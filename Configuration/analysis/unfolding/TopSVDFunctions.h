@@ -52,7 +52,12 @@ class TopSVDFunctions
                         TH1D* genInputHist,                                         
                         TH1D* recInputHist,                                
                         TH2D* respInputHist,                                         
-                        TH1D*& unfolded,         
+                        TH1D*& unfolded,
+                        double* totalDataEvents,
+                        double* totalBgrEvents,
+                        double* totalTtBgrEvents,
+                        double* totalRecEvents,
+                        double* totalGenEvents,
                         const double thebins[],         
                         const int numbins,                
                         double regPar,          
@@ -94,7 +99,7 @@ class TopSVDFunctions
         static void SVD_FormatLegendStandard(TLegend* leg);
         static void SVD_FormatLegendKScan(TLegend* leg);
         static void SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo, TString label, TString drawOptions, TString legOptions, int col, int numHist = 1);
-       
+         
        
         // Object Handling
         static TH1D* SVD_CloneHists1D(TH1D* hist, int numHist = 1);
@@ -105,7 +110,7 @@ class TopSVDFunctions
         static void SVD_WriteHists2D(TH2D* hists, int numHist = 1); 
         static void SVD_RmDir1D(TH1D* hist, int numHist = 1);
         static void SVD_RmDir2D(TH2D* hist, int numHist = 1);
-        
+        static double SVD_DoubleFromArray(double* arr, int pos);
         
         // Histogram Manipulation
         static void SVD_MoveOFBins1D(TH1D* hist, int numHist = 1);
@@ -193,7 +198,8 @@ class TopSVDFunctions
         static double SVD_LumiScaleFactor(TH1D* dataHist, TH1D* recHist);
         static void SVD_ArrayScale(TH1D* histo, double scale, int numHist = 1); 
         static double SVD_Integral1D(TH1D* hist, int syst, bool doOF); 
-        static double SVD_Integral2D(TH2D* hist, int syst, bool doOF);
+        static double SVD_Integral2D(TH2D* hist, int syst, bool doOF); 
+        static double* SVD_ArrayIntegral1D(TH1D* hist, bool doOF, int numHist);
         
         // Background
         static void SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, int numHist = 1);
@@ -219,6 +225,13 @@ class TopSVDFunctions
         // Systematics
         static TH1D* SVD_ArrayToShifts(TH1D* array, int numHist = 1); 
         
+        
+        // Normalization
+        static void SVD_GlobalEventYield(double*& globEvYield, double*& globEvYieldErr, double* totalDataEvents, double* totalBgrEvents, double* totalTtBgrEvents, int numHist);
+        static void SVD_GlobalEfficiency(double*& globalEff, double* totalRecEvents, double* totalGenEvents, int numHist);
+        static TH1D* SVD_NormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
+        static TH1D* SVD_NormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
+        static TH1D* SVD_NormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist);
         
         // Files and Folders
         static TString SVD_FindFolder(TString filepath);
