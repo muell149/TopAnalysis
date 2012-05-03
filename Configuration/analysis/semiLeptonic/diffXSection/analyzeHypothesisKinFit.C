@@ -6,7 +6,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=false, bool hadron=true)
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -137,15 +137,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   // choose plot input folder corresponding to systematic Variation  
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
-  // choose correct input folder for b-quark or b-jet
-  TString recPartonBpath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
-  TString recHadronBpath= "analyzeTopRecoKinematicsBjets" +sysInputFolderExtension;
-  TString genPartonBpath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
-  TString genHadronBpath= "analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
-  TString recBpath = ( (!extrapolate&&hadron) ? recHadronBpath : recPartonBpath );
-  TString genBpath = ( (!extrapolate&&hadron) ? genHadronBpath : genPartonBpath );
-  TString recBlabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
-  TString genBlabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
 
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
@@ -203,8 +194,17 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     case sysMisTagSFDown             : sysInputFolderExtension="MisTagSFdown";              break;
     default: break;
   }
-
   // additional (control plot folders): NoWeight, OnlyPUWeight, NoBtagSFWeight;
+
+  // choose correct input folder for b-quark or b-jet
+  TString recPartonBpath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
+  TString recHadronBpath= "analyzeTopRecoKinematicsBjets" +sysInputFolderExtension;
+  TString genPartonBpath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
+  TString genHadronBpath= "analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
+  TString recBpath = ( (!extrapolate&&hadron) ? recHadronBpath : recPartonBpath );
+  TString genBpath = ( (!extrapolate&&hadron) ? genHadronBpath : genPartonBpath );
+  TString recBlabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
+  TString genBlabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
 
   //  ---
   //     choose plots
@@ -795,6 +795,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     bool bqEtaExistsInAnySample=false;
     // get input path/folder
     TString path=recPartonBpath;
+    TString path2=recPartonBpath;
     // loop samples
     for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
       if(sample==kData){
@@ -813,11 +814,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
       // Check existence of plot
       if(targetPlotBqPt){ 
-	histo_[path+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt ->Clone(path+"/bqPt"); 
+	histo_[path2+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt ->Clone(path+"/bqPt"); 
 	bqPtExistsInAnySample =true;
       }
       if(targetPlotBqEta){
-	histo_[path+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
+	histo_[path2+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
 	bqEtaExistsInAnySample=true;
       }
     }
@@ -1639,7 +1640,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	rootFile="diffXSecUnfoldTopSemi";
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	if(decayChannel=="electron") rootFile+="Elec";
-	rootFile+=dataSample+".root";
+	rootFile+=dataSample+LV+PS+".root";
 	psFile=outputFolder+"unfolding/unfolding"+variable;
 	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
