@@ -52,7 +52,8 @@ class TopSVDFunctions
                         TH1D* genInputHist,                                         
                         TH1D* recInputHist,                                
                         TH2D* respInputHist,                                         
-                        TH1D*& unfolded,
+                        TH1D*& unfolded,                                       
+                        TH1D*& unfoldedNorm,
                         double* totalDataEvents,
                         double* totalBgrEvents,
                         double* totalTtBgrEvents,
@@ -75,7 +76,8 @@ class TopSVDFunctions
                         TString systnameTex = "",
                         TString rootFile = "",                          
                         TString psFile = "",                        
-                        TString regParFile = ""
+                        TString txtFile = "",
+        				TString regParFile = ""
         );
     
     
@@ -229,9 +231,13 @@ class TopSVDFunctions
         // Normalization
         static void SVD_GlobalEventYield(double*& globEvYield, double*& globEvYieldErr, double* totalDataEvents, double* totalBgrEvents, double* totalTtBgrEvents, int numHist);
         static void SVD_GlobalEfficiency(double*& globalEff, double* totalRecEvents, double* totalGenEvents, int numHist);
-        static TH1D* SVD_NormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
-        static TH1D* SVD_NormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
-        static TH1D* SVD_NormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist);
+        static TH1D* SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
+        static TH1D* SVD_ExtNormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
+        static TH1D* SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist);
+        static TH1D* SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* statCovMatrix, int numHist);
+        static TH1D* SVD_IntNormalizeBBBDistribution(TH1D* inputHist, int numHist);
+        static TH1D* SVD_IntNormalizeGenDistribution(TH1D* inputHist, int numHist);
+        
         
         // Files and Folders
         static TString SVD_FindFolder(TString filepath);
@@ -241,7 +247,7 @@ class TopSVDFunctions
         static void SVD_RemoveFile(TString filepath);
         static void SVD_LineToFile(TString string, TString filepath, TString option);
         static TString SVD_LineFromFile(TString key, TString filepath);
-        
+        static void SVD_PrintPage(TCanvas& canvas, TString outputfilename, bool doEps, int firstLast);
         
         // Misc
         static int SVD_GetDigit(TString steering, int digit, int standard); 

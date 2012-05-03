@@ -3806,7 +3806,7 @@ void TopSVDFunctions::SVD_RemoveFile(TString filepath)
 int TopSVDFunctions::SVD_GetDigit(TString steering, int digit, int standard)
 {
 	
-    int neededLength = 13;
+    int neededLength = 14;
     TString oldsteering = steering;
     
     // Length
@@ -3971,6 +3971,38 @@ TString TopSVDFunctions::SVD_LineFromFile(TString key, TString filepath)
     }
 }
 
+void TopSVDFunctions::SVD_PrintPage(TCanvas& canvas, TString outputfilename, bool doEps, int firstLast)
+{
+	// Plot Counter
+	static int plotcounter = 1;
+	if ( firstLast > 0 ) plotcounter = 1; 
+	
+	// Full Filename
+    TString fulloutputfilename = outputfilename;
+    if ( doEps == true ) {
+    	fulloutputfilename.Chop();
+    	fulloutputfilename.Chop();
+    	fulloutputfilename.Chop();
+    	fulloutputfilename.Chop();
+    	fulloutputfilename.Append(TString::Format("_%.4i", plotcounter));
+    	fulloutputfilename.Append(".eps");
+   cout << "                 " << fulloutputfilename << endl;
+    } else {
+    	if ( firstLast > 0 ) fulloutputfilename.Append("(");
+    	if ( firstLast < 0 ) fulloutputfilename.Append(")");
+    }
+    
+    // Print	
+    if ( doEps == true && firstLast < 0 ) {
+    } else {
+	    canvas.Print(fulloutputfilename);
+    }
+    
+    // Increment Counter
+    plotcounter++;
+}
+
+
 // Delete obsolete TopSVDUnfold objects
 void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 {
@@ -4019,7 +4051,7 @@ void TopSVDFunctions::SVD_GlobalEventYield(double*& globEvYield, double*& globEv
 // Normalization
 // Normalize SVD unfolded Event counts, using a global Efficiency and a global event yield
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_NormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist)
+TH1D* TopSVDFunctions::SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist)
 {
 	
      
@@ -4062,7 +4094,7 @@ TH1D* TopSVDFunctions::SVD_NormalizeSVDDistribution(TH1D* inputHist, TH2D* probM
 // Normalization
 // Normalize BBB unfolded Event counts, using a global Efficiency and a global event yield
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_NormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist)
+TH1D* TopSVDFunctions::SVD_ExtNormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist)
 {
 	
      
@@ -4105,7 +4137,7 @@ TH1D* TopSVDFunctions::SVD_NormalizeBBBDistribution(TH1D* inputHist, double* glo
 // Normalization
 // Normalize Generator Level distribution
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_NormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist)
+TH1D* TopSVDFunctions::SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist)
 {
 	
      
@@ -4136,6 +4168,137 @@ TH1D* TopSVDFunctions::SVD_NormalizeGenDistribution(TH1D* inputHist, double* tot
    			(hist+h)->SetBinError(i, error_new);
    		}
     }  
+    
+    // Return
+    return hist;
+    
+}
+
+// Normalization
+// Normalize SVD unfolded Event counts, using a global Efficiency and a global event yield
+// This creates new histograms on the heap. Do not forget to delete them sometimes.
+TH1D* TopSVDFunctions::SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* statCovMatrix, int numHist)
+{
+	
+     
+    // Existence of Objects
+    if ( inputHist == NULL ) return NULL;  
+       
+    // Create new Histograms
+    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    
+    // Number of Bins
+    int nbins = inputHist->GetNbinsX();
+    
+    // Loop over distributions
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+    	
+    	// Get Integral 
+    	bool doOF = true;
+    	double integral = SVD_Integral1D(inputHist, h, doOF);  
+    	
+    	// Loop over bins, including OF
+   		for ( int i = 1 ; i <= nbins ; i++ ) {
+   			
+   			double value_old = (inputHist+h)->GetBinContent(i);
+   			double error_old = (inputHist+h)->GetBinError(i);
+   			 
+			double value_new = value_old;
+			if ( integral > 0. ) value_new = value_new / integral ;  
+			double error_new = error_old;
+			if ( integral > 0. ) error_new = error_new / integral ;  
+   		
+   			(hist+h)->SetBinContent(i, value_new);
+   			(hist+h)->SetBinError(i, error_new);
+   		}
+    } 
+    
+    // Return
+    return hist;
+    
+}
+
+// Normalization
+// Normalize BBB unfolded Event counts, using a global Efficiency and a global event yield
+// This creates new histograms on the heap. Do not forget to delete them sometimes.
+TH1D* TopSVDFunctions::SVD_IntNormalizeBBBDistribution(TH1D* inputHist, int numHist)
+{
+	
+     
+    // Existence of Objects
+    if ( inputHist == NULL ) return NULL;  
+       
+    // Create new Histograms
+    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    
+    // Number of Bins
+    int nbins = inputHist->GetNbinsX();
+    
+    // Loop over distributions
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+    	
+    	// Get Integral 
+    	bool doOF = true;
+    	double integral = SVD_Integral1D(inputHist, h, doOF);  
+    	
+    	// Loop over bins, including OF
+   		for ( int i = 1 ; i <= nbins ; i++ ) {
+   			
+   			double value_old = (inputHist+h)->GetBinContent(i);
+   			double error_old = (inputHist+h)->GetBinError(i);
+   			 
+			double value_new = value_old;
+			if ( integral > 0. ) value_new = value_new / integral ;  
+			double error_new = error_old;
+			if ( integral > 0. ) error_new = error_new / integral ;  
+   		
+   			(hist+h)->SetBinContent(i, value_new);
+   			(hist+h)->SetBinError(i, error_new);
+   		}
+    } 
+    
+    // Return
+    return hist;
+    
+}
+
+// Normalization
+// Normalize Generator Level distribution
+// This creates new histograms on the heap. Do not forget to delete them sometimes.
+TH1D* TopSVDFunctions::SVD_IntNormalizeGenDistribution(TH1D* inputHist, int numHist)
+{
+	 
+    // Existence of Objects
+    if ( inputHist == NULL ) return NULL;  
+       
+    // Create new Histograms
+    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    
+    // Number of Bins
+    int nbins = inputHist->GetNbinsX();
+    
+    // Loop over distributions
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+    	
+    	// Get Integral 
+    	bool doOF = true;
+    	double integral = SVD_Integral1D(inputHist, h, doOF);  
+    	
+    	// Loop over bins, including OF
+   		for ( int i = 1 ; i <= nbins ; i++ ) {
+   			
+   			double value_old = (inputHist+h)->GetBinContent(i);
+   			double error_old = (inputHist+h)->GetBinError(i);
+   			 
+			double value_new = value_old;
+			if ( integral > 0. ) value_new = value_new / integral ;  
+			double error_new = error_old;
+			if ( integral > 0. ) error_new = error_new / integral ;  
+   		
+   			(hist+h)->SetBinContent(i, value_new);
+   			(hist+h)->SetBinError(i, error_new);
+   		}
+    } 
     
     // Return
     return hist;
@@ -4189,8 +4352,8 @@ void TopSVDFunctions::SVD_GlobalEfficiency(double*& globalEff, double* totalRecE
 //         3 means: SVD unfolding, regularization according
 //              to the parameter 'regPar'. Whether this one
 //              is taken as k value or tau value, can be 
-//              specified with the second digit of this
-//              parameter. (default)
+//              specified with the second digit of 'steering'
+//              (default)
 //         4 means: SVD unfolding according to the file
 //              given in 'regParFile'. Whether this one
 //              is taken as k value or tau value, can be 
@@ -4213,12 +4376,13 @@ void TopSVDFunctions::SVD_GlobalEfficiency(double*& globalEff, double* totalRecE
 //              specified with the second digit of this
 //              parameter.
 //              Note: The scan may take a while!    
-//    (4)  PS LOTTING  (4. digit from right)
+//    (4)  PS/EPS PLOTTING  (4. digit from right)
 //         0 means: Default value, same as 4
 //         1 means: no plotting at all
 //         2 means: standard plots
 //         3 means: standard plots + k scan plots
 //         4 means: standard plots + k scan plots + tau scan plots (default)
+//         Note: Whether EPS or PS is printed is specified in digit 14.
 //    (5)  ROOT FILE ( 5. digit from right)
 //         0 means: Default value, same as 1
 //         1 means: no root file will be written (default)
@@ -4259,8 +4423,16 @@ void TopSVDFunctions::SVD_GlobalEfficiency(double*& globalEff, double* totalRecE
 //         2 means: Do transpose input response matrix during rebinning (default)
 //    (13) NORMALIZATION
 //         0 means: Default value, same as 1
-//         1 means: Do not normalize the differential distributions (default)
-//         2 means: Normalize by means of the values given in total...Events 
+//         1 means: Extrinsic Normalization (default)
+//             This means, the normalization is done with a global inclusive cross
+//             section which is calculated from the parameters totalDataEvents, 
+//             totalBgrEvents, totalTtBgrEvents, totalRecEvents and totalGenEvents.
+//         2 means: Intrinsic Normalization.
+//             Each unfolded distribution is normalized with its integral.
+//    (14) EPS or PS for Control Plots
+//         0 means: Default value, same as 1
+//         1 means: Write out a PS Booklet of Control Plots
+//         2 means: Write out single EPS Plots 
 // Return value: 
 //        Best value of tau if scan is performed, -1. otherwise
 // Systematics Handling: 
@@ -4291,6 +4463,8 @@ double TopSVDFunctions::SVD_Unfold(
         TH2D* respInputHist,    
         // Returned: Unfolded Distribution.    
         TH1D*& unfolded,    
+        // Returned: Normalized unfolded Distribution.    
+        TH1D*& unfoldedNorm,    
         // For Normalization: Total Data Events
         // If set to zero, will be taken from the integral of dataInputHist
         double* totalDataEvents,
@@ -4340,7 +4514,9 @@ double TopSVDFunctions::SVD_Unfold(
         TString systTex,
         // If specified, plots will be saved in ROOT File
         TString rootFile,
-        // If specified, plots will be saved in PS File 
+        // If specified, plots will be saved in PS or EPS File
+        // Note: If EPS files are produces, the filename will be 
+        // extended by the number of the plot. 
         TString psFile,
         // The optimal Reg Parameters will be written to this file.
         // The file will NOT be overwritten, rather the result will be appended.
@@ -4348,8 +4524,12 @@ double TopSVDFunctions::SVD_Unfold(
         // (1) the optimal tau, (2) the two nearest k values,
         // (3) the k value from the d value method
         // (4) the number of bins including side bins
-        // If specified and if regMode is 3, a suitable regPar
-        // will be READ from the file
+        TString txtFile,
+        // In the following file, regularization parameters can be specified
+        // for the unfolding. It may contain the optimal results from a previous run.
+        // It should have the same file structure as txtFile, but it will be READ
+        // rather than written.
+        // Note: It will only be read if the steering option 'REGMODE' is set to 4.
         TString regParFile
 )
 {  
@@ -4438,8 +4618,12 @@ double TopSVDFunctions::SVD_Unfold(
      
      
      
-     // NORMALIZATION
+    // NORMALIZATION
     int flag_norm = SVD_GetDigit(steering, 13, 1); 
+    
+    
+    // EPS instead PS
+    int flag_eps = SVD_GetDigit(steering, 14, 1);
     
       
  
@@ -4609,8 +4793,7 @@ double TopSVDFunctions::SVD_Unfold(
     /////////  C O N T R O L   O U T P U T   ////////////////////////// 
     ///////////////////////////////////////////////////////////////////
   
-     
-  
+      
   
     // Screen Output
     if ( flag_verbose > 1 ) {
@@ -4623,11 +4806,10 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "    Special condition:                         " << special << endl;
         cout << "    Systematic:                                " << syst << endl;
         cout << "        Number Syst Samples:                   " << numberSyst << endl;
-        cout << "    Root File:                                 " << rootFile << endl;
-        cout << "    Ps File:                                   " << psFile << endl;
-        cout << "    Best Tau File:                             " << regParFile << endl;
-        cout << "        Write to Text File:                    " << (flag_text == 2 ) << endl;
-        cout << "        RTtBgrd to Text File:                     " << (flag_regmode == 4 ) << endl;
+        cout << "    ROOT File:                                 " << rootFile << endl;
+        cout << "    PS/EPS File:                               " << psFile << endl;
+        cout << "    TXT File (with scan output)                " << txtFile << endl; 
+        cout << "    File with regularization parameters:       " << regParFile << endl;
         cout << "        Key:                                   " << thekey << endl; 
         cout << "    Regularization Parameter:                  " << regPar << endl;
         cout << "    Steering Options (" <<  steering << "):    " << endl;
@@ -4638,7 +4820,8 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "        Use K:                                 " << (flag_regpar == 1) << endl;
         cout << "        Use Tau:                               " << (flag_regpar == 2) << endl;
         cout << "        Scan for best tau:                     " << (flag_scan == 2) << endl;
-        cout << "        Write to PS:                           " << (flag_ps >= 2) << endl;
+        cout << "        Write to PS/EPS:                       " << (flag_ps >= 2) << endl;
+        cout << "             as EPS:                           " << (flag_eps == 2 ) << endl;
         cout << "             K Scan Plots:                     " << (flag_ps >= 3 ) << endl;
         cout << "             Tau Scan Plots:                   " << (flag_ps >= 4 ) << endl;
         cout << "        Write to Text File:                    " << (flag_text == 2 ) << endl;
@@ -4681,7 +4864,8 @@ double TopSVDFunctions::SVD_Unfold(
             cout << "            Syst. Sample " << i << "                    " << SVD_Integral2D(respInputHist, i, true) << endl;
         }  
         cout << "    Normalization:                            " << endl; 
-        cout << "        Do normalization:                     " << (flag_norm == 2 ) << endl;
+        cout << "        Extrinsic Normalization:              " << (flag_norm == 1 ) << endl;
+        cout << "        Intrinsic Normalization:              " << (flag_norm == 2 ) << endl;
         cout << "        Total number of data events:          " << SVD_DoubleFromArray(totalDataEvents, 0)  << endl; 
         cout << "        Total number of background events:    " << SVD_DoubleFromArray(totalBgrEvents, 0) << endl;
         for ( int i = 1 ; i <= numberSyst ; i++ ) {
@@ -5295,7 +5479,7 @@ double TopSVDFunctions::SVD_Unfold(
         lineStrList.Append(TString::Format("%i", nbins));
         
         // Print to File, with option 'append'
-        SVD_LineToFile(lineStrList, regParFile, "a"); 
+        SVD_LineToFile(lineStrList, txtFile, "a"); 
         
     }
    
@@ -5305,13 +5489,19 @@ double TopSVDFunctions::SVD_Unfold(
       
     
     // Normalize SVD Unfolded histogram
-    TH1D* normUnfHist = SVD_NormalizeSVDDistribution(unfHist, probMatrixHist, statCovHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1); 
+    TH1D* normUnfHist = NULL;
+    if ( flag_norm == 1 ) normUnfHist = SVD_ExtNormalizeSVDDistribution(unfHist, probMatrixHist, statCovHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1);
+    if ( flag_norm == 2 ) normUnfHist = SVD_IntNormalizeSVDDistribution(unfHist, statCovHist, numberSyst+1); 
      
     // Normalize BBB Unfolded histogram
-    TH1D* normBBBHist = SVD_NormalizeBBBDistribution(bbbHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1);
+    TH1D* normBBBHist = NULL;
+    if ( flag_norm == 1 ) normBBBHist = SVD_ExtNormalizeBBBDistribution(bbbHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1);
+    if ( flag_norm == 2 ) normBBBHist = SVD_IntNormalizeBBBDistribution(bbbHist, numberSyst+1);
      
     // Normalize the SCALED generator level histogram
-    TH1D* normGenHist = SVD_NormalizeGenDistribution(xiniScaledHist, totalGenEvents, numberSyst+1);
+    TH1D* normGenHist = NULL;
+    if ( flag_norm == 1 ) normGenHist = SVD_ExtNormalizeGenDistribution(xiniScaledHist, totalGenEvents, numberSyst+1);
+    if ( flag_norm == 2 ) normGenHist = SVD_IntNormalizeGenDistribution(xiniScaledHist, numberSyst+1);
       
      
      
@@ -5366,10 +5556,10 @@ double TopSVDFunctions::SVD_Unfold(
  
 
     // Prepare Output
-    if ( flag_regmode == 1 && flag_norm == 1 ) unfolded = SVD_CloneHists1D(bbbHist, numberSyst+1);
-    if ( flag_regmode > 1  && flag_norm == 1 ) unfolded = SVD_CloneHists1D(unfHist, numberSyst+1);
-    if ( flag_regmode == 1 && flag_norm == 2 ) unfolded = SVD_CloneHists1D(normBBBHist, numberSyst+1);
-    if ( flag_regmode > 1  && flag_norm == 2 ) unfolded = SVD_CloneHists1D(normUnfHist, numberSyst+1);
+    if ( flag_regmode == 1  ) unfolded = SVD_CloneHists1D(bbbHist, numberSyst+1);
+    if ( flag_regmode > 1   ) unfolded = SVD_CloneHists1D(unfHist, numberSyst+1);
+    if ( flag_regmode == 1  ) unfoldedNorm = SVD_CloneHists1D(normBBBHist, numberSyst+1);
+    if ( flag_regmode > 1   ) unfoldedNorm = SVD_CloneHists1D(normUnfHist, numberSyst+1);
 
    
     ///////////////////////////////////////////////////////////////////
@@ -5737,12 +5927,13 @@ double TopSVDFunctions::SVD_Unfold(
  
         // Draw Response Matrix
         SVD_Draw2D(mcHist, "COLZ TEXT");
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 1);
         canvas.Print(outputfilename.Copy().Append("("));
 
 
         // Draw Probability Matrix
         SVD_Draw2D(probMatrixHist, "COLZ TEXT");
-        canvas.Print(outputfilename);   
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
         
 
 
@@ -5752,7 +5943,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, biniHist, "Rec", "E", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, dataScaledHist, "Data, scaled", "E", "", 1, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
-        canvas.Print(outputfilename);         
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);         
  
  
 
@@ -5762,7 +5953,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, rawHist, "Raw", "HIST E", "", 2, 1); // Only 1 Histogram
         SVD_Array2Stack(theRegStack, theLegend, bgrHist, "Bgr", "P", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
  
 
         // Draw Weight distributions          
@@ -5771,7 +5962,7 @@ double TopSVDFunctions::SVD_Unfold(
         TString weightHistLegendEntry = "Weights w_{i}";  
         SVD_Array2Stack(theRegStack, theLegend, weightHist, "Weights", "HIST", "", 1, numberSyst+1); 
         SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Weights", "", 0, true);   
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
 
   
         // Draw Unfolded distributions 
@@ -5780,7 +5971,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "E", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
 
 
 
@@ -5790,7 +5981,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, xiniScaledHist, "Gen, sc.", "E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "E", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
      
      
         // RATIO: Unfolded versus BBB 
@@ -5798,7 +5989,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, histRatioUnfBBB, "Unf/BBB", "E", "", 1, numberSyst+1);  
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Ratio: SVD over BBB, Error from SVD", "", 0, false);  
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
      
     
         // Draw Refolded Distribution 
@@ -5806,7 +5997,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "E", "", 1, numberSyst+1);  
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
-        canvas.Print(outputfilename); 
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0); 
            
     
     
@@ -5815,7 +6006,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, histRatioRefDat, "Ref/Data", "E", "", 1, numberSyst+1);  
         SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Ratio: Refolded over Data, Error from Data", "", 0, false);   
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
       
         // Draw D-Plot  
@@ -5823,7 +6014,7 @@ double TopSVDFunctions::SVD_Unfold(
         gPad->SetLogy(true); 
         SVD_Array2Stack(theDValStack, theLegend, ddHist, "d-Values", "HIST", "", 1, numberSyst+1); 
         SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "d-Values", "", 0, true, gPad->GetLogy());   
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
         gPad->SetLogy(false); 
    
    
@@ -5832,7 +6023,7 @@ double TopSVDFunctions::SVD_Unfold(
         gPad->SetLogy(true);
         SVD_Array2Stack(theDValStack, theLegend, svHist, "Sing. Values", "HIST", "", 1, numberSyst+1); 
         SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "Sing. Values", "", 0, true, gPad->GetLogy());   
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
         gPad->SetLogy(false); 
      
     
@@ -5845,7 +6036,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, effHist, "Eff.", "HIST", "", 1, numberSyst+1); 
         SVD_Array2Stack(theRegStack, theLegend, probHist, "Prob. i #rightarrow i", "P", "", 4, numberSyst+1);
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in \%", "", 0, true); 
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
     
         // Draw BBB Efficiency 
@@ -5855,49 +6046,49 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency \%", "", 0, true); 
         
         
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
     
         // Covariance Matrix (DATA)
         // Only for the nominal sample
         SVD_Draw2D(dataCovHist, "COLZ TEXT");
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
     
         // Covariance Matrix (STAT)
         // Only for the nominal sample
         SVD_Draw2D(statCovHist, "COLZ TEXT");
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
     
         // Covariance Matrix (MC)
         // Only for the nominal sample
         SVD_Draw2D(mcCovHist, "COLZ TEXT");
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
     
         // Covariance Matrix (Total)
         // Only for the nominal sample
         SVD_Draw2D(totCovHist, "COLZ TEXT");
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
      
     
         // Correlation Matrix (STAT)
         // Only for the nominal sample
         SVD_Draw2D(statCorrHist, "COLZ TEXT");
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
     
         // Correlation Matrix (MC)
         // Only for the nominal sample
         SVD_Draw2D(mcCorrHist, "COLZ TEXT");
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
     
         // Correlation Matrix (Total)
         // Only for the nominal sample
         SVD_Draw2D(totCorrHist, "COLZ TEXT");
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
          
     
      
@@ -5907,7 +6098,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, glcHist, "#rho_{i} in \%", "HIST", "", 4, 1);  
         SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Glob. Corr. #rho_{i} in \%", "HIST ", 0, true);
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
  
  
     
@@ -5917,7 +6108,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, bbbErrHist, "BBB Unc.", "HIST", "", 4, 1);  
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true); 
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
         	
     
     
@@ -5928,7 +6119,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, mcErrHist, "MC Unc.", "HIST", "", 4, 1);   
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true); 
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
    
 
     
@@ -5938,42 +6129,37 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, histRatioErrors, "Err. Ratio", "P", "", 1, 1);  
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false); 
-        canvas.Print(outputfilename);
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
     
-         
-        // Plots for the normalization
-        if ( flag_norm >= 2 ) {  
-        	
-	        // Draw Unfolded versus MC prediction  
-	        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
-	        SVD_Array2Stack(theRegStack, theLegend, normUnfHist, "Unf for {#sigma}_{bin}/{#sigma}_{tot} ", "E", "", 1, numberSyst+1);
-	        SVD_Array2Stack(theRegStack, theLegend, normGenHist, "Gen for {#sigma}_{bin}/{#sigma}_{tot}", "E", "", 3, numberSyst+1);
-	        SVD_Array2Stack(theRegStack, theLegend, normBBBHist, "BBB for {#sigma}_{bin}/{#sigma}_{tot} ", "E", "", 4, numberSyst+1); 
-	        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
-	        canvas.Print(outputfilename);
-	        
-	        
-	        // Errors (STAT, BBB)
-	        // Only for the nominal sample 
-	        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
-	        SVD_Array2Stack(theRegStack, theLegend, normStatErrHist, "Unf. Unc. on {#sigma}_{bin}/{#sigma}_{tot}", "HIST", "", 3, 1);  
-	        SVD_Array2Stack(theRegStack, theLegend, normBBBErrHist, "BBB Unc. on {#sigma}_{bin}/{#sigma}_{tot}", "HIST", "", 4, 1);  
-	        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true); 
-	        canvas.Print(outputfilename);
+          
+        // Draw Unfolded versus MC prediction  
+        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
+        SVD_Array2Stack(theRegStack, theLegend, normUnfHist, "Unf for {#sigma}_{bin}/{#sigma}_{tot} ", "E", "", 1, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, normGenHist, "Gen for {#sigma}_{bin}/{#sigma}_{tot}", "E", "", 3, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, normBBBHist, "BBB for {#sigma}_{bin}/{#sigma}_{tot} ", "E", "", 4, numberSyst+1); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
+        
+        
+        // Errors (STAT, BBB)
+        // Only for the nominal sample 
+        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
+        SVD_Array2Stack(theRegStack, theLegend, normStatErrHist, "Unf. Unc. on {#sigma}_{bin}/{#sigma}_{tot}", "HIST", "", 3, 1);  
+        SVD_Array2Stack(theRegStack, theLegend, normBBBErrHist, "BBB Unc. on {#sigma}_{bin}/{#sigma}_{tot}", "HIST", "", 4, 1);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true); 
+	        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
    
 
     
 	        // RATIO: UnfErrors versus BBBErrors
-	        // Only for the nominal sample
-	        // Do not show OF bins here!
-	        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
-	        SVD_Array2Stack(theRegStack, theLegend, normRatioErrors, "Err. Ratio for {#sigma}_{bin}/{#sigma}_{tot}", "P", "", 1, 1);  
-	        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false); 
-	        canvas.Print(outputfilename);
+        // Only for the nominal sample
+        // Do not show OF bins here!
+        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
+        SVD_Array2Stack(theRegStack, theLegend, normRatioErrors, "Err. Ratio for {#sigma}_{bin}/{#sigma}_{tot}", "P", "", 1, 1);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false); 
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
 	        
-	        
-        }
-	        
+	          
         
         // Systematics Plots
         if ( doSystematics == true ) {
@@ -5983,26 +6169,21 @@ double TopSVDFunctions::SVD_Unfold(
             SVD_Array2Stack(theRegStack, theLegend, unfShiftHist, "Unfolding",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, bbbShiftHist, "BBB", "HIST", "", 2, numberSyst);  
             SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in \%", "", 0, false);  
-            canvas.Print(outputfilename);
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
         
             // Shift Hist as Ratio
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, ratioShiftHist, "Shift Unf/BBB", "HIST", "", 1, numberSyst); 
             SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Syst. Shift Ratio", "", 0, false);  
-            canvas.Print(outputfilename);
-         
-	        // Plots for the normalization
-	        if ( flag_norm >= 2 ) {   
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);  
 	        	
-	            // Syst Shifts in Comparison
-	            SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
-	            SVD_Array2Stack(theRegStack, theLegend, normUnfShiftHist, "Unf.",  "HIST", "", 1, numberSyst);
-	            SVD_Array2Stack(theRegStack, theLegend, normBBBShiftHist, "BBB", "HIST", "", 2, numberSyst);  
-	            SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", "", 0, false);  
-	            canvas.Print(outputfilename); 
-	            
-	        }
-            
+            // Syst Shifts in Comparison
+            SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
+            SVD_Array2Stack(theRegStack, theLegend, normUnfShiftHist, "Unf.",  "HIST", "", 1, numberSyst);
+            SVD_Array2Stack(theRegStack, theLegend, normBBBShiftHist, "BBB", "HIST", "", 2, numberSyst);  
+            SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", "", 0, false);  
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0); 
+	             
         }    
     
         // K Scan Plots 
@@ -6020,7 +6201,7 @@ double TopSVDFunctions::SVD_Unfold(
             }
             SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolding Result x_{i}", "P", 1, 1);
             SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Unfolding Result x_{i}", "HIST ", 0, true);  
-            canvas.Print(outputfilename); 
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0); 
             
              
             // Draw Error distributions   
@@ -6033,7 +6214,7 @@ double TopSVDFunctions::SVD_Unfold(
             }
             SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Stat. Unc. #delta x_{i} in %", "P", 1, 1);
             SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Unc. #delta x_{i} in %", "HIST ", 0, true);  
-            canvas.Print(outputfilename); 
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0); 
          
              
             // Draw Glob Corr distributions   
@@ -6046,7 +6227,7 @@ double TopSVDFunctions::SVD_Unfold(
             }
             SVD_Array2Stack(theRegStack, theLegend, glcHist, "Global Correlation #rho_{i} in %", "P", 1, 1);
             SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Global Correlation #rho_{i} in %", "HIST ", 0, true);  
-            canvas.Print(outputfilename); 
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0); 
             
              
             // Draw Weight distributions   
@@ -6059,7 +6240,7 @@ double TopSVDFunctions::SVD_Unfold(
             } 
             SVD_Array2Stack(theRegStack, theLegend, weightHist, "Weights w_{i}", "P", 1, 1);
             SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Weights w_{i}", "HIST ", 0, true);  
-            canvas.Print(outputfilename); 
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0); 
             
             
             // Delete all the obsolete objects
@@ -6111,7 +6292,7 @@ double TopSVDFunctions::SVD_Unfold(
             double textPosBestPointX =  SVD_TextPosX(theBgrHisto, optimalTauX, gPad->GetLogx(), textOrientationBestPoint);
             double textPosBestPointY =  SVD_TextPosY(theBgrHisto, optimalTauY, gPad->GetLogy(), textOrientationBestPoint);
             SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint); 
-            canvas.Print(outputfilename);  
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);  
             delete gGlobCorr;
             delete bestPoint;  
                    
@@ -6136,7 +6317,7 @@ double TopSVDFunctions::SVD_Unfold(
             textPosBestPointX =  SVD_TextPosX(theBgrHisto, optimalTauX, gPad->GetLogx(), textOrientationBestPoint);
             textPosBestPointY =  SVD_TextPosY(theBgrHisto, optimalChiSq, gPad->GetLogy(), textOrientationBestPoint); 
             SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
-            canvas.Print(outputfilename);
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
             delete gChiSq;
             delete bestPoint;  
                   
@@ -6160,7 +6341,7 @@ double TopSVDFunctions::SVD_Unfold(
             textPosBestPointX =  SVD_TextPosX(theBgrHisto, optimalTauX, gPad->GetLogx(), textOrientationBestPoint);
             textPosBestPointY =  SVD_TextPosY(theBgrHisto, optimalCurv, gPad->GetLogy(), textOrientationBestPoint); 
             SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
-            canvas.Print(outputfilename);
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
             delete gCurv;
             delete bestPoint;  
                   
@@ -6188,7 +6369,7 @@ double TopSVDFunctions::SVD_Unfold(
             textPosBestPointX =  SVD_TextPosX(theBgrHisto, optimalTauX, gPad->GetLogx(), textOrientationBestPoint);
             textPosBestPointY =  SVD_TextPosY(theBgrHisto, optimalAvgSqErr, gPad->GetLogy(), textOrientationBestPoint); 
             SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
-            canvas.Print(outputfilename);
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
             delete gAvgSqErr;
             delete bestPoint;  
                   
@@ -6221,7 +6402,7 @@ double TopSVDFunctions::SVD_Unfold(
             textPosBestPointX =  SVD_TextPosX(theBgrHisto, optimalTauX, gPad->GetLogx(), textOrientationBestPoint);
             textPosBestPointY =  SVD_TextPosY(theBgrHisto, optimalAvgMean, gPad->GetLogy(), textOrientationBestPoint); 
             SVD_DrawText(textBestPoint, textPosBestPointX, textPosBestPointY, textOrientationBestPoint, latexBestPoint);  
-            canvas.Print(outputfilename);
+            SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), 0);
             delete gAvgMean;
             delete bestPoint;   
                   
@@ -6238,7 +6419,7 @@ double TopSVDFunctions::SVD_Unfold(
   
         // Last page empty
         canvas.Clear();
-        canvas.Print(outputfilename.Copy().Append(")"));
+        SVD_PrintPage(canvas, outputfilename, (flag_eps == 2), -1);
     
     
         // Reset Style
