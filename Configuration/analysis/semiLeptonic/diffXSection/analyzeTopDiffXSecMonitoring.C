@@ -689,7 +689,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   // - Last entry: uncertainty band
   
   // Data:
-  TString lumilabel = Form("%3.2f fb^{-1}",luminosity/1000);
+  TString lumilabel = Form("%2.1f fb^{-1}",luminosity/1000);
   leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel),"P");
   leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
   leg1->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
