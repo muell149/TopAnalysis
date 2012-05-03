@@ -2097,6 +2097,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     // Note: The unfolded histogram has additional side bins!
     // Keep this in mind when accessing bin content via indices
     TH1D* unfoldedDistribution = NULL;
+    TH1D* unfoldedDistributionNormalized = NULL;
     int numSystematics = 0;
     mySVDFunctions.SVD_DoUnfold(
 				(TH1D*) theDataHist, 
@@ -2109,7 +2110,9 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
                 totalRecEventsNom,  
                 totalGenEventsNom,   
 				theBins, numberBins,  
-				unfoldedDistribution, numSystematics,
+				unfoldedDistribution, 
+				unfoldedDistributionNormalized,
+				numSystematics,
 				theChannelName, theParticleName, theQuantityName, theSpecialPostfix, "");
  	
  		
@@ -2118,8 +2121,8 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     double UnfoldingResult[XAxisbinCenters.size()];
     double UnfoldingError[XAxisbinCenters.size()];
     for ( size_t i = 0; i < XAxisbinCenters.size() ; i++ ) {
-      UnfoldingResult[i] = unfoldedDistribution->GetBinContent(i+2);//account for extra row in SVD unfolding
-      UnfoldingError[i] = unfoldedDistribution->GetBinError(i+2);
+      UnfoldingResult[i] = unfoldedDistributionNormalized->GetBinContent(i+2);//account for extra row in SVD unfolding
+      UnfoldingError[i] = unfoldedDistributionNormalized->GetBinError(i+2);
     }
 		
 		 	

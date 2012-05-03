@@ -20,13 +20,13 @@ public:
     void SetOutputPath(TString path) { outpath = path;}
 
 
-    // Helpers
-    double SVD_GetRegPar(TString channel, TString particle, TString quantity, TString special, bool useTau);
+    // Helpers 
     TString SVD_GetSteering(TString channel, TString particle, TString quantity, TString special);
     void SVD_Tex(TString channel, TString particle, TString quantity, TString special, TString& channelTex, TString& particleTex, TString& quantityTex, TString& specialTex);
     TString SVD_GetOutputPath();
     TString SVD_GetOutputFileNamePs(TString channel, TString particle, TString quantity, TString syst, TString special);
-    TString SVD_GetOutputFileNameRoot(TString channel, TString particle, TString quantity, TString syst, TString special);
+    TString SVD_GetOutputFileNameRoot(TString channel, TString particle, TString quantity, TString syst, TString special); 
+    TString SVD_GetOutputFileNameTxt(); 
     
     // Unfolding
     double SVD_DoUnfold(
@@ -42,6 +42,7 @@ public:
         const double thebins[], 
         const int numbins, 
         TH1D*& unfolded, 
+        TH1D*& unfoldedNorm, 
         const int numSys, 
         TString channel,
         TString particle,
@@ -62,7 +63,7 @@ public:
         double totalGenEventsNom,  double totalGenEventsUp,  double totalGenEventsDown,  
         const double thebins[],                 
         const int numbins,                       
-        TH1D*& unfolded,                        
+        TH1D*& shifts,                        
         TString channel,                       
         TString particle,                      
         TString quantity,                      

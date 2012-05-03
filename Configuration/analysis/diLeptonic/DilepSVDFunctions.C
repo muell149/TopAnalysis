@@ -19,21 +19,22 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     
     
     // Determine the Steering 
-    int flag_regmode = 4; //3=manual, 4=fromfile
-    int flag_regpar = 2; //2=tau, 1=k
-    int flag_scan = 1; //2=doscan
-    int flag_ps = 4; 
-    int flag_root = 1;
-    int flag_text = 2;
-    int flag_verbose = 2;
-    int flag_scanpoints = 3; //3
-    int flag_scanrange = 2;
-    int flag_lowersidebin = 2; 
-    int flag_uppersidebin = 2;
-    int flag_matrixorientation = 1; 
-    int flag_norm = 2; 
+    int flag_regmode = 4;            // Always read in tau from file (4) 
+    int flag_regpar = 2;             // Always use Tau (2)
+    int flag_scan = 1;               // Turn scan on (2) or off (1) 
+    int flag_ps = 4;                 // Write everything to PS (4)
+    int flag_root = 1;               // Do not make a ROOT file (1)
+    int flag_text = 2;               // Do write Text file with optimal tau (2)
+    int flag_verbose = 2;            // Medium Verbosity (2)
+    int flag_scanpoints = 3;         // Use 125 Scan Points (3)
+    int flag_scanrange = 2;          // Use Factor 100 for Scan Range (2)
+    int flag_lowersidebin = 2;       // Cut out side bin on rec, not on gen level (2)
+    int flag_uppersidebin = 2;       // Cut out side bin on rec, not on gen level (2)
+    int flag_matrixorientation = 1;  // Transpose matrix prior to unfolding (1)
+    int flag_norm = 1;               // Extrinsic Normalization (1)
+    int flag_eps = 2;                // Write out EPS instead of PS
     
-    // Alter the Gen Level Treatment for the PT-Quantities
+    // Cut out the lower gen level side bin for the PT quantities
     TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
     if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_lowersidebin = 3;
     if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_lowersidebin = 3;
@@ -41,241 +42,26 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     
     // Calculate Steering Parameter
     TString steering = "";
-    steering.Prepend(TString::Format("%i", flag_regmode)); //1
-    steering.Prepend(TString::Format("%i", flag_regpar));  //2
-    steering.Prepend(TString::Format("%i", flag_scan));    //3
-    steering.Prepend(TString::Format("%i", flag_ps));      //4
-    steering.Prepend(TString::Format("%i", flag_root));    //5
-    steering.Prepend(TString::Format("%i", flag_text));    //6
-    steering.Prepend(TString::Format("%i", flag_verbose)); //7
-    steering.Prepend(TString::Format("%i", flag_scanpoints));   //8
-    steering.Prepend(TString::Format("%i", flag_scanrange));    //9
-    steering.Prepend(TString::Format("%i", flag_lowersidebin)); //10
-    steering.Prepend(TString::Format("%i", flag_uppersidebin)); //11
-    steering.Prepend(TString::Format("%i", flag_matrixorientation)); //12 
-    steering.Prepend(TString::Format("%i", flag_norm)); //13
+    steering.Prepend(TString::Format("%i", flag_regmode));                     //1
+    steering.Prepend(TString::Format("%i", flag_regpar));                      //2
+    steering.Prepend(TString::Format("%i", flag_scan));                        //3
+    steering.Prepend(TString::Format("%i", flag_ps));                          //4
+    steering.Prepend(TString::Format("%i", flag_root));                        //5
+    steering.Prepend(TString::Format("%i", flag_text));                        //6
+    steering.Prepend(TString::Format("%i", flag_verbose));                     //7
+    steering.Prepend(TString::Format("%i", flag_scanpoints));                  //8
+    steering.Prepend(TString::Format("%i", flag_scanrange));                   //9
+    steering.Prepend(TString::Format("%i", flag_lowersidebin));                //10
+    steering.Prepend(TString::Format("%i", flag_uppersidebin));                //11
+    steering.Prepend(TString::Format("%i", flag_matrixorientation));           //12 
+    steering.Prepend(TString::Format("%i", flag_norm));                        //13
+    steering.Prepend(TString::Format("%i", flag_eps));                        //14
     
     // Return it
     return steering;
 }
 
     
-// SVD Helper Function
-// Return a k-Value for the particle/quantity/channel combination
-double DilepSVDFunctions::SVD_GetRegPar(TString channel, TString particle, TString quantity, TString special, bool useTau)
-{
-	
-	bool useMacro = false;
- 
-    // Concatenate Strings
-    // NOTE: We use the same regPar for ALL Systematic samples!
-    //       Therefore, we leave the 'syst'-Parameter empty
-    TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
-    
-    // Variable for the regPar
-    double regPar = -1.;
-    
-    // Regularize Via k
-    if ( useTau == 0 && useMacro == true) { 
-        if ( concatenation.CompareTo("mumu_Leptons_Eta") == 0 ) regPar = 10.;//8.;
-        if ( concatenation.CompareTo("emu_Leptons_Eta") == 0 ) regPar = 10.;//8.;
-        if ( concatenation.CompareTo("ee_Leptons_Eta") == 0 ) regPar = 10.;//8.;
-        if ( concatenation.CompareTo("combined_Leptons_Eta") == 0 ) regPar = 10.;//8.;
-        if ( concatenation.CompareTo("mumu_Leptons_Eta_MoreBins") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("emu_Leptons_Eta_MoreBins") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("ee_Leptons_Eta_MoreBins") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("combined_Leptons_Eta_MoreBins") == 0 ) regPar = 8.; 
-        if ( concatenation.CompareTo("mumu_Leptons_Pt") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("emu_Leptons_Pt") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("ee_Leptons_Pt") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("combined_Leptons_Pt") == 0 ) regPar = 6.; 
-        if ( concatenation.CompareTo("mumu_LepPair_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("emu_LepPair_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("ee_LepPair_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("combined_LepPair_Eta") == 0 ) regPar = 8.; 
-        if ( concatenation.CompareTo("mumu_LepPair_Pt") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("emu_LepPair_Pt") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("ee_LepPair_Pt") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("combined_LepPair_Pt") == 0 ) regPar = 7.; //6.; 
-        if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 ) regPar = 6.; 
-        if ( concatenation.CompareTo("mumu_Jets_Eta") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("emu_Jets_Eta") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("ee_Jets_Eta") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("combined_Jets_Eta") == 0 ) regPar = 7.; //6.; 
-        if ( concatenation.CompareTo("mumu_Jets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("emu_Jets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("ee_Jets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("combined_Jets_Pt") == 0 ) regPar = 7.; //4.; 
-        if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("combined_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("emu_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("ee_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("combined_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.; 
-        if ( concatenation.CompareTo("mumu_TopQuarks_Pt") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("emu_TopQuarks_Pt") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("ee_TopQuarks_Pt") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("combined_TopQuarks_Pt") == 0 ) regPar = 4.;//3.; 
-        if ( concatenation.CompareTo("mumu_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("emu_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("ee_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("combined_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("mumu_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("emu_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("ee_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("combined_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.; 
-        if ( concatenation.CompareTo("mumu_TtBar_Pt") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("emu_TtBar_Pt") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("ee_TtBar_Pt") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("combined_TtBar_Pt") == 0 ) regPar = 4.; 
-        if ( concatenation.CompareTo("mumu_TtBar_Mass") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("emu_TtBar_Mass") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("ee_TtBar_Mass") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("combined_TtBar_Mass") == 0 ) regPar = 4.;
-    }
-    
-    // Regularize Via k
-    if ( useTau == 0 && useMacro == false) { 
-        if ( concatenation.CompareTo("mumu_Leptons_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("emu_Leptons_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("ee_Leptons_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("combined_Leptons_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("mumu_Leptons_Eta_MoreBins") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("emu_Leptons_Eta_MoreBins") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("ee_Leptons_Eta_MoreBins") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("combined_Leptons_Eta_MoreBins") == 0 ) regPar = 8.; 
-        if ( concatenation.CompareTo("mumu_Leptons_Pt") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("emu_Leptons_Pt") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("ee_Leptons_Pt") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("combined_Leptons_Pt") == 0 ) regPar = 6.; 
-        if ( concatenation.CompareTo("mumu_LepPair_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("emu_LepPair_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("ee_LepPair_Eta") == 0 ) regPar = 8.;
-        if ( concatenation.CompareTo("combined_LepPair_Eta") == 0 ) regPar = 8.; 
-        if ( concatenation.CompareTo("mumu_LepPair_Pt") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("emu_LepPair_Pt") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("ee_LepPair_Pt") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("combined_LepPair_Pt") == 0 ) regPar = 7.; //6.; 
-        if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 ) regPar = 6.;
-        if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 ) regPar = 6.; 
-        if ( concatenation.CompareTo("mumu_BJets_Rapidity") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("emu_BJets_Rapidity") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("ee_BJets_Rapidity") == 0 ) regPar = 7.; //6.;
-        if ( concatenation.CompareTo("combined_BJets_Rapidity") == 0 ) regPar = 7.; //6.; 
-        if ( concatenation.CompareTo("mumu_BJets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("emu_BJets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("ee_BJets_Pt") == 0 ) regPar = 7.; //4.;
-        if ( concatenation.CompareTo("combined_BJets_Pt") == 0 ) regPar = 7.; //4.; 
-        if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("combined_TopQuarks_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("emu_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("ee_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("combined_TopQuarks_Rapidity_MoreBins") == 0 ) regPar = 5.; 
-        if ( concatenation.CompareTo("mumu_TopQuarks_Pt") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("emu_TopQuarks_Pt") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("ee_TopQuarks_Pt") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("combined_TopQuarks_Pt") == 0 ) regPar = 4.;//3.; 
-        if ( concatenation.CompareTo("mumu_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("emu_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("ee_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("combined_TtBar_Rapidity") == 0 ) regPar = 4.;//3.;
-        if ( concatenation.CompareTo("mumu_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("emu_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("ee_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.;
-        if ( concatenation.CompareTo("combined_TtBar_Rapidity_MoreBins") == 0 ) regPar = 5.; 
-        if ( concatenation.CompareTo("mumu_TtBar_Pt") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("emu_TtBar_Pt") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("ee_TtBar_Pt") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("combined_TtBar_Pt") == 0 ) regPar = 4.; 
-        if ( concatenation.CompareTo("mumu_TtBar_Mass") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("emu_TtBar_Mass") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("ee_TtBar_Mass") == 0 ) regPar = 4.;
-        if ( concatenation.CompareTo("combined_TtBar_Mass") == 0 ) regPar = 4.;
-    }
-    
-    // Regularize via tau
-    //if ( useTau == 1 && useMacro == true) { 
-    if ( useTau == 1) { 
-    	if ( concatenation.CompareTo("emu_Leptons_Eta") == 0 )                          regPar = 12.46585;
-        if ( concatenation.CompareTo("mumu_Leptons_Eta") == 0 )                         regPar = 7.00469;
-        if ( concatenation.CompareTo("ee_Leptons_Eta") == 0 )                           regPar = 6.38505;
-        if ( concatenation.CompareTo("combined_Leptons_Eta") == 0 )                     regPar = 15.64009;
-        if ( concatenation.CompareTo("emu_Leptons_Pt") == 0 )                           regPar = 10.46604;
-        if ( concatenation.CompareTo("mumu_Leptons_Pt") == 0 )                          regPar = 5.73979;
-        if ( concatenation.CompareTo("ee_Leptons_Pt") == 0 )                            regPar = 5.26385;
-        if ( concatenation.CompareTo("combined_Leptons_Pt") == 0 )                      regPar = 12.95660;
-        if ( concatenation.CompareTo("emu_LepPair_Pt") == 0 )                           regPar = 14.21435;
-        if ( concatenation.CompareTo("mumu_LepPair_Pt") == 0 )                          regPar = 7.72164;
-        if ( concatenation.CompareTo("ee_LepPair_Pt") == 0 )                            regPar = 7.34612;
-        if ( concatenation.CompareTo("combined_LepPair_Pt") == 0 )                      regPar = 17.68402;
-        if ( concatenation.CompareTo("emu_LepPair_Mass") == 0 )                         regPar = 19.10723;
-		if ( concatenation.CompareTo("mumu_LepPair_Mass") == 0 )                        regPar = 15.77096;
-		if ( concatenation.CompareTo("ee_LepPair_Mass") == 0 )                          regPar = 14.36950;
-		if ( concatenation.CompareTo("combined_LepPair_Mass") == 0 )                    regPar = 23.62244;
-        if ( concatenation.CompareTo("emu_BJets_Rapidity") == 0 )                             regPar = 23.07640;
-        if ( concatenation.CompareTo("mumu_BJets_Rapidity") == 0 )                            regPar = 12.61893;
-        if ( concatenation.CompareTo("ee_BJets_Rapidity") == 0 )                              regPar = 12.13045;
-        if ( concatenation.CompareTo("combined_BJets_Rapidity") == 0 )                        regPar = 28.89900;
-        if ( concatenation.CompareTo("emu_BJets_Pt") == 0 )                              regPar = 19.69450;
-        if ( concatenation.CompareTo("mumu_BJets_Pt") == 0 )                             regPar = 10.53993;
-        if ( concatenation.CompareTo("ee_BJets_Pt") == 0 )                               regPar = 10.10353;
-        if ( concatenation.CompareTo("combined_BJets_Pt") == 0 )                         regPar = 24.39646;
-        if ( concatenation.CompareTo("emu_TopQuarks_Rapidity") == 0 )                   regPar = 22.01909;
-        if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity") == 0 )                  regPar = 12.18932;
-        if ( concatenation.CompareTo("ee_TopQuarks_Rapidity") == 0 )                    regPar = 11.80886;
-        if ( concatenation.CompareTo("combined_TopQuarks_Rapidity") == 0 )              regPar = 27.73292;
-        if ( concatenation.CompareTo("emu_TopQuarks_Rapidity_MoreBins") == 0 )          regPar = 28.86155;
-        if ( concatenation.CompareTo("mumu_TopQuarks_Rapidity_MoreBins") == 0 )         regPar = 15.99503;
-        if ( concatenation.CompareTo("ee_TopQuarks_Rapidity_MoreBins") == 0 )           regPar = 15.23704;
-        if ( concatenation.CompareTo("combined_TopQuarks_Rapidity_MoreBins") == 0 )     regPar = 36.22604;
-        if ( concatenation.CompareTo("emu_TopQuarks_Pt") == 0 )                         regPar = 30.32823;
-        if ( concatenation.CompareTo("mumu_TopQuarks_Pt") == 0 )                        regPar = 18.05278;
-        if ( concatenation.CompareTo("ee_TopQuarks_Pt") == 0 )                          regPar = 16.97786;
-        if ( concatenation.CompareTo("combined_TopQuarks_Pt") == 0 )                    regPar = 39.06316;
-        if ( concatenation.CompareTo("emu_TtBar_Rapidity") == 0 )                       regPar = 13.92207;
-        if ( concatenation.CompareTo("mumu_TtBar_Rapidity") == 0 )                      regPar = 6.61194;
-        if ( concatenation.CompareTo("ee_TtBar_Rapidity") == 0 )                        regPar = 6.81676;
-        if ( concatenation.CompareTo("combined_TtBar_Rapidity") == 0 )                  regPar = 16.74603;
-        if ( concatenation.CompareTo("emu_TtBar_Rapidity_MoreBins") == 0 )              regPar = 21.82622;
-        if ( concatenation.CompareTo("mumu_TtBar_Rapidity_MoreBins") == 0 )             regPar = 11.46453;
-        if ( concatenation.CompareTo("ee_TtBar_Rapidity_MoreBins") == 0 )               regPar = 11.07554;
-        if ( concatenation.CompareTo("combined_TtBar_Rapidity_MoreBins") == 0 )         regPar = 26.91094;
-        if ( concatenation.CompareTo("emu_TtBar_Pt") == 0 )                             regPar = 23.54894;
-        if ( concatenation.CompareTo("mumu_TtBar_Pt") == 0 )                            regPar = 12.68250;
-        if ( concatenation.CompareTo("ee_TtBar_Pt") == 0 )                              regPar = 12.95903;
-        if ( concatenation.CompareTo("combined_TtBar_Pt") == 0 )                        regPar = 29.66756;
-        if ( concatenation.CompareTo("emu_TtBar_Mass") == 0 )                           regPar = 9.94907;
-        if ( concatenation.CompareTo("mumu_TtBar_Mass") == 0 )                          regPar = 6.90770;
-        if ( concatenation.CompareTo("ee_TtBar_Mass") == 0 )                            regPar = 6.43150;
-        if ( concatenation.CompareTo("combined_TtBar_Mass") == 0 )                      regPar = 13.71350;    
-    }
-	
-	if( regPar > 0. ) return regPar;
-    
-    // Exit if this fails 
-    cout << "Error in DilepSVDFunctions::SVD_GetRegPar()" << endl;
-    cout << "Level of regularization could not be determined." << endl;
-    cout << "    particle = "<<particle<<endl;
-    cout << "    quantity = "<<quantity<<endl;
-    cout << "    channel  = "<<channel<<endl;
-    cout << "    special  = "<<special<<endl;
-    cout << "Check the reason for this NOW." << endl;
-    exit(1);
-    
-    return regPar;
-    
-}
-
 
 // DAVID
 // SVD Unfolding Helper Function
@@ -350,6 +136,19 @@ TString DilepSVDFunctions::SVD_GetOutputPath()
 
 // DAVID
 // SVD Unfolding Helper Function
+// Get complete Output File Name for Txt
+TString DilepSVDFunctions::SVD_GetOutputFileNameTxt()
+{
+
+    TString outputfilename = SVD_GetOutputPath();
+    outputfilename.Append("/optimalTau.txt"); 
+    
+    return outputfilename;
+     
+}
+
+// DAVID
+// SVD Unfolding Helper Function
 // Get complete Output File Name for Ps
 TString DilepSVDFunctions::SVD_GetOutputFileNamePs(TString channel, TString particle, TString quantity, TString syst, TString special)
 {
@@ -357,7 +156,7 @@ TString DilepSVDFunctions::SVD_GetOutputFileNamePs(TString channel, TString part
     TString outputfilename = SVD_GetOutputPath();
     outputfilename.Append("/Unfolding_");
     outputfilename.Append(SVD_CPQSS(channel, particle, quantity, special, syst)); 
-    outputfilename.Append(".ps");
+    outputfilename.Append(".eps");
     return outputfilename;
 
 }
@@ -384,18 +183,18 @@ TString DilepSVDFunctions::SVD_GetOutputFileNameRoot(TString channel, TString pa
 // The return value will contain absolute shifts !!!
 // For more information see function SVD_DoUnfold() 
 double DilepSVDFunctions::SVD_DoUnfoldSys(
-        TH1D* dataInputHist,                            // DATA.
-        TH1D* bgrNom, TH1D* bgrUp, TH1D* bgrDown,      // Background.
-        TH1D* genNom, TH1D* genUp, TH1D* genDown,        // Gen. Note: if genUp==NULL then genUp=genNom, etc. 
-        TH1D* recNom, TH1D* recUp, TH1D* recDown,      // Rec
-        TH2D* respNom, TH2D* respUp, TH2D* respDown,  // Response Matrices
+        TH1D* dataInputHist,                              // DATA.
+        TH1D* bgrNom, TH1D* bgrUp, TH1D* bgrDown,         // Background.
+        TH1D* genNom, TH1D* genUp, TH1D* genDown,         // Gen. Note: if genUp==NULL then genUp=genNom, etc. 
+        TH1D* recNom, TH1D* recUp, TH1D* recDown,         // Rec
+        TH2D* respNom, TH2D* respUp, TH2D* respDown,      // Response Matrices
         double totalDataEventsNom,
         double totalBgrEventsNom,  double totalBgrEventsUp,  double totalBgrEventsDown, 
         double totalRecEventsNom,  double totalRecEventsUp,  double totalRecEventsDown, 
         double totalGenEventsNom,  double totalGenEventsUp,  double totalGenEventsDown,     
         const double thebins[],                 
         const int numbins,                       
-        TH1D*& unfolded,                        
+        TH1D*& shifts,                        
         TString channel,                       
         TString particle,                      
         TString quantity,                      
@@ -443,6 +242,7 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
          
     // Create Pointer for Output 
     TH1D* arrUnfolded = NULL;
+    TH1D* arrUnfoldedNorm = NULL;
     
     
     // Call the unfolding function
@@ -459,7 +259,8 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
         totalGenEvents,                    
         thebins,                 
         numbins,                       
-        arrUnfolded,    // Return value   
+        arrUnfolded,      // Return value 
+        arrUnfoldedNorm,  // Return value
         numSys,          
         channel,                     
         particle,                      
@@ -468,15 +269,16 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
         syst);                    
      
      
-    // Get the unfolded histograms 
-    TH1D* unfNom = arrUnfolded;  
-    TH1D* unfUp = arrUnfolded + 1; 
-    TH1D* unfDown = arrUnfolded + 2; 
+    // Get the shifts histograms 
+    // Get them from the NORMALIZED distributions!
+    TH1D* unfNom = arrUnfoldedNorm;  
+    TH1D* unfUp = arrUnfoldedNorm + 1; 
+    TH1D* unfDown = arrUnfoldedNorm + 2; 
      
      
     // Create the output histogram for this function
-    if ( unfolded == NULL ) {
-        unfolded =  (TH1D*) unfNom->Clone("unfolded");
+    if ( shifts == NULL ) {
+        shifts =  (TH1D*) unfNom->Clone("shifts");
     }
      
     
@@ -486,11 +288,22 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
         double valunfUp = unfUp->GetBinContent(i);
         double valunfDown = unfDown->GetBinContent(i); 
         
-        double Sys_Error_Up   = TMath::Abs(valunfUp - valunfNom );
-        double Sys_Error_Down   = TMath::Abs(valunfDown - valunfNom ); 
-        double Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.; 
-        unfolded->SetBinContent(i, Sys_Error);
-        unfolded->SetBinError(i, 0.);
+        //double Sys_Error_Up   = TMath::Abs(valunfUp - valunfNom );
+        //double Sys_Error_Down   = TMath::Abs(valunfDown - valunfNom ); 
+        //double Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/2.; 
+        
+        // Square the shifts and calculate average of up and down shift
+        double Sys_Error_Up_Sq   = (valunfUp   - valunfNom)*(valunfUp   - valunfNom);
+        double Sys_Error_Down_Sq = (valunfDown - valunfNom)*(valunfDown - valunfNom); 
+        double Sys_Error_Sq      = (Sys_Error_Up_Sq + Sys_Error_Down_Sq) / 2.; 
+        
+        // Square Root
+        double Sys_Error = TMath::Sqrt(Sys_Error_Sq);
+        
+        
+        // Save it
+        shifts->SetBinContent(i, Sys_Error);
+        shifts->SetBinError(i, 0.);
     }
       
     
@@ -500,15 +313,7 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
 }    
  
  
-// PERFORM UNFOLDING 
-// Note: This function can do both, BBB and SVD Unfolding.
-// If kreg > 0:
-//       SVD Unfolding is done with 'kreg'
-//       and the result of SVD Unfolding is returned in 'unfolded'
-// If kreg <= 0:
-//       BBB Unfolding is returned in 'unfolded' 
-// If you specify filenames, plots will be drawn and saved.
-// Return value: Best tau, if found, -1. otherwise
+// PERFORM UNFOLDING  
 double DilepSVDFunctions::SVD_DoUnfold(
         TH1D* dataInputHist,                     // Data Input (RAW Data including the background)
         TH1D* bgrInputHist,                      // Background (will be substracted from data)
@@ -522,6 +327,7 @@ double DilepSVDFunctions::SVD_DoUnfold(
         const double thebins[],                  // Binning for the unfolding
         const int numbins,                       // Number of bins for unfolding (not counting OF bins !!!) 
         TH1D*& unfolded,                         // Returned: Unfolded Distribution.
+        TH1D*& unfoldedNorm,                         // Returned: Unfolded Distribution.
         const int numSys,                        // Number of used systematics (standard = 0 )
         TString channel,                         // Specify Name for the Channel ("mumu", "emu", "ee" ...)
         TString particle,                        // Specify Name for the Physics Object ("Top", "BJets", "Leptons")
@@ -535,21 +341,17 @@ double DilepSVDFunctions::SVD_DoUnfold(
     
     
     // Determine the Steering 
-    TString steering = SVD_GetSteering(channel, particle, quantity, special); 
-    int flag_regpar = SVD_GetDigit(steering, 2, 1); 
+    TString steering = SVD_GetSteering(channel, particle, quantity, special);  
+     
     
-
-    // Determine the right kValue
-    double regPar = -1.; 
-    regPar = SVD_GetRegPar(channel, particle, quantity, special, (bool) (flag_regpar-1) );    
+    // Filenames for output 
+    TString rootFile = SVD_GetOutputFileNameRoot(channel, particle, quantity, syst, special);
+    TString psFile = SVD_GetOutputFileNamePs(channel, particle, quantity, syst, special);
+    TString txtFile =  SVD_GetOutputFileNameTxt(); 
     
-    // FileNames for output 
-    TString rootFile = "";
-    rootFile.Append(SVD_GetOutputFileNameRoot(channel, particle, quantity, syst, special));
-    TString psFile = "";
-    psFile.Append(SVD_GetOutputFileNamePs(channel, particle, quantity, syst, special));
-    TString scanResultFile =  SVD_GetOutputPath();
-    scanResultFile.Append("/optimalTau.txt");
+    // Filenames for input
+    TString regParFile(gSystem->pwd());
+    regParFile.Append("/optimalTau.txt");
 
   
     // TexStrings for Formatting
@@ -563,48 +365,23 @@ double DilepSVDFunctions::SVD_DoUnfold(
     // Tex for Systematics
     TString systTex = syst; 
     
+    
+    // Dummy Parameters
+    TH1D* ttbgrInputHist = NULL;
+    double* totalTtBgrEvents = NULL;
+    double regPar = 1.; // will be ignored, since we read regPar from file
+
 
     // Do the Unfolding 
-    double optimalTauX = TopSVDFunctions::SVD_Unfold(dataInputHist, bgrInputHist, NULL, genInputHist, recInputHist, respInputHist,
-        unfolded, 
-        //NULL, NULL, NULL, NULL, NULL,
-        totalDataEvents, totalBgrEvents, NULL, totalRecEvents, totalGenEvents,
+    double optimalTauX = TopSVDFunctions::SVD_Unfold(dataInputHist, bgrInputHist, ttbgrInputHist, genInputHist, recInputHist, respInputHist,
+        unfolded, unfoldedNorm,
+        totalDataEvents, totalBgrEvents, totalTtBgrEvents, totalRecEvents, totalGenEvents,
         thebins, numbins, regPar, steering, numSys,
         channel, particle, quantity, special, syst,
         channelTex, particleTex, quantityTex, specialTex, systTex,
-        rootFile, psFile, scanResultFile);
+        rootFile, psFile, txtFile, regParFile);
   
-    // Save best tau to file if you do a scan
-    if ( flag_regpar == 2  ) {
-          
-        // Code for re-usage
-        TString tauTextFileCode = SVD_GetOutputPath();
-        tauTextFileCode.Append("/optimalTauCode.txt");
-        gSystem->RedirectOutput(tauTextFileCode, "a");
-        TString lineStrCode = "if ( concatenation.CompareTo(\"";
-        lineStrCode.Append(SVD_CPQSS(channel, particle, quantity, special, syst));
-        lineStrCode.Append("\") == 0 ) ");
-        for ( int i = lineStrCode.Length() ; i < 80 ; i++ ) lineStrCode.Append(" ");  
-        lineStrCode.Append("regPar = ");
-        lineStrCode.Append(TString::Format("%.5f", optimalTauX));
-        lineStrCode.Append(";");
-        cout << lineStrCode << endl;
-        gSystem->RedirectOutput(NULL, "a");
-         
-        // Plain list with Tau Parameters
-        TString tauTextFileList = SVD_GetOutputPath();
-        tauTextFileList.Append("/optimalTauDocu.txt");
-        gSystem->RedirectOutput(tauTextFileList, "a");
-        TString lineStrList =  SVD_CPQSS(channel, particle, quantity, special, syst);
-        lineStrList.ReplaceAll("_",""); // Remove underscores
-        lineStrList.Append(" ");
-        for ( int i = lineStrList.Length() ; i < 60 ; i++ ) lineStrList.Append(" ");   
-        lineStrList.Append(TString::Format("%.5f", optimalTauX)); 
-        cout << lineStrList << endl;
-        gSystem->RedirectOutput(NULL, "a");
-    } 
-    
-    
+    // Return
     return optimalTauX;
     
 }
