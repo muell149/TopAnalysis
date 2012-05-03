@@ -40,7 +40,7 @@ class Plotter {
   void setStyle(TH1D&, unsigned int);
   void setStyle(TH1&, unsigned int);
   void   write();
-  double CalcXSec();
+  double CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift);
   void MakeTable();
   void PlotXSec();
   void CalcDiffXSec(TH1* varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* genReco2d, double DiffXSecVec[4][10], double DiffXSecStatErrorVec[4][10], double GenDiffXSecVec[4][10]);
@@ -83,6 +83,12 @@ class Plotter {
   double InclusiveXsectionTotalError[4];
   double InclusiveXsectionSysError[4];
   double InclusiveXsectionSysErrorBySyst[4][20];
+  double InclusiveXsectionBySystNom[4][20];
+  double InclusiveXsectionBySystUp[4][20];
+  double InclusiveXsectionBySystDown[4][20];
+  double InclusiveXsectionStatErrorBySystNom[4][20];
+  double InclusiveXsectionStatErrorBySystUp[4][20];
+  double InclusiveXsectionStatErrorBySystDown[4][20];
   double VisXsection[4][10];//needed for bin-by-bin corrections to combination [channel][bin]
   double VisXsectionError[4][10];//needed for bin-by-bin corrections to combination [channel][bin]
   double GenDiffXSec[4][10];//the differential X-section per channel by bin [channel][bin]
@@ -103,6 +109,7 @@ class Plotter {
   double DiffXSecStatErrorBySystNom[4][10][20];//the differential X-section Error per channel by bin [channel][bin][systematic]
   double DiffXSecStatErrorBySystUp[4][10][20];//the differential X-section Error per channel by bin [channel][bin][systematic]
   double DiffXSecStatErrorBySystDown[4][10][20];//the differential X-section Error per channel by bin [channel][bin][systematic]
+  double SignalEventswithWeight;
 
   // DAVID
   bool doUnfolding; 
@@ -319,54 +326,48 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
   setSystDataSet(Systematic);
   fillSystHisto();
 
-  TH1D* stacksum = (TH1D*)hists[datafiles].Clone();
-  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Clone();
-  TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Clone();
+  double InclusiveXsectionNom[4], InclusiveXsectionUp[4], InclusiveXsectionDown[4];
+  double InclusiveXsectionStatErrorNom[4], InclusiveXsectionStatErrorUp[4], InclusiveXsectionStatErrorDown[4];
 
-  for(unsigned int i=datafiles+1; i<hists.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)hists[i].Clone();
-    if((legends[i] == DYEntry) && channelType!=2 ){
-      htemp->Scale(DYScale[channelType]);
-    }
-    stacksum->Add(htemp);
-  }
-  for(unsigned int i=datafiles+1; i<systhistsUp.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)systhistsUp[i].Clone();
-    if((legends[i] == DYEntry) && channelType!=2 ){
-      htemp->Scale(DYScale[channelType]);
-    }
-    if((legends[i] == DYEntry) && Systematic == "DY_"){
-      htemp->Scale(1.5);
-    }
-    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
-      htemp->Scale(1.3);
-    }
-    stacksumUp->Add(htemp);
-  }
-  for(unsigned int i=datafiles+1; i<systhistsDown.size() ; i++){ // prepare histos and leg
-    TH1 *htemp = (TH1D*)systhistsDown[i].Clone();
-    if((legends[i] == DYEntry) && channelType!=2 ){
-      htemp->Scale(DYScale[channelType]);
-    }
-    if((legends[i] == DYEntry) && Systematic == "DY_"){
-      htemp->Scale(0.5);
-    }
-    if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
-      htemp->Scale(0.7);
-    }
-    stacksumDown->Add(htemp);
-  }
   double Sys_Error_Up, Sys_Error_Down, Sys_Error;//, Sum_Errors;
   double scale = 1.;
 
-  TH1D* h_sys  = (TH1D*) stacksumUp->Clone();   h_sys->Reset();
-  TH1D* h_sys2 = (TH1D*) stacksumDown->Clone(); h_sys2->Reset();
+  if(channelType!=3){//set everything to zero
+      InclusiveXsectionDown[channelType]=0;
+      InclusiveXsectionStatErrorDown[channelType]=0;
+      InclusiveXsectionUp[channelType]=0;
+      InclusiveXsectionStatErrorUp[channelType]=0;
+      InclusiveXsectionNom[channelType]=0;
+      InclusiveXsectionStatErrorNom[channelType]=0;
+  }else{
+    for(int i = 0; i<3; i++){//fill the siffxsec vector with the values for the previous systematics
+	InclusiveXsectionDown[i]=InclusiveXsectionBySystDown[i][syst_number];
+	InclusiveXsectionStatErrorDown[i]=InclusiveXsectionStatErrorBySystDown[i][syst_number];
+	InclusiveXsectionUp[i]=InclusiveXsectionBySystUp[i][syst_number];
+	InclusiveXsectionStatErrorUp[i]=InclusiveXsectionStatErrorBySystUp[i][syst_number];
+	InclusiveXsectionNom[i]=InclusiveXsectionBySystNom[i][syst_number];
+	InclusiveXsectionStatErrorNom[i]=InclusiveXsectionStatErrorBySystNom[i][syst_number];
+    }    
+  }
+  CalcXSec(dataset, InclusiveXsectionNom,InclusiveXsectionStatErrorNom, Systematic, "None");
+  CalcXSec(datasetUp, InclusiveXsectionUp,InclusiveXsectionStatErrorUp, Systematic, "Up");
+  CalcXSec(datasetDown, InclusiveXsectionDown,InclusiveXsectionStatErrorDown, Systematic, "Down");
   
-  Sys_Error_Up   = abs(stacksum->Integral() - stacksumUp->Integral())/stacksum->Integral();
-  Sys_Error_Down = abs(stacksum->Integral() - stacksumDown->Integral())/stacksum->Integral();
-  Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
-  //  Sum_Errors += Sys_Error;
+  InclusiveXsectionBySystDown[channelType][syst_number]=InclusiveXsectionDown[channelType];
+  InclusiveXsectionStatErrorBySystDown[channelType][syst_number]=InclusiveXsectionStatErrorDown[channelType];
+  InclusiveXsectionBySystUp[channelType][syst_number]=InclusiveXsectionUp[channelType];
+  InclusiveXsectionStatErrorBySystUp[channelType][syst_number]=InclusiveXsectionStatErrorUp[channelType];
+  InclusiveXsectionBySystNom[channelType][syst_number]=InclusiveXsectionNom[channelType];
+  InclusiveXsectionStatErrorBySystNom[channelType][syst_number]=InclusiveXsectionStatErrorNom[channelType];
 
+  Sys_Error_Up   = abs(InclusiveXsectionNom[channelType] - InclusiveXsectionUp[channelType])/InclusiveXsectionNom[channelType];
+  Sys_Error_Down = abs(InclusiveXsectionNom[channelType] - InclusiveXsectionDown[channelType])/InclusiveXsectionNom[channelType];
+  Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
+  if(Systematic=="MASS"){
+    Sys_Error=Sys_Error/6.;
+  }
+
+  //  Sum_Errors += Sys_Error;
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error;
 
 }
@@ -794,7 +795,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 	if ( (legendsUp[i] == DYEntry) && (channelType != 2 ) ) {
 	  theDYScale = DYScale[channelType];
 	  if(Systematic == "DY_"){
-	    theDYScale=theDYScale*1.1;
+	    theDYScale=theDYScale*1.5;
 	  }
 	}
 	if ( theBgrHistUp == NULL ) {
@@ -826,7 +827,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 	if ( (legendsDown[i] == DYEntry) && (channelType != 2 ) ) {
 	  theDYScale = DYScale[channelType];
 	  if(Systematic == "DY_"){
-	    theDYScale=theDYScale*0.9;
+	    theDYScale=theDYScale*0.5;
 	  }
 	}
 	if ( theBgrHistDown == NULL ) {
@@ -996,16 +997,16 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
  
  
     // Get the integrals for the normalization
-    double totalDataEventsNom  = theDataHist->Integral(); 
-    double totalBgrEventsNom   = theBgrHist->Integral(); 
-    double totalBgrEventsUp    = theBgrHistUp->Integral();
-    double totalBgrEventsDown  = theBgrHistDown->Integral();
-    double totalRecEventsNom   = theRecHist->Integral(); 
-    double totalRecEventsUp    = theRecHistUp->Integral(); 
-    double totalRecEventsDown  = theRecHistDown->Integral(); 
-    double totalGenEventsNom   = theGenHist->Integral(); 
-    double totalGenEventsUp    = theGenHistUp->Integral(); 
-    double totalGenEventsDown  = theGenHistDown->Integral();  
+    double totalDataEventsNom  = TopSVDFunctions::SVD_Integral1D((TH1D*)theDataHist, 0, false);
+    double totalBgrEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHist, 0, false);
+    double totalBgrEventsUp    = TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHistUp, 0, false);
+    double totalBgrEventsDown  = TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHistDown, 0, false);
+    double totalRecEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHist, 0, false);
+    double totalRecEventsUp    = TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHistUp, 0, false);
+    double totalRecEventsDown  = TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHistDown, 0, false);
+    double totalGenEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHist, 0, false);
+    double totalGenEventsUp    = TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHistUp, 0, false);
+    double totalGenEventsDown  = TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHistDown, 0, false);
      
     // UNFOLDING OF SYSTEMATICS
     // Retrieve histograms with the unfolded quantities.
@@ -1638,7 +1639,30 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
 }
 
 void Plotter::PlotXSec(){
+
+  TH1::AddDirectory(kFALSE);
+  CalcInclSystematics("JES",0);
+  CalcInclSystematics("RES",1);
+  CalcInclSystematics("PU_",2);
+  CalcInclSystematics("SCALE",3);
+  CalcInclSystematics("MATCH",4);
+  CalcInclSystematics("MASS",5);
+  CalcInclSystematics("DY_",6);
+  CalcInclSystematics("BG_",7);
+  InclFlatSystematics(8);
   
+  CalcXSec(dataset, InclusiveXsection,InclusiveXsectionStatError, "","");
+
+  double syst_square=0;
+
+  for(int i =0; i<15; i++){
+    syst_square += InclusiveXsectionSysErrorBySyst[channelType][i]*InclusiveXsectionSysErrorBySyst[channelType][i];
+  }
+  InclusiveXsectionSysError[channelType] = sqrt(syst_square);
+  //cout<<"&^&^&^&^&^&^^&^&^ InclusiveXsectionSysError[channelType]: "<<InclusiveXsectionSysError[channelType]<<endl;
+
+  if(channelType==3){
+
      // measured results with statistical error
    Double_t mx[]   = {      0.50,       1.50,       2.50,       3.50};
    Double_t mexl[] = {      0.00,       0.00,       0.00,       0.00};
@@ -1744,7 +1768,14 @@ void Plotter::PlotXSec(){
    c->Print("Plots/"+channel+"/InclusiveXSec.eps");
    c->Clear();
    delete c;
-  
+
+   cout<<"!!!!!!!!!!!!!!!!!!!!ee Cross Section: "<<InclusiveXsection[0]<<" +/- "<<InclusiveXsectionStatError[0]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[0]<<"(sys)"<<endl;
+   cout<<"!!!!!!!!!!!!!!!!!!!!mumu Cross Section: "<<InclusiveXsection[1]<<" +/- "<<InclusiveXsectionStatError[1]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[1]<<"(sys)"<<endl;
+   cout<<"!!!!!!!!!!!!!!!!!!!!emu Cross Section: "<<InclusiveXsection[2]<<" +/- "<<InclusiveXsectionStatError[2]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[2]<<"(sys)"<<endl;
+   cout<<"!!!!!!!!!!!!!!!!!!!!Combined Cross Section: "<<InclusiveXsection[3]<<" +/- "<<InclusiveXsectionStatError[3]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[3]<<"(sys)"<<endl;
+
+
+  }
 }
 
 void Plotter::MakeTable(){
@@ -1875,25 +1906,7 @@ void Plotter::MakeTable(){
   EventFile9.close();  
 }
 
-double Plotter::CalcXSec(){
-  TH1::AddDirectory(kFALSE);
-  //  CalcInclSystematics("JES",0);
-  //CalcInclSystematics("RES",1);
-  //CalcInclSystematics("PU_",2);
-  //CalcInclSystematics("SCALE",3);
-  //CalcInclSystematics("MATCH",4);
-  //CalcInclSystematics("MASS",5);
-  //CalcInclSystematics("DY_",6);
-  //CalcInclSystematics("BG_",7);
-  //InclFlatSystematics(8);
-  
-  double syst_square=0;
-
-  for(int i =0; i<15; i++){
-    syst_square += InclusiveXsectionSysErrorBySyst[channelType][i]*InclusiveXsectionSysErrorBySyst[channelType][i];
-  }
-  InclusiveXsectionSysError[channelType] = sqrt(syst_square);
-  //cout<<"&^&^&^&^&^&^^&^&^ InclusiveXsectionSysError[channelType]: "<<InclusiveXsectionSysError[channelType]<<endl;
+double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift){
   //  double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu, combined] including tau
   double BranchingFraction[4]={0.011556, 0.011724, 0.022725, 0.04524};//[ee, mumu, emu, combined] not including tau
   lumi = 4966;
@@ -1901,8 +1914,8 @@ double Plotter::CalcXSec(){
   TH1D *numhists[hists.size()];
   double numbers[4]={0};
 
-  for(unsigned int i=0; i<dataset.size(); i++){
-    TFile *ftemp = TFile::Open(dataset[i]);
+  for(unsigned int i=0; i<datasetVec.size(); i++){
+    TFile *ftemp = TFile::Open(datasetVec[i]);
     TH1D *hist = (TH1D*)ftemp->Get("step9")->Clone();     
     numhists[i]=hist;
     delete ftemp;
@@ -1916,13 +1929,13 @@ double Plotter::CalcXSec(){
       numbers[0]+=numhists[i]->Integral();
     }
     else if(legends[i] == "t#bar{t} signal"){
-      TFile *ftemp2 = TFile::Open(dataset[i]);
+      TFile *ftemp2 = TFile::Open(datasetVec[i]);
       TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone();
       //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[1]+=NoPUPlot->Integral();
       delete ftemp2;
       
-      TFile *ftemp = TFile::Open(dataset[i]);
+      TFile *ftemp = TFile::Open(datasetVec[i]);
       TH1D *GenPlot = (TH1D*)ftemp->Get("GenAll")->Clone();
       numbers[2]+=GenPlot->Integral();
       delete ftemp;
@@ -1930,6 +1943,18 @@ double Plotter::CalcXSec(){
     else{      
       if((legends[i] == DYEntry) && channelType!=2){
 	numhists[i]->Scale(DYScale[channelType]);
+      }
+      if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Up"){
+	numhists[i]->Scale(1.5);
+      }
+      if(Systematic == "BG_" && Shift=="Up" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
+	numhists[i]->Scale(1.3);
+      }
+      if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Down"){
+	numhists[i]->Scale(0.5);
+      }
+      if(Systematic == "BG_" && Shift=="Down" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
+	numhists[i]->Scale(0.7);
       }
       //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[3]+=numhists[i]->Integral();
@@ -1969,24 +1994,20 @@ double Plotter::CalcXSec(){
   double xsecstaterror = TMath::Sqrt(numbers[0])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
 
   if(channelType!=3){
-    InclusiveXsection[channelType] = xsec;
-    InclusiveXsectionStatError[channelType] = xsecstaterror;
+    InclusiveXsectionVec[channelType] = xsec;
+    InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
   }else{
-    InclusiveXsection[channelType] =(InclusiveXsection[0]/(InclusiveXsectionStatError[0]*InclusiveXsectionStatError[0])
-				    +InclusiveXsection[1]/(InclusiveXsectionStatError[1]*InclusiveXsectionStatError[1])			
-		   		    +InclusiveXsection[2]/(InclusiveXsectionStatError[2]*InclusiveXsectionStatError[2]))/
-				     (1/(InclusiveXsectionStatError[0]*InclusiveXsectionStatError[0])
-				    +(1/(InclusiveXsectionStatError[1]*InclusiveXsectionStatError[1]))			
-				    +(1/(InclusiveXsectionStatError[2]*InclusiveXsectionStatError[2])));			
+    InclusiveXsectionVec[channelType] =(InclusiveXsectionVec[0]/(InclusiveXsectionStatError[0]*InclusiveXsectionStatErrorVec[0])
+				    +InclusiveXsectionVec[1]/(InclusiveXsectionStatError[1]*InclusiveXsectionStatErrorVec[1])			
+		   		    +InclusiveXsectionVec[2]/(InclusiveXsectionStatError[2]*InclusiveXsectionStatErrorVec[2]))/
+				     (1/(InclusiveXsectionStatErrorVec[0]*InclusiveXsectionStatErrorVec[0])
+				    +(1/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1]))			
+				    +(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2])));			
 
-    InclusiveXsectionStatError[channelType] =1/(TMath::Sqrt((1/(InclusiveXsectionStatError[0]*InclusiveXsectionStatError[0]))
-							+(1/(InclusiveXsectionStatError[1]*InclusiveXsectionStatError[1]))			
-    							+(1/(InclusiveXsectionStatError[2]*InclusiveXsectionStatError[2]))));			
+    InclusiveXsectionStatErrorVec[channelType] =1/(TMath::Sqrt((1/(InclusiveXsectionStatErrorVec[0]*InclusiveXsectionStatErrorVec[0]))
+							+(1/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1]))			
+    							+(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]))));			
 
-    cout<<"!!!!!!!!!!!!!!!!!!!!ee Cross Section: "<<InclusiveXsection[0]<<" +/- "<<InclusiveXsectionStatError[0]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[0]<<"(sys)"<<endl;
-    cout<<"!!!!!!!!!!!!!!!!!!!!mumu Cross Section: "<<InclusiveXsection[1]<<" +/- "<<InclusiveXsectionStatError[1]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[1]<<"(sys)"<<endl;
-    cout<<"!!!!!!!!!!!!!!!!!!!!emu Cross Section: "<<InclusiveXsection[2]<<" +/- "<<InclusiveXsectionStatError[2]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[2]<<"(sys)"<<endl;
-    cout<<"!!!!!!!!!!!!!!!!!!!!Combined Cross Section: "<<InclusiveXsection[3]<<" +/- "<<InclusiveXsectionStatError[3]<<"(stat) +/- "<<InclusiveXsection[0]*InclusiveXsectionSysError[3]<<"(sys)"<<endl;
   }
   return xsec;
 }
@@ -2086,10 +2107,10 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     TString theSpecialPostfix = "";
  
 
-    double totalDataEventsNom[1]  = {theDataHist->Integral()}; 
-    double totalBgrEventsNom[1]   = {theBgrHist->Integral()};  
-    double totalRecEventsNom[1]   = {theRecHist->Integral()};  
-    double totalGenEventsNom[1]  = {theGenHist->Integral()};  
+    double totalDataEventsNom[1]  = {TopSVDFunctions::SVD_Integral1D((TH1D*)theDataHist, 0, false)}; 
+    double totalBgrEventsNom[1]   = {TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHist, 0, false)};
+    double totalRecEventsNom[1]   = {TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHist, 0, false)};
+    double totalGenEventsNom[1]  = {TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHist, 0, true)}; 
     
     
     // UNFOLDING 
@@ -2126,20 +2147,26 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     }
 		
 		 	
-		
+    SignalEventswithWeight=0;
      // CROSS SECTION CALCULATION
+    for (Int_t i=0; i<bins; ++i) {
+      SignalEventswithWeight+=GenSignalSum[i];
+    }
+
     for (Int_t i=0; i<bins; ++i) {
       if(channelType!=3){
 	binWidth[i] = Xbins[i+1]-Xbins[i];       
-	DiffXSecVec[channelType][i] = UnfoldingResult[i]/(binWidth[i]*lumi);
-	DiffXSecStatErrorVec[channelType][i] = UnfoldingError[i]/(lumi*binWidth[i]); // statistical error 
-	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+	DiffXSecVec[channelType][i] = UnfoldingResult[i]/(binWidth[i]);
+	DiffXSecStatErrorVec[channelType][i] = UnfoldingError[i]/(binWidth[i]); // statistical error 
+	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEventswithWeight*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+	cout<<"GenDiffXSecVec[channelType][i]: "<<GenDiffXSecVec[channelType][i]<<endl;
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 				
 	if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
-	  DiffXSecVec[channelType][i]=DiffXSecVec[channelType][i]/2.;
+	  //	  DiffXSecVec[channelType][i]=DiffXSecVec[channelType][i]/2.;
+	  DiffXSecVec[channelType][i]=DiffXSecVec[channelType][i];
 	  GenDiffXSecVec[channelType][i]=GenDiffXSecVec[channelType][i]/2.;
-	  DiffXSecStatErrorVec[channelType][i]=DiffXSecStatErrorVec[channelType][i]/2.;
+	  DiffXSecStatErrorVec[channelType][i]=DiffXSecStatErrorVec[channelType][i];
 	}
       }else{//For the combination
 	binWidth[i] = Xbins[i+1]-Xbins[i];      
@@ -2153,12 +2180,12 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 	DiffXSecStatErrorVec[channelType][i]=1/(TMath::Sqrt((1/(DiffXSecStatErrorVec[0][i]*DiffXSecStatErrorVec[0][i]))
 							 +(1/(DiffXSecStatErrorVec[1][i]*DiffXSecStatErrorVec[1][i]))			
 							 +(1/(DiffXSecStatErrorVec[2][i]*DiffXSecStatErrorVec[2][i]))));			 
-	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEventswithWeight*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
-	  DiffXSecVec[channelType][i]=DiffXSecVec[channelType][i]/2.;
+	  DiffXSecVec[channelType][i]=DiffXSecVec[channelType][i];
 	  GenDiffXSecVec[channelType][i]=GenDiffXSecVec[channelType][i]/2.;
-	  DiffXSecStatErrorVec[channelType][i]=DiffXSecStatErrorVec[channelType][i]/2.;
+	  DiffXSecStatErrorVec[channelType][i]=DiffXSecStatErrorVec[channelType][i];
 	}
       }
       //		    h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
@@ -2174,7 +2201,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 	DiffXSecVec[channelType][i] = (DataSum[i]-BGSum[i])/(efficiencies[i]*binWidth[i]*lumi);
 	DiffXSecStatErrorVec[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	//	GenDiffXSec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*BranchingFraction[channelType]*binWidth[i]);//DIRTY (signal*topxsec)/(total events*bf*binwidth)
-	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEventswithWeight*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	
 	if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
@@ -2203,7 +2230,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!mumu DiffCross Sec: "<<DiffXSec[1][i]<<" +/- "<<DiffXSecStatError[1][i]<<endl;
 	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!emu DiffCross Sec: "<<DiffXSec[2][i]<<" +/- "<<DiffXSecStatError[2][i]<<endl;
 	//cout<<"&&&&&&&&&&&&&&&!!!!!!!!Combined DiffCross Sec: "<<DiffXSec[3][i]<<" +/- "<<DiffXSecStatError[3][i]<<endl;
-	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEvents*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEventswithWeight*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 	if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
 	  DiffXSecVec[channelType][i]=DiffXSecVec[channelType][i]/2.;
@@ -2216,15 +2243,15 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 }
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    //    CalcDiffSystematics("JES", 0);
+    CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
-    //CalcDiffSystematics("PU_", 2);
-    //CalcDiffSystematics("SCALE", 3);
-    //CalcDiffSystematics("MASS", 4);
-    //CalcDiffSystematics("MATCH", 5);
-    //CalcDiffSystematics("DY_", 6);
-    //CalcDiffSystematics("BG_", 7);
-    //DiffFlatSystematics(8,bins);
+    CalcDiffSystematics("PU_", 2);
+    CalcDiffSystematics("SCALE", 3);
+    CalcDiffSystematics("MASS", 4);
+    CalcDiffSystematics("MATCH", 5);
+    CalcDiffSystematics("DY_", 6);
+    CalcDiffSystematics("BG_", 7);
+    DiffFlatSystematics(8,bins);
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2458,7 +2485,8 @@ void Plotter::PlotDiffXSec(){
     double datascale;
     datascale = h_DiffXSec->Integral("width");
     //    if(name.Contains("LeptonEta")){
-      TotalVisXSection[channelType] = datascale;
+    //TotalVisXSection[channelType] = datascale;
+      TotalVisXSection[channelType] = 1.;
       //}
     //cout<<"VISIBLE CROSS-SECTION: "<<TotalVisXSection[channelType]<<endl;
     h_DiffXSec->Scale(1/TotalVisXSection[channelType]);
@@ -2483,7 +2511,7 @@ void Plotter::PlotDiffXSec(){
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin];//TotalVisXSection[channelType];
     }
     //The Markus plots
-    /*    TCanvas * c10 = new TCanvas("Markus","Markus");
+    TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
 
@@ -2504,7 +2532,8 @@ void Plotter::PlotDiffXSec(){
     c10->Print("Plots/"+channel+"/MSP_"+name+".eps");
     c10->Clear();
     delete leg10;
-    delete c10;*/
+    delete c10;
+
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
@@ -2524,16 +2553,17 @@ void Plotter::PlotDiffXSec(){
     //    for( Int_t j = 0; j< GenPlotTheory->GetNbinsX(); j++ ){
     // GenPlotTheory->SetBinContent(j,(GenPlotTheory->GetBinContent(j)*topxsec)/(SignalEvents*GenPlotTheory->GetBinWidth(j)));
     //}
-    GenPlotTheory->Scale(topxsec/(SignalEvents*GenPlotTheory->GetBinWidth(1)));
-    GenPlot->Scale(topxsec/(SignalEvents*GenPlot->GetBinWidth(1)));
+    GenPlotTheory->Scale(topxsec/(SignalEventswithWeight*GenPlotTheory->GetBinWidth(1)));
+    GenPlot->Scale(topxsec/(SignalEventswithWeight*GenPlot->GetBinWidth(1)));
     if(name.Contains("Lepton")||name.Contains("Top")||name.Contains("BJet")){
       GenPlotTheory->Scale(1./2.);
       //h_GenDiffXSec->Scale(1./2.);
     }
     double genscale = 1./GenPlotTheory->Integral("width");
+    //double genscale = 1.;
     
+    //    genscale = 1./ h_GenDiffXSec->Integral("width");
     GenPlotTheory->Scale(genscale);
-    //genscale = 1./ h_GenDiffXSec->Integral("width");
     h_GenDiffXSec->Scale(genscale);
     TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
     if(name.Contains("LeptonpT")){mcnlohist = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
