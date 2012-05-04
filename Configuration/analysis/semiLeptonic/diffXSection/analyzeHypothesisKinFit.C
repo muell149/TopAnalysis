@@ -1646,6 +1646,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	psFile+=".ps";
 	//if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
       }
+      TString txtfile="diffXSecUnfoldDetailsTopSemi";
+      if(decayChannel=="muon"    ) txtfile+="Mu";
+      if(decayChannel=="electron") txtfile+="Elec";
+      txtfile+=dataSample+LV+PS+".txt";
       // save unfolding plots in rootfile?
       //         0 means: Default value, same as 1
       //         1 means: no root file will be written (default)
@@ -1717,19 +1721,22 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //          2 means: Do transpose input response matrix during rebinning (default)
       int matrixori=2;
       steering=getTStringFromInt(matrixori)+steering;
-
-      // TString steering2=getTStringFromInt(matrixori);
-      // steering2+=getTStringFromInt(upsidebin);
-      // steering2+=getTStringFromInt(lowsidebin);
-      // steering2+=getTStringFromInt(scanrange);
-      // steering2+=getTStringFromInt(scanpoints);
-      // steering2+=getTStringFromInt(verbosity);
-      // steering2+=getTStringFromInt(doTextFile);
-      // steering2+=getTStringFromInt(doRootFile);
-      // steering2+=getTStringFromInt(plotting);
-      // steering2+=getTStringFromInt(scan);
-      // steering2+=getTStringFromInt(unfoldWithParameter);
-      // steering2+=getTStringFromInt(regMode-1);
+      //    (13) NORMALIZATION
+      //         0 means: Default value, same as 1
+      //         1 means: Extrinsic Normalization (default)
+      //             This means, the normalization is done with a global inclusive cross
+      //             section which is calculated from the parameters totalDataEvents, 
+      //             totalBgrEvents, totalTtBgrEvents, totalRecEvents and totalGenEvents.
+      //         2 means: Intrinsic Normalization.
+      //             Each unfolded distribution is normalized with its integral.
+      int normalizeUnfPlot=1;
+      steering=getTStringFromInt(normalizeUnfPlot)+steering;
+      //    (14) EPS or PS for Control Plots
+      //         0 means: Default value, same as 1
+      //         1 means: Write out a PS Booklet of Control Plots
+      //         2 means: Write out single EPS Plots 
+      int psOReps=1;
+      steering=getTStringFromInt(psOReps)+steering;
 
       // -----------
       // get binning
@@ -1785,6 +1792,18 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	if(verbose>1) std::cout << "bin " << bin << ": " << bins[bin]<< std::endl;
       }
       if(verbose>1) std::cout << "bins used for unfolding: " << unfoldbins << std::endl;
+
+      double * NdataTot = new double[1];
+      NdataTot[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->GetNbinsX()+1);
+      double * NBGTot= new double[1];
+      NBGTot[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->GetNbinsX()+1);
+      double * NttBG= new double[1];
+      NttBG[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->GetNbinsX()+1);
+      double * NttSG= new double[1];
+      NttSG[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]->GetNbinsX()+1);
+      double * NttSGgen= new double[1];
+      NttSGgen[1] = histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->Integral(0,histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->GetNbinsX()+1);
+      
       // ----------------------
       // use unfolding machine
       // ----------------------
@@ -1812,7 +1831,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	    std::cout << "     N(QCD): "    << NumQCD  << std::endl;
  	  }
 	}
-	TH1D* unfoldedData=new TH1D();
+	TH1D* unfoldedData    =new TH1D();
+	TH1D* unfoldedDataNorm=new TH1D();
 	TopSVDFunctions::SVD_Unfold(
 	// ---
 	//    HISTOS
@@ -1826,14 +1846,34 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	// on the inclusive ttbar cross section.) 
 	// Note: if 0 pointer is handed over 
 	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg],
-	// Generated MC
+	// Generated ttbar SG MC
 	(TH1D*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig],
-	// Reconstructed MC
+	// Reconstructed ttbar SG MC
 	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig],
 	// Response Matrix 
 	(TH2D*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig],
 	// Returned: Unfolded Distribution              
 	unfoldedData,
+	// Returned: Normalized Unfolded Distribution              
+	unfoldedDataNorm,
+	// ---
+	//    NUMBERS
+	// ---	
+        // For Normalization: Total Data Events
+        // If set to zero, will be taken from the integral of dataInputHist
+	NdataTot,
+        // For Normalization: Total Reconstructed all BG MC Events
+        // If set to NULL, will be taken from the integral of bgrInputHist
+	NBGTot,
+        // For Normalization: Total Reconstructed ttbar BG MC Events
+        // If set to NULL, will be taken from the integral of ttbgrInputHist
+	NttBG,
+	// For Normalization: Total Reconstructed ttbar SG MC Events
+        // If set to NULL, will be taken from the integral of recInputHist
+	NttSG,
+	// For Normalization: Total Generated ttbar SG MC Events
+        // If set to NULL, will be taken from the integral of genInputHist
+	NttSGgen,
 	// ---
 	//    BINS
 	// ---	
@@ -1882,6 +1922,13 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	rootFile,
 	// If specified, plots will be saved in PS File
 	psFile,
+        // The optimal Reg Parameters will be written to this file.
+        // The file will NOT be overwritten, rather the result will be appended.
+        // The following data will be saved in this order: 
+        // (1) the optimal tau, (2) the two nearest k values,
+        // (3) the k value from the d value method
+        // (4) the number of bins including side bins
+        txtfile,
         // If specified, optimal Reg Parameters will be 
 	// written to this file. The file will NOT be 
 	// overwritten, rather the result will be appended
