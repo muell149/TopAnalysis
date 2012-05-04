@@ -421,7 +421,7 @@ if options.runOnMC:
 #    process.eventWeightPU.Weight3DName        = "eventWeightPU3D"
     process.eventWeightPU.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
 #    process.eventWeightPU.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPU.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
+    process.eventWeightPU.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysNo_68000_2011Full.root")
 #    process.eventWeightPU.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
 #    process.eventWeightPU.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3D.root")
 
@@ -430,7 +430,7 @@ if options.runOnMC:
 #    process.eventWeightPUsysUp.Weight3DName       = "eventWeightPU3DUp"
     process.eventWeightPUsysUp.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
 #    process.eventWeightPUsysUp.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPUsysUp.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root")
+    process.eventWeightPUsysUp.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_71400_2011Full.root")
 #    process.eventWeightPUsysUp.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root")
 #    process.eventWeightPUsysUp.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3DUp.root")
 
@@ -438,7 +438,7 @@ if options.runOnMC:
 #    process.eventWeightPUsysDown.Weight3DName       = "eventWeightPU3DDown"
     process.eventWeightPUsysDown.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
 #    process.eventWeightPUsysDown.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPUsysDown.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root")
+    process.eventWeightPUsysDown.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_64600_2011Full.root")
 #    process.eventWeightPUsysDown.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root")
 #    process.eventWeightPUsysDown.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3DDown.root")
 
@@ -991,80 +991,8 @@ process.afterLeptonChargeSelection = cms.Sequence(
     process.filterDiLeptonMassQCDveto*
     process.makeTtFullLepEvent       *
     process.eventWeightDileptonSF    *
-    process.ntupleInRecoSeq *
+    process.ntupleInRecoSeq 
 
-    process.analyzeLeptonPair3       *
-    process.analyzeJets3             *
-    process.analyzeMet3              *
-    process.analyzeMuons3            *
-    process.analyzeElecs3            *
-    process.analyzeVertex3           *
-    process.eventIDPrinter3          *
-
-    #Step 4 = Z veto
-    process.Step4Cut                 *
-    process.analyzeJets4             *
-    process.analyzeMet4              *
-    process.analyzeMuons4            *
-    process.analyzeElecs4            *
-    process.analyzeLeptonPair4       *
-    process.analyzeVertex4           *
-    process.eventIDPrinter4          *
-
-    process.onePFJetSelection        *
-    process.analyzeJets5             *
-    process.analyzeMet5              *
-    process.analyzeMuons5            *
-    process.analyzeElecs5            *
-    process.analyzeVertex5           *
-    process.analyzeLeptonPair5       *
-
-    process.twoPFJetSelection        *
-
-    process.analyzeJets6             *
-    process.analyzeMet6              *
-    process.analyzeMuons6            *
-    process.analyzeElecs6            *
-    process.analyzeLeptonPair6       *
-    process.analyzeKinSolution6      *
-    process.analyzeVertex6           *
-    process.eventIDPrinter6          *
-
-    #Step7 = MET cut
-    process.Step7Cut *
-    process.analyzeJets7             *
-    process.analyzeMet7              *
-    process.analyzeMuons7            *
-    process.analyzeElecs7            *
-    process.analyzeLeptonPair7       *
-    process.analyzeKinSolution7      *
-    process.analyzeKinSolutionNoBtagging7 *
-    process.analyzeVertex7           *
-    process.analyzeGenEvent7         *
-    process.eventIDPrinter7          *
-
-    process.bTagSelectionTCHEL       *
-    process.analyzeKinSolution8      *
-    process.analyzeJets8             *
-    process.analyzeMet8              *
-    process.analyzeMuons8            *
-    process.analyzeElecs8            *
-    process.analyzeLeptonPair8       *
-    process.analyzeVertex8           *
-    process.analyzeGenEvent8         *
-    process.eventIDPrinter8          *
-
-    process.filterFullLepHypothesis  *
-    process.eventWeightDileptonKinEffSF*
-    process.analyzeKinSolution9      *
-    process.analyzeJets9             *
-    process.analyzeMet9              *
-    process.analyzeMuons9            *
-    process.analyzeElecs9            *
-    process.analyzeLeptonPair9       *
-    process.analyzeVertex9           *
-    process.analyzeGenEvent9         *
-    process.eventIDPrinter9
 ).expandAndClone()
 
 process.p = cms.Path(
