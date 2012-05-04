@@ -32,7 +32,7 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     int flag_uppersidebin = 2;       // Cut out side bin on rec, not on gen level (2)
     int flag_matrixorientation = 1;  // Transpose matrix prior to unfolding (1)
     int flag_norm = 1;               // Extrinsic Normalization (1)
-    int flag_eps = 2;                // Write out EPS instead of PS
+    int flag_eps = 1;                // Write out EPS instead of PS
     
     // Cut out the lower gen level side bin for the PT quantities
     TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
@@ -299,10 +299,12 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
         
         // Square Root
         double Sys_Error = TMath::Sqrt(Sys_Error_Sq);
-        
-        
+       
+        // Make a relative uncertainty from that
+        double Sys_Error_Relative = SVD_Divide(Sys_Error, valunfNom);
+
         // Save it
-        shifts->SetBinContent(i, Sys_Error);
+        shifts->SetBinContent(i, Sys_Error_Relative);
         shifts->SetBinError(i, 0.);
     }
       
