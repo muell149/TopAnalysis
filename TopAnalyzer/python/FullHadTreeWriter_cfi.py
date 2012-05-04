@@ -22,7 +22,9 @@ writeFullHadTree = cms.EDAnalyzer("FullHadTreeWriter",
                                   ## weight from PU reweighting
                                   PUweightSrc = cms.InputTag("eventWeightPU","eventWeightPU"),
                                   ## weight of MC sample
-                                  MCweight = cms.double(1.),
+                                  MCweight = cms.double(-1.),
+                                  ## do the PDF uncertainty
+                                  DoPDFUncertainty = cms.bool(False),
                                   ## information on b-tagging
                                   bTagName = cms.vstring("BTAGTCHEM"   ,"BTAGTCHEM"   ,
                                                          "MISTAGTCHEM" ,"MISTAGTCHEM" ,
