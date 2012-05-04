@@ -577,59 +577,47 @@ Bool_t Analysis::Process(Long64_t entry)
   if(MCSample->find("ttbarsignal")!=string::npos){  
     
     h_GenAll->Fill(LVGenTop.M(),weightPU*lumiWeight);
-    //    if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
-     //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
+    if (LVGenLepton.Pt()>20 && LVGenAntiLepton.Pt()>20 && abs(LVGenLepton.Eta())<2.4 && abs(LVGenAntiLepton.Eta())<2.4){
       //if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
-//       if(LVBHadronGenJet.Pt()>30 && abs(LVBHadronGenJet.Eta())<2.4 &&
-// 	LVAntiBHadronGenJet.Pt()>30 && abs(LVAntiBHadronGenJet.Eta())<2.4){
-	
-
-	h_VisGenAll->Fill(LVGenTop.M(),weightPU*lumiWeight); 
-        double VisGenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
-	h_VisGenTTBarMass->Fill(VisGenTTBarMass,weightPU*lumiWeight);
-	h_VisGenTTBarRapidity->Fill((LVGenTop+ LVGenAntiTop).Rapidity(),weightPU*lumiWeight);
-	h_VisGenTTBarpT->Fill((LVGenTop+ LVGenAntiTop).Pt(),weightPU*lumiWeight);
-	h_VisGenTopRapidity->Fill(LVGenTop.Rapidity(),weightPU*lumiWeight);
-	h_VisGenAntiTopRapidity->Fill(LVGenAntiTop.Rapidity(),weightPU*lumiWeight);
-
-	h_VisGenLLBarpT->Fill((LVGenLepton+ LVGenAntiLepton).Pt(),weightPU*lumiWeight);
-	h_VisGenLLBarMass->Fill((LVGenLepton+ LVGenAntiLepton).M(),weightPU*lumiWeight);
-	
-	h_VisGenToppT->Fill(LVGenTop.Pt(),weightPU*lumiWeight);
-	h_VisGenAntiToppT->Fill(LVGenAntiTop.Pt(),weightPU*lumiWeight);
-	//	h_VisGenBQuarkpT->Fill(LVGenBQuark.Pt(),weightPU*lumiWeight);
-	//h_VisGenAntiBQuarkpT->Fill(LVGenAntiBQuark.Pt(),weightPU*lumiWeight);
-	h_VisGenLeptonpT->Fill(LVGenLepton.Pt(),weightPU*lumiWeight);
-	h_VisGenAntiLeptonpT->Fill(LVGenAntiLepton.Pt(),weightPU*lumiWeight);
-	
-	h_VisGenTopEta->Fill(LVGenTop.Eta(),weightPU*lumiWeight);
-	h_VisGenAntiTopEta->Fill(LVGenAntiTop.Eta(),weightPU*lumiWeight);
-	//h_VisGenBQuarkEta->Fill(LVGenBQuark.Eta(),weightPU*lumiWeight);
-	//h_VisGenAntiBQuarkEta->Fill(LVGenAntiBQuark.Eta(),weightPU*lumiWeight);
-	h_VisGenLeptonEta->Fill(LVGenLepton.Eta(),weightPU*lumiWeight);
-	h_VisGenAntiLeptonEta->Fill(LVGenAntiLepton.Eta(),weightPU*lumiWeight);
-
-	if(BHadronIndex != -1 	&&   AntiBHadronIndex != -1){
+      if(BHadronIndex != -1 	&&   AntiBHadronIndex != -1){
+	if(LVGenJets[BHadronIndex].Pt()>30 && abs(LVGenJets[BHadronIndex].Eta())<2.4 &&
+	   LVGenJets[AntiBHadronIndex].Pt()>30 && abs(LVGenJets[AntiBHadronIndex].Eta())<2.4){
+	  
+	  
+	  h_VisGenAll->Fill(LVGenTop.M(),weightPU*lumiWeight); 
+	  
+	  h_VisGenLLBarpT->Fill((LVGenLepton+ LVGenAntiLepton).Pt(),weightPU*lumiWeight);
+	  h_VisGenLLBarMass->Fill((LVGenLepton+ LVGenAntiLepton).M(),weightPU*lumiWeight);
+	  
+	  
+	  h_VisGenLeptonpT->Fill(LVGenLepton.Pt(),weightPU*lumiWeight);
+	  h_VisGenAntiLeptonpT->Fill(LVGenAntiLepton.Pt(),weightPU*lumiWeight);
+	  
+	  h_VisGenLeptonEta->Fill(LVGenLepton.Eta(),weightPU*lumiWeight);
+	  h_VisGenAntiLeptonEta->Fill(LVGenAntiLepton.Eta(),weightPU*lumiWeight);
+	  
 	  h_VisGenBJetEta->Fill(LVGenJets[BHadronIndex].Eta(),weightPU*lumiWeight);
 	  h_VisGenAntiBJetEta->Fill(LVGenJets[AntiBHadronIndex].Eta(),weightPU*lumiWeight);
 	  h_VisGenBJetRapidity->Fill(LVGenJets[BHadronIndex].Rapidity(),weightPU*lumiWeight);
 	  h_VisGenAntiBJetRapidity->Fill(LVGenJets[AntiBHadronIndex].Rapidity(),weightPU*lumiWeight);
 	  h_VisGenBJetpT->Fill(LVGenJets[BHadronIndex].Pt(),weightPU*lumiWeight);
 	  h_VisGenAntiBJetpT->Fill(LVGenJets[AntiBHadronIndex].Pt(),weightPU*lumiWeight);
-	  /*h_VisGenBJetpT->Fill(LVBHadronGenJet.Pt(),weightPU*lumiWeight);
-	    h_VisGenAntiBJetpT->Fill(LVAntiBHadronGenJet.Pt(),weightPU*lumiWeight);
-	    h_VisGenBJetEta->Fill(LVBHadronGenJet.Eta(),weightPU*lumiWeight);
-	    h_VisGenAntiBJetEta->Fill(LVAntiBHadronGenJet.Eta(),weightPU*lumiWeight);
-	    h_VisGenBJetRapidity->Fill(LVBHadronGenJet.Rapidity(),weightPU*lumiWeight);
-	    h_VisGenAntiBJetRapidity->Fill(LVAntiBHadronGenJet.Rapidity(),weightPU*lumiWeight);
-	  */
-	  // 	h_VisGenBQuarkRapidity->Fill(LVGenBQuark.Rapidity(),weightPU*lumiWeight);
-	  // 	h_VisGenAntiBQuarkRapidity->Fill(LVGenAntiBQuark.Rapidity(),weightPU*lumiWeight);
-
-	}    
-	//}
+	}
+      }
+    }    
+    double VisGenTTBarMass = (LVGenTop+ LVGenAntiTop).M();
+    h_VisGenTTBarMass->Fill(VisGenTTBarMass,weightPU*lumiWeight);
+    h_VisGenTTBarRapidity->Fill((LVGenTop+ LVGenAntiTop).Rapidity(),weightPU*lumiWeight);
+    h_VisGenTTBarpT->Fill((LVGenTop+ LVGenAntiTop).Pt(),weightPU*lumiWeight);
+    
+    h_VisGenToppT->Fill(LVGenTop.Pt(),weightPU*lumiWeight);
+    h_VisGenAntiToppT->Fill(LVGenAntiTop.Pt(),weightPU*lumiWeight);
+    h_VisGenTopRapidity->Fill(LVGenTop.Rapidity(),weightPU*lumiWeight);
+    h_VisGenAntiTopRapidity->Fill(LVGenAntiTop.Rapidity(),weightPU*lumiWeight);
+    h_VisGenTopEta->Fill(LVGenTop.Eta(),weightPU*lumiWeight);
+    h_VisGenAntiTopEta->Fill(LVGenAntiTop.Eta(),weightPU*lumiWeight);
   }//for visible top events
-
+  
   //check triggers for ttbarsignal
   if(MCSample->find("ttbarsignal")!=string::npos){  
     if(channel->find("emu")!=string::npos && ((triggerBits & 0x1000) || (triggerBits & 0x100) || (triggerBits & 0x200))){
