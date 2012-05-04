@@ -4015,9 +4015,35 @@ void TopSVDFunctions::SVD_DeleteSVD(TopSVDUnfold* SVDs, int numSVDs)
 }
 
 
+
+// Normalization
+// Calculate Global Cross Section
+void TopSVDFunctions::SVD_GlobalCrossSection(double*& globCrossSection, double*& globCrossSectionErr, double* globEventYield, double* globEventYieldErr, double* globEfficiency, int numHist)
+{
+	 
+    // Loop over all histograms
+    for ( int h = 0 ; h < numHist ; h++ ) {
+    	
+    	// Get Input
+    	double globalEvYield    = SVD_DoubleFromArray(globEventYield, h);
+    	double globalEvYieldErr = SVD_DoubleFromArray(globEventYieldErr, h);
+    	double globalEfficiency = SVD_DoubleFromArray(globEfficiency, h);
+    	
+    	
+    	// Calculate Cross Section and Uncertainty
+    	double globalXSec    = SVD_Divide(globalEvYield,    globalEfficiency);
+    	double globalXSecErr = SVD_Divide(globalEvYieldErr, globalEfficiency);
+	 
+    	// Save it
+    	*(globCrossSection+h) = globalXSec;
+    	*(globCrossSectionErr+h) = globalXSecErr;
+    }
+	
+}
+	
 // Normalization
 // Calculate Global Event Yield
-void TopSVDFunctions::SVD_GlobalEventYield(double*& globEvYield, double*& globEvYieldErr, double* totalDataEvents, double* totalBgrEvents, double* totalTtBgrEvents, int numHist)
+void TopSVDFunctions::SVD_GlobalEventYield(double*& globEvYield, double*& globEvYieldErr, double* totalDataEvents, double* totalBgrEvents, double* totalTtBgrEvents, double* totalRecEvents, int numHist)
 {
 	 
     // Loop over all histograms
@@ -4028,9 +4054,11 @@ void TopSVDFunctions::SVD_GlobalEventYield(double*& globEvYield, double*& globEv
         double data = SVD_DoubleFromArray(totalDataEvents, 0); 
     	double bgr = SVD_DoubleFromArray(totalBgrEvents, h);
     	double ttbgr = SVD_DoubleFromArray(totalTtBgrEvents, h);
+    	double signal =  SVD_DoubleFromArray(totalRecEvents, h);
     	
     	// Calculate Yield
-    	double yield = data - bgr - ttbgr;
+    	double signalFraction = signal / (signal + ttbgr);
+    	double yield = (data - (bgr-ttbgr)) * signalFraction;
     	
     	// Input Error
     	double dataErrSq = data;
@@ -4780,14 +4808,17 @@ double TopSVDFunctions::SVD_Unfold(
     // Global Event Count
     double* globalEventYield    = new double[1+numberSyst];
     double* globalEventYieldErr = new double[1+numberSyst];
-    SVD_GlobalEventYield(globalEventYield, globalEventYieldErr, totalDataEvents, totalBgrEvents, totalTtBgrEvents, 1+numberSyst);
+    SVD_GlobalEventYield(globalEventYield, globalEventYieldErr, totalDataEvents, totalBgrEvents, totalTtBgrEvents, totalRecEvents, 1+numberSyst);
      
      
     // Global Efficiency
     double* globalEfficiency    = new double[1+numberSyst];
     SVD_GlobalEfficiency(globalEfficiency, totalRecEvents, totalGenEvents, 1+numberSyst);
     
-    
+    // Global Cross Section
+    double* globalCrossSection    = new double[1+numberSyst];
+    double* globalCrossSectionErr = new double[1+numberSyst];
+    SVD_GlobalCrossSection(globalCrossSection, globalCrossSectionErr, globalEventYield, globalEventYieldErr, globalEfficiency, 1+numberSyst);
      
     /////////////////////////////////////////////////////////////////// 
     /////////  C O N T R O L   O U T P U T   ////////////////////////// 
@@ -4886,7 +4917,11 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "        Global Event Yield:                   " << SVD_DoubleFromArray(globalEventYield, 0) << " +/- " << SVD_DoubleFromArray(globalEventYieldErr, 0) << endl;
         for ( int i = 1 ; i <= numberSyst ; i++ ) {
             cout << "            Syst. Sample " << i << "                    " << SVD_DoubleFromArray(globalEventYield, i) << " +/- " << SVD_DoubleFromArray(globalEventYieldErr, i) << endl;
-        }  
+        } 
+        cout << "        Global Unfolded Event Yield:          " << SVD_DoubleFromArray(globalCrossSection, 0) << " +/- " << SVD_DoubleFromArray(globalCrossSectionErr, 0) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "            Syst. Sample " << i << "                    " << SVD_DoubleFromArray(globalCrossSection, i) << " +/- " << SVD_DoubleFromArray(globalCrossSectionErr, i) << endl;
+        }   
         cout << "        Global Efficiency:                    " << SVD_DoubleFromArray(globalEfficiency, 0) << endl;
         for ( int i = 1 ; i <= numberSyst ; i++ ) {
             cout << "            Syst. Sample " << i << "                    " << SVD_DoubleFromArray(globalEfficiency, i) << endl;

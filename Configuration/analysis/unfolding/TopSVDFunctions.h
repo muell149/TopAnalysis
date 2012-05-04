@@ -229,8 +229,9 @@ class TopSVDFunctions
         
         
         // Normalization
-        static void SVD_GlobalEventYield(double*& globEvYield, double*& globEvYieldErr, double* totalDataEvents, double* totalBgrEvents, double* totalTtBgrEvents, int numHist);
+        static void SVD_GlobalEventYield(double*& globEvYield, double*& globEvYieldErr, double* totalDataEvents, double* totalBgrEvents, double* totalTtBgrEvents, double* totalRecEvents, int numHist);
         static void SVD_GlobalEfficiency(double*& globalEff, double* totalRecEvents, double* totalGenEvents, int numHist);
+        static void SVD_GlobalCrossSection(double*& globCrossSection, double*& globCrossSectionErr, double* globEventYield, double* globEventYieldErr, double* globEfficiency, int numHist);
         static TH1D* SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
         static TH1D* SVD_ExtNormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
         static TH1D* SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist);
