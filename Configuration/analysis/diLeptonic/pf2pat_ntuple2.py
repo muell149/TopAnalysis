@@ -211,7 +211,7 @@ muonSelectionPF = cms.string(' pt > 20 '
                              ' && muonRef.isNonnull '                                           # can be void!
                              ' && muonRef.innerTrack.isNonnull'                                 # can be void!
                              ' && muonRef.globalTrack.isNonnull'                                # can be void!
-                             ' && muonRef.innerTrack.hitPattern.trackerLayersWithMeasurement > 8'
+                             ' && muonRef.innerTrack.numberOfValidHits > 10'
                              ' && muonRef.globalTrack.hitPattern.numberOfValidMuonHits > 0'
                              ' && muonRef.globalTrack.normalizedChi2 < 10.0'
                              )
