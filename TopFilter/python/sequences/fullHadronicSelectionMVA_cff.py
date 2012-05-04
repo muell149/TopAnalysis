@@ -224,7 +224,7 @@ kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolutionPF.functions
 
 ## configure genMatch
 ttFullHadJetPartonMatch.useMaxDist = True
-ttFullHadJetPartonMatch.algorithm  = 'unambigousOnly' #'totalMinDist' #
+ttFullHadJetPartonMatch.algorithm  = 'unambiguousOnly' #'totalMinDist' #
 
 ## define ordered jets
 udsall =cms.PSet(index=cms.int32(-1), correctionLevel=cms.string('L3Absolute'), flavor=cms.string("uds")   , useTree=cms.bool(False))
@@ -667,6 +667,8 @@ def runAsBackgroundEstimation(process, whichEstimate):
         #process.analyzeFullHadQCDEstimation.udscResolutions = udscResolution.functions
         #process.analyzeFullHadQCDEstimation.bResolutions    = bjetResolution.functions
 
+        process.analyseFullHadronicSelection += process.analyzeFullHadQCDEstimation
+
     elif whichEstimate == 2 :
         ## ---
         ##    load FullHadEventMixer
@@ -684,6 +686,8 @@ def runAsBackgroundEstimation(process, whichEstimate):
         #from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
         process.analyzeFullHadEventMixer.udscResolutions = udscResolutionPF.functions
         process.analyzeFullHadEventMixer.bResolutions    = bjetResolutionPF.functions
+
+        process.analyseFullHadronicSelection += process.analyzeFullHadEventMixer
 
     else:
         print 'whichEstimate =', whichEstimate, 'not allowed, only supported options: 0 (no background estimate), 1 (b-tag weighting), 2 (event mixing)'
@@ -747,15 +751,16 @@ def modifyBTagDiscs(process, algo, newMinDisc, newMaxDisc):
     getattr(process, algo + "BJets").cut = 'bDiscriminator("' + algo + 'BJetTags") > ' + str(newMinDisc)
     process.analyseFullHadronicSelection.replace(process.trackCountingHighEffBJets, getattr(process, algo + "BJets"))
 
-    process.kinFitTtFullHadEventHypothesis.bTagAlgo = algo + 'BJetTags'
     for suf in listOfMonitoringSuffixes:
         if(hasattr(process, 'fullHadTopReco'+suf)):
             getattr(process, 'fullHadTopReco'+suf).analyze.bTagAlgo = algo + 'BJetTags' 
 
+    process.kinFitTtFullHadEventHypothesis.bTagAlgo            = algo + 'BJetTags'
     process.kinFitTtFullHadEventHypothesis.minBTagValueBJet    = newMinDisc
     process.kinFitTtFullHadEventHypothesis.maxBTagValueNonBJet = newMaxDisc
 
     if(hasattr(process, 'analyzeFullHadEventMixer')):
+        process.analyzeFullHadEventMixer.bTagAlgo            = algo + 'BJetTags' 
         process.analyzeFullHadEventMixer.minBTagValueBJet    = newMinDisc
         process.analyzeFullHadEventMixer.maxBTagValueNonBJet = newMaxDisc
 
@@ -805,14 +810,20 @@ def switchToSSVHPT(process):
 ## ---
 ##    switch to combinedSecondaryVertex bTagger
 ## ---
-def switchToCSVM(process):
+def switchToCSVL(process):
     modifyBTagDiscs(process, 'combinedSecondaryVertex', 0.244, 0.679)
 
 ## ---
 ##    switch to combinedSecondaryVertex bTagger
 ## ---
-def switchToCSVT(process):
+def switchToCSVM(process):
     modifyBTagDiscs(process, 'combinedSecondaryVertex', 0.679, 0.898)
+
+## ---
+##    switch to combinedSecondaryVertex bTagger
+## ---
+def switchToCSVT(process):
+    modifyBTagDiscs(process, 'combinedSecondaryVertex', 0.898, 0.898)
 
 ## ---
 ##    switch to combinedSecondaryVertexMVA bTagger
@@ -827,6 +838,14 @@ def increaseKinFitResolution(process, binning, factors):
     #process.kinFitTtFullHadEventHypothesis.energyResolutionSmearFactor = factor
     process.kinFitTtFullHadEventHypothesis.jetEnergyResolutionScaleFactors = cms.vdouble(factors)
     process.kinFitTtFullHadEventHypothesis.jetEnergyResolutionEtaBinning   = cms.vdouble(binning)
+
+    if(hasattr(process, 'analyzeFullHadEventMixer')):
+        process.analyzeFullHadEventMixer.jetEnergyResolutionScaleFactors = cms.vdouble(factors)
+        process.analyzeFullHadEventMixer.jetEnergyResolutionEtaBinning   = cms.vdouble(binning)
+    if(hasattr(process, 'analyzeFullHadQCDEstimation')):
+        process.analyzeFullHadQCDEstimation.jetEnergyResolutionScaleFactors = cms.vdouble(factors)
+        process.analyzeFullHadQCDEstimation.jetEnergyResolutionEtaBinning   = cms.vdouble(binning)
+
 
 ## ---
 ##    remove PDF uncertainty histograms / trees
