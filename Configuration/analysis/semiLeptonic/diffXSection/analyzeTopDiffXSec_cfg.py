@@ -1905,7 +1905,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         getattr(process,"analyzeTopRecoKinematicsKinFitTopAntitop"+sys).analyze.useTree = False
         # create plots for standard analyzer
         setattr(process,"analyzeTopRecoKinematicsBjets"+sys, process.analyzeTopRecoKinematicsBjets.clone(weight=weightTagName, useTree = False))
-        setattr(process,"analyzeTopRecoKinematicsLepton"+sys, process.analyzeTopRecoKinematicsBjets.clone(weight=weightTagName, useTree = False))
+        setattr(process,"analyzeTopRecoKinematicsLepton"+sys, process.analyzeTopRecoKinematicsLepton.clone(weight=weightTagName, useTree = False))
         # weights to be added to sequence
         if(sys.find("NoWeight") == -1 and sys.find("OnlyPUWeight") == -1 and sys.find("NoBtagSFWeight") == -1):
             process.weights*=getattr(process,"eventWeight"+sys)
