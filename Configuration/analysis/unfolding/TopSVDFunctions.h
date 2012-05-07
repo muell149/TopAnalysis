@@ -248,7 +248,7 @@ class TopSVDFunctions
         static void SVD_RemoveFile(TString filepath);
         static void SVD_LineToFile(TString string, TString filepath, TString option);
         static TString SVD_LineFromFile(TString key, TString filepath);
-        static void SVD_PrintPage(TCanvas& canvas, TString outputfilename, bool doEps, int firstLast);
+        static void SVD_PrintPage(TCanvas*& canvas, TString outputfilename, bool doEps, int firstLast, int manual_plotcounter = -1);
         
         // Misc
         static int SVD_GetDigit(TString steering, int digit, int standard); 
