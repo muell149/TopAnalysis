@@ -242,6 +242,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   TString plots1Dmu[ ] = { 
     // (I) preselection
     // (i) muon monitoring
+    "testIsoMuonQuality/relIso",
     //"kinematicMuonQualityPreSel/nHit"   ,
     //"kinematicMuonQualityPreSel/chi2"   ,
     //"kinematicMuonQualityPreSel/dB"     ,
@@ -276,6 +277,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	
   TString plots1De[ ] = { 
     // (ib) electron monitoring
+    "testIsoElectronQuality/relIso",
     "tightElectronKinematics/n" ,
     "tightElectronKinematics/en" ,
     "tightElectronKinematics/et" ,
@@ -419,6 +421,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 
   TString axisLabel1De[ ] = {
     // (iv) electron monitoring
+    "PF relIso(e) N-1;events;0;1",
     "N_{e};events;0;1" ,
     "E(e) [GeV];events;0;2",
     "E_{t}(e) [GeV];events;0;1" ,
@@ -441,6 +444,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   TString axisLabel1Dmu[ ] = {
     // (I) preselection
     // (i) muon monitoring
+    "PF relIso(#mu) N-1;events;0;1",
     //"N_{hits}(inner tracker #mu)/events/0/1"          ,
     //"#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
     //"d_{xy} (#mu(pt,#eta) wrt. beamspot)/events/0/1" ,
@@ -800,7 +804,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 	      else histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10);
 	    }
 	    if(getStringEntry(plotList_[plot], 2)=="dB"    ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.02);
-	    if(plotList_[plot].Contains("relIso")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.15);
+	    if(plotList_[plot].Contains("relIso")&&!plotList_[plot].Contains("test")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.15);
 	    if(plotList_[plot].Contains("tightJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,10);
 	    if(plotList_[plot].Contains("tightJetKinematicsNjets1/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(1,10);
 	    if(plotList_[plot].Contains("_JetKinematics/en")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
@@ -854,6 +858,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
 		label = "Tagged";
 		if(SSV) label+=" SSV";
 	      }
+	      if(plotList_[plot].Contains("test"  )) label = "N-1 Selection";
 	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
 	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 Jet";
 	      if(plotList_[plot].Contains("KinFit")) label = "";
