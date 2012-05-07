@@ -1,0 +1,211 @@
+0001        
+true
+false        
+EventMatrix           
+Event Matrix $\boldsymbol{A}$
+
+0002
+true        
+false        
+TransitionMatrix      
+Transition Matrix $\boldsymbol{M}$
+
+0003
+true        
+true         
+InputDataAndMC        
+Input Distributions $\vec{N}^{data}$, $\vec{N}^{rec}$ and $\vec{N}^{gen}$
+
+0004
+true        
+true         
+InputDAtaAndBgr       
+Input Distributions $\vec{N}^{raw}$, $\vec{N}^{bgr}$ and $\vec{N}^{data}$
+
+0005
+true
+true
+UnfoldedWeights
+Weights $\vec{x}^{unf} / \vec{x}^{gen}$
+
+0006
+true
+true
+UnfoldedResultPlusMeas
+Unfolded Results $\vec{x}^{bbb}$ and $\vec{x}^{unf}$ with Measured Distribution $\vec{x}^{data}$
+
+0007
+true
+true
+UnfoldedResultPlusGen
+Unfolded Results $\vec{x}^{bbb}$ and $\vec{x}^{unf}$ with Generated Distribution $\vec{x}^{gen}$
+
+0008
+true
+true
+UnfOverBBB
+Ration of Unfolded Results, $\vec{x}^{unf}$ over $\vec{x}^{bbb}$
+
+0009
+true
+true
+RefoldedResult
+Unfolding Result folded back ($\boldsymbol{A}\vec{x}^{unf}$)
+
+0010
+true
+true
+RefoldedOverData
+Ratio of Refolded Result ($\boldsymbol{A}\vec{x}^{unf}$) over Measured Distribution $\vec{x}^{data}$
+
+0011
+true
+true
+DValues
+Distribution of $d$-Values
+
+0012
+true
+true
+SVValues
+Distribution of Singular Values
+
+0013
+true
+true
+PurityStability
+Purity $s$, Stability $s$ and Efficiency $\epsilon$
+
+0014
+true
+true
+Efficiency
+Efficiency $\epsilon$ and Generalized Efficiency $\epsilon^{bbb}$
+
+0015
+true
+false
+CovarianceInput
+Statistical Covariance on Input Distribution $\boldsymbol{Cov}_{vec{N}^{data}}$
+
+0016
+true
+false
+CovarianceStat
+Statistical Data Covariance Matrix on Unfolding Result $\boldsymbol{Cov}^{Data}_{vec{N}^{data}}$
+
+0017
+true
+false
+CovarianceMC
+Statistical MC Covariance Matrix on Unfolding Result $\boldsymbol{Cov}^{MC}_{vec{x}^{data}}$
+
+0018
+true
+false
+CovarianceTotal
+Total Statistical Covariance Matrix on Unfolding Result $\boldsymbol{Cov}^{Total}_{vec{x}^{data}}$
+
+0019
+true
+false
+CorrelationStat
+Statistical Data Correlation Matrix on Unfolding Result $\boldsymbol{Corr}^{Data}_{vec{x}^{data}}$
+
+0020
+true
+false
+CorrelationMC 
+Statistical MC Correlation Matrix on Unfolding Result $\boldsymbol{Corr}^{MC}_{vec{x}^{data}}$
+
+0021
+true
+false
+CorrelationTotal
+Total Statistical Correlation Matrix on Unfolding Result $\boldsymbol{Corr}^{Total}_{vec{x}^{data}}$
+
+0022
+true
+false
+GlobalCorrelation
+Global Correlation $\rho$ of Unfolding Result
+
+0023
+true
+false
+UncertaintyStat
+Statistical Data Uncertainty on Unfolding Result $\delta^{Data}({vec{x}^{Data}})$
+
+0024
+true
+false
+UncertaintyMC
+Statistical Uncertainties from Data ($\delta^{Data}({vec{x}})$) and MC ($\delta^{MC}({vec{x}})$) on Unfolding Result
+
+0025
+true
+false
+RatioUncertainty
+Ratio of Statistical Data Uncertainty, $\delta^{Data}({vec{x}^{unf}})$ over $\delta^{Data}({vec{x}^{bbb}})$
+
+0026
+true 
+true
+UnfoldingResultNorm
+Normalized Unfolding Result $\sigma_{\textrm{Bin i}} / \sigma{\textrm{inc}}$
+
+0027
+true
+false
+UncertaintyStatNorm
+Statistical Data Uncertainty on Normalized Unfolding Result $\delta^{Data}(frac{\sigma_{\textrm{Bin i}}}{\sigma{\textrm{inc}}})$
+
+0028
+true
+false
+RatioUncertaintyNorm
+Ratio of Statistical Data Uncertainty on Normalized Unfolding Result,  $\delta^{Data}(frac{\sigma_{\textrm{Bin i}}}{\sigma{\textrm{inc}}})$ over $\delta^{Data}(frac{\sigma_{\textrm{Bin i}}}{\sigma{\textrm{inc}}})$
+
+0029
+false
+true
+SystematicShift
+Relative Systematic Shifts $({vec{x}^{Shifted}}) - {vec{x}^{Nominal}}) / {vec{x}^{Nominal}}$
+
+0030
+false
+true
+RatioSystematicShift
+Ratio of Relative Systematic Shifts $({vec{x}^{Shifted}}) - {vec{x}^{Nominal}}) / {vec{x}^{Nominal}}$ from BBB and SVD
+
+0031
+false
+true
+SystematicShiftNorm
+Relative Systematic Shifts on Normalized Unfolding Result
+
+0032
+true
+false
+KScanUnfoldingResult
+Unfolding Result for Different Values of the K-Parameter
+
+0033
+true
+false
+KScanUncertainty
+Statistical Uncertainty for Different Values of the K-Parameter
+
+0034
+true
+false
+KScanGlobalCorrelation
+Global Correlation for Different Values of the K-Parameter
+
+0035
+true
+false
+KScanWeights
+Weights from Unfolding for Different Values of the K-Parameter
+
+
