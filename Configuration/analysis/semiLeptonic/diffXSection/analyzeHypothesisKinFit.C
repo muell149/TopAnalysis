@@ -2,11 +2,11 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=false)
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=true)
 {
   // ============================
   //  Set ROOT Style
@@ -123,7 +123,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  bool redetermineopttau =false;
+  bool redetermineopttau =true;
   if(!SVDunfold) redetermineopttau =false;
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
@@ -206,6 +206,16 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   TString recBlabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
   TString genBlabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
 
+  // choose correct input folder for status 1 or 3 lepton
+  TString recPartonLeppath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
+  TString recHadronLeppath= "analyzeTopRecoKinematicsLepton" +sysInputFolderExtension;
+  TString genPartonLeppath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
+  TString genHadronLeppath= "analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sysInputGenFolderExtension;
+  TString recLeppath = ( (!extrapolate&&hadron) ? recHadronLeppath : recPartonLeppath );
+  TString genLeppath = ( (!extrapolate&&hadron) ? genHadronLeppath : genPartonLeppath );
+  TString recLeplabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
+  TString genLeplabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
+
   //  ---
   //     choose plots
   //  ---
@@ -254,17 +264,17 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarDelPhi",
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarDelY"  ,
     // reconstructed lepton quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepPt" , // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepEta", // XSec relevant! REC
-    // generated lepton quantities
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepPt" , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepEta", // XSec relevant! GEN
-    // reconstructed b-quark/b-jet quantities
-    recBpath+"/bqPt"+recBlabel,                                                // XSec relevant! REC
-    recBpath+"/bqEta"+recBlabel,                                               // XSec relevant! REC
-    // generated b-quark/b-jet quantities				      
-    genBpath+"/bqPt"+genBlabel,                                                // XSec relevant! GEN
-    genBpath+"/bqEta"+genBlabel                                                // XSec relevant! GEN
+    recLeppath+"/lepPt"+recLeplabel,            // XSec relevant! REC
+    recLeppath+"/lepEta"+recLeplabel,           // XSec relevant! REC
+    // generated lepton quantities		
+    genLeppath+"/lepPt"+genLeplabel,            // XSec relevant! GEN
+    genLeppath+"/lepEta"+genLeplabel,           // XSec relevant! GEN
+    // reconstructed b-quark/b-jet quantities	
+    recBpath+"/bqPt"+recBlabel,                 // XSec relevant! REC
+    recBpath+"/bqEta"+recBlabel,                // XSec relevant! REC
+    // generated b-quark/b-jet quantities	
+    genBpath+"/bqPt"+genBlabel,                 // XSec relevant! GEN
+    genBpath+"/bqEta"+genBlabel                 // XSec relevant! GEN
   };
  TString plots1Dadd[ ] = {
    // generated angular distributions
@@ -467,8 +477,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
     // d) response matrix lepton quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepPt_"      ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepEta_"     ,
+    recLeppath+"/lepPt_"                                                    ,
+    recLeppath+"/lepEta_"                                                   ,  
     // e) response matrix b-quark/b-jet quantities
     recBpath+"/bqPt_"                                                       ,
     recBpath+"/bqEta_"                                                      ,   
@@ -793,9 +803,13 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   if(!extrapolate&&hadron){
     bool bqPtExistsInAnySample =false;
     bool bqEtaExistsInAnySample=false;
+    bool lepPtExistsInAnySample =false;
+    bool lepEtaExistsInAnySample=false;
     // get input path/folder
     TString path=recPartonBpath;
     TString path2=recPartonBpath;
+    TString pathL=recPartonLeppath;
+    TString pathL2=recPartonLeppath;
     // loop samples
     for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
       if(sample==kData){
@@ -803,23 +817,46 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	  std::vector<TString>::iterator iter;
 	  for (iter = (vecRedundantPartOfNameInData.begin()); iter != (vecRedundantPartOfNameInData.end()); iter++){
 	    path.ReplaceAll((*iter), ""); 
+	    pathL.ReplaceAll((*iter), "");
 	  }
 	}
       }
-      // get plot
-      // create plot container
-      TH1* targetPlotBqPt;
-      TH1* targetPlotBqEta;
-      files_[sample]->GetObject(path+"/bqPt" , targetPlotBqPt );
-      files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
-      // Check existence of plot
-      if(targetPlotBqPt){ 
-	histo_[path2+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt ->Clone(path+"/bqPt"); 
-	bqPtExistsInAnySample =true;
-      }
-      if(targetPlotBqEta){
-	histo_[path2+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
-	bqEtaExistsInAnySample=true;
+      // check if file exists
+      if(files_[sample]){
+	// get plot
+	// create plot container
+	TH1* targetPlotBqPt;
+	TH1* targetPlotBqEta;
+	TH1* targetPlotLepPt;
+	TH1* targetPlotLepEta;
+	files_[sample]->GetObject(path+"/bqPt" , targetPlotBqPt );
+	files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
+	files_[sample]->GetObject(pathL+"/lepPt" , targetPlotLepPt );
+	files_[sample]->GetObject(pathL+"/lepEta", targetPlotLepEta);
+	// Check existence of plot
+	if(targetPlotBqPt){ 
+	  histo_[path2+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt ->Clone(path+"/bqPt"); 
+	  bqPtExistsInAnySample =true;
+	}
+	if(targetPlotBqEta){
+	  histo_[path2+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
+	  bqEtaExistsInAnySample=true;
+	}
+	if(targetPlotLepPt){ 
+	  histo_[pathL2+"/lepPt" ][sample]=(TH1F*)targetPlotLepPt ->Clone(pathL+"/lepPt" ); 
+	  lepPtExistsInAnySample =true;
+	}
+	if(targetPlotLepEta){
+	  histo_[pathL2+"/lepEta"][sample]=(TH1F*)targetPlotLepEta->Clone(pathL+"/lepEta");
+	  lepEtaExistsInAnySample=true;
+	}
+	if(verbose>1){
+	  std::cout << sampleLabel(sample) << ":" << std::endl;
+	  std::cout << "targetPlotBqPt  : " <<  targetPlotBqPt   << std::endl;
+	  std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	 << std::endl;
+          std::cout << "targetPlotLepPt : " <<  targetPlotLepPt  << std::endl;
+          std::cout << "targetPlotLepEta: " <<  targetPlotLepEta << std::endl;
+	}
       }
     }
     // check if plot exists at all
@@ -831,6 +868,15 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       std::cout << "no plot found with label " << path+"/bqEta for non ttbar signal" << std::endl;
       exit(0);
     }
+    if(!lepPtExistsInAnySample){
+      std::cout << "no plot found with label " << pathL+"/lepPt for non ttbar signal" << std::endl;
+      exit(0);
+    }
+    if(!lepEtaExistsInAnySample){
+      std::cout << "no plot found with label " << pathL+"/lepEta for non ttbar signal" << std::endl;
+      exit(0);
+    }
+
   }
 
 
@@ -873,18 +919,30 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     // ---
     else if(LV=="Hadron"){
       //  b1) change b-jet to b-quark label
-      // for gen plots
+      // for rec plots
       if(plotList_[plot].Contains(recHadronBpath)){ 
 	newName.ReplaceAll(recHadronBpath, recPartonBpath);
 	newName.ReplaceAll("Rec", "");
 	newName.ReplaceAll("Topo", "TopReco");
       }
-      // for rec plots
+      // for gen plots
       if(plotList_[plot].Contains(genHadronBpath)){ 
 	newName.ReplaceAll(genHadronBpath, genPartonBpath);
 	if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
       }
-      // b2) change hadron PS gen level label to parton PS gen level label
+      //  b2) change lepton status 1 to lepton status 3 label
+      // for rec plots
+      if(plotList_[plot].Contains(recHadronLeppath)){ 
+	newName.ReplaceAll(recHadronLeppath, recPartonLeppath);
+	newName.ReplaceAll("Rec", "");
+	newName.ReplaceAll("Topo", "TopReco");
+      }
+      // for gen plots
+      if(plotList_[plot].Contains(genHadronLeppath)){ 
+	newName.ReplaceAll(genHadronLeppath, genPartonLeppath);
+	if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
+      }
+      // b3) change hadron PS gen level label to parton PS gen level label
       if(newName.Contains(LV)&&newName.Contains("PhaseSpace")) newName.ReplaceAll(LV, "Parton");
     }
     // check if replacement is necessary
@@ -980,6 +1038,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     // create combined BG reco plot
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
     for(int bgsample=kZjets; bgsample<=kDiBos; ++bgsample){
+      if(!histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]){
+	std::cout << "missing plot: analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << " for sample " << sampleLabel(bgsample) << std::endl;
+	exit(1);
+      }
       histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone());
     }
     // data event yield
@@ -1576,7 +1638,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       // number of systematic samples to unfold 
       int numSys=0;
       // Regularization parameter
-      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true);
+      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron);
       // Regularization Modus 
       //         0 means: Default setting. Same as 2
       //         1 means: Bin by Bin Unfolding

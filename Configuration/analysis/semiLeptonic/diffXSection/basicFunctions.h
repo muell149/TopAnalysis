@@ -2823,7 +2823,7 @@ namespace semileptonic {
     }
   }
 
-  double regParameter(TString variable, TString decayChannel, int verbose=0, bool fullPS=false, bool tau=false){
+  double regParameter(TString variable, TString decayChannel, int verbose=0, bool fullPS=false, bool tau=false, bool hadronPS=false){
     // this function returns k/value for SVD 
     // unfolding for the corresponding variable
     // modified quantities: NONE
@@ -2840,16 +2840,16 @@ namespace semileptonic {
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=3.86619; // hadron LV PS: 3.86443
-	  if(fullPS) k=30.6447;
+	  k=3.86619; 
+	  if(fullPS) k=20.8531;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=3.67321; // hadron LV PS: 3.67205
-	  if(fullPS) k=16.4683;
+	  k=3.67321; 
+	  if(fullPS) k=3.2244;
 	}
       }
     }
@@ -2858,16 +2858,16 @@ namespace semileptonic {
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=3.4413; // hadron LV PS: 3.44115
-	  if(fullPS) k=3.1544;
+	  k=3.4413; 
+	  if(fullPS) k=2.146;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=3.2237; // hadron LV PS: 3.22795
-	  if(fullPS) k=2.96841;
+	  k=3.2237; 
+	  if(fullPS) k=2.0199;
 	}
       }
     }
@@ -2876,16 +2876,16 @@ namespace semileptonic {
 	k=8; 
 	// Optimal Tau
 	if(tau){
-	  k=3.31833; // hadron LV PS: 3.31775
-	  if(fullPS) k=3.09977;
+	  k=3.31833; 
+	  if(fullPS) k=2.1093;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
 	if(tau){
-	  k=3.10849; // hadron LV PS: 3.10724
-	  if(fullPS) k=2.71239;
+	  k=3.10849; 
+	  if(fullPS) k=1.8457;
 	}
       }
     }
@@ -2894,16 +2894,16 @@ namespace semileptonic {
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=6.27921; // hadron LV PS: 6.27445
-	  if(fullPS) k=3.21603;
+	  k=6.27921; 
+	  if(fullPS) k=4.7261;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=6.13571; // hadron LV PS: 6.13883
-	  if(fullPS) k=3.30734;
+	  k=6.13571; 
+	  if(fullPS) k=4.8603;
 	}
       }
     }
@@ -2912,16 +2912,16 @@ namespace semileptonic {
 	k=8; 
 	// Optimal Tau
 	if(tau){
-	  k=4.79079; // hadron LV PS: 4.79208
-	  if(fullPS) k=4.78635;
+	  k=4.79079;
+	  if(fullPS) k=3.2570;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
 	if(tau){
-	  k=4.35233; // hadron LV PS: 4.35451
-	  if(fullPS) k=4.2222;
+	  k=4.35233; 
+	  if(fullPS) k=2.8731;
 	}
       }
     }
@@ -2930,16 +2930,18 @@ namespace semileptonic {
 	k=13;
 	// Optimal Tau
 	if(tau){
-	  k=0.767378; // hadron LV PS: 0.767349
-	  if(fullPS) k=1.2226;
+	  k=0.767378;
+	  if(hadronPS) k=1.1277;
+	  if(fullPS) k=1.7967;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=13; 
 	// Optimal Tau
 	if(tau){
-	  k=0.691769; // hadron LV PS: 0.691907
-	  if(fullPS) k=2.336;
+	  k=0.691769;
+	  if(hadronPS) k=0.0038;
+	  if(fullPS) k=1.5896;
 	}
       }
     }
@@ -2948,16 +2950,18 @@ namespace semileptonic {
 	k=14;
 	// Optimal Tau
 	if(tau){
-	  k=1.52633; // hadron LV PS: 1.52483
-	  if(fullPS) k=1.52226;
+	  k=1.52633;
+	  if(hadronPS) k=0.0053;
+	  if(fullPS) k=1.0359;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=14; 
 	// Optimal Tau
 	if(tau){
-	  k=1.09523; // hadron LV PS: 1.09827
-	  if(fullPS) k=1.09098;
+	  k=1.09523;
+	  if(hadronPS) k=0.0038;
+	  if(fullPS) k=0.7424;
 	}
       }
     }
@@ -2966,16 +2970,18 @@ namespace semileptonic {
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=3.68081; // hadron LV PS: 3.67791
-	  if(fullPS) k=4.08056;
+	  k=3.68081;
+	  if(hadronPS) k=5.4091;
+	  if(fullPS) k=5.9966;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=5; 
 	// Optimal Tau
 	if(tau){
-	  k=3.71063; // hadron LV PS: 3.70874
-	  if(fullPS) k=3.88479;
+	  k=3.71063;
+	  if(hadronPS) k=5.4530;
+	  if(fullPS) k=5.7089;
 	}
       }
     }
@@ -2984,16 +2990,18 @@ namespace semileptonic {
 	k=8; 
 	// Optimal Tau
 	if(tau){
-	  k=4.28004; // hadron LV PS: 4.27399
-	  if(fullPS) k=4.27149;
+	  k=4.28004; 
+	  if(hadronPS) k=6.2897;
+	  if(fullPS) k=2.9067;
 	}
       }
       else if(decayChannel.Contains("electron")){
 	k=8; 
 	// Optimal Tau
 	if(tau){
-	  k=3.90018; // hadron LV PS: 3.87991
-	  if(fullPS) k=3.79943;
+	  k=3.90018;
+	  if(hadronPS) k=5.7315;
+	  if(fullPS) k=2.5854;
 	}
       }
     }
