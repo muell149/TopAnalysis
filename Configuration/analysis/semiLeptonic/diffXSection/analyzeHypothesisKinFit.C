@@ -2,7 +2,7 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=1, 
+void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
@@ -123,7 +123,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  bool redetermineopttau =true;
+  bool redetermineopttau =false;
   if(!SVDunfold) redetermineopttau =false;
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
