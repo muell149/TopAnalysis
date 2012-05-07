@@ -24,6 +24,8 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
   }
   // smooth instead of binned theory curves
   bool smoothcurves=true;
+  // FIXME: no smooth curves for hadron PS and full PS at the moment
+  if(hadron||extrapolate) smoothcurves=false;
   // say if closure test with reweighted m(ttbar) on parton level is done
   // will plot additionally the modified diff. norm. xSec on parton level
   bool reweightClosure=false;
@@ -52,11 +54,16 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
   bool DrawSmoothMadgraph = false;
   bool DrawMCAtNLOPlot = false;
   bool DrawPOWHEGPlot = false;
-  if(extrapolate==false&&hadron==false){
+  if(smoothcurves){
     DrawSmoothMadgraph = true;
     DrawMCAtNLOPlot = true;
     DrawPOWHEGPlot = true;
   }
+  //if(extrapolate==false&&hadron==false){
+  //  DrawSmoothMadgraph = true;
+  //  DrawMCAtNLOPlot = true;
+  //  DrawPOWHEGPlot = true;
+  //}
   // GOSSIE quick fix: cut of m(ttbar) below 354 GeV
   bool cutTtbarMass=false;
   // decay channels
@@ -280,7 +287,7 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
 	  plotTheo->Draw("AXIS");
 	  //if(xSecVariables_[i].Contains("Norm")){
 	    // b) binned MadGraph curve
-	    if(smoothcurves2) plotTheo->Draw("hist same");
+	    plotTheo->Draw("hist same");
 	    // draw smoothed theory curves
 	    // c) MC@NLO
 	    int smoothFactor=0;
@@ -355,7 +362,7 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
 	    else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor=2 ; rebinFactor=1 ; }
 	    if(DrawSmoothMadgraph2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon"), plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
 	    // draw binned MADGRAPH theory curve
-	    if(!smoothcurves2) plotTheo2->Draw("hist same");
+	    plotTheo2->Draw("hist same");
 	    // set up legend
 	    TLegend *leg = new TLegend();
 	    leg->SetTextFont(42);
