@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.h"
 
-void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, unsigned int verbose=1, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", bool exclShapeVar="true", bool extrapolate=false, bool hadron=false){
+void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", bool exclShapeVar=true, bool extrapolate=false, bool hadron=false){
 
   // ============================
   //  Systematic Variations:
@@ -264,11 +264,12 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
     // ===============================================================
     //  Part B: calculate combined systematic+statistic error
     // ===============================================================
-
     if(verbose>0) std::cout << std::endl << "part B: calculate systematic errors for all variables and bins" << std::endl;
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
-      if(verbose>0) std::cout << std::endl << "variable: " << xSecVariables_[i] << std::endl;
+    int verbose2=verbose;
+    if(xSecVariables_[i]=="inclusive") verbose2+=1;
+      if(verbose2>0) std::cout << std::endl << "variable: " << xSecVariables_[i] << std::endl;
       // check if any plot of the chosen variable has been found
       if(calculateError_.count(xSecVariables_[i])>0&&calculateError_[xSecVariables_[i]][sysNo]==true){
 	// define object to save uncertainties
@@ -300,12 +301,13 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
 	  }
 	  // else: continue with calculation
 	  else{
-	    if(verbose>0){ 
-	      std::cout << std::endl << xSecVariables_[i] << " bin #" << bin << "/" << Nbins << std::endl;
-	      std::cout << "( range " << binEdgeDown << " .. " << binEdgeUp << ")" << std::endl;
+	    if(verbose2>0){ 
+	      std::cout << std::endl;
+	      if(verbose>0) std::cout << xSecVariables_[i] << " bin #" << bin << "/" << Nbins << std::endl;
+	      if(verbose>0) std::cout << "( range " << binEdgeDown << " .. " << binEdgeUp << ")" << std::endl;
 	      std::cout << "std value[pb/binwidth]: " << std::endl;
 	      std::cout << "a) data   : " << stdBinXSecValue << std::endl;
-	      std::cout << "b) MC pred: " << MCpredBinVar << std::endl;
+	      if(verbose>0) std::cout << "b) MC pred: " << MCpredBinVar << std::endl;
 	    }
 	    // create plot that indicates all relative uncertainties
 	    // one plot for every variable in every bin
@@ -341,7 +343,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
 	      }
 	      // create plot that indicates the relative systematic uncertainty
 	      double sysDiff=0;
-	      if(verbose>1) std::cout << sysLabel(sys);
+	      if(verbose2>0) std::cout << sysLabel(sys);
 	      // check if chosen systematic variation of chosen variable has been found and std value is nonzero
 	      if(calculateError_[xSecVariables_[i]].count(sys)<=0||stdBinXSecValue==0){
 		if(verbose>1){
@@ -352,7 +354,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
 	      else{
 		// check if variable has to be considerered for total systematic error
 		if(calculateError_[xSecVariables_[i]][sys]==true){
-		  if(verbose>1) std::cout << "(considered): ";
+		  if(verbose2>0) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
 		  if(sys==sysHadUp||sys==sysHadDown){
 		    // placeholder for bquark quantities and inclusive xSec
@@ -370,9 +372,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
 		  if      (sys==sysTopMassUp)   sysDiff *= SF_TopMassUpUncertainty;   // SF_TopMassUpUncertainty: defined in basicFunctions.h
 		  else if (sys==sysTopMassDown) sysDiff *= SF_TopMassDownUncertainty; // SF_TopMassDownUncertainty: defined in basicFunctions.h
 		}
-		else if(verbose>1) std::cout << "(not considered): ";
+		else if(verbose2>0) std::cout << "(not considered): ";
 		// print single systematic uncertainty absolut and relative for bin & variable
-		if(verbose>1) std::cout << sysDiff << " ( = " << 100*sysDiff/stdBinXSecValue << "% )" << std::endl;
+		if(verbose2>0) std::cout << sysDiff << " ( = " << 100*sysDiff/stdBinXSecValue << "% )" << std::endl;
 		// save relative systematic uncertainties for bin & variable (weight 0.5 due to error symmetrization)
 		relSysPlot->Fill(nSysCnt, 100.0*0.5*sysDiff/stdBinXSecValue);
 	      }
@@ -391,7 +393,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4980, bool save=true, uns
 		double statErrorBinVar     = noSysPlot->GetBinError(bin);
 		double combinedErrorBinVar = sqrt(totalSystematicError*totalSystematicError + statErrorBinVar*statErrorBinVar);
 		// print statistical, systematic and total uncertainties, absolut and relative for bin & variable
-		if(verbose>0){
+		if(verbose2>0){
 		  std::cout << "total statistic uncertainty:  " << " +/- " << statErrorBinVar      << " (" << 100*statErrorBinVar/stdBinXSecValue      << "%)" << std::endl;
 		  std::cout << "total systematic uncertainty: " << " +/- " << totalSystematicError << " (" << 100*totalSystematicError/stdBinXSecValue << "%)" << std::endl;
 		  std::cout << "total uncertainty:            " << " +/- " << combinedErrorBinVar  << " (" << 100*combinedErrorBinVar/stdBinXSecValue  << "%)" << std::endl;
