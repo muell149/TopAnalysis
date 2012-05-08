@@ -285,6 +285,12 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     
     DiffXSecSysErrorBySyst[channelType][bin][syst] = .02;//all (different from inclusive?) 
     syst++;
+
+    //1 percent systematic
+    legendsSyst.push_back("One percent");
+    
+    DiffXSecSysErrorBySyst[channelType][bin][syst] = .01;//all (different from inclusive?) 
+    syst++;
     
     //B-tagging (for now)
     legendsSyst.push_back("b-tagging");
@@ -369,6 +375,7 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
 
   //  Sum_Errors += Sys_Error;
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error;
+  cout<<"Systematic: "<<Systematic<<" Error: "<<Sys_Error<<endl;
 
 }
 
@@ -1641,7 +1648,7 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
 void Plotter::PlotXSec(){
 
   TH1::AddDirectory(kFALSE);
-  CalcInclSystematics("JES",0);
+  /*  CalcInclSystematics("JES",0);
   CalcInclSystematics("RES",1);
   CalcInclSystematics("PU_",2);
   CalcInclSystematics("SCALE",3);
@@ -1649,7 +1656,7 @@ void Plotter::PlotXSec(){
   CalcInclSystematics("MASS",5);
   CalcInclSystematics("DY_",6);
   CalcInclSystematics("BG_",7);
-  InclFlatSystematics(8);
+  InclFlatSystematics(8);*/
   
   CalcXSec(dataset, InclusiveXsection,InclusiveXsectionStatError, "","");
 
@@ -1912,7 +1919,8 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
   lumi = 4966;
 
   TH1D *numhists[hists.size()];
-  double numbers[4]={0};
+  double numbers[4]={0};//[0]=data, [1]=Signal, [2]Signal(only lumi & PU weights), [3]background (non-ttbar)
+  double TTbarBGnum =0;
 
   for(unsigned int i=0; i<datasetVec.size(); i++){
     TFile *ftemp = TFile::Open(datasetVec[i]);
@@ -1925,13 +1933,11 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
 
     if(legends[i] == "data"){
-      //      cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[0]+=numhists[i]->Integral();
     }
     else if(legends[i] == "t#bar{t} signal"){
       TFile *ftemp2 = TFile::Open(datasetVec[i]);
       TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone();
-      //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
       numbers[1]+=NoPUPlot->Integral();
       delete ftemp2;
       
@@ -1940,6 +1946,12 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
       numbers[2]+=GenPlot->Integral();
       delete ftemp;
     } 
+    //    else if(legends[i] == "t#bar{t} other"){
+    //TFile *ftemp2 = TFile::Open(datasetVec[i]);
+    // TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone();
+    // TTbarBGnum+=NoPUPlot->Integral();
+    //delete ftemp2;
+    //} 
     else{      
       if((legends[i] == DYEntry) && channelType!=2){
 	numhists[i]->Scale(DYScale[channelType]);
@@ -1963,7 +1975,11 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
   ////////////////////////////Make output for tables
   double tmp_num = 0;
-  
+
+  double signalFraction = 0;
+
+  signalFraction = numbers[1]/(numbers[1]+TTbarBGnum);
+
   ofstream EventFile;
   string EventFilestring = "Plots/";
   if(channelType==0){EventFilestring.append("ee");}
@@ -1990,8 +2006,11 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
   EventFile<<"Total background: "<<bg_num<<endl;
   EventFile.close();
 
-  double xsec = (numbers[0]-numbers[3])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
+  //  double xsec = (signalFraction*(numbers[0]-numbers[3]))/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
+  double xsec = ((numbers[0]-numbers[3]))/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
   double xsecstaterror = TMath::Sqrt(numbers[0])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
+
+  if(Systematic == "") cout<<"Global Efficiency: "<<(numbers[1]/numbers[2])<<endl;
 
   if(channelType!=3){
     InclusiveXsectionVec[channelType] = xsec;
@@ -2035,7 +2054,8 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
       for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
 	GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
-	//	  cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
+	cout<<"GenSignalSum[bin]: "<<GenSignalSum[bin]<<endl;
+	cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
       }      
     }
     else{
@@ -2159,6 +2179,10 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 	DiffXSecVec[channelType][i] = UnfoldingResult[i]/(binWidth[i]);
 	DiffXSecStatErrorVec[channelType][i] = UnfoldingError[i]/(binWidth[i]); // statistical error 
 	GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEventswithWeight*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
+	cout<<"GenSignalSum[i]: "<<GenSignalSum[i]<<endl;
+	cout<<"topxsec: "<<topxsec<<endl;
+	cout<<"SignalEventswithWeight: "<<SignalEventswithWeight<<endl;
+	cout<<"binWidth: "<<binWidth[i]<<endl;
 	cout<<"GenDiffXSecVec[channelType][i]: "<<GenDiffXSecVec[channelType][i]<<endl;
 	GenDiffXSecError[channelType][i] = TMath::Sqrt(DataSum[i])/(efficiencies[i]*lumi*binWidth[i]); // statistical error
 				
@@ -2243,7 +2267,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 }
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    CalcDiffSystematics("JES", 0);
+    /*    CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
     CalcDiffSystematics("PU_", 2);
     CalcDiffSystematics("SCALE", 3);
@@ -2251,7 +2275,7 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("MATCH", 5);
     CalcDiffSystematics("DY_", 6);
     CalcDiffSystematics("BG_", 7);
-    DiffFlatSystematics(8,bins);
+    DiffFlatSystematics(8,bins);*/
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2511,7 +2535,7 @@ void Plotter::PlotDiffXSec(){
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin];//TotalVisXSection[channelType];
     }
     //The Markus plots
-    TCanvas * c10 = new TCanvas("Markus","Markus");
+    /*    TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
 
@@ -2520,9 +2544,9 @@ void Plotter::PlotDiffXSec(){
       systtemp->Reset();
       for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
 	//systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
-	systtemp->SetBinContent(bin+1,DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]);
+	systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
       }
-      systtemp->SetFillColor(syst);
+      systtemp->SetFillColor(syst+1);
       SystHists->Add((TH1D*)systtemp->Clone());
       leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
       delete systtemp;
@@ -2533,7 +2557,7 @@ void Plotter::PlotDiffXSec(){
     c10->Clear();
     delete leg10;
     delete c10;
-
+    */
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
