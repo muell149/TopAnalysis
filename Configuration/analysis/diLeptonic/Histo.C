@@ -11,21 +11,21 @@ void Histo::MakePlots(){
   h_XSecPlot.DYScaleFactor();
   h_XSecPlot.setDataSet("mumu");
   h_XSecPlot.fillHisto();
-  h_XSecPlot.CalcXSec();
+  h_XSecPlot.PlotXSec();
   h_XSecPlot.MakeTable();
   h_XSecPlot.setDataSet("emu");
   h_XSecPlot.fillHisto();
-  h_XSecPlot.CalcXSec();
+  h_XSecPlot.PlotXSec();
   h_XSecPlot.MakeTable();
   h_XSecPlot.setDataSet("ee");
   h_XSecPlot.fillHisto();
-  h_XSecPlot.CalcXSec();
+  h_XSecPlot.PlotXSec();
   h_XSecPlot.MakeTable();
   h_XSecPlot.setDataSet("combined");
   h_XSecPlot.fillHisto();
-  h_XSecPlot.CalcXSec();
-  h_XSecPlot.MakeTable();
   h_XSecPlot.PlotXSec();
+  h_XSecPlot.MakeTable();
+  //  h_XSecPlot.PlotXSec();
 
   string histolist = "HistoList";
   ifstream HistStream;
