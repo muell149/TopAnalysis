@@ -1,211 +1,210 @@
-0001        
+0001
 true
-false        
-EventMatrix           
-Event Matrix $\boldsymbol{A}$
-
+false
+EventMatrix
+Event Matrix $\mathrm{\boldsymbol{A}}$
+ 
 0002
-true        
-false        
-TransitionMatrix      
-Transition Matrix $\boldsymbol{M}$
-
+true
+false
+TransitionMatrix
+Probability Matrix $\mathrm{\boldsymbol{M}}$
+ 
 0003
-true        
-true         
-InputDataAndMC        
-Input Distributions $\vec{N}^{data}$, $\vec{N}^{rec}$ and $\vec{N}^{gen}$
-
+true
+true
+InputDataAndMC
+Input Distributions $\boldsymbol{N}^{\text{data}}$, $\boldsymbol{N}^{\text{rec}}$ and $\boldsymbol{x}^{\text{gen}}$
+ 
 0004
-true        
-true         
-InputDAtaAndBgr       
-Input Distributions $\vec{N}^{raw}$, $\vec{N}^{bgr}$ and $\vec{N}^{data}$
-
+true
+true
+InputDAtaAndBgr
+Input Distributions $\boldsymbol{N}^{\text{raw}}$, $\boldsymbol{N}^{\text{data}}$ and $\boldsymbol{N}^{\text{bgr}}$
+ 
 0005
 true
 true
 UnfoldedWeights
-Weights $\vec{x}^{unf} / \vec{x}^{gen}$
-
+Unfolded Weights $\boldsymbol{x}^{\text{unf}}/\boldsymbol{x}^{\text{gen}}$
+ 
 0006
 true
 true
 UnfoldedResultPlusMeas
-Unfolded Results $\vec{x}^{bbb}$ and $\vec{x}^{unf}$ with Measured Distribution $\vec{x}^{data}$
-
+Unfolded Results $\boldsymbol{x}^{\text{unf}}$and $\boldsymbol{x}^{\text{bbb}}$ with Data Distribution $\boldsymbol{N}^{\text{data}}$
+ 
 0007
 true
 true
 UnfoldedResultPlusGen
-Unfolded Results $\vec{x}^{bbb}$ and $\vec{x}^{unf}$ with Generated Distribution $\vec{x}^{gen}$
-
+Unfolded Results $\boldsymbol{x}^{\text{unf}}$and $\boldsymbol{x}^{\text{bbb}}$ with Generated Distribution $\boldsymbol{x}^{\text{gen}}$
+ 
 0008
 true
 true
 UnfOverBBB
-Ration of Unfolded Results, $\vec{x}^{unf}$ over $\vec{x}^{bbb}$
-
+Ratio $\boldsymbol{x}^{\text{unf}}/\boldsymbol{x}^{\text{bbb}}$ of Unfolded Results from BBB and SVD
+ 
 0009
 true
 true
 RefoldedResult
-Unfolding Result folded back ($\boldsymbol{A}\vec{x}^{unf}$)
-
+Refolded Result $\mathrm{\boldsymbol{A}}\boldsymbol{x}^{\text{unf}}$ with Data Distribution $\boldsymbol{N}^{\text{data}}$
+ 
 0010
 true
 true
 RefoldedOverData
-Ratio of Refolded Result ($\boldsymbol{A}\vec{x}^{unf}$) over Measured Distribution $\vec{x}^{data}$
-
+Ratio $\mathrm{\boldsymbol{A}}\boldsymbol{x}^{\text{unf}}/\boldsymbol{N}^{\text{data}}$ of Refolded Result and Data Distribution
+ 
 0011
 true
 true
 DValues
 Distribution of $d$-Values
-
+ 
 0012
 true
 true
 SVValues
 Distribution of Singular Values
-
+ 
 0013
 true
 true
 PurityStability
-Purity $s$, Stability $s$ and Efficiency $\epsilon$
-
+Purity $p$, Stability $s$ and Efficiency $\epsilon$
+ 
 0014
 true
 true
 Efficiency
-Efficiency $\epsilon$ and Generalized Efficiency $\epsilon^{bbb}$
-
+Efficiency $\epsilon$ and Generalized Efficiency $\epsilon^{\text{bbb}}$
+ 
 0015
 true
 false
 CovarianceInput
-Statistical Covariance on Input Distribution $\boldsymbol{Cov}_{vec{N}^{data}}$
-
+Statistical Covariance $\mathrm{\boldsymbol{COV}}_{\boldsymbol{N}^{\text{data}}}$ of Input Data Distribution
+ 
 0016
 true
 false
 CovarianceStat
-Statistical Data Covariance Matrix on Unfolding Result $\boldsymbol{Cov}^{Data}_{vec{N}^{data}}$
-
+Statistical Data Covariance $\mathrm{\boldsymbol{COV}}_{\boldsymbol{\boldsymbol{x}}^{\text{unf}}}^{\text{data}}$ of Unfolded Distribution
+ 
 0017
 true
 false
 CovarianceMC
-Statistical MC Covariance Matrix on Unfolding Result $\boldsymbol{Cov}^{MC}_{vec{x}^{data}}$
-
+Statistical MC Covariance $\mathrm{\boldsymbol{COV}}_{\boldsymbol{\boldsymbol{x}}^{\text{unf}}}^{\text{MC}}$ of Unfolded Distribution
+ 
 0018
 true
 false
 CovarianceTotal
-Total Statistical Covariance Matrix on Unfolding Result $\boldsymbol{Cov}^{Total}_{vec{x}^{data}}$
-
+Total Statistical Covariance $\mathrm{\boldsymbol{Corr}}_{\boldsymbol{\boldsymbol{x}}^{\text{unf}}}^{\text{total}}$ of Unfolded Distribution
+ 
 0019
 true
 false
 CorrelationStat
-Statistical Data Correlation Matrix on Unfolding Result $\boldsymbol{Corr}^{Data}_{vec{x}^{data}}$
-
+Statistical Data Correlation $\mathrm{\boldsymbol{Corr}}_{\boldsymbol{\boldsymbol{x}}^{\text{unf}}}^{\text{data}}$ of Unfolded Distribution
+ 
 0020
 true
 false
-CorrelationMC 
-Statistical MC Correlation Matrix on Unfolding Result $\boldsymbol{Corr}^{MC}_{vec{x}^{data}}$
-
+CorrelationMC
+Statistical MC Correlation $\mathrm{\boldsymbol{Corr}}_{\boldsymbol{\boldsymbol{x}}^{\text{unf}}}^{\text{MC}}$ of Unfolded Distribution
+ 
 0021
 true
 false
 CorrelationTotal
-Total Statistical Correlation Matrix on Unfolding Result $\boldsymbol{Corr}^{Total}_{vec{x}^{data}}$
-
+Total Statistical Correlation $\mathrm{\boldsymbol{Corr}}_{\boldsymbol{\boldsymbol{x}}^{\text{unf}}}^{\text{total}}$ of Unfolded Distribution
+ 
 0022
 true
 false
 GlobalCorrelation
-Global Correlation $\rho$ of Unfolding Result
-
+Global Correlation $\rho$
+ 
 0023
 true
 false
 UncertaintyStat
-Statistical Data Uncertainty on Unfolding Result $\delta^{Data}({vec{x}^{Data}})$
-
+Relative Statistical Data Uncertainties $\delta^{\text{data}}\left(\boldsymbol{x}^{\text{unf}}\right)$ and $\delta^{\text{data}}\left(\boldsymbol{x}^{\text{bbb}}\right)$ of Unfolded Distribution
+ 
 0024
 true
 false
 UncertaintyMC
-Statistical Uncertainties from Data ($\delta^{Data}({vec{x}})$) and MC ($\delta^{MC}({vec{x}})$) on Unfolding Result
-
+Total Relative Statistical Uncertainty $\delta^{\text{total}}\left(\boldsymbol{x}^{\text{unf}}\right)$ with contributions from Data $\delta^{\text{data}}\left(\boldsymbol{x}^{\text{unf}}\right)$ and from MC $\delta^{\text{MC}}\left(\boldsymbol{x}^{\text{unf}}\right)$
+ 
 0025
 true
 false
 RatioUncertainty
-Ratio of Statistical Data Uncertainty, $\delta^{Data}({vec{x}^{unf}})$ over $\delta^{Data}({vec{x}^{bbb}})$
-
+Ratio $\delta^{\text{data}}\left(\boldsymbol{x}^{\text{unf}}\right)/\delta^{\text{data}}\left(\boldsymbol{x}^{\text{bbb}}\right)$ of Statistical Data Uncertainties of Unfolded Distribution
+ 
 0026
-true 
+true
 true
 UnfoldingResultNorm
-Normalized Unfolding Result $\sigma_{\textrm{Bin i}} / \sigma{\textrm{inc}}$
-
+Normalized Unfolded Distribution $\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{unf}}$ and $\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{bbb}}$
+ 
 0027
 true
 false
 UncertaintyStatNorm
-Statistical Data Uncertainty on Normalized Unfolding Result $\delta^{Data}(frac{\sigma_{\textrm{Bin i}}}{\sigma{\textrm{inc}}})$
-
+Relative Statistical Data Uncertainties $\delta^{\text{data}}\left(\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{unf}}\right)$ and $\delta^{\text{data}}\left(\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{bbb}}\right)$ of Unfolded Distribution
+ 
 0028
 true
 false
 RatioUncertaintyNorm
-Ratio of Statistical Data Uncertainty on Normalized Unfolding Result,  $\delta^{Data}(frac{\sigma_{\textrm{Bin i}}}{\sigma{\textrm{inc}}})$ over $\delta^{Data}(frac{\sigma_{\textrm{Bin i}}}{\sigma{\textrm{inc}}})$
-
+Ratio $\delta^{\text{data}}\left(\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{unf}}\right)/\delta^{\text{data}}\left(\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{bbb}}\right)$ of Statistical Data Uncertainties of Unfolded Distribution
+ 
 0029
 false
 true
 SystematicShift
-Relative Systematic Shifts $({vec{x}^{Shifted}}) - {vec{x}^{Nominal}}) / {vec{x}^{Nominal}}$
-
+Relative Systematic Shifts $\delta^{\text{Sys}}\left(\boldsymbol{x}^{\text{unf}}\right)$ and $\delta^{\text{Sys}}\left(\boldsymbol{x}^{\text{bbb}}\right)$ on Unfolded Distribution
+ 
 0030
 false
 true
 RatioSystematicShift
-Ratio of Relative Systematic Shifts $({vec{x}^{Shifted}}) - {vec{x}^{Nominal}}) / {vec{x}^{Nominal}}$ from BBB and SVD
-
+Ratio $\delta^{\text{Sys}}\left(\boldsymbol{x}^{\text{unf}}\right)/\delta^{\text{Sys}}\left(\boldsymbol{x}^{\text{bbb}}\right)$ of Systematic Shifts on Unfolded Distribution
+ 
 0031
 false
 true
 SystematicShiftNorm
-Relative Systematic Shifts on Normalized Unfolding Result
-
+Relative Systematic Shifts $\delta^{\text{Sys}}\left(\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{unf}}\right)$ and $\delta^{\text{Sys}}\left(\frac{1}{\sigma_{\text{inc}}}\boldsymbol{\sigma}^{\text{bbb}}\right)$ on Normalized Unfolded Distribution
+ 
 0032
 true
 false
 KScanUnfoldingResult
-Unfolding Result for Different Values of the K-Parameter
-
+Unfolded Result $\boldsymbol{x}^{\text{unf}}\left(K\right)$ as a Function of the $K$-Parameter
+ 
 0033
 true
 false
 KScanUncertainty
-Statistical Uncertainty for Different Values of the K-Parameter
-
+Statistical Data Uncertainty $\delta^{\text{data}}\left(\boldsymbol{x}^{\text{unf}}\left(K\right)\right)$ of Unfolded Result as a Function of the $K$-Parameter
+ 
 0034
 true
 false
 KScanGlobalCorrelation
-Global Correlation for Different Values of the K-Parameter
-
+Global Correlation $\rho\left(K\right)$ as a Function of the $K$-Parameter
+ 
 0035
 true
 false
 KScanWeights
-Weights from Unfolding for Different Values of the K-Parameter
-
-
+Unfolded Weights $\boldsymbol{x}^{\text{unf}}\left(K\right)/\boldsymbol{x}^{\text{gen}}$ as a Function of the $K$-Parameter
+ 
