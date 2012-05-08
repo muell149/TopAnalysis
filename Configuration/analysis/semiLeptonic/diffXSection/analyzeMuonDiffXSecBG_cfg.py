@@ -3,7 +3,8 @@
 ##    but for ttbar BG
 ## ---
 
-sample="ttbar"
+# GOSSIE dit is lelijk, weg ermee!
+#sample="ttbar"
 
 ## change gen level event filter to ttbarBG
 eventFilter='background only'

@@ -229,6 +229,19 @@ if(not options.sample=="none"):
 	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
 	    outputFileName+="Bkg"
+    elif(options.sample=="powheg"):
+        usedSample="TopAnalysis/Configuration/Fall11/tt_Z2_powheg_Fall11_AOD_cff"
+	if(eventFilter=='signal only'):
+	    outputFileName+="SigPowheg"
+	elif(eventFilter=='background only'):
+	    outputFileName+="BkgPowheg"
+    elif(options.sample=="mcatnlo"):
+        usedSample="TopAnalysis/Configuration/Fall11/tt_Z2_mcatnlo_Fall11_AOD_cff"
+        PythiaSample="True"
+	if(eventFilter=='signal only'):
+	    outputFileName+="SigMcatnlo"
+	elif(eventFilter=='background only'):
+	    outputFileName+="BkgMcatnlo"
     elif(options.sample=="ttbarMatchingDown"):        
         usedSample="TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
