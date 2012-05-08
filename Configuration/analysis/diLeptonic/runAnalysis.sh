@@ -2,8 +2,7 @@
 
 mkdir FileLists
 
-#foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN SCALEUP SCALEDOWN MATCHUP MATCHDOWN MASSUP MASSDOWN)
-foreach syst (Nominal)
+foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN SCALEUP SCALEDOWN MATCHUP MATCHDOWN MASSUP MASSDOWN POWHEG MCATNLO)
 
    echo $syst > syst.txt
 
@@ -61,8 +60,8 @@ foreach syst (Nominal)
 
 end
 
-#foreach syst (PU_UP PU_DOWN)
-foreach syst ()
+foreach syst (PU_UP PU_DOWN)
+#foreach syst ()
    echo $syst > syst.txt
 
    foreach channel (ee emu mumu)

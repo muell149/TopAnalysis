@@ -2,27 +2,18 @@
 
 foreach channel (ee emu mumu)
      
-#   foreach syst (JESDOWN JESUP RESDOWN RESUP MATCHUP MATCHDOWN MASSUP MASSDOWN PU_UP PU_DOWN SCALEUP SCALEDOWN POWHEG)
-   foreach syst (JESDOWN JESUP RESDOWN RESUP MATCHUP MASSUP MASSDOWN PU_UP PU_DOWN SCALEUP SCALEDOWN POWHEG)
+   foreach syst (JESDOWN JESUP RESDOWN RESUP MATCHUP MATCHDOWN MASSUP MASSDOWN PU_UP PU_DOWN SCALEUP SCALEDOWN)
 
-   rm selectionRoot/$syst/$channel/run*
    cd selectionRoot/$syst/$channel/
-   ln -s ../../Nominal/$channel/run* .
+   ln -s ../../Nominal/$channel/* .
    cd ../../..
    end
 
 end
 
-rm selectionRoot/MATCHUP/*/ttbarbg.root
-rm selectionRoot/MATCHDOWN/*/ttbarbg.root
-rm selectionRoot/MASSUP/*/ttbarbg.root
-rm selectionRoot/MASSDOWN/*/ttbarbg.root
-rm selectionRoot/SCALEUP/*/ttbarbg.root
-rm selectionRoot/SCALEDOWN/*/ttbarbg.root
+foreach SignalSyst (MATCHUP MATCHDOWN MASSUP MASSDOWN SCALEUP SCALEDOWN)
 
-rm selectionRoot/MATCHUP/*/ttbarsignalplustau.root
-rm selectionRoot/MATCHDOWN/*/ttbarsignalplustau.root
-rm selectionRoot/MASSUP/*/ttbarsignalplustau.root
-rm selectionRoot/MASSDOWN/*/ttbarsignalplustau.root
-rm selectionRoot/SCALEUP/*/ttbarsignalplustau.root
-rm selectionRoot/SCALEDOWN/*/ttbarsignalplustau.root
+   rm selectionRoot/$SignalSyst/*/ttbarbg.root
+   rm selectionRoot/$SignalSyst/*/ttbarsignalplustau.root
+
+end
