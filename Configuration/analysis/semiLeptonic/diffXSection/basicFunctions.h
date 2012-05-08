@@ -2046,8 +2046,10 @@ namespace semileptonic {
 
       // close and delete input files
       for(std::map<unsigned int, TFile*>::const_iterator file=files_.begin(); file!=files_.end(); ++file){
-	file->second->Close();
-	delete file->second;
+	if(file->second){
+	  file->second->Close();
+	  delete file->second;
+	}
       }
     }
 
