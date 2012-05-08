@@ -255,6 +255,17 @@ Bool_t Analysis::Process(Long64_t entry)
     cout<<"Something went wrong"<<endl;
   }
 
+  //We must correct for the madGraph branching fraction beins 1/9 for dileptons (PDG average is .108)
+  if((MCSample->find("ttbarsignal")!=string::npos) ||(MCSample->find("ttbarbg")!=string::npos)){
+    if(decayMode==11){//all hadronic decay
+      lumiWeight=lumiWeight*(0.676*1.5)*(0.676*1.5);
+    } else if(decayMode<20 || (decayMode%10==1)){//semileptonic Decay
+      lumiWeight=lumiWeight*(0.108*9.)*(0.676*1.5);
+    } else {//dileptonic decay (including taus!)
+      lumiWeight=lumiWeight*(0.108*9.)*(0.108*9.);
+    }
+  }
+
   if(MCSample->find("ttbarsignal")!=string::npos){ Analysis::GetSignalBranches(entry);}
   if(MCSample->find("run")!=string::npos){ weightLepSF = 1.0;}
   EventCounter++;
