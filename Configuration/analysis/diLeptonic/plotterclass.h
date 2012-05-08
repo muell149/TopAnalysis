@@ -52,6 +52,7 @@ class Plotter {
   void DiffFlatSystematics(int syst_number,  int nbins);
   TLegend* getNewLegend();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
+  TH1* GetNloCurve(TString NewName, TString Generator);
   // DAVID
   void UnfoldingOptions(bool doSVD);
   void SetOutpath(TString path);
@@ -2311,6 +2312,7 @@ void Plotter::PlotDiffXSec(){
 	  RecoPlotFineBins =  (TH1D*)ftemp->Get("Reco"+newname)->Clone();
 	  genReco2d = (TH2*)ftemp->Get("GenReco"+newname)->Clone();
 	  GenPlotTheory=(TH1D*)ftemp->Get("VisGen"+newname)->Clone();
+	  
 	  if(newname.Contains("Lepton")||newname.Contains("Top")||newname.Contains("BJet")){
 	    RecoPlotFineBins->Add((TH1D*)ftemp->Get("RecoAnti"+newname)->Clone());
 	    genReco2d->Add((TH2*)ftemp->Get("GenRecoAnti"+newname)->Clone());
@@ -2590,17 +2592,7 @@ void Plotter::PlotDiffXSec(){
     GenPlotTheory->Scale(genscale);
     h_GenDiffXSec->Scale(genscale);
     TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
-    if(name.Contains("LeptonpT")){mcnlohist = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
-    else if(name.Contains("LeptonEta")){mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");}
-    else if(name.Contains("LLBarpT")){mcnlohist = GetNloCurve("LepPair","Pt","MCatNLO");}
-    else if(name.Contains("LLBarMass")){mcnlohist = GetNloCurve("LepPair","Mass","MCatNLO");}
-    else if(name.Contains("ToppT")){mcnlohist = GetNloCurve("TopQuarks","Pt","MCatNLO");}
-    else if(name.Contains("TopRapidity")){mcnlohist = GetNloCurve("TopQuarks","Rapidity","MCatNLO");}
-    else if(name.Contains("TTBarpT")){mcnlohist = GetNloCurve("TtBar","Pt","MCatNLO");}
-    else if(name.Contains("TTBarRapidity")){mcnlohist = GetNloCurve("TtBar","Rapidity","MCatNLO");}
-    else if(name.Contains("TTBarMass")){mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");}
-    else{mcnlohist = GetNloCurve("Leptons","Eta","MCatNLO");mcnlohist->SetLineColor(kWhite);}//default curve
-    //    mcnlohist = GetNloCurve("TtBar","Mass","MCatNLO");
+    mcnlohist = GetNloCurve(newname,"MCATNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
     mcnlohist->Rebin(5);mcnlohist->Scale(0.2);
     mcnlohist->Scale(mcnloscale);
@@ -2631,16 +2623,7 @@ void Plotter::PlotDiffXSec(){
     mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
     mcnlohistdown->Scale(mcnloscale);
 
-    if(name.Contains("LeptonpT")){powheghist = GetNloCurve("Leptons","Pt","Powheg");}//temprorary until I change the naming convention in the root file
-    else if(name.Contains("LeptonEta")){powheghist = GetNloCurve("Leptons","Eta","Powheg");}
-    else if(name.Contains("LLBarpT")){powheghist = GetNloCurve("LepPair","Pt","Powheg");}
-    else if(name.Contains("LLBarMass")){powheghist = GetNloCurve("LepPair","Mass","Powheg");}
-    else if(name.Contains("ToppT")){powheghist = GetNloCurve("TopQuarks","Pt","Powheg");}
-    else if(name.Contains("TopRapidity")){powheghist = GetNloCurve("TopQuarks","Rapidity","Powheg");}
-    else if(name.Contains("TTBarpT")){powheghist = GetNloCurve("TtBar","Pt","Powheg");}
-    else if(name.Contains("TTBarRapidity")){powheghist = GetNloCurve("TtBar","Rapidity","Powheg");}
-    else if(name.Contains("TTBarMass")){powheghist = GetNloCurve("TtBar","Mass","Powheg");}
-    else {powheghist = new TH1();}
+    powheghist = GetNloCurve(newname, "POWHEG");
     double powhegscale = 1./powheghist->Integral("width");
     powheghist->Rebin(2);powheghist->Scale(0.5);
     powheghist->Scale(powhegscale);
@@ -2692,9 +2675,9 @@ void Plotter::PlotDiffXSec(){
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(2);
     mcnlohist->SetLineColor(kAzure);
-    //mcnlohist->Draw("SAME,C");
+    mcnlohist->Draw("SAME,C");
     powheghist->SetLineColor(kGreen+1);
-    //powheghist->Draw("SAME,C");
+    powheghist->Draw("SAME,C");
     //h_DiffXSec->Draw("SAME, EP0");
     DrawCMSLabels(true, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
@@ -2704,7 +2687,8 @@ void Plotter::PlotDiffXSec(){
     leg2.AddEntry(GenPlotTheory,            "Madgraph","l");
     //if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
-    //if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "Powheg",  "l");        
+    if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
+    if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "Powheg",  "l");        
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
     leg2.Draw("same");
@@ -2752,51 +2736,123 @@ void Plotter::PlotDiffXSec(){
 TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char *generator){
 
   TH1::AddDirectory(kFALSE);
-    TString histname("visible_");
-    histname.Append(particle);
-    histname.Append(quantity);
-    histname.Append("_");
-    histname.Append(generator);
+  TString histname("visible_");
+  histname.Append(particle);
+  histname.Append(quantity);
+  histname.Append("_");
+  histname.Append(generator);
+  
+  TH1* hist;
+  
+  TFile* file = new TFile;
+  
+  if(strcmp(generator, "Powheg")==0){file = TFile::Open("selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root","READ");}
+  else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20111028.root","READ");}
+  else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20111028.root","READ");}
+  else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20111028.root","READ");}
+  
+  if (file && !file->IsZombie()) {
+    file->GetObject<TH1>(histname, hist);
 
-    TH1* hist;
-
-    TFile* file = new TFile;
-
-    if(strcmp(generator, "Powheg")==0){file = TFile::Open("Powheg.root","READ");}
-    else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20111028.root","READ");}
-    else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20111028.root","READ");}
-    else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20111028.root","READ");}
-
-    if (file && !file->IsZombie()) {
-      file->GetObject<TH1>(histname, hist);
-
-      if(!hist){
-        std::cerr << "WARNING in GetNloCurve: input histogram '" << histname << "' could not been opened! Returning dummy!" << endl;
-        hist = new TH1();
-        return hist;
-      }
-      
-      TH1D* rethist = (TH1D*)hist->Clone();
-      TH1D* weight = (TH1D*)file->Get(TString("total_LeptonsPt_").Append(generator));
-      
-      Double_t wgt = 1.;
-      if(!weight){
-        std::cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl;
-      } else{
-	Double_t nevents = weight->GetEntries();
-	//
-        Double_t crosssection = 169.9;
-        Double_t binw = hist->GetBinWidth(1);
-        wgt = crosssection/nevents/binw;
-      }
-      rethist->Scale(wgt);
-      return rethist;
+    if(!hist){
+      std::cerr << "WARNING in GetNloCurve: input histogram '" << histname << "' could not been opened! Returning dummy!" << endl;
+      hist = new TH1();
+      return hist;
     }
+    
+    TH1D* rethist = (TH1D*)hist->Clone();
+    TH1D* weight = (TH1D*)file->Get(TString("total_LeptonsPt_").Append(generator));
+    
+    Double_t wgt = 1.;
+    if(!weight){
+      std::cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl;
+    } else{
+      Double_t nevents = weight->GetEntries();
+      //
+      Double_t crosssection = 169.9;
+      Double_t binw = hist->GetBinWidth(1);
+      wgt = crosssection/nevents/binw;
+    }
+    rethist->Scale(wgt);
+    return rethist;
+  }
+  
+  std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << endl;
+  hist = new TH1D();
+  delete file;
+  return hist;
+}
 
-    std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << endl;
-    hist = new TH1D();
-    delete file;
-    return hist;
+TH1* Plotter::GetNloCurve(TString NewName, TString Generator){
+
+  TH1::AddDirectory(kFALSE);
+  TString histname("VisGen"+NewName);
+  
+  TH1* hist;
+  TH1* hist1;
+  TH1* hist2;
+  
+  TFile* file = new TFile;
+  TFile* file1 = new TFile;
+  TFile* file2 = new TFile;
+
+    
+  if(Generator=="MCATNLO"){
+    if(channelType == 0)file = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau.root","READ");
+    else if(channelType == 1)file = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau.root","READ");
+    else if(channelType == 2)file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau.root","READ");
+    else {
+      file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau.root","READ");
+      file1 = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau.root","READ");
+      file2 = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau.root","READ");
+    }
+  }else{
+    if(channelType == 0)file = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau_powheg.root","READ");
+    else if(channelType == 1)file = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau_powheg.root","READ");
+    else if(channelType == 2)file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau_powheg.root","READ");
+    else {
+      file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau_powheg.root","READ");
+      file1 = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau_powheg.root","READ");
+      file2 = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau_powheg.root","READ");
+    }
+  }
+  
+  if (file && !file->IsZombie()) {
+    if (channelType<3)hist=(TH1*)file->Get("VisGen"+NewName)->Clone();
+    else {
+      hist=(TH1*)file->Get("VisGen"+NewName)->Clone();
+      hist->Add((TH1*)file1->Get("VisGen"+NewName)->Clone());
+      hist->Add((TH1*)file2->Get("VisGen"+NewName)->Clone());
+    }
+    if(NewName.Contains("Lepton")||NewName.Contains("Top")||NewName.Contains("BJet")){
+      if(channelType<3)hist->Add((TH1*)file->Get("VisGenAnti"+NewName)->Clone());
+      else{
+	hist->Add((TH1*)file->Get("VisGenAnti"+NewName)->Clone());
+	hist->Add((TH1*)file1->Get("VisGenAnti"+NewName)->Clone());
+	hist->Add((TH1*)file2->Get("VisGenAnti"+NewName)->Clone());
+      }
+    }
+    if(!hist){
+      std::cerr << "WARNING in GetNloCurve: input histogram '" << histname << "' could not been opened! Returning dummy!" << endl;
+      hist = new TH1();
+      return hist;
+    }
+    
+    TH1D* rethist = (TH1D*)hist->Clone();
+    
+    Double_t wgt = 1.;
+    Double_t nevents = 16420479;//weight->GetEntries();
+    Double_t crosssection = 161.6;
+    Double_t binw = hist->GetBinWidth(1);
+    wgt = crosssection/nevents/binw;
+    rethist->Scale(wgt);
+    return rethist;
+  }
+  
+  std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << endl;
+  hist = new TH1D();
+  delete file;  delete file1;  delete file2;
+  return hist;
 }
 
 // get new legend
