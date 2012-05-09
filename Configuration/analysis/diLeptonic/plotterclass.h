@@ -228,10 +228,10 @@ void Plotter::InclFlatSystematics(int syst_number){
   syst_number++;
 
   //B-tagging (for now)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .06;}//combined  
+  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//ee 
+  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//mumu  
+  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//combined  
   syst_number++;
 
   //KinFit 
@@ -259,10 +259,10 @@ void Plotter::InclFlatSystematics(int syst_number){
   syst_number++;
 
   //Luminosity
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .045;}//combined  
+  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//ee 
+  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//mumu  
+  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .022;}//combined  
   syst_number++;
 
 }
@@ -287,12 +287,6 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     DiffXSecSysErrorBySyst[channelType][bin][syst] = .02;//all (different from inclusive?) 
     syst++;
 
-    //1 percent systematic
-    legendsSyst.push_back("One percent");
-    
-    DiffXSecSysErrorBySyst[channelType][bin][syst] = .01;//all (different from inclusive?) 
-    syst++;
-    
     //B-tagging (for now)
     legendsSyst.push_back("b-tagging");
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//ee 
@@ -499,7 +493,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       if((legends[i] == DYEntry) && channelType!=2){
 	varhistsUp[i]->Scale(DYScale[channelType]);
 	if(Systematic == "DY_"){
-	  varhistsUp[i]->Scale(1.5);
+	  varhistsUp[i]->Scale(1.3);
 	}
       }else if(legends[i] == "t#bar{t} signal"){
 	TFile *ftempUp = TFile::Open(datasetUp[i]);
@@ -562,7 +556,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       if((legends[i] == DYEntry) && channelType!=2){
 	varhistsDown[i]->Scale(DYScale[channelType]);
 	if(Systematic == "DY_"){
-	  varhistsDown[i]->Scale(0.5);
+	  varhistsDown[i]->Scale(0.7);
 	}
       }else if(legends[i] == "t#bar{t} signal"){
 	TFile *ftempDown = TFile::Open(datasetDown[i]);
@@ -803,7 +797,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 	if ( (legendsUp[i] == DYEntry) && (channelType != 2 ) ) {
 	  theDYScale = DYScale[channelType];
 	  if(Systematic == "DY_"){
-	    theDYScale=theDYScale*1.5;
+	    theDYScale=theDYScale*1.3;
 	  }
 	}
 	if ( theBgrHistUp == NULL ) {
@@ -835,7 +829,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 	if ( (legendsDown[i] == DYEntry) && (channelType != 2 ) ) {
 	  theDYScale = DYScale[channelType];
 	  if(Systematic == "DY_"){
-	    theDYScale=theDYScale*0.5;
+	    theDYScale=theDYScale*0.7;
 	  }
 	}
 	if ( theBgrHistDown == NULL ) {
@@ -1649,7 +1643,11 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
 void Plotter::PlotXSec(){
 
   TH1::AddDirectory(kFALSE);
-  /*  CalcInclSystematics("JES",0);
+  for(int i =0; i<15; i++){
+    InclusiveXsectionSysErrorBySyst[channelType][i] = 0.;
+  }
+  
+  CalcInclSystematics("JES",0);
   CalcInclSystematics("RES",1);
   CalcInclSystematics("PU_",2);
   CalcInclSystematics("SCALE",3);
@@ -1657,7 +1655,7 @@ void Plotter::PlotXSec(){
   CalcInclSystematics("MASS",5);
   CalcInclSystematics("DY_",6);
   CalcInclSystematics("BG_",7);
-  InclFlatSystematics(8);*/
+  InclFlatSystematics(8);
   
   CalcXSec(dataset, InclusiveXsection,InclusiveXsectionStatError, "","");
 
@@ -1667,7 +1665,7 @@ void Plotter::PlotXSec(){
     syst_square += InclusiveXsectionSysErrorBySyst[channelType][i]*InclusiveXsectionSysErrorBySyst[channelType][i];
   }
   InclusiveXsectionSysError[channelType] = sqrt(syst_square);
-  //cout<<"&^&^&^&^&^&^^&^&^ InclusiveXsectionSysError[channelType]: "<<InclusiveXsectionSysError[channelType]<<endl;
+  cout<<"&^&^&^&^&^&^^&^&^ InclusiveXsectionSysError[channelType]: "<<InclusiveXsectionSysError[channelType]<<endl;
 
   if(channelType==3){
 
@@ -1767,7 +1765,7 @@ void Plotter::PlotXSec(){
    mstwplot->Draw("C,2,SAME");
    gStyle->SetEndErrorSize(8);
    mplot->Draw("p,SAME");
-   //mplotwithsys->Draw("p,SAME,Z");
+   mplotwithsys->Draw("p,SAME,Z");
    leg ->Draw("SAME");
    box1->Draw("SAME");
    box2->Draw("SAME");
@@ -1955,16 +1953,16 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     //} 
     else{      
       if((legends[i] == DYEntry) && channelType!=2){
-	numhists[i]->Scale(DYScale[channelType]);
+	  numhists[i]->Scale(DYScale[channelType]);
       }
       if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Up"){
-	numhists[i]->Scale(1.5);
+	  numhists[i]->Scale(1.3);
+      }
+      if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Down"){
+	  numhists[i]->Scale(0.7);
       }
       if(Systematic == "BG_" && Shift=="Up" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
 	numhists[i]->Scale(1.3);
-      }
-      if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Down"){
-	numhists[i]->Scale(0.5);
       }
       if(Systematic == "BG_" && Shift=="Down" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
 	numhists[i]->Scale(0.7);
@@ -2011,8 +2009,13 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
   double xsec = ((numbers[0]-numbers[3]))/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
   double xsecstaterror = TMath::Sqrt(numbers[0])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
 
-  if(Systematic == "") cout<<"Global Efficiency: "<<(numbers[1]/numbers[2])<<endl;
-
+  if(Systematic == "") {
+    cout<<"numbers[0]: "<<numbers[0]<<endl;
+    cout<<"numbers[1]: "<<numbers[1]<<endl;
+    cout<<"numbers[2]: "<<numbers[2]<<endl;
+    cout<<"numbers[3]: "<<numbers[3]<<endl;
+    cout<<"Global Efficiency: "<<(numbers[1]/numbers[2])<<endl;
+  }
   if(channelType!=3){
     InclusiveXsectionVec[channelType] = xsec;
     InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
