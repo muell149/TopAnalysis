@@ -1,10 +1,10 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, int verbose=0, 
+void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  const std::string decayChannel = "electron", bool withRatioPlot = true, bool extrapolate=false, bool hadron=false)
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  const std::string decayChannel = "muon", bool withRatioPlot = true, bool extrapolate=false, bool hadron=false)
 {
   // ============================
   //  Set Root Style
@@ -236,7 +236,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     "analyzeTopRecoKinematicsKinFit/bqPt",
     "analyzeTopRecoKinematicsKinFit/bqEta",
     "analyzeTopRecoKinematicsKinFitBeforeProbSel/prob", 
-    "analyzeTopRecoKinematicsKinFitBeforeProbSel/chi2"
+    "analyzeTopRecoKinematicsKinFitBeforeProbSel/chi2",
+    // gen distributions
+    "analyzeTopPartonLevelKinematics/ttbarMass",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass",
   };
 
   TString plots1Dmu[ ] = { 
@@ -416,7 +419,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
     "p_{t}^{b quark} #left[#frac{GeV}{c}#right];Frequency;0;20",    
     "#eta^{b quark};Frequency;0;1",
     "probability (best fit hypothesis);events;1;25", 
-    "#chi^{2} (best fit hypothesis);events;0;10"
+    "#chi^{2} (best fit hypothesis);events;0;10",
+    // gen distributions
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton all truth;events;1;1",
+    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton lv truth;events;1;1"
+
   };
 
   TString axisLabel1De[ ] = {
@@ -621,6 +628,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
   }
   // b) print composition (only if ratio is also drawn)
   if(verbose>=0&&withRatioPlot){
+    double NttbarFull= histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->GetNbinsX()+1);
+    double NttbarPS  = histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
+    double BR=0.145888;
+    double A=NttbarPS/NttbarFull;
     // loop pretagged/tagged
     for(unsigned int step=0; step<selection_.size(); ++step){    
       // print label
@@ -632,8 +643,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
       }
       // all MC events
       double NAllMC=events_[selection_[step]][kSig]+events_[selection_[step]][MCBG];
+      double NData=events_[selection_[step]][kData];
       // print yield and composition
-      std::cout << " Events observed in data: " << events_[selection_[step]][kData] << std::endl;
+      std::cout << " Events observed in data: " << NData << std::endl;
       std::cout << " Events expected from MC: " << NAllMC << std::endl << std::endl;
       std::cout << " Expected event composition:"   << std::endl; 
       std::cout << " ttbar SG:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
@@ -645,6 +657,17 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980.0, bool save = true, 
       std::cout << std::endl;
       std::cout << " Single Top: " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
       std::cout << " DiBoson:    " << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
+      double NnonTtbarBG=NAllMC-events_[selection_[step]][kSig]-events_[selection_[step]][kBkg];
+      double ttbarSigFrac=events_[selection_[step]][kSig]/(events_[selection_[step]][kSig]+events_[selection_[step]][kBkg]);
+      double eff=events_[selection_[step]][kSig]/NttbarPS;  
+      double xSec=(NData-NnonTtbarBG)*ttbarSigFrac/(A*eff*BR*luminosity);
+      std::cout << std::endl;
+      std::cout << "    inclusive cross section: " << std::setprecision(2) << std::fixed << xSec << std::endl;
+      std::cout << "      N(nonttBG): " << std::setprecision(2) << std::fixed << NnonTtbarBG << std::endl;
+      std::cout << "      tt SG frac: " << std::setprecision(2) << std::fixed << ttbarSigFrac << std::endl;
+      std::cout << "      BR:         " << std::setprecision(2) << std::fixed << BR  << std::endl;
+      std::cout << "      efficiency: " << std::setprecision(2) << std::fixed << eff << std::endl;
+      std::cout << "      acceptance: " << std::setprecision(2) << std::fixed << A   << std::endl;
     }
     std::cout << std::endl << " The event composition is only printed when running the monitoring macro using the option 'withRatioPlot=true' " << std::endl;
   }
