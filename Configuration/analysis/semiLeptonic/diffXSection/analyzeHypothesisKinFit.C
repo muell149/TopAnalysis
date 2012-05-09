@@ -211,10 +211,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   TString recHadronLeppath= "analyzeTopRecoKinematicsLepton" +sysInputFolderExtension;
   TString genPartonLeppath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
   TString genHadronLeppath= "analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sysInputGenFolderExtension;
-  TString recLeppath = ( (!extrapolate&&hadron) ? recHadronLeppath : recPartonLeppath );
-  TString genLeppath = ( (!extrapolate&&hadron) ? genHadronLeppath : genPartonLeppath );
+  TString recLeppath  = ( (!extrapolate&&hadron) ? recHadronLeppath : recPartonLeppath );
+  TString genLeppath  = ( (!extrapolate&&hadron) ? genHadronLeppath : genPartonLeppath );
   TString recLeplabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
   TString genLeplabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
+
 
   //  ---
   //     choose plots
@@ -798,6 +799,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   std::vector<TString> vecRedundantPartOfNameInData;
   vecRedundantPartOfNameInData.push_back(sysInputFolderExtension);
   getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
+
   // take care of rec level b quark plots from MC BG
   // this is necessary because signal and background do have different input folders
   if(!extrapolate&&hadron){
@@ -821,14 +823,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	  }
 	}
       }
+      // create plot container
+      TH1* targetPlotBqPt  =0;
+      TH1* targetPlotBqEta =0;
+      TH1* targetPlotLepPt =0;
+      TH1* targetPlotLepEta=0;
       // check if file exists
       if(files_[sample]){
 	// get plot
-	// create plot container
-	TH1* targetPlotBqPt;
-	TH1* targetPlotBqEta;
-	TH1* targetPlotLepPt;
-	TH1* targetPlotLepEta;
 	files_[sample]->GetObject(path+"/bqPt" , targetPlotBqPt );
 	files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
 	files_[sample]->GetObject(pathL+"/lepPt" , targetPlotLepPt );
@@ -858,6 +860,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
           std::cout << "targetPlotLepEta: " <<  targetPlotLepEta << std::endl;
 	}
       }
+      // delete plot container
+      delete targetPlotBqPt;
+      delete targetPlotBqEta;
+      delete targetPlotLepPt;
+      delete targetPlotLepEta;
     }
     // check if plot exists at all
     if(!bqPtExistsInAnySample){
@@ -876,27 +883,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       std::cout << "no plot found with label " << pathL+"/lepEta for non ttbar signal" << std::endl;
       exit(0);
     }
-
   }
-
-
-  // ---
-  //    lumiweighting for choosen luminosity
-  // ---
-  // scale every histo in histo_ and histo2_ to the corresponding luminosity
-  // Additionally the mu eff SF is applied
-  // NOTE: luminosity [/pb]
-  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, systematicVariationMod, decayChannel);
-
-  // ---
-  //    add single top channels and DiBoson contributions
-  // ---
-  // for SingleTop and DiBoson samples:
-  // every plot plotList_ existing in sTop/ diBoson .root file
-  // will be combined and saved in the histo_ and histo2_ map
-  // reCreate: recreate combined plots if they are already existing
-  bool reCreate=false;
-  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose-1, reCreate, decayChannel);
 
   // ---
   //    Renaming of PS specific plot names to parton level PS names to unify naming
@@ -973,6 +960,24 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     }
   }
   
+  // ---
+  //    lumiweighting for choosen luminosity
+  // ---
+  // scale every histo in histo_ and histo2_ to the corresponding luminosity
+  // Additionally the mu eff SF is applied
+  // NOTE: luminosity [/pb]
+  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, systematicVariationMod, decayChannel);
+
+  // ---
+  //    add single top channels and DiBoson contributions
+  // ---
+  // for SingleTop and DiBoson samples:
+  // every plot plotList_ existing in sTop/ diBoson .root file
+  // will be combined and saved in the histo_ and histo2_ map
+  // reCreate: recreate combined plots if they are already existing
+  bool reCreate=false;
+  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose-1, reCreate, decayChannel);
+
   // ---
   //    copy event yields for total xSec calculation
   // ---
