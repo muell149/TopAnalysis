@@ -64,20 +64,20 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   // ---
   TTree * tree;
   bool useTree_;
-  double weight;
+  float weight;
   unsigned int runNumber, luminosityBlockNumber, eventNumber;
-  double valueBqPtRec;
-  double valueBqPtGen;
-  double valueBqEtaRec;
-  double valueBqEtaGen;
-  double valueBqYRec;
-  double valueBqYGen;
-  double valueBbarqPtRec;
-  double valueBbarqPtGen;
-  double valueBbarqEtaRec;
-  double valueBbarqEtaGen;
-  double valueBbarqYRec;
-  double valueBbarqYGen;
+  float valueBqPtRec;
+  float valueBqPtGen;
+  float valueBqEtaRec;
+  float valueBqEtaGen;
+  float valueBqYRec;
+  float valueBqYGen;
+  float valueBbarqPtRec;
+  float valueBbarqPtGen;
+  float valueBbarqEtaRec;
+  float valueBbarqEtaGen;
+  float valueBbarqYRec;
+  float valueBbarqYGen;
 
   // ---
   //    histos

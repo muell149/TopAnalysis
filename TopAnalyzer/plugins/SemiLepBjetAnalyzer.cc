@@ -229,7 +229,7 @@ SemiLepBjetAnalyzer::beginJob()
     // define the tree and make it known to the TFileService
     tree = fs->make<TTree>("tree","tree",0);
     // weight
-    tree->Branch("weight" , &weight , "weight/D" );
+    tree->Branch("weight" , &weight , "weight/F" );
     // event identifiers
     runNumber = 0;
     tree->Branch("runNumber", &runNumber, "runNumber/i");
@@ -238,18 +238,18 @@ SemiLepBjetAnalyzer::beginJob()
     eventNumber= 0;
     tree->Branch("eventNumber", &eventNumber, "eventNumber/i");
     // variables
-    tree->Branch("bqPtRec" , &valueBqPtRec , "bqPtRec/D" );
-    tree->Branch("bqPtGen" , &valueBqPtGen , "bqPtGen/D" );
-    tree->Branch("bqEtaRec", &valueBqEtaRec, "bqEtaRec/D");
-    tree->Branch("bqEtaGen", &valueBqEtaGen, "bqEtaGen/D");
-    tree->Branch("bqYRec"  , &valueBqYRec  , "bqYRec/D"  );
-    tree->Branch("bqYGen"  , &valueBqYGen  , "bqYGen/D"  );
-    tree->Branch("bbarqPtRec" , &valueBbarqPtRec , "bbarqPtRec/D" );
-    tree->Branch("bbarqPtGen" , &valueBbarqPtGen , "bbarqPtGen/D" );
-    tree->Branch("bbarqEtaRec", &valueBbarqEtaRec, "bbarqEtaRec/D");
-    tree->Branch("bbarqEtaGen", &valueBbarqEtaGen, "bbarqEtaGen/D");
-    tree->Branch("bbarqYRec"  , &valueBbarqYRec  , "bbarqYRec/D"  );
-    tree->Branch("bbarqYGen"  , &valueBbarqYGen  , "bbarqYGen/D"  );
+    tree->Branch("bqPtRec" , &valueBqPtRec , "bqPtRec/F" );
+    tree->Branch("bqPtGen" , &valueBqPtGen , "bqPtGen/F" );
+    tree->Branch("bqEtaRec", &valueBqEtaRec, "bqEtaRec/F");
+    tree->Branch("bqEtaGen", &valueBqEtaGen, "bqEtaGen/F");
+    tree->Branch("bqYRec"  , &valueBqYRec  , "bqYRec/F"  );
+    tree->Branch("bqYGen"  , &valueBqYGen  , "bqYGen/F"  );
+    tree->Branch("bbarqPtRec" , &valueBbarqPtRec , "bbarqPtRec/F" );
+    tree->Branch("bbarqPtGen" , &valueBbarqPtGen , "bbarqPtGen/F" );
+    tree->Branch("bbarqEtaRec", &valueBbarqEtaRec, "bbarqEtaRec/F");
+    tree->Branch("bbarqEtaGen", &valueBbarqEtaGen, "bbarqEtaGen/F");
+    tree->Branch("bbarqYRec"  , &valueBbarqYRec  , "bbarqYRec/F"  );
+    tree->Branch("bbarqYGen"  , &valueBbarqYGen  , "bbarqYGen/F"  );
   }
 }
 

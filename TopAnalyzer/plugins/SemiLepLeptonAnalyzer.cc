@@ -169,7 +169,7 @@ SemiLepLeptonAnalyzer::beginJob()
     // define the tree and make it known to the TFileService
     tree = fs->make<TTree>("tree","tree",0);
     // weight
-    tree->Branch("weight" , &weight , "weight/D" );
+    tree->Branch("weight" , &weight , "weight/F" );
     // event identifiers
     runNumber = 0;
     tree->Branch("runNumber", &runNumber, "runNumber/i");
@@ -178,12 +178,12 @@ SemiLepLeptonAnalyzer::beginJob()
     eventNumber= 0;
     tree->Branch("eventNumber", &eventNumber, "eventNumber/i");
     // variables
-    tree->Branch("lepPtRec" , &valueLepPtRec , "lepPtRec/D" );
-    tree->Branch("lepPtGen" , &valueLepPtGen , "lepPtGen/D" );
-    tree->Branch("lepEtaRec", &valueLepEtaRec, "lepEtaRec/D");
-    tree->Branch("lepEtaGen", &valueLepEtaGen, "lepEtaGen/D");
-    tree->Branch("lepYRec"  , &valueLepYRec  , "lepYRec/D"  );
-    tree->Branch("lepYGen"  , &valueLepYGen  , "lepYGen/D"  );
+    tree->Branch("lepPtRec" , &valueLepPtRec , "lepPtRec/F" );
+    tree->Branch("lepPtGen" , &valueLepPtGen , "lepPtGen/F" );
+    tree->Branch("lepEtaRec", &valueLepEtaRec, "lepEtaRec/F");
+    tree->Branch("lepEtaGen", &valueLepEtaGen, "lepEtaGen/F");
+    tree->Branch("lepYRec"  , &valueLepYRec  , "lepYRec/F"  );
+    tree->Branch("lepYGen"  , &valueLepYGen  , "lepYGen/F"  );
   }
 }
 

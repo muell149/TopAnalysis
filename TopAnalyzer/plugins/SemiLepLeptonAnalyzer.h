@@ -59,14 +59,14 @@ class SemiLepLeptonAnalyzer : public edm::EDAnalyzer {
   // ---
   TTree * tree;
   bool useTree_;
-  double weight;
+  float weight;
   unsigned int runNumber, luminosityBlockNumber, eventNumber;
-  double valueLepPtRec;
-  double valueLepPtGen;
-  double valueLepEtaRec;
-  double valueLepEtaGen;
-  double valueLepYRec;
-  double valueLepYGen;
+  float valueLepPtRec;
+  float valueLepPtGen;
+  float valueLepEtaRec;
+  float valueLepEtaGen;
+  float valueLepYRec;
+  float valueLepYGen;
 
   // ---
   //    histos
