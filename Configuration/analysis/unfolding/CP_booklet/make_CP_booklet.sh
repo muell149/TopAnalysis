@@ -2,24 +2,7 @@
 #
 # make_CP_booklet.sh
 #
-# Call this script to make nice booklets with 
-# unfolding control plots.
-#
-# As an argument, give it the name of a steering file, i.e.
-# make_CP_booklet.sh steering.steer
-#
-# The steering file should contain a line for each control plot
-# you want to make a booklet from.
-#
-# Each line in the steering file should have the following
-# syntax:
-#
-# <PageInPSBooklet> <Descriptive Title in Latex>
-# 
-# Example:
-#
-# 8 Generralized Efficiency $\epsilon_{gen}$
-#
+# Read the README file for instructions.
 #
 ###############################################################
 
@@ -29,10 +12,11 @@
 ############## S T E E R I N G ################################
 ###############################################################
 
-OUTPUTFOLDER="./newBooklets"
-STEERINGFILE="./Steering/steering_dilep.steer"
+OUTPUTFOLDER="../../diLeptonic/SVD/CP_Booklets"
+STEERINGFILE="./Steering/steering_dilep_fast.steer"
 SNIPPETFOLDER="./TexSnippets"
-INPUTFOLDER="../../diLeptonic/SVD"
+INPUTFOLDER="../../SVD"
+TEXFILE="SelectedControlPlots"
 
 LIST_SYST="RES"
 LIST_DISTa="Leptons_Eta Leptons_Pt LepPair_Pt LepPair_Mass BJets_Rapidity BJets_Pt"
@@ -42,6 +26,8 @@ LIST_CHANNEL="mumu emu ee combined"
 EPSTOPDF="false" 
 COPYIMG="false"
 COMPILE="true"
+COMBINEBOOKLETS="true"
+DEBUGTEX="false"
 
 ###############################################################
 ###############################################################
@@ -54,16 +40,24 @@ if [ "$COPYIMG" = "true" ]; then
     mkdir $OUTPUTFOLDER/Images 2> /dev/null ;
 fi
 
+# Real Input Folder
+REALINPUTFOLDER=$OUTPUTFOLDER/$INPUTFOLDER
+
 # Loop over booklets
 NUMSTEERINGLINES=`cat $STEERINGFILE | wc -l`
 STEERINGLINECNT=0
 TOKENCNT=0
+FIRSTBOOKLET=true
 while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
     let "STEERINGLINECNT = $STEERINGLINECNT + 1"
 
     # Read Steering, ingore lines containing whitespaces only
     STEERINGLINE=`cat $STEERINGFILE | head -${STEERINGLINECNT} | tail -1`
-    if [ "$STEERINGLINE" = "" ] ; then
+    TRUNCSTEERLINE=""
+    for i in `echo $STEERINGLINE` ; do
+        TRUNCSTEERLINE=$i ; 
+    done
+    if [ "$TRUNCSTEERLINE" = "" ] ; then
         continue;
     fi
     
@@ -96,6 +90,16 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
         TOKENCNT=0 ;
     fi ;
 
+    # Debug Tokens
+    DEBUGTOKENS=false
+    if [ "$DEBUGTOKENS" = "true" ]; then
+        echo "PAGENUMBER      = $PAGENUMBER"
+        echo "DONOM           = $DONOM"
+        echo "DOSYST          = $DOSYST"
+        echo "OUTPUTFILENAME  = $OUTPUTFILENAME"
+        echo "LINETITLE       = $LINETITLE" 
+        continue;
+    fi
 
     # Loop over systematics or not
     ALLSYST=$LIST_SYST
@@ -103,19 +107,34 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
         ALLSYST="" ;
     fi
 
+    # Which Outputfile
+    if [ "$COMBINEBOOKLETS" = "true" ]; then
+        OUTPUTFILENAME=$TEXFILE ;
+    fi
 
-    # Screen Output
-    echo "Creating Booklet ${OUTPUTFOLDER}/${OUTPUTFILENAME}..."
-
-	# Create a new Booklet
-    OUTPUTFILE=$OUTPUTFOLDER/$OUTPUTFILENAME
-    rm $OUTPUTFILE.tex 2> /dev/null
-	touch $OUTPUTFILE.tex
-
-    # Make Title Page
-    cat $SNIPPETFOLDER/CP_booklet_titlepageheader.tex >> $OUTPUTFILE.tex
-    cat $STEERINGFILE | head -${STEERINGLINECNT} | tail -1 >> $OUTPUTFILE.tex
-    cat $SNIPPETFOLDER/CP_booklet_titlepagefooter.tex >> $OUTPUTFILE.tex
+    # Open Booklet?
+    OPENBOOKLET=false
+    if [ "$COMBINEBOOKLETS" = "false" ]; then
+        OPENBOOKLET=true ;
+    fi
+    if [ "$FIRSTBOOKLET" = "true" ]; then
+        OPENBOOKLET=true ;
+    fi
+    
+    # Open Booklet!
+    if [ "$OPENBOOKLET" = "true" ]; then
+        echo "Creating Booklet ${OUTPUTFOLDER}/${OUTPUTFILENAME}.tex..."
+        OUTPUTFILE=$OUTPUTFOLDER/$OUTPUTFILENAME
+        rm $OUTPUTFILE.tex 2> /dev/null
+    	touch $OUTPUTFILE.tex
+        cat $SNIPPETFOLDER/CP_booklet_titlepageheader.tex >> $OUTPUTFILE.tex
+        if [ "$COMBINEBOOKLETS" = "true" ]; then
+             echo "Selected Unfolding Control Plots" >> $OUTPUTFILE.tex ;
+        else 
+             cat $STEERINGFILE | head -${STEERINGLINECNT} | tail -1 >> $OUTPUTFILE.tex ;
+        fi
+        cat $SNIPPETFOLDER/CP_booklet_titlepagefooter.tex >> $OUTPUTFILE.tex ; 
+    fi
 
     # Make first Nominal Plots if needed
     if [ "$DONOM" = "true" ]; then
@@ -127,15 +146,15 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
                 PLOTNAME="Unfolding_${cc}_${dist}_${PAGENUMBER}"
-                PLOTLOC="../${INPUTFOLDER}"
+                PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
-                if [ ! -e ${INPUTFOLDER}/${PLOTNAME}.eps ] ; then
-                    echo "File ${INPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
+                if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
+                    echo "File ${REALINPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
                      PLOTLOC="./Images"
-                     cp ${INPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
+                     cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
                     epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
@@ -156,15 +175,15 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
                 PLOTNAME="Unfolding_${cc}_${dist}_${PAGENUMBER}"
-                PLOTLOC="../${INPUTFOLDER}"
+                PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
-                if [ ! -e ${INPUTFOLDER}/${PLOTNAME}.eps ] ; then
-                    echo "File ${INPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
+                if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
+                    echo "File ${REALINPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
                     PLOTLOC="./Images"
-                    cp ${INPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
+                    cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
                     epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
@@ -189,15 +208,15 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
                 PLOTNAME="Unfolding_${cc}_${dist}_${syst}_${PAGENUMBER}"
-                PLOTLOC="../${INPUTFOLDER}"
+                PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
-                if [ ! -e ${INPUTFOLDER}/${PLOTNAME}.eps ] ; then
-                    echo "File ${INPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
+                if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
+                    echo "File ${REALINPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
                      PLOTLOC="./Images"
-                     cp ${INPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
+                     cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
                     epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
@@ -219,15 +238,15 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
                 PLOTNAME="Unfolding_${cc}_${dist}_${syst}_${PAGENUMBER}"
-                PLOTLOC="../${INPUTFOLDER}"
+                PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
-                if [ ! -e ${INPUTFOLDER}/${PLOTNAME}.eps ] ; then
-                    echo "File ${INPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
+                if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
+                    echo "File ${REALINPUTFOLDER}/${PLOTNAME}.eps not found. Exiting ..."
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
                      PLOTLOC="./Images"
-                     cp ${INPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
+                     cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
                     epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
@@ -243,25 +262,66 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
     
     done
 
+    # Close Booklet?
+    CLOSEBOOKLET=false;
+    if [ "$COMBINEBOOKLETS" = "false" ]; then
+        CLOSEBOOKLET=true ;
+    fi
 
-    # Finish off your little booklet
+    # Close Booklet
+    if [ "$CLOSEBOOKLET" = "true" ]; then
+        cat $SNIPPETFOLDER/CP_booklet_bookletfooter.tex >> $OUTPUTFILE.tex
+        echo "Done." 
+        if [ "$COMPILE" = "true" ] ; then
+            echo "...converting to ${OUTPUTFILENAME}.pdf!"
+            echo "   If this runs for ages, try 'X ENTER' and"
+            echo "   check the latex logfile ${OUTPUTFILENAME}.log"
+            THEPWD=`pwd`
+            cd $OUTPUTFOLDER
+            rm $OUTPUTFILENAME.pdf &> /dev/null
+            rm $OUTPUTFILENAME.log &> /dev/null
+            if [ "$DEBUGTEX" = "true" ]; then
+                latex $OUTPUTFILENAME.tex 
+                dvipdf $OUTPUTFILENAME.dvi ;
+            else 
+                latex $OUTPUTFILENAME.tex &> /dev/null 
+                dvipdf $OUTPUTFILENAME.dvi &> /dev/null ;
+            fi
+            rm $OUTPUTFILENAME.dvi &> /dev/null
+            rm $OUTPUTFILENAME.aux &> /dev/null
+            cd $THEPWD 
+            echo "...converted!";
+        fi  ;
+    fi
+
+    FIRSTBOOKLET=false ;
+done
+
+
+# Close Booklet if combined plots need to be made
+if [ "$COMBINEBOOKLETS" = "true" ] ; then
     cat $SNIPPETFOLDER/CP_booklet_bookletfooter.tex >> $OUTPUTFILE.tex
-    echo "Done." 
-
-    # Compilation
+    echo "Done."
     if [ "$COMPILE" = "true" ] ; then
         echo "...converting to ${OUTPUTFILENAME}.pdf!"
+        echo "   If this runs for ages, try 'X ENTER' and"
+        echo "   check the latex logfile ${OUTPUTFILENAME}.log"
         THEPWD=`pwd`
         cd $OUTPUTFOLDER
         rm $OUTPUTFILENAME.pdf &> /dev/null
         rm $OUTPUTFILENAME.log &> /dev/null
-        latex $OUTPUTFILENAME.tex &> /dev/null
-        dvipdf $OUTPUTFILENAME.dvi &> /dev/null
+        if [ "$DEBUGTEX" = "true" ]; then
+            latex $OUTPUTFILENAME.tex
+            dvipdf $OUTPUTFILENAME.dvi ;
+        else
+            latex $OUTPUTFILENAME.tex &> /dev/null
+            dvipdf $OUTPUTFILENAME.dvi &> /dev/null ;
+        fi
+
         rm $OUTPUTFILENAME.dvi &> /dev/null
         rm $OUTPUTFILENAME.aux &> /dev/null
-        cd $THEPWD 
+        cd $THEPWD
         echo "...converted!";
-    fi  ;
-
-done
+    fi ;
+fi
 
