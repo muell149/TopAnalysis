@@ -64,6 +64,7 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   // ---
   TTree * tree;
   bool useTree_;
+  double weight;
   unsigned int runNumber, luminosityBlockNumber, eventNumber;
   double valueBqPtRec;
   double valueBqPtGen;

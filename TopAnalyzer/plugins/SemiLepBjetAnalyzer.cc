@@ -55,7 +55,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   if(verbose>0) std::cout << "prepare inputs" << std::endl;
   if(verbose>1) std::cout << "a) event weight" << std::endl;
    // a) prepare the event weight
-  double weight = 1;
+  weight = 1;
   // get weight from the CMSSW event
   edm::Handle<double> wgt;
   event.getByLabel(weight_, wgt);
@@ -228,6 +228,8 @@ SemiLepBjetAnalyzer::beginJob()
   if(useTree_){
     // define the tree and make it known to the TFileService
     tree = fs->make<TTree>("tree","tree",0);
+    // weight
+    tree->Branch("weight" , &weight , "weight/D" );
     // event identifiers
     runNumber = 0;
     tree->Branch("runNumber", &runNumber, "runNumber/i");
