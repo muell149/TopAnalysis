@@ -647,12 +647,12 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     // quark quantities
     bookVariable(fs, "lightQPtPartonTruth"    );
     bookVariable(fs, "lightQbarPtPartonTruth" );
-    bookVariable(fs, "lepBPtPartonTruth"      );
-    bookVariable(fs, "hadBPtPartonTruth"      );  
+    bookVariable(fs, "bqPtLepPartonTruth"      );
+    bookVariable(fs, "bqPtHadPartonTruth"      );  
     bookVariable(fs, "lightQEtaPartonTruth"   );
     bookVariable(fs, "lightQbarEtaPartonTruth");
-    bookVariable(fs, "lepBEtaPartonTruth"     );
-    bookVariable(fs, "hadBEtaPartonTruth"     );
+    bookVariable(fs, "bqEtaLepPartonTruth"     );
+    bookVariable(fs, "bqEtaHadPartonTruth"     );
   }
 }
 
@@ -1147,12 +1147,12 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "neutrinoEtaPartonTruth" , genNuEta   , weight );
   fillValue( "lightQPtPartonTruth"    , genQPt     , weight );
   fillValue( "lightQbarPtPartonTruth" , genQbarPt  , weight );
-  fillValue( "lepBPtPartonTruth"      , genLepBPt  , weight );
-  fillValue( "hadBPtPartonTruth"      , genHadBPt  , weight );  
+  fillValue( "bqPtLepPartonTruth"      , genLepBPt  , weight );
+  fillValue( "bqPtHadPartonTruth"      , genHadBPt  , weight );  
   fillValue( "lightQEtaPartonTruth"   , genQEta    , weight );
   fillValue( "lightQbarEtaPartonTruth", genQbarEta , weight );
-  fillValue( "lepBEtaPartonTruth"     , genLepBEta , weight );
-  fillValue( "hadBEtaPartonTruth"     , genHadBEta , weight );
+  fillValue( "bqEtaLepPartonTruth"     , genLepBEta , weight );
+  fillValue( "bqEtaHadPartonTruth"     , genHadBEta , weight );
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
 }
