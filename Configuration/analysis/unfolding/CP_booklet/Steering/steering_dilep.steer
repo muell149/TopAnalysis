@@ -207,4 +207,33 @@ true
 false
 KScanWeights
 Unfolded Weights $\boldsymbol{x}^{\text{unf}}\left(K\right)/\boldsymbol{x}^{\text{gen}}$ as a Function of the $K$-Parameter
- 
+
+0036
+true
+false
+TauScanGlobCorr
+Averaged Global Correlation $\bar{\rho}\left(\tau\right)$ as Function of the $\tau$-Parameter
+
+0037
+true
+false
+TauScanChi2A
+Data Compatibility $\chi_{A}^{2}\left(\tau\right)$ as Function of the $\tau$-Parameter
+
+0038
+true
+false
+TauScanChi2L
+Curvature $\chi_{L}^{2}\left(\tau\right)$ as Function of the $\tau$-Parameter
+
+0039
+true
+false
+TauScanAvgError
+Averaged Absolute Statistical Data Uncertainty $\overline{\Delta^{\text{data}}\left(\boldsymbol{x}^{\text{unf}}\right)}$$\left(\tau\right)$ as a Function of the $\tau$-Parameter
+
+0040
+true
+false
+TauScanAvgMean 
+Averaged Central Values of Unfolding Result $\overline{\boldsymbol{x}^{\text{unf}}}$$\left(\tau\right)$ as a Function of the $\tau$-Parameter
