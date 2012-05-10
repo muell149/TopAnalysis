@@ -5,21 +5,13 @@
 ## HOW TO USE THIS SHELL SCRIPT
 ## note: has to be called from .../TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection
 ## a) set up the folder structure:
-## mkdir -p diffXSecFromSignal/plots/muon/2010/monitoring
-## mkdir -p diffXSecFromSignal/plots/muon/2010/partonLevel
-## mkdir -p diffXSecFromSignal/plots/muon/2010/recoYield
-## mkdir -p diffXSecFromSignal/plots/muon/2010/uncertainties
-## mkdir -p diffXSecFromSignal/plots/muon/2010/xSec
-## mkdir -p diffXSecFromSignal/plots/muon/2010/binning
-## mkdir -p diffXSecFromSignal/plots/muon/2010/effAndAcc
-## mkdir -p diffXSecFromSignal/plots/muon/2010/genRecoCorrPlots
-## mkdir -p diffXSecFromSignal/plots/muon/2010/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/monitoring
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/monitoring/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/recoYield
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/uncertainties
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/uncertaintyDistributions
+## mkdir -p diffXSecFromSignal/plots/muon/2011/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/binning
 ## mkdir -p diffXSecFromSignal/plots/muon/2011/effAndAcc
@@ -33,15 +25,18 @@
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/recoYield
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/uncertainties
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/uncertaintyDistributions
+## mkdir -p diffXSecFromSignal/plots/electron/2011/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/binning
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/effAndAcc
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/kinFitPerformance
-## mkdir -p diffXSecFromSignal/plots/electron/2011/shapeReweighting
+## mkdir -p diffXSecFromSignal/plots/electron/2011/shapeReweighting 
+## mkdir -p diffXSecFromSignal/plots/electron/2011/unfolding
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/xSec
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertainties
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertaintyDistributions
+## mkdir -p diffXSecFromSignal/plots/combined/2011/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/unfolding
 
 ## b) you don't need to copy root files needed for the Analysis 
@@ -55,7 +50,7 @@
 
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"muon\" 
+decayChannel=\"combined\" 
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset

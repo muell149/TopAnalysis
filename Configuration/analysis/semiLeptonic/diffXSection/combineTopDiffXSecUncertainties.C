@@ -103,41 +103,28 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.0;
   double errMin= 0.0;
-  // create plot container
+  // container for plots, uncertainties and uncertainty distributions
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
   std::map< TString, std::map <unsigned int, TH1F*> > relativeUncertainties_;
-  std::map< TString, std::map <unsigned int, TH1F*> > relUncertDistributions_;  // 1st: type of uncertainty, 2nd: xSec variable, 3rd: uncertainty value  
+  std::map< TString, std::map <unsigned int, TH1F*> > relUncertDistributions_;  // 1st: xSec variable, 2nd: type of uncertainty, 3rd: uncertainty values 
   std::map< TString, std::vector<double> > binning_ = makeVariableBinning();
+  std::map< TString, TH1F*> statUncertaintyDistributions_;
+  std::map< TString, TH1F*> sysUncertaintyDistributions_;
+  std::map< TString, TH1F*> totalUncertaintyDistributions_;
   // create container to indicate that plots have been found 
-  // and therefor systematics will be calculated
+  // and therefore systematics will be calculated
   std::map<TString, std::map<unsigned int, bool> > calculateError_;
   // create container for combined Errors
   std::map<TString, TGraphAsymmErrors*> totalErrors_;
 
-  // ===================================
-  //  Bin Center Corrections
-  // ===================================
-
-  //  basic configuration
-
-  bool mergeLepAndHadTop=true;
-  std::vector<TString> xSecVariableBranchNames_;
-  for(unsigned int i=0; i<xSecVariables_.size(); ++i){
-    if(!xSecVariables_[i].Contains("Norm")&&xSecVariables_[i]!="inclusive"){
-      if(xSecVariables_[i].Contains("top") || xSecVariables_[i].Contains("bq")){
-	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
-	xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
-      }
-      else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
-    }
-  }
-
   // parameter printout
 
   if(verbose>0){
-    std::cout << std::endl << "executing combineTopDiffXSecUncertainties with " << dataSample << " data" << std::endl << std::endl;
-    std::cout << "target file: " << outputFile << std::endl;
-    std::cout << "target variables for cross sections:" << std::endl;
+    std::cout << std::endl;
+    std::cout << " Executing combineTopDiffXSecUncertainties with " << dataSample << " data" << std::endl;
+    std::cout << std::endl;
+    std::cout << " Target file: " << outputFile << std::endl;
+    std::cout << " Target variables for cross sections:" << std::endl;
 
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -145,19 +132,35 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
       if(i<xSecVariables_.size()-1) std::cout << ", ";
       else std::cout << std::endl;
     }
-    std::cout << "target folder containing cross section plots: " << xSecFolder << std::endl;
-    if(save) std::cout << "final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
+    std::cout << " Target folder containing cross section plots: " << xSecFolder << std::endl;
+    if(save) std::cout << " Final plots will be saved in " << outputFile << " and as .eps in " << outputFolder << std::endl;
   }
   
   // ============================
   //  Bin Center Corrections
   // ============================
+  
   std::map<TString, std::vector<double> > correctedCenters_;
   std::map<TString, std::vector<double> > corrCenterErrors_;
-
+  
   if(useBCC){
+
     std::cout << " Loading and calculating bin center corrections .... " << std::endl;
 
+    //  basic configuration
+
+    bool mergeLepAndHadTop=true;
+    std::vector<TString> xSecVariableBranchNames_;
+    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+      if(!xSecVariables_[i].Contains("Norm")&&xSecVariables_[i]!="inclusive"){
+	if(xSecVariables_[i].Contains("top") || xSecVariables_[i].Contains("bq")){
+	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
+	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
+	}
+	else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
+      }
+    }
+  
     BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop);
 
     b.runBCCCalculation();
@@ -169,7 +172,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     if(verbose>1){
       for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 != correctedCenters_.end(); iter1++ ){
 	std::cout << iter1->first << ": ";
-	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++)	std::cout << (*iter2) << " ";
+	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++) std::cout << (*iter2) << " ";
 	std::cout << std::endl;
       }    
       for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ ){
@@ -187,23 +190,31 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // ============================
 
   TFile* file = TFile::Open(outputFile, "UPDATE");
-  if(verbose>1) std::cout << "opened file "+outputFile << std::endl;
+  if(verbose>1) std::cout << " Opened file "+outputFile << std::endl;
 
-  // check if file exist
-  if(file&&!file->IsZombie()){
-    if(verbose>0) std::cout << "target file found!" << std::endl;
+  // Proceed only if file exists and is not broken  
+  
+  if(!file || file->IsZombie()){
+    std::cout << "ERROR: Target file does not exist or is broken!" << std::endl;
+  }
+  else{
+
+    if(verbose>0) std::cout << " Target file found!" << std::endl;
 
     // =================================
     //  Load hadronization uncertainties
     // =================================
+
     // container for hadronization uncertainties
     std::map< TString, TH1F*> hadUnc_;
     // get file 
     TFile* hadfile=TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6mHadronUncert.root", "OPEN");
     if(!hadfile||hadfile->IsZombie()){
-      std::cout << "corrupt or missing file " << "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6mHadronUncert.root" << std::endl;
+      std::cout << " Corrupt or missing file " << "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6mHadronUncert.root" << std::endl;
+      std::cout << " Aborting execution of macro! " << std::endl;
       exit(0);
     }
+
     // loop quantities 
     for(unsigned int var=0; var<xSecVariables_.size(); ++var){
       // exclude inclusive cross section
@@ -222,7 +233,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     //  Part A: get all data xSec with all systematic variations
     // ===============================================================
 
-    if(verbose>0) std::cout << std::endl << "part A: loading plots" << std::endl;
+    if(verbose>0) std::cout << std::endl << " Part A: Loading Plots" << std::endl;
     // loop systematic variations
     for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
       TString subfolder=sysLabel(sys);      
@@ -236,16 +247,16 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	  plotName.ReplaceAll("Norm","");
 	  TH1F* plot= (TH1F*)canvas->GetPrimitive(plotName+"kData");
 	  if(plot){ 
-	    if(verbose>1) std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " found!" << std::endl;
+	    if(verbose>1) std::cout << " Plot "+plotName+" kData found in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	    // go to root directory, keep plot when closing rootfile
 	    gROOT->cd();	    
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
 	    calculateError_[xSecVariables_[i]][sys]=true;
 	  }
-	  if(!plot&&verbose>1){ 
-	    std::cout << "ERROR: plot " << xSecVariables_[i]+"kData" << " not found in ";
-	    std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
+	  else{
+	    if(verbose>1) std::cout << "ERROR: Plot " << plotName +" kData not found in "+ xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  }
+	  
 	  // get MC prediction plot without systematic variation
 	  if(sys==sysNo){
 	    TH1F* MCplot= (TH1F*)canvas->GetPrimitive(plotName);
@@ -254,6 +265,13 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      // go to root directory, keep plot when closing rootfile
 	      gROOT->cd();
 	      histo_[xSecVariables_[i]+"MC"][sys]=(TH1F*)(MCplot->Clone());
+	      // Prepare plots for uncertainty distributions
+	      statUncertaintyDistributions_[xSecVariables_[i]] =(TH1F*)(MCplot->Clone());
+	      statUncertaintyDistributions_[xSecVariables_[i]] ->Reset("ICESM");
+	      sysUncertaintyDistributions_[xSecVariables_[i]]  =(TH1F*)(MCplot->Clone());
+	      sysUncertaintyDistributions_[xSecVariables_[i]]  ->Reset("ICESM");
+	      totalUncertaintyDistributions_[xSecVariables_[i]]=(TH1F*)(MCplot->Clone());
+	      totalUncertaintyDistributions_[xSecVariables_[i]]->Reset("ICESM");
 	    }
 	  }
 	}	
@@ -264,7 +282,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     // ===============================================================
     //  Part B: calculate combined systematic+statistic error
     // ===============================================================
+
     if(verbose>0) std::cout << std::endl << "part B: calculate systematic errors for all variables and bins" << std::endl;
+
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     int verbose2=verbose;
@@ -398,6 +418,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		  std::cout << "total systematic uncertainty: " << " +/- " << totalSystematicError << " (" << 100*totalSystematicError/stdBinXSecValue << "%)" << std::endl;
 		  std::cout << "total uncertainty:            " << " +/- " << combinedErrorBinVar  << " (" << 100*combinedErrorBinVar/stdBinXSecValue  << "%)" << std::endl;
 		}
+		
 		// print MC prediction value and difference in std variations
 		double xSecDiff=stdBinXSecValue-MCpredBinVar;
 		double absError=combinedErrorBinVar;
@@ -409,14 +430,18 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		}
 		// save relative uncertainties for bin & variable in map relativeUncertainties_
 		// a) statistic uncertainty
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(nSysTypes+1, 100*statErrorBinVar/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(nSysTypes+1, "statistical");
+		
+		relativeUncertainties_[xSecVariables_[i]][bin]  ->SetBinContent(nSysTypes+1, 100*statErrorBinVar/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin]  ->GetXaxis()->SetBinLabel(nSysTypes+1, "statistical");
+		statUncertaintyDistributions_[xSecVariables_[i]]->SetBinContent(bin,100*statErrorBinVar/stdBinXSecValue);
 		// b) total systematic uncertainty
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(nSysTypes+2, 100*totalSystematicError/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(nSysTypes+2, "total syst.");
+		relativeUncertainties_[xSecVariables_[i]][bin] ->SetBinContent(nSysTypes+2, 100*totalSystematicError/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin] ->GetXaxis()->SetBinLabel(nSysTypes+2, "total syst.");
+		sysUncertaintyDistributions_[xSecVariables_[i]]->SetBinContent(bin,100*totalSystematicError/stdBinXSecValue);
 		// c) total stat+systematic uncertainty
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetBinContent(nSysTypes+3, 100*combinedErrorBinVar/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetBinLabel(nSysTypes+3, "total");
+		relativeUncertainties_[xSecVariables_[i]][bin]   ->SetBinContent(nSysTypes+3, 100*combinedErrorBinVar/stdBinXSecValue);
+		relativeUncertainties_[xSecVariables_[i]][bin]   ->GetXaxis()->SetBinLabel(nSysTypes+3, "total");
+		totalUncertaintyDistributions_[xSecVariables_[i]]->SetBinContent(bin,100*combinedErrorBinVar/stdBinXSecValue);
 		// set combined errors for final xSec plot
 		double pointXValue = histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
 		double pointXError = 0;
@@ -466,25 +491,89 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	}
       }
     }
-    // Create plot to show distribution of uncertainties per xSec variable
+    
+    // ======================================================================
+    //  Create plots to show distribution of uncertainties per xSec variable
+    // ======================================================================
 
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+
+      // Distributions of statistical, systematic, and total uncertainties
+
+      std::map<TString, TH1F*>::const_iterator statIter  = statUncertaintyDistributions_.find(xSecVariables_[i]);
+      std::map<TString, TH1F*>::const_iterator sysIter   = sysUncertaintyDistributions_.find(xSecVariables_[i]);
+      std::map<TString, TH1F*>::const_iterator totalIter = totalUncertaintyDistributions_.find(xSecVariables_[i]);
+
+      if (statIter == statUncertaintyDistributions_.end() || sysIter == sysUncertaintyDistributions_.end() || totalIter == totalUncertaintyDistributions_.end() ){
+      	std::cout << " Variable '" << xSecVariables_[i] << "' not found in statistical, systematic or total uncertainty distribution." << std::endl;
+
+      }
+      else{
+	std::cout << " Building statistical, systematic or total uncertainty distributions for '" << xSecVariables_[i] << "'." << std::endl;
+
+	TCanvas *canvasUncertaintyDistributions = new TCanvas("canvasUncertaintyDistributions","canvasUncertaintyDistributions",800,600);
+	canvasUncertaintyDistributions->cd();
+
+	totalUncertaintyDistributions_[xSecVariables_[i]]->SetLineColor(38);
+	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMinimum(errMin);
+	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMaximum(errMax);
+
+	statUncertaintyDistributions_[xSecVariables_[i]] ->SetLineColor(2);
+	sysUncertaintyDistributions_[xSecVariables_[i]]  ->SetLineColor(kOrange);
+
+	TLegend *uncDistLegend = new TLegend();
+	legendStyle(*uncDistLegend,"");
+	uncDistLegend->AddEntry(totalUncertaintyDistributions_[xSecVariables_[i]],"Total Uncertainty","L");
+	uncDistLegend->AddEntry(statUncertaintyDistributions_[xSecVariables_[i]],"Statistical Uncertainty","L");
+	uncDistLegend->AddEntry(sysUncertaintyDistributions_[xSecVariables_[i]],"Systematic Uncertainty","L");
+	uncDistLegend->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.35);
+	uncDistLegend->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - (double)uncDistLegend->GetNRows()*0.04);
+	uncDistLegend->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+	uncDistLegend->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
+
+	canvasUncertaintyDistributions->cd();
+	totalUncertaintyDistributions_[xSecVariables_[i]]->Draw();
+	statUncertaintyDistributions_[xSecVariables_[i]] ->Draw("SAME");
+	sysUncertaintyDistributions_[xSecVariables_[i]]  ->Draw("SAME");
+	uncDistLegend                                    ->Draw("SAME");
+
+	int initialIgnoreLevel=gErrorIgnoreLevel;
+	if(verbose==0) gErrorIgnoreLevel=kWarning;
+	// a) save to rootFile
+	//if(save) saveToRootFile(outputFile, canvasUncertaintyDistributions, true, verbose, "uncertaintyDistributionsOverview");
+	// b) save as eps and png
+	if(save){
+	  TString saveName=outputFolder+"/uncertaintyDistributionsOverview/relativeUncertainties"+xSecVariables_[i];
+	  if(decayChannel=="combined") saveName+="Combined";
+	  saveName+=universalplotLabel;
+	  canvasUncertaintyDistributions->Print(saveName+".eps");
+	  canvasUncertaintyDistributions->Print(saveName+".png");
+	}
+	gErrorIgnoreLevel=initialIgnoreLevel;
+
+	canvasUncertaintyDistributions->Print("");
+
+	delete canvasUncertaintyDistributions; canvasUncertaintyDistributions=NULL;
+      }
+
+
+
+      // Distributions for each uncertainty
 
       std::map<TString, std::map<unsigned int, TH1F*> >::const_iterator outerIter = relativeUncertainties_.find(xSecVariables_[i]);
 
       if (outerIter == relativeUncertainties_.end()){
-	std::cout << "Variable '" << xSecVariables_[i] << "' not found to build uncertainty distributions." << std::endl;
+	std::cout << " Variable '" << xSecVariables_[i] << "' not found to build uncertainty distributions." << std::endl;
       }
       else{
-	std::cout << "Building uncertainty distributions for '" << xSecVariables_[i] << "'." << std::endl;
+	std::cout << " Building single uncertainty distributions for '" << xSecVariables_[i] << "'." << std::endl;
 
 	TString plotNameForBinning = xSecVariables_[i];
-	plotNameForBinning.ReplaceAll("Norm","");
-	// int NBINS = histo_[xSecVariables_[i]][sysNo]->GetNbinsX();
+	plotNameForBinning.ReplaceAll("Norm","");       
 	int NBINS = binning_[plotNameForBinning].size()-1;
 
 	std::map<unsigned int, TH1F*>::const_iterator innerIter = outerIter->second.begin();
-	int NSYSTYPES = innerIter->second->GetNbinsX() - 3;
+	int NSYSTYPES = innerIter->second->GetNbinsX() - 3;	
 
 	for (int binUnc=0; binUnc<NSYSTYPES; ++binUnc){
 
@@ -828,7 +917,6 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     // close file
     hadfile->Close();
   }
-  else std::cout << std::endl << "ERROR:target file does not exist or is broken!" << std::endl;
 
   // close file
   file->Close();
