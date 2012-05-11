@@ -2021,7 +2021,8 @@ if(runningOnData=="MC" and BtagReweigthing):
 ## test isolation
 process.newvertexSelectedMuons=process.vertexSelectedMuons.clone(src="noCutPatMuons")
 process.newtrackMuons=process.trackMuons.clone(src="newvertexSelectedMuons")
-process.testIsoMuons=process.goldenMuons.clone(muons = "newtrackMuons")
+#process.testIsoMuons=process.goldenMuons.clone(muons = "newtrackMuons")
+process.testIsoMuons=process.newtrackMuons.clone()
 
 process.testIsoMuonSelection= process.muonSelection.clone (src = 'testIsoMuons', minNumber = 1, maxNumber = 99999999)
 process.testIsoMuonQuality  = process.tightMuonQualityTagged.clone(src = 'testIsoMuons')
@@ -2284,37 +2285,39 @@ if(decayChannel=="electron"):
     # adapt gen filter
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.electron = True
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon= False
-    ## lepton-jet veto
-    from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
-    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
-    process.noOverlapJetsPFelec = cleanPatJets.clone(
-        src = cms.InputTag("selectedPatJetsAK5PF"),
-        preselection = cms.string(''),
-        checkOverlaps = cms.PSet(
-          electrons = cms.PSet(
-            src       = cms.InputTag("tightElectronsEJ"),
-            algorithm = cms.string("byDeltaR"),
-            preselection        = cms.string(''),
-            deltaR              = cms.double(0.3),
-            checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-            pairCut             = cms.string(""),
-            requireNoOverlaps   = cms.bool(True), # overlaps don't cause the jet to be discared
-            )
-          ),
-        finalCut = cms.string(''),
-        )
-    process.goodJetsPF20.src  ='noOverlapJetsPFelec'
-    process.centralJetsPF.src ='noOverlapJetsPFelec'
-    process.reliableJetsPF.src='noOverlapJetsPFelec'
-    process.noEtaJetsPF.src   ='noOverlapJetsPFelec'
-    process.noPtJetsPF.src    ='noOverlapJetsPFelec'
-    process.noConstJetsPF.src ='noOverlapJetsPFelec'
-    process.noCEFJetsPF.src   ='noOverlapJetsPFelec'
-    process.noNHFJetsPF.src   ='noOverlapJetsPFelec'
-    process.noNEFJetsPF.src   ='noOverlapJetsPFelec'
-    process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
-    process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
-    process.noKinJetsPF.src   ='noOverlapJetsPFelec' 
+    
+    ## lepton-jet veto - REMOVED as Top Projections take care of it
+    #from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
+    #from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
+    #process.noOverlapJetsPFelec = cleanPatJets.clone(
+        #src = cms.InputTag("selectedPatJetsAK5PF"),
+        #preselection = cms.string(''),
+        #checkOverlaps = cms.PSet(
+          #electrons = cms.PSet(
+            #src       = cms.InputTag("tightElectronsEJ"),
+            #algorithm = cms.string("byDeltaR"),
+            #preselection        = cms.string(''),
+            #deltaR              = cms.double(0.3),
+            #checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
+            #pairCut             = cms.string(""),
+            #requireNoOverlaps   = cms.bool(True), # overlaps don't cause the jet to be discared
+            #)
+          #),
+        #finalCut = cms.string(''),
+        #)
+    #process.goodJetsPF20.src  ='noOverlapJetsPFelec'
+    #process.centralJetsPF.src ='noOverlapJetsPFelec'
+    #process.reliableJetsPF.src='noOverlapJetsPFelec'
+    #process.noEtaJetsPF.src   ='noOverlapJetsPFelec'
+    #process.noPtJetsPF.src    ='noOverlapJetsPFelec'
+    #process.noConstJetsPF.src ='noOverlapJetsPFelec'
+    #process.noCEFJetsPF.src   ='noOverlapJetsPFelec'
+    #process.noNHFJetsPF.src   ='noOverlapJetsPFelec'
+    #process.noNEFJetsPF.src   ='noOverlapJetsPFelec'
+    #process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
+    #process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
+    #process.noKinJetsPF.src   ='noOverlapJetsPFelec' 
+    
     # gen selection
     process.p3.replace(process.genMuonSelection, process.genElectronSelection)
     process.p4.replace(process.genMuonSelection, process.genElectronSelection)
@@ -2322,7 +2325,7 @@ if(decayChannel=="electron"):
     pathlist = [process.p1, process.p2, process.p3, process.p4, process.p5]
     for path in pathlist:
         # replace jet lepton veto
-        path.replace(process.noOverlapJetsPF, process.noOverlapJetsPFelec)
+        #path.replace(process.noOverlapJetsPF, process.noOverlapJetsPFelec)
         # replace muon selection
         path.remove(process.muonCuts)
         path.remove(process.secondMuonVeto)
