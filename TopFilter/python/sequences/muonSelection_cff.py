@@ -15,11 +15,13 @@ vetoJets = goodJets.clone()
 from TopAnalysis.TopFilter.sequences.MuonVertexDistanceSelector_cfi import *
 
 ## create helper collection with jet-distance filter only
-dRMuons = checkJetOverlapMuons.clone(muons = "vertexSelectedMuons",
-                                     jets =  "vetoJets" ,
-                                     deltaR  = cms.double(0.3),
-                                     overlap = cms.bool(False)
-                                     )
+#dRMuons = checkJetOverlapMuons.clone(muons = "vertexSelectedMuons",
+                                     #jets =  "vetoJets" ,
+                                     #deltaR  = cms.double(0.3),
+                                     #overlap = cms.bool(False)
+                                     #)
+## dR cut REMOVED!!!!!!
+dRMuons = vertexSelectedMuons.clone()
 ## ---
 ##    set up muon quality studies
 ## ---
@@ -60,17 +62,18 @@ trackMuons = selectedPatMuons.clone(src = 'vertexSelectedMuons',
                                     )
 
 ## check for good isolation concerning surrounding jets (MIP-qualities)
-goldenMuons = checkJetOverlapMuons.clone(muons = "trackMuons",
-                                         jets =  "vetoJets" ,
-                                         deltaR  = cms.double(0.3),
-                                         overlap = cms.bool(False)
-                                         )
+#goldenMuons = checkJetOverlapMuons.clone(muons = "trackMuons",
+                                         #jets =  "vetoJets" ,
+                                         #deltaR  = cms.double(0.3),
+                                         #overlap = cms.bool(False)
+                                         #)
+## dR cut REMOVED!!!!!!
+goldenMuons = trackMuons.clone()
 
 ## check muon isolation (combined relative) -> final Muon Collection
 tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
                                         cut = '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
                                               #'(trackIso+caloIso)/pt < 0.05 '
-                                             
                                        )
 
 ## N-1 collections
