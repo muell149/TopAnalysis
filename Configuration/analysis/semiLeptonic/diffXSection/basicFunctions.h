@@ -567,11 +567,11 @@ namespace semileptonic {
 
     if (cmsprelim)
       {
-	label -> AddText(Form("CMS Preliminary, %3.2f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
       }
     else
       {
-	label -> AddText(Form("CMS Work in progress, %3.2f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS Work in progress, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
       }
 
     label->SetFillStyle(0);
@@ -1529,6 +1529,8 @@ namespace semileptonic {
       //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
       bins_.clear();
       // m(ttbar)
+      //double ttbarMassBins[]={0.0, 345.0, 375.0, 400.0, 425.0, 450.0, 475.0, 500.0, 525.0, 550.0, 575.0, 600.0, 650.0, 700.0, 750.0, 800.0, 900.0, 1000.0, 1100.0, 1200.0}; 
+      //double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
       double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
       bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
       result["ttbarMass"]=bins_;
