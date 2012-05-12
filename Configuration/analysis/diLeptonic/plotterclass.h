@@ -192,9 +192,18 @@ void Plotter::DYScaleFactor(){
   double DYSFEE = NoutMCEE/NoutEEDYMC;
   double DYSFMuMu = NoutMCMuMu/NoutMuMuDYMC;
 
-  //cout<<"DYSFEE: "<<DYSFEE<<endl;
-  //cout<<"DYSFMuMu: "<<DYSFMuMu<<endl;
+  /*  cout<<"DYSFEE: "<<DYSFEE<<endl;
+  cout<<"DYSFMuMu: "<<DYSFMuMu<<endl;
 
+  cout<<"Rout/Rin Mumu: "<<(NoutMuMuDYMC/NinMuMuDYMC)<<endl;
+  cout<<"Rout/Rin ee: "<<(NoutEEDYMC/NinEEDYMC)<<endl;
+
+  cout<<"Est. From Data(ee): "<<NoutMCEE<<endl;
+  cout<<"Est. From Data(mumu): "<<NoutMCMuMu<<endl;
+
+  cout<<"Est. From MC(ee): "<<NoutEEDYMC<<endl;
+  cout<<"Est. From MC(mumu): "<<NoutMuMuDYMC<<endl;
+  */
   if(doDYScale==true){
     DYScale[0]=DYSFEE;
     DYScale[1]=DYSFMuMu;
@@ -365,7 +374,7 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
   Sys_Error_Down = abs(InclusiveXsectionNom[channelType] - InclusiveXsectionDown[channelType])/InclusiveXsectionNom[channelType];
   Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
   if(Systematic=="MASS"){
-    Sys_Error=Sys_Error/6.;
+    Sys_Error=Sys_Error/12.;
   }
 
   //  Sum_Errors += Sys_Error;
@@ -1034,7 +1043,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
       Sys_Error = symmSysErrors->GetBinContent(bin+2); // Keep in mind the extra layer of OF bins
       if(Systematic == "MASS"){
-	Sys_Error = Sys_Error/6.;
+	Sys_Error = Sys_Error/12.;
       }
       // Save it
       DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
@@ -2059,8 +2068,8 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
       for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
 	GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
-	//	cout<<"GenSignalSum[bin]: "<<GenSignalSum[bin]<<endl;
-	//cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
+	cout<<"GenSignalSum[bin]: "<<GenSignalSum[bin]<<endl;
+	cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
       }      
     }
     else{
@@ -2531,9 +2540,7 @@ void Plotter::PlotDiffXSec(){
       double syst_square = 0;
       for(int syst =0; syst<13; syst++){
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-	if(bin==3){cout<<"legendsSyst[syst]: "<<legendsSyst[syst]<<"  DiffXSecSysErrorBySyst[channelType][bin][syst]: "<<DiffXSecSysErrorBySyst[channelType][bin][syst]<<endl;}
       }
-      if(bin==3){cout<<"DiffXSecSysError[channelType][bin]: "<<sqrt(syst_square)<<endl;}
       DiffXSecSysError[channelType][bin] = sqrt(syst_square)*DiffXSec[channelType][bin];
       DiffXSecStatError[channelType][bin] = DiffXSecStatError[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecTotalError[channelType][bin] = sqrt(DiffXSecSysError[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
@@ -2542,6 +2549,25 @@ void Plotter::PlotDiffXSec(){
       DiffXSecStatErrorPlot[bin]=DiffXSecStatError[channelType][bin];//TotalVisXSection[channelType];
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin];//TotalVisXSection[channelType];
     }
+
+
+    //create a file for Results!!
+    ofstream ResultsFile;
+    string ResultsFilestring = "Plots/";
+    if(channelType==0){ResultsFilestring.append("ee");}
+    else if(channelType==1){ResultsFilestring.append("mumu");}
+    else if(channelType==2){ResultsFilestring.append("emu");}
+    else{ResultsFilestring.append("combined");}
+    ResultsFilestring.append("/");    ResultsFilestring.append(newname);    ResultsFilestring.append("Results.txt");
+    ResultsFile.open(ResultsFilestring.c_str());
+    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+      ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecPlot[bin]<<" StatError(percent): "<<DiffXSecStatErrorPlot[bin]/DiffXSecPlot[bin]<<" SysError: "<<DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" TotalError: "<<DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
+    }
+    ResultsFile.close();
+
+
+
+
     //The Markus plots
     TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
