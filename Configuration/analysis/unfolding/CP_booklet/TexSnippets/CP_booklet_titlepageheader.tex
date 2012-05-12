@@ -1,4 +1,3 @@
-%% Do not edit unless you really know what you are doing.
 \documentclass[english]{article}
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
@@ -6,18 +5,31 @@
 \usepackage{calc}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\geometry{verbose,letterpaper,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\usepackage{babel}
 \usepackage{graphicx}
+\geometry{verbose,letterpaper,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
 
 \makeatletter
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
-%% Bold symbol macro for standard LaTeX users
 \providecommand{\boldsymbol}[1]{\mbox{\boldmath $#1$}}
 
+% Special Clearpage Befehl
+\def\myClearpage{%
+  \ifvmode
+    \ifnum \@dbltopnum =\m@ne
+      \ifdim \pagetotal <\topskip
+        \hbox{}%
+      \fi
+    \fi
+  \fi
+%  \newpage
+  \write\m@ne{}%
+  \vbox{}%
+  \penalty -\@Mi
+}
 
-\usepackage{babel}
 \makeatother
+
 \begin{document}
 
 \title{Measurement of Top Quark Pair Differential Cross Sections in the
