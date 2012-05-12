@@ -18,7 +18,7 @@ SNIPPETFOLDER="./TexSnippets"
 INPUTFOLDER="../../SVD"
 TEXFILE="SelectedControlPlots"
 
-LIST_SYST="RES"
+LIST_SYST="RES JES MASS MATCH SCALE PU_ DY_ BG_"
 LIST_DISTa="Leptons_Eta Leptons_Pt LepPair_Pt LepPair_Mass BJets_Rapidity BJets_Pt"
 LIST_DISTb="TopQuarks_Rapidity TopQuarks_Pt TtBar_Rapidity TtBar_Pt TtBar_Mass"
 LIST_CHANNEL="mumu emu ee combined"
@@ -273,24 +273,30 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
         cat $SNIPPETFOLDER/CP_booklet_bookletfooter.tex >> $OUTPUTFILE.tex
         echo "Done." 
         if [ "$COMPILE" = "true" ] ; then
-            echo "...converting to ${OUTPUTFILENAME}.pdf!"
-            echo "   If this runs for ages, try 'X ENTER' and"
-            echo "   check the latex logfile ${OUTPUTFILENAME}.log"
+            echo "    Converting ${OUTPUTFILENAME}.tex to ${OUTPUTFILENAME}.dvi!"
+            echo "            (If this runs for ages, try 'X ENTER' and"
+            echo "            check the latex logfile ${OUTPUTFILENAME}.log)"
             THEPWD=`pwd`
             cd $OUTPUTFOLDER
             rm $OUTPUTFILENAME.pdf &> /dev/null
             rm $OUTPUTFILENAME.log &> /dev/null
             if [ "$DEBUGTEX" = "true" ]; then
-                latex $OUTPUTFILENAME.tex 
+                latex $OUTPUTFILENAME.tex
+            else
+                latex $OUTPUTFILENAME.tex &> /dev/null
+            fi
+            echo "    Converting ${OUTPUTFILENAME}.dvi to ${OUTPUTFILENAME}.pdf!"
+            echo "            (This may take some time, too.)"
+            if [ "$DEBUGTEX" = "true" ]; then
                 dvipdf $OUTPUTFILENAME.dvi ;
-            else 
-                latex $OUTPUTFILENAME.tex &> /dev/null 
+            else
                 dvipdf $OUTPUTFILENAME.dvi &> /dev/null ;
             fi
+
             rm $OUTPUTFILENAME.dvi &> /dev/null
             rm $OUTPUTFILENAME.aux &> /dev/null
-            cd $THEPWD 
-            echo "...converted!";
+            cd $THEPWD
+            echo "    Converted!";            
         fi  ;
     fi
 
@@ -303,25 +309,30 @@ if [ "$COMBINEBOOKLETS" = "true" ] ; then
     cat $SNIPPETFOLDER/CP_booklet_bookletfooter.tex >> $OUTPUTFILE.tex
     echo "Done."
     if [ "$COMPILE" = "true" ] ; then
-        echo "...converting to ${OUTPUTFILENAME}.pdf!"
-        echo "   If this runs for ages, try 'X ENTER' and"
-        echo "   check the latex logfile ${OUTPUTFILENAME}.log"
+        echo "    Converting ${OUTPUTFILENAME}.tex to ${OUTPUTFILENAME}.dvi!"
+        echo "        (If this runs for ages, try 'X ENTER' and"
+        echo "        check the latex logfile ${OUTPUTFILENAME}.log)"
         THEPWD=`pwd`
         cd $OUTPUTFOLDER
         rm $OUTPUTFILENAME.pdf &> /dev/null
         rm $OUTPUTFILENAME.log &> /dev/null
         if [ "$DEBUGTEX" = "true" ]; then
             latex $OUTPUTFILENAME.tex
-            dvipdf $OUTPUTFILENAME.dvi ;
         else
             latex $OUTPUTFILENAME.tex &> /dev/null
+        fi
+        echo "    Converting ${OUTPUTFILENAME}.dvi to ${OUTPUTFILENAME}.pdf!"
+        echo "        (This may take some time, too.)"        
+        if [ "$DEBUGTEX" = "true" ]; then
+            dvipdf $OUTPUTFILENAME.dvi ;
+        else
             dvipdf $OUTPUTFILENAME.dvi &> /dev/null ;
         fi
 
         rm $OUTPUTFILENAME.dvi &> /dev/null
         rm $OUTPUTFILENAME.aux &> /dev/null
         cd $THEPWD
-        echo "...converted!";
+        echo "    Converted!";
     fi ;
 fi
 
