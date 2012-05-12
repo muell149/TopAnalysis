@@ -8,6 +8,4 @@ HypTTBarpT N_{Events} p_{T}^{t#bar{t}} 1 0 1 0.0001 0 0 0 4 0 20 60 120 500 5 39
 HypTopRapidity N_{Events} y^{tand#bar{t}} 1 0 0 0 0 0 0 6 -2.5 -1.6 -0.8 0.0 0.8 1.6 2.5 -2.0 -1.2 -0.4 0.4 1.2 2.0
 HypToppT N_{Events} p_{T}^{tand#bar{t}} 1 0 1 0.0001 0 0 0 4 0 70 140 240 400 32 109 185 308
 HypBJetpT N_{Events} p_{T}^{band#bar{b}} 1 0 1 0.00001 0 0 0 5 30 50 80 130 210 400 38 65 103 170 280
-HypBJetRapidity N_{Events} y^{band#bar{b}} 1 0 0 0 0 0 0 4 -2.5 -1.2 0.0 1.2 2.5 -1.78 -0.66 0.69 1.76
 HypBJetEta  N_{Events} #eta^{b^{+}andb^{-}} 1 0 0 0 0 0 0 6 -2.4 -1.5 -0.8 0.0 0.8 1.5 2.4 -1.93 -1.15 -0.45 0.47 1.15 1.93
-LeptonEta  N_{Events} #eta^{l^{+}andl^{-}} 1 0 0 0 0 0 0 6 -2.4 -1.5 -0.8 0.0 0.8 1.5 2.4 -1.93 -1.15 -0.45 0.47 1.15 1.93
