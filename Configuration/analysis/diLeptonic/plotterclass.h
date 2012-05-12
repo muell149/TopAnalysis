@@ -1590,7 +1590,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
+  //  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
   gSystem->MakeDirectory("Plots");  
   gSystem->MakeDirectory("Plots/"+channel);  
   c->Print("Plots/"+channel+"/"+name+".eps");  
@@ -1914,7 +1914,8 @@ void Plotter::MakeTable(){
 
 double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift){
   //  double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu, combined] including tau
-  double BranchingFraction[4]={0.011556, 0.011724, 0.022725, 0.04524};//[ee, mumu, emu, combined] not including tau
+  //  double BranchingFraction[4]={0.011556, 0.011724, 0.022725, 0.04524};//[ee, mumu, emu, combined] not including tau
+  double BranchingFraction[4]={0.01166, 0.01166, 0.02332, 0.04666};//[ee, mumu, emu, combined] not including tau
   lumi = 4966;
 
   TH1D *numhists[hists.size()];
@@ -2058,8 +2059,8 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
       for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
 	GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
-	cout<<"GenSignalSum[bin]: "<<GenSignalSum[bin]<<endl;
-	cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
+	//	cout<<"GenSignalSum[bin]: "<<GenSignalSum[bin]<<endl;
+	//cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
       }      
     }
     else{
@@ -2271,7 +2272,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 }
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE);
-    /*    CalcDiffSystematics("JES", 0);
+    CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
     CalcDiffSystematics("PU_", 2);
     CalcDiffSystematics("SCALE", 3);
@@ -2279,7 +2280,7 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("MATCH", 5);
     CalcDiffSystematics("DY_", 6);
     CalcDiffSystematics("BG_", 7);
-    DiffFlatSystematics(8,bins);*/
+    DiffFlatSystematics(8,bins);
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2528,9 +2529,11 @@ void Plotter::PlotDiffXSec(){
 
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       double syst_square = 0;
-      for(int syst =0; syst<15; syst++){
+      for(int syst =0; syst<13; syst++){
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+	if(bin==3){cout<<"legendsSyst[syst]: "<<legendsSyst[syst]<<"  DiffXSecSysErrorBySyst[channelType][bin][syst]: "<<DiffXSecSysErrorBySyst[channelType][bin][syst]<<endl;}
       }
+      if(bin==3){cout<<"DiffXSecSysError[channelType][bin]: "<<sqrt(syst_square)<<endl;}
       DiffXSecSysError[channelType][bin] = sqrt(syst_square)*DiffXSec[channelType][bin];
       DiffXSecStatError[channelType][bin] = DiffXSecStatError[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecTotalError[channelType][bin] = sqrt(DiffXSecSysError[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
@@ -2540,11 +2543,11 @@ void Plotter::PlotDiffXSec(){
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin];//TotalVisXSection[channelType];
     }
     //The Markus plots
-    /*    TCanvas * c10 = new TCanvas("Markus","Markus");
+    TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
 
-    for(int syst =0; syst<15; syst++){
+    for(int syst =0; syst<13; syst++){
       TH1D* systtemp = (TH1D*)varhists[0]->Clone();
       systtemp->Reset();
       for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
@@ -2562,7 +2565,7 @@ void Plotter::PlotDiffXSec(){
     c10->Clear();
     delete leg10;
     delete c10;
-    */
+    
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
@@ -2673,10 +2676,10 @@ void Plotter::PlotDiffXSec(){
     gStyle->SetEndErrorSize(8);
     //    mcatnloBand->Draw("same, F");
 
-    GenPlotTheory->SetLineColor(2);
+    GenPlotTheory->SetLineColor(kRed+1);
     //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
     GenPlotTheory->Draw("SAME,C");
-    h_GenDiffXSec->SetLineColor(2);
+    h_GenDiffXSec->SetLineColor(kRed+1);
     mcnlohist->SetLineColor(kAzure);
     mcnlohist->Draw("SAME,C");
     powheghist->SetLineColor(kGreen+1);
