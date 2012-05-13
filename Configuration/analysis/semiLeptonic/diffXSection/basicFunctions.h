@@ -3024,6 +3024,12 @@ namespace semileptonic {
     // return result
     return k;
   }
+	
+
+	template <class T> bool SortVectorPrescription(const T& a, const T& b){
+		return a < b;
+	}	
+	
 
 #ifdef DILEPTON_MACRO
 }

@@ -1,5 +1,6 @@
 #include "basicFunctions.h"
 #include "BCC.h"
+#include <numeric>
 
 void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", bool exclShapeVar=true, bool extrapolate=false, bool hadron=false){
 
@@ -163,7 +164,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     }
   
     BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, (std::string)decayChannel),"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop);
-
+ 	  
     b.runBCCCalculation();
     correctedCenters_ = b.getMapWithCorrectedCentersInX();
     corrCenterErrors_ = b.getMapWithCenterErrorsInX();
@@ -591,31 +592,67 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 
 	    int binCounter = 1;
 
-	    for (std::map<unsigned int, TH1F*>::const_iterator histoIter = outerIter->second.begin(); histoIter != outerIter->second.end();){
-	      
-	      // jump over leading empty bins
-	      
-	      if (histo_[xSecVariables_[i]][sysNo]->GetBinContent(binCounter) == 0)
-		binCounter++;
-		
-	      else
-	      {
-		double value = histoIter->second->GetBinContent(binUnc); 
-		tempResult->Fill(binCounter,value);
-		
-		binCounter++;
-		histoIter++;
-	      }
-
-	      if (binCounter>NBINS) break;  // to avoid endless loop for empty histogrammes
-	    }    
-
+  	    std::vector<float> vecValues;
+		  
+		  for (std::map<unsigned int, TH1F*>::const_iterator histoIter = outerIter->second.begin(); histoIter != outerIter->second.end();){
+			  
+			  // jump over leading empty bins
+			  
+			  if (histo_[xSecVariables_[i]][sysNo]->GetBinContent(binCounter) == 0)
+				  binCounter++;
+			  
+			  else
+			  {
+				  double value = histoIter->second->GetBinContent(binUnc); 
+				  tempResult->Fill(binCounter,value);
+				  vecValues.push_back(value);
+				  
+				  binCounter++;
+				  histoIter++;
+			  }
+			  
+			  if (binCounter>NBINS) break;  // to avoid endless loop for empty histogrammes
+		  }    
+		  
 	    tempResult->SetMaximum(((int)(tempResult->GetMaximum()/5)+1)*5);
 
 	    relUncertDistributions_[xSecVariables_[i]][binUnc] = (TH1F*)tempResult->Clone();
 	    canvasUncertaintyDistributions->cd();
 	    tempResult->Draw();
-
+				  
+		std::sort(vecValues.begin(),vecValues.end(),SortVectorPrescription<float>);
+		  
+		size_t vecSize = vecValues.size();
+		  
+		float mean   = (std::accumulate(vecValues.begin(),vecValues.end(),0.0))/vecSize;
+		float median = ( vecValues.size() % 2 != 0 ) ? vecValues[vecSize/2] : (vecValues[vecSize/2-1] + vecValues[vecSize/2]) / 2;
+		  
+		DrawLabel((TString)(Form("Minimum: %3.1f",(*vecValues.begin()))) + "%",  
+				       gStyle->GetPadLeftMargin() + gStyle->GetTickLength(),
+				 1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05,
+					   gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.25, 
+				 1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength(), 12, 0.03);
+				  
+ 	    DrawLabel((TString)(Form("Maximum: %3.1f",(*(vecValues.end()-1)))) + "%",
+				       gStyle->GetPadLeftMargin() + gStyle->GetTickLength(),
+				 1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.10,
+					   gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.25, 
+		  	     1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05, 12, 0.03);							
+		
+	    DrawLabel((TString)(Form("Mean: %3.1f",mean)) + "%",
+					   gStyle->GetPadLeftMargin() + gStyle->GetTickLength(),
+				 1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.15,
+					   gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.25, 
+				 1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.10, 12, 0.03);
+		  
+		DrawLabel((TString)(Form("Median: %3.1f",median)) + "%",
+					   gStyle->GetPadLeftMargin() + gStyle->GetTickLength(),
+			     1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.20,
+					   gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.25, 
+			     1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.15, 12, 0.03);
+		
+  	    vecValues.clear();
+	  
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;
 	    // a) save to rootFile
@@ -631,6 +668,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  
 	    delete tempResult; tempResult = NULL;
+		  
 	  }	  
 	  delete canvasUncertaintyDistributions; canvasUncertaintyDistributions=NULL;
 	}
