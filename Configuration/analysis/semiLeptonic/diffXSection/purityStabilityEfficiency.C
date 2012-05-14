@@ -26,7 +26,7 @@
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
 void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TString lepton="muon", 
-			       TString inputFolderName="RecentAnalysisRun", bool plotEfficiency = true, 
+			       TString inputFolderName="RecentAnalysisRun", bool plotAcceptance = true, 
 			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=0, bool hadron=false)
 {
   // ARGUMENTS of function:
@@ -34,8 +34,8 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   //                 topPt, topY, ttbarPt, ttbarY, ttbarMass, lepPt, lepY
   // save:           save the purity and stability canvas 
   // lepton:         "muon" or "elec"
-  // plotEfficiency: in addition to purity and stability also efficiency*acceptance is plotted (if true)
-  // plotEfficiencyPhaseSpace: in addition to purity, stability, efficiency*acceptance also 
+  // plotAcceptance: in addition to purity and stability also acceptance is plotted (if true)
+  // plotEfficiencyPhaseSpace: in addition to purity, stability, acceptance also 
   //                           efficiency in restricted phase space (i.e. Acceptance=1) is plotted (if true)
   // hadron:         draw plots for hadron level
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
@@ -44,7 +44,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2011/binning";
   if(useTree&&chi2Max<100){ 
     plotEfficiencyPhaseSpace = false;
-    plotEfficiency = false;
+    plotAcceptance = false;
     plotEfficiency2= false;
   }
  
@@ -98,7 +98,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
       std::cout << "Exit programme!" <<std::endl;
       return;
     }
-    plotEfficiency=false;
+    plotAcceptance=false;
     genExtTree="Gen";
     recExtTree="Rec";
     genExtHisto="Gen";
@@ -152,7 +152,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1200-0.001; resEdgeL = -400.; resEdgeR=400.;  relResEdgeL = -1.; relResEdgeR=4.;}
   else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001; resEdgeL = -35.; resEdgeR=35.;   relResEdgeL = -.5; relResEdgeR=.5; textOpt="";}
   else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001; resEdgeL = -0.15; resEdgeR=0.15;  relResEdgeL = -.5; relResEdgeR=.5;  textOpt="";}
-  else if ( variable == "bqPt")      { rangeUserLeft = 0         ; rangeUserRight = 350-0.001; resEdgeL = -100.; resEdgeR=100.;  relResEdgeL = -1.; relResEdgeR=1.;}
+  else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001; resEdgeL = -200.; resEdgeR=200.;  relResEdgeL = -1.; relResEdgeR=2.;}
   else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001; resEdgeL = -0.2; resEdgeR=0.2;   relResEdgeL = -1.; relResEdgeR=1.; }
 
   //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
@@ -382,12 +382,20 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
     cout<<xmax<<"}"<<endl;
   }
   
-  // draw stability & purity histogram with the determined binning
+  // calculate stability & purity histogram with the determined binning
   TH1F* purityhist    = new TH1F("purityhist"   ,"purityhist"   ,numberOfBins, &(binvec.front()));
   TH1F* stabilityhist = new TH1F("stabilityhist","stabilityhist",numberOfBins, &(binvec.front()));
   
-  // ----------- Efficiency calculation--------------------------------
+  for(int i=0; i<numberOfBins; i++)
+  {
+    purityhist->SetBinContent(i+1,purityvec[i]);
+    stabilityhist->SetBinContent(i+1,stabilityvec[i]);
+  }
+  
+  //------------------------------------------------------------------------------------
+  // ----------- Bin-by-bin (BBB) Efficiency calculation--------------------------------
 
+  // ----------- BBB Efficiency*Acceptance--------------------------------
   // get histogram of generated quantity
   TH1F* genHist = (TH1F*)(((TH1F*)myFile1->Get(folderGenKin+"/"+variable+genExtHisto))->Clone());
   //genHist->SetStats(kFALSE);
@@ -397,19 +405,20 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   // rebin histogram of generated quantity
   genHist = (TH1F*)genHist->Rebin(binvec.size()-1, genHist->GetName(), &(binvec.front()));
   // get histogram of reconstructed quantity
-  TH1F* effHist = (TH1F*)(((TH1F*)myFile1->Get(folderRecoKin+"/"+variable+recExtHisto))->Clone());
-  //effHist->SetStats(kFALSE);
+  TH1F* effHistBBB = (TH1F*)(((TH1F*)myFile1->Get(folderRecoKin+"/"+variable+recExtHisto))->Clone());
+  //effHistBBB->SetStats(kFALSE);
   TCanvas* Canv3 = new TCanvas(folderRecoKin,folderRecoKin,600,600);
   Canv3->cd();
-  effHist->Draw();
+  effHistBBB->Draw();
   // rebin histogram of reconstructed quantity
-  effHist = (TH1F*)effHist->Rebin(binvec.size()-1, effHist->GetName(), &(binvec.front()));
-  TH1F* effHistPS=(TH1F*)(effHist->Clone());
+  effHistBBB = (TH1F*)effHistBBB->Rebin(binvec.size()-1, effHistBBB->GetName(), &(binvec.front()));
+  TH1F* effHistBBBPS=(TH1F*)(effHistBBB->Clone());
   // calculate efficiency histogram
-  effHist->Divide(genHist);
+  effHistBBB->Divide(genHist);
   
-  // if also effiency in limited phase space interesting:
+  // ----------- BBB Efficiency (i.e. in in limited phase) --------------------------------
   TH1F* genHistPS = 0;
+  TH1F* accHistBBB=0;
   if(plotEfficiencyPhaseSpace){
     // get histogram of generated quantity
     genHistPS = (TH1F*)(((TH1F*)myFile1->Get(folderGenKinPhaseSpace+"/"+variable+genExtHisto))->Clone());
@@ -421,11 +430,15 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
     genHistPS = (TH1F*)genHistPS->Rebin(binvec.size()-1, genHistPS->GetName(), &(binvec.front()));
     //genHistPS->Draw("");
     // calculate efficiency histogram
-    effHistPS->Divide(genHistPS);
+    effHistBBBPS->Divide(genHistPS);
+    
+    // ----------- BBB Acceptance --------------------------------
+    accHistBBB=(TH1F*)(effHistBBB->Clone());
+    accHistBBB->Divide(effHistBBBPS);
   }
   
     // if 2 effiency plots are supposed to be compared:
-  TH1F* effHist2 = 0;
+  TH1F* effHistBBB2 = 0;
   if(plotEfficiency2){
     // get histogram of generated quantity
     TH1F* genHist2 = (TH1F*)(((TH1F*)myFile2->Get(folderGenKin+"/"+variable+genExtHisto))->Clone());
@@ -434,157 +447,32 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
     genHist2->Draw();
     // rebin histogram of generated quantity
     genHist2 = (TH1F*)genHist2->Rebin(binvec.size()-1, genHist2->GetName(), &(binvec.front()));
-    effHist2 = (TH1F*)(((TH1F*)myFile2->Get(folderRecoKin+"/"+variable+recExtHisto))->Clone());
+    effHistBBB2 = (TH1F*)(((TH1F*)myFile2->Get(folderRecoKin+"/"+variable+recExtHisto))->Clone());
     // rebin histogram of reconstructed quantity
-    effHist2 = (TH1F*)effHist2->Rebin(binvec.size()-1, effHist2->GetName(), &(binvec.front()));
+    effHistBBB2 = (TH1F*)effHistBBB2->Rebin(binvec.size()-1, effHistBBB2->GetName(), &(binvec.front()));
     // calculate efficiency histogram
-    effHist2->Divide(genHist2);
+    effHistBBB2->Divide(genHist2);
   }
-
-  for(int i=0; i<numberOfBins; i++)
-    {
-      purityhist->SetBinContent(i+1,purityvec[i]);
-      stabilityhist->SetBinContent(i+1,stabilityvec[i]);
-    }
-  purityhist->SetTitle("");
-  TString xtitle = "";
-  if(variable.Contains("Pt"))xtitle+="p_{T}";
-  else if(variable.Contains("Y"))xtitle+="y";
-  else if(variable.Contains("Eta"))xtitle+="#eta";
-  else if(variable.Contains("Mass"))xtitle+="m";
-  if(variable.Contains("top"))xtitle+="^{t and #bar{t}}";
-  else if(variable.Contains("ttbar"))xtitle+="^{t#bar{t}}";
-  else if(variable.Contains("lep"))xtitle+="^{l}";
-  if(variable.Contains("Pt"))xtitle+=" #left[#frac{GeV}{c}#right]";
-  else if(variable.Contains("Mass"))xtitle+=" #left[#frac{GeV}{c^{2}}#right]";
-  if(variable=="topWAngle")xtitle="Angle(top,W)";
-  purityhist->GetXaxis()->SetTitle(xtitle);
-  purityhist->GetXaxis()->SetNoExponent(true);
-  purityhist->GetYaxis()->SetNoExponent(true);
-
-  //purityhist->GetXaxis()->SetTitleSize  ( 0.07);
-  //purityhist->GetXaxis()->SetTitleColor (    1);
-  //purityhist->GetXaxis()->SetTitleOffset(  0.95);
-  //purityhist->GetXaxis()->SetTitleFont  (   62);
-  //purityhist->GetXaxis()->SetLabelSize  ( 0.07);
-  //purityhist->GetXaxis()->SetLabelFont  (   62);
-  //purityhist->GetXaxis()->SetNdivisions (  505);
-  purityhist->GetXaxis()->SetRangeUser  (rangeUserLeft, rangeUserRight);
   
-  //purityhist->GetYaxis()->SetTitleSize  ( 0.07);
-  //purityhist->GetYaxis()->SetTitleColor (    1);
-  //purityhist->GetYaxis()->SetTitleOffset(  1.0);
-  //purityhist->GetYaxis()->SetTitleFont  (   62);
-  //purityhist->GetYaxis()->SetLabelSize  ( 0.07);
-  //purityhist->GetYaxis()->SetLabelFont  (   62);
-  //purityhist->GetYaxis()->SetNdivisions (  505);
-  purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
-
-  purityhist->SetMinimum(0.);
-  //double max=purityhist->GetMaximum();
-  //if(stabilityhist->GetMaximum()>max)max=stabilityhist->GetMaximum();
-  //purityhist->SetMaximum(1.1*max);
-  purityhist->SetMaximum(1.0);
-  purityhist->SetLineColor(2);
-  purityhist->SetLineWidth(4);
-  stabilityhist->SetLineColor(4);
-  stabilityhist->SetLineStyle(2);
-  stabilityhist->SetLineWidth(4);
-  effHist->SetLineColor(1);
-  effHist->SetLineStyle(1);
-  effHist->SetLineWidth(4);
-  effHist->GetXaxis()->SetNoExponent(true);
-  effHist->GetYaxis()->SetNoExponent(true);
-  purityhist->SetStats(kFALSE);
-
-  TCanvas* purstab = new TCanvas("purstab","purstab",600,600);
-  //gPad->SetBottomMargin(0.19);
-  purstab->cd();
-  purstab->SetGrid(1,1);
-  purityhist->Draw();
-  stabilityhist->Draw("same");
-  if(plotEfficiency)effHist->Draw("same");
-  if(plotEfficiencyPhaseSpace){
-    effHistPS->SetLineColor(1);
-    effHistPS->SetLineStyle(2);
-    effHistPS->SetLineWidth(4);
-    effHistPS->Draw("same");
-  }
-  if(plotEfficiency2){
-    effHist2->SetLineColor(1);
-    effHist2->SetLineStyle(2);
-    effHist2->SetLineWidth(4);
-    effHist2->Draw("same");
-  }
-  // chi2 cut efficiency
-  if(useTree && chi2Max<100){    
-    chi2eff = (TH1F*)chi2eff->Rebin(binvec.size()-1, chi2eff->GetName(), &(binvec.front()));
-    all     = (TH1F*)all    ->Rebin(binvec.size()-1, all->GetName()    , &(binvec.front()));
-    chi2eff->Divide(all);
-    chi2eff->SetLineColor(1);
-    //chi2eff->SetLineStyle(2);
-    chi2eff->SetLineWidth(4);
-    chi2eff->Draw("same");
-  }
-  if (lepton=="muon") DrawDecayChLabel("#mu + Jets");
-  else if(lepton=="elec") DrawDecayChLabel("e + Jets");
-  double legEdge = 0.4;
-  if(plotEfficiency)legEdge = effHist->GetMinimum();
-  TLegend* leg=new TLegend(0.47,0.68,0.67,0.87);
-  leg->SetTextSize(0.05);
-  leg->SetFillStyle(0);
-  leg->SetBorderSize(0);
-  leg->AddEntry(purityhist,   "Purity"    ,"l");
-  leg->AddEntry(stabilityhist,"Stability" ,"l");
-  //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
-  if(plotEfficiency)leg->AddEntry(effHist,"eff.*A","l");
-  //if(plotEfficiency)leg->AddEntry(effHist,"Eff*A full PS Spring11","l");
-  if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistPS,"eff. in restr. PS","l");
-  if(plotEfficiency2)leg->AddEntry(effHist2,"eff.*A full PS Summer11","l");
-  if(useTree && chi2Max<100){
-    TString entry="#chi^{2} < ";
-    entry+=chi2Max;
-    entry+=" cut eff.";
-    leg->AddEntry(chi2eff,entry,"l");
-  }
-  leg->SetFillColor(0);
-  leg->SetBorderSize(0);
-  if(variable == "topPt"||chi2Max<100) leg->Draw("same");
-  
-  // canvas for legend
-  TCanvas* purstabLeg = new TCanvas("purstabLeg","purstabLeg",600,300);
-  leg->Draw("");
+  //------------------------------------------------------------------------------------
+  // ----------- Pure Efficiency calculation--------------------------------
   
   // create histo with efficiency counting all events stemming from a gen bin that are reconstructed anywhere 
   // wrt. all events initially created in that bin, which are reconstructed or not 
-  TH1F* effHistGen = new TH1F("effHistGen","effHistGen", NxBins, &xBins[0]);
-  TCanvas* CanvEffGen = new TCanvas("CanvEffGen","CanvEffGen",600,600);
+  TH1F* effHistGen   = new TH1F("effHistGen","effHistGen", NxBins, &xBins[0]);
+  TH1F* effHistGenPS = new TH1F("effHistGenPS","effHistGenPS", NxBins, &xBins[0]);
+  TH1F* accHistGen   = new TH1F("accHist","accHist", NxBins, &xBins[0]);
   
-  // calculate response matrix as probability matrix: divide number in bin(gen,rec) by number of all
-  // initially generated events in the gen bin (i.e. also if they have been lost due to inefficiencies);
-  // if restricted phase space shall be plotted, it is calculated for that one
-  TCanvas* CanvResponseMatrix = new TCanvas("CanvResponseMatrix","CanvResponseMatrix",600,600);
-  // additionally: calculate response matrix that only includes migration effects, not limited acc. or eff.
-  TCanvas* CanvMigrationMatrix = new TCanvas("CanvMigrationMatrix","CanvMigrationMatrix",600,600);
-  // collection of residual histos for determination of resolution
-  TCanvas* CanvResidualHistos = new TCanvas("CanvResidualHistos","CanvResidualHistos",1200,1200);
-  TCanvas* CanvRelativeResidualHistos = new TCanvas("CanvRelativeResidualHistos","CanvRelativeResidualHistos",1200,1200);
-  int nDivide = (int)sqrt(NxBins) +1;
-  CanvResidualHistos->Divide(nDivide,nDivide);
-  CanvRelativeResidualHistos->Divide(nDivide,nDivide);
-  // resolution
-  TCanvas* CanvResolution         = new TCanvas("CanvResolution","CanvResolution",600,600);
-  TCanvas* CanvRelativeResolution = new TCanvas("CanvRelativeResolution","CanvRelativeResolution",600,600);
-  TCanvas* CanvBinwidthOverResol  = new TCanvas("CanvBinwidthOverResol","CanvBinwidthOverResol",600,600);
-  
-  if(useTree){
     for(int iGenBin=1; iGenBin <=NxBins; iGenBin++){
       double allRecEvtsFromGenBin=0.;
       double effDenom=-1.;
+      double effDenomPS=-1.;
       double effGen=0.;
+      double effGenPS=0.;
+      double acceptance=0.;
       double effDenomMigrationOnly = responseMatrix->Integral(iGenBin,iGenBin,0,NxBins+1);
-      if(plotEfficiencyPhaseSpace && genHistPS->GetBinContent(iGenBin)) effDenom=genHistPS->GetBinContent(iGenBin);
-      else if(genHist->GetBinContent(iGenBin))                          effDenom=genHist  ->GetBinContent(iGenBin);
+      if     (genHistPS->GetBinContent(iGenBin)) effDenomPS=genHistPS->GetBinContent(iGenBin);
+      if     (genHist  ->GetBinContent(iGenBin)) effDenom  =genHist  ->GetBinContent(iGenBin);
       
       for(int iRecBin=1; iRecBin <=NxBins; iRecBin++){
 	double binContentResponse=0.;
@@ -597,76 +485,195 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
 	responseMatrix  ->SetBinContent(iGenBin, iRecBin, binContentResponse);
 	migrationMatrix ->SetBinContent(iGenBin, iRecBin, binContentMigration);
       }
-      effGen=(double)allRecEvtsFromGenBin/effDenom;
+      if(effDenom>0)   effGen    =(double)allRecEvtsFromGenBin/effDenom;
+      if(effDenomPS>0) effGenPS  =(double)allRecEvtsFromGenBin/effDenomPS;
+      if(effDenom>0)   acceptance=(double)effDenomPS/effDenom;
 //    if(verbose>1){
 // 	std::cout<<"-------------------------"<<std::endl;
 // 	std::cout<<"EffNum= "<<allRecEvtsFromGenBin<<"; Eff.= "<<effGen <<std::endl;
 // 	std::cout<<"effDenomMigrationOnly= "<<effDenomMigrationOnly <<std::endl;
+//       std::cout<<"acceptance = "<<acceptance <<std::endl;
+//       std::cout<<"effDenom = "<<effDenom<<std::endl;
+//       std::cout<<"effDenomPS = "<<effDenomPS<<std::endl;
 // 	std::cout<<"-------------------------"<<std::endl;
 //    }
-      effHistGen->SetBinContent(iGenBin, effGen);
+      effHistGen  ->SetBinContent(iGenBin, effGen);
+      effHistGenPS->SetBinContent(iGenBin, effGenPS);
+      accHistGen  ->SetBinContent(iGenBin, acceptance);
     }
+    
+    // draw purity, stability, pure efficiency and acceptance
+    // canvas for purity, stability, pure efficiency and acceptance
+    TCanvas* purstab = new TCanvas("purstab","purstab",600,600);
+    // compare pure efficiency and bin-by-bin correction factor
+    TCanvas* CanvEffGenBBBcomp = new TCanvas("CanvEffGenBBBcomp","CanvEffGenBBBcomp",600,600);
+    
+    purityhist->SetTitle("");
+    TString xtitle = "";
+    if(variable.Contains("Pt"))xtitle+="p_{T}";
+    else if(variable.Contains("Y"))xtitle+="y";
+    else if(variable.Contains("Eta"))xtitle+="#eta";
+    else if(variable.Contains("Mass"))xtitle+="m";
+    if(variable.Contains("top"))xtitle+="^{t and #bar{t}}";
+    else if(variable.Contains("ttbar"))xtitle+="^{t#bar{t}}";
+    else if(variable.Contains("lep"))xtitle+="^{l}";
+    if(variable.Contains("Pt"))xtitle+=" #left[#frac{GeV}{c}#right]";
+    else if(variable.Contains("Mass"))xtitle+=" #left[#frac{GeV}{c^{2}}#right]";
+    if(variable=="topWAngle")xtitle="Angle(top,W)";
+    purityhist->GetXaxis()->SetTitle(xtitle);
+    purityhist->GetXaxis()->SetNoExponent(true);
+    purityhist->GetYaxis()->SetNoExponent(true);
+
+  //purityhist->GetXaxis()->SetTitleSize  ( 0.07);
+  //purityhist->GetXaxis()->SetTitleColor (    1);
+  //purityhist->GetXaxis()->SetTitleOffset(  0.95);
+  //purityhist->GetXaxis()->SetTitleFont  (   62);
+  //purityhist->GetXaxis()->SetLabelSize  ( 0.07);
+  //purityhist->GetXaxis()->SetLabelFont  (   62);
+  //purityhist->GetXaxis()->SetNdivisions (  505);
+    purityhist->GetXaxis()->SetRangeUser  (rangeUserLeft, rangeUserRight);
   
-  // draw responseMatrix incl. eff.
-  // text format for TH2 labels
-  gStyle->SetPaintTextFormat("3.2f");
-  CanvResponseMatrix->cd();
-  CanvResponseMatrix->SetRightMargin(0.2);
-  responseMatrix->SetStats(kFALSE);
-  responseMatrix->GetXaxis()->SetTitle("gen "+xtitle);
-  responseMatrix->GetYaxis()->SetTitle("rec "+xtitle);
-  responseMatrix->GetXaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
-  responseMatrix->GetYaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
-  responseMatrix->GetXaxis()->SetNoExponent(true);
-  responseMatrix->GetYaxis()->SetNoExponent(true);
-  responseMatrix->GetZaxis()->SetNoExponent(true);
-  responseMatrix->GetZaxis()->SetRangeUser(0,0.3);
-  responseMatrix->SetTitle("Response Matrix - Including Efficiency");
-  responseMatrix->Draw(Form("COLZ %s",textOpt.Data()));
-  //TPaletteAxis *palette = (TPaletteAxis*)responseMatrix->GetListOfFunctions()->FindObject("palette");
-  //gPad->Update();
-  if(plotEfficiencyPhaseSpace) DrawLabel("Full Response Matrix - Migration and Efficiency",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
-  else DrawLabel("Full Response Matrix - Migration and Eff.*Acc.",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  //purityhist->GetYaxis()->SetTitleSize  ( 0.07);
+  //purityhist->GetYaxis()->SetTitleColor (    1);
+  //purityhist->GetYaxis()->SetTitleOffset(  1.0);
+  //purityhist->GetYaxis()->SetTitleFont  (   62);
+  //purityhist->GetYaxis()->SetLabelSize  ( 0.07);
+  //purityhist->GetYaxis()->SetLabelFont  (   62);
+  //purityhist->GetYaxis()->SetNdivisions (  505);
+    purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
+
+    purityhist->SetMinimum(0.);
+  //double max=purityhist->GetMaximum();
+  //if(stabilityhist->GetMaximum()>max)max=stabilityhist->GetMaximum();
+  //purityhist->SetMaximum(1.1*max);
+    purityhist->SetMaximum(1.0);
+    purityhist->SetLineColor(2);
+    purityhist->SetLineWidth(4);
+    stabilityhist->SetLineColor(4);
+    stabilityhist->SetLineStyle(2);
+    stabilityhist->SetLineWidth(4);
+    accHistGen->SetLineColor(1);
+    accHistGen->SetLineStyle(2);
+    accHistGen->SetLineWidth(4);
+    accHistGen->GetXaxis()->SetNoExponent(true);
+    accHistGen->GetYaxis()->SetNoExponent(true);
+    purityhist->SetStats(kFALSE);
+
+  //gPad->SetBottomMargin(0.19);
+    purstab->cd();
+    purstab->SetGrid(1,1);
+    purityhist->Draw();
+    stabilityhist->Draw("same");
+    if(plotAcceptance)accHistGen->Draw("same");
+    if(plotEfficiencyPhaseSpace){
+      effHistGenPS->SetLineColor(1);
+      effHistGenPS->SetLineStyle(1);
+      effHistGenPS->SetLineWidth(4);
+      effHistGenPS->Draw("same");
+    }
+    if(plotEfficiency2){
+      effHistBBB2->SetLineColor(1);
+      effHistBBB2->SetLineStyle(2);
+      effHistBBB2->SetLineWidth(4);
+      effHistBBB2->Draw("same");
+    }
+  // chi2 cut efficiency
+    if(useTree && chi2Max<100){    
+      chi2eff = (TH1F*)chi2eff->Rebin(binvec.size()-1, chi2eff->GetName(), &(binvec.front()));
+      all     = (TH1F*)all    ->Rebin(binvec.size()-1, all->GetName()    , &(binvec.front()));
+      chi2eff->Divide(all);
+      chi2eff->SetLineColor(1);
+    //chi2eff->SetLineStyle(2);
+      chi2eff->SetLineWidth(4);
+      chi2eff->Draw("same");
+    }
+    if (lepton=="muon") DrawDecayChLabel("#mu + Jets");
+    else if(lepton=="elec") DrawDecayChLabel("e + Jets");
+    //double legEdge = 0.4;
+    //if(plotAcceptance)legEdge = effHistBBB->GetMinimum();
+    TLegend* leg=new TLegend(0.47,0.68,0.67,0.87);
+    leg->SetTextSize(0.05);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->AddEntry(purityhist,   "Purity"    ,"l");
+    leg->AddEntry(stabilityhist,"Stability" ,"l");
+  //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
+  //if(plotAcceptance)leg->AddEntry(effHistBBB,"Eff*A full PS Spring11","l");
+    if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistGenPS,"Efficiency","l");
+    if(plotAcceptance)leg->AddEntry(accHistGen,"Acceptance","l");
+    if(plotEfficiency2)leg->AddEntry(effHistBBB2,"eff.*A full PS Summer11","l");
+    if(useTree && chi2Max<100){
+      TString entry="#chi^{2} < ";
+      entry+=chi2Max;
+      entry+=" cut eff.";
+      leg->AddEntry(chi2eff,entry,"l");
+    }
+    leg->SetFillColor(0);
+    leg->SetBorderSize(0);
+    if(variable == "topPt"||chi2Max<100) leg->Draw("same");
+    
+    TLegend* legFull=new TLegend(0.,0.,1.,1.);
+    legFull->AddEntry(purityhist,   "Purity"    ,"l");
+    legFull->AddEntry(stabilityhist,"Stability" ,"l");
+  //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
+  //if(plotAcceptance)leg->AddEntry(effHistBBB,"Eff*A full PS Spring11","l");
+    if(plotEfficiencyPhaseSpace)legFull->AddEntry(effHistGenPS,"Efficiency","l");
+    if(plotAcceptance)legFull->AddEntry(accHistGen,"Acceptance","l");
+    if(plotEfficiency2)legFull->AddEntry(effHistBBB2,"eff.*A full PS Summer11","l");
   
-  // draw migrationMatrix w/o eff.
-  CanvMigrationMatrix->cd();
-  CanvMigrationMatrix->SetRightMargin(0.2);
-  migrationMatrix->SetStats(kFALSE);
-  migrationMatrix->GetXaxis()->SetTitle("gen "+xtitle);
-  migrationMatrix->GetYaxis()->SetTitle("rec "+xtitle);
-  migrationMatrix->GetXaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
-  migrationMatrix->GetYaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
-  migrationMatrix->GetXaxis()->SetNoExponent(true);
-  migrationMatrix->GetYaxis()->SetNoExponent(true);
-  migrationMatrix->GetZaxis()->SetNoExponent(true);
-  migrationMatrix->GetZaxis()->SetRangeUser(0,1);
-  migrationMatrix->SetTitle("Response Matrix - Migration Only");
-  migrationMatrix->Draw(Form("COLZ %s",textOpt.Data()));
-  DrawLabel("Response Matrix - Migration Only",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
-  
+  // canvas for legend
+    TCanvas* purstabLeg = new TCanvas("purstabLeg","purstabLeg",600,300);
+    legFull->Draw("");
+    
+   //------------------------------------------------------------------------------
   // draw effGen together with effective efficiencies from bin-by-bin
-  CanvEffGen->cd();
-  effHistGen->GetXaxis()->SetTitle("gen "+xtitle);
-  effHistGen->GetXaxis()->SetNoExponent(true);
-  effHistGen->GetYaxis()->SetNoExponent(true);
-  effHistGen->SetLineColor(kGreen+2);
-  effHistGen->SetLineStyle(1);
-  effHistGen->SetLineWidth(4);
-  effHistGen->GetXaxis()->SetRangeUser  (rangeUserLeft, rangeUserRight);
-  effHistGen->GetYaxis()->SetRangeUser  (0., 0.5);
-  effHistGen->Draw("");
-  if(plotEfficiency)           effHist->Draw("same");
-  if(plotEfficiencyPhaseSpace) effHistPS->Draw("same");
+  // OBSERVATION: acceptance from both methods the same!!! -> overlap
+    CanvEffGenBBBcomp->cd();
+    effHistBBBPS->GetXaxis()->SetTitle("gen "+xtitle);
+    effHistBBBPS->GetXaxis()->SetNoExponent(true);
+    effHistBBBPS->GetYaxis()->SetNoExponent(true);
+    effHistBBBPS->SetLineColor(kGreen+2);
+    effHistBBBPS->SetLineStyle(1);
+    effHistBBBPS->SetLineWidth(4);
+    effHistBBBPS->GetXaxis()->SetRangeUser  (rangeUserLeft, rangeUserRight);
+    effHistBBBPS->GetYaxis()->SetRangeUser  (0., 0.5);
+    effHistBBBPS->Draw("");
+
+    accHistBBB->SetLineColor(kGreen+2);
+    accHistBBB->SetLineStyle(3);
+    accHistBBB->SetLineWidth(4);
+    accHistBBB->Draw("same");
   
-  TLegend* leg2=new TLegend(0.2,0.68,0.67,0.87);
-  leg2->SetTextSize(0.03);
-  leg2->SetFillStyle(0);
-  leg2->SetBorderSize(0);
-  if(plotEfficiencyPhaseSpace) leg2->AddEntry(effHistGen,   "Pure eff. in restr. PS (no migration)"    ,"l");
-  else                         leg2->AddEntry(effHistGen,   "Pure eff.*A (no migration)"    ,"l");
-  if(plotEfficiency)           leg2->AddEntry(effHist,"eff.*A (bin-by-bin)","l");
-  if(plotEfficiencyPhaseSpace) leg2->AddEntry(effHistPS,"eff. in restr. PS (bin-by-bin)","l");
-  leg2->Draw();
+    if(plotAcceptance)           accHistGen->Draw("same");
+    if(plotEfficiencyPhaseSpace) effHistGenPS->Draw("same");
+  
+    TLegend* leg2=new TLegend(0.2,0.68,0.67,0.87);
+    leg2->SetTextSize(0.03);
+    leg2->SetFillStyle(0);
+    leg2->SetBorderSize(0);
+    if(plotAcceptance)           leg2->AddEntry(accHistGen,     "A (no migration)"    ,"l");
+    if(plotEfficiencyPhaseSpace) leg2->AddEntry(effHistGenPS,   "eff. (no migration)"    ,"l");
+    if(plotAcceptance)           leg2->AddEntry(accHistBBB,     "eff.*C*A (bin-by-bin)","l");
+    if(plotEfficiencyPhaseSpace) leg2->AddEntry(effHistBBBPS,   "eff.*C (bin-by-bin)","l");
+    leg2->Draw();
+    
+    //------------------------------------------------------------------------------
+  // calculate response matrix as probability matrix: divide number in bin(gen,rec) by number of all
+  // initially generated events in the gen bin (i.e. also if they have been lost due to inefficiencies);
+  // if restricted phase space shall be plotted, it is calculated for that one
+    TCanvas* CanvResponseMatrix = new TCanvas("CanvResponseMatrix","CanvResponseMatrix",600,600);
+  // additionally: calculate response matrix that only includes migration effects, not limited acc. or eff.
+    TCanvas* CanvMigrationMatrix = new TCanvas("CanvMigrationMatrix","CanvMigrationMatrix",600,600);
+  // collection of residual histos for determination of resolution
+    TCanvas* CanvResidualHistos = new TCanvas("CanvResidualHistos","CanvResidualHistos",1200,1200);
+    TCanvas* CanvRelativeResidualHistos = new TCanvas("CanvRelativeResidualHistos","CanvRelativeResidualHistos",1200,1200);
+    int nDivide = (int)sqrt(NxBins) +1;
+    CanvResidualHistos->Divide(nDivide,nDivide);
+    CanvRelativeResidualHistos->Divide(nDivide,nDivide);
+  // resolution
+    TCanvas* CanvResolution         = new TCanvas("CanvResolution","CanvResolution",600,600);
+    TCanvas* CanvRelativeResolution = new TCanvas("CanvRelativeResolution","CanvRelativeResolution",600,600);
+    TCanvas* CanvBinwidthOverResol  = new TCanvas("CanvBinwidthOverResol","CanvBinwidthOverResol",600,600);
   
   //----------------------------------------------------
   // draw residuals and calculate resolution
@@ -747,6 +754,49 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
       hisRelativeResolRMS->SetBinContent(iGenBin+1, relativeResidualHistos_.at(iGenBin)->GetRMS());
       hisRelativeResolFit->SetBinContent(iGenBin+1, f1RelativeSigma_[0]);
   }
+  
+  // draw responseMatrix incl. eff.
+  // text format for TH2 labels
+  gStyle->SetPaintTextFormat("3.2f");
+  CanvResponseMatrix->cd();
+  CanvResponseMatrix->SetRightMargin(0.2);
+  responseMatrix->SetStats(kFALSE);
+  responseMatrix->GetXaxis()->SetTitle("gen "+xtitle);
+  responseMatrix->GetYaxis()->SetTitle("rec "+xtitle);
+  responseMatrix->GetXaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  responseMatrix->GetYaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  responseMatrix->GetXaxis()->SetNoExponent(true);
+  responseMatrix->GetYaxis()->SetNoExponent(true);
+  responseMatrix->GetZaxis()->SetNoExponent(true);
+  responseMatrix->GetZaxis()->SetRangeUser(0,0.3);
+  //responseMatrix->SetMarkerColor(kWhite);
+  responseMatrix->SetMarkerSize(1.2);
+  responseMatrix->SetTitle("Response Matrix - Including Efficiency");
+  responseMatrix->Draw(Form("COLZ %s",textOpt.Data()));
+  //TPaletteAxis *palette = (TPaletteAxis*)responseMatrix->GetListOfFunctions()->FindObject("palette");
+  //gPad->Update();
+  if(plotEfficiencyPhaseSpace) DrawLabel("Full Response Matrix - Migration and Efficiency",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  else DrawLabel("Full Response Matrix - Migration and Eff.*Acc.",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  
+  // draw migrationMatrix w/o eff.
+  CanvMigrationMatrix->cd();
+  CanvMigrationMatrix->SetRightMargin(0.2);
+  migrationMatrix->SetStats(kFALSE);
+  migrationMatrix->GetXaxis()->SetTitle("gen "+xtitle);
+  migrationMatrix->GetYaxis()->SetTitle("rec "+xtitle);
+  migrationMatrix->GetXaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  migrationMatrix->GetYaxis()->SetRangeUser(rangeUserLeft,rangeUserRight);
+  migrationMatrix->GetXaxis()->SetNoExponent(true);
+  migrationMatrix->GetYaxis()->SetNoExponent(true);
+  migrationMatrix->GetZaxis()->SetNoExponent(true);
+  migrationMatrix->GetZaxis()->SetRangeUser(0,1);
+  //migrationMatrix->SetMarkerColor(kWhite);
+  migrationMatrix->SetMarkerSize(1.2);
+  migrationMatrix->SetTitle("Response Matrix - Migration Only");
+  migrationMatrix->Draw(Form("COLZ %s",textOpt.Data()));
+  DrawLabel("Response Matrix - Migration Only",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  
+  
   // draw resolution
   CanvResolution->cd();
   hisResolRMS->GetXaxis()->SetTitle("gen "+xtitle);
@@ -805,7 +855,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   hisBinwidthOverResolRMS->SetLineStyle(1);
   hisBinwidthOverResolRMS->SetLineWidth(2);
   hisBinwidthOverResolRMS->GetXaxis()->SetRangeUser  (rangeUserLeft, rangeUserRight);
-  hisBinwidthOverResolRMS->GetYaxis()->SetRangeUser  (0., 1.2*hisBinwidthOverResolRMS->GetMaximum());
+  hisBinwidthOverResolRMS->GetYaxis()->SetRangeUser  (0., 3.*hisBinwidthOverResolRMS->GetMaximum());
   hisBinwidthOverResolRMS->Draw("");
   hisBinwidthOverResolFit->SetLineColor(2);
   hisBinwidthOverResolFit->SetLineStyle(1);
@@ -818,7 +868,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
 //   legResol->AddEntry(hisResolRMS,   "#sigma_{histo}"    ,"l");
 //   legResol->AddEntry(hisResolFit,   "#sigma_{Gauss fit}"    ,"l");
   legResol->DrawClone("same");
-}
+
   
   if(save){
     if(verbose==0) gErrorIgnoreLevel=kWarning; 
@@ -829,12 +879,12 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
     }
     purstab->Print(outputFolder+"/purStabEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
     purstab->Print(outputFolder+"/purStabEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-    purstabLeg->Print(outputFolder+"/purStabLeg.png");
-    purstabLeg->Print(outputFolder+"/purStabLeg.eps");
+    purstabLeg->Print(outputFolder+"/purStabLeg_"+universalplotLabel+"_"+".png");
+    purstabLeg->Print(outputFolder+"/purStabLeg_"+universalplotLabel+"_"+".eps");
     if(useTree){
       CanvResponseMatrix->Print(outputFolder+"/responseMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
       CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-      CanvEffGen->Print(outputFolder+"/pureGenEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
+      CanvEffGenBBBcomp->Print(outputFolder+"/effGenBBBcomp_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
       CanvResidualHistos->Print(outputFolder+"/residualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
       CanvRelativeResidualHistos->Print(outputFolder+"/relativeResidualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
       CanvResolution->Print(outputFolder+"/resolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
@@ -842,7 +892,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
       //eps
       CanvResponseMatrix->Print(outputFolder+"/responseMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
       CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-      CanvEffGen->Print(outputFolder+"/pureGenEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
+      CanvEffGenBBBcomp->Print(outputFolder+"/effGenBBBcomp_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
       CanvResidualHistos->Print(outputFolder+"/residualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
       CanvRelativeResidualHistos->Print(outputFolder+"/relativeResidualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
       CanvResolution->Print(outputFolder+"/resolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
