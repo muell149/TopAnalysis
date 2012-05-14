@@ -57,7 +57,9 @@ namespace semileptonic {
 		   kWW     , kWZ     , kZZ     , 
 		   /*17*/    /*18*/    /*19*/    /*20*/    /*21*/    /*22*/
 		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW,
-                   /*23*/
+		   /*23*/    /*24*/
+		   kSigPow , kBkgPow,
+                   /*25*/
 		   ENDOFSAMPLEENUM};
 
   int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
@@ -198,6 +200,8 @@ namespace semileptonic {
     TString sampleLabel="";
     if(sample==kSig)     sampleLabel="ttbar prompt lepton";
     if(sample==kBkg)     sampleLabel="ttbar other";
+    if(sample==kSigPow)  sampleLabel="ttbar prompt lepton POWHEG";
+    if(sample==kBkgPow)  sampleLabel="ttbar other POWHEG";
     if(sample==kZjets)   sampleLabel="Z+jets";
     if(sample==kWjets)   sampleLabel="W+jets";
     if(sample==kQCD)     sampleLabel="combined QCD multijet";
@@ -479,6 +483,9 @@ namespace semileptonic {
     if(sample==kSig && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt)";
     if(sample==kSig && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt)";
     if(sample==kBkg    ) MCprocess="t#bar{t} other";
+    if(sample==kSigPow && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) POWHEG";
+    if(sample==kSigPow && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) POWHEG";
+    if(sample==kBkgPow    ) MCprocess="t#bar{t} other POWHEG";
     if(sample==kSTop   ) MCprocess="Single Top";
     if(sample==kSToptW ) MCprocess="Single Top tW";
     if(sample==kSTops  ) MCprocess="Single Top s";
@@ -634,7 +641,7 @@ namespace semileptonic {
     int verbose=0;
     // a) check if input is valid
     // sample existing?
-    if(sample>kSAToptW){
+    if(sample>=ENDOFSAMPLEENUM){
       std::cout << "ERROR: invalid sample label for lumiweight calculation, no scaling will be done" << std::endl;
       return 1.;
     }
@@ -669,6 +676,11 @@ namespace semileptonic {
       if(kSys==sysTopMatchDown) Nevents=1064250;//1065232;  --> still Summer 11
       if(kSys==sysTopMassUp   ) Nevents=1669928;//1671859; 
       if(kSys==sysTopMassDown ) Nevents=1618341;//1620072; 
+    }
+    else if((sample==kSigPow)||(sample==kBkgPow)){
+      crossSection=ttbarCrossSection; 
+      // Fall11
+      Nevents = 16420479;
     }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
@@ -831,7 +843,7 @@ namespace semileptonic {
     double weight2=weight;
     if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
     // e1) for ttbar->lnu: BR correction
-    if(sample==kSig) weight *= BRcorrectionSemileptonic;
+    if((sample==kSig)||(sample==kSigPow)) weight *= BRcorrectionSemileptonic;
     // e2) systematic higher/lower BG
     double scale=0;
     // (i) more/less DiBoson
@@ -862,7 +874,7 @@ namespace semileptonic {
       }
       std::cout << ": " << weight << std::endl;
       if(verbose>1) std::cout << "ratio: " << weight/weight2 << std::endl;
-      if(weight!=weight2&&sample==kSig) std::cout << "(BR correction applied)" << std::endl;
+      if(weight!=weight2&&((sample==kSig)||(sample==kSigPow))) std::cout << "(BR correction applied)" << std::endl;
     }
     // return result
     if(sample!=kData&&weight==1){
@@ -945,6 +957,8 @@ namespace semileptonic {
     // standard MC filenames
     if(sample==kSig    )fileName += "Sig";
     if(sample==kBkg    )fileName += "Bkg";
+    if(sample==kSigPow )fileName += "SigPowheg";
+    if(sample==kBkgPow )fileName += "BkgPowheg";
     if(sample==kWjets  )fileName += "Wjets";
     if(sample==kZjets  )fileName += "Zjets";
     if(sample==kDiBos  )fileName += "VV";
@@ -1041,7 +1055,7 @@ namespace semileptonic {
     }
   }
 
-  std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder, const unsigned int systematicVariation, const TString dataFile, const std::string decayChannel)
+  std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder, const unsigned int systematicVariation, const TString dataFile, const std::string decayChannel, TString ttbarMC="Madgraph")
     {
       // this function returns a map containing all existing .root in "inputFolder"
       // corresponding to the choosen systematic variation "systematicVariation"
@@ -1051,6 +1065,8 @@ namespace semileptonic {
       // modified quantities: NONE
       // used functions: TopFilename
       // used enumerators: samples
+      // ttbarMC: use "Madgraph" or "Powheg" for the respective samples
+
 
       // open our standard analysis files and save them in a map
       std::map<unsigned int, TFile*> files_;
@@ -1059,7 +1075,13 @@ namespace semileptonic {
 	// there are no QCD subsamples for muon channel
 	if(!(sample>=kQCDEM1&&sample<=kQCDBCE3&&decayChannel.compare("muon")==0)){
 	  TString fileName;
-	  if(sample!=kData) fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
+	  if(sample!=kData){
+	    if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Powheg") {
+	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigPow, systematicVariation, decayChannel);
+	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgPow, systematicVariation, decayChannel);
+	    }
+	    else fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
+	  }
 	  if(sample==kData) fileName = dataFile;
 	  // if file exists - save in map
 	  if((fileName!="no")&&(fileName!="")){
@@ -1176,7 +1198,7 @@ namespace semileptonic {
     }
   }
 
-  void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const double luminosity, const int verbose=1, const int systematicVariation=sysNo, const std::string decayChannel = "unset")
+  void scaleByLuminosity(const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, const double luminosity, const int verbose=1, const int systematicVariation=sysNo, const std::string decayChannel = "unset", TString ttbarMC="Madgraph")
   {
     // this function scales every histo in histo_ and histo2_ to the corresponding luminosity
     // Additionally the mu eff SF is applied
@@ -1187,18 +1209,24 @@ namespace semileptonic {
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "luminosity": [/pb]
     // "systematicVariation": specify systematic variation corresponding to enum systematicVariation
+    // ttbarMC: use "Madgraph" or "Powheg" for the respective samples
 
     // loop samples
     for(unsigned int sample=kSig; sample<=kSAToptW; ++sample) {
+      unsigned int sample2=sample;
+      if(ttbarMC=="Powheg"){
+	if(sample==kSig) sample2=kSigPow;
+	if(sample==kBkg) sample2=kBkgPow;
+      } ;
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	// a) 1D
 	// check if 1D plot exists
 	if((plot<N1Dplots)&&(histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
-	  if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample,decayChannel) << ":" << std::endl;
+	  if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample2,decayChannel) << ":" << std::endl;
 	  if(verbose>1) std::cout << "#events before weighting: " << histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << std::endl;
 	  // scale MC samples to same luminosity
-	  double weight = lumiweight(sample, luminosity, systematicVariation, decayChannel);
+	  double weight = lumiweight(sample2, luminosity, systematicVariation, decayChannel);
 	  histo_[plotList_[plot]][sample]->Scale(weight);
 	  if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	  if(verbose>1) std::cout << "#events after weighting: " << histo_[plotList_[plot]][sample]->Integral(0, histo_[plotList_[plot]][sample]->GetNbinsX()+1) << std::endl;
@@ -1208,10 +1236,10 @@ namespace semileptonic {
 	// b) 2D
 	// check if 2D plot exists
 	if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
-	  if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample,decayChannel) << ":" << std::endl;
+	  if(verbose>1) std::cout << std::endl << "plot: "+plotList_[plot] << " for sample " << sampleLabel(sample2,decayChannel) << ":" << std::endl;
 	  if(verbose>1) std::cout << "#events before weighting: " << histo2_[plotList_[plot]][sample]->Integral(0, histo2_[plotList_[plot]][sample]->GetNbinsX()+1, 0, histo2_[plotList_[plot]][sample]->GetNbinsY()+1) << std::endl;
 	  // scale MC samples to same luminosity
-	  double weight = lumiweight(sample, luminosity, systematicVariation, decayChannel);
+	  double weight = lumiweight(sample2, luminosity, systematicVariation, decayChannel);
 	  histo2_[plotList_[plot]][sample]->Scale(weight);
 	  if(verbose>1) std::cout << "weight: " << weight << std::endl;
 	  if(verbose>1) std::cout << "#events after weighting: " << histo2_[plotList_[plot]][sample]->Integral(0, histo2_[plotList_[plot]][sample]->GetNbinsX()+1, 0, histo2_[plotList_[plot]][sample]->GetNbinsY()+1) << std::endl;
@@ -2626,13 +2654,6 @@ namespace semileptonic {
     // --- 
     if(drawRawPlot){
       TH1F* raw=getTheoryPrediction(plotname, filename);
-      // add muon and electron channel to
-      // minimize statistical fluctuations
-      if(model=="madgraph"){
-	TString filenameEl = filename;
-	filenameEl.ReplaceAll("muon", "elec");
-	raw->Add(getTheoryPrediction(plotname, filenameEl));
-      }
       raw->SetMarkerColor(color);
       raw->SetLineColor(color);
       //raw->SetMarkerSize(2);
@@ -2648,18 +2669,11 @@ namespace semileptonic {
     // --- 
     // get plot
     TH1F* result=getTheoryPrediction(plotname, filename);
-    // add muon and electron channel to
-    // minimize statistical fluctuations
-    if(model=="madgraph"){
-      TString filenameEl = filename;
-      filenameEl.ReplaceAll("muon", "elec");
-      result->Add(getTheoryPrediction(plotname, filenameEl));
-    }
     // replace low statistic parts with fitted curve
     if(smoothcurves) result=useFittedFunctions(result, model, plotname, verbose);
     // rename
     TString name=plotname;
-    name.ReplaceAll("analyzeTopPartonLevelKinematicsPhaseSpace/","");
+    name.ReplaceAll(getStringEntry(name, 1,"/"),"");
     if(model=="powheg") name+="POWHEG";
     else if(model=="mcatnlo"){
       if(filename.Contains("mcatnlo" )) name+="MC@NLO";
