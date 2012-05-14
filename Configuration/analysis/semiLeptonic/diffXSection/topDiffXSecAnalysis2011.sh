@@ -50,7 +50,7 @@
 
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"combined\" 
+decayChannel=\"muon\" 
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
@@ -321,15 +321,23 @@ if [ $fast = false ]
     sleep 3
 fi
 # Array of differential variables:
-listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\")
+listVarParton_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+listVarHadron_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
 if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]
     then
     echo "purity and stability will be calculated for the following variables:"
     # loop over all systematic variations
-    for (( iVar=0; iVar<7; iVar++ ))
+    for (( iVar=0; iVar<9; iVar++ ))
     do
+      echo "parton level:"
       echo
-      root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', 99999)'
+      root -l -q -b './purityStabilityEfficiency.C++('${listVarParton_[$iVar]}','$save', '$decayChannel', '$inputFolderName', true, true, false)'
+    done
+    for (( iVar=0; iVar<4; iVar++ ))
+    do
+      echo "hadron level:"
+      echo
+      root -l -q -b './purityStabilityEfficiency.C++('${listVarHadron_[$iVar]}','$save', '$decayChannel', '$inputFolderName', false, true, false, 99999, 0, true)'
     done
 else
     echo "will be ignored, only done for decayChannel=muon/electron"
