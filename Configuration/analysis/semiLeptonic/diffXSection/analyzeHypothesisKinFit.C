@@ -2,7 +2,7 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysHadDown, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
@@ -1338,6 +1338,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     std::cout << " [pb]: ";
     std::cout << xSecResult << " +/- " << sigmaxSec << "(stat.)" << std::endl;
     std::cout << std::endl;
+    exit(0);
   }
   // create histo
   TString inclName = "xSec/inclusive";
@@ -2348,6 +2349,7 @@ for(unsigned int plot=0; plot<plotList_.size(); ++plot){
       // check if plot is existing
       // draw BBB xSec control plots in same canvas with SVD result
       if(((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0))&&!plotList_[plot].Contains("BBB")){
+	histo_[plotList_[plot]][sample]->SetName(((TString)histo_[plotList_[plot]][sample]->GetName()).ReplaceAll("Gen",""));
 	// draw all pull distributions in same canvas if RecPartonTruth pull is called
 	if((!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth"))){
 	  if(verbose>1){
