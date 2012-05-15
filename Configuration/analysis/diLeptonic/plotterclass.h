@@ -1599,7 +1599,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  //  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
+  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
   gSystem->MakeDirectory("Plots");  
   gSystem->MakeDirectory("Plots/"+channel);  
   c->Print("Plots/"+channel+"/"+name+".eps");  
@@ -2536,11 +2536,24 @@ void Plotter::PlotDiffXSec(){
     double DiffXSecStatErrorPlot[XAxisbinCenters.size()];
     double DiffXSecTotalErrorPlot[XAxisbinCenters.size()];
 
+    double ModelSysPlot[XAxisbinCenters.size()];
+    double ExpSysPlot[XAxisbinCenters.size()];;
+
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       double syst_square = 0;
+      ExpSysPlot[bin]=0.;
+      ModelSysPlot[bin]=0.;
       for(int syst =0; syst<13; syst++){
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
+	  ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+	}else{
+	  ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+	}
+
       }
+      ExpSysPlot[bin]=sqrt(ExpSysPlot[bin]);
+      ModelSysPlot[bin]=sqrt(ModelSysPlot[bin]);
       DiffXSecSysError[channelType][bin] = sqrt(syst_square)*DiffXSec[channelType][bin];
       DiffXSecStatError[channelType][bin] = DiffXSecStatError[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecTotalError[channelType][bin] = sqrt(DiffXSecSysError[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
@@ -2586,11 +2599,45 @@ void Plotter::PlotDiffXSec(){
       delete systtemp;
     }
     SystHists->Draw();
+    leg10->SetFillColor(0);
     leg10->Draw("SAME");
     c10->Print("Plots/"+channel+"/MSP_"+name+".eps");
     c10->Clear();
     delete leg10;
     delete c10;
+    
+    //The Experimental/Model/Statistical plot
+    TCanvas * c11 = new TCanvas("EMS","EMS");
+    TH1D* ExpHist = (TH1D*)varhists[0]->Clone();
+    TH1D* ModelHist = (TH1D*)varhists[0]->Clone();
+    TH1D* StatHist = (TH1D*)varhists[0]->Clone();
+    TH1D* TotalHist = (TH1D*)varhists[0]->Clone();
+    TLegend * leg11 =  new TLegend(0.65,0.60,0.90,0.85);
+    ExpHist->Reset();ModelHist->Reset();StatHist->Reset();TotalHist->Reset();
+    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+      ExpHist->SetBinContent(bin+1,ExpSysPlot[bin]);
+      ModelHist->SetBinContent(bin+1,ModelSysPlot[bin]);
+      StatHist->SetBinContent(bin+1,DiffXSecStatError[channelType][bin]/DiffXSec[channelType][bin]);
+      TotalHist->SetBinContent(bin+1,DiffXSecTotalError[channelType][bin]/DiffXSec[channelType][bin]);
+    }
+    TotalHist->SetMinimum(0.);
+    TotalHist->GetYaxis()->SetTitle("#frac{#Delta#sigma}{#sigma}");
+    TotalHist->SetLineColor(1);
+    ExpHist->SetLineColor(kRed);
+    StatHist->SetLineColor(kGreen);
+    ModelHist->SetLineColor(kBlue);
+    leg11->SetFillColor(0);
+    leg11->AddEntry(ExpHist->Clone(), "Experimental Uncertainty", "l");
+    leg11->AddEntry(StatHist->Clone(), "Statistical Uncertainty", "l");
+    leg11->AddEntry(ModelHist->Clone(), "Model Uncertainty", "l");
+    leg11->AddEntry(TotalHist->Clone(), "Total Uncertainty", "l");
+    TotalHist->Draw();ModelHist->Draw("SAME");ExpHist->Draw("SAME");StatHist->Draw("SAME");
+    leg11->Draw("SAME");
+    c11->Print("Plots/"+channel+"/SEM_"+name+".eps");
+    c11->Clear();
+    delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
+    delete leg11;
+    delete c11;
     
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
