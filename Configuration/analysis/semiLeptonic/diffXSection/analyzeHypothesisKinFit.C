@@ -2,7 +2,7 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysHadDown, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
@@ -129,6 +129,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
     save=false;
   }
+  // use different ttbar MC ("Madgraph", "Powheg")
+  TString ttbarMC="Madgraph";
+  TString ttbarMC2=ttbarMC;
+  if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg";
   // normalization of differential normalized cross sections
   // true: use integral of unfolded differential cross section ignoring UF/OF bins
   // false: use all events and inclusive eff*A (no BR!) before unfolding
@@ -774,7 +778,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   // ---
   //    open our standard analysis files
   // ---
-  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel);
+  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel, ttbarMC);
 
   // ---
   //    loading histos
@@ -961,12 +965,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   }
   
   // ---
-  //    lumiweighting for choosen luminosity
+  //    lumiweihting for choosen luminosity
   // ---
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
-  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, systematicVariationMod, decayChannel);
+  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, systematicVariationMod, decayChannel, ttbarMC2);
 
   // ---
   //    add single top channels and DiBoson contributions
@@ -1153,7 +1157,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	double N=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
 	double width=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinWidth(bin);
 	N*=width*effSFAB(systematicVariationMod,decayChannel);
-	N/=(lumiweight(kSig, luminosity, systematicVariationMod, decayChannel));
+	if(ttbarMC2=="Powheg") N/=(lumiweight(kSigPow, luminosity, systematicVariationMod, decayChannel));
+	else N/=(lumiweight(kSig, luminosity, systematicVariationMod, decayChannel));
 	if(verbose>1){
 	  std::cout << "bin " << bin << ": " << eff << ", " << N << ", " << width;
 	  std::cout << ", " <<  sqrt(eff*(1.-eff)/N) << std::endl;
@@ -1267,16 +1272,22 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   double sigFrac=NSig/(NSig+NBGtop);
   // print event composition
   if(verbose>0&&systematicVariation==sysNo){ 
+    unsigned int enumSG=kSig;
+    unsigned int enumBG=kBkg;
+    if(ttbarMC2=="Powheg"){
+      enumSG=kSigPow;
+      enumBG=kBkgPow;
+    }
     std::cout << std::endl;
     std::cout << "events expected from MC: " << NAllMC << std::endl;
     std::cout << "expected event composition:"   << std::endl;
     std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << NSig   / NAllMC;
-    std::cout << " (" << lumiweight(kSig, luminosity, systematicVariation, decayChannel) << "*";
-    std::cout << NSig/lumiweight(kSig, luminosity, systematicVariation, decayChannel) << "=" << NSig    << ") " << std::endl;
-    std::cout << " (" << "mean event SF: " << NSig/(lumiweight(kSig, luminosity, systematicVariation, decayChannel)*(0.5*SigYield->GetEntries())) << ")" << std::endl;
+    std::cout << " (" << lumiweight(enumSG, luminosity, systematicVariation, decayChannel) << "*";
+    std::cout << NSig/lumiweight(enumSG, luminosity, systematicVariation, decayChannel) << "=" << NSig    << ") " << std::endl;
+    std::cout << " (" << "mean event SF: " << NSig/(lumiweight(enumSG, luminosity, systematicVariation, decayChannel)*(0.5*SigYield->GetEntries())) << ")" << std::endl;
     std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << NBGtop / NAllMC; 
-    std::cout << " (" << lumiweight(kBkg, luminosity, systematicVariation, decayChannel) << "*";
-    std::cout << NBGtop/lumiweight(kBkg, luminosity, systematicVariation, decayChannel) << "=" << NBGtop << ") " << std::endl;
+    std::cout << " (" << lumiweight(enumBG, luminosity, systematicVariation, decayChannel) << "*";
+    std::cout << NBGtop/lumiweight(enumBG, luminosity, systematicVariation, decayChannel) << "=" << NBGtop << ") " << std::endl;
     std::cout << "single top:" << std::setprecision(4) << std::fixed << NBGsTop/ NAllMC; 
     std::cout << " (" << NBGsTop << ") " << std::endl;
     std::cout << "W+jets    :" << std::setprecision(4) << std::fixed << NBGW   / NAllMC; 
