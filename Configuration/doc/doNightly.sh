@@ -2,7 +2,7 @@
 
 docDir=/afs/desy.de/group/uh2/www/wwwiexp.desy.de/groups/cms/topphysics/TopAnalysis
 
-export CVSROOT=:pserver:anonymous@cmscvs.cern.ch:/cvs_server/repositories/CMSSW
+export CVSROOT=:pserver:anonymous@cmscvs.cern.ch:/local/reps/CMSSW
 export VO_CMS_SW_DIR=/afs/naf.desy.de/group/cms/sw/
 export SCRAM_ARCH=slc5_amd64_gcc434
 source $VO_CMS_SW_DIR/cmsset_default.sh
