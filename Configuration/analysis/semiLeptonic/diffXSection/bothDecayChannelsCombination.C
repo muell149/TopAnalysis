@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", bool pTPlotsLog=false, bool extrapolate=false, bool hadron=false){
+void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false){
 	
   // ============================
   //  Set Root Style
@@ -59,6 +59,9 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
     // FIXME: no smooth mc@nlo curve for hadron PS at the moment
     if(hadron) DrawMCAtNLOPlot = false;
   }
+  bool DrawNNLOPlot=false;
+  // add kidonakis plots for full PS
+  if(extrapolate&&smoothcurves) DrawNNLOPlot=true;
   //if(extrapolate==false&&hadron==false){
   //  DrawSmoothMadgraph = true;
   //  DrawMCAtNLOPlot = true;
@@ -377,6 +380,20 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
 	    else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor=10; rebinFactor=2 ; }
 	    else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor=2 ; rebinFactor=1 ; }
 	    if(DrawSmoothMadgraph2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined"), plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
+
+	    // draw NNLO curve
+	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
+	      TFile * file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/kidonakisNNLO.root");
+	      TString nnloplotname=xSecVariables_[i];
+	      nnloplotname.ReplaceAll("Norm", "");
+	      TH1F * plotnnlo= (TH1F*)(file->Get(nnloplotname)->Clone(nnloplotname+"nnlo"));
+	      if(plotnnlo){
+		plotnnlo->GetXaxis()->SetRange(0, plotnnlo->GetNbinsX()-1);
+		plotnnlo->SetMarkerColor(kMagenta);
+		plotnnlo->SetMarkerStyle(24);
+		plotnnlo->Draw("p same");		
+	      }
+	    }
 	    // draw binned MADGRAPH theory curve
 	    plotTheo2->Draw("hist same");
 	    // set up legend
@@ -420,6 +437,9 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
 	      TH1F* powhegcurve =(TH1F*)combicanvas->GetPrimitive(curveName);
 	      if(powhegcurve) leg->AddEntry(powhegcurve, "POWHEG  ", "L");
 	    }
+	    // d) NNLO
+	    TH1F* nnlocurve =(TH1F*)combicanvas->GetPrimitive("topPtnnlo");
+	    if(nnlocurve) leg->AddEntry(nnlocurve , "NNLO Kidonakis", "P");
 	    leg->Draw("same");
 	    // add additional labels for closure test(s)
 	    if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph Reweighted", "L");
