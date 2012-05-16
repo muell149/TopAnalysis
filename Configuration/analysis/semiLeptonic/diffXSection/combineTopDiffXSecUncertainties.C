@@ -380,19 +380,23 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		if(calculateError_[xSecVariables_[i]][sys]==true){
 		  if(verbose2>0) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
-		  if(sys==sysHadUp||sys==sysHadDown){
-		    // placeholder for bquark quantities and inclusive xSec
-		    if(xSecVariables_[i].Contains("bq")||xSecVariables_[i].Contains("inclusive")){
-		      sysBinXSecValue=(1.+std::abs(constHadUncertainty))*stdBinXSecValue;
-		    }
-		    // otherwise from external studies
-		    else{
-		      double unc=hadUnc_[xSecVariables_[i]]->GetBinContent(bin);
-		      sysBinXSecValue = (1.+std::abs(unc))*stdBinXSecValue;
-		    }
-		  }
+// 		  if(sys==sysHadUp||sys==sysHadDown){
+// 		    // placeholder for bquark quantities and inclusive xSec
+// 		    if(xSecVariables_[i].Contains("bq")||xSecVariables_[i].Contains("inclusive")){
+// 		      sysBinXSecValue=(1.+std::abs(constHadUncertainty))*stdBinXSecValue;
+// 		    }
+// 		    // otherwise from external studies
+// 		    else{
+// 		      double unc=hadUnc_[xSecVariables_[i]]->GetBinContent(bin);
+// 		      sysBinXSecValue = (1.+std::abs(unc))*stdBinXSecValue;
+// 		    }
+// 		  }
 
 		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
+		  // FIXME MARTIN: make hadronization uncertainty symmetric rel down =- rel. up
+ 		  if(sys==sysHadDown){
+		    sysBinXSecValue= (sysBinXSecValue-stdBinXSecValue < 0) ? stdBinXSecValue+2*sysDiff : stdBinXSecValue-2*sysDiff;
+		  }
 		  if      (sys==sysTopMassUp)   sysDiff *= SF_TopMassUpUncertainty;   // SF_TopMassUpUncertainty: defined in basicFunctions.h
 		  else if (sys==sysTopMassDown) sysDiff *= SF_TopMassDownUncertainty; // SF_TopMassDownUncertainty: defined in basicFunctions.h
 		}
