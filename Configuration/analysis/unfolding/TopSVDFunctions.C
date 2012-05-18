@@ -4083,7 +4083,8 @@ void TopSVDFunctions::SVD_GlobalEventYield(double*& globEvYield, double*& globEv
 TH1D* TopSVDFunctions::SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist)
 {
 	
-     
+    if (0) std::cout << probMatrixHist << statCovMatrix << std::endl; // Construct to avoid compilation warning
+    
     // Existence of Objects
     if ( inputHist == NULL ) return NULL;  
        
@@ -4188,7 +4189,7 @@ TH1D* TopSVDFunctions::SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* 
    		for ( int i = 1 ; i <= nbins ; i++ ) {
    			
    			double value_old = (inputHist+h)->GetBinContent(i);
-   			double error_old = (inputHist+h)->GetBinError(i);
+   			//double error_old = (inputHist+h)->GetBinError(i);
    			
 			double value_new = value_old / totalEvents;
 			double error_new = 0.;
@@ -4208,8 +4209,8 @@ TH1D* TopSVDFunctions::SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* 
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
 TH1D* TopSVDFunctions::SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* statCovMatrix, int numHist)
 {
-	
-     
+    if (0) std::cout << statCovMatrix << std::endl; // Construct to avoid compilation warning
+
     // Existence of Objects
     if ( inputHist == NULL ) return NULL;  
        
