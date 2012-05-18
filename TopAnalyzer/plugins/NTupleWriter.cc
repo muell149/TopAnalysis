@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.22 2012/03/23 21:56:23 blutz Exp $
+// $Id: NTupleWriter.cc,v 1.23 2012/04/02 13:06:38 tdorland Exp $
 //
 //
 
@@ -58,6 +58,9 @@ Implementation:
 #include "AnalysisDataFormats/TopObjects/interface/TtGenEvent.h"
 #include "TopQuarkAnalysis/TopSkimming/interface/TtDecayChannelSelector.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h" //###############
+
 
 #include <TLorentzVector.h>
 
@@ -342,7 +345,19 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 {
   clearVariables();
 
-  weightPU = getPUEventWeight( iEvent, weightPU_ );
+  //##################### MC weights for MCatNLO ###############
+
+   edm::Handle<GenEventInfoProduct> evt_info;
+   iEvent.getByType(evt_info);
+   double weightMC = evt_info->weight();
+
+   //#############################################################
+
+   //weightPU = getPUEventWeight( iEvent, weightPU_ ); //#######
+   weightPU = getPUEventWeight( iEvent, weightPU_ )*weightMC; //#######
+
+   //std::cout << "[NTupleWriter::analyze] weightPU = " << getPUEventWeight(iEvent, weightPU_) << " weightMC = " << weightMC << " weightPU*weightMC = " << weightPU << std::endl; //#######
+
   //weightPU3D = getPUEventWeight( iEvent, weightPU3D_);
   weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
   weightPU_Down = getPUEventWeight( iEvent, weightPU_Down_ );
