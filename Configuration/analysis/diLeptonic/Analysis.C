@@ -71,12 +71,12 @@ void Analysis::Begin(TTree * /*tree*/)
   h_RecoTopRapidity = new TH1D("RecoTopRapidity","Rapidity of Top (HYP)",100,-5,5);
   h_RecoAntiTopRapidity = new TH1D("RecoAntiTopRapidity","Rapidity of AntiTop (HYP)",100,-5,5);
 
-  h_RecoBJetpT = new TH1D("RecoBJetpT","pT of Top (HYP)",80,0,400);
-  h_RecoAntiBJetpT = new TH1D("RecoAntiBJetpT","pT of AntiTop (HYP)",80,0,400);
-  h_RecoBJetRapidity = new TH1D("RecoBJetRapidity","Rapidity of Top (HYP)",100,-5,5);
-  h_RecoAntiBJetRapidity = new TH1D("RecoAntiBJetRapidity","Rapidity of AntiTop (HYP)",100,-5,5);
-  h_RecoBJetEta = new TH1D("RecoBJetEta","Rapidity of Top (HYP)",100,-5,5);
-  h_RecoAntiBJetEta = new TH1D("RecoAntiBJetEta","Rapidity of AntiTop (HYP)",100,-5,5);
+  h_RecoBJetpT = new TH1D("RecoBJetpT","pT of BJet (HYP)",80,0,400);
+  h_RecoAntiBJetpT = new TH1D("RecoAntiBJetpT","pT of AntiBJet (HYP)",80,0,400);
+  h_RecoBJetRapidity = new TH1D("RecoBJetRapidity","Rapidity of BJet (HYP)",100,-5,5);
+  h_RecoAntiBJetRapidity = new TH1D("RecoAntiBJetRapidity","Rapidity of AntiBJet (HYP)",100,-5,5);
+  h_RecoBJetEta = new TH1D("RecoBJetEta","#eta of BJet (HYP)",100,-5,5);
+  h_RecoAntiBJetEta = new TH1D("RecoAntiBJetEta","#eta of AntiBJet (HYP)",100,-5,5);
 
   h_RecoLLBarMass = new TH1D("RecoLLBarMass","Mass of LLbar System (HYP)",500,0,1000);
   h_RecoLLBarpT = new TH1D("RecoLLBarpT","pT of LLbar System (HYP)",200,0,1000);
@@ -1130,11 +1130,11 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_RecoAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*lumiWeight); 
 
 	    h_RecoBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),weightPU*lumiWeight); 
-	    h_RecoAntiBJetpT->Fill(LVHypBJet[solutionIndex].Pt(),weightPU*lumiWeight); 
+	    h_RecoAntiBJetpT->Fill(LVHypAntiBJet[solutionIndex].Pt(),weightPU*lumiWeight); 
 	    h_RecoBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),weightPU*lumiWeight); 
-	    h_RecoAntiBJetRapidity->Fill(LVHypBJet[solutionIndex].Rapidity(),weightPU*lumiWeight); 
+	    h_RecoAntiBJetRapidity->Fill(LVHypAntiBJet[solutionIndex].Rapidity(),weightPU*lumiWeight); 
 	    h_RecoBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),weightPU*lumiWeight); 
-	    h_RecoAntiBJetEta->Fill(LVHypBJet[solutionIndex].Eta(),weightPU*lumiWeight); 
+	    h_RecoAntiBJetEta->Fill(LVHypAntiBJet[solutionIndex].Eta(),weightPU*lumiWeight); 
 
 	    h_HypLLBarMass->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_HypLLBarpT->Fill((LVHypLepton[solutionIndex]+ LVHypAntiLepton[solutionIndex]).Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
