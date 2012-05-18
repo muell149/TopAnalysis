@@ -330,24 +330,32 @@ if mcname == 'ttbarsignal':
     signal = True
     viaTau = False
     filterMadgraphPythiaBug = True
-
+    if options.inputScript == 'TopAnalysis.Configuration.Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff':
+       filterMadgraphPythiaBug = False ###
+       
 if mcname == 'ttbarsignalviatau':
     topfilter = True
     signal = True
     viaTau = True
     filterMadgraphPythiaBug = True
-
+    if options.inputScript == 'TopAnalysis.Configuration.Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff':
+       filterMadgraphPythiaBug = False ###
+       
 if mcname == 'ttbarsignalplustau':
     topfilter = True
     signal = True
     viaTau = False
     alsoViaTau = True
     filterMadgraphPythiaBug = True
-
+    if options.inputScript == 'TopAnalysis.Configuration.Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff':
+       filterMadgraphPythiaBug = False ###
+       
 if mcname == 'ttbarbg':
     topfilter = True
     filterMadgraphPythiaBug = True
-
+    if options.inputScript == 'TopAnalysis.Configuration.Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff':
+       filterMadgraphPythiaBug = False ###
+       
 if mcname == 'dyee1050':
     zfilter = True
     zfilterValue = 11
