@@ -489,6 +489,8 @@ public :
    
    TH1D *h_GenAntiLeptonpT, *h_GenAntiLeptonEta;
    TH1D *h_GenLeptonpT, *h_GenLeptonEta;
+   
+   TH1D *h_DPhiLepAntiLep, *h_MassLepAntiBJet, *h_MassAntiLepBJet;
 
    ClassDef(Analysis,0);
 };

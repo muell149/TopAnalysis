@@ -223,6 +223,10 @@ void Analysis::Begin(TTree * /*tree*/)
 
 
   h_NJetMatching = new TH1D("NJetMatching", "NJet Gen/Reco Matching",5,0,5);
+   
+  h_DPhiLepAntiLep   = new TH1D("DeltaPhiLepAntiLep", "#Delta#phi(Lep, AntiLep)", 100, -2*TMath::Pi(), 2*TMath::Pi());
+  h_MassLepAntiBJet  = new TH1D("MassLepAntiBJet",     "Mass(Lep, AntiBJet)", 80, 0, 400);
+  h_MassAntiLepBJet  = new TH1D("MassAntiLepBJet",     "Mass(AntiLep, BJet)", 80, 0, 400);
   
 }
 
@@ -1007,6 +1011,12 @@ Bool_t Analysis::Process(Long64_t entry)
 	  h_HypLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 
 	  h_HypAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+
+	  h_DPhiLepAntiLep ->Fill(TMath::Abs(LVHypLepton[solutionIndex].DeltaPhi(LVHypAntiLepton[solutionIndex])) ,weightPU*lumiWeight);
+	  h_MassLepAntiBJet->Fill((LVHypLepton[solutionIndex] + LVHypAntiBJet[solutionIndex]).M(), weightPU*lumiWeight);
+	  h_MassAntiLepBJet->Fill((LVHypAntiLepton[solutionIndex] + LVHypBJet[solutionIndex]).M(), weightPU*lumiWeight);
+
+
 	}
       }else if(*(metEt->begin()) > 30){
 	
@@ -1165,6 +1175,10 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_HypLeptonEta->Fill(LVHypLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 
 	    h_HypAntiLeptonEta->Fill(LVHypAntiLepton[solutionIndex].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+	    
+	    h_DPhiLepAntiLep->Fill(TMath::Abs(LVHypLepton[solutionIndex].DeltaPhi(LVHypAntiLepton[solutionIndex])) ,weightPU*lumiWeight);
+	    h_MassLepAntiBJet->Fill((LVHypLepton[solutionIndex] + LVHypAntiBJet[solutionIndex]).M(), weightPU*lumiWeight);
+	    h_MassAntiLepBJet->Fill((LVHypAntiLepton[solutionIndex] + LVHypBJet[solutionIndex]).M(), weightPU*lumiWeight);
 	     
 // 	    h_HypTopE->Fill(LVHypTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 // 	    h_HypAntiTopE->Fill(LVHypAntiTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
@@ -1398,6 +1412,11 @@ void Analysis::Terminate()
   h_step8->Write();
   h_step9->Write();
   
+  h_DPhiLepAntiLep->Write();
+  h_MassLepAntiBJet->Write();
+  h_MassAntiLepBJet->Write();
+  
+    
   f->Close();
   cout<<"Created: "<<f_savename<<endl;
 }
