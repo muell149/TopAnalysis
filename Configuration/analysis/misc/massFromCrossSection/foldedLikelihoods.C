@@ -474,22 +474,40 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   PredXSec ahrPredXSec("ahrPredXSec", xsec, mass, ahr->GetFunction("f1"), ahr_funcs);
 
   if(pole && !heraPDF) {
-    //    mass.setVal(140.);
-    RooPlot* testFrame = xsec.frame(130., 230.);
-    kidPredXSec.gaussianProb.plotOn(testFrame, RooFit::LineColor(kGreen),
+    mass.setVal(172.5);
+    RooPlot* convFrame = xsec.frame(120., 220.);
+    kidPredXSec.gaussianProb.plotOn(convFrame, RooFit::LineColor(kGreen),
+				    RooFit::NormRange("xsec_fullRange"),
 				    RooFit::FillStyle(1001), RooFit::FillColor(kGreen), RooFit::DrawOption("F"));
-    kidPredXSec.gaussianProb.plotOn(testFrame, RooFit::Range(kid->GetFunction("f1")->Eval(mass.getVal())-0.01,
+    kidPredXSec.gaussianProb.plotOn(convFrame, RooFit::Range(kid->GetFunction("f1")->Eval(mass.getVal())-0.01,
 							     kid->GetFunction("f1")->Eval(mass.getVal())+0.01),
 				    RooFit::NormRange("xsec_fullRange"),
 				    RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
-    kidPredXSec.rectangularProb.plotOn(testFrame, RooFit::Normalization(0.3));
-    kidPredXSec.prob.plotOn(testFrame, RooFit::LineColor(kRed));
-    testFrame->GetYaxis()->SetTitle("Probability density");
-    testFrame->Draw();
+    kidPredXSec.rectangularProb.plotOn(convFrame, RooFit::Normalization(0.215), RooFit::LineStyle(2), RooFit::FillColor(0));
+    kidPredXSec.prob.plotOn(convFrame, RooFit::LineColor(kRed), RooFit::FillColor(0));
+    convFrame->GetYaxis()->SetTitle("a.u.");
+    convFrame->Draw();
+    gPad->RedrawAxis();
+    TLegend convLeg = TLegend(0.66, 0.6, 0.92, 0.9);
+    convLeg.SetFillStyle(0);
+    convLeg.SetBorderSize(0);
+    convLeg.AddEntry(convFrame->findObject("kidPredXSec_gaussianProb_Norm[xsec]"), "Gauss(PDF#oplus#alpha_{S})", "F");
+    convLeg.AddEntry(convFrame->findObject("kidPredXSec_rectangularProb_Norm[xsec]"), "Rect(#mu_{r/f})", "F");
+    convLeg.AddEntry(convFrame->findObject("kidPredXSec_prob_Norm[xsec]"), "Gauss#otimesRect", "F");
+    convLeg.Draw();
+    char tmpTxt[99];
+    sprintf(tmpTxt, "Kidonakis #otimes MSTW, m_{t} = %.1f GeV", mass.getVal());
+    TLatex text(0.,0.,tmpTxt);
+    text.SetNDC();
+    text.SetTextAlign(13);
+    text.SetX(0.16);
+    text.SetY(0.99);
+    text.SetTextFont(43);
+    text.SetTextSizePixels(16);
+    text.Draw();
     canvas->Print(printNameBase+".ps");
     canvas->Print("figs/convolution.eps");
-
-    delete testFrame;
+    delete convFrame;
   }
 
   const int colorKid = kRed+1;
@@ -592,6 +610,18 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsString("densities", pole, heraPDF));
 
+  // producing final overview plots
+
+  ahr->GetXaxis()->SetRangeUser(140., 190.);
+  ahr->SetFillColor(colorAhr);
+  ahr->Draw("A3");
+//  kid->Draw("4 same");
+//  moc->Draw("4 same");
+  gPad->RedrawAxis();
+  canvas->Print(printNameBase+".ps");
+  
+  // cleaning up
+
   canvas->Print(printNameBase+".ps]");
 
   if(!pole) {
@@ -614,9 +644,9 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
 // main function
 //////////////////////////////////////////////////
 
-int main(const unsigned argc, const char** argv) {
+int main(const int argc, const char** argv) {
   TString arguments = "";
-  for(unsigned i=1; i<argc; i++)
+  for(int i=1; i<argc; i++)
     arguments += argv[i];
   arguments.ToLower();
   if(arguments=="all") {
