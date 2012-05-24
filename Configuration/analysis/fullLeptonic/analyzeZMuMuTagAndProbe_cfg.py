@@ -44,7 +44,7 @@ if(not globals().has_key("jetType")):
 	jetType = "PF"
 ## change muonPtCut from default if >0
 if(not globals().has_key("muonPtCut")):
-	muonPtCut = 20.
+	muonPtCut = 30.
 ## run PF2PAT?
 ## only possible for special pat tuples!!!
 if(not globals().has_key('pfToPAT')):
@@ -132,6 +132,8 @@ if(filterPathSelector == ""):
     ## in path (after triggerPathSelector): first number stands for lastFilterAccepted, the second
     ## number for L3FilterAccepted
     matchedCutsString=' path( "'+triggerPathSelector+'",1,0 )'
+elif(triggerPathSelector == "*"):
+    matchedCutsString='filter( "'+filterPathSelector+'" )'
 else:
     matchedCutsString=' path( "'+triggerPathSelector+'" ,0) && filter( "'+filterPathSelector+'" )'
 print "matchedCutsString = ", matchedCutsString
@@ -212,7 +214,7 @@ else:
 
 
 #-----------------------------------------------------------------------------
-# ----- P r e p a r e   M u o n   C o l l e c t i o n s ----- #
+# ----- R U N   D E T A I L S                       ----- #
 #-----------------------------------------------------------------------------
 
 ## high level trigger filter (to apply trigger on MC events), here: hltMu9 or other single-mu trigger
@@ -229,15 +231,15 @@ process.hltTriggerFilter = hltHighLevel.clone(TriggerResultsTag = triggerResults
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 print "dataSelector = ", dataSelector
 if(dataSelector == 1):
-     process.GlobalTag.globaltag = cms.string('START42_V13::All')
+     process.GlobalTag.globaltag = cms.string('START42_V17::All')
      jsonFile = ""
      print "dataSelector = 1, global tag: ", process.GlobalTag.globaltag
 elif(dataSelector == 11):
-     process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
+     process.GlobalTag.globaltag = cms.string('GR_R_42_V23::All')
      ##-------------------- Import the JEC services -----------------------
-     process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+     #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
      ##-------------------- Import the Jet RECO modules -----------------------
-     process.load('RecoJets.Configuration.RecoPFJets_cff')
+     #process.load('RecoJets.Configuration.RecoPFJets_cff')
      
      ## load JSON file for data
      if(jsonFile!=""):
@@ -262,26 +264,94 @@ else:
 #-----------------------------------------------------------------------------
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-#process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
-#if(options.sample=="ttbar"):
-    #process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
-#if(options.sample=="wjets"):
-    #process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WJetsToLNu_TuneZ2_7TeV_madgraph_tauola.root")
-#if(options.sample=="zjets"):
-process.PUweightEPS = process.eventWeightPU.clone(
-    MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root"),
-    DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
-    )
+
+## Apply common setting before module is cloned for systematic studies
+
+process.eventWeightPU.MCSampleTag = "Fall11"
+
+process.eventWeightPU.MCSampleHistoName        = "histo_Fall11_true"
+process.eventWeightPU.DataHistoName            = "histoData_true"
+
+process.eventWeightPU           = process.eventWeightPU.clone()
+process.eventWeightPUsysUp      = process.eventWeightPU.clone()
+process.eventWeightPUsysDown    = process.eventWeightPU.clone()
+process.eventWeightPUEPS        = process.eventWeightPU.clone()
+process.eventWeightPU2011B      = process.eventWeightPU.clone()
+process.eventWeightPUEle32      = process.eventWeightPU.clone()
+process.eventWeightPUEle32WP70 = process.eventWeightPU.clone()
+
+#### Configuration for Nominal PU Weights
+
+process.eventWeightPU.WeightName          = "eventWeightPU"
+process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPU.CreateWeight3DHisto = False
+process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
+
+#### Configuration for PU Up Variations
+
+process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+process.eventWeightPUsysUp.CreateWeight3DHisto = False
+process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
+
+#### Configuration for PU Down Variations
+
+process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+process.eventWeightPUsysDown.CreateWeight3DHisto = False
+process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
+
+#### Configuration for Nominal PU Weights EPS
+
+process.eventWeightPUEPS.WeightName          = "eventWeightPUEPS"
+process.eventWeightPUEPS.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_EPS.root"
+process.eventWeightPUEPS.CreateWeight3DHisto = False
+process.eventWeightPUEPS.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DEPS.root"
+
+### Configuration for Nominal PU Weights B
+
+process.eventWeightPU2011B.WeightName          = "eventWeightPU2011B"
+process.eventWeightPU2011B.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011B.root"
+process.eventWeightPU2011B.CreateWeight3DHisto = False
+#process.eventWeightPU2011B.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D2011B.root"
+
+### Configuration for Ele32 (effective taking pre scale into account)
+
+process.eventWeightPUEle32.WeightName          = "eventWeightPUEle32"
+process.eventWeightPUEle32.DataFile            = "TopAnalysis/TopUtils/data/DataPileupHistogram_Ele32_v1to7.root"
+process.eventWeightPUEle32.DataHistoName       = "pileup"
+process.eventWeightPUEle32.CreateWeight3DHisto = False
+#process.eventWeightPUEle32.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DEle32.root"
+
+### Configuration for Ele32 including Ele32WP70 (effective taking pre scale into account)
+
+process.eventWeightPUEle32WP70.WeightName          = "eventWeightPUEle32WP70"
+process.eventWeightPUEle32WP70.DataFile            = "TopAnalysis/TopUtils/data/DataPileupHistogram_Ele32_v1to7_Ele32_WP70_v2to3.root"
+process.eventWeightPUEle32WP70.DataHistoName       = "pileup"
+process.eventWeightPUEle32WP70.CreateWeight3DHisto = False
+#process.eventWeightPUEle32WP70.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DEle32WP70.root"
+
+process.makeEventWeightsPU = cms.Sequence(process.eventWeightPU        *
+                                          process.eventWeightPUsysUp   *
+                                          process.eventWeightPUsysDown *
+                                          process.eventWeightPUEPS     *
+                                          process.eventWeightPU2011B   *
+                                          process.eventWeightPUEle32   *
+                                          process.eventWeightPUEle32WP70)
 
 # relevant PU event weights (potentially merged with shape distortion weights)
-tagPUweightEPS    =cms.InputTag("PUweightEPS","eventWeightPU")
-tagPUweightEPSUp  =cms.InputTag("PUweightEPS","eventWeightPUUp")
-tagPUweightEPSDown=cms.InputTag("PUweightEPS","eventWeightPUDown")
+PUweightraw     = cms.InputTag("eventWeightPU",       "eventWeightPU")
+PUweightrawUp   = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
+PUweightrawDown = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
+PUweightrawEPS  = cms.InputTag("eventWeightPUEPS",    "eventWeightPUEPS")
+PUweightraw2011B= cms.InputTag("eventWeightPU2011B",  "eventWeightPU2011B")
+PUweightrawEle32= cms.InputTag("eventWeightPUEle32",  "eventWeightPUEle32")
+PUweightrawEle32WP70= cms.InputTag("eventWeightPUEle32WP70",  "eventWeightPUEle32WP70")
 
 ## create vector of input tags
-PUweights = cms.VInputTag(tagPUweightEPS, tagPUweightEPSUp, tagPUweightEPSDown)
+PUweights = cms.VInputTag(PUweightraw, PUweightrawUp, PUweightrawDown, PUweightrawEPS, PUweightraw2011B, PUweightrawEle32, PUweightrawEle32WP70)
 ## standard weight as normal input tag
-PUweight =cms.InputTag("PUweightEPS","eventWeightPU")
+PUweight = PUweightraw
 
 #-----------------------------------------------------------------------------
 # ----- P r e p a r e   S t a n d a r d   C o l l e c t i o n s ----- #
@@ -352,7 +422,8 @@ process.globalMuons = selectedPatMuons.clone(
 ## in case of tagAndProbe:
 if(modeSelector == 1):
        ## tag muons (tight selection) according to V4
-       process.tagMuonsNoDR = selectedPatMuons.clone(
+       #process.tagMuonsNoDR = ....
+       process.tagMuons = selectedPatMuons.clone(
             src = 'selectedPatMuonsTriggerMatch', 
             cut = 'triggerObjectMatches.size > 0 &'
                   'isGlobalMuon & isTrackerMuon &'
@@ -368,20 +439,20 @@ if(modeSelector == 1):
                   #'(trackIso+caloIso)/pt < 0.05'
        )
        ## jet-muon-distance filter
-       process.tagMuons = cms.EDProducer("MuonJetOverlapSelector",
-            ## input muon collection
-            muons = cms.InputTag("tagMuonsNoDR"),
-            ## jet collection to check overlap
-            jets = cms.InputTag("selectedJets"),
-            ## define overlap region (<deltaR)
-            deltaR = cms.double(0.3),
-            ## choose whether you want to
-            ## include/exclude overlapping
-            ## muons in the created collection
-            ## include: overlap = true,
-            ## exclude: overlap = false
-            overlap = cms.bool(False)
-       )
+       #process.tagMuons = cms.EDProducer("MuonJetOverlapSelector",
+            ### input muon collection
+            #muons = cms.InputTag("tagMuonsNoDR"),
+            ### jet collection to check overlap
+            #jets = cms.InputTag("selectedJets"),
+            ### define overlap region (<deltaR)
+            #deltaR = cms.double(0.3),
+            ### choose whether you want to
+            ### include/exclude overlapping
+            ### muons in the created collection
+            ### include: overlap = true,
+            ### exclude: overlap = false
+            #overlap = cms.bool(False)
+       #)
 
 
        ## do tagging with help of Z resonance
@@ -393,7 +464,8 @@ if(modeSelector == 1):
         deltaM =  15,
 	leptonId = leptonTypeId
        )
-       process.produceProbeMuons = cms.Sequence(process.tagMuonsNoDR *process.tagMuons * process.probeMuons)
+       #process.produceProbeMuons = cms.Sequence(process.tagMuonsNoDR *process.tagMuons * process.probeMuons)
+       process.produceProbeMuons = cms.Sequence(process.tagMuons * process.probeMuons)
        print "modeSelector =1"
 
 ## in case of generator efficiency: 
@@ -457,7 +529,8 @@ process.probeMuonsTotalSelection = selectedPatMuons.clone(
 )
 
 ## probe muons to test trigger on: muons passing track quality and isolation selection
-process.probeMuonsTriggerNoDR = selectedPatMuons.clone(
+# process.probeMuonsTriggerNoDR = ....
+process.probeMuonsTrigger = selectedPatMuons.clone(
    src = 'probeMuonsDZ',
    cut = 'innerTrack.numberOfValidHits >= 11 &'
          'globalTrack.normalizedChi2 < 10.0  &'
@@ -468,12 +541,12 @@ process.probeMuonsTriggerNoDR = selectedPatMuons.clone(
 	 '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
          #'(trackIso+caloIso)/pt < 0.05'
 )
-process.probeMuonsTrigger = cms.EDProducer("MuonJetOverlapSelector",
-  muons = cms.InputTag("probeMuonsTriggerNoDR"),
-  jets = cms.InputTag("selectedJets"),
-  deltaR = cms.double(0.3),
-  overlap = cms.bool(False)
-)
+#process.probeMuonsTrigger = cms.EDProducer("MuonJetOverlapSelector",
+  #muons = cms.InputTag("probeMuonsTriggerNoDR"),
+  #jets = cms.InputTag("selectedJets"),
+  #deltaR = cms.double(0.3),
+  #overlap = cms.bool(False)
+#)
 
 
 #-----------------------------------------------------------------------------
@@ -562,17 +635,18 @@ process.testMuonsTotalSelectionNoDZNoDR = selectedPatMuons.clone(
         #'(trackIso+caloIso)/pt < 0.05'
 )
 ## deltaZ(muonVertex, PV) < 0.5
-process.testMuonsTotalSelectionNoDR = cms.EDProducer("MuonVertexDistanceSelector",
+#process.testMuonsTotalSelectionNoDR = ...
+process.testMuonsTotalSelection = cms.EDProducer("MuonVertexDistanceSelector",
   src           = cms.InputTag("testMuonsTotalSelectionNoDZNoDR"),
   primaryVertex = cms.InputTag("offlinePrimaryVertices"),
   cutValue      = cms.double(0.5)
 )
-process.testMuonsTotalSelection = cms.EDProducer("MuonJetOverlapSelector",
-  muons = cms.InputTag("testMuonsTotalSelectionNoDR"),
-  jets = cms.InputTag("selectedJets"),
-  deltaR = cms.double(0.3),
-  overlap = cms.bool(False)
-)
+#process.testMuonsTotalSelection = cms.EDProducer("MuonJetOverlapSelector",
+  #muons = cms.InputTag("testMuonsTotalSelectionNoDR"),
+  #jets = cms.InputTag("selectedJets"),
+  #deltaR = cms.double(0.3),
+  #overlap = cms.bool(False)
+#)
 
 ## check if probe muons (without further selection) fired trigger
 process.testMuonsTrigger = selectedPatMuons.clone(
@@ -612,34 +686,40 @@ process.tapTrkQ = tagAndProbeAnalyzer.clone(
   tags   = "tagMuons",
   probes = "probeMuonsTrkQ", 
   tests  = "testMuonsTrkQ",
-  jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  jets   = "selectedJets"
+  
 )
 
 process.tapIso = tagAndProbeAnalyzer.clone(
   tags   = "tagMuons",
   probes = "probeMuonsIso", 
   tests  = "testMuonsIso",
-  jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  jets   = "selectedJets"
 )
 
 process.tapMinDR = tagAndProbeAnalyzer.clone(
   tags   = "tagMuons",
   probes = "probeMuonsMinDR", 
   tests  = "testMuonsMinDR",
-  jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  jets   = "selectedJets"
 )
 
 process.tapTotalSelection = tagAndProbeAnalyzer.clone(
   tags   = "tagMuons",
   probes = "probeMuonsTotalSelection", 
   tests  = "testMuonsTotalSelection",
-  jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
+  jets   = "selectedJets"
 )
 
 process.tapTrigger = tagAndProbeAnalyzer.clone(
   tags   = "tagMuons",
   probes = "probeMuonsTrigger", 
   tests  = "testMuonsTrigger",
+  #jets   = "goodJetsPF30NoOverlapJetsProbeMuons"
   jets   = "selectedJets"
 )
 
@@ -665,18 +745,18 @@ if(leptonTypeId==13):
 	process.probeMuonsIso      *
 	process.probeMuonsMinDR      *
 	process.probeMuonsTotalSelection *
-	process.probeMuonsTriggerNoDR  *
+	#process.probeMuonsTriggerNoDR  *
 	process.probeMuonsTrigger  *
 	## do jet-probe muon cleaning
-	process.noOverlapJetsProbeMuons *
-	process.goodJetsPF30NoOverlapJetsProbeMuons *
+	#process.noOverlapJetsProbeMuons *
+	#process.goodJetsPF30NoOverlapJetsProbeMuons *
 	## prepare test muons
 	process.testMuonsTrkQNoDZ  *
 	process.testMuonsTrkQ      *
 	process.testMuonsIso       *
 	process.testMuonsMinDR     *
 	process.testMuonsTotalSelectionNoDZNoDR *
-	process.testMuonsTotalSelectionNoDR *
+	#process.testMuonsTotalSelectionNoDR *
 	process.testMuonsTotalSelection *
 	process.testMuonsTrigger   *
 	#process.analyzeTestMuonsTrigger *
@@ -700,7 +780,7 @@ if(leptonTypeId==13):
 
 ## pre-selection on probe electrons (eta cuts)
 process.probeElectronsBasis = selectedPatElectrons.clone(src = 'selectedPatMuonsTriggerMatch', 
-                                                         cut = 'abs(eta) <  2.5  &'
+                                                         cut = 'abs(eta) <  2.1  &'
                                                                '( abs(superCluster.eta) < 1.4442   |'
                                                                '  abs(superCluster.eta) > 1.5660 )  '
                                                          )
@@ -761,19 +841,19 @@ process.probeElectronsID = selectedPatElectrons.clone(
 ## probe electrons to test isolation on: electrons passing track quality & ID
 process.probeElectronsIso = selectedPatElectrons.clone(
    src = 'probeElectronsDZ',
-   cut = 'abs(dB)  <  0.02 & test_bit( electronID(\"simpleEleId70cIso\"), 0 )'
+   cut = 'abs(dB)  <  0.02 & test_bit( electronID("eidHyperTight1MC"), 0 )'
 )
 ## probe electrons to test conversion rejection on: electrons passing track quality & ID &ISo
 process.probeElectronsConvRej = selectedPatElectrons.clone(
    src = 'probeElectronsDZ',
-   cut = 'abs(dB)  <  0.02 & test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
+   cut = 'abs(dB)  <  0.02 & test_bit( electronID("eidHyperTight1MC"), 0 ) &'
          '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.125'
 )
 
 ## probe electrons to test trigger on: electrons passing track quality, ID, Iso and conv. rej.
 process.probeElectronsTrigger = selectedPatElectrons.clone(
    src = 'probeElectrons',
-   cut = 'abs(dB)  <  0.02 & test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'
+   cut = 'abs(dB)  <  0.02 & test_bit( electronID("eidHyperTight1MC"), 0 ) &'
          '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.125 &'
 	 'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &'
          'abs(convDcot) > 0.02 &'
@@ -784,7 +864,7 @@ process.probeElectronsTrigger = selectedPatElectrons.clone(
 # -----Probe Electron -Jet Cleaning (only for ID/Iso T&P)                  ----- #
 #-----------------------------------------------------------------------------
 
-## reintroduce jet-muon cleaning between jets and probe muons
+## reintroduce jet-electron cleaning between jets and probe electrons
 process.noOverlapJetsProbeElectrons = cleanPatJets.clone( 	 
 	  src = cms.InputTag("selectedPatJetsAK5PF"), 	 
 	    
@@ -796,7 +876,7 @@ process.noOverlapJetsProbeElectrons = cleanPatJets.clone(
 	      muons = cms.PSet( 	 
 		  src       = cms.InputTag("probeElectronsDZ"), 	 
 		  algorithm = cms.string("byDeltaR"), 	 
-		  preselection        = cms.string('abs(eta) < 2.5 & pt >' + str(muonPtCut)), 	 
+		  preselection        = cms.string('abs(eta) < 2.1 & pt >' + str(muonPtCut)), 	 
 		  deltaR              = cms.double(0.1), 	 
 		  checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref 	 
 		  pairCut             = cms.string(""), 	 
@@ -835,7 +915,7 @@ process.testElectronsTrkQ = selectedPatElectrons.clone(
 ## cut on eID
 process.testElectronsID = selectedPatElectrons.clone(
    src = 'probeElectronsID',
-   cut = 'test_bit( electronID(\"simpleEleId70cIso\"), 0 )'
+   cut = 'test_bit( electronID("eidHyperTight1MC"), 0 )'
 )
 
 ## cut on isolation
@@ -871,35 +951,41 @@ process.tapTrkQEle = tagAndProbeAnalyzer.clone(
   tags   = "tagElectrons",
   probes = "probeElectronsTrkQ", 
   tests  = "testElectronsTrkQ",
-  jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  jets   = "selectedJets"
+  
   )
   
 process.tapIDEle = tagAndProbeAnalyzer.clone(
   tags   = "tagElectrons",
   probes = "probeElectronsID", 
   tests  = "testElectronsID",
-  jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  jets   = "selectedJets"
   )
   
 process.tapIsoEle = tagAndProbeAnalyzer.clone(
   tags   = "tagElectrons",
   probes = "probeElectronsIso", 
   tests  = "testElectronsIso",
-  jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  jets   = "selectedJets"
   )
 
 process.tapConvRejEle = tagAndProbeAnalyzer.clone(
   tags   = "tagElectrons",
   probes = "probeElectronsConvRej", 
   tests  = "testElectronsConvRej",
-  jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  jets   = "selectedJets"
   )
   
 process.tapTotalSelectionEle = tagAndProbeAnalyzer.clone(
   tags   = "tagElectrons",
   probes = "probeElectronsTrkQ", 
   tests  = "testElectronsConvRej",
-  jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  #jets   = "goodJetsPF30NoOverlapJetsProbeElectrons"
+  jets   = "selectedJets"
   )
 
 process.tapTriggerEle = tagAndProbeAnalyzer.clone(
@@ -934,8 +1020,8 @@ if(leptonTypeId==11):
 	process.probeElectronsConvRej *
 	process.probeElectronsTrigger *
 	## jet cleaning
-	process.noOverlapJetsProbeElectrons *
-        process.goodJetsPF30NoOverlapJetsProbeElectrons *
+	#process.noOverlapJetsProbeElectrons *
+        #process.goodJetsPF30NoOverlapJetsProbeElectrons *
 	## prepare test electrons
 	process.testElectronsDZ *
 	process.testElectronsTrkQ *
@@ -976,11 +1062,9 @@ else:
     
     ## jet kinematics analyzer
     process.load("TopAnalysis.TopAnalyzer.JetKinematicsVertex_cfi")
-    process.load("TopAnalysis.TopAnalyzer.JetKinematicsDifferentMultiplicities_cfi")
     ## add PU reweighting
     if(PUreweighting):
         process.analyzeJetKinematicsVertex.weight = PUweight
-	process.analyzeJetKinematicsDifferentMultiplicities.weight = PUweight
     ## define ordered jets
     ## ATTENTION!!! For MC it should be 'L3Absolute' !!!!
     corrLevel=''
@@ -1005,21 +1089,18 @@ else:
     process.analyzeJet2Trig1BeforeCut  = process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = uds2 )
     process.analyzeJet3Trig1BeforeCut  = process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = uds3 )
     process.analyzeJetAllTrig1BeforeCut= process.analyzeJetKinematicsVertex.clone (srcA = 'tightLeadingPFJets', analyze = udsAll)
-    process.analyzeJetDiffMultTrig1BeforeCut  = process.analyzeJetKinematicsDifferentMultiplicities.clone (src = 'tightLeadingPFJets')
     ##  Jet Kinematics Analyzer for the first 4 and all jets, for events fired by trigger 1 after the jet cut 
     process.analyzeJet0Trig1AfterCut  = process.analyzeJet0Trig1BeforeCut.clone() 
     process.analyzeJet1Trig1AfterCut  = process.analyzeJet1Trig1BeforeCut.clone()
     process.analyzeJet2Trig1AfterCut  = process.analyzeJet2Trig1BeforeCut.clone()
     process.analyzeJet3Trig1AfterCut  = process.analyzeJet3Trig1BeforeCut.clone()
     process.analyzeJetAllTrig1AfterCut= process.analyzeJetAllTrig1BeforeCut.clone()
-    process.analyzeJetDiffMultTrig1AfterCut  = process.analyzeJetKinematicsDifferentMultiplicities.clone (src = 'tightLeadingPFJets')
     ##  Jet Kinematics Analyzer for the first 4 and all jets, for events fired by trigger 2 after the jet cut
     process.analyzeJet0Trig2AfterCut  = process.analyzeJet0Trig1BeforeCut.clone()
     process.analyzeJet1Trig2AfterCut  = process.analyzeJet1Trig1BeforeCut.clone()
     process.analyzeJet2Trig2AfterCut  = process.analyzeJet2Trig1BeforeCut.clone()
     process.analyzeJet3Trig2AfterCut  = process.analyzeJet3Trig1BeforeCut.clone()
     process.analyzeJetAllTrig2AfterCut= process.analyzeJetAllTrig1BeforeCut.clone()
-    process.analyzeJetDiffMultTrig2AfterCut  = process.analyzeJetKinematicsDifferentMultiplicities.clone (src = 'tightLeadingPFJets')
     
     ## lepton analyzers after trigger 1 and trigger 2
     process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
@@ -1101,7 +1182,6 @@ else:
        process.analyzeJet2Trig1BeforeCut             *
        process.analyzeJet3Trig1BeforeCut             *
        #process.analyzeJetAllTrig1BeforeCut           *
-       process.analyzeJetDiffMultTrig1BeforeCut      *
        ## jet selection
        process.leadingJetSelectionNjets              *
        ## jet kinematics analyzer for events fired by trigger 1 after the jet cut
@@ -1110,7 +1190,6 @@ else:
        process.analyzeJet2Trig1AfterCut              *
        process.analyzeJet3Trig1AfterCut              *
        process.analyzeJetAllTrig1AfterCut            *
-       process.analyzeJetDiffMultTrig1AfterCut       *
        ## lepton analyzers
        process.leptonAnalyzersTrig1                  *
        ## HLT trigger filter: 2nd trigger
@@ -1121,7 +1200,6 @@ else:
        process.analyzeJet2Trig2AfterCut              *
        process.analyzeJet3Trig2AfterCut              *
        process.analyzeJetAllTrig2AfterCut            *
-       process.analyzeJetDiffMultTrig2AfterCut       *
        ## lepton analyzers
        process.leptonAnalyzersTrig2                 
     )
@@ -1182,7 +1260,7 @@ process.p1 = cms.Path(
     ## apply primary vertex selection
     process.PVSelection                *
     ## calculate PU weights
-    process.PUweightEPS              *
+    process.makeEventWeightsPU         *
     ## apply trigger selection
     process.hltTriggerFilter           *
     #process.analyzePostTriggerPatMuons *
@@ -1203,7 +1281,7 @@ process.p1 = cms.Path(
 )
 
 if(not PUreweighting):
-    process.p1.remove(process.PUweightEPS)
+    process.p1.remove(process.makeEventWeightsPU)
 
     ## switch to PF objects
 if(jetType=="PF"):
@@ -1238,6 +1316,7 @@ if(pfToPAT):
         'runOnAOD': True,
         'switchOffEmbedding': False,
         'addResolutions': True,
+	'resolutionsVersion': 'summer11',
         'runOnOLDcfg': True,
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
         'cutsElec': 'et > 15. & abs(eta) < 2.5',
@@ -1310,8 +1389,8 @@ if(pfToPAT):
         #getattr(process,path).remove( process.unconvTightElectronsEJ )
         #getattr(process,path).remove( process.goodElectronsEJ )
         # replace object consistently with names from PF2PAT
-        massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
-        massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
+        #massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
+        #massSearchReplaceAnyInputTag(getattr(process,path), 'selectedPatJetsAK5PF', 'selectedPatJets')        
         # run trigger at the beginning to save a lot of time
         getattr(process,path).insert(0,process.hltTriggerFilter)
     
