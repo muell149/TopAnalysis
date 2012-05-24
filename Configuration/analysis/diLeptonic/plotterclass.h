@@ -1579,6 +1579,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   leg->AddEntry( syshist, "uncertainty", "f" );
 
   drawhists[0]->SetMinimum(ymin);
+  if(rangemin!=0)drawhists[0]->SetAxisRange(rangemin, rangemax, "X");
   if(logY){  
     drawhists[0]->SetMaximum(18*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));
   }
@@ -1599,7 +1600,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
+  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
   gSystem->MakeDirectory("Plots");  
   gSystem->MakeDirectory("Plots/"+channel);  
   c->Print("Plots/"+channel+"/"+name+".eps");  
@@ -2178,6 +2179,8 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     for ( size_t i = 0; i < XAxisbinCenters.size() ; i++ ) {
       UnfoldingResult[i] = unfoldedDistributionNormalized->GetBinContent(i+2);//account for extra row in SVD unfolding
       UnfoldingError[i] = unfoldedDistributionNormalized->GetBinError(i+2);
+      //UnfoldingResult[i] = unfoldedDistribution->GetBinContent(i+2);//account for extra row in SVD unfolding
+      //UnfoldingError[i] = unfoldedDistribution->GetBinError(i+2);
     }
 		
 		 	
@@ -2538,18 +2541,17 @@ void Plotter::PlotDiffXSec(){
 
     double ModelSysPlot[XAxisbinCenters.size()];
     double ExpSysPlot[XAxisbinCenters.size()];;
-
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       double syst_square = 0;
       ExpSysPlot[bin]=0.;
       ModelSysPlot[bin]=0.;
       for(int syst =0; syst<13; syst++){
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
-	  ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-	}else{
-	  ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-	}
+    //	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
+    //  ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+    //}else{
+    //  ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+    //}
 
       }
       ExpSysPlot[bin]=sqrt(ExpSysPlot[bin]);
@@ -2579,10 +2581,8 @@ void Plotter::PlotDiffXSec(){
     ResultsFile.close();
 
 
-
-
     //The Markus plots
-    TCanvas * c10 = new TCanvas("Markus","Markus");
+    /*    TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
 
@@ -2638,7 +2638,7 @@ void Plotter::PlotDiffXSec(){
     delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
     delete leg11;
     delete c11;
-    
+    */
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
@@ -2731,14 +2731,54 @@ void Plotter::PlotDiffXSec(){
     mcatnloBand->SetFillColor(kGray);
     mcatnloBand->SetLineColor(kAzure);
     mcatnloBand->SetLineWidth(2);
+    
+    TGraphErrors *KidoHist=NULL;
+    if(name.Contains("ToppT") || name.Contains("TopRapidity")){
+      if(name.Contains("ToppT")){	//too early to be clever
+	TGraphErrors *KidoTemp = new TGraphErrors("pttopnnloapprox7lhc173m.txt");
+	double kidoscale = 1./KidoTemp->Integral(-1,-1);
+	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
+	  Double_t graphx,graphy;
+	  KidoTemp->GetPoint(points, graphx, graphy);
+	  graphy=graphy*kidoscale;
+	  KidoTemp->SetPoint(points, graphx, graphy);
+	}
+	KidoHist = (TGraphErrors*)KidoTemp->Clone();
+	delete KidoTemp;
+      }else{
+	TGraphErrors *KidoTemp = new TGraphErrors("ytopnnloapprox7lhc173m.txt");
+	double kidoscale = 1./KidoTemp->Integral(-1,-1);
+	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
+	  Double_t graphx,graphy;
+	  KidoTemp->GetPoint(points, graphx, graphy);
+	  graphy=graphy*kidoscale;
+	  KidoTemp->SetPoint(points, graphx, graphy);
+	}
+	KidoHist = (TGraphErrors*)KidoTemp->Clone();
+      delete KidoTemp;
+      }
+    }
 
+    TH1 *MCFMHist;
+    TFile* MCFMfile = new TFile("diffCrossSections_normalized_tt_bbl_todk_MSTW200_172_172_ful_central.root","READ");
+
+    if(name.Contains("LeptonpT")){MCFMfile->GetObject<TH1>("pt_l", MCFMHist);}
+    else if(name.Contains("LeptonEta")){MCFMfile->GetObject<TH1>("eta_l", MCFMHist);}
+    else if(name.Contains("LLBarpT")){MCFMfile->GetObject<TH1>("pt_ll", MCFMHist);}
+    else if(name.Contains("LLBarMass")){MCFMfile->GetObject<TH1>("m_ll", MCFMHist);}
+    else if(name.Contains("ToppT")){MCFMfile->GetObject<TH1>("pt_t", MCFMHist);}
+    else if(name.Contains("TopRapidity")){MCFMfile->GetObject<TH1>("y_t", MCFMHist);}
+    else if(name.Contains("TTBarpT")){MCFMfile->GetObject<TH1>("pt_tt", MCFMHist);}
+    else if(name.Contains("TTBarRapidity")){MCFMfile->GetObject<TH1>("y_tt", MCFMHist);}
+    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
+    else{cout<<"probably going to crash soon"<<endl;}
     TCanvas * c = new TCanvas("DiffXS","DiffXS");
     
     if(logY){
       c->SetLogy();
     }
     h_DiffXSec->SetMarkerStyle(20);
- 
+    MCFMHist->SetMarkerStyle(2);
     h_GenDiffXSec->SetMinimum(ymin);
     if(logY){  
       h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
@@ -2757,6 +2797,8 @@ void Plotter::PlotDiffXSec(){
     mcnlohist->Draw("SAME,C");
     powheghist->SetLineColor(kGreen+1);
     powheghist->Draw("SAME,C");
+    if(name.Contains("ToppT") || name.Contains("TopRapidity"))KidoHist->Draw("SAME,C");
+    //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
     DrawCMSLabels(true, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
@@ -2768,6 +2810,8 @@ void Plotter::PlotDiffXSec(){
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
     if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
     if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "Powheg",  "l");        
+    if(name.Contains("ToppT") || name.Contains("TopRapidity"))  leg2.AddEntry(KidoHist,       "Kidonakis",  "l");        
+    //if (MCFMHist->GetEntries())  leg2.AddEntry(MCFMHist,       "MCFM",  "p");        
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
     leg2.Draw("same");
@@ -2895,7 +2939,7 @@ TH1* Plotter::GetNloCurve(TString NewName, TString Generator){
       file2 = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau_powheg.root","READ");
     }
   }
-  
+
   if (file && !file->IsZombie()) {
     if (channelType<3)hist=(TH1*)file->Get("VisGen"+NewName)->Clone();
     else {
