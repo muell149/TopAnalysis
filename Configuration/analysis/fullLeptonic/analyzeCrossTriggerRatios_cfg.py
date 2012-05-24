@@ -125,20 +125,63 @@ process.patTriggerSequenceUser = cms.Sequence(
 #-----------------------------------------------------------------------------
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
-process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
-#if(options.sample=="ttbar"):
-process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
-#if(options.sample=="wjets"):
-    #process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_WJetsToLNu_TuneZ2_7TeV_madgraph_tauola.root")
-#if(options.sample=="zjets"):
-#process.eventWeightPU.MCSampleFile = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer11_DYJetsToLL_TuneZ2_M_50_7TeV_madgraph_tauola.root")
 
-process.eventWeightPU.DataFile = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_160404-163869_7TeV_May10ReReco_Collisions11_v2_and_165088-167913_7TeV_PromptReco_Collisions11.root")
+## Apply common setting before module is cloned for systematic studies
+
+process.eventWeightPU.MCSampleTag = "Fall11"
+
+process.eventWeightPU.MCSampleHistoName        = "histo_Fall11_true"
+process.eventWeightPU.DataHistoName            = "histoData_true"
+
+process.eventWeightPU        = process.eventWeightPU.clone()
+process.eventWeightPUsysUp   = process.eventWeightPU.clone()
+process.eventWeightPUsysDown = process.eventWeightPU.clone()
+process.eventWeightPUEPS     = process.eventWeightPU.clone()
+
+#### Configuration for Nominal PU Weights
+
+process.eventWeightPU.WeightName          = "eventWeightPU"
+process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPU.CreateWeight3DHisto = False
+process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
+
+#### Configuration for PU Up Variations
+
+process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+process.eventWeightPUsysUp.CreateWeight3DHisto = False
+process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
+
+#### Configuration for PU Down Variations
+
+process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+process.eventWeightPUsysDown.CreateWeight3DHisto = False
+process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
+
+#### Configuration for Nominal PU Weights EPS
+
+process.eventWeightPUEPS.WeightName          = "eventWeightPUEPS"
+process.eventWeightPUEPS.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_EPS.root"
+process.eventWeightPUEPS.CreateWeight3DHisto = False
+process.eventWeightPUEPS.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DEPS.root"
+
+process.makeEventWeightsPU = cms.Sequence(process.eventWeightPU        *
+                                          process.eventWeightPUsysUp   *
+                                          process.eventWeightPUsysDown *
+                                          process.eventWeightPUEPS  )
 
 # relevant PU event weights (potentially merged with shape distortion weights)
-PUweight    =cms.InputTag("eventWeightPU","eventWeightPU")
-PUweightUp  =cms.InputTag("eventWeightPU","eventWeightPUUp")
-PUweightDown=cms.InputTag("eventWeightPU","eventWeightPUDown")
+PUweightraw     = cms.InputTag("eventWeightPU",       "eventWeightPU")
+PUweightrawUp   = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
+PUweightrawDown = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
+PUweightrawEPS  = cms.InputTag("eventWeightPUEPS",    "eventWeightPUEPS")
+
+## create vector of input tags
+PUweights = cms.VInputTag(PUweightraw, PUweightrawUp, PUweightrawDown, PUweightrawEPS)
+## standard weight as normal input tag
+PUweight = PUweightraw
+
 
 #-----------------------------------------------------------------------------
 # ----- P r e p a r e   M u o n   C o l l e c t i o n s ----- #
@@ -164,15 +207,11 @@ process.hltL3Filter.hltFilter= l3FilterSelector
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 print "dataSelector = ", dataSelector
 if(dataSelector == 1):
-     process.GlobalTag.globaltag = cms.string('START42_V12::All')
+     process.GlobalTag.globaltag = cms.string('START42_V17::All')
      jsonFile = ""
      print "dataSelector = 1, global tag: ", process.GlobalTag.globaltag
 elif(dataSelector == 11):
-     process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
-     ##-------------------- Import the JEC services -----------------------
-     process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-     ##-------------------- Import the Jet RECO modules -----------------------
-     process.load('RecoJets.Configuration.RecoPFJets_cff')
+     process.GlobalTag.globaltag = cms.string('GR_R_42_V23::All')
      
      ## load JSON file for data
      if(jsonFile!=""):
@@ -204,6 +243,77 @@ from TopAnalysis.TopFilter.sequences.jetSelection_cff import goodJets
 process.vetoJets.src="goodJets"
 process.vetoJets.cut=''    
 
+#-----------------------------------------------------------------------------
+# ----- C o n f i g u r e   P A T   T r i g g e r  M a t c h i n g (optional)----- #
+#-----------------------------------------------------------------------------
+#######################################
+## so far only used for test purposes!!!!!!!! switch only to True if you know what you do!!
+#######################################
+useTriggerMatching = False
+
+## trigger sequences
+process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff" )
+## change triggerProcessName, e.g. to HLT or REDIGIXXXX
+process.patTrigger.processName      = triggerProcessName
+process.patTriggerEvent.processName = triggerProcessName
+## inpu tag for selectedPatMuons/Electrons
+if(leptonTypeId == 11):
+    selectedPatLeptons = "selectedPatElectrons"
+elif(leptonTypeId == 13):
+    selectedPatLeptons = "selectedPatMuons"
+
+## the following format for matchedCuts is needed for 3_11_X and higher, e.g.
+## matchedCuts = cms.string( 'type( "TriggerMuon" ) && ( path( "HLT_Mu15_v*" ) || path( "HLT_Mu15" ) )' )
+if(l3FilterSelector == ""):
+    ## in path (after triggerPathSelector): first number stands for lastFilterAccepted, the second
+    ## number for L3FilterAccepted
+    #matchedCutsString=' path( "'+triggerPathSelector+'",1,0 )'
+    matchedCutsString=''
+else:
+    #matchedCutsString=' path( "'+triggerPathSelector+'" ,0) && filter( "'+l3FilterSelector+'" )'
+    matchedCutsString=' filter( "'+l3FilterSelector+'" )'
+print "matchedCutsString = ", matchedCutsString
+## define HLT_Mu9 (or other trigger path) matches
+process.muonTriggerMatchHLTMuons = cms.EDProducer( "PATTriggerMatcherDRLessByR",
+    src     = cms.InputTag( selectedPatLeptons ),
+    matched = cms.InputTag( "patTrigger" ),
+    matchedCuts = cms.string( matchedCutsString ), # adapted to 3_11_X and higher
+    #matchedCuts = cms.string( ' type( "TriggerMuon" ) && path( "HLT_Mu15_v*" ,0) && filter("hltSingleMu15L3Filtered15" )'),
+    #matchedCuts = cms.string( ' type( "TriggerMuon" ) && path( "HLT_Mu15_v*")'),
+    maxDPtRel = cms.double( 0.2 ),  #originally: 0.5
+    maxDeltaR = cms.double( 0.2 ),  #originally: 0.5
+    resolveAmbiguities    = cms.bool( True ),
+    resolveByMatchQuality = cms.bool( True )
+)
+
+## Trigger match embedding in selectedPatMuons. In the following selectedPatMuonsTriggerMatch
+## must be used to make use of the embedded match
+if(leptonTypeId == 11):
+    process.selectedPatMuonsTriggerMatch = cms.EDProducer( "PATTriggerMatchElectronEmbedder",
+      src     = cms.InputTag( "selectedPatElectrons" ),
+      matches = cms.VInputTag( "muonTriggerMatchHLTMuons" )
+    )
+elif(leptonTypeId == 13):
+    process.selectedPatMuonsTriggerMatch = cms.EDProducer( "PATTriggerMatchMuonEmbedder",
+      src     = cms.InputTag( "selectedPatMuons" ),
+      matches = cms.VInputTag( "muonTriggerMatchHLTMuons" )
+    )
+    
+if(useTriggerMatching):
+    ## configure patTrigger & patTriggerEvent
+    process.patTriggerEvent.patTriggerMatches = [ "muonTriggerMatchHLTMuons" ]
+    process.patTriggerSequenceUser = cms.Sequence(
+	  process.patTrigger *
+	  process.muonTriggerMatchHLTMuons *
+	  process.patTriggerEvent *
+	  process.selectedPatMuonsTriggerMatch
+	  #process.analyzePostTriggerLeadPatMuons
+	)
+    ## use this filter to study trigger efficiency with the help of trigger matching
+    #process.goodElectronsEJTriggerMatch  = process.selectedPatElectrons.clone(src = "selectedPatMuonsTriggerMatch", cut = 'triggerObjectMatches.size > 0')
+    process.onlyTriggerMatchedLeptons    = process.selectedPatElectrons.clone(src = "selectedPatMuonsTriggerMatch", cut = 'triggerObjectMatches.size > 0')
+    process.hltL3FilterByTriggerMatching = process.countPatElectrons.clone   ( src = 'onlyTriggerMatchedLeptons'     , minNumber = 1, maxNumber = 1 )
+
 
 #-----------------------------------------------------------------------------
 # ----- Efficiency Studies  ----- #
@@ -211,11 +321,12 @@ process.vetoJets.cut=''
 
 ## jet kinematics analyzer
 process.load("TopAnalysis.TopAnalyzer.JetKinematicsVertex_cfi")
-process.load("TopAnalysis.TopAnalyzer.JetKinematicsDifferentMultiplicities_cfi")
+#process.load("TopAnalysis.TopAnalyzer.JetKinematicsDifferentMultiplicities_cfi")
 
 if(PUreweighting):
         process.analyzeJetKinematicsVertex.weight = PUweight
-	process.analyzeJetKinematicsDifferentMultiplicities.weight = PUweight
+	process.analyzeJetKinematicsVertex.weights = PUweights
+	#process.analyzeJetKinematicsDifferentMultiplicities.weight = PUweight
 ## define ordered jets
 ## ATTENTION!!! For MC it should be 'L3Absolute' !!!!
 corrLevel=''
@@ -259,7 +370,8 @@ process.analyzeJetAllTrig2AfterCut= process.analyzeJetAllTrig1BeforeCut.clone()
 ## lepton analyzers after trigger 1 and trigger 2
 process.load("TopAnalysis.TopAnalyzer.MuonKinematics_cfi")
 if(PUreweighting):
-        process.analyzeMuonKinematics.weight = PUweight
+        process.analyzeMuonKinematics.weight  = PUweight
+	process.analyzeMuonKinematics.weights = PUweights
 process.analyzeMuonKinematicsTrig1 = process.analyzeMuonKinematics.clone(src="tightMuons");
 process.analyzeMuonKinematicsTrig1.analyze=cms.PSet(index = cms.int32(0), useTree = cms.bool(True) )
 process.analyzeMuonKinematicsTrig2 = process.analyzeMuonKinematics.clone(src="tightMuons");
@@ -267,11 +379,13 @@ process.analyzeMuonKinematicsTrig2.analyze=cms.PSet(index = cms.int32(0), useTre
 process.load("TopAnalysis.TopAnalyzer.MuonQuality_cfi")
 if(PUreweighting):
         process.analyzeMuonQuality.weight = PUweight
+	process.analyzeMuonQuality.weights = PUweights
 process.analyzeMuonQualityTrig1 = process.analyzeMuonQuality.clone(src="tightMuons");
 process.analyzeMuonQualityTrig2 = process.analyzeMuonQuality.clone(src="tightMuons");
 process.load("TopAnalysis.TopAnalyzer.ElectronKinematics_cfi")
 if(PUreweighting):
         process.analyzeElectronKinematics.weight = PUweight
+	process.analyzeElectronKinematics.weights = PUweights
 process.analyzeElectronKinematicsTrig1 = process.analyzeElectronKinematics.clone(src="tightElectronsEJ")
 process.analyzeElectronKinematicsTrig1.analyze=cms.PSet(index = cms.int32(0), useTree = cms.bool(True) )
 process.analyzeElectronKinematicsTrig2 = process.analyzeElectronKinematics.clone(src="tightElectronsEJ")
@@ -279,6 +393,7 @@ process.analyzeElectronKinematicsTrig2.analyze=cms.PSet(index = cms.int32(0), us
 process.load("TopAnalysis.TopAnalyzer.ElectronQuality_cfi")
 if(PUreweighting):
         process.analyzeElectronQuality.weight = PUweight
+        process.analyzeElectronQuality.weights = PUweights
 process.analyzeElectronQualityTrig1 = process.analyzeElectronQuality.clone(src="tightElectronsEJ");
 process.analyzeElectronQualityTrig2 = process.analyzeElectronQuality.clone(src="tightElectronsEJ");
 
@@ -363,7 +478,7 @@ if(cutflowSelector == "effOnly" or cutflowSelector == "effAndCutflow"):
        ## apply primary vertex selection
        process.PVSelection                           *
        ## calculate PU weights
-       process.eventWeightPU                         *
+       process.makeEventWeightsPU                    *
        ## HLT trigger filter: lepton + 1jet
        process.hltTriggerFilter1                     *
        ## trigger event
@@ -418,9 +533,12 @@ if(jetMinNumber == 0):
     process.p1.remove(process.leadingJetSelectionNjets1Pt1)
     
 if(l3FilterSelector!=""):
-    process.p1.replace(process.hltTriggerFilter2, process.hltL3Filter)
+    if(not useTriggerMatching):
+        process.p1.replace(process.hltTriggerFilter2, process.hltL3Filter)
+    else:
+        process.p1.replace(process.hltTriggerFilter2, process.onlyTriggerMatchedLeptons*process.hltL3FilterByTriggerMatching)
 if(not PUreweighting):
-    process.p1.remove(process.eventWeightPU)
+    process.p1.remove(process.makeEventWeightsPU)
 
 ##-------------------------------------------------------------------------------------
 ## Cutflow path for purity studies
@@ -446,7 +564,7 @@ if(cutflowSelector == "cutflowOnly" or cutflowSelector == "effAndCutflow" or cut
        process.analyzeJet2Trig2AfterCut              *
        process.analyzeJet3Trig2AfterCut              *
        process.analyzeJetAllTrig2AfterCut            *
-       process.analyzeJetDiffMultTrig2AfterCut       *
+       #process.analyzeJetDiffMultTrig2AfterCut       *
        ## lepton analyzers
        process.leptonAnalyzersTrig2
     )
@@ -513,6 +631,7 @@ if(leptonTypeId==11):
     process.noNEFJetsPF .src  ='noOverlapJetsPFelec'
     process.noCHFJetsPF.src   ='noOverlapJetsPFelec'
     process.noNCHJetsPF.src   ='noOverlapJetsPFelec'
+    process.noKinJetsPF.src   ='noOverlapJetsPFelec'
     
     allpaths  = process.paths_().keys()
     for path in allpaths:
