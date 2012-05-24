@@ -84,7 +84,7 @@ struct eff{
 
 
 /// ---
-/// structure to keep features of each type of histo plot, like its TH1D, the plotted variable, cuts to apply etc.
+/// structure to keep features of each type of method (e.g. different samples), like draw options, style, legend etc.
 /// ---
 struct method{
    // constructor for initialisation
@@ -134,11 +134,13 @@ struct method{
 // bin or rebin mode:  -1 for variable (re)binning; >1 for fixed binning: nBins; >1 for rebinning: nRebin
 int mBinsControl= 1;
 int mBinsPt     = -1;
-int mBinsEta    = -1;
+//int mBinsEta    = -1;
+int mBinsEta    = 20;
 int mBinsEtaEle = -1;
 int mBinsPhi    = 10;
 int mBinsMult   = 10;
 int mBinsRelIso = 8;
+//int mBinsRelIso = 20;
 int mBinsAbsIso = 100;
 int mBinsMinDR  = -1;
 int mBinsLepMult= 10;
@@ -147,6 +149,7 @@ int mBinsLepLepMass = 60;
 
 int mBinsJetPt     = -1;
 int mBinsJetEta    = -1;
+int mBinsJetAbsEta    = -1;
 
 //modified
 //int mBinsMult   = 1;
@@ -159,22 +162,27 @@ std::vector<double> binsControl_(binsControl, binsControl + sizeof(binsControl)/
 // leptons
 // double binsPt[]     = {  0.,10.,20.,30.,40.,50.,75.,100.,150. };
 // std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
-double binsEta[]    = { -3.,-2.55,-2.1,-1.65,-1.2,-0.9,-0.45,0.,0.45,0.9,1.2,1.65,2.1,2.55,3. };
+// double binsEta[]    = { -3.,-2.55,-2.1,-1.65,-1.2,-0.9,-0.45,0.,0.45,0.9,1.2,1.65,2.1,2.55,3. };
+double binsEta[]    = { -3., 3. };
 std::vector<double> binsEta_(binsEta, binsEta + sizeof(binsEta)/sizeof(double));
 // double binsEtaEle[]    = { -3.,-2.5,-2.0,-1.566,-1.4442,-1.0,-0.5,0.,0.5,1.0,1.4442,1.566,2.0,2.5,3. };
 double binsEtaEle[]    = { -3.,-2.5,-2.,-1.5,-1.0,-0.5,0.,0.5,1.0,1.5,2.,2.5,3. };
 std::vector<double> binsEtaEle_(binsEtaEle, binsEtaEle + sizeof(binsEtaEle)/sizeof(double));
+double binsEtaEle2[]    = { -2.5,-2.1,-1.5,-1.0,-0.5,0.,0.5,1.0,1.5,2.1,2.5};
+std::vector<double> binsEtaEle2_(binsEtaEle2, binsEtaEle2 + sizeof(binsEtaEle2)/sizeof(double));
 double binsPhi[]    = { -3.14,   3.14};
 std::vector<double> binsPhi_(binsPhi, binsPhi + sizeof(binsPhi)/sizeof(double));
 double binsMult[]   = {  0.  ,  10.  };
 std::vector<double> binsMult_(binsMult, binsMult + sizeof(binsMult)/sizeof(double));
-double binsRelIso[] = {  0.  ,  0.2  };
+ double binsRelIso[] = {  0.  ,  0.2  };
+//double binsRelIso[] = {  0.  ,  1  };
 std::vector<double> binsRelIso_(binsRelIso, binsRelIso + sizeof(binsRelIso)/sizeof(double));
 double binsAbsIso[] = {  0.  ,  10.  };
 std::vector<double> binsAbsIso_(binsAbsIso, binsAbsIso + sizeof(binsAbsIso)/sizeof(double));
 double binsMinDR[]  = { 0.,0.3,0.7,1.,1.5,2.,2.5,3.,4.,5.,6. };
 std::vector<double> binsMinDR_(binsMinDR, binsMinDR + sizeof(binsMinDR)/sizeof(double));
-double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,10.,15.,20. };
+// double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,10.,15.,20. };
+double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.,12.,13.,14.,15.,16.,17.,18.,19.,20.,21.,22.,23.,24.,25.,26.,27.,28.,29.,30. };
 std::vector<double> binsPVMult_(binsPVMult, binsPVMult + sizeof(binsPVMult)/sizeof(double));
 double binsLepLepMass[] = {  61.  ,  121.  };
 std::vector<double> binsLepLepMass_(binsLepLepMass, binsLepLepMass + sizeof(binsLepLepMass)/sizeof(double));
@@ -183,8 +191,16 @@ std::vector<double> binsLepLepMass_(binsLepLepMass, binsLepLepMass + sizeof(bins
 // double binsPt[]     = {  0.,10.,20.,25., 30.,32., 37., 42.,50.,75.,100.,150. };
 // std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
 
-double binsPt[]     = {  0.,10.,20.,25., 30., 35., 40.,50.,75.,100.,150. };
+double binsPt[]     = {  0.,10.,20.,25., 30., 35., 40.,50.,75.,100.,150. , 200.};
 std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
+
+double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
+std::vector<double> binsPtAN_(binsPtAN, binsPtAN + sizeof(binsPtAN)/sizeof(double));
+double binsPtMedian[]   = {0., 30., 55., 200., 275.};
+std::vector<double> binsPtMedian_(binsPtMedian, binsPtMedian + sizeof(binsPtMedian)/sizeof(double));
+double binsPt3bins[]   = {0., 30., 45., 60., 200., 275.};
+std::vector<double> binsPt3bins_(binsPt3bins, binsPt3bins + sizeof(binsPt3bins)/sizeof(double));
+
 
 // double binsPt[]     = {  0.,10.,20.,25., 30.,50.,150. };
 // std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
@@ -203,8 +219,13 @@ std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
 // double binsJetPt[]     = {  0.,10.,20.,25., 30., 35., 40.,50.,75.,100.,150. };
 double binsJetPt[]     = {  0.,10.,20.,25., 30., 40.,50.,75.,100.,150. };
 std::vector<double> binsJetPt_(binsJetPt, binsJetPt + sizeof(binsJetPt)/sizeof(double));
-double binsJetEta[]    = {-3.5,-2.4,-1.8,-1.2,-0.6,0.,0.6,1.2,1.8,2.4,3.5 };
+double binsJetPt4[]     = {  0.,10.,20.,25., 30., 40.,50.,75.,150. };
+std::vector<double> binsJetPt4_(binsJetPt4, binsJetPt4 + sizeof(binsJetPt4)/sizeof(double));
+// double binsJetEta[]    = {-3.5,-2.4,-1.8,-1.2,-0.6,0.,0.6,1.2,1.8,2.4,3.5 };
+double binsJetEta[]    = {-3.5,-2.4,-1.4,-0.7,0.,0.7,1.4,2.4,3.5 };
 std::vector<double> binsJetEta_(binsJetEta, binsJetEta + sizeof(binsJetEta)/sizeof(double));
+double binsJetAbsEta[]    = {0.,1.4,2.4,3.5 };
+std::vector<double> binsJetAbsEta_(binsJetAbsEta, binsJetAbsEta + sizeof(binsJetAbsEta)/sizeof(double));
 
 
 
@@ -218,10 +239,10 @@ void setHistoStyle(T* his, TString titles, int lineStyle, int lineColor, int mar
   his->SetTitle(getStringEntry(titles, 1));
   his->GetXaxis()->SetTitle(getStringEntry(titles, 2));
   his->GetYaxis()->SetTitle(getStringEntry(titles, 3));
-  his->GetXaxis()->SetTitleSize(0.05);
-  his->GetXaxis()->SetLabelSize(0.05);
-  his->GetYaxis()->SetTitleSize(0.05);
-  his->GetYaxis()->SetLabelSize(0.05);
+//   his->GetXaxis()->SetTitleSize(0.05);
+//   his->GetXaxis()->SetLabelSize(0.05);
+//   his->GetYaxis()->SetTitleSize(0.05);
+//   his->GetYaxis()->SetLabelSize(0.05);
   if(xLo!=-9999. && xHi!=-9999.) his->GetXaxis()->SetRangeUser(xLo,xHi);
   if(yLo!=-9999. && yHi!=-9999.) his->GetYaxis()->SetRangeUser(yLo,yHi);
   if(getStringEntry(titles, 2)=="relIso") his->GetXaxis()->SetNdivisions(509);
@@ -237,8 +258,12 @@ void setHistoStyle(T* his, TString titles, int lineStyle, int lineColor, int mar
 /// ---
 void getHisto(TH1D*& his, TString var, TFile* file, TString folder, int binMode, std::vector<double> bins, TCut cuts="", TString source="tree", TString weightTag="")
 {
+  TString varString = var;
+  varString.ReplaceAll("(","");
+  varString.ReplaceAll(")","");
+  varString.ReplaceAll(":","");
   file->cd();
-  TString hisName = "hnew"+var+(Long_t)iHis; // create unique name for each histo
+  TString hisName = "hnew"+varString+(Long_t)iHis; // create unique name for each histo
   if(source=="tree" || (source=="treeV2" && weightTag=="")){
     TH1D* hnew;
     // fixed binning
@@ -360,6 +385,10 @@ void getEfficiencies(TH1D*& histoEff, TH1D*& histoPass, TH1D*& histoAll, TString
     if(source=="treeV2"){ // this is the new tree version that saves only the kinematic variable for probes + info if passed
       // gets histo with passing events from tree or histo
       TCut cutPass = cuts && "pass";
+      // if the combined selection and trigger efficiency is desired:
+      if     (folderAll=="tapAll")   {folderAll="tapTotalSelection"; folderPass="tapTrigger";}
+      else if(folderAll=="tapAllEle"){folderAll="tapTotalSelectionEle"; folderPass="tapTriggerEle";}
+      
       getHisto(histoPass, "probe"+var, file, folderPass, binMode, bins, cutPass, source, weightTag);
       // gets histo with all events from tree
       getHisto(histoAll, "probe"+var, file, folderAll, binMode, bins, cuts, source, weightTag);
@@ -402,6 +431,10 @@ void getEfficiencies(TGraphAsymmErrors*& graphEff, TH1D*& histoPass, TH1D*& hist
     if(source=="treeV2"){ // this is the new tree version that saves only the kinematic variable for probes + info if passed
       // add "probe" to name if not lepLepMass
       if(var!="lepLepMass") var="probe"+var;
+      // if the combined selection and trigger efficiency is desired:
+      if     (folderAll=="tapAll")   {folderAll="tapTotalSelection"; folderPass="tapTrigger";}
+      else if(folderAll=="tapAllEle"){folderAll="tapTotalSelectionEle"; folderPass="tapTriggerEle";}
+      
       // gets histo with passing events from tree or histo
       TCut cutPass = cuts && "pass==1";
       getHisto(histoPass, var, file, folderPass, binMode, bins, cutPass, source, weightTag);
@@ -551,6 +584,45 @@ void getEfficiencies(eff*& eff1, method*& method1, TString methodID, TString fol
 }
 
 /// ---
+/// averages two efficiencies according to the fraction f of their composition:
+/// eff.(av) = f*eff1 + (1-f)*eff2, where f = Nall1/(Nall1+Nall2)
+/// It is assumed that effAve has already a graph in the structurein the same format 
+/// as eff1 and eff2 (ideally initialise it with either eff1 or eff2 before)
+/// ---
+void averageEfficiencies(eff*& eff1, TString methodIDAve, TString methodID1, TString methodID2, double f1, double f2)
+{
+   // get points and their asymm. errors for first and second efficiency
+  int N                    = eff1->graphEff[methodIDAve]->GetN();
+  double * effAveX         = eff1->graphEff[methodIDAve]->GetX();
+  double * eff1Y           = eff1->graphEff[methodID1]  ->GetY();
+  double * eff2Y           = eff1->graphEff[methodID2]  ->GetY();
+  double * eff1YH          = eff1->graphEff[methodID1]  ->GetEYhigh();
+  double * eff1YL          = eff1->graphEff[methodID1]  ->GetEYlow();
+  double * eff2YH          = eff1->graphEff[methodID2]  ->GetEYhigh();
+  double * eff2YL          = eff1->graphEff[methodID2]  ->GetEYlow();
+  
+  // check if effAve, eff1 and eff2 have the same bin numbers
+  if(N!=eff1->graphEff[methodID1]->GetN() && N!=eff1->graphEff[methodID2]->GetN()){
+    std::cout<<"ERROR!!! Number of Points of effAve ("<<N<<"), eff1 ("<<eff1->graphEff[methodID1]->GetN()<<") and eff2 ("<<eff1->graphEff[methodID2]->GetN()<<" different!!!"<<std::endl;
+    std::cout<<"The averaging of efficiencies is interrupted!!!"<<std::endl;
+	return;
+  }
+      // set points and errors of average graph
+  double ave     = -1., aveErrH = -1., aveErrL = -1.;
+  for(int iPoint=0; iPoint< N ; iPoint++){
+    // central value combination
+    ave     = f1*eff1Y[iPoint] + f2*eff2Y[iPoint];
+    // error: just Gaussian propagation, no proper treatment of asymm. errors
+    aveErrH = TMath::Sqrt(f1*f1*eff1YH[iPoint]*eff1YH[iPoint] + f2*f2*eff2YH[iPoint]*eff2YH[iPoint]);
+    aveErrL = TMath::Sqrt(f1*f1*eff1YL[iPoint]*eff1YL[iPoint] + f2*f2*eff2YL[iPoint]*eff2YL[iPoint]);
+    // re-set points of effAve	
+    eff1->graphEff[methodIDAve]->SetPoint      (iPoint, effAveX[iPoint], ave);
+    eff1->graphEff[methodIDAve]->SetPointEYhigh(iPoint, aveErrH);
+    eff1->graphEff[methodIDAve]->SetPointEYlow (iPoint, aveErrL);
+  }
+}
+
+/// ---
 /// draw efficiency plots of one variable for all methods, incl. legend
 /// ---
 void drawEfficiencies(eff* eff1, std::map<TString, method*> method1, std::vector<TString> mID, double legXlo, double legYlo, double legXhi, double legYhi, bool drawLeg=true)
@@ -614,8 +686,10 @@ void drawLegend(eff* eff1, std::map<TString, method*> method1, std::vector<TStri
 /// SF!!
 /// calculate and draw efficiency scale factor plots of one variable for all methods, incl. legend
 /// ---
-void drawSF(eff* eff1, std::map<TString, method*> method1, std::vector<TString> mID, TString mIDnorm, double legXlo, double legYlo, double legXhi, double legYhi, bool drawLeg=true, double yLo=-9999., double yHi=-9999., double xLo=-9999., double xHi=-9999.)
+void drawSF(eff*& eff1, std::map<TString, method*> method1, std::vector<TString> mID, TString mIDnorm, double legXlo, double legYlo, double legXhi, double legYhi, bool drawLeg=true, double yLo=-9999., double yHi=-9999., double xLo=-9999., double xHi=-9999.)
 {
+  /// if mIDnorm is specified in eff structure, i.e.!="", it is taken for normalisation;
+  /// otherwise mIDnorm from the list of arguments of this function is taken
   TLegend leg(legXlo, legYlo, legXhi, legYhi);
   leg.SetFillStyle(0);
   
@@ -725,9 +799,13 @@ void drawSF(eff* eff1, std::map<TString, method*> method1, std::vector<TString> 
       SFgraph->DrawClone(drawOpt.Data());
        // legend
       if(method1[mID[iMethod]]->legOpt!="") leg.AddEntry(SFgraph, method1[mID[iMethod]]->legName, method1[mID[iMethod]]->legOpt);
+      
+      /// assign the graph to the eff structure
+      eff1->graphSF[mID[iMethod]]=SFgraph;
     }
   }
   if(drawLeg) leg.DrawClone();
+  
 }
 
 /// ---
