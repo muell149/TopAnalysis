@@ -68,6 +68,9 @@ print "apply PU reweighting?: ",PUreweighting
 ## change relIso value for top projection; default = 0.2 is enabled if relIsoTopProj = -1
 if(not globals().has_key('relIsoTopProj')):
     relIsoTopProj = -1
+## change mass window deltaM
+if(not globals().has_key("deltaM")):
+	deltaM = 15
 
 print "----------------------------------------------"
 print "Tag and Probe for Lepton ID (11 electron, 13 muon): ", leptonTypeId
@@ -461,7 +464,7 @@ if(modeSelector == 1):
         tags   = "tagMuons",
         probes = "globalMuons",
         mass   =  91,
-        deltaM =  15,
+        deltaM =  deltaM,
 	leptonId = leptonTypeId
        )
        #process.produceProbeMuons = cms.Sequence(process.tagMuonsNoDR *process.tagMuons * process.probeMuons)
@@ -661,7 +664,10 @@ process.testMuonsTrigger = selectedPatMuons.clone(
 
 from TopAnalysis.TopAnalyzer.TagAndProbeAnalyzer_cfi import tagAndProbeAnalyzer
 tagAndProbeAnalyzer.ptCut = muonPtCut
+tagAndProbeAnalyzer.deltaM = deltaM
+
 print "muonPtCut in TaP analyzer: ", tagAndProbeAnalyzer.ptCut
+print "mass window in TaP analyzer: ", tagAndProbeAnalyzer.deltaM
 
 #process.tapTrkQ = tagAndProbeAnalyzer.clone(
   #probes = "probeMuonsTrkQ", 
@@ -810,7 +816,7 @@ if(modeSelector == 1):
         tags   = "tagElectrons",
         probes = "probeElectronsBasis",
         mass   =  91,
-        deltaM =  15,
+        deltaM =  deltaM,
 	leptonId = leptonTypeId
        )
        process.produceProbeElectrons = cms.Sequence(process.probeElectronsBasis * process.vertexSelectedElectronsTaP * process.tightElectronsEJTaP * process.unconvTightElectronsEJTaP * process.goodElectronsEJTaP *process.tagElectrons * process.probeElectrons)
@@ -946,6 +952,10 @@ process.testElectronsTrigger = selectedPatElectrons.clone(
 #-----------------------------------------------------------------------------
 
 from TopAnalysis.TopAnalyzer.TagAndProbeAnalyzer_cfi import tagAndProbeAnalyzer
+tagAndProbeAnalyzer.deltaM = deltaM
+
+print "muonPtCut in TaP analyzer: ", tagAndProbeAnalyzer.ptCut
+print "mass window in TaP analyzer: ", tagAndProbeAnalyzer.deltaM
 
 process.tapTrkQEle = tagAndProbeAnalyzer.clone(
   tags   = "tagElectrons",
