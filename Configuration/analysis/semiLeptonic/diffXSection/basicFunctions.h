@@ -116,6 +116,9 @@ namespace semileptonic {
 
   double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
   double globalLumiUncertainty = 0.022; // relative uncertainty
+	
+  const double constLumiElec = 4980.0;	
+  const double constLumiMuon = 4955.0;
 
   TString sysLabel(unsigned int sys)
   {
@@ -376,7 +379,7 @@ namespace semileptonic {
     if(yMax!=-123) hist.SetMaximum(yMax);
   }
 
-  void legendStyle(TLegend& leg, TString header)
+  void legendStyle(TLegend& leg, TString header="")
   {
     // this function configures the style of legends
     // modified quantities: leg
@@ -388,7 +391,7 @@ namespace semileptonic {
     leg.SetBorderSize(0);
     leg.SetTextSize(0.03);
     leg.SetTextAlign(12);
-    leg.SetHeader(header);
+    if (header!="") leg.SetHeader(header); //
   }
 
   template <class T>
@@ -555,7 +558,7 @@ namespace semileptonic {
 
     decch -> SetFillStyle(0);
     decch -> SetBorderSize(0);
-    if(textSize!=0) decch->SetTextSize(textSize);
+    decch->SetTextSize(textSize);
     decch -> SetTextAlign(12);
     decch -> Draw("same");
   }
@@ -583,7 +586,7 @@ namespace semileptonic {
 
     label->SetFillStyle(0);
     label->SetBorderSize(0);
-    if(textSize!=0) label->SetTextSize(textSize);
+    label->SetTextSize(textSize);
     label->SetTextAlign(32);
     label->Draw("same");
   }
@@ -1403,15 +1406,15 @@ namespace semileptonic {
     double xMin=histoUnbinned.GetBinLowEdge(1);
     double xMax=histoUnbinned.GetBinLowEdge(NinitialBins+1);
     if(verbose>1){
-      std::cout << "plot: "  << histoUnbinned.GetName() << std::endl;
-      std::cout << "min: " << xMin << std::endl;
-      std::cout << "max: " << xMax << std::endl;
+      std::cout << "plot:            " << histoUnbinned.GetName() << std::endl;
+      std::cout << "min:             " << xMin << std::endl;
+      std::cout << "max:             " << xMax << std::endl;
       std::cout << "N(initial bins): " << NinitialBins << std::endl;
     }
     // check if chosen binning is valid
     // 1) N(bins)
     if(NinitialBins<=binlowerEdges_.size()){
-      std::cout << "histo " << histoUnbinned.GetName() << " can not be rebinned" << std::endl;
+      std::cout << "histo " << histoUnbinned.GetName() << " cannot be rebinned" << std::endl;
       std::cout << "N(chosen bins) < N(initial bins)!" << std::endl;
       exit(1);
     }
@@ -1443,7 +1446,7 @@ namespace semileptonic {
       }
     }
     // fill vector entries in array
-    // because TH1F constructer needs an array
+    // because TH1F constructor needs an array
     unsigned int arraySize=42;
     double * binLowerEdgeArray = new double[arraySize];
     if(binlowerEdges_.size()>arraySize){
@@ -1533,33 +1536,37 @@ namespace semileptonic {
       std::vector<double> bins_;
 
       // pt(top)
-      double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
+      double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0, 800.0};  
+      // old: double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
       result["topPt"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/topPt"  ]=bins_;
       bins_.clear();
       // y(top)
-      double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
+      double topYBins[]={-5.0, -2.5, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.5, 5.0}; 
+      // old: double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
       bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
       result["topY"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/topY"  ]=bins_;
       bins_.clear();
       // pt(ttbar)
-      double ttbarPtBins[]={0., 20., 60., 110., 200., 300.};
+      double ttbarPtBins[]={0.0, 20.0, 45.0, 75.0, 120.0, 190.0, 300.0};
+      // old: double ttbarPtBins[]={0., 20., 60., 110., 200., 300.};
       bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
       result["ttbarPt"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarPt"  ]=bins_;
       bins_.clear();
       // y(ttbar)
-      double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
+      double ttbarYBins[]={-5.0, -1.8, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 1.8, 5.0};
+      // old: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
       bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
       result["ttbarY"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
       bins_.clear();
       // m(ttbar)
-      //double ttbarMassBins[]={0.0, 345.0, 375.0, 400.0, 425.0, 450.0, 475.0, 500.0, 525.0, 550.0, 575.0, 600.0, 650.0, 700.0, 750.0, 800.0, 900.0, 1000.0, 1100.0, 1200.0}; 
-      //double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
-      double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
+      double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0}; 
+      // Korea: double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
+      // old:   double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
       bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
       result["ttbarMass"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
@@ -1595,8 +1602,8 @@ namespace semileptonic {
       // used enumerators: none
       
       // restrict axis
-      if(variable=="topPt")       his->GetXaxis()->SetRange(1,5);
-      else if(variable=="topY")   his->GetXaxis()->SetRange(2,9);
+      if(variable=="topPt")       his->GetXaxis()->SetRange(1, his->GetNbinsX() ); 
+      else if(variable=="topY")   his->GetXaxis()->SetRange(1, his->GetNbinsX() );
       else if(variable=="lepEta") his->GetXaxis()->SetRange(2, his->GetNbinsX()-2);
       else if(variable=="bqPt")   his->GetXaxis()->SetRange(2,6);
       else if(variable=="bqEta")  his->GetXaxis()->SetRange(2,9);
@@ -2602,7 +2609,8 @@ namespace semileptonic {
     // smoothcurves: indicates wheter smooth or binned curve is drawn
 
     TString plotname2=plotname;
-    plotname2.ReplaceAll("hVis"   ,"");
+	if(plotname2.BeginsWith("h")) plotname2.Replace(0,1,"");
+    plotname2.ReplaceAll("Vis"    ,"");
     plotname2.ReplaceAll("MC@NLO" ,"");
     plotname2.ReplaceAll("MC@NLO2","");
     plotname2.ReplaceAll("POWHEG","" );
@@ -2613,24 +2621,25 @@ namespace semileptonic {
     if(plotname2.Contains("/")){
       plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
     }
-    if(verbose>2) std::cout << "->" << plotname2 << std::endl;
 
     // create variable bin edges for non smooth curves
     std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output
     if(verbose>0){
-      std::cout << "variable: " << plotname <<std::endl;
-      if(rangeLow!=-1.||rangeHigh!=-1.) std::cout << "range: " << rangeLow << ".." << rangeHigh << std::endl;
-      std::cout << "file: " << filename << std::endl;
-      std::cout << "normalize?: " << normalize << std::endl;
-      std::cout << "smoothFactor: " << smoothFactor << std::endl;
-      std::cout << "rebinFactor: " << rebinFactor << std::endl;
-      std::cout << "color: " << color << std::endl;
-      std::cout << "draw errorbands?: " << errorbands << std::endl;
-      std::cout << "draw smooth curves?: " << smoothcurves << std::endl;
+	  std::cout << std::endl;
+	  std::cout << "variable:           " << plotname     << std::endl;
+      std::cout << "variable (modifed): " << plotname2    << std::endl;
+      if(rangeLow!=-1.||rangeHigh!=-1.) std::cout << "range:              " << rangeLow << " .... " << rangeHigh << std::endl;
+      std::cout << "file:               " << filename     << std::endl;
+      std::cout << "normalize:          " << normalize    << std::endl;
+      std::cout << "smoothFactor:       " << smoothFactor << std::endl;
+      std::cout << "rebinFactor:        " << rebinFactor  << std::endl;
+      std::cout << "color:              " << color        << std::endl;
+      std::cout << "draw errorbands:    " << errorbands   << std::endl;
+      std::cout << "draw smooth curves: " << smoothcurves << std::endl;
       if(errorbands){
-	std::cout << "errorRebinFactor: " << errorRebinFactor << std::endl;
-	std::cout << "errorSmoothFactor: " << errorSmoothFactor << std::endl;
+		  std::cout << "errorRebinFactor:   " << errorRebinFactor << std::endl;
+		  std::cout << "errorSmoothFactor:  " << errorSmoothFactor << std::endl;
       }
     }
     // --- 
@@ -2672,8 +2681,7 @@ namespace semileptonic {
     // replace low statistic parts with fitted curve
     if(smoothcurves) result=useFittedFunctions(result, model, plotname, verbose);
     // rename
-    TString name=plotname;
-    name.ReplaceAll(getStringEntry(name, 1,"/"),"");
+    TString name=plotname2;
     if(model=="powheg") name+="POWHEG";
     else if(model=="mcatnlo"){
       if(filename.Contains("mcatnlo" )) name+="MC@NLO";
@@ -2766,7 +2774,7 @@ namespace semileptonic {
       // create errorbands
       TGraphAsymmErrors * errorBands = new TGraphAsymmErrors(central->GetNbinsX()-1);
       TString errorBandName=name;
-      errorBandName.ReplaceAll("2","");
+      errorBandName.ReplaceAll("MC@NLO2","MC@NLO");
       errorBandName+="errorBand";
       if(verbose>0) std::cout << "name of error bands: " << errorBandName << std::endl;
       errorBands->SetName(errorBandName);
@@ -2852,177 +2860,106 @@ namespace semileptonic {
     
     // NB: k-value should be independent from decay channel
     // NB: at the moment k=N(bins) is used!
-    double k=-1.;
-    if(     variable.Contains("ttbarMass")){ 
+    double k=-1.0;
+
+    // Unfolding with optimal tau
+
+    if(tau){
+
       if(decayChannel.Contains("muon")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=3.86619; 
-	  if(fullPS) k=20.8531;
-	}
+	
+	  //if(variable == "topPt")          k = (fullPS) ? 3.22 : 2.65503;
+	  //else if(variable == "topY" )     k = (fullPS) ? 4.79 : 3.26004;
+	  //else if(variable == "ttbarPt")   k = (fullPS) ? 3.15 : 2.34174; 
+	  //else if(variable == "ttbarY")    k = (fullPS) ? 3.10 : 2.25806; 
+	  //else if(variable == "ttbarMass") k = (fullPS) ? 3.66 : 2.63087;
+	  // New Binning
+	  // if(variable == "topPt")          k = (fullPS) ? 1.81 : 2.65503;
+	  // else if(variable == "topY" )     k = (fullPS) ? 3.21 : 3.26004;
+	  // else if(variable == "ttbarPt")   k = (fullPS) ? 2.30 : 2.34174; 
+	  // else if(variable == "ttbarY")    k = (fullPS) ? 1.66 : 2.25806; 
+	  // else if(variable == "ttbarMass") k = (fullPS) ? 1.56 : 2.63087;
+	  // New Binning Revision 1
+	  //if(variable == "topPt")          k = (fullPS) ? 2.75 : 2.65503;
+	  //else if(variable == "topY" )     k = (fullPS) ? 3.73 : 3.26004;
+	  //else if(variable == "ttbarPt")   k = (fullPS) ? 2.30 : 2.34174; 
+	  //else if(variable == "ttbarY")    k = (fullPS) ? 1.18 : 2.25806; 
+	  //else if(variable == "ttbarMass") k = (fullPS) ? 1.63 : 2.63087;
+	  // New Binning Revision 2  
+	  if(variable == "topPt")          k = (fullPS) ? 2.77 : 2.65503;
+	  else if(variable == "topY" )     k = (fullPS) ? 3.73 : 3.26004;
+	  else if(variable == "ttbarPt")   k = (fullPS) ? 2.30 : 2.34174; 
+	  else if(variable == "ttbarY")    k = (fullPS) ? 0.94 : 2.25806; 
+	  else if(variable == "ttbarMass") k = (fullPS) ? 2.64 : 2.63087;
+	  else if(variable == "lepPt")     k = (fullPS) ? 1.28 : (hadronPS) ? 0.767378 : 1.1277;
+	  else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 0.000138 : 1.03864; 
+	  else if(variable == "bqPt")      k = (fullPS) ? 4.08 : (hadronPS) ? 3.68079  : 5.40913; 
+	  else if(variable == "bqEta")     k = (fullPS) ? 4.27 : (hadronPS) ? 4.28002  : 2.91248; 
       }
-      else if(decayChannel.Contains("electron")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=3.67321; 
-	  if(fullPS) k=3.2244;
-	}
+      else if (decayChannel.Contains("electron")){
+	
+	  //if(variable == "topPt")          k = (fullPS) ? 3.30 : 4.17523;
+	  //else if(variable == "topY")      k = (fullPS) ? 4.23 : 2.96168;
+	  //else if(variable == "ttbarPt")   k = (fullPS) ? 2.98 : 2.19367; 
+	  //else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.11527;
+	  //else if(variable == "ttbarMass") k = (fullPS) ? 3.40 : 2.49955;
+	  // New Binning
+	  //if(variable == "topPt")          k = (fullPS) ? 2.07 : 4.17523;
+	  //else if(variable == "topY")      k = (fullPS) ? 2.86 : 2.96168;
+	  //else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.19367; 
+	  //else if(variable == "ttbarY")    k = (fullPS) ? 1.50 : 2.11527;
+	  //else if(variable == "ttbarMass") k = (fullPS) ? 1.32 : 2.49955;
+	  // New Binning Revision 1
+	  //if(variable == "topPt")          k = (fullPS) ? 2.69 : 4.17523;
+	  //else if(variable == "topY")      k = (fullPS) ? 3.31 : 2.96168;
+	  //else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.19367; 
+	  //else if(variable == "ttbarY")    k = (fullPS) ? 1.62 : 2.11527;
+	  //else if(variable == "ttbarMass") k = (fullPS) ? 1.70 : 2.49955;
+	  // New Binning Revision 2
+	  if(variable == "topPt")          k = (fullPS) ? 2.80 : 4.17523;
+	  else if(variable == "topY")      k = (fullPS) ? 3.31 : 2.96168;
+	  else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.19367; 
+	  else if(variable == "ttbarY")    k = (fullPS) ? 0.95 : 2.11527;
+	  else if(variable == "ttbarMass") k = (fullPS) ? 2.50 : 2.49955;
+	  else if(variable == "lepPt")     k = (fullPS) ? 2.32 : (hadronPS) ? 1.09336  : 1.63605;
+	  else if(variable == "lepEta")    k = (fullPS) ? 1.09 : (hadronPS) ? 0.000099 : 0.745283; 
+	  else if(variable == "bqPt")      k = (fullPS) ? 3.88 : (hadronPS) ? 3.71066  : 5.45296; 
+	  else if(variable == "bqEta")     k = (fullPS) ? 3.79 : (hadronPS) ? 3.90017  : 2.654; 
       }
     }
-    else if(variable.Contains("ttbarPt"  )){ 
-      if(decayChannel.Contains("muon")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=3.4413; 
-	  if(fullPS) k=2.146;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=3.2237; 
-	  if(fullPS) k=2.0199;
-	}
-      }
-    }
-    else if(variable.Contains("ttbarY"   )){ 
-      if(decayChannel.Contains("muon")){
-	k=8; 
-	// Optimal Tau
-	if(tau){
-	  k=3.31833; 
-	  if(fullPS) k=2.1093;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=8; 
-	// Optimal Tau
-	if(tau){
-	  k=3.10849; 
-	  if(fullPS) k=1.8457;
-	}
-      }
-    }
-    else if(variable.Contains("topPt"    )){ 
-      if(decayChannel.Contains("muon")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=6.27921; 
-	  if(fullPS) k=4.7261;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=6.13571; 
-	  if(fullPS) k=4.8603;
-	}
-      }
-    }
-    else if(variable.Contains("topY"     )){ 
-      if(decayChannel.Contains("muon")){
-	k=8; 
-	// Optimal Tau
-	if(tau){
-	  k=4.79079;
-	  if(fullPS) k=3.2570;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=8; 
-	// Optimal Tau
-	if(tau){
-	  k=4.35233; 
-	  if(fullPS) k=2.8731;
-	}
-      }
-    }
-    else if(variable.Contains("lepPt"    )){ 
-      if(decayChannel.Contains("muon")){
-	k=13;
-	// Optimal Tau
-	if(tau){
-	  k=0.767378;
-	  if(hadronPS) k=1.1277;
-	  if(fullPS) k=1.7967;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=13; 
-	// Optimal Tau
-	if(tau){
-	  k=0.691769;
-	  if(hadronPS) k=0.0038;
-	  if(fullPS) k=1.5896;
-	}
-      }
-    }
-    else if(variable.Contains("lepEta"   )){ 
-      if(decayChannel.Contains("muon")){
-	k=14;
-	// Optimal Tau
-	if(tau){
-	  k=1.52633;
-	  if(hadronPS) k=0.0053;
-	  if(fullPS) k=1.0359;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=14; 
-	// Optimal Tau
-	if(tau){
-	  k=1.09523;
-	  if(hadronPS) k=0.0038;
-	  if(fullPS) k=0.7424;
-	}
-      }
-    }
-    else if(variable.Contains("bqPt"     )){ 
-      if(decayChannel.Contains("muon")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=3.68081;
-	  if(hadronPS) k=5.4091;
-	  if(fullPS) k=5.9966;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=5; 
-	// Optimal Tau
-	if(tau){
-	  k=3.71063;
-	  if(hadronPS) k=5.4530;
-	  if(fullPS) k=5.7089;
-	}
-      }
-    }
-    else if(variable.Contains("bqEta"    )){ 
-      if(decayChannel.Contains("muon")){
-	k=8; 
-	// Optimal Tau
-	if(tau){
-	  k=4.28004; 
-	  if(hadronPS) k=6.2897;
-	  if(fullPS) k=2.9067;
-	}
-      }
-      else if(decayChannel.Contains("electron")){
-	k=8; 
-	// Optimal Tau
-	if(tau){
-	  k=3.90018;
-	  if(hadronPS) k=5.7315;
-	  if(fullPS) k=2.5854;
-	}
-      }
-    }
+    else{
+      
+	// Default unfolding with number of bins
+	
+	//if(variable == "topPt")          k =  5;
+	//else if(variable == "topY")      k =  8;
+	//else if(variable == "ttbarPt")   k =  5;
+	//else if(variable == "ttbarY")    k =  8;
+	//else if(variable == "ttbarMass") k =  5;
+	// New Binning
+	//if(variable == "topPt")          k = 10;
+	//else if(variable == "topY")      k = 12;
+	//else if(variable == "ttbarPt")   k =  6;
+	//else if(variable == "ttbarY")    k = 16;
+	//else if(variable == "ttbarMass") k =  9;
+	// New Binning Revison 1
+	//if(variable == "topPt")          k =  9;
+	//else if(variable == "topY")      k = 10;
+	//else if(variable == "ttbarPt")   k =  6;
+	//else if(variable == "ttbarY")    k = 12;
+	//else if(variable == "ttbarMass") k =  8;
+	// New Binning Revision 2
+	if(variable == "topPt")          k =  8;
+	else if(variable == "topY")      k = 10;
+	else if(variable == "ttbarPt")   k =  6;
+	else if(variable == "ttbarY")    k = 12;
+	else if(variable == "ttbarMass") k =  8;
+	else if(variable == "lepPt")     k = 13;
+	else if(variable == "lepEta")    k = 14;
+	else if(variable == "bqPt")      k =  5;
+	else if(variable == "bqEta")     k =  8;
+    }      
+    
     // output
     if(verbose>1){
       if(tau) std::cout << "tau";
@@ -3030,20 +2967,22 @@ namespace semileptonic {
       std::cout << "(" << variable << ") = " << k << std::endl;
     }
     // check result
-    if(k<0.){
+    if(k<0){
       std::cout << "ERROR in regParameter:" << std::endl; 
       std::cout << "invalid k=" << k << " for variable " << variable << std::endl;
       std::cout << "unknown variable " << variable << " or decayChannel " << decayChannel << std::endl;
     }
-    // return result
     return k;
   }
-	
-
-	template <class T> bool SortVectorPrescription(const T& a, const T& b){
-		return a < b;
-	}	
-	
+  
+  
+  template <class T> bool SortVectorPrescription(const T& a, const T& b){
+    // This function is used to defined
+    // a sorting presciption to be used 
+    // with std::sort
+    return a < b;
+  }	
+  
 
 #ifdef DILEPTON_MACRO
 }
