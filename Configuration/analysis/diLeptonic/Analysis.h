@@ -490,8 +490,12 @@ public :
    TH1D *h_GenAntiLeptonpT, *h_GenAntiLeptonEta;
    TH1D *h_GenLeptonpT, *h_GenLeptonEta;
    
-   TH1D *h_DPhiLepAntiLep, *h_MassLepAntiBJet, *h_MassAntiLepBJet;
-
+   TH1D *h_GenLLBarDPhi,     *h_GenLeptonantiBjetMass,     *h_GenAntiLeptonBjetMass,	 *h_GenJetMult;
+   TH2D *h_GenRecoLLBarDPhi, *h_GenRecoLeptonantiBjetMass, *h_GenRecoAntiLeptonBjetMass, *h_GenRecoJetMult;
+   TH1D *h_VisGenLLBarDPhi,  *h_VisGenLeptonantiBjetMass,  *h_VisGenAntiLeptonBjetMass,	 *h_VisGenJetMult;
+   TH1D *h_RecoLLBarDPhi,    *h_RecoLeptonantiBjetMass,    *h_RecoAntiLeptonBjetMass,	 *h_RecoJetMult;
+   TH1D *h_HypLLBarDPhi,     *h_HypLeptonantiBjetMass,     *h_HypAntiLeptonBjetMass,	 *h_HypJetMult;
+      
    ClassDef(Analysis,0);
 };
 
