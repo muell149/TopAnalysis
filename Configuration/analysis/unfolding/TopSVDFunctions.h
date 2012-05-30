@@ -75,9 +75,10 @@ class TopSVDFunctions
                         TString specialTex = "",   
                         TString systnameTex = "",
                         TString rootFile = "",                          
-                        TString psFile = "",                        
+                        TString psFile = "",                           
+                        TString epsFile = "",                      
                         TString txtFile = "",
-        				TString regParFile = ""
+                        TString regParFile = ""
         );
     
     
@@ -109,10 +110,12 @@ class TopSVDFunctions
         static void SVD_DeleteHists1D(TH1D*& hist, int numHist = 1);
         static void SVD_DeleteHists2D(TH2D*& hist, int numHist = 1);
         static void SVD_WriteHists1D(TH1D* hists, int numHist = 1);
-        static void SVD_WriteHists2D(TH2D* hists, int numHist = 1); 
+        static void SVD_WriteHists2D(TH2D* hists, int numHist = 1);
         static void SVD_RmDir1D(TH1D* hist, int numHist = 1);
         static void SVD_RmDir2D(TH2D* hist, int numHist = 1);
-        static double SVD_DoubleFromArray(double* arr, int pos);
+        static void SVD_AddRightToLeft(TH1D*& histoLeft, TH1D* histoRight, double factorLeft, double factorRight, int numHist);
+        static void SVD_AddBinRightToLeft(TH1D*& histoLeft, TH1D* histoRight, int bin, double factorLeft, double factorRight, int numHist);
+        static double SVD_DoubleFromArray(double* arr, int pos); 
         
         // Histogram Manipulation
         static void SVD_MoveOFBins1D(TH1D* hist, int numHist = 1);
@@ -124,7 +127,8 @@ class TopSVDFunctions
         static void SVD_EmptyHistogram1D(TH1D* histo, int numHist = 1);
         static void SVD_EmptyHistogram2D(TH2D* histo, int numHist = 1);
         static void SVD_EmptyHistoErrors1D(TH1D* histo, int numHist = 1);
-        static void SVD_EmptyHistoErrors2D(TH2D* histo, int numHist = 1);  
+        static void SVD_EmptyHistoErrors2D(TH2D* histo, int numHist = 1);   
+        static void SVD_SetBinValErr1D(TH1D* histo, int bin, double value, double error, int numHist = 1); 
         
         
         // Rebinning
@@ -217,12 +221,18 @@ class TopSVDFunctions
         
         
         // Purity, Stability and all that
-        static void SVD_Pur(TH1D*& purHist, TH2D* mcHist,int numHist = 1);
-        static void SVD_Stab(TH1D*& stabHist, TH2D* mcHist,int numHist = 1);
+        static void SVD_Pur(TH1D*& purHist, TH2D* mcHist, int numHist = 1);
+        static void SVD_Stab(TH1D*& stabHist, TH2D* mcHist, int numHist = 1);
         static void SVD_Eff(TH1D*& effHist, TH2D* mcHist, TH1D* xiniHist,  int numHist = 1);
         static void SVD_BBBEff(TH1D*& beffHist, TH1D* biniHist, TH1D* xiniHist, int numHist = 1);
         static void SVD_BBBUnf(TH1D*& bbbHist, TH1D* dataHist, TH1D* beffHist, int numHist = 1);
         
+        
+        // Smearin and Smearout
+        static void SVD_LowerSmearin(TH1D*& smearinHist, TH2D* mcHist,  int numHist = 1);
+        static void SVD_UpperSmearin(TH1D*& smearinHist, TH2D* mcHist,  int numHist = 1);
+        static void SVD_LowerSmearout(TH1D*& smearoutHist, TH2D* mcHist,  int numHist = 1);
+        static void SVD_UpperSmearout(TH1D*& smearoutHist, TH2D* mcHist,  int numHist = 1);
         
         // Systematics
         static TH1D* SVD_ArrayToShifts(TH1D* array, int numHist = 1); 
@@ -248,7 +258,7 @@ class TopSVDFunctions
         static void SVD_RemoveFile(TString filepath);
         static void SVD_LineToFile(TString string, TString filepath, TString option);
         static TString SVD_LineFromFile(TString key, TString filepath);
-        static void SVD_PrintPage(TCanvas*& canvas, TString outputfilename, bool doEps, int firstLast, int manual_plotcounter = -1);
+        static void SVD_PrintPage(TCanvas*& canvas, TString outputfilenamePs, TString outputfilenameEps, int manual_plotcounter);
         
         // Misc
         static int SVD_GetDigit(TString steering, int digit, int standard); 
