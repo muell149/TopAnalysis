@@ -288,19 +288,19 @@ if(not options.sample=="none"):
         usedSample="TopAnalysis/Configuration/Fall11/wlnujets_MadgraphZ2_Fall11_AOD_cff"
 	outputFileName+="Wjets"
     elif(options.sample=="wjetsMatchingUp"):        
-        usedSample="TopAnalysis/Configuration/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_matching_up_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="WjetsMatchUp"
     elif(options.sample=="wjetsMatchingDown"):        
-        usedSample="TopAnalysis/Configuration/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_matching_down_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="WjetsMatchDown"
     elif(options.sample=="wjetsScaleUp"):        
-        usedSample="TopAnalysis/Configuration/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_scale_up_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="WjetsScaleUp"
     elif(options.sample=="wjetsScaleDown"):
-        usedSample="TopAnalysis/Configuration/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_scale_down_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False        
 	outputFileName+="WjetsScaleDown"
     elif(options.sample=="zjets"):        
