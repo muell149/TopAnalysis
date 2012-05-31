@@ -6359,8 +6359,8 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Draw Input Distributions
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");
-        SVD_Array2Stack(theRegStack, theLegend, xiniHist_forTSVD, "Gen", "HIST E", "", 4, numberSyst+1);
-        SVD_Array2Stack(theRegStack, theLegend, biniHist_forTSVD, "Rec", "HIST E", "", 2, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, xiniHist, "Gen", "HIST E", "", 4, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, biniHist, "Rec", "HIST E", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, dataScaledHist, "Data, scaled", "HIST E", "", 1, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, 3);         
@@ -6369,7 +6369,7 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Draw Background related Distributions 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");
-        SVD_Array2Stack(theRegStack, theLegend, dataHist_forTSVD, "Data", "HIST E", "", 1, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Data", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, rawHist, "Raw", "HIST E", "", 2, 1); // Only 1 Histogram
         SVD_Array2Stack(theRegStack, theLegend, bgrHist, "Bgr", "HIST", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
