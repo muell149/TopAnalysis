@@ -566,10 +566,10 @@ void TopSVDFunctions::SVD_AddRightToLeft(TH1D*& histoLeft, TH1D* histoRight, dou
         for ( int i = 1 ; i <= binsx ; i++ ) {
             
             // Get Values
-            double left = histoLeft->GetBinContent(i);
-            double leftError = histoLeft->GetBinError(i);
-            double right = histoRight->GetBinContent(i);
-            double rightError = histoRight->GetBinError(i);
+            double left = (histoLeft+h)->GetBinContent(i);
+            double leftError = (histoLeft+h)->GetBinError(i);
+            double right = (histoRight+h)->GetBinContent(i);
+            double rightError = (histoRight+h)->GetBinError(i);
             
             
             // Calculate new Values
@@ -601,10 +601,10 @@ void TopSVDFunctions::SVD_AddBinRightToLeft(TH1D*& histoLeft, TH1D* histoRight, 
     for ( int h = 0 ; h < numHist ; h++ ) {  
 
         // Get Values
-        double left = histoLeft->GetBinContent(bin);
-        double leftError = histoLeft->GetBinError(bin);
-        double right = histoRight->GetBinContent(bin);
-        double rightError = histoRight->GetBinError(bin);
+        double left = (histoLeft+h)->GetBinContent(bin);
+        double leftError = (histoLeft+h)->GetBinError(bin);
+        double right = (histoRight+h)->GetBinContent(bin);
+        double rightError = (histoRight+h)->GetBinError(bin);
         
         
         // Calculate new Values
@@ -2219,10 +2219,13 @@ void TopSVDFunctions::SVD_DrawStackRange(THStack* stack, TLegend* leg, TString x
         if ( useUserPalette == true ) currentcolor = theColors[cnt];
         if ( useOldColors == true ) currentcolor = histo->GetMarkerColor(); 
         double saveMarkerSize = histo->GetMarkerSize();
+        double saveLineStyle = histo->GetLineStyle();
         histo->UseCurrentStyle();  
         histo->SetLineColor(currentcolor);
+        histo->SetLineStyle(saveLineStyle);
         histo->SetMarkerColor(currentcolor);
-        histo->SetMarkerSize(saveMarkerSize); 
+        histo->SetMarkerSize(saveMarkerSize);  
+        
         cnt++;
     } 
   
@@ -2834,15 +2837,24 @@ void TopSVDFunctions::SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo,
             
         }
         
-        // Marker
+        // Draw Options
+        // For Systematic shifts, draw Options should ALWAYS
+        // be just HIST
+        TString theDrawOptions = drawOptions;
+        if ( h > 0 ) {
+        	theDrawOptions = "HIST";
+        }
+        
+        // Marker Style
         if ( drawOptions.Contains("P") == false ) {
             stackHisto->SetMarkerStyle(1);
             stackHisto->SetMarkerSize(0.);
         }  
         
-          
-        // Draw Options
-        TString theDrawOptions = drawOptions;
+        // Line Style 
+        stackHisto->SetLineStyle(h); 
+         
+        // Draw Options 
         stack->Add(stackHisto, theDrawOptions);
 
 
@@ -6336,7 +6348,7 @@ double TopSVDFunctions::SVD_Unfold(
  
         // Draw Response Matrix
         SVD_Draw2D(mcHist, "COLZ TEXT");
-        SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, 1); 
+        SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, 1);  
 
 
         // Draw Probability Matrix
@@ -6347,8 +6359,8 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Draw Input Distributions
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");
-        SVD_Array2Stack(theRegStack, theLegend, xiniHist, "Gen", "HIST E", "", 4, numberSyst+1);
-        SVD_Array2Stack(theRegStack, theLegend, biniHist, "Rec", "HIST E", "", 2, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, xiniHist_forTSVD, "Gen", "HIST E", "", 4, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, biniHist_forTSVD, "Rec", "HIST E", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, dataScaledHist, "Data, scaled", "HIST E", "", 1, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, 3);         
@@ -6357,7 +6369,7 @@ double TopSVDFunctions::SVD_Unfold(
 
         // Draw Background related Distributions 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");
-        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Data", "HIST E", "", 1, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, dataHist_forTSVD, "Data", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, rawHist, "Raw", "HIST E", "", 2, 1); // Only 1 Histogram
         SVD_Array2Stack(theRegStack, theLegend, bgrHist, "Bgr", "HIST", "", 4, numberSyst+1); 
         SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
