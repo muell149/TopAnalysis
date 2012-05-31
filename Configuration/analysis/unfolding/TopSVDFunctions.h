@@ -221,6 +221,8 @@ class TopSVDFunctions
         
         
         // Purity, Stability and all that
+        static void SVD_SumOverRecBins(TH1D*& sumHist, TH2D* mcHist, int numHist = 1);
+        static void SVD_SumOverGenBins(TH1D*& sumHist, TH2D* mcHist, int numHist = 1);
         static void SVD_Pur(TH1D*& purHist, TH2D* mcHist, int numHist = 1);
         static void SVD_Stab(TH1D*& stabHist, TH2D* mcHist, int numHist = 1);
         static void SVD_Eff(TH1D*& effHist, TH2D* mcHist, TH1D* xiniHist,  int numHist = 1);
