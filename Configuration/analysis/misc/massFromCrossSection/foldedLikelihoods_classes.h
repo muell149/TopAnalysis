@@ -15,12 +15,12 @@ public:
 
 private:
 
-  RooRealVar p0;
-  RooRealVar p1;
+  const RooRealVar p0;
+  const RooRealVar p1;
 
 public:
 
-  RooPolyVar polyVar;
+  const RooPolyVar polyVar;
 
 };
 
@@ -31,7 +31,7 @@ LinRelUncertainty::LinRelUncertainty(const TString& label, const TF1* fittedFunc
 {}
 
 //////////////////////////////////////////////////
-/// Class for predicted cross sections with
+/// Class for predicted cross sections
 /// with mass dependence and uncertainties
 //////////////////////////////////////////////////
 
@@ -42,17 +42,21 @@ public:
   PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var,
 	   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs);
 
+public:
+
+  const TString name;
+
 private:
 
-  RooRealVar p0;
-  RooRealVar p1;
-  RooRealVar p2;
-  RooRealVar p3;
+  const RooRealVar p0;
+  const RooRealVar p1;
+  const RooRealVar p2;
+  const RooRealVar p3;
 
-  LinRelUncertainty relUncPdf;
-  LinRelUncertainty relUncAlpha;
-  LinRelUncertainty relUncScaleUp;
-  LinRelUncertainty relUncScaleDown;
+  const LinRelUncertainty relUncPdf;
+  const LinRelUncertainty relUncAlpha;
+  const LinRelUncertainty relUncScaleUp;
+  const LinRelUncertainty relUncScaleDown;
 
 public:
 
@@ -76,6 +80,7 @@ public:
 
 PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var,
 		   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs):
+  name(label),
   p0(label+"_p0", label+"_p0", xsec_func->GetParameter(0)),
   p1(label+"_p1", label+"_p1", xsec_func->GetParameter(1)),
   p2(label+"_p2", label+"_p2", xsec_func->GetParameter(2)),
@@ -86,9 +91,9 @@ PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_
   relUncScaleDown(label+"_relUncScaleDown", unc_funcs[0].at(1), mass_var),
   xsec(label+"_xsec", label+"_xsec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)/(@0*@0*@0*@0)",
        RooArgSet(mass_var, p0, p1, p2, p3)),
-  xsecScaleUp(label+"_xsecScaleUp", label+"_xsecScaleUp", "@0+@0*@1",
+  xsecScaleUp(label+"_xsecScaleUp", label+"_xsecScaleUp", "@0+@0*TMath::Abs(@1)",
 	      RooArgSet(xsec, relUncScaleUp.polyVar)),
-  xsecScaleDown(label+"_xsecScaleDown", label+"_xsecScaleDown", "@0-@0*@1",
+  xsecScaleDown(label+"_xsecScaleDown", label+"_xsecScaleDown", "@0-@0*TMath::Abs(@1)",
 		RooArgSet(xsec, relUncScaleDown.polyVar)),
   gaussianUnc(label+"_gaussianUnc", label+"_gaussianUnc", "@0*TMath::Sqrt(@1*@1+@2*@2)",
 	      RooArgSet(xsec, relUncPdf.polyVar, relUncAlpha.polyVar)),
