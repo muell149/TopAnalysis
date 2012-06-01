@@ -1,5 +1,5 @@
 //
-// 1. initialize an up-to-date ROOT version, e.g. with: ini ROOT528
+// 1. initialize an up-to-date ROOT version, e.g. with: ini ROOT532
 //    (there are issues when drawing graphs with errors in old ROOT versions)
 // 2. compile like: g++ -Wall `root-config --cflags --libs` -lRooFit -o foldedLikelihoods foldedLikelihoods.C
 // 3. execute with: foldedLikelihoods [options]
@@ -113,9 +113,9 @@ TGraph* getMassShiftGraph()
 
 std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, const bool useAlphaUnc, const bool heraPDF)
 {
-  const unsigned nPoints = (name=="kidonakis" ? 91 : 51);
+  const unsigned nPoints = (name=="ahrens" ? 51 : 91);
 
-  TString fileName = "input/" + name;
+  TString fileName = "theories_7TeV/" + name;
   if(pole || name=="kidonakis")
     fileName += "_pole";
   else
@@ -212,8 +212,9 @@ void removeEmptyPoints(TGraph* graph)
   }
 }
 
-std::vector<TF1*> drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole, const TString title,
-					  const TString epsName, const TString printNameBase, const bool symmetrize)
+std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
+						const TString title, const TString epsName, const TString printNameBase,
+						const bool symmetrize)
 {
   const int n = graph->GetN();
   double uncUp  [n];
@@ -239,7 +240,6 @@ std::vector<TF1*> drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* can
     relUncUp->GetXaxis()->SetTitle("m_{t}^{#bar{MS}} (GeV)");
   relUncUp->GetYaxis()->SetTitle("#delta#sigma_{t#bar{t}} / #sigma_{t#bar{t}}");
   relUncUp->GetYaxis()->CenterTitle();
-  //  relUncUp->GetYaxis()->SetRangeUser(.055, .115);
   relUncUp->GetYaxis()->SetRangeUser(.0, .115);
   relUncUp  ->SetMarkerStyle(26);
   relUncDown->SetMarkerStyle(32);
@@ -266,13 +266,76 @@ std::vector<TF1*> drawRelativeUncertainty(TGraphAsymmErrors* graph, TCanvas* can
   leg.AddEntry(relUncDown, "#delta_{-}", "P");
   leg.Draw();
   gStyle->SetOptFit(0000);
-  canvas->Print(printNameBase+".ps");
-  canvas->Print(epsName);
+  if(!(epsName.Contains("kidonakis") && (!epsName.Contains("pole") || epsName.Contains("hera")))) {
+    canvas->Print(printNameBase+".ps");
+    canvas->Print(epsName);
+  }
   delete relUncUp;
   delete relUncDown;
   delete relUncMean;
   gStyle->SetOptFit(0011);
   return vec;
+}
+
+void drawConvolution(const PredXSec& predXSec, RooRealVar& xsec, RooRealVar& mass, const TF1* xsecFunc, const TString title,
+		     TCanvas* canvas, const TString printNameBase, const TString epsName)
+{
+  if(mass.getTitle().Contains("pole"))
+    mass.setVal(172.5);
+  else
+    mass.setVal(165.);
+  RooPlot* convFrame = xsec.frame(0.85*xsecFunc->Eval(mass.getVal()), 1.15*xsecFunc->Eval(mass.getVal()));
+  predXSec.gaussianProb.plotOn(convFrame, RooFit::LineColor(kGreen),
+			       RooFit::NormRange("xsec_fullRange"),
+			       RooFit::FillStyle(1001), RooFit::FillColor(kGreen), RooFit::DrawOption("F"));
+  predXSec.gaussianProb.plotOn(convFrame, RooFit::Range(xsecFunc->Eval(mass.getVal())-0.01,
+							xsecFunc->Eval(mass.getVal())+0.01),
+			       RooFit::NormRange("xsec_fullRange"),
+			       RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
+  predXSec.rectangularProb.plotOn(convFrame, RooFit::Normalization(1.), RooFit::LineStyle(2), RooFit::FillColor(0));
+  predXSec.prob.plotOn(convFrame, RooFit::LineColor(kRed), RooFit::FillColor(0));
+  convFrame->GetYaxis()->SetTitle("Probability density");
+  convFrame->Draw();
+  gPad->RedrawAxis();
+  TLegend convLeg = TLegend(0.66, 0.6, 0.92, 0.9);
+  convLeg.SetFillStyle(0);
+  convLeg.SetBorderSize(0);
+  convLeg.AddEntry(convFrame->findObject(predXSec.name+"_gaussianProb_Norm[xsec]"   ), "Gauss(PDF#oplus#alpha_{S})"  , "F");
+  //  convLeg.AddEntry(convFrame->findObject(predXSec.name+"_rectangularProb_Norm[xsec]"), "Rect(#mu_{r/f}) (#times0.59)", "F");
+  convLeg.AddEntry(convFrame->findObject(predXSec.name+"_rectangularProb_Norm[xsec]"), "Rect(#mu_{r/f})", "F");
+  convLeg.AddEntry(convFrame->findObject(predXSec.name+"_prob_Norm[xsec]"           ), "Gauss#otimesRect"            , "F");
+  convLeg.Draw();
+  char tmpTxt[99];
+  sprintf(tmpTxt, "%s, %s = %.1f GeV", title.Data(), mass.getTitle().Data(), mass.getVal());
+  TLatex text(0.,0.,tmpTxt);
+  text.SetNDC();
+  text.SetTextAlign(13);
+  text.SetX(0.16);
+  text.SetY(0.99);
+  text.SetTextFont(43);
+  text.SetTextSizePixels(16);
+  text.Draw();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(epsName);
+  delete convFrame;
+}
+
+void plot2DimProb(const PredXSec& predXSec, TCanvas* canvas, const TString title,
+		  const TString printNameBase, const TString epsName)
+{
+  TH1* h2 = predXSec.prob.createHistogram("xsec,mass",100,100);
+  h2->Draw("box");
+  TLatex text(0.,0.,title);
+  text.SetNDC();
+  text.SetTextAlign(13);
+  text.SetX(0.16);
+  text.SetY(0.99);
+  text.SetTextFont(43);
+  text.SetTextSizePixels(16);
+  text.Draw();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(epsName);
+  delete h2;
 }
 
 void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr)
@@ -281,16 +344,22 @@ void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr)
   std::cout << "Calculating uncertainties for "
 	    << f1->GetName() << " via integration around maximum..." << std::endl;
   const double precision = 1E-08;
-  const double max = f1->GetMaximumX();
   double* params = 0;
-  //  std::cout << f1->Integral(140, 200, params, precision) << std::endl; // this will give an integral of 1.00
+  const double max = f1->GetMaximumX();
+  const double fullIntegral = f1->Integral(140, 200, params, precision);
+  std::cout << "Maximum: " << max << " GeV" << std::endl;
+  std::cout << "Integral from 140 to 200 GeV: " << fullIntegral << std::endl;
+  if(fullIntegral < 0.99 || fullIntegral > 1.) {
+    std::cout << "Integral should be within 0.99 and 1.00!" << std::endl;
+  }
   double sigma = 0;
   double stepSize = 1;
   std::cout << std::left << std::setw(8) << "Delta:" << " " << "Integral:" << std::endl;
   while( 1 ) {
     sigma += stepSize;
-    double integral = f1->Integral(max-sigma, max+sigma, params, precision);
-    if(integral > 0.6827) {
+    const double integral = f1->Integral(max-sigma, max+sigma, params, precision) / fullIntegral;
+    //  std::cout << max-sigma << " " << max+sigma << " " << integral << std::endl;
+    if(integral > 0.683) {
       sigma -= stepSize;
       std::cout << std::left << std::setw(8) << sigma << " " << integral << std::endl;
       stepSize *= 0.1;
@@ -338,6 +407,7 @@ TLatex* cmsPreliminaryTxt()
 int foldedLikelihoods(const bool pole, const bool heraPDF)
 {
   const bool useAlphaUnc = true;
+  const bool full2011dilep = true;
 
   setTDRStyle();
   gStyle->SetTitleBorderSize(1);
@@ -381,20 +451,18 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   TGraphAsymmErrors* moc = moc_vec.at(3);
 
   TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,4)", 0, 1000);
-//  TF1* f1 = new TF1("f1", "([0]+[1]*(x-172.5)+[2]*TMath::Power(x-172.5,2)+[3]*TMath::Power(x-172.5,3))/TMath::Power(x-172.5,4)", 0, 1000);
-//  f1->SetParameter(0, 150.);
-//  f1->SetParameter(1, -1.5);
-//  f1->SetParameter(2, 0.01);
-//  f1->SetParameter(3, 0);
   kid->Fit(f1, "0");
   ahr->Fit(f1, "0");
   moc->Fit(f1, "0");
 
   const TString pdfName = (heraPDF ? "(with HERAPDF)" : "(with MSTW)");
+  const TString title[3] = {"Ahrens et al. "     + pdfName,
+			    "Kidonakis "         + pdfName,
+			    "Langenfeld et al. " + pdfName};
   for(unsigned j=0; j<4; j++) {
-    kid_vec.at(j)->SetTitle("Kidonakis " + pdfName);
-    moc_vec.at(j)->SetTitle("Langenfeld et al. " + pdfName);
-    ahr_vec.at(j)->SetTitle("Ahrens et al. " + pdfName);
+    ahr_vec.at(j)->SetTitle(title[0]);
+    kid_vec.at(j)->SetTitle(title[1]);
+    moc_vec.at(j)->SetTitle(title[2]);
   }
     
   gStyle->SetOptTitle(1);
@@ -406,34 +474,33 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   std::vector<TF1*> moc_funcs[4];
   std::vector<TF1*> ahr_funcs[4];
 
-  if(pole && !heraPDF) {
-    for(unsigned j=0; j<4; j++)
-      kid_funcs[j] = drawRelativeUncertainty(kid_vec.at(j), canvas, pole, errName[j],
-					     epsString("relUnc_kidonakis_"+errLabel[j], pole, heraPDF),
-					     printNameBase, (j==1 || j==2));
-    drawTheoryGraph(kid, canvas, pole, "kidonakis", printNameBase);
-  }
   for(unsigned j=0; j<4; j++)
-    moc_funcs[j] = drawRelativeUncertainty(moc_vec.at(j), canvas, pole, errName[j],
-					   epsString("relUnc_moch_"+errLabel[j], pole, heraPDF),
-					   printNameBase, (j==1 || j==2));
+    kid_funcs[j] = getAndDrawRelativeUncertainty(kid_vec.at(j), canvas, pole, errName[j],
+						 epsString("relUnc_kidonakis_"+errLabel[j], pole, heraPDF),
+						 printNameBase, (j==1 || j==2));
+  if(pole && !heraPDF)
+    drawTheoryGraph(kid, canvas, pole, "kidonakis", printNameBase);
+  for(unsigned j=0; j<4; j++)
+    moc_funcs[j] = getAndDrawRelativeUncertainty(moc_vec.at(j), canvas, pole, errName[j],
+						 epsString("relUnc_moch_"+errLabel[j], pole, heraPDF),
+						 printNameBase, (j==1 || j==2));
   drawTheoryGraph(moc, canvas, pole, "moch"  , printNameBase);
   for(unsigned j=0; j<4; j++)
-    ahr_funcs[j] = drawRelativeUncertainty(ahr_vec.at(j), canvas, pole, errName[j],
-					   epsString("relUnc_ahrens_"+errLabel[j], pole, heraPDF),
-					   printNameBase, (j==1 || j==2));
+    ahr_funcs[j] = getAndDrawRelativeUncertainty(ahr_vec.at(j), canvas, pole, errName[j],
+						 epsString("relUnc_ahrens_"+errLabel[j], pole, heraPDF),
+						 printNameBase, (j==1 || j==2));
   drawTheoryGraph(ahr, canvas, pole, "ahrens", printNameBase);
 
   gStyle->SetOptTitle(0);
 
-  RooRealVar mass("mass", "m_{t}^{pole}", 140., 200., "GeV");
+  RooRealVar mass("mass", "m_{t}^{pole}", 140., 190., "GeV");
   if(!pole)
     mass.SetTitle("m_{t}^{#bar{MS}}");
 
   RooRealVar xsec("xsec" , "#sigma_{t #bar{t}}", 0., 900., "pb");
 
-  mass.setRange("mass_fullRange", 140., 200.);
-  xsec.setRange("xsec_fullRange", 130., 230.);
+  mass.setRange("mass_fullRange", 140., 190.);
+  xsec.setRange("xsec_fullRange", 10., 900.);
 
   RooRealVar shift_p0("shift_p0", "shift_p0", 0.);
   RooRealVar shift_p1("shift_p1", "shift_p1", 0.);
@@ -443,7 +510,10 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   }
   RooPolyVar shift("shift", "shift", mass, RooArgSet(shift_p0, shift_p1));
 
-  RooFormulaVar deltaM("deltaM", "deltaM", "@0-172.5+@1", RooArgSet(mass, shift));
+  TString deltaM_formula = "@0-172.5+@1";
+  if(full2011dilep)
+    deltaM_formula = "@0+@1";
+  RooFormulaVar deltaM("deltaM", "deltaM", deltaM_formula, RooArgSet(mass, shift));
   // e-mu
   //  RooRealVar p0("p0", "p0",  1.01    ); // e-mu
   //  RooRealVar p1("p1", "p1", -0.93E-02); // e-mu
@@ -461,11 +531,23 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   RooRealVar p1("p1", "p1", -0.97E-02); // e-mu
   RooRealVar p2("p2", "p2",  1.125E-04 ); // e-mu
 
+  if(full2011dilep) {
+    p0.setVal(-1.467);
+    p1.setVal(0.03715);
+    p2.setVal(-0.0001324);
+  }
+
   RooPolyVar measXSecMassDepRel("measXSecMassDepRel", "measXSecMassDepRel", deltaM, RooArgSet(p0, p1, p2));
   RooRealVar measXSec("measXSec", "measXSec", 169.9, "pb");
   // total exp uncert of 18.23 from adding quadr. 3.9 (stat), 16.3 (syst) and 7.6 (lumi)
   // and subtracting 1.5 % = 2.5485 pb for the top mass (in e-mu, it is 2.6 % for ee and mumu)
   RooRealVar measXSecErr("measXSecErr", "measXSecErr", 18.23, "pb");
+
+  if(full2011dilep) {
+    measXSec.setVal(161.9);
+    measXSecErr.setVal(6.725);
+  }
+
   RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1", RooArgSet(measXSecMassDepRel,measXSec));
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecErr);
 
@@ -474,41 +556,16 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   PredXSec ahrPredXSec("ahrPredXSec", xsec, mass, ahr->GetFunction("f1"), ahr_funcs);
 
   if(pole && !heraPDF) {
-    mass.setVal(172.5);
-    RooPlot* convFrame = xsec.frame(120., 220.);
-    kidPredXSec.gaussianProb.plotOn(convFrame, RooFit::LineColor(kGreen),
-				    RooFit::NormRange("xsec_fullRange"),
-				    RooFit::FillStyle(1001), RooFit::FillColor(kGreen), RooFit::DrawOption("F"));
-    kidPredXSec.gaussianProb.plotOn(convFrame, RooFit::Range(kid->GetFunction("f1")->Eval(mass.getVal())-0.01,
-							     kid->GetFunction("f1")->Eval(mass.getVal())+0.01),
-				    RooFit::NormRange("xsec_fullRange"),
-				    RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
-    kidPredXSec.rectangularProb.plotOn(convFrame, RooFit::Normalization(0.215), RooFit::LineStyle(2), RooFit::FillColor(0));
-    kidPredXSec.prob.plotOn(convFrame, RooFit::LineColor(kRed), RooFit::FillColor(0));
-    convFrame->GetYaxis()->SetTitle("a.u.");
-    convFrame->Draw();
-    gPad->RedrawAxis();
-    TLegend convLeg = TLegend(0.66, 0.6, 0.92, 0.9);
-    convLeg.SetFillStyle(0);
-    convLeg.SetBorderSize(0);
-    convLeg.AddEntry(convFrame->findObject("kidPredXSec_gaussianProb_Norm[xsec]"), "Gauss(PDF#oplus#alpha_{S})", "F");
-    convLeg.AddEntry(convFrame->findObject("kidPredXSec_rectangularProb_Norm[xsec]"), "Rect(#mu_{r/f})", "F");
-    convLeg.AddEntry(convFrame->findObject("kidPredXSec_prob_Norm[xsec]"), "Gauss#otimesRect", "F");
-    convLeg.Draw();
-    char tmpTxt[99];
-    sprintf(tmpTxt, "Kidonakis #otimes MSTW, m_{t} = %.1f GeV", mass.getVal());
-    TLatex text(0.,0.,tmpTxt);
-    text.SetNDC();
-    text.SetTextAlign(13);
-    text.SetX(0.16);
-    text.SetY(0.99);
-    text.SetTextFont(43);
-    text.SetTextSizePixels(16);
-    text.Draw();
-    canvas->Print(printNameBase+".ps");
-    canvas->Print("figs/convolution.eps");
-    delete convFrame;
+    drawConvolution(kidPredXSec, xsec, mass, kid->GetFunction("f1"), title[1], canvas, printNameBase,
+		    epsString("convolution_kidonakis", pole, heraPDF));
+    plot2DimProb(kidPredXSec, canvas, title[1], printNameBase, epsString("2d_kidonakis", pole, heraPDF));
   }
+  drawConvolution(mocPredXSec, xsec, mass, moc->GetFunction("f1"), title[2], canvas, printNameBase,
+		  epsString("convolution_moch", pole, heraPDF));
+  plot2DimProb(mocPredXSec, canvas, title[2], printNameBase, epsString("2d_moch", pole, heraPDF));
+  drawConvolution(ahrPredXSec, xsec, mass, ahr->GetFunction("f1"), title[0], canvas, printNameBase,
+		  epsString("convolution_ahrens", pole, heraPDF));
+  plot2DimProb(ahrPredXSec, canvas, title[0], printNameBase, epsString("2d_ahrens", pole, heraPDF));
 
   const int colorKid = kRed+1;
   const int colorAhr = kMagenta;
@@ -562,8 +619,8 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
 
   if(pole && !heraPDF)
     getUncertaintiesFromIntegral(kidTF, kidLowErr, kidHigErr);
-  getUncertaintiesFromIntegral(mocTF, mocLowErr, mocHigErr);
   getUncertaintiesFromIntegral(ahrTF, ahrLowErr, ahrHigErr);
+  getUncertaintiesFromIntegral(mocTF, mocLowErr, mocHigErr);
 
   plotProjectedPDF(mocProjectedPDF, frame, colorMoc, mocMax, mocLowErr, mocHigErr);
   if(pole && !heraPDF)
@@ -612,11 +669,19 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
 
   // producing final overview plots
 
+  //  gStyle->SetOptFit(0000); ???
   ahr->GetXaxis()->SetRangeUser(140., 190.);
   ahr->SetFillColor(colorAhr);
+  if(pole && !heraPDF)
+    kid->SetFillColor(colorKid);
+  moc->SetFillColor(colorMoc);
+  //  moc->SetFillStyle(3002);
   ahr->Draw("A3");
-//  kid->Draw("4 same");
-//  moc->Draw("4 same");
+  if(pole && !heraPDF)
+    kid->Draw("3 same");
+  moc->Draw("3 same");
+  moc->Draw("L same");
+  ahr->GetYaxis()->CenterTitle(false);
   gPad->RedrawAxis();
   canvas->Print(printNameBase+".ps");
   
