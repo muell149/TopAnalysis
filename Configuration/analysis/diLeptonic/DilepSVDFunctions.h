@@ -21,10 +21,11 @@ public:
 
 
     // Helpers 
-    TString SVD_GetSteering(TString channel, TString particle, TString quantity, TString special);
+    TString SVD_GetSteering(TString channel, TString particle, TString quantity, TString special, TString syst);
     void SVD_Tex(TString channel, TString particle, TString quantity, TString special, TString& channelTex, TString& particleTex, TString& quantityTex, TString& specialTex);
     TString SVD_GetOutputPath();
     TString SVD_GetOutputFileNamePs(TString channel, TString particle, TString quantity, TString syst, TString special);
+    TString SVD_GetOutputFileNameEps(TString channel, TString particle, TString quantity, TString syst, TString special);
     TString SVD_GetOutputFileNameRoot(TString channel, TString particle, TString quantity, TString syst, TString special); 
     TString SVD_GetOutputFileNameTxt(); 
     
@@ -32,11 +33,13 @@ public:
     double SVD_DoUnfold(
         TH1D* dataInputHist, 
         TH1D* bgrInputHist, 
+        TH1D* ttbgrInputHist, 
         TH1D* genInputHist, 
         TH1D* recInputHist, 
         TH2D* respInputHist,
         double* totalDataEvents,
         double* totalBgrEvents, 
+        double* totalTtBgrEvents, 
         double* totalRecEvents,
         double* totalGenEvents,
         const double thebins[], 
@@ -53,14 +56,16 @@ public:
     // Unfolding with Systematics
     double SVD_DoUnfoldSys(
         TH1D* dataInputHist,        
-        TH1D* bgrNom, TH1D* bgrUp, TH1D* bgrDown,       
+        TH1D* bgrNom, TH1D* bgrUp, TH1D* bgrDown,  
+        TH1D* ttbgrNom, TH1D* ttbgrUp, TH1D* ttbgrDown,       
         TH1D* genNom, TH1D* genUp, TH1D* genDown,         
         TH1D* recNom, TH1D* recUp, TH1D* recDown,      
         TH2D* respNom, TH2D* respUp, TH2D* respDown,  
         double totalDataEventsNom,  
-        double totalBgrEventsNom,  double totalBgrEventsUp,  double totalBgrEventsDown, 
-        double totalRecEventsNom,  double totalRecEventsUp,  double totalRecEventsDown, 
-        double totalGenEventsNom,  double totalGenEventsUp,  double totalGenEventsDown,  
+        double totalBgrEventsNom,    double totalBgrEventsUp,    double totalBgrEventsDown, 
+        double totalTtBgrEventsNom,  double totalTtBgrEventsUp,  double totalTtBgrEventsDown, 
+        double totalRecEventsNom,    double totalRecEventsUp,    double totalRecEventsDown, 
+        double totalGenEventsNom,    double totalGenEventsUp,    double totalGenEventsDown,  
         const double thebins[],                 
         const int numbins,                       
         TH1D*& shifts,                        
