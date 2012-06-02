@@ -426,29 +426,17 @@ if options.runOnMC:
     process.eventWeightPUsysDown = process.eventWeightPU.clone()
 
     process.eventWeightPU.WeightName          = "eventWeightPU"
-#    process.eventWeightPU.Weight3DName        = "eventWeightPU3D"
     process.eventWeightPU.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-#    process.eventWeightPU.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
     process.eventWeightPU.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysNo_68000_2011Full.root")
-#    process.eventWeightPU.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root")
-#    process.eventWeightPU.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3D.root")
 
     #Systematics: PU Up/Down
     process.eventWeightPUsysUp.WeightName         = "eventWeightPUUp"
-#    process.eventWeightPUsysUp.Weight3DName       = "eventWeightPU3DUp"
     process.eventWeightPUsysUp.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-#    process.eventWeightPUsysUp.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
     process.eventWeightPUsysUp.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_71400_2011Full.root")
-#    process.eventWeightPUsysUp.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root")
-#    process.eventWeightPUsysUp.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3DUp.root")
 
     process.eventWeightPUsysDown.WeightName         = "eventWeightPUDown"
-#    process.eventWeightPUsysDown.Weight3DName       = "eventWeightPU3DDown"
     process.eventWeightPUsysDown.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-#    process.eventWeightPUsysDown.MCSample3DFile      = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
     process.eventWeightPUsysDown.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_64600_2011Full.root")
-#    process.eventWeightPUsysDown.Data3DFile          = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root")
-#    process.eventWeightPUsysDown.Weight3DHistoFile   = cms.FileInPath("TopAnalysis/TopUtils/data/DefaultWeight3DDown.root")
 
 else:
     process.eventWeightPU = cms.Sequence()
@@ -1146,11 +1134,11 @@ if options.runOnMC and not options.syncExcercise:
     #process.scaledJetEnergy.scaleType = "jes:up" #abs = 1, jes:up, jes:down
     #process.scaledJetEnergy.scaleType = "jes:down" #abs = 1, jes:up, jes:down
 
-    process.scaledJetEnergy.resolutionEtaRanges  = cms.vdouble(0, 1.5, 1.5, 2.0, 2.0, -1)
+    process.scaledJetEnergy.resolutionEtaRanges  = cms.vdouble(0, 0.5, 0.5, 1.1, 1.1, 1.7, 1.7, 2.3, 2.3, -1)
 
-    #process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.0, 0.95, 0.9) # JER down
-    process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.1, 1.1, 1.1) # JER standard
-    #process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.2, 1.25, 1.3) # JER up
+    #process.scaledJetEnergy.resolutionFactors    = cms.vdouble(0.991, 1.002, 1.034, 1.049, 1.135) # JER down
+    process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.052, 1.057, 1.096, 1.134, 1.288) # JER standard
+    #process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.114, 1.113, 1.159, 1.221, 1.443) # JER up
 
 
 if options.runOnMC and not options.syncExcercise and filterMadgraphPythiaBug:
