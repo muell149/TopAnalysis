@@ -1,10 +1,12 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false, int verbose=0, 
+void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  const std::string decayChannel = "muon", bool withRatioPlot = true, bool extrapolate=false, bool hadron=false)
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  const std::string decayChannel = "combined", 
+				  bool withRatioPlot = true, bool extrapolate=false, bool hadron=false)
 {
   // ============================
   //  Set Root Style
@@ -72,6 +74,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
   TString outputFileName="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
+  if(decayChannel=="combined") outputFileName+="Comb";
   // NOTE: reco plots are the same - whatever PS is chosen but its nice
   //       to have them in the same output file like the cross sections
   // choose phase space
@@ -90,7 +93,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
   // (WITHOUT ERRORBANDS..)
   bool SSV=false;
   if(SSV) std::cout << std::endl << " for all \"...Tagged/...\" plots the SSV algorithm is chosen!" << std::endl;
- 
+  // adjust luminosity and data files for combined control plots
+  double luminosityEl=0;
+  double luminosityMu=0;
+  TString dataFileEl="";
+  TString dataFileMu="";
+  if(decayChannel=="combined"&&luminosity>4500&&luminosity<5000){
+    luminosityEl=4980;
+    luminosityMu=4955;
+    dataFileEl=getStringEntry(dataFile,1 , ":");
+    dataFileMu=getStringEntry(dataFile,42, ":");
+  }
+  
   //  0: sysNo
   //  1: sysLumiUp                   2: sysLumiDown                
   //  3: sysPUUp                     4: sysPUDown                  
@@ -512,7 +526,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
   // ===================================
   //  Open the standard analysis files
   // ===================================
-  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
+  std::map<unsigned int, TFile*> files_, filesMu_, filesEl_;
+  if(decayChannel!="combined") files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
+  else{
+    filesMu_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileMu, "muon"    );
+    filesEl_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileEl, "electron");
+  }
 
   // =====================
   //  Loading histos
@@ -526,9 +545,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
 	
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
-  std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  std::map< TString, std::map <unsigned int, TH1F*> > histo_, histoEl_, histoMu_;
   std::map< TString, TH1F* > histoErrorBand_;
-  std::map< TString, std::map <unsigned int, TH2F*> > histo2_;
+  std::map< TString, std::map <unsigned int, TH2F*> > histo2_, histo2El_, histo2Mu_;
   // a) Save all histos from plotList_ that exist in files_ into histo_ and histo2_
   // b) Count total number of plots as Nplots
   // c) Special action required for control plots regarding PU and nVertex:
@@ -540,14 +559,23 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
   vecRedundantPartOfNameInData.push_back("_reweighted_up");
   vecRedundantPartOfNameInData.push_back("_reweighted_down");
   vecRedundantPartOfNameInData.push_back("_reweighted");
-  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData, SSV);
+  if(decayChannel!="combined") getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData, SSV);
+  else{
+    getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose, "muon"    , &vecRedundantPartOfNameInData, SSV);
+    getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose, "electron", &vecRedundantPartOfNameInData, SSV);
+  }
 
+  
   // ==========================================
   //  Lumiweighting for choosen luminosity
   // ==========================================
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
   // NOTE: luminosity [/pb]
-  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
+  if(decayChannel!="combined") scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
+  else{
+    scaleByLuminosity(plotList_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose, systematicVariation, "muon"    );
+    scaleByLuminosity(plotList_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose, systematicVariation, "electron");
+  }
 
   // =======================================================
   //  Add single top channels and DiBoson contributions
@@ -557,7 +585,41 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
   // will be combined and saved in the histo_ and histo2_ map
   // reCreate: reCreate combined plots if they are already existing
   bool reCreate=false;
-  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
+  if(decayChannel!="combined")  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
+  else{
+    AddSingleTopAndDiBoson(plotList_, histoMu_, histo2Mu_, N1Dplots, verbose, reCreate, "muon"    ); 
+    AddSingleTopAndDiBoson(plotList_, histoEl_, histo2El_, N1Dplots, verbose, reCreate, "electron");
+  }
+
+
+  // =======================================================
+  //  Add decay channels for combined control plot
+  // =======================================================
+  if(decayChannel=="combined"){
+    // loop samples
+    for(unsigned int sample=kSig; sample<=kData; ++sample){
+      if(verbose>1) std::cout << sampleLabel(sample) << std::endl;
+      // loop plots
+      for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+	if(verbose>1) std::cout << plotList_[plot] << " : " ;
+	// a) 1D
+	if((plot<N1Dplots)&&(histoMu_.count(plotList_[plot])>0)&&(histoMu_[plotList_[plot]].count(sample)>0)&&(histoEl_.count(plotList_[plot])>0)&&(histoEl_[plotList_[plot]].count(sample)>0)){ 
+	  if(verbose>1) std::cout << "1D" << std::endl;
+	  histo_[plotList_[plot]][sample]=(TH1F*)(histoMu_[plotList_[plot]][sample]->Clone());
+	  histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_[plotList_[plot]][sample]->Clone()));
+	}
+	// b) 2D
+	else if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
+	  if(verbose>1) std::cout << "2D" << std::endl;
+	  histo2_[plotList_[plot]][sample]=(TH2F*)(histo2Mu_[plotList_[plot]][sample]->Clone());
+	  histo2_[plotList_[plot]][sample]->Add((TH2F*)(histo2El_[plotList_[plot]][sample]->Clone()));
+	}
+	else{
+	  if(verbose>1) std::cout << "NOT FOUND" << std::endl;
+	}
+      }   
+    }
+  }
 
   // ============================
   //  Configure histograms
@@ -660,7 +722,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
       double NnonTtbarBG=NAllMC-events_[selection_[step]][kSig]-events_[selection_[step]][kBkg];
       double ttbarSigFrac=events_[selection_[step]][kSig]/(events_[selection_[step]][kSig]+events_[selection_[step]][kBkg]);
       double eff=events_[selection_[step]][kSig]/NttbarPS;  
-      double xSec=(NData-NnonTtbarBG)*ttbarSigFrac/(A*eff*BR*luminosity);
+      double luminosity2=luminosity;
+      if(decayChannel=="combined") luminosity2=luminosityMu+luminosityEl;
+      double xSec=(NData-NnonTtbarBG)*ttbarSigFrac/(A*eff*BR*luminosity2);
       std::cout << std::endl;
       std::cout << "    inclusive cross section: " << std::setprecision(2) << std::fixed << xSec << std::endl;
       std::cout << "      N(nonttBG): " << std::setprecision(2) << std::fixed << NnonTtbarBG << std::endl;
@@ -781,11 +845,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
       // a1) for 1D event yields, efficiency and cross section plots (existing)
       if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
 	// check if plot is existing
-       	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
+       	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)&&histo_[plotList_[plot]][sample]){
 	  histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	  if(verbose>0){
 	    std::cout << " Plotting "    << plotList_[plot];
-	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
+	    if(decayChannel!="combined") std::cout << " from sample " << sampleLabel(sample,decayChannel);
+	    else std::cout << " from sample " << sampleLabel(sample, "muon") << " and " << sampleLabel(sample, "electron");
 	    std::cout << " to canvas "   << canvasNumber << " ( " << plotCanvas_[canvasNumber]->GetTitle() << " )";
 	    std::cout << std::endl;
 	  }
@@ -800,7 +865,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
 	    // min / max
 	    double max = 1.3*histo_[maxFrom][sample]->GetMaximum();
 	    // if data file exists
-	    if(histo_[maxFrom].count(kData)>0){
+	    if(histo_.count(maxFrom)>0&&histo_[maxFrom].count(kData)>0&&histo_[plotList_[plot]][kData]){
 	      // and has larger maximum
 	      if(max < 1.3*histo_[maxFrom][kData]->GetMaximum()){
 		// take this maximum
@@ -863,8 +928,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
 	  }
 	  first=false;
 	  // at the end:
-	  if((sample==kData)&&(histo_.count(plotList_[plot])>0)){
-	    if(!SSV){
+	  if((sample==kData)&&(histo_.count(plotList_[plot])>0)&&histo_[plotList_[plot]][sample]){
+	    if(!SSV&&decayChannel!="combined"){
 	      // configure style of and draw uncertainty bands
 	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
 	      histoErrorBand_[plotList_[plot]]->SetFillColor(1);
