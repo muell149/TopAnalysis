@@ -585,6 +585,85 @@ void TopSVDFunctions::SVD_AddRightToLeft(TH1D*& histoLeft, TH1D* histoRight, dou
     } 
 }
 
+// Multiply histograms
+// This function multiplies the content of the right histo to the left histo.
+// This means, the left histogram is CHANGED, the right one is not changed.
+void TopSVDFunctions::SVD_MultRightToLeft(TH1D*& histoLeft, TH1D* histoRight, double factorLeft, double factorRight, int numHist)
+{
+     
+    // Existence of Objects
+    if ( histoLeft == NULL ) return;
+    if ( histoRight == NULL ) return;
+    
+    
+    // Create new objects 
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+          
+        int binsx = (histoLeft+h)->GetNbinsX();  
+        for ( int i = 1 ; i <= binsx ; i++ ) {
+            
+            // Get Values
+            double left = (histoLeft+h)->GetBinContent(i);
+            double leftError = (histoLeft+h)->GetBinError(i);
+            double right = (histoRight+h)->GetBinContent(i);
+            double rightError = (histoRight+h)->GetBinError(i); 
+            
+            
+            // Calculate new Values
+            double value = left*factorLeft*right*factorRight;  
+            double errorsq =  factorLeft*factorRight*(right*right*leftError*leftError+left*left*rightError*rightError);
+            double error = SVD_Sqrt(errorsq);
+            
+            
+            // Save it
+            (histoLeft+h)->SetBinContent(i, value);
+            (histoLeft+h)->SetBinError(i, error); 
+        } 
+    } 
+}
+
+// Divide histograms
+// This function multiplies the bin wise inverse of the right histo to the left histo.
+// This means, the left histogram is CHANGED, the right one is not changed.
+void TopSVDFunctions::SVD_MultInvRightToLeft(TH1D*& histoLeft, TH1D* histoRight, double factorLeft, double factorRight, double divZeroDefault,  int numHist)
+{
+     
+    // Existence of Objects
+    if ( histoLeft == NULL ) return;
+    if ( histoRight == NULL ) return;
+    
+    
+    // Create new objects 
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+          
+        int binsx = (histoLeft+h)->GetNbinsX();  
+        for ( int i = 1 ; i <= binsx ; i++ ) {
+            
+            // Get Values
+            double left = (histoLeft+h)->GetBinContent(i);
+            double leftError = (histoLeft+h)->GetBinError(i);
+            double right = (histoRight+h)->GetBinContent(i);
+            double rightError = (histoRight+h)->GetBinError(i); 
+            
+            // Default Values
+            double value = divZeroDefault;
+            double error = 0.;
+            
+            // Divide carefully
+            double denom = right*factorRight;
+            double nom = left*factorLeft;
+            if ( denom != 0.) { 
+            	value = nom / denom;
+            	double errorsq = ((factorLeft*factorLeft)/(denom*denom))*(leftError*leftError + ((left*left)/(right*right))*rightError*rightError);
+                error = SVD_Sqrt(errorsq);
+            }  
+            
+            // Save it
+            (histoLeft+h)->SetBinContent(i, value);
+            (histoLeft+h)->SetBinError(i, error); 
+        } 
+    } 
+}
 
 // Add up bins from histograms
 // This function adds up the content of the right histo to the left histo.
@@ -3136,7 +3215,8 @@ double TopSVDFunctions::SVD_Integral2D(TH2D* hist, int syst, bool doOF)
             if ( j == 0        && doOF == false ) continue;
             if ( j == nbinsy+1 && doOF == false ) continue;
             double value = (hist+syst)->GetBinContent(i,j);
-            sumData += value;
+            sumData += value; 
+            
         }
     }
         
@@ -4197,7 +4277,7 @@ void TopSVDFunctions::SVD_RemoveFile(TString filepath)
 int TopSVDFunctions::SVD_GetDigit(TString steering, int digit, int standard)
 {
     
-    int neededLength = 14;
+    int neededLength = 15;
     TString oldsteering = steering;
     
     // Length
@@ -4883,6 +4963,17 @@ void TopSVDFunctions::SVD_GlobalEfficiency(double*& globalEff, double* totalRecE
 //         0 means: Default value, same as 1
 //         1 means: No closure test, unfold real data (default)
 //         2 means: Closure test, unfold the reconstructed MC 
+//    (15) PRE-WEIGHTING (15. digit from right)
+//         0 means: Default value, same as 1
+//         1 means: No preweighting of MC is performed (default)
+//         2 means: MC is reweighted to unfolded data (1 iteration)
+//         3 means: MC is reweighted to unfolded data (2 iteration)
+//         4 means: MC is reweighted to unfolded data (3 iteration)
+//         5 means: MC is reweighted to unfolded data (4 iteration)
+//         6 means: MC is reweighted to unfolded data (5 iteration)
+//         7 means: MC is reweighted to unfolded data (6 iteration)
+//         8 means: MC is reweighted to unfolded data (7 iteration)
+//         9 means: MC is reweighted to unfolded data (8 iteration)
 //
 // Return value: 
 //        Best value of tau if scan is performed, -1. otherwise
@@ -5083,6 +5174,11 @@ double TopSVDFunctions::SVD_Unfold(
      
     // CLOSURE TEST 
     int flag_closure = SVD_GetDigit(steering, 14, 1);  
+     
+     
+     
+    // PREWEIGHTING
+    int flag_preweighting = SVD_GetDigit(steering, 15, 1);  
     
       
  
@@ -5333,6 +5429,7 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "    Transpose Response Matrix:                 " << (flag_respOr == 2) << endl; 
         cout << "    Plain Steering Parameter:                  " << steering << endl;
         cout << "    Closure Test (Unfold MC):                  " << (flag_closure == 2) << endl;
+        cout << "    Number of preweighting iterations:         " << flag_preweighting - 1 << endl;
         cout << " " << endl; 
         cout << "Integrals of Input Distributions:" << endl;
         cout << "    Data:                                      " << SVD_Integral1D(dataInputHist, 0, true) << endl;
@@ -5453,8 +5550,8 @@ double TopSVDFunctions::SVD_Unfold(
      
     // Reconstructed MC signal
     TH1D* biniHist = SVD_Rebin1D((TH1D*) recInputHist, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, numberSyst+1);
-    SVD_EmptyRecSideBins1D(biniHist, cutLowerRecSideBin, cutUpperRecSideBin, numberSyst+1);  
-    
+       
+ 
      
     /////////////////////////////////////////////////////////////////// 
     /////////  B A C K G R O U N D   H A N D L I N G  /////////////////
@@ -5514,31 +5611,181 @@ double TopSVDFunctions::SVD_Unfold(
     // Scaled Data
     TH1D* dataScaledHist = SVD_CloneHists1D(dataHist,numberSyst+1);
     SVD_ArrayScale(dataScaledHist, 1./lumiScaleFactor, numberSyst+1);
-       
- 
+    
+     
     ///////////////////////////////////////////////////////////////////
-    ////////////   B I N   B Y   B I N   U N F O L D I N G   //////////
-    ///////////////////////////////////////////////////////////////////
+    ////////////   P R E W E I G H T I N G  ///////////////////////////
+    /////////////////////////////////////////////////////////////////// 
+    
+    // Here, the MC model gets reweighted to the data.
+    // For this purpose, preliminary unfoldings are performed
+    // and then the MC model is reweighted to fit the data.
+    // This is an iterative procedure, and the number of iterations
+    // is set in the 'steering' parameter.
+    
+    // Attention:  
+    // (1) The unfolding for all iterations is done with the same
+    //     regularization parameter.
+    // (2) Background Reduction will be done on the basis of the
+    //     unreweighted MC!
+    // (3) Side bins will never be fixed to MC for preliminary 
+    //     unfoldings.
+    
+      
+    // Determine the number of iterations prior to regular unfolding
+    int numberPreweights = flag_preweighting - 1;
+    //int numberPreweights = 1;
+    
+     
+    // Make Copies of input histograms 
+    TH1D* dataHist_forTSVD = SVD_CloneHists1D(dataHist,numberSyst+1); 
+    TH1D* biniHist_forTSVD = SVD_CloneHists1D(biniHist,numberSyst+1);
+    TH1D* xiniHist_forTSVD = SVD_CloneHists1D(xiniHist,numberSyst+1);
+    TH2D* mcHist_forTSVD = SVD_CloneHists2D(mcHist,numberSyst+1);
  
 
-    // This is done for all systematics!
- 
-    // BBB-Efficiency
-    TH1D* beffHist = SVD_CloneHists1D(xiniHist,numberSyst+1);
-    SVD_BBBEff(beffHist, biniHist, xiniHist, numberSyst+1); 
-  
-  
-    // Do BBB Unfolding 
-    // Output stored in 'bbbHist'
-    // ATTENTION:
-    // (1) Use BBB Efficiency.
-    // (2) Although this might be tempting,
-    //     do not include the error from the efficiency.
-    //     This would bust your BBB / SVD comparison.
-    //     Instead, add the error on the efficiency
-    //     later on as a systematic MC uncertainty! 
-    TH1D* bbbHist = SVD_CloneHists1D(xiniHist,numberSyst+1);
-    SVD_BBBUnf(bbbHist, dataHist, beffHist, numberSyst+1); 
+    // Regularization
+    int theKReg = -1;
+    double theTau = -1.;
+    if ( flag_regpar == 2 ) {
+        theKReg = -1;
+        theTau = regPar;
+    } 
+    else {
+        theKReg = (int) regPar; 
+        theTau = 0.;
+    }  
+    
+    
+    // Make Iterations
+    TopSVDUnfold*  preliminarySVDUnfold = NULL;
+    TH1D* prelUnfHist = NULL;
+    for ( int iter = 0 ; iter < numberPreweights ; iter++) {
+    	
+    	cout << "" << endl;
+    	cout << "    Preweighting, iteration " << iter+1 << " of " << numberPreweights << endl;
+    	cout << "        Integrals before Reweighting:" << endl;
+    	cout << "            Background free data (dataHist):                     " <<  SVD_Integral1D(dataHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(dataHist_forTSVD, i, true) << endl;
+        }   
+    	cout << "            Reconstructed MC (biniHist):                         " <<  SVD_Integral1D(biniHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(biniHist_forTSVD, i, true) << endl;
+        }  
+    	cout << "            Generated MC (xiniHist):                             " <<  SVD_Integral1D(xiniHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(xiniHist_forTSVD, i, true) << endl;
+        }  
+    	cout << "            Response Matrix (mcHist):                            " <<  SVD_Integral2D(mcHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral2D(mcHist_forTSVD, i, true) << endl;
+        }  
+    	
+    	
+    	// Setup tool 
+        preliminarySVDUnfold = SVD_SetupTool(dataHist_forTSVD, biniHist_forTSVD, xiniHist_forTSVD, mcHist_forTSVD, theTau, numberSyst+1);  
+        
+        // Unfolding 
+        prelUnfHist = SVD_CallSVDUnfolding(preliminarySVDUnfold, theKReg, numberSyst+1); 
+        
+        // Calculate Gen Weights
+        TH1D* reweightsGen =  SVD_CloneHists1D(prelUnfHist, numberSyst+1); 
+        SVD_MultInvRightToLeft(reweightsGen, xiniHist_forTSVD, 1., 1., 1., numberSyst+1);
+        
+        // Reweight xiniHist   
+        SVD_MultRightToLeft(xiniHist_forTSVD, reweightsGen, 1., lumiScaleFactor, numberSyst+1); 
+        
+        
+        // Sum up  events in mcHist before Reweighting
+        TH1D* sumOverGenBeforeRW = SVD_CloneHists1D(prelUnfHist, numberSyst+1); 
+        SVD_SumOverGenBins(sumOverGenBeforeRW, mcHist_forTSVD, numberSyst+1); 
+        
+        // Apply weights to mcHist 
+        // NOTE: The generator level quantities are
+        // ... on the Y Axis
+        // ... that is the second index
+        // ... which is index j here.
+        for ( int h = 0; h < 1+numberSyst ; h++ ) {
+	        for ( int i = 1; i <= nbins ; i++ ) {
+	            for ( int j = 1; j <= nbins ; j++ ) {
+	        	    double value = (mcHist_forTSVD+h)->GetBinContent(i,j);
+	        	    double error = (mcHist_forTSVD+h)->GetBinError(i,j);
+	        	    double weight = reweightsGen->GetBinContent(j);
+	                value = value * weight;
+	                error = error * weight;
+	                (mcHist_forTSVD+h)->SetBinContent(i,j, value);
+	                (mcHist_forTSVD+h)->SetBinError(i,j, error);
+	            }
+	        }
+        }
+        
+        // Sum up  events in mcHist after Reweighting
+        TH1D* sumOverGenAfterRW = SVD_CloneHists1D(prelUnfHist, numberSyst+1); 
+        SVD_SumOverGenBins(sumOverGenAfterRW, mcHist_forTSVD, numberSyst+1);
+        
+         
+        // Calculate rec level weights
+        TH1D* reweightsRec =  SVD_CloneHists1D(sumOverGenAfterRW, numberSyst+1); 
+        SVD_MultInvRightToLeft(reweightsRec, sumOverGenBeforeRW, 1., 1., 1., numberSyst+1);
+        
+        
+        // Apply weights to biniHist
+        SVD_MultRightToLeft(biniHist_forTSVD, reweightsRec, 1., 1., numberSyst+1);
+        
+    	cout << "        Integrals after Reweighting:" << endl;
+    	cout << "            Background free data (dataHist):                     " <<  SVD_Integral1D(dataHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(dataHist_forTSVD, i, true) << endl;
+        }   
+    	cout << "            Reconstructed MC (biniHist):                         " <<  SVD_Integral1D(biniHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(biniHist_forTSVD, i, true) << endl;
+        }  
+    	cout << "            Generated MC (xiniHist):                             " <<  SVD_Integral1D(xiniHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(xiniHist_forTSVD, i, true) << endl;
+        }  
+    	cout << "            Response Matrix (mcHist):                            " <<  SVD_Integral2D(mcHist_forTSVD, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral2D(mcHist_forTSVD, i, true) << endl;
+        }  
+        
+    	cout << "        Helper Distributions:       " << endl;
+    	cout << "            Unfolding Result (prelUnfHist)::                     " <<  SVD_Integral1D(prelUnfHist, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(prelUnfHist, i, true) << endl;
+        }  
+    	cout << "            Generator Level Weights (reweightsGen):              " <<  SVD_Integral1D(reweightsGen, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(reweightsGen, i, true) << endl;
+        }  
+    	cout << "            Detector Level Weights (reweightsRec):               " <<  SVD_Integral1D(reweightsRec, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(reweightsRec, i, true) << endl;
+        }   
+    	cout << "            Sum over Gen Bins before RW (sumOverGenBeforeRW):    " <<  SVD_Integral1D(sumOverGenBeforeRW, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(sumOverGenBeforeRW, i, true) << endl;
+        }     
+    	cout << "            Sum over Gen Bins after RW (sumOverGenAfterRW):      " <<  SVD_Integral1D(sumOverGenAfterRW, 0, true) << endl;
+        for ( int i = 1 ; i <= numberSyst ; i++ ) {
+            cout << "                Syst. Sample " << i << "                                   " << SVD_Integral1D(sumOverGenAfterRW, i, true) << endl;
+        }   
+    	cout << "        Number of Bins:                                          " << nbins << endl;
+    	cout << "        Lumi Scale Factor:                                       " << lumiScaleFactor << endl;
+    	cout << "" << endl;
+        
+        // Delete obsolete Objects
+        SVD_DeleteSVD(preliminarySVDUnfold, numberSyst+1);
+        SVD_DeleteHists1D(sumOverGenAfterRW, numberSyst+1);
+        SVD_DeleteHists1D(sumOverGenBeforeRW, numberSyst+1);
+        SVD_DeleteHists1D(reweightsGen, numberSyst+1); 
+        SVD_DeleteHists1D(reweightsRec, numberSyst+1);
+        
+    }
+        
+        
     
  
     ///////////////////////////////////////////////////////////////////
@@ -5574,13 +5821,6 @@ double TopSVDFunctions::SVD_Unfold(
     SVD_SetTitles1D(upperSmearoutHist, lowerSmearoutStr, quantityTex, "Upper Smear-In", numberSyst+1);
     
     
-    // Make Copies of input histograms 
-    TH1D* dataHist_forTSVD = SVD_CloneHists1D(dataHist,numberSyst+1); 
-    TH1D* biniHist_forTSVD = SVD_CloneHists1D(biniHist,numberSyst+1);
-    TH1D* xiniHist_forTSVD = SVD_CloneHists1D(xiniHist,numberSyst+1);
-    TH2D* mcHist_forTSVD = SVD_CloneHists2D(mcHist,numberSyst+1);
-    
-    
     // Remove Smearin from lower side bin 
     if ( fixLowerSideBin == true ) {
         SVD_AddRightToLeft(dataHist_forTSVD, lowerSmearinHist, 1., -1.*lumiScaleFactor, numberSyst+1); 
@@ -5597,8 +5837,34 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_EmptyGenSideBins1D(xiniHist_forTSVD, false, true, numberSyst+1);
         SVD_EmptyGenSideBins2D(mcHist_forTSVD, false, true, numberSyst+1);  
     }
+        
+        
     
-    
+       
+ 
+    ///////////////////////////////////////////////////////////////////
+    ////////////   B I N   B Y   B I N   U N F O L D I N G   //////////
+    ///////////////////////////////////////////////////////////////////
+ 
+
+    // This is done for all systematics!
+ 
+    // BBB-Efficiency
+    TH1D* beffHist = SVD_CloneHists1D(xiniHist,numberSyst+1);
+    SVD_BBBEff(beffHist, biniHist, xiniHist, numberSyst+1); 
+  
+  
+    // Do BBB Unfolding 
+    // Output stored in 'bbbHist'
+    // ATTENTION:
+    // (1) Use BBB Efficiency.
+    // (2) Although this might be tempting,
+    //     do not include the error from the efficiency.
+    //     This would bust your BBB / SVD comparison.
+    //     Instead, add the error on the efficiency
+    //     later on as a systematic MC uncertainty! 
+    TH1D* bbbHist = SVD_CloneHists1D(xiniHist,numberSyst+1);
+    SVD_BBBUnf(bbbHist, dataHist, beffHist, numberSyst+1); 
 
      
     ///////////////////////////////////////////////////////////////////
@@ -5625,19 +5891,6 @@ double TopSVDFunctions::SVD_Unfold(
        double variance = TMath::Power(dataHist->GetBinError(i), 2.);
        dataCovHist->SetBinContent(i,i,variance);
     } 
- 
-
-    // Regularization
-    int theKReg = -1;
-    double theTau = -1.;
-    if ( flag_regpar == 2 ) {
-        theKReg = -1;
-        theTau = regPar;
-    } 
-    else {
-        theKReg = (int) regPar; 
-        theTau = 0.;
-    }  
     
 
     // Setup Unfolding Tools

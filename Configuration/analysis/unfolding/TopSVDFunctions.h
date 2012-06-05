@@ -113,9 +113,12 @@ class TopSVDFunctions
         static void SVD_WriteHists2D(TH2D* hists, int numHist = 1);
         static void SVD_RmDir1D(TH1D* hist, int numHist = 1);
         static void SVD_RmDir2D(TH2D* hist, int numHist = 1);
-        static void SVD_AddRightToLeft(TH1D*& histoLeft, TH1D* histoRight, double factorLeft, double factorRight, int numHist);
+        static void SVD_AddRightToLeft(TH1D*& histoLeft, TH1D* histoRight, double factorLeft, double factorRight, int numHist); 
+        static void SVD_MultRightToLeft(TH1D*& histoLeft, TH1D* histoRight, double factorLeft, double factorRight, int numHist); 
+        static void SVD_MultInvRightToLeft(TH1D*& histoLeft, TH1D* histoRight, double factorLeft, double factorRight, double divZeroDefault, int numHist); 
         static void SVD_AddBinRightToLeft(TH1D*& histoLeft, TH1D* histoRight, int bin, double factorLeft, double factorRight, int numHist);
         static double SVD_DoubleFromArray(double* arr, int pos); 
+         
         
         // Histogram Manipulation
         static void SVD_MoveOFBins1D(TH1D* hist, int numHist = 1);
