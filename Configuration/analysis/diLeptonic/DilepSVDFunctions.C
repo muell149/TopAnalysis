@@ -36,17 +36,17 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     int flag_preweighting = 1;       // Reweighting prior to unfolding off (1)
     
     // Cut out the lower gen level side bin for the PT quantities
-    TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
-    if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_lowersidebin = 5;
-    if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_lowersidebin = 5;
-    if ( concatenation.EndsWith("TtBar_Pt") == true ) flag_lowersidebin = 5;
+    //TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
+    //if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_lowersidebin = 5;
+    //if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_lowersidebin = 5;
+    //if ( concatenation.EndsWith("TtBar_Pt") == true ) flag_lowersidebin = 5;
     
     
     // Make preweighting iterations
-    if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_preweighting = 2;
-    if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_preweighting = 2;
-    if ( concatenation.EndsWith("TtBar_Pt") == true ) flag_preweighting = 2;
-    if ( concatenation.EndsWith("BJets_Pt") == true ) flag_preweighting = 4;
+    //if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_preweighting = 2;
+    //if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_preweighting = 2;
+    //if ( concatenation.EndsWith("TtBar_Pt") == true ) flag_preweighting = 2;
+    //if ( concatenation.EndsWith("BJets_Pt") == true ) flag_preweighting = 4;
     
     
     // Fix Side bins for Jet Quantities
