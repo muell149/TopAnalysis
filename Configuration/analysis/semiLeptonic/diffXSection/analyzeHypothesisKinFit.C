@@ -1781,18 +1781,22 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       int scanrange = (scan==2 ? 3 : 0);
       steering=getTStringFromInt(scanrange)+steering;
       //     (10) LOWER SIDE BIN
-      //          0 means: Default value, same as 1
-      //          1 means: Regard as regular bin (not encouraged!)
-      //          2 means: Cut away on Rec Level, unfold to Gen Level (default)
-      //          3 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!) 
-      int lowsidebin=2;
+      //         0 means: Default value, same as 3
+      //         1 means: Regard as regular bin (not encouraged!)
+      //         2 means: Regard as regular bin, keep bin content fixed to MC (not encouraged!)
+      //         3 means: Cut away on Rec Level, unfold to Gen Level (default)
+      //         4 means: Cut away on Rec Level, unfold to Gen Level, keep bin content fixed to MC 
+      //         5 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!) 
+      int lowsidebin=0;
       steering=getTStringFromInt(lowsidebin)+steering;
       //     (11) UPPER SIDE BIN 
-      //          0 means: Default value, same as 1
-      //          1 means: Regard as regular bin (not encouraged!)
-      //          2 means: Cut away on Rec Level, unfold to Gen Level (default)
-      //          3 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!)  
-      int upsidebin=2;
+      //         0 means: Default value, same as 3
+      //         1 means: Regard as regular bin (not encouraged!)
+      //         2 means: Regard as regular bin, keep bin content fixed to MC (not encouraged!)
+      //         3 means: Cut away on Rec Level, unfold to Gen Level (default)
+      //         4 means: Cut away on Rec Level, unfold to Gen Level, keep bin content fixed to MC 
+      //         5 means: Cut away on Rec Level, ignore on Gen Level (not encouraged!) 
+      int upsidebin=0;
       steering=getTStringFromInt(upsidebin)+steering;
       //     (12) ORIENTATION OF RESPONSE MATRIX
       //          0 means: Default value, same as 2
@@ -1816,7 +1820,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //         2 means: Write out single EPS Plots 
       int psOReps=1;
       steering=getTStringFromInt(psOReps)+steering;
-
+      
       // -----------
       // get binning
       // -----------
