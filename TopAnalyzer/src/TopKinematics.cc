@@ -79,7 +79,7 @@ void TopKinematics::book()
   // ttbar pair phi
   hists_["ttbarPhi"   ] = new TH1F( "ttbarPhi"   , "ttbarPhi"   ,  628, -pi ,  pi  );
   // ttbar pair invariant mass
-  hists_["ttbarMass"  ] = new TH1F( "ttbarMass"  , "ttbarMass"  , 1200,  0. , 1200 );
+  hists_["ttbarMass"  ] = new TH1F( "ttbarMass"  , "ttbarMass"  , 1800,  0. , 1800 );
   // deltaPhi between both top quarks
   hists_["ttbarDelPhi"] = new TH1F( "ttbarDelPhi", "ttbarDelPhi",  628, -pi , pi   );
   // deltaY between both top quarks
@@ -250,7 +250,7 @@ void TopKinematics::book()
   // gen-rec level correlation ttbar y
   corrs_["ttbarY_"     ] = new TH2F( "ttbarY_"     , "ttbarY_"      , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation ttbar mass
-  corrs_["ttbarMass_"  ] = new TH2F( "ttbarMass_"  , "ttbarMass_"   , 1200 ,   0., 1200.,     1200,  0., 1200.);
+  corrs_["ttbarMass_"  ] = new TH2F( "ttbarMass_"  , "ttbarMass_"   , 1800 ,   0., 1800.,     1800,  0., 1800.);
   // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
   corrs_["ttbarHT_"    ] = new TH2F( "ttbarHT_"    , "ttbarHT_"     , 1500,    0., 1500.,    1500,   0., 1500.);
   // gen-rec level correlation ttbar deltaPhi
@@ -338,7 +338,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // ttbar pair phi
   hists_["ttbarPhi"   ] = fs->make<TH1F>( "ttbarPhi"   , "ttbarPhi"   ,  628, -pi ,  pi  );
   // ttbar pair invariant mass
-  hists_["ttbarMass"  ] = fs->make<TH1F>( "ttbarMass"  , "ttbarMass"  , 1200,  0. , 1200 );
+  hists_["ttbarMass"  ] = fs->make<TH1F>( "ttbarMass"  , "ttbarMass"  , 1800,  0. , 1800 );
   // deltaPhi between both top quarks
   hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi", "ttbarDelPhi",  628, -pi , pi   );
   // deltaY between both top quarks
@@ -508,7 +508,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // gen-rec level correlation ttbar y
   corrs_["ttbarY_"    ] = fs->make<TH2F>( "ttbarY_"     , "ttbarY_"    , 1000,   -5.,    5.,    1000,  -5.,    5.);
   // gen-rec level correlation ttbar mass
-  corrs_["ttbarMass_" ] = fs->make<TH2F>( "ttbarMass_"  , "ttbarMass_" , 1200,    0., 1200.,    1200,   0., 1200.);
+  corrs_["ttbarMass_" ] = fs->make<TH2F>( "ttbarMass_"  , "ttbarMass_" , 1800,    0., 1800.,    1800,   0., 1800.);
   // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
   corrs_["ttbarHT_"   ] = fs->make<TH2F>( "ttbarHT_"    , "ttbarHT_"   ,  150,    0., 1500.,     150,   0., 1500.);
   // gen-rec level correlation ttbar deltaPhi
