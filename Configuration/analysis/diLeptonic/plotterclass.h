@@ -31,7 +31,7 @@ class Plotter {
   Plotter();
   Plotter(TString, TString, TString, double, double);
   ~Plotter();
-  void   setOptions(TString, TString, TString, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
+  void   setOptions(TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
   void   setDataSet(std::vector<TString>, std::vector<double>, std::vector<TString>, std::vector<int>, TString);
   void   setDataSet(TString);
   void   setSystDataSet(TString);
@@ -51,6 +51,7 @@ class Plotter {
   void InclFlatSystematics(int syst_number);
   void DiffFlatSystematics(int syst_number,  int nbins);
   TLegend* getNewLegend();
+  TLegend* getNewLegendpre();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
   TH1* GetNloCurve(TString NewName, TString Generator);
   // DAVID
@@ -58,7 +59,7 @@ class Plotter {
   void SetOutpath(TString path);
  private:
   TString name;
-  int bins, datafiles;
+  int bins, datafiles, rebin;
   double rangemin, rangemax, ymin, ymax;
   std::vector<TFile> files, filesUp, filesDown;
   std::vector<TString> dataset, datasetUp, datasetDown;
@@ -77,7 +78,7 @@ class Plotter {
   std::vector<TH1D> systhistsUp;
   std::vector<TH1D> systhistsDown;
   bool initialized, logX, logY, doDYScale;
-  int lumi;
+  int lumi, signalHist;
   TString channelLabel[4];
   double InclusiveXsection[4];
   double InclusiveXsectionStatError[4];
@@ -767,7 +768,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     // Notice, that the DY Background will be scaled with
     // the DYScale.
     for ( size_t i = 0; i < hists.size() ; i++ ) { 
-      if ( legends[i] == "data" ) { 
+      if ( legends[i] == "Data 2011" ) { 
 		if ( theDataHist == NULL ) {
 		  theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
 		} else {
@@ -808,7 +809,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     }
     
     for ( size_t i = 0; i < systhistsUp.size() ; i++ ) {  
-      if ( legendsUp[i] == "data") {
+      if ( legendsUp[i] == "Data 2011") {
       } 
       else if ( legendsUp[i] == "t#bar{t} signal") {   
 		if ( theRecHistUp == NULL ) { 
@@ -853,7 +854,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     }
     
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
-      if ( legendsDown[i] == "data") {
+      if ( legendsDown[i] == "Data 2011") {
       } else if ( legendsDown[i] == "t#bar{t} signal") {   
 		if ( theRecHistDown == NULL ) { 
 		  theRecHistDown = (TH1D*) (systhistsDown[i]).Clone("theRecHistDown"); 
@@ -1140,12 +1141,13 @@ Plotter::~Plotter()
 {
 }
 
-void Plotter::setOptions(TString name_, TString YAxis_, TString XAxis_, bool doDYScale_, bool logX_, bool logY_, double ymin_, double ymax_, double rangemin_, double rangemax_, int bins_, std::vector<double>XAxisbins_, std::vector<double>XAxisbinCenters_)
+void Plotter::setOptions(TString name_, TString YAxis_, TString XAxis_, int rebin_, bool doDYScale_, bool logX_, bool logY_, double ymin_, double ymax_, double rangemin_, double rangemax_, int bins_, std::vector<double>XAxisbins_, std::vector<double>XAxisbinCenters_)
 {
   XAxisbins.clear();
   XAxisbinCenters.clear();
   XAxisbinCenters = XAxisbinCenters_;
   XAxisbins = XAxisbins_;
+  rebin=rebin_;
   name=name_;
   bins=bins_;
   doDYScale = doDYScale_;
@@ -1157,6 +1159,16 @@ void Plotter::setOptions(TString name_, TString YAxis_, TString XAxis_, bool doD
   rangemax=rangemax_;
   YAxis=YAxis_;
   XAxis=XAxis_;
+  if(XAxis.Contains("band#bar{b}")){//Histogram naming convention has to be smarter
+    XAxis.ReplaceAll("band#bar{b}",11,"b and #bar{b}",13);
+  }
+  if(XAxis.Contains("tand#bar{t}")){//Histogram naming convention has to be smarter
+    XAxis.ReplaceAll("tand#bar{t}",11,"t and #bar{t}",13);
+  }
+  if(XAxis.Contains("l^{+}andl^{-}")){//Histogram naming convention has to be smarter
+    XAxis.ReplaceAll("l^{+}andl^{-}",13,"l^{+} and l^{-}",15);
+  }
+
   DYScale[0]=1.;
   DYScale[1]=1.;
   DYScale[2]=1.;
@@ -1208,7 +1220,7 @@ void Plotter::setDataSet(TString mode)
 
   lumi=4966;
   
-  DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
+  DYEntry = "Z / #gamma* #rightarrow ee/#mu#mu";
 
   if(channel=="ee" || channel=="emu" ||channel=="mumu"){  
     ifstream FileList("FileLists/HistoFileList_Nominal_"+channel+".txt");
@@ -1224,15 +1236,15 @@ void Plotter::setDataSet(TString mode)
 
       if(filename!=""){
 	dataset.push_back(filename);
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
+	if(filename.Contains("run")){legends.push_back("Data 2011"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
-	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
-	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
-	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
-//	else if(filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
-	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("diboson"); colors.push_back(10);}
+	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
+	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
+//	else if(filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W+jets"); colors.push_back(kGreen-3);}
 	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
       }
     }
@@ -1252,14 +1264,14 @@ void Plotter::setDataSet(TString mode)
       if(filename!=""){
 	dataset.push_back(filename);
 	
-	if(filename.Contains("run")){legends.push_back("data"); colors.push_back(kBlack);datafiles++;}
+	if(filename.Contains("run")){legends.push_back("Data 2011"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
-	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("VV"); colors.push_back(kYellow-10);}
-	else if(filename.Contains("dytautau")){legends.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
-	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
-	else if(filename.Contains("wtolnu")){legends.push_back("W #rightarrow l#nu"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("diboson"); colors.push_back(10);}
+	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
+	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W+jets"); colors.push_back(kGreen-3);}
 	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
       }
     }
@@ -1270,7 +1282,7 @@ void Plotter::setSystDataSet(TString systematic)
 {
   initialized=false;
 
-  DYEntry = "Z^{0} / #gamma* #rightarrow ee/#mu#mu";
+  DYEntry = "Z / #gamma* #rightarrow ee/#mu#mu";
   lumi=4966;
   if(channel=="ee" || channel=="emu" || channel=="mumu"){  
     TString HistoFileUp,HistoFileDown; 
@@ -1297,14 +1309,14 @@ void Plotter::setSystDataSet(TString systematic)
 
       if(filenameUp!=""){
 	datasetUp.push_back(filenameUp);
-	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
+	if(filenameUp.Contains("run")){legendsUp.push_back("Data 2011"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
-	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
-	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
-	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
-	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W #rightarrow l#nu"); colorsUp.push_back(kGreen-3);}
+	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("diboson"); colorsUp.push_back(10);}
+	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
+	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
+	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+jets"); colorsUp.push_back(kGreen-3);}
 	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD"); colorsUp.push_back(kYellow);}
       }
     }
@@ -1312,14 +1324,14 @@ void Plotter::setSystDataSet(TString systematic)
       FileListDown>>filenameDown;
       if(filenameDown!=""){
 	datasetDown.push_back(filenameDown);
-	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
+	if(filenameDown.Contains("run")){legendsDown.push_back("Data 2011"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
-	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
-	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
-	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
-	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W #rightarrow l#nu"); colorsDown.push_back(kGreen-3);}
+	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("diboson"); colorsDown.push_back(10);}
+	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
+	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
+	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+jets"); colorsDown.push_back(kGreen-3);}
 	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD"); colorsDown.push_back(kYellow);}
       }
     }
@@ -1350,14 +1362,14 @@ void Plotter::setSystDataSet(TString systematic)
 
       if(filenameUp!=""){
 	datasetUp.push_back(filenameUp);
-	if(filenameUp.Contains("run")){legendsUp.push_back("data"); colorsUp.push_back(kBlack);}
+	if(filenameUp.Contains("run")){legendsUp.push_back("Data 2011"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
-	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("VV"); colorsUp.push_back(kYellow-10);}
-	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
-	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
-	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W #rightarrow l#nu"); colorsUp.push_back(kGreen-3);}
+	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("diboson"); colorsUp.push_back(10);}
+	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
+	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
+	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+jets"); colorsUp.push_back(kGreen-3);}
 	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD"); colorsUp.push_back(kYellow);}
       }
     }
@@ -1365,14 +1377,14 @@ void Plotter::setSystDataSet(TString systematic)
       FileListDown>>filenameDown;
       if(filenameDown!=""){
 	datasetDown.push_back(filenameDown);
-	if(filenameDown.Contains("run")){legendsDown.push_back("data"); colorsDown.push_back(kBlack);}
+	if(filenameDown.Contains("run")){legendsDown.push_back("Data 2011"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
-	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("VV"); colorsDown.push_back(kYellow-10);}
-	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
-	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z^{0} / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
-	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W #rightarrow l#nu"); colorsDown.push_back(kGreen-3);}
+	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("diboson"); colorsDown.push_back(10);}
+	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
+	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
+	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+jets"); colorsDown.push_back(kGreen-3);}
 	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD"); colorsDown.push_back(kYellow);}
       }
     }
@@ -1520,6 +1532,7 @@ void Plotter::fillSystHisto()
 }
 
 
+
 void Plotter::write() // do scaling, stacking, legending, and write in file MISSING: DY Rescale
 {
   if(initialized){
@@ -1527,8 +1540,13 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   TCanvas * c = new TCanvas("","");
 
   THStack * stack=  new THStack("def", "def");
-  TLegend * leg =  new TLegend(0.70,0.65,0.95,0.90);
-
+  TLegend * leg =  new TLegend(0.70,0.55,0.98,0.85);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
+  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 - leg->GetNRows()*0.04);
+  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
   TH1D *drawhists[hists.size()];
 
 
@@ -1536,9 +1554,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   std::stringstream ss;
   ss << DYScale[channelType];
   TString scale;
-  int signalHist = -1;
   scale=(TString)ss.str();
-  
+  int legchange=0;
   leg->Clear();
   c->Clear();
   leg->SetFillStyle(0);
@@ -1547,22 +1564,41 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   c->SetTitle("");
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
     drawhists[i]=(TH1D*) hists[i].Clone();
+    if(rebin>1) drawhists[i]->Rebin(rebin);
     setStyle(*drawhists[i], i);
-  //  if(legends[i]!=legends[i+1] && i!=(hists.size()-1)){
-   //   drawhists[i]->SetLineColor(1);
-   // }
-    if(legends[i] != "data"){
+    if(legends[i] != "Data 2011"){
+      if(legends[i] == legends[0]){
+	drawhists[0]->Add(drawhists[i]);
+      }
+
       if(legends[i] == "t#bar{t} signal"){signalHist = i;}
       if((legends[i] == DYEntry) && channelType!=2 ){
 	    drawhists[i]->Scale(DYScale[channelType]);
       }
       if(i > 1){
 	    if(legends[i] != legends[i-1]){
+	      legchange = i;
 	      if((legends[i] == DYEntry)&& DYScale[channelType] != 1) leg->AddEntry(drawhists[i], legends[i],"f");
 	      else leg->AddEntry(drawhists[i], legends[i] ,"f");
+	    }else{
+	      drawhists[legchange]->Add(drawhists[i]);	      
 	    }
       }
-      stack->Add(drawhists[i]); 
+
+      if(i!=(hists.size()-1)){
+	if(legends[i]!=legends[i+1]){
+	  //cout<<legends[i]<<endl;
+	  drawhists[i]->SetLineColor(1);
+	}
+      }else{
+	drawhists[i]->SetLineColor(1);
+      }
+
+
+      if(legends[i] != legends[i-1]){
+	drawhists[i]->SetLineColor(1);
+	stack->Add(drawhists[i]); 
+      }
     }
     else{
       if(i==0) leg->AddEntry(drawhists[i], legends[i] ,"pe");
@@ -1619,8 +1655,6 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     syshist->SetBinError(i, TMath::Sqrt(binerr2));
   }    
   
-
-
   if(logY)c->SetLogy();
   syshist->SetFillStyle(3004);
   syshist->SetFillColor(kBlack);
@@ -1644,7 +1678,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   setex2->Draw();
   drawhists[0]->Draw("same,e1");
   
-  DrawCMSLabels(true, lumi);
+  DrawCMSLabels(false, lumi);
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
@@ -1668,16 +1702,25 @@ void Plotter::setStyle(TH1 &hist, unsigned int i)
   hist.SetLineColor(colors[i]);
   
 
-  if(legends[i] == "data"){
+  if(legends[i] == "Data 2011"){
     hist.SetFillColor(0);
     hist.SetMarkerStyle(20); 
     hist.SetMarkerSize(1.);
     hist.SetLineWidth(1);
     hist.GetXaxis()->SetLabelFont(42);
+    hist.GetYaxis()->SetLabelFont(42);
+    hist.GetXaxis()->SetTitleFont(42);
+    hist.GetYaxis()->SetTitleFont(42);
     hist.GetYaxis()->SetTitleOffset(1.7);
-    hist.GetXaxis()->SetTitle(XAxis);
-    //hist.GetXaxis()->SetTitle("M^{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]");
-    hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");
+    hist.GetXaxis()->SetTitleOffset(1.25);
+    if(name.Contains("pT") ||name.Contains("Mass") ){
+      hist.GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
+    }else  hist.GetXaxis()->SetTitle(XAxis);
+    
+    if(name.Contains("pT") ||name.Contains("Mass")){
+      hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}"+" #left[GeV^{-1}#right]");      
+    }else{hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");
+    }
   }
 }
 
@@ -1687,14 +1730,23 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
   hist.SetLineColor(colors[i]);
   
 
-  if(legends[i] == "data"){
+  if(legends[i] == "Data 2011"){
     hist.SetMarkerStyle(20); 
     hist.SetMarkerSize(1.);
     hist.SetLineWidth(1);
     hist.GetXaxis()->SetLabelFont(42);
-    hist.GetXaxis()->SetTitle(XAxis);
+    hist.GetYaxis()->SetLabelFont(42);
+    hist.GetXaxis()->SetTitleSize(0.04);
+    hist.GetYaxis()->SetTitleSize(0.04);
+    hist.GetXaxis()->SetTitleFont(42);
+    hist.GetYaxis()->SetTitleFont(42);
+    if(name.Contains("pT") || name.Contains("Mass")){
+      hist.GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
+    }else    hist.GetXaxis()->SetTitle(XAxis);
+    //hist.GetXaxis()->SetTitle(XAxis);
     hist.GetYaxis()->SetTitle(YAxis);
     hist.GetYaxis()->SetTitleOffset(1.7);
+    hist.GetXaxis()->SetTitleOffset(1.25);
   }
 }
 
@@ -1943,7 +1995,7 @@ void Plotter::MakeTable(){
       EventFile7<<legends[i]<<": "<<tmp_num7<<endl;
       EventFile8<<legends[i]<<": "<<tmp_num8<<endl;
       EventFile9<<legends[i]<<": "<<tmp_num9<<endl;
-      if(legends[i]!="data"){
+      if(legends[i]!="Data 2011"){
 	bg_num5+=tmp_num5;
 	bg_num6+=tmp_num6;
 	bg_num7+=tmp_num7;
@@ -1990,7 +2042,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
 
-    if(legends[i] == "data"){
+    if(legends[i] == "Data 2011"){
       numbers[0]+=numhists[i]->Integral();
     }
     else if(legends[i] == "t#bar{t} signal"){
@@ -2056,7 +2108,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
       tmp_num=0;
     }else if(legends[i]!=legends[i+1]){
       EventFile<<legends[i]<<": "<<tmp_num<<endl;
-      if(legends[i]!="data")bg_num+=tmp_num;
+      if(legends[i]!="Data 2011")bg_num+=tmp_num;
       tmp_num=0;
     }
 
@@ -2107,7 +2159,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
   double efficiencies[XAxisbinCenters.size()];
   
   for (unsigned int hist =0; hist<hists.size(); hist++){
-    if(legends[hist] == "data"){
+    if(legends[hist] == "Data 2011"){
       for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
       }
@@ -2144,7 +2196,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     TH1* theGenHist = GenPlot; 
     TH1* theRespHist = genReco2d;
     for ( size_t i = 0; i < hists.size() ; i++ ) {
-      if ( legends[i] == "data" ) {
+      if ( legends[i] == "Data 2011" ) {
 		if ( theDataHist == NULL ) {
 		  theDataHist = (TH1*) (varhists[i])->Clone("theDataHist");
 		} else {
@@ -2348,7 +2400,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 }
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE); 
-    CalcDiffSystematics("JES", 0);
+    /*CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
     CalcDiffSystematics("PU_", 2);
     CalcDiffSystematics("SCALE", 3);
@@ -2356,7 +2408,7 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("MATCH", 5);
     CalcDiffSystematics("DY_", 6);
     CalcDiffSystematics("BG_", 7);
-    DiffFlatSystematics(8,bins);
+    DiffFlatSystematics(8,bins);*/
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2414,27 +2466,48 @@ void Plotter::PlotDiffXSec(){
     GenPlot = GenPlotTheory->Rebin(bins,"genplot",Xbins);	
     RecoPlot = (TH1D*)RecoPlotFineBins->Rebin(bins,"recohists",Xbins);
     THStack * stack=  new THStack("def", "def");
-    TLegend * leg =  new TLegend(0.70,0.65,0.95,0.90);
+    TLegend *leg = getNewLegendpre();
+    int legchange = 0;
+    TH1 *varhistsPlotting[hists.size()];
+    
     for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
       setStyle(*varhists[i], i);
-      if(legends[i] != "data"){
+      varhistsPlotting[i]=(TH1*)varhists[i]->Clone();
+      if(legends[i] != "Data 2011"){
 	if((legends[i] == DYEntry) && channelType!=2){
 	  varhists[i]->Scale(DYScale[channelType]);
+	  varhistsPlotting[i]->Scale(DYScale[channelType]);
+	}
+
+	if(i!=(hists.size()-1)){
+	  if(legends[i]!=legends[i+1]){
+	    //cout<<legends[i]<<endl;
+	    varhistsPlotting[i]->SetLineColor(1);
+	  }
+	}else{
+	  varhistsPlotting[i]->SetLineColor(1);
+	}
+	
+	if(legends[i] != legends[i-1]){
+	  varhistsPlotting[i]->SetLineColor(1);
+	  stack->Add(varhistsPlotting[i]);  
 	}
 	if(i > 1){
 	  if(legends[i] != legends[i-1]){
+	    legchange = i;
 	    if( (legends[i] == DYEntry) && DYScale[channelType]!= 1){
-	      leg->AddEntry(varhists[i], legends[i]);
-	    }else leg->AddEntry(varhists[i], legends[i] ,"f");
+	      leg->AddEntry(varhistsPlotting[i], legends[i], "f");
+	    }else leg->AddEntry(varhistsPlotting[i], legends[i] ,"f");
+	  }else{
+	    varhistsPlotting[legchange]->Add(varhistsPlotting[i]);	      
 	  }
-	}
-	stack->Add(varhists[i]);  
+	}	
       }
       else{
-	if(i==0) leg->AddEntry(varhists[i], legends[i] ,"pe");
+	if(i==0) leg->AddEntry(varhistsPlotting[i], legends[i] ,"pe");
 	if(i>0){
 	  if(legends[i] != legends[i-1]){//check
-	    leg->AddEntry(varhists[i], legends[i] ,"pe");
+	    //	    leg->AddEntry(varhists[i], legends[i] ,"pe");
 	  }
 	}
       }
@@ -2550,13 +2623,14 @@ void Plotter::PlotDiffXSec(){
     double efficiencies[XAxisbinCenters.size()];
     init = false;
     for (unsigned int hist =0; hist<hists.size(); hist++){
-      if(legends[hist] == "data"){
+      if(legends[hist] == "Data 2011"){
 	    for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	      DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	    }
       }
       else if((legends[hist] == "t#bar{t} signal")&&init==false){
-	    init=true;
+	signalHist=hist;
+	init=true;
 	    for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	      efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
 	      GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
@@ -2649,7 +2723,7 @@ void Plotter::PlotDiffXSec(){
     }
     ResultsFile.close();
 
- 
+    /* 
     //The Markus plots
     TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
@@ -2667,9 +2741,6 @@ void Plotter::PlotDiffXSec(){
       leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
       delete systtemp;
     }
-
-
-
 
     SystHists->Draw();
     leg10->SetFillColor(0);
@@ -2711,7 +2782,7 @@ void Plotter::PlotDiffXSec(){
     delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
     delete leg11;
     delete c11;
-    
+    */
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
@@ -2745,7 +2816,7 @@ void Plotter::PlotDiffXSec(){
     TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
     mcnlohist = GetNloCurve(newname,"MCATNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
-    mcnlohist->Rebin(5);mcnlohist->Scale(0.2);
+    mcnlohist->Rebin(2);mcnlohist->Scale(0.2);
     mcnlohist->Scale(mcnloscale);
 
 
@@ -2781,6 +2852,19 @@ void Plotter::PlotDiffXSec(){
     powheghist->Rebin(2);powheghist->Scale(0.5);
     powheghist->Scale(powhegscale);
  	
+    TH1* powheghistBinned = powheghist->Rebin(bins,"powhegplot",Xbins);	
+    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+      powheghistBinned->SetBinContent(bin+1,powheghistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/powheghist->GetBinWidth(1)));
+    }
+    powheghistBinned->Scale(1./powheghistBinned->Integral("width"));
+
+    TH1* mcnlohistBinned = mcnlohist->Rebin(bins,"mcnloplot",Xbins);	
+    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+      mcnlohistBinned->SetBinContent(bin+1,mcnlohistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohist->GetBinWidth(1)));
+    }
+    mcnlohistBinned->Scale(1./mcnlohistBinned->Integral("width"));
+
+
     //Uncertainty band for MC@NLO
     const Int_t nMCNLOBins = mcnlohistup->GetNbinsX();
     Double_t x[nMCNLOBins];
@@ -2855,6 +2939,7 @@ void Plotter::PlotDiffXSec(){
     }
     h_DiffXSec->SetMarkerStyle(20);
     //MCFMHist->SetMarkerStyle(2);
+    h_GenDiffXSec->SetLineWidth(2);
     h_GenDiffXSec->SetMinimum(ymin);
     if(logY){  
       h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
@@ -2865,27 +2950,41 @@ void Plotter::PlotDiffXSec(){
     gStyle->SetEndErrorSize(8);
     //    mcatnloBand->Draw("same, F");
     GenPlotTheory->SetLineColor(kRed+1);
+    GenPlotTheory->SetLineWidth(2);
     //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(kRed+1);
+
+    bool binned_theory=true;
+
     mcnlohist->SetLineColor(kAzure);
-    mcnlohist->Draw("SAME,C");
     powheghist->SetLineColor(kGreen+1);
-    powheghist->Draw("SAME,C");
+    mcnlohistBinned->SetLineColor(kAzure);
+    powheghistBinned->SetLineColor(kGreen+1);
+    mcnlohistBinned->SetLineWidth(2);
+    powheghistBinned->SetLineWidth(2);
+    if(binned_theory==false){
+      mcnlohist->Draw("SAME,C");
+      powheghist->Draw("SAME,C");
+    }else{
+      mcnlohistBinned->Draw("SAME");
+      powheghistBinned->Draw("SAME");
+    }
+
     if(name.Contains("ToppT") || name.Contains("TopRapidity"))KidoHist->Draw("SAME,C");
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
-    DrawCMSLabels(true, lumi);
+    DrawCMSLabels(false, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
     
     TLegend leg2 = *getNewLegend();
-    leg2.AddEntry(h_DiffXSec, "Data",    "p");
-    leg2.AddEntry(GenPlotTheory,            "Madgraph","l");
+    leg2.AddEntry(h_DiffXSec, "Data 2011",    "p");
+    leg2.AddEntry(GenPlotTheory,            "MadGraph","l");
     //if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
     if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
-    if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "Powheg",  "l");        
-    if(name.Contains("ToppT") || name.Contains("TopRapidity"))  leg2.AddEntry(KidoHist,       "Kidonakis",  "l");        
+    if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "POWHEG",  "l");        
+    if(name.Contains("ToppT") || name.Contains("TopRapidity"))  leg2.AddEntry(KidoHist,       "Approx. NNLO",  "l");        
     //if (MCFMHist->GetEntries())  leg2.AddEntry(MCFMHist,       "MCFM",  "p");        
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
@@ -2913,12 +3012,50 @@ void Plotter::PlotDiffXSec(){
 	varhists[0]->Add(varhists[i]);
       }
     }
+    TH1D* syshist =0;
+    syshist = (TH1D*)stacksum->Clone();
+    double lumierr = 0.045; 
+    //stat uncertainty::make a function 
+    for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
+      
+      Double_t binc = 0;
+      binc += stacksum->GetBinContent(i);
+      syshist->SetBinContent(i, binc);
+      // calculate uncertainty: lumi uncertainty
+      Double_t binerr2 = binc*binc*lumierr*lumierr;
+      Double_t topunc = 0; // uncertainty on top xsec
+      
+      double topxsec = 161.6; //157.5
+      double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
+      
+      double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
+      //Functionality for multiple signal histograms
+      topunc += varhists[signalHist]->GetBinContent(i)*topRelUnc;
+      binerr2 += (topunc*topunc);
+      syshist->SetLineColor(1);
+      syshist->SetBinError(i, TMath::Sqrt(binerr2));
+    }    
+  
+    syshist->SetFillStyle(3004);
+    syshist->SetFillColor(kBlack);
+    leg->AddEntry( syshist, "uncertainty", "f" );
+
+
+    varhists[0]->SetMaximum(1.3*varhists[0]->GetBinContent(varhists[0]->GetMaximumBin()));
+
     varhists[0]->SetMinimum(0);
-    varhists[0]->GetYaxis()->SetTitle("N_{Events}");
-    varhists[0]->Draw("el");
+    varhists[0]->GetYaxis()->SetTitle("events");
+    varhists[0]->Draw("e1");
+
     stack->Draw("same HIST");
+
+    /*    TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");//this is frustrating and stupid but apparently necessary...
+    setex1->Draw();
+    syshist->Draw("same,E2");
+    TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
+    setex2->Draw();*/
     varhists[0]->Draw("same, e1");
-    DrawCMSLabels(true, lumi);
+    DrawCMSLabels(false, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
     leg->Draw("SAME");
     gPad->RedrawAxis();
@@ -3061,11 +3198,26 @@ TH1* Plotter::GetNloCurve(TString NewName, TString Generator){
 TLegend* Plotter::getNewLegend() {
   TLegend *leg = new TLegend();
   leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
-  leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.15);
+  leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.20);
   leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
   leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
   leg->SetTextFont(42);
-  leg->SetTextSize(0.04);
+  leg->SetTextSize(0.03);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+  leg->SetTextAlign(12);
+  return leg;
+}
+
+// get new legend
+TLegend* Plotter::getNewLegendpre() {
+  TLegend *leg = new TLegend();
+  leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
+  leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.30);
+  leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
+  leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
+  leg->SetTextFont(42);
+  leg->SetTextSize(0.03);
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
   leg->SetTextAlign(12);
