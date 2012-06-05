@@ -42,3 +42,7 @@ mumu_BJets_Rapidity                                         4.04395     3   4   
 emu_BJets_Rapidity                                          7.75042     3   4   2   6
 ee_BJets_Rapidity                                           3.89341     3   4   3   6
 combined_BJets_Rapidity                                     9.52330     3   4   2   6
+mumu_BJets_Eta                                              2.27815     6   7   4   8
+emu_BJets_Eta                                               4.41415     6   7   5   8
+ee_BJets_Eta                                                2.22098     6   7   3   8
+combined_BJets_Eta                                          5.42387     6   7   5   8
