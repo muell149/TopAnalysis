@@ -743,9 +743,12 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 		
     // Variables for the needed histograms
     TH1D* theDataHist = NULL;
-    TH1D* theBgrHist = NULL;
+    TH1D* theBgrHist = NULL; 
     TH1D* theBgrHistUp = NULL;
     TH1D* theBgrHistDown = NULL;
+    TH1D* theTtBgrHist = NULL; 
+    TH1D* theTtBgrHistUp = NULL;
+    TH1D* theTtBgrHistDown = NULL;
     TH1D* theRecHist = NULL;
     TH1D* theRecHistUp = NULL;
     TH1D* theRecHistDown = NULL;
@@ -765,94 +768,131 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     // the DYScale.
     for ( size_t i = 0; i < hists.size() ; i++ ) { 
       if ( legends[i] == "data" ) { 
-	if ( theDataHist == NULL ) {
-	  theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
-	} else {
-	  theDataHist->Add(&(hists[i]));
-	}
+		if ( theDataHist == NULL ) {
+		  theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
+		} else {
+		  theDataHist->Add(&(hists[i]));
+		}
       } else if ( legends[i] == "t#bar{t} signal") {  
-	if ( theRecHist == NULL ) {
-	  theRecHist = (TH1D*) (hists[i]).Clone("theRecHist");
-	} else {
-	  theRecHist->Add(&(hists[i]));
-	}  
+		if ( theRecHist == NULL ) {
+		  theRecHist = (TH1D*) (hists[i]).Clone("theRecHist");
+		} else {
+		  theRecHist->Add(&(hists[i]));
+		}   
+      } else if ( legends[i] == "t#bar{t} other") {  
+		if ( theTtBgrHist == NULL ) {
+		  theTtBgrHist = (TH1D*) (hists[i]).Clone("theTtBgrHist");
+		} else {
+		  theTtBgrHist->Add(&(hists[i]));
+		}
+		if ( theBgrHist == NULL ) {
+		  theBgrHist = (TH1D*) (hists[i]).Clone("theBgrHist");
+		} else {
+		  theBgrHist->Add(&(hists[i]));
+		}  
       } else {  
-	// Calculate DYScale fist
-	double theDYScale = 1.;
-	if ( (legends[i] == DYEntry) && (channelType != 2 ) ) {
-	  theDYScale = DYScale[channelType];
-	}
-				
-	// Get Background HIst, thereby applying DY Scale
-	if ( theBgrHist == NULL ) {
-	  theBgrHist = (TH1D*) (hists[i]).Clone("theBgrHist");
-	  theBgrHist->Scale(theDYScale);
-	} else {
-	  theBgrHist->Add(&(hists[i]), theDYScale);
-	}  
+		// Calculate DYScale fist
+		double theDYScale = 1.;
+		if ( (legends[i] == DYEntry) && (channelType != 2 ) ) {
+		  theDYScale = DYScale[channelType];
+		}
+					
+		// Get Background HIst, thereby applying DY Scale
+		if ( theBgrHist == NULL ) {
+		  theBgrHist = (TH1D*) (hists[i]).Clone("theBgrHist");
+		  theBgrHist->Scale(theDYScale);
+		} else {
+		  theBgrHist->Add(&(hists[i]), theDYScale);
+		}  
       }
     }
+    
     for ( size_t i = 0; i < systhistsUp.size() ; i++ ) {  
       if ( legendsUp[i] == "data") {
-      } else if ( legendsUp[i] == "t#bar{t} signal") {   
-	if ( theRecHistUp == NULL ) { 
-	  theRecHistUp = (TH1D*) (systhistsUp[i]).Clone("theRecHistUp"); 
-	} else {
-	  theRecHistUp->Add(&(systhistsUp[i]));
-	}  
+      } 
+      else if ( legendsUp[i] == "t#bar{t} signal") {   
+		if ( theRecHistUp == NULL ) { 
+		  theRecHistUp = (TH1D*) (systhistsUp[i]).Clone("theRecHistUp"); 
+		} else {
+		  theRecHistUp->Add(&(systhistsUp[i]));
+		}  
+      } 
+      else if ( legendsUp[i] == "t#bar{t} other") {  
+		if ( theTtBgrHistUp == NULL ) { 
+		  theTtBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theTtBgrHistUp"); 
+		} else {
+		  theTtBgrHistUp->Add(&(systhistsUp[i]));
+		}  
+		if ( theBgrHistUp == NULL ) {
+		  theBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theBgrHistUp");
+		} else {
+		  theBgrHistUp->Add(&(systhistsUp[i]));
+		} 
       } else {  
-	// Calculate DYScale fist
-	double theDYScale = 1.;
-	if ( (legendsUp[i] == DYEntry) && (channelType != 2 ) ) {
-	  theDYScale = DYScale[channelType];
-	  if(Systematic == "DY_"){
-	    theDYScale=theDYScale*1.3;
-	  }
-	}
-	if ( theBgrHistUp == NULL ) {
-	  theBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theBgrHistUp");
-	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-	    theDYScale=theDYScale*1.3;
-	  }
-	  theBgrHistUp->Scale(theDYScale);
-	} else {
-	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-	    theDYScale=theDYScale*1.3;
-	  }
-	  theBgrHistUp->Add(&(systhistsUp[i]), theDYScale);
-	} 
+    	// Calculate DYScale fist
+	    double theDYScale = 1.;
+    	if ( (legendsUp[i] == DYEntry) && (channelType != 2 ) ) {
+	      theDYScale = DYScale[channelType];
+    	  if(Systematic == "DY_"){
+	        theDYScale=theDYScale*1.3;
+    	  }
+    	}
+    	if ( theBgrHistUp == NULL ) {
+	      theBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theBgrHistUp");
+    	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
+	        theDYScale=theDYScale*1.3;
+	      }
+	      theBgrHistUp->Scale(theDYScale);
+    	} else {
+	      if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
+	        theDYScale=theDYScale*1.3;
+    	  }
+	      theBgrHistUp->Add(&(systhistsUp[i]), theDYScale);
+    	} 
       }
     }
+    
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
       if ( legendsDown[i] == "data") {
       } else if ( legendsDown[i] == "t#bar{t} signal") {   
-	if ( theRecHistDown == NULL ) { 
-	  theRecHistDown = (TH1D*) (systhistsDown[i]).Clone("theRecHistDown"); 
-	} else {
-	  theRecHistDown->Add(&(systhistsDown[i]));
-	}  
+		if ( theRecHistDown == NULL ) { 
+		  theRecHistDown = (TH1D*) (systhistsDown[i]).Clone("theRecHistDown"); 
+		} else {
+		  theRecHistDown->Add(&(systhistsDown[i]));
+		}  
+      } else if ( legendsDown[i] == "t#bar{t} other") {   
+		if ( theTtBgrHistDown == NULL ) { 
+		  theTtBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theTtBgrHistDown"); 
+		} else {
+		  theTtBgrHistDown->Add(&(systhistsDown[i]));
+		}  
+		if ( theBgrHistDown == NULL ) {
+		  theBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theBgrHistDown");
+		} else {
+		  theBgrHistDown->Add(&(systhistsDown[i]));
+		}
       } else {  
 
-	// Calculate DYScale fist
-	double theDYScale = 1.;
-	if ( (legendsDown[i] == DYEntry) && (channelType != 2 ) ) {
-	  theDYScale = DYScale[channelType];
-	  if(Systematic == "DY_"){
-	    theDYScale=theDYScale*0.7;
-	  }
-	}
-	if ( theBgrHistDown == NULL ) {
-	  theBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theBgrHistDown");
-	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-	    theDYScale=theDYScale*0.7;
-	  }
-	  theBgrHistDown->Scale(theDYScale);
-	} else {
-	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-	    theDYScale=theDYScale*0.7;
-	  }
-	  theBgrHistDown->Add(&(systhistsDown[i]), theDYScale);
-	} 
+    	// Calculate DYScale fist
+    	double theDYScale = 1.;
+    	if ( (legendsDown[i] == DYEntry) && (channelType != 2 ) ) {
+    	  theDYScale = DYScale[channelType];
+    	  if(Systematic == "DY_"){
+    	    theDYScale=theDYScale*0.7;
+    	  }
+    	}
+    	if ( theBgrHistDown == NULL ) {
+    	  theBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theBgrHistDown");
+    	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
+    	    theDYScale=theDYScale*0.7;
+    	  }
+    	  theBgrHistDown->Scale(theDYScale);
+    	} else {
+    	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
+    	    theDYScale=theDYScale*0.7;
+    	  }
+    	  theBgrHistDown->Add(&(systhistsDown[i]), theDYScale);
+    	} 
       } 
     }
  
@@ -871,88 +911,90 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     for ( size_t i = 0; i < hists.size() ; i++ ) {
       if(legends[i] == "t#bar{t} signal"){
 		    	
-	// Nominal Sample
-	TFile* ftemp = TFile::Open(dataset[i]);
-	TH2D* resptemp = (TH2D*) ftemp->Get("GenReco"+newname);
-	TH1D* gentemp = (TH1D*) ftemp->Get("VisGen"+newname); 
-	if ( theRespHist == NULL ) {
-	  theRespHist = (TH2D*) (resptemp)->Clone("theRespHist");
-	} else {
-	  theRespHist->Add(resptemp);
-	}
-	if ( theGenHist == NULL ) {
-	  theGenHist = (TH1D*) (gentemp)->Clone("theGenHist");
-	} else {
-	  theGenHist->Add(gentemp);
-	}
-				 
-	// Antiparticles 
-	if ( doAntiParticles == true ) {
-	  resptemp =  (TH2D*) ftemp->Get("GenRecoAnti"+newname);
-	  gentemp = (TH1D*) ftemp->Get("VisGenAnti"+newname); 
-	  theRespHist->Add(resptemp);
-	  theGenHist->Add(gentemp);
-	} 
-				
-	delete ftemp;
+		// Nominal Sample
+		TFile* ftemp = TFile::Open(dataset[i]);
+		TH2D* resptemp = (TH2D*) ftemp->Get("GenReco"+newname);
+		TH1D* gentemp = (TH1D*) ftemp->Get("VisGen"+newname); 
+		if ( theRespHist == NULL ) {
+		  theRespHist = (TH2D*) (resptemp)->Clone("theRespHist");
+		} else {
+		  theRespHist->Add(resptemp);
+		}
+		if ( theGenHist == NULL ) {
+		  theGenHist = (TH1D*) (gentemp)->Clone("theGenHist");
+		} else {
+		  theGenHist->Add(gentemp);
+		}
+					 
+		// Antiparticles 
+		if ( doAntiParticles == true ) {
+		  resptemp =  (TH2D*) ftemp->Get("GenRecoAnti"+newname);
+		  gentemp = (TH1D*) ftemp->Get("VisGenAnti"+newname); 
+		  theRespHist->Add(resptemp);
+		  theGenHist->Add(gentemp);
+		} 
+					
+		delete ftemp;
       }
     }
+    
     for ( size_t i = 0; i < systhistsUp.size() ; i++ ) { 
       if(legendsUp[i] == "t#bar{t} signal"){
-		    	
-	// Shift Up
-	TFile* ftempUp = TFile::Open(datasetUp[i]);
-	TH2D* resptempUp = (TH2D*) ftempUp->Get("GenReco"+newname);
-	TH1D* gentempUp = (TH1D*) ftempUp->Get("VisGen"+newname); 
-	if ( theRespHistUp == NULL ) {
-	  theRespHistUp = (TH2D*) (resptempUp)->Clone("theRespHistUp");
-	} else {
-	  theRespHistUp->Add(resptempUp);
-	}
-	if ( theGenHistUp == NULL ) {
-	  theGenHistUp = (TH1D*) (gentempUp)->Clone("theGenHistUp");
-	} else {
-	  theGenHistUp->Add(gentempUp);
-	} 
-				 
-	// Antiparticles 
-	if ( doAntiParticles == true ) {
-	  resptempUp =  (TH2D*) ftempUp->Get("GenRecoAnti"+newname);
-	  gentempUp = (TH1D*) ftempUp->Get("VisGenAnti"+newname); 
-	  theRespHistUp->Add(resptempUp);
-	  theGenHistUp->Add(gentempUp);
-	}
-				
-	delete ftempUp;
+			    	
+		// Shift Up
+		TFile* ftempUp = TFile::Open(datasetUp[i]);
+		TH2D* resptempUp = (TH2D*) ftempUp->Get("GenReco"+newname);
+		TH1D* gentempUp = (TH1D*) ftempUp->Get("VisGen"+newname); 
+		if ( theRespHistUp == NULL ) {
+		  theRespHistUp = (TH2D*) (resptempUp)->Clone("theRespHistUp");
+		} else {
+		  theRespHistUp->Add(resptempUp);
+		}
+		if ( theGenHistUp == NULL ) {
+		  theGenHistUp = (TH1D*) (gentempUp)->Clone("theGenHistUp");
+		} else {
+		  theGenHistUp->Add(gentempUp);
+		} 
+					 
+		// Antiparticles 
+		if ( doAntiParticles == true ) {
+		  resptempUp =  (TH2D*) ftempUp->Get("GenRecoAnti"+newname);
+		  gentempUp = (TH1D*) ftempUp->Get("VisGenAnti"+newname); 
+		  theRespHistUp->Add(resptempUp);
+		  theGenHistUp->Add(gentempUp);
+		}
+					
+		delete ftempUp;
       }
     }
+    
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
       if(legendsDown[i] == "t#bar{t} signal"){
-				
-	// Shift Down
-	TFile* ftempDown = TFile::Open(datasetDown[i]);
-	TH2D* resptempDown = (TH2D*) ftempDown->Get("GenReco"+newname);
-	TH1D* gentempDown = (TH1D*) ftempDown->Get("VisGen"+newname); 
-	if ( theRespHistDown == NULL ) {
-	  theRespHistDown = (TH2D*) (resptempDown)->Clone("theRespHistDown");
-	} else {
-	  theRespHistDown->Add(resptempDown);
-	}
-	if ( theGenHistDown == NULL ) {
-	  theGenHistDown = (TH1D*) (gentempDown)->Clone("theGenHistDown");
-	} else {
-	  theGenHistDown->Add(gentempDown);
-	} 
-				 
-	// Antiparticles 
-	if ( doAntiParticles == true ) {
-	  resptempDown =  (TH2D*) ftempDown->Get("GenRecoAnti"+newname);
-	  gentempDown = (TH1D*) ftempDown->Get("VisGenAnti"+newname); 
-	  theRespHistDown->Add(resptempDown);
-	  theGenHistDown->Add(gentempDown);
-	}
-				
-	delete ftempDown;
+					
+		// Shift Down
+		TFile* ftempDown = TFile::Open(datasetDown[i]);
+		TH2D* resptempDown = (TH2D*) ftempDown->Get("GenReco"+newname);
+		TH1D* gentempDown = (TH1D*) ftempDown->Get("VisGen"+newname); 
+		if ( theRespHistDown == NULL ) {
+		  theRespHistDown = (TH2D*) (resptempDown)->Clone("theRespHistDown");
+		} else {
+		  theRespHistDown->Add(resptempDown);
+		}
+		if ( theGenHistDown == NULL ) {
+		  theGenHistDown = (TH1D*) (gentempDown)->Clone("theGenHistDown");
+		} else {
+		  theGenHistDown->Add(gentempDown);
+		} 
+					 
+		// Antiparticles 
+		if ( doAntiParticles == true ) {
+		  resptempDown =  (TH2D*) ftempDown->Get("GenRecoAnti"+newname);
+		  gentempDown = (TH1D*) ftempDown->Get("VisGenAnti"+newname); 
+		  theRespHistDown->Add(resptempDown);
+		  theGenHistDown->Add(gentempDown);
+		}
+					
+		delete ftempDown;
 		    	
       }
     } 
@@ -1012,13 +1054,17 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     double totalBgrEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHist, 0, false);
     double totalBgrEventsUp    = TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHistUp, 0, false);
     double totalBgrEventsDown  = TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHistDown, 0, false);
+    double totalTtBgrEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theTtBgrHist, 0, false);
+    double totalTtBgrEventsUp    = TopSVDFunctions::SVD_Integral1D((TH1D*)theTtBgrHistUp, 0, false);
+    double totalTtBgrEventsDown  = TopSVDFunctions::SVD_Integral1D((TH1D*)theTtBgrHistDown, 0, false);
     double totalRecEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHist, 0, false);
     double totalRecEventsUp    = TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHistUp, 0, false);
     double totalRecEventsDown  = TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHistDown, 0, false);
     double totalGenEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHist, 0, false);
     double totalGenEventsUp    = TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHistUp, 0, false);
     double totalGenEventsDown  = TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHistDown, 0, false);
-     
+
+ 
     // UNFOLDING OF SYSTEMATICS
     // Retrieve histograms with the unfolded quantities.
     // Note: The unfolded histograms have additional side bins!
@@ -1027,11 +1073,13 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     mySVDFunctions.SVD_DoUnfoldSys(
 				   theDataHist,
 				   theBgrHist, theBgrHistUp, theBgrHistDown, 
+				   theTtBgrHist, theTtBgrHistUp, theTtBgrHistDown, 
 				   theGenHist, theGenHistUp, theGenHistDown, 
 				   theRecHist, theRecHistUp, theRecHistDown, 
 				   theRespHist, theRespHistUp, theRespHistDown, 
                    totalDataEventsNom, 
                    totalBgrEventsNom,  totalBgrEventsUp,  totalBgrEventsDown, 
+                   totalTtBgrEventsNom,  totalTtBgrEventsUp,  totalTtBgrEventsDown, 
                    totalRecEventsNom,  totalRecEventsUp,  totalRecEventsDown, 
                    totalGenEventsNom,  totalGenEventsUp,  totalGenEventsDown,  
 				   theBins, numberBins,
@@ -2068,7 +2116,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
       init=true;
       for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
-	GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
+	GenSignalSum[bin] = GenPlot->GetBinContent(bin+1);
 	cout<<"GenSignalSum[bin]: "<<GenSignalSum[bin]<<endl;
 	cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
       }      
@@ -2091,28 +2139,41 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     // Getting the histogram 
     TH1* theDataHist = NULL;
     TH1* theBgrHist = NULL;
+    TH1* theTtBgrHist = NULL;
     TH1* theRecHist = NULL;
     TH1* theGenHist = GenPlot; 
     TH1* theRespHist = genReco2d;
     for ( size_t i = 0; i < hists.size() ; i++ ) {
       if ( legends[i] == "data" ) {
-	if ( theDataHist == NULL ) {
-	  theDataHist = (TH1*) (varhists[i])->Clone("theDataHist");
-	} else {
-	  theDataHist->Add(varhists[i]);
-	}
+		if ( theDataHist == NULL ) {
+		  theDataHist = (TH1*) (varhists[i])->Clone("theDataHist");
+		} else {
+		  theDataHist->Add(varhists[i]);
+		}
       } else if ( legends[i] == "t#bar{t} signal") {
-	if ( theRecHist == NULL ) {
-	  theRecHist = (TH1*) (varhists[i])->Clone("theRecHist");
-	} else {
-	  theRecHist->Add(varhists[i]);
-	}
+		if ( theRecHist == NULL ) {
+		  theRecHist = (TH1*) (varhists[i])->Clone("theRecHist");
+		} else {
+		  theRecHist->Add(varhists[i]);
+		}
+      } else if ( legends[i] == "t#bar{t} other") {
+      	// Attention: The TtBar-Bgr must be added to the regular background
+		if ( theTtBgrHist == NULL ) {
+		  theTtBgrHist = (TH1*) (varhists[i])->Clone("theRecHist");
+		} else {
+		  theTtBgrHist->Add(varhists[i]);
+		}		
+		if ( theBgrHist == NULL ) {
+		  theBgrHist = (TH1*) (varhists[i])->Clone("theBgrHist");
+		} else {
+		  theBgrHist->Add(varhists[i]);
+		}
       } else {
-	if ( theBgrHist == NULL ) {
-	  theBgrHist = (TH1*) (varhists[i])->Clone("theBgrHist");
-	} else {
-	  theBgrHist->Add(varhists[i]);
-	}
+		if ( theBgrHist == NULL ) {
+		  theBgrHist = (TH1*) (varhists[i])->Clone("theBgrHist");
+		} else {
+		  theBgrHist->Add(varhists[i]);
+		}
       }
     }
 	
@@ -2144,6 +2205,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 
     double totalDataEventsNom[1]  = {TopSVDFunctions::SVD_Integral1D((TH1D*)theDataHist, 0, false)}; 
     double totalBgrEventsNom[1]   = {TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHist, 0, false)};
+    double totalTtBgrEventsNom[1]   = {TopSVDFunctions::SVD_Integral1D((TH1D*)theTtBgrHist, 0, false)};
     double totalRecEventsNom[1]   = {TopSVDFunctions::SVD_Integral1D((TH1D*)theRecHist, 0, false)};
     double totalGenEventsNom[1]  = {TopSVDFunctions::SVD_Integral1D((TH1D*)theGenHist, 0, true)}; 
     
@@ -2158,11 +2220,13 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     mySVDFunctions.SVD_DoUnfold(
 				(TH1D*) theDataHist, 
 				(TH1D*) theBgrHist, 
+				(TH1D*) theTtBgrHist, 
 				(TH1D*) theGenHist, 
 				(TH1D*) theRecHist, 
 				(TH2D*) theRespHist, 
                 totalDataEventsNom, 
-                totalBgrEventsNom,   
+                totalBgrEventsNom, 
+                totalTtBgrEventsNom,    
                 totalRecEventsNom,  
                 totalGenEventsNom,   
 				theBins, numberBins,  
@@ -2283,7 +2347,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
   }
 }
 void Plotter::PlotDiffXSec(){
-    TH1::AddDirectory(kFALSE);
+    TH1::AddDirectory(kFALSE); 
     CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
     CalcDiffSystematics("PU_", 2);
@@ -2300,7 +2364,6 @@ void Plotter::PlotDiffXSec(){
     for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
     double binCenters[XAxisbinCenters.size()];
     for(unsigned int i = 0; i<XAxisbinCenters.size();i++){binCenters[i]=XAxisbinCenters[i];}
-    
 
     TH1 *RecoPlot = new TH1D;
     TH1 *RecoPlotFineBins = new TH1D;
@@ -2376,7 +2439,6 @@ void Plotter::PlotDiffXSec(){
 	}
       }
     }
-
     ///////////////////////////////////
     //purity and stability plots as taken from CombinedCrossSection... ...
     
@@ -2473,7 +2535,6 @@ void Plotter::PlotDiffXSec(){
     grE->Draw("P,SAME");
     grP->Draw("P,SAME");
     grS->Draw("P,SAME");
-
     TLegend* leg3 = getNewLegend(); // new TLegend(0.60,0.73,0.95,0.83);
     leg3->SetFillStyle(0);
     leg3->SetBorderSize(0);
@@ -2481,6 +2542,7 @@ void Plotter::PlotDiffXSec(){
     leg3->AddEntry(grP, "Purity",    "p" );
     leg3->AddEntry(grS, "Stability", "p" );
     leg3->Draw("SAME");
+
 
     cESP->Print("Plots/"+channel+"/ESP_"+name+".eps");
     cESP->Clear();
@@ -2507,6 +2569,8 @@ void Plotter::PlotDiffXSec(){
 		}
       }      
     }
+
+
     double totalDataSum = 0;
     for (Int_t bin=0; bin<bins; ++bin) {
       totalDataSum+=DataSum[bin];
@@ -2516,24 +2580,29 @@ void Plotter::PlotDiffXSec(){
     h_DiffXSec->Reset();
     h_GenDiffXSec->Reset();
 
+
     CalcDiffXSec(varhists, RecoPlot, GenPlot, genReco2d, DiffXSec,DiffXSecStatError,GenDiffXSec);
+
     for (Int_t i=0; i<bins; ++i) {
       cout<<GenDiffXSec[channelType][i]<<endl;
       h_DiffXSec->SetBinContent(i+1,DiffXSec[channelType][i]);
       h_DiffXSec->SetBinError(i+1,DiffXSecStatError[channelType][i]);
       h_GenDiffXSec->SetBinContent(i+1,GenDiffXSec[channelType][i]);	
     }
+
     //data normalization
     double datascale;
     datascale = h_DiffXSec->Integral("width");
     //    if(name.Contains("LeptonEta")){
     //TotalVisXSection[channelType] = datascale;
+
       TotalVisXSection[channelType] = 1.;
       //}
+
     //cout<<"VISIBLE CROSS-SECTION: "<<TotalVisXSection[channelType]<<endl;
     h_DiffXSec->Scale(1/TotalVisXSection[channelType]);
-    
     //theory curves
+
 
     double DiffXSecPlot[XAxisbinCenters.size()];
     double DiffXSecStatErrorPlot[XAxisbinCenters.size()];
@@ -2545,14 +2614,14 @@ void Plotter::PlotDiffXSec(){
       double syst_square = 0;
       ExpSysPlot[bin]=0.;
       ModelSysPlot[bin]=0.;
-      for(int syst =0; syst<13; syst++){
+      for(int syst =0; syst<13; syst++){ 
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
     //	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
     //  ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
     //}else{
     //  ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
     //}
-
+ 
       }
       ExpSysPlot[bin]=sqrt(ExpSysPlot[bin]);
       ModelSysPlot[bin]=sqrt(ModelSysPlot[bin]);
@@ -2563,7 +2632,7 @@ void Plotter::PlotDiffXSec(){
       DiffXSecPlot[bin]=DiffXSec[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecStatErrorPlot[bin]=DiffXSecStatError[channelType][bin];//TotalVisXSection[channelType];
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin];//TotalVisXSection[channelType];
-    }
+    } 
 
 
     //create a file for Results!!
@@ -2580,9 +2649,9 @@ void Plotter::PlotDiffXSec(){
     }
     ResultsFile.close();
 
-
+ 
     //The Markus plots
-    /*    TCanvas * c10 = new TCanvas("Markus","Markus");
+    TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
 
@@ -2590,14 +2659,18 @@ void Plotter::PlotDiffXSec(){
       TH1D* systtemp = (TH1D*)varhists[0]->Clone();
       systtemp->Reset();
       for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
-	//systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
-	systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
+       	//systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
+	    systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
       }
       systtemp->SetFillColor(syst+1);
       SystHists->Add((TH1D*)systtemp->Clone());
       leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
       delete systtemp;
     }
+
+
+
+
     SystHists->Draw();
     leg10->SetFillColor(0);
     leg10->Draw("SAME");
@@ -2638,7 +2711,7 @@ void Plotter::PlotDiffXSec(){
     delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
     delete leg11;
     delete c11;
-    */
+    
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
@@ -2653,7 +2726,6 @@ void Plotter::PlotDiffXSec(){
     tga_DiffXSecPlotwithSys->SetMarkerColor(kBlack);
     tga_DiffXSecPlotwithSys->SetMarkerSize(1);
     tga_DiffXSecPlotwithSys->SetLineColor(kBlack);
-   
 
     //    for( Int_t j = 0; j< GenPlotTheory->GetNbinsX(); j++ ){
     // GenPlotTheory->SetBinContent(j,(GenPlotTheory->GetBinContent(j)*topxsec)/(SignalEvents*GenPlotTheory->GetBinWidth(j)));
@@ -2675,6 +2747,8 @@ void Plotter::PlotDiffXSec(){
     double mcnloscale = 1./mcnlohist->Integral("width");
     mcnlohist->Rebin(5);mcnlohist->Scale(0.2);
     mcnlohist->Scale(mcnloscale);
+
+
 
     if(name.Contains("LeptonpT")){mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");}//temprorary until I change the naming convention in the root file
     else if(name.Contains("LeptonEta")){mcnlohistup = GetNloCurve("Leptons","Eta","MCNLOup");}
@@ -2727,6 +2801,8 @@ void Plotter::PlotDiffXSec(){
       
     }
     
+
+
     TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
     mcatnloBand->SetFillColor(kGray);
     mcatnloBand->SetLineColor(kAzure);
@@ -2759,26 +2835,26 @@ void Plotter::PlotDiffXSec(){
       }
     }
 
-    TH1 *MCFMHist;
-    TFile* MCFMfile = new TFile("diffCrossSections_normalized_tt_bbl_todk_MSTW200_172_172_ful_central.root","READ");
-
-    if(name.Contains("LeptonpT")){MCFMfile->GetObject<TH1>("pt_l", MCFMHist);}
-    else if(name.Contains("LeptonEta")){MCFMfile->GetObject<TH1>("eta_l", MCFMHist);}
-    else if(name.Contains("LLBarpT")){MCFMfile->GetObject<TH1>("pt_ll", MCFMHist);}
-    else if(name.Contains("LLBarMass")){MCFMfile->GetObject<TH1>("m_ll", MCFMHist);}
-    else if(name.Contains("ToppT")){MCFMfile->GetObject<TH1>("pt_t", MCFMHist);}
-    else if(name.Contains("TopRapidity")){MCFMfile->GetObject<TH1>("y_t", MCFMHist);}
-    else if(name.Contains("TTBarpT")){MCFMfile->GetObject<TH1>("pt_tt", MCFMHist);}
-    else if(name.Contains("TTBarRapidity")){MCFMfile->GetObject<TH1>("y_tt", MCFMHist);}
-    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
-    else{cout<<"probably going to crash soon"<<endl;}
+//    TH1 *MCFMHist;
+//    TFile* MCFMfile = new TFile("diffCrossSections_normalized_tt_bbl_todk_MSTW200_172_172_ful_central.root","READ");
+//
+//    if(name.Contains("LeptonpT")){MCFMfile->GetObject<TH1>("pt_l", MCFMHist);}
+//    else if(name.Contains("LeptonEta")){MCFMfile->GetObject<TH1>("eta_l", MCFMHist);}
+//    else if(name.Contains("LLBarpT")){MCFMfile->GetObject<TH1>("pt_ll", MCFMHist);}
+//    else if(name.Contains("LLBarMass")){MCFMfile->GetObject<TH1>("m_ll", MCFMHist);}
+//    else if(name.Contains("ToppT")){MCFMfile->GetObject<TH1>("pt_t", MCFMHist);}
+//    else if(name.Contains("TopRapidity")){MCFMfile->GetObject<TH1>("y_t", MCFMHist);}
+//    else if(name.Contains("TTBarpT")){MCFMfile->GetObject<TH1>("pt_tt", MCFMHist);}
+//    else if(name.Contains("TTBarRapidity")){MCFMfile->GetObject<TH1>("y_tt", MCFMHist);}
+//    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
+//    else{cout<<"probably going to crash soon"<<endl;}
     TCanvas * c = new TCanvas("DiffXS","DiffXS");
     
     if(logY){
       c->SetLogy();
     }
     h_DiffXSec->SetMarkerStyle(20);
-    MCFMHist->SetMarkerStyle(2);
+    //MCFMHist->SetMarkerStyle(2);
     h_GenDiffXSec->SetMinimum(ymin);
     if(logY){  
       h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
@@ -2788,7 +2864,6 @@ void Plotter::PlotDiffXSec(){
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
     //    mcatnloBand->Draw("same, F");
-
     GenPlotTheory->SetLineColor(kRed+1);
     //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
     GenPlotTheory->Draw("SAME,C");
@@ -2825,13 +2900,14 @@ void Plotter::PlotDiffXSec(){
     delete c;
      	
     
+
+
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
     TList* l = stack->GetHists();
     TH1D* stacksum = (TH1D*) l->At(0)->Clone();
     for (int i = 1; i < l->GetEntries(); ++i) {
       stacksum->Add((TH1D*)l->At(i));
     } 
-
     for(unsigned int i=1; i<hists.size() ; i++){ // sum all data plots to first histogram
       if(legends[i] == legends[0]){
 	varhists[0]->Add(varhists[i]);
@@ -2853,6 +2929,9 @@ void Plotter::PlotDiffXSec(){
     c1->Print("Plots/"+channel+"/preunfolded_"+name+".eps");
     c1->Clear();
     delete c1; 	
+
+
+
 }
 
 // get generator cross section curve for NLO prediction
