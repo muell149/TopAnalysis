@@ -1627,6 +1627,7 @@ namespace semileptonic {
       //  result["analyzeTopPartonLevelKinematics/ttbarPt"  ]=bins_;
       bins_.clear();
       // y(ttbar)
+      // old: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
       double ttbarYBins[]={-5.0, -1.8, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 1.8, 5.0};
       // PAS binning: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
       bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
@@ -2336,14 +2337,14 @@ namespace semileptonic {
        b=1.14871;
        addOpt="LL";
      }
-     else if(plotname.Contains("LepPt")){
-       fitLowEdge=45.;
-       fitHighEdge=210.;
-       def="TMath::Exp(x*[0]+x*x*[1])*[2]";
-       a=-0.0414389;
-       b=0.0000334359;
-       c=0.133893;
-     }
+     //else if(plotname.Contains("LepPt")){
+     //  fitLowEdge=45.;
+     //  fitHighEdge=210.;
+     //  def="TMath::Exp(x*[0]+x*x*[1])*[2]";
+     //  a=-0.0414389;
+     //  b=0.0000334359;
+     //  c=0.133893;
+     //}
     }
     else if(model=="madgraph"){
       if(plotname.Contains("ttbarMass")){
@@ -2359,10 +2360,10 @@ namespace semileptonic {
 	fitLowEdgeB=345.;
 	fitHighEdgeB=400.;
 	defB="[3]*TMath::GammaDist(x,[0],[1],[2])";
-	aB=1.56;
-	bB=344.8;
-	cB=80.8;
-	dB=216786.;
+	aB=1.50;//1.56;
+	bB=345.;//344.8;
+	cB=79.3;//80.8;
+	dB=1010990;//1000000.;
 	addOptB="LL";
       }
       else if(plotname.Contains("ttbarPt")){
@@ -2397,12 +2398,13 @@ namespace semileptonic {
 	addOpt="LL";
       }
       else if(plotname.Contains("lepPt")){
-	fitLowEdge=45.;
-	fitHighEdge=210.;
-	def="TMath::Exp(x*[0]+x*x*[1])*[2]";
-	a=-0.0414389;
-	b=0.0000334359;
-	c=0.133893;
+      	fitLowEdge=45.;
+      	fitHighEdge=210.;
+      	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+      	a=-0.02;
+      	b=-0.0001;
+	c=0.0000003;
+	d=41000;
       }
     }
     else if(model=="powheg"){
@@ -2454,14 +2456,14 @@ namespace semileptonic {
 	d=12987.6;
 	addOpt="LL";
       }
-     else if(plotname.Contains("lepPt")){
-       fitLowEdge=45.;
-       fitHighEdge=210.;
-       def="TMath::Exp(x*[0]+x*x*[1])*[2]";
-       a=-0.0414389;
-       b=0.0000334359;
-       c=0.133893;
-     }
+     //else if(plotname.Contains("lepPt")){
+     //  fitLowEdge=45.;
+     //  fitHighEdge=210.;
+     //  def="TMath::Exp(x*[0]+x*x*[1])*[2]";
+     //  a=-0.0414389;
+     //  b=0.0000334359;
+     //  c=0.133893;
+     //}
     }
     // use fit function A
     if(def!=""&&fitLowEdge!=fitHighEdge){
