@@ -21,7 +21,7 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     // Determine the Steering 
     int flag_regmode = 4;            // Always read in tau from file (4) 
     int flag_regpar = 2;             // Always use Tau (2)
-    int flag_scan = 2;               // Turn scan on (2) or off (1) 
+    int flag_scan = 1;               // Turn scan on (2) or off (1) 
     int flag_ps = 4;                 // Write everything to PS (4)
     int flag_root = 1;               // Do not make a ROOT file (1)
     int flag_text = 2;               // Do write Text file with optimal tau (2)
@@ -33,12 +33,21 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     int flag_matrixorientation = 1;  // Transpose matrix prior to unfolding (1)
     int flag_norm = 1;               // Extrinsic Normalization (1) 
     int flag_closure = 1;            // Turn off closure test (1) 
+    int flag_preweighting = 1;       // Reweighting prior to unfolding off (1)
     
     // Cut out the lower gen level side bin for the PT quantities
     TString concatenation = DilepSVDFunctions::SVD_CPQSS(channel, particle, quantity, special, ""); 
     if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_lowersidebin = 5;
     if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_lowersidebin = 5;
     if ( concatenation.EndsWith("TtBar_Pt") == true ) flag_lowersidebin = 5;
+    
+    
+    // Make preweighting iterations
+    if ( concatenation.EndsWith("LepPair_Pt") == true ) flag_preweighting = 2;
+    if ( concatenation.EndsWith("TopQuarks_Pt") == true ) flag_preweighting = 2;
+    if ( concatenation.EndsWith("TtBar_Pt") == true ) flag_preweighting = 2;
+    if ( concatenation.EndsWith("BJets_Pt") == true ) flag_preweighting = 4;
+    
     
     // Fix Side bins for Jet Quantities
     // if ( concatenation.EndsWith("BJets_Pt") == true ) flag_lowersidebin = 4;
@@ -68,6 +77,7 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     steering.Prepend(TString::Format("%i", flag_matrixorientation));           //12 
     steering.Prepend(TString::Format("%i", flag_norm));                        //13 
     steering.Prepend(TString::Format("%i", flag_closure));                     //14 
+    steering.Prepend(TString::Format("%i", flag_preweighting));                //15 
     
     // Return it
     return steering;
