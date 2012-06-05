@@ -7,7 +7,7 @@ void Histo::MakePlots(){
   std::vector<double> Xbins;
   std::vector<double> binCenters;
   Plotter h_XSecPlot;
-  h_XSecPlot.setOptions("HypjetMultiXSec","N_{Events}","N_{jets}", true, false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
+  h_XSecPlot.setOptions("HypjetMultiXSec","N_{Events}","N_{jets}", 1, true, false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
   h_XSecPlot.DYScaleFactor();
   h_XSecPlot.setDataSet("mumu");
   h_XSecPlot.fillHisto();
@@ -36,9 +36,9 @@ void Histo::MakePlots(){
   	// Read HistoList-File
     TString name, YAxis, XAxis;
     bool logX, logY, DYScale;
-    int bins;
+    int bins, rebin;
     double ymin, ymax, xmin, xmax;
-    HistStream>>name>>YAxis>>XAxis>>DYScale>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
+    HistStream>>name>>YAxis>>XAxis>>rebin>>DYScale>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
     
     // Avoid running over empty lines in 'HistoList'-File
     if ( name.CompareTo("") == 0 ) continue;
@@ -75,7 +75,7 @@ void Histo::MakePlots(){
     /////////////////////////////////////////////////////
     /////////////////////////////////////////////////////
     
-    h_generalPlot.setOptions(name,YAxis,XAxis, DYScale, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
+    h_generalPlot.setOptions(name,YAxis,XAxis, rebin, DYScale, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
     h_generalPlot.fillHisto();
@@ -108,9 +108,9 @@ void Histo::MakePlots(){
   	// Read HistoList-File
     TString name, YAxis, XAxis;
     bool logX, logY, DYScale;
-    int bins;
+    int bins, rebin;
     double ymin, ymax, xmin, xmax;
-    controlHistStream>>name>>YAxis>>XAxis>>DYScale>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
+    controlHistStream>>name>>YAxis>>XAxis>>rebin>>DYScale>>logX>>logY>>ymin>>ymax>>xmin>>xmax>>bins;
 
     // Avoid running over empty lines in 'HistoList'-File
     if ( name.CompareTo("") == 0 ) continue;
@@ -145,7 +145,7 @@ void Histo::MakePlots(){
     ///////////////////////////////////////////////////// 
     
 
-    h_generalPlot.setOptions(name,YAxis,XAxis, DYScale, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
+    h_generalPlot.setOptions(name,YAxis,XAxis, rebin, DYScale, logX, logY, ymin, ymax, xmin, xmax, bins, Xbins, binCenters);
     h_generalPlot.DYScaleFactor();
     h_generalPlot.setDataSet("mumu");
     h_generalPlot.fillHisto();

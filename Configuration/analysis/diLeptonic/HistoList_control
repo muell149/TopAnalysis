@@ -1,24 +1,24 @@
-vertMulti N_{Events} N_{vtx} 0 0 0 0 0 0 0 0 0
-vertMulti_noPU N_{Events} N_{vtx} 0 0 0 0 0 0 0 0 0
-DIMFull N_{Events} M_{ll} 0 0 1 1.0 0 0 0 0 0
-DIMFull_fullSel N_{Events} M_{ll} 1 0 0 0 0 0 0 0 0
-Allh1 N_{Events} M_{ll} 1 0 0 0 0 0 0 0 0
-HypjetMulti N_{Events} N_{jets} 1 0 0 0 0 0 0 0 0
-HypjetMulti_diLep N_{Events} N_{jets} 0 0 1 1.0 0 0 0 0 0
-MuonpT N_{Events} p_{T,#mu} 1 0 0 0 0 0 0 0 0
-ElectronpT N_{Events} p_{T,e} 1 0 0 0 0 0 0 0 0
-LeptonpT N_{Events} p_{T,l} 1 0 0 0 0 0 0 0 0
-MuonEta N_{Events} #eta_{T,#mu} 1 0 0 0 0 0 0 0 0
-ElectronEta N_{Events} #eta_{T,e} 1 0 0 0 0 0 0 0 0
-LeptonEta N_{Events} #eta_{T,l} 1 0 0 0 0 0 0 0 0
-LeptonEta_diLep N_{Events} #eta_{T,l} 0 0 0 0 0 0 0 0 0
-jetpT N_{Events} p_{T,jet} 1 0 0 0 0 0 0 0 0
-jetHT N_{Events} H_{T,alljets} 1 0 0 0 0 0 0 0 0
-MET N_{Events} MET 0 0 0 0 0 0 0 0 0
-HypBjetMulti N_{Events} N_{b-jets} 1 0 0 0 0 0 0 0 0
-HypTopMass N_{Events} M_{t} 1 0 0 0 0 0 0 0 0
-HypTopRapidity N_{Events} y^{tand#bar{t}} 1 0 0 0 0 0 0 0 0
-HypToppT N_{Events} p_{T}^{tand#bar{t}} 1 0 0 0 0 0 0 0 0
-HypTTBarMass N_{Events} M^{t#bar{t}} 1 0 0 0 0 0 0 0 0
-HypTTBarRapidity N_{Events} y^{t#bar{t}} 1 0 0 0 0 0 0 0 0
-HypTTBarpT N_{Events} p_{T}^{t#bar{t}} 1 0 0 0 0 0 0 0 0
+vertMulti events N_{vtx} 1 0 0 0 0 0 0 0 0 0
+vertMulti_noPU events N_{vtx} 1 0 0 0 0 0 0 0 0 0
+DIMFull events M_{ll} 2 0 0 1 10.0 0 0 0 0 0
+DIMFull_fullSel events M_{ll} 2 1 0 0 0 0 0 0 0 0
+Allh1 events M_{ll} 1 1 0 0 0 0 0 0 0 0
+HypjetMulti events N_{jets} 1 1 0 1 1.0 0 2 10 0 0
+HypjetMulti_diLep events N_{jets} 1 0 0 1 1.0 0 0 0 0 0
+MuonpT muons p_{T,#mu} 4 1 0 0 0 0 0 0 0 0
+ElectronpT electrons p_{T} 4 1 0 0 0 0 20 400 0 0
+LeptonpT leptons p_{T} 2 1 0 0 0 0 0 0 0 0
+MuonEta muons #eta_{T} 4 1 0 0 0 0 -2.5 2.5 0 0
+ElectronEta electrons #eta_{T} 4 1 0 0 0 0 -2.5 2.5 0 0
+LeptonEta leptons #eta_{T} 4 1 0 0 0 0 -2.5 2.5 0 0
+LeptonEta_diLep leptons #eta_{T} 4 0 0 0 0 0 -2.5 2.5 0 0
+jetpT jets p_{T} 4 1 0 0 0 0 0 0 0 0
+jetHT jets H_{T} 4 1 0 0 0 0 0 0 0 0
+MET events MET 4 0 0 0 0 0 0 0 0 0
+HypBjetMulti events N_{b-jets} 1 1 0 1 0.5 0 0 6 0 0
+HypTopMass t-quarks M_{t} 2 1 0 0 0 0 100 300 0 0
+HypTopRapidity t-quarks y^{tand#bar{t}} 4 1 0 0 0 0 -2.5 2.5 0 0
+HypToppT t-quarks p_{T}^{tand#bar{t}} 4 1 0 0 0 0 0 0 0 0
+HypTTBarMass top-pairs M^{t#bar{t}} 8 1 0 0 0 0 0 0 0 0
+HypTTBarRapidity top-pairs y^{t#bar{t}} 2 1 0 0 0 0 -2.5 2.5 0 0
+HypTTBarpT top-pairs p_{T}^{t#bar{t}} 4 1 0 0 0 0 0 0 0 0
