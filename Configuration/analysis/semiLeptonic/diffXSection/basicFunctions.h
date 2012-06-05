@@ -201,15 +201,15 @@ namespace semileptonic {
     // used enumerators: none (label correspond to samples)
 
     TString sampleLabel="";
-    if(sample==kSig)     sampleLabel="ttbar prompt lepton";
-    if(sample==kBkg)     sampleLabel="ttbar other";
-    if(sample==kSigPow)  sampleLabel="ttbar prompt lepton POWHEG";
-    if(sample==kBkgPow)  sampleLabel="ttbar other POWHEG";
+    if(sample==kSig)     sampleLabel="t#bar{t} prompt e/#mu";
+    if(sample==kBkg)     sampleLabel="t#bar{t} other";
+    if(sample==kSigPow)  sampleLabel="t#bar{t} prompt e/#mu POWHEG";
+    if(sample==kBkgPow)  sampleLabel="t#bar{t} other POWHEG";
     if(sample==kZjets)   sampleLabel="Z+jets";
     if(sample==kWjets)   sampleLabel="W+jets";
-    if(sample==kQCD)     sampleLabel="combined QCD multijet";
-    if(sample==kSTop)    sampleLabel="combined single top";
-    if(sample==kDiBos)   sampleLabel="combined diboson";
+    if(sample==kQCD)     sampleLabel="QCD multijet";
+    if(sample==kSTop)    sampleLabel="single top";
+    if(sample==kDiBos)   sampleLabel="diboson";
     if(sample==kData)    sampleLabel="data";
     if(sample==kQCDEM1)  sampleLabel="QCD electromagnetic enriched 1";
     if(sample==kQCDEM2)  sampleLabel="QCD electromagnetic enriched 2";
@@ -2084,8 +2084,7 @@ namespace semileptonic {
       // close and delete input files
       for(std::map<unsigned int, TFile*>::const_iterator file=files_.begin(); file!=files_.end(); ++file){
 	if(file->second){
-	  file->second->Close();
-	  delete file->second;
+	  file->second->Close();	  delete file->second;
 	}
       }
     }
@@ -2095,7 +2094,13 @@ namespace semileptonic {
 			    std::vector<TString>& plotList_,
 			    unsigned int& Nplots)
   {
-    
+    // this function creates a set of errorbands ("histoErrorBand_") for 
+    // all samples for the histos in "histo_", using the "Nplots" plots 
+    // listed in "plotList_" taking into account luminosity and cross section error
+    // modified quantities: histoErrorBand_
+    // used functions: NONE
+    // used enumerators: samples
+
     for(unsigned int plot=0; plot<Nplots; ++plot){
       
       TString plotName     = plotList_[plot];

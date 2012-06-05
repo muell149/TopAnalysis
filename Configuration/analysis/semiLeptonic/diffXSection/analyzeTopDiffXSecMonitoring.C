@@ -778,21 +778,21 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   // - First entry: data
   // - Following entries: MC samples (if existing)
   // - Last entry: uncertainty band
-  
+
   // Data:
   TString lumilabel = Form("%2.1f fb^{-1}",luminosity/1000);
-  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel),"P");
-  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
-  leg1->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+  leg ->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], decayChannel=="combined" ? sampleLabel(kData) : sampleLabel(kData,decayChannel),"P");
+  leg0->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], decayChannel=="combined" ? sampleLabel(kData) : sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+  leg1->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], decayChannel=="combined" ? sampleLabel(kData) : sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
  
   // MC samples (add only if sample exists in at least one plot, then quit plot-loop to avoid duplication of entries)
   for(unsigned int sample=kSig; sample<kData; ++sample){
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size()-1; ++plot){  // <plotList_.size()-1, because last entry is for data (see above)
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
-	leg ->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
-	leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
-	leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	leg ->AddEntry(histo_[plotList_[plot]][sample], decayChannel=="combined" ? sampleLabel(sample) : sampleLabel(sample,decayChannel), "F");
+	leg0->AddEntry(histo_[plotList_[plot]][sample], decayChannel=="combined" ? sampleLabel(sample) : sampleLabel(sample,decayChannel), "F");
+	leg1->AddEntry(histo_[plotList_[plot]][sample], decayChannel=="combined" ? sampleLabel(sample) : sampleLabel(sample,decayChannel), "F");
 	break;
       }
     }
@@ -929,7 +929,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	  first=false;
 	  // at the end:
 	  if((sample==kData)&&(histo_.count(plotList_[plot])>0)&&histo_[plotList_[plot]][sample]){
-	    if(!SSV&&decayChannel!="combined"){
+	    if(!SSV){
 	      // configure style of and draw uncertainty bands
 	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
 	      histoErrorBand_[plotList_[plot]]->SetFillColor(1);

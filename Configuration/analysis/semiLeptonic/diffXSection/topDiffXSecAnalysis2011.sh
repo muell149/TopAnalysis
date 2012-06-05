@@ -48,7 +48,7 @@
 
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
-decayChannel=\"muon\" 
+decayChannel=\"combined\" 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
@@ -277,7 +277,7 @@ EOF
 
 root -l -b < commandsMonPrepare.cint
 
-if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
+if [ $redoControlPlots = true ]; then
 
     # with ratio plots
     if [ -f commandsMonRun1.cint ]; then    
