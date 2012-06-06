@@ -1668,7 +1668,9 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   else{drawhists[0]->SetMaximum(1.5*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
 
   
-  drawhists[0]->Draw("e1");  
+  drawhists[0]->Draw("e1"); //############## 
+  //drawhists[0]->Draw("e"); //############## 
+  
   stack->Draw("same HIST");
   gPad->RedrawAxis();
   TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");//this is frustrating and stupid but apparently necessary...
@@ -1676,7 +1678,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   syshist->Draw("same,E2");
   TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
   setex2->Draw();
-  drawhists[0]->Draw("same,e1");
+  drawhists[0]->Draw("same,e1"); //#############
+  //drawhists[0]->Draw("same,e"); //#############
   
   DrawCMSLabels(false, lumi);
   
@@ -1715,10 +1718,12 @@ void Plotter::setStyle(TH1 &hist, unsigned int i)
     hist.GetXaxis()->SetTitleOffset(1.25);
     if(name.Contains("pT") ||name.Contains("Mass") ){
       hist.GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
+      if(name.Contains("Rapidity")) hist.GetXaxis()->SetTitle(XAxis);
     }else  hist.GetXaxis()->SetTitle(XAxis);
     
     if(name.Contains("pT") ||name.Contains("Mass")){
-      hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}"+" #left[GeV^{-1}#right]");      
+      hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}"+" #left[GeV^{-1}#right]"); 
+      if(name.Contains("Rapidity")) hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");     
     }else{hist.GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");
     }
   }
@@ -1742,6 +1747,7 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
     hist.GetYaxis()->SetTitleFont(42);
     if(name.Contains("pT") || name.Contains("Mass")){
       hist.GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
+      if(name.Contains("Rapidity")) hist.GetXaxis()->SetTitle(XAxis);
     }else    hist.GetXaxis()->SetTitle(XAxis);
     //hist.GetXaxis()->SetTitle(XAxis);
     hist.GetYaxis()->SetTitle(YAxis);
@@ -2400,7 +2406,9 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 }
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE); 
-    /*CalcDiffSystematics("JES", 0);
+
+    //############### Syst ################
+    CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
     CalcDiffSystematics("PU_", 2);
     CalcDiffSystematics("SCALE", 3);
@@ -2408,7 +2416,8 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("MATCH", 5);
     CalcDiffSystematics("DY_", 6);
     CalcDiffSystematics("BG_", 7);
-    DiffFlatSystematics(8,bins);*/
+    DiffFlatSystematics(8,bins);
+    
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2813,12 +2822,14 @@ void Plotter::PlotDiffXSec(){
     //    genscale = 1./ h_GenDiffXSec->Integral("width");
     GenPlotTheory->Scale(genscale);
     h_GenDiffXSec->Scale(genscale);
+
+    bool binned_theory=true; //############
+  
     TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
     mcnlohist = GetNloCurve(newname,"MCATNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
-    mcnlohist->Rebin(2);mcnlohist->Scale(0.2);
+    if (binned_theory==false) mcnlohist->Rebin(2);mcnlohist->Scale(0.5); //#####
     mcnlohist->Scale(mcnloscale);
-
 
 
     if(name.Contains("LeptonpT")){mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");}//temprorary until I change the naming convention in the root file
@@ -2831,7 +2842,7 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
     else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
     else {mcnlohistup = new TH1();}
-    mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
+    if (binned_theory==false) mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
     mcnlohistup->Scale(mcnloscale);
 
     if(name.Contains("LeptonpT")){mcnlohistdown = GetNloCurve("Leptons","Pt","MCNLOdown");}//temprorary until I change the naming convention in the root file
@@ -2844,12 +2855,12 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
     else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
     else {mcnlohistdown = new TH1();}
-    mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
+    if (binned_theory==false) mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
     mcnlohistdown->Scale(mcnloscale);
 
     powheghist = GetNloCurve(newname, "POWHEG");
     double powhegscale = 1./powheghist->Integral("width");
-    powheghist->Rebin(2);powheghist->Scale(0.5);
+    if (binned_theory==false) powheghist->Rebin(2);powheghist->Scale(0.5);
     powheghist->Scale(powhegscale);
  	
     TH1* powheghistBinned = powheghist->Rebin(bins,"powhegplot",Xbins);	
@@ -2955,8 +2966,8 @@ void Plotter::PlotDiffXSec(){
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(kRed+1);
 
-    bool binned_theory=true;
-
+    //bool binned_theory=true; 
+    
     mcnlohist->SetLineColor(kAzure);
     powheghist->SetLineColor(kGreen+1);
     mcnlohistBinned->SetLineColor(kAzure);
@@ -2971,10 +2982,15 @@ void Plotter::PlotDiffXSec(){
       powheghistBinned->Draw("SAME");
     }
 
-    if(name.Contains("ToppT") || name.Contains("TopRapidity"))KidoHist->Draw("SAME,C");
+    if(name.Contains("ToppT") || name.Contains("TopRapidity")){
+      KidoHist->SetLineWidth(2);
+      KidoHist->SetLineColor(kOrange); //########################
+      KidoHist->Draw("SAME,C");
+    }
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
     DrawCMSLabels(false, lumi);
+    
     DrawDecayChLabel(channelLabel[channelType]);    
     
     TLegend leg2 = *getNewLegend();
@@ -2982,8 +2998,8 @@ void Plotter::PlotDiffXSec(){
     leg2.AddEntry(GenPlotTheory,            "MadGraph","l");
     //if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
-    if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
-    if (powheghist->GetEntries())  leg2.AddEntry(powheghist,       "POWHEG",  "l");        
+    if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
+    if (powheghist->GetEntries())  leg2.AddEntry(powheghistBinned,       "POWHEG",  "l");        
     if(name.Contains("ToppT") || name.Contains("TopRapidity"))  leg2.AddEntry(KidoHist,       "Approx. NNLO",  "l");        
     //if (MCFMHist->GetEntries())  leg2.AddEntry(MCFMHist,       "MCFM",  "p");        
     leg2.SetFillStyle(0);
@@ -3045,7 +3061,9 @@ void Plotter::PlotDiffXSec(){
 
     varhists[0]->SetMinimum(0);
     varhists[0]->GetYaxis()->SetTitle("events");
-    varhists[0]->Draw("e1");
+    //varhists[0]->Draw("e");  //#########
+    varhists[0]->Draw("e"); 
+    
 
     stack->Draw("same HIST");
 
@@ -3054,7 +3072,8 @@ void Plotter::PlotDiffXSec(){
     syshist->Draw("same,E2");
     TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     setex2->Draw();*/
-    varhists[0]->Draw("same, e1");
+    varhists[0]->Draw("same, e1"); //############
+    //varhists[0]->Draw("same, e"); 
     DrawCMSLabels(false, lumi);
     DrawDecayChLabel(channelLabel[channelType]);    
     leg->Draw("SAME");
