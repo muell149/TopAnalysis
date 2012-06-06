@@ -288,19 +288,19 @@ if(not options.sample=="none"):
         usedSample="TopAnalysis/Configuration/Fall11/wlnujets_MadgraphZ2_Fall11_AOD_cff"
 	outputFileName+="Wjets"
     elif(options.sample=="wjetsMatchingUp"):        
-        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_matching_up_MadgraphZ2_Fall11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/wlnujets_matching_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="WjetsMatchUp"
     elif(options.sample=="wjetsMatchingDown"):        
-        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_matching_down_MadgraphZ2_Fall11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/wlnujets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="WjetsMatchDown"
     elif(options.sample=="wjetsScaleUp"):        
-        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_scale_up_MadgraphZ2_Fall11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/wlnujets_scale_up_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False
 	outputFileName+="WjetsScaleUp"
     elif(options.sample=="wjetsScaleDown"):
-        usedSample="TopAnalysis/Configuration/Fall11/wlnujets_scale_down_MadgraphZ2_Fall11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/wlnujets_scale_down_MadgraphZ2_Summer11_AOD_cff"
 	additionalEventWeights=False        
 	outputFileName+="WjetsScaleDown"
     elif(options.sample=="zjets"):        
@@ -1412,10 +1412,10 @@ process.bTagSFEventWeightBTagSFShapeUpPt100        = process.bTagSFEventWeight.c
 process.bTagSFEventWeightBTagSFShapeDownPt100      = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt",  shapeVarPtThreshold   = 100.0)
 process.bTagSFEventWeightBTagSFShapeUpEta1p2       = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta",   shapeVarEtaThreshold  =   1.2)
 process.bTagSFEventWeightBTagSFShapeDownEta1p2     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta", shapeVarEtaThreshold  =   1.2)
-process.bTagSFEventWeightBTagSFHalfShapeUpPt65     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt",    shapeDistortionFactor =   0.5)
-process.bTagSFEventWeightBTagSFHalfShapeDownPt65   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt",  shapeDistortionFactor =   0.5)
-process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta",   shapeDistortionFactor =   0.5)
-process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7 = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta", shapeDistortionFactor =   0.5)
+process.bTagSFEventWeightBTagSFFullShapeUpPt65     = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpPt",    shapeDistortionFactor =   1.)
+process.bTagSFEventWeightBTagSFFullShapeDownPt65   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownPt",  shapeDistortionFactor =   1.)
+process.bTagSFEventWeightBTagSFFullShapeUpEta0p7   = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeUpEta",   shapeDistortionFactor =   1.)
+process.bTagSFEventWeightBTagSFFullShapeDownEta0p7 = process.bTagSFEventWeight.clone(sysVar = "bTagSFShapeDownEta", shapeDistortionFactor =   1.)
 
 ## ---
 ##    MC eff SF reweighting
@@ -1512,10 +1512,10 @@ weightlistBTagSFShapeUpPt65        =cms.VInputTag()
 weightlistBTagSFShapeDownPt65      =cms.VInputTag()
 weightlistBTagSFShapeUpEta1p2      =cms.VInputTag()
 weightlistBTagSFShapeDownEta1p2    =cms.VInputTag()
-weightlistBTagSFHalfShapeUpPt65    =cms.VInputTag()
-weightlistBTagSFHalfShapeDownPt65  =cms.VInputTag()
-weightlistBTagSFHalfShapeUpEta0p7  =cms.VInputTag()
-weightlistBTagSFHalfShapeDownEta0p7=cms.VInputTag()
+weightlistBTagSFFullShapeUpPt65    =cms.VInputTag()
+weightlistBTagSFFullShapeDownPt65  =cms.VInputTag()
+weightlistBTagSFFullShapeUpEta0p7  =cms.VInputTag()
+weightlistBTagSFFullShapeDownEta0p7=cms.VInputTag()
 weightlistBTagSFShapeUpPt100       =cms.VInputTag()
 weightlistBTagSFShapeDownPt100     =cms.VInputTag()
 weightlistBTagSFShapeUpEta0p7      =cms.VInputTag()
@@ -1550,10 +1550,10 @@ if(PUreweigthing):
     weightlistBTagSFShapeDownPt65      .append(PUweight) 
     weightlistBTagSFShapeUpEta1p2      .append(PUweight) 
     weightlistBTagSFShapeDownEta1p2    .append(PUweight) 
-    weightlistBTagSFHalfShapeUpPt65    .append(PUweight) 
-    weightlistBTagSFHalfShapeDownPt65  .append(PUweight) 
-    weightlistBTagSFHalfShapeUpEta0p7  .append(PUweight) 
-    weightlistBTagSFHalfShapeDownEta0p7.append(PUweight) 
+    weightlistBTagSFFullShapeUpPt65    .append(PUweight) 
+    weightlistBTagSFFullShapeDownPt65  .append(PUweight) 
+    weightlistBTagSFFullShapeUpEta0p7  .append(PUweight) 
+    weightlistBTagSFFullShapeDownEta0p7.append(PUweight) 
     weightlistBTagSFShapeUpPt100       .append(PUweight) 
     weightlistBTagSFShapeDownPt100     .append(PUweight) 
     weightlistBTagSFShapeUpEta0p7      .append(PUweight) 
@@ -1589,10 +1589,10 @@ if(effSFReweigthing and decayChannel=="muon"):
     weightlistBTagSFShapeDownPt65      .append("effSFMuonEventWeight")
     weightlistBTagSFShapeUpEta1p2      .append("effSFMuonEventWeight")
     weightlistBTagSFShapeDownEta1p2    .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeUpPt65    .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeDownPt65  .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeUpEta0p7  .append("effSFMuonEventWeight")
-    weightlistBTagSFHalfShapeDownEta0p7.append("effSFMuonEventWeight")
+    weightlistBTagSFFullShapeUpPt65    .append("effSFMuonEventWeight")
+    weightlistBTagSFFullShapeDownPt65  .append("effSFMuonEventWeight")
+    weightlistBTagSFFullShapeUpEta0p7  .append("effSFMuonEventWeight")
+    weightlistBTagSFFullShapeDownEta0p7.append("effSFMuonEventWeight")
     weightlistBTagSFShapeUpPt100       .append("effSFMuonEventWeight")
     weightlistBTagSFShapeDownPt100     .append("effSFMuonEventWeight")
     weightlistBTagSFShapeUpEta0p7      .append("effSFMuonEventWeight")
@@ -1627,10 +1627,10 @@ if(effSFReweigthing and decayChannel=="electron"):
     weightlistBTagSFShapeDownPt65      .append("effSFElectronEventWeight")
     weightlistBTagSFShapeUpEta1p2      .append("effSFElectronEventWeight")
     weightlistBTagSFShapeDownEta1p2    .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeUpPt65    .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeDownPt65  .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeUpEta0p7  .append("effSFElectronEventWeight")
-    weightlistBTagSFHalfShapeDownEta0p7.append("effSFElectronEventWeight")
+    weightlistBTagSFFullShapeUpPt65    .append("effSFElectronEventWeight")
+    weightlistBTagSFFullShapeDownPt65  .append("effSFElectronEventWeight")
+    weightlistBTagSFFullShapeUpEta0p7  .append("effSFElectronEventWeight")
+    weightlistBTagSFFullShapeDownEta0p7.append("effSFElectronEventWeight")
     weightlistBTagSFShapeUpPt100       .append("effSFElectronEventWeight")
     weightlistBTagSFShapeDownPt100     .append("effSFElectronEventWeight")
     weightlistBTagSFShapeUpEta0p7      .append("effSFElectronEventWeight")
@@ -1664,10 +1664,10 @@ if(BtagReweigthing):
     weightlistBTagSFShapeDownPt65      .append("bTagSFEventWeightBTagSFShapeDownPt65")
     weightlistBTagSFShapeUpEta1p2      .append("bTagSFEventWeightBTagSFShapeUpEta1p2")
     weightlistBTagSFShapeDownEta1p2    .append("bTagSFEventWeightBTagSFShapeDownEta1p2")
-    weightlistBTagSFHalfShapeUpPt65    .append("bTagSFEventWeightBTagSFHalfShapeUpPt65")
-    weightlistBTagSFHalfShapeDownPt65  .append("bTagSFEventWeightBTagSFHalfShapeDownPt65")
-    weightlistBTagSFHalfShapeUpEta0p7  .append("bTagSFEventWeightBTagSFHalfShapeUpEta0p7")
-    weightlistBTagSFHalfShapeDownEta0p7.append("bTagSFEventWeightBTagSFHalfShapeDownEta0p7")
+    weightlistBTagSFFullShapeUpPt65    .append("bTagSFEventWeightBTagSFFullShapeUpPt65")
+    weightlistBTagSFFullShapeDownPt65  .append("bTagSFEventWeightBTagSFFullShapeDownPt65")
+    weightlistBTagSFFullShapeUpEta0p7  .append("bTagSFEventWeightBTagSFFullShapeUpEta0p7")
+    weightlistBTagSFFullShapeDownEta0p7.append("bTagSFEventWeightBTagSFFullShapeDownEta0p7")
     weightlistBTagSFShapeUpPt100       .append("bTagSFEventWeightBTagSFShapeUpPt100")
     weightlistBTagSFShapeDownPt100     .append("bTagSFEventWeightBTagSFShapeDownPt100")
     weightlistBTagSFShapeUpEta0p7      .append("bTagSFEventWeightBTagSFShapeUpEta0p7")
@@ -1707,10 +1707,10 @@ process.eventWeightBTagSFShapeUpPt65        = process.eventWeightMultiplier.clon
 process.eventWeightBTagSFShapeDownPt65      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeDownPt65)
 process.eventWeightBTagSFShapeUpEta1p2      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeUpEta1p2)
 process.eventWeightBTagSFShapeDownEta1p2    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeDownEta1p2)
-process.eventWeightBTagSFHalfShapeUpPt65    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeUpPt65)
-process.eventWeightBTagSFHalfShapeDownPt65  = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeDownPt65)
-process.eventWeightBTagSFHalfShapeUpEta0p7  = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeUpEta0p7)
-process.eventWeightBTagSFHalfShapeDownEta0p7= process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFHalfShapeDownEta0p7)
+process.eventWeightBTagSFFullShapeUpPt65    = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFFullShapeUpPt65)
+process.eventWeightBTagSFFullShapeDownPt65  = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFFullShapeDownPt65)
+process.eventWeightBTagSFFullShapeUpEta0p7  = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFFullShapeUpEta0p7)
+process.eventWeightBTagSFFullShapeDownEta0p7= process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFFullShapeDownEta0p7)
 process.eventWeightBTagSFShapeUpPt100       = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeUpPt100)
 process.eventWeightBTagSFShapeDownPt100     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeDownPt100)
 process.eventWeightBTagSFShapeUpEta0p7      = process.eventWeightMultiplier.clone(eventWeightTags = weightlistBTagSFShapeUpEta0p7)
@@ -1893,7 +1893,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
              "EffSFShapeUpPt", "EffSFShapeDownPt", "EffSFShapeUpPt40", "EffSFShapeDownPt40",
              "EffSFNormUpSys", "EffSFNormDownSys", "TriggerEffSFJetNormUp", "TriggerEffSFJetNormDown", "TriggerEffSFJetShapeUp", "TriggerEffSFJetShapeDown",
              "BtagSFup", "BtagSFdown", "MisTagSFup", "MisTagSFdown", "BTagSFShapeUpPt65", "BTagSFShapeDownPt65", "BTagSFShapeUpEta1p2", "BTagSFShapeDownEta1p2",
-             #"BTagSFHalfShapeUpPt65", "BTagSFHalfShapeDownPt65", "BTagSFHalfShapeUpEta0p7", "BTagSFHalfShapeDownEta0p7",
+             "BTagSFFullShapeUpPt65", "BTagSFFullShapeDownPt65", "BTagSFFullShapeUpEta0p7", "BTagSFFullShapeDownEta0p7",
              "BTagSFShapeUpPt100", "BTagSFShapeDownPt100", "BTagSFShapeUpEta0p7", "BTagSFShapeDownEta0p7"]
     # loop them
     for sys in systExt:
@@ -1946,10 +1946,10 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            process.bTagSFEventWeightBTagSFShapeDownPt65  *
                            process.bTagSFEventWeightBTagSFShapeUpEta1p2    *
                            process.bTagSFEventWeightBTagSFShapeDownEta1p2  *
-                           #process.bTagSFEventWeightBTagSFHalfShapeUpPt65    *
-                           #process.bTagSFEventWeightBTagSFHalfShapeDownPt65  *
-                           #process.bTagSFEventWeightBTagSFHalfShapeUpEta0p7    *
-                           #process.bTagSFEventWeightBTagSFHalfShapeDownEta0p7  *
+                           #process.bTagSFEventWeightBTagSFFullShapeUpPt65    *
+                           #process.bTagSFEventWeightBTagSFFullShapeDownPt65  *
+                           #process.bTagSFEventWeightBTagSFFullShapeUpEta0p7    *
+                           #process.bTagSFEventWeightBTagSFFullShapeDownEta0p7  *
                            process.bTagSFEventWeightBTagSFShapeUpPt100    *
                            process.bTagSFEventWeightBTagSFShapeDownPt100  *
                            process.bTagSFEventWeightBTagSFShapeUpEta0p7    *
