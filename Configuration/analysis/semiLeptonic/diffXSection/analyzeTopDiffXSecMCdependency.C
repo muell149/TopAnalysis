@@ -8,7 +8,7 @@ double linSF(const double x, const double xmax, const double a, const double b);
 void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayChannel="electron", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
 				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-                                    bool doPDFuncertainty=false)
+                                    bool doPDFuncertainty=true)
 {
   // ---
   //     Configuration
@@ -70,9 +70,12 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
   // parton Level (phase space) plots
   std::map< TString, TH1F*> plots_;
   std::map< TString, TH1F*> plotsScaled_;
+  std::map< TString, TH2F*> plots2D_;
+  std::map< TString, TH2F*> plotsScaled2D_;
   // container for final distorted plots
   // lep/had top quantities are filled in the same plot
   std::map< TString, std::map< TString, TH1F*> > finalPlots_;
+  std::map< TString, std::map< TString, TH2F*> > finalPlots2D_;
   
   // printout of configuration
   if(verbose>0){
@@ -129,6 +132,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
   if(verbose>0) std::cout << "considered variables: ";
   for(unsigned int i=0; i<variable_.size();++i){
     TH1F* hist=(TH1F*)(inFile->Get(folder+"/"+variable_[i]));
+    TH2F* hist2D=(TH2F*)(inFile->Get(folder+"/"+variable_[i]+"_"));
     if(verbose>0) std::cout << variable_[i]+" ";
     value_[variable_[i]              ]=0;
     value_[variable_[i]+"PartonTruth"]=0;
@@ -139,10 +143,12 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
       value_[variable_[i]+"HadPartonTruth"]=0;
     }
     // initialize plots with correct binning
-    // original plots for parton level phase space / reconstruction level
+    // original plots for parton level phase space / parton level extrapolated / reconstruction level / gen - rec correlation plots
     plots_      [variable_[i]+"PartonTruth"    ]=new TH1F( variable_[i]+"PartonTruth"    , variable_[i]+"PartonTruth"    , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
     plots_      [variable_[i]+"PartonTruthFull"]=new TH1F( variable_[i]+"PartonTruthFull", variable_[i]+"PartonTruthFull", hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
     plots_      [variable_[i]                  ]=new TH1F( variable_[i]                  , variable_[i]                  , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+    plots2D_    [variable_[i]                  ]=new TH2F( variable_[i]                  , variable_[i]                  , hist2D->GetNbinsX(), hist2D->GetXaxis()->GetXmin(), hist2D->GetXaxis()->GetXmax(), hist2D->GetNbinsX(), hist2D->GetXaxis()->GetXmin(), hist2D->GetXaxis()->GetXmax());
+
     // loop all variations 
     for(unsigned int var=0; var<variation_.size();++var){
       TString Var=variation_[var];
@@ -151,12 +157,14 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
       plotsScaled_[variable_[i]+"PartonTruth"+Var    ]=new TH1F( variable_[i]+"PartonTruth"+Var    , variable_[i]+"PartonTruth"+Var    , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
       plotsScaled_[variable_[i]+"PartonTruthFull"+Var]=new TH1F( variable_[i]+"PartonTruthFull"+Var, variable_[i]+"PartonTruthFull"+Var, hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
       plotsScaled_[variable_[i]              +Var    ]=new TH1F( variable_[i]+Var                  , variable_[i]+Var                  , hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+      plotsScaled2D_[variable_[i]                    ]=new TH2F( variable_[i]+Var                  , variable_[i]+Var                  , hist2D->GetNbinsX(), hist2D->GetXaxis()->GetXmin(), hist2D->GetXaxis()->GetXmax(), hist2D->GetNbinsX(), hist2D->GetXaxis()->GetXmin(), hist2D->GetXaxis()->GetXmax());
       for(unsigned int j=0; j<variable_.size();++j){
 	// final plots: reweighted plots from tree entries
 	// (reweighting based on all events on parton level within phase space)
 	// reconstruction level plots and parton level plots for reconstructed events
 	finalPlots_[variable_[j]+"PartonTruth"][variable_[i]+Var]=new TH1F( variable_[j]+"PartonTruth"+variable_[i]+"SF"+Var, variable_[j]+"PartonTruth"+variable_[i]+"SF"+Var, hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
 	finalPlots_[variable_[j]              ][variable_[i]+Var]=new TH1F( variable_[j]              +variable_[i]+"SF"+Var, variable_[j]              +variable_[i]+"SF"+Var, hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+	finalPlots2D_[variable_[j]            ][variable_[i]+Var]=new TH2F( variable_[j]              +variable_[i]+"SF"+Var, variable_[j]              +variable_[i]+"SF"+Var, hist2D->GetNbinsX(), hist2D->GetXaxis()->GetXmin(), hist2D->GetXaxis()->GetXmax(), hist2D->GetNbinsX(), hist2D->GetXaxis()->GetXmin(), hist2D->GetXaxis()->GetXmax());
       }
     }
   }
@@ -528,6 +536,9 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
 	    finalPlots_[variable_[j]][variable_[i]+Var]->Fill(value_[variable_[j]+"Had"], weight*HadShapeWeight);
 	    if(verbose>3) std::cout << "lep reco: " << value_[variable_[j]+"Lep"] << "*" <<  weight << "*" << LepShapeWeight << std::endl;
 	    if(verbose>3) std::cout << "had reco: " << value_[variable_[j]+"Had"] << "*" <<  weight << "*" << HadShapeWeight << std::endl;
+	    // correlation plots
+	    finalPlots2D_[variable_[j]][variable_[i]+Var]->Fill(value_[variable_[i]+"Lep"+"PartonTruth"], value_[variable_[j]+"Lep"], weight*LepShapeWeight);
+	    finalPlots2D_[variable_[j]][variable_[i]+Var]->Fill(value_[variable_[i]+"Had"+"PartonTruth"], value_[variable_[j]+"Had"], weight*HadShapeWeight);
 	  }
 	  // other quantities: take average of leptonic and hadronic top SF
 	  else{
@@ -537,6 +548,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
 	    // reconstruction level plots
 	    finalPlots_[variable_[j]][variable_[i]+Var]->Fill(value_[variable_[j]], weight*0.5*(LepShapeWeight+HadShapeWeight));
 	    if(verbose>3) std::cout << "reco: " << value_[variable_[j]] << "*" <<  weight << "*" << 0.5*(LepShapeWeight+HadShapeWeight) << std::endl;
+	    // correlation plots
+	    finalPlots2D_[variable_[j]][variable_[i]+Var]->Fill(value_[variable_[j]+"PartonTruth"], value_[variable_[j]], weight*0.5*(LepShapeWeight+HadShapeWeight));
 	  }
 	}
       }
@@ -671,6 +684,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
 	finalPlots_[variable_[j]][variable_[i]+"Down"]->SetTitle(variable_[j]);
 	finalPlots_[variable_[j]][variable_[i]+"Up"  ]->SetName (variable_[j]);
 	finalPlots_[variable_[j]][variable_[i]+"Up"  ]->SetTitle(variable_[j]);
+	finalPlots2D_[variable_[j]][variable_[i]+"Up"  ]->SetName (variable_[j]+"_");
+	finalPlots2D_[variable_[j]][variable_[i]+"Up"  ]->SetTitle(variable_[j]+"_");
 	// draw legend
 	if(PS2=="RecoLevel") legReco->Draw("same");
 	// adapt counter
@@ -709,6 +724,10 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
 	  // reco plot (weighted with distorted parton level distribution of the same quantity)
 	  saveToRootFile(outputFileNameUp  , finalPlots_[variable_[j]][variable_[i]+"Up"  ] , true, verbose-1, folder);
 	  saveToRootFile(outputFileNameDown, finalPlots_[variable_[j]][variable_[i]+"Down"] , true, verbose-1, folder);
+	  // correlation plot (weighted with distorted parton level distribution of the same quantity)
+	  saveToRootFile(outputFileNameUp  , finalPlots2D_[variable_[j]][variable_[i]+"Up"  ] , true, verbose-1, folder);
+	  saveToRootFile(outputFileNameDown, finalPlots2D_[variable_[j]][variable_[i]+"Down"] , true, verbose-1, folder);
+
 	}
       }
     }
