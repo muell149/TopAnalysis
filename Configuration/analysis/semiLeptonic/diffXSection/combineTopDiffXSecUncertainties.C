@@ -2,7 +2,8 @@
 #include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", bool exclShapeVar=true, bool extrapolate=false, bool hadron=false){
+void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", 
+				     bool exclShapeVar=true, bool extrapolate=false, bool hadron=false){
 
   // ============================
   //  Systematic Variations:
@@ -52,8 +53,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // 0: no output, 1: std output 2: output for debugging
   // save: enable saving
   // take care that prescaling of muon channel for full 2011 datset was taken into account
-  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=4955;
-  if(luminosity==4955&&decayChannel=="electron") luminosity=4980;
+  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=constLumiMuon;
+  if(luminosity==4955&&decayChannel=="electron") luminosity=constLumiElec;
   // choose phase space
   TString PS="";
   // a) for full PS use extrapolate=true;
@@ -66,10 +67,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   if(verbose>1){
     if(extrapolate) std::cout << "full Phase Space will be used!" << std::endl; 
     else std::cout << LV << " level Phase Space will be used!" << std::endl; 
-  }
-  TString universalplotLabel="";
-  if(extrapolate) universalplotLabel="FullPS";
-  else universalplotLabel=LV+"LvPS";
+  } 
+  TString universalplotLabel = extrapolate ? "FullPS" : LV+"LvPS";  
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2011";
   if(luminosity<50.) dataSample="2010";
@@ -87,7 +86,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
   // use BCC values?
-  bool useBCC=false;
+  bool useBCC=true;
   if(extrapolate==false&&hadron==false) useBCC=true;
   unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
@@ -100,7 +99,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // NOTE: these must be identical to those defined in xSecVariables_ in analyzeHypothesisKinFit.C
 
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "bqPtNorm", "bqEtaNorm", "inclusive"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt", "lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "bqPtNorm", "bqEtaNorm", "inclusive"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.0;
@@ -210,9 +209,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     // container for hadronization uncertainties
     std::map< TString, TH1F* > hadUnc_;
     // get file 
-    TFile* hadfile=TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6mHadronUncert.root", "OPEN");
+    TFile* hadfile=TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mHadronUncert.root", "OPEN");
     if(!hadfile||hadfile->IsZombie()){
-      std::cout << " Corrupt or missing file " << "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/ttbarNtupleCteq6mHadronUncert.root" << std::endl;
+      std::cout << " Corrupt or missing file " << "/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mHadronUncert.root" << std::endl;
       std::cout << " Aborting execution of macro! " << std::endl;
       exit(0);
     }
