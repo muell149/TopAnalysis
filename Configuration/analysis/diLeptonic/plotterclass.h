@@ -54,6 +54,8 @@ class Plotter {
   TLegend* getNewLegendpre();
   TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
   TH1* GetNloCurve(TString NewName, TString Generator);
+  TH1F* ConvertGraphToHisto(TGraphErrors *pGraph);
+  TH1F* reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotname, bool rescale);
   // DAVID
   void UnfoldingOptions(bool doSVD);
   void SetOutpath(TString path);
@@ -2406,9 +2408,10 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 }
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE); 
+    TGaxis::SetMaxDigits(5);
 
     //############### Syst ################
-    CalcDiffSystematics("JES", 0);
+    /*    CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
     CalcDiffSystematics("PU_", 2);
     CalcDiffSystematics("SCALE", 3);
@@ -2417,7 +2420,7 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("DY_", 6);
     CalcDiffSystematics("BG_", 7);
     DiffFlatSystematics(8,bins);
-    
+    */
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2904,6 +2907,8 @@ void Plotter::PlotDiffXSec(){
     mcatnloBand->SetLineWidth(2);
     
     TGraphErrors *KidoHist=NULL;
+    TH1F *Kidoth1=NULL;
+    TH1F *Kidoth1_Binned=NULL;
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
       if(name.Contains("ToppT")){	//too early to be clever
 	TGraphErrors *KidoTemp = new TGraphErrors("pttopnnloapprox7lhc173m.txt");
@@ -2928,6 +2933,8 @@ void Plotter::PlotDiffXSec(){
 	KidoHist = (TGraphErrors*)KidoTemp->Clone();
       delete KidoTemp;
       }
+      Kidoth1 = ConvertGraphToHisto(KidoHist);
+      Kidoth1_Binned = reBinTH1FIrregularNewBinning(Kidoth1, "newKido", true);
     }
 
 //    TH1 *MCFMHist;
@@ -2983,9 +2990,9 @@ void Plotter::PlotDiffXSec(){
     }
 
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
-      KidoHist->SetLineWidth(2);
-      KidoHist->SetLineColor(kOrange); //########################
-      KidoHist->Draw("SAME,C");
+      Kidoth1_Binned->SetLineWidth(2);
+      Kidoth1_Binned->SetLineColor(kOrange); //########################
+      Kidoth1_Binned->Draw("SAME");
     }
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
@@ -3000,7 +3007,7 @@ void Plotter::PlotDiffXSec(){
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
     if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
     if (powheghist->GetEntries())  leg2.AddEntry(powheghistBinned,       "POWHEG",  "l");        
-    if(name.Contains("ToppT") || name.Contains("TopRapidity"))  leg2.AddEntry(KidoHist,       "Approx. NNLO",  "l");        
+    if(name.Contains("ToppT") || name.Contains("TopRapidity"))  leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");        
     //if (MCFMHist->GetEntries())  leg2.AddEntry(MCFMHist,       "MCFM",  "p");        
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
@@ -3242,5 +3249,99 @@ TLegend* Plotter::getNewLegendpre() {
   leg->SetTextAlign(12);
   return leg;
 }
+
+TH1F* Plotter::ConvertGraphToHisto(TGraphErrors *pGraph){
+  // takes data from a graph, determines binning and fills data into histogram
+  Int_t NPoints = pGraph->GetN();
+  Double_t BinLimits[NPoints+1];
+  // sort graph
+  pGraph->Sort();
+  // determine lower limit of histogram: half the distance to next point
+  Double_t x0,x1,y;
+  pGraph->GetPoint(0,x0,y);
+  pGraph->GetPoint(1,x1,y);
+  Double_t Distance = TMath::Abs(x0-x1);
+  BinLimits[0] = x0 - Distance/2.;
+  // now set upper limits for all the other points
+  for (Int_t k = 0 ; k<NPoints-1;k++){
+    pGraph->GetPoint(k,x0,y);
+    pGraph->GetPoint(k+1,x1,y);
+    Distance = TMath::Abs(x0-x1);
+    BinLimits[k+1] = x0 + Distance/2.;}
+  // for the last point set upper limit similar to first point:
+  pGraph->GetPoint(NPoints-2,x0,y);
+  pGraph->GetPoint(NPoints-1,x1,y);
+  Distance = TMath::Abs(x0-x1);
+  BinLimits[NPoints] = x1 + Distance/2.;
+  // now we know the binning and can create the histogram:
+  TString Name = "ConvertedHisto"; 
+  // make name unique 
+  Name+= rand();
+  TH1F *ThisHist = new TH1F(Name,"Converted Histogram",NPoints,BinLimits);
+  // now fill the histogram
+  for (Int_t i = 0; i<pGraph->GetN();i++){
+    Double_t x2,y2;
+    pGraph->GetPoint(i,x2,y2);
+    ThisHist->SetBinContent(i+1,y2);
+  }
+  return ThisHist;
+}
+
+//TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, const std::vector<double> &vecBinning, TString plotname, bool rescale=1){
+TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotname, bool rescale){
+  //  This function rebins a histogram using a variable binning
+  // 
+  //  (1) It is not required to have an equidistant binning.
+  //  (2) Any type of ROOT-histgramme can be used, so the template 
+  //      arguments should be 
+  //      (a) histoT = TH1D,   TH1F,  ....
+  //      (b) varT   = double, float, ....
+  //  
+  //  modified quantities: none
+  //  used functions:      none
+  //  used enumerators:    none
+  //  
+  //  "histoOldBinning":   plot to be re-binned
+  //  "vecBinning":        vector containing all bin edges 
+  //                       from xaxis.min to xaxis.max
+  //  "rescale":           rescale the rebinned histogramme
+  //                       (applicable for cross-section e.g.) 
+	
+  unsigned int vecIndex=0;
+
+  // fill vector into array to use appropriate constructor of TH1-classes
+  const double *binArray = XAxisbins.data();
+	
+  // create histo with new binning
+  TH1F *histoNewBinning = new TH1F("histoNewBinning"+plotname,"histoNewBinning"+plotname,XAxisbins.size()-1,binArray);
+	
+  // fill contents of histoOldBinning into histoNewBinning and rescale if applicable
+  for (vecIndex = 0; vecIndex < XAxisbins.size()-1; vecIndex++){
+	    
+    double lowEdge      = XAxisbins[vecIndex]; 
+    if (plotname=="topPt"&&vecIndex==0&&lowEdge==0.0) lowEdge+=10;  // adhoc fix to compensate for minimum top-Pt cut in NNLO curve
+    double highEdge     = XAxisbins[vecIndex+1];
+    double newBinWidth  = highEdge - lowEdge;
+    double newBinCenter = 0.5*(highEdge+lowEdge);
+    double binSum       = 0.0;	    	  
+	    
+    for (int j=1; j<histoOldBinning->GetNbinsX(); j++){
+		
+      double oldBin = histoOldBinning->GetBinCenter(j);
+		
+      if( (oldBin>=lowEdge) && (oldBin<highEdge) ){		   
+	if (rescale) binSum+=histoOldBinning->GetBinContent(j) * histoOldBinning->GetBinWidth(j);
+	else         binSum+=histoOldBinning->GetBinContent(j);
+      }
+    }
+
+    if (rescale) histoNewBinning->Fill(newBinCenter,binSum/newBinWidth);
+    else histoNewBinning->Fill(newBinCenter,binSum);
+  }
+
+  return (TH1F*)histoNewBinning->Clone();
+}
+
+
 
 #endif
