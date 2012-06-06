@@ -6216,7 +6216,7 @@ double TopSVDFunctions::SVD_Unfold(
             cout << "Perform Tau Scan from " << lowTau << " to " << highTau << " with Golden Section Search" << endl;
         }  
             
-        for ( int i = 0 ; i < nScanPoints ; i++ ) {
+        for ( int i = 0 ; i <= 100 ; i++ ) {
             if( optimalTauX!=newLowTau ){
                 // Do the unfolding for lowTau
                 mySVDUnfold->SetTau(newLowTau);
@@ -6258,6 +6258,7 @@ double TopSVDFunctions::SVD_Unfold(
                 globCorrLowTau=globCorrHighTau;
                 newHighTau=TMath::Power(10.,TMath::Log10(highTau) - goldSec*(TMath::Log10(highTau)-TMath::Log10(lowTau)));
             }
+	    if(i==100)cout << "Warning: Tau scan ended before reaching break condition" << endl;
         }
         if(flag_verbose>1)cout << "Optimal Tau = " << optimalTauX << endl;
      
