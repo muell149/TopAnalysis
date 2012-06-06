@@ -2,11 +2,11 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=true)
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -72,13 +72,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   // 47: ENDOFSYSENUM
   
   // take care that prescaling of muon channel for full 2011 datset was taken into account
-  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=4955;
-  if(luminosity==4955&&decayChannel=="electron") luminosity=4980;
+  if(luminosity==4980 && decayChannel=="muon"    ) luminosity=constLumiMuon;
+  if(luminosity==4955 && decayChannel=="electron") luminosity=constLumiElec;
   // luminosity uncertainties
-  if(luminosity<40.&&systematicVariation==sysLumiUp  )      luminosity*=1.04;
-  else if(luminosity<40.&&systematicVariation==sysLumiDown) luminosity*=0.96;
-  if(luminosity>40.&&systematicVariation==sysLumiUp  )      luminosity*=1.022;
-  else if(luminosity>40.&&systematicVariation==sysLumiDown) luminosity*=0.978;
+  if(systematicVariation==sysLumiUp  )      luminosity*=1.022;
+  else if(systematicVariation==sysLumiDown) luminosity*=0.978;
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: more output 3: output for debugging
   // data file: relative path of .root file
@@ -107,7 +105,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
   TString dataSample="";
-  if(luminosity<50) dataSample="2010";
   if(luminosity>50) dataSample="2011";
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
@@ -123,7 +120,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  bool redetermineopttau =false;
+  bool redetermineopttau = true;
   if(!SVDunfold) redetermineopttau =false;
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
@@ -144,8 +141,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt" ,"lepEta", "bqPt", "bqEta"};
-  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[#frac{GeV}{c}]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[#frac{GeV}{c}]", "m_{t#bar{t}}/[#frac{GeV}{c^{2}}]", "y^{t#bar{t}}/ ", "p_{T}^{#mu}/[#frac{GeV}{c}]" , "#eta^{#mu}/ ", "p_{T}^{b and #bar{b}}/[#frac{GeV}{c}]" , "#eta^{b and #bar{b}}/ "};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt" ,"lepEta", "bqPt", "bqEta"};
+  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[GeV]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{#mu}/[GeV]" , "#eta^{#mu}/ ", "p_{T}^{b and #bar{b}}/[GeV]" , "#eta^{b and #bar{b}}/ "};
+   
   xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
 
@@ -498,55 +496,55 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "#chi^{2} (best fit hypothesis)/events/0/10"                      ,
     "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
     // reconstructed top quantities
-    "m^{t and #bar{t}} #left[#frac{GeV}{c^{2}}#right]/#frac{dN}{dm^{t and #bar{t}}} #left[(#frac{GeV}{c^{2}})^{-1}#right]/0/10",
-    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{t and #bar{t}}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/1", //20"
+    "m^{t and #bar{t}} #left[GeV#right]/#frac{dN}{dm^{t and #bar{t}}} #left[GeV^{-1}#right]/0/10",
+    "p_{T}^{t and #bar{t}} #left[GeV#right]/#frac{dN}{dp_{T}^{t and #bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
     "#phi^{t and #bar{t}}/#frac{dN}{d#phi^{t and #bar{t}}}/0/4",
     "y^{t and #bar{t}}/#frac{dN}{dy^{t and #bar{t}}}/0/1",//5"
-    "p_{T}(hadronic t) #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{had. t}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/20",                         
+    "p_{T}(hadronic t) #left[GeV#right]/#frac{dN}{dp_{T}^{had. t}} #left[GeV^{-1}#right]/0/20",                         
     "#phi(hadronic t)/#frac{dN}{d#phi^{had. t}}/0/4",
     "y(hadronic t)/#frac{dN}{dy^{had. t}}/0/5"    ,
-    "p_{T}(leptonic t) #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{lep. t}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/20",                         
+    "p_{T}(leptonic t) #left[GeV#right]/#frac{dN}{dp_{T}^{lep. t}} #left[GeV^{-1}#right]/0/20",                         
     "#phi(leptonic t)/#frac{dN}{d#phi^{lep. t}}/0/4",
     "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,
     // generated top quantities
-    "m^{t and #bar{t}} parton truth #left[#frac{GeV}{c^{2}}#right]/events/0/10",
-    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",//20"
-    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] parton truth Phase Space/events/0/1",//20"
+    "m^{t and #bar{t}} parton truth #left[GeV#right]/events/0/10",
+    "p_{T}^{t and #bar{t}} #left[GeV#right] parton truth/events/0/1",//20"
+    "p_{T}^{t and #bar{t}} #left[GeV#right] parton truth Phase Space/events/0/1",//20"
     "#phi(t) parton truth/events/0/4",
     "y^{t and #bar{t}} parton truth/events/0/1",//5"
-    "p_{T}(hadronic t) #left[#frac{GeV}{c}#right] parton truth/events/0/20",                         
+    "p_{T}(hadronic t) #left[GeV#right] parton truth/events/0/20",                         
     "#phi(hadronic t) parton truth/events/0/4",
     "y(hadronic t) parton truth/events/0/5",
-    "p_{T}(leptonic t) #left[#frac{GeV}{c}#right] parton truth/events/0/20",                         
+    "p_{T}(leptonic t) #left[GeV#right] parton truth/events/0/20",                         
     "#phi(leptonic t) parton truth/events/0/4",
     "y(leptonic t) parton truth/events/0/5",
     // reconstructed ttbar quantities	                            
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right]/#frac{dN}{dm^{t#bar{t}}} #left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]/1/1",//60"
-    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right]/#frac{dN}{dp_{T}^{t#bar{t}}} #left[#left(#frac{GeV}{c}#right)^{-1}#right]/0/1",//10"
+    "m_{t#bar{t}} #left[GeV#right]/#frac{dN}{dm^{t#bar{t}}} #left[GeV^{-1}#right]/1/1",//60"
+    "p_{T}^{t#bar{t}} #left[GeV#right]/#frac{dN}{dp_{T}^{t#bar{t}}} #left[GeV^{-1}#right]/0/1",//10"
     "y^{t#bar{t}}/#frac{dN}{dy^{t#bar{t}}}/0/1",//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right]/#frac{dN}{dH_{T}^{t#bar{t}}}/0/20",
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right]/#frac{dN}{dH_{T}^{t#bar{t}}}/0/20",
     "y^{t}+y^{#bar{t}}/#frac{dN}{d(y^{t}+y^{#bar{t}})}/0/10",
     "#phi{lep. t}-#phi{had. t}/#frac{dN}{d(#phi^(lep. t)-#phi^{had. t})}/0/4",                
     "y^{lep. t}-y^{had. t}/#frac{dN}{d(y^(lep. t)-y^{had. t})}/0/4",  
     // generated ttbar quantities	                            
-    "m_{t#bar{t}} #left[#frac{GeV}{c^{2}}#right] parton truth/events/1/1",//60"
-    "p_{T}^{t#bar{t}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",//10"
+    "m_{t#bar{t}} #left[GeV#right] parton truth/events/1/1",//60"
+    "p_{T}^{t#bar{t}} #left[GeV#right] parton truth/events/0/1",//10"
     "y^{t#bar{t}} parton truth/events/0/1",//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[#frac{GeV}{c}#right] parton truth/events/0/20",
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right] parton truth/events/0/20",
     "y^{t and #bar{t}} parton truth/events/0/10",
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4",                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4",
     // reconstructed lepton quantities
-    "p_{T}^{l} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
+    "p_{T}^{l} #left[GeV#right]/events #left[GeV^{-1}#right]/0/1",
     "#eta^{l}/events/0/1" ,
     // generated lepton quantities
-    "p_{T}^{l} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
+    "p_{T}^{l} #left[GeV#right] parton truth/events/0/1",
     "#eta^{l} parton truth/events/0/1",
     // reconstructed b-quark/b-jet quantities
-    "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right]/events #left[(#frac{GeV}{c})^{-1}#right]/0/1",
+    "p_{T}^{b and #bar{b}} #left[GeV#right]/events #left[GeV^{-1}#right]/0/1",
     "#eta^{b and #bar{b}}/events/0/1" ,
     // generated b-quark/b-jet quantities
-    "p_{T}^{b and #bar{b}} #left[#frac{GeV}{c}#right] parton truth/events/0/1",
+    "p_{T}^{b and #bar{b}} #left[GeV#right] parton truth/events/0/1",
     "#eta^{b and #bar{b}} parton truth/events/0/1",
   };
   // 2D: "x-axis title"/"y-axis title"
@@ -554,23 +552,23 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) response matrix Top quantities
-    "p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] gen/p_{T}^{t and #bar{t}} #left[#frac{GeV}{c}#right] reco",
+    "p_{T}^{t and #bar{t}} #left[GeV#right] gen/p_{T}^{t and #bar{t}} #left[GeV#right] reco",
     "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
     "y^{t and #bar{t}} gen/y^{t and #bar{t}} reco",
     "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) response matrix ttbar quantities
-    "m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] gen/m(t#bar{t}) #left[#frac{GeV}{c^{2}}#right] reco",
-    "p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/p_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco",
+    "m(t#bar{t}) #left[GeV#right] gen/m(t#bar{t}) #left[GeV#right] reco",
+    "p_{T}(t#bar{t}) #left[GeV#right] gen/p_{T}(t#bar{t}) #left[GeV#right] reco",
     "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
-    "H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] gen/H_{T}(t#bar{t}) #left[#frac{GeV}{c}#right] reco",
+    "H_{T}(t#bar{t}) #left[GeV#right] gen/H_{T}(t#bar{t}) #left[GeV#right] reco",
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
     // d) response matrix lepton quantities
-    "p_{T}^{l} #left[#frac{GeV}{c}#right] gen/p_{T}^{l} #left[#frac{GeV}{c}#right] reco",
+    "p_{T}^{l} #left[GeV#right] gen/p_{T}^{l} #left[GeV#right] reco",
     "#eta^{l} gen/#eta^{l} reco",           
     // e) response matrix b-quark/b-jet quantities
-    "p_{T}^{b or #bar{b}} #left[#frac{GeV}{c}#right] gen/p_{T}^{b or #bar{b}} #left[#frac{GeV}{c}#right] reco",
+    "p_{T}^{b or #bar{b}} #left[GeV#right] gen/p_{T}^{b or #bar{b}} #left[GeV#right] reco",
     "#eta^{b or #bar{b}} gen/#eta^{b or #bar{b}} reco",           
   };
   TString axisLabel1Dadd[ ] = {
@@ -755,15 +753,15 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (correct permutation)/0/10",
     "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (correct permutation)/0/10",
   };
+
   // count # plots
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
   unsigned int N1Dplotsadd = sizeof(plots1Dadd)/sizeof(TString);
   
-  
-  // check if all axis labels exist
-  if(N1Dplots != sizeof(axisLabel1D)/sizeof(TString)) std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl;
-  if(N2Dplots != sizeof(axisLabel2D)/sizeof(TString)) std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl;
+   // check if all axis labels exist
+  if( N1Dplots != sizeof(axisLabel1D)/sizeof(TString)){ std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl; exit(1); }
+  if( N2Dplots != sizeof(axisLabel2D)/sizeof(TString)){ std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl; exit(1); }
   if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
   if(systematicVariation==sysNo){
     if(N1Dplotsadd != sizeof(axisLabel1Dadd)/sizeof(TString)){
@@ -775,14 +773,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 
-  // ---
-  //    open our standard analysis files
-  // ---
+  // ===================================
+  //  Open standard analysis files
+  // ===================================
   std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel, ttbarMC);
 
-  // ---
-  //    loading histos
-  // ---
+  // =====================
+  //  Loading histos
+  // =====================
   // collect all plot names in vector (first 1D, then 2D)
   std::vector<TString> plotList_;
   plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
@@ -889,9 +887,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     }
   }
 
-  // ---
-  //    Renaming of PS specific plot names to parton level PS names to unify naming
-  // ---
+  // ====================================================================================
+  //  Renaming of PS specific plot names to parton level PS names to unify naming
+  // ====================================================================================
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     TString newName=plotList_[plot];
@@ -964,17 +962,17 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     }
   }
   
-  // ---
-  //    lumiweihting for choosen luminosity
-  // ---
+  // ==========================================
+  //  Lumiweighting for choosen luminosity
+  // ==========================================
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
   scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, systematicVariationMod, decayChannel, ttbarMC2);
 
-  // ---
-  //    add single top channels and DiBoson contributions
-  // ---
+  // ========================================================
+  //  Add single top channels and DiBoson contributions
+  // ========================================================
   // for SingleTop and DiBoson samples:
   // every plot plotList_ existing in sTop/ diBoson .root file
   // will be combined and saved in the histo_ and histo2_ map
@@ -982,9 +980,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   bool reCreate=false;
   AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose-1, reCreate, decayChannel);
 
-  // ---
-  //    copy event yields for total xSec calculation
-  // ---
+  // =================================================
+  //  Copy event yields for total xSec calculation
+  // =================================================
   TH1F* dataYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kData ]->Clone());
   TH1F* SigYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kSig  ]->Clone());
   TH1F* BkgYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kBkg  ]->Clone());
@@ -996,9 +994,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   TH1F* GenInclusive =(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"          ][kSig]->Clone());
   TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt"][kSig]->Clone());
 
-  // ---
-  //    configure histograms
-  // ---
+  // ============================
+  //  Configure histograms
+  // ============================
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
   axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
@@ -1035,9 +1033,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)) histStyle2D( *histo2_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2));
     }
   }
-  // -------------------------------------------
-  // clone relevant plots for SVD unfolding xSec
-  // -------------------------------------------
+  // =================================================
+  //  Clone relevant plots for SVD unfolding xSec
+  // =================================================
   int kAllMC=kSAToptW+1;
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
@@ -1063,9 +1061,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable+"_"][kSig]->Clone();
   }
   
-  // ---
-  //    rebinning 1D histograms
-  // ---
+  // ============================
+  //  Rebinning 1D histogramme
+  // ============================
   // create variable bin edges
   std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
   // loop samples
@@ -1086,12 +1084,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	  if(binning_.count(getStringEntry(plotName, 2))>0){
 	    reBinTH1F(*histo_[plotName][sample], binning_[getStringEntry(plotName, 2)], verbose-1);
 	    // remove additional bins with 0 width
-	    double * newBinLowEdges = new double[binning_[getStringEntry(plotName, 2)].size()];
+	    double *newBinLowEdges = new double[binning_[getStringEntry(plotName, 2)].size()];
 	    newBinLowEdges = &binning_[getStringEntry(plotName, 2)].front();
-	     histo_[plotName][sample]= (TH1F*) histo_[plotName][sample]->Rebin(binning_[getStringEntry(plotName, 2)].size()-1, histo_[plotName][sample]->GetName(), newBinLowEdges); 
+	    histo_[plotName][sample]= (TH1F*)histo_[plotName][sample]->Rebin(binning_[getStringEntry(plotName, 2)].size()-1, histo_[plotName][sample]->GetName(), newBinLowEdges); 
 	    if(verbose>1){
-	      for(int i=1; i<= histo_[plotName][sample]->GetNbinsX()+1; i++){
-	       
+	      for(int i=1; i<= histo_[plotName][sample]->GetNbinsX()+1; i++){	       
 		std::cout << "bin " << i << ": " << histo_[plotName][sample]->GetBinContent(i) << " / ";
 		std::cout << histo_[plotName][sample]->GetBinWidth(i) << std::endl;
 	      }
@@ -1108,7 +1105,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	      //axisLabel_[plot].ReplaceAll(getStringEntry(axisLabel_[plot],2), getStringEntry(axisLabel_[plot],2)+" per binwidth");
 	      // check if unit is GeV
 	      if(getStringEntry(axisLabel_[plot],1).Contains("GeV")){
-		//axisLabel_[plot].ReplaceAll(getStringEntry(axisLabel_[plot],2), getStringEntry(axisLabel_[plot],2)+" [#frac{c}{GeV}]");
+		//axisLabel_[plot].ReplaceAll(getStringEntry(axisLabel_[plot],2), getStringEntry(axisLabel_[plot],2)+" [GeV^{-1}]");
 	      }
 	    }
 	  }
@@ -1117,9 +1114,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     }
   }
   
-  // ---
-  //    MC efficiency determination
-  // ---
+  // ===================================
+  //  MC efficiency determination
+  // ===================================
   // count # of efficiency histos
   unsigned int NMCeff=0;
   // loop all variables
@@ -1173,9 +1170,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     }
   }
 
-  // ---
-  //    differential cross section (extrapolated or PS) determination
-  // ---
+  // ===============================================================
+  //  Differential cross section (extrapolated or PS) determination
+  // ===============================================================
   // count # of cross section histos
   unsigned int NXSec=0;
   // loop all variables
@@ -1183,8 +1180,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     TString variable=xSecVariables_[number];
     TString label =getStringEntry(xSecLabel_[number],1);
     TString label2=getStringEntry(xSecLabel_[number],2);
-    if(label2=="[#frac{GeV}{c}]")          label2="#left[pb #left(#frac{GeV}{c}#right)^{-1}#right]";
-    else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[pb #left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+    if(label2=="[GeV]")  label2="#left[pb GeV^{-1}#right]";
     else if(label2==" ") label2="[pb]";
     TString xSec ="xSec/";
     if(compare) xSec+="BBB";
@@ -1250,9 +1246,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     }
   }
 
-  // ---
-  //    total inclusive cross section (ttbar->X) determination
-  // ---
+  // ===============================================================
+  //  Total inclusive cross section (ttbar->X) determination
+  // ===============================================================
   double xSecResult=0;
   double effA=0;
   double BR=0;
@@ -1338,7 +1334,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     std::cout << " [pb]: ";
     std::cout << xSecResult << " +/- " << sigmaxSec << "(stat.)" << std::endl;
     std::cout << std::endl;
-    exit(0);
+    //exit(0);
   }
   // create histo
   TString inclName = "xSec/inclusive";
@@ -1365,8 +1361,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       TString variable=xSecVariables_[number];
       TString label =getStringEntry(xSecLabel_[number],1);
       TString label2=getStringEntry(xSecLabel_[number],2);
-      if(label2=="[#frac{GeV}{c}]") label2="#left[#left(#frac{GeV}{c}#right)^{-1}#right]";
-      else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+      if(label2=="[GeV]")  label2="#left[GeV^{-1}#right]";
       else if(label2==" ") label2="";
       TString xSec ="xSecNorm/";
       if(compare) xSec+="BBB";
@@ -1541,14 +1536,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	histo_[xSec][kSig ]->SetMarkerColor(kOrange);
       }
       // restrict axis
-      setXAxisRange(histo_[xSec][kData], variable);
-      setXAxisRange(histo_[xSec][kSig ], variable);
+      setXAxisRange(histo_[xSec][kData],variable);
+      setXAxisRange(histo_[xSec][kSig ],variable);
       if(!compare) ++NXSec;
     }
   }
     
   // =======================================
-  //    use SVD unfolding for cross sections
+  //  Use SVD unfolding for cross sections
   // =======================================
   if(SVDunfold){
     // loop all variables
@@ -1557,13 +1552,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       TString variable=xSecVariables_[number];
       TString labelNorm =getStringEntry(xSecLabel_[number],1);
       TString label2Norm=getStringEntry(xSecLabel_[number],2);
-      if(label2Norm=="[#frac{GeV}{c}]") label2Norm="#left[#left(#frac{GeV}{c}#right)^{-1}#right]";
-      else if(label2Norm=="[#frac{GeV}{c^{2}}]") label2Norm="#left[#left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+      if(label2Norm=="[GeV]")  label2Norm="#left[GeV^{-1}#right]";
       else if(label2Norm==" ") label2Norm="";
       TString label =getStringEntry(xSecLabel_[number],1);
       TString label2=getStringEntry(xSecLabel_[number],2);
-      if(label2=="[#frac{GeV}{c}]")          label2="#left[pb #left(#frac{GeV}{c}#right)^{-1}#right]";
-      else if(label2=="[#frac{GeV}{c^{2}}]") label2="#left[pb #left(#frac{GeV}{c^{2}}#right)^{-1}#right]";
+      if(label2=="[GeV]")  label2="#left[pb GeV^{-1}#right]";
       else if(label2==" ") label2="[pb]";
       TString xSec ="xSec/"+variable;
       TString xSecNorm ="xSecNorm/"+variable;
@@ -1590,9 +1583,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       if(verbose>0){
 	std::cout << "inclusive cross section (PS) for normalization: " << xSecPSforNorm << std::endl;
       }
-      // -----------------------------------
-      // check availablility of input histos
-      // -----------------------------------
+      // ==========================================
+      //  Check availablility of input histos
+      // ==========================================
       bool calculateXSec=true;
       // check if BG reco plot is available
       if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable, kAllMC)){
@@ -1624,9 +1617,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	std::cout << "warning: plot " << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_" << " not found for signal" << std::endl;
 	calculateXSec=false;
       }
-      // ----------------
-      // configure labels
-      // ----------------
+      // =====================
+      //  Configure labels
+      // =====================
       // particle
       TString particle="";
       variable.Contains("ttbar") ? particle="t#bar{t}" : (variable.Contains("lep") ? particle="lepton" : (variable.Contains("top") ? particle="t and #bar{t}" : (variable.Contains("bq") ? particle="b and #bar{b}" : particle="unknown") ) );
@@ -1646,9 +1639,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       TString channelTex="#mu";
       if(decayChannel=="electron") channelTex="e";
       TString special="";
-      // -----------
-      // configure the unfolding details
-      // -----------
+      // ==========================================
+      //  Configure the unfolding details
+      // ==========================================
       // list of systematics
       TString sysList=sysLabel(systematicVariation);
       //TString sysList[]={sysLabel(systematicVariation)};
@@ -1738,7 +1731,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //         0 means: Default value, same as 2
       //         1 means: no text file is written
       //         2 means: text file with optimal reg. params. is written (default)
-      int doTextFile=(regFile=="" ? 1 : 2);
+      int doTextFile=(txtfile=="" ? 1 : 2);// (regFile=="" ? 1 : 2);
       // Combine all options in one Steering Parameter
       TString steering="";
       // Steering options in parameter 'steering' 
@@ -1771,7 +1764,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //          2 means: 25 scan points
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
-      int scanpoints= (scan==2 ? 1 : 0);
+      int scanpoints= (scan==2 ? 3 : 0);
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
@@ -1820,10 +1813,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //         2 means: Write out single EPS Plots 
       int psOReps=1;
       steering=getTStringFromInt(psOReps)+steering;
-      
-      // -----------
-      // get binning
-      // -----------
+
+      // ==============
+      //  Get binning
+      // ==============
+
       // a) filter relevant bins
       std::vector<double> relevantBins_;
       // loop all entries in binning_
@@ -1887,9 +1881,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       double * NttSGgen= new double[1];
       NttSGgen[1] = histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->Integral(0,histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->GetNbinsX()+1);
       
-      // ----------------------
-      // use unfolding machine
-      // ----------------------
+      // ============================
+      //  Use unfolding machine
+      // ============================
       if(calculateXSec){
 	if(verbose>3){
 	  // N(events) output for each bin and variable
@@ -1917,9 +1911,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	TH1D* unfoldedData    =new TH1D();
 	TH1D* unfoldedDataNorm=new TH1D();
 	TopSVDFunctions::SVD_Unfold(
-	// ---
-	//    HISTOS
-	// ---				    
+	// ==============
+	//  HISTOS
+	// ==============				    
 	// Data Input (RAW Data including the background)
 	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
 	// Background (will be substracted from data)
@@ -1939,9 +1933,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	unfoldedData,
 	// Returned: Normalized Unfolded Distribution              
 	unfoldedDataNorm,
-	// ---
-	//    NUMBERS
-	// ---	
+	// ==============
+	//  NUMBERS
+	// ==============	
         // For Normalization: Total Data Events
         // If set to zero, will be taken from the integral of dataInputHist
 	NdataTot,
@@ -1957,25 +1951,25 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	// For Normalization: Total Generated ttbar SG MC Events
         // If set to NULL, will be taken from the integral of genInputHist
 	NttSGgen,
-	// ---
-	//    BINS
-	// ---	
+	// ==============
+	//  BINS
+	// ==============	
 	// Binning for the unfolding
 	bins, 
 	// Number of bins for unfolding (not counting OF bins !!!)
 	unfoldbins, 
-	// ---
-	//    OPTIONS
-	// ---
+	// ==============
+	//  OPTIONS
+	// ==============
 	// Regularization parameter
 	regPar,
 	// steering parameter (as defined above)
 	steering,
 	// Specify the number of systematic samples to unfold 
         numSys,
-	// ---
-	//    TEX(T) AND LABELS
-	// ---                          
+	// =====================
+	//  TEX(T) AND LABELS
+	// =====================                         
 	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
 	(TString)decayChannel,  
 	// Specify Name for the Physics Object ("Top", "Jets", "Leptons")      
@@ -1998,9 +1992,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	// Array of Names for the different systematics
         // if you run only over the nominal sample, provide NULL
         sysList,
-	// ---
-	//    OUTPUT
-	// ---  
+	// ==============
+	//  OUTPUT
+	// ==============  
 	// If specified, plots will be saved in ROOT File
 	rootFile,
 	// If specified, plots will be saved in PS File
@@ -2021,9 +2015,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
         // (4) the number of bins including side bins
         regFile
 	);
-	// ---------------------------------------------
-	// remaining steps for cross section calculation
-	// ---------------------------------------------
+	// ========================================================
+	//  Remaining steps for cross section calculation
+	// ========================================================
 	// use unfolded event yield as input
 	histo_[xSec][kData+42]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
 	//histo_[xSec][kData+42]->SetBinContent(2, 2*histo_[xSec][kData+42]->GetBinContent(2));
@@ -2031,7 +2025,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	histo_[xSec][kData      ]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
 	histo_[xSec][kData      ]->Reset("icesm");
 	// remove additional bins with 0 width
-	double * newBinLowEdges = new double[binning_[variable].size()];
+	double *newBinLowEdges = new double[binning_[variable].size()];
 	newBinLowEdges = &binning_[variable].front();
 	histo_[xSec][kData] = (TH1F*) histo_[xSec][kData]->Rebin(binning_[variable].size()-1, histo_[xSec][kData]->GetName(), newBinLowEdges); 
 	// remove additional OF/UF bins from SVD unfolded plots
@@ -2122,9 +2116,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	  std::cout << "data unfolded sum abs: "  << getInclusiveXSec(histo_[xSec    ][kData],0) << std::endl;
 	  std::cout << "data norm sum: " << getInclusiveXSec(histo_[xSecNorm][kData],0) << std::endl;
 	}
-	// --------------
-	// styling issues
-	// --------------
+	// =====================
+	//  Styling issues
+	// =====================
 	// add plot to list of plots
 	plotList_.push_back(xSec);
 	plotList_.push_back(xSecNorm);
@@ -2146,9 +2140,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	  histo_[xSecNorm][kData]->SetLineWidth(4);
 	  histo_[xSec    ][kData]->SetLineWidth(4);
 	}
-	// ------------------------------------------------------
-	// calculate differential XSec from Signal(MC prediction)
-	// ------------------------------------------------------
+	// ========================================================
+	//  Calculate differential XSec from Signal(MC prediction)
+	// ========================================================
 	// get PS gen event yield/binwidth plots
 	histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone());
 	// divide by lumi
@@ -2164,11 +2158,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	histogramStyle(*histo_[xSec    ][kSig ], kSig , false);
 	histogramStyle(*histo_[xSecNorm][kSig ], kSig , false);
 	if(compare){
-	  histo_[xSec    ][kSig ]->SetLineWidth  (3);
-	  histo_[xSecNorm][kSig ]->SetLineWidth  (3);
+	  histo_[xSec    ][kSig]->SetLineWidth(3);
+	  histo_[xSecNorm][kSig]->SetLineWidth(3);
 	}
-	setXAxisRange(histo_[xSec    ][kSig ], variable);
-	setXAxisRange(histo_[xSecNorm][kSig ], variable);
+	setXAxisRange(histo_[xSec    ][kSig],variable);
+	setXAxisRange(histo_[xSecNorm][kSig],variable);
 	if(verbose>1){
 	std::cout << std::endl << xSec << std::endl;
 	std::cout << "mc abs for normalization: "   << XSecInclTheoPS << std::endl << std::endl;
@@ -2337,230 +2331,229 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     else createStackPlot(plotList_, histo_, plot, N1Dplots, verbose-1, decayChannel);
   }
   if(verbose>2) std::cout << std::endl;
-
-  // ---
-  //    do the printing
-  // ---
+  
+  // =====================
+  //  Do the printing
+  // =====================
   // a) for plots
   // loop plots
-for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-  bool first=true;
-  // loop samples
-  unsigned int sample=0;
-  for(sample=kSig; sample<=kData; ++sample){
-    // a1) for 1D event yields, efficiency and cross section plots (existing)
-    if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
-      // check if plot is existing
-      // draw BBB xSec control plots in same canvas with SVD result
-      if(((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0))&&!plotList_[plot].Contains("BBB")){
-	histo_[plotList_[plot]][sample]->SetName(((TString)histo_[plotList_[plot]][sample]->GetName()).ReplaceAll("Gen",""));
-	// draw all pull distributions in same canvas if RecPartonTruth pull is called
-	if((!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth"))){
-	  if(verbose>1){
-	    unsigned int activeCanv =(plotCanvas_.size()==0 ? 1 : plotCanvas_.size()-1);
-	    std::cout << "plotting " << plotList_[plot];
-	    std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	    std::cout << " to canvas " << activeCanv << std::endl;
-	  }
-	  // for efficiency plots: draw grid
-	  if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
-	  // for histos with variable binning:
-	  if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
-	    // get variable binning
-	    TString plotName=getStringEntry(plotList_[plot], 2);
-	    std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
-	    // set maximum of histo to last bin considered 
-	    // in variable binning (overflow excluded)
-	    double firstBin=0;
-	    double lastBin=binEdges_.size()-2;
-	    // -2 for subtracting overflow bin
-	    if(verbose>2){
-	      std::cout << "1st bin, last bin: " << firstBin << " , " << lastBin << std::endl;
-	    }
-	    histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(firstBin, lastBin);
-	  }
-	  // first plot
-	  if(first){ 
-	    // create canvas and set titel corresponding to plotname in .root file
-	    addCanvas(plotCanvas_);
-	    plotCanvas_[plotCanvas_.size()-1]->cd(0);
-	    plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
-	    // min / max
-	    double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
-	    // if data file exists
-	    if(histo_[plotList_[plot]].count(kData)>0){
-	      // and has larger maximum
-	      if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
-		// take this maximum
-		max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
-		if(verbose>1) std:: cout << "take max from data! " << std::endl;
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+      bool first=true;
+      // loop samples
+      unsigned int sample=0;
+      for(sample=kSig; sample<=kData; ++sample){
+	  // a1) for 1D event yields, efficiency and cross section plots (existing)
+	  if((plot<N1Dplots)||(plot>=N1Dplots+N2Dplots)){
+	      // check if plot is existing
+	      // draw BBB xSec control plots in same canvas with SVD result
+	      if(((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0))&&!plotList_[plot].Contains("BBB")){
+		  histo_[plotList_[plot]][sample]->SetName(((TString)histo_[plotList_[plot]][sample]->GetName()).ReplaceAll("Gen",""));
+		  // draw all pull distributions in same canvas if RecPartonTruth pull is called
+		  if((!plotList_[plot].Contains("Pull")||plotList_[plot].Contains("RecPartonTruth"))){
+		      if(verbose>1){
+			  unsigned int activeCanv =(plotCanvas_.size()==0 ? 1 : plotCanvas_.size()-1);
+			  std::cout << " Plotting "    << plotList_[plot];
+			  std::cout << " from sample " << sampleLabel(sample,decayChannel);
+			  std::cout << " to canvas "   << activeCanv << std::endl;
+		      }
+		      // for efficiency plots: draw grid
+		      if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
+		      // for histos with variable binning:
+		      if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
+			  // get variable binning
+			  TString plotName=getStringEntry(plotList_[plot], 2);			  
+			  std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
+			  // set maximum of histo to last bin considered 
+			  // in variable binning (overflow excluded)
+			  double firstBin=0;
+			  double lastBin=binEdges_.size()-2;
+			  // -2 for subtracting overflow bin
+			  if(verbose>1){
+			      std::cout << "1st bin, last bin: " << firstBin << " , " << lastBin << std::endl;
+			  }
+			  histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(firstBin, lastBin);
+		      }
+		      // first plot
+		      if(first){ 
+			  // create canvas and set titel corresponding to plotname in .root file
+			  addCanvas(plotCanvas_);
+			  plotCanvas_[plotCanvas_.size()-1]->cd(0);
+			  plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
+			  // min / max
+			  double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
+			  // if data file exists
+			  if(histo_[plotList_[plot]].count(kData)>0){
+			      // and has larger maximum
+			      if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
+				  // take this maximum
+				  max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
+				  if(verbose>1) std:: cout << "take max from data! " << std::endl;
+			      }
+			  }
+			  double min = 0;
+			  // log plots
+			  if(getStringEntry(axisLabel_[plot],3)=="1"){
+			      plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
+			      min=1;
+			      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
+			      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
+			      if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
+				  min=0.0001;
+				  max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
+				  if(plotList_[plot].Contains("Norm")){
+				      min=0.00001;
+				      max=0.06;
+				  }
+			      }
+			  }
+			  // get nicer int values if maximum is large enough
+			  if(max>3) max = (double)roundToInt(max);
+			  // style for pull plots
+			  if(plotList_[plot].Contains("RecPartonTruth")){
+			      min=0;
+			      //max=1;
+			      TString title=(TString)plotCanvas_[plotCanvas_.size()-1]->GetTitle();
+			      title.ReplaceAll("RecPartonTruth","");
+			      plotCanvas_[plotCanvas_.size()-1]->SetTitle(title);
+			      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+			      plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
+			  }
+			  // axis style
+			  axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
+			  histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+			  if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+			  else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
+			  if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+			  if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
+			  // restrict x axis for different plots
+			  if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
+			  if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
+			  if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
+								   getStringEntry(plotList_[plot], 2)=="topYHad"|| 
+								   getStringEntry(plotList_[plot], 2)=="topYLep")){histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
+			  if(getStringEntry(plotList_[plot], 2)=="lepPt" )         histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,200);
+			  if(getStringEntry(plotList_[plot], 2)=="ttbarY")         histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.49,2.49);
+			  if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
+			  // draw efficiency plots as line
+			  if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
+			  // draw pull plots as line into same canvas with extra legend
+			  if(plotList_[plot].Contains("RecPartonTruth")){
+			      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.5,1.5);
+			      histo_[plotList_[plot]][sample]->GetXaxis()->SetTitle(((TString)(histo_[plotList_[plot]][sample]->GetXaxis()->GetTitle())).ReplaceAll(":","/"));
+			      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+			      histo_[plotList_[plot]][sample]->Draw("hist");
+			      TString afterKinFit=plotList_[plot];
+			      afterKinFit.ReplaceAll("RecPartonTruth","KinFitPartonTruth");
+			      TString kinFitShift=plotList_[plot];
+			      kinFitShift.ReplaceAll("RecPartonTruth","KinFitRec"        );
+			      if(histo_.count(afterKinFit)>0){ 
+				  histo_[plotList_[plot]][sample]->SetMaximum(1.3*histo_[afterKinFit][sample]->GetMaximum());
+				  histo_[afterKinFit][sample]->Draw("hist same");
+			      }
+			      if(histo_.count(kinFitShift)>0) histo_[kinFitShift][sample]->Draw("hist same");
+			      legPull->Draw("same");
+			  }
+			  // others as histo (stack)
+			  else histo_[plotList_[plot]][sample]->Draw("hist");
+			  histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
+			  // draw BBB comparison results in same canvas
+			  if(compare&&plotList_[plot].Contains("xSec")){
+			      TString BBBlabel=plotList_[plot];
+			      BBBlabel.ReplaceAll("xSec/","xSec/BBB");
+			      BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
+			      if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("hist same");
+			  }
+		      }
+		      // draw other plots into same canvas
+		      else{ 
+			  // draw data as points
+			  if(sample==kData){ 
+			      histo_[plotList_[plot]][sample]->Draw("p e X0 same");
+			      // draw BBB comparison results in same canvas
+			      if(compare&&plotList_[plot].Contains("xSec")){
+				  TString BBBlabel=plotList_[plot];
+				  BBBlabel.ReplaceAll("xSec/","xSec/BBB");
+				  BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
+				  if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("p e X0 same");
+			      }
+			  }
+			  else{
+			      // draw efficiencies as points
+			      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
+			      // draw others as histo (stack)
+			      else histo_[plotList_[plot]][sample]->Draw("hist same");
+			  }
+		      }
+		      first=false;
+		  }
+		  first=false;	
+		  // draw uncertainty bands, add legend and labels and re-draw axis
+		  if(sample==kData){
+		      // configure style of and draw uncertainty bands
+		      if (!plotList_[plot].Contains("xSec")){
+			  histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
+			  histoErrorBand_[plotList_[plot]]->SetFillColor(1);
+			  histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
+			  gStyle->SetErrorX(0.5);  
+			  histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 	     
+			  // draw legend for recoYield plots
+			  TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
+			  if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
+			      if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
+			  }	 
+			  // labels
+			  TString plotType=getStringEntry(plotList_[plot], 1);
+			  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
+			      if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
+			      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+			      DrawCMSLabels(false,luminosity);
+			  }
+			  // redraw axis
+			  histo_[plotList_[plot]][42]->Draw("axis same");
+		      }
+		  }
 	      }
-	    }
-	    double min = 0;
-	    // log plots
-	    if(getStringEntry(axisLabel_[plot],3)=="1"){
-	      plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
-	      min=1;
-	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-	      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
-	      if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
-		min=0.0001;
-		max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
-		if(plotList_[plot].Contains("Norm")){
-		  min=0.00001;
-		  max=0.06;
-		}
-	      }
-	    }
-	    // get nicer int values if maximum is large enough
-	    if(max>3) max = (double)roundToInt(max);
-	    // style for pull plots
-	    if(plotList_[plot].Contains("RecPartonTruth")){
-	      min=0;
-	      //max=1;
-	      TString title=(TString)plotCanvas_[plotCanvas_.size()-1]->GetTitle();
-	      title.ReplaceAll("RecPartonTruth","");
-	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(title);
-	      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	      plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
-	    }
-	    // axis style
-	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
-	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
-	    if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
-	    if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	    if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
-	    // restrict x axis for different plots
-	    if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-	    if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
-	    if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
-						     getStringEntry(plotList_[plot], 2)=="topYHad"|| 
-						     getStringEntry(plotList_[plot], 2)=="topYLep")){
-	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
-	    if(getStringEntry(plotList_[plot], 2)=="lepPt" )  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,190);
-	    if(getStringEntry(plotList_[plot], 2)=="ttbarY")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
-	    if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
-	    // draw efficiency plots as line
-	    if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
-	    // draw pull plots as line into same canvas with extra legend
-	    if(plotList_[plot].Contains("RecPartonTruth")){
-	      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.5,1.5);
-	      histo_[plotList_[plot]][sample]->GetXaxis()->SetTitle(((TString)(histo_[plotList_[plot]][sample]->GetXaxis()->GetTitle())).ReplaceAll(":","/"));
-	      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-	      histo_[plotList_[plot]][sample]->Draw("hist");
-	      TString afterKinFit=plotList_[plot];
-	      afterKinFit.ReplaceAll("RecPartonTruth","KinFitPartonTruth");
-	      TString kinFitShift=plotList_[plot];
-	      kinFitShift.ReplaceAll("RecPartonTruth","KinFitRec"        );
-	      if(histo_.count(afterKinFit)>0){ 
-		histo_[plotList_[plot]][sample]->SetMaximum(1.3*histo_[afterKinFit][sample]->GetMaximum());
-		histo_[afterKinFit][sample]->Draw("hist same");
-	      }
-	      if(histo_.count(kinFitShift)>0) histo_[kinFitShift][sample]->Draw("hist same");
-	      legPull->Draw("same");
-	    }
-	    // others as histo (stack)
-	    else histo_[plotList_[plot]][sample]->Draw("hist");
-	    histo_[plotList_[plot]][42] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
-	    // draw BBB comparison results in same canvas
-	    if(compare&&plotList_[plot].Contains("xSec")){
-	      TString BBBlabel=plotList_[plot];
-	      BBBlabel.ReplaceAll("xSec/","xSec/BBB");
-	      BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
-	      if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("hist same");
-	    }
 	  }
-	  // draw other plots into same canvas
-	  else{ 
-	    // draw data as points
-	    if(sample==kData){ 
-	      histo_[plotList_[plot]][sample]->Draw("p e X0 same");
-	      // draw BBB comparison results in same canvas
-	      if(compare&&plotList_[plot].Contains("xSec")){
-		TString BBBlabel=plotList_[plot];
-		BBBlabel.ReplaceAll("xSec/","xSec/BBB");
-		BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
-		if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("p e X0 same");
+	  
+	  // a3) for 2D plots
+	  if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)&&	  
+	     // draw gen-reco correlation only for signal 
+	     (!plotList_[plot].Contains("_"   )||sample==kSig)){
+	      // new Canvas for every plot
+	      addCanvas(plotCanvas_);
+	      plotCanvas_[plotCanvas_.size()-1]->cd(0);
+	      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(myStyle.GetPadRightMargin());
+	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample));
+	      if(verbose>1){
+		  std::cout << " Plotting "    << plotList_[plot];
+		  std::cout << " from sample " << sampleLabel(sample,decayChannel);
+		  std::cout << " to canvas "   << plotCanvas_.size()-1  << " ( ";
+		  std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )"  << std::endl;
 	      }
-	    }
-	    else{
-	      // draw efficiencies as points
-	      if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e same");
-	      // draw others as histo (stack)
-	      else histo_[plotList_[plot]][sample]->Draw("hist same");
-	    }
+	      // draw histo
+	      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(0.15);
+	      histo2_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
+	      histo2_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+	      histo2_[plotList_[plot]][sample]->Draw("colz");
+	      // print correlation factor
+	      double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
+	      char correlation[20];
+	      sprintf(correlation, "%f", d);
+	      TString corr = (TString)correlation;
+	      DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
 	  }
-	  first=false;
-	}
-	first=false;	
-	// draw uncertainty bands, add legend and labels and re-draw axis
-	if(sample==kData){
-	  // configure style of and draw uncertainty bands
-	  if (!plotList_[plot].Contains("xSec")){
-	    histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
-	    histoErrorBand_[plotList_[plot]]->SetFillColor(1);
-	    histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
-	    gStyle->SetErrorX(0.5);  
-	    histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 	     
-	    // draw legend for recoYield plots
-	    TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
-	    if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
-	      if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
-	    }	 
-	    // labels
-	    TString plotType=getStringEntry(plotList_[plot], 1);
-	    if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-	      if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
-	      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
-	    DrawCMSLabels(true,luminosity);
-	    }
-	    // redraw axis
-	    histo_[plotList_[plot]][42]->Draw("axis same");
-	  }
-	}
-      }
-    }
-    
-    // a3) for 2D plots
-    if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)&&	  
-       // draw gen-reco correlation only for signal 
-       (!plotList_[plot].Contains("_"   )||sample==kSig)){
-      // new Canvas for every plot
-      addCanvas(plotCanvas_);
-      plotCanvas_[plotCanvas_.size()-1]->cd(0);
-      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(myStyle.GetPadRightMargin());
-      plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample));
-      if(verbose>1){
-	std::cout << "plotting " << plotList_[plot];
-	std::cout << " from sample " << sampleLabel(sample,decayChannel);
-	std::cout << " to canvas " << plotCanvas_.size()-1  << " ( ";
-	std::cout << plotCanvas_[plotCanvas_.size()-1]->GetTitle() << " )"  << std::endl;
-      }
-      // draw histo
-      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(0.15);
-      histo2_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
-      histo2_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
-      histo2_[plotList_[plot]][sample]->Draw("colz");
-      // print correlation factor
-      double d = histo2_[plotList_[plot]][sample]->GetCorrelationFactor();
-      char correlation[20];
-      sprintf(correlation, "%f", d);
-      TString corr = (TString)correlation;
-      DrawLabel("correlation: "+corr, 0.35, 0.92, 0.75, 0.99, 0.7);
-    }
-  } // end of loop over samples
- } // end of loop over plots
- 
+      } // end of loop over samples
+  } // end of loop over plots
+  
   // b) for legends
   addCanvas(plotCanvas_);
   plotCanvas_[plotCanvas_.size()-1]->cd(0);
   plotCanvas_[plotCanvas_.size()-1]->SetTitle("legend");
   leg0->Draw("");
 
-  // ---
-  // saving
-  // ---
+  // ==============
+  //  Saving
+  // ==============
   if(save){
     // pdf and eps only for standard analysis without variation
     if(systematicVariation==sysNo){
