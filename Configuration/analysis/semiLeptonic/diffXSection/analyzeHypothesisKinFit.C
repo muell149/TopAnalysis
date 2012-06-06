@@ -4,9 +4,9 @@
 
 void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -120,7 +120,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  bool redetermineopttau = true;
+  bool redetermineopttau =false;
   if(!SVDunfold) redetermineopttau =false;
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
@@ -1764,7 +1764,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
       //          2 means: 25 scan points
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
-      int scanpoints= (scan==2 ? 3 : 0);
+      int scanpoints= (scan==2 ? 1 : 0);
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
