@@ -1045,7 +1045,7 @@ TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString i
 {
 
   // this function loads the max/min PDF uncertainties as determined externally with MC@NLO for the desired variables and applies it to MadGraph
-  TString fileName    = "/afs/naf.desy.de/group/cms/scratch/tophh/" + inputFolderName + "/ttbarNtupleCteq6mPDFuncertOnly.root" ;
+  TString fileName    = "/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mPDFuncertOnly.root" ;
   TString plotNameVar = (variation == "") ? variable : variable + "_" + variation                                              ;
   TString plotNameNom = variable                                                                                               ;                 
   TString directory   = (phaseSpace == "Full") ? "FullPhaseSpace" : "VisiblePhaseSpace"                                        ; 
