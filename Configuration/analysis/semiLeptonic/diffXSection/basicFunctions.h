@@ -56,9 +56,9 @@ namespace semileptonic {
 		   kWW     , kWZ     , kZZ     , 
 		   /*17*/    /*18*/    /*19*/    /*20*/    /*21*/    /*22*/
 		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW,
-		   /*23*/    /*24*/
-		   kSigPow , kBkgPow,
-                   /*25*/
+		   /*23*/    /*24*/    /*25*/    /*26*/
+		   kSigPow , kBkgPow,  kSigMca , kBkgMca,
+                   /*27*/
 		   ENDOFSAMPLEENUM};
 
   int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
@@ -204,6 +204,8 @@ namespace semileptonic {
     if(sample==kBkg)     sampleLabel="t#bar{t} other";
     if(sample==kSigPow)  sampleLabel="t#bar{t} prompt e/#mu POWHEG";
     if(sample==kBkgPow)  sampleLabel="t#bar{t} other POWHEG";
+    if(sample==kSigMca)  sampleLabel="t#bar{t} prompt e/#mu MC@NLO";
+    if(sample==kBkgMca)  sampleLabel="t#bar{t} other MC@NLO";
     if(sample==kZjets)   sampleLabel="Z+jets";
     if(sample==kWjets)   sampleLabel="W+jets";
     if(sample==kQCD)     sampleLabel="QCD multijet";
@@ -488,6 +490,9 @@ namespace semileptonic {
     if(sample==kSigPow && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) POWHEG";
     if(sample==kSigPow && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) POWHEG";
     if(sample==kBkgPow    ) MCprocess="t#bar{t} other POWHEG";
+    if(sample==kSigMca && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) MC@NLO";
+    if(sample==kSigMca && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) MC@NLO";
+    if(sample==kBkgMca    ) MCprocess="t#bar{t} other MC@NLO";
     if(sample==kSTop   ) MCprocess="Single Top";
     if(sample==kSToptW ) MCprocess="Single Top tW";
     if(sample==kSTops  ) MCprocess="Single Top s";
@@ -684,6 +689,11 @@ namespace semileptonic {
       // Fall11
       Nevents = 16420479;
     }
+    else if((sample==kSigMca)||(sample==kBkgMca)){
+      crossSection=ttbarCrossSection; 
+      // Fall11
+      Nevents = 16420479;
+    }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
       crossSection=31314.0;
@@ -845,7 +855,7 @@ namespace semileptonic {
     double weight2=weight;
     if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
     // e1) for ttbar->lnu: BR correction
-    if((sample==kSig)||(sample==kSigPow)) weight *= BRcorrectionSemileptonic;
+    if((sample==kSig)||(sample==kSigPow)||(sample==kSigMca)) weight *= BRcorrectionSemileptonic;
     // e2) systematic higher/lower BG
     double scale=0;
     // (i) more/less DiBoson
@@ -876,7 +886,7 @@ namespace semileptonic {
       }
       std::cout << ": " << weight << std::endl;
       if(verbose>1) std::cout << "ratio: " << weight/weight2 << std::endl;
-      if(weight!=weight2&&((sample==kSig)||(sample==kSigPow))) std::cout << "(BR correction applied)" << std::endl;
+      if(weight!=weight2&&((sample==kSig)||(sample==kSigPow)||(sample==kSigMca))) std::cout << "(BR correction applied)" << std::endl;
     }
     // return result
     if(sample!=kData&&weight==1){
@@ -961,6 +971,8 @@ namespace semileptonic {
     if(sample==kBkg    )fileName += "Bkg";
     if(sample==kSigPow )fileName += "SigPowheg";
     if(sample==kBkgPow )fileName += "BkgPowheg";
+    if(sample==kSigMca )fileName += "SigMc@nlo";
+    if(sample==kBkgMca )fileName += "BkgMc@nlo";
     if(sample==kWjets  )fileName += "Wjets";
     if(sample==kZjets  )fileName += "Zjets";
     if(sample==kDiBos  )fileName += "VV";
@@ -1072,7 +1084,7 @@ namespace semileptonic {
       // modified quantities: NONE
       // used functions: TopFilename
       // used enumerators: samples
-      // ttbarMC: use "Madgraph" or "Powheg" for the respective samples
+      // ttbarMC: use "Madgraph", "Mc@nlo" or "Powheg" for the respective samples
 
 
       // open our standard analysis files and save them in a map
@@ -1086,6 +1098,10 @@ namespace semileptonic {
 	    if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Powheg") {
 	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigPow, systematicVariation, decayChannel);
 	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgPow, systematicVariation, decayChannel);
+	    }
+	    else if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Mc@nlo") {
+	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigMca, systematicVariation, decayChannel);
+	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgMca, systematicVariation, decayChannel);
 	    }
 	    else fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
 	  }
@@ -1216,7 +1232,7 @@ namespace semileptonic {
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "luminosity": [/pb]
     // "systematicVariation": specify systematic variation corresponding to enum systematicVariation
-    // ttbarMC: use "Madgraph" or "Powheg" for the respective samples
+    // ttbarMC: use "Madgraph", "Mc@nlo" or "Powheg" for the respective samples
 
     // loop samples
     for(unsigned int sample=kSig; sample<=kSAToptW; ++sample) {
@@ -1224,7 +1240,11 @@ namespace semileptonic {
       if(ttbarMC=="Powheg"){
 	if(sample==kSig) sample2=kSigPow;
 	if(sample==kBkg) sample2=kBkgPow;
-      } ;
+      }
+     if(ttbarMC=="Mc@nlo"){
+	if(sample==kSig) sample2=kSigMca;
+	if(sample==kBkg) sample2=kBkgMca;
+      }
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	// a) 1D
