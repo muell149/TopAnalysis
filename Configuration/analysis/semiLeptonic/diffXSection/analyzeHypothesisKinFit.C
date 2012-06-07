@@ -2,11 +2,11 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=true)
 {
   // ============================
   //  Set ROOT Style
@@ -202,7 +202,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
   TString recPartonBpath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
   TString recHadronBpath= "analyzeTopRecoKinematicsBjets" +sysInputFolderExtension;
   TString genPartonBpath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
-  TString genHadronBpath= "analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
+  TString genHadronBpath= "analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
   TString recBpath = ( (!extrapolate&&hadron) ? recHadronBpath : recPartonBpath );
   TString genBpath = ( (!extrapolate&&hadron) ? genHadronBpath : genPartonBpath );
   TString recBlabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
@@ -212,7 +212,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
   TString recPartonLeppath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
   TString recHadronLeppath= "analyzeTopRecoKinematicsLepton" +sysInputFolderExtension;
   TString genPartonLeppath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
-  TString genHadronLeppath= "analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sysInputGenFolderExtension;
+  TString genHadronLeppath= "analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sysInputGenFolderExtension;
   TString recLeppath  = ( (!extrapolate&&hadron) ? recHadronLeppath : recPartonLeppath );
   TString genLeppath  = ( (!extrapolate&&hadron) ? genHadronLeppath : genPartonLeppath );
   TString recLeplabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
