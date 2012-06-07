@@ -692,7 +692,13 @@ namespace semileptonic {
     else if((sample==kSigMca)||(sample==kBkgMca)){
       crossSection=ttbarCrossSection; 
       // Fall11
-      Nevents = 16420479;
+      // GOSSIE: preliminary 
+      // 21745199   total     events 
+      //    88.65 % positive  events NB: need to redetermine (fixed EventWeightDistributions)
+      //    11.35 % negative  events NB: need to redetermine (fixed EventWeightDistributions)
+      // 16810534   effective events
+      // weight per event: 190.41256 NB: number directly from LHE
+      Nevents = 3200936831 ; // 16810534 * 190.41256
     }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
@@ -971,8 +977,8 @@ namespace semileptonic {
     if(sample==kBkg    )fileName += "Bkg";
     if(sample==kSigPow )fileName += "SigPowheg";
     if(sample==kBkgPow )fileName += "BkgPowheg";
-    if(sample==kSigMca )fileName += "SigMc@nlo";
-    if(sample==kBkgMca )fileName += "BkgMc@nlo";
+    if(sample==kSigMca )fileName += "SigMcatnlo";
+    if(sample==kBkgMca )fileName += "BkgMcatnlo";
     if(sample==kWjets  )fileName += "Wjets";
     if(sample==kZjets  )fileName += "Zjets";
     if(sample==kDiBos  )fileName += "VV";
@@ -2713,7 +2719,7 @@ namespace semileptonic {
     // smoothcurves: indicates wheter smooth or binned curve is drawn
 
     TString plotname2=plotname;
-	if(plotname2.BeginsWith("h")) plotname2.Replace(0,1,"");
+    if(plotname2.BeginsWith("h")) plotname2.Replace(0,1,"");
     plotname2.ReplaceAll("Vis"    ,"");
     plotname2.ReplaceAll("MC@NLO" ,"");
     plotname2.ReplaceAll("MC@NLO2","");
@@ -2725,7 +2731,7 @@ namespace semileptonic {
     if(plotname2.Contains("/")){
       plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
     }
-
+    std::cout << plotname2 << std::endl;
     // create variable bin edges for non smooth curves
     std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output
