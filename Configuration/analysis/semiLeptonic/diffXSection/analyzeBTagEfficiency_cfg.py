@@ -62,49 +62,49 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 from Configuration.PyReleaseValidation.autoCond import autoCond
 process.GlobalTag.globaltag = cms.string('START42_V17::All')
 
-## ============================
-##  MC PU reweighting
-## ============================
+
+#-----------------------------------------------------------------------------
+# ----- MC PU reweighting                                         ----- #
+#-----------------------------------------------------------------------------
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
+
+## Apply common setting before module is cloned for systematic studies
+
+process.eventWeightPU.MCSampleTag = "Fall11"
+
+process.eventWeightPU.MCSampleHistoName        = "histo_Fall11_true"
+process.eventWeightPU.DataHistoName            = "histoData_true"
 
 process.eventWeightPU        = process.eventWeightPU.clone()
 process.eventWeightPUsysUp   = process.eventWeightPU.clone()
 process.eventWeightPUsysDown = process.eventWeightPU.clone()
+process.eventWeightPUEPS     = process.eventWeightPU.clone()
 
 #### Configuration for Nominal PU Weights
 
 process.eventWeightPU.WeightName          = "eventWeightPU"
-process.eventWeightPU.Weight3DName        = "eventWeightPU3D"
 process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
-process.eventWeightPU.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
-
 process.eventWeightPU.CreateWeight3DHisto = False
 process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
 process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
-process.eventWeightPUsysUp.Weight3DName        = "eventWeightPU3DUp"
 process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
-process.eventWeightPUsysUp.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
-
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
 process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
 process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
-process.eventWeightPUsysDown.Weight3DName        = "eventWeightPU3DDown"
 process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
-process.eventWeightPUsysDown.Data3DFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
-
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
 process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
 process.makeEventWeightsPU = cms.Sequence(process.eventWeightPU        *
                                           process.eventWeightPUsysUp   *
-                                          process.eventWeightPUsysDown  )
+                                          process.eventWeightPUsysDown)
 
 # relevant PU event weights (potentially merged with shape distortion weights)
 PUweightraw     = cms.InputTag("eventWeightPU",       "eventWeightPU")
