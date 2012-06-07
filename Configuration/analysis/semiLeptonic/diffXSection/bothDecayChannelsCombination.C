@@ -35,16 +35,22 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=false, unsig
   // ---
   std::vector<int> uncorrSys_;
   // trigger 
-  uncorrSys_.push_back(sysTrigEffSFNormUp         );   
-  uncorrSys_.push_back(sysTrigEffSFNormDown       );    
-  uncorrSys_.push_back(sysTriggerEffSFShapeUpEta  );
-  uncorrSys_.push_back(sysTriggerEffSFShapeDownEta);
-  uncorrSys_.push_back(sysTriggerEffSFShapeUpPt   );
-  uncorrSys_.push_back(sysTriggerEffSFShapeDownPt );
+  uncorrSys_.push_back(sysTriggerEffSFJetNormUp   ); 
+  uncorrSys_.push_back(sysTriggerEffSFJetNormDown );
+  uncorrSys_.push_back(sysTriggerEffSFJetShapeUp  );
+  uncorrSys_.push_back(sysTriggerEffSFJetShapeDown);
   // lepton eff
-  uncorrSys_.push_back(sysMuEffSFUp               );
-  uncorrSys_.push_back(sysMuEffSFDown             ); 
-
+  uncorrSys_.push_back(sysLepEffSFNormUp       );        
+  uncorrSys_.push_back(sysLepEffSFNormDown     );        
+  uncorrSys_.push_back(sysLepEffSFShapeUpEta   );    
+  uncorrSys_.push_back(sysLepEffSFShapeDownEta );
+  uncorrSys_.push_back(sysLepEffSFShapeUpPt    );     
+  uncorrSys_.push_back(sysLepEffSFShapeDownPt  );  
+  uncorrSys_.push_back(sysLepEffSFShapeUpPt40  );   
+  uncorrSys_.push_back(sysLepEffSFShapeDownPt40);
+  uncorrSys_.push_back(sysLepEffSFNormUpStat   );    
+  uncorrSys_.push_back(sysLepEffSFNormUpStat   );
+ 
   // Label for datasample
   TString dataSample="2011";
   
