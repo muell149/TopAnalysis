@@ -149,7 +149,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   else if ( variable == "topY")      { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001; resEdgeL = -3.; resEdgeR=3.;  relResEdgeL = -1.5; relResEdgeR=1.5;    }
   else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001; resEdgeL = -300.; resEdgeR=300.;  relResEdgeL = -1.; relResEdgeR=6.;}
   else if ( variable == "ttbarY")    { rangeUserLeft = -1.3+0.001; rangeUserRight = 1.3-0.001;  resEdgeL = -2.; resEdgeR=2.;    relResEdgeL = -2.; relResEdgeR=2.; }
-  else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1200-0.001; resEdgeL = -400.; resEdgeR=400.;  relResEdgeL = -1.; relResEdgeR=4.;}
+  else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.; resEdgeR=400.;  relResEdgeL = -1.; relResEdgeR=4.;}
   else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001; resEdgeL = -35.; resEdgeR=35.;   relResEdgeL = -.5; relResEdgeR=.5; textOpt="";}
   else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001; resEdgeL = -0.15; resEdgeR=0.15;  relResEdgeL = -.5; relResEdgeR=.5;  textOpt="";}
   else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001; resEdgeL = -200.; resEdgeR=200.;  relResEdgeL = -1.; relResEdgeR=2.;}
@@ -183,9 +183,12 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   //    get the 2D histogram
   // ---
   // x-Axis should be generated value, y-Axis should be reconstructed value
-  TH2F* myHist2d = (TH2F*)(((TH2F*)myFile1->Get(folderRecoKin+"/"+variable+"_"))->Clone());
+  TH2F* myHist2d = 0;
+  //(TH2F*)(((TH2F*)myFile1->Get(folderRecoKin+"/"+variable+"_"))->Clone());
   // empty histogram
-  if(useTree) myHist2d->Reset("ICES"); // Scale(0);
+  //if(useTree) myHist2d->Reset("ICES"); // Scale(0);
+  if(useTree) myHist2d = new TH2F("correlationMatrix", "correlationMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
+  else        myHist2d = (TH2F*)(((TH2F*)myFile1->Get(folderRecoKin+"/"+variable+"_"))->Clone());
   // create response matrix with and without efficiency correction in final binning; will be only filled if useTree==true
   TH2F* responseMatrix = new TH2F("responseMatrix", "responseMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
   TH2F* migrationMatrix = new TH2F("migrationMatrix", "migrationMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
