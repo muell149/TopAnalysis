@@ -1063,6 +1063,9 @@ double linSF(const double x, const double xmax, const double a, const double b){
 TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, TString phaseSpace, int verbose)
 {
 
+  if (verbose>0) std::cout << "Using hard-coded path '/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles' instead of '/afs/naf.desy.de/group/cms/scratch/tophh'" 
+			   << inputFolderName << " for file with PDF-uncertainties." << std::endl;
+
   // this function loads the max/min PDF uncertainties as determined externally with MC@NLO for the desired variables and applies it to MadGraph
   TString fileName    = "/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mPDFuncertOnly.root" ;
   TString plotNameVar = (variation == "") ? variable : variable + "_" + variation                                              ;
