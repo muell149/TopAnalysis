@@ -348,9 +348,11 @@ void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr)
   const double max = f1->GetMaximumX();
   const double fullIntegral = f1->Integral(140, 200, params, precision);
   std::cout << "Maximum: " << max << " GeV" << std::endl;
-  std::cout << "Integral from 140 to 200 GeV: " << fullIntegral << std::endl;
-  if(fullIntegral < 0.99 || fullIntegral > 1.) {
-    std::cout << "Integral should be within 0.99 and 1.00!" << std::endl;
+  std::cout << "Integral from 140 to 200 GeV: " << fullIntegral
+	    << " (deviation from unity will be used to rescale integrals calculated in the following)" << std::endl;
+  if(fullIntegral < 0.97 || fullIntegral > 1.03) {
+    std::cout << "Deviation from unity larger than expected!" << std::endl;
+    abort();
   }
   double sigma = 0;
   double stepSize = 1;
@@ -382,19 +384,23 @@ void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr)
   return;
 }
 
-void plotProjectedPDF(RooAbsPdf* pdf, RooPlot* frame, const int color,
+void plotProjectedPDF(RooAbsPdf* pdf, RooPlot* frame, const int color, const int fillStyle,
 		      const double max, const double errLow, const double errHig)
 {
   pdf->plotOn(frame, RooFit::LineColor(color), RooFit::NormRange("mass_fullRange"));
   pdf->plotOn(frame, RooFit::Range(max-errLow, max+errHig), RooFit::NormRange("mass_fullRange"),
-	      RooFit::FillStyle(1001), RooFit::FillColor(color), RooFit::DrawOption("F"), RooFit::VLines());
+	      //	      RooFit::LineColor(color), RooFit::LineWidth(1),
+	      RooFit::FillStyle(fillStyle), RooFit::FillColor(color), RooFit::DrawOption("F"), RooFit::VLines());
   pdf->plotOn(frame, RooFit::Range(max-.01, max+.01), RooFit::NormRange("mass_fullRange"),
-	      RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
+	      RooFit::LineColor(color), RooFit::LineWidth(3), RooFit::VLines());
 }
 
-TLatex* cmsPreliminaryTxt()
+TLatex* cmsTxt(const bool full2011dilep)
 {
-  TLatex* text = new TLatex(3.570061,23.08044,"CMS Preliminary, 1.14 fb^{-1} at  #sqrt{s} = 7 TeV");
+  const TString txt = (full2011dilep ?
+		       "CMS, 2.3 fb^{-1} at  #sqrt{s} = 7 TeV" :
+		       "CMS Preliminary, 1.14 fb^{-1} at  #sqrt{s} = 7 TeV");
+  TLatex* text = new TLatex(3.570061,23.08044,txt);
   text->SetNDC();
   text->SetTextAlign(13);
   text->SetX(0.16);
@@ -412,6 +418,9 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   setTDRStyle();
   gStyle->SetTitleBorderSize(1);
   gStyle->SetOptFit(0011);
+
+  RooAbsReal::defaultIntegratorConfig()->method2D().setLabel("RooSegmentedIntegrator2D");
+  RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooIntegrator1D").setCatLabel("sumRule", "Midpoint");
 
   gSystem->mkdir("figs");
 
@@ -587,8 +596,6 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   RooProdPdf mocProdPDF("mocProdPDF", "mocProdPDF", RooArgList(measXSecPDF, mocPredXSec.prob));
   RooProdPdf ahrProdPDF("ahrProdPDF", "ahrProdPDF", RooArgList(measXSecPDF, ahrPredXSec.prob));
 
-  frame = mass.frame(RooFit::Range(150., 190.));
-
   RooAbsPdf* kidProjectedPDF = kidProdPDF.createProjection(xsec);
   RooAbsPdf* mocProjectedPDF = mocProdPDF.createProjection(xsec);
   RooAbsPdf* ahrProjectedPDF = ahrProdPDF.createProjection(xsec);
@@ -622,29 +629,37 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   getUncertaintiesFromIntegral(ahrTF, ahrLowErr, ahrHigErr);
   getUncertaintiesFromIntegral(mocTF, mocLowErr, mocHigErr);
 
-  plotProjectedPDF(mocProjectedPDF, frame, colorMoc, mocMax, mocLowErr, mocHigErr);
+  if(full2011dilep)
+    frame = mass.frame(RooFit::Range(160., 190.));
+  else
+    frame = mass.frame(RooFit::Range(150., 190.));
+
+  plotProjectedPDF(mocProjectedPDF, frame, colorMoc, 3505, mocMax, mocLowErr, mocHigErr);
   if(pole && !heraPDF)
-    plotProjectedPDF(kidProjectedPDF, frame, colorKid, kidMax, kidLowErr, kidHigErr);
-  plotProjectedPDF(ahrProjectedPDF, frame, colorAhr, ahrMax, ahrLowErr, ahrHigErr);
+    plotProjectedPDF(kidProjectedPDF, frame, colorKid, 3545, kidMax, kidLowErr, kidHigErr);
+  plotProjectedPDF(ahrProjectedPDF, frame, colorAhr, 3554, ahrMax, ahrLowErr, ahrHigErr);
 
   frame->GetYaxis()->SetTitle("Probability density");
-  frame->GetYaxis()->SetRangeUser(0., 0.034);
+  if(full2011dilep)
+    frame->GetYaxis()->SetRangeUser(0., 0.056);
+  else
+    frame->GetYaxis()->SetRangeUser(0., 0.034);
   frame->Draw();
 
-  TLatex* cmsPreliminary = cmsPreliminaryTxt();
-  cmsPreliminary->Draw();
+  TLatex* cmsLabel = cmsTxt(full2011dilep);
+  cmsLabel->Draw();
 
   kidTF->SetLineColor(kBlack);
   kidTF->SetFillColor(colorKid);
-  kidTF->SetFillStyle(1001);
+  kidTF->SetFillStyle(3545);
 
   mocTF->SetLineColor(kBlack);
   mocTF->SetFillColor(colorMoc);
-  mocTF->SetFillStyle(1001);
+  mocTF->SetFillStyle(3305);
 
   ahrTF->SetLineColor(kBlack);
   ahrTF->SetFillColor(colorAhr);
-  ahrTF->SetFillStyle(1001);
+  ahrTF->SetFillStyle(3554);
 
   double yMin = 0.70;
   if(!pole || heraPDF)
@@ -700,7 +715,7 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   }
   delete canvas;
   delete f1;
-  delete cmsPreliminary;
+  delete cmsLabel;
 
   return 0;
 }
