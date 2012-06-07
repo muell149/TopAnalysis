@@ -78,30 +78,32 @@ namespace semileptonic {
 			     /* 3:*/ sysPUUp,                    /* 4:*/ sysPUDown,                  
 			     /* 5:*/ sysJESUp,                   /* 6:*/ sysJESDown,                 
 			     /* 7:*/ sysJERUp,                   /* 8:*/ sysJERDown,                 
-			     /* 9:*/ sysTrigEffSFNormUp,         /*10:*/ sysTrigEffSFNormDown,        
-			     /*11:*/ sysTriggerEffSFShapeUpEta,  /*12:*/ sysTriggerEffSFShapeDownEta,
-			     /*13:*/ sysTriggerEffSFShapeUpPt,   /*14:*/ sysTriggerEffSFShapeDownPt,  
-			     //      sysTriggerEffSFShapeUpPt40,         sysTriggerEffSFShapeDownPt40,  
-			     /*15:*/ sysMuEffSFUp,               /*16:*/ sysMuEffSFDown, 
-			     // old: sysBtagSFUp,                        sysBtagSFDown,  
-			     //      sysBtagSFShapeUpPt100,              sysBtagSFShapeDownPt100,
+			     /* 9:*/ sysLepEffSFNormUp,          /*10:*/ sysLepEffSFNormDown,        
+			     /*11:*/ sysLepEffSFShapeUpEta,      /*12:*/ sysLepEffSFShapeDownEta,
+			     /*13:*/ sysLepEffSFShapeUpPt,       /*14:*/ sysLepEffSFShapeDownPt,  
+			     //      sysLepEffSFShapeUpPt40,             sysLepEffSFShapeDownPt40,
+		             //      sysLepEffSFNormUpStat,              sysLepEffSFNormUpStat,
+			     /*15:*/ sysTriggerEffSFJetNormUp,   /*16:*/ sysTriggerEffSFJetNormDown,
+			     /*17:*/ sysTriggerEffSFJetShapeUp,  /*18:*/ sysTriggerEffSFJetShapeDown,    
+			     /*19:*/ sysBtagSFUp,                /*20:*/ sysBtagSFDown, 
+			     // old: sysBtagSFShapeUpPt100,              sysBtagSFShapeDownPt100,
 			     //      sysBtagSFShapeUpEta1p2,             sysBtagSFShapeDownEta1p2,
-			     /*17:*/ sysBtagSFShapeUpPt65,       /*18:*/ sysBtagSFShapeDownPt65,
-			     /*19:*/ sysBtagSFShapeUpEta0p7,     /*20:*/ sysBtagSFShapeDownEta0p7,
-			     /*21:*/ sysMisTagSFUp,              /*22:*/ sysMisTagSFDown,
-			     /*23:*/ sysTopScaleUp,              /*24:*/ sysTopScaleDown,            
-			     /*25:*/ sysVBosonScaleUp,           /*26:*/ sysVBosonScaleDown,          
-			     /*27:*/ sysSingleTopScaleUp,        /*28:*/ sysSingleTopScaleDown,     
-			     /*29:*/ sysTopMatchUp,              /*20:*/ sysTopMatchDown,            
-			     /*31:*/ sysVBosonMatchUp,           /*32:*/ sysVBosonMatchDown,         
-			     /*33:*/ sysTopMassUp,               /*34:*/ sysTopMassDown,            
-			     /*35:*/ sysQCDUp,                   /*36:*/ sysQCDDown,                 
-			     /*37:*/ sysSTopUp,                  /*38:*/ sysSTopDown,               
-			     /*39:*/ sysDiBosUp,                 /*40:*/ sysDiBosDown,              
-			     /*41:*/ sysPDFUp,                   /*42:*/ sysPDFDown,
-			     /*43:*/ sysHadUp,                   /*44:*/ sysHadDown,      
-			     /*45:*/ sysShapeUp,                 /*46:*/ sysShapeDown,
-			     /*47:*/ ENDOFSYSENUM};
+			     /*21:*/ sysBtagSFShapeUpPt65,       /*22:*/ sysBtagSFShapeDownPt65,
+			     /*23:*/ sysBtagSFShapeUpEta0p7,     /*24:*/ sysBtagSFShapeDownEta0p7,
+			     /*25:*/ sysMisTagSFUp,              /*26:*/ sysMisTagSFDown,
+			     /*27:*/ sysTopScaleUp,              /*28:*/ sysTopScaleDown,            
+			     /*29:*/ sysVBosonScaleUp,           /*30:*/ sysVBosonScaleDown,          
+			     /*31:*/ sysSingleTopScaleUp,        /*32:*/ sysSingleTopScaleDown,     
+			     /*33:*/ sysTopMatchUp,              /*34:*/ sysTopMatchDown,            
+			     /*35:*/ sysVBosonMatchUp,           /*36:*/ sysVBosonMatchDown,         
+			     /*37:*/ sysTopMassUp,               /*38:*/ sysTopMassDown,            
+			     /*39:*/ sysQCDUp,                   /*40:*/ sysQCDDown,                 
+			     /*41:*/ sysSTopUp,                  /*42:*/ sysSTopDown,               
+			     /*43:*/ sysDiBosUp,                 /*44:*/ sysDiBosDown,              
+			     /*45:*/ sysPDFUp,                   /*46:*/ sysPDFDown,
+			     /*47:*/ sysHadUp,                   /*48:*/ sysHadDown,      
+			     /*49:*/ sysShapeUp,                 /*50:*/ sysShapeDown,
+			     /*51:*/ ENDOFSYSENUM};
 
   double ttbarCrossSection=164.4;                                // combined 2011 CMS XSec
   double ttbarCrossSectionError=sqrt(2.8*2.8+11.9*11.9+7.4*7.4); // combined 2011 CMS XSec error 
@@ -138,18 +140,22 @@ namespace semileptonic {
       case sysJESDown                  : return "sysJESDown";
       case sysJERUp                    : return "sysJERUp";                 
       case sysJERDown                  : return "sysJERDown";                
-      case sysTrigEffSFNormUp          : return "sysTrigEffSFNormUp";
-      case sysTrigEffSFNormDown        : return "sysTrigEffSFNormDown";
-      case sysTriggerEffSFShapeUpEta   : return "sysTriggerEffSFShapeUpEta";
-      case sysTriggerEffSFShapeDownEta : return "sysTriggerEffSFShapeDownEta";
-      case sysTriggerEffSFShapeUpPt    : return "sysTriggerEffSFShapeUpPt";
-      case sysTriggerEffSFShapeDownPt  : return "sysTriggerEffSFShapeDownPt"; 
-   // case sysTriggerEffSFShapeUpPt40  : return "sysTriggerEffSFShapeUpPt40";
-   // case sysTriggerEffSFShapeDownPt40: return "sysTriggerEffSFShapeDownPt40";  
-      case sysMuEffSFUp                : return "sysMuEffSFUp";            
-      case sysMuEffSFDown              : return "sysMuEffSFDown";
-//old case sysBtagSFUp                 : return "sysBtagSFUp";
-//old case sysBtagSFDown               : return "sysBtagSFDown";
+      case sysLepEffSFNormUp           : return "sysLepEffSFNormUp";
+      case sysLepEffSFNormDown         : return "sysLepEffSFNormDown";
+      case sysLepEffSFShapeUpEta       : return "sysLepEffSFShapeUpEta";
+      case sysLepEffSFShapeDownEta     : return "sysLepEffSFShapeDownEta";
+      case sysLepEffSFShapeUpPt        : return "sysLepEffSFShapeUpPt";
+      case sysLepEffSFShapeDownPt      : return "sysLepEffSFShapeDownPt"; 
+   // case sysLepEffSFShapeUpPt40      : return "sysLepEffSFShapeUpPt40";
+   // case sysLepEffSFShapeDownPt40    : return "sysLepEffSFShapeDownPt40";
+   // case sysLepEffSFNormUpStat       : return "sysLepEffSFNormUpStat";
+   // case sysLepEffSFNormDownStat     : return "sysLepEffSFNormDownStat";
+      case sysTriggerEffSFJetNormUp    : return "sysTriggerEffSFJetNormUp";
+      case sysTriggerEffSFJetNormDown  : return "sysTriggerEffSFJetNormDown";
+      case sysTriggerEffSFJetShapeUp   : return "sysTriggerEffSFJetShapeUp";
+      case sysTriggerEffSFJetShapeDown : return "sysTriggerEffSFJetShapeDown"; 
+      case sysBtagSFUp                 : return "sysBtagSFUp";
+      case sysBtagSFDown               : return "sysBtagSFDown";
    // case sysBtagSFShapeUpPt100       : return "sysBtagSFShapeUpPt100";
    // case sysBtagSFShapeDownPt100     : return "sysBtagSFShapeDownPt100";
    // case sysBtagSFShapeUpEta1p2      : return "sysBtagSFShapeUpEta1p2";
@@ -157,7 +163,11 @@ namespace semileptonic {
       case sysBtagSFShapeUpPt65        : return "sysBtagSFShapeUpPt65";
       case sysBtagSFShapeDownPt65      : return "sysBtagSFShapeDownPt65";
       case sysBtagSFShapeUpEta0p7      : return "sysBtagSFShapeUpEta0p7";
-      case sysBtagSFShapeDownEta0p7    : return "sysBtagSFShapeDownEta0p7";  
+      case sysBtagSFShapeDownEta0p7    : return "sysBtagSFShapeDownEta0p7"; 
+   // case sysBTagSFFullShapeUpPt65    : return "sysBTagSFFullShapeUpPt65";
+   // case sysBTagSFFullShapeDownPt65  : return "sysBTagSFFullShapeDownPt65";
+   // case sysBTagSFFullShapeUpEta0p7  : return "sysBTagSFFullShapeUpEta0p7";
+   // case sysBTagSFFullShapeDownEta0p7: return "sysBTagSFFullShapeDownEta0p7"; 
       case sysMisTagSFUp               : return "sysMisTagSFUp";
       case sysMisTagSFDown             : return "sysMisTagSFDown";
       case sysTopScaleUp               : return "sysTopScaleUp";

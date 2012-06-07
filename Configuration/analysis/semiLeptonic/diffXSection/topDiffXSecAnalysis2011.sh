@@ -62,7 +62,7 @@ else
     if [ $decayChannel == \"muon\" ]; then
 	dataLuminosity=4955
 	dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
-        #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
+       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
        #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root\"
        #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
     else
@@ -102,8 +102,8 @@ makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be <= 46 (default), see list of systematics below)
-maxSys=46
+## maxSys>0 needs a lot of time (must be <= 50 (default), see list of systematics below)
+maxSys=50
 
 ## Shape variations:
 ## a) Calculate them at all
@@ -395,32 +395,35 @@ fi
 ## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
 
 echo
-echo "  0: noSys                                                      "
-echo "  1: sysLumiUp                   2: sysLumiDown                 "              
-echo "  3: sysPUUp                     4: sysPUDown                   "
-echo "  5: sysJESUp                    6: sysJESDown                  "
-echo "  7: sysJERUp                    8: sysJERDown                  "
-echo "  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown        " 
-echo " 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta "
-echo " 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  "
-echo " 15: sysMuEffSFUp               16: sysMuEffSFDown              "
-echo " 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65      "
-echo " 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7    "
-echo " 21: sysMisTagSFUp              22: sysMisTagSFDown             "
-echo " 23: sysTopScaleUp              24: sysTopScaleDown             "
-echo " 25: sysVBosonScaleUp           26: sysVBosonScaleDown          " 
-echo " 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       "
-echo " 29: sysTopMatchUp              20: sysTopMatchDown             "
-echo " 31: sysVBosonMatchUp           32: sysVBosonMatchDown          "
-echo " 33: sysTopMassUp               34: sysTopMassDown              "
-echo " 35: sysQCDUp                   36: sysQCDDown                  "
-echo " 37: sysSTopUp                  38: sysSTopDown                 "
-echo " 39: sysDiBosUp                 40: sysDiBosDown                "
-echo " 41: sysPDFUp                   42: sysPDFDown                  "
-echo " 43: sysHadUp                   44: sysHadDown                  "
-echo " 45: sysShapeUp                 46: sysShapeDown                "
-echo " 47: ENDOFSYSENUM                                               "
+echo "  0: sysNo,                                                       "
+echo "  1: sysLumiUp,                   2: sysLumiDown,                 "
+echo "  3: sysPUUp,                     4: sysPUDown,                   "
+echo "  5: sysJESUp,                    6: sysJESDown,                  "
+echo "  7: sysJERUp,                    8: sysJERDown,                  "
+echo "  9: sysLepEffSFNormUp,          10: sysLepEffSFNormDown,         "
+echo " 11: sysLepEffSFShapeUpEta,      12: sysLepEffSFShapeDownEta,     "
+echo " 13: sysLepEffSFShapeUpPt,       14: sysLepEffSFShapeDownPt,      "
+echo " 15: sysTriggerEffSFJetNormUp,   16: sysTriggerEffSFJetNormDown,  "
+echo " 17: sysTriggerEffSFJetShapeUp,  18: sysTriggerEffSFJetShapeDown, "
+echo " 19: sysBtagSFUp,                20: sysBtagSFDown,               "
+echo " 21: sysBtagSFShapeUpPt65,       22: sysBtagSFShapeDownPt65,      "
+echo " 23: sysBtagSFShapeUpEta0p7,     24: sysBtagSFShapeDownEta0p7,    "
+echo " 25: sysMisTagSFUp,              26: sysMisTagSFDown,             "
+echo " 27: sysTopScaleUp,              28: sysTopScaleDown,             "
+echo " 29: sysVBosonScaleUp,           30: sysVBosonScaleDown,          "
+echo " 31: sysSingleTopScaleUp,        32: sysSingleTopScaleDown,       "
+echo " 33: sysTopMatchUp,              34: sysTopMatchDown,             "
+echo " 35: sysVBosonMatchUp,           36: sysVBosonMatchDown,          "
+echo " 37: sysTopMassUp,               38: sysTopMassDown,              "
+echo " 39: sysQCDUp,                   40: sysQCDDown,                  "
+echo " 41: sysSTopUp,                  42: sysSTopDown,                 "
+echo " 43: sysDiBosUp,                 44: sysDiBosDown,                "
+echo " 45: sysPDFUp,                   46: sysPDFDown,                  "
+echo " 47: sysHadUp,                   48: sysHadDown,                  "
+echo " 49: sysShapeUp,                 50: sysShapeDown,                "
+echo " 51: ENDOFSYSENUM                                                 "
 echo
+
 if [ $fast = false ]
     then
     sleep 5
@@ -480,7 +483,7 @@ if [ $redoSystematics = true ]; then
 	if [ $decayChannel != \"combined\" ]; then
 	    
             ## exclude shape variation
-	    if [ $systematicVariation == 45 -o $systematicVariation == 46 ]; then
+	    if [ $systematicVariation == 49 -o $systematicVariation == 50 ]; then
 		echo " Shape variations are executed separately."
 	    else
 	    ## run macro for 2011 analysis
@@ -515,7 +518,7 @@ EOF
 	    echo " All regular systematic uncertainties processed .... Now running shape variations."
 	    echo ""
 
-	    for (( systematicVariation = 45; systematicVariation <= 46;  systematicVariation++ )); do
+	    for (( systematicVariation = 49; systematicVariation <= 50;  systematicVariation++ )); do
 
 		if [ -f commandsSysShapeVarRun.cint ]; then    
 		    rm commandsSysShapeVarRun.cint

@@ -45,31 +45,33 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   // a) options directly entered when calling function
   //    systematicVariation: which systematic shift do you want to make? from basicFunctions.h:  
   //
-  //  0: noSys                                                      
-  //  1: sysLumiUp                   2: sysLumiDown                               
-  //  3: sysPUUp                     4: sysPUDown                   
-  //  5: sysJESUp                    6: sysJESDown                  
-  //  7: sysJERUp                    8: sysJERDown                  
-  //  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown         
-  // 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta 
-  // 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  
-  // 15: sysMuEffSFUp               16: sysMuEffSFDown              
-  // 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65  
-  // 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7
-  // 21: sysMisTagSFUp              22: sysMisTagSFDown             
-  // 23: sysTopScaleUp              24: sysTopScaleDown             
-  // 25: sysVBosonScaleUp           26: sysVBosonScaleDown           
-  // 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
-  // 29: sysTopMatchUp              20: sysTopMatchDown             
-  // 31: sysVBosonMatchUp           32: sysVBosonMatchDown          
-  // 33: sysTopMassUp               34: sysTopMassDown              
-  // 35: sysQCDUp                   36: sysQCDDown                  
-  // 37: sysSTopUp                  38: sysSTopDown                 
-  // 39: sysDiBosUp                 40: sysDiBosDown                
-  // 41: sysPDFUp                   42: sysPDFDown                  
-  // 43: sysHadUp                   44: sysHadDown                  
-  // 45: sysShapeUp                 46: sysShapeDown                
-  // 47: ENDOFSYSENUM
+  //         0: sysNo,                                                       
+  //         1: sysLumiUp,                   2: sysLumiDown,                 
+  //         3: sysPUUp,                     4: sysPUDown,                   
+  //         5: sysJESUp,                    6: sysJESDown,                  
+  //         7: sysJERUp,                    8: sysJERDown,                  
+  //         9: sysLepEffSFNormUp,          10: sysLepEffSFNormDown,         
+  //        11: sysLepEffSFShapeUpEta,      12: sysLepEffSFShapeDownEta,     
+  //        13: sysLepEffSFShapeUpPt,       14: sysLepEffSFShapeDownPt,      
+  //        15: sysTriggerEffSFJetNormUp,   16: sysTriggerEffSFJetNormDown,  
+  //        17: sysTriggerEffSFJetShapeUp,  18: sysTriggerEffSFJetShapeDown, 
+  //        19: sysBtagSFUp,                20: sysBtagSFDown,               
+  //        21: sysBtagSFShapeUpPt65,       22: sysBtagSFShapeDownPt65,      
+  //        23: sysBtagSFShapeUpEta0p7,     24: sysBtagSFShapeDownEta0p7,    
+  //        25: sysMisTagSFUp,              26: sysMisTagSFDown,             
+  //        27: sysTopScaleUp,              28: sysTopScaleDown,             
+  //        29: sysVBosonScaleUp,           30: sysVBosonScaleDown,          
+  //        31: sysSingleTopScaleUp,        32: sysSingleTopScaleDown,       
+  //        33: sysTopMatchUp,              34: sysTopMatchDown,             
+  //        35: sysVBosonMatchUp,           36: sysVBosonMatchDown,          
+  //        37: sysTopMassUp,               38: sysTopMassDown,              
+  //        39: sysQCDUp,                   40: sysQCDDown,                  
+  //        41: sysSTopUp,                  42: sysSTopDown,                 
+  //        43: sysDiBosUp,                 44: sysDiBosDown,                
+  //        45: sysPDFUp,                   46: sysPDFDown,                  
+  //        47: sysHadUp,                   48: sysHadDown,                  
+  //        49: sysShapeUp,                 50: sysShapeDown,                
+  //        51: ENDOFSYSENUM
   
   // take care that prescaling of muon channel for full 2011 datset was taken into account
   if(luminosity==4980 && decayChannel=="muon"    ) luminosity=constLumiMuon;
@@ -120,7 +122,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  bool redetermineopttau =false;
+  bool redetermineopttau =true;
   if(!SVDunfold) redetermineopttau =false;
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
@@ -172,18 +174,22 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   {
     case sysPUUp                     : sysInputFolderExtension="PUup";   sysInputGenFolderExtension=sysInputFolderExtension; break;
     case sysPUDown                   : sysInputFolderExtension="PUdown"; sysInputGenFolderExtension=sysInputFolderExtension; break;
-    case sysTrigEffSFNormUp          : sysInputFolderExtension="TriggerEffSFNormUp";        break;
-    case sysTrigEffSFNormDown        : sysInputFolderExtension="TriggerEffSFNormDown";      break;
-    case sysTriggerEffSFShapeUpEta   : sysInputFolderExtension="TriggerEffSFShapeUpEta";    break;
-    case sysTriggerEffSFShapeDownEta : sysInputFolderExtension="TriggerEffSFShapeDownEta";  break;
-    case sysTriggerEffSFShapeUpPt    : sysInputFolderExtension="TriggerEffSFShapeUpPt";     break;
-    case sysTriggerEffSFShapeDownPt  : sysInputFolderExtension="TriggerEffSFShapeDownPt";   break;
- // case sysTriggerEffSFShapeUpPt40  : sysInputFolderExtension="TriggerEffSFShapeUpPt40";   break;
- // case sysTriggerEffSFShapeDownPt40: sysInputFolderExtension="TriggerEffSFShapeUpPt40";   break;
-    case sysMuEffSFUp                : sysInputFolderExtension="SelectionEffSFNormUp";      break;
-    case sysMuEffSFDown              : sysInputFolderExtension="SelectionEffSFNormDown";    break;
- // case sysBtagSFUp                 : sysInputFolderExtension="BtagSFup";                  break;
- // case sysBtagSFDown               : sysInputFolderExtension="BtagSFdown";                break;
+    case sysLepEffSFNormUp           : sysInputFolderExtension="EffSFNormUpSys";            break;
+    case sysLepEffSFNormDown         : sysInputFolderExtension="EffSFNormDownSys";          break;
+    case sysLepEffSFShapeUpEta       : sysInputFolderExtension="EffSFShapeUpEta";           break;
+    case sysLepEffSFShapeDownEta     : sysInputFolderExtension="EffSFShapeDownEta";         break;
+    case sysLepEffSFShapeUpPt        : sysInputFolderExtension="EffSFShapeUpPt";            break;
+    case sysLepEffSFShapeDownPt      : sysInputFolderExtension="EffSFShapeDownPt";          break;
+ // case sysLepEffSFShapeUpPt40      : sysInputFolderExtension="EffSFShapeUpPt40";          break;
+ // case sysLepEffSFShapeDownPt40    : sysInputFolderExtension="EffSFShapeDownPt40";        break;
+ // case sysLepEffSFNormUpStat       : sysInputFolderExtension="EffSFNormUpStat";           break;
+ // case sysLepEffSFNormDownStat     : sysInputFolderExtension="EffSFNormDownStat";         break;
+    case sysTriggerEffSFJetNormUp    : sysInputFolderExtension="TriggerEffSFJetNormUp";     break;
+    case sysTriggerEffSFJetNormDown  : sysInputFolderExtension="TriggerEffSFJetNormDown";   break;
+    case sysTriggerEffSFJetShapeUp   : sysInputFolderExtension="TriggerEffSFJetShapeUp";    break;
+    case sysTriggerEffSFJetShapeDown : sysInputFolderExtension="TriggerEffSFJetShapeDown";  break;
+    case sysBtagSFUp                 : sysInputFolderExtension="BtagSFup";                  break;
+    case sysBtagSFDown               : sysInputFolderExtension="BtagSFdown";                break;
  // case sysBtagSFShapeUpPt100       : sysInputFolderExtension="BTagSFShapeUpPt100";        break;
  // case sysBtagSFShapeDownPt100     : sysInputFolderExtension="BTagSFShapeDownPt100";      break;
  // case sysBtagSFShapeUpEta1p2      : sysInputFolderExtension="BTagSFShapeUpEta1p2";       break;
@@ -192,6 +198,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     case sysBtagSFShapeDownPt65      : sysInputFolderExtension="BTagSFShapeDownPt65";       break;
     case sysBtagSFShapeUpEta0p7      : sysInputFolderExtension="BTagSFShapeUpEta0p7";       break;
     case sysBtagSFShapeDownEta0p7    : sysInputFolderExtension="BTagSFShapeDownEta0p7";     break;
+ // case sysBTagSFFullShapeUpPt65    : sysInputFolderExtension="BTagSFFullShapeUpPt65";     break;
+ // case sysBTagSFFullShapeDownPt65  : sysInputFolderExtension="BTagSFFullShapeDownPt65";   break;
+ // case sysBTagSFFullShapeUpEta0p7  : sysInputFolderExtension="BTagSFFullShapeUpEta0p7";   break;
+ // case sysBTagSFFullShapeDownEta0p7: sysInputFolderExtension="BTagSFFullShapeDownEta0p7"; break;
     case sysMisTagSFUp               : sysInputFolderExtension="MisTagSFup";                break;
     case sysMisTagSFDown             : sysInputFolderExtension="MisTagSFdown";              break;
     default: break;
