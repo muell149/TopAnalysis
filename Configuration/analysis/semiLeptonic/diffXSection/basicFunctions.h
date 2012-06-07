@@ -2970,6 +2970,41 @@ namespace semileptonic {
       if(verbose>0) std::cout << "theory curve drawn" << std::endl;
     }
   }
+
+  void errorWeightedMeanCombination(const TH1& plotMu, const TH1& plotEl, TH1& plotCombination, unsigned int verbose=0){
+    // this function does a simple error weighted mean combination 
+    // for all bins of "plotMu" and "plotEl" seperately, saving the
+    // result in "plotCombination"
+    // verbose: level of output
+    // modified quantities: plotCombination
+    
+    // loop bins
+    for(int bin=1; bin<=plotCombination.GetNbinsX(); ++bin){
+      if(verbose>1){
+	std::cout << ", bin" << bin << ":" << std::endl;
+	std::cout << "(" << plotCombination.GetBinLowEdge(bin) << " .... " << plotCombination.GetBinLowEdge(bin+1) << ")" << std::endl;
+      }
+      // consider only non-empty bins
+      if(plotMu.GetBinContent(bin)!=0&&plotEl.GetBinContent(bin)!=0){
+	double xSecMu     =plotMu.GetBinContent(bin);
+	double xSecEl     =plotEl.GetBinContent(bin);
+	double xSecErrorMu=plotMu.GetBinError  (bin);
+	double xSecErrorEl=plotEl.GetBinError  (bin);
+	double combinedxSec=(xSecMu/(xSecErrorMu*xSecErrorMu)+xSecEl/(xSecErrorEl*xSecErrorEl));
+	combinedxSec/=(1/(xSecErrorMu*xSecErrorMu)+1/(xSecErrorEl*xSecErrorEl));
+	double combinedxSecError=sqrt(1/(1/(xSecErrorMu*xSecErrorMu)+1/(xSecErrorEl*xSecErrorEl)));
+	plotCombination.SetBinContent(bin, combinedxSec     );
+	plotCombination.SetBinError  (bin, combinedxSecError);
+	if(verbose>1){
+	  std::cout << "muon:     " << xSecMu       << " +/- " << xSecErrorMu       << std::endl;
+	  std::cout << "elec:     " << xSecEl       << " +/- " << xSecErrorEl       << std::endl;
+	  std::cout << "combined: " << combinedxSec << " +/- " << combinedxSecError << std::endl;
+	}
+      }
+    }
+  }
+
+
     
     // ===============================================================
     // ===============================================================
@@ -3081,6 +3116,8 @@ namespace semileptonic {
     // ===============================================================
     // ===============================================================
   
+    
+    
 
 #ifdef DILEPTON_MACRO
 }

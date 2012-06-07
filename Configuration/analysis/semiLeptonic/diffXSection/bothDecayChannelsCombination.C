@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
+void bothDecayChannelsCombination(double luminosity=4980, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool versionNNLO=true){
 
   // run automatically in batch mode
@@ -30,6 +30,21 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
   TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt" ,"lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   
+  // ---
+  //    create list of systematics to be treated as uncorrelated between electron and muon channel
+  // ---
+  std::vector<int> uncorrSys_;
+  // trigger 
+  uncorrSys_.push_back(sysTrigEffSFNormUp         );   
+  uncorrSys_.push_back(sysTrigEffSFNormDown       );    
+  uncorrSys_.push_back(sysTriggerEffSFShapeUpEta  );
+  uncorrSys_.push_back(sysTriggerEffSFShapeDownEta);
+  uncorrSys_.push_back(sysTriggerEffSFShapeUpPt   );
+  uncorrSys_.push_back(sysTriggerEffSFShapeDownPt );
+  // lepton eff
+  uncorrSys_.push_back(sysMuEffSFUp               );
+  uncorrSys_.push_back(sysMuEffSFDown             ); 
+
   // Label for datasample
   TString dataSample="2011";
   
@@ -137,31 +152,48 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=true, unsign
 	  TH1F* plotCombination=(TH1F*)(plotMu->Clone());
 	  plotCombination->Reset("ICESM");
 	  if(xSecVariables_[i].Contains("ttbarY")) plotCombination->GetXaxis()->SetRangeUser(-2.49,2.49);
-	  // loop bins
 	  if(verbose>1) std::cout << std::endl << xSecVariables_[i] << ":" << std::endl;
-	  for(int bin=1; bin<=plotCombination->GetNbinsX(); ++bin){
-	    if(verbose>1){
-	      std::cout << ", bin" << bin << ":" << std::endl;
-	      std::cout << "(" << plotCombination->GetBinLowEdge(bin) << " .... " << plotCombination->GetBinLowEdge(bin+1) << ")" << std::endl;
-	    }
-	    // consider only non-empty bins
-	    if(plotMu->GetBinContent(bin)!=0&&plotEl->GetBinContent(bin)!=0){
-	      double xSecMu     =plotMu->GetBinContent(bin);
-	      double xSecEl     =plotEl->GetBinContent(bin);
-	      double xSecErrorMu=plotMu->GetBinError  (bin);
-	      double xSecErrorEl=plotEl->GetBinError  (bin);
-	      double combinedxSec=(xSecMu/(xSecErrorMu*xSecErrorMu)+xSecEl/(xSecErrorEl*xSecErrorEl));
-	      combinedxSec/=(1/(xSecErrorMu*xSecErrorMu)+1/(xSecErrorEl*xSecErrorEl));
-	      double combinedxSecError=sqrt(1/(1/(xSecErrorMu*xSecErrorMu)+1/(xSecErrorEl*xSecErrorEl)));
-	      plotCombination->SetBinContent(bin, combinedxSec     );
-	      plotCombination->SetBinError  (bin, combinedxSecError);
-	      if(verbose>1){
-		std::cout << "muon:     " << xSecMu       << " +/- " << xSecErrorMu       << std::endl;
-		std::cout << "elec:     " << xSecEl       << " +/- " << xSecErrorEl       << std::endl;
-		std::cout << "combined: " << combinedxSec << " +/- " << combinedxSecError << std::endl;
+	  // check correlation of systematic variation
+	  bool correlated=true;
+	  for(int j =0; j<uncorrSys_.size(); ++j){
+	    if(uncorrSys_[j]==sys&&sys!=sysNo) correlated=false;
+	  }
+	  // (i) hadronization uncertainty: use Powhwg+Herwig vs McatNlo+Pythia 
+	  if (sys==sysHadUp||sys==sysHadDown){
+	    errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose);
+	  }
+	  // (ii) uncorrelated uncertainties 
+	  if(!correlated){
+	    // get standard xSec histos
+	    // a) canvas
+	    TCanvas* canvasMuStd = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sys)+"/"+xSecVariables_[i]));
+	    TCanvas* canvasElStd = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sys)+"/"+xSecVariables_[i]));
+	    // b) plots
+	    if(canvasMuStd&&canvasElStd){
+	      TH1F* plotMuStd = (TH1F*)canvasMuStd->GetPrimitive(plotName+"kData");
+	      TH1F* plotElStd = (TH1F*)canvasElStd->GetPrimitive(plotName+"kData");    
+	      // keep one decay channel constant and vary the other one
+	      TH1F* plotMuConstElecVaried=(TH1F*)(plotMu->Clone());
+	      errorWeightedMeanCombination(*plotMuStd, * plotEl   , *plotMuConstElecVaried, verbose);
+	      TH1F* plotMuVariedElecConst=(TH1F*)(plotMu->Clone());
+	      errorWeightedMeanCombination(*plotMu   , * plotElStd, *plotMuVariedElecConst, verbose);
+	      // loop all bins
+	      for(int bin=1; bin<=plotCombination->GetNbinsX(); ++bin){
+		// central combined value for this bin
+		double stdValue = histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
+		// calculate relative shift for both channels wrt. central combined value
+		double shiftEl=plotMuConstElecVaried->GetBinContent(bin)-stdValue;
+		double shiftMu=plotMuVariedElecConst->GetBinContent(bin)-stdValue;
+		// add seperate variations in quadrature
+		double totalShift=sqrt(shiftEl*shiftEl+shiftMu*shiftMu);
+		// save this absolute error wrt. central combined value as final systematic shifted plot
+		plotCombination->SetBinContent(bin, stdValue+totalShift);
 	      }
 	    }
 	  }
+	  // (iii)other correlated uncertainties: just do error weighted mean
+	  else errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose);
+	  
 	  // =================================================
 	  //  Additional histos for reweighting closure test
 	  // =================================================
