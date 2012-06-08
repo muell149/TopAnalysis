@@ -101,9 +101,10 @@ namespace semileptonic {
 			     /*41:*/ sysSTopUp,                  /*42:*/ sysSTopDown,               
 			     /*43:*/ sysDiBosUp,                 /*44:*/ sysDiBosDown,              
 			     /*45:*/ sysPDFUp,                   /*46:*/ sysPDFDown,
-			     /*47:*/ sysHadUp,                   /*48:*/ sysHadDown,      
-			     /*49:*/ sysShapeUp,                 /*50:*/ sysShapeDown,
-			     /*51:*/ ENDOFSYSENUM};
+			     /*47:*/ sysHadUp,                   /*48:*/ sysHadDown,
+			     /*49:*/ sysGenMCatNLO,              /*50:*/ sysGenPowheg,
+			     /*51:*/ sysShapeUp,                 /*52:*/ sysShapeDown,
+			     /*53:*/ ENDOFSYSENUM};
 
   double ttbarCrossSection=164.4;                                // combined 2011 CMS XSec
   double ttbarCrossSectionError=sqrt(2.8*2.8+11.9*11.9+7.4*7.4); // combined 2011 CMS XSec error 
@@ -191,7 +192,9 @@ namespace semileptonic {
       case sysPDFUp                    : return "sysPDFUp";              
       case sysPDFDown                  : return "sysPDFDown";
       case sysHadUp                    : return "sysHadronizationUp";
-      case sysHadDown                  : return "sysHadronizationDown"; 
+      case sysHadDown                  : return "sysHadronizationDown";
+      case sysGenMCatNLO               : return "sysGenMCatNLO";
+      case sysGenPowheg                : return "sysGenPowheg";  
       case sysShapeUp                  : return "sysShapeUp";              
       case sysShapeDown                : return "sysShapeDown"; 
       default                          : std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
@@ -1100,7 +1103,7 @@ namespace semileptonic {
       // modified quantities: NONE
       // used functions: TopFilename
       // used enumerators: samples
-      // ttbarMC: use "Madgraph", "Mc@nlo" or "Powheg" for the respective samples
+      // ttbarMC: use "Madgraph", "Mcatnlo" or "Powheg" for the respective samples
 
 
       // open our standard analysis files and save them in a map
@@ -1115,7 +1118,7 @@ namespace semileptonic {
 	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigPow, systematicVariation, decayChannel);
 	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgPow, systematicVariation, decayChannel);
 	    }
-	    else if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Mc@nlo") {
+	    else if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Mcatnlo") {
 	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigMca, systematicVariation, decayChannel);
 	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgMca, systematicVariation, decayChannel);
 	    }
@@ -1248,7 +1251,7 @@ namespace semileptonic {
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "luminosity": [/pb]
     // "systematicVariation": specify systematic variation corresponding to enum systematicVariation
-    // ttbarMC: use "Madgraph", "Mc@nlo" or "Powheg" for the respective samples
+    // ttbarMC: use "Madgraph", "Mcatnlo" or "Powheg" for the respective samples
 
     // loop samples
     for(unsigned int sample=kSig; sample<=kSAToptW; ++sample) {
@@ -1257,7 +1260,7 @@ namespace semileptonic {
 	if(sample==kSig) sample2=kSigPow;
 	if(sample==kBkg) sample2=kBkgPow;
       }
-     if(ttbarMC=="Mc@nlo"){
+     if(ttbarMC=="Mcatnlo"){
 	if(sample==kSig) sample2=kSigMca;
 	if(sample==kBkg) sample2=kBkgMca;
       }
@@ -1664,7 +1667,7 @@ namespace semileptonic {
       bins_.clear();
       // y(ttbar)
       // old: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
-      double ttbarYBins[]={-5.0, -1.8, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 1.8, 5.0};
+      double ttbarYBins[]={-5.0, -2.5, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 2.5, 5.0};
       // PAS binning: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
       bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
       result["ttbarY"]=bins_;
@@ -1714,6 +1717,7 @@ namespace semileptonic {
       // restrict axis
       if(variable=="topPt")          his->GetXaxis()->SetRange(1, his->GetNbinsX()-1); 
       else if(variable=="topY")      his->GetXaxis()->SetRange(2, his->GetNbinsX()-1);
+      else if(variable=="ttbarY")    his->GetXaxis()->SetRange(2, his->GetNbinsX()-1);
       else if(variable=="ttbarMass") his->GetXaxis()->SetRange(2, his->GetNbinsX());
       else if(variable=="lepEta")    his->GetXaxis()->SetRange(2, his->GetNbinsX()-2);
       else if(variable=="bqPt")      his->GetXaxis()->SetRange(2,6);
@@ -2740,8 +2744,7 @@ namespace semileptonic {
     plotname2.ReplaceAll("Lep","lep");
     if(plotname2.Contains("/")){
       plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
-    }
-    std::cout << plotname2 << std::endl;
+    }   
     // create variable bin edges for non smooth curves
     std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output
@@ -3040,7 +3043,7 @@ namespace semileptonic {
 		if(variable == "topPt")          k = (fullPS) ? 2.77 : 2.76;
 		else if(variable == "topY" )     k = (fullPS) ? 3.73 : 3.74;
 		else if(variable == "ttbarPt")   k = (fullPS) ? 2.30 : 2.30; 
-		else if(variable == "ttbarY")    k = (fullPS) ? 0.94 : 0.94; 
+		else if(variable == "ttbarY")    k = (fullPS) ? 2.98 : 2.98;
 		else if(variable == "ttbarMass") k = (fullPS) ? 2.64 : 2.63;
 		else if(variable == "lepPt")     k = (fullPS) ? 1.28 : (hadronPS) ? 0.80   : 1.28;
 		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 0.0001 : 1.52; 
@@ -3059,7 +3062,7 @@ namespace semileptonic {
 		if(variable == "topPt")          k = (fullPS) ? 2.80 : 2.79;
 		else if(variable == "topY")      k = (fullPS) ? 3.31 : 3.30;
 		else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.04; 
-		else if(variable == "ttbarY")    k = (fullPS) ? 0.95 : 0.95;
+		else if(variable == "ttbarY")    k = (fullPS) ? 2.25 : 2.25;
 		else if(variable == "ttbarMass") k = (fullPS) ? 2.50 : 2.61;
 		else if(variable == "lepPt")     k = (fullPS) ? 2.32 : (hadronPS) ? 1.37   : 2.33;
 		else if(variable == "lepEta")    k = (fullPS) ? 1.09 : (hadronPS) ? 0.0001 : 1.10; 

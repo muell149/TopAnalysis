@@ -45,33 +45,34 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   // a) options directly entered when calling function
   //    systematicVariation: which systematic shift do you want to make? from basicFunctions.h:  
   //
-  //         0: sysNo,                                                       
-  //         1: sysLumiUp,                   2: sysLumiDown,                 
-  //         3: sysPUUp,                     4: sysPUDown,                   
-  //         5: sysJESUp,                    6: sysJESDown,                  
-  //         7: sysJERUp,                    8: sysJERDown,                  
-  //         9: sysLepEffSFNormUp,          10: sysLepEffSFNormDown,         
-  //        11: sysLepEffSFShapeUpEta,      12: sysLepEffSFShapeDownEta,     
-  //        13: sysLepEffSFShapeUpPt,       14: sysLepEffSFShapeDownPt,      
-  //        15: sysTriggerEffSFJetNormUp,   16: sysTriggerEffSFJetNormDown,  
-  //        17: sysTriggerEffSFJetShapeUp,  18: sysTriggerEffSFJetShapeDown, 
-  //        19: sysBtagSFUp,                20: sysBtagSFDown,               
-  //        21: sysBtagSFShapeUpPt65,       22: sysBtagSFShapeDownPt65,      
-  //        23: sysBtagSFShapeUpEta0p7,     24: sysBtagSFShapeDownEta0p7,    
-  //        25: sysMisTagSFUp,              26: sysMisTagSFDown,             
-  //        27: sysTopScaleUp,              28: sysTopScaleDown,             
-  //        29: sysVBosonScaleUp,           30: sysVBosonScaleDown,          
-  //        31: sysSingleTopScaleUp,        32: sysSingleTopScaleDown,       
-  //        33: sysTopMatchUp,              34: sysTopMatchDown,             
-  //        35: sysVBosonMatchUp,           36: sysVBosonMatchDown,          
-  //        37: sysTopMassUp,               38: sysTopMassDown,              
-  //        39: sysQCDUp,                   40: sysQCDDown,                  
-  //        41: sysSTopUp,                  42: sysSTopDown,                 
-  //        43: sysDiBosUp,                 44: sysDiBosDown,                
-  //        45: sysPDFUp,                   46: sysPDFDown,                  
-  //        47: sysHadUp,                   48: sysHadDown,                  
-  //        49: sysShapeUp,                 50: sysShapeDown,                
-  //        51: ENDOFSYSENUM
+  //         0: sysNo                                                       
+  //         1: sysLumiUp                   2: sysLumiDown                 
+  //         3: sysPUUp                     4: sysPUDown                   
+  //         5: sysJESUp                    6: sysJESDown                  
+  //         7: sysJERUp                    8: sysJERDown                  
+  //         9: sysLepEffSFNormUp          10: sysLepEffSFNormDown         
+  //        11: sysLepEffSFShapeUpEta      12: sysLepEffSFShapeDownEta     
+  //        13: sysLepEffSFShapeUpPt       14: sysLepEffSFShapeDownPt      
+  //        15: sysTriggerEffSFJetNormUp   16: sysTriggerEffSFJetNormDown  
+  //        17: sysTriggerEffSFJetShapeUp  18: sysTriggerEffSFJetShapeDown 
+  //        19: sysBtagSFUp                20: sysBtagSFDown               
+  //        21: sysBtagSFShapeUpPt65       22: sysBtagSFShapeDownPt65      
+  //        23: sysBtagSFShapeUpEta0p7     24: sysBtagSFShapeDownEta0p7    
+  //        25: sysMisTagSFUp              26: sysMisTagSFDown             
+  //        27: sysTopScaleUp              28: sysTopScaleDown             
+  //        29: sysVBosonScaleUp           30: sysVBosonScaleDown          
+  //        31: sysSingleTopScaleUp        32: sysSingleTopScaleDown       
+  //        33: sysTopMatchUp              34: sysTopMatchDown             
+  //        35: sysVBosonMatchUp           36: sysVBosonMatchDown          
+  //        37: sysTopMassUp               38: sysTopMassDown              
+  //        39: sysQCDUp                   40: sysQCDDown                  
+  //        41: sysSTopUp                  42: sysSTopDown                 
+  //        43: sysDiBosUp                 44: sysDiBosDown                
+  //        45: sysPDFUp                   46: sysPDFDown                  
+  //        47: sysHadUp                   48: sysHadDown                  
+  //        49: sysGenMCatNLO              50: sysGenPowheg  
+  //        51: sysShapeUp                 52: sysShapeDown                
+  //        53: ENDOFSYSENUM
   
   // take care that prescaling of muon channel for full 2011 datset was taken into account
   if(luminosity==4980 && decayChannel=="muon"    ) luminosity=constLumiMuon;
@@ -122,15 +123,17 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  bool redetermineopttau =true;
+  bool redetermineopttau =false;
   if(!SVDunfold) redetermineopttau =false;
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
     save=false;
   }
-  // use different ttbar MC ("Madgraph", "Powheg")
+  // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
-  TString ttbarMC2=ttbarMC;
+  if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
+  else if(systematicVariation==sysGenPowheg)  ttbarMC="Powheg";
+  TString ttbarMC2=ttbarMC;  
   if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg";
   // normalization of differential normalized cross sections
   // true: use integral of unfolded differential cross section ignoring UF/OF bins
