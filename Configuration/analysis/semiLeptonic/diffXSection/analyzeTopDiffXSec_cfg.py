@@ -1442,7 +1442,7 @@ process.effSFMuonEventWeightEffSFShapeUpPt    = process.effSFMuonEventWeight.clo
 process.effSFMuonEventWeightEffSFShapeDownPt  = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeDownPt")
 process.effSFMuonEventWeightEffSFShapeUpPt40  = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeUpPt",   shapeVarPtThreshold=40.0)
 process.effSFMuonEventWeightEffSFShapeDownPt40= process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFShapeDownPt", shapeVarPtThreshold=40.0)
-process.effSFMuonEventWeighEffSFNormUpSys     = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFNormUpSys")
+process.effSFMuonEventWeightEffSFNormUpSys    = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFNormUpSys")
 process.effSFMuonEventWeightEffSFNormDownSys  = process.effSFMuonEventWeight.clone(sysVar = "combinedEffSFNormDownSys")
 
 process.load("TopAnalysis.TopUtils.EffSFElectronEventWeight_cfi")
@@ -1574,7 +1574,7 @@ if(effSFReweigthing and decayChannel=="muon"):
     weightlistEffSFShapeDownPt         .append("effSFMuonEventWeightEffSFShapeDownPt")
     weightlistEffSFShapeUpPt40         .append("effSFMuonEventWeightEffSFShapeUpPt40")
     weightlistEffSFShapeDownPt40       .append("effSFMuonEventWeightEffSFShapeDownPt40")
-    weightlistEffSFNormUpSys           .append("effSFMuonEventWeighEffSFNormUpSys")
+    weightlistEffSFNormUpSys           .append("effSFMuonEventWeightEffSFNormUpSys")
     weightlistEffSFNormDownSys         .append("effSFMuonEventWeightEffSFNormDownSys")
     weightlistTriggerEffSFJetNormUp    .append("effSFMuonEventWeight")
     weightlistTriggerEffSFJetNormDown  .append("effSFMuonEventWeight")
@@ -1969,7 +1969,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                                process.effSFMuonEventWeightEffSFShapeDownPt*
 			       process.effSFMuonEventWeightEffSFShapeUpPt40*  
                                process.effSFMuonEventWeightEffSFShapeDownPt40*
-                               process.effSFMuonEventWeighEffSFNormUpSys    *
+                               process.effSFMuonEventWeightEffSFNormUpSys    *
                                process.effSFMuonEventWeightEffSFNormDownSys
                                )
     elif(decayChannel=="electron"):
