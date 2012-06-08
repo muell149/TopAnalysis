@@ -3465,9 +3465,6 @@ TH1D* TopSVDFunctions::SVD_ArrayToShifts(TH1D* array, int numHist)
 void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, int numHist)
 { 
     
-                 
-     
-    
     int flag_verbose = 1; 
     
 
@@ -3488,7 +3485,7 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
 
             // get bin and errors for data
             // Notice: Only ONE histogram will be used here!
-            double value_data = rawHist->GetBinContent(i); 
+            double value_data = rawHist->GetBinContent(i);
             double err_data = rawHist->GetBinError(i);  
             // Get background value to be substracted! 
             double value_bgr = 0.; 
@@ -3497,6 +3494,8 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
                 std::cout << "ERROR in TopSVDFunctions::SVD_BackgrHandling: " << std::endl;
                 std::cout << "N_MC BG > N_data in bin " << i << std::endl;
                 for ( int k = 1 ; k <= nbins ; k++ ) {
+                    value_data = rawHist->GetBinContent(k);
+                    value_bgr = (bgrHist+h)->GetBinContent(k);
                     std::cout << "   Bin " << k << ":  Data=" << value_data << "    Bgr=" << value_bgr;
                     if ( value_bgr > value_data ) {
                         cout << " !@#$%^&*! " << endl;
@@ -5510,7 +5509,7 @@ double TopSVDFunctions::SVD_Unfold(
     // ATTENTION: Hier we assume to have only ONE histo in the array1
     TH1D* rawHist = SVD_Rebin1D(dataInputHist, numbins, thebins, !cutLowerGenSideBin, !cutUpperGenSideBin, 1);
     SVD_EmptyRecSideBins1D(rawHist, cutLowerRecSideBin, cutUpperRecSideBin); 
-     
+    
     
     // All Background
     // Set errors to zero!
