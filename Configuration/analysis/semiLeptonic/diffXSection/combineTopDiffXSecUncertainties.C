@@ -93,6 +93,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   if(extrapolate==false&&hadron==false) useBCC=true;
   unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
+  // draw ratio for final cross section plots?
+  bool ratio=true; 
   
   // ==========================================
   //  Basic Printout and Variable Definitions
@@ -382,23 +384,23 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		if(calculateError_[xSecVariables_[i]][sys]==true){
 		  if(verbose2>0) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
-// 		  if(sys==sysHadUp||sys==sysHadDown){
-// 		    // placeholder for bquark quantities and inclusive xSec
-// 		    if(xSecVariables_[i].Contains("bq")||xSecVariables_[i].Contains("inclusive")){
-// 		      sysBinXSecValue=(1.+std::abs(constHadUncertainty))*stdBinXSecValue;
-// 		    }
-// 		    // otherwise from external studies
-// 		    else{
-// 		      double unc=hadUnc_[xSecVariables_[i]]->GetBinContent(bin);
-// 		      sysBinXSecValue = (1.+std::abs(unc))*stdBinXSecValue;
-// 		    }
-// 		  }
-
+		  //OUTDATED FIXME MARTIN: use as hadronization uncertainty a plain value or external values
+		  //if(sys==sysHadUp||sys==sysHadDown){
+		  //  // placeholder for bquark quantities and inclusive xSec
+		  //  if(xSecVariables_[i].Contains("bq")||xSecVariables_[i].Contains("inclusive")){
+		  //    sysBinXSecValue=(1.+std::abs(constHadUncertainty))*stdBinXSecValue;
+		  //  }
+		  //  // otherwise from external studies
+		  //  else{
+		  //    double unc=hadUnc_[xSecVariables_[i]]->GetBinContent(bin);
+		  //    sysBinXSecValue = (1.+std::abs(unc))*stdBinXSecValue;
+		  //  }
+		  //}
 		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
-		  // FIXME MARTIN: make hadronization uncertainty symmetric rel down =- rel. up
- 		  if(sys==sysHadDown){
-		    sysBinXSecValue= (sysBinXSecValue-stdBinXSecValue < 0) ? stdBinXSecValue+2*sysDiff : stdBinXSecValue-2*sysDiff;
-		  }
+		  // OUTDATED FIXME MARTIN: make hadronization uncertainty symmetric rel down =- rel. up
+ 		  //if(sys==sysHadDown){
+		  //  sysBinXSecValue= (sysBinXSecValue-stdBinXSecValue < 0) ? stdBinXSecValue+2*sysDiff : stdBinXSecValue-2*sysDiff;
+		  //}
 		  if      (sys==sysTopMassUp)   sysDiff *= SF_TopMassUpUncertainty;   // SF_TopMassUpUncertainty: defined in basicFunctions.h
 		  else if (sys==sysTopMassDown) sysDiff *= SF_TopMassDownUncertainty; // SF_TopMassDownUncertainty: defined in basicFunctions.h
 		}
@@ -938,6 +940,67 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      // Draw errors into Canvas
 	      totalErrors_[xSecVariables_[i]]->Draw("p Z same");
 	      canvas->SetName(xSecVariables_[i]);
+	      // draw data/ theory ratio
+	      if(ratio&&decayChannel=="combined"&&xSecVariables_[i].Contains("Norm")){
+		TString plotName=xSecVariables_[i];
+		plotName.ReplaceAll("Norm", "");
+		// get data histo
+		//std::cout << binning_[plotName][0] << std::endl;
+		//std::cout << binning_[plotName][binning_[plotName].size()-1] << std::endl;
+		int Nbins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*10;
+		//std::cout << Nbins << std::endl;
+		TH1F* datatemp= new TH1F("data"+plotName, "data"+plotName, Nbins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
+		reBinTH1F(*datatemp, binning_[plotName], 0);
+		for(int bin=1; bin<=datatemp->GetNbinsX(); ++bin){
+		  //std::cout << "bin: " << bin << std::endl;
+		  //std::cout << totalErrors_[xSecVariables_[i]]->GetY()[bin];
+		  datatemp->SetBinContent(bin, totalErrors_[xSecVariables_[i]]->GetY()[bin]);
+		  double err=totalErrors_[xSecVariables_[i]]->GetErrorYhigh(bin);
+		  if(err<totalErrors_[xSecVariables_[i]]->GetErrorYlow(bin)) err=totalErrors_[xSecVariables_[i]]->GetErrorYlow(bin);
+		  //std::cout << " +- " << err << std::endl;
+		  datatemp->SetBinError(bin, err);
+		}
+		histo_["dataNorm"+plotName][kData]=killEmptyBins((TH1F*)datatemp->Clone(), verbose);
+		delete datatemp;
+		// get theory histos
+		std::vector<TH1F*> theories_;
+		TH1F* plotNNLO     = (TH1F*)canvas->GetPrimitive(plotName+"nnlo"   );
+		TH1F* plotMadGraph = (TH1F*)canvas->GetPrimitive(plotName          );
+		TH1F* plotmcatnlo  = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO2");
+		TH1F* plotpowheg   = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG" );
+		// TEST
+//		histo_["data"+plotName][kData]->SetMarkerColor(kMagenta);
+//		histo_["data"+plotName][kData]->SetMarkerStyle(kMagenta);
+//		histo_["data"+plotName][kData]->Draw("same");
+// 		if(plotNNLO){
+// 		  plotNNLO->SetLineColor(kMagenta);
+// 		  plotNNLO->SetLineStyle(2);
+// 		  plotNNLO->Draw("same");
+// 		}
+// 		if(plotMadGraph){
+// 		  plotMadGraph->SetLineColor(kMagenta);
+// 		  plotMadGraph->SetLineStyle(2);
+// 		  plotMadGraph->Draw("same");
+// 		}
+// 		if(plotmcatnlo){
+// 		  plotmcatnlo->SetLineColor(kMagenta);
+// 		  plotmcatnlo->SetLineStyle(2);
+// 		  plotmcatnlo->Draw("same");
+// 		}
+// 		if(plotpowheg){
+// 		  plotpowheg->SetLineColor(kMagenta);
+// 		  plotpowheg->SetLineStyle(2);
+// 		  plotpowheg->Draw("same");
+// 		}
+// 		theories_.push_back(histo_["data"+plotName][kData]);
+//		if(plotMadGraph) drawRatio(histo_["dataNorm"+plotName][kData], plotMadGraph, 0.5, 1.5, myStyle, 0);
+		if(plotmcatnlo ) theories_.push_back( killEmptyBins(plotmcatnlo , verbose) );
+		if(plotpowheg  ) theories_.push_back( killEmptyBins(plotpowheg  , verbose) );
+		if(plotMadGraph) theories_.push_back( killEmptyBins(plotMadGraph, verbose) );
+		if(plotNNLO    ) theories_.push_back( killEmptyBins(plotNNLO    , verbose) );
+		// FIXME MARTIN: ratio(s) not working properly at the moment 
+		//drawFinalResultRatio(histo_["dataNorm"+plotName][kData], 0.5, 1.5, myStyle, 2, theories_);
+	      }
 	    }
 	    // save Canvas
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
