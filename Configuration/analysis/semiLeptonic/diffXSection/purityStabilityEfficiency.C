@@ -145,15 +145,15 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   double resEdgeR = 1e6;
   double relResEdgeL = -1e6;
   double relResEdgeR = 1e6;
-  if ( variable == "topPt")          { rangeUserLeft = 0         ; rangeUserRight = 400-0.001; resEdgeL = -400.; resEdgeR=400.; relResEdgeL = -1.; relResEdgeR=4.;}
-  else if ( variable == "topY")      { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001; resEdgeL = -3.; resEdgeR=3.;  relResEdgeL = -1.5; relResEdgeR=1.5;    }
-  else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001; resEdgeL = -300.; resEdgeR=300.;  relResEdgeL = -1.; relResEdgeR=6.;}
-  else if ( variable == "ttbarY")    { rangeUserLeft = -1.3+0.001; rangeUserRight = 1.3-0.001;  resEdgeL = -2.; resEdgeR=2.;    relResEdgeL = -2.; relResEdgeR=2.; }
-  else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.; resEdgeR=400.;  relResEdgeL = -1.; relResEdgeR=4.;}
-  else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001; resEdgeL = -35.; resEdgeR=35.;   relResEdgeL = -.5; relResEdgeR=.5; textOpt="";}
-  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001; resEdgeL = -0.15; resEdgeR=0.15;  relResEdgeL = -.5; relResEdgeR=.5;  textOpt="";}
-  else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001; resEdgeL = -200.; resEdgeR=200.;  relResEdgeL = -1.; relResEdgeR=2.;}
-  else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001; resEdgeL = -0.2; resEdgeR=0.2;   relResEdgeL = -1.; relResEdgeR=1.; }
+  if ( variable == "topPt")          { rangeUserLeft = 0         ; rangeUserRight = 400-0.001;  resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
+  else if ( variable == "topY")      { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -3.0;  resEdgeR=  3.0;  relResEdgeL = -1.5; relResEdgeR=1.5; }
+  else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001;  resEdgeL = -300.0;  resEdgeR=300.0;  relResEdgeL = -1.0; relResEdgeR=6.0; }
+  else if ( variable == "ttbarY")    { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -2.0;  resEdgeR=  2.0;  relResEdgeL = -2.0; relResEdgeR=2.0; }
+  else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
+  else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001;  resEdgeL =  -35.0;  resEdgeR= 35.0;  relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
+  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =   -0.15; resEdgeR=  0.15; relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
+  else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001;  resEdgeL = -200.0;  resEdgeR=200.0;  relResEdgeL = -1.0; relResEdgeR=2.0 ;}
+  else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
 
   //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepPt"  && lepton == "elec")    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
