@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4980, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
+void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool versionNNLO=true){
 
   // run automatically in batch mode
@@ -33,23 +33,23 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=false, unsig
   // ---
   //    create list of systematics to be treated as uncorrelated between electron and muon channel
   // ---
-  std::vector<int> uncorrSys_;
+  std::vector<unsigned int> uncorrSys_;
   // trigger 
-  uncorrSys_.push_back(sysTriggerEffSFJetNormUp   ); 
-  uncorrSys_.push_back(sysTriggerEffSFJetNormDown );
-  uncorrSys_.push_back(sysTriggerEffSFJetShapeUp  );
-  uncorrSys_.push_back(sysTriggerEffSFJetShapeDown);
+  uncorrSys_.push_back(sysTriggerEffSFJetNormUp	);
+  uncorrSys_.push_back(sysTriggerEffSFJetNormDown	);
+  uncorrSys_.push_back(sysTriggerEffSFJetShapeUp	);
+  uncorrSys_.push_back(sysTriggerEffSFJetShapeDown);  
   // lepton eff
   uncorrSys_.push_back(sysLepEffSFNormUp       );        
   uncorrSys_.push_back(sysLepEffSFNormDown     );        
   uncorrSys_.push_back(sysLepEffSFShapeUpEta   );    
   uncorrSys_.push_back(sysLepEffSFShapeDownEta );
   uncorrSys_.push_back(sysLepEffSFShapeUpPt    );     
-  uncorrSys_.push_back(sysLepEffSFShapeDownPt  );  
-  uncorrSys_.push_back(sysLepEffSFShapeUpPt40  );   
-  uncorrSys_.push_back(sysLepEffSFShapeDownPt40);
-  uncorrSys_.push_back(sysLepEffSFNormUpStat   );    
-  uncorrSys_.push_back(sysLepEffSFNormUpStat   );
+  uncorrSys_.push_back(sysLepEffSFShapeDownPt  );
+  //uncorrSys_.push_back(sysLepEffSFShapeUpPt40  );   
+  //uncorrSys_.push_back(sysLepEffSFShapeDownPt40);
+  //uncorrSys_.push_back(sysLepEffSFNormUpStat   );    
+  //uncorrSys_.push_back(sysLepEffSFNormUpStat   );
  
   // Label for datasample
   TString dataSample="2011";
@@ -131,6 +131,17 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=false, unsig
       TCanvas* canvasMu   = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
       TCanvas* canvasEl   = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
       TCanvas* canvasTheo = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
+      if(!(canvasMu&&canvasEl&&canvasTheo)){
+	std::cout << std::endl << " WARNING in bothDecayChannelsCombination.C! " << std::endl;
+	if(!canvasMu||!canvasEl) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in ";
+	if(!canvasMu) std::cout << "diffXSecTopSemiMu"  +dataSample+LV+PS+".root (muon file)"     << std::endl;
+	if(!canvasEl) std::cout << "diffXSecTopSemiElec"+dataSample+LV+PS+".root (electron file)" << std::endl;
+	if(!canvasTheo){ 
+	  std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSample+LV+PS+".root" << std::endl;
+	}
+	// use std file instead
+	std::cout << "will use the std. files instead -> related uncertainty will be 0!!!!!!!" << std::endl;
+      }
       if(canvasMu&&canvasEl&&canvasTheo){
 	// get data plots for all systematics
 	TString plotName = xSecVariables_[i];
@@ -158,22 +169,76 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=false, unsig
 	  TH1F* plotCombination=(TH1F*)(plotMu->Clone());
 	  plotCombination->Reset("ICESM");
 	  if(xSecVariables_[i].Contains("ttbarY")) plotCombination->GetXaxis()->SetRangeUser(-2.49,2.49);
-	  if(verbose>1) std::cout << std::endl << xSecVariables_[i] << ":" << std::endl;
+	  if(verbose>1) std::cout << std::endl << xSecVariables_[i] << ", " << sysLabel(sys) << ":" << std::endl;
 	  // check correlation of systematic variation
 	  bool correlated=true;
-	  for(int j =0; j<uncorrSys_.size(); ++j){
+	  for(unsigned int j =0; j<uncorrSys_.size(); ++j){
 	    if(uncorrSys_[j]==sys&&sys!=sysNo) correlated=false;
 	  }
-	  // (i) hadronization uncertainty: use Powhwg+Herwig vs McatNlo+Pythia 
+	  // (i) hadronization uncertainty: use Powheg+Herwig vs Mc@nlo+Pythia 
 	  if (sys==sysHadUp||sys==sysHadDown){
-	    errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose);
+	    errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose); // use value from MC
+ 	    // A) get histos: Powheg and MC@NLO
+ 	    // canvas
+ 	    TCanvas* canvasMuPow = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysGenPowheg)+"/"+xSecVariables_[i]));
+ 	    TCanvas* canvasElPow = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sysGenPowheg)+"/"+xSecVariables_[i]));
+ 	    TCanvas* canvasMuMca = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysGenMCatNLO)+"/"+xSecVariables_[i]));
+ 	    TCanvas* canvasElMca = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sysGenMCatNLO)+"/"+xSecVariables_[i]));
+ 	    // plots
+	    TH1F* plotMuPow=0;
+	    TH1F* plotElPow=0;
+	    TH1F* plotMuMca=0;
+	    TH1F* plotElMca=0;
+ 	    if(canvasMuPow&&canvasElPow){
+ 	      plotMuPow = (TH1F*)canvasMuPow->GetPrimitive(plotName+"kData");
+ 	      plotElPow = (TH1F*)canvasElPow->GetPrimitive(plotName+"kData");  
+	    }
+ 	    if(canvasMuMca&&canvasElMca){
+ 	      plotMuMca = (TH1F*)canvasMuMca->GetPrimitive(plotName+"kData");
+ 	      plotElMca = (TH1F*)canvasElMca->GetPrimitive(plotName+"kData");  
+	    }
+	    // check if all plots are available
+	    if(canvasMuPow&&canvasElPow&&canvasMuMca&&canvasElMca){
+	      // B) combine channels for Powheg and Mcatnlo
+	      TH1F* plotCombPow=(TH1F*)(plotMu->Clone());
+	      TH1F* plotCombMca=(TH1F*)(plotMu->Clone());
+	      errorWeightedMeanCombination(*plotMuPow, *plotElPow, *plotCombPow, verbose);
+	      errorWeightedMeanCombination(*plotMuMca, *plotElMca, *plotCombMca, verbose);
+	      // C) transfer absolute uncertainty from Powheg vs. MCatNlo to systematic shifted plot (hadronization)
+	      // loop all bins
+	      for(int bin=1; bin<=plotCombination->GetNbinsX(); ++bin){
+		// central combined value for this bin
+		double stdValue = histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
+		// calculate absolute difference between Powheg and MCatNLO
+		double hadUnc = plotCombPow->GetBinContent(bin)-plotCombMca->GetBinContent(bin);
+		// take care of sign: hadDown = -hadUp
+		if(sys==sysHadDown) hadUnc*=-1;
+		// FIXME MARTIN: ignore Hadronization uncertainty in 1st bin because it comes from the difference if the finite and non-finite top mass
+		if(xSecVariables_[i].Contains("ttbarMass")&&bin==1) hadUnc=0;
+		// printout
+		if(verbose>1){
+		  std::cout << "bin " << bin << " MadGraph    xSec value: " << stdValue << std::endl;
+		  std::cout << "      "      << " Powheg el   xSec value: " <<  plotElPow->GetBinContent(bin)   << std::endl;
+		  std::cout << "      "      << " Powheg mu   xSec value: " <<  plotMuPow->GetBinContent(bin)   << std::endl;
+		  std::cout << "      "      << " Powheg comb xSec value: " <<  plotCombPow->GetBinContent(bin) << std::endl;
+		  std::cout << "      "      << " mc@nlo el   xSec value: " <<  plotElMca->GetBinContent(bin)   << std::endl;
+		  std::cout << "      "      << " mc@nlo mu   xSec value: " <<  plotMuMca->GetBinContent(bin)   << std::endl;
+		  std::cout << "      "      << " mc@nlo comb xSec value: " <<  plotCombMca->GetBinContent(bin) << std::endl;
+		  std::cout << "bin " << bin << " xSec value: " << stdValue << std::endl;
+		  std::cout << "  old (Powheg vs. MadGraph) uncertainty: " << plotCombination->GetBinContent(bin)-stdValue << std::endl;
+		  std::cout << "  new (Powheg vs. MC@nlo  ) uncertainty: " << hadUnc << std::endl;
+		}
+		// save this absolute error wrt. central combined value as final hadronization uncertainty shifted plot
+		plotCombination->SetBinContent(bin, stdValue+hadUnc);
+	      }
+	    }
 	  }
 	  // (ii) uncorrelated uncertainties 
-	  if(!correlated){
+	  else if(!correlated){
 	    // get standard xSec histos
 	    // a) canvas
-	    TCanvas* canvasMuStd = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sys)+"/"+xSecVariables_[i]));
-	    TCanvas* canvasElStd = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sys)+"/"+xSecVariables_[i]));
+	    TCanvas* canvasMuStd = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
+	    TCanvas* canvasElStd = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
 	    // b) plots
 	    if(canvasMuStd&&canvasElStd){
 	      TH1F* plotMuStd = (TH1F*)canvasMuStd->GetPrimitive(plotName+"kData");
@@ -630,18 +695,6 @@ void bothDecayChannelsCombination(double luminosity=4980, bool save=false, unsig
 	  closeStdTopAnalysisFiles(files_);
 	  exit(-2);
 	}
-      }
-      else{
-	std::cout << " ERROR in bothDecayChannelsCombination.C! " << std::endl;
-	if(!canvasMu||!canvasEl) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in ";
-	if(!canvasMu) std::cout << "diffXSecTopSemiMu"  +dataSample+LV+PS+".root (muon file)"     << std::endl;
-	if(!canvasEl) std::cout << "diffXSecTopSemiElec"+dataSample+LV+PS+".root (electron file)" << std::endl;
-	if(!canvasTheo){ 
-	  std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSample+LV+PS+".root" << std::endl;
-	}
-	// close file and delete pointer
-	closeStdTopAnalysisFiles(files_);
-	exit(-1);
       }
     }
   }
