@@ -14,8 +14,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
   //     Configuration
   // ---
   // take care that prescaling of muon channel for full 2011 datset was taken into account
-  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=4955;
-  if(luminosity==4955&&decayChannel=="electron") luminosity=4980;
+  if(luminosity==4980&&decayChannel=="muon"    ) luminosity=constLumiMuon;
+  if(luminosity==4955&&decayChannel=="electron") luminosity=constLumiElec;
   // set up common analysis style
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
