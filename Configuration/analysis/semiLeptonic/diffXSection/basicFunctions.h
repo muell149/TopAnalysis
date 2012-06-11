@@ -2098,6 +2098,243 @@ namespace semileptonic {
     f2->Draw("L same");
   }
 
+  void drawFinalResultRatio(const TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0))
+  {
+    // this function draws a pad with the ratio "histNumeratorData" over "histDenominatorTheoryX" 
+    // for up to five specified theory curves, using "histNumeratorDataDown" and "histNumeratorDataUp"
+    // the range of the ratio is 'ratioMin' to 'ratioMax'
+    // to the systematic variation "sys" of the enumerator "systematicVariation"
+    // the uncertainty of "histNumeratorData" only is considered for the uncertainty of the ratio:
+    // ( error(bin i) = sqrt(1/histNumerator->GetBinContent(i)) / histDenominator->GetBinContent(i) )
+    // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+
+    if(histDenominatorTheory_.size()>0&&histNumeratorData){
+      if(verbose>0) std::cout << "calling drawFinalResultRatio for " << histNumeratorData->GetName() << " and " << histDenominatorTheory_.size() << " theory curves" << std::endl;
+      // check that histos have the same binning
+      for(unsigned int nTheory=0; nTheory<histDenominatorTheory_.size(); ++nTheory){
+	if(!histDenominatorTheory_[nTheory]||histNumeratorData->GetNbinsX()!=histDenominatorTheory_[nTheory]->GetNbinsX()){
+	  std::cout << "error when calling drawRatio - data and theory" << nTheory+1 << " histo have different number of bins!" << std::endl;
+	  std::cout << histNumeratorData->GetNbinsX() << " (data) vs. " << histDenominatorTheory_[nTheory]->GetNbinsX() << " (theory)" << std::endl;
+	  std::cout << "set this ratio to 1!" << std::endl;
+	  histDenominatorTheory_[nTheory]=(TH1F*)histNumeratorData->Clone("WARNINGerrorInRatio");
+	}
+      }
+      if(verbose>1) std::cout << "range: " << histNumeratorData->GetNbinsX() << " bins from " <<  histNumeratorData->GetBinLowEdge(histNumeratorData->GetXaxis()->GetFirst()) << " to " << histNumeratorData->GetBinLowEdge(histNumeratorData->GetXaxis()->GetLast()+1) << std::endl;
+      // create ratios
+      std::vector<TH1*> ratio_;
+      for(unsigned int nTheory=0; nTheory<histDenominatorTheory_.size(); ++nTheory){
+	if(verbose>1){
+	  std::cout << "ratio for theory #" << nTheory;
+	  std::cout << "  (" << histDenominatorTheory_[nTheory]->GetName();
+	  std::cout << " / " << histNumeratorData->GetName() << ")" << std::endl;
+	}
+	// clone theory curve
+	TH1F* tempRatio = (TH1F*)histDenominatorTheory_[nTheory]->Clone();
+	tempRatio->Reset("icms");
+	// loop bins
+	for(int bin=1; bin<=histDenominatorTheory_[nTheory]->GetNbinsX(); ++bin){
+	  //std::cout << "bin: " << bin << std::endl;
+	  if(histNumeratorData->GetBinWidth(bin)!=0.&& histNumeratorData->GetBinContent(bin)!=0){
+	    // set content
+	    //std::cout << "histDenominatorTheory_[nTheory]->GetBinContent(bin): "<< histDenominatorTheory_[nTheory]->GetBinContent(bin) << std::endl;
+	    //std::cout << "histNumeratorData->GetBinContent(bin): " << histNumeratorData->GetBinContent(bin) << std::endl;
+	    tempRatio->SetBinContent(bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) / histNumeratorData->GetBinContent(bin));
+	    // set error
+	    tempRatio->SetBinError  (bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) * histNumeratorData->GetBinError(bin)* histNumeratorData->GetBinError(bin) / histNumeratorData->GetBinContent(bin));
+	  }
+	  // set technical bins with width==0 to zero
+	  else{
+	    tempRatio->SetBinError  (bin, 0.5);
+	    tempRatio->SetBinContent(bin, 1  );
+	  }
+	  //if(verbose>1) std::cout << tempRatio->GetBinContent(bin) << " +- " << tempRatio->GetBinError(bin)<< std::endl;
+	}
+	ratio_.push_back((TH1F*)tempRatio->Clone());
+      }
+      // get some values from style
+      Int_t    logx  = myStyle.GetOptLogx();
+      Double_t left  = myStyle.GetPadLeftMargin();
+      Double_t right = myStyle.GetPadRightMargin();
+      // y:x size ratio for canvas
+      double canvAsym = 4./3.;
+      // ratio size of pad with plot and pad with ratio
+      double ratioSize = 0.36;
+      double scaleFactor = 1./(canvAsym*ratioSize);
+      // change old pad
+      gPad->SetBottomMargin(ratioSize);
+      gPad->SetRightMargin(right);
+      gPad->SetLeftMargin(left);
+      gPad->SetBorderMode(0);
+      gPad->SetBorderSize(0);
+      gPad->SetFillColor(10);
+      // create new pad for ratio plot
+      TPad *rPad;
+      rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
+#ifdef DILEPTON_MACRO
+      rPad->SetFillColor(10);
+#else
+      rPad->SetFillStyle(0);
+      rPad->SetFillColor(0);
+#endif
+      rPad->SetBorderSize(0);
+      rPad->SetBorderMode(0);
+      rPad->Draw();
+      rPad->cd();
+      rPad->SetLogy(0);
+      rPad->SetLogx(logx);
+      rPad->SetTicky(1);
+      // configure ratio plot
+      histNumeratorData->GetXaxis()->SetLabelSize(0);
+      histNumeratorData->GetXaxis()->SetTitleSize(0);
+      for(unsigned int nTheory=0; nTheory<ratio_.size(); ++nTheory){
+	ratio_[nTheory]->SetStats(kFALSE);
+	ratio_[nTheory]->SetTitle("");
+	ratio_[nTheory]->SetMaximum(ratioMax);
+	ratio_[nTheory]->SetMinimum(ratioMin);
+	ratio_[nTheory]->SetLineColor(histDenominatorTheory_[nTheory]->GetLineColor());
+	ratio_[nTheory]->SetLineWidth(histDenominatorTheory_[nTheory]->GetLineWidth());
+	ratio_[nTheory]->SetMarkerColor(histDenominatorTheory_[nTheory]->GetLineColor());
+	// configure axis of ratio_[nTheory] plot
+	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
+	ratio_[nTheory]->GetXaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleOffset()*0.9);
+	ratio_[nTheory]->GetXaxis()->SetLabelSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetLabelSize()*scaleFactor*1.4);
+	ratio_[nTheory]->GetXaxis()->SetTitle(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitle());
+	ratio_[nTheory]->GetXaxis()->SetNdivisions(histDenominatorTheory_[nTheory]->GetNdivisions());
+	ratio_[nTheory]->GetYaxis()->CenterTitle();
+	ratio_[nTheory]->GetYaxis()->SetTitle("#frac{N_{theory}}{N_{data}}");
+	ratio_[nTheory]->GetYaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetYaxis()->GetTitleSize()*scaleFactor);
+	ratio_[nTheory]->GetYaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetYaxis()->GetTitleOffset()/scaleFactor);
+	ratio_[nTheory]->GetYaxis()->SetLabelSize(histDenominatorTheory_[nTheory]->GetYaxis()->GetLabelSize()*scaleFactor);
+	ratio_[nTheory]->GetYaxis()->SetLabelOffset(histDenominatorTheory_[nTheory]->GetYaxis()->GetLabelOffset()*3.3);
+	ratio_[nTheory]->GetYaxis()->SetTickLength(0.03);
+	ratio_[nTheory]->GetYaxis()->SetNdivisions(505);
+	ratio_[nTheory]->GetXaxis()->SetRange(histNumeratorData->GetXaxis()->GetFirst(), histNumeratorData->GetXaxis()->GetLast());
+	// delete axis of initial plot
+	histDenominatorTheory_[nTheory]->GetXaxis()->SetLabelSize(0);
+	histDenominatorTheory_[nTheory]->GetXaxis()->SetTitleSize(0);
+	// draw ratio_[nTheory] plot
+	if(nTheory==0) ratio_[nTheory]->DrawClone("hist");
+	else ratio_[nTheory]->DrawClone("hist same");
+	ratio_[nTheory]->SetMarkerSize(1.2);
+	ratio_[nTheory]->DrawClone("p e X0 same");
+      }
+
+      rPad->SetTopMargin(0.0);
+      rPad->SetBottomMargin(0.15*scaleFactor);
+      rPad->SetRightMargin(right);
+      gPad->SetLeftMargin(left);
+      gPad->RedrawAxis();
+      // draw grid
+      rPad->SetGrid(1,1);
+      // draw a horizontal lines on a given histogram
+      // a) at 1
+      Double_t xmin = ratio_[0]->GetXaxis()->GetXmin();
+      Double_t xmax = ratio_[0]->GetXaxis()->GetXmax();
+      TString height = ""; height += 1;
+      TF1 *f = new TF1("f", height, xmin, xmax);
+      f->SetLineStyle(1);
+      f->SetLineWidth(1);
+      f->SetLineColor(kBlack);
+      f->Draw("L same");
+      // b) at upper end of ratio pad
+      TString height2 = ""; height2 += ratioMax;
+      TF1 *f2 = new TF1("f2", height2, xmin, xmax);
+      f2->SetLineStyle(1);
+      f2->SetLineWidth(1);
+      f2->SetLineColor(kBlack);
+      f2->Draw("L same");
+      rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
+      gPad->cd();
+    }
+    else{
+      if(verbose>0){ 
+	std::cout << "calling drawFinalResultRatio for ";
+	if(histNumeratorData) std::cout << histNumeratorData->GetName();
+	else  std::cout << "missing data curve";
+	std::cout << " and " << histDenominatorTheory_.size() << " theory curves" << std::endl;
+      }
+    }
+  }
+
+  TH1F* killEmptyBins(TH1F* histo, int verbose=0){
+    // this function removes all bins with width==0 from "histo"
+    // verbose: level of text output
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+    
+    // collect nonemty bins
+    std::vector<double> binEdges_;
+    std::vector<double> binValues_;
+    std::vector<double> blockList_;
+    // loop original histogram
+    if(verbose>0) std::cout << "scanning " << histo->GetName() << " for technical bins with width 0" << std::endl;
+    for(int bin =1; bin<=histo->GetNbinsX(); ++bin){
+       if(verbose>1) std::cout << "bin #" << bin << " ( lowedge " << histo->GetBinLowEdge(bin) << ")" << std::endl;
+      if(histo->GetBinWidth(bin)!=0.){
+	if(verbose>1) std::cout << "nonzero width!"<< std::endl;
+	binValues_.push_back(histo->GetBinContent(bin));
+	if(binEdges_.size()==0||binEdges_[binEdges_.size()-1]!=histo->GetBinLowEdge(bin)){
+	  if(verbose>1) std::cout << "add "<< histo->GetBinLowEdge(bin) << std::endl;
+	  binEdges_.push_back(histo->GetBinLowEdge(bin));
+	}
+	if(binEdges_[binEdges_.size()-1]!=histo->GetBinLowEdge(bin+1)){
+	  binEdges_.push_back(histo->GetBinLowEdge(bin+1));
+	  if(verbose>1) std::cout << "add "<< histo->GetBinLowEdge(bin+1) << std::endl;
+	}
+      }
+      else{
+	blockList_.push_back(bin);
+	if(verbose>1) std::cout << "blocked!" << std::endl;
+      }
+    }
+    //if(binEdges_[binEdges_.size()-1]=!histo->GetBinLowEdge(histo->GetNbinsX()+1)) binEdges_.push_back(histo->GetBinLowEdge(histo->GetNbinsX()+1));
+    if(verbose>0) std::cout << "scanning 2" << std::endl;
+    // create histo without empty bins
+    int Nbins=binValues_.size();
+    double bins[binEdges_.size()];
+    if(verbose>0) std::cout << Nbins << " bins: ";
+    for(unsigned int entry=0; entry<binEdges_.size(); ++entry){
+      bins[entry]=binEdges_[entry];
+      if(verbose>0) std::cout << bins[entry] << ", ";
+    }
+    if(verbose>0) std::cout << "end" << std::endl;
+    if(verbose>0) std::cout << "scanning 3" << std::endl;
+    TString lab="mod"+(TString)histo->GetName();
+    TH1F* result = new TH1F(lab, lab, Nbins, bins);
+    // fill new histo
+    int resultbin=1;
+    for(int bin =1; bin<=histo->GetNbinsX(); ++bin){
+      // check if bin has to be refilled
+      bool fill=true;
+      for(unsigned int blocked=0; blocked<blockList_.size(); ++blocked){
+	if(blockList_[blocked]==bin) fill=false;
+      }
+      if(fill){
+	result->SetBinContent(resultbin,histo->GetBinContent(bin));
+	resultbin++;
+      }
+    }
+    // first bin
+    result->SetBinContent(0,histo->GetBinContent(0));
+    result->SetBinError  (0,histo->GetBinError  (0));
+    // last bin
+    result->SetBinContent(result->GetNbinsX()+1,histo->GetBinContent(histo->GetNbinsX()+1));
+    result->SetBinError  (result->GetNbinsX()+1,histo->GetBinError  (histo->GetNbinsX()+1));
+    // print out final plot
+    if(verbose>1){
+      for(int bin =0; bin<=result->GetNbinsX()+1; ++bin){
+	std::cout << "bin #" << bin << ": " <<  result->GetBinContent(bin) << " +- " << result->GetBinError(bin);
+	std::cout << "(" << result->GetBinLowEdge(bin) << ")" << std::endl;
+      }
+    }
+    // return cleaned plot
+    return result;
+  }
+
   double getInclusiveXSec(TH1* hist, int verbose=0)
   {
     // this function integrates a given
