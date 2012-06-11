@@ -201,6 +201,13 @@ DEFINE_FWK_MODULE(MCPileUp);
 DEFINE_FWK_MODULE(PUControlDistributionsAnalyzer);
 
 /**
+   Define modules for MC event weight analysis
+**/
+
+#include "TopAnalysis/TopAnalyzer/interface/EventWeightAnalyzer.h"
+DEFINE_FWK_MODULE(EventWeightAnalyzer);
+
+/**
     Define modules needed for the analysis of trigger
 
 

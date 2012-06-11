@@ -65,8 +65,8 @@ nafJobSplitter.pl -q 1 -d MuPowhegSG -c mctag=Fall11,triggerTag=HLT,sample=powhe
 nafJobSplitter.pl -q 1 -d ElPowhegSG -c mctag=Fall11,triggerTag=HLT,sample=powheg,lepton=electron 507 analyzeMuonDiffXSecCorrected_cfg.py
 
 # MC@NLO
-nafJobSplitter.pl -q 1 -d MuMcatnloSG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=muon     441 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -d ElMcatnloSG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=electron 441 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -d MuMcatnloSG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=muon     441 analyzeMuonDiffXSecCorrectedMCatNLO_cfg.py
+nafJobSplitter.pl -q 1 -d ElMcatnloSG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=electron 441 analyzeMuonDiffXSecCorrectedMCatNLO_cfg.py
 
 ###############
 # other ttbar #
@@ -110,8 +110,8 @@ nafJobSplitter.pl -q 1 -d MuPowhegBG -c mctag=Fall11,triggerTag=HLT,sample=powhe
 nafJobSplitter.pl -q 1 -d ElPowhegBG -c mctag=Fall11,triggerTag=HLT,sample=powheg,lepton=electron 507 analyzeMuonDiffXSecBG_cfg.py
 
 # MC@NLO
-nafJobSplitter.pl -q 1 -d MuMcatnloBG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=muon     441 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d ElMcatnloBG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=electron 441 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -d MuMcatnloBG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=muon     441 analyzeMuonDiffXSecBGMCatNLO_cfg.py
+nafJobSplitter.pl -q 1 -d ElMcatnloBG -c mctag=Fall11,triggerTag=HLT,sample=mcatnlo,lepton=electron 441 analyzeMuonDiffXSecBGMCatNLO_cfg.py
 
 ##########
 # W+jets #
