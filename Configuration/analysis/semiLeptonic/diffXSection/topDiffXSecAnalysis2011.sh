@@ -49,6 +49,7 @@
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
 decayChannel=\"combined\" 
+
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
@@ -90,7 +91,7 @@ inputFolderName=\"RecentAnalysisRun\"
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=true
+redoControlPlots=false
 
 ## Re-create systematic plots
 ## redoSystematics = true / false (default: true)
@@ -102,8 +103,8 @@ makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be <= 50 (default), see list of systematics below)
-maxSys=50
+## maxSys>0 needs a lot of time (must be <= 52 (default), see list of systematics below)
+maxSys=52
 
 ## Shape variations:
 ## a) Calculate them at all
@@ -126,18 +127,22 @@ clean=false
 SVD=true
 
 ## extrapolate xSec to full PS?
-## extrapolate = true / false (default: false)
-extrapolate=false
+## extrapolate = true / false (default: true)
+extrapolate=true
 
 ## use hadron level PS instead of parton level PS?
 ## hadron = true / false (default: false)
 hadron=false
 
-#####################
-## prepare running ##
-#####################
+#### =====================
+####  Prepare running
+#### =====================
+
+BoolArray=( true false )
+
 ## start the timer to stop the time needed for running the whole analysis
 START=$(date +%s)
+
 # get proper name of rootfile
 PS=""
 LV="Parton"
@@ -150,6 +155,7 @@ if [ $extrapolate == false -a $hadron == true ]
     then
     LV="Hadron"
 fi
+
 muonFile=./diffXSecTopSemiMu$dataLabel$LV$PS.root
 elecFile=./diffXSecTopSemiElec$dataLabel$LV$PS.root
 combFile=./diffXSecTopSemiLep$dataLabel$LV$PS.root
@@ -192,71 +198,70 @@ if [ $fast = false ]
     sleep 5
 fi
 
-## delete existing root file/ plots
+#### ===================================
+####  Delete existing root file/ plots
+#### ===================================
+echo
 echo "part A: Delete existing files and plots (if applicable)"
-if [ $fast = false ]
-    then
+if [ $fast = false ]; then
     sleep 3
 fi
 
-if [ $redoSystematics = false ]; then
-    echo
-    echo "Flag 'redoSystematics' is set to $redoSystematics  "
-    echo "Flag 'clean' set to 'false'                        "
-    echo "Avoid deleting files/plots which are not recreated "
-    echo
-    clean=false
-fi
+if [ $clean = true ]; then
 
-## delete existing root file
-if [ $clean = true ]
-    then
-     echo "Part A1: delete existing root file"
-    if [ $decayChannel == \"electron\" ]
-	then
-	echo $elecFile
-	rm $elecFile
+    if [ $redoSystematics = false ]; then
+	echo
+	echo "Flag 'redoSystematics' is set to $redoSystematics "
+	echo "Flag 'clean' set to 'false' to avoid deleting files/plots which are not recreated "
+	echo
+	clean=false
     else
-	if [ $decayChannel == \"muon\" ]
-	    then
-	    echo $muonFile
-	    rm $muonFile
+	
+        ## ============================
+        ##  Delete existing root files
+        ## ============================
+   
+	echo
+	echo "Part A1: delete existing root file"
+	if [ $decayChannel == \"electron\" ]; then
+	    echo $elecFile
+	    rm $elecFile
 	else
-	    if [ $decayChannel == \"combined\" ]
-		then
+	    if [ $decayChannel == \"muon\" ]; then
 		echo $muonFile
-		rm $combFile 
-		echo "none" 
+		rm $muonFile
+	    else
+		if [ $decayChannel == \"combined\" ]; then
+		    echo $muonFile
+		    rm $combFile		    
+		fi
+	    fi
+	fi 
+	
+        ## ============================    
+        ##  Delete existing plots
+	## ============================
+    
+	echo
+	echo "Part A2: delete existing plots within diffXSecFromSignal/plots/$decayChannel/$dataLabel/*/*.*"
+	if [ $decayChannel == \"electron\" ]; then
+	    rm ./diffXSecFromSignal/plots/electron/$dataLabel/*/*.*
+	else
+	    if [ $decayChannel == \"muon\" ]; then
+		rm ./diffXSecFromSignal/plots/muon/$dataLabel/*/*.*
+	    else
+		if [ $decayChannel == \"combined\" ]; then
+		    rm ./diffXSecFromSignal/plots/combined/$dataLabel/*/*.*
+		fi
 	    fi
 	fi
-    fi 
-fi
-
-## delete existing plots
-if [ $clean = true ]
-    then
-    echo "Part A2: delete existing plots within diffXSecFromSignal/plots/$decayChannel/$dataLabel/*/*.*"
-    if [ $decayChannel == \"muon\" ]
-	then
-	rm ./diffXSecFromSignal/plots/muon/$dataLabel/*/*.*
-    fi
-    if [ $decayChannel == \"electron\" ]
-	then
-	rm ./diffXSecFromSignal/plots/electron/$dataLabel/*/*.*
-    fi
-    if [ $decayChannel == \"combined\" ]
-	then
-	rm ./diffXSecFromSignal/plots/combined/$dataLabel/*/*.*
-    fi
-    if [ $fast = false ]
-	then
-	sleep 1
     fi
 fi
 
-########################
-## run cut monitoring ##
-########################
+#### =====================
+####  Run cut monitoring
+#### =====================
+
 BEFOREB=$(date +%s)
 echo
 echo "Part B: process cut monitoring macro"
@@ -265,51 +270,50 @@ if [ $fast = false ]
     sleep 3
 fi
 
-if [ -f commandsMonPrepare.cint ]; then    
-    rm commandsMonPrepare.cint
-    rm analyzeTopDiffXSecMonitoring_C.so
-    rm analyzeTopDiffXSecMonitoring_C.d
-fi
-
-cat >> commandsMonPrepare.cint << EOF
+if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
+    
+    ## Compile library
+    
+    if [ -f commandsMonPrepare.cint ]; then    
+	rm commandsMonPrepare.cint
+	rm analyzeTopDiffXSecMonitoring_C.so
+	rm analyzeTopDiffXSecMonitoring_C.d
+    fi
+    
+    cat >> commandsMonPrepare.cint << EOF
 .L analyzeTopDiffXSecMonitoring.C++
 EOF
+    
+    root -l -b < commandsMonPrepare.cint
+    
+    ## Execute macro
 
-root -l -b < commandsMonPrepare.cint
-
-if [ $redoControlPlots = true ]; then
-
-    # with ratio plots
-    if [ -f commandsMonRun1.cint ]; then    
-	rm commandsMonRun1.cint       
-    fi    
-
-    cat >> commandsMonRun1.cint << EOF
+    if [ $redoControlPlots = true ]; then
+	
+	for label in "${BoolArray[@]}"; do
+	    
+        ## label = 1: Control plots with ratio plots
+        ## label = 0: Control plots without ratio plots
+	    
+	    if [ -f commandsMonRun.cint ]; then    
+		rm commandsMonRun.cint       
+	    fi    
+	    
+	    cat >> commandsMonRun.cint << EOF
 .L analyzeTopDiffXSecMonitoring_C.so
-analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, $extrapolate, $hadron) 
+analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, $label, $extrapolate, $hadron) 
 EOF
-    echo ""
-    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, $extrapolate, $hadron)"
-    root -l -b < commandsMonRun1.cint
-
-    # without ratio plots
-
-    if [ -f commandsMonRun2.cint ]; then    
-	rm commandsMonRun2.cint       
-    fi  
-
-    cat >> commandsMonRun2.cint << EOF
-.L analyzeTopDiffXSecMonitoring_C.so
-analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false, $extrapolate, $hadron) 
-EOF
-    echo ""
-    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, false, $extrapolate, $hadron)"
-    root -l -b < commandsMonRun2.cint
+	    echo ""
+	    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, $extrapolate, $hadron)"
+	    root -l -b < commandsMonRun.cint
+	done
+    fi
 fi
 
-#####################################
-## run migration macro for binning ##
-#####################################
+#### ===================================
+####  Run migration macro for binning 
+#### ===================================
+
 BEFOREC=$(date +%s)
 echo
 echo "Part C: process migration macro to validate binning"
@@ -317,51 +321,54 @@ if [ $fast = false ]
     then
     sleep 3
 fi
-# Array of differential variables:
+
+# Array of differential variables
 listVarParton_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
 listVarHadron_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
-if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]
-    then
-    echo "purity and stability will be calculated for the following variables:"
-    # loop over all systematic variations
-    for (( iVar=0; iVar<9; iVar++ ))
-    do
-      echo "parton level:"
-      echo
-      root -l -q -b './purityStabilityEfficiency.C++('${listVarParton_[$iVar]}','$save', '$decayChannel', '$inputFolderName', true, true, false)'
+
+if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
+    
+    echo "purity and stability will be calculated for the following variables: "
+    echo
+    echo "Parton Level: ${listVarParton_[@]}"
+    echo "Hadron Level: ${listVarHadron_[@]}"
+   
+     # loop over all systematic variations
+    for (( iVar=0; iVar<${#listVarParton_[@]}; iVar++ )); do
+	echo "Parton Level: " 
+	echo
+	root -l -q -b './purityStabilityEfficiency.C++('${listVarParton_[$iVar]}','$save', '$decayChannel', '$inputFolderName', true, true, false)'
     done
-    for (( iVar=0; iVar<4; iVar++ ))
-    do
-      echo "hadron level:"
-      echo
-      root -l -q -b './purityStabilityEfficiency.C++('${listVarHadron_[$iVar]}','$save', '$decayChannel', '$inputFolderName', false, true, false, 99999, 0, true)'
+    
+    for (( iVar=0; iVar<${#listVarHadron_[@]}; iVar++ )); do
+	echo "Hadron Level: ${listVarHadron_[@]}"
+	echo
+	root -l -q -b './purityStabilityEfficiency.C++('${listVarHadron_[$iVar]}','$save', '$decayChannel', '$inputFolderName', false, true, false, 99999, 0, true)'
     done
 else
     echo "will be ignored, only done for decayChannel=muon/electron"
 fi
 
-#############################
-# prepare PDF uncertainties #
-#############################
+#### ============================
+####  Prepare PDF uncertainties 
+#### ============================
 BEFOREPDF=$(date +%s)
 echo
 echo "Part PDF: Prepare files for pdf uncertainties"
-echo
 
-if [ $decayChannel != \"combined\" -a $redoSystematics = true ]
-    then
+if [ $decayChannel != \"combined\" -a $redoSystematics = true ]; then
     echo
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true')' 
 else
     echo "Done for 2011 analysis in e/mu channel separate and if systematics are requested to be re-done (redoSystematics set to $redoSystematics)."
 fi
 
-##################################################################
-# run shape distortion macro to get root files for MC dependency #
-##################################################################
+#### ======================================================================
+####  Run shape distortion macro to get ROOT files for MC dependency 
+#### ======================================================================
 BEFORED=$(date +%s)
 echo
-echo "Part D: create rootfiles with shape variations"
+echo "Part D: Create rootfiles with shape variations"
 echo
 
 if [ $shapeVar = true -a $redoSystematics = true ]; then
@@ -377,9 +384,9 @@ else
     echo "choose shapeVar = true and redoSystematics = true!"
 fi
 
-#########################################
-## run efficiency& cross section macro ##
-#########################################
+#### ==========================================
+####  Run efficiency & cross section macro 
+####  ==========================================
 BEFOREE=$(date +%s)
 echo
 echo "part E1: process cross section calculation macro for all systematics"
@@ -391,73 +398,80 @@ if [ $fast = false ]
     then
     sleep 5
 fi
+
 ## print key for systematic variations
-## has to be consistend with the enumerator "systematicVariation" in "basicFunctions.h"
+## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
 
 echo
-echo "  0: sysNo,                                                       "
-echo "  1: sysLumiUp,                   2: sysLumiDown,                 "
-echo "  3: sysPUUp,                     4: sysPUDown,                   "
-echo "  5: sysJESUp,                    6: sysJESDown,                  "
-echo "  7: sysJERUp,                    8: sysJERDown,                  "
-echo "  9: sysLepEffSFNormUp,          10: sysLepEffSFNormDown,         "
-echo " 11: sysLepEffSFShapeUpEta,      12: sysLepEffSFShapeDownEta,     "
-echo " 13: sysLepEffSFShapeUpPt,       14: sysLepEffSFShapeDownPt,      "
-echo " 15: sysTriggerEffSFJetNormUp,   16: sysTriggerEffSFJetNormDown,  "
-echo " 17: sysTriggerEffSFJetShapeUp,  18: sysTriggerEffSFJetShapeDown, "
-echo " 19: sysBtagSFUp,                20: sysBtagSFDown,               "
-echo " 21: sysBtagSFShapeUpPt65,       22: sysBtagSFShapeDownPt65,      "
-echo " 23: sysBtagSFShapeUpEta0p7,     24: sysBtagSFShapeDownEta0p7,    "
-echo " 25: sysMisTagSFUp,              26: sysMisTagSFDown,             "
-echo " 27: sysTopScaleUp,              28: sysTopScaleDown,             "
-echo " 29: sysVBosonScaleUp,           30: sysVBosonScaleDown,          "
-echo " 31: sysSingleTopScaleUp,        32: sysSingleTopScaleDown,       "
-echo " 33: sysTopMatchUp,              34: sysTopMatchDown,             "
-echo " 35: sysVBosonMatchUp,           36: sysVBosonMatchDown,          "
-echo " 37: sysTopMassUp,               38: sysTopMassDown,              "
-echo " 39: sysQCDUp,                   40: sysQCDDown,                  "
-echo " 41: sysSTopUp,                  42: sysSTopDown,                 "
-echo " 43: sysDiBosUp,                 44: sysDiBosDown,                "
-echo " 45: sysPDFUp,                   46: sysPDFDown,                  "
-echo " 47: sysHadUp,                   48: sysHadDown,                  "
-echo " 49: sysShapeUp,                 50: sysShapeDown,                "
-echo " 51: ENDOFSYSENUM                                                 "
+
+echo "  0: sysNo                                                      "
+echo "  1: sysLumiUp                   2: sysLumiDown                 "
+echo "  3: sysPUUp                     4: sysPUDown                   "
+echo "  5: sysJESUp                    6: sysJESDown                  "
+echo "  7: sysJERUp                    8: sysJERDown                  "
+echo "  9: sysLepEffSFNormUp          10: sysLepEffSFNormDown         "
+echo " 11: sysLepEffSFShapeEtaUp      12: sysLepEffSFShapeEtaDown     "
+echo " 13: sysLepEffSFShapePtUp       14: sysLepEffSFShapePtDown      "
+echo " 15: sysTriggerEffSFJetNormUp   16: sysTriggerEffSFJetNormDown  "
+echo " 17: sysTriggerEffSFJetShapeUp  18: sysTriggerEffSFJetShapeDown "
+echo " 19: sysBtagSFUp                20: sysBtagSFDown               "
+echo " 21: sysBtagSFShapePt65Up       22: sysBtagSFShapePt65Down      "
+echo " 23: sysBtagSFShapeEta0p7Up     24: sysBtagSFShapeEta0p7Down    "
+echo " 25: sysMisTagSFUp              26: sysMisTagSFDown             "
+echo " 27: sysTopScaleUp              28: sysTopScaleDown             "
+echo " 29: sysVBosonScaleUp           30: sysVBosonScaleDown          "
+echo " 31: sysSingleTopScaleUp        32: sysSingleTopScaleDown       "
+echo " 33: sysTopMatchUp              34: sysTopMatchDown             "
+echo " 35: sysVBosonMatchUp           36: sysVBosonMatchDown          "
+echo " 37: sysTopMassUp               38: sysTopMassDown              "
+echo " 39: sysQCDUp                   40: sysQCDDown                  "
+echo " 41: sysSTopUp                  42: sysSTopDown                 "
+echo " 43: sysDiBosUp                 44: sysDiBosDown                "
+echo " 45: sysPDFUp                   46: sysPDFDown                  "
+echo " 47: sysHadUp                   48: sysHadDown                  "
+echo " 49: sysGenMCatNLO              50: sysGenPowheg                "
+echo " 51: sysShapeUp                 52: sysShapeDown                "
+echo " 53: ENDOFSYSENUM                                               "
+
 echo
 
-if [ $fast = false ]
-    then
+if [ $fast = false ]; then
     sleep 5
 fi
-# get start time
+
+#### ============================
+####  Systematic Uncertainties
+#### ============================
+
 BEFORESYS=$(date +%s)
 
-#### ====================================================================================
-####  Compile library, required only once before processing systematic uncertainties
-#### ====================================================================================
+if [ $decayChannel != \"combined\" ]; then
 
-if [ -f commandsSysPrepare.cint ]; then    
-    rm commandsSysPrepare.cint
-    rm analyzeHypothesisKinFit_C.so
-    rm analyzeHypothesisKinFit_C.d
-fi
+    ## ====================================================================================
+    ##  Compile library, required only once before processing systematic uncertainties
+    ## ====================================================================================
+    
+    if [ -f commandsSysPrepare.cint ]; then    
+	rm commandsSysPrepare.cint
+	rm analyzeHypothesisKinFit_C.so
+	rm analyzeHypothesisKinFit_C.d
+    fi
 
-cat >> commandsSysPrepare.cint << EOF
+    cat >> commandsSysPrepare.cint << EOF
 .L analyzeHypothesisKinFit.C++
 EOF
 
-root -l -b < commandsSysPrepare.cint
+    root -l -b < commandsSysPrepare.cint
 
-#### ================================================================================================================
-####  Processing reference data (noSys), required always thus excluded from looping over systematic uncertainties 
-#### ================================================================================================================
+    ## ================================================================================================================
+    ##  Processing reference data (noSys), required always thus excluded from looping over systematic uncertainties 
+    ## ================================================================================================================
 
-if [ $decayChannel != \"combined\" ]; then
-    
     if [ -f commandsNoSysRun.cint ]; then    
 	rm commandsNoSysRun.cint
     fi
     
-cat >> commandsNoSysRun.cint << EOF
+    cat >> commandsNoSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
 analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
 EOF
@@ -465,33 +479,30 @@ EOF
     echo ""
     echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
     root -l -b < commandsNoSysRun.cint
-fi
 
-#### ======================================================================
-####  Processing systematic uncertainties (all but shape uncertainties)
-#### ======================================================================
 
-if [ $redoSystematics = true ]; then
+    ## ==========================================
+    ##  Processing systematic uncertainties 
+    ## ==========================================
+
+    if [ $redoSystematics = true ]; then
     
-    ## loop all systematic variations
-    for (( systematicVariation = 1; systematicVariation <= $maxSys;  systematicVariation++ )); do
-      
-	if [ $fast = false ]; then
-	    sleep 2
-	fi
-
-	if [ $decayChannel != \"combined\" ]; then
-	    
+        ## loop all systematic variations (excluding shape variations)
+	
+	for (( systematicVariation = 1; systematicVariation <= $maxSys;  systematicVariation++ )); do
+    
             ## exclude shape variation
-	    if [ $systematicVariation == 49 -o $systematicVariation == 50 ]; then
+
+
+	    if [ $systematicVariation == 51 -o $systematicVariation == 52 ]; then
 		echo " Shape variations are executed separately."
 	    else
 	    ## run macro for 2011 analysis
-	      
+		
 		if [ -f commandsSysRun.cint ]; then    
 		    rm commandsSysRun.cint
 		fi
-    
+		
 		cat >> commandsSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
 analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
@@ -499,31 +510,23 @@ EOF
 		echo ""
 		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
 		root -l -b < commandsSysRun.cint
-		#root -l -q -b 'analyzeHypothesisKinFit.C++('$dataLuminosity', '$save', '$systematicVariation', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD', '$extrapolate', '$hadron')'
 	    fi  
-	else
-	    echo "will be ignored, only done for decayChannel=muon/electron"
-	fi
-    done
-
-#### ===================================
-####  Processing shape variations
-#### ===================================
-
-    if [ $shapeVar = true ]; then
-    
-	if [ $decayChannel != \"combined\" ]; then
+	done
+	
+        ##  Processing shape variations
+        
+	if [ $shapeVar = true ]; then
 	    
 	    echo ""
 	    echo " All regular systematic uncertainties processed .... Now running shape variations."
 	    echo ""
-
-	    for (( systematicVariation = 49; systematicVariation <= 50;  systematicVariation++ )); do
-
+	    
+	    for (( systematicVariation = 51; systematicVariation <= 52;  systematicVariation++ )); do
+		
 		if [ -f commandsSysShapeVarRun.cint ]; then    
 		    rm commandsSysShapeVarRun.cint
 		fi
-	    
+		
 		cat >> commandsSysShapeVarRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
 analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
@@ -534,62 +537,114 @@ EOF
 	    done
 	fi
     fi
+else
+    echo "will be ignored, only done for decayChannel=muon/electron"
 fi
 
-#######################################
-## combine electron and muon channel ##
-#######################################
+#### ===================================
+####  Combine electron and muon channel 
+#### ===================================
 echo
-echo "part E2: combine electron and muon channel"
-if [ $fast = false ]
-    then
+echo "Part E2: Combine electron and muon channel"
+if [ $fast = false ]; then
     sleep 2
 fi
-if [ $decayChannel == \"combined\" ]
-    then
-    echo "cross sections for all systematic variations"
-    echo "and all decay channels"
+
+if [ $decayChannel == \"combined\" ]; then
+    
+    echo "Cross sections for all systematic variations and decay channels"
     echo
-    root -l -q -b './bothDecayChannelsCombination.C++('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$makeLogPlots', '$extrapolate', '$hadron')'
+    
+    ## Compile library
+    
+    if [ -f commandsCombineChannelsPrepare.cint ]; then    
+	rm commandsCombineChannelsPrepare.cint
+	rm bothDecayChannelsCombination_C.so
+	rm bothDecayChannelsCombination_C.d
+    fi
+    
+    cat >> commandsCombineChannelsPrepare.cint << EOF
+.L bothDecayChannelsCombination.C++g
+EOF
+    
+    root -l -b < commandsCombineChannelsPrepare.cint
+    
+    ## Execute macro
+
+    if [ -f commandsCombineChannelsRun.cint ]; then    
+	rm commandsCombineChannelsRun.cint       
+    fi    
+    
+    cat >> commandsCombineChannelsRun.cint << EOF
+.L bothDecayChannelsCombination_C.so
+bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron)
+EOF
+    echo ""
+    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron)"
+    root -l -b < commandsCombineChannelsRun.cint
+
 else
     echo "will be ignored, only done for decayChannel=combined"
 fi
 echo
+
 AFTERSYS=$(date +%s)
 
-###########################################
-## combine uncertainties for final xSecs ##
-###########################################
+#### ==========================================
+####  Combine uncertainties for final xSecs 
+#### ==========================================
+
 BEFOREF=$(date +%s)
+
 echo
-echo "part F: calculate systematic errors and draw final cross section"
-if [ $fast = false ]
-    then
+echo "Part F: Calculate systematic errors and draw final cross section"
+if [ $fast = false ]; then
     sleep 3
 fi
-if [ -f commands.cint ]; then    
+
+## Compile library
+
+if [ -f commandsCombineUncPrepare.cint ]; then    
   
-    rm commands.cint
+    rm commandsCombineUncPrepare.cint
     rm combineTopDiffXSecUncertainties_C.so
     rm combineTopDiffXSecUncertainties_C.d
-
 fi
 
-cat >> commands.cint << EOF
+cat >> commandsCombineUncPrepare.cint << EOF
 .L BCC.C++
+.L combineTopDiffXSecUncertainties.C++
+EOF
+
+root -l -b < commandsCombineUncPrepare.cint
+
+## Execute macro
+
+if [ -f commandsCombineUncRun.cint ]; then    
+    rm commandsCombineUncRun.cint
+fi
+    
+cat >> commandsCombineUncRun.cint << EOF
 .L BCC_C.so
-.L combineTopDiffXSecUncertainties.C++g
 .L combineTopDiffXSecUncertainties_C.so
 combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron)
 EOF
+    
+echo ""
+echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron)"
+root -l -b < commandsCombineUncRun.cint
 
-root -l -b < commands.cint
+#### ==========================================
 
-echo "all analysis steps finished!"
+echo ""
+echo " All analysis steps finished!"
+echo ""
 
-################################
-## after running the analysis ##
-################################
+#### ==========================================
+
+#### ============================
+####  After running the analysis
+#### ============================
 ## stop the timer and echo time
 END=$(date +%s)
 TIME=$(( $END - $START ))
