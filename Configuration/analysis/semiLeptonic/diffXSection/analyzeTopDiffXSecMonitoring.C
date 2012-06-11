@@ -104,32 +104,36 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
-  
+ 
   //  0: sysNo
-  //  1: sysLumiUp                   2: sysLumiDown                
+  //  1: sysLumiUp                   2: sysLumiDown
   //  3: sysPUUp                     4: sysPUDown                  
   //  5: sysJESUp                    6: sysJESDown                 
-  //  7: sysJERUp                    8: sysJERDown                 
-  //  9: sysTrigEffSFNormUp         10: sysTrigEffSFNormDown        
-  // 11: sysTriggerEffSFShapeUpEta  12: sysTriggerEffSFShapeDownEta
-  // 13: sysTriggerEffSFShapeUpPt   14: sysTriggerEffSFShapeDownPt  
-  // 15: sysMuEffSFUp               16: sysMuEffSFDown
-  // 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65
-  // 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7
-  // 21: sysMisTagSFUp              22: sysMisTagSFDown
-  // 23: sysTopScaleUp              24: sysTopScaleDown            
-  // 25: sysVBosonScaleUp           26: sysVBosonScaleDown          
-  // 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown     
-  // 29: sysTopMatchUp              20: sysTopMatchDown           
-  // 31: sysVBosonMatchUp           32: sysVBosonMatchDown         
-  // 33: sysTopMassUp               34: sysTopMassDown            
-  // 35: sysQCDUp                   36: sysQCDDown          
-  // 37: sysSTopUp                  38: sysSTopDown               
-  // 39: sysDiBosUp                 40: sysDiBosDown              
-  // 41: sysPDFUp                   42: sysPDFDown
-  // 43: sysHadUp                   44: sysHadDown      
-  // 45: sysShapeUp                 46: sysShapeDown
- 
+  //  7: sysJERUp                    8: sysJERDown         
+  //  9: sysLepEffSFNormUp          10: sysLepEffSFNormDown     
+  // 11: sysLepEffSFShapeEtaUp      12: sysLepEffSFShapeEtaDown
+  // 13: sysLepEffSFShapePtUp       14: sysLepEffSFShapePtDown 
+  // 15: sysTriggerEffSFJetNormUp   16: sysTriggerEffSFJetNormDown
+  // 17: sysTriggerEffSFJetShapeUp  18: sysTriggerEffSFJetShapeDown
+  // 19: sysBtagSFUp                20: sysBtagSFDown
+  // 21: sysBtagSFShapePt65Up       22: sysBtagSFShapePt65Down
+  // 23: sysBtagSFShapeEta0p7Up     24: sysBtagSFShapeEta0p7Down
+  // 25: sysMisTagSFUp              26: sysMisTagSFDown
+  // 27: sysTopScaleUp              28: sysTopScaleDown          
+  // 29: sysVBosonScaleUp           30: sysVBosonScaleDown        
+  // 31: sysSingleTopScaleUp        32: sysSingleTopScaleDown
+  // 33: sysTopMatchUp              34: sysTopMatchDown          
+  // 35: sysVBosonMatchUp           36: sysVBosonMatchDown
+  // 37: sysTopMassUp               38: sysTopMassDown
+  // 39: sysQCDUp                   40: sysQCDDown                 
+  // 41: sysSTopUp                  42: sysSTopDown               
+  // 43: sysDiBosUp                 44: sysDiBosDown              
+  // 45: sysPDFUp                   46: sysPDFDown
+  // 47: sysHadUp                   48: sysHadDown
+  // 49: sysGenPowheg               50: sysGenMCatNLO
+  // 51: sysShapeUp                 52: sysShapeDown
+  // 53: ENDOFSYSENUM
+
   int systematicVariation=sysNo;
 
   // ============================
