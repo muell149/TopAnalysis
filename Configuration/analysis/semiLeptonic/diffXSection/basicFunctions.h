@@ -2163,14 +2163,18 @@ namespace semileptonic {
 	    //std::cout << "histNumeratorData->GetBinContent(bin): " << histNumeratorData->GetBinContent(bin) << std::endl;
 	    tempRatio->SetBinContent(bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) / histNumeratorData->GetBinContent(bin));
 	    // set error: simple gaussian error propagation neglecting the theory error
-	    tempRatio->SetBinError  (bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) / ( histNumeratorData->GetBinContent(bin)* histNumeratorData->GetBinContent(bin)) * histNumeratorData->GetBinError(bin));	    
+	    tempRatio->SetBinError  (bin, ( histDenominatorTheory_[nTheory]->GetBinContent(bin) / ( histNumeratorData->GetBinContent(bin)* histNumeratorData->GetBinContent(bin)) ) * histNumeratorData->GetBinError(bin));	    
 	  }
 	  // set technical bins with width==0 to zero
 	  else{
 	    tempRatio->SetBinError  (bin, 0.5);
 	    tempRatio->SetBinContent(bin, 1  );
 	  }
-	  if(verbose>1) std::cout << histDenominatorTheory_[nTheory]->GetName() << " bin " << bin << ":" << tempRatio->GetBinContent(bin) << "+-" << tempRatio->GetBinError(bin) << std::endl;
+	  if(verbose>1) {
+	    std::cout << histDenominatorTheory_[nTheory]->GetName() << " bin " << bin << ":" << tempRatio->GetBinContent(bin) << "+-" << tempRatio->GetBinError(bin) << std::endl;
+	    std::cout << "rel err ratio: " << tempRatio->GetBinError(bin)/tempRatio->GetBinContent(bin) << std::endl;
+	    std::cout << "rel err data:  " << histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin) << std::endl;
+	  }
 	}
 	ratio_.push_back((TH1F*)tempRatio->Clone());
       }
@@ -2274,7 +2278,7 @@ namespace semileptonic {
 	  up->DrawClone("hist same");
 	}
 	//if(nTheory==0) ratio_[nTheory]->DrawClone("hist");
-	ratio_[nTheory]->SetMarkerSize(0.2);
+	ratio_[nTheory]->SetMarkerSize(0.8);
 	ratio_[nTheory]->DrawClone("e1 p same");
 	//ratio_[nTheory]->DrawClone("p e X0 same");
 	//ratio_[nTheory]->Print("./"+(TString)(ratio_[nTheory]->GetName())+"ratio.png");
@@ -2356,6 +2360,7 @@ namespace semileptonic {
       }
       if(fill){
 	result->SetBinContent(resultbin,histo->GetBinContent(bin));
+	result->SetBinError  (resultbin,histo->GetBinError  (bin));
 	resultbin++;
       }
     }
