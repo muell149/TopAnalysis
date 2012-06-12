@@ -1625,11 +1625,8 @@ namespace semileptonic {
     }
 
   }
-    
-    // ===============================================================
-    // ===============================================================
-    
-    std::map<TString, std::vector<double> > makeVariableBinning()
+  
+  std::map<TString, std::vector<double> > makeVariableBinning()
     {
       // this function creates a map with the hard coded
       // bin values for variable binning
@@ -1704,30 +1701,25 @@ namespace semileptonic {
       return result;
     }
 
-    // ===============================================================
-    // ===============================================================
-
-    void setXAxisRange(TH1F*& his, TString variable)
-    {
-      // this function restricts the drawn range of the x axis in the differential variable
-      // modified quantities: xAxis of his
-      // used functions: none
-      // used enumerators: none
+  void setXAxisRange(TH1* his, TString variable)
+  {
+    // this function restricts the drawn range of the x axis in the differential variable
+    // modified quantities: xAxis of his
+    // used functions: none
+    // used enumerators: none
       
-      // restrict axis
-      if(variable=="topPt")          his->GetXaxis()->SetRange(1, his->GetNbinsX()-1); 
-      else if(variable=="topY")      his->GetXaxis()->SetRange(2, his->GetNbinsX()-1);
-      else if(variable=="ttbarY")    his->GetXaxis()->SetRange(2, his->GetNbinsX()-1);
-      else if(variable=="ttbarMass") his->GetXaxis()->SetRange(2, his->GetNbinsX());
-      else if(variable=="lepEta")    his->GetXaxis()->SetRange(2, his->GetNbinsX()-2);
-      else if(variable=="bqPt")      his->GetXaxis()->SetRange(2,6);
-      else if(variable=="bqEta")     his->GetXaxis()->SetRange(2,9);
-    }
+    // restrict axis
+    if(variable.Contains("topPt"))          his->GetXaxis()->SetRangeUser(0.  , 399. ); 
+    else if(variable.Contains("topY"     )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
+    else if(variable.Contains("ttbarY"   )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
+    else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(345., 1199.);
+    else if(variable.Contains("lepPt"    )) his->GetXaxis()->SetRangeUser(30  , 199. );
+    else if(variable.Contains("lepEta"   )) his->GetXaxis()->SetRangeUser(-2.1, 2.09 );
+    else if(variable.Contains("bqPt"     )) his->GetXaxis()->SetRangeUser(30. , 399. );
+    else if(variable.Contains("bqEta"    )) his->GetXaxis()->SetRangeUser(-2.4, 2.39 );
+  }
     
-    // ===============================================================
-    // ===============================================================
-
-    template <class T>
+  template <class T>
     unsigned int positionInVector(std::vector<T> vec_, T object)
     {
       // this function returns the position
@@ -2038,11 +2030,28 @@ namespace semileptonic {
     rPad->SetBorderSize(0);
     rPad->SetBorderMode(0);
     rPad->Draw();
+    // draw a horizontal lines on a given histogram
+    // a) at 1
+    Double_t xmin = ratio->GetXaxis()->GetXmin();
+    Double_t xmax = ratio->GetXaxis()->GetXmax();
+    TString height = ""; height += 1;
+    TF1 *f = new TF1("f", height, xmin, xmax);
+    f->SetLineStyle(1);
+    f->SetLineWidth(1);
+    f->SetLineColor(kBlack);
+    f->Draw("L same");
+    // b) at upper end of ratio pad
+    TString height2 = ""; height2 += ratioMax;
+    TF1 *f2 = new TF1("f2", height2, xmin, xmax);
+    f2->SetLineStyle(1);
+    f2->SetLineWidth(1);
+    f2->SetLineColor(kBlack);
+    f2->Draw("L same");
+    // configure ratio plot
     rPad->cd();
     rPad->SetLogy(0);
     rPad->SetLogx(logx);
     rPad->SetTicky(1);
-    // configure ratio plot
     double scaleFactor = 1./(canvAsym*ratioSize);
     ratio->SetStats(kFALSE);
     ratio->SetTitle("");
@@ -2078,27 +2087,38 @@ namespace semileptonic {
     gPad->RedrawAxis();
     // draw grid
     rPad->SetGrid(1,1);
-
-    // draw a horizontal lines on a given histogram
-    // a) at 1
-    Double_t xmin = ratio->GetXaxis()->GetXmin();
-    Double_t xmax = ratio->GetXaxis()->GetXmax();
-    TString height = ""; height += 1;
-    TF1 *f = new TF1("f", height, xmin, xmax);
-    f->SetLineStyle(1);
-    f->SetLineWidth(1);
-    f->SetLineColor(kBlack);
-    f->Draw("L same");
-    // b) at upper end of ratio pad
-    TString height2 = ""; height2 += ratioMax;
-    TF1 *f2 = new TF1("f2", height2, xmin, xmax);
-    f2->SetLineStyle(1);
-    f2->SetLineWidth(1);
-    f2->SetLineColor(kBlack);
-    f2->Draw("L same");
   }
 
-  void drawFinalResultRatio(const TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0))
+  unsigned int theoryColor(TString theo="madgraph"){
+    // this function returns the default color for a given theory specified by "theo"
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+    if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return kAzure; 
+    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return kGreen+1; 
+    if(theo.Contains("nnlo"   )||theo.Contains("kidonakis")) return kOrange;
+    return kRed+1;
+  }
+
+  TString xSecLabel(TString variable=""){
+    // this function returns the x axis label for a given quantity specified by "variable"
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+    TString tex="";
+    if(variable.Contains("topPt"))          tex="p_{T}^{t and #bar{t}} #left[GeV#right]"; 
+    else if(variable.Contains("topY"     )) tex="y^{t and #bar{t}}";
+    else if(variable.Contains("ttbarPt"  )) tex="p_{T}^{t#bar{t}} #left[GeV#right]";
+    else if(variable.Contains("ttbarY"   )) tex="y^{t#bar{t}}";
+    else if(variable.Contains("ttbarMass")) tex="m_{t#bar{t}} #left[GeV#right]";
+    else if(variable.Contains("lepPt"    )) tex="p_{T}^{l} #left[GeV#right]";
+    else if(variable.Contains("lepEta"   )) tex="#eta^{l}";
+    else if(variable.Contains("bqPt"     )) tex="p_{T}^{b and #bar{b}} #left[GeV#right]";
+    else if(variable.Contains("bqEta"    )) tex="#eta^{b and #bar{b}}";
+    return tex;  
+  }
+
+  TPad* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0))//, TCanvas* canv)
   {
     // this function draws a pad with the ratio "histNumeratorData" over "histDenominatorTheoryX" 
     // for up to five specified theory curves, using "histNumeratorDataDown" and "histNumeratorDataUp"
@@ -2108,7 +2128,7 @@ namespace semileptonic {
     // ( error(bin i) = sqrt(1/histNumerator->GetBinContent(i)) / histDenominator->GetBinContent(i) )
     // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
     // modified quantities: none
-    // used functions: none
+    // used functions: setXAxisRange, theoryColor
     // used enumerators: none
 
     if(histDenominatorTheory_.size()>0&&histNumeratorData){
@@ -2142,15 +2162,15 @@ namespace semileptonic {
 	    //std::cout << "histDenominatorTheory_[nTheory]->GetBinContent(bin): "<< histDenominatorTheory_[nTheory]->GetBinContent(bin) << std::endl;
 	    //std::cout << "histNumeratorData->GetBinContent(bin): " << histNumeratorData->GetBinContent(bin) << std::endl;
 	    tempRatio->SetBinContent(bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) / histNumeratorData->GetBinContent(bin));
-	    // set error
-	    tempRatio->SetBinError  (bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) * histNumeratorData->GetBinError(bin)* histNumeratorData->GetBinError(bin) / histNumeratorData->GetBinContent(bin));
+	    // set error: simple gaussian error propagation neglecting the theory error
+	    tempRatio->SetBinError  (bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) / ( histNumeratorData->GetBinContent(bin)* histNumeratorData->GetBinContent(bin)) * histNumeratorData->GetBinError(bin));	    
 	  }
 	  // set technical bins with width==0 to zero
 	  else{
 	    tempRatio->SetBinError  (bin, 0.5);
 	    tempRatio->SetBinContent(bin, 1  );
 	  }
-	  //if(verbose>1) std::cout << tempRatio->GetBinContent(bin) << " +- " << tempRatio->GetBinError(bin)<< std::endl;
+	  if(verbose>1) std::cout << histDenominatorTheory_[nTheory]->GetName() << " bin " << bin << ":" << tempRatio->GetBinContent(bin) << "+-" << tempRatio->GetBinError(bin) << std::endl;
 	}
 	ratio_.push_back((TH1F*)tempRatio->Clone());
       }
@@ -2158,6 +2178,9 @@ namespace semileptonic {
       Int_t    logx  = myStyle.GetOptLogx();
       Double_t left  = myStyle.GetPadLeftMargin();
       Double_t right = myStyle.GetPadRightMargin();
+      setXAxisRange(histNumeratorData, (TString)histNumeratorData->GetName());
+      //Double_t xmin = histNumeratorData->GetXaxis()->GetXmin();
+      //Double_t xmax = histNumeratorData->GetXaxis()->GetXmax();
       // y:x size ratio for canvas
       double canvAsym = 4./3.;
       // ratio size of pad with plot and pad with ratio
@@ -2170,9 +2193,15 @@ namespace semileptonic {
       gPad->SetBorderMode(0);
       gPad->SetBorderSize(0);
       gPad->SetFillColor(10);
+      // create pad to hide old axis
+      TPad *whitebox = new TPad("whitebox","",0.97*left,ratioSize-0.2,1,ratioSize+0.001);
+      whitebox->SetFillColor(10);
+      whitebox->SetFillStyle(1001);
+      whitebox->SetBorderSize(0);
+      whitebox->SetBorderMode(0);
+      whitebox->Draw("");
       // create new pad for ratio plot
-      TPad *rPad;
-      rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
+      TPad *rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
 #ifdef DILEPTON_MACRO
       rPad->SetFillColor(10);
 #else
@@ -2181,22 +2210,30 @@ namespace semileptonic {
 #endif
       rPad->SetBorderSize(0);
       rPad->SetBorderMode(0);
-      rPad->Draw();
-      rPad->cd();
       rPad->SetLogy(0);
       rPad->SetLogx(logx);
       rPad->SetTicky(1);
-      // configure ratio plot
-      histNumeratorData->GetXaxis()->SetLabelSize(0);
-      histNumeratorData->GetXaxis()->SetTitleSize(0);
+      // draw grid
+      TPad *grid =(TPad*)rPad->Clone("grid");
+      grid->SetGrid(1,1);
+      grid->Draw("");
+      rPad->SetGrid(1,1);
+      rPad->Draw("");
+      rPad->cd();
       for(unsigned int nTheory=0; nTheory<ratio_.size(); ++nTheory){
 	ratio_[nTheory]->SetStats(kFALSE);
 	ratio_[nTheory]->SetTitle("");
 	ratio_[nTheory]->SetMaximum(ratioMax);
 	ratio_[nTheory]->SetMinimum(ratioMin);
-	ratio_[nTheory]->SetLineColor(histDenominatorTheory_[nTheory]->GetLineColor());
-	ratio_[nTheory]->SetLineWidth(histDenominatorTheory_[nTheory]->GetLineWidth());
-	ratio_[nTheory]->SetMarkerColor(histDenominatorTheory_[nTheory]->GetLineColor());
+	unsigned int color = histDenominatorTheory_[nTheory]->GetMarkerColor();
+	if(color==kBlack) color=theoryColor((TString)histDenominatorTheory_[nTheory]->GetName());
+	ratio_[nTheory]->SetLineColor(color);
+	double linewidth=histDenominatorTheory_[nTheory]->GetLineWidth();
+	linewidth=2;
+	ratio_[nTheory]->SetLineWidth(linewidth);
+	ratio_[nTheory]->SetMarkerColor(color);
+	ratio_[nTheory]->SetFillColor(color-4);
+	ratio_[nTheory]->SetFillStyle(3001+nTheory);
 	// configure axis of ratio_[nTheory] plot
 	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
 	ratio_[nTheory]->GetXaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleOffset()*0.9);
@@ -2204,7 +2241,7 @@ namespace semileptonic {
 	ratio_[nTheory]->GetXaxis()->SetTitle(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitle());
 	ratio_[nTheory]->GetXaxis()->SetNdivisions(histDenominatorTheory_[nTheory]->GetNdivisions());
 	ratio_[nTheory]->GetYaxis()->CenterTitle();
-	ratio_[nTheory]->GetYaxis()->SetTitle("#frac{N_{theory}}{N_{data}}");
+	ratio_[nTheory]->GetYaxis()->SetTitle("#frac{theory}{data}");
 	ratio_[nTheory]->GetYaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetYaxis()->GetTitleSize()*scaleFactor);
 	ratio_[nTheory]->GetYaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetYaxis()->GetTitleOffset()/scaleFactor);
 	ratio_[nTheory]->GetYaxis()->SetLabelSize(histDenominatorTheory_[nTheory]->GetYaxis()->GetLabelSize()*scaleFactor);
@@ -2212,42 +2249,45 @@ namespace semileptonic {
 	ratio_[nTheory]->GetYaxis()->SetTickLength(0.03);
 	ratio_[nTheory]->GetYaxis()->SetNdivisions(505);
 	ratio_[nTheory]->GetXaxis()->SetRange(histNumeratorData->GetXaxis()->GetFirst(), histNumeratorData->GetXaxis()->GetLast());
+	if(nTheory==0) setXAxisRange(ratio_[nTheory], (TString)ratio_[nTheory]->GetName());
+	TString titleX=xSecLabel(histNumeratorData->GetName());
+	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
+	titleX=(TString)(histNumeratorData->GetXaxis()->GetTitle());
+	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
+	ratio_[nTheory]->GetXaxis()->SetNoExponent(true);
 	// delete axis of initial plot
 	histDenominatorTheory_[nTheory]->GetXaxis()->SetLabelSize(0);
 	histDenominatorTheory_[nTheory]->GetXaxis()->SetTitleSize(0);
 	// draw ratio_[nTheory] plot
-	if(nTheory==0) ratio_[nTheory]->DrawClone("hist");
-	else ratio_[nTheory]->DrawClone("hist same");
-	ratio_[nTheory]->SetMarkerSize(1.2);
-	ratio_[nTheory]->DrawClone("p e X0 same");
+	if(nTheory==0){
+	  // line at 1
+	  TH1F* one=(TH1F*)ratio_[nTheory]->Clone();
+	  one->Divide(one);
+	  one->SetLineWidth(1);
+	  one->SetLineColor(kBlack);
+	  one->SetFillStyle(0);
+	  one->DrawClone("hist");
+	  // line at upper border
+	  TH1F* up=(TH1F*)one->Clone("up");
+	  up->SetLineWidth(3);
+	  up->Scale(ratioMax);
+	  up->DrawClone("hist same");
+	}
+	//if(nTheory==0) ratio_[nTheory]->DrawClone("hist");
+	ratio_[nTheory]->SetMarkerSize(0.2);
+	ratio_[nTheory]->DrawClone("e1 p same");
+	//ratio_[nTheory]->DrawClone("p e X0 same");
+	//ratio_[nTheory]->Print("./"+(TString)(ratio_[nTheory]->GetName())+"ratio.png");
       }
-
       rPad->SetTopMargin(0.0);
       rPad->SetBottomMargin(0.15*scaleFactor);
       rPad->SetRightMargin(right);
       gPad->SetLeftMargin(left);
       gPad->RedrawAxis();
-      // draw grid
-      rPad->SetGrid(1,1);
-      // draw a horizontal lines on a given histogram
-      // a) at 1
-      Double_t xmin = ratio_[0]->GetXaxis()->GetXmin();
-      Double_t xmax = ratio_[0]->GetXaxis()->GetXmax();
-      TString height = ""; height += 1;
-      TF1 *f = new TF1("f", height, xmin, xmax);
-      f->SetLineStyle(1);
-      f->SetLineWidth(1);
-      f->SetLineColor(kBlack);
-      f->Draw("L same");
-      // b) at upper end of ratio pad
-      TString height2 = ""; height2 += ratioMax;
-      TF1 *f2 = new TF1("f2", height2, xmin, xmax);
-      f2->SetLineStyle(1);
-      f2->SetLineWidth(1);
-      f2->SetLineColor(kBlack);
-      f2->Draw("L same");
-      rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
+      //rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
       gPad->cd();
+      rPad->Draw();
+      return rPad;
     }
     else{
       if(verbose>0){ 
@@ -2257,6 +2297,7 @@ namespace semileptonic {
 	std::cout << " and " << histDenominatorTheory_.size() << " theory curves" << std::endl;
       }
     }
+    return (TPad*)0;
   }
 
   TH1F* killEmptyBins(TH1F* histo, int verbose=0){
