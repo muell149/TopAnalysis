@@ -944,20 +944,16 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      if(ratio&&decayChannel=="combined"&&xSecVariables_[i].Contains("Norm")){
 		TString plotName=xSecVariables_[i];
 		plotName.ReplaceAll("Norm", "");
-		// get data histo
-		//std::cout << binning_[plotName][0] << std::endl;
-		//std::cout << binning_[plotName][binning_[plotName].size()-1] << std::endl;
+		// get data points with final errors
 		int Nbins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*10;
-		//std::cout << Nbins << std::endl;
+		// create histo with correct binning
 		TH1F* datatemp= new TH1F("data"+plotName, "data"+plotName, Nbins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
 		reBinTH1F(*datatemp, binning_[plotName], 0);
+		// refill points to histo with correct binning 
 		for(int bin=1; bin<=datatemp->GetNbinsX(); ++bin){
-		  //std::cout << "bin: " << bin << std::endl;
-		  //std::cout << totalErrors_[xSecVariables_[i]]->GetY()[bin];
 		  datatemp->SetBinContent(bin, totalErrors_[xSecVariables_[i]]->GetY()[bin]);
 		  double err=totalErrors_[xSecVariables_[i]]->GetErrorYhigh(bin);
 		  if(err<totalErrors_[xSecVariables_[i]]->GetErrorYlow(bin)) err=totalErrors_[xSecVariables_[i]]->GetErrorYlow(bin);
-		  //std::cout << " +- " << err << std::endl;
 		  datatemp->SetBinError(bin, err);
 		}
 		histo_["dataNorm"+plotName][kData]=killEmptyBins((TH1F*)datatemp->Clone(), verbose);
@@ -968,38 +964,17 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		TH1F* plotMadGraph = (TH1F*)canvas->GetPrimitive(plotName          );
 		TH1F* plotmcatnlo  = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO2");
 		TH1F* plotpowheg   = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG" );
-		// TEST
-//		histo_["data"+plotName][kData]->SetMarkerColor(kMagenta);
-//		histo_["data"+plotName][kData]->SetMarkerStyle(kMagenta);
-//		histo_["data"+plotName][kData]->Draw("same");
-// 		if(plotNNLO){
-// 		  plotNNLO->SetLineColor(kMagenta);
-// 		  plotNNLO->SetLineStyle(2);
-// 		  plotNNLO->Draw("same");
-// 		}
-// 		if(plotMadGraph){
-// 		  plotMadGraph->SetLineColor(kMagenta);
-// 		  plotMadGraph->SetLineStyle(2);
-// 		  plotMadGraph->Draw("same");
-// 		}
-// 		if(plotmcatnlo){
-// 		  plotmcatnlo->SetLineColor(kMagenta);
-// 		  plotmcatnlo->SetLineStyle(2);
-// 		  plotmcatnlo->Draw("same");
-// 		}
-// 		if(plotpowheg){
-// 		  plotpowheg->SetLineColor(kMagenta);
-// 		  plotpowheg->SetLineStyle(2);
-// 		  plotpowheg->Draw("same");
-// 		}
-// 		theories_.push_back(histo_["data"+plotName][kData]);
-//		if(plotMadGraph) drawRatio(histo_["dataNorm"+plotName][kData], plotMadGraph, 0.5, 1.5, myStyle, 0);
 		if(plotmcatnlo ) theories_.push_back( killEmptyBins(plotmcatnlo , verbose) );
 		if(plotpowheg  ) theories_.push_back( killEmptyBins(plotpowheg  , verbose) );
 		if(plotMadGraph) theories_.push_back( killEmptyBins(plotMadGraph, verbose) );
 		if(plotNNLO    ) theories_.push_back( killEmptyBins(plotNNLO    , verbose) );
-		// FIXME MARTIN: ratio(s) not working properly at the moment 
-		//drawFinalResultRatio(histo_["dataNorm"+plotName][kData], 0.5, 1.5, myStyle, 2, theories_);
+		// need to draw the canvas to make drawFinalResultRatio working
+		canvas->cd();
+		canvas->Draw();
+		// get new plot including the ratio(s)
+		TPad* ratioPlot=drawFinalResultRatio(histo_["dataNorm"+plotName][kData], 0.5, 1.5, myStyle, verbose, theories_);
+		// substitute original with ratio plot
+		ratioPlot->Draw();
 	      }
 	    }
 	    // save Canvas
