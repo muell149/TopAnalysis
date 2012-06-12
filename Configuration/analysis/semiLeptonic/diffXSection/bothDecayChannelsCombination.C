@@ -198,7 +198,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
  	      plotElMca = (TH1F*)canvasElMca->GetPrimitive(plotName+"kData");  
 	    }
 	    // check if all plots are available
-	    if(canvasMuPow&&canvasElPow&&canvasMuMca&&canvasElMca){
+	    if(plotMuPow&&plotElPow&&plotMuMca&&plotElMca){
 	      // B) combine channels for Powheg and Mcatnlo
 	      TH1F* plotCombPow=(TH1F*)(plotMu->Clone());
 	      TH1F* plotCombMca=(TH1F*)(plotMu->Clone());
@@ -231,6 +231,13 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 		// save this absolute error wrt. central combined value as final hadronization uncertainty shifted plot
 		plotCombination->SetBinContent(bin, stdValue+hadUnc);
 	      }
+	    }
+	    else{ 
+	      std::cout << " ERROR: At least one plot not found for hadronization uncertainty (cf. following histo-pointers): " << std::endl;
+	      std::cout << " Powheg, muon:" << plotMuPow << std::endl;
+	      std::cout << " Powheg, elec:" << plotElPow << std::endl;
+	      std::cout << " MC@NLO, muon:" << plotMuMca << std::endl;
+	      std::cout << " MC@NLO, elec:" << plotElMca << std::endl;
 	    }
 	  }
 	  // (ii) uncorrelated uncertainties 
