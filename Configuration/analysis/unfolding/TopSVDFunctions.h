@@ -135,6 +135,12 @@ class TopSVDFunctions
         
         
         // Rebinning
+        static int SVD_NumBins1D(TH1D* histo, bool doCntOF);
+        static int SVD_NumBinsX2D(TH2D* histo, bool doCntOF);
+        static int SVD_NumBinsY2D(TH2D* histo, bool doCntOF); 
+        static void SVD_GetBinBoundaries1D(double* boundaries, TH1D* histo);
+        static void SVD_GetBinBoundariesX2D(double* boundaries, TH2D* histo);
+        static void SVD_GetBinBoundariesY2D(double* boundaries, TH2D* histo); 
         static int SVD_NumNewBins(int oldNumBins, bool addLowerSideBin, bool addUpperSideBin);
         static void SVD_NewBins(double*& theNewBins, int newNumBins, const double* theOldBins, int oldNumBins, bool addLowerSideBin, bool addUpperSideBin); 
         static TH1D* SVD_Rebin1D(TH1D* input, int nbinsx, const double* binsx, bool addLowerSideBin, bool addUpperSideBin, int numHist = 1);

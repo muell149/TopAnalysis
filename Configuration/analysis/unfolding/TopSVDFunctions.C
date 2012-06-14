@@ -4862,7 +4862,68 @@ void TopSVDFunctions::SVD_GlobalEfficiency(double*& globalEff, double* totalRecE
     
 }
 
+// Count Bins of a histogram 
+int TopSVDFunctions::SVD_NumBins1D(TH1D* histo, bool doCntOF)
+{
+	if ( histo == NULL ) return 0;
+	int numbins = histo->GetXaxis()->GetNbins();
+	if ( doCntOF == true ) numbins += 2;
+	return numbins;
+}
 
+// Count Bins of a histogram 
+int TopSVDFunctions::SVD_NumBinsX2D(TH2D* histo, bool doCntOF)
+{
+	if ( histo == NULL ) return 0;
+	int numbins = histo->GetXaxis()->GetNbins();
+	if ( doCntOF == true ) numbins += 2;
+	return numbins;
+}
+
+// Count Bins of a histogram 
+int TopSVDFunctions::SVD_NumBinsY2D(TH2D* histo, bool doCntOF)
+{
+	if ( histo == NULL ) return 0;
+	int numbins = histo->GetYaxis()->GetNbins();
+	if ( doCntOF == true ) numbins += 2;
+	return numbins;
+}
+
+// Save Bin Boundaries in Array
+void TopSVDFunctions::SVD_GetBinBoundaries1D(double* boundaries, TH1D* histo)
+{
+	if ( boundaries == NULL ) return;
+	if ( histo == NULL ) return;
+	
+	int numBnd = SVD_NumBins1D(histo, false) + 1;
+	for ( int i = 0 ; i < numBnd ; i++ ) {
+		boundaries[i] = histo->GetXaxis()->GetBinLowEdge(i+1);
+	}
+}
+
+// Save Bin Boundaries in Array
+void TopSVDFunctions::SVD_GetBinBoundariesX2D(double* boundaries, TH2D* histo)
+{
+	if ( boundaries == NULL ) return;
+	if ( histo == NULL ) return;
+	
+	int numBnd = SVD_NumBinsX2D(histo, false) + 1;
+	for ( int i = 0 ; i < numBnd ; i++ ) {
+		boundaries[i] = histo->GetXaxis()->GetBinLowEdge(i+1);
+	}
+}
+
+// Save Bin Boundaries in Array
+void TopSVDFunctions::SVD_GetBinBoundariesY2D(double* boundaries, TH2D* histo)
+{
+	if ( boundaries == NULL ) return;
+	if ( histo == NULL ) return;
+	
+	int numBnd = SVD_NumBinsY2D(histo, false) + 1;
+	for ( int i = 0 ; i < numBnd ; i++ ) {
+		boundaries[i] = histo->GetYaxis()->GetBinLowEdge(i+1);
+	}
+}
 
 // PERFORM UNFOLDING 
 // Steering options in parameter 'steering' 
@@ -5249,15 +5310,15 @@ double TopSVDFunctions::SVD_Unfold(
             
         // Read Tau
         TString theTauStr = theLine;
-        theTauStr.Remove(73, 100000);
-        theTauStr.Remove(0,60);
+        theTauStr.Remove(113, 100000);
+        theTauStr.Remove(0,100);
         double theTau = (double) theTauStr.Atof();
         
         
         // Read K Value
         TString theKStr = theLine;
-        theKStr.Remove(85,100000);
-        theKStr.Remove(0,80);
+        theKStr.Remove(125,100000);
+        theKStr.Remove(0,120);
         int theK = (int) theKStr.Atoi();
             
             
@@ -5287,6 +5348,30 @@ double TopSVDFunctions::SVD_Unfold(
     /////////////////////////////////////////////////////////////////// 
     /////////  P R E P A R E   R E B I N N I N G  ///////////////////// 
     ///////////////////////////////////////////////////////////////////
+ 
+
+	// Save old binnings for further reference
+	int oldNumBinsData = SVD_NumBins1D(dataInputHist, false);  
+    double oldBinBndsData[oldNumBinsData+1];
+    SVD_GetBinBoundaries1D(oldBinBndsData, dataInputHist);
+	int oldNumBinsBgr = SVD_NumBins1D(bgrInputHist, false);  
+    double oldBinBndsBgr[oldNumBinsBgr+1];
+    SVD_GetBinBoundaries1D(oldBinBndsBgr, bgrInputHist);
+	int oldNumBinsTtbgr = SVD_NumBins1D(ttbgrInputHist, false);  
+    double oldBinBndsTtbgr[oldNumBinsTtbgr+1];
+    SVD_GetBinBoundaries1D(oldBinBndsTtbgr, ttbgrInputHist);
+	int oldNumBinsGen = SVD_NumBins1D(genInputHist, false);  
+    double oldBinBndsGen[oldNumBinsGen+1];
+    SVD_GetBinBoundaries1D(oldBinBndsGen, genInputHist);
+	int oldNumBinsRec = SVD_NumBins1D(recInputHist, false);  
+    double oldBinBndsRec[oldNumBinsRec+1];
+    SVD_GetBinBoundaries1D(oldBinBndsRec, recInputHist);
+	int oldNumBinsRespX = SVD_NumBinsX2D(respInputHist, false);  
+    double oldBinBndsRespX[oldNumBinsRespX+1];
+    SVD_GetBinBoundariesX2D(oldBinBndsRespX, respInputHist);
+	int oldNumBinsRespY = SVD_NumBinsY2D(respInputHist, false);  
+    double oldBinBndsRespY[oldNumBinsRespY+1];
+    SVD_GetBinBoundariesY2D(oldBinBndsRespY, respInputHist);
     
     
     // How many bins do you need
@@ -5485,6 +5570,50 @@ double TopSVDFunctions::SVD_Unfold(
         for ( int i = 1 ; i <= numberSyst ; i++ ) {
             cout << "        Syst. Sample " << i << "                        " << SVD_DoubleFromArray(globalEfficiency, i) << endl;
         }  
+        cout << endl;
+        cout <<"Input Binnings:" << endl;
+        cout <<"     Data Histogram (" << oldNumBinsData << "+2 Bins):"; 
+        for ( int i = 0; i < oldNumBinsData+1 ; i++ ) {
+        	if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+        	cout << oldBinBndsData[i] << " " ;
+        }
+        cout << endl; 
+        cout <<"     Bgr Histogram (" << oldNumBinsBgr << "+2 Bins):"; 
+        for ( int i = 0; i < oldNumBinsBgr+1 ; i++ ) {
+        	if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+        	cout << oldBinBndsBgr[i] << " " ;
+        }
+        cout << endl; 
+        cout <<"     Ttbgr Histogram (" << oldNumBinsTtbgr << "+2 Bins):"; 
+        for ( int i = 0; i < oldNumBinsTtbgr+1 ; i++ ) {
+        	if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+        	cout << oldBinBndsTtbgr[i] << " " ;
+        }
+        cout << endl; 
+        cout <<"     Gen Histogram (" << oldNumBinsGen << "+2 Bins):"; 
+        for ( int i = 0; i < oldNumBinsGen+1 ; i++ ) {
+        	if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+        	cout << oldBinBndsGen[i] << " " ;
+        }
+        cout << endl; 
+        cout <<"     Rec Histogram (" << oldNumBinsRec << "+2 Bins):"; 
+        for ( int i = 0; i < oldNumBinsRec+1 ; i++ ) {
+        	if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+        	cout << oldBinBndsRec[i] << " " ;
+        }
+        cout << endl; 
+        cout <<"     Resp Histogram in X (" << oldNumBinsRespX << "+2 Bins):"; 
+        for ( int i = 0; i < oldNumBinsRespX+1 ; i++ ) {
+        	if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+        	cout << oldBinBndsRespX[i] << " " ;
+        }
+        cout << endl; 
+        cout <<"     Resp Histogram in Y (" << oldNumBinsRespY << "+2 Bins):"; 
+        for ( int i = 0; i < oldNumBinsRespY+1 ; i++ ) {
+        	if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+        	cout << oldBinBndsRespY[i] << " " ;
+        } 
+        cout << endl; 
         cout << "********************************************************************************************************************" << endl; 
         
     }    
@@ -6332,15 +6461,15 @@ double TopSVDFunctions::SVD_Unfold(
         // Create String to Print
         TString lineStrList =  thekey;
         lineStrList.Append(" ");
-        for ( int i = lineStrList.Length() ; i < 60 ; i++ ) lineStrList.Append(" ");   
+        for ( int i = lineStrList.Length() ; i < 100 ; i++ ) lineStrList.Append(" ");   
         lineStrList.Append(TString::Format("%.5f", optimalTauX)); 
-        for ( int i = lineStrList.Length() ; i < 72 ; i++ ) lineStrList.Append(" ");    
+        for ( int i = lineStrList.Length() ; i < 112 ; i++ ) lineStrList.Append(" ");    
         lineStrList.Append(TString::Format("%i", optimalTauLowK)); 
-        for ( int i = lineStrList.Length() ; i < 76 ; i++ ) lineStrList.Append(" ");  
+        for ( int i = lineStrList.Length() ; i < 116 ; i++ ) lineStrList.Append(" ");  
         lineStrList.Append(TString::Format("%i", optimalTauHighK)); 
-        for ( int i = lineStrList.Length() ; i < 80 ; i++ ) lineStrList.Append(" ");  
+        for ( int i = lineStrList.Length() ; i < 120 ; i++ ) lineStrList.Append(" ");  
         lineStrList.Append(TString::Format("%i", nSignSingularValues)); 
-        for ( int i = lineStrList.Length() ; i < 84 ; i++ ) lineStrList.Append(" ");  
+        for ( int i = lineStrList.Length() ; i < 124 ; i++ ) lineStrList.Append(" ");  
         lineStrList.Append(TString::Format("%i", nbins));
         
         // Print to File, with option 'append'
