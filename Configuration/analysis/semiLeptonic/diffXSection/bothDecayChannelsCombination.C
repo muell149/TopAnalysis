@@ -176,7 +176,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	    if(uncorrSys_[j]==sys&&sys!=sysNo) correlated=false;
 	  }
 	  // (i) hadronization uncertainty: use Powheg+Herwig vs Mc@nlo+Pythia 
-	  if (sys==sysHadUp||sys==sysHadDown){
+	  if (sys==sysHadUp||sys==sysHadDown){	    
 	    errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose); // use value from MC
  	    // A) get histos: Powheg and MC@NLO
  	    // canvas
@@ -427,7 +427,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  //if(xSecVariables_[i].Contains("Norm")){
 	  
 	  // b) binned MadGraph curve
-	  plotTheo->Draw("hist same");
+	  //plotTheo->Draw("hist same");
 	  
 	  // draw smoothed theory curves
 	  // c) MCatNLO
@@ -460,8 +460,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  
 	  bool errorbands=true; // error band for MCatNLO curves
 	  if(xSecVariables_[i].Contains("bqPt")||xSecVariables_[i].Contains("bqEta")) errorbands=false;
-	  if (DrawMCAtNLOPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root", plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, kAzure, 1, rangeLow, rangeHigh, errorbands, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
-	  if (DrawMCAtNLOPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root", plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, kAzure, 1, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2);
+	  if (DrawMCAtNLOPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root", plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, errorbands, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
+	  if (DrawMCAtNLOPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root", plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2);
 	  
 	  // d) POWHEG
 	  // configure configuration
@@ -488,7 +488,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor= 2; }
 	  // draw curve	 
-	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, kGreen+1, 1, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2);
+	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 1, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2);
 	  
 	  // e) reweighted histos for closure test
 	  if(reweightClosure&&sys==sysNo){
@@ -498,34 +498,16 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  // f) distorted parton truth histo including zprime
 	  if(zprime!=""&&sys==sysNo){
 	      histo_["modified"+plotName][kSig]->Draw("hist same");
-	  }	    
+	  }	    	  
 	  
-	  // g) smooth MadGraph Theory curve
-	  smoothFactor=0;
-	  rebinFactor=0;
-	  TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
-	  plotNameMadgraph.ReplaceAll("Norm","");
-	  rangeLow  = -1.0;
-	  rangeHigh = -1.0;
-	  if     (xSecVariables_[i].Contains("topPt"    )){ smoothFactor = 10; rebinFactor = 10; }
-	  else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor =  5; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor =  5; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor =  2; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor = 10; rebinFactor =  1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
-	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor =  2; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor =  4; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor =  2; }
-	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor =  2; rebinFactor =  1; }
-	  if(DrawSmoothMadgraph2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined"), plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
-	  
-	  // h) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
+	  // g) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
 	  if(DrawNNLOPlot || DrawMCFMPlot){ 
 	    
 	    TString plotname=xSecVariables_[i];	   
 	    plotname.ReplaceAll("Norm", "");
 	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
 
-	    // h1) draw NNLO curve for topPt (normalized) and topY (normalized)
+	    // g1) draw NNLO curve for topPt (normalized) and topY (normalized)
 
 	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
 	    
@@ -535,13 +517,13 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 		TH1F *newPlotNNLO = reBinTH1FIrregularNewBinning(plotnnlo,binning_[plotname],plotname,true);
 		newPlotNNLO->SetName(plotname+"nnlo"); 
 		newPlotNNLO->GetXaxis()->SetRange(0, plotnnlo->GetNbinsX()-1);
-		newPlotNNLO->SetLineColor(kOrange);
+		newPlotNNLO->SetLineColor(constNnloColor);
 		newPlotNNLO->SetLineWidth(2);
 		newPlotNNLO->Draw("same");		
 	      }	     	     
 	    }
 	  
-	    // h2) MCFM curves
+	    // g2) MCFM curves
 
 	    if (DrawMCFMPlot&&xSecVariables_[i].Contains("Norm")){
 
@@ -587,6 +569,26 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	      else std::cout << " Unknown variable for MCFM plot - skipping this part for " << plotname << std::endl;
 	    }
 	  }
+
+	  // h) smooth MadGraph Theory curve
+	  smoothFactor=0;
+	  rebinFactor=0;
+	  TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
+	  plotNameMadgraph.ReplaceAll("Norm","");
+	  rangeLow  = -1.0;
+	  rangeHigh = -1.0;
+	  if     (xSecVariables_[i].Contains("topPt"    )){ smoothFactor = 10; rebinFactor = 10; }
+	  else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor =  5; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor =  5; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor =  2; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor = 10; rebinFactor =  1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
+	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor =  2; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor =  4; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor =  2; }
+	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor =  2; rebinFactor =  1; }
+	  if(DrawSmoothMadgraph2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined"), plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
+	  
+
 	  // j) re-draw binned MADGRAPH theory curve
 	  plotTheo->Draw("hist same");
 	  	  
@@ -659,7 +661,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  if(zprime!=""     &&sys==sysNo) leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
 	  
 	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.30);
-	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.04 * (double)(leg->GetNRows()));
+	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05 * (double)(leg->GetNRows()));
 	  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	  
@@ -708,7 +710,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
   // =================================================
   //  Save combined mu+e plots to ROOT-file
   // =================================================
-  
+
   // loop variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // loop systematic variations

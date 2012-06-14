@@ -61,11 +61,21 @@ namespace semileptonic {
                    /*27*/
 		   ENDOFSAMPLEENUM};
 
+  // Colors for event samples
+
   int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
 		   kYellow , kMagenta, 10      , kBlack  , 
 		   kYellow , kYellow , kYellow , kYellow , kYellow , kYellow ,
 		   10      , 10      , 10      , 
 		   kMagenta, kMagenta, kMagenta, kMagenta, kMagenta, kMagenta };
+
+  // Colors for data and theory curves
+
+  const unsigned int constDataColor     = kBlack;
+  const unsigned int constMadgraphColor = kRed+1;
+  const unsigned int constMcatnloColor  = kAzure;
+  const unsigned int constPowhegColor   = kGreen+2;
+  const unsigned int constNnloColor     = kOrange-3;
 
   int marker_[] = {20, 22, 29, 23, 
 		   21, 27, 28, 20, 
@@ -2096,10 +2106,10 @@ namespace semileptonic {
     // modified quantities: none
     // used functions: none
     // used enumerators: none
-    if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return kAzure; 
-    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return kGreen+1; 
-    if(theo.Contains("nnlo"   )||theo.Contains("kidonakis")) return kOrange;
-    return kRed+1;
+    if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return constMcatnloColor; 
+    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return constPowhegColor; 
+    if(theo.Contains("nnlo"   )||theo.Contains("kidonakis")) return constNnloColor;
+    return constMadgraphColor;
   }
 
   TString xSecLabel(TString variable=""){
