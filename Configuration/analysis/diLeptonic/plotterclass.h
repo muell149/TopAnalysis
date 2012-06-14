@@ -31,7 +31,7 @@ class Plotter {
   Plotter();
   Plotter(TString, TString, TString, double, double);
   ~Plotter();
-  void   setOptions(TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
+  void   setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
   void   setDataSet(std::vector<TString>, std::vector<double>, std::vector<TString>, std::vector<int>, TString);
   void   setDataSet(TString);
   void   setSystDataSet(TString);
@@ -61,6 +61,7 @@ class Plotter {
   void SetOutpath(TString path);
  private:
   TString name;
+  TString specialComment;
   int bins, datafiles, rebin;
   double rangemin, rangemax, ymin, ymax;
   std::vector<TFile> files, filesUp, filesDown;
@@ -118,6 +119,9 @@ class Plotter {
   // DAVID
   bool doUnfolding; 
   TString outpath;
+  TString outpathPlots;
+  TString subfolderChannel;
+  TString subfolderSpecial;
 };
 
 
@@ -1027,6 +1031,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     if ( name.Contains("Rapidity")) theQuantityName = "Rapidity";
     if ( name.Contains("Mass")    ) theQuantityName = "Mass";
     TString theSpecialPostfix = "";
+    if ( specialComment.CompareTo("Standard") != 0 ) {
+    	theSpecialPostfix = specialComment;
+    } 
     TString theSystematicName = Systematic;
 		
 		 
@@ -1118,6 +1125,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 Plotter::Plotter()
 {
   name="defaultName";
+  specialComment="Standard";
   rangemin=0;
   rangemax=3;
   YAxis="N_{events}";
@@ -1126,6 +1134,9 @@ Plotter::Plotter()
   
   // DAVID  
   outpath = "";
+  outpathPlots = "Plots";
+  subfolderChannel = "";
+  subfolderSpecial = "";
 
 }
 
@@ -1143,7 +1154,7 @@ Plotter::~Plotter()
 {
 }
 
-void Plotter::setOptions(TString name_, TString YAxis_, TString XAxis_, int rebin_, bool doDYScale_, bool logX_, bool logY_, double ymin_, double ymax_, double rangemin_, double rangemax_, int bins_, std::vector<double>XAxisbins_, std::vector<double>XAxisbinCenters_)
+void Plotter::setOptions(TString name_, TString specialComment_, TString YAxis_, TString XAxis_, int rebin_, bool doDYScale_, bool logX_, bool logY_, double ymin_, double ymax_, double rangemin_, double rangemax_, int bins_, std::vector<double>XAxisbins_, std::vector<double>XAxisbinCenters_)
 {
   XAxisbins.clear();
   XAxisbinCenters.clear();
@@ -1151,6 +1162,7 @@ void Plotter::setOptions(TString name_, TString YAxis_, TString XAxis_, int rebi
   XAxisbins = XAxisbins_;
   rebin=rebin_;
   name=name_;
+  specialComment=specialComment_;
   bins=bins_;
   doDYScale = doDYScale_;
   logX = logX_;
@@ -1687,10 +1699,20 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);  
-  gSystem->MakeDirectory("Plots");  
-  gSystem->MakeDirectory("Plots/"+channel);  
-  c->Print("Plots/"+channel+"/"+name+".eps");  
+  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+    
+  // Create Directory for Output Plots 
+  subfolderChannel = channel;
+  subfolderChannel.Prepend("/");
+  subfolderSpecial = "";
+  if ( specialComment.CompareTo("Standard") != 0 ) {
+  	subfolderSpecial = specialComment;
+  	specialComment.Prepend("/");
+  }
+  gSystem->MakeDirectory(outpathPlots);
+  int cntMkdirTries = 0;
+  gSystem->MakeDirectory(outpathPlots+subfolderChannel+subfolderSpecial);  
+  c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+name+".eps");  
   c->Clear();  
   leg->Clear();  
   delete c;  
@@ -1889,7 +1911,7 @@ void Plotter::PlotXSec(){
    box2->Draw("SAME");
    box3->Draw("SAME");
    box4->Draw("SAME");
-   c->Print("Plots/"+channel+"/InclusiveXSec.eps");
+   c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/InclusiveXSec.eps");
    c->Clear();
    delete c;
 
@@ -1949,16 +1971,14 @@ void Plotter::MakeTable(){
   ofstream EventFile7;
   ofstream EventFile8;
   ofstream EventFile9;
-  string EventFilestring = "Plots/";
+  TString EventFilestringTS = outpathPlots+"/";
+  string EventFilestring = EventFilestringTS.Data();
+  EventFilestring.append(subfolderChannel);
   string EventFilestring5;
   string EventFilestring6;
   string EventFilestring7;
   string EventFilestring8;
-  string EventFilestring9;
-  if(channelType==0){EventFilestring.append("ee");}
-  else if(channelType==1){EventFilestring.append("mumu");}
-  else if(channelType==2){EventFilestring.append("emu");}
-  else{EventFilestring.append("combined");}
+  string EventFilestring9; 
   EventFilestring5 =EventFilestring;EventFilestring5.append("/Events5.txt");
   EventFilestring6 =EventFilestring;EventFilestring6.append("/Events6.txt");
   EventFilestring7 =EventFilestring;EventFilestring7.append("/Events7.txt");
@@ -2098,12 +2118,10 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
   signalFraction = numbers[1]/(numbers[1]+TTbarBGnum);
 
-  ofstream EventFile;
-  string EventFilestring = "Plots/";
-  if(channelType==0){EventFilestring.append("ee");}
-  else if(channelType==1){EventFilestring.append("mumu");}
-  else if(channelType==2){EventFilestring.append("emu");}
-  else{EventFilestring.append("combined");}
+  ofstream EventFile;  
+  TString EventFilestringTS = outpathPlots+"/";
+  string EventFilestring = EventFilestringTS.Data(); 
+  EventFilestring.append(subfolderChannel); 
   EventFilestring.append("/Events.txt");
   EventFile.open(EventFilestring.c_str());
   double bg_num = 0;
@@ -2261,8 +2279,11 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     if ( name.Contains("Rapidity")) theQuantityName = "Rapidity";
     if ( name.Contains("Mass")    ) theQuantityName = "Mass";
     TString theSpecialPostfix = "";
- 
-
+    if ( specialComment.CompareTo("Standard") != 0 ) {
+    	theSpecialPostfix = specialComment;
+    } 
+    
+    
     double totalDataEventsNom[1]  = {TopSVDFunctions::SVD_Integral1D((TH1D*)theDataHist, 0, false)}; 
     double totalBgrEventsNom[1]   = {TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHist, 0, false)};
     double totalTtBgrEventsNom[1]   = {TopSVDFunctions::SVD_Integral1D((TH1D*)theTtBgrHist, 0, false)};
@@ -2411,16 +2432,16 @@ void Plotter::PlotDiffXSec(){
     TGaxis::SetMaxDigits(5);
 
     //############### Syst ################
-    /*    CalcDiffSystematics("JES", 0);
+    CalcDiffSystematics("JES", 0);
     CalcDiffSystematics("RES", 1);
     CalcDiffSystematics("PU_", 2);
     CalcDiffSystematics("SCALE", 3);
     CalcDiffSystematics("MASS", 4);
     CalcDiffSystematics("MATCH", 5);
     CalcDiffSystematics("DY_", 6);
-    CalcDiffSystematics("BG_", 7);
+    CalcDiffSystematics("BG_", 7); 
     DiffFlatSystematics(8,bins);
-    */
+    
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2447,7 +2468,7 @@ void Plotter::PlotDiffXSec(){
       newname.ReplaceAll("Hyp",3,"",0);
     }
     for (unsigned int i =0; i<hists.size(); i++){
-      varhists[i]=hists[i].Rebin(bins,"varhists",Xbins);            
+      varhists[i]=hists[i].Rebin(bins,"varhists",Xbins);  
       setStyle(*varhists[i], i);
       if(legends[i] == "t#bar{t} signal"){
 	TFile *ftemp = TFile::Open(dataset[i]);
@@ -2629,7 +2650,7 @@ void Plotter::PlotDiffXSec(){
     leg3->Draw("SAME");
 
 
-    cESP->Print("Plots/"+channel+"/ESP_"+name+".eps");
+    cESP->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/ESP_"+name+".eps");
     cESP->Clear();
     delete cESP;
     double efficiencies[XAxisbinCenters.size()];
@@ -2722,12 +2743,10 @@ void Plotter::PlotDiffXSec(){
 
 
     //create a file for Results!!
-    ofstream ResultsFile;
-    string ResultsFilestring = "Plots/";
-    if(channelType==0){ResultsFilestring.append("ee");}
-    else if(channelType==1){ResultsFilestring.append("mumu");}
-    else if(channelType==2){ResultsFilestring.append("emu");}
-    else{ResultsFilestring.append("combined");}
+    ofstream ResultsFile;  
+    TString ResultsFilestringTS = outpathPlots+"/";
+    string ResultsFilestring = ResultsFilestringTS.Data(); 
+    ResultsFilestring.append(subfolderChannel); 
     ResultsFilestring.append("/");    ResultsFilestring.append(newname);    ResultsFilestring.append("Results.txt");
     ResultsFile.open(ResultsFilestring.c_str());
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
@@ -2735,7 +2754,7 @@ void Plotter::PlotDiffXSec(){
     }
     ResultsFile.close();
 
-    /* 
+    
     //The Markus plots
     TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
@@ -2757,7 +2776,7 @@ void Plotter::PlotDiffXSec(){
     SystHists->Draw();
     leg10->SetFillColor(0);
     leg10->Draw("SAME");
-    c10->Print("Plots/"+channel+"/MSP_"+name+".eps");
+    c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".eps");
     c10->Clear();
     delete leg10;
     delete c10;
@@ -2789,12 +2808,12 @@ void Plotter::PlotDiffXSec(){
     leg11->AddEntry(TotalHist->Clone(), "Total Uncertainty", "l");
     TotalHist->Draw();ModelHist->Draw("SAME");ExpHist->Draw("SAME");StatHist->Draw("SAME");
     leg11->Draw("SAME");
-    c11->Print("Plots/"+channel+"/SEM_"+name+".eps");
+    c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".eps");
     c11->Clear();
     delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
     delete leg11;
     delete c11;
-    */
+    
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
@@ -3017,7 +3036,7 @@ void Plotter::PlotDiffXSec(){
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
     
-    c->Print("Plots/"+channel+"/DiffXS_"+name+".eps");
+    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".eps");
     c->Clear();
     delete c;
      	
@@ -3089,7 +3108,7 @@ void Plotter::PlotDiffXSec(){
     stacksum->Write(name+"_"+channel+"_MC");
     varhists[0]->Write(name+"_"+channel+"_Data");
     f1->Close();
-    c1->Print("Plots/"+channel+"/preunfolded_"+name+".eps");
+    c1->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/preunfolded_"+name+".eps");
     c1->Clear();
     delete c1; 	
 
