@@ -393,7 +393,7 @@ namespace semileptonic {
     if(yMax!=-123) hist.SetMaximum(yMax);
   }
 
-    void legendStyle(TLegend& leg, TString header="", double textsize=0.03)
+  void legendStyle(TLegend& leg, TString header="", double textsize=0.03, unsigned int aligncode=12)
   {
     // this function configures the style of legends
     // modified quantities: leg
@@ -404,7 +404,7 @@ namespace semileptonic {
     leg.SetFillStyle(0);
     leg.SetBorderSize(0);
     leg.SetTextSize(textsize);
-    leg.SetTextAlign(12);
+    leg.SetTextAlign(aligncode);
     if (header!="") leg.SetHeader(header); // setting the header adds additional row even if contents is empty (""), important when using TLegend::GetNRows()
   }
 
@@ -1052,7 +1052,7 @@ namespace semileptonic {
     if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
     // (b) V+jets
     if((sys==sysVBosonMatchUp  )&&(sample==kWjets)) fileName = "MatchUp/"+fileName+"MatchUp";
-    if((sys==sysVBosonMatchDown)&&(sample==kWjets)) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
+    if((sys==sysVBosonMatchDown)&&(sample==kWjets)) fileName = "MatchDown/"+fileName+"MatchDown";
     if((sys==sysVBosonMatchUp  )&&(sample==kZjets)) {fileName = "MatchUp/"+fileName+"MatchUp";     MCTagSummer11=1;}
     if((sys==sysVBosonMatchDown)&&(sample==kZjets)) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
     // Top Mass
@@ -1957,7 +1957,7 @@ namespace semileptonic {
       file->Close();
     }
 
-  void drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0))
+  int drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0))
   {
     // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'
     // the range of the ratio is 'ratioMin' to 'ratioMax'
@@ -1973,9 +1973,10 @@ namespace semileptonic {
 
     // check that histos have the same binning
     if(histNumerator->GetNbinsX()!=histDenominator->GetNbinsX()){
-      std::cout << "error when calling drawRatio - histos have different number of bins" << std::endl;
-      return;
+      std::cout << " ERROR when calling drawRatio - histos have different number of bins" << std::endl;
+      return -1;
     }
+    
     if(verbose>1){
       std::cout << "building ratio plot of " << histNumerator->GetName();
       std::cout << " and " << histDenominator->GetName() << std::endl;
@@ -2002,11 +2003,11 @@ namespace semileptonic {
     //Int_t    logx = gPad->GetLogx();
     //Double_t left = gPad->GetLeftMargin();
     //Double_t right = gPad->GetRightMargin();
-
+      
     Int_t    logx  = myStyle.GetOptLogx();
     Double_t left  = myStyle.GetPadLeftMargin();
     Double_t right = myStyle.GetPadRightMargin();
-
+    
     // y:x size ratio for canvas
     double canvAsym = 4./3.;
     // ratio size of pad with plot and pad with ratio
@@ -2087,6 +2088,7 @@ namespace semileptonic {
     gPad->RedrawAxis();
     // draw grid
     rPad->SetGrid(1,1);
+    return 0;    
   }
 
   unsigned int theoryColor(TString theo="madgraph"){

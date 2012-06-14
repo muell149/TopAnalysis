@@ -964,12 +964,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
 	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
-	      else DrawDecayChLabel("e/#mu + Jets Combined");
-	      // set first parameter to false once "CMS Preliminary" is not required anymore
+	      else DrawDecayChLabel("e/#mu + Jets Combined");	      
 	      DrawCMSLabels(false,luminosity); 
 	      //draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0) && withRatioPlot){
-		drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, myStyle, verbose);	       
+		int rval = drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, myStyle, verbose);	       
+		if (rval!=0) std::cout << " Problem occured for " << plotList_[plot] << std::endl;
+
 	      }
 	    }
 	  }
