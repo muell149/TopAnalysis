@@ -2112,7 +2112,7 @@ namespace semileptonic {
     return constMadgraphColor;
   }
 
-  TString xSecLabel(TString variable=""){
+  TString xSecLabelName(TString variable=""){
     // this function returns the x axis label for a given quantity specified by "variable"
     // modified quantities: none
     // used functions: none
@@ -2249,7 +2249,8 @@ namespace semileptonic {
 	ratio_[nTheory]->SetLineWidth(linewidth);
 	ratio_[nTheory]->SetMarkerColor(color);
 	ratio_[nTheory]->SetFillColor(color-4);
-	ratio_[nTheory]->SetFillStyle(3001+nTheory);
+	ratio_[nTheory]->SetFillStyle(0);
+	ratio_[nTheory]->SetMarkerSize(0.2);
 	// configure axis of ratio_[nTheory] plot
 	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
 	ratio_[nTheory]->GetXaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleOffset()*0.9);
@@ -2266,7 +2267,7 @@ namespace semileptonic {
 	ratio_[nTheory]->GetYaxis()->SetNdivisions(505);
 	ratio_[nTheory]->GetXaxis()->SetRange(histNumeratorData->GetXaxis()->GetFirst(), histNumeratorData->GetXaxis()->GetLast());
 	if(nTheory==0) setXAxisRange(ratio_[nTheory], (TString)ratio_[nTheory]->GetName());
-	TString titleX=xSecLabel(histNumeratorData->GetName());
+	TString titleX=xSecLabelName(histNumeratorData->GetName());
 	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
 	titleX=(TString)(histNumeratorData->GetXaxis()->GetTitle());
 	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
@@ -2288,10 +2289,19 @@ namespace semileptonic {
 	  up->SetLineWidth(3);
 	  up->Scale(ratioMax);
 	  up->DrawClone("hist same");
+	  // errorband for data error around 1
+	  TH1F* errorband=(TH1F*)one->Clone("errorband");
+	  for(int bin=1; bin<=errorband->GetNbinsX(); ++bin){
+	    errorband->SetBinContent(bin, 1);
+	    errorband->SetBinError  (bin, histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin));
+	    errorband->SetMarkerColor(kGray+1);
+	    errorband->SetFillColor(kGray+1);
+	    errorband->SetFillStyle(1001);
+	  }
+	  errorband->DrawClone("e2 p same");
 	}
 	//if(nTheory==0) ratio_[nTheory]->DrawClone("hist");
-	ratio_[nTheory]->SetMarkerSize(0.8);
-	ratio_[nTheory]->DrawClone("e1 p same");
+	ratio_[nTheory]->DrawClone("hist same");
 	//ratio_[nTheory]->DrawClone("p e X0 same");
 	//ratio_[nTheory]->Print("./"+(TString)(ratio_[nTheory]->GetName())+"ratio.png");
       }
