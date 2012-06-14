@@ -1068,9 +1068,6 @@ namespace semileptonic {
     // Top Mass
     if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";    
     if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
-    // Hadronization
-    if((sys==sysHadUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationUp/"+fileName+"HadUp";
-    if((sys==sysHadDown)&&((sample==kSig)||(sample==kBkg))) fileName = "HadronizationDown/"+fileName+"HadDown";
     // label for MC production cycle
     fileName += (MCTagSummer11) ? "Summer11" : "Fall11";
     fileName += "PF.root";

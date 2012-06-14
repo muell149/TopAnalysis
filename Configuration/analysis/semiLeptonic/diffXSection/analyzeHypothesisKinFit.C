@@ -134,7 +134,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
   else if(systematicVariation==sysGenPowheg)  ttbarMC="Powheg";
   TString ttbarMC2=ttbarMC;  
-  if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg";
+  if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg"; // old hadronization uncertainty will be overwritten from 'bothDecayChannelCombination'
   // normalization of differential normalized cross sections
   // true: use integral of unfolded differential cross section ignoring UF/OF bins
   // false: use all events and inclusive eff*A (no BR!) before unfolding
