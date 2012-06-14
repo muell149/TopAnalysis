@@ -6,7 +6,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=false, bool hadron=true)
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -510,9 +510,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
     // reconstructed top quantities
     "m^{t and #bar{t}} #left[GeV#right]/#frac{dN}{dm^{t and #bar{t}}} #left[GeV^{-1}#right]/0/10",
-    "p_{T}^{t and #bar{t}} #left[GeV#right]/#frac{dN}{dp_{T}^{t and #bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
+    xSecLabelName("topPt")+"/#frac{dN}{dp_{T}^{t and #bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
     "#phi^{t and #bar{t}}/#frac{dN}{d#phi^{t and #bar{t}}}/0/4",
-    "y^{t and #bar{t}}/#frac{dN}{dy^{t and #bar{t}}}/0/1",//5"
+    xSecLabelName("topY")+"/#frac{dN}{dy^{t and #bar{t}}}/0/1",//5"
     "p_{T}(hadronic t) #left[GeV#right]/#frac{dN}{dp_{T}^{had. t}} #left[GeV^{-1}#right]/0/20",                         
     "#phi(hadronic t)/#frac{dN}{d#phi^{had. t}}/0/4",
     "y(hadronic t)/#frac{dN}{dy^{had. t}}/0/5"    ,
@@ -521,10 +521,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,
     // generated top quantities
     "m^{t and #bar{t}} parton truth #left[GeV#right]/events/0/10",
-    "p_{T}^{t and #bar{t}} #left[GeV#right] parton truth/events/0/1",//20"
-    "p_{T}^{t and #bar{t}} #left[GeV#right] parton truth Phase Space/events/0/1",//20"
+    xSecLabelName("topPt")+" parton truth/events/0/1",//20"
+    xSecLabelName("topPt")+" parton truth Phase Space/events/0/1",//20"
     "#phi(t) parton truth/events/0/4",
-    "y^{t and #bar{t}} parton truth/events/0/1",//5"
+    xSecLabelName("topY")+" parton truth/events/0/1",//5"
     "p_{T}(hadronic t) #left[GeV#right] parton truth/events/0/20",                         
     "#phi(hadronic t) parton truth/events/0/4",
     "y(hadronic t) parton truth/events/0/5",
@@ -532,57 +532,57 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "#phi(leptonic t) parton truth/events/0/4",
     "y(leptonic t) parton truth/events/0/5",
     // reconstructed ttbar quantities	                            
-    "m_{t#bar{t}} #left[GeV#right]/#frac{dN}{dm^{t#bar{t}}} #left[GeV^{-1}#right]/1/1",//60"
-    "p_{T}^{t#bar{t}} #left[GeV#right]/#frac{dN}{dp_{T}^{t#bar{t}}} #left[GeV^{-1}#right]/0/1",//10"
-    "y^{t#bar{t}}/#frac{dN}{dy^{t#bar{t}}}/0/1",//2
+    xSecLabelName("ttbarMass")+"/#frac{dN}{dm^{t#bar{t}}} #left[GeV^{-1}#right]/1/1",//60"
+    xSecLabelName("ttbarPt")+"/#frac{dN}{dp_{T}^{t#bar{t}}} #left[GeV^{-1}#right]/0/1",//10"
+    xSecLabelName("ttbarY")+"/#frac{dN}{dy^{t#bar{t}}}/0/1",//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right]/#frac{dN}{dH_{T}^{t#bar{t}}}/0/20",
     "y^{t}+y^{#bar{t}}/#frac{dN}{d(y^{t}+y^{#bar{t}})}/0/10",
     "#phi{lep. t}-#phi{had. t}/#frac{dN}{d(#phi^(lep. t)-#phi^{had. t})}/0/4",                
     "y^{lep. t}-y^{had. t}/#frac{dN}{d(y^(lep. t)-y^{had. t})}/0/4",  
     // generated ttbar quantities	                            
-    "m_{t#bar{t}} #left[GeV#right] parton truth/events/1/1",//60"
-    "p_{T}^{t#bar{t}} #left[GeV#right] parton truth/events/0/1",//10"
-    "y^{t#bar{t}} parton truth/events/0/1",//2
+    xSecLabelName("ttbarMass")+" parton truth/events/1/1",//60"
+    xSecLabelName("ttbarPt")+" #left[GeV#right] parton truth/events/0/1",//10"
+    xSecLabelName("ttbarY")+" parton truth/events/0/1",//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right] parton truth/events/0/20",
-    "y^{t and #bar{t}} parton truth/events/0/10",
+    xSecLabelName("ttbarY")+" parton truth/events/0/10",
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4",                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4",
     // reconstructed lepton quantities
-    "p_{T}^{l} #left[GeV#right]/events #left[GeV^{-1}#right]/0/1",
-    "#eta^{l}/events/0/1" ,
+    xSecLabelName("lepPt" )+"/events #left[GeV^{-1}#right]/0/1",
+    xSecLabelName("lepEta")+"/events/0/1" ,
     // generated lepton quantities
-    "p_{T}^{l} #left[GeV#right] parton truth/events/0/1",
-    "#eta^{l} parton truth/events/0/1",
+    xSecLabelName("lepPt" )+" parton truth/events/0/1",
+    xSecLabelName("lepEta")+" parton truth/events/0/1",
     // reconstructed b-quark/b-jet quantities
-    "p_{T}^{b and #bar{b}} #left[GeV#right]/events #left[GeV^{-1}#right]/0/1",
-    "#eta^{b and #bar{b}}/events/0/1" ,
+    xSecLabelName("bqPt" )+"/events #left[GeV^{-1}#right]/0/1",
+    xSecLabelName("bqEta")+"/events/0/1" ,
     // generated b-quark/b-jet quantities
-    "p_{T}^{b and #bar{b}} #left[GeV#right] parton truth/events/0/1",
-    "#eta^{b and #bar{b}} parton truth/events/0/1",
+    xSecLabelName("bqPt" )+" parton truth/events/0/1",
+    xSecLabelName("bqEta")+" parton truth/events/0/1",
   };
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) response matrix Top quantities
-    "p_{T}^{t and #bar{t}} #left[GeV#right] gen/p_{T}^{t and #bar{t}} #left[GeV#right] reco",
+    xSecLabelName("topPt")+" gen/"+xSecLabelName("topPt")+" reco",
     "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
-    "y^{t and #bar{t}} gen/y^{t and #bar{t}} reco",
+    xSecLabelName("topY")+" gen/"+xSecLabelName("topY")+" reco",
     "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) response matrix ttbar quantities
-    "m(t#bar{t}) #left[GeV#right] gen/m(t#bar{t}) #left[GeV#right] reco",
-    "p_{T}(t#bar{t}) #left[GeV#right] gen/p_{T}(t#bar{t}) #left[GeV#right] reco",
-    "y(t#bar{t}) gen/y(t#bar{t}) reco"              ,
+    xSecLabelName("ttbarMass")+" gen/"+xSecLabelName("ttbarMass")+" reco",
+    xSecLabelName("ttbarPt")+" gen/"+xSecLabelName("ttbarPt")+" reco",
+    xSecLabelName("ttbarY")+" gen/"+xSecLabelName("ttbarY")+" reco"              ,
     "H_{T}(t#bar{t}) #left[GeV#right] gen/H_{T}(t#bar{t}) #left[GeV#right] reco",
     "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
     // d) response matrix lepton quantities
-    "p_{T}^{l} #left[GeV#right] gen/p_{T}^{l} #left[GeV#right] reco",
-    "#eta^{l} gen/#eta^{l} reco",           
+    xSecLabelName("lepPt")+" gen/"+xSecLabelName("lepPt")+" reco",
+    xSecLabelName("lepEta")+" gen/"+xSecLabelName("lepEta")+" reco",           
     // e) response matrix b-quark/b-jet quantities
-    "p_{T}^{b or #bar{b}} #left[GeV#right] gen/p_{T}^{b or #bar{b}} #left[GeV#right] reco",
-    "#eta^{b or #bar{b}} gen/#eta^{b or #bar{b}} reco",           
+    xSecLabelName("bqPt")+" gen/"+xSecLabelName("bqPt")+" reco",
+    xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco", 
   };
   TString axisLabel1Dadd[ ] = {
     // generated angular distributions
@@ -2371,22 +2371,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 		      }
 		      // for efficiency plots: draw grid
 		      if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
-		      // for histos with variable binning:
-		      if(binning_.count("analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+getStringEntry(plotList_[plot], 2))>0){
-			  // get variable binning
-			  TString plotName=getStringEntry(plotList_[plot], 2);			  
-			  std::vector<double> binEdges_=binning_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+plotName];
-			  // set maximum of histo to last bin considered 
-			  // in variable binning (overflow excluded)
-			  double firstBin=0;
-			  double lastBin=binEdges_.size()-2;
-			  // -2 for subtracting overflow bin
-			  if(verbose>1){
-			      std::cout << "1st bin, last bin: " << firstBin << " , " << lastBin << std::endl;
-			  }
-			  histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(firstBin, lastBin);
-		      }
-		      // first plot
+		      // adjust x range
+		      setXAxisRange(histo_[plotList_[plot]][sample], getStringEntry(plotList_[plot], 2));
+		      if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
+							       getStringEntry(plotList_[plot], 2)=="topYHad"|| 
+							       getStringEntry(plotList_[plot], 2)=="topYLep")){histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
+		      if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
 		      if(first){ 
 			  // create canvas and set titel corresponding to plotname in .root file
 			  addCanvas(plotCanvas_);
@@ -2438,15 +2428,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 			  else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
 			  if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 			  if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
-			  // restrict x axis for different plots
-			  if(getStringEntry(plotList_[plot], 2)=="topMass") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-			  if(getStringEntry(plotList_[plot], 2)=="lepEta")  histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);
-			  if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
-								   getStringEntry(plotList_[plot], 2)=="topYHad"|| 
-								   getStringEntry(plotList_[plot], 2)=="topYLep")){histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
-			  if(getStringEntry(plotList_[plot], 2)=="lepPt" )         histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,200);
-			  if(getStringEntry(plotList_[plot], 2)=="ttbarY")         histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.49,2.49);
-			  if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
 			  // draw efficiency plots as line
 			  if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
 			  // draw pull plots as line into same canvas with extra legend
