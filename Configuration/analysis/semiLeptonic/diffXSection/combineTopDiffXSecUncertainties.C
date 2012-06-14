@@ -966,8 +966,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		TH1F* plotpowheg   = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG" );
 		if(plotmcatnlo ) theories_.push_back( killEmptyBins(plotmcatnlo , verbose) );
 		if(plotpowheg  ) theories_.push_back( killEmptyBins(plotpowheg  , verbose) );
-		if(plotMadGraph) theories_.push_back( killEmptyBins(plotMadGraph, verbose) );
 		if(plotNNLO    ) theories_.push_back( killEmptyBins(plotNNLO    , verbose) );
+		if(plotMadGraph) theories_.push_back( killEmptyBins(plotMadGraph, verbose) );
 		// need to draw the canvas to make drawFinalResultRatio working
 		canvas->cd();
 		canvas->Draw();
