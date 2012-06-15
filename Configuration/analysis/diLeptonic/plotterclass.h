@@ -785,7 +785,8 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     // "hists", "systhistsUp" amd "systhistsDown"
     // Notice, that the DY Background will be scaled with
     // the DYScale.
-    for ( size_t i = 0; i < hists.size() ; i++ ) { 
+    for ( size_t i = 0; i < hists.size() ; i++ ) {  
+      cout << "Sample " <<    legends[i] << " (Nom) has " << ((hists[i])).Integral()<< " Events  " << endl;
       if ( legends[i] == "Data 2011" ) { 
 		if ( theDataHist == NULL ) {
 		  theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
@@ -826,7 +827,8 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       }
     }
     
-    for ( size_t i = 0; i < systhistsUp.size() ; i++ ) {  
+    for ( size_t i = 0; i < systhistsUp.size() ; i++ ) {   
+      cout << "Sample " <<    legends[i] << " (Up) has " << ((systhistsUp[i])).Integral()<< " Events  " << endl;
       if ( legendsUp[i] == "Data 2011") {
       } 
       else if ( legendsUp[i] == "t#bar{t} signal") {   
@@ -872,6 +874,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     }
     
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
+      cout << "Sample " <<    legends[i] << " (Down) has " << ((systhistsDown[i])).Integral()<< " Events  " << endl;
       if ( legendsDown[i] == "Data 2011") {
       } else if ( legendsDown[i] == "t#bar{t} signal") {   
 		if ( theRecHistDown == NULL ) { 
