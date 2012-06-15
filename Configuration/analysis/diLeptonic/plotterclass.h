@@ -227,7 +227,7 @@ void Plotter::DYScaleFactor(){
 void Plotter::InclFlatSystematics(int syst_number){
   
   //trigger uncertainties
-
+  /*
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .025;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//emu  
@@ -235,6 +235,12 @@ void Plotter::InclFlatSystematics(int syst_number){
       1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
   	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
   	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
+  */
+
+  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 0.015;}//ee 
+  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 0.015;}//mumu  
+  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 0.015;}//emu  
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 0.015;}//combined  
 
   syst_number++;
 
@@ -288,6 +294,7 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     int syst = syst_number;
     //trigger uncertainties
     legendsSyst.push_back("trigger");
+    /*
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .025;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .02;}//emu  
@@ -295,6 +302,11 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
 	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
 		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
 		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
+    */
+    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//ee 
+    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//mumu  
+    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//combined
     syst++;
     
     //Lepton selection
@@ -2982,6 +2994,7 @@ void Plotter::PlotDiffXSec(){
       h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
     }
     else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
+    h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
     h_GenDiffXSec->Draw();
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
@@ -2995,9 +3008,9 @@ void Plotter::PlotDiffXSec(){
     //bool binned_theory=true; 
     
     mcnlohist->SetLineColor(kAzure);
-    powheghist->SetLineColor(kGreen+1);
+    powheghist->SetLineColor(kGreen+2); //#####################
     mcnlohistBinned->SetLineColor(kAzure);
-    powheghistBinned->SetLineColor(kGreen+1);
+    powheghistBinned->SetLineColor(kGreen+2); //#####################
     mcnlohistBinned->SetLineWidth(2);
     powheghistBinned->SetLineWidth(2);
     if(binned_theory==false){
@@ -3010,11 +3023,15 @@ void Plotter::PlotDiffXSec(){
 
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
       Kidoth1_Binned->SetLineWidth(2);
-      Kidoth1_Binned->SetLineColor(kOrange); //########################
+      Kidoth1_Binned->SetLineColor(kOrange-3); //########################
       Kidoth1_Binned->Draw("SAME");
     }
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
+
+    GenPlotTheory->Draw("SAME,C"); //### 150512 ###
+    h_GenDiffXSec->Draw("SAME"); //### 150512 ###
+
     DrawCMSLabels(false, lumi);
     
     DrawDecayChLabel(channelLabel[channelType]);    
@@ -3087,6 +3104,7 @@ void Plotter::PlotDiffXSec(){
 
     varhists[0]->SetMinimum(0);
     varhists[0]->GetYaxis()->SetTitle("events");
+    varhists[0]->GetXaxis()->SetNoExponent(kTRUE);
     //varhists[0]->Draw("e");  //#########
     varhists[0]->Draw("e"); 
     
@@ -3182,13 +3200,13 @@ TH1* Plotter::GetNloCurve(TString NewName, TString Generator){
 
     
   if(Generator=="MCATNLO"){
-    if(channelType == 0)file = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau.root","READ");
-    else if(channelType == 1)file = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau.root","READ");
-    else if(channelType == 2)file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau.root","READ");
+    if(channelType == 0)file = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau_mcatnlo.root","READ");
+    else if(channelType == 1)file = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau_mcatnlo.root","READ");
+    else if(channelType == 2)file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau_mcatnlo.root","READ");
     else {
-      file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau.root","READ");
-      file1 = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau.root","READ");
-      file2 = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau.root","READ");
+      file = TFile::Open("selectionRoot/"+Generator+"/emu/ttbarsignalplustau_mcatnlo.root","READ");
+      file1 = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau_mcatnlo.root","READ");
+      file2 = TFile::Open("selectionRoot/"+Generator+"/mumu/ttbarsignalplustau_mcatnlo.root","READ");
     }
   }else{
     if(channelType == 0)file = TFile::Open("selectionRoot/"+Generator+"/ee/ttbarsignalplustau_powheg.root","READ");
