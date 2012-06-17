@@ -2170,7 +2170,6 @@ process.testIsoElectronQuality  = process.tightElectronQualityTagged.clone(src =
 ## standard sequence for cross section analyis and detailed cut monitoring
 process.p1 = cms.Path(## GOSSIE
                       process.eventWeightMC                         *
-                      process.EventWeightDistributions              *
                       ## gen event selection (decay channel) and the trigger selection (hltFilter)
                       process.filterSequence                        *
                       ## PV event selection
@@ -2265,6 +2264,7 @@ if(runningOnData=="MC"):
     print "running on Monte Carlo, gen-plots produced"
     process.p3 = cms.Path(## GOSSIE
                           process.eventWeightMC                         *
+                          process.EventWeightDistributions              *
                           ## gen event selection: semileptonic (lepton &
                           ## tau->lepton if tau==True), lepton=muon/electron
                           process.genFilterSequence                     *
@@ -2310,8 +2310,12 @@ if(runningOnData=="MC"):
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p3.remove(process.dummy)
 else:
-    process.p3 = cms.Path(process.dummy)
-    
+## GOSSIE
+#    process.p3 = cms.Path(process.dummy)
+    process.p3 = cms.Path(process.eventWeightMC                         *
+                          process.EventWeightDistributions             
+                         )
+
 ## std analysis with generator objects as input for efficiency determination
 ## phase space cuts for parton level
 if(runningOnData=="MC"):
@@ -2341,9 +2345,8 @@ if(runningOnData=="MC"):
                           ## tau->Mu if eventFilter=='background only' and
                           ## process.ttSemiLeptonicFilter.invert = True
                           process.genFilterSequence                      *
-                          # GOSSIE
-                          process.eventWeightMC                          *
-                          process.EventWeightDistributions               *
+                          #GOSSIE
+                          process.eventWeightMC                          *  
                           ## sequence with gen selection and histograms
                           process.s4
                           )			   
