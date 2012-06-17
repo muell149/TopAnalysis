@@ -715,13 +715,13 @@ namespace semileptonic {
     else if((sample==kSigMca)||(sample==kBkgMca)){
       crossSection=ttbarCrossSection; 
       // Fall11
-      // GOSSIE: preliminary 
-      // 21745199   total     events 
-      //    88.65 % positive  events NB: need to redetermine (fixed EventWeightDistributions)
-      //    11.35 % negative  events NB: need to redetermine (fixed EventWeightDistributions)
-      // 16810534   effective events
-      // weight per event: 190.41256 NB: number directly from LHE
-      Nevents = 3200936831 ; // 16810534 * 190.41256
+      // MC@NLO: total events is sum of weights
+      //    21745196 total     weights
+      //    19277872 positive  weights (88.65%)
+      //     2467324 negative  weights (11.35%)
+      //    16810548 effective weights
+      // each |weight| = 190.41256 -> number directly from LHE
+      Nevents = 3200939480 ; // 16810548 * 190.41256
     }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
