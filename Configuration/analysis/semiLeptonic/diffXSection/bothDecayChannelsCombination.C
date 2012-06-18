@@ -96,7 +96,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
   // GOSSIE quick fix: cut of m(ttbar) below 345 GeV
   bool cutTtbarMass=true;
   const double constMassRangeLow  =  345.0;
-  const double constMassRangeHigh = 1200.0;
+  const double constMassRangeHigh = 1600.0;
   
   // Closure test with reweighted m(ttbar) on parton level
   // will plot additionally the modified diff. norm. xSec on parton level
@@ -377,7 +377,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	    // adjust max
 	    if(plotName=="lepEta"||plotName=="topY"||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
 	    
-	    if      (plotName=="topY"   ) plotTheo->SetMaximum(0.6);
+	    if      (plotName=="topY"   ) plotTheo->SetMaximum(0.8);
 	    else if (plotName=="ttbarY" ) plotTheo->SetMaximum(0.8);
 	    else if (plotName=="lepEta" ) plotTheo->SetMaximum(0.6);
 	    else if (plotName=="bqEta"  ) plotTheo->SetMaximum(0.55);
@@ -501,7 +501,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  }	    	  
 	  
 	  // g) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
-	  if(DrawNNLOPlot || DrawMCFMPlot){ 
+	  if(extrapolate && (DrawNNLOPlot || DrawMCFMPlot)){ 
 	    
 	    TString plotname=xSecVariables_[i];	   
 	    plotname.ReplaceAll("Norm", "");
