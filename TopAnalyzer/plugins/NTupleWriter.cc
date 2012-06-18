@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.23 2012/04/02 13:06:38 tdorland Exp $
+// $Id: NTupleWriter.cc,v 1.24 2012/05/18 14:13:10 maldayam Exp $
 //
 //
 
@@ -196,6 +196,7 @@ private:
   std::vector<std::string> VfiredTriggers;
 
   ///////////weight//////////
+  double weightMCatNLO;
   double weightPU;
   double weightPU3D;
   double weightPU_Down;
@@ -349,12 +350,11 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
    edm::Handle<GenEventInfoProduct> evt_info;
    iEvent.getByType(evt_info);
-   double weightMC = evt_info->weight();
+   weightMCatNLO = evt_info->weight();
 
    //#############################################################
 
-   //weightPU = getPUEventWeight( iEvent, weightPU_ ); //#######
-   weightPU = getPUEventWeight( iEvent, weightPU_ )*weightMC; //#######
+   weightPU = getPUEventWeight( iEvent, weightPU_ ); //#######
 
    //std::cout << "[NTupleWriter::analyze] weightPU = " << getPUEventWeight(iEvent, weightPU_) << " weightMC = " << weightMC << " weightPU*weightMC = " << weightPU << std::endl; //#######
 
@@ -763,6 +763,7 @@ NTupleWriter::beginJob()
   if ( includeTrig_ ) Ntuple->Branch ( "firedTriggers",&VfiredTriggers );
 
   ////////////weight////////////
+  Ntuple->Branch ( "weightMCatNLO",&weightMCatNLO, "weightMCatNLO/D" );
   Ntuple->Branch ( "weightPU",&weightPU, "weightPU/D" );
   //Ntuple->Branch ( "weightPU3D", &weightPU3D, "weightPU3D/D");
   Ntuple->Branch ( "weightPU_Up",&weightPU_Up, "weightPU_Up/D" );
