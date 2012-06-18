@@ -1559,7 +1559,7 @@ namespace semileptonic {
 	for (vecIndex = 0; vecIndex < vecBinning.size()-1; vecIndex++){
 	    
 	    varType lowEdge      = vecBinning[vecIndex]; 
-	    if (plotname=="topPt"&&vecIndex==0&&lowEdge==0.0) lowEdge+=10;  // adhoc fix to compensate for minimum top-Pt cut in NNLO curve
+	    //if (plotname=="topPt"&&vecIndex==0&&lowEdge==0.0) lowEdge+=10;  // adhoc fix to compensate for minimum top-Pt cut in NNLO curve
 	    varType highEdge     = vecBinning[vecIndex+1];
 	    varType newBinWidth  = highEdge - lowEdge;
 	    varType newBinCenter = 0.5*(highEdge+lowEdge);
@@ -1678,9 +1678,10 @@ namespace semileptonic {
       //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
       bins_.clear();
       // m(ttbar)
-      double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0}; 
-      // Korea:       double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
-      // PAS binning: double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
+      double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0, 2500.0};
+      // First option: double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0};  
+      // Korea:        double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
+      // PAS binning:  double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
       bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
       result["ttbarMass"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
@@ -2626,7 +2627,7 @@ namespace semileptonic {
       if(plotname.Contains("TTbarM")){
 	//tail:
 	fitLowEdge=430.;
-	fitHighEdge=1200.;
+	fitHighEdge=1600.;
 	def="[0]*exp([1]*x)+[2]";
 	a=0.11;
 	b=-0.0074;
@@ -2692,8 +2693,8 @@ namespace semileptonic {
     else if(model=="madgraph"){
       if(plotname.Contains("ttbarMass")){
 	//tail:
-	fitLowEdge=430.;
-	fitHighEdge=1200.;
+	fitLowEdge=470.;
+	fitHighEdge=1600.;
 	def="[0]*exp([1]*x)+[2]";
 	a=28165.;
 	b=-0.00756;
@@ -2753,7 +2754,7 @@ namespace semileptonic {
     else if(model=="powheg"){
       if(plotname.Contains("ttbarMass")){
       fitLowEdge=480.;
-      fitHighEdge=1200.;
+      fitHighEdge=1600.;
       def="[0]*exp([1]*x)+[2]";
       a=40556.;
       b=-0.007;
@@ -3346,7 +3347,7 @@ namespace semileptonic {
 		else if(variable == "topY" )     k = (fullPS) ? 3.73 : 3.74;
 		else if(variable == "ttbarPt")   k = (fullPS) ? 2.30 : 2.30; 
 		else if(variable == "ttbarY")    k = (fullPS) ? 2.98 : 2.98;
-		else if(variable == "ttbarMass") k = (fullPS) ? 2.64 : 2.63;
+		else if(variable == "ttbarMass") k = (fullPS) ? 1.22 : 1.22;
 		else if(variable == "lepPt")     k = (fullPS) ? 1.28 : (hadronPS) ? 0.80   : 1.28;
 		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 0.0001 : 1.52; 
 		else if(variable == "bqPt")      k = (fullPS) ? 4.08 : (hadronPS) ? 4.44   : 4.08; 
@@ -3365,7 +3366,7 @@ namespace semileptonic {
 		else if(variable == "topY")      k = (fullPS) ? 3.31 : 3.30;
 		else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.04; 
 		else if(variable == "ttbarY")    k = (fullPS) ? 2.25 : 2.25;
-		else if(variable == "ttbarMass") k = (fullPS) ? 2.50 : 2.61;
+		else if(variable == "ttbarMass") k = (fullPS) ? 1.33 : 1.33;
 		else if(variable == "lepPt")     k = (fullPS) ? 2.32 : (hadronPS) ? 1.37   : 2.33;
 		else if(variable == "lepEta")    k = (fullPS) ? 1.09 : (hadronPS) ? 0.0001 : 1.10; 
 		else if(variable == "bqPt")      k = (fullPS) ? 3.88 : (hadronPS) ? 4.06   : 3.88; 
