@@ -2,11 +2,11 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -1777,7 +1777,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //          2 means: 25 scan points
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
-      int scanpoints= (scan==2 ? 1 : 0);
+      int scanpoints= (scan==2 ? 3 : 0);
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
@@ -2404,7 +2404,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 				  min=0.0001;
 				  max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
 				  if(plotList_[plot].Contains("Norm")){
-				      min=0.00001;
+				      min=0.000001;
 				      max=0.06;
 				  }
 			      }
