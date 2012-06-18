@@ -3489,19 +3489,25 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
             double err_data = rawHist->GetBinError(i);  
             // Get background value to be substracted! 
             double value_bgr = 0.; 
-            if ( doBgr == true )  value_bgr = (bgrHist+h)->GetBinContent(i);  
-            if(value_data<value_bgr){
+            if ( doBgr == true   ) value_bgr = (bgrHist+h)->GetBinContent(i);  
+	    // if ttbar signal fraction method is used: consider only non ttbar BG in check
+	    double relevant_bgr= value_bgr;
+            if ( doTtBgr == true ) relevant_bgr-=(ttbgrHist+h)->GetBinContent(i);
+	    // check for data to be smaller as BG that will be subtracted
+            if(value_data<relevant_bgr){
                 std::cout << "ERROR in TopSVDFunctions::SVD_BackgrHandling: " << std::endl;
                 std::cout << "N_MC BG > N_data in bin " << i << std::endl;
                 for ( int k = 1 ; k <= nbins ; k++ ) {
-                    value_data = rawHist->GetBinContent(k);
-                    value_bgr = (bgrHist+h)->GetBinContent(k);
-                    std::cout << "   Bin " << k << ":  Data=" << value_data << "    Bgr=" << value_bgr;
-                    if ( value_bgr > value_data ) {
-                        cout << " !@#$%^&*! " << endl;
-                    } else {
-                        cout << endl;
-                    }
+		  std::cout << "   Bin " << k << ":  Data=" << rawHist->GetBinContent(k) << ",    Bgr=";
+		  double relevant_bgr_bin =(bgrHist+h)->GetBinContent(k);
+		  if ( doTtBgr == true ) relevant_bgr_bin-=(ttbgrHist+h)->GetBinContent(k);
+		  std::cout << relevant_bgr_bin;
+		  if ( relevant_bgr > value_data ) {
+		    cout << " !@#$%^&*! " << endl;
+		  } 
+		  else {
+		    cout << endl;
+		  }
                 }
                 exit(1);
             }
