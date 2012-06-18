@@ -50,6 +50,10 @@
 # choose \"muon\" or \"electron\" or \"combined\"
 decayChannel=\"combined\" 
 
+## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
+## inputFolderName=\"RecentAnalysisRun\" (default)
+inputFolderName=\"RecentAnalysisRun\"
+
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
@@ -85,13 +89,9 @@ save=true
 ## 2: output for debugging
 verbose=0
 
-## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
-## inputFolderName=\"RecentAnalysisRun\" (default)
-inputFolderName=\"RecentAnalysisRun\"
-
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=false
+redoControlPlots=true
 
 ## Re-create systematic plots
 ## redoSystematics = true / false (default: true)
@@ -270,7 +270,7 @@ if [ $fast = false ]
     sleep 3
 fi
 
-if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
+if [ $redoControlPlots = true ]; then
     
     ## Compile library
     
@@ -427,7 +427,7 @@ echo " 37: sysTopMassUp               38: sysTopMassDown              "
 echo " 39: sysQCDUp                   40: sysQCDDown                  "
 echo " 41: sysSTopUp                  42: sysSTopDown                 "
 echo " 43: sysDiBosUp                 44: sysDiBosDown                "
-echo " 45: sysPDFUp                   46: sysPDFDown                  "
+echo " 45: sysPDFUp                   46 sysPDFDown                  "
 echo " 47: sysHadUp                   48: sysHadDown                  "
 echo " 49: sysGenMCatNLO              50: sysGenPowheg                "
 echo " 51: sysShapeUp                 52: sysShapeDown                "
@@ -490,7 +490,7 @@ EOF
         ## loop all systematic variations (excluding shape variations)
 	
 	for (( systematicVariation = 1; systematicVariation <= $maxSys;  systematicVariation++ )); do
-    
+
             ## exclude shape variation
 
 
