@@ -1461,7 +1461,7 @@ process.effSFElectronEventWeight.jetTriggerEffsSFShapeSysErr=0.005
 
 process.effSFElectronEventWeightPUup              = process.effSFElectronEventWeight.clone(meanTriggerEffSF=0.991)
 process.effSFElectronEventWeightPUdown            = process.effSFElectronEventWeight.clone(meanTriggerEffSF=0.946)
-process.effSFElectronEventWeightFlatEffSF         = process.effSFElectronEventWeight.clone(sysVar = "FlatEffSF")
+process.effSFElectronEventWeightFlatEffSF         = process.effSFElectronEventWeight.clone(sysVar = "")
 process.effSFElectronEventWeightEffSFNormUpStat   = process.effSFElectronEventWeight.clone(sysVar = "combinedEffSFNormUpStat")
 process.effSFElectronEventWeightEffSFNormDownStat = process.effSFElectronEventWeight.clone(sysVar = "combinedEffSFNormDownStat")
 process.effSFElectronEventWeightEffSFShapeUpEta   = process.effSFElectronEventWeight.clone(sysVar = "combinedEffSFShapeUpEta")
@@ -1975,7 +1975,9 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     elif(decayChannel=="electron"):
         process.kinFit.replace(process.analyzeTopRecoKinematicsKinFit, 
                                process.analyzeTopRecoKinematicsKinFit*
-                               process.effSFElectronEventWeightFlatEffSF*           
+                               process.effSFElectronEventWeightPUup*      
+                               process.effSFElectronEventWeightPUdown*
+			       process.effSFElectronEventWeightFlatEffSF*           
                                process.effSFElectronEventWeightEffSFNormUpStat*      
                                process.effSFElectronEventWeightEffSFNormDownStat*    
                                process.effSFElectronEventWeightEffSFShapeUpEta*  
