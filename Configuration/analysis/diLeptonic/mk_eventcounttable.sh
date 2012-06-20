@@ -4,15 +4,15 @@ for sample in ee emu mumu
   do
   for step in 5 6 7 8 9
   do
-    tempdata=`grep data $sample/Events$step.txt | awk -F : '{print $2;}'`
+    tempdata=`grep Data $sample/Events$step.txt | awk -F : '{print $2;}'`
     let "data$sample$step=$tempdata"
     temptau=`grep tau $sample/Events$step.txt | awk -F : '{print $2;}'`
     let "tau$sample$step=$temptau"
     tempmu=`grep mu $sample/Events$step.txt | awk -F : '{print $2;}'`
     let "mu$sample$step=$tempmu"
-    tempVV=`grep VV $sample/Events$step.txt | awk -F : '{print $2;}'`
+    tempVV=`grep diboson $sample/Events$step.txt | awk -F : '{print $2;}'`
     let "VV$sample$step=$tempVV"
-    tempnu=`grep nu $sample/Events$step.txt | awk -F : '{print $2;}'`
+    tempnu=`grep W+ $sample/Events$step.txt | awk -F : '{print $2;}'`
     let "nu$sample$step=$tempnu"
     temptW=`grep tW $sample/Events$step.txt | awk -F : '{print $2;}'`
     let "tW$sample$step=$temptW"
