@@ -2,11 +2,11 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set ROOT Style
@@ -1898,20 +1898,29 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = true, int sys
       //  Use unfolding machine
       // ============================
       if(calculateXSec){
-	if(verbose>3){
-	  // N(events) output for each bin and variable
-	  std::cout << std::endl << variable << std::endl;
-	  for(int bin=0; bin<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetNbinsX()+1; ++bin){
-	    std::cout << "lep eta (bin" << bin << ")= (" <<  histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin) << "," << histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin+1) << ")" << std::endl;
-	    std::cout << "     N(data): " << histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinContent(bin)* histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinWidth(bin) << std::endl;
-	    double NumSig  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig  ]->GetBinWidth(bin);
-	    double NumBkg  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->GetBinWidth(bin);     
-	    double NumQCD  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinWidth(bin);
-	    double NumVV   = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinWidth(bin);
-	    double NumStop = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinWidth(bin);
-	    double NumWjet = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinWidth(bin);
-	    double NumZjet = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinWidth(bin); 
-	    std::cout << "     N(BG all): " << NumStop+NumWjet+NumZjet+NumVV+NumQCD << std::endl;
+	for(int bin=1; bin<=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetNbinsX(); ++bin){
+	  double NumSig  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig  ]->GetBinWidth(bin);
+	  double NumBkg  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg  ]->GetBinWidth(bin);     
+	  double NumQCD  = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kQCD  ]->GetBinWidth(bin);
+	  double NumVV   = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kDiBos]->GetBinWidth(bin);
+	  double NumStop = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSTop ]->GetBinWidth(bin);
+	  double NumWjet = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kWjets]->GetBinWidth(bin);
+	  double NumZjet = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinContent(bin)*histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kZjets]->GetBinWidth(bin);
+	  double dataVal = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinContent(bin)* histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinWidth(bin);
+	  double allBGVal=NumStop+NumWjet+NumZjet+NumVV+NumQCD;
+	  if(allBGVal>dataVal){
+	    std::cout << "WARNING: data=" << dataVal << "<BG=" << allBGVal << " in bin " << bin;
+	    std::cout << "("<< histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin) << ".." << histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin+1) << ")"<< std::endl;
+	    std::cout << " for " << variable << "(" << sysLabel(systematicVariation) << ") !!!" << std::endl;
+	    std::cout << "(now fixed by setting data=MC)" << std::endl;
+	    int binInRaw= histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->FindBin(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinCenter(bin));
+	    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->SetBinContent(binInRaw, histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->GetBinContent(binInRaw)+(allBGVal-dataVal));
+	  }
+	  if(allBGVal>dataVal||verbose>3){
+	    // N(events) output for each bin and variable
+	    std::cout << variable << " (bin" << bin << ")= (" <<  histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin) << "," << histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinLowEdge(bin+1) << ")" << std::endl;
+	    std::cout << "     N(data): "   << dataVal << std::endl; 
+	    std::cout << "     N(BG all): " << allBGVal << std::endl;
 	    std::cout << "     N(Sig): "    << NumSig  << std::endl;
 	    std::cout << "     N(Bkg): "    << NumBkg  << std::endl;
 	    std::cout << "     N(Stop): "   << NumStop << std::endl;
