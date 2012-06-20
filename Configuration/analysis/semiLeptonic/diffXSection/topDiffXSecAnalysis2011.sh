@@ -53,26 +53,30 @@ decayChannel=\"combined\"
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
 ## inputFolderName=\"RecentAnalysisRun\" (default)
 inputFolderName=\"RecentAnalysisRun\"
+#inputFolderName=\"1205_AnalysisRun\"
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
 if [ $decayChannel == \"electron\" ]; then
     dataLuminosity=4980
-    dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
+   dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
+   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
    #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
    #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedElectron.root\"
    #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
 else
     if [ $decayChannel == \"muon\" ]; then
 	dataLuminosity=4955
-	dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+       dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
        #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
        #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root\"
        #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
     else
 	dataLuminosity=4967.5   # mean value
 	dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+	#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
     fi
 fi
 
@@ -633,6 +637,17 @@ EOF
 echo ""
 echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron)"
 root -l -b < commandsCombineUncRun.cint
+
+
+#### ==========================================
+####  Create ratio plots for final xSecs 
+#### ==========================================
+
+if [ $decayChannel == \"combined\" ]; then
+    echo ""
+    echo " Processing .... createTheoryDataRatios($extrapolate, $hadron, $verbose)"
+    root -l -q -b './createTheoryDataRatios.C++('$extrapolate', '$hadron', '$verbose')'
+fi
 
 #### ==========================================
 
