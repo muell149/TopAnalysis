@@ -27,7 +27,6 @@
 #include <TKey.h>
 #include <TGraphAsymmErrors.h>
 #include <TString.h>
-//#include <TRandom.h>
 
 #include <TLine.h>
 #include <TBox.h>
@@ -2040,23 +2039,6 @@ namespace semileptonic {
     rPad->SetBorderSize(0);
     rPad->SetBorderMode(0);
     rPad->Draw();
-    // draw a horizontal lines on a given histogram
-    // a) at 1
-    Double_t xmin = ratio->GetXaxis()->GetXmin();
-    Double_t xmax = ratio->GetXaxis()->GetXmax();
-    TString height = ""; height += 1;
-    TF1 *f = new TF1("f", height, xmin, xmax);
-    f->SetLineStyle(1);
-    f->SetLineWidth(1);
-    f->SetLineColor(kBlack);
-    f->Draw("L same");
-    // b) at upper end of ratio pad
-    TString height2 = ""; height2 += ratioMax;
-    TF1 *f2 = new TF1("f2", height2, xmin, xmax);
-    f2->SetLineStyle(1);
-    f2->SetLineWidth(1);
-    f2->SetLineColor(kBlack);
-    f2->Draw("L same");
     // configure ratio plot
     rPad->cd();
     rPad->SetLogy(0);
@@ -2097,6 +2079,25 @@ namespace semileptonic {
     gPad->RedrawAxis();
     // draw grid
     rPad->SetGrid(1,1);
+
+    // draw a horizontal lines on a given histogram
+    // a) at 1
+    Double_t xmin = ratio->GetXaxis()->GetXmin();
+    Double_t xmax = ratio->GetXaxis()->GetXmax();
+    TString height = ""; height += 1;
+    TF1 *f = new TF1("f", height, xmin, xmax);
+    f->SetLineStyle(1);
+    f->SetLineWidth(1);
+    f->SetLineColor(kBlack);
+    f->Draw("L same");
+    // b) at upper end of ratio pad
+    TString height2 = ""; height2 += ratioMax;
+    TF1 *f2 = new TF1("f2", height2, xmin, xmax);
+    f2->SetLineStyle(1);
+    f2->SetLineWidth(1);
+    f2->SetLineColor(kBlack);
+    f2->Draw("L same");
+
     return 0;    
   }
 
