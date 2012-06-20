@@ -27,6 +27,7 @@
 #include <TKey.h>
 #include <TGraphAsymmErrors.h>
 #include <TString.h>
+//#include <TRandom.h>
 
 #include <TLine.h>
 #include <TBox.h>
@@ -560,7 +561,7 @@ namespace semileptonic {
 	// (these could not be filled and
 	// exist because of technical reasons only)
 	if(binwidth==0)binwidth=1;
-	// recalculate error
+	// recalculate errors
 	double error = (double)(histo->GetBinError(i)) / binwidth;
 	// recalculate bin content
 	outputHisto->SetBinContent(i, ( (double)(histo->GetBinContent(i)) / binwidth) );
@@ -1547,14 +1548,15 @@ namespace semileptonic {
 	//  "rescale":           rescale the rebinned histogramme
 	//                       (applicable for cross-section e.g.) 
 	
-	unsigned int vecIndex=0;
-
+        unsigned int vecIndex=0;
+	
 	// fill vector into array to use appropriate constructor of TH1-classes
 	const varType *binArray = vecBinning.data();
-	
+	//std::cout << "a" << std::endl;
 	// create histo with new binning
-	histoType *histoNewBinning = new histoType("histoNewBinning"+plotname,"histoNewBinning"+plotname,vecBinning.size()-1,binArray);
-	
+	TString name = (TString)histoOldBinning->GetName();
+	histoType histoNewBinning = histoType ("histoNewBinning"+plotname+name,"histoNewBinning"+plotname+name,vecBinning.size()-1,binArray);
+	//std::cout << "b" << std::endl;
 	// fill contents of histoOldBinning into histoNewBinning and rescale if applicable
 	for (vecIndex = 0; vecIndex < vecBinning.size()-1; vecIndex++){
 	    
@@ -1575,11 +1577,11 @@ namespace semileptonic {
 		}
 	    }
 
-	    if (rescale) histoNewBinning->Fill(newBinCenter,binSum/newBinWidth);
-	    else histoNewBinning->Fill(newBinCenter,binSum);
+	    if (rescale) histoNewBinning.Fill(newBinCenter,binSum/newBinWidth);
+	    else histoNewBinning.Fill(newBinCenter,binSum);
 	}
-
-	return (histoType*)histoNewBinning->Clone();
+	histoType * result=(histoType *)histoNewBinning.Clone();
+	return result;
     }
 
     // ===============================================================
@@ -1677,7 +1679,6 @@ namespace semileptonic {
       result["ttbarY"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
       bins_.clear();
-      // m(ttbar)
       double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0, 2500.0};
       // First option: double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0};  
       // Korea:        double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
@@ -1720,7 +1721,7 @@ namespace semileptonic {
     if(variable.Contains("topPt"))          his->GetXaxis()->SetRangeUser(0.  , 399. ); 
     else if(variable.Contains("topY"     )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
     else if(variable.Contains("ttbarY"   )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
-    else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(345., 1199.);
+    else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(346., 1599.);
     else if(variable.Contains("lepPt"    )) his->GetXaxis()->SetRangeUser(30  , 199. );
     else if(variable.Contains("lepEta"   )) his->GetXaxis()->SetRangeUser(-2.1, 2.09 );
     else if(variable.Contains("bqPt"     )) his->GetXaxis()->SetRangeUser(30. , 399. );
@@ -2128,7 +2129,7 @@ namespace semileptonic {
     return tex;  
   }
 
-  TPad* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0))//, TCanvas* canv)
+  TCanvas* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0), TCanvas* canv=0)
   {
     // this function draws a pad with the ratio "histNumeratorData" over "histDenominatorTheoryX" 
     // for up to five specified theory curves, using "histNumeratorDataDown" and "histNumeratorDataUp"
@@ -2141,6 +2142,8 @@ namespace semileptonic {
     // used functions: setXAxisRange, theoryColor
     // used enumerators: none
 
+
+    // some basic printout
     if(histDenominatorTheory_.size()>0&&histNumeratorData){
       if(verbose>0) std::cout << "calling drawFinalResultRatio for " << histNumeratorData->GetName() << " and " << histDenominatorTheory_.size() << " theory curves" << std::endl;
       // check that histos have the same binning
@@ -2149,10 +2152,20 @@ namespace semileptonic {
 	  std::cout << "error when calling drawRatio - data and theory" << nTheory+1 << " histo have different number of bins!" << std::endl;
 	  std::cout << histNumeratorData->GetNbinsX() << " (data) vs. " << histDenominatorTheory_[nTheory]->GetNbinsX() << " (theory)" << std::endl;
 	  std::cout << "set this ratio to 1!" << std::endl;
+	  // if not: theory is set to data -> ratio=1
 	  histDenominatorTheory_[nTheory]=(TH1F*)histNumeratorData->Clone("WARNINGerrorInRatio");
 	}
       }
       if(verbose>1) std::cout << "range: " << histNumeratorData->GetNbinsX() << " bins from " <<  histNumeratorData->GetBinLowEdge(histNumeratorData->GetXaxis()->GetFirst()) << " to " << histNumeratorData->GetBinLowEdge(histNumeratorData->GetXaxis()->GetLast()+1) << std::endl;
+
+      // enter canvas
+      if(!canv){
+	std::cout << "canvas handed over in drawFinalResultRatio as canv is empty" << std::endl;
+	return canv;
+      }	       
+      canv->cd();
+      canv->Draw();
+      
       // create ratios
       std::vector<TH1*> ratio_;
       for(unsigned int nTheory=0; nTheory<histDenominatorTheory_.size(); ++nTheory){
@@ -2214,6 +2227,14 @@ namespace semileptonic {
       whitebox->SetBorderSize(0);
       whitebox->SetBorderMode(0);
       whitebox->Draw("");
+      // create pad to hide the outer left part of the
+      // rapidity x-axis without masking the 0 of the y-axis
+      TPad *whitebox2 = new TPad("whitebox2","",0.176332,0.144974,0.982758,0.346332);
+      whitebox2->SetFillColor(10);
+      whitebox2->SetFillStyle(1001);
+      whitebox2->SetBorderSize(0);
+      whitebox2->SetBorderMode(0);
+      if(((TString)histNumeratorData->GetName()).Contains("Y"))	whitebox2->Draw("");
       // create new pad for ratio plot
       TPad *rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
 #ifdef DILEPTON_MACRO
@@ -2311,7 +2332,7 @@ namespace semileptonic {
       //rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
       gPad->cd();
       rPad->Draw();
-      return rPad;
+      return canv;
     }
     else{
       if(verbose>0){ 
@@ -2321,7 +2342,7 @@ namespace semileptonic {
 	std::cout << " and " << histDenominatorTheory_.size() << " theory curves" << std::endl;
       }
     }
-    return (TPad*)0;
+    return (TCanvas*)0;
   }
 
   TH1F* killEmptyBins(TH1F* histo, int verbose=0){
@@ -3103,9 +3124,29 @@ namespace semileptonic {
     // central prediction
     // --- 
     // get plot
-    TH1F* result=getTheoryPrediction(plotname, filename);
+    TH1F* load=getTheoryPrediction(plotname, filename);
+    TH1F* result=0;
     // replace low statistic parts with fitted curve
-    if(smoothcurves) result=useFittedFunctions(result, model, plotname, verbose);
+    if(smoothcurves) result=useFittedFunctions(load, model, plotname, verbose);
+    // variable rebinning for binned curve
+    TString plotname3 = plotname2;
+    plotname3.ReplaceAll("Gen","");
+    if(!smoothcurves){
+      // check if maxima of x-axes of loaded plot and new binning is the same
+      double newMax=binning_[plotname3][binning_[plotname3].size()-1];
+      double oldMax=load->GetBinLowEdge(load->GetNbinsX()+1);
+      if(newMax<=oldMax){
+	result=(TH1F*)(load->Clone());
+	reBinTH1F(*result, binning_[plotname3], verbose);
+      }
+      // if not: use different rebinning function and ignore bin content in the missing range
+      else{
+	std::cout << "use alternative rebinning function" << std::endl;
+	std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	std::cout << " theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	result= reBinTH1FIrregularNewBinning(load, binning_[plotname3] , plotname3, false);
+      }
+    }
     // rename
     TString name=plotname2;
     if(model=="powheg") name+="POWHEG";
@@ -3123,10 +3164,6 @@ namespace semileptonic {
     if(smoothcurves&&smoothFactor) result->Smooth(smoothFactor);
     // equal rebinning before
     if(smoothcurves&&rebinFactor) result->Rebin(rebinFactor);
-    // variable rebinning for binned curve
-    TString plotname3 = plotname2;
-    plotname3.ReplaceAll("Gen","");
-    if(!smoothcurves) reBinTH1F(*result, binning_[plotname3], verbose);
     // normalize to area
     if(normalize) result->Scale(1./(result->Integral(0,result->GetNbinsX()+1)));
     // absolute normalization for POWHEG and MCatNlo curve
@@ -3143,32 +3180,67 @@ namespace semileptonic {
     // --- 
     if(errorbands){
       // get values
-      TH1F* central   =getTheoryPrediction(plotname        , filename);
-      TH1F* ErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
-      TH1F* ErrorDown =getTheoryPrediction(plotname+"_Down", filename);
-      // replace low statistic parts with fitted curve
+      TH1F* loadcentral   =getTheoryPrediction(plotname        , filename);
+      TH1F* loadErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
+      TH1F* loadErrorDown =getTheoryPrediction(plotname+"_Down", filename);
+      TH1F* central=0;
+      TH1F* ErrorUp=0;
+      TH1F* ErrorDown=0;
       if(smoothcurves){
-	central=useFittedFunctions(central, model, plotname, verbose);
-	ErrorUp=useFittedFunctions(ErrorUp, model, plotname+"_Up", verbose);
-	ErrorDown=useFittedFunctions(ErrorDown, model, plotname+"_Down", verbose);
-      }
-      // smoothing 1
-      if(smoothcurves&&errorSmoothFactor){
-	central  ->Smooth(errorSmoothFactor);
-	ErrorUp  ->Smooth(errorSmoothFactor);
-	ErrorDown->Smooth(errorSmoothFactor);
-      }
-      // rebinning
-      if(smoothcurves&&errorRebinFactor){ 
-	central  ->Rebin(errorRebinFactor);
-	ErrorUp  ->Rebin(errorRebinFactor);
-	ErrorDown->Rebin(errorRebinFactor);
+	// replace low statistic parts with fitted curve
+	central=useFittedFunctions(loadcentral, model, plotname, verbose);
+	ErrorUp=useFittedFunctions(loadErrorUp, model, plotname+"_Up", verbose);
+	ErrorDown=useFittedFunctions(loadErrorDown, model, plotname+"_Down", verbose);
+	// smoothing 1
+	if(errorSmoothFactor){
+	  central  ->Smooth(errorSmoothFactor);
+	  ErrorUp  ->Smooth(errorSmoothFactor);
+	  ErrorDown->Smooth(errorSmoothFactor);
+	}
+	// rebinning
+	if(errorRebinFactor){ 
+	  central  ->Rebin(errorRebinFactor);
+	  ErrorUp  ->Rebin(errorRebinFactor);
+	  ErrorDown->Rebin(errorRebinFactor);
+	}
       }
       // variable rebinning for binned curve
       if(!smoothcurves){
-	reBinTH1F(*central  , binning_[plotname2], verbose-1);
-	reBinTH1F(*ErrorUp  , binning_[plotname2], verbose-1);
-	reBinTH1F(*ErrorDown, binning_[plotname2], verbose-1);
+	// check if maxima of x-axes of loaded plots and new binning is the same
+	double newMax=binning_[plotname3][binning_[plotname3].size()-1];
+	double oldMaxcentral=loadcentral->GetBinLowEdge(load->GetNbinsX()+1);
+	double oldMaxErrorUp=loadErrorUp->GetBinLowEdge(load->GetNbinsX()+1);
+	double oldMaxErrorDown=loadErrorDown->GetBinLowEdge(load->GetNbinsX()+1);
+	if(newMax<=oldMaxcentral){
+	  central=(TH1F*)(loadcentral->Clone());
+	  reBinTH1F(*central, binning_[plotname3], verbose);
+	}
+	// if not: use different rebinning function and ignore bin content in the missing range
+	else{
+	  std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	  std::cout << " central theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  central=reBinTH1FIrregularNewBinning(loadcentral, binning_[plotname3] , plotname3, false);
+	}
+	if(newMax<=oldMaxErrorUp){
+	  ErrorUp=(TH1F*)(loadErrorUp->Clone());
+	  reBinTH1F(*ErrorUp, binning_[plotname3], verbose);
+	}
+	// if not: use different rebinning function and ignore bin content in the missing range
+	else{
+	  std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	  std::cout << " ErrorUp theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  ErrorUp=reBinTH1FIrregularNewBinning(loadErrorUp, binning_[plotname3] , plotname3, false);
+	}
+	if(newMax<=oldMaxErrorDown){
+	  ErrorDown=(TH1F*)(loadErrorDown->Clone());
+	  reBinTH1F(*ErrorDown, binning_[plotname3], verbose);
+	}
+	// if not: use different rebinning function and ignore bin content in the missing range
+	else{
+	  std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	  std::cout << " ErrorDown theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  ErrorDown=reBinTH1FIrregularNewBinning(loadErrorDown, binning_[plotname3] , plotname3, false);
+	}
       }
       // normalize to area
       if(normalize){
@@ -3176,12 +3248,6 @@ namespace semileptonic {
 	ErrorUp  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
 	ErrorDown->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
       }
-      // absolute normalization for POWHEG and MCatNlo curve
-/*       if(!normalize&&(model=="powheg"||model=="mcatnlo")){ */
-/* 	central  ->Scale(weight/getInclusiveXSec(central)); */
-/* 	ErrorUp  ->Scale(weight/getInclusiveXSec(central)); */
-/* 	ErrorDown->Scale(weight/getInclusiveXSec(central)); */
-/*       } */
       // divide by binwidth
       if(smoothcurves){
 	central  ->Scale(1.0/central  ->GetBinWidth(1));
