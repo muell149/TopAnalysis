@@ -2,8 +2,7 @@
 #include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", 
-				     bool exclShapeVar=true, bool extrapolate=false, bool hadron=false){
+void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", bool exclShapeVar=true, bool extrapolate=false, bool hadron=false){
 
   // ============================
   //  Systematic Variations:
@@ -97,9 +96,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
                                              // value might change later, sysShapeDown/2 is the default
   unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
-  // draw ratio for final cross section plots?
-  bool ratio=true; 
-  
+
   // ==========================================
   //  Basic Printout and Variable Definitions
   // ==========================================
@@ -124,7 +121,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // create container to indicate that plots have been found 
   // and therefore systematics will be calculated
   // The following uncertainties are excluded
-  std::map<TString, std::map<unsigned int, bool> > calculateError_;
+  std::map<TString, std::map<unsigned int, bool> > calculateError_, considerError_;
   // create container for combined Errors
   std::map<TString, TGraphAsymmErrors*> totalErrors_;
 
@@ -215,7 +212,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     // ===================================
     //  Load hadronization uncertainties
     // ===================================
-
+    // ATTENTION: values are loaded but not used at the moment!!!
     // container for hadronization uncertainties
     std::map< TString, TH1F* > hadUnc_;
     // get file 
@@ -235,8 +232,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	name.ReplaceAll("Norm","");
 	// get plot 
 	hadUnc_[xSecVariables_[var]]=(TH1F*)(hadfile->Get(name)->Clone());
-	calculateError_[xSecVariables_[var]][sysHadUp  ]=true; 
-	calculateError_[xSecVariables_[var]][sysHadDown]=true; 
+	//calculateError_[xSecVariables_[var]][sysHadUp  ]=true; // done above
+	//calculateError_[xSecVariables_[var]][sysHadDown]=true; // done above
       }
     }
     
@@ -263,6 +260,11 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	    gROOT->cd();	    
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
 	    calculateError_[xSecVariables_[i]][sys]=true;
+	    // FIXME: no shape variation uncertainties considered at all
+	    if(sys==sysShapeDown||sys==sysShapeUp) calculateError_[xSecVariables_[i]][sys]=false;
+	    considerError_[xSecVariables_[i]][sys]=calculateError_[xSecVariables_[i]][sys];
+	    // FIXME: no generator uncertainties considered for final errors
+	    if(sys==sysGenPowheg||sys==sysGenMCatNLO) considerError_[xSecVariables_[i]][sys]=false;
 	  }
 	  else{
 	    if(verbose>1) std::cout << "ERROR: Plot " << plotName +"kData not found in "+ xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
@@ -384,10 +386,18 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      }
 	      // create plot that indicates the relative systematic uncertainty
 	      double sysDiff=0;
-	      if(verbose2>0) std::cout << sysLabel(sys);
+	      if(verbose2>0){
+		std::cout << sysLabel(sys);
+		// check if chosen systematic variation should be considered
+		if(calculateError_[xSecVariables_[i]].count(sys)>0&&considerError_[xSecVariables_[i]].count(sys)>0){
+		  if(considerError_[xSecVariables_[i]][sys]==true&&calculateError_[xSecVariables_[i]][sys]==true) std::cout << "(considered): ";
+		  else if (considerError_[xSecVariables_[i]][sys]==false&&calculateError_[xSecVariables_[i]][sys]==true) std::cout << "(NOT considered): ";
+		  else  std::cout << "(NOT calculated): ";
+		}
+	      }
 	      // check if chosen systematic variation of chosen variable has been found and std value is nonzero
 	      if(calculateError_[xSecVariables_[i]].count(sys)<=0||stdBinXSecValue==0){
-		if(verbose>1){
+		if(verbose2>0){
 		  if(stdBinXSecValue!=0) std::cout << ": not found" << std::endl;
 		  else std::cout << ": std value is 0" << std::endl;
 		}
@@ -395,7 +405,6 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      else{
 		// check if variable has to be considerered for total systematic error
 		if(calculateError_[xSecVariables_[i]][sys]==true){
-		  if(verbose2>0) std::cout << "(considered): ";
 		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
 		  //OUTDATED FIXME MARTIN: use as hadronization uncertainty a plain value or external values
 		  //if(sys==sysHadUp||sys==sysHadDown){
@@ -410,29 +419,35 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		  //  }
 		  //}
 		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
-		  // OUTDATED FIXME MARTIN: make hadronization uncertainty symmetric rel down =- rel. up
- 		  //if(sys==sysHadDown){
-		  //  sysBinXSecValue= (sysBinXSecValue-stdBinXSecValue < 0) ? stdBinXSecValue+2*sysDiff : stdBinXSecValue-2*sysDiff;
-		  //}
+		  // adjust hadronization uncertainty for non combined cross section by hand
+		  // as powheg vs mcatnlo
+		  if((!(decayChannel=="combined"))&&(sys==sysHadUp||sys==sysHadDown)&&calculateError_[xSecVariables_[i]][sysGenPowheg]==true&&calculateError_[xSecVariables_[i]][sysGenMCatNLO]==true){
+		    sysDiff=std::abs(histo_[xSecVariables_[i]][sysGenPowheg]->GetBinContent(bin)-histo_[xSecVariables_[i]][sysGenMCatNLO]->GetBinContent(bin));
+		    // make hadronization uncertainty symmetric rel down =- rel. up
+		    if(sys==sysHadDown) sysDiff*=-1;		    
+		  }
 		  if      (sys==sysTopMassUp)   sysDiff *= SF_TopMassUpUncertainty;   // SF_TopMassUpUncertainty: defined in basicFunctions.h
 		  else if (sys==sysTopMassDown) sysDiff *= SF_TopMassDownUncertainty; // SF_TopMassDownUncertainty: defined in basicFunctions.h
 		}
-		else if(verbose2>0) std::cout << "(not considered): ";
 		// print single systematic uncertainty absolut and relative for bin & variable
 		if(verbose2>0) std::cout << sysDiff << " ( = " << 100*sysDiff/stdBinXSecValue << "% )" << std::endl;
 		// save relative systematic uncertainties for bin & variable (weight 0.5 due to error symmetrization, not applied for generator uncertainties)
 		if (sys==sysGenPowheg || sys == sysGenMCatNLO) relSysPlot->Fill(nSysCnt, 100.0*sysDiff/stdBinXSecValue); 
 		else relSysPlot->Fill(nSysCnt, 100.0*0.5*sysDiff/stdBinXSecValue);
 	      }
-
 	      // for last systematic 
 	      if(sys==ENDOFSYSENUM-1){
 		// calculate total systematic uncertainty
-		for (unsigned int n=0; n<nSysTypes-1; n++) // -1 due to conversion between loop index and bin number
+		for (unsigned int n=0; n<nSysTypes-1; n++){// -1 due to conversion between loop index and bin number
 		  if (exclShapeVar && n==shapeVarIdx) std::cout << " Shape uncertainties are excluded from total systematic uncertainty." << std::endl;
-		  else if (n==mcatnloIdx) std::cout << " Uncertainties when unfolding with MCatNLO is excluded from total systematic uncertainty." << std::endl;
-		  else if (n==powhegIdx)  std::cout << " Uncertainties when unfolding with POWHEG is excluded from total systematic uncertainty." << std::endl;
+		  else if (considerError_[xSecVariables_[i]][sysGenMCatNLO]==false&&n==mcatnloIdx){
+		    if(verbose>0) std::cout << " Uncertainties when unfolding with MCatNLO is excluded from total systematic uncertainty." << std::endl;
+		  }
+		  else if (considerError_[xSecVariables_[i]][sysGenPowheg ]==false&&n==powhegIdx ){
+		    if(verbose>0) std::cout << " Uncertainties when unfolding with POWHEG is excluded from total systematic uncertainty." << std::endl;
+		  }
 		  else totalSystematicError += pow(stdBinXSecValue*relSysPlot->GetBinContent(n+1)/100.0,2);
+		}
 		totalSystematicError = sqrt(totalSystematicError);
 		// go to root directory keep plot when closing rootfile
 		gROOT->cd();
@@ -515,9 +530,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		}
 	      }
 	    }
-	    std::cout << mcatnloIdx  << std::endl;
-	    std::cout << powhegIdx   << std::endl;
-	    std::cout << shapeVarIdx << std::endl;
+	    // std::cout << mcatnloIdx  << std::endl;
+	    // std::cout << powhegIdx   << std::endl;
+	    // std::cout << shapeVarIdx << std::endl;
 	    delete relSysPlot;
 	  }
 	}
@@ -536,9 +551,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
       std::map<TString, TH1F*>::const_iterator sysIter   = sysUncertaintyDistributions_.find(xSecVariables_[i]);
       std::map<TString, TH1F*>::const_iterator totalIter = totalUncertaintyDistributions_.find(xSecVariables_[i]);
 
-      if (statIter  == statUncertaintyDistributions_.end()) {std::cout << "1" << std::endl;}
-      if (sysIter   == sysUncertaintyDistributions_.end())  {std::cout << "2" << std::endl;}
-      if (totalIter == totalUncertaintyDistributions_.end()){std::cout << "3" << std::endl;}
+      //if (statIter  == statUncertaintyDistributions_.end()) {std::cout << "1" << std::endl;}
+      //if (sysIter   == sysUncertaintyDistributions_.end())  {std::cout << "2" << std::endl;}
+      //if (totalIter == totalUncertaintyDistributions_.end()){std::cout << "3" << std::endl;}
 
       if (statIter == statUncertaintyDistributions_.end() || sysIter == sysUncertaintyDistributions_.end() || totalIter == totalUncertaintyDistributions_.end() ){
       	std::cout << " Variable '" << xSecVariables_[i] << "' not found in statistical, systematic or total uncertainty distribution." << std::endl;
@@ -605,7 +620,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	int NBINS = binning_[plotNameForBinning].size()-1;
 
 	std::map<unsigned int, TH1F*>::const_iterator innerIter = outerIter->second.begin();
-	int NSYSTYPES   = innerIter->second->GetNbinsX() - 3;	
+	//int NSYSTYPES   = innerIter->second->GetNbinsX() - 3;	
 	int histoBinIdx = 0;
 
 	for (int uncIdx=1; uncIdx<ENDOFSYSENUM;){ // loop starts at 1 to skip sysNo   
@@ -617,7 +632,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	  TString upTypeLabel   = sysLabel(uncIdx);    
 	  TString downTypeLabel = sysLabel(uncIdx+1); // +1 to get next entry
 	  
-	  for (int j=0; j<(sizeof(arrayLabelIds)/sizeof(arrayLabelIds[0])); j++){
+	  for (unsigned int j=0; j<(sizeof(arrayLabelIds)/sizeof(arrayLabelIds[0])); j++){
 	    upTypeLabel.ReplaceAll(arrayLabelIds[j],"");
 	    downTypeLabel.ReplaceAll(arrayLabelIds[j],"");	    
 	  }
@@ -626,7 +641,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 
 	  (upTypeLabel==downTypeLabel) ? uncIdx+=2 : uncIdx++;
 	  	  
-	  std::cout << histoBinIdx << " " << uncIdx << " " << upTypeLabel << " " << downTypeLabel << " " << label << std::endl;
+	  //std::cout << histoBinIdx << " " << uncIdx << " " << upTypeLabel << " " << downTypeLabel << " " << label << std::endl;
 
 	  TCanvas *canvasUncertaintyDistributions = new TCanvas("canvasUncertaintyDistributions","canvasUncertaintyDistributions",800,600);
 	  
@@ -937,6 +952,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      max*=1.3;
 	      if(max>1&&max<100) totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(false);
 	      else totalErrors_[xSecVariables_[i]]->GetYaxis()->SetNoExponent(true);
+	      totalErrors_[xSecVariables_[i]]->SetName("dataTotalError");
 	      // for combined cross sections:
 	      // change TH1F with statistical errors into 
 	      // TGraphAsymmErrors with bin center corrections
@@ -948,6 +964,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		TH1F* dataStat = (TH1F*)canvas->GetPrimitive(plotName+"kData");
 		// convert to TGraphAsymmErrors
 		TGraphAsymmErrors* statErrors= new TGraphAsymmErrors(dataStat->GetNbinsX());
+		statErrors->SetName("dataStatError");
 		statErrors->SetLineWidth(1.0) ; // totalErrors_[xSecVariables_[i]]->GetLineWidth());
 		statErrors->SetLineColor(totalErrors_[xSecVariables_[i]]->GetLineColor());
 		for(int bin=1; bin<=dataStat->GetNbinsX(); ++bin){
@@ -979,58 +996,22 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      // Draw errors into Canvas
 	      totalErrors_[xSecVariables_[i]]->Draw("p Z same");
 	      canvas->SetName(xSecVariables_[i]);
-	      // draw data/ theory ratio
-	      if(ratio&&decayChannel=="combined"&&xSecVariables_[i].Contains("Norm")){
-		TString plotName=xSecVariables_[i];
-		plotName.ReplaceAll("Norm", "");
-		// get data points with final errors
-		int Nbins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*10;
-		// create histo with correct binning
-		TH1F* datatemp= new TH1F("data"+plotName, "data"+plotName, Nbins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
-		reBinTH1F(*datatemp, binning_[plotName], 0);
-		// refill points to histo with correct binning 
-		for(int bin=1; bin<=datatemp->GetNbinsX(); ++bin){
-		  datatemp->SetBinContent(bin, totalErrors_[xSecVariables_[i]]->GetY()[bin]);
-		  double err=totalErrors_[xSecVariables_[i]]->GetErrorYhigh(bin);
-		  if(err<totalErrors_[xSecVariables_[i]]->GetErrorYlow(bin)) err=totalErrors_[xSecVariables_[i]]->GetErrorYlow(bin);
-		  datatemp->SetBinError(bin, err);
-		}
-		histo_["dataNorm"+plotName][kData]=killEmptyBins((TH1F*)datatemp->Clone(), verbose);
-		delete datatemp;
-		// get theory histos
-		std::vector<TH1F*> theories_;
-		TH1F* plotNNLO     = (TH1F*)canvas->GetPrimitive(plotName+"nnlo"   );
-		TH1F* plotMadGraph = (TH1F*)canvas->GetPrimitive(plotName          );
-		TH1F* plotmcatnlo  = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO2");
-		TH1F* plotpowheg   = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG" );
-		if(plotmcatnlo ) theories_.push_back( killEmptyBins(plotmcatnlo , verbose) );
-		if(plotpowheg  ) theories_.push_back( killEmptyBins(plotpowheg  , verbose) );
-		if(plotNNLO    ) theories_.push_back( killEmptyBins(plotNNLO    , verbose) );
-		if(plotMadGraph) theories_.push_back( killEmptyBins(plotMadGraph, verbose) );
-		// need to draw the canvas to make drawFinalResultRatio working
-		canvas->cd();
-		canvas->Draw();
-		// get new plot including the ratio(s)
-		TPad* ratioPlot=drawFinalResultRatio(histo_["dataNorm"+plotName][kData], 0.5, 1.5, myStyle, verbose, theories_);
-		// substitute original with ratio plot
-		ratioPlot->Draw();
-	      }
 	    }
 	    // save Canvas
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;
-	    // a) within rootFile
-	    if(save) saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
-	    // b) as eps and png
 	    if(save){
+	      // a) within rootFile
+	      saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
+	      // b) as eps and png
 	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
 	      if(decayChannel=="combined") saveName+="Combined";
 	      if(xSecVariables_[i]!="inclusive") saveName+=universalplotLabel;
 	      canvas->Print(saveName+".eps");
 	      canvas->Print(saveName+".png");
+	      gErrorIgnoreLevel=initialIgnoreLevel;
+	      //delete statErrors;
 	    }
-	    gErrorIgnoreLevel=initialIgnoreLevel;
-	    //delete statErrors;
 	  }
 	}
       }
@@ -1041,4 +1022,5 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 
   // close file
   file->Close();
+
 }
