@@ -1704,6 +1704,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   gPad->RedrawAxis();
   TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");//this is frustrating and stupid but apparently necessary...
   setex1->Draw();
+  syshist->SetMarkerStyle(0);//<===================
   syshist->Draw("same,E2");
   TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
   setex2->Draw();
@@ -1714,7 +1715,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
     
   // Create Directory for Output Plots 
   subfolderChannel = channel;
@@ -1988,6 +1989,7 @@ void Plotter::MakeTable(){
   ofstream EventFile9;
   TString EventFilestringTS = outpathPlots+"/";
   string EventFilestring = EventFilestringTS.Data();
+  subfolderChannel = channel;
   EventFilestring.append(subfolderChannel);
   string EventFilestring5;
   string EventFilestring6;
@@ -2738,12 +2740,12 @@ void Plotter::PlotDiffXSec(){
       ModelSysPlot[bin]=0.;
       for(int syst =0; syst<13; syst++){ 
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-    //	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
-    //  ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-    //}else{
-    //  ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-    //}
- 
+    	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
+          ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+        }
+	else{
+         ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+        }
       }
       ExpSysPlot[bin]=sqrt(ExpSysPlot[bin]);
       ModelSysPlot[bin]=sqrt(ModelSysPlot[bin]);
@@ -2758,17 +2760,25 @@ void Plotter::PlotDiffXSec(){
 
 
     //create a file for Results!!
-    ofstream ResultsFile;  
+    ofstream ResultsFile, ResultsLateX;  
     TString ResultsFilestringTS = outpathPlots+"/";
     string ResultsFilestring = ResultsFilestringTS.Data(); 
     ResultsFilestring.append(subfolderChannel); 
-    ResultsFilestring.append("/");    ResultsFilestring.append(newname);    ResultsFilestring.append("Results.txt");
+    ResultsFilestring.append("/"); ResultsFilestring.append(newname); ResultsFilestring.append("Results.txt");
     ResultsFile.open(ResultsFilestring.c_str());
+    
+    string ResultsFilestringLatex = ResultsFilestringTS.Data(); 
+    ResultsFilestringLatex.append(subfolderChannel); 
+    ResultsFilestringLatex.append("/"); ResultsFilestringLatex.append(newname); ResultsFilestringLatex.append("ResultsLaTeX.txt");
+    ResultsLateX.open(ResultsFilestringLatex.c_str());
+    ResultsLateX<<"Bin Center & Bin & 1/#sigma d#sigma/dX & stat(\%) & syst(\%) & total(\%)"<<endl;
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecPlot[bin]<<" StatError(percent): "<<DiffXSecStatErrorPlot[bin]/DiffXSecPlot[bin]<<" SysError: "<<DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" TotalError: "<<DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
+      ResultsLateX<<h_DiffXSec->GetBinCenter(bin+1)<<" & " <<h_DiffXSec->GetBinLowEdge(bin+1)<<" to "<<h_DiffXSec->GetBinLowEdge(bin+2)<<" & ";
+      ResultsLateX<<DiffXSecPlot[bin]<<" & "<<DiffXSecStatErrorPlot[bin]*100./DiffXSecPlot[bin]<<" & "<<100.*DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" & "<<100.*DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
     }
     ResultsFile.close();
-
+    ResultsLateX.close();
     
     //The Markus plots
     TCanvas * c10 = new TCanvas("Markus","Markus");
@@ -3059,10 +3069,8 @@ void Plotter::PlotDiffXSec(){
     c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".eps");
     c->Clear();
     delete c;
-     	
     
-
-
+    
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
     TList* l = stack->GetHists();
     TH1D* stacksum = (TH1D*) l->At(0)->Clone();
