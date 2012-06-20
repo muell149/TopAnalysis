@@ -25,7 +25,7 @@
 //#include "TopAnalysis/TopUtils/interface/extract_sigma.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TString lepton="muon", 
+void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TString lepton="muon", 
 			       TString inputFolderName="RecentAnalysisRun", bool plotAcceptance = true, 
 			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=0, bool hadron=false)
 {
@@ -47,7 +47,10 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
     plotAcceptance = false;
     plotEfficiency2= false;
   }
- 
+
+  int initialIgnoreLevel=gErrorIgnoreLevel;
+  if(verbose==0) gErrorIgnoreLevel=kWarning;
+
   // input file
   TFile* myFile1 = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, sysNo, (std::string)lepton), "READ");
   TFile* myFile2 = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, sysNo, (std::string)lepton), "READ");
@@ -154,7 +157,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
   else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =   -0.15; resEdgeR=  0.15; relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
   else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001;  resEdgeL = -200.0;  resEdgeR=200.0;  relResEdgeL = -1.0; relResEdgeR=2.0 ;}
   else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
-
+  
   //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepPt"  && lepton == "elec")    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepEta" && lepton == "muon")    { rangeUserLeft = -2.1; rangeUserRight = 2.1-0.001; }
@@ -939,6 +942,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=false, TS
       }
     }
   }
+  gErrorIgnoreLevel=initialIgnoreLevel;
   std::cout << std::endl << variable << "(" << lepton << "):" << std::endl;
   std::cout << "--------------------" << std::endl;
   std::cout << std::setprecision(2) << std::fixed << minPur  << " (<" << variable; 
