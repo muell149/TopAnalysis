@@ -2582,8 +2582,8 @@ void Plotter::PlotDiffXSec(){
         }
     }
 
-    TH1* genPseHist = ((TH2D*)genReco2d)->ProjectionX();
-    TH1* recPseHist = ((TH2D*)genReco2d)->ProjectionY();
+    TH1* genPseHist = ((TH2D*)genReco2d)->ProjectionY();
+    TH1* recPseHist = ((TH2D*)genReco2d)->ProjectionX();
     
     TH1* genBinHist    = genPseHist->Rebin(bins,"genBinHist", Xbins);
     TH1* recBinHist    = recPseHist->Rebin(bins,"recBinHist", Xbins);
