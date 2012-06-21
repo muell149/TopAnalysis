@@ -1927,7 +1927,10 @@ void Plotter::PlotXSec(){
    box2->Draw("SAME");
    box3->Draw("SAME");
    box4->Draw("SAME");
-   c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/InclusiveXSec.eps");
+   gSystem->MakeDirectory(outpathPlots);
+   gSystem->MakeDirectory(outpathPlots+subfolderChannel);
+   gSystem->MakeDirectory(outpathPlots+"/"+subfolderChannel+subfolderSpecial);
+   c->Print(outpathPlots+"/"+subfolderChannel+subfolderSpecial+"/InclusiveXSec.eps");
    c->Clear();
    delete c;
 
@@ -2654,6 +2657,8 @@ void Plotter::PlotDiffXSec(){
     recBinHist->Draw();
     recBinHist->SetMaximum(1.);
     //    FormatHisto(recBinHist);
+
+    recBinHist->GetXaxis()->SetTitle(TString("Reconstructed ").Copy().Append(XAxis));
     
     grE->Draw("P,SAME");
     grP->Draw("P,SAME");
@@ -2774,7 +2779,7 @@ void Plotter::PlotDiffXSec(){
     ResultsLateX<<"Bin Center & Bin & 1/#sigma d#sigma/dX & stat(\%) & syst(\%) & total(\%)"<<endl;
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecPlot[bin]<<" StatError(percent): "<<DiffXSecStatErrorPlot[bin]/DiffXSecPlot[bin]<<" SysError: "<<DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" TotalError: "<<DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
-      ResultsLateX<<h_DiffXSec->GetBinCenter(bin+1)<<" & " <<h_DiffXSec->GetBinLowEdge(bin+1)<<" to "<<h_DiffXSec->GetBinLowEdge(bin+2)<<" & ";
+      ResultsLateX<<"$"<<h_DiffXSec->GetBinCenter(bin+1)<<"$ & $" <<h_DiffXSec->GetBinLowEdge(bin+1)<<"$ to $"<<h_DiffXSec->GetBinLowEdge(bin+2)<<"$ & ";
       ResultsLateX<<DiffXSecPlot[bin]<<" & "<<DiffXSecStatErrorPlot[bin]*100./DiffXSecPlot[bin]<<" & "<<100.*DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" & "<<100.*DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
     }
     ResultsFile.close();
@@ -2797,8 +2802,16 @@ void Plotter::PlotDiffXSec(){
       leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
       delete systtemp;
     }
-
     SystHists->Draw();
+
+    if(name.Contains("pT") ||name.Contains("Mass") ){
+      SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
+      if(name.Contains("Rapidity")) SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
+    }
+    else  SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
+    SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
+
+
     leg10->SetFillColor(0);
     leg10->Draw("SAME");
     c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".eps");
