@@ -129,10 +129,32 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
     save=false;
   }
+
+  // ---
+  //    create list of systematics to be ignored- the std input will be used instead
+  // ---
+  int systematicVariationMod=systematicVariation;
+  std::vector<int> ignoreSys_;
+  // FIXME: use madgraph instead of mc@nlo for the moment to have madgraph vs. powheg as hadronization uncertainty
+  ignoreSys_.push_back(sysGenMCatNLO);
+  // exclude JES and JER
+  //for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
+  // exclude Scale matching and top mass 
+  //for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
+  // exclude Hadronization
+  //for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
+  // exclude PDF
+  //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
+  // exclude shape variation
+  for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
+  // use std variable for loading plots in case of listed systematics
+  for(unsigned int i=0; i<ignoreSys_.size(); ++i){
+    if(systematicVariation==ignoreSys_[i]) systematicVariationMod=sysNo;
+  }
   // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
-  if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
-  else if(systematicVariation==sysGenPowheg)  ttbarMC="Powheg";
+  if(systematicVariationMod==sysGenMCatNLO) ttbarMC="Mcatnlo";
+  else if(systematicVariationMod==sysGenPowheg)  ttbarMC="Powheg";
   TString ttbarMC2=ttbarMC;  
   if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg"; // old hadronization uncertainty will be overwritten from 'bothDecayChannelCombination'
   // normalization of differential normalized cross sections
@@ -151,26 +173,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
    
   xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
-
-  // ---
-  //    create list of systematics to be ignored- the std input will be used instead
-  // ---
-  int systematicVariationMod=systematicVariation;
-  std::vector<int> ignoreSys_;
-  // exclude JES and JER
-  //for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
-  // exclude Scale matching and top mass 
-  //for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
-  // exclude Hadronization
-  //for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
-  // exclude PDF
-  //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
-  // exclude shape variation
-  for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
-  // use std variable for loading plots in case of listed systematics
-  for(unsigned int i=0; i<ignoreSys_.size(); ++i){
-    if(systematicVariation==ignoreSys_[i]) systematicVariationMod=sysNo;
-  }
 
   // get folder prefix for systematics without extra rootfile
   switch (systematicVariationMod)
