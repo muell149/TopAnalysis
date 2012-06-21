@@ -1965,7 +1965,7 @@ namespace semileptonic {
       file->Close();
     }
 
-  int drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0))
+  int drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0), TString ratioLabelNominator="N_{data}", TString ratioLabelDenominator="N_{MC}", TString ratioDrawOption="p e X0", int ratioDrawColor=kBlack)
   {
     // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'
     // the range of the ratio is 'ratioMin' to 'ratioMax'
@@ -2049,7 +2049,7 @@ namespace semileptonic {
     ratio->SetTitle("");
     ratio->SetMaximum(ratioMax);
     ratio->SetMinimum(ratioMin);
-    ratio->SetLineWidth(1);
+    ratio->SetLineWidth(2);
     // configure axis of ratio plot
     ratio->GetXaxis()->SetTitleSize(histDenominator->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
     ratio->GetXaxis()->SetTitleOffset(histDenominator->GetXaxis()->GetTitleOffset()*0.9);
@@ -2057,7 +2057,7 @@ namespace semileptonic {
     ratio->GetXaxis()->SetTitle(histDenominator->GetXaxis()->GetTitle());
     ratio->GetXaxis()->SetNdivisions(histDenominator->GetNdivisions());
     ratio->GetYaxis()->CenterTitle();
-    ratio->GetYaxis()->SetTitle("#frac{N_{data}}{N_{MC}}");
+    ratio->GetYaxis()->SetTitle("#frac{"+ratioLabelNominator+"}{"+ratioLabelDenominator+"}");
     ratio->GetYaxis()->SetTitleSize(histDenominator->GetYaxis()->GetTitleSize()*scaleFactor);
     ratio->GetYaxis()->SetTitleOffset(histDenominator->GetYaxis()->GetTitleOffset()/scaleFactor);
     ratio->GetYaxis()->SetLabelSize(histDenominator->GetYaxis()->GetLabelSize()*scaleFactor);
@@ -2065,13 +2065,16 @@ namespace semileptonic {
     ratio->GetYaxis()->SetTickLength(0.03);
     ratio->GetYaxis()->SetNdivisions(505);
     ratio->GetXaxis()->SetRange(histDenominator->GetXaxis()->GetFirst(), histDenominator->GetXaxis()->GetLast());
+    ratio->GetXaxis()->SetNoExponent(true);
     // delete axis of initial plot
     histDenominator->GetXaxis()->SetLabelSize(0);
     histDenominator->GetXaxis()->SetTitleSize(0);
     // draw ratio plot
-    ratio->DrawClone("p e X0");
+    ratio->SetLineColor(ratioDrawColor);
+    ratio->DrawClone(ratioDrawOption);
     ratio->SetMarkerSize(1.2);
-    ratio->DrawClone("p e X0 same");
+    ratio->SetMarkerColor(ratioDrawColor);
+    ratio->DrawClone(ratioDrawOption+" same");
     rPad->SetTopMargin(0.0);
     rPad->SetBottomMargin(0.15*scaleFactor);
     rPad->SetRightMargin(right);
