@@ -59,7 +59,9 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   
   // create ratio canvas
   std::vector<TCanvas*> plotCanvas_;
-  plotCanvas_.push_back(drawFinalResultRatio(data, 0.3, 1.7, myStyle, 0, hist_, (TCanvas*)(canvas->Clone())));
+  double max= plotName.Contains("ttbarMass") ? 2.9 : 1.7;
+  double min= plotName.Contains("ttbarMass") ? 0 : 0.3;
+  plotCanvas_.push_back(drawFinalResultRatio(data, min, max, myStyle, 0, hist_, (TCanvas*)(canvas->Clone())));
   plotCanvas_[0]->Draw();
   plotCanvas_[0]->Update();
   // close file
@@ -88,12 +90,17 @@ void createTheoryDataRatios(bool extrapolate=true, bool hadron=false, int verbos
     // create ratio canvas
     TCanvas*canv=getRatio(variable, verbose, outputFile);
     // save ratio plots
-    int initialIgnoreLevel=gErrorIgnoreLevel;
-    if(verbose==0) gErrorIgnoreLevel=kWarning;
-    canv->Print(outputFolder+"ratioFinalXSec"+variable+"NormCombined"+LV+PS+".eps");
-    canv->Print(outputFolder+"ratioFinalXSec"+variable+"NormCombined"+LV+PS+".png");
-    gErrorIgnoreLevel=initialIgnoreLevel;
-    saveToRootFile(outputFile, canv, true, verbose,"ratio/"+variable);
+    if(canv){
+      int initialIgnoreLevel=gErrorIgnoreLevel;
+      if(verbose==0) gErrorIgnoreLevel=kWarning;
+      canv->Print(outputFolder+"ratioFinalXSec"+variable+"NormCombined"+LV+PS+".eps");
+      canv->Print(outputFolder+"ratioFinalXSec"+variable+"NormCombined"+LV+PS+".png");
+      if(i==0)     canv->Print(outputFolder+"ratioFinalXSecNormCombined"+LV+PS+".pdf(");
+      else if(i==(xSecVariables_.size()-1))canv->Print(outputFolder+"ratioFinalXSecNormCombined"+LV+PS+".pdf)");
+      else canv->Print(outputFolder+"ratioFinalXSecNormCombined"+LV+PS+".pdf");
+      gErrorIgnoreLevel=initialIgnoreLevel;
+      saveToRootFile(outputFile, canv, true, verbose,"ratio/"+variable);
+    }
     // delete ratio canvas
     delete canv;
   }
