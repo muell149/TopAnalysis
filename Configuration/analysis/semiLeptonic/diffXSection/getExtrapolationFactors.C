@@ -125,6 +125,8 @@ void getExtrapolationFactors(int verbose=0){
     TString variable=xSecVariables_[i];
     // create ratio canvas
     TCanvas*canv=getExtrapolFak(variable, xSecLabel_[i], verbose, outputFileFull, outputFileParton, outputFileHadron);
+    canv->SetName (variable);
+    canv->SetTitle(variable);
     // save ratio plots
     int initialIgnoreLevel=gErrorIgnoreLevel;
     if(verbose==0) gErrorIgnoreLevel=kWarning;
