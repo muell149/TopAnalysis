@@ -1,6 +1,6 @@
 #!/bin/zsh
 #this must be run inside of Plots/Nominal
-for sample in ee emu mumu
+for sample in ee emu mumu combined
   do
   for step in 5 6 7 8 9
   do
@@ -72,7 +72,25 @@ echo "           QCD                  &   $QCDee5   &       $QCDee6    &       $
 echo "\\\hline"
 echo "           Sum MC             &     $bgtotalee5   &       $bgtotalee6    &       $bgtotalee7    &       $bgtotalee8    &       $bgtotalee9   \\\\\\"
 echo "           Data             &     $dataee5   &       $dataee6    &       $dataee7    &       $dataee8    &       $dataee9   \\\\\\"
+
 echo "\\\hline"
+echo "\\\hline \$combined$ sample & 2 leptons  & 2 jets & \\\met & b-tag & kin. fit\\\\\\"
+echo "\\\hline"
+echo "           \\\ttbar\\\ signal &     $ttsigcombined5  &       $ttsigcombined6   &       $ttsigcombined7   &       $ttsigcombined8   &       $ttsigcombined9\\\\\\"
+echo "           \\\ttbar\\\ other  &     $ttbgcombined5   &       $ttbgcombined6    &       $ttbgcombined7    &       $ttbgcombined8    &       $ttbgcombined9\\\\\\"
+echo "           tW                 &     $tWcombined5   &       $tWcombined6    &       $tWcombined7    &       $tWcombined8    &       $tWcombined9   \\\\\\"
+echo "           diboson            &     $VVcombined5   &       $VVcombined6    &       $VVcombined7    &       $VVcombined8    &       $VVcombined9   \\\\\\"
+echo "           W                  &     $nucombined5   &       $nucombined6    &       $nucombined7    &       $nucombined8    &       $nucombined9   \\\\\\"
+echo "           DY$\\\rightarrow\\\tau\\\tau$ &     $tauee5   &       $taucombined6    &       $taucombined7    &       $taucombined8    &       $taucombined9\\\\\\"
+echo "           DY$\\\rightarrow\\\ell^+\\\ell^-$ &     $muee5   &       $mucombined6    &       $mucombined7    &       $mucombined8    &       $mucombined9\\\\\\"
+echo "           QCD                  &   $QCDcombined5   &       $QCDcombined6    &       $QCDcombined7    &       $QCDcombined8    &      $QCDcombined9\\\\\\"
+echo "\\\hline"
+echo "           Sum MC             &     $bgtotalcombined5   &       $bgtotalcombined6    &       $bgtotalcombined7    &       $bgtotalcombined8    &       $bgtotalcombined9   \\\\\\"
+echo "           Data             &     $datacombined5   &       $datacombined6    &       $datacombined7    &       $datacombined8    &       $datacombined9   \\\\\\"
+echo "\\\hline"
+
+
+
 echo "  \\\end{tabular}"
 echo "  } %end small"
 echo "\\\end{table}"
