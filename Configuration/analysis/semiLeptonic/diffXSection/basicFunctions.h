@@ -3059,7 +3059,13 @@ namespace semileptonic {
     //              to see whether rebinning and smoothing has changed the shape 
     // model: indicates theory (madgraph, powheg or mcatnalo)
     // smoothcurves: indicates wheter smooth or binned curve is drawn
+    
+/*     if(filename=="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root"){ */
+/*       std::cout << std::endl << "NEW IMPLEMENTATION!!!! " << std::endl <<  plotname << ": "; */
+/*       std::cout << " normalize? " << normalize << " , errorbands? " << errorbands << " , drawOnlyErrors? " << drawOnlyErrors << " , model? " << model << " , smoothcurves? " << smoothcurves << std::endl; */
+/*     } */
 
+    // get unified variable name from specific file dependend plotnames
     TString plotname2=plotname;
     if(plotname2.BeginsWith("h")) plotname2.Replace(0,1,"");
     plotname2.ReplaceAll("Vis"    ,"");
@@ -3072,13 +3078,13 @@ namespace semileptonic {
     plotname2.ReplaceAll("Lep","lep");
     if(plotname2.Contains("/")){
       plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
-    }   
+    }
     // create variable bin edges for non smooth curves
     std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output
-    if(verbose>0){
-	  std::cout << std::endl;
-	  std::cout << "variable:           " << plotname     << std::endl;
+    if(verbose>1||filename=="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root"){
+      std::cout << std::endl;
+      std::cout << "variable:           " << plotname     << std::endl;
       std::cout << "variable (modifed): " << plotname2    << std::endl;
       if(rangeLow!=-1.||rangeHigh!=-1.) std::cout << "range:              " << rangeLow << " .... " << rangeHigh << std::endl;
       std::cout << "file:               " << filename     << std::endl;
@@ -3089,8 +3095,8 @@ namespace semileptonic {
       std::cout << "draw errorbands:    " << errorbands   << std::endl;
       std::cout << "draw smooth curves: " << smoothcurves << std::endl;
       if(errorbands){
-		  std::cout << "errorRebinFactor:   " << errorRebinFactor << std::endl;
-		  std::cout << "errorSmoothFactor:  " << errorSmoothFactor << std::endl;
+	std::cout << "errorRebinFactor:   " << errorRebinFactor << std::endl;
+	std::cout << "errorSmoothFactor:  " << errorSmoothFactor << std::endl;
       }
     }
     // --- 
@@ -3155,12 +3161,14 @@ namespace semileptonic {
     TString name=plotname2;
     if(model=="powheg") name+="POWHEG";
     else if(model=="mcatnlo"){
-      if(filename.Contains("mcatnlo" )) name+="MC@NLO";
+      if(filename.Contains("catnlo" )) name+="MC@NLO";
       else if(filename.Contains("NtupleCteq6m" )) name+="MC@NLO2";
     }
     else if(model=="madgraph") name+="MADGRAPH";
     if(verbose>0) std::cout << "name of theory curve: " << name << std::endl;
     result->SetName(name);
+    result->SetTitle(name);
+    //std::cout << name << std::endl;
     // configure style
     histogramStyle(*result, kSig, false, 1.2, color);
     result->SetLineStyle(linestyle);
@@ -3276,6 +3284,7 @@ namespace semileptonic {
       errorBandName+="errorBand";
       if(verbose>0) std::cout << "name of error bands: " << errorBandName << std::endl;
       errorBands->SetName(errorBandName);
+      errorBands->SetTitle(errorBandName);
       // loop bins
       for(Int_t iBin=1; iBin<central->GetNbinsX(); iBin++){
 	Double_t centralValue = central  ->GetBinContent(iBin);
