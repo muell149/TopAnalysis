@@ -7,6 +7,7 @@
 #include "TH1.h"
 #include "TH1F.h"
 #include <vector>
+#include <map>
 #include <iostream>
 #include <fstream>
 #include "TCanvas.h"
@@ -199,8 +200,14 @@ void Plotter::DYScaleFactor(){
   double DYSFEE = NoutMCEE/NoutEEDYMC;
   double DYSFMuMu = NoutMCMuMu/NoutMuMuDYMC;
 
-  /*  cout<<"DYSFEE: "<<DYSFEE<<endl;
+  cout<<"DYSFEE: "<<DYSFEE<<endl;
   cout<<"DYSFMuMu: "<<DYSFMuMu<<endl;
+
+  cout<<"NinEEloose: "<<NinEEloose<<endl;
+  cout<<"NinMMloose: "<<NinMuMuloose<<endl;
+
+  cout<<"kee: "<<sqrt(NinEEloose/NinMuMuloose)<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
+  cout<<"kmumu: "<<sqrt(NinMuMuloose/NinEEloose)<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
 
   cout<<"Rout/Rin Mumu: "<<(NoutMuMuDYMC/NinMuMuDYMC)<<endl;
   cout<<"Rout/Rin ee: "<<(NoutEEDYMC/NinEEDYMC)<<endl;
@@ -210,7 +217,7 @@ void Plotter::DYScaleFactor(){
 
   cout<<"Est. From MC(ee): "<<NoutEEDYMC<<endl;
   cout<<"Est. From MC(mumu): "<<NoutMuMuDYMC<<endl;
-  */
+
   if(doDYScale==true){
     DYScale[0]=DYSFEE;
     DYScale[1]=DYSFMuMu;
@@ -272,6 +279,15 @@ void Plotter::InclFlatSystematics(int syst_number){
   	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
   	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
   syst_number++;
+
+  //PDF (for now). Taken rfom l+jet people
+
+  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//ee
+  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//mumu
+  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//emu
+  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//combined
+  syst_number++;
+
 
   //Branching Ratio
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .015;}//ee 
@@ -338,7 +354,7 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     syst++;
     
     //Hadronization (for now)
-    legendsSyst.push_back("PDF");
+    legendsSyst.push_back("Hadr.");
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .01;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
@@ -346,6 +362,14 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
 	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
 		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
 		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
+    syst++;
+
+    //PDF (for now). Taken from l+jet people
+    legendsSyst.push_back("PDF");
+    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//ee 
+    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//mumu  
+    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//emu  
+    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = .015;}//combined  
     syst++;
     
   }
@@ -1715,7 +1739,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+//  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
     
   // Create Directory for Output Plots 
   subfolderChannel = channel;
@@ -1799,7 +1823,8 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
 void Plotter::PlotXSec(){
 
   TH1::AddDirectory(kFALSE);
-  for(int i =0; i<15; i++){
+  for(int i =0; i<16; i++){
+//  for(int i =0; i<15; i++){
     InclusiveXsectionSysErrorBySyst[channelType][i] = 0.;
   }
   
@@ -1817,7 +1842,8 @@ void Plotter::PlotXSec(){
 
   double syst_square=0;
 
-  for(int i =0; i<15; i++){
+  for(int i =0; i<16; i++){
+//  for(int i =0; i<15; i++){
     syst_square += InclusiveXsectionSysErrorBySyst[channelType][i]*InclusiveXsectionSysErrorBySyst[channelType][i];
   }
   InclusiveXsectionSysError[channelType] = sqrt(syst_square);
@@ -2743,7 +2769,7 @@ void Plotter::PlotDiffXSec(){
       double syst_square = 0;
       ExpSysPlot[bin]=0.;
       ModelSysPlot[bin]=0.;
-      for(int syst =0; syst<13; syst++){ 
+      for(int syst =0; syst<14; syst++){ 
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
     	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
           ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
@@ -2780,29 +2806,92 @@ void Plotter::PlotDiffXSec(){
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecPlot[bin]<<" StatError(percent): "<<DiffXSecStatErrorPlot[bin]/DiffXSecPlot[bin]<<" SysError: "<<DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" TotalError: "<<DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
       ResultsLateX<<"$"<<h_DiffXSec->GetBinCenter(bin+1)<<"$ & $" <<h_DiffXSec->GetBinLowEdge(bin+1)<<"$ to $"<<h_DiffXSec->GetBinLowEdge(bin+2)<<"$ & ";
-      ResultsLateX<<DiffXSecPlot[bin]<<" & "<<DiffXSecStatErrorPlot[bin]*100./DiffXSecPlot[bin]<<" & "<<100.*DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" & "<<100.*DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
+      ResultsLateX<<DiffXSecPlot[bin]<<" & "<<setprecision(3)<<DiffXSecStatErrorPlot[bin]*100./DiffXSecPlot[bin]<<" & "<<setprecision(3)<<100.*DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" & "<<setprecision(3)<<100.*DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
     }
     ResultsFile.close();
     ResultsLateX.close();
     
     //The Markus plots
+
+    ofstream ResultsSysFilestring;
+    if (name.Contains("LeptonEta")){
+    //    ofstream ResultsSysFilestring;
+        string ResultsSystLaTeX= ResultsFilestringTS.Data(); 
+        ResultsSystLaTeX.append(subfolderChannel); 
+        ResultsSystLaTeX.append("/"); ResultsSystLaTeX.append(newname); ResultsSystLaTeX.append("SystematicsLaTeX.txt");
+        ResultsSysFilestring.open(ResultsSystLaTeX.c_str());
+        ResultsSysFilestring<<"Syst= integer numbers, check what is each"<<endl;
+        ResultsSysFilestring<<"Syst & Bin Center & Bin & syst(\%) & syst*syst"<<endl;
+    }
+
     TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
+    std::map<int, int> FillOrder;
+    FillOrder[13] = 0;   //JES
+    FillOrder[12] = 1;   //RES
+    FillOrder[11] = 2;   //PU
+    FillOrder[10] = 6;   //DY
+    FillOrder[9] = 7;   //BG
+    FillOrder[8] = 8;   //Trigg
+    FillOrder[7] = 9;   //Lep
+    FillOrder[6] = 10;  //Btag
+    FillOrder[5] = 11;  //KinFit
+    FillOrder[4] = 3;   //SCALE
+    FillOrder[3] = 4;  //MASS
+    FillOrder[2] = 5;  //MATCH
+    FillOrder[1] = 12; //HAD
+    FillOrder[0] = 13; //PDF
 
-    for(int syst =0; syst<13; syst++){
+    
+    for(int systs =0; systs<14; systs++){
+      int syst = FillOrder[systs];
+//    for(int syst =0; syst<14; syst++){
       TH1D* systtemp = (TH1D*)varhists[0]->Clone();
       systtemp->Reset();
+      double TotalSyst=0.0, TotalSqSyst=0.0;
+      double AvgSyst= 0.0, SqAvgSys=0.0;
       for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
        	//systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
-	    systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
+             systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
+             if (name.Contains("LeptonEta") || ResultsSysFilestring.good()){
+               if(bin==0){  
+                 if(syst==0) ResultsSysFilestring<<"JES ";
+                 if(syst==1) ResultsSysFilestring<<"RES ";
+                 if(syst==2) ResultsSysFilestring<<"PU ";
+                 if(syst==3) ResultsSysFilestring<<"SCALE ";
+                 if(syst==4) ResultsSysFilestring<<"MASS ";
+                 if(syst==5) ResultsSysFilestring<<"MATCH ";
+                 if(syst==6) ResultsSysFilestring<<"DY ";
+                 if(syst==7) ResultsSysFilestring<<"BG ";
+                 if(syst==8) ResultsSysFilestring<<"Trigg. ";
+                 if(syst==9) ResultsSysFilestring<<"Lep. ";
+                 if(syst==10) ResultsSysFilestring<<"B-Tag ";
+                 if(syst==11) ResultsSysFilestring<<"KinFit ";
+                 if(syst==12) ResultsSysFilestring<<"HAD. ";
+                 if(syst==13) ResultsSysFilestring<<"PDF";
+               }
+               /*
+               ResultsSysFilestring<<systtemp->GetBinCenter(bin+1)<<" & "<<systtemp->GetBinLowEdge(bin+1)<<" to "<<systtemp->GetBinLowEdge(bin+2)<<" & ";
+               ResultsSysFilestring<<setprecision(4)<<TMath::Sqrt(systtemp->GetBinContent(bin+1))*100<<" & "<<setprecision(3)<<systtemp->GetBinContent(bin+1)<<endl;
+               */
+               ResultsSysFilestring<<" "<<setprecision(4)<<TMath::Sqrt(systtemp->GetBinContent(bin+1))*100;
+               if(bin>0 && bin<bins-1){//Exclude the 2 side bins
+                   TotalSyst=TotalSyst+TMath::Sqrt(systtemp->GetBinContent(bin+1));
+                   TotalSqSyst=TotalSqSyst+systtemp->GetBinContent(bin+1);
+               }
+             }
       }
-      systtemp->SetFillColor(syst+1);
+      AvgSyst=TotalSyst/(bins-2);
+      SqAvgSys=TMath::Sqrt(TotalSqSyst/(bins-2));
+      ResultsSysFilestring<<" Lin.Avg.Error(%)= "<<100*AvgSyst<<"  Sq.Avg.Error(%)= "<<100*SqAvgSys<<endl;
+      systtemp->SetFillColor(15-systs);
       SystHists->Add((TH1D*)systtemp->Clone());
       leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
       delete systtemp;
     }
     SystHists->Draw();
+    ResultsSysFilestring.close();
 
     if(name.Contains("pT") ||name.Contains("Mass") ){
       SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
@@ -2828,13 +2917,13 @@ void Plotter::PlotDiffXSec(){
     TLegend * leg11 =  new TLegend(0.65,0.60,0.90,0.85);
     ExpHist->Reset();ModelHist->Reset();StatHist->Reset();TotalHist->Reset();
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
-      ExpHist->SetBinContent(bin+1,ExpSysPlot[bin]);
-      ModelHist->SetBinContent(bin+1,ModelSysPlot[bin]);
-      StatHist->SetBinContent(bin+1,DiffXSecStatError[channelType][bin]/DiffXSec[channelType][bin]);
-      TotalHist->SetBinContent(bin+1,DiffXSecTotalError[channelType][bin]/DiffXSec[channelType][bin]);
+      ExpHist->SetBinContent(bin+1,100*ExpSysPlot[bin]);
+      ModelHist->SetBinContent(bin+1,100*ModelSysPlot[bin]);
+      StatHist->SetBinContent(bin+1,100*DiffXSecStatError[channelType][bin]/DiffXSec[channelType][bin]);
+      TotalHist->SetBinContent(bin+1,100*DiffXSecTotalError[channelType][bin]/DiffXSec[channelType][bin]);
     }
     TotalHist->SetMinimum(0.);
-    TotalHist->GetYaxis()->SetTitle("#frac{#Delta#sigma}{#sigma}");
+    TotalHist->GetYaxis()->SetTitle("#frac{#Delta#sigma}{#sigma} [%]");
     TotalHist->SetLineColor(1);
     ExpHist->SetLineColor(kRed);
     StatHist->SetLineColor(kGreen);
