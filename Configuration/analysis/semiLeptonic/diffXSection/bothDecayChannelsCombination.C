@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
+void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool versionNNLO=true){
 
   // run automatically in batch mode
@@ -81,8 +81,9 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
     DrawSmoothMadgraph = true;
     DrawPOWHEGPlot     = true;
     DrawMCAtNLOPlot    = true;
-	// FIXME: no smooth mc@nlo curve for hadron PS at the moment
-    if(hadron) DrawMCAtNLOPlot = false;
+    // FIXME: no smooth mc@nlo curve for hadron PS at the moment
+    //if(hadron) DrawMCAtNLOPlot = false;
+    // FIXME: -> use the one running the sample itself
   }	
   // add kidonakis plots for full PS
   //if(extrapolate&&smoothcurves) DrawNNLOPlot=true;
@@ -92,7 +93,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
   //  DrawMCAtNLOPlot = true;
   //  DrawPOWHEGPlot = true;
   //}
-  
+  // use only mcatnlo plots from external studies 
+  // useOnlyExternalMCatNLOfile=false: means error bands from external studies
+  //                            but central values from std file
+  bool useOnlyExternalMCatNLOfile=false;
+
   // GOSSIE quick fix: cut of m(ttbar) below 345 GeV
   bool cutTtbarMass=true;
   const double constMassRangeLow  =  345.0;
@@ -405,9 +410,10 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  // ============================
 	  
 	  // NO MCatNLO CURVES for b quark quantities
-	  if(plotName=="bqPt"||plotName=="bqEta"){
-	    DrawMCAtNLOPlot2=false;
-	  }
+	  // FIXME: -> use the one running the sample itself
+// 	  if(plotName=="bqPt"||plotName=="bqEta"){
+// 	    DrawMCAtNLOPlot2=false;
+// 	  }
 	  
 	  // Adjust drawing paramters for theory curves
 	  if (normalize){
@@ -429,6 +435,15 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  // b) binned MadGraph curve
 	  //plotTheo->Draw("hist same");
 	  
+	  // get labels for folder extensions
+	  TString hadLevelExtend = "";
+	  TString hadLevelPlotExtend = "";
+	  if(hadron){
+	      if(xSecVariables_[i].Contains("lep")) hadLevelExtend="Lepton";
+	      if(xSecVariables_[i].Contains("bq" )) hadLevelExtend="Bjets" ;
+	      if(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq")) hadLevelPlotExtend="Gen";
+	  }
+
 	  // draw smoothed theory curves
 	  // c) MCatNLO
 	  int smoothFactor=0;
@@ -440,7 +455,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  double rangeLow  = -1.0;
 	  double rangeHigh = -1.0;
 	  TString PSlabel = (extrapolate) ? "" : "Vis";
-	  
+	  // adjust options for standalone external file
 	  if     (xSecVariables_[i].Contains("topPt"    )){ smoothFactor = 10; rebinFactor = 10; errorRebinFactor = 10; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"TopPt"  ;}
 	  else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor =  5; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor =  5; plotNameMCAtNLO="h"+PSlabel+"TopY"   ;}
 	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor = 10; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"TTbarPt";}
@@ -457,23 +472,42 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	    closeStdTopAnalysisFiles(files_);
 	    exit(-3);
 	  }
+	  // choose mcatnlo file
+	  // -> file from standalone external studies for errorBands
+	  // -> std simulation file else
+	  TString filename="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root";
+	  TString errorBandFilename="/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root";
+	  // error bands for MCatNLO curves
+	  // plotname for std simulation file = madgraph-plotname from analyzer structure
+	  TString plotNameMCAtNLO2="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
+	  plotNameMCAtNLO2.ReplaceAll("Norm","");
+	  // for hadron level and not for bquark quantities
+	  // -> no error bands
+	  bool errorbands=true; 
+	  if((!extrapolate&&hadron)||xSecVariables_[i].Contains("bqPt")||xSecVariables_[i].Contains("bqEta")){
+	    errorbands=false;
+	    // check if only external file should be used
+	    // -> then: no mcatnlo curve for hadron level and bquark quantities
+	    if(useOnlyExternalMCatNLOfile) DrawMCAtNLOPlot2=false;
+	  }
 	  
-	  bool errorbands=true; // error band for MCatNLO curves
-	  if(xSecVariables_[i].Contains("bqPt")||xSecVariables_[i].Contains("bqEta")) errorbands=false;
-	  if (DrawMCAtNLOPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root", plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, errorbands, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
-	  if (DrawMCAtNLOPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root", plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2);
+	  else{
+	    // check if only external file should be used
+	    // -> then: use external file and plotname
+	    if(useOnlyExternalMCatNLOfile){
+	      plotNameMCAtNLO2=plotNameMCAtNLO;
+	      filename=errorBandFilename;
+	    }
+	  }
+	  // draw errorband
+	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
+	  // draw central curve
+	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2);
 	  
 	  // d) POWHEG
 	  // configure configuration
 	  smoothFactor=0;
 	  rebinFactor=0;
-	  TString hadLevelExtend = "";
-	  TString hadLevelPlotExtend = "";
-	  if(hadron){
-	      if(xSecVariables_[i].Contains("lep")) hadLevelExtend="Lepton";
-	      if(xSecVariables_[i].Contains("bq" )) hadLevelExtend="Bjets" ;
-	      if(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq")) hadLevelPlotExtend="Gen";
-	  }
 	  TString plotNamePOWHEG="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+xSecVariables_[i]+hadLevelPlotExtend;
 	  plotNamePOWHEG.ReplaceAll("Norm","");
 	  rangeLow  = -1.0;
@@ -615,16 +649,25 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	    curveName.ReplaceAll("Norm","");
 	    //curveName.ReplaceAll("MCatNLO","MCatNLO2");
 	    curveName+="MC@NLOerrorBand";
+	    //std::cout << "searching " << curveName << std::endl;
 	    TGraphAsymmErrors *mcatnlocurve =(TGraphAsymmErrors*)combicanvas->GetPrimitive(curveName);
-	    if(mcatnlocurve) leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
+	    if(mcatnlocurve){
+	      leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
+	      std::cout << "found!" << std::endl;
+	    }	    
 	    else{
 	      if(verbose>0){
 		std::cout << "curve " << curveName << " not found. ";
 		curveName.ReplaceAll("errorBand","");
 		std::cout << "Will add " << curveName << " instead to the legend" << std::endl;
 	      }
+	      curveName.ReplaceAll("errorBand","");
+	      //std::cout << "searching " << curveName << std::endl;
 	      TH1F* mcatnlocurve2 =(TH1F*)combicanvas->GetPrimitive(curveName);
-	      if(mcatnlocurve2) leg->AddEntry(mcatnlocurve2, "MC@NLO  ", "L");	
+	      if(mcatnlocurve2){
+		leg->AddEntry(mcatnlocurve2, "MC@NLO  ", "L");	
+		//std::cout << "found!" << std::endl;
+	      }
 	    }
 	  }
 	  
@@ -632,18 +675,32 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=false, unsig
 	  if(DrawPOWHEGPlot2){
 	    TString curveName=xSecVariables_[i];
 	    curveName.ReplaceAll("Norm","");
-	    if(curveName.Contains("lep")||curveName.Contains("bq")) curveName+="Gen";
+	    //if(curveName.Contains("lep")||curveName.Contains("bq")) curveName+="Gen";
 	    curveName+="POWHEG";
+	    //std::cout << "searching " << curveName << std::endl; 
 	    TH1F* powhegcurve =(TH1F*)combicanvas->GetPrimitive(curveName);
-	    if(powhegcurve) leg->AddEntry(powhegcurve, "POWHEG  ", "L");
+	    if(powhegcurve){
+	      leg->AddEntry(powhegcurve, "POWHEG  ", "L");
+	      //std::cout << "found!" << std::endl;
+	    }
 	  }
 	  
 	  // e) Legend - Theory prediction - NNLO
 	  if(DrawNNLOPlot){
 	    TH1F* nnlocurve = 0;
-	    if      (xSecVariables_[i].Contains("topPtNorm")){nnlocurve =(TH1F*)combicanvas->GetPrimitive("topPtnnlo");}
-	    else if (xSecVariables_[i].Contains("topYNorm" )){nnlocurve =(TH1F*)combicanvas->GetPrimitive("topYnnlo"); }
-	    if(nnlocurve) leg->AddEntry(nnlocurve, "Approx. NNLO", "L");
+	    if      (xSecVariables_[i].Contains("topPtNorm")){
+	      //std::cout << "searching " << "topPtnnlo" << std::endl; 	      
+	      nnlocurve =(TH1F*)combicanvas->GetPrimitive("topPtnnlo");
+	    }
+	    else if (xSecVariables_[i].Contains("topYNorm" )){
+	      //std::cout << "searching " << "topYnnlo" << std::endl; 	    
+	      nnlocurve =(TH1F*)combicanvas->GetPrimitive("topYnnlo"); 
+
+}
+	    if(nnlocurve){
+	      leg->AddEntry(nnlocurve, "Approx. NNLO", "L");
+	      //std::cout << "found!" << std::endl;
+	    }
 	  }
 
 	  // f) Legend - Theory prediction - MCFM
