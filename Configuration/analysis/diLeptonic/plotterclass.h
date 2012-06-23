@@ -544,9 +544,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       setStyle(*varhistsUp[i], i);
       if((legends[i] == DYEntry) && channelType!=2){
 	varhistsUp[i]->Scale(DYScale[channelType]);
-	if(Systematic == "DY_"){
-	  varhistsUp[i]->Scale(1.3);
-	}
+	//if(Systematic == "DY_"){
+	//varhistsUp[i]->Scale(1.3);
+	//}
       }else if(legends[i] == "t#bar{t} signal"){
 	TFile *ftempUp = TFile::Open(datasetUp[i]);
 	if(initUp==false){
@@ -571,7 +571,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 	}
 	delete ftempUp;
       }else{
-	if(Systematic == "BG_"){
+	if(Systematic == "BG_" || Systematic == "DY_"){
 	  varhistsUp[i]->Scale(1.3);
 	}
       }
@@ -607,9 +607,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       setStyle(*varhistsDown[i], i);
       if((legends[i] == DYEntry) && channelType!=2){
 	varhistsDown[i]->Scale(DYScale[channelType]);
-	if(Systematic == "DY_"){
-	  varhistsDown[i]->Scale(0.7);
-	}
+	//if(Systematic == "DY_"){
+	//varhistsDown[i]->Scale(0.7);
+	//}
       }else if(legends[i] == "t#bar{t} signal"){
 	TFile *ftempDown = TFile::Open(datasetDown[i]);
 	if(initDown==false){
@@ -634,7 +634,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 	}
 	delete ftempDown;
       }else{
-	if(Systematic == "BG_"){
+	if(Systematic == "BG_" || Systematic == "DY_"){
 	  varhistsDown[i]->Scale(0.7);
 	}
       }
@@ -1474,6 +1474,9 @@ void Plotter::fillHisto()
       
       setHHStyle(*gStyle);
       //gStyle->SetErrorX(0);
+
+      //cout << "[Plotter::fillHisto] datasetname = " << dataset[i] << endl;
+
       hists.push_back(*hist);
       //ftemp->Close("R");
       //delete hist;
@@ -1739,7 +1742,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-//  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+
     
   // Create Directory for Output Plots 
   subfolderChannel = channel;
@@ -1954,7 +1958,7 @@ void Plotter::PlotXSec(){
    box3->Draw("SAME");
    box4->Draw("SAME");
    gSystem->MakeDirectory(outpathPlots);
-   gSystem->MakeDirectory(outpathPlots+subfolderChannel);
+   gSystem->MakeDirectory(outpathPlots+"/"+subfolderChannel);
    gSystem->MakeDirectory(outpathPlots+"/"+subfolderChannel+subfolderSpecial);
    c->Print(outpathPlots+"/"+subfolderChannel+subfolderSpecial+"/InclusiveXSec.eps");
    c->Clear();
@@ -2806,7 +2810,7 @@ void Plotter::PlotDiffXSec(){
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecPlot[bin]<<" StatError(percent): "<<DiffXSecStatErrorPlot[bin]/DiffXSecPlot[bin]<<" SysError: "<<DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" TotalError: "<<DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
       ResultsLateX<<"$"<<h_DiffXSec->GetBinCenter(bin+1)<<"$ & $" <<h_DiffXSec->GetBinLowEdge(bin+1)<<"$ to $"<<h_DiffXSec->GetBinLowEdge(bin+2)<<"$ & ";
-      ResultsLateX<<DiffXSecPlot[bin]<<" & "<<setprecision(3)<<DiffXSecStatErrorPlot[bin]*100./DiffXSecPlot[bin]<<" & "<<setprecision(3)<<100.*DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" & "<<setprecision(3)<<100.*DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<<endl;
+      ResultsLateX<<DiffXSecPlot[bin]<<" & "<<setprecision(3)<<DiffXSecStatErrorPlot[bin]*100./DiffXSecPlot[bin]<<" & "<<setprecision(3)<<100.*DiffXSecSysError[channelType][bin]/DiffXSecPlot[bin]<<" & "<<setprecision(3)<<100.*DiffXSecTotalErrorPlot[bin]/DiffXSecPlot[bin]<< "\\\\" << endl;
     }
     ResultsFile.close();
     ResultsLateX.close();
@@ -3284,7 +3288,7 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
     } else{
       Double_t nevents = weight->GetEntries();
       //
-      Double_t crosssection = 169.9;
+      Double_t crosssection = 161.6; //######
       Double_t binw = hist->GetBinWidth(1);
       wgt = crosssection/nevents/binw;
     }
