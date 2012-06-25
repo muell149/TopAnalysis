@@ -200,23 +200,30 @@ void Plotter::DYScaleFactor(){
   double DYSFEE = NoutMCEE/NoutEEDYMC;
   double DYSFMuMu = NoutMCMuMu/NoutMuMuDYMC;
 
-  cout<<"DYSFEE: "<<DYSFEE<<endl;
-  cout<<"DYSFMuMu: "<<DYSFMuMu<<endl;
+  cout << endl;
+  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+  cout << "Calculation of DY Scale Factors for '" << name << "'  " << endl;
+   
+  cout<<"DYSFEE:                 "<<DYSFEE<<endl;
+  cout<<"DYSFMuMu:               "<<DYSFMuMu<<endl;
 
-  cout<<"NinEEloose: "<<NinEEloose<<endl;
-  cout<<"NinMMloose: "<<NinMuMuloose<<endl;
+  cout<<"NinEEloose:             "<<NinEEloose<<endl;
+  cout<<"NinMMloose:             "<<NinMuMuloose<<endl;
 
-  cout<<"kee: "<<sqrt(NinEEloose/NinMuMuloose)<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
-  cout<<"kmumu: "<<sqrt(NinMuMuloose/NinEEloose)<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
+  cout<<"kee:                    "<<sqrt(NinEEloose/NinMuMuloose)<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
+  cout<<"kmumu:                  "<<sqrt(NinMuMuloose/NinEEloose)<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
 
-  cout<<"Rout/Rin Mumu: "<<(NoutMuMuDYMC/NinMuMuDYMC)<<endl;
-  cout<<"Rout/Rin ee: "<<(NoutEEDYMC/NinEEDYMC)<<endl;
+  cout<<"Rout/Rin Mumu:          "<<(NoutMuMuDYMC/NinMuMuDYMC)<<endl;
+  cout<<"Rout/Rin ee:            "<<(NoutEEDYMC/NinEEDYMC)<<endl;
 
-  cout<<"Est. From Data(ee): "<<NoutMCEE<<endl;
-  cout<<"Est. From Data(mumu): "<<NoutMCMuMu<<endl;
+  cout<<"Est. From Data(ee):     "<<NoutMCEE<<endl;
+  cout<<"Est. From Data(mumu):   "<<NoutMCMuMu<<endl;
 
-  cout<<"Est. From MC(ee): "<<NoutEEDYMC<<endl;
-  cout<<"Est. From MC(mumu): "<<NoutMuMuDYMC<<endl;
+  cout<<"Est. From MC(ee):       "<<NoutEEDYMC<<endl;
+  cout<<"Est. From MC(mumu):     "<<NoutMuMuDYMC<<endl;
+ 
+  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+  cout << endl;
 
   if(doDYScale==true){
     DYScale[0]=DYSFEE;
@@ -373,6 +380,7 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     syst++;
     
   }
+   
 }
 
 void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
@@ -421,8 +429,9 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
   }
 
   //  Sum_Errors += Sys_Error;
-  InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error;
-  cout<<"Systematic: "<<Systematic<<" Error: "<<Sys_Error<<endl;
+  InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error; 
+  cout<<"Inclusive Systematic for '"<<Systematic<<"':";
+  cout<<" " << Sys_Error*100 << " % " << endl;
 
 }
 
@@ -433,6 +442,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
   // if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
   //   newname.ReplaceAll("Hyp",3,"",0);
   // }
+  cout << endl;
+  cout << endl;
+  cout << "    Preparing to Calculate " << Systematic << "-Uncertainty ... " << endl;
 
   legendsSyst.push_back(Systematic);
   double Xbins[XAxisbins.size()];
@@ -769,7 +781,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       Sys_Error  = (Sys_Error_Up+Sys_Error_Down)/(2.*scale);
       //    Sum_Errors += Sys_Error;
       DiffXSecSysErrorBySyst[channelType][i][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
-      cout<<"Systematic: "<<Systematic<<" NAME: "<<name<<" channel: "<<channelType<<endl;
+      cout<<"Differential Systematic: "<<Systematic<<" NAME: "<<name<<" channel: "<<channelType<<endl;
       cout<<"DiffXSecNom[channelType][i]: "<<DiffXSecNom[channelType][i]<<endl;
       cout<<"DiffXSecUp[channelType][i]: "<<DiffXSecUp[channelType][i]<<endl;
       cout<<"DiffXSecDown[channelType][i]: "<<DiffXSecDown[channelType][i]<<endl;
@@ -809,8 +821,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     // "hists", "systhistsUp" amd "systhistsDown"
     // Notice, that the DY Background will be scaled with
     // the DYScale.
-    for ( size_t i = 0; i < hists.size() ; i++ ) {  
-      cout << "Sample " <<    legends[i] << " (Nom) has " << ((hists[i])).Integral()<< " Events  " << endl;
+    for ( size_t i = 0; i < hists.size() ; i++ ) {
+      TString histsIntegral = TString::Format("%20.2f", ((hists[i])).Integral());
+      cout << "        " << histsIntegral << " Events in Sample " <<    legends[i] << " (Nom)" << endl;
       if ( legends[i] == "Data 2011" ) { 
 		if ( theDataHist == NULL ) {
 		  theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
@@ -851,8 +864,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       }
     }
     
-    for ( size_t i = 0; i < systhistsUp.size() ; i++ ) {   
-      cout << "Sample " <<    legends[i] << " (Up) has " << ((systhistsUp[i])).Integral()<< " Events  " << endl;
+    for ( size_t i = 0; i < systhistsUp.size() ; i++ ) {  
+      TString histsIntegral = TString::Format("%20.2f", ((systhistsUp[i])).Integral());
+      cout << "        " << histsIntegral << " Events in Sample " <<    legendsUp[i] << " (Up)" << endl;  
       if ( legendsUp[i] == "Data 2011") {
       } 
       else if ( legendsUp[i] == "t#bar{t} signal") {   
@@ -874,31 +888,43 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 		  theBgrHistUp->Add(&(systhistsUp[i]));
 		} 
       } else {  
+
     	// Calculate DYScale fist
 	    double theDYScale = 1.;
     	if ( (legendsUp[i] == DYEntry) && (channelType != 2 ) ) {
 	      theDYScale = DYScale[channelType];
-    	  if(Systematic == "DY_"){
-	        theDYScale=theDYScale*1.3;
-    	  }
     	}
-    	if ( theBgrHistUp == NULL ) {
-	      theBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theBgrHistUp");
-    	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-	        theDYScale=theDYScale*1.3;
-	      }
-	      theBgrHistUp->Scale(theDYScale);
-    	} else {
-	      if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-	        theDYScale=theDYScale*1.3;
-    	  }
-	      theBgrHistUp->Add(&(systhistsUp[i]), theDYScale);
-    	} 
+
+        // Background Scale Factor
+        double theBgrScaleFactor = 1.;
+        if ( legendsUp[i] == DYEntry ) {
+            theBgrScaleFactor = theDYScale;
+        }
+        if(Systematic == "BG_") {
+          if ( legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry) {
+             theBgrScaleFactor=theBgrScaleFactor*1.3;
+          }
+        }
+        if(Systematic == "DY_") {
+          if ( legendsUp[i] == DYEntry) {
+             theBgrScaleFactor=theBgrScaleFactor*1.3;
+          }
+        }
+        
+        // Fetching and Scaling the Background Histos 
+        if ( theBgrHistUp == NULL ) {
+          theBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theBgrHistUp");
+          theBgrHistUp->Scale(theBgrScaleFactor);
+        } else {
+          theBgrHistUp->Add(&(systhistsUp[i]), theBgrScaleFactor);
+        }
+
       }
     }
     
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
-      cout << "Sample " <<    legends[i] << " (Down) has " << ((systhistsDown[i])).Integral()<< " Events  " << endl;
+      TString histsIntegral = TString::Format("%20.2f", ((systhistsDown[i])).Integral());
+      cout << "        " << histsIntegral << " Events in Sample " <<    legendsDown[i] << " (Down)" << endl;   
       if ( legendsDown[i] == "Data 2011") {
       } else if ( legendsDown[i] == "t#bar{t} signal") {   
 		if ( theRecHistDown == NULL ) { 
@@ -918,27 +944,37 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 		  theBgrHistDown->Add(&(systhistsDown[i]));
 		}
       } else {  
+        
+        // Calculate DYScale fist
+        double theDYScale = 1.;
+        if ( (legendsDown[i] == DYEntry) && (channelType != 2 ) ) {
+          theDYScale = DYScale[channelType];
+        }
 
-    	// Calculate DYScale fist
-    	double theDYScale = 1.;
-    	if ( (legendsDown[i] == DYEntry) && (channelType != 2 ) ) {
-    	  theDYScale = DYScale[channelType];
-    	  if(Systematic == "DY_"){
-    	    theDYScale=theDYScale*0.7;
-    	  }
-    	}
-    	if ( theBgrHistDown == NULL ) {
-    	  theBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theBgrHistDown");
-    	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-    	    theDYScale=theDYScale*0.7;
-    	  }
-    	  theBgrHistDown->Scale(theDYScale);
-    	} else {
-    	  if(Systematic == "BG_" && legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry){
-    	    theDYScale=theDYScale*0.7;
-    	  }
-    	  theBgrHistDown->Add(&(systhistsDown[i]), theDYScale);
-    	} 
+        // Background Scale Factor
+        double theBgrScaleFactor = 1.;
+        if ( legendsDown[i] == DYEntry ) {
+            theBgrScaleFactor = theDYScale;
+        }
+        if(Systematic == "BG_") {
+          if ( legendsDown[i] != "t#bar{t} other" && legendsDown[i] != DYEntry) {
+             theBgrScaleFactor=theBgrScaleFactor*0.7;
+          }
+        }
+        if(Systematic == "DY_") {
+          if ( legendsDown[i] == DYEntry) {
+             theBgrScaleFactor=theBgrScaleFactor*0.7;
+          }
+        }
+
+        // Fetching and Scaling the Background Histos
+        if ( theBgrHistDown == NULL ) {
+          theBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theBgrHistDown");
+          theBgrHistDown->Scale(theBgrScaleFactor);
+        } else {
+          theBgrHistDown->Add(&(systhistsDown[i]), theBgrScaleFactor);
+        }
+ 
       } 
     }
  
@@ -1097,7 +1133,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     //cout << "theSpecialPostfix = " << theSpecialPostfix<< endl;
     //cout << "theSystematicName = " << theSystematicName<< endl; 
  
- 
+    cout << endl;
+    cout << endl;
+   
     // Get the integrals for the normalization
     double totalDataEventsNom  = TopSVDFunctions::SVD_Integral1D((TH1D*)theDataHist, 0, false);
     double totalBgrEventsNom   = TopSVDFunctions::SVD_Integral1D((TH1D*)theBgrHist, 0, false);
@@ -1258,6 +1296,7 @@ void Plotter::setDataSet(std::vector<TString> dataset_, std::vector<double> scal
   legends=legends_;
   colors=colors_;
   DYEntry=DYEntry_;
+  
 }
 
 void Plotter::setDataSet(TString mode)
@@ -1270,6 +1309,18 @@ void Plotter::setDataSet(TString mode)
   if(channel =="mumu"){channelType=1;channelLabel[1]="#mu#mu";}
   if(channel =="emu"){channelType=2;channelLabel[2]="e#mu";}
   if(channel =="combined"){channelType=3;channelLabel[3]="Dilepton Combined";}
+
+
+  // Set dataset specific subfolders
+  outpathPlots = "./Plots";
+  subfolderChannel = channel; 
+  subfolderChannel.Prepend("/");
+  subfolderSpecial = "";
+  if ( specialComment.CompareTo("Standard") != 0 ) {
+  	subfolderSpecial = specialComment;
+  	specialComment.Prepend("/");
+  }
+  
 
   lumi=4966;
   
@@ -1746,13 +1797,6 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 
     
   // Create Directory for Output Plots 
-  subfolderChannel = channel;
-  subfolderChannel.Prepend("/");
-  subfolderSpecial = "";
-  if ( specialComment.CompareTo("Standard") != 0 ) {
-  	subfolderSpecial = specialComment;
-  	specialComment.Prepend("/");
-  }
   gSystem->MakeDirectory(outpathPlots);
   int cntMkdirTries = 0;
   gSystem->MakeDirectory(outpathPlots+subfolderChannel+subfolderSpecial);  
@@ -1832,6 +1876,11 @@ void Plotter::PlotXSec(){
     InclusiveXsectionSysErrorBySyst[channelType][i] = 0.;
   }
   
+  
+  cout << endl;
+  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+  cout << "Starting Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
+  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
   CalcInclSystematics("JES",0);
   CalcInclSystematics("RES",1);
   CalcInclSystematics("PU_",2);
@@ -1841,6 +1890,11 @@ void Plotter::PlotXSec(){
   CalcInclSystematics("DY_",6);
   CalcInclSystematics("BG_",7);
   InclFlatSystematics(8);
+  
+  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+  cout << "Finished Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
+  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+  cout << endl;
   
   CalcXSec(dataset, InclusiveXsection,InclusiveXsectionStatError, "","");
 
@@ -1958,9 +2012,9 @@ void Plotter::PlotXSec(){
    box3->Draw("SAME");
    box4->Draw("SAME");
    gSystem->MakeDirectory(outpathPlots);
-   gSystem->MakeDirectory(outpathPlots+"/"+subfolderChannel);
-   gSystem->MakeDirectory(outpathPlots+"/"+subfolderChannel+subfolderSpecial);
-   c->Print(outpathPlots+"/"+subfolderChannel+subfolderSpecial+"/InclusiveXSec.eps");
+   gSystem->MakeDirectory(outpathPlots+subfolderChannel);
+   gSystem->MakeDirectory(outpathPlots+subfolderChannel+subfolderSpecial);
+   c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+"InclusiveXSec.eps");
    c->Clear();
    delete c;
 
@@ -2019,11 +2073,10 @@ void Plotter::MakeTable(){
   ofstream EventFile6;
   ofstream EventFile7;
   ofstream EventFile8;
-  ofstream EventFile9;
-  TString EventFilestringTS = outpathPlots+"/";
-  string EventFilestring = EventFilestringTS.Data();
-  subfolderChannel = channel;
-  EventFilestring.append(subfolderChannel);
+  ofstream EventFile9; 
+  string EventFilestring = outpathPlots.Data();
+  EventFilestring.append(subfolderChannel.Data());
+  EventFilestring.append(subfolderSpecial.Data()); 
   string EventFilestring5;
   string EventFilestring6;
   string EventFilestring7;
@@ -2169,9 +2222,9 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
   signalFraction = numbers[1]/(numbers[1]+TTbarBGnum);
 
   ofstream EventFile;  
-  TString EventFilestringTS = outpathPlots+"/";
-  string EventFilestring = EventFilestringTS.Data(); 
-  EventFilestring.append(subfolderChannel); 
+  string EventFilestring = outpathPlots.Data();
+  EventFilestring.append(subfolderChannel.Data());
+  EventFilestring.append(subfolderSpecial.Data());  
   EventFilestring.append("/Events.txt");
   EventFile.open(EventFilestring.c_str());
   double bg_num = 0;
@@ -2482,15 +2535,23 @@ void Plotter::PlotDiffXSec(){
     TGaxis::SetMaxDigits(5);
 
     //############### Syst ################
-    CalcDiffSystematics("JES", 0);
-    CalcDiffSystematics("RES", 1);
-    CalcDiffSystematics("PU_", 2);
-    CalcDiffSystematics("SCALE", 3);
-    CalcDiffSystematics("MASS", 4);
-    CalcDiffSystematics("MATCH", 5);
+    cout << endl;
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    //CalcDiffSystematics("JES", 0);
+    //CalcDiffSystematics("RES", 1);
+    //CalcDiffSystematics("PU_", 2);
+    //CalcDiffSystematics("SCALE", 3);
+    //CalcDiffSystematics("MASS", 4);
+    //CalcDiffSystematics("MATCH", 5);
     CalcDiffSystematics("DY_", 6);
     CalcDiffSystematics("BG_", 7); 
-    DiffFlatSystematics(8,bins);
+    DiffFlatSystematics(8,bins); 
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << endl; 
     
     double topxsec = 161.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
@@ -2796,15 +2857,21 @@ void Plotter::PlotDiffXSec(){
 
     //create a file for Results!!
     ofstream ResultsFile, ResultsLateX;  
-    TString ResultsFilestringTS = outpathPlots+"/";
-    string ResultsFilestring = ResultsFilestringTS.Data(); 
-    ResultsFilestring.append(subfolderChannel); 
-    ResultsFilestring.append("/"); ResultsFilestring.append(newname); ResultsFilestring.append("Results.txt");
+    string ResultsFilestring = outpathPlots.Data();
+    ResultsFilestring.append(subfolderChannel.Data());
+    ResultsFilestring.append(subfolderSpecial.Data());   
+    ResultsFilestring.append("/"); 
+    ResultsFilestring.append(newname); 
+    ResultsFilestring.append("Results.txt");
     ResultsFile.open(ResultsFilestring.c_str());
     
-    string ResultsFilestringLatex = ResultsFilestringTS.Data(); 
-    ResultsFilestringLatex.append(subfolderChannel); 
-    ResultsFilestringLatex.append("/"); ResultsFilestringLatex.append(newname); ResultsFilestringLatex.append("ResultsLaTeX.txt");
+    
+    string ResultsFilestringLatex = outpathPlots.Data();
+    ResultsFilestringLatex.append(subfolderChannel.Data());
+    ResultsFilestringLatex.append(subfolderSpecial.Data()); 
+    ResultsFilestringLatex.append("/"); 
+    ResultsFilestringLatex.append(newname); 
+    ResultsFilestringLatex.append("ResultsLaTeX.txt");
     ResultsLateX.open(ResultsFilestringLatex.c_str());
     ResultsLateX<<"Bin Center & Bin & 1/#sigma d#sigma/dX & stat(\%) & syst(\%) & total(\%)"<<endl;
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
@@ -2817,16 +2884,16 @@ void Plotter::PlotDiffXSec(){
     
     //The Markus plots
 
-    ofstream ResultsSysFilestring;
-    if (name.Contains("LeptonEta")){
-    //    ofstream ResultsSysFilestring;
-        string ResultsSystLaTeX= ResultsFilestringTS.Data(); 
-        ResultsSystLaTeX.append(subfolderChannel); 
-        ResultsSystLaTeX.append("/"); ResultsSystLaTeX.append(newname); ResultsSystLaTeX.append("SystematicsLaTeX.txt");
-        ResultsSysFilestring.open(ResultsSystLaTeX.c_str());
-        ResultsSysFilestring<<"Syst= integer numbers, check what is each"<<endl;
-        ResultsSysFilestring<<"Syst & Bin Center & Bin & syst(\%) & syst*syst"<<endl;
-    }
+    ofstream ResultsSysFilestring; 
+    string ResultsSystLaTeX = outpathPlots.Data();
+    ResultsSystLaTeX.append(subfolderChannel.Data());
+    ResultsSystLaTeX.append(subfolderSpecial.Data());    
+    ResultsSystLaTeX.append("/"); 
+    ResultsSystLaTeX.append(newname); 
+    ResultsSystLaTeX.append("SystematicsLaTeX.txt");
+    ResultsSysFilestring.open(ResultsSystLaTeX.c_str());
+    ResultsSysFilestring<<"Syst= integer numbers, check what is each"<<endl;
+    ResultsSysFilestring<<"Syst & Bin Center & Bin & syst(\%) & syst*syst"<<endl; 
 
     TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
