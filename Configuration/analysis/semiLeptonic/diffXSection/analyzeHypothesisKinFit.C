@@ -136,7 +136,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   int systematicVariationMod=systematicVariation;
   std::vector<int> ignoreSys_;
   // FIXME: use madgraph instead of mc@nlo for the moment to have madgraph vs. powheg as hadronization uncertainty
-  ignoreSys_.push_back(sysGenMCatNLO);
+  //ignoreSys_.push_back(sysGenMCatNLO);
   // exclude JES and JER
   //for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude Scale matching and top mass 
