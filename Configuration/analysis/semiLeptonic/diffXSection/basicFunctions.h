@@ -1497,22 +1497,15 @@ namespace semileptonic {
     }
     // fill vector entries in array
     // because TH1F constructor needs an array
-    unsigned int arraySize=42;
-    double * binLowerEdgeArray = new double[arraySize];
-    if(binlowerEdges_.size()>arraySize){
-      std::cout << "histo " << histoUnbinned.GetName() << " can not be rebinned" << std::endl;
-      std::cout << "the function reBinTH1F can deal with at most " << arraySize << " bins" << std::endl;
-      exit(1);
-    }
+    const unsigned int arraySize=binlowerEdges_.size();
+    double *binLowerEdgeArray = new double[arraySize];
+ 
     for(unsigned int arrayEntry=0; arrayEntry<arraySize; ++arrayEntry){
-      if(arrayEntry<binlowerEdges_.size()){
-	binLowerEdgeArray[arrayEntry]=binlowerEdges_[arrayEntry];
-	if(verbose>1) std::cout << "array entry #" << arrayEntry << ": " << binLowerEdgeArray[arrayEntry] << " ";
-      }
-      else binLowerEdgeArray[arrayEntry]=binlowerEdges_[binlowerEdges_.size()-1];
+      binLowerEdgeArray[arrayEntry]=binlowerEdges_[arrayEntry];
+      if(verbose>1) std::cout << "array entry #" << arrayEntry << ": " << binLowerEdgeArray[arrayEntry] << " ";
     }
     if(verbose>1) std::cout << std::endl;
-    // TH1F* histoBinned = new TH1F( histoUnbinned.GetName(), histoUnbinned.GetTitle(), arraySize-1, binLowerEdgeArray);
+   
     if(verbose>1) std::cout << "N(bins) before rebinning: " << histoUnbinned.GetNbinsX() << std::endl;
     histoUnbinned = *(TH1F*)histoUnbinned.Rebin(arraySize-1, histoUnbinned.GetName(), binLowerEdgeArray);
     if(verbose>1){
@@ -1551,11 +1544,11 @@ namespace semileptonic {
 	
 	// fill vector into array to use appropriate constructor of TH1-classes
 	const varType *binArray = vecBinning.data();
-	//std::cout << "a" << std::endl;
+	
 	// create histo with new binning
 	TString name = (TString)histoOldBinning->GetName();
 	histoType histoNewBinning = histoType ("histoNewBinning"+plotname+name,"histoNewBinning"+plotname+name,vecBinning.size()-1,binArray);
-	//std::cout << "b" << std::endl;
+	
 	// fill contents of histoOldBinning into histoNewBinning and rescale if applicable
 	for (vecIndex = 0; vecIndex < vecBinning.size()-1; vecIndex++){
 	    
@@ -1566,13 +1559,13 @@ namespace semileptonic {
 	    varType newBinCenter = 0.5*(highEdge+lowEdge);
 	    varType binSum       = 0.0;	    	  
 	    
-	    for (int j=1; j<histoOldBinning->GetNbinsX(); j++){
+	    for (int j=0; j<histoOldBinning->GetNbinsX(); j++){
 		
-		varType oldBin = histoOldBinning->GetBinCenter(j);
+		varType oldBin = histoOldBinning->GetBinLowEdge(j+1);
 		
-		if( (oldBin>=lowEdge) && (oldBin<highEdge) ){		   
-		    if (rescale) binSum+=histoOldBinning->GetBinContent(j) * histoOldBinning->GetBinWidth(j);
-		    else         binSum+=histoOldBinning->GetBinContent(j);
+		if( (oldBin>lowEdge) && (oldBin<=highEdge) ){		   
+		    if (rescale) binSum+=histoOldBinning->GetBinContent(j+1) * histoOldBinning->GetBinWidth(j+1);
+		    else         binSum+=histoOldBinning->GetBinContent(j+1);
 		}
 	    }
 
