@@ -2539,12 +2539,12 @@ void Plotter::PlotDiffXSec(){
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
     cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    //CalcDiffSystematics("JES", 0);
-    //CalcDiffSystematics("RES", 1);
-    //CalcDiffSystematics("PU_", 2);
-    //CalcDiffSystematics("SCALE", 3);
-    //CalcDiffSystematics("MASS", 4);
-    //CalcDiffSystematics("MATCH", 5);
+    CalcDiffSystematics("JES", 0);
+    CalcDiffSystematics("RES", 1);
+    CalcDiffSystematics("PU_", 2);
+    CalcDiffSystematics("SCALE", 3);
+    CalcDiffSystematics("MASS", 4);
+    CalcDiffSystematics("MATCH", 5);
     CalcDiffSystematics("DY_", 6);
     CalcDiffSystematics("BG_", 7); 
     DiffFlatSystematics(8,bins); 
