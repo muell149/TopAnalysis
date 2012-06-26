@@ -49,7 +49,8 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   TH1F* plotNNLO     = (TH1F*)canvas->GetPrimitive(plotName+"nnlo"   );
   TH1F* plotMadGraph = (TH1F*)canvas->GetPrimitive(plotName          );
   TH1F* plotmcatnlo  = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO2");
-  TH1F* plotpowheg   = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG" );
+  if(!plotmcatnlo) plotmcatnlo  = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO");
+  TH1F* plotpowheg   = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG");
   std::vector<TH1F*>hist_;
   // GET THEORY: delete empty bins
   if(plotmcatnlo ) hist_.push_back( killEmptyBins(plotmcatnlo , verbose) );
