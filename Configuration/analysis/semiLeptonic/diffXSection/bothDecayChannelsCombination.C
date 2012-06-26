@@ -647,12 +647,14 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    //leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
 	    TString curveName=xSecVariables_[i];
 	    curveName.ReplaceAll("Norm","");
+	    if(curveName.Contains("lep")||curveName.Contains("bq")) curveName+="GenMC@NLO";
+	    else curveName+="MC@NLOerrorBand";
 	    //curveName.ReplaceAll("MCatNLO","MCatNLO2");
-	    curveName+="MC@NLOerrorBand";
 	    //std::cout << "searching " << curveName << std::endl;
 	    TGraphAsymmErrors *mcatnlocurve =(TGraphAsymmErrors*)combicanvas->GetPrimitive(curveName);
 	    if(mcatnlocurve){
-	      leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
+	      if(curveName.Contains("lep")||curveName.Contains("bq")) leg->AddEntry(mcatnlocurve, "MC@NLO  ", "L");
+	      else leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
 	      std::cout << "found!" << std::endl;
 	    }	    
 	    else{
@@ -675,7 +677,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(DrawPOWHEGPlot2){
 	    TString curveName=xSecVariables_[i];
 	    curveName.ReplaceAll("Norm","");
-	    //if(curveName.Contains("lep")||curveName.Contains("bq")) curveName+="Gen";
+	    if(curveName.Contains("lep")||curveName.Contains("bq")) curveName+="Gen";
 	    curveName+="POWHEG";
 	    //std::cout << "searching " << curveName << std::endl; 
 	    TH1F* powhegcurve =(TH1F*)combicanvas->GetPrimitive(curveName);
