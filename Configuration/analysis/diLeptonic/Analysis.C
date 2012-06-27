@@ -43,29 +43,29 @@ void Analysis::Begin(TTree * /*tree*/)
   h_BjetMulti = new TH1D("HypBjetMulti", "B-Jet Multiplicity", 10, -0.5, 9.5);
   
   h_HypTTBarRapidity = new TH1D("HypTTBarRapidity","Rapidity of TTbar System (HYP)",100,-5,5);
-  h_HypTTBarpT = new TH1D("HypTTBarpT","pT of TTbar System (HYP)",100,0,500);
-  h_HypTTBarMass = new TH1D("HypTTBarMass","Mass of TTbar System (HYP)",400,0,2000);
+  h_HypTTBarpT = new TH1D("HypTTBarpT","pT of TTbar System (HYP)",500,0,500);
+  h_HypTTBarMass = new TH1D("HypTTBarMass","Mass of TTbar System (HYP)",2000,0,2000);
   h_HypLLBarMass = new TH1D("HypLLBarMass","Mass of LLbar System (HYP)",500,0,1000);
   h_HypLLBarpT = new TH1D("HypLLBarpT","pT of LLbar System (HYP)",200,0,1000);
 
-  h_GenTTBarMass = new TH1D("GenTTBarMass","Mass of TTbar System(GEN)",240,0,1200);
+  h_GenTTBarMass = new TH1D("GenTTBarMass","Mass of TTbar System(GEN)",1200,0,1200);
   h_GenTTBarRapidity = new TH1D("GenTTBarRapidity","Rapidity of TTbar System(GEN)",100,-5,5);
-  h_GenTTBarpT = new TH1D("GenTTBarpT","pT of TTbar System(GEN)",240,0,1200);
+  h_GenTTBarpT = new TH1D("GenTTBarpT","pT of TTbar System(GEN)",1200,0,1200);
   h_GenLLBarpT = new TH1D("GenLLBarpT","pT of LLbar System(GEN)",200,0,1000);
   h_GenLLBarMass = new TH1D("GenLLBarMass","Mass of LLbar System(GEN)",500,0,1000);
 
-  h_VisGenTTBarMass = new TH1D("VisGenTTBarMass","Mass of TTbar System(VisGEN)",240,0,1200);
+  h_VisGenTTBarMass = new TH1D("VisGenTTBarMass","Mass of TTbar System(VisGEN)",120,0,1200);
   h_VisGenTTBarRapidity = new TH1D("VisGenTTBarRapidity","Rapidity of TTbar System(VisGEN)",100,-5,5);
-  h_VisGenTTBarpT = new TH1D("VisGenTTBarpT","pT of TTbar System(VisGEN)",240,0,1200);
+  h_VisGenTTBarpT = new TH1D("VisGenTTBarpT","pT of TTbar System(VisGEN)",1200,0,1200);
   h_VisGenTopRapidity = new TH1D("VisGenTopRapidity","Rapidity of Top(VisGEN)",100,-5,5);
   h_VisGenAntiTopRapidity = new TH1D("VisGenAntiTopRapidity","Rapidity of AntiTop(VisGEN)",100,-5,5);
 
   h_VisGenLLBarpT = new TH1D("VisGenLLBarpT","pT of LLbar System(VisGEN)",200,0,1000);
   h_VisGenLLBarMass = new TH1D("VisGenLLBarMass","Mass of LLbar System(VisGEN)",500,0,1000);
 
-  h_RecoTTBarMass = new TH1D("RecoTTBarMass","Mass of TTbar System (HYP)",240,0,1200);
+  h_RecoTTBarMass = new TH1D("RecoTTBarMass","Mass of TTbar System (HYP)",1200,0,1200);
   h_RecoTTBarRapidity = new TH1D("RecoTTBarRapidity","Rapidity of TTbar System (HYP)",100,-5,5);
-  h_RecoTTBarpT = new TH1D("RecoTTBarpT","pT of TTbar System (HYP)",240,0,1200);
+  h_RecoTTBarpT = new TH1D("RecoTTBarpT","pT of TTbar System (HYP)",1200,0,1200);
   h_RecoToppT = new TH1D("RecoToppT","pT of Top (HYP)",240,0,1200);
   h_RecoAntiToppT = new TH1D("RecoAntiToppT","pT of AntiTop (HYP)",240,0,1200);
   h_RecoTopRapidity = new TH1D("RecoTopRapidity","Rapidity of Top (HYP)",100,-5,5);
@@ -216,8 +216,8 @@ void Analysis::Begin(TTree * /*tree*/)
   h_GenRecoAntiToppT = new TH2D("GenRecoAntiToppT", "Gen/Reco Matching", 80,0,400,80,0,400);
 
   h_GenRecoTTBarRapidity = new TH2D("GenRecoTTBarRapidity","Rapidity of TTbar System (HYP)",100,-5,5,100,-5,5);
-  h_GenRecoTTBarpT = new TH2D("GenRecoTTBarpT","pT of TTbar System (HYP)",50,0,500,50,0,500);
-  h_GenRecoTTBarMass = new TH2D("GenRecoTTBarMass","Mass of TTbar System (HYP)",400,0,2000,400,0,2000);
+  h_GenRecoTTBarpT = new TH2D("GenRecoTTBarpT","pT of TTbar System (HYP)",500,0,500,500,0,500);
+  h_GenRecoTTBarMass = new TH2D("GenRecoTTBarMass","Mass of TTbar System (HYP)",2000,0,2000,2000,0,2000);
   h_GenRecoLLBarMass = new TH2D("GenRecoLLBarMass","Mass of LLbar System (HYP)",500,0,1000,500,0,1000);
   h_GenRecoLLBarpT = new TH2D("GenRecoLLBarpT","pT of LLbar System (HYP)",200,0,1000,200,0,1000);
 
@@ -282,6 +282,7 @@ Bool_t Analysis::Process(Long64_t entry)
 
   //We must correct for the madGraph branching fraction beins 1/9 for dileptons (PDG average is .108)
   if((MCSample->find("ttbarsignal")!=string::npos) ||(MCSample->find("ttbarbg")!=string::npos)){
+    lumiWeight=lumiWeight*(165.60/164.00); //include small factor for Kidonakis normalization
     if(decayMode==11){//all hadronic decay
       lumiWeight=lumiWeight*(0.676*1.5)*(0.676*1.5);
     } else if(decayMode<20 || (decayMode%10==1)){//semileptonic Decay
