@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <cstdio>
 #include <fstream>
 #include "TCanvas.h"
 #include "TLegend.h"
@@ -1173,16 +1174,52 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 				   symmSysErrors,  
 				   theChannelName, theParticleName, theQuantityName, theSpecialPostfix, theSystematicName
 				   ); 
-  	  
-    // Save the shifts in Tyler's triple-matrix ...
-    for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
-      Sys_Error = symmSysErrors->GetBinContent(bin+2); // Keep in mind the extra layer of OF bins
-      if(Systematic == "MASS"){
-	Sys_Error = Sys_Error/12.;
-      }
-      // Save it
-      DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
-    } 
+    
+    
+//     // Save the shifts in Tyler's triple-matrix ...
+//     for(Int_t bin = 0; bin <= stacksum->GetNbinsX(); ++bin) {
+//         Sys_Error = symmSysErrors->GetBinContent(bin+2); // Keep in mind the extra layer of OF bins
+//         if(Systematic == "MASS"){
+//         Sys_Error = Sys_Error/12.;
+//         }
+//         // Save it
+//         DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
+//     }
+    
+    
+    
+    //Symetrize Eta and Rapidity distributions (Ivan)
+    if (theQuantityName == "Eta" || theQuantityName == "Rapidity" ){
+        for(int j=0; j<(int) symmSysErrors->GetNbinsX(); ++j){
+            cout<<"In bin "<<j<<" binCenter "<<symmSysErrors->GetBinCenter(j+1)<<" Content "<<symmSysErrors->GetBinContent(j+1)<<endl;
+        }
+
+        int Nbins = stacksum->GetNbinsX();
+        cout<<"Nbins in "<<symmSysErrors->GetName()<<" = "<<symmSysErrors->GetNbinsX()<<endl;
+        //There are 2 extra bins coming from the unfolding ==>  skip the underflow+1 bin from left and and overflow+1 bin from right
+        for(int i=0; i<Nbins; ++i){
+            cout<<"(2nd loop) In bin "<<i<<" binCenter "<<symmSysErrors->GetBinCenter(i+2)<<" Content "<<symmSysErrors->GetBinContent(i+2)<<endl;
+            cout<<"                     binCenter "<<symmSysErrors->GetBinCenter(Nbins-i+1)<<" Content "<<symmSysErrors->GetBinContent(Nbins-i+1)<<endl;
+            Sys_Error = 0.5*(symmSysErrors->GetBinContent(i+2)+symmSysErrors->GetBinContent(Nbins+1-i));
+            cout<<"Symetrized error "<<Sys_Error<<endl;
+            if(Systematic == "MASS"){
+                Sys_Error = Sys_Error/12.;
+            }
+            // Save it
+            DiffXSecSysErrorBySyst[channelType][i][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
+        }
+    }
+    else{
+        // Save the shifts in Tyler's triple-matrix ...
+        for(Int_t bin = 0; bin < stacksum->GetNbinsX(); ++bin) {
+            Sys_Error = symmSysErrors->GetBinContent(bin+2); // Keep in mind the extra layer of OF bins
+            if(Systematic == "MASS"){
+                Sys_Error = Sys_Error/12.;
+            }
+            // Save it
+            DiffXSecSysErrorBySyst[channelType][bin][syst_number] = Sys_Error;//the differential X-section Error per channel by bin [channel][bin][systematic]
+        }
+    }
   }
      
   // Old pre SVD code
@@ -2883,18 +2920,6 @@ void Plotter::PlotDiffXSec(){
     ResultsLateX.close();
     
     //The Markus plots
-
-    ofstream ResultsSysFilestring; 
-    string ResultsSystLaTeX = outpathPlots.Data();
-    ResultsSystLaTeX.append(subfolderChannel.Data());
-    ResultsSystLaTeX.append(subfolderSpecial.Data());    
-    ResultsSystLaTeX.append("/"); 
-    ResultsSystLaTeX.append(newname); 
-    ResultsSystLaTeX.append("SystematicsLaTeX.txt");
-    ResultsSysFilestring.open(ResultsSystLaTeX.c_str());
-    ResultsSysFilestring<<"Syst= integer numbers, check what is each"<<endl;
-    ResultsSysFilestring<<"Syst & Bin Center & Bin & syst(\%) & syst*syst"<<endl; 
-
     TCanvas * c10 = new TCanvas("Markus","Markus");
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
@@ -2914,10 +2939,18 @@ void Plotter::PlotDiffXSec(){
     FillOrder[1] = 12; //HAD
     FillOrder[0] = 13; //PDF
 
+    ofstream ResultsSysFilestring; 
+    string ResultsSystLaTeX = outpathPlots.Data();
+    ResultsSystLaTeX.append(subfolderChannel.Data());
+    ResultsSystLaTeX.append(subfolderSpecial.Data());    
+    ResultsSystLaTeX.append("/"); 
+    ResultsSystLaTeX.append(newname); 
+    ResultsSystLaTeX.append("SystematicsLaTeX.txt");
+    FILE *systfile;
+    systfile = fopen(ResultsSystLaTeX.c_str(), "w");
     
     for(int systs =0; systs<14; systs++){
       int syst = FillOrder[systs];
-//    for(int syst =0; syst<14; syst++){
       TH1D* systtemp = (TH1D*)varhists[0]->Clone();
       systtemp->Reset();
       double TotalSyst=0.0, TotalSqSyst=0.0;
@@ -2925,45 +2958,39 @@ void Plotter::PlotDiffXSec(){
       for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
        	//systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
              systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
-             if (name.Contains("LeptonEta") || ResultsSysFilestring.good()){
                if(bin==0){  
-                 if(syst==0) ResultsSysFilestring<<"JES ";
-                 if(syst==1) ResultsSysFilestring<<"RES ";
-                 if(syst==2) ResultsSysFilestring<<"PU ";
-                 if(syst==3) ResultsSysFilestring<<"SCALE ";
-                 if(syst==4) ResultsSysFilestring<<"MASS ";
-                 if(syst==5) ResultsSysFilestring<<"MATCH ";
-                 if(syst==6) ResultsSysFilestring<<"DY ";
-                 if(syst==7) ResultsSysFilestring<<"BG ";
-                 if(syst==8) ResultsSysFilestring<<"Trigg. ";
-                 if(syst==9) ResultsSysFilestring<<"Lep. ";
-                 if(syst==10) ResultsSysFilestring<<"B-Tag ";
-                 if(syst==11) ResultsSysFilestring<<"KinFit ";
-                 if(syst==12) ResultsSysFilestring<<"HAD. ";
-                 if(syst==13) ResultsSysFilestring<<"PDF";
+                if(syst==0) fprintf(systfile, "JES    ");
+                if(syst==1) fprintf(systfile, "RES    ");
+                if(syst==2) fprintf(systfile, "PU     ");
+                if(syst==3) fprintf(systfile, "SCALE  ");
+                if(syst==4) fprintf(systfile, "MASS   ");
+                if(syst==5) fprintf(systfile, "MATCH  ");
+                if(syst==6) fprintf(systfile, "DY     ");
+                if(syst==7) fprintf(systfile, "BG     ");
+                if(syst==8) fprintf(systfile, "Trigg  ");
+                if(syst==9) fprintf(systfile, "Lep.   ");
+                if(syst==10)fprintf(systfile, "Btag   ");
+                if(syst==11)fprintf(systfile, "KinFit ");
+                if(syst==12)fprintf(systfile, "HAD    ");
+                if(syst==13)fprintf(systfile, "PDF    ");
                }
-               /*
-               ResultsSysFilestring<<systtemp->GetBinCenter(bin+1)<<" & "<<systtemp->GetBinLowEdge(bin+1)<<" to "<<systtemp->GetBinLowEdge(bin+2)<<" & ";
-               ResultsSysFilestring<<setprecision(4)<<TMath::Sqrt(systtemp->GetBinContent(bin+1))*100<<" & "<<setprecision(3)<<systtemp->GetBinContent(bin+1)<<endl;
-               */
-               ResultsSysFilestring<<" "<<setprecision(4)<<TMath::Sqrt(systtemp->GetBinContent(bin+1))*100;
+               fprintf(systfile, "%2.5f ", TMath::Sqrt(systtemp->GetBinContent(bin+1))*100);
                if(bin>0 && bin<bins-1){//Exclude the 2 side bins
                    TotalSyst=TotalSyst+TMath::Sqrt(systtemp->GetBinContent(bin+1));
                    TotalSqSyst=TotalSqSyst+systtemp->GetBinContent(bin+1);
                }
-             }
       }
       AvgSyst=TotalSyst/(bins-2);
       SqAvgSys=TMath::Sqrt(TotalSqSyst/(bins-2));
-      ResultsSysFilestring<<" Lin.Avg.Error(%)= "<<100*AvgSyst<<"  Sq.Avg.Error(%)= "<<100*SqAvgSys<<endl;
+      fprintf(systfile, "Lin.Avg.\(%)= %.5f  Quad.Avg\(%)=%.5f\n", 100*AvgSyst, 100*SqAvgSys);
       systtemp->SetFillColor(15-systs);
       SystHists->Add((TH1D*)systtemp->Clone());
       leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
       delete systtemp;
     }
     SystHists->Draw();
-    ResultsSysFilestring.close();
-
+    fclose(systfile);
+    
     if(name.Contains("pT") ||name.Contains("Mass") ){
       SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
       if(name.Contains("Rapidity")) SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
