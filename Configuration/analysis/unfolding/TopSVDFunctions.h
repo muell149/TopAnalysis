@@ -217,7 +217,7 @@ class TopSVDFunctions
         static double* SVD_ArrayIntegral1D(TH1D* hist, bool doOF, int numHist);
         
         // Background
-        static void SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, int numHist = 1);
+        static void SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* ttbgrHist, TH1D* biniHist, TH1D* rawHist, bool beForgiving, int numHist = 1);
         
         
         // SVD Setup
@@ -269,7 +269,7 @@ class TopSVDFunctions
         static void SVD_RemoveFile(TString filepath);
         static void SVD_LineToFile(TString string, TString filepath, TString option);
         static TString SVD_LineFromFile(TString key, TString filepath);
-        static void SVD_PrintPage(TCanvas*& canvas, TString outputfilenamePs, TString outputfilenameEps, int manual_plotcounter);
+        static void SVD_PrintPage(TCanvas*& canvas, TString outputfilenamePs, TString outputfilenameEps, TString description, TString option = "");
         
         // Misc
         static int SVD_GetDigit(TString steering, int digit, int standard); 
