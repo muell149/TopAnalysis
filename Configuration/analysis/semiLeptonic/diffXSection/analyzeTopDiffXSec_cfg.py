@@ -612,6 +612,8 @@ process.load("TopAnalysis.TopAnalyzer.ElectronKinematics_cfi")
 process.load("TopAnalysis.TopAnalyzer.MuonJetKinematics_cfi")
 ## muon vertex analyzer
 process.load("TopAnalysis.TopAnalyzer.MuonVertexKinematics_cfi")
+## mixed object analyzer
+process.load("TopAnalysis.TopAnalyzer.MixedObjectsAnalyzer_cfi")
 
 ## ---
 ##    set up vertex filter
@@ -835,6 +837,24 @@ process.tightMuontightJetsKinematics       = process.analyzeMuonJetKinematics.cl
 process.tightMuontightJetsKinematicsTagged = process.tightMuontightJetsKinematics.clone()
 process.tightMuontightJetsKinematicsSSV = process.analyzeMuonJetKinematics.clone(srcA = 'tightMuons', srcB = 'vetoJets')
 
+## multiple objects
+process.compositedKinematics  = process.analyzeCompositedObjects.clone(
+                                  ## jets
+                                  JetSrc = 'tightLeadingPFJets',
+                                  ## MET
+                                  METSrc = 'patMETs',
+                                  ## muons
+                                  MuonSrc = 'tightMuons',
+                                  ## electrons
+                                  ElectronSrc = 'goodElectronsEJ',
+                                  ## event weight (PU, etc...)
+                                  weight = "",
+                                  ## primary vertex info
+                                  VertexSrc = "goodOfflinePrimaryVertices"
+                                  )
+process.compositedKinematicsTagged = process.compositedKinematics.clone()
+
+
 ## electrons
 process.tightElectronKinematics        = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
 process.tightElectronQuality           = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
@@ -922,7 +942,8 @@ process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinemati
                                                        process.bottomJetKinematics          +
 						       process.bottomJetQuality             +
                                                        process.analyzeMETMuon               +
-                                                       process.tightMuontightJetsKinematics
+                                                       process.tightMuontightJetsKinematics +
+                                                       process.compositedKinematics
                                                        )
 
 
@@ -938,6 +959,7 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.bottomJetQualityTagged             +
                                                       process.analyzeMETMuonTagged               +
                                                       process.tightMuontightJetsKinematicsTagged +
+                                                      process.compositedKinematicsTagged         +
                                                       process.bottomLead_0_JetKinematicsTagged   +
                                                       process.bottomLead_1_JetKinematicsTagged
                                                       )
@@ -2357,6 +2379,10 @@ if(decayChannel=="electron"):
         path.replace(process.testIsoMuonQuality, process.testIsoElectronQuality)
         # replace muon by electron in (remaining) kinfit analyzers
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
+        # take care of replacements you do NOT want to do!
+        process.compositedKinematics.MuonSrc='tightMuons'
+        process.compositedKinematicsTagged.MuonSrc='tightMuons'     
+        
 allpaths  = process.paths_().keys()
 
 # switch to PF2PAT
