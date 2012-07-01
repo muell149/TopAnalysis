@@ -66,7 +66,7 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   TTree * tree;
 
   // doubles
-  double MuNu4J, ElNu4J, mJJ, mWJJ;
+  double MuNu4J, ElNu4J, mJJ, mWJJ, mHbb;
 
   /// histo container
   std::map< std::string, TH1F* > hists_;

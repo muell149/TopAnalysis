@@ -63,15 +63,18 @@ MixedObjectsAnalyzer::beginJob()
   ElNu4J=-1;
   mJJ=-1; 
   mWJJ=-1;
+  mHbb=-1;  
+                      
+  tree->Branch("MWJJ"      , &mWJJ      , "MWJJ/D"      );
   tree->Branch("MuNu4J"    , &MuNu4J    , "MuNu4J/D"    );
   tree->Branch("ElNu4J"    , &ElNu4J    , "MuNu4J/D"    );                
-  tree->Branch("MWJJ"      , &mWJJ      , "MWJJ/D"      );  
+  tree->Branch("mHbb"      , &mHbb      , "MHbb/D"      );  
 
   hists_["MuNu4J"] = fs->make<TH1F>( "MuNu4J"  , "MuNu4J"  , 2500,  0. , 2500 );
   hists_["ElNu4J"] = fs->make<TH1F>( "ElNu4J"  , "ElNu4J"  , 2500,  0. , 2500 );
   hists_["MJJ"   ] = fs->make<TH1F>( "MJJ"     , "MJJ"     , 2500,  0. , 2500 );        
   hists_["MWJJ"  ] = fs->make<TH1F>( "MWJJ"    , "MWJJ"    , 160 ,  0. , 160  );  
-  
+  hists_["mHbb"  ] = fs->make<TH1F>( "mHbb"    , "mHbb"    , 400 ,  0. , 400  ); 
 
 }
 
@@ -126,20 +129,31 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   // invariant jet-jet mass (measure for W mass)
   mJJ=-1;
   mWJJ=-1;
+  mHbb=-1;
   for(edm::View< pat::Jet>::const_iterator jetsA=jets_h->begin(); jetsA!=jets_h->end(); ++jetsA){
     for(edm::View< pat::Jet>::const_iterator jetsB=jets_h->begin(); jetsB!=jets_h->end(); ++jetsB){      
       // take care of double counting
       if(jetsB>jetsA){
+	// get invariant mass
 	mJJ=(jetsA->p4()+jetsB->p4()).mass();
+	// check wrt w mass
 	if(mWJJ==-1) mWJJ=mJJ;
 	else if(std::abs(mJJ-80.4)<std::abs(mWJJ-80.4)) mWJJ=mJJ;
-	// all invariant masses
+	// check wrt bb (CSVL algo) and 125.3 GeV
+	if(jetsA->bDiscriminator("combinedSecondaryVertexBJetTags") > 0.244&&
+	   jetsB->bDiscriminator("combinedSecondaryVertexBJetTags") > 0.244  ){
+	  if(mHbb==-1) mHbb=mJJ;
+	  else if (std::abs(mJJ-125.3)<std::abs(mHbb-125.3));
+	}
+	// fill all invariant masses
 	hists_["MJJ"]->Fill(mJJ, weight);
       }
     }
   }
   // jet-jet invariant mass closest to w mass
   if(mWJJ!=-1) hists_["MWJJ"]->Fill(mWJJ, weight);   
+  // bjet-bjet invariant mass closest to randomely chosen mass point of 125.3 GeV 
+  if(mHbb!=-1) hists_["mHbb"]->Fill(mHbb, weight); 
 
   tree->Fill();
 }
