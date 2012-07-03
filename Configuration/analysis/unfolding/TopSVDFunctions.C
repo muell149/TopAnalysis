@@ -7340,7 +7340,7 @@ double TopSVDFunctions::SVD_Unfold(
             SVD_Array2Stack(theRegStack, theLegend, normUnfShiftHist, "Unf.",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, normBBBShiftHist, "BBB", "HIST", "", 2, numberSyst);  
             SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on #sigma_{bin} / #sigma_{tot} in \%", "", 0, false);  
-            SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioNormShifts"); 
+            SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormShifts"); 
                  
         }  
             
