@@ -12,13 +12,14 @@ are put in one TeX-File.
 Usage: In the file ./Steering/steering.steer you give 4 lines for
 each booklet:
 
-(1) The number of the EPS Plot with which the Filename ends.
+(1) The Extension of the EPS Plot with which the Filename ends.
+    If this is 'Unfolding_combined_Leptons_Eta_HAD_InputDataGenRec.eps', 
+    then this should be 'InputDataGenRec'.
+    Note, that his extension will also be the name of the Tex/PDF file.
 
 (2) Whether this plot should be printed for the nominal sample or not
 
 (3) Whether this plot should be pribted for a systematic or not
-
-(4) The Filename of the Tex/PDF file to be created (without ending)
 
 (4) A descriptive title
 

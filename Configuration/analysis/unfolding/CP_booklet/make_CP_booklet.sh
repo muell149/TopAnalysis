@@ -12,21 +12,22 @@
 ############## S T E E R I N G ################################
 ###############################################################
 
-OUTPUTFOLDER="../../diLeptonic/SVD/CP_Booklets"
-STEERINGFILE="./Steering/steering_dilep_fast.steer"
-SNIPPETFOLDER="./TexSnippets"
-INPUTFOLDER="../../SVD"
+OUTPUTFOLDER="/afs/desy.de/user/d/dfischer/www/TopUnfolding/CP_Booklets"
+STEERINGFILE="/afs/desy.de/user/d/dfischer/workspace/TopUnfolding/CMSSW/CMSSW_4_2_5/src/unfolding/CP_booklet/Steering/steering_test.steer"
+SNIPPETFOLDER="/afs/desy.de/user/d/dfischer/workspace/TopUnfolding/CMSSW/CMSSW_4_2_5/src/unfolding/CP_booklet/TexSnippets"
+INPUTFOLDER="/afs/desy.de/user/d/dfischer/workspace/TopUnfolding/CMSSW/CMSSW_4_2_5/src/diLeptonic/SVD"
 TEXFILE="SelectedControlPlots"
 
-LIST_SYST="RES JES MASS MATCH SCALE PU_ DY_ BG_"
-LIST_DISTa="Leptons_Eta Leptons_Pt LepPair_Pt LepPair_Mass BJets_Rapidity BJets_Pt"
+#LIST_SYST="RES JES MASS MATCH SCALE PU_ DY_ BG_ HAD"
+LIST_SYST="HAD"
+LIST_DISTa="Leptons_Eta Leptons_Pt LepPair_Pt LepPair_Mass BJets_Eta BJets_Pt"
 LIST_DISTb="TopQuarks_Rapidity TopQuarks_Pt TtBar_Rapidity TtBar_Pt TtBar_Mass"
 LIST_CHANNEL="mumu emu ee combined"
 
 EPSTOPDF="false" 
 COPYIMG="false"
 COMPILE="true"
-COMBINEBOOKLETS="true"
+COMBINEBOOKLETS="false"
 DEBUGTEX="false"
 
 ###############################################################
@@ -41,7 +42,7 @@ if [ "$COPYIMG" = "true" ]; then
 fi
 
 # Real Input Folder
-REALINPUTFOLDER=$OUTPUTFOLDER/$INPUTFOLDER
+REALINPUTFOLDER=$INPUTFOLDER
 
 # Loop over booklets
 NUMSTEERINGLINES=`cat $STEERINGFILE | wc -l`
@@ -65,7 +66,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
     let "TOKENCNT = $TOKENCNT + 1"
     if [ "$TOKENCNT" = "1" ]; then
         for i in `echo $STEERINGLINE` ; do
-             PAGENUMBER=$i;
+             PLOTKEY=$i;
         done
         continue;
     elif [ "$TOKENCNT" = "2" ]; then
@@ -79,11 +80,6 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
         done
         continue;
     elif [ "$TOKENCNT" = "4" ]; then
-        for i in `echo $STEERINGLINE` ; do
-             OUTPUTFILENAME=$i;
-        done        
-        continue;
-    elif [ "$TOKENCNT" = "5" ]; then
         LINETITLE="$STEERINGLINECNT"
         TOKENCNT=0 ;
     else
@@ -93,10 +89,9 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
     # Debug Tokens
     DEBUGTOKENS=false
     if [ "$DEBUGTOKENS" = "true" ]; then
-        echo "PAGENUMBER      = $PAGENUMBER"
+        echo "PLOTKEY         = $PLOTKEY"
         echo "DONOM           = $DONOM"
         echo "DOSYST          = $DOSYST"
-        echo "OUTPUTFILENAME  = $OUTPUTFILENAME"
         echo "LINETITLE       = $LINETITLE" 
         continue;
     fi
@@ -110,6 +105,8 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
     # Which Outputfile
     if [ "$COMBINEBOOKLETS" = "true" ]; then
         OUTPUTFILENAME=$TEXFILE ;
+    else 
+        OUTPUTFILENAME=$PLOTKEY ; 
     fi
 
     # Open Booklet?
@@ -145,7 +142,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             cat $SNIPPETFOLDER/CP_booklet_rowheader.tex >> $OUTPUTFILE.tex
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
-                PLOTNAME="Unfolding_${cc}_${dist}_${PAGENUMBER}"
+                PLOTNAME="Unfolding_${cc}_${dist}_${PLOTKEY}"
                 PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
                 if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
@@ -153,11 +150,11 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
-                     PLOTLOC="./Images"
+                     PLOTLOC="${OUTPUTFOLDER}/Images"
                      cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
-                    epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
+                    epstopdf "${PLOTLOC}/${PLOTNAME}.eps"
                     OUTEXT="pdf" ;
                 fi
                 echo "${PLOTLOC}/${PLOTNAME}.${OUTEXT}%" >> $OUTPUTFILE.tex
@@ -174,7 +171,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             cat $SNIPPETFOLDER/CP_booklet_rowheader.tex >> $OUTPUTFILE.tex
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
-                PLOTNAME="Unfolding_${cc}_${dist}_${PAGENUMBER}"
+                PLOTNAME="Unfolding_${cc}_${dist}_${PLOTKEY}"
                 PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
                 if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
@@ -182,11 +179,11 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
-                    PLOTLOC="./Images"
+                    PLOTLOC="${OUTPUTFOLDER}/Images"
                     cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
-                    epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
+                    epstopdf "${PLOTLOC}/${PLOTNAME}.eps"
                     OUTEXT="pdf" ;
                 fi
                 echo "${PLOTLOC}/${PLOTNAME}.${OUTEXT}%" >> $OUTPUTFILE.tex
@@ -207,7 +204,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             cat $SNIPPETFOLDER/CP_booklet_rowheader.tex >> $OUTPUTFILE.tex
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
-                PLOTNAME="Unfolding_${cc}_${dist}_${syst}_${PAGENUMBER}"
+                PLOTNAME="Unfolding_${cc}_${dist}_${syst}_${PLOTKEY}"
                 PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
                 if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
@@ -215,11 +212,11 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
-                     PLOTLOC="./Images"
+                     PLOTLOC="${OUTPUTFOLDER}/Images"
                      cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
-                    epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
+                    epstopdf "${PLOTLOC}/${PLOTNAME}.eps"
                     OUTEXT="pdf" ;
                 fi
                 echo "${PLOTLOC}/${PLOTNAME}.${OUTEXT}%" >> $OUTPUTFILE.tex
@@ -237,7 +234,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
             cat $SNIPPETFOLDER/CP_booklet_rowheader.tex >> $OUTPUTFILE.tex
             for cc in `echo $LIST_CHANNEL` ; do
                 cat $SNIPPETFOLDER/CP_booklet_plotheader.tex >> $OUTPUTFILE.tex
-                PLOTNAME="Unfolding_${cc}_${dist}_${syst}_${PAGENUMBER}"
+                PLOTNAME="Unfolding_${cc}_${dist}_${syst}_${PLOTKEY}"
                 PLOTLOC="${INPUTFOLDER}"
                 OUTEXT="eps"
                 if [ ! -e ${REALINPUTFOLDER}/${PLOTNAME}.eps ] ; then
@@ -245,11 +242,11 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
                     exit;
                 fi
                 if [ "$COPYIMG" = "true" ]; then
-                     PLOTLOC="./Images"
+                     PLOTLOC="${OUTPUTFOLDER}/Images"
                      cp ${REALINPUTFOLDER}/${PLOTNAME}.eps ${OUTPUTFOLDER}/Images/${PLOTNAME}.eps ;
                 fi
                 if [ "$EPSTOPDF" = "true" ]; then
-                    epstopdf "${OUTPUTFOLDER}/${PLOTLOC}/${PLOTNAME}.eps"
+                    epstopdf "${PLOTLOC}/${PLOTNAME}.eps"
                     OUTEXT="pdf" ;
                 fi
                 echo "${PLOTLOC}/${PLOTNAME}.${OUTEXT}%" >> $OUTPUTFILE.tex
