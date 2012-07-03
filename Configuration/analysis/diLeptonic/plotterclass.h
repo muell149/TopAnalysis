@@ -36,7 +36,7 @@ class Plotter {
   void   setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
   void   setDataSet(std::vector<TString>, std::vector<double>, std::vector<TString>, std::vector<int>, TString);
   void   setDataSet(TString);
-  void   setSystDataSet(TString);
+  void   setSystDataSet(TString, TString, TString);
   void   fillSystHisto();
   void   fillHisto();
   void setStyle(TH1D&, unsigned int);
@@ -48,8 +48,8 @@ class Plotter {
   void CalcDiffXSec(TH1* varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* genReco2d, double DiffXSecVec[4][10], double DiffXSecStatErrorVec[4][10], double GenDiffXSecVec[4][10]);
   void PlotDiffXSec();
   void DYScaleFactor();
-  void CalcInclSystematics(TString Systematic, int syst_number);
-  void CalcDiffSystematics(TString Systematic, int syst_number);
+  void CalcInclSystematics(TString Systematic, TString systSampleUp, TString systSampleDown, int syst_number);
+  void CalcDiffSystematics(TString Systematic, TString systSampleUp, TString systSampleDown, int syst_number);
   void InclFlatSystematics(int syst_number);
   void DiffFlatSystematics(int syst_number,  int nbins);
   TLegend* getNewLegend();
@@ -60,7 +60,8 @@ class Plotter {
   TH1F* reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotname, bool rescale);
   // DAVID
   void UnfoldingOptions(bool doSVD);
-  void SetOutpath(TString path);
+  void SetOutpath(TString path); 
+  void ApplyMCATNLOWeight(TH1* hist, TString Systematic, TString Shift, TString Sample);
  private:
   TString name;
   TString specialComment;
@@ -278,15 +279,15 @@ void Plotter::InclFlatSystematics(int syst_number){
   if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .017;}//combined 
   syst_number++;
 
-  //Hadronization (for now)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .049;}//ee 
-  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .043;}//mumu  
-  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .054;}//emu  
-  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
-      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
-  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
-  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
-  syst_number++;
+//  //Hadronization (for now)
+//  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .049;}//ee 
+//  if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .043;}//mumu  
+//  if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .054;}//emu  
+//  if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = 
+//      1/(sqrt((1/(InclusiveXsectionSysErrorBySyst[0][syst_number]*InclusiveXsectionSysErrorBySyst[0][syst_number]) + 
+//  	       1/(InclusiveXsectionSysErrorBySyst[1][syst_number]*InclusiveXsectionSysErrorBySyst[1][syst_number]) +
+//  	       1/(InclusiveXsectionSysErrorBySyst[2][syst_number]*InclusiveXsectionSysErrorBySyst[2][syst_number]))));}//combined  
+//  syst_number++;
 
   //PDF (for now). Taken rfom l+jet people
 
@@ -361,16 +362,16 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     //		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
     
-    //Hadronization (for now)
-    legendsSyst.push_back("Hadr.");
-    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//ee 
-    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .01;}//mumu  
-    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
-    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
-	1/(sqrt((1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
-		 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
-		 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
-    syst++;
+//    //Hadronization (for now)
+//    legendsSyst.push_back("Hadr.");
+//    if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .006;}//ee 
+//    if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .01;}//mumu  
+//    if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .003;}//emu  
+//    if (channelType==3){DiffXSecSysErrorBySyst[channelType][bin][syst] = 
+//	1/(sqrt(     1/(DiffXSecSysErrorBySyst[0][bin][syst]*DiffXSecSysErrorBySyst[0][bin][syst]) + 
+//		         1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
+//		         1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst])    ));}//combined  
+//    syst++;
 
     //PDF (for now). Taken from l+jet people
     legendsSyst.push_back("PDF");
@@ -384,14 +385,14 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
    
 }
 
-void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
-  setSystDataSet(Systematic);
+void Plotter::CalcInclSystematics(TString Systematic, TString systSampleUp, TString systSampleDown, int syst_number){
+  setSystDataSet(Systematic, systSampleUp, systSampleDown);
   fillSystHisto();
 
   double InclusiveXsectionNom[4], InclusiveXsectionUp[4], InclusiveXsectionDown[4];
   double InclusiveXsectionStatErrorNom[4], InclusiveXsectionStatErrorUp[4], InclusiveXsectionStatErrorDown[4];
 
-  double Sys_Error_Up, Sys_Error_Down, Sys_Error;//, Sum_Errors;
+  double Sys_Error_Up, Sys_Error_Down, Sys_Error;
   double scale = 1.;
 
   if(channelType!=3){//set everything to zero
@@ -403,17 +404,17 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
       InclusiveXsectionStatErrorNom[channelType]=0;
   }else{
     for(int i = 0; i<3; i++){//fill the siffxsec vector with the values for the previous systematics
-	InclusiveXsectionDown[i]=InclusiveXsectionBySystDown[i][syst_number];
-	InclusiveXsectionStatErrorDown[i]=InclusiveXsectionStatErrorBySystDown[i][syst_number];
-	InclusiveXsectionUp[i]=InclusiveXsectionBySystUp[i][syst_number];
-	InclusiveXsectionStatErrorUp[i]=InclusiveXsectionStatErrorBySystUp[i][syst_number];
-	InclusiveXsectionNom[i]=InclusiveXsectionBySystNom[i][syst_number];
-	InclusiveXsectionStatErrorNom[i]=InclusiveXsectionStatErrorBySystNom[i][syst_number];
+	  InclusiveXsectionDown[i]=InclusiveXsectionBySystDown[i][syst_number];
+	  InclusiveXsectionStatErrorDown[i]=InclusiveXsectionStatErrorBySystDown[i][syst_number];
+	  InclusiveXsectionUp[i]=InclusiveXsectionBySystUp[i][syst_number];
+	  InclusiveXsectionStatErrorUp[i]=InclusiveXsectionStatErrorBySystUp[i][syst_number];
+	  InclusiveXsectionNom[i]=InclusiveXsectionBySystNom[i][syst_number];
+	  InclusiveXsectionStatErrorNom[i]=InclusiveXsectionStatErrorBySystNom[i][syst_number];
     }    
-  }
-  CalcXSec(dataset, InclusiveXsectionNom,InclusiveXsectionStatErrorNom, Systematic, "None");
-  CalcXSec(datasetUp, InclusiveXsectionUp,InclusiveXsectionStatErrorUp, Systematic, "Up");
-  CalcXSec(datasetDown, InclusiveXsectionDown,InclusiveXsectionStatErrorDown, Systematic, "Down");
+  }   
+  CalcXSec(dataset, InclusiveXsectionNom,InclusiveXsectionStatErrorNom, Systematic, "None"); 
+  CalcXSec(datasetUp, InclusiveXsectionUp,InclusiveXsectionStatErrorUp, Systematic, "Up");  
+  CalcXSec(datasetDown, InclusiveXsectionDown,InclusiveXsectionStatErrorDown, Systematic, "Down");  
   
   InclusiveXsectionBySystDown[channelType][syst_number]=InclusiveXsectionDown[channelType];
   InclusiveXsectionStatErrorBySystDown[channelType][syst_number]=InclusiveXsectionStatErrorDown[channelType];
@@ -436,7 +437,7 @@ void Plotter::CalcInclSystematics(TString Systematic, int syst_number){
 
 }
 
-void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
+void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TString systSampleDown, int syst_number){
 
   //    TH2 *genReco2d=0; 
   // TString newname = name;
@@ -450,11 +451,11 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
   legendsSyst.push_back(Systematic);
   double Xbins[XAxisbins.size()];
   //  double binWidth[XAxisbinCenters.size()];
-  for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
-  setSystDataSet(Systematic);  
-  fillSystHisto(); 
-  TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);  
-  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Rebin(bins,"stackup",Xbins); 
+  for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];} 
+  setSystDataSet(Systematic, systSampleUp, systSampleDown);   
+  fillSystHisto();  
+  TH1D* stacksum = (TH1D*)hists[datafiles].Rebin(bins,"stack",Xbins);   
+  TH1D* stacksumUp = (TH1D*)systhistsUp[datafiles].Rebin(bins,"stackup",Xbins);  
   TH1D* stacksumDown = (TH1D*)systhistsDown[datafiles].Rebin(bins,"stackdown",Xbins); 
 
   TH2 *genReco2d=NULL;
@@ -480,7 +481,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
   bool init = false;
   bool initUp = false;
   bool initDown = false;
-
+ 
   TH1 *varhists[hists.size()];
   TH1 *varhistsUp[hists.size()];
   TH1 *varhistsDown[hists.size()];
@@ -491,6 +492,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
   if(name.Contains("Hyp")){//Histogram naming convention has to be smarter
     newname.ReplaceAll("Hyp",3,"",0);
   } 
+   
   if ( doUnfolding == false ) {
     // Prepare Histograms//DY!!
     //Nominal
@@ -814,7 +816,8 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     TH2D* theRespHist = NULL;
     TH2D* theRespHistUp = NULL;
     TH2D* theRespHistDown = NULL;   
-		
+		 
+  
     // DAVID:
     // Data, Signal and Background
     // can be obtained from vectors that Tyler fills.
@@ -871,15 +874,15 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
       if ( legendsUp[i] == "Data 2011") {
       } 
       else if ( legendsUp[i] == "t#bar{t} signal") {   
-		if ( theRecHistUp == NULL ) { 
-		  theRecHistUp = (TH1D*) (systhistsUp[i]).Clone("theRecHistUp"); 
+		if ( theRecHistUp == NULL ) {  
+		  theRecHistUp = (TH1D*) (systhistsUp[i]).Clone("theRecHistUp");  
 		} else {
 		  theRecHistUp->Add(&(systhistsUp[i]));
 		}  
       } 
       else if ( legendsUp[i] == "t#bar{t} other") {  
 		if ( theTtBgrHistUp == NULL ) { 
-		  theTtBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theTtBgrHistUp"); 
+		  theTtBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theTtBgrHistUp");  
 		} else {
 		  theTtBgrHistUp->Add(&(systhistsUp[i]));
 		}  
@@ -978,7 +981,8 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
  
       } 
     }
- 
+        
+         
 		
     // Do we have to take care of antiparticles?
     bool doAntiParticles = false;
@@ -993,6 +997,11 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     // have to be obtained from the files directly
     for ( size_t i = 0; i < hists.size() ; i++ ) {
       if(legends[i] == "t#bar{t} signal"){
+		 
+		// Histo Names
+		TString respHistName("GenReco"+newname);
+		TString genHistName("Gen"+newname);
+		 
 		    	
 		// Nominal Sample
 		TFile* ftemp = TFile::Open(dataset[i]);
@@ -1048,8 +1057,12 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 		}
 					
 		delete ftempUp;
+		
+
       }
     }
+    
+  
     
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
       if(legendsDown[i] == "t#bar{t} signal"){
@@ -1078,10 +1091,19 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
 		}
 					
 		delete ftempDown;
-		    	
+		 
+		 
       }
     } 
-		
+     
+      
+    // Apply Scale Factor for MC@NLO 
+	if ( legendsSyst.size() > 0 ) {  
+        ApplyMCATNLOWeight(theRespHistUp, legendsSyst.back(), "Up", "ttbarsignal");  
+        ApplyMCATNLOWeight(theRespHistDown, legendsSyst.back(), "Down", "ttbarsignal");  
+        ApplyMCATNLOWeight(theGenHistUp, legendsSyst.back(), "Up", "ttbarsignal");  
+        ApplyMCATNLOWeight(theGenHistDown, legendsSyst.back(), "Down", "ttbarsignal");  
+    }
 		 
     // Get the binning 
     double* theBins = Xbins;
@@ -1108,31 +1130,9 @@ void Plotter::CalcDiffSystematics(TString Systematic, int syst_number){
     if ( name.Contains("Mass")    ) theQuantityName = "Mass";
     TString theSpecialPostfix = "";
     if ( specialComment.CompareTo("Standard") != 0 ) {
-    	theSpecialPostfix = specialComment;
+    	//theSpecialPostfix = specialComment;
     } 
-    TString theSystematicName = Systematic;
-		
-		 
-    //cout << "theDataHist = " <<theDataHist << endl;
-    //cout << "theBgrHist = " << theBgrHist<< endl;
-    //cout << "theBgrHistUp = " << theBgrHistUp<< endl;
-    //cout << "theBgrHistDown = " << theBgrHistDown<< endl;
-    //cout << "theGenHist= " << theGenHist<< endl;
-    //cout << "theGenHistUp = " <<theGenHistUp << endl;
-    //cout << "theGenHistDown = " << theGenHistDown<< endl;
-    //cout << "theRecHist = " << theRecHist<< endl;
-    //cout << "theRecHistUp = " << theRecHistUp<< endl;
-    //cout << "theRecHistDown = " << theRecHistDown<< endl;
-    //cout << "theRespHist = " << theRespHist<< endl;
-    //cout << "theRespHistUp = " << theRespHistUp<< endl;
-    //cout << "theRespHistDown = " << theRespHistDown<< endl;
-    //cout << "theBins = " << theBins<< endl;
-    //cout << "numberBins = " << numberBins<< endl; 
-    //cout << "theChannelName = " << theChannelName << endl;
-    //cout << "theParticleName = " << theParticleName << endl;
-    //cout << "theQuantityName = " << theQuantityName<< endl;
-    //cout << "theSpecialPostfix = " << theSpecialPostfix<< endl;
-    //cout << "theSystematicName = " << theSystematicName<< endl; 
+    TString theSystematicName = Systematic; 
  
     cout << endl;
     cout << endl;
@@ -1355,7 +1355,7 @@ void Plotter::setDataSet(TString mode)
   subfolderSpecial = "";
   if ( specialComment.CompareTo("Standard") != 0 ) {
   	subfolderSpecial = specialComment;
-  	specialComment.Prepend("/");
+  	subfolderSpecial.Prepend("/");
   }
   
 
@@ -1419,7 +1419,7 @@ void Plotter::setDataSet(TString mode)
   }
 }
 
-void Plotter::setSystDataSet(TString systematic)
+void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString systSampleDown)
 {
   initialized=false;
 
@@ -1431,8 +1431,8 @@ void Plotter::setSystDataSet(TString systematic)
       HistoFileUp = "FileLists/HistoFileList_Nominal_"+channel+".txt";
       HistoFileDown = "FileLists/HistoFileList_Nominal_"+channel+".txt";
     }else{
-      HistoFileUp = "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
-      HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+      HistoFileUp = "FileLists/HistoFileList_"+systSampleUp+"_"+channel+".txt";
+      HistoFileDown = "FileLists/HistoFileList_"+systSampleDown+"_"+channel+".txt";
     }
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
@@ -1443,10 +1443,9 @@ void Plotter::setSystDataSet(TString systematic)
     legendsUp.clear();
     legendsDown.clear();
     colorsUp.clear();
-    colorsDown.clear();
-  
+    colorsDown.clear(); 
     while(!FileListUp.eof()){
-      FileListUp>>filenameUp;
+      FileListUp>>filenameUp; 
 
       if(filenameUp!=""){
 	datasetUp.push_back(filenameUp);
@@ -1484,8 +1483,8 @@ void Plotter::setSystDataSet(TString systematic)
       HistoFileUp = "FileLists/HistoFileList_Nominal_"+channel+".txt";
       HistoFileDown = "FileLists/HistoFileList_Nominal_"+channel+".txt";
     }else{
-      HistoFileUp= "FileLists/HistoFileList_"+systematic+"UP_"+channel+".txt";
-      HistoFileDown = "FileLists/HistoFileList_"+systematic+"DOWN_"+channel+".txt";
+      HistoFileUp = "FileLists/HistoFileList_"+systSampleUp+"_"+channel+".txt";
+      HistoFileDown = "FileLists/HistoFileList_"+systSampleDown+"_"+channel+".txt";
     }
     ifstream FileListUp(HistoFileUp);
     ifstream FileListDown(HistoFileDown);
@@ -1560,6 +1559,9 @@ void Plotter::fillHisto()
       	hist->Add(hist2);
       }
       
+      
+      
+      
       setHHStyle(*gStyle);
       //gStyle->SetErrorX(0);
 
@@ -1574,8 +1576,70 @@ void Plotter::fillHisto()
   }
 }
 
+
+void Plotter::ApplyMCATNLOWeight(TH1* hist, TString Systematic, TString Shift, TString Sample)
+{
+    // This Scale Factor is needed, because the lumiWeight
+    // which is stored on the Ntupels does not account
+    // for the MC weights that MC@NLO uses.
+    
+    
+    // First, we test if we need to apply the weight in the first place
+    bool doApplyMCATNLOWeight = false; 
+    if ( (Systematic == "HAD") && (Shift == "Up") && Sample.Contains("ttbar") ) doApplyMCATNLOWeight = true;
+    
+    // Exit, if nothing needs to be done
+    if ( doApplyMCATNLOWeight == false ) return;
+    
+    
+    // Here, we calculate the factor.
+    
+    // Take the number of non-weighted generated events which comes
+    // from the file unmerged/MCATNLO/ee_ttbarsignalplustau.txt
+    // which is
+    double MCATNLO_Events = 21745199.;
+    //
+    // The absolut value of the weight for all these is
+    double MCATNLO_Weight = 190.41256;
+    //
+    // There is a fraction with positive weights
+    double MCATNLO_posWeights = 0.8865;
+    //
+    // And a fraction with negative weights
+    double MCATNLO_negWeights = 0.1135;
+    //
+    // Such that the weighted number of events is 
+    double MCATNLO_Weights = MCATNLO_Weight * MCATNLO_Events * (MCATNLO_posWeights - MCATNLO_negWeights);
+    // 
+    // Therefore, the scale factor to be applied is
+    double MCATNLO_ScaleFactor = MCATNLO_Weights / MCATNLO_Events;
+    double MCATNLO_ScaleFactorInv = MCATNLO_Events / MCATNLO_Weights;
+    
+    
+    // Output
+    cout << endl; 
+    cout << endl; 
+    cout << "ATTENTION!" << endl;
+    cout << "Applying a scale factor to the MC@NLO Sample to account for MC Weights" << endl;  
+    cout << "    Histo Name:           " << hist->GetName() << endl;
+    cout << "    Histo Title:          " << hist->GetTitle() << endl;
+    cout << "    Systematic:           " << Systematic << endl;
+    cout << "    Shift:                " << Shift << endl;
+    cout << "    Sample:               " << Sample << endl;
+    cout << "    Channel:              " << channel << endl;
+    cout << "    Quantity:             " << name << endl; 
+    cout << "    The factor is:        " << MCATNLO_ScaleFactor << endl;
+    cout << "    The inverse of it is: " << MCATNLO_ScaleFactorInv << endl;
+    cout << endl;
+  
+    // Apply the weight
+    hist->Scale(MCATNLO_ScaleFactorInv);
+  
+}
+
 void Plotter::fillSystHisto()
 {
+	 
   TH1::AddDirectory(kFALSE);
   if(!initialized){ 
     hists.clear();
@@ -1586,6 +1650,9 @@ void Plotter::fillSystHisto()
     for(unsigned int i=0; i<dataset.size(); i++){
       TFile *ftemp = TFile::Open(dataset[i]);
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+      
+ 
+      
       if(name.Contains("Lepton")){
       	TString stemp = name;
 	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
@@ -1604,7 +1671,8 @@ void Plotter::fillSystHisto()
 	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
-      
+                 
+     
       setHHStyle(*gStyle);
       //gStyle->SetErrorX(0);
       hists.push_back(*hist);
@@ -1614,8 +1682,8 @@ void Plotter::fillSystHisto()
     }
     
     
-    // Fill up-shifted sample
-    for(unsigned int i=0; i<datasetUp.size(); i++){
+    // Fill up-shifted sample 
+    for(unsigned int i=0; i<datasetUp.size(); i++){ 
       TFile *ftemp = TFile::Open(datasetUp[i]);
       TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
       if(name.Contains("BJet")){
@@ -1636,6 +1704,13 @@ void Plotter::fillSystHisto()
 	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
+      
+      
+      
+      // Apply Scale Factor for MC@NLO
+      if ( legendsSyst.size() > 0 ) { 
+      	ApplyMCATNLOWeight(hist, legendsSyst.back(), "Up", datasetUp[i]);
+      } 
       
       setHHStyle(*gStyle);
       //gStyle->SetErrorX(0);
@@ -1665,6 +1740,12 @@ void Plotter::fillSystHisto()
 	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
       	hist->Add(hist2);
       }
+      
+      // Apply Scale Factor for MC@NLO
+      if ( legendsSyst.size() > 0 ) {
+          ApplyMCATNLOWeight(hist, legendsSyst.back(), "Down", datasetDown[i]);
+      }
+
       
       setHHStyle(*gStyle);
       //gStyle->SetErrorX(0);
@@ -1712,7 +1793,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     setStyle(*drawhists[i], i);
     if(legends[i] != "Data 2011"){
       if(legends[i] == legends[0]){
-	drawhists[0]->Add(drawhists[i]);
+	    drawhists[0]->Add(drawhists[i]);
       }
 
       if(legends[i] == "t#bar{t} signal"){signalHist = i;}
@@ -1721,7 +1802,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
       }
       if(i > 1){
 	    if(legends[i] != legends[i-1]){
-	      legchange = i;
+	      legchange = i; 
 	      if((legends[i] == DYEntry)&& DYScale[channelType] != 1) leg->AddEntry(drawhists[i], legends[i],"f");
 	      else leg->AddEntry(drawhists[i], legends[i] ,"f");
 	    }else{
@@ -1918,22 +1999,24 @@ void Plotter::PlotXSec(){
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
   cout << "Starting Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-  CalcInclSystematics("JES",0);
-  CalcInclSystematics("RES",1);
-  CalcInclSystematics("PU_",2);
-  CalcInclSystematics("SCALE",3);
-  CalcInclSystematics("MATCH",4);
-  CalcInclSystematics("MASS",5);
-  CalcInclSystematics("DY_",6);
-  CalcInclSystematics("BG_",7);
-  InclFlatSystematics(8);
+  CalcInclSystematics("JES","JESUP", "JESDOWN", 0);
+  CalcInclSystematics("RES", "RESUP", "RESDOWN", 1);
+  CalcInclSystematics("PU_", "PU_UP", "PU_DOWN", 2);
+  CalcInclSystematics("SCALE", "SCALEUP", "SCALEDOWN", 3);
+  CalcInclSystematics("MATCH", "MATCHUP", "MATCHDOWN", 4);
+  CalcInclSystematics("MASS", "MASSUP", "MASSDOWN", 5);
+  CalcInclSystematics("DY_", "DY_UP", "DY_DOWN", 6);
+  CalcInclSystematics("BG_","BG_UP", "BG_DOWN", 7);
+  CalcInclSystematics("HAD", "MCATNLO", "POWHEG", 8);
+  //CalcInclSystematics("MCATNLO",9);
+  InclFlatSystematics(9);
   
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
   cout << "Finished Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
   cout << endl;
   
-  CalcXSec(dataset, InclusiveXsection,InclusiveXsectionStatError, "","");
+  CalcXSec(dataset, InclusiveXsection, InclusiveXsectionStatError, "","");
 
   double syst_square=0;
 
@@ -2164,11 +2247,11 @@ void Plotter::MakeTable(){
       EventFile8<<legends[i]<<": "<<tmp_num8<<endl;
       EventFile9<<legends[i]<<": "<<tmp_num9<<endl;
       if(legends[i]!="Data 2011"){
-	bg_num5+=tmp_num5;
-	bg_num6+=tmp_num6;
-	bg_num7+=tmp_num7;
-	bg_num8+=tmp_num8;
-	bg_num9+=tmp_num9;
+    	bg_num5+=tmp_num5;
+    	bg_num6+=tmp_num6;
+    	bg_num7+=tmp_num7;
+    	bg_num8+=tmp_num8;
+	    bg_num9+=tmp_num9;
       }
       tmp_num5=0;
       tmp_num6=0;
@@ -2193,70 +2276,89 @@ void Plotter::MakeTable(){
 double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift){
   //  double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu, combined] including tau
   //  double BranchingFraction[4]={0.011556, 0.011724, 0.022725, 0.04524};//[ee, mumu, emu, combined] not including tau
+
+  
   double BranchingFraction[4]={0.01166, 0.01166, 0.02332, 0.04666};//[ee, mumu, emu, combined] not including tau
   lumi = 4966;
 
   TH1D *numhists[hists.size()];
-  double numbers[4]={0};//[0]=data, [1]=Signal, [2]Signal(only lumi & PU weights), [3]background (non-ttbar)
+  double numbers[4]={0., 0., 0., 0.};//[0]=data, [1]=Signal, [2]Signal(only lumi & PU weights), [3]background (non-ttbar)
   double TTbarBGnum =0;
 
   for(unsigned int i=0; i<datasetVec.size(); i++){
     TFile *ftemp = TFile::Open(datasetVec[i]);
-    TH1D *hist = (TH1D*)ftemp->Get("step9")->Clone();     
+    TH1D *hist = (TH1D*)ftemp->Get("step9")->Clone();   
+    
+    // Apply Scale Factor for MC@NLO
+    ApplyMCATNLOWeight(hist, Systematic, Shift,  datasetVec[i]); 
+    
+      
     numhists[i]=hist;
     delete ftemp;
   }
-
-
-  for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
-
+ 
+  for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg 
     if(legends[i] == "Data 2011"){
       numbers[0]+=numhists[i]->Integral();
     }
-    else if(legends[i] == "t#bar{t} signal"){
-      TFile *ftemp2 = TFile::Open(datasetVec[i]);
-      TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone();
-      numbers[1]+=NoPUPlot->Integral();
-      delete ftemp2;
+    else if(legends[i] == "t#bar{t} signal"){ 
+      TFile *ftemp2 = TFile::Open(datasetVec[i]);  
+      TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone(); 
+    
+      // Apply Scale Factor for MC@NLO
+      ApplyMCATNLOWeight(NoPUPlot, Systematic, Shift,  datasetVec[i]);  
       
-      TFile *ftemp = TFile::Open(datasetVec[i]);
-      TH1D *GenPlot = (TH1D*)ftemp->Get("GenAll")->Clone();
-      numbers[2]+=GenPlot->Integral();
-      delete ftemp;
-    } 
-    //    else if(legends[i] == "t#bar{t} other"){
-    //TFile *ftemp2 = TFile::Open(datasetVec[i]);
-    // TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone();
-    // TTbarBGnum+=NoPUPlot->Integral();
-    //delete ftemp2;
-    //} 
-    else{      
+      numbers[1]+=NoPUPlot->Integral(); 
+      delete ftemp2;
+       
+      TFile *ftemp = TFile::Open(datasetVec[i]);   
+      //TH1D *GenPlot = (TH1D*)ftemp->Get("VisGenAll")->Clone();  
+      TH1D *GenPlot = (TH1D*)ftemp->Get("GenAll")->Clone();  
+      
+      // Apply Scale Factor for MC@NLO
+      ApplyMCATNLOWeight(GenPlot, Systematic, Shift,  datasetVec[i]); 
+      
+      numbers[2]+=GenPlot->Integral();  
+      delete ftemp; 
+      
+    }  else if(legends[i] == "t#bar{t} other"){
+      //TFile *ftemp2 = TFile::Open(datasetVec[i]);
+      // TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone();
+      // TTbarBGnum+=NoPUPlot->Integral();
+      //delete ftemp2;
+      //}  
+    
+      
+      numbers[3]+=numhists[i]->Integral();
+      
+    } else {      
       if((legends[i] == DYEntry) && channelType!=2){
-	  numhists[i]->Scale(DYScale[channelType]);
+	    numhists[i]->Scale(DYScale[channelType]);
       }
       if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Up"){
-	  numhists[i]->Scale(1.3);
+	    numhists[i]->Scale(1.3);
       }
       if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Down"){
-	  numhists[i]->Scale(0.7);
+	    numhists[i]->Scale(0.7);
       }
       if(Systematic == "BG_" && Shift=="Up" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
-	numhists[i]->Scale(1.3);
+	    numhists[i]->Scale(1.3);
       }
       if(Systematic == "BG_" && Shift=="Down" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
-	numhists[i]->Scale(0.7);
-      }
-      //cout<<legends[i]<<" = "<<numhists[i]->Integral()<<endl;
+	     numhists[i]->Scale(0.7);
+      }  
+      
       numbers[3]+=numhists[i]->Integral();
-    }        
+    }   
   }  
-
+ 
   ////////////////////////////Make output for tables
+  
   double tmp_num = 0;
 
-  double signalFraction = 0;
-
-  signalFraction = numbers[1]/(numbers[1]+TTbarBGnum);
+  double signalFraction = 0; 
+  
+  signalFraction = numbers[1]/(numbers[1]+TTbarBGnum); // is 1 right now, since TTbarBGnum is 0
 
   ofstream EventFile;  
   string EventFilestring = outpathPlots.Data();
@@ -2281,34 +2383,35 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
   }
   EventFile<<"Total background: "<<bg_num<<endl;
   EventFile.close();
-
+ 
   //  double xsec = (signalFraction*(numbers[0]-numbers[3]))/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
   double xsec = ((numbers[0]-numbers[3]))/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
   double xsecstaterror = TMath::Sqrt(numbers[0])/((numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
 
-  if(Systematic == "") {
-    cout<<"numbers[0]: "<<numbers[0]<<endl;
-    cout<<"numbers[1]: "<<numbers[1]<<endl;
-    cout<<"numbers[2]: "<<numbers[2]<<endl;
-    cout<<"numbers[3]: "<<numbers[3]<<endl;
-    cout<<"Global Efficiency: "<<(numbers[1]/numbers[2])<<endl;
+  if(Systematic == "HAD") { 
+    cout<<"numbers[0] (All data)     : "<<numbers[0]<<endl;
+    cout<<"numbers[1] (Rec Level MC) : "<<numbers[1]<<endl;
+    cout<<"numbers[2] (Gen Level MC) : "<<numbers[2]<<endl;
+    cout<<"numbers[3] (Background)   : "<<numbers[3]<<endl;
+    cout<<"Global Efficiency: "<<(numbers[1]/numbers[2])<<endl;      
   }
   if(channelType!=3){
     InclusiveXsectionVec[channelType] = xsec;
     InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
   }else{
-    InclusiveXsectionVec[channelType] =(InclusiveXsectionVec[0]/(InclusiveXsectionStatError[0]*InclusiveXsectionStatErrorVec[0])
-				    +InclusiveXsectionVec[1]/(InclusiveXsectionStatError[1]*InclusiveXsectionStatErrorVec[1])			
-		   		    +InclusiveXsectionVec[2]/(InclusiveXsectionStatError[2]*InclusiveXsectionStatErrorVec[2]))/
-				     (1/(InclusiveXsectionStatErrorVec[0]*InclusiveXsectionStatErrorVec[0])
-				    +(1/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1]))			
-				    +(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2])));			
+    InclusiveXsectionVec[channelType] =( InclusiveXsectionVec[0]/(InclusiveXsectionStatErrorVec[0]*InclusiveXsectionStatErrorVec[0])
+				                        +InclusiveXsectionVec[1]/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1])			
+		   		                        +InclusiveXsectionVec[2]/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]) )/
+				                         ( 1/(InclusiveXsectionStatErrorVec[0]*InclusiveXsectionStatErrorVec[0])
+				                        +  1/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1])			
+				                        +  1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2])   );			
 
-    InclusiveXsectionStatErrorVec[channelType] =1/(TMath::Sqrt((1/(InclusiveXsectionStatErrorVec[0]*InclusiveXsectionStatErrorVec[0]))
-							+(1/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1]))			
-    							+(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]))));			
-
-  }
+    InclusiveXsectionStatErrorVec[channelType] =1/(TMath::Sqrt(
+                                      (1/(InclusiveXsectionStatErrorVec[0]*InclusiveXsectionStatErrorVec[0]))
+							         +(1/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1]))			
+    				                 +(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]))      ));	 
+  } 
+  
   return xsec;
 }
 void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* genReco2d, double DiffXSecVec[4][10], double DiffXSecStatErrorVec[4][10], double GenDiffXSecVec[4][10]){
@@ -2420,7 +2523,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     if ( name.Contains("Mass")    ) theQuantityName = "Mass";
     TString theSpecialPostfix = "";
     if ( specialComment.CompareTo("Standard") != 0 ) {
-    	theSpecialPostfix = specialComment;
+    	//theSpecialPostfix = specialComment;
     } 
     
     
@@ -2576,15 +2679,16 @@ void Plotter::PlotDiffXSec(){
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
     cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    CalcDiffSystematics("JES", 0);
-    CalcDiffSystematics("RES", 1);
-    CalcDiffSystematics("PU_", 2);
-    CalcDiffSystematics("SCALE", 3);
-    CalcDiffSystematics("MASS", 4);
-    CalcDiffSystematics("MATCH", 5);
-    CalcDiffSystematics("DY_", 6);
-    CalcDiffSystematics("BG_", 7); 
-    DiffFlatSystematics(8,bins); 
+    CalcDiffSystematics("JES", "JESUP", "JESDOWN", 0);
+    CalcDiffSystematics("RES", "RESUP", "RESDOWN", 1);
+    CalcDiffSystematics("PU_", "PU_UP", "PU_DOWN", 2);
+    CalcDiffSystematics("SCALE", "SCALEUP", "SCALEDOWN", 3);
+    CalcDiffSystematics("MATCH", "MATCHUP", "MATCHDOWN", 4);
+    CalcDiffSystematics("MASS", "MASSUP", "MASSDOWN", 5);
+    CalcDiffSystematics("DY_", "DY_UP", "DY_DOWN", 6);
+    CalcDiffSystematics("BG_", "BG_UP", "BG_DOWN", 7);  
+    CalcDiffSystematics("HAD", "MCATNLO", "POWHEG", 8); 
+    DiffFlatSystematics(9,bins); 
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
     cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
@@ -3155,27 +3259,27 @@ void Plotter::PlotDiffXSec(){
     TH1F *Kidoth1_Binned=NULL;
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
       if(name.Contains("ToppT")){	//too early to be clever
-	TGraphErrors *KidoTemp = new TGraphErrors("pttopnnloapprox7lhc173m.txt");
-	double kidoscale = 1./KidoTemp->Integral(-1,-1);
-	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
-	  Double_t graphx,graphy;
-	  KidoTemp->GetPoint(points, graphx, graphy);
-	  graphy=graphy*kidoscale;
-	  KidoTemp->SetPoint(points, graphx, graphy);
-	}
-	KidoHist = (TGraphErrors*)KidoTemp->Clone();
-	delete KidoTemp;
+	    TGraphErrors *KidoTemp = new TGraphErrors("pttopnnloapprox7lhc173m.txt");
+	    double kidoscale = 1./KidoTemp->Integral(-1,-1);
+    	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
+	      Double_t graphx,graphy;
+	      KidoTemp->GetPoint(points, graphx, graphy);
+	      graphy=graphy*kidoscale;
+	      KidoTemp->SetPoint(points, graphx, graphy);
+    	}
+    	KidoHist = (TGraphErrors*)KidoTemp->Clone();
+    	delete KidoTemp;
       }else{
-	TGraphErrors *KidoTemp = new TGraphErrors("ytopnnloapprox7lhc173m.txt");
-	double kidoscale = 1./KidoTemp->Integral(-1,-1);
-	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
-	  Double_t graphx,graphy;
-	  KidoTemp->GetPoint(points, graphx, graphy);
-	  graphy=graphy*kidoscale;
-	  KidoTemp->SetPoint(points, graphx, graphy);
-	}
-	KidoHist = (TGraphErrors*)KidoTemp->Clone();
-      delete KidoTemp;
+    	TGraphErrors *KidoTemp = new TGraphErrors("ytopnnloapprox7lhc173m.txt");
+    	double kidoscale = 1./KidoTemp->Integral(-1,-1);
+    	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
+	      Double_t graphx,graphy;
+	      KidoTemp->GetPoint(points, graphx, graphy);
+	      graphy=graphy*kidoscale;
+	      KidoTemp->SetPoint(points, graphx, graphy);
+    	}
+    	KidoHist = (TGraphErrors*)KidoTemp->Clone();
+        delete KidoTemp;
       }
       Kidoth1 = ConvertGraphToHisto(KidoHist);
       Kidoth1_Binned = reBinTH1FIrregularNewBinning(Kidoth1, "newKido", true);
@@ -3256,7 +3360,9 @@ void Plotter::PlotDiffXSec(){
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
     if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
     if (powheghist->GetEntries())  leg2.AddEntry(powheghistBinned,       "POWHEG",  "l");        
-    if(name.Contains("ToppT") || name.Contains("TopRapidity"))  leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");        
+    if (name.Contains("ToppT") || name.Contains("TopRapidity"))  {
+    	leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");
+    }        
     //if (MCFMHist->GetEntries())  leg2.AddEntry(MCFMHist,       "MCFM",  "p");        
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
@@ -3554,7 +3660,16 @@ TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotn
   //                       from xaxis.min to xaxis.max
   //  "rescale":           rescale the rebinned histogramme
   //                       (applicable for cross-section e.g.) 
-	
+  cout << endl;
+  cout << endl;
+  cout << "asdfasdfasdfasdfasdf hallo david " << plotname << " " << rescale << endl;
+  cout << "histoOldBinning = ";
+  for ( int i = 0 ; i < histoOldBinning->GetXaxis()->GetNbins() + 1; i++ ) cout << " " << histoOldBinning->GetXaxis()->GetBinLowEdge(i+1);
+  cout << endl;
+  cout << endl;
+  cout << endl;
+  
+   
   unsigned int vecIndex=0;
 
   // fill vector into array to use appropriate constructor of TH1-classes
