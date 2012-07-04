@@ -66,8 +66,8 @@ void Analysis::Begin(TTree * /*tree*/)
   h_RecoTTBarMass = new TH1D("RecoTTBarMass","Mass of TTbar System (HYP)",1200,0,1200);
   h_RecoTTBarRapidity = new TH1D("RecoTTBarRapidity","Rapidity of TTbar System (HYP)",100,-5,5);
   h_RecoTTBarpT = new TH1D("RecoTTBarpT","pT of TTbar System (HYP)",1200,0,1200);
-  h_RecoToppT = new TH1D("RecoToppT","pT of Top (HYP)",240,0,1200);
-  h_RecoAntiToppT = new TH1D("RecoAntiToppT","pT of AntiTop (HYP)",240,0,1200);
+  h_RecoToppT = new TH1D("RecoToppT","pT of Top (HYP)",1200,0,1200);
+  h_RecoAntiToppT = new TH1D("RecoAntiToppT","pT of AntiTop (HYP)",1200,0,1200);
   h_RecoTopRapidity = new TH1D("RecoTopRapidity","Rapidity of Top (HYP)",100,-5,5);
   h_RecoAntiTopRapidity = new TH1D("RecoAntiTopRapidity","Rapidity of AntiTop (HYP)",100,-5,5);
 
@@ -115,12 +115,12 @@ void Analysis::Begin(TTree * /*tree*/)
   h_AntiLeptonpT_diLep = new TH1D("AntiLeptonpT_diLep","Lepton pT (after dilepton cut)",80,0,400);
   h_AntiLeptonEta_diLep = new TH1D("AntiLeptonEta_diLep","Lepton Eta (after dilepton cut)",100,-5,5);
 
-  h_HypToppT = new TH1D("HypToppT","Top pT",80,0,400);
+  h_HypToppT = new TH1D("HypToppT","Top pT",400,0,400);
   h_HypTopEta = new TH1D("HypTopEta","Top pT",100,-5,5);
   h_HypTopMass = new TH1D("HypTopMass","Top Mass",80,0,400);
   h_HypTopRapidity = new TH1D("HypTopRapidity","Top Rapidity",100,-5,5);
 
-  h_HypAntiToppT = new TH1D("HypAntiToppT","AntiTop pT",80,0,400);
+  h_HypAntiToppT = new TH1D("HypAntiToppT","AntiTop pT",400,0,400);
   h_HypAntiTopEta = new TH1D("HypAntiTopEta","AntiTop pT",100,-5,5);
   h_HypAntiTopMass = new TH1D("HypAntiTopMass","AntiTop Mass",80,0,400);
   h_HypAntiTopRapidity = new TH1D("HypAntiTopRapidity","Top Rapidity",100,-5,5);
@@ -139,10 +139,10 @@ void Analysis::Begin(TTree * /*tree*/)
   h_HypAntiBJetEta = new TH1D("HypAntiBJetEta","AntiB Hypothesis Eta",100,-5,5);
   h_HypAntiBJetRapidity = new TH1D("HypAntiBJetRapidity","AntiB Hypothesis Eta",100,-5,5);
 
-  h_VisGenToppT = new TH1D("VisGenToppT","Top pT (VisGen)",80,0,400);
+  h_VisGenToppT = new TH1D("VisGenToppT","Top pT (VisGen)",400,0,400);
   h_VisGenTopEta = new TH1D("VisGenTopEta","Top Eta (VisGen)",100,-5,5);
 
-  h_VisGenAntiToppT = new TH1D("VisGenAntiToppT","AntiTop pT (VisGen)",80,0,400);
+  h_VisGenAntiToppT = new TH1D("VisGenAntiToppT","AntiTop pT (VisGen)",400,0,400);
   h_VisGenAntiTopEta = new TH1D("VisGenAntiTopEta","AntiTop pT (VisGen)",100,-5,5);
 
   h_VisGenLeptonpT = new TH1D("VisGenLeptonpT","Lepton VisGenothesis pT",80,0,400);
@@ -212,8 +212,8 @@ void Analysis::Begin(TTree * /*tree*/)
 
   h_GenRecoTopRapidity = new TH2D("GenRecoTopRapidity", "Gen/Reco Matching", 100,-5,5,100,-5,5);
   h_GenRecoAntiTopRapidity = new TH2D("GenRecoAntiTopRapidity", "Gen/Reco Matching", 100,-5,5,100,-5,5);
-  h_GenRecoToppT = new TH2D("GenRecoToppT", "Gen/Reco Matching", 80,0,400,80,0,400);
-  h_GenRecoAntiToppT = new TH2D("GenRecoAntiToppT", "Gen/Reco Matching", 80,0,400,80,0,400);
+  h_GenRecoToppT = new TH2D("GenRecoToppT", "Gen/Reco Matching", 400,0,400,400,0,400);
+  h_GenRecoAntiToppT = new TH2D("GenRecoAntiToppT", "Gen/Reco Matching", 400,0,400,400,0,400);
 
   h_GenRecoTTBarRapidity = new TH2D("GenRecoTTBarRapidity","Rapidity of TTbar System (HYP)",100,-5,5,100,-5,5);
   h_GenRecoTTBarpT = new TH2D("GenRecoTTBarpT","pT of TTbar System (HYP)",500,0,500,500,0,500);
