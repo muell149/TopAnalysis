@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.24 2012/05/18 14:13:10 maldayam Exp $
+// $Id: NTupleWriter.cc,v 1.25 2012/06/18 14:25:36 tdorland Exp $
 //
 //
 
@@ -94,6 +94,8 @@ private:
   void clearVariables();
   int getTriggerBits ( const edm::Event& iEvent, const edm::Handle< edm::TriggerResults >& trigResults );
   int getTriggerBits (const std::vector< std::string > &trigName );
+  int getJetType ( const pat::Jet *jet );
+
   void AssignLeptonAndTau ( const reco::GenParticle* lepton, LV &GenLepton, int &pdgid, LV &GenTau );
   bool isTau( const reco::GenParticle* lepton);
   const reco::GenParticle* getTauDaughter(const reco::GenParticle* tau);
@@ -178,6 +180,7 @@ private:
   std::vector<LV> VallGenJets;
   std::vector<LV> VgenJet;
   std::vector<LV> Vjet;
+  std::vector<int> VjetType;
   std::vector<double> VjetBTagTCHE;
   std::vector<double> VjetBTagTCHP;
   std::vector<double> VjetBTagJetProbability;
@@ -348,15 +351,15 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
   //##################### MC weights for MCatNLO ###############
 
-   edm::Handle<GenEventInfoProduct> evt_info;
-   iEvent.getByType(evt_info);
-   weightMCatNLO = evt_info->weight();
+  edm::Handle<GenEventInfoProduct> evt_info;
+  iEvent.getByType(evt_info);
+  weightMCatNLO = evt_info->weight();
 
-   //#############################################################
+  //#############################################################
 
-   weightPU = getPUEventWeight( iEvent, weightPU_ ); //#######
+  weightPU = getPUEventWeight( iEvent, weightPU_ ); //#######
 
-   //std::cout << "[NTupleWriter::analyze] weightPU = " << getPUEventWeight(iEvent, weightPU_) << " weightMC = " << weightMC << " weightPU*weightMC = " << weightPU << std::endl; //#######
+  //std::cout << "[NTupleWriter::analyze] weightPU = " << getPUEventWeight(iEvent, weightPU_) << " weightMC = " << weightMC << " weightPU*weightMC = " << weightPU << std::endl; //#######
 
   //weightPU3D = getPUEventWeight( iEvent, weightPU3D_);
   weightPU_Up = getPUEventWeight( iEvent, weightPU_Up_ );
@@ -547,7 +550,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
           int triggerResult = 0;
 
-	  //          std::cout << "processing muon, is lepton object: " << Vlep.size() << std::endl;
+          //          std::cout << "processing muon, is lepton object: " << Vlep.size() << std::endl;
 
           pat::TriggerObjectStandAloneCollection triggers = amuon->triggerObjectMatches();
           if (triggers.size() > 0) triggerResult = triggerMap_["general"];
@@ -555,7 +558,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
             triggerResult |= getTriggerBits ( triggers[i].pathNames() );
           VlepTrigger.push_back(triggerResult);
 
-	  //          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
+          //          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
           amuon++;
 
 
@@ -579,7 +582,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
           int triggerResult = 0;
 
-	  //          std::cout << "processing electron, is lepton object: " << Vlep.size() << std::endl;
+          //          std::cout << "processing electron, is lepton object: " << Vlep.size() << std::endl;
 
           pat::TriggerObjectStandAloneCollection triggers = anelectron->triggerObjectMatches();
           if (triggers.size() > 0) triggerResult = triggerMap_["general"];
@@ -587,7 +590,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
             triggerResult |= getTriggerBits ( triggers[i].pathNames() );
           VlepTrigger.push_back(triggerResult);
 
-	  //          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
+          //          std::cout << "trigger result: " << std::hex << triggerResult << std::dec << std::endl;
 
           anelectron++;
 
@@ -605,6 +608,7 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
       if (! iEvent.isRealData()) {
         if (ajet->genJet()) {
           VgenJet.push_back(ajet->genJet()->p4());
+          VjetType.push_back( getJetType( &(*ajet) ) ); // I hate this &(* ... ) CMSSW design
         } else {
           VgenJet.push_back(dummy);
         }
@@ -663,6 +667,15 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
 
 
   Ntuple->Fill();
+
+}
+
+
+int NTupleWriter::getJetType( const pat::Jet *jet ) {
+
+  if      (jet->partonFlavour() == 5 || jet->partonFlavour() == -5) return 2;
+  else if (jet->partonFlavour() == 4 || jet->partonFlavour() == -4) return 1;
+  else return 0;
 
 }
 
@@ -744,6 +757,7 @@ NTupleWriter::beginJob()
   Ntuple->Branch ( "jetBTagCSV", &VjetBTagCSV);
   Ntuple->Branch ( "jetBTagCSVMVA", &VjetBTagCSVMVA);
   Ntuple->Branch ( "allGenJets", &VallGenJets);
+  Ntuple->Branch ( "jetType",&VjetType );
   Ntuple->Branch ( "genJet", &VgenJet);
 
   /////////////met properties///////////
@@ -891,6 +905,7 @@ void NTupleWriter::clearVariables()
 
   /////////jets///////////
   Vjet.clear();
+  VjetType.clear();
   VjetBTagTCHE.clear();
   VjetBTagTCHP.clear();
   VjetBTagSSVHE.clear();
