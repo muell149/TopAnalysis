@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.25 2012/06/18 14:25:36 tdorland Exp $
+// $Id: NTupleWriter.cc,v 1.26 2012/07/05 11:39:31 blutz Exp $
 //
 //
 
@@ -606,9 +606,9 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
     {
       Vjet.push_back ( ajet->p4() );
       if (! iEvent.isRealData()) {
+        VjetType.push_back( getJetType( &(*ajet) ) ); // I hate this &(* ... ) CMSSW design
         if (ajet->genJet()) {
           VgenJet.push_back(ajet->genJet()->p4());
-          VjetType.push_back( getJetType( &(*ajet) ) ); // I hate this &(* ... ) CMSSW design
         } else {
           VgenJet.push_back(dummy);
         }
