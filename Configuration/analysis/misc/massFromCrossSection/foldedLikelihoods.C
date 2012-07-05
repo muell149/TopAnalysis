@@ -1,7 +1,7 @@
 //
 // 1. initialize an up-to-date ROOT version, e.g. with: ini ROOT532
 //    (there are issues when drawing graphs with errors in old ROOT versions)
-// 2. compile like: g++ -Wall `root-config --cflags --libs` -lRooFit -o foldedLikelihoods foldedLikelihoods.C
+// 2. compile like: g++ -Wall -Wextra -O2 `root-config --cflags --libs` -lRooFit -o foldedLikelihoods foldedLikelihoods.C
 // 3. execute with: foldedLikelihoods [options]
 //    where options could be: 'pole'/'MSbar' and 'MSTW'/'HERA' or 'all'
 //
@@ -9,13 +9,16 @@
 #include "Riostream.h"
 
 #include "TAxis.h"
+#include "TBox.h"
 #include "TCanvas.h"
 #include "TF1.h"
+#include "TF2.h"
 #include "TGraphErrors.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1.h"
 #include "TLatex.h"
 #include "TLegend.h"
+#include "TLine.h"
 #include "TMath.h"
 #include "TROOT.h"
 #include "TSystem.h"
@@ -31,6 +34,7 @@
 #include <iostream>
 
 #include "tdrstyle.C"
+#include "foldedLikelihoods_helpers.h"
 #include "foldedLikelihoods_classes.h"
 
 double alpha_s(const double Q)
@@ -89,7 +93,7 @@ TGraph* getRunningAlphaGraph()
   TGraph* graph = new TGraph(n, mass, alpha);
   graph->GetXaxis()->SetTitle("Q (GeV)");
   graph->GetYaxis()->SetTitle("#alpha_{S}");
-  graph->SetTitle("At three-loop level and with N(flavors)=5, using 2009 world average for #alpha_{s}(M_{Z})");
+  graph->SetTitle("At three-loop level and with N(flavors)=5, using 2009 world average for #alpha_{S}(M_{Z})");
   graph->GetYaxis()->CenterTitle();
   return graph;
 }
@@ -323,7 +327,7 @@ void drawConvolution(const PredXSec& predXSec, RooRealVar& xsec, RooRealVar& mas
 void plot2DimProb(const PredXSec& predXSec, TCanvas* canvas, const TString title,
 		  const TString printNameBase, const TString epsName)
 {
-  TH1* h2 = predXSec.prob.createHistogram("xsec,mass",100,100);
+  TH1* h2 = predXSec.prob.createHistogram("mass,alpha,xsec",50,30,90);
   h2->Draw("box");
   TLatex text(0.,0.,title);
   text.SetNDC();
@@ -336,52 +340,6 @@ void plot2DimProb(const PredXSec& predXSec, TCanvas* canvas, const TString title
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsName);
   delete h2;
-}
-
-void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr)
-{
-  std::cout << "============================================================" << std::endl;
-  std::cout << "Calculating uncertainties for "
-	    << f1->GetName() << " via integration around maximum..." << std::endl;
-  const double precision = 1E-08;
-  double* params = 0;
-  const double max = f1->GetMaximumX();
-  const double fullIntegral = f1->Integral(140, 200, params, precision);
-  std::cout << "Maximum: " << max << " GeV" << std::endl;
-  std::cout << "Integral from 140 to 200 GeV: " << fullIntegral
-	    << " (deviation from unity will be used to rescale integrals calculated in the following)" << std::endl;
-  if(fullIntegral < 0.97 || fullIntegral > 1.03) {
-    std::cout << "Deviation from unity larger than expected!" << std::endl;
-    abort();
-  }
-  double sigma = 0;
-  double stepSize = 1;
-  std::cout << std::left << std::setw(8) << "Delta:" << " " << "Integral:" << std::endl;
-  while( 1 ) {
-    sigma += stepSize;
-    const double integral = f1->Integral(max-sigma, max+sigma, params, precision) / fullIntegral;
-    //  std::cout << max-sigma << " " << max+sigma << " " << integral << std::endl;
-    if(integral > 0.683) {
-      sigma -= stepSize;
-      std::cout << std::left << std::setw(8) << sigma << " " << integral << std::endl;
-      stepSize *= 0.1;
-      if(stepSize < 0.01)
-	break;
-    }
-  }
-  std::cout << "Symmetric uncertainty (1 sigma): " << sigma << std::endl;
-  std::cout << "Function value at left / right edge: " << f1->Eval(max-sigma) << " / " << f1->Eval(max+sigma) << std::endl;
-  lowErr = sigma;
-  higErr = sigma;
-  while( f1->Eval(max-lowErr) < f1->Eval(max+higErr) ) {
-    lowErr -= stepSize;
-    higErr += stepSize;
-  }
-  std::cout << "Asymmetric uncertainties: " << "+" << higErr << ", -" << lowErr << std::endl;
-  std::cout << "Function value at left / right edge: " << f1->Eval(max-lowErr) << " / " << f1->Eval(max+higErr) << std::endl;
-  std::cout << "Integral: " << f1->Integral(max-lowErr, max+higErr, params, precision) << std::endl;
-  std::cout << "============================================================" << std::endl;
-  return;
 }
 
 void plotProjectedPDF(RooAbsPdf* pdf, RooPlot* frame, const int color, const int fillStyle,
@@ -412,7 +370,7 @@ TLatex* cmsTxt(const bool full2011dilep)
 
 int foldedLikelihoods(const bool pole, const bool heraPDF)
 {
-  const bool useAlphaUnc = true;
+  const bool useAlphaUnc = false;
   const bool full2011dilep = true;
 
   setTDRStyle();
@@ -421,6 +379,9 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
 
   RooAbsReal::defaultIntegratorConfig()->method2D().setLabel("RooSegmentedIntegrator2D");
   RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooIntegrator1D").setCatLabel("sumRule", "Midpoint");
+  //  RooAbsReal::defaultIntegratorConfig()->methodND().setLabel("RooBinIntegrator");
+  RooAbsReal::defaultIntegratorConfig()->methodND().setLabel("RooMCIntegrator");
+  //  RooAbsReal::defaultIntegratorConfig()->printMultiline(std::cout, 1, true);
 
   gSystem->mkdir("figs");
 
@@ -506,6 +467,10 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   if(!pole)
     mass.SetTitle("m_{t}^{#bar{MS}}");
 
+  RooRealVar alpha("alpha", "#alpha_{S}(M_{Z})", 0.10, 0.13);
+  alpha.setVal(0.117);
+  //  alpha.setConstant(kTRUE);
+
   RooRealVar xsec("xsec" , "#sigma_{t #bar{t}}", 0., 900., "pb");
 
   mass.setRange("mass_fullRange", 140., 190.);
@@ -560,9 +525,9 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1", RooArgSet(measXSecMassDepRel,measXSec));
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecErr);
 
-  PredXSec kidPredXSec("kidPredXSec", xsec, mass, kid->GetFunction("f1"), kid_funcs);
-  PredXSec mocPredXSec("mocPredXSec", xsec, mass, moc->GetFunction("f1"), moc_funcs);
-  PredXSec ahrPredXSec("ahrPredXSec", xsec, mass, ahr->GetFunction("f1"), ahr_funcs);
+  PredXSec kidPredXSec("kidPredXSec", xsec, mass, alpha, kid->GetFunction("f1"), kid_funcs);
+  PredXSec mocPredXSec("mocPredXSec", xsec, mass, alpha, moc->GetFunction("f1"), moc_funcs);
+  PredXSec ahrPredXSec("ahrPredXSec", xsec, mass, alpha, ahr->GetFunction("f1"), ahr_funcs);
 
   if(pole && !heraPDF) {
     drawConvolution(kidPredXSec, xsec, mass, kid->GetFunction("f1"), title[1], canvas, printNameBase,
@@ -591,18 +556,149 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   frame->Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsString("xsec_vs_mass", pole, heraPDF));
-  
+
+  RooPlot* frame_alpha = alpha.frame();
+  mass.setVal(172.5);
+  mocPredXSec.xsec.plotOn(frame_alpha, RooFit::LineColor(colorMoc));
+  measXSecMassDep.plotOn(frame_alpha, RooFit::LineColor(colorDil));
+  frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
+  frame_alpha->Draw();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(epsString("xsec_vs_alpha", pole, heraPDF));
+
+  RooRealVar alpha2009_mean("alpha2009_mean", "alpha2009_mean", 0.1184);
+  RooRealVar alpha2009_unc ("alpha2009_unc" , "alpha2009_unc" , 0.0007);
+
+  RooRealVar alphaMSTW_mean("alphaMSTW_mean", "alphaMSTW_mean", 0.1171); //Eur.Phys.J.C64:653-680,2009
+  RooRealVar alphaMSTW_unc ("alphaMSTW_unc" , "alphaMSTW_unc" , 0.0014); //Eur.Phys.J.C64:653-680,2009
+
+  RooRealVar alphaHERA_mean("alphaHERA_mean", "alphaHERA_mean", 0.1176);
+  RooRealVar alphaHERA_unc ("alphaHERA_unc" , "alphaHERA_unc" , 0.0020);
+
+  RooGaussian alphaMSTW_prob("alphaMSTW_prob", "alphaMSTW_prob", alpha, alphaMSTW_mean, alphaMSTW_unc);
+
+  RooRealVar mass_mean("mass_mean", "mass_mean", 173.2); // Tevatron July 2012
+  RooRealVar mass_unc ("mass_unc" , "mass_unc" , 1.4); // Tevatron July 2012 plus 1 GeV for m(pole)/m(MC)?
+  RooGaussian massProb("massProb", "massProb", mass, mass_mean, mass_unc);
+
   RooProdPdf kidProdPDF("kidProdPDF", "kidProdPDF", RooArgList(measXSecPDF, kidPredXSec.prob));
-  RooProdPdf mocProdPDF("mocProdPDF", "mocProdPDF", RooArgList(measXSecPDF, mocPredXSec.prob));
+  RooProdPdf mocProdPDF("mocProdPDF", "mocProdPDF", RooArgList(measXSecPDF, mocPredXSec.prob, massProb));
   RooProdPdf ahrProdPDF("ahrProdPDF", "ahrProdPDF", RooArgList(measXSecPDF, ahrPredXSec.prob));
 
   RooAbsPdf* kidProjectedPDF = kidProdPDF.createProjection(xsec);
   RooAbsPdf* mocProjectedPDF = mocProdPDF.createProjection(xsec);
   RooAbsPdf* ahrProjectedPDF = ahrProdPDF.createProjection(xsec);
 
-  TF1* kidTF = kidProjectedPDF->asTF(mass, RooArgSet(), RooArgSet(mass));
-  TF1* mocTF = mocProjectedPDF->asTF(mass, RooArgSet(), RooArgSet(mass));
-  TF1* ahrTF = ahrProjectedPDF->asTF(mass, RooArgSet(), RooArgSet(mass));
+  FinalLikeliResults mocResultAlpha("mocResultAlpha",
+				    xsec, mass, alpha, RooArgList(measXSecPDF, mocPredXSec.prob, massProb));
+
+  FinalLikeliResults mocResultMass("mocResultMass",
+				   xsec, mass, alpha, RooArgList(measXSecPDF, mocPredXSec.prob, alphaMSTW_prob));
+
+  TF1* kidTF = 0;//kidProjectedPDF->asTF(RooArgList(mass, alpha), RooArgSet(), RooArgSet(mass, alpha));
+  TF2* mocTF = (TF2*) mocProjectedPDF->asTF(RooArgList(alpha, mass), RooArgList(), RooArgSet(alpha, mass));
+  TF1* ahrTF = 0;//ahrProjectedPDF->asTF(RooArgList(mass, alpha), RooArgSet(), RooArgSet(mass, alpha));
+
+//  frame = mass.frame(RooFit::Range(165., 180.));
+//  mocProjectedPDF->plotOn(frame);
+//  frame->Draw();
+//  mocTF_mass->Draw("L same");
+//  canvas->Print(printNameBase+".ps");
+//
+//  frame = alpha.frame(RooFit::Range(.11, .12));
+//  mocProjectedPDF->plotOn(frame);
+//  frame->Draw();
+//  mocTF_mass->Draw("L same");
+//  canvas->Print(printNameBase+".ps");
+//
+//  gStyle->SetPalette(1);
+//  mocTF->SetLineColor(kGray);
+//  mocTF->Draw("surf7");
+//  mocTF->Draw("cont1 same");
+//  mocTF->GetZaxis()->SetRangeUser(0.1, 100.);
+//  canvas->Print(printNameBase+".ps");
+//
+//  mocTF->GetYaxis()->SetRangeUser(170., 180.);
+//  mocTF->GetXaxis()->SetRangeUser(0.114, 0.12);
+//  mocTF->Draw("cont1");
+
+  gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
+
+  const double alphaAxisMin = 0.11;
+  const double alphaAxisMax = 0.13;
+
+  const double massAxisMin = 170.;
+  const double massAxisMax = 180.;
+
+  mocResultAlpha.point.GetXaxis()->SetLimits(alphaAxisMin, alphaAxisMax);
+  mocResultAlpha.point.GetYaxis()->SetRangeUser(massAxisMin , massAxisMax);
+  mocResultAlpha.point.SetPointError(0, mocResultAlpha.point.GetErrorX(0), 0);
+
+  mocResultMass.point.GetXaxis()->SetLimits(alphaAxisMin, alphaAxisMax);
+  mocResultMass.point.GetYaxis()->SetRangeUser(massAxisMin, massAxisMax);
+  mocResultMass.point.SetPointError(0, 0, mocResultMass.point.GetErrorY(0));
+
+  TBox boxAlpha2009(alpha2009_mean.getVal()-alpha2009_unc.getVal(), massAxisMin,
+		    alpha2009_mean.getVal()+alpha2009_unc.getVal(), massAxisMax);
+  boxAlpha2009.SetFillColor(kGreen-9);
+  TLine lineAlpha2009(alpha2009_mean.getVal(), massAxisMin,
+		      alpha2009_mean.getVal(), massAxisMax);
+  lineAlpha2009.SetLineColor(kGray);
+
+  TBox boxAlphaMSTW(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), massAxisMin,
+		    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), massAxisMax);
+  boxAlphaMSTW.SetFillColor(kGreen-9);
+  TLine lineAlphaMSTW(alphaMSTW_mean.getVal(), massAxisMin,
+		      alphaMSTW_mean.getVal(), massAxisMax);
+  lineAlphaMSTW.SetLineColor(kGray);
+
+  TBox boxMass(alphaAxisMin, mass_mean.getVal()-mass_unc.getVal(),
+	       alphaAxisMax, mass_mean.getVal()+mass_unc.getVal());
+  boxMass.SetFillColor(kMagenta-9);
+  TLine lineMass(alphaAxisMin, mass_mean.getVal(),
+		 alphaAxisMax, mass_mean.getVal());
+  lineMass.SetLineColor(kGray);
+
+  mocResultAlpha.point.Draw("AP");
+  boxMass.Draw();
+  lineMass.Draw();
+  boxAlpha2009.Draw();
+  lineAlpha2009.Draw();
+  boxAlphaMSTW.Draw();
+  lineAlphaMSTW.Draw();
+  gPad->RedrawAxis();
+  mocResultAlpha.point.Draw("P");
+  mocResultAlpha.ellipse.Draw("L");
+  canvas->Print(printNameBase+".ps");
+
+  mocResultMass.point.Draw("AP");
+  boxMass.Draw();
+  lineMass.Draw();
+  boxAlpha2009.Draw();
+  lineAlpha2009.Draw();
+  boxAlphaMSTW.Draw();
+  lineAlphaMSTW.Draw();
+  gPad->RedrawAxis();
+  mocResultMass.point.Draw("P");
+  mocResultMass.ellipse.Draw("L");
+  canvas->Print(printNameBase+".ps");
+
+  mocResultAlpha.point.Draw("AP");
+  boxMass.Draw();
+  lineMass.Draw();
+  boxAlphaMSTW.Draw();
+  lineAlphaMSTW.Draw();
+  gPad->RedrawAxis();
+  mocResultAlpha.point.Draw("P");
+  mocResultAlpha.ellipse.Draw("L");
+  mocResultMass.point.Draw("P");
+  mocResultMass.ellipse.Draw("L");
+  canvas->Print(printNameBase+".ps");
+
+  //  delete mocTF;
+
+  canvas->Print(printNameBase+".ps]");
+  return 0;
 
   const double kidMax = kidTF->GetMaximumX();
   const double mocMax = mocTF->GetMaximumX();
@@ -625,9 +721,9 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   double ahrLowErr, ahrHigErr;
 
   if(pole && !heraPDF)
-    getUncertaintiesFromIntegral(kidTF, kidLowErr, kidHigErr);
-  getUncertaintiesFromIntegral(ahrTF, ahrLowErr, ahrHigErr);
-  getUncertaintiesFromIntegral(mocTF, mocLowErr, mocHigErr);
+    getUncertaintiesFromIntegral(kidTF, kidLowErr, kidHigErr, 140., 200., 1., 0.01);
+  getUncertaintiesFromIntegral(ahrTF, ahrLowErr, ahrHigErr  , 140., 200., 1., 0.01);
+  getUncertaintiesFromIntegral(mocTF, mocLowErr, mocHigErr  , 140., 200., 1., 0.01);
 
   if(full2011dilep)
     frame = mass.frame(RooFit::Range(160., 190.));
