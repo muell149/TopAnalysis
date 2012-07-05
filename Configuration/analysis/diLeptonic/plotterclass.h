@@ -1188,7 +1188,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
     
     
     
-    //Symetrize Eta and Rapidity distributions (Ivan)
+    //Symetrize Eta and Rapidity distributions
     if (theQuantityName == "Eta" || theQuantityName == "Rapidity" ){
         for(int j=0; j<(int) symmSysErrors->GetNbinsX(); ++j){
             cout<<"In bin "<<j<<" binCenter "<<symmSysErrors->GetBinCenter(j+1)<<" Content "<<symmSysErrors->GetBinContent(j+1)<<endl;
@@ -1870,8 +1870,11 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     Double_t binerr2 = binc*binc*lumierr*lumierr;
     Double_t topunc = 0; // uncertainty on top xsec
     
-    double topxsec = 161.6; //157.5
-    double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
+//     double topxsec = 161.6; //157.5
+//     double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
+    //Kidonakis
+    double topxsec = 165.6;
+    double topxsecErr2 = 2.2*2.2 + 4.4*4.4 + 5.5*5.5; //topxsecErr2 = lumiErr*lumiErr + topxsecScaleErr*topxsecScaleErr + topxsecPDFErr*topxsecPDFErr
 
     double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
     topunc += drawhists[signalHist]->GetBinContent(i)*topRelUnc;
@@ -2008,7 +2011,6 @@ void Plotter::PlotXSec(){
   CalcInclSystematics("DY_", "DY_UP", "DY_DOWN", 6);
   CalcInclSystematics("BG_","BG_UP", "BG_DOWN", 7);
   CalcInclSystematics("HAD", "MCATNLO", "POWHEG", 8);
-  //CalcInclSystematics("MCATNLO",9);
   InclFlatSystematics(9);
   
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
@@ -2411,7 +2413,6 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 							         +(1/(InclusiveXsectionStatErrorVec[1]*InclusiveXsectionStatErrorVec[1]))			
     				                 +(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]))      ));	 
   } 
-  
   return xsec;
 }
 void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* genReco2d, double DiffXSecVec[4][10], double DiffXSecStatErrorVec[4][10], double GenDiffXSecVec[4][10]){
@@ -3033,14 +3034,14 @@ void Plotter::PlotDiffXSec(){
     FillOrder[11] = 2;   //PU
     FillOrder[10] = 6;   //DY
     FillOrder[9] = 7;   //BG
-    FillOrder[8] = 8;   //Trigg
-    FillOrder[7] = 9;   //Lep
-    FillOrder[6] = 10;  //Btag
-    FillOrder[5] = 11;  //KinFit
+    FillOrder[8] = 9;   //Trigg
+    FillOrder[7] = 10;   //Lep
+    FillOrder[6] = 11;  //Btag
+    FillOrder[5] = 12;  //KinFit
     FillOrder[4] = 3;   //SCALE
-    FillOrder[3] = 4;  //MASS
-    FillOrder[2] = 5;  //MATCH
-    FillOrder[1] = 12; //HAD
+    FillOrder[3] = 5;  //MASS
+    FillOrder[2] = 4;  //MATCH
+    FillOrder[1] = 8; //HAD
     FillOrder[0] = 13; //PDF
 
     ofstream ResultsSysFilestring; 
@@ -3086,7 +3087,7 @@ void Plotter::PlotDiffXSec(){
       }
       AvgSyst=TotalSyst/(bins-2);
       SqAvgSys=TMath::Sqrt(TotalSqSyst/(bins-2));
-      fprintf(systfile, "Lin.Avg.\(%)= %.5f  Quad.Avg\(%)=%.5f\n", 100*AvgSyst, 100*SqAvgSys);
+      fprintf(systfile, "Lin.Avg.(%)= %.5f  Quad.Avg.(%)=%.5f\n", 100*AvgSyst, 100*SqAvgSys);
       systtemp->SetFillColor(15-systs);
       SystHists->Add((TH1D*)systtemp->Clone());
       leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
