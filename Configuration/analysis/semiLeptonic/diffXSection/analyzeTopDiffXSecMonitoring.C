@@ -601,8 +601,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   // =======================================================
   if(decayChannel=="combined"){
     // loop samples
-    for(unsigned int sample=kSig; sample<=kData; ++sample){
-      if(verbose>1) std::cout << sampleLabel(sample) << std::endl;
+      for(unsigned int sample=kSig; sample<=kData; ++sample){
+	  if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << std::endl;
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	if(verbose>1) std::cout << plotList_[plot] << " : " ;
@@ -785,18 +785,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 
   // Data:
   TString lumilabel = Form("%2.1f fb^{-1}",luminosity/1000);
-  leg ->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], decayChannel=="combined" ? sampleLabel(kData) : sampleLabel(kData,decayChannel),"P");
-  leg0->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], decayChannel=="combined" ? sampleLabel(kData) : sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
-  leg1->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], decayChannel=="combined" ? sampleLabel(kData) : sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+  leg ->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], sampleLabel(kData,decayChannel),"P");
+  leg0->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+  leg1->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
  
   // MC samples (add only if sample exists in at least one plot, then quit plot-loop to avoid duplication of entries)
   for(unsigned int sample=kSig; sample<kData; ++sample){
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size()-1; ++plot){  // <plotList_.size()-1, because last entry is for data (see above)
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
-	leg ->AddEntry(histo_[plotList_[plot]][sample], decayChannel=="combined" ? sampleLabel(sample) : sampleLabel(sample,decayChannel), "F");
-	leg0->AddEntry(histo_[plotList_[plot]][sample], decayChannel=="combined" ? sampleLabel(sample) : sampleLabel(sample,decayChannel), "F");
-	leg1->AddEntry(histo_[plotList_[plot]][sample], decayChannel=="combined" ? sampleLabel(sample) : sampleLabel(sample,decayChannel), "F");
+	leg ->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
 	break;
       }
     }

@@ -870,7 +870,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	  lepEtaExistsInAnySample=true;
 	}
 	if(verbose>1){
-	  std::cout << sampleLabel(sample) << ":" << std::endl;
+	    std::cout << sampleLabel(sample,decayChannel) << ":" << std::endl;
 	  std::cout << "targetPlotBqPt  : " <<  targetPlotBqPt   << std::endl;
 	  std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	 << std::endl;
           std::cout << "targetPlotLepPt : " <<  targetPlotLepPt  << std::endl;
@@ -956,14 +956,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       for(unsigned int sample=kSig; sample<=kData; ++sample){
 	// check if plot exists 1D
 	if(plotExists(histo_, plotList_[plot], sample)){
-	  if(verbose>1) std::cout << sampleLabel(sample) << "(1D)" << std::endl;
+	    if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << "(1D)" << std::endl;
 	  // replace plot entry
 	  histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
 	  histo_[plotList_[plot]].erase(sample);
 	}
 	// check if plot exists 2D
 	else if(plotExists(histo2_, plotList_[plot], sample)){
-	  if(verbose>1) std::cout << sampleLabel(sample) << "(2D)" << std::endl;
+	    if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << "(2D)" << std::endl;
 	  // replace plot entry
 	  histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
 	  histo2_[plotList_[plot]].erase(sample);
@@ -1061,7 +1061,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
     for(int bgsample=kZjets; bgsample<=kDiBos; ++bgsample){
       if(!histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]){
-	std::cout << "missing plot: analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << " for sample " << sampleLabel(bgsample) << std::endl;
+	  std::cout << "missing plot: analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << " for sample " << sampleLabel(bgsample,decayChannel) << std::endl;
 	exit(1);
       }
       histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone());

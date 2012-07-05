@@ -214,44 +214,55 @@ namespace semileptonic {
     }
   }
 
-  TString sampleLabel(unsigned int sample)
+  TString sampleLabel(unsigned int sample, const std::string decayChannel)
   {
-    // this function returns a TString that corresponds
-    // to the enumerator entry "sample" in enum samples
-    // modified quantities: none
-    // used functions: none
-    // used enumerators: none (label correspond to samples)
+    // this function returns the name of the entered MC process
+    // corresponding to the enumerator entry "sample" as defined in samples
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: samples
 
-    TString sampleLabel="";
-    if(sample==kSig)     sampleLabel="t#bar{t} prompt e/#mu";
-    if(sample==kBkg)     sampleLabel="t#bar{t} other";
-    if(sample==kSigPow)  sampleLabel="t#bar{t} prompt e/#mu POWHEG";
-    if(sample==kBkgPow)  sampleLabel="t#bar{t} other POWHEG";
-    if(sample==kSigMca)  sampleLabel="t#bar{t} prompt e/#mu MC@NLO";
-    if(sample==kBkgMca)  sampleLabel="t#bar{t} other MC@NLO";
-    if(sample==kZjets)   sampleLabel="Z+jets";
-    if(sample==kWjets)   sampleLabel="W+jets";
-    if(sample==kQCD)     sampleLabel="QCD multijet";
-    if(sample==kSTop)    sampleLabel="single top";
-    if(sample==kDiBos)   sampleLabel="diboson";
-    if(sample==kData)    sampleLabel="data";
-    if(sample==kQCDEM1)  sampleLabel="QCD electromagnetic enriched 1";
-    if(sample==kQCDEM2)  sampleLabel="QCD electromagnetic enriched 2";
-    if(sample==kQCDEM3)  sampleLabel="QCD electromagnetic enriched 3";
-    if(sample==kQCDBCE1) sampleLabel="QCD heavy quark to electron enriched 1";
-    if(sample==kQCDBCE2) sampleLabel="QCD heavy quark to electron enriched 2";
-    if(sample==kQCDBCE3) sampleLabel="QCD heavy quark to electron enriched 3";
-    if(sample==kWW)      sampleLabel="WW";
-    if(sample==kWZ)      sampleLabel="WZ";
-    if(sample==kZZ)      sampleLabel="ZZ";
-    if(sample==kSTops)   sampleLabel="single top production s channel";
-    if(sample==kSATops)  sampleLabel="single anti top production s channel";
-    if(sample==kSTopt)   sampleLabel="single top production t channel";
-    if(sample==kSATopt)  sampleLabel="single anti top production t channel";
-    if(sample==kSToptW)  sampleLabel="single top production tW channel";
-    if(sample==kSAToptW) sampleLabel="single anti top production tW channel";
-    return sampleLabel;
-}
+    // create output
+    TString MCprocess="TheDefault";
+    // list all MC process/sample names
+    if(sample==kSig    && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt)";
+    if(sample==kSig    && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt)";
+    if(sample==kSig    && decayChannel.compare("combined")==0) MCprocess="t#bar{t} (e/#mu prompt)";
+    if(sample==kSigPow && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) POWHEG";
+    if(sample==kSigPow && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) POWHEG";
+    if(sample==kSigPow && decayChannel.compare("combined")==0) MCprocess="t#bar{t} (e/#mu prompt) POWHEG";
+    if(sample==kSigMca && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) MC@NLO";
+    if(sample==kSigMca && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) MC@NLO";
+    if(sample==kSigMca && decayChannel.compare("combined")==0) MCprocess="t#bar{t} (e/#mu prompt) MC@NLO";
+    if(sample==kBkg    ) MCprocess="t#bar{t} other";
+    if(sample==kBkgPow ) MCprocess="t#bar{t} other POWHEG";
+    if(sample==kBkgMca ) MCprocess="t#bar{t} other MC@NLO";
+    if(sample==kSTop   ) MCprocess="Single Top";
+    if(sample==kSToptW ) MCprocess="Single Top tW";
+    if(sample==kSTops  ) MCprocess="Single Top s";
+    if(sample==kSTopt  ) MCprocess="Single Top t";
+    if(sample==kSAToptW) MCprocess="Single Antitop tW";
+    if(sample==kSATops ) MCprocess="Single Antitop s";
+    if(sample==kSATopt ) MCprocess="Single Antitop t";
+    if(sample==kWjets  ) MCprocess="W+Jets";
+    if(sample==kZjets  ) MCprocess="Z+Jets";
+    if(sample==kDiBos  ) MCprocess="Diboson";
+    if(sample==kWW     ) MCprocess="WW";
+    if(sample==kWZ     ) MCprocess="WZ";
+    if(sample==kZZ     ) MCprocess="ZZ";
+    if(sample==kQCD    ) MCprocess="QCD Multijet";
+    if(sample==kQCDEM1 ) MCprocess="QCDEM1";
+    if(sample==kQCDEM2 ) MCprocess="QCDEM2";
+    if(sample==kQCDEM3 ) MCprocess="QCDEM3";
+    if(sample==kQCDBCE1) MCprocess="QCDBCE1"; 
+    if(sample==kQCDBCE2) MCprocess="QCDBCE2";
+    if(sample==kQCDBCE3) MCprocess="QCDBCE3"; 
+    if(sample==kData   ) MCprocess="Data";
+    // return result
+    return MCprocess;
+  }
+
+
 
   double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   {
@@ -494,51 +505,6 @@ namespace semileptonic {
     char result[20];
     sprintf(result, "%i", i);
     return (TString)result;
-  }
-
-  TString sampleLabel(unsigned int sample, const std::string decayChannel)
-  {
-    // this function returns the name of the entered MC process
-    // corresponding to the enumerator entry "sample" as defined in samples
-    // modified quantities: NONE
-    // used functions: NONE
-    // used enumerators: samples
-
-    // create output
-    TString MCprocess;
-    // list all MC process/sample names
-    if(sample==kSig && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt)";
-    if(sample==kSig && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt)";
-    if(sample==kBkg    ) MCprocess="t#bar{t} other";
-    if(sample==kSigPow && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) POWHEG";
-    if(sample==kSigPow && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) POWHEG";
-    if(sample==kBkgPow    ) MCprocess="t#bar{t} other POWHEG";
-    if(sample==kSigMca && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) MC@NLO";
-    if(sample==kSigMca && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) MC@NLO";
-    if(sample==kBkgMca    ) MCprocess="t#bar{t} other MC@NLO";
-    if(sample==kSTop   ) MCprocess="Single Top";
-    if(sample==kSToptW ) MCprocess="Single Top tW";
-    if(sample==kSTops  ) MCprocess="Single Top s";
-    if(sample==kSTopt  ) MCprocess="Single Top t";
-    if(sample==kSAToptW) MCprocess="Single Antitop tW";
-    if(sample==kSATops ) MCprocess="Single Antitop s";
-    if(sample==kSATopt ) MCprocess="Single Antitop t";
-    if(sample==kWjets  ) MCprocess="W+Jets";
-    if(sample==kZjets  ) MCprocess="Z+Jets";
-    if(sample==kDiBos  ) MCprocess="Diboson";
-    if(sample==kWW     ) MCprocess="WW";
-    if(sample==kWZ     ) MCprocess="WZ";
-    if(sample==kZZ     ) MCprocess="ZZ";
-    if(sample==kQCD    ) MCprocess="QCD Multijet";
-    if(sample==kQCDEM1 ) MCprocess="QCDEM1";
-    if(sample==kQCDEM2 ) MCprocess="QCDEM2";
-    if(sample==kQCDEM3 ) MCprocess="QCDEM3";
-    if(sample==kQCDBCE1) MCprocess="QCDBCE1"; 
-    if(sample==kQCDBCE2) MCprocess="QCDBCE2";
-    if(sample==kQCDBCE3) MCprocess="QCDBCE3"; 
-    if(sample==kData   ) MCprocess="Data 2011";
-    // return result
-    return MCprocess;
   }
 
   TH1F* divideByBinwidth(TH1F* histo, bool calculateError=true)
@@ -921,7 +887,7 @@ namespace semileptonic {
     if(sample!=kData&&weight==1){
       std::cout << "WARNING: function lumiweight";
       std::cout << " gives result 1 for sample:" << std::endl;
-      std::cout << sampleLabel(sample) << ", " << decayChannel << " channel" << std::endl;
+      std::cout << sampleLabel(sample,decayChannel) << ", " << decayChannel << " channel" << std::endl;
       std::cout << "used xSec:       " << crossSection << std::endl;
       std::cout << "used Nevents:    " << Nevents      << std::endl;
       std::cout << "used luminosity: " << luminosity   << std::endl;

@@ -283,8 +283,8 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
 	  }
 	  if(verbose>1){ 
 	    if(useZprime&&sample==kZprime) std::cout << "z prime, weight " << zPrimeLumiWeight << std::endl;
-	    else if(useReweightedTop&&(sample==kSig||sample==kBkg))  std::cout << "reweighted "+sampleLabel(sample)+", weight " << 1.0/avReweight << std::endl;
-	    else std::cout << sampleLabel(sample) << ", weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
+	    else if(useReweightedTop&&(sample==kSig||sample==kBkg))  std::cout << "reweighted "+sampleLabel(sample,decayChannel)+", weight " << 1.0/avReweight << std::endl;
+	    else std::cout << sampleLabel(sample,decayChannel) << ", weight " << lumiweight(sample, luminosity, sysNo, decayChannel) << std::endl;
 	  }
 	}
       }
