@@ -63,11 +63,11 @@ namespace semileptonic {
 
   // Colors for event samples
 
-  int color_ [] =  {kRed+1 , kRed-7  , kAzure-2, kGreen-3, 
-		   kYellow , kMagenta, 10      , kBlack  , 
-		   kYellow , kYellow , kYellow , kYellow , kYellow , kYellow ,
-		   10      , 10      , 10      , 
-		   kMagenta, kMagenta, kMagenta, kMagenta, kMagenta, kMagenta };
+  int color_[] ={ kRed+1  , kRed-7  , kAzure-2, kGreen-3, 
+		  kYellow , kMagenta, 10      , kBlack  , 
+		  kYellow , kYellow , kYellow , kYellow , kYellow , kYellow ,
+		  10      , 10      , 10      , 
+		  kMagenta, kMagenta, kMagenta, kMagenta, kMagenta, kMagenta };
 
   // Colors for data and theory curves
 
@@ -116,10 +116,9 @@ namespace semileptonic {
 			     /*51:*/ sysShapeUp,                 /*52:*/ sysShapeDown,
 			     /*53:*/ ENDOFSYSENUM};
 
-  double ttbarCrossSection=164.4;                                // combined 2011 CMS XSec
-  double ttbarCrossSectionError=sqrt(2.8*2.8+11.9*11.9+7.4*7.4); // combined 2011 CMS XSec error 
-                                                                 // --> should contain luminosity error
-                                                                 // --> for MC error bands: luminosity error is subtracted in analyzeTopDiffXSecMonitoring.C
+  double ttbarCrossSection=165.6;                      // NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
+  double ttbarCrossSectionError=sqrt(6.2*6.2+9.1*9.1); // Scale and PDF uncertainties on NNLO value
+                                                       // --> the scale contributions has been symetrized
 
   double SF_TopMassDownUncertainty=0.9/11.0; // scale factors for top mass uncertainty
   double SF_TopMassUpUncertainty  =0.9/12.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
@@ -2494,21 +2493,25 @@ namespace semileptonic {
       }
     }
 
+  // ===========================================================================================
+  // ===========================================================================================
+
   void makeUncertaintyBands(std::map< TString, std::map <unsigned int, TH1F*> >& histo_,
 			    std::map< TString, TH1F* >& histoErrorBand_,
 			    std::vector<TString>& plotList_,
 			    unsigned int& Nplots)
   {
-    // this function creates a set of errorbands ("histoErrorBand_") for 
-    // all samples for the histos in "histo_", using the "Nplots" plots 
-    // listed in "plotList_" taking into account luminosity and cross section error
+    // this function generates set of errorbands ("histoErrorBand_") for all samples 
+    // and histogrammes in "histo_", using the "Nplots" plots listed in "plotList_" 
+    // taking into account luminosity and cross section error
+    // 
     // modified quantities: histoErrorBand_
-    // used functions: NONE
-    // used enumerators: samples
+    // used functions:      none
+    // used enumerators:    samples
 
-    for(unsigned int plot=0; plot<Nplots; ++plot){
+    for(unsigned int plot=0; plot<Nplots; plot++){
       
-      TString plotName     = plotList_[plot];
+      TString plotName = plotList_[plot];
       
       // Initialize and reset histograms
       
@@ -2533,7 +2536,7 @@ namespace semileptonic {
       
       // Compare summed histograms, symmetrize deviations and store relative deviation to error histogram after adding constant contributions
       
-      double relXSecError = sqrt(pow(ttbarCrossSectionError/ttbarCrossSection,2)-pow(globalLumiUncertainty,2));  // to avoid double counting of luminosity error
+      double relXSecError = ttbarCrossSectionError/ttbarCrossSection;
       
       for (int bin = 0; bin < histoSumRef->GetNbinsX(); bin++){
 
@@ -2547,8 +2550,10 @@ namespace semileptonic {
       
       histoErrorBand_[plotName] = (TH1F*)histoSumRef->Clone();
     }
-  
   }
+
+  // ===========================================================================================
+  // ===========================================================================================
   
   void addCanvas(std::vector<TCanvas*> &plotCanvas_){
     // this function adds a new canvas to the vector of canvas "plotCanvas_"
