@@ -30,10 +30,10 @@ mumu_TopQuarks_Rapidity                                                         
 emu_TopQuarks_Rapidity                                                                              3.59997     6   7   2   10
 ee_TopQuarks_Rapidity                                                                               1.85795     6   7   2   10      
 combined_TopQuarks_Rapidity                                                                         4.47645     6   7   4   10
-mumu_TopQuarks_Pt                                                                                   2.00628     4   5   3   8
-emu_TopQuarks_Pt                                                                                    3.43698     4   5   3   8
-ee_TopQuarks_Pt                                                                                     1.90568     4   5   2   8
-combined_TopQuarks_Pt                                                                               4.42489     4   5   3   8
+mumu_TopQuarks_Pt                                                                                   2.45933     4   5   3   7
+emu_TopQuarks_Pt                                                                                    4.02255     4   5   4   7
+ee_TopQuarks_Pt                                                                                     2.23392     4   5   3   7
+combined_TopQuarks_Pt                                                                               5.22732     4   5   2   7
 mumu_BJets_Pt                                                                                       1.47233     5   6   3   7
 emu_BJets_Pt                                                                                        2.87951     5   6   4   7
 ee_BJets_Pt                                                                                         1.57362     5   6   4   7
