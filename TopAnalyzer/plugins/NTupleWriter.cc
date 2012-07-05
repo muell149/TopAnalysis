@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.26 2012/07/05 11:39:31 blutz Exp $
+// $Id: NTupleWriter.cc,v 1.27 2012/07/05 12:47:49 blutz Exp $
 //
 //
 
@@ -350,10 +350,12 @@ NTupleWriter::analyze ( const edm::Event& iEvent, const edm::EventSetup& iSetup 
   clearVariables();
 
   //##################### MC weights for MCatNLO ###############
-
-  edm::Handle<GenEventInfoProduct> evt_info;
-  iEvent.getByType(evt_info);
-  weightMCatNLO = evt_info->weight();
+  if ( ! iEvent.isRealData() ) {
+    edm::Handle<GenEventInfoProduct> evt_info;
+    iEvent.getByType(evt_info);
+    weightMCatNLO = evt_info->weight();
+  }
+  else weightMCatNLO = 0.;
 
   //#############################################################
 
