@@ -525,9 +525,18 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1", RooArgSet(measXSecMassDepRel,measXSec));
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecErr);
 
-  PredXSec kidPredXSec("kidPredXSec", xsec, mass, alpha, kid->GetFunction("f1"), kid_funcs);
-  PredXSec mocPredXSec("mocPredXSec", xsec, mass, alpha, moc->GetFunction("f1"), moc_funcs);
-  PredXSec ahrPredXSec("ahrPredXSec", xsec, mass, alpha, ahr->GetFunction("f1"), ahr_funcs);
+  TString alpha_funcFileName = "theories_7TeV/xSecVsMass_";
+  if(pole)
+    alpha_funcFileName += "pole_";
+  else
+    alpha_funcFileName += "msbar_";
+  if(heraPDF)
+    alpha_funcFileName += "hera_alphaScan.root";
+  else
+    alpha_funcFileName += "mstw_alphaScan.root";
+  PredXSec kidPredXSec("kidPredXSec", xsec, mass, alpha, kid->GetFunction("f1"), kid_funcs, alpha_funcFileName);
+  PredXSec mocPredXSec("mocPredXSec", xsec, mass, alpha, moc->GetFunction("f1"), moc_funcs, alpha_funcFileName);
+  PredXSec ahrPredXSec("ahrPredXSec", xsec, mass, alpha, ahr->GetFunction("f1"), ahr_funcs, alpha_funcFileName);
 
   if(pole && !heraPDF) {
     drawConvolution(kidPredXSec, xsec, mass, kid->GetFunction("f1"), title[1], canvas, printNameBase,
@@ -576,6 +585,7 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   RooRealVar alphaHERA_unc ("alphaHERA_unc" , "alphaHERA_unc" , 0.0020);
 
   RooGaussian alphaMSTW_prob("alphaMSTW_prob", "alphaMSTW_prob", alpha, alphaMSTW_mean, alphaMSTW_unc);
+  RooGaussian alphaHERA_prob("alphaHERA_prob", "alphaHERA_prob", alpha, alphaHERA_mean, alphaHERA_unc);
 
   RooRealVar mass_mean("mass_mean", "mass_mean", 173.2); // Tevatron July 2012
   RooRealVar mass_unc ("mass_unc" , "mass_unc" , 1.4); // Tevatron July 2012 plus 1 GeV for m(pole)/m(MC)?
@@ -640,7 +650,7 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
 
   TBox boxAlpha2009(alpha2009_mean.getVal()-alpha2009_unc.getVal(), massAxisMin,
 		    alpha2009_mean.getVal()+alpha2009_unc.getVal(), massAxisMax);
-  boxAlpha2009.SetFillColor(kGreen-9);
+  boxAlpha2009.SetFillColor(kYellow-9);
   TLine lineAlpha2009(alpha2009_mean.getVal(), massAxisMin,
 		      alpha2009_mean.getVal(), massAxisMax);
   lineAlpha2009.SetLineColor(kGray);
@@ -652,6 +662,13 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
 		      alphaMSTW_mean.getVal(), massAxisMax);
   lineAlphaMSTW.SetLineColor(kGray);
 
+  TBox boxAlphaHERA(alphaHERA_mean.getVal()-alphaHERA_unc.getVal(), massAxisMin,
+		    alphaHERA_mean.getVal()+alphaHERA_unc.getVal(), massAxisMax);
+  boxAlphaHERA.SetFillColor(kCyan-9);
+  TLine lineAlphaHERA(alphaHERA_mean.getVal(), massAxisMin,
+		      alphaHERA_mean.getVal(), massAxisMax);
+  lineAlphaHERA.SetLineColor(kGray);
+
   TBox boxMass(alphaAxisMin, mass_mean.getVal()-mass_unc.getVal(),
 	       alphaAxisMax, mass_mean.getVal()+mass_unc.getVal());
   boxMass.SetFillColor(kMagenta-9);
@@ -662,10 +679,16 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   mocResultAlpha.point.Draw("AP");
   boxMass.Draw();
   lineMass.Draw();
+  if(heraPDF) {
+    boxAlphaHERA.Draw();
+    lineAlphaHERA.Draw();
+  }
+  else {
+    boxAlphaMSTW.Draw();
+    lineAlphaMSTW.Draw();
+  }
   boxAlpha2009.Draw();
   lineAlpha2009.Draw();
-  boxAlphaMSTW.Draw();
-  lineAlphaMSTW.Draw();
   gPad->RedrawAxis();
   mocResultAlpha.point.Draw("P");
   mocResultAlpha.ellipse.Draw("L");
@@ -674,10 +697,16 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   mocResultMass.point.Draw("AP");
   boxMass.Draw();
   lineMass.Draw();
+  if(heraPDF) {
+    boxAlphaHERA.Draw();
+    lineAlphaHERA.Draw();
+  }
+  else {
+    boxAlphaMSTW.Draw();
+    lineAlphaMSTW.Draw();
+  }
   boxAlpha2009.Draw();
   lineAlpha2009.Draw();
-  boxAlphaMSTW.Draw();
-  lineAlphaMSTW.Draw();
   gPad->RedrawAxis();
   mocResultMass.point.Draw("P");
   mocResultMass.ellipse.Draw("L");
@@ -686,8 +715,14 @@ int foldedLikelihoods(const bool pole, const bool heraPDF)
   mocResultAlpha.point.Draw("AP");
   boxMass.Draw();
   lineMass.Draw();
-  boxAlphaMSTW.Draw();
-  lineAlphaMSTW.Draw();
+  if(heraPDF) {
+    boxAlphaHERA.Draw();
+    lineAlphaHERA.Draw();
+  }
+  else {
+    boxAlphaMSTW.Draw();
+    lineAlphaMSTW.Draw();
+  }
   gPad->RedrawAxis();
   mocResultAlpha.point.Draw("P");
   mocResultAlpha.ellipse.Draw("L");

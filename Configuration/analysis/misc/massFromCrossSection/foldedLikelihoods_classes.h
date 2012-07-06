@@ -1,6 +1,7 @@
 #ifndef foldedLikelihoods_classes_h
 #define foldedLikelihoods_classes_h
 
+#include "TFile.h"
 #include "TMatrixD.h"
 #include "TVirtualFitter.h"
 
@@ -10,14 +11,14 @@
 #include "foldedLikelihoods_helpers.h"
 
 //////////////////////////////////////////////////
-/// Class for linearized relative uncertainties
+/// Class for linear dependencies
 //////////////////////////////////////////////////
 
-class LinRelUncertainty {
+class LinearDependence {
 
 public:
 
-  LinRelUncertainty(const TString& label, const TF1* fittedFunction, RooRealVar& x);
+  LinearDependence(const TString& label, const TF1* fittedFunction, RooRealVar& x);
 
 private:
 
@@ -30,15 +31,44 @@ public:
 
 };
 
-LinRelUncertainty::LinRelUncertainty(const TString& label, const TF1* fittedFunction, RooRealVar& x):
+LinearDependence::LinearDependence(const TString& label, const TF1* fittedFunction, RooRealVar& x):
   p0(label+"_p0", label+"_p0", fittedFunction->GetParameter(0)),
   p1(label+"_p1", label+"_p1", fittedFunction->GetParameter(1)),
   polyVar(label, label, x, RooArgSet(p0, p1))
 {}
 
 //////////////////////////////////////////////////
-/// Class for predicted cross sections
-/// with mass dependence and uncertainties
+/// Class for quadratic dependencies
+//////////////////////////////////////////////////
+
+class QuadraticDependence {
+
+public:
+
+  QuadraticDependence(const TString& label, const TF1* fittedFunction, RooRealVar& x);
+
+private:
+
+  const RooRealVar p0;
+  const RooRealVar p1;
+  const RooRealVar p2;
+
+public:
+
+  const RooPolyVar polyVar;
+
+};
+
+QuadraticDependence::QuadraticDependence(const TString& label, const TF1* fittedFunction, RooRealVar& x):
+  p0(label+"_p0", label+"_p0", fittedFunction->GetParameter(0)),
+  p1(label+"_p1", label+"_p1", fittedFunction->GetParameter(1)),
+  p2(label+"_p2", label+"_p2", fittedFunction->GetParameter(2)),
+  polyVar(label, label, x, RooArgSet(p0, p1, p2))
+{}
+
+//////////////////////////////////////////////////
+/// Class for predicted cross sections with
+/// mass dependence, alphaS dependence and uncertainties
 //////////////////////////////////////////////////
 
 class PredXSec {
@@ -46,7 +76,7 @@ class PredXSec {
 public:
 
   PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-	   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs);
+	   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, const TString& alpha_funcFileName);
 
 public:
 
@@ -59,15 +89,17 @@ private:
   const RooRealVar p2;
   const RooRealVar p3;
 
-  const RooRealVar alpha_p0;
-  const RooRealVar alpha_p1;
-  const RooRealVar alpha_p2;
+  const LinearDependence relUncPdf;
+  const LinearDependence relUncScaleUp;
+  const LinearDependence relUncScaleDown;
 
-  const LinRelUncertainty relUncPdf;
-  const LinRelUncertainty relUncScaleUp;
-  const LinRelUncertainty relUncScaleDown;
+  TFile alpha_funcFile;
 
-  RooFormulaVar alphaDep;
+  const QuadraticDependence alpha_p0;
+  const QuadraticDependence alpha_p1;
+  const QuadraticDependence alpha_p2;
+
+  const RooPolyVar alphaDep;
 
 public:
 
@@ -90,19 +122,22 @@ public:
 };
 
 PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-		   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs):
+		   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, const TString& alpha_funcFileName):
   name(label),
   p0(label+"_p0", label+"_p0", xsec_func->GetParameter(0)),
   p1(label+"_p1", label+"_p1", xsec_func->GetParameter(1)),
   p2(label+"_p2", label+"_p2", xsec_func->GetParameter(2)),
   p3(label+"_p3", label+"_p3", xsec_func->GetParameter(3)),
-  alpha_p0(label+"_alpha_p0", label+"_alpha_p0", 1.7605),
-  alpha_p1(label+"_alpha_p1", label+"_alpha_p1", -36.2661),
-  alpha_p2(label+"_alpha_p2", label+"_alpha_p2", 254.554),
   relUncPdf      (label+"_relUncPdf"      , unc_funcs[1].at(0), mass_var),
   relUncScaleUp  (label+"_relUncScaleUp"  , unc_funcs[0].at(0), mass_var),
   relUncScaleDown(label+"_relUncScaleDown", unc_funcs[0].at(1), mass_var),
-  alphaDep(label+"_alphaDep", label+"_alphaDep", "@1+@2*@0+@3*@0*@0", RooArgSet(alpha_var, alpha_p0, alpha_p1, alpha_p2)),
+  alpha_funcFile(alpha_funcFileName, "READ"),
+  alpha_p0(label+"_alpha_p0", ((TGraph*)alpha_funcFile.Get("graph_p0"))->GetFunction("pol2"), mass_var),
+  alpha_p1(label+"_alpha_p1", ((TGraph*)alpha_funcFile.Get("graph_p1"))->GetFunction("pol2"), mass_var),
+  alpha_p2(label+"_alpha_p2", ((TGraph*)alpha_funcFile.Get("graph_p2"))->GetFunction("pol2"), mass_var),
+  alphaDep(label+"_alphaDep", label+"_alphaDep", alpha_var, RooArgSet(alpha_p0.polyVar,
+								      alpha_p1.polyVar,
+								      alpha_p2.polyVar)),
   xsec(label+"_xsec", label+"_xsec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)*@5/(@0*@0*@0*@0)",
        RooArgSet(mass_var, p0, p1, p2, p3, alphaDep)),
   xsecScaleUp(label+"_xsecScaleUp", label+"_xsecScaleUp", "@0+@0*TMath::Abs(@1)",
@@ -119,6 +154,7 @@ PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_
        "1/(2*(@3-@2))*(TMath::Erf((@3-@0)/(@1*TMath::Sqrt(2)))-TMath::Erf((@2-@0)/(@1*TMath::Sqrt(2))))",
        RooArgList(xsec_var, gaussianUnc, xsecScaleDown, xsecScaleUp))
 {
+  alpha_funcFile.Close();
   mcIntegratorCfg.method1D().setLabel("RooMCIntegrator");
   rectangularProb.setIntegratorConfig(mcIntegratorCfg);
 }
