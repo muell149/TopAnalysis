@@ -12,7 +12,7 @@ cd ${destination}
 
 
   mkdir eps
-  mv *.eps eps
+  cp *.eps eps
 
   file="index.html"
   blue="#0000FF"
