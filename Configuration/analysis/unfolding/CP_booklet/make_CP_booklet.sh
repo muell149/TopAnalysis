@@ -12,22 +12,27 @@
 ############## S T E E R I N G ################################
 ###############################################################
 
+# Set Folders
 OUTPUTFOLDER="/afs/desy.de/user/d/dfischer/www/TopUnfolding/CP_Booklets"
-STEERINGFILE="/afs/desy.de/user/d/dfischer/workspace/TopUnfolding/CMSSW/CMSSW_4_2_5/src/unfolding/CP_booklet/Steering/steering_test.steer"
+STEERINGFOLDER="/afs/desy.de/user/d/dfischer/workspace/TopUnfolding/CMSSW/CMSSW_4_2_5/src/unfolding/CP_booklet/Steering"
 SNIPPETFOLDER="/afs/desy.de/user/d/dfischer/workspace/TopUnfolding/CMSSW/CMSSW_4_2_5/src/unfolding/CP_booklet/TexSnippets"
 INPUTFOLDER="/afs/desy.de/user/d/dfischer/workspace/TopUnfolding/CMSSW/CMSSW_4_2_5/src/diLeptonic/SVD"
-TEXFILE="SelectedControlPlots"
 
-#LIST_SYST="RES JES MASS MATCH SCALE PU_ DY_ BG_ HAD"
-LIST_SYST="HAD"
+# Set Files
+STEERINGFILE="steering_dilep.steer"
+COMBINEDOUTPUTFILE="SelectedControlPlots"
+
+# Specify Distributions
+LIST_SYST="RES JES MASS MATCH SCALE PU_ DY_ BG_ HAD"
 LIST_DISTa="Leptons_Eta Leptons_Pt LepPair_Pt LepPair_Mass BJets_Eta BJets_Pt"
 LIST_DISTb="TopQuarks_Rapidity TopQuarks_Pt TtBar_Rapidity TtBar_Pt TtBar_Mass"
 LIST_CHANNEL="mumu emu ee combined"
 
+# More options
 EPSTOPDF="false" 
 COPYIMG="false"
-COMPILE="true"
-COMBINEBOOKLETS="false"
+COMPILE="true" 
+COMBINEBOOKLETS="false" 
 DEBUGTEX="false"
 
 ###############################################################
@@ -45,7 +50,7 @@ fi
 REALINPUTFOLDER=$INPUTFOLDER
 
 # Loop over booklets
-NUMSTEERINGLINES=`cat $STEERINGFILE | wc -l`
+NUMSTEERINGLINES=`cat ${STEERINGFOLDER}/${STEERINGFILE} | wc -l`
 STEERINGLINECNT=0
 TOKENCNT=0
 FIRSTBOOKLET=true
@@ -53,7 +58,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
     let "STEERINGLINECNT = $STEERINGLINECNT + 1"
 
     # Read Steering, ingore lines containing whitespaces only
-    STEERINGLINE=`cat $STEERINGFILE | head -${STEERINGLINECNT} | tail -1`
+    STEERINGLINE=`cat ${STEERINGFOLDER}/${STEERINGFILE} | head -${STEERINGLINECNT} | tail -1`
     TRUNCSTEERLINE=""
     for i in `echo $STEERINGLINE` ; do
         TRUNCSTEERLINE=$i ; 
@@ -104,7 +109,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
 
     # Which Outputfile
     if [ "$COMBINEBOOKLETS" = "true" ]; then
-        OUTPUTFILENAME=$TEXFILE ;
+        OUTPUTFILENAME=$COMBINEDOUTPUTFILE ;
     else 
         OUTPUTFILENAME=$PLOTKEY ; 
     fi
@@ -128,7 +133,7 @@ while [ "$STEERINGLINECNT" -lt "$NUMSTEERINGLINES" ] ; do
         if [ "$COMBINEBOOKLETS" = "true" ]; then
              echo "Selected Unfolding Control Plots" >> $OUTPUTFILE.tex ;
         else 
-             cat $STEERINGFILE | head -${STEERINGLINECNT} | tail -1 >> $OUTPUTFILE.tex ;
+             cat ${STEERINGFOLDER}/${STEERINGFILE} | head -${STEERINGLINECNT} | tail -1 >> $OUTPUTFILE.tex ;
         fi
         cat $SNIPPETFOLDER/CP_booklet_titlepagefooter.tex >> $OUTPUTFILE.tex ; 
     fi
