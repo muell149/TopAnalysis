@@ -1726,7 +1726,7 @@ namespace semileptonic {
     gPad->SetLeftMargin(left);
     gPad->RedrawAxis();
     // draw grid
-    rPad->SetGrid(1,1);
+    //rPad->SetGrid(1,1);
 
     // draw a horizontal lines on a given histogram
     // a) at 1
