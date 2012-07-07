@@ -1922,6 +1922,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   int cntMkdirTries = 0;
   gSystem->MakeDirectory(outpathPlots+subfolderChannel+subfolderSpecial);  
   c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+name+".eps");  
+  c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+name+".C");  
   c->Clear();  
   leg->Clear();  
   delete c;  
@@ -2137,6 +2138,7 @@ void Plotter::PlotXSec(){
    gSystem->MakeDirectory(outpathPlots+subfolderChannel);
    gSystem->MakeDirectory(outpathPlots+subfolderChannel+subfolderSpecial);
    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+"InclusiveXSec.eps");
+   c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+"InclusiveXSec.C");
    c->Clear();
    delete c;
 
@@ -2906,6 +2908,7 @@ void Plotter::PlotDiffXSec(){
 
 
     cESP->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/ESP_"+name+".eps");
+    cESP->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/ESP_"+name+".C");
     cESP->Clear();
     delete cESP;
     double efficiencies[XAxisbinCenters.size()];
@@ -3107,6 +3110,7 @@ void Plotter::PlotDiffXSec(){
     leg10->SetFillColor(0);
     leg10->Draw("SAME");
     c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".eps");
+    c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".C");
     c10->Clear();
     delete leg10;
     delete c10;
@@ -3139,6 +3143,7 @@ void Plotter::PlotDiffXSec(){
     TotalHist->Draw();ModelHist->Draw("SAME");ExpHist->Draw("SAME");StatHist->Draw("SAME");
     leg11->Draw("SAME");
     c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".eps");
+    c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".C");
     c11->Clear();
     delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
     delete leg11;
@@ -3377,8 +3382,9 @@ void Plotter::PlotDiffXSec(){
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
     
-    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".eps");
-    gStyle->SetEndErrorSize(8);
+    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".eps"); 
+    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".C"); 
+    gStyle->SetEndErrorSize(8); 
     c->Clear();
     delete c;
     
@@ -3450,6 +3456,7 @@ void Plotter::PlotDiffXSec(){
     varhists[0]->Write(name+"_"+channel+"_Data");
     f1->Close();
     c1->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/preunfolded_"+name+".eps");
+    c1->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/preunfolded_"+name+".C");
     c1->Clear();
     delete c1; 	
 
