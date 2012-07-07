@@ -828,7 +828,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
     for ( size_t i = 0; i < hists.size() ; i++ ) {
       TString histsIntegral = TString::Format("%20.2f", ((hists[i])).Integral());
       cout << "        " << histsIntegral << " Events in Sample " <<    legends[i] << " (Nom)" << endl;
-      if ( legends[i] == "Data 2011" ) { 
+      if ( legends[i] == "Data" ) { 
 		if ( theDataHist == NULL ) {
 		  theDataHist = (TH1D*) (hists[i]).Clone("theDataHist");
 		} else {
@@ -871,7 +871,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
     for ( size_t i = 0; i < systhistsUp.size() ; i++ ) {  
       TString histsIntegral = TString::Format("%20.2f", ((systhistsUp[i])).Integral());
       cout << "        " << histsIntegral << " Events in Sample " <<    legendsUp[i] << " (Up)" << endl;  
-      if ( legendsUp[i] == "Data 2011") {
+      if ( legendsUp[i] == "Data") {
       } 
       else if ( legendsUp[i] == "t#bar{t} signal") {   
 		if ( theRecHistUp == NULL ) {  
@@ -929,7 +929,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
       TString histsIntegral = TString::Format("%20.2f", ((systhistsDown[i])).Integral());
       cout << "        " << histsIntegral << " Events in Sample " <<    legendsDown[i] << " (Down)" << endl;   
-      if ( legendsDown[i] == "Data 2011") {
+      if ( legendsDown[i] == "Data") {
       } else if ( legendsDown[i] == "t#bar{t} signal") {   
 		if ( theRecHistDown == NULL ) { 
 		  theRecHistDown = (TH1D*) (systhistsDown[i]).Clone("theRecHistDown"); 
@@ -1377,7 +1377,7 @@ void Plotter::setDataSet(TString mode)
 
       if(filename!=""){
 	dataset.push_back(filename);
-	if(filename.Contains("run")){legends.push_back("Data 2011"); colors.push_back(kBlack);datafiles++;}
+	if(filename.Contains("run")){legends.push_back("Data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
@@ -1405,7 +1405,7 @@ void Plotter::setDataSet(TString mode)
       if(filename!=""){
 	dataset.push_back(filename);
 	
-	if(filename.Contains("run")){legends.push_back("Data 2011"); colors.push_back(kBlack);datafiles++;}
+	if(filename.Contains("run")){legends.push_back("Data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
@@ -1449,7 +1449,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 
       if(filenameUp!=""){
 	datasetUp.push_back(filenameUp);
-	if(filenameUp.Contains("run")){legendsUp.push_back("Data 2011"); colorsUp.push_back(kBlack);}
+	if(filenameUp.Contains("run")){legendsUp.push_back("Data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
@@ -1464,7 +1464,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
       FileListDown>>filenameDown;
       if(filenameDown!=""){
 	datasetDown.push_back(filenameDown);
-	if(filenameDown.Contains("run")){legendsDown.push_back("Data 2011"); colorsDown.push_back(kBlack);}
+	if(filenameDown.Contains("run")){legendsDown.push_back("Data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
@@ -1502,7 +1502,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 
       if(filenameUp!=""){
 	datasetUp.push_back(filenameUp);
-	if(filenameUp.Contains("run")){legendsUp.push_back("Data 2011"); colorsUp.push_back(kBlack);}
+	if(filenameUp.Contains("run")){legendsUp.push_back("Data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
@@ -1517,7 +1517,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
       FileListDown>>filenameDown;
       if(filenameDown!=""){
 	datasetDown.push_back(filenameDown);
-	if(filenameDown.Contains("run")){legendsDown.push_back("Data 2011"); colorsDown.push_back(kBlack);}
+	if(filenameDown.Contains("run")){legendsDown.push_back("Data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
@@ -1791,7 +1791,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     drawhists[i]=(TH1D*) hists[i].Clone();
     if(rebin>1) drawhists[i]->Rebin(rebin);
     setStyle(*drawhists[i], i);
-    if(legends[i] != "Data 2011"){
+    if(legends[i] != "Data"){
       if(legends[i] == legends[0]){
 	    drawhists[0]->Add(drawhists[i]);
       }
@@ -1938,7 +1938,7 @@ void Plotter::setStyle(TH1 &hist, unsigned int i)
   hist.SetLineColor(colors[i]);
   
 
-  if(legends[i] == "Data 2011"){
+  if(legends[i] == "Data"){
     hist.SetFillColor(0);
     hist.SetMarkerStyle(20); 
     hist.SetMarkerSize(1.);
@@ -1968,7 +1968,7 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
   hist.SetLineColor(colors[i]);
   
 
-  if(legends[i] == "Data 2011"){
+  if(legends[i] == "Data"){
     hist.SetMarkerStyle(20); 
     hist.SetMarkerSize(1.);
     hist.SetLineWidth(1);
@@ -2248,7 +2248,7 @@ void Plotter::MakeTable(){
       EventFile7<<legends[i]<<": "<<tmp_num7<<endl;
       EventFile8<<legends[i]<<": "<<tmp_num8<<endl;
       EventFile9<<legends[i]<<": "<<tmp_num9<<endl;
-      if(legends[i]!="Data 2011"){
+      if(legends[i]!="Data"){
     	bg_num5+=tmp_num5;
     	bg_num6+=tmp_num6;
     	bg_num7+=tmp_num7;
@@ -2300,7 +2300,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
   }
  
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg 
-    if(legends[i] == "Data 2011"){
+    if(legends[i] == "Data"){
       numbers[0]+=numhists[i]->Integral();
     }
     else if(legends[i] == "t#bar{t} signal"){ 
@@ -2378,7 +2378,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
       tmp_num=0;
     }else if(legends[i]!=legends[i+1]){
       EventFile<<legends[i]<<": "<<tmp_num<<endl;
-      if(legends[i]!="Data 2011")bg_num+=tmp_num;
+      if(legends[i]!="Data")bg_num+=tmp_num;
       tmp_num=0;
     }
 
@@ -2429,7 +2429,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
   double efficiencies[XAxisbinCenters.size()];
   
   for (unsigned int hist =0; hist<hists.size(); hist++){
-    if(legends[hist] == "Data 2011"){
+    if(legends[hist] == "Data"){
       for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
       }
@@ -2466,7 +2466,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
     TH1* theGenHist = GenPlot; 
     TH1* theRespHist = genReco2d;
     for ( size_t i = 0; i < hists.size() ; i++ ) {
-      if ( legends[i] == "Data 2011" ) {
+      if ( legends[i] == "Data" ) {
 		if ( theDataHist == NULL ) {
 		  theDataHist = (TH1*) (varhists[i])->Clone("theDataHist");
 		} else {
@@ -2759,7 +2759,7 @@ void Plotter::PlotDiffXSec(){
     for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
       setStyle(*varhists[i], i);
       varhistsPlotting[i]=(TH1*)varhists[i]->Clone();
-      if(legends[i] != "Data 2011"){
+      if(legends[i] != "Data"){
 	if((legends[i] == DYEntry) && channelType!=2){
 	  varhists[i]->Scale(DYScale[channelType]);
 	  varhistsPlotting[i]->Scale(DYScale[channelType]);
@@ -2911,7 +2911,7 @@ void Plotter::PlotDiffXSec(){
     double efficiencies[XAxisbinCenters.size()];
     init = false;
     for (unsigned int hist =0; hist<hists.size(); hist++){
-      if(legends[hist] == "Data 2011"){
+      if(legends[hist] == "Data"){
 	    for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	      DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	    }
@@ -3068,15 +3068,15 @@ void Plotter::PlotDiffXSec(){
                 if(syst==1) fprintf(systfile, "RES    ");
                 if(syst==2) fprintf(systfile, "PU     ");
                 if(syst==3) fprintf(systfile, "SCALE  ");
-                if(syst==4) fprintf(systfile, "MASS   ");
-                if(syst==5) fprintf(systfile, "MATCH  ");
+                if(syst==4) fprintf(systfile, "MATCH  ");
+                if(syst==5) fprintf(systfile, "MASS   ");
                 if(syst==6) fprintf(systfile, "DY     ");
                 if(syst==7) fprintf(systfile, "BG     ");
-                if(syst==8) fprintf(systfile, "Trigg  ");
-                if(syst==9) fprintf(systfile, "Lep.   ");
-                if(syst==10)fprintf(systfile, "Btag   ");
-                if(syst==11)fprintf(systfile, "KinFit ");
-                if(syst==12)fprintf(systfile, "HAD    ");
+                if(syst==8)fprintf(systfile, "HAD    ");
+                if(syst==9) fprintf(systfile, "Trigg  ");
+                if(syst==10) fprintf(systfile, "Lep.   ");
+                if(syst==11)fprintf(systfile, "Btag   ");
+                if(syst==12)fprintf(systfile, "KinFit ");
                 if(syst==13)fprintf(systfile, "PDF    ");
                }
                fprintf(systfile, "%2.5f ", TMath::Sqrt(systtemp->GetBinContent(bin+1))*100);
@@ -3148,7 +3148,7 @@ void Plotter::PlotDiffXSec(){
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
     TGraphAsymmErrors *tga_DiffXSecPlot = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecStatErrorPlot, DiffXSecStatErrorPlot);
-    tga_DiffXSecPlot->SetMarkerStyle(20);
+    tga_DiffXSecPlot->SetMarkerStyle(1);
     tga_DiffXSecPlot->SetMarkerColor(kBlack);
     tga_DiffXSecPlot->SetMarkerSize(1);
     tga_DiffXSecPlot->SetLineColor(kBlack);
@@ -3342,7 +3342,10 @@ void Plotter::PlotDiffXSec(){
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
       Kidoth1_Binned->SetLineWidth(2);
       Kidoth1_Binned->SetLineColor(kOrange-3); //########################
+      KidoHist->SetLineColor(kOrange-3);
+      KidoHist->SetLineWidth(2);
       Kidoth1_Binned->Draw("SAME");
+      KidoHist->Draw("SAME, L");
     }
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
@@ -3355,7 +3358,7 @@ void Plotter::PlotDiffXSec(){
     DrawDecayChLabel(channelLabel[channelType]);    
     
     TLegend leg2 = *getNewLegend();
-    leg2.AddEntry(h_DiffXSec, "Data 2011",    "p");
+    leg2.AddEntry(h_DiffXSec, "Data",    "p");
     leg2.AddEntry(GenPlotTheory,            "MadGraph","l");
     //if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
@@ -3369,11 +3372,13 @@ void Plotter::PlotDiffXSec(){
     leg2.SetBorderSize(0);
     leg2.Draw("same");
     h_GenDiffXSec->Draw("SAME");
+    gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
     
     c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".eps");
+    gStyle->SetEndErrorSize(8);
     c->Clear();
     delete c;
     
