@@ -2682,12 +2682,12 @@ namespace semileptonic {
     else if(model=="madgraph"){
       if(plotname.Contains("ttbarMass")){
 	//tail:
-	fitLowEdge=470.;
-	fitHighEdge=1600.;
+	fitLowEdge=470.0;
+	fitHighEdge=1600.0;
 	def="[0]*exp([1]*x)+[2]";
-	a=28165.;
-	b=-0.00756;
-	c=2.77;
+	a= 164748.0;   //  28165.;
+	b=-0.00810181; // -0.00756;
+	c= 3.59495;    // 2.77;
 	addOpt="LL";
 	// start:
 	fitLowEdgeB=345.;
@@ -2731,14 +2731,42 @@ namespace semileptonic {
 	addOpt="LL";
       }
       else if(plotname.Contains("lepPt")){
-      	fitLowEdge=45.;
-      	fitHighEdge=210.;
-      	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-      	a=-0.02;
-      	b=-0.0001;
-	c=0.0000003;
-	d=41000;
+	  // head
+	  fitLowEdge =30.0;
+	  fitHighEdge=60.0;
+	  def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	  a= 3.702E-01;
+	  b=-7.855E-03;
+	  c= 5.200E-05;
+	  d= 2.447E+01;
+	  // tail
+	  fitLowEdgeB = 60.0; // 45.0
+	  fitHighEdgeB=210.0; //210.0
+	  defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	  aB=-1.358E-02; // -0.02;
+	  bB=-1.363E-04; // -0.0001;
+	  cB= 3.657E-07; //  0.0000003;
+	  dB= 1.449E+04; // 41000;
       }
+      else if(plotname.Contains("bqPt")){
+	  // head
+	  fitLowEdge =30.0;
+	  fitHighEdge=75.0;
+	  def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	  a= 2.711E-01;
+	  b=-4.337E-03;
+	  c= 2.192E-05;
+	  d= 3.548E+01;
+	  // tail
+	  fitLowEdgeB = 75.0;
+	  fitHighEdgeB=450.0;
+	  defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	  aB=-1.704E-02;
+	  bB=-4.333E-05;
+	  cB= 7.428E-08;
+	  dB= 2.887E+04;
+      }
+
     }
     else if(model=="powheg"){
       if(plotname.Contains("ttbarMass")){
