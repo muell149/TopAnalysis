@@ -1870,8 +1870,6 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
     Double_t binerr2 = binc*binc*lumierr*lumierr;
     Double_t topunc = 0; // uncertainty on top xsec
     
-//     double topxsec = 161.6; //157.5
-//     double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
     //Kidonakis
     double topxsec = 165.6;
     double topxsecErr2 = 2.2*2.2 + 4.4*4.4 + 5.5*5.5; //topxsecErr2 = lumiErr*lumiErr + topxsecScaleErr*topxsecScaleErr + topxsecPDFErr*topxsecPDFErr
@@ -1914,7 +1912,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
 
     
   // Create Directory for Output Plots 
@@ -2422,7 +2420,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
   double SignalEvents = 63244696.0;
   double Xbins[XAxisbins.size()];
   double binWidth[XAxisbinCenters.size()];
-  double topxsec = 161.6;
+  double topxsec = 165.6;
   for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
   double DataSum[XAxisbinCenters.size()];
   double GenSignalSum[XAxisbinCenters.size()];
@@ -2697,7 +2695,7 @@ void Plotter::PlotDiffXSec(){
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
     cout << endl; 
     
-    double topxsec = 161.6;
+    double topxsec = 165.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
     double Xbins[XAxisbins.size()];
@@ -3324,7 +3322,7 @@ void Plotter::PlotDiffXSec(){
     //    mcatnloBand->Draw("same, F");
     GenPlotTheory->SetLineColor(kRed+1);
     GenPlotTheory->SetLineWidth(2);
-    //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
+    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
     GenPlotTheory->Draw("SAME,C");
     h_GenDiffXSec->SetLineColor(kRed+1);
 
@@ -3413,7 +3411,7 @@ void Plotter::PlotDiffXSec(){
       Double_t binerr2 = binc*binc*lumierr*lumierr;
       Double_t topunc = 0; // uncertainty on top xsec
       
-      double topxsec = 161.6; //157.5
+      double topxsec = 165.6; //157.5
       double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
       
       double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
@@ -3501,7 +3499,7 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
     } else{
       Double_t nevents = weight->GetEntries();
       //
-      Double_t crosssection = 161.6; //######
+      Double_t crosssection = 165.6; //######
       Double_t binw = hist->GetBinWidth(1);
       wgt = crosssection/nevents/binw;
     }
@@ -3574,7 +3572,7 @@ TH1* Plotter::GetNloCurve(TString NewName, TString Generator){
     
     Double_t wgt = 1.;
     Double_t nevents = 16420479;//weight->GetEntries();
-    Double_t crosssection = 161.6;
+    Double_t crosssection = 165.6;
     Double_t binw = hist->GetBinWidth(1);
     wgt = crosssection/nevents/binw;
     rethist->Scale(wgt);
