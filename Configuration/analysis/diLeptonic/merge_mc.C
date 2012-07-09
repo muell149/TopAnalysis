@@ -49,7 +49,7 @@ void merge(string channel){
 
   list<string>::iterator it;
   
-  double topxsec = 164.0;
+  double topxsec = 165.6;
 
   map<string,float> MCXsecmap; //map of sample and cross-section
   
