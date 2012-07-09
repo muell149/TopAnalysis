@@ -84,8 +84,9 @@ process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(WANTSUMMARY)
 )
 
+print options.maxEvents
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(MAXEVENTS)
+    input = cms.untracked.int32(options.maxEvents)
 )
 
 ####################################################################
