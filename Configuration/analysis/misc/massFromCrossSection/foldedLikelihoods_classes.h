@@ -241,24 +241,5 @@ FinalLikeliResults::FinalLikeliResults(const TString& label,
   ellipse = RooEllipse(label+"_ellipse", bestX, bestY, xBestErr[0], yBestErr[0], correl);
 }
 
-//  std::cout << mocTF->Eval(xMinTest-alphaLowErr, yMinTest) << " "
-//	    << mocTF->Eval(xMinTest+alphaLowErr, yMinTest) << " "
-//	    << mocTF->Eval(xMinTest, yMinTest-massLowErr) << " "
-//	    << mocTF->Eval(xMinTest, yMinTest+massLowErr) << std::endl;
-//
-//  const int nLevels = 4;
-//  const double levels[nLevels] = {mocTF->Eval(xMinTest+alphaLowErr, yMinTest),
-//				  mocTF->Eval(xMinTest, yMinTest-massLowErr),
-//				  mocTF->Eval(xMinTest-alphaLowErr, yMinTest),
-//				  mocTF->Eval(xMinTest, yMinTest+massLowErr)};
-//  mocTF->SetContour(nLevels, levels);
-
-//  std::cout << "Latest Integral: " << mocTF->Integral(0.1, 0.13, 140., 190.) << std::endl;
-//  std::cout << "Latest Integral: " << mocTF->Integral(xMinTest-alphaLowErr,
-//						      xMinTest+alphaLowErr,
-//						      yMinTest-massLowErr,
-//						      yMinTest+massLowErr) << std::endl;
-
-
 #endif
 
