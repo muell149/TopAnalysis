@@ -2,8 +2,8 @@
 // 1. initialize an up-to-date ROOT version, e.g. with: ini ROOT532
 //    (there are issues when drawing graphs with errors in old ROOT versions)
 // 2. compile like: g++ -Wall -Wextra -O2 `root-config --cflags --libs` -lRooFit -o foldedLikelihoods foldedLikelihoods.C
-// 3. execute with: foldedLikelihoods [options]
-//    where options could be: 'pole'/'MSbar' and 'MSTW'/'HERA' or 'all'
+// 3. execute with: foldedLikelihoods [massScheme]
+//    where the supported mass schemes are: 'pole' and 'msbar'
 //
 
 #include "Riostream.h"
@@ -273,8 +273,8 @@ std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, 
   return vec;
 }
 
-void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mass, const TF1* xsecFunc, const TString title,
-		     TCanvas* canvas, const TString printNameBase, const TString epsName)
+void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mass, RooRealVar& alpha, const TF1* xsecFunc,
+		     const TString title, TCanvas* canvas, const TString printNameBase, const TString epsName)
 {
   if(mass.getTitle().Contains("pole"))
     mass.setVal(172.5);
@@ -301,7 +301,8 @@ void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mas
   convLeg.AddEntry(convFrame->findObject(predXSec->name+"_prob_Norm[xsec]"           ), "Gauss#otimesRect", "F");
   convLeg.Draw();
   char tmpTxt[99];
-  sprintf(tmpTxt, "%s, %s = %.1f GeV", title.Data(), mass.getTitle().Data(), mass.getVal());
+  sprintf(tmpTxt, "%s, %s = %.1f GeV, %s = %.4f",
+	  title.Data(), mass.getTitle().Data(), mass.getVal(), alpha.getTitle().Data(), alpha.getVal());
   TLatex text(0.,0.,tmpTxt);
   text.SetNDC();
   text.SetTextAlign(13);
@@ -347,7 +348,8 @@ void plotProjectedPDF(RooAbsPdf* pdf, RooPlot* frame, const int color, const int
 TLatex* cmsTxt(const bool full2011dilep)
 {
   const TString txt = (full2011dilep ?
-		       "CMS, 2.3 fb^{-1} at  #sqrt{s} = 7 TeV" :
+		       //		       "CMS, 2.3 fb^{-1} at  #sqrt{s} = 7 TeV" :
+		       "CMS 2011 t#bar{t} Data #times Approx. NNLO by Langenfeld et al." :
 		       "CMS Preliminary, 1.14 fb^{-1} at  #sqrt{s} = 7 TeV");
   TLatex* text = new TLatex(3.570061,23.08044,txt);
   text->SetNDC();
@@ -454,9 +456,23 @@ int foldedLikelihoods(const bool pole)
     mass.SetTitle("m_{t}^{#bar{MS}}");
 
   RooRealVar alpha("alpha", "#alpha_{S}(M_{Z})", 0.10, 0.13);
-  alpha.setVal(0.117);
 
   RooRealVar xsec("xsec" , "#sigma_{t #bar{t}}", 0., 900., "pb");
+
+  RooRealVar alpha2012_mean("alpha2012_mean", "alpha2012_mean", 0.1184);
+  RooRealVar alpha2012_unc ("alpha2012_unc" , "alpha2012_unc" , 0.0007);
+
+  RooRealVar alphaMSTW_mean("alphaMSTW_mean", "alphaMSTW_mean", 0.1171); //Eur.Phys.J.C64:653-680,2009
+  RooRealVar alphaMSTW_unc ("alphaMSTW_unc" , "alphaMSTW_unc" , 0.0014); //Eur.Phys.J.C64:653-680,2009
+
+  RooRealVar alphaHERA_mean("alphaHERA_mean", "alphaHERA_mean", 0.1176);
+  RooRealVar alphaHERA_unc ("alphaHERA_unc" , "alphaHERA_unc" , 0.0020);
+
+  alpha.setVal(alphaMSTW_mean.getVal());
+
+  RooRealVar mass_mean("mass_mean", "mass_mean", 173.2); // Tevatron July 2012
+  RooRealVar mass_unc ("mass_unc" , "mass_unc" , 1.4); // Tevatron July 2012 plus 1 GeV for m(pole)/m(MC)?
+  RooGaussian massProb("massProb", "massProb", mass, mass_mean, mass_unc);
 
   mass.setRange("mass_fullRange", 140., 190.);
   xsec.setRange("xsec_fullRange", 10., 900.);
@@ -526,12 +542,15 @@ int foldedLikelihoods(const bool pole)
 
     alphaFile.Close();
 
-    drawConvolution(mocPredXSec[h], xsec, mass, moc[h]->GetFunction("f1"), title[h][1], canvas, printNameBase,
+    if(h==0)
+      alpha.setVal(alphaMSTW_mean.getVal());
+    else if(h==1)
+      alpha.setVal(alphaHERA_mean.getVal());
+
+    drawConvolution(mocPredXSec[h], xsec, mass, alpha, moc[h]->GetFunction("f1"), title[h][1], canvas, printNameBase,
 		    epsString("convolution_moch", pole, h));
-    //    plot2DimProb(mocPredXSec[h], canvas, title[h][1], printNameBase, epsString("2d_moch", pole, h));
-    drawConvolution(ahrPredXSec[h], xsec, mass, ahr[h]->GetFunction("f1"), title[h][0], canvas, printNameBase,
+    drawConvolution(ahrPredXSec[h], xsec, mass, alpha, ahr[h]->GetFunction("f1"), title[h][0], canvas, printNameBase,
 		    epsString("convolution_ahrens", pole, h));
-    //    plot2DimProb(ahrPredXSec[h], canvas, title[h][0], printNameBase, epsString("2d_ahrens", pole, h));
   }
 
   const int colorAhr = kMagenta;
@@ -557,34 +576,34 @@ int foldedLikelihoods(const bool pole)
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsString("xsec_vs_alpha", pole, 0));
 
-  RooRealVar alpha2009_mean("alpha2009_mean", "alpha2009_mean", 0.1184);
-  RooRealVar alpha2009_unc ("alpha2009_unc" , "alpha2009_unc" , 0.0007);
-
-  RooRealVar alphaMSTW_mean("alphaMSTW_mean", "alphaMSTW_mean", 0.1171); //Eur.Phys.J.C64:653-680,2009
-  RooRealVar alphaMSTW_unc ("alphaMSTW_unc" , "alphaMSTW_unc" , 0.0014); //Eur.Phys.J.C64:653-680,2009
-
-  RooRealVar alphaHERA_mean("alphaHERA_mean", "alphaHERA_mean", 0.1176);
-  RooRealVar alphaHERA_unc ("alphaHERA_unc" , "alphaHERA_unc" , 0.0020);
-
-  RooRealVar mass_mean("mass_mean", "mass_mean", 173.2); // Tevatron July 2012
-  RooRealVar mass_unc ("mass_unc" , "mass_unc" , 1.4); // Tevatron July 2012 plus 1 GeV for m(pole)/m(MC)?
-  RooGaussian massProb("massProb", "massProb", mass, mass_mean, mass_unc);
-
   RooGaussian alphaProb[2] = {RooGaussian("alphaProbMSTW", "alphaProbMSTW", alpha, alphaMSTW_mean, alphaMSTW_unc),
 			      RooGaussian("alphaProbHERA", "alphaProbHERA", alpha, alphaHERA_mean, alphaHERA_unc)};
+
+//  RooProdPdf testProd("testProd", "testProd", RooArgList(measXSecPDF,mocPredXSec[0]->prob, alphaProb[0]));
+//  RooAbsPdf*  projPdfTest = testProd.createProjection(xsec);
+//  TF2* f2Test = (TF2*) projPdfTest->asTF(RooArgList(alpha, mass), RooArgList(), RooArgSet(alpha, mass));
+//  gStyle->SetPalette(1);
+//  f2Test->GetXaxis()->SetTitle(alpha.getTitle());
+//  f2Test->GetYaxis()->SetTitle(mass.getTitle(true));
+//  //  f2Test->Draw("cont3");
+//  f2Test->SetLineColor(kGray);
+//  f2Test->Draw("surf7");
+//  f2Test->Draw("cont1 same");
+//  canvas->Print("test.eps");
+//
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
 
   FinalLikeliResults* mocResultAlpha[2];
   FinalLikeliResults* mocResultMass [2];
 
   gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
 
-  const double alphaAxisMin = 0.11;
-  const double alphaAxisMax = 0.13;
+  const double alphaAxisMin = 0.1135;
+  const double alphaAxisMax = 0.1205;
 
   const double massAxisMin = 170.;
   const double massAxisMax = 180.;
-
-  const int markerStyle[2] = {22, 23};
 
   for(unsigned h=0; h<2; h++) {
     const TString suf = (h ? "HERA" : "MSTW");
@@ -601,96 +620,160 @@ int foldedLikelihoods(const bool pole)
     mocResultMass[h]->point.GetYaxis()->SetRangeUser(massAxisMin, massAxisMax);
     mocResultMass[h]->point.SetPointError(0, 0, mocResultMass[h]->point.GetErrorY(0));
 
-    mocResultAlpha[h]->point.SetMarkerStyle(markerStyle[h]);
-    mocResultMass [h]->point.SetMarkerStyle(markerStyle[h]);
-  }
+    mocResultMass[h]->point  .SetLineStyle(2+h);
+    mocResultMass[h]->ellipse.SetLineStyle(2+h);
 
-  TBox boxAlpha2009(alpha2009_mean.getVal()-alpha2009_unc.getVal(), massAxisMin,
-		    alpha2009_mean.getVal()+alpha2009_unc.getVal(), massAxisMax);
-  boxAlpha2009.SetFillColor(kYellow-9);
-  TLine lineAlpha2009(alpha2009_mean.getVal(), massAxisMin,
-		      alpha2009_mean.getVal(), massAxisMax);
-  lineAlpha2009.SetLineColor(kGray);
+    mocResultAlpha[h]->point  .SetLineStyle(2+h);
+    mocResultAlpha[h]->ellipse.SetLineStyle(2+h);
+  }
+  mocResultMass[0]->point.SetMarkerStyle(22);
+  mocResultMass[1]->point.SetMarkerStyle(26);
+
+  mocResultAlpha[0]->point.SetMarkerStyle(23);
+  mocResultAlpha[1]->point.SetMarkerStyle(32);
+
+  TBox boxAlpha2012(alpha2012_mean.getVal()-alpha2012_unc.getVal(), massAxisMin,
+		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), massAxisMax);
+  boxAlpha2012.SetFillColor(kYellow-9);
+  boxAlpha2012.SetFillStyle(3007);
+  TLine lineAlpha2012(alpha2012_mean.getVal(), massAxisMin,
+		      alpha2012_mean.getVal(), massAxisMax);
+  TLine lineAlpha2012_left(alpha2012_mean.getVal()-alpha2012_unc.getVal(), massAxisMin,
+			   alpha2012_mean.getVal()-alpha2012_unc.getVal(), massAxisMax);
+  TLine lineAlpha2012_right(alpha2012_mean.getVal()+alpha2012_unc.getVal(), massAxisMin,
+			    alpha2012_mean.getVal()+alpha2012_unc.getVal(), massAxisMax);
+  lineAlpha2012_left .SetLineColor(kYellow-9);
+  lineAlpha2012_right.SetLineColor(kYellow-9);
+
+  TText textAlpha2012(alpha2012_mean.getVal(), massAxisMax-0.5, "PDG 2012");
+  textAlpha2012.SetTextAngle(90);
+  textAlpha2012.SetTextAlign(31);
+  textAlpha2012.SetTextSizePixels(18);
+  textAlpha2012.SetTextFont(42);
+
+  TText textAlphaMSTW(alphaMSTW_mean.getVal(), massAxisMax-0.5, "Default MSTW 2008");
+  textAlphaMSTW.SetTextAngle(90);
+  textAlphaMSTW.SetTextAlign(31);
+  textAlphaMSTW.SetTextSizePixels(14);
+  textAlphaMSTW.SetTextFont(42);
+
+  TText textAlphaHERA(alphaHERA_mean.getVal(), massAxisMax-0.5, "Default HERAPDF 1.5");
+  textAlphaHERA.SetTextAngle(90);
+  textAlphaHERA.SetTextAlign(31);
+  textAlphaHERA.SetTextSizePixels(14);
+  textAlphaHERA.SetTextFont(42);
 
   TBox boxAlphaMSTW(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), massAxisMin,
 		    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), massAxisMax);
   boxAlphaMSTW.SetFillColor(kGreen-9);
+  boxAlphaMSTW.SetFillStyle(3013);
   TLine lineAlphaMSTW(alphaMSTW_mean.getVal(), massAxisMin,
 		      alphaMSTW_mean.getVal(), massAxisMax);
-  lineAlphaMSTW.SetLineColor(kGray);
+
+  TLine lineAlphaMSTW_left(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), massAxisMin,
+			   alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), massAxisMax);
+  TLine lineAlphaMSTW_right(alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), massAxisMin,
+			    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), massAxisMax);
+  lineAlphaMSTW_left .SetLineColor(kGreen-9);
+  lineAlphaMSTW_right.SetLineColor(kGreen-9);
 
   TBox boxAlphaHERA(alphaHERA_mean.getVal()-alphaHERA_unc.getVal(), massAxisMin,
 		    alphaHERA_mean.getVal()+alphaHERA_unc.getVal(), massAxisMax);
   boxAlphaHERA.SetFillColor(kCyan-9);
   TLine lineAlphaHERA(alphaHERA_mean.getVal(), massAxisMin,
 		      alphaHERA_mean.getVal(), massAxisMax);
-  lineAlphaHERA.SetLineColor(kGray);
 
   TBox boxMass(alphaAxisMin, mass_mean.getVal()-mass_unc.getVal(),
 	       alphaAxisMax, mass_mean.getVal()+mass_unc.getVal());
   boxMass.SetFillColor(kMagenta-9);
   TLine lineMass(alphaAxisMin, mass_mean.getVal(),
 		 alphaAxisMax, mass_mean.getVal());
-  lineMass.SetLineColor(kGray);
 
-  mocResultAlpha[0]->point.Draw("AP");
-  boxMass.Draw();
-  lineMass.Draw();
-  boxAlphaHERA.Draw();
-  lineAlphaHERA.Draw();
-  boxAlphaMSTW.Draw();
-  lineAlphaMSTW.Draw();
-  boxAlpha2009.Draw();
-  lineAlpha2009.Draw();
-  gPad->RedrawAxis();
-  for(unsigned h=0; h<2; h++) {
-    mocResultAlpha[h]->point.Draw("P");
-    mocResultAlpha[h]->ellipse.Draw("L");
-  }
-  canvas->Print(printNameBase+".ps");
+  TText textMass(alphaAxisMin+0.0002, mass_mean.getVal(), "Tevatron July 2012");
+  textMass.SetTextAlign(11);
+  textMass.SetTextSizePixels(18);
+  textMass.SetTextFont(42);
+
+  TLegend legResultsMass = TLegend(0.2, 0.76, 0.5, 0.9);
+  legResultsMass.SetFillStyle(0);
+  legResultsMass.SetBorderSize(0);
+  legResultsMass.AddEntry(&mocResultMass[0]->point, "MSTW 2008"  , "PL");
+  legResultsMass.AddEntry(&mocResultMass[1]->point, "HERAPDF 1.5", "PL");
+
+  TLegend legResultsAlpha = TLegend(0.2, 0.76, 0.5, 0.9);
+  legResultsAlpha.SetFillStyle(0);
+  legResultsAlpha.SetBorderSize(0);
+  legResultsAlpha.AddEntry(&mocResultAlpha[0]->point, "MSTW 2008"  , "PL");
+  legResultsAlpha.AddEntry(&mocResultAlpha[1]->point, "HERAPDF 1.5", "PL");
 
   mocResultMass[0]->point.Draw("AP");
   boxMass.Draw();
+  boxAlpha2012.Draw();
+  lineAlpha2012_left .Draw();
+  lineAlpha2012_right.Draw();
   lineMass.Draw();
-  boxAlphaHERA.Draw();
-  lineAlphaHERA.Draw();
-  boxAlphaMSTW.Draw();
-  lineAlphaMSTW.Draw();
-  boxAlpha2009.Draw();
-  lineAlpha2009.Draw();
+  lineAlpha2012.Draw();
   gPad->RedrawAxis();
   for(unsigned h=0; h<2; h++) {
     mocResultMass[h]->point.Draw("P");
     mocResultMass[h]->ellipse.Draw("L");
   }
+  legResultsMass.Draw();
+  textAlpha2012.Draw();
+  textMass.Draw();
+  TLatex* cmsLabel = cmsTxt(full2011dilep);
+  cmsLabel->Draw();
   canvas->Print(printNameBase+".ps");
+  canvas->Print(epsString("results_mass", pole, 0));
+  canvas->Print("results_mass.root");
+
+  mocResultAlpha[0]->point.Draw("AP");
+  boxAlphaHERA.Draw();
+  boxAlphaMSTW.Draw();
+  lineAlphaMSTW_left .Draw();
+  lineAlphaMSTW_right.Draw();
+  boxAlpha2012.Draw();
+  lineAlphaHERA.Draw();
+  lineAlpha2012_left .Draw();
+  lineAlpha2012_right.Draw();
+  lineAlphaMSTW.Draw();
+  lineAlpha2012.Draw();
+  gPad->RedrawAxis();
+  for(unsigned h=0; h<2; h++) {
+    mocResultAlpha[h]->point.Draw("P");
+    mocResultAlpha[h]->ellipse.Draw("L");
+  }
+  legResultsAlpha.Draw();
+  textAlpha2012.Draw();
+  textAlphaMSTW.Draw();
+  textAlphaHERA.Draw();
+  cmsLabel->Draw();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(epsString("results_alpha", pole, 0));
+  canvas->Print("results_alpha.root");
+
+  const TString header[2] = {"MSTW 2008", "HERAPDF 1.5"};
 
   for(unsigned h=0; h<2; h++) {
+    TLegend legResultsAlphaMass = TLegend(0.2, 0.69, 0.5, 0.9);
+    legResultsAlphaMass.SetFillStyle(0);
+    legResultsAlphaMass.SetBorderSize(0);
+    legResultsAlphaMass.SetHeader(header[h]);
+    legResultsAlphaMass.AddEntry(&mocResultMass [h]->point, "Constrained #alpha_{S}", "PL");
+    legResultsAlphaMass.AddEntry(&mocResultAlpha[h]->point, "Constrained m_{t}"     , "PL");
+
     mocResultAlpha[h]->point.Draw("AP");
-    boxMass.Draw();
-    lineMass.Draw();
-    if(h) {
-      boxAlphaHERA.Draw();
-      lineAlphaHERA.Draw();
-    }
-    else {
-      boxAlphaMSTW.Draw();
-      lineAlphaMSTW.Draw();
-    }
-    gPad->RedrawAxis();
-    mocResultAlpha[h]->point.Draw("P");
     mocResultAlpha[h]->ellipse.Draw("L");
     mocResultMass [h]->point.Draw("P");
     mocResultMass [h]->ellipse.Draw("L");
+    legResultsAlphaMass.Draw();
+    cmsLabel->Draw();
     canvas->Print(printNameBase+".ps");
+    TString canvasName = "results_alpha_vs_mass_"; canvasName += h;
+    canvas->Print(canvasName+".root");
+    canvas->Print(epsString("results_alpha_vs_mass", pole, h));
   }
 
-  canvas->Print(printNameBase+".ps]");
-  return 0;
-
-//  const double mocMax = mocTF->GetMaximumX();
-//  const double ahrMax = ahrTF->GetMaximumX();
-//
 //  if(pole) {
 //    std::cout << "============================================================" << std::endl;
 //    std::cout << "Langenfeld et al.: Extracted pole mass = " << mocMax
@@ -699,12 +782,6 @@ int foldedLikelihoods(const bool pole)
 //	      << " GeV (converted to MSbar mass: " << mMSbar(ahrMax) << " GeV)" << std::endl;
 //    std::cout << "============================================================" << std::endl;
 //  }
-//
-//  double mocLowErr, mocHigErr;
-//  double ahrLowErr, ahrHigErr;
-//
-//  getUncertaintiesFromIntegral(ahrTF, ahrLowErr, ahrHigErr  , 140., 200., 1., 0.01);
-//  getUncertaintiesFromIntegral(mocTF, mocLowErr, mocHigErr  , 140., 200., 1., 0.01);
 //
 //  if(full2011dilep)
 //    frame = mass.frame(RooFit::Range(160., 190.));
@@ -760,22 +837,32 @@ int foldedLikelihoods(const bool pole)
 //  ahr->GetYaxis()->CenterTitle(false);
 //  gPad->RedrawAxis();
 //  canvas->Print(printNameBase+".ps");
-//  
-//  // cleaning up
-//
-//  canvas->Print(printNameBase+".ps]");
-//
-//  if(!pole) {
-//    delete runningAlpha;
-//    delete mShift;
-//  }
-//  for(unsigned j=0; j<4; j++) {
-//    delete ahr_vec.at(j);
-//    delete moc_vec.at(j);
-//  }
-//  delete canvas;
-//  delete f1;
-//  delete cmsLabel;
+  
+  // cleaning up
+
+  canvas->Print(printNameBase+".ps]");
+
+  if(!pole) {
+    delete runningAlpha;
+    delete mShift;
+  }
+  for(unsigned h=0; h<2; h++) {
+    for(unsigned j=0; j<4; j++) {
+      delete ahr_vec[h].at(j);
+      delete moc_vec[h].at(j);
+      for(unsigned i=0; i<moc_funcs[h][j].size(); i++) {
+	delete moc_funcs[h][j].at(i);
+	delete ahr_funcs[h][j].at(i);
+      }
+    }
+    delete mocPredXSec[h];
+    delete ahrPredXSec[h];
+    delete mocResultAlpha[h];
+    delete mocResultMass[h];
+  }
+  delete canvas;
+  delete f1;
+  delete cmsLabel;
 
   return 0;
 }
@@ -785,23 +872,15 @@ int foldedLikelihoods(const bool pole)
 //////////////////////////////////////////////////
 
 int main(const int argc, const char** argv) {
-  TString arguments = "";
-  for(int i=1; i<argc; i++)
-    arguments += argv[i];
-  arguments.ToLower();
-  if(arguments=="all") {
-    return
-      foldedLikelihoods(0) +
-      foldedLikelihoods(1);
+  if(argc!=2) {
+    std::cout << "Wrong number of arguments!" << std::endl;
+    std::cout << "Choose either 'pole' or 'msbar'...!" << std::endl;
+    return 64;
   }
-  else if(arguments.Contains("all")) {
-    std::cout << "Option 'all' should not be combined with other arguments!" << std::endl;
-    return 999;
+  else if(strcmp(argv[1],"msbar") && strcmp(argv[1],"pole")) {
+    std::cout << "Unkown argument: " << argv[1] << std::endl;
+    std::cout << "Choose either 'pole' or 'msbar'...!" << std::endl;
+    return 64;
   }
-  if(arguments.Contains("pole") && arguments.Contains("msbar")) {
-    std::cout << "Should choose either 'pole' or 'MSbar'...!" << std::endl;
-    return 999;
-  }
-  const bool pole = !arguments.Contains("msbar");
-  return foldedLikelihoods(pole);
+  return foldedLikelihoods(!strcmp(argv[1],"pole"));
 }
