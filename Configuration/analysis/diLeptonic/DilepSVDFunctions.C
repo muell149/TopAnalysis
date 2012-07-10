@@ -325,6 +325,29 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
     TH1D* unfDown = arrUnfoldedNorm + 2; 
      
      
+    TCanvas *c = new TCanvas("Ivan", "Ivan");
+    TLegend * leg =  new TLegend(0.70,0.55,0.98,0.85);
+    TH1 *Nominal= (TH1*)unfNom->Clone("Nominal");
+    TH1 *NominalUp= (TH1*)unfUp->Clone("NominalUp");
+    TH1 *NominalDown= (TH1*)unfDown->Clone("NominalDown");
+    Nominal->SetLineColor(kBlack);
+    NominalUp->SetLineColor(kRed);
+    NominalDown->SetLineColor(kBlue);
+    leg->AddEntry(Nominal, "Nominal", "p");
+    leg->AddEntry(NominalUp, "Up", "lp");
+    leg->AddEntry(NominalDown, "Down", "lp");
+    Nominal->DrawNormalized();
+    NominalUp->DrawNormalized("same");
+    NominalDown->DrawNormalized("same");
+    leg->Draw("same");
+    c->Print(TString("Plots/").Copy().Append(channel).Append("/SystComparison_").Append(channel).Append("_").Append(particle).Append("_").Append(quantity).Append("_").Append(syst).Append(".eps"));
+    leg->Clear();
+    Nominal->Clear();Nominal->Delete();
+    NominalUp->Clear();NominalUp->Delete();
+    NominalDown->Clear();NominalDown->Delete();
+    c->Clear();
+    
+    
     // Create the output histogram for this function
     if ( shifts == NULL ) {
         shifts =  (TH1D*) unfNom->Clone("shifts");

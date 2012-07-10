@@ -529,7 +529,7 @@ namespace semileptonic {
     label->SetFillStyle(0);
     label->SetBorderSize(0);
     if(textSize!=0) label->SetTextSize(textSize);
-    label->SetTextAlign(22);
+    label->SetTextAlign(32);
     label->Draw("same");
   }
 

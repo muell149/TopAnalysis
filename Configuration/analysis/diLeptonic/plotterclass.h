@@ -62,6 +62,8 @@ class Plotter {
   void UnfoldingOptions(bool doSVD);
   void SetOutpath(TString path); 
   void ApplyMCATNLOWeight(TH1* hist, TString Systematic, TString Shift, TString Sample);
+  TLegend* ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> legends, TLegend *leg);
+  TLegend* ControlLegend(int HistsSize, TH1D* drawhists[], std::vector<TString> Legends, TLegend *leg);
  private:
   TString name;
   TString specialComment;
@@ -1381,12 +1383,12 @@ void Plotter::setDataSet(TString mode)
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
-	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("diboson"); colors.push_back(10);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("Diboson"); colors.push_back(10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
 	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
 //	else if(filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
 	else if(filename.Contains("wtolnu")){legends.push_back("W+jets"); colors.push_back(kGreen-3);}
-	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
+	else if(filename.Contains("qcd")){legends.push_back("QCD Multijet"); colors.push_back(kYellow);}
       }
     }
   }
@@ -1409,11 +1411,11 @@ void Plotter::setDataSet(TString mode)
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
-	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("diboson"); colors.push_back(10);}
+	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("Diboson"); colors.push_back(10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
 	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
 	else if(filename.Contains("wtolnu")){legends.push_back("W+jets"); colors.push_back(kGreen-3);}
-	else if(filename.Contains("qcd")){legends.push_back("QCD"); colors.push_back(kYellow);}
+	else if(filename.Contains("qcd")){legends.push_back("QCD Multijet"); colors.push_back(kYellow);}
       }
     }
   }
@@ -1453,11 +1455,11 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
-	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("diboson"); colorsUp.push_back(10);}
+	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("Diboson"); colorsUp.push_back(10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
 	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
 	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+jets"); colorsUp.push_back(kGreen-3);}
-	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD"); colorsUp.push_back(kYellow);}
+	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD Multijet"); colorsUp.push_back(kYellow);}
       }
     }
     while(!FileListDown.eof()){
@@ -1468,11 +1470,11 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
-	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("diboson"); colorsDown.push_back(10);}
+	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("Diboson"); colorsDown.push_back(10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
 	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
 	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+jets"); colorsDown.push_back(kGreen-3);}
-	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD"); colorsDown.push_back(kYellow);}
+	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD Multijet"); colorsDown.push_back(kYellow);}
       }
     }
   }
@@ -1506,11 +1508,11 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
-	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("diboson"); colorsUp.push_back(10);}
+	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("Diboson"); colorsUp.push_back(10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
 	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
 	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+jets"); colorsUp.push_back(kGreen-3);}
-	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD"); colorsUp.push_back(kYellow);}
+	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD Multijet"); colorsUp.push_back(kYellow);}
       }
     }
     while(!FileListDown.eof()){
@@ -1521,11 +1523,11 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
-	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("diboson"); colorsDown.push_back(10);}
+	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("Diboson"); colorsDown.push_back(10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
 	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
 	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+jets"); colorsDown.push_back(kGreen-3);}
-	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD"); colorsDown.push_back(kYellow);}
+	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD Multijet"); colorsDown.push_back(kYellow);}
       }
     }
   }
@@ -1837,7 +1839,8 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
       }
     }
   } 
-    
+  
+  leg = ControlLegend(hists.size(), drawhists, legends, leg);
   
   TFile *f0 = new TFile("SigBackground.root","UPDATE");
 
@@ -1885,7 +1888,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   syshist->SetFillStyle(3004);
   syshist->SetFillColor(kBlack);
   leg->AddEntry( syshist, "uncertainty", "f" );
-
+  
   drawhists[0]->SetMinimum(ymin);
   if(rangemin!=0)drawhists[0]->SetAxisRange(rangemin, rangemax, "X");
   if(logY){  
@@ -1918,7 +1921,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   // Create Directory for Output Plots 
   gSystem->MakeDirectory(outpathPlots);
   int cntMkdirTries = 0;
-  gSystem->MakeDirectory(outpathPlots+subfolderChannel+subfolderSpecial);  
+  gSystem->MakeDirectory(outpathPlots+"/"+subfolderChannel+"/"+subfolderSpecial);  
   c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+name+".eps");  
   c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+name+".C");  
   c->Clear();  
@@ -1935,6 +1938,7 @@ void Plotter::setStyle(TH1 &hist, unsigned int i)
 {
   hist.SetFillColor(colors[i]);
   hist.SetLineColor(colors[i]);
+  hist.SetLineWidth(1);
   
 
   if(legends[i] == "Data"){
@@ -2198,7 +2202,9 @@ void Plotter::MakeTable(){
   ofstream EventFile9; 
   string EventFilestring = outpathPlots.Data();
   EventFilestring.append(subfolderChannel.Data());
-  EventFilestring.append(subfolderSpecial.Data()); 
+  EventFilestring.append(subfolderSpecial.Data());
+  gSystem->MakeDirectory(outpathPlots);
+  gSystem->MakeDirectory(outpathPlots+"/"+subfolderChannel+"/"+subfolderSpecial);  
   string EventFilestring5;
   string EventFilestring6;
   string EventFilestring7;
@@ -3251,44 +3257,24 @@ void Plotter::PlotDiffXSec(){
       
     }
     
-
-
     TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
     mcatnloBand->SetFillColor(kGray);
     mcatnloBand->SetLineColor(kAzure);
     mcatnloBand->SetLineWidth(2);
     
-    TGraphErrors *KidoHist=NULL;
     TH1F *Kidoth1=NULL;
     TH1F *Kidoth1_Binned=NULL;
+    TFile *KidoFile=NULL;
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
-      if(name.Contains("ToppT")){	//too early to be clever
-	    TGraphErrors *KidoTemp = new TGraphErrors("pttopnnloapprox7lhc173m.txt");
-	    double kidoscale = 1./KidoTemp->Integral(-1,-1);
-    	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
-	      Double_t graphx,graphy;
-	      KidoTemp->GetPoint(points, graphx, graphy);
-	      graphy=graphy*kidoscale;
-	      KidoTemp->SetPoint(points, graphx, graphy);
-    	}
-    	KidoHist = (TGraphErrors*)KidoTemp->Clone();
-    	delete KidoTemp;
-      }else{
-    	TGraphErrors *KidoTemp = new TGraphErrors("ytopnnloapprox7lhc173m.txt");
-    	double kidoscale = 1./KidoTemp->Integral(-1,-1);
-    	for(Int_t points = 0; points < KidoTemp->GetN(); points++) {
-	      Double_t graphx,graphy;
-	      KidoTemp->GetPoint(points, graphx, graphy);
-	      graphy=graphy*kidoscale;
-	      KidoTemp->SetPoint(points, graphx, graphy);
-    	}
-    	KidoHist = (TGraphErrors*)KidoTemp->Clone();
-        delete KidoTemp;
+      KidoFile=TFile::Open("dilepton_kidonakisNNLO.root");
+      if(name.Contains("ToppT")){
+        Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
       }
-      Kidoth1 = ConvertGraphToHisto(KidoHist);
-      Kidoth1_Binned = reBinTH1FIrregularNewBinning(Kidoth1, "newKido", true);
+      else if(name.Contains("TopRapidity")){
+        Kidoth1_Binned = (TH1F*)KidoFile->Get("topY");
+      }
     }
-
+    
 //    TH1 *MCFMHist;
 //    TFile* MCFMfile = new TFile("diffCrossSections_normalized_tt_bbl_todk_MSTW200_172_172_ful_central.root","READ");
 //
@@ -3322,8 +3308,10 @@ void Plotter::PlotDiffXSec(){
     //    mcatnloBand->Draw("same, F");
     GenPlotTheory->SetLineColor(kRed+1);
     GenPlotTheory->SetLineWidth(2);
-    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
-    GenPlotTheory->Draw("SAME,C");
+//    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
+    if( name.Contains("HypLeptonpT") ||name.Contains("HypBJetpT") || name.Contains("HypLLBarpT") || name.Contains("HypTTBarpT") ){
+       GenPlotTheory->Draw("SAME,C");
+    }
     h_GenDiffXSec->SetLineColor(kRed+1);
 
     //bool binned_theory=true; 
@@ -3345,15 +3333,17 @@ void Plotter::PlotDiffXSec(){
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
       Kidoth1_Binned->SetLineWidth(2);
       Kidoth1_Binned->SetLineColor(kOrange-3); //########################
-      KidoHist->SetLineColor(kOrange-3);
-      KidoHist->SetLineWidth(2);
       Kidoth1_Binned->Draw("SAME");
-      KidoHist->Draw("SAME, L");
-    }
+     }
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
 
-    GenPlotTheory->Draw("SAME,C"); //### 150512 ###
+    if( !name.Contains("HypLeptonpT") && !name.Contains("HypBJetpT") && !name.Contains("HypLLBarpT") && !name.Contains("HypTTBarpT") ){
+        TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
+        SmoothMadgraph->Smooth(10);
+        SmoothMadgraph->Draw("SAME, L");
+    }
+    else {GenPlotTheory->Draw("SAME,C");} //### 150512 ###
     h_GenDiffXSec->Draw("SAME"); //### 150512 ###
 
     DrawCMSLabels(false, lumi);
@@ -3382,10 +3372,9 @@ void Plotter::PlotDiffXSec(){
     
     c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".eps"); 
     c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".C"); 
-    gStyle->SetEndErrorSize(8); 
     c->Clear();
     delete c;
-    
+    gStyle->SetEndErrorSize(0);
     
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
     TList* l = stack->GetHists();
@@ -3411,7 +3400,7 @@ void Plotter::PlotDiffXSec(){
       Double_t binerr2 = binc*binc*lumierr*lumierr;
       Double_t topunc = 0; // uncertainty on top xsec
       
-      double topxsec = 165.6; //157.5
+      double topxsec = 165.6;
       double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
       
       double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
@@ -3421,7 +3410,8 @@ void Plotter::PlotDiffXSec(){
       syshist->SetLineColor(1);
       syshist->SetBinError(i, TMath::Sqrt(binerr2));
     }    
-  
+
+    leg = ControlLegend(hists.size(), varhistsPlotting, legends, leg);
     syshist->SetFillStyle(3004);
     syshist->SetFillColor(kBlack);
     leg->AddEntry( syshist, "uncertainty", "f" );
@@ -3714,6 +3704,87 @@ TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotn
   }
 
   return (TH1F*)histoNewBinning->Clone();
+}
+
+TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> Legends, TLegend *leg){
+    //hardcoded ControlPlot legend
+    std::vector<TString> OrderedLegends;    
+    OrderedLegends.push_back("Data");
+    OrderedLegends.push_back("t#bar{t} signal");
+    OrderedLegends.push_back("t#bar{t} other");
+    OrderedLegends.push_back("Single Top");
+    OrderedLegends.push_back("W+jets");
+    OrderedLegends.push_back("Z / #gamma* #rightarrow ee/#mu#mu");
+    OrderedLegends.push_back("Z / #gamma* #rightarrow #tau#tau");
+    OrderedLegends.push_back("Diboson");
+    OrderedLegends.push_back("QCD Multijet");
+      
+    leg->Clear();
+    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
+    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.30);
+    leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
+    leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
+    leg->SetTextFont(42);
+    leg->SetTextSize(0.03);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->SetTextAlign(12);
+    for(int i=0; i<(int)OrderedLegends.size(); ++i){
+        for(int j=0; j<HistsSize; ++j){
+            if (OrderedLegends[i] == Legends[j]){
+                if( OrderedLegends[i] == "Data"){
+                    leg->AddEntry(drawhists[j], OrderedLegends[i], "pe");
+                    break;
+                }
+                else{
+                    leg->AddEntry(drawhists[j], OrderedLegends[i], "f");
+                    break;
+                }
+            }
+        }
+    }
+    return leg;
+}
+
+TLegend* Plotter::ControlLegend(int HistsSize, TH1D* drawhists[], std::vector<TString> Legends, TLegend *leg){
+    
+    //hardcoded ControlPlot legend
+    std::vector<TString> OrderedLegends;    
+    OrderedLegends.push_back("Data");
+    OrderedLegends.push_back("t#bar{t} signal");
+    OrderedLegends.push_back("t#bar{t} other");
+    OrderedLegends.push_back("Single Top");
+    OrderedLegends.push_back("W+jets");
+    OrderedLegends.push_back("Z / #gamma* #rightarrow ee/#mu#mu");
+    OrderedLegends.push_back("Z / #gamma* #rightarrow #tau#tau");
+    OrderedLegends.push_back("Diboson");
+    OrderedLegends.push_back("QCD Multijet");
+    
+    leg->Clear();
+    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
+    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.30);
+    leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
+    leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
+    leg->SetTextFont(42);
+    leg->SetTextSize(0.03);
+    leg->SetFillStyle(0);
+    leg->SetBorderSize(0);
+    leg->SetTextAlign(12);
+    for(int i=0; i<(int)OrderedLegends.size(); ++i){
+        for(int j=0; j<HistsSize; ++j){
+            if (OrderedLegends[i] == Legends[j]){
+                if( OrderedLegends[i] == "Data"){
+                    leg->AddEntry(drawhists[j], OrderedLegends[i], "pe");
+                    break;
+                }
+                else{
+                    leg->AddEntry(drawhists[j], OrderedLegends[i], "f");
+                    break;
+                }
+            }
+        }
+    }
+    return leg;
 }
 
 
