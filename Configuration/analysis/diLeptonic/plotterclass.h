@@ -1915,7 +1915,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
 
     
   // Create Directory for Output Plots 
@@ -3302,6 +3302,7 @@ void Plotter::PlotDiffXSec(){
     }
     else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
+    h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);
     h_GenDiffXSec->Draw();
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
