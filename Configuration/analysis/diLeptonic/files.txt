@@ -6,11 +6,11 @@
 
 # first process data, then small+fast samples, then signal and main background
 
-30  samples.dilepton.emu_Run2011A_May10ReReco_v1_cff.py emu_run2011av1v2.root    realdata,rereco=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_may7rerecov3.txt
-30  samples.dilepton.emu_Run2011A_PromptReco_v4_cff.py  emu_run2011a_v4.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
-30  samples.dilepton.emu_Run2011A_05Aug2011_v1_cff.py   emu_run2011a_v5rr.root    realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_aug5rerecov3.txt
-30  samples.dilepton.emu_Run2011A_PromptReco_v6_cff.py  emu_run2011a_v6.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
-30  samples.dilepton.emu_Run2011B_PromptReco_v1_cff.py  emu_run2011b_v1.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.emu_Run2011A_May10ReReco_v1_cff.py emu_run2011av1v2.root    realdata,rereco=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_may7rerecov3.txt
+50  samples.dilepton.emu_Run2011A_PromptReco_v4_cff.py  emu_run2011a_v4.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.emu_Run2011A_05Aug2011_v1_cff.py   emu_run2011a_v5rr.root    realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_aug5rerecov3.txt
+50  samples.dilepton.emu_Run2011A_PromptReco_v6_cff.py  emu_run2011a_v6.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.emu_Run2011B_PromptReco_v1_cff.py  emu_run2011b_v1.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
 
 10    Fall11.wwtoall_Pythia6Z2_Fall11_AOD_cff      emu_wwtoall.root               ww,runOnAOD=True
 10    Fall11.wztoall_Pythia6Z2_Fall11_AOD_cff       emu_wztoall.root                wz,runOnAOD=True
@@ -44,11 +44,11 @@
 
 ###### MUMU channel
 
-30  samples.dilepton.mumu_Run2011A_May10ReReco_v1_cff.py mumu_run2011av1v2.root    realdata,rereco=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_may7rerecov3.txt
-30  samples.dilepton.mumu_Run2011A_PromptReco_v4_cff.py  mumu_run2011a_v4.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
-30  samples.dilepton.mumu_Run2011A_05Aug2011_v1_cff.py   mumu_run2011a_v5rr.root    realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_aug5rerecov3.txt
-30  samples.dilepton.mumu_Run2011A_PromptReco_v6_cff.py  mumu_run2011a_v6.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
-30  samples.dilepton.mumu_Run2011B_PromptReco_v1_cff.py  mumu_run2011b_v1.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.mumu_Run2011A_May10ReReco_v1_cff.py mumu_run2011av1v2.root    realdata,rereco=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_may7rerecov3.txt
+50  samples.dilepton.mumu_Run2011A_PromptReco_v4_cff.py  mumu_run2011a_v4.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.mumu_Run2011A_05Aug2011_v1_cff.py   mumu_run2011a_v5rr.root    realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_aug5rerecov3.txt
+50  samples.dilepton.mumu_Run2011A_PromptReco_v6_cff.py  mumu_run2011a_v6.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.mumu_Run2011B_PromptReco_v1_cff.py  mumu_run2011b_v1.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
 
 10    Fall11.wwtoall_Pythia6Z2_Fall11_AOD_cff      mumu_wwtoall.root               ww,runOnAOD=True
 10    Fall11.wztoall_Pythia6Z2_Fall11_AOD_cff       mumu_wztoall.root                wz,runOnAOD=True
@@ -84,11 +84,11 @@
 
 #### EE channel
 
-30  samples.dilepton.ee_Run2011A_May10ReReco_v1_cff.py ee_run2011av1v2.root    realdata,rereco=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_may7rerecov3.txt
-30  samples.dilepton.ee_Run2011A_PromptReco_v4_cff.py  ee_run2011a_v4.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
-30  samples.dilepton.ee_Run2011A_05Aug2011_v1_cff.py   ee_run2011a_v5rr.root    realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_aug5rerecov3.txt
-30  samples.dilepton.ee_Run2011A_PromptReco_v6_cff.py  ee_run2011a_v6.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
-30  samples.dilepton.ee_Run2011B_PromptReco_v1_cff.py  ee_run2011b_v1.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.ee_Run2011A_May10ReReco_v1_cff.py ee_run2011av1v2.root    realdata,rereco=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_may7rerecov3.txt
+50  samples.dilepton.ee_Run2011A_PromptReco_v4_cff.py  ee_run2011a_v4.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.ee_Run2011A_05Aug2011_v1_cff.py   ee_run2011a_v5rr.root    realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_aug5rerecov3.txt
+50  samples.dilepton.ee_Run2011A_PromptReco_v6_cff.py  ee_run2011a_v6.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
+50  samples.dilepton.ee_Run2011B_PromptReco_v1_cff.py  ee_run2011b_v1.root      realdata,prompt=True,runOnAOD=True,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/dilepton/json_nov4_160404_180252.txt
 
 10    Fall11.wwtoall_Pythia6Z2_Fall11_AOD_cff      ee_wwtoall.root               ww,runOnAOD=True
 10    Fall11.wztoall_Pythia6Z2_Fall11_AOD_cff       ee_wztoall.root                wz,runOnAOD=True
