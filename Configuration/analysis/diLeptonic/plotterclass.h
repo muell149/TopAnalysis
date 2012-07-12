@@ -1899,6 +1899,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   drawhists[0]->Draw("e1"); //############## 
   //drawhists[0]->Draw("e"); //############## 
+  drawhists[0]->GetXaxis()->SetNoExponent(kTRUE);
   
   stack->Draw("same HIST");
   gPad->RedrawAxis();
@@ -2896,9 +2897,9 @@ void Plotter::PlotDiffXSec(){
     recBinHist->Draw();
     recBinHist->SetMaximum(1.);
     //    FormatHisto(recBinHist);
-
     recBinHist->GetXaxis()->SetTitle(TString("Reconstructed ").Copy().Append(XAxis));
-    
+    recBinHist->GetXaxis()->SetNoExponent(kTRUE);
+    grE->GetXaxis()->SetNoExponent(kTRUE);
     grE->Draw("P,SAME");
     grP->Draw("P,SAME");
     grS->Draw("P,SAME");
@@ -3109,6 +3110,7 @@ void Plotter::PlotDiffXSec(){
     }
     else  SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
     SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
+    SystHists->GetXaxis()->SetNoExponent(kTRUE);
 
 
     leg10->SetFillColor(0);
@@ -3146,6 +3148,7 @@ void Plotter::PlotDiffXSec(){
     leg11->AddEntry(TotalHist->Clone(), "Total Uncertainty", "l");
     TotalHist->Draw();ModelHist->Draw("SAME");ExpHist->Draw("SAME");StatHist->Draw("SAME");
     leg11->Draw("SAME");
+    TotalHist->GetXaxis()->SetNoExponent(kTRUE);
     c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".eps");
     c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".C");
     c11->Clear();
@@ -3302,7 +3305,7 @@ void Plotter::PlotDiffXSec(){
     }
     else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
-    h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);
+    //h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);
     h_GenDiffXSec->Draw();
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
@@ -3423,6 +3426,7 @@ void Plotter::PlotDiffXSec(){
     varhists[0]->SetMinimum(0);
     varhists[0]->GetYaxis()->SetTitle("events");
     varhists[0]->GetXaxis()->SetNoExponent(kTRUE);
+    //varhists[0]->GetYaxis()->SetNoExponent(kTRUE);
     //varhists[0]->Draw("e");  //#########
     varhists[0]->Draw("e"); 
     
