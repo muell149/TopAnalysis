@@ -282,7 +282,6 @@ Bool_t Analysis::Process(Long64_t entry)
 
   //We must correct for the madGraph branching fraction beins 1/9 for dileptons (PDG average is .108)
   if((MCSample->find("ttbarsignal")!=string::npos) ||(MCSample->find("ttbarbg")!=string::npos)){
-    lumiWeight=lumiWeight*(165.60/164.00); //include small factor for Kidonakis normalization
     if(decayMode==11){//all hadronic decay
       lumiWeight=lumiWeight*(0.676*1.5)*(0.676*1.5);
     } else if(decayMode<20 || (decayMode%10==1)){//semileptonic Decay
