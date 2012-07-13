@@ -1893,7 +1893,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   if(logY)c->SetLogy();
   syshist->SetFillStyle(3004);
   syshist->SetFillColor(kBlack);
-  leg->AddEntry( syshist, "uncertainty", "f" );
+  leg->AddEntry( syshist, "Uncertainty", "f" );
   
   drawhists[0]->SetMinimum(ymin);
   if(rangemin!=0 || rangemax!=0)drawhists[0]->SetAxisRange(rangemin, rangemax, "X");
@@ -3425,7 +3425,7 @@ void Plotter::PlotDiffXSec(){
     leg = ControlLegend(hists.size(), varhistsPlotting, legends, leg);
     syshist->SetFillStyle(3004);
     syshist->SetFillColor(kBlack);
-    leg->AddEntry( syshist, "uncertainty", "f" );
+    leg->AddEntry( syshist, "Uncertainty", "f" );
 
 
     varhists[0]->SetMaximum(1.5*varhists[0]->GetBinContent(varhists[0]->GetMaximumBin()));
