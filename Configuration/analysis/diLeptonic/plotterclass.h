@@ -505,7 +505,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
 	varhists[i]->Scale(DYScale[channelType]);
       }
 
-      if(legends[i] == "t#bar{t} signal"){
+      if(legends[i] == "t#bar{t} Signal"){
 	TFile *ftemp = TFile::Open(dataset[i]);
 	if(init==false){
 	  RecoPlotFineBins =  (TH1D*)ftemp->Get("Reco"+newname)->Clone();
@@ -564,7 +564,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
 	//if(Systematic == "DY_"){
 	//varhistsUp[i]->Scale(1.3);
 	//}
-      }else if(legends[i] == "t#bar{t} signal"){
+      }else if(legends[i] == "t#bar{t} Signal"){
 	TFile *ftempUp = TFile::Open(datasetUp[i]);
 	if(initUp==false){
 	  RecoPlotFineBinsUp =  (TH1D*)ftempUp->Get("Reco"+newname)->Clone();
@@ -627,7 +627,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
 	//if(Systematic == "DY_"){
 	//varhistsDown[i]->Scale(0.7);
 	//}
-      }else if(legends[i] == "t#bar{t} signal"){
+      }else if(legends[i] == "t#bar{t} Signal"){
 	TFile *ftempDown = TFile::Open(datasetDown[i]);
 	if(initDown==false){
 	  RecoPlotFineBinsDown =  (TH1D*)ftempDown->Get("Reco"+newname)->Clone();
@@ -713,7 +713,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
 	if((legends[i] == DYEntry) && Systematic == "DY_"){
 	htemp->Scale(1.5);
 	}
-	if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
+	if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} Signal") && Systematic == "BG_"){
 	htemp->Scale(1.3);
 	}
 
@@ -733,7 +733,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
 	if((legends[i] == DYEntry) && Systematic == "DY_"){
 	htemp->Scale(0.5);
 	}
-	if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} signal") && Systematic == "BG_"){
+	if((legends[i] != DYEntry)&& (legends[i] != "t#bar{t} Signal") && Systematic == "BG_"){
 	htemp->Scale(0.7);
 	}
 	stacksumDown->Add(htemp);
@@ -836,13 +836,13 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
 		} else {
 		  theDataHist->Add(&(hists[i]));
 		}
-      } else if ( legends[i] == "t#bar{t} signal") {  
+      } else if ( legends[i] == "t#bar{t} Signal") {  
 		if ( theRecHist == NULL ) {
 		  theRecHist = (TH1D*) (hists[i]).Clone("theRecHist");
 		} else {
 		  theRecHist->Add(&(hists[i]));
 		}   
-      } else if ( legends[i] == "t#bar{t} other") {  
+      } else if ( legends[i] == "t#bar{t} Other") {  
 		if ( theTtBgrHist == NULL ) {
 		  theTtBgrHist = (TH1D*) (hists[i]).Clone("theTtBgrHist");
 		} else {
@@ -875,14 +875,14 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
       cout << "        " << histsIntegral << " Events in Sample " <<    legendsUp[i] << " (Up)" << endl;  
       if ( legendsUp[i] == "Data") {
       } 
-      else if ( legendsUp[i] == "t#bar{t} signal") {   
+      else if ( legendsUp[i] == "t#bar{t} Signal") {   
 		if ( theRecHistUp == NULL ) {  
 		  theRecHistUp = (TH1D*) (systhistsUp[i]).Clone("theRecHistUp");  
 		} else {
 		  theRecHistUp->Add(&(systhistsUp[i]));
 		}  
       } 
-      else if ( legendsUp[i] == "t#bar{t} other") {  
+      else if ( legendsUp[i] == "t#bar{t} Other") {  
 		if ( theTtBgrHistUp == NULL ) { 
 		  theTtBgrHistUp = (TH1D*) (systhistsUp[i]).Clone("theTtBgrHistUp");  
 		} else {
@@ -907,7 +907,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
             theBgrScaleFactor = theDYScale;
         }
         if(Systematic == "BG_") {
-          if ( legendsUp[i] != "t#bar{t} other" && legendsUp[i] != DYEntry) {
+          if ( legendsUp[i] != "t#bar{t} Other" && legendsUp[i] != DYEntry) {
              theBgrScaleFactor=theBgrScaleFactor*1.3;
           }
         }
@@ -932,13 +932,13 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
       TString histsIntegral = TString::Format("%20.2f", ((systhistsDown[i])).Integral());
       cout << "        " << histsIntegral << " Events in Sample " <<    legendsDown[i] << " (Down)" << endl;   
       if ( legendsDown[i] == "Data") {
-      } else if ( legendsDown[i] == "t#bar{t} signal") {   
+      } else if ( legendsDown[i] == "t#bar{t} Signal") {   
 		if ( theRecHistDown == NULL ) { 
 		  theRecHistDown = (TH1D*) (systhistsDown[i]).Clone("theRecHistDown"); 
 		} else {
 		  theRecHistDown->Add(&(systhistsDown[i]));
 		}  
-      } else if ( legendsDown[i] == "t#bar{t} other") {   
+      } else if ( legendsDown[i] == "t#bar{t} Other") {   
 		if ( theTtBgrHistDown == NULL ) { 
 		  theTtBgrHistDown = (TH1D*) (systhistsDown[i]).Clone("theTtBgrHistDown"); 
 		} else {
@@ -963,7 +963,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
             theBgrScaleFactor = theDYScale;
         }
         if(Systematic == "BG_") {
-          if ( legendsDown[i] != "t#bar{t} other" && legendsDown[i] != DYEntry) {
+          if ( legendsDown[i] != "t#bar{t} Other" && legendsDown[i] != DYEntry) {
              theBgrScaleFactor=theBgrScaleFactor*0.7;
           }
         }
@@ -998,7 +998,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
     // Response Matrix and visible Gen Dist
     // have to be obtained from the files directly
     for ( size_t i = 0; i < hists.size() ; i++ ) {
-      if(legends[i] == "t#bar{t} signal"){
+      if(legends[i] == "t#bar{t} Signal"){
 		 
 		// Histo Names
 		TString respHistName("GenReco"+newname);
@@ -1033,7 +1033,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
     }
     
     for ( size_t i = 0; i < systhistsUp.size() ; i++ ) { 
-      if(legendsUp[i] == "t#bar{t} signal"){
+      if(legendsUp[i] == "t#bar{t} Signal"){
 			    	
 		// Shift Up
 		TFile* ftempUp = TFile::Open(datasetUp[i]);
@@ -1067,7 +1067,7 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
   
     
     for ( size_t i = 0; i < systhistsDown.size() ; i++ ) { 
-      if(legendsDown[i] == "t#bar{t} signal"){
+      if(legendsDown[i] == "t#bar{t} Signal"){
 					
 		// Shift Down
 		TFile* ftempDown = TFile::Open(datasetDown[i]);
@@ -1298,6 +1298,12 @@ void Plotter::setOptions(TString name_, TString specialComment_, TString YAxis_,
   if(XAxis.Contains("l^{+}andl^{-}")){//Histogram naming convention has to be smarter
     XAxis.ReplaceAll("l^{+}andl^{-}",13,"l^{+} and l^{-}",15);
   }
+  if(YAxis.Contains("toppairs")){
+    YAxis.ReplaceAll("toppairs",8,"top-quark pairs",15);
+  }
+  if(YAxis.Contains("topquarks")){
+    YAxis.ReplaceAll("topquarks",9, "top quarks",10);
+  }
 
   DYScale[0]=1.;
   DYScale[1]=1.;
@@ -1380,14 +1386,14 @@ void Plotter::setDataSet(TString mode)
       if(filename!=""){
 	dataset.push_back(filename);
 	if(filename.Contains("run")){legends.push_back("Data"); colors.push_back(kBlack);datafiles++;}
-	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
+	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} Signal"); colors.push_back(kRed+1);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} Other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("Diboson"); colors.push_back(10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
 	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
 //	else if(filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee"); colors.push_back(kAzure-2);}
-	else if(filename.Contains("wtolnu")){legends.push_back("W+jets"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W+Jets"); colors.push_back(kGreen-3);}
 	else if(filename.Contains("qcd")){legends.push_back("QCD Multijet"); colors.push_back(kYellow);}
       }
     }
@@ -1408,13 +1414,13 @@ void Plotter::setDataSet(TString mode)
 	dataset.push_back(filename);
 	
 	if(filename.Contains("run")){legends.push_back("Data"); colors.push_back(kBlack);datafiles++;}
-	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} signal"); colors.push_back(kRed+1);}
-	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} other"); colors.push_back(kRed-7);}
+	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} Signal"); colors.push_back(kRed+1);}
+	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} Other"); colors.push_back(kRed-7);}
 	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("Diboson"); colors.push_back(10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
 	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
-	else if(filename.Contains("wtolnu")){legends.push_back("W+jets"); colors.push_back(kGreen-3);}
+	else if(filename.Contains("wtolnu")){legends.push_back("W+Jets"); colors.push_back(kGreen-3);}
 	else if(filename.Contains("qcd")){legends.push_back("QCD Multijet"); colors.push_back(kYellow);}
       }
     }
@@ -1452,13 +1458,13 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
       if(filenameUp!=""){
 	datasetUp.push_back(filenameUp);
 	if(filenameUp.Contains("run")){legendsUp.push_back("Data"); colorsUp.push_back(kBlack);}
-	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
+	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} Signal"); colorsUp.push_back(kRed+1);}
+	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} Other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("Diboson"); colorsUp.push_back(10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
 	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
-	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+jets"); colorsUp.push_back(kGreen-3);}
+	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+Jets"); colorsUp.push_back(kGreen-3);}
 	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD Multijet"); colorsUp.push_back(kYellow);}
       }
     }
@@ -1467,13 +1473,13 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
       if(filenameDown!=""){
 	datasetDown.push_back(filenameDown);
 	if(filenameDown.Contains("run")){legendsDown.push_back("Data"); colorsDown.push_back(kBlack);}
-	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
+	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} Signal"); colorsDown.push_back(kRed+1);}
+	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} Other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("Diboson"); colorsDown.push_back(10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
 	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
-	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+jets"); colorsDown.push_back(kGreen-3);}
+	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+Jets"); colorsDown.push_back(kGreen-3);}
 	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD Multijet"); colorsDown.push_back(kYellow);}
       }
     }
@@ -1505,13 +1511,13 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
       if(filenameUp!=""){
 	datasetUp.push_back(filenameUp);
 	if(filenameUp.Contains("run")){legendsUp.push_back("Data"); colorsUp.push_back(kBlack);}
-	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} signal"); colorsUp.push_back(kRed+1);}
-	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} other"); colorsUp.push_back(kRed-7);}
+	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} Signal"); colorsUp.push_back(kRed+1);}
+	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} Other"); colorsUp.push_back(kRed-7);}
 	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("Diboson"); colorsUp.push_back(10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
 	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
-	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+jets"); colorsUp.push_back(kGreen-3);}
+	else if(filenameUp.Contains("wtolnu")){legendsUp.push_back("W+Jets"); colorsUp.push_back(kGreen-3);}
 	else if(filenameUp.Contains("qcd")){legendsUp.push_back("QCD Multijet"); colorsUp.push_back(kYellow);}
       }
     }
@@ -1520,13 +1526,13 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
       if(filenameDown!=""){
 	datasetDown.push_back(filenameDown);
 	if(filenameDown.Contains("run")){legendsDown.push_back("Data"); colorsDown.push_back(kBlack);}
-	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} signal"); colorsDown.push_back(kRed+1);}
-	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} other"); colorsDown.push_back(kRed-7);}
+	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} Signal"); colorsDown.push_back(kRed+1);}
+	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} Other"); colorsDown.push_back(kRed-7);}
 	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("Diboson"); colorsDown.push_back(10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
 	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
-	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+jets"); colorsDown.push_back(kGreen-3);}
+	else if(filenameDown.Contains("wtolnu")){legendsDown.push_back("W+Jets"); colorsDown.push_back(kGreen-3);}
 	else if(filenameDown.Contains("qcd")){legendsDown.push_back("QCD Multijet"); colorsDown.push_back(kYellow);}
       }
     }
@@ -1798,7 +1804,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
 	    drawhists[0]->Add(drawhists[i]);
       }
 
-      if(legends[i] == "t#bar{t} signal"){signalHist = i;}
+      if(legends[i] == "t#bar{t} Signal"){signalHist = i;}
       if((legends[i] == DYEntry) && channelType!=2 ){
 	    drawhists[i]->Scale(DYScale[channelType]);
       }
@@ -1851,10 +1857,10 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   for (int i = 1; i < l->GetEntries(); ++i) {
     aaa=aaa+"a"; 
     stacksum->Add((TH1D*)l->At(i));
-    if(legends[datafiles+i] == "t#bar{t} other") {
+    if(legends[datafiles+i] == "t#bar{t} Other") {
       stacksum->Write(name+"_"+channel+aaa+"_Background");
     }
-    if(legends[datafiles+i] == "t#bar{t} signal") {
+    if(legends[datafiles+i] == "t#bar{t} Signal") {
 	stacksum->Write(name+"_"+channel+aaa+"_Signal");
     }
 
@@ -1890,7 +1896,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   leg->AddEntry( syshist, "uncertainty", "f" );
   
   drawhists[0]->SetMinimum(ymin);
-  if(rangemin!=0)drawhists[0]->SetAxisRange(rangemin, rangemax, "X");
+  if(rangemin!=0 || rangemax!=0)drawhists[0]->SetAxisRange(rangemin, rangemax, "X");
   if(logY){  
     drawhists[0]->SetMaximum(18*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));
   }
@@ -1916,7 +1922,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
 
     
   // Create Directory for Output Plots 
@@ -2310,7 +2316,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     if(legends[i] == "Data"){
       numbers[0]+=numhists[i]->Integral();
     }
-    else if(legends[i] == "t#bar{t} signal"){ 
+    else if(legends[i] == "t#bar{t} Signal"){ 
       TFile *ftemp2 = TFile::Open(datasetVec[i]);  
       TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone(); 
     
@@ -2330,7 +2336,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
       numbers[2]+=GenPlot->Integral();  
       delete ftemp; 
       
-    }  else if(legends[i] == "t#bar{t} other"){
+    }  else if(legends[i] == "t#bar{t} Other"){
       //TFile *ftemp2 = TFile::Open(datasetVec[i]);
       // TH1D *NoPUPlot = (TH1D*)ftemp2->Get("step9")->Clone();
       // TTbarBGnum+=NoPUPlot->Integral();
@@ -2350,10 +2356,10 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
       if((legends[i] == DYEntry) && Systematic == "DY_" && Shift == "Down"){
 	    numhists[i]->Scale(0.7);
       }
-      if(Systematic == "BG_" && Shift=="Up" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
+      if(Systematic == "BG_" && Shift=="Up" && legends[i]!= "t#bar{t} Other" && legends[i] != DYEntry){
 	    numhists[i]->Scale(1.3);
       }
-      if(Systematic == "BG_" && Shift=="Down" && legends[i]!= "t#bar{t} other" && legends[i] != DYEntry){
+      if(Systematic == "BG_" && Shift=="Down" && legends[i]!= "t#bar{t} Other" && legends[i] != DYEntry){
 	     numhists[i]->Scale(0.7);
       }  
       
@@ -2441,7 +2447,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 	DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
       }
     }
-    else if((legends[hist] == "t#bar{t} signal")&&init==false){
+    else if((legends[hist] == "t#bar{t} Signal")&&init==false){
       init=true;
       for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 	efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
@@ -2479,13 +2485,13 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 		} else {
 		  theDataHist->Add(varhists[i]);
 		}
-      } else if ( legends[i] == "t#bar{t} signal") {
+      } else if ( legends[i] == "t#bar{t} Signal") {
 		if ( theRecHist == NULL ) {
 		  theRecHist = (TH1*) (varhists[i])->Clone("theRecHist");
 		} else {
 		  theRecHist->Add(varhists[i]);
 		}
-      } else if ( legends[i] == "t#bar{t} other") {
+      } else if ( legends[i] == "t#bar{t} Other") {
       	// Attention: The TtBar-Bgr must be added to the regular background
 		if ( theTtBgrHist == NULL ) {
 		  theTtBgrHist = (TH1*) (varhists[i])->Clone("theRecHist");
@@ -2730,7 +2736,7 @@ void Plotter::PlotDiffXSec(){
     for (unsigned int i =0; i<hists.size(); i++){
       varhists[i]=hists[i].Rebin(bins,"varhists",Xbins);  
       setStyle(*varhists[i], i);
-      if(legends[i] == "t#bar{t} signal"){
+      if(legends[i] == "t#bar{t} Signal"){
 	TFile *ftemp = TFile::Open(dataset[i]);
 	if(init==false){
 	  RecoPlotFineBins =  (TH1D*)ftemp->Get("Reco"+newname)->Clone();
@@ -2924,7 +2930,7 @@ void Plotter::PlotDiffXSec(){
 	      DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
 	    }
       }
-      else if((legends[hist] == "t#bar{t} signal")&&init==false){
+      else if((legends[hist] == "t#bar{t} Signal")&&init==false){
 	signalHist=hist;
 	init=true;
 	    for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
@@ -3305,8 +3311,9 @@ void Plotter::PlotDiffXSec(){
     }
     else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
-    //h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);
+    if (name.Contains("Rapidity") || name.Contains("Eta")){h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);}
     h_GenDiffXSec->Draw();
+    if (ymax!=0) h_GenDiffXSec->SetMaximum(ymax);
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
     //    mcatnloBand->Draw("same, F");
@@ -3421,7 +3428,7 @@ void Plotter::PlotDiffXSec(){
     leg->AddEntry( syshist, "uncertainty", "f" );
 
 
-    varhists[0]->SetMaximum(1.3*varhists[0]->GetBinContent(varhists[0]->GetMaximumBin()));
+    varhists[0]->SetMaximum(1.5*varhists[0]->GetBinContent(varhists[0]->GetMaximumBin()));
 
     varhists[0]->SetMinimum(0);
     varhists[0]->GetYaxis()->SetTitle("events");
@@ -3715,10 +3722,10 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TSt
     //hardcoded ControlPlot legend
     std::vector<TString> OrderedLegends;    
     OrderedLegends.push_back("Data");
-    OrderedLegends.push_back("t#bar{t} signal");
-    OrderedLegends.push_back("t#bar{t} other");
+    OrderedLegends.push_back("t#bar{t} Signal");
+    OrderedLegends.push_back("t#bar{t} Other");
     OrderedLegends.push_back("Single Top");
-    OrderedLegends.push_back("W+jets");
+    OrderedLegends.push_back("W+Jets");
     OrderedLegends.push_back("Z / #gamma* #rightarrow ee/#mu#mu");
     OrderedLegends.push_back("Z / #gamma* #rightarrow #tau#tau");
     OrderedLegends.push_back("Diboson");
@@ -3756,10 +3763,10 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1D* drawhists[], std::vector<TS
     //hardcoded ControlPlot legend
     std::vector<TString> OrderedLegends;    
     OrderedLegends.push_back("Data");
-    OrderedLegends.push_back("t#bar{t} signal");
-    OrderedLegends.push_back("t#bar{t} other");
+    OrderedLegends.push_back("t#bar{t} Signal");
+    OrderedLegends.push_back("t#bar{t} Other");
     OrderedLegends.push_back("Single Top");
-    OrderedLegends.push_back("W+jets");
+    OrderedLegends.push_back("W+Jets");
     OrderedLegends.push_back("Z / #gamma* #rightarrow ee/#mu#mu");
     OrderedLegends.push_back("Z / #gamma* #rightarrow #tau#tau");
     OrderedLegends.push_back("Diboson");
