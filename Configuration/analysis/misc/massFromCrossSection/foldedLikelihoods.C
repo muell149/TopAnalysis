@@ -245,14 +245,14 @@ std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, 
   relUncDown->Draw("P");
   std::vector<TF1*> vec;
   if(symmetrize) {
-    relUncMean->Fit("pol1");
+    relUncMean->Fit("pol1", "Q");
     relUncMean->GetFunction("pol1")->Draw("same");
     vec.push_back((TF1*) relUncMean->GetFunction("pol1")->Clone());
   }
   else {
-    relUncUp->Fit("pol1");
+    relUncUp->Fit("pol1", "Q");
     relUncUp->GetFunction("pol1")->Draw("same");
-    relUncDown->Fit("pol1");
+    relUncDown->Fit("pol1", "Q");
     relUncDown->GetFunction("pol1")->Draw("same");
     vec.push_back((TF1*) relUncUp  ->GetFunction("pol1")->Clone());
     vec.push_back((TF1*) relUncDown->GetFunction("pol1")->Clone());
@@ -397,51 +397,70 @@ int foldedLikelihoods(const bool pole)
   if(!pole) {
     mShift = getMassShiftGraph();
     mShift->Draw("AP");
-    mShift->Fit("pol1");
+    mShift->Fit("pol1", "Q");
     canvas->Print(printNameBase+".ps");
     canvas->Print("figs/MSbar_vs_pole_mass.eps");
   }
 
-  std::vector<TGraphAsymmErrors*> ahr_vec[2];
-  std::vector<TGraphAsymmErrors*> moc_vec[2];
+  const unsigned nPdfSets=2;
+  const unsigned nTheories=3;
 
-  TGraphAsymmErrors* ahr[2];
-  TGraphAsymmErrors* moc[2];
+  std::vector<TGraphAsymmErrors*> ahr_vec[nPdfSets];
+  std::vector<TGraphAsymmErrors*> moc_vec[nPdfSets];
+  std::vector<TGraphAsymmErrors*> mit_vec[nPdfSets];
+  
+  TGraphAsymmErrors* ahr[nPdfSets];
+  TGraphAsymmErrors* moc[nPdfSets];
+  TGraphAsymmErrors* mit[nPdfSets];
+  
+  std::vector<TF1*> moc_funcs[nPdfSets][4];
+  std::vector<TF1*> ahr_funcs[nPdfSets][4];
+  std::vector<TF1*> mit_funcs[nPdfSets][4];
 
-  std::vector<TF1*> moc_funcs[2][4];
-  std::vector<TF1*> ahr_funcs[2][4];
+  const TString pdfName[nPdfSets] = {"MSTW2008", "HERAPDF1.5"};
+  const TString theoName[nTheories] = {"Ahrens", "Langenfeld", "Cacciari"};
 
-  const TString pdfName[2] = {"(with MSTW)", "(with HERAPDF)"};
-  const TString title[2][2] = {{"Ahrens et al. "+pdfName[0], "Langenfeld et al. "+pdfName[0]},
-			       {"Ahrens et al. "+pdfName[1], "Langenfeld et al. "+pdfName[1]}};
+  TString theoTitle[nPdfSets][nTheories];
+  for(unsigned h=0; h<nPdfSets; h++)
+    for(unsigned i=0; i<nTheories; i++)
+      theoTitle[h][i] = theoName[i] + " et al. with " + pdfName[h];
 
   const TString errName [4] = {"Scale", "Experimental PDF", "#alpha_{S}", "Total"};
   const TString errLabel[4] = {"scale", "expPDF", "alphaS", "total"};
 
   TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,4)", 0, 1000);
 
-  for(unsigned h=0; h<2; h++) {
+  for(unsigned h=0; h<nPdfSets; h++) {
     ahr_vec[h] = readTheory("ahrens", pole, useAlphaUnc, h);
     moc_vec[h] = readTheory("moch"  , pole, useAlphaUnc, h);
+    mit_vec[h] = readTheory("mitov" , pole, useAlphaUnc, h);
 
     ahr[h] = ahr_vec[h].at(3);
     moc[h] = moc_vec[h].at(3);
+    mit[h] = mit_vec[h].at(3);
 
-    ahr[h]->Fit(f1, "0");
-    moc[h]->Fit(f1, "0");
+    ahr[h]->Fit(f1, "Q0");
+    moc[h]->Fit(f1, "Q0");
+    mit[h]->Fit(f1, "Q0");
 
     for(unsigned j=0; j<4; j++) {
-      ahr_vec[h].at(j)->SetTitle(title[h][0]);
-      moc_vec[h].at(j)->SetTitle(title[h][1]);
+      ahr_vec[h].at(j)->SetTitle(theoTitle[h][0]);
+      moc_vec[h].at(j)->SetTitle(theoTitle[h][1]);
+      mit_vec[h].at(j)->SetTitle(theoTitle[h][2]);
     }
 
     gStyle->SetOptTitle(1);
     
     for(unsigned j=0; j<4; j++)
+      mit_funcs[h][j] = getAndDrawRelativeUncertainty(mit_vec[h].at(j), canvas, pole, errName[j],
+						      epsString("relUnc_mitov_"+errLabel[j], pole, h),
+						      printNameBase, (j==1 || j==2));
+    drawTheoryGraph(mit[h], canvas, pole, "mitov", printNameBase);
+    for(unsigned j=0; j<4; j++)
       moc_funcs[h][j] = getAndDrawRelativeUncertainty(moc_vec[h].at(j), canvas, pole, errName[j],
 						      epsString("relUnc_moch_"+errLabel[j], pole, h),
 						      printNameBase, (j==1 || j==2));
-    drawTheoryGraph(moc[h], canvas, pole, "moch"  , printNameBase);
+    drawTheoryGraph(moc[h], canvas, pole, "moch", printNameBase);
     for(unsigned j=0; j<4; j++)
       ahr_funcs[h][j] = getAndDrawRelativeUncertainty(ahr_vec[h].at(j), canvas, pole, errName[j],
 						      epsString("relUnc_ahrens_"+errLabel[j], pole, h),
@@ -510,6 +529,9 @@ int foldedLikelihoods(const bool pole)
     p0.setVal(-1.467);
     p1.setVal(0.03715);
     p2.setVal(-0.0001324);
+//    p0.setVal(1.0);
+//    p1.setVal(0.0);
+//    p2.setVal(0.0);
   }
 
   RooPolyVar measXSecMassDepRel("measXSecMassDepRel", "measXSecMassDepRel", deltaM, RooArgSet(p0, p1, p2));
@@ -526,8 +548,9 @@ int foldedLikelihoods(const bool pole)
   RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1", RooArgSet(measXSecMassDepRel,measXSec));
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecErr);
 
-  PredXSec* mocPredXSec[2];
-  PredXSec* ahrPredXSec[2];
+  PredXSec* mitPredXSec[nPdfSets];
+  PredXSec* mocPredXSec[nPdfSets];
+  PredXSec* ahrPredXSec[nPdfSets];
 
   for(unsigned h=0; h<2; h++) {
     TString alphaFileName = "theories_7TeV/xSecVsMass_";
@@ -537,6 +560,7 @@ int foldedLikelihoods(const bool pole)
 
     const TString suf = (h ? "HERA" : "MSTW");
     
+    mitPredXSec[h] = new PredXSec("mitPredXSec"+suf, xsec, mass, alpha, mit[h]->GetFunction("f1"), mit_funcs[h], alphaFile);
     mocPredXSec[h] = new PredXSec("mocPredXSec"+suf, xsec, mass, alpha, moc[h]->GetFunction("f1"), moc_funcs[h], alphaFile);
     ahrPredXSec[h] = new PredXSec("ahrPredXSec"+suf, xsec, mass, alpha, ahr[h]->GetFunction("f1"), ahr_funcs[h], alphaFile);
 
@@ -547,19 +571,23 @@ int foldedLikelihoods(const bool pole)
     else if(h==1)
       alpha.setVal(alphaHERA_mean.getVal());
 
-    drawConvolution(mocPredXSec[h], xsec, mass, alpha, moc[h]->GetFunction("f1"), title[h][1], canvas, printNameBase,
+    drawConvolution(mitPredXSec[h], xsec, mass, alpha, mit[h]->GetFunction("f1"), theoTitle[h][1], canvas, printNameBase,
+		    epsString("convolution_mitov", pole, h));
+    drawConvolution(mocPredXSec[h], xsec, mass, alpha, moc[h]->GetFunction("f1"), theoTitle[h][1], canvas, printNameBase,
 		    epsString("convolution_moch", pole, h));
-    drawConvolution(ahrPredXSec[h], xsec, mass, alpha, ahr[h]->GetFunction("f1"), title[h][0], canvas, printNameBase,
+    drawConvolution(ahrPredXSec[h], xsec, mass, alpha, ahr[h]->GetFunction("f1"), theoTitle[h][0], canvas, printNameBase,
 		    epsString("convolution_ahrens", pole, h));
   }
 
   const int colorAhr = kMagenta;
   const int colorMoc = kGreen-3;
+  const int colorMit = kCyan;
   const int colorDil = kBlue;
 
   RooPlot* frame = mass.frame();
   ahrPredXSec[0]->xsec.plotOn(frame, RooFit::LineColor(colorAhr));
   mocPredXSec[0]->xsec.plotOn(frame, RooFit::LineColor(colorMoc));
+  mitPredXSec[0]->xsec.plotOn(frame, RooFit::LineColor(colorMit));
   measXSecMassDep.plotOn(frame, RooFit::LineColor(colorDil));
   frame->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
   frame->Draw();
@@ -597,6 +625,9 @@ int foldedLikelihoods(const bool pole)
   FinalLikeliResults* mocResultAlpha[2];
   FinalLikeliResults* mocResultMass [2];
 
+  FinalLikeliResults* mitResultAlpha[2];
+  FinalLikeliResults* mitResultMass [2];
+
   gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
 
   const double alphaAxisMin = 0.1135;
@@ -607,10 +638,15 @@ int foldedLikelihoods(const bool pole)
 
   for(unsigned h=0; h<2; h++) {
     const TString suf = (h ? "HERA" : "MSTW");
-    mocResultAlpha[h] = new FinalLikeliResults("mocResultAlpha"+suf,
-					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,massProb));
-    mocResultMass[h]  = new FinalLikeliResults("mocResultMass"+suf,
-					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,alphaProb[h]));
+//    mocResultAlpha[h] = new FinalLikeliResults("mocResultAlpha"+suf,
+//					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,massProb));
+//    mocResultMass[h]  = new FinalLikeliResults("mocResultMass"+suf,
+//					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,alphaProb[h]));
+
+    mocResultAlpha[h] = new FinalLikeliResults("mitResultAlpha"+suf,
+					       xsec,mass,alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob,massProb));
+    mocResultMass[h]  = new FinalLikeliResults("mitResultMass"+suf,
+					       xsec,mass,alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob,alphaProb[h]));
 
     mocResultAlpha[h]->point.GetXaxis()->SetLimits(alphaAxisMin, alphaAxisMax);
     mocResultAlpha[h]->point.GetYaxis()->SetRangeUser(massAxisMin , massAxisMax);
@@ -850,13 +886,20 @@ int foldedLikelihoods(const bool pole)
     for(unsigned j=0; j<4; j++) {
       delete ahr_vec[h].at(j);
       delete moc_vec[h].at(j);
+      delete mit_vec[h].at(j);
       for(unsigned i=0; i<moc_funcs[h][j].size(); i++) {
 	delete moc_funcs[h][j].at(i);
 	delete ahr_funcs[h][j].at(i);
+	delete mit_funcs[h][j].at(i);
       }
     }
+    delete mitPredXSec[h];
     delete mocPredXSec[h];
     delete ahrPredXSec[h];
+
+//    delete mitResultAlpha[h];
+//    delete mitResultMass[h];
+
     delete mocResultAlpha[h];
     delete mocResultMass[h];
   }
