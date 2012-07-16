@@ -273,19 +273,19 @@ std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, 
   return vec;
 }
 
-void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mass, RooRealVar& alpha, const TF1* xsecFunc,
+void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mass, RooRealVar& alpha,
 		     const TString title, TCanvas* canvas, const TString printNameBase, const TString epsName)
 {
   if(mass.getTitle().Contains("pole"))
     mass.setVal(172.5);
   else
     mass.setVal(165.);
-  RooPlot* convFrame = xsec.frame(0.85*xsecFunc->Eval(mass.getVal()), 1.15*xsecFunc->Eval(mass.getVal()));
+  RooPlot* convFrame = xsec.frame(0.85*predXSec->xsec.getVal(), 1.15*predXSec->xsec.getVal());
   predXSec->gaussianProb.plotOn(convFrame, RooFit::LineColor(kGreen),
 				RooFit::NormRange("xsec_fullRange"),
 				RooFit::FillStyle(1001), RooFit::FillColor(kGreen), RooFit::DrawOption("F"));
-  predXSec->gaussianProb.plotOn(convFrame, RooFit::Range(xsecFunc->Eval(mass.getVal())-0.01,
-							 xsecFunc->Eval(mass.getVal())+0.01),
+  predXSec->gaussianProb.plotOn(convFrame, RooFit::Range(predXSec->xsec.getVal()-0.01,
+							 predXSec->xsec.getVal()+0.01),
 				RooFit::NormRange("xsec_fullRange"),
 				RooFit::LineColor(kBlack), RooFit::LineWidth(1), RooFit::VLines());
   predXSec->rectangularProb.plotOn(convFrame, RooFit::Normalization(1.), RooFit::LineStyle(2), RooFit::FillColor(0));
@@ -571,11 +571,11 @@ int foldedLikelihoods(const bool pole)
     else if(h==1)
       alpha.setVal(alphaHERA_mean.getVal());
 
-    drawConvolution(mitPredXSec[h], xsec, mass, alpha, mit[h]->GetFunction("f1"), theoTitle[h][1], canvas, printNameBase,
+    drawConvolution(mitPredXSec[h], xsec, mass, alpha, theoTitle[h][2], canvas, printNameBase,
 		    epsString("convolution_mitov", pole, h));
-    drawConvolution(mocPredXSec[h], xsec, mass, alpha, moc[h]->GetFunction("f1"), theoTitle[h][1], canvas, printNameBase,
+    drawConvolution(mocPredXSec[h], xsec, mass, alpha, theoTitle[h][1], canvas, printNameBase,
 		    epsString("convolution_moch", pole, h));
-    drawConvolution(ahrPredXSec[h], xsec, mass, alpha, ahr[h]->GetFunction("f1"), theoTitle[h][0], canvas, printNameBase,
+    drawConvolution(ahrPredXSec[h], xsec, mass, alpha, theoTitle[h][0], canvas, printNameBase,
 		    epsString("convolution_ahrens", pole, h));
   }
 
