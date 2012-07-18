@@ -2723,39 +2723,34 @@ namespace semileptonic {
 	  // head
 	  fitLowEdge =30.0;
 	  fitHighEdge=60.0;
-	  def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  a= 3.702E-01;
-	  b=-7.855E-03;
-	  c= 5.200E-05;
-	  d= 2.447E+01;
+	  def="TMath::Exp(x*[0]+x*x*[1])*[2]";
+	  a=-1.03538e-02;
+	  b=-3.40307e-04;
+	  c= 7.53315e+03;	 
 	  // tail
-	  fitLowEdgeB = 60.0; // 45.0
-	  fitHighEdgeB=210.0; //210.0
-	  defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  aB=-1.358E-02; // -0.02;
-	  bB=-1.363E-04; // -0.0001;
-	  cB= 3.657E-07; //  0.0000003;
-	  dB= 1.449E+04; // 41000;
+	  fitLowEdgeB = 60.0;
+	  fitHighEdgeB=210.0;
+	  defB="TMath::Exp(x*[0])*[1]";
+	  aB=-3.08600e-02;
+	  bB= 2.75566e+04;
       }
       else if(plotname.Contains("bqPt")){
 	  // head
 	  fitLowEdge =30.0;
 	  fitHighEdge=75.0;
-	  def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  a= 2.711E-01;
-	  b=-4.337E-03;
-	  c= 2.192E-05;
-	  d= 3.548E+01;
+	  def="TMath::Exp(x*[0]+x*x*[1])*[2]";
+	  a= 4.51177E-02;
+	  b=-4.46043E-04;
+	  c= 1.95411e+03;
 	  // tail
 	  fitLowEdgeB = 75.0;
 	  fitHighEdgeB=450.0;
 	  defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  aB=-1.704E-02;
-	  bB=-4.333E-05;
-	  cB= 7.428E-08;
-	  dB= 2.887E+04;
+	  aB=-1.48359e-02;
+	  bB=-4.80788e-05;
+	  cB= 9.13016e-08;
+	  dB= 1.91231e+04;
       }
-
     }
     else if(model=="powheg"){
       if(plotname.Contains("ttbarMass")){
