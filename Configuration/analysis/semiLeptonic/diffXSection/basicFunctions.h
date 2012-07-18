@@ -218,50 +218,39 @@ namespace semileptonic {
     // this function returns the name of the entered MC process
     // corresponding to the enumerator entry "sample" as defined in samples
     // modified quantities: NONE
-    // used functions: NONE
-    // used enumerators: samples
-
-    // create output
-    TString MCprocess="TheDefault";
+    // used functions:      NONE
+    // used enumerators:    sample
+    
     // list all MC process/sample names
-    if(sample==kSig    && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt)";
-    if(sample==kSig    && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt)";
-    if(sample==kSig    && decayChannel.compare("combined")==0) MCprocess="t#bar{t} (e/#mu prompt)";
-    if(sample==kSigPow && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) POWHEG";
-    if(sample==kSigPow && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) POWHEG";
-    if(sample==kSigPow && decayChannel.compare("combined")==0) MCprocess="t#bar{t} (e/#mu prompt) POWHEG";
-    if(sample==kSigMca && decayChannel.compare("electron")==0) MCprocess="t#bar{t} (e prompt) MC@NLO";
-    if(sample==kSigMca && decayChannel.compare("muon"    )==0) MCprocess="t#bar{t} (#mu prompt) MC@NLO";
-    if(sample==kSigMca && decayChannel.compare("combined")==0) MCprocess="t#bar{t} (e/#mu prompt) MC@NLO";
-    if(sample==kBkg    ) MCprocess="t#bar{t} other";
-    if(sample==kBkgPow ) MCprocess="t#bar{t} other POWHEG";
-    if(sample==kBkgMca ) MCprocess="t#bar{t} other MC@NLO";
-    if(sample==kSTop   ) MCprocess="Single Top";
-    if(sample==kSToptW ) MCprocess="Single Top tW";
-    if(sample==kSTops  ) MCprocess="Single Top s";
-    if(sample==kSTopt  ) MCprocess="Single Top t";
-    if(sample==kSAToptW) MCprocess="Single Antitop tW";
-    if(sample==kSATops ) MCprocess="Single Antitop s";
-    if(sample==kSATopt ) MCprocess="Single Antitop t";
-    if(sample==kWjets  ) MCprocess="W+Jets";
-    if(sample==kZjets  ) MCprocess="Z+Jets";
-    if(sample==kDiBos  ) MCprocess="Diboson";
-    if(sample==kWW     ) MCprocess="WW";
-    if(sample==kWZ     ) MCprocess="WZ";
-    if(sample==kZZ     ) MCprocess="ZZ";
-    if(sample==kQCD    ) MCprocess="QCD Multijet";
-    if(sample==kQCDEM1 ) MCprocess="QCDEM1";
-    if(sample==kQCDEM2 ) MCprocess="QCDEM2";
-    if(sample==kQCDEM3 ) MCprocess="QCDEM3";
-    if(sample==kQCDBCE1) MCprocess="QCDBCE1"; 
-    if(sample==kQCDBCE2) MCprocess="QCDBCE2";
-    if(sample==kQCDBCE3) MCprocess="QCDBCE3"; 
-    if(sample==kData   ) MCprocess="Data";
-    // return result
-    return MCprocess;
+    if(sample==kSig    ) return "t#bar{t} Signal";
+    if(sample==kSigPow ) return "t#bar{t} Signal POWHEG";
+    if(sample==kSigMca ) return "t#bar{t} Signal MC@NLO";
+    if(sample==kBkg    ) return "t#bar{t} Other";
+    if(sample==kBkgPow ) return "t#bar{t} Other POWHEG";
+    if(sample==kBkgMca ) return "t#bar{t} Other MC@NLO";
+    if(sample==kSTop   ) return "Single Top";
+    if(sample==kSToptW ) return "Single Top tW";
+    if(sample==kSTops  ) return "Single Top s";
+    if(sample==kSTopt  ) return "Single Top t";
+    if(sample==kSAToptW) return "Single Antitop tW";
+    if(sample==kSATops ) return "Single Antitop s";
+    if(sample==kSATopt ) return "Single Antitop t";
+    if(sample==kWjets  ) return "W+Jets";
+    if(sample==kZjets  ) return "Z+Jets";
+    if(sample==kDiBos  ) return "Diboson";
+    if(sample==kWW     ) return "WW";
+    if(sample==kWZ     ) return "WZ";
+    if(sample==kZZ     ) return "ZZ";
+    if(sample==kQCD    ) return "QCD Multijet";
+    if(sample==kQCDEM1 ) return "QCDEM1";
+    if(sample==kQCDEM2 ) return "QCDEM2";
+    if(sample==kQCDEM3 ) return "QCDEM3";
+    if(sample==kQCDBCE1) return "QCDBCE1"; 
+    if(sample==kQCDBCE2) return "QCDBCE2";
+    if(sample==kQCDBCE3) return "QCDBCE3"; 
+    if(sample==kData   ) return "Data";
+    else return "Default"+decayChannel;
   }
-
-
 
   double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   {
@@ -1115,8 +1104,8 @@ namespace semileptonic {
     // modified quantities: "histo_", "histo2_", "Nplots"
     // used functions: sampleLabel
     // used enumerators: samples
-    // "N1Dplots": the #1D plots is needed as input to destinguish between 1D and 2D plots
-    // "Nplots": the total # of plots is calclated
+    // "N1Dplots": the #1D plots is needed as input to distinguish between 1D and 2D plots
+    // "Nplots": the total # of plots is calculated
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "redundantPartOfNameInData": delete this part in the (folder)name when loading the plots from data
     //                              (needed to handle systematic variations where foldername in data and MC is different)
@@ -2084,8 +2073,8 @@ namespace semileptonic {
     else if(variable.Contains("ttbarPt"  )) tex="p_{T}^{t#bar{t}} #left[GeV#right]";
     else if(variable.Contains("ttbarY"   )) tex="y^{t#bar{t}}";
     else if(variable.Contains("ttbarMass")) tex="m_{t#bar{t}} #left[GeV#right]";
-    else if(variable.Contains("lepPt"    )) tex="p_{T}^{l} #left[GeV#right]";
-    else if(variable.Contains("lepEta"   )) tex="#eta^{l}";
+    else if(variable.Contains("lepPt"    )) tex="p_{T}^{l^{+} and l^{-}} #left[GeV#right]";
+    else if(variable.Contains("lepEta"   )) tex="#eta^{l^{+} and l^{-}}";
     else if(variable.Contains("bqPt"     )) tex="p_{T}^{b and #bar{b}} #left[GeV#right]";
     else if(variable.Contains("bqEta"    )) tex="#eta^{b and #bar{b}}";
     return tex;  

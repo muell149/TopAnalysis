@@ -109,7 +109,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   // Zprime pseudo data test: "", "500" or "750"
   TString zprime="";
   // adjust data label
-  TString dataLabel = (reweightClosure||zprime!="") ? "Pseudo-Data " : "Data "+dataSample; 
+  TString dataLabel = (reweightClosure||zprime!="") ? "Pseudo-Data " : "Data"; 
   
   //  Define muon and electron input rootfiles
   std::map<unsigned int, TFile*> files_;
@@ -372,20 +372,22 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	      if      (plotName=="topPt"  ) plotTheo->SetMaximum(0.02);
 	      else if (plotName=="ttbarPt") plotTheo->SetMaximum(0.07);
 	      else if (plotName=="lepPt"  ) plotTheo->SetMaximum(0.07);
-	      combicanvas    ->SetLogy(1);
+	      else if (plotName=="bqPt"   ) plotTheo->SetMaximum(0.02);
+	      combicanvas->SetLogy(1);
 	    }
 	    else{
 	      if      (plotName=="topPt"  ) plotTheo->SetMaximum(0.01);
 	      else if (plotName=="ttbarPt") plotTheo->SetMaximum(0.025);
 	      else if (plotName=="lepPt"  ) plotTheo->SetMaximum(0.03);
+	      else if (plotName=="bqPt"   ) plotTheo->SetMaximum(0.018);
 	    }
 	    // adjust max
-	    if(plotName=="lepEta"||plotName=="topY"||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
+	    if(plotName=="lepEta"||plotName=="bqEta"||plotName=="topY"||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
 	    
-	    if      (plotName=="topY"   ) plotTheo->SetMaximum(0.8);
+	    if      (plotName=="topY"   ) plotTheo->SetMaximum(0.7);
 	    else if (plotName=="ttbarY" ) plotTheo->SetMaximum(0.8);
 	    else if (plotName=="lepEta" ) plotTheo->SetMaximum(0.6);
-	    else if (plotName=="bqEta"  ) plotTheo->SetMaximum(0.55);
+	    else if (plotName=="bqEta"  ) plotTheo->SetMaximum(0.6);
 	  }
 	  
 	  // activate canvas
@@ -545,16 +547,26 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 
 	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
 	    
-	      TFile *file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisNNLO.root");
-	      TH1F *plotnnlo= (TH1F*)(file->Get(plotname)->Clone(plotname+"nnlo"));
-	      if(plotnnlo){ 		
-		TH1F *newPlotNNLO = reBinTH1FIrregularNewBinning(plotnnlo,binning_[plotname],plotname,true);
-		newPlotNNLO->SetName(plotname+"nnlo"); 
-		newPlotNNLO->GetXaxis()->SetRange(0, plotnnlo->GetNbinsX()-1);
-		newPlotNNLO->SetLineColor(constNnloColor);
-		newPlotNNLO->SetLineWidth(2);
-		newPlotNNLO->Draw("same");		
-	      }	     	     
+	      TFile  *file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisNNLO.root");
+	      TH1F   *newPlotNNLOHisto = (TH1F*)(file->Get(plotname)->Clone(plotname+"nnlo"));
+	      //TGraph *newPlotNNLOGraph = (TGraph*)(file->Get(plotname+"_graph")->Clone(plotname+"nnlo_graph"));
+	      if(newPlotNNLOHisto){
+		newPlotNNLOHisto->GetXaxis()->SetRange(0, newPlotNNLOHisto->GetNbinsX()-1); 	
+		//newPlotNNLOHisto->SetName(plotname+"nnlo"); 
+		newPlotNNLOHisto->SetLineColor(constNnloColor);
+		newPlotNNLOHisto->SetLineWidth(2);
+		newPlotNNLOHisto->SetMarkerStyle(7);
+		newPlotNNLOHisto->SetMarkerColor(constNnloColor);
+		newPlotNNLOHisto->Draw("SAME");
+	      }
+	      //if(newPlotNNLOGraph){
+	      //	//newPlotNNLOGraph->SetName(plotname+"nnlo_graph"); 
+	      //	newPlotNNLOGraph->SetLineColor(constNnloColor);
+	      //	newPlotNNLOGraph->SetLineWidth(2);
+	      //	newPlotNNLOGraph->SetMarkerStyle(7);
+	      //	newPlotNNLOGraph->SetMarkerColor(constNnloColor);
+	      //	newPlotNNLOGraph->Draw("LP");		
+	      //}	     	     
 	    }
 	  
 	    // g2) MCFM curves
@@ -731,6 +743,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  gPad->RedrawAxis(); 
 	  DrawCMSLabels(false,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
+
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
 	  
 	  // save combined e+mu plot for systematic error calculation afterwards

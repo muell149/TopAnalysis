@@ -169,7 +169,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
   // create list of variables you would like to create the efficiency / cross section for
   std::vector<TString> xSecVariables_, xSecLabel_;
   TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt" ,"lepEta", "bqPt", "bqEta"};
-  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[GeV]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{#mu}/[GeV]" , "#eta^{#mu}/ ", "p_{T}^{b and #bar{b}}/[GeV]" , "#eta^{b and #bar{b}}/ "};
+  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[GeV]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{#mu^{+} and #mu^{-}}/[GeV]" , "#eta^{#mu^{+} and #mu^{-}}/ ", "p_{T}^{b and #bar{b}}/[GeV]" , "#eta^{b and #bar{b}}/ "};
    
   xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
