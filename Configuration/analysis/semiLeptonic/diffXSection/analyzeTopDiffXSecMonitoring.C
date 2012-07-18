@@ -5,7 +5,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  const std::string decayChannel = "combined", 
+				  const std::string decayChannel = "electron", 
 				  bool withRatioPlot = true, bool extrapolate=false, bool hadron=false)
 {
   // ============================
@@ -99,8 +99,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   TString dataFileEl="";
   TString dataFileMu="";
   if(decayChannel=="combined"&&luminosity>4500&&luminosity<5000){
-    luminosityEl=4980;
-    luminosityMu=4955;
+    luminosityEl=constLumiElec;
+    luminosityMu=constLumiMuon;
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
@@ -260,70 +260,66 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass",
   };
 
-  TString plots1Dmu[ ] = { 
+  TString plots1DLeptons[] = {
+    // control plots: common for both lepton types and combined
+    // "Lepton" will be replace later by "Electron" or "Muon":
+    // e.g: tightLeptonKinematics/n --> tightMuonKinematics/n
+    //      tightLeptonKinematics/n --> tightElectronKinematics/n
     // (I) preselection
-    // (i) muon monitoring
-    "testIsoMuonQuality/relIso",
-    //"kinematicMuonQualityPreSel/nHit"   ,
-    //"kinematicMuonQualityPreSel/chi2"   ,
-    //"kinematicMuonQualityPreSel/dB"     ,
-    //"kinematicMuonQualityPreSel/dz"     ,
-    //"kinematicMuonQualityPreSel/matches",  
-    //"trackMuontightJetsKinematicsPreSel/dist30_",
-    //"goldenMuonQualityPreSel/relIso"    , 
-    //"tightMuonKinematicsPreSel/n"       ,
+    "testIsoLeptonQuality/relIso",
     // (II) before btagging
-    // (i) muon monitoring
-    "tightMuonKinematics/n" ,
-    "tightMuonKinematics/en" ,
-    "tightMuonKinematics/pt" ,
-    "tightMuonKinematics/eta",
-    "tightMuonKinematics/y"  ,
-    "tightMuonKinematics/phi",
-    "tightMuonQuality/nHit"   ,
-    "tightMuonQuality/chi2"   ,
-    "tightMuonQuality/dB"     ,
-    "tightMuonQuality/dz"     ,
-    "tightMuonQuality/ecalEn" ,
-    "tightMuonQuality/hcalEn" ,
-    "tightMuonQuality/relIso" ,
-    "tightMuonQuality/matches",  			 
+    "tightLeptonKinematics/n",
+    "tightLeptonKinematics/en",
+    "tightLeptonKinematics/pt",
+    "tightLeptonQuality/relIso",
     // (III) after btagging 
-    // (i) muon monitoring
-    "tightMuonQualityTagged/relIso" ,
-    "tightMuonKinematicsTagged/pt" ,
+    "tightLeptonQualityTagged/relIso",
+    "tightLeptonKinematicsTagged/pt"
+   };
+
+  TString plots1Dmu[ ] = { 
+    // control plots: muon only
+    // (I) preselection
+    // (II) before btagging
+    "tightMuonKinematics/eta",
+    "tightMuonKinematics/y",
+    "tightMuonKinematics/phi",
+    "tightMuonQuality/nHit",
+    "tightMuonQuality/chi2",
+    "tightMuonQuality/dB",
+    "tightMuonQuality/dz",
+    "tightMuonQuality/ecalEn",
+    "tightMuonQuality/hcalEn",
+    "tightMuonQuality/matches",
+   // (III) after btagging 
     "tightMuonKinematicsTagged/eta",
-    "tightMuonKinematicsTagged/phi"
+    "tightMuonKinematicsTagged/phi" 			 
   };
-	
+
   TString plots1De[ ] = { 
-    // (ib) electron monitoring
-    "testIsoElectronQuality/relIso",
-    "tightElectronKinematics/n" ,
-    "tightElectronKinematics/en" ,
-    "tightElectronKinematics/et" ,
+    // control plots: electron only
+    // (I) preselection
+    // (II) before btagging
     "tightElectronKinematics/eta",
     "tightElectronKinematics/phi",
-    "tightElectronQuality/etaSC"  ,
-    "tightElectronQuality/dB"     ,
+    "tightElectronQuality/etaSC",
+    "tightElectronQuality/dB",
     "tightElectronQuality/simpleEleId70cIso", 
     "tightElectronQuality/nHitsInner",
-    "tightElectronQuality/convDcot" ,
-    "tightElectronQuality/convDist" ,
-    "tightElectronQuality/relIso"   ,
-    // (ib) electron monitoring
-    "tightElectronQualityTagged/relIso",
-    "tightElectronKinematicsTagged/et" ,
+    "tightElectronQuality/convDcot",
+    "tightElectronQuality/convDist",
+    // (III) after btagging 
     "tightElectronKinematicsTagged/eta",
     "tightElectronKinematicsTagged/phi"
   };
 	
-  TString plots2D[ ] = { 
-  };	
-	
-  // b) list plot axes style
-  // 1D: "x-axis title"/"y-axis title"/log/rebin-factor
-  // log = 0 or 1 for linear or logarithmic axis 
+  TString plots2D[ ] = {};	
+
+  // ========================================================
+  //  b) list plot axes style
+  //  1D: "x-axis title"/"y-axis title"/log/rebin-factor
+  //  log = 0 or 1 for linear or logarithmic axis 
+  // ========================================================
       
   TString axisLabel1D[ ] = { 
     // (I) preselection
@@ -338,7 +334,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "N_{jets};events;1;1",
     "N_{jets};events;1;1",
     "E(jets) [GeV];jets;1;1",
-    "p_{t}(jets) #left[GeV#right];jets;1;1",
+    "p_{T} #left[GeV#right];jets;1;1",
     "#eta(jets);jets;0;5",
     "#phi(jets);jets;0;10",
     "H_{T} #left[GeV#right];events;0;50",
@@ -393,7 +389,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     // (III) after btagging 
     // (ii) jet monitoring
     "N_{jets};events;1;1",
-    "p_{t}(jets) #left[GeV#right];jets;1;2",
+    "p_{T} #left[GeV#right];jets;1;2",
     "#eta(jets);jets;0;5" ,
     "#phi(jets);jets;0;10",
     "H_{T} [GeV];events;0;100",
@@ -425,97 +421,85 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "Number of Vertices (Reweighted sysUp);Frequency;0;1", 
     "Number of Vertices (Reweighted sysDown);Frequency;0;1", 
     // (III) after kinematic fit 
-    "p^{t}^{t and #bar{t}} #left[GeV#right];N^{t and #bar{t}};0;20",
-    "y^{t and #bar{t}};N^{t and #bar{t}};0;1",
-    "p^{t}^{t#bar{t}} #left[GeV#right];N^{t#bar{t}};0;20",
-    "y^{t#bar{t}};N^{t#bar{t}};0;1",
-    "m^{t#bar{t}} #left[GeV#right];N^{t#bar{t}};0;20",
-    "p^{t}^{l} #left[GeV#right];N^{l};0;20",    
+    "p_{T}^{t and #bar{t}} #left[GeV#right];top quarks;0;20",
+    "y^{t and #bar{t}};top quarks;0;1",
+    "p_{T}^{t#bar{t}} #left[GeV#right];top-quark pairs;0;20",
+    "y^{t#bar{t}};top-quark pairs;0;1",
+    "m^{t#bar{t}} #left[GeV#right];top-quark pairs;0;20",
+    "p_{T}^{l} #left[GeV#right];N^{l};0;20",    
     "#eta^{l};N^{l};0;1",
-    "p^{t}^{q} #left[GeV#right];N^{q};0;20",    
+    "p_{T}^{q} #left[GeV#right];N^{q};0;20",    
     "#eta^{q};N^{q};0;1",
-    "p^{t}^{b and #bar{b}} #left[GeV#right];N^{b and #bar{b}};0;20",    
+    "p_{T}^{b and #bar{b}} #left[GeV#right];N^{b and #bar{b}};0;20",    
     "#eta^{b and #bar{b}};N^{b and #bar{b}};0;1",
     "probability (best fit hypothesis);events;1;25", 
     "#chi^{2} (best fit hypothesis);events;0;10",
     // gen distributions
     "m^{t#bar{t}} #left[GeV#right] parton all truth;events;1;1",
     "m^{t#bar{t}} #left[GeV#right] parton lv truth;events;1;1"
+  };
 
+  TString axisLabel1DLeptons[ ] = {
+    // (I) preselection
+    "PF relIso N-1;leptons;0;1",
+    // (II) before btagging
+    "N;leptons;0;1"   ,
+    "E;events;0;2"    ,
+    "p_{T} [GeV];leptons;0;1",   
+    "PF relIso;leptons;0;1",
+    // (III) after btagging 
+    "PF relIso;leptons;0;1",
+    "p_{T} [GeV];leptons;0;2",
+  };
+
+  TString axisLabel1Dmu[ ] = {
+    // (I) preselection
+    // (II) before btagging
+    "#eta;muons;0;5" ,
+    "y;muons;0;5",	
+    "#phi;muons;0;5" ,
+    "N_{hits}(inner tracker #mu);muons;0;1",
+    "#chi^{2} (global trackfit #mu);muons;1;1",
+    "d_{xy} (#mu wrt. beamspot) [cm];muons;0;1",
+    "d_{z} [cm];muons;0;10",
+    "E_{Ecal};muons;1;1",
+    "E_{Hcal};muons;1;1",
+    "N_{matched #mu segments};muons;0;1",
+    // (III) after btagging 
+    "#eta;muons;0;1",
+    "#phi;muons;0;10"
   };
 
   TString axisLabel1De[ ] = {
-    // (iv) electron monitoring
-    "PF relIso(e) N-1;events;0;1",
-    "N_{e};events;0;1" ,
-    "E(e) [GeV];events;0;2",
-    "E_{t}(e) [GeV];events;0;1" ,
-    "#eta(e);events;0;5",
-    "#phi(e);events;0;5",
-    "#eta(S.C.);events;0;1"  ,
-    "d_{xy} (e wrt. beamspot) [cm];events;0;1",
-    "simpleEleId70cIso;events;0;1", 
-    "nHitsInner(conv);events;0;1",
-    "convCot;events;0;5",
-    "convDist;events;0;5" ,
-    "PF relIso(e);events;0;1" ,
-    // (iv) electron monitoring
-    "PF relIso(e);events;0;1" ,
-    "E_{t}(e) [GeV];events;0;2",
-    "#eta(e);events;0;1",
-    "#phi(e);events;0;1"
-  };
-	
-  TString axisLabel1Dmu[ ] = {
     // (I) preselection
-    // (i) muon monitoring
-    "PF relIso(#mu) N-1;events;0;1",
-    //"N_{hits}(inner tracker #mu)/events/0/1"          ,
-    //"#chi^{2} (global trackfit #mu(pt,#eta))/events/1/1",
-    //"d_{xy} (#mu(pt,#eta) wrt. beamspot)/events/0/1" ,
-    //"d_{z} (#mu(pt,#eta))/events/0/10",
-    //"N_{matched #mu segments}(#mu(pt,#eta))/events/0/1",
-    //"#DeltaR(jet(pt,#eta,ID), #mu(pt, #eta, track criteria))/events/0/1",
-    //"relIso(#mu(no isolation))/events/0/1",
-    //"N_{#mu}/events/0/1",
     // (II) before btagging
-    // (i) muon monitoring
-    "N_{#mu};events;0;1"   ,
-    "E(#mu);events;0;2"    ,
-    "p_{t}(#mu);events;0;1",
-    "#eta(#mu);events;0;5" ,
-    "y(#mu);events;0;5"    ,	
-    "#phi(#mu);events;0;5" ,
-    "N_{hits}(inner tracker #mu);events;0;1"          ,
-    "#chi^{2} (global trackfit #mu);events;1;1",
-    "d_{xy} (#mu wrt. beamspot) [cm];events;0;1" ,
-    "d_{z} (#mu) [cm];events;0;10"               ,
-    "E_{Ecal} (#mu);events;1;1",
-    "E_{Hcal} (#mu);events;1;1",
-    "PF relIso(#mu);events;0;1",
-    "N_{matched #mu segments}(#mu);events;0;1",
+    "#eta;electrons;0;5",
+    "#phi;electrons;0;5",
+    "#eta(S.C.);electrons;0;1",
+    "d_{xy} (e wrt. beamspot) [cm];electrons;0;1",
+    "simpleEleId70cIso;electrons;0;1", 
+    "nHitsInner(conv);electrons;0;1",
+    "convCot;electrons;0;5",
+    "convDist;electrons;0;5",
     // (III) after btagging 
-    // (i) muon monitoring
-    "PF relIso(#mu);events;0;1",
-    "p_{t}(#mu);events;0;2",
-    "#eta(#mu);events;0;1",
-    "#phi(#mu);events;0;10",
+    "#eta;electrons;0;1",
+    "#phi;electrons;0;10"
   };
 
   // 2D: "x-axis title"/"y-axis title"
-  TString axisLabel2D[ ] = {
-  };
+  TString axisLabel2D[ ] = {};
+
   // ======================================================================
   //  Count number of plots + cross-check to number of axis-label defined 
   // ======================================================================
-  unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
-  if(decayChannel=="electron") N1Dplots+=(sizeof(plots1De )/sizeof(TString));
-  if(decayChannel=="muon"    ) N1Dplots+=(sizeof(plots1Dmu)/sizeof(TString));
+  unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString) + sizeof(plots1DLeptons)/sizeof(TString);
+  if(decayChannel=="electron") N1Dplots += sizeof(plots1De )/sizeof(TString);
+  if(decayChannel=="muon"    ) N1Dplots += sizeof(plots1Dmu)/sizeof(TString);
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
   // get number fo axis labels and check if it corresponds to number of plots
-  unsigned int Naxislabels = sizeof(axisLabel1D)/sizeof(TString);
-  if(decayChannel=="electron") Naxislabels+=(sizeof(axisLabel1De )/sizeof(TString));
-  if(decayChannel=="muon"    ) Naxislabels+=(sizeof(axisLabel1Dmu)/sizeof(TString));
+  unsigned int Naxislabels = sizeof(axisLabel1D)/sizeof(TString) + sizeof(axisLabel1DLeptons)/sizeof(TString);
+  if(decayChannel=="electron") Naxislabels += sizeof(axisLabel1De )/sizeof(TString);
+  if(decayChannel=="muon"    ) Naxislabels += sizeof(axisLabel1Dmu)/sizeof(TString);
   if(N1Dplots != Naxislabels){
     std::cout << "ERROR - 1D plots: Number of plots and axis label do not correspond .... Exiting macro!" << std::endl;
     exit(1);
@@ -541,12 +525,38 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   //  Loading histos
   // =====================
   // collect all plot names in vector (first 1D, then 2D)
-  std::vector<TString> plotList_;
-  plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
-  if(decayChannel=="electron") plotList_.insert( plotList_.end(), plots1De , plots1De  + sizeof(plots1De )/sizeof(TString) );
-  if(decayChannel=="muon"    ) plotList_.insert( plotList_.end(), plots1Dmu, plots1Dmu + sizeof(plots1Dmu)/sizeof(TString) );
+  std::vector<TString> plotList_, plotListEl_, plotListMu_;
+  plotList_.insert(plotList_.begin(), plots1D,        plots1D        + sizeof(plots1D       )/sizeof(TString));
+  plotList_.insert(plotList_.end(),   plots1DLeptons, plots1DLeptons + sizeof(plots1DLeptons)/sizeof(TString));
+  if(decayChannel=="electron") plotList_.insert(plotList_.end(), plots1De,  plots1De  + sizeof(plots1De )/sizeof(TString));
+  if(decayChannel=="muon"    ) plotList_.insert(plotList_.end(), plots1Dmu, plots1Dmu + sizeof(plots1Dmu)/sizeof(TString)); 
   plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );	
-	
+
+  // Rename lepton plots according to chosen decay channel
+
+  if (decayChannel != "combined"){
+
+    for (std::vector<TString>::iterator iter = plotList_.begin(); iter != plotList_.end(); iter++){
+      
+      if (iter->Contains("Lepton")){     
+	if (decayChannel=="electron")  iter->ReplaceAll("Lepton","Electron");
+	else if (decayChannel=="muon") iter->ReplaceAll("Lepton","Muon");    
+      }
+    }
+  }
+  else{
+    plotListEl_ = plotList_;
+    plotListMu_ = plotList_;
+    
+    for (std::vector<TString>::iterator iter = plotListEl_.begin(); iter != plotListEl_.end(); iter++){
+      if (iter->Contains("Lepton")) iter->ReplaceAll("Lepton","Electron");
+      if (iter->Contains("tightElectronKinematics/pt")) iter->ReplaceAll("tightElectronKinematics/pt","tightElectronKinematics/et");
+    }
+    
+    for (std::vector<TString>::iterator iter = plotListMu_.begin(); iter != plotListMu_.end(); iter++)
+      if (iter->Contains("Lepton")) iter->ReplaceAll("Lepton","Muon");
+  }
+
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
   std::map< TString, std::map <unsigned int, TH1F*> > histo_, histoEl_, histoMu_;
@@ -565,10 +575,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   vecRedundantPartOfNameInData.push_back("_reweighted");
   if(decayChannel!="combined") getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose, decayChannel, &vecRedundantPartOfNameInData, SSV);
   else{
-    getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose, "muon"    , &vecRedundantPartOfNameInData, SSV);
-    getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose, "electron", &vecRedundantPartOfNameInData, SSV);
+    getAllPlots(filesEl_, plotListEl_, histoEl_, histo2El_, N1Dplots, Nplots, verbose, "electron", &vecRedundantPartOfNameInData, SSV);
+    getAllPlots(filesMu_, plotListMu_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose, "muon"    , &vecRedundantPartOfNameInData, SSV);
   }
-
   
   // ==========================================
   //  Lumiweighting for choosen luminosity
@@ -577,8 +586,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   // NOTE: luminosity [/pb]
   if(decayChannel!="combined") scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
   else{
-    scaleByLuminosity(plotList_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose, systematicVariation, "muon"    );
-    scaleByLuminosity(plotList_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose, systematicVariation, "electron");
+    scaleByLuminosity(plotListMu_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose, systematicVariation, "muon"    );
+    scaleByLuminosity(plotListEl_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose, systematicVariation, "electron");
   }
 
   // =======================================================
@@ -591,10 +600,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   bool reCreate=false;
   if(decayChannel!="combined")  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose, reCreate, decayChannel);
   else{
-    AddSingleTopAndDiBoson(plotList_, histoMu_, histo2Mu_, N1Dplots, verbose, reCreate, "muon"    ); 
-    AddSingleTopAndDiBoson(plotList_, histoEl_, histo2El_, N1Dplots, verbose, reCreate, "electron");
+    AddSingleTopAndDiBoson(plotListMu_, histoMu_, histo2Mu_, N1Dplots, verbose, reCreate, "muon"    ); 
+    AddSingleTopAndDiBoson(plotListEl_, histoEl_, histo2El_, N1Dplots, verbose, reCreate, "electron");
   }
-
 
   // =======================================================
   //  Add decay channels for combined control plot
@@ -605,18 +613,22 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	  if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << std::endl;
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-	if(verbose>1) std::cout << plotList_[plot] << " : " ;
+	if(verbose>1) std::cout << plotList_[plot] << " " << plotListMu_[plot] << " " << plotListEl_[plot] << " : " ;
 	// a) 1D
-	if((plot<N1Dplots)&&(histoMu_.count(plotList_[plot])>0)&&(histoMu_[plotList_[plot]].count(sample)>0)&&(histoEl_.count(plotList_[plot])>0)&&(histoEl_[plotList_[plot]].count(sample)>0)){ 
+	if((plot<N1Dplots)&&(histoMu_.count(plotListMu_[plot])>0)&&(histoMu_[plotListMu_[plot]].count(sample)>0)&&(histoEl_.count(plotListEl_[plot])>0)&&(histoEl_[plotListEl_[plot]].count(sample)>0)){ 
 	  if(verbose>1) std::cout << "1D" << std::endl;
-	  histo_[plotList_[plot]][sample]=(TH1F*)(histoMu_[plotList_[plot]][sample]->Clone());
-	  histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_[plotList_[plot]][sample]->Clone()));
+	  histo_[plotList_[plot]][sample]=     (TH1F*)(histoMu_[plotListMu_[plot]][sample]->Clone());
+	  if (plotListMu_[plot]=="tightMuonKinematics/pt"){
+	    histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_["tightElectronKinematics/et"][sample]->Clone()));
+	    std::cout << " PT_ET " << std::endl;
+	  }
+	  else histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_[plotListEl_[plot]][sample]->Clone()));
 	}
 	// b) 2D
 	else if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
 	  if(verbose>1) std::cout << "2D" << std::endl;
-	  histo2_[plotList_[plot]][sample]=(TH2F*)(histo2Mu_[plotList_[plot]][sample]->Clone());
-	  histo2_[plotList_[plot]][sample]->Add((TH2F*)(histo2El_[plotList_[plot]][sample]->Clone()));
+	  histo2_[plotList_[plot]][sample]=     (TH2F*)(histo2Mu_[plotListMu_[plot]][sample]->Clone());
+	  histo2_[plotList_[plot]][sample]->Add((TH2F*)(histo2El_[plotListEl_[plot]][sample]->Clone()));
 	}
 	else{
 	  if(verbose>1) std::cout << "NOT FOUND" << std::endl;
@@ -630,7 +642,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   // ============================
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
-  axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
+  axisLabel_.insert(axisLabel_.begin(), axisLabel1D,        axisLabel1D        + sizeof(axisLabel1D)/sizeof(TString));
+  axisLabel_.insert(axisLabel_.end(),   axisLabel1DLeptons, axisLabel1DLeptons + sizeof(axisLabel1DLeptons)/sizeof(TString));
   if(decayChannel=="electron") axisLabel_.insert( axisLabel_.end(), axisLabel1De , axisLabel1De +sizeof(axisLabel1De )/sizeof(TString) );
   if(decayChannel=="muon"    ) axisLabel_.insert( axisLabel_.end(), axisLabel1Dmu, axisLabel1Dmu+sizeof(axisLabel1Dmu)/sizeof(TString) );
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
@@ -904,7 +917,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	    if(plotList_[plot].Contains("analyzeMETMuon/metSumEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(200,1400);
 	    if(plotList_[plot].Contains("analyzeMETMuon/metEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
 	    if(plotList_[plot].Contains("bottomJetKinematics")&&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
-	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,350);
+	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,350);
+	    if(plotList_[plot].Contains("LeptonKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,150);
 	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);	
 	    if(plotList_[plot].Contains("lepPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);
 	    if(plotList_[plot].Contains("lepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
