@@ -3196,11 +3196,25 @@ void Plotter::PlotDiffXSec(){
     bool binned_theory=true; //############
   
     TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
+    TH1* mcnlohistnorm=0;
     mcnlohist = GetNloCurve(newname,"MCATNLO");
     double mcnloscale = 1./mcnlohist->Integral("width");
     if (binned_theory==false) mcnlohist->Rebin(2);mcnlohist->Scale(0.5); //#####
     mcnlohist->Scale(mcnloscale);
 
+
+    if(name.Contains("LeptonpT")){mcnlohistnorm = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
+    else if(name.Contains("LeptonEta")){mcnlohistnorm = GetNloCurve("Leptons","Eta","MCatNLO");}
+    else if(name.Contains("LLBarpT")){mcnlohistnorm = GetNloCurve("LepPair","Pt","MCatNLO");}
+    else if(name.Contains("LLBarMass")){mcnlohistnorm = GetNloCurve("LepPair","Mass","MCatNLO");}
+    else if(name.Contains("ToppT")){mcnlohistnorm = GetNloCurve("TopQuarks","Pt","MCatNLO");}
+    else if(name.Contains("TopRapidity")){mcnlohistnorm = GetNloCurve("TopQuarks","Rapidity","MCatNLO");}
+    else if(name.Contains("TTBarpT")){mcnlohistnorm = GetNloCurve("TtBar","Pt","MCatNLO");}
+    else if(name.Contains("TTBarRapidity")){mcnlohistnorm = GetNloCurve("TtBar","Rapidity","MCatNLO");}
+    else if(name.Contains("TTBarMass")){mcnlohistnorm = GetNloCurve("TtBar","Mass","MCatNLO");}
+    else {mcnlohistnorm = new TH1();}
+    //    if (binned_theory==false) mcnlohistnorm->Rebin(5);mcnlohistnorm->Scale(0.2);
+    TH1* mcnlohistnormBinned    = mcnlohistnorm->Rebin(bins,"genBinHist", Xbins);
 
     if(name.Contains("LeptonpT")){mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");}//temprorary until I change the naming convention in the root file
     else if(name.Contains("LeptonEta")){mcnlohistup = GetNloCurve("Leptons","Eta","MCNLOup");}
@@ -3212,8 +3226,10 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
     else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
     else {mcnlohistup = new TH1();}
-    if (binned_theory==false) mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
-    mcnlohistup->Scale(mcnloscale);
+    //    if (binned_theory==false) mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
+    TH1* mcnlohistupBinned    = mcnlohistup->Rebin(bins,"genBinHist", Xbins);
+
+    //    mcnlohistupBinned->Scale(1./mcnlohistupBinned->Integral("width"));
 
     if(name.Contains("LeptonpT")){mcnlohistdown = GetNloCurve("Leptons","Pt","MCNLOdown");}//temprorary until I change the naming convention in the root file
     else if(name.Contains("LeptonEta")){mcnlohistdown = GetNloCurve("Leptons","Eta","MCNLOdown");}
@@ -3225,8 +3241,10 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
     else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
     else {mcnlohistdown = new TH1();}
-    if (binned_theory==false) mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
-    mcnlohistdown->Scale(mcnloscale);
+    //    if (binned_theory==false) mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
+    TH1* mcnlohistdownBinned    = mcnlohistdown->Rebin(bins,"genBinHist", Xbins);
+    //mcnlohistdown->Scale(mcnloscale);
+    //    mcnlohistdownBinned->Scale(1./mcnlohistdownBinned->Integral("width"));
 
     powheghist = GetNloCurve(newname, "POWHEG");
     double powhegscale = 1./powheghist->Integral("width");
@@ -3234,39 +3252,41 @@ void Plotter::PlotDiffXSec(){
     powheghist->Scale(powhegscale);
  	
     TH1* powheghistBinned = powheghist->Rebin(bins,"powhegplot",Xbins);	
-    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+    for (Int_t bin=0; bin<bins; bin++){
       powheghistBinned->SetBinContent(bin+1,powheghistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/powheghist->GetBinWidth(1)));
     }
     powheghistBinned->Scale(1./powheghistBinned->Integral("width"));
 
     TH1* mcnlohistBinned = mcnlohist->Rebin(bins,"mcnloplot",Xbins);	
-    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+    for (Int_t bin=0; bin<bins; bin++){
       mcnlohistBinned->SetBinContent(bin+1,mcnlohistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohist->GetBinWidth(1)));
     }
     mcnlohistBinned->Scale(1./mcnlohistBinned->Integral("width"));
+    mcnlohistupBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
+    mcnlohistdownBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
 
 
     //Uncertainty band for MC@NLO
     const Int_t nMCNLOBins = mcnlohistup->GetNbinsX();
-    Double_t x[nMCNLOBins];
-    Double_t xband[2*nMCNLOBins];
-    Double_t errup[nMCNLOBins];
-    Double_t errdn[nMCNLOBins];
-    Double_t errorband[2*nMCNLOBins];
+    Double_t x[bins];
+    Double_t xband[2*bins];
+    Double_t errup[bins];
+    Double_t errdn[bins];
+    Double_t errorband[2*bins];
     
-    for( Int_t j = 0; j< nMCNLOBins; j++ ){
-      x[j]=mcnlohist->GetBinCenter(j+1);
-      errup[j]=mcnlohistup->GetBinContent(j+1);
-      errdn[j]=mcnlohistdown->GetBinContent(j+1);
+    for( Int_t j = 0; j< bins; j++ ){
+      x[j]=mcnlohistBinned->GetBinCenter(j+1);
+      errup[j]=mcnlohistupBinned->GetBinContent(j+1);
+      errdn[j]=mcnlohistdownBinned->GetBinContent(j+1);
       
       xband[j] = x[j];
       errorband[j] = errdn[j]; //lower band
-      xband[2*nMCNLOBins-j-1] = x[j];
-      errorband[2*nMCNLOBins-j-1] = errup[j]; //upper band
+      xband[2*bins-j-1] = x[j];
+      errorband[2*bins-j-1] = errup[j]; //upper band
       
     }
     
-    TGraph *mcatnloBand = new TGraph(2*nMCNLOBins, xband, errorband);
+    TGraph *mcatnloBand = new TGraph(2*bins, xband, errorband);
     mcatnloBand->SetFillColor(kGray);
     mcatnloBand->SetLineColor(kAzure);
     mcatnloBand->SetLineWidth(2);
@@ -3316,7 +3336,13 @@ void Plotter::PlotDiffXSec(){
     if (ymax!=0) h_GenDiffXSec->SetMaximum(ymax);
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
-    //    mcatnloBand->Draw("same, F");
+    //mcatnloBand->Draw("same, F");
+    mcnlohistupBinned->SetFillColor(kGray);
+    mcnlohistupBinned->SetLineColor(kGray);
+    mcnlohistupBinned->Draw("same");
+    mcnlohistdownBinned->SetLineColor(10);
+    mcnlohistdownBinned->SetFillColor(10);
+    mcnlohistdownBinned->Draw("same");
     GenPlotTheory->SetLineColor(kRed+1);
     GenPlotTheory->SetLineWidth(2);
 //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
@@ -3364,9 +3390,10 @@ void Plotter::PlotDiffXSec(){
     TLegend leg2 = *getNewLegend();
     leg2.AddEntry(h_DiffXSec, "Data",    "p");
     leg2.AddEntry(GenPlotTheory,            "MadGraph","l");
-    //if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
+    if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
     //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
-    if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
+    //if (mcnlohistupBinned->GetEntries()) leg2.AddEntry(mcnlohistupBinned,      "MC@NLO",  "fl");
+    //if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
     if (powheghist->GetEntries())  leg2.AddEntry(powheghistBinned,       "POWHEG",  "l");        
     if (name.Contains("ToppT") || name.Contains("TopRapidity"))  {
     	leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");
@@ -3468,7 +3495,12 @@ void Plotter::PlotDiffXSec(){
 TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char *generator){
 
   TH1::AddDirectory(kFALSE);
-  TString histname("visible_");
+  TString histname;
+  if(strcmp(particle, "TopQuarks")==0||strcmp(particle, "TtBar")==0){
+    histname="total_";
+  }else{
+    histname="visible_";
+  }
   histname.Append(particle);
   histname.Append(quantity);
   histname.Append("_");
@@ -3479,9 +3511,9 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
   TFile* file = new TFile;
   
   if(strcmp(generator, "Powheg")==0){file = TFile::Open("selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root","READ");}
-  else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20111028.root","READ");}
-  else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20111028.root","READ");}
-  else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20111028.root","READ");}
+  else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20120130.root","READ");}
+  else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20120130.root","READ");}
+  else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20120130.root","READ");}
   
   if (file && !file->IsZombie()) {
     file->GetObject<TH1>(histname, hist);
@@ -3505,7 +3537,7 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
       Double_t binw = hist->GetBinWidth(1);
       wgt = crosssection/nevents/binw;
     }
-    rethist->Scale(wgt);
+    //rethist->Scale(wgt);
     return rethist;
   }
   
