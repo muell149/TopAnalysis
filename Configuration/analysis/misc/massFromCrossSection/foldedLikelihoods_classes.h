@@ -76,7 +76,7 @@ class PredXSec {
 public:
 
   PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-	   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile& alpha_funcFile);
+	   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile& alpha_funcFile, RooRealVar& alpha_def);
 
 public:
 
@@ -98,6 +98,7 @@ private:
   const QuadraticDependence alpha_p2;
 
   const RooPolyVar alphaDep;
+  const RooPolyVar alphaDepCorr;
 
 public:
 
@@ -120,7 +121,8 @@ public:
 };
 
 PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-		   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile& alpha_funcFile):
+		   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile& alpha_funcFile,
+		   RooRealVar& alpha_def):
   name(label),
   p0(label+"_p0", label+"_p0", xsec_func->GetParameter(0)),
   p1(label+"_p1", label+"_p1", xsec_func->GetParameter(1)),
@@ -135,8 +137,11 @@ PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_
   alphaDep(label+"_alphaDep", label+"_alphaDep", alpha_var, RooArgSet(alpha_p0.polyVar,
 								      alpha_p1.polyVar,
 								      alpha_p2.polyVar)),
-  xsec(label+"_xsec", label+"_xsec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)*@5/(@0*@0*@0*@0)",
-       RooArgSet(mass_var, p0, p1, p2, p3, alphaDep)),
+  alphaDepCorr(label+"_alphaDepCorr", label+"_alphaDepCorr", alpha_def, RooArgSet(alpha_p0.polyVar,
+										  alpha_p1.polyVar,
+										  alpha_p2.polyVar)),
+  xsec(label+"_xsec", label+"_xsec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)*(@5/@6)/(@0*@0*@0*@0)",
+       RooArgSet(mass_var, p0, p1, p2, p3, alphaDep, alphaDepCorr)),
   xsecScaleUp(label+"_xsecScaleUp", label+"_xsecScaleUp", "@0+@0*TMath::Abs(@1)",
 	      RooArgSet(xsec, relUncScaleUp.polyVar)),
   xsecScaleDown(label+"_xsecScaleDown", label+"_xsecScaleDown", "@0-@0*TMath::Abs(@1)",
