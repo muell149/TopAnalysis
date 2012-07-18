@@ -1,4 +1,3 @@
-//
 #include "Riostream.h"
 
 #include "TAxis.h"
@@ -493,6 +492,14 @@ int foldedLikelihoods(const bool pole)
   RooRealVar alphaHERA_mean("alphaHERA_mean", "alphaHERA_mean", 0.1176);
   RooRealVar alphaHERA_unc ("alphaHERA_unc" , "alphaHERA_unc" , 0.0020);
 
+  RooRealVar alphaABM_mean("alphaABM_mean", "alphaABM_mean", 0.1134);
+  RooRealVar alphaABM_unc ("alphaABM_unc" , "alphaABM_unc" , 0.0011);
+
+  std::vector<RooRealVar> defaultAlphas;
+  defaultAlphas.push_back(alphaMSTW_mean);
+  defaultAlphas.push_back(alphaHERA_mean);
+  defaultAlphas.push_back(alphaABM_mean );
+
   RooRealVar mass_mean("mass_mean", "mass_mean", 173.2); // Tevatron July 2012
   RooRealVar mass_unc ("mass_unc" , "mass_unc" , 1.4); // Tevatron July 2012 plus 1 GeV for m(pole)/m(MC)?
   RooGaussian massProb("massProb", "massProb", mass, mass_mean, mass_unc);
@@ -556,25 +563,29 @@ int foldedLikelihoods(const bool pole)
   PredXSec* mocPredXSec[nPdfSets];
   //  PredXSec* ahrPredXSec[nPdfSets];
 
-  for(unsigned h=0; h<2; h++) {
+  for(unsigned h=0; h<nPdfSets; h++) {
     TString alphaFileName = (pole ? "pole_" : "msbar_");
-    alphaFileName += (h ? "hera_alphaDep.root" : "mstw_alphaDep.root");
-    TFile mitAlphaFile("theories_7TeV/mitov_"+alphaFileName, "READ");
-    TFile mocAlphaFile("theories_7TeV/moch_" +alphaFileName, "READ");
+    TString suf = "PredXSec";
 
-    const TString suf = (h ? "PredXSecHERA" : "PredXSecMSTW");
+    switch(h) {
+    case kMSTW: alphaFileName += "mstw"; suf += "MSTW"; break;
+    case kHERA: alphaFileName += "hera"; suf += "HERA"; break;
+    case kABM : alphaFileName += "abm" ; suf += "ABM" ; break;
+    }
+
+    TFile mitAlphaFile("theories_7TeV/mitov_"+alphaFileName+"_alphaDep.root", "READ");
+    TFile mocAlphaFile("theories_7TeV/moch_" +alphaFileName+"_alphaDep.root", "READ");
     
-    mitPredXSec[h] = new PredXSec("mit"+suf, xsec, mass, alpha, mit[h]->GetFunction("f1"), mit_funcs[h], mitAlphaFile);
-    mocPredXSec[h] = new PredXSec("moc"+suf, xsec, mass, alpha, moc[h]->GetFunction("f1"), moc_funcs[h], mocAlphaFile);
+    mitPredXSec[h] = new PredXSec("mit"+suf, xsec, mass, alpha, mit[h]->GetFunction("f1"), mit_funcs[h],
+				  mitAlphaFile, defaultAlphas.at(h));
+    mocPredXSec[h] = new PredXSec("moc"+suf, xsec, mass, alpha, moc[h]->GetFunction("f1"), moc_funcs[h],
+				  mocAlphaFile, defaultAlphas.at(h));
     //    ahrPredXSec[h] = new PredXSec("ahrPredXSec"+suf, xsec, mass, alpha, ahr[h]->GetFunction("f1"), ahr_funcs[h], alphaFile);
 
     mitAlphaFile.Close();
     mocAlphaFile.Close();
 
-    if(h==0)
-      alpha.setVal(alphaMSTW_mean.getVal());
-    else if(h==1)
-      alpha.setVal(alphaHERA_mean.getVal());
+    alpha.setVal(defaultAlphas.at(h).getVal());
 
     drawConvolution(mitPredXSec[h], xsec, mass, alpha, theoTitle[h][1], canvas, printNameBase,
 		    epsString("convolution_mitov", pole, (PdfType)h));
@@ -599,15 +610,38 @@ int foldedLikelihoods(const bool pole)
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsString("xsec_vs_mass", pole, (PdfType)0));
 
-  RooPlot* frame_alpha = alpha.frame();
-  mass.setVal(172.5);
+  RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
+  mass.setVal(mass_mean.getVal());
   mocPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed)  , RooFit::LineStyle(2));
   mocPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen), RooFit::LineStyle(2));
+  mocPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan ), RooFit::LineStyle(2));
   mitPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
   mitPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
-  measXSecMassDep.plotOn(frame_alpha, RooFit::LineColor(colorDil));
+  mitPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan));
+  measXSecMassDep.plotOn(frame_alpha, RooFit::LineColor(colorDil), RooFit::LineStyle(3));
   frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
+  frame_alpha->SetMaximum(230.);
+  frame_alpha->SetMinimum(110.);
   frame_alpha->Draw();
+  TLegend theoLeg = TLegend(0.2, 0.52, 0.65, 0.9);
+  theoLeg.SetFillStyle(0);
+  theoLeg.SetBorderSize(0);
+  for(unsigned h=0; h<nPdfSets; h++) {
+    theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][0], "L");
+    theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][1], "L");
+  }
+  theoLeg.AddEntry(frame_alpha->findObject(measXSecMassDep.GetName()+(TString)"_Norm[alpha]"), "CMS 2011", "L");
+  theoLeg.Draw();
+  char massTxt[99];
+  sprintf(massTxt, "%s = %.1f GeV", mass.getTitle().Data(), mass.getVal());
+  TLatex massText(0.,0.,massTxt);
+  massText.SetNDC();
+  massText.SetTextAlign(13);
+  massText.SetX(0.70);
+  massText.SetY(0.85);
+  massText.SetTextFont(43);
+  massText.SetTextSizePixels(22);
+  massText.Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsString("xsec_vs_alpha", pole, (PdfType)0));
 
@@ -626,14 +660,14 @@ int foldedLikelihoods(const bool pole)
 //  f2Test->Draw("cont1 same");
 //  canvas->Print("test.eps");
 //
-  canvas->Print(printNameBase+".ps]");
-  return 0;
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
 
-  FinalLikeliResults* mocResultAlpha[2];
-  FinalLikeliResults* mocResultMass [2];
+  FinalLikeliResults* mocResultAlpha[nPdfSets];
+  FinalLikeliResults* mocResultMass [nPdfSets];
 
-  FinalLikeliResults* mitResultAlpha[2];
-  FinalLikeliResults* mitResultMass [2];
+  FinalLikeliResults* mitResultAlpha[nPdfSets];
+  FinalLikeliResults* mitResultMass [nPdfSets];
 
   gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
 
@@ -643,16 +677,17 @@ int foldedLikelihoods(const bool pole)
   const double massAxisMin = 170.;
   const double massAxisMax = 180.;
 
-  for(unsigned h=0; h<2; h++) {
-    const TString suf = (h ? "HERA" : "MSTW");
-//    mocResultAlpha[h] = new FinalLikeliResults("mocResultAlpha"+suf,
+  for(unsigned h=0; h<nPdfSets; h++) {
+    const TString suf[3] = {"MSTW", "HERA", "ABM"};
+
+//    mocResultAlpha[h] = new FinalLikeliResults("mocResultAlpha"+suf[h],
 //					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,massProb));
-//    mocResultMass[h]  = new FinalLikeliResults("mocResultMass"+suf,
+//    mocResultMass[h]  = new FinalLikeliResults("mocResultMass"+suf[h],
 //					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,alphaProb[h]));
 
-    mocResultAlpha[h] = new FinalLikeliResults("mitResultAlpha"+suf,
+    mocResultAlpha[h] = new FinalLikeliResults("mitResultAlpha"+suf[h],
 					       xsec,mass,alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob,massProb));
-    mocResultMass[h]  = new FinalLikeliResults("mitResultMass"+suf,
+    mocResultMass[h]  = new FinalLikeliResults("mitResultMass"+suf[h],
 					       xsec,mass,alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob,alphaProb[h]));
 
     mocResultAlpha[h]->point.GetXaxis()->SetLimits(alphaAxisMin, alphaAxisMax);
