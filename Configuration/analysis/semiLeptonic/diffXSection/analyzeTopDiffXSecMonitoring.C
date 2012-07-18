@@ -620,7 +620,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	  histo_[plotList_[plot]][sample]=     (TH1F*)(histoMu_[plotListMu_[plot]][sample]->Clone());
 	  if (plotListMu_[plot]=="tightMuonKinematics/pt"){
 	    histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_["tightElectronKinematics/et"][sample]->Clone()));
-	    std::cout << " PT_ET " << std::endl;
 	  }
 	  else histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_[plotListEl_[plot]][sample]->Clone()));
 	}
