@@ -3260,10 +3260,14 @@ void Plotter::PlotDiffXSec(){
     TH1* mcnlohistBinned = mcnlohist->Rebin(bins,"mcnloplot",Xbins);	
     for (Int_t bin=0; bin<bins; bin++){
       mcnlohistBinned->SetBinContent(bin+1,mcnlohistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohist->GetBinWidth(1)));
+      mcnlohistupBinned->SetBinContent(bin+1,mcnlohistupBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistup->GetBinWidth(1)));
+      mcnlohistdownBinned->SetBinContent(bin+1,mcnlohistdownBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistdown->GetBinWidth(1)));
+      mcnlohistnormBinned->SetBinContent(bin+1,mcnlohistnormBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistnorm->GetBinWidth(1)));
     }
     mcnlohistBinned->Scale(1./mcnlohistBinned->Integral("width"));
     mcnlohistupBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
     mcnlohistdownBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
+    mcnlohistnormBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
 
 
     //Uncertainty band for MC@NLO
