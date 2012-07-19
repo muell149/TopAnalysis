@@ -161,6 +161,82 @@ PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_
 }
 
 //////////////////////////////////////////////////
+/// Final likelihood and extracted results
+/// for either m_top or alpha_S
+//////////////////////////////////////////////////
+
+class FinalLikeliResults1D {
+
+public:
+  
+  FinalLikeliResults1D(const TString& label, RooRealVar& xsec_var, RooRealVar& target_var, const RooArgList& prodPdfList,
+		       RooRealVar& constrained_var,
+		       const RooRealVar& constrained_var_mean, const RooRealVar& constrained_var_unc);
+
+  void addPointToGraphs(TGraphAsymmErrors& graphInnerError, TGraphAsymmErrors& graphTotalError,
+			const unsigned iPoint, const double y) const;
+
+private:
+
+  RooProdPdf prodPdf;
+
+public:
+
+  RooAbsPdf* projPdf;
+  TF1* f1;
+  double bestX;
+  double lowErrFromIntegral;
+  double lowErrFromConstraintUncertainty;
+  double lowErrTotal;
+  double highErrFromIntegral;
+  double highErrFromConstraintUncertainty;
+  double highErrTotal;
+
+};
+
+FinalLikeliResults1D::FinalLikeliResults1D(const TString& label,
+					   RooRealVar& xsec_var, RooRealVar& target_var, const RooArgList& prodPdfList,
+					   RooRealVar& constrained_var,
+					   const RooRealVar& constrained_var_mean,
+					   const RooRealVar& constrained_var_unc):
+  prodPdf(label+"_prodPdf", label+"_prodPdf", prodPdfList)
+{
+  projPdf = prodPdf.createProjection(xsec_var);
+  constrained_var.setVal(constrained_var_mean.getVal());
+  f1 = projPdf->asTF(RooArgList(target_var), RooArgList(), RooArgSet(target_var));
+//  bestX = f1->GetMaximumX();
+//  lowErrFromIntegral = 0.002;
+//  highErrFromIntegral = 0.002;
+  if(!strcmp(target_var.GetName(),"mass"))
+    bestX = getMaxAndUncertaintiesFromIntegral(f1, lowErrFromIntegral, highErrFromIntegral, 140., 200., .1 , .01  );
+  if(!strcmp(target_var.GetName(),"alpha"))
+    bestX = getMaxAndUncertaintiesFromIntegral(f1, lowErrFromIntegral, highErrFromIntegral, .10 , .13 , .01, .00001);
+  else {
+    std::cout << "Target variable " << target_var.GetName() << " not supported in " << label << "!" << std::endl;
+    abort();
+  }
+  constrained_var.setVal(constrained_var_mean.getVal()-constrained_var_unc.getVal());
+  const double variationA = f1->GetMaximumX();
+  constrained_var.setVal(constrained_var_mean.getVal()+constrained_var_unc.getVal());
+  const double variationB = f1->GetMaximumX();
+  lowErrFromConstraintUncertainty  = bestX - TMath::Min(TMath::Min(variationA, variationB), bestX);
+  highErrFromConstraintUncertainty = TMath::Max(TMath::Max(variationA, variationB), bestX) - bestX;
+  lowErrTotal  = TMath::Sqrt(TMath::Power(lowErrFromIntegral , 2) + TMath::Power(lowErrFromConstraintUncertainty , 2));
+  highErrTotal = TMath::Sqrt(TMath::Power(highErrFromIntegral, 2) + TMath::Power(highErrFromConstraintUncertainty, 2));
+  std::cout << "lowErrTotal, highErrTotal : " << lowErrTotal << ", " << highErrTotal << std::endl;
+}
+
+void
+FinalLikeliResults1D::addPointToGraphs(TGraphAsymmErrors& graphInnerError, TGraphAsymmErrors& graphTotalError,
+				       const unsigned iPoint, const double y) const
+{
+  graphInnerError.SetPoint(iPoint, bestX, y);
+  graphTotalError.SetPoint(iPoint, bestX, y);
+  graphInnerError.SetPointError(iPoint, lowErrFromIntegral, highErrFromIntegral, 0., 0.);
+  graphTotalError.SetPointError(iPoint, lowErrTotal       , highErrTotal       , 0., 0.);
+}
+
+//////////////////////////////////////////////////
 /// Class for vertical reflections of TF1 functions
 //////////////////////////////////////////////////
 
@@ -182,12 +258,12 @@ private:
 /// for m_top and alpha_S
 //////////////////////////////////////////////////
 
-class FinalLikeliResults {
+class FinalLikeliResults2D {
 
 public:
   
-  FinalLikeliResults(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-		     const RooArgList& prodPdfList);
+  FinalLikeliResults2D(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
+		       const RooArgList& prodPdfList);
 
 private:
 
@@ -205,9 +281,9 @@ public:
 
 };
 
-FinalLikeliResults::FinalLikeliResults(const TString& label,
-				       RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-				       const RooArgList& prodPdfList):
+FinalLikeliResults2D::FinalLikeliResults2D(const TString& label,
+					   RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
+					   const RooArgList& prodPdfList):
   prodPdf(label+"_prodPdf", label+"_prodPdf", prodPdfList)
 {
   projPdf = prodPdf.createProjection(xsec_var);
@@ -233,8 +309,8 @@ FinalLikeliResults::FinalLikeliResults(const TString& label,
   f1_mass  = projPdf->asTF(RooArgList(mass_var ), RooArgList(), RooArgSet(mass_var ));
   double alphaLowErr, alphaHighErr;
   double massLowErr, massHighErr;
-  getUncertaintiesFromIntegral(f1_alpha, alphaLowErr, alphaHighErr, .10 , .13 , .01, .00001);
-  getUncertaintiesFromIntegral(f1_mass , massLowErr , massHighErr , 140., 200., .1 , .01  );
+  getMaxAndUncertaintiesFromIntegral(f1_alpha, alphaLowErr, alphaHighErr, .10 , .13 , .01, .00001);
+  getMaxAndUncertaintiesFromIntegral(f1_mass , massLowErr , massHighErr , 140., 200., .1 , .01  );
   const double xBest[1] = {bestX};
   const double yBest[1] = {bestY};
   const double xBestErr[1] = {(alphaLowErr+alphaHighErr)/2};
