@@ -1,8 +1,9 @@
 #ifndef foldedLikelihoods_helpers_h
 #define foldedLikelihoods_helpers_h
 
-void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr,
-				  const double xMin, const double xMax, double stepSize, const double targetPrecision)
+double
+getMaxAndUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr,
+				   const double xMin, const double xMax, double stepSize, const double targetPrecision)
 {
   std::cout << "============================================================" << std::endl;
   std::cout << "Calculating uncertainties for "
@@ -51,7 +52,7 @@ void getUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr,
   std::cout << "Function value at left / right edge: " << f1->Eval(max-lowErr) << " / " << f1->Eval(max+higErr) << std::endl;
   std::cout << "Integral: " << f1->Integral(max-lowErr, max+higErr, params, precision) << std::endl;
   std::cout << "============================================================" << std::endl;
-  return;
+  return max;
 }
 
 #endif
