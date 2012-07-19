@@ -354,15 +354,15 @@ TLatex* cmsTxt(const bool full2011dilep)
 {
   const TString txt = (full2011dilep ?
 		       //		       "CMS, 2.3 fb^{-1} at  #sqrt{s} = 7 TeV" :
-		       "CMS 2011 t#bar{t} Data #times Approx. NNLO by Langenfeld et al." :
+		       "CMS 2011 t#bar{t} data #times approx. NNLO,  #sqrt{s} = 7 TeV, m^{pole} = 173.2 #pm 1.4 GeV" :
 		       "CMS Preliminary, 1.14 fb^{-1} at  #sqrt{s} = 7 TeV");
   TLatex* text = new TLatex(3.570061,23.08044,txt);
   text->SetNDC();
   text->SetTextAlign(13);
-  text->SetX(0.16);
+  text->SetX(0.157);
   text->SetY(1.003);
-  text->SetTextFont(42);
-  text->SetTextSizePixels(24);
+  text->SetTextFont(43);
+  text->SetTextSizePixels(25);
   return text;
 }
 
@@ -612,25 +612,17 @@ int foldedLikelihoods(const bool pole)
 
   RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
   mass.setVal(mass_mean.getVal());
-  mocPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed)  , RooFit::LineStyle(2));
-  mocPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen), RooFit::LineStyle(2));
-  mocPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan ), RooFit::LineStyle(2));
   mitPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
-  mitPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
-  mitPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan));
   measXSecMassDep.plotOn(frame_alpha, RooFit::LineColor(colorDil), RooFit::LineStyle(3));
   frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
   frame_alpha->SetMaximum(230.);
   frame_alpha->SetMinimum(110.);
   frame_alpha->Draw();
-  TLegend theoLeg = TLegend(0.2, 0.52, 0.65, 0.9);
+  TLegend theoLeg = TLegend(0.2, 0.79, 0.65, 0.9);
   theoLeg.SetFillStyle(0);
   theoLeg.SetBorderSize(0);
-  for(unsigned h=0; h<nPdfSets; h++) {
-    theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][0], "L");
-    theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][1], "L");
-  }
   theoLeg.AddEntry(frame_alpha->findObject(measXSecMassDep.GetName()+(TString)"_Norm[alpha]"), "CMS 2011", "L");
+  theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][1], "L");
   theoLeg.Draw();
   char massTxt[99];
   sprintf(massTxt, "%s = %.1f GeV", mass.getTitle().Data(), mass.getVal());
@@ -643,10 +635,33 @@ int foldedLikelihoods(const bool pole)
   massText.SetTextSizePixels(22);
   massText.Draw();
   canvas->Print(printNameBase+".ps");
-  canvas->Print(epsString("xsec_vs_alpha", pole, (PdfType)0));
-
-  RooGaussian alphaProb[2] = {RooGaussian("alphaProbMSTW", "alphaProbMSTW", alpha, alphaMSTW_mean, alphaMSTW_unc),
-			      RooGaussian("alphaProbHERA", "alphaProbHERA", alpha, alphaHERA_mean, alphaHERA_unc)};
+  canvas->Print(printNameBase+"_xsec_vs_alpha_pre1.eps");
+  mocPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed)  , RooFit::LineStyle(2));
+  frame_alpha->SetMaximum(230.);
+  frame_alpha->SetMinimum(110.);
+  frame_alpha->Draw();
+  theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][0], "L");
+  theoLeg.SetY1NDC(0.73);
+  theoLeg.Draw();
+  massText.Draw();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(printNameBase+"_xsec_vs_alpha_pre2.eps");
+  mocPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen), RooFit::LineStyle(2));
+  mocPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan ), RooFit::LineStyle(2));
+  mitPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
+  mitPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan));
+  frame_alpha->SetMaximum(230.);
+  frame_alpha->SetMinimum(110.);
+  frame_alpha->Draw();
+  for(unsigned h=1; h<nPdfSets; h++) {
+    theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][1], "L");
+    theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][0], "L");
+  }
+  theoLeg.SetY1NDC(0.52);
+  theoLeg.Draw();
+  massText.Draw();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(printNameBase+"_xsec_vs_alpha.eps");
 
 //  RooProdPdf testProd("testProd", "testProd", RooArgList(measXSecPDF,mocPredXSec[0]->prob, alphaProb[0]));
 //  RooAbsPdf*  projPdfTest = testProd.createProjection(xsec);
@@ -663,204 +678,127 @@ int foldedLikelihoods(const bool pole)
 //  canvas->Print(printNameBase+".ps]");
 //  return 0;
 
-  FinalLikeliResults* mocResultAlpha[nPdfSets];
-  FinalLikeliResults* mocResultMass [nPdfSets];
-
-  FinalLikeliResults* mitResultAlpha[nPdfSets];
-  FinalLikeliResults* mitResultMass [nPdfSets];
+  FinalLikeliResults1D* mocResult[nPdfSets];
+  FinalLikeliResults1D* mitResult[nPdfSets];
 
   gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
 
-  const double alphaAxisMin = 0.1135;
-  const double alphaAxisMax = 0.1205;
-
-  const double massAxisMin = 170.;
-  const double massAxisMax = 180.;
+  const unsigned nSummaryPoints = nPdfSets*nTheories;
+  //  const unsigned nSummaryPoints = 2;
+  TGraphAsymmErrors mocSummaryGraphInnErr(nSummaryPoints);
+  TGraphAsymmErrors mocSummaryGraphTotErr(nSummaryPoints);
+  TGraphAsymmErrors mitSummaryGraphInnErr(nSummaryPoints);
+  TGraphAsymmErrors mitSummaryGraphTotErr(nSummaryPoints);
+  unsigned iGraphPoint = 0;
 
   for(unsigned h=0; h<nPdfSets; h++) {
+  //  for(unsigned h=0; h<1; h++) {
     const TString suf[3] = {"MSTW", "HERA", "ABM"};
 
-//    mocResultAlpha[h] = new FinalLikeliResults("mocResultAlpha"+suf[h],
-//					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,massProb));
-//    mocResultMass[h]  = new FinalLikeliResults("mocResultMass"+suf[h],
-//					       xsec,mass,alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob,alphaProb[h]));
+    mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob),
+					    mass, mass_mean, mass_unc);
+    mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob),
+					    mass, mass_mean, mass_unc);
 
-    mocResultAlpha[h] = new FinalLikeliResults("mitResultAlpha"+suf[h],
-					       xsec,mass,alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob,massProb));
-    mocResultMass[h]  = new FinalLikeliResults("mitResultMass"+suf[h],
-					       xsec,mass,alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob,alphaProb[h]));
-
-    mocResultAlpha[h]->point.GetXaxis()->SetLimits(alphaAxisMin, alphaAxisMax);
-    mocResultAlpha[h]->point.GetYaxis()->SetRangeUser(massAxisMin , massAxisMax);
-    mocResultAlpha[h]->point.SetPointError(0, mocResultAlpha[h]->point.GetErrorX(0), 0);
-
-    mocResultMass[h]->point.GetXaxis()->SetLimits(alphaAxisMin, alphaAxisMax);
-    mocResultMass[h]->point.GetYaxis()->SetRangeUser(massAxisMin, massAxisMax);
-    mocResultMass[h]->point.SetPointError(0, 0, mocResultMass[h]->point.GetErrorY(0));
-
-    mocResultMass[h]->point  .SetLineStyle(2+h);
-    mocResultMass[h]->ellipse.SetLineStyle(2+h);
-
-    mocResultAlpha[h]->point  .SetLineStyle(2+h);
-    mocResultAlpha[h]->ellipse.SetLineStyle(2+h);
+    mocResult[h]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, iGraphPoint, 2*iGraphPoint+0.2);
+    mitResult[h]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, iGraphPoint, 2*iGraphPoint+0.8);
+    iGraphPoint++;
   }
-  mocResultMass[0]->point.SetMarkerStyle(22);
-  mocResultMass[1]->point.SetMarkerStyle(26);
 
-  mocResultAlpha[0]->point.SetMarkerStyle(23);
-  mocResultAlpha[1]->point.SetMarkerStyle(32);
+  mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1115, 0.1245);
+  mocSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
+  mocSummaryGraphTotErr.GetYaxis()->SetRangeUser(-1, nSummaryPoints+2);
+  mocSummaryGraphTotErr.GetYaxis()->SetNdivisions(0);
 
-  TBox boxAlpha2012(alpha2012_mean.getVal()-alpha2012_unc.getVal(), massAxisMin,
-		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), massAxisMax);
-  boxAlpha2012.SetFillColor(kYellow-9);
+  mocSummaryGraphTotErr.SetMarkerSize(2);
+  mitSummaryGraphTotErr.SetMarkerSize(2);
+  mocSummaryGraphTotErr.SetMarkerStyle(22);
+  mitSummaryGraphTotErr.SetMarkerStyle(23);
+
+  TBox boxAlpha2012(alpha2012_mean.getVal()-alpha2012_unc.getVal(), -1,
+		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+2);
+  boxAlpha2012.SetFillColor(kMagenta-9);
   boxAlpha2012.SetFillStyle(3007);
-  TLine lineAlpha2012(alpha2012_mean.getVal(), massAxisMin,
-		      alpha2012_mean.getVal(), massAxisMax);
-  TLine lineAlpha2012_left(alpha2012_mean.getVal()-alpha2012_unc.getVal(), massAxisMin,
-			   alpha2012_mean.getVal()-alpha2012_unc.getVal(), massAxisMax);
-  TLine lineAlpha2012_right(alpha2012_mean.getVal()+alpha2012_unc.getVal(), massAxisMin,
-			    alpha2012_mean.getVal()+alpha2012_unc.getVal(), massAxisMax);
-  lineAlpha2012_left .SetLineColor(kYellow-9);
-  lineAlpha2012_right.SetLineColor(kYellow-9);
-
-  TText textAlpha2012(alpha2012_mean.getVal(), massAxisMax-0.5, "PDG 2012");
+  TLine lineAlpha2012(alpha2012_mean.getVal(), -1,
+		      alpha2012_mean.getVal(), nSummaryPoints+2);
+  lineAlpha2012.SetLineStyle(2);
+  TLine lineAlpha2012_left(alpha2012_mean.getVal()-alpha2012_unc.getVal(), -1,
+			   alpha2012_mean.getVal()-alpha2012_unc.getVal(), nSummaryPoints+2);
+  TLine lineAlpha2012_right(alpha2012_mean.getVal()+alpha2012_unc.getVal(), -1,
+			    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+2);
+  lineAlpha2012_left .SetLineColor(kMagenta-9);
+  lineAlpha2012_right.SetLineColor(kMagenta-9);
+  TText textAlpha2012(alpha2012_mean.getVal()-0.5*alpha2012_unc.getVal(), (nSummaryPoints+2)*0.95, "PDG 2012");
   textAlpha2012.SetTextAngle(90);
-  textAlpha2012.SetTextAlign(31);
-  textAlpha2012.SetTextSizePixels(18);
-  textAlpha2012.SetTextFont(42);
+  textAlpha2012.SetTextAlign(32);
+  textAlpha2012.SetTextFont(43);
+  textAlpha2012.SetTextSizePixels(23);
 
-  TText textAlphaMSTW(alphaMSTW_mean.getVal(), massAxisMax-0.5, "Default MSTW 2008");
-  textAlphaMSTW.SetTextAngle(90);
-  textAlphaMSTW.SetTextAlign(31);
-  textAlphaMSTW.SetTextSizePixels(14);
-  textAlphaMSTW.SetTextFont(42);
-
-  TText textAlphaHERA(alphaHERA_mean.getVal(), massAxisMax-0.5, "Default HERAPDF 1.5");
-  textAlphaHERA.SetTextAngle(90);
-  textAlphaHERA.SetTextAlign(31);
-  textAlphaHERA.SetTextSizePixels(14);
-  textAlphaHERA.SetTextFont(42);
-
-  TBox boxAlphaMSTW(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), massAxisMin,
-		    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), massAxisMax);
+  TBox boxAlphaMSTW(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), -0.1,
+		    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(),  1.1);
   boxAlphaMSTW.SetFillColor(kGreen-9);
-  boxAlphaMSTW.SetFillStyle(3013);
-  TLine lineAlphaMSTW(alphaMSTW_mean.getVal(), massAxisMin,
-		      alphaMSTW_mean.getVal(), massAxisMax);
+  TLine lineAlphaMSTW(alphaMSTW_mean.getVal(), -0.1,
+		      alphaMSTW_mean.getVal(),  1.1);
+  lineAlphaMSTW.SetLineStyle(3);
+  TText textAlphaMSTW(0.1210, 0.5, "MSTW2008");
+  textAlphaMSTW.SetTextFont(43);
+  textAlphaMSTW.SetTextSizePixels(26);
+  textAlphaMSTW.SetTextAlign(12);
 
-  TLine lineAlphaMSTW_left(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), massAxisMin,
-			   alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), massAxisMax);
-  TLine lineAlphaMSTW_right(alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), massAxisMin,
-			    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), massAxisMax);
-  lineAlphaMSTW_left .SetLineColor(kGreen-9);
-  lineAlphaMSTW_right.SetLineColor(kGreen-9);
+  TBox boxAlphaHERA(alphaHERA_mean.getVal()-alphaHERA_unc.getVal(), 1.9,
+		    alphaHERA_mean.getVal()+alphaHERA_unc.getVal(), 3.1);
+  boxAlphaHERA.SetFillColor(kGreen-9);
+  TLine lineAlphaHERA(alphaHERA_mean.getVal(), 1.9,
+		      alphaHERA_mean.getVal(), 3.1);
+  lineAlphaHERA.SetLineStyle(3);
+  TText textAlphaHERA(alphaHERA_mean.getVal()+alphaHERA_unc.getVal()+0.0004, 2.5, "HERAPDF1.5");
+  textAlphaHERA.SetTextFont(43);
+  textAlphaHERA.SetTextSizePixels(26);
+  textAlphaHERA.SetTextAlign(12);
 
-  TBox boxAlphaHERA(alphaHERA_mean.getVal()-alphaHERA_unc.getVal(), massAxisMin,
-		    alphaHERA_mean.getVal()+alphaHERA_unc.getVal(), massAxisMax);
-  boxAlphaHERA.SetFillColor(kCyan-9);
-  TLine lineAlphaHERA(alphaHERA_mean.getVal(), massAxisMin,
-		      alphaHERA_mean.getVal(), massAxisMax);
+  TBox boxAlphaABM(alphaABM_mean.getVal()-alphaABM_unc.getVal(), 3.9,
+		    alphaABM_mean.getVal()+alphaABM_unc.getVal(), 5.1);
+  boxAlphaABM.SetFillColor(kGreen-9);
+  TLine lineAlphaABM(alphaABM_mean.getVal(), 3.9,
+		      alphaABM_mean.getVal(), 5.1);
+  lineAlphaABM.SetLineStyle(3);
+  TText textAlphaABM(alphaABM_mean.getVal()+alphaABM_unc.getVal()+0.0004, 4.5, "ABM11");
+  textAlphaABM.SetTextFont(43);
+  textAlphaABM.SetTextSizePixels(26);
+  textAlphaABM.SetTextAlign(12);
 
-  TBox boxMass(alphaAxisMin, mass_mean.getVal()-mass_unc.getVal(),
-	       alphaAxisMax, mass_mean.getVal()+mass_unc.getVal());
-  boxMass.SetFillColor(kMagenta-9);
-  TLine lineMass(alphaAxisMin, mass_mean.getVal(),
-		 alphaAxisMax, mass_mean.getVal());
+  TLegend summaryLeg = TLegend(0.2, 0.75, 0.45, 0.9);
+  summaryLeg.SetFillStyle(0);
+  summaryLeg.SetBorderSize(0);
+  summaryLeg.AddEntry(&mitSummaryGraphTotErr, "Cacciari et al."  , "PL");
+  summaryLeg.AddEntry(&mocSummaryGraphTotErr, "Langenfeld et al.", "PL");
 
-  TText textMass(alphaAxisMin+0.0002, mass_mean.getVal(), "Tevatron July 2012");
-  textMass.SetTextAlign(11);
-  textMass.SetTextSizePixels(18);
-  textMass.SetTextFont(42);
-
-  TLegend legResultsMass = TLegend(0.2, 0.76, 0.5, 0.9);
-  legResultsMass.SetFillStyle(0);
-  legResultsMass.SetBorderSize(0);
-  legResultsMass.AddEntry(&mocResultMass[0]->point, "MSTW 2008"  , "PL");
-  legResultsMass.AddEntry(&mocResultMass[1]->point, "HERAPDF 1.5", "PL");
-
-  TLegend legResultsAlpha = TLegend(0.2, 0.76, 0.5, 0.9);
-  legResultsAlpha.SetFillStyle(0);
-  legResultsAlpha.SetBorderSize(0);
-  legResultsAlpha.AddEntry(&mocResultAlpha[0]->point, "MSTW 2008"  , "PL");
-  legResultsAlpha.AddEntry(&mocResultAlpha[1]->point, "HERAPDF 1.5", "PL");
-
-  mocResultMass[0]->point.Draw("AP");
-  boxMass.Draw();
-  boxAlpha2012.Draw();
-  lineAlpha2012_left .Draw();
-  lineAlpha2012_right.Draw();
-  lineMass.Draw();
-  lineAlpha2012.Draw();
-  gPad->RedrawAxis();
-  for(unsigned h=0; h<2; h++) {
-    mocResultMass[h]->point.Draw("P");
-    mocResultMass[h]->ellipse.Draw("L");
-  }
-  legResultsMass.Draw();
-  textAlpha2012.Draw();
-  textMass.Draw();
-  TLatex* cmsLabel = cmsTxt(full2011dilep);
-  cmsLabel->Draw();
-  canvas->Print(printNameBase+".ps");
-  canvas->Print(epsString("results_mass", pole, (PdfType)0));
-  canvas->Print("results_mass.root");
-
-  mocResultAlpha[0]->point.Draw("AP");
-  boxAlphaHERA.Draw();
+  mocSummaryGraphTotErr.Draw("AP");
   boxAlphaMSTW.Draw();
-  lineAlphaMSTW_left .Draw();
-  lineAlphaMSTW_right.Draw();
-  boxAlpha2012.Draw();
-  lineAlphaHERA.Draw();
-  lineAlpha2012_left .Draw();
-  lineAlpha2012_right.Draw();
   lineAlphaMSTW.Draw();
+  boxAlphaHERA.Draw();
+  lineAlphaHERA.Draw();
+  boxAlphaABM.Draw();
+  lineAlphaABM.Draw();
+  boxAlpha2012.Draw();
   lineAlpha2012.Draw();
+  lineAlpha2012_left.Draw();
+  lineAlpha2012_right.Draw();
+  mocSummaryGraphTotErr.Draw("P");
+  mocSummaryGraphInnErr.Draw("||");
+  mitSummaryGraphTotErr.Draw("P");
+  mitSummaryGraphInnErr.Draw("||");
+  summaryLeg.Draw();
   gPad->RedrawAxis();
-  for(unsigned h=0; h<2; h++) {
-    mocResultAlpha[h]->point.Draw("P");
-    mocResultAlpha[h]->ellipse.Draw("L");
-  }
-  legResultsAlpha.Draw();
   textAlpha2012.Draw();
   textAlphaMSTW.Draw();
   textAlphaHERA.Draw();
+  textAlphaABM.Draw();
+  TLatex* cmsLabel = cmsTxt(full2011dilep);
   cmsLabel->Draw();
+  canvas->Print(printNameBase+"_summaryPlot.eps");
   canvas->Print(printNameBase+".ps");
-  canvas->Print(epsString("results_alpha", pole, (PdfType)0));
-  canvas->Print("results_alpha.root");
 
-  const TString header[2] = {"MSTW 2008", "HERAPDF 1.5"};
-
-  for(unsigned h=0; h<2; h++) {
-    TLegend legResultsAlphaMass = TLegend(0.2, 0.69, 0.5, 0.9);
-    legResultsAlphaMass.SetFillStyle(0);
-    legResultsAlphaMass.SetBorderSize(0);
-    legResultsAlphaMass.SetHeader(header[h]);
-    legResultsAlphaMass.AddEntry(&mocResultMass [h]->point, "Constrained #alpha_{S}", "PL");
-    legResultsAlphaMass.AddEntry(&mocResultAlpha[h]->point, "Constrained m_{t}"     , "PL");
-
-    mocResultAlpha[h]->point.Draw("AP");
-    mocResultAlpha[h]->ellipse.Draw("L");
-    mocResultMass [h]->point.Draw("P");
-    mocResultMass [h]->ellipse.Draw("L");
-    legResultsAlphaMass.Draw();
-    cmsLabel->Draw();
-    canvas->Print(printNameBase+".ps");
-    TString canvasName = "results_alpha_vs_mass_"; canvasName += h;
-    canvas->Print(canvasName+".root");
-    canvas->Print(epsString("results_alpha_vs_mass", pole, (PdfType)h));
-  }
-
-//  if(pole) {
-//    std::cout << "============================================================" << std::endl;
-//    std::cout << "Langenfeld et al.: Extracted pole mass = " << mocMax
-//	      << " GeV (converted to MSbar mass: " << mMSbar(mocMax) << " GeV)" << std::endl;
-//    std::cout << "Ahrens et al.    : Extracted pole mass = " << ahrMax
-//	      << " GeV (converted to MSbar mass: " << mMSbar(ahrMax) << " GeV)" << std::endl;
-//    std::cout << "============================================================" << std::endl;
-//  }
-//
 //  if(full2011dilep)
 //    frame = mass.frame(RooFit::Range(160., 190.));
 //  else
@@ -901,20 +839,6 @@ int foldedLikelihoods(const bool pole)
 //
 //  canvas->Print(printNameBase+".ps");
 //  canvas->Print(epsString("densities", pole, heraPDF));
-//
-//  // producing final overview plots
-//
-//  //  gStyle->SetOptFit(0000); ???
-//  ahr->GetXaxis()->SetRangeUser(140., 190.);
-//  ahr->SetFillColor(colorAhr);
-//  moc->SetFillColor(colorMoc);
-//  //  moc->SetFillStyle(3002);
-//  ahr->Draw("A3");
-//  moc->Draw("3 same");
-//  moc->Draw("L same");
-//  ahr->GetYaxis()->CenterTitle(false);
-//  gPad->RedrawAxis();
-//  canvas->Print(printNameBase+".ps");
   
   // cleaning up
 
@@ -926,24 +850,15 @@ int foldedLikelihoods(const bool pole)
   }
   for(unsigned h=0; h<nPdfSets; h++) {
     for(unsigned j=0; j<4; j++) {
-      //      delete ahr_vec[h].at(j);
       delete moc_vec[h].at(j);
       delete mit_vec[h].at(j);
       for(unsigned i=0; i<moc_funcs[h][j].size(); i++) {
 	delete moc_funcs[h][j].at(i);
-	//	delete ahr_funcs[h][j].at(i);
 	delete mit_funcs[h][j].at(i);
       }
     }
-    delete mitPredXSec[h];
-    delete mocPredXSec[h];
-    //    delete ahrPredXSec[h];
-
-//    delete mitResultAlpha[h];
-//    delete mitResultMass[h];
-
-    delete mocResultAlpha[h];
-    delete mocResultMass[h];
+    delete mocResult[h];
+    delete mitResult[h];
   }
   delete canvas;
   delete f1;
