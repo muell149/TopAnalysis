@@ -926,6 +926,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	    if(plotList_[plot].Contains("topPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,400.);
 	    if(plotList_[plot].Contains("topY"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
 	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);	
+	    // Special y-range for paper control plots
+	    if (decayChannel == "combined"){
+	      if(plotList_[plot].Contains("tightJetKinematicsTagged/n"))    {min=1.0; max=1.0E06;}
+	      if(plotList_[plot].Contains("bottomJetKinematics/n"))         {min=1.0; max=1.0E06;}
+	      if(plotList_[plot].Contains("tightJetKinematicsTagged/pt"))   {min=1.0; max=1.0E06;}
+	      if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")){min=0.0; max=6.0E03;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt"))   {min=0; max=7.0E03;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY"))    {min=0; max=2.5E03;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")) {min=0; max=6.0E03;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=1.6E03;}
+	    }
+
 	    // axis style
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"), min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
