@@ -1766,7 +1766,7 @@ void Plotter::fillSystHisto()
 
 
 
-void Plotter::write() // do scaling, stacking, legending, and write in file MISSING: DY Rescale
+void Plotter::write() // do scaling, stacking, legending, and write in file 
 {
   if(initialized){
 
@@ -1897,15 +1897,18 @@ void Plotter::write() // do scaling, stacking, legending, and write in file MISS
   
   drawhists[0]->SetMinimum(ymin);
   if(rangemin!=0 || rangemax!=0)drawhists[0]->SetAxisRange(rangemin, rangemax, "X");
-  if(logY){  
-    drawhists[0]->SetMaximum(18*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));
+  if(ymax==0){
+    if(logY){  
+      drawhists[0]->SetMaximum(18*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));
+    }
+    else{drawhists[0]->SetMaximum(1.5*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
+  }else{
+    drawhists[0]->SetMaximum(ymax);
   }
-  else{drawhists[0]->SetMaximum(1.5*drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
-
-  
+  drawhists[0]->GetXaxis()->SetNoExponent(kTRUE);
+  TGaxis::SetMaxDigits(2);
   drawhists[0]->Draw("e1"); //############## 
   //drawhists[0]->Draw("e"); //############## 
-  drawhists[0]->GetXaxis()->SetNoExponent(kTRUE);
   
   stack->Draw("same HIST");
   gPad->RedrawAxis();
@@ -2686,7 +2689,7 @@ void Plotter::CalcDiffXSec(TH1 *varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* ge
 }
 void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE); 
-    TGaxis::SetMaxDigits(5);
+    TGaxis::SetMaxDigits(2);
 
     //############### Syst ################
     cout << endl;
@@ -3330,10 +3333,13 @@ void Plotter::PlotDiffXSec(){
     //MCFMHist->SetMarkerStyle(2);
     h_GenDiffXSec->SetLineWidth(2);
     h_GenDiffXSec->SetMinimum(ymin);
-    if(logY){  
-      h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
+    if(ymax!=0){
+      
+      if(logY){  
+	h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
+      }
+      else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     }
-    else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
     if (name.Contains("Rapidity") || name.Contains("Eta")){h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);}
     h_GenDiffXSec->Draw();
