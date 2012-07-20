@@ -702,7 +702,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 //     TF1 *f1 = new TF1("f1","gaus",-200,200);
 //     f1->SetLineWidth(2);    
     std::vector<double> f1sigma_;
-    f1sigma_=extract_sigma(residualHistos_.at(iGenBin));
+    f1sigma_=extract_sigma(residualHistos_.at(iGenBin),verbose);
 //     residualHistos_.at(iGenBin)->Fit("f1");
 //     double f1norm  = f1->GetParameter(0);
 //     double f1mean  = f1->GetParameter(1);
@@ -738,7 +738,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 //       TF1 *f1 = new TF1("f1","gaus",-200,200);
 //       f1->SetLineWidth(2);    
       std::vector<double> f1RelativeSigma_;
-      f1RelativeSigma_=extract_sigma(relativeResidualHistos_.at(iGenBin));
+      f1RelativeSigma_=extract_sigma(relativeResidualHistos_.at(iGenBin), verbose);
 //     residualHistos_.at(iGenBin)->Fit("f1");
 //     double f1norm  = f1->GetParameter(0);
 //     double f1mean  = f1->GetParameter(1);
