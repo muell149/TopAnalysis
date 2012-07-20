@@ -5,8 +5,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  const std::string decayChannel = "electron", 
-				  bool withRatioPlot = true, bool extrapolate=false, bool hadron=false)
+				  const std::string decayChannel = "combined", 
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set Root Style
@@ -255,6 +255,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "analyzeTopRecoKinematicsKinFit/bqEta",
     "analyzeTopRecoKinematicsKinFitBeforeProbSel/prob", 
     "analyzeTopRecoKinematicsKinFitBeforeProbSel/chi2",
+    "analyzeTopRecoKinematicsKinFitTopAntitop/ttbarDelPhi",
     // gen distributions
     "analyzeTopPartonLevelKinematics/ttbarMass",
     "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass",
@@ -434,6 +435,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "#eta^{b and #bar{b}};N^{b and #bar{b}};0;1",
     "probability (best fit hypothesis);events;1;25", 
     "#chi^{2} (best fit hypothesis);events;0;10",
+    "#Delta#Phi(t,#bar{t});events;0;4",
     // gen distributions
     "m^{t#bar{t}} #left[GeV#right] parton all truth;events;1;1",
     "m^{t#bar{t}} #left[GeV#right] parton lv truth;events;1;1"
