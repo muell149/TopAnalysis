@@ -31,13 +31,14 @@
 
 enum PdfType { kMSTW, kHERA, kABM, kNNPDF };
 
-double alpha_s(const double Q)
+const double mZ=91.1876;
+
+double alpha_s(const double Q, const double lambda_MSbar=0.213, const unsigned Nf = 5)
 {
   //
   // c.f. arXiv:0908.1135 (Bethke: The 2009 World Average of alphaS)
   //
-  const unsigned Nf = 5; // number of active flavors (assumed range here: from b mass threshold up to top mass scale!)
-  const double lambda2 = 0.213*0.213; // from lambda_MSbar with alpha_s(mZ) = 0.1184 and Nf = 5
+  const double lambda2 = lambda_MSbar*lambda_MSbar;
   const double beta0 = (33-2*Nf)/(12*TMath::Pi());
   const double beta1 = (153-19*Nf)/(24*TMath::Power(TMath::Pi(),2));
   const double beta2 = (77139-15099*Nf+325*Nf*Nf)/(3456*TMath::Power(TMath::Pi(),3));
@@ -73,22 +74,37 @@ double mMSbar(const double mPole)
   return mMSbarNew;
 }
 
-TGraph* getRunningAlphaGraph()
+TGraph* getRunningAlphaGraph(const double qRangeMin=80, const unsigned qRangeLength=111, const double lambda=0.213)
 {
-  int n = 111;
-  double mass [n];
-  double alpha[n];
-  double m = 80;
-  for(int i=0; i<n; i++) {
-    mass [i] = m;
-    alpha[i] = alpha_s(m);
-    m += 1;
+  double scale[qRangeLength];
+  double alpha[qRangeLength];
+  double q = qRangeMin;
+  for(unsigned i=0; i<qRangeLength; i++) {
+    scale[i] = q;
+    alpha[i] = alpha_s(q, lambda);
+    q += 1;
   }
-  TGraph* graph = new TGraph(n, mass, alpha);
+  TGraph* graph = new TGraph(qRangeLength, scale, alpha);
   graph->GetXaxis()->SetTitle("Q (GeV)");
-  graph->GetYaxis()->SetTitle("#alpha_{S}");
-  graph->SetTitle("At three-loop level and with N(flavors)=5, using 2009 world average for #alpha_{S}(M_{Z})");
-  graph->GetYaxis()->CenterTitle();
+  graph->GetYaxis()->SetTitle("#alpha_{S} (Q)");
+  graph->SetTitle("At three-loop level and with N(flavors)=5, using 2012 world average for #alpha_{S}(M_{Z})");
+  return graph;
+}
+
+TGraph* getAlphaLambdaGraph()
+{
+  unsigned nPoints=100;
+  double lambda[nPoints];
+  double alpha [nPoints];
+  double x = 150;
+  for(unsigned i=0; i<nPoints; i++) {
+    lambda[i] = x;
+    alpha [i] = alpha_s(mZ, x/1000.);
+    x += 1;
+  }
+  TGraph* graph = new TGraph(nPoints, lambda, alpha);
+  graph->GetXaxis()->SetTitle("#Lambda_{#bar{MS}} (MeV)");
+  graph->GetYaxis()->SetTitle("#alpha_{S} (m_{Z})");
   return graph;
 }
 
@@ -282,7 +298,7 @@ void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mas
 		     const TString title, TCanvas* canvas, const TString printNameBase, const TString epsName)
 {
   if(mass.getTitle().Contains("pole"))
-    mass.setVal(172.5);
+    mass.setVal(173.2);
   else
     mass.setVal(165.);
   RooPlot* convFrame = xsec.frame(0.85*predXSec->xsec.getVal(), 1.15*predXSec->xsec.getVal());
@@ -339,15 +355,22 @@ void plot2DimProb(const PredXSec* predXSec, TCanvas* canvas, const TString title
   delete h2;
 }
 
-void plotProjectedPDF(RooAbsPdf* pdf, RooPlot* frame, const int color, const int fillStyle,
-		      const double max, const double errLow, const double errHig)
+void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int color, const int fillStyle,
+		      const RooRealVar& x_var)
 {
-  pdf->plotOn(frame, RooFit::LineColor(color), RooFit::NormRange("mass_fullRange"));
-  pdf->plotOn(frame, RooFit::Range(max-errLow, max+errHig), RooFit::NormRange("mass_fullRange"),
-	      //	      RooFit::LineColor(color), RooFit::LineWidth(1),
-	      RooFit::FillStyle(fillStyle), RooFit::FillColor(color), RooFit::DrawOption("F"), RooFit::VLines());
-  pdf->plotOn(frame, RooFit::Range(max-.01, max+.01), RooFit::NormRange("mass_fullRange"),
-	      RooFit::LineColor(color), RooFit::LineWidth(3), RooFit::VLines());
+  TString normRange = (TString)x_var.GetName() + "_fullRange";
+  result->projPdf->plotOn(frame, RooFit::Range(result->bestX - result->lowErrFromIntegral,
+					       result->bestX + result->highErrFromIntegral), RooFit::NormRange(normRange),
+			  RooFit::FillStyle(fillStyle), RooFit::FillColor(color-9), RooFit::DrawOption("F"),
+			  RooFit::VLines());
+  result->projPdf->plotOn(frame, RooFit::LineColor(color+1), RooFit::NormRange(normRange));
+  double epsilon = 0.00001;
+  if(!strcmp(x_var.GetName(),"mass"))
+    epsilon = 0.01;
+  if(x_var.GetName())
+    result->projPdf->plotOn(frame, RooFit::Range(result->bestX - epsilon,
+						 result->bestX + epsilon), RooFit::NormRange(normRange),
+			    RooFit::LineColor(color+1), RooFit::LineWidth(2), RooFit::VLines());
 }
 
 TLatex* cmsTxt(const bool full2011dilep)
@@ -374,6 +397,8 @@ int foldedLikelihoods(const bool pole)
   setTDRStyle();
   gStyle->SetTitleBorderSize(1);
   gStyle->SetOptFit(0011);
+
+  gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
 
   RooAbsReal::defaultIntegratorConfig()->method2D().setLabel("RooSegmentedIntegrator2D");
   RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooIntegrator1D").setCatLabel("sumRule", "Midpoint");
@@ -406,6 +431,65 @@ int foldedLikelihoods(const bool pole)
     canvas->Print(printNameBase+".ps");
     canvas->Print("figs/MSbar_vs_pole_mass.eps");
   }
+
+  //////////////////////////////////////
+  /// Start of quick'n dirty
+  //////////////////////////////////////
+
+  TGraph* alphaLambdaGraph = getAlphaLambdaGraph();
+  alphaLambdaGraph->Draw("AC");
+  canvas->Print(printNameBase+".ps");
+  delete alphaLambdaGraph;
+
+  TGraphErrors alphaWA = TGraphErrors(1);
+  alphaWA.SetPoint(0, mZ, 0.1184);
+  alphaWA.SetPointError(0, 0.0007, 0.0007);
+  alphaWA.SetMarkerSize(2);
+  alphaWA.SetMarkerColor(kRed);
+  alphaWA.SetLineStyle(2);
+
+  TGraphErrors alphaOur = TGraphErrors(1);
+  const double ourAlphaS2mTop = alpha_s(2*173.2, 0.200);
+  const double ourRescaledError = 0.0032*ourAlphaS2mTop/0.1173;
+  alphaOur.SetPoint(0, 2*173.2, ourAlphaS2mTop);
+  alphaOur.SetPointError(0, ourRescaledError, ourRescaledError);
+  alphaOur.SetMarkerSize(2);
+  alphaOur.SetMarkerStyle(21);
+  alphaOur.SetMarkerColor(kRed);
+  alphaOur.SetLineStyle(1);
+
+  TLegend lastMinuteLeg = TLegend(0.4, 0.7, 0.95, 0.85);
+  lastMinuteLeg.SetFillStyle(0);
+  lastMinuteLeg.SetBorderSize(0);
+  lastMinuteLeg.AddEntry(&alphaWA , "PDG 2012 world average"  , "PL");
+  lastMinuteLeg.AddEntry(&alphaOur, "Our result (using Cacciari et al. with MSTW2008)", "PL");
+
+  runningAlpha = getRunningAlphaGraph(50, 450);
+  TGraph* runningAlpha_new = getRunningAlphaGraph(50, 450, 0.200);
+  runningAlpha->SetLineWidth(2);
+  runningAlpha->SetLineStyle(2);
+  runningAlpha_new->SetLineWidth(2);
+  runningAlpha_new->SetLineStyle(1);
+  runningAlpha->Draw("AC");
+  runningAlpha_new->Draw("C");
+  alphaWA.Draw("P");
+  alphaOur.Draw("P");
+  gPad->SetLogx();
+  lastMinuteLeg.Draw();
+  runningAlpha->GetXaxis()->SetLimits(50,500);
+  runningAlpha->GetXaxis()->SetMoreLogLabels();
+  runningAlpha->GetXaxis()->SetNoExponent();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(printNameBase+"results_qDep.eps");
+
+  delete runningAlpha_new;
+
+  //  canvas->Print(printNameBase+".ps]");
+  //  return 0;
+
+  //////////////////////////////////////
+  /// End of quick'n dirty
+  //////////////////////////////////////
 
   const unsigned nPdfSets=3;
   const unsigned nTheories=2;
@@ -681,10 +765,7 @@ int foldedLikelihoods(const bool pole)
   FinalLikeliResults1D* mocResult[nPdfSets];
   FinalLikeliResults1D* mitResult[nPdfSets];
 
-  gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
-
   const unsigned nSummaryPoints = nPdfSets*nTheories;
-  //  const unsigned nSummaryPoints = 2;
   TGraphAsymmErrors mocSummaryGraphInnErr(nSummaryPoints);
   TGraphAsymmErrors mocSummaryGraphTotErr(nSummaryPoints);
   TGraphAsymmErrors mitSummaryGraphInnErr(nSummaryPoints);
@@ -692,7 +773,6 @@ int foldedLikelihoods(const bool pole)
   unsigned iGraphPoint = 0;
 
   for(unsigned h=0; h<nPdfSets; h++) {
-  //  for(unsigned h=0; h<1; h++) {
     const TString suf[3] = {"MSTW", "HERA", "ABM"};
 
     mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob),
@@ -799,55 +879,77 @@ int foldedLikelihoods(const bool pole)
   canvas->Print(printNameBase+"_summaryPlot.eps");
   canvas->Print(printNameBase+".ps");
 
-//  if(full2011dilep)
-//    frame = mass.frame(RooFit::Range(160., 190.));
-//  else
-//    frame = mass.frame(RooFit::Range(150., 190.));
-//
-//  plotProjectedPDF(mocProjectedPDF, frame, colorMoc, 3505, mocMax, mocLowErr, mocHigErr);
-//  plotProjectedPDF(ahrProjectedPDF, frame, colorAhr, 3554, ahrMax, ahrLowErr, ahrHigErr);
-//
-//  frame->GetYaxis()->SetTitle("Probability density");
-//  if(full2011dilep)
-//    frame->GetYaxis()->SetRangeUser(0., 0.056);
-//  else
-//    frame->GetYaxis()->SetRangeUser(0., 0.034);
-//  frame->Draw();
-//
-//  TLatex* cmsLabel = cmsTxt(full2011dilep);
-//  cmsLabel->Draw();
-//
-//  mocTF->SetLineColor(kBlack);
-//  mocTF->SetFillColor(colorMoc);
-//  mocTF->SetFillStyle(3305);
-//
-//  ahrTF->SetLineColor(kBlack);
-//  ahrTF->SetFillColor(colorAhr);
-//  ahrTF->SetFillStyle(3554);
-//
-//  double yMin = 0.77;
-//  TLegend leg = TLegend(0.2, yMin, 0.9, 0.9);
-//  leg.SetFillStyle(0);
-//  leg.SetBorderSize(0);
-//
-//  char legTmpTxt[99];
-//  sprintf(legTmpTxt, "Langenfeld et al. (%.1f +%.1f -%.1f GeV)", mocMax, mocHigErr, mocLowErr);
-//  leg.AddEntry(mocTF, legTmpTxt, "F");
-//  sprintf(legTmpTxt, "Ahrens et al. (%.1f +%.1f -%.1f GeV)", ahrMax, ahrHigErr, ahrLowErr);
-//  leg.AddEntry(ahrTF, legTmpTxt, "F");
-//  leg.Draw();
-//
-//  canvas->Print(printNameBase+".ps");
-//  canvas->Print(epsString("densities", pole, heraPDF));
+  ofstream outfile;
+  outfile.open(printNameBase+ "_summary.tab");
+  outfile << "\\begin{tabular}{|ll|c|c|c|}" << std::endl;
+  outfile << "\\hline" << std::endl;
+  outfile << " & & Most likely & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
+  outfile << " & & value       & Total & From $\\delta m_{t}$ \\\\" << std::endl;
+  outfile << "\\hline" << std::endl;
+  for(unsigned h=0; h<nPdfSets; h++) {
+    char tmpTxt[99];
+    sprintf(tmpTxt, "%s et al. & \\multirow{2}{*}{with %s} &%.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
+	    theoName[1].Data(), pdfName[h].Data(),
+	    mitResult[h]->bestX,
+	    mitResult[h]->highErrTotal, mitResult[h]->lowErrTotal,
+	    mitResult[h]->highErrFromConstraintUncertainty, mitResult[h]->lowErrFromConstraintUncertainty);
+    outfile << tmpTxt << std::endl;
+    outfile << "\\cline{3-5}" << std::endl;
+    sprintf(tmpTxt, "%s et al. & & %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
+	    theoName[0].Data(),
+	    mocResult[h]->bestX,
+	    mocResult[h]->highErrTotal, mocResult[h]->lowErrTotal,
+	    mocResult[h]->highErrFromConstraintUncertainty, mocResult[h]->lowErrFromConstraintUncertainty);
+    outfile << tmpTxt << std::endl;
+    outfile << "\\hline" << std::endl;
+  }
+  outfile << "\\end{tabular}" << std::endl;
+  outfile.close();
+  std::cout << "Wrote " << printNameBase+ "_summary.tab" << std::endl;
+
+//  const unsigned color[3] = {kRed+1, kMagenta, kGreen-3};
+//  const unsigned fillStyle[3] = {3545, 3305, 3554};
+
+  for(unsigned h=0; h<nPdfSets; h++) {
+    char tmpTxt[99];
+    sprintf(tmpTxt, "CMS 2011 t#bar{t} data #times %s, %s = %.1f GeV",
+	    theoTitle[h][0].Data(), mass.getTitle().Data(), mass.getVal());
+    TLatex text(0.,0.,tmpTxt);
+    text.SetNDC();
+    text.SetTextAlign(13);
+    text.SetX(0.16);
+    text.SetY(0.99);
+    text.SetTextFont(43);
+    text.SetTextSizePixels(16);
+
+    frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
+    frame_alpha->GetYaxis()->SetTitle("Probability density");
+    plotProjectedPDF(mocResult[h], frame_alpha, kRed, 1001, alpha);
+    frame_alpha->Draw();
+    text.Draw();
+    canvas->Print(printNameBase+".ps");
+    canvas->Print(epsString("final_probDensity_moch", pole, (PdfType)h));
+
+    sprintf(tmpTxt, "CMS 2011 t#bar{t} data #times %s, %s = %.1f GeV",
+	    theoTitle[h][1].Data(), mass.getTitle().Data(), mass.getVal());    
+    text.SetTitle(tmpTxt);
+    frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
+    frame_alpha->GetYaxis()->SetTitle("Probability density");
+    plotProjectedPDF(mitResult[h], frame_alpha, kRed, 1001, alpha);
+    frame_alpha->Draw();
+    text.Draw();
+    canvas->Print(printNameBase+".ps");
+    canvas->Print(epsString("final_probDensity_mitov", pole, (PdfType)h));
+  }
   
   // cleaning up
 
   canvas->Print(printNameBase+".ps]");
 
-  if(!pole) {
+  if(runningAlpha)
     delete runningAlpha;
+  if(mShift)
     delete mShift;
-  }
   for(unsigned h=0; h<nPdfSets; h++) {
     for(unsigned j=0; j<4; j++) {
       delete moc_vec[h].at(j);
