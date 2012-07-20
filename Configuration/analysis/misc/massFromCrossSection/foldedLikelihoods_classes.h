@@ -224,6 +224,7 @@ FinalLikeliResults1D::FinalLikeliResults1D(const TString& label,
   lowErrTotal  = TMath::Sqrt(TMath::Power(lowErrFromIntegral , 2) + TMath::Power(lowErrFromConstraintUncertainty , 2));
   highErrTotal = TMath::Sqrt(TMath::Power(highErrFromIntegral, 2) + TMath::Power(highErrFromConstraintUncertainty, 2));
   std::cout << "lowErrTotal, highErrTotal : " << lowErrTotal << ", " << highErrTotal << std::endl;
+  constrained_var.setVal(constrained_var_mean.getVal());
 }
 
 void
