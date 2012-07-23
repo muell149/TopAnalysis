@@ -2587,8 +2587,7 @@ namespace semileptonic {
     double aB=0.;
     double bB=0.;
     double cB=0.;
-    double dB=0.;
-    double eB=0.;
+    double dB=0.;    double eB=0.;
     TString addOptB="";
     // define fit function C
     double fitLowEdgeC=0;
@@ -2672,7 +2671,7 @@ namespace semileptonic {
       if(plotname.Contains("ttbarMass")){
 	//tail:
 	fitLowEdge=470.0;
-	fitHighEdge=1600.0;
+	fitHighEdge=830.0;
 	def="[0]*exp([1]*x)+[2]";
 	a= 164748.0;   //  28165.;
 	b=-0.00810181; // -0.00756;
@@ -2687,6 +2686,14 @@ namespace semileptonic {
 	cB=79.3;//80.8;
 	dB=1010990;//1000000.;
 	addOptB="LL";
+	//end of tail:
+	fitLowEdgeC=830.0;
+	fitHighEdgeC=1600.0;
+	defC="[0]*exp([1]*x)+[2]";
+	aC= 54699.0;  
+	bC=-0.0068;
+	cC= 0.979;
+	addOptC="LL";
       }
       else if(plotname.Contains("ttbarPt")){
 	//tail:
