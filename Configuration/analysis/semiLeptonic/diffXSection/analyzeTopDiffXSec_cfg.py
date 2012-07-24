@@ -1,4 +1,4 @@
- import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Config as cms
 
 ## ---
 ##   use this file to study different distributions for measurement of differential Cross Section
