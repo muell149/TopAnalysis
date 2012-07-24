@@ -74,17 +74,23 @@ double mMSbar(const double mPole)
   return mMSbarNew;
 }
 
-TGraph* getRunningAlphaGraph(const double qRangeMin=80, const unsigned qRangeLength=111, const double lambda=0.213)
+TGraphErrors* getRunningAlphaGraph(const double qRangeMin=80, const unsigned qRangeLength=111, const double lambda=0.213,
+				   const double alphaErrAtMZ=0.0007)
 {
+  const double alphaAtMZ = alpha_s(mZ, lambda);
   double scale[qRangeLength];
   double alpha[qRangeLength];
+  double scale_err[qRangeLength];
+  double alpha_err[qRangeLength];
   double q = qRangeMin;
   for(unsigned i=0; i<qRangeLength; i++) {
     scale[i] = q;
     alpha[i] = alpha_s(q, lambda);
+    scale_err[i] = 0.;
+    alpha_err[i] = alphaErrAtMZ * alpha[i]/alphaAtMZ;
     q += 1;
   }
-  TGraph* graph = new TGraph(qRangeLength, scale, alpha);
+  TGraphErrors* graph = new TGraphErrors(qRangeLength, scale, alpha, scale_err, alpha_err);
   graph->GetXaxis()->SetTitle("Q (GeV)");
   graph->GetYaxis()->SetTitle("#alpha_{S} (Q)");
   graph->SetTitle("At three-loop level and with N(flavors)=5, using 2012 world average for #alpha_{S}(M_{Z})");
@@ -202,7 +208,7 @@ TString epsString(const TString& label, const bool pole, const PdfType pdfType)
 }
 
 void drawTheoryGraph(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
-		     const TString label, const TString printNameBase)
+		     const TString epsLabel, const TString printNameBase)
 {
   if(pole)
     graph->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
@@ -216,7 +222,7 @@ void drawTheoryGraph(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
   graph->GetFunction("f1")->Draw("same");
 
   canvas->Print(printNameBase+".ps");
-  canvas->Print("figs/"+label+".eps");
+  canvas->Print(epsLabel);
 }
 
 void removeEmptyPoints(TGraph* graph)
@@ -398,8 +404,6 @@ int foldedLikelihoods(const bool pole)
   gStyle->SetTitleBorderSize(1);
   gStyle->SetOptFit(0011);
 
-  gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
-
   RooAbsReal::defaultIntegratorConfig()->method2D().setLabel("RooSegmentedIntegrator2D");
   RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooIntegrator1D").setCatLabel("sumRule", "Midpoint");
   RooAbsReal::defaultIntegratorConfig()->methodND().setLabel("RooMCIntegrator");
@@ -441,51 +445,55 @@ int foldedLikelihoods(const bool pole)
   canvas->Print(printNameBase+".ps");
   delete alphaLambdaGraph;
 
-  TGraphErrors alphaWA = TGraphErrors(1);
-  alphaWA.SetPoint(0, mZ, 0.1184);
-  alphaWA.SetPointError(0, 0.0007, 0.0007);
-  alphaWA.SetMarkerSize(2);
-  alphaWA.SetMarkerColor(kRed);
-  alphaWA.SetLineStyle(2);
+  runningAlpha = getRunningAlphaGraph(50, 450);
+  TGraph* runningAlpha_new = getRunningAlphaGraph(50, 450, 0.200, 0.0032);
 
-  TGraphErrors alphaOur = TGraphErrors(1);
-  const double ourAlphaS2mTop = alpha_s(2*173.2, 0.200);
-  const double ourRescaledError = 0.0032*ourAlphaS2mTop/0.1173;
-  alphaOur.SetPoint(0, 2*173.2, ourAlphaS2mTop);
-  alphaOur.SetPointError(0, ourRescaledError, ourRescaledError);
-  alphaOur.SetMarkerSize(2);
-  alphaOur.SetMarkerStyle(21);
-  alphaOur.SetMarkerColor(kRed);
-  alphaOur.SetLineStyle(1);
+  runningAlpha->SetFillColor(kMagenta-9);
+  runningAlpha_new->SetFillColor(kCyan);
+  runningAlpha->SetLineStyle(2);
+  runningAlpha_new->SetLineStyle(3);
 
   TLegend lastMinuteLeg = TLegend(0.4, 0.7, 0.95, 0.85);
-  lastMinuteLeg.SetFillStyle(0);
+  lastMinuteLeg.SetFillColor(0);
   lastMinuteLeg.SetBorderSize(0);
-  lastMinuteLeg.AddEntry(&alphaWA , "PDG 2012 world average"  , "PL");
-  lastMinuteLeg.AddEntry(&alphaOur, "Our result (using Cacciari et al. with MSTW2008)", "PL");
+  lastMinuteLeg.AddEntry(runningAlpha    , "PDG 2012 world average"  , "LF");
+  lastMinuteLeg.AddEntry(runningAlpha_new, "Our result (using Cacciari et al. with MSTW2008)", "LF");
 
-  runningAlpha = getRunningAlphaGraph(50, 450);
-  TGraph* runningAlpha_new = getRunningAlphaGraph(50, 450, 0.200);
-  runningAlpha->SetLineWidth(2);
-  runningAlpha->SetLineStyle(2);
-  runningAlpha_new->SetLineWidth(2);
-  runningAlpha_new->SetLineStyle(1);
-  runningAlpha->Draw("AC");
-  runningAlpha_new->Draw("C");
-  alphaWA.Draw("P");
-  alphaOur.Draw("P");
+  TLine lineMZ(mZ, 0.09, mZ, 0.135);
+  TLatex textMZ(0.95*mZ, 0.11, "m_{Z}");
+  textMZ.SetTextAngle(90);
+  textMZ.SetTextAlign(32);
+  textMZ.SetTextFont(43);
+  textMZ.SetTextSizePixels(25);
+
+  TLine line2Mt(2*173.2, 0.09, 2*173.2, 0.135);
+  TLatex text2Mt(0.95*2*173.2, 0.11, "2m_{t}");
+  text2Mt.SetTextAngle(90);
+  text2Mt.SetTextAlign(32);
+  text2Mt.SetTextFont(43);
+  text2Mt.SetTextSizePixels(25);
+
+  runningAlpha_new->Draw("A3");
+  lineMZ.Draw();
+  textMZ.Draw();
+  line2Mt.Draw();
+  text2Mt.Draw();
+  runningAlpha_new->Draw("3");
+  runningAlpha->Draw("3");
+  runningAlpha->Draw("XC");
+  runningAlpha_new->Draw("XC");
   gPad->SetLogx();
   lastMinuteLeg.Draw();
-  runningAlpha->GetXaxis()->SetLimits(50,500);
-  runningAlpha->GetXaxis()->SetMoreLogLabels();
-  runningAlpha->GetXaxis()->SetNoExponent();
+  gPad->RedrawAxis();
+  runningAlpha_new->GetXaxis()->SetLimits(50, 500);
+  runningAlpha_new->GetXaxis()->SetMoreLogLabels();
+  runningAlpha_new->GetXaxis()->SetNoExponent();
+  runningAlpha_new->GetYaxis()->SetRangeUser(0.09, 0.135);
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"results_qDep.eps");
+  gPad->SetLogx(false);
 
   delete runningAlpha_new;
-
-  //  canvas->Print(printNameBase+".ps]");
-  //  return 0;
 
   //////////////////////////////////////
   /// End of quick'n dirty
@@ -518,6 +526,7 @@ int foldedLikelihoods(const bool pole)
   const TString errLabel[4] = {"scale", "expPDF", "alphaS", "total"};
 
   TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,4)", 0, 1000);
+  f1->SetParNames("a", "b", "c", "d");
 
   for(unsigned h=0; h<nPdfSets; h++) {
     //    ahr_vec[h] = readTheory("ahrens", pole, useAlphaUnc, (PdfType)h);
@@ -544,12 +553,12 @@ int foldedLikelihoods(const bool pole)
       mit_funcs[h][j] = getAndDrawRelativeUncertainty(mit_vec[h].at(j), canvas, pole, errName[j],
 						      epsString("relUnc_mitov_"+errLabel[j], pole, (PdfType)h),
 						      printNameBase, (j==1 || j==2));
-    drawTheoryGraph(mit[h], canvas, pole, "mitov", printNameBase);
+    drawTheoryGraph(mit[h], canvas, pole, epsString("mitov", pole, (PdfType)h), printNameBase);
     for(unsigned j=0; j<2; j++)
       moc_funcs[h][j] = getAndDrawRelativeUncertainty(moc_vec[h].at(j), canvas, pole, errName[j],
 						      epsString("relUnc_moch_"+errLabel[j], pole, (PdfType)h),
 						      printNameBase, (j==1 || j==2));
-    drawTheoryGraph(moc[h], canvas, pole, "moch", printNameBase);
+    drawTheoryGraph(moc[h], canvas, pole, epsString("moch", pole, (PdfType)h), printNameBase);
 //    for(unsigned j=0; j<4; j++)
 //      ahr_funcs[h][j] = getAndDrawRelativeUncertainty(ahr_vec[h].at(j), canvas, pole, errName[j],
 //						      epsString("relUnc_ahrens_"+errLabel[j], pole, (PdfType)h),
@@ -558,6 +567,9 @@ int foldedLikelihoods(const bool pole)
     
     gStyle->SetOptTitle(0);
   }
+
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
 
   RooRealVar mass("mass", "m_{t}^{pole}", 140., 190., "GeV");
   if(!pole)
@@ -785,6 +797,8 @@ int foldedLikelihoods(const bool pole)
     iGraphPoint++;
   }
 
+  gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
+
   mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1115, 0.1245);
   mocSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
   mocSummaryGraphTotErr.GetYaxis()->SetRangeUser(-1, nSummaryPoints+2);
@@ -888,18 +902,18 @@ int foldedLikelihoods(const bool pole)
   outfile << "\\hline" << std::endl;
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
-    sprintf(tmpTxt, "%s et al. & \\multirow{2}{*}{with %s} &%.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
+    sprintf(tmpTxt, "%s et al. & \\multirow{2}{*}{with %s} & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
 	    theoName[1].Data(), pdfName[h].Data(),
 	    mitResult[h]->bestX,
-	    mitResult[h]->highErrTotal, mitResult[h]->lowErrTotal,
-	    mitResult[h]->highErrFromConstraintUncertainty, mitResult[h]->lowErrFromConstraintUncertainty);
+	    TMath::Max(mitResult[h]->highErrTotal, mitResult[h]->lowErrTotal),
+	    TMath::Max(mitResult[h]->highErrFromConstraintUncertainty, mitResult[h]->lowErrFromConstraintUncertainty));
     outfile << tmpTxt << std::endl;
     outfile << "\\cline{3-5}" << std::endl;
-    sprintf(tmpTxt, "%s et al. & & %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
+    sprintf(tmpTxt, "%s et al. & & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
 	    theoName[0].Data(),
 	    mocResult[h]->bestX,
-	    mocResult[h]->highErrTotal, mocResult[h]->lowErrTotal,
-	    mocResult[h]->highErrFromConstraintUncertainty, mocResult[h]->lowErrFromConstraintUncertainty);
+	    TMath::Max(mocResult[h]->highErrTotal, mocResult[h]->lowErrTotal),
+	    TMath::Max(mocResult[h]->highErrFromConstraintUncertainty, mocResult[h]->lowErrFromConstraintUncertainty));
     outfile << tmpTxt << std::endl;
     outfile << "\\hline" << std::endl;
   }
