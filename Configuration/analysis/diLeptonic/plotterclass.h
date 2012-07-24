@@ -1925,7 +1925,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
   
   DrawDecayChLabel(channelLabel[channelType]);    
   leg->Draw("SAME");  
-  drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
+  //drawRatio(drawhists[0], stacksum, 0.5, 1.9, *gStyle);
 
     
   // Create Directory for Output Plots 
@@ -3295,8 +3295,10 @@ void Plotter::PlotDiffXSec(){
     
     TGraph *mcatnloBand = new TGraph(2*bins, xband, errorband);
     mcatnloBand->SetFillColor(kGray);
-    mcatnloBand->SetLineColor(kAzure);
+    mcatnloBand->SetFillStyle(1001);
+    mcatnloBand->SetLineColor(kBlue);
     mcatnloBand->SetLineWidth(2);
+    mcatnloBand->SetLineStyle(5);
     
     TH1F *Kidoth1=NULL;
     TH1F *Kidoth1_Binned=NULL;
@@ -3355,20 +3357,27 @@ void Plotter::PlotDiffXSec(){
     mcnlohistdownBinned->Draw("same");
     GenPlotTheory->SetLineColor(kRed+1);
     GenPlotTheory->SetLineWidth(2);
+    GenPlotTheory->SetLineStyle(1);
 //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
     if( name.Contains("HypLeptonpT") ||name.Contains("HypBJetpT") || name.Contains("HypLLBarpT") || name.Contains("HypTTBarpT") ){
        GenPlotTheory->Draw("SAME,C");
     }
     h_GenDiffXSec->SetLineColor(kRed+1);
+    h_GenDiffXSec->SetLineStyle(1);
 
     //bool binned_theory=true; 
     
-    mcnlohist->SetLineColor(kAzure);
-    powheghist->SetLineColor(kGreen+2); //#####################
-    mcnlohistBinned->SetLineColor(kAzure);
-    powheghistBinned->SetLineColor(kGreen+2); //#####################
+    mcnlohist->SetLineColor(kBlue); //#####################
+    mcnlohist->SetLineStyle(5);
+    mcnlohistBinned->SetLineColor(kBlue); //#####################
     mcnlohistBinned->SetLineWidth(2);
+    mcnlohistBinned->SetLineStyle(5);
+    powheghist->SetLineColor(kGreen+1); //#####################
+    powheghist->SetLineStyle(7);
+    powheghistBinned->SetLineColor(kGreen+1); //#####################
     powheghistBinned->SetLineWidth(2);
+    powheghistBinned->SetLineStyle(7);
+    
     if(binned_theory==false){
       mcnlohist->Draw("SAME,C");
       powheghist->Draw("SAME,C");
@@ -3380,6 +3389,7 @@ void Plotter::PlotDiffXSec(){
     if(name.Contains("ToppT") || name.Contains("TopRapidity")){
       Kidoth1_Binned->SetLineWidth(2);
       Kidoth1_Binned->SetLineColor(kOrange-3); //########################
+      Kidoth1_Binned->SetLineStyle(1);
       Kidoth1_Binned->Draw("SAME");
      }
     //MCFMHist->Draw("SAME");
