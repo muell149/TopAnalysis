@@ -103,6 +103,8 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
     line_vert.Draw();
 
     canvas.Print(fileName + ".ps");
+    if(mt==173)
+      canvas.Print(fileName + "_173.eps");
   }
 
   inFile.close();
@@ -165,6 +167,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
     sprintf(parName, "graph_p%i", p);
     graph_par[p].Write(parName);
     canvas.Print(fileName + ".ps");
+    canvas.Print(fileName + "_" + parName +".eps");
   }
 
   outFile.Close();
