@@ -73,8 +73,8 @@ namespace semileptonic {
 
   const unsigned int constDataColor     = kBlack;
   const unsigned int constMadgraphColor = kRed+1;
-  const unsigned int constMcatnloColor  = kAzure;
-  const unsigned int constPowhegColor   = kGreen+2;
+  const unsigned int constMcatnloColor  = kBlue;
+  const unsigned int constPowhegColor   = kGreen+1;
   const unsigned int constNnloColor     = kOrange-3;
 
   int marker_[] = {20, 22, 29, 23, 

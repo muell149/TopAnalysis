@@ -299,7 +299,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    // divide by binwidth
 	    histo_["reweighted"+plotName][kSig]=divideByBinwidth(histo_["reweighted"+plotName][kSig], verbose-1);
 	    //set style
-	    histogramStyle(*histo_["reweighted"+plotName][kSig], kSig, false, 1.2, kRed+1);
+	    histogramStyle(*histo_["reweighted"+plotName][kSig], kSig, false, 1.2, constMadgraphColor);
 	    histo_["reweighted"+plotName][kSig]->SetLineColor(kMagenta);
 	  }
 	  // =================================================
@@ -340,7 +340,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    // divide by binwidth
 	    histo_["modified"+plotName][kSig]=divideByBinwidth(histo_["modified"+plotName][kSig], verbose-1);
 	    // set style
-	    histogramStyle(*histo_["modified"+plotName][kSig], kSig, false, 1.2, kRed+1);
+	    histogramStyle(*histo_["modified"+plotName][kSig], kSig, false, 1.2, constMadgraphColor);
 	    histo_["modified"+plotName][kSig]->SetLineColor(kMagenta);
 	  }
 
@@ -502,9 +502,9 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    }
 	  }
 	  // draw errorband
-	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
+	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
 	  // draw central curve
-	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 1, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2);
+	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2);
 	  
 	  // d) POWHEG
 	  // configure configuration
@@ -524,7 +524,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor= 2; }
 	  // draw curve	 
-	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 1, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2);
+	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2);
 	  
 	  // e) reweighted histos for closure test
 	  if(reweightClosure&&sys==sysNo){
@@ -574,7 +574,6 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    if (DrawMCFMPlot&&xSecVariables_[i].Contains("Norm")){
 
 	      TString mcfmplotname = "";
-	      
 	      if      (plotname=="topPt")     mcfmplotname = "pt_t";
 	      else if (plotname=="topY")      mcfmplotname = "y_t";
 	      else if (plotname=="ttbarPt")   mcfmplotname = "pt_tt";
@@ -632,10 +631,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor =  4; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor =  0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor =  2; rebinFactor =  1; }
-	  if(DrawSmoothMadgraph2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined"), plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
+	  if(DrawSmoothMadgraph2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined"), plotNameMadgraph, normalize, smoothFactor, rebinFactor, constMadgraphColor, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
 	  
 
 	  // j) re-draw binned MADGRAPH theory curve
+	  plotTheo->SetLineColor(constMadgraphColor);
 	  plotTheo->Draw("hist same");
 	  	  
 	  // ==============
@@ -665,6 +665,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    //std::cout << "searching " << curveName << std::endl;
 	    TGraphAsymmErrors *mcatnlocurve =(TGraphAsymmErrors*)combicanvas->GetPrimitive(curveName);
 	    if(mcatnlocurve){
+	      mcatnlocurve->SetLineStyle(5);
 	      if(curveName.Contains("lep")||curveName.Contains("bq")) leg->AddEntry(mcatnlocurve, "MC@NLO  ", "L");
 	      else leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
 	      std::cout << "found!" << std::endl;
