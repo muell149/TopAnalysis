@@ -154,6 +154,11 @@ if(not eventFilter=='signal only' and not eventFilter=='background only'):
 ## choose whether synchronisation exercise should be done
 if(not globals().has_key('cutflowSynch')): 
     cutflowSynch  = False # True
+
+# choose if you want to have only the gen paths
+# (useful when running high stats sample for smooth gen predictions)
+if(not globals().has_key('noRec')):
+    noRec=False
     
 ## choose whether additional event weights should be applied
 if(not globals().has_key('additionalEventWeights')): 
@@ -477,6 +482,7 @@ print " Output file name:                   ",outputFileName
 print " Synchronization exercise:           ",cutflowSynch
 print " Additional event weights:           ",additionalEventWeights," ---- If 'True' weights are applied to the KinFit analyzers for monitoring, PU, b-tag and lepton eff. variations"
 print " Apply shape reweighting, variation: ",sysDistort
+print " remove reco paths:                  ",noRec
 print " "
 if(removeGenTtbar==True):
     print " All gen level filters using ttbar decay subset are removed" 
@@ -2105,6 +2111,7 @@ process.p1 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       ## apply kinematic fit
                       process.kinFit
                       )
+
 if(applyKinFit==False or eventFilter!="signal only"):
     process.p1.remove(process.dummy)
 if(runningOnData=="data"):
@@ -2520,3 +2527,9 @@ if(sysDistort==''):
         getattr(process,path).remove( process.eventWeightPUDistort              )
         getattr(process,path).remove( process.eventWeightPUupDistort            )
         getattr(process,path).remove( process.eventWeightPUdownDistort          )
+
+# remove reco paths
+if(noRec):
+    process.p1=cms.Path(process.dummy)
+    process.p2=cms.Path(process.dummy)
+        
