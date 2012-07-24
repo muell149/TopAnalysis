@@ -1,4 +1,4 @@
-import FWCore.ParameterSet.Config as cms
+ import FWCore.ParameterSet.Config as cms
 
 ## ---
 ##   use this file to study different distributions for measurement of differential Cross Section
@@ -156,9 +156,12 @@ if(not globals().has_key('cutflowSynch')):
     cutflowSynch  = False # True
 
 # choose if you want to have only the gen paths
-# (useful when running high stats sample for smooth gen predictions)
-if(not globals().has_key('noRec')):
-    noRec=False
+# and use the full statistics sample
+if(not globals().has_key('genFull')):
+    genFull=False
+# makes no sense for non ttbar signal
+if(not eventFilter=='signal only' or not options.sample=="ttbar"):
+    genFull=False
     
 ## choose whether additional event weights should be applied
 if(not globals().has_key('additionalEventWeights')): 
@@ -228,8 +231,11 @@ usedSample="none"
 if(not options.sample=="none"):
     outputFileName+="DiffXSec"    
     if(options.sample=="ttbar"):
-        # usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
-        usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_AOD_cff"
+        # limited statistics
+        usedSample="TopAnalysis/Configuration/ttjets_MadgraphZ2_Summer11_AOD_cff"
+        # full statistics
+        if(genFull):
+            usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff"
 	if(eventFilter=='signal only'):
 	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
@@ -482,7 +488,7 @@ print " Output file name:                   ",outputFileName
 print " Synchronization exercise:           ",cutflowSynch
 print " Additional event weights:           ",additionalEventWeights," ---- If 'True' weights are applied to the KinFit analyzers for monitoring, PU, b-tag and lepton eff. variations"
 print " Apply shape reweighting, variation: ",sysDistort
-print " remove reco paths:                  ",noRec
+print " rm rec path& use full ttbar sample: ",genFull
 print " "
 if(removeGenTtbar==True):
     print " All gen level filters using ttbar decay subset are removed" 
@@ -2529,7 +2535,7 @@ if(sysDistort==''):
         getattr(process,path).remove( process.eventWeightPUdownDistort          )
 
 # remove reco paths
-if(noRec):
+if(genFull):
     process.p1=cms.Path(process.dummy)
     process.p2=cms.Path(process.dummy)
         
