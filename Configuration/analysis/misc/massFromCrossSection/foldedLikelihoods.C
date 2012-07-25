@@ -652,8 +652,17 @@ int foldedLikelihoods(const bool pole)
     measXSecErr.setVal(6.725);
   }
 
-  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1", RooArgSet(measXSecMassDepRel,measXSec));
-  RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecErr);
+  //  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "(@0*@1)*(1+0.01*(@2-0.1171)/0.0100)",
+  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1",
+				RooArgSet(measXSecMassDepRel,measXSec,alpha));
+  RooFormulaVar measXSecMassDepErr("measXSecMassDepErr", "measXSecMassDepErr",
+				   "(@0/@1)*@2", RooArgSet(measXSecMassDep,measXSec,measXSecErr));
+  RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecMassDepErr);
+
+//  mass.setVal(173.2);
+//  std::cout << measXSecMassDep.getVal() << std::endl;
+//  std::cout << measXSecMassDepErr.getVal() << std::endl;
+//  return 0;
 
   PredXSec* mitPredXSec[nPdfSets];
   PredXSec* mocPredXSec[nPdfSets];
