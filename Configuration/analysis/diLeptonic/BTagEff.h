@@ -5,8 +5,8 @@
 // found on file: mergedRoot/mumu/ttbarsignal.root
 //////////////////////////////////////////////////////////
 
-#ifndef Analysis_h
-#define Analysis_h
+#ifndef BTagEff_h
+#define BTagEff_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -28,7 +28,8 @@
 #include "basicFunctions.h"
 #include "HHStyle.h"
 #include "TGraphAsymmErrors.h"
-
+#include <vector>
+#include <TLorentzVector.h>
 
    const Int_t kMaxlepton = 99;
    const Int_t kMaxjet = 99;
@@ -50,11 +51,12 @@
    
 using namespace std;
 
-class Analysis : public TSelector {
+class BTagEff : public TSelector {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
    // Declaration of leaf types
+   Double_t        BtagWP;
    Int_t           EventCounter;
    Int_t           lepton_;
    Double_t        leptonpX[kMaxlepton];   //[lepton_]
@@ -158,17 +160,6 @@ public :
    vector<int>     *BHadronVsJet;
    vector<int>     *AntiBHadronVsJet;   
    
-   /*   Int_t           BHadronJet_;
-   Double_t	   BHadronJetpX;
-   Double_t	   BHadronJetpY;
-   Double_t	   BHadronJetpZ;
-   Double_t	   BHadronJetE;
-   Int_t           AntiBHadronJet_;
-   Double_t	   AntiBHadronJetpX;
-   Double_t	   AntiBHadronJetpY;
-   Double_t	   AntiBHadronJetpZ;
-   Double_t	   AntiBHadronJetE;
-   */
    Int_t           HypTop_;
    Double_t        HypToppX[kMaxHypTop];   //[HypTop_]
    Double_t        HypToppY[kMaxHypTop];   //[HypTop_]
@@ -406,8 +397,8 @@ public :
    TBranch        *b_MCSample;   //!
    TBranch        *b_lumiWeight;   //!
 
-   Analysis(TTree * /*tree*/ =0) { }
-   virtual ~Analysis() { }
+   BTagEff(TTree * /*tree*/ =0) { }
+   virtual ~BTagEff() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -424,25 +415,13 @@ public :
 
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
-   
-   
-   // BEGIN of btag SF stuff
-//   TFile *bEfficiencies;
-   vector<double>  ptbinning, etabinning;
-   double ptmedian;
-
-   double BJetSF(double, double);
-   double CJetSF(double, double);
-   double LJetSF(double, double);
-   double BJetSFAbsErr(int);
-
-   TH2D *bEff, *cEff, *lEff;
-   TH1D *h_BTagSF, *h_BTagEvtSF, *h_BTagSF_Up, *h_BTagEvtSF_Up, *h_BTagSF_Down, *h_BTagEvtSF_Down;
-   // END of btag SF stuff
-   
-   TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT;
+   TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT, ;
    TH2D *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;//, *h_GenRecoBJetE, *h_GenRecoAntiBJetE;;
    TH2D *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
+   
+   TH2D *h_bjets, *h_btaggedjets;
+   TH2D *h_cjets, *h_ctaggedjets;
+   TH2D *h_ljets, *h_ltaggedjets;
    
    TH1D *h_NJetMatching;
 
@@ -513,14 +492,18 @@ public :
    TH1D *h_VisGenLLBarDPhi,  *h_VisGenLeptonantiBjetMass,  *h_VisGenAntiLeptonBjetMass,	 *h_VisGenJetMult;
    TH1D *h_RecoLLBarDPhi,    *h_RecoLeptonantiBjetMass,    *h_RecoAntiLeptonBjetMass,	 *h_RecoJetMult;
    TH1D *h_HypLLBarDPhi,     *h_HypLeptonantiBjetMass,     *h_HypAntiLeptonBjetMass,	 *h_HypJetMult;
-      
-   ClassDef(Analysis,0);
+   
+   
+   TH1D *h_TestHisto;
+   
+   
+   ClassDef(BTagEff,0);
 };
 
 #endif
 
-#ifdef Analysis_cxx
-void Analysis::Init(TTree *tree)
+#ifdef BTagEff_cxx
+void BTagEff::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -659,7 +642,7 @@ void Analysis::Init(TTree *tree)
    fChain->SetBranchAddress("lumiWeight", &lumiWeight, &b_lumiWeight);
 }
 
-Bool_t Analysis::Notify()
+Bool_t BTagEff::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -671,7 +654,7 @@ Bool_t Analysis::Notify()
 }
 
 
-void Analysis::GetAllBranches(Long64_t & entry)
+void BTagEff::GetAllBranches(Long64_t & entry)
 {
 
   b_metEt->GetEntry(entry);   //!
@@ -781,7 +764,7 @@ void Analysis::GetAllBranches(Long64_t & entry)
   
 }
 
-void Analysis::GetSignalBranches(Long64_t & entry)
+void BTagEff::GetSignalBranches(Long64_t & entry)
 {
   
    BHadJetIndex = 0;
@@ -946,65 +929,8 @@ void Analysis::GetSignalBranches(Long64_t & entry)
 }
 
 
-double Analysis::BJetSF(double pt, double eta){
-    //CSVL b-jet SF
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt
-    
-    if (TMath::Abs(eta)>2.4){
-        cout<<"Jet Eta out of the selected range. Check it"<<endl;
-        return 0.0;
-    }
-    if(pt<30.) pt=30.0;
-    if(pt>670.)pt=670.;
-    
-    TF1 bSF= TF1("BjetSF", "1.02658*((1.+(0.0195388*x))/(1.+(0.0209145*x)))", 30., 670.);
-    
-    return bSF(pt);
-    
-};
+#endif // #ifdef BTagEff_cxx
 
 
-double Analysis::CJetSF(double pt, double eta){
-    //CSVL c-jet SF
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2011_Data_and_MC
-    return Analysis::BJetSF(pt, eta);
-};
 
 
-double Analysis::LJetSF(double pt, double eta){
-    //CSVL ligth jet mistag SF.
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C
-    
-    TF1 tmpSFl;
-    
-    if(TMath::Abs(eta)>2.4) {cout<<"There is a jet out of the selected ETA region. Check that!!!!!";return 0.0;}
-    if(pt>670.){tmpSFl = TF1("SFlightMin","((0.956023+(0.000825106*x))+(-3.18828e-06*(x*x)))+(2.81787e-09*(x*(x*x)))", 20.,670.);}
-    else{
-        if( TMath::Abs(eta)>0.0 && TMath::Abs(eta)<=0.5)     {tmpSFl = TF1("SFlightMin","((0.994425+(-8.66392e-05*x))+(-3.03813e-08*(x*x)))+(-3.52151e-10*(x*(x*x)))", 20.,670.);}
-        else if( TMath::Abs(eta)>0.5 && TMath::Abs(eta)<=1.0){tmpSFl = TF1("SFlightMin","((0.998088+(6.94916e-05*x))+(-4.82731e-07*(x*x)))+(1.63506e-10*(x*(x*x)))", 20.,670.);}
-        else if( TMath::Abs(eta)>1.0 && TMath::Abs(eta)<=1.5){tmpSFl = TF1("SFlightMin","((1.00294+(0.000289844*x))+(-7.9845e-07*(x*x)))+(5.38525e-10*(x*(x*x)))", 20.,670.);}
-        else if( TMath::Abs(eta)>1.5 && TMath::Abs(eta)<=2.4){tmpSFl = TF1("SFlightMin","((0.979816+(0.000138797*x))+(-3.14503e-07*(x*x)))+(2.38124e-10*(x*(x*x)))", 20.,670.);}
-    }
-    
-    return tmpSFl(pt);
-};
-
-
-double Analysis::BJetSFAbsErr(int ptbin){
-    //c- and l-jets errors are not necessary for the calculation and are not implemented. If needed go to https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2011_Data_and_MC
-    
-    //b-jet pt ranges {0, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 670};
-    //this pt range matches the pTEff histogram!!
-
-    double error=0.0;
-    double SFb_error[] = {0.1388743, 0.0188743, 0.0161816, 0.0139824, 0.0152644, 0.0161226, 0.0157396, 0.0161619, 0.0168747, 0.0257175, 0.026424, 0.0264928, 0.0315127, 0.030734, 0.0438259 };
-    
-    if (ptbin>14) {
-        ptbin =14;
-        error=2*SFb_error[ptbin];
-    }
-    else {error=SFb_error[ptbin];};
-    
-    return error;
-}
-#endif // #ifdef Analysis_cxx

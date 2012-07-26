@@ -248,6 +248,43 @@ void Analysis::Begin(TTree * /*tree*/)
   h_VisGenAntiLeptonBjetMass= new TH1D("VisGenAntiLeptonBjetMass", "M(AntiLep, BJet) (VisGEN)", 500, 0, 1000);
   h_VisGenJetMult	    = new TH1D("VisGenJetMult",         "Jet Multiplicty (VisGEN)", 26, -0.5, 25.5);
   
+  // BEGIN: BTag SF calculation neccessary stuff
+  
+  //map to match the pt value and the corresponding bin number in the efficiency plots
+  //map<int, double> ptbinning, etabinning;
+  double pts[]={0,30,40,50,60,70,80,100,120,160,210,260,320,400,500,670};
+  double etas[]={0.0,0.5,1.0,1.5,2.4};
+  for (int i=0;i<15; ++i){ptbinning.push_back(pts[i]);}
+  for (int i=0;i<5; ++i) {etabinning.push_back(etas[i]);};
+
+  //Histograms to fill the per-event SF!!
+  h_BTagSF = new TH1D("BTagSF", "BTagging SF per event", 100 , 0.95,1.05);      h_BTagSF->Sumw2();
+  h_BTagEvtSF = new TH1D("BTagEvtSF", "Event's BTagging SF", 2.2e6, 0, 2.2e6);  h_BTagEvtSF->Sumw2();
+  h_BTagSF_Up = new TH1D("BTagSFUp", "BTagging SF Up variation per event", 100 , 0.95,1.05);      h_BTagSF_Up->Sumw2();
+  h_BTagEvtSF_Up = new TH1D("BTagEvtSFUp", "Event's BTagging SF Up variation", 2.2e6, 0, 2.2e6);  h_BTagEvtSF_Up->Sumw2();
+  h_BTagSF_Down = new TH1D("BTagSFDown", "BTagging SF Down variation per event", 100 , 0.95,1.05);      h_BTagSF_Down->Sumw2();
+  h_BTagEvtSF_Down = new TH1D("BTagEvtSFDown", "Event's BTagging SF Down variation", 2.2e6, 0, 2.2e6);  h_BTagEvtSF_Down->Sumw2();
+  
+  //pt efficiency median value can be obtained running and reading the output of: root -l -b -q CalcMedian.C
+  //By now defined the per-jet SFs vary according to:
+  //   BTag_Up   ==> pt>ptmedian vary DOWN, pt<ptmedian vary UP
+  //   BTag_Down ==> pt>ptmedian vary UP, pt<ptmedian vary DOWN
+  ptmedian=110.;
+  
+  //load per-jet efficienciies file and Histograms
+  TFile *bEfficiencies;
+  if(option!=""){bEfficiencies=TFile::Open(option);}
+  else {cout<<"WARNING!!! Provide 'channel' option to the file for running"<<endl; return;}
+  
+  if (bEfficiencies->IsZombie()) {cout<<"File "<<bEfficiencies->GetName()<<" is zombie. Check that!!!"<<endl; return;}
+  bEff = (TH2D*) bEfficiencies->Get("BEffPerJet"); if (bEff->IsZombie()){cout<<"Histogram bEff is not in the file "<<bEfficiencies->GetName();return;}
+  cEff = (TH2D*) bEfficiencies->Get("CEffPerJet"); if (cEff->IsZombie()){cout<<"Histogram cEff is not in the file "<<bEfficiencies->GetName();return;}
+  lEff = (TH2D*) bEfficiencies->Get("LEffPerJet"); if (lEff->IsZombie()){cout<<"Histogram lEff is not in the file "<<bEfficiencies->GetName();return;}
+  
+  //load the histograms in memory, to avoid memory leaks
+  bEff->SetDirectory(0);  cEff->SetDirectory(0);  lEff->SetDirectory(0);
+  bEfficiencies->Close();   bEfficiencies->Delete();
+  // END: BTag SF calculation neccessary stuff
 }
 
 void Analysis::SlaveBegin(TTree * /*tree*/)
@@ -721,8 +758,157 @@ Bool_t Analysis::Process(Long64_t entry)
     h_vertMulti_noPU->Fill(vertMulti,weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
   }
   
- 
+  //Do the b-Tag SF calculation!! 
+  double btagSF_Up = 1.0, btagSF_Down = 1.0;
+  btagSF = 1.0;
+  //only for NON data samples
+  if(MCSample->find("run2011") == string::npos){
+    //Only for events passing our selection criteria
+    if(lepton_>1 && dimass>12.0 && NLeadLeptonNumber!=0 && jet_>1 && BJetIndex.size()>0 && HypTop_){
+        if ((int) LVjet.size()!=(int) jet_ || (int) LVjet.size()!=(int) (*jetBTagCSV).size() || (int) jet_!=(int) (*jetBTagCSV).size()){
+            cout<<"WARNING!!!!!"<<endl;
+            cout<<"LVjet.size() != jet_     OR     LVjet.size() != jetBTagCSV.size()    OR    jet_!= jetBTagCSV.size()"<<endl;
+            return kTRUE;
+        }
+        //emu channel
+        if (channel->find("emu")!=string::npos){
+            double OneMinusEff=1;
+            double OneMinusSEff=1, OneMinusSEff_Up=1, OneMinusSEff_Down=1;
+            double SFPerJet=1, eff=1;
+            double SFPerJet_Up=0.0, SFPerJet_Down=0.0;
+            for (int i=0; i< (int) jet_; ++i){
+                double pt=0.0, eta=0.0;
+                int ptbin=0, etabin=0;
+                if (LVjet[i].Pt()>30 && TMath::Abs(LVjet[i].Eta())<2.4){
+                    pt= LVjet[i].Pt();   eta=abs(LVjet[i].Eta());
+                    //select pt & eta bin to take information from per-jet-efficiency histograms
+                    for (int iter=0; iter<(int)ptbinning.size(); iter++){
+                        if(pt<ptbinning[iter]){continue;}
+                        else {ptbin = iter+1;}
+                    }
+                    for (int iter=0; iter<(int)etabinning.size(); iter++){
+                        if(eta<etabinning[iter]){continue;}
+                        else {etabin = iter+1;}
+                    }
+                    //do the type-jet selection & Eff and SF obtention
+                    if((*jetType)[i] == 2){//b-quark
+                        eff=bEff->GetBinContent(ptbin, etabin);                        
+                        SFPerJet=Analysis::BJetSF(pt, eta);
+                        SFPerJet_Up  = SFPerJet+Analysis::BJetSFAbsErr(ptbin);
+                        SFPerJet_Down= SFPerJet-Analysis::BJetSFAbsErr(ptbin);
+                    }
+                    else if((*jetType)[i] == 1){//c-quark
+                        SFPerJet=Analysis::CJetSF(pt, eta);
+                        SFPerJet_Up=SFPerJet;
+                        SFPerJet_Down=SFPerJet;
+                        eff=cEff->GetBinContent(ptbin, etabin);
+                    }
+                    else if((*jetType)[i] == 0){//l-quark
+                        SFPerJet=Analysis::LJetSF(pt, eta);
+                        SFPerJet_Up=SFPerJet;
+                        SFPerJet_Down=SFPerJet;
+                        eff=lEff->GetBinContent(ptbin, etabin);
+                    }
+                    else {cout<<"I found a jet in event "<<eventNumber<<" which is not b, c nor ligth"<<endl; return kFALSE;}
+                    //calculate both numerator and denominator for per-event SF calculation
+                    //consider also the UP and DOWN variation for systematics calculation. Same procedure as PU
+                    OneMinusEff = OneMinusEff*(1-eff);
+                    OneMinusSEff= OneMinusSEff*(1-SFPerJet*eff);
+                    if(systematic=="BTAG_UP"){
+                        if (pt>ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Down*eff);}
+                        if (pt<ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Up*eff);}
+                        if (pt==ptmedian) {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet*eff);}
+                    }
+                    if(systematic=="BTAG_DOWN"){
+                        if (pt>ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Up*eff);}
+                        if (pt<ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Down*eff);}
+                        if (pt==ptmedian) {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet*eff);}
+                    }
+                }
+            };
+             //per-event SF calculation (also the UP and DOWN variations)
+            btagSF      = (1.-OneMinusEff)/(1.-OneMinusSEff);
+            btagSF_Up   = (1.-OneMinusEff)/(1.-OneMinusSEff_Up);
+            btagSF_Down = (1.-OneMinusEff)/(1.-OneMinusSEff_Down);
+        }
+        //ee && mumu channels
+        else if ((dimass<76.0 || dimass > 106.0) && *(metEt->begin()) > 30 ){
+            double OneMinusEff=1;
+            double OneMinusSEff=1, OneMinusSEff_Up=1, OneMinusSEff_Down=1;
+            double SFPerJet=1, eff=1;
+            double SFPerJet_Up=0.0, SFPerJet_Down=0.0;
+            for (int i=0; i< (int) jet_; ++i){
+                double pt=0.0, eta=0.0;
+                int ptbin=0, etabin=0;
+                if (LVjet[i].Pt()>30 && TMath::Abs(LVjet[i].Eta())<2.4){
+                    pt= LVjet[i].Pt();   eta=abs(LVjet[i].Eta());
+                    //select pt & eta bin to take information from per-jet-efficiency histograms
+                    for (int iter=0; iter<(int)ptbinning.size(); iter++){
+                        if(pt<ptbinning[iter]){continue;}
+                        else {ptbin = iter+1;}
+                    }
+                    for (int iter=0; iter<(int)etabinning.size(); iter++){
+                        if(eta<etabinning[iter]){continue;}
+                        else {etabin = iter+1;}
+                    }
+                    //do the type-jet selection & Eff and SF obtention
+                    if((*jetType)[i] == 2){//b-quark
+                        eff=bEff->GetBinContent(ptbin, etabin);                        
+                        SFPerJet=Analysis::BJetSF(pt, eta);
+                        SFPerJet_Up  = SFPerJet+Analysis::BJetSFAbsErr(ptbin);
+                        SFPerJet_Down= SFPerJet-Analysis::BJetSFAbsErr(ptbin);
+                    }
+                    else if((*jetType)[i] == 1){//c-quark
+                        SFPerJet=Analysis::CJetSF(pt, eta);
+                        SFPerJet_Up=SFPerJet;
+                        SFPerJet_Down=SFPerJet;
+                        eff=cEff->GetBinContent(ptbin, etabin);
+                    }
+                    else if((*jetType)[i] == 0){//l-quark
+                        SFPerJet=Analysis::LJetSF(pt, eta);
+                        SFPerJet_Up=SFPerJet;
+                        SFPerJet_Down=SFPerJet;
+                        eff=lEff->GetBinContent(ptbin, etabin);
+                    }
+                    else {cout<<"I found a jet in event "<<eventNumber<<" which is not b, c nor ligth"<<endl; return kFALSE;}
+                    //calculate both numerator and denominator for per-event SF calculation
+                    //consider also the UP and DOWN variation for systematics calculation. Same procedure as PU
+                    OneMinusEff = OneMinusEff*(1-eff);
+                    OneMinusSEff= OneMinusSEff*(1-SFPerJet*eff);
+                    if(systematic=="BTAG_UP"){
+                        if (pt>ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Down*eff);}
+                        if (pt<ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Up*eff);}
+                        if (pt==ptmedian) {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet*eff);}
+                    }
+                    if(systematic=="BTAG_DOWN"){
+                        if (pt>ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Up*eff);}
+                        if (pt<ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Down*eff);}
+                        if (pt==ptmedian) {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet*eff);}
+                    }
+                }
+            };
+            //per-event SF calculation (also the UP and DOWN variations)
+            btagSF      = (1.-OneMinusEff)/(1.-OneMinusSEff);
+            btagSF_Up   = (1.-OneMinusEff)/(1.-OneMinusSEff_Up);
+            btagSF_Down = (1.-OneMinusEff)/(1.-OneMinusSEff_Down);
+        }
+    }
+  }
+  //End of b-Tag SF calculation!!
 
+  //Set the Btag SF for each of the cases: Nominal, systUp, systDown
+  if(systematic=="BTAG_UP") btagSF=btagSF_Up;
+  else if(systematic=="BTAG_DOWN") btagSF=btagSF_Down;
+
+  h_BTagSF->Fill(btagSF);
+  h_BTagEvtSF->Fill(EventCounter, btagSF);
+
+  h_BTagSF_Up->Fill(btagSF_Up);
+  h_BTagEvtSF_Up->Fill(EventCounter, btagSF_Up);
+  h_BTagSF_Down->Fill(btagSF_Down);
+  h_BTagEvtSF_Down->Fill(EventCounter, btagSF_Down);
+
+  
   //Cross-section Plots
   if(lepton_>1 && dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_){
     if(channel->find("emu")!=string::npos){//quick and DIRTY!
@@ -1493,7 +1679,13 @@ void Analysis::Terminate()
   h_step9->Write();
   
   
-    
+  h_BTagSF->Write();
+  h_BTagEvtSF->Write();
+  h_BTagSF_Up->Write();
+  h_BTagEvtSF_Up->Write();
+  h_BTagSF_Down->Write();
+  h_BTagEvtSF_Down->Write();
+  
   f->Close();
   cout<<"Created: "<<f_savename<<endl;
 }

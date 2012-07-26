@@ -1,5 +1,23 @@
 #!/bin/zsh
 
+
+#do the b-Tag per-jet efficiency calculation
+
+echo
+echo "**********************************************************************"
+echo "Processing B-Tag Efficiencies ..."
+echo "**********************************************************************"
+echo
+
+root -l -b -q load_BTagEff.C
+
+echo
+echo "**********************************************************************"
+echo "... Finished processing B-Tag Efficiencies ..."
+echo "**********************************************************************"
+echo
+
+
 mkdir FileLists
 
 foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN SCALEUP SCALEDOWN MATCHUP MATCHDOWN MASSUP MASSDOWN POWHEG MCATNLO)
@@ -60,7 +78,7 @@ foreach syst (Nominal JESUP JESDOWN RESUP RESDOWN SCALEUP SCALEDOWN MATCHUP MATC
 
 end
 
-foreach syst (PU_UP PU_DOWN)
+foreach syst (PU_UP PU_DOWN BTAG_UP BTAG_DOWN)
 #foreach syst ()
    echo $syst > syst.txt
 
