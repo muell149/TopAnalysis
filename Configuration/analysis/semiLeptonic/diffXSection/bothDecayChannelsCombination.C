@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
 void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool versionNNLO=true){
+				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool versionNNLO=true){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -85,6 +85,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
     //if(hadron) DrawMCAtNLOPlot = false;
     // FIXME: -> use the one running the sample itself
   }	
+  // use large 40M ttbar sample?
+  bool largeMGfile=true;
   // add kidonakis plots for full PS
   //if(extrapolate&&smoothcurves) DrawNNLOPlot=true;
   
@@ -622,18 +624,18 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  plotNameMadgraph.ReplaceAll("Norm","");
 	  rangeLow  = -1.0;
 	  rangeHigh = -1.0;
-	  if     (xSecVariables_[i].Contains("topPt"    )){ smoothFactor = 10; rebinFactor = 10; }
-	  else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor =  5; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor =  5; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor =  2; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor = 10; rebinFactor =  1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
-	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor =  0; rebinFactor =  0; }
-	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor =  4; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor =  0; rebinFactor =  0; }
-	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor =  2; rebinFactor =  1; }
-	  if(DrawSmoothMadgraph2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined"), plotNameMadgraph, normalize, smoothFactor, rebinFactor, constMadgraphColor, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
-	  
-
+	  if     (xSecVariables_[i].Contains("topPt"    )){ smoothFactor = (largeMGfile ? 1 : 10); rebinFactor = (largeMGfile ? 2 : 10); }
+	  else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor = (largeMGfile ? 1 : 5 ); rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor = (largeMGfile ? 1 : 5 ); rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor = (largeMGfile ? 0 : 2 ); rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor = (largeMGfile ? 1 : 10); rebinFactor =  1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
+	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 0; rebinFactor =  0; }
+	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = (largeMGfile ? 0 : 4); rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
+	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
+	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
+	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge_noTree.root";
+	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
 	  // j) re-draw binned MADGRAPH theory curve
 	  plotTheo->SetLineColor(constMadgraphColor);
 	  plotTheo->Draw("hist same");

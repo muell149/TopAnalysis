@@ -2566,6 +2566,19 @@ namespace semileptonic {
     // model: indicates theory (madgraph, powheg or mcatnalo)
     // verbose: level of output
     int initialIgnoreLevel=gErrorIgnoreLevel;
+    // check chosen PS
+    TString PS="";
+    if(!plotname.Contains("PhaseSpace")) PS+="full";
+    else if(plotname.Contains("Hadron")) PS+="had";
+    else if(plotname.Contains("Parton")) PS+="part";
+    else std::cout << "error in useFittedFunctions, can not get PS from plotname " << plotname << std::endl;
+    // if large sample:
+    double largeSampleSF=1;
+    bool largeSample=false;
+    if(model=="madgraph"&&((PS=="full"&&input->GetEntries()>10000000)||(PS!="full"&&input->GetEntries()>3000000))){
+      largeSampleSF=17.;
+      largeSample=true;
+    }
     if(verbose==0) gErrorIgnoreLevel=kFatal;
     if(verbose>1) std::cout << plotname << "(" << model << ")" << std::endl;
     // clone histo for output
@@ -2673,34 +2686,36 @@ namespace semileptonic {
 	fitLowEdge=470.0;
 	fitHighEdge=830.0;
 	def="[0]*exp([1]*x)+[2]";
-	a= 164748.0;   //  28165.;
-	b=-0.00810181; // -0.00756;
-	c= 3.59495;    // 2.77;
+	a= (PS=="full" ? 164748.0 : 28165.)*largeSampleSF;
+	b= (PS=="full" ? -0.00810181 : -0.00756);
+	c= (PS=="full" ? 3.59495 : 2.77)*largeSampleSF;
 	addOpt="LL";
-	// start:
-	fitLowEdgeB=345.;
-	fitHighEdgeB=400.;
-	defB="[3]*TMath::GammaDist(x,[0],[1],[2])";
-	aB=1.50;//1.56;
-	bB=345.;//344.8;
-	cB=79.3;//80.8;
-	dB=1010990;//1000000.;
-	addOptB="LL";
 	//end of tail:
-	fitLowEdgeC=830.0;
-	fitHighEdgeC=1600.0;
-	defC="[0]*exp([1]*x)+[2]";
-	aC= 54699.0;  
-	bC=-0.0068;
-	cC= 0.979;
-	addOptC="LL";
+	fitLowEdgeB=830.0;
+	fitHighEdgeB=1600.0;
+	defB="[0]*exp([1]*x)+[2]";
+	aB= 54699.0*largeSampleSF;  
+	bB=-0.0068;
+	cB= 0.979;
+	addOptB="LL";
+	// start:
+	if(!largeSample){
+	  fitLowEdgeC=345.;
+	  fitHighEdgeC=400.;
+	  defC="[3]*TMath::GammaDist(x,[0],[1],[2])";
+	  aC=(PS=="full" ? 1.50 : 1.56 );
+	  bC=(PS=="full" ? 345. : 344.8);
+	  cC=(PS=="full" ? 79.3 : 80.8 );
+	  dC=(PS=="full" ? 1010990 : 1000000.);
+	  addOptC="LL";
+	}
       }
       else if(plotname.Contains("ttbarPt")){
 	//tail:
 	fitLowEdge=50.;
 	fitHighEdge=300.;
 	def="[0]*exp([1]*x)+[2]*x+[3]*x*x+[4]";
-	a= 5180.;
+	a= 5180.*largeSampleSF;
 	b=-0.03;
 	c=-4.48;
 	d= 0.007;
@@ -2709,58 +2724,62 @@ namespace semileptonic {
       }
       else if(plotname.Contains("topY")){
 	//tail:
-	fitLowEdge=-1.;
-	fitHighEdge=1.;
-	def="[0]*TMath::Gaus(x,0,[1])";
-	a=19845.2;
-	b=1.09186;
-	addOpt="LL";
+	if(!largeSample){
+	  fitLowEdge=-1.;
+	  fitHighEdge=1.;
+	  def="[0]*TMath::Gaus(x,0,[1])";
+	  a=19845.2;
+	  b=1.09186;
+	  addOpt="LL";
+	}
       }
       else if(plotname.Contains("ttbarY")){
-	fitLowEdge=-1.5;
-	fitHighEdge=1.5;
-	def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
-	a=-0.658848;
-	b=-0.0509368;
-	c=-0.0320204;
-	d=12297.7;
-	addOpt="LL";
+	if(!largeSample){
+	  fitLowEdge=-1.5;
+	  fitHighEdge=1.5;
+	  def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
+	  a=-0.658848;
+	  b=-0.0509368;
+	  c=-0.0320204;
+	  d=12297.7;
+	  addOpt="LL";
+	}
       }
       else if(plotname.Contains("lepPt")){
-	  // head
-	  fitLowEdge =30.0;
-	  fitHighEdge=58.0;
-	  def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  a= 4.26320e-02;
-	  b=-1.11187e-03;
-	  c= 6.03412e-06;
-	  d= 4.84434e+03;
-	  // tail
-	  fitLowEdgeB = 57.0;
-	  fitHighEdgeB=210.0;
-	  defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  aB=-1.39410e-02;
-	  bB=-1.49428e-04;
-	  cB= 4.11490e-07;
-	  dB= 1.51488e+04;
+	// head
+	fitLowEdge = (largeSample ? 40. : 30.);
+	fitHighEdge= (largeSample ? 50. : 58.);
+	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	a= 4.26320e-02;
+	b=-1.11187e-03;
+	c= 6.03412e-06*largeSampleSF;
+	d= 4.84434e+03;
+	// tail
+	fitLowEdgeB = (largeSample ? 50 : 57.0);
+	fitHighEdgeB=(largeSample ? 90 : 210.0);
+	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	aB=-1.39410e-02;
+	bB=-1.49428e-04;
+	cB= 4.11490e-07*largeSampleSF;
+	dB= 1.51488e+04;
       }
       else if(plotname.Contains("bqPt")){
-	  // head
-	  fitLowEdge =30.0;
-	  fitHighEdge=89.0;
-	  def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  a= 8.46734e-02;
-	  b=-1.22843e-03;
-	  c= 4.96488e-06;
-	  d= 1.03112e+03;
-	  // tail
-	  fitLowEdgeB = 88.0;
-	  fitHighEdgeB=410.0;
-	  defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	  aB=-1.74611e-02;
-	  bB=-3.82167e-05;
-	  cB= 8.20966e-08;
-	  dB= 2.31613e+04;
+	// head
+	fitLowEdge =30.0;
+	fitHighEdge=89.0;
+	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	a= 8.46734e-02;
+	b=-1.22843e-03;
+	c= 4.96488e-06*largeSampleSF;
+	d= 1.03112e+03;
+	// tail
+	fitLowEdgeB = 88.0;
+	fitHighEdgeB=410.0;
+	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+	aB=-1.74611e-02;
+	bB=-3.82167e-05;
+	cB= 8.20966e-08;
+	dB= 2.31613e+04;
       }
     }
     else if(model=="powheg"){
@@ -3069,12 +3088,13 @@ namespace semileptonic {
     // create variable bin edges for non smooth curves
     std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output
-    if(verbose>1||filename=="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root"){
+    if(verbose>1){
       std::cout << std::endl;
       std::cout << "variable:           " << plotname     << std::endl;
       std::cout << "variable (modifed): " << plotname2    << std::endl;
       if(rangeLow!=-1.||rangeHigh!=-1.) std::cout << "range:              " << rangeLow << " .... " << rangeHigh << std::endl;
       std::cout << "file:               " << filename     << std::endl;
+      std::cout << "model:              " << model        << std::endl;
       std::cout << "normalize:          " << normalize    << std::endl;
       std::cout << "smoothFactor:       " << smoothFactor << std::endl;
       std::cout << "rebinFactor:        " << rebinFactor  << std::endl;
@@ -3107,8 +3127,8 @@ namespace semileptonic {
     // --- 
     if(drawRawPlot){
       TH1F* raw=getTheoryPrediction(plotname, filename);
-      raw->SetMarkerColor(color);
-      raw->SetLineColor(color);
+      raw->SetMarkerColor(kBlack);
+      raw->SetLineColor(kBlack);
       //raw->SetMarkerSize(2);
       //raw->SetMarkerStyle(29);
       if(normalize) raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
