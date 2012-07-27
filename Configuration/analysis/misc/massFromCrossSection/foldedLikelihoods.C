@@ -93,7 +93,7 @@ TGraphErrors* getRunningAlphaGraph(const double qRangeMin=80, const unsigned qRa
   TGraphErrors* graph = new TGraphErrors(qRangeLength, scale, alpha, scale_err, alpha_err);
   graph->GetXaxis()->SetTitle("Q (GeV)");
   graph->GetYaxis()->SetTitle("#alpha_{S} (Q)");
-  graph->SetTitle("At three-loop level and with N(flavors)=5, using 2012 world average for #alpha_{S}(M_{Z})");
+  graph->SetTitle("At three-loop level and with N(flavors)=5, using 2012 world average for #alpha_{S}(m_{Z})");
   return graph;
 }
 
@@ -343,12 +343,48 @@ void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mas
   delete convFrame;
 }
 
-void plot2DimProb(const PredXSec* predXSec, TCanvas* canvas, const TString title,
-		  const TString printNameBase, const TString epsName)
+void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std::vector<TString>& labels,
+		     TCanvas* canvas, const TString printNameBase)
 {
-  TH1* h2 = predXSec->prob.createHistogram("mass,alpha,xsec",50,30,90);
-  h2->Draw("box");
-  TLatex text(0.,0.,title);
+  TBox boxMass2012(171.8, 0.10,
+		   174.6, 0.13);
+  boxMass2012.SetFillColor(kYellow);
+  TLine lineMass2012(173.2, 0.10,
+		     173.2, 0.13);
+  lineMass2012.SetLineStyle(2);
+  TText textMass2012(172.5, 0.101, "Tevatron June 2012");
+  textMass2012.SetTextAngle(90);
+  textMass2012.SetTextAlign(12);
+  textMass2012.SetTextFont(43);
+  textMass2012.SetTextSizePixels(21);
+
+  const unsigned color[6] = {kRed, kRed, kGreen, kGreen, kCyan, kCyan};
+  const unsigned style[6] = {1, 6, 2, 8, 3, 4};
+  const unsigned nPreds = predVec.size();
+  TLegend leg = TLegend(0.2, 0.55, 0.7, 0.9);
+  leg.SetFillStyle(0);
+  leg.SetBorderSize(0);
+  TH1* h2[nPreds];
+  for(unsigned i=0; i<predVec.size(); i++) {
+    h2[i] = predVec.at(i)->createHistogram("mass,alpha",50,30);
+    h2[i]->Scale(1./(1*0.001));
+    const double levels[1] = {162.};
+    h2[i]->SetContour(1, levels);
+    h2[i]->GetXaxis()->SetRangeUser(144., 186.);
+    h2[i]->SetLineWidth(2);
+    h2[i]->SetLineStyle(style[i]);
+    h2[i]->SetLineColor(color[i]);
+    leg.AddEntry(h2[i], labels.at(i), "L");
+    if(i==0) {
+      h2[i]->Draw("cont3");
+      boxMass2012.Draw();
+      lineMass2012.Draw();
+      textMass2012.Draw();
+    }
+    h2[i]->Draw("cont3 same");
+  }
+  leg.Draw();
+  TLatex text(0.,0., "Approx. NNLO, #sigma_{t#bar{t}} (7 TeV) = 162 pb");
   text.SetNDC();
   text.SetTextAlign(13);
   text.SetX(0.16);
@@ -356,9 +392,11 @@ void plot2DimProb(const PredXSec* predXSec, TCanvas* canvas, const TString title
   text.SetTextFont(43);
   text.SetTextSizePixels(16);
   text.Draw();
+  gPad->RedrawAxis();
   canvas->Print(printNameBase+".ps");
-  canvas->Print(epsName);
-  delete h2;
+  canvas->Print(printNameBase+"_predXSecAlphaVsMass.eps");
+  for(unsigned i=0; i<predVec.size(); i++)
+    delete h2[i];
 }
 
 void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int color, const int fillStyle,
@@ -575,7 +613,7 @@ int foldedLikelihoods(const bool pole)
   if(!pole)
     mass.SetTitle("m_{t}^{#bar{MS}}");
 
-  RooRealVar alpha("alpha", "#alpha_{S}(M_{Z})", 0.10, 0.13);
+  RooRealVar alpha("alpha", "#alpha_{S}(m_{Z})", 0.10, 0.13);
 
   RooRealVar xsec("xsec" , "#sigma_{t #bar{t}}", 0., 900., "pb");
 
@@ -668,6 +706,9 @@ int foldedLikelihoods(const bool pole)
   PredXSec* mocPredXSec[nPdfSets];
   //  PredXSec* ahrPredXSec[nPdfSets];
 
+  std::vector<const RooFormulaVar*> predXSecFormularVec;
+  std::vector<TString> predXSecFormularVecLabels;
+
   for(unsigned h=0; h<nPdfSets; h++) {
     TString alphaFileName = (pole ? "pole_" : "msbar_");
     TString suf = "PredXSec";
@@ -698,7 +739,17 @@ int foldedLikelihoods(const bool pole)
 		    epsString("convolution_moch", pole, (PdfType)h));
 //    drawConvolution(ahrPredXSec[h], xsec, mass, alpha, theoTitle[h][0], canvas, printNameBase,
 //		    epsString("convolution_ahrens", pole, (PdfType)h));
+
+    predXSecFormularVec.push_back(&mitPredXSec[h]->xsec);
+    predXSecFormularVec.push_back(&mocPredXSec[h]->xsec);
+
+    predXSecFormularVecLabels.push_back(theoTitle[h][1]);
+    predXSecFormularVecLabels.push_back(theoTitle[h][0]);
   }
+  drawAlphaVsMass(predXSecFormularVec, predXSecFormularVecLabels, canvas, printNameBase);
+
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
 
   //  const int colorAhr = kMagenta;
   const int colorMoc = kGreen-3;
