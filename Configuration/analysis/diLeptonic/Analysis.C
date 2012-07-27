@@ -337,6 +337,7 @@ Bool_t Analysis::Process(Long64_t entry)
   double weightKinFituse = 1.0;//only use the kin fit SF when using the kinematic reconstruction
   if(systematic=="PU_UP"){weightPU = weightPU_Up;}//only for PU systematic run
   if(systematic=="PU_DOWN"){weightPU = weightPU_Down;}//only for PU systematic run
+  if(systematic=="MCATNLO"){weightPU = weightPU*weightMCatNLO;}//only for PU systematic run
   std::vector<float> VLepton;
 
   std::vector<TLorentzVector> LVlepton;

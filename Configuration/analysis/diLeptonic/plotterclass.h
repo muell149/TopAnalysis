@@ -268,12 +268,12 @@ void Plotter::InclFlatSystematics(int syst_number){
   syst_number++;
 
   //B-tagging (for now)
-  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//ee 
+  /*  if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//mumu  
   if (channelType==2){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//emu  
   if (channelType==3){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .034;}//combined  
   syst_number++;
-
+  */
   //KinFit 
   if (channelType==0){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//ee 
   if (channelType==1){InclusiveXsectionSysErrorBySyst[channelType][syst_number] = .02;}//mumu  
@@ -343,7 +343,7 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
     syst++;
 
     //B-tagging (for now)
-    legendsSyst.push_back("b-tagging");
+    /*    legendsSyst.push_back("b-tagging");
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//ee 
     if (channelType==1){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//mumu  
     if (channelType==2){DiffXSecSysErrorBySyst[channelType][bin][syst] = .017;}//emu  
@@ -352,7 +352,7 @@ void Plotter::DiffFlatSystematics(int syst_number, int nbins){
 	//	 1/(DiffXSecSysErrorBySyst[1][bin][syst]*DiffXSecSysErrorBySyst[1][bin][syst]) +
 	//	 1/(DiffXSecSysErrorBySyst[2][bin][syst]*DiffXSecSysErrorBySyst[2][bin][syst]))));}//combined  
     syst++;
-    
+    */
     //KinFit 
     legendsSyst.push_back("kin fit");
     if (channelType==0){DiffXSecSysErrorBySyst[channelType][bin][syst] = .005;}//ee 
@@ -2024,7 +2024,8 @@ void Plotter::PlotXSec(){
   CalcInclSystematics("DY_", "DY_UP", "DY_DOWN", 6);
   CalcInclSystematics("BG_","BG_UP", "BG_DOWN", 7);
   CalcInclSystematics("HAD", "MCATNLO", "POWHEG", 8);
-  InclFlatSystematics(9);
+  CalcInclSystematics("BTAG_", "BTAG_UP", "BTAG_DOWN", 9);
+  InclFlatSystematics(10);
   
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
   cout << "Finished Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
@@ -2705,7 +2706,8 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("DY_", "DY_UP", "DY_DOWN", 6);
     CalcDiffSystematics("BG_", "BG_UP", "BG_DOWN", 7);  
     CalcDiffSystematics("HAD", "MCATNLO", "POWHEG", 8); 
-    DiffFlatSystematics(9,bins); 
+    CalcDiffSystematics("BTAG_", "BTAG_UP", "BTAG_DOWN", 9); 
+    DiffFlatSystematics(10,bins); 
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
     cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
@@ -3051,9 +3053,9 @@ void Plotter::PlotDiffXSec(){
     FillOrder[11] = 2;   //PU
     FillOrder[10] = 6;   //DY
     FillOrder[9] = 7;   //BG
-    FillOrder[8] = 9;   //Trigg
-    FillOrder[7] = 10;   //Lep
-    FillOrder[6] = 11;  //Btag
+    FillOrder[8] = 10;   //Trigg
+    FillOrder[7] = 11;   //Lep
+    FillOrder[6] = 9;  //Btag
     FillOrder[5] = 12;  //KinFit
     FillOrder[4] = 3;   //SCALE
     FillOrder[3] = 5;  //MASS
