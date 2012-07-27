@@ -2747,33 +2747,33 @@ namespace semileptonic {
       }
       else if(plotname.Contains("lepPt")){
 	// head
-	fitLowEdge = (largeSample ? 40. : 30.);
-	fitHighEdge= (largeSample ? 50. : 58.);
+	fitLowEdge = 30.;
+	fitHighEdge= 58.;
 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	a= 4.26320e-02;
-	b=-1.11187e-03;
-	c= 6.03412e-06*largeSampleSF;
-	d= 4.84434e+03;
+	a=(largeSample ?  5.53215e-02 :  4.26320e-02);
+	b=(largeSample ? -1.36559e-03 : -1.11187e-03);
+	c=(largeSample ?  7.65236e-06 :  6.03412e-06);
+	d=(largeSample ?  6.78192e+04 :  4.84434e+03);
 	// tail
-	fitLowEdgeB = (largeSample ? 50 : 57.0);
-	fitHighEdgeB=(largeSample ? 90 : 210.0);
+	fitLowEdgeB =57.;
+	fitHighEdgeB=210.;
 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	aB=-1.39410e-02;
-	bB=-1.49428e-04;
-	cB= 4.11490e-07*largeSampleSF;
-	dB= 1.51488e+04;
+	aB=(largeSample ? -2.03019e-02 : -1.39410e-02);
+	bB=(largeSample ? -9.19906e-05 : -1.49428e-04);
+	cB=(largeSample ?  2.63030e-07 :  4.11490e-07);
+	dB=(largeSample ?  3.18800e+05 :  1.51488e+04);
       }
       else if(plotname.Contains("bqPt")){
 	// head
 	fitLowEdge =30.0;
-	fitHighEdge=89.0;
+	fitHighEdge=93.0;
 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
 	a= 8.46734e-02;
 	b=-1.22843e-03;
 	c= 4.96488e-06*largeSampleSF;
 	d= 1.03112e+03;
 	// tail
-	fitLowEdgeB = 88.0;
+	fitLowEdgeB = 92.0;
 	fitHighEdgeB=410.0;
 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
 	aB=-1.74611e-02;

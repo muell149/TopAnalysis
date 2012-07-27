@@ -637,9 +637,23 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge_noTree.root";
 	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
 	  // j) re-draw binned MADGRAPH theory curve
-	  plotTheo->SetLineColor(constMadgraphColor);
-	  plotTheo->Draw("hist same");
-	  	  
+	  // load it from combined file
+	  TH1F* plotTheo2 = getTheoryPrediction(plotNameMadgraph, MGcombFile);
+	  // Rebinning 
+	  std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	  reBinTH1F(*plotTheo2, binning_[plotName], verbose-1);
+	  // divide by binwidth
+	  plotTheo2=divideByBinwidth(plotTheo2, verbose-1);
+	  // Normalization
+	  double XSecInclTheoPS= getInclusiveXSec(plotTheo2,verbose-1);
+	  plotTheo2->Scale(1/(XSecInclTheoPS));
+	  // styling
+	  histogramStyle( *plotTheo2, kSig, false);
+	  plotTheo2->SetTitle(plotTheo->GetTitle());
+	  plotTheo2->SetName (plotTheo->GetName() );
+	  // drawing
+	  plotTheo2->Draw("hist same");
+	  
 	  // ==============
 	  //  Legend
 	  // ==============
@@ -670,7 +684,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	      mcatnlocurve->SetLineStyle(5);
 	      if(curveName.Contains("lep")||curveName.Contains("bq")) leg->AddEntry(mcatnlocurve, "MC@NLO  ", "L");
 	      else leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
-	      std::cout << "found!" << std::endl;
+	      if(verbose>0) std::cout << "found!" << std::endl;
 	    }	    
 	    else{
 	      if(verbose>0){
