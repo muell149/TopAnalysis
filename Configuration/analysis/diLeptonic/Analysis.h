@@ -431,7 +431,7 @@ public :
    // BEGIN of btag SF stuff
 //   TFile *bEfficiencies;
    vector<double>  ptbinning, etabinning;
-   double ptmedian;
+   double ptmedian, etamedian;
 
    double BJetSF(double, double);
    double CJetSF(double, double);
@@ -439,7 +439,9 @@ public :
    double BJetSFAbsErr(int);
 
    TH2D *bEff, *cEff, *lEff;
-   TH1D *h_BTagSF, *h_BTagEvtSF, *h_BTagSF_Up, *h_BTagEvtSF_Up, *h_BTagSF_Down, *h_BTagEvtSF_Down;
+   TH1D *h_BTagSF, *h_BTagEvtSF;
+   TH1D *h_BTagSF_Pt_Up, *h_BTagEvtSF_Pt_Up, *h_BTagSF_Pt_Down, *h_BTagEvtSF_Pt_Down;
+   TH1D *h_BTagSF_Eta_Up, *h_BTagEvtSF_Eta_Up, *h_BTagSF_Eta_Down, *h_BTagEvtSF_Eta_Down;
    // END of btag SF stuff
    
    TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT;
