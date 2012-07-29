@@ -415,6 +415,7 @@ public :
 
    void GetAllBranches(Long64_t &);
    void GetSignalBranches(Long64_t &);
+   double Median(TH1D * );
    TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT, ;
    TH2D *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;//, *h_GenRecoBJetE, *h_GenRecoAntiBJetE;;
    TH2D *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
@@ -927,6 +928,18 @@ void BTagEff::GetSignalBranches(Long64_t & entry)
   b_AntiBHadronJetE->GetEntry(entry);   //!
   */
 }
+
+
+double BTagEff::Median(TH1D * h1) { 
+
+   int n = h1->GetXaxis()->GetNbins();  
+   std::vector<double>  x(n);
+   h1->GetXaxis()->GetCenter( &x[0] );
+   const double * y = h1->GetArray(); 
+   // exclude underflow/overflows from bin content array y
+   return TMath::Median(n, &x[0], &y[1]); 
+}
+
 
 
 #endif // #ifdef BTagEff_cxx

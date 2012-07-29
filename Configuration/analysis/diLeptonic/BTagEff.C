@@ -10,6 +10,7 @@
 #include <TMath.h>
 #include <TSystem.h>
 #include <set>
+#include <stdio.h>
 
 
 void BTagEff::Begin(TTree * /*tree*/)
@@ -31,16 +32,19 @@ void BTagEff::Begin(TTree * /*tree*/)
   //CSV Loose working point
   BtagWP = 0.244;
   
+  gStyle->SetOptStat(0);
   
-  Double_t ptbins[16] = {0,30,40,50,60,70,80,100,120,160,210,260,320,400,500,670};
-  Double_t etabins[5] = {0.0,0.5,1.0,1.5,2.4};
+  //Double_t ptbins[] = {0.,30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,260.,320.,400.,500.,670.};
+  Double_t ptbins[] = {0.,30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,260.,320.,400.,500.,670.,1000.,2000.};
+  //Double_t etabins[] = {0.0,0.5,1.0,1.5,2.4};
+  Double_t etabins[] = {0.0,0.5,1.0,1.5,2.0,2.4,3.0};
   
-  h_bjets = new TH2D("bjets2D", "unTagged Bjets", 15, ptbins, 4, etabins);              h_bjets->Sumw2();
-  h_btaggedjets = new TH2D("bjetsTagged2D", "Tagged Bjets", 15, ptbins, 4, etabins);    h_btaggedjets->Sumw2();
-  h_cjets = new TH2D("cjets2D", "unTagged Cjets", 15, ptbins, 4, etabins);              h_cjets->Sumw2();
-  h_ctaggedjets = new TH2D("cjetsTagged2D", "Tagged Cjets", 15, ptbins, 4, etabins);    h_ctaggedjets->Sumw2();
-  h_ljets = new TH2D("ljets2D", "unTagged Ljets", 15, ptbins, 4, etabins);              h_ljets->Sumw2();
-  h_ltaggedjets = new TH2D("ljetsTagged2D", "Tagged Ljets", 15, ptbins, 4, etabins);    h_ltaggedjets->Sumw2();
+  h_bjets = new TH2D("bjets2D", "unTagged Bjets", 17, ptbins, 6, etabins);              h_bjets->Sumw2();
+  h_btaggedjets = new TH2D("bjetsTagged2D", "Tagged Bjets", 17, ptbins, 6, etabins);    h_btaggedjets->Sumw2();
+  h_cjets = new TH2D("cjets2D", "unTagged Cjets", 17, ptbins, 6, etabins);              h_cjets->Sumw2();
+  h_ctaggedjets = new TH2D("cjetsTagged2D", "Tagged Cjets", 17, ptbins, 6, etabins);    h_ctaggedjets->Sumw2();
+  h_ljets = new TH2D("ljets2D", "unTagged Ljets", 17, ptbins, 6, etabins);              h_ljets->Sumw2();
+  h_ltaggedjets = new TH2D("ljetsTagged2D", "Tagged Ljets", 17, ptbins, 6, etabins);    h_ltaggedjets->Sumw2();
   
   gStyle->SetOptStat(0);
 
@@ -322,21 +326,91 @@ void BTagEff::Terminate()
   TH1D *ctaggedPt = (TH1D*)h_ctaggedjets->ProjectionX(); TH1D *ctaggedEta = (TH1D*)h_ctaggedjets->ProjectionY();
   TH1D *ltaggedPt = (TH1D*)h_ltaggedjets->ProjectionX(); TH1D *ltaggedEta = (TH1D*)h_ltaggedjets->ProjectionY();
   
-  TH1D *bPt = (TH1D*)h_bjets->ProjectionX(); TH1D *bEta = (TH1D*)h_bjets->ProjectionY();
-  TH1D *cPt = (TH1D*)h_cjets->ProjectionX(); TH1D *cEta = (TH1D*)h_cjets->ProjectionY();
-  TH1D *lPt = (TH1D*)h_ljets->ProjectionX(); TH1D *lEta = (TH1D*)h_ljets->ProjectionY();
+  TH1D *bUntaggedPt = (TH1D*)h_bjets->ProjectionX(); TH1D *bEta = (TH1D*)h_bjets->ProjectionY();
+  TH1D *cUntaggedPt = (TH1D*)h_cjets->ProjectionX(); TH1D *cEta = (TH1D*)h_cjets->ProjectionY();
+  TH1D *lUntaggedPt = (TH1D*)h_ljets->ProjectionX(); TH1D *lEta = (TH1D*)h_ljets->ProjectionY();
   
-  TH1D *beffPt =(TH1D*) btaggedPt->Clone("beffPt");  beffPt->Divide(btaggedPt, bPt, 1, 1, "B"); beffPt->Write("BEffPt"); 
-  TH1D *ceffPt =(TH1D*) ctaggedPt->Clone("ceffPt");  ceffPt->Divide(ctaggedPt, cPt, 1, 1, "B"); ceffPt->Write("CEffPt"); 
-  TH1D *leffPt =(TH1D*) ltaggedPt->Clone("leffPt");  leffPt->Divide(ltaggedPt, lPt, 1, 1, "B"); leffPt->Write("LEffPt"); 
+  //Calculate the medians and save them in a txt file
+  FILE * pFile;
+  pFile = fopen ("BJetMedians.txt","a");
+  double PtMedian= Median(btaggedPt);
+  double EtaMedian= Median(btaggedEta);
+  fprintf(pFile, "-------------------------------\n");
+  fprintf(pFile, "Pt  median = %.3f (%s channel)\n", PtMedian, channel->c_str());
+  fprintf(pFile, "Eta median = %.3f (%s channel)\n", EtaMedian, channel->c_str());
+  fclose(pFile);
+  //end median calculations
   
-  TH1D *beffEta =(TH1D*) btaggedEta->Clone("beffEta");  beffEta->Divide(btaggedEta, bEta, 1, 1, "B"); beffEta->Write("BEffEta"); 
-  TH1D *ceffEta =(TH1D*) ctaggedEta->Clone("ceffEta");  ceffEta->Divide(ctaggedEta, cEta, 1, 1, "B"); ceffEta->Write("CEffEta"); 
-  TH1D *leffEta =(TH1D*) ltaggedEta->Clone("leffEta");  leffEta->Divide(ltaggedEta, lEta, 1, 1, "B"); leffEta->Write("LEffEta"); 
+  TH1D *beffPt =(TH1D*) btaggedPt->Clone("beffPt");
+  TH1D *ceffPt =(TH1D*) ctaggedPt->Clone("ceffPt");
+  TH1D *leffPt =(TH1D*) ltaggedPt->Clone("leffPt");
+  
+  TH1D *beffEta =(TH1D*) btaggedEta->Clone("beffEta");  
+  TH1D *ceffEta =(TH1D*) ctaggedEta->Clone("ceffEta");  
+  TH1D *leffEta =(TH1D*) ltaggedEta->Clone("leffEta");  
 
-  h_btaggedjets->Divide(h_btaggedjets, h_bjets, 1, 1, "B"); h_btaggedjets->Write("BEffPerJet");
-  h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); h_ctaggedjets->Write("CEffPerJet");
-  h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); h_ltaggedjets->Write("LEffPerJet");
+  
+  //Calculate Efficiency: N_tageed/N_all
+  beffPt->Divide(btaggedPt, bUntaggedPt, 1, 1, "B"); 
+  ceffPt->Divide(ctaggedPt, cUntaggedPt, 1, 1, "B"); 
+  leffPt->Divide(ltaggedPt, lUntaggedPt, 1, 1, "B");
+  beffEta->Divide(btaggedEta, bEta, 1, 1, "B"); 
+  ceffEta->Divide(ctaggedEta, cEta, 1, 1, "B"); 
+  leffEta->Divide(ltaggedEta, lEta, 1, 1, "B"); 
+  h_btaggedjets->Divide(h_btaggedjets, h_bjets, 1, 1, "B"); 
+  h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); 
+  h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); 
+
+  //Calculate 1D distributions' error
+  //start with pT efficiencies
+  for (int i=1; i<=(int) beffPt->GetNbinsX(); ++i){
+      if(beffPt->GetNbinsX() != ceffPt->GetNbinsX() || beffPt->GetNbinsX() != leffPt->GetNbinsX() || beffPt->GetNbinsX() != bUntaggedPt->GetNbinsX()){
+          cout<<"WARNING!!! b-, c- & l-pT efficiency histograms have different axis range"<<endl;
+          return;
+      }
+      beffPt->SetBinError(i, 0);
+      ceffPt->SetBinError(i, 0);
+      leffPt->SetBinError(i, 0);
+
+      //if eff=a/b  ==>  eff_error=sqrt(eff*(1-eff)/b)
+      if(bUntaggedPt->GetBinContent(i)<1.e-6){beffPt->SetBinError(i,0);}
+      else{beffPt->SetBinError(i, TMath::Sqrt(beffPt->GetBinContent(i)*(1-beffPt->GetBinContent(i))/bUntaggedPt->GetBinContent(i)));}
+      if(cUntaggedPt->GetBinContent(i)<1.e-6){ceffPt->SetBinError(i,0);}
+      else{ceffPt->SetBinError(i, TMath::Sqrt(ceffPt->GetBinContent(i)*(1-ceffPt->GetBinContent(i))/cUntaggedPt->GetBinContent(i)));}
+      if(lUntaggedPt->GetBinContent(i)<1.e-6){leffPt->SetBinError(i,0);}
+      else{leffPt->SetBinError(i, TMath::Sqrt(leffPt->GetBinContent(i)*(1-leffPt->GetBinContent(i))/lUntaggedPt->GetBinContent(i)));}
+  }
+  
+  //start with Eta efficiencies
+  for (int i=1; i<=(int) beffEta->GetNbinsX(); ++i){
+      if(beffEta->GetNbinsX() != ceffEta->GetNbinsX() || beffEta->GetNbinsX() != leffEta->GetNbinsX() || beffEta->GetNbinsX() != bEta->GetNbinsX()){
+          cout<<"WARNING!!! b-, c- & l-pT efficiency histograms have different axis range"<<endl;
+          return;
+      }
+      beffEta->SetBinError(i, 0);
+      ceffEta->SetBinError(i, 0);
+      leffEta->SetBinError(i, 0);
+      
+      //if eff=a/b  ==>  eff_error=sqrt(eff*(1-eff)/b)
+      if(bEta->GetBinContent(i)<1.e-6){beffEta->SetBinError(i,0);}
+      else{beffEta->SetBinError(i, TMath::Sqrt(beffEta->GetBinContent(i)*(1-beffEta->GetBinContent(i))/bEta->GetBinContent(i)));}
+      if(cEta->GetBinContent(i)<1.e-6){ceffEta->SetBinError(i,0);}
+      else{ceffEta->SetBinError(i, TMath::Sqrt(ceffEta->GetBinContent(i)*(1-ceffEta->GetBinContent(i))/cEta->GetBinContent(i)));}
+      if(lEta->GetBinContent(i)<1.e-6){leffEta->SetBinError(i,0);}
+      else{leffEta->SetBinError(i, TMath::Sqrt(leffEta->GetBinContent(i)*(1-leffEta->GetBinContent(i))/lEta->GetBinContent(i)));}
+  }
+  
+  
+  //Save histograms in ROOT file
+  beffPt->Write("BEffPt"); 
+  ceffPt->Write("CEffPt"); 
+  leffPt->Write("LEffPt"); 
+  beffEta->Write("BEffEta"); 
+  ceffEta->Write("CEffEta"); 
+  leffEta->Write("LEffEta"); 
+  h_btaggedjets->Write("BEffPerJet");
+  h_ctaggedjets->Write("CEffPerJet");
+  h_ltaggedjets->Write("LEffPerJet");
   
   f->Close();
   
