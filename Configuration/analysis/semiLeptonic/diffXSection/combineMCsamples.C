@@ -146,13 +146,13 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
   // ---
   if(verbose>0){
     std::cout << "combining MC subsamples for: " << std::endl;
-    std::cout << " - " << sampleLabel(sample,decayChannel) << std::endl;
+    std::cout << " - " << sampleLabel(sample,(const std::string)decayChannel) << std::endl;
     std::cout << " - " << decayChannel << " channel " << std::endl;
     std::cout << " - " << "systematic variation " <<  sysLabel(sysTag) << std::endl;
     std::cout << " - " << "input folder:" << inputFolder << std::endl;
     std::cout << " - " << "input subSamples(weights without luminosity):";
     for(unsigned int subsample=0; subsample<subSamples_.size(); ++subsample){
-	std::cout << std::endl << "   " << sampleLabel(subSamples_[subsample],decayChannel) << " ( " << files_[subsample].second << " )";
+      std::cout << std::endl << "   " << sampleLabel(subSamples_[subsample],(const std::string)decayChannel) << " ( " << files_[subsample].second << " )";
     }
     std::cout << std::endl;
     std::cout << " - " << " output file created: " << outputFilename << std::endl << std::endl;
