@@ -796,8 +796,8 @@ Bool_t Analysis::Process(Long64_t entry)
                     if((*jetType)[i] == 2){//b-quark
                         eff=bEff->GetBinContent(ptbin, etabin);                        
                         SFPerJet=Analysis::BJetSF(pt, eta);
-                        SFPerJet_Up  = SFPerJet+Analysis::BJetSFAbsErr(ptbin);
-                        SFPerJet_Down= SFPerJet-Analysis::BJetSFAbsErr(ptbin);
+                        SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
+                        SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
                     }
                     else if((*jetType)[i] == 1){//c-quark
                         SFPerJet=Analysis::CJetSF(pt, eta);
@@ -839,11 +839,11 @@ Bool_t Analysis::Process(Long64_t entry)
                 }
             };
              //per-event SF calculation (also the UP and DOWN variations)
-            btagSF      = (1.-OneMinusEff)/(1.-OneMinusSEff);
-            btagSF_Pt_Up   = (1.-OneMinusEff)/(1.-OneMinusSEff_Up);
-            btagSF_Pt_Down = (1.-OneMinusEff)/(1.-OneMinusSEff_Down);
-            btagSF_Eta_Up   = (1.-OneMinusEff)/(1.-OneMinusSEff_Up);
-            btagSF_Eta_Down = (1.-OneMinusEff)/(1.-OneMinusSEff_Down);
+            btagSF      = (1.-OneMinusSEff)/(1.-OneMinusEff);
+            btagSF_Pt_Up   = (1.-OneMinusSEff_Up)/(1.-OneMinusEff);
+            btagSF_Pt_Down = (1.-OneMinusSEff_Down)/(1.-OneMinusEff);
+            btagSF_Eta_Up   = (1.-OneMinusSEff_Up)/(1.-OneMinusEff);
+            btagSF_Eta_Down = (1.-OneMinusSEff_Down)/(1.-OneMinusEff);
 
             
         }
@@ -871,8 +871,8 @@ Bool_t Analysis::Process(Long64_t entry)
                     if((*jetType)[i] == 2){//b-quark
                         eff=bEff->GetBinContent(ptbin, etabin);                        
                         SFPerJet=Analysis::BJetSF(pt, eta);
-                        SFPerJet_Up  = SFPerJet+Analysis::BJetSFAbsErr(ptbin);
-                        SFPerJet_Down= SFPerJet-Analysis::BJetSFAbsErr(ptbin);
+                        SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
+                        SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
                     }
                     else if((*jetType)[i] == 1){//c-quark
                         SFPerJet=Analysis::CJetSF(pt, eta);

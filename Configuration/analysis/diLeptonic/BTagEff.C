@@ -351,6 +351,7 @@ void BTagEff::Terminate()
 
   
   //Calculate Efficiency: N_tageed/N_all
+  //Calculate also the binomial error (option "B" does it)!!
   beffPt->Divide(btaggedPt, bUntaggedPt, 1, 1, "B"); 
   ceffPt->Divide(ctaggedPt, cUntaggedPt, 1, 1, "B"); 
   leffPt->Divide(ltaggedPt, lUntaggedPt, 1, 1, "B");
@@ -361,45 +362,6 @@ void BTagEff::Terminate()
   h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); 
   h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); 
 
-  //Calculate 1D distributions' error
-  //start with pT efficiencies
-  for (int i=1; i<=(int) beffPt->GetNbinsX(); ++i){
-      if(beffPt->GetNbinsX() != ceffPt->GetNbinsX() || beffPt->GetNbinsX() != leffPt->GetNbinsX() || beffPt->GetNbinsX() != bUntaggedPt->GetNbinsX()){
-          cout<<"WARNING!!! b-, c- & l-pT efficiency histograms have different axis range"<<endl;
-          return;
-      }
-      beffPt->SetBinError(i, 0);
-      ceffPt->SetBinError(i, 0);
-      leffPt->SetBinError(i, 0);
-
-      //if eff=a/b  ==>  eff_error=sqrt(eff*(1-eff)/b)
-      if(bUntaggedPt->GetBinContent(i)<1.e-6){beffPt->SetBinError(i,0);}
-      else{beffPt->SetBinError(i, TMath::Sqrt(beffPt->GetBinContent(i)*(1-beffPt->GetBinContent(i))/bUntaggedPt->GetBinContent(i)));}
-      if(cUntaggedPt->GetBinContent(i)<1.e-6){ceffPt->SetBinError(i,0);}
-      else{ceffPt->SetBinError(i, TMath::Sqrt(ceffPt->GetBinContent(i)*(1-ceffPt->GetBinContent(i))/cUntaggedPt->GetBinContent(i)));}
-      if(lUntaggedPt->GetBinContent(i)<1.e-6){leffPt->SetBinError(i,0);}
-      else{leffPt->SetBinError(i, TMath::Sqrt(leffPt->GetBinContent(i)*(1-leffPt->GetBinContent(i))/lUntaggedPt->GetBinContent(i)));}
-  }
-  
-  //start with Eta efficiencies
-  for (int i=1; i<=(int) beffEta->GetNbinsX(); ++i){
-      if(beffEta->GetNbinsX() != ceffEta->GetNbinsX() || beffEta->GetNbinsX() != leffEta->GetNbinsX() || beffEta->GetNbinsX() != bEta->GetNbinsX()){
-          cout<<"WARNING!!! b-, c- & l-pT efficiency histograms have different axis range"<<endl;
-          return;
-      }
-      beffEta->SetBinError(i, 0);
-      ceffEta->SetBinError(i, 0);
-      leffEta->SetBinError(i, 0);
-      
-      //if eff=a/b  ==>  eff_error=sqrt(eff*(1-eff)/b)
-      if(bEta->GetBinContent(i)<1.e-6){beffEta->SetBinError(i,0);}
-      else{beffEta->SetBinError(i, TMath::Sqrt(beffEta->GetBinContent(i)*(1-beffEta->GetBinContent(i))/bEta->GetBinContent(i)));}
-      if(cEta->GetBinContent(i)<1.e-6){ceffEta->SetBinError(i,0);}
-      else{ceffEta->SetBinError(i, TMath::Sqrt(ceffEta->GetBinContent(i)*(1-ceffEta->GetBinContent(i))/cEta->GetBinContent(i)));}
-      if(lEta->GetBinContent(i)<1.e-6){leffEta->SetBinError(i,0);}
-      else{leffEta->SetBinError(i, TMath::Sqrt(leffEta->GetBinContent(i)*(1-leffEta->GetBinContent(i))/lEta->GetBinContent(i)));}
-  }
-  
   
   //Save histograms in ROOT file
   beffPt->Write("BEffPt"); 
