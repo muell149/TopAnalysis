@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
 void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool versionNNLO=true){
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool versionNNLO=true){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -468,8 +468,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	      if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 10; rebinFactor =  1; errorRebinFactor =  0; errorSmoothFactor =  2; plotNameMCAtNLO="h"+PSlabel+"LepPt"  ;}
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = 10; rebinFactor = 20; errorRebinFactor = 20; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"LepEta" ;}
-	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="" ;}
-	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="" ;}
+	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomPt"  ;}
+	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomEta" ;}
 	  else{
 	    std::cout << " ERROR - Unknown variable " << xSecVariables_[i] << std::endl;
 	    // close file and delete pointer
@@ -488,21 +488,21 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  // for hadron level and not for bquark quantities
 	  // -> no error bands
 	  bool errorbands=true; 
-	  if((!extrapolate&&hadron)||xSecVariables_[i].Contains("bqPt")||xSecVariables_[i].Contains("bqEta")){
-	    errorbands=false;
-	    // check if only external file should be used
-	    // -> then: no mcatnlo curve for hadron level and bquark quantities
-	    if(useOnlyExternalMCatNLOfile) DrawMCAtNLOPlot2=false;
-	  }
+// 	  if((!extrapolate&&hadron)||xSecVariables_[i].Contains("bqPt")||xSecVariables_[i].Contains("bqEta")){
+// 	    errorbands=false;
+// 	    // check if only external file should be used
+// 	    // -> then: no mcatnlo curve for hadron level and bquark quantities
+// 	    if(useOnlyExternalMCatNLOfile) DrawMCAtNLOPlot2=false;
+// 	  }
 	  
-	  else{
-	    // check if only external file should be used
-	    // -> then: use external file and plotname
-	    if(useOnlyExternalMCatNLOfile){
-	      plotNameMCAtNLO2=plotNameMCAtNLO;
-	      filename=errorBandFilename;
-	    }
+	  //else{
+	  // check if only external file should be used
+	  // -> then: use external file and plotname
+	  if(useOnlyExternalMCatNLOfile){
+	    plotNameMCAtNLO2=plotNameMCAtNLO;
+	    filename=errorBandFilename;
 	  }
+	  //}
 	  // draw errorband
 	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
 	  // draw central curve

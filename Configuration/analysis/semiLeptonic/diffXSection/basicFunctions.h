@@ -1474,7 +1474,7 @@ namespace semileptonic {
     // ===============================================================
 
     template <class histoType, class varType> 
-    histoType* reBinTH1FIrregularNewBinning(histoType *histoOldBinning, const std::vector<varType> &vecBinning, TString plotname, bool rescale=1)
+      histoType* reBinTH1FIrregularNewBinning(histoType *histoOldBinning, const std::vector<varType> &vecBinning, TString plotname, bool rescale=1, int verbose=-1)
     {
 	//  This function rebins a histogram using a variable binning
 	// 
@@ -1493,7 +1493,8 @@ namespace semileptonic {
 	//                       from xaxis.min to xaxis.max
 	//  "rescale":           rescale the rebinned histogramme
 	//                       (applicable for cross-section e.g.) 
-	
+        //  "verbose":           level of output 
+      
         unsigned int vecIndex=0;
 	
 	// fill vector into array to use appropriate constructor of TH1-classes
@@ -1501,8 +1502,14 @@ namespace semileptonic {
 	
 	// create histo with new binning
 	TString name = (TString)histoOldBinning->GetName();
+
+	// suppress error massage
+	// FIXME: source of error should be revised at some point
+        int initialIgnoreLevel=gErrorIgnoreLevel;
+	if(verbose==-1) gErrorIgnoreLevel=kError;
 	histoType histoNewBinning = histoType ("histoNewBinning"+plotname+name,"histoNewBinning"+plotname+name,vecBinning.size()-1,binArray);
-	
+	gErrorIgnoreLevel=initialIgnoreLevel;
+
 	// fill contents of histoOldBinning into histoNewBinning and rescale if applicable
 	for (vecIndex = 0; vecIndex < vecBinning.size()-1; vecIndex++){
 	    
@@ -3082,6 +3089,7 @@ namespace semileptonic {
     plotname2.ReplaceAll("TTbarM","ttbarMass" );
     plotname2.ReplaceAll("TTbar","ttbar");
     plotname2.ReplaceAll("Lep","lep");
+    plotname2.ReplaceAll("Bottom","bq");
     if(plotname2.Contains("/")){
       plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
     }
@@ -3158,9 +3166,11 @@ namespace semileptonic {
       }
       // if not: use different rebinning function and ignore bin content in the missing range
       else{
-	std::cout << "use alternative rebinning function" << std::endl;
-	std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
-	std::cout << " theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	if(verbose>0){
+	  std::cout << "use alternative rebinning function" << std::endl;
+	  std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	  std::cout << " theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	}
 	result= reBinTH1FIrregularNewBinning(load, binning_[plotname3] , plotname3, false);
       }
     }
@@ -3202,23 +3212,50 @@ namespace semileptonic {
       TH1F* loadcentral   =getTheoryPrediction(plotname        , filename);
       TH1F* loadErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
       TH1F* loadErrorDown =getTheoryPrediction(plotname+"_Down", filename);
-      TH1F* central=0;
+      // for bq and lep error bands: use mcatnlo central curve for correct PS from default running
+      // and transfer relative error from parton level studies
+      // ATTENTION: the hadron level PS is used also for parton level PS as one can not destinguish them from the plotname...
+      // get name for loading mcatnlo central curve for correct PS from default running
+      TString plotname4="analyzeTop";
+      plotname4+= (plotname.Contains("Vis") ? "HadronLevelKinematics" : "PartonLevelKinematics");
+      if(plotname.Contains("Vis")){      
+	if(plotname.Contains("Lep"   )) plotname4+="Lepton";
+	if(plotname.Contains("Bottom")) plotname4+="Bjets";
+	plotname4+="PhaseSpace";
+      }
+      plotname4+="/"+plotname2;
+      if(plotname.Contains("Vis")) plotname4+="Gen";
+      if(verbose>1) std::cout << plotname << "->" << plotname4 << std::endl;
+      TH1F* loadcentral2=0;
+      if(plotname.Contains("Lep")||plotname.Contains("Bottom")){
+	if(verbose>0){
+	  std::cout << "transfer relative uncertianties to central value from: " << plotname4 << " in " << "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root" << std::endl;
+	}
+	loadcentral2=getTheoryPrediction(plotname4,"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root");
+      }
+      else loadcentral2=(TH1F*)loadcentral->Clone();
+      TH1F* central=0;    
+      TH1F* central2=0;
       TH1F* ErrorUp=0;
       TH1F* ErrorDown=0;
       if(smoothcurves){
 	// replace low statistic parts with fitted curve
-	central=useFittedFunctions(loadcentral, model, plotname, verbose);
+	central =useFittedFunctions(loadcentral , model, plotname, verbose);
+	central2=useFittedFunctions(loadcentral2, model, plotname, verbose);
+	//std:: cout << central2->GetBinContent(50) << std::endl;
 	ErrorUp=useFittedFunctions(loadErrorUp, model, plotname+"_Up", verbose);
 	ErrorDown=useFittedFunctions(loadErrorDown, model, plotname+"_Down", verbose);
 	// smoothing 1
 	if(errorSmoothFactor){
 	  central  ->Smooth(errorSmoothFactor);
+	  central2 ->Smooth(errorSmoothFactor);
 	  ErrorUp  ->Smooth(errorSmoothFactor);
 	  ErrorDown->Smooth(errorSmoothFactor);
 	}
 	// rebinning
 	if(errorRebinFactor){ 
 	  central  ->Rebin(errorRebinFactor);
+	  central2 ->Rebin(errorRebinFactor);
 	  ErrorUp  ->Rebin(errorRebinFactor);
 	  ErrorDown->Rebin(errorRebinFactor);
 	}
@@ -3228,64 +3265,87 @@ namespace semileptonic {
 	// check if maxima of x-axes of loaded plots and new binning is the same
 	double newMax=binning_[plotname3][binning_[plotname3].size()-1];
 	double oldMaxcentral=loadcentral->GetBinLowEdge(load->GetNbinsX()+1);
+	double oldMaxcentral2=loadcentral2->GetBinLowEdge(loadcentral2->GetNbinsX()+1);
 	double oldMaxErrorUp=loadErrorUp->GetBinLowEdge(load->GetNbinsX()+1);
 	double oldMaxErrorDown=loadErrorDown->GetBinLowEdge(load->GetNbinsX()+1);
 	if(newMax<=oldMaxcentral){
 	  central=(TH1F*)(loadcentral->Clone());
 	  reBinTH1F(*central, binning_[plotname3], verbose);
 	}
-	// if not: use different rebinning function and ignore bin content in the missing range
+	// central curve- if not: use different rebinning function and ignore bin content in the missing range
 	else{
-	  std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
-	  std::cout << " central theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
-	  central=reBinTH1FIrregularNewBinning(loadcentral, binning_[plotname3] , plotname3, false);
+	  if(verbose>0){
+	    std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	    std::cout << " central theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  }
+	  central =reBinTH1FIrregularNewBinning(loadcentral , binning_[plotname3] , plotname3, false);
 	}
+	if(newMax<=oldMaxcentral2){
+	  central2=(TH1F*)(loadcentral2->Clone());
+	  reBinTH1F(*central2, binning_[plotname3], verbose);
+	}
+	// central curve- if not: use different rebinning function and ignore bin content in the missing range
+	else{
+	  if(verbose>0){
+	    std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	    std::cout << " central2 theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  }
+	  central2=reBinTH1FIrregularNewBinning(loadcentral2, binning_[plotname3] , plotname3, false);
+	}	
 	if(newMax<=oldMaxErrorUp){
 	  ErrorUp=(TH1F*)(loadErrorUp->Clone());
 	  reBinTH1F(*ErrorUp, binning_[plotname3], verbose);
 	}
-	// if not: use different rebinning function and ignore bin content in the missing range
+	// error up- if not: use different rebinning function and ignore bin content in the missing range
 	else{
-	  std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
-	  std::cout << " ErrorUp theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  if(verbose>0){
+	    std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	    std::cout << " ErrorUp theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  }
 	  ErrorUp=reBinTH1FIrregularNewBinning(loadErrorUp, binning_[plotname3] , plotname3, false);
 	}
 	if(newMax<=oldMaxErrorDown){
 	  ErrorDown=(TH1F*)(loadErrorDown->Clone());
 	  reBinTH1F(*ErrorDown, binning_[plotname3], verbose);
 	}
-	// if not: use different rebinning function and ignore bin content in the missing range
+	// error down- if not: use different rebinning function and ignore bin content in the missing range
 	else{
-	  std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
-	  std::cout << " ErrorDown theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  if(verbose>0){
+	    std::cout << "WARNING: in DrawTheoryCurve: maximum of loaded "<< model;
+	    std::cout << " ErrorDown theory curve is smaller then the maximum of the requested binning! Will ignore the missing bin content!" << std::endl;
+	  }
 	  ErrorDown=reBinTH1FIrregularNewBinning(loadErrorDown, binning_[plotname3] , plotname3, false);
 	}
       }
       // normalize to area
       if(normalize){
 	central  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
+	central2 ->Scale(1./(central2 ->Integral(0,central2 ->GetNbinsX()+1)));
 	ErrorUp  ->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
 	ErrorDown->Scale(1./(central  ->Integral(0,central  ->GetNbinsX()+1)));
       }
       // divide by binwidth
       if(smoothcurves){
 	central  ->Scale(1.0/central  ->GetBinWidth(1));
+	central2 ->Scale(1.0/central  ->GetBinWidth(1));
 	ErrorUp  ->Scale(1.0/ErrorUp  ->GetBinWidth(1));
 	ErrorDown->Scale(1.0/ErrorDown->GetBinWidth(1));
       }
       else{
 	central  =divideByBinwidth(central  , false);
+	central2 =divideByBinwidth(central2 , false);
 	ErrorUp  =divideByBinwidth(ErrorUp  , false);
 	ErrorDown=divideByBinwidth(ErrorDown, false);
       }
       // smoothing 2
       if(smoothcurves&&errorSmoothFactor){
 	central  ->Smooth(errorSmoothFactor);
+	central2 ->Smooth(errorSmoothFactor);
 	ErrorUp  ->Smooth(errorSmoothFactor);
 	ErrorDown->Smooth(errorSmoothFactor);
       }
       // create errorbands
-      TGraphAsymmErrors * errorBands = new TGraphAsymmErrors(central->GetNbinsX()-1);
+      TGraphAsymmErrors * errorBands = new TGraphAsymmErrors(central2->GetNbinsX()-1);
       TString errorBandName=name;
       errorBandName.ReplaceAll("MC@NLO2","MC@NLO");
       errorBandName+="errorBand";
@@ -3293,25 +3353,40 @@ namespace semileptonic {
       errorBands->SetName(errorBandName);
       errorBands->SetTitle(errorBandName);
       // loop bins
-      for(Int_t iBin=1; iBin<central->GetNbinsX(); iBin++){
-	Double_t centralValue = central  ->GetBinContent(iBin);
-	Double_t maxValue     = ErrorUp  ->GetBinContent(iBin);
-	Double_t minValue     = ErrorDown->GetBinContent(iBin);
+      for(Int_t iBin=1; iBin<central2->GetNbinsX(); iBin++){
+	Double_t centralVal   = central  ->GetBinContent(iBin);
+	Double_t maxVal    = ErrorUp  ->GetBinContent(iBin);
+	Double_t minVal    = ErrorDown->GetBinContent(iBin);
+	// transfer relative uncertainty from parton level studies to central value for specific phase space
+	Double_t centralValue = central2 ->GetBinContent(iBin);
+	Double_t maxValue     = centralValue * (1+(maxVal-centralVal)/centralVal);
+	Double_t minValue     = centralValue * (1+(minVal-centralVal)/centralVal);
+	if(verbose>1&&(plotname.Contains("Lep")||plotname.Contains("Bottom"))){
+	  std::cout << std::endl << plotname << ", bin " << iBin << "/" << central->GetNbinsX() << std::endl;
+	  std::cout << "central: " << centralValue << std::endl;
+	  std::cout << "up     : " << maxValue     << std::endl;
+	  std::cout << "down   : " << minValue     << std::endl;
+	  std::cout << "c: " << centralVal << std::endl;
+	  std::cout << "u: " << maxVal << " ( = " << 1+(maxVal-centralVal)/centralVal << " )" << std::endl;
+	  std::cout << "d: " << minVal << " ( = " << 1+(minVal-centralVal)/centralVal << " )" << std::endl;
+	}
 	// take care of points outside x-plotrange
-	if((rangeLow!=-1.&&central->GetBinCenter(iBin)<rangeLow)||(rangeHigh!=-1.&&central->GetBinCenter(iBin)>rangeHigh)){
-	  errorBands->SetPoint      (iBin, central->GetBinCenter(iBin), 0.);
+	if((rangeLow!=-1.&&central2->GetBinCenter(iBin)<rangeLow)||(rangeHigh!=-1.&&central2->GetBinCenter(iBin)>rangeHigh)){
+	  errorBands->SetPoint      (iBin, central2->GetBinCenter(iBin), 0.);
+	  //std::cout << "errorBands->SetPoint      (iBin, central2->GetBinCenter(iBin), 0.)" << std::endl;
 	  errorBands->SetPointEXlow (iBin, 0.);
 	  errorBands->SetPointEXhigh(iBin, 0.);
 	}
 	else {
-	  errorBands->SetPoint      (iBin, central->GetBinCenter(iBin), centralValue  );
+	  //std::cout << "errorBands->SetPoint      (iBin, central2->GetBinCenter(iBin), centralValue  )" << std::endl;
+	  errorBands->SetPoint      (iBin, central2->GetBinCenter(iBin), centralValue  );
 	  if(smoothcurves){
-	    errorBands->SetPointEXlow (iBin, central->GetXaxis()->GetBinLowEdge(iBin) );
-	    errorBands->SetPointEXhigh(iBin, central->GetXaxis()->GetBinUpEdge (iBin) );
+	    errorBands->SetPointEXlow (iBin, central2->GetXaxis()->GetBinLowEdge(iBin) );
+	    errorBands->SetPointEXhigh(iBin, central2->GetXaxis()->GetBinUpEdge (iBin) );
 	  }
 	  else{
-	    errorBands->SetPointEXlow (iBin, 0.5*central->GetBinWidth(iBin));
-	    errorBands->SetPointEXhigh(iBin, 0.5*central->GetBinWidth(iBin));
+	    errorBands->SetPointEXlow (iBin, 0.5*central2->GetBinWidth(iBin));
+	    errorBands->SetPointEXhigh(iBin, 0.5*central2->GetBinWidth(iBin));
 	  }
 	}
 	// symmetrize errors 
@@ -3330,13 +3405,13 @@ namespace semileptonic {
 	if(verbose>1){
 	  std::cout << "bin " << iBin << std::endl;
 	  std::cout << "central TH1: " << std::endl;
-	  std::cout << "(<x>,y)= (" << result->GetBinCenter(iBin) << "," << result->GetBinContent(iBin) << ")" << std::endl;
+	  std::cout << "(<x>,y)= (" << central2->GetBinCenter(iBin) << "," << central2->GetBinContent(iBin) << ")" << std::endl;
 	  std::cout << "error input:" << std::endl;
-	  std::cout << "central, min, max: " << central->GetBinContent(iBin);
+	  std::cout << "central, min, max: " << central2->GetBinContent(iBin);
 	  std::cout << ", " << ErrorDown->GetBinContent(iBin) << ", ";
 	  std::cout <<  ErrorUp->GetBinContent(iBin) << std::endl;
 	  std::cout << "error band" << std::endl;
-	  std::cout << "(x,y): (" << *errorBands->GetX() << "," << *errorBands->GetY() << ")" << std::endl;
+	  std::cout << "(x,y): (" << errorBands->GetX()[iBin] << "," << errorBands->GetY()[iBin] << ")" << std::endl;
 	  std::cout << "error xlow:  " << errorBands->GetErrorXlow(iBin)  << std::endl;
 	  std::cout << "error xhigh: " << errorBands->GetErrorXhigh(iBin) << std::endl;
 	  std::cout << "error ylow:  " << errorBands->GetErrorYlow(iBin)  << std::endl;
