@@ -782,7 +782,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     // if the kinFit hypothesis is valid, fill KinFit quantities 
     if(hypoKey_=="kKinFit"){
       // fit probability of the best fit hypothesis
-      prob=tops.fitProb();
+      prob=TMath::Prob(tops.fitChi2(),2);
       // chi2 of the best fit hypothesis
       chi2= tops.fitChi2();
       // make sure that a second best fit hypothesis exists to be able to fill these plots
