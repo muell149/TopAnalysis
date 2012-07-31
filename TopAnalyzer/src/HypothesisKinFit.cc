@@ -7,6 +7,7 @@
 #include "TopAnalysis/TopAnalyzer/interface/HypothesisKinFit.h"
 #include "TopAnalysis/TopAnalyzer/interface/TopAngles.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "TMath.h"
 
 /// default constructor for fw lite
 HypothesisKinFit::HypothesisKinFit()
@@ -510,8 +511,12 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     // if kinFit is the hypothesis, fill KinFit quantities 
     if(hypoKey_ == "kKinFit" ){
       // fit probability of the best fit hypothesis
-      hists_.find("prob")->second->Fill( tops.fitProb(), weight );
-      prob=tops.fitProb();
+      // FIXME: hardcoded ndof=2. This is needed because the neutrino
+      //   eta resolution is set to infinity decreasing ndof by 1.
+      prob=TMath::Prob(tops.fitChi2(),2);
+      hists_.find("prob")->second->Fill( prob, weight );
+      // prob=tops.fitProb();
+      // hists_.find("prob")->second->Fill( prob, weight );
       // chi2 of the best fit hypothesis
       hists_.find("chi2")->second->Fill( tops.fitChi2(), weight );      
       chi2=tops.fitChi2();
