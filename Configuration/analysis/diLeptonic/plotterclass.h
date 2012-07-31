@@ -434,9 +434,17 @@ void Plotter::CalcInclSystematics(TString Systematic, TString systSampleUp, TStr
 
   //  Sum_Errors += Sys_Error;
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error; 
-  cout<<"Inclusive Systematic for '"<<Systematic<<"':";
-  cout<<" " << Sys_Error*100 << " % " << endl;
-
+  
+  if (syst_number==10){
+      //BTAG_Pt & BTAG_ETA variation addition!!!
+      Sys_Error = TMath::Sqrt(InclusiveXsectionSysErrorBySyst[channelType][syst_number-1]*InclusiveXsectionSysErrorBySyst[channelType][syst_number-1] + InclusiveXsectionSysErrorBySyst[channelType][syst_number]*InclusiveXsectionSysErrorBySyst[channelType][syst_number]);
+      cout<<"Inclusive Systematic for 'BTAG':";
+      cout<<" " << Sys_Error*100 << " % " << endl;
+  }
+  else if(syst_number!=9 && syst_number!=10){
+    cout<<"Inclusive Systematic for '"<<Systematic<<"':";
+    cout<<" " << Sys_Error*100 << " % " << endl;
+  }
 }
 
 void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TString systSampleDown, int syst_number){
@@ -450,7 +458,8 @@ void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TStr
   cout << endl;
   cout << "    Preparing to Calculate " << Systematic << "-Uncertainty ... " << endl;
 
-  legendsSyst.push_back(Systematic);
+  if(Systematic=="BTAG_PT_" || Systematic=="BTAG_ETA_"){  legendsSyst.push_back("BTAG");}
+  else {legendsSyst.push_back(Systematic);}
   double Xbins[XAxisbins.size()];
   //  double binWidth[XAxisbinCenters.size()];
   for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];} 
@@ -2024,8 +2033,9 @@ void Plotter::PlotXSec(){
   CalcInclSystematics("DY_", "DY_UP", "DY_DOWN", 6);
   CalcInclSystematics("BG_","BG_UP", "BG_DOWN", 7);
   CalcInclSystematics("HAD", "MCATNLO", "POWHEG", 8);
-  CalcInclSystematics("BTAG_", "BTAG_UP", "BTAG_DOWN", 9);
-  InclFlatSystematics(10);
+  CalcInclSystematics("BTAG_PT", "BTAG_PT_UP", "BTAG_PT_DOWN", 9);
+  CalcInclSystematics("BTAG_ETA", "BTAG_ETA_UP", "BTAG_ETA_DOWN", 10);
+  InclFlatSystematics(11);
   
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
   cout << "Finished Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
@@ -2706,8 +2716,9 @@ void Plotter::PlotDiffXSec(){
     CalcDiffSystematics("DY_", "DY_UP", "DY_DOWN", 6);
     CalcDiffSystematics("BG_", "BG_UP", "BG_DOWN", 7);  
     CalcDiffSystematics("HAD", "MCATNLO", "POWHEG", 8); 
-    CalcDiffSystematics("BTAG_", "BTAG_UP", "BTAG_DOWN", 9); 
-    DiffFlatSystematics(10,bins); 
+    CalcDiffSystematics("BTAG_PT_", "BTAG_PT_UP", "BTAG_PT_DOWN", 9); 
+    CalcDiffSystematics("BTAG_ETA_", "BTAG_ETA_UP", "BTAG_ETA_DOWN", 10); 
+    DiffFlatSystematics(11,bins); 
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
     cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
     cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
@@ -2995,9 +3006,9 @@ void Plotter::PlotDiffXSec(){
       double syst_square = 0;
       ExpSysPlot[bin]=0.;
       ModelSysPlot[bin]=0.;
-      for(int syst =0; syst<14; syst++){ 
+      for(int syst =0; syst<15; syst++){ 
 	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-    	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="b-tagging" ||legendsSyst[syst]=="kin fit"){
+    	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="BTAG" ||legendsSyst[syst]=="kin fit"){
           ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
         }
 	else{
@@ -3048,20 +3059,21 @@ void Plotter::PlotDiffXSec(){
     THStack* SystHists = new THStack("MSTACK","MSTACK");
     TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
     std::map<int, int> FillOrder;
-    FillOrder[13] = 0;   //JES
-    FillOrder[12] = 1;   //RES
-    FillOrder[11] = 2;   //PU
-    FillOrder[10] = 6;   //DY
-    FillOrder[9] = 7;   //BG
-    FillOrder[8] = 10;   //Trigg
-    FillOrder[7] = 11;   //Lep
+    FillOrder[14] = 0;   //JES
+    FillOrder[13] = 1;   //RES
+    FillOrder[12] = 2;   //PU
+    FillOrder[11] = 6;   //DY
+    FillOrder[10] = 7;   //BG
+    FillOrder[9] = 11;   //Trigg
+    FillOrder[8] = 12;   //Lep
+    FillOrder[7] = 10;  //Btag
     FillOrder[6] = 9;  //Btag
-    FillOrder[5] = 12;  //KinFit
+    FillOrder[5] = 13;  //KinFit
     FillOrder[4] = 3;   //SCALE
     FillOrder[3] = 5;  //MASS
     FillOrder[2] = 4;  //MATCH
     FillOrder[1] = 8; //HAD
-    FillOrder[0] = 13; //PDF
+    FillOrder[0] = 14; //PDF
 
     ofstream ResultsSysFilestring; 
     string ResultsSystLaTeX = outpathPlots.Data();
@@ -3073,13 +3085,18 @@ void Plotter::PlotDiffXSec(){
     FILE *systfile;
     systfile = fopen(ResultsSystLaTeX.c_str(), "w");
     
-    for(int systs =0; systs<14; systs++){
+    for(int systs =0; systs<15; systs++){
       int syst = FillOrder[systs];
+      if (syst==10) {continue;}//Skip the BTAG_ETA systematic because it's added in quadrature to BTAG_PT
       TH1D* systtemp = (TH1D*)varhists[0]->Clone();
       systtemp->Reset();
       double TotalSyst=0.0, TotalSqSyst=0.0;
       double AvgSyst= 0.0, SqAvgSys=0.0;
+      
       for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+       if(syst==9){//sum up in quadrature the pT and Eta variations of btagging
+           DiffXSecSysErrorBySyst[channelType][bin][syst]= TMath::Sqrt((DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst])+(DiffXSecSysErrorBySyst[channelType][bin][syst+1]*DiffXSecSysErrorBySyst[channelType][bin][syst+1]));
+       }
        	//systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
              systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
                if(bin==0){  
@@ -3091,12 +3108,13 @@ void Plotter::PlotDiffXSec(){
                 if(syst==5) fprintf(systfile, "MASS   ");
                 if(syst==6) fprintf(systfile, "DY     ");
                 if(syst==7) fprintf(systfile, "BG     ");
-                if(syst==8)fprintf(systfile, "HAD    ");
-                if(syst==9) fprintf(systfile, "Trigg  ");
-                if(syst==10) fprintf(systfile, "Lep.   ");
-                if(syst==11)fprintf(systfile, "Btag   ");
-                if(syst==12)fprintf(systfile, "KinFit ");
-                if(syst==13)fprintf(systfile, "PDF    ");
+                if(syst==8) fprintf(systfile, "HAD    ");
+                if(syst==9) fprintf(systfile, "Btag   ");
+                //ssyt==10 BTAG_ETA, it summed in quadrature with BTAG_PT syst==9
+                if(syst==11) fprintf(systfile, "Trigg  ");
+                if(syst==12) fprintf(systfile, "Lep.   ");
+                if(syst==13) fprintf(systfile, "KinFit ");
+                if(syst==14) fprintf(systfile, "PDF    ");
                }
                fprintf(systfile, "%2.5f ", TMath::Sqrt(systtemp->GetBinContent(bin+1))*100);
                if(bin>0 && bin<bins-1){//Exclude the 2 side bins
