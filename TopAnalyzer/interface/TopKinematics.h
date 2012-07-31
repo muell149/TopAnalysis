@@ -89,14 +89,31 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
     fill(tops, weight);
   }
   /// everything which needs to be done after the event loop
-  void process(){};
+  void process(){
+/*     TFile &file = fs->file(); */
+/*     for(std::map<std::string, TH2*>::const_iterator iter = corrs_.begin(); iter != corrs_.end(); ++iter){ */
+/*       std::cout << self->moduleDescription_.moduleLabel() << std::endl; */
+/*       std::cout << self->moduleDescription_.moduleName() << std::endl; */
+/*       TString folder=""; */
+/* 	//file.cd(folder); */
+/*       if(!iter->second->GetEntries()){  */
+/* 	std::cout << "deleting" << folder << "/" << iter->second->GetName() << std::endl; */
+/* 	//file.Delete(TString(iter->second->GetName())+TString(";*")); */
+/* 	std::cout << "ok" << std::endl; */
+/*       } */
+/*     } */
+  };
 
  private:
   /**
      Helper functions for special histogram management
   **/
   /// histogram filling for candidates topA and topB
-  void fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, const reco::Candidate* leptonicW, const reco::Candidate* hadronicW, double HT, const double& weight=1.);
+  void fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, 
+	    const reco::Candidate* topPlus    , const reco::Candidate* topMinus   , 
+	    const reco::Candidate* leptonicW, const reco::Candidate* hadronicW    , 
+	    double HT, const double& charge, const double& weight=1.);
+
   /// histogram filling for candidate topA and topB (for stability and purity calculation)
   void fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, double HTrec, double HTgen, const double& weight=1.);
   /// helper function for determining stability and purity
@@ -124,6 +141,7 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
 			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepB    ,
 			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& lepton  ,
 			     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> >& neutrino,
+			     const double& charge,
 			     const double& weight);
   /// helper function to get the decay mode
   double getDecayChannel(const TtGenEvent& tops);
