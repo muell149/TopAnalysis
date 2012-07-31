@@ -802,7 +802,12 @@ setForAllTtFullLepHypotheses(process,"muons"    ,finalLeptons)
 setForAllTtFullLepHypotheses(process,"electrons",finalLeptons)
 setForAllTtFullLepHypotheses(process,"jets"     ,jetCollection         )
 setForAllTtFullLepHypotheses(process,"mets"     ,metCollection        )
-setForAllTtFullLepHypotheses(process,"jetCorrectionLevel","L3Absolute")
+if options.runOnMC:
+    setForAllTtFullLepHypotheses(process,"jetCorrectionLevel","L3Absolute")
+    print "L3Absolute"
+else:
+    setForAllTtFullLepHypotheses(process,"jetCorrectionLevel","L2L3Residual")
+    print "L2L3Residual"
 setForAllTtFullLepHypotheses(process,"maxNJets",-1)
 
 #use this?
