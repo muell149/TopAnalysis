@@ -13,6 +13,7 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   semiLepEvt_(cfg.getParameter<edm::InputTag>("semiLepEvent")),
   hypoKey_   (cfg.getParameter<std::string>  ("hypoKey"     )),
   genJets_   (cfg.getParameter<edm::InputTag>("genJets"     )),
+  bJetCollection_(cfg.getParameter<bool>   ("bJetCollection")),
   verbose    (cfg.getParameter<int>          ("output"      )),
   weight_    (cfg.getParameter<edm::InputTag>("weight"      )),
   genPlots_  (cfg.getParameter<bool>         ("genPlots"    )),
@@ -80,32 +81,39 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   int bIX   =-1;
   int bbarIX=-1;
   if(genPlots_){
-    // get indices produced by TopAnalysis/TopUtils/GenLevelBJetProducer.cc
-    std::vector<int> VBHadJetIdx, VAntiBHadJetIdx;
-    edm::Handle<std::vector<int> > BHadJetIndex, AntiBHadJetIndex;
-    event.getByLabel(bHadJetIdx_    , BHadJetIndex    );
-    event.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
-    // save them in vector
-    for (int i=0; i<(int) BHadJetIndex->size()    ; ++i){  VBHadJetIdx    .push_back(BHadJetIndex->at(i)    );};
-    for (int i=0; i<(int) AntiBHadJetIndex->size(); ++i){  VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
-    // use leading vector entries finally 
-    if(VBHadJetIdx    .size()>0) bIX   =VBHadJetIdx    [0];
-    if(VAntiBHadJetIdx.size()>0) bbarIX=VAntiBHadJetIdx[0];
-    // output for user information
-    if(verbose>1){
-      std::cout << "N(b jets): "    << VBHadJetIdx    .size() << std::endl;
-      for(unsigned int idx=0; idx<VBHadJetIdx    .size(); ++idx){
-	if(idx==0) std::cout << "("; 
-	std::cout << VBHadJetIdx[idx];
-	if(idx<VBHadJetIdx.size()-1) std::cout << ", ";
-	else std::cout << ")" << std::endl;
-      }
-      std::cout << "N(bbar jets): " << VAntiBHadJetIdx.size() << std::endl;
-      for(unsigned int idx=0; idx<VAntiBHadJetIdx.size(); ++idx){
-	if(idx==0) std::cout << "("; 
-	std::cout << VAntiBHadJetIdx[idx];
-	if(idx<VAntiBHadJetIdx.size()-1) std::cout << ", ";
-	else std::cout << ")" << std::endl;
+    // take leading two jets assuming that collection genJets consists of bjets only
+    if(bJetCollection_==true){
+      bIX   =0;
+      bbarIX=1;
+    }
+    else{
+      // get indices produced by TopAnalysis/TopUtils/GenLevelBJetProducer.cc
+      std::vector<int> VBHadJetIdx, VAntiBHadJetIdx;
+      edm::Handle<std::vector<int> > BHadJetIndex, AntiBHadJetIndex;
+      event.getByLabel(bHadJetIdx_    , BHadJetIndex    );
+      event.getByLabel(antibHadJetIdx_, AntiBHadJetIndex);
+      // save them in vector
+      for (int i=0; i<(int) BHadJetIndex->size()    ; ++i){  VBHadJetIdx    .push_back(BHadJetIndex->at(i)    );};
+      for (int i=0; i<(int) AntiBHadJetIndex->size(); ++i){  VAntiBHadJetIdx.push_back(AntiBHadJetIndex->at(i));};
+      // use leading vector entries finally 
+      if(VBHadJetIdx    .size()>0) bIX   =VBHadJetIdx    [0];
+      if(VAntiBHadJetIdx.size()>0) bbarIX=VAntiBHadJetIdx[0];
+      // output for user information
+      if(verbose>1){
+	std::cout << "N(b jets): "    << VBHadJetIdx    .size() << std::endl;
+	for(unsigned int idx=0; idx<VBHadJetIdx    .size(); ++idx){
+	  if(idx==0) std::cout << "("; 
+	  std::cout << VBHadJetIdx[idx];
+	  if(idx<VBHadJetIdx.size()-1) std::cout << ", ";
+	  else std::cout << ")" << std::endl;
+	}
+	std::cout << "N(bbar jets): " << VAntiBHadJetIdx.size() << std::endl;
+	for(unsigned int idx=0; idx<VAntiBHadJetIdx.size(); ++idx){
+	  if(idx==0) std::cout << "("; 
+	  std::cout << VAntiBHadJetIdx[idx];
+	  if(idx<VAntiBHadJetIdx.size()-1) std::cout << ", ";
+	  else std::cout << ")" << std::endl;
+	}
       }
     }
   }
@@ -143,7 +151,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   // ---
   if(verbose>0) std::cout << std::endl << "create gen level plots" << std::endl;
   // ensure there are indices for both
-  if(bIX<0||bbarIX<0){
+  if(bIX<-1||bbarIX<-1){
     if(genPlots_&&verbose>0) std::cout << "WARNING: gen bjet indices incomplete!" << std::endl;
     genPlots_=false;
   }

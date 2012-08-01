@@ -15,6 +15,10 @@ analyzeSemiLepBJets = cms.EDAnalyzer("SemiLepBjetAnalyzer",
                                      #       is used to identify the b-jets, the SAME jet collection
                                      #       has to be chosen
                                      genJets = cms.InputTag('ak5GenJets','','HLT'),
+                                     # specify if 'genJets' is a pure b gen jet collection:
+                                     # for true, BHadJetIndex and AntiBHadJetIndex will be ignored
+                                     # and the leading two jets are chosen!
+                                     bJetCollection = cms.bool(False),
                                      # output manager:
                                      # 0: no output, 1: info, >=2: debug
                                      output = cms.int32(0),

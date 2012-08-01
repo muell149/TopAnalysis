@@ -48,6 +48,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   std::string hypoKey_;
   // genJet collection 
   edm::InputTag genJets_;
+  // pure b gen jet collection?
+  bool bJetCollection_;
   // output manager
   int verbose;
   // event weight
