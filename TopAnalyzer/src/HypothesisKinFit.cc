@@ -19,7 +19,8 @@ HypothesisKinFit::HypothesisKinFit(const edm::ParameterSet& cfg) :
   hypoKey_( cfg.getParameter<std::string>("hypoKey") ),
   lepton_ ( cfg.getParameter<std::string>("lepton") ),
   wantTree( cfg.getParameter<bool>("wantTree") ),
-  maxNJets( cfg.getParameter<int> ("maxNJets") )
+  maxNJets( cfg.getParameter<int> ("maxNJets") ),
+  ndof    ( cfg.getParameter<int> ("ndof") )
 {
   /// check if input is correct
   if (lepton_.compare("muon")!=0 && lepton_.compare("electron")!=0) throw edm::Exception( edm::errors::Configuration, "lepton specified incorrectly; has to be either 'muon' or 'electron'" ) ;
@@ -513,10 +514,9 @@ HypothesisKinFit::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       // fit probability of the best fit hypothesis
       // FIXME: hardcoded ndof=2. This is needed because the neutrino
       //   eta resolution is set to infinity decreasing ndof by 1.
-      prob=TMath::Prob(tops.fitChi2(),2);
+      if(ndof<0)prob=tops.fitProb();
+      else prob=TMath::Prob(tops.fitChi2(),ndof);
       hists_.find("prob")->second->Fill( prob, weight );
-      // prob=tops.fitProb();
-      // hists_.find("prob")->second->Fill( prob, weight );
       // chi2 of the best fit hypothesis
       hists_.find("chi2")->second->Fill( tops.fitChi2(), weight );      
       chi2=tops.fitChi2();

@@ -35,7 +35,8 @@ TopKinematics::TopKinematics(const edm::ParameterSet& cfg) :
   useTree_( cfg.getParameter<bool>       ("useTree") ),
   matchForStabilityAndPurity_( cfg.getParameter<bool>("matchForStabilityAndPurity") ),
   ttbarInsteadOfLepHadTop_   ( cfg.getParameter<bool>("ttbarInsteadOfLepHadTop"   ) ),
-  maxNJets( cfg.getParameter<int> ("maxNJets") )
+  maxNJets( cfg.getParameter<int> ("maxNJets") ),
+  ndof( cfg.getParameter<int> ("ndof") )
 {
   tree = 0;
   /// check if input is correct
@@ -872,10 +873,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     // if the kinFit hypothesis is valid, fill KinFit quantities 
     if(hypoKey_=="kKinFit"){
       // fit probability of the best fit hypothesis
-      // WARNING FIXME: ndof=2 is hard coded for the moment, this is correct for the kinfit configuration
-      //                with fixed W masses, equal top masses and neutrino eta resolution=inf because the 
-      //                neutrino is treated similar to a non measured particle
-      prob=TMath::Prob(tops.fitChi2(),2);
+      if(ndof<0)prob=tops.fitProb();
+      else prob=TMath::Prob(tops.fitChi2(),ndof);
       // chi2 of the best fit hypothesis
       chi2= tops.fitChi2();
       // make sure that a second best fit hypothesis exists to be able to fill these plots

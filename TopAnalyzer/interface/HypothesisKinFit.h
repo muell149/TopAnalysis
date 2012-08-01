@@ -60,6 +60,8 @@ class HypothesisKinFit : public SingleObject<TtSemiLeptonicEvent> {
   bool wantTree;
   /// number of jets considered in Kinematic fit (needed for the classification of permutations)
   int maxNJets;
+  /// number degrees of freedom used to calculate fit probability
+  int ndof;
   /// histogram container for correlation plots
   std::map<std::string, TH2*> corrs_;
   /// all avriables used to fill the tree
