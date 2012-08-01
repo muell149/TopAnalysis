@@ -3235,6 +3235,8 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohistnorm = GetNloCurve("TtBar","Pt","MCatNLO");}
     else if(name.Contains("TTBarRapidity")){mcnlohistnorm = GetNloCurve("TtBar","Rapidity","MCatNLO");}
     else if(name.Contains("TTBarMass")){mcnlohistnorm = GetNloCurve("TtBar","Mass","MCatNLO");}
+    else if(name.Contains("BJetpT")){mcnlohistnorm = GetNloCurve("Jets","Pt","MCatNLO");}
+    else if(name.Contains("BJetEta")){mcnlohistnorm = GetNloCurve("Jets","Eta","MCatNLO");}
     else {mcnlohistnorm = new TH1();}
     //    if (binned_theory==false) mcnlohistnorm->Rebin(5);mcnlohistnorm->Scale(0.2);
     TH1* mcnlohistnormBinned    = mcnlohistnorm->Rebin(bins,"genBinHist", Xbins);
@@ -3248,6 +3250,8 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohistup = GetNloCurve("TtBar","Pt","MCNLOup");}
     else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
     else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
+    else if(name.Contains("BJetpT")){mcnlohistup = GetNloCurve("Jets","Pt","MCNLOup");}
+    else if(name.Contains("BJetEta")){mcnlohistup = GetNloCurve("Jets","Eta","MCNLOup");}
     else {mcnlohistup = new TH1();}
     //    if (binned_theory==false) mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
     TH1* mcnlohistupBinned    = mcnlohistup->Rebin(bins,"genBinHist", Xbins);
@@ -3263,6 +3267,8 @@ void Plotter::PlotDiffXSec(){
     else if(name.Contains("TTBarpT")){mcnlohistdown = GetNloCurve("TtBar","Pt","MCNLOdown");}
     else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
     else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
+    else if(name.Contains("BJetpT")){mcnlohistdown = GetNloCurve("Jets","Pt","MCNLOdown");}
+    else if(name.Contains("BJetEta")){mcnlohistdown = GetNloCurve("Jets","Eta","MCNLOdown");}
     else {mcnlohistdown = new TH1();}
     //    if (binned_theory==false) mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
     TH1* mcnlohistdownBinned    = mcnlohistdown->Rebin(bins,"genBinHist", Xbins);
@@ -3292,6 +3298,10 @@ void Plotter::PlotDiffXSec(){
     mcnlohistdownBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
     mcnlohistnormBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
 
+    for (Int_t bin=0; bin<bins; bin++){
+      mcnlohistupBinned->SetBinContent(bin+1,(mcnlohistupBinned->GetBinContent(bin+1)/mcnlohistnormBinned->GetBinContent(bin+1))*mcnlohistBinned->GetBinContent(bin+1));
+      mcnlohistdownBinned->SetBinContent(bin+1,(mcnlohistdownBinned->GetBinContent(bin+1)/mcnlohistnormBinned->GetBinContent(bin+1))*mcnlohistBinned->GetBinContent(bin+1));
+    }
 
     //Uncertainty band for MC@NLO
     const Int_t nMCNLOBins = mcnlohistup->GetNbinsX();
@@ -3303,8 +3313,8 @@ void Plotter::PlotDiffXSec(){
     
     for( Int_t j = 0; j< bins; j++ ){
       x[j]=mcnlohistBinned->GetBinCenter(j+1);
-      errup[j]=mcnlohistupBinned->GetBinContent(j+1);
-      errdn[j]=mcnlohistdownBinned->GetBinContent(j+1);
+      errup[j]=(mcnlohistupBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
+      errdn[j]=(mcnlohistdownBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
       
       xband[j] = x[j];
       errorband[j] = errdn[j]; //lower band
@@ -3368,7 +3378,7 @@ void Plotter::PlotDiffXSec(){
     if (ymax!=0) h_GenDiffXSec->SetMaximum(ymax);
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
-    //mcatnloBand->Draw("same, F");
+    //    mcatnloBand->Draw("same, F");
     mcnlohistupBinned->SetFillColor(kGray);
     mcnlohistupBinned->SetLineColor(kGray);
     mcnlohistupBinned->Draw("same");
@@ -3556,9 +3566,9 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
   TFile* file = new TFile;
   
   if(strcmp(generator, "Powheg")==0){file = TFile::Open("selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root","READ");}
-  else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20120130.root","READ");}
-  else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20120130.root","READ");}
-  else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20120130.root","READ");}
+  else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20120729.root","READ");}
+  else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20120729.root","READ");}
+  else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20120729.root","READ");}
   
   if (file && !file->IsZombie()) {
     file->GetObject<TH1>(histname, hist);
