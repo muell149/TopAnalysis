@@ -9,14 +9,14 @@
 #include "TLine.h"
 
 enum TheoryType { kMoch, kMitov };
-enum PdfType { kMSTW, kHERA, kABM };
+enum PdfType { kMSTW, kHERA, kABM, kNNPDF };
 
 void printInfo()
 {
   std::cout << "Usage: alphaDep THEORY SCHEME PDF" << std::endl
 	    << "With THEORY    : \"moch\" or \"mitov\"" << std::endl
 	    << "     SCHEME    : \"pole\" or \"msbar\"" << std::endl
-	    << "     PDF       : \"mstw\", \"hera\" or \"abm\"" << std::endl;
+	    << "     PDF       : \"mstw\", \"hera\", \"abm\" or \"nnpdf\"" << std::endl;
 }
 
 int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const TString& fileName)
@@ -35,6 +35,8 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
     pdfName = "HERAPDF1.5"; nPoints = 9 ; break;
   case kABM:
     pdfName = "ABM11"     ; nPoints = 17; break;
+  case kNNPDF:
+    pdfName = "NNPDF2.1"  ; nPoints = 11; break;
   }
 
   const unsigned iCentral = (nPoints-1)/2;
@@ -215,6 +217,8 @@ int main(const int argc, const char** argv)
     pdf=kHERA;
   else if (!strcmp(argv[3],"abm"))
     pdf=kABM;
+  else if (!strcmp(argv[3],"nnpdf"))
+    pdf=kNNPDF;
   else {
     std::cout << "Unkown argument: " << argv[3] << std::endl;
     printInfo();
