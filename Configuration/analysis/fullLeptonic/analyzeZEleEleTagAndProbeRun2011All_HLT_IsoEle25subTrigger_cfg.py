@@ -3,6 +3,8 @@
 jetType="PF"
 dataSelector = 11
 leptonTypeId = 11
+## CHANGE MASS WINDOW:
+deltaM = 15
 ## This is overwritten later!!!!
 triggerPathSelector = "*"
 ## l3 subtrigger filter which is used for T&P
@@ -16,10 +18,10 @@ jsonFile = "../semiLeptonic/diffXSection/Cert_160404-180252_7TeV_PromptReco_ReRe
 #execfile("TopAnalysis/Configuration/analysis/fullLeptonic/analyzeZMuMuTagAndProbe_cfg.py")
 execfile("analyzeZMuMuTagAndProbe_cfg.py")
 
-## 1119
-#process.load("TopAnalysis/Configuration/samples/Run2011A_ElectronHad_PromptRecoV4_165970_latest_Trig2_AOD_cff")
+## 4219
+process.load("TopAnalysis/Configuration/samples/Run2011AllIsoEle25TriJet_ElectronHad_AOD_cff")
 ##
-process.load("Run2011PostEPS_ElectronHad_Aug05ReRecoV1_AV6_BV1_170053_180252_AOD_cff.py")
+#process.load("Run2011PostEPS_ElectronHad_Aug05ReRecoV1_AV6_BV1_170053_180252_AOD_cff.py")
 
 # change triggers!!!!
 ## connection of more than one path name: all HLT_Ele paths used in 2011
@@ -27,7 +29,7 @@ process.load("Run2011PostEPS_ElectronHad_Aug05ReRecoV1_AV6_BV1_170053_180252_AOD
 
 ## All Ele25_MultiJet triggers
 #process.hltTriggerFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_v*", "HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_DiCentralJet30_v*", "HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*", "HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_QuadCentralJet30_v*", "HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_BTagIP_v*"]
-process.hltTriggerFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
+process.hltTriggerFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*", "HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralPFJet30_v*"]
     
 #process.hltTriggerFilter.HLTPaths = ["HLT_Ele25_CaloIdVT_TrkIdT_CentralTriJet30_v*",
     #"HLT_Ele25_CaloIdVT_TrkIdT_TriCentralJet30_v3", "HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*", "HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralPFJet30_v*"]
@@ -45,6 +47,7 @@ else:
     ## Use lumisToSkip if JSON file shall be constrained additionally to a certain run range
     #process.source.lumisToSkip = cms.untracked.VLuminosityBlockRange('165634:1-999999:1')
     #print "lumisToProcess = ", process.source.lumisToProcess
-process.TFileService.fileName = 'analyzeZEleEleTagAndProbeRun2011AEPS_IsoEle25subTrigger.root'
+
+process.TFileService.fileName = 'analyzeZEleEleTagAndProbeRun2011All_IsoEle25subTrigger.root'
 process.maxEvents.input = 10000
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
