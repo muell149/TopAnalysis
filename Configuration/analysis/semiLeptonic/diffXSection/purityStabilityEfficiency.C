@@ -27,7 +27,8 @@
 
 void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TString lepton="muon", 
 			       TString inputFolderName="RecentAnalysisRun", bool plotAcceptance = true, 
-			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=0, bool hadron=false)
+			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=1, bool hadron=false,
+			       bool fitGaussRes=false, bool printSeparateRes = false)
 {
   // ARGUMENTS of function:
   // variable:       choose variable to plot, e.g.:
@@ -38,6 +39,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // plotEfficiencyPhaseSpace: in addition to purity, stability, acceptance also 
   //                           efficiency in restricted phase space (i.e. Acceptance=1) is plotted (if true)
   // hadron:         draw plots for hadron level
+  // fitGaussRes:    fit a Gauss to the residuum plots to obtain the resolution
+  // printSeparateRes save the residuum plots separately
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
   if(!useTree) chi2Max=99999; // can be done only with tree
   // output folder in case of saving the canvases:
@@ -107,14 +110,47 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     genExtHisto="Gen";
     recExtHisto="Rec";
   }
-    
-  // determine here the binning:
+  
+  ///---------------------------------------------------------------------------------------------
+    // determine here the binning:
+   // change x axis range and determine edges of residual histo for resolution studies
+  double rangeUserLeft = -1e6;
+  double rangeUserRight = 1e6;
+  double resEdgeL = -1e6;
+  double resEdgeR = 1e6;
+  double relResEdgeL = -1e6;
+  double relResEdgeR = 1e6;
+  if ( variable == "topPt")          { rangeUserLeft = 0         ; rangeUserRight = 400-0.001;  resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
+  else if ( variable == "topY")      { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -3.0;  resEdgeR=  3.0;  relResEdgeL = -1.5; relResEdgeR=1.5; }
+  else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001;  resEdgeL = -300.0;  resEdgeR=300.0;  relResEdgeL = -1.0; relResEdgeR=6.0; }
+  else if ( variable == "ttbarY")    { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -2.0;  resEdgeR=  2.0;  relResEdgeL = -2.0; relResEdgeR=2.0; }
+  else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
+  else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001;  resEdgeL =  -35.0;  resEdgeR= 35.0;  relResEdgeL = -0.2; relResEdgeR=0.2; textOpt="";}
+  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =  -0.02;  resEdgeR= 0.02;  relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
+  else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001;  resEdgeL = -200.0;  resEdgeR=200.0;  relResEdgeL = -1.0; relResEdgeR=2.0 ;}
+  else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
+  
+  //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
+  //else if ( variable == "lepPt"  && lepton == "elec")    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
+  //else if ( variable == "lepEta" && lepton == "muon")    { rangeUserLeft = -2.1; rangeUserRight = 2.1-0.001; }
+  //else if ( variable == "lepEta" && lepton == "elec")    { rangeUserLeft = -2.5; rangeUserRight = 2.5-0.001; }
+  
+   // determine here the binning:
   // Attention: binning ALWAYS should start from left boundary of first and bin of the input file;
   // it ends with the last bin of the input file even if this is not part of the array defined below
   
   std::map<TString, std::vector<double> > binningMap = makeVariableBinning();
   std::vector<double> xBins = binningMap[variable];
   int NxBins = xBins.size()-1;  
+  // determine binning that is actually plottet
+  std::vector<double> xPlotBins; 
+  for(int iBin =0; iBin < NxBins; iBin++){
+    if(xBins[iBin]>rangeUserLeft-0.002 && xBins[iBin]<rangeUserRight+0.002){
+      xPlotBins.push_back(xBins[iBin]);
+//       std::cout<<"xBins[iBin]= " << xBins[iBin] << std::endl;
+    }
+  }
+  int NxPlotBins = xPlotBins.size()-1;
   
   // pt
   // double xBins[] = {0, 60, 120, 200, 280, 400};
@@ -139,37 +175,17 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // double bqEtaBins[] = {-5.0, -2.5, -1.5, -1.0, -0.5, 0., 0.5, 1.0, 1.5, 2.5, 5.0};
   //int NxBins = sizeof(xBins)/sizeof(double);
 
-  if(verbose>0) std::cout << "size of xBins: " << NxBins << std::endl;
+  if(verbose>0) std::cout << "size of all calculated bins, xBins: " << NxBins << std::endl;
+  if(verbose>0) std::cout << "size of all plotted bins, xPlotBins: " << NxPlotBins <<  std::endl;
   
-  // change x axis range and determine edges of residual histo for resolution studies
-  double rangeUserLeft = -1e6;
-  double rangeUserRight = 1e6;
-  double resEdgeL = -1e6;
-  double resEdgeR = 1e6;
-  double relResEdgeL = -1e6;
-  double relResEdgeR = 1e6;
-  if ( variable == "topPt")          { rangeUserLeft = 0         ; rangeUserRight = 400-0.001;  resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
-  else if ( variable == "topY")      { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -3.0;  resEdgeR=  3.0;  relResEdgeL = -1.5; relResEdgeR=1.5; }
-  else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001;  resEdgeL = -300.0;  resEdgeR=300.0;  relResEdgeL = -1.0; relResEdgeR=6.0; }
-  else if ( variable == "ttbarY")    { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -2.0;  resEdgeR=  2.0;  relResEdgeL = -2.0; relResEdgeR=2.0; }
-  else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
-  else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001;  resEdgeL =  -35.0;  resEdgeR= 35.0;  relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
-  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =   -0.15; resEdgeR=  0.15; relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
-  else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001;  resEdgeL = -200.0;  resEdgeR=200.0;  relResEdgeL = -1.0; relResEdgeR=2.0 ;}
-  else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
-  
-  //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
-  //else if ( variable == "lepPt"  && lepton == "elec")    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
-  //else if ( variable == "lepEta" && lepton == "muon")    { rangeUserLeft = -2.1; rangeUserRight = 2.1-0.001; }
-  //else if ( variable == "lepEta" && lepton == "elec")    { rangeUserLeft = -2.5; rangeUserRight = 2.5-0.001; }
-  
+  ///---------------------------------------------------------------------------------------------
   // histos for resolution studies for each bin of the variable of interest:
   // vector with one histo for each bin of the distribution of the variable of interest
   std::vector<TH1F*> residualHistos_;
   std::vector<TH1F*> relativeResidualHistos_;
-  for(int iBin=0; iBin < NxBins; iBin++){
+  for(int iBin=0; iBin < NxPlotBins; iBin++){
     TString histoName  = "residualHisto"+variable+universalplotLabel+"Bin"+Form("%i",iBin);
-    TString histoTitle = "residualHisto"+universalplotLabel+" "+Form("%4.1f",xBins[iBin])+"<"+variable+"<"+Form("%4.1f",xBins[iBin+1]);
+    TString histoTitle = "residualHisto"+universalplotLabel+" "+Form("%4.1f",xPlotBins[iBin])+"<"+variable+"<"+Form("%4.1f",xPlotBins[iBin+1]);
     residualHistos_.push_back        ( new TH1F (histoName, histoTitle, 100, resEdgeL, resEdgeR) );
     relativeResidualHistos_.push_back( new TH1F ("relative"+histoName, "relative"+histoTitle, 100, relResEdgeL, relResEdgeR) );
   }
@@ -178,7 +194,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   myStyle.cd();
-  TGaxis::SetMaxDigits(2);
+  TGaxis::SetMaxDigits(3);
   gROOT->SetStyle("HHStyle");
   gROOT->ForceStyle();	
 
@@ -286,8 +302,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 	  // fill events passing chi2
 	  chi2eff->Fill(rec, weight);
 	  // fill residual histo of the right bin
-	  for(int iBin=0; iBin < NxBins; iBin++){
-	    if(gen>xBins[iBin] && gen< xBins[iBin+1]){
+	  for(int iBin=0; iBin < NxPlotBins; iBin++){
+	    if(gen>xPlotBins[iBin] && gen< xPlotBins[iBin+1]){
 	      residualHistos_.at(iBin)->Fill(rec-gen, weight);
 	      if(gen!=0) relativeResidualHistos_.at(iBin)->Fill((rec-gen)/gen, weight);
 	      else       relativeResidualHistos_.at(iBin)->Fill(-1);
@@ -488,8 +504,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 	//binContent=99;
 //  	if(verbose>1) std::cout<<"num= "<<responseMatrix->GetBinContent(iGenBin, iRecBin) <<"; denom= "<<effDenom<<"; binContentResponse= "<< binContent<<std::endl;
 	allRecEvtsFromGenBin+=responseMatrix->GetBinContent(iGenBin, iRecBin);
-	responseMatrix  ->SetBinContent(iGenBin, iRecBin, binContentResponse);
-	migrationMatrix ->SetBinContent(iGenBin, iRecBin, binContentMigration);
+	responseMatrix  ->SetBinContent(iGenBin, iRecBin, binContentResponse*100);  // in %
+	migrationMatrix ->SetBinContent(iGenBin, iRecBin, binContentMigration*100); // in %
       }
       if(effDenom>0)   effGen    =(double)allRecEvtsFromGenBin/effDenom;
       if(effDenomPS>0) effGenPS  =(double)allRecEvtsFromGenBin/effDenomPS;
@@ -516,6 +532,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     
     purityhist->SetTitle("");
     TString xtitle = "";
+    TString xtitleNoUnit = "";
     if(variable.Contains("Pt"))xtitle+="p_{T}";
     else if(variable.Contains("Y"))xtitle+="y";
     else if(variable.Contains("Eta"))xtitle+="#eta";
@@ -523,8 +540,9 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     if(variable.Contains("top"))xtitle+="^{t and #bar{t}}";
     else if(variable.Contains("ttbar"))xtitle+="^{t#bar{t}}";
     else if(variable.Contains("lep"))xtitle+="^{l}";
-    if(variable.Contains("Pt"))xtitle+=" #left[#frac{GeV}{c}#right]";
-    else if(variable.Contains("Mass"))xtitle+=" #left[#frac{GeV}{c^{2}}#right]";
+    xtitleNoUnit = xtitle;
+    if(variable.Contains("Pt"))xtitle+=" [GeV]";
+    else if(variable.Contains("Mass"))xtitle+=" [GeV]";
     if(variable=="topWAngle")xtitle="Angle(top,W)";
     purityhist->GetXaxis()->SetTitle(xtitle);
     purityhist->GetXaxis()->SetNoExponent(true);
@@ -559,7 +577,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     stabilityhist->SetLineStyle(2);
     stabilityhist->SetLineWidth(4);
     accHistGen->SetLineColor(1);
-    accHistGen->SetLineStyle(2);
+    accHistGen->SetLineStyle(3);
     accHistGen->SetLineWidth(4);
     accHistGen->GetXaxis()->SetNoExponent(true);
     accHistGen->GetYaxis()->SetNoExponent(true);
@@ -567,7 +585,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 
   //gPad->SetBottomMargin(0.19);
     purstab->cd();
-    purstab->SetGrid(1,1);
+    //purstab->SetGrid(1,1);
     purityhist->Draw();
     stabilityhist->Draw("same");
     if(plotAcceptance)accHistGen->Draw("same");
@@ -671,11 +689,16 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // additionally: calculate response matrix that only includes migration effects, not limited acc. or eff.
     TCanvas* CanvMigrationMatrix = new TCanvas("CanvMigrationMatrix","CanvMigrationMatrix",600,600);
   // collection of residual histos for determination of resolution
-    TCanvas* CanvResidualHistos = new TCanvas("CanvResidualHistos","CanvResidualHistos",1200,1200);
-    TCanvas* CanvRelativeResidualHistos = new TCanvas("CanvRelativeResidualHistos","CanvRelativeResidualHistos",1200,1200);
-    int nDivide = (int)sqrt(NxBins) +1;
-    CanvResidualHistos->Divide(nDivide,nDivide);
-    CanvRelativeResidualHistos->Divide(nDivide,nDivide);
+//     TCanvas* CanvResidualHistos = new TCanvas("CanvResidualHistos","CanvResidualHistos",1200,1200);
+//     TCanvas* CanvRelativeResidualHistos = new TCanvas("CanvRelativeResidualHistos","CanvRelativeResidualHistos",1200,1200);
+//     int nDivide = (int)sqrt(NxBins) +1;
+//     CanvResidualHistos->Divide(nDivide,nDivide);
+//     CanvRelativeResidualHistos->Divide(nDivide,nDivide);
+    int nRows = (int)((NxBins+2)/3); // number of rows for 3 columns
+    TCanvas* CanvResidualHistos = new TCanvas("CanvResidualHistos","CanvResidualHistos",840,200*nRows);
+    TCanvas* CanvRelativeResidualHistos = new TCanvas("CanvRelativeResidualHistos","CanvRelativeResidualHistos",840,200*nRows);
+    CanvResidualHistos->Divide(3,nRows);
+    CanvRelativeResidualHistos->Divide(3,nRows);
   // resolution
     TCanvas* CanvResolution         = new TCanvas("CanvResolution","CanvResolution",600,600);
     TCanvas* CanvRelativeResolution = new TCanvas("CanvRelativeResolution","CanvRelativeResolution",600,600);
@@ -683,26 +706,31 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   
   //----------------------------------------------------
   // draw residuals and calculate resolution
-  TH1F* hisResolRMS = new TH1F("hisResolRMS","hisResolRMS", NxBins, &xBins[0]);
-  TH1F* hisResolFit = new TH1F("hisResolFit","hisResolFit", NxBins, &xBins[0]);
-  TH1F* hisRelativeResolRMS = new TH1F("hisRelativeResolRMS","hisRelativeResolRMS", NxBins, &xBins[0]);
-  TH1F* hisRelativeResolFit = new TH1F("hisRelativeResolFit","hisRelativeResolFit", NxBins, &xBins[0]);
-  TH1F* hisBinwidthOverResolRMS = new TH1F("hisBinwidthOverResolRMS","hisBinwidthOverResolRMS", NxBins, &xBins[0]);
-  TH1F* hisBinwidthOverResolFit = new TH1F("hisBinwidthOverResolFit","hisBinwidthOverResolFit", NxBins, &xBins[0]);
-  
-  for(int iGenBin=0; iGenBin <NxBins; iGenBin++){
+  TH1F* hisResolRMS = new TH1F("hisResolRMS","hisResolRMS", NxPlotBins, &xPlotBins[0]);
+  TH1F* hisResolFit = new TH1F("hisResolFit","hisResolFit", NxPlotBins, &xPlotBins[0]);
+  TH1F* hisRelativeResolRMS = new TH1F("hisRelativeResolRMS","hisRelativeResolRMS", NxPlotBins, &xPlotBins[0]);
+  TH1F* hisRelativeResolFit = new TH1F("hisRelativeResolFit","hisRelativeResolFit", NxPlotBins, &xPlotBins[0]);
+  TH1F* hisBinwidthOverResolRMS = new TH1F("hisBinwidthOverResolRMS","hisBinwidthOverResolRMS", NxPlotBins, &xPlotBins[0]);
+  TH1F* hisBinwidthOverResolFit = new TH1F("hisBinwidthOverResolFit","hisBinwidthOverResolFit", NxPlotBins, &xPlotBins[0]);
+  for(int iGenBin=0; iGenBin <NxPlotBins; iGenBin++){
     // absolute resolution	
     CanvResidualHistos->cd(iGenBin+1);
     residualHistos_.at(iGenBin)->GetXaxis()->SetNoExponent(true);
     residualHistos_.at(iGenBin)->GetXaxis()->SetTitle(xtitle+" (rec-gen)");
+    residualHistos_.at(iGenBin)->GetYaxis()->SetTitle("N");
+    residualHistos_.at(iGenBin)->GetXaxis()->SetTitleSize(0.06);
+    residualHistos_.at(iGenBin)->GetXaxis()->SetLabelSize(0.06);
+    residualHistos_.at(iGenBin)->GetXaxis()->SetTitleOffset(1.1);
+    residualHistos_.at(iGenBin)->GetYaxis()->SetTitleSize(0.06);
+    residualHistos_.at(iGenBin)->GetYaxis()->SetLabelSize(0.06);
+    residualHistos_.at(iGenBin)->GetYaxis()->SetTitleOffset(1.1);
     residualHistos_.at(iGenBin)->SetLineWidth(2);
     residualHistos_.at(iGenBin)->Draw();
-    
     // fit
 //     TF1 *f1 = new TF1("f1","gaus",-200,200);
 //     f1->SetLineWidth(2);    
     std::vector<double> f1sigma_;
-    f1sigma_=extract_sigma(residualHistos_.at(iGenBin),verbose);
+    if(fitGaussRes) f1sigma_=extract_sigma(residualHistos_.at(iGenBin),verbose);
 //     residualHistos_.at(iGenBin)->Fit("f1");
 //     double f1norm  = f1->GetParameter(0);
 //     double f1mean  = f1->GetParameter(1);
@@ -711,26 +739,33 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     TPaveText *label = new TPaveText(0.7, 0.6, 0.9, 0.8, "br NDC");
     label->AddText("Fit:");
   //  label->AddText(Form("x_{0} = %3.2f",f1mean));
-    label->AddText(Form("#sigma = %3.2f",f1sigma_[0]));
+    if(fitGaussRes) label->AddText(Form("#sigma = %3.2f",f1sigma_[0]));
     label->SetFillStyle(0);
     label->SetBorderSize(0);
     label->SetTextSize(0.04);
     label->SetTextAlign(12);
-    label->Draw("same");
-    TString labelText  = TString("")+ Form("%4.1f",xBins[iGenBin])+"<"+variable+"<"+Form("%4.1f",xBins[iGenBin+1]);
-    DrawLabel(labelText,gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
-    
+    if(fitGaussRes) label->Draw("same");
+    TString labelText  = TString("       ")+ Form("%4.1f",xPlotBins[iGenBin])+"<"+xtitle+"<"+Form("%4.1f",xPlotBins[iGenBin+1]);
+    DrawLabel(labelText,gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.07);
+
     // calculate resolution
     hisResolRMS->SetBinContent(iGenBin+1, residualHistos_.at(iGenBin)->GetRMS());
-    hisResolFit->SetBinContent(iGenBin+1, f1sigma_[0]);
+    if(fitGaussRes) hisResolFit->SetBinContent(iGenBin+1, f1sigma_[0]);
     hisBinwidthOverResolRMS->SetBinContent(iGenBin+1, hisBinwidthOverResolRMS->GetBinWidth(iGenBin+1)/(residualHistos_.at(iGenBin)->GetRMS()));
-    hisBinwidthOverResolFit->SetBinContent(iGenBin+1, hisBinwidthOverResolFit->GetBinWidth(iGenBin+1)/f1sigma_[0]);
+    if(fitGaussRes) hisBinwidthOverResolFit->SetBinContent(iGenBin+1, hisBinwidthOverResolFit->GetBinWidth(iGenBin+1)/f1sigma_[0]);
     
     //------------------
     // relative resolution	
       CanvRelativeResidualHistos->cd(iGenBin+1);
       relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetNoExponent(true);
       relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetTitle(xtitle+" (rec-gen)/gen");
+      relativeResidualHistos_.at(iGenBin)->GetYaxis()->SetTitle("N");
+      relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetTitleSize(0.06);
+      relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetLabelSize(0.06);
+      relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetTitleOffset(1.1);
+      relativeResidualHistos_.at(iGenBin)->GetYaxis()->SetTitleSize(0.06);
+      relativeResidualHistos_.at(iGenBin)->GetYaxis()->SetLabelSize(0.06);
+      relativeResidualHistos_.at(iGenBin)->GetYaxis()->SetTitleOffset(1.1);
       relativeResidualHistos_.at(iGenBin)->SetLineWidth(2);
       relativeResidualHistos_.at(iGenBin)->Draw();
     
@@ -738,7 +773,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 //       TF1 *f1 = new TF1("f1","gaus",-200,200);
 //       f1->SetLineWidth(2);    
       std::vector<double> f1RelativeSigma_;
-      f1RelativeSigma_=extract_sigma(relativeResidualHistos_.at(iGenBin), verbose);
+      if(fitGaussRes) f1RelativeSigma_=extract_sigma(relativeResidualHistos_.at(iGenBin), verbose);
 //     residualHistos_.at(iGenBin)->Fit("f1");
 //     double f1norm  = f1->GetParameter(0);
 //     double f1mean  = f1->GetParameter(1);
@@ -747,23 +782,23 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
       TPaveText *label2 = new TPaveText(0.7, 0.6, 0.9, 0.8, "br NDC");
       label2->AddText("Fit:");
   //  label2->AddText(Form("x_{0} = %3.2f",f1mean));
-      label2->AddText(Form("#sigma = %3.2f",f1RelativeSigma_[0]));
+      if(fitGaussRes) label2->AddText(Form("#sigma = %3.2f",f1RelativeSigma_[0]));
       label2->SetFillStyle(0);
       label2->SetBorderSize(0);
       label2->SetTextSize(0.04);
       label2->SetTextAlign(12);
-      label2->Draw("same");
-      TString label2Text  = TString("")+ Form("%4.1f",xBins[iGenBin])+"<"+variable+"<"+Form("%4.1f",xBins[iGenBin+1]);
-      DrawLabel(label2Text,gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+      if(fitGaussRes) label2->Draw("same");
+      TString label2Text  = TString("       ")+ Form("%4.1f",xPlotBins[iGenBin])+"<"+xtitle+"<"+Form("%4.1f",xPlotBins[iGenBin+1]);
+      DrawLabel(label2Text,gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.07);
     
     // calculate resolution
       hisRelativeResolRMS->SetBinContent(iGenBin+1, relativeResidualHistos_.at(iGenBin)->GetRMS());
-      hisRelativeResolFit->SetBinContent(iGenBin+1, f1RelativeSigma_[0]);
+      if(fitGaussRes) hisRelativeResolFit->SetBinContent(iGenBin+1, f1RelativeSigma_[0]);
   }
-  
+
   // draw responseMatrix incl. eff.
   // text format for TH2 labels
-  gStyle->SetPaintTextFormat("3.2f");
+  gStyle->SetPaintTextFormat("3.0f");
   CanvResponseMatrix->cd();
   CanvResponseMatrix->SetRightMargin(0.2);
   responseMatrix->SetStats(kFALSE);
@@ -774,7 +809,9 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   responseMatrix->GetXaxis()->SetNoExponent(true);
   responseMatrix->GetYaxis()->SetNoExponent(true);
   responseMatrix->GetZaxis()->SetNoExponent(true);
-  responseMatrix->GetZaxis()->SetRangeUser(0,0.3);
+  responseMatrix->GetZaxis()->SetRangeUser(0,30);
+  responseMatrix->GetZaxis()->SetTitle("[\%]");
+  responseMatrix->GetZaxis()->SetTitleOffset(1.3);
   //responseMatrix->SetMarkerColor(kWhite);
   responseMatrix->SetMarkerSize(1.2);
   responseMatrix->SetTitle("Response Matrix - Including Efficiency");
@@ -783,7 +820,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   //gPad->Update();
   if(plotEfficiencyPhaseSpace) DrawLabel("Full Response Matrix - Migration and Efficiency",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
   else DrawLabel("Full Response Matrix - Migration and Eff.*Acc.",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
-  
+
   // draw migrationMatrix w/o eff.
   CanvMigrationMatrix->cd();
   CanvMigrationMatrix->SetRightMargin(0.2);
@@ -795,20 +832,22 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   migrationMatrix->GetXaxis()->SetNoExponent(true);
   migrationMatrix->GetYaxis()->SetNoExponent(true);
   migrationMatrix->GetZaxis()->SetNoExponent(true);
-  migrationMatrix->GetZaxis()->SetRangeUser(0,1);
+  migrationMatrix->GetZaxis()->SetRangeUser(0,100);
+  migrationMatrix->GetZaxis()->SetTitle("[\%]");
+  migrationMatrix->GetZaxis()->SetTitleOffset(1.3);
   //migrationMatrix->SetMarkerColor(kWhite);
   migrationMatrix->SetMarkerSize(1.2);
   migrationMatrix->SetTitle("Response Matrix - Migration Only");
   migrationMatrix->Draw(Form("COLZ %s",textOpt.Data()));
   DrawLabel("Response Matrix - Migration Only",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
   
-  
   // draw resolution
   CanvResolution->cd();
   hisResolRMS->GetXaxis()->SetTitle("gen "+xtitle);
-  hisResolRMS->GetYaxis()->SetTitle("Resolution "+xtitle);
+  hisResolRMS->GetYaxis()->SetTitle("Resolution of "+xtitle);
+  //hisResolRMS->GetYaxis()->SetTitleOffset(1.1);
   hisResolRMS->GetXaxis()->SetNoExponent(true);
-  hisResolRMS->GetYaxis()->SetNoExponent(true);
+  //hisResolRMS->GetYaxis()->SetNoExponent(true);
   hisResolRMS->SetLineColor(1);
   hisResolRMS->SetLineStyle(1);
   hisResolRMS->SetLineWidth(2);
@@ -818,21 +857,22 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   hisResolFit->SetLineColor(2);
   hisResolFit->SetLineStyle(1);
   hisResolFit->SetLineWidth(2);
-  hisResolFit->Draw("same");
+  if(fitGaussRes) hisResolFit->Draw("same");
   TLegend* legResol=new TLegend(0.2,0.68,0.67,0.87);
   legResol->SetTextSize(0.03);
   legResol->SetFillStyle(0);
   legResol->SetBorderSize(0);
   legResol->AddEntry(hisResolRMS,   "#sigma_{histo}"    ,"l");
-  legResol->AddEntry(hisResolFit,   "#sigma_{Gauss fit}"    ,"l");
-  legResol->DrawClone("same");
+  if(fitGaussRes) legResol->AddEntry(hisResolFit,   "#sigma_{Gauss fit}"    ,"l");
+  if(fitGaussRes) legResol->DrawClone("same");
   
   // draw relative resolution
   CanvRelativeResolution->cd();
   hisRelativeResolRMS->GetXaxis()->SetTitle("gen "+xtitle);
-  hisRelativeResolRMS->GetYaxis()->SetTitle("Relative Resolution");
+  hisRelativeResolRMS->GetYaxis()->SetTitle("Relative Resolution of "+xtitleNoUnit);
+  //hisRelativeResolRMS->GetYaxis()->SetTitleOffset(1.1);
   hisRelativeResolRMS->GetXaxis()->SetNoExponent(true);
-  hisRelativeResolRMS->GetYaxis()->SetNoExponent(true);
+  //hisRelativeResolRMS->GetYaxis()->SetNoExponent(true);
   hisRelativeResolRMS->SetLineColor(1);
   hisRelativeResolRMS->SetLineStyle(1);
   hisRelativeResolRMS->SetLineWidth(2);
@@ -842,14 +882,14 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   hisRelativeResolFit->SetLineColor(2);
   hisRelativeResolFit->SetLineStyle(1);
   hisRelativeResolFit->SetLineWidth(2);
-  hisRelativeResolFit->Draw("same");
+  if(fitGaussRes) hisRelativeResolFit->Draw("same");
 //   TLegend* legResol=new TLegend(0.2,0.68,0.67,0.87);
 //   legResol->SetTextSize(0.03);
 //   legResol->SetFillStyle(0);
 //   legResol->SetBorderSize(0);
 //   legResol->AddEntry(hisResolRMS,   "#sigma_{histo}"    ,"l");
 //   legResol->AddEntry(hisResolFit,   "#sigma_{Gauss fit}"    ,"l");
-  legResol->DrawClone("same");
+  if(fitGaussRes) legResol->DrawClone("same");
   
   // draw binwidth over resolution
   CanvBinwidthOverResol->cd();
@@ -866,14 +906,14 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   hisBinwidthOverResolFit->SetLineColor(2);
   hisBinwidthOverResolFit->SetLineStyle(1);
   hisBinwidthOverResolFit->SetLineWidth(2);
-  hisBinwidthOverResolFit->Draw("same");
+  if(fitGaussRes) hisBinwidthOverResolFit->Draw("same");
 //   TLegend* legResol=new TLegend(0.2,0.68,0.67,0.87);
 //   legResol->SetTextSize(0.03);
 //   legResol->SetFillStyle(0);
 //   legResol->SetBorderSize(0);
 //   legResol->AddEntry(hisResolRMS,   "#sigma_{histo}"    ,"l");
 //   legResol->AddEntry(hisResolFit,   "#sigma_{Gauss fit}"    ,"l");
-  legResol->DrawClone("same");
+  if(fitGaussRes) legResol->DrawClone("same");
 
   
   if(save){
@@ -903,6 +943,14 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
       CanvRelativeResidualHistos->Print(outputFolder+"/relativeResidualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
       CanvResolution->Print(outputFolder+"/resolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
       CanvRelativeResolution->Print(outputFolder+"/relativeResolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
+      // print residuums separately if desired
+      if(printSeparateRes){
+	for(int iBin =0; iBin < NxPlotBins; iBin++){
+	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
+	  CanvRelativeResidualHistos->cd(iBin+1)->Print(outputFolder+"/relativeResidualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
+	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
+	  CanvRelativeResidualHistos->cd(iBin+1)->Print(outputFolder+"/relativeResidualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");	}
+      }
     }
     if(verbose>0) std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
   }
