@@ -333,12 +333,13 @@ double DilepSVDFunctions::SVD_DoUnfoldSys(
     Nominal->SetLineColor(kBlack);
     NominalUp->SetLineColor(kRed);
     NominalDown->SetLineColor(kBlue);
+    NominalDown->SetLineStyle(2);
     leg->AddEntry(Nominal, "Nominal", "p");
     leg->AddEntry(NominalUp, "Up", "lp");
     leg->AddEntry(NominalDown, "Down", "lp");
     Nominal->DrawNormalized();
-    NominalUp->DrawNormalized("same");
-    NominalDown->DrawNormalized("same");
+    NominalUp->DrawNormalized("h,same");
+    NominalDown->DrawNormalized("h,same");
     leg->Draw("same");
     c->Print(TString("Plots/").Copy().Append(channel).Append("/SystComparison_").Append(channel).Append("_").Append(particle).Append("_").Append(quantity).Append("_").Append(syst).Append(".eps"));
     leg->Clear();
