@@ -1690,6 +1690,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //         2 means: interpret 'regPar' as tau value
       int unfoldWithParameter=2;
       if(systematicVariation!=sysNo) regMode=3;
+      //    PRE-WEIGHTING
+      //         0 means: Default value, same as 1
+      //         1 means: No preweighting of MC is performed (default)
+      //         2 means: MC is reweighted to unfolded data (1 iteration)
+      //         i means: MC is reweighted to unfolded data ((i-1) iteration), i<=9 (up to 8 iterations)
+      int unfPreWeighting=0;
+      TString unfPreWeightingStr = "";
+      if(unfPreWeighting>1) unfPreWeightingStr+="PreWeight"+getTStringFromInt(unfPreWeighting-1)+"Iter";
       // produce scan plots? 
       //         0 means: Default setting, same as 2
       //         1 means: no scan for optimal tau is perforemd,
@@ -1708,9 +1716,16 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       bool scanPlots=false;
       if(regMode<3) scan =1;
       if(scan==2) scanPlots=true;
+      // print unfolding eps and ps plots?
+      // 0 means: no
+      // 1 means: only ps file containing all plots
+      // 2 means: both ps and individual eps
+      int printUnfPlots = 1;
+      
       // output files
       TString rootFile="";
       TString psFile="";
+      TString epsFile="";
       TString regFile="";
       //         0 means: Default value, same as 4
       //         1 means: no plotting at all
@@ -1724,19 +1739,24 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	if(plotting==1) plotting+=1;
 	if(scan==2&&scanPlots) plotting+=2; // k and tau scan plots
 	// output files: labels
-	rootFile="diffXSecUnfoldTopSemi";
+	rootFile=outputFolder+"unfolding/diffXSecUnfoldTopSemi";
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	if(decayChannel=="electron") rootFile+="Elec";
-	rootFile+=dataSample+LV+PS+".root";
-	psFile=outputFolder+"unfolding/unfolding"+variable;
+	rootFile+=dataSample+LV+PS+unfPreWeightingStr+".root";
+	psFile =outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr;
+	epsFile=outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
 	//if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
+	// if ps and/or eps files not desired, set back to ""
+	if(printUnfPlots!=1 && printUnfPlots!=2) psFile="";
+	if(printUnfPlots!=2 )                    epsFile="";
       }
-      TString txtfile="diffXSecUnfoldDetailsTopSemi";
+      
+      TString txtfile=outputFolder+"unfolding/diffXSecUnfoldDetailsTopSemi";
       if(decayChannel=="muon"    ) txtfile+="Mu";
       if(decayChannel=="electron") txtfile+="Elec";
-      txtfile+=dataSample+LV+PS+".txt";
+      txtfile+=dataSample+LV+PS+unfPreWeightingStr+".txt";
       // save unfolding plots in rootfile?
       //         0 means: Default value, same as 1
       //         1 means: no root file will be written (default)
@@ -1822,12 +1842,25 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //             Each unfolded distribution is normalized with its integral.
       int normalizeUnfPlot=1;
       steering=getTStringFromInt(normalizeUnfPlot)+steering;
-      //    (14) EPS or PS for Control Plots
+      // NEW: !!!
+      //    (14) CLOSURE TEST (14. digit from right)
       //         0 means: Default value, same as 1
-      //         1 means: Write out a PS Booklet of Control Plots
-      //         2 means: Write out single EPS Plots 
-      int psOReps=1;
-      steering=getTStringFromInt(psOReps)+steering;
+      //         1 means: No closure test, unfold real data (default)
+      //         2 means: Closure test, unfold the reconstructed MC 
+      int closureTest=0;
+      steering=getTStringFromInt(closureTest)+steering;
+      //    (15) PRE-WEIGHTING (15. digit from right)
+      //         0 means: Default value, same as 1
+      //         1 means: No preweighting of MC is performed (default)
+      //         2 means: MC is reweighted to unfolded data (1 iteration)
+      //         i means: MC is reweighted to unfolded data ((i-1) iteration), i<=9 (up to 8 iterations)
+      steering=getTStringFromInt(unfPreWeighting)+steering;
+      //    (16) BACKGROUND REDUCTION (16. digit from right)
+      //         0 means: Default value, same as 1
+      //         1 means: Be non-forgiving
+      //         2 means: If Background>Data, set Data to zero.
+      int unfBkgReduction=0;
+      steering=getTStringFromInt(unfBkgReduction)+steering;
 
       // ==============
       //  Get binning
@@ -2023,6 +2056,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	rootFile,
 	// If specified, plots will be saved in PS File
 	psFile,
+	// If specified, plots will be saved in EPS Files 
+	epsFile,
         // The optimal Reg Parameters will be written to this file.
         // The file will NOT be overwritten, rather the result will be appended.
         // The following data will be saved in this order: 
