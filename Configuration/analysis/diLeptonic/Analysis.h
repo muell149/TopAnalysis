@@ -442,6 +442,7 @@ public :
    TH1D *h_BTagSF, *h_BTagEvtSF;
    TH1D *h_BTagSF_Pt_Up, *h_BTagEvtSF_Pt_Up, *h_BTagSF_Pt_Down, *h_BTagEvtSF_Pt_Down;
    TH1D *h_BTagSF_Eta_Up, *h_BTagEvtSF_Eta_Up, *h_BTagSF_Eta_Down, *h_BTagEvtSF_Eta_Down;
+   TH1D *h_BTagSF_Up, *h_BTagEvtSF_Up, *h_BTagSF_Down, *h_BTagEvtSF_Down;
    // END of btag SF stuff
    
    TH2D *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT;
@@ -518,6 +519,8 @@ public :
    TH1D *h_RecoLLBarDPhi,    *h_RecoLeptonantiBjetMass,    *h_RecoAntiLeptonBjetMass,	 *h_RecoJetMult;
    TH1D *h_HypLLBarDPhi,     *h_HypLeptonantiBjetMass,     *h_HypAntiLeptonBjetMass,	 *h_HypJetMult;
       
+   TH2D *h_HypLLBarpTDPhi;
+   
    ClassDef(Analysis,0);
 };
 

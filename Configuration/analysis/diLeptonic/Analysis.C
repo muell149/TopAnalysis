@@ -248,6 +248,8 @@ void Analysis::Begin(TTree * /*tree*/)
   h_VisGenAntiLeptonBjetMass= new TH1D("VisGenAntiLeptonBjetMass", "M(AntiLep, BJet) (VisGEN)", 500, 0, 1000);
   h_VisGenJetMult	    = new TH1D("VisGenJetMult",         "Jet Multiplicty (VisGEN)", 26, -0.5, 25.5);
   
+  h_HypLLBarpTDPhi = new TH2D ("HypLLBarpTDPhi", "DiLep: pT(ll) vs DPhi(ll)", 500,0,1000, 112, -0.1, 3.25);
+  
   // BEGIN: BTag SF calculation neccessary stuff
   //Histograms to fill the per-event SF!!
   h_BTagSF = new TH1D("BTagSF", "BTagging SF per event", 100 , 0.95,1.05);      h_BTagSF->Sumw2();
@@ -260,6 +262,10 @@ void Analysis::Begin(TTree * /*tree*/)
   h_BTagEvtSF_Eta_Up = new TH1D("BTagEvtSFEtaUp", "Event's BTagging SF Eta Up variation", 2.2e6, 0, 2.2e6);  h_BTagEvtSF_Eta_Up->Sumw2();
   h_BTagSF_Eta_Down = new TH1D("BTagSFEtaDown", "BTagging SF Eta Down variation per event", 100 , 0.95,1.05);      h_BTagSF_Eta_Down->Sumw2();
   h_BTagEvtSF_Eta_Down = new TH1D("BTagEvtSFEtaDown", "Event's BTagging SF Eta Down variation", 2.2e6, 0, 2.2e6);  h_BTagEvtSF_Eta_Down->Sumw2();
+  h_BTagSF_Up = new TH1D("BTagSFUp", "BTagging SF Up variation per event", 100 , 0.95,1.05);      h_BTagSF_Up->Sumw2();
+  h_BTagEvtSF_Up = new TH1D("BTagEvtSFUp", "Event's BTagging SF Up variation", 2.2e6, 0, 2.2e6);  h_BTagEvtSF_Up->Sumw2();
+  h_BTagSF_Down = new TH1D("BTagSFDown", "BTagging SF Down variation per event", 100 , 0.95,1.05);      h_BTagSF_Down->Sumw2();
+  h_BTagEvtSF_Down = new TH1D("BTagEvtSFDown", "Event's BTagging Pt Down variation", 2.2e6, 0, 2.2e6);  h_BTagEvtSF_Down->Sumw2();
 
   //pt efficiency median value can be obtained running and reading the output of: root -l -b -q CalcMedian.C
   //By now defined the per-jet SFs vary according to:
@@ -760,7 +766,8 @@ Bool_t Analysis::Process(Long64_t entry)
   }
   
   //Do the b-Tag SF calculation!! 
-  double btagSF_Pt_Up = 1.0, btagSF_Pt_Down = 1.0, btagSF_Eta_Up = 1.0, btagSF_Eta_Down = 1.0;
+  double btagSF_Pt_Up = 1.0, btagSF_Pt_Down = 1.0, btagSF_Eta_Up = 1.0, btagSF_Eta_Down = 1.0;//shape unceratinty SF
+  double btagSF_Up = 1.0, btagSF_Down = 1.0;//Normalization unceratinty SF
   btagSF = 1.0;
   //only for NON data samples
   if(MCSample->find("run2011") == string::npos){
@@ -774,12 +781,14 @@ Bool_t Analysis::Process(Long64_t entry)
         //emu channel
         if (channel->find("emu")!=string::npos){
             double OneMinusEff=1;
-            double OneMinusSEff=1, OneMinusSEff_Up=1, OneMinusSEff_Down=1;
+            double OneMinusSEff=1, OneMinusSEff_PtUp=1, OneMinusSEff_PtDown=1, OneMinusSEff_EtaUp=1, OneMinusSEff_EtaDown=1; //shape variation uncertainty
+            double OneMinusSEff_Up=1, OneMinusSEff_Down=1; //Normalization uncertainty
             double SFPerJet=1, eff=1;
             double SFPerJet_Up=0.0, SFPerJet_Down=0.0;
             for (int i=0; i< (int) jet_; ++i){
                 double pt=0.0, eta=0.0;
                 int ptbin=0, etabin=0;
+                double SF_Error=0.0;
                 if (LVjet[i].Pt()>30 && TMath::Abs(LVjet[i].Eta())<2.4){
                     pt= LVjet[i].Pt();   eta=abs(LVjet[i].Eta());
                     //select pt & eta bin to take information from per-jet-efficiency histograms
@@ -796,71 +805,84 @@ Bool_t Analysis::Process(Long64_t entry)
                     if((*jetType)[i] == 2){//b-quark
                         eff=bEff->GetBinContent(ptbin, etabin);                        
                         SFPerJet=Analysis::BJetSF(pt, eta);
-                        SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
-                        SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
+//                         SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
+//                         SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
+                        SF_Error = Analysis::BJetSFAbsErr(ptbin);
                     }
                     else if((*jetType)[i] == 1){//c-quark
                         SFPerJet=Analysis::CJetSF(pt, eta);
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=cEff->GetBinContent(ptbin, etabin);
+                        SF_Error = 0.0;
                     }
                     else if((*jetType)[i] == 0){//l-quark
                         SFPerJet=Analysis::LJetSF(pt, eta);
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=lEff->GetBinContent(ptbin, etabin);
+                        SF_Error = 0.0;
                     }
                     else {cout<<"I found a jet in event "<<eventNumber<<" which is not b, c nor ligth"<<endl; return kFALSE;}
                     //calculate both numerator and denominator for per-event SF calculation
                     //consider also the UP and DOWN variation for systematics calculation. Same procedure as PU
                     OneMinusEff = OneMinusEff*(1-eff);
                     OneMinusSEff= OneMinusSEff*(1-SFPerJet*eff);
+                    if(systematic=="BTAG_UP"){
+                        OneMinusSEff_Up= OneMinusSEff_Up*(1-eff*(SFPerJet+SF_Error));
+                    }
+                    if(systematic=="BTAG_DOWN"){
+                        OneMinusSEff_Down= OneMinusSEff_Down*(1-eff*(SFPerJet-SF_Error));
+                    }
                     if(systematic=="BTAG_PT_UP"){
-                        if (pt>ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Down*eff);}
-                        if (pt<ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Up*eff);}
-                        if (pt==ptmedian) {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet*eff);}
+                        if (pt>ptmedian)  {OneMinusSEff_PtUp= OneMinusSEff_PtUp*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (pt<ptmedian)  {OneMinusSEff_PtUp= OneMinusSEff_PtUp*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (pt==ptmedian) {OneMinusSEff_PtUp= OneMinusSEff_PtUp*(1-eff*SFPerJet);}
                     }
                     if(systematic=="BTAG_PT_DOWN"){
-                        if (pt>ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Up*eff);}
-                        if (pt<ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Down*eff);}
-                        if (pt==ptmedian) {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet*eff);}
+                        if (pt>ptmedian)  {OneMinusSEff_PtDown= OneMinusSEff_PtDown*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (pt<ptmedian)  {OneMinusSEff_PtDown= OneMinusSEff_PtDown*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (pt==ptmedian) {OneMinusSEff_PtDown= OneMinusSEff_PtDown*(1-eff*SFPerJet);}
                     }
                     if(systematic=="BTAG_ETA_UP"){
-                        if (eta>etamedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Down*eff);}
-                        if (eta<etamedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Up*eff);}
-                        if (eta==etamedian) {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet*eff);}
+                        if (eta>etamedian)  {OneMinusSEff_EtaUp= OneMinusSEff_EtaUp*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (eta<etamedian)  {OneMinusSEff_EtaUp= OneMinusSEff_EtaUp*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (eta==etamedian) {OneMinusSEff_EtaUp= OneMinusSEff_EtaUp*(1-eff*SFPerJet);}
                     }
                     if(systematic=="BTAG_ETA_DOWN"){
-                        if (eta>etamedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Up*eff);}
-                        if (eta<etamedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Down*eff);}
-                        if (eta==etamedian) {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet*eff);}
+                        if (eta>etamedian)  {OneMinusSEff_EtaDown= OneMinusSEff_EtaDown*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (eta<etamedian)  {OneMinusSEff_EtaDown= OneMinusSEff_EtaDown*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (eta==etamedian) {OneMinusSEff_EtaDown= OneMinusSEff_EtaDown*(1-eff*SFPerJet);}
                     }
                 }
             };
              //per-event SF calculation (also the UP and DOWN variations)
             btagSF      = (1.-OneMinusSEff)/(1.-OneMinusEff);
-            btagSF_Pt_Up   = (1.-OneMinusSEff_Up)/(1.-OneMinusEff);
-            btagSF_Pt_Down = (1.-OneMinusSEff_Down)/(1.-OneMinusEff);
-            btagSF_Eta_Up   = (1.-OneMinusSEff_Up)/(1.-OneMinusEff);
-            btagSF_Eta_Down = (1.-OneMinusSEff_Down)/(1.-OneMinusEff);
-
+            btagSF_Pt_Up   = (1.-OneMinusSEff_PtUp)/(1.-OneMinusEff);
+            btagSF_Pt_Down = (1.-OneMinusSEff_PtDown)/(1.-OneMinusEff);
+            btagSF_Eta_Up   = (1.-OneMinusSEff_EtaUp)/(1.-OneMinusEff);
+            btagSF_Eta_Down = (1.-OneMinusSEff_EtaDown)/(1.-OneMinusEff);
+            btagSF_Up   = (1.-OneMinusSEff_Up)/(1.-OneMinusEff);
+            btagSF_Down = (1.-OneMinusSEff_Down)/(1.-OneMinusEff);
             
         }
         //ee && mumu channels
         else if ((dimass<76.0 || dimass > 106.0) && *(metEt->begin()) > 30 ){
             double OneMinusEff=1;
-            double OneMinusSEff=1, OneMinusSEff_Up=1, OneMinusSEff_Down=1;
+            double OneMinusSEff=1, OneMinusSEff_PtUp=1, OneMinusSEff_PtDown=1, OneMinusSEff_EtaUp=1, OneMinusSEff_EtaDown=1; //shape variation uncertainty
+            double OneMinusSEff_Up=1, OneMinusSEff_Down=1; //Normalization uncertainty
             double SFPerJet=1, eff=1;
             double SFPerJet_Up=0.0, SFPerJet_Down=0.0;
             for (int i=0; i< (int) jet_; ++i){
                 double pt=0.0, eta=0.0;
                 int ptbin=0, etabin=0;
+                double SF_Error=0.0;
                 if (LVjet[i].Pt()>30 && TMath::Abs(LVjet[i].Eta())<2.4){
                     pt= LVjet[i].Pt();   eta=abs(LVjet[i].Eta());
                     //select pt & eta bin to take information from per-jet-efficiency histograms
                     for (int iter=0; iter<(int)ptbinning.size(); iter++){
                         if(pt<ptbinning[iter]){continue;}
+                        else if (pt> 670.){ptbin = iter+1;}
                         else {ptbin = iter+1;}
                     }
                     for (int iter=0; iter<(int)etabinning.size(); iter++){
@@ -871,65 +893,78 @@ Bool_t Analysis::Process(Long64_t entry)
                     if((*jetType)[i] == 2){//b-quark
                         eff=bEff->GetBinContent(ptbin, etabin);                        
                         SFPerJet=Analysis::BJetSF(pt, eta);
-                        SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
-                        SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
+//                         SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
+//                         SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
+                        SF_Error = Analysis::BJetSFAbsErr(ptbin);
                     }
                     else if((*jetType)[i] == 1){//c-quark
                         SFPerJet=Analysis::CJetSF(pt, eta);
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=cEff->GetBinContent(ptbin, etabin);
+                        SF_Error = 0.0;
                     }
                     else if((*jetType)[i] == 0){//l-quark
                         SFPerJet=Analysis::LJetSF(pt, eta);
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=lEff->GetBinContent(ptbin, etabin);
+                        SF_Error = 0.0;
                     }
                     else {cout<<"I found a jet in event "<<eventNumber<<" which is not b, c nor ligth"<<endl; return kFALSE;}
                     //calculate both numerator and denominator for per-event SF calculation
                     //consider also the UP and DOWN variation for systematics calculation. Same procedure as PU
                     OneMinusEff = OneMinusEff*(1-eff);
                     OneMinusSEff= OneMinusSEff*(1-SFPerJet*eff);
+                    if(systematic=="BTAG_UP"){
+                        OneMinusSEff_Up= OneMinusSEff_Up*(1-eff*(SFPerJet+SF_Error));
+                    }
+                    if(systematic=="BTAG_DOWN"){
+                        OneMinusSEff_Down= OneMinusSEff_Down*(1-eff*(SFPerJet-SF_Error));
+                    }
                     if(systematic=="BTAG_PT_UP"){
-                        if (pt>ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Down*eff);}
-                        if (pt<ptmedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Up*eff);}
-                        if (pt==ptmedian) {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet*eff);}
+                        if (pt>ptmedian)  {OneMinusSEff_PtUp= OneMinusSEff_PtUp*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (pt<ptmedian)  {OneMinusSEff_PtUp= OneMinusSEff_PtUp*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (pt==ptmedian) {OneMinusSEff_PtUp= OneMinusSEff_PtUp*(1-eff*SFPerJet);}
                     }
                     if(systematic=="BTAG_PT_DOWN"){
-                        if (pt>ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Up*eff);}
-                        if (pt<ptmedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Down*eff);}
-                        if (pt==ptmedian) {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet*eff);}
+                        if (pt>ptmedian)  {OneMinusSEff_PtDown= OneMinusSEff_PtDown*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (pt<ptmedian)  {OneMinusSEff_PtDown= OneMinusSEff_PtDown*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (pt==ptmedian) {OneMinusSEff_PtDown= OneMinusSEff_PtDown*(1-eff*SFPerJet);}
                     }
                     if(systematic=="BTAG_ETA_UP"){
-                        if (eta>etamedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Down*eff);}
-                        if (eta<etamedian)  {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet_Up*eff);}
-                        if (eta==etamedian) {OneMinusSEff_Up= OneMinusSEff_Up*(1-SFPerJet*eff);}
+                        if (eta>etamedian)  {OneMinusSEff_EtaUp= OneMinusSEff_EtaUp*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (eta<etamedian)  {OneMinusSEff_EtaUp= OneMinusSEff_EtaUp*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (eta==etamedian) {OneMinusSEff_EtaUp= OneMinusSEff_EtaUp*(1-eff*SFPerJet);}
                     }
                     if(systematic=="BTAG_ETA_DOWN"){
-                        if (eta>etamedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Up*eff);}
-                        if (eta<etamedian)  {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet_Down*eff);}
-                        if (eta==etamedian) {OneMinusSEff_Down= OneMinusSEff_Down*(1-SFPerJet*eff);}
+                        if (eta>etamedian)  {OneMinusSEff_EtaDown= OneMinusSEff_EtaDown*(1-eff*(SFPerJet+0.5*SF_Error));}
+                        if (eta<etamedian)  {OneMinusSEff_EtaDown= OneMinusSEff_EtaDown*(1-eff*(SFPerJet-0.5*SF_Error));}
+                        if (eta==etamedian) {OneMinusSEff_EtaDown= OneMinusSEff_EtaDown*(1-eff*SFPerJet);}
                     }
                 }
             };
-            //per-event SF calculation (also the UP and DOWN variations)
-            btagSF          = (1.-OneMinusEff)/(1.-OneMinusSEff);
-            btagSF_Pt_Up    = (1.-OneMinusEff)/(1.-OneMinusSEff_Up);
-            btagSF_Pt_Down  = (1.-OneMinusEff)/(1.-OneMinusSEff_Down);
-            btagSF_Eta_Up   = (1.-OneMinusEff)/(1.-OneMinusSEff_Up);
-            btagSF_Eta_Down = (1.-OneMinusEff)/(1.-OneMinusSEff_Down);
+             //per-event SF calculation (also the UP and DOWN variations)
+            btagSF      = (1.-OneMinusSEff)/(1.-OneMinusEff);
+            btagSF_Pt_Up   = (1.-OneMinusSEff_PtUp)/(1.-OneMinusEff);
+            btagSF_Pt_Down = (1.-OneMinusSEff_PtDown)/(1.-OneMinusEff);
+            btagSF_Eta_Up   = (1.-OneMinusSEff_EtaUp)/(1.-OneMinusEff);
+            btagSF_Eta_Down = (1.-OneMinusSEff_EtaDown)/(1.-OneMinusEff);
+            btagSF_Up   = (1.-OneMinusSEff_Up)/(1.-OneMinusEff);
+            btagSF_Down = (1.-OneMinusSEff_Down)/(1.-OneMinusEff);
         }
     }
   }
   //End of b-Tag SF calculation!!
 
-  //Set the Btag SF for each of the cases: Nominal, systUp, systDown
+  //Set the Btag SF for each of the cases: shape (Nominal, systUp, systDown) and normalization(up and down)
   if(systematic=="BTAG_PT_UP") btagSF=btagSF_Pt_Up;
   else if(systematic=="BTAG_PT_DOWN") btagSF=btagSF_Pt_Down;
   else if(systematic=="BTAG_ETA_UP") btagSF=btagSF_Eta_Up;
   else if(systematic=="BTAG_ETA_DOWN") btagSF=btagSF_Eta_Down;
-
+  else if(systematic=="BTAG_UP") btagSF=btagSF_Up;
+  else if(systematic=="BTAG_DOWN") btagSF=btagSF_Down;
+  
   h_BTagSF->Fill(btagSF);
   h_BTagEvtSF->Fill(EventCounter, btagSF);
 
@@ -941,6 +976,10 @@ Bool_t Analysis::Process(Long64_t entry)
   h_BTagEvtSF_Eta_Up->Fill(EventCounter, btagSF_Eta_Up);
   h_BTagSF_Eta_Down->Fill(btagSF_Eta_Down);
   h_BTagEvtSF_Eta_Down->Fill(EventCounter, btagSF_Eta_Down);
+  h_BTagSF_Up->Fill(btagSF_Up);
+  h_BTagEvtSF_Up->Fill(EventCounter, btagSF_Up);
+  h_BTagSF_Down->Fill(btagSF_Down);
+  h_BTagEvtSF_Down->Fill(EventCounter, btagSF_Down);
   
   //Cross-section Plots
   if(lepton_>1 && dimass>12 && jet_>1 && BJetIndex.size()>0 && HypTop_){
@@ -1277,6 +1316,8 @@ Bool_t Analysis::Process(Long64_t entry)
 	  h_HypAntiLeptonBjetMass->Fill((LVHypAntiLepton[solutionIndex] + LVHypBJet[solutionIndex]).M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	  h_HypJetMult->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 
+          h_HypLLBarpTDPhi->Fill((LVHypLepton[solutionIndex] + LVHypAntiBJet[solutionIndex]).Pt(), TMath::Abs(LVHypLepton[solutionIndex].DeltaPhi(LVHypAntiLepton[solutionIndex])), 1);
+          
 	}
       }else if(*(metEt->begin()) > 30){
 	
@@ -1454,12 +1495,7 @@ Bool_t Analysis::Process(Long64_t entry)
 	    h_HypAntiLeptonBjetMass->Fill((LVHypAntiLepton[solutionIndex] + LVHypBJet[solutionIndex]).M(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	    h_HypJetMult->Fill(jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
 	     
-// 	    h_HypTopE->Fill(LVHypTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-// 	    h_HypAntiTopE->Fill(LVHypAntiTop[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-// 	    h_HypBJetE->Fill(LVHypBJet[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-// 	    h_HypAntiBJetE->Fill(LVHypAntiBJet[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-// 	    h_HypLeptonE->Fill(LVHypLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
-// 	    h_HypAntiLeptonE->Fill(LVHypAntiLepton[solutionIndex].E(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse);
+            h_HypLLBarpTDPhi->Fill((LVHypLepton[solutionIndex] + LVHypAntiBJet[solutionIndex]).Pt(), TMath::Abs(LVHypLepton[solutionIndex].DeltaPhi(LVHypAntiLepton[solutionIndex])), 1);
 	  }
 	}
       }
@@ -1722,6 +1758,12 @@ void Analysis::Terminate()
   h_BTagEvtSF_Eta_Up->Write();
   h_BTagSF_Eta_Down->Write();
   h_BTagEvtSF_Eta_Down->Write();
+  h_BTagSF_Up->Write();
+  h_BTagEvtSF_Up->Write();
+  h_BTagSF_Down->Write();
+  h_BTagEvtSF_Down->Write();
+  
+  h_HypLLBarpTDPhi->Write();
   
   f->Close();
   cout<<"Created: "<<f_savename<<endl;

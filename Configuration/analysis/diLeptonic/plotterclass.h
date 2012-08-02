@@ -434,17 +434,9 @@ void Plotter::CalcInclSystematics(TString Systematic, TString systSampleUp, TStr
 
   //  Sum_Errors += Sys_Error;
   InclusiveXsectionSysErrorBySyst[channelType][syst_number] = Sys_Error; 
-  
-  if (syst_number==10){
-      //BTAG_Pt & BTAG_ETA variation addition!!!
-      Sys_Error = TMath::Sqrt(InclusiveXsectionSysErrorBySyst[channelType][syst_number-1]*InclusiveXsectionSysErrorBySyst[channelType][syst_number-1] + InclusiveXsectionSysErrorBySyst[channelType][syst_number]*InclusiveXsectionSysErrorBySyst[channelType][syst_number]);
-      cout<<"Inclusive Systematic for 'BTAG':";
-      cout<<" " << Sys_Error*100 << " % " << endl;
-  }
-  else if(syst_number!=9 && syst_number!=10){
-    cout<<"Inclusive Systematic for '"<<Systematic<<"':";
-    cout<<" " << Sys_Error*100 << " % " << endl;
-  }
+  cout<<"Inclusive Systematic for '"<<Systematic<<"':";
+  cout<<" " << Sys_Error*100 << " % " << endl;
+    
 }
 
 void Plotter::CalcDiffSystematics(TString Systematic, TString systSampleUp, TString systSampleDown, int syst_number){
@@ -2033,9 +2025,8 @@ void Plotter::PlotXSec(){
   CalcInclSystematics("DY_", "DY_UP", "DY_DOWN", 6);
   CalcInclSystematics("BG_","BG_UP", "BG_DOWN", 7);
   CalcInclSystematics("HAD", "MCATNLO", "POWHEG", 8);
-  CalcInclSystematics("BTAG_PT", "BTAG_PT_UP", "BTAG_PT_DOWN", 9);
-  CalcInclSystematics("BTAG_ETA", "BTAG_ETA_UP", "BTAG_ETA_DOWN", 10);
-  InclFlatSystematics(11);
+  CalcInclSystematics("BTAG_", "BTAG_UP", "BTAG_DOWN", 9);
+  InclFlatSystematics(10);
   
   cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
   cout << "Finished Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
@@ -2046,8 +2037,8 @@ void Plotter::PlotXSec(){
 
   double syst_square=0;
 
-  for(int i =0; i<16; i++){
-//  for(int i =0; i<15; i++){
+
+  for(int i =0; i<15; i++){
     syst_square += InclusiveXsectionSysErrorBySyst[channelType][i]*InclusiveXsectionSysErrorBySyst[channelType][i];
   }
   InclusiveXsectionSysError[channelType] = sqrt(syst_square);
