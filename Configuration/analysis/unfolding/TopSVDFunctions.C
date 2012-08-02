@@ -5013,7 +5013,7 @@ void TopSVDFunctions::SVD_GetBinBoundariesY2D(double* boundaries, TH2D* histo)
 //         2 means: standard plots
 //         3 means: standard plots + k scan plots
 //         4 means: standard plots + k scan plots + tau scan plots (default)
-//         Note: Whether EPS or PS is printed is specified in digit 14.
+//         Note: EPS are PS printed if their corresponding fileNames are specified.
 //    (5)  ROOT FILE ( 5. digit from right)
 //         0 means: Default value, same as 1
 //         1 means: no root file will be written (default)
@@ -5924,8 +5924,8 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "Files:" << endl;
         cout << "    Output ROOT File:                          " << outputfilenameRoot << endl;
         cout << "        Write to ROOT:                         " << (flag_root == 2 ) << endl;
-        cout << "    Output PS File:                            " << outputfilenameEps << endl;
-        cout << "    Output EPS File:                           " << outputfilenamePs << endl;
+        cout << "    Output PS File:                            " << outputfilenamePs << endl;
+        cout << "    Output EPS File:                           " << outputfilenameEps << endl;
         cout << "        Create PS/EPS Files:                   " << (flag_ps >= 2) << endl; 
         cout << "        Write K Scan Plots to PS/EPS:          " << (flag_ps >= 3 ) << endl;
         cout << "        Write Tau Scan Plots to PS/EPS:        " << (flag_ps >= 4 ) << endl;
