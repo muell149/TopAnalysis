@@ -1742,7 +1742,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	rootFile=outputFolder+"unfolding/diffXSecUnfoldTopSemi";
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	if(decayChannel=="electron") rootFile+="Elec";
-	rootFile+=dataSample+LV+PS+unfPreWeightingStr+".root";
+	rootFile+=dataSample+variable+LV+PS+unfPreWeightingStr+".root";
 	psFile =outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr;
 	epsFile=outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
