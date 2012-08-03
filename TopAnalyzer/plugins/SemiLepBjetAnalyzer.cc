@@ -23,6 +23,8 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   useTree_   (cfg.getParameter<bool>("useTree")),
   valueBqPtRec(-999),
   valueBqPtGen(-999),
+  valueLeadBqPtRec(-999),
+  valueLeadBqPtGen(-999),
   valueBqEtaRec(-999),
   valueBqEtaGen(-999),
   valueBqYRec(-999),
@@ -138,6 +140,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   if(b&&bbar){
     if(useTree_){
       valueBqPtRec =b->pt();
+      valueLeadBqPtRec = b->pt()>bbar->pt() ? b->pt() : bbar->pt();
       valueBqEtaRec=b->eta();
       valueBqYRec  =b->rapidity(); 
       valueBbarqPtRec =bbar->pt();
@@ -151,6 +154,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     if(verbose>1) std::cout << "do filling" << std::endl;
     bqPtRec ->Fill( b->pt()         , weight);
     bqPtRec ->Fill( bbar->pt()      , weight);
+    leadbqPtRec ->Fill( (b->pt()>bbar->pt() ? b->pt() : bbar->pt()), weight);
     bqEtaRec->Fill( b->eta()        , weight);
     bqEtaRec->Fill( bbar->eta()     , weight);
     bqYRec  ->Fill( b->rapidity()   , weight);
@@ -178,6 +182,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   if(genb&&genbbar){
     if(useTree_){
       valueBqPtGen =genb->pt();
+      valueLeadBqPtGen = genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt();
       valueBqEtaGen=genb->eta();
       valueBqYGen  =genb->rapidity();
       valueBbarqPtGen =genbbar->pt();
@@ -191,6 +196,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     if(verbose>1) std::cout << "do filling" << std::endl;
     bqPtGen ->Fill( genb->pt()         , weight);
     bqPtGen ->Fill( genbbar->pt()      , weight);
+    leadbqPtGen ->Fill( (genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt()), weight);
     bqEtaGen->Fill( genb->eta()        , weight);
     bqEtaGen->Fill( genbbar->eta()     , weight);
     bqYGen  ->Fill( genb->rapidity()   , weight);
@@ -210,6 +216,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     if(verbose>1) std::cout << "do filling" << std::endl;
     // fill correlation histograms
     bqPt_ ->Fill( genb->pt()         , b->pt()         , weight);
+    leadbqPt_ ->Fill((genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt()), (b->pt()>bbar->pt() ? b->pt() : bbar->pt()), weight);
     bqPt_ ->Fill( genbbar->pt()      , bbar->pt()      , weight);
     bqEta_->Fill( genb->eta()        , b->eta()        , weight);
     bqEta_->Fill( genbbar->eta()     , bbar->eta()     , weight);
@@ -219,6 +226,27 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bbbarEta_ ->Fill( (genb->p4()+genbbar->p4()).eta()     , (b->p4()+bbar->p4()).eta()     , weight);
     bbbarY_   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), (b->p4()+bbar->p4()).Rapidity(), weight);
     bbbarMass_->Fill( (genb->p4()+genbbar->p4()).mass()    , (b->p4()+bbar->p4()).mass()    , weight);
+    // search for best gen-reco match to resolve b-bbar ambiguity and find correct gen-reco association
+    double bpt    =b->pt();         
+    double bbarpt =bbar->pt(); 
+    double beta   =b->eta();        
+    double bbareta=bbar->eta(); 
+    double bY     =b->rapidity();   
+    double bbarY  =bbar->rapidity();
+    if(std::abs(genb->pt()-b->pt())+std::abs(genbbar->pt()-bbar->pt()) > std::abs(genb->pt()-bbar->pt())+std::abs(genbbar->pt()-b->pt())){ 
+      bY=bbar->rapidity(); 
+      bbarY=b->rapidity();
+      bpt=bbar->pt(); 
+      bbarpt=b->pt();
+      beta=bbar->eta(); 
+      bbareta=b->eta();
+    }
+    bqPtClosestPt_ ->Fill( genb->pt()         , bpt    , weight);
+    bqPtClosestPt_ ->Fill( genbbar->pt()      , bbarpt , weight);
+    bqEtaClosestPt_->Fill( genb->eta()        , beta   , weight);
+    bqEtaClosestPt_->Fill( genbbar->eta()     , bbareta, weight);
+    bqYClosestPt_  ->Fill( genb->rapidity()   , bY     , weight);
+    bqYClosestPt_  ->Fill( genbbar->rapidity(), bbarY  , weight);
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
 
@@ -247,6 +275,8 @@ SemiLepBjetAnalyzer::beginJob()
   // pt
   if(recPlots_) bqPtRec  = fs->make<TH1F>("bqPtRec" , "p_{t}^{b and #bar{b}} (rec) [GeV]", 1200, 0., 1200.);
   if(genPlots_) bqPtGen  = fs->make<TH1F>("bqPtGen" , "p_{t}^{b and #bar{b}} (gen) [GeV]", 1200, 0., 1200.);
+  if(recPlots_) leadbqPtRec  = fs->make<TH1F>("leadbqPtRec" , "p_{t}^{lead b}} (rec) [GeV]", 1200, 0., 1200.);
+  if(genPlots_) leadbqPtGen  = fs->make<TH1F>("leadbqPtGen" , "p_{t}^{lead b}} (gen) [GeV]", 1200, 0., 1200.);
   // eta
   if(recPlots_) bqEtaRec = fs->make<TH1F>("bqEtaRec", "#eta^{b and #bar{b}} (rec)"       , 100, -5., 5.);
   if(genPlots_) bqEtaGen = fs->make<TH1F>("bqEtaGen", "#eta^{b and #bar{b}} (gen)"       , 100, -5., 5.);
@@ -267,12 +297,18 @@ SemiLepBjetAnalyzer::beginJob()
   if(recPlots_) bbbarMassRec= fs->make<TH1F>("bbbarMassRec" , "m^{b#bar{b}} (rec) [GeV]"    , 1200,  0., 1200.);
   if(genPlots_) bbbarMassGen= fs->make<TH1F>("bbbarMassGen" , "m^{b#bar{b}} (gen) [GeV]"    , 1200,  0., 1200.);
 
+
   // 2D correlation
   if(recPlots_&&genPlots_){
-    // A) b-quark quantities
-    bqPt_  = fs->make<TH2F>("bqPt_" , "p_{t}^{b and #bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
+    // A1) b-jet quantities
+    bqPt_    = fs->make<TH2F>("bqPt_" , "p_{t}^{b and #bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
+    leadbqPt_= fs->make<TH2F>("leadbqPt_" , "p_{t}^{lead b} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
     bqEta_ = fs->make<TH2F>("bqEta_", "#eta^{b and #bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
     bqY_   = fs->make<TH2F>("bqY_"  , "y^{b and #bar{b}} (gen vs rec)"          ,  100, -5.,    5.,  100, -5.,    5.);
+    // A2) b-jet quantities taking into account that b and bbar can be switched for those measurements
+    bqPtClosestPt_  = fs->make<TH2F>("bqPtClosestPt_" , "p_{t}^{b and #bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
+    bqEtaClosestPt_ = fs->make<TH2F>("bqEtaClosestPt_", "#eta^{b and #bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
+    bqYClosestPt_   = fs->make<TH2F>("bqYClosestPt_"  , "y^{b and #bar{b}} (gen vs rec)"          ,  100, -5.,    5.,  100, -5.,    5.);
     // B) bbbar-system quantities
     bbbarPt_  = fs->make<TH2F>("bbbarPt_"   , "p_{t}^{b#bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
     bbbarEta_ = fs->make<TH2F>("bbbarEta_"  , "#eta^{b#bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);

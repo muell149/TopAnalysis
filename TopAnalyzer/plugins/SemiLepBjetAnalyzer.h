@@ -70,6 +70,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   unsigned int runNumber, luminosityBlockNumber, eventNumber;
   float valueBqPtRec;
   float valueBqPtGen;
+  float valueLeadBqPtRec;
+  float valueLeadBqPtGen;
   float valueBqEtaRec;
   float valueBqEtaGen;
   float valueBqYRec;
@@ -95,6 +97,9 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH1F* bqPtRec;
   TH1F* bqPtGen;
 
+  TH1F* leadbqPtRec;
+  TH1F* leadbqPtGen;
+
   TH1F* bqEtaRec;
   TH1F* bqEtaGen;
 
@@ -114,8 +119,12 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH1F* bbbarMassGen;
 
   TH2F* bqPt_;
+  TH2F* leadbqPt_;
   TH2F* bqEta_;
   TH2F* bqY_;
+  TH2F* bqPtClosestPt_;
+  TH2F* bqEtaClosestPt_;
+  TH2F* bqYClosestPt_;
   TH2F* bbbarPt_;
   TH2F* bbbarEta_;
   TH2F* bbbarY_;
