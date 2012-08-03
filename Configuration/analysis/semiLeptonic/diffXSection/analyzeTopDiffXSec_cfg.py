@@ -254,7 +254,7 @@ if(not options.sample=="none"):
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgMcatnlo"
     elif(options.sample=="ttbarMatchingDown"):        
-        usedSample="TopAnalysis/Configuration/ttjets_matching_down_MadgraphZ2_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigMatchDown"

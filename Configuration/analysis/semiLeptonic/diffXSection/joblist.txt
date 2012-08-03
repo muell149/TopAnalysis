@@ -57,8 +57,8 @@ nafJobSplitter.pl -q 1 -d ElttbarSGScaleDn -c mctag=Fall11,triggerTag=HLT,sample
 # matching
 nafJobSplitter.pl -q 1 -d MuttbarSGMatchUp -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingUp,lepton=muon     360 analyzeMuonDiffXSecCorrected_cfg.py
 nafJobSplitter.pl -q 1 -d ElttbarSGMatchUp -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingUp,lepton=electron 360 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -d MuttbarSGMatchDn -c mctag=Summer11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     83 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarSGMatchDn -c mctag=Summer11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 83 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -d MuttbarSGMatchDn -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     114 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -d ElttbarSGMatchDn -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 114 analyzeMuonDiffXSecCorrected_cfg.py
 
 # POWHEG
 nafJobSplitter.pl -q 1 -d MuPowhegSG -c mctag=Fall11,triggerTag=HLT,sample=powheg,lepton=muon     507 analyzeMuonDiffXSecCorrected_cfg.py
@@ -102,8 +102,8 @@ nafJobSplitter.pl -q 1 -d ElttbarBGScaleDn -c mctag=Fall11,triggerTag=HLT,sample
 # matching
 nafJobSplitter.pl -q 1 -d MuttbarBGMatchUp -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingUp,lepton=muon     360 analyzeMuonDiffXSecBG_cfg.py
 nafJobSplitter.pl -q 1 -d ElttbarBGMatchUp -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingUp,lepton=electron 360 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d MuttbarBGMatchDn -c mctag=Summer11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     83 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -d ElttbarBGMatchDn -c mctag=Summer11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 83 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -d MuttbarBGMatchDn -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     114 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -d ElttbarBGMatchDn -c mctag=Fall11,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 114 analyzeMuonDiffXSecBG_cfg.py
 
 # POWHEG
 nafJobSplitter.pl -q 1 -d MuPowhegBG -c mctag=Fall11,triggerTag=HLT,sample=powheg,lepton=muon     507 analyzeMuonDiffXSecBG_cfg.py
