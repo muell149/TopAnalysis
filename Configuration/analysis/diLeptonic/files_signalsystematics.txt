@@ -7,8 +7,8 @@
 17  Fall11.ttjets_matching_up_MadgraphZ2_Fall11_AOD_cff    emu_ttbarsignalplustau_matchingup.root     ttbarsignalplustau,runOnAOD=True
 17  Fall11.ttjets_matching_up_MadgraphZ2_Fall11_AOD_cff    emu_ttbarbg_matchingup.root		   ttbarbg,runOnAOD=True
 
-#21  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  emu_ttbarsignalplustau_matchingdown.root   ttbarsignalplustau,runOnAOD=True
-#21  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  emu_ttbarbg_matchingdown.root		   ttbarbg,runOnAOD=True
+17  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  emu_ttbarsignalplustau_matchingdown.root   ttbarsignalplustau,runOnAOD=True
+17  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  emu_ttbarbg_matchingdown.root		   ttbarbg,runOnAOD=True
 
 20  Fall11.ttjets_scale_up_MadgraphZ2_Fall11_AOD_cff       emu_ttbarsignalplustau_scaleup.root        ttbarsignalplustau,runOnAOD=True
 20  Fall11.ttjets_scale_up_MadgraphZ2_Fall11_AOD_cff       emu_ttbarbg_scaleup.root		   ttbarbg,runOnAOD=True
@@ -33,8 +33,8 @@
 17  Fall11.ttjets_matching_up_MadgraphZ2_Fall11_AOD_cff    mumu_ttbarsignalplustau_matchingup.root     ttbarsignalplustau,runOnAOD=True
 17  Fall11.ttjets_matching_up_MadgraphZ2_Fall11_AOD_cff    mumu_ttbarbg_matchingup.root		   ttbarbg,runOnAOD=True
 
-#21  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  mumu_ttbarsignalplustau_matchingdown.root   ttbarsignalplustau,runOnAOD=True
-#21  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  mumu_ttbarbg_matchingdown.root		   ttbarbg,runOnAOD=True
+17  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  mumu_ttbarsignalplustau_matchingdown.root   ttbarsignalplustau,runOnAOD=True
+17  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  mumu_ttbarbg_matchingdown.root		   ttbarbg,runOnAOD=True
 
 20  Fall11.ttjets_scale_up_MadgraphZ2_Fall11_AOD_cff       mumu_ttbarsignalplustau_scaleup.root        ttbarsignalplustau,runOnAOD=True
 20  Fall11.ttjets_scale_up_MadgraphZ2_Fall11_AOD_cff       mumu_ttbarbg_scaleup.root		   ttbarbg,runOnAOD=True
@@ -59,8 +59,8 @@
 17  Fall11.ttjets_matching_up_MadgraphZ2_Fall11_AOD_cff    ee_ttbarsignalplustau_matchingup.root      ttbarsignalplustau,runOnAOD=True
 17  Fall11.ttjets_matching_up_MadgraphZ2_Fall11_AOD_cff    ee_ttbarbg_matchingup.root		   ttbarbg,runOnAOD=True
 
-#21  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  ee_ttbarsignalplustau_matchingdown.root    ttbarsignalplustau,runOnAOD=True
-#21  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  ee_ttbarbg_matchingdown.root		   ttbarbg,runOnAOD=True
+17  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  ee_ttbarsignalplustau_matchingdown.root    ttbarsignalplustau,runOnAOD=True
+17  Fall11.ttjets_matching_down_MadgraphZ2_Fall11_AOD_cff  ee_ttbarbg_matchingdown.root		   ttbarbg,runOnAOD=True
 
 20  Fall11.ttjets_scale_up_MadgraphZ2_Fall11_AOD_cff       ee_ttbarsignalplustau_scaleup.root	   ttbarsignalplustau,runOnAOD=True
 20  Fall11.ttjets_scale_up_MadgraphZ2_Fall11_AOD_cff       ee_ttbarbg_scaleup.root			   ttbarbg,runOnAOD=True
