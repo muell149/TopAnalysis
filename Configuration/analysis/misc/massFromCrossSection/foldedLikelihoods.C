@@ -97,6 +97,28 @@ TGraphErrors* getRunningAlphaGraph(const double qRangeMin=80, const unsigned qRa
   return graph;
 }
 
+TGraphErrors getMeasXSecWithErr(const RooFormulaVar& measXSec, const RooFormulaVar& measXSecErr,
+				RooRealVar& xvar, const double xMin, const double xMax, const unsigned nPoints)
+{
+  const double xOld = xvar.getVal();
+  double x[nPoints];
+  double y[nPoints];
+  double xErr[nPoints];
+  double yErr[nPoints];
+  const double deltaX = (xMax - xMin)/nPoints;
+  double xi = xMin;
+  for(unsigned i=0; i<nPoints; i++) {
+    xvar.setVal(xi);
+    x[i] = xi;
+    y[i] = measXSec.getVal();
+    xErr[i] = 0.;
+    yErr[i] = measXSecErr.getVal();
+    xi += deltaX;
+  }
+  xvar.setVal(xOld);
+  return TGraphErrors(nPoints, x, y, xErr, yErr);
+}
+
 TGraph* getAlphaLambdaGraph()
 {
   unsigned nPoints=100;
@@ -139,10 +161,11 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
   TString fileName = "theories_7TeV/" + name;
   fileName += (pole ? "_pole" : "_msbar");
   switch (pdfType) {
-  case kMSTW: fileName += "_mstw.tab"; break;
-  case kHERA: fileName += "_hera.tab"; break;
-  case kABM : fileName += "_abm.tab" ; break;
-  default   : std::cout << "PdfType (" << pdfType << ") not supported!" << std::endl; abort();
+  case kMSTW : fileName += "_mstw.tab" ; break;
+  case kHERA : fileName += "_hera.tab" ; break;
+  case kABM  : fileName += "_abm.tab"  ; break;
+  case kNNPDF: fileName += "_nnpdf.tab"; break;
+  default    : std::cout << "PdfType (" << pdfType << ") not supported!" << std::endl; abort();
   }
   
   ifstream in;
@@ -199,10 +222,11 @@ TString epsString(const TString& label, const bool pole, const PdfType pdfType)
   TString name = "figs/"+label;
   name += (pole ? "_pole" : "_MSbar");
   switch (pdfType) {
-  case kMSTW: name += "_mstw"; break;
-  case kHERA: name += "_hera"; break;
-  case kABM : name += "_abm" ; break;
-  default   : std::cout << "PdfType (" << pdfType << ") not supported!" << std::endl; abort();
+  case kMSTW : name += "_mstw" ; break;
+  case kHERA : name += "_hera" ; break;
+  case kABM  : name += "_abm"  ; break;
+  case kNNPDF: name += "_nnpdf"; break;
+  default    : std::cout << "PdfType (" << pdfType << ") not supported!" << std::endl; abort();
   }
   return (name + ".eps");
 }
@@ -273,16 +297,28 @@ std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, 
   std::vector<TF1*> vec;
   if(symmetrize) {
     relUncMean->Fit("pol1", "Q");
-    relUncMean->GetFunction("pol1")->Draw("same");
-    vec.push_back((TF1*) relUncMean->GetFunction("pol1")->Clone());
+    if(relUncMean->GetFunction("pol1")) {
+      relUncMean->GetFunction("pol1")->Draw("same");
+      vec.push_back((TF1*) relUncMean->GetFunction("pol1")->Clone());
+    }
+    else
+      std::cout << "WARNING: Failed to fit TGraph relUncMean for " << title << std::endl;
   }
   else {
     relUncUp->Fit("pol1", "Q");
-    relUncUp->GetFunction("pol1")->Draw("same");
+    if(relUncUp->GetFunction("pol1")) {
+      relUncUp->GetFunction("pol1")->Draw("same");
+      vec.push_back((TF1*) relUncUp  ->GetFunction("pol1")->Clone());
+    }
+    else
+      std::cout << "WARNING: Failed to fit TGraph relUncUp for " << title << std::endl;
     relUncDown->Fit("pol1", "Q");
-    relUncDown->GetFunction("pol1")->Draw("same");
-    vec.push_back((TF1*) relUncUp  ->GetFunction("pol1")->Clone());
-    vec.push_back((TF1*) relUncDown->GetFunction("pol1")->Clone());
+    if(relUncDown->GetFunction("pol1")) {
+      relUncDown->GetFunction("pol1")->Draw("same");
+      vec.push_back((TF1*) relUncDown->GetFunction("pol1")->Clone());
+    }
+    else
+      std::cout << "WARNING: Failed to fit TGraph relUncDown for " << title << std::endl;
   }
   TLegend leg = TLegend(0.8, 0.2, 0.9, 0.35);
   leg.SetFillColor(0);
@@ -344,7 +380,7 @@ void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mas
 }
 
 void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std::vector<TString>& labels,
-		     TCanvas* canvas, const TString printNameBase)
+		     TCanvas* canvas, const TString printNameBase, const bool oneTheoryOnly=false)
 {
   TBox boxMass2012(171.8, 0.10,
 		   174.6, 0.13);
@@ -357,29 +393,52 @@ void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std
   textMass2012.SetTextAlign(12);
   textMass2012.SetTextFont(43);
   textMass2012.SetTextSizePixels(21);
+ 
+  TBox boxAlpha2012(144., 0.1177,
+		    187., 0.1191);
+  boxAlpha2012.SetFillColor(kYellow);
+  TLine lineAlpha2012(144, 0.1184,
+		      187, 0.1184);
+  lineAlpha2012.SetLineStyle(2);
+  TText textAlpha2012(145.5, 0.1186, "PDG World Average June 2012");
+  textAlpha2012.SetTextAlign(11);
+  textAlpha2012.SetTextFont(43);
+  textAlpha2012.SetTextSizePixels(21);
 
-  const unsigned color[6] = {kRed, kRed, kGreen, kGreen, kCyan, kCyan};
-  const unsigned style[6] = {1, 6, 2, 8, 3, 4};
-  const unsigned nPreds = predVec.size();
-  TLegend leg = TLegend(0.2, 0.55, 0.7, 0.9);
+  const unsigned color[8] = {kRed, kRed, kGreen, kGreen, kCyan, kCyan, kBlue, kBlue};
+  const unsigned style[8] = {1, 6, 2, 8, 3, 4, 1, 6};
+  const unsigned nPreds = (oneTheoryOnly ? 1 : predVec.size());
+  double yMin = 0.91 - nPreds*0.06;
+  if(yMin < 0.55)
+    yMin = 0.55;
+  TLegend leg = TLegend(0.2, yMin, 0.7, 0.91);
   leg.SetFillStyle(0);
   leg.SetBorderSize(0);
   TH1* h2[nPreds];
-  for(unsigned i=0; i<predVec.size(); i++) {
+  for(unsigned i=0; i<nPreds; i++) {
     h2[i] = predVec.at(i)->createHistogram("mass,alpha",50,30);
     h2[i]->Scale(1./(1*0.001));
     const double levels[1] = {162.};
     h2[i]->SetContour(1, levels);
     h2[i]->GetXaxis()->SetRangeUser(144., 186.);
-    h2[i]->SetLineWidth(2);
+    if(oneTheoryOnly)
+      h2[i]->SetLineWidth(4);
+    else
+      h2[i]->SetLineWidth(2);
     h2[i]->SetLineStyle(style[i]);
     h2[i]->SetLineColor(color[i]);
     leg.AddEntry(h2[i], labels.at(i), "L");
     if(i==0) {
       h2[i]->Draw("cont3");
       boxMass2012.Draw();
+      if(oneTheoryOnly)
+	boxAlpha2012.Draw();
       lineMass2012.Draw();
       textMass2012.Draw();
+      if(oneTheoryOnly) {
+	lineAlpha2012.Draw();
+	textAlpha2012.Draw();
+      }
     }
     h2[i]->Draw("cont3 same");
   }
@@ -394,8 +453,11 @@ void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std
   text.Draw();
   gPad->RedrawAxis();
   canvas->Print(printNameBase+".ps");
-  canvas->Print(printNameBase+"_predXSecAlphaVsMass.eps");
-  for(unsigned i=0; i<predVec.size(); i++)
+  if(oneTheoryOnly)
+    canvas->Print(printNameBase+"_predXSecAlphaVsMass_oneTheoryOnly.eps");
+  else
+    canvas->Print(printNameBase+"_predXSecAlphaVsMass.eps");
+  for(unsigned i=0; i<nPreds; i++)
     delete h2[i];
 }
 
@@ -426,7 +488,7 @@ TLatex* cmsTxt(const bool full2011dilep)
   TLatex* text = new TLatex(3.570061,23.08044,txt);
   text->SetNDC();
   text->SetTextAlign(13);
-  text->SetX(0.157);
+  text->SetX(gPad->GetLeftMargin());
   text->SetY(1.003);
   text->SetTextFont(43);
   text->SetTextSizePixels(25);
@@ -495,7 +557,7 @@ int foldedLikelihoods(const bool pole)
   lastMinuteLeg.SetFillColor(0);
   lastMinuteLeg.SetBorderSize(0);
   lastMinuteLeg.AddEntry(runningAlpha    , "PDG 2012 world average"  , "LF");
-  lastMinuteLeg.AddEntry(runningAlpha_new, "Our result (using Cacciari et al. with MSTW2008)", "LF");
+  lastMinuteLeg.AddEntry(runningAlpha_new, "Our result", "LF");
 
   TLine lineMZ(mZ, 0.09, mZ, 0.135);
   TLatex textMZ(0.95*mZ, 0.11, "m_{Z}");
@@ -537,8 +599,8 @@ int foldedLikelihoods(const bool pole)
   /// End of quick'n dirty
   //////////////////////////////////////
 
-  const unsigned nPdfSets=3;
-  const unsigned nTheories=2;
+  const unsigned nPdfSets  = 3;
+  const unsigned nTheories = 2;
 
   //  std::vector<TGraphAsymmErrors*> ahr_vec[nPdfSets];
   std::vector<TGraphAsymmErrors*> moc_vec[nPdfSets];
@@ -552,13 +614,13 @@ int foldedLikelihoods(const bool pole)
   //  std::vector<TF1*> ahr_funcs[nPdfSets][4];
   std::vector<TF1*> mit_funcs[nPdfSets][4];
 
-  const TString pdfName[nPdfSets] = {"MSTW2008", "HERAPDF1.5", "ABM11"};
-  const TString theoName[nTheories] = {"Langenfeld", "Cacciari"};
+  const TString pdfName [4] = {"MSTW2008", "HERAPDF1.5", "ABM11", "NNPDF2.1"};
+  const TString theoName[nTheories] = {"Hathor 1.2", "Top++ 1.2"};
 
   TString theoTitle[nPdfSets][nTheories];
   for(unsigned h=0; h<nPdfSets; h++)
     for(unsigned i=0; i<nTheories; i++)
-      theoTitle[h][i] = theoName[i] + " et al. with " + pdfName[h];
+      theoTitle[h][i] = theoName[i] + " with " + pdfName[h];
 
   const TString errName [4] = {"Scale", "Experimental PDF", "#alpha_{S}", "Total"};
   const TString errLabel[4] = {"scale", "expPDF", "alphaS", "total"};
@@ -629,10 +691,14 @@ int foldedLikelihoods(const bool pole)
   RooRealVar alphaABM_mean("alphaABM_mean", "alphaABM_mean", 0.1134);
   RooRealVar alphaABM_unc ("alphaABM_unc" , "alphaABM_unc" , 0.0011);
 
+  RooRealVar alphaNNPDF_mean("alphaNNPDF_mean", "alphaNNPDF_mean", 0.1180); //dummy!!!
+  RooRealVar alphaNNPDF_unc ("alphaNNPDF_unc" , "alphaNNPDF_unc" , 0.0080); //dummy!!!
+
   std::vector<RooRealVar> defaultAlphas;
-  defaultAlphas.push_back(alphaMSTW_mean);
-  defaultAlphas.push_back(alphaHERA_mean);
-  defaultAlphas.push_back(alphaABM_mean );
+  defaultAlphas.push_back(alphaMSTW_mean );
+  defaultAlphas.push_back(alphaHERA_mean );
+  defaultAlphas.push_back(alphaABM_mean  );
+  defaultAlphas.push_back(alphaNNPDF_mean);
 
   RooRealVar mass_mean("mass_mean", "mass_mean", 173.2); // Tevatron July 2012
   RooRealVar mass_unc ("mass_unc" , "mass_unc" , 1.4); // Tevatron July 2012 plus 1 GeV for m(pole)/m(MC)?
@@ -714,9 +780,10 @@ int foldedLikelihoods(const bool pole)
     TString suf = "PredXSec";
 
     switch(h) {
-    case kMSTW: alphaFileName += "mstw"; suf += "MSTW"; break;
-    case kHERA: alphaFileName += "hera"; suf += "HERA"; break;
-    case kABM : alphaFileName += "abm" ; suf += "ABM" ; break;
+    case kMSTW : alphaFileName += "mstw" ; suf += "MSTW" ; break;
+    case kHERA : alphaFileName += "hera" ; suf += "HERA" ; break;
+    case kABM  : alphaFileName += "abm"  ; suf += "ABM"  ; break;
+    case kNNPDF: alphaFileName += "nnpdf"; suf += "NNPDF"; break;
     }
 
     TFile mitAlphaFile("theories_7TeV/mitov_"+alphaFileName+"_alphaDep.root", "READ");
@@ -746,6 +813,7 @@ int foldedLikelihoods(const bool pole)
     predXSecFormularVecLabels.push_back(theoTitle[h][1]);
     predXSecFormularVecLabels.push_back(theoTitle[h][0]);
   }
+  drawAlphaVsMass(predXSecFormularVec, predXSecFormularVecLabels, canvas, printNameBase, true);
   drawAlphaVsMass(predXSecFormularVec, predXSecFormularVecLabels, canvas, printNameBase);
 
 //  canvas->Print(printNameBase+".ps]");
@@ -766,18 +834,24 @@ int foldedLikelihoods(const bool pole)
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsString("xsec_vs_mass", pole, (PdfType)0));
 
-  RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
   mass.setVal(mass_mean.getVal());
+
+  TGraphErrors measXSecWithErr = getMeasXSecWithErr(measXSecMassDep, measXSecMassDepErr, alpha, 0.10, 0.13, 30);
+
+  RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
+  frame_alpha->addObject(&measXSecWithErr, "3");
+  frame_alpha->addObject(&measXSecWithErr, "CX");
   mitPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
-  measXSecMassDep.plotOn(frame_alpha, RooFit::LineColor(colorDil), RooFit::LineStyle(3));
   frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
   frame_alpha->SetMaximum(230.);
   frame_alpha->SetMinimum(110.);
   frame_alpha->Draw();
-  TLegend theoLeg = TLegend(0.2, 0.79, 0.65, 0.9);
+  measXSecWithErr.SetFillColor(kBlue-9);
+  measXSecWithErr.SetLineColor(kBlue+1);
+  TLegend theoLeg = TLegend(0.18, 0.81, 0.63, 0.92);
   theoLeg.SetFillStyle(0);
   theoLeg.SetBorderSize(0);
-  theoLeg.AddEntry(frame_alpha->findObject(measXSecMassDep.GetName()+(TString)"_Norm[alpha]"), "CMS 2011", "L");
+  theoLeg.AddEntry(&measXSecWithErr, "CMS 2011", "FL");
   theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][1], "L");
   theoLeg.Draw();
   char massTxt[99];
@@ -797,7 +871,7 @@ int foldedLikelihoods(const bool pole)
   frame_alpha->SetMinimum(110.);
   frame_alpha->Draw();
   theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][0], "L");
-  theoLeg.SetY1NDC(0.73);
+  theoLeg.SetY1NDC(0.75);
   theoLeg.Draw();
   massText.Draw();
   canvas->Print(printNameBase+".ps");
@@ -813,7 +887,7 @@ int foldedLikelihoods(const bool pole)
     theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][1], "L");
     theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][0], "L");
   }
-  theoLeg.SetY1NDC(0.52);
+  theoLeg.SetY1NDC(0.54);
   theoLeg.Draw();
   massText.Draw();
   canvas->Print(printNameBase+".ps");
@@ -845,7 +919,7 @@ int foldedLikelihoods(const bool pole)
   unsigned iGraphPoint = 0;
 
   for(unsigned h=0; h<nPdfSets; h++) {
-    const TString suf[3] = {"MSTW", "HERA", "ABM"};
+    const TString suf[4] = {"MSTW", "HERA", "ABM", "NNPDF"};
 
     mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob),
 					    mass, mass_mean, mass_unc);
@@ -921,11 +995,19 @@ int foldedLikelihoods(const bool pole)
   textAlphaABM.SetTextSizePixels(26);
   textAlphaABM.SetTextAlign(12);
 
-  TLegend summaryLeg = TLegend(0.2, 0.75, 0.45, 0.9);
+  TText textAlphaNNPDF(alphaHERA_mean.getVal()+alphaHERA_unc.getVal()+0.0004, 6.5, "NNPDF2.1");
+  textAlphaNNPDF.SetTextFont(43);
+  textAlphaNNPDF.SetTextSizePixels(26);
+  textAlphaNNPDF.SetTextAlign(12);
+
+  TLegend summaryLeg = TLegend(0.1, 0.75, 0.25, 0.9);
   summaryLeg.SetFillStyle(0);
   summaryLeg.SetBorderSize(0);
-  summaryLeg.AddEntry(&mitSummaryGraphTotErr, "Cacciari et al."  , "PL");
-  summaryLeg.AddEntry(&mocSummaryGraphTotErr, "Langenfeld et al.", "PL");
+  summaryLeg.AddEntry(&mitSummaryGraphTotErr, theoName[1], "PL");
+  summaryLeg.AddEntry(&mocSummaryGraphTotErr, theoName[0], "PL");
+
+  const double oldPadLeftMargin = gPad->GetLeftMargin();
+  gPad->SetLeftMargin(gPad->GetRightMargin());
 
   mocSummaryGraphTotErr.Draw("AP");
   boxAlphaMSTW.Draw();
@@ -948,10 +1030,14 @@ int foldedLikelihoods(const bool pole)
   textAlphaMSTW.Draw();
   textAlphaHERA.Draw();
   textAlphaABM.Draw();
+  if(nPdfSets>kNNPDF)
+    textAlphaNNPDF.Draw();
   TLatex* cmsLabel = cmsTxt(full2011dilep);
   cmsLabel->Draw();
   canvas->Print(printNameBase+"_summaryPlot.eps");
   canvas->Print(printNameBase+".ps");
+
+  gPad->SetLeftMargin(oldPadLeftMargin);
 
   ofstream outfile;
   outfile.open(printNameBase+ "_summary.tab");
@@ -962,14 +1048,14 @@ int foldedLikelihoods(const bool pole)
   outfile << "\\hline" << std::endl;
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
-    sprintf(tmpTxt, "%s et al. & \\multirow{2}{*}{with %s} & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
+    sprintf(tmpTxt, "%s & \\multirow{2}{*}{with %s} & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
 	    theoName[1].Data(), pdfName[h].Data(),
 	    mitResult[h]->bestX,
 	    TMath::Max(mitResult[h]->highErrTotal, mitResult[h]->lowErrTotal),
 	    TMath::Max(mitResult[h]->highErrFromConstraintUncertainty, mitResult[h]->lowErrFromConstraintUncertainty));
     outfile << tmpTxt << std::endl;
     outfile << "\\cline{3-5}" << std::endl;
-    sprintf(tmpTxt, "%s et al. & & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
+    sprintf(tmpTxt, "%s & & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
 	    theoName[0].Data(),
 	    mocResult[h]->bestX,
 	    TMath::Max(mocResult[h]->highErrTotal, mocResult[h]->lowErrTotal),
@@ -997,7 +1083,7 @@ int foldedLikelihoods(const bool pole)
     text.SetTextSizePixels(16);
 
     frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
-    frame_alpha->GetYaxis()->SetTitle("Probability density");
+    frame_alpha->GetYaxis()->SetTitle("Likelihood density");
     plotProjectedPDF(mocResult[h], frame_alpha, kRed, 1001, alpha);
     frame_alpha->Draw();
     text.Draw();
@@ -1008,7 +1094,7 @@ int foldedLikelihoods(const bool pole)
 	    theoTitle[h][1].Data(), mass.getTitle().Data(), mass.getVal());    
     text.SetTitle(tmpTxt);
     frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
-    frame_alpha->GetYaxis()->SetTitle("Probability density");
+    frame_alpha->GetYaxis()->SetTitle("Likelihood density");
     plotProjectedPDF(mitResult[h], frame_alpha, kRed, 1001, alpha);
     frame_alpha->Draw();
     text.Draw();
