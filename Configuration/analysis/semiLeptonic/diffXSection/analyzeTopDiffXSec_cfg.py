@@ -844,21 +844,22 @@ process.tightMuontightJetsKinematicsSSV = process.analyzeMuonJetKinematics.clone
 
 ## multiple objects
 process.compositedKinematics  = process.analyzeCompositedObjects.clone(
-                                  ## jets
                                   JetSrc = 'tightLeadingPFJets',
-                                  ## MET
                                   METSrc = 'patMETs',
-                                  ## muons
                                   MuonSrc = 'tightMuons',
-                                  ## electrons
                                   ElectronSrc = 'goodElectronsEJ',
-                                  ## event weight (PU, etc...)
                                   weight = "",
-                                  ## primary vertex info
-                                  VertexSrc = "goodOfflinePrimaryVertices"
+                                  VertexSrc = "goodOfflinePrimaryVertices",
+                                  semiLepEvent = cms.InputTag(""),
+                                  hypoKey = cms.string("kKinFit"),
+                                  btagAlgo=cms.string("combinedSecondaryVertexBJetTags"),
+                                  btagDiscr=cms.double(0.679)
                                   )
-process.compositedKinematicsTagged = process.compositedKinematics.clone()
 
+process.compositedKinematicsTagged = process.compositedKinematics.clone()
+process.compositedKinematicsKinFit = process.compositedKinematics.clone()
+process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
+process.compositedKinematics.btagDiscr=cms.double(0.244) # loose WP for untagged selection
 
 ## electrons
 process.tightElectronKinematics        = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
@@ -1282,6 +1283,7 @@ if(applyKinFit==True):
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
                                              process.analyzeHypoKinFit                       +
+                                             process.compositedKinematicsKinFit              +
                                              process.analyzeHypoKinFitLepton                 +
                                              process.analyzeHypoKinFitLeptonCorr             +
                                              process.analyzeHypoKinFitMET                    +
@@ -1324,7 +1326,8 @@ if(applyKinFit==True):
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
                                              #process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
-                                             process.analyzeTopRecoKinematicsKinFit          
+                                             process.analyzeTopRecoKinematicsKinFit          +
+                                             process.compositedKinematicsKinFit
                                              )
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
@@ -1336,7 +1339,8 @@ if(applyKinFit==True):
                                          process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
                                          #process.filterProbKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFit          +
-                                         process.analyzeTopRecoKinematicsKinFitTopAntitop
+                                         process.analyzeTopRecoKinematicsKinFitTopAntitop+
+                                         process.compositedKinematicsKinFit
                                          )
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
@@ -2470,7 +2474,8 @@ if(decayChannel=="electron"):
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
         # take care of replacements you do NOT want to do!
         process.compositedKinematics.MuonSrc='tightMuons'
-        process.compositedKinematicsTagged.MuonSrc='tightMuons'     
+        process.compositedKinematicsTagged.MuonSrc='tightMuons' 
+        process.compositedKinematicsKinFit.MuonSrc='tightMuons'      
         
 allpaths  = process.paths_().keys()
 
