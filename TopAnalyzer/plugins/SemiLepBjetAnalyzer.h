@@ -80,6 +80,14 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   float valueBbarqEtaGen;
   float valueBbarqYRec;
   float valueBbarqYGen;
+  float valueBbbarPtRec;
+  float valueBbbarPtGen;
+  float valueBbbarEtaRec;
+  float valueBbbarEtaGen;
+  float valueBbbarYRec;
+  float valueBbbarYGen;
+  float valueBbbarMassRec;
+  float valueBbbarMassGen;
 
   // ---
   //    histos
@@ -93,10 +101,25 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH1F* bqYRec;
   TH1F* bqYGen;
 
+  TH1F* bbbarPtRec;
+  TH1F* bbbarPtGen;
+
+  TH1F* bbbarEtaRec;
+  TH1F* bbbarEtaGen;
+
+  TH1F* bbbarYRec;
+  TH1F* bbbarYGen;
+
+  TH1F* bbbarMassRec;
+  TH1F* bbbarMassGen;
+
   TH2F* bqPt_;
   TH2F* bqEta_;
   TH2F* bqY_;
-
+  TH2F* bbbarPt_;
+  TH2F* bbbarEta_;
+  TH2F* bbbarY_;
+  TH2F* bbbarMass_;
 };
 
 #endif

@@ -21,18 +21,26 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   bHadJetIdx_    (cfg.getParameter<edm::InputTag> ("BHadJetIndex"    )),
   antibHadJetIdx_(cfg.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
   useTree_   (cfg.getParameter<bool>("useTree")),
-  valueBqPtRec(0),
-  valueBqPtGen(0),
-  valueBqEtaRec(0),
-  valueBqEtaGen(0),
-  valueBqYRec(0),
-  valueBqYGen(0),
-  valueBbarqPtRec(0),
-  valueBbarqPtGen(0),
-  valueBbarqEtaRec(0),
-  valueBbarqEtaGen(0),
-  valueBbarqYRec(0),
-  valueBbarqYGen(0)
+  valueBqPtRec(-999),
+  valueBqPtGen(-999),
+  valueBqEtaRec(-999),
+  valueBqEtaGen(-999),
+  valueBqYRec(-999),
+  valueBqYGen(-999),
+  valueBbarqPtRec(-999),
+  valueBbarqPtGen(-999),
+  valueBbarqEtaRec(-999),
+  valueBbarqEtaGen(-999),
+  valueBbarqYRec(-999),
+  valueBbarqYGen(-999),
+  valueBbbarPtRec(-999),
+  valueBbbarPtGen(-999),
+  valueBbbarEtaRec(-999),
+  valueBbbarEtaGen(-999),
+  valueBbbarYRec(-999),
+  valueBbbarYGen(-999),
+  valueBbbarMassRec(-999),
+  valueBbbarMassGen(-999)
 {
 }
 
@@ -135,6 +143,10 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       valueBbarqPtRec =bbar->pt();
       valueBbarqEtaRec=bbar->eta();
       valueBbarqYRec  =bbar->rapidity();
+      valueBbbarPtRec  =(b->p4()+bbar->p4()).pt();
+      valueBbbarEtaRec =(b->p4()+bbar->p4()).eta();
+      valueBbbarYRec   =(b->p4()+bbar->p4()).Rapidity();
+      valueBbbarMassRec=(b->p4()+bbar->p4()).mass();
     }
     if(verbose>1) std::cout << "do filling" << std::endl;
     bqPtRec ->Fill( b->pt()         , weight);
@@ -143,6 +155,10 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bqEtaRec->Fill( bbar->eta()     , weight);
     bqYRec  ->Fill( b->rapidity()   , weight);
     bqYRec  ->Fill( bbar->rapidity(), weight);
+    bbbarPtRec  ->Fill( (b->p4()+bbar->p4()).pt()      , weight);
+    bbbarEtaRec ->Fill( (b->p4()+bbar->p4()).eta()     , weight);
+    bbbarYRec   ->Fill( (b->p4()+bbar->p4()).Rapidity(), weight);
+    bbbarMassRec->Fill( (b->p4()+bbar->p4()).mass()    , weight);
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
  
@@ -155,7 +171,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     if(genPlots_&&verbose>0) std::cout << "WARNING: gen bjet indices incomplete!" << std::endl;
     genPlots_=false;
   }
-  // get generator level b-Jets fromgen jet collection using indices from B Hadron identification procedure
+  // get generator level b-Jets from gen jet collection using indices from B Hadron identification procedure
   const reco::GenJet* genb    = genPlots_ ? getJetFromCollection(*genJets,bIX   ) : 0;
   const reco::GenJet* genbbar = genPlots_ ? getJetFromCollection(*genJets,bbarIX) : 0;
   // fill gen histograms
@@ -167,6 +183,10 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       valueBbarqPtGen =genbbar->pt();
       valueBbarqEtaGen=genbbar->eta();
       valueBbarqYGen  =genbbar->rapidity();
+      valueBbbarPtGen  =(genb->p4()+genbbar->p4()).pt();
+      valueBbbarEtaGen =(genb->p4()+genbbar->p4()).eta();
+      valueBbbarYGen   =(genb->p4()+genbbar->p4()).Rapidity();
+      valueBbbarMassGen=(genb->p4()+genbbar->p4()).mass();
     }
     if(verbose>1) std::cout << "do filling" << std::endl;
     bqPtGen ->Fill( genb->pt()         , weight);
@@ -175,7 +195,11 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bqEtaGen->Fill( genbbar->eta()     , weight);
     bqYGen  ->Fill( genb->rapidity()   , weight);
     bqYGen  ->Fill( genbbar->rapidity(), weight);
-  }  
+    bbbarPtGen  ->Fill( (genb->p4()+genbbar->p4()).pt()      , weight);
+    bbbarEtaGen ->Fill( (genb->p4()+genbbar->p4()).eta()     , weight);
+    bbbarYGen   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), weight);
+    bbbarMassGen->Fill( (genb->p4()+genbbar->p4()).mass()    , weight);
+  }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
 
   // ---
@@ -191,9 +215,12 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bqEta_->Fill( genbbar->eta()     , bbar->eta()     , weight);
     bqY_  ->Fill( genb->rapidity()   , b->rapidity()   , weight);
     bqY_  ->Fill( genbbar->rapidity(), bbar->rapidity(), weight);
+    bbbarPt_  ->Fill( (genb->p4()+genbbar->p4()).pt()      , (b->p4()+bbar->p4()).pt()      , weight);
+    bbbarEta_ ->Fill( (genb->p4()+genbbar->p4()).eta()     , (b->p4()+bbar->p4()).eta()     , weight);
+    bbbarY_   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), (b->p4()+bbar->p4()).Rapidity(), weight);
+    bbbarMass_->Fill( (genb->p4()+genbbar->p4()).mass()    , (b->p4()+bbar->p4()).mass()    , weight);
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
- 
 
   if(useTree_) tree->Fill();
 }
@@ -215,6 +242,8 @@ SemiLepBjetAnalyzer::beginJob()
   //---
   //   book histograms
   //---
+  // 1D rec und gen
+  // A) b-quark quantities
   // pt
   if(recPlots_) bqPtRec  = fs->make<TH1F>("bqPtRec" , "p_{t}^{b and #bar{b}} (rec) [GeV]", 1200, 0., 1200.);
   if(genPlots_) bqPtGen  = fs->make<TH1F>("bqPtGen" , "p_{t}^{b and #bar{b}} (gen) [GeV]", 1200, 0., 1200.);
@@ -224,11 +253,31 @@ SemiLepBjetAnalyzer::beginJob()
   // rapidity
   if(recPlots_) bqYRec   = fs->make<TH1F>("bqYRec"  , "y^{b and #bar{b}} (rec)"          , 100, -5., 5.);
   if(genPlots_) bqYGen   = fs->make<TH1F>("bqYGen"  , "y^{b and #bar{b}} (gen)"          , 100, -5., 5.);
-  // correlation
+  // B) bbbar-system quantities
+  // pt
+  if(recPlots_) bbbarPtRec  = fs->make<TH1F>("bbbarPtRec"   , "p_{t}^{b#bar{b}} (rec) [GeV]", 1200,  0., 1200.);
+  if(genPlots_) bbbarPtGen  = fs->make<TH1F>("bbbarPtGen"   , "p_{t}^{b#bar{b}} (gen) [GeV]", 1200,  0., 1200.);
+  // eta
+  if(recPlots_) bbbarEtaRec = fs->make<TH1F>("bbbarEtaRec"  , "#eta^{b#bar{b}} (rec)"       ,  100, -5.,    5.);
+  if(genPlots_) bbbarEtaGen = fs->make<TH1F>("bbbarEtaGen"  , "#eta^{b#bar{b}} (gen)"       ,  100, -5.,    5.);
+  // rapidity
+  if(recPlots_) bbbarYRec   = fs->make<TH1F>("bbbarYRec"    , "y^{b#bar{b}} (rec)"          ,  100, -5.,    5.);
+  if(genPlots_) bbbarYGen   = fs->make<TH1F>("bbbarYGen"    , "y^{b#bar{b}} (gen)"          ,  100, -5.,    5.);
+  // mass
+  if(recPlots_) bbbarMassRec= fs->make<TH1F>("bbbarMassRec" , "m^{b#bar{b}} (rec) [GeV]"    , 1200,  0., 1200.);
+  if(genPlots_) bbbarMassGen= fs->make<TH1F>("bbbarMassGen" , "m^{b#bar{b}} (gen) [GeV]"    , 1200,  0., 1200.);
+
+  // 2D correlation
   if(recPlots_&&genPlots_){
+    // A) b-quark quantities
     bqPt_  = fs->make<TH2F>("bqPt_" , "p_{t}^{b and #bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
     bqEta_ = fs->make<TH2F>("bqEta_", "#eta^{b and #bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
     bqY_   = fs->make<TH2F>("bqY_"  , "y^{b and #bar{b}} (gen vs rec)"          ,  100, -5.,    5.,  100, -5.,    5.);
+    // B) bbbar-system quantities
+    bbbarPt_  = fs->make<TH2F>("bbbarPt_"   , "p_{t}^{b#bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
+    bbbarEta_ = fs->make<TH2F>("bbbarEta_"  , "#eta^{b#bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
+    bbbarY_   = fs->make<TH2F>("bbbarY_"    , "y^{b#bar{b}} (gen vs rec)"          ,  100, -5.,    5.,  100, -5.,    5.);
+    bbbarMass_= fs->make<TH2F>("bbbarMass_" , "m^{b#bar{b}} (gen vs rec) [GeV]"    , 1200,  0., 1200., 1200,  0., 1200.);
   }
   //---
   //   create branches
