@@ -341,6 +341,7 @@ Bool_t Analysis::Process(Long64_t entry)
   float dimass=0.;
   double btagSFuse=1.0;//only use the btag SF when applying b-tagging
   double weightKinFituse = 1.0;//only use the kin fit SF when using the kinematic reconstruction
+  double trigEFF = 1.0;//set trigger efficiency scale factor to 1. 
   if(systematic=="PU_UP"){weightPU = weightPU_Up;}//only for PU systematic run
   if(systematic=="PU_DOWN"){weightPU = weightPU_Down;}//only for PU systematic run
   if(systematic=="MCATNLO"){weightPU = weightPU*weightMCatNLO;}//only for PU systematic run
