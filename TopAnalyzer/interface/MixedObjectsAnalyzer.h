@@ -54,7 +54,10 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   virtual void endJob();
 
   /// src's for the different infos
-  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, weight_, VertexSrc_;
+  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, weight_, VertexSrc_, semiLepEvt_;
+
+  // class key of kinfit hypothesis
+  std::string hypoKey_, btagAlgo_;
 
   /// event weight
   double weight;
@@ -65,8 +68,13 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   /// define Tree for event content
   TTree * tree;
 
-  // doubles
-  double MuNu4J, ElNu4J, mJJ, mWJJ, mHbb;
+  /// doubles
+  double btagDiscr_, MuNu4J, ElNu4J, mJJ, mWJJ, mWFitJJ, mHbb, leadNonttjetPt, leadNonttjetY, leadNonttjetEta;
+  double bqhadPtPre, bqhadEtaPre, bqhadPhiPre, bqlepPtPre, bqlepEtaPre, bqlepPhiPre, lqPtPre, lqEtaPre, lqPhiPre, lqbarPtPre, lqbarEtaPre, lqbarPhiPre, nuPtPre, nuEtaPre, nuPhiPre, lepPtPre, lepEtaPre, lepPhiPre;
+  double bqhadPtFit, bqhadEtaFit, bqhadPhiFit, bqlepPtFit, bqlepEtaFit, bqlepPhiFit, lqPtFit, lqEtaFit, lqPhiFit, lqbarPtFit, lqbarEtaFit, lqbarPhiFit, nuPtFit, nuEtaFit, nuPhiFit, lepPtFit, lepEtaFit, lepPhiFit;
+
+  /// ints
+  int BindexA, BindexB, BindexC, BindexD, Nbjets, Njets, leadNonttjet;
 
   /// histo container
   std::map< std::string, TH1F* > hists_;
