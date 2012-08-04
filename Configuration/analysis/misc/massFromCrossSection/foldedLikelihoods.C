@@ -219,7 +219,7 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
 
 TString epsString(const TString& label, const bool pole, const PdfType pdfType)
 {
-  TString name = "figs/"+label;
+  TString name = "figures/"+label;
   name += (pole ? "_pole" : "_MSbar");
   switch (pdfType) {
   case kMSTW : name += "_mstw" ; break;
@@ -508,9 +508,9 @@ int foldedLikelihoods(const bool pole)
   RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooIntegrator1D").setCatLabel("sumRule", "Midpoint");
   RooAbsReal::defaultIntegratorConfig()->methodND().setLabel("RooMCIntegrator");
 
-  gSystem->mkdir("figs");
+  gSystem->mkdir("figures");
 
-  TString printNameBase = "figs/foldedLikelihoods";
+  TString printNameBase = "figures/foldedLikelihoods";
   printNameBase += (pole ? "_pole" : "_MSbar");
 
   TCanvas* canvas = new TCanvas("canvas", "canvas", 10, 10, 900, 600);
@@ -523,7 +523,7 @@ int foldedLikelihoods(const bool pole)
     gStyle->SetOptTitle(1);
     runningAlpha->Draw("AP");
     canvas->Print(printNameBase+".ps");
-    canvas->Print("figs/alpha_s.eps");
+    canvas->Print("figures/alpha_s.eps");
     gStyle->SetOptTitle(0);
   }
 
@@ -533,7 +533,7 @@ int foldedLikelihoods(const bool pole)
     mShift->Draw("AP");
     mShift->Fit("pol1", "Q");
     canvas->Print(printNameBase+".ps");
-    canvas->Print("figs/MSbar_vs_pole_mass.eps");
+    canvas->Print("figures/MSbar_vs_pole_mass.eps");
   }
 
   //////////////////////////////////////
@@ -615,7 +615,7 @@ int foldedLikelihoods(const bool pole)
   std::vector<TF1*> mit_funcs[nPdfSets][4];
 
   const TString pdfName [4] = {"MSTW2008", "HERAPDF1.5", "ABM11", "NNPDF2.1"};
-  const TString theoName[nTheories] = {"Hathor 1.2", "Top++ 1.2"};
+  const TString theoName[nTheories] = {"HATHOR 1.2", "Top++ 1.2"};
 
   TString theoTitle[nPdfSets][nTheories];
   for(unsigned h=0; h<nPdfSets; h++)
