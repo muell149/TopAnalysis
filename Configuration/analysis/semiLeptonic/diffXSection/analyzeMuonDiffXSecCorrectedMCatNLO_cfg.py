@@ -10,7 +10,7 @@ execfile("analyzeTopDiffXSecMCatNLO_cfg.py")
 
 ## change input collections to JER-shifted collections (for reco paths only)
 from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
-pathlist = [process.p1, process.p2, process.p5]
+pathlist = [process.p1, process.p2]#, process.p5]
 for path in pathlist:
     if(jetType=="particleFlow"):
         massSearchReplaceAnyInputTag(path, 'selectedPatJetsAK5PF', 'scaledJetEnergy:selectedPatJetsAK5PF')
