@@ -479,12 +479,9 @@ void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int co
 			    RooFit::LineColor(color+1), RooFit::LineWidth(2), RooFit::VLines());
 }
 
-TLatex* cmsTxt(const bool full2011dilep)
+TLatex* cmsTxt()
 {
-  const TString txt = (full2011dilep ?
-		       //		       "CMS, 2.3 fb^{-1} at  #sqrt{s} = 7 TeV" :
-		       "CMS 2011 t#bar{t} data #times approx. NNLO,  #sqrt{s} = 7 TeV, m^{pole} = 173.2 #pm 1.4 GeV" :
-		       "CMS Preliminary, 1.14 fb^{-1} at  #sqrt{s} = 7 TeV");
+  const TString txt = "CMS 2011 t#bar{t} data #times approx. NNLO,  #sqrt{s} = 7 TeV, m^{pole} = 173.2 #pm 1.4 GeV" ;
   TLatex* text = new TLatex(3.570061,23.08044,txt);
   text->SetNDC();
   text->SetTextAlign(13);
@@ -498,7 +495,6 @@ TLatex* cmsTxt(const bool full2011dilep)
 int foldedLikelihoods(const bool pole)
 {
   const bool useAlphaUnc = false;
-  const bool full2011dilep = true;
 
   setTDRStyle();
   gStyle->SetTitleBorderSize(1);
@@ -715,52 +711,25 @@ int foldedLikelihoods(const bool pole)
   }
   RooPolyVar shift("shift", "shift", mass, RooArgSet(shift_p0, shift_p1));
 
-  TString deltaM_formula = "@0-172.5+@1";
-  if(full2011dilep)
-    deltaM_formula = "@0+@1";
+  //  TString deltaM_formula = "@0-172.5+@1";
+  TString deltaM_formula = "@0+@1";
   RooFormulaVar deltaM("deltaM", "deltaM", deltaM_formula, RooArgSet(mass, shift));
-  // e-mu
-  //  RooRealVar p0("p0", "p0",  1.01    ); // e-mu
-  //  RooRealVar p1("p1", "p1", -0.93E-02); // e-mu
-  //  RooRealVar p2("p2", "p2",  1.2E-04 ); // e-mu
-  // mu-mu
-  //  RooRealVar p0("p0", "p0",  1.00    ); // mu-mu
-  //  RooRealVar p1("p1", "p1", -1.01E-02); // mu-mu
-  //  RooRealVar p2("p2", "p2",  1.1E-04 ); // mu-mu
-  // e-e
-  //  RooRealVar p0("p0", "p0",  1.02    ); // e-e
-  //  RooRealVar p1("p1", "p1", -1.02E-02); // e-e
-  //  RooRealVar p2("p2", "p2",  1.0E-04 ); // e-e
-  // weighted average
-  RooRealVar p0("p0", "p0",  1.01    ); // e-mu
-  RooRealVar p1("p1", "p1", -0.97E-02); // e-mu
-  RooRealVar p2("p2", "p2",  1.125E-04 ); // e-mu
-
-  if(full2011dilep) {
-    p0.setVal(-1.467);
-    p1.setVal(0.03715);
-    p2.setVal(-0.0001324);
-//    p0.setVal(1.0);
-//    p1.setVal(0.0);
-//    p2.setVal(0.0);
-  }
+  RooRealVar p0("p0", "p0", -1.467);
+  RooRealVar p1("p1", "p1", 0.03715);
+  RooRealVar p2("p2", "p2", -0.0001324);
+//  p0.setVal(1.0);
+//  p1.setVal(0.0);
+//  p2.setVal(0.0);
 
   RooPolyVar measXSecMassDepRel("measXSecMassDepRel", "measXSecMassDepRel", deltaM, RooArgSet(p0, p1, p2));
-  RooRealVar measXSec("measXSec", "measXSec", 169.9, "pb");
-  // total exp uncert of 18.23 from adding quadr. 3.9 (stat), 16.3 (syst) and 7.6 (lumi)
-  // and subtracting 1.5 % = 2.5485 pb for the top mass (in e-mu, it is 2.6 % for ee and mumu)
-  RooRealVar measXSecErr("measXSecErr", "measXSecErr", 18.23, "pb");
+  RooRealVar measXSec("measXSec", "measXSec", 161.9, "pb");
+  RooRealVar measXSecErr("measXSecErr", "measXSecErr", 6.725, "pb");
 
-  if(full2011dilep) {
-    measXSec.setVal(161.9);
-    measXSecErr.setVal(6.725);
-  }
-
-  //  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "(@0*@1)*(1+0.01*(@2-0.1171)/0.0100)",
-  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1",
+  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "(@0*@1)*(1+0.01*(@2-0.1180)/0.0100)",
 				RooArgSet(measXSecMassDepRel,measXSec,alpha));
   RooFormulaVar measXSecMassDepErr("measXSecMassDepErr", "measXSecMassDepErr",
-				   "(@0/@1)*@2", RooArgSet(measXSecMassDep,measXSec,measXSecErr));
+				   "TMath::Sqrt(TMath::Power((@0/@1)*@2,2)+TMath::Power((@0/@1)*@2*(1+0.01*TMath::Abs((@3-0.1180)/0.0100)),2))",
+				   RooArgSet(measXSecMassDep,measXSec,measXSecErr,alpha));
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecMassDepErr);
 
 //  mass.setVal(173.2);
@@ -1032,7 +1001,7 @@ int foldedLikelihoods(const bool pole)
   textAlphaABM.Draw();
   if(nPdfSets>kNNPDF)
     textAlphaNNPDF.Draw();
-  TLatex* cmsLabel = cmsTxt(full2011dilep);
+  TLatex* cmsLabel = cmsTxt();
   cmsLabel->Draw();
   canvas->Print(printNameBase+"_summaryPlot.eps");
   canvas->Print(printNameBase+".ps");
