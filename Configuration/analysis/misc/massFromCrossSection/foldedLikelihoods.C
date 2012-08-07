@@ -365,9 +365,9 @@ void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mas
   convLeg.Draw();
   TLatex textTop(0.,0.,title);
   textTop.SetNDC();
-  textTop.SetTextAlign(13);
+  textTop.SetTextAlign(11);
   textTop.SetX(gPad->GetLeftMargin());
-  textTop.SetY(1.003);
+  textTop.SetY(0.96);
   textTop.SetTextFont(43);
   textTop.SetTextSizePixels(25);
   textTop.Draw();
