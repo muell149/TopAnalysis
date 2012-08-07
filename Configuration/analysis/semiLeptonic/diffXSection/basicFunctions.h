@@ -3047,7 +3047,7 @@ namespace semileptonic {
     return result;
   }
 
-  void DrawTheoryCurve(TString filename="", TString plotname="", bool normalize=true, int smoothFactor=0, int rebinFactor=0, int color=kBlack, int linestyle=1, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="", bool smoothcurves=true)
+  void DrawTheoryCurve(TString filename="", TString plotname="", bool normalize=true, int smoothFactor=0, int rebinFactor=0, int color=kBlack, int linestyle=1, double rangeLow=-1., double rangeHigh=-1., bool errorbands=false, int errorRebinFactor=0, int errorSmoothFactor=0, int verbose=0, bool drawOnlyErrors=false, bool drawRawPlot=false, TString model="", bool smoothcurves=true, TString PS="Parton")
   {
     // this function draws "plot" from "file" into the active canvas
     // modified quantities: NONE
@@ -3072,6 +3072,7 @@ namespace semileptonic {
     //              to see whether rebinning and smoothing has changed the shape 
     // model: indicates theory (madgraph, powheg or mcatnalo)
     // smoothcurves: indicates wheter smooth or binned curve is drawn
+    // PS: "Parton", "Hadron"
     
 /*     if(filename=="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root"){ */
 /*       std::cout << std::endl << "NEW IMPLEMENTATION!!!! " << std::endl <<  plotname << ": "; */
@@ -3090,6 +3091,7 @@ namespace semileptonic {
     plotname2.ReplaceAll("TTbar","ttbar");
     plotname2.ReplaceAll("Lep","lep");
     plotname2.ReplaceAll("Bottom","bq");
+    plotname2.ReplaceAll("Gen","");
     if(plotname2.Contains("/")){
       plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
     }
@@ -3185,8 +3187,7 @@ namespace semileptonic {
     if(verbose>0) std::cout << "name of theory curve: " << name << std::endl;
     result->SetName(name);
     result->SetTitle(name);
-    //std::cout << name << std::endl;
-    // configure style
+     // configure style
     histogramStyle(*result, kSig, false, 1.2, color);
     result->SetLineStyle(linestyle);
     // smoothing 1
@@ -3208,43 +3209,39 @@ namespace semileptonic {
     // error bands
     // --- 
     if(errorbands){
-      // get values
+      // get values   
       TH1F* loadcentral   =getTheoryPrediction(plotname        , filename);
       TH1F* loadErrorUp   =getTheoryPrediction(plotname+"_Up"  , filename);
       TH1F* loadErrorDown =getTheoryPrediction(plotname+"_Down", filename);
       // for bq and lep error bands: use mcatnlo central curve for correct PS from default running
       // and transfer relative error from parton level studies
-      // ATTENTION: the hadron level PS is used also for parton level PS as one can not destinguish them from the plotname...
-      // get name for loading mcatnlo central curve for correct PS from default running
-      TString plotname4="analyzeTop";
-      plotname4+= (plotname.Contains("Vis") ? "HadronLevelKinematics" : "PartonLevelKinematics");
-      if(plotname.Contains("Vis")){      
-	if(plotname.Contains("Lep"   )) plotname4+="Lepton";
-	if(plotname.Contains("Bottom")) plotname4+="Bjets";
-	plotname4+="PhaseSpace";
+      TString plotname4="analyzeTop"+PS+"LevelKinematics";     
+      if(PS=="Hadron"){
+	if     (plotname.Contains("Lep"   )) plotname4+="Lepton";
+	else if(plotname.Contains("Bottom")) plotname4+="Bjets";
       }
+      if(plotname.Contains("Vis")) plotname4+="PhaseSpace"; 
       plotname4+="/"+plotname2;
-      if(plotname.Contains("Vis")) plotname4+="Gen";
+
+      if(PS=="Hadron"&&(plotname.Contains("Lep")||plotname.Contains("Bottom"))) plotname4+="Gen";
       if(verbose>1) std::cout << plotname << "->" << plotname4 << std::endl;
       TH1F* loadcentral2=0;
-      if(plotname.Contains("Lep")||plotname.Contains("Bottom")){
-	if(verbose>0){
-	  std::cout << "transfer relative uncertianties to central value from: " << plotname4 << " in " << "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root" << std::endl;
-	}
-	loadcentral2=getTheoryPrediction(plotname4,"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root");
-      }
-      else loadcentral2=(TH1F*)loadcentral->Clone();
+      if(verbose>0){
+	std::cout << "transfer relative uncertainties to central value from: " << plotname4 << " in " 
+		  << "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root" << std::endl;
+      }       
+      loadcentral2=getTheoryPrediction(plotname4,"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root");
+
       TH1F* central=0;    
       TH1F* central2=0;
       TH1F* ErrorUp=0;
       TH1F* ErrorDown=0;
       if(smoothcurves){
 	// replace low statistic parts with fitted curve
-	central =useFittedFunctions(loadcentral , model, plotname, verbose);
-	central2=useFittedFunctions(loadcentral2, model, plotname, verbose);
-	//std:: cout << central2->GetBinContent(50) << std::endl;
-	ErrorUp=useFittedFunctions(loadErrorUp, model, plotname+"_Up", verbose);
-	ErrorDown=useFittedFunctions(loadErrorDown, model, plotname+"_Down", verbose);
+	central  =useFittedFunctions(loadcentral , model,plotname,        verbose);
+	central2 =useFittedFunctions(loadcentral2, model,plotname,        verbose);      
+	ErrorUp  =useFittedFunctions(loadErrorUp,  model,plotname+"_Up",  verbose);
+	ErrorDown=useFittedFunctions(loadErrorDown,model,plotname+"_Down",verbose);
 	// smoothing 1
 	if(errorSmoothFactor){
 	  central  ->Smooth(errorSmoothFactor);
@@ -3263,10 +3260,10 @@ namespace semileptonic {
       // variable rebinning for binned curve
       if(!smoothcurves){
 	// check if maxima of x-axes of loaded plots and new binning is the same
-	double newMax=binning_[plotname3][binning_[plotname3].size()-1];
-	double oldMaxcentral=loadcentral->GetBinLowEdge(load->GetNbinsX()+1);
-	double oldMaxcentral2=loadcentral2->GetBinLowEdge(loadcentral2->GetNbinsX()+1);
-	double oldMaxErrorUp=loadErrorUp->GetBinLowEdge(load->GetNbinsX()+1);
+	double newMax         =binning_[plotname3][binning_[plotname3].size()-1];
+	double oldMaxcentral  =loadcentral  ->GetBinLowEdge(load->GetNbinsX()+1);
+	double oldMaxcentral2 =loadcentral2 ->GetBinLowEdge(loadcentral2->GetNbinsX()+1);
+	double oldMaxErrorUp  =loadErrorUp  ->GetBinLowEdge(load->GetNbinsX()+1);
 	double oldMaxErrorDown=loadErrorDown->GetBinLowEdge(load->GetNbinsX()+1);
 	if(newMax<=oldMaxcentral){
 	  central=(TH1F*)(loadcentral->Clone());
@@ -3345,7 +3342,7 @@ namespace semileptonic {
 	ErrorDown->Smooth(errorSmoothFactor);
       }
       // create errorbands
-      TGraphAsymmErrors * errorBands = new TGraphAsymmErrors(central2->GetNbinsX()-1);
+      TGraphAsymmErrors *errorBands = new TGraphAsymmErrors(central2->GetNbinsX()-1);
       TString errorBandName=name;
       errorBandName.ReplaceAll("MC@NLO2","MC@NLO");
       errorBandName+="errorBand";
@@ -3354,9 +3351,9 @@ namespace semileptonic {
       errorBands->SetTitle(errorBandName);
       // loop bins
       for(Int_t iBin=1; iBin<central2->GetNbinsX(); iBin++){
-	Double_t centralVal   = central  ->GetBinContent(iBin);
-	Double_t maxVal    = ErrorUp  ->GetBinContent(iBin);
-	Double_t minVal    = ErrorDown->GetBinContent(iBin);
+	Double_t centralVal = central  ->GetBinContent(iBin);
+	Double_t maxVal     = ErrorUp  ->GetBinContent(iBin);
+	Double_t minVal     = ErrorDown->GetBinContent(iBin);
 	// transfer relative uncertainty from parton level studies to central value for specific phase space
 	Double_t centralValue = central2 ->GetBinContent(iBin);
 	Double_t maxValue     = centralValue * (1+(maxVal-centralVal)/centralVal);
@@ -3379,7 +3376,7 @@ namespace semileptonic {
 	}
 	else {
 	  //std::cout << "errorBands->SetPoint      (iBin, central2->GetBinCenter(iBin), centralValue  )" << std::endl;
-	  errorBands->SetPoint      (iBin, central2->GetBinCenter(iBin), centralValue  );
+	  errorBands->SetPoint(iBin, central2->GetBinCenter(iBin), centralValue  );
 	  if(smoothcurves){
 	    errorBands->SetPointEXlow (iBin, central2->GetXaxis()->GetBinLowEdge(iBin) );
 	    errorBands->SetPointEXhigh(iBin, central2->GetXaxis()->GetBinUpEdge (iBin) );

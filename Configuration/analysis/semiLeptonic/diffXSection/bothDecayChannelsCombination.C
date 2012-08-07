@@ -443,12 +443,10 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  TString hadLevelExtend = "";
 	  TString hadLevelPlotExtend = "";
 	  if(hadron){
-	      if(xSecVariables_[i].Contains("lep")) hadLevelExtend="Lepton";
-	      if(xSecVariables_[i].Contains("bq" )) hadLevelExtend="Bjets" ;
-	      if(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq")) hadLevelPlotExtend="Gen";
+	    if     (xSecVariables_[i].Contains("lep")){ hadLevelExtend="Lepton"; hadLevelPlotExtend="Gen"; }
+	    else if(xSecVariables_[i].Contains("bq" )){ hadLevelExtend="Bjets" ; hadLevelPlotExtend="Gen"; }
 	  }
 
-	  // draw smoothed theory curves
 	  // c) MCatNLO
 	  int smoothFactor=0;
 	  int rebinFactor=0;
@@ -504,9 +502,9 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  }
 	  //}
 	  // draw errorband
-	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2);
+	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2, LV);
 	  // draw central curve
-	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2);
+	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2, LV);
 	  
 	  // d) POWHEG
 	  // configure configuration
@@ -526,7 +524,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor= 2; }
 	  // draw curve	 
-	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2);
+	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
 	  // e) reweighted histos for closure test
 	  if(reweightClosure&&sys==sysNo){
@@ -635,7 +633,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
 	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge_noTree.root";
-	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph");
+	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", LV);
 	  // j) re-draw binned MADGRAPH theory curve
 	  // load it from combined file
 	  TH1F* plotTheo2 = getTheoryPrediction(plotNameMadgraph, MGcombFile);
@@ -672,19 +670,14 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  
 	  // c) Legend - Theory prediction - MCatNLO
 	  if(DrawMCAtNLOPlot2){
-	    //leg->AddEntry(errorBandsMCatNLO, "MC@NLO  ", "FL");
 	    TString curveName=xSecVariables_[i];
 	    curveName.ReplaceAll("Norm","");
-	    if(curveName.Contains("lep")||curveName.Contains("bq")) curveName+="GenMC@NLO";
-	    else curveName+="MC@NLOerrorBand";
-	    //curveName.ReplaceAll("MCatNLO","MCatNLO2");
-	    //std::cout << "searching " << curveName << std::endl;
+	    curveName+="MC@NLOerrorBand";
 	    TGraphAsymmErrors *mcatnlocurve =(TGraphAsymmErrors*)combicanvas->GetPrimitive(curveName);
 	    if(mcatnlocurve){
 	      mcatnlocurve->SetLineStyle(5);
-	      if(curveName.Contains("lep")||curveName.Contains("bq")) leg->AddEntry(mcatnlocurve, "MC@NLO  ", "L");
-	      else leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
-	      if(verbose>0) std::cout << "found!" << std::endl;
+	      leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
+	      if(verbose>0) std::cout << curveName << " found!" << std::endl;
 	    }	    
 	    else{
 	      if(verbose>0){
@@ -693,11 +686,10 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 		std::cout << "Will add " << curveName << " instead to the legend" << std::endl;
 	      }
 	      curveName.ReplaceAll("errorBand","");
-	      //std::cout << "searching " << curveName << std::endl;
 	      TH1F* mcatnlocurve2 =(TH1F*)combicanvas->GetPrimitive(curveName);
 	      if(mcatnlocurve2){
 		leg->AddEntry(mcatnlocurve2, "MC@NLO  ", "L");	
-		//std::cout << "found!" << std::endl;
+		std::cout << "found!" << std::endl;
 	      }
 	    }
 	  }
@@ -706,9 +698,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(DrawPOWHEGPlot2){
 	    TString curveName=xSecVariables_[i];
 	    curveName.ReplaceAll("Norm","");
-	    if(curveName.Contains("lep")||curveName.Contains("bq")) curveName+="Gen";
 	    curveName+="POWHEG";
-	    //std::cout << "searching " << curveName << std::endl; 
 	    TH1F* powhegcurve =(TH1F*)combicanvas->GetPrimitive(curveName);
 	    if(powhegcurve){
 	      leg->AddEntry(powhegcurve, "POWHEG  ", "L");
