@@ -339,7 +339,7 @@ std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, 
 void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mass, RooRealVar& alpha,
 		     const TString title, TCanvas* canvas, const TString printNameBase, const TString epsName)
 {
-  if(mass.getTitle().Contains("pole"))
+  if(!mass.getTitle().Contains("bar"))
     mass.setVal(173.2);
   else
     mass.setVal(165.);
@@ -360,20 +360,38 @@ void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mas
   convLeg.SetFillStyle(0);
   convLeg.SetBorderSize(0);
   convLeg.AddEntry(convFrame->findObject(predXSec->name+"_gaussianProb_Norm[xsec]"   ), "Gauss(PDF)"      , "F");
-  convLeg.AddEntry(convFrame->findObject(predXSec->name+"_rectangularProb_Norm[xsec]"), "Rect(#mu_{r/f})" , "F");
+  convLeg.AddEntry(convFrame->findObject(predXSec->name+"_rectangularProb_Norm[xsec]"), "Rect(#mu_{R/F})" , "F");
   convLeg.AddEntry(convFrame->findObject(predXSec->name+"_prob_Norm[xsec]"           ), "Gauss#otimesRect", "F");
   convLeg.Draw();
+  TLatex textTop(0.,0.,title);
+  textTop.SetNDC();
+  textTop.SetTextAlign(13);
+  textTop.SetX(gPad->GetLeftMargin());
+  textTop.SetY(1.003);
+  textTop.SetTextFont(43);
+  textTop.SetTextSizePixels(25);
+  textTop.Draw();
   char tmpTxt[99];
-  sprintf(tmpTxt, "%s, %s = %.1f GeV, %s = %.4f",
-	  title.Data(), mass.getTitle().Data(), mass.getVal(), alpha.getTitle().Data(), alpha.getVal());
-  TLatex text(0.,0.,tmpTxt);
-  text.SetNDC();
-  text.SetTextAlign(13);
-  text.SetX(0.16);
-  text.SetY(0.99);
-  text.SetTextFont(43);
-  text.SetTextSizePixels(16);
-  text.Draw();
+  sprintf(tmpTxt, "%s = %.1f GeV",
+	  mass.getTitle().Data(), mass.getVal());
+  TLatex textMass(0.,0.,tmpTxt);
+  textMass.SetNDC();
+  textMass.SetTextAlign(13);
+  textMass.SetX(0.22);
+  textMass.SetY(0.90);
+  textMass.SetTextFont(43);
+  textMass.SetTextSizePixels(24);
+  textMass.Draw();
+  sprintf(tmpTxt, "%s = %.4f",
+	  alpha.getTitle().Data(), alpha.getVal());
+  TLatex textAlpha(0.,0.,tmpTxt);
+  textAlpha.SetNDC();
+  textAlpha.SetTextAlign(13);
+  textAlpha.SetX(0.22);
+  textAlpha.SetY(0.85);
+  textAlpha.SetTextFont(43);
+  textAlpha.SetTextSizePixels(24);
+  textAlpha.Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsName);
   delete convFrame;
@@ -446,7 +464,7 @@ void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std
   TLatex text(0.,0., "Approx. NNLO, #sigma_{t#bar{t}} (7 TeV) = 162 pb");
   text.SetNDC();
   text.SetTextAlign(13);
-  text.SetX(0.16);
+  text.SetX(gPad->GetLeftMargin());
   text.SetY(0.99);
   text.SetTextFont(43);
   text.SetTextSizePixels(16);
@@ -467,8 +485,8 @@ void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int co
   TString normRange = (TString)x_var.GetName() + "_fullRange";
   result->projPdf->plotOn(frame, RooFit::Range(result->bestX - result->lowErrFromIntegral,
 					       result->bestX + result->highErrFromIntegral), RooFit::NormRange(normRange),
-			  RooFit::FillStyle(fillStyle), RooFit::FillColor(color-9), RooFit::DrawOption("F"),
-			  RooFit::VLines());
+			  RooFit::FillStyle(fillStyle), RooFit::FillColor(color-9), RooFit::LineColor(color-9),
+			  RooFit::DrawOption("F"), RooFit::VLines(), RooFit::Name("Confide"));
   result->projPdf->plotOn(frame, RooFit::LineColor(color+1), RooFit::NormRange(normRange));
   double epsilon = 0.00001;
   if(!strcmp(x_var.GetName(),"mass"))
@@ -476,13 +494,15 @@ void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int co
   if(x_var.GetName())
     result->projPdf->plotOn(frame, RooFit::Range(result->bestX - epsilon,
 						 result->bestX + epsilon), RooFit::NormRange(normRange),
-			    RooFit::LineColor(color+1), RooFit::LineWidth(2), RooFit::VLines());
+			    RooFit::LineColor(color+1), RooFit::LineWidth(2), RooFit::LineStyle(2), RooFit::VLines(),
+			    RooFit::Name("Maximum"));
+  frame->GetYaxis()->SetTitle("Likelihood density");
 }
 
 TLatex* cmsTxt()
 {
-  const TString txt = "CMS 2011 t#bar{t} data #times approx. NNLO,  #sqrt{s} = 7 TeV, m^{pole} = 173.2 #pm 1.4 GeV" ;
-  TLatex* text = new TLatex(3.570061,23.08044,txt);
+  const TString txt = "2.3 fb^{-1} of 2011 CMS t#bar{t} data #times approx. NNLO,  #sqrt{s} = 7 TeV, m = 173.2 #pm 1.4 GeV" ;
+  TLatex* text = new TLatex(0,0,txt);
   text->SetNDC();
   text->SetTextAlign(13);
   text->SetX(gPad->GetLeftMargin());
@@ -667,7 +687,7 @@ int foldedLikelihoods(const bool pole)
 //  canvas->Print(printNameBase+".ps]");
 //  return 0;
 
-  RooRealVar mass("mass", "m_{t}^{pole}", 140., 190., "GeV");
+  RooRealVar mass("mass", "m_{t}", 140., 190., "GeV");
   if(!pole)
     mass.SetTitle("m_{t}^{#bar{MS}}");
 
@@ -820,7 +840,7 @@ int foldedLikelihoods(const bool pole)
   TLegend theoLeg = TLegend(0.18, 0.81, 0.63, 0.92);
   theoLeg.SetFillStyle(0);
   theoLeg.SetBorderSize(0);
-  theoLeg.AddEntry(&measXSecWithErr, "CMS 2011", "FL");
+  theoLeg.AddEntry(&measXSecWithErr, "CMS 2011, 2.3 fb^{-1}", "FL");
   theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][1], "L");
   theoLeg.Draw();
   char massTxt[99];
@@ -937,7 +957,7 @@ int foldedLikelihoods(const bool pole)
   TLine lineAlphaMSTW(alphaMSTW_mean.getVal(), -0.1,
 		      alphaMSTW_mean.getVal(),  1.1);
   lineAlphaMSTW.SetLineStyle(3);
-  TText textAlphaMSTW(0.1210, 0.5, "MSTW2008");
+  TText textAlphaMSTW(0.1215, 0.5, "MSTW2008");
   textAlphaMSTW.SetTextFont(43);
   textAlphaMSTW.SetTextSizePixels(26);
   textAlphaMSTW.SetTextAlign(12);
@@ -1041,32 +1061,53 @@ int foldedLikelihoods(const bool pole)
 
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
-    sprintf(tmpTxt, "CMS 2011 t#bar{t} data #times %s, %s = %.1f GeV",
-	    theoTitle[h][0].Data(), mass.getTitle().Data(), mass.getVal());
+    sprintf(tmpTxt, "2.3 fb^{-1} of 2011 CMS t#bar{t} data #times %s", theoTitle[h][0].Data());
     TLatex text(0.,0.,tmpTxt);
     text.SetNDC();
     text.SetTextAlign(13);
-    text.SetX(0.16);
-    text.SetY(0.99);
+    text.SetX(gPad->GetLeftMargin());
+    text.SetY(1.003);
     text.SetTextFont(43);
-    text.SetTextSizePixels(16);
+    text.SetTextSizePixels(25);
 
-    frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
-    frame_alpha->GetYaxis()->SetTitle("Likelihood density");
+    sprintf(tmpTxt, "%s = %.1f GeV",
+	    mass.getTitle().Data(), mass.getVal());
+    TLatex textMass(0.,0.,tmpTxt);
+    textMass.SetNDC();
+    textMass.SetTextAlign(13);
+    textMass.SetX(0.22);
+    textMass.SetY(0.90);
+    textMass.SetTextFont(43);
+    textMass.SetTextSizePixels(24);
+
+    frame_alpha = alpha.frame(RooFit::Range(0.105, 0.130));
     plotProjectedPDF(mocResult[h], frame_alpha, kRed, 1001, alpha);
     frame_alpha->Draw();
+    frame_alpha->SetMaximum(1.4*frame_alpha->GetMaximum());
+
+    TLegend likeLeg = TLegend(0.5, 0.75, 0.9, 0.92);
+    likeLeg.SetFillStyle(0);
+    likeLeg.SetBorderSize(0);
+    likeLeg.AddEntry("Maximum", "Maximum likelihood"      , "L");
+    likeLeg.AddEntry("Confide", "68% confidence interval" , "F");
+    likeLeg.SetTextFont(43);
+    likeLeg.SetTextSizePixels(25);
+
+    likeLeg.Draw();
     text.Draw();
+    textMass.Draw();
     canvas->Print(printNameBase+".ps");
     canvas->Print(epsString("final_probDensity_moch", pole, (PdfType)h));
 
-    sprintf(tmpTxt, "CMS 2011 t#bar{t} data #times %s, %s = %.1f GeV",
-	    theoTitle[h][1].Data(), mass.getTitle().Data(), mass.getVal());    
+    sprintf(tmpTxt, "2.3 fb^{-1} of 2011 CMS t#bar{t} data #times %s", theoTitle[h][1].Data());    
     text.SetTitle(tmpTxt);
-    frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
-    frame_alpha->GetYaxis()->SetTitle("Likelihood density");
+    frame_alpha = alpha.frame(RooFit::Range(0.105, 0.130));
     plotProjectedPDF(mitResult[h], frame_alpha, kRed, 1001, alpha);
     frame_alpha->Draw();
+    frame_alpha->SetMaximum(1.4*frame_alpha->GetMaximum());
+    likeLeg.Draw();
     text.Draw();
+    textMass.Draw();
     canvas->Print(printNameBase+".ps");
     canvas->Print(epsString("final_probDensity_mitov", pole, (PdfType)h));
   }
