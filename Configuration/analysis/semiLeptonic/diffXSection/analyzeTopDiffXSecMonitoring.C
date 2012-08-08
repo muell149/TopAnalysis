@@ -231,6 +231,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "bottomJetKinematicsTagged/n"          ,
     // (iv) MET monitoring
     "analyzeMETMuonTagged/metEt"   ,
+    "analyzeMETMuonTagged/metPhi"  ,
     "analyzeMETMuonTagged/metSumEt",
     // (v) Vertices and pileup
     "PUControlDistributionsAfterBtagging/pileup",
@@ -253,12 +254,46 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "analyzeTopRecoKinematicsKinFit/lightqEta",   
     "analyzeTopRecoKinematicsKinFit/bqPt",
     "analyzeTopRecoKinematicsKinFit/bqEta",
+    "analyzeTopRecoKinematicsKinFit/lepPlusEta",
+    "analyzeTopRecoKinematicsKinFit/lepMinusEta",
+    "analyzeTopRecoKinematicsKinFit/topPlusEta",
+    "analyzeTopRecoKinematicsKinFit/topMinusEta",
+    "analyzeTopRecoKinematicsKinFit/lepPlusY",
+    "analyzeTopRecoKinematicsKinFit/lepMinusY",
+    "analyzeTopRecoKinematicsKinFit/topPlusY",
+    "analyzeTopRecoKinematicsKinFit/topMinusY",
+    "analyzeTopRecoKinematicsKinFit/leadqPt",
+    "analyzeTopRecoKinematicsKinFit/bbbarPt",
+    "analyzeTopRecoKinematicsKinFit/bbbarY",
+    "analyzeTopRecoKinematicsKinFit/bbbarMass",
+    "compositedKinematicsKinFit/MWFitJJ",
+    "compositedKinematicsKinFit/MJJ",
+    "compositedKinematicsKinFit/mHbb",
+    "compositedKinematicsKinFit/mbb",
+    "compositedKinematicsKinFit/Nbjets",
+    "compositedKinematicsKinFit/Njets",
+    "compositedKinematicsKinFit/leadNonttjetPt",
+    "compositedKinematicsKinFit/leadNonttjetY",
+    "compositedKinematicsKinFit/leadNonttjetEta",
     "analyzeTopRecoKinematicsKinFitBeforeProbSel/prob", 
     "analyzeTopRecoKinematicsKinFitBeforeProbSel/chi2",
     "analyzeTopRecoKinematicsKinFitTopAntitop/ttbarDelPhi",
     // gen distributions
     "analyzeTopPartonLevelKinematics/ttbarMass",
     "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass",
+    // kinfit object shifts
+    "compositedKinematicsKinFit/shiftLqPt",
+    "compositedKinematicsKinFit/shiftLqEta",
+    "compositedKinematicsKinFit/shiftLqPhi",
+    "compositedKinematicsKinFit/shiftBqPt",
+    "compositedKinematicsKinFit/shiftBqEta",
+    "compositedKinematicsKinFit/shiftBqPhi",
+    "compositedKinematicsKinFit/shiftLepPt",
+    "compositedKinematicsKinFit/shiftLepEta",
+    "compositedKinematicsKinFit/shiftLepPhi",
+    "compositedKinematicsKinFit/shiftNuPt",
+    "compositedKinematicsKinFit/shiftNuEta",
+    "compositedKinematicsKinFit/shiftNuPhi",
   };
 
   TString plots1DLeptons[] = {
@@ -267,7 +302,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     // e.g: tightLeptonKinematics/n --> tightMuonKinematics/n
     //      tightLeptonKinematics/n --> tightElectronKinematics/n
     // (I) preselection
-    "testIsoLeptonQuality/relIso",
+    //"testIsoLeptonQuality/relIso",
     // (II) before btagging
     "tightLeptonKinematics/n",
     "tightLeptonKinematics/en",
@@ -411,6 +446,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "N_{b-jets};events;1;1" ,
     // (iv) MET monitoring 
     "#slash{E}_{T} #left[GeV#right];events;0;20",
+    "#phi(#slash{E}_{T});events;0;5",
     "#SigmaE_{T} [GeV];events;0;30",
     // (v) Vertices and pileup
     "Number of PU Events;Frequency;0;1",
@@ -433,17 +469,51 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "#eta^{q};N^{q};0;1",
     "p_{T}^{b and #bar{b}} #left[GeV#right];N^{b and #bar{b}};0;20",    
     "#eta^{b and #bar{b}};N^{b and #bar{b}};0;1",
+    "#eta^{l+};N^{l+};0;1",
+    "#eta^{l-};N^{l-};0;1",
+    "#eta^{t+};N^{t+};0;1",
+    "#eta^{t-};N^{t-};0;1",
+    "y^{l+};N^{l+};0;1",
+    "y^{l-};N^{l-};0;1",
+    "y^{t+};N^{t+};0;1",
+    "y^{t-};N^{t-};0;1",
+    "p_{T}^{leading jet} #left[GeV#right];events;0;4",
+    "p_{T}^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];events;0;20",  
+    "y^{b#bar{b}}(assigned to t#bar{t} system);events;0;1",
+    "m^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];events;0;20",
+    "m^{jj} (KinFit W-assignment) #left[GeV#right];events;1;5",
+    "m^{jj} #left[GeV#right];events;1;10",
+    "m^{bb} (KinFit non t#bar{t} b-jets) #left[GeV#right];4 b-tag events;1;50",
+    "m^{bb} #left[GeV#right];permutations;1;10",
+    "N^{bjets};events;1;1",
+    "N^{jets};events;1;1",
+    "p_{T}^{leading non t#bar{t}-jet} #left[GeV#right];events;1;5",
+    "y^{leading non t#bar{t}-jet};events;0;1",
+    "#eta^{leading non t#bar{t}-jet};events;0;1",
     "probability (best fit hypothesis);events;1;25", 
     "#chi^{2} (best fit hypothesis);events;0;10",
     "#Delta#Phi(t,#bar{t});events;0;4",
     // gen distributions
     "m^{t#bar{t}} #left[GeV#right] parton all truth;events;1;1",
-    "m^{t#bar{t}} #left[GeV#right] parton lv truth;events;1;1"
+    "m^{t#bar{t}} #left[GeV#right] parton lv truth;events;1;1",
+    // kinfit object shifts
+    "#Delta p_{T}^{light jets} #left[GeV#right];events;0;5",
+    "#Delta #eta^{light jets};events;0;1",
+    "#Delta #phi^{light jets};events;0;10",
+    "#Delta p_{T}^{b jets} #left[GeV#right];events;0;5",
+    "#Delta #eta^{b jets};events;0;1",
+    "#Delta #phi^{b jets};events;0;2",
+    "#Delta p_{T}^{lepton} #left[GeV#right];events;0;1",
+    "#Delta #eta^{lepton};events;0;1",
+    "#Delta #phi^{lepton};events;0;1",
+    "#Delta p_{T}^{neutrino} #left[GeV#right];events;0;5",
+    "#Delta #eta^{neutrino};events;0;20",
+    "#Delta #phi^{neutrino};events;0;2",
   };
 
   TString axisLabel1DLeptons[ ] = {
     // (I) preselection
-    "PF relIso N-1;leptons;0;1",
+    //"PF relIso N-1;leptons;0;1",
     // (II) before btagging
     "N;leptons;0;1"   ,
     "E;events;0;2"    ,
@@ -899,6 +969,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
 	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")&&plotList_[plot].Contains("/prob")) min=0.1; 
 	      if(plotList_[plot].Contains("_JetKinematicsTagged/pt")) min=0.1;
+	      if(plotList_[plot].Contains("mHbb")) min=0.1;
 	    }
 	    // get nicer int values if maximum is large enough
 	    if(max>3) max = (double)roundToInt(max);
@@ -923,11 +994,25 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);	
 	    if(plotList_[plot].Contains("lepPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);
 	    if(plotList_[plot].Contains("lepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
+	    if((plotList_[plot].Contains("Y")||plotList_[plot].Contains("Eta"))&&(plotList_[plot].Contains("lep")||plotList_[plot].Contains("top"))&&(plotList_[plot].Contains("Plus")||plotList_[plot].Contains("Minus"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
 	    if(plotList_[plot].Contains("bqPt"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);
 	    if(plotList_[plot].Contains("bqEta" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
 	    if(plotList_[plot].Contains("topPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,400.);
 	    if(plotList_[plot].Contains("topY"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
 	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);	
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/leadqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/MJJ")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarMass")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-80,80);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-10,10);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
+	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqEta"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqEta"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.1,0.1);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.,1.);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.1,0.1);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.5,0.5);
 	    // Special y-range for paper control plots
 	    if (decayChannel == "combined"){
 	      if(plotList_[plot].Contains("tightJetKinematicsTagged/n"))    {min=1.0; max=1.0E06;}
@@ -939,7 +1024,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")) {min=0; max=6.0E03;}
 	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=1.6E03;}
 	    }
-
 	    // axis style
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"), min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
@@ -1055,6 +1139,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
       if(!title.Contains("canv")){
 	plotCanvas_[idx]->Print(outputFolder+title+".eps"); 
 	plotCanvas_[idx]->Print(outputFolder+title+".png");
+      }
+      // kinfitshift as pdf
+      if(title.Contains("shift")){
+	TString pdfname=outputFolder+"KinFitObjectShift.pdf";
+	if(title.Contains("shiftLqPt" )) pdfname+="(";
+	if(title.Contains("shiftNuPhi")) pdfname+=")";
+	plotCanvas_[idx]->Print(pdfname); 
       }
     }
     // root file
