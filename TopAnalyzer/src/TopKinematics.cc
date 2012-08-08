@@ -124,6 +124,8 @@ void TopKinematics::book()
   **/
   hists_["topPtPlus"  ] = new TH1F( "topPtPlus"  , "topPtPlus"  ,  800,  0. ,  800.);
   hists_["topPtMinus" ] = new TH1F( "topPtMinus" , "topPtMinus" ,  800,  0. ,  800.);
+  hists_["lepPtPlus"  ] = new TH1F( "lepPtPlus"  , "lepPtPlus"  , 1200,  0. , 1200.);
+  hists_["lepPtMinus" ] = new TH1F( "lepPtMinus" , "lepPtMinus" , 1200,  0. , 1200.);
   hists_["lepEtaPlus"     ] = new TH1F( "lepEtaPlus"   , "lepEtaPlus"   ,  100,  -5. ,  5. );
   hists_["lepEtaMinus"    ] = new TH1F( "lepEtaMinus"  , "lepEtaMinus"  ,  100,  -5. ,  5. );
   hists_["lepYPlus"       ] = new TH1F( "lepYPlus"     , "lepYPlus"     ,  100,  -5. ,  5. );
@@ -311,6 +313,8 @@ void TopKinematics::book()
     // asymmetry variables
     corrs_["topPtPlus_"      ] = new TH2F( "topPtPlus_"    , "topPtPlus_"    , 800 ,   0. , 800.,  800,   0. , 800.);
     corrs_["topPtMinus_"     ] = new TH2F( "topPtMinus_"   , "topPtMinus_"   , 800 ,   0. , 800.,  800,   0. , 800.);
+    corrs_["lepPtPlus_"      ] = new TH2F( "lepPtPlus_"    , "lepPtPlus_"    , 1200 ,  0. , 1200., 1200,  0. ,1200.);
+    corrs_["lepPtMinus_"     ] = new TH2F( "lepPtMinus_"   , "lepPtMinus_"   , 1200 ,  0. , 1200., 1200,  0. ,1200.);
     corrs_["lepEtaPlus_"     ] = new TH2F( "lepEtaPlus_"   , "lepEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["lepEtaMinus_"    ] = new TH2F( "lepEtaMinus_"  , "lepEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["lepYPlus_"       ] = new TH2F( "lepYPlus_"     , "lepYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
@@ -416,6 +420,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   **/
   hists_["topPtPlus"      ] =fs->make<TH1F>( "topPtPlus"    , "topPtPlus"    ,  800,   0. ,  800.);
   hists_["topPtMinus"     ] =fs->make<TH1F>( "topPtMinus"   , "topPtMinus"   ,  800,   0. ,  800.);
+  hists_["lepPtPlus"      ] =fs->make<TH1F>( "lepPtPlus"    , "lepPtPlus"    , 1200,   0. , 1200.);
+  hists_["lepPtMinus"     ] =fs->make<TH1F>( "lepPtMinus"   , "lepPtMinus"   , 1200,   0. , 1200.);
   hists_["lepEtaPlus"     ] =fs->make<TH1F>( "lepEtaPlus"   , "lepEtaPlus"   ,  100,  -5. ,  5.  );
   hists_["lepEtaMinus"    ] =fs->make<TH1F>( "lepEtaMinus"  , "lepEtaMinus"  ,  100,  -5. ,  5.  );
   hists_["lepYPlus"       ] =fs->make<TH1F>( "lepYPlus"     , "lepYPlus"     ,  100,  -5. ,  5.  );
@@ -602,6 +608,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     // asymmetry variables
     corrs_["topPtPlus_"  ] = fs->make<TH2F>( "topPtPlus_"    , "topPtPlus_"    ,  800,   0. , 800.,  800,   0. , 800.);
     corrs_["topPtMinus_" ] = fs->make<TH2F>( "topPtMinus_"   , "topPtMinus_"   ,  800,   0. , 800.,  800,   0. , 800.);
+    corrs_["lepPtPlus_"  ] = fs->make<TH2F>( "lepPtPlus_"    , "lepPtPlus_"    , 1200 ,  0. , 1200., 1200,  0. ,1200.);
+    corrs_["lepPtMinus_" ] = fs->make<TH2F>( "lepPtMinus_"   , "lepPtMinus_"   , 1200 ,  0. , 1200., 1200,  0. ,1200.);
     corrs_["lepEtaPlus_" ] = fs->make<TH2F>( "lepEtaPlus_"   , "lepEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["lepEtaMinus_"] = fs->make<TH2F>( "lepEtaMinus_"  , "lepEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["lepYPlus_"   ] = fs->make<TH2F>( "lepYPlus_"     , "lepYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
@@ -640,12 +648,12 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "topPhiLep" );
     bookVariable(fs, "lepTopMass");
     // top quantities (= top plus)
+    bookVariable(fs, "topPtPlus" );
     bookVariable(fs, "topEtaPlus");
-    bookVariable(fs, "topPtPlus");
     bookVariable(fs, "topYPlus"  );
     // antitop quantities (= top minus)
+    bookVariable(fs, "topPtMinus" );
     bookVariable(fs, "topEtaMinus");
-    bookVariable(fs, "topPtMinus");
     bookVariable(fs, "topYMinus"  );
     // charge
     bookVariable(fs, "lepCharge"); 
@@ -738,11 +746,11 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "bbbarMassPartonTruth"   );
     // top quantities (= top plus)
     bookVariable(fs, "topEtaPlusPartonTruth");
-    bookVariable(fs, "topPtPlusPartonTruth");
+    bookVariable(fs, "topPtPlusPartonTruth" );
     bookVariable(fs, "topYPlusPartonTruth"  );
     // antitop quantities (= top minus)
     bookVariable(fs, "topEtaMinusPartonTruth");
-    bookVariable(fs, "topPtMinusPartonTruth");
+    bookVariable(fs, "topPtMinusPartonTruth" );
     bookVariable(fs, "topYMinusPartonTruth"  );
     // top/antitop association with lep/had top
     bookVariable(fs, "lepTopIsTopPlus");
@@ -857,8 +865,9 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double genTopPlusY      =-9999;
   double genTopMinusY     =-9999;
   double genTopPlusEta    =-9999;
-  double genTopPlusPt     =-9999;
   double genTopMinusEta   =-9999;
+  double genTopPlusPt     =-9999;
+  double genTopMinusPt    =-9999;
 
   if(useTree_) initializeTrees(-9999, weight);
   // ttbar decay channel
@@ -973,8 +982,9 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       genTopPlusY      = topPlusGen ->rapidity();
       genTopMinusY     = topMinusGen->rapidity();
       genTopPlusEta    = topPlusGen ->eta();
-      genTopPlusPt     = topPlusGen ->pt();
       genTopMinusEta   = topMinusGen->eta();
+      genTopPlusPt     = topPlusGen ->pt();
+      genTopMinusPt    = topMinusGen->pt();
 
       if(!hypoKey_.compare("None")==0){
 	// fill pt correlation plot for ttbar pair
@@ -1004,10 +1014,12 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	if(tops.singleLepton(hypoKey_)->charge()>0){
 	  corrs_.find("lepEtaPlus_" )->second->Fill( tops.singleLepton()->eta()     , tops.singleLepton(hypoKey_)->eta()     , weight );
 	  corrs_.find("lepYPlus_"   )->second->Fill( tops.singleLepton()->rapidity(), tops.singleLepton(hypoKey_)->rapidity(), weight );
+	  corrs_.find("lepPtPlus_"  )->second->Fill( tops.singleLepton()->pt()      , tops.singleLepton(hypoKey_)->pt()      , weight );
 	}
 	else{			 
 	  corrs_.find("lepEtaMinus_")->second->Fill( tops.singleLepton()->eta()     , tops.singleLepton(hypoKey_)->eta()     , weight );
 	  corrs_.find("lepYMinus_"  )->second->Fill( tops.singleLepton()->rapidity(), tops.singleLepton(hypoKey_)->rapidity(), weight );
+	  corrs_.find("lepPtMinus_" )->second->Fill( tops.singleLepton()->pt()      , tops.singleLepton(hypoKey_)->pt()      , weight );
 	}
 	corrs_.find("topEtaPlus_" )->second->Fill( topPlusGen ->eta()     , topPlusRec ->eta()     , weight );
 	corrs_.find("topEtaMinus_")->second->Fill( topMinusGen->eta()     , topMinusRec->eta()     , weight );
@@ -1748,10 +1760,12 @@ TopKinematics::fillFinalStateObjects(const ROOT::Math::LorentzVector<ROOT::Math:
 
   // fill asymmetry variables
   if(charge>0){
+    fillValue("lepPtPlus" , lepton.pt()      , weight );
     fillValue("lepEtaPlus", lepton.eta()     , weight );
     fillValue("lepYPlus"  , lepton.Rapidity(), weight );
   }				 
   else{			 
+    fillValue("lepPtMinus" , lepton.pt()      , weight );
     fillValue("lepEtaMinus", lepton.eta()     , weight );
     fillValue("lepYMinus"  , lepton.Rapidity(), weight );
   }
