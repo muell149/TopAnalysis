@@ -657,7 +657,7 @@ namespace semileptonic {
       if(kSys==sysTopScaleUp  ) Nevents=3691845;//3696269;  
       if(kSys==sysTopScaleDown) Nevents=4000585;//4004587;  
       if(kSys==sysTopMatchUp  ) Nevents=4025110;//4029823; 
-      if(kSys==sysTopMatchDown) Nevents=1064250;//1065232;  --> still Summer 11
+      if(kSys==sysTopMatchDown) Nevents=1544084;//1545688;
       if(kSys==sysTopMassUp   ) Nevents=1669928;//1671859; 
       if(kSys==sysTopMassDown ) Nevents=1618341;//1620072; 
     }
@@ -1012,8 +1012,8 @@ namespace semileptonic {
     if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) fileName = "ScaleDown/"+fileName+"ScaleDown";
     // Matching Scale
     // (a) top   
-    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg)))  fileName = "MatchUp/"+fileName+"MatchUp";   
-    if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
+    if((sys==sysTopMatchUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "MatchUp/"+fileName+"MatchUp";   
+    if((sys==sysTopMatchDown)&&((sample==kSig)||(sample==kBkg))) fileName = "MatchDown/"+fileName+"MatchDown";
     // (b) V+jets
     if((sys==sysVBosonMatchUp  )&&(sample==kWjets)) fileName = "MatchUp/"+fileName+"MatchUp";
     if((sys==sysVBosonMatchDown)&&(sample==kWjets)) fileName = "MatchDown/"+fileName+"MatchDown";
@@ -3501,15 +3501,15 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 1.50 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 1.32 : 2.49955;
 		// New Binning Revision
-		if(variable == "topPt")          k = (fullPS) ? 2.77 : 2.76;
-		else if(variable == "topY" )     k = (fullPS) ? 3.73 : 3.74;
-		else if(variable == "ttbarPt")   k = (fullPS) ? 2.30 : 2.30; 
-		else if(variable == "ttbarY")    k = (fullPS) ? 2.98 : 2.98;
-		else if(variable == "ttbarMass") k = (fullPS) ? 1.22 : 1.22;
-		else if(variable == "lepPt")     k = (fullPS) ? 1.28 : (hadronPS) ? 0.80   : 1.28;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 0.0001 : 1.52; 
-		else if(variable == "bqPt")      k = (fullPS) ? 4.08 : (hadronPS) ? 4.44   : 4.08; 
-		else if(variable == "bqEta")     k = (fullPS) ? 4.27 : (hadronPS) ? 4.00   : 4.26; 
+		if(variable == "topPt")          k = (fullPS) ? 2.81 : 2.80;
+		else if(variable == "topY" )     k = (fullPS) ? 3.76 : 3.77;
+		else if(variable == "ttbarPt")   k = (fullPS) ? 2.34 : 2.34; 
+		else if(variable == "ttbarY")    k = (fullPS) ? 3.13 : 3.13;
+		else if(variable == "ttbarMass") k = (fullPS) ? 0.12 : 0.12;
+		else if(variable == "lepPt")     k = (fullPS) ? 0.76 : (hadronPS) ? 0.60   : 0.76;
+		else if(variable == "lepEta")    k = (fullPS) ? 1.54 : (hadronPS) ? 0.0001 : 1.54; 
+		else if(variable == "bqPt")      k = (fullPS) ? 3.75 : (hadronPS) ? 3.14   : 3.75; 
+		else if(variable == "bqEta")     k = (fullPS) ? 4.29 : (hadronPS) ? 3.74   : 4.28; 
 	    }
 	    else if (decayChannel.Contains("electron")){
 		
@@ -3520,15 +3520,15 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 3.40 : 2.49955;
 		// New Binning Revision
-		if(variable == "topPt")          k = (fullPS) ? 2.80 : 2.79;
-		else if(variable == "topY")      k = (fullPS) ? 3.31 : 3.30;
-		else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.04; 
-		else if(variable == "ttbarY")    k = (fullPS) ? 2.25 : 2.25;
-		else if(variable == "ttbarMass") k = (fullPS) ? 1.33 : 1.33;
-		else if(variable == "lepPt")     k = (fullPS) ? 2.32 : (hadronPS) ? 1.37   : 2.33;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.09 : (hadronPS) ? 0.0001 : 1.10; 
-		else if(variable == "bqPt")      k = (fullPS) ? 3.88 : (hadronPS) ? 4.06   : 3.88; 
-		else if(variable == "bqEta")     k = (fullPS) ? 3.79 : (hadronPS) ? 3.48   : 3.79; 
+		if(variable == "topPt")          k = (fullPS) ? 2.84 : 2.84;
+		else if(variable == "topY")      k = (fullPS) ? 3.33 : 3.33;
+		else if(variable == "ttbarPt")   k = (fullPS) ? 2.06 : 2.06; 
+		else if(variable == "ttbarY")    k = (fullPS) ? 2.73 : 2.73;
+		else if(variable == "ttbarMass") k = (fullPS) ? 0.18 : 0.20;
+		else if(variable == "lepPt")     k = (fullPS) ? 0.65 : (hadronPS) ? 0.36   : 0.65;
+		else if(variable == "lepEta")    k = (fullPS) ? 1.08 : (hadronPS) ? 0.0001 : 1.08; 
+		else if(variable == "bqPt")      k = (fullPS) ? 3.65 : (hadronPS) ? 2.68   : 3.65; 
+		else if(variable == "bqEta")     k = (fullPS) ? 3.82 : (hadronPS) ? 2.50   : 3.82; 
 	    }
 	}
 	else{
@@ -3544,7 +3544,7 @@ namespace semileptonic {
 	    if(variable == "topPt")          k =  8;
 	    else if(variable == "topY")      k = 10;
 	    else if(variable == "ttbarPt")   k =  6;
-	    else if(variable == "ttbarY")    k = 12;
+	    else if(variable == "ttbarY")    k = 10;
 	    else if(variable == "ttbarMass") k =  8;
 	    else if(variable == "lepPt")     k = 13;
 	    else if(variable == "lepEta")    k = 14;
