@@ -17,8 +17,7 @@
 #include "TH2F.h"
 #include "TTree.h"
 #include "TFile.h"
-
-//#include "AnalysisDataFormats/TopObjects/interface/TtFullHadronicEvent.h"
+#include "TMath.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -52,6 +51,8 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   virtual void analyze(const edm::Event& event, const edm::EventSetup& iSetup);
   /// empty
   virtual void endJob();
+  /// helper functions to deal with abs(deltaphi) > pi
+  double modTwoPi(double DeltaPhi);
 
   /// src's for the different infos
   edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, weight_, VertexSrc_, semiLepEvt_;

@@ -136,18 +136,18 @@ MixedObjectsAnalyzer::beginJob()
   hists_["leadNonttjetPt" ] = fs->make<TH1F>( "leadNonttjetPt" , "leadNonttjetPt" , 1500, 0 , 1500.);
   hists_["leadNonttjetY"  ] = fs->make<TH1F>( "leadNonttjetY"  , "leadNonttjetY"  , 100 ,-5., 5    );
   hists_["leadNonttjetEta"] = fs->make<TH1F>( "leadNonttjetEta", "leadNonttjetEta", 100 ,-5., 5    );
-  hists_["shiftBqPt"    ] = fs->make<TH1F>( "shiftBqPt" , "shiftBqPt" , 2000,  -1000. , 1000);
-  hists_["shiftLqPt"    ] = fs->make<TH1F>( "shiftLqPt" , "shiftLqPt" , 2000,  -1000. , 1000);
-  hists_["shiftBqEta"   ] = fs->make<TH1F>( "shiftBqEta", "shiftBqEta", 1000,  -5. , 5);
-  hists_["shiftLqEta"   ] = fs->make<TH1F>( "shiftLqEta", "shiftLqEta", 1000,  -5. , 5);
-  hists_["shiftBqPhi"   ] = fs->make<TH1F>( "shiftBqPhi", "shiftBqPhi", 1400,  -7  , 7);
-  hists_["shiftLqPhi"   ] = fs->make<TH1F>( "shiftLqPhi", "shiftLqPhi", 1400,  -7. , 7);
-  hists_["shiftLepPt"   ] = fs->make<TH1F>( "shiftLepPt" , "shiftLepPt" , 2000,  -1000. , 1000);
-  hists_["shiftLepEta"  ] = fs->make<TH1F>( "shiftLepEta", "shiftLepEta", 1000,  -5. , 5);
-  hists_["shiftLepPhi"  ] = fs->make<TH1F>( "shiftLepPhi", "shiftLepPhi", 1400,  -7. , 7);
-  hists_["shiftNuPt"    ] = fs->make<TH1F>( "shiftNuPt" , "shiftNuPt" , 2000,  -1000. , 1000);
-  hists_["shiftNuEta"   ] = fs->make<TH1F>( "shiftNuEta", "shiftNuEta", 1000,  -5. , 5);
-  hists_["shiftNuPhi"   ] = fs->make<TH1F>( "shiftNuPhi", "shiftNuPhi", 1400,  -7. , 7);
+  hists_["shiftBqPt"    ] = fs->make<TH1F>( "shiftBqPt" , "shiftBqPt"   , 2000,  -100. , 100 );
+  hists_["shiftLqPt"    ] = fs->make<TH1F>( "shiftLqPt" , "shiftLqPt"   , 2000,  -100. , 100 );
+  hists_["shiftBqEta"   ] = fs->make<TH1F>( "shiftBqEta", "shiftBqEta"  , 1000,  -1.   , 1.  );
+  hists_["shiftLqEta"   ] = fs->make<TH1F>( "shiftLqEta", "shiftLqEta"  , 1000,  -1.   , 1.  );
+  hists_["shiftBqPhi"   ] = fs->make<TH1F>( "shiftBqPhi", "shiftBqPhi"  , 1000,  -0.5  , 0.5 );
+  hists_["shiftLqPhi"   ] = fs->make<TH1F>( "shiftLqPhi", "shiftLqPhi"  , 1000,  -0.5  , 0.5 );
+  hists_["shiftLepPt"   ] = fs->make<TH1F>( "shiftLepPt" , "shiftLepPt" , 2000,  -50.  , 50  );
+  hists_["shiftLepEta"  ] = fs->make<TH1F>( "shiftLepEta", "shiftLepEta", 1000,  -0.05 , 0.05);
+  hists_["shiftLepPhi"  ] = fs->make<TH1F>( "shiftLepPhi", "shiftLepPhi", 1000,  -0.05 , 0.05);
+  hists_["shiftNuPt"    ] = fs->make<TH1F>( "shiftNuPt" , "shiftNuPt"   , 2000,  -200. , 200 );
+  hists_["shiftNuEta"   ] = fs->make<TH1F>( "shiftNuEta", "shiftNuEta"  , 1000,  -5.   , 5   );
+  hists_["shiftNuPhi"   ] = fs->make<TH1F>( "shiftNuPhi", "shiftNuPhi"  , 1200,  -3.   , 3   );
 }
 
 /// fill variables
@@ -379,17 +379,17 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       hists_["shiftLqEta"    ]->Fill( lqbarEtaFit-lqEtaPre, weight);
     }
   }
-  if(bqhadPhiFit!=-999&&bqhadPhiPre!=-999) hists_["shiftBqPhi" ]->Fill( bqhadPhiFit-bqhadPhiPre, weight);
-  if(bqlepPhiFit!=-999&&bqlepPhiPre!=-999) hists_["shiftBqPhi" ]->Fill( bqlepPhiFit-bqlepPhiPre, weight);
+  if(bqhadPhiFit!=-999&&bqhadPhiPre!=-999) hists_["shiftBqPhi" ]->Fill( modTwoPi(bqhadPhiFit-bqhadPhiPre), weight);
+  if(bqlepPhiFit!=-999&&bqlepPhiPre!=-999) hists_["shiftBqPhi" ]->Fill( modTwoPi(bqlepPhiFit-bqlepPhiPre), weight);
   if(lqPhiFit!=-999&&lqPhiPre!=-999&&lqbarPhiFit!=-999&&lqbarPhiPre!=-999){
     // consider ambiguity for light jets
-    if(std::abs(lqPhiFit-lqPhiPre)+std::abs(lqbarPhiFit-lqbarPhiPre)<std::abs(lqPhiFit-lqbarPhiPre)+std::abs(lqbarPhiFit-lqPhiPre)){
-      hists_["shiftLqPhi"    ]->Fill( lqPhiFit-lqPhiPre, weight);
-      hists_["shiftLqPhi"    ]->Fill( lqbarPhiFit-lqbarPhiPre, weight);
+    if(std::abs(modTwoPi(lqPhiFit-lqPhiPre))+std::abs(modTwoPi(lqbarPhiFit-lqbarPhiPre))<std::abs(modTwoPi(lqPhiFit-lqbarPhiPre))+std::abs(modTwoPi(lqbarPhiFit-lqPhiPre))){
+      hists_["shiftLqPhi"    ]->Fill( modTwoPi(lqPhiFit-lqPhiPre), weight);
+      hists_["shiftLqPhi"    ]->Fill( modTwoPi(lqbarPhiFit-lqbarPhiPre), weight);
     }
     else{
-      hists_["shiftLqPhi"    ]->Fill( lqPhiFit-lqbarPhiPre, weight);
-      hists_["shiftLqPhi"    ]->Fill( lqbarPhiFit-lqPhiPre, weight);
+      hists_["shiftLqPhi"    ]->Fill( modTwoPi(lqPhiFit-lqbarPhiPre), weight);
+      hists_["shiftLqPhi"    ]->Fill( modTwoPi(lqbarPhiFit-lqPhiPre), weight);
     }
   }
   lepPtPre=lepEtaPre=lepPhiPre=nuPtPre=nuEtaPre=nuPhiPre=-999;
@@ -412,8 +412,8 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   if(nuPtFit!=-999 &&nuPtPre!=-999   ) hists_["shiftNuPt"  ]->Fill( nuPtFit  -nuPtPre  , weight);
   if(lepEtaFit!=-999&&lepEtaPre!=-999) hists_["shiftLepEta"]->Fill( lepEtaFit-lepEtaPre, weight);  
   if(nuEtaFit!=-999 &&nuEtaPre!=-999 ) hists_["shiftNuEta" ]->Fill( nuEtaFit -nuEtaPre , weight);
-  if(lepPhiFit!=-999&&lepPhiPre!=-999) hists_["shiftLepPhi"]->Fill( lepPhiFit-lepPhiPre, weight);  
-  if(nuPhiFit!=-999 &&nuPhiPre!=-999 ) hists_["shiftNuPhi" ]->Fill( nuPhiFit -nuPhiPre , weight);
+  if(lepPhiFit!=-999&&lepPhiPre!=-999) hists_["shiftLepPhi"]->Fill( modTwoPi(lepPhiFit-lepPhiPre), weight);  
+  if(nuPhiFit!=-999 &&nuPhiPre!=-999 ) hists_["shiftNuPhi" ]->Fill( modTwoPi(nuPhiFit -nuPhiPre ), weight);
 
   tree->Fill();
 }
@@ -423,6 +423,22 @@ MixedObjectsAnalyzer::endJob()
 {
 
 }
+
+/// helper funtion to take care that delta phi is < pi
+double
+MixedObjectsAnalyzer::modTwoPi(double DeltaPhi){
+  const double pi=TMath::Pi();
+  if(DeltaPhi>pi){
+    double output=std::abs(2*pi-std::abs(DeltaPhi));
+    if(DeltaPhi>0) output*=-1.;
+  }
+  return DeltaPhi;
+}
+
+
+
+
+
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE( MixedObjectsAnalyzer );
