@@ -63,7 +63,10 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
     
     mapBinning  = makeVariableBinning();
            
-    // Open file and get tree
+    // Set variable 'largeMGFile', open file and get tree
+
+    largeMGFile = (filename.Contains("Large")) ? 1 : 0;
+
     datafile = new TFile(filename,"READ");
     datafile -> cd(pathname); 
 
@@ -249,15 +252,15 @@ void BCC::MakeHistos()
   HistoBins["bqPt"]      = 160;
   HistoBins["bqEta"]     = 200;
 
-  HistoSmoothingValue["lepEta"]    =  4;
-  HistoSmoothingValue["lepPt"]     = 10;
-  HistoSmoothingValue["topPt"]     = 10;
-  HistoSmoothingValue["topY"]      =  4;
-  HistoSmoothingValue["ttbarMass"] = 10;
-  HistoSmoothingValue["ttbarPt"]   = 10;
-  HistoSmoothingValue["ttbarY"]    =  4;
-  HistoSmoothingValue["bqPt"]      = 10;
-  HistoSmoothingValue["bqEta"]     =  4;
+  HistoSmoothingValue["lepEta"]    = (largeMGFile) ? 1 :  4;
+  HistoSmoothingValue["lepPt"]     = (largeMGFile) ? 0 :  0;
+  HistoSmoothingValue["topPt"]     = (largeMGFile) ? 1 : 10;
+  HistoSmoothingValue["topY"]      = (largeMGFile) ? 1 :  5;
+  HistoSmoothingValue["ttbarMass"] = (largeMGFile) ? 1 : 10;
+  HistoSmoothingValue["ttbarPt"]   = (largeMGFile) ? 1 :  5;
+  HistoSmoothingValue["ttbarY"]    = (largeMGFile) ? 0 :  2;
+  HistoSmoothingValue["bqPt"]      = (largeMGFile) ? 0 :  0;
+  HistoSmoothingValue["bqEta"]     = (largeMGFile) ? 2 :  2;
 
   for (BCCMap::iterator iter = mapData.begin(); iter != mapData.end(); iter++)
   {
@@ -380,8 +383,8 @@ void BCC::setBCCinX_IntersectionInBin()
 	}
       }			
       
-            std::cout << Form(" Bin %1.2f .... %1.2f : mean data = %1.4f and mean x = %1.2f",
-      			refVecBinning[jBinData], refVecBinning[jBinData+1], average[jBinData], avXvalues[jBinData]) << std::endl;			
+      std::cout << Form(" Bin %1.2f .... %1.2f : mean data = %1.4f and mean x = %1.2f",
+      			  refVecBinning[jBinData], refVecBinning[jBinData+1], average[jBinData], avXvalues[jBinData]) << std::endl;			
       
       vecTempBCCs.push_back(avXvalues[jBinData]);
       vecTempBCCErrors.push_back(0.5*refHisto.GetXaxis()->GetBinWidth(1));

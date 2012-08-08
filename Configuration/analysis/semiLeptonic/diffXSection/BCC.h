@@ -43,6 +43,8 @@ private:
 	
     int error_code;  
 
+    bool largeMGFile;
+
     TFile *datafile;	
     
     std::map<TString, std::vector<double> > mapBinning;
