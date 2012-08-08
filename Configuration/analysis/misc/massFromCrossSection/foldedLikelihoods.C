@@ -494,7 +494,7 @@ void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int co
   if(x_var.GetName())
     result->projPdf->plotOn(frame, RooFit::Range(result->bestX - epsilon,
 						 result->bestX + epsilon), RooFit::NormRange(normRange),
-			    RooFit::LineColor(color+1), RooFit::LineWidth(2), RooFit::LineStyle(2), RooFit::VLines(),
+			    RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::LineStyle(2), RooFit::VLines(),
 			    RooFit::Name("Maximum"));
   frame->GetYaxis()->SetTitle("Likelihood density");
 }
@@ -731,16 +731,11 @@ int foldedLikelihoods(const bool pole)
   }
   RooPolyVar shift("shift", "shift", mass, RooArgSet(shift_p0, shift_p1));
 
-  //  TString deltaM_formula = "@0-172.5+@1";
-  TString deltaM_formula = "@0+@1";
-  RooFormulaVar deltaM("deltaM", "deltaM", deltaM_formula, RooArgSet(mass, shift));
-  RooRealVar p0("p0", "p0", -1.467);
-  RooRealVar p1("p1", "p1", 0.03715);
-  RooRealVar p2("p2", "p2", -0.0001324);
-//  p0.setVal(1.0);
-//  p1.setVal(0.0);
-//  p2.setVal(0.0);
+  RooFormulaVar deltaM("deltaM", "deltaM", "@0-172.5+@1", RooArgSet(mass, shift));
 
+  RooRealVar p0("p0", "p0", 1.);
+  RooRealVar p1("p1", "p1", -0.008);
+  RooRealVar p2("p2", "p2", -0.000137);
   RooPolyVar measXSecMassDepRel("measXSecMassDepRel", "measXSecMassDepRel", deltaM, RooArgSet(p0, p1, p2));
   RooRealVar measXSec("measXSec", "measXSec", 161.9, "pb");
   RooRealVar measXSecErr("measXSecErr", "measXSecErr", 6.725, "pb");
@@ -753,6 +748,7 @@ int foldedLikelihoods(const bool pole)
   RooGaussian measXSecPDF("measXSecPDF", "measXSecPDF", xsec, measXSecMassDep, measXSecMassDepErr);
 
 //  mass.setVal(173.2);
+//  alpha.setVal(0.118);
 //  std::cout << measXSecMassDep.getVal() << std::endl;
 //  std::cout << measXSecMassDepErr.getVal() << std::endl;
 //  return 0;
