@@ -123,6 +123,7 @@ class Plotter {
 
   // DAVID
   bool doUnfolding; 
+  bool doSystematics;
   TString outpath;
   TString outpathPlots;
   TString subfolderChannel;
@@ -134,6 +135,7 @@ class Plotter {
 void Plotter::UnfoldingOptions(bool doSVD)
 {
   doUnfolding = doSVD;
+  doSystematics = true;
 }
 
 
@@ -2012,26 +2014,28 @@ void Plotter::PlotXSec(){
   }
   
   
-  cout << endl;
-  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-  cout << "Starting Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
-  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-  CalcInclSystematics("JES","JESUP", "JESDOWN", 0);
-  CalcInclSystematics("RES", "RESUP", "RESDOWN", 1);
-  CalcInclSystematics("PU_", "PU_UP", "PU_DOWN", 2);
-  CalcInclSystematics("SCALE", "SCALEUP", "SCALEDOWN", 3);
-  CalcInclSystematics("MATCH", "MATCHUP", "MATCHDOWN", 4);
-  CalcInclSystematics("MASS", "MASSUP", "MASSDOWN", 5);
-  CalcInclSystematics("DY_", "DY_UP", "DY_DOWN", 6);
-  CalcInclSystematics("BG_","BG_UP", "BG_DOWN", 7);
-  CalcInclSystematics("HAD", "MCATNLO", "POWHEG", 8);
-  CalcInclSystematics("BTAG_", "BTAG_UP", "BTAG_DOWN", 9);
-  InclFlatSystematics(10);
-  
-  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-  cout << "Finished Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
-  cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-  cout << endl;
+  if(doSystematics){
+    cout << endl;
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << "Starting Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    CalcInclSystematics("JES","JESUP", "JESDOWN", 0);
+    CalcInclSystematics("RES", "RESUP", "RESDOWN", 1);
+    CalcInclSystematics("PU_", "PU_UP", "PU_DOWN", 2);
+    CalcInclSystematics("SCALE", "SCALEUP", "SCALEDOWN", 3);
+    CalcInclSystematics("MATCH", "MATCHUP", "MATCHDOWN", 4);
+    CalcInclSystematics("MASS", "MASSUP", "MASSDOWN", 5);
+    CalcInclSystematics("DY_", "DY_UP", "DY_DOWN", 6);
+    CalcInclSystematics("BG_","BG_UP", "BG_DOWN", 7);
+    CalcInclSystematics("HAD", "MCATNLO", "POWHEG", 8);
+    CalcInclSystematics("BTAG_", "BTAG_UP", "BTAG_DOWN", 9);
+    InclFlatSystematics(10);
+      
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << "Finished Calculation of Inclusive Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << endl;
+  }
   
   CalcXSec(dataset, InclusiveXsection, InclusiveXsectionStatError, "","");
 
@@ -2693,28 +2697,28 @@ void Plotter::PlotDiffXSec(){
     TH1::AddDirectory(kFALSE); 
     TGaxis::SetMaxDigits(2);
 
-    //############### Syst ################
-    cout << endl;
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    CalcDiffSystematics("JES", "JESUP", "JESDOWN", 0);
-    CalcDiffSystematics("RES", "RESUP", "RESDOWN", 1);
-    CalcDiffSystematics("PU_", "PU_UP", "PU_DOWN", 2);
-    CalcDiffSystematics("SCALE", "SCALEUP", "SCALEDOWN", 3);
-    CalcDiffSystematics("MATCH", "MATCHUP", "MATCHDOWN", 4);
-    CalcDiffSystematics("MASS", "MASSUP", "MASSDOWN", 5);
-    CalcDiffSystematics("DY_", "DY_UP", "DY_DOWN", 6);
-    CalcDiffSystematics("BG_", "BG_UP", "BG_DOWN", 7);  
-    CalcDiffSystematics("HAD", "MCATNLO", "POWHEG", 8); 
-    CalcDiffSystematics("BTAG_PT_", "BTAG_PT_UP", "BTAG_PT_DOWN", 9); 
-    CalcDiffSystematics("BTAG_ETA_", "BTAG_ETA_UP", "BTAG_ETA_DOWN", 10); 
-    DiffFlatSystematics(11,bins); 
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << endl; 
-    
+    if(doSystematics){//############### Syst ################
+      cout << endl;
+      cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+      cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
+      cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+      CalcDiffSystematics("JES", "JESUP", "JESDOWN", 0);
+      CalcDiffSystematics("RES", "RESUP", "RESDOWN", 1);
+      CalcDiffSystematics("PU_", "PU_UP", "PU_DOWN", 2);
+      CalcDiffSystematics("SCALE", "SCALEUP", "SCALEDOWN", 3);
+      CalcDiffSystematics("MATCH", "MATCHUP", "MATCHDOWN", 4);
+      CalcDiffSystematics("MASS", "MASSUP", "MASSDOWN", 5);
+      CalcDiffSystematics("DY_", "DY_UP", "DY_DOWN", 6);
+      CalcDiffSystematics("BG_", "BG_UP", "BG_DOWN", 7);  
+      CalcDiffSystematics("HAD", "MCATNLO", "POWHEG", 8); 
+      CalcDiffSystematics("BTAG_PT_", "BTAG_PT_UP", "BTAG_PT_DOWN", 9); 
+      CalcDiffSystematics("BTAG_ETA_", "BTAG_ETA_UP", "BTAG_ETA_DOWN", 10); 
+      DiffFlatSystematics(11,bins); 
+      cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+      cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;  
+      cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+      cout << endl; 
+    }
     double topxsec = 165.6;
     //double BranchingFraction[4]={0.0167, 0.0162, 0.0328, 0.06569};//[ee, mumu, emu]
     double SignalEvents = 63244696.0;
@@ -2930,6 +2934,7 @@ void Plotter::PlotDiffXSec(){
     cESP->Clear();
     delete cESP;
     double efficiencies[XAxisbinCenters.size()];
+
     init = false;
     for (unsigned int hist =0; hist<hists.size(); hist++){
       if(legends[hist] == "Data"){
@@ -2963,7 +2968,6 @@ void Plotter::PlotDiffXSec(){
     h_DiffXSec->Reset();
     h_GenDiffXSec->Reset();
 
-
     CalcDiffXSec(varhists, RecoPlot, GenPlot, genReco2d, DiffXSec,DiffXSecStatError,GenDiffXSec);
 
     for (Int_t i=0; i<bins; ++i) {
@@ -2986,37 +2990,37 @@ void Plotter::PlotDiffXSec(){
     h_DiffXSec->Scale(1/TotalVisXSection[channelType]);
     //theory curves
 
-
     double DiffXSecPlot[XAxisbinCenters.size()];
     double DiffXSecStatErrorPlot[XAxisbinCenters.size()];
     double DiffXSecTotalErrorPlot[XAxisbinCenters.size()];
 
     double ModelSysPlot[XAxisbinCenters.size()];
     double ExpSysPlot[XAxisbinCenters.size()];;
+
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
       double syst_square = 0;
       ExpSysPlot[bin]=0.;
       ModelSysPlot[bin]=0.;
-      for(int syst =0; syst<15; syst++){ 
-	syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-    	if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="BTAG" ||legendsSyst[syst]=="kin fit"){
-          ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-        }
-	else{
-         ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
-        }
+      if(doSystematics){
+	for(int syst =0; syst<15; syst++){ 
+	  syst_square += DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+	  if(legendsSyst[syst]=="RES" ||legendsSyst[syst]=="JES" ||legendsSyst[syst]=="PU_" ||legendsSyst[syst]=="DY_" ||legendsSyst[syst]=="BG_" ||legendsSyst[syst]=="trigger" ||legendsSyst[syst]=="lepton" ||legendsSyst[syst]=="BTAG" ||legendsSyst[syst]=="kin fit"){
+	    ExpSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+	  }
+	  else{
+	    ModelSysPlot[bin]+=DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst];
+	  }
+	}
       }
       ExpSysPlot[bin]=sqrt(ExpSysPlot[bin]);
       ModelSysPlot[bin]=sqrt(ModelSysPlot[bin]);
       DiffXSecSysError[channelType][bin] = sqrt(syst_square)*DiffXSec[channelType][bin];
       DiffXSecStatError[channelType][bin] = DiffXSecStatError[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecTotalError[channelType][bin] = sqrt(DiffXSecSysError[channelType][bin]*DiffXSecSysError[channelType][bin] + DiffXSecStatError[channelType][bin]*DiffXSecStatError[channelType][bin]);
-
       DiffXSecPlot[bin]=DiffXSec[channelType][bin]/TotalVisXSection[channelType];
       DiffXSecStatErrorPlot[bin]=DiffXSecStatError[channelType][bin];//TotalVisXSection[channelType];
       DiffXSecTotalErrorPlot[bin]=DiffXSecTotalError[channelType][bin];//TotalVisXSection[channelType];
     } 
-
 
     //create a file for Results!!
     ofstream ResultsFile, ResultsLateX;  
@@ -3045,137 +3049,138 @@ void Plotter::PlotDiffXSec(){
     ResultsFile.close();
     ResultsLateX.close();
     
-    //The Markus plots
-    TCanvas * c10 = new TCanvas("Markus","Markus");
-    THStack* SystHists = new THStack("MSTACK","MSTACK");
-    TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
-    std::map<int, int> FillOrder;
-    FillOrder[14] = 0;   //JES
-    FillOrder[13] = 1;   //RES
-    FillOrder[12] = 2;   //PU
-    FillOrder[11] = 6;   //DY
-    FillOrder[10] = 7;   //BG
-    FillOrder[9] = 11;   //Trigg
-    FillOrder[8] = 12;   //Lep
-    FillOrder[7] = 10;  //Btag
-    FillOrder[6] = 9;  //Btag
-    FillOrder[5] = 13;  //KinFit
-    FillOrder[4] = 3;   //SCALE
-    FillOrder[3] = 5;  //MASS
-    FillOrder[2] = 4;  //MATCH
-    FillOrder[1] = 8; //HAD
-    FillOrder[0] = 14; //PDF
-
-    ofstream ResultsSysFilestring; 
-    string ResultsSystLaTeX = outpathPlots.Data();
-    ResultsSystLaTeX.append(subfolderChannel.Data());
-    ResultsSystLaTeX.append(subfolderSpecial.Data());    
-    ResultsSystLaTeX.append("/"); 
-    ResultsSystLaTeX.append(newname); 
-    ResultsSystLaTeX.append("SystematicsLaTeX.txt");
-    FILE *systfile;
-    systfile = fopen(ResultsSystLaTeX.c_str(), "w");
-    
-    for(int systs =0; systs<15; systs++){
-      int syst = FillOrder[systs];
-      if (syst==10) {continue;}//Skip the BTAG_ETA systematic because it's added in quadrature to BTAG_PT
-      TH1D* systtemp = (TH1D*)varhists[0]->Clone();
-      systtemp->Reset();
-      double TotalSyst=0.0, TotalSqSyst=0.0;
-      double AvgSyst= 0.0, SqAvgSys=0.0;
+    if(doSystematics){
+      //The Markus plots
+      TCanvas * c10 = new TCanvas("Markus","Markus");
+      THStack* SystHists = new THStack("MSTACK","MSTACK");
+      TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
+      std::map<int, int> FillOrder;
+      FillOrder[14] = 0;   //JES
+      FillOrder[13] = 1;   //RES
+      FillOrder[12] = 2;   //PU
+      FillOrder[11] = 6;   //DY
+      FillOrder[10] = 7;   //BG
+      FillOrder[9] = 11;   //Trigg
+      FillOrder[8] = 12;   //Lep
+      FillOrder[7] = 10;  //Btag
+      FillOrder[6] = 9;  //Btag
+      FillOrder[5] = 13;  //KinFit
+      FillOrder[4] = 3;   //SCALE
+      FillOrder[3] = 5;  //MASS
+      FillOrder[2] = 4;  //MATCH
+      FillOrder[1] = 8; //HAD
+      FillOrder[0] = 14; //PDF
       
-      for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
-       if(syst==9){//sum up in quadrature the pT and Eta variations of btagging
-           DiffXSecSysErrorBySyst[channelType][bin][syst]= TMath::Sqrt((DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst])+(DiffXSecSysErrorBySyst[channelType][bin][syst+1]*DiffXSecSysErrorBySyst[channelType][bin][syst+1]));
-       }
-       	//systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
-             systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
-               if(bin==0){  
-                if(syst==0) fprintf(systfile, "JES    ");
-                if(syst==1) fprintf(systfile, "RES    ");
-                if(syst==2) fprintf(systfile, "PU     ");
-                if(syst==3) fprintf(systfile, "SCALE  ");
-                if(syst==4) fprintf(systfile, "MATCH  ");
-                if(syst==5) fprintf(systfile, "MASS   ");
-                if(syst==6) fprintf(systfile, "DY     ");
-                if(syst==7) fprintf(systfile, "BG     ");
-                if(syst==8) fprintf(systfile, "HAD    ");
-                if(syst==9) fprintf(systfile, "Btag   ");
-                //ssyt==10 BTAG_ETA, it summed in quadrature with BTAG_PT syst==9
-                if(syst==11) fprintf(systfile, "Trigg  ");
-                if(syst==12) fprintf(systfile, "Lep.   ");
-                if(syst==13) fprintf(systfile, "KinFit ");
-                if(syst==14) fprintf(systfile, "PDF    ");
-               }
-               fprintf(systfile, "%2.5f ", TMath::Sqrt(systtemp->GetBinContent(bin+1))*100);
-               if(bin>0 && bin<bins-1){//Exclude the 2 side bins
-                   TotalSyst=TotalSyst+TMath::Sqrt(systtemp->GetBinContent(bin+1));
-                   TotalSqSyst=TotalSqSyst+systtemp->GetBinContent(bin+1);
-               }
+      ofstream ResultsSysFilestring; 
+      string ResultsSystLaTeX = outpathPlots.Data();
+      ResultsSystLaTeX.append(subfolderChannel.Data());
+      ResultsSystLaTeX.append(subfolderSpecial.Data());    
+      ResultsSystLaTeX.append("/"); 
+      ResultsSystLaTeX.append(newname); 
+      ResultsSystLaTeX.append("SystematicsLaTeX.txt");
+      FILE *systfile;
+      systfile = fopen(ResultsSystLaTeX.c_str(), "w");
+      
+      for(int systs =0; systs<15; systs++){
+	int syst = FillOrder[systs];
+	if (syst==10) {continue;}//Skip the BTAG_ETA systematic because it's added in quadrature to BTAG_PT
+	TH1D* systtemp = (TH1D*)varhists[0]->Clone();
+	systtemp->Reset();
+	double TotalSyst=0.0, TotalSqSyst=0.0;
+	double AvgSyst= 0.0, SqAvgSys=0.0;
+	
+	for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+	  if(syst==9){//sum up in quadrature the pT and Eta variations of btagging
+	    DiffXSecSysErrorBySyst[channelType][bin][syst]= TMath::Sqrt((DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst])+(DiffXSecSysErrorBySyst[channelType][bin][syst+1]*DiffXSecSysErrorBySyst[channelType][bin][syst+1]));
+	  }
+	  //systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin])*(DiffXSecSysErrorBySyst[channelType][bin][syst]/DiffXSec[channelType][bin]));
+	  systtemp->SetBinContent(bin+1,(DiffXSecSysErrorBySyst[channelType][bin][syst]*DiffXSecSysErrorBySyst[channelType][bin][syst]));
+	  if(bin==0){  
+	    if(syst==0) fprintf(systfile, "JES    ");
+	    if(syst==1) fprintf(systfile, "RES    ");
+	    if(syst==2) fprintf(systfile, "PU     ");
+	    if(syst==3) fprintf(systfile, "SCALE  ");
+	    if(syst==4) fprintf(systfile, "MATCH  ");
+	    if(syst==5) fprintf(systfile, "MASS   ");
+	    if(syst==6) fprintf(systfile, "DY     ");
+	    if(syst==7) fprintf(systfile, "BG     ");
+	    if(syst==8) fprintf(systfile, "HAD    ");
+	    if(syst==9) fprintf(systfile, "Btag   ");
+	    //ssyt==10 BTAG_ETA, it summed in quadrature with BTAG_PT syst==9
+	    if(syst==11) fprintf(systfile, "Trigg  ");
+	    if(syst==12) fprintf(systfile, "Lep.   ");
+	    if(syst==13) fprintf(systfile, "KinFit ");
+	    if(syst==14) fprintf(systfile, "PDF    ");
+	  }
+	  fprintf(systfile, "%2.5f ", TMath::Sqrt(systtemp->GetBinContent(bin+1))*100);
+	  if(bin>0 && bin<bins-1){//Exclude the 2 side bins
+	    TotalSyst=TotalSyst+TMath::Sqrt(systtemp->GetBinContent(bin+1));
+	    TotalSqSyst=TotalSqSyst+systtemp->GetBinContent(bin+1);
+	  }
+	}
+	AvgSyst=TotalSyst/(bins-2);
+	SqAvgSys=TMath::Sqrt(TotalSqSyst/(bins-2));
+	fprintf(systfile, "Lin.Avg.(%)= %.5f  Quad.Avg.(%)=%.5f\n", 100*AvgSyst, 100*SqAvgSys);
+	systtemp->SetFillColor(15-systs);
+	SystHists->Add((TH1D*)systtemp->Clone());
+	leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
+	delete systtemp;
       }
-      AvgSyst=TotalSyst/(bins-2);
-      SqAvgSys=TMath::Sqrt(TotalSqSyst/(bins-2));
-      fprintf(systfile, "Lin.Avg.(%)= %.5f  Quad.Avg.(%)=%.5f\n", 100*AvgSyst, 100*SqAvgSys);
-      systtemp->SetFillColor(15-systs);
-      SystHists->Add((TH1D*)systtemp->Clone());
-      leg10->AddEntry(systtemp->Clone(), legendsSyst[syst], "f");
-      delete systtemp;
+      SystHists->Draw();
+      fclose(systfile);
+      
+      if(name.Contains("pT") ||name.Contains("Mass") ){
+	SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
+	if(name.Contains("Rapidity")) SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
+      }
+      else  SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
+      SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
+      SystHists->GetXaxis()->SetNoExponent(kTRUE);
+      
+      
+      leg10->SetFillColor(0);
+      leg10->Draw("SAME");
+      c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".eps");
+      c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".C");
+      c10->Clear();
+      delete leg10;
+      delete c10;
+      
+      //The Experimental/Model/Statistical plot
+      TCanvas * c11 = new TCanvas("EMS","EMS");
+      TH1D* ExpHist = (TH1D*)varhists[0]->Clone();
+      TH1D* ModelHist = (TH1D*)varhists[0]->Clone();
+      TH1D* StatHist = (TH1D*)varhists[0]->Clone();
+      TH1D* TotalHist = (TH1D*)varhists[0]->Clone();
+      TLegend * leg11 =  new TLegend(0.65,0.60,0.90,0.85);
+      ExpHist->Reset();ModelHist->Reset();StatHist->Reset();TotalHist->Reset();
+      for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
+	ExpHist->SetBinContent(bin+1,100*ExpSysPlot[bin]);
+	ModelHist->SetBinContent(bin+1,100*ModelSysPlot[bin]);
+	StatHist->SetBinContent(bin+1,100*DiffXSecStatError[channelType][bin]/DiffXSec[channelType][bin]);
+	TotalHist->SetBinContent(bin+1,100*DiffXSecTotalError[channelType][bin]/DiffXSec[channelType][bin]);
+      }
+      TotalHist->SetMinimum(0.);
+      TotalHist->GetYaxis()->SetTitle("#frac{#Delta#sigma}{#sigma} [%]");
+      TotalHist->SetLineColor(1);
+      ExpHist->SetLineColor(kRed);
+      StatHist->SetLineColor(kGreen);
+      ModelHist->SetLineColor(kBlue);
+      leg11->SetFillColor(0);
+      leg11->AddEntry(ExpHist->Clone(), "Experimental Uncertainty", "l");
+      leg11->AddEntry(StatHist->Clone(), "Statistical Uncertainty", "l");
+      leg11->AddEntry(ModelHist->Clone(), "Model Uncertainty", "l");
+      leg11->AddEntry(TotalHist->Clone(), "Total Uncertainty", "l");
+      TotalHist->Draw();ModelHist->Draw("SAME");ExpHist->Draw("SAME");StatHist->Draw("SAME");
+      leg11->Draw("SAME");
+      TotalHist->GetXaxis()->SetNoExponent(kTRUE);
+      c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".eps");
+      c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".C");
+      c11->Clear();
+      delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
+      delete leg11;
+      delete c11;
     }
-    SystHists->Draw();
-    fclose(systfile);
-    
-    if(name.Contains("pT") ||name.Contains("Mass") ){
-      SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
-      if(name.Contains("Rapidity")) SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
-    }
-    else  SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
-    SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
-    SystHists->GetXaxis()->SetNoExponent(kTRUE);
-
-
-    leg10->SetFillColor(0);
-    leg10->Draw("SAME");
-    c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".eps");
-    c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".C");
-    c10->Clear();
-    delete leg10;
-    delete c10;
-    
-    //The Experimental/Model/Statistical plot
-    TCanvas * c11 = new TCanvas("EMS","EMS");
-    TH1D* ExpHist = (TH1D*)varhists[0]->Clone();
-    TH1D* ModelHist = (TH1D*)varhists[0]->Clone();
-    TH1D* StatHist = (TH1D*)varhists[0]->Clone();
-    TH1D* TotalHist = (TH1D*)varhists[0]->Clone();
-    TLegend * leg11 =  new TLegend(0.65,0.60,0.90,0.85);
-    ExpHist->Reset();ModelHist->Reset();StatHist->Reset();TotalHist->Reset();
-    for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
-      ExpHist->SetBinContent(bin+1,100*ExpSysPlot[bin]);
-      ModelHist->SetBinContent(bin+1,100*ModelSysPlot[bin]);
-      StatHist->SetBinContent(bin+1,100*DiffXSecStatError[channelType][bin]/DiffXSec[channelType][bin]);
-      TotalHist->SetBinContent(bin+1,100*DiffXSecTotalError[channelType][bin]/DiffXSec[channelType][bin]);
-    }
-    TotalHist->SetMinimum(0.);
-    TotalHist->GetYaxis()->SetTitle("#frac{#Delta#sigma}{#sigma} [%]");
-    TotalHist->SetLineColor(1);
-    ExpHist->SetLineColor(kRed);
-    StatHist->SetLineColor(kGreen);
-    ModelHist->SetLineColor(kBlue);
-    leg11->SetFillColor(0);
-    leg11->AddEntry(ExpHist->Clone(), "Experimental Uncertainty", "l");
-    leg11->AddEntry(StatHist->Clone(), "Statistical Uncertainty", "l");
-    leg11->AddEntry(ModelHist->Clone(), "Model Uncertainty", "l");
-    leg11->AddEntry(TotalHist->Clone(), "Total Uncertainty", "l");
-    TotalHist->Draw();ModelHist->Draw("SAME");ExpHist->Draw("SAME");StatHist->Draw("SAME");
-    leg11->Draw("SAME");
-    TotalHist->GetXaxis()->SetNoExponent(kTRUE);
-    c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".eps");
-    c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".C");
-    c11->Clear();
-    delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
-    delete leg11;
-    delete c11;
-    
     Double_t mexl[XAxisbinCenters.size()];
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
