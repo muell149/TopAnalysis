@@ -49,6 +49,12 @@ cvs co -d TopAnalysis UserCode/Bromo/TopAnalysis
 addpkg TopQuarkAnalysis/Configuration V06-01-04
 addpkg TopQuarkAnalysis/TopEventSelection V06-07-13
 
+### instead of deleting TopAnalysis/TopAnalyzer/src/FullHadQCDEstimation.cc
+### in order to get the user code compiling, you could also do:
+#addpkg PhysicsTools/KinFitter                V00-03-07
+#addpkg TopQuarkAnalysis/TopKinFitter         V06-07-18
+#addpkg TopQuarkAnalysis/TopObjectResolutions V06-07-09
+
 checkdeps -a
 
 scram b -j12
