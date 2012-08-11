@@ -1227,6 +1227,11 @@ process.analyzeTopPartonLevelKinematicsBjets=process.analyzeTopRecoKinematicsBje
 process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
 process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
 
+process.analyzeTopRecoKinematicsBjets.genJets = cms.InputTag('ak5GenJets','','HLT')
+process.analyzeTopRecoKinematicsBjets.bJetCollection = cms.bool(False)
+process.analyzeTopRecoKinematicsBjets.BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    )
+process.analyzeTopRecoKinematicsBjets.AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex")
+
 # b gen jet selection
 process.bGenJetSelection = process.leadingGenJetSelection.clone (src = 'noOverlapBGenJetCollection', minNumber = 2)
 
