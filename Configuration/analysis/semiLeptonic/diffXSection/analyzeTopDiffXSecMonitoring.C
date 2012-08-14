@@ -254,14 +254,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "analyzeTopRecoKinematicsKinFit/lightqEta",   
     "analyzeTopRecoKinematicsKinFit/bqPt",
     "analyzeTopRecoKinematicsKinFit/bqEta",
-    "analyzeTopRecoKinematicsKinFit/lepPlusEta",
-    "analyzeTopRecoKinematicsKinFit/lepMinusEta",
-    "analyzeTopRecoKinematicsKinFit/topPlusEta",
-    "analyzeTopRecoKinematicsKinFit/topMinusEta",
-    "analyzeTopRecoKinematicsKinFit/lepPlusY",
-    "analyzeTopRecoKinematicsKinFit/lepMinusY",
-    "analyzeTopRecoKinematicsKinFit/topPlusY",
-    "analyzeTopRecoKinematicsKinFit/topMinusY",
+    "analyzeTopRecoKinematicsKinFit/lepEtaPlus",
+    "analyzeTopRecoKinematicsKinFit/lepEtaMinus",
+    "analyzeTopRecoKinematicsKinFit/topEtaPlus",
+    "analyzeTopRecoKinematicsKinFit/topEtaMinus",
+    "analyzeTopRecoKinematicsKinFit/lepYPlus",
+    "analyzeTopRecoKinematicsKinFit/lepYMinus",
+    "analyzeTopRecoKinematicsKinFit/topYPlus",
+    "analyzeTopRecoKinematicsKinFit/topYMinus",
     "analyzeTopRecoKinematicsKinFit/leadqPt",
     "analyzeTopRecoKinematicsKinFit/bbbarPt",
     "analyzeTopRecoKinematicsKinFit/bbbarY",
@@ -497,13 +497,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "m^{t#bar{t}} #left[GeV#right] parton all truth;events;1;1",
     "m^{t#bar{t}} #left[GeV#right] parton lv truth;events;1;1",
     // kinfit object shifts
-    "#Delta p_{T}^{light jets} #left[GeV#right];events;0;5",
+    "#Delta p_{T}^{light jets} #left[GeV#right];events;0;20",
     "#Delta #eta^{light jets};events;0;1",
     "#Delta #phi^{light jets};events;0;10",
-    "#Delta p_{T}^{b jets} #left[GeV#right];events;0;5",
+    "#Delta p_{T}^{b jets} #left[GeV#right];events;0;10",
     "#Delta #eta^{b jets};events;0;1",
     "#Delta #phi^{b jets};events;0;2",
-    "#Delta p_{T}^{lepton} #left[GeV#right];events;0;1",
+    "#Delta p_{T}^{lepton} #left[GeV#right];events;0;2",
     "#Delta #eta^{lepton};events;0;1",
     "#Delta #phi^{lepton};events;0;1",
     "#Delta p_{T}^{neutrino} #left[GeV#right];events;0;5",
@@ -1005,13 +1005,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/MJJ")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarMass")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-80,80);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-10,10);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
-	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqEta"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqEta"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.1,0.1);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.,1.);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.1,0.1);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
+	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-80,80);
+if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-20,20);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.001,0.001);
+	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqEta"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqEta"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.1,0.1);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.001,0.001);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.5,0.5);
 	    // Special y-range for paper control plots
 	    if (decayChannel == "combined"){
