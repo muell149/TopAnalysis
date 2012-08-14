@@ -119,6 +119,42 @@ TGraphErrors getMeasXSecWithErr(const RooFormulaVar& measXSec, const RooFormulaV
   return TGraphErrors(nPoints, x, y, xErr, yErr);
 }
 
+TGraphAsymmErrors getMeasXSecAlpha(const RooFormulaVar& measXSec, const RooFormulaVar& measXSecErr, RooRealVar& alpha_var,
+				   const FinalLikeliResults1D* result)
+{
+  const double xOld = alpha_var.getVal();
+  alpha_var.setVal(result->bestX);
+  double x[1] = {result->bestX};
+  double y[1] = {measXSec.getVal()};
+  double xErrLow [1] = {result->lowErrFromIntegral };
+  double xErrHigh[1] = {result->highErrFromIntegral};
+  double yErr[1] = {measXSecErr.getVal()};
+  alpha_var.setVal(xOld);
+  return TGraphAsymmErrors(1, x, y, xErrLow, xErrHigh, yErr, yErr);
+}
+
+TGraphAsymmErrors getPredXSecAlpha(const PredXSec* predXSec, const TGraphAsymmErrors* errorGraph,
+				   RooRealVar& alpha_var, const RooRealVar& default_alpha,
+				   const RooRealVar& default_alpha_unc)
+{
+  const double xOld = alpha_var.getVal();
+  alpha_var.setVal(default_alpha.getVal());
+  double x[1] = {default_alpha.getVal()};
+  double y[1] = {predXSec->xsec.getVal()};
+  double xp, yp;
+  errorGraph->GetPoint(43, xp, yp);
+  if(xp!=173.) {
+    std::cout << "Error in getPredXSecAlpha for " << predXSec->name << "!" << std::endl
+	      << "Was expecting to find a mass of 173 GeV at point 43 but got a mass of " << xp << " GeV!" << std::endl;
+    abort();
+  }
+  double xErr[1] = {default_alpha_unc.getVal()};
+  double yErrLow [1] = {errorGraph->GetErrorYlow (43)};
+  double yErrHigh[1] = {errorGraph->GetErrorYhigh(43)};
+  alpha_var.setVal(xOld);
+  return TGraphAsymmErrors(1, x, y, xErr, xErr, yErrLow, yErrHigh);
+}
+
 TGraph* getAlphaLambdaGraph()
 {
   unsigned nPoints=100;
@@ -423,8 +459,8 @@ void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std
   textAlpha2012.SetTextFont(43);
   textAlpha2012.SetTextSizePixels(21);
 
-  const unsigned color[8] = {kRed, kRed, kGreen, kGreen, kCyan, kCyan, kBlue, kBlue};
-  const unsigned style[8] = {1, 6, 2, 8, 3, 4, 1, 6};
+  const unsigned color[7] = {kRed, kGreen, kRed, kRed, kRed, kRed, kRed};
+  const unsigned style[7] = {1, 1, 2, 3, 5, 8, 6};
   const unsigned nPreds = (oneTheoryOnly ? 1 : predVec.size());
   double yMin = 0.91 - nPreds*0.06;
   if(yMin < 0.55)
@@ -615,7 +651,7 @@ int foldedLikelihoods(const bool pole)
   /// End of quick'n dirty
   //////////////////////////////////////
 
-  const unsigned nPdfSets  = 3;
+  const unsigned nPdfSets  = 4;
   const unsigned nTheories = 2;
 
   //  std::vector<TGraphAsymmErrors*> ahr_vec[nPdfSets];
@@ -707,8 +743,8 @@ int foldedLikelihoods(const bool pole)
   RooRealVar alphaABM_mean("alphaABM_mean", "alphaABM_mean", 0.1134);
   RooRealVar alphaABM_unc ("alphaABM_unc" , "alphaABM_unc" , 0.0011);
 
-  RooRealVar alphaNNPDF_mean("alphaNNPDF_mean", "alphaNNPDF_mean", 0.1180); //dummy!!!
-  RooRealVar alphaNNPDF_unc ("alphaNNPDF_unc" , "alphaNNPDF_unc" , 0.0080); //dummy!!!
+  RooRealVar alphaNNPDF_mean("alphaNNPDF_mean", "alphaNNPDF_mean", 0.1190);
+  RooRealVar alphaNNPDF_unc ("alphaNNPDF_unc" , "alphaNNPDF_unc" , 0.0012);
 
   std::vector<RooRealVar> defaultAlphas;
   defaultAlphas.push_back(alphaMSTW_mean );
@@ -793,10 +829,12 @@ int foldedLikelihoods(const bool pole)
 //		    epsString("convolution_ahrens", pole, (PdfType)h));
 
     predXSecFormularVec.push_back(&mitPredXSec[h]->xsec);
-    predXSecFormularVec.push_back(&mocPredXSec[h]->xsec);
+    if(h==0)
+      predXSecFormularVec.push_back(&mocPredXSec[h]->xsec);
 
     predXSecFormularVecLabels.push_back(theoTitle[h][1]);
-    predXSecFormularVecLabels.push_back(theoTitle[h][0]);
+    if(h==0)
+      predXSecFormularVecLabels.push_back(theoTitle[h][0]);
   }
   drawAlphaVsMass(predXSecFormularVec, predXSecFormularVecLabels, canvas, printNameBase, true);
   drawAlphaVsMass(predXSecFormularVec, predXSecFormularVecLabels, canvas, printNameBase);
@@ -821,23 +859,58 @@ int foldedLikelihoods(const bool pole)
 
   mass.setVal(mass_mean.getVal());
 
+  gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
+
   TGraphErrors measXSecWithErr = getMeasXSecWithErr(measXSecMassDep, measXSecMassDepErr, alpha, 0.10, 0.13, 30);
+
+  TGraphAsymmErrors predXSecAlphaMitNNPDF = getPredXSecAlpha(mitPredXSec[kNNPDF], mit_vec[kNNPDF].at(3),
+							     alpha, alphaNNPDF_mean, alphaNNPDF_unc);
+  predXSecAlphaMitNNPDF.SetLineColor(kRed);
+  predXSecAlphaMitNNPDF.SetMarkerSize(2);
+  predXSecAlphaMitNNPDF.SetMarkerStyle(22);
+
+  TGraphAsymmErrors predXSecAlphaMocNNPDF = getPredXSecAlpha(mocPredXSec[kNNPDF], moc_vec[kNNPDF].at(3),
+							     alpha, alphaNNPDF_mean, alphaNNPDF_unc);
+  predXSecAlphaMocNNPDF.SetLineColor(kGreen);
+  predXSecAlphaMocNNPDF.SetMarkerSize(2);
+  predXSecAlphaMocNNPDF.SetMarkerStyle(23);
+
+  TGraphAsymmErrors predXSecAlphaMitMSTW = getPredXSecAlpha(mitPredXSec[kMSTW], mit_vec[kMSTW].at(3),
+							    alpha, alphaMSTW_mean, alphaMSTW_unc);
+  predXSecAlphaMitMSTW.SetLineColor(kRed);
+  predXSecAlphaMitMSTW.SetMarkerSize(2);
+  predXSecAlphaMitMSTW.SetMarkerStyle(21);
+
+  TGraphAsymmErrors predXSecAlphaMitHERA = getPredXSecAlpha(mitPredXSec[kHERA], mit_vec[kHERA].at(3),
+							    alpha, alphaHERA_mean, alphaHERA_unc);
+  predXSecAlphaMitHERA.SetLineColor(kRed);
+  predXSecAlphaMitHERA.SetMarkerSize(3);
+  predXSecAlphaMitHERA.SetMarkerStyle(29);
+
+  TGraphAsymmErrors predXSecAlphaMitABM = getPredXSecAlpha(mitPredXSec[kABM], mit_vec[kABM].at(3),
+							   alpha, alphaABM_mean, alphaABM_unc);
+  predXSecAlphaMitABM.SetLineColor(kRed);
+  predXSecAlphaMitABM.SetMarkerSize(2.5);
+  predXSecAlphaMitABM.SetMarkerStyle(34);
 
   RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
   frame_alpha->addObject(&measXSecWithErr, "3");
   frame_alpha->addObject(&measXSecWithErr, "CX");
-  mitPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
+  mitPredXSec[3]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
+  frame_alpha->addObject(&predXSecAlphaMitNNPDF, "PE");
   frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
-  frame_alpha->SetMaximum(230.);
-  frame_alpha->SetMinimum(110.);
+  frame_alpha->SetMaximum(235.);
+  frame_alpha->SetMinimum(115.);
   frame_alpha->Draw();
-  measXSecWithErr.SetFillColor(kBlue-9);
+  measXSecWithErr.SetFillColor(kBlue-10);
   measXSecWithErr.SetLineColor(kBlue+1);
   TLegend theoLeg = TLegend(0.18, 0.81, 0.63, 0.92);
   theoLeg.SetFillStyle(0);
   theoLeg.SetBorderSize(0);
   theoLeg.AddEntry(&measXSecWithErr, "CMS 2011, 2.3 fb^{-1}", "FL");
-  theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][1], "L");
+  frame_alpha->getAttMarker(mitPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerStyle(22);
+  frame_alpha->getAttMarker(mitPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerSize(2);
+  theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[3][1], "LP");
   theoLeg.Draw();
   char massTxt[99];
   sprintf(massTxt, "%s = %.1f GeV", mass.getTitle().Data(), mass.getVal());
@@ -851,27 +924,37 @@ int foldedLikelihoods(const bool pole)
   massText.Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_alpha_pre1.eps");
-  mocPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed)  , RooFit::LineStyle(2));
-  frame_alpha->SetMaximum(230.);
-  frame_alpha->SetMinimum(110.);
+  mocPredXSec[3]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
+  frame_alpha->addObject(&predXSecAlphaMocNNPDF, "PE");
+  frame_alpha->SetMaximum(235.);
+  frame_alpha->SetMinimum(115.);
   frame_alpha->Draw();
-  theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][0], "L");
+  frame_alpha->getAttMarker(mocPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerStyle(23);
+  frame_alpha->getAttMarker(mocPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerSize(2);
+  theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[3][0], "LP");
   theoLeg.SetY1NDC(0.75);
   theoLeg.Draw();
   massText.Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_alpha_pre2.eps");
-  mocPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen), RooFit::LineStyle(2));
-  mocPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan ), RooFit::LineStyle(2));
-  mitPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
-  mitPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kCyan));
-  frame_alpha->SetMaximum(230.);
-  frame_alpha->SetMinimum(110.);
+  mitPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(2));
+  mitPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(3));
+  mitPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(5));
+  frame_alpha->addObject(&predXSecAlphaMitMSTW , "PE");
+  frame_alpha->addObject(&predXSecAlphaMitHERA , "PE");
+  frame_alpha->addObject(&predXSecAlphaMitABM  , "PE");
+  frame_alpha->SetMaximum(235.);
+  frame_alpha->SetMinimum(115.);
   frame_alpha->Draw();
-  for(unsigned h=1; h<nPdfSets; h++) {
-    theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][1], "L");
-    theoLeg.AddEntry(frame_alpha->findObject(mocPredXSec[h]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[h][0], "L");
-  }
+  frame_alpha->getAttMarker(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerStyle(21);
+  frame_alpha->getAttMarker(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerSize(2);
+  frame_alpha->getAttMarker(mitPredXSec[1]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerStyle(29);
+  frame_alpha->getAttMarker(mitPredXSec[1]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerSize(3);
+  frame_alpha->getAttMarker(mitPredXSec[2]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerStyle(34);
+  frame_alpha->getAttMarker(mitPredXSec[2]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerSize(2.5);
+  theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][1], "LP");
+  theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[1]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[1][1], "LP");
+  theoLeg.AddEntry(frame_alpha->findObject(mitPredXSec[2]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[2][1], "LP");
   theoLeg.SetY1NDC(0.54);
   theoLeg.Draw();
   massText.Draw();
@@ -901,7 +984,6 @@ int foldedLikelihoods(const bool pole)
   TGraphAsymmErrors mocSummaryGraphTotErr(nSummaryPoints);
   TGraphAsymmErrors mitSummaryGraphInnErr(nSummaryPoints);
   TGraphAsymmErrors mitSummaryGraphTotErr(nSummaryPoints);
-  unsigned iGraphPoint = 0;
 
   for(unsigned h=0; h<nPdfSets; h++) {
     const TString suf[4] = {"MSTW", "HERA", "ABM", "NNPDF"};
@@ -910,17 +992,20 @@ int foldedLikelihoods(const bool pole)
 					    mass, mass_mean, mass_unc);
     mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob),
 					    mass, mass_mean, mass_unc);
-
-    mocResult[h]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, iGraphPoint, 2*iGraphPoint+0.2);
-    mitResult[h]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, iGraphPoint, 2*iGraphPoint+0.8);
-    iGraphPoint++;
   }
 
-  gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
+  mocResult[kABM  ]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, 0, 2*0+0.2);
+  mitResult[kABM  ]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, 0, 2*0+0.8);
+  mocResult[kHERA ]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, 1, 2*1+0.2);
+  mitResult[kHERA ]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, 1, 2*1+0.8);
+  mocResult[kMSTW ]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, 2, 2*2+0.2);
+  mitResult[kMSTW ]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, 2, 2*2+0.8);
+  mocResult[kNNPDF]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, 3, 2*3+0.2);
+  mitResult[kNNPDF]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, 3, 2*3+0.8);
 
-  mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1115, 0.1245);
+  mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1115, 0.1265);
   mocSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
-  mocSummaryGraphTotErr.GetYaxis()->SetRangeUser(-1, nSummaryPoints+2);
+  mocSummaryGraphTotErr.GetYaxis()->SetRangeUser(-1, nSummaryPoints+3);
   mocSummaryGraphTotErr.GetYaxis()->SetNdivisions(0);
 
   mocSummaryGraphTotErr.SetMarkerSize(2);
@@ -929,31 +1014,42 @@ int foldedLikelihoods(const bool pole)
   mitSummaryGraphTotErr.SetMarkerStyle(23);
 
   TBox boxAlpha2012(alpha2012_mean.getVal()-alpha2012_unc.getVal(), -1,
-		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+2);
+		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+3);
   boxAlpha2012.SetFillColor(kMagenta-9);
   boxAlpha2012.SetFillStyle(3007);
   TLine lineAlpha2012(alpha2012_mean.getVal(), -1,
-		      alpha2012_mean.getVal(), nSummaryPoints+2);
+		      alpha2012_mean.getVal(), nSummaryPoints+3);
   lineAlpha2012.SetLineStyle(2);
   TLine lineAlpha2012_left(alpha2012_mean.getVal()-alpha2012_unc.getVal(), -1,
-			   alpha2012_mean.getVal()-alpha2012_unc.getVal(), nSummaryPoints+2);
+			   alpha2012_mean.getVal()-alpha2012_unc.getVal(), nSummaryPoints+3);
   TLine lineAlpha2012_right(alpha2012_mean.getVal()+alpha2012_unc.getVal(), -1,
-			    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+2);
+			    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+3);
   lineAlpha2012_left .SetLineColor(kMagenta-9);
   lineAlpha2012_right.SetLineColor(kMagenta-9);
-  TText textAlpha2012(alpha2012_mean.getVal()-0.5*alpha2012_unc.getVal(), (nSummaryPoints+2)*0.95, "PDG 2012");
+  TText textAlpha2012(alpha2012_mean.getVal()-0.5*alpha2012_unc.getVal(), (nSummaryPoints+3)*0.95, "PDG 2012");
   textAlpha2012.SetTextAngle(90);
   textAlpha2012.SetTextAlign(32);
   textAlpha2012.SetTextFont(43);
   textAlpha2012.SetTextSizePixels(23);
 
-  TBox boxAlphaMSTW(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), -0.1,
-		    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(),  1.1);
+  TBox boxAlphaNNPDF(alphaNNPDF_mean.getVal()-alphaNNPDF_unc.getVal(), 5.9,
+		     alphaNNPDF_mean.getVal()+alphaNNPDF_unc.getVal(), 7.1);
+  boxAlphaNNPDF.SetFillColor(kGreen-9);
+  TLine lineAlphaNNPDF(alphaNNPDF_mean.getVal(), 5.9,
+		       alphaNNPDF_mean.getVal(), 7.1);
+  lineAlphaNNPDF.SetLineStyle(3);
+  TText textAlphaNNPDF(0.1230, 6.5, "NNPDF2.1");
+  textAlphaNNPDF.SetTextFont(43);
+  textAlphaNNPDF.SetTextSizePixels(26);
+  textAlphaNNPDF.SetTextAlign(12);
+
+  TBox boxAlphaMSTW(alphaMSTW_mean.getVal()-alphaMSTW_unc.getVal(), 3.9,
+		    alphaMSTW_mean.getVal()+alphaMSTW_unc.getVal(), 5.1);
   boxAlphaMSTW.SetFillColor(kGreen-9);
-  TLine lineAlphaMSTW(alphaMSTW_mean.getVal(), -0.1,
-		      alphaMSTW_mean.getVal(),  1.1);
+  TLine lineAlphaMSTW(alphaMSTW_mean.getVal(), 3.9,
+		      alphaMSTW_mean.getVal(), 5.1);
   lineAlphaMSTW.SetLineStyle(3);
-  TText textAlphaMSTW(0.1215, 0.5, "MSTW2008");
+  TText textAlphaMSTW(0.1215, 4.5, "MSTW2008");
   textAlphaMSTW.SetTextFont(43);
   textAlphaMSTW.SetTextSizePixels(26);
   textAlphaMSTW.SetTextAlign(12);
@@ -969,21 +1065,16 @@ int foldedLikelihoods(const bool pole)
   textAlphaHERA.SetTextSizePixels(26);
   textAlphaHERA.SetTextAlign(12);
 
-  TBox boxAlphaABM(alphaABM_mean.getVal()-alphaABM_unc.getVal(), 3.9,
-		    alphaABM_mean.getVal()+alphaABM_unc.getVal(), 5.1);
+  TBox boxAlphaABM(alphaABM_mean.getVal()-alphaABM_unc.getVal(), -0.1,
+		   alphaABM_mean.getVal()+alphaABM_unc.getVal(),  1.1);
   boxAlphaABM.SetFillColor(kGreen-9);
-  TLine lineAlphaABM(alphaABM_mean.getVal(), 3.9,
-		      alphaABM_mean.getVal(), 5.1);
+  TLine lineAlphaABM(alphaABM_mean.getVal(), -0.1,
+		     alphaABM_mean.getVal(),  1.1);
   lineAlphaABM.SetLineStyle(3);
-  TText textAlphaABM(alphaABM_mean.getVal()+alphaABM_unc.getVal()+0.0004, 4.5, "ABM11");
+  TText textAlphaABM(alphaABM_mean.getVal()+alphaABM_unc.getVal()+0.0004, 0.5, "ABM11");
   textAlphaABM.SetTextFont(43);
   textAlphaABM.SetTextSizePixels(26);
   textAlphaABM.SetTextAlign(12);
-
-  TText textAlphaNNPDF(alphaHERA_mean.getVal()+alphaHERA_unc.getVal()+0.0004, 6.5, "NNPDF2.1");
-  textAlphaNNPDF.SetTextFont(43);
-  textAlphaNNPDF.SetTextSizePixels(26);
-  textAlphaNNPDF.SetTextAlign(12);
 
   TLegend summaryLeg = TLegend(0.1, 0.75, 0.25, 0.9);
   summaryLeg.SetFillStyle(0);
@@ -1001,6 +1092,8 @@ int foldedLikelihoods(const bool pole)
   lineAlphaHERA.Draw();
   boxAlphaABM.Draw();
   lineAlphaABM.Draw();
+  boxAlphaNNPDF.Draw();
+  lineAlphaNNPDF.Draw();
   boxAlpha2012.Draw();
   lineAlpha2012.Draw();
   lineAlpha2012_left.Draw();
@@ -1015,8 +1108,7 @@ int foldedLikelihoods(const bool pole)
   textAlphaMSTW.Draw();
   textAlphaHERA.Draw();
   textAlphaABM.Draw();
-  if(nPdfSets>kNNPDF)
-    textAlphaNNPDF.Draw();
+  textAlphaNNPDF.Draw();
   TLatex* cmsLabel = cmsTxt();
   cmsLabel->Draw();
   canvas->Print(printNameBase+"_summaryPlot.eps");
@@ -1031,20 +1123,25 @@ int foldedLikelihoods(const bool pole)
   outfile << " & & Most likely & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
   outfile << " & & value       & Total & From $\\delta m_{t}$ \\\\" << std::endl;
   outfile << "\\hline" << std::endl;
+  const unsigned hOrdered[nPdfSets] = {3, 0, 1, 2};
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
-    sprintf(tmpTxt, "%s & \\multirow{2}{*}{with %s} & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
-	    theoName[1].Data(), pdfName[h].Data(),
-	    mitResult[h]->bestX,
-	    TMath::Max(mitResult[h]->highErrTotal, mitResult[h]->lowErrTotal),
-	    TMath::Max(mitResult[h]->highErrFromConstraintUncertainty, mitResult[h]->lowErrFromConstraintUncertainty));
+    sprintf(tmpTxt, "%s & \\multirow{2}{*}{with %s} &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
+	    theoName[1].Data(), pdfName[hOrdered[h]].Data(),
+	    mitResult[hOrdered[h]]->bestX,
+	    mitResult[hOrdered[h]]->highErrTotal,
+	    mitResult[hOrdered[h]]->lowErrTotal,
+	    mitResult[hOrdered[h]]->highErrFromConstraintUncertainty,
+	    mitResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
     outfile << tmpTxt << std::endl;
     outfile << "\\cline{3-5}" << std::endl;
-    sprintf(tmpTxt, "%s & & %.4f & $\\pm %.4f$ & $\\pm %.4f$ \\\\",
+    sprintf(tmpTxt, "%s & & %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
 	    theoName[0].Data(),
-	    mocResult[h]->bestX,
-	    TMath::Max(mocResult[h]->highErrTotal, mocResult[h]->lowErrTotal),
-	    TMath::Max(mocResult[h]->highErrFromConstraintUncertainty, mocResult[h]->lowErrFromConstraintUncertainty));
+	    mocResult[hOrdered[h]]->bestX,
+	    mocResult[hOrdered[h]]->highErrTotal,
+	    mocResult[hOrdered[h]]->lowErrTotal,
+	    mocResult[hOrdered[h]]->highErrFromConstraintUncertainty,
+	    mocResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
     outfile << tmpTxt << std::endl;
     outfile << "\\hline" << std::endl;
   }
@@ -1052,8 +1149,42 @@ int foldedLikelihoods(const bool pole)
   outfile.close();
   std::cout << "Wrote " << printNameBase+ "_summary.tab" << std::endl;
 
-//  const unsigned color[3] = {kRed+1, kMagenta, kGreen-3};
-//  const unsigned fillStyle[3] = {3545, 3305, 3554};
+  TGraphAsymmErrors measXSecAlpha = getMeasXSecAlpha(measXSecMassDep, measXSecMassDepErr, alpha, mitResult[kNNPDF]);
+  measXSecAlpha.SetMarkerStyle(20);
+  measXSecAlpha.SetMarkerSize(2);
+  measXSecAlpha.SetLineWidth(2);
+
+  frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
+  frame_alpha->addObject(&measXSecWithErr, "3");
+  frame_alpha->addObject(&measXSecWithErr, "CX");
+  mitPredXSec[3]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
+  frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
+  mocPredXSec[3]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
+  mitPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(2));
+  mitPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(3));
+  mitPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(5));
+  frame_alpha->addObject(&measXSecAlpha, "P");
+  frame_alpha->SetMaximum(235.);
+  frame_alpha->SetMinimum(115.);
+  frame_alpha->Draw();
+  TLegend theoLNoMk = TLegend(0.18, 0.54, 0.63, 0.92);
+  theoLNoMk.SetFillStyle(0);
+  theoLNoMk.SetBorderSize(0);
+  theoLNoMk.AddEntry(&measXSecWithErr, "CMS 2011, 2.3 fb^{-1}", "FL");
+  theoLNoMk.AddEntry(frame_alpha->findObject(mitPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[3][1], "L");
+  theoLNoMk.AddEntry(frame_alpha->findObject(mocPredXSec[3]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[3][0], "L");
+  theoLNoMk.AddEntry(frame_alpha->findObject(mitPredXSec[0]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[0][1], "L");
+  theoLNoMk.AddEntry(frame_alpha->findObject(mitPredXSec[1]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[1][1], "L");
+  theoLNoMk.AddEntry(frame_alpha->findObject(mitPredXSec[2]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[2][1], "L");
+  theoLNoMk.Draw();
+  massText.Draw();
+  TLegend theoMessLeg = TLegend(0.45, 0.2, 0.95, 0.26);
+  theoMessLeg.SetFillStyle(0);
+  theoMessLeg.SetBorderSize(0);
+  theoMessLeg.AddEntry(&measXSecAlpha, "CMS 2011  #times "+theoTitle[kNNPDF][1], "LEP");
+  theoMessLeg.Draw();
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(printNameBase+"_xsec_vs_alpha_with_result.eps");
 
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
@@ -1107,7 +1238,7 @@ int foldedLikelihoods(const bool pole)
     canvas->Print(printNameBase+".ps");
     canvas->Print(epsString("final_probDensity_mitov", pole, (PdfType)h));
   }
-  
+
   // cleaning up
 
   canvas->Print(printNameBase+".ps]");
