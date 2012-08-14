@@ -1,6 +1,7 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun",
+void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
+				  TString inputFolderName="1206_AnalysisRun",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool versionNNLO=true){
 
   // run automatically in batch mode
@@ -27,7 +28,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   // NOTE: these must also be included in xSecVariables_ in analyzeHypothesisKinFit.C and combineTopDiffXSecUncertainties.C
   std::vector<TString> xSecVariables_;
   //TString xSecVariables[] ={"topPt", "topPtNorm"};
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt" ,"lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"};
+  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt" ,"lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm", "inclusive"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   
   // ---
@@ -153,9 +154,13 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	// get data plots for all systematics
 	TString plotName = xSecVariables_[i];
 	plotName.ReplaceAll("Norm","");
+	TString plotNameTheo=plotName;
+	plotNameTheo.ReplaceAll("inclusive","xSec/inclusiveTheory");
+	//std::cout << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << "/" << plotNameTheo << std::endl;
 	TH1F* plotMu   = (TH1F*)canvasMu  ->GetPrimitive(plotName+"kData");
 	TH1F* plotEl   = (TH1F*)canvasEl  ->GetPrimitive(plotName+"kData");
-	TH1F* plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotName);
+	TH1F* plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotNameTheo);
+	plotTheo->SetName(plotName);
 	if(!plotTheo){
 	  // take care of differing naming convention for hadron level plots
 	  if(hadron) plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotName+"Gen");
@@ -413,11 +418,13 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  //    !!!! PLEASE READ !!!!
 	  // ============================
 	  
-	  // NO MCatNLO CURVES for b quark quantities
-	  // FIXME: -> use the one running the sample itself
-// 	  if(plotName=="bqPt"||plotName=="bqEta"){
-// 	    DrawMCAtNLOPlot2=false;
-// 	  }
+	  // NO theory CURVES for inclusive xSec
+ 	  if(plotName=="inclusive"){
+ 	    DrawMCAtNLOPlot2=false;
+	    DrawPOWHEGPlot2=false;
+	    DrawSmoothMadgraph2=false;
+	    smoothcurves2=false;
+	  }
 	  
 	  // Adjust drawing paramters for theory curves
 	  if (normalize){
@@ -468,7 +475,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = 10; rebinFactor = 20; errorRebinFactor = 20; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"LepEta" ;}
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomPt"  ;}
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomEta" ;}
-	  else{
+	  else if(DrawMCAtNLOPlot2){
 	    std::cout << " ERROR - Unknown variable " << xSecVariables_[i] << std::endl;
 	    // close file and delete pointer
 	    closeStdTopAnalysisFiles(files_);
@@ -632,19 +639,39 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
-	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge_noTree.root";
+	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge.root";
 	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", LV);
 	  // j) re-draw binned MADGRAPH theory curve
 	  // load it from combined file
-	  TH1F* plotTheo2 = getTheoryPrediction(plotNameMadgraph, MGcombFile);
-	  // Rebinning 
-	  std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
-	  reBinTH1F(*plotTheo2, binning_[plotName], verbose-1);
-	  // divide by binwidth
-	  plotTheo2=divideByBinwidth(plotTheo2, verbose-1);
-	  // Normalization
-	  double XSecInclTheoPS= getInclusiveXSec(plotTheo2,verbose-1);
-	  plotTheo2->Scale(1/(XSecInclTheoPS));
+	  TString plotNameMadgraph2=plotNameMadgraph;
+	  plotNameMadgraph2.ReplaceAll("inclusive", "topPt");
+	  TH1F* plotTheo2 = getTheoryPrediction(plotNameMadgraph2, MGcombFile);
+	  // inclusive cross section
+	  if(xSecVariables_[i]=="inclusive"){
+	    // get events in PS from top pt
+	    double NGenPS=0.5*plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1);
+	    NGenPS*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
+	    // get BR
+	    TH1F* plotTheo3 = getTheoryPrediction("analyzeTopPartonLevelKinematics/topPt", MGcombFile);
+	    double NGen=0.5*plotTheo3->Integral(0,plotTheo2->GetNbinsX()+1);
+	    NGen*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
+	    double BR=NGen*1.0/(ttbarCrossSection*0.5*(constLumiElec+constLumiMuon));
+	    // get predicted inclusive cross section in chosen PS 
+	    double inclxSec=NGenPS/(BR*0.5*(constLumiElec+constLumiMuon));
+	    // fill histo
+	    plotTheo2 = new TH1F( plotTheo->GetName(), plotTheo->GetTitle(), 1, 0., 1.0);
+	    plotTheo2->SetBinContent(1, inclxSec );
+	  }
+	  else{
+	    // other quantities
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	    reBinTH1F(*plotTheo2, binning_[plotName], verbose-1);
+	    // divide by binwidth
+	    plotTheo2=divideByBinwidth(plotTheo2, verbose-1);
+	    // Normalization
+	    double XSecInclTheoPS= getInclusiveXSec(plotTheo2,verbose-1);
+	    plotTheo2->Scale(1/(XSecInclTheoPS));
+	  }
 	  // styling
 	  histogramStyle( *plotTheo2, kSig, false);
 	  plotTheo2->SetTitle(plotTheo->GetTitle());

@@ -2,7 +2,7 @@
 #include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="electron", bool exclShapeVar=true, bool extrapolate=false, bool hadron=false){
+void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false){
 
   // ============================
   //  Systematic Variations:
@@ -105,7 +105,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // NOTE: these must be identical to those defined in xSecVariables_ in analyzeHypothesisKinFit.C
 
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt", "lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "bqPtNorm", "bqEtaNorm", "inclusive"};
+  TString xSecVariables[] ={"inclusive", "topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt", "lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "bqPtNorm", "bqEtaNorm"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.0;
@@ -274,13 +274,14 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	  
 	  // get MC prediction plot without systematic variation
 	  if(sys==sysNo){
-	    if (xSecVariables_[i]=="inclusive") plotName = "xSec/"+plotName+"Theory";
+	    if (xSecVariables_[i]=="inclusive"&&decayChannel!="combined") plotName = "xSec/"+plotName+"Theory";
 	    TH1F* MCplot= (TH1F*)canvas->GetPrimitive(plotName);	    
 	    if(MCplot){ 
 	      if(verbose>1) std::cout << "MC plot "+plotName+" in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " found!" << std::endl;
 	      // go to root directory, keep plot when closing rootfile
 	      gROOT->cd();
 	      histo_[xSecVariables_[i]+"MC"][sys]=(TH1F*)(MCplot->Clone());
+	      if(!histo_[xSecVariables_[i]+"MC"][sys]) std::cout << plotName << " buggy" << std::endl;
 	      // Prepare plots for uncertainty distributions	     
 	      statUncertaintyDistributions_[xSecVariables_[i]] =(TH1F*)(MCplot->Clone());
 	      statUncertaintyDistributions_[xSecVariables_[i]] ->Reset("ICESM");
@@ -897,13 +898,13 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      // 2010 CMS result
 	      double cms2010xSecValue=158.;
 	      double cms2010ErrorUp  =sqrt(10.*10.+6.*6.+15.*15.);
-	      double cms2010ErrorDown=sqrt(10.*10.+6.*6.+15.*15.);
+	      double cms2010ErrorDown=cms2010ErrorUp;
 	      double cms2010StatError=10;
-	      // 2011 CMS result - semleptonic TOP-11-003
-	      double cms2011xSecValue=164.0;
-	      double cms2011ErrorUp  =sqrt(3.0*3.0+12.0*12.0+7.0*7.0);
-	      double cms2011ErrorDown=sqrt(3.0*3.0+12.0*12.0+7.0*7.0);
-	      double cms2011StatError=3.0;
+	      // 2011 CMS result - semleptonic TOP-11-024
+	      double cms2011xSecValue=165.8;
+	      double cms2011ErrorUp  =sqrt(2.2*2.2+10.6*10.6+7.8*7.8);
+	      double cms2011ErrorDown=cms2011ErrorUp;
+	      double cms2011StatError=2.2;
 	      if(verbose>0){
 		std::cout << "xSec:            " << xSecValue      << std::endl;
 		std::cout << "stat. error: +/- " << xSecError      << " (" << xSecError/xSecValue      << ")" << std::endl;
@@ -932,14 +933,16 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      DrawLabel("2010 data, 36/pb"  , 0.07, 0.65, 0.4, 0.70);
 	      DrawLabel("(arXiv:1108.3773)" , 0.07, 0.60, 0.4, 0.65);
 
-	      DrawLabel("CMS 2011 (l + Jets)   " , 0.07, 0.50, 0.4, 0.55); 
-	      DrawLabel("2011 Data, 0.8-1.09/fb" , 0.07, 0.45, 0.4, 0.50);
-	      DrawLabel("(TOP-11-003)"           , 0.07, 0.40, 0.4, 0.45);
+	      DrawLabel("CMS 2011 combined"      , 0.07, 0.50, 0.4, 0.55); 
+	      DrawLabel("2011 data, 0.8-1.09/fb" , 0.07, 0.45, 0.4, 0.50);
+	      DrawLabel("(TOP-11-024)"           , 0.07, 0.40, 0.4, 0.45);
 
 	      TString channelLabel="unknown";
 	      TString dataLabel=Form(dataSample+" data, %2.1f fb^{-1}",luminosity/1000);
-	      if(decayChannel.Contains("mu")) channelLabel="#mu + Jets";
-	      if(decayChannel.Contains("el")) channelLabel="e + Jets";
+	      if(decayChannel.Contains("mu"  )) channelLabel="#mu + Jets";
+	      if(decayChannel.Contains("el"  )) channelLabel="e + Jets";
+	      if(decayChannel.Contains("comb")) channelLabel="e/#mu + Jets";
+
 	      DrawLabel(channelLabel, 0.07, 0.30, 0.4, 0.35);
 	      DrawLabel(dataLabel,    0.07, 0.25, 0.4, 0.30);
 	      canvas=(TCanvas*)canvas2->Clone();
@@ -1008,7 +1011,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      // b) as eps and png
 	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
 	      if(decayChannel=="combined") saveName+="Combined";
-	      if(xSecVariables_[i]!="inclusive") saveName+=universalplotLabel;
+	      saveName+=universalplotLabel;
 	      canvas->Print(saveName+".eps");
 	      canvas->Print(saveName+".png");
 	      gErrorIgnoreLevel=initialIgnoreLevel;
