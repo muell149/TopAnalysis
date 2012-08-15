@@ -77,6 +77,11 @@ namespace semileptonic {
   const unsigned int constPowhegColor   = kGreen+1;
   const unsigned int constNnloColor     = kOrange-3;
 
+  // Line style for theory curves
+  const unsigned int constPowhegStyle  = 7;
+  const unsigned int constNnloStyle    = 5;
+
+
   int marker_[] = {20, 22, 29, 23, 
 		   21, 27, 28, 20, 
 		   21, 21, 21, 21, 21, 21,
@@ -2087,7 +2092,7 @@ namespace semileptonic {
     return tex;  
   }
 
-  TCanvas* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0), TCanvas* canv=0)
+  TCanvas* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0), TCanvas* canv=0, double rangeMin=-1., double rangeMax=-1.)
   {
     // this function draws a pad with the ratio "histNumeratorData" over "histDenominatorTheoryX" 
     // for up to five specified theory curves, using "histNumeratorDataDown" and "histNumeratorDataUp"
@@ -2164,6 +2169,9 @@ namespace semileptonic {
       Double_t left  = myStyle.GetPadLeftMargin();
       Double_t right = myStyle.GetPadRightMargin();
       setXAxisRange(histNumeratorData, (TString)histNumeratorData->GetName());
+      if(rangeMin!=-1.&&rangeMax!=-1.){
+	histNumeratorData->GetXaxis()->SetRange(histNumeratorData->FindBin(rangeMin),histNumeratorData->FindBin(rangeMax));
+      }
       //Double_t xmin = histNumeratorData->GetXaxis()->GetXmin();
       //Double_t xmax = histNumeratorData->GetXaxis()->GetXmax();
       // y:x size ratio for canvas
@@ -2243,7 +2251,13 @@ namespace semileptonic {
 	ratio_[nTheory]->GetYaxis()->SetTickLength(0.03);
 	ratio_[nTheory]->GetYaxis()->SetNdivisions(505);
 	ratio_[nTheory]->GetXaxis()->SetRange(histNumeratorData->GetXaxis()->GetFirst(), histNumeratorData->GetXaxis()->GetLast());
-	if(nTheory==0) setXAxisRange(ratio_[nTheory], (TString)ratio_[nTheory]->GetName());
+	if(nTheory==0){
+	  setXAxisRange(ratio_[nTheory], (TString)ratio_[nTheory]->GetName());
+	  if(rangeMin!=-1.&&rangeMax!=-1.){
+	    if(verbose>0) std::cout << "manual range chosen: " << ratio_[nTheory]->FindBin(rangeMin) << " .. " << ratio_[nTheory]->FindBin(rangeMax) << std::endl;
+	    ratio_[nTheory]->GetXaxis()->SetRange(ratio_[nTheory]->FindBin(rangeMin),ratio_[nTheory]->FindBin(rangeMax));
+	  }
+	}
 	TString titleX=xSecLabelName(histNumeratorData->GetName());
 	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
 	titleX=(TString)(histNumeratorData->GetXaxis()->GetTitle());
