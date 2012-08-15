@@ -485,11 +485,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     "m^{jj} #left[GeV#right];events;1;10",
     "m^{bb} (KinFit non t#bar{t} b-jets) #left[GeV#right];4 b-tag events;1;50",
     "m^{bb} #left[GeV#right];permutations;1;10",
-    "N^{bjets};events;1;1",
-    "N^{jets};events;1;1",
-    "p_{T}^{leading non t#bar{t}-jet} #left[GeV#right];events;1;5",
-    "y^{leading non t#bar{t}-jet};events;0;1",
-    "#eta^{leading non t#bar{t}-jet};events;0;1",
+    "N_{bjets};events;1;1",
+    "N_{jets};events;1;1",
+    "p_{T}^{leading non t#bar{t}-jet} #left[GeV#right];events;1;50",
+    "y^{leading non t#bar{t}-jet};events;0;4",
+    "#eta^{leading non t#bar{t}-jet};events;0;4",
     "probability (best fit hypothesis);events;1;25", 
     "#chi^{2} (best fit hypothesis);events;0;10",
     "#Delta#Phi(t,#bar{t});events;0;4",
@@ -874,6 +874,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   leg1->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
  
   // MC samples (add only if sample exists in at least one plot, then quit plot-loop to avoid duplication of entries)
+  TLegend *legTheo=(TLegend*)leg->Clone();
+  legTheo->SetHeader("#splitline{after KinFit reco,}{#splitline{BG subtracted}{  }}");
   for(unsigned int sample=kSig; sample<kData; ++sample){
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size()-1; ++plot){  // <plotList_.size()-1, because last entry is for data (see above)
@@ -885,12 +887,91 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
       }
     }
   }
-  
+
+
   // Uncertainty band
   if(histoErrorBand_.size() > 0 && plotList_.size() > 0){
     leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
     leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
     leg1->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
+  }
+	
+  // ===================================
+  //  Change 1D plots into stack plots
+  // ===================================
+  // loop plots -> all 1D plots will become stacked plots
+  if(verbose>1) std::cout << std::endl;
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+    createStackPlot(plotList_, histo_, plot, N1Dplots, verbose, decayChannel);
+  }
+  if(verbose>1) std::cout << std::endl;
+
+  // ============================
+  // introduce some BG subtracted
+  // shape plots
+  // ============================
+  // loop all plots
+  bool firstBGsub=true;
+  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+    // search for leading non ttbar jet
+    if((plotList_[plot].Contains("compositedKinematicsKinFit/leadNontt")||plotList_[plot].Contains("compositedKinematicsKinFit/Njets"))&&!plotList_[plot].Contains("BGSubNorm")){
+      // create new Entry
+      TString  newName=plotList_[plot];
+      newName+="BGSubNorm";
+      plotList_ .insert(plotList_ .begin()+plot+1, newName         );
+      axisLabel_.insert(axisLabel_.begin()+plot+1, axisLabel_[plot]);
+      axisLabel_[plot+1].ReplaceAll("events", "norm. events");
+      N1Dplots++;
+      std::cout << plotList_[plot] << ": " << histo_[plotList_[plot]][kSig] << std::endl;
+      // BG subtracted data and pure signal prediction
+      histo_[newName][kSig]=(TH1F*)histo_[plotList_[plot]][kSig]->Clone(newName);
+      histo_[newName][kSig]->Add(histo_[plotList_[plot]][kBkg],-1);
+      histo_[newName][kData]=(TH1F*)histo_[plotList_[plot]][kData]->Clone(newName);
+      histo_[newName][kData]->Add(histo_[plotList_[plot]][kBkg],-1);
+      // shape normalization
+      histo_[newName][kSig ]->Scale(1./histo_[newName][kSig ]->Integral(0,histo_[newName][kSig ]->GetNbinsX()+1));
+      histo_[newName][kData]->Scale(1./histo_[newName][kData]->Integral(0,histo_[newName][kData]->GetNbinsX()+1)); 
+      // adapt style 
+      histo_[newName][kSig]->SetLineColor(histo_[newName][kSig]->GetFillColor());
+      histo_[newName][kSig]->SetLineWidth(2);
+      histo_[newName][kSig]->SetFillStyle(0);
+      // create other theory prediction plots
+      unsigned int koneMca= (decayChannel!="electron" ? kSigMca : kBkgMca);
+      unsigned int ktwoMca= (decayChannel=="combined" ? kBkgMca : 999);
+      unsigned int konePow= (decayChannel!="electron" ? kSigPow : kBkgPow);
+      unsigned int ktwoPow= (decayChannel=="combined" ? kBkgPow : 999);
+      files_[kSigMca]=TFile::Open(inputFolder+"/"+TopFilename(kSigMca, systematicVariation, "muon"    ));
+      files_[kBkgMca]=TFile::Open(inputFolder+"/"+TopFilename(kSigMca, systematicVariation, "electron"));
+      files_[kSigPow]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "muon"    ));
+      files_[kBkgPow]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "electron"));
+      histo_[newName][kSigMca]=(TH1F*)(files_[koneMca]->Get(plotList_[plot])->Clone(newName));
+      if(ktwoMca!=999) histo_[newName][kSigMca]->Add((TH1F*)(files_[ktwoMca]->Get(plotList_[plot])->Clone(newName)));
+      histo_[newName][kSigPow]=(TH1F*)(files_[konePow]->Get(plotList_[plot])->Clone(newName));
+      if(ktwoPow!=999) histo_[newName][kSigPow]->Add((TH1F*)(files_[ktwoPow]->Get(plotList_[plot])->Clone(newName)));
+      double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4,";")).c_str());
+      if(reBinFactor>1){
+	equalReBinTH1(reBinFactor, histo_, newName, kSigPow);
+	equalReBinTH1(reBinFactor, histo_, newName, kSigMca);
+      }
+      histo_[newName][kSigMca]->Scale(1./histo_[newName][kSigMca]->Integral(0,histo_[newName][kSigMca]->GetNbinsX()+1));
+      histo_[newName][kSigPow]->Scale(1./histo_[newName][kSigPow]->Integral(0,histo_[newName][kSigPow]->GetNbinsX()+1));
+      histo_[newName][kSigMca]->SetLineColor(constMcatnloColor);
+      histo_[newName][kSigPow]->SetLineColor(constPowhegColor );
+      histo_[newName][kSigMca]->SetMarkerColor(constMcatnloColor);
+      histo_[newName][kSigPow]->SetMarkerColor(constPowhegColor );
+      histo_[newName][kSigMca]->SetLineWidth(2);
+      histo_[newName][kSigPow]->SetLineWidth(2);
+      histo_[newName][kSigMca]->SetLineStyle(constNnloStyle);
+      histo_[newName][kSigPow]->SetLineStyle(constPowhegStyle);
+      histo_[newName][kSigMca]->SetFillStyle(0);
+      histo_[newName][kSigPow]->SetFillStyle(0);
+      if(firstBGsub){
+	legTheo->AddEntry(histo_[newName][kSig   ], "MadGraph", "L");
+	legTheo->AddEntry(histo_[newName][kSigPow], "POWHEG"  , "L");
+	legTheo->AddEntry(histo_[newName][kSigMca], "MC@NLO"  , "L");
+	firstBGsub=false;
+      }
+    }
   }
 
   // =====================
@@ -904,17 +985,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
     plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
     //canvasStyle(*plotCanvas_[sample]);
   }
-	
-  // ===================================
-  //  Change 1D plots into stack plots
-  // ===================================
-  // loop plots -> all 1D plots will become stacked plots
-  if(verbose>1) std::cout << std::endl;
-  for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-    createStackPlot(plotList_, histo_, plot, N1Dplots, verbose, decayChannel);
-  }
-  if(verbose>1) std::cout << std::endl;
-	
+
   // =====================
   //  Do the printing
   // =====================
@@ -970,6 +1041,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")&&plotList_[plot].Contains("/prob")) min=0.1; 
 	      if(plotList_[plot].Contains("_JetKinematicsTagged/pt")) min=0.1;
 	      if(plotList_[plot].Contains("mHbb")) min=0.1;
+	      if(plotList_[plot].Contains("BGSubNorm")){ max=5.0; min=0.0001; }
 	    }
 	    // get nicer int values if maximum is large enough
 	    if(max>3) max = (double)roundToInt(max);
@@ -1001,7 +1073,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
 	    if(plotList_[plot].Contains("topY"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
 	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);	
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/leadqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,400);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.4,2.4);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.4,2.4);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/MJJ")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarMass")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
@@ -1014,6 +1088,7 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.001,0.001);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.5,0.5);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"     )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4.,9.);
 	    // Special y-range for paper control plots
 	    if (decayChannel == "combined"){
 	      if(plotList_[plot].Contains("tightJetKinematicsTagged/n"))    {min=1.0; max=1.0E06;}
@@ -1034,6 +1109,17 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	    histo_[plotList_[plot]][sample]->Draw("hist X0");
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->GetXaxis()->SetNoExponent(true);
+	    // draw other theory predictions for BG subtracted plots
+	    if(plotList_[plot].Contains("BGSubNorm")){
+	      histo_[plotList_[plot]][kSigMca]->Draw("hist X0 same");
+	      histo_[plotList_[plot]][kSigPow]->Draw("hist X0 same");
+	      // draw small legend
+	      legTheo->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+	      legTheo->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() +0.05 - 0.03 * leg->GetNRows());
+	      legTheo->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+	      legTheo->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
+	      if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")||plotList_[plot].Contains("compositedKinematicsKinFit/Njets"))legTheo->Draw("same");
+	    }
 	  }
 	  // draw other plots into same canvas 
 	  else{ 
@@ -1045,7 +1131,7 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	  first=false;
 	  // at the end:
 	  if((sample==kData)&&(histo_.count(plotList_[plot])>0)&&histo_[plotList_[plot]][sample]){
-	    if(!SSV){
+	    if(!SSV&&!plotList_[plot].Contains("BGSubNorm")){
 	      // configure style of and draw uncertainty bands
 	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
 	      histoErrorBand_[plotList_[plot]]->SetFillColor(1);
@@ -1072,7 +1158,7 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05 - 0.03 * leg->GetNRows());
 	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05);
-	      leg->Draw("SAME");
+	      if(!plotList_[plot].Contains("BGSubNorm"))leg->Draw("SAME");
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
 	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
@@ -1080,9 +1166,30 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	      DrawCMSLabels(false,luminosity); 
 	      //draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0) && withRatioPlot){
-		int rval = drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, myStyle, verbose);	       
-		if (rval!=0) std::cout << " Problem occured for " << plotList_[plot] << std::endl;
-
+		if(plotList_[plot].Contains("BGSubNorm")){
+		  std::vector<TH1F*>ratiohists_;
+		  // get theory
+		  ratiohists_.push_back( histo_[plotList_[plot]][kSig   ] );
+		  ratiohists_.push_back( histo_[plotList_[plot]][kSigMca] );
+		  ratiohists_.push_back( histo_[plotList_[plot]][kSigPow] );
+		  double max=1.8;
+		  double min=0.2;
+		  double xmax=-1;
+		  double xmin=-1;
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt" )){ xmin=30. ; xmax=400.; }
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")){ xmin=-2.4; xmax=2.4 ; }
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY"  )){ xmin=-2.4; xmax=2.4 ; }
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"          )){ xmin=4   ; xmax=9   ; }
+		  // create ratio canvas
+		  std::vector<TCanvas*> plotCanvasRatio_;
+		  plotCanvasRatio_.push_back(drawFinalResultRatio(histo_[plotList_[plot]][kData], min, max, myStyle, 0, ratiohists_, plotCanvas_[canvasNumber], xmin, xmax));
+		  plotCanvasRatio_[0]->Draw();
+		  plotCanvasRatio_[0]->Update();
+		}
+		else{
+		  int rval = drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], 0.1, 1.9, myStyle, verbose);	       
+		  if (rval!=0) std::cout << " Problem occured when creating ratio plot for " << plotList_[plot] << std::endl;
+		}
 	      }
 	    }
 	  }
