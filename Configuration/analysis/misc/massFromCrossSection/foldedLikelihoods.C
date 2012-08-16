@@ -537,11 +537,11 @@ void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int co
 
 TLatex* cmsTxt()
 {
-  const TString txt = "2.3 fb^{-1} of 2011 CMS t#bar{t} data #times approx. NNLO,  #sqrt{s} = 7 TeV, m = 173.2 #pm 1.4 GeV" ;
+  const TString txt = "2.3 fb^{-1} of 2011 CMS data #times approx. NNLO for #sigma_{#lower[-0.2]{t#bar{t}}},  #sqrt{s} = 7 TeV, m_{#kern[0.3]{#lower[-0.1]{t}}} = 173.2 #pm 1.4 GeV";
   TLatex* text = new TLatex(0,0,txt);
   text->SetNDC();
-  text->SetTextAlign(13);
-  text->SetX(gPad->GetLeftMargin());
+  text->SetTextAlign(23);
+  text->SetX(0.5);
   text->SetY(1.003);
   text->SetTextFont(43);
   text->SetTextSizePixels(25);
@@ -1083,7 +1083,9 @@ int foldedLikelihoods(const bool pole)
   summaryLeg.AddEntry(&mocSummaryGraphTotErr, theoName[0], "PL");
 
   const double oldPadLeftMargin = gPad->GetLeftMargin();
+  const double oldPadTopMargin  = gPad->GetTopMargin();
   gPad->SetLeftMargin(gPad->GetRightMargin());
+  gPad->SetTopMargin(1.25*oldPadTopMargin);
 
   mocSummaryGraphTotErr.Draw("AP");
   boxAlphaMSTW.Draw();
@@ -1112,9 +1114,11 @@ int foldedLikelihoods(const bool pole)
   TLatex* cmsLabel = cmsTxt();
   cmsLabel->Draw();
   canvas->Print(printNameBase+"_summaryPlot.eps");
+  canvas->Print(printNameBase+"_summaryPlot.root");
   canvas->Print(printNameBase+".ps");
 
   gPad->SetLeftMargin(oldPadLeftMargin);
+  gPad->SetTopMargin(oldPadTopMargin);
 
   ofstream outfile;
   outfile.open(printNameBase+ "_summary.tab");
