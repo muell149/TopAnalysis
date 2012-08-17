@@ -848,6 +848,9 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   METSrc = 'patMETs',
                                   MuonSrc = 'tightMuons',
                                   ElectronSrc = 'goodElectronsEJ',
+                                  GenJetSrc = cms.InputTag('ak5GenJets','','HLT'),
+                                  GenMETSrc = 'genMetTrue',
+                                  GenLepSrc = 'isolatedGenMuons',
                                   weight = "",
                                   VertexSrc = "goodOfflinePrimaryVertices",
                                   semiLepEvent = cms.InputTag(""),
@@ -855,7 +858,8 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   btagAlgo=cms.string("combinedSecondaryVertexBJetTags"),
                                   btagDiscr=cms.double(0.679)
                                   )
-
+if(decayChannel=='electron'):
+    compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
 process.compositedKinematicsTagged = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
