@@ -1042,8 +1042,8 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
@@ -1080,7 +1080,7 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## kinfit succeeded?
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
-process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.05"  ) )
+process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.10"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## configure top reconstruction analyzers & define PSets
@@ -1287,7 +1287,7 @@ if(applyKinFit==True):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                             #process.filterProbKinFit                        +
+                                             process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -1333,7 +1333,7 @@ if(applyKinFit==True):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                             #process.filterProbKinFit                        +
+                                             process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.compositedKinematicsKinFit
@@ -1346,7 +1346,7 @@ if(applyKinFit==True):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
                                          process.filterRecoKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                         #process.filterProbKinFit                        +
+                                         process.filterProbKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFit          +
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                          process.compositedKinematicsKinFit
