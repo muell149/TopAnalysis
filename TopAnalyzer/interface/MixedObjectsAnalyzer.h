@@ -18,6 +18,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TMath.h"
+#include "TString.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -25,7 +26,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
+#include "DataFormats/Candidate/interface/CompositePtrCandidate.h"
 
 /**
    \class   MixedObjectsAnalyzer MixedObjectsAnalyzer.h "TopAnalysis/TopAnalyzer/interface/MixedObjectsAnalyzer.h"
@@ -51,11 +52,13 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   virtual void analyze(const edm::Event& event, const edm::EventSetup& iSetup);
   /// empty
   virtual void endJob();
-  /// helper functions to deal with abs(deltaphi) > pi
+  /// helper function to deal with abs(deltaphi) > pi
   double modTwoPi(double DeltaPhi);
-
+  /// helper function to find to find non-ttbar jets
+  bool findAncestor(const reco::Candidate* cand, TString decaychain);
+    
   /// src's for the different infos
-  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, weight_, VertexSrc_, semiLepEvt_;
+  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_,  GenJetSrc_, GenMETSrc_, GenLepSrc_, weight_, VertexSrc_, semiLepEvt_;
 
   // class key of kinfit hypothesis
   std::string hypoKey_, btagAlgo_;
@@ -79,6 +82,7 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
 
   /// histo container
   std::map< std::string, TH1F* > hists_;
+  std::map< std::string, TH2F* > hists2D_;
 };
 
 #endif

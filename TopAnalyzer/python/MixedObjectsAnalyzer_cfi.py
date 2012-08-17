@@ -9,6 +9,12 @@ analyzeCompositedObjects = cms.EDAnalyzer("MixedObjectsAnalyzer",
                                           MuonSrc = cms.InputTag('selectedPatMuons'),
                                           ## electrons
                                           ElectronSrc = cms.InputTag('selectedPatElectrons'),
+                                          ## gen jets
+                                          GenJetSrc =  cms.InputTag(""),
+                                          ## gen MET
+                                          GenMETSrc =  cms.InputTag(""),
+                                          ## gen lepton
+                                          GenLepSrc =  cms.InputTag(""),
                                           ## event weight (PU, etc...)
                                           weight = cms.InputTag("eventWeightPU","eventWeightPU"),
                                           ## primary vertex info

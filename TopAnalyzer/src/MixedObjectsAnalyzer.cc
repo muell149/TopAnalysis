@@ -20,12 +20,15 @@
 
 /// default constructor
 MixedObjectsAnalyzer::MixedObjectsAnalyzer(const edm::ParameterSet& cfg) :
-  JetSrc_            (cfg.getParameter<edm::InputTag>("JetSrc"     )),
-  METSrc_            (cfg.getParameter<edm::InputTag>("METSrc"     )),
-  MuonSrc_           (cfg.getParameter<edm::InputTag>("MuonSrc"    )),
-  ElectronSrc_       (cfg.getParameter<edm::InputTag>("ElectronSrc")),
-  weight_            (cfg.getParameter<edm::InputTag>("weight"     )),
-  VertexSrc_         (cfg.getParameter<edm::InputTag>("VertexSrc"  )),
+  JetSrc_            (cfg.getParameter<edm::InputTag>("JetSrc"      )),
+  METSrc_            (cfg.getParameter<edm::InputTag>("METSrc"      )),
+  MuonSrc_           (cfg.getParameter<edm::InputTag>("MuonSrc"     )),
+  ElectronSrc_       (cfg.getParameter<edm::InputTag>("ElectronSrc" )),
+  GenJetSrc_         (cfg.getParameter<edm::InputTag>("GenJetSrc"   )),
+  GenMETSrc_         (cfg.getParameter<edm::InputTag>("GenMETSrc"   )),
+  GenLepSrc_         (cfg.getParameter<edm::InputTag>("GenLepSrc"   )),
+  weight_            (cfg.getParameter<edm::InputTag>("weight"      )),
+  VertexSrc_         (cfg.getParameter<edm::InputTag>("VertexSrc"   )),
   semiLepEvt_        (cfg.getParameter<edm::InputTag>("semiLepEvent")),
   hypoKey_           (cfg.getParameter<std::string>  ("hypoKey"     )),
   btagAlgo_          (cfg.getParameter<std::string>  ("btagAlgo"    )),
@@ -124,6 +127,7 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("lepPhiPre"     ,&lepPhiPre   , "lepEtaPre/D"   );
 
   // histos
+  // 1D
   hists_["MuNu4J" ] = fs->make<TH1F>( "MuNu4J"  , "MuNu4J"  , 2500,  0. , 2500 );
   hists_["ElNu4J" ] = fs->make<TH1F>( "ElNu4J"  , "ElNu4J"  , 2500,  0. , 2500 );
   hists_["MJJ"    ] = fs->make<TH1F>( "MJJ"     , "MJJ"     , 2500,  0. , 2500 );        
@@ -132,7 +136,8 @@ MixedObjectsAnalyzer::beginJob()
   hists_["mHbb"   ] = fs->make<TH1F>( "mHbb"    , "mHbb"    , 500 ,  0. , 500  );      
   hists_["mbb"    ] = fs->make<TH1F>( "mbb"     , "mbb"     , 500 ,  0. , 500  );  
   hists_["Nbjets" ] = fs->make<TH1F>( "Nbjets"  , "Nbjets"  , 10  ,  -0.5, 9.5 ); 
-  hists_["Njets"  ] = fs->make<TH1F>( "Njets"   , "Njets"   , 15  ,  -0.5, 14.5);   
+  hists_["Njets"  ] = fs->make<TH1F>( "Njets"   , "Njets"   , 15  ,  -0.5, 14.5);  
+  hists_["Ngenjets"]= fs->make<TH1F>( "Ngenjets", "Ngenjets", 15  ,  -0.5, 14.5);  
   hists_["leadNonttjetPt" ] = fs->make<TH1F>( "leadNonttjetPt" , "leadNonttjetPt" , 1500, 0 , 1500.);
   hists_["leadNonttjetY"  ] = fs->make<TH1F>( "leadNonttjetY"  , "leadNonttjetY"  , 100 ,-5., 5    );
   hists_["leadNonttjetEta"] = fs->make<TH1F>( "leadNonttjetEta", "leadNonttjetEta", 100 ,-5., 5    );
@@ -148,6 +153,9 @@ MixedObjectsAnalyzer::beginJob()
   hists_["shiftNuPt"    ] = fs->make<TH1F>( "shiftNuPt" , "shiftNuPt"   , 2000,  -200. , 200 );
   hists_["shiftNuEta"   ] = fs->make<TH1F>( "shiftNuEta", "shiftNuEta"  , 1000,  -5.   , 5   );
   hists_["shiftNuPhi"   ] = fs->make<TH1F>( "shiftNuPhi", "shiftNuPhi"  , 1200,  -3.   , 3   );
+  // 2D
+  hists2D_["Njets_"  ] = fs->make<TH2F>( "Njets_" , "Njets_" , 15, -0.5, 14.5, 15, -0.5, 14.5);  
+
 }
 
 /// fill variables
@@ -173,6 +181,15 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   
   edm::Handle<edm::View< pat::Jet > > jets_h;
   event.getByLabel(JetSrc_, jets_h);
+  
+  edm::Handle<edm::View< reco::GenJet > > genJets_h;
+  event.getByLabel(GenJetSrc_, genJets_h);
+
+  edm::Handle<edm::View< reco::GenMET > > genMET_h;
+  event.getByLabel(GenMETSrc_, genMET_h);
+  
+  edm::Handle<edm::View< reco::GenParticle > > genLep_h;
+  event.getByLabel(GenLepSrc_, genLep_h);
   
   edm::Handle<std::vector<reco::Vertex> > vertecies_h;
   event.getByLabel(VertexSrc_, vertecies_h);
@@ -310,10 +327,38 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       }
     }
   }
+  //std::cout << "looping genjets" << std::endl;
+  // loop gen Jets
+  int Ngenjet=-1;
+  if(genJets_h.isValid()){
+    Ngenjet=0;
+    for(edm::View< reco::GenJet >::const_iterator genJets=genJets_h->begin(); genJets!=genJets_h->end(); ++genJets){
+//       std::cout << "#" << genJets-genJets_h->begin() << ":" << std::endl;
+//       std::cout << "(" << genJets->numberOfDaughters() << " daughters)"<< std::endl;
+//       if(genJets->numberOfDaughters()>0){
+// 	for(unsigned int numDaught=0; numDaught<genJets->numberOfDaughters(); ++numDaught){
+// 	  //std::cout << "daughter #" << numDaught << std::endl;
+// 	  if(findAncestor(genJets->daughter(numDaught), "")){
+// 	    std::cout << "ttbar jet!" << std::endl; 
+// 	    break;
+// 	  }
+// 	}
+//       }
+      //std::cout << std::endl;
+      if(genJets->pt()>30&&genJets->eta()<2.4){
+	++Ngenjet;
+      }
+    }
+  }
   // fill multiplicity plots
   hists_["Nbjets"]->Fill(Nbjets, weight);
   hists_["Nbjets"]->GetXaxis()->SetTitle("N("+TString(btagAlgo_)+" b-jets)");
-  hists_["Njets" ]->Fill(Njets , weight);  
+  hists_["Njets" ]->Fill(Njets , weight);
+  //std::cout << "fill gen jet plot" << std::endl;
+  hists_["Ngenjets"]->Fill(Ngenjet, weight); 
+  //std::cout << "fill gen-reco jet plot" << std::endl;
+  hists2D_["Njets_"]->Fill(Ngenjet, Njets, weight); 
+  // std::cout << "done" << std::endl;
 
   // lead non ttbar jet
   if(leadNonttjet!=-1){
@@ -436,8 +481,104 @@ MixedObjectsAnalyzer::modTwoPi(double DeltaPhi){
 }
 
 
-
-
+bool
+MixedObjectsAnalyzer::findAncestor(const reco::Candidate* cand, TString decaychain){
+  //static int calls = 0;
+  //int calls = decaychain.CountChar('<');
+  if(cand->numberOfMothers()==0){
+    decaychain.Remove(decaychain.Sizeof()-3, 2);
+    //resetCount=true;
+    //std::cout << decaychain << std::endl;
+    // check for light quark candiates hadrons
+    TString decaychain2=decaychain;
+    int index=decaychain.Index("6");
+    decaychain2.Remove(index+1,decaychain.Sizeof()-index-1);
+    if((decaychain.Contains("1<-24<-6")&&!decaychain2.Contains("21"))||
+       (decaychain.Contains("2<-24<-6")&&!decaychain2.Contains("21"))||
+       (decaychain.Contains("3<-24<-6")&&!decaychain2.Contains("21"))||
+       (decaychain.Contains("4<-24<-6")&&!decaychain2.Contains("21"))||
+       (decaychain.Contains("5<-6")&&!decaychain2.Contains("21")
+	&&(decaychain.Contains("511")||
+	   decaychain.Contains("521")||
+	   decaychain.Contains("513")||
+	   decaychain.Contains("523")||
+	   decaychain.Contains("515")||
+	   decaychain.Contains("525")||
+	   decaychain.Contains("531")||
+	   decaychain.Contains("533")||
+	   decaychain.Contains("535")||
+	   decaychain.Contains("541")||
+	   decaychain.Contains("543")||
+	   decaychain.Contains("545")||
+	   decaychain.Contains("551")||
+	   decaychain.Contains("553")||
+	   decaychain.Contains("555")||
+	   decaychain.Contains("557")||
+	   decaychain.Contains("5122")||
+	   decaychain.Contains("5112")||
+	   decaychain.Contains("5212")||
+	   decaychain.Contains("5222")||
+	   decaychain.Contains("5114")||
+	   decaychain.Contains("5214")||
+	   decaychain.Contains("5132")||
+	   decaychain.Contains("5232")||
+	   decaychain.Contains("5312")||
+	   decaychain.Contains("5322")||
+	   decaychain.Contains("5314")||
+	   decaychain.Contains("5324")||
+	   decaychain.Contains("5332")||
+	   decaychain.Contains("5334")||
+	   decaychain.Contains("5142")||
+	   decaychain.Contains("5242")||
+	   decaychain.Contains("5412")||
+	   decaychain.Contains("5422")||
+	   decaychain.Contains("5414")||
+	   decaychain.Contains("5424")||
+	   decaychain.Contains("5342")||
+	   decaychain.Contains("5432")||
+	   decaychain.Contains("5434")||
+	   decaychain.Contains("5442")||
+	   decaychain.Contains("5444")||
+	   decaychain.Contains("5512")||
+	   decaychain.Contains("5522")||
+	   decaychain.Contains("5514")||
+	   decaychain.Contains("5524")||
+	   decaychain.Contains("5532")||
+	   decaychain.Contains("5534")||
+	   decaychain.Contains("5542")||
+	   decaychain.Contains("5544")||
+	   decaychain.Contains("5554")
+	   ))
+       ){
+      //std::cout << "possible ttbar jet!" << std::endl;
+      std::cout << decaychain << std::endl;
+      return true;
+    }
+  }
+  
+  // pdgid original particle
+  //std::cout.width(5*calls);
+  //if(calls==0) std::cout << " " << cand->pdgId() << "(" << cand->numberOfMothers() << " ancestors)" << std::endl;
+  // check mothers
+  if(cand->numberOfMothers()>0){
+    
+    // pdgid mothers
+    //for(unsigned int numMother=0; numMother<cand->numberOfMothers(); ++numMother){
+      //if(numMother==0) { std::cout.width(5*calls); std::cout << " "; std::cout << " <- " << cand->mother(numMother)->pdgId(); }
+      //else             { std::cout << ", " << cand->mother(numMother)->pdgId(); }
+      //if(numMother==cand->numberOfMothers()-1) std::cout << std::endl; 
+      
+    //}
+    // bubble up mothers
+    for(unsigned int numMother=0; numMother<cand->numberOfMothers(); ++numMother){
+      TString newchain=decaychain;
+      newchain+=std::abs(cand->mother(numMother)->pdgId());
+      newchain+="<-";
+      findAncestor(cand->mother(numMother), newchain);
+    }
+  }
+  return false;
+}
 
 
 #include "FWCore/Framework/interface/MakerMacros.h"
