@@ -2,7 +2,7 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4980, bool save = false, int systematicVariation=sysJERUp, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
@@ -483,17 +483,17 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "analyzeHypoKinFit/mapKinFit_"                                          ,
     // b) response matrix top quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_"     ,
+    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_"     ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"       ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
+    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
     // c) response matrix ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass_"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt_"    ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarY_"     ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT_"    ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
+    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT_"    ,
+    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
+    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
+    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
     // d) response matrix lepton quantities
     recLeppath+"/lepPt_"                                                    ,
     recLeppath+"/lepEta_"                                                   ,  
@@ -568,17 +568,17 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) response matrix Top quantities
     xSecLabelName("topPt")+" gen/"+xSecLabelName("topPt")+" reco",
-    "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
+    //    "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
     xSecLabelName("topY")+" gen/"+xSecLabelName("topY")+" reco",
-    "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
+    //    "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) response matrix ttbar quantities
     xSecLabelName("ttbarMass")+" gen/"+xSecLabelName("ttbarMass")+" reco",
     xSecLabelName("ttbarPt")+" gen/"+xSecLabelName("ttbarPt")+" reco",
     xSecLabelName("ttbarY")+" gen/"+xSecLabelName("ttbarY")+" reco"              ,
-    "H_{T}(t#bar{t}) #left[GeV#right] gen/H_{T}(t#bar{t}) #left[GeV#right] reco",
-    "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
-    "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
-    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
+    //    "H_{T}(t#bar{t}) #left[GeV#right] gen/H_{T}(t#bar{t}) #left[GeV#right] reco",
+    //    "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
+    //    "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
+    //    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
     // d) response matrix lepton quantities
     xSecLabelName("lepPt")+" gen/"+xSecLabelName("lepPt")+" reco",
     xSecLabelName("lepEta")+" gen/"+xSecLabelName("lepEta")+" reco",           
@@ -1799,7 +1799,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
       //          2 means: 25 scan points
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
-      int scanpoints= (scan==2 ? 3 : 0);
+      int scanpoints= 1;//(scan==2 ? 3 : 0);
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
@@ -1949,7 +1949,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955, bool save = true, int sys
 	    std::cout << " for " << variable << "(" << sysLabel(systematicVariation) << ") !!!" << std::endl;
 	    std::cout << "(now fixed by setting data=MC)" << std::endl;
 	    int binInRaw= histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->FindBin(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable ][kData]->GetBinCenter(bin));
-	    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->SetBinContent(binInRaw, histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->GetBinContent(binInRaw)+(allBGVal-dataVal));
+	    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->SetBinContent(binInRaw, 1.01*(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->GetBinContent(binInRaw)+(allBGVal-dataVal)));
 	  }
 	  if(allBGVal>dataVal||verbose>3){
 	    // N(events) output for each bin and variable
