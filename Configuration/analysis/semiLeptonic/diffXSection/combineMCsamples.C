@@ -11,9 +11,9 @@
 
 using std::make_pair;
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose);
-void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName);
+void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName, TString outputFolder);
 
-void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun") {
+void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalyisRun", TString outputFolder="") {
   // ---
   //    list all of all subsamples to be combined 
   // ---
@@ -57,7 +57,7 @@ void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun"
 	for(unsigned int sys=0; sys<sysVariation_.size(); ++sys){
 	  // scale variation exists only for single top
 	  if(!(((sysVariation_[sys]==sysTopScaleUp)||(sysVariation_[sys]==sysTopScaleDown))&&(samples_[sample]!=kSTop))){
-	    combineAllPlots(sysVariation_[sys], samples_[sample], leptons_[lepton], verbose, inputFolderName);
+	    combineAllPlots(sysVariation_[sys], samples_[sample], leptons_[lepton], verbose, inputFolderName, outputFolder);
 	  }
 	}
       }
@@ -65,7 +65,7 @@ void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun"
   }
 }
 
-void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName){
+void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName, TString outputFolder){
   // ---
   //    check input 
   // ---
@@ -115,7 +115,8 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
   // folder were subsamples can be found
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // folder and name of the (combined) output file
-  TString outputFilename=inputFolder+"/"+TopFilename(sample, sysTag, std::string(decayChannel));
+  TString outputFilename= (outputFolder=="" ? inputFolder : outputFolder);
+  outputFilename+="/"+TopFilename(sample, sysTag, std::string(decayChannel));
 
   // ---
   //    container for all subsample files and
