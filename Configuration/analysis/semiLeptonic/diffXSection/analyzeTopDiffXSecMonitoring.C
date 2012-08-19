@@ -1,11 +1,11 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, int verbose=0, 
+void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  const std::string decayChannel = "combined", 
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  const std::string decayChannel = "electron", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
@@ -682,7 +682,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   if(decayChannel=="combined"){
     // loop samples
       for(unsigned int sample=kSig; sample<=kData; ++sample){
-	  if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << std::endl;
+	if(verbose>1) std::cout << sampleLabel(sample, decayChannel) << std::endl;
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	if(verbose>1) std::cout << plotList_[plot] << " " << plotListMu_[plot] << " " << plotListEl_[plot] << " : " ;
@@ -770,6 +770,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
   for(unsigned int step=0; step<selection_.size(); ++step){
     // loop samples
     for(unsigned int sample=kSig; sample<=kData; ++sample){
+      if(verbose>1) std::cout << selection_[step] << " in " << sampleLabel(sample, decayChannel) << std::endl;
       // save number
       events_[selection_[step]][sample]=histo_[selection_[step]][sample]->Integral(0,histo_[selection_[step]][sample]->GetNbinsX()+1);
       // add non ttbar MC
@@ -944,31 +945,39 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, bool save = true, 
       files_[kBkgMca]=TFile::Open(inputFolder+"/"+TopFilename(kSigMca, systematicVariation, "electron"));
       files_[kSigPow]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "muon"    ));
       files_[kBkgPow]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "electron"));
-      histo_[newName][kSigMca]=(TH1F*)(files_[koneMca]->Get(plotList_[plot])->Clone(newName));
-      if(ktwoMca!=999) histo_[newName][kSigMca]->Add((TH1F*)(files_[ktwoMca]->Get(plotList_[plot])->Clone(newName)));
-      histo_[newName][kSigPow]=(TH1F*)(files_[konePow]->Get(plotList_[plot])->Clone(newName));
-      if(ktwoPow!=999) histo_[newName][kSigPow]->Add((TH1F*)(files_[ktwoPow]->Get(plotList_[plot])->Clone(newName)));
+      if(files_[kSigMca]&&files_[kBkgMca]){
+	histo_[newName][kSigMca]=(TH1F*)(files_[koneMca]->Get(plotList_[plot])->Clone(newName));
+	if(ktwoMca!=999) histo_[newName][kSigMca]->Add((TH1F*)(files_[ktwoMca]->Get(plotList_[plot])->Clone(newName)));
+      }
+      if(files_[kSigPow]&&files_[kBkgPow]){
+	histo_[newName][kSigPow]=(TH1F*)(files_[konePow]->Get(plotList_[plot])->Clone(newName));
+	if(ktwoPow!=999) histo_[newName][kSigPow]->Add((TH1F*)(files_[ktwoPow]->Get(plotList_[plot])->Clone(newName)));
+      }
       double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4,";")).c_str());
       if(reBinFactor>1){
-	equalReBinTH1(reBinFactor, histo_, newName, kSigPow);
-	equalReBinTH1(reBinFactor, histo_, newName, kSigMca);
+	if(files_[kSigPow]&&files_[kBkgPow]) equalReBinTH1(reBinFactor, histo_, newName, kSigPow);
+	if(files_[kSigMca]&&files_[kBkgMca]) equalReBinTH1(reBinFactor, histo_, newName, kSigMca);
       }
-      histo_[newName][kSigMca]->Scale(1./histo_[newName][kSigMca]->Integral(0,histo_[newName][kSigMca]->GetNbinsX()+1));
-      histo_[newName][kSigPow]->Scale(1./histo_[newName][kSigPow]->Integral(0,histo_[newName][kSigPow]->GetNbinsX()+1));
-      histo_[newName][kSigMca]->SetLineColor(constMcatnloColor);
-      histo_[newName][kSigPow]->SetLineColor(constPowhegColor );
-      histo_[newName][kSigMca]->SetMarkerColor(constMcatnloColor);
-      histo_[newName][kSigPow]->SetMarkerColor(constPowhegColor );
-      histo_[newName][kSigMca]->SetLineWidth(2);
-      histo_[newName][kSigPow]->SetLineWidth(2);
-      histo_[newName][kSigMca]->SetLineStyle(constNnloStyle);
-      histo_[newName][kSigPow]->SetLineStyle(constPowhegStyle);
-      histo_[newName][kSigMca]->SetFillStyle(0);
-      histo_[newName][kSigPow]->SetFillStyle(0);
+      if(files_[kSigMca]&&files_[kBkgMca]){
+	histo_[newName][kSigMca]->Scale(1./histo_[newName][kSigMca]->Integral(0,histo_[newName][kSigMca]->GetNbinsX()+1));
+	histo_[newName][kSigMca]->SetLineColor(constMcatnloColor);
+	histo_[newName][kSigMca]->SetMarkerColor(constMcatnloColor);
+	histo_[newName][kSigMca]->SetLineWidth(2);
+	histo_[newName][kSigMca]->SetLineStyle(constNnloStyle);
+	histo_[newName][kSigMca]->SetFillStyle(0);
+      }
+      if(files_[kSigPow]&&files_[kBkgPow]){
+	histo_[newName][kSigPow]->Scale(1./histo_[newName][kSigPow]->Integral(0,histo_[newName][kSigPow]->GetNbinsX()+1));
+	histo_[newName][kSigPow]->SetLineColor(constPowhegColor );
+	histo_[newName][kSigPow]->SetMarkerColor(constPowhegColor );
+	histo_[newName][kSigPow]->SetLineWidth(2);
+	histo_[newName][kSigPow]->SetLineStyle(constPowhegStyle);
+	histo_[newName][kSigPow]->SetFillStyle(0);
+      }
       if(firstBGsub){
-	legTheo->AddEntry(histo_[newName][kSig   ], "MadGraph", "L");
-	legTheo->AddEntry(histo_[newName][kSigPow], "POWHEG"  , "L");
-	legTheo->AddEntry(histo_[newName][kSigMca], "MC@NLO"  , "L");
+	legTheo->AddEntry(histo_[newName][kSig], "MadGraph", "L");
+	if(files_[kSigPow]&&files_[kBkgPow]) legTheo->AddEntry(histo_[newName][kSigPow], "POWHEG"  , "L");
+	if(files_[kSigMca]&&files_[kBkgMca]) legTheo->AddEntry(histo_[newName][kSigMca], "MC@NLO"  , "L");
 	firstBGsub=false;
       }
     }
@@ -1111,8 +1120,8 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->GetXaxis()->SetNoExponent(true);
 	    // draw other theory predictions for BG subtracted plots
 	    if(plotList_[plot].Contains("BGSubNorm")){
-	      histo_[plotList_[plot]][kSigMca]->Draw("hist X0 same");
-	      histo_[plotList_[plot]][kSigPow]->Draw("hist X0 same");
+	      if(histo_[plotList_[plot]].count(kSigMca)>0) histo_[plotList_[plot]][kSigMca]->Draw("hist X0 same");
+	      if(histo_[plotList_[plot]].count(kSigPow)>0) histo_[plotList_[plot]][kSigPow]->Draw("hist X0 same");
 	      // draw small legend
 	      legTheo->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
 	      legTheo->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() +0.05 - 0.03 * leg->GetNRows());
@@ -1170,8 +1179,8 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 		  std::vector<TH1F*>ratiohists_;
 		  // get theory
 		  ratiohists_.push_back( histo_[plotList_[plot]][kSig   ] );
-		  ratiohists_.push_back( histo_[plotList_[plot]][kSigMca] );
-		  ratiohists_.push_back( histo_[plotList_[plot]][kSigPow] );
+		  if(histo_[plotList_[plot]].count(kSigMca)>0) ratiohists_.push_back( histo_[plotList_[plot]][kSigMca] );
+		  if(histo_[plotList_[plot]].count(kSigPow)>0) ratiohists_.push_back( histo_[plotList_[plot]][kSigPow] );
 		  double max=1.8;
 		  double min=0.2;
 		  double xmax=-1;
