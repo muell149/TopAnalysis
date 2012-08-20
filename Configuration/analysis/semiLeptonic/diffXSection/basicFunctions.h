@@ -3520,10 +3520,10 @@ namespace semileptonic {
 		else if(variable == "ttbarPt")   k = (fullPS) ? 2.468 : 2.465; 
 		else if(variable == "ttbarY")    k = (fullPS) ? 3.07 : 3.07;
 		else if(variable == "ttbarMass") k = (fullPS) ? 0.00012 : 0.00012;
-		else if(variable == "lepPt")     k = (fullPS) ? 0.85 : (hadronPS) ? 0.60   : 0.85;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 0.0001 : 1.52; 
-		else if(variable == "bqPt")      k = (fullPS) ? 3.61 : (hadronPS) ? 3.14   : 3.61; 
-		else if(variable == "bqEta")     k = (fullPS) ? 4.24 : (hadronPS) ? 3.74   : 4.24; 
+		else if(variable == "lepPt")     k = (fullPS) ? 0.85 : (hadronPS) ? 0.71   : 0.85;
+		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 0.00002 : 1.52; 
+		else if(variable == "bqPt")      k = (fullPS) ? 3.61 : (hadronPS) ? 4.02   : 3.61; 
+		else if(variable == "bqEta")     k = (fullPS) ? 4.24 : (hadronPS) ? 4.01   : 4.24; 
 	    }
 	    else if (decayChannel.Contains("electron")){
 		
@@ -3539,10 +3539,10 @@ namespace semileptonic {
 		else if(variable == "ttbarPt")   k = (fullPS) ? 2.10 : 2.10; 
 		else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.71;
 		else if(variable == "ttbarMass") k = (fullPS) ? 0.055 : 0.066;
-		else if(variable == "lepPt")     k = (fullPS) ? 0.59 : (hadronPS) ? 0.36   : 0.59;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.06 : (hadronPS) ? 0.0001 : 1.06; 
-		else if(variable == "bqPt")      k = (fullPS) ? 3.46 : (hadronPS) ? 2.68   : 3.46; 
-		else if(variable == "bqEta")     k = (fullPS) ? 3.76 : (hadronPS) ? 2.50   : 3.76; 
+		else if(variable == "lepPt")     k = (fullPS) ? 0.59 : (hadronPS) ? 0.30   : 0.59;
+		else if(variable == "lepEta")    k = (fullPS) ? 1.06 : (hadronPS) ? 0.00002 : 1.06; 
+		else if(variable == "bqPt")      k = (fullPS) ? 3.46 : (hadronPS) ? 3.73   : 3.46; 
+		else if(variable == "bqEta")     k = (fullPS) ? 3.76 : (hadronPS) ? 3.52   : 3.76; 
 	    }
 	}
 	else{
