@@ -27,7 +27,8 @@
 
 void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TString lepton="muon", 
 			       TString inputFolderName="RecentAnalysisRun", bool plotAcceptance = true, 
-			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int verbose=1, bool hadron=false,
+			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int
+			       verbose=1, bool hadron=false, int qAssignment=-1,
 			       bool fitGaussRes=false, bool printSeparateRes = false)
 {
   // ARGUMENTS of function:
@@ -39,6 +40,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // plotEfficiencyPhaseSpace: in addition to purity, stability, acceptance also 
   //                           efficiency in restricted phase space (i.e. Acceptance=1) is plotted (if true)
   // hadron:         draw plots for hadron level
+  // qAssignment     make a cut on kinFit jet permutation: -1= no cut, 0=ok, 1=bb, 2=blepq, 3=bhadq, 4=bbqlep, 5=bbqhad, 6=bbqq, 7=jmis, 8=wrongj, 9=nomatch
   // fitGaussRes:    fit a Gauss to the residuum plots to obtain the resolution
   // printSeparateRes save the residuum plots separately
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
@@ -53,6 +55,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 
   int initialIgnoreLevel=gErrorIgnoreLevel;
   if(verbose==0) gErrorIgnoreLevel=kWarning;
+  
+  if(qAssignment>=0) std::cout << "qAssignment=" << qAssignment << std::endl;
 
   // input file
   TFile* myFile1 = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, sysNo, (std::string)lepton), "READ");
@@ -75,6 +79,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   //choose proper root folder name with histos and tree
   //default for parton level
   TString folderRecoKin          ="analyzeTopRecoKinematicsKinFit";
+  TString folderRecoKinGeneral   ="analyzeTopRecoKinematicsKinFit";
   TString folderGenKin           ="analyzeTopPartonLevelKinematics";
   TString folderGenKinPhaseSpace ="analyzeTopPartonLevelKinematicsPhaseSpace";
   
@@ -126,7 +131,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   else if ( variable == "ttbarY")    { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -2.0;  resEdgeR=  2.0;  relResEdgeL = -2.0; relResEdgeR=2.0; }
   else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
   else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001;  resEdgeL =  -35.0;  resEdgeR= 35.0;  relResEdgeL = -0.2; relResEdgeR=0.2; textOpt="";}
-  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =  -0.02;  resEdgeR= 0.02;  relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
+  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =  -0.005;  resEdgeR= 0.005;  relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
   else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001;  resEdgeL = -200.0;  resEdgeR=200.0;  relResEdgeL = -1.0; relResEdgeR=2.0 ;}
   else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
   
@@ -217,9 +222,20 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // loading tree
   if (useTree){
     TTree *tree=(TTree*)(myFile1->Get(folderRecoKin+"/tree"));
+    // for hadron level, the specific RecoKin folder does not contain a complete tree with all variavles;
+    //  add the general tree
+    TTree *treeGeneral=(TTree*)(myFile1->Get(folderRecoKinGeneral+"/tree"));
     if(!tree||tree->IsZombie()){
       std::cout << "there seems to be a problem with the chosen tree " << folderRecoKin<<"/tree" << std::endl;
       exit(0);  
+    }
+    if(!treeGeneral||treeGeneral->IsZombie()){
+      std::cout << "there seems to be a problem with the chosen tree " << folderRecoKinGeneral<<"/tree" << std::endl;
+      exit(0);  
+    }
+    if(tree->GetEntries()!=treeGeneral->GetEntries()){
+      std::cout << "ERROR!!! Entries of tree (" << tree->GetEntries() << ") != entries of treeGeneral (" << treeGeneral->GetEntries() <<")" <<std::endl;
+      exit(0);
     }
     // list relevant tree entries
     std::vector<TString> variable_;
@@ -261,18 +277,21 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // when new entries are added
     value_["weight"]=1;
     value_["chi2"]  =0;
+    value_["qAssignment"]  =-2;
     for(unsigned int i=0; i<variable_.size(); ++i){
       value_[variable_[i]+recExtTree]=0;
       value_[variable_[i]+genExtTree]=0;
     }
     // initialize branches
     tree->SetBranchStatus("*",0);
+    treeGeneral->SetBranchStatus("*",0);
     tree->SetBranchStatus("weight",1);
     tree->SetBranchAddress("weight",(&value_["weight"]));
-    if(!hadron){
-      tree->SetBranchStatus("chi2",1);
-      tree->SetBranchAddress("chi2",(&value_["chi2"]));
-    }
+    treeGeneral->SetBranchStatus("qAssignment",1);
+    treeGeneral->SetBranchStatus("chi2",1);
+    treeGeneral->SetBranchAddress("chi2",(&value_["chi2"]));
+    treeGeneral->SetBranchAddress("qAssignment",(&value_["qAssignment"]));
+      
     for(unsigned int i=0; i<variable_.size(); ++i){
       // activate branches
       tree->SetBranchStatus(variable_[i]+recExtTree,1);
@@ -284,6 +303,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     // loop all events to fill plots
     for(unsigned int event=0; event<tree->GetEntries(); ++event){
       tree->GetEntry(event);
+      treeGeneral->GetEntry(event);
       double weight=value_["weight"];
       double chi2=value_["chi2"];
       for(unsigned int i=0; i<variable_.size(); ++i){
@@ -295,8 +315,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 	  std::cout << "gen " <<  variable_[i]+genExtTree << ": " << gen << std::endl;
 	  exit(0);
 	}
-	// apply chi2 cut
-	if(chi2<chi2Max){
+	// apply chi2 and qAssignment cut
+	if(chi2<chi2Max && (qAssignment==-1 || qAssignment==value_["qAssignment"])){
 	  myHist2d       ->Fill(gen, rec, weight);
 	  responseMatrix ->Fill(gen, rec, weight);
 	  // fill events passing chi2
@@ -540,6 +560,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     if(variable.Contains("top"))xtitle+="^{t and #bar{t}}";
     else if(variable.Contains("ttbar"))xtitle+="^{t#bar{t}}";
     else if(variable.Contains("lep"))xtitle+="^{l}";
+    else if(variable.Contains("bq"))xtitle+="^{b and #bar{b}}";
     xtitleNoUnit = xtitle;
     if(variable.Contains("Pt"))xtitle+=" [GeV]";
     else if(variable.Contains("Mass"))xtitle+=" [GeV]";
@@ -637,6 +658,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     if(variable == "topPt"||chi2Max<100) leg->Draw("same");
     
     TLegend* legFull=new TLegend(0.,0.,1.,1.);
+    legFull->SetFillStyle(0);
+    legFull->SetBorderSize(0);
     legFull->AddEntry(purityhist,   "Purity"    ,"l");
     legFull->AddEntry(stabilityhist,"Stability" ,"l");
   //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
@@ -758,7 +781,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     // relative resolution	
       CanvRelativeResidualHistos->cd(iGenBin+1);
       relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetNoExponent(true);
-      relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetTitle(xtitle+" (rec-gen)/gen");
+      relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetTitle(xtitleNoUnit+" (rec-gen)/gen");
       relativeResidualHistos_.at(iGenBin)->GetYaxis()->SetTitle("N");
       relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetTitleSize(0.06);
       relativeResidualHistos_.at(iGenBin)->GetXaxis()->SetLabelSize(0.06);
@@ -810,8 +833,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   responseMatrix->GetYaxis()->SetNoExponent(true);
   responseMatrix->GetZaxis()->SetNoExponent(true);
   responseMatrix->GetZaxis()->SetRangeUser(0,30);
-  responseMatrix->GetZaxis()->SetTitle("[\%]");
-  responseMatrix->GetZaxis()->SetTitleOffset(1.3);
+  responseMatrix->GetZaxis()->SetTitle("Transition Probability [\%]");
+  responseMatrix->GetZaxis()->SetTitleOffset(1.4);
   //responseMatrix->SetMarkerColor(kWhite);
   responseMatrix->SetMarkerSize(1.2);
   responseMatrix->SetTitle("Response Matrix - Including Efficiency");
@@ -833,8 +856,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   migrationMatrix->GetYaxis()->SetNoExponent(true);
   migrationMatrix->GetZaxis()->SetNoExponent(true);
   migrationMatrix->GetZaxis()->SetRangeUser(0,100);
-  migrationMatrix->GetZaxis()->SetTitle("[\%]");
-  migrationMatrix->GetZaxis()->SetTitleOffset(1.3);
+  migrationMatrix->GetZaxis()->SetTitle("Transition Probability [\%]");
+  migrationMatrix->GetZaxis()->SetTitleOffset(1.4);
   //migrationMatrix->SetMarkerColor(kWhite);
   migrationMatrix->SetMarkerSize(1.2);
   migrationMatrix->SetTitle("Response Matrix - Migration Only");
@@ -923,33 +946,41 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
       chi+="chi";
       chi+=chi2Max;
     }
-    purstab->Print(outputFolder+"/purStabEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-    purstab->Print(outputFolder+"/purStabEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
+    TString qAssStr="";
+    if(qAssignment>=0){ 
+      qAssStr+="Perm";
+      if(qAssignment==0)      qAssStr+="Ok";
+      else if(qAssignment==1) qAssStr+="Bb";
+      else if(qAssignment==9) qAssStr+="NoMatch";
+      else                    qAssStr+=getTStringFromInt(qAssignment);
+    }
+    purstab->Print(outputFolder+"/purStabEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+    purstab->Print(outputFolder+"/purStabEff_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
     purstabLeg->Print(outputFolder+"/purStabLeg_"+universalplotLabel+"_"+".png");
     purstabLeg->Print(outputFolder+"/purStabLeg_"+universalplotLabel+"_"+".eps");
     if(useTree){
-      CanvResponseMatrix->Print(outputFolder+"/responseMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-      CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-      CanvEffGenBBBcomp->Print(outputFolder+"/effGenBBBcomp_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-      CanvResidualHistos->Print(outputFolder+"/residualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-      CanvRelativeResidualHistos->Print(outputFolder+"/relativeResidualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-      CanvResolution->Print(outputFolder+"/resolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-      CanvRelativeResolution->Print(outputFolder+"/relativeResolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
+      CanvResponseMatrix->Print(outputFolder+"/responseMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+      CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+      CanvEffGenBBBcomp->Print(outputFolder+"/effGenBBBcomp_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+      CanvResidualHistos->Print(outputFolder+"/residualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+      CanvRelativeResidualHistos->Print(outputFolder+"/relativeResidualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+      CanvResolution->Print(outputFolder+"/resolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+      CanvRelativeResolution->Print(outputFolder+"/relativeResolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
       //eps
-      CanvResponseMatrix->Print(outputFolder+"/responseMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-      CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-      CanvEffGenBBBcomp->Print(outputFolder+"/effGenBBBcomp_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-      CanvResidualHistos->Print(outputFolder+"/residualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-      CanvRelativeResidualHistos->Print(outputFolder+"/relativeResidualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-      CanvResolution->Print(outputFolder+"/resolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-      CanvRelativeResolution->Print(outputFolder+"/relativeResolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
+      CanvResponseMatrix->Print(outputFolder+"/responseMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
+      CanvMigrationMatrix->Print(outputFolder+"/migrationMatrix_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
+      CanvEffGenBBBcomp->Print(outputFolder+"/effGenBBBcomp_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
+      CanvResidualHistos->Print(outputFolder+"/residualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
+      CanvRelativeResidualHistos->Print(outputFolder+"/relativeResidualHistos_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
+      CanvResolution->Print(outputFolder+"/resolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
+      CanvRelativeResolution->Print(outputFolder+"/relativeResolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
       // print residuums separately if desired
       if(printSeparateRes){
 	for(int iBin =0; iBin < NxPlotBins; iBin++){
-	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-	  CanvRelativeResidualHistos->cd(iBin+1)->Print(outputFolder+"/relativeResidualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".png");
-	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");
-	  CanvRelativeResidualHistos->cd(iBin+1)->Print(outputFolder+"/relativeResidualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+".eps");	}
+	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+	  CanvRelativeResidualHistos->cd(iBin+1)->Print(outputFolder+"/relativeResidualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
+	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
+	  CanvRelativeResidualHistos->cd(iBin+1)->Print(outputFolder+"/relativeResidualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");	}
       }
     }
     if(verbose>0) std::cout<<"Canvas with purity and stability plots is saved in "<<outputFolder<<std::endl;
