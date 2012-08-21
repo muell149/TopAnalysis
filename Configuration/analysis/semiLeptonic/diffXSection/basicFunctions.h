@@ -1609,14 +1609,14 @@ namespace semileptonic {
       std::vector<double> bins_;
 
       // pt(top)
-      double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0, 800.0};  
+      double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0};  
       // PAS binning: double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
       result["topPt"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/topPt"  ]=bins_;
       bins_.clear();
       // y(top)
-      double topYBins[]={-5.0, -2.5, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.5, 5.0}; 
+      double topYBins[]={-2.5, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.5}; 
       // PAS binning: double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
       bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
       result["topY"]=bins_;
@@ -1631,13 +1631,13 @@ namespace semileptonic {
       bins_.clear();
       // y(ttbar)
       // old: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
-      double ttbarYBins[]={-5.0, -2.5, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 2.5, 5.0};
+      double ttbarYBins[]={-2.5, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 2.5};
       // PAS binning: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
       bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
       result["ttbarY"]=bins_;
       //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
       bins_.clear();
-      double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0, 2500.0};
+      double ttbarMassBins[]={345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0};
       // First option: double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0};  
       // Korea:        double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
       // PAS binning:  double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
@@ -1646,22 +1646,22 @@ namespace semileptonic {
       //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
       bins_.clear();
       // pt(lepton)
-      double lepPtBins[]={0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
+      double lepPtBins[]={30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200.};
       bins_.insert( bins_.begin(), lepPtBins, lepPtBins + sizeof(lepPtBins)/sizeof(double) );
       result["lepPt"]=bins_;
       bins_.clear();
       // eta(lepton)
-      double lepEtaBins[]={-5., -2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 5.};
+      double lepEtaBins[]={-2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1};
       bins_.insert( bins_.begin(), lepEtaBins, lepEtaBins + sizeof(lepEtaBins)/sizeof(double) );
       result["lepEta"]=bins_;
       bins_.clear();
       // pt(bquark)
-      double bqPtBins[]={0., 30., 60., 95., 140., 200., 400., 1200.};
+      double bqPtBins[]={30., 60., 95., 140., 200., 400.};
       bins_.insert( bins_.begin(), bqPtBins, bqPtBins + sizeof(bqPtBins)/sizeof(double) );
       result["bqPt"]=bins_;
       bins_.clear();
       // eta(bquark)
-      double bqEtaBins[]={-5., -2.4, -1.5, -1, -0.5, 0., 0.5, 1., 1.5, 2.4, 5};
+      double bqEtaBins[]={-2.4, -1.5, -1, -0.5, 0., 0.5, 1., 1.5, 2.4};
       bins_.insert( bins_.begin(), bqEtaBins, bqEtaBins + sizeof(bqEtaBins)/sizeof(double) );
       result["bqEta"]=bins_;
       bins_.clear();
@@ -1680,6 +1680,7 @@ namespace semileptonic {
     else if(variable.Contains("topY"     )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
     else if(variable.Contains("ttbarY"   )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
     else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(346., 1599.);
+    else if(variable.Contains("ttbarPt"  )) his->GetXaxis()->SetRangeUser(0.  , 299. );
     else if(variable.Contains("lepPt"    )) his->GetXaxis()->SetRangeUser(30  , 199. );
     else if(variable.Contains("lepEta"   )) his->GetXaxis()->SetRangeUser(-2.1, 2.09 );
     else if(variable.Contains("bqPt"     )) his->GetXaxis()->SetRangeUser(30. , 399. );
@@ -3137,7 +3138,7 @@ namespace semileptonic {
     double weight=ttbarCrossSection;
     // consider efficiency in phase space
     //if(model=="powheg" ) weight*=255743./1227541.;
-    //if(model=="mcatnlo") weight*=119134./546459; // MadGraph value for the moment
+    //if(model=="mcatnlo") weight*=119134./546459; // MaGraph value for the moment
     // BR correction = <BR W->e/mu> * <BR W->qq> (from pdg)
     weight*=0.5*(0.1075+0.1057)*0.676;
     // N-> <e+mu>

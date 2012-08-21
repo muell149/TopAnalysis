@@ -2,7 +2,8 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4980, bool save = false, int systematicVariation=sysJERUp, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
+, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
@@ -1799,7 +1800,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = false, int sy
       //          2 means: 25 scan points
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
-      int scanpoints= 1;//(scan==2 ? 3 : 0);
+      int scanpoints= (scan==2 ? 3 : 0);
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
@@ -1867,51 +1868,12 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = false, int sy
       // ==============
 
       // a) filter relevant bins
-      std::vector<double> relevantBins_;
-      // loop all entries in binning_
-      for(unsigned int bin=0; bin<binning_[variable].size(); ++bin){
-	bool relevant=true;
-	// include UF/OF side bins if non-empty
-	// UF
-	double LowerBinEdge= binning_[variable].at(bin);
-	double UpperBinEdge=0;
-	if(bin==0){
-	  relevant=false;
-	  if(verbose>1) std:: cout << "check UF side bin " << binning_[variable].at(bin) << " for " << variable << std::endl;
-	  UpperBinEdge=binning_[variable].at(bin+1);
-	}
-	// OF
-	if(bin==binning_[variable].size()-1){
-	  relevant=false;
-	  if(verbose>1) std:: cout << "check OF side bin " << binning_[variable].at(bin) << std::endl;
-	  UpperBinEdge= LowerBinEdge;
-	  LowerBinEdge=binning_[variable].at(bin-1);
-	}
-	double center = 0.5*(UpperBinEdge+LowerBinEdge);
-	if(!relevant&&verbose>1) std:: cout << "and center " << center << std::endl;
-	// exclude most outer bins that are empty in data or in gen MC PS
-	if(!relevant){
-	  int databin=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->FindBin(center);
-	  double data=histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->GetBinContent(databin);
-	  int genbin=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->FindBin(center);
-	  double gen=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinContent(genbin);
-	  if(gen!=0.&&data!=0) relevant=true;
-	  // FIXME: exclude bins that are cut out for PS 
-	  //        only necessary for hadron level at the moment because plotted
-	  //        object and object for gen PS selection are not the same
-	  if(variable=="lepEta"||variable=="lepPt"||variable=="bqPt"||variable=="bqEta") relevant=false;
-	  if(verbose>1){
-	    std::cout << "data: " << data << " (" << databin << ")" << std::endl;
-	    std::cout << "gen: " << gen << " (" << genbin << ")" << std::endl;
-	    std::cout << "will be " << (relevant ? "in" : "ex" ) << "cluded" << std::endl;
-	  }
-	}
-	if(relevant) relevantBins_.push_back(binning_[variable][bin]);
-      }
+      std::vector<double> relevantBins_(binning_[variable]);
       // b) calculate number of considered bins 
       int unfoldbins=relevantBins_.size()-1; // NB: N(bins)=NbinEdges-1 
       // c) refill bin edges to array
       double bins[relevantBins_.size()];
+      std::cout << std::endl << variable << std::endl;
       for(unsigned int bin=0; bin<relevantBins_.size(); ++bin){
 	bins[bin]=relevantBins_[bin]; 
 	if(verbose>1) std::cout << "bin " << bin << ": " << bins[bin]<< std::endl;
@@ -2446,6 +2408,7 @@ void analyzeHypothesisKinFit(double luminosity = 4980, bool save = false, int sy
 			      min=1;
 			      max=exp(1.3*(std::log(max)-std::log(min))+std::log(min));
 			      if(plotList_[plot]=="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob") min=0.1; 
+			      if(plotList_[plot].Contains("ttbarMass")) min=0.1;
 			      if(plotList_[plot].Contains("ttbarMass")&&plotList_[plot].Contains("xSec")){
 				  min=0.0001;
 				  max=1.2*exp(1.3*(std::log(max)-std::log(min))+std::log(min));
