@@ -1873,7 +1873,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
       int unfoldbins=relevantBins_.size()-1; // NB: N(bins)=NbinEdges-1 
       // c) refill bin edges to array
       double bins[relevantBins_.size()];
-      std::cout << std::endl << variable << std::endl;
       for(unsigned int bin=0; bin<relevantBins_.size(); ++bin){
 	bins[bin]=relevantBins_[bin]; 
 	if(verbose>1) std::cout << "bin " << bin << ": " << bins[bin]<< std::endl;
