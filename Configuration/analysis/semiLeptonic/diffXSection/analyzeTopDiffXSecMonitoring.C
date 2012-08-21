@@ -923,7 +923,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, in
       axisLabel_.insert(axisLabel_.begin()+plot+1, axisLabel_[plot]);
       axisLabel_[plot+1].ReplaceAll("events", "norm. events");
       N1Dplots++;
-      std::cout << plotList_[plot] << ": " << histo_[plotList_[plot]][kSig] << std::endl;
       // BG subtracted data and pure signal prediction
       histo_[newName][kSig]=(TH1F*)histo_[plotList_[plot]][kSig]->Clone(newName);
       histo_[newName][kSig]->Add(histo_[plotList_[plot]][kBkg],-1);
