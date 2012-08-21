@@ -528,9 +528,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		totalErrors_[xSecVariables_[i]]=(TGraphAsymmErrors*)(combinedErrors->Clone());
 		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]], verbose);
 		// remove ugly first point in m(ttbar)
-		if(xSecVariables_[i].Contains("ttbarMass")){
-		  totalErrors_[xSecVariables_[i]]->SetPoint(1, 0, -1000);
-		}
+		//if(xSecVariables_[i].Contains("ttbarMass")){
+		//totalErrors_[xSecVariables_[i]]->SetPoint(1, 0, -1000);
+		//}
 	      }
 	    }
 	    // std::cout << mcatnloIdx  << std::endl;
