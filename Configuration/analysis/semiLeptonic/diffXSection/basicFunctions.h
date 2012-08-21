@@ -3516,16 +3516,16 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 1.50 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 1.32 : 2.49955;
 		// New Binning Revision
-		if(variable == "topPt")          k = (fullPS) ? 2.51 : 2.51;
+		if(variable == "topPt")          k = (fullPS) ? 3.65 : 3.65;
 		else if(variable == "topY" )     k = (fullPS) ? 3.65 : 3.65;
-		else if(variable == "ttbarPt")   k = (fullPS) ? 2.468 : 2.465; 
+		else if(variable == "ttbarPt")   k = (fullPS) ? 2.47 : 2.47; 
 		else if(variable == "ttbarY")    k = (fullPS) ? 3.07 : 3.07;
-		else if(variable == "ttbarMass") k = (fullPS) ? 0.00012 : 0.00012;
-		else if(variable == "lepPt")     k = (fullPS) ? 0.85 : (hadronPS) ? 0.71   : 0.85;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 0.00002 : 1.52; 
-		else if(variable == "bqPt")      k = (fullPS) ? 3.61 : (hadronPS) ? 4.02   : 3.61; 
-		else if(variable == "bqEta")     k = (fullPS) ? 4.24 : (hadronPS) ? 4.01   : 4.24; 
-	    }
+		else if(variable == "ttbarMass") k = (fullPS) ? 1.29 : 1.29;
+		else if(variable == "lepPt")     k = (fullPS) ? 2.86 : (hadronPS) ? 2.29   : 2.86;
+		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 1e-5   : 1.52; 
+		else if(variable == "bqPt")      k = (fullPS) ? 3.61 : (hadronPS) ? 4.01   : 3.61; 
+		else if(variable == "bqEta")     k = (fullPS) ? 4.22 : (hadronPS) ? 4.03   : 4.22; 
+            }
 	    else if (decayChannel.Contains("electron")){
 		
 		// PAS Binning
@@ -3535,16 +3535,16 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 3.40 : 2.49955;
 		// New Binning Revision
-		if(variable == "topPt")          k = (fullPS) ? 2.59 : 2.59;
+	        if(variable == "topPt")          k = (fullPS) ? 3.52 : 3.52;
 		else if(variable == "topY")      k = (fullPS) ? 3.20 : 3.20;
 		else if(variable == "ttbarPt")   k = (fullPS) ? 2.10 : 2.10; 
 		else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.71;
-		else if(variable == "ttbarMass") k = (fullPS) ? 0.055 : 0.066;
-		else if(variable == "lepPt")     k = (fullPS) ? 0.59 : (hadronPS) ? 0.30   : 0.59;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.06 : (hadronPS) ? 0.00002 : 1.06; 
-		else if(variable == "bqPt")      k = (fullPS) ? 3.46 : (hadronPS) ? 3.73   : 3.46; 
+		else if(variable == "ttbarMass") k = (fullPS) ? 1.3 : 1.3;
+		else if(variable == "lepPt")     k = (fullPS) ? 2.65 : (hadronPS) ? 2.32   : 2.65;
+		else if(variable == "lepEta")    k = (fullPS) ? 1.06 : (hadronPS) ? 1e-5   : 1.06; 
+		else if(variable == "bqPt")      k = (fullPS) ? 3.47 : (hadronPS) ? 3.73   : 3.47; 
 		else if(variable == "bqEta")     k = (fullPS) ? 3.76 : (hadronPS) ? 3.52   : 3.76; 
-	    }
+            }
 	}
 	else{
 	    
