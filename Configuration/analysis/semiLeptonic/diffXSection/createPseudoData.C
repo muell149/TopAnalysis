@@ -15,15 +15,15 @@
 
 void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=0, bool smear=1, bool useReweightedTop=0, double avReweight=1, bool useZprime=0, double zPrimeLumiWeight=1);
 
-void createPseudoData(double luminosity= 1143.22, const std::string decayChannel="electron", bool zprime=true, bool useReweightedTop=false){
+void createPseudoData(double luminosity=4955., const std::string decayChannel="muon", bool zprime=true, bool useReweightedTop=false){
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
   int verbose=0;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
   bool smear=false;
   // "dataFile": absolute path of data file, used to define plots of interest
   TString dataFile= "";
-  if(decayChannel.compare("electron")==0) dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root";
-  else dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root";
+  if(decayChannel.compare("electron")==0) dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root";
+  else dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root";
   // "useReweightedTop": use parton level reweighted ttbar signal file in pseudo data?
   TString rewVar="ttbarMassUp";
   // "zprime": include additional Zprime in pseudo data?
@@ -41,12 +41,15 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   //     parton level reweighted top distribution
   //  ---
   // a) name and path of rootfile
-  TString nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/";
+  TString variation="Down";
+  TString nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/Shape"+variation+"/";
   if(decayChannel.compare("electron")==0) nameTtbarReweighted+="elecDiffXSec";
   else                                    nameTtbarReweighted+="muonDiffXSec";
-  nameTtbarReweighted+="SigMadD6TSummer11Reweighted"+rewVar+"PF.root";
+  nameTtbarReweighted+="SigSysDistort"+variation+".root";
   TString nameTtbarBGReweighted=nameTtbarReweighted;
-  nameTtbarBGReweighted.ReplaceAll("Sig","Bkg");
+  //nameTtbarBGReweighted.ReplaceAll("Sig","Bkg"); // FIXME: only ttbar SG reweighted for the moment
+  nameTtbarBGReweighted.ReplaceAll("/Shape"+variation,""); // FIXME: only ttbar SG reweighted for the moment
+  nameTtbarBGReweighted.ReplaceAll("SigSysDistort"+variation,"BkgFall11PF"); // FIXME: only ttbar SG reweighted for the moment
   if(useReweightedTop) outNameExtension="Reweighted"+rewVar;
   // b) get average weight of reweighting
   double avWeight=1;
@@ -59,7 +62,7 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
     avWeight=histo_ ["avWeight"][kSig]->GetBinContent(2)/histo_ ["avWeight"][kSig]->GetBinContent(1);
     histo_["avWeight"].erase(kSig);
     //std::cout << "histo ratio: " << avWeight << std::endl;
-    TFile* sigfile = new (TFile)("/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/"+TopFilename(kSig, sysNo, decayChannel));
+    TFile* sigfile = new (TFile)("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/"+TopFilename(kSig, sysNo, decayChannel));
     TString partonPlot="analyzeTopPartonLevelKinematics/ttbarMass";
     histo_["parton"   ][kSig] = (TH1F*)(sigfile     ->Get(partonPlot));
     histo_["partonRew"][kSig] = (TH1F*)(ttbarRewfile->Get(partonPlot));
@@ -73,12 +76,12 @@ void createPseudoData(double luminosity= 1143.22, const std::string decayChannel
   //  ---
   //     Z prime 
   //  ---
-  TString zprimeMass="750";
+  TString zprimeMass="500";
   TString nameZprime="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/Zprime/";
   double xSecSF=1.0;
   if(decayChannel.compare("electron")==0) nameZprime+="elec";
   else nameZprime+="muon";
-  nameZprime+="DiffXSecZPrime_M"+zprimeMass+"_W"+zprimeMass+"0_MadSummer11PF.root";
+  nameZprime+="DiffXSecZPrime_M"+zprimeMass+"_W"+zprimeMass+"0Fall11PF.root";
   double zPrimeLumiWeight=1.;
   if     (zprimeMass=="500") zPrimeLumiWeight=(xSecSF*16.2208794979645*luminosity)/232074;
   else if(zprimeMass=="750") zPrimeLumiWeight=(xSecSF*3.16951400706147*luminosity)/206525;
