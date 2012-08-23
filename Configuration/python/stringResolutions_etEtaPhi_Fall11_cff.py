@@ -630,6 +630,17 @@ elecResolution   = stringResolution.clone(parametrization = 'EtEtaPhi',
                                           constraints = cms.vdouble(0)
                                           )
 
+neutrinoResolution = stringResolution.clone(parametrization = 'EtEtaPhi',
+                                            functions = cms.VPSet(
+    cms.PSet(
+    et  = cms.string('et * (sqrt(1.38e-07^2 + (1.4/sqrt(et))^2 + (14.2/et)^2))'),
+    eta  = cms.string('sqrt(0^2 + (0/sqrt(et))^2 + (0/et)^2)'),
+    phi  = cms.string('sqrt(9.18e-09^2 + (0.661/sqrt(et))^2 + (17.5/et)^2)'),
+    ),
+    ),
+                                            constraints = cms.vdouble(0)
+                                            )
+
 metResolutionPF  = stringResolution.clone(parametrization = 'EtEtaPhi',
                                           functions = cms.VPSet(
     cms.PSet(
