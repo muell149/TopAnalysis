@@ -101,7 +101,7 @@ class TopSVDFunctions
         static void SVD_ClearStackLeg(THStack*& stack, TLegend*& leg, TString header1, TString header2, TString header3);
         static void SVD_FormatLegendStandard(TLegend* leg);
         static void SVD_FormatLegendKScan(TLegend* leg);
-        static void SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo, TString label, TString drawOptions, TString legOptions, int col, int numHist = 1);
+        static void SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo, TString label, TString drawOptions, TString legOptions, int col, int numHist = 1, int lineSty=-1);
          
        
         // Object Handling
@@ -166,26 +166,26 @@ class TopSVDFunctions
         static void SVD_RangeStack(THStack* stack, double& ymin, double& ymax, bool showOF = false);
         static double SVD_TextPosX(TH1D* hist, double xpos, bool log, int orientation);
         static double SVD_TextPosY(TH1D* hist, double ypos, bool log, int orientation);
-        static void SVD_NewRange(double min, double max, double& newmin, double& newmax, bool log);
+        static void SVD_NewRange(double min, double max, double& newmin, double& newmax, bool log, double marginFact=0.15);
         static void SVD_NewUpperRange(double max, double& newmax);
         static int SVD_FindMinimum(TVectorD* xVec, TVectorD* yVec, double& xBest, double& yBest); 
         
         
         // Drawing
-        static void SVD_Draw2D(TH2D* hist, TString options = "");
+	static void SVD_Draw2D(TH2D* hist, TString options = "", double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
         static void SVD_Draw1D(TH1D* hist, TString options = "",  int color = 1); 
-        static void SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1); 
+	static void SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1, double marginFact=0.15); 
         static void SVD_DrawGraphRange(TGraph* graph, TH1D*& bgrHisto, double ymin, double ymax, TString options = "",  int color = 1); 
-        static void SVD_DrawGraphAutoRange(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1); 
+	static void SVD_DrawGraphAutoRange(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1, double marginFact=0.15); 
         static void SVD_DrawGraphZero(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1); 
         static TLatex* SVD_DrawText(TString theText, double xpos, double ypos, int orientation, TLatex*& mylatex); 
         static TLine* SVD_DrawVertLine(TH1D*& bgrHisto, double xpos, int color = 1); 
         static TLine* SVD_DrawHorizLine(TH1D*& bgrHisto, double ypos, int color = 1); 
         static void SVD_DrawVertLines(TH1D*& bgrHisto, TVectorD* xpositions, int color = 1); 
         static void SVD_DrawRange(TH1D* histo, double ymin, double ymax, TString options = "",  int color = 0);
-        static void SVD_DrawStackRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, double ymin, double ymax, TString options = "", int col = -1, bool showOF = false);
-        static void SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false, bool log = false);
-        static void SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false);
+	static void SVD_DrawStackRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, double ymin, double ymax, TString options = "", int col = -1, bool showOF = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
+	static void SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false, bool log = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
+	static void SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
         static TGraph* SVD_Vect2Graph(TVectorD* vectorX, TVectorD* vectorY);
         static TGraph* SVD_Point2Graph(double x, double y); 
          

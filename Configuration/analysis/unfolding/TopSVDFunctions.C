@@ -1569,7 +1569,7 @@ TH1D* TopSVDFunctions::SVD_Cov2Err(TH2D* input, TH1D* means, TString name, TStri
 
 // Formats a 2D histogram according to current style
 // Corrects formatting in a manner specific to 2D histos  
-void TopSVDFunctions::SVD_Draw2D(TH2D* hist, TString options)
+void TopSVDFunctions::SVD_Draw2D(TH2D* hist, TString options, double rangeL, double rangeR, bool setNoExp)
 {
     // Set the Style    
     hist->UseCurrentStyle();
@@ -1606,6 +1606,16 @@ void TopSVDFunctions::SVD_Draw2D(TH2D* hist, TString options)
 
     // Draw it, thereby create pad primitives
     hist->Draw(options);
+    
+        // restrict range if desired
+    if(rangeL!=-9999 && rangeR!=-9999) {
+      hist->GetXaxis()->SetRangeUser(rangeL, rangeR);
+      hist->GetYaxis()->SetRangeUser(rangeL, rangeR);
+    }
+    if(setNoExp) {
+      hist->GetXaxis()->SetNoExponent(true);
+      hist->GetYaxis()->SetNoExponent(true);
+    }
 
     // Change the position of the palette
     gPad->Update();
@@ -1766,10 +1776,10 @@ void TopSVDFunctions::SVD_RangeStack(THStack* stack, double& ymin, double& ymax,
 //     returned in bgrHisto.
 // (3) If you already have a histogram, than provide it in 
 //     'bgrHisto'  
-void TopSVDFunctions::SVD_DrawGraphAutoRange(TGraph* graph, TH1D*& bgrHisto, TString options,  int color)
+void TopSVDFunctions::SVD_DrawGraphAutoRange(TGraph* graph, TH1D*& bgrHisto, TString options,  int color, double marginFact)
 { 
     // Draw Graph with automatically  
-    SVD_DrawGraph(graph, bgrHisto, options, color);
+    SVD_DrawGraph(graph, bgrHisto, options, color, marginFact);
       
 }
 
@@ -1823,7 +1833,7 @@ void TopSVDFunctions::SVD_DrawGraphZero(TGraph* graph, TH1D*& bgrHisto, TString 
 //     returned in bgrHisto.
 // (3) If you already have a histogram, than provide it in 
 //     'bgrHisto'  
-void TopSVDFunctions::SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString options,  int color)
+void TopSVDFunctions::SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString options,  int color, double marginFact)
 {
      
     // Get Range of Graph in x automatically
@@ -1841,7 +1851,7 @@ void TopSVDFunctions::SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString opti
     // Add some extra margin on both sides in y 
     double newYmin = autoymin;
     double newYmax = autoymax;
-    SVD_NewRange(autoymin, autoymax, newYmin, newYmax, gPad->GetLogx()); 
+    SVD_NewRange(autoymin, autoymax, newYmin, newYmax, gPad->GetLogx(), marginFact); 
      
     
     
@@ -2147,6 +2157,7 @@ TGraph* TopSVDFunctions::SVD_Point2Graph(double x, double y)
     
 }
 
+
 // SVD Unfolding Helper FUnction
 // Format a Ratio plot according to current style
 void TopSVDFunctions::SVD_DrawRange(TH1D* histo, double ymin, double ymax, TString options,  int color)
@@ -2312,7 +2323,7 @@ TH1D* TopSVDFunctions::SVD_MakeRatioZero(TH1D* numerator, TH1D* denominator, int
 // cols=0   means: Do not touch the colors!
 // cols=243 means: First Histogram red, second blue, and third and all following ones green 
 // cols<0   means: Standard palette.
-void TopSVDFunctions::SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF, bool log)
+void TopSVDFunctions::SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF, bool log, double rangeL, double rangeR, bool setNoExp)
 {
     // Get Range
     double min = 0;
@@ -2325,7 +2336,7 @@ void TopSVDFunctions::SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TStri
     SVD_NewRange(min, max, newmin, newmax, log);
     
     // Draw with new Range
-    SVD_DrawStackRange(stack, leg, xTitle, yTitle, newmin, newmax, options, col, showOF);
+    SVD_DrawStackRange(stack, leg, xTitle, yTitle, newmin, newmax, options, col, showOF, rangeL, rangeR, setNoExp);
 }
 
 // Formats a Stack of Histos to the current style
@@ -2333,7 +2344,7 @@ void TopSVDFunctions::SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TStri
 // cols=0   means: Do not touch the colors!
 // cols=243 means: First Histogram red, second blue, and third and all following ones green 
 // cols<0   means: Standard palette.
-void TopSVDFunctions::SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF)
+void TopSVDFunctions::SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF, double rangeL, double rangeR, bool setNoExp)
 {
     
     // Get Range of stack
@@ -2348,7 +2359,7 @@ void TopSVDFunctions::SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xT
     SVD_NewUpperRange(max, newmax);
     
     // Draw with new Range
-    SVD_DrawStackRange(stack, leg, xTitle, yTitle, newmin, newmax, options, col, showOF);
+    SVD_DrawStackRange(stack, leg, xTitle, yTitle, newmin, newmax, options, col, showOF, rangeL, rangeR, setNoExp);
 }
 
 
@@ -2358,7 +2369,7 @@ void TopSVDFunctions::SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xT
 // cols=243 means: First Histogram red, second blue, and third and all following ones green 
 // cols<0   means: Standard palette.
 // If ymax < ymin, the range will be calculated automatically  
-void TopSVDFunctions::SVD_DrawStackRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, double ymin, double ymax, TString options, int col, bool showOF)
+void TopSVDFunctions::SVD_DrawStackRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, double ymin, double ymax, TString options, int col, bool showOF, double rangeL, double rangeR, bool setNoExp)
 { 
     // Colors 
     bool useStandardPalette = false;
@@ -2442,6 +2453,10 @@ void TopSVDFunctions::SVD_DrawStackRange(THStack* stack, TLegend* leg, TString x
     // Draw it
     options.Append("nostack");
     stack->Draw(options);
+    
+    // restrict range if desired
+    if(rangeL!=-9999 && rangeR!=-9999) stack->GetHistogram()->GetXaxis()->SetRangeUser(rangeL, rangeR);
+    if(setNoExp) stack->GetHistogram()->GetXaxis()->SetNoExponent(true);
 
     // Style
     stack->GetHistogram()->UseCurrentStyle();
@@ -2724,7 +2739,7 @@ double TopSVDFunctions::SVD_ScanAvgMean(TH1D* unfHist)
 // Helper Function
 // If you have a range you want to depict in a histogram,
 // than this function gives you a good range 
-void TopSVDFunctions::SVD_NewRange(double min, double max, double& newmin, double& newmax, bool log)
+void TopSVDFunctions::SVD_NewRange(double min, double max, double& newmin, double& newmax, bool log, double marginFact)
 {
     // Set Min and Max Values
     double theMin = min;
@@ -2735,7 +2750,7 @@ void TopSVDFunctions::SVD_NewRange(double min, double max, double& newmin, doubl
     }
     
     // Get margin
-    double margin = 0.15*(theMax - theMin);
+    double margin = marginFact*(theMax - theMin);
     
     // New Min and Max
     double theNewMin = theMin - margin;
@@ -2771,8 +2786,7 @@ void TopSVDFunctions::SVD_NewUpperRange(double max, double& newmax)
     // Return 
     newmax = theNewMax;  
     
-}
-    
+} 
     
 
 // GLOBAL CORRELATION
@@ -2999,7 +3013,7 @@ int TopSVDFunctions::SVD_FindMinimum(TVectorD* xVec, TVectorD* yVec, double& xBe
 //      col=0   means: The colors will not be touched
 //      col=2   means: All histos get the color 2
 //      col=243 means: First Histogram red, second blue, third and all following ones green 
-void TopSVDFunctions::SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo, TString label, TString drawOptions, TString legOptions, int col, int numHist)
+void TopSVDFunctions::SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo, TString label, TString drawOptions, TString legOptions, int col, int numHist, int lineSty)
 {  
     // Existence of Objects
     if ( histo == NULL ) return; 
@@ -3060,8 +3074,9 @@ void TopSVDFunctions::SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo,
             stackHisto->SetMarkerSize(0.);
         }  
         
-        // Line Style 
-        stackHisto->SetLineStyle(h+1); 
+        // Line Style
+	if(lineSty<0) stackHisto->SetLineStyle(h+1);
+	else          stackHisto->SetLineStyle(lineSty);  
          
         // Draw Options 
         stack->Add(stackHisto, theDrawOptions);
@@ -4324,7 +4339,7 @@ void TopSVDFunctions::SVD_RemoveFile(TString filepath)
 int TopSVDFunctions::SVD_GetDigit(TString steering, int digit, int standard)
 {
     
-    int neededLength = 16;
+    int neededLength = 17;
     TString oldsteering = steering;
     
     // Length
@@ -5083,6 +5098,10 @@ void TopSVDFunctions::SVD_GetBinBoundariesY2D(double* boundaries, TH2D* histo)
 //         0 means: Default value, same as 1
 //         1 means: Be non-forgiving
 //         2 means: If Background>Data, set Data to zero.
+//    (17) CONTROL PLOT STYLE (17. digit from right)
+//         0 means: Default value, same as 1
+//         1 means: default style (e.g. show all bins incl. UF/OF, show vertical lines for tau scan etc.)
+//         2 means: Uni HH style (e.g. show only bins of measurement, no vertical lines etc.)
 //
 // Return value: 
 //        Best value of tau if scan is performed, -1. otherwise
@@ -5293,6 +5312,21 @@ double TopSVDFunctions::SVD_Unfold(
      
     // BACKGROUND HANDLING
     int flag_bgrhandling = SVD_GetDigit(steering, 16, 1);  
+    
+    
+    
+    // CONTROL PLOT STYLE
+    int flag_plotStyle = SVD_GetDigit(steering, 17, 1);
+    std::cout << "flag_plotStyle="<<flag_plotStyle<<std::endl;
+    // plot range; per default (-9999) not restricted
+    double rangeL = -9999.;
+    double rangeR = -9999.;
+    if(flag_plotStyle==2) {
+      // restrict plot range to relevant bins
+      rangeL = thebins[0]+0.001;
+      rangeR = thebins[numbins]-0.001;
+      std::cout << "Range of axis restricted to: rangeL="<<rangeL<< "; rangeR="<<rangeR<<std::endl;
+    }
     
       
  
@@ -7117,10 +7151,12 @@ double TopSVDFunctions::SVD_Unfold(
         CPQTex.Append(particleTex);
         CPQTex.Append(", ");
         CPQTex.Append(quantityTex);     
+	if(flag_plotStyle==2) CPQTex=channelTex;
 
         // Tex / Systematics
         TString SystTex = syst;
         SystTex = systTex;
+	if(flag_plotStyle==2) SystTex="";
 
         // Tex / Regularization
         TString RegTex = ""; 
@@ -7131,6 +7167,7 @@ double TopSVDFunctions::SVD_Unfold(
             RegTex.Append("k = ");
             RegTex.Append(TString::Format("%.0f", regPar)); 
         } 
+	if(flag_plotStyle==2) RegTex="";
     
         // Stacks and Legends
         THStack* theRegStack = NULL;
@@ -7139,12 +7176,12 @@ double TopSVDFunctions::SVD_Unfold(
 
  
         // Draw Response Matrix
-        SVD_Draw2D(mcHist, "COLZ TEXT");
+	SVD_Draw2D(mcHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputEventMatrix", "OPEN");  
 
 
         // Draw Probability Matrix
-        SVD_Draw2D(probMatrixHist, "COLZ TEXT");
+	SVD_Draw2D(probMatrixHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputResponseMatrix");
         
 
@@ -7154,7 +7191,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, xiniHist, "Gen", "HIST E", "", 4, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, biniHist, "Rec", "HIST E", "", 2, numberSyst+1); 
         SVD_Array2Stack(theRegStack, theLegend, dataScaledHist, "Data, scaled", "HIST E", "", 1, numberSyst+1); 
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputDataGenRec");         
  
  
@@ -7164,7 +7201,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, dataHist, "Data", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, rawHist, "Raw", "HIST E", "", 2, 1); // Only 1 Histogram
         SVD_Array2Stack(theRegStack, theLegend, bgrHist, "Bgr", "HIST", "", 4, numberSyst+1); 
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputDataRawBgr");
  
 
@@ -7173,7 +7210,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ArrayScale(weightHist, 1./lumiScaleFactor, numberSyst+1);
         TString weightHistLegendEntry = "Weights w_{i}";  
         SVD_Array2Stack(theRegStack, theLegend, weightHist, "Weights", "HIST", "", 1, numberSyst+1); 
-        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Weights", "", 0, true);   
+	SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Weights", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultWeights");
 
   
@@ -7182,7 +7219,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "HIST E", "", 4, numberSyst+1); 
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultUnfBbbData");
 
 
@@ -7192,7 +7229,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, xiniScaledHist, "Gen, sc.", "HIST E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "HIST E", "", 4, numberSyst+1); 
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultUnfBbbGen");
      
      
@@ -7200,15 +7237,21 @@ double TopSVDFunctions::SVD_Unfold(
         // Exclude OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, histRatioUnfBBB, "Unf/BBB", "HIST E", "", 1, numberSyst+1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Ratio: SVD over BBB, Error from SVD", "", 0, false);  
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Ratio: SVD over BBB, Error from SVD", "", 0, false, rangeL, rangeR, true);  
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioUnfBBB");
      
     
-        // Draw Refolded Distribution 
-        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
-        SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 3, numberSyst+1);
-        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 1, numberSyst+1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
+        // Draw Refolded Distribution
+        SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);
+	if(flag_plotStyle==2){
+	    SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 1, numberSyst+1, 1);
+	    SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 2, numberSyst+1, 2);
+	}
+	else{
+	    SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 3, numberSyst+1);
+	    SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 1, numberSyst+1); 
+	} 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultRefoldedData"); 
            
      
@@ -7217,7 +7260,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Exclude OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, histRatioRefDat, "Ref/Data", "HIST E", "", 1, numberSyst+1);  
-        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Ratio: Refolded over Data, Error from Data", "", 0, false);   
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Ratio: Refolded over Data, Error from Data", "", 0, false, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioRefoldedData");
     
       
@@ -7225,7 +7268,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theDValStack, theLegend, CPQTex, SystTex, "");  
         if ( flag_regmode > 1) gPad->SetLogy(true); 
         SVD_Array2Stack(theDValStack, theLegend, ddHist, "d-Values", "HIST", "", 1, numberSyst+1); 
-        SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "d-Values", "", 0, true, gPad->GetLogy());   
+	SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "d-Values", "", 0, true, gPad->GetLogy(), rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "SvdD");
         gPad->SetLogy(false); 
    
@@ -7234,7 +7277,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theDValStack, theLegend, CPQTex, SystTex, "");  
         if ( flag_regmode > 1) gPad->SetLogy(true);
         SVD_Array2Stack(theDValStack, theLegend, svHist, "Sing. Values", "HIST", "", 1, numberSyst+1); 
-        SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "Sing. Values", "", 0, true, gPad->GetLogy());   
+	SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "Sing. Values", "", 0, true, gPad->GetLogy(), rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "SvdSV");
         gPad->SetLogy(false); 
      
@@ -7246,7 +7289,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, stabHist, "Stab.", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, effHist, "Eff.", "HIST", "", 1, numberSyst+1); 
         SVD_Array2Stack(theRegStack, theLegend, probHist, "Prob. i #rightarrow i", "HIST", "", 4, numberSyst+1);
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in \%", "", 0, true); 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in \%", "", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationEffStabPurr"); 
      
     
@@ -7257,7 +7300,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, upperSmearinHist, "Smear-In Up", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, lowerSmearoutHist, "Smear-Out Low", "HIST", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, upperSmearoutHist, "Smear-Out Up", "HIST", "", 4, numberSyst+1);
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Smear-In and Smear-Out", "", 0, true); 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Smear-In and Smear-Out", "", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationSmear"); 
         
     
@@ -7266,49 +7309,49 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");   
         SVD_Array2Stack(theRegStack, theLegend, beffHist, "Gen. Eff.", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, effHist, "Efficiency", "HIST", "", 1, numberSyst+1); 
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency \%", "", 0, true);  
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency \%", "", 0, true, rangeL, rangeR, true);  
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationEfficiency");
     
     
         // Covariance Matrix (DATA)
         // Only for the nominal sample
-        SVD_Draw2D(dataCovHist, "COLZ TEXT");
+	SVD_Draw2D(dataCovHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputCov");
     
     
         // Covariance Matrix (STAT)
         // Only for the nominal sample
-        SVD_Draw2D(statCovHist, "COLZ TEXT");
+	SVD_Draw2D(statCovHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovStat");
     
     
         // Covariance Matrix (MC)
         // Only for the nominal sample
-        SVD_Draw2D(mcCovHist, "COLZ TEXT");
+	SVD_Draw2D(mcCovHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovMC");
     
     
         // Covariance Matrix (Total)
         // Only for the nominal sample
-        SVD_Draw2D(totCovHist, "COLZ TEXT");
+	SVD_Draw2D(totCovHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovTot");
      
     
         // Correlation Matrix (STAT)
         // Only for the nominal sample
-        SVD_Draw2D(statCorrHist, "COLZ TEXT");
+	SVD_Draw2D(statCorrHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCorrStat");
     
     
         // Correlation Matrix (MC)
         // Only for the nominal sample
-        SVD_Draw2D(mcCorrHist, "COLZ TEXT");
+	SVD_Draw2D(mcCorrHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCorrMC");
     
     
         // Correlation Matrix (Total)
         // Only for the nominal sample
-        SVD_Draw2D(totCorrHist, "COLZ TEXT");
+	SVD_Draw2D(totCorrHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCorrTot");
          
     
@@ -7318,7 +7361,7 @@ double TopSVDFunctions::SVD_Unfold(
         glcHist->UseCurrentStyle(); 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, glcHist, "#rho_{i} in \%", "HIST", "", 4, 1);  
-        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Glob. Corr. #rho_{i} in \%", "HIST ", 0, true);
+	SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Glob. Corr. #rho_{i} in \%", "HIST ", 0, true, rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultGlobalCorr");
  
  
@@ -7328,7 +7371,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, bbbErrHist, "BBB Unc.", "HIST", "", 4, 1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Error in \%", "HIST ", 0, true); 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultErrorUnfBbb");
             
     
@@ -7339,7 +7382,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, totErrHist, "Tot. Unc.", "HIST", "", 1, 1);  
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, mcErrHist, "MC Unc.", "HIST", "", 4, 1);   
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "MC Stat. Error in \%", "HIST ", 0, true); 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "MC Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultErrorStatMcTotal");
    
 
@@ -7349,7 +7392,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Do not show OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, histRatioErrors, "Err. Ratio", "HIST", "", 1, 1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false); 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioErrorUnfBbb");
     
           
@@ -7358,7 +7401,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, normUnfHist, "Unf for #sigma_{bin}/#sigma_{tot}", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, normGenHist, "Gen for #sigma_{bin}/#sigma_{tot}", "HIST E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, normBBBHist, "BBB for #sigma_{bin}/#sigma_{tot}", "HIST E", "", 4, numberSyst+1); 
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true);   
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormUnfBbbGen");
         
         
@@ -7367,7 +7410,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, normStatErrHist, "Unf. Err. #sigma_{bin}/#sigma_{tot}", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, normBBBErrHist, "BBB Err. #sigma_{bin}/#sigma_{tot}", "HIST", "", 4, 1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true); 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormErrorUnfBbb");
    
  
@@ -7377,7 +7420,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Do not show OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, normRatioErrors, "Err. Rat. #sigma_{bin}/#sigma_{tot}", "HIST", "", 1, 1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false); 
+	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioNormErrorUnfBbb");
             
               
@@ -7389,20 +7432,20 @@ double TopSVDFunctions::SVD_Unfold(
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, unfShiftHist, "Unfolding",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, bbbShiftHist, "BBB", "HIST", "", 2, numberSyst);  
-            SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in \%", "", 0, false);  
+	    SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in \%", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultShifts");
         
             // Shift Hist as Ratio
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, ratioShiftHist, "Shift Unf/BBB", "HIST", "", 1, numberSyst); 
-            SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Syst. Shift Ratio", "", 0, false);  
+	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Syst. Shift Ratio", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioShifts");  
                 
             // Syst Shifts in Comparison
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, normUnfShiftHist, "Unf.",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, normBBBShiftHist, "BBB", "HIST", "", 2, numberSyst);  
-            SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on #sigma_{bin} / #sigma_{tot} in \%", "", 0, false);  
+	    SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on #sigma_{bin} / #sigma_{tot} in \%", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormShifts"); 
                  
         }  
@@ -7422,7 +7465,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpUnfResult);
             }
             SVD_Array2Stack(theRegStack, theLegend, unfHist, "Opt.", "P", "p", 1, 1);
-            SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Unfolding Result x_{i}", "HIST ", 0, true);  
+	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Unfolding Result x_{i}", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanResults"); 
             
              
@@ -7435,7 +7478,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpErr); 
             }
             SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Opt.", "P", "p", 1, 1);
-            SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Unc. #delta x_{i} in %", "HIST ", 0, true);  
+	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Unc. #delta x_{i} in %", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanErrors"); 
          
              
@@ -7448,7 +7491,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpGlC); 
             }
             SVD_Array2Stack(theRegStack, theLegend, glcHist, "Opt.", "P", "p", 1, 1);
-            SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Global Correlation #rho_{i} in %", "HIST ", 0, true);  
+	    SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Global Correlation #rho_{i} in %", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanGlobCorr"); 
             
              
@@ -7461,7 +7504,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpWeights); 
             } 
             SVD_Array2Stack(theRegStack, theLegend, weightHist, "Opt.", "P", "p", 1, 1);
-            SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Weights w_{i}", "HIST ", 0, true);  
+	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Weights w_{i}", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanWeights"); 
             
             
@@ -7499,14 +7542,16 @@ double TopSVDFunctions::SVD_Unfold(
             canvas->Clear();
             delete theBgrHisto; theBgrHisto = NULL; 
             TGraph* gGlobCorr = SVD_Vect2Graph(vScanPoints, vGlobCorr);
-            SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1); 
+	    if(flag_plotStyle==2) SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1, 0.2); 
+	    else                  SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1); 
             TString gGlobCorrStr = SVD_PlotName(channel, particle, quantity, special, syst, "scanGLOBC");
-            SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "Averaged Global Correlation  #bar{#rho}  in %");  
+	    if(flag_plotStyle==2) SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "RMS Global Correlation  #bar{#rho}  [%]");
+	    else                  SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "Averaged Global Correlation  #bar{#rho}  in %");  
             TGraph* bestPoint = SVD_Point2Graph(optimalTauX, optimalTauY); 
             SVD_DrawGraph(bestPoint,  theBgrHisto, "P", 2); 
             bestPoint->SetMarkerSize(2.5); 
             bestPoint->SetMarkerStyle(3); 
-            SVD_DrawVertLines(theBgrHisto, &vSingularValues, 2);
+	    if(flag_plotStyle!=2) SVD_DrawVertLines(theBgrHisto, &vSingularValues, 2);
             TString textBestPoint = TString::Format("#tau = %.3f", optimalTauX);
             int textOrientationBestPoint = 23; 
             latexBestPoint->SetTextSize(0.03); 
