@@ -7,7 +7,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false)
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool redetermineopttau =false)
 {
   // ============================
   //  Set ROOT Style
@@ -124,7 +124,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  bool redetermineopttau =false;
   if(!SVDunfold) redetermineopttau =false;
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
@@ -1093,7 +1092,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   int kAllMC=kSAToptW+1;
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
-    std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << std::endl;
+    if(verbose>1) std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << std::endl;
     if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
     // ttbar BG yield for signal fraction
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
