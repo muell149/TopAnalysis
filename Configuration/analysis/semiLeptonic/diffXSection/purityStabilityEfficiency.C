@@ -146,16 +146,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   
   std::map<TString, std::vector<double> > binningMap = makeVariableBinning();
   std::vector<double> xBins = binningMap[variable];
-  int NxBins = xBins.size()-1;  
-  // determine binning that is actually plottet
-  std::vector<double> xPlotBins; 
-  for(int iBin =0; iBin < NxBins; iBin++){
-    if(xBins[iBin]>rangeUserLeft-0.002 && xBins[iBin]<rangeUserRight+0.002){
-      xPlotBins.push_back(xBins[iBin]);
-//       std::cout<<"xBins[iBin]= " << xBins[iBin] << std::endl;
-    }
-  }
-  int NxPlotBins = xPlotBins.size()-1;
+  int NxBins = xBins.size()-1;
   
   // pt
   // double xBins[] = {0, 60, 120, 200, 280, 400};
@@ -181,16 +172,15 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   //int NxBins = sizeof(xBins)/sizeof(double);
 
   if(verbose>0) std::cout << "size of all calculated bins, xBins: " << NxBins << std::endl;
-  if(verbose>0) std::cout << "size of all plotted bins, xPlotBins: " << NxPlotBins <<  std::endl;
   
   ///---------------------------------------------------------------------------------------------
   // histos for resolution studies for each bin of the variable of interest:
   // vector with one histo for each bin of the distribution of the variable of interest
   std::vector<TH1F*> residualHistos_;
   std::vector<TH1F*> relativeResidualHistos_;
-  for(int iBin=0; iBin < NxPlotBins; iBin++){
+  for(int iBin=0; iBin < NxBins; iBin++){
     TString histoName  = "residualHisto"+variable+universalplotLabel+"Bin"+Form("%i",iBin);
-    TString histoTitle = "residualHisto"+universalplotLabel+" "+Form("%4.1f",xPlotBins[iBin])+"<"+variable+"<"+Form("%4.1f",xPlotBins[iBin+1]);
+    TString histoTitle = "residualHisto"+universalplotLabel+" "+Form("%4.1f",xBins[iBin])+"<"+variable+"<"+Form("%4.1f",xBins[iBin+1]);
     residualHistos_.push_back        ( new TH1F (histoName, histoTitle, 100, resEdgeL, resEdgeR) );
     relativeResidualHistos_.push_back( new TH1F ("relative"+histoName, "relative"+histoTitle, 100, relResEdgeL, relResEdgeR) );
   }
@@ -322,8 +312,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 	  // fill events passing chi2
 	  chi2eff->Fill(rec, weight);
 	  // fill residual histo of the right bin
-	  for(int iBin=0; iBin < NxPlotBins; iBin++){
-	    if(gen>xPlotBins[iBin] && gen< xPlotBins[iBin+1]){
+	  for(int iBin=0; iBin < NxBins; iBin++){
+	    if(gen>xBins[iBin] && gen< xBins[iBin+1]){
 	      residualHistos_.at(iBin)->Fill(rec-gen, weight);
 	      if(gen!=0) relativeResidualHistos_.at(iBin)->Fill((rec-gen)/gen, weight);
 	      else       relativeResidualHistos_.at(iBin)->Fill(-1);
@@ -729,13 +719,13 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   
   //----------------------------------------------------
   // draw residuals and calculate resolution
-  TH1F* hisResolRMS = new TH1F("hisResolRMS","hisResolRMS", NxPlotBins, &xPlotBins[0]);
-  TH1F* hisResolFit = new TH1F("hisResolFit","hisResolFit", NxPlotBins, &xPlotBins[0]);
-  TH1F* hisRelativeResolRMS = new TH1F("hisRelativeResolRMS","hisRelativeResolRMS", NxPlotBins, &xPlotBins[0]);
-  TH1F* hisRelativeResolFit = new TH1F("hisRelativeResolFit","hisRelativeResolFit", NxPlotBins, &xPlotBins[0]);
-  TH1F* hisBinwidthOverResolRMS = new TH1F("hisBinwidthOverResolRMS","hisBinwidthOverResolRMS", NxPlotBins, &xPlotBins[0]);
-  TH1F* hisBinwidthOverResolFit = new TH1F("hisBinwidthOverResolFit","hisBinwidthOverResolFit", NxPlotBins, &xPlotBins[0]);
-  for(int iGenBin=0; iGenBin <NxPlotBins; iGenBin++){
+  TH1F* hisResolRMS = new TH1F("hisResolRMS","hisResolRMS", NxBins, &xBins[0]);
+  TH1F* hisResolFit = new TH1F("hisResolFit","hisResolFit", NxBins, &xBins[0]);
+  TH1F* hisRelativeResolRMS = new TH1F("hisRelativeResolRMS","hisRelativeResolRMS", NxBins, &xBins[0]);
+  TH1F* hisRelativeResolFit = new TH1F("hisRelativeResolFit","hisRelativeResolFit", NxBins, &xBins[0]);
+  TH1F* hisBinwidthOverResolRMS = new TH1F("hisBinwidthOverResolRMS","hisBinwidthOverResolRMS", NxBins, &xBins[0]);
+  TH1F* hisBinwidthOverResolFit = new TH1F("hisBinwidthOverResolFit","hisBinwidthOverResolFit", NxBins, &xBins[0]);
+  for(int iGenBin=0; iGenBin <NxBins; iGenBin++){
     // absolute resolution	
     CanvResidualHistos->cd(iGenBin+1);
     residualHistos_.at(iGenBin)->GetXaxis()->SetNoExponent(true);
@@ -768,7 +758,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     label->SetTextSize(0.04);
     label->SetTextAlign(12);
     if(fitGaussRes) label->Draw("same");
-    TString labelText  = TString("       ")+ Form("%4.1f",xPlotBins[iGenBin])+"<"+xtitle+"<"+Form("%4.1f",xPlotBins[iGenBin+1]);
+    TString labelText  = TString("       ")+ Form("%4.1f",xBins[iGenBin])+"<"+xtitle+"<"+Form("%4.1f",xBins[iGenBin+1]);
     DrawLabel(labelText,gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.07);
 
     // calculate resolution
@@ -811,7 +801,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
       label2->SetTextSize(0.04);
       label2->SetTextAlign(12);
       if(fitGaussRes) label2->Draw("same");
-      TString label2Text  = TString("       ")+ Form("%4.1f",xPlotBins[iGenBin])+"<"+xtitle+"<"+Form("%4.1f",xPlotBins[iGenBin+1]);
+      TString label2Text  = TString("       ")+ Form("%4.1f",xBins[iGenBin])+"<"+xtitle+"<"+Form("%4.1f",xBins[iGenBin+1]);
       DrawLabel(label2Text,gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.07);
     
     // calculate resolution
@@ -976,7 +966,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
       CanvRelativeResolution->Print(outputFolder+"/relativeResolution_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
       // print residuums separately if desired
       if(printSeparateRes){
-	for(int iBin =0; iBin < NxPlotBins; iBin++){
+	for(int iBin =0; iBin < NxBins; iBin++){
 	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
 	  CanvRelativeResidualHistos->cd(iBin+1)->Print(outputFolder+"/relativeResidualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".png");
 	  CanvResidualHistos->cd(iBin+1)->Print(outputFolder+"/residualHistoBin"+Form("%i",iBin)+"_"+universalplotLabel+"_"+lepton+"_"+variable+chi+qAssStr+".eps");
