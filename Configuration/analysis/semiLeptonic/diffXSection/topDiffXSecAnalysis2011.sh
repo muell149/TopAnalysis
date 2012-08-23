@@ -95,7 +95,7 @@ verbose=0
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=true
+redoControlPlots=false # // Thomas
 
 ## Re-create systematic plots
 ## redoSystematics = true / false (default: true)
@@ -109,6 +109,15 @@ makeLogPlots=false
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
 ## maxSys>0 needs a lot of time (must be <= 52 (default), see list of systematics below)
 maxSys=52
+
+## Include cross-check variables to get additional differential cross-sections for
+## a) pT(top) and pT(antitop)
+## b) y(top)  and y(antitop)
+## c) eta(l+) and eta(l-)
+## Attention: The exectution mainly of analyzeHypothesisKinFit.C lasts longer if this parameter is set to true
+##
+## inclCCVars = true / false (default: false)
+inclCCVars=true 
 
 ## Shape variations:
 ## a) Calculate them at all
@@ -431,7 +440,7 @@ echo " 37: sysTopMassUp               38: sysTopMassDown              "
 echo " 39: sysQCDUp                   40: sysQCDDown                  "
 echo " 41: sysSTopUp                  42: sysSTopDown                 "
 echo " 43: sysDiBosUp                 44: sysDiBosDown                "
-echo " 45: sysPDFUp                   46 sysPDFDown                  "
+echo " 45: sysPDFUp                   46: sysPDFDown                  "
 echo " 47: sysHadUp                   48: sysHadDown                  "
 echo " 49: sysGenMCatNLO              50: sysGenPowheg                "
 echo " 51: sysShapeUp                 52: sysShapeDown                "
@@ -462,7 +471,7 @@ if [ $decayChannel != \"combined\" ]; then
     fi
 
     cat >> commandsSysPrepare.cint << EOF
-.L analyzeHypothesisKinFit.C++
+.L analyzeHypothesisKinFit.C++g
 EOF
 
     root -l -b < commandsSysPrepare.cint
@@ -477,11 +486,11 @@ EOF
     
     cat >> commandsNoSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
+analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)
 EOF
 
     echo ""
-    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
+    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron ,$inclCCVars)"
     root -l -b < commandsNoSysRun.cint
 
 
@@ -509,10 +518,10 @@ EOF
 		
 		cat >> commandsSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)"
 		root -l -b < commandsSysRun.cint
 	    fi  
 	done
@@ -533,10 +542,10 @@ EOF
 		
 		cat >> commandsSysShapeVarRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)"
 		root -l -b < commandsSysShapeVarRun.cint
 	    done
 	fi

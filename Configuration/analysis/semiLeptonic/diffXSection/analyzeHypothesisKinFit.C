@@ -2,12 +2,12 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
+void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
 , int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false)
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false)
 {
   // ============================
   //  Set ROOT Style
@@ -167,13 +167,15 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
 
-  // create list of variables you would like to create the efficiency / cross section for
-  std::vector<TString> xSecVariables_, xSecLabel_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt" ,"lepEta", "bqPt", "bqEta"};
-  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[GeV]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{#mu^{+} and #mu^{-}}/[GeV]" , "#eta^{#mu^{+} and #mu^{-}}/ ", "p_{T}^{b and #bar{b}}/[GeV]" , "#eta^{b and #bar{b}}/ "};
-   
-  xSecVariables_ .insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
-  xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );
+  // create list of variables you would like to create the efficiency / cross section for (centrally defined in basicFunctions.h)
+  std::vector<TString> xSecVariables_, xSecLabel_;     
+  xSecVariables_.insert(xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
+  xSecLabel_   .insert(xSecLabel_.begin(), xSecLabel, xSecLabel + sizeof(xSecLabel)/sizeof(TString));
+
+  if (addCrossCheckVariables){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesCCVar, xSecVariablesCCVar + sizeof(xSecVariablesCCVar)/sizeof(TString));
+    xSecLabel_.insert(xSecLabel_.end(), xSecLabelCCVar, xSecLabelCCVar + sizeof(xSecLabelCCVar)/sizeof(TString));
+  }
 
   // get folder prefix for systematics without extra rootfile
   switch (systematicVariationMod)
@@ -254,18 +256,26 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLep"   ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiLep"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYLep"    ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus"  , // XSec relevant! REC       
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus" , // XSec relevant! REC       
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus"   , // XSec relevant! REC       
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus"  , // XSec relevant! REC       
     // generated top quantities
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topMass"      , 
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"           , // XSec relevant! GEN  
     "analyzeTop"+LV+"LevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt" , 
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhi"       ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topY", // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topY"         , // XSec relevant! GEN
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtHad"     ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhiHad"    ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYHad"      ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtLep"     ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhiLep"    ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYLep"      ,
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtPlus"    , // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtMinus"   , // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYPlus"     , // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYMinus"    , // XSec relevant! GEN
     // reconstructed ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass"  , // XSec relevant! REC
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt"    , // XSec relevant! REC
@@ -285,9 +295,13 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     // reconstructed lepton quantities
     recLeppath+"/lepPt"+recLeplabel,            // XSec relevant! REC
     recLeppath+"/lepEta"+recLeplabel,           // XSec relevant! REC
+    recLeppath+"/lepEtaPlus"+recLeplabel,       // XSec relevant! REC
+    recLeppath+"/lepEtaMinus"+recLeplabel,      // XSec relevant! REC
     // generated lepton quantities		
     genLeppath+"/lepPt"+genLeplabel,            // XSec relevant! GEN
     genLeppath+"/lepEta"+genLeplabel,           // XSec relevant! GEN
+    genLeppath+"/lepEtaPlus"+genLeplabel,       // XSec relevant! GEN
+    genLeppath+"/lepEtaMinus"+genLeplabel,      // XSec relevant! GEN
     // reconstructed b-quark/b-jet quantities	
     recBpath+"/bqPt"+recBlabel,                 // XSec relevant! REC
     recBpath+"/bqEta"+recBlabel,                // XSec relevant! REC
@@ -484,8 +498,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     "analyzeHypoKinFit/mapKinFit_"                                          ,
     // b) response matrix top quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,
-    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_"     ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"       ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus_"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus_" , 
+    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"     ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus_" ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus_",
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
     // c) response matrix ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass_"  ,
@@ -497,7 +515,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
     // d) response matrix lepton quantities
     recLeppath+"/lepPt_"                                                    ,
-    recLeppath+"/lepEta_"                                                   ,  
+    recLeppath+"/lepEta_"                                                   ,
+    recLeppath+"/lepEtaPlus_"                                               ,
+    recLeppath+"/lepEtaMinus_"                                              ,
     // e) response matrix b-quark/b-jet quantities
     recBpath+"/bqPt_"                                                       ,
     recBpath+"/bqEta_"                                                      ,   
@@ -522,6 +542,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     "p_{T}(leptonic t) #left[GeV#right]/#frac{dN}{dp_{T}^{lep. t}} #left[GeV^{-1}#right]/0/20",                         
     "#phi(leptonic t)/#frac{dN}{d#phi^{lep. t}}/0/4",
     "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,
+    xSecLabelName("topPtPlus") +"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1", //20"
+    xSecLabelName("topPtMinus")+"/#frac{dN}{dp_{T}^{#bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
+    xSecLabelName("topYPlus")  +"/#frac{dN}{dy^{t}}/0/1",//5"
+    xSecLabelName("topYMinus") +"/#frac{dN}{dy^{#bar{t}}}/0/1",//5"
     // generated top quantities
     "m^{t and #bar{t}} parton truth #left[GeV#right]/events/0/10",
     xSecLabelName("topPt")+" parton truth/events/0/1",//20"
@@ -533,7 +557,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     "y(hadronic t) parton truth/events/0/5",
     "p_{T}(leptonic t) #left[GeV#right] parton truth/events/0/20",                         
     "#phi(leptonic t) parton truth/events/0/4",
-    "y(leptonic t) parton truth/events/0/5",
+    "y(leptonic t) parton truth/events/0/5",\
+    xSecLabelName("topPtPlus") +" parton truth/events/0/1",//20"
+    xSecLabelName("topPtMinus")+" parton truth/events/0/1",//20"
+    xSecLabelName("topYPlus")  +" parton truth/events/0/1",//5"
+    xSecLabelName("topYMinus") +" parton truth/events/0/1",//5"
     // reconstructed ttbar quantities	                            
     xSecLabelName("ttbarMass")+"/#frac{dN}{dm^{t#bar{t}}} #left[GeV^{-1}#right]/1/1",//60"
     xSecLabelName("ttbarPt")+"/#frac{dN}{dp_{T}^{t#bar{t}}} #left[GeV^{-1}#right]/0/1",//10"
@@ -551,11 +579,15 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     "#phi(leptonic t)-#phi(hadronic t) parton truth/events/0/4",                
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4",
     // reconstructed lepton quantities
-    xSecLabelName("lepPt" )+"/events #left[GeV^{-1}#right]/0/1",
-    xSecLabelName("lepEta")+"/events/0/1" ,
+    xSecLabelName("lepPt" )     +"/events #left[GeV^{-1}#right]/0/1",
+    xSecLabelName("lepEta")     +"/events/0/1" ,
+    xSecLabelName("lepEtaPlus") +"/events/0/1" ,
+    xSecLabelName("lepEtaMinus")+"/events/0/1" ,
     // generated lepton quantities
-    xSecLabelName("lepPt" )+" parton truth/events/0/1",
-    xSecLabelName("lepEta")+" parton truth/events/0/1",
+    xSecLabelName("lepPt" )     +" parton truth/events/0/1",
+    xSecLabelName("lepEta")     +" parton truth/events/0/1",
+    xSecLabelName("lepEtaPlus") +" parton truth/events/0/1",
+    xSecLabelName("lepEtaMinus")+" parton truth/events/0/1",
     // reconstructed b-quark/b-jet quantities
     xSecLabelName("bqPt" )+"/events #left[GeV^{-1}#right]/0/1",
     xSecLabelName("bqEta")+"/events/0/1" ,
@@ -568,10 +600,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) response matrix Top quantities
-    xSecLabelName("topPt")+" gen/"+xSecLabelName("topPt")+" reco",
-    //    "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
-    xSecLabelName("topY")+" gen/"+xSecLabelName("topY")+" reco",
-    //    "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
+    xSecLabelName("topPt"    )+" gen/"+xSecLabelName("topPt"     )+" reco",
+    xSecLabelName("topPtPlus")+" gen/"+xSecLabelName("topPtPlus" )+" reco",
+    xSecLabelName("topPtPlus")+" gen/"+xSecLabelName("topPtMinus")+" reco",
+    // "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
+    xSecLabelName("topY"     )+" gen/"+xSecLabelName("topY"     )+" reco",
+    xSecLabelName("topYPlus" )+" gen/"+xSecLabelName("topYPlus" )+" reco",
+    xSecLabelName("topYMinus")+" gen/"+xSecLabelName("topYMinus")+" reco",
+    // "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) response matrix ttbar quantities
     xSecLabelName("ttbarMass")+" gen/"+xSecLabelName("ttbarMass")+" reco",
     xSecLabelName("ttbarPt")+" gen/"+xSecLabelName("ttbarPt")+" reco",
@@ -581,10 +617,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
     //    "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     //    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
     // d) response matrix lepton quantities
-    xSecLabelName("lepPt")+" gen/"+xSecLabelName("lepPt")+" reco",
-    xSecLabelName("lepEta")+" gen/"+xSecLabelName("lepEta")+" reco",           
+    xSecLabelName("lepPt"      )+" gen/"+xSecLabelName("lepPt"      )+" reco",
+    xSecLabelName("lepEta"     )+" gen/"+xSecLabelName("lepEta"     )+" reco", 
+    xSecLabelName("lepEtaPlus" )+" gen/"+xSecLabelName("lepEtaPlus" )+" reco",
+    xSecLabelName("lepEtaMinus")+" gen/"+xSecLabelName("lepEtaMinus")+" reco",            
     // e) response matrix b-quark/b-jet quantities
-    xSecLabelName("bqPt")+" gen/"+xSecLabelName("bqPt")+" reco",
+    xSecLabelName("bqPt" )+" gen/"+xSecLabelName("bqPt" )+" reco",
     xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco", 
   };
   TString axisLabel1Dadd[ ] = {
@@ -1055,7 +1093,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
   int kAllMC=kSAToptW+1;
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
-    if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << variable << std::endl;
+    std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << std::endl;
+    if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
     // ttbar BG yield for signal fraction
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
     // create combined BG reco plot

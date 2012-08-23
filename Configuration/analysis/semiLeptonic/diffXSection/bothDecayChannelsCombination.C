@@ -24,13 +24,14 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   // decay channels
   enum channel {kMuon, kElectron};
     
-  // Define variables for combination
-  // NOTE: these must also be included in xSecVariables_ in analyzeHypothesisKinFit.C and combineTopDiffXSecUncertainties.C
+  // Define variables for combination (centrally defined in basicFunctions.h)
   std::vector<TString> xSecVariables_;
-  //TString xSecVariables[] ={"topPt", "topPtNorm"};
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt" ,"lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm", "inclusive"};
-  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
-  
+  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables,          xSecVariables          + sizeof(xSecVariables)/sizeof(TString)         );
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesNorm,      xSecVariablesNorm      + sizeof(xSecVariablesNorm)/sizeof(TString)     );
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesIncl,      xSecVariablesIncl      + sizeof(xSecVariablesIncl)/sizeof(TString)     );
+
   // ---
   //    create list of systematics to be treated as uncorrelated between electron and muon channel
   // ---

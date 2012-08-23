@@ -46,6 +46,34 @@
 namespace semileptonic {
 #endif
 
+  // ==========================================
+  //  Cross-section variables and labels
+  // ==========================================
+
+  // basic variables
+ 
+  TString xSecVariables[]     = {"topPt",     "topY",     "ttbarPt",     "ttbarY",     "ttbarMass",     "lepPt" ,    "lepEta",     "bqPt",     "bqEta"    };
+  TString xSecVariablesNorm[] = {"topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"};
+  TString xSecVariablesIncl[] = {"inclusive"};
+
+  TString xSecLabel[] = {"p_{T}^{t and #bar{t}}/[GeV]" ,"y^{t and #bar{t}}/ ",
+			 "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", 
+			 "p_{T}^{#mu^{+} and #mu^{-}}/[GeV]" , "#eta^{#mu^{+} and #mu^{-}}/ ", 
+			 "p_{T}^{b and #bar{b}}/[GeV]" , "#eta^{b and #bar{b}}/ "};
+
+  // cross-check variables
+ 
+  TString xSecVariablesCCVar[]     = {"topPtPlus",    "topPtMinus",    "topYPlus",    "topYMinus",    "lepEtaPlus",    "lepEtaMinus"    };
+  TString xSecVariablesCCVarNorm[] = {"topPtPlusNorm","topPtMinusNorm","topYPlusNorm","topYMinusNorm","lepEtaPlusNorm","lepEtaMinusNorm"};
+
+  TString xSecLabelCCVar[] = {"p_{T}^{t}/[GeV]", "p_{T}^{#bar{t}}/[GeV]", "y^{t}/ ", "y^{#bar{t}}/ ", "#eta^{#mu^{+}}/ ", "#eta^{#mu^{-}}/ "};
+
+  // =================================================
+  //  Parameters for samples and style options 
+  // =================================================
+  
+  // Enumerator to assign an unique integer value to each sample
+
                    /*0:*/    /*1:*/    /*2:*/    /*3:*/    
   enum samples    {kSig    , kBkg    , kZjets  , kWjets  , 
 		   /*4:*/    /*5:*/    /*6:*/    /*7:*/  
@@ -78,15 +106,19 @@ namespace semileptonic {
   const unsigned int constNnloColor     = kOrange-3;
 
   // Line style for theory curves
+
   const unsigned int constPowhegStyle  = 7;
   const unsigned int constNnloStyle    = 5;
 
+  // Marker style
 
   int marker_[] = {20, 22, 29, 23, 
 		   21, 27, 28, 20, 
 		   21, 21, 21, 21, 21, 21,
 		   28, 28, 28,
 		   27, 27, 27, 27, 27, 27};
+
+  // Enumerator to assign an unique integer value to each systematic variation
 
   enum systematicVariation { /* 0:*/ sysNo,
 			     /* 1:*/ sysLumiUp,                  /* 2:*/ sysLumiDown,                
@@ -121,20 +153,28 @@ namespace semileptonic {
 			     /*51:*/ sysShapeUp,                 /*52:*/ sysShapeDown,
 			     /*53:*/ ENDOFSYSENUM};
 
-  double ttbarCrossSection=165.6;                      // NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
-  double ttbarCrossSectionError=sqrt(6.2*6.2+9.1*9.1); // Scale and PDF uncertainties on NNLO value
-                                                       // --> the scale contributions has been symetrized
+  // ============================
+  //  Numerical Constants
+  // ============================
 
-  double SF_TopMassDownUncertainty=0.9/11.0; // scale factors for top mass uncertainty
-  double SF_TopMassUpUncertainty  =0.9/12.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
-                                             // --> systematic samples are varied by -11.0/+12.0 GeV 
-                                             // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
+  const double ttbarCrossSection=165.6;                      // NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
+  const double ttbarCrossSectionError=sqrt(6.2*6.2+9.1*9.1); // Scale and PDF uncertainties on NNLO value
+                                                             // --> the scale contributions has been symetrized
 
-  double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
-  double globalLumiUncertainty = 0.022; // relative uncertainty
+  const double SF_TopMassDownUncertainty=0.9/11.0; // scale factors for top mass uncertainty
+  const double SF_TopMassUpUncertainty  =0.9/12.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
+                                                   // --> systematic samples are varied by -11.0/+12.0 GeV 
+                                                   // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
+
+  const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
+  const double globalLumiUncertainty = 0.022; // relative uncertainty
 	
   const double constLumiElec = 4980.0;	
   const double constLumiMuon = 4955.0;
+
+  // ============== 
+  //  Functions
+  // ============== 
 
   TString sysLabel(unsigned int sys)
   {
@@ -669,7 +709,7 @@ namespace semileptonic {
     else if((sample==kSigPow)||(sample==kBkgPow)){
       crossSection=ttbarCrossSection; 
       // Fall11
-      Nevents = 16420479;
+      Nevents = 16420479;//16439970;
     }
     else if((sample==kSigMca)||(sample==kBkgMca)){
       crossSection=ttbarCrossSection; 
@@ -1612,54 +1652,64 @@ namespace semileptonic {
       double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0};  
       // PAS binning: double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
-      result["topPt"]=bins_;
-      //  result["analyzeTopPartonLevelKinematics/topPt"  ]=bins_;
+      result["topPt"]      = bins_;
+      result["topPtPlus"]  = bins_;
+      result["topPtMinus"] = bins_;
       bins_.clear();
+
       // y(top)
       double topYBins[]={-2.5, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.5}; 
       // PAS binning: double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
       bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
-      result["topY"]=bins_;
-      //  result["analyzeTopPartonLevelKinematics/topY"  ]=bins_;
+      result["topY"]      = bins_;
+      result["topYPlus"]  = bins_;
+      result["topYMinus"] = bins_;
       bins_.clear();
+
       // pt(ttbar)
       double ttbarPtBins[]={0.0, 20.0, 45.0, 75.0, 120.0, 190.0, 300.0};
       // PAS binning: double ttbarPtBins[]={0., 20., 60., 110., 200., 300.}; // PAS Binning
       bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
       result["ttbarPt"]=bins_;
-      //  result["analyzeTopPartonLevelKinematics/ttbarPt"  ]=bins_;
       bins_.clear();
+
       // y(ttbar)
       // old: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
       double ttbarYBins[]={-2.5, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 2.5};
       // PAS binning: double ttbarYBins[]={-5., -1.3, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.3, 5.};
       bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
       result["ttbarY"]=bins_;
-      //  result["analyzeTopPartonLevelKinematics/ttbarY"  ]=bins_;
       bins_.clear();
+
+      // m(ttbar)
       double ttbarMassBins[]={345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0};
       // First option: double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0};  
       // Korea:        double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
       // PAS binning:  double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
       bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
       result["ttbarMass"]=bins_;
-      //  result["analyzeTopPartonLevelKinematics/ttbarMass"  ]=bins_;
       bins_.clear();
+
       // pt(lepton)
       double lepPtBins[]={30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200.};
       bins_.insert( bins_.begin(), lepPtBins, lepPtBins + sizeof(lepPtBins)/sizeof(double) );
       result["lepPt"]=bins_;
       bins_.clear();
+
       // eta(lepton)
       double lepEtaBins[]={-2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1};
       bins_.insert( bins_.begin(), lepEtaBins, lepEtaBins + sizeof(lepEtaBins)/sizeof(double) );
-      result["lepEta"]=bins_;
+      result["lepEta"]      = bins_;
+      result["lepEtaPlus"]  = bins_;
+      result["lepEtaMinus"] = bins_;
       bins_.clear();
+
       // pt(bquark)
       double bqPtBins[]={30., 60., 95., 140., 200., 400.};
       bins_.insert( bins_.begin(), bqPtBins, bqPtBins + sizeof(bqPtBins)/sizeof(double) );
       result["bqPt"]=bins_;
       bins_.clear();
+
       // eta(bquark)
       double bqEtaBins[]={-2.4, -1.5, -1, -0.5, 0., 0.5, 1., 1.5, 2.4};
       bins_.insert( bins_.begin(), bqEtaBins, bqEtaBins + sizeof(bqEtaBins)/sizeof(double) );
@@ -2080,17 +2130,23 @@ namespace semileptonic {
     // modified quantities: none
     // used functions: none
     // used enumerators: none
-    TString tex="";
-    if(variable.Contains("topPt"))          tex="p_{T}^{t and #bar{t}} #left[GeV#right]"; 
-    else if(variable.Contains("topY"     )) tex="y^{t and #bar{t}}";
-    else if(variable.Contains("ttbarPt"  )) tex="p_{T}^{t#bar{t}} #left[GeV#right]";
-    else if(variable.Contains("ttbarY"   )) tex="y^{t#bar{t}}";
-    else if(variable.Contains("ttbarMass")) tex="m_{t#bar{t}} #left[GeV#right]";
-    else if(variable.Contains("lepPt"    )) tex="p_{T}^{l^{+} and l^{-}} #left[GeV#right]";
-    else if(variable.Contains("lepEta"   )) tex="#eta^{l^{+} and l^{-}}";
-    else if(variable.Contains("bqPt"     )) tex="p_{T}^{b and #bar{b}} #left[GeV#right]";
-    else if(variable.Contains("bqEta"    )) tex="#eta^{b and #bar{b}}";
-    return tex;  
+
+    if     (variable == "topPt"      ) return "p_{T}^{t and #bar{t}} #left[GeV#right]";
+    else if(variable == "topPtPlus"  ) return "p_{T}^{t} #left[GeV#right]";
+    else if(variable == "topPtMinus" ) return "p_{T}^{#bar{t}} #left[GeV#right]";
+    else if(variable == "topY"       ) return "y^{t and #bar{t}}";
+    else if(variable == "topYPlus"   ) return "y^{t}";
+    else if(variable == "topYMinus"  ) return "y^{#bar{t}}";
+    else if(variable == "ttbarPt"    ) return "p_{T}^{t#bar{t}} #left[GeV#right]";
+    else if(variable == "ttbarY"     ) return "y^{t#bar{t}}";
+    else if(variable == "ttbarMass"  ) return "m_{t#bar{t}} #left[GeV#right]";
+    else if(variable == "lepPt"      ) return "p_{T}^{l^{+} and l^{-}} #left[GeV#right]";
+    else if(variable == "lepEta"     ) return "#eta^{l^{+} and l^{-}}"; 
+    else if(variable == "lepEtaPlus" ) return "#eta^{l^{+}}";
+    else if(variable == "lepEtaMinus") return "#eta^{l^{-}}";
+    else if(variable == "bqPt"       ) return "p_{T}^{b and #bar{b}} #left[GeV#right]";
+    else if(variable == "bqEta"      ) return "#eta^{b and #bar{b}}";
+    else return "Default Label";
   }
 
   TCanvas* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0), TCanvas* canv=0, double rangeMin=-1., double rangeMax=-1.)
@@ -3516,15 +3572,15 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 1.50 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 1.32 : 2.49955;
 		// New Binning Revision
-		if(variable == "topPt")          k = (fullPS) ? 3.65 : 3.65;
-		else if(variable == "topY" )     k = (fullPS) ? 3.65 : 3.65;
-		else if(variable == "ttbarPt")   k = (fullPS) ? 2.47 : 2.47; 
-		else if(variable == "ttbarY")    k = (fullPS) ? 3.07 : 3.07;
-		else if(variable == "ttbarMass") k = (fullPS) ? 1.29 : 1.29;
-		else if(variable == "lepPt")     k = (fullPS) ? 2.86 : (hadronPS) ? 2.29   : 2.86;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.52 : (hadronPS) ? 1e-5   : 1.52; 
-		else if(variable == "bqPt")      k = (fullPS) ? 3.61 : (hadronPS) ? 4.01   : 3.61; 
-		else if(variable == "bqEta")     k = (fullPS) ? 4.22 : (hadronPS) ? 4.03   : 4.22; 
+		if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.65 : 3.65;
+		else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.65 : 3.65;
+		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.47 : 2.47; 
+		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.07 : 3.07;
+		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.29 : 1.29;
+		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.86 : (hadronPS) ? 2.29   : 2.86;
+		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.52 : (hadronPS) ? 1e-5   : 1.52; 
+		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.61 : (hadronPS) ? 4.01   : 3.61; 
+		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.22 : (hadronPS) ? 4.03   : 4.22; 
             }
 	    else if (decayChannel.Contains("electron")){
 		
@@ -3535,15 +3591,15 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 3.40 : 2.49955;
 		// New Binning Revision
-	        if(variable == "topPt")          k = (fullPS) ? 3.52 : 3.52;
-		else if(variable == "topY")      k = (fullPS) ? 3.20 : 3.20;
-		else if(variable == "ttbarPt")   k = (fullPS) ? 2.10 : 2.10; 
-		else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.71;
-		else if(variable == "ttbarMass") k = (fullPS) ? 1.3 : 1.3;
-		else if(variable == "lepPt")     k = (fullPS) ? 2.65 : (hadronPS) ? 2.32   : 2.65;
-		else if(variable == "lepEta")    k = (fullPS) ? 1.06 : (hadronPS) ? 1e-5   : 1.06; 
-		else if(variable == "bqPt")      k = (fullPS) ? 3.47 : (hadronPS) ? 3.73   : 3.47; 
-		else if(variable == "bqEta")     k = (fullPS) ? 3.76 : (hadronPS) ? 3.52   : 3.76; 
+	        if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.52 : 3.52;
+		else if(variable.Contains("topY")     ) k = (fullPS) ? 3.20 : 3.20;
+		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.10 : 2.10; 
+		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.71 : 2.71;
+		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.3 : 1.3;
+		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.65 : (hadronPS) ? 2.32   : 2.65;
+		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.06 : (hadronPS) ? 1e-5   : 1.06; 
+		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.47 : (hadronPS) ? 3.73   : 3.47; 
+		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.76 : (hadronPS) ? 3.52   : 3.76; 
             }
 	}
 	else{
@@ -3556,15 +3612,15 @@ namespace semileptonic {
 	    //else if(variable == "ttbarY")    k =  8;
 	    //else if(variable == "ttbarMass") k =  5;
 	    // New Binning
-	    if(variable == "topPt")          k =  8;
-	    else if(variable == "topY")      k = 10;
-	    else if(variable == "ttbarPt")   k =  6;
-	    else if(variable == "ttbarY")    k = 10;
-	    else if(variable == "ttbarMass") k =  8;
-	    else if(variable == "lepPt")     k = 13;
-	    else if(variable == "lepEta")    k = 14;
-	    else if(variable == "bqPt")      k =  5;
-	    else if(variable == "bqEta")     k =  8;
+	    if     (variable.Contains("topPt")    ) k =  8;
+	    else if(variable.Contains("topY")     ) k = 10;
+	    else if(variable.Contains("ttbarPt")  ) k =  6;
+	    else if(variable.Contains("ttbarY")   ) k = 10;
+	    else if(variable.Contains("ttbarMass")) k =  8;
+	    else if(variable.Contains("lepPt")    ) k = 13;
+	    else if(variable.Contains("lepEta")   ) k = 14;
+	    else if(variable.Contains("bqPt")     ) k =  5;
+	    else if(variable.Contains("bqEta")    ) k =  8;
 	}      
 	
 	// output
