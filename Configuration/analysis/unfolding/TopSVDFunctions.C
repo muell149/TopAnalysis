@@ -1592,7 +1592,7 @@ void TopSVDFunctions::SVD_Draw2D(TH2D* hist, TString options)
     for ( int i = 1 ; i <= nbinsX ; i++ ) {
 	    for ( int j = 1 ; j <= nbinsY ; j++ ) {
 	    	double binContent = hist->GetBinContent(i,j);
-	    	double binError= hist->GetBinError(i,j);
+	    	//double binError= hist->GetBinError(i,j);
 	    	if ( binContent != 0. ) {
 	    		isEmpty = false;
 	    	}
@@ -1635,7 +1635,7 @@ void TopSVDFunctions::SVD_Draw1D(TH1D* hist, TString options,  int color)
     bool isEmpty = true;
     for ( int i = 1 ; i <= nbinsX ; i++ ) { 
     	double binContent = hist->GetBinContent(i);
-    	double binError= hist->GetBinError(i);
+    	//double binError= hist->GetBinError(i);
     	if ( binContent != 0. ) {
     		isEmpty = false; 
     	}
