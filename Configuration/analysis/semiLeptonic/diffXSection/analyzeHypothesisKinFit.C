@@ -1647,13 +1647,13 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
       // quantity
       TString quantity="";
       variable.Contains("Mass") ? quantity="mass" : (variable.Contains("Pt") ? quantity="p_{t}" : (variable.Contains("Eta") ? quantity="#eta" : (variable.Contains("Y") ? quantity="y" : quantity="unknown") ) );
-      TString quantityTex=quantity;
+      TString quantityTex=xSecLabelName(variable);
       quantity.ReplaceAll("#","");
       quantity.ReplaceAll("{","");
       quantity.ReplaceAll("}","");
       // decay channel
-      TString channelTex="#mu";
-      if(decayChannel=="electron") channelTex="e";
+      TString channelTex="#mu + Jets";
+      if(decayChannel=="electron") channelTex="e + Jets";
       TString special="";
       // ==========================================
       //  Configure the unfolding details
@@ -1862,6 +1862,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955., bool save = true
       //         2 means: If Background>Data, set Data to zero.
       int unfBkgReduction=0;
       steering=getTStringFromInt(unfBkgReduction)+steering;
+      //    (17) CONTROL PLOT STYLE (17. digit from right)
+      //         0 means: Default value, same as 1
+      //         1 means: default style (e.g. show all bins incl. UF/OF, show vertical lines for tau scan etc.)
+      //         2 means: Uni HH style (e.g. show only bins of measurement, no vertical lines etc.)
+      int unfPlotStyle=2;
+      steering=getTStringFromInt(unfPlotStyle)+steering;
 
       // ==============
       //  Get binning
