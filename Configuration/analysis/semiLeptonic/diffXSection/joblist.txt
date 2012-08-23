@@ -361,9 +361,9 @@ nafJobSplitter.pl -q 1 -d ElWZJESUp -c mctag=Fall11,triggerTag=HLT,sample=WZ,lep
 nafJobSplitter.pl -q 1 -d MuZZJESUp -c mctag=Fall11,triggerTag=HLT,sample=ZZ,lepton=muon     102 analyzeMuonJES11All_cfg.py
 nafJobSplitter.pl -q 1 -d ElZZJESUp -c mctag=Fall11,triggerTag=HLT,sample=ZZ,lepton=electron 102 analyzeMuonJES11All_cfg.py
 # JES down
-nafJobSplitter.pl -q 1 -d MuWWJESDn -c mctag=Fall11,triggerTag=HLT,sample=WW,lepton=muon      89 analyzeMuonJES0checkN9All_cfg.py
+nafJobSplitter.pl -q 1 -d MuWWJESDn -c mctag=Fall11,triggerTag=HLT,sample=WW,lepton=muon      89 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d ElWWJESDn -c mctag=Fall11,triggerTag=HLT,sample=WW,lepton=electron  89 analyzeMuonJES09All_cfg.py
-nafJobSplitter.pl -q 1 -d MuWZJESDn -c mctag=Fall11,triggerTag=HLT,sample=WZ,lepton=muon      99  analyzeMuonJES09All_cfg.py
+nafJobSplitter.pl -q 1 -d MuWZJESDn -c mctag=Fall11,triggerTag=HLT,sample=WZ,lepton=muon      99 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d ElWZJESDn -c mctag=Fall11,triggerTag=HLT,sample=WZ,lepton=electron  99 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d MuZZJESDn -c mctag=Fall11,triggerTag=HLT,sample=ZZ,lepton=muon     102 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 1 -d ElZZJESDn -c mctag=Fall11,triggerTag=HLT,sample=ZZ,lepton=electron 102 analyzeMuonJES09All_cfg.py
