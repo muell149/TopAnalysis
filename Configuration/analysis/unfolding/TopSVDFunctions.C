@@ -5317,7 +5317,7 @@ double TopSVDFunctions::SVD_Unfold(
     
     // CONTROL PLOT STYLE
     int flag_plotStyle = SVD_GetDigit(steering, 17, 1);
-    std::cout << "flag_plotStyle="<<flag_plotStyle<<std::endl;
+    if(flag_verbose>=3) std::cout << "flag_plotStyle="<<flag_plotStyle<<std::endl;
     // plot range; per default (-9999) not restricted
     double rangeL = -9999.;
     double rangeR = -9999.;
@@ -5325,7 +5325,7 @@ double TopSVDFunctions::SVD_Unfold(
       // restrict plot range to relevant bins
       rangeL = thebins[0]+0.001;
       rangeR = thebins[numbins]-0.001;
-      std::cout << "Range of axis restricted to: rangeL="<<rangeL<< "; rangeR="<<rangeR<<std::endl;
+      if(flag_verbose>=3) std::cout << "Range of axis restricted to: rangeL="<<rangeL<< "; rangeR="<<rangeR<<std::endl;
     }
     
       
