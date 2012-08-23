@@ -61,10 +61,7 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("eventNumber", &eventNumber, "eventNumber/i");
 
   // event weight
-  if(weight_.label() != ""){
-    weight = 1;
-    tree->Branch("weight", &weight, "weight/D");
-  }
+  tree->Branch("weight", &weight, "weight/D");
   
   // different invariant masses
   MuNu4J=-1;
@@ -86,16 +83,14 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("Njets"     , &Njets     , "Njets/I"     );  
  
   // leading jet which is not associated with the ttbar system
-  leadNonttjetPt=leadNonttjetY=leadNonttjetEta=-999;
   tree->Branch("leadNonttjetPt" , &leadNonttjetPt , "leadNonttjetPt/D" );   
   tree->Branch("leadNonttjetY"  , &leadNonttjetY  , "leadNonttjetY/D"  );   
   tree->Branch("leadNonttjetEta", &leadNonttjetEta, "leadNonttjetEta/D");   
   
   // object kinematics to check kinfit shift
-  bqhadPtPre=bqhadEtaPre=bqhadPhiPre=bqlepPtPre=bqlepEtaPre=bqlepPhiPre=lqPtPre=lqEtaPre=lqPhiPre=lqbarPtPre=lqbarEtaPre=lqbarPhiPre=bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqlepPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=-999;
-  tree->Branch("bqhadPtPre"      ,&bqhadPtPre    , "bqhadPtPre/D"    ); 
-  tree->Branch("bqhadEtaPre"     ,&bqhadEtaPre   , "bqhadEtaPre/D"   ); 
-  tree->Branch("bqhadPhiPre"     ,&bqhadPhiPre   , "bqhadEtaPre/D"   ); 
+  tree->Branch("bqhadPtPre"   ,&bqhadPtPre , "bqhadPtPre/D" ); 
+  tree->Branch("bqhadEtaPre"  ,&bqhadEtaPre, "bqhadEtaPre/D"); 
+  tree->Branch("bqhadPhiPre"  ,&bqhadPhiPre, "bqhadEtaPre/D"); 
   tree->Branch("bqlepPtPre"   ,&bqlepPtPre , "bqlepPtPre/D" ); 
   tree->Branch("bqlepEtaPre"  ,&bqlepEtaPre, "bqlepEtaPre/D"); 
   tree->Branch("bqlepPhiPre"  ,&bqlepPhiPre, "bqlepPhiPre/D"); 
@@ -105,9 +100,9 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("lqbarPtPre"   ,&lqbarPtPre , "lqbarPtPre/D" ); 
   tree->Branch("lqbarEtaPre"  ,&lqbarEtaPre, "lqbarEtaPre/D"); 
   tree->Branch("lqbarPhiPre"  ,&lqbarPhiPre, "lqbarPhiPre/D"); 
-  tree->Branch("bqhadPtFit"      ,&bqhadPtFit    , "bqhadPtFit/D"    ); 
-  tree->Branch("bqhadEtaFit"     ,&bqhadEtaFit   , "bqhadEtaFit/D"   ); 
-  tree->Branch("bqhadPhiFit"     ,&bqhadPhiFit   , "bqhadPhiFit/D"   ); 
+  tree->Branch("bqhadPtFit"   ,&bqhadPtFit , "bqhadPtFit/D" ); 
+  tree->Branch("bqhadEtaFit"  ,&bqhadEtaFit, "bqhadEtaFit/D"); 
+  tree->Branch("bqhadPhiFit"  ,&bqhadPhiFit, "bqhadPhiFit/D"); 
   tree->Branch("bqlepPtFit"   ,&bqlepPtFit , "bqlepPtFit/D" ); 
   tree->Branch("bqlepEtaFit"  ,&bqlepEtaFit, "bqlepEtaFit/D"); 
   tree->Branch("bqlepPhiFit"  ,&bqlepPhiFit, "bqlepPhiFit/D"); 
@@ -117,14 +112,26 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("lqbarPtFit"   ,&lqbarPtFit , "lqbarPtFit/D" ); 
   tree->Branch("lqbarEtaFit"  ,&lqbarEtaFit, "lqbarEtaFit/D"); 
   tree->Branch("lqbarPhiFit"  ,&lqbarPhiFit, "lqbarPhiFit/D"); 
-  nuPtPre=nuEtaPre=nuPhiPre=-999;
   tree->Branch("nuPtPre"      ,&nuPtPre    , "nuPtPre/D"    ); 
   tree->Branch("nuEtaPre"     ,&nuEtaPre   , "nuEtaPre/D"   ); 
   tree->Branch("nuPhiPre"     ,&nuPhiPre   , "nuEtaPre/D"   ); 
-  lepPtPre=lepEtaPre=lepPhiPre=-999;
-  tree->Branch("lepPtPre"      ,&lepPtPre    , "lepPtPre/D"    ); 
-  tree->Branch("lepEtaPre"     ,&lepEtaPre   , "lepEtaPre/D"   ); 
-  tree->Branch("lepPhiPre"     ,&lepPhiPre   , "lepEtaPre/D"   );
+  tree->Branch("nuPtTrue"     ,&nuPtTrue   , "nuPtTrue/D"   ); 
+  tree->Branch("nuEtaTrue"    ,&nuEtaTrue  , "nuEtaTrue/D"  ); 
+  tree->Branch("nuPhiTrue"    ,&nuPhiTrue  , "nuEtaTrue/D"  ); 
+  tree->Branch("nuPtFit"      ,&nuPtFit    , "nuPtFit/D"    ); 
+  tree->Branch("nuEtaFit"     ,&nuEtaFit   , "nuEtaFit/D"   ); 
+  tree->Branch("nuPhiFit"     ,&nuPhiFit   , "nuEtaFit/D"   ); 
+  tree->Branch("lepPtPre"     ,&lepPtPre   , "lepPtPre/D"   ); 
+  tree->Branch("lepEtaPre"    ,&lepEtaPre  , "lepEtaPre/D"  ); 
+  tree->Branch("lepPhiPre"    ,&lepPhiPre  , "lepEtaPre/D"  );
+  tree->Branch("lepPtTrue"    ,&lepPtTrue  , "lepPtTrue/D"  ); 
+  tree->Branch("lepEtaTrue"   ,&lepEtaTrue , "lepEtaTrue/D" ); 
+  tree->Branch("lepPhiTrue"   ,&lepPhiTrue , "lepEtaTrue/D" );
+  tree->Branch("lepPtFit"     ,&lepPtFit   , "lepPtFit/D"   ); 
+  tree->Branch("lepEtaFit"    ,&lepEtaFit  , "lepEtaFit/D"  ); 
+  tree->Branch("lepPhiFit"    ,&lepPhiFit  , "lepEtaFit/D"  );
+  tree->Branch("sumEtPre"     ,&sumEtPre   , "sumEtPre/D"   ); 
+  tree->Branch("sumEtTrue"    ,&sumEtTrue  , "sumEtTrue/D"  ); 
 
   // histos
   // 1D
@@ -205,8 +212,8 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
 
   // collect information from KinFitHypothesis
   int lepBIndex=-1, hadBIndex=-1, lightQIndex=-1, lightQBarIndex=-1;
-  bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqhadPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=-999;
-  lepPtFit=lepEtaFit=lepPhiFit=nuPtFit=nuEtaFit=nuPhiFit=-999;
+  bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqlepPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=-999;
+  lepPtFit=lepEtaFit=lepPhiFit=lepPtTrue=lepEtaTrue=lepPhiTrue=nuPtFit=nuEtaFit=nuPhiFit=nuPtTrue=nuEtaTrue=nuPhiTrue=-999;
 
   if( semiLepEvt_h.isValid()&&semiLepEvt_h->isHypoValid(hypoKey_) ){
     // jet indices
@@ -234,7 +241,15 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     nuEtaFit  =semiLepEvt_h->singleNeutrino(hypoKey_)->eta();
     nuPhiFit  =semiLepEvt_h->singleNeutrino(hypoKey_)->phi();
   }
-  
+  if( semiLepEvt_h.isValid()&&semiLepEvt_h->genEvent().isAvailable() ){
+    lepPtTrue =semiLepEvt_h->singleLepton()->pt();
+    lepEtaTrue=semiLepEvt_h->singleLepton()->eta();
+    lepPhiTrue=semiLepEvt_h->singleLepton()->phi();
+    nuPtTrue  =semiLepEvt_h->singleNeutrino()->pt();
+    nuEtaTrue =semiLepEvt_h->singleNeutrino()->eta();
+    nuPhiTrue =semiLepEvt_h->singleNeutrino()->phi();
+  }
+
   // invariant masses (measure for mttbar)
   MuNu4J=-1;
   ElNu4J=-1;
@@ -263,7 +278,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   Njets=0;
   leadNonttjet=-1;
   leadNonttjetPt=leadNonttjetY=leadNonttjetEta=-999;
-  bqhadPtPre=bqhadEtaPre=bqhadPhiPre=bqlepPtPre=bqlepEtaPre=bqhadPhiPre=lqPtPre=lqEtaPre=lqPhiPre=lqbarPtPre=lqbarEtaPre=lqbarPhiPre=-999;
+  bqhadPtPre=bqhadEtaPre=bqhadPhiPre=bqlepPtPre=bqlepEtaPre=bqlepPhiPre=lqPtPre=lqEtaPre=lqPhiPre=lqbarPtPre=lqbarEtaPre=lqbarPhiPre=-999;
   // loop jets
   for(edm::View< pat::Jet>::const_iterator jetsA=jets_h->begin(); jetsA!=jets_h->end(); ++jetsA){
     int tempindex=jetsA-jets_h->begin();
@@ -437,21 +452,25 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       hists_["shiftLqPhi"    ]->Fill( modTwoPi(lqbarPhiFit-lqPhiPre), weight);
     }
   }
-  lepPtPre=lepEtaPre=lepPhiPre=nuPtPre=nuEtaPre=nuPhiPre=-999;
+  lepPtPre=lepEtaPre=lepPhiPre=nuPtPre=nuEtaPre=nuPhiPre=sumEtPre=sumEtTrue=-999;
   if(muons_h->end()-muons_h->begin()>0){
     lepPtPre  =muons_h->at(0).pt();
     lepEtaPre =muons_h->at(0).eta();
     lepPhiPre =muons_h->at(0).phi();
   }
   else if(electrons_h->end()-electrons_h->begin()>0){
-    nuPtPre   =electrons_h->at(0).pt();
-    nuEtaPre  =electrons_h->at(0).eta();
-    nuPhiPre  =electrons_h->at(0).phi();
+    lepPtPre  =electrons_h->at(0).pt();
+    lepEtaPre =electrons_h->at(0).eta();
+    lepPhiPre =electrons_h->at(0).phi();
   }
   if(MET_h->end()-MET_h->begin()>0){
     nuPtPre   =MET_h->at(0).pt();
     nuEtaPre  =MET_h->at(0).eta();
     nuPhiPre  =MET_h->at(0).phi();
+    sumEtPre  =MET_h->at(0).sumEt();
+    if(MET_h->begin()->genMET()){
+      sumEtTrue=MET_h->begin()->genMET()->sumEt();
+    }
   }
   if(lepPtFit!=-999&&lepPtPre!=-999  ) hists_["shiftLepPt" ]->Fill( lepPtFit -lepPtPre , weight);  
   if(nuPtFit!=-999 &&nuPtPre!=-999   ) hists_["shiftNuPt"  ]->Fill( nuPtFit  -nuPtPre  , weight);
