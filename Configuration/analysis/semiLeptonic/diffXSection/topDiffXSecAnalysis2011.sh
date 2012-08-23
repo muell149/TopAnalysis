@@ -41,14 +41,64 @@
 ##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/
 ## c) when using the shell script for the very first time, do "chmod a+x topDiffXSecAnalysis2011.sh
 ## find final plots in ./diffXSecFromSignal/plots/ after running the analysis via ./topDiffXSecAnalysis2011.sh
+## d) The decay channel, PS and level can be specified via 3 arguments, e.g.
+##    ./topDiffXSecAnalysis2011.sh muon (or electron or combined) extrapolate (or visible) parton (or hadron)
+##    if 0 arguments are given -> default values as specified below
+##    if not 0 or 3 arguments -> Abort!!!
 
 ########################
 ## configure settings ##
 ########################
 
+## default values
+
 # lepton flavour in semi leptonic decay
 # choose \"muon\" or \"electron\" or \"combined\"
 decayChannel=\"combined\" 
+
+## extrapolate xSec to full PS?
+## extrapolate = true / false (default: true)
+extrapolate=true
+
+## use hadron level PS instead of parton level PS?
+## hadron = true / false (default: false)
+hadron=false
+  
+## take arguments
+clear
+echo "-------------------------------------------------------------------------------------"
+if [ $# -eq 0 ]; then
+   echo "The default settings for decay channel, phase space extrapolation and level are used:"
+elif [ $# -eq 3 ]; then
+   ## set first argument
+   if   [ $1 == "muon"      ];   then decayChannel=\"muon\"
+   elif [ $1 == "electron"  ];   then decayChannel=\"electron\"
+   elif [ $1 == "combined"  ];   then decayChannel=\"combined\"
+   else                          echo "1st argument ( $1 ) is not valid! Choose \"muon\", \"electron\" or \"combined\" as decay channel! Abort!"; exit
+   fi
+   ## set second argument
+   if   [ $2 == "extrapolate" ]; then extrapolate=true
+   elif [ $2 == "visible"     ]; then extrapolate=false
+   else                          echo "2nd argument ( $2 ) is not valid! Choose \"extrapolate\" or \"visible\" as phase space! Abort!"; exit
+   fi
+   ## set third argument
+   if   [ $3 == "parton" ];      then hadron=false
+   elif [ $3 == "hadron" ];      then hadron=true
+   else                          echo "3rd argument ( $3 ) is not valid! Choose \"parton\" or \"hadron\" as level! Abort!"; exit
+   fi
+   echo "Decay channel, phase space extrapolation and level were specified by user:"
+else
+   echo "Wrong number of arguments! Choose 0 arguments for default values and 3 arguments to specify" 
+   echo "decay channel, phase space extrapolation and level. Abort!"
+   exit
+fi
+
+echo "-------------------------------------------------------------------------------------"
+echo "Decay channel:                              $decayChannel    "
+echo "extrapolate:                                $extrapolate     "
+echo "hadron:                                     $hadron          "
+echo "-------------------------------------------------------------------------------------"
+echo
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
 ## inputFolderName=\"RecentAnalysisRun\" (default)
@@ -95,7 +145,7 @@ verbose=0
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=false # // Thomas
+redoControlPlots=true
 
 ## Re-create systematic plots
 ## redoSystematics = true / false (default: true)
@@ -117,7 +167,7 @@ maxSys=52
 ## Attention: The exectution mainly of analyzeHypothesisKinFit.C lasts longer if this parameter is set to true
 ##
 ## inclCCVars = true / false (default: false)
-inclCCVars=true 
+inclCCVars=false 
 
 ## Shape variations:
 ## a) Calculate them at all
@@ -139,13 +189,9 @@ clean=false
 ## SVD = true / false (default: true)
 SVD=true
 
-## extrapolate xSec to full PS?
-## extrapolate = true / false (default: true)
-extrapolate=true
-
-## use hadron level PS instead of parton level PS?
-## hadron = true / false (default: false)
-hadron=false
+## redetermine regularisation parameter tau?
+## redetTau = true / false (default: false)
+redetTau=false
 
 #### =====================
 ####  Prepare running
@@ -174,7 +220,6 @@ elecFile=./diffXSecTopSemiElec$dataLabel$LV$PS.root
 combFile=./diffXSecTopSemiLep$dataLabel$LV$PS.root
 
 ## print out configuration
-clear
 if [ $decayChannel == \"combined\" ]
     then
     echo
@@ -336,27 +381,23 @@ if [ $fast = false ]
 fi
 
 # Array of differential variables
-listVarParton_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
-listVarHadron_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+plotAcceptance=true
+if [ $hadron = true ]; 
+    then 
+    listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+    plotAcceptance=false
+fi
 
 if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
     
     echo "purity and stability will be calculated for the following variables: "
     echo
-    echo "Parton Level: ${listVarParton_[@]}"
-    echo "Hadron Level: ${listVarHadron_[@]}"
+    echo "${listVar_[@]}"
    
      # loop over all systematic variations
-    for (( iVar=0; iVar<${#listVarParton_[@]}; iVar++ )); do
-	echo "Parton Level: " 
-	echo
-	root -l -q -b './purityStabilityEfficiency.C++('${listVarParton_[$iVar]}','$save', '$decayChannel', '$inputFolderName', true, true, false)'
-    done
-    
-    for (( iVar=0; iVar<${#listVarHadron_[@]}; iVar++ )); do
-	echo "Hadron Level: ${listVarHadron_[@]}"
-	echo
-	root -l -q -b './purityStabilityEfficiency.C++('${listVarHadron_[$iVar]}','$save', '$decayChannel', '$inputFolderName', false, true, false, 99999, 0, true)'
+    for (( iVar=0; iVar<${#listVar_[@]}; iVar++ )); do
+	root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, 99999, 0, '$hadron')'
     done
 else
     echo "will be ignored, only done for decayChannel=muon/electron"
@@ -486,11 +527,11 @@ EOF
     
     cat >> commandsNoSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)
+analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)
 EOF
 
     echo ""
-    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron ,$inclCCVars)"
+    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron ,$inclCCVars, $redetTau)"
     root -l -b < commandsNoSysRun.cint
 
 
@@ -518,10 +559,10 @@ EOF
 		
 		cat >> commandsSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)"
 		root -l -b < commandsSysRun.cint
 	    fi  
 	done
@@ -542,10 +583,10 @@ EOF
 		
 		cat >> commandsSysShapeVarRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)"
 		root -l -b < commandsSysShapeVarRun.cint
 	    done
 	fi
