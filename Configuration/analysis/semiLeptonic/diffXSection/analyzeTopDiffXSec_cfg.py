@@ -861,6 +861,7 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
 if(decayChannel=='electron'):
     compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
 process.compositedKinematicsTagged = process.compositedKinematics.clone()
+process.compositedKinematicsTagged.semiLepEvent = cms.InputTag("ttSemiLepEvent")
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
 process.compositedKinematics.btagDiscr=cms.double(0.244) # loose WP for untagged selection
@@ -969,7 +970,6 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.bottomJetQualityTagged             +
                                                       process.analyzeMETMuonTagged               +
                                                       process.tightMuontightJetsKinematicsTagged +
-                                                      process.compositedKinematicsTagged         +
                                                       process.bottomLead_0_JetKinematicsTagged   +
                                                       process.bottomLead_1_JetKinematicsTagged
                                                       )
@@ -1285,6 +1285,7 @@ if(applyKinFit==True):
         ## case 1a): ttbar semileptonic mu-signal
         if(eventFilter=='signal only'):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                             process.compositedKinematicsTagged              +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
                                              process.filterProbKinFit                        +
