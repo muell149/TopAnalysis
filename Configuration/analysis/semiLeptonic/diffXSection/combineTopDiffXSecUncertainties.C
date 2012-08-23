@@ -101,12 +101,17 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   //  Basic Printout and Variable Definitions
   // ==========================================
   
-  // Define variables for combination
+  // Define variables for combination (centrally defined in basicFunctions.h)
   // NOTE: these must be identical to those defined in xSecVariables_ in analyzeHypothesisKinFit.C
 
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"inclusive", "topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt", "lepEta", "bqPt", "bqEta", "topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarMassNorm", "ttbarYNorm", "lepPtNorm", "lepEtaNorm", "bqPtNorm", "bqEtaNorm"};
-  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString) );
+
+  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables,          xSecVariables          + sizeof(xSecVariables)/sizeof(TString)         );
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesNorm,      xSecVariablesNorm      + sizeof(xSecVariablesNorm)/sizeof(TString)     );
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesIncl,      xSecVariablesIncl      + sizeof(xSecVariablesIncl)/sizeof(TString)     );
+
   // chose min/max value[%] for relative uncertainty plots
   double errMax=40.0;
   double errMin= 0.0;
@@ -161,7 +166,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     std::vector<TString> xSecVariableBranchNames_;
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       if(!xSecVariables_[i].Contains("Norm")&&xSecVariables_[i]!="inclusive"){
-	if(xSecVariables_[i].Contains("top") || xSecVariables_[i].Contains("bq")){
+	if(xSecVariables_[i]=="topPt" || xSecVariables_[i]=="topY" || xSecVariables_[i].Contains("bq")){
 	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
 	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
 	}
@@ -169,7 +174,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
       }
     }
   
-    TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
+    //   TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
+    TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PF.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
 
     BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC,"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop);
  	  
