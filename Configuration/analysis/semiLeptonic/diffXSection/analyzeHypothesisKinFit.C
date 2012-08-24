@@ -125,7 +125,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   bool setQCDtoZero=true;
   if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
   // redetermine optimal tau
-  if(!SVDunfold) redetermineopttau =false;
+  if(!SVDunfold || systematicVariation!=sysNo) redetermineopttau =false; // never determine tau for syst. var or if not SVD unf. is used
   if(redetermineopttau){
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
     save=false;
