@@ -104,15 +104,11 @@ TCanvas* getExtrapolFak(TString plotName, TString label, int verbose, TString ou
 }
 
 void getExtrapolationFactors(int verbose=0){
-    
+
+  // Defintion of variables and labels (centrally defined in basicFunction.h)
   std::vector<TString> xSecVariables_, xSecLabel_;
-  // list all variables you want to create a ratio for
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt", "lepEta", "bqPt", "bqEta"};
-  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
-  
-  // list the labels
-  TString xSecLabel    [] ={"p_{T}^{t and #bar{t}}/[GeV]" , "y^{t and #bar{t}}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{l}/[GeV]" , "#eta^{l}/ ", "p_{T}^{b and #bar{b}}/[GeV]" , "#eta^{b and #bar{b}}/ "};
-  xSecLabel_     .insert( xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );     
+  xSecVariables_.insert(xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
+  xSecLabel_    .insert(xSecLabel_    .begin(), xSecLabel    , xSecLabel     + sizeof(xSecLabel    )/sizeof(TString) );     
   // get correct names
   TString outputFolder="./diffXSecFromSignal/plots/combined/2011/";
   
