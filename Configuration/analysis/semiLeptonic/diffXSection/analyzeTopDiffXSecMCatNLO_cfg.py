@@ -870,7 +870,7 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   btagDiscr=cms.double(0.679)
                                   )
 if(decayChannel=='electron'):
-    compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
+    process.compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
 process.compositedKinematicsTagged = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
@@ -986,7 +986,6 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.bottomJetQualityTagged             +
                                                       process.analyzeMETMuonTagged               +
                                                       process.tightMuontightJetsKinematicsTagged +
-                                                      process.compositedKinematicsTagged         +
                                                       process.bottomLead_0_JetKinematicsTagged   +
                                                       process.bottomLead_1_JetKinematicsTagged
                                                       )
@@ -1059,8 +1058,8 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
@@ -1302,6 +1301,7 @@ if(applyKinFit==True):
         ## case 1a): ttbar semileptonic mu-signal
         if(eventFilter=='signal only'):
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                             process.compositedKinematicsTagged              +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
                                              process.filterProbKinFit                        +
