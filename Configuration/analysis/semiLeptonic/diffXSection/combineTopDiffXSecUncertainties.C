@@ -2,7 +2,7 @@
 #include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false){
+void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false){
 
   // ============================
   //  Systematic Variations:
@@ -108,8 +108,11 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables,          xSecVariables          + sizeof(xSecVariables)/sizeof(TString)         );
   xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesNorm,      xSecVariablesNorm      + sizeof(xSecVariablesNorm)/sizeof(TString)     );
-  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
-  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
+  if (addCrossCheckVariables && !hadron){
+    // cross check variables presently only available for parton level cross-sections
+    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
+    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
+  }
   xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesIncl,      xSecVariablesIncl      + sizeof(xSecVariablesIncl)/sizeof(TString)     );
 
   // chose min/max value[%] for relative uncertainty plots
@@ -119,7 +122,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
   std::map< TString, std::map <unsigned int, TH1F*> > relativeUncertainties_;
   std::map< TString, std::map <unsigned int, TH1F*> > relUncertDistributions_;  // 1st: xSec variable, 2nd: type of uncertainty, 3rd: uncertainty values 
-  std::map< TString, std::vector<double> > binning_ = makeVariableBinning();
+  std::map< TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
   std::map< TString, TH1F*> statUncertaintyDistributions_;
   std::map< TString, TH1F*> sysUncertaintyDistributions_;
   std::map< TString, TH1F*> totalUncertaintyDistributions_;
@@ -177,7 +180,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     //   TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
     TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PF.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
 
-    BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC,"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop);
+    BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC,"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop,addCrossCheckVariables);
  	  
     b.runBCCCalculation();
     correctedCenters_ = b.getMapWithCorrectedCentersInX();

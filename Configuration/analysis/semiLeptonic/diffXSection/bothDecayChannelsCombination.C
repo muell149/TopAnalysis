@@ -2,7 +2,7 @@
 
 void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
 				  TString inputFolderName="1206_AnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool versionNNLO=true){
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -28,8 +28,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   std::vector<TString> xSecVariables_;
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables,          xSecVariables          + sizeof(xSecVariables)/sizeof(TString)         );
   xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesNorm,      xSecVariablesNorm      + sizeof(xSecVariablesNorm)/sizeof(TString)     );
-  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
-  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
+  if (addCrossCheckVariables && !hadron){
+    // cross check variables presently only available for parton level cross-sections
+    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
+    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
+  }
   xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesIncl,      xSecVariablesIncl      + sizeof(xSecVariablesIncl)/sizeof(TString)     );
 
   // ---
@@ -75,11 +78,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   bool DrawSmoothMadgraph = true;
   bool DrawMCAtNLOPlot    = true;
   bool DrawPOWHEGPlot     = true;
-  bool DrawNNLOPlot       = versionNNLO;
+  bool DrawNNLOPlot       = true;
   bool DrawMCFMPlot       = false;
   // smooth instead of binned theory curves
   bool smoothcurves=false;
-  if(smoothcurves&&!versionNNLO){
+  if(smoothcurves){
     DrawSmoothMadgraph = true;
     DrawPOWHEGPlot     = true;
     DrawMCAtNLOPlot    = true;
@@ -300,7 +303,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    histo_["reweighted"+plotName+"El"][kSig] = (TH1F*)(elfile->Get(partonPlot)->Clone("el"+plotName));
 	    histo_["reweighted"+plotName     ][kSig]->Add(histo_["reweighted"+plotName+"El"][kSig]);
 	    // apply standard rebinning
-	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 	    reBinTH1F(*histo_["reweighted"+plotName][kSig], binning_[plotName], verbose-1);
 	    // scale to unit area
 	    histo_["reweighted"+plotName][kSig]->Scale(1/histo_["reweighted"+plotName][kSig]->Integral(0,histo_["reweighted"+plotName][kSig]->GetNbinsX()+1));
@@ -341,7 +344,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    histo_["modified"+plotName][kSig]->Add(histo_["modified"+plotName+"muZprime"][kSig]);
 	    histo_["modified"+plotName][kSig]->Add(histo_["modified"+plotName+"ElZprime"][kSig]);
 	    // apply standard rebinning
-	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 	    reBinTH1F(*histo_["modified"+plotName][kSig], binning_[plotName], verbose-1);
 	    // scale to unit area
 	    histo_["modified"+plotName][kSig]->Scale(1/histo_["modified"+plotName][kSig]->Integral(0,histo_["modified"+plotName][kSig]->GetNbinsX()+1));
@@ -377,25 +380,25 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(normalize){
 	    if (pTPlotsLog && xSecVariables_[i].Contains("Pt") ){
 	      plotTheo->SetMinimum(0.0001);
-	      if      (plotName=="topPt"  ) plotTheo->SetMaximum(0.02);
-	      else if (plotName=="ttbarPt") plotTheo->SetMaximum(0.07);
-	      else if (plotName=="lepPt"  ) plotTheo->SetMaximum(0.07);
-	      else if (plotName=="bqPt"   ) plotTheo->SetMaximum(0.02);
+	      if      (plotName.Contains("topPt")) plotTheo->SetMaximum(0.02);
+	      else if (plotName=="ttbarPt"       ) plotTheo->SetMaximum(0.07);
+	      else if (plotName=="lepPt"         ) plotTheo->SetMaximum(0.07);
+	      else if (plotName=="bqPt"          ) plotTheo->SetMaximum(0.02);
 	      combicanvas->SetLogy(1);
 	    }
 	    else{
-	      if      (plotName=="topPt"  ) plotTheo->SetMaximum(0.01);
-	      else if (plotName=="ttbarPt") plotTheo->SetMaximum(0.025);
-	      else if (plotName=="lepPt"  ) plotTheo->SetMaximum(0.03);
-	      else if (plotName=="bqPt"   ) plotTheo->SetMaximum(0.018);
+	      if      (plotName.Contains("topPt")) plotTheo->SetMaximum(0.01);
+	      else if (plotName=="ttbarPt"       ) plotTheo->SetMaximum(0.025);
+	      else if (plotName=="lepPt"         ) plotTheo->SetMaximum(0.03);
+	      else if (plotName=="bqPt"          ) plotTheo->SetMaximum(0.018);
 	    }
 	    // adjust max
-	    if(plotName=="lepEta"||plotName=="bqEta"||plotName=="topY"||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
+	    if(plotName.Contains("lepEta")||plotName=="bqEta"||plotName.Contains("topY")||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
 	    
-	    if      (plotName=="topY"   ) plotTheo->SetMaximum(0.7);
-	    else if (plotName=="ttbarY" ) plotTheo->SetMaximum(0.8);
-	    else if (plotName=="lepEta" ) plotTheo->SetMaximum(0.6);
-	    else if (plotName=="bqEta"  ) plotTheo->SetMaximum(0.6);
+	    if      (plotName.Contains("topY")  ) plotTheo->SetMaximum(0.7);
+	    else if (plotName=="ttbarY"         ) plotTheo->SetMaximum(0.8);
+	    else if (plotName.Contains("lepEta")) plotTheo->SetMaximum(0.6);
+	    else if (plotName=="bqEta"          ) plotTheo->SetMaximum(0.6);
 	  }
 	  
 	  // activate canvas
@@ -549,7 +552,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    
 	    TString plotname=xSecVariables_[i];	   
 	    plotname.ReplaceAll("Norm", "");
-	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 
 	    // g1) draw NNLO curve for topPt (normalized) and topY (normalized)
 
@@ -665,7 +668,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  }
 	  else{
 	    // other quantities
-	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 	    reBinTH1F(*plotTheo2, binning_[plotName], verbose-1);
 	    // divide by binwidth
 	    plotTheo2=divideByBinwidth(plotTheo2, verbose-1);

@@ -7,7 +7,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool redetermineopttau =false)
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false)
 {
   // ============================
   //  Set ROOT Style
@@ -169,9 +170,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   // create list of variables you would like to create the efficiency / cross section for (centrally defined in basicFunctions.h)
   std::vector<TString> xSecVariables_, xSecLabel_;     
   xSecVariables_.insert(xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
-  xSecLabel_   .insert(xSecLabel_.begin(), xSecLabel, xSecLabel + sizeof(xSecLabel)/sizeof(TString));
+  xSecLabel_    .insert(xSecLabel_.begin(),     xSecLabel,     xSecLabel     + sizeof(xSecLabel)/sizeof(TString));
 
-  if (addCrossCheckVariables){
+  if (addCrossCheckVariables && !hadron){
+    // cross check variables presently only available for parton level cross-sections
     xSecVariables_.insert(xSecVariables_.end(), xSecVariablesCCVar, xSecVariablesCCVar + sizeof(xSecVariablesCCVar)/sizeof(TString));
     xSecLabel_.insert(xSecLabel_.end(), xSecLabelCCVar, xSecLabelCCVar + sizeof(xSecLabelCCVar)/sizeof(TString));
   }
@@ -254,11 +256,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYHad"    ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLep"   ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiLep"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYLep"    ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus"  , // XSec relevant! REC       
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus" , // XSec relevant! REC       
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus"   , // XSec relevant! REC       
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus"  , // XSec relevant! REC       
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYLep"    ,  
     // generated top quantities
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topMass"      , 
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"           , // XSec relevant! GEN  
@@ -271,10 +269,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtLep"     ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhiLep"    ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYLep"      ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtPlus"    , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtMinus"   , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYPlus"     , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYMinus"    , // XSec relevant! GEN
     // reconstructed ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass"  , // XSec relevant! REC
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt"    , // XSec relevant! REC
@@ -294,20 +288,32 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     // reconstructed lepton quantities
     recLeppath+"/lepPt"+recLeplabel,            // XSec relevant! REC
     recLeppath+"/lepEta"+recLeplabel,           // XSec relevant! REC
-    recLeppath+"/lepEtaPlus"+recLeplabel,       // XSec relevant! REC
-    recLeppath+"/lepEtaMinus"+recLeplabel,      // XSec relevant! REC
     // generated lepton quantities		
     genLeppath+"/lepPt"+genLeplabel,            // XSec relevant! GEN
     genLeppath+"/lepEta"+genLeplabel,           // XSec relevant! GEN
-    genLeppath+"/lepEtaPlus"+genLeplabel,       // XSec relevant! GEN
-    genLeppath+"/lepEtaMinus"+genLeplabel,      // XSec relevant! GEN
     // reconstructed b-quark/b-jet quantities	
     recBpath+"/bqPt"+recBlabel,                 // XSec relevant! REC
     recBpath+"/bqEta"+recBlabel,                // XSec relevant! REC
     // generated b-quark/b-jet quantities	
     genBpath+"/bqPt"+genBlabel,                 // XSec relevant! GEN
     genBpath+"/bqEta"+genBlabel                 // XSec relevant! GEN
+  }; 
+
+  TString plots1D_CCVars[ ] = {
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus"        , // XSec relevant! REC       
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus"       , // XSec relevant! REC       
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus"         , // XSec relevant! REC       
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus"        , // XSec relevant! REC       
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtPlus" , // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtMinus", // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYPlus"  , // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYMinus" , // XSec relevant! GEN
+    recLeppath+"/lepEtaPlus"+recLeplabel                                         , // XSec relevant! REC
+    recLeppath+"/lepEtaMinus"+recLeplabel                                        , // XSec relevant! REC
+    genLeppath+"/lepEtaPlus"+genLeplabel                                         , // XSec relevant! GEN
+    genLeppath+"/lepEtaMinus"+genLeplabel                                          // XSec relevant! GEN
   };
+
  TString plots1Dadd[ ] = {
    // generated angular distributions
    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/bbbarAngle"   ,
@@ -496,13 +502,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
     "analyzeHypoKinFit/mapKinFit_"                                          ,
     // b) response matrix top quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus_"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus_" , 
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,   
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_",
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"     ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus_" ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus_",
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
     // c) response matrix ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass_"  ,
@@ -515,11 +517,18 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     // d) response matrix lepton quantities
     recLeppath+"/lepPt_"                                                    ,
     recLeppath+"/lepEta_"                                                   ,
-    recLeppath+"/lepEtaPlus_"                                               ,
-    recLeppath+"/lepEtaMinus_"                                              ,
     // e) response matrix b-quark/b-jet quantities
     recBpath+"/bqPt_"                                                       ,
     recBpath+"/bqEta_"                                                      ,   
+  };
+
+  TString plots2D_CCVars[ ] = {
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus_" ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus_", 
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus_"  ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus_" ,
+    recLeppath+"/lepEtaPlus_"                                              ,
+    recLeppath+"/lepEtaMinus_"                                             
   };
 
   // b) list plot axes style
@@ -540,11 +549,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     "y(hadronic t)/#frac{dN}{dy^{had. t}}/0/5"    ,
     "p_{T}(leptonic t) #left[GeV#right]/#frac{dN}{dp_{T}^{lep. t}} #left[GeV^{-1}#right]/0/20",                         
     "#phi(leptonic t)/#frac{dN}{d#phi^{lep. t}}/0/4",
-    "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,
-    xSecLabelName("topPtPlus") +"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1", //20"
-    xSecLabelName("topPtMinus")+"/#frac{dN}{dp_{T}^{#bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
-    xSecLabelName("topYPlus")  +"/#frac{dN}{dy^{t}}/0/1",//5"
-    xSecLabelName("topYMinus") +"/#frac{dN}{dy^{#bar{t}}}/0/1",//5"
+    "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,    
     // generated top quantities
     "m^{t and #bar{t}} parton truth #left[GeV#right]/events/0/10",
     xSecLabelName("topPt")+" parton truth/events/0/1",//20"
@@ -557,10 +562,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     "p_{T}(leptonic t) #left[GeV#right] parton truth/events/0/20",                         
     "#phi(leptonic t) parton truth/events/0/4",
     "y(leptonic t) parton truth/events/0/5",\
-    xSecLabelName("topPtPlus") +" parton truth/events/0/1",//20"
-    xSecLabelName("topPtMinus")+" parton truth/events/0/1",//20"
-    xSecLabelName("topYPlus")  +" parton truth/events/0/1",//5"
-    xSecLabelName("topYMinus") +" parton truth/events/0/1",//5"
     // reconstructed ttbar quantities	                            
     xSecLabelName("ttbarMass")+"/#frac{dN}{dm^{t#bar{t}}} #left[GeV^{-1}#right]/1/1",//60"
     xSecLabelName("ttbarPt")+"/#frac{dN}{dp_{T}^{t#bar{t}}} #left[GeV^{-1}#right]/0/1",//10"
@@ -580,13 +581,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     // reconstructed lepton quantities
     xSecLabelName("lepPt" )     +"/events #left[GeV^{-1}#right]/0/1",
     xSecLabelName("lepEta")     +"/events/0/1" ,
-    xSecLabelName("lepEtaPlus") +"/events/0/1" ,
-    xSecLabelName("lepEtaMinus")+"/events/0/1" ,
     // generated lepton quantities
     xSecLabelName("lepPt" )     +" parton truth/events/0/1",
     xSecLabelName("lepEta")     +" parton truth/events/0/1",
-    xSecLabelName("lepEtaPlus") +" parton truth/events/0/1",
-    xSecLabelName("lepEtaMinus")+" parton truth/events/0/1",
     // reconstructed b-quark/b-jet quantities
     xSecLabelName("bqPt" )+"/events #left[GeV^{-1}#right]/0/1",
     xSecLabelName("bqEta")+"/events/0/1" ,
@@ -594,18 +591,30 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     xSecLabelName("bqPt" )+" parton truth/events/0/1",
     xSecLabelName("bqEta")+" parton truth/events/0/1",
   };
+  
+  TString axisLabel1D_CCVars[ ] = {
+    xSecLabelName("topPtPlus") +"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1", //20"
+    xSecLabelName("topPtMinus")+"/#frac{dN}{dp_{T}^{#bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
+    xSecLabelName("topYPlus")  +"/#frac{dN}{dy^{t}}/0/1",//5"
+    xSecLabelName("topYMinus") +"/#frac{dN}{dy^{#bar{t}}}/0/1",//5" 
+    xSecLabelName("topPtPlus") +" parton truth/events/0/1",//20"
+    xSecLabelName("topPtMinus")+" parton truth/events/0/1",//20"
+    xSecLabelName("topYPlus")  +" parton truth/events/0/1",//5"
+    xSecLabelName("topYMinus") +" parton truth/events/0/1",//5" 
+    xSecLabelName("lepEtaPlus") +"/events/0/1" ,
+    xSecLabelName("lepEtaMinus")+"/events/0/1" , 
+    xSecLabelName("lepEtaPlus") +" parton truth/events/0/1",
+    xSecLabelName("lepEtaMinus")+" parton truth/events/0/1"
+  };
+  
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
     // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) response matrix Top quantities
     xSecLabelName("topPt"    )+" gen/"+xSecLabelName("topPt"     )+" reco",
-    xSecLabelName("topPtPlus")+" gen/"+xSecLabelName("topPtPlus" )+" reco",
-    xSecLabelName("topPtPlus")+" gen/"+xSecLabelName("topPtMinus")+" reco",
     // "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
     xSecLabelName("topY"     )+" gen/"+xSecLabelName("topY"     )+" reco",
-    xSecLabelName("topYPlus" )+" gen/"+xSecLabelName("topYPlus" )+" reco",
-    xSecLabelName("topYMinus")+" gen/"+xSecLabelName("topYMinus")+" reco",
     // "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
     // c) response matrix ttbar quantities
     xSecLabelName("ttbarMass")+" gen/"+xSecLabelName("ttbarMass")+" reco",
@@ -618,12 +627,21 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     // d) response matrix lepton quantities
     xSecLabelName("lepPt"      )+" gen/"+xSecLabelName("lepPt"      )+" reco",
     xSecLabelName("lepEta"     )+" gen/"+xSecLabelName("lepEta"     )+" reco", 
-    xSecLabelName("lepEtaPlus" )+" gen/"+xSecLabelName("lepEtaPlus" )+" reco",
-    xSecLabelName("lepEtaMinus")+" gen/"+xSecLabelName("lepEtaMinus")+" reco",            
+    
     // e) response matrix b-quark/b-jet quantities
     xSecLabelName("bqPt" )+" gen/"+xSecLabelName("bqPt" )+" reco",
     xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco", 
   };
+
+  TString axisLabel2D_CCVars[ ] = {
+    xSecLabelName("topPtPlus") +" gen/"+xSecLabelName("topPtPlus" )  +" reco",
+    xSecLabelName("topPtMinus")+" gen/"+xSecLabelName("topPtMinus")  +" reco",
+    xSecLabelName("topYPlus" ) +" gen/"+xSecLabelName("topYPlus" )   +" reco",
+    xSecLabelName("topYMinus") +" gen/"+xSecLabelName("topYMinus")   +" reco",
+    xSecLabelName("lepEtaPlus" )+" gen/"+xSecLabelName("lepEtaPlus" )+" reco",
+    xSecLabelName("lepEtaMinus")+" gen/"+xSecLabelName("lepEtaMinus")+" reco"         
+  };
+
   TString axisLabel1Dadd[ ] = {
     // generated angular distributions
     "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
@@ -808,14 +826,16 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   };
 
   // count # plots
-  unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString);
-  unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
-  unsigned int N1Dplotsadd = sizeof(plots1Dadd)/sizeof(TString);
+  unsigned int N1Dplots        = sizeof(plots1D)/sizeof(TString);
+  unsigned int N1Dplots_CCVars = sizeof(plots1D_CCVars)/sizeof(TString);
+  unsigned int N1Dplotsadd     = sizeof(plots1Dadd)/sizeof(TString);
+  unsigned int N2Dplots        = sizeof(plots2D)/sizeof(TString);
+  unsigned int N2Dplots_CCVars = sizeof(plots2D_CCVars)/sizeof(TString);
   
-   // check if all axis labels exist
-  if( N1Dplots != sizeof(axisLabel1D)/sizeof(TString)){ std::cout << "ERROR: some 1D plots or axis label are missing" << std::endl; exit(1); }
-  if( N2Dplots != sizeof(axisLabel2D)/sizeof(TString)){ std::cout << "ERROR: some 2D plots or axis label are missing" << std::endl; exit(1); }
-  if((N1Dplots != sizeof(axisLabel1D)/sizeof(TString))||(N2Dplots != sizeof(axisLabel2D)/sizeof(TString))) exit (1);
+  // check if all axis labels exist
+  if(N1Dplots        != sizeof(axisLabel1D)/sizeof(TString))       { std::cout << "ERROR: some 1D plots or axis label are missing"          << std::endl; exit(1); }
+  if(N1Dplots_CCVars != sizeof(axisLabel1D_CCVars)/sizeof(TString)){ std::cout << "ERROR: some 1D plots (CCVars) or axis label are missing" << std::endl; exit(1); }
+
   if(systematicVariation==sysNo){
     if(N1Dplotsadd != sizeof(axisLabel1Dadd)/sizeof(TString)){
       std::cout << "ERROR: some additional 1D plots or axis label are missing" << std::endl;
@@ -823,6 +843,15 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     }
     N1Dplots+=N1Dplotsadd;
   }
+
+  if(N2Dplots        != sizeof(axisLabel2D)/sizeof(TString))       { std::cout << "ERROR: some 2D plots or axis label are missing"          << std::endl; exit(1); }
+  if(N2Dplots_CCVars != sizeof(axisLabel2D_CCVars)/sizeof(TString)){ std::cout << "ERROR: some 2D plots (CCVars) or axis label are missing" << std::endl; exit(1); }
+
+  if (addCrossCheckVariables&&!hadron){
+    N1Dplots += N1Dplots_CCVars;
+    N2Dplots += N2Dplots_CCVars;
+  }
+
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 
@@ -836,9 +865,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   // =====================
   // collect all plot names in vector (first 1D, then 2D)
   std::vector<TString> plotList_;
-  plotList_.insert( plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString) );
-  if(systematicVariation==sysNo) plotList_.insert( plotList_.end(), plots1Dadd, plots1Dadd + sizeof(plots1Dadd)/sizeof(TString) );
-  plotList_.insert( plotList_.end()  , plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );
+  plotList_.insert(plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString));
+  if(addCrossCheckVariables&&!hadron) plotList_.insert(plotList_.end(), plots1D_CCVars, plots1D_CCVars + sizeof(plots1D_CCVars)/sizeof(TString));
+  if(systematicVariation==sysNo)      plotList_.insert(plotList_.end(), plots1Dadd,     plots1Dadd     + sizeof(plots1Dadd)/sizeof(TString)    );
+  plotList_.insert(plotList_.end(),   plots2D, plots2D + sizeof(plots2D)/sizeof(TString));
+  if(addCrossCheckVariables&&!hadron) plotList_.insert(plotList_.end(), plots2D_CCVars, plots2D_CCVars + sizeof(plots2D_CCVars)/sizeof(TString));
+
   // remove irrelevant plots for systemtic variation to speed up
 
   // container for all histos (1D&2D)
@@ -1052,9 +1084,13 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   // ============================
   // needs: plotList_, histo_, histo2_, N1Dplots, axisLabel_, axisLabel1D, axisLabel2D
   std::vector<TString> axisLabel_;
-  axisLabel_.insert( axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString) );
-  if(systematicVariation==sysNo) axisLabel_.insert( axisLabel_.end(), axisLabel1Dadd, axisLabel1Dadd + sizeof(axisLabel1Dadd)/sizeof(TString) );
-  axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
+
+  axisLabel_.insert(axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString));
+  if(addCrossCheckVariables&&!hadron)   axisLabel_.insert(axisLabel_.end(), axisLabel1D_CCVars, axisLabel1D_CCVars + sizeof(axisLabel1D_CCVars)/sizeof(TString));
+  if(systematicVariation==sysNo)        axisLabel_.insert(axisLabel_.end(), axisLabel1Dadd,     axisLabel1Dadd     + sizeof(axisLabel1Dadd)/sizeof(TString)    );
+  axisLabel_.insert(axisLabel_.end(),   axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString));
+  if(addCrossCheckVariables&&!hadron)   axisLabel_.insert(axisLabel_.end(), axisLabel2D_CCVars, axisLabel2D_CCVars + sizeof(axisLabel2D_CCVars)/sizeof(TString));
+
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     if(decayChannel=="electron"&&axisLabel_[plot].Contains("#mu")) axisLabel_[plot].ReplaceAll("#mu", "e");
@@ -1119,7 +1155,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   //  Rebinning 1D histogramme
   // ============================
   // create variable bin edges
-  std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+  std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
   // loop samples
   for(unsigned int sample=kSig; sample<=kData; ++sample){
     // loop plots

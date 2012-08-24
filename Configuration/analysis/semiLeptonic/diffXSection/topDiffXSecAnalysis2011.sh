@@ -167,7 +167,7 @@ maxSys=52
 ## Attention: The exectution mainly of analyzeHypothesisKinFit.C lasts longer if this parameter is set to true
 ##
 ## inclCCVars = true / false (default: false)
-inclCCVars=false 
+inclCCVars=false
 
 ## Shape variations:
 ## a) Calculate them at all
@@ -631,10 +631,10 @@ EOF
     
     cat >> commandsCombineChannelsRun.cint << EOF
 .L bothDecayChannelsCombination_C.so
-bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron)
+bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars)
 EOF
     echo ""
-    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron)"
+    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars)"
     root -l -b < commandsCombineChannelsRun.cint
 
 else
@@ -681,11 +681,11 @@ fi
 cat >> commandsCombineUncRun.cint << EOF
 .L BCC_C.so
 .L combineTopDiffXSecUncertainties_C.so
-combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron)
+combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars)
 EOF
     
 echo ""
-echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron)"
+echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars)"
 root -l -b < commandsCombineUncRun.cint
 
 

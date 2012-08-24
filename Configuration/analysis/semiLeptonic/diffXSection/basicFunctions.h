@@ -58,8 +58,8 @@ namespace semileptonic {
 
   TString xSecLabel[] = {"p_{T}^{t and #bar{t}}/[GeV]" ,"y^{t and #bar{t}}/ ",
 			 "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", 
-			 "p_{T}^{#mu^{+} and #mu^{-}}/[GeV]" , "#eta^{#mu^{+} and #mu^{-}}/ ", 
-			 "p_{T}^{b and #bar{b}}/[GeV]" , "#eta^{b and #bar{b}}/ "};
+			 "p_{T}^{l^{+} and l^{-}}/[GeV]", "#eta^{l^{+} and l^{-}}/ ", 
+			 "p_{T}^{b and #bar{b}}/[GeV]", "#eta^{b and #bar{b}}/ "};
 
   // cross-check variables
  
@@ -1633,7 +1633,7 @@ namespace semileptonic {
 
   }
   
-  std::map<TString, std::vector<double> > makeVariableBinning()
+  std::map<TString, std::vector<double> > makeVariableBinning(bool addCrossCheckVariables=false)
     {
       // this function creates a map with the hard coded
       // bin values for variable binning
@@ -1653,8 +1653,10 @@ namespace semileptonic {
       // PAS binning: double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
       result["topPt"]      = bins_;
-      result["topPtPlus"]  = bins_;
-      result["topPtMinus"] = bins_;
+      if (addCrossCheckVariables){
+	result["topPtPlus"]  = bins_;
+	result["topPtMinus"] = bins_;
+      }
       bins_.clear();
 
       // y(top)
@@ -1662,8 +1664,10 @@ namespace semileptonic {
       // PAS binning: double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
       bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
       result["topY"]      = bins_;
-      result["topYPlus"]  = bins_;
-      result["topYMinus"] = bins_;
+      if (addCrossCheckVariables){
+	result["topYPlus"]  = bins_;
+	result["topYMinus"] = bins_;
+      }
       bins_.clear();
 
       // pt(ttbar)
@@ -1700,8 +1704,10 @@ namespace semileptonic {
       double lepEtaBins[]={-2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1};
       bins_.insert( bins_.begin(), lepEtaBins, lepEtaBins + sizeof(lepEtaBins)/sizeof(double) );
       result["lepEta"]      = bins_;
-      result["lepEtaPlus"]  = bins_;
-      result["lepEtaMinus"] = bins_;
+      if (addCrossCheckVariables){
+	result["lepEtaPlus"]  = bins_;
+	result["lepEtaMinus"] = bins_;
+      }
       bins_.clear();
 
       // pt(bquark)
