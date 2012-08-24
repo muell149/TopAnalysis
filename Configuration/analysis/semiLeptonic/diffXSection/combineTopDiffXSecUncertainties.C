@@ -106,8 +106,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 
   std::vector<TString> xSecVariables_;
 
-  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables,          xSecVariables          + sizeof(xSecVariables)/sizeof(TString)         );
-  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesNorm,      xSecVariablesNorm      + sizeof(xSecVariablesNorm)/sizeof(TString)     );
+  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables,     xSecVariables     + sizeof(xSecVariables)/sizeof(TString)    );
+  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesNorm, xSecVariablesNorm + sizeof(xSecVariablesNorm)/sizeof(TString));
   if (addCrossCheckVariables && !hadron){
     // cross check variables presently only available for parton level cross-sections
     xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
@@ -241,6 +241,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
       if(!xSecVariables_[var].Contains("inclusive")&&!xSecVariables_[var].Contains("bq")){
 	TString name=xSecVariables_[var];       
 	name.ReplaceAll("Norm","");
+	name.ReplaceAll("Plus","");
+	name.ReplaceAll("Minus","");
 	// get plot 
 	hadUnc_[xSecVariables_[var]]=(TH1F*)(hadfile->Get(name)->Clone());
 	//calculateError_[xSecVariables_[var]][sysHadUp  ]=true; // done above
