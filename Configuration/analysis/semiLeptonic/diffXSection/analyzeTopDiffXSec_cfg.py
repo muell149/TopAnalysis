@@ -859,7 +859,7 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   btagDiscr=cms.double(0.679)
                                   )
 if(decayChannel=='electron'):
-    compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
+    process.compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
 process.compositedKinematicsTagged = process.compositedKinematics.clone()
 process.compositedKinematicsTagged.semiLepEvent = cms.InputTag("ttSemiLepEvent")
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
@@ -1042,8 +1042,8 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
@@ -1080,7 +1080,7 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## kinfit succeeded?
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
-process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>0.10"  ) )
+process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>=0.0"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## configure top reconstruction analyzers & define PSets
@@ -1169,6 +1169,14 @@ process.bjetGenJets=process.selectedGenJets.clone(
     pt =cms.double(30.),
     eta=cms.double(2.4)                          
     )
+process.bjetGenJetsRaw=process.selectedGenJets.clone(
+    #genJet = cms.InputTag("noOverlapGenJetCollection"),
+    genJet = cms.InputTag("ak5GenJets"),
+    BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
+    AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex"),
+    pt =cms.double(0.),
+    eta=cms.double(9999.)                          
+    )
 
 process.noOverlapBGenJetCollection = cms.EDProducer("PATGenJetCleaner",
     src = cms.InputTag("bjetGenJets"),
@@ -1221,6 +1229,8 @@ process.analyzeTopRecoKinematicsBjets.AntiBHadJetIndex = cms.InputTag("makeGenLe
 
 # b gen jet selection
 process.bGenJetSelection = process.leadingGenJetSelection.clone (src = 'noOverlapBGenJetCollection', minNumber = 2)
+process.bGenJetSelectionNoOverlapRemoval = process.leadingGenJetSelection.clone (src = 'bjetGenJets', minNumber = 2)
+process.bGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = 'bjetGenJetsRaw', minNumber = 2)
 
 ## ---
 ##    lepton hadron level distributions
@@ -1270,6 +1280,8 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   # add bjet indices
                                   process.makeGenLevelBJets                         +
                                   # add bjet selection
+                                  process.bGenJetSelectionRaw                       +
+                                  process.bGenJetSelectionNoOverlapRemoval          +
                                   process.bGenJetSelection                          
                                   )
 
@@ -2244,6 +2256,7 @@ if(runningOnData=="MC"):
                           process.semiLeptGenCollections                *
                           process.noOverlapGenJetCollection             *
                           process.makeGenLevelBJets                     *
+                          process.bjetGenJetsRaw                        *
                           process.bjetGenJets                           *
                           process.noOverlapBGenJetCollection            *
                           ## create PU event weights
