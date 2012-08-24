@@ -55,13 +55,13 @@
 
 BCC::BCC(){}
 
-BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, bool mergeLepHad)
+BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, bool mergeLepHad, bool addCrossCheckVariables)
 {
     error_code = 0;
     
     // Please provide your own function 'makeVariableBinning' producing a std::map with your binning
     
-    mapBinning  = makeVariableBinning();
+    mapBinning  = makeVariableBinning(addCrossCheckVariables);
            
     // Set variable 'largeMGFile', open file and get tree
 
@@ -82,16 +82,18 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
 
     if (datafile)
     { 
-	// fill data from tree into temporary map
+        // fill data from tree into temporary map
+       
+        for (std::vector<TString>::iterator iterBranch = vecBranches.begin(); iterBranch != vecBranches.end(); iterBranch++){
 
-	for (std::vector<TString>::iterator iterBranch = vecBranches.begin(); iterBranch != vecBranches.end(); iterBranch++)
-	{
 	    vecBranchData.clear();
 
 	    std::cout << " Processing Data for .... " << *iterBranch;
 	    
 	    TString activeBranchName = "";
 	    activeBranchName = (*iterBranch);	    
+
+	    if( activeBranchName.Contains("lepEtaMinus") || activeBranchName.Contains("lepEtaPlus")) activeBranchName="lepEta";
 
 	    std::cout << " --> " << activeBranchName << std::endl;
 
@@ -232,38 +234,56 @@ void BCC::MakeHistos()
   std::map<TString,int>    HistoBins; 
   std::map<TString,int>    HistoSmoothingValue;
 
-  BinWidthScaler["lepEta"]    = 20.0;
-  BinWidthScaler["lepPt"]     =  0.4;
-  BinWidthScaler["topPt"]     =  0.2;
-  BinWidthScaler["topY"]      = 20.0;
-  BinWidthScaler["ttbarMass"] =  0.2;
-  BinWidthScaler["ttbarPt"]   =  0.5;
-  BinWidthScaler["ttbarY"]    = 20.0;
-  BinWidthScaler["bqPt"]      =  0.2;
-  BinWidthScaler["bqEta"]     = 20.0;
+  BinWidthScaler["lepEta"]      = 20.0;
+  BinWidthScaler["lepEtaPlus"]  = 20.0;
+  BinWidthScaler["lepEtaMinus"] = 20.0;
+  BinWidthScaler["lepPt"]       =  0.4;
+  BinWidthScaler["topPt"]       =  0.2;
+  BinWidthScaler["topPtPlus"]   =  0.2;
+  BinWidthScaler["topPtminus"]  =  0.2;
+  BinWidthScaler["topY"]        = 20.0;
+  BinWidthScaler["topYPlus"]    = 20.0;
+  BinWidthScaler["topYMinus"]   = 20.0;
+  BinWidthScaler["ttbarMass"]   =  0.2;
+  BinWidthScaler["ttbarPt"]     =  0.5;
+  BinWidthScaler["ttbarY"]      = 20.0;
+  BinWidthScaler["bqPt"]        =  0.2;
+  BinWidthScaler["bqEta"]       = 20.0;
 
-  HistoBins["lepEta"]    = 200;
-  HistoBins["lepPt"]     = 160;
-  HistoBins["topPt"]     = 160;
-  HistoBins["topY"]      = 200;
-  HistoBins["ttbarMass"] = 240;
-  HistoBins["ttbarPt"]   = 300;
-  HistoBins["ttbarY"]    = 200;
-  HistoBins["bqPt"]      = 160;
-  HistoBins["bqEta"]     = 200;
+  HistoBins["lepEta"]      = 200;
+  HistoBins["lepEtaPlus"]  = 200;
+  HistoBins["lepEtaMinus"] = 200;
+  HistoBins["lepPt"]       = 160;
+  HistoBins["topPt"]       = 160;
+  HistoBins["topPtPlus"]   = 160;
+  HistoBins["topPtMinus"]  = 160;
+  HistoBins["topY"]        = 200;
+  HistoBins["topYPlus"]    = 200;
+  HistoBins["topYMinus"]   = 200;
+  HistoBins["ttbarMass"]   = 240;
+  HistoBins["ttbarPt"]     = 300;
+  HistoBins["ttbarY"]      = 200;
+  HistoBins["bqPt"]        = 160;
+  HistoBins["bqEta"]       = 200;
 
-  HistoSmoothingValue["lepEta"]    = (largeMGFile) ? 1 :  4;
-  HistoSmoothingValue["lepPt"]     = (largeMGFile) ? 0 :  0;
-  HistoSmoothingValue["topPt"]     = (largeMGFile) ? 1 : 10;
-  HistoSmoothingValue["topY"]      = (largeMGFile) ? 1 :  5;
-  HistoSmoothingValue["ttbarMass"] = (largeMGFile) ? 1 : 10;
-  HistoSmoothingValue["ttbarPt"]   = (largeMGFile) ? 1 :  5;
-  HistoSmoothingValue["ttbarY"]    = (largeMGFile) ? 0 :  2;
-  HistoSmoothingValue["bqPt"]      = (largeMGFile) ? 0 :  0;
-  HistoSmoothingValue["bqEta"]     = (largeMGFile) ? 2 :  2;
+  HistoSmoothingValue["lepEta"]      = (largeMGFile) ? 1 :  4;
+  HistoSmoothingValue["lepEtaPlus"]  = (largeMGFile) ? 1 :  4;
+  HistoSmoothingValue["lepEtaMinus"] = (largeMGFile) ? 1 :  4;
+  HistoSmoothingValue["lepPt"]       = (largeMGFile) ? 0 :  0;
+  HistoSmoothingValue["topPtPlus"]   = (largeMGFile) ? 1 : 10;
+  HistoSmoothingValue["topPtMinus"]  = (largeMGFile) ? 1 : 10; 
+  HistoSmoothingValue["topPt"]       = (largeMGFile) ? 1 : 10;
+  HistoSmoothingValue["topY"]        = (largeMGFile) ? 1 :  5; 
+  HistoSmoothingValue["topYPlus"]    = (largeMGFile) ? 1 :  5;
+  HistoSmoothingValue["topYMinus"]   = (largeMGFile) ? 1 :  5;
+  HistoSmoothingValue["ttbarMass"]   = (largeMGFile) ? 1 : 10;
+  HistoSmoothingValue["ttbarPt"]     = (largeMGFile) ? 1 :  5;
+  HistoSmoothingValue["ttbarY"]      = (largeMGFile) ? 0 :  2;
+  HistoSmoothingValue["bqPt"]        = (largeMGFile) ? 0 :  0;
+  HistoSmoothingValue["bqEta"]       = (largeMGFile) ? 2 :  2;
 
-  for (BCCMap::iterator iter = mapData.begin(); iter != mapData.end(); iter++)
-  {
+  for (BCCMap::iterator iter = mapData.begin(); iter != mapData.end(); iter++){
+
     std::vector<double>& refVecTempBinning = mapBinning[iter->first];  // required for ROOT purposes
     std::vector<double>& refVecTempData    = iter->second;	       // required for ROOT purposes
     
@@ -272,26 +292,28 @@ void BCC::MakeHistos()
     hname  = iter->first;
     binmin = refVecTempBinning[0];
     binmax = refVecTempBinning[refVecTempBinning.size()-1];
-    
+
     TH1F temphisto(hname,hname, BinWidthScaler[hname]*(binmax-binmin),binmin,binmax);
     //TH1F temphisto(hname,hname, HistoBins[hname], binmin, binmax);
+
     
     for (iterVecData = refVecTempData.begin(); iterVecData != refVecTempData.end(); iterVecData++ )
       temphisto.Fill(*iterVecData);
 
     temphisto.Smooth(HistoSmoothingValue[hname]);
+
     mapHistos[hname] = temphisto;
   }
   
-  if (mapBinning.size() != mapHistos.size() )
-  {
+  if (mapBinning.size() != mapHistos.size() ){
+
     error_code = -3;
     std::cout << " WARNING ---- Size of maps for binning and histograms do not correspond!" << std::endl;
     std::cout << " WARNING ---- Calculation of corrected bin centres will be suppressed."   << std::endl;
     std::cout << " WARNING ---- Switch to geometrical centres as default values."           << std::endl;
   }
-  else
-  {
+  else{
+
     for (std::map<TString, TH1F>::iterator iterHistos = mapHistos.begin(); iterHistos != mapHistos.end(); iterHistos++)
           
       std::cout << " Creating new histo .... " << (iterHistos->first) << " with " << (iterHistos->second).GetEntries() << " entries." << std::endl;

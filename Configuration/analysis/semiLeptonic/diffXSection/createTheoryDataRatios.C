@@ -75,7 +75,6 @@ void createTheoryDataRatios(bool extrapolate=true, bool hadron=false, int verbos
 
   // list all variables you want to create a ratio for
   std::vector<TString> xSecVariables_;
-  TString xSecVariables[] ={"topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "lepPt", "lepEta", "bqPt", "bqEta"};
   xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
 
   // get correct names
