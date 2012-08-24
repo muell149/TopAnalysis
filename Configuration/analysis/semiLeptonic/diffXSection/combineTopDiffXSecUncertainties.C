@@ -50,6 +50,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // ============================
   //  Parameter Configuration
   // ============================
+  
+  // if true: for uncertainties with different versions like eff. SF (norm., eta+pt shape) take only maximum of those
+  bool takeMaxOfNormAndShape=true;
 
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: output for debugging
@@ -459,17 +462,46 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      // for last systematic 
 	      if(sys==ENDOFSYSENUM-1){
 		// calculate total systematic uncertainty
+		double maxLepEffSF=0;
+		double maxJetTrigEffSF=0;
+		double maxBtagSF=0;
 		for (unsigned int n=1; n<=nSysTypes; n++){
+		  // exclude shape uncertainties from total uncertainties
 		  if (exclShapeVar && n==shapeVarIdx) {
 		    if(verbose>0) std::cout << " Shape uncertainties are excluded from total systematic uncertainty." << std::endl;
 		  }
+		  // exclude uncertainties from total uncertainties if it is not intended to be considered
 		  else if (considerError_[xSecVariables_[i]][ mapNew2OldSysIndex_[n] ]==false){
 		    if(verbose>0) std::cout << " Uncertainties when unfolding with "<< relSysPlot->GetXaxis()->GetBinLabel(n) <<" is excluded from total systematic uncertainty. Idx= "<< n << std::endl;
 		  }
+		  // add errors quadratically for other uncertainties
 		  else {
-		    if(verbose>0) std::cout << "The following uncertainty is added: "<< relSysPlot->GetXaxis()->GetBinLabel(n) << "; Index= " << n <<std::endl;
-		    // add errors quadratically
-		    totalSystematicError += pow(stdBinXSecValue*relSysPlot->GetBinContent(n)/100.0,2);
+		    TString tempSysLabel = (TString) relSysPlot->GetXaxis()->GetBinLabel(n);
+		    double tempErr = stdBinXSecValue*relSysPlot->GetBinContent(n)/100.0;
+		    // for uncertainties with different versions like eff. SF (norm., eta+pt shape) take only maximum of those
+		    if(takeMaxOfNormAndShape){
+		      if(tempSysLabel=="LepEffSFNorm" || tempSysLabel=="LepEffSFShapeEta" || tempSysLabel=="LepEffSFShapePt"){
+			maxLepEffSF=TMath::Max(maxLepEffSF, tempErr);
+			if(verbose>0) std::cout << "   Search for the maximum of LepEffSF; now: "<< tempSysLabel << "; with err= " << tempErr << "; maxLepEffSF= " << maxLepEffSF <<std::endl;
+			if(tempSysLabel=="LepEffSFShapePt") tempErr=maxLepEffSF;
+			else                                tempErr=0.;
+		      }
+		      else if(tempSysLabel=="TriggerEffSFJetNorm" || tempSysLabel=="TriggerEffSFJetShape"){
+			maxJetTrigEffSF=TMath::Max(maxJetTrigEffSF, tempErr);
+			if(verbose>0) std::cout << "   Search for the maximum of TriggerEffSFJet; now: "<< tempSysLabel << "; with err= " << tempErr << "; maxJetTrigEffSF= " << maxJetTrigEffSF <<std::endl;
+			if(tempSysLabel=="TriggerEffSFJetShape") tempErr=maxJetTrigEffSF;
+			else                                     tempErr=0.;
+		      }
+		      else if(tempSysLabel=="BtagSF" || tempSysLabel=="BtagSFShapePt65" || tempSysLabel=="BtagSFShapeEta0p7"){
+			maxBtagSF=TMath::Max(maxBtagSF, tempErr);
+			if(verbose>0) std::cout << "   Search for the maximum of BtagSF; now: "<< tempSysLabel << "; with err= " << tempErr << "; maxBtagSF= " << maxBtagSF <<std::endl;
+			if(tempSysLabel=="BtagSFShapeEta0p7") tempErr=maxBtagSF;
+			else                                  tempErr=0.;
+		      }
+		    }
+		    // add finally quadratically!!!
+		    if(verbose>0) std::cout << "The following uncertainty is added: "<< tempSysLabel << "; Index= " << n << "; Unc.= " <<tempErr << std::endl;
+		    totalSystematicError += pow(tempErr,2);
 		  }
 		}
 		totalSystematicError = sqrt(totalSystematicError);
