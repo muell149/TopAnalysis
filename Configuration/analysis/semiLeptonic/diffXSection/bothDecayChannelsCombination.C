@@ -494,6 +494,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  // plotname for std simulation file = madgraph-plotname from analyzer structure
 	  TString plotNameMCAtNLO2="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
 	  plotNameMCAtNLO2.ReplaceAll("Norm","");
+	  plotNameMCAtNLO2.ReplaceAll("Minus","");
+	  plotNameMCAtNLO2.ReplaceAll("Plus","");
 	  // for hadron level and not for bquark quantities
 	  // -> no error bands
 	  bool errorbands=true; 
@@ -523,6 +525,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  rebinFactor=0;
 	  TString plotNamePOWHEG="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+xSecVariables_[i]+hadLevelPlotExtend;
 	  plotNamePOWHEG.ReplaceAll("Norm","");
+	  plotNamePOWHEG.ReplaceAll("Minus","");	
+	  plotNamePOWHEG.ReplaceAll("Plus","");
 	  rangeLow  = -1.0;
 	  rangeHigh = -1.0;
 	  if     (xSecVariables_[i].Contains("topPt"    )){ smoothFactor = 10; rebinFactor=10; }

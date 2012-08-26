@@ -100,6 +100,9 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
 
+  // No cross-check variables for hadron phase space
+  if (hadron) addCrossCheckVariables=false;
+
   // ==========================================
   //  Basic Printout and Variable Definitions
   // ==========================================
