@@ -38,6 +38,7 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   }
   // GET DATA: delete empty bins
   TH1F* data=killEmptyBins((TH1F*)datatemp->Clone(), verbose);
+  data->GetXaxis()->SetTitle(xSecLabelName(plotName));
   if(verbose>1){
     for(int bin=1; bin<=data->GetNbinsX(); ++bin){
       std::cout << "bin: " << bin << std::endl;
@@ -57,6 +58,9 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   if(plotpowheg  ) hist_.push_back( killEmptyBins(plotpowheg  , verbose) );
   if(plotMadGraph) hist_.push_back( killEmptyBins(plotMadGraph, verbose) );
   if(plotNNLO    ) hist_.push_back( killEmptyBins(plotNNLO    , verbose) );
+  // set axis colors to white because otherwise it spoils the ratio plot on top of it
+  plotMadGraph->GetXaxis()->SetLabelColor(0);
+  plotMadGraph->GetXaxis()->SetTitleColor(0);
   
   // create ratio canvas
   std::vector<TCanvas*> plotCanvas_;

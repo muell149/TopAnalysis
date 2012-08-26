@@ -2152,7 +2152,7 @@ namespace semileptonic {
     else if(variable == "lepEtaMinus") return "#eta^{l^{-}}";
     else if(variable == "bqPt"       ) return "p_{T}^{b and #bar{b}} #left[GeV#right]";
     else if(variable == "bqEta"      ) return "#eta^{b and #bar{b}}";
-    else return "Default Label";
+    else return "Default Label for variable "+variable;
   }
 
   TCanvas* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0), TCanvas* canv=0, double rangeMin=-1., double rangeMax=-1.)
@@ -2255,7 +2255,7 @@ namespace semileptonic {
       whitebox->SetFillStyle(1001);
       whitebox->SetBorderSize(0);
       whitebox->SetBorderMode(0);
-      whitebox->Draw("");
+      //whitebox->Draw("");
       // create pad to hide the outer left part of the
       // rapidity x-axis without masking the 0 of the y-axis
       TPad *whitebox2 = new TPad("whitebox2","",0.176332,0.144974,0.982758,0.346332);
@@ -2263,7 +2263,7 @@ namespace semileptonic {
       whitebox2->SetFillStyle(1001);
       whitebox2->SetBorderSize(0);
       whitebox2->SetBorderMode(0);
-      if(((TString)histNumeratorData->GetName()).Contains("Y"))	whitebox2->Draw("");
+      //if(((TString)histNumeratorData->GetName()).Contains("Y"))	whitebox2->Draw("");
       // create new pad for ratio plot
       TPad *rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
 #ifdef DILEPTON_MACRO
@@ -2321,7 +2321,7 @@ namespace semileptonic {
 	    ratio_[nTheory]->GetXaxis()->SetRange(ratio_[nTheory]->FindBin(rangeMin),ratio_[nTheory]->FindBin(rangeMax));
 	  }
 	}
-	TString titleX=xSecLabelName(histNumeratorData->GetName());
+	TString titleX=histNumeratorData->GetXaxis()->GetTitle();
 	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
 	titleX=(TString)(histNumeratorData->GetXaxis()->GetTitle());
 	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
