@@ -200,6 +200,7 @@ process.MessageLogger.cerr.GenCandSelector = cms.untracked.PSet(
 )
 ## print memory infos to check for modules with memory leaks
 #process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck", ignoreTotal = cms.untracked.int32(0)) 
+# 
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -1158,17 +1159,18 @@ process.makeGenLevelBJets=process.produceGenLevelBJets.clone(
     requireTopBquark = cms.bool(False),
     noBBbarResonances = cms.bool(True)
 )
+process.altermakeGenLevelBJets=process.produceGenLevelBJets.clone(
+    ttGenEvent = cms.InputTag('genEvt'),
+    #genJets = cms.InputTag('ak5GenJets','','HLT'),
+    genJets = cms.InputTag("noOverlapGenJetCollection"),
+    deltaR = cms.double(5.0),
+    resolveParticleName = cms.bool(False),
+    requireTopBquark = cms.bool(False),
+    noBBbarResonances = cms.bool(True)
+)
 
 ## tool to select identified bjets from genJet collection
 process.load("TopAnalysis.TopUtils.GenJetSelector_cfi")
-process.bjetGenJets=process.selectedGenJets.clone(
-    #genJet = cms.InputTag("noOverlapGenJetCollection"),
-    genJet = cms.InputTag("ak5GenJets"),
-    BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
-    AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex"),
-    pt =cms.double(30.),
-    eta=cms.double(2.4)                          
-    )
 process.bjetGenJetsRaw=process.selectedGenJets.clone(
     #genJet = cms.InputTag("noOverlapGenJetCollection"),
     genJet = cms.InputTag("ak5GenJets"),
@@ -1178,8 +1180,17 @@ process.bjetGenJetsRaw=process.selectedGenJets.clone(
     eta=cms.double(9999.)                          
     )
 
+process.bjetGenJets=process.selectedGenJets.clone(
+    genJet = cms.InputTag("noOverlapGenJetCollection"),
+    BHadJetIndex     = cms.InputTag("altermakeGenLevelBJets", "BHadJetIndex"    ),
+    AntiBHadJetIndex = cms.InputTag("altermakeGenLevelBJets", "AntiBHadJetIndex"),
+    pt =cms.double(30.),
+    eta=cms.double(2.4)                          
+    )
+
+
 process.noOverlapBGenJetCollection = cms.EDProducer("PATGenJetCleaner",
-    src = cms.InputTag("bjetGenJets"),
+    src = cms.InputTag("bjetGenJetsRaw"),
     ## preselection (any string-based cut on pat::Jet)
     preselection = cms.string(''),
     ## overlap checking configurables
@@ -1195,7 +1206,7 @@ process.noOverlapBGenJetCollection = cms.EDProducer("PATGenJetCleaner",
        )
        ),
     ## finalCut (any string-based cut on pat::Jet)
-    finalCut = cms.string(''),
+    finalCut = cms.string('pt > 30 & abs(eta) < 2.4'),
     )
 
 # make b jet gen and rec plots using the identification from above
@@ -1221,6 +1232,7 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
 process.analyzeTopPartonLevelKinematicsBjets=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
 process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
 process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
+process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.genJets = cms.InputTag("bjetGenJets")
 
 process.analyzeTopRecoKinematicsBjets.genJets = cms.InputTag('ak5GenJets','','HLT')
 process.analyzeTopRecoKinematicsBjets.bJetCollection = cms.bool(False)
@@ -1228,8 +1240,7 @@ process.analyzeTopRecoKinematicsBjets.BHadJetIndex     = cms.InputTag("makeGenLe
 process.analyzeTopRecoKinematicsBjets.AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex")
 
 # b gen jet selection
-process.bGenJetSelection = process.leadingGenJetSelection.clone (src = 'noOverlapBGenJetCollection', minNumber = 2)
-process.bGenJetSelectionNoOverlapRemoval = process.leadingGenJetSelection.clone (src = 'bjetGenJets', minNumber = 2)
+process.bGenJetSelection    = process.leadingGenJetSelection.clone (src = 'bjetGenJets'   , minNumber = 2)
 process.bGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = 'bjetGenJetsRaw', minNumber = 2)
 
 ## ---
@@ -1278,11 +1289,10 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   process.leadingGenJetSelectionNjets4 +
                                   process.leadingCleanedGenJetSelectionNjets4       +
                                   # add bjet indices
-                                  process.makeGenLevelBJets                         +
+                                  #process.makeGenLevelBJets                         +
                                   # add bjet selection
                                   process.bGenJetSelectionRaw                       +
-                                  process.bGenJetSelectionNoOverlapRemoval          +
-                                  process.bGenJetSelection                          
+                                  process.bGenJetSelection                     
                                   )
 
 ## ---
@@ -2155,9 +2165,9 @@ process.p1 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       process.semiLeptonicSelection                 *
                       process.isolatedGenLeptons                    *
                       process.semiLeptGenCollections                *
-                      process.noOverlapGenJetCollection             *
                       process.makeGenLevelBJets                     *
-                      process.bjetGenJets                           *
+                      process.bjetGenJetsRaw                        *
+                      process.noOverlapGenJetCollection             *
                       process.noOverlapBGenJetCollection            *
                       ## create PU event weights
                       process.makeEventWeightsPU                    *
@@ -2197,11 +2207,13 @@ process.p1 = cms.Path(## gen event selection (decay channel) and the trigger sel
 
 if(applyKinFit==False or eventFilter!="signal only"):
     # rm gen collection- only needed when processing signal for gen-reco correlations
-    process.p1.remove(process.makeGenLevelBJets            ) 
+    process.p1.remove(process.makeGenLevelBJets            )
     process.p1.remove(process.noOverlapGenJetCollection    )
+    process.p1.remove(process.noOverlapBGenJetCollection   )
     process.p1.remove(process.isolatedGenLeptons           )
     process.p1.remove(process.semiLeptGenCollections       )
     process.p1.remove(process.bjetGenJets                  )
+    process.p1.remove(process.bjetGenJetsRaw               )
     process.p1.remove(process.noOverlapBGenJetCollection   )
     process.p1.remove(process.dummy)
 
@@ -2254,11 +2266,12 @@ if(runningOnData=="MC"):
                           ## introduce some collections
                           process.isolatedGenLeptons                    *
                           process.semiLeptGenCollections                *
-                          process.noOverlapGenJetCollection             *
                           process.makeGenLevelBJets                     *
                           process.bjetGenJetsRaw                        *
-                          process.bjetGenJets                           *
+                          process.noOverlapGenJetCollection             *
                           process.noOverlapBGenJetCollection            *
+                          process.altermakeGenLevelBJets                *
+                          process.bjetGenJets                           *                          
                           ## create PU event weights
                           process.makeEventWeightsPU                    *
                           ## create shape distortion event weights
@@ -2289,7 +2302,9 @@ if(runningOnData=="MC"):
         process.p3.remove(process.genJetCuts)
         process.p3.remove(process.noOverlapGenJetCollection)
         process.p3.remove(process.bjetGenJets)
+        process.p3.remove(process.bjetGenJetsRaw)
         process.p3.remove(process.noOverlapBGenJetCollection)
+        process.p3.remove(process.altermakeGenLevelBJets)
         process.p3.remove(process.makeGenLevelBJets)
     if(eventFilter=='background only'):
         process.p3.remove(process.filterGenPhaseSpace)
@@ -2298,7 +2313,9 @@ if(runningOnData=="MC"):
         process.p3.remove(process.genJetCuts)
         process.p3.remove(process.noOverlapGenJetCollection)
         process.p3.remove(process.bjetGenJets)
+        process.p3.remove(process.bjetGenJetsRaw)
         process.p3.remove(process.noOverlapBGenJetCollection)
+        process.p3.remove(process.altermakeGenLevelBJets)
         process.p3.remove(process.makeGenLevelBJets)
         process.p3.remove(process.dummy)
     ## delete dummy sequence
