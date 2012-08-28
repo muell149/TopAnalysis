@@ -21,7 +21,7 @@ void printInfo()
 
 int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const TString& fileName)
 {
-  const TString theoName = (theory ? "Top++ 1.2" : "Hathor 1.2");
+  const TString theoName = (theory ? "Top++ 1.3" : "Hathor 1.3");
 
   const TString massName = (pole ? "m_{t}^{pole}" : "m_{t}^{#bar{MS}}");
 
@@ -40,7 +40,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
   }
 
   const unsigned minMass = ((theory==kMoch && pdf==kNNPDF) ? 165 : 130);
-  const unsigned maxMass = ((theory==kMoch && pdf==kNNPDF) ? 175 : 190);
+  const unsigned maxMass = ((theory==kMoch && pdf==kNNPDF) ? 175 : 220);
   const unsigned nPointsMass = maxMass - minMass + 1;
   const unsigned iMassCentral = (nPointsMass-1)/2;
 
@@ -242,6 +242,7 @@ int main(const int argc, const char** argv)
   }
 
   char fileName[99];
+  //  sprintf(fileName, "%s_%s_%s_off_alphaDep", argv[1], argv[2], argv[3]);
   sprintf(fileName, "%s_%s_%s_alphaDep", argv[1], argv[2], argv[3]);
 
   return alphaDep(theory, pole, pdf, (TString)fileName);
