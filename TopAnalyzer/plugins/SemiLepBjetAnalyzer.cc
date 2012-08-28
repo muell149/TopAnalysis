@@ -7,6 +7,7 @@
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 
 #include "TopAnalysis/TopAnalyzer/plugins/SemiLepBjetAnalyzer.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 // default constructor
 SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
@@ -179,7 +180,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::GenJet* genb    = genPlots_ ? getJetFromCollection(*genJets,bIX   ) : 0;
   const reco::GenJet* genbbar = genPlots_ ? getJetFromCollection(*genJets,bbarIX) : 0;
   // fill gen histograms
-  if(genb&&genbbar){
+  if(genb&&genbbar){   
     if(useTree_){
       valueBqPtGen =genb->pt();
       valueLeadBqPtGen = genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt();
@@ -192,6 +193,11 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       valueBbbarEtaGen =(genb->p4()+genbbar->p4()).eta();
       valueBbbarYGen   =(genb->p4()+genbbar->p4()).Rapidity();
       valueBbbarMassGen=(genb->p4()+genbbar->p4()).mass();
+    }
+    if(!recPlots_&&valueBqPtGen>0&&valueBbarqPtGen>0&&verbose>1){ 
+      std::cout << "gen truth filling" << std::endl;
+      std::cout << "b(pt, eta)=(" << valueBqPtGen << "." << valueBqEtaGen << ")" << std::endl;
+      std::cout << "bbar(pt, eta)=(" << valueBbarqPtGen << "." << valueBbarqEtaGen << ")" << std::endl;
     }
     if(verbose>1) std::cout << "do filling" << std::endl;
     bqPtGen ->Fill( genb->pt()         , weight);
@@ -233,7 +239,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     double bbareta=bbar->eta(); 
     double bY     =b->rapidity();   
     double bbarY  =bbar->rapidity();
-    if(std::abs(genb->pt()-b->pt())+std::abs(genbbar->pt()-bbar->pt()) > std::abs(genb->pt()-bbar->pt())+std::abs(genbbar->pt()-b->pt())){ 
+    if(deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) > deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi())){
       bY=bbar->rapidity(); 
       bbarY=b->rapidity();
       bpt=bbar->pt(); 
@@ -247,6 +253,14 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bqEtaClosestPt_->Fill( genbbar->eta()     , bbareta, weight);
     bqYClosestPt_  ->Fill( genb->rapidity()   , bY     , weight);
     bqYClosestPt_  ->Fill( genbbar->rapidity(), bbarY  , weight);
+    if(valueBqPtGen>0&&valueBbarqPtGen>0&&verbose>1){ 
+      std::cout << "XXXXXXXXXXXX correlation filling XXXXXXXXXXXXXXXXX" << std::endl;
+      std::cout << "b(pt, eta)=(" << valueBqPtGen << "." << valueBqEtaGen << ")" << std::endl;
+      std::cout << "bbar(pt, eta)=(" << valueBbarqPtGen << "." << valueBbarqEtaGen << ")" << std::endl;
+    }
+
+
+
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
 
