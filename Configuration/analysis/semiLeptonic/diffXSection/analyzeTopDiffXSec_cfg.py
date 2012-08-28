@@ -1184,8 +1184,8 @@ process.bjetGenJetsRaw=process.selectedGenJets.clone(
     #genJet = cms.InputTag("ak5GenJets"),
     BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
     AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex"),
-    pt =cms.double(0.),
-    eta=cms.double(9999.)                          
+    pt =cms.double(10.),
+    eta=cms.double(5.0)                          
     )
 
 process.bjetGenJets=process.selectedGenJets.clone(
@@ -1221,11 +1221,11 @@ process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKin
 process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
 process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.genJets = cms.InputTag("bjetGenJets")
 
-process.analyzeTopRecoKinematicsBjets.genJets = cms.InputTag('ak5GenJets','','HLT')
-process.analyzeTopRecoKinematicsBjets.bJetCollection = cms.bool(False)
-process.analyzeTopRecoKinematicsBjets.BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    )
-process.analyzeTopRecoKinematicsBjets.AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex")
-
+#process.analyzeTopRecoKinematicsBjets.genJets = cms.InputTag('ak5GenJets','','HLT')
+#process.analyzeTopRecoKinematicsBjets.bJetCollection = cms.bool(False)
+#process.analyzeTopRecoKinematicsBjets.BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    )
+#process.analyzeTopRecoKinematicsBjets.AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex")
+#
 # b gen jet selection
 process.bGenJetSelection    = process.leadingGenJetSelection.clone (src = 'bjetGenJets'   , minNumber = 2)
 process.bGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = 'bjetGenJetsRaw', minNumber = 2)
