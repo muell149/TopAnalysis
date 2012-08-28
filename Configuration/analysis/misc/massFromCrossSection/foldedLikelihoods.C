@@ -33,6 +33,10 @@ enum PdfType { kMSTW, kHERA, kABM, kNNPDF };
 
 const double mZ=91.1876;
 
+const bool moch_highE=false;
+
+const TString figDir = (moch_highE ? "figures" : "figures_mocOff");
+
 double alpha_s(const double Q, const double lambda_MSbar=0.213, const unsigned Nf = 5)
 {
   //
@@ -197,12 +201,15 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
   TString fileName = "theories_7TeV/" + name;
   fileName += (pole ? "_pole" : "_msbar");
   switch (pdfType) {
-  case kMSTW : fileName += "_mstw.tab" ; break;
-  case kHERA : fileName += "_hera.tab" ; break;
-  case kABM  : fileName += "_abm.tab"  ; break;
-  case kNNPDF: fileName += "_nnpdf.tab"; break;
+  case kMSTW : fileName += "_mstw" ; break;
+  case kHERA : fileName += "_hera" ; break;
+  case kABM  : fileName += "_abm"  ; break;
+  case kNNPDF: fileName += "_nnpdf"; break;
   default    : std::cout << "PdfType (" << pdfType << ") not supported!" << std::endl; abort();
   }
+  if(name=="moch" && !moch_highE)
+    fileName += "_off";
+  fileName += ".tab";
   
   ifstream in;
   in.open(fileName);
@@ -255,7 +262,7 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
 
 TString epsString(const TString& label, const bool pole, const PdfType pdfType)
 {
-  TString name = "figures/"+label;
+  TString name = figDir+"/"+label;
   name += (pole ? "_pole" : "_MSbar");
   switch (pdfType) {
   case kMSTW : name += "_mstw" ; break;
@@ -560,9 +567,9 @@ int foldedLikelihoods(const bool pole)
   RooAbsReal::defaultIntegratorConfig()->getConfigSection("RooIntegrator1D").setCatLabel("sumRule", "Midpoint");
   RooAbsReal::defaultIntegratorConfig()->methodND().setLabel("RooMCIntegrator");
 
-  gSystem->mkdir("figures");
+  gSystem->mkdir(figDir);
 
-  TString printNameBase = "figures/foldedLikelihoods";
+  TString printNameBase = figDir+"/foldedLikelihoods";
   printNameBase += (pole ? "_pole" : "_MSbar");
 
   TCanvas* canvas = new TCanvas("canvas", "canvas", 10, 10, 900, 600);
@@ -575,7 +582,7 @@ int foldedLikelihoods(const bool pole)
     gStyle->SetOptTitle(1);
     runningAlpha->Draw("AP");
     canvas->Print(printNameBase+".ps");
-    canvas->Print("figures/alpha_s.eps");
+    canvas->Print(figDir+"/alpha_s.eps");
     gStyle->SetOptTitle(0);
   }
 
@@ -585,7 +592,7 @@ int foldedLikelihoods(const bool pole)
     mShift->Draw("AP");
     mShift->Fit("pol1", "Q");
     canvas->Print(printNameBase+".ps");
-    canvas->Print("figures/MSbar_vs_pole_mass.eps");
+    canvas->Print(figDir+"/MSbar_vs_pole_mass.eps");
   }
 
   //////////////////////////////////////
@@ -667,7 +674,7 @@ int foldedLikelihoods(const bool pole)
   std::vector<TF1*> mit_funcs[nPdfSets][4];
 
   const TString pdfName [4] = {"MSTW2008", "HERAPDF1.5", "ABM11", "NNPDF2.1"};
-  const TString theoName[nTheories] = {"HATHOR 1.2", "Top++ 1.2"};
+  const TString theoName[nTheories] = {"HATHOR 1.3", "Top++ 1.3"};
 
   TString theoTitle[nPdfSets][nTheories];
   for(unsigned h=0; h<nPdfSets; h++)
@@ -776,7 +783,7 @@ int foldedLikelihoods(const bool pole)
   RooRealVar measXSec("measXSec", "measXSec", 161.9, "pb");
   RooRealVar measXSecErr("measXSecErr", "measXSecErr", 6.725, "pb");
 
-  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "(@0*@1)*(1+0.01*(@2-0.1180)/0.0100)",
+  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "(@0*@1)*(1+0.000*(@2-0.1180)/0.0100)",
 				RooArgSet(measXSecMassDepRel,measXSec,alpha));
   RooFormulaVar measXSecMassDepErr("measXSecMassDepErr", "measXSecMassDepErr",
 				   "TMath::Sqrt(TMath::Power((@0/@1)*@2,2)+TMath::Power((@0/@1)*@2*(1+0.01*TMath::Abs((@3-0.1180)/0.0100)),2))",
@@ -807,8 +814,14 @@ int foldedLikelihoods(const bool pole)
     case kNNPDF: alphaFileName += "nnpdf"; suf += "NNPDF"; break;
     }
 
-    TFile mitAlphaFile("theories_7TeV/mitov_"+alphaFileName+"_alphaDep.root", "READ");
-    TFile mocAlphaFile("theories_7TeV/moch_" +alphaFileName+"_alphaDep.root", "READ");
+    TString alphaFileNameMit = "theories_7TeV/mitov_"+alphaFileName+"_alphaDep.root";
+    TString alphaFileNameMoc = "theories_7TeV/moch_" +alphaFileName;
+    if(!moch_highE)
+      alphaFileNameMoc += "_off";
+    alphaFileNameMoc += "_alphaDep.root";
+
+    TFile mitAlphaFile(alphaFileNameMit, "READ");
+    TFile mocAlphaFile(alphaFileNameMoc, "READ");
     
     mitPredXSec[h] = new PredXSec("mit"+suf, xsec, mass, alpha, mit[h]->GetFunction("f1"), mit_funcs[h],
 				  mitAlphaFile, defaultAlphas.at(h));
@@ -1003,7 +1016,7 @@ int foldedLikelihoods(const bool pole)
   mocResult[kNNPDF]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, 3, 2*3+0.2);
   mitResult[kNNPDF]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, 3, 2*3+0.8);
 
-  mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1115, 0.1265);
+  mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1095, 0.1265);
   mocSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
   mocSummaryGraphTotErr.GetYaxis()->SetRangeUser(-1, nSummaryPoints+3);
   mocSummaryGraphTotErr.GetYaxis()->SetNdivisions(0);
@@ -1071,16 +1084,25 @@ int foldedLikelihoods(const bool pole)
   TLine lineAlphaABM(alphaABM_mean.getVal(), -0.1,
 		     alphaABM_mean.getVal(),  1.1);
   lineAlphaABM.SetLineStyle(3);
-  TText textAlphaABM(alphaABM_mean.getVal()+alphaABM_unc.getVal()+0.0004, 0.5, "ABM11");
+  TText textAlphaABM(0.1102, 0.5, "ABM11");
   textAlphaABM.SetTextFont(43);
   textAlphaABM.SetTextSizePixels(26);
   textAlphaABM.SetTextAlign(12);
 
-  TLegend summaryLeg = TLegend(0.1, 0.75, 0.25, 0.9);
+  double yLeft = 0.10;
+  double yRight = 0.25;
+  if(!moch_highE) {
+    yLeft = 0.05;
+    yRight = 0.48;
+  }
+  TLegend summaryLeg = TLegend(yLeft, 0.75, yRight, 0.9);
   summaryLeg.SetFillStyle(0);
   summaryLeg.SetBorderSize(0);
   summaryLeg.AddEntry(&mitSummaryGraphTotErr, theoName[1], "PL");
-  summaryLeg.AddEntry(&mocSummaryGraphTotErr, theoName[0], "PL");
+  if(!moch_highE)
+    summaryLeg.AddEntry(&mocSummaryGraphTotErr, theoName[0]+" w/o high-energy approx.", "PL");
+  else
+    summaryLeg.AddEntry(&mocSummaryGraphTotErr, theoName[0], "PL");
 
   const double oldPadLeftMargin = gPad->GetLeftMargin();
   const double oldPadTopMargin  = gPad->GetTopMargin();
