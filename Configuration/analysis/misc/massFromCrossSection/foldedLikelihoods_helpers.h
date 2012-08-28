@@ -12,7 +12,7 @@ getMaxAndUncertaintiesFromIntegral(TF1* f1, double &lowErr, double& higErr,
   double* params = 0;
   const double max = f1->GetMaximumX();
   const double fullIntegral = f1->Integral(xMin, xMax, params, precision);
-  std::cout << "Maximum: " << max << " GeV" << std::endl;
+  std::cout << "Maximum: " << max << std::endl;
   std::cout << "Integral from " << xMin << " to " << xMax << ": " << fullIntegral
 	    << " (deviation from unity will be used to rescale integrals calculated in the following)" << std::endl;
   if(fullIntegral < 0.97 || fullIntegral > 1.03) {
