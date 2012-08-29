@@ -241,7 +241,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     nuEtaFit  =semiLepEvt_h->singleNeutrino(hypoKey_)->eta();
     nuPhiFit  =semiLepEvt_h->singleNeutrino(hypoKey_)->phi();
   }
-  if( semiLepEvt_h.isValid()&&semiLepEvt_h->genEvent().isAvailable() ){
+  if( semiLepEvt_h.isValid()&&semiLepEvt_h->singleLepton()&&semiLepEvt_h->singleNeutrino() ){
     lepPtTrue =semiLepEvt_h->singleLepton()->pt();
     lepEtaTrue=semiLepEvt_h->singleLepton()->eta();
     lepPhiTrue=semiLepEvt_h->singleLepton()->phi();

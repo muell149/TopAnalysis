@@ -1341,6 +1341,7 @@ if(applyKinFit==True):
         ## case 1b): other MC
         else:
             process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                             process.compositedKinematicsTagged              +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
                                              process.filterProbKinFit                        +
@@ -1354,6 +1355,7 @@ if(applyKinFit==True):
     ## case 2: data sample
     elif(runningOnData=="data"):
         process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+                                         process.compositedKinematicsTagged              +
                                          process.filterRecoKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
                                          process.filterProbKinFit                        +
