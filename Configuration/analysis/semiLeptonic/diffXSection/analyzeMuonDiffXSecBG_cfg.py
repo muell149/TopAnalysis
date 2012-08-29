@@ -19,8 +19,5 @@ execfile("analyzeMuonDiffXSecCorrected_cfg.py")
 ## reduce output
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
-## change number of processed events
-process.maxEvents.input = 100
-
 ## change output name 
 #process.TFileService.fileName = 'analyzeMuonDiffXSecCorr_testBkg.root'
