@@ -528,6 +528,7 @@ namespace semileptonic {
     return outputInt;
   }
 
+
   TString getTStringFromInt(int i)
   {
     // function to convert an int "i" to
@@ -537,6 +538,22 @@ namespace semileptonic {
     // used enumerators: NONE
     char result[20];
     sprintf(result, "%i", i);
+    return (TString)result;
+  }
+
+  TString getTStringFromDouble(double d, int precision=2)
+  {
+    // function to convert an double "d" to
+    // a TString and return this one
+    // precision: number of digits to be considered
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: NONE
+    TString conv="%.";
+    conv+=getTStringFromInt(precision);
+    conv+="f";
+    char result[30];
+    sprintf(result, conv, d);
     return (TString)result;
   }
 
