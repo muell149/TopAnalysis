@@ -1450,9 +1450,9 @@ process.eventWeightDileptonModelVariation.maxWeight = cms.double(100)  #high cut
 process.eventWeightDileptonModelVariation.landauMPV = cms.double(420)
 process.eventWeightDileptonModelVariation.landauSigma = cms.double(34)
 if(sysDistort=='up'):
-    process.eventWeightDileptonModelVariation.landauMoveX = cms.double(100)
+    process.eventWeightDileptonModelVariation.slope = cms.double(0.03)
 if(sysDistort=='down'):
-    process.eventWeightDileptonModelVariation.landauMoveX = cms.double(-100)
+    process.eventWeightDileptonModelVariation.slope = cms.double(-0.03)
 # multiply with PU weight
 eventWeightDileptonModelVariation=cms.InputTag("eventWeightDileptonModelVariation")
 weightlistDistortPU=cms.VInputTag()
