@@ -699,6 +699,16 @@ if [ $decayChannel == \"combined\" ]; then
     root -l -q -b './createTheoryDataRatios.C++('$extrapolate', '$hadron', '$verbose')'
 fi
 
+
+#### ===================================================
+####  Create latex code result tables for final xSecs 
+#### ===================================================
+if [ $decayChannel == \"combined\" ]; then
+    echo ""
+    echo " Processing .... makeResultTables($decayChannel, $extrapolate, $hadron, $inclCCVars)"
+    root -l -q -b './makeResultTables.C++('$decayChannel', '$extrapolate', '$hadron', '$inclCCVars')'
+fi
+
 #### ==========================================
 
 echo ""
