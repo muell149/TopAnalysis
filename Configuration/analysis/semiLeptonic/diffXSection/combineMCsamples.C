@@ -13,7 +13,7 @@ using std::make_pair;
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose);
 void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName, TString outputFolder);
 
-void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalyisRun", TString outputFolder="") {
+void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun", TString outputFolder="") {
   // ---
   //    list all of all subsamples to be combined 
   // ---
