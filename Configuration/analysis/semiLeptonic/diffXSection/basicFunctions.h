@@ -835,7 +835,7 @@ namespace semileptonic {
     }
     else if(sample==kSAToptW){
       crossSection= 7.87;
-      Nevents     = 783536;//785246;
+      Nevents     = 808200;//809984;
       // scale variation
       if(kSys==sysTopScaleUp  ) Nevents =436750;//437798;
       if(kSys==sysTopScaleDown) Nevents =437007;//437863;
