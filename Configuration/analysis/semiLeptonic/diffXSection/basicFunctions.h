@@ -53,7 +53,7 @@ namespace semileptonic {
   // basic variables
  
   TString xSecVariables[]     = {"topPt",     "topY",     "ttbarPt",     "ttbarY",     "ttbarMass",     "lepPt" ,    "lepEta",     "bqPt",     "bqEta"    };
-  TString xSecVariablesNorm[] = {"topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"};
+  TString xSecVariablesNorm[] = {"topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"}; 
   TString xSecVariablesIncl[] = {"inclusive"};
 
   TString xSecLabel[] = {"p_{T}^{t and #bar{t}}/[GeV]" ,"y^{t and #bar{t}}/ ",
@@ -3595,15 +3595,15 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 1.50 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 1.32 : 2.49955;
 		// New Binning Revision
-		if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.65 : 3.65;
-		else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.65 : 3.65;
-		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.47 : 2.47; 
-		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.07 : 3.07;
-		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.29 : 1.29;
-		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.86 : (hadronPS) ? 2.29   : 2.86;
-		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.52 : (hadronPS) ? 1e-5   : 1.52; 
-		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.61 : (hadronPS) ? 4.01   : 3.61; 
-		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.22 : (hadronPS) ? 4.03   : 4.22; 
+		if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.67 : 3.67;
+		else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.70 : 3.70;
+		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.44 : 2.44; 
+		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.09 : 3.09;
+		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.26 : 1.26;
+		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.88 : (hadronPS) ? 2.31  : 2.88;
+		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.53 : (hadronPS) ? 1e-5  : 1.53; 
+		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.64 : (hadronPS) ? 3.06  : 3.64; 
+		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.24 : (hadronPS) ? 3.94  : 4.24; 
             }
 	    else if (decayChannel.Contains("electron")){
 		
@@ -3614,15 +3614,15 @@ namespace semileptonic {
 		//else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.11527;
 		//else if(variable == "ttbarMass") k = (fullPS) ? 3.40 : 2.49955;
 		// New Binning Revision
-	        if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.52 : 3.52;
-		else if(variable.Contains("topY")     ) k = (fullPS) ? 3.20 : 3.20;
-		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.10 : 2.10; 
-		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.71 : 2.71;
-		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.3 : 1.3;
-		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.65 : (hadronPS) ? 2.32   : 2.65;
-		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.06 : (hadronPS) ? 1e-5   : 1.06; 
-		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.47 : (hadronPS) ? 3.73   : 3.47; 
-		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.76 : (hadronPS) ? 3.52   : 3.76; 
+	        if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.57 : 3.57;
+		else if(variable.Contains("topY")     ) k = (fullPS) ? 3.24 : 3.24;
+		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.11 : 2.11; 
+		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.72 : 2.72;
+		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.31 : 1.31;
+		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.66 : (hadronPS) ? 2.32   : 2.66;
+		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.07 : (hadronPS) ? 1e-5   : 1.07; 
+		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.52 : (hadronPS) ? 2.86   : 3.52; 
+		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.78 : (hadronPS) ? 3.44   : 3.78; 
             }
 	}
 	else{
