@@ -8,7 +8,7 @@ double linSF(const double x, const double xmax, const double a, const double b);
 void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayChannel="electron", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
 				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-                                    bool doPDFuncertainty=true)
+                                    bool doPDFuncertainty=true, bool addCrossCheckVariables=false)
 {
   // ---
   //     Configuration
@@ -64,6 +64,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
   std::vector<TString> variable_;
   TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta"};
   variable_.insert( variable_.begin(), variable, variable + sizeof(variable)/sizeof(TString) );
+  if (addCrossCheckVariables) variable_.insert(variable_.end(),   xSecVariablesCCVar,  xSecVariablesCCVar + sizeof( xSecVariablesCCVar)/sizeof(TString));
   // container for values read from tree
   std::map< TString, float > value_;
   // container for original and shape distorted

@@ -412,7 +412,7 @@ echo "Part PDF: Prepare files for pdf uncertainties"
 
 if [ $decayChannel != \"combined\" -a $redoSystematics = true ]; then
     echo
-    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true')' 
+    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true', '$inclCCVars')' 
 else
     echo "Done for 2011 analysis in e/mu channel separate and if systematics are requested to be re-done (redoSystematics set to $redoSystematics)."
 fi
@@ -430,7 +430,7 @@ if [ $shapeVar = true -a $redoSystematics = true ]; then
     if [ $decayChannel != \"combined\" ]; then
 	
 	echo "will be done"
-	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'false')'
+	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'false', '$inclCCVars')'
     else
 	echo "only done for 2011 analysis in e/mu channel separate"
     fi
