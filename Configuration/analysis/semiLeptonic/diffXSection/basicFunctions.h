@@ -620,11 +620,11 @@ namespace semileptonic {
 
     if (cmsprelim)
       {
-	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s} = 7 TeV",luminosity/1000));
       }
     else
       {
-	label -> AddText(Form("CMS, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS, %2.1f fb^{-1} at #sqrt{s} = 7 TeV",luminosity/1000));
       }
 
     label->SetFillStyle(0);
@@ -3436,7 +3436,8 @@ namespace semileptonic {
 	ErrorDown->Smooth(errorSmoothFactor);
       }
       // create errorbands
-      TGraphAsymmErrors *errorBands = new TGraphAsymmErrors(central2->GetNbinsX()-1);
+      const int constNBINS = central2->GetNbinsX();
+      TGraphAsymmErrors *errorBands = new TGraphAsymmErrors(constNBINS);      
       TString errorBandName=name;
       errorBandName.ReplaceAll("MC@NLO2","MC@NLO");
       errorBandName+="errorBand";
@@ -3444,7 +3445,7 @@ namespace semileptonic {
       errorBands->SetName(errorBandName);
       errorBands->SetTitle(errorBandName);
       // loop bins
-      for(Int_t iBin=1; iBin<central2->GetNbinsX(); iBin++){
+      for(Int_t iBin=1; iBin<=constNBINS; iBin++){
 	Double_t centralVal = central  ->GetBinContent(iBin);
 	Double_t maxVal     = ErrorUp  ->GetBinContent(iBin);
 	Double_t minVal     = ErrorDown->GetBinContent(iBin);
@@ -3635,12 +3636,12 @@ namespace semileptonic {
 	    //else if(variable == "ttbarY")    k =  8;
 	    //else if(variable == "ttbarMass") k =  5;
 	    // New Binning
-	    if     (variable.Contains("topPt")    ) k =  8;
+	    if     (variable.Contains("topPt")    ) k =  7;
 	    else if(variable.Contains("topY")     ) k = 10;
 	    else if(variable.Contains("ttbarPt")  ) k =  6;
 	    else if(variable.Contains("ttbarY")   ) k = 10;
-	    else if(variable.Contains("ttbarMass")) k =  8;
-	    else if(variable.Contains("lepPt")    ) k = 13;
+	    else if(variable.Contains("ttbarMass")) k =  7;
+	    else if(variable.Contains("lepPt")    ) k = 11;
 	    else if(variable.Contains("lepEta")   ) k = 14;
 	    else if(variable.Contains("bqPt")     ) k =  5;
 	    else if(variable.Contains("bqEta")    ) k =  8;
