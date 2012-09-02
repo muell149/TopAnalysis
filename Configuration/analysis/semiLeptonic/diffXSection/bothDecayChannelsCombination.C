@@ -773,18 +773,22 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph Reweighted", "L");
 	  if(zprime!=""     &&sys==sysNo) leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
 	  
-	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.30);
+	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.33);
 	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05 * (double)(leg->GetNRows()));
 	  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	  
 	  //}
 
+	  // h) Plotting, legend and additional labels
+
 	  plotCombination->Draw("e X0 same"); 
 	  leg->Draw("same");  
 	  gPad->RedrawAxis(); 
 	  DrawCMSLabels(false,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
+	  if(DrawNNLOPlot&&extrapolate&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm")))
+	    DrawLabel("(Kidonakis + MSTW2008)", leg->GetX1NDC()+0.07, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
 	  
