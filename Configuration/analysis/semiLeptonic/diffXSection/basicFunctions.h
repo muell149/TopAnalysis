@@ -56,10 +56,10 @@ namespace semileptonic {
   TString xSecVariablesNorm[] = {"topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"}; 
   TString xSecVariablesIncl[] = {"inclusive"};
 
-  TString xSecLabel[] = {"p_{T}^{t and #bar{t}}/[GeV]" ,"y^{t and #bar{t}}/ ",
+  TString xSecLabel[] = {"p_{T}^{t}/[GeV]" ,"y^{t}/ ",
 			 "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", 
-			 "p_{T}^{l^{+} and l^{-}}/[GeV]", "#eta^{l^{+} and l^{-}}/ ", 
-			 "p_{T}^{b and #bar{b}}/[GeV]", "#eta^{b and #bar{b}}/ "};
+			 "p_{T}^{l}/[GeV]", "#eta^{l}/ ", 
+			 "p_{T}^{b}/[GeV]", "#eta^{b}/ "};
 
   // cross-check variables
  
@@ -1688,7 +1688,7 @@ namespace semileptonic {
       bins_.clear();
 
       // pt(ttbar)
-      double ttbarPtBins[]={0.0, 20.0, 45.0, 75.0, 120.0, 190.0, 300.0};
+      double ttbarPtBins[]={0.0, 19.0, 45.0, 75.0, 120.0, 190.0, 300.0};
       // PAS binning: double ttbarPtBins[]={0., 20., 60., 110., 200., 300.}; // PAS Binning
       bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
       result["ttbarPt"]=bins_;
@@ -2154,21 +2154,21 @@ namespace semileptonic {
     // used functions: none
     // used enumerators: none
 
-    if     (variable == "topPt"      ) return "p_{T}^{t and #bar{t}} #left[GeV#right]";
+    if     (variable == "topPt"      ) return "p_{T}^{t} #left[GeV#right]";
     else if(variable == "topPtPlus"  ) return "p_{T}^{t} #left[GeV#right]";
     else if(variable == "topPtMinus" ) return "p_{T}^{#bar{t}} #left[GeV#right]";
-    else if(variable == "topY"       ) return "y^{t and #bar{t}}";
+    else if(variable == "topY"       ) return "y^{t}";
     else if(variable == "topYPlus"   ) return "y^{t}";
     else if(variable == "topYMinus"  ) return "y^{#bar{t}}";
     else if(variable == "ttbarPt"    ) return "p_{T}^{t#bar{t}} #left[GeV#right]";
     else if(variable == "ttbarY"     ) return "y^{t#bar{t}}";
     else if(variable == "ttbarMass"  ) return "m_{t#bar{t}} #left[GeV#right]";
-    else if(variable == "lepPt"      ) return "p_{T}^{l^{+} and l^{-}} #left[GeV#right]";
-    else if(variable == "lepEta"     ) return "#eta^{l^{+} and l^{-}}"; 
+    else if(variable == "lepPt"      ) return "p_{T}^{l} #left[GeV#right]";
+    else if(variable == "lepEta"     ) return "#eta^{l}"; 
     else if(variable == "lepEtaPlus" ) return "#eta^{l^{+}}";
     else if(variable == "lepEtaMinus") return "#eta^{l^{-}}";
-    else if(variable == "bqPt"       ) return "p_{T}^{b and #bar{b}} #left[GeV#right]";
-    else if(variable == "bqEta"      ) return "#eta^{b and #bar{b}}";
+    else if(variable == "bqPt"       ) return "p_{T}^{b} #left[GeV#right]";
+    else if(variable == "bqEta"      ) return "#eta^{b}";
     else return "Default Label for variable "+variable;
   }
 
@@ -2811,77 +2811,77 @@ namespace semileptonic {
 	  addOptC="LL";
 	}
       }
-      else if(plotname.Contains("ttbarPt")){
-	//tail:
-	fitLowEdge=50.;
-	fitHighEdge=300.;
-	def="[0]*exp([1]*x)+[2]*x+[3]*x*x+[4]";
-	a= 5180.*largeSampleSF;
-	b=-0.03;
-	c=-4.48;
-	d= 0.007;
-	e= 745.5;
-	addOpt="LL";
-      }
-      else if(plotname.Contains("topY")){
-	//tail:
-	if(!largeSample){
-	  fitLowEdge=-1.;
-	  fitHighEdge=1.;
-	  def="[0]*TMath::Gaus(x,0,[1])";
-	  a=19845.2;
-	  b=1.09186;
-	  addOpt="LL";
-	}
-      }
-      else if(plotname.Contains("ttbarY")){
-	if(!largeSample){
-	  fitLowEdge=-1.5;
-	  fitHighEdge=1.5;
-	  def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
-	  a=-0.658848;
-	  b=-0.0509368;
-	  c=-0.0320204;
-	  d=12297.7;
-	  addOpt="LL";
-	}
-      }
-      else if(plotname.Contains("lepPt")){
-	// head
-	fitLowEdge = 30.;
-	fitHighEdge= 58.;
-	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	a=(largeSample ?  5.53215e-02 :  4.26320e-02);
-	b=(largeSample ? -1.36559e-03 : -1.11187e-03);
-	c=(largeSample ?  7.65236e-06 :  6.03412e-06);
-	d=(largeSample ?  6.78192e+04 :  4.84434e+03);
-	// tail
-	fitLowEdgeB =57.;
-	fitHighEdgeB=210.;
-	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	aB=(largeSample ? -2.03019e-02 : -1.39410e-02);
-	bB=(largeSample ? -9.19906e-05 : -1.49428e-04);
-	cB=(largeSample ?  2.63030e-07 :  4.11490e-07);
-	dB=(largeSample ?  3.18800e+05 :  1.51488e+04);
-      }
-      else if(plotname.Contains("bqPt")){
-	// head
-	fitLowEdge =30.0;
-	fitHighEdge=93.0;
-	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	a= 8.46734e-02;
-	b=-1.22843e-03;
-	c= 4.96488e-06*largeSampleSF;
-	d= 1.03112e+03;
-	// tail
-	fitLowEdgeB = 92.0;
-	fitHighEdgeB=410.0;
-	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
-	aB=-1.74611e-02;
-	bB=-3.82167e-05;
-	cB= 8.20966e-08;
-	dB= 2.31613e+04;
-      }
+/*       else if(plotname.Contains("ttbarPt")){ */
+/* 	//tail: */
+/* 	fitLowEdge=50.; */
+/* 	fitHighEdge=300.; */
+/* 	def="[0]*exp([1]*x)+[2]*x+[3]*x*x+[4]"; */
+/* 	a= 5180.*largeSampleSF; */
+/* 	b=-0.03; */
+/* 	c=-4.48; */
+/* 	d= 0.007; */
+/* 	e= 745.5; */
+/* 	addOpt="LL"; */
+/*       } */
+/*       else if(plotname.Contains("topY")){ */
+/* 	//tail: */
+/* 	if(!largeSample){ */
+/* 	  fitLowEdge=-1.; */
+/* 	  fitHighEdge=1.; */
+/* 	  def="[0]*TMath::Gaus(x,0,[1])"; */
+/* 	  a=19845.2; */
+/* 	  b=1.09186; */
+/* 	  addOpt="LL"; */
+/* 	} */
+/*       } */
+/*       else if(plotname.Contains("ttbarY")){ */
+/* 	if(!largeSample){ */
+/* 	  fitLowEdge=-1.5; */
+/* 	  fitHighEdge=1.5; */
+/* 	  def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]"; */
+/* 	  a=-0.658848; */
+/* 	  b=-0.0509368; */
+/* 	  c=-0.0320204; */
+/* 	  d=12297.7; */
+/* 	  addOpt="LL"; */
+/* 	} */
+/*       } */
+/*       else if(plotname.Contains("lepPt")){ */
+/* 	// head */
+/* 	fitLowEdge = 30.; */
+/* 	fitHighEdge= 58.; */
+/* 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
+/* 	a=(largeSample ?  5.53215e-02 :  4.26320e-02); */
+/* 	b=(largeSample ? -1.36559e-03 : -1.11187e-03); */
+/* 	c=(largeSample ?  7.65236e-06 :  6.03412e-06); */
+/* 	d=(largeSample ?  6.78192e+04 :  4.84434e+03); */
+/* 	// tail */
+/* 	fitLowEdgeB =57.; */
+/* 	fitHighEdgeB=210.; */
+/* 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
+/* 	aB=(largeSample ? -2.03019e-02 : -1.39410e-02); */
+/* 	bB=(largeSample ? -9.19906e-05 : -1.49428e-04); */
+/* 	cB=(largeSample ?  2.63030e-07 :  4.11490e-07); */
+/* 	dB=(largeSample ?  3.18800e+05 :  1.51488e+04); */
+/*       } */
+/*       else if(plotname.Contains("bqPt")){ */
+/* 	// head */
+/* 	fitLowEdge =30.0; */
+/* 	fitHighEdge=93.0; */
+/* 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
+/* 	a= 8.46734e-02; */
+/* 	b=-1.22843e-03; */
+/* 	c= 4.96488e-06*largeSampleSF; */
+/* 	d= 1.03112e+03; */
+/* 	// tail */
+/* 	fitLowEdgeB = 92.0; */
+/* 	fitHighEdgeB=410.0; */
+/* 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
+/* 	aB=-1.74611e-02; */
+/* 	bB=-3.82167e-05; */
+/* 	cB= 8.20966e-08; */
+/* 	dB= 2.31613e+04; */
+/*       } */
     }
     else if(model=="powheg"){
       if(plotname.Contains("ttbarMass")){
