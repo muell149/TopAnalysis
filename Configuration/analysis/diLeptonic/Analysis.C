@@ -771,7 +771,7 @@ Bool_t Analysis::Process(Long64_t entry)
   double btagSF_Up = 1.0, btagSF_Down = 1.0;//Normalization unceratinty SF
   btagSF = 1.0;
   //only for NON data samples
-  if(MCSample->find("run2011") == string::npos){
+  if(MCSample->find("run201") == string::npos){
     //Only for events passing our selection criteria
     if(lepton_>1 && dimass>12.0 && NLeadLeptonNumber!=0 && jet_>1 && BJetIndex.size()>0 && HypTop_){
         if ((int) LVjet.size()!=(int) jet_ || (int) LVjet.size()!=(int) (*jetBTagCSV).size() || (int) jet_!=(int) (*jetBTagCSV).size()){
