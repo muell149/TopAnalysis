@@ -3,10 +3,10 @@
 void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  const std::string decayChannel = "electron", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  const std::string decayChannel = "combined", 
+				  bool withRatioPlot = false, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set Root Style
@@ -458,8 +458,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, in
     "Number of Vertices (Reweighted sysUp);Frequency;0;1", 
     "Number of Vertices (Reweighted sysDown);Frequency;0;1", 
     // (III) after kinematic fit 
-    "p_{T}^{t and #bar{t}} #left[GeV#right];top quarks;0;20",
-    "y^{t and #bar{t}};top quarks;0;1",
+    "p_{T}^{t} #left[GeV#right];top quarks;0;20",
+    "y^{t};top quarks;0;1",
     "p_{T}^{t#bar{t}} #left[GeV#right];top-quark pairs;0;20",
     "y^{t#bar{t}};top-quark pairs;0;1",
     "m^{t#bar{t}} #left[GeV#right];top-quark pairs;0;20",
@@ -467,8 +467,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, in
     "#eta^{l};N^{l};0;1",
     "p_{T}^{q} #left[GeV#right];N^{q};0;20",    
     "#eta^{q};N^{q};0;1",
-    "p_{T}^{b and #bar{b}} #left[GeV#right];N^{b and #bar{b}};0;20",    
-    "#eta^{b and #bar{b}};N^{b and #bar{b}};0;1",
+    "p_{T}^{b} #left[GeV#right];N^{b and #bar{b}};0;20",    
+    "#eta^{b};N^{b and #bar{b}};0;1",
     "#eta^{l+};N^{l+};0;1",
     "#eta^{l-};N^{l-};0;1",
     "#eta^{t+};N^{t+};0;1",
@@ -743,6 +743,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, in
 	histogramStyle(*histo_[plotList_[plot]][sample], sample, true);
 	// Special configurations
 	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample] -> SetNdivisions(816);
+	if(plotList_[plot].Contains("tightJetKinematics")&&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->SetNdivisions(010);
+	if(plotList_[plot].Contains("Njets")&&plotList_[plot].Contains("compositedKinematics")) histo_[plotList_[plot]][sample]->SetNdivisions(010);
 	// set QCD to 0
 	if(setQCDtoZero&&sample==kQCD&&(plotList_[plot].Contains("Tagged")||plotList_[plot].Contains("analyzeTopReco"))) histo_[plotList_[plot]][sample]->Scale(0.);
       }
@@ -1109,7 +1111,17 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=1.6E03;}
 	    }
 	    // axis style
-	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"), min, max);
+	    TString titleY=getStringEntry(axisLabel_[plot],2,";");
+	    if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||
+	       plotList_[plot].Contains("tightJetKinematicsTagged/pt"   )||
+	       plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")
+	       ){
+	      titleY+=" / "+getTStringFromInt(histo_[plotList_[plot]][sample]->GetBinWidth(1));
+	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))){
+		titleY+=" GeV";
+	      }
+	    }
+	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), titleY, min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 	    if(max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 	    else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
@@ -1127,7 +1139,7 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	      legTheo->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      legTheo->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	      if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")||plotList_[plot].Contains("compositedKinematicsKinFit/Njets"))legTheo->Draw("same");
-	    }
+    }
 	  }
 	  // draw other plots into same canvas 
 	  else{ 
