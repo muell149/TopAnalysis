@@ -540,10 +540,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     "#chi^{2} (best fit hypothesis)/events/0/10"                      ,
     "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
     // reconstructed top quantities
-    "m^{t and #bar{t}} #left[GeV#right]/#frac{dN}{dm^{t and #bar{t}}} #left[GeV^{-1}#right]/0/10",
-    xSecLabelName("topPt")+"/#frac{dN}{dp_{T}^{t and #bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
-    "#phi^{t and #bar{t}}/#frac{dN}{d#phi^{t and #bar{t}}}/0/4",
-    xSecLabelName("topY")+"/#frac{dN}{dy^{t and #bar{t}}}/0/1",//5"
+    "m^{t} #left[GeV#right]/#frac{dN}{dm^{t} #left[GeV^{-1}#right]/0/10",
+    xSecLabelName("topPt")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1", //20"
+    "#phi^{t}/#frac{dN}{d#phi^{t}}/0/4",
+    xSecLabelName("topY")+"/#frac{dN}{dy^{t}}/0/1",//5"
     "p_{T}(hadronic t) #left[GeV#right]/#frac{dN}{dp_{T}^{had. t}} #left[GeV^{-1}#right]/0/20",                         
     "#phi(hadronic t)/#frac{dN}{d#phi^{had. t}}/0/4",
     "y(hadronic t)/#frac{dN}{dy^{had. t}}/0/5"    ,
@@ -551,7 +551,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     "#phi(leptonic t)/#frac{dN}{d#phi^{lep. t}}/0/4",
     "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,    
     // generated top quantities
-    "m^{t and #bar{t}} parton truth #left[GeV#right]/events/0/10",
+    "m^{t} parton truth #left[GeV#right]/events/0/10",
     xSecLabelName("topPt")+" parton truth/events/0/1",//20"
     xSecLabelName("topPt")+" parton truth Phase Space/events/0/1",//20"
     "#phi(t) parton truth/events/0/4",
@@ -1712,7 +1712,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
       // =====================
       // particle
       TString particle="";
-      variable.Contains("ttbar") ? particle="t#bar{t}" : (variable.Contains("lep") ? particle="lepton" : (variable.Contains("top") ? particle="t and #bar{t}" : (variable.Contains("bq") ? particle="b and #bar{b}" : particle="unknown") ) );
+      variable.Contains("ttbar") ? particle="t#bar{t}" : (variable.Contains("lep") ? particle="lepton" : (variable.Contains("top") ? particle="t" : (variable.Contains("bq") ? particle="b" : particle="unknown") ) );
     
       TString particleTex=particle;
       particle.ReplaceAll("#","");
