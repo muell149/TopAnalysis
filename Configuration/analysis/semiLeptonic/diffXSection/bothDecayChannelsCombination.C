@@ -392,6 +392,12 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	      else if (plotName=="lepPt"         ) plotTheo->SetMaximum(0.03);
 	      else if (plotName=="bqPt"          ) plotTheo->SetMaximum(0.018);
 	    }
+	    // bq Pt should alwaye be log
+	    if (!pTPlotsLog && xSecVariables_[i].Contains("bqPt") ){
+	      plotTheo->SetMinimum(0.00001);
+	      plotTheo->SetMaximum(0.05);
+	      combicanvas->SetLogy(1); 
+	    }
 	    // adjust max
 	    if(plotName.Contains("lepEta")||plotName=="bqEta"||plotName.Contains("topY")||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
 	    
@@ -773,7 +779,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph Reweighted", "L");
 	  if(zprime!=""     &&sys==sysNo) leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
 	  
-	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.33);
+	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.30);
 	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05 * (double)(leg->GetNRows()));
 	  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
@@ -787,8 +793,9 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  gPad->RedrawAxis(); 
 	  DrawCMSLabels(false,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
-	  if(DrawNNLOPlot&&extrapolate&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm")))
-	    DrawLabel("(Kidonakis + MSTW2008)", leg->GetX1NDC()+0.07, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	  if(DrawNNLOPlot&&extrapolate)
+	    if (xSecVariables_[i].Contains("topPtNorm")) DrawLabel("(arXiv:1009.4935)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	    if (xSecVariables_[i].Contains("topYNorm"))  DrawLabel("(arXiv:1105.5167)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
 	  
