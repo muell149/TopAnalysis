@@ -743,7 +743,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, in
 	histogramStyle(*histo_[plotList_[plot]][sample], sample, true);
 	// Special configurations
 	if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample] -> SetNdivisions(816);
-	if(plotList_[plot].Contains("tightJetKinematics")&&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->SetNdivisions(010);
+	if(plotList_[plot].Contains("tightJetKinematics") &&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->SetNdivisions(010); 
+	if(plotList_[plot].Contains("bottomJetKinematics")&&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->SetNdivisions(010);
 	if(plotList_[plot].Contains("Njets")&&plotList_[plot].Contains("compositedKinematics")) histo_[plotList_[plot]][sample]->SetNdivisions(010);
 	// set QCD to 0
 	if(setQCDtoZero&&sample==kQCD&&(plotList_[plot].Contains("Tagged")||plotList_[plot].Contains("analyzeTopReco"))) histo_[plotList_[plot]][sample]->Scale(0.);
@@ -1081,7 +1082,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, in
 	    if(plotList_[plot].Contains("bqEta" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
 	    if(plotList_[plot].Contains("topPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,400.);
 	    if(plotList_[plot].Contains("topY"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
-	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.0,2.0);	
+	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);	
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/leadqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,400);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.4,2.4);
@@ -1090,7 +1091,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980, bool save = true, in
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarMass")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
 	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-80,80);
-if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-20,20);
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-20,20);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.001,0.001);
 	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqEta"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqEta"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
@@ -1114,12 +1115,12 @@ if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plot
 	    TString titleY=getStringEntry(axisLabel_[plot],2,";");
 	    if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||
 	       plotList_[plot].Contains("tightJetKinematicsTagged/pt"   )||
-	       plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")
-	       ){
-	      titleY+=" / "+getTStringFromInt(histo_[plotList_[plot]][sample]->GetBinWidth(1));
-	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))){
-		titleY+=" GeV";
-	      }
+	       plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")){
+	      
+	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt")))
+		titleY += Form(" / %d GeV",(int)histo_[plotList_[plot]][sample]->GetBinWidth(1));
+	      else 
+		titleY += Form(" / %2.1f",histo_[plotList_[plot]][sample]->GetBinWidth(1));
 	    }
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), titleY, min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
