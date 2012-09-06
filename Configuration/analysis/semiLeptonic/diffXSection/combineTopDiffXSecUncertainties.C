@@ -185,8 +185,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
       }
     }
   
-    //TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
-    TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PF.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
+    TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
+    //TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PF.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
 
     BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC,"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop,addCrossCheckVariables);
  	  
