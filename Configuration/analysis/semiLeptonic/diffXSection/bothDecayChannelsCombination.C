@@ -395,7 +395,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    // bq Pt should alwaye be log
 	    if (!pTPlotsLog && xSecVariables_[i].Contains("bqPt") ){
 	      plotTheo->SetMinimum(0.00001);
-	      plotTheo->SetMaximum(0.05);
+	      plotTheo->SetMaximum(0.1);
 	      combicanvas->SetLogy(1); 
 	    }
 	    // adjust max
@@ -436,7 +436,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    smoothcurves2=false;
 	  }
 	  
-	  // Adjust drawing paramters for theory curves
+	  // Adjust drawing parameters for theory curves
 	  if (normalize){
 	    smoothcurves2=smoothcurves;
 	  }
@@ -654,7 +654,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
 	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge.root";
-	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", smoothcurves2, LV);
+	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", DrawSmoothMadgraph2, LV);
 	  // j) re-draw binned MADGRAPH theory curve
 	  // load it from combined file
 	  TString plotNameMadgraph2=plotNameMadgraph;
