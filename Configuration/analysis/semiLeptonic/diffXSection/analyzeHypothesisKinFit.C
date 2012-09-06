@@ -540,7 +540,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
     "#chi^{2} (best fit hypothesis)/events/0/10"                      ,
     "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
     // reconstructed top quantities
-    "m^{t} #left[GeV#right]/#frac{dN}{dm^{t} #left[GeV^{-1}#right]/0/10",
+    "m^{t} #left[GeV#right]/#frac{dN}{dm^{t}} #left[GeV^{-1}#right]/0/10",
     xSecLabelName("topPt")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1", //20"
     "#phi^{t}/#frac{dN}{d#phi^{t}}/0/4",
     xSecLabelName("topY")+"/#frac{dN}{dy^{t}}/0/1",//5"
