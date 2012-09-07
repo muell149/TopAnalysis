@@ -519,11 +519,11 @@ namespace semileptonic {
 
     if (cmsprelim)
       {
-	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s} = 7 TeV",luminosity/1000));
       }
     else
       {
-	label -> AddText(Form("CMS, %2.1f fb^{-1} at #sqrt{s}=7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS, %2.1f fb^{-1} at #sqrt{s} = 7 TeV",luminosity/1000));
       }
 
     label->SetFillStyle(0);

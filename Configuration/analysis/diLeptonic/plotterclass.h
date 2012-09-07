@@ -64,6 +64,7 @@ class Plotter {
   void ApplyMCATNLOWeight(TH1* hist, TString Systematic, TString Shift, TString Sample);
   TLegend* ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> legends, TLegend *leg);
   TLegend* ControlLegend(int HistsSize, TH1D* drawhists[], std::vector<TString> Legends, TLegend *leg);
+  void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, int centering, double textSize);
  private:
   TString name;
   TString specialComment;
@@ -1910,6 +1911,17 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
   }
   drawhists[0]->GetXaxis()->SetNoExponent(kTRUE);
   TGaxis::SetMaxDigits(2);
+  //Removal of extra ticks in JetMult plots
+  if(name.Contains("jet") && name.Contains("Multi")){ drawhists[0]->GetXaxis()->SetNdivisions(drawhists[0]->GetNbinsX(),0,0, 1);}
+  //Add the binwidth to the yaxis in yield plots
+  TString ytitle = TString(drawhists[0]->GetYaxis()->GetTitle()).Copy();
+  double binwidth = drawhists[0]->GetXaxis()->GetBinWidth(1);
+  std::ostringstream width;
+  width<<binwidth;
+  if(name.Contains("Rapidity") || name.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
+  else if(name.Contains("pT") || name.Contains("Mass") || name.Contains("mass") || name.Contains("MET") || name.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
+  drawhists[0]->GetYaxis()->SetTitle(ytitle);
+  
   drawhists[0]->Draw("e1"); //############## 
   //drawhists[0]->Draw("e"); //############## 
   
@@ -3441,9 +3453,8 @@ void Plotter::PlotDiffXSec(){
     //if (mcnlohistupBinned->GetEntries()) leg2.AddEntry(mcnlohistupBinned,      "MC@NLO",  "fl");
     //if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
     if (powheghist->GetEntries())  leg2.AddEntry(powheghistBinned,       "POWHEG",  "l");        
-    if (name.Contains("ToppT") || name.Contains("TopRapidity"))  {
-    	leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");
-    }        
+    if (name.Contains("ToppT") || name.Contains("TopRapidity")) leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");
+    
     //if (MCFMHist->GetEntries())  leg2.AddEntry(MCFMHist,       "MCFM",  "p");        
     leg2.SetFillStyle(0);
     leg2.SetBorderSize(0);
@@ -3453,6 +3464,9 @@ void Plotter::PlotDiffXSec(){
     leg2.SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg2.SetTextSize(0.04);
     leg2.Draw("same");
+    if (name.Contains("ToppT"))        DrawLabel("(arXiv:1009.4935)", leg2.GetX1NDC()+0.06, leg2.GetY1NDC()-0.025, leg2.GetX2NDC(), leg2.GetY1NDC(), 12, 0.025);
+    if (name.Contains("TopRapidity"))  DrawLabel("(arXiv:1105.5167)", leg2.GetX1NDC()+0.06, leg2.GetY1NDC()-0.025, leg2.GetX2NDC(), leg2.GetY1NDC(), 12, 0.025);
+    
     h_GenDiffXSec->Draw("SAME");
     gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
@@ -3515,6 +3529,14 @@ void Plotter::PlotDiffXSec(){
     //varhists[0]->Draw("e");  //#########
     varhists[0]->Draw("e"); 
     
+    //Add the binwidth to the yaxis in yield plots
+    TString ytitle = TString(varhists[0]->GetYaxis()->GetTitle()).Copy();
+    double binwidth = varhists[0]->GetXaxis()->GetBinWidth(1);
+    std::ostringstream width;
+    width<<binwidth;
+    if(name.Contains("Rapidity") || name.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
+    else if(name.Contains("pT") || name.Contains("Mass") || name.Contains("mass") || name.Contains("MET") || name.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
+    varhists[0]->GetYaxis()->SetTitle(ytitle);
 
     stack->Draw("same HIST");
 
@@ -3880,6 +3902,18 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1D* drawhists[], std::vector<TS
         }
     }
     return leg;
+}
+
+void Plotter::DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, int centering, double textSize){
+    //Function to add Kidonakis references to DiffXSection plots' legends
+    TPaveText *label = new TPaveText(x1, y1, x2, y2, "br NDC");
+    label->AddText(text);
+    label->SetFillStyle(0);
+    label->SetBorderSize(0);
+    
+    if (textSize!=0) label->SetTextSize(textSize);
+    label->SetTextAlign(centering);
+    label->Draw("same");
 }
 
 
