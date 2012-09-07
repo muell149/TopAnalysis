@@ -2,8 +2,8 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
-, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true, 
+			     int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
@@ -1404,8 +1404,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
   // branching ratio
   // careful: the xSec here needs to be 
   // consistent with the one in lumiweight()
-  BR=NGen*1.0/(ttbarCrossSection*luminosity);
-  //  double BR2=12.0/81.0;
+  //BR=NGen*1.0/(ttbarCrossSection*luminosity);
+  BR=0.145888;//PDG
   // calculate xSec
   xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity*BR );
   double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity*BR );
@@ -1670,6 +1670,15 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
       NrecMCBG-=NrecttbarBG;
       // cross section 
       double xSecPSforNorm= (Ndataplain - NrecMCBG)*signalFraction / (effAPSforNorm * luminosity);
+      if(verbose>1){
+	std::cout << "calculate incl. xSec PS (without unfolding)" << std::cout;
+	std::cout << "Ndataplain :" << Ndataplain << std::endl;
+	std::cout << "NrecMCBG :"   << NrecMCBG   << std::endl;
+	std::cout << "signalFraction :" << signalFraction << std::endl;
+	std::cout << "effAPSforNorm: " << effAPSforNorm << std::endl;
+	std::cout << "luminosity: " << luminosity << std::endl;
+	std::cout << "xSecPSforNorm: " << xSecPSforNorm << std::endl;
+      }
       if(verbose>0){
 	std::cout << "inclusive cross section (PS) for normalization: " << xSecPSforNorm << std::endl;
       }
@@ -2208,8 +2217,17 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true
 	double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
 	inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
 	inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
-	if(normToIntegral==true) histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
-	else histo_[xSecNorm][kData]->Scale(1./xSecPSforNorm);
+	if(normToIntegral==true){
+	  histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
+	  if(verbose>1) std::cout << "normalizing to integral" << std::endl;
+	}
+	else{
+	  histo_[xSecNorm][kData]->Scale(1./xSecPSforNorm);
+	  if(verbose>1){
+	    std::cout << "normalizing to calculated incl. xSec:" << std::endl;
+	    std::cout << xSecPSforNorm << std::endl;
+	  }
+	}
 	if(verbose>0){
 	  std::cout << std::endl << variable << std::endl;
 	  std::cout << "data preunfolded inclusive abs: " << xSecPSforNorm << std::endl;
