@@ -3397,7 +3397,7 @@ void Plotter::PlotDiffXSec(){
     GenPlotTheory->SetLineWidth(2);
     GenPlotTheory->SetLineStyle(1);
 //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
-    if( name.Contains("HypLeptonpT") ||name.Contains("HypBJetpT") || name.Contains("HypLLBarpT") || name.Contains("HypTTBarpT") ){
+    if( name.Contains("HypLLBarpT") || name.Contains("HypTTBarpT") ){
        GenPlotTheory->Draw("SAME,C");
     }
     h_GenDiffXSec->SetLineColor(kRed+1);
@@ -3433,7 +3433,7 @@ void Plotter::PlotDiffXSec(){
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
 
-    if( !name.Contains("HypLeptonpT") && !name.Contains("HypBJetpT") && !name.Contains("HypLLBarpT") && !name.Contains("HypTTBarpT") ){
+    if(!name.Contains("HypLLBarpT") && !name.Contains("HypTTBarpT") ){
         TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
         SmoothMadgraph->Smooth(10);
         SmoothMadgraph->Draw("SAME, L");
