@@ -1969,15 +1969,15 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       if(verbose>1) std::cout << "bins used for unfolding: " << unfoldbins << std::endl;
 
       double * NdataTot = new double[1];
-      NdataTot[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->GetNbinsX()+1);
+      NdataTot[0] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]->GetNbinsX()+1);
       double * NBGTot= new double[1];
-      NBGTot[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->GetNbinsX()+1);
+      NBGTot[0] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->GetNbinsX()+1);
       double * NttBG= new double[1];
-      NttBG[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->GetNbinsX()+1);
+      NttBG[0] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]->GetNbinsX()+1);
       double * NttSG= new double[1];
-      NttSG[1] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]->GetNbinsX()+1);
+      NttSG[0] = histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]->GetNbinsX()+1);
       double * NttSGgen= new double[1];
-      NttSGgen[1] = histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->Integral(0,histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->GetNbinsX()+1);
+      NttSGgen[0] = histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->Integral(0,histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]->GetNbinsX()+1);
       
       // ============================
       //  Use unfolding machine
@@ -2128,15 +2128,18 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	//  Remaining steps for cross section calculation
 	// ========================================================
 	// use unfolded event yield as input
-	histo_[xSec][kData+42]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
+	histo_[xSec][kData+42   ]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
+	histo_[xSec][kData+42+42]=(TH1F*)(unfoldedDataNorm->Clone(variable+"kData"));
 	//histo_[xSec][kData+42]->SetBinContent(2, 2*histo_[xSec][kData+42]->GetBinContent(2));
 	// use reco yield plot clone to get correct and complete binning 
-	histo_[xSec][kData      ]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
-	histo_[xSec][kData      ]->Reset("icesm");
+	histo_[xSec    ][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
+	histo_[xSec    ][kData]->Reset("icesm");
+	histo_[xSecNorm][kData]=(TH1F*)(histo_[xSec][kData]->Clone());
 	// remove additional bins with 0 width
 	double *newBinLowEdges = new double[binning_[variable].size()];
 	newBinLowEdges = &binning_[variable].front();
-	histo_[xSec][kData] = (TH1F*) histo_[xSec][kData]->Rebin(binning_[variable].size()-1, histo_[xSec][kData]->GetName(), newBinLowEdges); 
+	histo_[xSec    ][kData] = (TH1F*) histo_[xSec    ][kData]->Rebin(binning_[variable].size()-1, histo_[xSec    ][kData]->GetName(), newBinLowEdges); 
+	histo_[xSecNorm][kData] = (TH1F*) histo_[xSecNorm][kData]->Rebin(binning_[variable].size()-1, histo_[xSecNorm][kData]->GetName(), newBinLowEdges); 
 	// remove additional OF/UF bins from SVD unfolded plots
 	if(verbose>1){ 
 	  std::cout << std::endl << variable << ":" << std::endl;
@@ -2145,13 +2148,22 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	    std::cout << " (" << histo_[xSec][kData+42]->GetBinLowEdge(bin) << " .. ";
 	    //std::cout << (bin==histo_[xSec][kData+42]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData+42]->GetBinLowEdge(bin+1));
 	    std::cout << histo_[xSec][kData+42]->GetBinLowEdge(bin+1);
-	    std::cout << "): " << histo_[xSec][kData+42]->GetBinContent(bin)  << std::endl;
+	    std::cout << "): " << histo_[xSec][kData+42]->GetBinContent(bin) << ", Norm: " << histo_[xSec][kData+42+42]->GetBinContent(bin) << std::endl;
 	  }
 	}
+	//std::cout << std::endl << variable << ":" << std::endl;
+	//for(int bin=0; bin<=unfoldedDataNorm->GetNbinsX()+1; ++bin){
+	//  std::cout << "bin " << bin;
+	//  std::cout << " (" << unfoldedDataNorm->GetBinLowEdge(bin) << " .. ";
+	//  std::cout << unfoldedDataNorm->GetBinLowEdge(bin+1);
+	//  std::cout << "): " << unfoldedDataNorm->GetBinContent(bin)/(unfoldedDataNorm->GetBinWidth(bin))  << std::endl;
+	//}
 	for(int binSVD=0; binSVD<=histo_[xSec][kData+42]->GetNbinsX()+1; ++binSVD){
 	  if(verbose>1) std::cout << "bin " << binSVD;
 	  double value=histo_[xSec][kData+42]->GetBinContent(binSVD);
 	  double error=histo_[xSec][kData+42]->GetBinError(binSVD);
+	  double valueNorm=histo_[xSec][kData+42+42]->GetBinContent(binSVD);
+	  double errorNorm=histo_[xSec][kData+42+42]->GetBinError(binSVD);
 	  double loweredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD);
 	  double higheredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD+1);
 	  // search corresponding final bin
@@ -2166,6 +2178,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 		if(verbose>1) std::cout << "-> bin " << bin << std::endl;
 		histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
 		histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+		histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
+		histo_[xSecNorm][kData]->SetBinError(bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
 	      }
 	    }
 	  }
@@ -2176,14 +2190,18 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	      int bin=0;
 	      if(verbose>1) std::cout << "-> bin " << bin << std::endl;
 	      histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
-	      histo_[xSec][kData]->SetBinError(  bin, histo_[xSec][kData]->GetBinError(  bin)+error);
+	      histo_[xSec][kData]->SetBinError(  bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+	      histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
+	      histo_[xSecNorm][kData]->SetBinError(  bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
 	    }
 	    else if(binSVD==histo_[xSec][kData+42]->GetNbinsX()+1||(loweredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1)&&higheredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1))){
 	      found=true; 
 	      int bin=histo_[xSec][kData]->GetNbinsX()+1;
 	      if(verbose>1) std::cout << "-> bin " << bin << std::endl;
 	      histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
-	      histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(  bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+	      histo_[xSec][kData]->SetBinError(  bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+	      histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
+	      histo_[xSecNorm][kData]->SetBinError(  bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
 	    }
 	  }
 	  // make sure there is always a corresponding bin found!
@@ -2197,7 +2215,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	  }
 	}
 	if(verbose>1){
-	  std::cout << std::endl << "->" << std::endl;
+	  // std::cout << std::endl << "->" << std::endl;
 	  for(int bin=0; bin<=histo_[xSec][kData]->GetNbinsX()+1; ++bin){
 	    std::cout << "bin " << bin;
 	    std::cout << " (" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
@@ -2211,23 +2229,34 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
 	// divide by luminosity 
 	histo_[xSec][kData]->Scale(1./(luminosity));
-	// Normalization
+	// Normalization -> not needed anymore, done in unfolding setup
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
-	histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
-	double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
-	inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
-	inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
-	if(normToIntegral==true){
-	  histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
-	  if(verbose>1) std::cout << "normalizing to integral" << std::endl;
-	}
-	else{
-	  histo_[xSecNorm][kData]->Scale(1./xSecPSforNorm);
-	  if(verbose>1){
-	    std::cout << "normalizing to calculated incl. xSec:" << std::endl;
-	    std::cout << xSecPSforNorm << std::endl;
-	  }
-	}
+	//histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
+	//double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
+	//inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
+	//inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
+	//if(normToIntegral==true){
+	//  histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
+	//  if(verbose>1) std::cout << "normalizing to integral" << std::endl;
+	//}
+	//else{
+	//  histo_[xSecNorm][kData]->Scale(1./xSecPSforNorm);
+	//  if(verbose>1){
+	//    std::cout << "normalizing to calculated incl. xSec:" << std::endl;
+	//    std::cout << xSecPSforNorm << std::endl;
+	//  }
+	//}
+	//std::cout << "our normalization:" << std::endl;
+	//for(int bin=0; bin<=histo_[xSecNorm][kData]->GetNbinsX()+1; ++bin){
+	//  std::cout << "bin " << bin;
+	//  std::cout << " (" << histo_[xSecNorm][kData]->GetBinLowEdge(bin) << " .. ";
+	//  //std::cout << (bin==histo_[xSecNorm][kData]->GetNbinsX()+1 ? 999999 : histo_[xSecNorm][kData]->GetBinLowEdge(bin+1));
+	//  std::cout << histo_[xSecNorm][kData]->GetBinLowEdge(bin+1);
+	//  std::cout << "): " << histo_[xSecNorm][kData]->GetBinContent(bin) << std::endl;
+	//}
+	// divide Normalized plot by binwidth and set title
+	histo_[xSecNorm][kData]->SetTitle(variable);
+	histo_[xSecNorm][kData] = divideByBinwidth(histo_[xSecNorm][kData], verbose-1);
 	if(verbose>0){
 	  std::cout << std::endl << variable << std::endl;
 	  std::cout << "data preunfolded inclusive abs: " << xSecPSforNorm << std::endl;
