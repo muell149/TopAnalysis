@@ -8,7 +8,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false)
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
   // ============================
   //  Set ROOT Style
@@ -111,6 +111,18 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   // see if its 2010 or 2011 data from luminosity
   TString dataSample="";
   if(luminosity>50) dataSample="2011";
+  // for closure test if desired
+  TString closureLabel = "";
+  if (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down")){
+    closureLabel = "SysDistort"+closureTestSpecifier;
+    //dataFile = inputFolder+"/Shape"+closureTestSpecifier+"/"+decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"7TeV.root";
+    dataFile=decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"7TeV.root";
+  }
+  else if (closureTestSpecifier=="500" || closureTestSpecifier=="750"){
+    closureLabel = "Zprime"+closureTestSpecifier;
+    //dataFile = inputFolder+"/Zprime/"+decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime7TeV.root";
+    dataFile = decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime7TeV.root";
+  }
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample+"/";
@@ -118,7 +130,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   TString outputFileName="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
-  outputFileName+=dataSample+LV+PS+".root";
+  outputFileName+=closureLabel+dataSample+LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitHypothesis"+lumi+"pb";
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
@@ -1631,7 +1643,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       if(!compare) ++NXSec;
     }
   }
-    
+  
   // =======================================
   //  Use SVD unfolding for cross sections
   // =======================================
@@ -1747,7 +1759,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       // number of systematic samples to unfold 
       int numSys=0;
       // Regularization parameter
-      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron);
+      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier);
       // Regularization Modus 
       //         0 means: Default setting. Same as 2
       //         1 means: Bin by Bin Unfolding
@@ -2712,8 +2724,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	    if(compare   ) universalplotLabel+="BBBcomparison";
 	  }
 	  // do the saving
-	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+".eps"); 
-	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+".png");
+	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+closureLabel+".eps"); 
+	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+closureLabel+".png");
 	}
       }
       if(verbose>0) std::cout << "done" << std::endl;

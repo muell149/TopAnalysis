@@ -2,7 +2,7 @@
 #include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false){
+void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
 
   // ============================
   //  Systematic Variations:
@@ -77,21 +77,23 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2011";
   if(luminosity<50.) dataSample="2010";
+  // for closure test if desired
+  TString closureLabel = "";
+  if      (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down")) closureLabel = "SysDistort"+closureTestSpecifier;
+  else if (closureTestSpecifier=="500" || closureTestSpecifier=="750") closureLabel = "Zprime"+closureTestSpecifier;
   // outputFile: target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
   TString outputFile="diffXSecTopSemi";
-  if(decayChannel=="muon"    ) outputFile+="Mu"+dataSample;
-  if(decayChannel=="electron") outputFile+="Elec"+dataSample;
-  if(decayChannel=="combined") outputFile+="Lep";
+  if(decayChannel=="muon"    ) outputFile+="Mu"+closureLabel+dataSample;
+  if(decayChannel=="electron") outputFile+="Elec"+closureLabel+dataSample;
+  if(decayChannel=="combined") outputFile+="Lep"+closureLabel;
   outputFile+=LV+PS+".root";
   // define folder where XSec plots are stored
   TString xSecFolder = "xSec";
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
-  // use BCC values?
-  bool useBCC=true;
   if(extrapolate==false&&hadron==false) useBCC=true;
   unsigned int mcatnloIdx  = sysShapeDown/2; // index variable (bin number!) to track MCatNLO uncertainty index among all uncertainties, 
                                              // value might change later, sysShapeDown/2 is the default
@@ -1067,7 +1069,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	      // b) as eps and png
 	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
 	      if(decayChannel=="combined") saveName+="Combined";
-	      saveName+=universalplotLabel;
+	      saveName+=universalplotLabel+closureLabel;
 	      canvas->Print(saveName+".eps");
 	      canvas->Print(saveName+".png");
 	      gErrorIgnoreLevel=initialIgnoreLevel;

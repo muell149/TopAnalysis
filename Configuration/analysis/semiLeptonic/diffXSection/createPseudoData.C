@@ -15,7 +15,8 @@
 
 void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=0, bool smear=1, bool useReweightedTop=0, double avReweight=1, bool useZprime=0, double zPrimeLumiWeight=1);
 
-void createPseudoData(double luminosity=4955., const std::string decayChannel="muon", bool zprime=true, bool useReweightedTop=false){
+void createPseudoData(double luminosity=4955., const std::string decayChannel="muon", bool zprime=true, bool useReweightedTop=false, TString specifier=""){
+  // specifier="Up" or "Down" for shape distortions, "500" or "750" for Zprime
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
   int verbose=0;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
@@ -25,7 +26,6 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   if(decayChannel.compare("electron")==0) dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root";
   else dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root";
   // "useReweightedTop": use parton level reweighted ttbar signal file in pseudo data?
-  TString rewVar="ttbarMassUp";
   // "zprime": include additional Zprime in pseudo data?
   if(useReweightedTop) zprime=false;
   TString outNameExtension="";
@@ -41,16 +41,18 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   //     parton level reweighted top distribution
   //  ---
   // a) name and path of rootfile
-  TString variation="Down";
+  TString variation="";
+  if      (specifier.Contains("Up"  )) variation="Up";
+  else if (specifier.Contains("Down")) variation="Down";  
   TString nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/Shape"+variation+"/";
   if(decayChannel.compare("electron")==0) nameTtbarReweighted+="elecDiffXSec";
   else                                    nameTtbarReweighted+="muonDiffXSec";
-  nameTtbarReweighted+="SigSysDistort"+variation+".root";
+  nameTtbarReweighted+="SigSysDistort"+specifier+"Fall11PF.root";
   TString nameTtbarBGReweighted=nameTtbarReweighted;
-  //nameTtbarBGReweighted.ReplaceAll("Sig","Bkg"); // FIXME: only ttbar SG reweighted for the moment
-  nameTtbarBGReweighted.ReplaceAll("/Shape"+variation,""); // FIXME: only ttbar SG reweighted for the moment
-  nameTtbarBGReweighted.ReplaceAll("SigSysDistort"+variation,"BkgFall11PF"); // FIXME: only ttbar SG reweighted for the moment
-  if(useReweightedTop) outNameExtension="Reweighted"+rewVar;
+  nameTtbarBGReweighted.ReplaceAll("Sig","Bkg"); 
+  //nameTtbarBGReweighted.ReplaceAll("/Shape"+variation,""); //  ttbar SG reweighted for the moment
+  //nameTtbarBGReweighted.ReplaceAll("SigSysDistort"+variation,"BkgFall11PF"); 
+  if(useReweightedTop) outNameExtension="ReweightedttbarMass"+specifier;
   // b) get average weight of reweighting
   double avWeight=1;
   if(useReweightedTop){
@@ -76,12 +78,12 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   //  ---
   //     Z prime 
   //  ---
-  TString zprimeMass="500";
+  TString zprimeMass=specifier;
   TString nameZprime="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/Zprime/";
   double xSecSF=1.0;
   if(decayChannel.compare("electron")==0) nameZprime+="elec";
   else nameZprime+="muon";
-  nameZprime+="DiffXSecZPrime_M"+zprimeMass+"_W"+zprimeMass+"0Fall11PF.root";
+  nameZprime+="DiffXSecZprime_M"+zprimeMass+"_W"+zprimeMass+"0_Fall11PF.root";
   double zPrimeLumiWeight=1.;
   if     (zprimeMass=="500") zPrimeLumiWeight=(xSecSF*16.2208794979645*luminosity)/232074;
   else if(zprimeMass=="750") zPrimeLumiWeight=(xSecSF*3.16951400706147*luminosity)/206525;
@@ -110,7 +112,14 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   if(files_.count(kDiBos)>0)files_.erase(kDiBos);
   //if(files_.count(kData )>0)fiZprime/les_.erase(kData ); // data file needed for list of plots
   // remove combined QCD file for electron channel
-  if(decayChannel.compare("electron")==0&&files_.count(kQCD)>0) files_.erase(kQCD);
+  //if(decayChannel.compare("electron")==0&&files_.count(kQCD)>0) files_.erase(kQCD);
+  // remove all QCD files to be consistent with later treatment
+  if(files_.count(kQCD)>0) files_.erase(kQCD);
+  if(decayChannel.compare("electron")==0){
+    for(int sample = kQCDEM1; sample<=kQCDBCE3; sample++){
+      if(files_.count(sample)>0) files_.erase(sample);
+    }
+  }
   // add zprime
   if(zprime) files_[kZprime]=new (TFile)(nameZprime);
   // change ttbar files for reweighted distributions

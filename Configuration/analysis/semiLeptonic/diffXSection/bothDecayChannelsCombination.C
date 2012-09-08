@@ -2,7 +2,7 @@
 
 void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
 				  TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false){
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -110,18 +110,35 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   const double constMassRangeLow  =  345.0;
   const double constMassRangeHigh = 1600.0;
   
+  // up to which systematic variation should be looped? Default: all
+  unsigned int sysEnd = ENDOFSYSENUM;
+  
+  TString dataLabel = "Data";
+  TString closureLabel = "";
   // Closure test with reweighted m(ttbar) on parton level
   // will plot additionally the modified diff. norm. xSec on parton level
   bool reweightClosure=false;
+  if(closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down")){
+    reweightClosure=true;
+    dataLabel = "#splitline{Reco. and Unf.}{Reweighted t#bar{t}}";
+    closureLabel = "SysDistort"+closureTestSpecifier;
+    // no systematics
+    sysEnd = 1;
+  }
   // Zprime pseudo data test: "", "500" or "750"
   TString zprime="";
-  // adjust data label
-  TString dataLabel = (reweightClosure||zprime!="") ? "Pseudo-Data " : "Data"; 
-  
+  if(closureTestSpecifier=="500" || closureTestSpecifier=="750"){
+    zprime=closureTestSpecifier;
+    dataLabel = "Pseudo-Data";
+    closureLabel = "Zprime"+closureTestSpecifier;
+    // no systematics
+    sysEnd = 1;
+  }
+
   //  Define muon and electron input rootfiles
   std::map<unsigned int, TFile*> files_;
-  files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +dataSample+LV+PS+".root");
-  files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+dataSample+LV+PS+".root");
+  files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +closureLabel+dataSample+LV+PS+".root");
+  files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+closureLabel+dataSample+LV+PS+".root");
   
   // define folders where XSec plots are stored
   TString xSecFolder = "xSec";
@@ -135,7 +152,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   // =============================================================================
   
   // loop systematic variations
-  for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
+  for(unsigned int sys=sysNo; sys<sysEnd; ++sys){
     TString subfolder=sysLabel(sys);
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -146,10 +163,10 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
       if(!(canvasMu&&canvasEl&&canvasTheo)){
 	std::cout << std::endl << " WARNING in bothDecayChannelsCombination.C! " << std::endl;
 	if(!canvasMu||!canvasEl) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in ";
-	if(!canvasMu) std::cout << "diffXSecTopSemiMu"  +dataSample+LV+PS+".root (muon file)"     << std::endl;
-	if(!canvasEl) std::cout << "diffXSecTopSemiElec"+dataSample+LV+PS+".root (electron file)" << std::endl;
+	if(!canvasMu) std::cout << "diffXSecTopSemiMu"+closureLabel+dataSample+LV+PS+".root (muon file)"     << std::endl;
+	if(!canvasEl) std::cout << "diffXSecTopSemiElec"+closureLabel+dataSample+LV+PS+".root (electron file)" << std::endl;
 	if(!canvasTheo){ 
-	  std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+dataSample+LV+PS+".root" << std::endl;
+	  std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+closureLabel+dataSample+LV+PS+".root" << std::endl;
 	}
 	// use std file instead
 	std::cout << "will use the std. files instead -> related uncertainty will be 0!!!!!!!" << std::endl;
@@ -291,10 +308,13 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  // =================================================
 	  //  Additional histos for reweighting closure test
 	  // =================================================
-	  if(reweightClosure&&sys==sysNo){
+	  if(reweightClosure&&sys==sysNo&&plotName!="inclusive"){
+	    TString closureTestSpecifier2="";
+	    if     (closureTestSpecifier.Contains("Up"  )) closureTestSpecifier2="Up";
+	    else if(closureTestSpecifier.Contains("Down")) closureTestSpecifier2="Down";
 	    // get reweighted samples
-	    TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecSigMadD6TSummer11ReweightedttbarMassUpPF.root";
-	    TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecSigMadD6TSummer11ReweightedttbarMassUpPF.root";
+	    TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/muonDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
+	    TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/elecDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
 	    TFile* mufile = new (TFile)(muReweighted);
 	    TFile* elfile = new (TFile)(elReweighted);
 	    // get plot
@@ -312,15 +332,20 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    //set style
 	    histogramStyle(*histo_["reweighted"+plotName][kSig], kSig, false, 1.2, constMadgraphColor);
 	    histo_["reweighted"+plotName][kSig]->SetLineColor(kMagenta);
+	    // no other theory curves
+	    DrawPOWHEGPlot     = false;
+	    DrawMCAtNLOPlot    = false;
+	    DrawSmoothMadgraph = false;
+	    DrawNNLOPlot       = false;
 	  }
 	  // =================================================
 	  //  Additional histos for z prime closure test
 	  // =================================================
-	  if(zprime!=""&&sys==sysNo){
-	    TString muSig="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecSigMadD6TSummer11PF.root";
-	    TString elSig="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecSigMadD6TSummer11PF.root";
-	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/muonDiffXSecZPrime_M"+zprime+"_W"+zprime+"0_MadSummer11PF.root";
-	    TString elZprime="/afs/naf.desy.de/group/cms/scratch/tophh/TOP2011/110819_AnalysisRun/elecDiffXSecZPrime_M"+zprime+"_W"+zprime+"0_MadSummer11PF.root";
+	  if(zprime!=""&&sys==sysNo&&plotName!="inclusive"){
+	    TString muSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSigFall11PF.root";
+	    TString elSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSigFall11PF.root";
+	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"muonDiffXSecZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
+	    TString elZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"elecDiffXSecZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
 	    TFile* muSigfile = new (TFile)(muSig);
 	    TFile* elSigfile = new (TFile)(elSig);
 	    TFile* muZprimefile = new (TFile)(muZprime);
@@ -353,6 +378,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    // set style
 	    histogramStyle(*histo_["modified"+plotName][kSig], kSig, false, 1.2, constMadgraphColor);
 	    histo_["modified"+plotName][kSig]->SetLineColor(kMagenta);
+	    // no other theory curves
+	    DrawPOWHEGPlot     = false;
+	    DrawMCAtNLOPlot    = false;
+	    DrawSmoothMadgraph = false;
+	    DrawNNLOPlot       = false;
 	  }
 
 	  // =====================
@@ -548,12 +578,12 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
 	  // e) reweighted histos for closure test
-	  if(reweightClosure&&sys==sysNo){
+	  if(reweightClosure&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
 	  }
 	  
 	  // f) distorted parton truth histo including zprime
-	  if(zprime!=""&&sys==sysNo){
+	  if(zprime!=""&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["modified"+plotName][kSig]->Draw("hist same");
 	  }	    	  
 	  
@@ -698,16 +728,26 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  // ==============
 	  
 	  TLegend *leg = new TLegend();
-	  legendStyle(*leg,"",0.04);
+	  double legTxtSize         = 0.04;
+	  double x1Subtrahend       = 0.30;
+	  double y1SubtrahendFactor = 0.05;
+	  if(reweightClosure) {
+	    legTxtSize         = 0.03;
+	    x1Subtrahend       = 0.35;
+	    y1SubtrahendFactor = 0.10;
+	  }
+	  legendStyle(*leg,"",legTxtSize);
 	  
 	  // a) Legend - Data label
 	  leg->AddEntry(plotCombination, dataLabel, "P");
 	  
 	  // b) Legend - Theory prediction - MADGRAPH
 	  TString nameMADGRAPHcurve=plotName;
+	  TString legLabelMADGRAPH="MadGraph";
+	  if(reweightClosure || zprime!="") legLabelMADGRAPH="#splitline{MadGraph t#bar{t}}{Used in Unf. Setup}";
 	  nameMADGRAPHcurve.ReplaceAll("Norm","");
 	  TH1F* madgraphcurve =(TH1F*)combicanvas->GetPrimitive(nameMADGRAPHcurve);
-	  if(madgraphcurve) leg->AddEntry(madgraphcurve, "MadGraph", "L" );
+	  if(madgraphcurve) leg->AddEntry(madgraphcurve, legLabelMADGRAPH, "L" );
 	  
 	  // c) Legend - Theory prediction - MCatNLO
 	  if(DrawMCAtNLOPlot2){
@@ -776,11 +816,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  }
 	  
 	  // g) Legend - Closure test(s)
-	  if(reweightClosure&&sys==sysNo) leg->AddEntry(histo_["reweighted"+plotName][kSig], "MadGraph Reweighted", "L");
-	  if(zprime!=""     &&sys==sysNo) leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
+	  if(reweightClosure&&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["reweighted"+plotName][kSig], "#splitline{MadGraph t#bar{t}}{Reweighted}", "L");
+	  if(zprime!=""     &&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
 	  
-	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.30);
-	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05 * (double)(leg->GetNRows()));
+	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - x1Subtrahend);
+	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - y1SubtrahendFactor * (double)(leg->GetNRows()));
 	  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	  
@@ -793,9 +833,10 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  gPad->RedrawAxis(); 
 	  DrawCMSLabels(false,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
-	  if(DrawNNLOPlot&&extrapolate)
+	  if(DrawNNLOPlot&&extrapolate){
 	    if (xSecVariables_[i].Contains("topPtNorm")) DrawLabel("(arXiv:1009.4935)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 	    if (xSecVariables_[i].Contains("topYNorm"))  DrawLabel("(arXiv:1105.5167)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	  }
 
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
 	  
@@ -807,8 +848,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    if(verbose>0) std::cout << "saving" << std::endl;
 	    int initialIgnoreLevel=gErrorIgnoreLevel;
 	    if(verbose==0) gErrorIgnoreLevel=kWarning;
-	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+universalplotLabel+".eps"); 
-	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+xSecVariables_[i]+universalplotLabel+".png");
+	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+closureLabel+xSecVariables_[i]+universalplotLabel+".eps"); 
+	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/xSec/xSec"+closureLabel+xSecVariables_[i]+universalplotLabel+".png");
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
 	  // close Canvas
@@ -839,9 +880,9 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   // loop variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // loop systematic variations
-    for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
+    for(unsigned int sys=sysNo; sys<sysEnd; ++sys){
       if(histo_[xSecVariables_[i]][sys]){
-	saveToRootFile("diffXSecTopSemiLep"+LV+PS+".root", canvas_[xSecVariables_[i]][sys], true, verbose,""+xSecFolder+"/"+sysLabel(sys));
+	saveToRootFile("diffXSecTopSemiLep"+closureLabel+LV+PS+".root", canvas_[xSecVariables_[i]][sys], true, verbose,""+xSecFolder+"/"+sysLabel(sys));
       }
     }
   }

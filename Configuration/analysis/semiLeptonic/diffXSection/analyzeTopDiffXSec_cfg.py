@@ -170,8 +170,8 @@ if(not globals().has_key('additionalEventWeights')):
 ## enable/ disable systematic shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
     sysDistort =  ''
-    #sysDistort =  'up'
-    #sysDistort =  'down'
+    #sysDistort =  'Up'
+    #sysDistort =  'Down'
 # only done for ttbar
 if(not options.sample=="ttbar"):
     sysDistort=''
@@ -241,6 +241,9 @@ if(not options.sample=="none"):
 	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
 	    outputFileName+="Bkg"
+	if(sysDistort!=""):
+	    additionalEventWeights=False
+	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="powheg"):
         usedSample="TopAnalysis/Configuration/Fall11/tt_Z2_powheg_Fall11_AOD_cff"
 	if(eventFilter=='signal only'):
@@ -402,9 +405,12 @@ if(not options.sample=="none"):
 	outputFileName+="SingleAntiTopTWScaleUp"
     elif(options.sample=="zprime_m500gev_w5000mev"):        
         usedSample="TopAnalysis/Configuration/zprime_M500GeV_W5000MeV_Madgraph_Summer11_AOD_cff"
+	additionalEventWeights=False
+	outputFileName+="Zprime_M500_W5000_"
     elif(options.sample=="zprime_m750gev_w7500mev"):        
         usedSample="TopAnalysis/Configuration/zprime_M750GeV_W7500MeV_Madgraph_Summer11_AOD_cff"
 	additionalEventWeights=False
+	outputFileName+="Zprime_M750_W7500_"
     elif(options.sample=="qcd" and decayChannel=='muon'):
         usedSample="TopAnalysis/Configuration/Fall11/qcdmu15enriched_Pythia6_Fall11_AOD_cff"
         PythiaSample="True"
@@ -1449,10 +1455,14 @@ process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-o
 process.eventWeightDileptonModelVariation.maxWeight = cms.double(100)  #high cut-off, at most 2 event weight
 process.eventWeightDileptonModelVariation.landauMPV = cms.double(420)
 process.eventWeightDileptonModelVariation.landauSigma = cms.double(34)
-if(sysDistort=='up'):
+if(sysDistort=='Up'):
     process.eventWeightDileptonModelVariation.slope = cms.double(0.03)
-if(sysDistort=='down'):
+if(sysDistort=='Down'):
     process.eventWeightDileptonModelVariation.slope = cms.double(-0.03)
+if(sysDistort=='Up0p015'):
+    process.eventWeightDileptonModelVariation.slope = cms.double(0.015)
+if(sysDistort=='Down0p015'):
+    process.eventWeightDileptonModelVariation.slope = cms.double(-0.015)
 # multiply with PU weight
 eventWeightDileptonModelVariation=cms.InputTag("eventWeightDileptonModelVariation")
 weightlistDistortPU=cms.VInputTag()

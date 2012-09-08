@@ -63,13 +63,18 @@ extrapolate=true
 ## use hadron level PS instead of parton level PS?
 ## hadron = true / false (default: false)
 hadron=false
+
+## Unfolding closure test -> use pseudo data
+## closureTestSpecifier = \"\" / \"Up\" or \"Down\" for ttbar shape distortions
+##                           / \"500\" or \"750\" for corresponding Zprime pseudo data  (default: "")
+closureTestSpecifier=\"\"
   
 ## take arguments
 clear
 echo "-------------------------------------------------------------------------------------"
 if [ $# -eq 0 ]; then
    echo "The default settings for decay channel, phase space extrapolation and level are used:"
-elif [ $# -eq 3 ]; then
+elif [ $# -eq 3 -o $# -eq 4 ]; then
    ## set first argument
    if   [ $1 == "muon"      ];   then decayChannel=\"muon\"
    elif [ $1 == "electron"  ];   then decayChannel=\"electron\"
@@ -86,6 +91,17 @@ elif [ $# -eq 3 ]; then
    elif [ $3 == "hadron" ];      then hadron=true
    else                          echo "3rd argument ( $3 ) is not valid! Choose \"parton\" or \"hadron\" as level! Abort!"; exit
    fi
+## in case of fourth argument:
+   if [ $# -eq 4 ]; then
+       if   [ $4 == "Up"   ];        then closureTestSpecifier=\"Up\"
+       elif [ $4 == "Down" ];        then closureTestSpecifier=\"Down\"
+       elif [ $4 == "Up0p015"   ];   then closureTestSpecifier=\"Up0p015\"
+       elif [ $4 == "Down0p015" ];   then closureTestSpecifier=\"Down0p015\"
+       elif [ $4 == "500"  ];        then closureTestSpecifier=\"500\"
+       elif [ $4 == "750"  ];        then closureTestSpecifier=\"750\"
+       else                          closureTestSpecifier=\"\"
+       fi
+   fi
    echo "Decay channel, phase space extrapolation and level were specified by user:"
 else
    echo "Wrong number of arguments! Choose 0 arguments for default values and 3 arguments to specify" 
@@ -97,6 +113,7 @@ echo "--------------------------------------------------------------------------
 echo "Decay channel:                              $decayChannel    "
 echo "extrapolate:                                $extrapolate     "
 echo "hadron:                                     $hadron          "
+echo "closureTestSpecifier                        $closureTestSpecifier          "
 echo "-------------------------------------------------------------------------------------"
 echo
 
@@ -193,6 +210,14 @@ SVD=true
 ## redetTau = true / false (default: false)
 redetTau=false
 
+## Re-create purity/stability/resolution plots
+## redoPurStab = true / false (default: true)
+redoPurStab=true
+
+## Use bin-centre corrections (BCC)
+## useBCC = true / false (default: true)
+useBCC=true
+
 #### =====================
 ####  Prepare running
 #### =====================
@@ -213,6 +238,19 @@ fi
 if [ $extrapolate == false -a $hadron == true ] 
     then
     LV="Hadron"
+fi
+
+# switches for unfolding closure test
+if [ $closureTestSpecifier != \"\" ] 
+    then
+    echo
+    echo "CLOSURE TEST FOR UNFOLDING!"
+    echo "closure test type: " $closureTestSpecifier
+    redoControlPlots=false
+    redoSystematics=false
+    maxSys=0
+    redoPurStab=false
+    useBCC=false
 fi
 
 muonFile=./diffXSecTopSemiMu$dataLabel$LV$PS.root
@@ -368,9 +406,9 @@ EOF
     fi
 fi
 
-#### ===================================
-####  Run migration macro for binning 
-#### ===================================
+### ===================================
+###  Run migration macro for binning 
+### ===================================
 
 BEFOREC=$(date +%s)
 echo
@@ -380,27 +418,30 @@ if [ $fast = false ]
     sleep 3
 fi
 
-# Array of differential variables
-listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
-plotAcceptance=true
-if [ $hadron = true ]; 
-    then 
-    listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
-    plotAcceptance=false
-fi
-
-if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
+if [ $redoPurStab == true ]
+    then
+    # Array of differential variables
+    listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+    plotAcceptance=true
+    if [ $hadron = true ]; 
+	then 
+	listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+	plotAcceptance=false
+    fi
     
-    echo "purity and stability will be calculated for the following variables: "
-    echo
-    echo "${listVar_[@]}"
-   
-     # loop over all systematic variations
-    for (( iVar=0; iVar<${#listVar_[@]}; iVar++ )); do
-	root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, 99999, 0, '$hadron')'
-    done
-else
-    echo "will be ignored, only done for decayChannel=muon/electron"
+    if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
+	
+	echo "purity and stability will be calculated for the following variables: "
+	echo
+	echo "${listVar_[@]}"
+      
+	# loop over all systematic variations
+	for (( iVar=0; iVar<${#listVar_[@]}; iVar++ )); do
+	    root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, 99999, 0, '$hadron')'
+	done
+    else
+	echo "will be ignored, only done for decayChannel=muon/electron"
+    fi
 fi
 
 #### ============================
@@ -527,11 +568,11 @@ EOF
     
     cat >> commandsNoSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)
+analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)
 EOF
 
     echo ""
-    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron ,$inclCCVars, $redetTau)"
+    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron ,$inclCCVars, $redetTau, $closureTestSpecifier)"
     root -l -b < commandsNoSysRun.cint
 
 
@@ -559,10 +600,10 @@ EOF
 		
 		cat >> commandsSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)"
 		root -l -b < commandsSysRun.cint
 	    fi  
 	done
@@ -583,10 +624,10 @@ EOF
 		
 		cat >> commandsSysShapeVarRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)
 EOF
 		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau)"
+		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)"
 		root -l -b < commandsSysShapeVarRun.cint
 	    done
 	fi
@@ -631,10 +672,10 @@ EOF
     
     cat >> commandsCombineChannelsRun.cint << EOF
 .L bothDecayChannelsCombination_C.so
-bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars)
+bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier)
 EOF
     echo ""
-    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars)"
+    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier)"
     root -l -b < commandsCombineChannelsRun.cint
 
 else
@@ -681,11 +722,11 @@ fi
 cat >> commandsCombineUncRun.cint << EOF
 .L BCC_C.so
 .L combineTopDiffXSecUncertainties_C.so
-combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars)
+combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)
 EOF
     
 echo ""
-echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars)"
+echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
 root -l -b < commandsCombineUncRun.cint
 
 
@@ -693,7 +734,7 @@ root -l -b < commandsCombineUncRun.cint
 ####  Create ratio plots for final xSecs 
 #### ==========================================
 
-if [ $decayChannel == \"combined\" ]; then
+if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" ]; then
     echo ""
     echo " Processing .... createTheoryDataRatios($extrapolate, $hadron, $verbose)"
     root -l -q -b './createTheoryDataRatios.C++('$extrapolate', '$hadron', '$verbose')'
@@ -703,7 +744,7 @@ fi
 #### ===================================================
 ####  Create latex code result tables for final xSecs 
 #### ===================================================
-if [ $decayChannel == \"combined\" ]; then
+if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" ]; then
     echo ""
     echo " Processing .... makeResultTables($decayChannel, $extrapolate, $hadron, $inclCCVars)"
     root -l -q -b './makeResultTables.C++('$decayChannel', '$extrapolate', '$hadron', '$inclCCVars')'

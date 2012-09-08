@@ -3568,7 +3568,7 @@ namespace semileptonic {
     // ===============================================================
     // ===============================================================
     
-    double regParameter(TString variable, TString decayChannel, int verbose=0, bool fullPS=false, bool tau=false, bool hadronPS=false)
+    double regParameter(TString variable, TString decayChannel, int verbose=0, bool fullPS=false, bool tau=false, bool hadronPS=false, TString closureTestSpecifier="")
     {
 	// this function returns k/value for SVD 
 	// unfolding for the corresponding variable
@@ -3588,42 +3588,142 @@ namespace semileptonic {
 	if(tau){
 	    
 	    if(decayChannel.Contains("muon")){
-		
-		// PAS Binning
-		//if(variable == "topPt")          k = (fullPS) ? 2.07 : 4.17523;
-		//else if(variable == "topY")      k = (fullPS) ? 2.86 : 2.96168;
-		//else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.19367; 
-		//else if(variable == "ttbarY")    k = (fullPS) ? 1.50 : 2.11527;
-		//else if(variable == "ttbarMass") k = (fullPS) ? 1.32 : 2.49955;
-		// New Binning Revision
-		if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.67 : 3.67;
-		else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.70 : 3.70;
-		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.44 : 2.44; 
-		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.09 : 3.09;
-		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.26 : 1.26;
-		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.88 : (hadronPS) ? 2.31  : 2.88;
-		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.53 : (hadronPS) ? 1e-5  : 1.53; 
-		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.64 : (hadronPS) ? 3.06  : 3.64; 
-		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.24 : (hadronPS) ? 3.94  : 4.24; 
+	        if(closureTestSpecifier==""){
+		// STANDARD data
+		    // PAS Binning
+		    //if(variable == "topPt")          k = (fullPS) ? 2.07 : 4.17523;
+		    //else if(variable == "topY")      k = (fullPS) ? 2.86 : 2.96168;
+		    //else if(variable == "ttbarPt")   k = (fullPS) ? 2.04 : 2.19367; 
+		    //else if(variable == "ttbarY")    k = (fullPS) ? 1.50 : 2.11527;
+		    //else if(variable == "ttbarMass") k = (fullPS) ? 1.32 : 2.49955;
+		    // New Binning Revision
+		    if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.67 : 3.67;
+		    else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.70 : 3.70;
+		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.44 : 2.44; 
+		    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.09 : 3.09;
+		    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.26 : 1.26;
+		    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.88 : (hadronPS) ? 2.31  : 2.88;
+		    else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.53 : (hadronPS) ? 1e-5  : 1.53; 
+		    else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.64 : (hadronPS) ? 3.06  : 3.64; 
+		    else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.24 : (hadronPS) ? 3.94  : 4.24;
+		}
+		else if(closureTestSpecifier=="Up"){
+		  // so far only redetermined for parton lv PS, hadron are copied from standard
+		  if     (variable.Contains("topPt")    ) k = (fullPS) ? 2.47 : 2.47;
+		  else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.54 : 3.54;
+		  else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.33 : 2.33; 
+		  else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.04 : 3.04;
+		  else if(variable.Contains("ttbarMass")) k = (fullPS) ? 0.77 : 0.77;
+		  else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.61 : (hadronPS) ? 2.31  : 2.61;
+		  else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.47 : (hadronPS) ? 1e-5  : 1.47; 
+		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 2.57 : (hadronPS) ? 3.06  : 2.57; 
+		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.12 : (hadronPS) ? 3.94  : 4.12;
+		}
+		else if(closureTestSpecifier=="Down"){
+		    // so far only redetermined for parton lv PS, hadron are copied from standard
+		    if     (variable.Contains("topPt")    ) k = (fullPS) ? 4.54 : 4.54;
+		    else if(variable.Contains("topY" )    ) k = (fullPS) ? 4.07 : 4.07;
+		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.56 : 2.56; 
+		    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.26 : 3.26;
+		    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.67 : 1.67;
+		    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 3.26 : (hadronPS) ? 2.31  : 3.26;
+		    else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.72 : (hadronPS) ? 1e-5  :1.72; 
+		    else if(variable.Contains("bqPt")     ) k = (fullPS) ? 4.51 : (hadronPS) ? 3.06  : 4.51; 
+		    else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.69 : (hadronPS) ? 3.94  : 4.69;
+		}
+		else if(closureTestSpecifier=="Up0p015"){
+		  // so far only redetermined for parton lv PS, hadron are copied from standard
+		  if     (variable.Contains("topPt")    ) k = (fullPS) ? 2.59 : 2.47;
+		  else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.59 : 3.54;
+		  else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.37 : 2.33; 
+		  else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.06 : 3.04;
+		  else if(variable.Contains("ttbarMass")) k = (fullPS) ? 0.82 : 0.77;
+		  else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.66 : (hadronPS) ? 2.31  : 2.61;
+		  else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.49 : (hadronPS) ? 1e-5  : 1.47; 
+		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 2.69 : (hadronPS) ? 3.06  : 2.57; 
+		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.17 : (hadronPS) ? 3.94  : 4.12;
+		}
+		else if(closureTestSpecifier=="Down0p015"){
+		    // so far only redetermined for parton lv PS, hadron are copied from standard
+		  if     (variable.Contains("topPt")    ) k = (fullPS) ? 5.13 : 4.54;
+		  else if(variable.Contains("topY" )    ) k = (fullPS) ? 4.18 : 4.07;
+		  else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.84 : 2.56; 
+		  else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.31 : 3.26;
+		  else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.91 : 1.67;
+		  else if(variable.Contains("lepPt")    ) k = (fullPS) ? 3.39 : (hadronPS) ? 2.31  : 3.26;
+		  else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.76 : (hadronPS) ? 1e-5  :1.72; 
+		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 5.06 : (hadronPS) ? 3.06  : 4.51; 
+		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.79 : (hadronPS) ? 3.94  : 4.69;
+		}
             }
 	    else if (decayChannel.Contains("electron")){
-		
-		// PAS Binning
-		//if(variable == "topPt")          k = (fullPS) ? 3.30 : 4.17523;
-		//else if(variable == "topY")      k = (fullPS) ? 4.23 : 2.96168;
-		//else if(variable == "ttbarPt")   k = (fullPS) ? 2.98 : 2.19367; 
-		//else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.11527;
-		//else if(variable == "ttbarMass") k = (fullPS) ? 3.40 : 2.49955;
-		// New Binning Revision
-	        if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.57 : 3.57;
-		else if(variable.Contains("topY")     ) k = (fullPS) ? 3.24 : 3.24;
-		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.11 : 2.11; 
-		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.72 : 2.72;
-		else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.31 : 1.31;
-		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.66 : (hadronPS) ? 2.32   : 2.66;
-		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.07 : (hadronPS) ? 1e-5   : 1.07; 
-		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.52 : (hadronPS) ? 2.86   : 3.52; 
-		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.78 : (hadronPS) ? 3.44   : 3.78; 
+	        if(closureTestSpecifier==""){
+		// STANDARD data
+		    // PAS Binning
+		    //if(variable == "topPt")          k = (fullPS) ? 3.30 : 4.17523;
+		    //else if(variable == "topY")      k = (fullPS) ? 4.23 : 2.96168;
+		    //else if(variable == "ttbarPt")   k = (fullPS) ? 2.98 : 2.19367; 
+		    //else if(variable == "ttbarY")    k = (fullPS) ? 2.71 : 2.11527;
+		    //else if(variable == "ttbarMass") k = (fullPS) ? 3.40 : 2.49955;
+		    // New Binning Revision
+		    if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.57 : 3.57;
+		    else if(variable.Contains("topY")     ) k = (fullPS) ? 3.24 : 3.24;
+		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.11 : 2.11; 
+		    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.72 : 2.72;
+		    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.31 : 1.31;
+		    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.66 : (hadronPS) ? 2.32   : 2.66;
+		    else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.07 : (hadronPS) ? 1e-5   : 1.07; 
+		    else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.52 : (hadronPS) ? 2.86   : 3.52; 
+		    else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.78 : (hadronPS) ? 3.44   : 3.78;
+		}
+		else if(closureTestSpecifier=="Up"){
+		  // so far only redetermined for parton lv PS, hadron are copied from standard
+		  if     (variable.Contains("topPt")    ) k = (fullPS) ? 2.36 : 2.36;
+		  else if(variable.Contains("topY")     ) k = (fullPS) ? 3.12 : 3.12;
+		  else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.06 : 2.06; 
+		  else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.72 : 2.72;
+		  else if(variable.Contains("ttbarMass")) k = (fullPS) ? 0.78 : 0.78;
+		  else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.52 : (hadronPS) ? 2.32   : 2.52;
+		  else if(variable.Contains("lepEta")   ) k = (fullPS) ? 0.91 : (hadronPS) ? 1e-5   : 0.91; 
+		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 2.38 : (hadronPS) ? 2.86   : 2.38; 
+		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.66 : (hadronPS) ? 3.44   : 3.66;
+		}
+		else if(closureTestSpecifier=="Down"){
+		  // so far only redetermined for parton lv PS, hadron are copied from standard
+		  if     (variable.Contains("topPt")    ) k = (fullPS) ? 4.26 : 4.26;
+		  else if(variable.Contains("topY")     ) k = (fullPS) ? 3.62 : 3.62;
+		  else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.43 : 2.43; 
+		  else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.93 : 2.93;
+		  else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.78 : 1.78;
+		  else if(variable.Contains("lepPt")    ) k = (fullPS) ? 3.01 : (hadronPS) ? 2.32   : 3.01;
+		  else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.05 : (hadronPS) ? 1e-5   : 1.05; 
+		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 4.14 : (hadronPS) ? 2.86   : 4.14; 
+		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.21 : (hadronPS) ? 3.44   : 4.21;
+		}
+		else if(closureTestSpecifier=="Up0p015"){
+		  // so far only redetermined for parton lv PS, hadron are copied from standard
+		  if     (variable.Contains("topPt")    ) k = (fullPS) ? 2.47 : 2.36;
+		  else if(variable.Contains("topY")     ) k = (fullPS) ? 3.18 : 3.12;
+		  else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.09 : 2.06; 
+		  else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.74 : 2.72;
+		  else if(variable.Contains("ttbarMass")) k = (fullPS) ? 0.84 : 0.78;
+		  else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.56 : (hadronPS) ? 2.32   : 2.52;
+		  else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.05 : (hadronPS) ? 1e-5   : 0.91; 
+		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 2.48 : (hadronPS) ? 2.86   : 2.38; 
+		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.75 : (hadronPS) ? 3.44   : 3.66;
+		}
+		else if(closureTestSpecifier=="Down0p015"){
+		  // so far only redetermined for parton lv PS, hadron are copied from standard
+		  if     (variable.Contains("topPt")    ) k = (fullPS) ? 4.75 : 4.26;
+		  else if(variable.Contains("topY")     ) k = (fullPS) ? 3.75 : 3.62;
+		  else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.49 : 2.43; 
+		  else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.97 : 2.93;
+		  else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.99 : 1.78;
+		  else if(variable.Contains("lepPt")    ) k = (fullPS) ? 3.10 : (hadronPS) ? 2.32   : 3.01;
+		  else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.27 : (hadronPS) ? 1e-5   : 1.05; 
+		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 4.66 : (hadronPS) ? 2.86   : 4.14; 
+		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.35 : (hadronPS) ? 3.44   : 4.21;
+		}
             }
 	}
 	else{
