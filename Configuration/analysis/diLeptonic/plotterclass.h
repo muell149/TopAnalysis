@@ -1392,7 +1392,7 @@ void Plotter::setDataSet(TString mode)
 	if(filename.Contains("run")){legends.push_back("Data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} Signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} Other"); colors.push_back(kRed-7);}
-	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
+	else if(filename.Contains("single")){legends.push_back("Single Top"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("Diboson"); colors.push_back(10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
 	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
@@ -1420,7 +1420,7 @@ void Plotter::setDataSet(TString mode)
 	if(filename.Contains("run")){legends.push_back("Data"); colors.push_back(kBlack);datafiles++;}
 	else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} Signal"); colors.push_back(kRed+1);}
 	else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} Other"); colors.push_back(kRed-7);}
-	else if(filename.Contains("single")){legends.push_back("tW"); colors.push_back(kMagenta);}
+	else if(filename.Contains("single")){legends.push_back("Single Top"); colors.push_back(kMagenta);}
 	else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("Diboson"); colors.push_back(10);}
 	else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
 	else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
@@ -1464,7 +1464,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	if(filenameUp.Contains("run")){legendsUp.push_back("Data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} Signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} Other"); colorsUp.push_back(kRed-7);}
-	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
+	else if(filenameUp.Contains("single")){legendsUp.push_back("Single Top"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("Diboson"); colorsUp.push_back(10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
 	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
@@ -1479,7 +1479,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	if(filenameDown.Contains("run")){legendsDown.push_back("Data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} Signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} Other"); colorsDown.push_back(kRed-7);}
-	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
+	else if(filenameDown.Contains("single")){legendsDown.push_back("Single Top"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("Diboson"); colorsDown.push_back(10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
 	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
@@ -1517,7 +1517,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	if(filenameUp.Contains("run")){legendsUp.push_back("Data"); colorsUp.push_back(kBlack);}
 	else if(filenameUp.Contains("ttbarsignal")){legendsUp.push_back("t#bar{t} Signal"); colorsUp.push_back(kRed+1);}
 	else if(filenameUp.Contains("ttbarbg")){legendsUp.push_back("t#bar{t} Other"); colorsUp.push_back(kRed-7);}
-	else if(filenameUp.Contains("single")){legendsUp.push_back("tW"); colorsUp.push_back(kMagenta);}
+	else if(filenameUp.Contains("single")){legendsUp.push_back("Single Top"); colorsUp.push_back(kMagenta);}
 	else if(filenameUp.Contains("ww") ||filenameUp.Contains("wz")||filenameUp.Contains("zz")){legendsUp.push_back("Diboson"); colorsUp.push_back(10);}
 	else if(filenameUp.Contains("dytautau")){legendsUp.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsUp.push_back(kAzure+8);}
 	else if(filenameUp.Contains("dymumu")||filenameUp.Contains("dyee")){legendsUp.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsUp.push_back(kAzure-2);}
@@ -1532,7 +1532,7 @@ void Plotter::setSystDataSet(TString systematic, TString systSampleUp, TString s
 	if(filenameDown.Contains("run")){legendsDown.push_back("Data"); colorsDown.push_back(kBlack);}
 	else if(filenameDown.Contains("ttbarsignal")){legendsDown.push_back("t#bar{t} Signal"); colorsDown.push_back(kRed+1);}
 	else if(filenameDown.Contains("ttbarbg")){legendsDown.push_back("t#bar{t} Other"); colorsDown.push_back(kRed-7);}
-	else if(filenameDown.Contains("single")){legendsDown.push_back("tW"); colorsDown.push_back(kMagenta);}
+	else if(filenameDown.Contains("single")){legendsDown.push_back("Single Top"); colorsDown.push_back(kMagenta);}
 	else if(filenameDown.Contains("ww") ||filenameDown.Contains("wz")||filenameDown.Contains("zz")){legendsDown.push_back("Diboson"); colorsDown.push_back(10);}
 	else if(filenameDown.Contains("dytautau")){legendsDown.push_back("Z / #gamma* #rightarrow #tau#tau"); colorsDown.push_back(kAzure+8);}
 	else if(filenameDown.Contains("dymumu")||filenameDown.Contains("dyee")){legendsDown.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colorsDown.push_back(kAzure-2);}
