@@ -1688,7 +1688,7 @@ namespace semileptonic {
       bins_.clear();
 
       // pt(ttbar)
-      double ttbarPtBins[]={0.0, 19.0, 45.0, 75.0, 120.0, 190.0, 300.0};
+      double ttbarPtBins[]={0.0, 18.0, 45.0, 75.0, 120.0, 190.0, 300.0};
       // PAS binning: double ttbarPtBins[]={0., 20., 60., 110., 200., 300.}; // PAS Binning
       bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
       result["ttbarPt"]=bins_;
@@ -2162,7 +2162,7 @@ namespace semileptonic {
     else if(variable == "topYMinus"  ) return "y^{#bar{t}}";
     else if(variable == "ttbarPt"    ) return "p_{T}^{t#bar{t}} #left[GeV#right]";
     else if(variable == "ttbarY"     ) return "y^{t#bar{t}}";
-    else if(variable == "ttbarMass"  ) return "m_{t#bar{t}} #left[GeV#right]";
+    else if(variable == "ttbarMass"  ) return "m^{t#bar{t}} #left[GeV#right]";
     else if(variable == "lepPt"      ) return "p_{T}^{l} #left[GeV#right]";
     else if(variable == "lepEta"     ) return "#eta^{l}"; 
     else if(variable == "lepEtaPlus" ) return "#eta^{l^{+}}";
@@ -2864,24 +2864,25 @@ namespace semileptonic {
 /* 	cB=(largeSample ?  2.63030e-07 :  4.11490e-07); */
 /* 	dB=(largeSample ?  3.18800e+05 :  1.51488e+04); */
 /*       } */
-/*       else if(plotname.Contains("bqPt")){ */
-/* 	// head */
-/* 	fitLowEdge =30.0; */
-/* 	fitHighEdge=93.0; */
-/* 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
-/* 	a= 8.46734e-02; */
-/* 	b=-1.22843e-03; */
-/* 	c= 4.96488e-06*largeSampleSF; */
-/* 	d= 1.03112e+03; */
-/* 	// tail */
-/* 	fitLowEdgeB = 92.0; */
-/* 	fitHighEdgeB=410.0; */
-/* 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
-/* 	aB=-1.74611e-02; */
-/* 	bB=-3.82167e-05; */
-/* 	cB= 8.20966e-08; */
-/* 	dB= 2.31613e+04; */
-/*       } */
+       else if(plotname.Contains("bqPt")){ 
+ 	// head 
+ 	fitLowEdge =30.0; 
+ 	fitHighEdge=93.0; 
+ 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; 
+ 	a= 6.96386e-02; 
+ 	b=-1.01480e-03; 
+ 	c= 3.86642e-06; 
+ 	d= 1.63953e+03; 
+ 	// tail 
+ 	fitLowEdgeB = 92.0; 
+ 	fitHighEdgeB=410.0; 
+ 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; 
+ 	aB=-1.87272e-02; 
+ 	bB=-3.43912e-05; 
+ 	cB= 7.16568e-08; 
+ 	dB= 2.67318e+04; 
+       } 
+
     }
     else if(model=="powheg"){
       if(plotname.Contains("ttbarMass")){
@@ -3588,6 +3589,7 @@ namespace semileptonic {
 	if(tau){
 	    
 	    if(decayChannel.Contains("muon")){
+
 	        if(closureTestSpecifier==""){
 		// STANDARD data
 		    // PAS Binning
@@ -3599,7 +3601,7 @@ namespace semileptonic {
 		    // New Binning Revision
 		    if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.67 : 3.67;
 		    else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.70 : 3.70;
-		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.44 : 2.44; 
+		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.51 : 2.51; 
 		    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.09 : 3.09;
 		    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.26 : 1.26;
 		    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.88 : (hadronPS) ? 2.31  : 2.88;
@@ -3655,8 +3657,10 @@ namespace semileptonic {
 		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 5.06 : (hadronPS) ? 3.06  : 4.51; 
 		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.79 : (hadronPS) ? 3.94  : 4.69;
 		}
+
             }
 	    else if (decayChannel.Contains("electron")){
+
 	        if(closureTestSpecifier==""){
 		// STANDARD data
 		    // PAS Binning
@@ -3668,7 +3672,7 @@ namespace semileptonic {
 		    // New Binning Revision
 		    if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.57 : 3.57;
 		    else if(variable.Contains("topY")     ) k = (fullPS) ? 3.24 : 3.24;
-		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.11 : 2.11; 
+		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.18 : 2.18; 
 		    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.72 : 2.72;
 		    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.31 : 1.31;
 		    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.66 : (hadronPS) ? 2.32   : 2.66;
@@ -3724,6 +3728,7 @@ namespace semileptonic {
 		  else if(variable.Contains("bqPt")     ) k = (fullPS) ? 4.66 : (hadronPS) ? 2.86   : 4.14; 
 		  else if(variable.Contains("bqEta")    ) k = (fullPS) ? 4.35 : (hadronPS) ? 3.44   : 4.21;
 		}
+
             }
 	}
 	else{
