@@ -423,11 +423,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	      else if (plotName=="bqPt"          ) plotTheo->SetMaximum(0.018);
 	    }
 	    // bq Pt should alwaye be log
-	    if (!pTPlotsLog && xSecVariables_[i].Contains("bqPt") ){
-	      plotTheo->SetMinimum(0.00001);
-	      plotTheo->SetMaximum(0.1);
-	      combicanvas->SetLogy(1); 
-	    }
+	    // if (!pTPlotsLog && xSecVariables_[i].Contains("bqPt") ){
+	    //  plotTheo->SetMinimum(0.00001);
+	    //  plotTheo->SetMaximum(0.1);
+	    //  combicanvas->SetLogy(1); 
+	    //}
 	    // adjust max
 	    if(plotName.Contains("lepEta")||plotName=="bqEta"||plotName.Contains("topY")||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
 	    
@@ -680,7 +680,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor = (largeMGfile ? 1 : 10); rebinFactor =  1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = (largeMGfile ? 0 : 4); rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
+	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 2; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
 	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge.root";
