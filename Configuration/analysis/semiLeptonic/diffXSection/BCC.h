@@ -27,7 +27,7 @@ class BCC
 public:
 	
     BCC();
-    BCC(TString filename, TString pathname, std::vector<TString> branches, bool mergeLepHad, bool addCrossCheckVariables);
+    BCC(TString filename, std::vector<TString> pathnames, std::vector<TString> branches, bool mergeLepHad, bool addCrossCheckVariables);
     ~BCC();
 
     BCCMap getMapWithCorrectedCentersInX();

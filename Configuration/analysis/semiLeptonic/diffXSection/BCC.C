@@ -55,7 +55,7 @@
 
 BCC::BCC(){}
 
-BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, bool mergeLepHad, bool addCrossCheckVariables)
+BCC::BCC(TString filename, std::vector<TString> vecPathnames, std::vector<TString> vecBranches, bool mergeLepHad, bool addCrossCheckVariables)
 {
     error_code = 0;
     
@@ -68,11 +68,6 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
     largeMGFile = (filename.Contains("Large")) ? 1 : 0;
 
     datafile = new TFile(filename,"READ");
-    datafile -> cd(pathname); 
-
-    std::cout << filename << " " <<  pathname << std::endl;
-
-    TTree *treeData = (TTree*)gDirectory->Get("tree");
     
     // Local variables
 
@@ -85,13 +80,18 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
         // fill data from tree into temporary map
        
         for (std::vector<TString>::iterator iterBranch = vecBranches.begin(); iterBranch != vecBranches.end(); iterBranch++){
-
+	  
+	    datafile -> cd(vecPathnames[iterBranch-vecBranches.begin()]);
+	    TTree *treeData = (TTree*)gDirectory->Get("tree");
 	    vecBranchData.clear();
 
-	    std::cout << " Processing Data for .... " << *iterBranch;
-	    
+	    std::cout << " Processing Data for .... " << filename << ": ";
+	    std::cout << vecPathnames.at(iterBranch-vecBranches.begin()) << "/" << *iterBranch << std::endl;
 	    TString activeBranchName = "";
-	    activeBranchName = (*iterBranch);	    
+	    activeBranchName = (*iterBranch);	 
+	    // for b-jet quantities: treat thm like had/lep altough their name does not contain these appendices
+	    activeBranchName.ReplaceAll("GenLep","Gen");
+	    activeBranchName.ReplaceAll("GenHad","Gen");
 
 	    if( activeBranchName.Contains("lepEtaMinus") || activeBranchName.Contains("lepEtaPlus")) activeBranchName="lepEta";
 
@@ -100,16 +100,15 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
 	    treeData->SetBranchStatus("*",0);
 	    treeData->SetBranchStatus(activeBranchName,1);
 	    treeData->SetBranchAddress(activeBranchName,(&tempData));
-	    
 	    for (int j=0; j<treeData->GetEntries(); j++)
 	    {	
 		treeData->GetEntry(j);
 		vecBranchData.push_back(tempData);		
 	    }
-
-	    mapTempData[*iterBranch] = vecBranchData; 	    
+	    TString tempmapname=*iterBranch;
+	    tempmapname.ReplaceAll("bbarq","bq");
+	    mapTempData[tempmapname] = vecBranchData; 	    
 	}
-	
 	vecBranchData.clear();
 
 	// Merge data for top- and antitop-quarks if no distinction between them is required
@@ -117,7 +116,6 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
 	if (mergeLepHad)
 	{
 	    TString strNew, strHad, strLep;
-	    
 	    for (BCCMap::iterator iter = mapTempData.begin(); iter != mapTempData.end(); iter++)
 	    {
 		vecBranchData.clear();
@@ -128,36 +126,52 @@ BCC::BCC(TString filename, TString pathname, std::vector<TString> vecBranches, b
 		strLep = "DefaultLep";
 		strNew = iter->first;
 		vecBranchData = iter->second; 
-		
+		//std::cout << "variable: " << strNew << std::endl;
 		// Check if data belong to top -> bqq'
 		
 		if (iter != mapTempData.end() && iter->first.EndsWith("Had"))
 		{ 
 		    strHad = (iter->first); 
+		    strHad.ReplaceAll("Gen"  ,"");
+		    //std::cout << "had identified: " << strHad << std::endl;
 		    iter++;
 		}
 		
 		// Check if immediately following entry in map belongs to top -> blnu 
 		// This works because the map is sorted alphabetically -> must be reviewed and fixed if new a branch is added between topxxHad and topxxLep
-		
-		if (iter != mapTempData.end() && iter->first.EndsWith("Lep"))    strLep = (iter->first); 
+		//std::cout << iter->first << std::endl;
+		//std::cout << "if (iter != mapTempData.end())"     << (iter != mapTempData.end()) << std::endl;
+		//std::cout << "if (iter->first.EndsWith(\"Lep\")"  << iter->first.EndsWith("Lep") << std::endl;
+		if (iter != mapTempData.end() && iter->first.EndsWith("Lep")){
+		  strLep = (iter->first); 
+		  strLep.ReplaceAll("Gen"  ,"");
+		  //std::cout << "lep identified: " << strLep << std::endl;
 
+		}
 		if (strHad != "DefaultHad" && strLep != "DefaultLep" && strHad(0,strHad.Length()-3) == strLep(0,strLep.Length()-3) )
 		{
-		    strNew = iter->first(0,(iter->first).Length()-3);
-		    vecBranchData.insert(vecBranchData.end(),iter->second.begin(),iter->second.end());		    
+		    strNew = strHad(0,strHad.Length()-3);
+		    vecBranchData.insert(vecBranchData.end(),iter->second.begin(),iter->second.end());	
+	    	    //std::cout << "merging vectors " << std::endl;
 		}
 
 		mapData[strNew] = vecBranchData;
 	    }
 	}
-
 	if (mapBinning.size() != mapData.size() )
 	{
 	    error_code = -2;
 	    std::cout << " WARNING ---- Size of maps for binning and data do not correspond!"     << std::endl;
 	    std::cout << " WARNING ---- Calculation of corrected bin centres will be suppressed." << std::endl;
 	    std::cout << " WARNING ---- Switch to geometrical centres as default values."         << std::endl;
+	    std::cout << "        data entries: "     << std::endl;
+	    for (BCCMap::iterator iter = mapData.begin(); iter != mapData.end(); iter++){
+	      std::cout << "        " << iter->first << std::endl;
+	    }
+	    std::cout << "        binning entries: "     << std::endl;
+	    for (BCCMap::iterator iter = mapBinning.begin(); iter != mapBinning.end(); iter++){
+	      std::cout << "        " << iter->first << std::endl;
+	    }
 	}
 	else
 	{
@@ -210,9 +224,10 @@ void BCC::setDefValues()
 	    vecTempBCCs.push_back(refVecTempBinning[bin-1]+0.5*(refVecTempBinning[bin]-refVecTempBinning[bin-1])); 
 	    vecTempBCCErrors.push_back(0.5*(refVecTempBinning[bin]-refVecTempBinning[bin-1]));
 	}	
-
-	mapCorrBinCentersInX[iter->first]      = vecTempBCCs;
-	mapCorrBinCenterErrorsInX[iter->first] = vecTempBCCErrors;
+	TString plotname=iter->first;
+	plotname.ReplaceAll("Gen","");
+	mapCorrBinCentersInX[plotname]      = vecTempBCCs;
+	mapCorrBinCenterErrorsInX[plotname] = vecTempBCCErrors;
 	
 	vecTempBCCs.clear();
 	vecTempBCCErrors.clear();       
@@ -284,12 +299,20 @@ void BCC::MakeHistos()
 
   for (BCCMap::iterator iter = mapData.begin(); iter != mapData.end(); iter++){
 
-    std::vector<double>& refVecTempBinning = mapBinning[iter->first];  // required for ROOT purposes
-    std::vector<double>& refVecTempData    = iter->second;	       // required for ROOT purposes
+    //TString& refname= iter->first;
+    TString plotname=iter->first;
+    //TString plotname=(TString)(refname);
+    plotname.ReplaceAll("Gen","");
+    const std::vector<double>& refVecTempBinning = mapBinning[plotname];  // required for ROOT purposes
+    const std::vector<double>& refVecTempData    = iter->second;	       // required for ROOT purposes
     
-    std::vector<double>::iterator iterVecData;
+    std::vector<double>::const_iterator iterVecData;
     
     hname  = iter->first;
+    hname.ReplaceAll("Gen","");
+    plotname.ReplaceAll("Gen","");
+    //std::cout << "refVecTempBinning.size(): " << refVecTempBinning.size() << std::endl;
+    //std::cout << "mapData entry valid? " << iter->first << std::endl;
     binmin = refVecTempBinning[0];
     binmax = refVecTempBinning[refVecTempBinning.size()-1];
 
@@ -386,6 +409,7 @@ void BCC::setBCCinX_IntersectionInBin()
     
     for (int jBinData = 0; jBinData < NBinsData; jBinData++)
     {
+      bool exists=false;
       if(sumWeights[jBinData] > 0.0)
       {
 	min = (double)LONG_MAX;
@@ -397,13 +421,15 @@ void BCC::setBCCinX_IntersectionInBin()
 	  double xTheory     = refHisto.GetBinCenter(jBinTheory);
 	  double diff        = fabs(average[jBinData] - refHisto.GetBinContent(jBinTheory));
 	  
-	  if ( (xTheory > refVecBinning[jBinData] && xTheory < refVecBinning[jBinData+1]) && diff < min ) 
+	  if ( (xTheory > refVecBinning[jBinData] && xTheory < refVecBinning[jBinData+1]) && diff < min && !exists) 
 	  {
+	    // take first intersection point for top Pt bin 1
+	    //if((iterHistos->first).Contains("ttbarPt")) exists=true;	    
 	    min = diff;
 	    avXvalues[jBinData] = refHisto.GetBinCenter(jBinTheory);					
 	  }
 	}
-      }			
+      }
       
       std::cout << Form(" Bin %1.2f .... %1.2f : mean data = %1.4f and mean x = %1.2f",
       			  refVecBinning[jBinData], refVecBinning[jBinData+1], average[jBinData], avXvalues[jBinData]) << std::endl;			
@@ -501,8 +527,10 @@ void BCC::setBCCinX_MeanOverBin()
     
     // fill maps
     
-    mapCorrBinCentersInX[iter->first]      = vecTempBCCs;
-    mapCorrBinCenterErrorsInX[iter->first] = vecTempBCCErrors;
+    TString plotname=iter->first;
+    plotname.ReplaceAll("Gen","");
+    mapCorrBinCentersInX[plotname]      = vecTempBCCs;
+    mapCorrBinCenterErrorsInX[plotname] = vecTempBCCErrors;
     
     vecTempBCCs.clear();
     vecTempBCCErrors.clear();       

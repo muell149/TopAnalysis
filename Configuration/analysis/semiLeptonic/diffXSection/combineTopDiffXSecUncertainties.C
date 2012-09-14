@@ -176,22 +176,49 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     //  basic configuration
 
     bool mergeLepAndHadTop=true;
-    std::vector<TString> xSecVariableBranchNames_;
+    std::vector<TString> xSecVariableBranchNames_, folderNamesBCC_;
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       if(!xSecVariables_[i].Contains("Norm")&&xSecVariables_[i]!="inclusive"){
-	if(xSecVariables_[i]=="topPt" || xSecVariables_[i]=="topY" || xSecVariables_[i].Contains("bq")){
+	// collect names of branch entries and names of cross section folder(s)
+	if(xSecVariables_[i]=="topPt" || xSecVariables_[i]=="topY"){ 
 	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
 	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
+	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
+	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
 	}
-	else xSecVariableBranchNames_.push_back(xSecVariables_[i]);
+	else if(xSecVariables_[i].Contains("bq")){
+	  if(!extrapolate&&hadron){
+	    xSecVariableBranchNames_.push_back(xSecVariables_[i]+"GenLep");
+	    TString antib=xSecVariables_[i]+"GenHad";
+	    antib.ReplaceAll("bq", "bbarq");
+	    xSecVariableBranchNames_.push_back(antib);
+	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Bjets"+PS);
+	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Bjets"+PS);
+	  }
+	  else{
+	    xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
+	    xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
+	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
+	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
+	  }
+	}
+	else if(xSecVariables_[i].Contains("lep")&&!extrapolate&&hadron&&!xSecVariables_[i].Contains("Plus")&&!xSecVariables_[i].Contains("Minus")){
+	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Gen");
+	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Lepton"+PS);
+	}
+	else{
+	  xSecVariableBranchNames_.push_back(xSecVariables_[i]);
+	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS); 
+	}
       }
     }
-  
+//     for(int i=0; i<xSecVariableBranchNames_.size(); ++i){
+//       std::cout << folderNamesBCC_[i] << "/" << xSecVariableBranchNames_[i] << std::endl;
+//     }
     TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
+    fileNameBCC="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC;
     //TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PF.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
-
-    BCC b("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC,"analyzeTop"+LV+"LevelKinematics"+PS,xSecVariableBranchNames_,mergeLepAndHadTop,addCrossCheckVariables);
- 	  
+    BCC b(fileNameBCC,folderNamesBCC_,xSecVariableBranchNames_,mergeLepAndHadTop,addCrossCheckVariables);
     b.runBCCCalculation();
     correctedCenters_ = b.getMapWithCorrectedCentersInX();
     corrCenterErrors_ = b.getMapWithCenterErrorsInX();
@@ -213,6 +240,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 
     std::cout << " .... Executing bin center corrections finished." << std::endl;
   }
+   
 
   // ============================
   //  Open rootfile
@@ -560,8 +588,16 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		      std::cout << "center (bin " << bin << ") " << ((int)val->second.size() >= bin ? val->second.at(bin-1) : -1.) << ")" << std::endl;
 		    }
 		  }
-		  pointXValue = correctedCenters_[plotName].at(bin-1);
-		  pointXError = corrCenterErrors_[plotName].at(bin-1);
+		  if(correctedCenters_.find(plotName)!=correctedCenters_.end()) pointXValue = correctedCenters_[plotName].at(bin-1);
+		  else{
+		    std::cout << "ERROR: no entry for " << plotName << " found in correctedCenters_= b.getMapWithCorrectedCentersInX()" << std::endl;
+		    exit(0);
+		  }
+		  if(corrCenterErrors_.find(plotName)!=corrCenterErrors_.end()) pointXError = corrCenterErrors_[plotName].at(bin-1);
+		  else{
+		    std::cout << "ERROR: no entry for " << plotName << " found in corrCenterErrors_=b.getMapWithCenterErrorsInX()" << std::endl;
+		      exit(0);
+		  }
 		  pointXError=0;
 		}
 		combinedErrors->SetPoint(0, 0, -1000);
@@ -1034,14 +1070,14 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		  // exclude over/underflow bins with empty bin content or zero width 
 		  if(dataStat->GetBinWidth(bin)!=0&&dataStat->GetBinContent(bin)!=0){
 		    if(useBCC && verbose>1){ 
-		      std::cout << "try to access BCC result map for " << plotName << " (bin " << bin << ")" << std::endl;
+		      std::cout << "try to access BCC result map (2nd) for " << plotName << " (bin " << bin << ")" << std::endl;
 		      for(std::map<TString, std::vector<double> >::const_iterator val=correctedCenters_.begin(); val!=correctedCenters_.end(); ++val){
 			std::cout << "found entry " << val->first << " (size " << val->second.size() << ", ";
 			std::cout << "center (bin " << bin << ") " << ((int)val->second.size() >= bin ? val->second.at(bin-1) : -1.) << ")" << std::endl;
 		      }
 		    }
-		    double pointXValue = useBCC ? correctedCenters_[plotName].at(bin-1): histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
-		    double pointXError = useBCC ? corrCenterErrors_[plotName].at(bin-1): 0;
+		    double pointXValue = (useBCC&&correctedCenters_.find(plotName)!=correctedCenters_.end()) ? correctedCenters_[plotName].at(bin-1): histo_[xSecVariables_[i]][sysNo]->GetBinCenter(bin);
+		    double pointXError = (useBCC&&corrCenterErrors_.find(plotName)!=corrCenterErrors_.end()) ? corrCenterErrors_[plotName].at(bin-1): 0;
 		    double pointYError = dataStat->GetBinError(bin);
 		    statErrors->SetPoint(bin, pointXValue, dataStat->GetBinContent(bin));
 		    statErrors->SetPoint(0, 0, -1000);
