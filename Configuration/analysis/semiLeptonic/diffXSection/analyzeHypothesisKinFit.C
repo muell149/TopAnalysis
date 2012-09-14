@@ -1936,7 +1936,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       //             totalBgrEvents, totalTtBgrEvents, totalRecEvents and totalGenEvents.
       //         2 means: Intrinsic Normalization.
       //             Each unfolded distribution is normalized with its integral.
-      int normalizeUnfPlot=1;
+      int normalizeUnfPlot=2;
       steering=getTStringFromInt(normalizeUnfPlot)+steering;
       // NEW: !!!
       //    (14) CLOSURE TEST (14. digit from right)
@@ -2142,7 +2142,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	// use unfolded event yield as input
 	histo_[xSec][kData+42   ]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
 	histo_[xSec][kData+42+42]=(TH1F*)(unfoldedDataNorm->Clone(variable+"kData"));
-	//histo_[xSec][kData+42]->SetBinContent(2, 2*histo_[xSec][kData+42]->GetBinContent(2));
 	// use reco yield plot clone to get correct and complete binning 
 	histo_[xSec    ][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
 	histo_[xSec    ][kData]->Reset("icesm");
@@ -2258,17 +2257,18 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	//    std::cout << xSecPSforNorm << std::endl;
 	//  }
 	//}
-	//std::cout << "our normalization:" << std::endl;
-	//for(int bin=0; bin<=histo_[xSecNorm][kData]->GetNbinsX()+1; ++bin){
-	//  std::cout << "bin " << bin;
-	//  std::cout << " (" << histo_[xSecNorm][kData]->GetBinLowEdge(bin) << " .. ";
-	//  //std::cout << (bin==histo_[xSecNorm][kData]->GetNbinsX()+1 ? 999999 : histo_[xSecNorm][kData]->GetBinLowEdge(bin+1));
-	//  std::cout << histo_[xSecNorm][kData]->GetBinLowEdge(bin+1);
-	//  std::cout << "): " << histo_[xSecNorm][kData]->GetBinContent(bin) << std::endl;
-	//}
 	// divide Normalized plot by binwidth and set title
 	histo_[xSecNorm][kData]->SetTitle(variable);
 	histo_[xSecNorm][kData] = divideByBinwidth(histo_[xSecNorm][kData], verbose-1);
+	if(verbose>1){ 
+	  std::cout << std::endl << variable << ":" << std::endl;
+	  for(int bin=0; bin<=histo_[xSecNorm][kData]->GetNbinsX()+1; ++bin){
+	    std::cout << "bin " << bin;
+	    std::cout << " (" << histo_[xSecNorm][kData]->GetBinLowEdge(bin) << " .. ";
+	    std::cout << (bin==histo_[xSecNorm][kData]->GetNbinsX()+1 ? 999999 : histo_[xSecNorm][kData]->GetBinLowEdge(bin+1));
+	    std::cout << "): " << histo_[xSecNorm][kData]->GetBinContent(bin) << std::endl;
+	  }
+	}
 	if(verbose>0){
 	  std::cout << std::endl << variable << std::endl;
 	  std::cout << "data preunfolded inclusive abs: " << xSecPSforNorm << std::endl;
