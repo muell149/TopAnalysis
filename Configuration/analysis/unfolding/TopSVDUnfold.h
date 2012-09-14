@@ -43,6 +43,15 @@ public:
     // --- Set tau via the "SetTau" setter function
     // --- Use UnfoldTau with k = -1.
     virtual TH1D* Unfold(Int_t kreg); 
+    
+    // Joern
+    // Determine for given input error matrix covariance matrix of unfolded 
+   // spectrum from toy simulation
+   // "cov"    - covariance matrix on the measured spectrum, to be propagated
+   // "ntoys"  - number of pseudo experiments used for the propagation
+   // "seed"   - seed for pseudo experiments
+    TH2D* GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t seed =1, Int_t normType=2, Int_t verbose=0 );
+    static TH1D* IntNormalizeSVDDistribution(TH1D* inputHist);
 
 protected:
     double fTau;

@@ -262,3 +262,191 @@ TH1D* TopSVDUnfold::Unfold(Int_t kreg)
 
    return h;
 }
+
+//_______________________________________________________________________
+TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t seed, Int_t normType, Int_t verbose )
+{
+   // Added by Joern: adapted from TSVDUnfold::GetUnfoldCovMatrix
+   //                 to include the normalisation in the procedure
+   //  
+   // Determine for given input error matrix covariance matrix of unfolded 
+   // spectrum from toy simulation given the passed covariance matrix on measured spectrum
+   // "cov"    - covariance matrix on the measured spectrum, to be propagated
+   // "ntoys"  - number of pseudo experiments used for the propagation
+   // "seed"   - seed for pseudo experiments
+   // "normType" - set type of normalisation (1=extrinsic, 2=intrinsic)
+   // Note that this covariance matrix will contain effects of forced normalisation if spectrum is normalised to unit area.
+  if(verbose>=2) {
+    cout << "TopSVDUnfold::GetUnfoldCovMatrixNorm -> calculates the covariance matrix for the unfolded results after normalisation" << endl;
+    if     (normType==1) cout << "Extrinsic Normalisation (at the moment NOT WORKING!!!) normType = " << normType << endl;
+    else if(normType==2) cout << "Intrinsic Normalisation! normType = " << normType << endl;
+  }
+  fToyMode = true;
+  TH1D* unfres = 0;
+  TH1D* unfresNorm = 0;
+  TH2D* unfcov = (TH2D*)fAdet->Clone("unfcovmat");
+  unfcov->SetTitle("Toy covariance matrix");
+  for(int i=1; i<=fNdim; i++)
+    for(int j=1; j<=fNdim; j++)
+      unfcov->SetBinContent(i,j,0.);
+  TH2D* unfcovNorm = (TH2D*)unfcov->Clone("unfcovmatnorm");
+  unfcovNorm->SetTitle("Toy covariance matrix (normalised)");
+  
+   // Code for generation of toys (taken from RooResult and modified)
+   // Calculate the elements of the upper-triangular matrix L that
+   // gives Lt*L = C, where Lt is the transpose of L (the "square-root method")  
+  TMatrixD L(fNdim,fNdim); L *= 0;
+
+  for (Int_t iPar= 0; iPar < fNdim; iPar++) {
+
+      // Calculate the diagonal term first
+    L(iPar,iPar) = cov->GetBinContent(iPar+1,iPar+1);
+    for (Int_t k=0; k<iPar; k++) L(iPar,iPar) -= TMath::Power( L(k,iPar), 2 );
+    if (L(iPar,iPar) > 0.0) L(iPar,iPar) = TMath::Sqrt(L(iPar,iPar));
+    else                    L(iPar,iPar) = 0.0;
+
+      // ...then the off-diagonal terms
+    for (Int_t jPar=iPar+1; jPar<fNdim; jPar++) {
+      L(iPar,jPar) = cov->GetBinContent(iPar+1,jPar+1);
+      for (Int_t k=0; k<iPar; k++) L(iPar,jPar) -= L(k,iPar)*L(k,jPar);
+      if (L(iPar,iPar)!=0.) L(iPar,jPar) /= L(iPar,iPar);
+      else                  L(iPar,jPar) = 0;
+    }
+  }
+
+   // Remember it
+  TMatrixD *Lt = new TMatrixD(TMatrixD::kTransposed,L);
+  TRandom3 random(seed);
+
+  fToyhisto = (TH1D*)fBdat->Clone("toyhisto");
+  TH1D *toymean = (TH1D*)fBdat->Clone("toymean");
+  for (Int_t j=1; j<=fNdim; j++) toymean->SetBinContent(j,0.);
+  TH1D *toymeanNorm = (TH1D*)toymean->Clone("toymeanNorm");
+
+   // Get the mean of the toys first
+  for (int i=1; i<=ntoys; i++) {
+      // create a vector of unit Gaussian variables
+    TVectorD g(fNdim);
+    for (Int_t k= 0; k < fNdim; k++) g(k) = random.Gaus(0.,1.);
+
+      // Multiply this vector by Lt to introduce the appropriate correlations
+    g *= (*Lt);
+
+      // Add the mean value offsets and store the results
+    for (int j=1; j<=fNdim; j++) {
+      fToyhisto->SetBinContent(j,fBdat->GetBinContent(j)+g(j-1));
+      fToyhisto->SetBinError(j,fBdat->GetBinError(j));
+    }
+
+    unfres = Unfold(GetKReg());
+    // change by Joern
+    if(normType==2) unfresNorm = IntNormalizeSVDDistribution(unfres);
+    // for other normalisation types return empty histo
+    else return unfcovNorm;
+
+    for (Int_t j=1; j<=fNdim; j++) {
+      toymean    ->SetBinContent(j, toymean    ->GetBinContent(j) + unfres    ->GetBinContent(j)/ntoys);
+      toymeanNorm->SetBinContent(j, toymeanNorm->GetBinContent(j) + unfresNorm->GetBinContent(j)/ntoys);
+      if(verbose>=2 && i==ntoys) cout <<"bin " <<j << "; toymean = " <<toymean->GetBinContent(j) << "; toymeanNorm = " << toymeanNorm->GetBinContent(j) <<endl;
+    }
+    delete unfres;
+    delete unfresNorm;
+    unfres = 0;
+    unfresNorm = 0;
+  }
+
+   // Reset the random seed
+  random.SetSeed(seed);
+   //Now the toys for the covariance matrix
+  for (int i=1; i<=ntoys; i++) {
+      // Create a vector of unit Gaussian variables
+    TVectorD g(fNdim);
+    for (Int_t k= 0; k < fNdim; k++) g(k) = random.Gaus(0.,1.);
+    
+      // Multiply this vector by Lt to introduce the appropriate correlations
+    g *= (*Lt);
+
+      // Add the mean value offsets and store the results
+    for (int j=1; j<=fNdim; j++) {
+      fToyhisto->SetBinContent( j, fBdat->GetBinContent(j)+g(j-1) );
+      fToyhisto->SetBinError  ( j, fBdat->GetBinError(j) );
+    }
+    unfres = Unfold(GetKReg());
+    // change by Joern
+    if(normType==2) unfresNorm = IntNormalizeSVDDistribution(unfres);
+    
+    for (Int_t j=1; j<=fNdim; j++) {
+      for (Int_t k=1; k<=fNdim; k++) {
+	unfcov->SetBinContent(j,k,unfcov->GetBinContent(j,k) + ( (unfres->GetBinContent(j) - toymean->GetBinContent(j))* (unfres->GetBinContent(k) - toymean->GetBinContent(k))/(ntoys-1)) );
+	unfcovNorm->SetBinContent(j,k,unfcovNorm->GetBinContent(j,k) + ( (unfresNorm->GetBinContent(j) - toymeanNorm->GetBinContent(j))* (unfresNorm->GetBinContent(k) - toymeanNorm->GetBinContent(k))/(ntoys-1)) );
+	
+	if(verbose>=2 && i==ntoys) {
+	  //cout << "(j,k) = (" << j <<", " << k << "); unfcov = " << unfcov->GetBinContent(j,k) << "; unfcovNorm = " << unfcovNorm->GetBinContent(j,k) <<endl;
+	  double unfcovCorrDenom = TMath::Sqrt(unfcov->GetBinContent(j,j)*unfcov->GetBinContent(k,k));
+	  if(unfcovCorrDenom==0) unfcovCorrDenom=1e10;
+	  double unfcovNormCorrDenom = TMath::Sqrt(unfcovNorm->GetBinContent(j,j)*unfcovNorm->GetBinContent(k,k));
+	  if(unfcovNormCorrDenom==0) unfcovNormCorrDenom=1e10;
+	  cout << "(j,k) = (" << j <<", " << k << "); unfcorr = " << unfcov->GetBinContent(j,k)/unfcovCorrDenom << "; unfcorrNorm = " << unfcovNorm->GetBinContent(j,k)/unfcovNormCorrDenom <<endl;
+	  double unfcovUncDenom = toymean->GetBinContent(k);
+	  if(unfcovUncDenom==0) unfcovUncDenom=1e10;
+	  double unfcovNormUncDenom = toymeanNorm->GetBinContent(k);
+	  if(unfcovNormUncDenom==0) unfcovNormUncDenom=1e10;
+	  if(j==k) cout<< "UNCERTAINTY [%], bin " << j << "; non-norm: " << TMath::Sqrt(unfcov->GetBinContent(j,j))/unfcovUncDenom << "; norm: " << TMath::Sqrt(unfcovNorm->GetBinContent(j,j))/unfcovNormUncDenom << endl;
+	}
+      }
+    }
+    
+    delete unfres;
+    unfres = 0;
+    delete unfresNorm;
+    unfresNorm = 0;
+  }
+  delete Lt;
+  delete toymean;
+  delete toymeanNorm;
+  fToyMode = kFALSE;
+  
+  return unfcovNorm;
+}
+
+//_______________________________________________________________________
+TH1D* TopSVDUnfold::IntNormalizeSVDDistribution(TH1D* inputHist)
+{
+   // Added by Joern: adapted from TopSVDFunctions::SVD_IntNormalizeSVDDistribution
+   //                 to include the normalisation in the procedure
+   // ATTENTION!!!! Make sure this does the same as TopSVDFunctions::SVD_IntNormalizeSVDDistribution!!!
+  // Existence of Objects
+  if ( inputHist == NULL ) return NULL;  
+       
+  // Create new Histograms
+  TH1D* hist = (TH1D*) inputHist->Clone(TString(inputHist->GetName())+"Norm");
+    
+  // Number of Bins
+  int nbins = inputHist->GetNbinsX();
+        
+  // Get Integral 
+  bool doOF = true;
+  double    integral = -1;
+  if(doOF) integral = inputHist->Integral(0, nbins+1);
+  else     integral = inputHist->Integral(1, nbins);
+      
+  // Loop over bins, including OF
+  for ( int i = 1 ; i <= nbins ; i++ ) {
+	      
+    double value_old = inputHist->GetBinContent(i);
+    //double error_old = inputHist->GetBinError(i);
+	      
+    double value_new = value_old;
+    if ( integral > 0. ) value_new = value_new / integral ;  
+    //double error_new = error_old;
+    //if ( integral > 0. ) error_new = error_new / integral ;  
+	  
+    hist->SetBinContent(i, value_new);
+    //hist->SetBinError(i, error_new);
+    
+    //cout << "TopSVDUnfold::IntNormalizeSVDDistribution; bin " << i << "; value = " << value_new << endl;
+  } 
+    
+  // Return
+  return hist;
+}

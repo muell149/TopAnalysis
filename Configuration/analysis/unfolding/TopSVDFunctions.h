@@ -256,7 +256,7 @@ class TopSVDFunctions
         static TH1D* SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
         static TH1D* SVD_ExtNormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
         static TH1D* SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist);
-        static TH1D* SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* statCovMatrix, int numHist);
+	static TH1D* SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* statCovMatrix, int numHist, TH2D* statCovMatrixNorm, int verbose=0);
         static TH1D* SVD_IntNormalizeBBBDistribution(TH1D* inputHist, int numHist);
         static TH1D* SVD_IntNormalizeGenDistribution(TH1D* inputHist, int numHist);
         
