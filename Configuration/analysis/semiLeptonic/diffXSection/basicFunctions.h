@@ -1688,7 +1688,7 @@ namespace semileptonic {
       bins_.clear();
 
       // pt(ttbar)
-      double ttbarPtBins[]={0.0, 18.0, 45.0, 75.0, 120.0, 190.0, 300.0};
+      double ttbarPtBins[]={0.0, 20.0, 45.0, 75.0, 120.0, 190.0, 300.0};
       // PAS binning: double ttbarPtBins[]={0., 20., 60., 110., 200., 300.}; // PAS Binning
       bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
       result["ttbarPt"]=bins_;
@@ -2864,25 +2864,34 @@ namespace semileptonic {
 /* 	cB=(largeSample ?  2.63030e-07 :  4.11490e-07); */
 /* 	dB=(largeSample ?  3.18800e+05 :  1.51488e+04); */
 /*       } */
-       else if(plotname.Contains("bqPt")){ 
- 	// head 
- 	fitLowEdge =30.0; 
- 	fitHighEdge=93.0; 
- 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; 
- 	a= 6.96386e-02; 
- 	b=-1.01480e-03; 
- 	c= 3.86642e-06; 
- 	d= 1.63953e+03; 
- 	// tail 
- 	fitLowEdgeB = 92.0; 
- 	fitHighEdgeB=410.0; 
- 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; 
- 	aB=-1.87272e-02; 
- 	bB=-3.43912e-05; 
- 	cB= 7.16568e-08; 
- 	dB= 2.67318e+04; 
-       } 
-
+      else if(plotname.Contains("bqPt")){
+ 	// head
+ 	fitLowEdge =30.0;
+ 	fitHighEdge=93.0;
+ 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+ 	a= 6.96386e-02;
+ 	b=-1.01480e-03;
+ 	c= 3.86642e-06;
+ 	d= 1.63953e+03;
+ 	// tail
+ 	fitLowEdgeB = 92.0;
+ 	fitHighEdgeB=410.0;
+ 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]";
+ 	aB=-1.87272e-02;
+ 	bB=-3.43912e-05;
+ 	cB= 7.16568e-08;
+ 	dB= 2.67318e+04;
+      }
+/*       else if(plotname.Contains("bqPt")&&plotname.Contains("Hadron")){ */
+/* 	// tail */
+/* 	fitLowEdge =100.0; */
+/* 	fitHighEdge=400.0; */
+/* 	def="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
+/* 	a=-2.08896e-02; */
+/* 	b=-2.63966e-05; */
+/* 	c= 6.52234e-08; */
+/* 	d= 5.32653e+05; */
+/*       } */
     }
     else if(model=="powheg"){
       if(plotname.Contains("ttbarMass")){
@@ -3601,7 +3610,7 @@ namespace semileptonic {
 		    // New Binning Revision
 		    if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.67 : 3.67;
 		    else if(variable.Contains("topY" )    ) k = (fullPS) ? 3.70 : 3.70;
-		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.51 : 2.51; 
+		    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.11 : 2.11; 
 		    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 3.09 : 3.09;
 		    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.26 : 1.26;
 		    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.88 : (hadronPS) ? 2.31  : 2.88;
