@@ -172,20 +172,20 @@ class TopSVDFunctions
         
         
         // Drawing
-	static void SVD_Draw2D(TH2D* hist, TString options = "", double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
+        static void SVD_Draw2D(TH2D* hist, TString options = "", double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
         static void SVD_Draw1D(TH1D* hist, TString options = "",  int color = 1); 
-	static void SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1, double marginFact=0.15); 
+        static void SVD_DrawGraph(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1, double marginFact=0.15); 
         static void SVD_DrawGraphRange(TGraph* graph, TH1D*& bgrHisto, double ymin, double ymax, TString options = "",  int color = 1); 
-	static void SVD_DrawGraphAutoRange(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1, double marginFact=0.15); 
+        static void SVD_DrawGraphAutoRange(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1, double marginFact=0.15); 
         static void SVD_DrawGraphZero(TGraph* graph, TH1D*& bgrHisto, TString options = "",  int color = 1); 
         static TLatex* SVD_DrawText(TString theText, double xpos, double ypos, int orientation, TLatex*& mylatex); 
         static TLine* SVD_DrawVertLine(TH1D*& bgrHisto, double xpos, int color = 1); 
         static TLine* SVD_DrawHorizLine(TH1D*& bgrHisto, double ypos, int color = 1); 
         static void SVD_DrawVertLines(TH1D*& bgrHisto, TVectorD* xpositions, int color = 1); 
         static void SVD_DrawRange(TH1D* histo, double ymin, double ymax, TString options = "",  int color = 0);
-	static void SVD_DrawStackRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, double ymin, double ymax, TString options = "", int col = -1, bool showOF = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
-	static void SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false, bool log = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
-	static void SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
+        static void SVD_DrawStackRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, double ymin, double ymax, TString options = "", int col = -1, bool showOF = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
+        static void SVD_DrawStackAutoRange(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false, bool log = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
+        static void SVD_DrawStackZero(THStack* stack, TLegend* leg, TString xTitle, TString yTitle, TString options, int col, bool showOF = false, double rangeL=-9999, double rangeR=-9999, bool setNoExp=false);
         static TGraph* SVD_Vect2Graph(TVectorD* vectorX, TVectorD* vectorY);
         static TGraph* SVD_Point2Graph(double x, double y); 
          
@@ -253,12 +253,15 @@ class TopSVDFunctions
         static void SVD_GlobalEventYield(double*& globEvYield, double*& globEvYieldErr, double* totalDataEvents, double* totalBgrEvents, double* totalTtBgrEvents, double* totalRecEvents, int numHist);
         static void SVD_GlobalEfficiency(double*& globalEff, double* totalRecEvents, double* totalGenEvents, int numHist);
         static void SVD_GlobalCrossSection(double*& globCrossSection, double*& globCrossSectionErr, double* globEventYield, double* globEventYieldErr, double* globEfficiency, int numHist);
-        static TH1D* SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
-        static TH1D* SVD_ExtNormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist);
-        static TH1D* SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist);
-	static TH1D* SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* statCovMatrix, int numHist, TH2D* statCovMatrixNorm, int verbose=0);
-        static TH1D* SVD_IntNormalizeBBBDistribution(TH1D* inputHist, int numHist);
-        static TH1D* SVD_IntNormalizeGenDistribution(TH1D* inputHist, int numHist);
+        static void SVD_ExtNormalizeSVDDistribution(TH1D* outputResultHist, TH2D*& outputCovHist, TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist, int verbose=0);
+        static void SVD_ExtNormalizeBBBDistribution(TH1D* outputResultHist, TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist, int verbose=0);
+        static void SVD_ExtNormalizeGenDistribution(TH1D* outputResultHist, TH1D* inputHist, double* totalGenEvents, int numHist, int verbose=0);
+        static void SVD_IntNormalizeSVDDistribution(TH1D* outputResultHist, TH2D*& outputCovHist, TH1D* inputHist, TH2D* statCovMatrix, int numHist, int verbose=0);
+        static void SVD_IntNormalizeBBBDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose=0);
+        static void SVD_IntNormalizeGenDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose=0);
+        static void SVD_PseudatNormalizeSVDDistribution(TH1D* outputResultHist, TH2D*& outputCovHist, TH1D* inputHist, TH2D* statCovMatrixNorm, int numHist, int verbose=0);
+        static void SVD_PseudatNormalizeBBBDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose=0);
+        static void SVD_PseudatNormalizeGenDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose=0);
         
         
         // Files and Folders

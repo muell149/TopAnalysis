@@ -172,7 +172,7 @@ void TopSVDFunctions::SVD_ClearStackLeg(THStack*& stack, TLegend*& leg, TString 
     
     // Create new Objects if needed
     if ( leg   == NULL ) leg   = new TLegend();
-    if ( stack == NULL ) stack = new THStack("","");  
+    if ( stack == NULL ) stack = new THStack("stack","stack");  
 
 
 
@@ -1591,15 +1591,15 @@ void TopSVDFunctions::SVD_Draw2D(TH2D* hist, TString options, double rangeL, dou
     int nbinsY = hist->GetNbinsY();
     bool isEmpty = true;
     for ( int i = 1 ; i <= nbinsX ; i++ ) {
-	    for ( int j = 1 ; j <= nbinsY ; j++ ) {
-	    	double binContent = hist->GetBinContent(i,j);
-	    	//double binError= hist->GetBinError(i,j);
-	    	if ( binContent != 0. ) {
-	    		isEmpty = false;
-	    	}
-	    	if ( isEmpty == false ) break; 
-	    }
-	    if ( isEmpty == false ) break; 
+        for ( int j = 1 ; j <= nbinsY ; j++ ) {
+            double binContent = hist->GetBinContent(i,j);
+            //double binError= hist->GetBinError(i,j);
+            if ( binContent != 0. ) {
+                isEmpty = false;
+            }
+            if ( isEmpty == false ) break; 
+        }
+        if ( isEmpty == false ) break; 
     }
     if ( isEmpty == true ) {
         hist->GetZaxis()->SetRangeUser(0., 1.);
@@ -1645,15 +1645,15 @@ void TopSVDFunctions::SVD_Draw1D(TH1D* hist, TString options,  int color)
     int nbinsX = hist->GetNbinsX(); 
     bool isEmpty = true;
     for ( int i = 1 ; i <= nbinsX ; i++ ) { 
-    	double binContent = hist->GetBinContent(i);
-    	//double binError= hist->GetBinError(i);
-    	if ( binContent != 0. ) {
-    		isEmpty = false; 
-    	}
-	    if ( isEmpty == false ) break; 
+        double binContent = hist->GetBinContent(i);
+        //double binError= hist->GetBinError(i);
+        if ( binContent != 0. ) {
+            isEmpty = false; 
+        }
+        if ( isEmpty == false ) break; 
     }
     if ( isEmpty == true ) {
-    	hist->GetYaxis()->SetRangeUser(0., 1.);
+        hist->GetYaxis()->SetRangeUser(0., 1.);
     }
     
     // Draw it
@@ -3076,8 +3076,8 @@ void TopSVDFunctions::SVD_Array2Stack(THStack* stack, TLegend* leg, TH1D* histo,
         }  
         
         // Line Style
-	if(lineSty<0) stackHisto->SetLineStyle(h+1);
-	else          stackHisto->SetLineStyle(lineSty);  
+    if(lineSty<0) stackHisto->SetLineStyle(h+1);
+    else          stackHisto->SetLineStyle(lineSty);  
          
         // Draw Options 
         stack->Add(stackHisto, theDrawOptions);
@@ -4531,11 +4531,22 @@ void TopSVDFunctions::SVD_PrintPage(TCanvas*& canvas, TString outputfilenamePs, 
     fulloutputfilenameEps.Chop();
     fulloutputfilenameEps.Chop();
     fulloutputfilenameEps.Chop();
-    fulloutputfilenameEps.Chop();
-    //fulloutputfilenameEps.Append(TString::Format("_%.4i", plotcounter));
+    fulloutputfilenameEps.Chop(); 
     fulloutputfilenameEps.Append("_");
     fulloutputfilenameEps.Append(description);
     fulloutputfilenameEps.Append(".eps"); 
+    
+    
+    // Filename C 
+    TString fulloutputfilenameC = outputfilenameEps;
+    fulloutputfilenameC.Chop();
+    fulloutputfilenameC.Chop();
+    fulloutputfilenameC.Chop();
+    fulloutputfilenameC.Chop(); 
+    fulloutputfilenameC.Append("_");
+    fulloutputfilenameC.Append(description);
+    fulloutputfilenameC.Append(".C"); 
+     
      
     // Filename PS 
     TString fulloutputfilenamePs = outputfilenamePs;
@@ -4550,10 +4561,13 @@ void TopSVDFunctions::SVD_PrintPage(TCanvas*& canvas, TString outputfilenamePs, 
     // Print plot   
     if ( doEps == true ) {
         canvas->Print(fulloutputfilenameEps);
+    //    canvas->Print(fulloutputfilenameC);
     }
     if ( doPs == true ) { 
         canvas->Print(fulloutputfilenamePs);   
     }
+    
+    
     
 }
 
@@ -4634,16 +4648,15 @@ void TopSVDFunctions::SVD_GlobalEventYield(double*& globEvYield, double*& globEv
 // Normalization
 // Normalize SVD unfolded Event counts, using a global Efficiency and a global event yield
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist)
+void TopSVDFunctions::SVD_ExtNormalizeSVDDistribution(TH1D* outputResultHist, TH2D*& outputCovHist, TH1D* inputHist, TH2D* probMatrixHist, TH2D* statCovMatrix, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist, int verbose)
 { 
     // Thomas
-    if (0) std::cout << probMatrixHist << statCovMatrix << std::endl; // Construct to avoid compilation warning
+    if (0) std::cout << probMatrixHist << statCovMatrix << verbose << std::endl; // Construct to avoid compilation warning
      
     // Existence of Objects
-    if ( inputHist == NULL ) return NULL;  
-       
-    // Create new Histograms
-    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    if ( inputHist == NULL ) return;  
+    if ( outputResultHist == NULL ) return;  
+    if ( outputCovHist == NULL ) return;  
     
     // Number of Bins
     int nbins = inputHist->GetNbinsX();
@@ -4653,40 +4666,90 @@ TH1D* TopSVDFunctions::SVD_ExtNormalizeSVDDistribution(TH1D* inputHist, TH2D* pr
         
         double globalYield = *(globalEventYield+h);
         double globalYieldErr = *(globalEventYieldErr+h);
-        double globalEff = *(globalEfficiency+h); 
-        globalYieldErr = 0.;
+        double globalEff = *(globalEfficiency+h);  
+        
+        // Calculate the Covariance Matrix
+        // only for nominal sample
+        if ( h == 0 ) {
+              
+            // Loop over bins, including OF
+            for ( int i = 1 ; i <= nbins ; i++ ) { 
+                for ( int j = 1 ; j<= nbins ; j++ ) {
+                
+                    // First term
+                    double cov_first = (statCovMatrix)->GetBinContent(i,j);
+                    
+                    
+                    // Second term
+                    double cov_second = 0.;
+                    for ( int a = 1 ; a <= nbins ; a++ ) { 
+                        for ( int b = 1 ; b<= nbins ; b++ ) {
+                            double response_term = 0.01*probMatrixHist->GetBinContent(a,b);
+                            double cov_term = (statCovMatrix)->GetBinContent(i,b); 
+                            cov_second += response_term*cov_term;  
+                        }
+                    }
+                    cov_second = cov_second * (inputHist)->GetBinContent(j);
+                    cov_second = cov_second * (-1.) / globalYield;
+                    
+                    
+                    // Third term
+                    double cov_third = 0.;
+                    for ( int a = 1 ; a <= nbins ; a++ ) { 
+                        for ( int b = 1 ; b<= nbins ; b++ ) {
+                            double response_term = 0.01*probMatrixHist->GetBinContent(a,b);
+                            double cov_term = (statCovMatrix)->GetBinContent(j,b); 
+                            cov_third += response_term*cov_term; 
+                        }
+                    }
+                    cov_third = cov_third * (inputHist)->GetBinContent(i);
+                    cov_third = cov_third * (-1.) / globalYield;
+                    
+                    // Fourth term
+                    double cov_fourth = globalYieldErr * globalYieldErr / globalYield / globalYield;
+                    cov_fourth = cov_fourth * (inputHist)->GetBinContent(i);
+                    cov_fourth = cov_fourth * (inputHist)->GetBinContent(j);  
+
+                    
+                    // Sum up and normalize
+                    double cov_new = cov_first + cov_second + cov_third + cov_fourth;
+                    cov_new = cov_new * (globalEff / globalYield) * (globalEff / globalYield); 
+                    (outputCovHist)->SetBinContent(i, j, cov_new);
+                    (outputCovHist)->SetBinError(i, j, 0.);
+                }
+            }
+        }
+        
         
         // Loop over bins, including OF
-           for ( int i = 1 ; i <= nbins ; i++ ) {
+        for ( int i = 1 ; i <= nbins ; i++ ) {
                
-               double value_old = (inputHist+h)->GetBinContent(i);
-               double error_old = (inputHist+h)->GetBinError(i);
+            double value_old = (inputHist+h)->GetBinContent(i); 
                 
             double value_new = value_old * globalEff / globalYield; 
-            double error_new = error_old * globalEff / globalYield;
+            
+            // Get Error from Covariance Matrix
+            double error_new = TMath::Sqrt(outputCovHist->GetBinContent(i, i)); 
            
-               (hist+h)->SetBinContent(i, value_new);
-               (hist+h)->SetBinError(i, error_new);
-           }
-    } 
-    
-    // Return
-    return hist;
-    
+            (outputResultHist+h)->SetBinContent(i, value_new);
+            (outputResultHist+h)->SetBinError(i, error_new);
+        }
+        
+    }  
 }
 
 // Normalization
 // Normalize BBB unfolded Event counts, using a global Efficiency and a global event yield
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_ExtNormalizeBBBDistribution(TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist)
+void TopSVDFunctions::SVD_ExtNormalizeBBBDistribution(TH1D* outputResultHist, TH1D* inputHist, double* globalEfficiency, double* globalEventYield, double* globalEventYieldErr, int numHist, int verbose)
 {
     
+    // Thomas  
+    if (0) std::cout << globalEventYieldErr << verbose << std::endl; // Construct to avoid compilation warning
      
     // Existence of Objects
-    if ( inputHist == NULL ) return NULL;  
-       
-    // Create new Histograms
-    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    if ( inputHist == NULL ) return;   
+    if ( outputResultHist == NULL ) return;   
     
     // Number of Bins
     int nbins = inputHist->GetNbinsX();
@@ -4695,41 +4758,36 @@ TH1D* TopSVDFunctions::SVD_ExtNormalizeBBBDistribution(TH1D* inputHist, double* 
     for ( int h = 0 ; h < numHist ; h++ ) { 
         
         double globalYield = *(globalEventYield+h);
-        double globalYieldErr = *(globalEventYieldErr+h);
-        double globalEff = *(globalEfficiency+h); 
-        globalYieldErr = 0.;
+        double globalEff = *(globalEfficiency+h);  
         
         // Loop over bins, including OF
-           for ( int i = 1 ; i <= nbins ; i++ ) {
+        for ( int i = 1 ; i <= nbins ; i++ ) {
                
-               double value_old = (inputHist+h)->GetBinContent(i);
-               double error_old = (inputHist+h)->GetBinError(i);
+            double value_old = (inputHist+h)->GetBinContent(i);
+            double error_old = (inputHist+h)->GetBinError(i);
                 
             double value_new = value_old * globalEff / globalYield; 
             double error_new = error_old * globalEff / globalYield;
            
-               (hist+h)->SetBinContent(i, value_new);
-               (hist+h)->SetBinError(i, error_new);
-           }
-    }  
-    
-    // Return
-    return hist;
+            (outputResultHist+h)->SetBinContent(i, value_new);
+            (outputResultHist+h)->SetBinError(i, error_new);
+        }
+    }   
     
 }
 
 // Normalization
 // Normalize Generator Level distribution
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* totalGenEvents, int numHist)
+void TopSVDFunctions::SVD_ExtNormalizeGenDistribution(TH1D* outputResultHist, TH1D* inputHist, double* totalGenEvents, int numHist, int verbose)
 {
     
+    // Thomas  
+    if (0) std::cout <<  verbose << std::endl; // Construct to avoid compilation warning
      
     // Existence of Objects
-    if ( inputHist == NULL ) return NULL;   
-
-    // Create new Histograms
-    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    if ( inputHist == NULL ) return;    
+    if ( outputResultHist == NULL ) return;   
     
     // Number of Bins
     int nbins = inputHist->GetNbinsX();
@@ -4742,33 +4800,31 @@ TH1D* TopSVDFunctions::SVD_ExtNormalizeGenDistribution(TH1D* inputHist, double* 
         // Loop over bins, including OF
         for ( int i = 1 ; i <= nbins ; i++ ) {
                
-            double value_old = (inputHist+h)->GetBinContent(i);
-            //double error_old = (inputHist+h)->GetBinError(i);
+            double value_old = (inputHist+h)->GetBinContent(i); 
                
             double value_new = value_old / totalEvents;
             double error_new = 0.;
            
-            (hist+h)->SetBinContent(i, value_new);
-            (hist+h)->SetBinError(i, error_new);
+            (outputResultHist+h)->SetBinContent(i, value_new);
+            (outputResultHist+h)->SetBinError(i, error_new);
         }
-    }  
-    
-    // Return
-    return hist;
+    }   
     
 }
 
 // Normalization
 // Normalize SVD unfolded Event counts, using a global Efficiency and a global event yield
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* statCovMatrix, int numHist, TH2D* statCovMatrixNorm, int verbose)
+void TopSVDFunctions::SVD_IntNormalizeSVDDistribution(TH1D* outputResultHist, TH2D*& outputCovHist, TH1D* inputHist, TH2D* statCovMatrix, int numHist, int verbose)
 { 
-  
+    
+    // Thomas  
+    if (0) std::cout << statCovMatrix << verbose << std::endl; // Construct to avoid compilation warning
+ 
     // Existence of Objects
-    if ( inputHist == NULL ) return NULL;  
-       
-    // Create new Histograms
-    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    if ( inputHist == NULL ) return;   
+    if ( outputResultHist == NULL ) return;  
+    if ( outputCovHist == NULL ) return;  
     
     // Number of Bins
     int nbins = inputHist->GetNbinsX();
@@ -4779,77 +4835,89 @@ TH1D* TopSVDFunctions::SVD_IntNormalizeSVDDistribution(TH1D* inputHist, TH2D* st
         // Get Integral 
         bool doOF = true;
         double integral = SVD_Integral1D(inputHist, h, doOF);  
-	
-	//---
-	// parameters for mathematical calculation of error by error propagation
-	double errorIntegral2 = 0.;
-	double errorIntegralNaive2 = 0.;
-	for ( int i = 1 ; i <= nbins ; i++ ) {
-	  for ( int j = 1 ; j <= nbins ; j++ ) {
-	    errorIntegral2 += statCovMatrix->GetBinContent(i,j);
-	  }
-	  errorIntegralNaive2 += statCovMatrix->GetBinContent(i,i);
-	}
-	if(verbose>=2) cout << "errorIntegral2 = " << errorIntegral2 << "; errorIntegralNaive2= " << errorIntegralNaive2 <<endl;
-	//---
+        
+        // Calculate the Covariance Matrix
+        // only for nominal sample
+        if ( h == 0 ) {
+              
+            // Loop over bins, including OF
+            for ( int i = 1 ; i <= nbins ; i++ ) { 
+                for ( int j = 1 ; j<= nbins ; j++ ) {
+                
+                    double cov_old = (statCovMatrix)->GetBinContent(i,j);
+                    
+                    // First Term
+                    double cov_first = integral * integral * cov_old;
+                    
+                    // Second Term
+                    double cov_second = 0.;
+                    for ( int a = 1 ; a <= nbins; a++ ) {
+                         cov_second += (statCovMatrix)->GetBinContent(a,i);
+                    }
+                    cov_second = cov_second * (inputHist)->GetBinContent(j);
+                    cov_second = (-1.) * cov_second * integral ; 
+                    
+                    // Third Term
+                    double cov_third = 0.;
+                    for ( int a = 1 ; a <= nbins; a++ ) {
+                         cov_third += (statCovMatrix)->GetBinContent(a,j);
+                    }
+                    cov_third = cov_third * (inputHist)->GetBinContent(i);
+                    cov_third = (-1.) * cov_third * integral ; 
+                    
+                    // Fourth Term
+                    double cov_fourth = 0.;
+                    for ( int a = 1 ; a <= nbins; a++ ) { 
+                        for ( int b = 1 ; b <= nbins; b++ ) {
+                             cov_fourth += (statCovMatrix)->GetBinContent(a,b);
+                        }
+                    }
+                    cov_fourth = cov_fourth * (inputHist)->GetBinContent(i);
+                    cov_fourth = cov_fourth * (inputHist)->GetBinContent(j);
+                    
+                    // Normalization
+                    double cov_new = cov_first + cov_second + cov_third + cov_fourth; 
+                    if ( integral > 0. ) cov_new = cov_new / integral / integral / integral / integral;
+                    
+                    (outputCovHist)->SetBinContent(i, j, cov_new);
+                    (outputCovHist)->SetBinError(i, j, 0.);
+                }
+            }
+        }
+        
         
         // Loop over bins, including OF
-           for ( int i = 1 ; i <= nbins ; i++ ) {
-               
-               double value_old = (inputHist+h)->GetBinContent(i);
-               double error_old = (inputHist+h)->GetBinError(i);
+        for ( int i = 1 ; i <= nbins ; i++ ) {
                 
-	      double value_new = value_old;
-	      if ( integral > 0. ) value_new = value_new / integral ;  
-	      double errorFromDiv = error_old;
-	      double errorFromCov = 0.;
-	      if ( integral > 0. )   errorFromDiv = errorFromDiv / integral ;
-	      if (statCovMatrixNorm) errorFromCov = TMath::Sqrt(statCovMatrixNorm->GetBinContent(i,i));
-	      
-	      //---
-	      // mathematical calculation of error by error propagation
-	      double covIntegralSigmaI = 0.;
-	      for ( int j = 1 ; j <= nbins ; j++ ) {
-		covIntegralSigmaI += statCovMatrix->GetBinContent(j,i);
-	      }
-	      // derived equation
-	      double errorFromCovCalculated =  value_new*value_new * TMath::Sqrt(errorIntegral2/(value_old*value_old) - 2*integral*covIntegralSigmaI/TMath::Power(value_old,3) + integral*integral *error_old*error_old/TMath::Power(value_old,4)  );
-	      //---
-	    
-		(hist+h)->SetBinContent(i, value_new);
-		(hist+h)->SetBinError(i, errorFromCov);
-		
-		// comparison of different errors in verbose case
-		if(verbose>=2){
-		  double value = value_new;
-		  if(value==0) value=1e10;
-		  double relDifference = 0.;
-		  if(errorFromCov!=0) relDifference = (errorFromCov-errorFromDiv)/errorFromCov;
-		  cout << "rel. err. from division;            bin " << i << "; err/value= " << errorFromDiv/value <<endl;
-		  cout << "rel. err. from covariance matrix;   bin " << i << "; err/value= " << errorFromCov/value <<endl;
-		  cout << "rel. err. from covariance m. calc.; bin " << i << "; err/value= " << errorFromCovCalculated/value <<endl;
-		  cout << "difference = " << relDifference <<endl;
-	       }
-           }
-    } 
-    
-    // Return
-    return hist;
-    
+            double value_old = (inputHist+h)->GetBinContent(i); 
+                
+            double value_new = value_old;
+            if ( integral > 0. ) value_new = value_new / integral ;  
+            
+            // Get Error from Covariance Matrix
+            double error_new = TMath::Sqrt(outputCovHist->GetBinContent(i, i)); 
+           
+            (outputResultHist+h)->SetBinContent(i, value_new);             
+            (outputResultHist+h)->SetBinError(i, error_new);
+        }
+        
+        
+    }   
 }
 
 // Normalization
 // Normalize BBB unfolded Event counts, using a global Efficiency and a global event yield
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_IntNormalizeBBBDistribution(TH1D* inputHist, int numHist)
+void TopSVDFunctions::SVD_IntNormalizeBBBDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose)
 {
     
+    
+    // Thomas  
+    if (0) std::cout <<  verbose << std::endl; // Construct to avoid compilation warning
      
     // Existence of Objects
-    if ( inputHist == NULL ) return NULL;  
-       
-    // Create new Histograms
-    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    if ( inputHist == NULL ) return;   
+    if ( outputResultHist == NULL ) return;   
     
     // Number of Bins
     int nbins = inputHist->GetNbinsX();
@@ -4862,37 +4930,37 @@ TH1D* TopSVDFunctions::SVD_IntNormalizeBBBDistribution(TH1D* inputHist, int numH
         double integral = SVD_Integral1D(inputHist, h, doOF);  
         
         // Loop over bins, including OF
-           for ( int i = 1 ; i <= nbins ; i++ ) {
+        for ( int i = 1 ; i <= nbins ; i++ ) {
                
-               double value_old = (inputHist+h)->GetBinContent(i);
-               double error_old = (inputHist+h)->GetBinError(i);
+            double value_old = (inputHist+h)->GetBinContent(i);
+            double error_old = (inputHist+h)->GetBinError(i);
                 
             double value_new = value_old;
             if ( integral > 0. ) value_new = value_new / integral ;  
             double error_new = error_old;
             if ( integral > 0. ) error_new = error_new / integral ;  
            
-               (hist+h)->SetBinContent(i, value_new);
-               (hist+h)->SetBinError(i, error_new);
-           }
-    } 
-    
-    // Return
-    return hist;
+            (outputResultHist+h)->SetBinContent(i, value_new);
+            (outputResultHist+h)->SetBinError(i, error_new);
+        }
+    }  
     
 }
 
 // Normalization
 // Normalize Generator Level distribution
 // This creates new histograms on the heap. Do not forget to delete them sometimes.
-TH1D* TopSVDFunctions::SVD_IntNormalizeGenDistribution(TH1D* inputHist, int numHist)
+void TopSVDFunctions::SVD_IntNormalizeGenDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose)
 {
      
+    
+    // Thomas  
+    if (0) std::cout <<  verbose << std::endl; // Construct to avoid compilation warning
+    
+    
     // Existence of Objects
-    if ( inputHist == NULL ) return NULL;  
-       
-    // Create new Histograms
-    TH1D* hist = SVD_CloneHists1D(inputHist, numHist);
+    if ( inputHist == NULL ) return;  
+    if ( outputResultHist == NULL ) return;   
     
     // Number of Bins
     int nbins = inputHist->GetNbinsX();
@@ -4905,27 +4973,195 @@ TH1D* TopSVDFunctions::SVD_IntNormalizeGenDistribution(TH1D* inputHist, int numH
         double integral = SVD_Integral1D(inputHist, h, doOF);  
         
         // Loop over bins, including OF
-           for ( int i = 1 ; i <= nbins ; i++ ) {
+        for ( int i = 1 ; i <= nbins ; i++ ) {
                
-               double value_old = (inputHist+h)->GetBinContent(i);
-               double error_old = (inputHist+h)->GetBinError(i);
+            double value_old = (inputHist+h)->GetBinContent(i);
+            double error_old = (inputHist+h)->GetBinError(i);
                 
             double value_new = value_old;
             if ( integral > 0. ) value_new = value_new / integral ;  
             double error_new = error_old;
             if ( integral > 0. ) error_new = error_new / integral ;  
            
-               (hist+h)->SetBinContent(i, value_new);
-               (hist+h)->SetBinError(i, error_new);
-           }
-    } 
-    
-    // Return
-    return hist;
+            (outputResultHist+h)->SetBinContent(i, value_new);
+            (outputResultHist+h)->SetBinError(i, error_new);
+        }
+    }  
     
 }
 
 
+// Normalization
+// Normalize SVD unfolded Event counts, using a global Efficiency and a global event yield
+// This creates new histograms on the heap. Do not forget to delete them sometimes.
+void TopSVDFunctions::SVD_PseudatNormalizeSVDDistribution(TH1D* outputResultHist, TH2D*& outputCovHist, TH1D* inputHist, TH2D* statCovMatrixNorm, int numHist, int verbose)
+{ 
+    // Thomas  
+    if (0) std::cout << statCovMatrixNorm << verbose << std::endl; // Construct to avoid compilation warning
+ 
+    // Existence of Objects
+    if ( inputHist == NULL ) return;   
+    if ( outputResultHist == NULL ) return;  
+    if ( outputCovHist == NULL ) return;  
+    
+    // Number of Bins
+    int nbins = inputHist->GetNbinsX(); 
+    
+    // Loop over distributions
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+        
+        // Get Integral 
+        bool doOF = true;
+        double integral = SVD_Integral1D(inputHist, h, doOF);  
+    
+        //---
+        // parameters for mathematical calculation of error by error propagation
+        double errorIntegral2 = 0.;
+        double errorIntegralNaive2 = 0.;
+        for ( int i = 1 ; i <= nbins ; i++ ) {
+            for ( int j = 1 ; j <= nbins ; j++ ) {
+                errorIntegral2 += statCovMatrixNorm->GetBinContent(i,j);
+            }
+            errorIntegralNaive2 += statCovMatrixNorm->GetBinContent(i,i);
+        }
+        if(verbose>=2) cout << "errorIntegral2 = " << errorIntegral2 << "; errorIntegralNaive2= " << errorIntegralNaive2 <<endl;
+        //---
+        
+        // Loop over bins, including OF
+        for ( int i = 1 ; i <= nbins ; i++ ) {
+               
+            double value_old = (inputHist+h)->GetBinContent(i);
+            double error_old = (inputHist+h)->GetBinError(i);
+                    
+            double value_new = value_old;
+            if ( integral > 0. ) value_new = value_new / integral ;  
+            double errorFromDiv = error_old;
+            double errorFromCov = 0.;
+            if ( integral > 0. )   errorFromDiv = errorFromDiv / integral ;
+            if (statCovMatrixNorm) errorFromCov = TMath::Sqrt(statCovMatrixNorm->GetBinContent(i,i));
+              
+            //---
+            // mathematical calculation of error by error propagation
+            double covIntegralSigmaI = 0.;
+            for ( int j = 1 ; j <= nbins ; j++ ) {
+                covIntegralSigmaI += statCovMatrixNorm->GetBinContent(j,i);
+            }
+            // derived equation
+            double errorFromCovCalculated =  value_new*value_new * TMath::Sqrt(errorIntegral2/(value_old*value_old) - 2*integral*covIntegralSigmaI/TMath::Power(value_old,3) + integral*integral *error_old*error_old/TMath::Power(value_old,4)  );
+            //---
+            
+            (outputResultHist)->SetBinContent(i, value_new);
+            (outputResultHist)->SetBinError(i, errorFromCov);
+            
+            
+            // Copy covariance matrix
+            if ( h == 0 ) {
+                for ( int k = 1 ; k <= nbins ; k++ ) { 
+                    for ( int l = 1 ; l<= nbins ; l++ ) {  
+                        outputCovHist->SetBinContent(k,l, statCovMatrixNorm->GetBinContent(k,l));
+                    }
+                }
+            }
+            
+            // comparison of different errors in verbose case
+            if(verbose>=2){
+                double value = value_new;
+                if(value==0) value=1e10;
+                double relDifference = 0.;
+                if(errorFromCov!=0) relDifference = (errorFromCov-errorFromDiv)/errorFromCov;
+                cout << "rel. err. from division;            bin " << i << "; err/value= " << errorFromDiv/value <<endl;
+                cout << "rel. err. from covariance matrix;   bin " << i << "; err/value= " << errorFromCov/value <<endl;
+                cout << "rel. err. from covariance m. calc.; bin " << i << "; err/value= " << errorFromCovCalculated/value <<endl;
+                cout << "difference = " << relDifference <<endl;
+            }  
+    }
+    }  
+}
+
+// Normalization
+// Normalize BBB unfolded Event counts, using a global Efficiency and a global event yield
+// This creates new histograms on the heap. Do not forget to delete them sometimes.
+void TopSVDFunctions::SVD_PseudatNormalizeBBBDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose)
+{
+    
+    
+    // Thomas  
+    if (0) std::cout <<  verbose << std::endl; // Construct to avoid compilation warning
+     
+    // Existence of Objects
+    if ( inputHist == NULL ) return;   
+    if ( outputResultHist == NULL ) return;   
+    
+    // Number of Bins
+    int nbins = inputHist->GetNbinsX();
+    
+    // Loop over distributions
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+        
+        // Get Integral 
+        bool doOF = true;
+        double integral = SVD_Integral1D(inputHist, h, doOF);  
+        
+        // Loop over bins, including OF
+        for ( int i = 1 ; i <= nbins ; i++ ) {
+               
+            double value_old = (inputHist+h)->GetBinContent(i);
+            double error_old = (inputHist+h)->GetBinError(i);
+                
+            double value_new = value_old;
+            if ( integral > 0. ) value_new = value_new / integral ;  
+            double error_new = error_old;
+            if ( integral > 0. ) error_new = error_new / integral ;  
+           
+            (outputResultHist+h)->SetBinContent(i, value_new);
+            (outputResultHist+h)->SetBinError(i, error_new);
+        }
+    }  
+    
+}
+
+// Normalization
+// Normalize Generator Level distribution
+// This creates new histograms on the heap. Do not forget to delete them sometimes.
+void TopSVDFunctions::SVD_PseudatNormalizeGenDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose)
+{
+     
+    
+    // Thomas  
+    if (0) std::cout <<  verbose << std::endl; // Construct to avoid compilation warning
+    
+    
+    // Existence of Objects
+    if ( inputHist == NULL ) return;  
+    if ( outputResultHist == NULL ) return;   
+    
+    // Number of Bins
+    int nbins = inputHist->GetNbinsX();
+    
+    // Loop over distributions
+    for ( int h = 0 ; h < numHist ; h++ ) { 
+        
+        // Get Integral 
+        bool doOF = true;
+        double integral = SVD_Integral1D(inputHist, h, doOF);  
+        
+        // Loop over bins, including OF
+        for ( int i = 1 ; i <= nbins ; i++ ) {
+               
+            double value_old = (inputHist+h)->GetBinContent(i);
+            double error_old = (inputHist+h)->GetBinError(i);
+                
+            double value_new = value_old;
+            if ( integral > 0. ) value_new = value_new / integral ;  
+            double error_new = error_old;
+            if ( integral > 0. ) error_new = error_new / integral ;  
+           
+            (outputResultHist+h)->SetBinContent(i, value_new);
+            (outputResultHist+h)->SetBinError(i, error_new);
+        }
+    }  
+    
+}
 // Normalization
 // Calculate Globel Efficiency
 void TopSVDFunctions::SVD_GlobalEfficiency(double*& globalEff, double* totalRecEvents, double* totalGenEvents, int numHist)
@@ -5112,8 +5348,13 @@ void TopSVDFunctions::SVD_GetBinBoundariesY2D(double* boundaries, TH2D* histo)
 //             This means, the normalization is done with a global inclusive cross
 //             section which is calculated from the parameters totalDataEvents, 
 //             totalBgrEvents, totalTtBgrEvents, totalRecEvents and totalGenEvents.
+//             Analytic Error Propagation.
 //         2 means: Intrinsic Normalization.
 //             Each unfolded distribution is normalized with its integral. 
+//             Analytic Error Propagation.
+//         3 means: Intrinsic Normalization.
+//             Each unfolded distribution is normalized with its integral. 
+//             Error Propagation on the basis of pseudo experiments
 //    (14) CLOSURE TEST (14. digit from right)
 //         0 means: Default value, same as 1
 //         1 means: No closure test, unfold real data (default)
@@ -6066,6 +6307,7 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "Normalization:                                " << endl; 
         cout << "    Extrinsic Normalization:                  " << (flag_norm == 1 ) << endl;
         cout << "    Intrinsic Normalization:                  " << (flag_norm == 2 ) << endl;
+        cout << "    Intrinsic Normalization (Pseudo-Exp.):    " << (flag_norm == 3 ) << endl;
         cout << "    Total number of data events:              " << SVD_DoubleFromArray(totalDataEvents, 0)  << endl; 
         cout << "    Total number of background events:        " << SVD_DoubleFromArray(totalBgrEvents, 0) << endl;
         for ( int i = 1 ; i <= numberSyst ; i++ ) {
@@ -6096,51 +6338,51 @@ double TopSVDFunctions::SVD_Unfold(
             cout << "        Syst. Sample " << i << "                        " << SVD_DoubleFromArray(globalEfficiency, i) << endl;
         }  
         cout << endl;
-	if ( flag_verbose > 2 ) {
-	    cout <<"Input Binnings:" << endl;
-	    cout <<"     Data Histogram (" << oldNumBinsData << "+2 Bins):"; 
-	    for ( int i = 0; i < oldNumBinsData+1 ; i++ ) {
-		if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
-		cout << oldBinBndsData[i] << " " ;
-	    }
-	    cout << endl; 
-	    cout <<"     Bgr Histogram (" << oldNumBinsBgr << "+2 Bins):"; 
-	    for ( int i = 0; i < oldNumBinsBgr+1 ; i++ ) {
-		if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
-		cout << oldBinBndsBgr[i] << " " ;
-	    }
-	    cout << endl; 
-	    cout <<"     Ttbgr Histogram (" << oldNumBinsTtbgr << "+2 Bins):"; 
-	    for ( int i = 0; i < oldNumBinsTtbgr+1 ; i++ ) {
-		if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
-		cout << oldBinBndsTtbgr[i] << " " ;
-	    }
-	    cout << endl; 
-	    cout <<"     Gen Histogram (" << oldNumBinsGen << "+2 Bins):"; 
-	    for ( int i = 0; i < oldNumBinsGen+1 ; i++ ) {
-		if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
-		cout << oldBinBndsGen[i] << " " ;
-	    }
-	    cout << endl; 
-	    cout <<"     Rec Histogram (" << oldNumBinsRec << "+2 Bins):"; 
-	    for ( int i = 0; i < oldNumBinsRec+1 ; i++ ) {
-		if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
-		cout << oldBinBndsRec[i] << " " ;
-	    }
-	    cout << endl; 
-	    cout <<"     Resp Histogram in X (" << oldNumBinsRespX << "+2 Bins):"; 
-	    for ( int i = 0; i < oldNumBinsRespX+1 ; i++ ) {
-		if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
-		cout << oldBinBndsRespX[i] << " " ;
-	    }
-	    cout << endl; 
-	    cout <<"     Resp Histogram in Y (" << oldNumBinsRespY << "+2 Bins):"; 
-	    for ( int i = 0; i < oldNumBinsRespY+1 ; i++ ) {
-		if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
-		cout << oldBinBndsRespY[i] << " " ;
-	    } 
-	    cout << endl;
-	} 
+        if ( flag_verbose > 2 ) {
+            cout <<"Input Binnings:" << endl;
+            cout <<"     Data Histogram (" << oldNumBinsData << "+2 Bins):"; 
+            for ( int i = 0; i < oldNumBinsData+1 ; i++ ) {
+                if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+                cout << oldBinBndsData[i] << " " ;
+            }
+            cout << endl; 
+            cout <<"     Bgr Histogram (" << oldNumBinsBgr << "+2 Bins):"; 
+            for ( int i = 0; i < oldNumBinsBgr+1 ; i++ ) {
+                if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+                cout << oldBinBndsBgr[i] << " " ;
+            }
+            cout << endl; 
+            cout <<"     Ttbgr Histogram (" << oldNumBinsTtbgr << "+2 Bins):"; 
+            for ( int i = 0; i < oldNumBinsTtbgr+1 ; i++ ) {
+                if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+                cout << oldBinBndsTtbgr[i] << " " ;
+            }
+            cout << endl; 
+            cout <<"     Gen Histogram (" << oldNumBinsGen << "+2 Bins):"; 
+            for ( int i = 0; i < oldNumBinsGen+1 ; i++ ) {
+                if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+                cout << oldBinBndsGen[i] << " " ;
+            }
+            cout << endl; 
+            cout <<"     Rec Histogram (" << oldNumBinsRec << "+2 Bins):"; 
+            for ( int i = 0; i < oldNumBinsRec+1 ; i++ ) {
+                if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+                cout << oldBinBndsRec[i] << " " ;
+            }
+            cout << endl; 
+            cout <<"     Resp Histogram in X (" << oldNumBinsRespX << "+2 Bins):"; 
+            for ( int i = 0; i < oldNumBinsRespX+1 ; i++ ) {
+                if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+                cout << oldBinBndsRespX[i] << " " ;
+            }
+            cout << endl; 
+            cout <<"     Resp Histogram in Y (" << oldNumBinsRespY << "+2 Bins):"; 
+            for ( int i = 0; i < oldNumBinsRespY+1 ; i++ ) {
+                if ( i % 20 == 0 ) { cout << endl; cout << "        ";}
+                cout << oldBinBndsRespY[i] << " " ;
+            } 
+        }
+        cout << endl; 
         cout << "********************************************************************************************************************" << endl; 
         
     }        
@@ -6315,13 +6557,13 @@ double TopSVDFunctions::SVD_Unfold(
     
      
     // Calculate TOTAL COVARIANCE
-    TH2D* statCovHist     = NULL;
+    TH2D* statCovHist = NULL;
     TH2D* statCovHistNorm = NULL;
     TH2D* mcCovHist = NULL;
     if ( flag_regmode > 1 ) {
-        statCovHist     = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments), 1);
-	statCovHistNorm = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrixNorm(dataCovHist, nExperiments, 1, flag_norm, flag_verbose), 1);
-        mcCovHist       = SVD_CloneHists2D(mySVDUnfold->GetAdetCovMatrix(nExperiments), 1);
+        statCovHist = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments), 1);
+        statCovHistNorm = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrixNorm(dataCovHist, nExperiments, 1, flag_norm, flag_verbose), 1);
+        mcCovHist = SVD_CloneHists2D(mySVDUnfold->GetAdetCovMatrix(nExperiments), 1);
     } else {
         // The BBB only case 
         // Note: MC Cov hist is empty in this case.
@@ -6763,23 +7005,37 @@ double TopSVDFunctions::SVD_Unfold(
     
      
     // Normalize BBB Unfolded histogram
-    TH1D* normBBBHist = NULL;
-    if ( flag_norm == 1 ) normBBBHist = SVD_ExtNormalizeBBBDistribution(bbbHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1);
-    if ( flag_norm == 2 ) normBBBHist = SVD_IntNormalizeBBBDistribution(bbbHist, numberSyst+1);
+    TH1D* normBBBHist = SVD_CloneHists1D(bbbHist, numberSyst+1);
+    if ( flag_norm == 1 ) SVD_ExtNormalizeBBBDistribution(normBBBHist, bbbHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1);
+    if ( flag_norm == 2 ) SVD_IntNormalizeBBBDistribution(normBBBHist, bbbHist, numberSyst+1);
+    if ( flag_norm == 3 ) SVD_PseudatNormalizeBBBDistribution(normBBBHist, bbbHist, numberSyst+1);
     
     // Normalize SVD Unfolded histogram
-    TH1D* normUnfHist = NULL;
+    TH1D* normUnfHist = SVD_CloneHists1D(bbbHist, numberSyst+1);
+    TH2D* normUnfCovHist = SVD_CloneHists2D(mcHist, 1); 
     if ( flag_regmode > 1 ) {
-        if ( flag_norm == 1 ) normUnfHist = SVD_ExtNormalizeSVDDistribution(unfHist, probMatrixHist, statCovHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1);
-	if ( flag_norm == 2 ) normUnfHist = SVD_IntNormalizeSVDDistribution(unfHist, statCovHist, numberSyst+1, statCovHistNorm); 
+        if ( flag_norm == 1 ) SVD_ExtNormalizeSVDDistribution(normUnfHist, normUnfCovHist, unfHist, probMatrixHist, statCovHist, globalEfficiency, globalEventYield, globalEventYieldErr, numberSyst+1);
+        if ( flag_norm == 2 ) SVD_IntNormalizeSVDDistribution(normUnfHist, normUnfCovHist, unfHist, statCovHist, numberSyst+1); 
+        if ( flag_norm == 3 ) SVD_PseudatNormalizeSVDDistribution(normUnfHist, normUnfCovHist, unfHist, statCovHistNorm, numberSyst+1); 
     } else {
-    	normUnfHist =  SVD_CloneHists1D(normBBBHist, numberSyst+1); 
+        normUnfHist =  SVD_CloneHists1D(normBBBHist, numberSyst+1); 
+        for ( int i=1; i<=nbins; i++ ) {
+            for ( int j = 1; j <= nbins ; j++ ) {
+                normUnfCovHist->SetBinContent(i,j,0.);
+                normUnfCovHist->SetBinError(i,j,0.);
+            } 
+        } 
+        for (int i=1; i<=nbins; i++ ) {
+           double variance = TMath::Power(normBBBHist->GetBinError(i), 2.);
+           normUnfCovHist->SetBinContent(i,i,variance);
+        }   
     }
      
     // Normalize the SCALED generator level histogram
-    TH1D* normGenHist = NULL;
-    if ( flag_norm == 1 ) normGenHist = SVD_ExtNormalizeGenDistribution(xiniScaledHist, totalGenEvents, numberSyst+1);
-    if ( flag_norm == 2 ) normGenHist = SVD_IntNormalizeGenDistribution(xiniScaledHist, numberSyst+1);
+    TH1D* normGenHist = SVD_CloneHists1D(bbbHist, numberSyst+1);
+    if ( flag_norm == 1 ) SVD_ExtNormalizeGenDistribution(normGenHist, xiniScaledHist, totalGenEvents, numberSyst+1);
+    if ( flag_norm == 2 ) SVD_IntNormalizeGenDistribution(normGenHist, xiniScaledHist, numberSyst+1);
+    if ( flag_norm == 3 ) SVD_PseudatNormalizeGenDistribution(normGenHist, xiniScaledHist, numberSyst+1);
       
       
      
@@ -6846,7 +7102,7 @@ double TopSVDFunctions::SVD_Unfold(
      
     // Format Covariance Matrix
     TString dataCovStr = SVD_PlotName(channel, particle, quantity, special, syst, "DATACOV");
-    SVD_SetTitles2D(dataCovHist, dataCovStr, quantityTex, quantityTex, "Covariance on Measurements", 1); 
+    SVD_SetTitles2D(dataCovHist, dataCovStr, quantityTex, quantityTex, "Covariance on Measurements", 1);  
         
 
     // Format Raw Data
@@ -6913,12 +7169,6 @@ double TopSVDFunctions::SVD_Unfold(
     // Note: Here we have only 1 histogram in the array!
     TString statCovStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATCOV");
     SVD_SetTitles2D(statCovHist, statCovStr, quantityTex, quantityTex, "Statistical Covariance (Absolute)", 1);
-    
-    
-    // Format Stat COV Norm
-    // Note: Here we have only 1 histogram in the array!
-    TString statCovNormStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATCOVNORM");
-    SVD_SetTitles2D(statCovHistNorm, statCovNormStr, quantityTex, quantityTex, "Statistical Covariance (Normalised) [10^{-6}]", 1);
 
 
     // Format MC COV 
@@ -6931,6 +7181,12 @@ double TopSVDFunctions::SVD_Unfold(
     // Note: Here we have only 1 histogram in the array!
     TString totCovStr = SVD_PlotName(channel, particle, quantity, special, syst, "TOTCOV");
     SVD_SetTitles2D(totCovHist, totCovStr, quantityTex, quantityTex, "Total Covariance", 1);
+
+        
+    // Format Stat COV NORM 
+    // Note: Here we have only 1 histogram in the array!
+    TString normUnfCovStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATCOVNORM");
+    SVD_SetTitles2D(normUnfCovHist, normUnfCovStr, quantityTex, quantityTex, "Normalized Statistical Covariance", 1);
       
 
     // Format D-Distribution 
@@ -7095,11 +7351,6 @@ double TopSVDFunctions::SVD_Unfold(
     // CORRELATION STAT
     TString statCorrStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATCORR");
     TH2D* statCorrHist = SVD_Cov2Corr(statCovHist, statCorrStr, quantityTex, "Statistical");
-    
-    
-    // CORRELATION STAT
-    TString statCorrNormStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATCORRNORM");
-    TH2D* statCorrHistNorm = SVD_Cov2Corr(statCovHistNorm, statCorrNormStr, quantityTex, "Normalised Statistical");
 
 
     // CORRELATION MC    
@@ -7110,6 +7361,11 @@ double TopSVDFunctions::SVD_Unfold(
     // CORRELATION TOT
     TString totCorrStr = SVD_PlotName(channel, particle, quantity, special, syst, "TOTCORR");
     TH2D* totCorrHist = SVD_Cov2Corr(totCovHist, totCorrStr, quantityTex, "Total");
+
+
+    // CORRELATION STAT NORMALIZED
+    TString normUnfCorrStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATCORRORM");
+    TH2D* normUnfCorrHist = SVD_Cov2Corr(normUnfCovHist, normUnfCorrStr, quantityTex, "Normalized Statistical");
 
  
     // GLOBAL CORRELATION
@@ -7201,12 +7457,12 @@ double TopSVDFunctions::SVD_Unfold(
         CPQTex.Append(particleTex);
         CPQTex.Append(", ");
         CPQTex.Append(quantityTex);     
-	if(flag_plotStyle==2) CPQTex=channelTex;
+    if(flag_plotStyle==2) CPQTex=channelTex;
 
         // Tex / Systematics
         TString SystTex = syst;
         SystTex = systTex;
-	if(flag_plotStyle==2) SystTex="";
+    if(flag_plotStyle==2) SystTex="";
 
         // Tex / Regularization
         TString RegTex = ""; 
@@ -7217,7 +7473,7 @@ double TopSVDFunctions::SVD_Unfold(
             RegTex.Append("k = ");
             RegTex.Append(TString::Format("%.0f", regPar)); 
         } 
-	if(flag_plotStyle==2) RegTex="";
+    if(flag_plotStyle==2) RegTex="";
     
         // Stacks and Legends
         THStack* theRegStack = NULL;
@@ -7226,12 +7482,12 @@ double TopSVDFunctions::SVD_Unfold(
 
  
         // Draw Response Matrix
-	SVD_Draw2D(mcHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(mcHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputEventMatrix", "OPEN");  
 
 
         // Draw Probability Matrix
-	SVD_Draw2D(probMatrixHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(probMatrixHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputResponseMatrix");
         
 
@@ -7241,7 +7497,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, xiniHist, "Gen", "HIST E", "", 4, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, biniHist, "Rec", "HIST E", "", 2, numberSyst+1); 
         SVD_Array2Stack(theRegStack, theLegend, dataScaledHist, "Data, scaled", "HIST E", "", 1, numberSyst+1); 
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputDataGenRec");         
  
  
@@ -7251,7 +7507,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, dataHist, "Data", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, rawHist, "Raw", "HIST E", "", 2, 1); // Only 1 Histogram
         SVD_Array2Stack(theRegStack, theLegend, bgrHist, "Bgr", "HIST", "", 4, numberSyst+1); 
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputDataRawBgr");
  
 
@@ -7260,7 +7516,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ArrayScale(weightHist, 1./lumiScaleFactor, numberSyst+1);
         TString weightHistLegendEntry = "Weights w_{i}";  
         SVD_Array2Stack(theRegStack, theLegend, weightHist, "Weights", "HIST", "", 1, numberSyst+1); 
-	SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Weights", "", 0, true, rangeL, rangeR, true);   
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Weights", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultWeights");
 
   
@@ -7269,7 +7525,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "HIST E", "", 4, numberSyst+1); 
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultUnfBbbData");
 
 
@@ -7279,7 +7535,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, unfHist, "Unfolded", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, xiniScaledHist, "Gen, sc.", "HIST E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, bbbHist, "BBB", "HIST E", "", 4, numberSyst+1); 
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultUnfBbbGen");
      
      
@@ -7287,21 +7543,21 @@ double TopSVDFunctions::SVD_Unfold(
         // Exclude OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, histRatioUnfBBB, "Unf/BBB", "HIST E", "", 1, numberSyst+1);  
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Ratio: SVD over BBB, Error from SVD", "", 0, false, rangeL, rangeR, true);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Ratio: SVD over BBB, Error from SVD", "", 0, false, rangeL, rangeR, true);  
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioUnfBBB");
      
     
         // Draw Refolded Distribution
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);
-	if(flag_plotStyle==2){
-	    SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 1, numberSyst+1, 1);
-	    SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 2, numberSyst+1, 2);
-	}
-	else{
-	    SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 3, numberSyst+1);
-	    SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 1, numberSyst+1); 
-	} 
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);
+    if(flag_plotStyle==2){
+        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 1, numberSyst+1, 1);
+        SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 2, numberSyst+1, 2);
+    }
+    else{
+        SVD_Array2Stack(theRegStack, theLegend, refoldHist, "Refolded", "HIST", "", 3, numberSyst+1);
+        SVD_Array2Stack(theRegStack, theLegend, dataHist, "Measured", "HIST E", "", 1, numberSyst+1); 
+    } 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultRefoldedData"); 
            
      
@@ -7318,7 +7574,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theDValStack, theLegend, CPQTex, SystTex, "");  
         if ( flag_regmode > 1) gPad->SetLogy(true); 
         SVD_Array2Stack(theDValStack, theLegend, ddHist, "d-Values", "HIST", "", 1, numberSyst+1); 
-	SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "d-Values", "", 0, true, gPad->GetLogy(), rangeL, rangeR, true);   
+        SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "d-Values", "", 0, true, gPad->GetLogy(), rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "SvdD");
         gPad->SetLogy(false); 
    
@@ -7327,7 +7583,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theDValStack, theLegend, CPQTex, SystTex, "");  
         if ( flag_regmode > 1) gPad->SetLogy(true);
         SVD_Array2Stack(theDValStack, theLegend, svHist, "Sing. Values", "HIST", "", 1, numberSyst+1); 
-	SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "Sing. Values", "", 0, true, gPad->GetLogy(), rangeL, rangeR, true);   
+        SVD_DrawStackAutoRange(theDValStack, theLegend, quantityTex, "Sing. Values", "", 0, true, gPad->GetLogy(), rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "SvdSV");
         gPad->SetLogy(false); 
      
@@ -7339,7 +7595,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, stabHist, "Stab.", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, effHist, "Eff.", "HIST", "", 1, numberSyst+1); 
         SVD_Array2Stack(theRegStack, theLegend, probHist, "Prob. i #rightarrow i", "HIST", "", 4, numberSyst+1);
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in \%", "", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in \%", "", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationEffStabPurr"); 
      
     
@@ -7350,7 +7606,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, upperSmearinHist, "Smear-In Up", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, lowerSmearoutHist, "Smear-Out Low", "HIST", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, upperSmearoutHist, "Smear-Out Up", "HIST", "", 4, numberSyst+1);
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Smear-In and Smear-Out", "", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Smear-In and Smear-Out", "", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationSmear"); 
         
     
@@ -7359,64 +7615,62 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");   
         SVD_Array2Stack(theRegStack, theLegend, beffHist, "Gen. Eff.", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, effHist, "Efficiency", "HIST", "", 1, numberSyst+1); 
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency \%", "", 0, true, rangeL, rangeR, true);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency \%", "", 0, true, rangeL, rangeR, true);  
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationEfficiency");
     
     
         // Covariance Matrix (DATA)
         // Only for the nominal sample
-	SVD_Draw2D(dataCovHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(dataCovHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "InputCov");
     
-	
-	// Covariance Matrix (STAT)
-        // Only for the nominal sample
-	SVD_Draw2D(statCovHist, "COLZ TEXT", rangeL, rangeR, true);
-	SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovStat");
-	
     
-	// Covariance Matrix (STAT Normalised)
+        // Covariance Matrix (STAT)
         // Only for the nominal sample
-	statCovHistNorm->Scale(1e6);
-	SVD_Draw2D(statCovHistNorm, "COLZ TEXT", rangeL, rangeR, true);
-	SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovStatNorm");
-	statCovHistNorm->Scale(1e-6);
+        SVD_Draw2D(statCovHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovStat");
     
     
         // Covariance Matrix (MC)
         // Only for the nominal sample
-	SVD_Draw2D(mcCovHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(mcCovHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovMC");
     
     
         // Covariance Matrix (Total)
         // Only for the nominal sample
-	SVD_Draw2D(totCovHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(totCovHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCovTot");
+    
+    
+        // Covariance Matrix Normalized (STAT)
+        // Only for the nominal sample
+        SVD_Draw2D(normUnfCovHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormCovStat");
      
     
         // Correlation Matrix (STAT)
         // Only for the nominal sample
-	SVD_Draw2D(statCorrHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(statCorrHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCorrStat");
-		
-	
-	// Correlation Matrix (STAT)
-        // Only for the nominal sample
-	SVD_Draw2D(statCorrHistNorm, "COLZ TEXT", rangeL, rangeR, true);
-	SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCorrStatNorm");
     
     
         // Correlation Matrix (MC)
         // Only for the nominal sample
-	SVD_Draw2D(mcCorrHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(mcCorrHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCorrMC");
     
     
         // Correlation Matrix (Total)
         // Only for the nominal sample
-	SVD_Draw2D(totCorrHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_Draw2D(totCorrHist, "COLZ TEXT", rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultCorrTot");
+    
+    
+        // Correlation Matrix Normalized (STAT)
+        // Only for the nominal sample
+        SVD_Draw2D(normUnfCorrHist, "COLZ TEXT", rangeL, rangeR, true);
+        SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormCorrStat"); 
          
     
      
@@ -7425,7 +7679,7 @@ double TopSVDFunctions::SVD_Unfold(
         glcHist->UseCurrentStyle(); 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, glcHist, "#rho_{i} in \%", "HIST", "", 4, 1);  
-	SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Glob. Corr. #rho_{i} in \%", "HIST ", 0, true, rangeL, rangeR, true);
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Glob. Corr. #rho_{i} in \%", "HIST ", 0, true, rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultGlobalCorr");
  
  
@@ -7435,7 +7689,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, bbbErrHist, "BBB Unc.", "HIST", "", 4, 1);  
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultErrorUnfBbb");
             
     
@@ -7446,7 +7700,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, totErrHist, "Tot. Unc.", "HIST", "", 1, 1);  
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, mcErrHist, "MC Unc.", "HIST", "", 4, 1);   
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "MC Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "MC Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultErrorStatMcTotal");
    
 
@@ -7456,7 +7710,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Do not show OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, histRatioErrors, "Err. Ratio", "HIST", "", 1, 1);  
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioErrorUnfBbb");
     
           
@@ -7465,7 +7719,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, normUnfHist, "Unf for #sigma_{bin}/#sigma_{tot}", "HIST E", "", 1, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, normGenHist, "Gen for #sigma_{bin}/#sigma_{tot}", "HIST E", "", 3, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, normBBBHist, "BBB for #sigma_{bin}/#sigma_{tot}", "HIST E", "", 4, numberSyst+1); 
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Entries", "", 0, true, rangeL, rangeR, true);   
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormUnfBbbGen");
         
         
@@ -7474,7 +7728,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, normStatErrHist, "Unf. Err. #sigma_{bin}/#sigma_{tot}", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, normBBBErrHist, "BBB Err. #sigma_{bin}/#sigma_{tot}", "HIST", "", 4, 1);  
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormErrorUnfBbb");
    
  
@@ -7484,7 +7738,7 @@ double TopSVDFunctions::SVD_Unfold(
         // Do not show OF bins here!
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
         SVD_Array2Stack(theRegStack, theLegend, normRatioErrors, "Err. Rat. #sigma_{bin}/#sigma_{tot}", "HIST", "", 1, 1);  
-	SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Err. Ratio", "", 0, false, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioNormErrorUnfBbb");
             
               
@@ -7496,20 +7750,20 @@ double TopSVDFunctions::SVD_Unfold(
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, unfShiftHist, "Unfolding",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, bbbShiftHist, "BBB", "HIST", "", 2, numberSyst);  
-	    SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in \%", "", 0, false, rangeL, rangeR, true);  
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in \%", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultShifts");
         
             // Shift Hist as Ratio
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, ratioShiftHist, "Shift Unf/BBB", "HIST", "", 1, numberSyst); 
-	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Syst. Shift Ratio", "", 0, false, rangeL, rangeR, true);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Syst. Shift Ratio", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "RatioShifts");  
                 
             // Syst Shifts in Comparison
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, normUnfShiftHist, "Unf.",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, normBBBShiftHist, "BBB", "HIST", "", 2, numberSyst);  
-	    SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on #sigma_{bin} / #sigma_{tot} in \%", "", 0, false, rangeL, rangeR, true);  
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on #sigma_{bin} / #sigma_{tot} in \%", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormShifts"); 
                  
         }  
@@ -7529,7 +7783,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpUnfResult);
             }
             SVD_Array2Stack(theRegStack, theLegend, unfHist, "Opt.", "P", "p", 1, 1);
-	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Unfolding Result x_{i}", "HIST ", 0, true, rangeL, rangeR, true);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Unfolding Result x_{i}", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanResults"); 
             
              
@@ -7542,7 +7796,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpErr); 
             }
             SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Opt.", "P", "p", 1, 1);
-	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Unc. #delta x_{i} in %", "HIST ", 0, true, rangeL, rangeR, true);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Unc. #delta x_{i} in %", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanErrors"); 
          
              
@@ -7555,7 +7809,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpGlC); 
             }
             SVD_Array2Stack(theRegStack, theLegend, glcHist, "Opt.", "P", "p", 1, 1);
-	    SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Global Correlation #rho_{i} in %", "HIST ", 0, true, rangeL, rangeR, true);  
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Global Correlation #rho_{i} in %", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanGlobCorr"); 
             
              
@@ -7568,7 +7822,7 @@ double TopSVDFunctions::SVD_Unfold(
                 SVD_DeleteHists1D(tmpWeights); 
             } 
             SVD_Array2Stack(theRegStack, theLegend, weightHist, "Opt.", "P", "p", 1, 1);
-	    SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Weights w_{i}", "HIST ", 0, true, rangeL, rangeR, true);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Weights w_{i}", "HIST ", 0, true, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "KScanWeights"); 
             
             
@@ -7606,16 +7860,16 @@ double TopSVDFunctions::SVD_Unfold(
             canvas->Clear();
             delete theBgrHisto; theBgrHisto = NULL; 
             TGraph* gGlobCorr = SVD_Vect2Graph(vScanPoints, vGlobCorr);
-	    if(flag_plotStyle==2) SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1, 0.2); 
-	    else                  SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1); 
+            if(flag_plotStyle==2) SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1, 0.2); 
+            else                  SVD_DrawGraphAutoRange(gGlobCorr,  theBgrHisto, "P", 1); 
             TString gGlobCorrStr = SVD_PlotName(channel, particle, quantity, special, syst, "scanGLOBC");
-	    if(flag_plotStyle==2) SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "RMS Global Correlation  #bar{#rho}  [%]");
-	    else                  SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "Averaged Global Correlation  #bar{#rho}  in %");  
+            if(flag_plotStyle==2) SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "RMS Global Correlation  #bar{#rho}  [%]");
+            else                  SVD_SetTitles1D(theBgrHisto, gGlobCorrStr, "Parameter #tau", "Averaged Global Correlation  #bar{#rho}  in %");  
             TGraph* bestPoint = SVD_Point2Graph(optimalTauX, optimalTauY); 
             SVD_DrawGraph(bestPoint,  theBgrHisto, "P", 2); 
             bestPoint->SetMarkerSize(2.5); 
             bestPoint->SetMarkerStyle(3); 
-	    if(flag_plotStyle!=2) SVD_DrawVertLines(theBgrHisto, &vSingularValues, 2);
+            if(flag_plotStyle!=2) SVD_DrawVertLines(theBgrHisto, &vSingularValues, 2);
             TString textBestPoint = TString::Format("#tau = %.3f", optimalTauX);
             int textOrientationBestPoint = 23; 
             latexBestPoint->SetTextSize(0.03); 
@@ -7800,10 +8054,10 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_WriteHists1D(weightHist, numberSyst+1); 
         SVD_WriteHists1D(ddHist, numberSyst+1); 
         SVD_WriteHists1D(svHist, numberSyst+1); 
-        SVD_WriteHists2D(statCovHist, 1);
-	SVD_WriteHists2D(statCovHistNorm, 1);
+        SVD_WriteHists2D(statCovHist, 1); 
         SVD_WriteHists2D(mcCovHist, 1); 
-        SVD_WriteHists2D(totCovHist, 1); 
+        SVD_WriteHists2D(totCovHist, 1);
+        SVD_WriteHists2D(normUnfCovHist, 1);  
         SVD_WriteHists1D(probHist, numberSyst+1); 
         SVD_WriteHists1D(purHist, numberSyst+1); 
         SVD_WriteHists1D(stabHist, numberSyst+1); 
@@ -7817,9 +8071,9 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_WriteHists1D(bbbErrHist, 1); 
         SVD_WriteHists1D(histRatioErrors, 1); 
         SVD_WriteHists2D(statCorrHist, 1); 
-	SVD_WriteHists2D(statCorrHistNorm, 1);  
         SVD_WriteHists2D(mcCorrHist, 1); 
         SVD_WriteHists2D(totCorrHist, 1); 
+        SVD_WriteHists2D(normUnfCorrHist, 1);  
         SVD_WriteHists1D(glcHist, 1); 
         SVD_WriteHists1D(bbbShiftHist, numberSyst); 
         SVD_WriteHists1D(ratioShiftHist, numberSyst); 
@@ -7855,10 +8109,10 @@ double TopSVDFunctions::SVD_Unfold(
     SVD_DeleteHists1D(weightHist, numberSyst+1);  
     SVD_DeleteHists1D(ddHist, numberSyst+1); 
     SVD_DeleteHists1D(svHist, numberSyst+1); 
-    SVD_DeleteHists2D(statCovHist, 1);
-    SVD_DeleteHists2D(statCovHistNorm, 1);  
+    SVD_DeleteHists2D(statCovHist, 1); 
     SVD_DeleteHists2D(mcCovHist, 1); 
     SVD_DeleteHists2D(totCovHist, 1); 
+    SVD_DeleteHists2D(statCovHist, 1);  
     SVD_DeleteHists1D(probHist, numberSyst+1);  
     SVD_DeleteHists1D(purHist, numberSyst+1); 
     SVD_DeleteHists1D(stabHist, numberSyst+1); 
@@ -7871,10 +8125,10 @@ double TopSVDFunctions::SVD_Unfold(
     SVD_DeleteHists1D(totErrHist, 1); 
     SVD_DeleteHists1D(bbbErrHist, 1); 
     SVD_DeleteHists1D(histRatioErrors, 1); 
-    SVD_DeleteHists2D(statCorrHist, 1);
-    SVD_DeleteHists2D(statCorrHistNorm, 1);
+    SVD_DeleteHists2D(statCorrHist, 1); 
     SVD_DeleteHists2D(mcCorrHist, 1); 
-    SVD_DeleteHists2D(totCorrHist, 1);  
+    SVD_DeleteHists2D(totCorrHist, 1); 
+    SVD_DeleteHists2D(statCorrHist, 1);   
     SVD_DeleteHists1D(glcHist, 1);  
     SVD_DeleteHists1D(bbbShiftHist, numberSyst);  
     SVD_DeleteHists1D(ratioShiftHist, numberSyst);  

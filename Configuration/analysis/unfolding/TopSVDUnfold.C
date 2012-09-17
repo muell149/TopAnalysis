@@ -51,7 +51,7 @@ TopSVDUnfold::TopSVDUnfold( const TopSVDUnfold& other ) : BaseSVDUnfold(other)
 
 TopSVDUnfold::~TopSVDUnfold() 
 {
-	if ( fWeights != NULL ) delete fWeights;	
+    if ( fWeights != NULL ) delete fWeights;    
 }
 
 
@@ -59,12 +59,12 @@ TopSVDUnfold::~TopSVDUnfold()
 // This is your stuff here
 TH1D* TopSVDUnfold::GetWeights()
 { 
-	if ( fWeights == NULL ) return NULL;
-	 
-	for ( int i = 0 ; i < fWeights->GetNbinsX() + 2 ; i++) {
-		fWeights->SetBinError(i, 0.);
-	} 
-	return fWeights;
+    if ( fWeights == NULL ) return NULL;
+     
+    for ( int i = 0 ; i < fWeights->GetNbinsX() + 2 ; i++) {
+        fWeights->SetBinError(i, 0.);
+    } 
+    return fWeights;
 }
 
 // Unfold via tau
@@ -130,12 +130,12 @@ TH1D* TopSVDUnfold::Unfold(Int_t kreg)
    for(int i=0; i<fNdim; i++){
      for(int j=0; j<fNdim; j++){
        if(BSV(i)){
-  	 vbtmp(i) += QT(i,j)*vb(j)/BSV(i);
+       vbtmp(i) += QT(i,j)*vb(j)/BSV(i);
        }
        for(int m=0; m<fNdim; m++){
- 	 if(BSV(i)){
- 	   mAtmp(i,j) += QT(i,m)*mA(m,j)/BSV(i);
- 	 }
+      if(BSV(i)){
+        mAtmp(i,j) += QT(i,m)*mA(m,j)/BSV(i);
+      }
        }
      }
    }
@@ -176,9 +176,9 @@ TH1D* TopSVDUnfold::Unfold(Int_t kreg)
      // DAVID
      // Here is the point where you made changes!
      if ( kreg == -1 ) { // tau steered damping
-     	vdz(i) = sreg/(sreg*sreg + fTau*fTau);
+         vdz(i) = sreg/(sreg*sreg + fTau*fTau);
      } else { // k steered damping
-     	vdz(i) = sreg/(sreg*sreg + ASV(k)*ASV(k));
+         vdz(i) = sreg/(sreg*sreg + ASV(k)*ASV(k));
      }
      
      
@@ -252,11 +252,11 @@ TH1D* TopSVDUnfold::Unfold(Int_t kreg)
    // Save the weights
    // but only if this is not a "Toy"-Run
    if (!fToyMode && !fMatToyMode) {
-	   if ( fWeights != NULL ) {
-	       delete fWeights;
-	       fWeights = NULL;
-	   }
- 	  fWeights = (TH1D*)fBdat->Clone("Weights");
+       if ( fWeights != NULL ) {
+           delete fWeights;
+           fWeights = NULL;
+       }
+       fWeights = (TH1D*)fBdat->Clone("Weights");
       V2H(vw, *fWeights);
    }
 
@@ -266,6 +266,8 @@ TH1D* TopSVDUnfold::Unfold(Int_t kreg)
 //_______________________________________________________________________
 TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t seed, Int_t normType, Int_t verbose )
 {
+    
+verbose = 5;
    // Added by Joern: adapted from TSVDUnfold::GetUnfoldCovMatrix
    //                 to include the normalisation in the procedure
    //  
@@ -325,6 +327,7 @@ TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t 
 
    // Get the mean of the toys first
   for (int i=1; i<=ntoys; i++) {
+  	 
       // create a vector of unit Gaussian variables
     TVectorD g(fNdim);
     for (Int_t k= 0; k < fNdim; k++) g(k) = random.Gaus(0.,1.);
@@ -340,21 +343,21 @@ TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t 
 
     unfres = Unfold(GetKReg());
     // change by Joern
-    if(normType==2) unfresNorm = IntNormalizeSVDDistribution(unfres);
+    if(normType==3) unfresNorm = IntNormalizeSVDDistribution(unfres);
     // for other normalisation types return empty histo
     else return unfcovNorm;
 
     for (Int_t j=1; j<=fNdim; j++) {
       toymean    ->SetBinContent(j, toymean    ->GetBinContent(j) + unfres    ->GetBinContent(j)/ntoys);
       toymeanNorm->SetBinContent(j, toymeanNorm->GetBinContent(j) + unfresNorm->GetBinContent(j)/ntoys);
-      if(verbose>=2 && i==ntoys) cout <<"bin " <<j << "; toymean = " <<toymean->GetBinContent(j) << "; toymeanNorm = " << toymeanNorm->GetBinContent(j) <<endl;
+      if(verbose>2 && i==ntoys) cout <<"bin " <<j << "; toymean = " <<toymean->GetBinContent(j) << "; toymeanNorm = " << toymeanNorm->GetBinContent(j) <<endl;
     }
     delete unfres;
     delete unfresNorm;
     unfres = 0;
     unfresNorm = 0;
-  }
-
+  } 
+  
    // Reset the random seed
   random.SetSeed(seed);
    //Now the toys for the covariance matrix
@@ -373,26 +376,26 @@ TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t 
     }
     unfres = Unfold(GetKReg());
     // change by Joern
-    if(normType==2) unfresNorm = IntNormalizeSVDDistribution(unfres);
-    
+    if(normType==3) unfresNorm = IntNormalizeSVDDistribution(unfres);
+     
     for (Int_t j=1; j<=fNdim; j++) {
-      for (Int_t k=1; k<=fNdim; k++) {
-	unfcov->SetBinContent(j,k,unfcov->GetBinContent(j,k) + ( (unfres->GetBinContent(j) - toymean->GetBinContent(j))* (unfres->GetBinContent(k) - toymean->GetBinContent(k))/(ntoys-1)) );
-	unfcovNorm->SetBinContent(j,k,unfcovNorm->GetBinContent(j,k) + ( (unfresNorm->GetBinContent(j) - toymeanNorm->GetBinContent(j))* (unfresNorm->GetBinContent(k) - toymeanNorm->GetBinContent(k))/(ntoys-1)) );
-	
-	if(verbose>=2 && i==ntoys) {
-	  //cout << "(j,k) = (" << j <<", " << k << "); unfcov = " << unfcov->GetBinContent(j,k) << "; unfcovNorm = " << unfcovNorm->GetBinContent(j,k) <<endl;
-	  double unfcovCorrDenom = TMath::Sqrt(unfcov->GetBinContent(j,j)*unfcov->GetBinContent(k,k));
-	  if(unfcovCorrDenom==0) unfcovCorrDenom=1e10;
-	  double unfcovNormCorrDenom = TMath::Sqrt(unfcovNorm->GetBinContent(j,j)*unfcovNorm->GetBinContent(k,k));
-	  if(unfcovNormCorrDenom==0) unfcovNormCorrDenom=1e10;
-	  cout << "(j,k) = (" << j <<", " << k << "); unfcorr = " << unfcov->GetBinContent(j,k)/unfcovCorrDenom << "; unfcorrNorm = " << unfcovNorm->GetBinContent(j,k)/unfcovNormCorrDenom <<endl;
-	  double unfcovUncDenom = toymean->GetBinContent(k);
-	  if(unfcovUncDenom==0) unfcovUncDenom=1e10;
-	  double unfcovNormUncDenom = toymeanNorm->GetBinContent(k);
-	  if(unfcovNormUncDenom==0) unfcovNormUncDenom=1e10;
-	  if(j==k) cout<< "UNCERTAINTY [%], bin " << j << "; non-norm: " << TMath::Sqrt(unfcov->GetBinContent(j,j))/unfcovUncDenom << "; norm: " << TMath::Sqrt(unfcovNorm->GetBinContent(j,j))/unfcovNormUncDenom << endl;
-	}
+      for (Int_t k=1; k<=fNdim; k++) { 
+        unfcov->SetBinContent(j,k,unfcov->GetBinContent(j,k) + ( (unfres->GetBinContent(j) - toymean->GetBinContent(j))* (unfres->GetBinContent(k) - toymean->GetBinContent(k))/(ntoys-1)) ); 
+        unfcovNorm->SetBinContent(j,k,unfcovNorm->GetBinContent(j,k) + ( (unfresNorm->GetBinContent(j) - toymeanNorm->GetBinContent(j))* (unfresNorm->GetBinContent(k) - toymeanNorm->GetBinContent(k))/(ntoys-1)) ); 
+        
+        if(verbose>2 && i==ntoys) {
+          //cout << "(j,k) = (" << j <<", " << k << "); unfcov = " << unfcov->GetBinContent(j,k) << "; unfcovNorm = " << unfcovNorm->GetBinContent(j,k) <<endl;
+          double unfcovCorrDenom = TMath::Sqrt(unfcov->GetBinContent(j,j)*unfcov->GetBinContent(k,k));
+          if(unfcovCorrDenom==0) unfcovCorrDenom=1e10;
+          double unfcovNormCorrDenom = TMath::Sqrt(unfcovNorm->GetBinContent(j,j)*unfcovNorm->GetBinContent(k,k));
+          if(unfcovNormCorrDenom==0) unfcovNormCorrDenom=1e10;
+          cout << "(j,k) = (" << j <<", " << k << "); unfcorr = " << unfcov->GetBinContent(j,k)/unfcovCorrDenom << "; unfcorrNorm = " << unfcovNorm->GetBinContent(j,k)/unfcovNormCorrDenom <<endl;
+          double unfcovUncDenom = toymean->GetBinContent(k);
+          if(unfcovUncDenom==0) unfcovUncDenom=1e10;
+          double unfcovNormUncDenom = toymeanNorm->GetBinContent(k);
+          if(unfcovNormUncDenom==0) unfcovNormUncDenom=1e10;
+          if(j==k) cout<< "UNCERTAINTY [%], bin " << j << "; non-norm: " << TMath::Sqrt(unfcov->GetBinContent(j,j))/unfcovUncDenom << "; norm: " << TMath::Sqrt(unfcovNorm->GetBinContent(j,j))/unfcovNormUncDenom << endl;
+        } 
       }
     }
     
@@ -405,6 +408,12 @@ TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t 
   delete toymean;
   delete toymeanNorm;
   fToyMode = kFALSE;
+   
+    for (Int_t j=1; j<=fNdim; j++) {
+      for (Int_t k=1; k<=fNdim; k++) {
+      	 cout << "asdfasdfa " << j <<"/"<<k<<" " << unfcovNorm->GetBinContent(j,k) << endl;
+      }
+    }
   
   return unfcovNorm;
 }
@@ -432,15 +441,15 @@ TH1D* TopSVDUnfold::IntNormalizeSVDDistribution(TH1D* inputHist)
       
   // Loop over bins, including OF
   for ( int i = 1 ; i <= nbins ; i++ ) {
-	      
+          
     double value_old = inputHist->GetBinContent(i);
     //double error_old = inputHist->GetBinError(i);
-	      
+          
     double value_new = value_old;
     if ( integral > 0. ) value_new = value_new / integral ;  
     //double error_new = error_old;
     //if ( integral > 0. ) error_new = error_new / integral ;  
-	  
+      
     hist->SetBinContent(i, value_new);
     //hist->SetBinError(i, error_new);
     
