@@ -118,18 +118,28 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   // Closure test with reweighted m(ttbar) on parton level
   // will plot additionally the modified diff. norm. xSec on parton level
   bool reweightClosure=false;
-  if(closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down")){
+  if(closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")){
     reweightClosure=true;
     dataLabel = "#splitline{Reco. and Unf.}{Reweighted t#bar{t}}";
+    if (closureTestSpecifier.Contains("NoDistort")) dataLabel="Reco. and Unf.";
     closureLabel = "SysDistort"+closureTestSpecifier;
     // no systematics
     sysEnd = 1;
   }
   // Zprime pseudo data test: "", "500" or "750"
   TString zprime="";
-  if(closureTestSpecifier=="500" || closureTestSpecifier=="750"){
-    zprime=closureTestSpecifier;
-    dataLabel = "Pseudo-Data";
+  double zPrimeLumiWeightIni=1.;
+  TString zPrimeLumiWeightStr="";
+  if(closureTestSpecifier.Contains("500") || closureTestSpecifier.Contains("750")){
+    if      (closureTestSpecifier.Contains("500")) zprime="500";
+    else if (closureTestSpecifier.Contains("750")) zprime="750";
+    if      (closureTestSpecifier.Contains("x0p03"))  {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (x0.03)";}
+    else if (closureTestSpecifier.Contains("x0p1"))  {zPrimeLumiWeightIni=0.1; zPrimeLumiWeightStr=" (x0.1)";}
+    else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (x0.25)";}
+    else if (closureTestSpecifier.Contains("x0p5"))  {zPrimeLumiWeightIni=0.5; zPrimeLumiWeightStr=" (x0.5)";}
+    else if (closureTestSpecifier.Contains("x2"))    {zPrimeLumiWeightIni=2.; zPrimeLumiWeightStr=" (x2)";}
+    else if (closureTestSpecifier.Contains("x4"))    {zPrimeLumiWeightIni=4.; zPrimeLumiWeightStr=" (x4)";}
+    dataLabel = "#splitline{Reco. and Unf.}{t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr+"}";
     closureLabel = "Zprime"+closureTestSpecifier;
     // no systematics
     sysEnd = 1;
@@ -309,29 +319,32 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  //  Additional histos for reweighting closure test
 	  // =================================================
 	  if(reweightClosure&&sys==sysNo&&plotName!="inclusive"){
-	    TString closureTestSpecifier2="";
-	    if     (closureTestSpecifier.Contains("Up"  )) closureTestSpecifier2="Up";
-	    else if(closureTestSpecifier.Contains("Down")) closureTestSpecifier2="Down";
-	    // get reweighted samples
-	    TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/muonDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
-	    TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/elecDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
-	    TFile* mufile = new (TFile)(muReweighted);
-	    TFile* elfile = new (TFile)(elReweighted);
-	    // get plot
-	    TString partonPlot="analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName;
-	    histo_["reweighted"+plotName     ][kSig] = (TH1F*)(mufile->Get(partonPlot)->Clone("mu"+plotName));
-	    histo_["reweighted"+plotName+"El"][kSig] = (TH1F*)(elfile->Get(partonPlot)->Clone("el"+plotName));
-	    histo_["reweighted"+plotName     ][kSig]->Add(histo_["reweighted"+plotName+"El"][kSig]);
-	    // apply standard rebinning
-	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
-	    reBinTH1F(*histo_["reweighted"+plotName][kSig], binning_[plotName], verbose-1);
-	    // scale to unit area
-	    histo_["reweighted"+plotName][kSig]->Scale(1/histo_["reweighted"+plotName][kSig]->Integral(0,histo_["reweighted"+plotName][kSig]->GetNbinsX()+1));
-	    // divide by binwidth
-	    histo_["reweighted"+plotName][kSig]=divideByBinwidth(histo_["reweighted"+plotName][kSig], verbose-1);
-	    //set style
-	    histogramStyle(*histo_["reweighted"+plotName][kSig], kSig, false, 1.2, constMadgraphColor);
-	    histo_["reweighted"+plotName][kSig]->SetLineColor(kMagenta);
+	    // only if spectrum is distorted
+	    if(!closureTestSpecifier.Contains("NoDistort")){
+	      TString closureTestSpecifier2="";
+	      if     (closureTestSpecifier.Contains("Up"  )) closureTestSpecifier2="Up";
+	      else if(closureTestSpecifier.Contains("Down")) closureTestSpecifier2="Down";
+	      // get reweighted samples
+	      TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/muonDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
+	      TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/elecDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
+	      TFile* mufile = new (TFile)(muReweighted);
+	      TFile* elfile = new (TFile)(elReweighted);
+	      // get plot
+	      TString partonPlot="analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName;
+	      histo_["reweighted"+plotName     ][kSig] = (TH1F*)(mufile->Get(partonPlot)->Clone("mu"+plotName));
+	      histo_["reweighted"+plotName+"El"][kSig] = (TH1F*)(elfile->Get(partonPlot)->Clone("el"+plotName));
+	      histo_["reweighted"+plotName     ][kSig]->Add(histo_["reweighted"+plotName+"El"][kSig]);
+	      // apply standard rebinning
+	      std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
+	      reBinTH1F(*histo_["reweighted"+plotName][kSig], binning_[plotName], verbose-1);
+	      // scale to unit area
+	      histo_["reweighted"+plotName][kSig]->Scale(1/histo_["reweighted"+plotName][kSig]->Integral(0,histo_["reweighted"+plotName][kSig]->GetNbinsX()+1));
+	      // divide by binwidth
+	      histo_["reweighted"+plotName][kSig]=divideByBinwidth(histo_["reweighted"+plotName][kSig], verbose-1);
+	      //set style
+	      histogramStyle(*histo_["reweighted"+plotName][kSig], kSig, false, 1.2, constMadgraphColor);
+	      histo_["reweighted"+plotName][kSig]->SetLineColor(kMagenta);
+	    }
 	    // no other theory curves
 	    DrawPOWHEGPlot     = false;
 	    DrawMCAtNLOPlot    = false;
@@ -344,8 +357,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(zprime!=""&&sys==sysNo&&plotName!="inclusive"){
 	    TString muSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSigFall11PF.root";
 	    TString elSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSigFall11PF.root";
-	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"muonDiffXSecZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
-	    TString elZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"elecDiffXSecZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
+	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"muonDiffXSecSigZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
+	    TString elZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"elecDiffXSecSigZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
 	    TFile* muSigfile = new (TFile)(muSig);
 	    TFile* elSigfile = new (TFile)(elSig);
 	    TFile* muZprimefile = new (TFile)(muZprime);
@@ -359,9 +372,14 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    // relative apply lumiweight- needed because these are different samples (lumi-values defined in basicFunction.h)
 	    histo_["modified"+plotName           ][kSig]->Scale(lumiweight(kSig, constLumiMuon, 0, "muon"    ));
 	    histo_["modified"+plotName+"ElSig"   ][kSig]->Scale(lumiweight(kSig, constLumiElec, 0, "electron"));
-	    double zPrimeLumiWeight=1;
-	    if     (zprime=="500") zPrimeLumiWeight=(10*16.2208794979645*luminosity)/232074;
-	    else if(zprime=="750") zPrimeLumiWeight=(10*3.16951400706147*luminosity)/206525;
+	    double zPrimeLumiWeight=zPrimeLumiWeightIni;
+	    if     (zprime=="500") zPrimeLumiWeight=(zPrimeLumiWeight*16.2208794979645*luminosity)/232074;
+	    else if(zprime=="750") zPrimeLumiWeight=(zPrimeLumiWeight*3.16951400706147*luminosity)/206525;
+	    //zPrimeLumiWeight*=1000;
+	    std::cout<<"N mu sig="    << histo_["modified"+plotName           ][kSig]->GetEntries() << "; weight= " << lumiweight(kSig, constLumiMuon, 0, "muon"    ) << std::endl;
+	    std::cout<<"N mu sig integral="    << histo_["modified"+plotName           ][kSig]->Integral(0,histo_["modified"+plotName           ][kSig]->GetEntries()+1)<< std::endl;
+	    std::cout<<"N mu Zprime=" << histo_["modified"+plotName+"muZprime"][kSig]->GetEntries() << "; weight= " << zPrimeLumiWeight << std::endl;
+	    std::cout<<"N mu Zprime integral="<< histo_["modified"+plotName+"muZprime"][kSig]->Integral(0,histo_["modified"+plotName+"muZprime"][kSig]->GetEntries()+1)<< std::endl;
 	    histo_["modified"+plotName+"muZprime"][kSig]->Scale(zPrimeLumiWeight);
 	    histo_["modified"+plotName+"ElZprime"][kSig]->Scale(zPrimeLumiWeight);
 	    // add plots
@@ -578,7 +596,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
 	  // e) reweighted histos for closure test
-	  if(reweightClosure&&sys==sysNo&&plotName!="inclusive"){
+	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
 	  }
 	  
@@ -731,7 +749,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  double legTxtSize         = 0.04;
 	  double x1Subtrahend       = 0.30;
 	  double y1SubtrahendFactor = 0.05;
-	  if(reweightClosure) {
+	  if(reweightClosure || zprime!="") {
 	    legTxtSize         = 0.03;
 	    x1Subtrahend       = 0.35;
 	    y1SubtrahendFactor = 0.10;
@@ -816,8 +834,8 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  }
 	  
 	  // g) Legend - Closure test(s)
-	  if(reweightClosure&&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["reweighted"+plotName][kSig], "#splitline{MadGraph t#bar{t}}{Reweighted}", "L");
-	  if(zprime!=""     &&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} & "+zprime+" GeV Z'", "L");
+	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["reweighted"+plotName][kSig], "#splitline{MadGraph t#bar{t}}{Reweighted}", "L");
+	  if(zprime!=""     &&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr, "L");
 	  
 	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - x1Subtrahend);
 	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - y1SubtrahendFactor * (double)(leg->GetNRows()));

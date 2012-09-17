@@ -48,6 +48,8 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   if(decayChannel.compare("electron")==0) nameTtbarReweighted+="elecDiffXSec";
   else                                    nameTtbarReweighted+="muonDiffXSec";
   nameTtbarReweighted+="SigSysDistort"+specifier+"Fall11PF.root";
+  if(specifier=="NoDistort"&&decayChannel.compare("muon")==0) nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/muonDiffXSecSigFall11PF.root";
+  else if(specifier=="NoDistort"&&decayChannel.compare("electron")==0) nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/elecDiffXSecSigFall11PF.root";
   TString nameTtbarBGReweighted=nameTtbarReweighted;
   nameTtbarBGReweighted.ReplaceAll("Sig","Bkg"); 
   //nameTtbarBGReweighted.ReplaceAll("/Shape"+variation,""); //  ttbar SG reweighted for the moment
@@ -55,7 +57,7 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   if(useReweightedTop) outNameExtension="ReweightedttbarMass"+specifier;
   // b) get average weight of reweighting
   double avWeight=1;
-  if(useReweightedTop){
+  if(useReweightedTop && specifier!="NoDistort"){
     TFile* ttbarRewfile = new (TFile)(nameTtbarReweighted);
     TString weightPlot="eventWeightDileptonModelVariation/modelWeightSum";
     weightPlot.ReplaceAll("Up"  ,"");
@@ -81,13 +83,20 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   TString zprimeMass=specifier;
   TString nameZprime="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/Zprime/";
   double xSecSF=1.0;
+  xSecSF=0.03;
   if(decayChannel.compare("electron")==0) nameZprime+="elec";
   else nameZprime+="muon";
   nameZprime+="DiffXSecZprime_M"+zprimeMass+"_W"+zprimeMass+"0_Fall11PF.root";
   double zPrimeLumiWeight=1.;
   if     (zprimeMass=="500") zPrimeLumiWeight=(xSecSF*16.2208794979645*luminosity)/232074;
   else if(zprimeMass=="750") zPrimeLumiWeight=(xSecSF*3.16951400706147*luminosity)/206525;
-  if(zprime) outNameExtension="and"+zprimeMass+"GeVZprime";
+  TString xSecSFstr="";
+  if      (xSecSF==0.5)  xSecSFstr="x0p5";
+  else if (xSecSF==0.25) xSecSFstr="x0p25";
+  else if (xSecSF==0.1) xSecSFstr="x0p1";
+  else if (xSecSF==0.03) xSecSFstr="x0p03";
+  else if (xSecSF>1.)    xSecSFstr="x"+getTStringFromDouble(xSecSF,0);
+  if(zprime) outNameExtension="and"+zprimeMass+xSecSFstr+"GeVZprime";
   unsigned int kLast=kSAToptW;
   unsigned int kZprime=kSAToptW+1;
   if(zprime) kLast=kZprime;

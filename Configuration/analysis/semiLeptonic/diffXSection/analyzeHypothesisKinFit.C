@@ -113,12 +113,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   if(luminosity>50) dataSample="2011";
   // for closure test if desired
   TString closureLabel = "";
-  if (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down")){
+  if (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")){
     closureLabel = "SysDistort"+closureTestSpecifier;
     //dataFile = inputFolder+"/Shape"+closureTestSpecifier+"/"+decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"7TeV.root";
     dataFile=decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"7TeV.root";
   }
-  else if (closureTestSpecifier=="500" || closureTestSpecifier=="750"){
+  else if (closureTestSpecifier.Contains("500") || closureTestSpecifier.Contains("750")){
     closureLabel = "Zprime"+closureTestSpecifier;
     //dataFile = inputFolder+"/Zprime/"+decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime7TeV.root";
     dataFile = decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime7TeV.root";

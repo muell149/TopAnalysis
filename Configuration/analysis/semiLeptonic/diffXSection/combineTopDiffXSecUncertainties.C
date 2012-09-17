@@ -79,8 +79,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   if(luminosity<50.) dataSample="2010";
   // for closure test if desired
   TString closureLabel = "";
-  if      (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down")) closureLabel = "SysDistort"+closureTestSpecifier;
-  else if (closureTestSpecifier=="500" || closureTestSpecifier=="750") closureLabel = "Zprime"+closureTestSpecifier;
+  if      (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")) closureLabel = "SysDistort"+closureTestSpecifier;
+  else if (closureTestSpecifier.Contains("500") || closureTestSpecifier.Contains("750")) closureLabel = "Zprime"+closureTestSpecifier;
   // outputFile: target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C

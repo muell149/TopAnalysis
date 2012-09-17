@@ -93,14 +93,7 @@ elif [ $# -eq 3 -o $# -eq 4 ]; then
    fi
 ## in case of fourth argument:
    if [ $# -eq 4 ]; then
-       if   [ $4 == "Up"   ];        then closureTestSpecifier=\"Up\"
-       elif [ $4 == "Down" ];        then closureTestSpecifier=\"Down\"
-       elif [ $4 == "Up0p015"   ];   then closureTestSpecifier=\"Up0p015\"
-       elif [ $4 == "Down0p015" ];   then closureTestSpecifier=\"Down0p015\"
-       elif [ $4 == "500"  ];        then closureTestSpecifier=\"500\"
-       elif [ $4 == "750"  ];        then closureTestSpecifier=\"750\"
-       else                          closureTestSpecifier=\"\"
-       fi
+       closureTestSpecifier=\"$4\"
    fi
    echo "Decay channel, phase space extrapolation and level were specified by user:"
 else

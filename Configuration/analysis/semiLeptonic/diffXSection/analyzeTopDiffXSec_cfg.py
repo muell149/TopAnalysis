@@ -404,11 +404,15 @@ if(not options.sample=="none"):
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopTWScaleUp"
     elif(options.sample=="zprime_m500gev_w5000mev"):        
-        usedSample="TopAnalysis/Configuration/zprime_M500GeV_W5000MeV_Madgraph_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/zprime_M500GeV_W5000MeV_Madgraph_Fall11_AOD_cff"
 	additionalEventWeights=False
+	if(eventFilter=='signal only'):
+	    outputFileName+="Sig"
 	outputFileName+="Zprime_M500_W5000_"
     elif(options.sample=="zprime_m750gev_w7500mev"):        
-        usedSample="TopAnalysis/Configuration/zprime_M750GeV_W7500MeV_Madgraph_Summer11_AOD_cff"
+        usedSample="TopAnalysis/Configuration/Fall11/zprime_M750GeV_W7500MeV_Madgraph_Fall11_AOD_cff"
+	if(eventFilter=='signal only'):
+	    outputFileName+="Sig"
 	additionalEventWeights=False
 	outputFileName+="Zprime_M750_W7500_"
     elif(options.sample=="qcd" and decayChannel=='muon'):
