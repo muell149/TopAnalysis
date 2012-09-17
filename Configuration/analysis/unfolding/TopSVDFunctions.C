@@ -4163,7 +4163,10 @@ void TopSVDFunctions::SVD_WriteHists1D(TH1D* hists, int numHist)
     
     // Loop over all histograms
     for ( int h = 0 ; h < numHist ; h++ ) {
+        
+        // Root File
         (hists+h)->Write();
+        
     } 
 }
 
@@ -4180,6 +4183,108 @@ void TopSVDFunctions::SVD_WriteHists2D(TH2D* hists, int numHist)
         (hists+h)->Write();
     } 
 }  
+
+
+// Write Array of 1D histograms to ASCII file
+void TopSVDFunctions::SVD_Hists1DToASCII(TH1D* hists, TString textOutputFolderName, TString numberFormat, TString errSep, TString lineSep, int numHist)
+{
+    // Existence of Objects
+    if ( hists == NULL ) return; 
+    
+    // Get Histogram name
+    TString histoname = hists->GetName();
+    
+    // Loop over all histograms
+    for ( int h = 0 ; h < numHist ; h++ ) {
+        
+        // Create File     
+        TString filename = "";
+        filename.Append(histoname);
+        if ( h > 0 ) {
+            filename.Append("_");
+            filename.Append(h);
+        } 
+        filename.Append(".txt");       
+        SVD_MakeFolder(textOutputFolderName);
+        filename.Prepend("/");
+        filename.Prepend(textOutputFolderName);
+        SVD_RemoveFile(filename);
+        SVD_TouchFile(filename);
+        
+        // Size of Histogram
+        int nbins = hists->GetNbinsX();
+        
+        
+        // Fill that new file with numbers
+        FILE* outputFile; 
+        outputFile = fopen(filename, "w"); 
+        for ( int i = 1 ; i <= nbins ; i++ ) {
+            double value = (hists+h)->GetBinContent(i);
+            double error = (hists+h)->GetBinError(i);
+            
+            TString FormatString = "";
+            FormatString.Append(numberFormat);
+            FormatString.Append(errSep);
+            FormatString.Append(numberFormat);
+            FormatString.Append(lineSep);
+              
+            fprintf(outputFile, FormatString, value, error); 
+        
+        }
+        fclose(outputFile);
+    } 
+}
+
+// Write Array of 1D histograms to ASCII file
+void TopSVDFunctions::SVD_Hists2DToASCII(TH2D* hists, TString textOutputFolderName, TString numberFormat, TString errSep, TString lineSep, TString colSep, int numHist)
+{
+    // Existence of Objects
+    if ( hists == NULL ) return; 
+    
+    // Get Histogram name
+    TString histoname = hists->GetName();
+    
+    // Loop over all histograms
+    for ( int h = 0 ; h < numHist ; h++ ) {
+        
+        // Create File
+        TString filename = "";
+        filename.Append(histoname);
+        if ( h > 0 ) {
+            filename.Append("_");
+            filename.Append(h);
+        } 
+        filename.Append(".txt");        
+        SVD_MakeFolder(textOutputFolderName);
+        filename.Prepend("/");
+        filename.Prepend(textOutputFolderName);
+        SVD_RemoveFile(filename);
+        SVD_TouchFile(filename);
+        
+        // Size of Histogram
+        int nbins = hists->GetNbinsX();
+        
+        
+        // Fill that new file with numbers
+        FILE* outputFile; 
+        outputFile = fopen(filename, "w"); 
+        for ( int i = 1 ; i <= nbins ; i++ ) {
+            for ( int j = 1 ; j <= nbins ; j++ ) {
+                double value = (hists+h)->GetBinContent(i, j);
+                double error = (hists+h)->GetBinError(i, j);
+                
+                TString FormatString = "";
+                FormatString.Append(numberFormat);
+                FormatString.Append(errSep);
+                FormatString.Append(numberFormat);
+                if (j < nbins )  FormatString.Append(colSep);
+                if ( j == nbins) FormatString.Append(lineSep);
+                fprintf(outputFile, FormatString, value, error); 
+            }
+        }
+        fclose(outputFile);
+    } 
+}
 
 
 // Remove from TDirectory
@@ -5523,9 +5628,7 @@ double TopSVDFunctions::SVD_Unfold(
       
      
     // TEXT FILE
-    int flag_text = SVD_GetDigit(steering, 6, 2); 
-    if ( flag_scan == 1 ) flag_text = 1;
-    if ( regParFile.CompareTo("")==0 ) flag_text = 1;
+    int flag_text = SVD_GetDigit(steering, 6, 2);  
 
 
     // VERBOSITY
@@ -6974,7 +7077,7 @@ double TopSVDFunctions::SVD_Unfold(
     ////////////   S A V E   B E S T   V A L U E S   //////////////////
     ///////////////////////////////////////////////////////////////////    
  
-    if ( flag_scan == 2 && flag_text == 2) {
+    if ( flag_scan == 2) {
          
         // Create String to Print
         TString lineStrList =  thekey;
@@ -7259,7 +7362,8 @@ double TopSVDFunctions::SVD_Unfold(
 
     // RATIO: Unfolded versus BBB
     TH1D* histRatioUnfBBB = SVD_MakeRatioNum(unfHist, bbbHist, numberSyst+1);
-    SVD_SetTitles1D(histRatioUnfBBB, "RATIO", quantityTex, "Ratio", numberSyst+1);
+    TString ratioUnfBBBStr = SVD_PlotName(channel, particle, quantity, special, syst, "RATIOUNFBBB"); 
+    SVD_SetTitles1D(histRatioUnfBBB, ratioUnfBBBStr, quantityTex, "Ratio", numberSyst+1);
 
  
  
@@ -7280,7 +7384,8 @@ double TopSVDFunctions::SVD_Unfold(
 
     // RATIO: Refolded versus Data
     TH1D* histRatioRefDat = SVD_MakeRatioDenom(refoldHist, dataHist, numberSyst+1);
-    SVD_SetTitles1D(histRatioRefDat, "RATIO", quantityTex, "Ratio", numberSyst+1);
+    TString ratioRefDatStr = SVD_PlotName(channel, particle, quantity, special, syst, "RATIOREFDAT"); 
+    SVD_SetTitles1D(histRatioRefDat, ratioRefDatStr, quantityTex, "Ratio", numberSyst+1);
 
 
 
@@ -7340,12 +7445,14 @@ double TopSVDFunctions::SVD_Unfold(
 
     // RATIO: UnfErrors versus BBBErrors
     TH1D* histRatioErrors = SVD_MakeRatioZero(statErrHist, bbbErrHist);
-    SVD_SetTitles1D(histRatioErrors, "RATIO", quantityTex, "Ratio");
+    TString ratioErrorsStr = SVD_PlotName(channel, particle, quantity, special, syst, "RATIOERROR"); 
+    SVD_SetTitles1D(histRatioErrors, ratioErrorsStr, quantityTex, "Ratio");
     
 
     // RATIO: UnfErrors versus BBBErrors (Normalized)
     TH1D* normRatioErrors = SVD_MakeRatioZero(normStatErrHist, normBBBErrHist);
-    SVD_SetTitles1D(normRatioErrors, "RATIO", quantityTex, "Ratio");
+    TString rormRatioErrorsStr = SVD_PlotName(channel, particle, quantity, special, syst, "RATIONORMERROR"); 
+    SVD_SetTitles1D(normRatioErrors, rormRatioErrorsStr, quantityTex, "Ratio");
 
 
     // CORRELATION STAT
@@ -7383,27 +7490,32 @@ double TopSVDFunctions::SVD_Unfold(
 
     // Systematic Shifts with Unfolding
     TH1D* unfShiftHist = SVD_ArrayToShifts(unfHist, numberSyst+1);
-    SVD_SetTitles1D(unfShiftHist, "SHIFT", quantityTex, "Syst. Shift in \%", numberSyst);
+    TString unfShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "UNFSHIFT");
+    SVD_SetTitles1D(unfShiftHist, unfShiftHistStr, quantityTex, "Syst. Shift in \%", numberSyst);
     
     
     // Systematic Shifts with BBB
     TH1D* bbbShiftHist = SVD_ArrayToShifts(bbbHist, numberSyst+1);
-    SVD_SetTitles1D(bbbShiftHist, "SHIFT", quantityTex, "Syst. Shift in \%", numberSyst);
+    TString bbbShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "BBBSHIFT");
+    SVD_SetTitles1D(bbbShiftHist, bbbShiftHistStr, quantityTex, "Syst. Shift in \%", numberSyst);
     
     
     // Comparison of systematic shifts
     TH1D* ratioShiftHist = SVD_MakeRatioZero(unfShiftHist, bbbShiftHist, numberSyst);
-    SVD_SetTitles1D(ratioShiftHist, "SHIFTRATIO", quantityTex, "Ratio of Syst. Shifts", numberSyst); 
+    TString ratioShiftHistStr = SVD_PlotName(channel, particle, quantity, special, syst, "RATIOSHIFT"); 
+    SVD_SetTitles1D(ratioShiftHist, ratioShiftHistStr, quantityTex, "Ratio of Syst. Shifts", numberSyst); 
     
      
     // Systematic Shifts with Unfolding, Normalized
     TH1D* normUnfShiftHist = SVD_ArrayToShifts(normUnfHist, numberSyst+1);
-    SVD_SetTitles1D(normUnfShiftHist, "SHIFT", quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", numberSyst);
+    TString normUnfShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "NORMUNFSHIFT");
+    SVD_SetTitles1D(normUnfShiftHist, normUnfShiftHistStr, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", numberSyst);
     
      
     // Systematic Shifts with BBB, Normalized
     TH1D* normBBBShiftHist = SVD_ArrayToShifts(normBBBHist, numberSyst+1);
-    SVD_SetTitles1D(normBBBShiftHist, "SHIFT", quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", numberSyst);
+    TString normBbbShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "NORMBBBSHIFT");
+    SVD_SetTitles1D(normBBBShiftHist, normBbbShiftHistStr, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", numberSyst);
     
     
     
@@ -8025,6 +8137,70 @@ double TopSVDFunctions::SVD_Unfold(
     
     }
      
+     
+  
+    //////////////////////////////////////////////////////////
+    ///////////   SAVE TO TXT FILE  //////////////////////////
+    //////////////////////////////////////////////////////////
+    
+    
+    // Save all relevant Plots in ROOT File
+    if ( flag_text == 2 ) {
+    
+     
+        TString textOutputFolderName = "./SVD/Text";
+        TString errSep = "+/-";
+        TString lineSep = "\n";
+        TString colSep = ", ";
+   
+        // Open a ROOT file        
+        TFile* file = new TFile(outputfilenameRoot, "RECREATE");
+    
+        // Write histograms
+        SVD_Hists1DToASCII(rawHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
+        SVD_Hists1DToASCII(bgrHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(ttbgrHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(dataHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(dataScaledHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists2DToASCII(mcHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, numberSyst+1); 
+        SVD_Hists1DToASCII(xiniHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(xiniScaledHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(biniHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(beffHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1);  
+        SVD_Hists1DToASCII(bbbHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists2DToASCII(dataCovHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
+        SVD_Hists1DToASCII(weightHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(ddHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(svHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists2DToASCII(statCovHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1);
+        SVD_Hists2DToASCII(statCovHistNorm, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1);
+        SVD_Hists2DToASCII(mcCovHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
+        SVD_Hists2DToASCII(totCovHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
+        SVD_Hists1DToASCII(probHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(purHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(stabHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(effHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(histRatioUnfBBB, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(refoldHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(histRatioRefDat, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst+1); 
+        SVD_Hists1DToASCII(statErrHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
+        SVD_Hists1DToASCII(mcErrHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
+        SVD_Hists1DToASCII(totErrHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
+        SVD_Hists1DToASCII(bbbErrHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
+        SVD_Hists1DToASCII(histRatioErrors, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
+        SVD_Hists2DToASCII(statCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
+        SVD_Hists2DToASCII(normUnfCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1);  
+        SVD_Hists2DToASCII(mcCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
+        SVD_Hists2DToASCII(totCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
+        SVD_Hists1DToASCII(glcHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
+        SVD_Hists1DToASCII(bbbShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
+        SVD_Hists1DToASCII(ratioShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
+    
+        // Close file
+        file->Close();
+ 
+ 
+    }  
   
     //////////////////////////////////////////////////////////
     ///////////   SAVE TO ROOT FILE //////////////////////////

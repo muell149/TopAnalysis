@@ -264,6 +264,10 @@ class TopSVDFunctions
         static void SVD_PseudatNormalizeGenDistribution(TH1D* outputResultHist, TH1D* inputHist, int numHist, int verbose=0);
         
         
+        // Text Files
+        static void SVD_Hists1DToASCII(TH1D* hists, TString textOutputFolderName, TString numberFormat, TString errSep = "+/-", TString lineSep = "\n", int numHist = 1);
+        static void SVD_Hists2DToASCII(TH2D* hists, TString textOutputFolderName, TString numberFormat, TString errSep = "+/-", TString lineSep = "\n", TString colSep = ", ", int numHist = 1);
+        
         // Files and Folders
         static TString SVD_FindFolder(TString filepath);
         static TString SVD_FindFile(TString filepath);

@@ -266,8 +266,7 @@ TH1D* TopSVDUnfold::Unfold(Int_t kreg)
 //_______________________________________________________________________
 TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t seed, Int_t normType, Int_t verbose )
 {
-    
-verbose = 5;
+     
    // Added by Joern: adapted from TSVDUnfold::GetUnfoldCovMatrix
    //                 to include the normalisation in the procedure
    //  
@@ -278,7 +277,7 @@ verbose = 5;
    // "seed"   - seed for pseudo experiments
    // "normType" - set type of normalisation (1=extrinsic, 2=intrinsic)
    // Note that this covariance matrix will contain effects of forced normalisation if spectrum is normalised to unit area.
-  if(verbose>=2) {
+  if(verbose>2) {
     cout << "TopSVDUnfold::GetUnfoldCovMatrixNorm -> calculates the covariance matrix for the unfolded results after normalisation" << endl;
     if     (normType==1) cout << "Extrinsic Normalisation (at the moment NOT WORKING!!!) normType = " << normType << endl;
     else if(normType==2) cout << "Intrinsic Normalisation! normType = " << normType << endl;
