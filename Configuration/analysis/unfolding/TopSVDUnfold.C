@@ -408,11 +408,11 @@ TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t 
   delete toymeanNorm;
   fToyMode = kFALSE;
    
-    for (Int_t j=1; j<=fNdim; j++) {
-      for (Int_t k=1; k<=fNdim; k++) {
-      	 cout << "asdfasdfa " << j <<"/"<<k<<" " << unfcovNorm->GetBinContent(j,k) << endl;
-      }
-    }
+//     for (Int_t j=1; j<=fNdim; j++) {
+//       for (Int_t k=1; k<=fNdim; k++) {
+//       	 cout << "asdfasdfa " << j <<"/"<<k<<" " << unfcovNorm->GetBinContent(j,k) << endl;
+//       }
+//     }
   
   return unfcovNorm;
 }
