@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.27 2012/07/05 12:47:49 blutz Exp $
+// $Id: NTupleWriter.cc,v 1.28 2012/07/05 21:31:30 blutz Exp $
 //
 //
 
@@ -291,6 +291,7 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
   triggerMap_["HLT_Mu13_Mu8_v"] = 4;
   triggerMap_["HLT_Mu17_Mu8_v"] = 8;
   triggerMap_["HLT_DoubleMu45_v"] = 0x10;
+  triggerMap_["HLT_Mu17_TkMu8_v"] = 0x20;
 
   //use bits 9 to 16 for mu e
   triggerMap_["HLT_Mu8_Ele17_CaloIdL_v"] = 0x100;
@@ -298,6 +299,8 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
   triggerMap_["HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v"] = 0x400;
   triggerMap_["HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v"] = 0x800;
   triggerMap_["HLT_Mu10_Ele10_CaloIdL_v"] = 0x1000;
+  triggerMap_["HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"] = 0x2000;
+  triggerMap_["HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"] = 0x4000;
 
 
   //use bits 17-24 for ee
