@@ -409,24 +409,26 @@ void BCC::setBCCinX_IntersectionInBin()
     
     for (int jBinData = 0; jBinData < NBinsData; jBinData++)
     {
-      bool exists=false;
       if(sumWeights[jBinData] > 0.0)
       {
 	min = (double)LONG_MAX;
-	
+	avXvalues[jBinData] =0.0;
 	average[jBinData] = sumWeights[jBinData]/NTheoryBinsPerDataBin[jBinData];
-	
 	for(int jBinTheory = 1; jBinTheory <= NBinsTheory; jBinTheory++)
 	{
 	  double xTheory     = refHisto.GetBinCenter(jBinTheory);
-	  double diff        = fabs(average[jBinData] - refHisto.GetBinContent(jBinTheory));
+	  double diff        = std::abs(average[jBinData] - refHisto.GetBinContent(jBinTheory));
 	  
-	  if ( (xTheory > refVecBinning[jBinData] && xTheory < refVecBinning[jBinData+1]) && diff < min && !exists) 
+	  if ( (xTheory > refVecBinning[jBinData] && xTheory < refVecBinning[jBinData+1]) && diff <= min) 
 	  {
-	    // take first intersection point for top Pt bin 1
-	    //if((iterHistos->first).Contains("ttbarPt")) exists=true;	    
-	    min = diff;
-	    avXvalues[jBinData] = refHisto.GetBinCenter(jBinTheory);					
+	    // use first intersection point in ttbarPt bin1
+	    if(!((iterHistos->first).Contains("ttbarPt")&&jBinData==0)||(refHisto.GetBinCenter(jBinTheory)<15)){
+	      // use no intersection points near to bin borders
+	      //if(std::abs((refHisto.GetBinCenter(jBinTheory)-refVecBinning[jBinData])/refVecBinning[jBinData])>0.05&&std::abs((refHisto.GetBinCenter(jBinTheory)-refVecBinning[jBinData+1])/refVecBinning[jBinData+1])<0.05){
+	      //std::cout << iterHistos->first << ": theory bin " << jBinTheory << "y average: " << average[jBinData] << ", y-diff(bin) " << diff << "<" << min << ", xval "<< refHisto.GetBinCenter(jBinTheory) << std::endl;
+	      min = diff;
+	      avXvalues[jBinData] = refHisto.GetBinCenter(jBinTheory);					
+	    }
 	  }
 	}
       }
