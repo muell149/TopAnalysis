@@ -142,6 +142,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
     save=false;
   }
+  
+  if(verbose>1) {
+    std::cout << "dataFile " << dataFile << std::endl;
+    std::cout << "closureTestSpecifier " << closureTestSpecifier << std::endl;
+    std::cout << "outputFileName " << outputFileName << std::endl;
+  } 
 
   // ---
   //    create list of systematics to be ignored- the std input will be used instead
@@ -1816,7 +1822,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       // 0 means: no
       // 1 means: only ps file containing all plots
       // 2 means: both ps and individual eps
-      int printUnfPlots = 1;
+      int printUnfPlots = 2;
       
       // output files
       TString rootFile="";
@@ -1928,15 +1934,20 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       //          2 means: Do transpose input response matrix during rebinning (default)
       int matrixori=2;
       steering=getTStringFromInt(matrixori)+steering;
-      //    (13) NORMALIZATION
+      //    (13) NORMALIZATION (13. digit from right)
       //         0 means: Default value, same as 1
       //         1 means: Extrinsic Normalization (default)
       //             This means, the normalization is done with a global inclusive cross
       //             section which is calculated from the parameters totalDataEvents, 
       //             totalBgrEvents, totalTtBgrEvents, totalRecEvents and totalGenEvents.
+      //             Analytic Error Propagation.
       //         2 means: Intrinsic Normalization.
-      //             Each unfolded distribution is normalized with its integral.
-      int normalizeUnfPlot=2;
+      //             Each unfolded distribution is normalized with its integral. 
+      //             Analytic Error Propagation.
+      //         3 means: Intrinsic Normalization.
+      //             Each unfolded distribution is normalized with its integral. 
+      //             Error Propagation on the basis of pseudo experiments
+      int normalizeUnfPlot=3;
       steering=getTStringFromInt(normalizeUnfPlot)+steering;
       // NEW: !!!
       //    (14) CLOSURE TEST (14. digit from right)
