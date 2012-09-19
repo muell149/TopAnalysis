@@ -5412,7 +5412,8 @@ void TopSVDFunctions::SVD_GetBinBoundariesY2D(double* boundaries, TH2D* histo)
 //    (6)  TEXT FILE ( 6. digit from right)
 //         0 means: Default value, same as 2
 //         1 means: no text file is written
-//         2 means: text file with optimal reg. params. is written (default)
+//         2 means: text file with histogram entries is written (default)
+//         3 means: text file is written if (syst==sysNo)
 //    (7)  VERBOSITY (7. digit from right)
 //         0 means: Default value, same as 2
 //         1 means: no output at all
@@ -5629,6 +5630,9 @@ double TopSVDFunctions::SVD_Unfold(
      
     // TEXT FILE
     int flag_text = SVD_GetDigit(steering, 6, 2);  
+    bool writeHistToText=false;
+    if(flag_text==2) writeHistToText=true;
+    if(flag_text==3 && syst=="sysNo") writeHistToText=true;
 
 
     // VERBOSITY
@@ -6343,7 +6347,7 @@ double TopSVDFunctions::SVD_Unfold(
         cout << "        Write K Scan Plots to PS/EPS:          " << (flag_ps >= 3 ) << endl;
         cout << "        Write Tau Scan Plots to PS/EPS:        " << (flag_ps >= 4 ) << endl;
         cout << "    Output TXT File (with scan output):        " << outputfilenameTxt << endl;
-        cout << "        Write to Text File:                    " << (flag_text == 2 ) << endl;
+	cout << "        Write to Text File:                    " << (writeHistToText ) << endl;
         cout << "    File with regularization parameters:       " << fullRegParFile << endl;
         cout << "        Key to search for:                     " << thekey << endl; 
         cout << "    " << endl;
@@ -8145,16 +8149,13 @@ double TopSVDFunctions::SVD_Unfold(
     
     
     // Save all relevant Plots in ROOT File
-    if ( flag_text == 2 ) {
+    if ( writeHistToText ) {
     
      
         TString textOutputFolderName = "./SVD/Text";
         TString errSep = "+/-";
         TString lineSep = "\n";
         TString colSep = ", ";
-   
-        // Open a ROOT file        
-        TFile* file = new TFile(outputfilenameRoot, "RECREATE");
     
         // Write histograms
         SVD_Hists1DToASCII(rawHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
@@ -8194,11 +8195,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Hists2DToASCII(totCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
         SVD_Hists1DToASCII(glcHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
         SVD_Hists1DToASCII(bbbShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
-        SVD_Hists1DToASCII(ratioShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
-    
-        // Close file
-        file->Close();
- 
+        SVD_Hists1DToASCII(ratioShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst);  
  
     }  
   
