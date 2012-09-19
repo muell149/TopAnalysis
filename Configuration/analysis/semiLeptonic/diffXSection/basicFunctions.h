@@ -2148,26 +2148,30 @@ namespace semileptonic {
     return constMadgraphColor;
   }
 
-  TString xSecLabelName(TString variable=""){
+  TString xSecLabelName(TString variable="", bool noUnit=false){
     // this function returns the x axis label for a given quantity specified by "variable"
+    // if noUnit==true -> skip unit
     // modified quantities: none
     // used functions: none
     // used enumerators: none
+    
+    TString strUnitGeV = " #left[GeV#right]";
+    if(noUnit) strUnitGeV="";
 
-    if     (variable == "topPt"      ) return "p_{T}^{t} #left[GeV#right]";
-    else if(variable == "topPtPlus"  ) return "p_{T}^{t} #left[GeV#right]";
-    else if(variable == "topPtMinus" ) return "p_{T}^{#bar{t}} #left[GeV#right]";
+    if     (variable == "topPt"      ) return "p_{T}^{t}"+strUnitGeV;
+    else if(variable == "topPtPlus"  ) return "p_{T}^{t}"+strUnitGeV;
+    else if(variable == "topPtMinus" ) return "p_{T}^{#bar{t}}"+strUnitGeV;
     else if(variable == "topY"       ) return "y^{t}";
     else if(variable == "topYPlus"   ) return "y^{t}";
     else if(variable == "topYMinus"  ) return "y^{#bar{t}}";
-    else if(variable == "ttbarPt"    ) return "p_{T}^{t#bar{t}} #left[GeV#right]";
+    else if(variable == "ttbarPt"    ) return "p_{T}^{t#bar{t}}"+strUnitGeV;
     else if(variable == "ttbarY"     ) return "y^{t#bar{t}}";
-    else if(variable == "ttbarMass"  ) return "m^{t#bar{t}} #left[GeV#right]";
-    else if(variable == "lepPt"      ) return "p_{T}^{l} #left[GeV#right]";
+    else if(variable == "ttbarMass"  ) return "m^{t#bar{t}}"+strUnitGeV;
+    else if(variable == "lepPt"      ) return "p_{T}^{l}"+strUnitGeV;
     else if(variable == "lepEta"     ) return "#eta^{l}"; 
     else if(variable == "lepEtaPlus" ) return "#eta^{l^{+}}";
     else if(variable == "lepEtaMinus") return "#eta^{l^{-}}";
-    else if(variable == "bqPt"       ) return "p_{T}^{b} #left[GeV#right]";
+    else if(variable == "bqPt"       ) return "p_{T}^{b}"+strUnitGeV;
     else if(variable == "bqEta"      ) return "#eta^{b}";
     else return "Default Label for variable "+variable;
   }
