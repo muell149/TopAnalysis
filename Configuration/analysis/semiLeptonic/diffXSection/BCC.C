@@ -249,21 +249,21 @@ void BCC::MakeHistos()
   std::map<TString,int>    HistoBins; 
   std::map<TString,int>    HistoSmoothingValue;
 
-  BinWidthScaler["lepEta"]      = 20.0;
-  BinWidthScaler["lepEtaPlus"]  = 20.0;
-  BinWidthScaler["lepEtaMinus"] = 20.0;
-  BinWidthScaler["lepPt"]       =  0.4;
+  BinWidthScaler["lepEta"]      = 50.0;
+  BinWidthScaler["lepEtaPlus"]  = 50.0;
+  BinWidthScaler["lepEtaMinus"] = 50.0;
+  BinWidthScaler["lepPt"]       =    1;
   BinWidthScaler["topPt"]       =  0.2;
   BinWidthScaler["topPtPlus"]   =  0.2;
   BinWidthScaler["topPtminus"]  =  0.2;
-  BinWidthScaler["topY"]        = 20.0;
-  BinWidthScaler["topYPlus"]    = 20.0;
-  BinWidthScaler["topYMinus"]   = 20.0;
-  BinWidthScaler["ttbarMass"]   =  0.2;
-  BinWidthScaler["ttbarPt"]     =  0.5;
-  BinWidthScaler["ttbarY"]      = 20.0;
-  BinWidthScaler["bqPt"]        =  0.2;
-  BinWidthScaler["bqEta"]       = 20.0;
+  BinWidthScaler["topY"]        = 40.0;
+  BinWidthScaler["topYPlus"]    = 40.0;
+  BinWidthScaler["topYMinus"]   = 40.0;
+  BinWidthScaler["ttbarMass"]   =  0.5;
+  BinWidthScaler["ttbarPt"]     =    1;
+  BinWidthScaler["ttbarY"]      = 40.0;
+  BinWidthScaler["bqPt"]        =    1;
+  BinWidthScaler["bqEta"]       = 40.0;
 
   HistoBins["lepEta"]      = 200;
   HistoBins["lepEtaPlus"]  = 200;
@@ -427,7 +427,8 @@ void BCC::setBCCinX_IntersectionInBin()
 	      //if(std::abs((refHisto.GetBinCenter(jBinTheory)-refVecBinning[jBinData])/refVecBinning[jBinData])>0.05&&std::abs((refHisto.GetBinCenter(jBinTheory)-refVecBinning[jBinData+1])/refVecBinning[jBinData+1])<0.05){
 	      //std::cout << iterHistos->first << ": theory bin " << jBinTheory << "y average: " << average[jBinData] << ", y-diff(bin) " << diff << "<" << min << ", xval "<< refHisto.GetBinCenter(jBinTheory) << std::endl;
 	      min = diff;
-	      avXvalues[jBinData] = refHisto.GetBinCenter(jBinTheory);					
+	      avXvalues[jBinData] = refHisto.GetBinCenter(jBinTheory);	      
+	      if(((iterHistos->first).Contains("ttbarMass"))&&avXvalues[jBinData]>1270&&avXvalues[jBinData]<1310) avXvalues[jBinData] =1290;
 	    }
 	  }
 	}
