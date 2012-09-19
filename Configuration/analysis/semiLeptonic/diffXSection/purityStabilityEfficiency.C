@@ -541,19 +541,22 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     TCanvas* CanvEffGenBBBcomp = new TCanvas("CanvEffGenBBBcomp","CanvEffGenBBBcomp",600,600);
     
     purityhist->SetTitle("");
-    TString xtitle = "";
-    TString xtitleNoUnit = "";
-    if(variable.Contains("Pt"))xtitle+="p_{T}";
-    else if(variable.Contains("Y"))xtitle+="y";
-    else if(variable.Contains("Eta"))xtitle+="#eta";
-    else if(variable.Contains("Mass"))xtitle+="m";
-    if(variable.Contains("top"))xtitle+="^{t and #bar{t}}";
-    else if(variable.Contains("ttbar"))xtitle+="^{t#bar{t}}";
-    else if(variable.Contains("lep"))xtitle+="^{l}";
-    else if(variable.Contains("bq"))xtitle+="^{b and #bar{b}}";
-    xtitleNoUnit = xtitle;
-    if(variable.Contains("Pt"))xtitle+=" [GeV]";
-    else if(variable.Contains("Mass"))xtitle+=" [GeV]";
+//     TString xtitle = "";
+//     TString xtitleNoUnit = "";
+//     if(variable.Contains("Pt"))xtitle+="p_{T}";
+//     else if(variable.Contains("Y"))xtitle+="y";
+//     else if(variable.Contains("Eta"))xtitle+="#eta";
+//     else if(variable.Contains("Mass"))xtitle+="m";
+//     if(variable.Contains("top"))xtitle+="^{t and #bar{t}}";
+//     else if(variable.Contains("ttbar"))xtitle+="^{t#bar{t}}";
+//     else if(variable.Contains("lep"))xtitle+="^{l}";
+//     else if(variable.Contains("bq"))xtitle+="^{b and #bar{b}}";
+//     xtitleNoUnit = xtitle;
+//     if(variable.Contains("Pt"))xtitle+=" [GeV]";
+//     else if(variable.Contains("Mass"))xtitle+=" [GeV]";
+//     if(variable=="topWAngle")xtitle="Angle(top,W)";
+    TString xtitle = xSecLabelName(variable);
+    TString xtitleNoUnit = xSecLabelName(variable,true);
     if(variable=="topWAngle")xtitle="Angle(top,W)";
     purityhist->GetXaxis()->SetTitle(xtitle);
     purityhist->GetXaxis()->SetNoExponent(true);
@@ -645,7 +648,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     }
     leg->SetFillColor(0);
     leg->SetBorderSize(0);
-    if(variable == "topPt"||chi2Max<100) leg->Draw("same");
+    //if(variable == "topPt"||chi2Max<100) leg->Draw("same");
     
     TLegend* legFull=new TLegend(0.,0.,1.,1.);
     legFull->SetFillStyle(0);
