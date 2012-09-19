@@ -1149,24 +1149,24 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
     if(verbose>1) std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << std::endl;
     if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
     // ttbar BG yield for signal fraction
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone(variable);
     // create combined BG reco plot
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone();
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone(variable);
     for(int bgsample=kZjets; bgsample<=kDiBos; ++bgsample){
       if(!histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]){
 	  std::cout << "missing plot: analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << " for sample " << sampleLabel(bgsample,decayChannel) << std::endl;
 	exit(1);
       }
-      histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone());
+      histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone(variable));
     }
     // data event yield
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone();
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable);
     // signal reco plot
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone();
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone(variable);
     // signal gen plot
-    histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone();
+    histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone(variable);
     // response matrix plot
-    histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable+"_"][kSig]->Clone();
+    histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable+"_"][kSig]->Clone(variable);
   }
   
   // ============================
@@ -1864,11 +1864,6 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       //         1 means: no root file will be written (default)
       //         2 means: standard plots to root file  
       int doRootFile=(rootFile=="" ? 1 : 2);
-      // save in optimal unfolding parameter in textfile?
-      //         0 means: Default value, same as 2
-      //         1 means: no text file is written
-      //         2 means: text file with optimal reg. params. is written (default)
-      int doTextFile=(txtfile=="" ? 1 : 2);// (regFile=="" ? 1 : 2);
       // Combine all options in one Steering Parameter
       TString steering="";
       // Steering options in parameter 'steering' 
@@ -1882,7 +1877,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       steering=getTStringFromInt(plotting)+steering;
       //     (5) ROOT FILE 
       steering=getTStringFromInt(doRootFile)+steering;
-      //     (6) TEXT FILE 
+      //     (6) TEXT FILE
+      //         0 means: Default value, same as 2
+      //         1 means: no text file is written
+      //         2 means: text file with histogram entries is written (default)
+      //         3 means: text file is written if (syst==sysNo)
+      int  doTextFile = 1;
       steering=getTStringFromInt(doTextFile)+steering;
       //     (7) VERBOSITY
       //         0 means: Default value, same as 2
