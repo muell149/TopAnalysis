@@ -3020,7 +3020,7 @@ namespace semileptonic {
       if(verbose>0) std::cout << "will perform fit" << std::endl;
       // empty bins within fit range for output histo
       bool lastBin=false;
-      for(int bin=1; bin<=result->GetNbinsX()+1; ++bin){
+      for(int bin=0; bin<=result->GetNbinsX()+1; ++bin){
 	bool thisBin=false;
 	double binX=result->GetBinCenter(bin);
 	if(binX>=fitLowEdgeB&&binX<=fitHighEdgeB){ 
@@ -3203,6 +3203,7 @@ namespace semileptonic {
     if(plotname2.Contains("/")){
       plotname2.ReplaceAll(getStringEntry(plotname2,1)+"/","");
     }
+    //if(plotname2.Contains("bq")&&model=="madgraph"&&smoothcurves) verbose=1;
     // create variable bin edges for non smooth curves
     std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
     // output

@@ -252,17 +252,17 @@ void BCC::MakeHistos()
   BinWidthScaler["lepEta"]      = 50.0;
   BinWidthScaler["lepEtaPlus"]  = 50.0;
   BinWidthScaler["lepEtaMinus"] = 50.0;
-  BinWidthScaler["lepPt"]       =    1;
-  BinWidthScaler["topPt"]       =  0.2;
-  BinWidthScaler["topPtPlus"]   =  0.2;
-  BinWidthScaler["topPtminus"]  =  0.2;
+  BinWidthScaler["lepPt"]       =    2;
+  BinWidthScaler["topPt"]       =  0.4;
+  BinWidthScaler["topPtPlus"]   =  0.4;
+  BinWidthScaler["topPtminus"]  =  0.4;
   BinWidthScaler["topY"]        = 40.0;
   BinWidthScaler["topYPlus"]    = 40.0;
   BinWidthScaler["topYMinus"]   = 40.0;
-  BinWidthScaler["ttbarMass"]   =  0.5;
+  BinWidthScaler["ttbarMass"]   =  1.0;
   BinWidthScaler["ttbarPt"]     =    1;
   BinWidthScaler["ttbarY"]      = 40.0;
-  BinWidthScaler["bqPt"]        =    1;
+  BinWidthScaler["bqPt"]        =    2;
   BinWidthScaler["bqEta"]       = 40.0;
 
   HistoBins["lepEta"]      = 200;

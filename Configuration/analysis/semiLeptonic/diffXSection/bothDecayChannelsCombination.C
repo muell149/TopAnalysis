@@ -2,7 +2,7 @@
 
 void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
 				  TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier=""){
+				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -163,6 +163,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   
   // loop systematic variations
   for(unsigned int sys=sysNo; sys<sysEnd; ++sys){
+    //for(unsigned int sys=sysNo; sys<sysNo+1; ++sys){ 
     TString subfolder=sysLabel(sys);
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -698,10 +699,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor = (largeMGfile ? 1 : 10); rebinFactor =  1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = (largeMGfile ? 0 : 4); rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 2; rebinFactor =  0; }
+	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
 	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge.root";
+	  //std::cout << plotNameMadgraph << std::endl;
 	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", DrawSmoothMadgraph2, LV);
 	  // j) re-draw binned MADGRAPH theory curve
 	  // load it from combined file
