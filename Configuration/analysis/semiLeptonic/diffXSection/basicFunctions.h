@@ -2789,31 +2789,38 @@ namespace semileptonic {
       if(plotname.Contains("ttbarMass")){
 	//tail:
 	fitLowEdge=470.0;
-	fitHighEdge=830.0;
+	fitHighEdge=720.0;
 	def="[0]*exp([1]*x)+[2]";
 	a= (PS=="full" ? 164748.0 : 28165.)*largeSampleSF;
 	b= (PS=="full" ? -0.00810181 : -0.00756);
 	c= (PS=="full" ? 3.59495 : 2.77)*largeSampleSF;
 	addOpt="LL";
+        fitLowEdgeB=680.0;
+        fitHighEdgeB=920.0;
+        defB="[0]*exp([1]*x)+[2]";
+        aB= (PS=="full" ? 164748.0 : 28165.)*largeSampleSF;
+        bB= (PS=="full" ? -0.00810181 : -0.00756);
+        cB= (PS=="full" ? 3.59495 : 2.77)*largeSampleSF;
+        addOptB="LL";  
 	//end of tail:
-	fitLowEdgeB=830.0;
-	fitHighEdgeB=1600.0;
-	defB="[0]*exp([1]*x)+[2]";
-	aB= 54699.0*largeSampleSF;  
-	bB=-0.0068;
-	cB= 0.979;
-	addOptB="LL";
+	fitLowEdgeC=880.0;
+	fitHighEdgeC=1600.0;
+	defC="[0]*exp([1]*x)+[2]";
+	aC= 54699.0*largeSampleSF;  
+	bC=-0.0068;
+	cC= 0.979;
+	addOptC="LL";
 	// start:
-	if(!largeSample){
-	  fitLowEdgeC=345.;
-	  fitHighEdgeC=400.;
-	  defC="[3]*TMath::GammaDist(x,[0],[1],[2])";
-	  aC=(PS=="full" ? 1.50 : 1.56 );
-	  bC=(PS=="full" ? 345. : 344.8);
-	  cC=(PS=="full" ? 79.3 : 80.8 );
-	  dC=(PS=="full" ? 1010990 : 1000000.);
-	  addOptC="LL";
-	}
+	//if(!largeSample){
+	//  fitLowEdgeC=345.;
+	//  fitHighEdgeC=400.;
+	//  defC="[3]*TMath::GammaDist(x,[0],[1],[2])";
+	//  aC=(PS=="full" ? 1.50 : 1.56 );
+	//  bC=(PS=="full" ? 345. : 344.8);
+	//  cC=(PS=="full" ? 79.3 : 80.8 );
+	//  dC=(PS=="full" ? 1010990 : 1000000.);
+	//  addOptC="LL";
+	//}
       }
 /*       else if(plotname.Contains("ttbarPt")){ */
 /* 	//tail: */
@@ -2850,7 +2857,7 @@ namespace semileptonic {
 /* 	  addOpt="LL"; */
 /* 	} */
 /*       } */
-/*       else if(plotname.Contains("lepPt")){ */
+      else if(plotname.Contains("lepPt")){ 
 /* 	// head */
 /* 	fitLowEdge = 30.; */
 /* 	fitHighEdge= 58.; */
@@ -2859,15 +2866,15 @@ namespace semileptonic {
 /* 	b=(largeSample ? -1.36559e-03 : -1.11187e-03); */
 /* 	c=(largeSample ?  7.65236e-06 :  6.03412e-06); */
 /* 	d=(largeSample ?  6.78192e+04 :  4.84434e+03); */
-/* 	// tail */
-/* 	fitLowEdgeB =57.; */
-/* 	fitHighEdgeB=210.; */
-/* 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; */
-/* 	aB=(largeSample ? -2.03019e-02 : -1.39410e-02); */
-/* 	bB=(largeSample ? -9.19906e-05 : -1.49428e-04); */
-/* 	cB=(largeSample ?  2.63030e-07 :  4.11490e-07); */
-/* 	dB=(largeSample ?  3.18800e+05 :  1.51488e+04); */
-/*       } */
+ 	// tail 
+ 	fitLowEdgeB =50.; 
+ 	fitHighEdgeB=200.; 
+ 	defB="TMath::Exp(x*[0]+x*x*[1]+x*x*x*[2])*[3]"; 
+ 	aB=(largeSample ? -2.03019e-02 : -1.39410e-02); 
+ 	bB=(largeSample ? -9.19906e-05 : -1.49428e-04); 
+ 	cB=(largeSample ?  2.63030e-07 :  4.11490e-07); 
+ 	dB=(largeSample ?  3.18800e+05 :  1.51488e+04); 
+      } 
       else if(plotname.Contains("bqPt")){
  	// head
  	fitLowEdge =30.0;
@@ -3300,7 +3307,17 @@ namespace semileptonic {
     histogramStyle(*result, kSig, false, 1.2, color);
     result->SetLineStyle(linestyle);
     // smoothing 1
-    if(smoothcurves&&smoothFactor) result->Smooth(smoothFactor);
+    if(smoothcurves&&smoothFactor){ 
+      if(!plotname.Contains("bqEta")) result->Smooth(smoothFactor);
+      else{
+	TH1F* duplicate=(TH1F*)result->Clone();
+	result->Smooth(smoothFactor); 
+	// no smoothing for |eta|>1.6
+	for(int bin=0; bin<=result->GetNbinsX(); ++bin){
+	  if(std::abs(result->GetBinCenter(bin))>1.6) result->SetBinContent(bin, duplicate->GetBinContent(bin));	  
+	}
+      }
+    }  
     // equal rebinning before
     if(smoothcurves&&rebinFactor) result->Rebin(rebinFactor);
     // normalize to area
@@ -3311,7 +3328,17 @@ namespace semileptonic {
     if(smoothcurves) result->Scale(1.0/result->GetBinWidth(1));
     else result=divideByBinwidth(result, false);
     // smoothing 2
-    if(smoothcurves&&smoothFactor) result->Smooth(smoothFactor);
+    if(smoothcurves&&smoothFactor){
+      if(!plotname.Contains("bqEta")) result->Smooth(smoothFactor);
+      else{
+        TH1F* duplicate=(TH1F*)result->Clone(); 
+        result->Smooth(smoothFactor);
+        // no smoothing for |eta|>1.6
+        for(int bin=0; bin<=result->GetNbinsX(); ++bin){
+          if(std::abs(result->GetBinCenter(bin))>1.6) result->SetBinContent(bin, duplicate->GetBinContent(bin));
+        }
+      }                    
+    }   
     // set range
     if(rangeLow!=-1.&&rangeHigh!=-1.) result->GetXaxis()->SetRangeUser(rangeLow, rangeHigh);
     // --- 
