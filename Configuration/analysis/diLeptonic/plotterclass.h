@@ -1308,6 +1308,9 @@ void Plotter::setOptions(TString name_, TString specialComment_, TString YAxis_,
   if(YAxis.Contains("topquarks")){
     YAxis.ReplaceAll("topquarks",9, "top quarks",10);
   }
+  if(YAxis.Contains("Numberof")){
+      YAxis.ReplaceAll("Numberof", 8, "Number of ",10);
+  }
 
   DYScale[0]=1.;
   DYScale[1]=1.;
@@ -3397,9 +3400,6 @@ void Plotter::PlotDiffXSec(){
     GenPlotTheory->SetLineWidth(2);
     GenPlotTheory->SetLineStyle(1);
 //    GenPlotTheory->Rebin(2);GenPlotTheory->Scale(1./2.);
-    if( name.Contains("HypLLBarpT") || name.Contains("HypTTBarpT") ){
-       GenPlotTheory->Draw("SAME,C");
-    }
     h_GenDiffXSec->SetLineColor(kRed+1);
     h_GenDiffXSec->SetLineStyle(1);
 
@@ -3433,12 +3433,23 @@ void Plotter::PlotDiffXSec(){
     //MCFMHist->Draw("SAME");
     //h_DiffXSec->Draw("SAME, EP0");
 
-    if(!name.Contains("HypLLBarpT") && !name.Contains("HypTTBarpT") ){
+    if(!name.Contains("HypLLBarpT") && !name.Contains("HypTTBarpT") && !name.Contains("HypLeptonpT") && !name.Contains("HypBJetpT")){
         TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
         SmoothMadgraph->Smooth(10);
         SmoothMadgraph->Draw("SAME, L");
     }
-    else {GenPlotTheory->Draw("SAME,C");} //### 150512 ###
+    else if( !name.Contains("HypTTBarpT") && !name.Contains("HypLeptonpT")){
+        TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
+        SmoothMadgraph->Smooth(4);
+        SmoothMadgraph->Draw("SAME, L");
+    }
+    else if( !name.Contains("HypTTBarpT")){
+        TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
+        SmoothMadgraph->Smooth(2);
+        SmoothMadgraph->Draw("SAME, L");
+    }
+    else {GenPlotTheory->Draw("SAME,C");} //### 150512 ###    
+
     h_GenDiffXSec->Draw("SAME"); //### 150512 ###
 
     DrawCMSLabels(false, lumi);
