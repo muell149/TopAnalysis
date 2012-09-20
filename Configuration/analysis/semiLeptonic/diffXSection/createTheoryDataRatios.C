@@ -57,7 +57,31 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   if(plotmcatnlo ) hist_.push_back( killEmptyBins(plotmcatnlo , verbose) );
   if(plotpowheg  ) hist_.push_back( killEmptyBins(plotpowheg  , verbose) );
   if(plotMadGraph) hist_.push_back( killEmptyBins(plotMadGraph, verbose) );
-  if(plotNNLO    ) hist_.push_back( killEmptyBins(plotNNLO    , verbose) );
+  if(plotNNLO    ){
+    // delete empty bins
+    TH1F* tempNNLO=killEmptyBins(plotNNLO, verbose);
+    std::cout << tempNNLO->GetName() << std::endl;  
+    // delete bins put of range
+    int Nnnlobins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*10;
+    TH1F* finalNNLO=new TH1F(tempNNLO->GetName(),tempNNLO->GetTitle(), Nnnlobins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
+    reBinTH1F(*finalNNLO, binning_[plotName], 0);
+    for(int bin=0; bin<=tempNNLO->GetNbinsX()+1; ++bin){
+      double binlowedge=tempNNLO->GetBinLowEdge(bin); 
+      if(plotName.Contains("topPt")&&binlowedge==1.) binlowedge=0.;
+      //std::cout << "binlowedge: " << binlowedge << std::endl;      
+      for(int binf=0; binf<=finalNNLO->GetNbinsX()+1; ++binf){
+	//std::cout << "scanlowedge: " << finalNNLO->GetBinLowEdge(binf) << std::endl;
+	if(binlowedge==finalNNLO->GetBinLowEdge(binf)){
+	  //std::cout << "fits!" << std::endl;
+	  finalNNLO->SetBinContent(binf, tempNNLO->GetBinContent(bin)) ;
+	  finalNNLO->SetBinError(binf, tempNNLO->GetBinError(bin)); 
+	}
+      }
+    }
+    hist_.push_back( finalNNLO);
+    //hist_.push_back( killEmptyBins(plotNNLO    , verbose) );
+    
+  }
   // set axis colors to white because otherwise it spoils the ratio plot on top of it
   plotMadGraph->GetXaxis()->SetLabelColor(0);
   plotMadGraph->GetXaxis()->SetTitleColor(0);
