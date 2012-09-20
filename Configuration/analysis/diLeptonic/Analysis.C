@@ -804,7 +804,8 @@ Bool_t Analysis::Process(Long64_t entry)
                     }
                     //do the type-jet selection & Eff and SF obtention
                     if((*jetType)[i] == 2){//b-quark
-                        eff=bEff->GetBinContent(ptbin, etabin);                        
+                        eff=bEff->GetBinContent(ptbin, etabin);     
+                        if (eff <= 0.) eff = 1.;                                     
                         SFPerJet=Analysis::BJetSF(pt, eta);
 //                         SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
 //                         SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
@@ -815,6 +816,7 @@ Bool_t Analysis::Process(Long64_t entry)
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=cEff->GetBinContent(ptbin, etabin);
+                        if (eff <= 0.) eff = 1.;                  
                         SF_Error = 0.0;
                     }
                     else if((*jetType)[i] == 0){//l-quark
@@ -822,6 +824,7 @@ Bool_t Analysis::Process(Long64_t entry)
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=lEff->GetBinContent(ptbin, etabin);
+                        if (eff <= 0.) eff = 1.;                  
                         SF_Error = 0.0;
                     }
                     else {cout<<"I found a jet in event "<<eventNumber<<" which is not b, c nor ligth"<<endl; return kFALSE;}
@@ -892,7 +895,8 @@ Bool_t Analysis::Process(Long64_t entry)
                     }
                     //do the type-jet selection & Eff and SF obtention
                     if((*jetType)[i] == 2){//b-quark
-                        eff=bEff->GetBinContent(ptbin, etabin);                        
+                        eff=bEff->GetBinContent(ptbin, etabin);  
+                        if (eff <= 0.) eff = 1.;                      
                         SFPerJet=Analysis::BJetSF(pt, eta);
 //                         SFPerJet_Up  = SFPerJet+0.5*Analysis::BJetSFAbsErr(ptbin);
 //                         SFPerJet_Down= SFPerJet-0.5*Analysis::BJetSFAbsErr(ptbin);
@@ -903,6 +907,7 @@ Bool_t Analysis::Process(Long64_t entry)
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=cEff->GetBinContent(ptbin, etabin);
+                        if (eff <= 0.) eff = 1.;                  
                         SF_Error = 0.0;
                     }
                     else if((*jetType)[i] == 0){//l-quark
@@ -910,6 +915,7 @@ Bool_t Analysis::Process(Long64_t entry)
                         SFPerJet_Up=SFPerJet;
                         SFPerJet_Down=SFPerJet;
                         eff=lEff->GetBinContent(ptbin, etabin);
+                        if (eff <= 0.) eff = 1.;                  
                         SF_Error = 0.0;
                     }
                     else {cout<<"I found a jet in event "<<eventNumber<<" which is not b, c nor ligth"<<endl; return kFALSE;}
