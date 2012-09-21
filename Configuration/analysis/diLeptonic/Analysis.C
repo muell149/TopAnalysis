@@ -516,6 +516,7 @@ Bool_t Analysis::Process ( Long64_t entry )
         int antihadron_index = -1;
         int hadrontop_index = -1;
         int antihadrontop_index = -1;
+        
         //Case 1: highest pT genJet matched to a BHadron
         for ( int genJet=0; genJet<allGenJets_; genJet++ ) {
             if ( LVGenJets[genJet].Pt() <30 ) {
@@ -767,18 +768,18 @@ Bool_t Analysis::Process ( Long64_t entry )
         h_VisGenAntiTopEta->Fill ( LVGenAntiTop.Eta(),weightPU*lumiWeight );
     }//for visible top events
 
-    //check triggers for ttbarsignal
-    if ( MCSample->find ( "ttbarsignal" ) !=string::npos ) {
-        if ( channel->find ( "emu" ) !=string::npos && ( ( triggerBits & 0x1000 ) || ( triggerBits & 0x100 ) || ( triggerBits & 0x200 ) ) ) {
-            int emutrig;
-        } else if ( channel->find ( "ee" ) !=string::npos && ( ( triggerBits & 0x40000 ) ) ) {
-            int eetrig;
-        } else if ( channel->find ( "mumu" ) !=string::npos && ( ( triggerBits & 2 ) ) ) {
-            int eetrig;
-        } else {
-            return kTRUE;
-        }
-    }
+//    //check triggers for ttbarsignal
+//    if ( MCSample->find ( "ttbarsignal" ) !=string::npos ) {
+//        if ( channel->find ( "emu" ) !=string::npos && ( ( triggerBits & 0x1000 ) || ( triggerBits & 0x100 ) || ( triggerBits & 0x200 ) ) ) {
+//            int emutrig;
+//        } else if ( channel->find ( "ee" ) !=string::npos && ( ( triggerBits & 0x40000 ) ) ) {
+//            int eetrig;
+//        } else if ( channel->find ( "mumu" ) !=string::npos && ( ( triggerBits & 2 ) ) ) {
+//            int eetrig;
+//        } else {
+//            return kTRUE;
+//        }
+//    }
 
     int LeadLeptonNumber = 0;
     int NLeadLeptonNumber = 0;
@@ -1276,7 +1277,7 @@ Bool_t Analysis::Process ( Long64_t entry )
             }
         } //
         if ( dimass>76.0 && dimass < 106.0 ) Looseh1->Fill ( dimass,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-
+ 
         //if(dimass>12 && NLeadLeptonNumber>0){//Analysis step 6
         //if(dimass>12 && jet_>1 && NLeadLeptonNumber>0){//Analysis step 7
         //if(dimass>12 && jet_>1 && BJetIndex.size()>0 && NLeadLeptonNumber>0){btagSFuse=btagSF;//Analysis step 8?
@@ -1293,7 +1294,8 @@ Bool_t Analysis::Process ( Long64_t entry )
                 }
 
 
-                if ( MCSample->find ( "ttbarsignal" ) !=string::npos ) {
+                if ( MCSample->find ( "ttbarsignal" ) !=string::npos ) { 
+                	
                     if ( LVGenLepton.Pt() >20 && LVGenAntiLepton.Pt() >20 && abs ( LVGenLepton.Eta() ) <2.4 && abs ( LVGenAntiLepton.Eta() ) <2.4 ) {
 //Comment the next 2 lines and uncomment the 3rd one for gen-level Vis PS cuts
                         //if (LVGenBQuark.Pt()>30 && LVGenAntiBQuark.Pt()>30 && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
