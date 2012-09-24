@@ -125,6 +125,7 @@ class Plotter {
   // DAVID
   bool doUnfolding; 
   bool doSystematics;
+  bool drawNLOCurves;
   TString outpath;
   TString outpathPlots;
   TString subfolderChannel;
@@ -137,6 +138,7 @@ void Plotter::UnfoldingOptions(bool doSVD)
 {
   doUnfolding = doSVD;
   doSystematics = true;
+  drawNLOCurves = true;
 }
 
 
@@ -3229,144 +3231,155 @@ void Plotter::PlotDiffXSec(){
 
     bool binned_theory=true; //############
   
-    TH1* mcnlohist=0;TH1* mcnlohistup=0;TH1* mcnlohistdown=0;TH1* powheghist=0;
+    
+  
+    TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0;
     TH1* mcnlohistnorm=0;
-    mcnlohist = GetNloCurve(newname,"MCATNLO");
-    double mcnloscale = 1./mcnlohist->Integral("width");
-    if (binned_theory==false) mcnlohist->Rebin(2);mcnlohist->Scale(0.5); //#####
-    mcnlohist->Scale(mcnloscale);
-
-
-    if(name.Contains("LeptonpT")){mcnlohistnorm = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
-    else if(name.Contains("LeptonEta")){mcnlohistnorm = GetNloCurve("Leptons","Eta","MCatNLO");}
-    else if(name.Contains("LLBarpT")){mcnlohistnorm = GetNloCurve("LepPair","Pt","MCatNLO");}
-    else if(name.Contains("LLBarMass")){mcnlohistnorm = GetNloCurve("LepPair","Mass","MCatNLO");}
-    else if(name.Contains("ToppT")){mcnlohistnorm = GetNloCurve("TopQuarks","Pt","MCatNLO");}
-    else if(name.Contains("TopRapidity")){mcnlohistnorm = GetNloCurve("TopQuarks","Rapidity","MCatNLO");}
-    else if(name.Contains("TTBarpT")){mcnlohistnorm = GetNloCurve("TtBar","Pt","MCatNLO");}
-    else if(name.Contains("TTBarRapidity")){mcnlohistnorm = GetNloCurve("TtBar","Rapidity","MCatNLO");}
-    else if(name.Contains("TTBarMass")){mcnlohistnorm = GetNloCurve("TtBar","Mass","MCatNLO");}
-    else if(name.Contains("BJetpT")){mcnlohistnorm = GetNloCurve("Jets","Pt","MCatNLO");}
-    else if(name.Contains("BJetEta")){mcnlohistnorm = GetNloCurve("Jets","Eta","MCatNLO");}
-    else {mcnlohistnorm = new TH1();}
-    //    if (binned_theory==false) mcnlohistnorm->Rebin(5);mcnlohistnorm->Scale(0.2);
-    TH1* mcnlohistnormBinned    = mcnlohistnorm->Rebin(bins,"genBinHist", Xbins);
-
-    if(name.Contains("LeptonpT")){mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");}//temprorary until I change the naming convention in the root file
-    else if(name.Contains("LeptonEta")){mcnlohistup = GetNloCurve("Leptons","Eta","MCNLOup");}
-    else if(name.Contains("LLBarpT")){mcnlohistup = GetNloCurve("LepPair","Pt","MCNLOup");}
-    else if(name.Contains("LLBarMass")){mcnlohistup = GetNloCurve("LepPair","Mass","MCNLOup");}
-    else if(name.Contains("ToppT")){mcnlohistup = GetNloCurve("TopQuarks","Pt","MCNLOup");}
-    else if(name.Contains("TopRapidity")){mcnlohistup = GetNloCurve("TopQuarks","Rapidity","MCNLOup");}
-    else if(name.Contains("TTBarpT")){mcnlohistup = GetNloCurve("TtBar","Pt","MCNLOup");}
-    else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
-    else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
-    else if(name.Contains("BJetpT")){mcnlohistup = GetNloCurve("Jets","Pt","MCNLOup");}
-    else if(name.Contains("BJetEta")){mcnlohistup = GetNloCurve("Jets","Eta","MCNLOup");}
-    else {mcnlohistup = new TH1();}
-    //    if (binned_theory==false) mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
-    TH1* mcnlohistupBinned    = mcnlohistup->Rebin(bins,"genBinHist", Xbins);
-
-    //    mcnlohistupBinned->Scale(1./mcnlohistupBinned->Integral("width"));
-
-    if(name.Contains("LeptonpT")){mcnlohistdown = GetNloCurve("Leptons","Pt","MCNLOdown");}//temprorary until I change the naming convention in the root file
-    else if(name.Contains("LeptonEta")){mcnlohistdown = GetNloCurve("Leptons","Eta","MCNLOdown");}
-    else if(name.Contains("LLBarpT")){mcnlohistdown = GetNloCurve("LepPair","Pt","MCNLOdown");}
-    else if(name.Contains("LLBarMass")){mcnlohistdown = GetNloCurve("LepPair","Mass","MCNLOdown");}
-    else if(name.Contains("ToppT")){mcnlohistdown = GetNloCurve("TopQuarks","Pt","MCNLOdown");}
-    else if(name.Contains("TopRapidity")){mcnlohistdown = GetNloCurve("TopQuarks","Rapidity","MCNLOdown");}
-    else if(name.Contains("TTBarpT")){mcnlohistdown = GetNloCurve("TtBar","Pt","MCNLOdown");}
-    else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
-    else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
-    else if(name.Contains("BJetpT")){mcnlohistdown = GetNloCurve("Jets","Pt","MCNLOdown");}
-    else if(name.Contains("BJetEta")){mcnlohistdown = GetNloCurve("Jets","Eta","MCNLOdown");}
-    else {mcnlohistdown = new TH1();}
-    //    if (binned_theory==false) mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
-    TH1* mcnlohistdownBinned    = mcnlohistdown->Rebin(bins,"genBinHist", Xbins);
-    //mcnlohistdown->Scale(mcnloscale);
-    //    mcnlohistdownBinned->Scale(1./mcnlohistdownBinned->Integral("width"));
-
-    powheghist = GetNloCurve(newname, "POWHEG");
-    double powhegscale = 1./powheghist->Integral("width");
-    if (binned_theory==false) powheghist->Rebin(2);powheghist->Scale(0.5);
-    powheghist->Scale(powhegscale);
- 	
-    TH1* powheghistBinned = powheghist->Rebin(bins,"powhegplot",Xbins);	
-    for (Int_t bin=0; bin<bins; bin++){
-      powheghistBinned->SetBinContent(bin+1,powheghistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/powheghist->GetBinWidth(1)));
-    }
-    powheghistBinned->Scale(1./powheghistBinned->Integral("width"));
-
-    TH1* mcnlohistBinned = mcnlohist->Rebin(bins,"mcnloplot",Xbins);	
-    for (Int_t bin=0; bin<bins; bin++){
-      mcnlohistBinned->SetBinContent(bin+1,mcnlohistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohist->GetBinWidth(1)));
-      mcnlohistupBinned->SetBinContent(bin+1,mcnlohistupBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistup->GetBinWidth(1)));
-      mcnlohistdownBinned->SetBinContent(bin+1,mcnlohistdownBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistdown->GetBinWidth(1)));
-      mcnlohistnormBinned->SetBinContent(bin+1,mcnlohistnormBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistnorm->GetBinWidth(1)));
-    }
-    mcnlohistBinned->Scale(1./mcnlohistBinned->Integral("width"));
-    mcnlohistupBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
-    mcnlohistdownBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
-    mcnlohistnormBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
-
-    for (Int_t bin=0; bin<bins; bin++){
-      mcnlohistupBinned->SetBinContent(bin+1,(mcnlohistupBinned->GetBinContent(bin+1)/mcnlohistnormBinned->GetBinContent(bin+1))*mcnlohistBinned->GetBinContent(bin+1));
-      mcnlohistdownBinned->SetBinContent(bin+1,(mcnlohistdownBinned->GetBinContent(bin+1)/mcnlohistnormBinned->GetBinContent(bin+1))*mcnlohistBinned->GetBinContent(bin+1));
-    }
-
-    //Uncertainty band for MC@NLO
-    const Int_t nMCNLOBins = mcnlohistup->GetNbinsX();
-    Double_t x[bins];
-    Double_t xband[2*bins];
-    Double_t errup[bins];
-    Double_t errdn[bins];
-    Double_t errorband[2*bins];
+    TGraph *mcatnloBand=0;
     
-    for( Int_t j = 0; j< bins; j++ ){
-      x[j]=mcnlohistBinned->GetBinCenter(j+1);
-      errup[j]=(mcnlohistupBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
-      errdn[j]=(mcnlohistdownBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
-      
-      xband[j] = x[j];
-      errorband[j] = errdn[j]; //lower band
-      xband[2*bins-j-1] = x[j];
-      errorband[2*bins-j-1] = errup[j]; //upper band
-      
+    TH1* mcnlohistnormBinned, *mcnlohistupBinned, *mcnlohistdownBinned, *mcnlohistBinned;
+    TH1* powheghistBinned;
+    
+    TH1F *Kidoth1(nullptr);
+    TH1F *Kidoth1_Binned(nullptr);
+    TFile *KidoFile(nullptr);
+    
+    if (drawNLOCurves) {
+        mcnlohist = GetNloCurve(newname,"MCATNLO");
+        double mcnloscale = 1./mcnlohist->Integral("width");
+        if (binned_theory==false) mcnlohist->Rebin(2);mcnlohist->Scale(0.5); //#####
+        mcnlohist->Scale(mcnloscale);
+
+
+        if(name.Contains("LeptonpT")){mcnlohistnorm = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
+        else if(name.Contains("LeptonEta")){mcnlohistnorm = GetNloCurve("Leptons","Eta","MCatNLO");}
+        else if(name.Contains("LLBarpT")){mcnlohistnorm = GetNloCurve("LepPair","Pt","MCatNLO");}
+        else if(name.Contains("LLBarMass")){mcnlohistnorm = GetNloCurve("LepPair","Mass","MCatNLO");}
+        else if(name.Contains("ToppT")){mcnlohistnorm = GetNloCurve("TopQuarks","Pt","MCatNLO");}
+        else if(name.Contains("TopRapidity")){mcnlohistnorm = GetNloCurve("TopQuarks","Rapidity","MCatNLO");}
+        else if(name.Contains("TTBarpT")){mcnlohistnorm = GetNloCurve("TtBar","Pt","MCatNLO");}
+        else if(name.Contains("TTBarRapidity")){mcnlohistnorm = GetNloCurve("TtBar","Rapidity","MCatNLO");}
+        else if(name.Contains("TTBarMass")){mcnlohistnorm = GetNloCurve("TtBar","Mass","MCatNLO");}
+        else if(name.Contains("BJetpT")){mcnlohistnorm = GetNloCurve("Jets","Pt","MCatNLO");}
+        else if(name.Contains("BJetEta")){mcnlohistnorm = GetNloCurve("Jets","Eta","MCatNLO");}
+        else {mcnlohistnorm = new TH1();}
+        //    if (binned_theory==false) mcnlohistnorm->Rebin(5);mcnlohistnorm->Scale(0.2);
+        mcnlohistnormBinned    = mcnlohistnorm->Rebin(bins,"genBinHist", Xbins);
+
+        if(name.Contains("LeptonpT")){mcnlohistup = GetNloCurve("Leptons","Pt","MCNLOup");}//temprorary until I change the naming convention in the root file
+        else if(name.Contains("LeptonEta")){mcnlohistup = GetNloCurve("Leptons","Eta","MCNLOup");}
+        else if(name.Contains("LLBarpT")){mcnlohistup = GetNloCurve("LepPair","Pt","MCNLOup");}
+        else if(name.Contains("LLBarMass")){mcnlohistup = GetNloCurve("LepPair","Mass","MCNLOup");}
+        else if(name.Contains("ToppT")){mcnlohistup = GetNloCurve("TopQuarks","Pt","MCNLOup");}
+        else if(name.Contains("TopRapidity")){mcnlohistup = GetNloCurve("TopQuarks","Rapidity","MCNLOup");}
+        else if(name.Contains("TTBarpT")){mcnlohistup = GetNloCurve("TtBar","Pt","MCNLOup");}
+        else if(name.Contains("TTBarRapidity")){mcnlohistup = GetNloCurve("TtBar","Rapidity","MCNLOup");}
+        else if(name.Contains("TTBarMass")){mcnlohistup = GetNloCurve("TtBar","Mass","MCNLOup");}
+        else if(name.Contains("BJetpT")){mcnlohistup = GetNloCurve("Jets","Pt","MCNLOup");}
+        else if(name.Contains("BJetEta")){mcnlohistup = GetNloCurve("Jets","Eta","MCNLOup");}
+        else {mcnlohistup = new TH1();}
+        //    if (binned_theory==false) mcnlohistup->Rebin(5);mcnlohistup->Scale(0.2);
+        mcnlohistupBinned    = mcnlohistup->Rebin(bins,"genBinHist", Xbins);
+
+        //    mcnlohistupBinned->Scale(1./mcnlohistupBinned->Integral("width"));
+
+        if(name.Contains("LeptonpT")){mcnlohistdown = GetNloCurve("Leptons","Pt","MCNLOdown");}//temprorary until I change the naming convention in the root file
+        else if(name.Contains("LeptonEta")){mcnlohistdown = GetNloCurve("Leptons","Eta","MCNLOdown");}
+        else if(name.Contains("LLBarpT")){mcnlohistdown = GetNloCurve("LepPair","Pt","MCNLOdown");}
+        else if(name.Contains("LLBarMass")){mcnlohistdown = GetNloCurve("LepPair","Mass","MCNLOdown");}
+        else if(name.Contains("ToppT")){mcnlohistdown = GetNloCurve("TopQuarks","Pt","MCNLOdown");}
+        else if(name.Contains("TopRapidity")){mcnlohistdown = GetNloCurve("TopQuarks","Rapidity","MCNLOdown");}
+        else if(name.Contains("TTBarpT")){mcnlohistdown = GetNloCurve("TtBar","Pt","MCNLOdown");}
+        else if(name.Contains("TTBarRapidity")){mcnlohistdown = GetNloCurve("TtBar","Rapidity","MCNLOdown");}
+        else if(name.Contains("TTBarMass")){mcnlohistdown = GetNloCurve("TtBar","Mass","MCNLOdown");}
+        else if(name.Contains("BJetpT")){mcnlohistdown = GetNloCurve("Jets","Pt","MCNLOdown");}
+        else if(name.Contains("BJetEta")){mcnlohistdown = GetNloCurve("Jets","Eta","MCNLOdown");}
+        else {mcnlohistdown = new TH1();}
+        //    if (binned_theory==false) mcnlohistdown->Rebin(5);mcnlohistdown->Scale(0.2);
+        mcnlohistdownBinned    = mcnlohistdown->Rebin(bins,"genBinHist", Xbins);
+        //mcnlohistdown->Scale(mcnloscale);
+        //    mcnlohistdownBinned->Scale(1./mcnlohistdownBinned->Integral("width"));
+
+        powheghist = GetNloCurve(newname, "POWHEG");
+        double powhegscale = 1./powheghist->Integral("width");
+        if (binned_theory==false) powheghist->Rebin(2);powheghist->Scale(0.5);
+        powheghist->Scale(powhegscale);
+            
+        powheghistBinned = powheghist->Rebin(bins,"powhegplot",Xbins);	
+        for (Int_t bin=0; bin<bins; bin++){
+        powheghistBinned->SetBinContent(bin+1,powheghistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/powheghist->GetBinWidth(1)));
+        }
+        powheghistBinned->Scale(1./powheghistBinned->Integral("width"));
+
+        mcnlohistBinned = mcnlohist->Rebin(bins,"mcnloplot",Xbins);	
+        for (Int_t bin=0; bin<bins; bin++){
+        mcnlohistBinned->SetBinContent(bin+1,mcnlohistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohist->GetBinWidth(1)));
+        mcnlohistupBinned->SetBinContent(bin+1,mcnlohistupBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistup->GetBinWidth(1)));
+        mcnlohistdownBinned->SetBinContent(bin+1,mcnlohistdownBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistdown->GetBinWidth(1)));
+        mcnlohistnormBinned->SetBinContent(bin+1,mcnlohistnormBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohistnorm->GetBinWidth(1)));
+        }
+        mcnlohistBinned->Scale(1./mcnlohistBinned->Integral("width"));
+        mcnlohistupBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
+        mcnlohistdownBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
+        mcnlohistnormBinned->Scale(1./mcnlohistnormBinned->Integral("width"));
+
+        for (Int_t bin=0; bin<bins; bin++){
+        mcnlohistupBinned->SetBinContent(bin+1,(mcnlohistupBinned->GetBinContent(bin+1)/mcnlohistnormBinned->GetBinContent(bin+1))*mcnlohistBinned->GetBinContent(bin+1));
+        mcnlohistdownBinned->SetBinContent(bin+1,(mcnlohistdownBinned->GetBinContent(bin+1)/mcnlohistnormBinned->GetBinContent(bin+1))*mcnlohistBinned->GetBinContent(bin+1));
+        }
+
+        //Uncertainty band for MC@NLO
+        const Int_t nMCNLOBins = mcnlohistup->GetNbinsX();
+        Double_t x[bins];
+        Double_t xband[2*bins];
+        Double_t errup[bins];
+        Double_t errdn[bins];
+        Double_t errorband[2*bins];
+        
+        for( Int_t j = 0; j< bins; j++ ){
+        x[j]=mcnlohistBinned->GetBinCenter(j+1);
+        errup[j]=(mcnlohistupBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
+        errdn[j]=(mcnlohistdownBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
+        
+        xband[j] = x[j];
+        errorband[j] = errdn[j]; //lower band
+        xband[2*bins-j-1] = x[j];
+        errorband[2*bins-j-1] = errup[j]; //upper band
+        
+        }
+        
+        mcatnloBand = new TGraph(2*bins, xband, errorband);
+        mcatnloBand->SetFillColor(kGray);
+        mcatnloBand->SetFillStyle(1001);
+        mcatnloBand->SetLineColor(kBlue);
+        mcatnloBand->SetLineWidth(2);
+        mcatnloBand->SetLineStyle(5);
+        
+        if(name.Contains("ToppT") || name.Contains("TopRapidity")){
+        KidoFile=TFile::Open("dilepton_kidonakisNNLO.root");
+        if(name.Contains("ToppT")){
+            Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
+        }
+        else if(name.Contains("TopRapidity")){
+            Kidoth1_Binned = (TH1F*)KidoFile->Get("topY");
+        }
+        }
+        
+    //    TH1 *MCFMHist;
+    //    TFile* MCFMfile = new TFile("diffCrossSections_normalized_tt_bbl_todk_MSTW200_172_172_ful_central.root","READ");
+    //
+    //    if(name.Contains("LeptonpT")){MCFMfile->GetObject<TH1>("pt_l", MCFMHist);}
+    //    else if(name.Contains("LeptonEta")){MCFMfile->GetObject<TH1>("eta_l", MCFMHist);}
+    //    else if(name.Contains("LLBarpT")){MCFMfile->GetObject<TH1>("pt_ll", MCFMHist);}
+    //    else if(name.Contains("LLBarMass")){MCFMfile->GetObject<TH1>("m_ll", MCFMHist);}
+    //    else if(name.Contains("ToppT")){MCFMfile->GetObject<TH1>("pt_t", MCFMHist);}
+    //    else if(name.Contains("TopRapidity")){MCFMfile->GetObject<TH1>("y_t", MCFMHist);}
+    //    else if(name.Contains("TTBarpT")){MCFMfile->GetObject<TH1>("pt_tt", MCFMHist);}
+    //    else if(name.Contains("TTBarRapidity")){MCFMfile->GetObject<TH1>("y_tt", MCFMHist);}
+    //    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
+    //    else{cout<<"probably going to crash soon"<<endl;}
     }
     
-    TGraph *mcatnloBand = new TGraph(2*bins, xband, errorband);
-    mcatnloBand->SetFillColor(kGray);
-    mcatnloBand->SetFillStyle(1001);
-    mcatnloBand->SetLineColor(kBlue);
-    mcatnloBand->SetLineWidth(2);
-    mcatnloBand->SetLineStyle(5);
-    
-    TH1F *Kidoth1=NULL;
-    TH1F *Kidoth1_Binned=NULL;
-    TFile *KidoFile=NULL;
-    if(name.Contains("ToppT") || name.Contains("TopRapidity")){
-      KidoFile=TFile::Open("dilepton_kidonakisNNLO.root");
-      if(name.Contains("ToppT")){
-        Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
-      }
-      else if(name.Contains("TopRapidity")){
-        Kidoth1_Binned = (TH1F*)KidoFile->Get("topY");
-      }
-    }
-    
-//    TH1 *MCFMHist;
-//    TFile* MCFMfile = new TFile("diffCrossSections_normalized_tt_bbl_todk_MSTW200_172_172_ful_central.root","READ");
-//
-//    if(name.Contains("LeptonpT")){MCFMfile->GetObject<TH1>("pt_l", MCFMHist);}
-//    else if(name.Contains("LeptonEta")){MCFMfile->GetObject<TH1>("eta_l", MCFMHist);}
-//    else if(name.Contains("LLBarpT")){MCFMfile->GetObject<TH1>("pt_ll", MCFMHist);}
-//    else if(name.Contains("LLBarMass")){MCFMfile->GetObject<TH1>("m_ll", MCFMHist);}
-//    else if(name.Contains("ToppT")){MCFMfile->GetObject<TH1>("pt_t", MCFMHist);}
-//    else if(name.Contains("TopRapidity")){MCFMfile->GetObject<TH1>("y_t", MCFMHist);}
-//    else if(name.Contains("TTBarpT")){MCFMfile->GetObject<TH1>("pt_tt", MCFMHist);}
-//    else if(name.Contains("TTBarRapidity")){MCFMfile->GetObject<TH1>("y_tt", MCFMHist);}
-//    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
-//    else{cout<<"probably going to crash soon"<<endl;}
     TCanvas * c = new TCanvas("DiffXS","DiffXS");
     
     if(logY){
@@ -3389,13 +3402,15 @@ void Plotter::PlotDiffXSec(){
     if (ymax!=0) h_GenDiffXSec->SetMaximum(ymax);
     //    h_DiffXSec->Draw("SAME, EP0");
     gStyle->SetEndErrorSize(8);
+    if (drawNLOCurves) {
     //    mcatnloBand->Draw("same, F");
-    mcnlohistupBinned->SetFillColor(kGray);
-    mcnlohistupBinned->SetLineColor(kGray);
-    mcnlohistupBinned->Draw("same");
-    mcnlohistdownBinned->SetLineColor(10);
-    mcnlohistdownBinned->SetFillColor(10);
-    mcnlohistdownBinned->Draw("same");
+        mcnlohistupBinned->SetFillColor(kGray);
+        mcnlohistupBinned->SetLineColor(kGray);
+        mcnlohistupBinned->Draw("same");
+        mcnlohistdownBinned->SetLineColor(10);
+        mcnlohistdownBinned->SetFillColor(10);
+        mcnlohistdownBinned->Draw("same");
+    }
     GenPlotTheory->SetLineColor(kRed+1);
     GenPlotTheory->SetLineWidth(2);
     GenPlotTheory->SetLineStyle(1);
@@ -3404,34 +3419,35 @@ void Plotter::PlotDiffXSec(){
     h_GenDiffXSec->SetLineStyle(1);
 
     //bool binned_theory=true; 
-    
-    mcnlohist->SetLineColor(kBlue); //#####################
-    mcnlohist->SetLineStyle(5);
-    mcnlohistBinned->SetLineColor(kBlue); //#####################
-    mcnlohistBinned->SetLineWidth(2);
-    mcnlohistBinned->SetLineStyle(5);
-    powheghist->SetLineColor(kGreen+1); //#####################
-    powheghist->SetLineStyle(7);
-    powheghistBinned->SetLineColor(kGreen+1); //#####################
-    powheghistBinned->SetLineWidth(2);
-    powheghistBinned->SetLineStyle(7);
-    
-    if(binned_theory==false){
-      mcnlohist->Draw("SAME,C");
-      powheghist->Draw("SAME,C");
-    }else{
-      mcnlohistBinned->Draw("SAME");
-      powheghistBinned->Draw("SAME");
-    }
+    if (drawNLOCurves) {
+        mcnlohist->SetLineColor(kBlue); //#####################
+        mcnlohist->SetLineStyle(5);
+        mcnlohistBinned->SetLineColor(kBlue); //#####################
+        mcnlohistBinned->SetLineWidth(2);
+        mcnlohistBinned->SetLineStyle(5);
+        powheghist->SetLineColor(kGreen+1); //#####################
+        powheghist->SetLineStyle(7);
+        powheghistBinned->SetLineColor(kGreen+1); //#####################
+        powheghistBinned->SetLineWidth(2);
+        powheghistBinned->SetLineStyle(7);
+        
+        if(binned_theory==false){
+        mcnlohist->Draw("SAME,C");
+        powheghist->Draw("SAME,C");
+        }else{
+        mcnlohistBinned->Draw("SAME");
+        powheghistBinned->Draw("SAME");
+        }
 
-    if(name.Contains("ToppT") || name.Contains("TopRapidity")){
-      Kidoth1_Binned->SetLineWidth(2);
-      Kidoth1_Binned->SetLineColor(kOrange-3); //########################
-      Kidoth1_Binned->SetLineStyle(1);
-      Kidoth1_Binned->Draw("SAME");
-     }
-    //MCFMHist->Draw("SAME");
-    //h_DiffXSec->Draw("SAME, EP0");
+        if(name.Contains("ToppT") || name.Contains("TopRapidity")){
+        Kidoth1_Binned->SetLineWidth(2);
+        Kidoth1_Binned->SetLineColor(kOrange-3); //########################
+        Kidoth1_Binned->SetLineStyle(1);
+        Kidoth1_Binned->Draw("SAME");
+        }
+        //MCFMHist->Draw("SAME");
+        //h_DiffXSec->Draw("SAME, EP0");
+    }
 
     if(!name.Contains("HypLLBarpT") && !name.Contains("HypTTBarpT") && !name.Contains("HypLeptonpT") && !name.Contains("HypBJetpT")){
         TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
@@ -3459,12 +3475,14 @@ void Plotter::PlotDiffXSec(){
     TLegend leg2 = *getNewLegend();
     leg2.AddEntry(h_DiffXSec, "Data",    "p");
     leg2.AddEntry(GenPlotTheory,            "MadGraph","l");
-    if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
-    //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
-    //if (mcnlohistupBinned->GetEntries()) leg2.AddEntry(mcnlohistupBinned,      "MC@NLO",  "fl");
-    //if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
-    if (powheghist->GetEntries())  leg2.AddEntry(powheghistBinned,       "POWHEG",  "l");        
-    if (name.Contains("ToppT") || name.Contains("TopRapidity")) leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");
+    if (drawNLOCurves) {
+        if (mcnlohistup->GetEntries() && mcnlohistdown->GetEntries()) leg2.AddEntry(mcatnloBand,      "MC@NLO",  "fl");
+        //else if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohist,      "MC@NLO",  "l");
+        //if (mcnlohistupBinned->GetEntries()) leg2.AddEntry(mcnlohistupBinned,      "MC@NLO",  "fl");
+        //if (mcnlohist->GetEntries()) leg2.AddEntry(mcnlohistBinned,      "MC@NLO",  "l");
+        if (powheghist->GetEntries())  leg2.AddEntry(powheghistBinned,       "POWHEG",  "l");        
+        if (name.Contains("ToppT") || name.Contains("TopRapidity")) leg2.AddEntry(Kidoth1_Binned,       "Approx. NNLO",  "l");
+    }
     
     //if (MCFMHist->GetEntries())  leg2.AddEntry(MCFMHist,       "MCFM",  "p");        
     leg2.SetFillStyle(0);
@@ -3475,8 +3493,10 @@ void Plotter::PlotDiffXSec(){
     leg2.SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg2.SetTextSize(0.04);
     leg2.Draw("same");
-    if (name.Contains("ToppT"))        DrawLabel("(arXiv:1009.4935)", leg2.GetX1NDC()+0.06, leg2.GetY1NDC()-0.025, leg2.GetX2NDC(), leg2.GetY1NDC(), 12, 0.025);
-    if (name.Contains("TopRapidity"))  DrawLabel("(arXiv:1105.5167)", leg2.GetX1NDC()+0.06, leg2.GetY1NDC()-0.025, leg2.GetX2NDC(), leg2.GetY1NDC(), 12, 0.025);
+    if (drawNLOCurves) {
+        if (name.Contains("ToppT"))        DrawLabel("(arXiv:1009.4935)", leg2.GetX1NDC()+0.06, leg2.GetY1NDC()-0.025, leg2.GetX2NDC(), leg2.GetY1NDC(), 12, 0.025);
+        if (name.Contains("TopRapidity"))  DrawLabel("(arXiv:1105.5167)", leg2.GetX1NDC()+0.06, leg2.GetY1NDC()-0.025, leg2.GetX2NDC(), leg2.GetY1NDC(), 12, 0.025);
+    }
     
     h_GenDiffXSec->Draw("SAME");
     gStyle->SetEndErrorSize(10);
