@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.28 2012/07/05 21:31:30 blutz Exp $
+// $Id: NTupleWriter.cc,v 1.29 2012/09/18 11:34:33 iasincru Exp $
 //
 //
 
@@ -285,29 +285,32 @@ NTupleWriter::NTupleWriter ( const edm::ParameterSet& iConfig ) :
 
   dummy(0, 0, 0, 0)
 {
+  
+  //WARNING: The trigger map can be used either for a specific version, e.g. Trig_v6
+  //or for any version, Trig_v*. NOT supported: Trig_v1* - the star captures ALL digits!
   //use first 8 bits for mumu
-  triggerMap_["HLT_DoubleMu6_v"] = 1;
-  triggerMap_["HLT_DoubleMu7_v"] = 2;
-  triggerMap_["HLT_Mu13_Mu8_v"] = 4;
-  triggerMap_["HLT_Mu17_Mu8_v"] = 8;
-  triggerMap_["HLT_DoubleMu45_v"] = 0x10;
-  triggerMap_["HLT_Mu17_TkMu8_v"] = 0x20;
+  triggerMap_["HLT_DoubleMu6_v*"] = 1;
+  triggerMap_["HLT_DoubleMu7_v*"] = 2;
+  triggerMap_["HLT_Mu13_Mu8_v*"] = 4;
+  triggerMap_["HLT_Mu17_Mu8_v*"] = 8;
+  triggerMap_["HLT_DoubleMu45_v*"] = 0x10;
+  triggerMap_["HLT_Mu17_TkMu8_v*"] = 0x20;
 
   //use bits 9 to 16 for mu e
-  triggerMap_["HLT_Mu8_Ele17_CaloIdL_v"] = 0x100;
-  triggerMap_["HLT_Mu17_Ele8_CaloIdL_v"] = 0x200;
-  triggerMap_["HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v"] = 0x400;
-  triggerMap_["HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v"] = 0x800;
-  triggerMap_["HLT_Mu10_Ele10_CaloIdL_v"] = 0x1000;
-  triggerMap_["HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"] = 0x2000;
-  triggerMap_["HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"] = 0x4000;
+  triggerMap_["HLT_Mu8_Ele17_CaloIdL_v*"] = 0x100;
+  triggerMap_["HLT_Mu17_Ele8_CaloIdL_v*"] = 0x200;
+  triggerMap_["HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v*"] = 0x400;
+  triggerMap_["HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v*"] = 0x800;
+  triggerMap_["HLT_Mu10_Ele10_CaloIdL_v*"] = 0x1000;
+  triggerMap_["HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*"] = 0x2000;
+  triggerMap_["HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*"] = 0x4000;
 
 
   //use bits 17-24 for ee
-  triggerMap_["HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v"] = 0x10000;
-  triggerMap_["HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v"] = 0x20000;
-  triggerMap_["HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"] = 0x40000;
-  triggerMap_["HLT_DoubleEle45_CaloIdL_v"] = 0x80000;
+  triggerMap_["HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v*"] = 0x10000;
+  triggerMap_["HLT_Ele17_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_Ele8_CaloIdT_TrkIdVL_CaloIsoVL_TrkIsoVL_v*"] = 0x20000;
+  triggerMap_["HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v*"] = 0x40000;
+  triggerMap_["HLT_DoubleEle45_CaloIdL_v*"] = 0x80000;
 
 
   //use bit 32 for general trigger to avoid false for unmatched triggers
@@ -696,13 +699,15 @@ int NTupleWriter::getTriggerBits (const edm::Event &iEvent, const edm::Handle< e
         {
           if (includeTrig_) VfiredTriggers.push_back ( trigName.triggerName ( i_Trig ) );
           std::string triggerName = trigName.triggerName ( i_Trig );
-          while (triggerName.length() > 0
-                 && triggerName[triggerName.length()-1] >= '0'
-                 && triggerName[triggerName.length()-1] <= '9')
+	  std::string triggerNameWithoutVersion(triggerName);
+          while (triggerNameWithoutVersion.length() > 0
+                 && triggerNameWithoutVersion[triggerNameWithoutVersion.length()-1] >= '0'
+                 && triggerNameWithoutVersion[triggerNameWithoutVersion.length()-1] <= '9')
             {
-              triggerName.replace(triggerName.length()-1, 1, "");
+              triggerNameWithoutVersion.replace(triggerNameWithoutVersion.length()-1, 1, "");
             }
-          result |= triggerMap_[triggerName];
+          result |= triggerMap_[triggerNameWithoutVersion + "*"];
+	  result |= triggerMap_[triggerName];
         }
     }
   return result;
@@ -715,12 +720,14 @@ int NTupleWriter::getTriggerBits ( const std::vector< std::string > &trigName ) 
   for ( unsigned int i_Trig = 0; i_Trig < trigName.size(); ++i_Trig ) {
 
     std::string triggerName = trigName.at( i_Trig );
-    while (triggerName.length() > 0
-           && triggerName[triggerName.length()-1] >= '0'
-           && triggerName[triggerName.length()-1] <= '9')
+    std::string triggerNameWithoutVersion(triggerName);
+    while (triggerNameWithoutVersion.length() > 0
+	    && triggerNameWithoutVersion[triggerNameWithoutVersion.length()-1] >= '0'
+	    && triggerNameWithoutVersion[triggerNameWithoutVersion.length()-1] <= '9')
       {
-        triggerName.replace(triggerName.length()-1, 1, "");
+	triggerNameWithoutVersion.replace(triggerNameWithoutVersion.length()-1, 1, "");
       }
+    result |= triggerMap_[triggerNameWithoutVersion + "*"];
     result |= triggerMap_[triggerName];
   }
   return result;
