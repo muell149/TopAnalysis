@@ -78,6 +78,7 @@ void merge(string channel){
     if(filename.find("qcdbcem2030")!=string::npos){MCXsecmap[filename] = 2.361E8*5.9E-4;}//BCtoE 20-30GeV QCD sample (x-sec * FilterEff)
     if(filename.find("qcdbcem3080")!=string::npos){MCXsecmap[filename] = 5.944E7*0.00242;}//BCtoE pT 30-80GeV QCD sample (x-sec * FilterEff)
     if(filename.find("qcdbcem80170")!=string::npos){MCXsecmap[filename] = 898200.0*0.0105;}//BCtoE 80-170GeV QCD sample (x-sec * FilterEff)
+    if(filename.find("tth")!=string::npos){MCXsecmap[filename] = 0.08634;} //ttH at 125 GeV https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt7TeV#ttH_associate_production
 
     sf=(lumi*MCXsecmap[filename])/MCNumbermap[filename];
 
