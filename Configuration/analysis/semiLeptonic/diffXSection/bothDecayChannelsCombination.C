@@ -2,7 +2,7 @@
 
 void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
 				  TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, TString closureTestSpecifier=""){
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -627,7 +627,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 		newPlotNNLOHisto->SetLineWidth(2);
 		newPlotNNLOHisto->SetMarkerStyle(7);
 		newPlotNNLOHisto->SetMarkerColor(constNnloColor);
-		newPlotNNLOHisto->Draw("SAME");
+		newPlotNNLOHisto->Draw("][ SAME");
 	      }
 	      //if(newPlotNNLOGraph){
 	      //	//newPlotNNLOGraph->SetName(plotname+"nnlo_graph"); 
