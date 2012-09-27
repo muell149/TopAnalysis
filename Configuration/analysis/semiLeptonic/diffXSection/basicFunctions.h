@@ -2758,15 +2758,15 @@ namespace semileptonic {
 	addOpt="LL";
       }
      else if(plotname.Contains("TTbarY")){
-	fitLowEdge=-1.5;
-	fitHighEdge=1.5;
+	fitLowEdge=0.5;
+	fitHighEdge=-0.75;
 	def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
-	a=-0.658848;
-	b=-0.0509368;
-	c=-0.0320204;
-	d=0.00513375;
+	a=-0.52;
+	b=-0.047;
+	c=-0.094;
+	d=812149;
 	addOpt="LL";
-      }
+     }
      else if(plotname.Contains("TopY")){
        //tail:
        fitLowEdge=-1.;
@@ -2845,18 +2845,16 @@ namespace semileptonic {
 /* 	  addOpt="LL"; */
 /* 	} */
 /*       } */
-/*       else if(plotname.Contains("ttbarY")){ */
-/* 	if(!largeSample){ */
-/* 	  fitLowEdge=-1.5; */
-/* 	  fitHighEdge=1.5; */
-/* 	  def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]"; */
-/* 	  a=-0.658848; */
-/* 	  b=-0.0509368; */
-/* 	  c=-0.0320204; */
-/* 	  d=12297.7; */
-/* 	  addOpt="LL"; */
-/* 	} */
-/*       } */
+      else if(plotname.Contains("TTbarY")){
+	fitLowEdge=-0.5;
+	fitHighEdge=0.75;
+	def="TMath::Exp(x*x*[0]+x*x*x*x*[1]+x*x*x*x*x*x*[2])*[3]";
+	a=-0.52;
+	b=-0.047;
+	c=-0.094;
+	d=812149;
+	addOpt="LL";
+      }
       else if(plotname.Contains("lepPt")){ 
 /* 	// head */
 /* 	fitLowEdge = 30.; */
@@ -3994,6 +3992,38 @@ namespace semileptonic {
 	return k;
     }
     
+    double getValue(TString fileName, TString canvName, TString plotName, int bin){
+      // get file
+      TFile* file = TFile::Open(fileName);
+      if(!file||(file->IsZombie())){ 
+	std::cout << "WARNING in getUncFromRootFile: file " << fileName << " not found" << std::endl;
+	return 0.;
+      }
+      // get canvas
+      TCanvas* canv=(TCanvas*)file->Get(canvName);
+      if(!canv){ 
+	std::cout << "WARNING in getUncFromRootFile: canvas " << canvName << " in file " << fileName << " not found" << std::endl;
+	return 0.;
+      }
+      // get plot
+      TH1F* plot  = (TH1F*)canv->GetPrimitive(plotName);
+      if(!plot){ 
+	std::cout << "WARNING in getUncFromRootFile: plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found" << std::endl;
+	return 0.;
+      }
+      // get uncertainty value
+      if(plot->GetNbinsX()+1<bin||bin<0){
+	std::cout << "WARNING in getUncFromRootFile: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found (" << plot->GetNbinsX() << " bins)" << std::endl;
+	return 0.;
+      }
+      if(plot->GetBinContent(bin)<0){
+	std::cout << "WARNING in getUncFromRootFile: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " has a negative value" << std::endl;
+      }
+      std::cout << plot->GetBinContent(bin) << std::endl;
+      return plot->GetBinContent(bin);
+    }
+
+
     // ===============================================================
     // ===============================================================
 
