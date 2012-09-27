@@ -261,32 +261,32 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
     // ===================================
     //  Load hadronization uncertainties
     // ===================================
-    // ATTENTION: values are loaded but not used at the moment!!!
-    // container for hadronization uncertainties
-    std::map< TString, TH1F* > hadUnc_;
-    // get file 
-    TFile* hadfile=TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mHadronUncert.root", "OPEN");
-    if(!hadfile||hadfile->IsZombie()){
-      std::cout << " Corrupt or missing file " << "/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mHadronUncert.root" << std::endl;
-      std::cout << " Aborting execution of macro! " << std::endl;
-      exit(0);
-    }
+//     // ATTENTION: values are loaded but not used at the moment!!!
+//     // container for hadronization uncertainties
+//     std::map< TString, TH1F* > hadUnc_;
+//     // get file 
+//     TFile* hadfile=TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mHadronUncert.root", "OPEN");
+//     if(!hadfile||hadfile->IsZombie()){
+//       std::cout << " Corrupt or missing file " << "/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mHadronUncert.root" << std::endl;
+//       std::cout << " Aborting execution of macro! " << std::endl;
+//       exit(0);
+//     }
 
-    // loop quantities 
-    for(unsigned int var=0; var<xSecVariables_.size(); ++var){
-      // exclude inclusive cross section
-      // FIXME: exclude bquark quantities for the moment
-      if(!xSecVariables_[var].Contains("inclusive")&&!xSecVariables_[var].Contains("bq")){
-	TString name=xSecVariables_[var];       
-	name.ReplaceAll("Norm","");
-	name.ReplaceAll("Plus","");
-	name.ReplaceAll("Minus","");
-	// get plot 
-	hadUnc_[xSecVariables_[var]]=(TH1F*)(hadfile->Get(name)->Clone());
-	//calculateError_[xSecVariables_[var]][sysHadUp  ]=true; // done above
-	//calculateError_[xSecVariables_[var]][sysHadDown]=true; // done above
-      }
-    }
+//     // loop quantities 
+//     for(unsigned int var=0; var<xSecVariables_.size(); ++var){
+//       // exclude inclusive cross section
+//       // FIXME: exclude bquark quantities for the moment
+//       if(!xSecVariables_[var].Contains("inclusive")&&!xSecVariables_[var].Contains("bq")){
+// 	TString name=xSecVariables_[var];       
+// 	name.ReplaceAll("Norm","");
+// 	name.ReplaceAll("Plus","");
+// 	name.ReplaceAll("Minus","");
+// 	// get plot 
+// 	hadUnc_[xSecVariables_[var]]=(TH1F*)(hadfile->Get(name)->Clone());
+// 	//calculateError_[xSecVariables_[var]][sysHadUp  ]=true; // done above
+// 	//calculateError_[xSecVariables_[var]][sysHadDown]=true; // done above
+//       }
+//     }
     
     // ===============================================================
     //  Part A: get all data xSec with all systematic variations
@@ -473,6 +473,19 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		  //  }
 		  //}
 		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
+		  // hadron lv PS lepton and b-jet PDF uncertainties
+		  if(!extrapolate&&hadron&&(sys==sysPDFUp||sys==sysPDFDown)&&(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq"))){
+		    std::cout << "load unc PDF for " << xSecVariables_[i] << " bin " << bin << std::endl;
+		    TString fileName="/afs/naf.desy.de/group/cms/scratch/tophh/tmp/diffXSecTopSemi";
+		    if(decayChannel=="muon"    ) fileName+="Mu2011";
+		    else if(decayChannel=="electron") fileName+="Elec2011";
+		    else if(decayChannel=="combined") fileName+="Lep";
+		    fileName+="PartonPhaseSpace.root";   
+		    TString canvName="relativeUncertainties/"+xSecVariables_[i]+"/relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i];
+		    TString plotName="relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i];
+		    int sysBin=23; // FIXME: will change if additional systematics are added to the list
+		    sysDiff=stdBinXSecValue*getValue(fileName, canvName, plotName, sysBin)/100.;
+		  }
 		  // adjust hadronization uncertainty for non combined cross section by hand
 		  // as powheg vs mcatnlo
 		  if((!(decayChannel=="combined"))&&(sys==sysHadUp||sys==sysHadDown)&&calculateError_[xSecVariables_[i]][sysGenPowheg]==true&&calculateError_[xSecVariables_[i]][sysGenMCatNLO]==true){
@@ -1093,7 +1106,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		canvas->GetListOfPrimitives()->Remove(canvas->GetPrimitive(plotName+"kData"));
 	      }
 	      // Draw errors into Canvas
-	      totalErrors_[xSecVariables_[i]]->Draw("p Z same");
+	      totalErrors_[xSecVariables_[i]]->Draw("][ p Z same");
 	      canvas->SetName(xSecVariables_[i]);
 	    }
 	    // save Canvas
@@ -1116,7 +1129,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
       }
     }
     // close file
-    hadfile->Close();
+    //hadfile->Close();
   }
 
   // close file
