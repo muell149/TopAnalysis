@@ -1,11 +1,11 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4955, bool save = true, int verbose=0, 
+void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  const std::string decayChannel = "combined", 
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  const std::string decayChannel = "muon", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
@@ -75,7 +75,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955, bool save = true, in
   TString outputFileName="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
-  if(decayChannel=="combined") outputFileName+="Comb";
+  if(decayChannel=="combined") outputFileName+="Lep";
   // NOTE: reco plots are the same - whatever PS is chosen but its nice
   //       to have them in the same output file like the cross sections
   // choose phase space
@@ -87,7 +87,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955, bool save = true, in
   // b2) hadron PS: hadron=true
   TString LV="Parton";
   if(!extrapolate&&hadron) LV="Hadron";
-  outputFileName+=dataSample+LV+PS+".root";
+  if(decayChannel=="electron"||decayChannel=="muon") outputFileName+=dataSample;
+  outputFileName+=LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="differentialXSecMonitoring"+lumi+"pb";
   // chose wheter SSV instead of CSV btagging control plots should be shown 
