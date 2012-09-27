@@ -5,7 +5,7 @@ TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString i
 TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b);
 
-void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayChannel="electron", bool save=true, int verbose=0, TString inputFolderName="RecentAnalysisRun",
+void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayChannel="electron", bool save=false, int verbose=0, TString inputFolderName="RecentAnalysisRun",
 				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
                                     bool doPDFuncertainty=true, bool addCrossCheckVariables=false)
@@ -47,7 +47,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
     outputFileNameDown.ReplaceAll(inputFolderName, inputFolderName+"/PDFDown");
     outputFileNameUp.ReplaceAll(SampleTag+"PF", "PdfVarUp"+SampleTag+"PF"  );
     outputFileNameDown.ReplaceAll(SampleTag+"PF", "PdfVarDown"+SampleTag+"PF");
-  } else { 
+  } 
+  else { 
     outputFileNameUp.ReplaceAll(inputFolderName, inputFolderName+"/MCShapeUp");
     outputFileNameDown.ReplaceAll(inputFolderName, inputFolderName+"/MCShapeDown");
     outputFileNameUp.ReplaceAll("PF", "MCShapeVarUp"+SampleTag+"PF"  );
@@ -63,8 +64,13 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
   // define variables
   std::vector<TString> variable_;
   TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta"};
+  // cross check variables
   variable_.insert( variable_.begin(), variable, variable + sizeof(variable)/sizeof(TString) );
   if (addCrossCheckVariables) variable_.insert(variable_.end(),   xSecVariablesCCVar,  xSecVariablesCCVar + sizeof( xSecVariablesCCVar)/sizeof(TString));
+  // b quark variables only for PDF uncertainties
+  TString bvariables[]={"bqPt", "bqEta"};
+  if(doPDFuncertainty) variable_.insert(variable_.end(), bvariables, bvariables+sizeof(bvariables)/sizeof(TString));
+  
   // container for values read from tree
   std::map< TString, float > value_;
   // container for original and shape distorted
@@ -137,7 +143,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
     if(verbose>0) std::cout << variable_[i]+" ";
     value_[variable_[i]              ]=0;
     value_[variable_[i]+"PartonTruth"]=0;
-    if(variable_[i].Contains("top")){
+    if(variable_[i].Contains("top")||variable_[i].Contains("bq")){
       value_[variable_[i]+"Lep"]=0;
       value_[variable_[i]+"Had"]=0;
       value_[variable_[i]+"LepPartonTruth"]=0;
@@ -181,7 +187,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
   // loop all variables
   for(unsigned int i=0; i<variable_.size();++i){
     // take care about splitted leptonic and hadronic top distributions
-    if(variable_[i].Contains("top")){
+    if(variable_[i].Contains("top")||variable_[i].Contains("bq")){
       // activate branches
       tree->SetBranchStatus(variable_[i]+"Lep",1);
       tree->SetBranchStatus(variable_[i]+"Had",1);
@@ -211,7 +217,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
     // loop all variables
     for(unsigned int i=0; i<variable_.size();++i){
       // check leptonic/ hadronic top quantities
-      if(variable_[i].Contains("top")){
+      if(variable_[i].Contains("top")||variable_[i].Contains("bq")){
 	// leptonic top
 	if(value_[variable_[i]+"Lep"]==-9999){
 	  // check if already an invalid branch entry was found
@@ -316,7 +322,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
     // count number of entries
     int entries=plots_[variable_[i]+"PartonTruth"]->GetEntries();
     // take into account that there are two top quarks
-    if(variable_[i].Contains("top")) entries*=0.5;
+    if(variable_[i].Contains("top")||variable_[i].Contains("bq")) entries*=0.5;
     // compare number of events
     if(entries!=NeventsPS){
 	std::cout << "ERROR: wrong number of events in plot " << analysisFileName;
@@ -337,7 +343,8 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
 	// restricted phase space
 	plotsScaled_[variable_[i]+"PartonTruth"    +Var]=distortPDF(*plots_[variable_[i]+"PartonTruth"    ], Var, variable_[i], inputFolderName, ""       , verbose-1);
 	// full phase space
-	plotsScaled_[variable_[i]+"PartonTruthFull"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruthFull"], Var, variable_[i], inputFolderName, "Full"   , verbose-1);
+	TString pdfUncPS="Full";
+	plotsScaled_[variable_[i]+"PartonTruthFull"+Var]=distortPDF(*plots_[variable_[i]+"PartonTruthFull"], Var, variable_[i], inputFolderName, pdfUncPS   , verbose-1);
       } 
       else {
 	// restricted phase space
@@ -357,8 +364,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
     for(unsigned int var=0; var<variation_.size();++var){
       TString Var=variation_[var];
       // calculate lepton variation SF from full PS
-      // others from restricted
-      // temporary necessary because of different gen and reco cuts
+      // others from restricted      // temporary necessary because of different gen and reco cuts
       TString PS="Full";
       //if(!(variable_[i]=="lepPt"||variable_[i]=="lepEta")) PS="";
       if(variable_[i].Contains("Y")) PS="";
@@ -508,7 +514,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
 	  double LepShapeWeight=0;
 	  double HadShapeWeight=0;
 	  // for leptonic and hadronic top: get 2xSF (from variable i)
-	  if(variable_[i].Contains("top")){
+	  if(variable_[i].Contains("top")||variable_[i].Contains("bq")){
 	    LepShapeWeight=SF_[variable_[i]+Var]->GetBinContent(SF_[variable_[i]+Var]->FindBin(value_[variable_[i]+"Lep"+"PartonTruth"]));
 	    HadShapeWeight=SF_[variable_[i]+Var]->GetBinContent(SF_[variable_[i]+Var]->FindBin(value_[variable_[i]+"Had"+"PartonTruth"]));
 	  }
@@ -526,7 +532,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
 	    std::cout << "rec value " << value_[variable_[i]] << std::endl;
 	  }
 	  // filling for top quantities: fill leptonic and hadronic top quantities in same plot
-	  if(variable_[j].Contains("top")){
+	  if(variable_[j].Contains("top")||variable_[i].Contains("bq")){
 	    // parton truth plots
 	    finalPlots_[variable_[j]+"PartonTruth"][variable_[i]+Var]->Fill(value_[variable_[j]+"Lep"+"PartonTruth"], weight*LepShapeWeight);
 	    finalPlots_[variable_[j]+"PartonTruth"][variable_[i]+Var]->Fill(value_[variable_[j]+"Had"+"PartonTruth"], weight*HadShapeWeight);
@@ -694,7 +700,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayC
       }
     }
   }
-
+  
   // ---
   //    part G: save weighted plots and control plots
   // ---
@@ -1063,21 +1069,17 @@ double linSF(const double x, const double xmax, const double a, const double b){
 
 TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString inputFolderName, TString phaseSpace, int verbose)
 {
-
-  if (verbose>0) std::cout << "Using hard-coded path '/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles' instead of '/afs/naf.desy.de/group/cms/scratch/tophh'" 
-			   << inputFolderName << " for file with PDF-uncertainties." << std::endl;
-
+  if (verbose>0) std::cout << "Using hard-coded path '/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles' instead of '/afs/naf.desy.de/group/cms/scratch/tophh'" << inputFolderName << " for file with PDF-uncertainties." << std::endl;
   // this function loads the max/min PDF uncertainties as determined externally with MC@NLO for the desired variables and applies it to MadGraph
   TString fileName    = "/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6mPDFuncertOnly.root" ;
   TString plotNameVar = (variation == "") ? variable : variable + "_" + variation                                              ;
   TString plotNameNom = variable                                                                                               ;                 
   TString directory   = (phaseSpace == "Full") ? "FullPhaseSpace" : "VisiblePhaseSpace"                                        ; 
-
-  if(verbose>0) std::cout << "distortPDF: using file " << fileName << " for estimated PDF uncertainties in plot " << plotNameVar << std::endl;
+  if(verbose>0) std::cout << "distortPDF: using plot " << directory + "/" + plotNameNom << " from file " << fileName << " for estimated PDF uncertainties in plot " << plotNameVar << std::endl;
 
   TH1F * histPdfNom = getTheoryPrediction(directory + "/" + plotNameNom,fileName) ;  // the central values of MC@NLO (needed to rescale to central values of MadGraph)
   TH1F * histPdfVar = getTheoryPrediction(directory + "/" + plotNameVar,fileName) ;  // the varied  values of MC@NLO (needed to add     to central values of MadGraph)
-  TH1F * histPdf    = getTheoryPrediction(directory + "/" + plotNameVar,fileName) ;  // the desired histogram (PDF variations for MadGraph)
+  TH1F * histPdf    = getTheoryPrediction(directory + "/" + plotNameVar,fileName) ;  // the desired output histogram (PDF variations for MadGraph)
 
   // check if binning and ranges are consistent
   if ( histPdf->GetNbinsX() != hist.GetNbinsX() || histPdf->GetXaxis()->GetXmin() != hist.GetXaxis()->GetXmin() || histPdf->GetXaxis()->GetXmax() != hist.GetXaxis()->GetXmax() )
