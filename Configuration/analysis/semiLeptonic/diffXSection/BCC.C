@@ -249,9 +249,9 @@ void BCC::MakeHistos()
   std::map<TString,int>    HistoBins; 
   std::map<TString,int>    HistoSmoothingValue;
 
-  BinWidthScaler["lepEta"]      = 50.0;
-  BinWidthScaler["lepEtaPlus"]  = 50.0;
-  BinWidthScaler["lepEtaMinus"] = 50.0;
+  BinWidthScaler["lepEta"]      = 80.0;
+  BinWidthScaler["lepEtaPlus"]  = 80.0;
+  BinWidthScaler["lepEtaMinus"] = 80.0;
   BinWidthScaler["lepPt"]       =    2;
   BinWidthScaler["topPt"]       =  0.4;
   BinWidthScaler["topPtPlus"]   =  0.4;
@@ -261,7 +261,7 @@ void BCC::MakeHistos()
   BinWidthScaler["topYMinus"]   = 40.0;
   BinWidthScaler["ttbarMass"]   =  1.0;
   BinWidthScaler["ttbarPt"]     =    1;
-  BinWidthScaler["ttbarY"]      = 40.0;
+  BinWidthScaler["ttbarY"]      = 80.0;
   BinWidthScaler["bqPt"]        =    2;
   BinWidthScaler["bqEta"]       = 40.0;
 
