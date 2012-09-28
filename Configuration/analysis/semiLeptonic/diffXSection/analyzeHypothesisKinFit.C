@@ -5,9 +5,10 @@
 void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true, 
 			     int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
   // ============================
@@ -130,6 +131,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   TString outputFileName="diffXSecTopSemi";
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
+  if(decayChannel=="combined") outputFileName+="Lep";
   outputFileName+=closureLabel+dataSample+LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitHypothesis"+lumi+"pb";
@@ -142,12 +144,22 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
     if(verbose>1) std::cout << "ATTENTION: optimal tau for SVD unfolding will be determined! this takes a while"; 
     save=false;
   }
-  
+  // adjust luminosity and data files for combined control plots
+  double luminosityEl=0;
+  double luminosityMu=0;
+  TString dataFileEl="";
+  TString dataFileMu="";
+  if(decayChannel=="combined"&&luminosity>4500&&luminosity<5000){
+    luminosityEl=constLumiElec;
+    luminosityMu=constLumiMuon;
+    dataFileEl=getStringEntry(dataFile,1 , ":");
+    dataFileMu=getStringEntry(dataFile,42, ":");
+  }
   if(verbose>1) {
     std::cout << "dataFile " << dataFile << std::endl;
     std::cout << "closureTestSpecifier " << closureTestSpecifier << std::endl;
     std::cout << "outputFileName " << outputFileName << std::endl;
-  } 
+  }
 
   // ---
   //    create list of systematics to be ignored- the std input will be used instead
@@ -876,7 +888,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   // ===================================
   //  Open standard analysis files
   // ===================================
-  std::map<unsigned int, TFile*> files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel, ttbarMC);
+  std::map<unsigned int, TFile*> files_, filesMu_, filesEl_;
+  if(decayChannel!="combined") files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel, ttbarMC);
+  else{
+    filesMu_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileMu, "muon"    , ttbarMC);
+    filesEl_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileEl, "electron", ttbarMC);
+  }
 
   // =====================
   //  Loading histos
@@ -893,9 +910,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 
   // container for all histos (1D&2D)
   // example for acess: histo_["plotName"][sampleNr]
-  std::map< TString, std::map <unsigned int, TH1F*> > histo_;
+  std::map< TString, std::map <unsigned int, TH1F*> > histo_, histoEl_, histoMu_;
   std::map< TString, TH1F* > histoErrorBand_;
-  std::map< TString, std::map <unsigned int, TH2F*> > histo2_;
+  std::map< TString, std::map <unsigned int, TH2F*> > histo2_, histo2El_, histo2Mu_;
   // total # plots 
   int Nplots=0;
   // save all histos from plotList_ that exist in files_ into 
@@ -903,90 +920,212 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   if(verbose>1) std::cout << std::endl;
   std::vector<TString> vecRedundantPartOfNameInData;
   vecRedundantPartOfNameInData.push_back(sysInputFolderExtension);
-  getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
-
+  if(decayChannel!="combined") getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
+  else{
+    getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData);
+    getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose-1, "muon"    , &vecRedundantPartOfNameInData);
+  }
+  
+  // ===============================================
   // take care of rec level b quark plots from MC BG
+  // ===============================================
   // this is necessary because signal and background do have different input folders
   if(!extrapolate&&hadron){
-    bool bqPtExistsInAnySample =false;
-    bool bqEtaExistsInAnySample=false;
-    bool lepPtExistsInAnySample =false;
-    bool lepEtaExistsInAnySample=false;
-    // get input path/folder
-    TString path=recPartonBpath;
-    TString path2=recPartonBpath;
-    TString pathL=recPartonLeppath;
-    TString pathL2=recPartonLeppath;
-    // loop samples
-    for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
-      if(sample==kData){
-	if (vecRedundantPartOfNameInData.size() != 0){
-	  std::vector<TString>::iterator iter;
-	  for (iter = (vecRedundantPartOfNameInData.begin()); iter != (vecRedundantPartOfNameInData.end()); iter++){
-	    path.ReplaceAll((*iter), ""); 
-	    pathL.ReplaceAll((*iter), "");
+    if(decayChannel!="combined"){
+      bool bqPtExistsInAnySample =false;
+      bool bqEtaExistsInAnySample=false;
+      bool lepPtExistsInAnySample =false;
+      bool lepEtaExistsInAnySample=false;
+      // get input path/folder
+      TString path=recPartonBpath;
+      TString path2=recPartonBpath;
+      TString pathL=recPartonLeppath;
+      TString pathL2=recPartonLeppath;
+      // loop samples
+      for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
+	if(sample==kData){
+	  if (vecRedundantPartOfNameInData.size() != 0){
+	    std::vector<TString>::iterator iter;
+	    for (iter = (vecRedundantPartOfNameInData.begin()); iter != (vecRedundantPartOfNameInData.end()); iter++){
+	      path.ReplaceAll( (*iter), ""); 
+	      pathL.ReplaceAll((*iter), "");
+	    }
 	  }
 	}
-      }
-      // create plot container
-      TH1* targetPlotBqPt  =0;
-      TH1* targetPlotBqEta =0;
-      TH1* targetPlotLepPt =0;
-      TH1* targetPlotLepEta=0;
-      // check if file exists
-      if(files_[sample]){
-	// get plot
-	files_[sample]->GetObject(path+"/bqPt" , targetPlotBqPt );
-	files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
-	files_[sample]->GetObject(pathL+"/lepPt" , targetPlotLepPt );
-	files_[sample]->GetObject(pathL+"/lepEta", targetPlotLepEta);
-	// Check existence of plot
-	if(targetPlotBqPt){ 
-	  histo_[path2+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt ->Clone(path+"/bqPt"); 
-	  bqPtExistsInAnySample =true;
+	if(verbose>2){
+	  std::cout << std::endl << sampleLabel(sample, decayChannel) << std::endl;
+	  std::cout << path+"/bqPt"    << " -> " << path2+"/bqPt"    << std::endl;
+	  std::cout << path+"/bqEta"   << " -> " << path2+"/bqEta"   << std::endl;
+	  std::cout << pathL+"/lepPt"  << " -> " << pathL2+"/lepPt"  << std::endl;
+	  std::cout << pathL+"/lepEta" << " -> " << pathL2+"/lepEta" << std::endl;
 	}
-	if(targetPlotBqEta){
-	  histo_[path2+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
-	  bqEtaExistsInAnySample=true;
-	}
-	if(targetPlotLepPt){ 
-	  histo_[pathL2+"/lepPt" ][sample]=(TH1F*)targetPlotLepPt ->Clone(pathL+"/lepPt" ); 
-	  lepPtExistsInAnySample =true;
-	}
-	if(targetPlotLepEta){
-	  histo_[pathL2+"/lepEta"][sample]=(TH1F*)targetPlotLepEta->Clone(pathL+"/lepEta");
-	  lepEtaExistsInAnySample=true;
-	}
-	if(verbose>1){
+	// create plot container
+	TH1* targetPlotBqPt  =0;
+	TH1* targetPlotBqEta =0;
+	TH1* targetPlotLepPt =0;
+	TH1* targetPlotLepEta=0;
+	// check if file exists
+	if(files_[sample]){
+	  // get plot
+	  files_[sample]->GetObject(path+"/bqPt" , targetPlotBqPt );
+	  files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
+	  files_[sample]->GetObject(pathL+"/lepPt" , targetPlotLepPt );
+	  files_[sample]->GetObject(pathL+"/lepEta", targetPlotLepEta);
+	  // Check existence of plot
+	  if(targetPlotBqPt){ 
+	    histo_[path2+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt ->Clone(path+"/bqPt"); 
+	    bqPtExistsInAnySample =true;
+	  }
+	  if(targetPlotBqEta){
+	    histo_[path2+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
+	    bqEtaExistsInAnySample=true;
+	  }
+	  if(targetPlotLepPt){ 
+	    histo_[pathL2+"/lepPt" ][sample]=(TH1F*)targetPlotLepPt ->Clone(pathL+"/lepPt" ); 
+	    lepPtExistsInAnySample =true;
+	  }
+	  if(targetPlotLepEta){
+	    histo_[pathL2+"/lepEta"][sample]=(TH1F*)targetPlotLepEta->Clone(pathL+"/lepEta");
+	    lepEtaExistsInAnySample=true;
+	  }
+	  if(verbose>1){
 	    std::cout << sampleLabel(sample,decayChannel) << ":" << std::endl;
-	  std::cout << "targetPlotBqPt  : " <<  targetPlotBqPt   << std::endl;
-	  std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	 << std::endl;
-          std::cout << "targetPlotLepPt : " <<  targetPlotLepPt  << std::endl;
-          std::cout << "targetPlotLepEta: " <<  targetPlotLepEta << std::endl;
+	    std::cout << "targetPlotBqPt  : " <<  targetPlotBqPt   << std::endl;
+	    std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	 << std::endl;
+	    std::cout << "targetPlotLepPt : " <<  targetPlotLepPt  << std::endl;
+	    std::cout << "targetPlotLepEta: " <<  targetPlotLepEta << std::endl;
+	  }
 	}
+	// delete plot container
+	delete targetPlotBqPt;
+	delete targetPlotBqEta;
+	delete targetPlotLepPt;
+	delete targetPlotLepEta;
       }
-      // delete plot container
-      delete targetPlotBqPt;
-      delete targetPlotBqEta;
-      delete targetPlotLepPt;
-      delete targetPlotLepEta;
+      // check if plot exists at all
+      if(!bqPtExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bqPt for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!bqEtaExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bqEta for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!lepPtExistsInAnySample){
+	std::cout << "no plot found with label " << pathL+"/lepPt for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!lepEtaExistsInAnySample){
+	std::cout << "no plot found with label " << pathL+"/lepEta for non ttbar signal" << std::endl;
+	exit(0);
+      }
     }
-    // check if plot exists at all
-    if(!bqPtExistsInAnySample){
-      std::cout << "no plot found with label " << path+"/bqPt for non ttbar signal" << std::endl;
-      exit(0);
-    }
-    if(!bqEtaExistsInAnySample){
-      std::cout << "no plot found with label " << path+"/bqEta for non ttbar signal" << std::endl;
-      exit(0);
-    }
-    if(!lepPtExistsInAnySample){
-      std::cout << "no plot found with label " << pathL+"/lepPt for non ttbar signal" << std::endl;
-      exit(0);
-    }
-    if(!lepEtaExistsInAnySample){
-      std::cout << "no plot found with label " << pathL+"/lepEta for non ttbar signal" << std::endl;
-      exit(0);
+    else{
+      bool bqPtExistsInAnySample =false;
+      bool bqEtaExistsInAnySample=false;
+      bool lepPtExistsInAnySample =false;
+      bool lepEtaExistsInAnySample=false;
+      // get input path/folder
+      TString path=recPartonBpath;
+      TString path2=recPartonBpath;
+      TString pathL=recPartonLeppath;
+      TString pathL2=recPartonLeppath;
+      // loop samples
+      for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
+	if(sample==kData){
+	  if (vecRedundantPartOfNameInData.size() != 0){
+	    std::vector<TString>::iterator iter;
+	    for (iter = (vecRedundantPartOfNameInData.begin()); iter != (vecRedundantPartOfNameInData.end()); iter++){
+	      path.ReplaceAll( (*iter), ""); 
+	      pathL.ReplaceAll((*iter), "");
+	    }
+	  }
+	}
+	if(verbose>2){
+	  std::cout << std::endl << sampleLabel(sample, decayChannel) << std::endl;
+	  std::cout << path+"/bqPt"    << " -> " << path2+"/bqPt"    << std::endl;
+	  std::cout << path+"/bqEta"   << " -> " << path2+"/bqEta"   << std::endl;
+	  std::cout << pathL+"/lepPt"  << " -> " << pathL2+"/lepPt"  << std::endl;
+	  std::cout << pathL+"/lepEta" << " -> " << pathL2+"/lepEta" << std::endl;
+	}
+	// create plot container
+	TH1* targetPlotBqPt  =0;
+	TH1* targetPlotBqEta =0;
+	TH1* targetPlotLepPt =0;
+	TH1* targetPlotLepEta=0;
+	TH1* targetMuPlotBqPt  =0;
+	TH1* targetMuPlotBqEta =0;
+	TH1* targetMuPlotLepPt =0;
+	TH1* targetMuPlotLepEta=0;
+	// check if file exists
+	if(filesMu_[sample]&&filesEl_[sample]){
+	  //std::cout << "file for " << sampleLabel(sample, decayChannel) << " there" << std::endl;
+	  // get plot
+	  filesEl_[sample]->GetObject(path+"/bqPt"   , targetPlotBqPt  );
+	  filesEl_[sample]->GetObject(path+"/bqEta"  , targetPlotBqEta );
+	  filesEl_[sample]->GetObject(pathL+"/lepPt" , targetPlotLepPt );
+	  filesEl_[sample]->GetObject(pathL+"/lepEta", targetPlotLepEta);
+	  filesMu_[sample]->GetObject(path+"/bqPt"   , targetMuPlotBqPt  );
+	  filesMu_[sample]->GetObject(path+"/bqEta"  , targetMuPlotBqEta );
+	  filesMu_[sample]->GetObject(pathL+"/lepPt" , targetMuPlotLepPt );
+	  filesMu_[sample]->GetObject(pathL+"/lepEta", targetMuPlotLepEta);
+	  // Check existence of plot
+	  if(targetPlotBqPt&&targetMuPlotBqPt){ 
+	    //std::cout << "canv there for" << sampleLabel(sample, decayChannel) << std::endl;
+	    histoEl_[path2+"/bqPt" ][sample]=(TH1F*)targetPlotBqPt  ->Clone(path+"/bqPt"); 
+	    histoMu_[path2+"/bqPt" ][sample]=(TH1F*)targetMuPlotBqPt->Clone(path+"/bqPt"); 
+	    bqPtExistsInAnySample =true;
+	  }
+	  if(targetPlotBqEta&&targetMuPlotBqEta){
+	    histoEl_[path2+"/bqEta"][sample]=(TH1F*)targetPlotBqEta  ->Clone(path+"/bqEta");
+	    histoMu_[path2+"/bqEta"][sample]=(TH1F*)targetMuPlotBqEta->Clone(path+"/bqEta");
+	    bqEtaExistsInAnySample=true;
+	  }
+	  if(targetPlotLepPt&&targetMuPlotLepPt){ 
+	    histoEl_[pathL2+"/lepPt" ][sample]=(TH1F*)targetPlotLepPt  ->Clone(pathL+"/lepPt" );
+	    histoMu_[pathL2+"/lepPt" ][sample]=(TH1F*)targetMuPlotLepPt->Clone(pathL+"/lepPt" );  
+	    lepPtExistsInAnySample =true;
+	  }
+	  if(targetPlotLepEta&&targetMuPlotLepEta){
+	    histoEl_[pathL2+"/lepEta"][sample]=(TH1F*)targetPlotLepEta  ->Clone(pathL+"/lepEta");
+	    histoMu_[pathL2+"/lepEta"][sample]=(TH1F*)targetMuPlotLepEta->Clone(pathL+"/lepEta");
+	    lepEtaExistsInAnySample=true;
+	  }
+	  if(verbose>1){
+	    std::cout << sampleLabel(sample,decayChannel) << ":" << std::endl;
+	    std::cout << "targetPlotBqPt  : " <<  targetPlotBqPt   << std::endl;
+	    std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	 << std::endl;
+	    std::cout << "targetPlotLepPt : " <<  targetPlotLepPt  << std::endl;
+	    std::cout << "targetPlotLepEta: " <<  targetPlotLepEta << std::endl;
+	  }
+	}
+	// delete plot container
+	delete targetPlotBqPt;
+	delete targetPlotBqEta;
+	delete targetPlotLepPt;
+	delete targetPlotLepEta;
+	delete targetMuPlotBqPt;
+	delete targetMuPlotBqEta;
+	delete targetMuPlotLepPt;
+	delete targetMuPlotLepEta;
+      }
+      // check if plot exists at all
+      if(!bqPtExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bqPt for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!bqEtaExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bqEta for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!lepPtExistsInAnySample){
+	std::cout << "no plot found with label " << pathL+"/lepPt for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!lepEtaExistsInAnySample){
+	std::cout << "no plot found with label " << pathL+"/lepEta for non ttbar signal" << std::endl;
+	exit(0);
+      }
     }
   }
 
@@ -1043,18 +1182,34 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       // loop samples
       for(unsigned int sample=kSig; sample<=kData; ++sample){
 	// check if plot exists 1D
-	if(plotExists(histo_, plotList_[plot], sample)){
-	    if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << "(1D)" << std::endl;
+	if((decayChannel!="combined"&&plotExists(histo_, plotList_[plot], sample))||(decayChannel=="combined"&&plotExists(histoEl_, plotList_[plot], sample)&&plotExists(histoMu_, plotList_[plot], sample))){
+	  if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << "(1D)" << std::endl;
 	  // replace plot entry
-	  histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
-	  histo_[plotList_[plot]].erase(sample);
+	  if(decayChannel!="combined"){
+	    histo_[newName][sample]=(TH1F*)histo_[plotList_[plot]][sample]->Clone(); 
+	    histo_[plotList_[plot]].erase(sample);
+	  }
+	  else{
+	    histoEl_[newName][sample]=(TH1F*)histoEl_[plotList_[plot]][sample]->Clone(); 
+	    histoEl_[plotList_[plot]].erase(sample);
+	    histoMu_[newName][sample]=(TH1F*)histoMu_[plotList_[plot]][sample]->Clone(); 
+	    histoMu_[plotList_[plot]].erase(sample);
+	  }
 	}
 	// check if plot exists 2D
-	else if(plotExists(histo2_, plotList_[plot], sample)){
-	    if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << "(2D)" << std::endl;
+	else if((decayChannel!="combined"&&plotExists(histo2_, plotList_[plot], sample))||(decayChannel=="combined"&&plotExists(histo2Mu_, plotList_[plot], sample)&&plotExists(histo2El_, plotList_[plot], sample))){
+	  if(verbose>1) std::cout << sampleLabel(sample,decayChannel) << "(2D)" << std::endl;
 	  // replace plot entry
-	  histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
-	  histo2_[plotList_[plot]].erase(sample);
+	  if(decayChannel!="combined"){
+	    histo2_[newName][sample]=(TH2F*)histo2_[plotList_[plot]][sample]->Clone(); 
+	    histo2_[plotList_[plot]].erase(sample);
+	  }
+	  else{
+	    histo2El_[newName][sample]=(TH2F*)histo2El_[plotList_[plot]][sample]->Clone(); 
+	    histo2El_[plotList_[plot]].erase(sample); 
+	    histo2Mu_[newName][sample]=(TH2F*)histo2Mu_[plotList_[plot]][sample]->Clone(); 
+	    histo2Mu_[plotList_[plot]].erase(sample);
+	  }
 	}
 	// finally delete the whole name entry
 	// attention: some full PS plots still needed!!!
@@ -1064,15 +1219,19 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       plotList_[plot]=newName;
     }
   }
-  
+
   // ==========================================
   //  Lumiweighting for choosen luminosity
   // ==========================================
   // scale every histo in histo_ and histo2_ to the corresponding luminosity
   // Additionally the mu eff SF is applied
   // NOTE: luminosity [/pb]
-  scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, systematicVariationMod, decayChannel, ttbarMC2);
-
+  if(decayChannel!="combined") scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose-1, systematicVariationMod, decayChannel, ttbarMC2);
+  else{
+    scaleByLuminosity(plotList_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose-1, systematicVariationMod, "muon"    , ttbarMC2);
+    scaleByLuminosity(plotList_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose-1, systematicVariationMod, "electron", ttbarMC2);
+  }
+  
   // ========================================================
   //  Add single top channels and DiBoson contributions
   // ========================================================
@@ -1081,7 +1240,40 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   // will be combined and saved in the histo_ and histo2_ map
   // reCreate: recreate combined plots if they are already existing
   bool reCreate=false;
-  AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose-1, reCreate, decayChannel);
+  if(decayChannel!="combined") AddSingleTopAndDiBoson(plotList_, histo_, histo2_, N1Dplots, verbose-1, reCreate, decayChannel);
+  else{
+    AddSingleTopAndDiBoson(plotList_, histoMu_, histo2Mu_, N1Dplots, verbose-1, reCreate, "muon"    );
+    AddSingleTopAndDiBoson(plotList_, histoEl_, histo2El_, N1Dplots, verbose-1, reCreate, "electron");
+  }
+
+  // =======================================================
+  //  Add decay channels for combined control plot
+  // =======================================================
+  if(decayChannel=="combined"){
+    // loop samples
+      for(unsigned int sample=kSig; sample<=kData; ++sample){
+	if(verbose>1) std::cout << sampleLabel(sample, decayChannel) << std::endl;
+      // loop plots
+      for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+	if(verbose>1) std::cout << plotList_[plot] << " : " ;
+	// a) 1D
+	if((plot<N1Dplots)&&(histoMu_.count(plotList_[plot])>0)&&(histoMu_[plotList_[plot]].count(sample)>0)&&(histoEl_.count(plotList_[plot])>0)&&(histoEl_[plotList_[plot]].count(sample)>0)){ 
+	  if(verbose>1) std::cout << "1D" << std::endl;
+	  histo_[plotList_[plot]][sample]=     (TH1F*)(histoMu_[plotList_[plot]][sample]->Clone());
+	  histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_[plotList_[plot]][sample]->Clone()));
+	}
+	// b) 2D
+	else if((plot>=N1Dplots)&&(histo2Mu_.count(plotList_[plot])>0)&&(histo2Mu_[plotList_[plot]].count(sample)>0)&&(histo2El_.count(plotList_[plot])>0)&&(histo2El_[plotList_[plot]].count(sample)>0)){
+	  if(verbose>1) std::cout << "2D" << std::endl;
+	  histo2_[plotList_[plot]][sample]=     (TH2F*)(histo2Mu_[plotList_[plot]][sample]->Clone());
+	  histo2_[plotList_[plot]][sample]->Add((TH2F*)(histo2El_[plotList_[plot]][sample]->Clone()));
+	}
+	else{
+	  if(verbose>1) std::cout << "NOT FOUND" << std::endl;
+	}
+      }   
+    }
+  }
 
   // =================================================
   //  Copy event yields for total xSec calculation
@@ -1111,7 +1303,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-    if(decayChannel=="electron"&&axisLabel_[plot].Contains("#mu")) axisLabel_[plot].ReplaceAll("#mu", "e");
+    if(decayChannel=="electron"&&axisLabel_[plot].Contains("#mu")) axisLabel_[plot].ReplaceAll("#mu", "e"  );
+    if(decayChannel=="combined"&&axisLabel_[plot].Contains("#mu")) axisLabel_[plot].ReplaceAll("#mu", "lep");
     if(verbose>1){
       std::cout << "(plot, x Axis label , y Axis label , log scale?, rebinning factor):" << std::endl;
       std::cout << plotList_[plot] << ": " << getStringEntry(axisLabel_[plot],1);
@@ -1157,6 +1350,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	  std::cout << "missing plot: analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << " for sample " << sampleLabel(bgsample,decayChannel) << std::endl;
 	exit(1);
       }
+      if(verbose>1) std::cout << sampleLabel(bgsample,decayChannel) << std::endl;
       histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone(variable));
     }
     // data event yield
@@ -1254,7 +1448,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
       TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#epsilon #times A (MC t#bar{t}#rightarrow#mu)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-      if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+      if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
+      if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
       // set binomial errors
       if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
       for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
@@ -1262,8 +1457,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	double N=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
 	double width=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinWidth(bin);
 	N*=width*effSFAB(systematicVariationMod,decayChannel);
-	if(ttbarMC2=="Powheg") N/=(lumiweight(kSigPow, luminosity, systematicVariationMod, decayChannel));
-	else N/=(lumiweight(kSig, luminosity, systematicVariationMod, decayChannel));
+	if(decayChannel!="combined"){
+	  if(ttbarMC2=="Powheg") N/=(lumiweight(kSigPow, luminosity, systematicVariationMod, decayChannel));
+	  else N/=(lumiweight(kSig, luminosity, systematicVariationMod, decayChannel));
+	}
 	if(verbose>1){
 	  std::cout << "bin " << bin << ": " << eff << ", " << N << ", " << width;
 	  std::cout << ", " <<  sqrt(eff*(1.-eff)/N) << std::endl;
@@ -1336,7 +1533,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       recoAxisLabel.ReplaceAll("KinFit ","");
       //      axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt)/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-      if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+      if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
+      if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false);
@@ -1842,9 +2040,10 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	if(scan==2&&scanPlots) plotting+=2; // k and tau scan plots
 	// output files: labels
 	rootFile=outputFolder+"unfolding/diffXSecUnfoldTopSemi";
-	if(decayChannel=="muon"    ) rootFile+="Mu";
-	if(decayChannel=="electron") rootFile+="Elec";
-	rootFile+=dataSample+variable+LV+PS+unfPreWeightingStr+".root";
+	if(decayChannel=="muon"    ) rootFile+="Mu"+dataSample;
+	else if(decayChannel=="electron") rootFile+="Elec"+dataSample;
+	else if(decayChannel=="combined") rootFile+="Lep";
+	rootFile+=+variable+LV+PS+unfPreWeightingStr+".root";
 	psFile =outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr;
 	epsFile=outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
@@ -1857,7 +2056,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       
       TString txtfile=outputFolder+"unfolding/diffXSecUnfoldDetailsTopSemi";
       if(decayChannel=="muon"    ) txtfile+="Mu";
-      if(decayChannel=="electron") txtfile+="Elec";
+      else if(decayChannel=="electron") txtfile+="Elec";
+      else if(decayChannel=="combined") txtfile+="Lep";
       txtfile+=dataSample+LV+PS+unfPreWeightingStr+".txt";
       // save unfolding plots in rootfile?
       //         0 means: Default value, same as 1
@@ -2297,9 +2497,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 	TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
 	recoAxisLabel.ReplaceAll("KinFit ","");
 	axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
+	if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
 	axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+labelNorm+"} "+label2Norm+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
+	if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
 	// configure xSec plot histo style
 	histogramStyle(*histo_[xSecNorm][kData], kData, false);
 	// restrict axis
@@ -2658,6 +2860,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
 			  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
 			      if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
 			      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+			      else if(decayChannel=="electron") DrawDecayChLabel("e/#mu + Jets Combined");
 			      DrawCMSLabels(false,luminosity);
 			  }
 			  // redraw axis
