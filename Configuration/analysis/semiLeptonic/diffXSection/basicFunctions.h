@@ -294,7 +294,7 @@ namespace semileptonic {
     if(sample==kQCDBCE2) return "QCDBCE2";
     if(sample==kQCDBCE3) return "QCDBCE3"; 
     if(sample==kData   ) return "Data";
-    else return "Default"+decayChannel;
+    else return "Default "+decayChannel;
   }
 
   double effSFAB(int sys=sysNo, std::string decayChannel="unset")
@@ -325,6 +325,7 @@ namespace semileptonic {
       // result = 0.9658; 
       result = 1.0; // SF is now applied as event weight in analyzer
     }
+    else if (decayChannel.compare("combined")==0) result = 1.0;
     // errors for the derived SF
     //double errorUp   = 0.03*result;
     //double errorDown = 0.03*result;
@@ -698,7 +699,8 @@ namespace semileptonic {
     }
     // valid decayChannel entered?
     if(!(decayChannel.compare("muon")==0 || decayChannel.compare("electron")==0)){
-      std::cout << "ERROR: chosen decaychannel does not correspond to electron or muon, no scaling will be done" << std::endl;
+      // for combined channel: no weighting but also no text output
+      if(!(decayChannel.compare("combined")==0)) std::cout << "ERROR: chosen decaychannel does not correspond to electron or muon, no scaling will be done" << std::endl;
       return 1.;
     }
     // b) define in/output for weight calculation
@@ -3955,6 +3957,18 @@ namespace semileptonic {
 		}
 
             }
+	    else if(decayChannel.Contains("combined")){  
+	      // New Binning Revision
+	      if     (variable.Contains("topPt")    ) k = (fullPS) ? 5.13 : 5.13;
+	      else if(variable.Contains("topY")     ) k = (fullPS) ? 4.92 : 4.92;
+	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 3.23 : 3.23; 
+	      else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 4.13 : 4.13;
+	      else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.81 : 1.81;
+	      else if(variable.Contains("lepPt")    ) k = (fullPS) ? 3.93 : (hadronPS) ? 3.26  : 3.93;
+	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.87 : (hadronPS) ? 0.003 : 1.87; 
+	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 5.05 : (hadronPS) ? 4.17  : 5.06; 
+	      else if(variable.Contains("bqEta")    ) k = (fullPS) ? 5.68 : (hadronPS) ? 5.22  : 5.68;
+	    }
 	}
 	else{
 	    
