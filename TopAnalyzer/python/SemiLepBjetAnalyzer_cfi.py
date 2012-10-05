@@ -18,6 +18,8 @@ analyzeSemiLepBJets = cms.EDAnalyzer("SemiLepBjetAnalyzer",
                                      # specify if 'genJets' is a pure b gen jet collection:
                                      # for true, BHadJetIndex and AntiBHadJetIndex will be ignored
                                      # and the leading two jets are chosen!
+                                     # NOTE: the assumed ordering within the collection is:
+                                     #       1st entry=b-jet, 2nd entry=anti-bjet
                                      bJetCollection = cms.bool(False),
                                      # output manager:
                                      # 0: no output, 1: info, >=2: debug
@@ -33,6 +35,10 @@ analyzeSemiLepBJets = cms.EDAnalyzer("SemiLepBjetAnalyzer",
                                      # please adapt if cloning and renaming produceGenLevelBJets!
                                      BHadJetIndex     = cms.InputTag("produceGenLevelBJets", "BHadJetIndex"    ),
                                      AntiBHadJetIndex = cms.InputTag("produceGenLevelBJets", "AntiBHadJetIndex"),
+                                     # take minimum dR as criteria to assign rec and gen level b-jets to each other?
+                                     # this is useful for simultaneous measurements of b-jet and anti-bjet 
+                                     # where only the resolution and not the association matters
+                                     useClosestDrBs = cms.bool(True),
                                      # create tree?
                                      useTree = cms.bool(False)
                                      )

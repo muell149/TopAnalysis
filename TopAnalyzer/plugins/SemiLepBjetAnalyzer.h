@@ -60,6 +60,10 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   bool recPlots_;
   // from gen level b-jet identification  
   edm::InputTag bHadJetIdx_, antibHadJetIdx_;
+  // take minimum dR as criteria to assign rec and gen level b-jets to each other?
+  // this is useful for simultaneous measurements of b-jet and anti-bjet 
+  // where only the resolution and not the association matters
+  bool useClosestDrBs_;
 
   // ---
   //    define Tree for event content

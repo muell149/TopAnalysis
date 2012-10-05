@@ -21,6 +21,7 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   recPlots_  (cfg.getParameter<bool>         ("recPlots"    )),
   bHadJetIdx_    (cfg.getParameter<edm::InputTag> ("BHadJetIndex"    )),
   antibHadJetIdx_(cfg.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
+  useClosestDrBs_(cfg.getParameter<bool>   ("useClosestDrBs")),
   useTree_   (cfg.getParameter<bool>("useTree")),
   valueBqPtRec(-999),
   valueBqPtGen(-999),
@@ -93,7 +94,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   int bIX   =-1;
   int bbarIX=-1;
   if(genPlots_){
-    // take leading two jets assuming that collection genJets consists of bjets only
+    // take leading two jets assuming that collection genJets consists of b-jets only in the order 1st entry: b-jet, 2nd entry: anti-bjet
     if(bJetCollection_==true){
       bIX   =0;
       bbarIX=1;
@@ -140,6 +141,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::Candidate* bbar= recBJets.second;
   // fill rec histograms
   if(b&&bbar){
+    // fill tree variables   
     if(useTree_){
       valueBqPtRec =b->pt();
       valueLeadBqPtRec = b->pt()>bbar->pt() ? b->pt() : bbar->pt();
@@ -153,7 +155,9 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       valueBbbarYRec   =(b->p4()+bbar->p4()).Rapidity();
       valueBbbarMassRec=(b->p4()+bbar->p4()).mass();
     }
+    // debug output
     if(verbose>1) std::cout << "do filling" << std::endl;
+    // fill plots
     bqPtRec ->Fill( b->pt()         , weight);
     bqPtRec ->Fill( bbar->pt()      , weight);
     leadbqPtRec ->Fill( (b->pt()>bbar->pt() ? b->pt() : bbar->pt()), weight);
@@ -181,7 +185,8 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::GenJet* genb    = genPlots_ ? getJetFromCollection(*genJets,bIX   ) : 0;
   const reco::GenJet* genbbar = genPlots_ ? getJetFromCollection(*genJets,bbarIX) : 0;
   // fill gen histograms
-  if(genb&&genbbar){   
+  if(genb&&genbbar){
+    // fill tree variables   
     if(useTree_){
       valueBqPtGen =genb->pt();
       valueLeadBqPtGen = genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt();
@@ -195,12 +200,14 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       valueBbbarYGen   =(genb->p4()+genbbar->p4()).Rapidity();
       valueBbbarMassGen=(genb->p4()+genbbar->p4()).mass();
     }
+    // debug output
     if(!recPlots_&&valueBqPtGen>0&&valueBbarqPtGen>0&&verbose>1){ 
       std::cout << "gen truth filling" << std::endl;
       std::cout << "b(pt, eta)=(" << valueBqPtGen << "." << valueBqEtaGen << ")" << std::endl;
       std::cout << "bbar(pt, eta)=(" << valueBbarqPtGen << "." << valueBbarqEtaGen << ")" << std::endl;
     }
     if(verbose>1) std::cout << "do filling" << std::endl;
+    // fill plots
     bqPtGen ->Fill( genb->pt()         , weight);
     bqPtGen ->Fill( genbbar->pt()      , weight);
     leadbqPtGen ->Fill( (genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt()), weight);
@@ -219,26 +226,26 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   //     D: gen rec correlation plots
   // ---  
   if(verbose>0) std::cout << std::endl << "correlation plots" << std::endl;
+  // check if gen and reco b-jets exist in the event
   if(genb&&genbbar&&b&&bbar){
     if(verbose>1) std::cout << "do filling" << std::endl;
-    // fill correlation histograms
-    bqPt_ ->Fill( genb->pt()         , b->pt()         , weight);
+    // fill lead b-jet and bbbar correlation histograms 
+    // (those have only one entry per event and are independend of the rec-gen b-jet association)
     leadbqPt_ ->Fill((genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt()), (b->pt()>bbar->pt() ? b->pt() : bbar->pt()), weight);
-    bqPt_ ->Fill( genbbar->pt()      , bbar->pt()      , weight);
-    bqEta_->Fill( genb->eta()        , b->eta()        , weight);
-    bqEta_->Fill( genbbar->eta()     , bbar->eta()     , weight);
-    bqY_  ->Fill( genb->rapidity()   , b->rapidity()   , weight);
-    bqY_  ->Fill( genbbar->rapidity(), bbar->rapidity(), weight);
     bbbarPt_  ->Fill( (genb->p4()+genbbar->p4()).pt()      , (b->p4()+bbar->p4()).pt()      , weight);
     bbbarEta_ ->Fill( (genb->p4()+genbbar->p4()).eta()     , (b->p4()+bbar->p4()).eta()     , weight);
     bbbarY_   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), (b->p4()+bbar->p4()).Rapidity(), weight);
     bbbarMass_->Fill( (genb->p4()+genbbar->p4()).mass()    , (b->p4()+bbar->p4()).mass()    , weight);
     if(verbose>1){
       std::cout << "---" << std::endl;
-      std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << b->pt() << "-- eta: genb   = " << genb->eta()    << "; recb   = " << b->eta() << std::endl;
+      std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << b->pt()    << "-- eta: genb   = " << genb->eta()    << "; recb   = " << b->eta() << std::endl;
       std::cout << "pt: genbbar= " << genbbar->pt() << "; recbbar= " << bbar->pt() << "-- eta: genbbar= " << genbbar->eta() << "; recbbar= " << bbar->eta() << std::endl;
     }
-    // search for best gen-reco match to resolve b-bbar ambiguity and find correct gen-reco association
+    // for plots with combined b-jet and bbar-jet measurement:
+    // take into account that both values end up in the same histogram
+    // -> search for best gen-reco association based on minimal dR 
+
+    // start with gen: association from B/AntiB, reco: association from KinFit
     double bpt    =b->pt();         
     double bbarpt =bbar->pt(); 
     double beta   =b->eta();        
@@ -247,23 +254,30 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     double bbarY  =bbar->rapidity();
     bool swapped = false;
     bbSwapBetter = false;
+    // check if dR is smaller for swopping gen-rec assignment
     if(deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) > deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi())){
       swapped = true;
       if(useTree_) bbSwapBetter = true;
-      bY=bbar->rapidity(); 
-      bbarY=b->rapidity();
-      bpt=bbar->pt(); 
-      bbarpt=b->pt();
-      beta=bbar->eta(); 
-      bbareta=b->eta();
+      // use the better dR combination only if parameter useClosestDrBs_ is true
+      if(useClosestDrBs_){
+	bY=bbar->rapidity(); 
+	bbarY=b->rapidity();
+	bpt=bbar->pt(); 
+	bbarpt=b->pt();
+	beta=bbar->eta(); 
+	bbareta=b->eta();
+      }
       if(verbose>1) std::cout << "dR unswapped = " << deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) << "; dR swapped = " << deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi()) << std::endl;
     }
-    bqPtClosestPt_ ->Fill( genb->pt()         , bpt    , weight);
-    bqPtClosestPt_ ->Fill( genbbar->pt()      , bbarpt , weight);
-    bqEtaClosestPt_->Fill( genb->eta()        , beta   , weight);
-    bqEtaClosestPt_->Fill( genbbar->eta()     , bbareta, weight);
-    bqYClosestPt_  ->Fill( genb->rapidity()   , bY     , weight);
-    bqYClosestPt_  ->Fill( genbbar->rapidity(), bbarY  , weight);
+    // fill combined b-jet and bbar-jet correlation histograms 
+    // (those have both b-jets as entry per event and depend on rec-gen b-jet association)
+    bqPt_ ->Fill( genb->pt()         , bpt    , weight);
+    bqPt_ ->Fill( genbbar->pt()      , bbarpt , weight);
+    bqEta_->Fill( genb->eta()        , beta   , weight);
+    bqEta_->Fill( genbbar->eta()     , bbareta, weight);
+    bqY_  ->Fill( genb->rapidity()   , bY     , weight);
+    bqY_  ->Fill( genbbar->rapidity(), bbarY  , weight);
+    // output
     if(verbose>1){
       std::cout << "swapped: " << swapped << "; bbSwapBetter: " << bbSwapBetter << std::endl;
       std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << bpt << "-- eta: genb   = " << genb->eta()    << "; recb   = " << beta << std::endl;
@@ -274,9 +288,6 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       std::cout << "b(pt, eta)=(" << valueBqPtGen << "." << valueBqEtaGen << ")" << std::endl;
       std::cout << "bbar(pt, eta)=(" << valueBbarqPtGen << "." << valueBbarqEtaGen << ")" << std::endl;
     }
-
-
-
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
 
@@ -330,15 +341,11 @@ SemiLepBjetAnalyzer::beginJob()
 
   // 2D correlation
   if(recPlots_&&genPlots_){
-    // A1) b-jet quantities
+    // A) b-jet quantities
     bqPt_    = fs->make<TH2F>("bqPt_" , "p_{t}^{b and #bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
     leadbqPt_= fs->make<TH2F>("leadbqPt_" , "p_{t}^{lead b} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
     bqEta_ = fs->make<TH2F>("bqEta_", "#eta^{b and #bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
     bqY_   = fs->make<TH2F>("bqY_"  , "y^{b and #bar{b}} (gen vs rec)"          ,  100, -5.,    5.,  100, -5.,    5.);
-    // A2) b-jet quantities taking into account that b and bbar can be switched for those measurements
-    bqPtClosestPt_  = fs->make<TH2F>("bqPtClosestPt_" , "p_{t}^{b and #bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
-    bqEtaClosestPt_ = fs->make<TH2F>("bqEtaClosestPt_", "#eta^{b and #bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
-    bqYClosestPt_   = fs->make<TH2F>("bqYClosestPt_"  , "y^{b and #bar{b}} (gen vs rec)"          ,  100, -5.,    5.,  100, -5.,    5.);
     // B) bbbar-system quantities
     bbbarPt_  = fs->make<TH2F>("bbbarPt_"   , "p_{t}^{b#bar{b}} (gen vs rec) [GeV]", 1200,  0., 1200., 1200,  0., 1200.);
     bbbarEta_ = fs->make<TH2F>("bbbarEta_"  , "#eta^{b#bar{b}} (gen vs rec)"       ,  100, -5.,    5.,  100, -5.,    5.);
