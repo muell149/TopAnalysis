@@ -1223,6 +1223,8 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     AntiBHadJetIndex = cms.InputTag("", ""),
     #BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
     #AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex"),
+    #useClosestDrBs= cms.bool(False),
+    useClosestDrBs= cms.bool(True),
     useTree = cms.bool(True)
     )
 
@@ -1235,7 +1237,7 @@ process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.genJets = cms.InputTag("b
 #process.analyzeTopRecoKinematicsBjets.bJetCollection = cms.bool(False)
 #process.analyzeTopRecoKinematicsBjets.BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    )
 #process.analyzeTopRecoKinematicsBjets.AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex")
-#
+
 # b gen jet selection
 process.bGenJetSelection    = process.leadingGenJetSelection.clone (src = 'bjetGenJets'   , minNumber = 2)
 process.bGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = 'bjetGenJetsRaw', minNumber = 2)
@@ -2155,6 +2157,8 @@ process.testIsoElectrons=process.tightElectronsEJ.clone(
 
 process.testIsoElectronSelection= process.convElecTrkRejection.clone (src = 'testIsoElectrons', minNumber = 1, maxNumber = 99999999)
 process.testIsoElectronQuality  = process.tightElectronQualityTagged.clone(src = 'testIsoElectrons')
+
+#process.analyzeTopRecoKinematicsBjets.output = cms.int32(2)
       
 ## ---
 ##    run the final sequences
