@@ -43,7 +43,8 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   valueBbbarYRec(-999),
   valueBbbarYGen(-999),
   valueBbbarMassRec(-999),
-  valueBbbarMassGen(-999)
+  valueBbbarMassGen(-999),
+  bbSwapBetter(false)
 {
 }
 
@@ -232,6 +233,11 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bbbarEta_ ->Fill( (genb->p4()+genbbar->p4()).eta()     , (b->p4()+bbar->p4()).eta()     , weight);
     bbbarY_   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), (b->p4()+bbar->p4()).Rapidity(), weight);
     bbbarMass_->Fill( (genb->p4()+genbbar->p4()).mass()    , (b->p4()+bbar->p4()).mass()    , weight);
+    if(verbose>1){
+      std::cout << "---" << std::endl;
+      std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << b->pt() << "-- eta: genb   = " << genb->eta()    << "; recb   = " << b->eta() << std::endl;
+      std::cout << "pt: genbbar= " << genbbar->pt() << "; recbbar= " << bbar->pt() << "-- eta: genbbar= " << genbbar->eta() << "; recbbar= " << bbar->eta() << std::endl;
+    }
     // search for best gen-reco match to resolve b-bbar ambiguity and find correct gen-reco association
     double bpt    =b->pt();         
     double bbarpt =bbar->pt(); 
@@ -239,13 +245,18 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     double bbareta=bbar->eta(); 
     double bY     =b->rapidity();   
     double bbarY  =bbar->rapidity();
+    bool swapped = false;
+    bbSwapBetter = false;
     if(deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) > deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi())){
+      swapped = true;
+      if(useTree_) bbSwapBetter = true;
       bY=bbar->rapidity(); 
       bbarY=b->rapidity();
       bpt=bbar->pt(); 
       bbarpt=b->pt();
       beta=bbar->eta(); 
       bbareta=b->eta();
+      if(verbose>1) std::cout << "dR unswapped = " << deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) << "; dR swapped = " << deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi()) << std::endl;
     }
     bqPtClosestPt_ ->Fill( genb->pt()         , bpt    , weight);
     bqPtClosestPt_ ->Fill( genbbar->pt()      , bbarpt , weight);
@@ -253,6 +264,11 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bqEtaClosestPt_->Fill( genbbar->eta()     , bbareta, weight);
     bqYClosestPt_  ->Fill( genb->rapidity()   , bY     , weight);
     bqYClosestPt_  ->Fill( genbbar->rapidity(), bbarY  , weight);
+    if(verbose>1){
+      std::cout << "swapped: " << swapped << "; bbSwapBetter: " << bbSwapBetter << std::endl;
+      std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << bpt << "-- eta: genb   = " << genb->eta()    << "; recb   = " << beta << std::endl;
+      std::cout << "pt: genbbar= " << genbbar->pt() << "; recbbar= " << bbarpt << "-- eta: genbbar= " << genbbar->eta()    << "; recbbar= " << bbareta << std::endl;
+    }
     if(valueBqPtGen>0&&valueBbarqPtGen>0&&verbose>1){ 
       std::cout << "XXXXXXXXXXXX correlation filling XXXXXXXXXXXXXXXXX" << std::endl;
       std::cout << "b(pt, eta)=(" << valueBqPtGen << "." << valueBqEtaGen << ")" << std::endl;
@@ -357,6 +373,8 @@ SemiLepBjetAnalyzer::beginJob()
     tree->Branch("bbarqEtaGen", &valueBbarqEtaGen, "bbarqEtaGen/F");
     tree->Branch("bbarqYRec"  , &valueBbarqYRec  , "bbarqYRec/F"  );
     tree->Branch("bbarqYGen"  , &valueBbarqYGen  , "bbarqYGen/F"  );
+    // boolean = true if swapping gives better results
+    tree->Branch("bbSwapBetter"  , &bbSwapBetter  , "bbSwapBetter/O"  );
   }
 }
 

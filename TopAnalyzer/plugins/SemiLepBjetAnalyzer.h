@@ -90,6 +90,7 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   float valueBbbarYGen;
   float valueBbbarMassRec;
   float valueBbbarMassGen;
+  bool bbSwapBetter;
 
   // ---
   //    histos
