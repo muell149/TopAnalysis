@@ -177,8 +177,8 @@ if(not globals().has_key('additionalEventWeights')):
 ## enable/ disable systematic shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
     sysDistort =  ''
-    #sysDistort =  'up'
-    #sysDistort =  'down'
+    #sysDistort =  'Up'
+    #sysDistort =  'Down'
 # only done for ttbar
 if(not options.sample=="ttbar"):
     sysDistort=''
@@ -1230,6 +1230,8 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     AntiBHadJetIndex = cms.InputTag("", ""),
     #BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
     #AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex"),
+    #useClosestDrBs= cms.bool(False),
+    useClosestDrBs= cms.bool(True),
     useTree = cms.bool(True)
     )
 
@@ -1466,10 +1468,14 @@ process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-o
 process.eventWeightDileptonModelVariation.maxWeight = cms.double(100)  #high cut-off, at most 2 event weight
 process.eventWeightDileptonModelVariation.landauMPV = cms.double(420)
 process.eventWeightDileptonModelVariation.landauSigma = cms.double(34)
-if(sysDistort=='up'):
-    process.eventWeightDileptonModelVariation.landauMoveX = cms.double(100)
-if(sysDistort=='down'):
-    process.eventWeightDileptonModelVariation.landauMoveX = cms.double(-100)
+if(sysDistort=='Up'):
+    process.eventWeightDileptonModelVariation.slope = cms.double(0.03)
+if(sysDistort=='Down'):
+    process.eventWeightDileptonModelVariation.slope = cms.double(-0.03)
+if(sysDistort=='Up0p015'):
+    process.eventWeightDileptonModelVariation.slope = cms.double(0.015)
+if(sysDistort=='Down0p015'):
+    process.eventWeightDileptonModelVariation.slope = cms.double(-0.015)
 # multiply with PU weight
 eventWeightDileptonModelVariation=cms.InputTag("eventWeightDileptonModelVariation")
 weightlistDistortPU=cms.VInputTag()
@@ -2269,6 +2275,8 @@ process.testIsoElectrons=process.tightElectronsEJ.clone(
 
 process.testIsoElectronSelection= process.convElecTrkRejection.clone (src = 'testIsoElectrons', minNumber = 1, maxNumber = 99999999)
 process.testIsoElectronQuality  = process.tightElectronQualityTagged.clone(src = 'testIsoElectrons')
+
+#process.analyzeTopRecoKinematicsBjets.output = cms.int32(2)
       
 ## ---
 ##    run the final sequences
@@ -2807,8 +2815,3 @@ if(genFull):
     process.p1=cms.Path(process.dummy)
     process.p2=cms.Path(process.dummy)
         
-## GOSSIE
-#process.p1 = cms.Path()
-#process.p2 = cms.Path()
-#process.p4 = cms.Path()
-#process.p5 = cms.Path()
