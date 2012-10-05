@@ -6,6 +6,7 @@
 \usepackage[latin9]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{graphicx}
 
 \makeatletter
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
@@ -77,8 +78,8 @@
 \item Check out the following CVS packages:
 
 \begin{itemize}
-\item Uni-HH functions: \url{http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Bromo/TopAnalysis/Configuration/analysis/unfolding/}
-\item Unfolding Code: \url{http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Bromo/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection}
+\item Uni-HH functions: \url{http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Bromo/TopAnalysis/Configuration/analysis/semiLeptonic/diffXSection}
+\item Unfolding Code: \url{http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Bromo/TopAnalysis/Configuration/analysis/unfolding/}
 \end{itemize}
 \end{itemize}
 
@@ -134,8 +135,8 @@ particular the luminosity weight.
 \item \textbf{TH1D{*} bgrInputHist}
 
 \begin{itemize}
-\item Distribution of the complete simulated background to be removed from
-the data. 
+\item Distribution of the complete simulated background (reconstruction
+level) to be removed from the data. 
 \item The distribution must have all generator level and reconstruction
 level weights applied, in particular the luminosity weight.
 \item Tip for a first shot: Give a NULL pointer, and the background will
@@ -144,8 +145,9 @@ be neglected.
 \item \textbf{TH1D{*} ttbgrInputHist}
 
 \begin{itemize}
-\item Fraction of the simulated background which will be removed by the
-\emph{Signal Fraction Method}.
+\item Fraction of the simulated background (reconstruction level) which
+will be removed by the \emph{Signal Fraction Method}. The signal fraction
+method is described in the reference guide.
 \item The distribution must have all generator level and reconstruction
 level weights applied, in particular the luminosity weight.
 \item If a NULL pointer is given, the Signal Fraction Method will not be
@@ -290,7 +292,7 @@ the same time.
 
 \begin{itemize}
 \item \emph{Exception}: TH1D{*} dataInputHist and double totalDateEvents
-will always be interpreted as anarray of length $\texttt{1}$, as
+will always be interpreted as an array of length $\texttt{1}$, as
 there should be no systematic shifts on the raw data! 
 \end{itemize}
 \end{itemize}
@@ -341,32 +343,32 @@ naming of histograms and output files.
 \item \textbf{TString channelTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the channel under investigation. Will be used in legends
-and axis titles.
+\item Tex string for the channel under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString particleTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the physics object under investigation. Will be used
-in legends and axis titles.
+\item Tex string for the physics object under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString quantityTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the variable under investigation. Will be used in legends
-and axis titles.
+\item Tex string for the variable under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString specialTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
 \item Tex string to describe any special condition of this unfolding process.
-Will be used in legends and axis titles.
+Uses ROOT/\TeX{}-Syntax. Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString systnameTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the systematic shift under investigation. Will be used
-in legends and axis titles.
+\item Tex string for the systematic shift under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \end{itemize}
 
@@ -378,14 +380,16 @@ in legends and axis titles.
 \item \textbf{TString rootFile = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Name of the ROOT file to contain all control plots.
+\item Name of the ROOT (including ending '.root') file to contain all control
+plots.
 \item Will only be created, if steering option 5 is set to 2. 
 \item Will only be created, if rootFile is a valid file name.
 \end{itemize}
 \item \textbf{TString psFile = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Name of the PS File to contain all control plots.
+\item Name of the PS File (including ending '.ps') to contain all control
+plots.
 \item Will only be created, if steering option 4 is set to 2, 3 or 4. 
 \item Will only be created, if psFile is a valid file name. 
 \end{itemize}
@@ -423,14 +427,15 @@ content, thereby following the following pattern:
 \item \textbf{TString txtFile = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Output text file containing the results of a regularization parameter
-scan. 
+\item Output text file (including ending '.txt') containing the results
+of a regularization parameter scan. 
 \item Will only be created, if txtFile is a valid file name.
 \end{itemize}
 \item \textbf{TString regParFile = ``''}
 
 \begin{itemize}
-\item Input text file with the input regularization parameters.
+\item Input text file (including ending '.txt') with the input regularization
+parameters.
 \item Will only be used, if the first steering option is set to 3, accordingly. 
 \item Leave this empty, if you are just starting with unfolding.
 \end{itemize}
@@ -439,7 +444,7 @@ scan.
 \lyxframeend{}
 
 
-\lyxframeend{}\lyxframe{Step 3: Steering Options}
+\lyxframeend{}\lyxframe{Step 3: Steering Options (Example)}
 \begin{itemize}
 \item \textbf{TString steering}
 
@@ -454,7 +459,7 @@ to the rightmost one.
 
 \begin{itemize}
 \item TString steering = ``324321232143213232''
-\item The first steering option is 2, the second steering option is 1, etc.
+\item The first steering option is 2, the second steering option is 3, etc.
 \end{itemize}
 \item Each steering option can take on values between 1 and maximal 9. 
 \item Each steering option has a default value which is automatically selected
@@ -465,7 +470,7 @@ if the parameter is set to 0.
 \lyxframeend{}
 
 
-\lyxframeend{}\lyxframe{Step 3: Steering Options}
+\lyxframeend{}\lyxframe{Step 3: Steering Options (Example)}
 \begin{itemize}
 \item Starting point for \textbf{very first unfolding}: TString steering
 = ``11111133232114121''
@@ -485,7 +490,7 @@ plots.
 \lyxframeend{}
 
 
-\lyxframeend{}\lyxframe{Step 3: Steering Options}
+\lyxframeend{}\lyxframe{Step 3: Steering Options (Example)}
 \begin{itemize}
 \item Starting point for \textbf{very first unfolding}: TString steering
 = ``11111133232114121''
@@ -512,7 +517,7 @@ this to 2 instead of 1.}
 \lyxframeend{}
 
 
-\lyxframeend{}\lyxframe{Step 3: Steering Options}
+\lyxframeend{}\lyxframe{Step 3: Steering Options (Example)}
 \begin{itemize}
 \item Starting point for \textbf{very first unfolding}: TString steering
 = ``11111133232114121''
@@ -616,6 +621,10 @@ can perform a $\tau$ scan.
 will perform a scan in both directions.
 \item It will search for the $\tau$ parameter at which the averaged global
 correlation will be minimal.
+
+\begin{itemize}
+\item For details, see reference guide.
+\end{itemize}
 \item \textbf{However: The actual unfolding is done with the input regularization,
 not with the optimal one!}
 
@@ -625,9 +634,33 @@ not with the optimal one!}
 \end{itemize}
 \item The optimal $\tau$ parameters will be saved in the text file specified
 in 'txtFile'.
+
+\begin{enumerate}
+\item Make sure to check whether the numbers in this file make sense!
+\end{enumerate}
 \item Check the PS booklet again. They contain scan plots at the very end,
 which are very illuminating!
 \end{itemize}
+
+\lyxframeend{}
+
+
+\lyxframeend{}\lyxframe{Step 6: Perform $\tau$ Scan}
+
+\begin{center}
+\begin{figure}
+\begin{centering}
+\includegraphics[width=5cm]{ExampleScan}
+\par\end{centering}
+
+\centering{}Example Plot for a $\tau$ scan using the averaged global
+correlation $\rho$. The mimimum is clearly visible. The vertical
+lines indicate the $\tau$ values corresponding to the possible choices
+of the discrete $k$-parameter. 
+\end{figure}
+
+\par\end{center}
+
 
 \lyxframeend{}
 
@@ -652,22 +685,22 @@ $\tau$ parameters.
 \item Think about the overflow and underflow bins. Which treatment is best?
 
 \begin{itemize}
-\item Check out steering options 10 and 11 
+\item Check out steering options 10 and 11, see reference guide.
 \end{itemize}
 \item Do you need to adapt the number of scan points or the scan range?
 
 \begin{itemize}
-\item Check out steering options 8 and 9
+\item Check out steering options 8 and 9, see reference guide.
 \end{itemize}
 \item What normalization is right for you?
 
 \begin{itemize}
-\item Check out steering option 13
+\item Check out steering option 13, see reference guide.
 \end{itemize}
 \item Need the results in different formats?
 
 \begin{itemize}
-\item Check out steering options 4, 5, 6 and 17
+\item Check out steering options 4, 5, 6 and 17, see reference guide.
 \end{itemize}
 \end{itemize}
 
@@ -699,14 +732,17 @@ result stable? What happens if you do many such iterations?
 \item If you wish, you can unfold multiple systematics samples at the same
 time, by letting the pointer type input parameters be arrays instead
 of single histograms. 
+\item N\textbf{ote:} \textbf{All pointer type input parameters (except data
+input) are expected to be arrays of length 'numSys+1'.} The first
+entry will be taken als nominal sample, the following entries as systematics
+samples!
 
 \begin{itemize}
 \item Example: If you have a nominal, an upshifted and a downshifted sample,
 
 \begin{itemize}
-\item set 'numSys' to 2 and ...
-\item let all pointer type parameters be arrays of length 3 (except data
-distribution and total data event count).
+\item set 'numSys' to 2 and let all pointer type parameters be arrays of
+length 3 (except data distribution and total data event count).
 \item The output parameters 'unfolded' and 'unfoldedNorm' will automatically
 arrays of length 3.
 \item In addition, the code will produce systematics related control plots.

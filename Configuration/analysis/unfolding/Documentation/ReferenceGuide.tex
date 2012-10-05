@@ -9,6 +9,7 @@
 \usepackage{array}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{graphicx}
 \ifx\hypersetup\undefined
   \AtBeginDocument{%
     \hypersetup{unicode=true,
@@ -114,8 +115,8 @@ of those two analyses!}
 $\texttt{TSVDUnfold}$ by Kerstin Tackmann.
 \item \textbf{Adjustment of regularization }based on the global correlation
 method ($\tau$-parameter scan).
-\item An \textbf{easy to use interface}. The user has to get aquainted with
-just one function call!
+\item An \textbf{easy to use interface}. The user has to get acquainted
+with just one function call!
 \item A lot of unfolding related \textbf{control plots}.
 \item Error propagation of\textbf{ statistical and systematic uncertainties}.
 \end{itemize}
@@ -126,7 +127,8 @@ just one function call!
 \lyxframeend{}\lyxframe{Supplemental Features}
 \begin{itemize}
 \item \textbf{Background removal}\textbf{\emph{ }}based on a combination
-of a simple subtraction method and the signal fraction method.
+of a simple \emph{subtraction method} and the \emph{signal fraction
+method}. (Explained later in this reference guide.)
 \item \textbf{Rebinning} of input histograms.
 \item \textbf{Iterative unfolding}: Reweight your MC to the unfolded data
 and unfold again.
@@ -243,7 +245,7 @@ and adapt your Makefile accordingly.
 
 \begin{itemize}
 \item No setting of environment variables needed.
-\item No setting of data members neended. (In fact, there are none.)
+\item No setting of data members needed. (In fact, there are none.)
 \end{itemize}
 \end{itemize}
 
@@ -375,8 +377,8 @@ with the steering option number 12, see below.
 \item \textbf{TH1D{*} bgrInputHist: }
 
 \begin{itemize}
-\item Distribution of the complete simulated background to be removed from
-the data. 
+\item Distribution of the complete simulated background (reconstruction
+level) to be removed from the data. 
 \item The distribution must have all generator level and reconstruction
 level weights applied, in particular the luminosity weight.
 \item If a NULL pointer is given, no background will be removed. 
@@ -384,7 +386,8 @@ level weights applied, in particular the luminosity weight.
 \item \textbf{double{*} totalBgrEvents}
 
 \begin{itemize}
-\item Total event count of simulated background to be removed from the data. 
+\item Total event count of simulated background (reconstruction level) to
+be removed from the data. 
 \item The value must have all generator level and reconstruction level weights
 applied, in particular the luminosity weight.
 \item If a NULL pointer is given, the value is assumed to be the integral
@@ -401,8 +404,8 @@ to be 0.
 \item \textbf{TH1D{*} ttbgrInputHist}
 
 \begin{itemize}
-\item Fraction of the simulated background which will be removed by the
-\emph{Signal Fraction Method}.
+\item Fraction of the simulated background (reconstruction level) which
+will be removed by the \emph{Signal Fraction Method}.
 \item The distribution must have all generator level and reconstruction
 level weights applied, in particular the luminosity weight.
 \item If a NULL pointer is given, the Signal Fraction Method will not be
@@ -411,8 +414,8 @@ used.
 \item \textbf{double{*} totalTtBgrEvents}
 
 \begin{itemize}
-\item Total event count of simulated background which will be removed by
-the \emph{Signal Fraction Method}.
+\item Total event count of simulated background (reconstruction level) which
+will be removed by the \emph{Signal Fraction Method}.
 \item The value must have all generator level and reconstruction level weights
 applied, in particular the luminosity weight.
 \item If a NULL pointer is given, the value is assumed to be the integral
@@ -477,9 +480,17 @@ range!
 \begin{itemize}
 \item \emph{k-Parameter}: regPar must take on an integer value between 1
 and numBins (number of bins in the target binning). Set the second
-steering option to 1.
+steering option to 1. Examples:
+\[
+\texttt{double regPar = 2.0, double regPar = 8.0}
+\]
+
 \item $\tau$-\emph{Parameter:} regPar must take on a real value greater
-than zero. Set the second steering option to 2.
+than zero. Set the second steering option to 2.Examples:
+\[
+\texttt{double regPar = 1.630E-5, double regPar = 1.30E-2 }
+\]
+
 \end{itemize}
 \item Will only be used, if the first steering option is set to 3, accordingly. 
 \end{itemize}
@@ -555,32 +566,32 @@ naming of histograms and output files.
 \item \textbf{TString channelTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the channel under investigation. Will be used in legends
-and axis titles.
+\item Tex string for the channel under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString particleTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the physics object under investigation. Will be used
-in legends and axis titles.
+\item Tex string for the physics object under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString quantityTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the variable under investigation. Will be used in legends
-and axis titles.
+\item Tex string for the variable under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString specialTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
 \item Tex string to describe any special condition of this unfolding process.
-Will be used in legends and axis titles.
+Uses ROOT/\TeX{}-Syntax. Will be used in legends and axis titles.
 \end{itemize}
 \item \textbf{TString systnameTex = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Tex string for the systematic shift under investigation. Will be used
-in legends and axis titles.
+\item Tex string for the systematic shift under investigation. Uses ROOT/\TeX{}-Syntax.
+Will be used in legends and axis titles.
 \end{itemize}
 \end{itemize}
 
@@ -592,14 +603,16 @@ in legends and axis titles.
 \item \textbf{TString rootFile = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item IName of the ROOT file to contain all control plots.
+\item Name of the ROOT file (including ending '.root') to contain all control
+plots.
 \item Will only be created, if steering option 5 is set to 2. 
 \item Will only be breated, if rootFile is a valid file name.
 \end{itemize}
 \item \textbf{TString psFile = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Name of the PS File to contain all control plots.
+\item Name of the PS File (including ending '.ps') to contain all control
+plots.
 \item Will only be created, if steering option 4 is set to 2, 3 or 4. 
 \item Will only be created, if psFile is a valid file name. 
 \end{itemize}
@@ -637,14 +650,15 @@ content, thereby following the following pattern:
 \item \textbf{TString txtFile = \textquotedbl{}\textquotedbl{}}
 
 \begin{itemize}
-\item Output text file containing the results of a regularization parameter
-scan. 
+\item Output text file (including ending '.txt') containing the results
+of a regularization parameter scan. 
 \item Will only be created, if txtFile is a valid file name.
 \end{itemize}
 \item \textbf{TString regParFile = ``''}
 
 \begin{itemize}
-\item Input text file with the input regularization parameters.
+\item Input text file (including ending '.txt') with the input regularization
+parameters.
 \item Will only be used, if the first steering option is set to 3, accordingly. 
 \end{itemize}
 \end{itemize}
@@ -667,7 +681,7 @@ to the rightmost one.
 
 \begin{itemize}
 \item TString steering = ``324321232143213232''
-\item The first steering option is 2, the second steering option is 1, etc.
+\item The first steering option is 2, the second steering option is 3, etc.
 \end{itemize}
 \item Each steering option can take on values between 1 and maximal 9. 
 \item Each steering option has a default value which is automatically selected
@@ -689,8 +703,9 @@ if the parameter is set to 0.
 \item 2 means: SVD Unfolding, minimal regularization.
 
 \begin{itemize}
-\item Regularization will be done with a k value, whil the k value is set
-to the number of non-zero d-Values. Parameter 'regPar' is ignored. 
+\item Regularization will be done with a k value, while the k value is automatically
+taken to be the number of non-zero d-Values. Parameter 'regPar' is
+ignored. 
 \end{itemize}
 \item 3 (default) means: SVD unfolding, manual regularization.
 
@@ -738,7 +753,7 @@ is set to 2.
 \item input parameter ('regmode') if steering option 1 is set to 3.
 \item input file ('regParFile') if steering option 1 is set to 4.
 \end{itemize}
-\item If steering option 1 is set to 1 (BBB unfolding), so $\tau$ scan
+\item If steering option 1 is set to 1 (BBB unfolding), no $\tau$ scan
 will be performed.
 \item The scan is based on a \emph{golden section search}\textbf{ }and hence
 very fast.
@@ -756,8 +771,10 @@ very fast.
 control plots.
 
 \begin{itemize}
-\item For PS files, a valid filename must be given in parameter 'psFile'.
-\item For EPS files, a valid filename must be given in parameter 'epsFile'.
+\item For PS files, a valid filename must be given in parameter 'psFile',
+including the ending \emph{'.ps'}.
+\item For EPS files, a valid filename must be given in parameter 'epsFile',
+including the ending \emph{'.eps'}.
 \end{itemize}
 \item 3 means: In addition to 2, print comparison plots with different $k$-parameters.
 \item 4 (default) means: In addition to 3, print $\tau$ scan plots. 
@@ -782,7 +799,8 @@ section search.
 \item 2 means: A lot of control plots will be written to a ROOT file. 
 
 \begin{itemize}
-\item A valid filename must be given in parameter 'rootFile'.
+\item A valid filename must be given in parameter 'rootFile', including
+the ending \emph{'.root'}.
 \end{itemize}
 \end{itemize}
 
@@ -808,6 +826,7 @@ in the future!)
 \item between rows in 2-dimensional histograms: linebreak.
 \end{itemize}
 \end{itemize}
+\item 3 means: Like 2, but text output is suppressed for systematics.
 \end{itemize}
 
 \lyxframeend{}
@@ -1000,6 +1019,9 @@ event yield, the code returns with an error message.
 \begin{itemize}
 \item If in a bin the background event yield exceeds the data event yield,
 the background event yield will be set equal to the data event yield.
+\item \emph{Attention:} Choosing this option might alter the analysis result!
+Use it only if you are certain, that the excess of background over
+data is due to a statistical fluctuation!
 \end{itemize}
 \end{itemize}
 
@@ -1036,10 +1058,11 @@ of binnings used:
 \item The \emph{target binning} is specified in const couble thebins{[}{]}
 and const int numbins. It is the binning relevant for the unfolding
 process. 
-\item The \emph{output binning} is the binning of the output histograms.
-It consists of the target binning plus one more bin on each side of
-the binning range. These bins correspond to the underflow and overflow
-bin content of the unfolding result.
+\item The \emph{output binning} is calculated from the target binning. It
+is the binning of the output histograms. It consists of the target
+binning plus one more bin on each side of the binning range. These
+bins correspond to the underflow and overflow bin content of the unfolding
+result.
 \end{itemize}
 \item Note: The input binnings can be chosen farily arbitrary. However,
 for each bin boundary in the\emph{ }specified target binning\emph{
@@ -1084,31 +1107,12 @@ and will always be empty.
 \lyxframeend{}\lyxframe{Background Reduction}
 \begin{itemize}
 \item Background removal is done bin wise. Two steps are involved.
-\item First step: The \emph{Signal Fraction Method }is used, according to
-the formula
+\item First step: The \emph{Subtraction Method} is used. This removes all
+background\emph{ except} the background which has to be removed by
+the signal fraction method (see below). This corresponds to the following
+formula:
 \[
-x^{\text{Data}}\longrightarrow x^{\text{Data}}\cdot\frac{x^{\text{Signal}}}{\left(x^{\text{Signal}}+x^{\text{Tt-Background}}\right)}
-\]
-\[
-\Delta x^{\text{Data}}\longrightarrow\Delta x^{\text{Data}}\cdot\frac{x^{\text{Signal}}}{\left(x^{\text{Signal}}+x^{\text{Tt-Background}}\right)}
-\]
-Here, $x^{\text{Data}}$ is given by totalDataEvents or a bin of dataInputHist,
-$x^{\text{Signal}}$ is given by totalRecEvents or a bin of recInputHist
-and \textrm{$x^{\text{Tt-Background}}$ is given by totalTtBgrEvents
-or a bin of }ttbgrInputHist. This method is optimal for the removal
-of $t\bar{t}$ events with top quarks decaying via $\tau$ leptons,
-hence the naming.
-\end{itemize}
-
-\lyxframeend{}
-
-
-\lyxframeend{}\lyxframe{Background Reduction }
-\begin{itemize}
-\item Second step: The residual background is removed by the \emph{Subtraction
-Method}, according to the formula
-\[
-x^{\text{Data}}\longrightarrow x^{\text{Data}}-\left(x^{\text{Tt-Background}}-x^{\text{TtBackground}}\right)
+x^{\text{Data}}\longrightarrow x^{\text{Data}}-\left(x^{\text{Background}}-x^{\text{Tt-Background}}\right)
 \]
 \[
 \Delta x^{\text{Data}}\longrightarrow\Delta x^{\text{Data}}
@@ -1117,6 +1121,27 @@ Here, $x^{\text{Data}}$ is given by totalDataEvents or a bin of dataInputHist,
 $x^{\text{Background}}$ is given by totalBgrEvents or a bin of bgrInputHist
 and \textrm{$x^{\text{Tt-Background}}$ is given by totalTtBgrEvents
 or a bin of }ttbgrInputHist. 
+\end{itemize}
+
+\lyxframeend{}
+
+
+\lyxframeend{}\lyxframe{Background Reduction }
+\begin{itemize}
+\item Second step: The \emph{Signal Fraction Method }is used, removing the
+residual background according to the formula
+\[
+x^{\text{Data}}\longrightarrow x^{\text{Data}}\cdot\frac{x^{\text{Signal}}}{\left(x^{\text{Signal}}+x^{\text{Tt-Background}}\right)}
+\]
+\[
+\Delta x^{\text{Data}}\longrightarrow\Delta x^{\text{Data}}\cdot\frac{x^{\text{Signal}}}{\left(x^{\text{Signal}}+x^{\text{Tt-Background}}\right)}
+\]
+Here, $x^{\text{Data}}$ is given by totalDataEvents or a bin of dataInputHist,
+after background removal by the subtraction method. Moreover, $x^{\text{Signal}}$
+is given by totalRecEvents or a bin of recInputHist and \textrm{$x^{\text{Tt-Background}}$
+is given by totalTtBgrEvents or a bin of }ttbgrInputHist. This method
+is optimal for the removal of $t\bar{t}$ events with top quarks decaying
+via $\tau$ leptons, hence the naming.
 \item \emph{Room for improvement}: Up to now, the error propagation neglects
 the statistical uncertainty of the background sample! 
 \end{itemize}
@@ -1129,9 +1154,11 @@ the statistical uncertainty of the background sample!
 \item The $\tau$ parameter steers the influence of the \emph{penalty term}
 in the $\chi^{2}-$function which underlies the unfolding:
 \[
-\chi^{2}=\left(\vec{N}^{data}-\boldsymbol{A}\vec{x}\right)^{T}\boldsymbol{COV}_{\vec{N}^{data}}\left(\vec{N}^{data}-\boldsymbol{A}\vec{x}\right)+\tau^{2}\mathrm{Curv}\left(\vec{x}\right)
+\chi^{2}=\left(\vec{N}^{data}-\boldsymbol{A}\vec{x}\right)^{T}\boldsymbol{COV}_{\vec{N}^{data}}^{-1}\left(\vec{N}^{data}-\boldsymbol{A}\vec{x}\right)+\tau^{2}\mathrm{Curv}\left(\vec{x}\right)
 \]
-
+where $\mathrm{Curv}\left(\vec{x}\right)$ denotes the curvature of
+the solution $\vec{x}$ and $\tau^{2}\mathrm{Curv}\left(\vec{x}\right)$
+is the penalty term.
 \item There is a mapping between $k$-values and $\tau$-values:
 
 \begin{itemize}
@@ -1172,22 +1199,40 @@ Note: $0\leq\rho_{i}\leq1\forall i$.
 \item Global correlation $\rho_{i}$ is very sensitive to regularization: 
 
 \begin{itemize}
-\item If $\tau$ too small (under-smoothing): Negative bin-to-bin correlations.
-$\longrightarrow$ Large global correlation.
+\item If $\tau$ too small (under-smoothing): \emph{Negative} bin-to-bin
+correlations. $\longrightarrow$ Large global correlation.
 \item If $\tau$ too large (over-smoothing): Neighboring data points will
-be ``glued together'', leading to positive correlations. $\longrightarrow$Large
-global correlation.
+be ``glued together'', leading to \emph{positive} correlations.
+$\longrightarrow$Large global correlation.
 \item If $\tau$ just right: Global correlation will have a minimum.
 \end{itemize}
 \item \emph{Idea: Scan for the $\tau$ with minimal averaged global correlation!}
 \item Averaging prescription: Use average over all non-empty non-side bins.
 \item Note: All upcoming plots made with $\tau$ from global correlation
-method.
+method.Note: $0\leq\rho_{i}\leq1\forall i$.
 \end{itemize}
 
 \lyxframeend{}
 
- 
+
+\lyxframeend{}\lyxframe{Averaged Global Correlation $\bar{\rho}$}
+
+\begin{center}
+\begin{figure}
+\begin{centering}
+\includegraphics[width=5cm]{ExampleScan}
+\par\end{centering}
+
+\centering{}Example Plot for a $\tau$ scan using the averaged global
+correlation $\rho$. The mimimum is clearly visible. The vertical
+lines indicate the $\tau$ values corresponding to the possible choices
+of the discrete $k$-parameter. 
+\end{figure}
+
+\par\end{center}
+
+
+\lyxframeend{}
 
 
 \lyxframeend{}\lyxframe{File Based Regularization}
@@ -1216,7 +1261,7 @@ option to 2.
 
 \lyxframeend{}\lyxframe{File Based Regularization }
 \begin{itemize}
-\item Each line entry consists of the following tokens:
+\item Each line entry contains the following tokens (continued on next slide):
 
 \begin{itemize}
 \item \textbf{Key}: A string identifying the distribution under investigation.
@@ -1232,7 +1277,21 @@ formats:
 $\tau$ parameter as determined from global correlation method.
 \item \textbf{Closest lower $k$ parameter: }Highest of all k parameters,
 which lead to softer regularization than the optimal $\tau$ parameter
-as determined from global correlation method.
+as determined from global correlation method. 
+\end{itemize}
+\end{itemize}
+
+\lyxframeend{}
+
+ 
+
+
+\lyxframeend{}\lyxframe{File Based Regularization }
+\begin{itemize}
+\item Each line entry contains the following tokens (continuation from last
+slide):
+
+\begin{itemize}
 \item \textbf{Closest higher $k$ parameter: }Lowest of all k parameters,
 which lead to harder regularization than the optimal $\tau$ parameter
 as determined from global correlation method.
@@ -1292,6 +1351,110 @@ weights.
 \end{itemize}
 \item Note: We do not reweight the data in any way! 
 \item Iterative unfolding can be steered with steering option 15.
+\end{itemize}
+
+\lyxframeend{}
+
+ 
+
+
+\lyxframeend{}\lyxframe{Latex Booklets with Control Plots}
+\begin{itemize}
+\item A zsh script \texttt{CP\_booklet/make\_CP\_booklet.sh }is provided
+which
+
+\begin{itemize}
+\item groups \emph{same type} histograms together and
+\item compiles and arranges them in a latex file.
+\end{itemize}
+\item Use this script, if 
+
+\begin{itemize}
+\item you unfold multiple distributions
+\item and if you want to compare same type plots easily.
+\end{itemize}
+\item Check out the directory \texttt{CP\_booklet }which contains 
+
+\begin{itemize}
+\item the script \texttt{make\_CP\_booklet.sh,}
+\item a README file,
+\item A directory with sample steering files (ending: \texttt{.steer) and}
+\item A directory with tex snippets used by the script.
+\end{itemize}
+\end{itemize}
+
+\lyxframeend{}
+
+ 
+
+
+\lyxframeend{}\lyxframe{Latex Booklets with Control Plots}
+\begin{itemize}
+\item Steering file syntax: For each booklet you want to create, you give
+4 lines:
+
+\begin{itemize}
+\item The Extension of the EPS plots with which the filename ends. 
+
+\begin{itemize}
+\item Example: For plots with names like 'Unfolding\_<channel>\_<particle>\_<quantity>\_HAD\_InputDataGenRec.eps',
+you should provide the 'InputDataGenRec'. Note, that his will also
+be the name of the Tex/PDF file.
+\end{itemize}
+\item Whether this plot should be printed for the nominal sample or not
+(\texttt{true} or \texttt{false}).
+\item Whether this plot should be printed for the systematic samples or
+not (\texttt{true} or \texttt{false}).
+\item A descriptive title for the booklet in LateX Format 
+\end{itemize}
+\item The steering file is read successively, blank lines are ignored.
+\end{itemize}
+
+\lyxframeend{}
+
+ 
+
+
+\lyxframeend{}\lyxframe{Latex Booklets with Control Plots}
+\begin{itemize}
+\item More steering options are hardcoded at the top of \texttt{make\_CP\_booklet.sh:}
+
+\begin{itemize}
+\item The output folder to use
+\item the names of the systematics to loop over
+\item the channels to loop over
+\item the distributions to loop over (note, that this list is devided to
+steer the distribution over two pages)
+\item whether EPS should be converted to PDF (in case you want to use pdflatex)
+\item whether the image files should be copied to a subdirectory of the
+output folder
+\item whether the tex files should be converted to PDF or not.
+\end{itemize}
+\end{itemize}
+
+\lyxframeend{}
+
+ 
+
+
+\lyxframeend{}\lyxframe{Latex Booklets with Control Plots}
+\begin{itemize}
+\item Example steering:
+
+
+\texttt{InputResponseMatrix }
+
+
+\texttt{true }
+
+
+\texttt{false }
+
+
+\texttt{Probability Matrix \$\textbackslash{}mathrm\{\textbackslash{}boldsymbol\{M\}\}\$}
+
+\item This creates a latex booklet ``InputResponseMatrix.tex'' with all
+nominal response matrices, but no systematics reponse matrices.
 \end{itemize}
 
 \lyxframeend{}
