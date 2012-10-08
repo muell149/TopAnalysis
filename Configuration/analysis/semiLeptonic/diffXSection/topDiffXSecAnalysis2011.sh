@@ -32,6 +32,7 @@
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/shapeReweighting 
 ## mkdir -p diffXSecFromSignal/plots/electron/2011/unfolding
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/xSec
+## mkdir -p diffXSecFromSignal/plots/combined/2011/binning
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/recoYield
 ## mkdir -p diffXSecFromSignal/plots/combined/2011/binning
@@ -417,7 +418,7 @@ if [ $fast = false ]
     sleep 3
 fi
 
-if [ $redoPurStab == true ]
+if [ $redoPurStab = true -a $redoControlPlots = true ]
     then
     # Array of differential variables
     listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
@@ -427,20 +428,15 @@ if [ $redoPurStab == true ]
 	listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
 	plotAcceptance=false
     fi
-    
-    if [ $decayChannel != \"combined\" -a $redoControlPlots = true ]; then
-	
-	echo "purity and stability will be calculated for the following variables: "
-	echo
-	echo "${listVar_[@]}"
-      
-	# loop over all systematic variations
-	for (( iVar=0; iVar<${#listVar_[@]}; iVar++ )); do
-	    root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, 99999, 0, '$hadron')'
-	done
-    else
-	echo "will be ignored, only done for decayChannel=muon/electron"
-    fi
+    	
+    echo "purity and stability will be calculated for the following variables: "
+    echo
+    echo "${listVar_[@]}"
+  
+    # loop over all systematic variations
+    for (( iVar=0; iVar<${#listVar_[@]}; iVar++ )); do
+	root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, 99999, 0, '$hadron')'
+    done
 fi
 
 #### ============================
