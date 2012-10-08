@@ -35,7 +35,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // variable:       choose variable to plot, e.g.:
   //                 topPt, topY, ttbarPt, ttbarY, ttbarMass, lepPt, lepY
   // save:           save the purity and stability canvas 
-  // lepton:         "muon" or "elec"
+  // lepton:         "muon" or "elec" or "combined"
   // plotAcceptance: in addition to purity and stability also acceptance is plotted (if true)
   // plotEfficiencyPhaseSpace: in addition to purity, stability, acceptance also 
   //                           efficiency in restricted phase space (i.e. Acceptance=1) is plotted (if true)
@@ -45,6 +45,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // printSeparateRes save the residuum plots separately
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
   if(!useTree) chi2Max=99999; // can be done only with tree
+  if(lepton.Contains("combined")) lepton="combined";
   // output folder in case of saving the canvases:
   TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2011/binning";
   if(useTree&&chi2Max<100){ 
@@ -52,7 +53,11 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     plotAcceptance = false;
     plotEfficiency2= false;
   }
-
+  
+  // shall b-jets be swapped if deltaR is better then?
+  bool swapBb = false;
+  if(hadron) swapBb=true;
+  
   int initialIgnoreLevel=gErrorIgnoreLevel;
   if(verbose==0) gErrorIgnoreLevel=kWarning;
   
@@ -267,6 +272,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   // when new entries are added
     value_["weight"]=1;
     value_["chi2"]  =0;
+    bool bbSwapBetter  = false;
     value_["qAssignment"]  =-2;
     for(unsigned int i=0; i<variable_.size(); ++i){
       value_[variable_[i]+recExtTree]=0;
@@ -281,6 +287,10 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     treeGeneral->SetBranchStatus("chi2",1);
     treeGeneral->SetBranchAddress("chi2",(&value_["chi2"]));
     treeGeneral->SetBranchAddress("qAssignment",(&value_["qAssignment"]));
+    if(variable.Contains("bq") && swapBb){
+      tree->SetBranchStatus("bbSwapBetter",1);
+      tree->SetBranchAddress("bbSwapBetter",(&bbSwapBetter));
+    }
       
     for(unsigned int i=0; i<variable_.size(); ++i){
       // activate branches
@@ -299,6 +309,10 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
       for(unsigned int i=0; i<variable_.size(); ++i){
 	double rec =value_[variable_[i]+recExtTree];
 	double gen =value_[variable_[i]+genExtTree];
+	// swap bb if deltaR better then
+	if(swapBb && bbSwapBetter){
+	  gen = (i==0) ? value_[variable_[1]+genExtTree] : value_[variable_[0]+genExtTree];
+	}
 	if(rec==-9999||gen==-9999){ 
 	  std::cout << "variable " << variable << " is not filled properly:" << std::endl;
 	  std::cout << "rec " <<  variable_[i]+recExtTree << ": " << rec << std::endl;
@@ -627,6 +641,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     }
     if (lepton=="muon") DrawDecayChLabel("#mu + Jets");
     else if(lepton=="elec") DrawDecayChLabel("e + Jets");
+    else if(lepton=="combined") DrawDecayChLabel("e/#mu + Jets Combined");
     //double legEdge = 0.4;
     //if(plotAcceptance)legEdge = effHistBBB->GetMinimum();
     TLegend* leg=new TLegend(0.47,0.68,0.67,0.87);
