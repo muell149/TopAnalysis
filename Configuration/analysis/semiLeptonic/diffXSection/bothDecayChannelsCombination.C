@@ -133,12 +133,12 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   if(closureTestSpecifier.Contains("500") || closureTestSpecifier.Contains("750")){
     if      (closureTestSpecifier.Contains("500")) zprime="500";
     else if (closureTestSpecifier.Contains("750")) zprime="750";
-    if      (closureTestSpecifier.Contains("x0p03"))  {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (x0.03)";}
-    else if (closureTestSpecifier.Contains("x0p1"))  {zPrimeLumiWeightIni=0.1; zPrimeLumiWeightStr=" (x0.1)";}
-    else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (x0.25)";}
-    else if (closureTestSpecifier.Contains("x0p5"))  {zPrimeLumiWeightIni=0.5; zPrimeLumiWeightStr=" (x0.5)";}
-    else if (closureTestSpecifier.Contains("x2"))    {zPrimeLumiWeightIni=2.; zPrimeLumiWeightStr=" (x2)";}
-    else if (closureTestSpecifier.Contains("x4"))    {zPrimeLumiWeightIni=4.; zPrimeLumiWeightStr=" (x4)";}
+    if      (closureTestSpecifier.Contains("x0p03"))  {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.03)";}
+    else if (closureTestSpecifier.Contains("x0p1"))  {zPrimeLumiWeightIni=0.1; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.1)";}
+    else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.25)";}
+    else if (closureTestSpecifier.Contains("x0p5"))  {zPrimeLumiWeightIni=0.5; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.5)";}
+    else if (closureTestSpecifier.Contains("x2"))    {zPrimeLumiWeightIni=2.; zPrimeLumiWeightStr=" (#sigma_{Z'}x2)";}
+    else if (closureTestSpecifier.Contains("x4"))    {zPrimeLumiWeightIni=4.; zPrimeLumiWeightStr=" (#sigma_{Z'}x4)";}
     dataLabel = "#splitline{Reco. and Unf.}{t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr+"}";
     closureLabel = "Zprime"+closureTestSpecifier;
     // no systematics
