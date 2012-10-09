@@ -76,6 +76,12 @@ hadron=false
 ##                           / \"500\" or \"750\" for corresponding Zprime pseudo data  (default: "")
 closureTestSpecifier=\"\"
   
+## run combination based on event yield combination instead of 
+## combinedEventYields = true / false (default: false)
+## attention: this affects only bothDecayChannelsCombination.C 
+##            and is automatically adjusted with input string "combined2"
+combinedEventYields=false
+
 ## take arguments
 clear
 echo "-------------------------------------------------------------------------------------"
@@ -86,6 +92,9 @@ elif [ $# -eq 3 -o $# -eq 4 ]; then
    if   [ $1 == "muon"      ];   then decayChannel=\"muon\"
    elif [ $1 == "electron"  ];   then decayChannel=\"electron\"
    elif [ $1 == "combined"  ];   then decayChannel=\"combined\"
+   elif [ $1 == "combined2" ];   then 
+       decayChannel=\"combined\"
+       combinedEventYields=true
    else                          echo "1st argument ( $1 ) is not valid! Choose \"muon\", \"electron\" or \"combined\" as decay channel! Abort!"; exit
    fi
    ## set second argument
@@ -125,25 +134,29 @@ inputFolderName=\"RecentAnalysisRun\"
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
+mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+       #mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+       #mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
+       #mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root\"
+       #mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
+eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
+   #eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
+   #eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
+   #eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedElectron.root\"
+   #eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
+
+
+
 if [ $decayChannel == \"electron\" ]; then
     dataLuminosity=4980
-   dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
-   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedElectron.root\"
-   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedElectron.root\"
-   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedElectron.root\"
-   #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Electron_160404_167913.root\"
+    dataSample=$eldataSample
 else
     if [ $decayChannel == \"muon\" ]; then
 	dataLuminosity=4955
-       dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
-       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
-       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AEPSCombinedMuon.root\"
-       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011PostEPSCombinedMuon.root\"
-       #dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011A_Muon_160404_167913.root\"
+	dataSample=$mudataSample
     else
 	dataLuminosity=4967.5   # mean value
-	dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
-	#dataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/1205_AnalysisRun/analyzeDiffXData2011AllCombinedMuon.root\"
+	dataSample=$eldataSample\":\"$mudataSample
     fi
 fi
 
@@ -262,9 +275,25 @@ if [ $decayChannel == \"combined\" ]
     then
     echo
     echo "combining the electron and muon channel"
-    if [ -f $muonFile -a -f $elecFile ]; then
+    if [ -f $muonFile -a -f $elecFile -a $1 != "combined2" ]; then
 	echo
 	echo "Doing the full differential top xSec analysis. "
+	echo 
+	echo "Data Label:                                 $dataLabel       "
+	echo "Used data:                                  $dataSample      "
+	echo "Decay channel:                              $decayChannel    "
+	echo "Luminosity:                                 $dataLuminosity  " 
+	echo "Re-do control plots:                        $redoControlPlots" 
+	echo "Re-do systematic uncertainties:             $redoSystematics "
+	echo "Number of considered systematics:           $maxSys          "
+	echo "Consider shape variation:                   $shapeVar        " 
+	echo "Exclude shape unc. from total uncertainty:  $exclShapeVar    "
+	echo "Save plots:                                 $save            " 
+	echo
+    elif [  $1 == "combined2" ]; then
+	echo
+	echo "Doing the full differential top xSec analysis. "
+	echo "COMBINING THE CHANNELS AT EVENT YIELD LEVEL"
 	echo 
 	echo "Data Label:                                 $dataLabel       "
 	echo "Used data:                                  $dataSample      "
@@ -449,8 +478,11 @@ echo "Part PDF: Prepare files for pdf uncertainties"
 if [ $decayChannel != \"combined\" -a $redoSystematics = true ]; then
     echo
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true', '$inclCCVars')' 
+elif [ $1 == "combined2" -a $redoSystematics = true ]; then
+    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"muon\"',     '$save', '$verbose', '$inputFolderName', '$mudataSample', 'true', '$inclCCVars')' 
+    root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"electron\"', '$save', '$verbose', '$inputFolderName', '$eldataSample', 'true', '$inclCCVars')' 
 else
-    echo "Done for 2011 analysis in e/mu channel separate and if systematics are requested to be re-done (redoSystematics set to $redoSystematics)."
+    echo "Done for 2011 analysis (in e/mu channel separate or when combining event yields) and if systematics are requested to be re-done (redoSystematics set to $redoSystematics)."
 fi
 
 #### ======================================================================
@@ -467,6 +499,9 @@ if [ $shapeVar = true -a $redoSystematics = true ]; then
 	
 	echo "will be done"
 	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'false', '$inclCCVars')'
+    elif [ $1 == "combined2" ]; then
+	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"muon\"',     '$save', '$verbose', '$inputFolderName', '$mudataSample', 'false', '$inclCCVars')'
+	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"electron\"', '$save', '$verbose', '$inputFolderName', '$eldataSample', 'false', '$inclCCVars')'
     else
 	echo "only done for 2011 analysis in e/mu channel separate"
     fi
@@ -535,7 +570,7 @@ fi
 
 BEFORESYS=$(date +%s)
 
-if [ $decayChannel != \"combined\" ]; then
+if [ $decayChannel != \"combined\" -o $1 == "combined2" ]; then
 
     ## ====================================================================================
     ##  Compile library, required only once before processing systematic uncertainties
@@ -667,10 +702,10 @@ EOF
     
     cat >> commandsCombineChannelsRun.cint << EOF
 .L bothDecayChannelsCombination_C.so
-bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier)
+bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier)
 EOF
     echo ""
-    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier)"
+    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier)"
     root -l -b < commandsCombineChannelsRun.cint
 
 else
