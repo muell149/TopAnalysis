@@ -50,7 +50,7 @@
 
 
 # W+Jets
-50   Summer12.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff              emu_wtolnu.root                  wjets,runOnAOD=True 
+50   Summer12.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v2_cff              emu_wtolnu.root                  wjets,runOnAOD=True 
 
 
 
@@ -97,7 +97,7 @@
 
 
 # W+Jets
-50   Summer12.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff              mumu_wtolnu.root                  wjets,runOnAOD=True 
+50   Summer12.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v2_cff              mumu_wtolnu.root                  wjets,runOnAOD=True 
 
 
 ################################################################
@@ -143,5 +143,5 @@
 
 
 # W+Jets
-50   Summer12.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff              ee_wtolnu.root                   wjets,runOnAOD=True 
+50   Summer12.WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v2_cff              ee_wtolnu.root                   wjets,runOnAOD=True 
 
