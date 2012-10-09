@@ -32,8 +32,10 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   reBinTH1F(*datatemp, binning_[plotName], 0);
   // GET DATA: refill TGraphAsymmErrors to rebinned histo
   for(int bin=1; bin<=datatemp->GetNbinsX(); ++bin){
-    if(verbose>1) std::cout << "bin: " << bin << std::endl;
-    if(verbose>1) std::cout << dataRaw->GetY()[bin];
+    if(verbose>1){
+      std::cout << "bin: " << bin << std::endl;
+      std::cout << dataRaw->GetY()[bin];
+    }
     datatemp->SetBinContent(bin, dataRaw->GetY()[bin]);
     double err=dataRaw->GetErrorYhigh(bin);
     if(err<dataRaw->GetErrorYlow(bin)) err=dataRaw->GetErrorYlow(bin);
@@ -98,22 +100,19 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
     reBinTH1F(*data2temp, binning_[plotName], 0);
     // GET DATA2: refill TGraphAsymmErrors to rebinned histo
     for(int bin=1; bin<=data2temp->GetNbinsX(); ++bin){
-      if(verbose>1) std::cout << "bin: " << bin << std::endl;
-      if(verbose>1) std::cout << data2Raw->GetY()[bin];
       data2temp->SetBinContent(bin, data2Raw->GetY()[bin]);
       double err=data2Raw->GetErrorYhigh(bin);
       if(err<data2Raw->GetErrorYlow(bin)) err=data2Raw->GetErrorYlow(bin);
-      if(verbose>1) std::cout << " +- " << err << std::endl;
       data2temp->SetBinError(bin, err);
     }
     // GET DATA: delete empty bins
     TH1F* data2=killEmptyBins((TH1F*)data2temp->Clone(), verbose);
     data2->GetXaxis()->SetTitle(xSecLabelName(plotName));
-    if(verbose>1){
-      for(int bin=1; bin<=data2->GetNbinsX(); ++bin){
-	std::cout << "bin: " << bin << std::endl;
-	std::cout << data2->GetBinContent(bin) << " +- " << data2->GetBinError(bin) << std::endl;
-      }
+    for(int bin=1; bin<=data2->GetNbinsX(); ++bin){
+      std::cout << plotName << "bin: " << bin << std::endl;
+      std::cout << "old: " << data2->GetBinContent(bin) << " +- " << data2->GetBinError(bin) << std::endl;
+      if(data->GetNbinsX()==data2->GetNbinsX()) std::cout << "new: " << data->GetBinContent(bin)  << " +- " << data->GetBinError(bin)  << std::endl;
+      if(bin==data2->GetNbinsX()) std::cout << std::endl;
     }
     data2->SetFillStyle(0);
     data2->SetMarkerColor(kBlack);
@@ -139,7 +138,7 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   return plotCanvas_[0];
 }
 
-void createTheoryDataRatios(bool extrapolate=true, bool hadron=false, int verbose=0){
+void createTheoryDataRatios(bool extrapolate=false, bool hadron=true, int verbose=0){
 
   // list all variables you want to create a ratio for
   std::vector<TString> xSecVariables_;
