@@ -1,4 +1,5 @@
 #include "basicFunctions.h"
+#include <stdlib.h>
 
 void makeResultTables(std::string decayChannel = "combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, int verbose=0){
   
@@ -97,31 +98,46 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
 	precXBCC=1;
 	precX=0;
       }
+//       if(plotName.Contains("ttbarY")){
+// 	std::cout << std::endl << "xValueDn=" << xValueDn << std::endl;
+// 	std::cout << "precX=" << precX << std::endl;
+// 	std::cout << "xValueDn +5./(pow(10,precX+1))=" << xValueDn +5./(pow(10,precX   +1)) << std::endl;
+// 	TString help=getTStringFromDouble(xValueDn +5./(pow(10,precX+1)), precX, true);
+// 	std::cout << "rounded number=" << help << std::endl;
+//       }
       TString out= "";
-      out+=getTStringFromDouble(BCCxValue+5./(pow(10,precXBCC+1)), precXBCC);
+      out+=getTStringFromDouble(BCCxValue, precXBCC);
       out+=" &  ";			  
-      out+=getTStringFromDouble(xValueDn +5./(pow(10,precX   +1)), precX   );
+      out+=getTStringFromDouble(xValueDn, precX);
       out+=" to  ";			  
-      out+=getTStringFromDouble(xValueUp +5./(pow(10,precX   +1)), precX   );
+      out+=getTStringFromDouble(xValueUp, precX);
       out+=" & ";
-      out+=getTStringFromDouble(MCxSec+5./(pow(10,precXSec+1)), precXSec);
+      out+=getTStringFromDouble(MCxSec, precXSec);
       out+="  & ";
-      out+=getTStringFromDouble(xSec  +5./(pow(10,precXSec+1)), precXSec);
+      out+=getTStringFromDouble(xSec  , precXSec);
       out+=" &  ";
-      out+=getTStringFromDouble(100*(statError/xSec)+5./(pow(10,precErr+1)),  precErr);
+      out+=getTStringFromDouble(100*(statError/xSec),  precErr);
       out+=" &  ";
-      out+=getTStringFromDouble(100*(sysError/xSec )+5./(pow(10,precErr+1)),  precErr);
-      out+=" &  ";
-      out+=getTStringFromDouble(100*(totError/xSec )+5./(pow(10,precErr+1)),  precErr);
+      out+=getTStringFromDouble(100*(sysError/xSec ),  precErr);
+      out+=" &  ";				    
+      out+=getTStringFromDouble(100*(totError/xSec ),  precErr);
       out+=" \\\\ ";
+      //if(plotName.Contains("ttbarY")) std::cout << out << std::endl;
       bool append= (bin==1 ? false : true);
       TString txtfile="./diffXSecFromSignal/"+filename;
       txtfile.ReplaceAll(".root",plotName+".txt");
       writeToFile(out, txtfile, append);
-      std::cout << out << std::endl;
+      //std::cout << out << std::endl;
       //std::cout << BCCxValue << " &  " << xValueDn << " to  " << xValueUp << " & " << MCxSec << "  & " << xSec << " &  " << statError/xSec << " &  " << sysError/xSec << " &  " << totError/xSec << " \\\\ " << std::endl;
       if(verbose>0) std::cout << std::setprecision(7) << std::fixed<< xSec << "+/-" << statError << "+/-" << sysError << std::endl;
       if(verbose>0) std::cout << std::setprecision(7) << std::fixed << "xvalue: " << BCCxValue << " (" << xValueDn << ".." << xValueUp << ")" << std::endl;
+      if(verbose>0){
+	double rel=(xSec-MCxSec)/xSec;
+	double relvar=(xSec-MCxSec)/totError;
+	std::cout << "MadGraph prediction wrt data: " << std::setprecision(2) << std::fixed << rel << std::endl;
+	//system("Color 1A");
+	std::cout << std::setprecision(1) << std::fixed << "( " << relvar << " std variations)" << std::endl;
+      }
     }
   }
 }

@@ -542,7 +542,7 @@ namespace semileptonic {
     return (TString)result;
   }
 
-  TString getTStringFromDouble(double d, int precision=2)
+  TString getTStringFromDouble(double d, int precision=2, bool output=false)
   {
     // function to convert an double "d" to
     // a TString and return this one
@@ -554,6 +554,7 @@ namespace semileptonic {
     conv+=getTStringFromInt(precision);
     conv+="f";
     char result[30];
+    if(output) std::cout << "sprintf(result, conv, d)=sprintf(" << result << ", " << conv << ", " << d << ")" << std::endl;
     sprintf(result, conv, d);
     return (TString)result;
   }
@@ -2161,6 +2162,7 @@ namespace semileptonic {
     if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return constMcatnloColor; 
     if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return constPowhegColor; 
     if(theo.Contains("nnlo"   )||theo.Contains("kidonakis")) return constNnloColor;
+    if(theo.Contains("data")) return kBlack;
     return constMadgraphColor;
   }
 
@@ -2336,6 +2338,7 @@ namespace semileptonic {
 	ratio_[nTheory]->SetFillColor(color-4);
 	ratio_[nTheory]->SetFillStyle(0);
 	ratio_[nTheory]->SetMarkerSize(0.2);
+	ratio_[nTheory]->SetLineStyle(histDenominatorTheory_[nTheory]->GetLineStyle());
 	// configure axis of ratio_[nTheory] plot
 	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
 	ratio_[nTheory]->GetXaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleOffset()*0.9);
@@ -2385,11 +2388,26 @@ namespace semileptonic {
 	  for(int bin=1; bin<=errorband->GetNbinsX(); ++bin){
 	    errorband->SetBinContent(bin, 1);
 	    errorband->SetBinError  (bin, histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin));
-	    errorband->SetMarkerColor(kGray+1);
-	    errorband->SetFillColor(kGray+1);
+	    errorband->SetMarkerColor(kYellow);
+	    errorband->SetFillColor(kYellow);
 	    errorband->SetFillStyle(1001);
 	  }
 	  errorband->DrawClone("e2 p same");
+	TLegend *leg  = new TLegend(); 
+	//leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+	//leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03*leg->GetNRows());
+	//leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength()+0.20);
+	//leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength()-0.20);
+	leg->SetX1NDC(0.2);
+	leg->SetY1NDC(1.0);
+	leg->SetX2NDC(0.4);
+	leg->SetY2NDC(0.8);
+	leg ->SetFillStyle(0);
+	leg ->SetBorderSize(0);
+	leg ->SetTextSize(0.1);
+	leg ->SetTextAlign(12);
+	leg ->AddEntry(errorband, "data stat+sys error", "F");
+	leg ->DrawClone("same");
 	}
 	//if(nTheory==0) ratio_[nTheory]->DrawClone("hist");
 	ratio_[nTheory]->DrawClone("hist same");
