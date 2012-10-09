@@ -2,7 +2,7 @@
 
 void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
 				  TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier=""){
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -22,7 +22,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   // ============================
   
   // decay channels
-  enum channel {kMuon, kElectron};
+  enum channel {kMuon, kElectron, kCombined};
     
   // Define variables for combination (centrally defined in basicFunctions.h)
   std::vector<TString> xSecVariables_;
@@ -147,8 +147,16 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 
   //  Define muon and electron input rootfiles
   std::map<unsigned int, TFile*> files_;
-  files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +closureLabel+dataSample+LV+PS+".root");
-  files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+closureLabel+dataSample+LV+PS+".root");
+  if(!combinedEventYields){
+    files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +closureLabel+dataSample+LV+PS+".root");
+    files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+closureLabel+dataSample+LV+PS+".root");
+  }
+  else files_[kCombined] = new (TFile)("diffXSecTopSemiLep"+closureLabel+dataSample+LV+PS+".root");
+  // output for chosen input
+  if(verbose>0){
+    if(combinedEventYields) std::cout << "using COMBINED EVENT YIELD as input!!!" << std::endl;
+    else std::cout << "using MU and EL SEPARATE files as input!!!" << std::endl;
+  }
   
   // define folders where XSec plots are stored
   TString xSecFolder = "xSec";
@@ -168,10 +176,14 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       // get canvas
-      TCanvas* canvasMu   = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
-      TCanvas* canvasEl   = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
-      TCanvas* canvasTheo = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
-      if(!(canvasMu&&canvasEl&&canvasTheo)){
+      TCanvas* canvasMu   = combinedEventYields ? 0 : (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
+      TCanvas* canvasEl   = combinedEventYields ? 0 : (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
+      TCanvas* canvasTheo = combinedEventYields ? 0 : (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
+      // if already combined at yield level:
+      TCanvas* canvasComb     = combinedEventYields ? (TCanvas*)(files_[kCombined]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]))       : 0;
+      TCanvas* canvasTheoComb = combinedEventYields ? (TCanvas*)(files_[kCombined]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i])) : 0;
+      bool foundCanv=true;
+      if(!(canvasMu&&canvasEl&&canvasTheo)&&!combinedEventYields){
 	std::cout << std::endl << " WARNING in bothDecayChannelsCombination.C! " << std::endl;
 	if(!canvasMu||!canvasEl) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in ";
 	if(!canvasMu) std::cout << "diffXSecTopSemiMu"+closureLabel+dataSample+LV+PS+".root (muon file)"     << std::endl;
@@ -181,37 +193,47 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	}
 	// use std file instead
 	std::cout << "will use the std. files instead -> related uncertainty will be 0!!!!!!!" << std::endl;
+	foundCanv=false;
       }
-      if(canvasMu&&canvasEl&&canvasTheo){
+      if(!(canvasComb&&canvasTheoComb)){
+	if(!canvasComb) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiLep"+closureLabel+dataSample+LV+PS+".root (event yield combined file)"     << std::endl;
+	if(!canvasTheoComb) std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiLep"+closureLabel+dataSample+LV+PS+".root (event yield combined file)" << std::endl;
+	foundCanv=false;
+      }
+      if(foundCanv){
 	// get data plots for all systematics
 	TString plotName = xSecVariables_[i];
 	plotName.ReplaceAll("Norm","");
 	TString plotNameTheo=plotName;
 	plotNameTheo.ReplaceAll("inclusive","xSec/inclusiveTheory");
 	//std::cout << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << "/" << plotNameTheo << std::endl;
-	TH1F* plotMu   = (TH1F*)canvasMu  ->GetPrimitive(plotName+"kData");
-	TH1F* plotEl   = (TH1F*)canvasEl  ->GetPrimitive(plotName+"kData");
-	TH1F* plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotNameTheo);
-	plotTheo->SetName(plotName);
+	TH1F* plotMu   = combinedEventYields ? 0 : (TH1F*)canvasMu  ->GetPrimitive(plotName+"kData");
+	TH1F* plotEl   = combinedEventYields ? 0 : (TH1F*)canvasEl  ->GetPrimitive(plotName+"kData");
+	TH1F* plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotNameTheo) : (TH1F*)canvasTheo->GetPrimitive(plotNameTheo);
+	// if already combined at yield level:
+	TH1F* plotComb = combinedEventYields ? (TH1F*)canvasComb    ->GetPrimitive(plotName+"kData") : 0;
+	if( plotTheo) plotTheo->SetName(plotName);
 	if(!plotTheo){
 	  // take care of differing naming convention for hadron level plots
-	  if(hadron) plotTheo = (TH1F*)canvasTheo->GetPrimitive(plotName+"Gen");
+	  if(hadron) plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotName+"Gen") : (TH1F*)canvasTheo->GetPrimitive(plotName+"Gen");
 	  // if theory is not found, load parton level theory plots directly
-	  else plotTheo = (TH1F*)canvasTheo->GetPrimitive("analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName);
+	  else plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive("analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName) : (TH1F*)canvasTheo->GetPrimitive("analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName);
 	  if(plotTheo) plotTheo->SetName(plotName);
 	}
 	
-	if(plotMu&&plotEl&&plotTheo){ 
+	if(((plotMu&&plotEl)||plotComb)&&plotTheo){ 
 	  if(verbose>1){
-	    std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for both channels found!" << std::endl;
+	    if(!combinedEventYields) std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for both channels found!" << std::endl;
+	    else std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for combined event yield found!" << std::endl;
 	  }
-	  
+
+	  if(verbose>0) std::cout << "loading plots done..." << std::endl;
 	  // Store information if variable should be drawn normalized
 	  bool normalize=xSecVariables_[i].Contains("Norm");
 	  
 	  // combine the results
-	  TH1F* plotCombination=(TH1F*)(plotMu->Clone());
-	  plotCombination->Reset("ICESM");
+	  TH1F* plotCombination= combinedEventYields ? (TH1F*)(plotComb->Clone()) : (TH1F*)(plotMu->Clone());
+	  if(!combinedEventYields) plotCombination->Reset("ICESM");
 	  if(xSecVariables_[i].Contains("ttbarY")) plotCombination->GetXaxis()->SetRangeUser(-2.49,2.49);
 	  if(verbose>1) std::cout << std::endl << xSecVariables_[i] << ", " << sysLabel(sys) << ":" << std::endl;
 	  // check correlation of systematic variation
@@ -220,34 +242,47 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    if(uncorrSys_[j]==sys&&sys!=sysNo) correlated=false;
 	  }
 	  // (i) hadronization uncertainty: use Powheg+Herwig vs Mc@nlo+Pythia 
-	  if (sys==sysHadUp||sys==sysHadDown){	    
-	    errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose); // use value from MC
- 	    // A) get histos: Powheg and MC@NLO
- 	    // canvas
- 	    TCanvas* canvasMuPow = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysGenPowheg)+"/"+xSecVariables_[i]));
- 	    TCanvas* canvasElPow = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sysGenPowheg)+"/"+xSecVariables_[i]));
- 	    TCanvas* canvasMuMca = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysGenMCatNLO)+"/"+xSecVariables_[i]));
- 	    TCanvas* canvasElMca = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sysGenMCatNLO)+"/"+xSecVariables_[i]));
- 	    // plots
+	  if (sys==sysHadUp||sys==sysHadDown){
 	    TH1F* plotMuPow=0;
 	    TH1F* plotElPow=0;
 	    TH1F* plotMuMca=0;
 	    TH1F* plotElMca=0;
- 	    if(canvasMuPow&&canvasElPow){
- 	      plotMuPow = (TH1F*)canvasMuPow->GetPrimitive(plotName+"kData");
- 	      plotElPow = (TH1F*)canvasElPow->GetPrimitive(plotName+"kData");  
+	    TH1F* plotCombPow=0;
+	    TH1F* plotCombMca=0;
+	    if(!combinedEventYields){
+	      errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose); // use value from MC
+	      // A) get histos: Powheg and MC@NLO
+	      // canvas
+	      TCanvas* canvasMuPow = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysGenPowheg)+"/"+xSecVariables_[i]));
+	      TCanvas* canvasElPow = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sysGenPowheg)+"/"+xSecVariables_[i]));
+	      TCanvas* canvasMuMca = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysGenMCatNLO)+"/"+xSecVariables_[i]));
+	      TCanvas* canvasElMca = (TCanvas*)(files_[kElectron]->Get(xSecFolder+"/"+sysLabel(sysGenMCatNLO)+"/"+xSecVariables_[i]));
+	      // plots
+	      if(canvasMuPow&&canvasElPow){
+		plotMuPow = (TH1F*)canvasMuPow->GetPrimitive(plotName+"kData");
+		plotElPow = (TH1F*)canvasElPow->GetPrimitive(plotName+"kData");  
+	      }
+	      if(canvasMuMca&&canvasElMca){
+		plotMuMca = (TH1F*)canvasMuMca->GetPrimitive(plotName+"kData");
+		plotElMca = (TH1F*)canvasElMca->GetPrimitive(plotName+"kData");  
+	      }
+	      // check if all plots are available
+	      if(plotMuPow&&plotElPow&&plotMuMca&&plotElMca){
+		// B) combine channels for Powheg and Mcatnlo
+		plotCombPow=(TH1F*)(plotMu->Clone());
+		plotCombMca=(TH1F*)(plotMu->Clone());
+		errorWeightedMeanCombination(*plotMuPow, *plotElPow, *plotCombPow, verbose);
+		errorWeightedMeanCombination(*plotMuMca, *plotElMca, *plotCombMca, verbose);
+	      }
 	    }
- 	    if(canvasMuMca&&canvasElMca){
- 	      plotMuMca = (TH1F*)canvasMuMca->GetPrimitive(plotName+"kData");
- 	      plotElMca = (TH1F*)canvasElMca->GetPrimitive(plotName+"kData");  
+	    else{
+	      // for combination on yield level: get combined plots
+	      TCanvas* canvasCombPow = (TCanvas*)(files_[kCombined]->Get(xSecFolder+"/"+sysLabel(sysGenPowheg )+"/"+xSecVariables_[i]));
+	      TCanvas* canvasCombMca = (TCanvas*)(files_[kCombined]->Get(xSecFolder+"/"+sysLabel(sysGenMCatNLO)+"/"+xSecVariables_[i]));
+	      if(canvasCombPow) plotCombPow=(TH1F*)canvasCombPow->GetPrimitive(plotName+"kData");
+	      if(canvasCombMca) plotCombMca=(TH1F*)canvasCombMca->GetPrimitive(plotName+"kData");
 	    }
-	    // check if all plots are available
-	    if(plotMuPow&&plotElPow&&plotMuMca&&plotElMca){
-	      // B) combine channels for Powheg and Mcatnlo
-	      TH1F* plotCombPow=(TH1F*)(plotMu->Clone());
-	      TH1F* plotCombMca=(TH1F*)(plotMu->Clone());
-	      errorWeightedMeanCombination(*plotMuPow, *plotElPow, *plotCombPow, verbose);
-	      errorWeightedMeanCombination(*plotMuMca, *plotElMca, *plotCombMca, verbose);
+	    if(plotCombPow&&plotCombMca){
 	      // C) transfer absolute uncertainty from Powheg vs. MCatNlo to systematic shifted plot (hadronization)
 	      // loop all bins
 	      for(int bin=1; bin<=plotCombination->GetNbinsX(); ++bin){
@@ -262,11 +297,11 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 		// printout
 		if(verbose>1){
 		  std::cout << "bin " << bin << " MadGraph    xSec value: " << stdValue << std::endl;
-		  std::cout << "      "      << " Powheg el   xSec value: " <<  plotElPow->GetBinContent(bin)   << std::endl;
-		  std::cout << "      "      << " Powheg mu   xSec value: " <<  plotMuPow->GetBinContent(bin)   << std::endl;
+		  if(plotElPow) std::cout << "      "      << " Powheg el   xSec value: " <<  plotElPow->GetBinContent(bin)   << std::endl;
+		  if(plotMuPow) std::cout << "      "      << " Powheg mu   xSec value: " <<  plotMuPow->GetBinContent(bin)   << std::endl;
 		  std::cout << "      "      << " Powheg comb xSec value: " <<  plotCombPow->GetBinContent(bin) << std::endl;
-		  std::cout << "      "      << " mc@nlo el   xSec value: " <<  plotElMca->GetBinContent(bin)   << std::endl;
-		  std::cout << "      "      << " mc@nlo mu   xSec value: " <<  plotMuMca->GetBinContent(bin)   << std::endl;
+		  if(plotElMca) std::cout << "      "      << " mc@nlo el   xSec value: " <<  plotElMca->GetBinContent(bin)   << std::endl;
+		  if(plotMuMca) std::cout << "      "      << " mc@nlo mu   xSec value: " <<  plotMuMca->GetBinContent(bin)   << std::endl;
 		  std::cout << "      "      << " mc@nlo comb xSec value: " <<  plotCombMca->GetBinContent(bin) << std::endl;
 		  std::cout << "bin " << bin << " xSec value: " << stdValue << std::endl;
 		  std::cout << "  old (Powheg vs. MadGraph) uncertainty: " << plotCombination->GetBinContent(bin)-stdValue << std::endl;
@@ -278,14 +313,21 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    }
 	    else{ 
 	      std::cout << " ERROR: At least one plot not found for hadronization uncertainty (cf. following histo-pointers): " << std::endl;
+	      if(!combinedEventYields){
 	      std::cout << " Powheg, muon:" << plotMuPow << std::endl;
 	      std::cout << " Powheg, elec:" << plotElPow << std::endl;
 	      std::cout << " MC@NLO, muon:" << plotMuMca << std::endl;
 	      std::cout << " MC@NLO, elec:" << plotElMca << std::endl;
+	      }
+	      else{
+		std::cout << " Powheg, combined:" << plotCombPow << std::endl;
+		std::cout << " MC@NLO, combined:" << plotCombMca << std::endl;
+	      }
 	    }
 	  }
 	  // (ii) uncorrelated uncertainties 
-	  else if(!correlated){
+	  // FIXME: for combination on event yield level all systematics are treated as correlated so far
+	  else if(!correlated&&!combinedEventYields){
 	    // get standard xSec histos
 	    // a) canvas
 	    TCanvas* canvasMuStd = (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i]));
@@ -314,12 +356,17 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    }
 	  }
 	  // (iii)other correlated uncertainties: just do error weighted mean
-	  else errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose);
+	  //      for combination on event yield level: do nothing
+	  else if(!combinedEventYields) errorWeightedMeanCombination(*plotMu, * plotEl, *plotCombination, verbose);
 	  
 	  // =================================================
 	  //  Additional histos for reweighting closure test
 	  // =================================================
 	  if(reweightClosure&&sys==sysNo&&plotName!="inclusive"){
+	    if(combinedEventYields){
+	      std::cout << "ERROR: closure test with combination on event yield level is not yet implemented!!!" << std::endl;
+	      exit(0);
+	    }
 	    // only if spectrum is distorted
 	    if(!closureTestSpecifier.Contains("NoDistort")){
 	      TString closureTestSpecifier2="";
@@ -356,6 +403,10 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  //  Additional histos for z prime closure test
 	  // =================================================
 	  if(zprime!=""&&sys==sysNo&&plotName!="inclusive"){
+	    if(combinedEventYields){
+	      std::cout << "ERROR: zprime closure test with combination on event yield level is not yet implemented!!!" << std::endl;
+	      exit(0);
+	    }
 	    TString muSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSigFall11PF.root";
 	    TString elSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSigFall11PF.root";
 	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"muonDiffXSecSigZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
@@ -425,7 +476,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  // Create canvases
 	  TCanvas* combicanvas = new TCanvas("combicanvasStd", "combicanvasStd",  600, 600);
 	  // get style from old canvas
-	  combicanvas ->SetLogy(canvasMu->GetLogy());
+	  combicanvas ->SetLogy(combinedEventYields ? canvasComb->GetLogy() : canvasMu->GetLogy());
 	  if(normalize){
 	    if (pTPlotsLog && xSecVariables_[i].Contains("Pt") ){
 	      plotTheo->SetMinimum(0.0001);
@@ -882,8 +933,13 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	  std::cout << " ERROR in bothDecayChannelsCombination.C! " << std::endl;
 	  std::cout << " plot " << xSecVariables_[i]+"kData" << " not found in ";
 	  std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for:" << std::endl;
-	  if(!plotMu)   std::cout << "muon channel data"     << std::endl;
-	  if(!plotEl)   std::cout << "electron channel data" << std::endl;
+	  if(!combinedEventYields){
+	    if(!plotMu)   std::cout << "muon channel data"     << std::endl;
+	    if(!plotEl)   std::cout << "electron channel data" << std::endl;
+	  }
+	  else{
+	    if(!plotComb) std::cout << "combined event yield channel data" << std::endl;
+	  }
 	  if(!plotTheo) std::cout << "theory"                << std::endl;
 	  // close file and delete pointer
 	  closeStdTopAnalysisFiles(files_);
