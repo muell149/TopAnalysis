@@ -100,9 +100,9 @@ if options.globalTag != '':
 else:
     #from Configuration.PyReleaseValidation.autoCond import autoCond
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string("START52_V9::All")
+        process.GlobalTag.globaltag = cms.string('START53_V7F::All')
     else:
-        process.GlobalTag.globaltag = cms.string( 'GR_P_V32::All' )
+        process.GlobalTag.globaltag = cms.string('FT_53_V6_AN2::All')
 
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
@@ -423,23 +423,26 @@ if options.runOnMC:
     process.eventWeightPUsysDown = process.eventWeightPU.clone()
 
     process.eventWeightPU.WeightName          = "eventWeightPU"
-    process.eventWeightPU.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPU.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysNo_68000_2011Full.root")
-    #process.eventWeightPU.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer2012.root")
-    #process.eventWeightPU.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012AB.root")
+    process.eventWeightPU.MCSampleTag         = cms.string("Summer12")
+    process.eventWeightPU.MCSampleHistoName   = cms.string("puhisto")
+    process.eventWeightPU.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root")
+    process.eventWeightPU.DataHistoName       = cms.string("pileup")
+    process.eventWeightPU.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABReReco.root")
 
     #Systematics: PU Up/Down
-    process.eventWeightPUsysUp.WeightName         = "eventWeightPUUp"
-    process.eventWeightPUsysUp.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPUsysUp.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_71400_2011Full.root")
-    #process.eventWeightPUsysUp.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer2012.root")
-    #process.eventWeightPUsysUp.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72760_2012AB.root")
-
-    process.eventWeightPUsysDown.WeightName         = "eventWeightPUDown"
-    process.eventWeightPUsysDown.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Default2011.root")
-    process.eventWeightPUsysDown.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_64600_2011Full.root")
-    #process.eventWeightPUsysDown.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer2012.root")
-    #process.eventWeightPUsysDown.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_65835_2012AB.root")
+    process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
+    process.eventWeightPUsysUp.MCSampleTag         = cms.string("Summer12")
+    process.eventWeightPUsysUp.MCSampleHistoName   = cms.string("puhisto")
+    process.eventWeightPUsysUp.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root")
+    process.eventWeightPUsysUp.DataHistoName       = cms.string("pileup")
+    process.eventWeightPUsysUp.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72870_2012ABReReco.root")
+ 
+    process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
+    process.eventWeightPUsysDown.MCSampleTag         = cms.string("Summer12")
+    process.eventWeightPUsysDown.MCSampleHistoName   = cms.string("puhisto")
+    process.eventWeightPUsysDown.MCSampleFile        = cms.FileInPath("TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root")
+    process.eventWeightPUsysDown.DataHistoName       = cms.string("pileup")
+    process.eventWeightPUsysDown.DataFile            = cms.FileInPath("TopAnalysis/TopUtils/data/Data_PUDist_sysDown_65930_2012ABReReco.root")
 
 else:
     process.eventWeightPU = cms.Sequence()
@@ -1084,6 +1087,7 @@ prependPF2PATSequence(process, options = { 'switchOffEmbedding': False,
                                            'pfIsoConeElec': electronIsolationCone,
                                            'skipIfNoPFMuon': skipIfNoMuons,
                                            'skipIfNoPFElec': skipIfNoElectrons,
+                                           #'cutsJets': 'pt>20. & abs(eta) < 2.5',
                                            #'addNoCutPFMuon': False,
                                            #'addNoCutPFElec': False,
                                            #'skipIfNoPFMuon': False,
