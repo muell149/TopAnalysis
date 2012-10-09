@@ -475,7 +475,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
 		  // hadron lv PS lepton and b-jet PDF uncertainties
 		  if(!extrapolate&&hadron&&(sys==sysPDFUp||sys==sysPDFDown)&&(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq"))){
-		    std::cout << "load unc PDF for " << xSecVariables_[i] << " bin " << bin << std::endl;
+		    if(verbose>1) std::cout << "load unc PDF for " << xSecVariables_[i] << " bin " << bin << std::endl;
 		    TString fileName="/afs/naf.desy.de/group/cms/scratch/tophh/tmp/diffXSecTopSemi";
 		    if(decayChannel=="muon"    ) fileName+="Mu2011";
 		    else if(decayChannel=="electron") fileName+="Elec2011";
