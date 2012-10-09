@@ -11,6 +11,10 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
   
+  // compare current with old result
+  bool compare=false;
+  TString oldResult="/afs/naf.desy.de/group/cms/scratch/tophh/tmp/OldCombination/";
+
   // open file
   TFile* file = TFile::Open(outputFile, "READ");
   // dont associate new objects with file to be able to close it in the end
@@ -80,8 +84,44 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
     }
     hist_.push_back( finalNNLO);
     //hist_.push_back( killEmptyBins(plotNNLO    , verbose) );
-    
   }
+  
+  if(compare){
+    // reference results from a different analysis setup
+    // GET DATA2: with final errors from canvas
+    TString modfile=oldResult;
+    modfile+=outputFile;
+    TFile* file2 = TFile::Open(modfile, "READ");
+    TCanvas* canvas2 = (TCanvas*)(file2->Get("finalXSec/"+plotName+"Norm")->Clone());
+    TGraphAsymmErrors* data2Raw  = (TGraphAsymmErrors*)canvas2->GetPrimitive("dataTotalError");
+    TH1F* data2temp= new TH1F("data"+plotName, "data"+plotName, Nbins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
+    reBinTH1F(*data2temp, binning_[plotName], 0);
+    // GET DATA2: refill TGraphAsymmErrors to rebinned histo
+    for(int bin=1; bin<=data2temp->GetNbinsX(); ++bin){
+      if(verbose>1) std::cout << "bin: " << bin << std::endl;
+      if(verbose>1) std::cout << data2Raw->GetY()[bin];
+      data2temp->SetBinContent(bin, data2Raw->GetY()[bin]);
+      double err=data2Raw->GetErrorYhigh(bin);
+      if(err<data2Raw->GetErrorYlow(bin)) err=data2Raw->GetErrorYlow(bin);
+      if(verbose>1) std::cout << " +- " << err << std::endl;
+      data2temp->SetBinError(bin, err);
+    }
+    // GET DATA: delete empty bins
+    TH1F* data2=killEmptyBins((TH1F*)data2temp->Clone(), verbose);
+    data2->GetXaxis()->SetTitle(xSecLabelName(plotName));
+    if(verbose>1){
+      for(int bin=1; bin<=data2->GetNbinsX(); ++bin){
+	std::cout << "bin: " << bin << std::endl;
+	std::cout << data2->GetBinContent(bin) << " +- " << data2->GetBinError(bin) << std::endl;
+      }
+    }
+    data2->SetFillStyle(0);
+    data2->SetMarkerColor(kBlack);
+    data2->SetLineColor(kBlack);
+    data2->SetLineWidth(3);
+    hist_.push_back(data2);
+  }
+
   // set axis colors to white because otherwise it spoils the ratio plot on top of it
   plotMadGraph->GetXaxis()->SetLabelColor(0);
   plotMadGraph->GetXaxis()->SetTitleColor(0);
