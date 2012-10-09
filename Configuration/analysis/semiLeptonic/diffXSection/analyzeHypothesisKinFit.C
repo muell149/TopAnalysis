@@ -2,13 +2,13 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true, 
-			     int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5 
+			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=false, bool hadron=true,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
   // ============================
@@ -149,9 +149,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   double luminosityMu=0;
   TString dataFileEl="";
   TString dataFileMu="";
-  if(decayChannel=="combined"&&luminosity>4500&&luminosity<5000){
+  if(decayChannel=="combined"&&luminosity>4500&&luminosity<6000){
     luminosityEl=constLumiElec;
     luminosityMu=constLumiMuon;
+    if(systematicVariation==sysLumiUp ){      luminosityEl*=1.022; luminosityMu*=1.022;}
+    else if(systematicVariation==sysLumiDown){luminosityEl*=0.978; luminosityMu*=0.978;}
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
@@ -891,8 +893,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
   std::map<unsigned int, TFile*> files_, filesMu_, filesEl_;
   if(decayChannel!="combined") files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel, ttbarMC);
   else{
-    filesMu_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileMu, "muon"    , ttbarMC);
-    filesEl_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileEl, "electron", ttbarMC);
+    filesMu_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFileMu, "muon"    , ttbarMC);
+    filesEl_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFileEl, "electron", ttbarMC);
   }
 
   // =====================
@@ -2102,6 +2104,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.0, bool save = true,
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
       int scanpoints= (scan==2 ? 3 : 0);
+      //scanpoints=1; // FIXME: fast tauscan results
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
