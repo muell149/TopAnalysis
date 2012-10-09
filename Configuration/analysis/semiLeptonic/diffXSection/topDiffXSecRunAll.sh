@@ -16,3 +16,8 @@
 ./topDiffXSecAnalysis2011.sh muon extrapolate parton
 ./topDiffXSecAnalysis2011.sh electron extrapolate parton
 ./topDiffXSecAnalysis2011.sh combined extrapolate parton
+
+# combined event yield analysis
+#./topDiffXSecAnalysis2011.sh combined2 visible hadron
+#./topDiffXSecAnalysis2011.sh combined2 visible parton
+#./topDiffXSecAnalysis2011.sh combined2 extrapolate parton
