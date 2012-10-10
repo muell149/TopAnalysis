@@ -1,11 +1,12 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false, int verbose=0, 
+void analyzeTopDiffXSecMonitoring(double luminosity = 4980., //4955 //4980 //4967.5 
+				  bool save = false, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  const std::string decayChannel = "muon", 
+				  const std::string decayChannel = "electron", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
@@ -821,11 +822,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4955.0, bool save = false,
       double xSec=(NData-NnonTtbarBG)*ttbarSigFrac/(A*eff*BR*luminosity2);
       std::cout << std::endl;
       std::cout << "    inclusive cross section: " << std::setprecision(2) << std::fixed << xSec << std::endl;
-      std::cout << "      N(nonttBG): " << std::setprecision(2) << std::fixed << NnonTtbarBG << std::endl;
-      std::cout << "      tt SG frac: " << std::setprecision(2) << std::fixed << ttbarSigFrac << std::endl;
-      std::cout << "      BR:         " << std::setprecision(2) << std::fixed << BR  << std::endl;
-      std::cout << "      efficiency: " << std::setprecision(2) << std::fixed << eff << std::endl;
-      std::cout << "      acceptance: " << std::setprecision(2) << std::fixed << A   << std::endl;
+      std::cout << "      N(nonttBG):    " << std::setprecision(3) << std::fixed << NnonTtbarBG << std::endl;
+      std::cout << "      tt SG frac:    " << std::setprecision(3) << std::fixed << ttbarSigFrac << std::endl;
+      std::cout << "      BR:            " << std::setprecision(3) << std::fixed << BR  << std::endl;
+      std::cout << "      efficiency:    " << std::setprecision(3) << std::fixed << eff << std::endl;
+      std::cout << "      acceptance:    " << std::setprecision(3) << std::fixed << A   << std::endl;
+      std::cout << "      eff. lumi[pb]: " << std::setprecision(3) << std::fixed << luminosity2 << std::endl;
     }
     std::cout << std::endl << " The event composition is only printed when running the monitoring macro using the option 'withRatioPlot=true' " << std::endl;
   }
