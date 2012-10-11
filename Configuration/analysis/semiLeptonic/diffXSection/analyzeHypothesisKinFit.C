@@ -2,13 +2,13 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5 
+void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
 			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     std::string decayChannel = "electron", bool SVDunfold=true, bool extrapolate=false, bool hadron=true,
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
   // ============================
@@ -328,7 +328,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
     recBpath+"/bqEta"+recBlabel,                // XSec relevant! REC
     // generated b-quark/b-jet quantities	
     genBpath+"/bqPt"+genBlabel,                 // XSec relevant! GEN
-    genBpath+"/bqEta"+genBlabel                 // XSec relevant! GEN
+    genBpath+"/bqEta"+genBlabel,                // XSec relevant! GEN
+    // ttbar other composition
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/decayChannel"
   }; 
 
   TString plots1D_CCVars[ ] = {
@@ -622,6 +624,8 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
     // generated b-quark/b-jet quantities
     xSecLabelName("bqPt" )+" parton truth/events/0/1",
     xSecLabelName("bqEta")+" parton truth/events/0/1",
+    // ttbar other composition
+    "t#bar{t} other decay channel/events/0/1"
   };
   
   TString axisLabel1D_CCVars[ ] = {
@@ -1625,19 +1629,22 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
   //BR=NGen*1.0/(ttbarCrossSection*luminosity);
   BR=0.145888;//PDG
   // calculate xSec
-  xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity*BR );
-  double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity*BR );
+  double luminosity2=luminosity;
+  if(decayChannel=="combined") luminosity2= ( constLumiElec + constLumiMuon );
+  xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity2*BR );
+  double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity2*BR );
   // text output
   if(verbose>0){ 
     std::cout << std::endl;
-    std::cout << "systematic variation:" << sysLabel(systematicVariation) << std::endl;
-    std::cout << "lumi[pb]:      " << luminosity << std::endl;
-    std::cout << "N(Data):       " << Ndata << std::endl;
-    std::cout << "N(BG):         " << NBG   << std::endl;
-    std::cout << "eff:           " << eff   << std::endl;
-    std::cout << "A:             " << A     << std::endl;
-    std::cout << "BR MC:         " << BR    << std::endl;
-    std::cout << "ttbar sigfrac: " << sigFrac << std::endl;
+    std::cout << "systematic variation: " << sysLabel(systematicVariation) << std::endl;
+    std::cout << "lumi[pb]:             " << luminosity << std::endl;
+    std::cout << "N(Data):              " << Ndata << std::endl;
+    std::cout << "N(BG):                " << NBG   << std::endl;
+    std::cout << "eff:                  " << eff   << std::endl;
+    std::cout << "A:                    " << A     << std::endl;
+    std::cout << "BR->l (PDG):          " << BR    << std::endl;
+    std::cout << "effective lumi[pb]:   " << luminosity2 << std::endl;
+    std::cout << "ttbar sigfrac:        " << sigFrac << std::endl;
     std::cout << "inclusive cross section";
     std::cout << " [pb]: ";
     std::cout << xSecResult << " +/- " << sigmaxSec << "(stat.)" << std::endl;
@@ -1833,6 +1840,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
       //    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+" (t#bar{t}#rightarrow #mu prompt"+")/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
       if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e");
+      else if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "l");
       // configure xSec plot histo style
       histogramStyle(*histo_[xSec][kData], kData, false);
       histogramStyle(*histo_[xSec][kSig ], kSig , false);
@@ -1955,6 +1963,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
       // decay channel
       TString channelTex="#mu + Jets";
       if(decayChannel=="electron") channelTex="e + Jets";
+      if(decayChannel=="combined") channelTex="e/#mu + Jets";
       TString special="";
       // ==========================================
       //  Configure the unfolding details
@@ -2654,36 +2663,46 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     // show kinfit permutation plot as relative plot for signal
     // and delete this plot for all other samples 
-    if(plotList_[plot].Contains("qAssignment")){
+    if(plotList_[plot].Contains("qAssignment")||plotList_[plot].Contains("decayChannel")){
       TString permutationLabel=plotList_[plot];
-      for(unsigned int sample=kBkg; sample<=kData; ++sample){
-	if(histo_[permutationLabel].count(sample)>0)  histo_[permutationLabel].erase(sample);
-      }
-      if(histo_[permutationLabel].count(kSig)>0){ 
-	histo_[permutationLabel][kSig]->Scale(1./histo_[permutationLabel][kSig]->Integral(0, histo_[permutationLabel][kSig]->GetNbinsX()));
-	axisLabel_[plot].ReplaceAll("events","relative fraction of events");
-	histogramStyle( *histo_[permutationLabel][kSig], kSig, true);
-	// print permutations
-	if(systematicVariation==sysNo){
-	  std::cout << std::endl << "permutations wrt jet parton matching: " << std::endl;
-	  std::cout << "-------------------------------------" << std::endl;
-	  std::cout << "ok     : " << histo_[permutationLabel][kSig]->GetBinContent(1) << std::endl;
-	  std::cout << "(correct jet-quark assignment)" << std::endl;
-	  std::cout << "b<->b  : " << histo_[permutationLabel][kSig]->GetBinContent(2) << std::endl;
-	  std::cout << "(hadronic and leptonic b-jet interchanged)" << std::endl;
-	  double others=0.;
-	  for(int bin=3; bin<=7; ++bin){
-	    others+=histo_[permutationLabel][kSig]->GetBinContent(bin);
+      if(verbose>2) std::cout << "adapting plot " << permutationLabel << std::endl;
+      for(unsigned int sample=kSig; sample<=kData; ++sample){
+	if(histo_[permutationLabel].count(sample)>0){
+	  if((sample!=kSig&&plotList_[plot].Contains("qAssignment"))||(sample!=kBkg&&plotList_[plot].Contains("decayChannel"))){
+	    histo_[permutationLabel].erase(sample);
+	    if(verbose>2) std::cout << "erase plot for sample " << sampleLabel(sample, decayChannel) << std::endl;
 	  }
-	  std::cout << "q<->q  : " << others << std::endl;
-	  std::cout << "(2 or more other quarks interchanged)" << std::endl;
-	  std::cout << "jmis   : " << histo_[permutationLabel][kSig]->GetBinContent(8) << std::endl;
-	  std::cout << "(jet(s) missing in leading 5) " << std::endl;
-	  std::cout << "wrongj : " << histo_[permutationLabel][kSig]->GetBinContent(9) << std::endl;
-	  std::cout << "(wrong 4 out of the 5 leading chosen)" << std::endl;
-	  std::cout << "nomatch: " << histo_[permutationLabel][kSig]->GetBinContent(10) << std::endl;
-	  std::cout << "(no unambigious matching due to e.g. jet splitting(ISR/FSR), jet merging,";
-	  std::cout << " jet(s) out of acceptance or jets close by)" << std::endl << std::endl;
+	}
+      }
+      if((histo_[permutationLabel].count(kSig)>0&&plotList_[plot].Contains("qAssignment"))||(histo_[permutationLabel].count(kBkg)>0&&plotList_[plot].Contains("decayChannel"))){ 
+	if(verbose>2) std::cout << "scale to area" << std::endl;
+	unsigned int sample = (plotList_[plot].Contains("qAssignment") ? kSig : kBkg);
+	histo_[permutationLabel][sample]->Scale(1./histo_[permutationLabel][sample]->Integral(0, histo_[permutationLabel][sample]->GetNbinsX()));
+	axisLabel_[plot].ReplaceAll("events","relative fraction of events");
+	if(plotList_[plot].Contains("qAssignment")){
+	  histogramStyle( *histo_[permutationLabel][kSig], kSig, true);
+	  // print permutations
+	  if(systematicVariation==sysNo){
+	    std::cout << std::endl << "permutations wrt jet parton matching: " << std::endl;
+	    std::cout << "-------------------------------------" << std::endl;
+	    std::cout << "ok     : " << histo_[permutationLabel][kSig]->GetBinContent(1) << std::endl;
+	    std::cout << "(correct jet-quark assignment)" << std::endl;
+	    std::cout << "b<->b  : " << histo_[permutationLabel][kSig]->GetBinContent(2) << std::endl;
+	    std::cout << "(hadronic and leptonic b-jet interchanged)" << std::endl;
+	    double others=0.;
+	    for(int bin=3; bin<=7; ++bin){
+	      others+=histo_[permutationLabel][kSig]->GetBinContent(bin);
+	    }
+	    std::cout << "q<->q  : " << others << std::endl;
+	    std::cout << "(2 or more other quarks interchanged)" << std::endl;
+	    std::cout << "jmis   : " << histo_[permutationLabel][kSig]->GetBinContent(8) << std::endl;
+	    std::cout << "(jet(s) missing in leading 5) " << std::endl;
+	    std::cout << "wrongj : " << histo_[permutationLabel][kSig]->GetBinContent(9) << std::endl;
+	    std::cout << "(wrong 4 out of the 5 leading chosen)" << std::endl;
+	    std::cout << "nomatch: " << histo_[permutationLabel][kSig]->GetBinContent(10) << std::endl;
+	    std::cout << "(no unambigious matching due to e.g. jet splitting(ISR/FSR), jet merging,";
+	    std::cout << " jet(s) out of acceptance or jets close by)" << std::endl << std::endl;
+	  }
 	}
       }
     }
@@ -2732,13 +2751,14 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
 			  std::cout << " to canvas "   << activeCanv << std::endl;
 		      }
 		      // for efficiency plots: draw grid
-		      if(getStringEntry(plotList_[plot], 1)=="efficiency"||plotList_[plot].Contains("qAssignment")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
+		      if(getStringEntry(plotList_[plot], 1)=="efficiency") plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
 		      // adjust x range
 		      setXAxisRange(histo_[plotList_[plot]][sample], getStringEntry(plotList_[plot], 2));
 		      if(!(plotList_[plot].Contains("xSec"))&&(getStringEntry(plotList_[plot], 2)=="topY"   ||
 							       getStringEntry(plotList_[plot], 2)=="topYHad"|| 
 							       getStringEntry(plotList_[plot], 2)=="topYLep")){histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-3,3);}
 		      if(getStringEntry(plotList_[plot], 2)=="PartonJetDRall") histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,4);
+		      if(getStringEntry(plotList_[plot], 2)=="decayChannel"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRange(5,histo_[plotList_[plot]][sample]->GetNbinsX());
 		      if(first){ 
 			  // create canvas and set titel corresponding to plotname in .root file
 			  addCanvas(plotCanvas_);
@@ -2748,12 +2768,12 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
 			  double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
 			  // if data file exists
 			  if(histo_[plotList_[plot]].count(kData)>0){
-			      // and has larger maximum
-			      if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
-				  // take this maximum
-				  max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
-				  if(verbose>1) std:: cout << "take max from data! " << std::endl;
-			      }
+			    // and has larger maximum
+			    if(max < 1.3*histo_[plotList_[plot]][kData]->GetMaximum()){
+			      // take this maximum
+			      max = 1.3*histo_[plotList_[plot]][kData]->GetMaximum();
+			      if(verbose>1) std:: cout << "take max from data! " << std::endl;
+			    }
 			  }
 			  double min = 0;
 			  // log plots
@@ -2784,12 +2804,13 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
 			      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 			      plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
 			  }
+			  if(plotList_[plot].Contains("qAssignment")||plotList_[plot].Contains("decayChannel")) plotCanvas_[plotCanvas_.size()-1]->SetGrid(1,1);
 			  // axis style
 			  axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1), getStringEntry(axisLabel_[plot],2), min, max); 
 			  histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
 			  if(max>1&&max<100) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 			  else histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(false);
-			  if(plotList_[plot].Contains("qAssignment")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+			  if(plotList_[plot].Contains("qAssignment")||plotList_[plot].Contains("decayChannel")) histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
 			  if(getStringEntry(plotList_[plot], 1).Contains("xSec")) histo_[plotList_[plot]][sample]->GetYaxis()->SetTitleOffset(1.6);
 			  // draw efficiency plots as line
 			  if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
@@ -2856,7 +2877,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955.,//4980 //4967.5
 			  // draw legend for recoYield plots
 			  TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
 			  if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
-			      if(!plotList_[plot].Contains("qAssignment")) leg->Draw("SAME");
+			    if(!plotList_[plot].Contains("qAssignment")&&!plotList_[plot].Contains("decayChannel")) leg->Draw("SAME");
 			  }	 
 			  // labels
 			  TString plotType=getStringEntry(plotList_[plot], 1);
