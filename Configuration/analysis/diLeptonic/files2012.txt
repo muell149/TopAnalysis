@@ -35,10 +35,10 @@
 
 # Drell Yan
 100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  emu_dyee1050.root                dyee1050,runOnAOD=True
-100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  emu_dyemu1050.root               dyemu1050,runOnAOD=True
+100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  emu_dytautau1050.root            dytautau1050,runOnAOD=True
 100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  emu_dymumu1050.root              dymumu1050,runOnAOD=True
 100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         emu_dyee50inf.root               dyee50inf,runOnAOD=True
-100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         emu_dyemu50inf.root              dyemu50inf,runOnAOD=True
+100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         emu_dytautau50inf.root           dytautau50inf,runOnAOD=True
 100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         emu_dymumu50inf.root             dymumu50inf,runOnAOD=True
 
 
@@ -47,6 +47,11 @@
 30   Summer12.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff          emu_qcdem3080.root               qcdem3080,runOnAOD=True
 30   Summer12.QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         emu_qcdem80170.root              qcdem80170,runOnAOD=True
 30   Summer12.QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v3_cff        emu_qcdmu15.root                 qcdmu15,runOnAOD=True
+#30   Summer12.QCD_Pt_20to30_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     emu_qcdmu2030.root               qcdmu2030,runOnAOD=True
+#30   Summer12.QCD_Pt_30to50_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     emu_qcdmu3050.root               qcdmu3050,runOnAOD=True
+#30   Summer12.QCD_Pt_50to80_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     emu_qcdmu5080.root               qcdmu5080,runOnAOD=True
+#30   Summer12.QCD_Pt_80to120_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1cff     emu_qcdmu80120.root              qcdmu80120,runOnAOD=True
+#30   Summer12.QCD_Pt_120to170_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff   emu_qcdmu120170.root             qcdmu120170,runOnAOD=True
 
 
 # W+Jets
@@ -82,10 +87,10 @@
 
 # Drell Yan
 100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  mumu_dyee1050.root               dyee1050,runOnAOD=True
-100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  mumu_dyemu1050.root              dyemu1050,runOnAOD=True
+100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  mumu_dytautau1050.root           dytautau1050,runOnAOD=True
 100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  mumu_dymumu1050.root             dymumu1050,runOnAOD=True
 100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         mumu_dyee50inf.root              dyee50inf,runOnAOD=True
-100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         mumu_dyemu50inf.root             dyemu50inf,runOnAOD=True
+100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         mumu_dytautau50inf.root          dytautau50inf,runOnAOD=True
 100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         mumu_dymumu50inf.root            dymumu50inf,runOnAOD=True
 
 
@@ -94,6 +99,11 @@
 30   Summer12.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff          mumu_qcdem3080.root               qcdem3080,runOnAOD=True
 30   Summer12.QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         mumu_qcdem80170.root              qcdem80170,runOnAOD=True
 30   Summer12.QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v3_cff        mumu_qcdmu15.root                 qcdmu15,runOnAOD=True
+#30   Summer12.QCD_Pt_20to30_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     mumu_qcdmu2030.root               qcdmu2030,runOnAOD=True
+#30   Summer12.QCD_Pt_30to50_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     mumu_qcdmu3050.root               qcdmu3050,runOnAOD=True
+#30   Summer12.QCD_Pt_50to80_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     mumu_qcdmu5080.root               qcdmu5080,runOnAOD=True
+#30   Summer12.QCD_Pt_80to120_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1cff     mumu_qcdmu80120.root              qcdmu80120,runOnAOD=True
+#30   Summer12.QCD_Pt_120to170_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff   mumu_qcdmu120170.root             qcdmu120170,runOnAOD=True
 
 
 # W+Jets
@@ -128,10 +138,10 @@
 
 # Drell Yan
 100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  ee_dyee1050.root                 dyee1050,runOnAOD=True
-100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  ee_dyemu1050.root                dyemu1050,runOnAOD=True
+100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  ee_dytautau1050.root             dytautau1050,runOnAOD=True
 100   Summer12.DYJetsToLL_M-10To50filter_8TeV-madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_cff                  ee_dymumu1050.root               dymumu1050,runOnAOD=True
 100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         ee_dyee50inf.root                dyee50inf,runOnAOD=True
-100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         ee_dyemu50inf.root               dyemu50inf,runOnAOD=True
+100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         ee_dytautau50inf.root            dytautau50inf,runOnAOD=True
 100   Summer12.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         ee_dymumu50inf.root              dymumu50inf,runOnAOD=True
 
 
@@ -140,6 +150,11 @@
 30   Summer12.QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff          ee_qcdem3080.root                qcdem3080,runOnAOD=True
 30   Summer12.QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff         ee_qcdem80170.root               qcdem80170,runOnAOD=True
 30   Summer12.QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v3_cff        ee_qcdmu15.root                  qcdmu15,runOnAOD=True
+#30   Summer12.QCD_Pt_20to30_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     ee_qcdmu2030.root                qcdmu2030,runOnAOD=True
+#30   Summer12.QCD_Pt_30to50_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     ee_qcdmu3050.root                qcdmu3050,runOnAOD=True
+#30   Summer12.QCD_Pt_50to80_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff     ee_qcdmu5080.root                qcdmu5080,runOnAOD=True
+#30   Summer12.QCD_Pt_80to120_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1cff     ee_qcdmu80120.root               qcdmu80120,runOnAOD=True
+#30   Summer12.QCD_Pt_120to170_MuEnrichedPt5_TuneZ2star_8TeV_pythia6_Summer12_DR53X-PU_S10_START53_V7A-v1_cff   ee_qcdmu120170.root              qcdmu120170,runOnAOD=True
 
 
 # W+Jets
