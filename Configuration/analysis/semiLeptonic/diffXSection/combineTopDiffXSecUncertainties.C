@@ -76,7 +76,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   TString universalplotLabel = extrapolate ? "FullPS" : LV+"LvPS";  
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2011";
-  if(luminosity<50.) dataSample="2010";
+  if(luminosity<50.) dataSample="2010"; //FIXME: remove 2010 -> introduce 2012 (not via luminosity!)
   // for closure test if desired
   TString closureLabel = "";
   if      (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")) closureLabel = "SysDistort"+closureTestSpecifier;
@@ -648,10 +648,37 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	}
       }
     }
-    
     // ======================================================================
     //  Create plots to show distribution of uncertainties per xSec variable
     // ======================================================================
+
+    // prepare complete uncertainty table
+
+    std::map<TString, double> minMedian;
+    std::map<TString, double> maxMedian;
+
+    TString uncList = "";
+    for (int uncIdx=1; uncIdx<ENDOFSYSENUM;){
+
+      TString arrayLabelIds[] = {"Up","up","Down","down"};
+      
+      TString upTypeLabel   = sysLabel(uncIdx);    
+      TString downTypeLabel = sysLabel(uncIdx+1); // +1 to get next entry
+      
+      for (unsigned int j=0; j<(sizeof(arrayLabelIds)/sizeof(arrayLabelIds[0])); j++){
+	upTypeLabel.ReplaceAll(arrayLabelIds[j],"");
+	downTypeLabel.ReplaceAll(arrayLabelIds[j],"");	    
+      }
+      
+      TString label = upTypeLabel;
+      
+      (upTypeLabel==downTypeLabel) ? uncIdx+=2 : uncIdx++;
+
+      uncList+=" & ";	  
+      uncList+=label;
+    }
+    uncList.ReplaceAll("sys","");
+    writeToFile(uncList, outputFolder+"/uncertaintyDistributionsOverview/uncertaintyTable_"+decayChannel+"_"+universalplotLabel+".txt", false);
 
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
 
@@ -733,6 +760,12 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	//int NSYSTYPES   = innerIter->second->GetNbinsX() - 3;	
 	int histoBinIdx = 0;
 
+	// prepare uncertainty table with minimum and maximum
+
+	if(universalplotLabel!="PartonLvPS")writeToFile("Type of unc. & min Relative unc. & max Relative unc. \\\\", outputFolder+"/uncertaintyDistributionsOverview/uncertaintyTable_"+decayChannel+"_"+universalplotLabel+"_minmax.txt", false);
+	uncList = "";
+	uncList+=xSecVariables_[i];
+
 	for (int uncIdx=1; uncIdx<ENDOFSYSENUM;){ // loop starts at 1 to skip sysNo   
 
 	  histoBinIdx++;
@@ -799,7 +832,31 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	    
 	    float mean   = (std::accumulate(vecValues.begin(),vecValues.end(),0.0))/vecSize;
 	    float median = ( vecValues.size() % 2 != 0 ) ? vecValues[vecSize/2] : (vecValues[vecSize/2-1] + vecValues[vecSize/2]) / 2;
-	    
+
+	    // calculate minimum and maximum of medians for uncertainty table (in the plotted variables)
+
+	    if((((xSecVariables_[i].Contains("bq") || xSecVariables_[i].Contains("lep")) && universalplotLabel=="HadronLvPS") ||
+		(!(xSecVariables_[i].Contains("bq") || xSecVariables_[i].Contains("lep")) && universalplotLabel=="FullPS")) && xSecVariables_[i].Contains("Norm")){
+	      if(!minMedian[label])minMedian[label]=1000.;
+	      if(median < minMedian[label])minMedian[label] = median;
+	      if(!maxMedian[label])maxMedian[label]=0.;
+	      if(median > maxMedian[label])maxMedian[label] = median;
+	    }
+
+	    // fill uncertainty table with minimum and maximum
+
+	    if(i==xSecVariables_.size()-1 && universalplotLabel!="PartonLvPS"){
+	      TString uncTable2 = label;
+	      uncTable2+=Form(" & %3.1f",minMedian[label]); uncTable2+="\\%"; uncTable2+=Form(" & %3.1f",maxMedian[label]); uncTable2+="\\% \\\\";
+	      uncTable2.ReplaceAll("sys","");
+	      writeToFile(uncTable2, outputFolder+"/uncertaintyDistributionsOverview/uncertaintyTable_"+decayChannel+"_"+universalplotLabel+"_minmax.txt", true);
+	    }
+
+	    // prepare line for the complete uncertainty table
+
+	    uncList+=" & ";
+	    uncList+=Form("%3.2f",median);
+
 	    DrawLabel((TString)(Form("Minimum: %3.1f",(*vecValues.begin()))) + "%",  
 		      gStyle->GetPadLeftMargin() + gStyle->GetTickLength(),
 		      1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05,
@@ -844,6 +901,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	  }	  	  
 	  delete canvasUncertaintyDistributions; canvasUncertaintyDistributions=NULL;
 	}
+	// fill complete uncertainty table
+	writeToFile(uncList, outputFolder+"/uncertaintyDistributionsOverview/uncertaintyTable_"+decayChannel+"_"+universalplotLabel+".txt", true);
       }
     }    
   
