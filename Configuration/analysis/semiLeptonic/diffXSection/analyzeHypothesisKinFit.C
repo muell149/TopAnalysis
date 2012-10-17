@@ -2,13 +2,13 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
-			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
+			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
   // ============================
@@ -154,6 +154,11 @@ void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
     luminosityMu=constLumiMuon;
     if(systematicVariation==sysLumiUp ){      luminosityEl*=1.022; luminosityMu*=1.022;}
     else if(systematicVariation==sysLumiDown){luminosityEl*=0.978; luminosityMu*=0.978;}
+    if(!dataFile.Contains(":")){
+      std::cout << "wrong input filenames, should be dataFileEl:dataFileMu, but is";
+      std::cout << dataFile << std::endl;
+      exit(0);
+    }
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
@@ -189,7 +194,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
   if(systematicVariationMod==sysGenMCatNLO) ttbarMC="Mcatnlo";
   else if(systematicVariationMod==sysGenPowheg)  ttbarMC="Powheg";
   TString ttbarMC2=ttbarMC;  
-  if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg"; // old hadronization uncertainty will be overwritten from 'bothDecayChannelCombination'
+  if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg"; // this is the old hadronization uncertainty will be overwritten from 'bothDecayChannelCombination'
   // normalization of differential normalized cross sections
   // true: use integral of unfolded differential cross section ignoring UF/OF bins
   // false: use all events and inclusive eff*A (no BR!) before unfolding
@@ -1293,7 +1298,7 @@ void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
   TH1F* DiBosYield=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kDiBos]->Clone());
   TH1F* QCDYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kQCD  ]->Clone());
   TH1F* GenInclusive =(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"          ][kSig]->Clone());
-  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt"][kSig]->Clone());
+  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt"][kSig]->Clone()); // don't let you confuse from the naming- for hadron=true this is the hadron level plots as "Hadron" level is renamed to "Parton" level in the step before!
 
   // ============================
   //  Configure histograms
@@ -1627,16 +1632,28 @@ void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
   // careful: the xSec here needs to be 
   // consistent with the one in lumiweight()
   //BR=NGen*1.0/(ttbarCrossSection*luminosity);
-  BR=0.145888;//PDG
+  BR=BRPDG;//PDG
+  // for inclusive xSec in chosen PS
+  if(!extrapolate){ 
+    BR=1.; // kinematic cuts for final state objects are specific for the decay channel (at least l+jets)!
+    A=1.;
+  }
   // calculate xSec
   double luminosity2=luminosity;
   if(decayChannel=="combined") luminosity2= ( constLumiElec + constLumiMuon );
   xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity2*BR );
   double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity2*BR );
   // text output
-  if(verbose>0){ 
+  if(systematicVariation==sysNo||systematicVariation==sysGenMCatNLO||systematicVariation==sysGenPowheg){ 
     std::cout << std::endl;
     std::cout << "systematic variation: " << sysLabel(systematicVariation) << std::endl;
+    std::cout << "Phase space: "; 
+    if(extrapolate) std::cout << "full extrapolation" << std::endl; 
+    else{
+      if(hadron) std::cout << "hadron level PS";
+      else std::cout << "parton level PS";
+      std::cout << " (will use A=1&BR=1)" << std::endl; 
+    }
     std::cout << "lumi[pb]:             " << luminosity << std::endl;
     std::cout << "N(Data):              " << Ndata << std::endl;
     std::cout << "N(BG):                " << NBG   << std::endl;
@@ -1654,19 +1671,25 @@ void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
   // create histo
   TString inclName = "xSec/inclusive";
   histo_[inclName][kData] = new TH1F( "inclusivekData", "inclusivekData", 1, 0., 1.0);
-  histo_[inclName][kData]->SetBinContent(1, xSecResult     );
-  histo_[inclName][kData]->SetBinError  (1, sigmaxSec);
+  histo_[inclName][kData]->SetBinContent(1, xSecResult);
+  histo_[inclName][kData]->SetBinError  (1, sigmaxSec );
   // add plot to list of all plots
   plotList_.push_back(inclName);
   // configure xSec plot histo style
   histogramStyle(*histo_[inclName][kData], kData, false);
-  axisLabel_.push_back(" /#sigma(t#bar{t}#rightarrowX)[pb]/0/1");
+  TString inclXSeclabel=" #sigma(t#bar{t}#rightarrowX)";
+  if(!extrapolate) inclXSeclabel+="*BR(#mu or e)*A ";
+  inclXSeclabel+="[pb]/ /0/1";
+  axisLabel_.push_back(inclXSeclabel);
   // theory xSec
   histo_[inclName][kSig]=(TH1F*)histo_[inclName][kData]->Clone("xSec/inclusiveTheory");
-  histo_[inclName][kSig]->SetBinContent(1, 157.5);
-  histo_[inclName][kSig]->SetBinError  (1, 0);
+  double xSecRef=ttbarCrossSection;
+  double xSecErr=ttbarCrossSectionError;
+  if(!extrapolate) xSecRef*=(GenPhaseSpace->Integral(0,GenPhaseSpace->GetNbinsX()+1))/(GenInclusive->Integral(0, GenInclusive->GetNbinsX()+1))*BRPDG; // BR: only l+jets events for l=#mu OR e, A=GenPS/GenInlusive: xSec in chosen kinematic PS
+  histo_[inclName][kSig]->SetBinContent(1, xSecRef);
+  histo_[inclName][kSig]->SetBinError  (1, xSecErr);
   histogramStyle(*histo_[inclName][kSig ], kSig , false);
-
+  
   // ---
   //    differential normalized cross section (phase space) determination
   // ---
@@ -2462,7 +2485,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
 	// divide by binwidth
 	histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
 	// divide by luminosity 
-	histo_[xSec][kData]->Scale(1./(luminosity));
+	histo_[xSec][kData]->Scale(1./(luminosity2));
+	// BR correction
+	if(extrapolate) histo_[xSec][kData]->Scale(1./BRPDG);
 	// Normalization -> not needed anymore, done in unfolding setup
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
 	//histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
@@ -2530,7 +2555,9 @@ void analyzeHypothesisKinFit(double luminosity = 4955,//4980 //4967.5 /4955.
 	// get PS gen event yield/binwidth plots
 	histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone());
 	// divide by lumi
-	histo_[xSec][kSig]->Scale(1/luminosity);
+	histo_[xSec][kSig]->Scale(1./luminosity2);
+	// BR correction
+	if(extrapolate) histo_[xSec][kSig]->Scale(1./BRPDG);
 	// Normalization
 	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
