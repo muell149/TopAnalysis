@@ -118,7 +118,7 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
 	  histoNPVertexReweightedScaleUp   -> Fill(pPVertex->size(),weight*PUEventWeightUp);
 	  histoNPVertexReweightedScaleDown -> Fill(pPVertex->size(),weight*PUEventWeightDown);
 
-	  if      (inTag_MCSampleTag == "Fall11")   NPUEvents = iterPU->getTrueNumInteractions();
+	  if      (inTag_MCSampleTag == "Fall11" || inTag_MCSampleTag == "Summer12") NPUEvents = iterPU->getTrueNumInteractions();
 	  else if (inTag_MCSampleTag == "Summer11") NPUEvents = iterPU->getPU_NumInteractions(); 
 	  else NPUEvents = -1;
 
