@@ -9,19 +9,19 @@
 #include "TLine.h"
 
 enum TheoryType { kMoch, kMitov };
-enum PdfType { kMSTW, kHERA, kABM, kNNPDF };
+enum PdfType { kMSTW, kHERA, kABM, kNNPDF, kCT };
 
 void printInfo()
 {
   std::cout << "Usage: alphaDep THEORY SCHEME PDF" << std::endl
 	    << "With THEORY    : \"moch\" or \"mitov\"" << std::endl
 	    << "     SCHEME    : \"pole\" or \"msbar\"" << std::endl
-	    << "     PDF       : \"mstw\", \"hera\", \"abm\" or \"nnpdf\"" << std::endl;
+	    << "     PDF       : \"mstw\", \"hera\", \"abm\", \"nnpdf\" or \"ct\"" << std::endl;
 }
 
 int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const TString& fileName)
 {
-  const TString theoName = (theory ? "Top++ 1.3" : "Hathor 1.3");
+  const TString theoName = (theory ? "Top++ 1.4" : "Hathor 1.3");
 
   const TString massName = (pole ? "m_{t}^{pole}" : "m_{t}^{#bar{MS}}");
 
@@ -36,11 +36,13 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
   case kABM:
     pdfName = "ABM11"     ; nPointsAlpha = 17; break;
   case kNNPDF:
-    pdfName = "NNPDF2.1"  ; nPointsAlpha = 11; break;
+    pdfName = "NNPDF2.3"  ; nPointsAlpha = 5; break;
+  case kCT:
+    pdfName = "CT10"      ; nPointsAlpha = 21; break;
   }
 
-  const unsigned minMass = ((theory==kMoch && pdf==kNNPDF) ? 165 : 130);
-  const unsigned maxMass = ((theory==kMoch && pdf==kNNPDF) ? 175 : 220);
+  const unsigned minMass = 130;
+  const unsigned maxMass = 220;
   const unsigned nPointsMass = maxMass - minMass + 1;
   const unsigned iMassCentral = (nPointsMass-1)/2;
 
@@ -170,18 +172,12 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
     sprintf(parName, "p_{%i}", p);
     graph_par[p].GetYaxis()->SetTitle(parName);
     graph_par[p].Draw("A*");
-    if(pdf==kNNPDF)
-      graph_par[p].Fit("pol1", "Q", "", (double)minMass, 175.);
-    else
-      graph_par[p].Fit("pol1", "Q");
+    graph_par[p].Fit("pol1", "Q");
     if(graph_par[p].GetFunction("pol1")) {
       graph_par[p].GetFunction("pol1")->SetLineStyle(2);
       graph_par[p].GetFunction("pol1")->SetLineColor(kBlue);
     }
-    if(pdf==kNNPDF)
-      graph_par[p].Fit("pol2", "+", "", (double)minMass, 175.);
-    else
-      graph_par[p].Fit("pol2", "+");
+    graph_par[p].Fit("pol2", "+");
     sprintf(parName, "graph_p%i", p);
     graph_par[p].Write(parName);
     canvas.Print(fileName + ".ps");
@@ -235,6 +231,8 @@ int main(const int argc, const char** argv)
     pdf=kABM;
   else if (!strcmp(argv[3],"nnpdf"))
     pdf=kNNPDF;
+  else if (!strcmp(argv[3],"ct"))
+    pdf=kCT;
   else {
     std::cout << "Unkown argument: " << argv[3] << std::endl;
     printInfo();
