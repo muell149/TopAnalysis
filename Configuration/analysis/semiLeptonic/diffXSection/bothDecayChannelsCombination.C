@@ -1,8 +1,8 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
+void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
 				  TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
+				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -60,7 +60,7 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
   TString dataSample="2011";
   
   // Choose phase space
-    // a) for full PS use extrapolate=true;
+    // a) for full PS use extrapolatetrue;
   TString PS = extrapolate ? "" : "PhaseSpace";
   // b) for restricted phase space:
   // b1) parton PS: hadron=false
@@ -781,11 +781,28 @@ void bothDecayChannelsCombination(double luminosity=4967, bool save=true, unsign
 	    // other quantities
 	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 	    reBinTH1F(*plotTheo2, binning_[plotName], verbose-1);
+	    // Normalization absolute cross sections
+	    if(!normalize){
+	      // luminosity
+	      double luminosity2=luminosity;
+	      if(combinedEventYields) luminosity2= ( constLumiElec + constLumiMuon );
+	      plotTheo2->Scale(1./(luminosity2));
+	      // muon and electron channel are added in the root file
+	      plotTheo2->Scale(1./(2));
+	      // event weight (for signal it does not matter if muon or electron)
+	      plotTheo2->Scale(lumiweight(kSig, luminosity2, sysNo, "muon"));
+	      // large sample correction factor for number of events
+	      // lumiweight is for v1 but large sample is v1+v2
+	      if(largeMGfile) plotTheo2->Scale(3697693./(59613991.+3697693.));
+	      // BR
+	      if(extrapolate) plotTheo2->Scale(1./BRPDG);
+	      if(verbose>1) std::cout << "area from abs diff MC plot: " << plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1) << std::endl;
+	    }
 	    // divide by binwidth
 	    plotTheo2=divideByBinwidth(plotTheo2, verbose-1);
-	    // Normalization
+	    // Normalization normalized cross sections
 	    double XSecInclTheoPS= getInclusiveXSec(plotTheo2,verbose-1);
-	    plotTheo2->Scale(1/(XSecInclTheoPS));
+	    if(normalize) plotTheo2->Scale(1./(XSecInclTheoPS));
 	  }
 	  // styling
 	  histogramStyle( *plotTheo2, kSig, false);

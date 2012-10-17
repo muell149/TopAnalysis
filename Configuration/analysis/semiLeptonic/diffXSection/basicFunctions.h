@@ -171,6 +171,8 @@ namespace semileptonic {
 	
   const double constLumiElec = 4980.0;	
   const double constLumiMuon = 4955.0;
+  
+  const double BRPDG=0.145888;
 
   // ============== 
   //  Functions
