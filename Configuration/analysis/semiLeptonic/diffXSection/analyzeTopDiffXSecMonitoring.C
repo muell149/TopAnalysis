@@ -1,12 +1,12 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 4980., //4955 //4980 //4967.5 
+void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //4967.5 
 				  bool save = false, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-				  const std::string decayChannel = "electron", 
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+				  const std::string decayChannel = "combined", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
@@ -104,6 +104,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980., //4955 //4980 //496
   if(decayChannel=="combined"&&luminosity>4500&&luminosity<5000){
     luminosityEl=constLumiElec;
     luminosityMu=constLumiMuon;
+    if(!dataFile.Contains(":")){
+      std::cout << "wrong input filenames, should be dataFileEl:dataFileMu, but is";
+      std::cout << dataFile << std::endl;
+      exit(0);
+    }
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
@@ -138,6 +143,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980., //4955 //4980 //496
   // 53: ENDOFSYSENUM
 
   int systematicVariation=sysNo;
+  // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
+  TString ttbarMC="Madgraph";
+  if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
+  else if(systematicVariation==sysGenPowheg)  ttbarMC="Powheg";
 
   // ============================
   //     choose plots
@@ -590,10 +599,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980., //4955 //4980 //496
   //  Open the standard analysis files
   // ===================================
   std::map<unsigned int, TFile*> files_, filesMu_, filesEl_;
-  if(decayChannel!="combined") files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel);
+  if(decayChannel!="combined") files_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFile, decayChannel, ttbarMC);
   else{
-    filesMu_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileMu, "muon"    );
-    filesEl_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileEl, "electron");
+    filesMu_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileMu, "muon"    , ttbarMC);
+    filesEl_ = getStdTopAnalysisFiles(inputFolder, systematicVariation, dataFileEl, "electron", ttbarMC);
   }
 
   // =====================
@@ -814,17 +823,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4980., //4955 //4980 //496
       std::cout << std::endl;
       std::cout << " Single Top: " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSTop ] / NAllMC << std::endl;
       // investigate single top composition
-      TString selStep=selection_[step];
-      double Nschannel= histo_[selection_[step]][kSTops  ]->Integral(0,histo_[selection_[step]][kSTops  ]->GetNbinsX()+1);
-      Nschannel+=       histo_[selection_[step]][kSATops ]->Integral(0,histo_[selection_[step]][kSATops ]->GetNbinsX()+1);
-      double Ntchannel= histo_[selection_[step]][kSTopt  ]->Integral(0,histo_[selection_[step]][kSTopt  ]->GetNbinsX()+1);
-      Ntchannel+=       histo_[selection_[step]][kSATopt ]->Integral(0,histo_[selection_[step]][kSATopt ]->GetNbinsX()+1);
-      double NtWchannel=histo_[selection_[step]][kSToptW ]->Integral(0,histo_[selection_[step]][kSToptW ]->GetNbinsX()+1);
-      NtWchannel+=      histo_[selection_[step]][kSAToptW]->Integral(0,histo_[selection_[step]][kSAToptW]->GetNbinsX()+1);
-      double NallCh=events_[selection_[step]][kSTop];
-      std::cout << "             (s: " << std::setprecision(2) << std::fixed << Nschannel/NallCh;
-      std::cout << ", t: "  << std::setprecision(2) << std::fixed << Ntchannel/NallCh;
-      std::cout << ", tW: " << std::setprecision(2) << std::fixed << NtWchannel/NallCh << ")" << std::endl;
+      if(decayChannel != "combined"){
+	double Nschannel= histo_[selection_[step]][kSTops  ]->Integral(0,histo_[selection_[step]][kSTops  ]->GetNbinsX()+1);
+	Nschannel+=       histo_[selection_[step]][kSATops ]->Integral(0,histo_[selection_[step]][kSATops ]->GetNbinsX()+1);
+	double Ntchannel= histo_[selection_[step]][kSTopt  ]->Integral(0,histo_[selection_[step]][kSTopt  ]->GetNbinsX()+1);
+	Ntchannel+=       histo_[selection_[step]][kSATopt ]->Integral(0,histo_[selection_[step]][kSATopt ]->GetNbinsX()+1);
+	double NtWchannel=histo_[selection_[step]][kSToptW ]->Integral(0,histo_[selection_[step]][kSToptW ]->GetNbinsX()+1);
+	NtWchannel+=      histo_[selection_[step]][kSAToptW]->Integral(0,histo_[selection_[step]][kSAToptW]->GetNbinsX()+1);
+	double NallCh=events_[selection_[step]][kSTop];
+	std::cout << "             (s: " << std::setprecision(2) << std::fixed << Nschannel/NallCh;
+	std::cout << ", t: "  << std::setprecision(2) << std::fixed << Ntchannel/NallCh;
+	std::cout << ", tW: " << std::setprecision(2) << std::fixed << NtWchannel/NallCh << ")" << std::endl;
+      }
       std::cout << " DiBoson:    " << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
       double NnonTtbarBG=NAllMC-events_[selection_[step]][kSig]-events_[selection_[step]][kBkg];
       double ttbarSigFrac=events_[selection_[step]][kSig]/(events_[selection_[step]][kSig]+events_[selection_[step]][kBkg]);
