@@ -1148,6 +1148,7 @@ Bool_t Analysis::Process ( Long64_t entry )
                     h_step6->Fill ( 1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
                     h_step7->Fill ( 1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
 
+                    h_BjetMulti->Fill ( BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
                     if ( BJetIndex.size() >0 ) {
                         btagSFuse=btagSF;
                         h_step8->Fill ( 1,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
@@ -1159,7 +1160,7 @@ Bool_t Analysis::Process ( Long64_t entry )
 
                         //btagSFuse=1.0;
                         weightKinFituse=1.0;
-                        h_BjetMulti->Fill ( BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+//                         h_BjetMulti->Fill ( BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
                         h_jetMulti->Fill ( jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
                         double jetHT = 0;
                         for ( int i=0; i<jet_; i++ ) {
@@ -1232,45 +1233,49 @@ Bool_t Analysis::Process ( Long64_t entry )
                 }
                 //	btagSFuse=1.0;
                 weightKinFituse=1.0;
-                if ( dimass> 12.0 && ( dimass<76.0 || dimass > 106.0 ) && jet_>1 && * ( metEt->begin() ) > 30 && BJetIndex.size() >0 ) {
+                btagSFuse=1.0;
+                if ( dimass> 12.0 && ( dimass<76.0 || dimass > 106.0 ) && jet_>1 && * ( metEt->begin() ) > 30){
                     h_BjetMulti->Fill ( BJetIndex.size(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                    h_jetMulti->Fill ( jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                    double jetHT = 0;
-                    for ( int i=0; i<jet_; i++ ) {
-                        jetHT+=LVjet[i].Pt();
-                    }
-                    h_jetHT->Fill ( jetHT,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                    for ( int i=0; i<2; i++ ) {
-                        h_jetpT->Fill ( LVjet[i].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                    }
-                    if ( ( *lepQ ) [LeadLeptonNumber]==1 ) {
-                        h_LeptonpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                        h_AntiLeptonpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                        h_LeptonEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                        h_AntiLeptonEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                    } else {
-                        h_LeptonpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                        h_AntiLeptonpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                        h_LeptonEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                        h_AntiLeptonEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                    }
-                    h_MET->Fill ( * ( metEt->begin() ),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                    if ( * ( metEt->begin() ) > 30 ) {
-                        if ( ( *lepType ) [LeadLeptonNumber]==-1 ) {
-                            h_ElectronpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                            h_ElectronEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                    if(BJetIndex.size() >0) {
+                        btagSFuse=btagSF;
+                        h_jetMulti->Fill ( jet_,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                        double jetHT = 0;
+                        for ( int i=0; i<jet_; i++ ) {
+                            jetHT+=LVjet[i].Pt();
                         }
-                        if ( ( *lepType ) [NLeadLeptonNumber]==-1 ) {
-                            h_ElectronpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                            h_ElectronEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                        h_jetHT->Fill ( jetHT,weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                        for ( int i=0; i<2; i++ ) {
+                            h_jetpT->Fill ( LVjet[i].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
                         }
-                        if ( ( *lepType ) [LeadLeptonNumber]==1 ) {
-                            h_MuonpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                            h_MuonEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                        if ( ( *lepQ ) [LeadLeptonNumber]==1 ) {
+                            h_LeptonpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            h_AntiLeptonpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            h_LeptonEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            h_AntiLeptonEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                        } else {
+                            h_LeptonpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            h_AntiLeptonpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            h_LeptonEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            h_AntiLeptonEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
                         }
-                        if ( ( *lepType ) [NLeadLeptonNumber]==1 ) {
-                            h_MuonpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
-                            h_MuonEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                        h_MET->Fill ( * ( metEt->begin() ),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                        if ( * ( metEt->begin() ) > 30 ) {
+                            if ( ( *lepType ) [LeadLeptonNumber]==-1 ) {
+                                h_ElectronpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                                h_ElectronEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            }
+                            if ( ( *lepType ) [NLeadLeptonNumber]==-1 ) {
+                                h_ElectronpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                                h_ElectronEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            }
+                            if ( ( *lepType ) [LeadLeptonNumber]==1 ) {
+                                h_MuonpT->Fill ( LVlepton[LeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                                h_MuonEta->Fill ( LVlepton[LeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            }
+                            if ( ( *lepType ) [NLeadLeptonNumber]==1 ) {
+                                h_MuonpT->Fill ( LVlepton[NLeadLeptonNumber].Pt(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                                h_MuonEta->Fill ( LVlepton[NLeadLeptonNumber].Eta(),weightPU*weightLepSF*lumiWeight*btagSFuse*trigEFF*weightKinFituse );
+                            }
                         }
                     }
                 }
