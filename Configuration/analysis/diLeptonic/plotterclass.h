@@ -1304,11 +1304,11 @@ void Plotter::setOptions(TString name_, TString specialComment_, TString YAxis_,
   if(XAxis.Contains("l^{+}andl^{-}")){//Histogram naming convention has to be smarter
     XAxis.ReplaceAll("l^{+}andl^{-}",13,"l^{+} and l^{-}",15);
   }
-  if(YAxis.Contains("toppairs")){
-    YAxis.ReplaceAll("toppairs",8,"top-quark pairs",15);
+  if(YAxis.Contains("Toppairs")){
+    YAxis.ReplaceAll("Toppairs",8,"Top-quark pairs",15);
   }
-  if(YAxis.Contains("topquarks")){
-    YAxis.ReplaceAll("topquarks",9, "top quarks",10);
+  if(YAxis.Contains("Topquarks")){
+    YAxis.ReplaceAll("Topquarks",9, "Top quarks",10);
   }
   if(YAxis.Contains("Numberof")){
       YAxis.ReplaceAll("Numberof", 8, "Number of ",10);
