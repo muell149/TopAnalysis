@@ -1,13 +1,13 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //4967.5 
-				  bool save = false, int verbose=0, 
+				  bool save = true, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
+				  bool withRatioPlot = true, bool extrapolate=false, bool hadron=true)
 {
   // ============================
   //  Set Root Style
@@ -147,7 +147,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
   TString ttbarMC="Madgraph";
   if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
   else if(systematicVariation==sysGenPowheg)  ttbarMC="Powheg";
-
+  if(ttbarMC!="Madgraph"){
+    pdfName+=ttbarMC;
+    outputFolder+=ttbarMC;
+  }
+  
   // ============================
   //     choose plots
   // ============================
@@ -260,6 +264,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
     "analyzeTopRecoKinematicsKinFit/ttbarPt",
     "analyzeTopRecoKinematicsKinFit/ttbarY",
     "analyzeTopRecoKinematicsKinFit/ttbarMass",
+    "analyzeTopRecoKinematicsKinFit/ttbarHT",
     "analyzeTopRecoKinematicsKinFit/lepPt",
     "analyzeTopRecoKinematicsKinFit/lepEta",
     "analyzeTopRecoKinematicsKinFit/lightqPt",
@@ -372,59 +377,59 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
   TString axisLabel1D[ ] = { 
     // (I) preselection
     // (ii) jet monitoring
-    //"N_{jets}/Number of events/0/1",
-    //"E(jets)/Number of jets/1/1",
-    //"p_{t}(jets)/Number of jets/1/1",
-    //"#eta(jets)/Number of jets/0/5",
-    //"#phi(jets)/Number of jets/0/10",
+    //"N_{jets}/Events/0/1",
+    //"E(jets)/jets/1/1",
+    //"p_{t}(jets)/jets/1/1",
+    //"#eta(jets)/jets/0/5",
+    //"#phi(jets)/jets/0/10",
     // (II) before btagging
     // (ii) jet monitoring
-    "N_{jets};Number of events;1;1",
-    "N_{jets};Number of events;1;1",
-    "E(jets) [GeV];Number of jets;1;1",
-    "p_{T} #left[GeV#right];Number of jets;1;1",
-    "#eta(jets);Number of jets;0;5",
-    "#phi(jets);Number of jets;0;10",
-    "H_{T} #left[GeV#right];Number of events;0;50",
-    "N(jet constituents);Number of jets;0;10",
-    "jet charge;Number of Number of jets;0;10"         ,
-    "neutral hadron fraction (jets);Number of jets;1;1"         ,
-    "neutral electromagnetic fraction (jets);Number of jets;0;2",
-    "charged hadron fraction (jets);Number of jets;0;1"         ,
-    "charged electromagnetic fraction (jets);Number of jets;1;1",
-    "N_{charged particles} (jets);Number of jets;0;2"           ,
-    "E(lead 1^{st} jet) [GeV];Number of events;1;2",
-    "p_{t}(lead 1^{st} jet) #left[GeV#right];Number of events;0;5",
-    "#eta(lead 1^{st} jet);Number of events;0;5",
-    "#phi(lead 1^{st} jet);Number of events;0;10",
-    "E(lead 2^{nd} jet) [GeV];Number of events;1;2",
-    "p_{t}(lead 2^{nd} jet) #left[GeV#right];Number of events;0;5",
-    "#eta(lead 2^{nd} jet);Number of events;0;5",
-    "#phi(lead 2^{nd} jet);Number of events;0;10",
-    "E(lead 3^{rd} jet) [GeV];Number of events;1;2",
-    "p_{t}(lead 3^{rd} jet) #left[GeV#right];Number of events;0;5",
-    "#eta(lead 3^{rd} jet);Number of events;0;5",
-    "#phi(lead 3^{rd} jet);Number of events;0;10",
-    "E(lead 4^{th} jet) [GeV];Number of events;1;2",
-    "p_{t}(lead 4^{th} jet) #left[GeV#right];Number of events;0;5",
-    "#eta(lead 4^{th} jet);Number of events;0;5",
-    "#phi(lead 4^{th} jet);Number of events;0;10",
+    "N_{jets};Events;1;1",
+    "N_{jets};Events;1;1",
+    "E(jets) [GeV]; jets;1;1",
+    "p_{T} #left[GeV#right];Jets;1;1",
+    "#eta(jets);Jets;0;5",
+    "#phi(jets);Jets;0;10",
+    "H_{T} #left[GeV#right];Events;0;50",
+    "N(jet constituents);Jets;0;10",
+    "jet charge;Jets;0;10"         ,
+    "neutral hadron fraction (jets);Jets;1;1"         ,
+    "neutral electromagnetic fraction (jets);Jets;0;2",
+    "charged hadron fraction (jets);Jets;0;1"         ,
+    "charged electromagnetic fraction (jets);Jets;1;1",
+    "N_{charged particles} (jets);Jets;0;2"           ,
+    "E(lead 1^{st} jet) [GeV];Events;1;2",
+    "p_{t}(lead 1^{st} jet) #left[GeV#right];Events;0;5",
+    "#eta(lead 1^{st} jet);Events;0;5",
+    "#phi(lead 1^{st} jet);Events;0;10",
+    "E(lead 2^{nd} jet) [GeV];Events;1;2",
+    "p_{t}(lead 2^{nd} jet) #left[GeV#right];Events;0;5",
+    "#eta(lead 2^{nd} jet);Events;0;5",
+    "#phi(lead 2^{nd} jet);Events;0;10",
+    "E(lead 3^{rd} jet) [GeV];Events;1;2",
+    "p_{t}(lead 3^{rd} jet) #left[GeV#right];Events;0;5",
+    "#eta(lead 3^{rd} jet);Events;0;5",
+    "#phi(lead 3^{rd} jet);Events;0;10",
+    "E(lead 4^{th} jet) [GeV];Events;1;2",
+    "p_{t}(lead 4^{th} jet) #left[GeV#right];Events;0;5",
+    "#eta(lead 4^{th} jet);Events;0;5",
+    "#phi(lead 4^{th} jet);Events;0;10",
     // (iii) btag monitoring
-    "b-discr.(TCHP);Number of jets;0;2"        ,
-    "b-discr.(TCHE);Number of jets;0;2"	,
-    "b-discr.(SSV HEff);Number of jets;1;2"	,
-    "b-discr.(SSV HPur);Number of jets;0;2"	,
-    "b-discr.(CSV);Number of jets;0;2"	,
-    "b-discr.(CSVMVA);Number of jets;0;2"	,
-    "b-discr.(JetBProb);Number of jets;0;5"	,
-    "b-discr.(JetProb);Number of jets;0;5"	,
-    "b-discr.(soft#mu);Number of jets;0;10"	,
-    "b-discr.(soft#muPt);Number of jets;0;10"  ,                  
-    "b-discr.(soft#muIP3d);Number of jets;0;10",
-    "N_{b-jets};Number of events;1;1"      ,
+    "b-discr.(TCHP);Jets;0;2"        ,
+    "b-discr.(TCHE);Jets;0;2"	,
+    "b-discr.(SSV HEff);Jets;1;2"	,
+    "b-discr.(SSV HPur);Jets;0;2"	,
+    "b-discr.(CSV);Jets;0;2"	,
+    "b-discr.(CSVMVA);Jets;0;2"	,
+    "b-discr.(JetBProb);Jets;0;5"	,
+    "b-discr.(JetProb);Jets;0;5"	,
+    "b-discr.(soft#mu);Jets;0;10"	,
+    "b-discr.(soft#muPt);Jets;0;10"  ,                  
+    "b-discr.(soft#muIP3d);Jets;0;10",
+    "N_{b-jets};Events;1;1"      ,
     // (iv) MET monitoring 
-    "#slash{E}_{T} #left[GeV#right];Number of events;0;10",
-    "#SigmaE_{T} [GeV];Number of events;0;50"  ,
+    "#slash{E}_{T} #left[GeV#right];Events;0;10",
+    "#SigmaE_{T} [GeV];Events;0;50"  ,
     // (v) Vertices and pileup
     "Number of PU Events;Frequency;1;1",
     "Number of PU Events (Reweighted);Frequency;1;1",
@@ -436,30 +441,30 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
     "Number of Vertices (Reweighted sysDown);Frequency;1;1",
     // (III) after btagging 
     // (ii) jet monitoring
-    "N_{jets};Number of events;1;1",
-    "p_{T} #left[GeV#right];Number of jets;1;2",
-    "#eta(jets);Number of jets;0;5" ,
-    "#phi(jets);Number of jets;0;10",
-    "H_{T} [GeV];Number of events;0;100",
-    "p_{t}(lead 1^{st} jet) #left[GeV#right];Number of events;1;5",
-    "#eta(lead 1^{st} jet);Number of events;0;5" ,
-    "p_{t}(lead 2^{nd} jet) #left[GeV#right];Number of events;1;5",
-    "#eta(lead 2^{nd} jet);Number of events;0;5" ,
-    "p_{t}(lead 3^{rd} jet) #left[GeV#right];Number of events;1;5",
-    "#eta(lead 3^{rd} jet);Number of events;0;5" ,
-    "p_{t}(lead 4^{th} jet) #left[GeV#right];Number of events;1;5",
-    "#eta(lead 4^{th} jet);Number of events;0;5" ,
-    "p_{t}(lead 1^{st} b-tagged jet) #left[GeV#right];Number of events;1;5",
-    "p_{t}(lead 2^{nd} b-tagged jet) #left[GeV#right];Number of events;1;5",
-    "#eta(lead 1^{st} b-tagged jet);Number of events;0;5" ,
-    "#eta(lead 2^{nd} b-tagged jet);Number of events;0;5" ,
+    "N_{jets};Events;1;1",
+    "p_{T} #left[GeV#right];Jets;1;2",
+    "#eta(jets);Jets;0;5" ,
+    "#phi(jets);Jets;0;10",
+    "H_{T} [GeV];Events;0;100",
+    "p_{t}(lead 1^{st} jet) #left[GeV#right];Events;1;5",
+    "#eta(lead 1^{st} jet);Events;0;5" ,
+    "p_{t}(lead 2^{nd} jet) #left[GeV#right];Events;1;5",
+    "#eta(lead 2^{nd} jet);Events;0;5" ,
+    "p_{t}(lead 3^{rd} jet) #left[GeV#right];Events;1;5",
+    "#eta(lead 3^{rd} jet);Events;0;5" ,
+    "p_{t}(lead 4^{th} jet) #left[GeV#right];Events;1;5",
+    "#eta(lead 4^{th} jet);Events;0;5" ,
+    "p_{t}(lead 1^{st} b-tagged jet) #left[GeV#right];Events;1;5",
+    "p_{t}(lead 2^{nd} b-tagged jet) #left[GeV#right];Events;1;5",
+    "#eta(lead 1^{st} b-tagged jet);Events;0;5" ,
+    "#eta(lead 2^{nd} b-tagged jet);Events;0;5" ,
     // (iii) btag monitoring    
-    "b-discr.(CSV);Number of jets;0;2",
-    "N_{b-jets};Number of events;1;1" ,
+    "b-discr.(CSV);Jets;0;2",
+    "N_{b-jets};Events;1;1" ,
     // (iv) MET monitoring 
-    "#slash{E}_{T} #left[GeV#right];Number of events;0;20",
-    "#phi(#slash{E}_{T});Number of events;0;5",
-    "#SigmaE_{T} [GeV];Number of events;0;30",
+    "#slash{E}_{T} #left[GeV#right];Events;0;20",
+    "#phi(#slash{E}_{T});Events;0;5",
+    "#SigmaE_{T} [GeV];Events;0;30",
     // (v) Vertices and pileup
     "Number of PU Events;Frequency;0;1",
     "Number of PU Events (Reweighted);Frequency;0;1",
@@ -470,17 +475,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
     "Number of Vertices (Reweighted sysUp);Frequency;0;1", 
     "Number of Vertices (Reweighted sysDown);Frequency;0;1", 
     // (III) after kinematic fit 
-    "p_{T}^{t} #left[GeV#right];Number of top quarks;0;20",
-    "y^{t};Number of top quarks;0;1",
-    "p_{T}^{t#bar{t}} #left[GeV#right];Number of top-quark pairs;0;20",
-    "y^{t#bar{t}};Number of top-quark pairs;0;1",
-    "m^{t#bar{t}} #left[GeV#right];Number of top-quark pairs;0;20",
+    "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
+    "y^{t};Top quarks;0;1",
+    "p_{T}^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
+    "y^{t#bar{t}};Top-quark pairs;0;1",
+    "m^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
+    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right];#frac{dN}{dH_{T}^{t#bar{t}}};0;20",
     "p_{T}^{l} #left[GeV#right];N^{l};0;20",    
-    "#eta^{l};Number of leptons;0;1",
-    "p_{T}^{q} #left[GeV#right];Number of tt jets;0;20",    
-    "#eta^{q};Number of tt jets;0;1",
-    "p_{T}^{b} #left[GeV#right];Number of b-jets;0;20",    
-    "#eta^{b};Number of b-jets;0;1",
+    "#eta^{l};Leptons;0;1",
+    "p_{T}^{q} #left[GeV#right];tt jets;0;20",    
+    "#eta^{q};tt jets;0;1",
+    "p_{T}^{b} #left[GeV#right];b-jets;0;20",    
+    "#eta^{b};b-jets;0;1",
     "#eta^{l+};N^{l+};0;1",
     "#eta^{l-};N^{l-};0;1",
     "#eta^{t+};N^{t+};0;1",
@@ -489,85 +495,85 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
     "y^{l-};N^{l-};0;1",
     "y^{t+};N^{t+};0;1",
     "y^{t-};N^{t-};0;1",
-    "p_{T}^{leading jet} #left[GeV#right];Number of events;0;4",
-    "p_{T}^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];Number of events;0;20",  
-    "y^{b#bar{b}}(assigned to t#bar{t} system);Number of events;0;1",
-    "m^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];Number of events;0;20",
-    "m^{jj} (KinFit W-assignment) #left[GeV#right];Number of events;1;5",
-    "m^{jj} #left[GeV#right];Number of events;1;10",
-    "m^{bb} (KinFit non t#bar{t} b-jets) #left[GeV#right];4 b-tag Number of events;1;50",
+    "p_{T}^{leading jet} #left[GeV#right];Events;0;4",
+    "p_{T}^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];Events;0;20",  
+    "y^{b#bar{b}}(assigned to t#bar{t} system);Events;0;1",
+    "m^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];Events;0;20",
+    "m^{jj} (KinFit W-assignment) #left[GeV#right];Events;1;5",
+    "m^{jj} #left[GeV#right];Events;1;10",
+    "m^{bb} (KinFit non t#bar{t} b-jets) #left[GeV#right];4 b-tag events;1;50",
     "m^{bb} #left[GeV#right];permutations;1;10",
-    "N_{bjets};Number of events;1;1",
-    "N_{jets};Number of events;1;1",
-    "p_{T}^{leading non t#bar{t}-jet} #left[GeV#right];Number of events;1;50",
-    "y^{leading non t#bar{t}-jet};Number of events;0;4",
-    "#eta^{leading non t#bar{t}-jet};Number of events;0;4",
-    "probability (best fit hypothesis);Number of events;1;25", 
-    "#chi^{2} (best fit hypothesis);Number of events;0;10",
-    "#Delta#Phi(t,#bar{t});Number of events;0;4",
+    "N_{bjets};Events;1;1",
+    "N_{jets};Events;1;1",
+    "p_{T}^{leading non t#bar{t}-jet} #left[GeV#right];Events;1;50",
+    "y^{leading non t#bar{t}-jet};Events;0;4",
+    "#eta^{leading non t#bar{t}-jet};Events;0;4",
+    "probability (best fit hypothesis);Events;1;25", 
+    "#chi^{2} (best fit hypothesis);Events;0;10",
+    "#Delta#Phi(t,#bar{t});Events;0;4",
     // gen distributions
-    "m^{t#bar{t}} #left[GeV#right] parton all truth;Number of events;1;1",
-    "m^{t#bar{t}} #left[GeV#right] parton lv truth;Number of events;1;1",
+    "m^{t#bar{t}} #left[GeV#right] parton all truth;Events;1;1",
+    "m^{t#bar{t}} #left[GeV#right] parton lv truth;Events;1;1",
     // kinfit object shifts
-    "#Delta p_{T}^{light jets} #left[GeV#right];Number of events;0;20",
-    "#Delta #eta^{light jets};Number of events;0;1",
-    "#Delta #phi^{light jets};Number of events;0;10",
-    "#Delta p_{T}^{b jets} #left[GeV#right];Number of events;0;10",
-    "#Delta #eta^{b jets};Number of events;0;1",
-    "#Delta #phi^{b jets};Number of events;0;2",
-    "#Delta p_{T}^{lepton} #left[GeV#right];Number of events;0;2",
-    "#Delta #eta^{lepton};Number of events;0;1",
-    "#Delta #phi^{lepton};Number of events;0;1",
-    "#Delta p_{T}^{neutrino} #left[GeV#right];Number of events;0;5",
-    "#Delta #eta^{neutrino};Number of events;0;20",
-    "#Delta #phi^{neutrino};Number of events;0;2",
+    "#Delta p_{T}^{light jets} #left[GeV#right];Events;0;20",
+    "#Delta #eta^{light jets};Events;0;1",
+    "#Delta #phi^{light jets};Events;0;10",
+    "#Delta p_{T}^{b jets} #left[GeV#right];Events;0;10",
+    "#Delta #eta^{b jets};Events;0;1",
+    "#Delta #phi^{b jets};Events;0;2",
+    "#Delta p_{T}^{lepton} #left[GeV#right];Events;0;2",
+    "#Delta #eta^{lepton};Events;0;1",
+    "#Delta #phi^{lepton};Events;0;1",
+    "#Delta p_{T}^{neutrino} #left[GeV#right];Events;0;5",
+    "#Delta #eta^{neutrino};Events;0;20",
+    "#Delta #phi^{neutrino};Events;0;2",
   };
 
   TString axisLabel1DLeptons[ ] = {
     // (I) preselection
     //"PF relIso N-1;leptons;0;1",
     // (II) before btagging
-    "N;Number of leptons;0;1"   ,
-    "E;Number of events;0;2"    ,
-    "p_{T} [GeV];Number of leptons;0;1",   
-    "PF relIso;Number of leptons;0;1",
+    "N;Leptons;0;1"   ,
+    "E;Events;0;2"    ,
+    "p_{T} [GeV];Leptons;0;1",   
+    "PF relIso;Leptons;0;1",
     // (III) after btagging 
-    "PF relIso;Number of leptons;0;1",
-    "p_{T} [GeV];Number of leptons;0;2",
+    "PF relIso;Leptons;0;1",
+    "p_{T} [GeV];Leptons;0;2",
   };
 
   TString axisLabel1Dmu[ ] = {
     // (I) preselection
     // (II) before btagging
-    "#eta;Number of muons;0;5" ,
-    "y;Number of muons;0;5",	
-    "#phi;Number of muons;0;5" ,
-    "N_{hits}(inner tracker #mu);Number of muons;0;1",
-    "#chi^{2} (global trackfit #mu);Number of muons;1;1",
-    "d_{xy} (#mu wrt. beamspot) [cm];Number of muons;0;1",
-    "d_{z} [cm];Number of muons;0;10",
-    "E_{Ecal};Number of muons;1;1",
-    "E_{Hcal};Number of muons;1;1",
-    "N_{matched #mu segments};Number of muons;0;1",
+    "#eta;muons;0;5" ,
+    "y;muons;0;5",	
+    "#phi;muons;0;5" ,
+    "N_{hits}(inner tracker #mu);muons;0;1",
+    "#chi^{2} (global trackfit #mu);muons;1;1",
+    "d_{xy} (#mu wrt. beamspot) [cm];muons;0;1",
+    "d_{z} [cm];muons;0;10",
+    "E_{Ecal};muons;1;1",
+    "E_{Hcal};muons;1;1",
+    "N_{matched #mu segments};muons;0;1",
     // (III) after btagging 
-    "#eta;Number of muons;0;1",
-    "#phi;Number of muons;0;10"
+    "#eta;muons;0;1",
+    "#phi;muons;0;10"
   };
 
   TString axisLabel1De[ ] = {
     // (I) preselection
     // (II) before btagging
-    "#eta;Number of electrons;0;5",
-    "#phi;Number of electrons;0;5",
-    "#eta(S.C.);Number of electrons;0;1",
-    "d_{xy} (e wrt. beamspot) [cm];Number of electrons;0;1",
-    "simpleEleId70cIso;Number of electrons;0;1", 
-    "nHitsInner(conv);Number of electrons;0;1",
-    "convCot;Number of electrons;0;5",
-    "convDist;Number of electrons;0;5",
+    "#eta;electrons;0;5",
+    "#phi;electrons;0;5",
+    "#eta(S.C.);electrons;0;1",
+    "d_{xy} (e wrt. beamspot) [cm];electrons;0;1",
+    "simpleEleId70cIso;electrons;0;1", 
+    "nHitsInner(conv);electrons;0;1",
+    "convCot;electrons;0;5",
+    "convDist;electrons;0;5",
     // (III) after btagging 
-    "#eta;Number of electrons;0;1",
-    "#phi;Number of electrons;0;10"
+    "#eta;electrons;0;1",
+    "#phi;electrons;0;10"
   };
 
   // 2D: "x-axis title"/"y-axis title"
@@ -670,8 +676,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
   // NOTE: luminosity [/pb]
   if(decayChannel!="combined") scaleByLuminosity(plotList_, histo_, histo2_, N1Dplots, luminosity, verbose, systematicVariation, decayChannel);
   else{
-    scaleByLuminosity(plotListMu_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose, systematicVariation, "muon"    );
-    scaleByLuminosity(plotListEl_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose, systematicVariation, "electron");
+    scaleByLuminosity(plotListMu_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose, systematicVariation, "muon"    ,ttbarMC);
+    scaleByLuminosity(plotListEl_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose, systematicVariation, "electron",ttbarMC);
   }
 
   // =======================================================
