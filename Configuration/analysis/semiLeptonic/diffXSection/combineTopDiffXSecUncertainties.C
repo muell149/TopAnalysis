@@ -85,8 +85,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
   TString outputFile="diffXSecTopSemi";
-  if(decayChannel=="muon"    ) outputFile+="Mu"+closureLabel+dataSample;
-  if(decayChannel=="electron") outputFile+="Elec"+closureLabel+dataSample;
+  if(decayChannel=="muon"    ) outputFile+="Mu"+closureLabel;
+  if(decayChannel=="electron") outputFile+="Elec"+closureLabel;
   if(decayChannel=="combined") outputFile+="Lep"+closureLabel;
   outputFile+=LV+PS+".root";
   // define folder where XSec plots are stored

@@ -148,10 +148,10 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
   //  Define muon and electron input rootfiles
   std::map<unsigned int, TFile*> files_;
   if(!combinedEventYields){
-    files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +closureLabel+dataSample+LV+PS+".root");
-    files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+closureLabel+dataSample+LV+PS+".root");
+    files_[kMuon    ] = new (TFile)("diffXSecTopSemiMu"  +closureLabel+LV+PS+".root");
+    files_[kElectron] = new (TFile)("diffXSecTopSemiElec"+closureLabel+LV+PS+".root");
   }
-  else files_[kCombined] = new (TFile)("diffXSecTopSemiLep"+closureLabel+dataSample+LV+PS+".root");
+  else files_[kCombined] = new (TFile)("diffXSecTopSemiLep"+closureLabel+LV+PS+".root");
   // output for chosen input
   if(verbose>0){
     if(combinedEventYields) std::cout << "using COMBINED EVENT YIELD as input!!!" << std::endl;
@@ -186,18 +186,18 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
       if(!(canvasMu&&canvasEl&&canvasTheo)&&!combinedEventYields){
 	std::cout << std::endl << " WARNING in bothDecayChannelsCombination.C! " << std::endl;
 	if(!canvasMu||!canvasEl) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in ";
-	if(!canvasMu) std::cout << "diffXSecTopSemiMu"+closureLabel+dataSample+LV+PS+".root (muon file)"     << std::endl;
-	if(!canvasEl) std::cout << "diffXSecTopSemiElec"+closureLabel+dataSample+LV+PS+".root (electron file)" << std::endl;
+	if(!canvasMu) std::cout << "diffXSecTopSemiMu"+closureLabel+LV+PS+".root (muon file)"     << std::endl;
+	if(!canvasEl) std::cout << "diffXSecTopSemiElec"+closureLabel+LV+PS+".root (electron file)" << std::endl;
 	if(!canvasTheo){ 
-	  std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+closureLabel+dataSample+LV+PS+".root" << std::endl;
+	  std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiMu"+closureLabel+LV+PS+".root" << std::endl;
 	}
 	// use std file instead
 	std::cout << "will use the std. files instead -> related uncertainty will be 0!!!!!!!" << std::endl;
 	foundCanv=false;
       }
       if(!(canvasComb&&canvasTheoComb)){
-	if(!canvasComb) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiLep"+closureLabel+dataSample+LV+PS+".root (event yield combined file)"     << std::endl;
-	if(!canvasTheoComb) std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiLep"+closureLabel+dataSample+LV+PS+".root (event yield combined file)" << std::endl;
+	if(!canvasComb) std::cout << " canvas " << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiLep"+closureLabel+LV+PS+".root (event yield combined file)"     << std::endl;
+	if(!canvasTheoComb) std::cout << " theory canvas " << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << " not found in diffXSecTopSemiLep"+closureLabel+LV+PS+".root (event yield combined file)" << std::endl;
 	foundCanv=false;
       }
       if(foundCanv){

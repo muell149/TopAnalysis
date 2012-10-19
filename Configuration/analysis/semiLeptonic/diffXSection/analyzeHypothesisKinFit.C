@@ -132,7 +132,7 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
   if(decayChannel=="combined") outputFileName+="Lep";
-  outputFileName+=closureLabel+dataSample+LV+PS+".root";
+  outputFileName+=closureLabel+LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitHypothesis"+lumi+"pb";
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
@@ -600,7 +600,7 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
     "y(hadronic t) parton truth/events/0/5",
     "p_{T}(leptonic t) #left[GeV#right] parton truth/events/0/20",                         
     "#phi(leptonic t) parton truth/events/0/4",
-    "y(leptonic t) parton truth/events/0/5",\
+    "y(leptonic t) parton truth/events/0/5",
     // reconstructed ttbar quantities	                            
     xSecLabelName("ttbarMass")+"/#frac{dN}{dm^{t#bar{t}}} #left[GeV^{-1}#right]/1/1",//60"
     xSecLabelName("ttbarPt")+"/#frac{dN}{dp_{T}^{t#bar{t}}} #left[GeV^{-1}#right]/0/1",//10"
@@ -2074,8 +2074,8 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
 	if(scan==2&&scanPlots) plotting+=2; // k and tau scan plots
 	// output files: labels
 	rootFile=outputFolder+"unfolding/diffXSecUnfoldTopSemi";
-	if(decayChannel=="muon"    ) rootFile+="Mu"+dataSample;
-	else if(decayChannel=="electron") rootFile+="Elec"+dataSample;
+	if(decayChannel=="muon"    ) rootFile+="Mu";
+	else if(decayChannel=="electron") rootFile+="Elec";
 	else if(decayChannel=="combined") rootFile+="Lep";
 	rootFile+=+variable+LV+PS+unfPreWeightingStr+".root";
 	psFile =outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr;
