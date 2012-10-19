@@ -543,9 +543,13 @@ void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int co
   frame->GetYaxis()->SetTitle("Likelihood density");
 }
 
-TLatex* cmsTxt()
+TLatex* cmsTxt(const bool targetAlpha)
 {
-  const TString txt = "2.3 fb^{-1} of 2011 CMS data #times approx. NNLO for #sigma_{#lower[-0.2]{t#bar{t}}},  #sqrt{s} = 7 TeV, m_{#kern[0.3]{#lower[-0.1]{t}}} = 173.2 #pm 1.4 GeV";
+  TString txt = "2.3 fb^{-1} of 2011 CMS data #times approx. NNLO for #sigma_{#lower[-0.2]{t#bar{t}}}, #sqrt{s} = 7 TeV, ";
+  if(targetAlpha)
+    txt += "m_{#kern[0.3]{#lower[-0.1]{t}}} = 173.2 #pm 1.4 GeV";
+  else
+    txt += "#alpha_{S} (m_{Z}) = 0.1184 #pm 0.0007";
   TLatex* text = new TLatex(0,0,txt);
   text->SetNDC();
   text->SetTextAlign(23);
@@ -1047,20 +1051,30 @@ int foldedLikelihoods(const bool pole)
   FinalLikeliResults1D* mocResult[nPdfSets];
   FinalLikeliResults1D* mitResult[nPdfSets];
 
+  const bool targetAlpha = false;
+
+  for(unsigned h=0; h<nPdfSets; h++) {
+    const TString suf[nPdfSets] = {"MSTW", "HERA", "ABM", "NNPDF", "CT"};
+
+    if(targetAlpha) {
+      mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob),
+					      mass, mass_mean, mass_unc);
+      mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob),
+					      mass, mass_mean, mass_unc);
+    }
+    else {
+      mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, mass, RooArgList(measXSecPDF,mocPredXSec[h]->prob),
+					      alpha, alpha2012_mean, alpha2012_unc);
+      mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, mass, RooArgList(measXSecPDF,mitPredXSec[h]->prob),
+					      alpha, alpha2012_mean, alpha2012_unc);
+    }
+  }
+
   const unsigned nSummaryPoints = nPdfSets*nTheories;
   TGraphAsymmErrors mocSummaryGraphInnErr(nSummaryPoints);
   TGraphAsymmErrors mocSummaryGraphTotErr(nSummaryPoints);
   TGraphAsymmErrors mitSummaryGraphInnErr(nSummaryPoints);
   TGraphAsymmErrors mitSummaryGraphTotErr(nSummaryPoints);
-
-  for(unsigned h=0; h<nPdfSets; h++) {
-    const TString suf[nPdfSets] = {"MSTW", "HERA", "ABM", "NNPDF", "CT"};
-
-    mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mocPredXSec[h]->prob),
-					    mass, mass_mean, mass_unc);
-    mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,mitPredXSec[h]->prob),
-					    mass, mass_mean, mass_unc);
-  }
 
   mocResult[kABM  ]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, 0, 2*0+0.2);
   mitResult[kABM  ]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, 0, 2*0+0.8);
@@ -1073,8 +1087,15 @@ int foldedLikelihoods(const bool pole)
   mocResult[kNNPDF]->addPointToGraphs(mocSummaryGraphInnErr, mocSummaryGraphTotErr, 4, 2*4+0.2);
   mitResult[kNNPDF]->addPointToGraphs(mitSummaryGraphInnErr, mitSummaryGraphTotErr, 4, 2*4+0.8);
 
-  mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1095, 0.1265);
-  mocSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
+  if(targetAlpha) {
+    mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1095, 0.1265);
+    mocSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
+  }
+  else {
+    mocSummaryGraphTotErr.GetXaxis()->SetLimits(163., 185.);
+    mocSummaryGraphTotErr.GetXaxis()->SetTitle(mass.getTitle(true));
+  }
+
   mocSummaryGraphTotErr.GetYaxis()->SetRangeUser(-1, nSummaryPoints+3);
   mocSummaryGraphTotErr.GetYaxis()->SetNdivisions(0);
 
@@ -1082,6 +1103,30 @@ int foldedLikelihoods(const bool pole)
   mitSummaryGraphTotErr.SetMarkerSize(2);
   mocSummaryGraphTotErr.SetMarkerStyle(22);
   mitSummaryGraphTotErr.SetMarkerStyle(23);
+
+  TBox boxMass2012(mass_mean.getVal()-mass_unc.getVal(), -1,
+		    mass_mean.getVal()+mass_unc.getVal(), nSummaryPoints+3);
+  boxMass2012.SetFillColor(kMagenta-9);
+  boxMass2012.SetFillStyle(3007);
+  TLine lineMass2012(mass_mean.getVal(), -1,
+		      mass_mean.getVal(), nSummaryPoints+3);
+  lineMass2012.SetLineStyle(2);
+  TLine lineMass2012_left(mass_mean.getVal()-mass_unc.getVal(), -1,
+			   mass_mean.getVal()-mass_unc.getVal(), nSummaryPoints+3);
+  TLine lineMass2012_right(mass_mean.getVal()+mass_unc.getVal(), -1,
+			    mass_mean.getVal()+mass_unc.getVal(), nSummaryPoints+3);
+  lineMass2012_left .SetLineColor(kMagenta-9);
+  lineMass2012_right.SetLineColor(kMagenta-9);
+  TText textMass2012_left(mass_mean.getVal()-0.5*mass_unc.getVal(), (nSummaryPoints+3)*0.95, "Tevatron");
+  textMass2012_left.SetTextAngle(90);
+  textMass2012_left.SetTextAlign(32);
+  textMass2012_left.SetTextFont(43);
+  textMass2012_left.SetTextSizePixels(23);
+  TText textMass2012_right(mass_mean.getVal()+0.5*mass_unc.getVal(), (nSummaryPoints+3)*0.95, "June 2012");
+  textMass2012_right.SetTextAngle(90);
+  textMass2012_right.SetTextAlign(32);
+  textMass2012_right.SetTextFont(43);
+  textMass2012_right.SetTextSizePixels(23);
 
   TBox boxAlpha2012(alpha2012_mean.getVal()-alpha2012_unc.getVal(), -1,
 		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+3);
@@ -1178,52 +1223,75 @@ int foldedLikelihoods(const bool pole)
   gPad->SetTopMargin(1.25*oldPadTopMargin);
 
   mocSummaryGraphTotErr.Draw("AP");
-  boxAlphaMSTW.Draw();
-  lineAlphaMSTW.Draw();
-  boxAlphaHERA.Draw();
-  lineAlphaHERA.Draw();
-  boxAlphaABM.Draw();
-  lineAlphaABM.Draw();
-  boxAlphaNNPDF.Draw();
-  lineAlphaNNPDF.Draw();
-  boxAlphaCT.Draw();
-  lineAlphaCT.Draw();
-  boxAlpha2012.Draw();
-  lineAlpha2012.Draw();
-  lineAlpha2012_left.Draw();
-  lineAlpha2012_right.Draw();
+  if(targetAlpha) {
+    boxAlphaMSTW.Draw();
+    lineAlphaMSTW.Draw();
+    boxAlphaHERA.Draw();
+    lineAlphaHERA.Draw();
+    boxAlphaABM.Draw();
+    lineAlphaABM.Draw();
+    boxAlphaNNPDF.Draw();
+    lineAlphaNNPDF.Draw();
+    boxAlphaCT.Draw();
+    lineAlphaCT.Draw();
+    boxAlpha2012.Draw();
+    lineAlpha2012.Draw();
+    lineAlpha2012_left.Draw();
+    lineAlpha2012_right.Draw();
+  }
+  else {
+    boxMass2012.Draw();
+    lineMass2012.Draw();
+    lineMass2012_left.Draw();
+    lineMass2012_right.Draw();    
+  }
   mocSummaryGraphTotErr.Draw("P");
   mocSummaryGraphInnErr.Draw("||");
   mitSummaryGraphTotErr.Draw("P");
   mitSummaryGraphInnErr.Draw("||");
   summaryLeg.Draw();
   gPad->RedrawAxis();
-  textAlpha2012.Draw();
-  textAlphaMSTW.Draw();
-  textAlphaHERA.Draw();
-  textAlphaABM.Draw();
-  textAlphaNNPDF.Draw();
-  textAlphaCT.Draw();
-  TLatex* cmsLabel = cmsTxt();
+  if(targetAlpha) {
+    textAlpha2012.Draw();
+    textAlphaMSTW.Draw();
+    textAlphaHERA.Draw();
+    textAlphaABM.Draw();
+    textAlphaNNPDF.Draw();
+    textAlphaCT.Draw();
+  }
+  else {
+    textMass2012_left.Draw();
+    textMass2012_right.Draw();
+  }
+  TLatex* cmsLabel = cmsTxt(targetAlpha);
   cmsLabel->Draw();
-  canvas->Print(printNameBase+"_summaryPlot.eps");
-  canvas->Print(printNameBase+"_summaryPlot.root");
+  if(targetAlpha)
+    canvas->Print(printNameBase+"_alphaSummaryPlot.eps");
+  else
+    canvas->Print(printNameBase+"_massSummaryPlot.eps");
   canvas->Print(printNameBase+".ps");
 
   gPad->SetLeftMargin(oldPadLeftMargin);
   gPad->SetTopMargin(oldPadTopMargin);
 
+  const TString outfile_name = (targetAlpha ? printNameBase+ "_alphaSummary.tab" : printNameBase+ "_massSummary.tab");
   ofstream outfile;
-  outfile.open(printNameBase+ "_summary.tab");
+  outfile.open(outfile_name);
   outfile << "\\begin{tabular}{|ll|c|c|c|}" << std::endl;
   outfile << "\\hline" << std::endl;
   outfile << " & & Most likely & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
-  outfile << " & & value       & Total & From $\\delta m_{t}$ \\\\" << std::endl;
+  if(targetAlpha)
+    outfile << " & & value       & Total & From $\\delta m_{t}$ \\\\" << std::endl;
+  else
+    outfile << " & & value       & Total & From $\\delta \\alpha_{S}$ \\\\" << std::endl;
   outfile << "\\hline" << std::endl;
-  const unsigned hOrdered[nPdfSets] = {3, 0, 1, 2};
+  const unsigned hOrdered[nPdfSets] = {3, 4, 0, 1, 2};
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
-    sprintf(tmpTxt, "%s & \\multirow{2}{*}{with %s} &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
+    TString format = (targetAlpha ?
+		      "%s & \\multirow{2}{*}{with %s} &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
+		      "%s & \\multirow{2}{*}{with %s} &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+    sprintf(tmpTxt, format,
 	    theoName[1].Data(), pdfName[hOrdered[h]].Data(),
 	    mitResult[hOrdered[h]]->bestX,
 	    mitResult[hOrdered[h]]->highErrTotal,
@@ -1232,7 +1300,10 @@ int foldedLikelihoods(const bool pole)
 	    mitResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
     outfile << tmpTxt << std::endl;
     outfile << "\\cline{3-5}" << std::endl;
-    sprintf(tmpTxt, "%s & & %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\",
+    format = (targetAlpha ?
+	      "%s & & %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
+	      "%s & & %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+    sprintf(tmpTxt, format,
 	    theoName[0].Data(),
 	    mocResult[hOrdered[h]]->bestX,
 	    mocResult[hOrdered[h]]->highErrTotal,
@@ -1244,7 +1315,10 @@ int foldedLikelihoods(const bool pole)
   }
   outfile << "\\end{tabular}" << std::endl;
   outfile.close();
-  std::cout << "Wrote " << printNameBase+ "_summary.tab" << std::endl;
+  std::cout << "Wrote " << outfile_name << std::endl;
+
+  canvas->Print(printNameBase+".ps]");
+  return 0;
 
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
