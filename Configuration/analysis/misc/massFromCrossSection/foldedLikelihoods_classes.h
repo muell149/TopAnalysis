@@ -204,16 +204,21 @@ FinalLikeliResults1D::FinalLikeliResults1D(const TString& label,
   projPdf = prodPdf.createProjection(xsec_var);
   constrained_var.setVal(constrained_var_mean.getVal());
   f1 = projPdf->asTF(RooArgList(target_var), RooArgList(), RooArgSet(target_var));
-//  bestX = f1->GetMaximumX();
-//  lowErrFromIntegral = 0.002;
-//  highErrFromIntegral = 0.002;
-  if(!strcmp(target_var.GetName(),"mass"))
-    bestX = getMaxAndUncertaintiesFromIntegral(f1, lowErrFromIntegral, highErrFromIntegral, 140., 200., .1 , .01  );
-  if(!strcmp(target_var.GetName(),"alpha"))
-    bestX = getMaxAndUncertaintiesFromIntegral(f1, lowErrFromIntegral, highErrFromIntegral, .10 , .13 , .01, .00001);
+  const bool quickDebug = true;
+  if(quickDebug) {
+    bestX = f1->GetMaximumX();
+    lowErrFromIntegral  = (!strcmp(target_var.GetName(),"mass") ? 4. : 0.002);
+    highErrFromIntegral = (!strcmp(target_var.GetName(),"mass") ? 4. : 0.002);
+  }
   else {
-    std::cout << "Target variable " << target_var.GetName() << " not supported in " << label << "!" << std::endl;
-    abort();
+    if(!strcmp(target_var.GetName(),"mass"))
+      bestX = getMaxAndUncertaintiesFromIntegral(f1, lowErrFromIntegral, highErrFromIntegral, 140., 190., .1 , .01  );
+    else if(!strcmp(target_var.GetName(),"alpha"))
+      bestX = getMaxAndUncertaintiesFromIntegral(f1, lowErrFromIntegral, highErrFromIntegral, .10 , .13 , .01, .00001);
+    else {
+      std::cout << "Target variable " << target_var.GetName() << " not supported in " << label << "!" << std::endl;
+      abort();
+    }
   }
   constrained_var.setVal(constrained_var_mean.getVal()-constrained_var_unc.getVal());
   const double variationA = f1->GetMaximumX();
