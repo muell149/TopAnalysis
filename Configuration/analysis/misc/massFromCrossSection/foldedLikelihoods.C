@@ -196,8 +196,6 @@ TGraph* getMassShiftGraph()
 std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, const bool useAlphaUnc,
 					   const PdfType pdfType)
 {
-  const unsigned nPoints = (name=="ahrens" ? 51 : 91);
-
   TString fileName = "theories_7TeV/" + name;
   fileName += (pole ? "_pole" : "_msbar");
   switch (pdfType) {
@@ -214,6 +212,7 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
   ifstream in;
   in.open(fileName);
 
+  const unsigned nPoints = 91;
   double mass     [nPoints];
   double sigma    [nPoints];
   double dummy_err[nPoints];
@@ -666,16 +665,13 @@ int foldedLikelihoods(const bool pole)
   const unsigned nPdfSets  = 4;
   const unsigned nTheories = 2;
 
-  //  std::vector<TGraphAsymmErrors*> ahr_vec[nPdfSets];
   std::vector<TGraphAsymmErrors*> moc_vec[nPdfSets];
   std::vector<TGraphAsymmErrors*> mit_vec[nPdfSets];
   
-  //  TGraphAsymmErrors* ahr[nPdfSets];
   TGraphAsymmErrors* moc[nPdfSets];
   TGraphAsymmErrors* mit[nPdfSets];
   
   std::vector<TF1*> moc_funcs[nPdfSets][4];
-  //  std::vector<TF1*> ahr_funcs[nPdfSets][4];
   std::vector<TF1*> mit_funcs[nPdfSets][4];
 
   const TString pdfName [4] = {"MSTW2008", "HERAPDF1.5", "ABM11", "NNPDF2.3"};
@@ -693,20 +689,16 @@ int foldedLikelihoods(const bool pole)
   f1->SetParNames("a", "b", "c", "d");
 
   for(unsigned h=0; h<nPdfSets; h++) {
-    //    ahr_vec[h] = readTheory("ahrens", pole, useAlphaUnc, (PdfType)h);
     moc_vec[h] = readTheory("moch"  , pole, useAlphaUnc, (PdfType)h);
     mit_vec[h] = readTheory("mitov" , pole, useAlphaUnc, (PdfType)h);
 
-    //    ahr[h] = ahr_vec[h].at(3);
     moc[h] = moc_vec[h].at(3);
     mit[h] = mit_vec[h].at(3);
 
-    //    ahr[h]->Fit(f1, "Q0");
     moc[h]->Fit(f1, "Q0");
     mit[h]->Fit(f1, "Q0");
 
     for(unsigned j=0; j<4; j++) {
-      //      ahr_vec[h].at(j)->SetTitle(theoTitle[h][0]);
       moc_vec[h].at(j)->SetTitle(theoTitle[h][0]);
       mit_vec[h].at(j)->SetTitle(theoTitle[h][1]);
     }
@@ -723,11 +715,6 @@ int foldedLikelihoods(const bool pole)
 						      epsString("relUnc_moch_"+errLabel[j], pole, (PdfType)h),
 						      printNameBase, (j==1 || j==2));
     drawTheoryGraph(moc[h], canvas, pole, epsString("moch", pole, (PdfType)h), printNameBase);
-//    for(unsigned j=0; j<4; j++)
-//      ahr_funcs[h][j] = getAndDrawRelativeUncertainty(ahr_vec[h].at(j), canvas, pole, errName[j],
-//						      epsString("relUnc_ahrens_"+errLabel[j], pole, (PdfType)h),
-//						      printNameBase, (j==1 || j==2));
-//    drawTheoryGraph(ahr[h], canvas, pole, "ahrens", printNameBase);
     
     gStyle->SetOptTitle(0);
   }
@@ -803,7 +790,6 @@ int foldedLikelihoods(const bool pole)
 
   PredXSec* mitPredXSec[nPdfSets];
   PredXSec* mocPredXSec[nPdfSets];
-  //  PredXSec* ahrPredXSec[nPdfSets];
 
   std::vector<const RooFormulaVar*> predXSecFormularVec;
   std::vector<TString> predXSecFormularVecLabels;
@@ -832,7 +818,6 @@ int foldedLikelihoods(const bool pole)
 				  mitAlphaFile, defaultAlphas.at(h));
     mocPredXSec[h] = new PredXSec("moc"+suf, xsec, mass, alpha, moc[h]->GetFunction("f1"), moc_funcs[h],
 				  mocAlphaFile, defaultAlphas.at(h));
-    //    ahrPredXSec[h] = new PredXSec("ahrPredXSec"+suf, xsec, mass, alpha, ahr[h]->GetFunction("f1"), ahr_funcs[h], alphaFile);
 
     mitAlphaFile.Close();
     mocAlphaFile.Close();
@@ -843,8 +828,6 @@ int foldedLikelihoods(const bool pole)
 		    epsString("convolution_mitov", pole, (PdfType)h));
     drawConvolution(mocPredXSec[h], xsec, mass, alpha, theoTitle[h][0], canvas, printNameBase,
 		    epsString("convolution_moch", pole, (PdfType)h));
-//    drawConvolution(ahrPredXSec[h], xsec, mass, alpha, theoTitle[h][0], canvas, printNameBase,
-//		    epsString("convolution_ahrens", pole, (PdfType)h));
 
     predXSecFormularVec.push_back(&mitPredXSec[h]->xsec);
     if(h==0)
@@ -860,13 +843,11 @@ int foldedLikelihoods(const bool pole)
 //  canvas->Print(printNameBase+".ps]");
 //  return 0;
 
-  //  const int colorAhr = kMagenta;
   const int colorMoc = kGreen-3;
   const int colorMit = kCyan;
   const int colorDil = kBlue;
 
   RooPlot* frame = mass.frame();
-  //  ahrPredXSec[0]->xsec.plotOn(frame, RooFit::LineColor(colorAhr));
   mocPredXSec[0]->xsec.plotOn(frame, RooFit::LineColor(colorMoc));
   mitPredXSec[0]->xsec.plotOn(frame, RooFit::LineColor(colorMit));
   measXSecMassDep.plotOn(frame, RooFit::LineColor(colorDil));
