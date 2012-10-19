@@ -170,6 +170,7 @@ if(not globals().has_key('additionalEventWeights')):
 ## enable/ disable systematic shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
     sysDistort =  ''
+    #sysDistort =  'data'
     #sysDistort =  'Up'
     #sysDistort =  'Down'
 # only done for ttbar
@@ -1469,6 +1470,11 @@ if(sysDistort=='Up0p015'):
     process.eventWeightDileptonModelVariation.slope = cms.double(0.015)
 if(sysDistort=='Down0p015'):
     process.eventWeightDileptonModelVariation.slope = cms.double(-0.015)
+if(sysDistort=='data'):
+    process.eventWeightDileptonModelVariation.weightVariable= cms.string('data')
+    process.eventWeightDileptonModelVariation.minWeight = cms.double(0.   )
+    process.eventWeightDileptonModelVariation.maxWeight = cms.double(1000.)
+    
 # multiply with PU weight
 eventWeightDileptonModelVariation=cms.InputTag("eventWeightDileptonModelVariation")
 weightlistDistortPU=cms.VInputTag()
