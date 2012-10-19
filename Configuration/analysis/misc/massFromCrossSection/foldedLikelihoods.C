@@ -33,7 +33,7 @@ enum PdfType { kMSTW, kHERA, kABM, kNNPDF };
 
 const double mZ=91.1876;
 
-const bool moch_highE=false;
+const bool moch_highE=true;
 
 const TString figDir = (moch_highE ? "figures" : "figures_mocOff");
 
@@ -605,32 +605,34 @@ int foldedLikelihoods(const bool pole)
   delete alphaLambdaGraph;
 
   runningAlpha = getRunningAlphaGraph(50, 450);
-  TGraph* runningAlpha_new = getRunningAlphaGraph(50, 450, 0.200, 0.0032);
+  TGraph* runningAlpha_new = getRunningAlphaGraph(50, 450, 0.207, 0.0043);
 
   runningAlpha->SetFillColor(kMagenta-9);
   runningAlpha_new->SetFillColor(kCyan);
   runningAlpha->SetLineStyle(2);
   runningAlpha_new->SetLineStyle(3);
 
-  TLegend lastMinuteLeg = TLegend(0.4, 0.7, 0.95, 0.85);
+  TLegend lastMinuteLeg = TLegend(0.4, 0.7, 0.8, 0.9);
   lastMinuteLeg.SetFillColor(0);
   lastMinuteLeg.SetBorderSize(0);
-  lastMinuteLeg.AddEntry(runningAlpha    , "PDG 2012 world average"  , "LF");
-  lastMinuteLeg.AddEntry(runningAlpha_new, "Our result", "LF");
+  lastMinuteLeg.AddEntry(runningAlpha    , "PDG 2012"  , "LF");
+  lastMinuteLeg.AddEntry(runningAlpha_new, "CMS-PAS-TOP-12-022", "LF");
 
   TLine lineMZ(mZ, 0.09, mZ, 0.135);
-  TLatex textMZ(0.95*mZ, 0.11, "m_{Z}");
+  lineMZ.SetLineWidth(3);
+  TLatex textMZ(0.95*mZ, 0.11, "m_{#lower[-0.1]{Z}}");
   textMZ.SetTextAngle(90);
   textMZ.SetTextAlign(32);
   textMZ.SetTextFont(43);
-  textMZ.SetTextSizePixels(25);
+  textMZ.SetTextSizePixels(33);
 
   TLine line2Mt(2*173.2, 0.09, 2*173.2, 0.135);
-  TLatex text2Mt(0.95*2*173.2, 0.11, "2m_{t}");
+  line2Mt.SetLineWidth(3);
+  TLatex text2Mt(0.95*2*173.2, 0.11, "2m_{#lower[-0.2]{t}}");
   text2Mt.SetTextAngle(90);
   text2Mt.SetTextAlign(32);
   text2Mt.SetTextFont(43);
-  text2Mt.SetTextSizePixels(25);
+  text2Mt.SetTextSizePixels(33);
 
   runningAlpha_new->Draw("A3");
   lineMZ.Draw();
@@ -654,6 +656,9 @@ int foldedLikelihoods(const bool pole)
 
   delete runningAlpha_new;
 
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
+
   //////////////////////////////////////
   /// End of quick'n dirty
   //////////////////////////////////////
@@ -673,8 +678,8 @@ int foldedLikelihoods(const bool pole)
   //  std::vector<TF1*> ahr_funcs[nPdfSets][4];
   std::vector<TF1*> mit_funcs[nPdfSets][4];
 
-  const TString pdfName [4] = {"MSTW2008", "HERAPDF1.5", "ABM11", "NNPDF2.1"};
-  const TString theoName[nTheories] = {"HATHOR 1.3", "Top++ 1.3"};
+  const TString pdfName [4] = {"MSTW2008", "HERAPDF1.5", "ABM11", "NNPDF2.3"};
+  const TString theoName[nTheories] = {"HATHOR 1.3", "Top++ 1.4"};
 
   TString theoTitle[nPdfSets][nTheories];
   for(unsigned h=0; h<nPdfSets; h++)
@@ -906,10 +911,28 @@ int foldedLikelihoods(const bool pole)
   predXSecAlphaMitABM.SetMarkerSize(2.5);
   predXSecAlphaMitABM.SetMarkerStyle(34);
 
+//  TGraphAsymmErrors predXSecAlphaMitNNPDF_pdfOnly = getPredXSecAlpha(mitPredXSec[kNNPDF], mit_vec[kNNPDF].at(1),
+//								     alpha, alphaNNPDF_mean, alphaNNPDF_unc);
+//  predXSecAlphaMitNNPDF_pdfOnly.SetLineColor(kRed);
+//  TGraphAsymmErrors predXSecAlphaMitMSTW_pdfOnly = getPredXSecAlpha(mitPredXSec[kMSTW], mit_vec[kMSTW].at(1),
+//								    alpha, alphaMSTW_mean, alphaMSTW_unc);
+//  predXSecAlphaMitMSTW_pdfOnly.SetLineColor(kRed);
+//  TGraphAsymmErrors predXSecAlphaMitHERA_pdfOnly = getPredXSecAlpha(mitPredXSec[kHERA], mit_vec[kHERA].at(1),
+//								    alpha, alphaHERA_mean, alphaHERA_unc);
+//  predXSecAlphaMitHERA_pdfOnly.SetLineColor(kRed);
+//  TGraphAsymmErrors predXSecAlphaMitABM_pdfOnly = getPredXSecAlpha(mitPredXSec[kABM], mit_vec[kABM].at(1),
+//								   alpha, alphaABM_mean, alphaABM_unc);
+//  predXSecAlphaMitABM_pdfOnly.SetLineColor(kRed);
+//  TGraphAsymmErrors predXSecAlphaMocNNPDF_pdfOnly = getPredXSecAlpha(mocPredXSec[kNNPDF], moc_vec[kNNPDF].at(1),
+//								     alpha, alphaNNPDF_mean, alphaNNPDF_unc);
+//  predXSecAlphaMocNNPDF_pdfOnly.SetLineColor(kGreen);
+
+
   RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
   frame_alpha->addObject(&measXSecWithErr, "3");
   frame_alpha->addObject(&measXSecWithErr, "CX");
   mitPredXSec[3]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
+  //  frame_alpha->addObject(&predXSecAlphaMitNNPDF_pdfOnly, "E");
   frame_alpha->addObject(&predXSecAlphaMitNNPDF, "PE");
   frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
   frame_alpha->SetMaximum(235.);
@@ -938,6 +961,7 @@ int foldedLikelihoods(const bool pole)
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_alpha_pre1.eps");
   mocPredXSec[3]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
+  //  frame_alpha->addObject(&predXSecAlphaMocNNPDF_pdfOnly, "E");
   frame_alpha->addObject(&predXSecAlphaMocNNPDF, "PE");
   frame_alpha->SetMaximum(235.);
   frame_alpha->SetMinimum(115.);
@@ -953,6 +977,9 @@ int foldedLikelihoods(const bool pole)
   mitPredXSec[0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(2));
   mitPredXSec[1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(3));
   mitPredXSec[2]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(5));
+//  frame_alpha->addObject(&predXSecAlphaMitMSTW_pdfOnly, "E");
+//  frame_alpha->addObject(&predXSecAlphaMitHERA_pdfOnly, "E");
+//  frame_alpha->addObject(&predXSecAlphaMitABM_pdfOnly, "E");
   frame_alpha->addObject(&predXSecAlphaMitMSTW , "PE");
   frame_alpha->addObject(&predXSecAlphaMitHERA , "PE");
   frame_alpha->addObject(&predXSecAlphaMitABM  , "PE");
@@ -1051,7 +1078,7 @@ int foldedLikelihoods(const bool pole)
   TLine lineAlphaNNPDF(alphaNNPDF_mean.getVal(), 5.9,
 		       alphaNNPDF_mean.getVal(), 7.1);
   lineAlphaNNPDF.SetLineStyle(3);
-  TText textAlphaNNPDF(0.1230, 6.5, "NNPDF2.1");
+  TText textAlphaNNPDF(0.1230, 6.5, "NNPDF2.3");
   textAlphaNNPDF.SetTextFont(43);
   textAlphaNNPDF.SetTextSizePixels(26);
   textAlphaNNPDF.SetTextAlign(12);
