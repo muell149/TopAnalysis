@@ -53,6 +53,7 @@ my @checkGCs;
 my @getGCs;
 my @killGCs;
 my @forHadd;
+my @forJson;
 
 my $hypernewsName = $arg{h} || $ENV{HN_USER};
 die "Who are you?\n" unless $hypernewsName;
@@ -107,6 +108,7 @@ while(my $line = <$IN>) {
     push @checkGCs, "echo checking $gcConfig\n./grid-control/go.py $gcConfig\n";
     push @killGCs, "echo killing $gcConfig\n./grid-control/go.py -d ALL $gcConfig\n";
     push @forHadd, "hadd /scratch/hh/dust/naf/cms/user/$ENV{USER}/${outputFile}.root /scratch/hh/dust/naf/cms/user/$ENV{USER}/$jobdirWithSomeTimestamp/*.root\n";
+    push @forJson, "./grid-control/scripts/lumiInfo.py -j $gcConfig\n";
 
 }
 
@@ -143,6 +145,12 @@ print $OUTR $_ for @forHadd;
 close $OUTR;
 chmod 0755, "$arg{d}/haddAllRoot.sh";
 print "run ./$arg{d}/haddAllRoot.sh to hadd all output\n";
+
+open my $OUTL, '>', "$arg{d}/getJsons.sh" or die $!;
+print $OUTL $_ for @forJson;
+close $OUTL;
+chmod 0755, "$arg{d}/getJsons.sh";
+print "run ./$arg{d}/getJsons.sh to get all processed Jsons\n";
 
 
 
