@@ -151,7 +151,7 @@ namespace semileptonic {
 			     /*47:*/ sysHadUp,                   /*48:*/ sysHadDown,
 			     /*49:*/ sysGenMCatNLO,              /*50:*/ sysGenPowheg,
 			     /*51:*/ sysShapeUp,                 /*52:*/ sysShapeDown,
-			     /*53:*/ ENDOFSYSENUM};
+			     /*53:*/ ENDOFSYSENUM,               /*54:*/ sysTest };
 
   // ============================
   //  Numerical Constants
@@ -310,7 +310,7 @@ namespace semileptonic {
     // chosen, the corresponding systematic shifted
     // SF is returned
 
-    if(sys>=ENDOFSYSENUM){
+    if(sys>=ENDOFSYSENUM&&sys!=sysTest){
       std::cout << "ERROR in effSFAB:" << std::endl;
       std::cout << "sys must be smaller than " << ENDOFSYSENUM << std::endl;
     }
@@ -917,6 +917,13 @@ namespace semileptonic {
     }
     // e) systematic shifts
     double weight2=weight;
+    // e0) ttbar data basd reweighting
+    if(kSys==sysTest){
+      if(sample==kSig&&decayChannel.compare("electron")==0) weight2*=549.162/557.161;
+      if(sample==kSig&&decayChannel.compare("muon"    )==0) weight2*=546.5/567.8;
+      if(sample==kBkg&&decayChannel.compare("electron")==0) weight2*=3148.5/3193.74;
+      if(sample==kBkg&&decayChannel.compare("muon"    )==0) weight2*=3151.23/3196.51;
+    }
     if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
     // e1) for ttbar->lnu: BR correction
     if((sample==kSig)||(sample==kSigPow)||(sample==kSigMca)) weight *= BRcorrectionSemileptonic;
@@ -1079,6 +1086,9 @@ namespace semileptonic {
       if(sys==sysPDFUp  ) fileName = "PDFUp/"+fileName+"PdfVarUp";
       if(sys==sysPDFDown) fileName = "PDFDown/"+fileName+"PdfVarDown";
     }
+    // data based pt ttbar reweighting
+    if(sample==kSig||sample==kBkg){
+      if(sys==sysTest) fileName = "ttbarReweight/"+fileName+"SysDistortdata";                                                                                                     }  
     // Q2-Scale
     // (a) top
     if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleUp/"+fileName+"ScaleUp";    

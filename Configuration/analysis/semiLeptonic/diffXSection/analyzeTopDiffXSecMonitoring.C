@@ -7,7 +7,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=false, bool hadron=true)
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
   //  Set Root Style
@@ -142,7 +142,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
   // 51: sysShapeUp                 52: sysShapeDown
   // 53: ENDOFSYSENUM
 
-  int systematicVariation=sysNo;
+  int systematicVariation=sysNo; // topPt-reweigthing: sysTest, Powheg: sysGenPowheg, McatNLO: sysGenMCatNLO
   // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
   if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
@@ -916,9 +916,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size()-1; ++plot){  // <plotList_.size()-1, because last entry is for data (see above)
       if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
-	leg ->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
-	leg0->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
-	leg1->AddEntry(histo_[plotList_[plot]][sample], sampleLabel(sample,decayChannel), "F");
+	TString leglabel=sampleLabel(sample,decayChannel);
+	if((systematicVariation==sysTest)&&(sample==kSig||sample==kBkg)) leglabel="weighted "+leglabel;
+	leg ->AddEntry(histo_[plotList_[plot]][sample], leglabel, "F");
+	leg0->AddEntry(histo_[plotList_[plot]][sample], leglabel, "F");
+	leg1->AddEntry(histo_[plotList_[plot]][sample], leglabel, "F");
 	break;
       }
     }
@@ -1207,7 +1209,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 4967.5, //4955 //4980 //49
 	      if(plotList_[plot].Contains("KinFit")) label = "";
 	      DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
 		 	       1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 12    );
-	      leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+	      double x1=1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20;
+	      if(systematicVariation==sysTest) x1-=0.05;
+	      leg->SetX1NDC(x1);
 	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05 - 0.03 * leg->GetNRows());
 	      leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.05);
