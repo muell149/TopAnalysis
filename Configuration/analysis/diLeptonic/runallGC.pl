@@ -104,7 +104,7 @@ while(my $line = <$IN>) {
     } else {
         push @createDirs, "mkdir -p /scratch/hh/dust/naf/cms/user/$ENV{USER}/$jobdirWithSomeTimestamp\n";
     }
-    push @runGCs, "starting $gcConfig\n./grid-control/go.py -i $gcConfig\n";
+    push @runGCs, "echo starting $gcConfig\n./grid-control/go.py -i $gcConfig\n";
     push @checkGCs, "echo checking $gcConfig\n./grid-control/go.py $gcConfig\n";
     push @killGCs, "echo killing $gcConfig\n./grid-control/go.py -d ALL $gcConfig\n";
     push @forHadd, "hadd /scratch/hh/dust/naf/cms/user/$ENV{USER}/${outputFile}.root /scratch/hh/dust/naf/cms/user/$ENV{USER}/$jobdirWithSomeTimestamp/*.root\n";
