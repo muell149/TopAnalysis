@@ -88,6 +88,7 @@ while(my $line = <$IN>) {
         s/##DATASET##/$dataset/g;
         s/##OUTPUTFILE##/$outputFile/g;
         s/##HN_USER##/$hypernewsName/g;
+        s/##USER##/$ENV{USER}/g;
         s/##OPTIONS##/$options/g;
         s/##jobdirWithSomeTimestamp##/$jobdirWithSomeTimestamp/g;
         s/##SE_DCACHE##/$arg{g} ? '' : ';'/eg;
@@ -194,7 +195,7 @@ dataset            = ##DATASET## ; /MuEG/Run2012A-recover-06Aug2012-v1/AOD
 [storage]
 se output files    = *.root ;
 ##SE_DCACHE##se path            = srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/##HN_USER##/##jobdirWithSomeTimestamp##
-##SE_SCRATCH##se path           = dir:///scratch/hh/dust/naf/cms/user/##HN_USER##/##jobdirWithSomeTimestamp##
+##SE_SCRATCH##se path           = dir:///scratch/hh/dust/naf/cms/user/##USER##/##jobdirWithSomeTimestamp##
 
 
 
