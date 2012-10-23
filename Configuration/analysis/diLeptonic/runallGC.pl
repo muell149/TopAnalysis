@@ -66,7 +66,7 @@ while(my $line = <$IN>) {
     next unless $line =~ /\w/; #skip empty lines
     next unless (!exists $arg{'r'} || $line =~ /$arg{'r'}/);
     
-    my ($eventsPerJob, $dataset, $outputFile, $options) =
+    my ($eventsPerJob, $dataset, $outputFile, $options, $jsonFile) =
         map { s!\${(\w+)}!$ENV{$1}!g; $_ }
         split / {2,}/, $line;
         
@@ -78,6 +78,9 @@ while(my $line = <$IN>) {
     
     my $t = getGCtemplate();
     
+
+    my $json = File::Spec->rel2abs($jsonFile);
+
     for ($t) {
         s/##LOCAL_OR_GRID##/$arg{g} ? "grid" : "local"/eg;
         s/##WORKDIR##/$path/g;
@@ -90,6 +93,7 @@ while(my $line = <$IN>) {
         s/##HN_USER##/$hypernewsName/g;
         s/##USER##/$ENV{USER}/g;
         s/##OPTIONS##/$options/g;
+        s/##JSON##/$json/g;
         s/##jobdirWithSomeTimestamp##/$jobdirWithSomeTimestamp/g;
         s/##SE_DCACHE##/$arg{g} ? '' : ';'/eg;
         s/##SE_SCRATCH##/$arg{g} ? ';' : ''/eg;        
@@ -154,7 +158,6 @@ chmod 0755, "$arg{d}/getJsons.sh";
 print "run ./$arg{d}/getJsons.sh to get all processed Jsons\n";
 
 
-
 sub getGCtemplate
 {
     return <<'ENDE_TEMPLATE';
@@ -190,7 +193,7 @@ events per job     = ##EVENTS_PER_JOB##   ; I think better than to restrict tota
 
 
 dataset            = ##DATASET## ; /MuEG/Run2012A-recover-06Aug2012-v1/AOD
-
+lumi filter        = ##JSON## ; is this the right way to do it?
 
 [storage]
 se output files    = *.root ;
