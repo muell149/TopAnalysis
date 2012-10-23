@@ -22,8 +22,8 @@
 20  Summer12.TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      emu_ttbarsignalplustau_massdown.root       ttbarsignalplustau,runOnAOD=True
 20  Summer12.TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      emu_ttbarbg_massdown.root		       ttbarbg,runOnAOD=True
 
-#20  Fall11.tt_Z2_powheg_Fall11_AOD_cff            emu_ttbarsignalplustau_powheg.root	 ttbarsignalplustau,runOnAOD=True
-#20  Fall11.tt_Z2_powheg_Fall11_AOD_cff            emu_ttbarbg_powheg.root	         ttbarbg,runOnAOD=True
+20  Summer12.TTTo2L2Nu2B_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff            emu_ttbarsignalplustau_powheg.root	 ttbarsignalplustau,runOnAOD=True
+20  Summer12.TTTo2L2Nu2B_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff            emu_ttbarbg_powheg.root	         ttbarbg,runOnAOD=True
 
 #30  Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff           emu_ttbarsignalplustau_mcatnlo.root   ttbarsignalplustau,runOnAOD=True
 #30  Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff           emu_ttbarbg_mcatnlo.root	         ttbarbg,runOnAOD=True
@@ -47,8 +47,8 @@
 20  Summer12.TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      mumu_ttbarsignalplustau_massdown.root       ttbarsignalplustau,runOnAOD=True
 20  Summer12.TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      mumu_ttbarbg_massdown.root		        ttbarbg,runOnAOD=True
 
-#20  Fall11.tt_Z2_powheg_Fall11_AOD_cff            mumu_ttbarsignalplustau_powheg.root	   ttbarsignalplustau,runOnAOD=True
-#20  Fall11.tt_Z2_powheg_Fall11_AOD_cff            mumu_ttbarbg_powheg.root	           ttbarbg,runOnAOD=True
+20  Summer12.TTTo2L2Nu2B_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff            mumu_ttbarsignalplustau_powheg.root	   ttbarsignalplustau,runOnAOD=True
+20  Summer12.TTTo2L2Nu2B_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff            mumu_ttbarbg_powheg.root	           ttbarbg,runOnAOD=True
 
 #30  Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff           mumu_ttbarsignalplustau_mcatnlo.root	   ttbarsignalplustau,runOnAOD=True
 #30  Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff           mumu_ttbarbg_mcatnlo.root	           ttbarbg,runOnAOD=True
@@ -72,8 +72,8 @@
 20  Summer12.TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      ee_ttbarsignalplustau_massdown.root      ttbarsignalplustau,runOnAOD=True
 20  Summer12.TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff      ee_ttbarbg_massdown.root                 ttbarbg,runOnAOD=True
 
-#20  Fall11.tt_Z2_powheg_Fall11_AOD_cff            ee_ttbarsignalplustau_powheg.root	   ttbarsignalplustau,runOnAOD=True
-#20  Fall11.tt_Z2_powheg_Fall11_AOD_cff            ee_ttbarbg_powheg.root	           ttbarbg,runOnAOD=True
+20  Summer12.TTTo2L2Nu2B_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff            ee_ttbarsignalplustau_powheg.root         ttbarsignalplustau,runOnAOD=True
+20  Summer12.TTTo2L2Nu2B_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff            ee_ttbarbg_powheg.root                    ttbarbg,runOnAOD=True
 
 #30  Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff            ee_ttbarsignalplustau_mcatnlo.root	   ttbarsignalplustau,runOnAOD=True
 #30  Fall11.tt_Z2_mcatnlo_Fall11_AOD_cff            ee_ttbarbg_mcatnlo.root	           ttbarbg,runOnAOD=True
