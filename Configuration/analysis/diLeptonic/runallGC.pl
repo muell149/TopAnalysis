@@ -14,12 +14,15 @@ unless ( $arg{d} && $arg{c} && -f $arg{c}) {
     print <<'USAGE';
 Syntax:
  $ runallGC.pl [-g] -d directoryName -c configFile.py [-r regexp] [-s]
-        [-j NJobs] [-x factor] [-m maxEventsPerJob] [-f files.txt] -h hypernewsName
+        [-j NJobs] [-x factor] [-m maxEventsPerJob] [-f files.txt]
 
 Run runallGC.pl to run over all data samples given in files.txt using the
 configuration file configFile.py - and use GridControl to submit jobs
 
-the grid-control directory must be placed in the folder this script is run from.
+A directory on the sonar user space named "GridControl_workingDir" will
+be created to contain working directories and output.
+
+Set environment variable HN_USER to your hypernews name!
 
 -g      run on the grid
 
@@ -56,7 +59,27 @@ my @forHadd;
 my @forJson;
 
 my $hypernewsName = $arg{h} || $ENV{HN_USER};
-die "Who are you?\n" unless $hypernewsName;
+die "Who are you? Set your hypernews name (HN_USER).\n" unless $hypernewsName;
+
+# prepare workingdir
+
+my $globalGcWorkingdir="/scratch/hh/dust/naf/cms/user/$ENV{USER}/GridControl_workingDir";
+
+unless(-e $globalGcWorkingdir){
+    print "creating global grid-control working dir at $globalGcWorkingdir...\n";
+    mkdir($globalGcWorkingdir);
+}
+unless(-e "${globalGcWorkingdir}/grid-control"){
+    print "checking out stable grid-control version...\n";
+    system("svn co -q https://ekptrac.physik.uni-karlsruhe.de/public/grid-control/tags/stable/grid-control ${globalGcWorkingdir}/grid-control");
+    print "\n\n";
+}
+
+my $workDirWithTime="$arg{d}_" . strftime("%FT%H-%M-%S",localtime);
+
+if ($arg{g}) {
+    push @createDirs, "srmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$workDirWithTime\n";
+}
 
 
 while(my $line = <$IN>) {
@@ -72,12 +95,11 @@ while(my $line = <$IN>) {
         
     next unless $options;
     
-    my $path = File::Spec->rel2abs("$arg{d}/GC-$outputFile");
+    my $path = "${globalGcWorkingdir}/$workDirWithTime/GC-$outputFile";
     mkpath($path);
-    my $jobdirWithSomeTimestamp = "runallGC-$outputFile-" . strftime("%FT%H-%M-%S",localtime);
+    my $jobdir = "output-$outputFile"; #. strftime("%FT%H-%M-%S",localtime);
     
     my $t = getGCtemplate();
-    
 
     my $json = File::Spec->rel2abs($jsonFile);
 
@@ -91,71 +113,71 @@ while(my $line = <$IN>) {
         s/##DATASET##/$dataset/g;
         s/##OUTPUTFILE##/$outputFile/g;
         s/##HN_USER##/$hypernewsName/g;
-        s/##USER##/$ENV{USER}/g;
+        s/##SEOUTDIR##/$path/g;
         s/##OPTIONS##/$options/g;
         s/##JSON##/$json/g;
-        s/##jobdirWithSomeTimestamp##/$jobdirWithSomeTimestamp/g;
+        s/##JOBDIR##/$jobdir/g;
         s/##SE_DCACHE##/$arg{g} ? '' : ';'/eg;
         s/##SE_SCRATCH##/$arg{g} ? ';' : ''/eg;        
     }
-    my $gcConfig = File::Spec->rel2abs("$arg{d}/GC-$outputFile.conf");
+    my $gcConfig = "${globalGcWorkingdir}/$workDirWithTime/GC-$outputFile.conf";
     open my $OUT, '>', $gcConfig or die $!;
     print $OUT $t;
     close $OUT;
     
     if ($arg{g}) {
-        push @createDirs, "srmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$jobdirWithSomeTimestamp\n";
-	push @getGCs, "./grid-control/scripts/downloadFromSE.py -m -o /scratch/hh/dust/naf/cms/user/$ENV{USER}/$jobdirWithSomeTimestamp $gcConfig\n";
+        push @createDirs, "srmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$workDirWithTime/$jobdir\n";
+	push @getGCs, ".${globalGcWorkingdir}/grid-control/scripts/downloadFromSE.py -m -o ${globalGcWorkingdir}/$workDirWithTime/$jobdir $gcConfig\n";
     } else {
-        push @createDirs, "mkdir -p /scratch/hh/dust/naf/cms/user/$ENV{USER}/$jobdirWithSomeTimestamp\n";
+        push @createDirs, "mkdir -p ${globalGcWorkingdir}/$workDirWithTime/$jobdir\n";
     }
-    push @runGCs, "echo starting $gcConfig\n./grid-control/go.py -i $gcConfig\n";
-    push @checkGCs, "echo checking $gcConfig\n./grid-control/go.py $gcConfig\n";
-    push @killGCs, "echo killing $gcConfig\n./grid-control/go.py -d ALL $gcConfig\n";
-    push @forHadd, "hadd /scratch/hh/dust/naf/cms/user/$ENV{USER}/${outputFile}.root /scratch/hh/dust/naf/cms/user/$ENV{USER}/$jobdirWithSomeTimestamp/*.root\n";
-    push @forJson, "./grid-control/scripts/lumiInfo.py -j $gcConfig\n";
+    push @runGCs, "echo starting $gcConfig\n.${globalGcWorkingdir}/grid-control/go.py -i $gcConfig\n";
+    push @checkGCs, "echo checking $gcConfig\n.${globalGcWorkingdir}/grid-control/go.py $gcConfig\n";
+    push @killGCs, "echo killing $gcConfig\n.${globalGcWorkingdir}/grid-control/go.py -d ALL $gcConfig\n";
+    push @forHadd, "hadd ${globalGcWorkingdir}/$workDirWithTime/${outputFile}.root ${globalGcWorkingdir}/$workDirWithTime/$jobdir/*.root\n";
+    push @forJson, ".${globalGcWorkingdir}/grid-control/scripts/lumiInfo.py -j $gcConfig\n";
 
 }
 
-open my $OUT, '>', "$arg{d}/createDirsAndRun.sh" or die $!;
+open my $OUT, '>', "${globalGcWorkingdir}/$workDirWithTime/createDirsAndRun.sh" or die $!;
 print $OUT $_ for @createDirs;
 print $OUT "\n" x 3;
 print $OUT $_ for @runGCs;
 close $OUT;
-chmod 0755, "$arg{d}/createDirsAndRun.sh";
-print "run ./$arg{d}/createDirsAndRun.sh to create dirs and submit jobs\n";
+chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/createDirsAndRun.sh";
+print "run .${globalGcWorkingdir}/$workDirWithTime/createDirsAndRun.sh to create dirs and submit jobs\n";
 
-open my $OUTC, '>', "$arg{d}/checkAllJobs.sh" or die $!;
+open my $OUTC, '>', "${globalGcWorkingdir}/$workDirWithTime/checkAllJobs.sh" or die $!;
 print $OUTC $_ for @checkGCs;
 close $OUTC;
-chmod 0755, "$arg{d}/checkAllJobs.sh";
-print "run ./$arg{d}/checkAllJobs.sh to check dirs and resubmit jobs\n";
+chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/checkAllJobs.sh";
+print "run .${globalGcWorkingdir}/$workDirWithTime/checkAllJobs.sh to check dirs and resubmit jobs\n";
 
 if ($arg{g}) {
-    open my $OUTG, '>', "$arg{d}/downloadAllFromSE.sh" or die $!;
+    open my $OUTG, '>', "${globalGcWorkingdir}/$workDirWithTime/downloadAllFromSE.sh" or die $!;
     print $OUTG $_ for @getGCs;
     close $OUTG;
-    chmod 0755, "$arg{d}/downloadAllFromSE.sh";
-    print "run ./$arg{d}/downloadAllFromSE.sh to download from dcache to your sonar user space\n";
+    chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/downloadAllFromSE.sh";
+    print "run .${globalGcWorkingdir}/$workDirWithTime/downloadAllFromSE.sh to download from dcache to your sonar user space\n";
 }
 
-open my $OUTD, '>', "$arg{d}/killAllJobs.sh" or die $!;
+open my $OUTD, '>', "${globalGcWorkingdir}/$workDirWithTime/killAllJobs.sh" or die $!;
 print $OUTD $_ for @killGCs;
 close $OUTD;
-chmod 0755, "$arg{d}/killAllJobs.sh";
-print "run ./$arg{d}/killAllJobs.sh to kill all jobs\n";
+chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/killAllJobs.sh";
+print "run .${globalGcWorkingdir}/$workDirWithTime/killAllJobs.sh to kill all jobs\n";
 
-open my $OUTR, '>', "$arg{d}/haddAllRoot.sh" or die $!;
+open my $OUTR, '>', "${globalGcWorkingdir}/$workDirWithTime/haddAllRoot.sh" or die $!;
 print $OUTR $_ for @forHadd;
 close $OUTR;
-chmod 0755, "$arg{d}/haddAllRoot.sh";
-print "run ./$arg{d}/haddAllRoot.sh to hadd all output\n";
+chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/haddAllRoot.sh";
+print "run .${globalGcWorkingdir}/$workDirWithTime/haddAllRoot.sh to hadd all output\n";
 
-open my $OUTL, '>', "$arg{d}/getJsons.sh" or die $!;
+open my $OUTL, '>', "${globalGcWorkingdir}/$workDirWithTime/getJsons.sh" or die $!;
 print $OUTL $_ for @forJson;
 close $OUTL;
-chmod 0755, "$arg{d}/getJsons.sh";
-print "run ./$arg{d}/getJsons.sh to get all processed Jsons\n";
+chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/getJsons.sh";
+print "run .${globalGcWorkingdir}/$workDirWithTime/getJsons.sh to get all processed Jsons\n";
 
 
 sub getGCtemplate
@@ -197,15 +219,15 @@ lumi filter        = ##JSON## ; is this the right way to do it?
 
 [storage]
 se output files    = *.root ;
-##SE_DCACHE##se path            = srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/##HN_USER##/##jobdirWithSomeTimestamp##
-##SE_SCRATCH##se path           = dir:///scratch/hh/dust/naf/cms/user/##USER##/##jobdirWithSomeTimestamp##
+##SE_DCACHE##se path            = srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/##HN_USER##/##JOBDIR##
+##SE_SCRATCH##se path           = dir://##SEOUTDIR##/##JOBDIR##
 
 
 
 
 
 ; $workdir must be created before to avoid script from stopping
-; srmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/${HN_USER}/##jobdirWithSomeTimestamp##
+; srmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/${HN_USER}/##JOBDIR##
 ; 
 ; ./grid-control/go.py -i [gc_configfile]  ; inits working dir, runs the jobs, then quits
 ; ./grid-control/scripts/downloadFromSE.py -ml --out=$outputdir [gc_configfile]  ; loops in background, checks if files are there and if ok, moves them to outputdir
