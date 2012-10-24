@@ -3243,6 +3243,19 @@ double TopSVDFunctions::SVD_Integral1D(TH1D* hist, int syst, bool doOF)
         if ( i == 0       && doOF == false ) continue;
         if ( i == nbins+1 && doOF == false ) continue;
         double value = (hist+syst)->GetBinContent(i);
+        bool NaN_found = false;
+        if ( isnan(value) == true ) NaN_found = true;
+        if ( NaN_found == true ) {
+        	cout << endl;
+        	cout << "Error in TopSVDFunctions::SVD_Integral()" << endl;
+        	cout << "NaN Found in Bin " << i << endl;
+        	cout << "Exiting ... " << endl;
+        	cout << endl;
+        	exit(1);
+        }
+         
+       
+       
         sumData += value;
     }
         
@@ -3265,6 +3278,16 @@ double TopSVDFunctions::SVD_Integral2D(TH2D* hist, int syst, bool doOF)
             if ( j == 0        && doOF == false ) continue;
             if ( j == nbinsy+1 && doOF == false ) continue;
             double value = (hist+syst)->GetBinContent(i,j);
+	        bool NaN_found = false;
+	        if ( isnan(value) == true ) NaN_found = true;
+	        if ( NaN_found == true ) {
+	        	cout << endl;
+	        	cout << "Error in TopSVDFunctions::SVD_Integral()" << endl;
+	        	cout << "NaN Found in Bin " << i << "/" << j << endl;
+	        	cout << "Exiting ... " << endl;
+	        	cout << endl;
+	        	exit(1);
+	        }
             sumData += value; 
             
         }
@@ -5596,9 +5619,7 @@ double TopSVDFunctions::SVD_Unfold(
     // Number of Pseudo Experiments for the error calculation    
     int nExperiments = 1000;
      
-  
-    
-    
+   
       
     ///////////////////////////////////////////////////////////////////  
     /////////  S E T   F L A G S   //////////////////////////////////// 
@@ -6236,8 +6257,9 @@ double TopSVDFunctions::SVD_Unfold(
     ////////////   L U M I   S C A L I N G    /////////////////////////
     ///////////////////////////////////////////////////////////////////
  
-  
- 
+
+    // Scaling data and simulation to same statistics to enable comparisons
+     
     // Get Lumi Scale Factor
     // This is done only for the nominal sample
     // MUST BE DONE AFTER THE BACKGROUND HANDLING
@@ -6294,6 +6316,7 @@ double TopSVDFunctions::SVD_Unfold(
     }  
      
     // Global Event Count
+    // (means: Data after background removal)
     double* globalEventYield    = new double[1+numberSyst];
     double* globalEventYieldErr = new double[1+numberSyst];
     SVD_GlobalEventYield(globalEventYield, globalEventYieldErr, totalDataEvents, totalBgrEvents, totalTtBgrEvents, totalRecEvents, 1+numberSyst);
@@ -6499,6 +6522,12 @@ double TopSVDFunctions::SVD_Unfold(
     ////////////   S M E A R - I N - O U T  ///////////////////////////
     ///////////////////////////////////////////////////////////////////
      
+    // Smaer out: Fraction of events generated inside but 
+    // reconstructed outside the chosen binning.
+
+    // Smear in: Fraction of generated events outside but
+    // reconstructed inside the chosen binning.
+
     
      
     // Make Copies of input histograms 
@@ -6611,11 +6640,13 @@ double TopSVDFunctions::SVD_Unfold(
     // Setup Unfolding Tools
     // One for each Systematic Sample
     // This way, they are all independent from each other 
+    // UNFOLDINGPROGRAM
     TopSVDUnfold*  mySVDUnfold = SVD_SetupTool(dataHist_forTSVD, biniHist_forTSVD, xiniHist_forTSVD, mcHist_forTSVD, theTau, numberSyst+1); 
    
     // Unfolding 
     TH1D* unfHist = NULL;
     if ( flag_regmode > 1 ) {
+        // UNFOLDINGPROGRAM
         unfHist = SVD_CallSVDUnfolding(mySVDUnfold, theKReg, numberSyst+1);
     } else {
         // The BBB Only Case
@@ -6627,9 +6658,10 @@ double TopSVDFunctions::SVD_Unfold(
     TH1D* ddHist = NULL;
     TH1D* svHist = NULL;
     if ( flag_regmode > 1 ) {
-        weightHist = SVD_RetrieveWeights(mySVDUnfold, numberSyst+1);
-        ddHist = SVD_RetrieveDD(mySVDUnfold, numberSyst+1);
-        svHist = SVD_RetrieveSV(mySVDUnfold, numberSyst+1);
+        // UNFOLDINGPROGRAM
+        weightHist = SVD_RetrieveWeights(mySVDUnfold, numberSyst+1); // Weights = x^unf / x^gen, TSVDUnfold-specific
+        ddHist = SVD_RetrieveDD(mySVDUnfold, numberSyst+1); // D-Values
+        svHist = SVD_RetrieveSV(mySVDUnfold, numberSyst+1); // SV-Values
     } else { 
         // The BBB Only Case 
         weightHist = SVD_CloneHists1D(unfHist,numberSyst+1);
@@ -6668,6 +6700,7 @@ double TopSVDFunctions::SVD_Unfold(
     TH2D* statCovHistNorm = NULL;
     TH2D* mcCovHist = NULL;
     if ( flag_regmode > 1 ) {
+        // UNFOLDINGPROGRAM
         statCovHist = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments), 1);
         statCovHistNorm = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrixNorm(dataCovHist, nExperiments, 1, flag_norm, flag_verbose), 1);
         mcCovHist = SVD_CloneHists2D(mySVDUnfold->GetAdetCovMatrix(nExperiments), 1);
@@ -6897,7 +6930,7 @@ double TopSVDFunctions::SVD_Unfold(
        
                 // Do the unfolding with k = -1
                 double tau = (*vScanPoints)[i];
-                mySVDUnfold->SetTau(tau); 
+                mySVDUnfold->SetTau(tau);  // UNFOLDINGPROGRAM
                 TH1D* tmpUnfResult = SVD_CloneHists1D(mySVDUnfold->Unfold(-1)); 
                 TH1D* tmpWeights = SVD_CloneHists1D(mySVDUnfold->GetWeights()); 
                 double tmpCurv = mySVDUnfold->GetCurv();
@@ -7573,12 +7606,12 @@ double TopSVDFunctions::SVD_Unfold(
         CPQTex.Append(particleTex);
         CPQTex.Append(", ");
         CPQTex.Append(quantityTex);     
-    if(flag_plotStyle==2) CPQTex=channelTex;
+        if(flag_plotStyle==2) CPQTex=channelTex;
 
         // Tex / Systematics
         TString SystTex = syst;
         SystTex = systTex;
-    if(flag_plotStyle==2) SystTex="";
+        if(flag_plotStyle==2) SystTex="";
 
         // Tex / Regularization
         TString RegTex = ""; 
@@ -7589,7 +7622,7 @@ double TopSVDFunctions::SVD_Unfold(
             RegTex.Append("k = ");
             RegTex.Append(TString::Format("%.0f", regPar)); 
         } 
-    if(flag_plotStyle==2) RegTex="";
+        if(flag_plotStyle==2) RegTex="";
     
         // Stacks and Legends
         THStack* theRegStack = NULL;
@@ -8156,6 +8189,10 @@ double TopSVDFunctions::SVD_Unfold(
         TString errSep = "+/-";
         TString lineSep = "\n";
         TString colSep = ", ";
+<<<<<<< TopSVDFunctions.C
+   
+=======
+>>>>>>> 1.50
     
         // Write histograms
         SVD_Hists1DToASCII(rawHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
@@ -8195,7 +8232,13 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Hists2DToASCII(totCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
         SVD_Hists1DToASCII(glcHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
         SVD_Hists1DToASCII(bbbShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
+<<<<<<< TopSVDFunctions.C
+        SVD_Hists1DToASCII(ratioShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
+    
+ 
+=======
         SVD_Hists1DToASCII(ratioShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst);  
+>>>>>>> 1.50
  
     }  
   
