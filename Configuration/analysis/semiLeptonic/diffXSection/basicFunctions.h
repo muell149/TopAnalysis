@@ -507,7 +507,7 @@ namespace semileptonic {
 
   int roundToInt(double value, bool roundDown=false)
   {
-    // function to round an double "value"
+    // function to round a double "value"
     // to an int and return this one
     // modified quantities: NONE
     // used functions: NONE
@@ -531,7 +531,27 @@ namespace semileptonic {
     return outputInt;
   }
 
+  Double_t round(Double_t value, Int_t k)
+  {
+    // function to round a double "value"
+    // to a double with "k" digits
 
+    // no need for rounding if the value is 0
+    if(value==0.)return value;
+    Double_t result = value;
+    // search window: 10^20 to 10^-20
+    for(Int_t i = 20; i > -20; i--){
+      Double_t exp = pow(10.,i);
+      // searching for the 'k'th non-zero digit
+      if(round(value/(exp*pow(10.,k-1))) != 0){
+	// round to the found digit
+	result = round(value/(exp))*exp;
+	break;
+      }
+    }
+    return result;
+  }
+  
   TString getTStringFromInt(int i)
   {
     // function to convert an int "i" to
