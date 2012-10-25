@@ -131,9 +131,9 @@ while(my $line = <$IN>) {
     } else {
         push @createDirs, "mkdir -p ${globalGcWorkingdir}/$workDirWithTime/$jobdir\n";
     }
-    push @runGCs, "echo starting $gcConfig\n.${globalGcWorkingdir}/grid-control/go.py -i $gcConfig\n";
-    push @checkGCs, "echo checking $gcConfig\n.${globalGcWorkingdir}/grid-control/go.py $gcConfig\n";
-    push @killGCs, "echo killing $gcConfig\n.${globalGcWorkingdir}/grid-control/go.py -d ALL $gcConfig\n";
+    push @runGCs, "echo '\\n\\n---------############----------\\n\\nstarting $gcConfig'\n.${globalGcWorkingdir}/grid-control/go.py -i $gcConfig\n";
+    push @checkGCs, "echo '\\n\\n---------############----------\\n\\nchecking $gcConfig'\n.${globalGcWorkingdir}/grid-control/go.py -r -R $gcConfig\n";
+    push @killGCs, "echo '\\n\\n---------############----------\\n\\nkilling $gcConfig'\n.${globalGcWorkingdir}/grid-control/go.py -d ALL $gcConfig\n";
     push @forHadd, "hadd ${globalGcWorkingdir}/$workDirWithTime/${outputFile}.root ${globalGcWorkingdir}/$workDirWithTime/$jobdir/*.root\n";
     push @forJson, ".${globalGcWorkingdir}/grid-control/scripts/lumiInfo.py -j $gcConfig\n";
 
@@ -193,6 +193,9 @@ wms = SGE
 
 [SGE]
 site = hh 
+
+[grid]
+sites     =  desy.de -colorado.edu -hep.wisc.edu -hep.ucl.ac.uk
 
 [jobs]
 ##JOBS##
