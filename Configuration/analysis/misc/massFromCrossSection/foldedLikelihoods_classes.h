@@ -76,7 +76,7 @@ class PredXSec {
 public:
 
   PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-	   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile& alpha_funcFile, RooRealVar& alpha_def);
+	   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile* alpha_funcFile, RooRealVar& alpha_def);
 
 public:
 
@@ -121,7 +121,7 @@ public:
 };
 
 PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_var, RooRealVar& alpha_var,
-		   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile& alpha_funcFile,
+		   const TF1* xsec_func, const std::vector<TF1*>* unc_funcs, TFile* alpha_funcFile,
 		   RooRealVar& alpha_def):
   name(label),
   p0(label+"_p0", label+"_p0", xsec_func->GetParameter(0)),
@@ -131,9 +131,9 @@ PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_
   relUncPdf      (label+"_relUncPdf"      , unc_funcs[1].at(0), mass_var),
   relUncScaleUp  (label+"_relUncScaleUp"  , unc_funcs[0].at(0), mass_var),
   relUncScaleDown(label+"_relUncScaleDown", unc_funcs[0].at(1), mass_var),
-  alpha_p0(label+"_alpha_p0", ((TGraph*)alpha_funcFile.Get("graph_p0"))->GetFunction("pol2"), mass_var),
-  alpha_p1(label+"_alpha_p1", ((TGraph*)alpha_funcFile.Get("graph_p1"))->GetFunction("pol2"), mass_var),
-  alpha_p2(label+"_alpha_p2", ((TGraph*)alpha_funcFile.Get("graph_p2"))->GetFunction("pol2"), mass_var),
+  alpha_p0(label+"_alpha_p0", ((TGraph*)alpha_funcFile->Get("graph_p0"))->GetFunction("pol2"), mass_var),
+  alpha_p1(label+"_alpha_p1", ((TGraph*)alpha_funcFile->Get("graph_p1"))->GetFunction("pol2"), mass_var),
+  alpha_p2(label+"_alpha_p2", ((TGraph*)alpha_funcFile->Get("graph_p2"))->GetFunction("pol2"), mass_var),
   alphaDep(label+"_alphaDep", label+"_alphaDep", alpha_var, RooArgSet(alpha_p0.polyVar,
 								      alpha_p1.polyVar,
 								      alpha_p2.polyVar)),
@@ -204,7 +204,7 @@ FinalLikeliResults1D::FinalLikeliResults1D(const TString& label,
   projPdf = prodPdf.createProjection(xsec_var);
   constrained_var.setVal(constrained_var_mean.getVal());
   f1 = projPdf->asTF(RooArgList(target_var), RooArgList(), RooArgSet(target_var));
-  const bool quickDebug = true;
+  const bool quickDebug = false;
   if(quickDebug) {
     bestX = f1->GetMaximumX();
     lowErrFromIntegral  = (!strcmp(target_var.GetName(),"mass") ? 4. : 0.002);
