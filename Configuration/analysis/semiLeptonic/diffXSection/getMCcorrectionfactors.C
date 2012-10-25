@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void getMCcorrectionfactors(){
+void getMCcorrectionfactors(TString func = "exp"){
 
   // ---
   //    canvas style 
@@ -62,7 +62,7 @@ void getMCcorrectionfactors(){
   SFdilep->SetLineColor(kGreen+2);
 
   // c) combined data points
-  int Nbins=NbinsLjets=NbinsDilep;
+  int Nbins=NbinsLjets+NbinsDilep;
   TGraphAsymmErrors* SF = new TGraphAsymmErrors(Nbins);
   //           bin x(BCC)    data  / Madgraph 
   SF->SetPoint( 0, 26.2 , 0.004536 / 0.003806 );
@@ -129,18 +129,17 @@ void getMCcorrectionfactors(){
   SF->Draw("e same");
   SFljets->Draw("ep same");
   SFdilep->Draw("ep same");
-  // fit a exponential function
-  TString def="[0]*x*x+[1]*x+[2]";
+  // fit polynomial or exponential function
+  TString def = "";
+  if(func=="pol2")def="[0]*x*x+[1]*x+[2]";
+  if(func=="exp")def="exp([0]+[1]*x)";
   double fitLowEdge=0.;
   double fitHighEdge=400.;
   TF1* function=new TF1("function",def,fitLowEdge, fitHighEdge);
-  double a=1.40520e-06;
-  double b=-2.00947e-03;
-  double c=1.22081e+00;
-  function->SetParameter(0,a);
-  function->SetParameter(1,b);
-  function->SetParameter(2,c);
   SF->Fit(function,"R","same",fitLowEdge, fitHighEdge);
-  leg0->AddEntry( function, "fit (1.4*10^{-6}*x^{2}+2*10^{-3}*x+1.2)", "L");
+  for(int i=0; i<function->GetNumberFreeParameters(); i++){
+    function->SetParameter(i,round(function->GetParameter(i),3));
+  }
+  leg0->AddEntry( function, "fit ("+function->GetExpFormula("p")+")", "L");
   leg0->Draw("same");
 }
