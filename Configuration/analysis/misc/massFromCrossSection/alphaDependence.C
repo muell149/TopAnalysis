@@ -36,7 +36,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
   case kABM:
     pdfName = "ABM11"     ; nPointsAlpha = 17; break;
   case kNNPDF:
-    pdfName = "NNPDF2.3"  ; nPointsAlpha = 5; break;
+    pdfName = "NNPDF2.3"  ; nPointsAlpha = 11; break;
   case kCT:
     pdfName = "CT10"      ; nPointsAlpha = 21; break;
   }
@@ -172,12 +172,18 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
     sprintf(parName, "p_{%i}", p);
     graph_par[p].GetYaxis()->SetTitle(parName);
     graph_par[p].Draw("A*");
-    graph_par[p].Fit("pol1", "Q");
+    if(pdf==kNNPDF)
+      graph_par[p].Fit("pol1", "Q", "", 155., 175.);
+    else
+      graph_par[p].Fit("pol1", "Q");
     if(graph_par[p].GetFunction("pol1")) {
       graph_par[p].GetFunction("pol1")->SetLineStyle(2);
       graph_par[p].GetFunction("pol1")->SetLineColor(kBlue);
     }
-    graph_par[p].Fit("pol2", "+");
+    if(pdf==kNNPDF)
+      graph_par[p].Fit("pol2", "+", "", 155., 175.);
+    else
+      graph_par[p].Fit("pol2", "+");
     sprintf(parName, "graph_p%i", p);
     graph_par[p].Write(parName);
     canvas.Print(fileName + ".ps");
