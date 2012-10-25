@@ -115,6 +115,7 @@ while(my $line = <$IN>) {
         s/##HN_USER##/$hypernewsName/g;
         s/##SEOUTDIR##/$path/g;
         s/##OPTIONS##/$options/g;
+	s/##FILTERLUMI##/$jsonFile ? '' : ';'/eg
         s/##JSON##/$json/g;
         s/##JOBDIR##/$jobdir/g;
         s/##SE_DCACHE##/$arg{g} ? '' : ';'/eg;
@@ -195,7 +196,7 @@ wms = SGE
 site = hh 
 
 [grid]
-sites     =  desy.de -colorado.edu -hep.wisc.edu -hep.ucl.ac.uk
+sites     =  desy.de physik.rwth-aachen.de -colorado.edu -hep.wisc.edu -hep.ucl.ac.uk -in2p3.fr
 
 [jobs]
 ##JOBS##
@@ -218,7 +219,7 @@ events per job     = ##EVENTS_PER_JOB##   ; I think better than to restrict tota
 
 
 dataset            = ##DATASET## ; /MuEG/Run2012A-recover-06Aug2012-v1/AOD
-lumi filter        = ##JSON## ; is this the right way to do it?
+##FILTERLUMI##lumi filter        = ##JSON## ;
 
 [storage]
 se output files    = *.root ;
