@@ -3606,10 +3606,11 @@ void TopSVDFunctions::SVD_BackgrHandling(TH1D*& dataHist, TH1D* bgrHist, TH1D* t
                 if(value_ttBgr>value_bgr){
                     if ( beForgiving == false ) {
                         std::cout << "ERROR in TopSVDFunctions::SVD_BackgrHandling: " << std::endl;
-                        std::cout << "N_MC BG > N_data for plot " << rawHist->GetName() << std::endl;
-                        std::cout << "in bin " << i << " (range " << rawHist->GetBinLowEdge(i) << ",";
+                        std::cout << "The TtBar-Background is larger than the complete Background!" << std::endl;
+                        std::cout << "This happens in bin " << i << " (range " << rawHist->GetBinLowEdge(i) << ",";
                         std::cout << rawHist->GetBinLowEdge(i+1) << " )" << std::endl;
-                        std::cout << "(" << value_ttBgr << ">" << value_bgr << ")" << std::endl;
+                        std::cout << "    TTBar-Bgr: " << value_ttBgr << std::endl;
+                        std::cout << "    Bgr:       " << value_bgr << std::endl;
                         exit(0);
                     } else {
                         value_ttBgr=value_bgr;
@@ -8189,10 +8190,6 @@ double TopSVDFunctions::SVD_Unfold(
         TString errSep = "+/-";
         TString lineSep = "\n";
         TString colSep = ", ";
-<<<<<<< TopSVDFunctions.C
-   
-=======
->>>>>>> 1.50
     
         // Write histograms
         SVD_Hists1DToASCII(rawHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
@@ -8231,14 +8228,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Hists2DToASCII(mcCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
         SVD_Hists2DToASCII(totCorrHist, textOutputFolderName, "%2.5f", errSep, lineSep, colSep, 1); 
         SVD_Hists1DToASCII(glcHist, textOutputFolderName, "%2.5f", errSep, lineSep, 1); 
-        SVD_Hists1DToASCII(bbbShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
-<<<<<<< TopSVDFunctions.C
-        SVD_Hists1DToASCII(ratioShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst); 
-    
- 
-=======
         SVD_Hists1DToASCII(ratioShiftHist, textOutputFolderName, "%2.5f", errSep, lineSep, numberSyst);  
->>>>>>> 1.50
  
     }  
   
