@@ -2,7 +2,7 @@
 
 void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
 				  TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
+				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -171,7 +171,7 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
   
   // loop systematic variations
   for(unsigned int sys=sysNo; sys<sysEnd; ++sys){
-    //for(unsigned int sys=sysNo; sys<sysNo+1; ++sys){ 
+    //if(sys>sysNo) break; // FIXME: shortcut- process only results without systematic variation 
     TString subfolder=sysLabel(sys);
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -909,9 +909,9 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
 	  
 	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - x1Subtrahend);
 	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - y1SubtrahendFactor * (double)(leg->GetNRows()));
-	  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
-	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
-	  
+	  leg->SetX2NDC(1.03 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - 0.8*gStyle->GetTickLength());
+
 	  //}
 
 	  // h) Plotting, legend and additional labels
