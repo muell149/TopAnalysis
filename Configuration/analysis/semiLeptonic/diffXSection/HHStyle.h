@@ -145,11 +145,11 @@ void setHHStyle(TStyle& HHStyle)
 	
   HHStyle.SetTitleColor(1, "XYZ");
   HHStyle.SetTitleFont(fontstyle, "XYZ");
-  HHStyle.SetTitleSize(0.04, "XYZ");
+  HHStyle.SetTitleSize(0.05, "XYZ");
   // HHStyle.SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
   // HHStyle.SetTitleYSize(Float_t size = 0.02);
-  HHStyle.SetTitleXOffset(1.25);
-  HHStyle.SetTitleYOffset(1.6);
+  HHStyle.SetTitleXOffset(1.0);
+  HHStyle.SetTitleYOffset(1.7);
   // HHStyle.SetTitleOffset(1.1, "Y"); // Another way to set the Offset
 	
   // ==============
