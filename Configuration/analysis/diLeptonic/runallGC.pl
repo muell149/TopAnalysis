@@ -133,8 +133,7 @@ while(my $line = <$IN>) {
     } else {
         push @createDirs, "mkdir -p ${globalGcWorkingdir}/$workDirWithTime/$joboutdir\n";
     }
-    push @runGCs, "echo 'starting $gcConfig'\n${globalGcWorkingdir}/grid-control/go.py -i $gcConfig\n";
-    push @runGCs, "touch $path/first_sub\n\n";
+    push @runGCs, "echo 'starting $gcConfig'\nif [[ -f \"$path/first_sub\" ]]; \nthen\necho already initialized!\nelse\n${globalGcWorkingdir}/grid-control/go.py -i $gcConfig\ntouch $path/first_sub\nfi\n\n";
     push @checkGCs, "echo 'checking $gcConfig'\nif [[ -f \"$path/first_sub\" ]]; \nthen\n${globalGcWorkingdir}/grid-control/go.py $gcConfig\n\n${globalGcWorkingdir}/grid-control/go.py -s -r -R $gcConfig\nelse\necho not yet submitted\nfi\n\n";
     push @killGCs, "echo 'killing $gcConfig'\n${globalGcWorkingdir}/grid-control/go.py -d ALL $gcConfig\n";
     push @forHadd, "hadd ${globalGcWorkingdir}/$workDirWithTime/${outputFile}.root ${globalGcWorkingdir}/$workDirWithTime/$joboutdir/*.root\n";
@@ -169,7 +168,7 @@ if ($arg{g}) {
 open my $OUTD, '>', "${globalGcWorkingdir}/$workDirWithTime/killAllJobs.sh" or die $!;
 print $OUTD $_ for @killGCs;
 close $OUTD;
-chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/killAllJobs.sh";
+##chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/killAllJobs.sh";
 print "run ${globalGcWorkingdir}/$workDirWithTime/killAllJobs.sh to kill all jobs\n";
 
 open my $OUTR, '>', "${globalGcWorkingdir}/$workDirWithTime/haddAllRoot.sh" or die $!;
