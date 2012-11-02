@@ -77,6 +77,7 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   double bqhadPtPre, bqhadEtaPre, bqhadPhiPre, bqlepPtPre, bqlepEtaPre, bqlepPhiPre, lqPtPre, lqEtaPre, lqPhiPre, lqbarPtPre, lqbarEtaPre, lqbarPhiPre, nuPtPre, nuEtaPre, nuPhiPre, lepPtPre, lepEtaPre, lepPhiPre;
   double bqhadPtFit, bqhadEtaFit, bqhadPhiFit, bqlepPtFit, bqlepEtaFit, bqlepPhiFit, lqPtFit, lqEtaFit, lqPhiFit, lqbarPtFit, lqbarEtaFit, lqbarPhiFit, nuPtFit, nuEtaFit, nuPhiFit, lepPtFit, lepEtaFit, lepPhiFit;
   double nuPtTrue, nuEtaTrue, nuPhiTrue, lepPtTrue, lepEtaTrue, lepPhiTrue, sumEtPre, sumEtTrue;
+  double nPV;
 
   /// ints
   int BindexA, BindexB, BindexC, BindexD, Nbjets, Njets, leadNonttjet;

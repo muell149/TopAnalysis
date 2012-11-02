@@ -133,6 +133,10 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("sumEtPre"     ,&sumEtPre   , "sumEtPre/D"   ); 
   tree->Branch("sumEtTrue"    ,&sumEtTrue  , "sumEtTrue/D"  ); 
 
+  // nPV
+  nPV=-1;
+  tree->Branch("nPV",&nPV, "nPV/D");
+
   // histos
   // 1D
   hists_["MuNu4J" ] = fs->make<TH1F>( "MuNu4J"  , "MuNu4J"  , 2500,  0. , 2500 );
@@ -160,6 +164,11 @@ MixedObjectsAnalyzer::beginJob()
   hists_["shiftNuPt"    ] = fs->make<TH1F>( "shiftNuPt" , "shiftNuPt"   , 2000,  -200. , 200 );
   hists_["shiftNuEta"   ] = fs->make<TH1F>( "shiftNuEta", "shiftNuEta"  , 1000,  -5.   , 5   );
   hists_["shiftNuPhi"   ] = fs->make<TH1F>( "shiftNuPhi", "shiftNuPhi"  , 1200,  -3.   , 3   );
+  hists_["nPV"          ] = fs->make<TH1F>("nPV"          , "nPV"          , 50, 0., 50.);
+  hists_["nPVunweighted"] = fs->make<TH1F>("nPVunweighted", "nPVunweighted", 50, 0., 50.);
+  hists_["nPV"          ]->GetXaxis()->SetTitle(VertexSrc_.label().c_str());
+  hists_["nPVunweighted"]->GetXaxis()->SetTitle(VertexSrc_.label().c_str());
+
   // 2D
   hists2D_["Njets_"  ] = fs->make<TH2F>( "Njets_" , "Njets_" , 15, -0.5, 14.5, 15, -0.5, 14.5);  
 
@@ -210,6 +219,11 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   // event weight
   weight = weight_h.isValid() ? *weight_h : 1.;
 
+  // information concerning PU/NPV   
+  nPV=vertecies_h->size();
+  hists_["nPV"          ]->Fill(nPV, weight);
+  hists_["nPVunweighted"]->Fill(nPV, 1.    );
+  
   // collect information from KinFitHypothesis
   int lepBIndex=-1, hadBIndex=-1, lightQIndex=-1, lightQBarIndex=-1;
   bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqlepPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=-999;
