@@ -100,8 +100,8 @@ while(my $line = <$IN>) {
     my $joboutdir = "output-$outputFile"; #. strftime("%FT%H-%M-%S",localtime);
     
     my $t = getGCtemplate();
-
-    my $json = File::Spec->rel2abs($jsonFile);
+    if($jsonFile)
+	my $json = File::Spec->rel2abs($jsonFile);
 
     for ($t) {
         s/##LOCAL_OR_GRID##/$arg{g} ? "grid" : "local"/eg;
@@ -189,8 +189,8 @@ sub getGCtemplate
     return <<'ENDE_TEMPLATE';
 [global]
 module  = CMSSW
-backend = ##LOCAL_OR_GRID## ; (local or grid) ; switch is enough
-workdir = ##WORKDIR## ; (when running locally also the sandbox will be placed here ; 
+backend = ##LOCAL_OR_GRID## ; 
+workdir = ##WORKDIR## ; 
 
 [local]
 wms = SGE
@@ -215,10 +215,10 @@ prepare config     = True
 arguments          = ##OPTIONS## outputFile=##OUTPUTFILE##  ; 
 
 dataset splitter   = EventBoundarySplitter
-events per job     = ##EVENTS_PER_JOB##   ; I think better than to restrict total number of jobs
+events per job     = ##EVENTS_PER_JOB##   ;
 
 
-dataset            = ##DATASET## ; /MuEG/Run2012A-recover-06Aug2012-v1/AOD
+dataset            = ##DATASET## ;
 ##FILTERLUMI##lumi filter        = ##JSON## ;
 
 [storage]
@@ -226,16 +226,12 @@ se output files    = *.root ;
 ##SE_DCACHE##se path            = srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/##HN_USER##/##WORKDIRWITHTIME##/##JOBOUTDIR##
 ##SE_SCRATCH##se path           = dir://##GLOBALGCWD##/##WORKDIRWITHTIME##/##JOBOUTDIR##
 
+[glite-wms]
+;ce            = ce1.gridka.de ; Select destination CE
+config = ##GLOBALGCWD##/grid-control/docs/glite_wms_DESY.conf       ; GliteWMS backend specific configuration (WMS, ...)
 
 
 
-
-; $workdir must be created before to avoid script from stopping
-; srmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/${HN_USER}/##JOBOUTDIR##
-; 
-; ./grid-control/go.py -i [gc_configfile]  ; inits working dir, runs the jobs, then quits
-; ./grid-control/scripts/downloadFromSE.py -ml --out=$outputdir [gc_configfile]  ; loops in background, checks if files are there and if ok, moves them to outputdir
-; ./grid-control/go.py [gc_configfile] ; checks and resubmits
 ENDE_TEMPLATE
 
 }
