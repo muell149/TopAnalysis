@@ -207,8 +207,10 @@ kinFitTtFullHadEventHypothesis.maxNJets = -1
 ttFullHadJetPartonMatch.maxNJets        = -1
 
 #setForAllTtFullHadHypotheses(process, 'jetCorrectionLevel', 'had')
-kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L3Absolute'
-ttFullHadHypGenMatch.jetCorrectionLevel           = 'L3Absolute'
+#kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L3Absolute'
+#ttFullHadHypGenMatch.jetCorrectionLevel           = 'L3Absolute'
+kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L7Parton'
+ttFullHadHypGenMatch.jetCorrectionLevel           = 'L7Parton'
 
 #setForAllTtFullHadHypotheses(process, 'jets', 'tightLeadingJets')
 kinFitTtFullHadEventHypothesis.jets = 'tightLeadingJets'
@@ -580,10 +582,10 @@ def runOnData(process):
 
     ## switch to residual jet energy correction for data
     #if(hasattr(process, 'goodJetsPF')):
-    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
-    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
-    if(hasattr(process, 'analyzeFullHadEventMixer')):
-        process.analyzeFullHadEventMixer.jetCorrectionLevel   = 'L2L3Residual'
+    #process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
+    #process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
+    #if(hasattr(process, 'analyzeFullHadEventMixer')):
+    #    process.analyzeFullHadEventMixer.jetCorrectionLevel   = 'L2L3Residual'
     
     udsall.correctionLevel  = 'L2L3Residual'
     uds0.correctionLevel    = 'L2L3Residual'
@@ -681,7 +683,8 @@ def runAsBackgroundEstimation(process, whichEstimate):
         print '++++++++++++++++++++++++++++++++++++++++++++'
         
         process.load("TopAnalysis.TopAnalyzer.FullHadEventMixer_cfi")
-        process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets")
+        process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets", jetCorrectionLevel = 'L7Parton')
+        #process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets")
         
         #from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
         process.analyzeFullHadEventMixer.udscResolutions = udscResolutionPF.functions
@@ -714,14 +717,14 @@ def runOnCalo(process):
     process.tightBottomJets.cut   = tightJetCut  #+ tightCaloJetID
 
     ## exchange resolutions for CaloJets
-    process.load("TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff")
-    process.kinFitTtFullHadEventHypothesis.udscResolutions = process.udscResolution.functions
-    process.kinFitTtFullHadEventHypothesis.bResolutions    = process.bjetResolution.functions
+    from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import udscResolution,bjetResolution
+    process.kinFitTtFullHadEventHypothesis.udscResolutions = udscResolution.functions
+    process.kinFitTtFullHadEventHypothesis.bResolutions    = bjetResolution.functions
 
     #for suf in listOfMonitoringSuffixes:
     #    if(hasattr(process, 'kinFitQuality'+suf)):
-    #        getattr(process, 'kinFitQuality'+suf).analyze.udscResolutions = process.udscResolution.functions
-    #        getattr(process, 'kinFitQuality'+suf).analyze.bResolutions    = process.bjetResolution.functions
+    #        getattr(process, 'kinFitQuality'+suf).analyze.udscResolutions = udscResolution.functions
+    #        getattr(process, 'kinFitQuality'+suf).analyze.bResolutions    = bjetResolution.functions
 
     ## run kinematic fit for CaloJets with L1L2L3(Res)L5 correted jets
     process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L5Hadron'
@@ -734,8 +737,8 @@ def runOnCalo(process):
 
     ## give correct resolutions for background estimation if done
     if(hasattr(process, 'analyzeFullHadQCDEstimation')):
-        process.analyzeFullHadQCDEstimation.analyze.udscResolutions = process.udscResolution.functions
-        process.analyzeFullHadQCDEstimation.analyze.bResolutions    = process.bjetResolution.functions
+        process.analyzeFullHadQCDEstimation.analyze.udscResolutions = udscResolution.functions
+        process.analyzeFullHadQCDEstimation.analyze.bResolutions    = bjetResolution.functions
 
     ## in case of mc, smear the energy resolution additionally
     if(hasattr(process, 'scaledJetEnergy')):
@@ -824,6 +827,10 @@ def switchToCSVM(process):
 ## ---
 def switchToCSVT(process):
     modifyBTagDiscs(process, 'combinedSecondaryVertex', 0.898, 0.898)
+def switchToCSVTSysUp(process):
+    modifyBTagDiscs(process, 'combinedSecondaryVertex', 0.891, 0.891)
+def switchToCSVTSysDown(process):
+    modifyBTagDiscs(process, 'combinedSecondaryVertex', 0.904, 0.904)
 
 ## ---
 ##    switch to combinedSecondaryVertexMVA bTagger

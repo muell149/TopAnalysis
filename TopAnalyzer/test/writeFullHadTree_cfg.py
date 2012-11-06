@@ -213,6 +213,29 @@ process.source = cms.Source("PoolSource",
         #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7AA6A623-8198-E011-AB19-003048679076.root',
         #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7C571269-FF97-E011-BAA7-001A92810AEC.root',
         #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7C66C165-EF97-E011-B33B-003048678FFA.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_0.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_100.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_101.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_102.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_103.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_104.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_105.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_106.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_107.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_108.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_109.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_10.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_110.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_111.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_112.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_113.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_114.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_115.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_116.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_117.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_118.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_119.root',
+        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_11.root',
         #'/store/mc/Fall11/TT_TuneZ2_7TeV-mcatnlo/AODSIM/PU_S6_START42_V14B-v1/0000/C8F655E6-242A-E111-9138-002618943959.root',
         #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/3E5BE6DC-A407-E111-8CE7-00261894391B.root',
         #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/9A058174-A807-E111-B212-002618943971.root',
@@ -234,6 +257,7 @@ process.source = cms.Source("PoolSource",
         #'/store/mc/Summer11/QCD_Pt-15to3000_Tune4C_Flat_7TeV_pythia8/AODSIM/PU_S3_START42_V11-v2/0000/44F38536-0381-E011-A170-0030487F929B.root',
         #'/store/mc/Summer11/QCD_Pt-15to3000_Tune4C_Flat_7TeV_pythia8/AODSIM/PU_S3_START42_V11-v2/0000/844976AF-1C81-E011-926A-0030487F1309.root',
         #'/store/mc/Summer11/QCD_Pt-15to3000_Tune4C_Flat_7TeV_pythia8/AODSIM/PU_S3_START42_V11-v2/0000/B0EAC171-3C81-E011-8640-003048D436B2.root',
+        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/966C784E-990F-E111-B38E-0026189438C0.root',
         ),
                             skipEvents = cms.untracked.uint32(0)
 )
@@ -343,13 +367,17 @@ process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = 
                                                        )
 
 ## set set energy scaling factors
-if options.jesType == 'jes' and options.jesFactor > 1.0 :
-    #process.scaledJetEnergy.scaleType = "top:up"
-    process.scaledJetEnergy.scaleType = "jes:up"
-
-if options.jesType == 'jes' and options.jesFactor < 1.0 :
-    #process.scaledJetEnergy.scaleType = "top:down"
-    process.scaledJetEnergy.scaleType = "jes:down"
+if options.jesType == 'jes' :
+    if options.jesFactor > 1.0 :
+        process.scaledJetEnergy.scaleType = "jes:up"
+    elif options.jesFactor < 1.0 :
+        process.scaledJetEnergy.scaleType = "jes:down"
+## set set energy scaling factors for flavor ONLY
+elif options.jesType == 'flavor' :
+    if options.jesFactor > 1.0 :
+        process.scaledJetEnergy.scaleType = "flavor:up"
+    elif options.jesFactor < 1.0 :
+        process.scaledJetEnergy.scaleType = "flavor:down"
 
 ## residual jet corrector for data
 process.load("TopAnalysis.TopUtils.ResidualJetCorrector_cfi")
@@ -395,6 +423,11 @@ elif options.eventFilter=='qcd' :
 elif options.eventFilter=='all' :
     process.filterSequence = cms.Sequence(process.scaledJetEnergy)
     
+elif options.eventFilter=='toyMC' :
+    ## convert GenJets to PatJets
+    process.load("TopAnalysis.TopUtils.convertGenToPatJets_cff")
+    process.filterSequence = cms.Sequence(process.fullHadGenJetSelection*process.convertGenToPatJets)
+    
 else:
     raise NameError, "'"+options.eventFilter+"' is not a proper eventFilter!"
 
@@ -439,6 +472,10 @@ elif options.bTagAlgoWP == "CSVM" :
     switchToCSVM(process)
 elif options.bTagAlgoWP == "CSVT" :
     switchToCSVT(process)
+elif options.bTagAlgoWP == "CSVTSysUp" :
+    switchToCSVTSysUp(process)
+elif options.bTagAlgoWP == "CSVTSysDown" :
+    switchToCSVTSysDown(process)
 elif options.bTagAlgoWP == "CSVMVA" :
     switchToCSVMVA(process)
 else :
@@ -563,6 +600,8 @@ if options.backgroundEstimation != 0:
         if options.usePF:
             getattr(process, process.tightBottomJets.src.getModuleLabel()).src = cms.InputTag("goodJetsPF")
                      
+        if(options.eventFilter=='toyMC'):
+            process.analyzeFullHadEventMixer.speedUp = 10.0
         process.p1 += cms.Sequence( getattr(process, process.tightBottomJets.src.getModuleLabel())
                                   * process.tightBottomJets
                                   * process.tightBottomJetSelection
@@ -597,9 +636,27 @@ else:
         process.goodJets.src   = cms.InputTag('scaledJetEnergy', 'selectedPatJets', process.name_())
     if(hasattr(process, 'goodJetsPF') & hasattr(process, 'scaledJetEnergy')):
         process.goodJetsPF.src = cms.InputTag('scaledJetEnergy', 'selectedPatJetsAK5PF', process.name_())
+    # change input for toyMC
+    if(options.eventFilter=='toyMC'):
+        from TopAnalysis.TopUtils.convertGenToPatJets_cff import selectedPatJets as mySelectedPatJets
+        process.selectedPatJets = mySelectedPatJets
+        process.goodJetsPF.src = cms.InputTag('selectedPatJets', '', process.name_())
+        process.goodJetsPF.cut = "abs(eta) < 2.4 & pt > 20."
+        process.p1.remove(process.eventWeightPU)
+        #process.p1.remove(process.FullHadTreeWriter)
+        process.FullHadTreeWriter.MultiJetMVADiscSrc = ""
+        process.FullHadTreeWriter.PUweightSrc        = ""
+        process.FullHadTreeWriter.ElectronSrc        = ""
+        #process.FullHadTreeWriter.FitSrc             = ""
+        process.FullHadTreeWriter.METSrc             = ""
+        process.FullHadTreeWriter.PUSrc              = ""
+        process.FullHadTreeWriter.VertexSrc          = ""
+        process.FullHadTreeWriter.MuonSrc            = ""
+        #process.FullHadTreeWriter.bTagVal            = cms.vstring()
+        #process.FullHadTreeWriter.bTagName           = cms.vstring()
 
 
-if(not options.pdfUn==2):
+if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
     
      ## prepend the sequence needed to run on the NEW PAT tuples
     from TopAnalysis.TopUtils.usePatTupleWithParticleFlow_cff import prependPF2PATSequence
@@ -612,9 +669,12 @@ if(not options.pdfUn==2):
     pf2patOptions['excludeElectronsFromWsFromGenJets'] = True
     #pf2patOptions['noMuonTopProjection'] = True
     #pf2patOptions['noElecTopProjection'] = True
-    pf2patOptions['METCorrectionLevel'] = 1
+    pf2patOptions['METCorrectionLevel'] = 1 
     pf2patOptions['addResolutions'] = True
     pf2patOptions['resolutionsVersion'] = 'fall11'
+    pf2patOptions['JECEra'] = 'Jec11_V10'
+    pf2patOptions['JECFile'] = 'TopAnalysis/TopUtils/data/Jec11_V10_L7PartonPrivate.db'
+    pf2patOptions['additionalJECLevels'] = ['L7Parton']
     if options.eventFilter=='data':
         pf2patOptions['runOnMC'] = False
     if options.runOnAOD:
