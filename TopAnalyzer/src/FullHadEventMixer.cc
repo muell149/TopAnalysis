@@ -702,8 +702,8 @@ FullHadEventMixer::doFitting(const std::vector<pat::Jet>& myJets)
     TLorentzVector bBarCandidate = TLorentzVector( res->BBar.px(), res->BBar.py(), res->BBar.pz(), res->BBar.energy() );
     double bAngle = bCandidate.Angle( bBarCandidate.Vect() );
     */
-    TopAngles angles = TopAngles::TopAngles(res->B   .p4(), res->LightQ.p4(), res->LightQBar.p4(),
-					    res->BBar.p4(), res->LightP.p4(), res->LightPBar.p4());
+    TopAngles angles = TopAngles(res->B   .p4(), res->LightQ.p4(), res->LightQBar.p4(),
+				 res->BBar.p4(), res->LightP.p4(), res->LightPBar.p4());
 
     if(nCombos == 1){
       prob    = res->Prob;												    
