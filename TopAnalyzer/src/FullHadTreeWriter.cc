@@ -36,7 +36,7 @@ FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   bTagName_          (cfg.getParameter<std::vector<std::string> >("bTagName")),
   bTagVal_           (cfg.getParameter<std::vector<std::string> >("bTagVal" )),
   DoPDFUncertainty_  (cfg.getParameter<bool>("DoPDFUncertainty")),
-  kMAX(50), kMAXCombo(10000)
+  kMAX(50), kMAXCombo(10000), checkedIsPFJet(false), isPFJet(false)
 {
 }
 
@@ -876,17 +876,23 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
       bTag_CSV     [i] = jet->bDiscriminator("combinedSecondaryVertexBJetTags");
       bTag_CSVMVA  [i] = jet->bDiscriminator("combinedSecondaryVertexMVABJetTags");
       charge       [i] = jet->jetCharge();
-      fChHad       [i] = jet->chargedHadronEnergyFraction();
-      fNeHad       [i] = jet->neutralHadronEnergyFraction();
-      fChEm        [i] = jet->chargedEmEnergyFraction();
-      fNeEm        [i] = jet->neutralEmEnergyFraction();
-      //fElec        [i] = jet->electronEnergyFraction();
-      //fPhot        [i] = jet->photonEnergyFraction();
-      fMuon        [i] = jet->muonEnergyFraction();
-      jetConst     [i] = jet->nConstituents();
-      chargeMulti  [i] = jet->chargedMultiplicity();
-      pdgId        [i] = (jet->genParticle()) ? jet->genParticle()->pdgId() : 0;
-      partonFlavour[i] = jet->partonFlavour();
+      if(!checkedIsPFJet){
+	isPFJet = jet->isPFJet();
+	checkedIsPFJet = true;
+      }
+      if(isPFJet){
+	fChHad       [i] = jet->chargedHadronEnergyFraction();
+	fNeHad       [i] = jet->neutralHadronEnergyFraction();
+	fChEm        [i] = jet->chargedEmEnergyFraction();
+	fNeEm        [i] = jet->neutralEmEnergyFraction();
+	//fElec        [i] = jet->electronEnergyFraction();
+	//fPhot        [i] = jet->photonEnergyFraction();
+	fMuon        [i] = jet->muonEnergyFraction();
+	jetConst     [i] = jet->nConstituents();
+	chargeMulti  [i] = jet->chargedMultiplicity();
+	pdgId        [i] = (jet->genParticle()) ? jet->genParticle()->pdgId() : 0;
+	partonFlavour[i] = jet->partonFlavour();
+      }
 
       for(size_t ibTag = 0; ibTag < bTagName_.size(); ++ibTag){
 

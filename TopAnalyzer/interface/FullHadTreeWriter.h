@@ -69,6 +69,9 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   // max possible number of permutations per event
   const unsigned int kMAXCombo;
 
+  // check if jet is a PFJet
+  bool checkedIsPFJet, isPFJet;
+
   /// define variables for tree
   
   // bools
