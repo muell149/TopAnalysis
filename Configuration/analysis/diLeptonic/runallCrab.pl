@@ -219,12 +219,13 @@ pset = ##CMSSWConfigFile##
 pycfg_params = ##OPTIONS## outputFile=##OUTPUTFILE##
 
 ##FILTERLUMI##lumi_mask = ##JSON##
-total_number_of_lumis = -1
+total_number_of_events = -1
+#number_of_jobs = 5
 events_per_job = ##EVENTS_PER_JOB##
 output_file = ##OUTPUTFILE##.root
 
 
-#total_number_of_events = 10000
+#total_number_of_lumis = -1
 #number_of_jobs = 30
 #lumis_per_job = 200
 
