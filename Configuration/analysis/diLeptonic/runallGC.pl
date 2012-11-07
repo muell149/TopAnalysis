@@ -60,6 +60,10 @@ my @forJson;
 
 my $hypernewsName = $arg{h} || $ENV{HN_USER};
 die "Who are you? Set your hypernews name (HN_USER).\n" unless $hypernewsName;
+die "CMS ENV must be set!" unless $ENV{CMSSW_BASE};
+if($arg{g}) {
+    die "glite must be initialized to run grid jobs!!" unless $ENV{GLITE_LOCATION};
+}
 
 # prepare workingdir
 
@@ -100,8 +104,10 @@ while(my $line = <$IN>) {
     my $joboutdir = "output-$outputFile"; #. strftime("%FT%H-%M-%S",localtime);
     
     my $t = getGCtemplate();
-    if($jsonFile)
-	my $json = File::Spec->rel2abs($jsonFile);
+    my $json = '';
+    if($jsonFile){
+	$json = File::Spec->rel2abs($jsonFile);
+    }
 
     for ($t) {
         s/##LOCAL_OR_GRID##/$arg{g} ? "grid" : "local"/eg;
@@ -120,7 +126,10 @@ while(my $line = <$IN>) {
 	s/##WORKDIRWITHTIME##/$workDirWithTime/g;
         s/##JOBOUTDIR##/$joboutdir/g;
         s/##SE_DCACHE##/$arg{g} ? '' : ';'/eg;
-        s/##SE_SCRATCH##/$arg{g} ? ';' : ''/eg;        
+        s/##SE_SCRATCH##/$arg{g} ? ';' : ''/eg;   
+	if($arg{g}) {
+	    s/##GLITE_LOCATION##/$ENV{GLITE_LOCATION}/g;  
+	} 
     }
     my $gcConfig = "${globalGcWorkingdir}/$workDirWithTime/GC-$outputFile.conf";
     open my $OUT, '>', $gcConfig or die $!;
@@ -198,8 +207,16 @@ wms = SGE
 [SGE]
 site = hh 
 
+
+[glite-wms]
+;ce            = ce1.gridka.de ; Select destination CE
+;config     =    ##GLOBALGCWD##/grid-control/docs/glite_wms_DESY.conf     ; GliteWMS backend specific configuration (WMS, ...)
+config     =    ##GLITE_LOCATION##/etc/cms/glite_wms.conf
+
+
 [jobs]
 ##JOBS##
+;jobs = 5
 wall time    = 40:59:00 ;queue dingens // thats the 12 hour cue!!!
 ; in queue     = $maxjobsinqueue ; 1000 -1
 memory       = 3700
@@ -225,11 +242,6 @@ dataset            = ##DATASET## ;
 se output files    = *.root ;
 ##SE_DCACHE##se path            = srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/##HN_USER##/##WORKDIRWITHTIME##/##JOBOUTDIR##
 ##SE_SCRATCH##se path           = dir://##GLOBALGCWD##/##WORKDIRWITHTIME##/##JOBOUTDIR##
-
-[glite-wms]
-;ce            = ce1.gridka.de ; Select destination CE
-config = ##GLOBALGCWD##/grid-control/docs/glite_wms_DESY.conf       ; GliteWMS backend specific configuration (WMS, ...)
-
 
 
 ENDE_TEMPLATE
