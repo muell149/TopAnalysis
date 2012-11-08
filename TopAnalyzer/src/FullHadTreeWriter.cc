@@ -26,6 +26,8 @@ FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   METSrc_            (cfg.getParameter<edm::InputTag>("METSrc")),
   MuonSrc_           (cfg.getParameter<edm::InputTag>("MuonSrc")),
   ElectronSrc_       (cfg.getParameter<edm::InputTag>("ElectronSrc")),
+  //GenJetSrc_         (cfg.getParameter<edm::InputTag>("GenJetSrc")),
+  //GenPartonSrc_      (cfg.getParameter<edm::InputTag>("GenPartonSrc")),
   FitSrc_            (cfg.getParameter<edm::InputTag>("FitSrc")),
   MultiJetMVADiscSrc_(cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc")),
   GenSrc_            (cfg.getParameter<edm::InputTag>("GenSrc")),
@@ -126,6 +128,14 @@ FullHadTreeWriter::beginJob()
     jets = new TClonesArray("TLorentzVector", kMAX);
     tree->Branch("jets", &jets, 32000, -1);
     jets->BypassStreamer();
+
+    genJets = new TClonesArray("TLorentzVector", kMAX);
+    tree->Branch("genJets", &genJets, 32000, -1);
+    genJets->BypassStreamer();
+
+    genPartons = new TClonesArray("TLorentzVector", kMAX);
+    tree->Branch("genPartons", &genPartons, 32000, -1);
+    genPartons->BypassStreamer();
 
     // number of jets in events
     Njet = -1;
@@ -812,6 +822,12 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   edm::Handle<edm::View< pat::Jet > > jets_h;
   event.getByLabel(JetSrc_, jets_h);
   
+  //edm::Handle<edm::View< reco::GenJet > > genJets_h;
+  //event.getByLabel(GenJetSrc_, genJets_h);
+  
+  //edm::Handle<edm::View< reco::GenParticle > > genPartons_h;
+  //event.getByLabel(GenPartonSrc_, genPartons_h);
+  
   edm::Handle<TtFullHadronicEvent> fullHadEvent_h;
   event.getByLabel(FitSrc_, fullHadEvent_h);
   
@@ -863,12 +879,18 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 
     unsigned short i = 0;
     jets->Clear();
+    genJets->Clear();
+    genPartons->Clear();
     for(edm::View< pat::Jet >::const_iterator jet = jets_h->begin(); jet != jets_h->end(); ++jet, ++i){
       
       //std::cout << jet->jecFactor("Uncorrected") << jet->jecFactor("L1FastJet") << " " << jet->jecFactor("L2Relative") << " " << jet->jecFactor("L3Absolute") << std::endl;
       //std::cout << jet->jecFactor(0) << " " << jet->jecFactor(1) << " " << jet->jecFactor(2) << " " << jet->jecFactor(3) << std::endl;
       jets_v.push_back(*jet);
       new((*jets)[i]) TLorentzVector(jet->px(), jet->py(), jet->pz(), jet->energy());
+      if(jet->genJet()) new((*genJets)[i]) TLorentzVector(jet->genJet()->px(), jet->genJet()->py(), jet->genJet()->pz(), jet->genJet()->energy());
+      else              new((*genJets)[i]) TLorentzVector();
+      if(jet->genParticle()) new((*genPartons)[i]) TLorentzVector(jet->genParticle()->px(), jet->genParticle()->py(), jet->genParticle()->pz(), jet->genParticle()->energy());
+      else                   new((*genPartons)[i]) TLorentzVector();
       bTag_TCHE    [i] = jet->bDiscriminator("trackCountingHighEffBJetTags");
       bTag_TCHP    [i] = jet->bDiscriminator("trackCountingHighPurBJetTags");
       bTag_SSVHE   [i] = jet->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
@@ -1527,7 +1549,11 @@ FullHadTreeWriter::endJob()
     delete[] comboTypes;
  }
 
-  if(JetSrc_     .label() != "") jets->Delete();
+  if(JetSrc_     .label() != ""){
+    jets->Delete();
+    genJets->Delete();
+    genPartons->Delete();
+  }
   if(METSrc_     .label() != "") MET->Delete();
   if(MuonSrc_    .label() != "") muons->Delete();
   if(ElectronSrc_.label() != "") electrons->Delete();
