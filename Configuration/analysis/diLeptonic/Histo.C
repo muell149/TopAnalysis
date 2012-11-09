@@ -7,6 +7,8 @@ void Histo::MakePlots(){
   std::vector<double> Xbins;
   std::vector<double> binCenters;
   Plotter h_XSecPlot;
+  bool doSVD = true;
+  h_XSecPlot.UnfoldingOptions(doSVD);
   h_XSecPlot.setOptions("HypjetMultiXSec","Standard", "N_{Events}","N_{jets}", 1, true, false, false, 0.0, 0, 0, 0,0,Xbins, binCenters);
   h_XSecPlot.DYScaleFactor();
   h_XSecPlot.setDataSet("mumu");
@@ -66,7 +68,8 @@ void Histo::MakePlots(){
     /////////////////////////////////////////////////////
     
     // Unfolding Options
-    bool doSVD = true;
+//     bool doSVD = true;
+    doSVD = true;
     TString outpath = "";
     h_generalPlot.UnfoldingOptions(doSVD);
     h_generalPlot.SetOutpath("");

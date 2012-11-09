@@ -7,7 +7,7 @@ HypjetMulti Standard Events N_{jets} 1 1 0 1 0.5 1E5 2 10 0 0
 HypjetMulti_diLep Standard Events N_{jets} 1 0 0 1 1.0 0 0 0 0 0
 MuonpT Standard Muons p_{T,#mu} 4 1 0 0 0 0 20 400 0 0
 ElectronpT Standard Electrons p_{T,e} 4 1 0 0 0 0 20 400 0 0
-LeptonpT Standard Leptons p_{T} 2 1 0 0 0 8E3 20 400 0 0
+LeptonpT Standard Leptons p_{T} 2 1 0 0 0 8E3 20 250 0 0
 MuonEta Standard Muons #eta_{#mu} 4 1 0 0 0 0 -2.5 2.5 0 0
 ElectronEta Standard Electrons #eta_{e} 4 1 0 0 0 0 -2.5 2.5 0 0
 LeptonEta Standard Leptons #eta_{l} 4 1 0 0 0 0 -2.5 2.5 0 0

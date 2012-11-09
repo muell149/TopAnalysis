@@ -1637,7 +1637,7 @@ void Plotter::ApplyMCATNLOWeight(TH1* hist, TString Systematic, TString Shift, T
     cout << endl; 
     cout << endl; 
     cout << "ATTENTION!" << endl;
-    cout << "Applying a scale factor to the MC@NLO Sample to account for MC Weights" << endl;  
+    cout << "Applying a scale factor to the MC@NLO Sample to account for MC Weights" << endl;
     cout << "    Histo Name:           " << hist->GetName() << endl;
     cout << "    Histo Title:          " << hist->GetTitle() << endl;
     cout << "    Systematic:           " << Systematic << endl;
@@ -1648,126 +1648,110 @@ void Plotter::ApplyMCATNLOWeight(TH1* hist, TString Systematic, TString Shift, T
     cout << "    The factor is:        " << MCATNLO_ScaleFactor << endl;
     cout << "    The inverse of it is: " << MCATNLO_ScaleFactorInv << endl;
     cout << endl;
-  
+
     // Apply the weight
     hist->Scale(MCATNLO_ScaleFactorInv);
-  
+
 }
 
 void Plotter::fillSystHisto()
 {
-	 
+
   TH1::AddDirectory(kFALSE);
-  if(!initialized){ 
+  if(!initialized){
     hists.clear();
     systhistsUp.clear();
     systhistsDown.clear();
     
     // Fill nominal sample
     for(unsigned int i=0; i<dataset.size(); i++){
-      TFile *ftemp = TFile::Open(dataset[i]);
-      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
-      
- 
-      
-      if(name.Contains("Lepton")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-      if(name.Contains("BJet")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("BJet",4,"AntiBJet",8);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-      if(name.Contains("Top")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("Top",3,"AntiTop",7);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-                 
-     
-      setHHStyle(*gStyle);
-      //gStyle->SetErrorX(0);
-      hists.push_back(*hist);
-      //ftemp->Close("R");
-      //delete hist;
-      delete ftemp;
+        TFile *ftemp = TFile::Open(dataset[i]);
+        TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+        
+        if(name.Contains("Lepton")){
+            TString stemp = name;
+            stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+        if(name.Contains("BJet")){
+            TString stemp = name;
+            stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+        if(name.Contains("Top")){
+            TString stemp = name;
+            stemp.ReplaceAll("Top",3,"AntiTop",7);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+
+        setHHStyle(*gStyle);
+        hists.push_back(*hist);
+        delete ftemp;
     }
-    
-    
+
     // Fill up-shifted sample 
     for(unsigned int i=0; i<datasetUp.size(); i++){ 
-      TFile *ftemp = TFile::Open(datasetUp[i]);
-      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
-      if(name.Contains("BJet")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("BJet",4,"AntiBJet",8);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-      if(name.Contains("Lepton")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-      if(name.Contains("Top")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("Top",3,"AntiTop",7);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-      
-      
-      
-      // Apply Scale Factor for MC@NLO
-      if ( legendsSyst.size() > 0 ) { 
-      	ApplyMCATNLOWeight(hist, legendsSyst.back(), "Up", datasetUp[i]);
-      } 
-      
-      setHHStyle(*gStyle);
-      //gStyle->SetErrorX(0);
-      systhistsUp.push_back(*hist);
-      delete ftemp;
+        TFile *ftemp = TFile::Open(datasetUp[i]);
+        TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+        if(name.Contains("BJet")){
+            TString stemp = name;
+            stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+        if(name.Contains("Lepton")){
+            TString stemp = name;
+            stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+        if(name.Contains("Top")){
+            TString stemp = name;
+            stemp.ReplaceAll("Top",3,"AntiTop",7);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+
+        // Apply Scale Factor for MC@NLO
+        if ( legendsSyst.size() > 0 ) {ApplyMCATNLOWeight(hist, legendsSyst.back(), "Up", datasetUp[i]);}
+
+        setHHStyle(*gStyle);
+        systhistsUp.push_back(*hist);
+        delete ftemp;
     }
     
     // Fill down-shifted sample
     for(unsigned int i=0; i<datasetDown.size(); i++){
-      TFile *ftemp = TFile::Open(datasetDown[i]);
-      TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();     
-      if(name.Contains("BJet")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("BJet",4,"AntiBJet",8);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-      if(name.Contains("Lepton")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-       	hist->Add(hist2);
-      }
-      if(name.Contains("Top")){
-      	TString stemp = name;
-	    stemp.ReplaceAll("Top",3,"AntiTop",7);
-	    TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();     
-      	hist->Add(hist2);
-      }
-      
-      // Apply Scale Factor for MC@NLO
-      if ( legendsSyst.size() > 0 ) {
-          ApplyMCATNLOWeight(hist, legendsSyst.back(), "Down", datasetDown[i]);
-      }
+        TFile *ftemp = TFile::Open(datasetDown[i]);
+        TH1D *hist = (TH1D*)ftemp->Get(name)->Clone();
+        if(name.Contains("BJet")){
+            TString stemp = name;
+            stemp.ReplaceAll("BJet",4,"AntiBJet",8);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+        if(name.Contains("Lepton")){
+            TString stemp = name;
+            stemp.ReplaceAll("Lepton",6,"AntiLepton",10);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
+        if(name.Contains("Top")){
+            TString stemp = name;
+            stemp.ReplaceAll("Top",3,"AntiTop",7);
+            TH1D *hist2 = (TH1D*)ftemp->Get(stemp)->Clone();
+            hist->Add(hist2);
+        }
 
-      
-      setHHStyle(*gStyle);
-      //gStyle->SetErrorX(0);
-      systhistsDown.push_back(*hist);
-      delete ftemp;
+        // Apply Scale Factor for MC@NLO
+        if ( legendsSyst.size() > 0 ) {ApplyMCATNLOWeight(hist, legendsSyst.back(), "Down", datasetDown[i]);}
+
+        setHHStyle(*gStyle);
+        systhistsDown.push_back(*hist);
+        delete ftemp;
     }
     initialized=true;
   }
@@ -1782,16 +1766,10 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
   TCanvas * c = new TCanvas("","");
 
   THStack * stack=  new THStack("def", "def");
-  TLegend * leg =  new TLegend(0.70,0.55,0.98,0.85);
+  TLegend * leg =  new TLegend();
   leg->SetFillStyle(0);
   leg->SetBorderSize(0);
-  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
-  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 - leg->GetNRows()*0.04);
-  leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
-  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
   TH1D *drawhists[hists.size()];
-
-
 
   std::stringstream ss;
   ss << DYScale[channelType];
@@ -1804,54 +1782,43 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
   leg->SetBorderSize(0);
   c->SetName("");
   c->SetTitle("");
+  double lumiCORR = 175.3/165.6;// Correction to the measured signal sample normalization, required in the Final Reading
   for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
     drawhists[i]=(TH1D*) hists[i].Clone();
     if(rebin>1) drawhists[i]->Rebin(rebin);
     setStyle(*drawhists[i], i);
     if(legends[i] != "Data"){
-      if(legends[i] == legends[0]){
-	    drawhists[0]->Add(drawhists[i]);
-      }
+        if(legends[i] == legends[0]){drawhists[0]->Add(drawhists[i]);}
 
-      if(legends[i] == "t#bar{t} Signal"){signalHist = i;}
-      if((legends[i] == DYEntry) && channelType!=2 ){
-	    drawhists[i]->Scale(DYScale[channelType]);
-      }
-      if(i > 1){
-	    if(legends[i] != legends[i-1]){
-	      legchange = i; 
-	      if((legends[i] == DYEntry)&& DYScale[channelType] != 1) leg->AddEntry(drawhists[i], legends[i],"f");
-	      else leg->AddEntry(drawhists[i], legends[i] ,"f");
-	    }else{
-	      drawhists[legchange]->Add(drawhists[i]);	      
-	    }
-      }
+        if(legends[i] == "t#bar{t} Signal"){
+            drawhists[i]->Scale(lumiCORR);
+            signalHist = i;
+        }
+        if(legends[i] == "t#bar{t} Other"){drawhists[i]->Scale(lumiCORR);}
+        if((legends[i] == DYEntry) && channelType!=2 ){drawhists[i]->Scale(DYScale[channelType]);}
+        if(i > 1){
+            if(legends[i] != legends[i-1]){
+                legchange = i; 
+                if((legends[i] == DYEntry)&& DYScale[channelType] != 1) leg->AddEntry(drawhists[i], legends[i],"f");
+                else leg->AddEntry(drawhists[i], legends[i] ,"f");
+            }
+            else{drawhists[legchange]->Add(drawhists[i]);}
+        }
 
-      if(i!=(hists.size()-1)){
-	if(legends[i]!=legends[i+1]){
-	  //cout<<legends[i]<<endl;
-	  drawhists[i]->SetLineColor(1);
-	}
-      }else{
-	drawhists[i]->SetLineColor(1);
-      }
+        if(i!=(hists.size()-1)){if(legends[i]!=legends[i+1]){drawhists[i]->SetLineColor(1);}}
+        else{drawhists[i]->SetLineColor(1);}
 
-
-      if(legends[i] != legends[i-1]){
-	drawhists[i]->SetLineColor(1);
-	stack->Add(drawhists[i]); 
-      }
+        if(legends[i] != legends[i-1]){
+            drawhists[i]->SetLineColor(1);
+            stack->Add(drawhists[i]); 
+        }
     }
     else{
-      if(i==0) leg->AddEntry(drawhists[i], legends[i] ,"pe");
-      if(i>0){
-	    if(legends[i] != legends[i-1]){
-	      leg->AddEntry(drawhists[i], legends[i] ,"pe");
-	    }
-	    if(legends[i] == legends[0]){
-	      drawhists[0]->Add(drawhists[i]);
-	    }
-      }
+        if(i==0) leg->AddEntry(drawhists[i], legends[i] ,"pe");
+        if(i>0){
+            if(legends[i] != legends[i-1]){leg->AddEntry(drawhists[i], legends[i] ,"pe");}
+            if(legends[i] == legends[0]){drawhists[0]->Add(drawhists[i]);}
+        }
     }
   } 
   
@@ -1866,19 +1833,14 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
   for (int i = 1; i < l->GetEntries(); ++i) {
     aaa=aaa+"a"; 
     stacksum->Add((TH1D*)l->At(i));
-    if(legends[datafiles+i] == "t#bar{t} Other") {
-      stacksum->Write(name+"_"+channel+aaa+"_Background");
-    }
-    if(legends[datafiles+i] == "t#bar{t} Signal") {
-	stacksum->Write(name+"_"+channel+aaa+"_Signal");
-    }
-
-  } 
+    if(legends[datafiles+i] == "t#bar{t} Other")  {stacksum->Write(name+"_"+channel+aaa+"_Background");}
+    if(legends[datafiles+i] == "t#bar{t} Signal") {stacksum->Write(name+"_"+channel+aaa+"_Signal");}
+  }
   f0->Close();
   //stat uncertainty::make a function 
   TH1D* syshist =0;
   syshist = (TH1D*)stacksum->Clone();
-  double lumierr = 0.045; 
+  double lumierr = 0.022;
   for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
     
     Double_t binc = 0;
@@ -1888,9 +1850,14 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
     Double_t binerr2 = binc*binc*lumierr*lumierr;
     Double_t topunc = 0; // uncertainty on top xsec
     
-    //Kidonakis
-    double topxsec = 165.6;
-    double topxsecErr2 = 2.2*2.2 + 4.4*4.4 + 5.5*5.5; //topxsecErr2 = lumiErr*lumiErr + topxsecScaleErr*topxsecScaleErr + topxsecPDFErr*topxsecPDFErr
+//     //Kidonakis
+//     double topxsec = 165.6;
+//     double topxsecErr2 = 2.2*2.2 + 4.4*4.4 + 5.5*5.5; //topxsecErr2 = lumiErr*lumiErr + topxsecScaleErr*topxsecScaleErr + topxsecPDFErr*topxsecPDFErr
+
+    //Measured Incl XSection: Combined Cross Section: 175.278 +/- 1.98487(stat) +/- 15.5638(sys)
+    double topxsec = 175.3;
+    double topxsecErr2 = 2.2*2.2 + 1.98*1.98 + 15.56*15.56; //topxsecErr2 = lumiErr*lumiErr + stat*stat + syst*syst
+
 
     double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
     topunc += drawhists[signalHist]->GetBinContent(i)*topRelUnc;
@@ -1902,7 +1869,7 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
   if(logY)c->SetLogy();
   syshist->SetFillStyle(3004);
   syshist->SetFillColor(kBlack);
-  leg->AddEntry( syshist, "Uncertainty", "f" );
+  //leg->AddEntry( syshist, "Uncertainty", "f" );
   
   drawhists[0]->SetMinimum(ymin);
   if(rangemin!=0 || rangemax!=0)drawhists[0]->SetAxisRange(rangemin, rangemax, "X");
@@ -1928,19 +1895,17 @@ void Plotter::write() // do scaling, stacking, legending, and write in file
   drawhists[0]->GetYaxis()->SetTitle(ytitle);
   
   drawhists[0]->Draw("e1"); //############## 
-  //drawhists[0]->Draw("e"); //############## 
   
   stack->Draw("same HIST");
   gPad->RedrawAxis();
   TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");//this is frustrating and stupid but apparently necessary...
   setex1->Draw();
   syshist->SetMarkerStyle(0);//<===================
-  syshist->Draw("same,E2");
+  //syshist->Draw("same,E2");
   TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
   setex2->Draw();
   drawhists[0]->Draw("same,e1"); //#############
-  //drawhists[0]->Draw("same,e"); //#############
-  
+
   DrawCMSLabels(false, lumi);
   
   DrawDecayChLabel(channelLabel[channelType]);    
@@ -1974,14 +1939,16 @@ void Plotter::setStyle(TH1 &hist, unsigned int i)
   if(legends[i] == "Data"){
     hist.SetFillColor(0);
     hist.SetMarkerStyle(20); 
-    hist.SetMarkerSize(1.);
+    hist.SetMarkerSize(1.2);
     hist.SetLineWidth(1);
     hist.GetXaxis()->SetLabelFont(42);
     hist.GetYaxis()->SetLabelFont(42);
+    hist.GetXaxis()->SetTitleSize(0.05);
+    hist.GetYaxis()->SetTitleSize(0.05);
     hist.GetXaxis()->SetTitleFont(42);
     hist.GetYaxis()->SetTitleFont(42);
     hist.GetYaxis()->SetTitleOffset(1.7);
-    hist.GetXaxis()->SetTitleOffset(1.25);
+    hist.GetXaxis()->SetTitleOffset(1.);
     if(name.Contains("pT") ||name.Contains("Mass") ){
       hist.GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
       if(name.Contains("Rapidity")) hist.GetXaxis()->SetTitle(XAxis);
@@ -2003,22 +1970,23 @@ void Plotter::setStyle(TH1D &hist, unsigned int i)
 
   if(legends[i] == "Data"){
     hist.SetMarkerStyle(20); 
-    hist.SetMarkerSize(1.);
+    hist.SetMarkerSize(1.2);
     hist.SetLineWidth(1);
     hist.GetXaxis()->SetLabelFont(42);
     hist.GetYaxis()->SetLabelFont(42);
-    hist.GetXaxis()->SetTitleSize(0.04);
-    hist.GetYaxis()->SetTitleSize(0.04);
+    hist.GetXaxis()->SetTitleSize(0.05);
+    hist.GetYaxis()->SetTitleSize(0.05);
     hist.GetXaxis()->SetTitleFont(42);
     hist.GetYaxis()->SetTitleFont(42);
+    hist.GetYaxis()->SetTitleOffset(1.7);
+    hist.GetXaxis()->SetTitleOffset(1.);
     if(name.Contains("pT") || name.Contains("Mass")){
       hist.GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
       if(name.Contains("Rapidity")) hist.GetXaxis()->SetTitle(XAxis);
     }else    hist.GetXaxis()->SetTitle(XAxis);
     //hist.GetXaxis()->SetTitle(XAxis);
     hist.GetYaxis()->SetTitle(YAxis);
-    hist.GetYaxis()->SetTitleOffset(1.7);
-    hist.GetXaxis()->SetTitleOffset(1.25);
+
   }
 }
 
@@ -3204,13 +3172,13 @@ void Plotter::PlotDiffXSec(){
     TGraphAsymmErrors *tga_DiffXSecPlot = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecStatErrorPlot, DiffXSecStatErrorPlot);
     tga_DiffXSecPlot->SetMarkerStyle(1);
     tga_DiffXSecPlot->SetMarkerColor(kBlack);
-    tga_DiffXSecPlot->SetMarkerSize(1);
+    tga_DiffXSecPlot->SetMarkerSize(1.2);
     tga_DiffXSecPlot->SetLineColor(kBlack);
    
     TGraphAsymmErrors *tga_DiffXSecPlotwithSys = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecTotalErrorPlot, DiffXSecTotalErrorPlot);
     tga_DiffXSecPlotwithSys->SetMarkerStyle(20);
     tga_DiffXSecPlotwithSys->SetMarkerColor(kBlack);
-    tga_DiffXSecPlotwithSys->SetMarkerSize(1);
+    tga_DiffXSecPlotwithSys->SetMarkerSize(1.2);
     tga_DiffXSecPlotwithSys->SetLineColor(kBlack);
 
     //    for( Int_t j = 0; j< GenPlotTheory->GetNbinsX(); j++ ){
@@ -3443,7 +3411,8 @@ void Plotter::PlotDiffXSec(){
         Kidoth1_Binned->SetLineWidth(2);
         Kidoth1_Binned->SetLineColor(kOrange-3); //########################
         Kidoth1_Binned->SetLineStyle(1);
-        Kidoth1_Binned->Draw("SAME");
+        if(name.Contains("ToppT")) {Kidoth1_Binned->Draw("SAME, ][");};
+        if(name.Contains("TopRapidity")){Kidoth1_Binned->Draw("SAME");};
         }
         //MCFMHist->Draw("SAME");
         //h_DiffXSec->Draw("SAME, EP0");
@@ -3454,14 +3423,9 @@ void Plotter::PlotDiffXSec(){
         SmoothMadgraph->Smooth(10);
         SmoothMadgraph->Draw("SAME, L");
     }
-    else if( !name.Contains("HypTTBarpT") && !name.Contains("HypLeptonpT")){
+    else if( !name.Contains("HypTTBarpT") && !name.Contains("HypLeptonpT") && !name.Contains("HypBJetpT")){
         TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
         SmoothMadgraph->Smooth(4);
-        SmoothMadgraph->Draw("SAME, L");
-    }
-    else if( !name.Contains("HypTTBarpT")){
-        TH1D *SmoothMadgraph =(TH1D*)GenPlotTheory->Clone("SmoothMadgraph");
-        SmoothMadgraph->Smooth(2);
         SmoothMadgraph->Draw("SAME, L");
     }
     else {GenPlotTheory->Draw("SAME,C");} //### 150512 ###    
@@ -3523,7 +3487,7 @@ void Plotter::PlotDiffXSec(){
     }
     TH1D* syshist =0;
     syshist = (TH1D*)stacksum->Clone();
-    double lumierr = 0.045; 
+    double lumierr = 0.022; 
     //stat uncertainty::make a function 
     for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
       
@@ -3548,7 +3512,7 @@ void Plotter::PlotDiffXSec(){
     leg = ControlLegend(hists.size(), varhistsPlotting, legends, leg);
     syshist->SetFillStyle(3004);
     syshist->SetFillColor(kBlack);
-    leg->AddEntry( syshist, "Uncertainty", "f" );
+    //leg->AddEntry( syshist, "Uncertainty", "f" );
 
 
     varhists[0]->SetMaximum(1.5*varhists[0]->GetBinContent(varhists[0]->GetMaximumBin()));
@@ -3868,12 +3832,7 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TSt
     OrderedLegends.push_back("QCD Multijet");
       
     leg->Clear();
-    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
-    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.30);
-    leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
-    leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg->SetTextFont(42);
-    leg->SetTextSize(0.03);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     leg->SetTextAlign(12);
@@ -3891,6 +3850,12 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TSt
             }
         }
     }
+    leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
+    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() -0.05 - 0.03 * leg->GetNRows());
+    leg->SetX2NDC(1.03- gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()-0.8*gStyle->GetTickLength());
+    leg->SetTextSize(0.035);
+    
     return leg;
 }
 
@@ -3909,12 +3874,7 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1D* drawhists[], std::vector<TS
     OrderedLegends.push_back("QCD Multijet");
     
     leg->Clear();
-    leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
-    leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.30);
-    leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
-    leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg->SetTextFont(42);
-    leg->SetTextSize(0.03);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     leg->SetTextAlign(12);
@@ -3932,6 +3892,11 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1D* drawhists[], std::vector<TS
             }
         }
     }
+    leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
+    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() -0.05 - 0.03 * leg->GetNRows());
+    leg->SetX2NDC(1.03- gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()-0.8*gStyle->GetTickLength());
+    leg->SetTextSize(0.035);
     return leg;
 }
 
