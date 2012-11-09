@@ -9,6 +9,8 @@ writeFullHadTree = cms.EDAnalyzer("FullHadTreeWriter",
                                   MuonSrc = cms.InputTag('selectedPatMuons'),
                                   ## electrons
                                   ElectronSrc = cms.InputTag('selectedPatElectrons'),
+                                  ## gluon tag
+                                  GluonTagSrc = cms.InputTag("GluonTagProducer","GluonTag"),
                                   ### genJets
                                   #GenJetSrc = cms.InputTag('ak5GenJets','','FullHadTreeWriter'), 
                                   ### genPartons

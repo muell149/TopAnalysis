@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <TMath.h>
+
 #include "TopAnalysis/TopAnalyzer/interface/TopAngles.h"
 #include "TopAnalysis/TopAnalyzer/interface/FullHadTreeWriter.h"
 #include "TopQuarkAnalysis/TopEventSelection/interface/TtFullHadSignalSel.h"
@@ -26,6 +28,7 @@ FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   METSrc_            (cfg.getParameter<edm::InputTag>("METSrc")),
   MuonSrc_           (cfg.getParameter<edm::InputTag>("MuonSrc")),
   ElectronSrc_       (cfg.getParameter<edm::InputTag>("ElectronSrc")),
+  GluonTagSrc_       (cfg.getParameter<edm::InputTag>("GluonTagSrc")),
   //GenJetSrc_         (cfg.getParameter<edm::InputTag>("GenJetSrc")),
   //GenPartonSrc_      (cfg.getParameter<edm::InputTag>("GenPartonSrc")),
   FitSrc_            (cfg.getParameter<edm::InputTag>("FitSrc")),
@@ -51,6 +54,8 @@ FullHadTreeWriter::~FullHadTreeWriter()
 void
 FullHadTreeWriter::beginJob()
 {
+  //TEST();
+
   // define TFileService which takes care of writing contents to root file
   edm::Service<TFileService> fs;
   if( !fs ) throw edm::Exception( edm::errors::Configuration, "TFile Service is not registered in cfg file" );
@@ -182,6 +187,8 @@ FullHadTreeWriter::beginJob()
     chargeMulti      = new short[kMAX];
     pdgId            = new short[kMAX];
     partonFlavour    = new short[kMAX];
+
+    gluonTag         = new float[kMAX];
     
     EtSin2Theta      = new float[kMAX];
     theta            = new float[kMAX];
@@ -231,6 +238,8 @@ FullHadTreeWriter::beginJob()
       pdgId            [i] =    0 ;
       partonFlavour    [i] =    0 ;
       
+      gluonTag         [i] = -999.;
+
       EtSin2Theta      [i] = -1.;
       theta            [i] = -100.;
       sinTheta         [i] = -100 ;
@@ -279,6 +288,7 @@ FullHadTreeWriter::beginJob()
     tree->Branch("chargeMulti"     , chargeMulti     , "chargeMulti[Njet]/S"   );
     tree->Branch("pdgId"           , pdgId           , "pdgId[Njet]/S"         );
     tree->Branch("partonFlavour"   , partonFlavour   , "partonFlavour[Njet]/S" );
+    tree->Branch("gluonTag"        , gluonTag        , "gluonTag[Njet]/F"   );
     tree->Branch("EtSin2Theta"     , EtSin2Theta     , "EtSin2Theta[Njet]/F"   );
     tree->Branch("theta"           , theta           , "theta[Njet]/F"         );
     tree->Branch("sinTheta"        , sinTheta        , "sinTheta[Njet]/F"      );
@@ -633,37 +643,42 @@ FullHadTreeWriter::beginJob()
     chi2    = -1.;
     topMass = -1.;
     ttMass  = -1.;
-    comboTypeValue = 0;
-    tree->Branch("prob"     , &prob          , "prob/D"     );
-    tree->Branch("chi2"     , &chi2          , "chi2/D"     );
-    tree->Branch("topMass"  , &topMass       , "topMass/D"  );
-    tree->Branch("ttMass"   , &ttMass        , "ttMass/D"   );
-    tree->Branch("comboType", &comboTypeValue, "comboType/s");
+    comboTypeID = -99;
+    comboTypeValue = -99;
+    tree->Branch("prob"       , &prob          , "prob/D"       );
+    tree->Branch("chi2"       , &chi2          , "chi2/D"       );
+    tree->Branch("topMass"    , &topMass       , "topMass/D"    );
+    tree->Branch("ttMass"     , &ttMass        , "ttMass/D"     );
+    tree->Branch("comboTypeID", &comboTypeID   , "comboTypeID/S");
+    tree->Branch("comboType"  , &comboTypeValue, "comboType/S"  );
 
     // all masses, probs etc. needed fo mass measurment
-    nCombos    = 0;
-    probs      = new double[kMAXCombo];
-    chi2s      = new double[kMAXCombo];
-    topMasses  = new double[kMAXCombo];
-    w1Mass     = new double[kMAXCombo];
-    w2Mass     = new double[kMAXCombo];
-    comboTypes = new short [kMAXCombo];
+    nCombos      = 0;
+    probs        = new double[kMAXCombo];
+    chi2s        = new double[kMAXCombo];
+    topMasses    = new double[kMAXCombo];
+    w1Mass       = new double[kMAXCombo];
+    w2Mass       = new double[kMAXCombo];
+    comboTypeIDs = new short [kMAXCombo];
+    comboTypes   = new short [kMAXCombo];
 
     for(unsigned int i = 0; i < kMAXCombo; ++i) {
-      probs[i]      = -1.;
-      chi2s[i]      = -1.;
-      topMasses[i]  = -1.;
-      w1Mass[i]     = -1.; 
-      w2Mass[i]     = -1.;
-      comboTypes[i] =  0 ;
+      probs[i]        = -1.;
+      chi2s[i]        = -1.;
+      topMasses[i]    = -1.;
+      w1Mass[i]       = -1.; 
+      w2Mass[i]       = -1.;
+      comboTypeIDs[i] = -99;
+      comboTypes[i]   = -99;
     }
-    tree->Branch("nCombos"   , &nCombos   , "nCombos/i"            );
-    tree->Branch("probs"     ,  probs     , "probs[nCombos]/D"     );
-    tree->Branch("chi2s"     ,  chi2s     , "chi2s[nCombos]/D"     );
-    tree->Branch("topMasses" ,  topMasses , "topMasses[nCombos]/D" );
-    tree->Branch("w1Mass"    ,  w1Mass    , "w1Mass[nCombos]/D"    );
-    tree->Branch("w2Mass"    ,  w2Mass    , "w2Mass[nCombos]/D"    );
-    tree->Branch("comboTypes",  comboTypes, "comboTypes[nCombos]/s");
+    tree->Branch("nCombos"     , &nCombos     , "nCombos/i"              );
+    tree->Branch("probs"       ,  probs       , "probs[nCombos]/D"       );
+    tree->Branch("chi2s"       ,  chi2s       , "chi2s[nCombos]/D"       );
+    tree->Branch("topMasses"   ,  topMasses   , "topMasses[nCombos]/D"   );
+    tree->Branch("w1Mass"      ,  w1Mass      , "w1Mass[nCombos]/D"      );
+    tree->Branch("w2Mass"      ,  w2Mass      , "w2Mass[nCombos]/D"      );
+    tree->Branch("comboTypeIDs",  comboTypeIDs, "comboTypeIDs[nCombos]/S");
+    tree->Branch("comboTypes"  ,  comboTypes  , "comboTypes[nCombos]/S"  );
 
     // pt asymmetry of b and W boson
     ptAsy    = -100.;
@@ -822,6 +837,9 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   edm::Handle<edm::View< pat::Jet > > jets_h;
   event.getByLabel(JetSrc_, jets_h);
   
+  edm::Handle<edm::ValueMap<float> >  gluonTagsHandle;
+  event.getByLabel(GluonTagSrc_, gluonTagsHandle);
+
   //edm::Handle<edm::View< reco::GenJet > > genJets_h;
   //event.getByLabel(GenJetSrc_, genJets_h);
   
@@ -915,6 +933,13 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 	pdgId        [i] = (jet->genParticle()) ? jet->genParticle()->pdgId() : 0;
 	partonFlavour[i] = jet->partonFlavour();
       }
+
+      if (gluonTagsHandle.isValid()){
+	edm::RefToBase<pat::Jet> jetRef(edm::Ref<edm::View<pat::Jet> >(jets_h,i));
+	gluonTag[i] = (*gluonTagsHandle)[jetRef];
+      }
+      else
+	gluonTag[i] = -999.;
 
       for(size_t ibTag = 0; ibTag < bTagName_.size(); ++ibTag){
 
@@ -1152,16 +1177,18 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   chi2      = -1.;
   topMass   = -1.;
   ttMass    = -1.;
-  comboTypeValue = 0;
+  comboTypeID = -99;
+  comboTypeValue = -99;
 
   nCombos = 0;
   for(unsigned int i = 0; i < kMAXCombo; ++i) {
-    probs     [i] = -1.;
-    chi2s     [i] = -1.;
-    topMasses [i] = -1.;
-    w1Mass    [i] = -1.; 
-    w2Mass    [i] = -1.;
-    comboTypes[i] =  0 ;
+    probs       [i] = -1.;
+    chi2s       [i] = -1.;
+    topMasses   [i] = -1.;
+    w1Mass      [i] = -1.; 
+    w2Mass      [i] = -1.;
+    comboTypeIDs[i] = -99;
+    comboTypes  [i] = -99;
   }
 
   ptAsy    = -100.;
@@ -1284,10 +1311,14 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 								     fullHadEvent_h->bBar     ("kKinFit")->py(),
 								     fullHadEvent_h->bBar     ("kKinFit")->pz(),
 								     fullHadEvent_h->bBar     ("kKinFit")->energy());
-      if( fullHadEvent_h->isHypoValid("kGenMatch") )
-	comboTypeValue = comboType(fullHadEvent_h);
-      if( !fullHadEvent_h->isHypoValid("kGenMatch") )
-	comboTypeValue = 5;
+      if( fullHadEvent_h->isHypoValid("kGenMatch") ){
+	comboTypeID    = comboTypeIDCalculator(fullHadEvent_h);
+	comboTypeValue = comboType(comboTypeID);
+      }
+      if( !fullHadEvent_h->isHypoValid("kGenMatch") ){
+	comboTypeID    = -10;
+	comboTypeValue = -10;
+      }
 
       ptAsy    = (fullHadEvent_h->b   ("kKinFit")->pt()-fullHadEvent_h->wPlus ("kKinFit")->pt())/(fullHadEvent_h->b   ("kKinFit")->pt()+fullHadEvent_h->wPlus ("kKinFit")->pt());
       ptAsyBar = (fullHadEvent_h->bBar("kKinFit")->pt()-fullHadEvent_h->wMinus("kKinFit")->pt())/(fullHadEvent_h->bBar("kKinFit")->pt()+fullHadEvent_h->wMinus("kKinFit")->pt());
@@ -1335,12 +1366,19 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 	  std::cout << "Maximum number of combinations per event (" <<  kMAXCombo << ") reached, stopping and continuing with next event!" << std::endl;
 	  break;
 	}
-	probs     [i] = fullHadEvent_h->fitProb(i);
-	chi2s     [i] = fullHadEvent_h->fitChi2(i);
-	topMasses [i] = fullHadEvent_h->top("kKinFit",i)->mass();
-	w1Mass    [i] = (((TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQ]))->operator+(*(TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQBar]))).M();
-	w2Mass    [i] = (((TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightP]))->operator+(*(TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightPBar]))).M();
-	comboTypes[i] = fullHadEvent_h->isHypoValid("kGenMatch") ? comboType(fullHadEvent_h,i) : 5;
+	probs       [i] = fullHadEvent_h->fitProb(i);
+	chi2s       [i] = fullHadEvent_h->fitChi2(i);
+	topMasses   [i] = fullHadEvent_h->top("kKinFit",i)->mass();
+	w1Mass      [i] = (((TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQ]))->operator+(*(TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQBar]))).M();
+	w2Mass      [i] = (((TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightP]))->operator+(*(TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightPBar]))).M();
+	if(fullHadEvent_h->isHypoValid("kGenMatch")){
+	  comboTypeIDs[i] = comboTypeIDCalculator(fullHadEvent_h,i);
+	  comboTypes  [i] = comboType(comboTypeIDs[i] );
+	}
+	else{
+	  comboTypeIDs[i] = -10;
+	  comboTypes  [i] = -10;
+	}
       }
     }
   }
@@ -1394,7 +1432,7 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 
   tree->Fill();
 }
-
+/*
 /// function to find types of jet-combinations in KinFits (1 right, 2 branches right, but inner-branche particles mixup, 3 inter-branch mixup, 4 missing jet)
 int
 FullHadTreeWriter::comboType(edm::Handle<TtFullHadronicEvent> fullHadEvent_h, unsigned int whichCombo)
@@ -1487,6 +1525,248 @@ FullHadTreeWriter::comboType(edm::Handle<TtFullHadronicEvent> fullHadEvent_h, un
 
   return 4;
 }
+*/
+
+short
+FullHadTreeWriter::TESTHelper(int *jetIndexGenHelperPtr)
+{
+  int jetIndexFitHelper[6] = {1,2,3,4,5,6};
+  int jetIndexGenHelper[6] = {jetIndexGenHelperPtr[0],jetIndexGenHelperPtr[1],jetIndexGenHelperPtr[2],jetIndexGenHelperPtr[3],jetIndexGenHelperPtr[4],jetIndexGenHelperPtr[5]};
+
+  std::vector<int> jetIndexFit(jetIndexFitHelper, jetIndexFitHelper + sizeof(jetIndexFitHelper)/sizeof(int));
+  std::vector<int> jetIndexGen(jetIndexGenHelper, jetIndexGenHelper + sizeof(jetIndexGenHelper)/sizeof(int));
+
+  int comboTypeID = comboTypeAlgo(jetIndexFit, jetIndexGen);
+
+  std::vector<int> jetIndexFitTest = comboTypeAlgoInverted(jetIndexGen, comboTypeID);
+
+  std::cout << "TEST: ";
+  for(unsigned int i = 0; i < jetIndexFitTest.size(); ++i){
+    std::cout << jetIndexFitTest[i] << ",";
+  }
+  std::cout << std::endl;
+
+  return comboTypeID;
+}
+
+void
+FullHadTreeWriter::TEST()
+{
+  std::vector<short> correctTypeIDs;
+  std::vector<short> innerBranchMixingTypeIDs;
+  std::vector<short> crossBranchMixingTypeIDs;
+
+  int jetIndexFitHelper[]  = {1,2,3,4,5,6};
+  std::vector<int> jetIndexFit(jetIndexFitHelper, jetIndexFitHelper + sizeof(jetIndexFitHelper)/sizeof(int));
+
+  int jetIndexGenHelper1[] = {1,2,3,4,5,6}; // 0
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper1));
+
+  int jetIndexGenHelper2[] = {1,3,2,4,5,6}; // 24
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper2));
+
+  int jetIndexGenHelper3[] = {1,2,3,4,6,5}; // 1
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper3));
+
+  int jetIndexGenHelper4[] = {1,3,2,4,6,5}; // 25
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper4));
+
+  int jetIndexGenHelper5[] = {4,5,6,1,2,3}; // 450
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper5));
+
+  int jetIndexGenHelper6[] = {4,6,5,1,2,3}; // 451
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper6));
+
+  int jetIndexGenHelper7[] = {4,5,6,1,3,2}; // 474
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper7));
+
+  int jetIndexGenHelper8[] = {4,6,5,1,3,2}; // 475
+  correctTypeIDs.push_back(TESTHelper(jetIndexGenHelper8));
+
+  int jetIndexGenHelper9[] = {1,2,3,5,4,6}; // 2
+  innerBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper9));
+
+  int jetIndexGenHelper10[] = {1,2,3,6,4,5}; // 3
+  innerBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper10));
+
+  int jetIndexGenHelper11[] = {1,2,3,5,6,4}; // 4
+  innerBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper11));
+
+  int jetIndexGenHelper12[] = {1,2,3,6,5,4}; // 5
+  innerBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper12));
+
+  int jetIndexGenHelper100[] = {1,2,4,3,5,6}; // 6
+  crossBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper100));
+
+  int jetIndexGenHelper101[] = {1,2,4,3,6,5}; // 7
+  crossBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper101));
+
+  int jetIndexGenHelper102[] = {1,2,4,5,3,6}; // 8
+  crossBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper102));
+
+  int jetIndexGenHelper103[] = {1,2,6,3,4,5}; // 9
+  crossBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper103));
+
+  int jetIndexGenHelper107[] = {1,2,4,6,3,5}; // 13
+  crossBranchMixingTypeIDs.push_back(TESTHelper(jetIndexGenHelper107));
+
+  for(int idx = 0; idx < 721; ++idx){
+    std::vector<int> jetIndexGenTest1 = comboTypeAlgoInverted(jetIndexFit, idx);
+    std::cout << "combo for " << idx << ": ";
+    for(unsigned int i = 0; i < jetIndexGenTest1.size(); ++i){
+      std::cout << jetIndexGenTest1[i] << ",";
+    }
+    std::cout << std::endl;
+  }
+
+  std::cout << "correct comboTypes: ";
+  for(unsigned int i = 0; i < correctTypeIDs.size(); ++i){
+    std::cout << correctTypeIDs[i] << ", ";
+  }
+  std::cout << std::endl;
+  std::cout << "innerBranchMixing comboTypes: ";
+  for(unsigned int i = 0; i < innerBranchMixingTypeIDs.size(); ++i){
+    std::cout << innerBranchMixingTypeIDs[i] << ", ";
+  }
+  std::cout << std::endl;
+  std::cout << "crossBranchMixing comboTypes: ";
+  for(unsigned int i = 0; i < crossBranchMixingTypeIDs.size(); ++i){
+    std::cout << crossBranchMixingTypeIDs[i] << ", ";
+  }
+  std::cout << std::endl;
+}
+
+/// function to find types of jet-combinations in KinFits (1 right, 2 one branche right, other branch inner-branch mixup, 3 both branches inner-branch mixup, 4 cross-branch mixup, -1 to -6 number of falsely picked jets)
+short
+FullHadTreeWriter::comboType(short comboTypeID)
+{
+  // falsely picked jets
+  if(comboTypeID < 0)
+    return comboTypeID;
+
+  // correct permutations
+  if(comboTypeID == 0 || comboTypeID == 1 || comboTypeID == 24 || comboTypeID == 25 || comboTypeID == 450 || comboTypeID == 451 || comboTypeID == 474 || comboTypeID == 475)
+    return 1;
+
+  // one branch mixup
+  if((comboTypeID >= 2 && comboTypeID <= 5) || (comboTypeID >= 26 && comboTypeID <= 29) || 
+     comboTypeID == 120 || comboTypeID <= 121 || comboTypeID == 144 || comboTypeID <= 145 || comboTypeID == 240 || comboTypeID <= 241 || comboTypeID == 264 || comboTypeID <= 265 || 
+     (comboTypeID >= 452 && comboTypeID <= 455) || (comboTypeID >= 476 && comboTypeID <= 479) || 
+     comboTypeID == 570 || comboTypeID <= 571 || comboTypeID == 594 || comboTypeID <= 595 || comboTypeID == 690 || comboTypeID <= 691 || comboTypeID == 714 || comboTypeID <= 715)
+    return 2;
+
+  // both branches mixup
+  if((comboTypeID >= 122 && comboTypeID <= 125) || (comboTypeID >= 146 && comboTypeID <= 149) || 
+     (comboTypeID >= 242 && comboTypeID <= 245) || (comboTypeID >= 266 && comboTypeID <= 269) || 
+     (comboTypeID >= 572 && comboTypeID <= 575) || (comboTypeID >= 596 && comboTypeID <= 599) || 
+     (comboTypeID >= 692 && comboTypeID <= 695) || (comboTypeID >= 716 && comboTypeID <= 719))
+    return 3;
+     
+  // mixup cross branches
+  if((comboTypeID >= 6 && comboTypeID <= 23) || (comboTypeID >= 30 && comboTypeID <= 119) || 
+     (comboTypeID >= 126 && comboTypeID <= 143) || (comboTypeID >= 150 && comboTypeID <= 239) || 
+     (comboTypeID >= 246 && comboTypeID <= 263) || (comboTypeID >= 270 && comboTypeID <= 449) || 
+     (comboTypeID >= 459 && comboTypeID <= 473) || (comboTypeID >= 480 && comboTypeID <= 569) || 
+     (comboTypeID >= 576 && comboTypeID <= 593) || (comboTypeID >= 600 && comboTypeID <= 689) || 
+     (comboTypeID >= 696 && comboTypeID <= 713) )
+    return 4;
+
+  return -37;
+}
+
+/// assign unique ID to every permutation type
+short
+FullHadTreeWriter::comboTypeIDCalculator(edm::Handle<TtFullHadronicEvent> fullHadEvent_h, unsigned int whichCombo)
+{
+  /// vector to store the jet indices
+  std::vector<int> jetIndexFit;
+  std::vector<int> jetIndexGen;
+
+  int lightQFit    = fullHadEvent_h->jetLeptonCombination("kKinFit",whichCombo)[TtFullHadEvtPartons::LightQ   ];
+  int lightQBarFit = fullHadEvent_h->jetLeptonCombination("kKinFit",whichCombo)[TtFullHadEvtPartons::LightQBar];
+  int bFit         = fullHadEvent_h->jetLeptonCombination("kKinFit",whichCombo)[TtFullHadEvtPartons::B        ];
+  int bBarFit      = fullHadEvent_h->jetLeptonCombination("kKinFit",whichCombo)[TtFullHadEvtPartons::BBar     ];
+  int lightPFit    = fullHadEvent_h->jetLeptonCombination("kKinFit",whichCombo)[TtFullHadEvtPartons::LightP   ];
+  int lightPBarFit = fullHadEvent_h->jetLeptonCombination("kKinFit",whichCombo)[TtFullHadEvtPartons::LightPBar];
+
+  int lightQGen    = fullHadEvent_h->jetLeptonCombination("kGenMatch")[TtFullHadEvtPartons::LightQ   ];
+  int lightQBarGen = fullHadEvent_h->jetLeptonCombination("kGenMatch")[TtFullHadEvtPartons::LightQBar];
+  int bGen         = fullHadEvent_h->jetLeptonCombination("kGenMatch")[TtFullHadEvtPartons::B        ];
+  int bBarGen      = fullHadEvent_h->jetLeptonCombination("kGenMatch")[TtFullHadEvtPartons::BBar     ];
+  int lightPGen    = fullHadEvent_h->jetLeptonCombination("kGenMatch")[TtFullHadEvtPartons::LightP   ];
+  int lightPBarGen = fullHadEvent_h->jetLeptonCombination("kGenMatch")[TtFullHadEvtPartons::LightPBar];
+
+  jetIndexFit.push_back(bFit);
+  jetIndexFit.push_back(lightQFit);
+  jetIndexFit.push_back(lightQBarFit);
+  jetIndexFit.push_back(bBarFit);
+  jetIndexFit.push_back(lightPFit);
+  jetIndexFit.push_back(lightPBarFit);
+
+  jetIndexGen.push_back(bGen);
+  jetIndexGen.push_back(lightQGen);
+  jetIndexGen.push_back(lightQBarGen);
+  jetIndexGen.push_back(bBarGen);
+  jetIndexGen.push_back(lightPGen);
+  jetIndexGen.push_back(lightPBarGen);
+
+  //std::cout << "Fit: " << bFit << ", " << lightQFit << ", " << lightQBarFit << ", " << bBarFit << ", " << lightPFit << ", " << lightPBarFit << std::endl;
+  //std::cout << "Gen: " << bGen << ", " << lightQGen << ", " << lightQBarGen << ", " << bBarGen << ", " << lightPGen << ", " << lightPBarGen << std::endl;
+
+  return comboTypeAlgo(jetIndexFit, jetIndexGen);
+}
+
+short
+FullHadTreeWriter::comboTypeAlgo(std::vector<int> jetIndexFit, std::vector<int> jetIndexGen)
+{
+  short result = 0;
+  short wrongJets = 0;
+  for(unsigned short iFit = 0; iFit < jetIndexFit.size(); ++iFit){
+    short fact = TMath::Factorial(jetIndexFit.size()-iFit-1);
+    //std::cout << "result = " << result;
+    bool foundPair = false;
+    for(unsigned short jGen = 0, jGenCount = 0; jGen < jetIndexGen.size(); ++jGen, ++jGenCount){
+      if(jetIndexGen.at(jGen) == -37){
+	--jGenCount;
+	continue;
+      }
+      if(jetIndexFit.at(iFit) == jetIndexGen.at(jGen)){
+	foundPair = true;
+	result += fact*(jGenCount);
+	//std::cout << " (" << iFit << "," << jGen << "," << jGenCount << ")";
+	jetIndexGen[jGen] = -37;
+      }
+    }
+    if(!foundPair){
+      ++wrongJets;
+    }
+    //std::cout << " -> " << result << std::endl;
+  }
+  if(wrongJets){
+    result = 0-wrongJets;
+  }
+
+  //std::cout << "result: " << result << std::endl;
+
+  return result;
+}
+
+std::vector<int>
+FullHadTreeWriter::comboTypeAlgoInverted(std::vector<int> jetIndexGen, short comboType)
+{
+  unsigned int lGen = jetIndexGen.size();
+  if(comboType<0 || comboType>=TMath::Factorial(lGen)) return std::vector<int>(0);
+  std::vector<int> result(lGen);
+  for(unsigned short iGen = 0; iGen < lGen; ++iGen){
+    int idx = lGen-iGen-1;
+    short fact = TMath::Factorial(idx);
+    short calc = comboType/fact;
+    result[iGen] = jetIndexGen.at(calc);
+    jetIndexGen.erase(jetIndexGen.begin()+calc);
+    comboType -= calc*fact;
+  }
+  return result;
+}
 
 void
 FullHadTreeWriter::endJob()
@@ -1534,6 +1814,8 @@ FullHadTreeWriter::endJob()
     delete[] pdgId;
     delete[] partonFlavour;
 
+    delete[] gluonTag;
+
     delete[] EtSin2Theta;
     delete[] theta;
     delete[] sinTheta;
@@ -1546,6 +1828,7 @@ FullHadTreeWriter::endJob()
     delete[] topMasses;
     delete[] w1Mass;
     delete[] w2Mass;
+    delete[] comboTypeIDs;
     delete[] comboTypes;
  }
 

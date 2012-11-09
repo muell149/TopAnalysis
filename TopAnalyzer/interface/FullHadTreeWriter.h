@@ -44,11 +44,16 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   /// empty
   virtual void endJob();
 
-  /// function to find types of jet-combinations in KinFits (1 right, 2 branches right, but inner-branche particles mixup, 3 inter-branch mixup, 4 missing jet)
-  int comboType(edm::Handle<TtFullHadronicEvent> fullHadEvent_h, unsigned int whichCombo = 0);
+  /// function to find types of jet-combinations in KinFits (1 right, 2 one branche right, other branch inner-branch mixup, 3 both branches inner-branch mixup, 4 cross-branch mixup, -1 to -6 number of falsely picked jets)
+  short comboType(short comboTypeID);
+  short comboTypeIDCalculator(edm::Handle<TtFullHadronicEvent> fullHadEvent_h, unsigned int whichCombo = 0);
+  short comboTypeAlgo(std::vector<int> jetIndexFit, std::vector<int> jetIndexGen);
+  std::vector<int> comboTypeAlgoInverted(std::vector<int> jetIndexGen, short comboType);
+  void TEST();
+  short TESTHelper(int genArray[6]);
 
   /// src's for the different infos
-  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, /*GenJetSrc_, GenPartonSrc_,*/ FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
+  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, GluonTagSrc_, /*GenJetSrc_, GenPartonSrc_,*/ FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
 
   /// MC weight
   double MCweight_;
@@ -83,6 +88,8 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   short * jetConst;
   short * chargeMulti;
   short * comboTypes;
+  short * comboTypeIDs;
+  short comboTypeID;
   short comboTypeValue;
   short nPU   , nPUnext   , nPUprev   ;
   short nPUTru, nPUnextTru, nPUprevTru;
@@ -112,6 +119,8 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   float * mTag_TCHE_SF_Un, * mTag_TCHP_SF_Un, * mTag_SSVHE_SF_Un, * mTag_SSVHP_SF_Un, * mTag_CSV_SF_Un;
   float * charge, * fChHad, * fNeHad, * fChEm, * fNeEm, * fElec, * fPhot, * fMuon;
   float Q;
+
+  float * gluonTag;
 
   float H, Ht, Ht123, Ht3jet, sqrt_s, Et56, M3;
 
