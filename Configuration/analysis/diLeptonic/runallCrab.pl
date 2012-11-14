@@ -13,8 +13,7 @@ getopts('d:c:r:sj:m:f:R:gh', \%arg);
 unless ( $arg{d} && $arg{c} && -f $arg{c}) {
     print <<'USAGE';
 Syntax:
- $ runallGC.pl [-g] -d directoryName -c configFile.py [-r regexp] [-s]
-        [-j NJobs] [-x factor] [-m maxEventsPerJob] [-f files.txt]
+ $ runallCrab.pl-d directoryName -c configFile.py [-f files.txt]
 
 Run runallCrab.pl to run over all data samples given in files.txt using the
 configuration file configFile.py - and use Crab to submit jobs
@@ -96,7 +95,7 @@ push @forJson, $environmentcheck;
 push @killCs, $environmentcheck;
 
 push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$workDirWithTime\n\n";
-
+push @getCs, "\necho copying output from SE to <workdir>/res...\n";
 
 while(my $line = <$IN>) {
     chomp $line;
@@ -105,21 +104,22 @@ while(my $line = <$IN>) {
     next unless $line =~ /\w/; #skip empty lines
     next unless (!exists $arg{'r'} || $line =~ /$arg{'r'}/);
     
-    my ($eventsPerJob, $dataset, $outputFile, $options, $jsonFile) =
+    my ($numJobs, $dataset, $outputFile, $options, $jsonFile) =
         map { s!\${(\w+)}!$ENV{$1}!g; $_ }
         split / {2,}/, $line;
         
-    next unless $options;
+    next unless $outputFile;
     
     my $wdpath = "${globalCWorkingdir}/$workDirWithTime/C_$outputFile";
     mkpath($wdpath);
-    my $joboutdir = "${globalCWorkingdir}/$workDirWithTime/output_$outputFile"; #. strftime("%FT%H-%M-%S",localtime);
-    mkpath($joboutdir);
+   # my $joboutdir = "${globalCWorkingdir}/$workDirWithTime/output_$outputFile"; #. strftime("%FT%H-%M-%S",localtime);
+   # mkpath($joboutdir);
     my $json = '';
     if($jsonFile){
 	$json = File::Spec->rel2abs($jsonFile);
     }
-    my $cConfig = "${globalCWorkingdir}/$workDirWithTime/C_$outputFile.cfg";
+    my $cConfig = "${wdpath}.cfg";
+    my $sedir = "$workDirWithTime/output_$outputFile";
 
 ### Prepare template    
 
@@ -130,16 +130,17 @@ while(my $line = <$IN>) {
         s/##JOBS##/$arg{j} ? $arg{j} : ''/eg;
         s/##CMSSW_BASE##/$ENV{CMSSW_BASE}/g;
         s/##CMSSWConfigFile##/File::Spec->rel2abs($arg{c})/eg;
-        s/##EVENTS_PER_JOB##/$eventsPerJob/g;
+        s/##NUMJOBS##/$numJobs/g;
         s/##DATASET##/$dataset/g;
         s/##OUTPUTFILE##/$outputFile/g;
         s/##HN_USER##/$hypernewsName/g;
         s/##GLOBALGCWD##/$globalCWorkingdir/g;
-        s/##OPTIONS##/$options/g;
+	if($options){
+	    s/##OPTIONS##/$options/g;
+	}
 	s/##FILTERLUMI##/$jsonFile ? '' : '#'/eg;
         s/##JSON##/$json/g;
-        s/##JOBOUTDIR##/$joboutdir/g;
-	s/##SEDIR##/$workDirWithTime\/output_$outputFile/g;
+	s/##SEDIR##/$sedir/g;
         s/##SE_DCACHE##/$arg{g} ? '' : ';'/eg;
         s/##SE_SCRATCH##/$arg{g} ? ';' : ''/eg; 
 	s/##CCONFIG##/$cConfig/g;
@@ -150,10 +151,11 @@ while(my $line = <$IN>) {
     close $OUT;
     
     push @runCs, "echo 'starting $cConfig'\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\necho already initialized!\nelse\ncrab -create -submit -cfg $cConfig\ntouch $wdpath/first_sub\nfi\n\n";
-    push @checkCs, "echo 'checking $cConfig'\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\ncrab -status -c $wdpath\nelse\necho not yet submitted\nfi\n";
-    push @getCs, "crab -getoutput -c $wdpath\ncrab -copyData -c $wdpath\n\n";
+    push @checkCs, "echo 'checking $cConfig'\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\ncrab -status -c $wdpath\ncrab -getoutput -c $wdpath\nelse\necho not yet submitted\nfi\n";
+  #  push @getCs, "crab -getoutput -c $wdpath\ncrab -copyData -c $wdpath\n\n";
+    push @getCs, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastySRMcp.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$sedir $wdpath/res";
     push @killCs, "echo 'killing $cConfig'\ncrab -kill all -c $wdpath\nsleep 5\n";
-    push @forHadd, "hadd ${globalCWorkingdir}/$workDirWithTime/${outputFile}.root $joboutdir/*.root\n";
+    push @forHadd, "hadd ${globalCWorkingdir}/$workDirWithTime/${outputFile}.root $wdpath/res/*.root\n";
     push @forJson, "crab -report -c $wdpath\ncp $wdpath/res/lumiSummary.json ${globalCWorkingdir}/$workDirWithTime/${outputFile}_lumi.json\n\n";
 
 #lumiSummary.json in res
@@ -219,15 +221,14 @@ pset = ##CMSSWConfigFile##
 pycfg_params = ##OPTIONS## outputFile=##OUTPUTFILE##
 
 ##FILTERLUMI##lumi_mask = ##JSON##
-total_number_of_events = -1
-#number_of_jobs = 5
-events_per_job = ##EVENTS_PER_JOB##
-output_file = ##OUTPUTFILE##.root
-
-
-#total_number_of_lumis = -1
+#total_number_of_events = -1
+number_of_jobs = ##NUMJOBS##
+total_number_of_lumis = -1
 #number_of_jobs = 30
 #lumis_per_job = 200
+#events_per_job = ##EVENTS_PER_JOB##
+#output_file = ##OUTPUTFILE##.root
+
 
 [USER]
 ui_working_dir= ##WORKDIR##
@@ -235,9 +236,9 @@ return_data = 0
 copy_data = 1
 storage_element = T2_DE_DESY
 user_remote_dir = ##SEDIR##
-outputdir = ##JOBOUTDIR##
+#outputdir = ##JOBOUTDIR## # default: workdir/res
 eMail = ##HN_USER##@cern.ch
-thresholdLevel = 90    #threshold for mail
+thresholdLevel = 95    #threshold for mail
 publish_data=0
 
 #logdir= /full/path/yourLogDir # default: workdir/res

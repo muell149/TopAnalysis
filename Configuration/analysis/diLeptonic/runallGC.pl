@@ -13,8 +13,7 @@ getopts('d:c:r:sj:m:f:R:gh', \%arg);
 unless ( $arg{d} && $arg{c} && -f $arg{c}) {
     print <<'USAGE';
 Syntax:
- $ runallGC.pl [-g] -d directoryName -c configFile.py [-r regexp] [-s]
-        [-j NJobs] [-x factor] [-m maxEventsPerJob] [-f files.txt]
+ $ runallGC.pl [-g] -d directoryName -c configFile.py [-f files.txt]
 
 Run runallGC.pl to run over all data samples given in files.txt using the
 configuration file configFile.py - and use GridControl to submit jobs
@@ -93,11 +92,11 @@ while(my $line = <$IN>) {
     next unless $line =~ /\w/; #skip empty lines
     next unless (!exists $arg{'r'} || $line =~ /$arg{'r'}/);
     
-    my ($eventsPerJob, $dataset, $outputFile, $options, $jsonFile) =
+    my ($numJobs, $dataset, $outputFile, $options, $jsonFile) =
         map { s!\${(\w+)}!$ENV{$1}!g; $_ }
         split / {2,}/, $line;
         
-    next unless $options;
+    next unless $outputFile;
     
     my $path = "${globalGcWorkingdir}/$workDirWithTime/GC-$outputFile";
     mkpath($path);
@@ -112,15 +111,17 @@ while(my $line = <$IN>) {
     for ($t) {
         s/##LOCAL_OR_GRID##/$arg{g} ? "grid" : "local"/eg;
         s/##WORKDIR##/$path/g;
-        s/##JOBS##/$arg{j} ? $arg{j} : ''/eg;
+       # s/##JOBS##/$arg{j} ? $arg{j} : ''/eg;
         s/##CMSSW_BASE##/$ENV{CMSSW_BASE}/g;
         s/##CMSSWConfigFile##/File::Spec->rel2abs($arg{c})/eg;
-        s/##EVENTS_PER_JOB##/$eventsPerJob/g;
+        s/##JOBS##/$numJobs/g;
         s/##DATASET##/$dataset/g;
         s/##OUTPUTFILE##/$outputFile/g;
         s/##HN_USER##/$hypernewsName/g;
         s/##GLOBALGCWD##/$globalGcWorkingdir/g;
-        s/##OPTIONS##/$options/g;
+        if($options){
+	    s/##OPTIONS##/$options/g;
+	}
 	s/##FILTERLUMI##/$jsonFile ? '' : ';'/eg;
         s/##JSON##/$json/g;
 	s/##WORKDIRWITHTIME##/$workDirWithTime/g;
@@ -215,8 +216,8 @@ config     =    ##GLITE_LOCATION##/etc/cms/glite_wms.conf
 
 
 [jobs]
-##JOBS##
-;jobs = 5
+
+jobs = ##JOBS##
 wall time    = 40:59:00 ;queue dingens // thats the 12 hour cue!!!
 ; in queue     = $maxjobsinqueue ; 1000 -1
 memory       = 3700
@@ -232,7 +233,7 @@ prepare config     = True
 arguments          = ##OPTIONS## outputFile=##OUTPUTFILE##  ; 
 
 dataset splitter   = EventBoundarySplitter
-events per job     = ##EVENTS_PER_JOB##   ;
+events per job     = -1 ;##EVENTS_PER_JOB##   ;
 
 
 dataset            = ##DATASET## ;
