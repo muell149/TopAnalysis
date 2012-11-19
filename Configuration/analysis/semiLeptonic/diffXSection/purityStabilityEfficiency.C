@@ -135,8 +135,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001;  resEdgeL = -300.0;  resEdgeR=300.0;  relResEdgeL = -1.0; relResEdgeR=6.0; }
   else if ( variable == "ttbarY")    { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -2.0;  resEdgeR=  2.0;  relResEdgeL = -2.0; relResEdgeR=2.0; }
   else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
-  else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001;  resEdgeL =  -35.0;  resEdgeR= 35.0;  relResEdgeL = -0.2; relResEdgeR=0.2; textOpt="";}
-  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =  -0.005;  resEdgeR= 0.005;  relResEdgeL = -0.5; relResEdgeR=0.5; textOpt="";}
+  else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001;  resEdgeL =  -35.0;  resEdgeR= 35.0;  relResEdgeL = -0.2; relResEdgeR=0.2; /*textOpt="";*/}
+  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =  -0.005;  resEdgeR= 0.005;  relResEdgeL = -0.5; relResEdgeR=0.5; /*textOpt="";*/}
   else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001;  resEdgeL = -200.0;  resEdgeR=200.0;  relResEdgeL = -1.0; relResEdgeR=2.0 ;}
   else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
   
@@ -598,7 +598,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   //double max=purityhist->GetMaximum();
   //if(stabilityhist->GetMaximum()>max)max=stabilityhist->GetMaximum();
   //purityhist->SetMaximum(1.1*max);
-    purityhist->SetMaximum(1.0);
+    purityhist->SetMaximum(1.04);
     purityhist->SetLineColor(2);
     purityhist->SetLineWidth(4);
     stabilityhist->SetLineColor(4);
@@ -610,6 +610,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     accHistGen->GetXaxis()->SetNoExponent(true);
     accHistGen->GetYaxis()->SetNoExponent(true);
     purityhist->SetStats(kFALSE);
+    purityhist->GetYaxis()->SetNdivisions(511);
 
   //gPad->SetBottomMargin(0.19);
     purstab->cd();
@@ -672,12 +673,14 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
     legFull->AddEntry(stabilityhist,"Stability" ,"l");
   //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
   //if(plotAcceptance)leg->AddEntry(effHistBBB,"Eff*A full PS Spring11","l");
-    if(plotEfficiencyPhaseSpace)legFull->AddEntry(effHistGenPS,"Efficiency","l");
-    if(plotAcceptance)legFull->AddEntry(accHistGen,"Acceptance","l");
+//     if(plotEfficiencyPhaseSpace)legFull->AddEntry(effHistGenPS,"Efficiency","l");
+    if(plotEfficiencyPhaseSpace)legFull->AddEntry(effHistGenPS,"#epsilon^{vis. PS}","l");
+//     if(plotAcceptance)legFull->AddEntry(accHistGen,"Acceptance","l");
+    if(plotAcceptance)legFull->AddEntry(accHistGen,"A","l");
     if(plotEfficiency2)legFull->AddEntry(effHistBBB2,"eff.*A full PS Summer11","l");
   
   // canvas for legend
-    TCanvas* purstabLeg = new TCanvas("purstabLeg","purstabLeg",600,300);
+    TCanvas* purstabLeg = new TCanvas("purstabLeg","purstabLeg",200,100);
     legFull->Draw("");
     
    //------------------------------------------------------------------------------
@@ -854,7 +857,8 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
 
   // draw migrationMatrix w/o eff.
   CanvMigrationMatrix->cd();
-  CanvMigrationMatrix->SetRightMargin(0.2);
+  //CanvMigrationMatrix->SetRightMargin(0.2);
+  CanvMigrationMatrix->SetRightMargin(0.13);
   migrationMatrix->SetStats(kFALSE);
   migrationMatrix->GetXaxis()->SetTitle("gen "+xtitle);
   migrationMatrix->GetYaxis()->SetTitle("rec "+xtitle);
@@ -864,13 +868,15 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   migrationMatrix->GetYaxis()->SetNoExponent(true);
   migrationMatrix->GetZaxis()->SetNoExponent(true);
   migrationMatrix->GetZaxis()->SetRangeUser(0,100);
-  migrationMatrix->GetZaxis()->SetTitle("Transition Probability [\%]");
-  migrationMatrix->GetZaxis()->SetTitleOffset(1.4);
+  //migrationMatrix->GetZaxis()->SetTitle("Transition Probability [\%]");
+  migrationMatrix->GetZaxis()->SetTitleOffset(1.3);
   //migrationMatrix->SetMarkerColor(kWhite);
-  migrationMatrix->SetMarkerSize(1.2);
-  migrationMatrix->SetTitle("Response Matrix - Migration Only");
+//   migrationMatrix->SetMarkerSize(1.2);
+  migrationMatrix->SetMarkerSize(1.4);
+  if(variable=="lepPt") migrationMatrix->SetMarkerSize(1.);
+  migrationMatrix->SetTitle("Migration Matrix - Transition Probability [\%]");
   migrationMatrix->Draw(Form("COLZ %s",textOpt.Data()));
-  DrawLabel("Response Matrix - Migration Only",gStyle->GetPadLeftMargin(),1.0-gStyle->GetPadTopMargin(),1.-gStyle->GetPadRightMargin(),1.,12,0.03);
+  DrawLabel("Migration Matrix - Transition Probability [\%]", gStyle->GetPadLeftMargin()-0.03, 1.0-gStyle->GetPadTopMargin(), 1.-gStyle->GetPadRightMargin(), 1., 12,0.04);
   
   // draw resolution
   CanvResolution->cd();
