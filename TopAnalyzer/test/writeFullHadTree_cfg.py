@@ -37,6 +37,8 @@ options.register('mcWeight', -1.0 , VarParsing.VarParsing.multiplicity.singleton
 options.register('PUscenario', '11_178078', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
 ## trigger results tag
 options.register('triggerTag', 'HLT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "tag of trigger Results")
+## use the *totalKinematicsFilter*
+options.register('useTotalKinFilter', True, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "use totalKinematicsFilter")
 
 # get and parse the command line arguments
 if hasattr(sys, "argv") :
@@ -502,13 +504,20 @@ else:
 ## do kinematic fit needed for fully hadronic selection
 from TopQuarkAnalysis.TopEventProducers.sequences.ttFullHadEvtBuilder_cff import *
 
+## add a second genMatch which does not care about ambiguities
+cloneTtFullHadEvent(process)
+process.ttFullHadJetPartonMatch2.algorithm = 'totalMinDist'
+
+## add the kinematic fit to the event
 addTtFullHadHypotheses(process,
                        ["kKinFit"]
                        )
 
+## remove the genMatch if not running on signal events
 if not options.eventFilter=='sig' :
     removeTtFullHadHypGenMatch(process)
 
+## load the background estimation modules
 runAsBackgroundEstimation(process, options.backgroundEstimation)
 
 ## changing bTagger, possible are: TCHEL, TCHEM, TCHPM, TCHPT, SSVHEM, SSVHPT, CSVM, CSVT, CSVMVA
@@ -738,6 +747,9 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
     if not os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
         pf2patOptions['JECEra'] = 'Jec11_V10'
         pf2patOptions['JECFile'] = 'TopAnalysis/TopUtils/data/Jec11_V10_L7PartonPrivate.db'
+        if os.getenv('GC_CONF'):
+            print "Running with GC, resetting address of JECFile!"
+            pf2patOptions['JECFile'] = '../src/TopAnalysis/TopUtils/data/Jec11_V10_L7PartonPrivate.db'
         pf2patOptions['additionalJECLevels'] = ['L7Parton']
     if options.eventFilter=='data':
         pf2patOptions['runOnMC'] = False
@@ -772,7 +784,7 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
             getattr(process, pathname).insert(0,process.readAK5PF)
         
         ## add bugfix for wrongly generated MC files
-        if not options.eventFilter == 'data' :
+        if not options.eventFilter == 'data' and options.useTotalKinFilter == True:
             getattr(process, pathname).insert(0,process.totalKinematicsFilter)
 
 
@@ -791,14 +803,14 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
         #### TEST GLUON TAGGING ####
         ############################
 
-        #process.GluonTagProducer = cms.EDProducer('GluonTag',
-        #                                          src    = cms.untracked.string('tightLeadingJets'),
-        #                                          xmldir = cms.untracked.string('VBFZ/GluonTag/data/'),
-        #                                          #mva    = cms.untracked.string('BDTD')
-        #                                          )
-        #getattr(process, pathname).replace(process.tightLeadingJets, process.tightLeadingJets*process.GluonTagProducer)
-        #
-        process.FullHadTreeWriter.GluonTagSrc = ''
+        process.GluonTagProducer = cms.EDProducer('GluonTag',
+                                                  src    = cms.untracked.string('tightLeadingJets'),
+                                                  xmldir = cms.untracked.string('VBFZ/GluonTag/data/'),
+                                                  mva    = cms.untracked.string('Likelihood')
+                                                  )
+
+        getattr(process, pathname).replace(process.tightLeadingJets, process.tightLeadingJets*process.GluonTagProducer)
+        #process.FullHadTreeWriter.GluonTagSrc = ''
 
         ############################
         ############################
