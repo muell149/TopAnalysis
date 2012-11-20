@@ -34,7 +34,7 @@ FullHadEventMixer::FullHadEventMixer(const edm::ParameterSet& cfg) :
   MCweight_           ( cfg.getParameter<double>("MCweight") ),
   myRand(0),
   //tree(0),
-  kMAX(50), kMAXCombo(10000)
+  kMAX(50), kMAXCombo(10000), checkedHasL7PartonCor(false), hasL7PartonCor(false)
 {
 
   myRand = new TRandom3(0);
@@ -165,6 +165,7 @@ FullHadEventMixer::beginJob()
     bTag_SSVHP       = new float[kMAX];
     bTag_CSV         = new float[kMAX];
     bTag_CSVMVA      = new float[kMAX];
+    L7PartonCorrection = new double[kMAX];
     for(unsigned short i = 0; i < kMAX; ++i) {
       bTag_TCHE        [i] = -100.;
       bTag_TCHP        [i] = -100.;
@@ -172,6 +173,7 @@ FullHadEventMixer::beginJob()
       bTag_SSVHP       [i] = -100.;
       bTag_CSV         [i] = -100.;
       bTag_CSVMVA      [i] = -100.;
+      L7PartonCorrection[i] = -100.;
     }
 
     tree->Branch("bTag_TCHE"  , bTag_TCHE  , "bTag_TCHE[Njet]"    );
@@ -180,6 +182,7 @@ FullHadEventMixer::beginJob()
     tree->Branch("bTag_SSVHP" , bTag_SSVHP , "bTag_SSVHP[Njet]"   );
     tree->Branch("bTag_CSV"   , bTag_CSV   , "bTag_CSV[Njet]/F"   );
     tree->Branch("bTag_CSVMVA", bTag_CSVMVA, "bTag_CSVMVA[Njet]/F");
+    tree->Branch("L7PartonCorrection", L7PartonCorrection, "L7PartonCorrection[Njet]/D");
 
     // probability and chi2 of kinematic fit
     fitExitCode    = -66;
@@ -310,13 +313,13 @@ FullHadEventMixer::beginJob()
     tree->Branch("pInW2FrameW2InDetFrame"             , pInW2FrameW2InDetFrame             , "pInW2FrameW2InDetFrame[nCombos]/F"             );
     tree->Branch("pbarInW2FrameW2InDetFrame"          , pbarInW2FrameW2InDetFrame          , "pbarInW2FrameW2InDetFrame[nCombos]/F"          );
 
-    //// jet-parton assignments
-    //fitAssigns = new short[6*kMAXCombo];
-    //for(unsigned int i = 0; i < 6*kMAXCombo; ++i){
-    //  fitAssigns[i] = -1;
-    //}
-    //tree->Branch("fitAssigns", fitAssigns , "fitAssigns[nCombos][6]/S");
-    //
+    // jet-parton assignments
+    fitAssigns = new short[6*kMAXCombo];
+    for(unsigned int i = 0; i < 6*kMAXCombo; ++i){
+      fitAssigns[i] = -1;
+    }
+    tree->Branch("fitAssigns", fitAssigns , "fitAssigns[nCombos][6]/S");
+    
     //// 4-vectors of kinFit
     //fitVecs = new TClonesArray("TLorentzVector", 6*kMAXCombo);
     //tree->Branch("fitVecs", &fitVecs, 32000, -1);
@@ -619,6 +622,15 @@ FullHadEventMixer::doFitting(const std::vector<pat::Jet>& myJets)
     bTag_SSVHP   [i] = jet->bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
     bTag_CSV     [i] = jet->bDiscriminator("combinedSecondaryVertexBJetTags");
     bTag_CSVMVA  [i] = jet->bDiscriminator("combinedSecondaryVertexMVABJetTags");
+    if(!checkedHasL7PartonCor){
+      const std::vector<std::string> jecLevels = jet->availableJECLevels();
+      for(std::vector<std::string>::const_iterator jec = jecLevels.begin(); jec != jecLevels.end(); ++jec){
+	if(*jec == "L7Parton") hasL7PartonCor = true;
+      }
+      checkedHasL7PartonCor = true;
+    }
+
+    L7PartonCorrection[i] = hasL7PartonCor ? jet->jecFactor("L7Parton", "uds") : 1.0;
   }
 
   // reset variables of kinFit
@@ -626,6 +638,11 @@ FullHadEventMixer::doFitting(const std::vector<pat::Jet>& myJets)
   chi2      = -1.;
   topMass   = -1.;
   ttMass    = -1.;
+
+  for(unsigned int i = 0; i < 6*kMAXCombo; ++i){
+    fitAssigns[i] = -1;
+  }
+  //fitVecs->Clear();
 
   nCombos = 0;
   for(unsigned int i = 0; i < kMAXCombo; ++i) {
@@ -664,11 +681,6 @@ FullHadEventMixer::doFitting(const std::vector<pat::Jet>& myJets)
     qbarInW1FrameW1InDetFrame          [i] = -100.;
     pInW2FrameW2InDetFrame             [i] = -100.;
     pbarInW2FrameW2InDetFrame          [i] = -100.;
-
-    //for(unsigned int i = 0; i < 6*kMAXCombo; ++i){
-    //  fitAssigns[i] = -1;
-    //}
-    //fitVecs->Clear();
   }
 
   std::list<TtFullHadKinFitter::KinFitResult> result = kinFitter->fit(myJets);
@@ -716,8 +728,25 @@ FullHadEventMixer::doFitting(const std::vector<pat::Jet>& myJets)
     probs    [nCombos-1] = res->Prob;
     chi2s    [nCombos-1] = res->Chi2;
     topMasses[nCombos-1] = (res->B.p4()+res->LightQ.p4()+res->LightQBar.p4()).mass();
-    w1Mass   [nCombos-1] = (((TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightQ]))->operator+(*(TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightQBar]))).M();
-    w2Mass   [nCombos-1] = (((TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightP]))->operator+(*(TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightPBar]))).M();
+    int lQID    = res->JetCombi[TtFullHadEvtPartons::LightQ   ];
+    int lQBarID = res->JetCombi[TtFullHadEvtPartons::LightQBar];
+    int lPID    = res->JetCombi[TtFullHadEvtPartons::LightP   ];
+    int lPBarID = res->JetCombi[TtFullHadEvtPartons::LightPBar];
+    TLorentzVector lQ    = ((TLorentzVector*)jets->At(lQID   ))->operator*(L7PartonCorrection[lQID   ]);
+    TLorentzVector lQBar = ((TLorentzVector*)jets->At(lQBarID))->operator*(L7PartonCorrection[lQBarID]);
+    TLorentzVector lP    = ((TLorentzVector*)jets->At(lPID   ))->operator*(L7PartonCorrection[lPID   ]);
+    TLorentzVector lPBar = ((TLorentzVector*)jets->At(lPBarID))->operator*(L7PartonCorrection[lPBarID]);
+    w1Mass[nCombos-1] = (lQ + lQBar).M();
+    w2Mass[nCombos-1] = (lP + lPBar).M();
+    //w1Mass   [nCombos-1] = (((TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightQ]))->operator+(*(TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightQBar]))).M();
+    //w2Mass   [nCombos-1] = (((TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightP]))->operator+(*(TLorentzVector*)jets->At(res->JetCombi[TtFullHadEvtPartons::LightPBar]))).M();
+
+    fitAssigns[TtFullHadEvtPartons::LightQ   *(nCombos-1)] = res->JetCombi[TtFullHadEvtPartons::LightQ   ];
+    fitAssigns[TtFullHadEvtPartons::LightQBar*(nCombos-1)] = res->JetCombi[TtFullHadEvtPartons::LightQBar];
+    fitAssigns[TtFullHadEvtPartons::B        *(nCombos-1)] = res->JetCombi[TtFullHadEvtPartons::B        ];
+    fitAssigns[TtFullHadEvtPartons::LightP   *(nCombos-1)] = res->JetCombi[TtFullHadEvtPartons::LightP   ];
+    fitAssigns[TtFullHadEvtPartons::LightPBar*(nCombos-1)] = res->JetCombi[TtFullHadEvtPartons::LightPBar];
+    fitAssigns[TtFullHadEvtPartons::BBar     *(nCombos-1)] = res->JetCombi[TtFullHadEvtPartons::BBar     ];
 
     dRbb[nCombos-1] = deltaR(res->B.eta(), res->B.phi(), res->BBar.eta(), res->BBar.phi());
     ttDetFrame                         [nCombos-1] = angles.ttDetFrame()                         ;			

@@ -114,8 +114,11 @@ class FullHadEventMixer : public edm::EDAnalyzer {
   // max possible number of permutations per event
   const unsigned int kMAXCombo;
 
+  // check if jet has L7Parton corrections
+  bool checkedHasL7PartonCor, hasL7PartonCor;
+
   // shorts
-  //short * fitAssigns;
+  short * fitAssigns;
   short nVertex;
   short fitExitCode;
   short nPU   , nPUnext   , nPUprev   ;
@@ -137,6 +140,7 @@ class FullHadEventMixer : public edm::EDAnalyzer {
   double MCweight;
   double prob, chi2, topMass, ttMass, ttPt;
   double * probs, * chi2s, * topMasses, * w1Mass, * w2Mass;
+  double * L7PartonCorrection;
 
   // TClonesArray(TLorentzVectors)
   TClonesArray * jets, * MET, * muons, * electrons;//, * fitVecs;

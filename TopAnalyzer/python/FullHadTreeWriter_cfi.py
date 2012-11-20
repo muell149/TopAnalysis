@@ -17,6 +17,8 @@ writeFullHadTree = cms.EDAnalyzer("FullHadTreeWriter",
                                   #GenPartonSrc = cms.InputTag('genParticles'), 
                                   ## kinematic fit result
                                   FitSrc = cms.InputTag("ttFullHadEvent"),
+                                  ## second genMatch
+                                  GenMatch2Src = cms.InputTag("ttFullHadEvent2"),
                                   ## GenEventInfoProduct for PDF uncertainties
                                   GenSrc = cms.InputTag("generator"),
                                   ## multi-jet MVA discriminator

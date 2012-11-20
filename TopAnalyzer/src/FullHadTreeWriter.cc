@@ -32,6 +32,7 @@ FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   //GenJetSrc_         (cfg.getParameter<edm::InputTag>("GenJetSrc")),
   //GenPartonSrc_      (cfg.getParameter<edm::InputTag>("GenPartonSrc")),
   FitSrc_            (cfg.getParameter<edm::InputTag>("FitSrc")),
+  GenMatch2Src_      (cfg.getParameter<edm::InputTag>("GenMatch2Src")),
   MultiJetMVADiscSrc_(cfg.getParameter<edm::InputTag>("MultiJetMVADiscSrc")),
   GenSrc_            (cfg.getParameter<edm::InputTag>("GenSrc")),
   PUSrc_             (cfg.getParameter<edm::InputTag>("PUSrc")),
@@ -41,7 +42,7 @@ FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   bTagName_          (cfg.getParameter<std::vector<std::string> >("bTagName")),
   bTagVal_           (cfg.getParameter<std::vector<std::string> >("bTagVal" )),
   DoPDFUncertainty_  (cfg.getParameter<bool>("DoPDFUncertainty")),
-  kMAX(50), kMAXCombo(10000), checkedIsPFJet(false), isPFJet(false)
+  kMAX(50), kMAXCombo(10000), checkedIsPFJet(false), isPFJet(false), checkedHasL7PartonCor(false), hasL7PartonCor(false)
 {
 }
 
@@ -196,6 +197,7 @@ FullHadTreeWriter::beginJob()
     EtStar           = new float[kMAX];
     thetaStar        = new float[kMAX];
     sinThetaStar     = new float[kMAX];
+    L7PartonCorrection = new double[kMAX];
 
     for(unsigned short i = 0; i < kMAX; ++i) {
       bTag_TCHE_SF     [i] = -100.;
@@ -246,6 +248,7 @@ FullHadTreeWriter::beginJob()
       EtStar           [i] = -1.;
       thetaStar        [i] = -100.;
       sinThetaStar     [i] = -100 ;
+      L7PartonCorrection[i] = -100.;
     }
     //char buffer[7];
     //sprintf(buffer, "[%i]/F", kBTagMAX);
@@ -295,6 +298,7 @@ FullHadTreeWriter::beginJob()
     tree->Branch("EtStar"          , EtStar          , "EtStar[Njet]/F"        );
     tree->Branch("thetaStar"       , thetaStar       , "thetaStar[Njet]/F"     );
     tree->Branch("sinThetaStar"    , sinThetaStar    , "sinThetaStar[Njet]/F"  );
+    tree->Branch("L7PartonCorrection", L7PartonCorrection, "L7PartonCorrection[Njet]/D");
 
     measureMap["BTAGBEFF"]=PerformanceResult::BTAGBEFF;
     measureMap["BTAGBERR"]=PerformanceResult::BTAGBERR;
@@ -848,7 +852,10 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   
   edm::Handle<TtFullHadronicEvent> fullHadEvent_h;
   event.getByLabel(FitSrc_, fullHadEvent_h);
-  
+
+  edm::Handle<TtFullHadronicEvent> fullHadEvent2_h;
+  event.getByLabel(GenMatch2Src_, fullHadEvent2_h);
+
   edm::Handle<GenEventInfoProduct> genEventInfo_h;
   event.getByLabel(GenSrc_, genEventInfo_h);
   
@@ -933,6 +940,15 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 	pdgId        [i] = (jet->genParticle()) ? jet->genParticle()->pdgId() : 0;
 	partonFlavour[i] = jet->partonFlavour();
       }
+      if(!checkedHasL7PartonCor){
+	const std::vector<std::string> jecLevels = jet->availableJECLevels();
+	for(std::vector<std::string>::const_iterator jec = jecLevels.begin(); jec != jecLevels.end(); ++jec){
+	  if(*jec == "L7Parton") hasL7PartonCor = true;
+	}
+	checkedHasL7PartonCor = true;
+      }
+
+      L7PartonCorrection[i] = hasL7PartonCor ? jet->jecFactor("L7Parton", "uds") : 1.0;
 
       if (gluonTagsHandle.isValid()){
 	edm::RefToBase<pat::Jet> jetRef(edm::Ref<edm::View<pat::Jet> >(jets_h,i));
@@ -1311,13 +1327,23 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 								     fullHadEvent_h->bBar     ("kKinFit")->py(),
 								     fullHadEvent_h->bBar     ("kKinFit")->pz(),
 								     fullHadEvent_h->bBar     ("kKinFit")->energy());
-      if( fullHadEvent_h->isHypoValid("kGenMatch") ){
+
+      bool genMatch1Valid = fullHadEvent_h->isHypoValid("kGenMatch");
+      bool genMatch2Valid = (fullHadEvent2_h.isValid() && fullHadEvent2_h->isHypoValid("kGenMatch"));
+
+      if( genMatch1Valid ){
 	comboTypeID    = comboTypeIDCalculator(fullHadEvent_h);
 	comboTypeValue = comboType(comboTypeID);
       }
-      if( !fullHadEvent_h->isHypoValid("kGenMatch") ){
-	comboTypeID    = -10;
-	comboTypeValue = -10;
+      else{
+	if( genMatch2Valid ){
+	  comboTypeID    = -55;
+	  comboTypeValue =   5;
+	}
+	else{
+	  comboTypeID    = -66;
+	  comboTypeValue =   6;
+	}
       }
 
       ptAsy    = (fullHadEvent_h->b   ("kKinFit")->pt()-fullHadEvent_h->wPlus ("kKinFit")->pt())/(fullHadEvent_h->b   ("kKinFit")->pt()+fullHadEvent_h->wPlus ("kKinFit")->pt());
@@ -1369,15 +1395,32 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 	probs       [i] = fullHadEvent_h->fitProb(i);
 	chi2s       [i] = fullHadEvent_h->fitChi2(i);
 	topMasses   [i] = fullHadEvent_h->top("kKinFit",i)->mass();
-	w1Mass      [i] = (((TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQ]))->operator+(*(TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQBar]))).M();
-	w2Mass      [i] = (((TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightP]))->operator+(*(TLorentzVector*)jets->At(fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightPBar]))).M();
-	if(fullHadEvent_h->isHypoValid("kGenMatch")){
+	int lQID    = fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQ];
+	int lQBarID = fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightQBar];
+	int lPID    = fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightP];
+	int lPBarID = fullHadEvent_h->jetLeptonCombination("kKinFit",i)[TtFullHadEvtPartons::LightPBar];
+	TLorentzVector lQ    = ((TLorentzVector*)jets->At(lQID   ))->operator*(L7PartonCorrection[lQID]);
+	TLorentzVector lQBar = ((TLorentzVector*)jets->At(lQBarID))->operator*(L7PartonCorrection[lQBarID]);
+	TLorentzVector lP    = ((TLorentzVector*)jets->At(lPID   ))->operator*(L7PartonCorrection[lPID]);
+	TLorentzVector lPBar = ((TLorentzVector*)jets->At(lPBarID))->operator*(L7PartonCorrection[lPBarID]);
+	w1Mass      [i] = (lQ + lQBar).M();
+	w2Mass      [i] = (lP + lPBar).M();
+	// will be 80.4 by definition
+	//w1Mass      [i] = fullHadEvent_h->wPlus ("kKinFit",i)->mass();
+	//w2Mass      [i] = fullHadEvent_h->wMinus("kKinFit",i)->mass();
+	if(genMatch1Valid){
 	  comboTypeIDs[i] = comboTypeIDCalculator(fullHadEvent_h,i);
 	  comboTypes  [i] = comboType(comboTypeIDs[i] );
 	}
 	else{
-	  comboTypeIDs[i] = -10;
-	  comboTypes  [i] = -10;
+	  if( genMatch2Valid ){
+	    comboTypeID    = -55;
+	    comboTypeValue =   5;
+	  }
+	  else{
+	    comboTypeIDs[i] = -66;
+	    comboTypes  [i] =   6;
+	  }
 	}
       }
     }

@@ -53,7 +53,7 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   short TESTHelper(int genArray[6]);
 
   /// src's for the different infos
-  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, GluonTagSrc_, /*GenJetSrc_, GenPartonSrc_,*/ FitSrc_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
+  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_, GluonTagSrc_, /*GenJetSrc_, GenPartonSrc_,*/ FitSrc_, GenMatch2Src_, MultiJetMVADiscSrc_, GenSrc_, PUSrc_, VertexSrc_, PUWeightSrc_;
 
   /// MC weight
   double MCweight_;
@@ -76,6 +76,9 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
 
   // check if jet is a PFJet
   bool checkedIsPFJet, isPFJet;
+
+  // check if jet has L7Parton corrections
+  bool checkedHasL7PartonCor, hasL7PartonCor;
 
   /// define variables for tree
   
@@ -207,6 +210,7 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   double multiJetMVADisc;
   double x1, x2;
   double ptHat;
+  double * L7PartonCorrection;
   
   // TClonesArray(TLorentzVectors)
   TClonesArray * jets, * genJets, * genPartons, * MET, * muons, * electrons, * fitVecs;
