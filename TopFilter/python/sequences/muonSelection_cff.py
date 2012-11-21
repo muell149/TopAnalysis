@@ -1,4 +1,4 @@
- import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Config as cms
 
 ## muon selector
 from PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi import *
