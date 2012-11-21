@@ -44,19 +44,19 @@ noOverlapJetsPF = selectedPatJets.clone(src = "selectedPatJetsAK5PF")
 
 ## getting started
 centralJets  = selectedPatJets.clone(src = 'selectedPatJets',
-                                     cut = 'abs(eta) < 2.4'
+                                     cut = 'abs(eta) < 2.5'
                                      )
 reliableJets = selectedPatJets.clone(src = 'selectedPatJets',
-                                     cut = 'abs(eta) < 2.4 & pt > 30.'
+                                     cut = 'abs(eta) < 2.5 & pt > 30.'
                                      )
 goodJets     = selectedPatJets.clone(src = 'selectedPatJets',
-                                     cut = 'abs(eta) < 2.4 & pt > 30. &'
+                                     cut = 'abs(eta) < 2.5 & pt > 30. &'
                                            'emEnergyFraction > 0.01   &'
                                            'jetID.fHPD < 0.98         &'
                                            'jetID.n90Hits > 1'
                                      )
 centralJetsPF    = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                         cut = 'abs(eta) < 2.4'
+                                         cut = 'abs(eta) < 2.5'
                                          )
 centralJetsPF25  = selectedPatJets.clone(src = 'centralJetsPF',
                                          cut = 'pt > 25.'
@@ -65,7 +65,7 @@ centralJetsPF30  = selectedPatJets.clone(src = 'centralJetsPF',
                                          cut = 'pt > 30.'
                                          )
 reliableJetsPF   = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                         cut = 'abs(eta) < 2.4 & pt > 20.'
+                                         cut = 'abs(eta) < 2.5 & pt > 20.'
                                          )
 reliableJetsPF25 = selectedPatJets.clone(src = 'reliableJetsPF',
                                          cut = 'pt > 25.'
@@ -74,7 +74,7 @@ reliableJetsPF30 = selectedPatJets.clone(src = 'reliableJetsPF',
                                          cut = 'pt > 30.'
                                          )
 goodJetsPF       = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
-                                         cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                         cut = 'abs(eta) < 2.5 & pt > 20.          &' #new in 2012 (was abs(eta) < 2.4)
                                                'chargedHadronEnergyFraction > 0.0  &'
                                                'neutralHadronEnergyFraction < 0.99 &'
                                                'chargedEmEnergyFraction     < 0.99 &'
@@ -83,13 +83,13 @@ goodJetsPF       = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
                                                'nConstituents > 1'
                                          )
 goodJetsPF20     = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                         cut = 'abs(eta) < 2.4 & pt > 20.          &'
-                                               'chargedHadronEnergyFraction > 0.0  &'
-                                               'neutralHadronEnergyFraction < 0.99 &'
-                                               'chargedEmEnergyFraction     < 0.99 &'
-                                               'neutralEmEnergyFraction     < 0.99 &'
-                                               'chargedMultiplicity > 0            &'
-                                               'nConstituents > 1'
+                                         cut = 'abs(eta) < 2.5 & pt > 20.           &' #new in 2012 (was abs(eta) < 2.4)
+                                               'neutralHadronEnergyFraction  < 0.99 &'
+                                               'neutralEmEnergyFraction      < 0.99 &'
+                                               '(chargedHadronEnergyFraction > 0.0  | abs(eta) >= 2.4) &'
+                                               '(chargedEmEnergyFraction     < 0.99 | abs(eta) >= 2.4) &'
+                                               '(chargedMultiplicity         > 0    | abs(eta) >= 2.4) &'
+                                               'numberOfDaughters > 1' #changed in 2012 (was nConstituents)
                                          )
 goodJetsPF25     = selectedPatJets.clone(src = 'goodJetsPF20',
                                          cut = 'pt > 25.'
@@ -105,23 +105,23 @@ noEtaJets      = selectedPatJets.clone(src = 'selectedPatJets',
                                              'jetID.n90Hits > 1'
                                        )
 noPtJets       = selectedPatJets.clone(src = 'selectedPatJets',
-                                       cut = 'abs(eta) < 2.4            &'
+                                       cut = 'abs(eta) < 2.5            &'
                                              '0.01 < emEnergyFraction   &'
                                              'jetID.fHPD < 0.98         &'
                                              'jetID.n90Hits > 1'
                                        )
 noEmJets       = selectedPatJets.clone(src = 'selectedPatJets',
-                                       cut = 'pt > 30. & abs(eta) < 2.4 &'
+                                       cut = 'pt > 30. & abs(eta) < 2.5 &'
                                              'jetID.fHPD < 0.98         &'
                                              'jetID.n90Hits > 1'
                                        )
 noN90HitsJets  = selectedPatJets.clone(src = 'selectedPatJets',
-                                       cut = 'pt > 30. & abs(eta) < 2.4 &'
+                                       cut = 'pt > 30. & abs(eta) < 2.5 &'
                                              '0.01 < emEnergyFraction   &'
                                              'jetID.fHPD < 0.98          '
                                        )
 nofHPDJets     = selectedPatJets.clone(src = 'selectedPatJets',
-                                       cut = 'pt > 30. & abs(eta) < 2.4 &'
+                                       cut = 'pt > 30. & abs(eta) < 2.5 &'
                                              '0.01 < emEnergyFraction   &'
                                              'jetID.n90Hits > 1'                                                                       )
 
@@ -135,7 +135,7 @@ noEtaJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                               'nConstituents > 1'
                                           )
 noPtJetsPF      = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                        cut = 'abs(eta) < 2.4                     &'
+                                        cut = 'abs(eta) < 2.5                     &'
                                               'chargedHadronEnergyFraction > 0.0  &'
                                               'neutralHadronEnergyFraction < 0.99 &'
                                               'chargedEmEnergyFraction     < 0.99 &'
@@ -152,7 +152,7 @@ noKinJetsPF      = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                                'nConstituents > 1'
                                          )
 noConstJetsPF   = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                        cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                        cut = 'abs(eta) < 2.5 & pt > 20.          &'
                                               'chargedHadronEnergyFraction > 0.0  &'
                                               'neutralHadronEnergyFraction < 0.99 &'
                                               'chargedEmEnergyFraction     < 0.99 &'
@@ -160,7 +160,7 @@ noConstJetsPF   = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                               'chargedMultiplicity > 0'
                                         )
 noCEFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                        cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                        cut = 'abs(eta) < 2.5 & pt > 20.          &'
                                               'chargedHadronEnergyFraction > 0.0  &'
                                               'neutralHadronEnergyFraction < 0.99 &'
                                               'neutralEmEnergyFraction     < 0.99 &'
@@ -168,7 +168,7 @@ noCEFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                               'nConstituents > 1'
                                         )
 noNHFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                        cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                        cut = 'abs(eta) < 2.5 & pt > 20.          &'
                                               'chargedHadronEnergyFraction > 0.0  &'
                                               'chargedEmEnergyFraction     < 0.99 &'
                                               'neutralEmEnergyFraction     < 0.99 &'
@@ -176,7 +176,7 @@ noNHFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                               'nConstituents > 1'
                                         )
 noNEFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                        cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                        cut = 'abs(eta) < 2.5 & pt > 20.          &'
                                               'chargedHadronEnergyFraction > 0.0  &'
                                               'neutralHadronEnergyFraction < 0.99 &'
                                               'chargedEmEnergyFraction     < 0.99 &'
@@ -184,7 +184,7 @@ noNEFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                               'nConstituents > 1'
                                         )
 noCHFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                        cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                        cut = 'abs(eta) < 2.5 & pt > 20.          &'
                                               'neutralHadronEnergyFraction < 0.99 &'
                                               'chargedEmEnergyFraction     < 0.99 &'
                                               'neutralEmEnergyFraction     < 0.99 &'
@@ -192,7 +192,7 @@ noCHFJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
                                               'nConstituents > 1'
                                         )
 noNCHJetsPF     = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                        cut = 'abs(eta) < 2.4 & pt > 20.          &'
+                                        cut = 'abs(eta) < 2.5 & pt > 20.          &'
                                               'chargedHadronEnergyFraction > 0.0  &'
                                               'neutralHadronEnergyFraction < 0.99 &'
                                               'chargedEmEnergyFraction     < 0.99 &'

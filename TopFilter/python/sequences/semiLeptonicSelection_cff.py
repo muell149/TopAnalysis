@@ -29,17 +29,15 @@ from PhysicsTools.PatAlgos.selectionLayer1.electronCountFilter_cfi import *
 ## setup the lepton selection collections
 ## for tight Muons see muonSelection_cff.py
 looseMuons     = selectedPatMuons.clone(src = 'selectedPatMuons',
-                                        cut = 'isGlobalMuon &'
+                                        cut = '(isGlobalMuon | isTrackerMuon) & isPFMuon &' # changed in 2012 (was isGlobalMuon)
                                               'abs(eta) < 2.5 & pt > 10.&'
-                                              '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.2'
-                                              #'(trackIso+caloIso)/pt <  0.2'
-                                              
+                                              '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/pt < 0.2' # changed in 2012
                                         )
 ## NB: defintions also in electronSelection_cff.py
 looseElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons',
-                                            cut = 'et > 15. & abs(eta) < 2.5 &'
-                                                  #'(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et <  0.2'
-                                                  '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.2'
+                                            cut = 'pt > 20. & abs(eta) < 2.5 &' # changed in 2012 (was et>15)
+                                                  '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/et < 0.15 &'
+                                                  'electronID("mvaTrigV0") > 0'
                                            )
 
 ## setup jet selection collection
@@ -58,6 +56,7 @@ tightBottomPFJets  = selectedPatJets.clone(src = 'combinedSecondaryVertexBJets'
 ## event selection; on these collection monitoring
 ## can still be performed
 semiLeptonicSelection = cms.Sequence(vertexSelectedMuons       *
+                                     vertexSelectedMuons2012   *
                                      vertexSelectedElectrons   *  
                                      looseElectrons            * 
                                      standAloneMuons           *
@@ -185,4 +184,3 @@ semiLeptonicElectronEvents = cms.Sequence( electronSelection      *
 def disableCountFilter(whichCountFilter):
     whichCountFilter.minNumber = 0
     whichCountFilter.maxNumber = 999999
-
