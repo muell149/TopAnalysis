@@ -1641,6 +1641,8 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
   // calculate xSec
   double luminosity2=luminosity;
   if(decayChannel=="combined") luminosity2= ( constLumiElec + constLumiMuon );
+  if(systematicVariation==sysLumiUp  )      luminosity2*=1.022;
+  else if(systematicVariation==sysLumiDown) luminosity2*=0.978;
   xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity2*BR );
   double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity2*BR );
   // text output
