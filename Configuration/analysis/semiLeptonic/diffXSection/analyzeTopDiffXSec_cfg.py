@@ -243,10 +243,10 @@ if(not options.sample=="none"):
         # full statistics: FIXME not available yet
 ##         if(genFull):
 ##             usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff"
-## 	if(eventFilter=='signal only'):
-## 	    outputFileName+="Sig"
-## 	elif(eventFilter=='background only'):
-## 	    outputFileName+="Bkg"
+	if(eventFilter=='signal only'):
+	    outputFileName+="Sig"
+	elif(eventFilter=='background only'):
+	    outputFileName+="Bkg"
 	if(sysDistort!=""):
 	    additionalEventWeights=False
 	    outputFileName+="SysDistort"+sysDistort
