@@ -157,8 +157,8 @@ namespace semileptonic {
   //  Numerical Constants
   // ============================
 
-  const double ttbarCrossSection=165.6;                      // NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
-  const double ttbarCrossSectionError=sqrt(6.2*6.2+9.1*9.1); // Scale and PDF uncertainties on NNLO value
+  const double ttbarCrossSection=234;                      // NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
+  const double ttbarCrossSectionError=sqrt(12.*12.+((10.+7.)/2.)*((10.+7.)/2.)); // Scale and PDF uncertainties on NNLO value
                                                              // --> the scale contributions has been symetrized
 
   const double SF_TopMassDownUncertainty=0.9/11.0; // scale factors for top mass uncertainty
@@ -167,10 +167,10 @@ namespace semileptonic {
                                                    // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
-  const double globalLumiUncertainty = 0.022; // relative uncertainty
+  const double globalLumiUncertainty = 0.022; // relative uncertainty // FIXME UPDATE FOR 8 TEV
 	
-  const double constLumiElec = 4980.0;	
-  const double constLumiMuon = 4955.0;
+  const double constLumiElec = 4980.0; // FIXME UPDATE FOR 8 TEV
+  const double constLumiMuon = 4955.0; // FIXME UPDATE FOR 8 TEV
   
   const double BRPDG=0.145888;
 
@@ -752,90 +752,90 @@ namespace semileptonic {
     //  MadGraph: ttbar signal + background
     if((sample==kSig)||(sample==kBkg)){
       crossSection=ttbarCrossSection; 
-      // Fall11
-      Nevents = 3697693;//3701947;
+      // Summer12
+      Nevents = 6923750;
       // Systematic samples
-      if(kSys==sysTopScaleUp  ) Nevents=3691845;//3696269;  
-      if(kSys==sysTopScaleDown) Nevents=4000585;//4004587;  
-      if(kSys==sysTopMatchUp  ) Nevents=4025110;//4029823; 
-      if(kSys==sysTopMatchDown) Nevents=1544084;//1545688;
-      if(kSys==sysTopMassUp   ) Nevents=1669928;//1671859; 
-      if(kSys==sysTopMassDown ) Nevents=1618341;//1620072; 
+      if(kSys==sysTopScaleUp  ) Nevents=5009488;
+      if(kSys==sysTopScaleDown) Nevents=5387181;
+      if(kSys==sysTopMatchUp  ) Nevents=5415010;
+      if(kSys==sysTopMatchDown) Nevents=5476728;
+      if(kSys==sysTopMassUp   ) Nevents=5249525;
+      if(kSys==sysTopMassDown ) Nevents=5369214;
     }
     else if((sample==kSigPow)||(sample==kBkgPow)){
       crossSection=ttbarCrossSection; 
-      // Fall11
-      Nevents = 16420479;//16439970;
+      // Summer12
+      Nevents = 21675970;
     }
     else if((sample==kSigMca)||(sample==kBkgMca)){
       crossSection=ttbarCrossSection; 
-      // Fall11
+      // Summer12
       // MC@NLO: total events is sum of weights
       //    21745196 total     weights
       //    19277872 positive  weights (88.65%)
       //     2467324 negative  weights (11.35%)
       //    16810548 effective weights
       // each |weight| = 190.41256 -> number directly from LHE
-      Nevents = 3200939480 ; // 16810548 * 190.41256
+      Nevents = 32852589*190.41256; // FIXME UPDATE av. weight FOR 8 TEV
     }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
-      crossSection=31314.0;
-      // Fall11
-      Nevents = 81171633;//81345381;
+      crossSection=36257;
+      // Summer12
+      Nevents = 57709905;
       // Systematic samples:
-      if(kSys==sysVBosonScaleUp  ) Nevents= 9761537;// 9784907; 
-      if(kSys==sysVBosonScaleDown) Nevents=10075524;//10092532;  
-      if(kSys==sysVBosonMatchUp  ) Nevents=10438789;//10461655;
-      if(kSys==sysVBosonMatchDown) Nevents= 9936639;// 9956679;  
+      if(kSys==sysVBosonScaleUp  ) Nevents=20784770; 
+      if(kSys==sysVBosonScaleDown) Nevents=20760884;  
+      if(kSys==sysVBosonMatchUp  ) Nevents=20976082;
+      if(kSys==sysVBosonMatchDown) Nevents=21364637;  
     }
     // MadGraph: DY->ll+jets
     else if(sample==kZjets){
-      crossSection=3048.0;
-      // Fall11
-      Nevents = 36138495;//36209629;
-      // Summer11 systematic samples:
-      if(kSys==sysVBosonScaleUp  ) Nevents=1589496;//1593052;
-      if(kSys==sysVBosonScaleDown) Nevents=1656321;//1658995;
-      if(kSys==sysVBosonMatchUp  ) Nevents=1638100;//1641367;
-      if(kSys==sysVBosonMatchDown) Nevents=1612036;//1615032;
+      crossSection=3503;
+      // Summer12
+      Nevents =30459503;
+      // Summer12 systematic samples:
+      if(kSys==sysVBosonScaleUp  ) Nevents=2170270;
+      if(kSys==sysVBosonScaleDown) Nevents=1934901;
+      if(kSys==sysVBosonMatchUp  ) Nevents=1985529;
+      if(kSys==sysVBosonMatchDown) Nevents=2000000; // FIXME UPDATE FOR 8 TEV
     }
     // Pythia6: QCD Mu enriched
     else if(sample==kQCD&&decayChannel.compare("muon")==0){
-      // Fall11
-      crossSection=296600000.*0.0002855; // generator crossSection * prefilter efficiency
-      Nevents     =25080241;
+      // Summer12
+      crossSection=3.64E8*3.7E-4; // generator crossSection * prefilter efficiency
+      Nevents     =21484602;
     }
     // QCD e+jets channel 
-    // Fall11
+    // Summer12
     // a) subsamples
     else if(sample==kQCDEM1){
-      crossSection= 0.0106*236100000;  // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     = 35721833;
+      crossSection= 2.886E8*1.01E-2;  // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 35040695;
     }
     else if(sample==kQCDEM2){
-      crossSection= 0.061*59440000;    // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     = 70392060;
+      crossSection= 7.433E7*6.21E-2;    // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 33088888;
     }
     else if(sample==kQCDEM3){
-      crossSection= 0.159*898200;      // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     = 8150672;
-    }
+      crossSection= 1.191E6*0.1539;      // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 34542763;
+    } //EM4: 31697066 3.099E4*0.148 //EM5: 34611322 4.25E3*0.131 //EM6: 34080562 8.1E2*0.11
     else if(sample==kQCDBCE1){
-      crossSection= 0.00059*236100000; // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     = 2071133;
+      crossSection= 2.886E8*5.8E-4; // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 1740229;
     }
     else if(sample==kQCDBCE2){
-      crossSection= 0.00242*59440000;  // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     = 2030033; 
+      crossSection= 7.424E7*2.25E-3;  // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 2048152; 
     }
     else if(sample==kQCDBCE3){
-      crossSection= 0.0105*898200;     // generator prefilter efficiency * LO PYTHIA crossSection
-      Nevents     = 1082691; 
-    }
+      crossSection= 1.191E6*1.09E-2;     // generator prefilter efficiency * LO PYTHIA crossSection
+      Nevents     = 1945525; 
+    } //BCE4: 1948112 3.098E4*2.04E-2 //BCE5: 2026521 4.25E3*2.43E-2  //BCE6: 1948532 8.11E2*2.95E-2 
     // b)combined
     else if(sample==kQCD&&decayChannel.compare("electron")==0){
-      // Fall11: already added in combineMCsamples.C
+      // Summer12: already added in combineMCsamples.C
       // with cross section as weight, only
       // lumi normalization is done here
       Nevents     =1.;
@@ -844,74 +844,73 @@ namespace semileptonic {
     // Powheg: singleTop/Antitop Samples
     // a) subsamples
     else if(sample==kSATops){
-      crossSection= 1.44;
-      Nevents     = 137662;//137980;
+      crossSection= 1.8;
+      Nevents     = 139974;
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =153584;//153981;
-      if(kSys==sysTopScaleDown) Nevents =153650;//153971;
+      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
     }
     else if(sample==kSTops){
-      crossSection= 3.19;
-      Nevents     = 259595;//259971;
+      crossSection= 3.8;
+      Nevents     = 259961;
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =285513;//285972;
-      if(kSys==sysTopScaleDown) Nevents =285182;//285602;
+      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
     }
     else if(sample==kSATopt){
-      crossSection= 22.65;
-      Nevents     = 1939703;//1944826;
+      crossSection= 30.7;
+      Nevents     = 1935072;
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =563929;//565520;
-      if(kSys==sysTopScaleDown) Nevents =564169;//565454;
+      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
     }
     else if(sample==kSTopt){
-      crossSection= 41.92;
-      Nevents     = 3891841;//3900171;
+      crossSection= 56.4;
+      Nevents     = 3758227;
       // scale variation
-      // FIXME: t channel single top scale samples after kinematics filter
-      if(kSys==sysTopScaleUp  ) Nevents = 1029915;//1032197;
-      if(kSys==sysTopScaleDown) Nevents = 1037460;//1039406;
+      // if(kSys==sysTopScaleUp  ) Nevents = ; // FIXME UPDATE FOR 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents = ; // FIXME UPDATE FOR 8 TEV
     }
     else if(sample==kSAToptW){
-      crossSection= 7.87;
-      Nevents     = 808200;//809984;
+      crossSection= 11.1;
+      Nevents     = 493460;
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =436750;//437798;
-      if(kSys==sysTopScaleDown) Nevents =437007;//437863;
+      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
     }
     else if(sample==kSToptW){
-      crossSection= 7.87;
-      Nevents     = 812600;//814390;
+      crossSection= 11.1; 
+      Nevents     = 497658;
       // scale variation
-      if(kSys==sysTopScaleUp  ) Nevents =436656;//437736;
-      if(kSys==sysTopScaleDown) Nevents =436986;//437819;
-    }
+      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
+    } 
     // b) combined single top sample
     else if(sample==kSTop){
-      // Fall11: already added in combineMCsamples.C
+      // Summer12: already added in combineMCsamples.C
       // with cross section as weight,
       // lumi normalization is done here
       Nevents=1;
       crossSection=1.;
     }
     // Pythia6: DiBoson Samples
-    // Fall11
+    // Summer12
     // a) subsamples
     else if(sample==kWW){
-      crossSection= 43.0;
-      Nevents     = 4225916;
+      crossSection= 54.8;
+      Nevents     = 10000431;
     }
     else if(sample==kWZ){
-      crossSection= 18.2;
-      Nevents     = 4265243;
+      crossSection= 33.2;
+      Nevents     = 10000283;
     }
     else if(sample==kZZ){
-      crossSection= 5.9;
-      Nevents     = 4191045;
+      crossSection= 8.1;
+      Nevents     = 9799908;
     }
     // b) combined diboson: WW,WZ,ZZ
     else if(sample==kDiBos){
-      // Fall11: already added in combineMCsamples.C
+      // Summer12: already added in combineMCsamples.C
       // with cross section as weight,
       // lumi normalization is done here
       crossSection=1.;
@@ -938,7 +937,7 @@ namespace semileptonic {
     // e) systematic shifts
     double weight2=weight;
     // e0) ttbar data basd reweighting
-    if(kSys==sysTest){
+    if(kSys==sysTest){ // FIXME UPDATE FOR 8 TEV
       if(sample==kSig&&decayChannel.compare("electron")==0) weight2*=549.162/557.161;
       if(sample==kSig&&decayChannel.compare("muon"    )==0) weight2*=546.5/567.8;
       if(sample==kBkg&&decayChannel.compare("electron")==0) weight2*=3148.5/3193.74;
@@ -1088,7 +1087,6 @@ namespace semileptonic {
     // take care of systematic variations
     // they are located in dedicated subfolders
     // JES
-    bool MCTagSummer11 = 0;
     if(sys==sysJESUp  ) fileName = "JESUp/"+fileName+"JESUp";
     if(sys==sysJESDown) fileName = "JESDown/"+fileName+"JESDown";
     // JER
@@ -1116,8 +1114,8 @@ namespace semileptonic {
     // (b) V+jets
     if((sys==sysVBosonScaleUp  )&&(sample==kWjets)) fileName = "ScaleUp/"+fileName+"ScaleUp";    
     if((sys==sysVBosonScaleDown)&&(sample==kWjets)) fileName = "ScaleDown/"+fileName+"ScaleDown";
-    if((sys==sysVBosonScaleUp  )&&(sample==kZjets)) {fileName = "ScaleUp/"+fileName+"ScaleUp";     MCTagSummer11=1;}
-    if((sys==sysVBosonScaleDown)&&(sample==kZjets)) {fileName = "ScaleDown/"+fileName+"ScaleDown"; MCTagSummer11=1;}
+    if((sys==sysVBosonScaleUp  )&&(sample==kZjets)) {fileName = "ScaleUp/"+fileName+"ScaleUp";     }
+    if((sys==sysVBosonScaleDown)&&(sample==kZjets)) {fileName = "ScaleDown/"+fileName+"ScaleDown"; }
     // (c) SingleTop
     if((sys==sysSingleTopScaleUp)  &&(sample==kSTop)) fileName = "ScaleUp/"+fileName+"ScaleUp";   
     if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) fileName = "ScaleDown/"+fileName+"ScaleDown";
@@ -1128,13 +1126,13 @@ namespace semileptonic {
     // (b) V+jets
     if((sys==sysVBosonMatchUp  )&&(sample==kWjets)) fileName = "MatchUp/"+fileName+"MatchUp";
     if((sys==sysVBosonMatchDown)&&(sample==kWjets)) fileName = "MatchDown/"+fileName+"MatchDown";
-    if((sys==sysVBosonMatchUp  )&&(sample==kZjets)) {fileName = "MatchUp/"+fileName+"MatchUp";     MCTagSummer11=1;}
-    if((sys==sysVBosonMatchDown)&&(sample==kZjets)) {fileName = "MatchDown/"+fileName+"MatchDown"; MCTagSummer11=1;}
+    if((sys==sysVBosonMatchUp  )&&(sample==kZjets)) {fileName = "MatchUp/"+fileName+"MatchUp";     }
+    if((sys==sysVBosonMatchDown)&&(sample==kZjets)) {fileName = "MatchDown/"+fileName+"MatchDown"; }
     // Top Mass
     if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";    
     if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
     // label for MC production cycle
-    fileName += (MCTagSummer11) ? "Summer11" : "Fall11";
+    fileName += "Summer12";
     fileName += "PF.root";
     // return output
     return fileName;
@@ -3253,11 +3251,6 @@ namespace semileptonic {
     // smoothcurves: indicates wheter smooth or binned curve is drawn
     // PS: "Parton", "Hadron"
     
-/*     if(filename=="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root"){ */
-/*       std::cout << std::endl << "NEW IMPLEMENTATION!!!! " << std::endl <<  plotname << ": "; */
-/*       std::cout << " normalize? " << normalize << " , errorbands? " << errorbands << " , drawOnlyErrors? " << drawOnlyErrors << " , model? " << model << " , smoothcurves? " << smoothcurves << std::endl; */
-/*     } */
-
     // get unified variable name from specific file dependend plotnames
     TString plotname2=plotname;
     if(plotname2.BeginsWith("h")) plotname2.Replace(0,1,"");
@@ -3428,9 +3421,9 @@ namespace semileptonic {
       TH1F* loadcentral2=0;
       if(verbose>0){
 	std::cout << "transfer relative uncertainties to central value from: " << plotname4 << " in " 
-		  << "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root" << std::endl;
+		  << "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root" << std::endl;
       }       
-      loadcentral2=getTheoryPrediction(plotname4,"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root");
+      loadcentral2=getTheoryPrediction(plotname4,"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root");
 
       TH1F* central=0;    
       TH1F* central2=0;
