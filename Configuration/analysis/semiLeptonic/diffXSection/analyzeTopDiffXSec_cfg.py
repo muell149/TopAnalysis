@@ -1432,7 +1432,8 @@ elif (options.mctag == "Summer11"):
 elif (options.mctag == "Summer12"):
     process.eventWeightPU.MCSampleHistoName        = "puhisto"
     process.eventWeightPU.DataHistoName            = "pileup"
-    process.eventWeightPU.MCSampleFile             = "TopAnalysis/TopUtils/data/MC_PUDist_Summer2012.root"
+
+    process.eventWeightPU.MCSampleFile             = "TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root"
     process.eventWeightPU.DataFile                 = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012B_194270-196531.root"
     
 process.eventWeightPUsysNo   = process.eventWeightPU.clone()
