@@ -567,7 +567,7 @@ else:
 ## load JSON file for data
 if(runningOnData=="data"):
     if(jsonFile!=""):
-        import PhysicsTools.PythonAnalysis.LumiList as LumiList
+        import FWCore.PythonUtilities.LumiList as LumiList
         import FWCore.ParameterSet.Types as CfgTypes
 	print "The following JSON file is used in the cfg file: ", jsonFile
 	myLumis = LumiList.LumiList(filename = jsonFile).getCMSSWString().split(',')
@@ -676,8 +676,9 @@ from RecoMET.METFilters.multiEventFilter_cfi import multiEventFilter
 ## ---
 ##    set up filter for different ttbar decay channels
 ## ---
-process.load("TopQuarkAnalysis.TopEventProducers.producers.TtDecaySelection_cfi")
-process.ttSemiLeptonicFilter = process.ttDecaySelection.clone()
+from TopQuarkAnalysis.TopSkimming.TtDecayChannelFilter_cfi import ttDecayChannelFilter
+process.ttSemiLeptonicFilter = ttDecayChannelFilter.clone()
+process.ttSemiLeptonicFilter.src = "genEvt"
 process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.muon = True
 if(tau==True):
     process.ttSemiLeptonicFilter.allowedTopDecays.decayBranchA.tau  = True
