@@ -1461,7 +1461,7 @@ process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
 if ("11" in options.mctag):
     process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysNo.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72765_2012B_194270-196531.root"
+    process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72765_2012B_194270-196531.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
@@ -1473,7 +1473,7 @@ process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
 if ("11" in options.mctag):
     process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysNo.DataFile          = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65835_2012B_194270-196531.root"
+    process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65835_2012B_194270-196531.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
