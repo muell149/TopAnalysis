@@ -28,30 +28,30 @@ void PUControlDistributionsAnalyzer::beginJob()
 
   // Histograms for PU Events
 
-  histoNPU = fs->make<TH1F>("pileup",";Number of PU Events (Unweighted);Frequency",71,-0.5,70.5);
+  histoNPU = fs->make<TH1F>("pileup",";Number of PU Events (Unweighted);Frequency",710,0.,71);
   histoNPU -> SetFillColor(2);  
 
-  histoNPUReweighted = fs->make<TH1F>("pileup_reweighted",";Number of PU Events (Reweighted);Frequency",71,-0.5,70.5);
+  histoNPUReweighted = fs->make<TH1F>("pileup_reweighted",";Number of PU Events (Reweighted);Frequency",710,0.,71.);
   histoNPUReweighted -> SetFillColor(2);
 
-  histoNPUReweightedScaleUp = fs->make<TH1F>("pileup_reweighted_up",";Number of PU Events (Reweighted, Scale Up);Frequency",71,-0.5,70.5);
+  histoNPUReweightedScaleUp = fs->make<TH1F>("pileup_reweighted_up",";Number of PU Events (Reweighted, Scale Up);Frequency",710,0.,71.);
   histoNPUReweightedScaleUp -> SetFillColor(2);
 
-  histoNPUReweightedScaleDown = fs->make<TH1F>("pileup_reweighted_down",";Number of PU Events (Reweighted, Scale Down);Frequency",71,-0.5,70.5);
+  histoNPUReweightedScaleDown = fs->make<TH1F>("pileup_reweighted_down",";Number of PU Events (Reweighted, Scale Down);Frequency",710,0.,71.);
   histoNPUReweightedScaleDown -> SetFillColor(2);
 
   // Histograms for Primary Vertices
 
-  histoNPVertex = fs->make<TH1F>("npvertex",";Number of Primary Vertices (Unweighted);Frequency",71,-0.5,70.5);
+  histoNPVertex = fs->make<TH1F>("npvertex",";Number of Primary Vertices (Unweighted);Frequency",710,0.,71.);
   histoNPVertex -> SetFillColor(2);
 
-  histoNPVertexReweighted = fs->make<TH1F>("npvertex_reweighted",";Number of Primary Vertices (Reweighted);Frequency",71,-0.5,70.5);
+  histoNPVertexReweighted = fs->make<TH1F>("npvertex_reweighted",";Number of Primary Vertices (Reweighted);Frequency",710,0.,71.);
   histoNPVertexReweighted -> SetFillColor(2);  
 
-  histoNPVertexReweightedScaleUp = fs->make<TH1F>("npvertex_reweighted_up",";Number of Primary Vertices (Reweighted, Scale Up);Frequency",71,-0.5,70.5);
+  histoNPVertexReweightedScaleUp = fs->make<TH1F>("npvertex_reweighted_up",";Number of Primary Vertices (Reweighted, Scale Up);Frequency",710,0.,71.);
   histoNPVertexReweightedScaleUp -> SetFillColor(2);
 
-  histoNPVertexReweightedScaleDown = fs->make<TH1F>("npvertex_reweighted_down",";Number of Primary Vertices (Reweighted, Scale Down);Frequency",71,-0.5,70.5);
+  histoNPVertexReweightedScaleDown = fs->make<TH1F>("npvertex_reweighted_down",";Number of Primary Vertices (Reweighted, Scale Down);Frequency",710,0.,71.);
   histoNPVertexReweightedScaleDown -> SetFillColor(2);
 
   // Histograms for Event Weights
@@ -67,7 +67,7 @@ void PUControlDistributionsAnalyzer::beginJob()
 
   // Histograms for correlations between PU events and number of vertices
 
-  histoNPUvsNPVertex = fs->make<TH2F>("pileup_vs_npvertex",";Number of PU Events (Unweighted) versus Number of Primary Vertices (Unweighted);Frequency",71,-0.5,70.5,71,-0.5,70.5);
+  histoNPUvsNPVertex = fs->make<TH2F>("pileup_vs_npvertex",";Number of PU Events (Unweighted) versus Number of Primary Vertices (Unweighted);Frequency",71,0.,71.,71,0.,71.);
   histoNPUvsNPVertex -> SetFillColor(2);    
 }
 
