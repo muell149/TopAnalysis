@@ -82,7 +82,6 @@ class TopSVDFunctions
         );
     
     
-    protected:
            
    
         // Math
