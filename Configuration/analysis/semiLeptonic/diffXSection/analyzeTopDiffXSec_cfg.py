@@ -454,7 +454,7 @@ if(not options.sample=="none"):
         PythiaSample="True"
         outputFileName+="QCDBCE2"
     elif(options.sample=="qcdBCE3" and decayChannel=='electron'):
-        usedSample="TopAnalysis/Configuration/Summer12/QCD_Pt_80_170_BCtoE_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff.py"
+        usedSample="TopAnalysis/Configuration/Summer12/QCD_Pt_80_170_BCtoE_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         PythiaSample="True"
         outputFileName+="QCDBCE3"
     elif(options.sample=="WW"):        
