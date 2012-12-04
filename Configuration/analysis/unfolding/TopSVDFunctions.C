@@ -3244,7 +3244,7 @@ double TopSVDFunctions::SVD_Integral1D(TH1D* hist, int syst, bool doOF)
         if ( i == nbins+1 && doOF == false ) continue;
         double value = (hist+syst)->GetBinContent(i);
         bool NaN_found = false;
-        if ( isnan(value) == true ) NaN_found = true;
+        if ( std::isnan(value) == true ) NaN_found = true;
         if ( NaN_found == true ) {
         	cout << endl;
         	cout << "Error in TopSVDFunctions::SVD_Integral()" << endl;
@@ -3279,7 +3279,7 @@ double TopSVDFunctions::SVD_Integral2D(TH2D* hist, int syst, bool doOF)
             if ( j == nbinsy+1 && doOF == false ) continue;
             double value = (hist+syst)->GetBinContent(i,j);
 	        bool NaN_found = false;
-	        if ( isnan(value) == true ) NaN_found = true;
+	        if ( std::isnan(value) == true ) NaN_found = true;
 	        if ( NaN_found == true ) {
 	        	cout << endl;
 	        	cout << "Error in TopSVDFunctions::SVD_Integral()" << endl;
