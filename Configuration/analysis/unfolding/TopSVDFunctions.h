@@ -29,7 +29,14 @@
 
 // Includes from Top Analysis
 #include "TopSVDUnfold.h"
+
+#ifdef STANDALONE_COMPILE
+#include "../diLeptonic/utils.h"
+#else
 #include "TopSVDUnfold.C"
+#include "../semiLeptonic/diffXSection/basicFunctions.h"
+#include "../semiLeptonic/diffXSection/HHStyle.h"
+#endif
 
 // Namespaces
 using namespace std;

@@ -2,7 +2,9 @@
 #define TOPSVDUNFOLD_H
 
 #include "BaseSVDUnfold.h"
+#ifndef STANDALONE_COMPILE
 #include "BaseSVDUnfold.C"
+#endif
 
 class TopSVDUnfold : public BaseSVDUnfold {
 
