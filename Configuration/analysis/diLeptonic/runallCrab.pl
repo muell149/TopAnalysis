@@ -138,6 +138,9 @@ while(my $line = <$IN>) {
 	if($options){
 	    s/##OPTIONS##/$options/g;
 	}
+	else{
+	    s/##OPTIONS##/''/g;
+	}
 	s/##FILTERLUMI##/$jsonFile ? '' : '#'/eg;
         s/##JSON##/$json/g;
 	s/##SEDIR##/$sedir/g;
