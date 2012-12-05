@@ -1,4 +1,10 @@
 #include "TopSVDUnfold.h"
+#include "TDecompSVD.h"
+#include <TH1.h>
+#include <TH2.h>
+#include <TMath.h>
+#include <TRandom3.h>
+#include <iostream>
 
 using namespace std;
  
