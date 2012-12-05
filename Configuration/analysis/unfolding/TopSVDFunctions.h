@@ -28,8 +28,6 @@
 #include "TPaletteAxis.h"
 
 // Includes from Top Analysis
-#include "../semiLeptonic/diffXSection/basicFunctions.h"
-#include "../semiLeptonic/diffXSection/HHStyle.h"
 #include "TopSVDUnfold.h"
 #include "TopSVDUnfold.C"
 
