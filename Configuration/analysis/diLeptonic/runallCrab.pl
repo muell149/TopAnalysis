@@ -139,7 +139,7 @@ while(my $line = <$IN>) {
 	    s/##OPTIONS##/$options/g;
 	}
 	else{
-	    s/##OPTIONS##/''/g;
+	    s/##OPTIONS##/ /g;
 	}
 	s/##FILTERLUMI##/$jsonFile ? '' : '#'/eg;
         s/##JSON##/$json/g;
