@@ -4419,8 +4419,12 @@ void TopSVDFunctions::SVD_MakeFolder(TString outputpath)
 {
     // Use the TSystem class for this 
     // Do it RECURSIVELY!!
-    int success = gSystem->mkdir(outputpath, true);  
-    success = 0;
+    gSystem->mkdir(outputpath, true); 
+//    bool success = gSystem->mkdir(outputpath, true) == 0; 
+//    if (!success) {
+//        std::cerr << "Cannot create directory " << outputpath << std::endl;
+//        std::exit(1);
+//    }
 }
 
 
