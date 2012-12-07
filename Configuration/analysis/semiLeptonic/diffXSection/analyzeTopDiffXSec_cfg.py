@@ -241,8 +241,8 @@ if(not options.sample=="none"):
         # limited statistics (wo spin correlation inclusive sample)
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         # full statistics: FIXME not available yet
-##         if(genFull):
-##             usedSample="TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff"
+         if(genFull):
+             usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	if(eventFilter=='signal only'):
 	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
@@ -251,7 +251,7 @@ if(not options.sample=="none"):
 	    additionalEventWeights=False
 	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="synch"):
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff" 
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
     elif(options.sample=="powheg"):
         usedSample="TopAnalysis/Configuration/Summer12/TT_CT10_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v2_cff" 
