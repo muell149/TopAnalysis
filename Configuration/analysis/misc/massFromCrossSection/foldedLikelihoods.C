@@ -35,6 +35,8 @@ const double mZ=91.1876;
 
 const bool moch_highE=true;
 
+// const bool topppOnly=true;
+
 const TString figDir = (moch_highE ? "figures" : "figures_mocOff");
 
 double alpha_s(const double Q, const double lambda_MSbar=0.213, const unsigned Nf = 5)
@@ -276,7 +278,7 @@ TString epsString(const TString& label, const bool pole, const PdfType pdfType)
 }
 
 void drawTheoryGraph(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
-		     const TString epsLabel, const TString printNameBase)
+		     TString epsLabel, const TString printNameBase)
 {
   if(pole)
     graph->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
@@ -291,6 +293,20 @@ void drawTheoryGraph(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
 
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsLabel);
+
+  const unsigned n = graph->GetN();
+  double relDiff[n];
+  for(unsigned i=0; i<n; i++)
+    relDiff[i] = (graph->GetFunction("f1")->Eval((graph->GetX())[i]) / (graph->GetY())[i] -1.) * 100.;
+  TGraph graphRelDiff(n, graph->GetX(), relDiff);
+  graphRelDiff.SetTitle(graph->GetTitle());
+  graphRelDiff.GetXaxis()->SetTitle(graph->GetXaxis()->GetTitle());
+  graphRelDiff.GetYaxis()->SetTitle("#sigma_{t#bar{t}}^{fit}/#sigma_{t#bar{t}}^{point} -1 (%)");
+  graphRelDiff.GetYaxis()->CenterTitle();
+  graphRelDiff.Draw("AP");
+  //  graphRelDiff.Fit("pol3");
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(epsLabel.Insert(epsLabel.Index(".eps"), "_relDiffToFitFunc"));
 }
 
 void removeEmptyPoints(TGraph* graph)
@@ -607,73 +623,73 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     canvas->Print(figDir+"/MSbar_vs_pole_mass.eps");
   }
 
-  //////////////////////////////////////
-  /// Start of quick'n dirty
-  //////////////////////////////////////
-
-  TGraph* alphaLambdaGraph = getAlphaLambdaGraph();
-  alphaLambdaGraph->Draw("AC");
-  canvas->Print(printNameBase+".ps");
-  delete alphaLambdaGraph;
-
-  runningAlpha = getRunningAlphaGraph(50, 450);
-  TGraph* runningAlpha_new = getRunningAlphaGraph(50, 450, 0.207, 0.0043);
-
-  runningAlpha->SetFillColor(kMagenta-9);
-  runningAlpha_new->SetFillColor(kCyan);
-  runningAlpha->SetLineStyle(2);
-  runningAlpha_new->SetLineStyle(3);
-
-  TLegend lastMinuteLeg = TLegend(0.4, 0.7, 0.8, 0.9);
-  lastMinuteLeg.SetFillColor(0);
-  lastMinuteLeg.SetBorderSize(0);
-  lastMinuteLeg.AddEntry(runningAlpha    , "PDG 2012"  , "LF");
-  lastMinuteLeg.AddEntry(runningAlpha_new, "CMS-PAS-TOP-12-022", "LF");
-
-  TLine lineMZ(mZ, 0.09, mZ, 0.135);
-  lineMZ.SetLineWidth(3);
-  TLatex textMZ(0.95*mZ, 0.11, "m_{#lower[-0.1]{Z}}");
-  textMZ.SetTextAngle(90);
-  textMZ.SetTextAlign(32);
-  textMZ.SetTextFont(43);
-  textMZ.SetTextSizePixels(33);
-
-  TLine line2Mt(2*173.2, 0.09, 2*173.2, 0.135);
-  line2Mt.SetLineWidth(3);
-  TLatex text2Mt(0.95*2*173.2, 0.11, "2m_{#lower[-0.2]{t}}");
-  text2Mt.SetTextAngle(90);
-  text2Mt.SetTextAlign(32);
-  text2Mt.SetTextFont(43);
-  text2Mt.SetTextSizePixels(33);
-
-  runningAlpha_new->Draw("A3");
-  lineMZ.Draw();
-  textMZ.Draw();
-  line2Mt.Draw();
-  text2Mt.Draw();
-  runningAlpha_new->Draw("3");
-  runningAlpha->Draw("3");
-  runningAlpha->Draw("XC");
-  runningAlpha_new->Draw("XC");
-  gPad->SetLogx();
-  lastMinuteLeg.Draw();
-  gPad->RedrawAxis();
-  runningAlpha_new->GetXaxis()->SetLimits(50, 500);
-  runningAlpha_new->GetXaxis()->SetMoreLogLabels();
-  runningAlpha_new->GetXaxis()->SetNoExponent();
-  runningAlpha_new->GetYaxis()->SetRangeUser(0.09, 0.135);
-  canvas->Print(printNameBase+".ps");
-  canvas->Print(printNameBase+"results_qDep.eps");
-  gPad->SetLogx(false);
-
-  delete runningAlpha_new;
-
-//  canvas->Print(printNameBase+".ps]");
-//  return 0;
-
-  //////////////////////////////////////
-  /// End of quick'n dirty
-  //////////////////////////////////////
+//  //////////////////////////////////////
+//  /// Start of quick'n dirty
+//  //////////////////////////////////////
+//
+//  TGraph* alphaLambdaGraph = getAlphaLambdaGraph();
+//  alphaLambdaGraph->Draw("AC");
+//  canvas->Print(printNameBase+".ps");
+//  delete alphaLambdaGraph;
+//
+//  runningAlpha = getRunningAlphaGraph(50, 450);
+//  TGraph* runningAlpha_new = getRunningAlphaGraph(50, 450, 0.207, 0.0043);
+//
+//  runningAlpha->SetFillColor(kMagenta-9);
+//  runningAlpha_new->SetFillColor(kCyan);
+//  runningAlpha->SetLineStyle(2);
+//  runningAlpha_new->SetLineStyle(3);
+//
+//  TLegend lastMinuteLeg = TLegend(0.4, 0.7, 0.8, 0.9);
+//  lastMinuteLeg.SetFillColor(0);
+//  lastMinuteLeg.SetBorderSize(0);
+//  lastMinuteLeg.AddEntry(runningAlpha    , "PDG 2012"  , "LF");
+//  lastMinuteLeg.AddEntry(runningAlpha_new, "CMS-PAS-TOP-12-022", "LF");
+//
+//  TLine lineMZ(mZ, 0.09, mZ, 0.135);
+//  lineMZ.SetLineWidth(3);
+//  TLatex textMZ(0.95*mZ, 0.11, "m_{#lower[-0.1]{Z}}");
+//  textMZ.SetTextAngle(90);
+//  textMZ.SetTextAlign(32);
+//  textMZ.SetTextFont(43);
+//  textMZ.SetTextSizePixels(33);
+//
+//  TLine line2Mt(2*173.2, 0.09, 2*173.2, 0.135);
+//  line2Mt.SetLineWidth(3);
+//  TLatex text2Mt(0.95*2*173.2, 0.11, "2m_{#lower[-0.2]{t}}");
+//  text2Mt.SetTextAngle(90);
+//  text2Mt.SetTextAlign(32);
+//  text2Mt.SetTextFont(43);
+//  text2Mt.SetTextSizePixels(33);
+//
+//  runningAlpha_new->Draw("A3");
+//  lineMZ.Draw();
+//  textMZ.Draw();
+//  line2Mt.Draw();
+//  text2Mt.Draw();
+//  runningAlpha_new->Draw("3");
+//  runningAlpha->Draw("3");
+//  runningAlpha->Draw("XC");
+//  runningAlpha_new->Draw("XC");
+//  gPad->SetLogx();
+//  lastMinuteLeg.Draw();
+//  gPad->RedrawAxis();
+//  runningAlpha_new->GetXaxis()->SetLimits(50, 500);
+//  runningAlpha_new->GetXaxis()->SetMoreLogLabels();
+//  runningAlpha_new->GetXaxis()->SetNoExponent();
+//  runningAlpha_new->GetYaxis()->SetRangeUser(0.09, 0.135);
+//  canvas->Print(printNameBase+".ps");
+//  canvas->Print(printNameBase+"results_qDep.eps");
+//  gPad->SetLogx(false);
+//
+//  delete runningAlpha_new;
+//
+////  canvas->Print(printNameBase+".ps]");
+////  return 0;
+//
+//  //////////////////////////////////////
+//  /// End of quick'n dirty
+//  //////////////////////////////////////
 
   const unsigned nPdfSets  = 5;
   const unsigned nTheories = 2;
@@ -698,20 +714,30 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   const TString errName [4] = {"Scale", "Experimental PDF", "#alpha_{S}", "Total"};
   const TString errLabel[4] = {"scale", "expPDF", "alphaS", "total"};
 
+  //  TF1* f1 = new TF1("f1", "[0]+[1]/x+[2]*TMath::Power(x,-2)+[3]*TMath::Power(x,-3)+[4]*TMath::Power(x,-4)", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,5)", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "TMath::Power(x, [0])*[1]", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "TMath::Power(x, [0]+[2]*x)*[1]", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "TMath::Power(x, [0])*TMath::Exp([2]*x)*[1]", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "TMath::Power(x, [0])*([1]*x+[2]*x*x+[3]*x*x*x)", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "[4]*TMath::Power(x, [0])+([1]*x+[2]*x*x+[3]*x*x*x)", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "TMath::Exp([1]*x+[2]*x*x+[3]*x*x*x)*[0]", 0, 1000);
+  //  TF1* f1 = new TF1("f1", "[0]+(x-175.)*[1]+[2]*(x-175.)*(x-175.)+[3]*(x-175.)*(x-175.)*(x-175.)", 0, 1000);
   TF1* f1 = new TF1("f1", "([0]+[1]*x+[2]*TMath::Power(x,2)+[3]*TMath::Power(x,3))/TMath::Power(x,4)", 0, 1000);
   f1->SetParNames("a", "b", "c", "d");
 
   for(unsigned h=0; h<nPdfSets; h++) {
     moc_vec[h] = readTheory("moch"  , pole, useAlphaUnc, (PdfType)h);
     moc[h] = moc_vec[h].at(3);
-    moc[h]->Fit(f1, "Q0");
+    moc[h]->Fit(f1, "WQ0");
     for(unsigned j=0; j<4; j++)
       moc_vec[h].at(j)->SetTitle(theoTitle[h][0]);
 
     if(pole) {
       mit_vec[h] = readTheory("mitov" , pole, useAlphaUnc, (PdfType)h);
       mit[h] = mit_vec[h].at(3);
-      mit[h]->Fit(f1, "Q0");
+      mit[h]->Fit(f1, "WQ0");
       for(unsigned j=0; j<4; j++)
 	mit_vec[h].at(j)->SetTitle(theoTitle[h][1]);
     }
@@ -734,8 +760,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     gStyle->SetOptTitle(0);
   }
 
-//  canvas->Print(printNameBase+".ps]");
-//  return 0;
+  //  canvas->Print(printNameBase+".ps]");
+  //  return 0;
 
   RooRealVar mass("mass", "m_{t}^{pole}", 140., 190., "GeV");
   if(!pole)
@@ -1039,8 +1065,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_mass.eps");
 
-//  canvas->Print(printNameBase+".ps]");
-//  return 0;
+  canvas->Print(printNameBase+".ps]");
+  return 0;
 
   FinalLikeliResults1D* mocResult[nPdfSets];
   FinalLikeliResults1D* mitResult[nPdfSets];
