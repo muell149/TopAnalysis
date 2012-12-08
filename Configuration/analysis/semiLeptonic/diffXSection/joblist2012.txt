@@ -37,8 +37,8 @@ nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mutt
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBG -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=electron 722 analyzeMuonDiffXSecBG_cfg.py
 
 # POWHEG
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=muon     540 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=electron 540 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 12 -M 6500 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=muon     540 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 12 -M 6500 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=electron 540 analyzeMuonDiffXSecBG_cfg.py
 
 # MC@NLO
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuMcatnloBG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=muon     829 analyzeMuonDiffXSecBG_cfg.py
