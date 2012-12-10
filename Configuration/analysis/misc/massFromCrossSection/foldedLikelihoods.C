@@ -541,7 +541,7 @@ void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std
     delete h2[i];
 }
 
-void plotProjectedPDF(FinalLikeliResults1D* result, RooPlot* frame, const int color, const int fillStyle,
+void plotProjectedPDF(const FinalLikeliResults1D* result, RooPlot* frame, const int color, const int fillStyle,
 		      const RooRealVar& x_var)
 {
   TString normRange = (TString)x_var.GetName() + "_fullRange";
@@ -1336,50 +1336,68 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   gPad->SetLeftMargin(oldPadLeftMargin);
   gPad->SetTopMargin(oldPadTopMargin);
   
-  canvas->Print(printNameBase+".ps]");
-  return 0;
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
   
   const TString outfile_name = (targetAlpha ? printNameBase+ "_alphaSummary.tab" : printNameBase+ "_massSummary.tab");
   ofstream outfile;
   outfile.open(outfile_name);
-  outfile << "\\begin{tabular}{|ll|c|c|c|}" << std::endl;
+  if(topppOnly)
+    outfile << "\\begin{tabular}{|l|c|c|c|}" << std::endl;
+  else
+    outfile << "\\begin{tabular}{|ll|c|c|c|}" << std::endl;
   outfile << "\\hline" << std::endl;
+  const TString oneOrTwoEmptyCols = (topppOnly ? " & " : " & & ");
   if(targetAlpha)
-    outfile << " & & Most likely & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "Most likely & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
   else
-    outfile << " & & Most likely & \\multicolumn{2}{c|}{Uncertainty / GeV} \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "Most likely & \\multicolumn{2}{c|}{Uncertainty / GeV} \\\\" << std::endl;
   if(targetAlpha)
-    outfile << " & & value       & Total & From $\\delta m_{t}$ \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "value       & Total & From $\\delta m_{t}$ \\\\" << std::endl;
   else
-    outfile << " & & value / GeV & Total & From $\\delta \\alpha_{S}$ \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "value / GeV & Total & From $\\delta \\alpha_{S}$ \\\\" << std::endl;
   outfile << "\\hline" << std::endl;
   const unsigned hOrdered[nPdfSets] = {3, 4, 0, 1, 2};
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
     if(pole) {
-      TString format = (targetAlpha ?
-			"%s & \\multirow{2}{*}{with %s} &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
-			"%s & \\multirow{2}{*}{with %s} &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
-      sprintf(tmpTxt, format,
-	      theoName[1].Data(), pdfName[hOrdered[h]].Data(),
-	      mitResult[hOrdered[h]]->bestX,
-	      mitResult[hOrdered[h]]->highErrTotal,
-	      mitResult[hOrdered[h]]->lowErrTotal,
-	      mitResult[hOrdered[h]]->highErrFromConstraintUncertainty,
-	      mitResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
-      outfile << tmpTxt << std::endl;
-      outfile << "\\cline{3-5}" << std::endl;
-      format = (targetAlpha ?
-		"%s & & %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
-		"%s & & %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
-      sprintf(tmpTxt, format,
-	      theoName[0].Data(),
-	      mocResult[hOrdered[h]]->bestX,
-	      mocResult[hOrdered[h]]->highErrTotal,
-	      mocResult[hOrdered[h]]->lowErrTotal,
-	      mocResult[hOrdered[h]]->highErrFromConstraintUncertainty,
-	      mocResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
-      outfile << tmpTxt << std::endl;
+      if(topppOnly) {
+	TString format = (targetAlpha ?
+			  "With %s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
+			  "With %s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+	sprintf(tmpTxt, format, pdfName[hOrdered[h]].Data(),
+		mitResult[hOrdered[h]]->bestX,
+		mitResult[hOrdered[h]]->highErrTotal,
+		mitResult[hOrdered[h]]->lowErrTotal,
+		mitResult[hOrdered[h]]->highErrFromConstraintUncertainty,
+		mitResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
+	outfile << tmpTxt << std::endl;
+      }
+      else {
+	TString format = (targetAlpha ?
+			  "%s & \\multirow{2}{*}{with %s} &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
+			  "%s & \\multirow{2}{*}{with %s} &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+	sprintf(tmpTxt, format,
+		theoName[1].Data(), pdfName[hOrdered[h]].Data(),
+		mitResult[hOrdered[h]]->bestX,
+		mitResult[hOrdered[h]]->highErrTotal,
+		mitResult[hOrdered[h]]->lowErrTotal,
+		mitResult[hOrdered[h]]->highErrFromConstraintUncertainty,
+		mitResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
+	outfile << tmpTxt << std::endl;
+	outfile << "\\cline{3-5}" << std::endl;
+	format = (targetAlpha ?
+		  "%s & & %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
+		  "%s & & %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+	sprintf(tmpTxt, format,
+		theoName[0].Data(),
+		mocResult[hOrdered[h]]->bestX,
+		mocResult[hOrdered[h]]->highErrTotal,
+		mocResult[hOrdered[h]]->lowErrTotal,
+		mocResult[hOrdered[h]]->highErrFromConstraintUncertainty,
+		mocResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
+	outfile << tmpTxt << std::endl;
+      }
       outfile << "\\hline" << std::endl;
     }
     else {
@@ -1403,82 +1421,68 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 //  return 0;
 
   for(unsigned h=0; h<nPdfSets; h++) {
-    char tmpTxt[99];
-    sprintf(tmpTxt, "2.3 fb^{-1} of 2011 CMS t#bar{t} data #times %s", theoTitle[h][0].Data());
-    TLatex text(0.,0.,tmpTxt);
-    text.SetNDC();
-    text.SetTextAlign(13);
-    text.SetX(gPad->GetLeftMargin());
-    text.SetY(1.003);
-    text.SetTextFont(43);
-    text.SetTextSizePixels(25);
+    for(unsigned t=0; t<2; t++) {
 
-    if(targetAlpha)
-      sprintf(tmpTxt, "%s = %.1f GeV",
-	      mass.getTitle().Data(), mass.getVal());
-    else
-      sprintf(tmpTxt, "%s = %.4f",
-	      alpha.getTitle().Data(), alpha.getVal());
-    TLatex textConstrVar(0.,0.,tmpTxt);
-    textConstrVar.SetNDC();
-    textConstrVar.SetTextAlign(13);
-    textConstrVar.SetX(0.22);
-    textConstrVar.SetY(0.90);
-    textConstrVar.SetTextFont(43);
-    textConstrVar.SetTextSizePixels(24);
+      if((t==0 && topppOnly) ||
+	 (t==1 && !pole))
+	continue;
 
-    RooPlot* frame;
-    if(targetAlpha) {
-      frame = alpha.frame(RooFit::Range(0.105, 0.130));
-      plotProjectedPDF(mocResult[h], frame, kRed, 1001, alpha);
+      const FinalLikeliResults1D* result = (t ? mitResult[h] : mocResult[h]);
+
+      char tmpTxt[99];
+      sprintf(tmpTxt, "2.3 fb^{-1} of 2011 CMS t#bar{t} data #times %s", theoTitle[h][t].Data());
+      TLatex text(0.,0.,tmpTxt);
+      text.SetNDC();
+      text.SetTextAlign(13);
+      text.SetX(gPad->GetLeftMargin());
+      text.SetY(1.003);
+      text.SetTextFont(43);
+      text.SetTextSizePixels(25);
+
+      if(targetAlpha)
+	sprintf(tmpTxt, "%s = %.1f GeV",
+		mass.getTitle().Data(), mass.getVal());
+      else
+	sprintf(tmpTxt, "%s = %.4f",
+		alpha.getTitle().Data(), alpha.getVal());
+      TLatex textConstrVar(0.,0.,tmpTxt);
+      textConstrVar.SetNDC();
+      textConstrVar.SetTextAlign(13);
+      textConstrVar.SetX(0.22);
+      textConstrVar.SetY(0.90);
+      textConstrVar.SetTextFont(43);
+      textConstrVar.SetTextSizePixels(24);
+
+      RooPlot* frame;
+      if(targetAlpha) {
+	frame = alpha.frame(RooFit::Range(0.105, 0.130));
+	plotProjectedPDF(result, frame, kRed, 1001, alpha);
+      }
+      else {
+	frame = mass.frame(RooFit::Range(160., 190.));
+	plotProjectedPDF(result, frame, kRed, 1001, mass);
+      }
+      frame->Draw();
+      frame->SetMaximum(1.4*frame->GetMaximum());
+      
+      TLegend likeLeg = TLegend(0.5, 0.75, 0.9, 0.92);
+      likeLeg.SetFillStyle(0);
+      likeLeg.SetBorderSize(0);
+      likeLeg.AddEntry("Maximum", "Maximum likelihood"      , "L");
+      likeLeg.AddEntry("Confide", "68% confidence interval" , "F");
+      likeLeg.SetTextFont(43);
+      likeLeg.SetTextSizePixels(25);
+
+      likeLeg.Draw();
+      text.Draw();
+      textConstrVar.Draw();
+      canvas->Print(printNameBase+".ps");
+      const TString epsAppendix = (t ? "mitov" : "moch");
+      if(targetAlpha)
+	canvas->Print(epsString("final_likeDensity_alpha_"+epsAppendix, pole, (PdfType)h));
+      else
+	canvas->Print(epsString("final_likeDensity_mass_"+epsAppendix, pole, (PdfType)h));
     }
-    else {
-      frame = mass.frame(RooFit::Range(160., 190.));
-      plotProjectedPDF(mocResult[h], frame, kRed, 1001, mass);
-    }
-    frame->Draw();
-    frame->SetMaximum(1.4*frame->GetMaximum());
-
-    TLegend likeLeg = TLegend(0.5, 0.75, 0.9, 0.92);
-    likeLeg.SetFillStyle(0);
-    likeLeg.SetBorderSize(0);
-    likeLeg.AddEntry("Maximum", "Maximum likelihood"      , "L");
-    likeLeg.AddEntry("Confide", "68% confidence interval" , "F");
-    likeLeg.SetTextFont(43);
-    likeLeg.SetTextSizePixels(25);
-
-    likeLeg.Draw();
-    text.Draw();
-    textConstrVar.Draw();
-    canvas->Print(printNameBase+".ps");
-    if(targetAlpha)
-      canvas->Print(epsString("final_likeDensity_alpha_moch", pole, (PdfType)h));
-    else
-      canvas->Print(epsString("final_likeDensity_mass_moch", pole, (PdfType)h));
-
-    if(!pole)
-      continue;
-
-    sprintf(tmpTxt, "2.3 fb^{-1} of 2011 CMS t#bar{t} data #times %s", theoTitle[h][1].Data());    
-    text.SetTitle(tmpTxt);
-    if(targetAlpha) {
-      frame = alpha.frame(RooFit::Range(0.105, 0.130));
-      plotProjectedPDF(mitResult[h], frame, kRed, 1001, alpha);
-    }
-    else {
-      frame = mass.frame(RooFit::Range(160., 190.));
-      plotProjectedPDF(mitResult[h], frame, kRed, 1001, mass);
-    }
-    frame->Draw();
-    frame->SetMaximum(1.4*frame->GetMaximum());
-    likeLeg.Draw();
-    text.Draw();
-    textConstrVar.Draw();
-    canvas->Print(printNameBase+".ps");
-    if(targetAlpha)
-      canvas->Print(epsString("final_likeDensity_alpha_mitov", pole, (PdfType)h));
-    else
-      canvas->Print(epsString("final_likeDensity_mass_mitov", pole, (PdfType)h));
   }
 
   // cleaning up
@@ -1495,12 +1499,13 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
       if(pole)
 	delete mit_vec[h].at(j);
       for(unsigned i=0; i<moc_funcs[h][j].size(); i++) {
-	delete moc_funcs[h][j].at(i);
+	  delete moc_funcs[h][j].at(i);
 	if(pole)
 	  delete mit_funcs[h][j].at(i);
       }
     }
-    delete mocResult[h];
+    if(!topppOnly)
+      delete mocResult[h];
     if(pole)
       delete mitResult[h];
   }
