@@ -118,6 +118,10 @@ while(my $line = <$IN>) {
     if($jsonFile){
 	$json = File::Spec->rel2abs($jsonFile);
     }
+    my $opts='';
+    if($options){
+	$opts=$options;
+    }
     my $cConfig = "${wdpath}.cfg";
     my $sedir = "$workDirWithTime/output_$outputFile";
 
@@ -135,12 +139,7 @@ while(my $line = <$IN>) {
         s/##OUTPUTFILE##/$outputFile/g;
         s/##HN_USER##/$hypernewsName/g;
         s/##GLOBALGCWD##/$globalCWorkingdir/g;
-	if($options){
-	    s/##OPTIONS##/$options/g;
-	}
-	else{
-	    s/##OPTIONS##/ /g;
-	}
+	s/##OPTIONS##/$opts/g;
 	s/##FILTERLUMI##/$jsonFile ? '' : '#'/eg;
         s/##JSON##/$json/g;
 	s/##SEDIR##/$sedir/g;
