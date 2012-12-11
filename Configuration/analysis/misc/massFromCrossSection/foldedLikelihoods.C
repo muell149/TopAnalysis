@@ -1455,11 +1455,11 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 
       RooPlot* frame;
       if(targetAlpha) {
-	frame = alpha.frame(RooFit::Range(0.105, 0.130));
+	frame = alpha.frame(RooFit::Range(0.11, 0.130));
 	plotProjectedPDF(result, frame, kRed, 1001, alpha);
       }
       else {
-	frame = mass.frame(RooFit::Range(160., 190.));
+	frame = mass.frame(RooFit::Range(160., 185.));
 	plotProjectedPDF(result, frame, kRed, 1001, mass);
       }
       frame->Draw();
