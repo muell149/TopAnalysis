@@ -281,7 +281,7 @@ void drawTheoryGraph(TGraphAsymmErrors* graph, TCanvas* canvas, const bool pole,
 		     TString epsLabel, const TString printNameBase)
 {
   if(pole)
-    graph->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
+    graph->GetXaxis()->SetTitle("m_{t} (GeV)");
   else
     graph->GetXaxis()->SetTitle("m_{t}^{#bar{MS}} (GeV)");
   graph->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
@@ -344,7 +344,7 @@ std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, 
   TString titleApp = ": " + title + " uncertainty";
   relUncUp->SetTitle(graph->GetTitle() + titleApp);
   if(pole)
-    relUncUp->GetXaxis()->SetTitle("m_{t}^{pole} (GeV)");
+    relUncUp->GetXaxis()->SetTitle("m_{t} (GeV)");
   else
     relUncUp->GetXaxis()->SetTitle("m_{t}^{#bar{MS}} (GeV)");
   relUncUp->GetYaxis()->SetTitle("#delta#sigma_{t#bar{t}} / #sigma_{t#bar{t}}");
@@ -763,7 +763,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   //  canvas->Print(printNameBase+".ps]");
   //  return 0;
 
-  RooRealVar mass("mass", "m_{t}^{pole}", 140., 190., "GeV");
+  RooRealVar mass("mass", "m_{t}", 140., 190., "GeV");
   if(!pole)
     mass.SetTitle("m_{t}^{#bar{MS}}");
 
