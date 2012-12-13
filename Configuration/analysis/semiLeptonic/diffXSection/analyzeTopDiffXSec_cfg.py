@@ -32,7 +32,7 @@ options.register('lepton', 'unset',VarParsing.VarParsing.multiplicity.singleton,
 # create label to select version of MC samples (Summer11, Fall11)
 # a) important for trigger
 # b) also used to automatically select the mode for PU event reweighting
-options.register('mctag', 'Fall11',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "label for version of MC samples (Summer12, Fall11, Summer11")
+options.register('mctag', 'Summer12',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "label for version of MC samples (Summer12, Fall11, Summer11")
 # create variable to indicate number of processed events
 # -42 means nothing is changed wrt number typed below
 options.register('eventsToProcess', -42,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int, "events to process")
@@ -241,8 +241,8 @@ if(not options.sample=="none"):
         # limited statistics (wo spin correlation inclusive sample)
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         # full statistics: FIXME not available yet
-         if(genFull):
-             usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        if(genFull):
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	if(eventFilter=='signal only'):
 	    outputFileName+="Sig"
 	elif(eventFilter=='background only'):
@@ -544,16 +544,15 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 #global tag:
-# a) 4_1:
-#process.GlobalTag.globaltag = cms.string('START38_V14::All')
-# b) 4_2:
+#(see https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions)
+# 5_3:
 #from Configuration.PyReleaseValidation.autoCond import autoCond
 if(runningOnData=="MC"):
-    process.GlobalTag.globaltag = cms.string('START53_V13::All')
-    #process.GlobalTag.globaltag = cms.string('START52_V9::All')
-else:
-    process.GlobalTag.globaltag = cms.string('GR_R_53_V15::All')
-    #process.GlobalTag.globaltag = cms.string('GR_R_52_V7::All')
+    process.GlobalTag.globaltag = cms.string('START53_V15::All') # Fall 2012 JEC for up to 11 / fb
+    #process.GlobalTag.globaltag = cms.string('START53_V13::All')
+else: 
+    process.GlobalTag.globaltag = cms.string('GR_P_V42_AN3::All') # Fall 2012 JEC for up to 11 / fb
+    #process.GlobalTag.globaltag = cms.string('GR_R_53_V15::All')
 
 ## Needed for redoing the ak5GenJets
 #if(runningOnData=="MC" and pfToPAT==False):
