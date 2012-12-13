@@ -86,6 +86,10 @@ unless(-e $globalCWorkingdir){
 
 my $workDirWithTime="$arg{d}_" . strftime("%FT%H-%M-%S",localtime);
 
+my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
+my $cfgfilename = ( split m{/}, $arg{c} )[-1];
+
+
 my $environmentcheck="if [[ \"\${VOMS_USERCONF}\" != $ENV{VOMS_USERCONF} ]] ;\nthen\necho Need grid proxy\nfi\nif [[ \"\${CRABDIR}\" != $ENV{CRABDIR} ]] ;\nthen\necho Crab env not set\nexit\nfi\nif [[ \"\${CMSSW_BASE}\" != $ENV{CMSSW_BASE} ]] ;\nthen\necho Wrong CMSSW env set. should be $ENV{CMSSW_BASE}\nexit\nfi\n";
 
 push @runCs, $environmentcheck;
@@ -133,7 +137,7 @@ while(my $line = <$IN>) {
         s/##WORKDIR##/$wdpath/g;
         s/##JOBS##/$arg{j} ? $arg{j} : ''/eg;
         s/##CMSSW_BASE##/$ENV{CMSSW_BASE}/g;
-        s/##CMSSWConfigFile##/File::Spec->rel2abs($arg{c})/eg;
+        s/##CMSSWConfigFile##/$cfgfilename/eg;
         s/##NUMJOBS##/$numJobs/g;
         s/##DATASET##/$dataset/g;
         s/##OUTPUTFILE##/$outputFile/g;
@@ -207,6 +211,7 @@ chmod 0755, "${globalCWorkingdir}/$workDirWithTime/getJsons.sh";
 print "run ${globalCWorkingdir}/$workDirWithTime/getJsons.sh to get all processed Jsons\n";
 
 system("ln -s $ENV{CMSSW_BASE} ${globalCWorkingdir}/$workDirWithTime/CMSSW_BASE");
+system("cp ${fullCMSSWcfpath} ${globalCWorkingdir}/${workDirWithTime}");
 
 sub getCrabtemplate
 {
