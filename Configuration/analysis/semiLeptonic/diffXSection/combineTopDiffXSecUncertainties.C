@@ -2,7 +2,7 @@
 #include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
+void combineTopDiffXSecUncertainties(double luminosity=3855., bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun8TeV", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
 
   // ============================
   //  Systematic Variations:
@@ -75,8 +75,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
   } 
   TString universalplotLabel = extrapolate ? "FullPS" : LV+"LvPS";  
   // dataSample: see if its "2010" or "2011" data
-  TString dataSample="2011";
-  if(luminosity<50.) dataSample="2010"; //FIXME: remove 2010 -> introduce 2012 (not via luminosity!)
+  TString dataSample="2012";
   // for closure test if desired
   TString closureLabel = "";
   if      (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")) closureLabel = "SysDistort"+closureTestSpecifier;
@@ -215,7 +214,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 //     for(int i=0; i<xSecVariableBranchNames_.size(); ++i){
 //       std::cout << folderNamesBCC_[i] << "/" << xSecVariableBranchNames_[i] << std::endl;
 //     }
-    TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
+    TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigSummer12PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
     fileNameBCC="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC;
     //TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PF.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
     BCC b(fileNameBCC,folderNamesBCC_,xSecVariableBranchNames_,mergeLepAndHadTop,addCrossCheckVariables);
@@ -477,8 +476,8 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 		  if(!extrapolate&&hadron&&(sys==sysPDFUp||sys==sysPDFDown)&&(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq"))){
 		    if(verbose>1) std::cout << "load unc PDF for " << xSecVariables_[i] << " bin " << bin << std::endl;
 		    TString fileName="/afs/naf.desy.de/group/cms/scratch/tophh/tmp/diffXSecTopSemi";
-		    if(decayChannel=="muon"    ) fileName+="Mu2011";
-		    else if(decayChannel=="electron") fileName+="Elec2011";
+		    if(decayChannel=="muon"    ) fileName+="Mu2012";
+		    else if(decayChannel=="electron") fileName+="Elec2012";
 		    else if(decayChannel=="combined") fileName+="Lep";
 		    fileName+="PartonPhaseSpace.root";   
 		    TString canvName="relativeUncertainties/"+xSecVariables_[i]+"/relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i];
@@ -756,7 +755,7 @@ void combineTopDiffXSecUncertainties(double luminosity=4967.5, bool save=false, 
 	plotNameForBinning.ReplaceAll("Norm","");       
 	int NBINS = binning_[plotNameForBinning].size()-1;
 
-	std::map<unsigned int, TH1F*>::const_iterator innerIter = outerIter->second.begin();
+	//std::map<unsigned int, TH1F*>::const_iterator innerIter = outerIter->second.begin();
 	//int NSYSTYPES   = innerIter->second->GetNbinsX() - 3;	
 	int histoBinIdx = 0;
 

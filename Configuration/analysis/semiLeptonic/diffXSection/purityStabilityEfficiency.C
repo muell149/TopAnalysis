@@ -4,7 +4,6 @@
 // (Modified version of the macro findBinning.C)
 // --------------------------------------------------------------
 
-
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -22,11 +21,10 @@
 #include <TMath.h>
 #include "HHStyle.h"
 #include "basicFunctions.h"
-//#include "TopAnalysis/TopUtils/interface/extract_sigma.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TString lepton="muon", 
-			       TString inputFolderName="RecentAnalysisRun", bool plotAcceptance = true, 
+void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TString lepton="combined", 
+			       TString inputFolderName="RecentAnalysisRun8TeV", bool plotAcceptance = true, 
 			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int
 			       verbose=1, bool hadron=false, int qAssignment=-1,
 			       bool fitGaussRes=false, bool printSeparateRes = false)
@@ -47,7 +45,7 @@ void purityStabilityEfficiency(TString variable = "ttbarY", bool save=false, TSt
   if(!useTree) chi2Max=99999; // can be done only with tree
   if(lepton.Contains("combined")) lepton="combined";
   // output folder in case of saving the canvases:
-  TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2011/binning";
+  TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2012/binning";
   if(useTree&&chi2Max<100){ 
     plotEfficiencyPhaseSpace = false;
     plotAcceptance = false;

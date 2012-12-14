@@ -3,9 +3,10 @@
 void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
 				  bool save = true, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun8TeV",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root:",
-				  const std::string decayChannel = "muon", 
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
+				  const std::string decayChannel = "combined", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
@@ -58,7 +59,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
 
   // b) options to be configured only once
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
-  bool setQCDtoZero=false;
+  bool setQCDtoZero=true;
   //if(withRatioPlot==true) setQCDtoZero=false;
   // scale ttbar component to measured inclusive xSec	
   bool scaleToMeasured=false;
@@ -101,7 +102,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
   double luminosityMu=0;
   TString dataFileEl="";
   TString dataFileMu="";
-  if(decayChannel=="combined"&&luminosity>4500&&luminosity<5000){
+  if(decayChannel=="combined"){
     luminosityEl=constLumiElec;
     luminosityMu=constLumiMuon;
     if(!dataFile.Contains(":")){
@@ -219,10 +220,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
     "PUControlDistributionsBeforeBtagging/pileup_reweighted",
     "PUControlDistributionsBeforeBtagging/pileup_reweighted_up",
     "PUControlDistributionsBeforeBtagging/pileup_reweighted_down",
-    "PUControlDistributionsBeforeBtagging/npvertex",
+    //"PUControlDistributionsBeforeBtagging/npvertex",
     "PUControlDistributionsBeforeBtagging/npvertex_reweighted",
-    "PUControlDistributionsBeforeBtagging/npvertex_reweighted_up",
-    "PUControlDistributionsBeforeBtagging/npvertex_reweighted_down",
+    //"PUControlDistributionsBeforeBtagging/npvertex_reweighted_up",
+    //"PUControlDistributionsBeforeBtagging/npvertex_reweighted_down",
     // (III) after btagging 
     // (ii) jet monitoring
     "tightJetKinematicsTagged/n"  ,
@@ -254,10 +255,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
     "PUControlDistributionsAfterBtagging/pileup_reweighted",
     "PUControlDistributionsAfterBtagging/pileup_reweighted_up",
     "PUControlDistributionsAfterBtagging/pileup_reweighted_down",
-    "PUControlDistributionsAfterBtagging/npvertex",
+    //"PUControlDistributionsAfterBtagging/npvertex",
     "PUControlDistributionsAfterBtagging/npvertex_reweighted",
-    "PUControlDistributionsAfterBtagging/npvertex_reweighted_up", 
-    "PUControlDistributionsAfterBtagging/npvertex_reweighted_down", 
+    //"PUControlDistributionsAfterBtagging/npvertex_reweighted_up", 
+    //"PUControlDistributionsAfterBtagging/npvertex_reweighted_down", 
     // (III) after kinematic fit 
     "analyzeTopRecoKinematicsKinFit/topPt",
     "analyzeTopRecoKinematicsKinFit/topY",
@@ -435,10 +436,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
     "Number of PU Events (Reweighted);Frequency;1;1",
     "Number of PU Events (Reweighted sysUp);Frequency;1;1",
     "Number of PU Events (Reweighted sysDown);Frequency;1;1",
-    "Number of Vertices;Frequency;1;1",
-    "Number of Vertices (Reweighted);Frequency;1;1",
-    "Number of Vertices (Reweighted sysUp);Frequency;1;1",
-    "Number of Vertices (Reweighted sysDown);Frequency;1;1",
+    "Number of Vertices;Frequency;1;10",
+    //"Number of Vertices (Reweighted);Frequency;1;10",
+    //"Number of Vertices (Reweighted sysUp);Frequency;1;10",
+    //"Number of Vertices (Reweighted sysDown);Frequency;1;10",
     // (III) after btagging 
     // (ii) jet monitoring
     "N_{jets};Events;1;1",
@@ -470,10 +471,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
     "Number of PU Events (Reweighted);Frequency;0;1",
     "Number of PU Events (Reweighted sysUp);Frequency;0;1",
     "Number of PU Events (Reweighted sysDown);Frequency;0;1",
-    "Number of Vertices;Frequency;0;1",
-    "Number of Vertices (Reweighted);Frequency;0;1",
-    "Number of Vertices (Reweighted sysUp);Frequency;0;1", 
-    "Number of Vertices (Reweighted sysDown);Frequency;0;1", 
+    "Number of Vertices;Frequency;0;10",
+    //"Number of Vertices (Reweighted);Frequency;0;10",
+    //"Number of Vertices (Reweighted sysUp);Frequency;0;10", 
+    //"Number of Vertices (Reweighted sysDown);Frequency;0;10", 
     // (III) after kinematic fit 
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
     "y^{t};Top quarks;0;1",
@@ -1247,7 +1248,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
 	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
 	      else DrawDecayChLabel("e/#mu + Jets Combined");	      
-	      DrawCMSLabels(false,luminosity); 
+	      DrawCMSLabels(true,luminosity); 
 	      //draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0) && withRatioPlot){
 		if(plotList_[plot].Contains("BGSubNorm")){

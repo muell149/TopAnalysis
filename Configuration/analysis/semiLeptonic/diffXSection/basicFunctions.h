@@ -169,8 +169,8 @@ namespace semileptonic {
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
   const double globalLumiUncertainty = 0.022; // relative uncertainty // FIXME UPDATE FOR 8 TEV
 	
-  const double constLumiElec = 4980.0; // FIXME UPDATE FOR 8 TEV
-  const double constLumiMuon = 4955.0; // FIXME UPDATE FOR 8 TEV
+  const double constLumiElec = 3885.0; // FIXME UPDATE FOR 8 TEV
+  const double constLumiMuon = 3885.0; // FIXME UPDATE FOR 8 TEV
   
   const double BRPDG=0.145888;
 
@@ -644,11 +644,11 @@ namespace semileptonic {
 
     if (cmsprelim)
       {
-	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s} = 7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s} = 8 TeV",luminosity/1000));
       }
     else
       {
-	label -> AddText(Form("CMS, %2.1f fb^{-1} at #sqrt{s} = 7 TeV",luminosity/1000));
+	label -> AddText(Form("CMS, %2.1f fb^{-1} at #sqrt{s} = 8 TeV",luminosity/1000));
       }
 
     label->SetFillStyle(0);
@@ -2745,7 +2745,7 @@ namespace semileptonic {
     double largeSampleSF=1;
     bool largeSample=false;
     if(model=="madgraph"&&((PS=="full"&&input->GetEntries()>10000000)||(PS!="full"&&input->GetEntries()>3000000))){
-      largeSampleSF=17.;
+      largeSampleSF=25424818/6923750;
       largeSample=true;
     }
     if(verbose==0) gErrorIgnoreLevel=kFatal;
@@ -3685,9 +3685,8 @@ namespace semileptonic {
 	// Unfolding with optimal tau
 	
 	if(tau){
-	    
+	// FIXME: need to be updated for 8 TeV    
 	    if(decayChannel.Contains("muon")){
-
 	        if(closureTestSpecifier==""){
 		// STANDARD data
 		    // PAS Binning

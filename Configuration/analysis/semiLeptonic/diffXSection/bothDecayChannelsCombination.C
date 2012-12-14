@@ -1,8 +1,8 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun",
-				  TString inputFolderName="RecentAnalysisRun",
-				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
+void bothDecayChannelsCombination(double luminosity=3885, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun8TeV",
+				  TString inputFolderName="RecentAnalysisRun8TeV",
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -57,7 +57,7 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
   //uncorrSys_.push_back(sysLepEffSFNormUpStat   );
  
   // Label for datasample
-  TString dataSample="2011";
+  TString dataSample="2012";
   
   // Choose phase space
     // a) for full PS use extrapolatetrue;
@@ -373,8 +373,8 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
 	      if     (closureTestSpecifier.Contains("Up"  )) closureTestSpecifier2="Up";
 	      else if(closureTestSpecifier.Contains("Down")) closureTestSpecifier2="Down";
 	      // get reweighted samples
-	      TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/muonDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
-	      TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/elecDiffXSecSigSysDistort"+closureTestSpecifier+"Fall11PF.root";
+	      TString muReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/muonDiffXSecSigSysDistort"+closureTestSpecifier+"Summer12PF.root";
+	      TString elReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Shape"+closureTestSpecifier2+"/elecDiffXSecSigSysDistort"+closureTestSpecifier+"Summer12PF.root";
 	      TFile* mufile = new (TFile)(muReweighted);
 	      TFile* elfile = new (TFile)(elReweighted);
 	      // get plot
@@ -407,10 +407,10 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
 	      std::cout << "ERROR: zprime closure test with combination on event yield level is not yet implemented!!!" << std::endl;
 	      exit(0);
 	    }
-	    TString muSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSigFall11PF.root";
-	    TString elSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSigFall11PF.root";
-	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"muonDiffXSecSigZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
-	    TString elZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"elecDiffXSecSigZprime_M"+zprime+"_W"+zprime+"0_Fall11PF.root";
+	    TString muSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSigSummer12PF.root";
+	    TString elSig="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSigSummer12PF.root";
+	    TString muZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"muonDiffXSecSigZprime_M"+zprime+"_W"+zprime+"0_Summer12PF.root";
+	    TString elZprime="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/Zprime/"+"elecDiffXSecSigZprime_M"+zprime+"_W"+zprime+"0_Summer12PF.root";
 	    TFile* muSigfile = new (TFile)(muSig);
 	    TFile* elSigfile = new (TFile)(elSig);
 	    TFile* muZprimefile = new (TFile)(muZprime);
@@ -594,7 +594,7 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
 	  // choose mcatnlo file
 	  // -> file from standalone external studies for errorBands
 	  // -> std simulation file else
-	  TString filename="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/combinedDiffXSecSigMcatnloFall11PF.root";
+	  TString filename="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root";
 	  TString errorBandFilename="/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root";
 	  // error bands for MCatNLO curves
 	  // plotname for std simulation file = madgraph-plotname from analyzer structure
@@ -645,7 +645,7 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor= 2; }
 	  // draw curve	 
-	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegFall11PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
+	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegSummer12PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
 	  // e) reweighted histos for closure test
 	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive"){
@@ -753,7 +753,7 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
-	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigFall11PFLarge.root";
+	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
 	  //std::cout << plotNameMadgraph << std::endl;
 	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", DrawSmoothMadgraph2, LV);
 	  // j) re-draw binned MADGRAPH theory curve
@@ -923,7 +923,8 @@ void bothDecayChannelsCombination(double luminosity=4967.5, bool save=true, unsi
 	  DrawDecayChLabel("e/#mu + Jets Combined");
 	  if(DrawNNLOPlot&&extrapolate){
 	    if (xSecVariables_[i].Contains("topPtNorm")) DrawLabel("(arXiv:1009.4935)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
-	    if (xSecVariables_[i].Contains("topYNorm"))  DrawLabel("(arXiv:1105.5167)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	    if (xSecVariables_[i].Contains("topYNorm" )) DrawLabel("(arXiv:1105.5167)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	    //if (xSecVariables_[i].Contains("ttbarMassNorm")) DrawLabel("(arXiv:1003.5827)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 	  }
 
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());

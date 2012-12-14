@@ -2,12 +2,12 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
-			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=0, 
-			     TString inputFolderName="RecentAnalysisRun",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+void analyzeHypothesisKinFit(double luminosity = 3885,
+			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+			     TString inputFolderName="RecentAnalysisRun8TeV",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
@@ -77,12 +77,9 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
   //        51: sysShapeUp                 52: sysShapeDown                
   //        53: ENDOFSYSENUM
   
-  // take care that prescaling of muon channel for full 2011 datset was taken into account
-  if(luminosity==4980 && decayChannel=="muon"    ) luminosity=constLumiMuon;
-  if(luminosity==4955 && decayChannel=="electron") luminosity=constLumiElec;
   // luminosity uncertainties
-  if(systematicVariation==sysLumiUp  )      luminosity*=1.022;
-  else if(systematicVariation==sysLumiDown) luminosity*=0.978;
+  if(systematicVariation==sysLumiUp  )      luminosity*=1.045;
+  else if(systematicVariation==sysLumiDown) luminosity*=0.955;
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: more output 3: output for debugging
   // data file: relative path of .root file
@@ -110,19 +107,18 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2010 or 2011 data from luminosity
-  TString dataSample="";
-  if(luminosity>50) dataSample="2011";
+  TString dataSample="2012";
   // for closure test if desired
   TString closureLabel = "";
   if (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")){
     closureLabel = "SysDistort"+closureTestSpecifier;
-    //dataFile = inputFolder+"/Shape"+closureTestSpecifier+"/"+decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"7TeV.root";
-    dataFile=decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"7TeV.root";
+    //dataFile = inputFolder+"/Shape"+closureTestSpecifier+"/"+decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"8TeV.root";
+    dataFile=decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"8TeV.root";
   }
   else if (closureTestSpecifier.Contains("500") || closureTestSpecifier.Contains("750")){
     closureLabel = "Zprime"+closureTestSpecifier;
-    //dataFile = inputFolder+"/Zprime/"+decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime7TeV.root";
-    dataFile = decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime7TeV.root";
+    //dataFile = inputFolder+"/Zprime/"+decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime8TeV.root";
+    dataFile = decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime8TeV.root";
   }
   // save all plots into the following folder
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
@@ -149,10 +145,10 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
   double luminosityMu=0;
   TString dataFileEl="";
   TString dataFileMu="";
-  if(decayChannel=="combined"&&luminosity>4500&&luminosity<6000){
+  if(decayChannel=="combined"){
     luminosityEl=constLumiElec;
     luminosityMu=constLumiMuon;
-    if(systematicVariation==sysLumiUp ){      luminosityEl*=1.022; luminosityMu*=1.022;}
+    if(systematicVariation==sysLumiUp ){      luminosityEl*=1.022; luminosityMu*=1.022;} // FIXME:: top be adapted
     else if(systematicVariation==sysLumiDown){luminosityEl*=0.978; luminosityMu*=0.978;}
     if(!dataFile.Contains(":")){
       std::cout << "wrong input filenames, should be dataFileEl:dataFileMu, but is";
@@ -176,13 +172,13 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
   // FIXME: use madgraph instead of mc@nlo for the moment to have madgraph vs. powheg as hadronization uncertainty
   //ignoreSys_.push_back(sysGenMCatNLO);
   // exclude JES and JER
-  //for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
+  for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude Scale matching and top mass 
-  //for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
+  for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
   // exclude Hadronization
-  //for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
+  for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude PDF
-  //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
+  for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude shape variation
   for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
@@ -198,8 +194,8 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
   // normalization of differential normalized cross sections
   // true: use integral of unfolded differential cross section ignoring UF/OF bins
   // false: use all events and inclusive eff*A (no BR!) before unfolding
-  bool normToIntegral=true;
-  if(extrapolate)  normToIntegral=false;
+  //bool normToIntegral=true;
+  //if(extrapolate)  normToIntegral=false;
   // choose plot input folder corresponding to systematic Variation  
   TString sysInputFolderExtension="";
   TString sysInputGenFolderExtension="";
@@ -2914,7 +2910,7 @@ void analyzeHypothesisKinFit(double luminosity = 4967.5,//4980 //4967.5 /4955.
 			      if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
 			      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
 			      else if(decayChannel=="electron") DrawDecayChLabel("e/#mu + Jets Combined");
-			      DrawCMSLabels(false,luminosity);
+			      DrawCMSLabels(true,luminosity);
 			  }
 			  // redraw axis
 			  histo_[plotList_[plot]][42]->Draw("axis same");
