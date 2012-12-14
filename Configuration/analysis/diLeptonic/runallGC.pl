@@ -80,9 +80,13 @@ unless(-e "${globalGcWorkingdir}/grid-control"){
 
 my $workDirWithTime="$arg{d}_" . strftime("%FT%H-%M-%S",localtime);
 
+
+
 if ($arg{g}) {
     push @createDirs, "srmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$workDirWithTime\n";
 }
+my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
+my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 
 
 while(my $line = <$IN>) {
@@ -113,7 +117,7 @@ while(my $line = <$IN>) {
         s/##WORKDIR##/$path/g;
        # s/##JOBS##/$arg{j} ? $arg{j} : ''/eg;
         s/##CMSSW_BASE##/$ENV{CMSSW_BASE}/g;
-        s/##CMSSWConfigFile##/File::Spec->rel2abs($arg{c})/eg;
+        s/##CMSSWConfigFile##/$cfgfilename/eg;
         s/##JOBS##/$numJobs/g;
         s/##DATASET##/$dataset/g;
         s/##OUTPUTFILE##/$outputFile/g;
@@ -193,6 +197,7 @@ close $OUTL;
 chmod 0755, "${globalGcWorkingdir}/$workDirWithTime/getJsons.sh";
 print "run ${globalGcWorkingdir}/$workDirWithTime/getJsons.sh to get all processed Jsons\n";
 
+system("cp ${fullCMSSWcfpath} ${globalGcWorkingdir}/${workDirWithTime}");
 
 sub getGCtemplate
 {
