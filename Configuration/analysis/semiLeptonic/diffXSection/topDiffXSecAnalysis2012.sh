@@ -134,7 +134,7 @@ inputFolderName=\"RecentAnalysisRun8TeV\"
 ## has to fit to current dataset
 
 mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root\"
-eldataSample=\"\"
+eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root\"
 
 if [ $decayChannel == \"electron\" ]; then
     dataLuminosity=3885
@@ -457,6 +457,8 @@ if [ $redoPurStab = true -a $redoControlPlots = true ]
     done
 fi
 
+
+
 #### ============================
 ####  Prepare PDF uncertainties 
 #### ============================
@@ -716,6 +718,9 @@ if [ $fast = false ]; then
     sleep 3
 fi
 
+## FIXME: need to restore compatibility with root 532, use older version in the meantime
+#ini root526
+
 ## Compile library
 
 if [ -f commandsCombineUncPrepare.cint ]; then    
@@ -748,6 +753,8 @@ echo ""
 echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
 root -l -b < commandsCombineUncRun.cint
 
+## FIXME: need to restore compatibility with root 532, use older version in the meantime
+#ini -d root526
 
 #### ==========================================
 ####  Create ratio plots for final xSecs 
