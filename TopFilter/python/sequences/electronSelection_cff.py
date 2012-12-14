@@ -59,7 +59,7 @@ tightElectronsEJ       = selectedPatElectrons.clone( src = 'vertexSelectedElectr
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'                                            # NB: needs "process.selectedPatElectrons.usePV = false" for PAT tuple production
                                                            #'test_bit( electronID(\"simpleEleId70cIso\"), 0 ) &'            # NB: 0 is the 'index of the bit', ie. the first bit has index 0!!! (so this tests 0x1)
-					                   'electronID("mvaTrigV0") > 0 &'
+					                   'electronID("mvaTrigV0") > 0.5 &'
                                                            #'(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 0.2'
                                                            '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/et < 0.1'
                                                    ) 
