@@ -8,12 +8,10 @@
 #include "TDirectory.h"
 #include "TClass.h"
 
-
-using std::make_pair;
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose);
 void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName, TString outputFolder);
 
-void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun", TString outputFolder="") {
+void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8TeV", TString outputFolder="") {
   // ---
   //    list all of all subsamples to be combined 
   // ---
@@ -132,7 +130,7 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
       TFile* file =  TFile::Open(fileName);
       if(file&&!(file->IsZombie())){ 
 	// N.B.: a luminosity of 1 pb is used, lumi normalization is done later in the main file 
-	files_.push_back(make_pair(file, lumiweight(subSamples_[subsample], 1, sysTag, std::string(decayChannel))));   
+	files_.push_back(std::make_pair(file, lumiweight(subSamples_[subsample], 1, sysTag, std::string(decayChannel))));   
       }
     }
   }
