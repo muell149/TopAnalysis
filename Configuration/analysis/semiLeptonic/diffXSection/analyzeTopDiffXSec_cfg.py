@@ -1556,7 +1556,7 @@ if(bTagAlgo =='simpleSecondaryVertexHighEffBJet'):
     bTagAlgoShort = "SSVHEM"
 process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
 process.bTagSFEventWeight.bTagAlgo=bTagAlgoShort
-process.bTagSFEventWeight.version="11-004"
+process.bTagSFEventWeight.version="12-470"
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown, 
                                                     # bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta possible;
 process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+bTagAlgoShort+".root"
@@ -2277,42 +2277,43 @@ if(runningOnData=="data"):
     process.p1.remove(process.semiLeptGenCollections)
 
 ## analysis with SSV btagger
-if(not cutflowSynch):
-    process.p2 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
-                          process.filterSequence                        *
-                          ## PV event selection
-                          #process.PVSelection                           *
-                          ## introduce some collections
-                          process.semiLeptonicSelection                 *
-                          ## create PU event weights
-                          process.makeEventWeightsPU                    *
-                          ## create shape distortion event weights
-                          process.eventWeightDileptonModelVariation     *
-                          process.eventWeightPUDistort                  *
-                          process.eventWeightPUupDistort                *
-                          process.eventWeightPUdownDistort              *
-                          ## create effSF eventWeight
-                          process.effSFMuonEventWeight                  *
-                          ## multiply event weights
-                          process.eventWeightNoBtagSFWeight             *
-                          ## monitoring of PU reweighting and PV
-                          process.PUControlDistributionsDefault         *
-                          ## std sel wo b-tagging
-                          process.muonCuts                              *
-                          process.secondMuonVeto                        *
-                          process.electronVeto                          *
-                          process.leadingJetSelectionNjets4             *
-                          ## SSV btag-selection
-                          process.btagSelectionSSV                      *
-                          ## create PU event weights
-                          process.bTagSFEventWeightSSV                  *
-                          ## create combined weight
-                          process.eventWeightFinalSSV                   *
-                          ## monitoring after SSV
-                          process.SSVMonitoring                         
-                          )
-else:
-    process.p2 = cms.Path(process.dummy)
+process.p2 = cms.Path(process.dummy)
+## if(not cutflowSynch):
+##     process.p2 = cms.Path(## gen event selection (decay channel) and the trigger selection (hltFilter)
+##                           process.filterSequence                        *
+##                           ## PV event selection
+##                           #process.PVSelection                           *
+##                           ## introduce some collections
+##                           process.semiLeptonicSelection                 *
+##                           ## create PU event weights
+##                           process.makeEventWeightsPU                    *
+##                           ## create shape distortion event weights
+##                           process.eventWeightDileptonModelVariation     *
+##                           process.eventWeightPUDistort                  *
+##                           process.eventWeightPUupDistort                *
+##                           process.eventWeightPUdownDistort              *
+##                           ## create effSF eventWeight
+##                           process.effSFMuonEventWeight                  *
+##                           ## multiply event weights
+##                           process.eventWeightNoBtagSFWeight             *
+##                           ## monitoring of PU reweighting and PV
+##                           process.PUControlDistributionsDefault         *
+##                           ## std sel wo b-tagging
+##                           process.muonCuts                              *
+##                           process.secondMuonVeto                        *
+##                           process.electronVeto                          *
+##                           process.leadingJetSelectionNjets4             *
+##                           ## SSV btag-selection
+##                           process.btagSelectionSSV                      *
+##                           ## create PU event weights
+##                           process.bTagSFEventWeightSSV                  *
+##                           ## create combined weight
+##                           process.eventWeightFinalSSV                   *
+##                           ## monitoring after SSV
+##                           process.SSVMonitoring                         
+##                           )
+## else:
+##     process.p2 = cms.Path(process.dummy)
 
 ## std analysis with generator objects as input for efficiency determination
 ## no phase space cuts and phase space cuts for hadron level
