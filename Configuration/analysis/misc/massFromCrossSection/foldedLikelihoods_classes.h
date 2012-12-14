@@ -103,12 +103,11 @@ private:
 public:
 
   RooFormulaVar xsec;
-
-private:
-
   RooFormulaVar xsecScaleUp;
   RooFormulaVar xsecScaleDown;
   RooFormulaVar gaussianUnc;
+
+private:
 
   RooNumIntConfig mcIntegratorCfg;
 
