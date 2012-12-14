@@ -125,40 +125,30 @@ TGraphErrors getMeasXSecWithErr(const RooFormulaVar& measXSec, const RooFormulaV
   return TGraphErrors(nPoints, x, y, xErr, yErr);
 }
 
-TGraphAsymmErrors getMeasXSecAlpha(const RooFormulaVar& measXSec, const RooFormulaVar& measXSecErr, RooRealVar& alpha_var,
-				   const FinalLikeliResults1D* result)
+TGraphAsymmErrors getPredXSecWithErr(const PredXSec* predXSec, RooRealVar& xvar, const double xMin, const double xMax,
+				     const unsigned nPoints, const double xerr=0.)
 {
-  const double xOld = alpha_var.getVal();
-  alpha_var.setVal(result->bestX);
-  double x[1] = {result->bestX};
-  double y[1] = {measXSec.getVal()};
-  double xErrLow [1] = {result->lowErrFromIntegral };
-  double xErrHigh[1] = {result->highErrFromIntegral};
-  double yErr[1] = {measXSecErr.getVal()};
-  alpha_var.setVal(xOld);
-  return TGraphAsymmErrors(1, x, y, xErrLow, xErrHigh, yErr, yErr);
-}
-
-TGraphAsymmErrors getPredXSecAlpha(const PredXSec* predXSec, const TGraphAsymmErrors* errorGraph,
-				   RooRealVar& alpha_var, const RooRealVar& default_alpha,
-				   const RooRealVar& default_alpha_unc)
-{
-  const double xOld = alpha_var.getVal();
-  alpha_var.setVal(default_alpha.getVal());
-  double x[1] = {default_alpha.getVal()};
-  double y[1] = {predXSec->xsec.getVal()};
-  double xp, yp;
-  errorGraph->GetPoint(43, xp, yp);
-  if(xp!=173.) {
-    std::cout << "Error in getPredXSecAlpha for " << predXSec->name << "!" << std::endl
-	      << "Was expecting to find a mass of 173 GeV at point 43 but got a mass of " << xp << " GeV!" << std::endl;
-    abort();
+  const double xOld = xvar.getVal();
+  double x[nPoints];
+  double y[nPoints];
+  double xErr[nPoints];
+  double yErrLo[nPoints];
+  double yErrHi[nPoints];
+  const double deltaX = (xMax - xMin)/nPoints;
+  double xi = xMin;
+  for(unsigned i=0; i<nPoints; i++) {
+    xvar.setVal(xi);
+    x[i] = xi;
+    y[i] = predXSec->xsec.getVal();
+    xErr[i] = xerr;
+    yErrLo[i] = TMath::Sqrt(TMath::Power(y[i]-predXSec->xsecScaleDown.getVal(),2) +
+			    TMath::Power(predXSec->gaussianUnc.getVal(),2));
+    yErrHi[i] = TMath::Sqrt(TMath::Power(predXSec->xsecScaleUp.getVal()-y[i],2) +
+			    TMath::Power(predXSec->gaussianUnc.getVal(),2));
+    xi += deltaX;
   }
-  double xErr[1] = {default_alpha_unc.getVal()};
-  double yErrLow [1] = {errorGraph->GetErrorYlow (43)};
-  double yErrHigh[1] = {errorGraph->GetErrorYhigh(43)};
-  alpha_var.setVal(xOld);
-  return TGraphAsymmErrors(1, x, y, xErr, xErr, yErrLow, yErrHigh);
+  xvar.setVal(xOld);
+  return TGraphAsymmErrors(nPoints, x, y, xErr, xErr, yErrLo, yErrHi);  
 }
 
 TGraph* getAlphaLambdaGraph()
@@ -902,47 +892,58 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 
   TGraphErrors measXSecWithErrAlpha = getMeasXSecWithErr(measXSecMassDep, measXSecMassDepErr, alpha, 0.10, 0.13, 30);
 
-  TGraphAsymmErrors predXSecAlphaMitNNPDF = getPredXSecAlpha(predXSec[kNNPDF][1], mit_vec[kNNPDF].at(3),
-							     alpha, alphaNNPDF_mean, alphaNNPDF_unc);
-  predXSecAlphaMitNNPDF.SetLineColor(kRed);
-  predXSecAlphaMitNNPDF.SetMarkerSize(2);
-  predXSecAlphaMitNNPDF.SetMarkerStyle(22);
+  TGraphAsymmErrors predXSecAlphaMitNNPDF = getPredXSecWithErr(predXSec[kNNPDF][1], alpha, 0.10, 0.13, 30);
 
-  TGraphAsymmErrors predXSecAlphaMocNNPDF = getPredXSecAlpha(predXSec[kNNPDF][0], moc_vec[kNNPDF].at(3),
-							     alpha, alphaNNPDF_mean, alphaNNPDF_unc);
-  predXSecAlphaMocNNPDF.SetLineColor(kGreen);
-  predXSecAlphaMocNNPDF.SetMarkerSize(2);
-  predXSecAlphaMocNNPDF.SetMarkerStyle(23);
+  TGraphAsymmErrors predXSecDefAlphaMitNNPDF = getPredXSecWithErr(predXSec[kNNPDF][1], alpha,
+								  alphaNNPDF_mean.getVal(), alphaNNPDF_mean.getVal(),
+								  1, alphaNNPDF_unc.getVal());
+  predXSecDefAlphaMitNNPDF.SetLineColor(kRed);
+  predXSecDefAlphaMitNNPDF.SetMarkerSize(2);
+  predXSecDefAlphaMitNNPDF.SetMarkerStyle(22);
 
-  TGraphAsymmErrors predXSecAlphaMitMSTW = getPredXSecAlpha(predXSec[kMSTW][1], mit_vec[kMSTW].at(3),
-							    alpha, alphaMSTW_mean, alphaMSTW_unc);
-  predXSecAlphaMitMSTW.SetLineColor(kRed);
-  predXSecAlphaMitMSTW.SetMarkerSize(2);
-  predXSecAlphaMitMSTW.SetMarkerStyle(21);
+  TGraphAsymmErrors predXSecDefAlphaMocNNPDF = getPredXSecWithErr(predXSec[kNNPDF][0], alpha,
+								  alphaNNPDF_mean.getVal(), alphaNNPDF_mean.getVal(),
+								  1, alphaNNPDF_unc.getVal());
+  predXSecDefAlphaMocNNPDF.SetLineColor(kGreen);
+  predXSecDefAlphaMocNNPDF.SetMarkerSize(2);
+  predXSecDefAlphaMocNNPDF.SetMarkerStyle(23);
 
-  TGraphAsymmErrors predXSecAlphaMitHERA = getPredXSecAlpha(predXSec[kHERA][1], mit_vec[kHERA].at(3),
-							    alpha, alphaHERA_mean, alphaHERA_unc);
-  predXSecAlphaMitHERA.SetLineColor(kRed);
-  predXSecAlphaMitHERA.SetMarkerSize(3);
-  predXSecAlphaMitHERA.SetMarkerStyle(29);
+  TGraphAsymmErrors predXSecDefAlphaMitMSTW = getPredXSecWithErr(predXSec[kMSTW][1], alpha,
+								 alphaMSTW_mean.getVal(), alphaMSTW_mean.getVal(),
+								 1, alphaMSTW_unc.getVal());
+  predXSecDefAlphaMitMSTW.SetLineColor(kRed);
+  predXSecDefAlphaMitMSTW.SetMarkerSize(2);
+  predXSecDefAlphaMitMSTW.SetMarkerStyle(21);
 
-  TGraphAsymmErrors predXSecAlphaMitABM = getPredXSecAlpha(predXSec[kABM][1], mit_vec[kABM].at(3),
-							   alpha, alphaABM_mean, alphaABM_unc);
-  predXSecAlphaMitABM.SetLineColor(kRed);
-  predXSecAlphaMitABM.SetMarkerSize(2.5);
-  predXSecAlphaMitABM.SetMarkerStyle(34);
+  TGraphAsymmErrors predXSecDefAlphaMitHERA = getPredXSecWithErr(predXSec[kHERA][1], alpha,
+								 alphaHERA_mean.getVal(), alphaHERA_mean.getVal(),
+								 1, alphaHERA_unc.getVal());
+  predXSecDefAlphaMitHERA.SetLineColor(kRed);
+  predXSecDefAlphaMitHERA.SetMarkerSize(3);
+  predXSecDefAlphaMitHERA.SetMarkerStyle(29);
 
-  TGraphAsymmErrors predXSecAlphaMitCT = getPredXSecAlpha(predXSec[kCT][1], mit_vec[kCT].at(3),
-							  alpha, alphaCT_mean, alphaCT_unc);
-  predXSecAlphaMitCT.SetLineColor(kRed);
-  predXSecAlphaMitCT.SetMarkerSize(2.0);
-  predXSecAlphaMitCT.SetMarkerStyle(20);
+  TGraphAsymmErrors predXSecDefAlphaMitABM = getPredXSecWithErr(predXSec[kABM][1], alpha,
+								alphaABM_mean.getVal(), alphaABM_mean.getVal(),
+								1, alphaABM_unc.getVal());
+  predXSecDefAlphaMitABM.SetLineColor(kRed);
+  predXSecDefAlphaMitABM.SetMarkerSize(2.5);
+  predXSecDefAlphaMitABM.SetMarkerStyle(34);
+
+  TGraphAsymmErrors predXSecDefAlphaMitCT = getPredXSecWithErr(predXSec[kCT][1], alpha,
+							       alphaCT_mean.getVal(), alphaCT_mean.getVal(),
+							       1, alphaCT_unc.getVal());
+  predXSecDefAlphaMitCT.SetLineColor(kRed);
+  predXSecDefAlphaMitCT.SetMarkerSize(2.0);
+  predXSecDefAlphaMitCT.SetMarkerStyle(20);
 
   RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
   frame_alpha->addObject(&measXSecWithErrAlpha, "3");
   frame_alpha->addObject(&measXSecWithErrAlpha, "CX");
+  frame_alpha->addObject(&predXSecAlphaMitNNPDF, "3");
+  predXSecAlphaMitNNPDF.SetFillColor(kRed-9);
+  //  predXSecAlphaMitNNPDF.SetFillStyle(3244);
   predXSec[3][1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed));
-  frame_alpha->addObject(&predXSecAlphaMitNNPDF, "PE");
+  frame_alpha->addObject(&predXSecDefAlphaMitNNPDF, "PE");
   frame_alpha->GetYaxis()->SetTitle("#sigma_{t#bar{t}} (pb)");
   frame_alpha->SetMaximum(235.);
   frame_alpha->SetMinimum(115.);
@@ -971,7 +972,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   canvas->Print(printNameBase+"_xsec_vs_alpha_pre1.eps");
   if(!topppOnly) {
     predXSec[3][0]->xsec.plotOn(frame_alpha, RooFit::LineColor(kGreen));
-    frame_alpha->addObject(&predXSecAlphaMocNNPDF, "PE");
+    frame_alpha->addObject(&predXSecDefAlphaMocNNPDF, "PE");
     frame_alpha->SetMaximum(235.);
     frame_alpha->SetMinimum(115.);
     frame_alpha->Draw();
@@ -988,10 +989,10 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   predXSec[1][1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(3));
   predXSec[2][1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(5));
   predXSec[4][1]->xsec.plotOn(frame_alpha, RooFit::LineColor(kRed), RooFit::LineStyle(8));
-  frame_alpha->addObject(&predXSecAlphaMitMSTW , "PE");
-  frame_alpha->addObject(&predXSecAlphaMitHERA , "PE");
-  frame_alpha->addObject(&predXSecAlphaMitABM  , "PE");
-  frame_alpha->addObject(&predXSecAlphaMitCT   , "PE");
+  frame_alpha->addObject(&predXSecDefAlphaMitMSTW , "PE");
+  frame_alpha->addObject(&predXSecDefAlphaMitHERA , "PE");
+  frame_alpha->addObject(&predXSecDefAlphaMitABM  , "PE");
+  frame_alpha->addObject(&predXSecDefAlphaMitCT   , "PE");
   frame_alpha->SetMaximum(235.);
   frame_alpha->SetMinimum(115.);
   frame_alpha->Draw();
@@ -1028,6 +1029,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   alphaText.SetTextFont(43);
   alphaText.SetTextSizePixels(22);
 
+  TGraphAsymmErrors predXSecMassMitNNPDF = getPredXSecWithErr(predXSec[kNNPDF][1], mass, 130., 220., 90);
+
   RooPlot* frame_mass;
   if(pole)
     frame_mass = mass.frame(160., 190.);
@@ -1037,6 +1040,11 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   frame_mass->addObject(&measXSecWithErrMass, "CX");
   measXSecWithErrMass.SetFillColor(kBlue-10);
   measXSecWithErrMass.SetLineColor(kBlue+1);
+  frame_mass->addObject(&predXSecMassMitNNPDF, "3");
+  frame_mass->addObject(&predXSecMassMitNNPDF, "CX");
+  predXSecMassMitNNPDF.SetFillColor(kRed-9);
+  //  predXSecMassMitNNPDF.SetFillStyle(3244);
+  predXSecMassMitNNPDF.SetLineColor(kRed+1);
   if(pole) {
     predXSec[3][1]->xsec.plotOn(frame_mass, RooFit::LineColor(kRed));
     if(!topppOnly)
@@ -1058,7 +1066,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   legMassDep.SetBorderSize(0);
   legMassDep.AddEntry(&measXSecWithErrMass, "CMS 2011, 2.3 fb^{-1}", "FL");
   if(pole)
-    legMassDep.AddEntry(frame_mass->findObject(predXSec[3][1]->xsec.GetName()+(TString)"_Norm[mass]"), theoTitle[3][1], "L");
+    legMassDep.AddEntry(&predXSecMassMitNNPDF, theoTitle[3][1], "FL");
   if(!topppOnly)
     legMassDep.AddEntry(frame_mass->findObject(predXSec[3][0]->xsec.GetName()+(TString)"_Norm[mass]"), theoTitle[3][0], "L");
   legMassDep.AddEntry(frame_mass->findObject(predXSec[4][pole]->xsec.GetName()+(TString)"_Norm[mass]"), theoTitle[4][pole], "L");
