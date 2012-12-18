@@ -78,8 +78,8 @@ void analyzeHypothesisKinFit(double luminosity = 3885,
   //        53: ENDOFSYSENUM
   
   // luminosity uncertainties
-  if(systematicVariation==sysLumiUp  )      luminosity*=1.045;
-  else if(systematicVariation==sysLumiDown) luminosity*=0.955;
+  if(systematicVariation==sysLumiUp  )      luminosity*=1.044;
+  else if(systematicVariation==sysLumiDown) luminosity*=0.956;
   // verbose: set detail level of output 
   // 0: no output, 1: std output 2: more output 3: output for debugging
   // data file: relative path of .root file
