@@ -3,6 +3,8 @@
 jetType="PF"
 dataSelector = 1
 leptonTypeId = 11
+## CHANGE MASS WINDOW:
+deltaM = 50
 ## This is overwritten later!!!!
 triggerPathSelector = "*"
 ## l3 subtrigger filter which is used for T&P

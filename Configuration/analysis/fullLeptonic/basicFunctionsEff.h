@@ -40,9 +40,10 @@ TF1 *fVoigt = new TF1("fVoigt","[0]*TMath::Voigt( (x-[1]), [3], [2])",60.,120.);
 // fBreitWigner->SetParameters(1, 91, 5, 5);
 
 // Voigt + exp. background
-TF1 *fVoigtExpBkg = new TF1("fVoigtExpBkg","[0]*TMath::Voigt( (x-[1]), [3], [2]) + [4]*TMath::Exp([5]*x)",60.,120.);
+// TF1 *fVoigtExpBkg = new TF1("fVoigtExpBkg","[0]*TMath::Voigt( (x-[1]), [3], [2]) + [4]*TMath::Exp([5]*(x-50))",40.,140.);
+TF1 *fVoigtExpBkg = new TF1("fVoigtExpBkg","[0]*TMath::Voigt( (x-[1]), [3], [2]) + [4]*TMath::Exp([5]*(x-50))",40.,140.);
 // fBreitWigner->SetParNames("VNorm","BWMean","BWGamma", "GSigma","ExpNorm","ExpScale");
-// fBreitWigner->SetParameters(1, 91, 5, 5, 1, -1);
+   //fBreitWigner->SetParameters(1, 91, 5, 5, 1, -1);
 
 /// ---
 /// structure to keep features of each type of histo plot, like its TH1D, the plotted variable, cuts to apply etc.
@@ -145,7 +146,7 @@ int mBinsAbsIso = 100;
 int mBinsMinDR  = -1;
 int mBinsLepMult= 10;
 int mBinsPVMult = -1;
-int mBinsLepLepMass = 60;
+int mBinsLepLepMass = 100;
 
 int mBinsJetPt     = -1;
 int mBinsJetEta    = -1;
@@ -179,22 +180,24 @@ std::vector<double> binsMult_(binsMult, binsMult + sizeof(binsMult)/sizeof(doubl
 std::vector<double> binsRelIso_(binsRelIso, binsRelIso + sizeof(binsRelIso)/sizeof(double));
 double binsAbsIso[] = {  0.  ,  10.  };
 std::vector<double> binsAbsIso_(binsAbsIso, binsAbsIso + sizeof(binsAbsIso)/sizeof(double));
-double binsMinDR[]  = { 0.,0.3,0.7,1.,1.5,2.,2.5,3.,4.,5.,6. };
+double binsMinDR[]  = { 0.,0.3,0.7,1.,1.5,2.,2.5,3.,3.7,5., };
 std::vector<double> binsMinDR_(binsMinDR, binsMinDR + sizeof(binsMinDR)/sizeof(double));
 // double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,10.,15.,20. };
-double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.,12.,13.,14.,15.,16.,17.,18.,19.,20.,21.,22.,23.,24.,25.,26.,27.,28.,29.,30. };
+//double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.,12.,13.,14.,15.,16.,17.,18.,19.,20.,21.,22.,23.,24.,25.,26.,27.,28.,29.,30. };
+double binsPVMult[] = {  0.,1.,3.,5.,7.,9.,11.,13.,15.,17.,20.,21.,22.,23.,24.,25.,26.,27.,28.,29.,30. };
 std::vector<double> binsPVMult_(binsPVMult, binsPVMult + sizeof(binsPVMult)/sizeof(double));
-double binsLepLepMass[] = {  61.  ,  121.  };
+double binsLepLepMass[] = {  41.  ,  141.  };
 std::vector<double> binsLepLepMass_(binsLepLepMass, binsLepLepMass + sizeof(binsLepLepMass)/sizeof(double));
 
 
 // double binsPt[]     = {  0.,10.,20.,25., 30.,32., 37., 42.,50.,75.,100.,150. };
 // std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
 
-double binsPt[]     = {  0.,10.,20.,25., 30., 35., 40.,50.,75.,100.,150. , 200.};
+double binsPt[]     = {  0.,10.,20.,25., 30., 35., 40.,50.,75.,125.,200.};
 std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
 
-double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
+// double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
+double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
 std::vector<double> binsPtAN_(binsPtAN, binsPtAN + sizeof(binsPtAN)/sizeof(double));
 double binsPtMedian[]   = {0., 30., 55., 200., 275.};
 std::vector<double> binsPtMedian_(binsPtMedian, binsPtMedian + sizeof(binsPtMedian)/sizeof(double));
@@ -217,15 +220,18 @@ std::vector<double> binsPt3bins_(binsPt3bins, binsPt3bins + sizeof(binsPt3bins)/
 
 // jets
 // double binsJetPt[]     = {  0.,10.,20.,25., 30., 35., 40.,50.,75.,100.,150. };
-double binsJetPt[]     = {  0.,10.,20.,25., 30., 40.,50.,75.,100.,150. };
+double binsJetPt[]     = {  0.,10.,20.,25., 30., 35., 40., 45., 50., 60.,70.,95.,120.,150. };
 std::vector<double> binsJetPt_(binsJetPt, binsJetPt + sizeof(binsJetPt)/sizeof(double));
-double binsJetPt4[]     = {  0.,10.,20.,25., 30., 40.,50.,75.,150. };
+double binsJetPt4[]     = {  0.,10.,20.,25., 30., 40.,50.,70.,120.,150. };
 std::vector<double> binsJetPt4_(binsJetPt4, binsJetPt4 + sizeof(binsJetPt4)/sizeof(double));
 // double binsJetEta[]    = {-3.5,-2.4,-1.8,-1.2,-0.6,0.,0.6,1.2,1.8,2.4,3.5 };
 double binsJetEta[]    = {-3.5,-2.4,-1.4,-0.7,0.,0.7,1.4,2.4,3.5 };
 std::vector<double> binsJetEta_(binsJetEta, binsJetEta + sizeof(binsJetEta)/sizeof(double));
 double binsJetAbsEta[]    = {0.,1.4,2.4,3.5 };
 std::vector<double> binsJetAbsEta_(binsJetAbsEta, binsJetAbsEta + sizeof(binsJetAbsEta)/sizeof(double));
+
+double binsJetPVMult[] = {  0.,1.,5.,7.,9.,11.,13.,16.,20.,21.,22.,23.,24.,25.,26.,27.,28.,29.,30. };
+std::vector<double> binsJetPVMult_(binsJetPVMult, binsJetPVMult + sizeof(binsJetPVMult)/sizeof(double));
 
 
 
@@ -809,6 +815,257 @@ void drawSF(eff*& eff1, std::map<TString, method*> method1, std::vector<TString>
 }
 
 /// ---
+/// Eff. and SF as ratio plots under it !!!
+/// calculate and draw efficiency scale factor plots of one variable for all methods, incl. legend
+/// ---
+void drawEffAndSFinOne(eff*& eff1, std::map<TString, method*> method1, std::vector<TString> mID, TString mIDnorm, double legXlo, double legYlo, double legXhi, double legYhi, bool drawLeg=true, double yLo=-9999., double yHi=-9999., double xLo=-9999., double xHi=-9999.)
+{
+  /// --------------------------------------
+  /// 1st step: draw Efficiency!!!
+  /// --------------------------------------
+  
+  // get Canvas
+  TCanvas *mainpad = (TCanvas*)gPad->GetPad(0);
+ // std::cout << "mainpad->GetName()= " << mainpad->GetName() << std::endl;
+  TAxis *mainaxis=0;
+  TGraph *his0=0;
+  
+  TGraph *his;
+  TString drawOpt="";
+  
+  TLegend leg(legXlo, legYlo, legXhi, legYhi);
+  leg.SetFillStyle(0);
+  
+  for(unsigned int iMethod=0; iMethod<mID.size(); iMethod++){
+    if(eff1->errorOpt=="normalBinomial") {
+      his = (TGraph*)eff1->his[mID[iMethod]]->Clone(Form("clone%i",iMethod));
+      if(iMethod==0) drawOpt = method1[mID[iMethod]]->drawOpt;
+      else           drawOpt = method1[mID[iMethod]]->drawOpt+" same";
+    }
+    else {
+      his = (TGraph*)eff1->graphEff[mID[iMethod]]->Clone(Form("clone%i",iMethod));
+      if(iMethod==0) drawOpt = "PA";
+      else           drawOpt = "P same";
+      
+      // set x errors to 0 if desired (needs to be done manually for TGraphAsymmErrors)
+      if(method1[mID[iMethod]]->drawOpt.Contains("X0")){
+	for(int iPoint=0; iPoint< eff1->graphEff[mID[iMethod]]->GetN() ; iPoint++){
+	  eff1->graphEff[mID[iMethod]]->SetPointEXhigh(iPoint,0);
+	  eff1->graphEff[mID[iMethod]]->SetPointEXlow(iPoint,0);
+	}
+      }
+    }
+    his->GetXaxis()->SetTitleColor(0);
+    his->GetXaxis()->SetLabelColor(0);
+    his->DrawClone(drawOpt.Data());
+    if(iMethod==0) {mainaxis = (TAxis*) ((TGraph*)his)->GetYaxis(); his0=his;}
+    
+    // legend
+    if(method1[mID[iMethod]]->legOpt!="") leg.AddEntry(his, method1[mID[iMethod]]->legName, method1[mID[iMethod]]->legOpt);
+  }
+  if(drawLeg) leg.DrawClone();
+  
+  /// --------------------------------------
+  /// 2nd step: calculate and draw SF !!!
+  /// --------------------------------------
+  
+  /// prepare 2nd pad for ratio plot
+   // get some values from old pad
+    Int_t    logx = gPad->GetLogx();
+    Double_t left = gPad->GetLeftMargin();
+    Double_t right = gPad->GetRightMargin();
+
+    // y:x size ratio for canvas
+    double canvAsym = 5./4.;
+    // ratio size of pad with plot and pad with ratio
+  double ratioSize = 0.42;
+    // change old pad
+  gPad->SetBottomMargin(ratioSize);
+  gPad->SetRightMargin(right);
+  gPad->SetLeftMargin(left);
+  gPad->SetBorderMode(0);
+  gPad->SetBorderSize(0);
+  gPad->SetFillColor(10);
+    // create new pad for ratio plot
+  TPad *rPad;
+  rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
+  rPad->SetFillStyle(0);
+  rPad->SetFillColor(0);
+  rPad->SetBorderSize(0);
+  rPad->SetBorderMode(0);
+  rPad->Draw();
+    // configure ratio plot
+  rPad->cd();
+  double scaleFactor = 1./(canvAsym*ratioSize);
+
+    
+  /// if mIDnorm is specified in eff structure, i.e.!="", it is taken for normalisation;
+  /// otherwise mIDnorm from the list of arguments of this function is taken
+  
+  TH1D* SFhis;
+  TGraphAsymmErrors* SFgraph;
+  drawOpt="";
+  
+  for(unsigned int iMethod=0; iMethod<mID.size(); iMethod++){
+    // check if method contains mIDnorm: then overwrite mIDnorm from function argument
+    if(method1[mID[iMethod]]->mIDnorm!="") mIDnorm = method1[mID[iMethod]]->mIDnorm;
+    std::cout<<"Method ID: "<<mID[iMethod] <<"; normalised to " << mIDnorm <<std::endl;
+    // calculate SF
+    // if histo with normalBinomial errors is desired
+    if(eff1->errorOpt=="normalBinomial"){
+      SFhis = (TH1D*)eff1->his[mID[iMethod]]->Clone("SF");
+      SFhis -> Reset();
+      SFhis ->SetTitle(Form("%s SF", eff1->his[mID[iMethod]]->GetTitle()));
+      SFhis ->Divide(eff1->his[mID[iMethod]], eff1->his[mIDnorm]);
+      // set y errors to 0 for reference SF
+      if(mID[iMethod]==mIDnorm){
+	double yErr0[100]={0.};
+	SFhis->SetError(yErr0);
+      }
+      // draw SF
+      if(iMethod==0){
+	if(xLo!=-9999. && xHi!=-9999.) SFhis->GetXaxis()->SetRangeUser(xLo,xHi);
+	if(yLo!=-9999. && yHi!=-9999.) SFhis->GetYaxis()->SetRangeUser(yLo,yHi);
+	drawOpt= method1[mID[iMethod]]->drawOpt;
+      }
+      else drawOpt=method1[mID[iMethod]]->drawOpt+" same";
+      SFhis->DrawCopy(drawOpt.Data());
+      // legend
+      if(method1[mID[iMethod]]->legOpt!="") leg.AddEntry(eff1->his[mID[iMethod]], method1[mID[iMethod]]->legName, method1[mID[iMethod]]->legOpt);
+    }
+    
+    // if other error options are desired, which require TGraphAsymm
+    else{
+      SFgraph = (TGraphAsymmErrors*) eff1->graphEff[mID[iMethod]]->Clone(Form("%s SF", eff1->graphEff[mID[iMethod]]->GetTitle()));
+      SFgraph ->SetTitle("");
+      // get points and their asymm. errors for numerator (eff_data) and denom. (eff_MC)
+      int N                  = eff1->graphEff[mID[iMethod]]->GetN();
+      double * numerator     = eff1->graphEff[mID[iMethod]]->GetY();
+      double * denom         = eff1->graphEff[mIDnorm]->GetY();
+      double * numeratorErrH = eff1->graphEff[mID[iMethod]]->GetEYhigh();
+      double * numeratorErrL = eff1->graphEff[mID[iMethod]]->GetEYlow();
+      double * denomErrH     = eff1->graphEff[mIDnorm]->GetEYhigh();
+      double * denomErrL     = eff1->graphEff[mIDnorm]->GetEYlow();
+      double * numeratorX    = eff1->graphEff[mID[iMethod]]->GetX();
+      double * denomX        = eff1->graphEff[mIDnorm]->GetX();
+      double * numeratorErrXH = eff1->graphEff[mID[iMethod]]->GetEXhigh();
+      double * numeratorErrXL = eff1->graphEff[mID[iMethod]]->GetEXlow();
+      double * denomErrXH     = eff1->graphEff[mIDnorm]->GetEXhigh();
+      double * denomErrXL     = eff1->graphEff[mIDnorm]->GetEXlow();
+      // check if numerator and denominator have the same bin numbers
+      if(N!=eff1->graphEff[mIDnorm]->GetN()){
+	std::cout<<"WARNING!!! Number of Points of numerator ("<<N<<") and denominator ("<<eff1->graphEff[mIDnorm]->GetN()<<") different!!!"<<std::endl;
+	std::cout<<"SF for method "<<mID[iMethod] <<" for titles "<< eff1->titles<<" is only calculated for numerator points!!!"<<std::endl;
+	//continue;
+      }
+      // set points and errors of SF graph
+      double SF     = -1., SFErrH = -1., SFErrL = -1.;
+      for(int iPointNum=0; iPointNum< N ; iPointNum++){
+	// loop over denominator points to find the matching point
+	for(int iPointDenom=iPointNum; iPointDenom < eff1->graphEff[mIDnorm]->GetN(); iPointDenom++){
+	  // check if binning is the same: either bin boundaries the same or point itself
+	  if((numeratorX[iPointNum]-numeratorErrXL[iPointNum] == denomX[iPointDenom]-denomErrXL[iPointDenom] && numeratorX[iPointNum]+numeratorErrXH[iPointNum] == denomX[iPointDenom]+denomErrXH[iPointDenom]) || numeratorX[iPointNum]==denomX[iPointDenom]){
+	    SF     = numerator[iPointNum]/denom[iPointDenom];
+	    // calculate asymmetric errors
+	    SFErrH = SF*TMath::Sqrt(numeratorErrH[iPointNum]*numeratorErrH[iPointNum] / (numerator[iPointNum]*numerator[iPointNum]) + denomErrL[iPointDenom]*denomErrL[iPointDenom]/(denom[iPointDenom]*denom[iPointDenom]));
+	    SFErrL = SF*TMath::Sqrt(numeratorErrL[iPointNum]*numeratorErrL[iPointNum] / (numerator[iPointNum]*numerator[iPointNum]) + denomErrH[iPointDenom]*denomErrH[iPointDenom]/(denom[iPointDenom]*denom[iPointDenom]));
+	    SFgraph -> SetPoint(iPointNum, numeratorX[iPointNum], SF);
+	    double xErrH=0;
+	    double xErrL=0;
+	    // set x errors if desired
+	    if(!method1[mID[iMethod]]->drawOpt.Contains("X0")){
+	      xErrH=numeratorErrXH[iPointNum];
+	      xErrL=numeratorErrXL[iPointNum];
+	    }
+	    // set y errors to 0 for reference SF
+	    if(mID[iMethod]==mIDnorm){
+	      SFErrH=0;
+	      SFErrL=0;
+	    }
+	    SFgraph -> SetPointError(iPointNum, xErrL, xErrH, SFErrL, SFErrH);
+	    break;
+	  }
+	  if(iPointDenom==eff1->graphEff[mIDnorm]->GetN()-1) std::cout<< "WARNING!!!! For numerator point x="<<numeratorX[iPointDenom]<<" no denominator found!!!"<<std::endl;
+	}
+      }
+      
+      // Print efficiency and SF
+      if(eff1->var=="Control"){
+	std::cout<< SFgraph ->GetTitle() << "SF. = " << numerator[0] <<"+" <<numeratorErrH[0] << "-" <<numeratorErrL[0] <<
+	    " / " << denom[0] <<"+" <<denomErrH[0] << "-" <<denomErrL[0] << 
+	    " = " << SF     <<"+" <<SFErrH << "-" <<SFErrL << std::endl; 
+      }
+
+      if(iMethod==0){
+	if(xLo!=-9999. && xHi!=-9999.) SFgraph->GetXaxis()->SetRangeUser(xLo,xHi);
+	if(yLo!=-9999. && yHi!=-9999.) SFgraph->GetYaxis()->SetRangeUser(yLo,yHi);
+	drawOpt="P A";
+      }
+      else drawOpt="P same";
+      /// specific ratio plot configuration
+    // configure axis of ratio plot
+//     SFgraph->GetXaxis()->SetTitleSize(eff1->graphEff[mID[iMethod]]->GetXaxis()->GetTitleSize()*scaleFactor);
+//     SFgraph->GetXaxis()->SetTitleOffset(eff1->graphEff[mID[iMethod]]->GetXaxis()->GetTitleOffset());
+//     SFgraph->GetXaxis()->SetLabelSize(eff1->graphEff[mID[iMethod]]->GetXaxis()->GetLabelSize()*scaleFactor);
+    SFgraph->GetXaxis()->SetTitleSize(0.1);
+    SFgraph->GetXaxis()->SetTitleOffset(1.15);
+    SFgraph->GetXaxis()->SetLabelSize(0.1);
+    SFgraph->GetXaxis()->SetLabelOffset(0.02);
+    SFgraph->GetXaxis()->SetTitle( eff1->graphEff[mID[iMethod]]->GetXaxis()->GetTitle() );
+    SFgraph->GetXaxis()->SetNdivisions(eff1->graphEff[mID[iMethod]]->GetXaxis()->GetNdivisions());
+    if((TString)(SFgraph->GetXaxis()->GetTitle())=="relIso") SFgraph->GetXaxis()->SetNdivisions(509);
+    
+    SFgraph->GetYaxis()->CenterTitle();
+    SFgraph->GetYaxis()->SetTitle("SF");
+    SFgraph->GetYaxis()->SetTitleSize(0.1);
+    SFgraph->GetYaxis()->SetTitleOffset(0.5);
+    SFgraph->GetYaxis()->SetLabelSize(0.1);
+   // SFgraph->GetYaxis()->SetLabelOffset(eff1->graphEff[mID[iMethod]]->GetYaxis()->GetLabelOffset()*3.3);
+    SFgraph->GetYaxis()->SetTickLength(0.03);
+    SFgraph->GetYaxis()->SetNdivisions(505);
+    //SFgraph->GetXaxis()->SetRange(eff1->graphEff[mID[iMethod]]->GetXaxis()->GetFirst(), eff1->graphEff[mID[iMethod]]->GetXaxis()->GetLast());
+    // delete axis of initial plot
+   //eff1->graphEff[mID[iMethod]]->GetXaxis()->SetLabelSize(0);
+   //eff1->graphEff[mID[iMethod]]->GetXaxis()->SetTitleSize(0);
+ 
+      SFgraph->DrawClone(drawOpt.Data());
+      /// assign the graph to the eff structure
+      eff1->graphSF[mID[iMethod]]=SFgraph;
+    }
+  }
+  
+  /// operate at pad after drawing
+  // create pad to hide old axis
+  TPad *whitebox = new TPad("whitebox","",0,0.9,0.098,1.);
+  whitebox->SetFillColor(10);
+  whitebox->SetFillStyle(1001);
+  whitebox->SetBorderSize(0);
+  whitebox->SetBorderMode(0);
+  whitebox->Draw("");
+//   TPad *whitebox2 = new TPad("whitebox2","",0,0.2,0.09,0.4);
+//   whitebox2->SetFillColor(10);
+//   whitebox2->SetFillStyle(1001);
+//   whitebox2->SetBorderSize(0);
+//   whitebox2->SetBorderMode(0);
+//   whitebox2->Draw("");
+  rPad->SetTopMargin(0.0);
+  rPad->SetBottomMargin(0.15*scaleFactor);
+  rPad->SetRightMargin(right);
+  gPad->SetLeftMargin(left);
+  //gPad->RedrawAxis();
+  gPad->cd();
+  rPad->Draw();
+  
+ //  mainpad->cd();
+//   mainpad->RedrawAxis();
+ //  his0->Draw("");
+//   leg.DrawClone();
+    // draw grid
+//    rPad->SetGrid(1,1);
+  
+}
+
+/// ---
 /// draw raw N_event plots for all and pass histos of one variable for all methods, incl. legend
 /// ---
 void drawEventHistos(eff* eff1, std::map<TString, method*> method1, std::vector<TString> mID, double legXlo, double legYlo, double legXhi, double legYhi, bool drawLeg=true, TString normalize="")
@@ -856,4 +1113,101 @@ void drawEventHistos(eff* eff1, std::map<TString, method*> method1, std::vector<
   }
   if(drawLeg) leg.DrawClone();
 }
+
+/// ---
+/// FIT method for efficiency determination
+/// pass eff_[lepLepMass] to eff1
+/// ---
+void getEffFromFit(eff* eff1, std::map<TString, method*> method1, std::vector<TString> mID, TCanvas *& Canv, double legXlo, double legYlo, double legXhi, double legYhi, bool drawLeg=true)
+{
+  TH1 *hisPass;
+  TH1 *hisAll;
+  TString drawOpt="";
+  TString legTitle="";
+  
+  int mIDNum = mID.size();
+  Canv->Divide(mIDNum/2+1, 2);
+  
+  TLegend leg(legXlo, legYlo, legXhi, legYhi);
+  leg.SetFillStyle(0);
+  
+  std::cout << "-------" << std::endl;
+  std::cout << "!!!!!!!!!!! Fits for " << mID.size() <<" methods " <<std::endl;
+   for(unsigned int iMethod=0; iMethod<mID.size(); iMethod++){
+    std::cout << "!!!! iMethod" << iMethod <<" mID "<< mID[iMethod] <<std::endl;
+    Canv->cd(iMethod+1);
+    hisPass = (TH1D*) eff1->hisPass[mID[iMethod]]->Clone("newHisPass");
+    hisPass->SetLineColor(2);
+    hisPass->SetLineStyle(1);
+    hisAll = (TH1D*) eff1->hisAll[mID[iMethod]]->Clone("newHisAll");
+    hisAll->SetLineColor(1);
+    hisAll->SetLineStyle(1);
+    
+    hisAll ->Draw("L");
+    hisPass->Draw("same");
+    // legend
+    legTitle=method1[mID[iMethod]]->legName + " all";
+    if(method1[mID[iMethod]]->legOpt!="") leg.AddEntry(hisAll, legTitle, method1[mID[iMethod]]->legOpt);
+    legTitle=method1[mID[iMethod]]->legName + " pass";
+    //if(method1[mID[iMethod]]->legOpt!="") leg.AddEntry(hisPass, legTitle, method1[mID[iMethod]]->legOpt);
+    
+    // Fit!!!
+//     fVoigtExpBkg->SetParameters(5e4, 91., 2.5, 2., 100., -100.);
+    fVoigtExpBkg->SetParameters(5e4, 91., 2.5, 2., 40., -0.005);
+    //fVoigtExpBkg->FixParameter(2,2.5);
+//     fVoigtExpBkg->FixParameter(4.,0.);
+//     fVoigtExpBkg->FixParameter(5.,1.);
+    
+    // unique name for each iMethod
+    TString namefVoigtExpBkgAll  = Form("fVoigtExpBkgAll%i",iMethod);
+    TString namefVoigtExpBkgPass = Form("fVoigtExpBkgPass%i",iMethod);
+    
+    TF1 * fVoigtExpBkgAll  = (TF1*)fVoigtExpBkg->Clone(namefVoigtExpBkgAll);
+    TF1 * fVoigtExpBkgPass = (TF1*)fVoigtExpBkg->Clone(namefVoigtExpBkgPass);
+    TF1 * fExpBkgAll  = new TF1("fExpBkgAll","[0]*TMath::Exp([1]*(x-60))",60.,140.);
+    TF1 * fExpBkgPass = new TF1("fExpBkgPass","[0]*TMath::Exp([1]*(x-60))",60.,140.);
+    fVoigtExpBkgPass->SetLineStyle(2);
+    fVoigtExpBkgPass->SetLineColor(4);
+    
+    std::cout << "Fitting hisAll" << std::endl;
+    hisAll -> Fit(namefVoigtExpBkgAll,"","same", 61.,121.);
+    fExpBkgAll->SetParameter(0,fVoigtExpBkgAll->GetParameter(4));
+    fExpBkgAll->SetParameter(1,fVoigtExpBkgAll->GetParameter(5));
+    fExpBkgAll->SetLineStyle(2);
+    fExpBkgAll->SetLineColor(8);
+    fExpBkgAll->Draw("same");
+    
+    fExpBkgPass->SetParameter(0,fVoigtExpBkgPass->GetParameter(4));
+    fExpBkgPass->SetParameter(1,fVoigtExpBkgPass->GetParameter(5));
+    fExpBkgPass->SetLineStyle(2);
+    fExpBkgPass->SetLineColor(8);
+    fExpBkgPass->Draw("same");
+    
+    std::cout << "Fitting hisPass" << std::endl;
+    hisPass -> Fit(namefVoigtExpBkgPass,"","same", 61.,121.);
+    
+    // take integral of fit curve to count number of events
+    double NevtsFitAll  = fVoigtExpBkgAll ->Integral(76.,106.);
+    double NevtsFitPass = fVoigtExpBkgPass->Integral(76.,106.);
+    double NevtsBGAll   = fExpBkgAll      ->Integral(76.,106.);
+    double NevtsBGPass  = fExpBkgPass     ->Integral(76.,106.);
+    double effFit       = (NevtsFitPass-NevtsBGPass)/(NevtsFitAll-NevtsBGAll);
+    
+    
+    // print integral for different ranges
+    std::cout << std::endl;
+    std::cout << "-------" << std::endl;
+    std::cout << "Integral interv.: 76-106; NevtsFitAll = " << NevtsFitAll << "; NevtsFitPass = " << NevtsFitPass << "; effFit = " << effFit << std::endl;
+    std::cout << "Integral interv.: 76-106; NevtsBGAll = " << NevtsBGAll << "; NevtsBGPass = " << NevtsBGPass << std::endl;
+    std::cout << "Integral interv.: 71-111; NevtsFitAll = " << fVoigtExpBkgAll ->Integral(71.,111.) << "; NevtsFitPass = " << fVoigtExpBkgPass->Integral(71.,111.) << "; effFit = " << fVoigtExpBkgPass->Integral(71.,111.)/fVoigtExpBkgAll->Integral(71.,111.) << std::endl;
+    std::cout << "Integral interv.: 81-101; NevtsFitAll = " << fVoigtExpBkgAll ->Integral(81.,101.) << "; NevtsFitPass = " << fVoigtExpBkgPass->Integral(81.,101.) << "; effFit = " << fVoigtExpBkgPass->Integral(81.,101.)/fVoigtExpBkgAll->Integral(81.,101.) << std::endl;
+    std::cout << "Integral interv.: 61-121; NevtsFitAll = " << fVoigtExpBkgAll ->Integral(61.,121.) << "; NevtsFitPass = " << fVoigtExpBkgPass->Integral(61.,121.) << "; effFit = " << fVoigtExpBkgPass->Integral(61.,121.)/fVoigtExpBkgAll->Integral(61.,121.) << std::endl;
+    std::cout << "Integral interv.: 83.5-98.5; NevtsFitAll = " << fVoigtExpBkgAll ->Integral(83.5,98.5) << "; NevtsFitPass = " << fVoigtExpBkgPass->Integral(83.5,98.5) << "; effFit = " << fVoigtExpBkgPass->Integral(83.5,98.5)/fVoigtExpBkgAll->Integral(83.5,98.5) << std::endl;
+    std::cout << "-------" << std::endl;
+    
+    
+  }
+  if(drawLeg) leg.DrawClone();
+}
+
 #endif

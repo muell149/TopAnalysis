@@ -240,13 +240,13 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_32_IsoEle25subtriggerTaP_comp(bo
 //    TString folderID[]={"tapTotalSelectionEle", "tapTriggerEle"};
 //    TString foldersTitle[]={"Overall Selection", "Trigger"};
   
-  const int folderNum=1;
-  TString folderID[]={"tapTotalSelectionEle"};
-  TString foldersTitle[]={"Overall Selection"};
-  
 //   const int folderNum=1;
-//   TString folderID[]={"tapTriggerEle"};
-//   TString foldersTitle[]={"Trigger"};
+//   TString folderID[]={"tapTotalSelectionEle"};
+//   TString foldersTitle[]={"Overall Selection"};
+  
+  const int folderNum=1;
+  TString folderID[]={"tapTriggerEle"};
+  TString foldersTitle[]={"Trigger"};
   
 //      const int folderNum=3;
 //    TString folderID[]={"tapTotalSelectionEle", "tapTriggerEle", "tapAllEle"};
@@ -292,8 +292,10 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_32_IsoEle25subtriggerTaP_comp(bo
   double yLoSF = 0.9, yHiSF = 1.1;
   
   /// Constructor for struct eff(TString iniVar, T  iniCuts, TString iniBins, TString iniTitles, double iniYLo=-9999., double iniYHi=-9999., double iniXLo=-9999., double iniXHi=-9999.)
-  TCut cutPt  = "probePt>30. && probeMult>1 && probeRelIso<0.2"; /*"(probePt>30. || testPt>30. )";*/
-  TCut cutEta = "TMath::Abs(probeEta)<2.1  && probeMult>1 && probeRelIso<0.2"; /*"(TMath::Abs(probeEta)<2.1 || TMath::Abs(testEta)<2.1)";*/
+//   TCut cutPt  = "probePt>30. && probeMult>1 && probeRelIso<0.2"; /*"(probePt>30. || testPt>30. )";*/
+//   TCut cutEta = "TMath::Abs(probeEta)<2.1  && probeMult>1 && probeRelIso<0.2"; /*"(TMath::Abs(probeEta)<2.1 || TMath::Abs(testEta)<2.1)";*/
+  TCut cutPt  = "probePt>37.";
+  TCut cutEta = "TMath::Abs(probeEta)<2.1";
   TCut cutPtEta = cutPt && cutEta;
   for(int iFolder=0; iFolder < folderNum; iFolder++){
     title = foldersTitle[iFolder]+" Efficiency/ / ";

@@ -39,4 +39,4 @@ else:
 
 process.TFileService.fileName = 'analyzeCrossTriggerRatiosRun2011APromptRecoV4_165970_167913_Trig2_Jet_IsoEle25TriJet.root'
 process.maxEvents.input = 10000
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000

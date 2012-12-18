@@ -39,14 +39,16 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
   TString inputPath42       ="/afs/naf.desy.de/user/j/jlange/nafscratch/top/CMSSW_4_2_4/src/TopAnalysis/Configuration/analysis/fullLeptonic";
   TString inputPath428       ="/afs/naf.desy.de/user/j/jlange/nafscratch/top/CMSSW_4_2_8_patch7/src/TopAnalysis/Configuration/analysis/fullLeptonic";
   
-    TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleEle/Fall11/DataMCcomp_IsoEle25_IsoEle32Comp";
+//    TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleEle/Fall11/DataMCcomp_IsoEle25_IsoEle32Comp";
 //  TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleEle/Fall11/DataMCcomp_IsoEle25_IsoEle32Comp_pt37";
-//   TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleEle/Fall11/DataMCcomp_IsoEle25";
+  /// !!! this is configuration used for main analysis: !!!
+  TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleEle/Fall11/DataMCcomp_IsoEle25";
 //      TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleEle/Fall11/DataMCcomp_IsoEle25_relIsoL0p2";
  // TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleEle/Fall11/DataMCcomp_IsoEle25_IsoEle32Comp_EPS";
-     TString outputFileName = "/DataMCcomp_IsoEle25_IsoEle32Comp_";
+//      TString outputFileName = "/DataMCcomp_IsoEle25_IsoEle32Comp_";
 //  TString outputFileName = "/DataMCcomp_IsoEle25_IsoEle32Comp_pt37_";
-//  TString outputFileName = "/DataMCcomp_IsoEle25_";
+  /// !!! this is configuration used for main analysis: !!!
+ TString outputFileName = "/DataMCcomp_IsoEle25_";
  //  TString outputFileName = "/DataMCcomp_IsoEle25_relIsoL0p2_";
 //   TString outputFileName = "/DataMCcomp_IsoEle25_IsoEle32Comp_EPS_relIso0p2andNjetMin2";
 //  TString outputFileName = "/DataMCcomp_IsoEle25_IsoEle32Comp_EPS_pt37_";
@@ -79,8 +81,10 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
   /// comparison IsoEle25 IsoEle32
   //TString mIDarr []= {"m1-25TriJetPUEPS", "m1PUEPS", "m3-25TriJetPromptV4", "m2-32PromptV4"};
 //   TString mIDarr []= {"m1-25TriJetPUEPS", "m1-25TriJet", "m1PUEPS", "m1PUele32",   "m3-25TriJetPromptV4", "m3-25TriJet", "m2-32PromptV4", "m2"};
-  TString mIDarr []= { "m1-25TriJet", "m1PUele32",   "m3-25TriJet","m2"};
-//  TString mIDarr []= { "m1-25TriJet",  "m3-25TriJet"};
+  /// for comparison
+//   TString mIDarr []= { "m1-25TriJet", "m1PUele32",   "m3-25TriJet","m2"};
+  /// !!! this is configuration used for main analysis: !!!
+ TString mIDarr []= { "m1-25TriJet",  "m3-25TriJet"};
   
 //   TString mIDarr []= {"m1PUEPS", "m1-424", "m2-32PromptV4", "m2-32PromptV4-424"};
   
@@ -239,23 +243,23 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
 
 //   const int folderNum=6;
 //    TString folderID[]={"tapTrkQEle", "tapIDEle", "tapIsoEle", "tapConvRejEle", "tapTotalSelectionEle", "tapTriggerEle"};
-//    TString foldersTitle[]={"Track Quality", "ID", "Isolation", "Conversion Rejection", "Overall Selection", "Trigger"};
+//    TString foldersTitle[]={"Electron Track Quality", "Electron ID", "Electron Isolation", "Electron Conversion Rejection", "Electron Selection", "Electron Trigger"};
   
-//      const int folderNum=5;
-//    TString folderID[]={"tapTrkQEle", "tapIDEle", "tapIsoEle", "tapConvRejEle", "tapTotalSelectionEle"};
-//    TString foldersTitle[]={"d_{0}", "ID_{CiC}", "Isolation", "Conversion Rejection", "Overall Selection"};
+     const int folderNum=6;
+   TString folderID[]={"tapTrkQEle", "tapIDEle", "tapIsoEle", "tapConvRejEle", "tapTotalSelectionEle", "tapTriggerEle"};
+   TString foldersTitle[]={"Electron d_{0}", "Electron ID_{CiC}", "Electron Isolation", "Electron Conversion Rejection", "Electron Selection", "Electron Trigger"};
   
 //   const int folderNum=4;
 //   TString folderID[]={"tapTrkQEle", "tapIDEle", "tapIsoEle", "tapConvRejEle"};
-//   TString foldersTitle[]={"d_{0}", "ID_{CiC}", "Isolation", "Conversion Rejection"};
+//   TString foldersTitle[]={"Electron d_{0}", "Electron ID_{CiC}", "Electron Isolation", "Electron Conversion Rejection"};
    
 //    const int folderNum=2;
 //    TString folderID[]={"tapTotalSelectionEle", "tapTriggerEle"};
-//    TString foldersTitle[]={"Overall Selection", "Trigger"};
+//    TString foldersTitle[]={"Electron Selection", "Electron Trigger"};
   
-  const int folderNum=1;
-  TString folderID[]={"tapTotalSelectionEle"};
-  TString foldersTitle[]={"Overall Selection"};
+//   const int folderNum=1;
+//   TString folderID[]={"tapTotalSelectionEle"};
+//   TString foldersTitle[]={"Electron Selection"};
   
 //   const int folderNum=1;
 //   TString folderID[]={"tapTriggerEle"};
@@ -303,8 +307,8 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
   
   /// axis range
   //double yLo = 0.5, yHi = 1.1;
-  double yLo = 0.5, yHi = 1.;
-  double yLoSF = 0.9, yHiSF = 1.1;
+  double yLo = 0.45, yHi = 1.;
+  double yLoSF = 0.9, yHiSF = 1.1-0.0001;
   
   /// Constructor for struct eff(TString iniVar, T  iniCuts, TString iniBins, TString iniTitles, double iniYLo=-9999., double iniYHi=-9999., double iniXLo=-9999., double iniXHi=-9999.)
   TCut cutPt  = "probePt>30."; // && probeRelIso<0.2 "; //&& probeMult>1"; /*"(probePt>30. || testPt>30. )";*/
@@ -318,17 +322,17 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
     eff_["Pt_inclLegend"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.,true);
     title = foldersTitle[iFolder]+" Efficiency/#eta/ ";
-    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEtaEle, binsEtaEle2_, title, yLo, yHi);
+    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEtaEle, binsEtaEle2_, title, yLo, yHi,-2.1,2.1);
     title = foldersTitle[iFolder]+" Efficiency/relIso/ ";
     eff_["RelIso"][folderID[iFolder]]          =new eff("RelIso", cutPtEta, mBinsRelIso, binsRelIso_, title, yLo, yHi);
     title = foldersTitle[iFolder]+" Efficiency/absIso/ ";
     eff_["AbsIso"][folderID[iFolder]]          =new eff("AbsIso", cutPtEta, mBinsAbsIso, binsAbsIso_, title, yLo, yHi);
-    title = foldersTitle[iFolder]+" Efficiency/Primary Vertices/ ";
+    title = foldersTitle[iFolder]+" Efficiency/N_{PV}/ ";
     eff_["PVMult"][folderID[iFolder]]          =new eff("PVMult", cutPtEta, mBinsPVMult, binsPVMult_, title, yLo, yHi,0.,20.);
     title = foldersTitle[iFolder]+" Efficiency/N_{jet}/ ";
     eff_["Mult"][folderID[iFolder]]            =new eff("Mult", cutPtEta, mBinsMult, binsMult_, title, yLo, yHi);
     title = foldersTitle[iFolder]+" Efficiency/Minimum #DeltaR(e,jet)/ ";
-    eff_["MinDR"][folderID[iFolder]]            =new eff("MinDR", cutPtEta, mBinsMinDR, binsMinDR_, title, yLo, yHi);
+    eff_["MinDR"][folderID[iFolder]]            =new eff("MinDR", cutPtEta && "probeRelIso<0.2", mBinsMinDR, binsMinDR_, title, yLo, yHi,0.,5.);
     title = foldersTitle[iFolder]+" Efficiency/Minimum M_{lep,lep}/ ";
     eff_["lepLepMass"][folderID[iFolder]]            =new eff("lepLepMass", cutPtEta, mBinsLepLepMass, binsLepLepMass_, title, yLo, yHi);
     
@@ -379,6 +383,7 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
  /// Each canvas shows test (1st row) and probe collection (2nd) and efficiency (3rd) for different variables (columns)
   TCanvas* CanvComp [folderNum];
   TCanvas* CanvSFComp [folderNum];
+  TCanvas* CanvEffAndSFComp [folderNum];
   TCanvas* CanvEvtsComp [folderNum];
   TCanvas* CanvEvtsNormComp [folderNum];
   TCanvas* CanvLeg = new TCanvas("CanvLeg", "CanvLeg", 350,200);
@@ -391,6 +396,7 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
 
     CanvComp[iFolder] = new TCanvas("Comparison"+folderID[iFolder], "Comparison"+folderID[iFolder], 1700,1000);
     CanvSFComp[iFolder] = new TCanvas("ComparisonSF"+folderID[iFolder], "ComparisonSF"+folderID[iFolder], 1700,1000);
+    CanvEffAndSFComp[iFolder] = new TCanvas("ComparisonEffAndSF"+folderID[iFolder], "ComparisonEffAndSF"+folderID[iFolder], 1700,1000);
     CanvEvtsComp[iFolder] = new TCanvas("ComparisonEvts"+folderID[iFolder], "ComparisonEvts"+folderID[iFolder], 1700,1000);
     CanvEvtsNormComp[iFolder] = new TCanvas("ComparisonEvtsNorm"+folderID[iFolder], "ComparisonEvtsNorm"+folderID[iFolder], 1700,1000);
     
@@ -399,6 +405,7 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
     
     CanvComp[iFolder]->Divide(4,2);
     CanvSFComp[iFolder]->Divide(4,2);
+    CanvEffAndSFComp[iFolder]->Divide(4,2);
     CanvEvtsComp[iFolder]->Divide(4,2);
     CanvEvtsNormComp[iFolder]->Divide(4,2);
     
@@ -413,6 +420,9 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
       CanvSFComp[iFolder]->cd(iEff+1);
       std::cout<< "Drawing SF"<<std::endl;
       drawSF          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
+      CanvEffAndSFComp[iFolder]->cd(iEff+1);
+      std::cout<< "Drawing Eff. and SF"<<std::endl;
+      drawEffAndSFinOne          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
     // if desired plot also raw event number histos
       if(onlyEffPlots!=1) {
 	std::cout<< "Drawing event numbers"<<std::endl;
@@ -447,6 +457,7 @@ void tagAndProbePlotsRun2011_MCdataCom_IsoEle27_IsoEle32(bool save=false)
 	for(int iEff=0; iEff<effIDNum; iEff++){
 	  CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID[iEff]+"."+fileFormat[iFileFormat]);
 	  CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+	  CanvEffAndSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_EffAndSF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
 	}
 	
 	for(int iEff=0; iEff<effIDNum2; iEff++){

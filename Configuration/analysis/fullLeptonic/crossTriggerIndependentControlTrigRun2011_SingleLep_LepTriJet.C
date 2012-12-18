@@ -9,6 +9,15 @@ void crossTriggerIndependentControlTrigRun2011_SingleLep_LepTriJet(bool save=fal
   gStyle->SetLabelSize(0.05,"XY");
   gStyle->SetTitleSize(0.05,"XY");
   gStyle->SetFillColor(0);
+  gStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
+  gStyle->SetPadTickY(1);
+  
+//   const int fontstyle1=62;
+  const int fontstyle1=42;
+  gStyle->SetTitleFont(fontstyle1);
+  gStyle->SetTitleFont(fontstyle1, "XYZ");
+  gStyle->SetLabelFont(fontstyle1, "XYZ");
+  gStyle->SetTextFont(fontstyle1);
   
   
   /// path where input files are stored
@@ -17,7 +26,7 @@ void crossTriggerIndependentControlTrigRun2011_SingleLep_LepTriJet(bool save=fal
   TString inputPath428       ="/afs/naf.desy.de/user/j/jlange/nafscratch/top/CMSSW_4_2_8_patch7/src/TopAnalysis/Configuration/analysis/fullLeptonic";
   
   TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/LepHad/PF2PAT/MuCombined";
-  TString outputFileName = "/MuCombined";
+  TString outputFileName = "/MuCombined4Jets";
 
   TString fileFormatArr []= {"root", "png", "eps"};
   std::vector<TString> fileFormat(fileFormatArr, fileFormatArr + sizeof(fileFormatArr)/sizeof(TString));
@@ -122,29 +131,29 @@ void crossTriggerIndependentControlTrigRun2011_SingleLep_LepTriJet(bool save=fal
   /// Muons: 
   
   fileName=inputPath428+"/naf_analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet_cfg/analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet.root";
-  method_["m1ttMu"] = new method(fileName, "t#bar{t} (MuHad)", 1, 2, 1, 2, "E same", "LP","treeV2","","eventWeightPUeventWeightPU");
+  method_["m1ttMu"] = new method(fileName, "t#bar{t}", 1, 2, 1, 2, "E same", "LP","treeV2","","eventWeightPUeventWeightPU");
   
   fileName=inputPath428+"/naf_analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet_cfg/analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet.root";
-  method_["m1ttMuEPS"] = new method(fileName, "t#bar{t} (MuHad) PU EPS", 1, 2, 1, 2, "E same", "LP","treeV2","","eventWeightPUEPSeventWeightPUEPS");
+  method_["m1ttMuEPS"] = new method(fileName, "t#bar{t} PU EPS", 1, 2, 1, 2, "E same", "LP","treeV2","","eventWeightPUEPSeventWeightPUEPS");
   
   fileName=inputPath428+"/naf_analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet_cfg/analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet.root";
-  method_["m1ttMunoPUrew"] = new method(fileName, "t#bar{t} (MuHad)", 1, 2, 1, 2, "E same", "LP","treeV2","","");
+  method_["m1ttMunoPUrew"] = new method(fileName, "t#bar{t}", 1, 2, 1, 2, "E same", "LP","treeV2","","");
   
   fileName=inputPath428+"/naf_analyzeCrossTriggerRatiosMCSFall11WJets_IsoMu24_eta2p1_IsoMu17TriJet_cfg/analyzeCrossTriggerRatiosMCFall11WJets_IsoMu24_eta2p1_IsoMu17TriJet.root";
-  method_["m1WMu"] = new method(fileName, "W (MuHad)", 1, 8, 1, 8, "E same", "LP","treeV2","","eventWeightPUeventWeightPU");
+  method_["m1WMu"] = new method(fileName, "W+Jets", 1, 8, 1, 8, "E same", "LP","treeV2","","eventWeightPUeventWeightPU");
   
   fileName=inputPath428+"/naf_analyzeCrossTriggerRatiosMCSFall11WJets_IsoMu24_eta2p1_IsoMu17TriJet_cfg/analyzeCrossTriggerRatiosMCFall11WJets_IsoMu24_eta2p1_IsoMu17TriJet.root";
-  method_["m1WMuEPS"] = new method(fileName, "W (MuHad)", 1, 8, 1, 8, "E same", "LP","treeV2","","eventWeightPUEPSeventWeightPUEPS");
+  method_["m1WMuEPS"] = new method(fileName, "W+Jets", 1, 8, 1, 8, "E same", "LP","treeV2","","eventWeightPUEPSeventWeightPUEPS");
   
   fileName=inputPath428+"/naf_analyzeZMuMuTagAndProbeMCFall11_HLT_IsoMu24_eta2p1_IsoMu17TriJet_cfg/analyzeZMuMuTagAndProbeMCFall11_HLT_IsoMu24_eta2p1_IsoMu17eta2p1TriJet.root";
-  method_["m1MuTaP"] = new method(fileName, "Z (MuHad)", 1, 4, 1, 4, "E same", "LP","treeV2","","weight");
+  method_["m1MuTaP"] = new method(fileName, "Z+Jets", 1, 4, 1, 4, "E same", "LP","treeV2","","weight");
   
   fileName=inputPath428+"/naf_analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet_cfg/analyzeCrossTriggerRatiosMCFall11ttbar_IsoMu24_eta2p1_IsoMu17TriJet.root";
-  method_["m1ttWcombMu"] = new method(fileName, "t#bar{t} and W (MuHad)", 1, 1, 1, 1, "E same", "LP","treeV2","","eventWeightPUeventWeightPU");
+  method_["m1ttWcombMu"] = new method(fileName, "t#bar{t} and W+Jets", 1, 1, 1, 1, "E same", "LP","treeV2","","eventWeightPUeventWeightPU");
   
   /// Mu data
   fileName=inputPath428+"/naf_analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet_cfg/analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet.root";
-  method_["m2allMu"] = new method(fileName, "Data (MuHad)", 1, 1, 21, 1, "E same", "LP","treeV2","","");
+  method_["m2allMu"] = new method(fileName, "Data", 1, 1, 21, 1, "E same", "LP","treeV2","","");
   
   fileName=inputPath428+"/naf_analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet_cfg/analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet.root";
   method_["m2EPSMu"] = new method(fileName, "Data EPS (MuHad)", 1, 4, 22, 4, "E same", "LP","treeV2","runNumber<=167913","");
@@ -194,7 +203,8 @@ void crossTriggerIndependentControlTrigRun2011_SingleLep_LepTriJet(bool save=fal
   //TString effIDarr[]      = {"pt3-3jets", "pt4-4jets", "pt4-geq4jets", "pt5-5jets", "eta3-3jets-ptl40", "eta4-4jets-ptl40", "eta4-geq4jets-ptl40", "absEta4-4jets-ptl40"};
   //TString effIDarr[]      = {"pt3-3jets", "pt4-4jets", "pt4-geq4jets", "pt5-5jets", "eta3-3jets-ptl40", "eta4-4jets-ptl40", "eta4-geq4jets-ptl40", "eta5-5jets-ptl40"};
   //TString effIDarr[]      = {"pt3-3jets", "eta3-3jets", "eta3-3jets-ptl40", "pv-3jets"};
-   TString effIDarr[]      = {"pt4-4jets", "eta4-4jets-ptl40", "pv-4jets", "pt4-4jets_inclLegend", "eta4-4jets-ptl40_inclLegend"};
+//    TString effIDarr[]      = {"pt4-4jets", "eta4-4jets-ptl40", "pv-4jets", "pt4-4jets_inclLegend", "eta4-4jets-ptl40_inclLegend"};
+  TString effIDarr[]      = {"pt4-4jets", "eta4-4jets-ptl40", "pv-4jets"};
 //  TString effIDarr[]      = {"eta4-4jets-ptl40_inclLegend"};
  // TString effIDarr[]      = {"pt5-5jets", "eta5-5jets-ptl40", "pv-5jets"};
 //   TString effIDarr[]      = {"pt3-3jets_inclLegend", "pt3-3jets", "eta3-3jets", "eta3-3jets-ptl40", "pv-3jets", "pt5-5jets", "eta5-5jets-ptl40", "pv-5jets"};
@@ -213,9 +223,9 @@ void crossTriggerIndependentControlTrigRun2011_SingleLep_LepTriJet(bool save=fal
   
   /// axis range
   //double yLo = 0.5, yHi = 1.1;
-  double yLo = 0.9, yHi = 1.;
+  double yLo = 0.9+0.0001, yHi = 1.;
   double yLo3 = 0.5, yHi3 = 1.;
-  double yLoSF = 0.9, yHiSF = 1.1;
+  double yLoSF = 0.9, yHiSF = 1.1-0.0001;
   double yLoSF3 = 0.7, yHiSF3 = 1.3;
   
   /// Constructor for struct eff(TString iniVar, T  iniCuts, TString iniBins, TString iniTitles, double iniYLo=-9999., double iniYHi=-9999., double iniXLo=-9999., double iniXHi=-9999.)
@@ -226,78 +236,78 @@ void crossTriggerIndependentControlTrigRun2011_SingleLep_LepTriJet(bool save=fal
     title = foldersTitle[iFolder]+" Efficiency/ / ";
     eff_["Control"][folderID[iFolder]]        =new eff("Control", cutPtEta, mBinsControl, binsControl_, title, yLo, yHi, -9999.,-9999.,true);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/3rd Jet p_{T} [GeV]/ ";
-//     eff_["pt3-3jets"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.,true);
+//     eff_["pt3-3jets"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.,true);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/3rd Jet p_{T} [GeV]/ ";
-//     eff_["pt3-4jets"][folderID[iFolder]]             =new eff("pt3", "n==4", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.,true);
+//     eff_["pt3-4jets"][folderID[iFolder]]             =new eff("pt3", "n==4", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.,true);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet p_{T} [GeV]/ ";
-//     eff_["pt4-4jets"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.,true);
+//     eff_["pt4-4jets"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.,true);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/3rd Jet p_{T} [GeV]/ ";
-//     eff_["pt3-5jets"][folderID[iFolder]]             =new eff("pt3", "n==5", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.,true);
+//     eff_["pt3-5jets"][folderID[iFolder]]             =new eff("pt3", "n==5", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.,true);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/4th Jet p_{T} [GeV]/ ";
-//     eff_["pt4-5jets"][folderID[iFolder]]             =new eff("pt4", "n==5", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.,true);
+//     eff_["pt4-5jets"][folderID[iFolder]]             =new eff("pt4", "n==5", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.,true);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/5th Jet p_{T} [GeV]/ ";
-//     eff_["pt5-5jets"][folderID[iFolder]]             =new eff("pt5", "n==5", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.,true);
+//     eff_["pt5-5jets"][folderID[iFolder]]             =new eff("pt5", "n==5", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.,true);
     
     
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/3rd Jet p_{T} [GeV]/ ";
-    eff_["pt3-3jets"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,150.);
+    eff_["pt3-3jets"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,120.);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/3rd Jet p_{T} [GeV]/ ";
-    eff_["pt3-3jets_inclLegend"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,150.,true);
+    eff_["pt3-3jets_inclLegend"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,120.,true);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet p_{T} [GeV]/ ";
-    eff_["pt4-4jets"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,150.);
+    eff_["pt4-4jets"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,120.);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet p_{T} [GeV]/ ";
-    eff_["pt4-4jets_inclLegend"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,150.,true);
+    eff_["pt4-4jets_inclLegend"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,120.,true);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}>=4/4th Jet p_{T} [GeV]/ ";
-    eff_["pt4-geq4jets"][folderID[iFolder]]             =new eff("pt4", "n>=4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,150.);
+    eff_["pt4-geq4jets"][folderID[iFolder]]             =new eff("pt4", "n>=4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,120.);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/5th Jet p_{T} [GeV]/ ";
-    eff_["pt5-5jets"][folderID[iFolder]]             =new eff("pt5", "n==5", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,150.);
+    eff_["pt5-5jets"][folderID[iFolder]]             =new eff("pt5", "n==5", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,120.);
     
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/3rd Jet #eta/ ";
-    eff_["eta3-3jets"][folderID[iFolder]]             =new eff("eta3", "n==3", mBinsJetEta, binsJetEta_, title, yLo3, yHi3, 30.,150.);
+    eff_["eta3-3jets"][folderID[iFolder]]             =new eff("eta3", "n==3", mBinsJetEta, binsJetEta_, title, yLo3, yHi3, -2.4,2.4);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet #eta/ ";
-    eff_["eta4-4jets"][folderID[iFolder]]             =new eff("eta4", "n==4", mBinsJetEta, binsJetEta_, title, yLo, yHi, 30.,150.);
+    eff_["eta4-4jets"][folderID[iFolder]]             =new eff("eta4", "n==4", mBinsJetEta, binsJetEta_, title, yLo, yHi, -2.4,2.4);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}>=4/4th Jet #eta/ ";
-    eff_["eta4-geq4jets"][folderID[iFolder]]             =new eff("eta4", "n>=4", mBinsJetEta, binsJetEta_, title, yLo, yHi, 30.,150.);
+    eff_["eta4-geq4jets"][folderID[iFolder]]             =new eff("eta4", "n>=4", mBinsJetEta, binsJetEta_, title, yLo, yHi, -2.4,2.4);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/5th Jet #eta/ ";
-    eff_["eta5-5jets"][folderID[iFolder]]             =new eff("eta5", "n==5", mBinsJetEta, binsJetEta_, title, yLo, yHi, 30.,150.);
+    eff_["eta5-5jets"][folderID[iFolder]]             =new eff("eta5", "n==5", mBinsJetEta, binsJetEta_, title, yLo, yHi, -2.4,2.4);
     
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/3rd Jet #eta (p_{T}<40 GeV)/ ";
-    eff_["eta3-3jets-ptl40"][folderID[iFolder]]             =new eff("eta3", "n==3 && pt3 < 40", mBinsJetEta, binsJetEta_, title, yLo3, yHi3, 30.,150.);
+    eff_["eta3-3jets-ptl40"][folderID[iFolder]]             =new eff("eta3", "n==3 && pt3 < 40", mBinsJetEta, binsJetEta_, title, yLo3, yHi3, -2.4,2.4);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet #eta (p_{T}<40 GeV)/ ";
-    eff_["eta4-4jets-ptl40"][folderID[iFolder]]             =new eff("eta4", "n==4 && pt4 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, 30.,150.);
+    eff_["eta4-4jets-ptl40"][folderID[iFolder]]             =new eff("eta4", "n==4 && pt4 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, -2.4,2.4);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet #eta (p_{T}<40 GeV)/ ";
-    eff_["eta4-4jets-ptl40_inclLegend"][folderID[iFolder]]             =new eff("eta4", "n==4 && pt4 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, 30.,150., true);
+    eff_["eta4-4jets-ptl40_inclLegend"][folderID[iFolder]]             =new eff("eta4", "n==4 && pt4 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, -2.4,2.4, true);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}>=4/4th Jet #eta (p_{T}<40 GeV)/ ";
-    eff_["eta4-geq4jets-ptl40"][folderID[iFolder]]             =new eff("eta4", "n>=4 && pt4 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, 30.,150.);
+    eff_["eta4-geq4jets-ptl40"][folderID[iFolder]]             =new eff("eta4", "n>=4 && pt4 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, -2.4,2.4);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/5th Jet #eta (p_{T}<40 GeV)/ ";
-    eff_["eta5-5jets-ptl40"][folderID[iFolder]]             =new eff("eta5", "n==5 && pt5 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, 30.,150.);
+    eff_["eta5-5jets-ptl40"][folderID[iFolder]]             =new eff("eta5", "n==5 && pt5 < 40", mBinsJetEta, binsJetEta_, title, yLo, yHi, -2.4,2.4);
     
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet |#eta| (p_{T}<40 GeV)/ ";
     eff_["absEta4-4jets-ptl40"][folderID[iFolder]]             =new eff("TMath::Abs(eta4)", "n==4 && pt4 < 40", mBinsJetAbsEta, binsJetAbsEta_, title, yLo, yHi);
     
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/1st Jet p_{T} [GeV]/ ";
-    eff_["pt1-3jets"][folderID[iFolder]]             =new eff("pt1", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,150.,true);
+    eff_["pt1-3jets"][folderID[iFolder]]             =new eff("pt1", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,120.,true);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/2nd Jet p_{T} [GeV]/ ";
-    eff_["pt2-3jets"][folderID[iFolder]]             =new eff("pt2", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,150.);
+    eff_["pt2-3jets"][folderID[iFolder]]             =new eff("pt2", "n==3", mBinsJetPt, binsJetPt_, title, yLo3, yHi3, 30.,120.);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3/3rd Jet p_{T} [GeV]/ ";
-//     eff_["pt4-geq4jets"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.);
+//     eff_["pt4-geq4jets"][folderID[iFolder]]             =new eff("pt3", "n==3", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/1st Jet p_{T} [GeV]/ ";
-    eff_["pt1-4jets"][folderID[iFolder]]             =new eff("pt1", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,150.);
+    eff_["pt1-4jets"][folderID[iFolder]]             =new eff("pt1", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,120.);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/2nd Jet p_{T} [GeV]/ ";
-    eff_["pt2-4jets"][folderID[iFolder]]             =new eff("pt2", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,150.);
+    eff_["pt2-4jets"][folderID[iFolder]]             =new eff("pt2", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,120.);
     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/3rd Jet p_{T} [GeV]/ ";
-    eff_["pt3-4jets"][folderID[iFolder]]             =new eff("pt3", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,150.);
+    eff_["pt3-4jets"][folderID[iFolder]]             =new eff("pt3", "n==4", mBinsJetPt, binsJetPt4_, title, yLo, yHi, 30.,120.);
 //     title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/4th Jet p_{T} [GeV]/ ";
-//     eff_["pt5-5jets"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,150.);
+//     eff_["pt5-5jets"][folderID[iFolder]]             =new eff("pt4", "n==4", mBinsJetPt, binsJetPt_, title, yLo, yHi, 30.,120.);
     
-    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3 /pv / ";
-    eff_["pv-3jets"][folderID[iFolder]]             =new eff("pv", "n==3", mBinsPVMult, binsPVMult_, title, yLo3, yHi3, 0.,20.);
-    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/ pv / ";
-    eff_["pv-4jets"][folderID[iFolder]]             =new eff("pv", "n==4", mBinsPVMult, binsPVMult_, title, yLo, yHi, 0.,20.);
-    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}>=4/ pv / ";
-    eff_["pv-geq4jets"][folderID[iFolder]]             =new eff("pv", "n>=4", mBinsPVMult, binsPVMult_, title, yLo, yHi, 0.,20.);
-    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/ pv / ";
-    eff_["pv-5jets"][folderID[iFolder]]             =new eff("pv", "n==5", mBinsPVMult, binsPVMult_, title, yLo, yHi, 0.,20.);
+    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=3 /N_{PV} / ";
+    eff_["pv-3jets"][folderID[iFolder]]             =new eff("pv", "n==3", mBinsPVMult, binsJetPVMult_, title, yLo3, yHi3, 0.,20.);
+    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=4/ N_{PV} / ";
+    eff_["pv-4jets"][folderID[iFolder]]             =new eff("pv", "n==4", mBinsPVMult, binsJetPVMult_, title, yLo, yHi, 0.,20.);
+    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}>=4/ N_{PV} / ";
+    eff_["pv-geq4jets"][folderID[iFolder]]             =new eff("pv", "n>=4", mBinsPVMult, binsJetPVMult_, title, yLo, yHi, 0.,20.);
+    title = foldersTitle[iFolder]+" Efficiency, N_{Jet}=5/ N_{PV} / ";
+    eff_["pv-5jets"][folderID[iFolder]]             =new eff("pv", "n==5", mBinsPVMult, binsJetPVMult_, title, yLo, yHi, 0.,20.);
   }
 
   /// ---
@@ -323,6 +333,7 @@ void crossTriggerIndependentControlTrigRun2011_SingleLep_LepTriJet(bool save=fal
  /// Each canvas shows test (1st row) and probe collection (2nd) and efficiency (3rd) for different variables (columns)
  TCanvas* CanvComp [folderNum];
  TCanvas* CanvSFComp [folderNum];
+ TCanvas* CanvEffAndSFComp [folderNum];
  TCanvas* CanvEvtsComp [folderNum];
  TCanvas* CanvEvtsNormComp [folderNum];
  TCanvas* CanvLeg = new TCanvas("CanvLeg", "CanvLeg", 350,200);
@@ -332,11 +343,13 @@ for(int iFolder=0; iFolder<folderNum; iFolder++) {
 
   CanvComp[iFolder] = new TCanvas("Comparison"+folderID[iFolder], "Comparison"+folderID[iFolder], 1700,1000);
   CanvSFComp[iFolder] = new TCanvas("ComparisonSF"+folderID[iFolder], "ComparisonSF"+folderID[iFolder], 1700,1000);
+  CanvEffAndSFComp[iFolder] = new TCanvas("ComparisonEffAndSF"+folderID[iFolder], "ComparisonEffAndSF"+folderID[iFolder], 1700,1000);
   CanvEvtsComp[iFolder] = new TCanvas("ComparisonEvts"+folderID[iFolder], "ComparisonEvts"+folderID[iFolder], 1700,1000);
   CanvEvtsNormComp[iFolder] = new TCanvas("ComparisonEvtsNorm"+folderID[iFolder], "ComparisonEvtsNorm"+folderID[iFolder], 1700,1000);
-  
+    
   CanvComp[iFolder]->Divide(4,2);
   CanvSFComp[iFolder]->Divide(4,2);
+  CanvEffAndSFComp[iFolder]->Divide(4,2);
   CanvEvtsComp[iFolder]->Divide(4,2);
   CanvEvtsNormComp[iFolder]->Divide(4,2);
   
@@ -349,6 +362,9 @@ for(int iFolder=0; iFolder<folderNum; iFolder++) {
     // for pt: 0.15,0.15,0.9,0.45
     // for eta SF: 0.15, 0.6, 0.9, 0.9
     drawSF          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.15,0.15,0.9,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
+    CanvEffAndSFComp[iFolder]->cd(iEff+1);
+    std::cout<< "Drawing Eff. and SF"<<std::endl;
+    drawEffAndSFinOne (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
     // if desired plot also raw event number histos
     if(onlyEffPlots!=1) {
       std::cout<< "Drawing event numbers"<<std::endl;
@@ -371,6 +387,7 @@ for(int iFolder=0; iFolder<folderNum; iFolder++) {
     for(int iEff=0; iEff<effIDNum; iEff++){
       CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID[iEff]+"."+fileFormat[iFileFormat]);
       CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+      CanvEffAndSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_EffAndSF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
     }
     if(iFolder==0) CanvLeg->Print(outputFolder+outputFileName+"_Legend."+fileFormat[iFileFormat]);
     std::cout<<"Canvas with plots is saved in "<<outputFolder<<std::endl;

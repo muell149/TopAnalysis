@@ -38,7 +38,9 @@ void tagAndProbePlotsRun2011A_MCdataCom_IsoEle27_32_differentRunRanges(bool save
   //TString mIDarr []= {"m3", "m4", "m5","m6","m7","m8"};
   //TString mIDarr []= {"m1", "m2", "m3", "m4", "m5","m6","m7","m8","m9"};
   //TString mIDarr []= {"m1", "m3", "m5", "m10","m11","m12"};
-  TString mIDarr []= {"m1", "m2", "m3", "m4","m5"};
+  //TString mIDarr []= {"m1", "m2", "m3", "m4","m5"};
+  
+  TString mIDarr []= {"m1", "m5", "m10"};
   std::vector<TString> mID(mIDarr, mIDarr + sizeof(mIDarr)/sizeof(TString));
   int mIDNum = mID.size();
   std::cout<< "Number of considered methods (i.e. files): " <<  mIDNum << std::endl;
@@ -110,9 +112,9 @@ void tagAndProbePlotsRun2011A_MCdataCom_IsoEle27_32_differentRunRanges(bool save
 // //   fileName=inputPath42+"/naf_analyzeZEleEleTagAndProbeRun2011A_165088_167913_HLT_IsoEle32_Ele25TriJet2_cfg/analyzeZEleEleTagAndProbeRun2011A_165088_167913_HLT_IsoEle32_IsoEle25TriJet.root";
 // //   method_["m9"] = new method(fileName, "Run PromptV4 IsoEle32 pt>50 GeV", 2, 8, 28, 8, "E same", "LP","treeV2","tagPt>50","");
 // 
-//   fileName=inputPath42+"/naf_analyzeZEleEleTagAndProbeRun2011A_170053_178380_HLT_IsoEle32_Ele25TriJet_cfg/analyzeZEleEleTagAndProbeRun2011AB_170053_178380_HLT_IsoEle32_IsoEle25TriJet.root";
-//   method_["m10"] = new method(fileName, "Run Aug05+PromptV6 +B IsoEle32", 2, 8, 27, 8, "E same", "LP","treeV2","","");
-//   
+  fileName=inputPath42+"/naf_analyzeZEleEleTagAndProbeRun2011A_170053_178380_HLT_IsoEle32_Ele25TriJet_cfg/analyzeZEleEleTagAndProbeRun2011AB_170053_178380_HLT_IsoEle32_IsoEle25TriJet.root";
+  method_["m10"] = new method(fileName, "Run Aug05+PromptV6 +B IsoEle32", 2, 8, 27, 8, "E same", "LP","treeV2","","");
+  
 //   fileName=inputPath42+"/naf_analyzeZEleEleTagAndProbeRun2011A_170053_178380_HLT_IsoEle32_Ele25TriJet_cfg/analyzeZEleEleTagAndProbeRun2011AB_170053_178380_HLT_IsoEle32_IsoEle25TriJet.root";
 //   method_["m11"] = new method(fileName, "Run Aug05+PromptV6 IsoEle32", 2, 6, 28, 6, "E same", "LP","treeV2","run<175800","");
 //   

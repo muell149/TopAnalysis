@@ -89,7 +89,7 @@ void tagAndProbePlotsRun2011_IsoMu17_IsoMu24_differentRunRanges(bool save=false)
   method_["m1b"] = new method(fileName, "Fall11 IsoMu24eta2p1 no PUrew", 2, 2, 1, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","");
   
   fileName=inputPath428+"/naf_analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet_cfg/analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet.root";
-  method_["mfull"] = new method(fileName, "Data All IsoMu17(24)(_eta2p1)", 1, 1, 21, 1, "E", "LP", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1");
+  method_["mfull"] = new method(fileName, "Data All IsoMu17(24)(eta2p1)", 1, 1, 21, 1, "E", "LP", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1");
   
   fileName=inputPath428+"/naf_analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet_cfg/analyzeZMuMuTagAndProbeRun2011All_HLT_IsoMu17_24_IsoMu17TriJet.root";
   method_["m5e32"] = new method(fileName, "Data 5e32 IsoMu17", 1, 4, 23, 4, "E", "LP", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1 && run<=163869");
@@ -123,7 +123,7 @@ void tagAndProbePlotsRun2011_IsoMu17_IsoMu24_differentRunRanges(bool save=false)
   
     const int folderNum=2;
   TString folderID[]={"tapTotalSelection", "tapTrigger"};
-  TString foldersTitle[]={"Overall Selection", "Trigger"};
+  TString foldersTitle[]={"Muon Selection", "Muon Trigger"};
   
 //     const int folderNum=1;
 //     /// to combine selection and trigger efficiencies use tapAll:
@@ -174,7 +174,7 @@ void tagAndProbePlotsRun2011_IsoMu17_IsoMu24_differentRunRanges(bool save=false)
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
     eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.);
     title = foldersTitle[iFolder]+" Efficiency/#eta/ ";
-    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEta, binsEta_, title, yLo, yHi);
+    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEta, binsEta_, title, yLo, yHi,-2.1,2.1);
     title = foldersTitle[iFolder]+" Efficiency/relIso/ ";
     eff_["RelIso"][folderID[iFolder]]          =new eff("RelIso", cutPtEta, mBinsRelIso, binsRelIso_, title, yLo, yHi);
     title = foldersTitle[iFolder]+" Efficiency/absIso/ ";
