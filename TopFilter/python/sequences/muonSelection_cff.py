@@ -7,7 +7,6 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 ## muon jet distance filter
 from TopAnalysis.TopFilter.filters.MuonJetOverlapSelector_cfi import *
 
-
 ## create collection for cut on distance to muon
 from TopAnalysis.TopFilter.sequences.jetSelection_cff import goodJets
 vetoJets = goodJets.clone()
@@ -41,7 +40,7 @@ highPtMuons20    = selectedPatMuons.clone(src = 'combinedMuons',
                                         cut = 'pt > 20.'
                                         )
 highPtMuons    = selectedPatMuons.clone(src = 'combinedMuons',
-                                        cut = 'pt > 26.'
+                                        cut = 'pt > 30.'
                                         )
 
 ## check muon kinematics
@@ -53,13 +52,13 @@ kinematicMuons    = selectedPatMuons.clone(src = 'highPtMuons',
 trackMuons = selectedPatMuons.clone(src = 'vertexSelectedMuons2012',
                                     cut = 'isGlobalMuon &'
                                           'isPFMuon &' # new in 2012
-                                          'pt > 26. &' # changed in 2012 (was 30)
+                                          'pt > 30. &' # changed wrt reference selection (was 26)
                                           'abs(eta) < 2.1 &'
                                           #'innerTrack.numberOfValidHits >= 11 &' # not in 2012
                                           'globalTrack.normalizedChi2 < 10.0  &'
                                           'innerTrack.hitPattern.trackerLayersWithMeasurement>5 &' # new in 2012
                                           'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                          'abs(dB)<0.2 &' # changed in 2012 (was 0.02)
+                                          'abs(dB)<0.02 &' # changed wrt referense selection (ref is 0.2)
                                           'innerTrack.hitPattern.numberOfValidPixelHits>=1 &' # changed in 2012 (was pixelLayersWithMeasurement)
                                           'numberOfMatchedStations>1' # changed in 2012 (was numberOfMatches)
                                     )
@@ -80,7 +79,7 @@ tightMuons     = selectedPatMuons.clone(src = 'goldenMuons',
 
 ## N-1 collections
 noDRMuons     = selectedPatMuons.clone(src = 'vertexSelectedMuons2012',
-                                       cut = 'pt > 26. & abs(eta) < 2.1 &'
+                                       cut = 'pt > 30. & abs(eta) < 2.1 &'
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
                                              '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125&'
@@ -107,7 +106,7 @@ noPtMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                              'numberOfMatches>1'
                                        )
 noEtaMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                        cut = 'pt > 26. &'
+                                        cut = 'pt > 30. &'
                                               'combinedMuon.isNull = 0 &'
                                               'isTrackerMuon() =1 &'
                                               '(trackIso+caloIso)/pt < 0.05 &'
@@ -133,7 +132,7 @@ noKinMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                        )
 
 noIsoMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                        cut = 'pt > 26. & abs(eta) < 2.1 &'
+                                        cut = 'pt > 30. & abs(eta) < 2.1 &'
                                               'combinedMuon.isNull = 0 &'
                                               'isTrackerMuon() =1 &'                                            
                                               'innerTrack.numberOfValidHits >= 11 &'
@@ -144,7 +143,7 @@ noIsoMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                               'numberOfMatches>1'
                                         )
 noTrkHitsMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                            cut = 'pt > 26. & abs(eta) < 2.1 &'
+                                            cut = 'pt > 30. & abs(eta) < 2.1 &'
                                                   'combinedMuon.isNull = 0 &'
                                                   'isTrackerMuon() =1 &'
                                                   #'(trackIso+caloIso)/pt < 0.05 &'
@@ -156,7 +155,7 @@ noTrkHitsMuons     = selectedPatMuons.clone(src = 'dRMuons',
                                                   'numberOfMatches>1'
                                             )
 noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
-                                         cut = 'pt > 26. & abs(eta) < 2.1 &'
+                                         cut = 'pt > 30. & abs(eta) < 2.1 &'
                                                'combinedMuon.isNull = 0 &'
                                                'isTrackerMuon() =1 &'
                                                #'(trackIso+caloIso)/pt < 0.05 &'
@@ -168,7 +167,7 @@ noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
                                                'numberOfMatches>1'
                                          )
 noDbMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                       cut = 'pt > 26. & abs(eta) < 2.1 &'
+                                       cut = 'pt > 30. & abs(eta) < 2.1 &'
                                              'combinedMuon.isNull = 0 &'
                                              'isTrackerMuon() =1 &'
                                              #'(trackIso+caloIso)/pt < 0.05 &'

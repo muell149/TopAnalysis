@@ -12,21 +12,21 @@ idOnlyElectrons   = selectedPatElectrons.clone(src = 'selectedPatElectrons',
                                                   cut = 'electronID(\"eidRobustTight\") > 0.99'                                                
                                                   )
 centralElectrons  = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
-                                                  cut = 'abs(eta) < 2.4'
+                                                  cut = 'abs(eta) < 2.1'
                                                   )
 highPtElectrons   = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
-                                                  cut = 'abs(eta) < 2.4 & et > 20.'
+                                                  cut = 'abs(eta) < 2.1 & et > 20.'
                                                   )
 
 ## electron Id on top of kinematics
 tightElectrons    = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
-                                                  cut = 'abs(eta) < 2.4 & et > 20.' 
+                                                  cut = 'abs(eta) < 2.1 & et > 20.' 
                                                   '& electronID(\"eidRobustTight\") > 0.99'                                                
                                                   )
 
 ## isolated electrons
 isolatedElectrons = selectedPatElectrons.clone(src = 'selectedPatElectrons', 
-                                                  cut = 'abs(eta) < 2.4 & et > 20.' 
+                                                  cut = 'abs(eta) < 2.1 & et > 20.' 
                                                   '& electronID(\"eidRobustTight\") > 0.99'
                                                   #'& (trackIso+caloIso)/et <  0.1'
                                                   '&(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.125'
@@ -44,7 +44,7 @@ looseElectronsEJ       = selectedPatElectrons.clone( src = 'selectedPatElectrons
                                                      cut = 'electronID("mvaTrigV0") > 0 &'
 					                   #'test_bit( electronID(\"simpleEleId95cIso\"), 0 ) &'
                                                            'et       > 20   &'
-                                                           'abs(eta) <  2.5 &'
+                                                           'abs(eta) <  2.1 &'
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            #'(dr03TkSumPt+dr03EcalRecHitSumEt+dr03HcalTowerSumEt)/et < 1.0'
@@ -54,7 +54,7 @@ looseElectronsEJ       = selectedPatElectrons.clone( src = 'selectedPatElectrons
 ## intermediate collection
 tightElectronsEJ       = selectedPatElectrons.clone( src = 'vertexSelectedElectrons',                                      # | PV.z() - elec.vertex().z() | < 1.0 (need to be created)
                                                      cut = 'et > 30. &'
-                                                           'abs(eta) <  2.5  &'
+                                                           'abs(eta) <  2.1  &' # differs from reference for synchronisation between electron and muon channel (ref is 2.4)
                                                            '( abs(superCluster.eta) < 1.4442   |'
                                                            '  abs(superCluster.eta) > 1.5660 ) &'
                                                            'abs(dB)  <  0.02 &'                                            # NB: needs "process.selectedPatElectrons.usePV = false" for PAT tuple production
