@@ -107,12 +107,12 @@ process.maxEvents = cms.untracked.PSet(
 #    Filter on Primary Vertex
 #----------------------------------------------------------------------------
 ## new DiffXSection version (compatible with SelV4)
-process.PVSelection = cms.EDFilter("PrimaryVertexFilter",
-                                   pvSrc   = cms.InputTag('offlinePrimaryVertices'),
-                                   minNdof = cms.double(4.0),
-                                   maxZ    = cms.double(24.0),
-                                   maxRho  = cms.double(2.0)
-                                   )
+#process.PVSelection = cms.EDFilter("PrimaryVertexFilter",
+                                   #pvSrc   = cms.InputTag('offlinePrimaryVertices'),
+                                   #minNdof = cms.double(4.0),
+                                   #maxZ    = cms.double(24.0),
+                                   #maxRho  = cms.double(2.0)
+                                   #)
 
 #-----------------------------------------------------------------------------
 # ----- C o n f i g u r e   P A T   T r i g g e r ----- #
@@ -234,11 +234,11 @@ process.hltTriggerFilter = hltHighLevel.clone(TriggerResultsTag = triggerResults
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 print "dataSelector = ", dataSelector
 if(dataSelector == 1):
-     process.GlobalTag.globaltag = cms.string('START42_V17::All')
+     process.GlobalTag.globaltag = cms.string('START53_V15::All')
      jsonFile = ""
      print "dataSelector = 1, global tag: ", process.GlobalTag.globaltag
 elif(dataSelector == 11):
-     process.GlobalTag.globaltag = cms.string('GR_R_42_V23::All')
+     process.GlobalTag.globaltag = cms.string('GR_P_V42_AN3::All')
      ##-------------------- Import the JEC services -----------------------
      #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
      ##-------------------- Import the Jet RECO modules -----------------------
@@ -270,89 +270,49 @@ process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 
 ## Apply common setting before module is cloned for systematic studies
 
-process.eventWeightPU.MCSampleTag = "Fall11"
+process.eventWeightPU.MCSampleTag = "Summer12"
 
-process.eventWeightPU.MCSampleHistoName        = "histo_Fall11_true"
-process.eventWeightPU.DataHistoName            = "histoData_true"
+process.eventWeightPU.MCSampleHistoName        = "puhisto"
+process.eventWeightPU.DataHistoName            = "pileup"
+
+process.eventWeightPU.MCSampleFile             = "TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root"
 
 process.eventWeightPU           = process.eventWeightPU.clone()
 process.eventWeightPUsysUp      = process.eventWeightPU.clone()
 process.eventWeightPUsysDown    = process.eventWeightPU.clone()
-process.eventWeightPUEPS        = process.eventWeightPU.clone()
-process.eventWeightPU2011B      = process.eventWeightPU.clone()
-process.eventWeightPUEle32      = process.eventWeightPU.clone()
-process.eventWeightPUEle32WP70 = process.eventWeightPU.clone()
 
 #### Configuration for Nominal PU Weights
 
 process.eventWeightPU.WeightName          = "eventWeightPU"
-process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABC_190456-203755.root"
 process.eventWeightPU.CreateWeight3DHisto = False
 process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
 process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
-process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72870_2012ABC_190456-203755.root"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
 process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
 process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
-process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65930_2012ABC_190456-203755.root"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
 process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
-#### Configuration for Nominal PU Weights EPS
-
-process.eventWeightPUEPS.WeightName          = "eventWeightPUEPS"
-process.eventWeightPUEPS.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_EPS.root"
-process.eventWeightPUEPS.CreateWeight3DHisto = False
-process.eventWeightPUEPS.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DEPS.root"
-
-### Configuration for Nominal PU Weights B
-
-process.eventWeightPU2011B.WeightName          = "eventWeightPU2011B"
-process.eventWeightPU2011B.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011B.root"
-process.eventWeightPU2011B.CreateWeight3DHisto = False
-#process.eventWeightPU2011B.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D2011B.root"
-
-### Configuration for Ele32 (effective taking pre scale into account)
-
-process.eventWeightPUEle32.WeightName          = "eventWeightPUEle32"
-process.eventWeightPUEle32.DataFile            = "TopAnalysis/TopUtils/data/DataPileupHistogram_Ele32_v1to7.root"
-process.eventWeightPUEle32.DataHistoName       = "pileup"
-process.eventWeightPUEle32.CreateWeight3DHisto = False
-#process.eventWeightPUEle32.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DEle32.root"
-
-### Configuration for Ele32 including Ele32WP70 (effective taking pre scale into account)
-
-process.eventWeightPUEle32WP70.WeightName          = "eventWeightPUEle32WP70"
-process.eventWeightPUEle32WP70.DataFile            = "TopAnalysis/TopUtils/data/DataPileupHistogram_Ele32_v1to7_Ele32_WP70_v2to3.root"
-process.eventWeightPUEle32WP70.DataHistoName       = "pileup"
-process.eventWeightPUEle32WP70.CreateWeight3DHisto = False
-#process.eventWeightPUEle32WP70.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DEle32WP70.root"
-
 process.makeEventWeightsPU = cms.Sequence(process.eventWeightPU        *
                                           process.eventWeightPUsysUp   *
-                                          process.eventWeightPUsysDown *
-                                          process.eventWeightPUEPS     *
-                                          process.eventWeightPU2011B   *
-                                          process.eventWeightPUEle32   *
-                                          process.eventWeightPUEle32WP70)
+                                          process.eventWeightPUsysDown )
 
 # relevant PU event weights (potentially merged with shape distortion weights)
 PUweightraw     = cms.InputTag("eventWeightPU",       "eventWeightPU")
 PUweightrawUp   = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
 PUweightrawDown = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
-PUweightrawEPS  = cms.InputTag("eventWeightPUEPS",    "eventWeightPUEPS")
-PUweightraw2011B= cms.InputTag("eventWeightPU2011B",  "eventWeightPU2011B")
-PUweightrawEle32= cms.InputTag("eventWeightPUEle32",  "eventWeightPUEle32")
-PUweightrawEle32WP70= cms.InputTag("eventWeightPUEle32WP70",  "eventWeightPUEle32WP70")
 
 ## create vector of input tags
-PUweights = cms.VInputTag(PUweightraw, PUweightrawUp, PUweightrawDown, PUweightrawEPS, PUweightraw2011B, PUweightrawEle32, PUweightrawEle32WP70)
+PUweights = cms.VInputTag(PUweightraw, PUweightrawUp, PUweightrawDown)
 ## standard weight as normal input tag
 PUweight = PUweightraw
 
@@ -371,7 +331,7 @@ process.vetoJets.cut=''
 ## if desired change mu pt cut
 if(muonPtCut>0):
     process.highPtMuons.cut = cms.string('pt > ' + str(muonPtCut))
-    process.trackMuons.cut = cms.string('isGlobalMuon & isTrackerMuon &abs(eta) < 2.1 &innerTrack.numberOfValidHits >= 11 &globalTrack.normalizedChi2 < 10.0  &globalTrack.hitPattern.numberOfValidMuonHits>0 &abs(dB)<0.02 &innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &numberOfMatches>1 &pt >' + str(muonPtCut))
+    process.trackMuons.cut = cms.string('isGlobalMuon  &abs(eta) < 2.1 &innerTrack.hitPattern.trackerLayersWithMeasurement > 5 &globalTrack.normalizedChi2 < 10.0  &globalTrack.hitPattern.numberOfValidMuonHits>0 &abs(dB)<0.02 &innerTrack.hitPattern.numberOfValidPixelHits>=1 &numberOfMatchedStations>1 &pt >' + str(muonPtCut))
 print "trackMuonsCut = ", process.trackMuons.cut
 
 #-----------------------------------------------------------------------------
@@ -419,7 +379,7 @@ else:
 ## global muons as candidate for probe muons (loose selection)
 process.globalMuons = selectedPatMuons.clone(
   src = 'selectedPatMuonsTriggerMatch',
-  cut = 'isGlobalMuon & isTrackerMuon'	
+  cut = 'isGlobalMuon '	
 )
 
 ## in case of tagAndProbe:
@@ -429,15 +389,15 @@ if(modeSelector == 1):
        process.tagMuons = selectedPatMuons.clone(
             src = 'selectedPatMuonsTriggerMatch', 
             cut = 'triggerObjectMatches.size > 0 &'
-                  'isGlobalMuon & isTrackerMuon &'
+                  'isGlobalMuon  &'
                   'abs(eta) < 2.1 &'
-                  'innerTrack.numberOfValidHits >= 11 &'
+                  'innerTrack.hitPattern.trackerLayersWithMeasurement > 5 &'
                   'globalTrack.normalizedChi2 < 10.0  &'
                   'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
                   'abs(dB)<0.02 &'
-                  'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-                  'numberOfMatches>1 &'
-		  '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125 &'
+                  'innerTrack.hitPattern.numberOfValidPixelHits>=1 &'
+                  'numberOfMatchedStations>1 &'
+		  '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/pt < 0.12 &'
 		  'pt >' + str(muonPtCut)
                   #'(trackIso+caloIso)/pt < 0.05'
        )
@@ -504,24 +464,24 @@ process.probeMuonsTrkQ = selectedPatMuons.clone(
 ## probe muons to test isolation on: muons passing track quality selection
 process.probeMuonsIso = selectedPatMuons.clone(
    src = 'probeMuonsDZ',
-   cut = 'innerTrack.numberOfValidHits >= 11 &'
+   cut = 'innerTrack.hitPattern.trackerLayersWithMeasurement > 5 &'
          'globalTrack.normalizedChi2 < 10.0  &'
          'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
          'abs(dB)<0.02 &'
-         'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-         'numberOfMatches>1'
+         'innerTrack.hitPattern.numberOfValidPixelHits>=1 &'
+         'numberOfMatchedStations>1'
 )
 
 ## probe muons to test cut of minimum distance (mu,jet) on: isolated muons
 process.probeMuonsMinDR = selectedPatMuons.clone(
    src = 'probeMuonsDZ',
-   cut = 'innerTrack.numberOfValidHits >= 11 &'
+   cut = 'innerTrack.hitPattern.trackerLayersWithMeasurement > 5 &'
          'globalTrack.normalizedChi2 < 10.0  &'
          'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
          'abs(dB)<0.02 &'
-         'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-         'numberOfMatches>1 &'
-	 '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
+         'innerTrack.hitPattern.numberOfValidPixelHits>=1 &'
+         'numberOfMatchedStations>1 &'
+	 '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/pt < 0.12'
          #'(trackIso+caloIso)/pt < 0.05'
 )
 
@@ -535,13 +495,13 @@ process.probeMuonsTotalSelection = selectedPatMuons.clone(
 # process.probeMuonsTriggerNoDR = ....
 process.probeMuonsTrigger = selectedPatMuons.clone(
    src = 'probeMuonsDZ',
-   cut = 'innerTrack.numberOfValidHits >= 11 &'
+   cut = 'innerTrack.hitPattern.trackerLayersWithMeasurement > 5 &'
          'globalTrack.normalizedChi2 < 10.0  &'
          'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
          'abs(dB)<0.02 &'
-         'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-         'numberOfMatches>1 &'
-	 '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
+         'innerTrack.hitPattern.numberOfValidPixelHits>=1 &'
+         'numberOfMatchedStations>1 &'
+	 '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/pt < 0.12'
          #'(trackIso+caloIso)/pt < 0.05'
 )
 #process.probeMuonsTrigger = cms.EDProducer("MuonJetOverlapSelector",
@@ -596,12 +556,12 @@ process.goodJetsPF30NoOverlapJetsProbeMuons     = selectedPatJets.clone(src = 'n
 ## cut on track quality
 process.testMuonsTrkQNoDZ = selectedPatMuons.clone(
   src = 'probeMuonsTrkQ',
-  cut = 'innerTrack.numberOfValidHits >= 11 &'
+  cut = 'innerTrack.hitPattern.trackerLayersWithMeasurement > 5 &'
         'globalTrack.normalizedChi2 < 10.0  &'
         'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
         'abs(dB)<0.02 &'
-        'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-        'numberOfMatches>1'	
+        'innerTrack.hitPattern.numberOfValidPixelHits>=1 &'
+        'numberOfMatchedStations>1'	
 )
 ## deltaZ(muonVertex, PV) < 0.5
 process.testMuonsTrkQ = cms.EDProducer("MuonVertexDistanceSelector",
@@ -613,7 +573,7 @@ process.testMuonsTrkQ = cms.EDProducer("MuonVertexDistanceSelector",
 ## cut on muon isolation
 process.testMuonsIso = selectedPatMuons.clone(
   src = 'probeMuonsIso',
-  cut = '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125' 
+  cut = '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/pt < 0.12' 
         #'(trackIso+caloIso)/pt < 0.05'	
 )
 
@@ -628,13 +588,13 @@ process.testMuonsMinDR = cms.EDProducer("MuonJetOverlapSelector",
 ## test the whole muon selection except trigger
 process.testMuonsTotalSelectionNoDZNoDR = selectedPatMuons.clone(
   src = 'probeMuonsTotalSelection',
-  cut = 'innerTrack.numberOfValidHits >= 11 &'
+  cut = 'innerTrack.hitPattern.trackerLayersWithMeasurement > 5 &'
         'globalTrack.normalizedChi2 < 10.0  &'
         'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
         'abs(dB)<0.02 &'
-        'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-        'numberOfMatches>1 &'
-	'(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125'
+        'innerTrack.hitPattern.numberOfValidPixelHits>=1 &'
+        'numberOfMatchedStations>1 &'
+	'(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/pt < 0.12'
         #'(trackIso+caloIso)/pt < 0.05'
 )
 ## deltaZ(muonVertex, PV) < 0.5
@@ -847,23 +807,22 @@ process.probeElectronsID = selectedPatElectrons.clone(
 ## probe electrons to test isolation on: electrons passing track quality & ID
 process.probeElectronsIso = selectedPatElectrons.clone(
    src = 'probeElectronsDZ',
-   cut = 'abs(dB)  <  0.02 & test_bit( electronID("eidHyperTight1MC"), 0 )'
+   cut = 'abs(dB)  <  0.02 & electronID("mvaTrigV0") > 0.5'
 )
 ## probe electrons to test conversion rejection on: electrons passing track quality & ID &ISo
 process.probeElectronsConvRej = selectedPatElectrons.clone(
    src = 'probeElectronsDZ',
-   cut = 'abs(dB)  <  0.02 & test_bit( electronID("eidHyperTight1MC"), 0 ) &'
-         '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.125'
+   cut = 'abs(dB)  <  0.02 & electronID("mvaTrigV0") > 0.5 &'
+         '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/et < 0.1'
 )
 
 ## probe electrons to test trigger on: electrons passing track quality, ID, Iso and conv. rej.
 process.probeElectronsTrigger = selectedPatElectrons.clone(
    src = 'probeElectrons',
-   cut = 'abs(dB)  <  0.02 & test_bit( electronID("eidHyperTight1MC"), 0 ) &'
-         '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.125 &'
+   cut = 'abs(dB)  <  0.02 & electronID("mvaTrigV0") > 0.5 &'
+         '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/et < 0.1 &'
 	 'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &'
-         'abs(convDcot) > 0.02 &'
-	 'abs(convDist) > 0.02'
+         'passConversionVeto()'
 )
 
 #-----------------------------------------------------------------------------
@@ -921,21 +880,20 @@ process.testElectronsTrkQ = selectedPatElectrons.clone(
 ## cut on eID
 process.testElectronsID = selectedPatElectrons.clone(
    src = 'probeElectronsID',
-   cut = 'test_bit( electronID("eidHyperTight1MC"), 0 )'
+   cut = 'electronID("mvaTrigV0") > 0.5'
 )
 
 ## cut on isolation
 process.testElectronsIso = selectedPatElectrons.clone(
    src = 'probeElectronsIso',
-   cut = '(chargedHadronIso+neutralHadronIso+photonIso)/et < 0.125'
+   cut = '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/et < 0.1'
 )
 
 ## conversion rejection
 process.testElectronsConvRej = selectedPatElectrons.clone(
    src = 'probeElectronsConvRej',
    cut = 'gsfTrack.trackerExpectedHitsInner.numberOfHits = 0 &'
-         'abs(convDcot) > 0.02 &'
-	 'abs(convDist) > 0.02'
+         'passConversionVeto()'
 )
 
 ## total selection: same as ConvRej
@@ -1268,7 +1226,7 @@ process.p1 = cms.Path(
     #process.analyzeAllPatMuons     *
     #process.analyzeAllPatMuonsMass *
     ## apply primary vertex selection
-    process.PVSelection                *
+   # process.PVSelection                *
     ## calculate PU weights
     process.makeEventWeightsPU         *
     ## apply trigger selection
@@ -1331,11 +1289,13 @@ if(pfToPAT):
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
         'cutsElec': 'et > 15. & abs(eta) < 2.5',
         'cutsJets': 'pt > 10 & abs(eta) < 5.0', 
-        'electronIDs': ['CiC','classical'],
+        'electronIDs': ['CiC','classical','MVA'],
         'pfIsoConeMuon': 0.4,
-        'pfIsoConeElec': 0.4,
+        'pfIsoConeElec': 0.3,
         'pfIsoValMuon': 0.2,
-        'pfIsoValElec': 0.2,
+        'pfIsoValElec': 0.15,
+	'doDeltaBetaCorrMuon' : True,
+        'doDeltaBetaCorrElec' : True,
         'skipIfNoPFMuon': False,
         'skipIfNoPFElec': False,
         'addNoCutPFMuon': False,
@@ -1343,6 +1303,7 @@ if(pfToPAT):
         'noMuonTopProjection': False,
         'noElecTopProjection': False,
         'analyzersBeforeMuonIso':cms.Sequence(),
+	'analyzersBeforeElecIso':cms.Sequence(),
         'excludeElectronsFromWsFromGenJets': True,
         'METCorrectionLevel': 1
         }
