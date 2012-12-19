@@ -113,8 +113,12 @@ void
 ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& weight)
 {
   int index=0;
+  double relIso=0.;
   for(edm::View<pat::Electron>::const_iterator electron=electrons.begin(); electron!=electrons.end(); ++electron, ++index){
       if( (index_<0 || index_==index) ){
+      relIso=((electron->chargedHadronIso() + 
+	       TMath::Max((electron->neutralHadronIso() + electron->photonIso() - 0.5*electron->puChargedHadronIso()),0.0)
+	       ) / electron->pt());
       /**
 	 Fill Selection Variables
       **/
@@ -128,8 +132,7 @@ ElectronQuality::fill(const edm::View<pat::Electron>& electrons, const double& w
       // relative isolation (tracker and calo combined)
       //hists_.find("relIso")          ->second->Fill( (electron->dr03TkSumPt()+electron->dr03EcalRecHitSumEt()+electron->dr03HcalTowerSumEt())/electron->et(), weight );    
       /// PF relIso
-      hists_.find("relIso")->second->Fill( (electron->chargedHadronIso() + electron->neutralHadronIso() + 
-	  electron->photonIso()) / electron->et() , weight );
+      hists_.find("relIso")->second->Fill( relIso, weight );
       // energy in ecal corrected on SC level
       hists_.find("ecalEn")          ->second->Fill( electron->ecalEnergy(), weight );
       // energy from super cluster attached to the candidate trajectory

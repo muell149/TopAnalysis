@@ -187,12 +187,15 @@ void
 MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
 {      
   int index=0;
+  double relIso=0.;
   for(edm::View<pat::Muon>::const_iterator muon=muons.begin(); muon!=muons.end(); ++muon, ++index){
     // NOTE: against the common policy *not* to have any implicit selection cuts 
     // within analyzers these plots are restricted to global muons, as otherwise
     // some of the monitor histograms cannot be filled
     if( (index_<0 || index_==index) && muon->isGlobalMuon() ){
-
+      relIso=((muon->chargedHadronIso() + 
+	       TMath::Max((muon->neutralHadronIso() + muon->photonIso() - 0.5*muon->puChargedHadronIso()),0.0)
+	       ) / muon->pt());
       /**
 	 Fill Selection Variables
       **/
@@ -211,8 +214,7 @@ MuonQuality::fill(const edm::View<pat::Muon>& muons, const double& weight)
       // relative isolation (tracker and calo combined)
       //hists_.find("relIso")->second->Fill( (muon->trackIso()+muon->caloIso())/muon->pt() , weight );
       // PF relIso
-      hists_.find("relIso")->second->Fill( (muon->chargedHadronIso() + muon->neutralHadronIso() + 
-					    muon->photonIso()) / muon->pt() , weight );
+      hists_.find("relIso")->second->Fill( relIso, weight );
       // PF absIso
       hists_.find("absIso")->second->Fill( (muon->chargedHadronIso() + muon->neutralHadronIso() + 
 					    muon->photonIso())              , weight );
