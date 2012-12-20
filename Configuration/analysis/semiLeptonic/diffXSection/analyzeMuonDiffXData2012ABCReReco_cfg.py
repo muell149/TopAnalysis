@@ -31,6 +31,9 @@ jsonFile = 'Cert_190456-198523_8TeV_201213Jul06Aug24AugReRecos_Collisions12_JSON
 ## get the mother file
 execfile("analyzeTopDiffXSec_cfg.py")
 
+## adjust global tag: 5_3-X PROMPTRECO
+process.GlobalTag.globaltag = cms.string('GR_P_V42_AN3::All')
+
 ## choose data set
 if(decayChannel == 'muon'):
     process.load("TopAnalysis/Configuration/samples/SingleMu_ReRecoRun2012ABC_cff")
@@ -57,7 +60,7 @@ else:
     process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange()
     process.source.lumisToProcess.extend(myLumis)
     ## Use lumisToSkip if JSON file shall be constrained additionally to a certain run range
-    process.source.lumisToSkip = cms.untracked.VLuminosityBlockRange('190456:1-198523:1')
+    #process.source.lumisToSkip = cms.untracked.VLuminosityBlockRange('190456:1-198523:1')
     print "lumisToProcess = ", process.source.lumisToProcess
 
 ## global tag: set in main cfg
@@ -66,7 +69,7 @@ else:
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## change number of processed events: process them all
-#process.maxEvents.input = -1 #FIXME: for testing
+process.maxEvents.input = -1 #FIXME: comment out for for testing
 process.source.skipEvents = cms.untracked.uint32(0)
 
 ## create tuples with events surviving the cuts
