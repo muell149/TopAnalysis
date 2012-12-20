@@ -28,6 +28,6 @@ else:
     ## Use lumisToSkip if JSON file shall be constrained additionally to a certain run range
     #process.source.lumisToSkip = cms.untracked.VLuminosityBlockRange('165634:1-999999:1')
     #print "lumisToProcess = ", process.source.lumisToProcess
-process.TFileService.fileName = 'analyzeZMuMuTagAndProbeRun2012ABCReReco_HLT_Ele27WP80.root'
+process.TFileService.fileName = 'analyzeZEleEleTagAndProbeRun2012ABCReReco_HLT_Ele27WP80.root'
 process.maxEvents.input = 10000
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
