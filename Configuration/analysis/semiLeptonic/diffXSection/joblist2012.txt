@@ -2,13 +2,21 @@
 ## 2012 data ##
 ###############
 
-############
-## 2012B  ##
-############
+####################
+## 2012ABCRERECO  ##
+####################
 # muon
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012B -c lepton=muon     900 analyzeMuonDiffXData2012B_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012ABCReReco -c lepton=muon     900 analyzeMuonDiffXData2012ABCReReco_cfg.py
 # electron
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012B -c lepton=electron 900 analyzeMuonDiffXData2012B_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012ABCReReco -c lepton=electron 900 analyzeMuonDiffXData2012ABCReReco_cfg.py
+
+######################
+## 2012CPROMPTRECO  ##
+######################
+# muon
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012CPromptReco -c lepton=muon     900 analyzeMuonDiffXData2012CPromptReco_cfg.py
+# electron
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012CPromptReco -c lepton=electron 900 analyzeMuonDiffXData2012CPromptReco_cfg.py
 
 ##################
 ## summer 12 MC ##
