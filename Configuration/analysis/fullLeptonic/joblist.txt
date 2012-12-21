@@ -12,6 +12,6 @@ nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5
 
 
 # ele data
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZMuMuTagAndProbeRun2012ABCReReco_HLT_Ele27WP80.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZEleEleTagAndProbeRun2012ABCReReco_HLT_Ele27WP80.py
 
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZMuMuTagAndProbeRun2012CPromptReco_HLT_Ele27WP80.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZEleEleTagAndProbeRun2012CPromptReco_HLT_Ele27WP80.py
