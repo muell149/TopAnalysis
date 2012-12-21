@@ -668,7 +668,7 @@ void bothDecayChannelsCombination(double luminosity=3885, bool save=true, unsign
 
 	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
 	    
-	      TFile  *file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisNNLO.root");
+	      TFile  *file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisApproxNNLO8TeV.root");
 	      TH1F   *newPlotNNLOHisto = (TH1F*)(file->Get(plotname)->Clone(plotname+"nnlo"));
 	      //TGraph *newPlotNNLOGraph = (TGraph*)(file->Get(plotname+"_graph")->Clone(plotname+"nnlo_graph"));
 	      if(newPlotNNLOHisto){
