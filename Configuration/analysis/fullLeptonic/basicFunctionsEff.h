@@ -184,7 +184,7 @@ double binsMinDR[]  = { 0.,0.3,0.7,1.,1.5,2.,2.5,3.,3.7,5., };
 std::vector<double> binsMinDR_(binsMinDR, binsMinDR + sizeof(binsMinDR)/sizeof(double));
 // double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,10.,15.,20. };
 //double binsPVMult[] = {  0.,1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.,12.,13.,14.,15.,16.,17.,18.,19.,20.,21.,22.,23.,24.,25.,26.,27.,28.,29.,30. };
-double binsPVMult[] = {  0.,1.,3.,5.,7.,9.,11.,13.,15.,17.,20.,21.,22.,23.,24.,25.,26.,27.,28.,29.,30. };
+double binsPVMult[] = {  0.,1.,5.,8.,10.,12.,14.,16.,18.,20.,22.,24.,27.,30.,35., 40.,45.,50.};
 std::vector<double> binsPVMult_(binsPVMult, binsPVMult + sizeof(binsPVMult)/sizeof(double));
 double binsLepLepMass[] = {  41.  ,  141.  };
 std::vector<double> binsLepLepMass_(binsLepLepMass, binsLepLepMass + sizeof(binsLepLepMass)/sizeof(double));
