@@ -1,6 +1,6 @@
 #include "basicFunctionsEff.h"
 
-void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
+void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
 {
   /// set style
   // ============================
@@ -16,8 +16,6 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
 //   myStyle.cd();
 //   gROOT->SetStyle("HHStyle");
 //   gROOT->ForceStyle();  
-  
-//   gStyle->SetLineScalePS(1);
   
   gStyle->SetOptStat(0);
   gStyle->SetTitleBorderSize(0);
@@ -38,14 +36,9 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
   
   /// path where input files are stored
   TString inputPathScratch  ="/afs/naf.desy.de/group/cms/scratch/tophh/efficiencies";
-  TString inputPath535      ="/afs/naf.desy.de/user/j/jlange/nafscratch/top/CMSSW_5_3_5/src/TopAnalysis/Configuration/analysis/fullLeptonic";
-  TString inputPathDust     ="/scratch/hh/dust/naf/cms/user/jlange/output_5_3";
   
-  TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2012/singleMu";
-//  TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2011/singleMu/Fall11/DataMCcomp_IsoMu17-24_relIsoL0p2";
-  
-   TString outputFileName = "/DataMCcomp_IsoMu24eta2p1_";
-//  TString outputFileName = "/DataMCcomp_IsoMu17-24_relIsoL0p2_";
+  TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2012/singleEle";
+ TString outputFileName = "/DataMCcomp_Ele27WP80_";
 
   TString fileFormatArr []= {"root", "png", "eps"};
   std::vector<TString> fileFormat(fileFormatArr, fileFormatArr + sizeof(fileFormatArr)/sizeof(TString));
@@ -53,13 +46,14 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
   /// if set to 0: all plots (probe, test, eff) are drawn; to 1: only eff plots
   int onlyEffPlots =1;
   /// method ID of MC file to normalise scale factors to
-  TString mIDnorm = "m1";
+   TString mIDnorm = "m1";
+  //TString mIDnorm = "m1-25TriJetPUEPS";
   std::cout<< "Efficiency wrt. which SF is supposed to be normalized " <<  mIDnorm << std::endl;
 
   
    /// map with structure that keeps features of methods, like file, filename, legend etc.
   std::map<TString, method*> method_;
-
+  
   /// standard for nice plots:
   TString mIDarr []= {"m1","m2"};
   /// for different PU scenarios: (also savable in root file)
@@ -88,61 +82,76 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
 //   TString legOpt  []= {"L","P","P","P","P","P"};
 //   bool legOnPlot = false;
   
+  /// option to select different cuts 
+  TCut cutEle = "probePt>30. && TMath::Abs(probeEta)<2.1";
+  
   /// Constructor for struct method(TString iniFileName, TString iniLegName, int iniLineStyle, int iniLineColor, int iniMarkerStyle, int iniMarkerColor, TString iniDrawOpt, TString iniLepOpt, TString source)
   
    /// Summer12 MC
-  fileName=inputPathScratch+"/analyzeZMuMuTagAndProbeMCSummer12_HLT_IsoMu24_eta2p1.root";
-  method_["m1"] = new method(fileName, "Simulation IsoMu24eta2p1", 1, 2, 1, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","eventWeightPUeventWeightPU");
+  fileName=inputPathScratch+"/analyzeZEleEleTagAndProbeMCSummer12_HLT_Ele27WP80.root";
+  method_["m1"] = new method(fileName, "Simulation Ele27WP80", 1, 2, 1, 1, "E", "L", "treeV2",cutEle,"eventWeightPUeventWeightPU");
   
-  method_["m1PUup"] = new method(fileName, "Simulation IsoMu24eta2p1 PUrew UP", 1, 2, 1, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","eventWeightPUsysUpeventWeightPUUp","m1PUup");
+  method_["m1PUup"] = new method(fileName, "Simulation Ele27WP80 PUrew UP", 1, 2, 1, 1, "E", "L", "treeV2",cutEle,"eventWeightPUsysUpeventWeightPUUp","m1PUup");
   
-  method_["m1PUdown"] = new method(fileName, "Simulation IsoMu24eta2p1 PUrew DOWN", 1, 2, 1, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","eventWeightPUsysDowneventWeightPUDown","m1PUdown");
+  method_["m1PUdown"] = new method(fileName, "Simulation Ele27WP80 PUrew DOWN", 1, 2, 1, 1, "E", "L", "treeV2", cutEle, "eventWeightPUsysDowneventWeightPUDown","m1PUdown");
   
+ 
   /// data
-  fileName=inputPathScratch+"/analyzeZMuMuTagAndProbeRun2012ABC_HLT_IsoMu24eta2p1.root";
-  method_["m2"] = new method(fileName, "Data IsoMu24eta2p1", 1, 1, 21, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1");
+  fileName=inputPathScratch+"/analyzeZEleEleTagAndProbeRun2012ABC_HLT_Ele27WP80.root";
+  method_["m2"] = new method(fileName, "Data Ele27WP80", 1, 1, 24, 1, "E", "PL", "treeV2",cutEle, "");
   
-  method_["m2PUup"] = new method(fileName, "Data IsoMu24eta2p1 PU up", 1, 1, 24, 1, "E", "LP", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","","m1PUup");
+  method_["m2PUup"] = new method(fileName, "Data Ele27WP80 PU up", 1, 1, 25, 1, "E", "LP", "treeV2",cutEle,"","m1PUup");
   
-  method_["m2PUdown"] = new method(fileName, "Data IsoMu24eta2p1 PU down", 1, 1, 26, 1, "E", "LP", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","","m1PUdown");
-  
-
+  method_["m2PUdown"] = new method(fileName, "Data Ele27WP80 PU down", 1, 1, 26, 1, "E", "LP", "treeV2",cutEle,"","m1PUdown");
   
   /// different tap studies (different efficiencies)
-//    const int folderNum=4;
-//    TString folderID[]={"tapTrkQ", "tapIso", "tapTotalSelection", "tapTrigger"};
-//    TString foldersTitle[]={"Muon ID", "Muon Isolation", "Muon Selection", "Muon Trigger"};
+
+//   const int folderNum=6;
+//    TString folderID[]={"tapTrkQEle", "tapIDEle", "tapIsoEle", "tapConvRejEle", "tapTotalSelectionEle", "tapTriggerEle"};
+//    TString foldersTitle[]={"Electron Track Quality", "Electron ID", "Electron Isolation", "Electron Conversion Rejection", "Electron Selection", "Electron Trigger"};
   
-//   const int folderNum=3;
-//   TString folderID[]={"tapTotalSelection", "tapTrigger", "tapAll"};
-//   TString foldersTitle[]={"Muon Selection", "Muon Trigger", "Combined Muon Selection and Trigger"};
+//      const int folderNum=6;
+//    TString folderID[]={"tapTrkQEle", "tapIDEle", "tapIsoEle", "tapConvRejEle", "tapTotalSelectionEle", "tapTriggerEle"};
+//    TString foldersTitle[]={"Electron d_{0}", "Electron ID_{CiC}", "Electron Isolation", "Electron Conversion Rejection", "Electron Selection", "Electron Trigger"};
   
-    const int folderNum=1;
-    /// to combine selection and trigger efficiencies use tapAll:
-  TString folderID[]={"tapAll"};
-  TString foldersTitle[]={"Combined Selection and Trigger"};
+//   const int folderNum=4;
+//   TString folderID[]={"tapTrkQEle", "tapIDEle", "tapIsoEle", "tapConvRejEle"};
+//   TString foldersTitle[]={"Electron d_{0}", "Electron ID_{CiC}", "Electron Isolation", "Electron Conversion Rejection"};
+   
+//    const int folderNum=2;
+//    TString folderID[]={"tapTotalSelectionEle", "tapTriggerEle"};
+//    TString foldersTitle[]={"Electron Selection", "Electron Trigger"};
+  
+//   const int folderNum=1;
+//   TString folderID[]={"tapTotalSelectionEle"};
+//   TString foldersTitle[]={"Electron Selection"};
+  
+//   const int folderNum=1;
+//   TString folderID[]={"tapTriggerEle"};
+//   TString foldersTitle[]={"Trigger"};
+  
+     const int folderNum=3;
+   TString folderID[]={"tapTotalSelectionEle", "tapTriggerEle", "tapAllEle"};
+   TString foldersTitle[]={"Overall Selection", "Trigger", "Combined Selection and Trigger"};
+  
+//     const int folderNum=1;
+//     /// to combine selection and trigger efficiencies use tapAll:
+//   TString folderID[]={"tapAllEle"};
+//   TString foldersTitle[]={"Combined Selection and Trigger"};
   
 //   const int folderNum=1;
 //   TString folderID[]={"tapTrigger"};
-//   TString foldersTitle[]={"Muon Trigger"};
-  
-//   const int folderNum=2;
-//   TString folderID[]={"tapTotalSelection", "tapTrigger"};
-//   TString foldersTitle[]={"Muon Selection", "Muon Trigger"};
-  
-//     const int folderNum=1;
-//     TString folderID[]={"tapIso"};
-//     TString foldersTitle[]={"Isolation"};
+//   TString foldersTitle[]={"Trigger"};
 
 
   /// effName = name of the effHisto; variables: corresponding variable to effName; cuts: corresponding cut to effName
 
-    TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","Pt_inclLegend"};
-   //TString effIDarr[]      = {"Pt_inclLegend"};
+   TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","Pt_inclLegend"};
+//  TString effIDarr[]      = {"Pt_inclLegend"};
    //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","lepLepMass"};
   //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "PtEta0to1p5", "PtEta1p5to2p1"};
   //TString effIDarr[]      = {"Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR"};
-//   TString effIDarr[]      = {"Pt"};
+  //TString effIDarr[]      = {"Pt"};
   std::vector<TString> effID(effIDarr, effIDarr + sizeof(effIDarr)/sizeof(TString));
   int effIDNum = effID.size();
   std::cout<< "Number of considered plots: " <<  effIDNum << std::endl;
@@ -167,18 +176,18 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
   double yLoSF = 0.9, yHiSF = 1.1-0.0001;
   
   /// Constructor for struct eff(TString iniVar, T  iniCuts, TString iniBins, TString iniTitles, double iniYLo=-9999., double iniYHi=-9999., double iniXLo=-9999., double iniXHi=-9999.)
-  TCut cutPt  = "probePt>30."; // && probeRelIso<0.2 "; /*"(probePt>30. || testPt>30. )";*/
-  TCut cutEta = "TMath::Abs(probeEta)<2.1"; // && probeRelIso<0.2 "; /*"(TMath::Abs(probeEta)<2.1 || TMath::Abs(testEta)<2.1)";*/
+  TCut cutPt  = "probePt>30."; // && probeRelIso<0.2 "; //&& probeMult>1"; /*"(probePt>30. || testPt>30. )";*/
+  TCut cutEta = "TMath::Abs(probeEta)<2.1 "; //&& probeRelIso<0.2 "; //&& probeMult>1"; /*"(TMath::Abs(probeEta)<2.1 || TMath::Abs(testEta)<2.1)";*/
   TCut cutPtEta = cutPt && cutEta;
   for(int iFolder=0; iFolder < folderNum; iFolder++){
     title = foldersTitle[iFolder]+" Efficiency/ / ";
     eff_["Control"][folderID[iFolder]]        =new eff("Control", cutPtEta, mBinsControl, binsControl_, title, yLo, yHi, -9999.,-9999.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
-    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.);
+    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPt_, title, yLo, yHi, 30.,200.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
     eff_["Pt_inclLegend"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.,true);
     title = foldersTitle[iFolder]+" Efficiency/#eta/ ";
-    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEta, binsEta_, title, yLo, yHi,-2.1,2.1);
+    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEtaEle, binsEtaEle2_, title, yLo, yHi,-2.1,2.1);
     title = foldersTitle[iFolder]+" Efficiency/relIso/ ";
     eff_["RelIso"][folderID[iFolder]]          =new eff("RelIso", cutPtEta, mBinsRelIso, binsRelIso_, title, yLo, yHi);
     title = foldersTitle[iFolder]+" Efficiency/absIso/ ";
@@ -187,8 +196,8 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
     eff_["PVMult"][folderID[iFolder]]          =new eff("PVMult", cutPtEta, mBinsPVMult, binsPVMult_, title, yLo, yHi,0.,40.);
     title = foldersTitle[iFolder]+" Efficiency/N_{jet}/ ";
     eff_["Mult"][folderID[iFolder]]            =new eff("Mult", cutPtEta, mBinsMult, binsMult_, title, yLo, yHi);
-    title = foldersTitle[iFolder]+" Efficiency/Minimum #DeltaR(#mu,jet)/ ";
-    eff_["MinDR"][folderID[iFolder]]            =new eff("MinDR", cutPtEta&& "probeRelIso<0.2", mBinsMinDR, binsMinDR_, title, yLo, yHi, 0., 5.);
+    title = foldersTitle[iFolder]+" Efficiency/Minimum #DeltaR(e,jet)/ ";
+    eff_["MinDR"][folderID[iFolder]]            =new eff("MinDR", cutPtEta && "probeRelIso<0.2", mBinsMinDR, binsMinDR_, title, yLo, yHi,0.,5.);
     title = foldersTitle[iFolder]+" Efficiency/Minimum M_{lep,lep}/ ";
     eff_["lepLepMass"][folderID[iFolder]]            =new eff("lepLepMass", cutPtEta, mBinsLepLepMass, binsLepLepMass_, title, yLo, yHi);
     
@@ -269,15 +278,16 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
     CanvSFComp2[iFolder]->Divide(4,2);
   
     for(int iEff=0; iEff<effIDNum; iEff++){
-//       CanvComp[iFolder]->cd(iEff+1);
+      CanvComp[iFolder]->cd(iEff+1);
+//       CanvComp[iFolder]->cd(iEff+1)->SetGrid(1,1);
 //       std::cout<< "Drawing eff."<<std::endl;
-//       drawEfficiencies(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend);
+//       drawEfficiencies(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.6,1.0,0.9,eff_[effID[iEff]][folderID[iFolder]]->drawLegend);
 //       CanvSFComp[iFolder]->cd(iEff+1);
 //       std::cout<< "Drawing SF"<<std::endl;
 //       drawSF          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
 //       CanvEffAndSFComp[iFolder]->cd(iEff+1);
       std::cout<< "Drawing Eff. and SF"<<std::endl;
-      drawEffAndSFinOne (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
+      drawEffAndSFinOne          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
     // if desired plot also raw event number histos
       if(onlyEffPlots!=1) {
 	std::cout<< "Drawing event numbers"<<std::endl;
@@ -310,8 +320,8 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
       for(unsigned int iFileFormat=0; iFileFormat < fileFormat.size(); iFileFormat++){
 	CanvComp[iFolder]->Print(outputFolder+outputFileName+folderID[iFolder]+"_overview."+fileFormat[iFileFormat]);
 	for(int iEff=0; iEff<effIDNum; iEff++){
-	  //CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID[iEff]+"."+fileFormat[iFileFormat]);
-	  //CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+	  CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+	  CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
 	  CanvEffAndSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_EffAndSF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
 	}
 	
@@ -323,16 +333,13 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false)
 	if(iFolder==0) CanvLeg->Print(outputFolder+outputFileName+"_Legend."+fileFormat[iFileFormat]);
 	std::cout<<"Canvas with plots is saved in "<<outputFolder<<std::endl;
       }
+      /// save graph in root file
+//       TFile f("MuonEffSF2011.root", "new");
+//       eff_["Eta"]["tapAll"]->graphSF["m2"]->SetName("tapAllSFeta");
+//       //eff_["Eta"]["tapAll"]->graphSF["m2"]->SetTitle("tapAllSFeta");
+//       eff_["Eta"]["tapAll"]->graphSF["m2"]->Write();
+//       std::cout<<"MuonEffSF.root with TGraphErrors is saved in "<<outputFolder<<std::endl;
     }
-    /// save graph in root file
-//     TFile f("MuonEffSF2012.root", "recreate");
-//     eff_["Eta"]["tapAll"]->graphSF["m2"]->SetName("tapAllSFeta");
-//     eff_["Eta"]["tapAll"]->graphSF["m2"]->Write();
-//     eff_["Eta"]["tapAll"]->graphSF["m2PUup"]->SetName("tapAllSFetaPUup");
-//     eff_["Eta"]["tapAll"]->graphSF["m2PUup"]->Write();
-//     eff_["Eta"]["tapAll"]->graphSF["m2PUdown"]->SetName("tapAllSFetaPUdown");
-//     eff_["Eta"]["tapAll"]->graphSF["m2PUdown"]->Write();
-//     std::cout<<"MuonEffSF2012.root with TGraphErrors is saved in "<<outputFolder<<std::endl;
   }
   std::cout<< "Done"<<std::endl;
 }
