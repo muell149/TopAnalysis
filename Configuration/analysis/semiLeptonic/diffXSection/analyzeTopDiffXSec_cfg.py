@@ -1592,10 +1592,10 @@ process.bTagSFEventWeightBTagSFFullShapeDownEta0p7 = process.bTagSFEventWeight.c
 process.load("TopAnalysis.TopUtils.EffSFMuonEventWeight_cfi")
 process.effSFMuonEventWeight.particles=cms.InputTag("tightMuons")
 process.effSFMuonEventWeight.sysVar   = cms.string("")
-process.effSFMuonEventWeight.filename= "TopAnalysis/Configuration/data/MuonEffSF2011.root"
+process.effSFMuonEventWeight.filename= "TopAnalysis/Configuration/data/MuonEffSF2012.root"
 process.effSFMuonEventWeight.verbose=cms.int32(0)
 process.effSFMuonEventWeight.additionalFactor=1.0 ## lepton selection and trigger eff. SF both included in loaded histo
-process.effSFMuonEventWeight.additionalFactorErr=0.0 ## 1% sys error to account for non-flatness
+process.effSFMuonEventWeight.additionalFactorErr=0.00 ## 0% sys error to account for non-flatness
 process.effSFMuonEventWeight.meanTriggerEffSF=1.0
 process.effSFMuonEventWeight.shapeDistortionFactor=-1
 
@@ -1620,15 +1620,15 @@ process.effSFElectronEventWeight.sysVar   = cms.string("")
 process.effSFElectronEventWeight.verbose=cms.int32(0)
 process.effSFElectronEventWeight.filenameJetLeg="TopAnalysis/Configuration/data/JetLegTriggerEfficiencyIsoLepTriJetJetMult4.root"
 process.effSFElectronEventWeight.additionalFactor=1. ## lepton selection eff. SF
-process.effSFElectronEventWeight.additionalFactorErr=0.0 ## 2% sys error to account for selection difference Z - ttbar
-process.effSFElectronEventWeight.meanTriggerEffSF=1.0
-process.effSFElectronEventWeight.meanTriggerEffSFErr=0.0
-process.effSFElectronEventWeight.shapeDistortionErr=0.00
-process.effSFElectronEventWeight.jetTriggerEffsSFNormSysErr =0.00
-process.effSFElectronEventWeight.jetTriggerEffsSFShapeSysErr=0.00
+process.effSFElectronEventWeight.additionalFactorErr=0.00 ## 0% sys error to account for selection difference Z - ttbar
+process.effSFElectronEventWeight.meanTriggerEffSF=0.97562 ## FIXME: this is currentl used as complete SF, the jet part is set to 1.0
+process.effSFElectronEventWeight.meanTriggerEffSFErr=0.001
+process.effSFElectronEventWeight.shapeDistortionErr=0.02
+process.effSFElectronEventWeight.jetTriggerEffsSFNormSysErr =0.00 ## not used for 8TeV
+process.effSFElectronEventWeight.jetTriggerEffsSFShapeSysErr=0.00 ## not used for 8TeV
 
-process.effSFElectronEventWeightPUup              = process.effSFElectronEventWeight.clone(meanTriggerEffSF=1.0)
-process.effSFElectronEventWeightPUdown            = process.effSFElectronEventWeight.clone(meanTriggerEffSF=1.0)
+process.effSFElectronEventWeightPUup              = process.effSFElectronEventWeight.clone(meanTriggerEffSF=0.98091)
+process.effSFElectronEventWeightPUdown            = process.effSFElectronEventWeight.clone(meanTriggerEffSF=0.97562)
 process.effSFElectronEventWeightFlatEffSF         = process.effSFElectronEventWeight.clone(sysVar = "")
 process.effSFElectronEventWeightEffSFNormUpStat   = process.effSFElectronEventWeight.clone(sysVar = "combinedEffSFNormUpStat")
 process.effSFElectronEventWeightEffSFNormDownStat = process.effSFElectronEventWeight.clone(sysVar = "combinedEffSFNormDownStat")
