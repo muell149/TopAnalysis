@@ -42,30 +42,30 @@ nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mutt
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGJESUp -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=electron 722 analyzeMuonJES11_cfg.py
 
 # mass
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=muon     153 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=electron 153 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=muon     146 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=electron 146 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=muon     554 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=electron 554 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=muon     553 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=electron 553 analyzeMuonDiffXSecCorrected_cfg.py
 
 # scale
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=muon     308 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=electron 308 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=muon     333 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=electron 333 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=muon     549 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=electron 549 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=muon     616 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=electron 616 analyzeMuonDiffXSecCorrected_cfg.py
 
 # matching
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=muon     360 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=electron 360 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     114 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 114 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=muon     657 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=electron 657 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     606 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 606 analyzeMuonDiffXSecCorrected_cfg.py
 
 # POWHEG
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegSG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=muon     540 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegSG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=electron 540 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegSG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=muon     540 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegSG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=electron 540 analyzeMuonDiffXSecCorrected_cfg.py
 
 # MC@NLO
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuMcatnloSG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=muon     829 analyzeMuonDiffXSecCorrected_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElMcatnloSG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=electron 829 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuMcatnloSG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=muon     829 analyzeMuonDiffXSecCorrected_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElMcatnloSG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=electron 829 analyzeMuonDiffXSecCorrected_cfg.py
 
 ###############
 # other ttbar #
@@ -87,30 +87,30 @@ nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mutt
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGJESUp -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=electron 722 analyzeMuonJES11BG_cfg.py
 
 # mass
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=muon     153 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=electron 153 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=muon     146 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=electron 146 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=muon     554 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMassUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassUp,lepton=electron 554 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=muon     553 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMassDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMassDown,lepton=electron 553 analyzeMuonDiffXSecBG_cfg.py
 
 # scale
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=muon     308 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=electron 308 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=muon     333 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=electron 333 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=muon     549 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGScaleUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleUp,lepton=electron 549 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=muon     616 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGScaleDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarScaleDown,lepton=electron 616 analyzeMuonDiffXSecBG_cfg.py
 
 # matching
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=muon     360 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=electron 360 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     114 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 114 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=muon     657 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMatchUp -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingUp,lepton=electron 657 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=muon     606 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMatchDn -c mctag=Summer12,triggerTag=HLT,sample=ttbarMatchingDown,lepton=electron 606 analyzeMuonDiffXSecBG_cfg.py
 
 # POWHEG
 nafJobSplitter.pl -q 12 -M 6500 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=muon     540 analyzeMuonDiffXSecBG_cfg.py
 nafJobSplitter.pl -q 12 -M 6500 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=electron 540 analyzeMuonDiffXSecBG_cfg.py
 
 # MC@NLO
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuMcatnloBG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=muon     829 analyzeMuonDiffXSecBG_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElMcatnloBG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=electron 829 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuMcatnloBG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=muon     829 analyzeMuonDiffXSecBG_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElMcatnloBG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=electron 829 analyzeMuonDiffXSecBG_cfg.py
 
 ##########
 # W+jets #
@@ -132,16 +132,16 @@ nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Muw
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsJESDn -c mctag=Summer12,triggerTag=HLT,sample=wjets,lepton=electron 592 analyzeMuonJES09All_cfg.py
 
 # scale
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleUp,lepton=muon       673 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleUp,lepton=electron   673 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleDown,lepton=muon     567 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleDown,lepton=electron 567 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleUp,lepton=muon       849 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleUp,lepton=electron   849 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleDown,lepton=muon     917 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsScaleDown,lepton=electron 917 analyzeMuonDiffXSecAll_cfg.py
 
-# matching
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingUp,lepton=muon       722 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingUp,lepton=electron   722 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingDown,lepton=muon     644 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingDown,lepton=electron 644 analyzeMuonDiffXSecAll_cfg.py
+# matching (matchingUp not yet available)
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingUp,lepton=muon       722 analyzeMuonDiffXSecAll_cfg.py
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingUp,lepton=electron   722 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuwjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingDown,lepton=muon     913 analyzeMuonDiffXSecAll_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElwjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=wjetsMatchingDown,lepton=electron 913 analyzeMuonDiffXSecAll_cfg.py
 
 ##########
 # Z+jets #
@@ -162,17 +162,17 @@ nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Elz
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsJESDn -c mctag=Summer12,triggerTag=HLT,sample=zjets,lepton=muon     430 analyzeMuonJES09All_cfg.py
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsJESDn -c mctag=Summer12,triggerTag=HLT,sample=zjets,lepton=electron 430 analyzeMuonJES09All_cfg.py
 
-# scale
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleUp,lepton=muon       75 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleUp,lepton=electron   75 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleDown,lepton=muon     81 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleDown,lepton=electron 81 analyzeMuonDiffXSecAll_cfg.py
+# scale (scale not yet available)
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleUp,lepton=muon       75 analyzeMuonDiffXSecAll_cfg.py
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsScaleUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleUp,lepton=electron   75 analyzeMuonDiffXSecAll_cfg.py
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleDown,lepton=muon     81 analyzeMuonDiffXSecAll_cfg.py
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsScaleDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsScaleDown,lepton=electron 81 analyzeMuonDiffXSecAll_cfg.py
 
-# matching
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingUp,lepton=muon       74 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingUp,lepton=electron   74 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingDown,lepton=muon     72 analyzeMuonDiffXSecAll_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingDown,lepton=electron 72 analyzeMuonDiffXSecAll_cfg.py
+# matching (matching not yet available)
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingUp,lepton=muon       74 analyzeMuonDiffXSecAll_cfg.py
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsMatchUp -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingUp,lepton=electron   74 analyzeMuonDiffXSecAll_cfg.py
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuzjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingDown,lepton=muon     72 analyzeMuonDiffXSecAll_cfg.py
+#nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElzjetsMatchDn -c mctag=Summer12,triggerTag=HLT,sample=zjetsMatchingDown,lepton=electron 72 analyzeMuonDiffXSecAll_cfg.py
 
 ##############
 # single top #
