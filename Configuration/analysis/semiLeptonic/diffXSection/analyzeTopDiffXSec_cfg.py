@@ -321,7 +321,7 @@ if(not options.sample=="none"):
  	additionalEventWeights=False
  	outputFileName+="WjetsMatchDown"
     elif(options.sample=="wjetsScaleUp"):        
-        usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_scaleup_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v2"
+        usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_scaleup_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v2_cff"
  	additionalEventWeights=False
  	outputFileName+="WjetsScaleUp"
     elif(options.sample=="wjetsScaleDown"):
