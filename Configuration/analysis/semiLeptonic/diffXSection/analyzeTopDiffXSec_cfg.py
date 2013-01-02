@@ -311,31 +311,30 @@ if(not options.sample=="none"):
     elif(options.sample=="wjets"):        
         usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v2_cff"
 	outputFileName+="Wjets"
-# FIXME: some W+jets systematics not available yet 
-##     elif(options.sample=="wjetsMatchingUp"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/wlnujets_matching_up_MadgraphZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="WjetsMatchUp"
+    elif(options.sample=="wjetsMatchingUp"  ):        
+        usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_matchingup_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+ 	additionalEventWeights=False
+ 	outputFileName+="WjetsMatchUp"
     elif(options.sample=="wjetsMatchingDown"):        
         usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_matchingdown_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
  	additionalEventWeights=False
  	outputFileName+="WjetsMatchDown"
-    elif(options.sample=="wjetsScaleUp"):        
+    elif(options.sample=="wjetsScaleUp"     ):        
         usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_scaleup_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v2_cff"
  	additionalEventWeights=False
  	outputFileName+="WjetsScaleUp"
-    elif(options.sample=="wjetsScaleDown"):
+    elif(options.sample=="wjetsScaleDown"   ):
         usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_scaledown_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
  	additionalEventWeights=False        
  	outputFileName+="WjetsScaleDown"
     elif(options.sample=="zjets"):        
         usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         outputFileName+="Zjets"
-# FIXME: Z+jets systematics not available yet 
-##     elif(options.sample=="zjetsMatchingUp"):        
-##         usedSample="TopAnalysis/Configuration/zlljets_matching_up_MadgraphZ2_Summer11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="ZjetsMatchUp"
+    # FIXME: some Z+jets systematics not available yet 
+    elif(options.sample=="zjetsMatchingUp"):        
+        usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_matchingup_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+ 	additionalEventWeights=False
+ 	outputFileName+="ZjetsMatchUp"
 ##     elif(options.sample=="zjetsMatchingDown"):        
 ##         usedSample="TopAnalysis/Configuration/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff"
 ## 	additionalEventWeights=False
