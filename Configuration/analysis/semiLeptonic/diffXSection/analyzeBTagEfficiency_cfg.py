@@ -33,7 +33,7 @@ print "-------------------------------------"
     #'/store/user/wbehrenh/TTJets_TuneD6T_7TeV-madgraph-tauola/Spring11-PAT/6e6559812e09b52af172f27db20ae337/mc2pat_9_1_HFr.root'
     #)
 #)
-process.load("TopAnalysis/Configuration/Fall11/ttjets_MadgraphZ2_Fall11_v1_and_2_AOD_cff")
+process.load("TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff")
 
 ## register TFileService => define output file
 process.TFileService = cms.Service("TFileService",
@@ -47,7 +47,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 ## configure process options
@@ -56,25 +56,27 @@ process.options = cms.untracked.PSet(
 )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
+#process.load("Configuration.Geometry.GeometryIdeal_cff")
+process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-from Configuration.PyReleaseValidation.autoCond import autoCond
-process.GlobalTag.globaltag = cms.string('START42_V17::All')
+#from Configuration.PyReleaseValidation.autoCond import autoCond
+process.GlobalTag.globaltag = cms.string('START53_V15::All')
 
 
-#-----------------------------------------------------------------------------
-# ----- MC PU reweighting                                         ----- #
-#-----------------------------------------------------------------------------
+#----------------------------------------------------------------------------- #
+# ----- MC PU reweighting                                                ----- #
+#----------------------------------------------------------------------------- #
 
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 
 ## Apply common setting before module is cloned for systematic studies
 
-process.eventWeightPU.MCSampleTag = "Fall11"
+process.eventWeightPU.MCSampleTag = "Summer12"
 
-process.eventWeightPU.MCSampleHistoName        = "histo_Fall11_true"
-process.eventWeightPU.DataHistoName            = "histoData_true"
+process.eventWeightPU.MCSampleHistoName        = "puhisto"
+process.eventWeightPU.DataHistoName            = "pileup"
+process.eventWeightPU.MCSampleFile        = "TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root"
 
 process.eventWeightPU        = process.eventWeightPU.clone()
 process.eventWeightPUsysUp   = process.eventWeightPU.clone()
@@ -84,21 +86,21 @@ process.eventWeightPUEPS     = process.eventWeightPU.clone()
 #### Configuration for Nominal PU Weights
 
 process.eventWeightPU.WeightName          = "eventWeightPU"
-process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
+process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABC_190456-203755.root"
 process.eventWeightPU.CreateWeight3DHisto = False
 process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
 process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
-process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72870_2012ABC_190456-203755.root"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
 process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
 process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
-process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65930_2012ABC_190456-203755.root"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
 process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
@@ -170,18 +172,20 @@ if(pfToPAT):
         'runOnAOD': True,
         'switchOffEmbedding': False,
         'addResolutions': True,
-	'resolutionsVersion': 'summer11',
+	'resolutionsVersion': 'fall11',
         'runOnOLDcfg': True,
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
         'cutsElec': 'et > 15. & abs(eta) < 2.5',
         'cutsJets': 'pt > 10 & abs(eta) < 5.0', 
-        'electronIDs': ['CiC','classical'],
+        'electronIDs': ['CiC','classical','MVA'],
         'pfIsoConeMuon': 0.4,
-        'pfIsoConeElec': 0.4,
+        'pfIsoConeElec': 0.3,
         'pfIsoValMuon': 0.2,
-        'pfIsoValElec': 0.2,
+        'pfIsoValElec': 0.15,
         'skipIfNoPFMuon': True,
         'skipIfNoPFElec': False,
+        'doDeltaBetaCorrMuon' : True,
+        'doDeltaBetaCorrElec' : True,
         'addNoCutPFMuon': False,
         'addNoCutPFElec': False,
         'noMuonTopProjection': False,
@@ -190,7 +194,7 @@ if(pfToPAT):
 	'analyzersBeforeElecIso':cms.Sequence(),
         'excludeElectronsFromWsFromGenJets': True,
 	'METCorrectionLevel': 1
-        }
+        }   
     prependPF2PATSequence(process, recoPaths, PFoptions)
     #for path in recoPaths:
         # replace object consistently with names from PF2PAT
