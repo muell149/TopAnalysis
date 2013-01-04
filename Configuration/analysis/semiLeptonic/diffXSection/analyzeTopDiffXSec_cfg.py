@@ -330,23 +330,22 @@ if(not options.sample=="none"):
     elif(options.sample=="zjets"):        
         usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         outputFileName+="Zjets"
-    # FIXME: some Z+jets systematics not available yet 
     elif(options.sample=="zjetsMatchingUp"):        
         usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_matchingup_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
  	additionalEventWeights=False
  	outputFileName+="ZjetsMatchUp"
-##     elif(options.sample=="zjetsMatchingDown"):        
-##         usedSample="TopAnalysis/Configuration/zlljets_matching_down_MadgraphZ2_Summer11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="ZjetsMatchDown"
-##     elif(options.sample=="zjetsScaleUp"):        
-##         usedSample="TopAnalysis/Configuration/zlljets_scale_up_MadgraphZ2_Summer11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="ZjetsScaleUp"
-##     elif(options.sample=="zjetsScaleDown"):        
-##         usedSample="TopAnalysis/Configuration/zlljets_scale_down_MadgraphZ2_Summer11_AOD_cff"
-## 	additionalEventWeights=False      
-## 	outputFileName+="ZjetsScaleDown"
+    elif(options.sample=="zjetsMatchingDown"):        
+        usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_matchingdown_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="ZjetsMatchDown"
+    elif(options.sample=="zjetsScaleUp"):        
+        usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_scaleup_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="ZjetsScaleUp"
+    elif(options.sample=="zjetsScaleDown"):        
+        usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_scaledown_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False      
+	outputFileName+="ZjetsScaleDown"
 # FIXME: single top scale systematics not available yet 
     elif(options.sample=="singleTopS"):        
         usedSample="TopAnalysis/Configuration/Summer12/T_s_channel_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
