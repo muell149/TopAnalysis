@@ -61,6 +61,8 @@ my @forJson;
 
 my @getOut;
 
+my @delSEOut;
+
 
 push @runCs, "#!/bin/sh\n";
 push @getCs, "#!/bin/sh\n";
@@ -68,6 +70,7 @@ push @checkCs, "#!/bin/sh\n";
 push @forJson, "#!/bin/sh\n";
 push @killCs, "#!/bin/sh\n";
 push @forHadd, "#!/bin/sh\n";
+push @delSEOut, "#!/bin/sh\n";
 
 my $hypernewsName = $arg{h} || $ENV{HN_USER};
 die "Who are you? Set your hypernews name (HN_USER).\n" unless $hypernewsName;
@@ -99,12 +102,16 @@ push @getCs, $environmentcheck;
 push @checkCs, $environmentcheck;
 push @forJson, $environmentcheck;
 push @killCs, $environmentcheck;
+push @delSEOut, $environmentcheck;
 
 push @runCs, "echo creating directories on dCache...\n";
 push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output >| /dev/null\n";
 push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n";
 
 push @getCs, "\necho copying output from SE to workdir/res...\n";
+
+push @delSEOut, "\necho deleting temporary files from SE";
+push @delSEOut, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastyRecursiveSRMremove.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n";
 
 while(my $line = <$IN>) {
     chomp $line;
@@ -214,6 +221,12 @@ print $OUTL $_ for @forJson;
 close $OUTL;
 chmod 0755, "${globalCWorkingdir}/$workDirWithTime/getJsons.sh";
 print "run ${globalCWorkingdir}/$workDirWithTime/getJsons.sh to get all processed Jsons\n";
+
+open my $OUTM, '>', "${globalCWorkingdir}/$workDirWithTime/deleteOutFromSE.sh" or die $!;
+print $OUTM $_ for @delSEOut;
+close $OUTM;
+chmod 0755, "${globalCWorkingdir}/$workDirWithTime/deleteOutFromSE.sh";
+print "run ${globalCWorkingdir}/$workDirWithTime/deleteOutFromSE.sh to delete all output from SE\n";
 
 system("ln -s $ENV{CMSSW_BASE} ${globalCWorkingdir}/$workDirWithTime/CMSSW_BASE");
 system("cp ${fullCMSSWcfpath} ${globalCWorkingdir}/${workDirWithTime}");
