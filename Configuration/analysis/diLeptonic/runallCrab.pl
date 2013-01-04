@@ -21,6 +21,8 @@ configuration file configFile.py - and use Crab to submit jobs
 A directory on the sonar user space named "Crab_workingDir" will
 be created to contain working directories and output.
 
+The output is written to dCache in "Crab_output/<workdir>"
+
 Set environment variable HN_USER to your hypernews name!
 
 -g      run on the grid
@@ -98,8 +100,11 @@ push @checkCs, $environmentcheck;
 push @forJson, $environmentcheck;
 push @killCs, $environmentcheck;
 
-push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$workDirWithTime\n\n";
-push @getCs, "\necho copying output from SE to <workdir>/res...\n";
+push @runCs, "echo creating directories on dCache...\n";
+push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output >| /dev/null\n";
+push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n";
+
+push @getCs, "\necho copying output from SE to workdir/res...\n";
 
 while(my $line = <$IN>) {
     chomp $line;
@@ -127,7 +132,7 @@ while(my $line = <$IN>) {
 	$opts=$options;
     }
     my $cConfig = "${wdpath}.cfg";
-    my $sedir = "$workDirWithTime/output_$outputFile";
+    my $sedir = "Crab_output/$workDirWithTime/output_$outputFile";
 
 ### Prepare template    
 
