@@ -2,13 +2,13 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 3885,
+void analyzeHypothesisKinFit(double luminosity = 12148,
 			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
-			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
   // ============================
@@ -172,13 +172,13 @@ void analyzeHypothesisKinFit(double luminosity = 3885,
   // FIXME: use madgraph instead of mc@nlo for the moment to have madgraph vs. powheg as hadronization uncertainty
   //ignoreSys_.push_back(sysGenMCatNLO);
   // exclude JES and JER
-  for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude Scale matching and top mass 
-  for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=sysTopScaleUp; sys<=sysTopMassDown; ++sys) ignoreSys_.push_back(sys);
   // exclude Hadronization
   for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude PDF
-  for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude shape variation
   for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics

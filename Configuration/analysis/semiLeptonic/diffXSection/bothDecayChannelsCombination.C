@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=3885, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun8TeV",
+void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun8TeV",
 				  TString inputFolderName="RecentAnalysisRun8TeV",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
 
@@ -922,8 +922,8 @@ void bothDecayChannelsCombination(double luminosity=3885, bool save=true, unsign
 	  DrawCMSLabels(false,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
 	  if(DrawNNLOPlot&&extrapolate){
-	    if (xSecVariables_[i].Contains("topPtNorm")) DrawLabel("(arXiv:1009.4935)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
-	    if (xSecVariables_[i].Contains("topYNorm" )) DrawLabel("(arXiv:1105.5167)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	    if (xSecVariables_[i].Contains("topPtNorm")) DrawLabel("(arXiv:1205.3453)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	    if (xSecVariables_[i].Contains("topYNorm" )) DrawLabel("(arXiv:1205.3453)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 	    //if (xSecVariables_[i].Contains("ttbarMassNorm")) DrawLabel("(arXiv:1003.5827)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 	  }
 

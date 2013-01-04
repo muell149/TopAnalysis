@@ -2,7 +2,7 @@
 #include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=3855., bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun8TeV", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
+void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun8TeV", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
 
   // ============================
   //  Systematic Variations:

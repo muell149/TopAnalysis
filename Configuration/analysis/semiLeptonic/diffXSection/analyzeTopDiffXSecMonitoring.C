@@ -1,12 +1,12 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
+void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 				  bool save = true, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun8TeV",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root",
-				  const std::string decayChannel = "combined", 
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  const std::string decayChannel = "muon", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
@@ -262,6 +262,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
     // (III) after kinematic fit 
     "analyzeTopRecoKinematicsKinFit/topPt",
     "analyzeTopRecoKinematicsKinFit/topY",
+    "analyzeTopRecoKinematicsKinFit/topMass",
     "analyzeTopRecoKinematicsKinFit/ttbarPt",
     "analyzeTopRecoKinematicsKinFit/ttbarY",
     "analyzeTopRecoKinematicsKinFit/ttbarMass",
@@ -478,6 +479,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
     // (III) after kinematic fit 
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
     "y^{t};Top quarks;0;1",
+    "m^{t};Top quarks;0;10",
     "p_{T}^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
     "y^{t#bar{t}};Top-quark pairs;0;1",
     "m^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
@@ -1154,6 +1156,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.001,0.001);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.5,0.5);
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"     )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4.,9.);
+	    if(getStringEntry(plotList_[plot], 2).Contains("topMass")  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(100.,500.);
 	    // Special y-range for paper control plots
 	    if (decayChannel == "combined"){
 	      if(plotList_[plot].Contains("tightJetKinematicsTagged/n"))    {min=1.0; max=1.0E06;}
@@ -1194,7 +1197,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 3885,
 	      legTheo->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      legTheo->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	      if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")||plotList_[plot].Contains("compositedKinematicsKinFit/Njets"))legTheo->Draw("same");
-    }
+	    }
 	  }
 	  // draw other plots into same canvas 
 	  else{ 

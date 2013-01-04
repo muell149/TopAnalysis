@@ -5,9 +5,9 @@ TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString i
 TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b);
 
-void analyzeTopDiffXSecMCdependency(double luminosity = 4980, std::string decayChannel="electron", bool save=false, int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root",
-				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root",
+void analyzeTopDiffXSecMCdependency(double luminosity = 12148, std::string decayChannel="electron", bool save=false, int verbose=0, TString inputFolderName="RecentAnalysisRun",
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
+				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
                                     bool doPDFuncertainty=true, bool addCrossCheckVariables=false)
 {
   // ---
