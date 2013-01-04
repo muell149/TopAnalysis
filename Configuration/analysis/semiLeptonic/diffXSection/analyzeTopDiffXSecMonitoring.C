@@ -1222,19 +1222,22 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
 	      // draw label indicating event selection, common labels and legend
 	      TString label = "pre-Tagged";
+	      double x=0.25;
 	      if(plotList_[plot].Contains("Tagged") || plotList_[plot].Contains("AfterBtagging")){ 
 		label = "Tagged";
 		if(SSV) label+=" SSV";
+		x=0.18;
 	      }
 	      if(plotList_[plot].Contains("test"  )) label = "N-1 Selection";
 	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
 	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 Jet";
 	      if(plotList_[plot].Contains("KinFit")) label = "";
 	      // draw tagged/untagged label not for paper plots
-	      if(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarMass"))){
-		DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2, 
+	      if(withRatioPlot||(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarMass")))){
+		
+		DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2-x, 
 			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
-			  1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength(),       
+			  1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength()-x,       
 			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 12
 			  );
 	      }
