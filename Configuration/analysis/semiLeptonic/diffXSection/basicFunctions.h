@@ -167,10 +167,10 @@ namespace semileptonic {
                                                    // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
-  const double globalLumiUncertainty = 0.022; // relative uncertainty // FIXME UPDATE FOR 8 TEV
+  const double globalLumiUncertainty = 0.044; // relative uncertainty 
 	
-  const double constLumiElec = 3885.0; // FIXME UPDATE FOR 8 TEV
-  const double constLumiMuon = 3885.0; // FIXME UPDATE FOR 8 TEV
+  const double constLumiElec = 12148.0; // ABC wo recover
+  const double constLumiMuon = 12148.0; // ABC wo recover
   
   const double BRPDG=0.145888;
 
@@ -1222,12 +1222,17 @@ namespace semileptonic {
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+      TString testPlotNameForTrackingDownErrors="notUsedAtTheMoment";
+      bool hugo=plotList_[plot].Contains(testPlotNameForTrackingDownErrors) ? true : false;
       // check if plot exists in any sample
       bool existsInAnySample=false;
+      if(hugo) std::cout << plotList_[plot] << std::endl;
       // loop samples
       for(unsigned int sample=kSig; sample<=kSAToptW; ++sample){
 	// check existence of sample
+	if(hugo) std::cout << TopFilename(sample, sysNo, decayChannel) << std::endl;
 	if(files_.count(sample)!=0){
+	  if(hugo) std::cout << "-> file found!" << std::endl;
 	  // create plot container
 	  TH1* targetPlot;
 	  // delete additional part of MC foldername
@@ -1241,13 +1246,16 @@ namespace semileptonic {
 	      }
 	    }
 	  }
+	  if(hugo) std::cout << "-> searching " << plotname << std::endl;
 	  files_[sample]->GetObject(plotList_[plot], targetPlot);
 	  // Check existence of plot
 	  if(targetPlot){ 
 	    existsInAnySample=true;
 	    // go to end of loop
 	    sample=kSAToptW;
+	    if(hugo) std::cout << "-> found! " << plotname << std::endl;
 	  }
+	  else if(hugo){std::cout << "-> NOT found! " << plotname << std::endl;}
 	}
       }
       // end program and draw error if plot does not exist at all
@@ -3852,17 +3860,15 @@ namespace semileptonic {
 	  else if (decayChannel.Contains("electron")){
 	    if(closureTestSpecifier==""){
 	      // New Binning Revision
-	      if     (variable.Contains("topPt")    ) k = (fullPS) ? 3.57 : 3.57; // hadron level not important
-	      else if(variable.Contains("topY")     ) k = (fullPS) ? 3.24 : 3.24; // hadron level not important
-	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 2.18 : 2.18; // hadron level not important
-	      else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 2.72 : 2.72; // hadron level not important
-	      else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.31 : 1.31; // hadron level not important
-	      else if(variable.Contains("lepPt")    ) k = (fullPS) ? 2.66 : ((hadronPS) ? 2.33   : 2.66);
-	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.07 : ((hadronPS) ? 2e-6   : 1.07); 
-	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 3.52 : ((hadronPS) ? 4.07   : 3.52); 
-	      else if(variable.Contains("bqEta")    ) k = (fullPS) ? 3.78 : ((hadronPS) ? 3.04   : 3.78);
-	      // FIXME: use muon values as starting point!
-	      k=regParameter(variable, "muon", verbose, fullPS, tau, hadronPS, closureTestSpecifier);
+	      if     (variable.Contains("topPt")    ) k = (fullPS) ? 7.45 : 7.45; // hadron level not important
+	      else if(variable.Contains("topY" )    ) k = (fullPS) ? 6.53 : 6.53; // hadron level not important
+	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 3.91 : 3.91; // hadron level not important
+	      else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 5.47 : 5.47; // hadron level not important
+	      else if(variable.Contains("ttbarMass")) k = (fullPS) ? 3.32 : 3.31; // hadron level not important
+	      else if(variable.Contains("lepPt")    ) k = (fullPS) ? 5.45 : ((hadronPS) ? 5.00  : 5.45);
+	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.86 : ((hadronPS) ? 0.0002 : 1.86); 
+	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 7.54 : ((hadronPS) ? 8.87  : 7.54); 
+	      else if(variable.Contains("bqEta")    ) k = (fullPS) ? 7.80 : ((hadronPS) ? 6.48  : 7.80);
 	    }
 	    else if(closureTestSpecifier=="Up"){
 	      // so far only redetermined for parton lv PS, hadron are copied from standard
@@ -4009,17 +4015,15 @@ namespace semileptonic {
 	  }
 	  else if(decayChannel.Contains("combined")){  
 	    // New Binning Revision
-	    if     (variable.Contains("topPt")    ) k = (fullPS) ? 5.13 : 5.13; // hadron level not important
-	    else if(variable.Contains("topY")     ) k = (fullPS) ? 4.92 : 4.92; // hadron level not important
-	    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 3.23 : 3.23; // hadron level not important 
-	    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 4.13 : 4.13; // hadron level not important
-	    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 1.81 : 1.81; // hadron level not important
-	    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 3.93 : ((hadronPS) ? 3.26  : 3.93);
-	    else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.87 : ((hadronPS) ? 0.0006: 1.87); 
-	    else if(variable.Contains("bqPt")     ) k = (fullPS) ? 5.05 : ((hadronPS) ? 5.9   : 5.06); 
-	    else if(variable.Contains("bqEta")    ) k = (fullPS) ? 5.68 : ((hadronPS) ? 4.64  : 5.68);
-	    // FIXME: use muon values as starting point!
-	    k=regParameter(variable, "muon", verbose, fullPS, tau, hadronPS, closureTestSpecifier);
+	    if     (variable.Contains("topPt")    ) k = (fullPS) ? 10.37 : 10.36; // hadron level not important
+	    else if(variable.Contains("topY" )    ) k = (fullPS) ? 9.52 : 9.51; // hadron level not important
+	    else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? 5.55 : 5.54; // hadron level not important
+	    else if(variable.Contains("ttbarY")   ) k = (fullPS) ? 7.94 : 7.93; // hadron level not important
+	    else if(variable.Contains("ttbarMass")) k = (fullPS) ? 4.42 : 4.44; // hadron level not important
+	    else if(variable.Contains("lepPt")    ) k = (fullPS) ? 7.65 : ((hadronPS) ? 6.68  : 7.65);
+	    else if(variable.Contains("lepEta")   ) k = (fullPS) ? 3.02 : ((hadronPS) ? 3.91585e-05 : 3.00); 
+	    else if(variable.Contains("bqPt")     ) k = (fullPS) ? 10.53 : ((hadronPS) ? 12.51  : 10.53); 
+	    else if(variable.Contains("bqEta")    ) k = (fullPS) ? 11.12 : ((hadronPS) ? 9.12  : 11.11);
 	  }
 	}
 	else{
