@@ -3,10 +3,10 @@
 void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 				  bool save = true, int verbose=0, 
 				  TString inputFolderName="RecentAnalysisRun8TeV",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
-				  const std::string decayChannel = "muon", 
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  const std::string decayChannel = "combined", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 {
   // ============================
@@ -37,7 +37,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 
   // decayChannel+"DiffXSec"+sampleName+systematicVariation+MCProduction+"PF.root"
 
-  // decayChannel      = "elec", "muon"
+  // decayChannel      = "electron", "muon", "combined"
   // sampleName        = "Sig", "Bkg", Wjets", "Zjets", "WW", "WZ", "ZZ", "VV", "SingleTopSchannel", 
   //                     "SingleTopTchannel", "SingleTopTWchannel", "QCD"
   // MCProductionCycle = "Summer11","Fall11"
@@ -59,7 +59,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 
   // b) options to be configured only once
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
-  bool setQCDtoZero=true;
+  bool setQCDtoZero=false;
   //if(withRatioPlot==true) setQCDtoZero=false;
   // scale ttbar component to measured inclusive xSec	
   bool scaleToMeasured=false;
@@ -170,7 +170,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // (II) before btagging
     // (ii) jet monitoring
     "tightJetKinematics/n"  ,
-    "tightJetKinematicsNjets1/n",
+    //"tightJetKinematicsNjets1/n",
     "tightJetKinematics/en" ,
     "tightJetKinematics/pt" ,
     "tightJetKinematics/eta",
@@ -387,7 +387,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // (II) before btagging
     // (ii) jet monitoring
     "N_{jets};Events;1;1",
-    "N_{jets};Events;1;1",
+    //"N_{jets};Events;1;1",
     "E(jets) [GeV]; jets;1;1",
     "p_{T} #left[GeV#right];Jets;1;1",
     "#eta(jets);Jets;0;5",
