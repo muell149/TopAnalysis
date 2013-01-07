@@ -346,74 +346,105 @@ if(not options.sample=="none"):
         usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_scaledown_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	additionalEventWeights=False      
 	outputFileName+="ZjetsScaleDown"
-# FIXME: single top scale systematics not available yet 
+# INFO: single top scale systematics are inclusive samples
     elif(options.sample=="singleTopS"):        
         usedSample="TopAnalysis/Configuration/Summer12/T_s_channel_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	outputFileName+="SingleTopS"
-##  elif(options.sample=="singleTopSScaleDown"):        
-##      usedSample="TopAnalysis/Configuration/Fall11/"
-##      additionalEventWeights=False   
-##      outputFileName+="SingleTopSScaleDown"
-##  elif(options.sample=="singleTopSScaleUp"):        
-##      usedSample="TopAnalysis/Configuration/Fall11/"
-##      additionalEventWeights=False
-##      outputFileName+="SingleTopSScaleUp"
+    elif(options.sample=="singleTopSScaleDown"):        
+        usedSample="TopAnalysis/Configuration/Fall11/TToLeptons_s_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        additionalEventWeights=False   
+        outputFileName+="SingleTopSScaleDown"
+    elif(options.sample=="singleTopSScaleUp"):        
+        usedSample="TopAnalysis/Configuration/Fall11/TToLeptons_s_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        additionalEventWeights=False
+        outputFileName+="SingleTopSScaleUp"        
     elif(options.sample=="singleAntiTopS"):        
         usedSample="TopAnalysis/Configuration/Summer12/Tbar_s_channel_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-  	outputFileName+="SingleAntiTopS"
-##  elif(options.sample=="singleAntiTopSScaleDown"):        
-##      usedSample="TopAnalysis/Configuration/Fall11/"
-##      additionalEventWeights=False
-##      outputFileName+="SingleAntiTopSScaleDown"
-##  elif(options.sample=="singleAntiTopSScaleUp"):        
-##      usedSample="TopAnalysis/Configuration/Fall11/"
-##      additionalEventWeights=False
-##	outputFileName+="SingleAntiTopSScaleUp"
+  	outputFileName+="SingleAntiTopS"        
+    elif(options.sample=="singleAntiTopSScaleDown"):        
+        usedSample="TopAnalysis/Configuration/Fall11/TBarToLeptons_s_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        additionalEventWeights=False
+        outputFileName+="SingleAntiTopSScaleDown"
+    elif(options.sample=="singleAntiTopSScaleUp"):        
+        usedSample="TopAnalysis/Configuration/Fall11/TBarToLeptons_s_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        additionalEventWeights=False
+	outputFileName+="SingleAntiTopSScaleUp"
     elif(options.sample=="singleTopT"):        
         usedSample="TopAnalysis/Configuration/Summer12/T_t_channel_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
  	outputFileName+="SingleTopT"
-##     elif(options.sample=="singleTopTScaleDown"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleTop_tchannel_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleTopTScaleDown"
-##     elif(options.sample=="singleTopTScaleUp"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleTop_tchannel_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleTopTScaleUp"
+    elif(options.sample=="singleTopTScaleDown"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TToLeptons_t_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False
+   	outputFileName+="SingleTopTScaleDown"
+    elif(options.sample=="singleTopTScaleUp"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToLeptons_t_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff.py"
+   	additionalEventWeights=False
+   	outputFileName+="SingleTopTScaleUp"
     elif(options.sample=="singleAntiTopT"):       
         usedSample="TopAnalysis/Configuration/Summer12/Tbar_t_channel_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         outputFileName+="SingleAntiTopT"
-##     elif(options.sample=="singleAntiTopTScaleDown"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleAntiTopTScaleDown"
-##     elif(options.sample=="singleAntiTopTScaleUp"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_tchannel_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleAntiTopTScaleUp"
+    elif(options.sample=="singleAntiTopTScaleDown"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToLeptons_t_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False
+   	outputFileName+="SingleAntiTopTScaleDown"
+    elif(options.sample=="singleAntiTopTScaleUp"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TToLeptons_t_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff" 
+   	additionalEventWeights=False
+   	outputFileName+="SingleAntiTopTScaleUp"
     elif(options.sample=="singleTopTw"):        
         usedSample="TopAnalysis/Configuration/Summer12/T_tW_channel_DR_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	outputFileName+="SingleTopTW"
-# FIXME: single to tW channel systematics not available yet 
-##     elif(options.sample=="singleTopTwScaleDown"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleTopTWScaleDown"
-##     elif(options.sample=="singleTopTwScaleUp"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleTop_twchannelDR_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleTopTWScaleUp"
+    elif(options.sample=="singleTopTwScaleDown1"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TToDilepton_tW_channel_DR_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False             
+   	outputFileName+="SingleTopTWScaleDown1"   
+    elif(options.sample=="singleTopTwScaleUp1"):
+        usedSample="TopAnalysis/Configuration/Summer12/TToDilepton_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False
+   	outputFileName+="SingleTopTWScaleUp1"
+    elif(options.sample=="singleTopTwScaleDown2"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TToThadWlep_tW_channel_DR_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False             
+   	outputFileName+="SingleTopTWScaleDown2"   
+    elif(options.sample=="singleTopTwScaleUp2"):
+        usedSample="TopAnalysis/Configuration/Summer12/TToThadWlep_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False
+   	outputFileName+="SingleTopTWScaleUp2"
+    elif(options.sample=="singleTopTwScaleDown3"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TToTlepWhad_tW_channel_DR_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False             
+   	outputFileName+="SingleTopTWScaleDown3"   
+    elif(options.sample=="singleTopTwScaleUp3"):
+        usedSample="TopAnalysis/Configuration/Summer12/TToTlepWhad_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+   	additionalEventWeights=False
+   	outputFileName+="SingleTopTWScaleUp3"
     elif(options.sample=="singleAntiTopTw"):        
         usedSample="TopAnalysis/Configuration/Summer12/Tbar_tW_channel_DR_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	outputFileName+="SingleAntiTopTW"
-##     elif(options.sample=="singleAntiTopTwScaleDown"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_scale_down_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleAntiTopTWScaleDown"
-##     elif(options.sample=="singleAntiTopTwScaleUp"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/singleAntiTop_twchannelDR_scale_up_PythiaPowhegZ2_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	outputFileName+="SingleAntiTopTWScaleUp"
+    elif(options.sample=="singleAntiTopTwScaleDown1"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToDilepton_tW_channel_DR_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="SingleAntiTopTWScaleDown1"
+    elif(options.sample=="singleAntiTopTwScaleUp1"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToDilepton_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="SingleAntiTopTWScaleUp1"
+    elif(options.sample=="singleAntiTopTwScaleDown2"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToThadWlep_tW_channel_DR_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="SingleAntiTopTWScaleDown2"
+    elif(options.sample=="singleAntiTopTwScaleUp2"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToThadWlep_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="SingleAntiTopTWScaleUp2"
+    elif(options.sample=="singleAntiTopTwScaleDown3"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToTlepWhad_tW_channel_DR_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="SingleAntiTopTWScaleDown3"
+    elif(options.sample=="singleAntiTopTwScaleUp3"):        
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToTlepWhad_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+	additionalEventWeights=False
+	outputFileName+="SingleAntiTopTWScaleUp3"       
 # FIXME: Z prime to be updated for 8 TeV
 ##     elif(options.sample=="zprime_m500gev_w5000mev"):        
 ##         usedSample="TopAnalysis/Configuration/Fall11/zprime_M500GeV_W5000MeV_Madgraph_Fall11_AOD_cff"
@@ -1558,6 +1589,8 @@ process.bTagSFEventWeight.version="12-470"
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown, 
                                                     # bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta possible;
 process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+bTagAlgoShort+".root"
+#FIXME: use the following file for the next round of resubmitting:
+#process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency2012.root" 
 process.bTagSFEventWeight.verbose=cms.int32(0)
 
 ## for SSV:
