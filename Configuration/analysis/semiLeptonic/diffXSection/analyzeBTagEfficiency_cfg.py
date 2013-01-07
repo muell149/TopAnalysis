@@ -47,7 +47,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 
 ## configure process options
