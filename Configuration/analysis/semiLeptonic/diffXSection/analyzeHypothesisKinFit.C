@@ -2,13 +2,13 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 12148,
+void analyzeHypothesisKinFit(double luminosity = 12148.,
 			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
-			     std::string decayChannel = "muon", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
   // ============================
@@ -148,8 +148,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148,
   if(decayChannel=="combined"){
     luminosityEl=constLumiElec;
     luminosityMu=constLumiMuon;
-    if(systematicVariation==sysLumiUp ){      luminosityEl*=1.022; luminosityMu*=1.022;} // FIXME:: top be adapted
-    else if(systematicVariation==sysLumiDown){luminosityEl*=0.978; luminosityMu*=0.978;}
+    if(systematicVariation==sysLumiUp ){      luminosityEl*=(1.0+globalLumiUncertainty); luminosityMu*=(1.0+globalLumiUncertainty);}
+    else if(systematicVariation==sysLumiDown){luminosityEl*=(1.0-globalLumiUncertainty); luminosityMu*=(1.0-globalLumiUncertainty);}
     if(!dataFile.Contains(":")){
       std::cout << "wrong input filenames, should be dataFileEl:dataFileMu, but is";
       std::cout << dataFile << std::endl;
@@ -1637,8 +1637,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148,
   // calculate xSec
   double luminosity2=luminosity;
   if(decayChannel=="combined") luminosity2= ( constLumiElec + constLumiMuon );
-  if(systematicVariation==sysLumiUp  )      luminosity2*=1.022;
-  else if(systematicVariation==sysLumiDown) luminosity2*=0.978;
+  if(systematicVariation==sysLumiUp  )      luminosity2*=(1.0+globalLumiUncertainty);
+  else if(systematicVariation==sysLumiDown) luminosity2*=(1.0-globalLumiUncertainty);
   xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity2*BR );
   double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity2*BR );
   // text output
