@@ -133,18 +133,18 @@ inputFolderName=\"RecentAnalysisRun8TeV\"
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
-mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BMuon.root\"
-eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012BElec.root\"
+mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root\"
+eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root\"
 
 if [ $decayChannel == \"electron\" ]; then
-    dataLuminosity=3885
+    dataLuminosity=12148
     dataSample=$eldataSample
 else
     if [ $decayChannel == \"muon\" ]; then
-	dataLuminosity=3885
+	dataLuminosity=12148
 	dataSample=$mudataSample
     else
-	dataLuminosity=3885 # mean value
+	dataLuminosity=12148 # mean value
 	dataSample=$eldataSample\":\"$mudataSample
     fi
 fi
