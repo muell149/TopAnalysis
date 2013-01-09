@@ -1496,7 +1496,7 @@ TH2D* TopSVDFunctions::SVD_Cov2Corr(TH2D* input, TString name, TString axisName,
     input->SetDirectory(NULL);
     output->SetName(name);
     output->SetTitle(name);
-    TString corrStrZ(type + " Correlations in \%");
+    TString corrStrZ(type + " Correlations in %");
     output->GetXaxis()->SetTitle(axisName);
     output->GetYaxis()->SetTitle(axisName);
     output->GetZaxis()->SetTitle(corrStrZ);
@@ -1548,7 +1548,7 @@ TH1D* TopSVDFunctions::SVD_Cov2Err(TH2D* input, TH1D* means, TString name, TStri
     TH1D* output = SVD_CloneHists1D(means); 
     output->SetName(name);
     output->SetTitle(name);
-    TString corrStrY(type + " Error in \%");
+    TString corrStrY(type + " Error in %");
     output->GetXaxis()->SetTitle(axisName);
     output->GetYaxis()->SetTitle(corrStrY);
     for ( int i = 1 ; i <= nbins ; i++ ) {
@@ -6829,13 +6829,13 @@ double TopSVDFunctions::SVD_Unfold(
             TH2D* tmpCovHist = SVD_CloneHists2D(mySVDUnfold->GetUnfoldCovMatrix(dataCovHist, nExperiments));  
             TH1D* tmpErr = SVD_Cov2Err(tmpCovHist, tmpUnfResult, TString::Format("arrK_Mean_%i", tmpK), quantityTex, "Stat.");
             TString statErrStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATERR"); 
-            SVD_SetTitles1D(tmpErr, statErrStr, quantityTex, "Stat. Err. in \%");  
+            SVD_SetTitles1D(tmpErr, statErrStr, quantityTex, "Stat. Err. in %");  
               
             
             // Global Correlation
             TH1D* tmpGlC = SVD_CalcGlobCorr(tmpCovHist, dataHist); 
             TString glcStr = SVD_PlotName(channel, particle, quantity, special, syst, "GLOBC");
-            SVD_SetTitles1D(tmpGlC, glcStr, quantityTex, "Glob. Corr. in \%");
+            SVD_SetTitles1D(tmpGlC, glcStr, quantityTex, "Glob. Corr. in %");
                    
  
             // Save Objects in Array
@@ -7470,21 +7470,21 @@ double TopSVDFunctions::SVD_Unfold(
     // Only for nominal sample!
     TH1D* bbbErrHist = SVD_HistoErrors1D(bbbHist, 1); 
     TString bbbErrStr = SVD_PlotName(channel, particle, quantity, special, syst, "BBBERR"); 
-    SVD_SetTitles1D(bbbErrHist, bbbErrStr, quantityTex, "Statistical Error in \%");
+    SVD_SetTitles1D(bbbErrHist, bbbErrStr, quantityTex, "Statistical Error in %");
 
     
     // ERROR PLOT (Data Statistics, Normalized)
     // Only for nominal sample! 
     TH1D* normStatErrHist = SVD_HistoErrors1D(normUnfHist, 1);
     TString normStatErrStr = SVD_PlotName(channel, particle, quantity, special, syst, "STATERRnorm"); 
-    SVD_SetTitles1D(normUnfHist, normStatErrStr, quantityTex, "Statistical Error on {#sigma}_{bin} / {#sigma}_{tot} in \% (SVD)"); 
+    SVD_SetTitles1D(normUnfHist, normStatErrStr, quantityTex, "Statistical Error on {#sigma}_{bin} / {#sigma}_{tot} in % (SVD)"); 
     
     
     // ERROR PLOT (BBB Data Statistics, Normalized)
     // Only for nominal sample!
     TH1D* normBBBErrHist = SVD_HistoErrors1D(normBBBHist, 1);
     TString normBBBErrStr = SVD_PlotName(channel, particle, quantity, special, syst, "BBBERRnorm"); 
-    SVD_SetTitles1D(normBBBErrHist, normBBBErrStr, quantityTex, "Statistical Error on {#sigma}_{bin} / {#sigma}_{tot} in \% (BBB)"); 
+    SVD_SetTitles1D(normBBBErrHist, normBBBErrStr, quantityTex, "Statistical Error on {#sigma}_{bin} / {#sigma}_{tot} in % (BBB)"); 
     
 
     // RATIO: UnfErrors versus BBBErrors
@@ -7528,20 +7528,20 @@ double TopSVDFunctions::SVD_Unfold(
     TString glcStr = SVD_PlotName(channel, particle, quantity, special, syst, "GLOBC");
     glcHist->SetName(glcStr);
     glcHist->SetTitle(glcStr);
-    SVD_SetTitles1D(glcHist, glcStr, quantityTex, "Glob. Corr. in \%");
+    SVD_SetTitles1D(glcHist, glcStr, quantityTex, "Glob. Corr. in %");
 
 
 
     // Systematic Shifts with Unfolding
     TH1D* unfShiftHist = SVD_ArrayToShifts(unfHist, numberSyst+1);
     TString unfShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "UNFSHIFT");
-    SVD_SetTitles1D(unfShiftHist, unfShiftHistStr, quantityTex, "Syst. Shift in \%", numberSyst);
+    SVD_SetTitles1D(unfShiftHist, unfShiftHistStr, quantityTex, "Syst. Shift in %", numberSyst);
     
     
     // Systematic Shifts with BBB
     TH1D* bbbShiftHist = SVD_ArrayToShifts(bbbHist, numberSyst+1);
     TString bbbShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "BBBSHIFT");
-    SVD_SetTitles1D(bbbShiftHist, bbbShiftHistStr, quantityTex, "Syst. Shift in \%", numberSyst);
+    SVD_SetTitles1D(bbbShiftHist, bbbShiftHistStr, quantityTex, "Syst. Shift in %", numberSyst);
     
     
     // Comparison of systematic shifts
@@ -7553,13 +7553,13 @@ double TopSVDFunctions::SVD_Unfold(
     // Systematic Shifts with Unfolding, Normalized
     TH1D* normUnfShiftHist = SVD_ArrayToShifts(normUnfHist, numberSyst+1);
     TString normUnfShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "NORMUNFSHIFT");
-    SVD_SetTitles1D(normUnfShiftHist, normUnfShiftHistStr, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", numberSyst);
+    SVD_SetTitles1D(normUnfShiftHist, normUnfShiftHistStr, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in %", numberSyst);
     
      
     // Systematic Shifts with BBB, Normalized
     TH1D* normBBBShiftHist = SVD_ArrayToShifts(normBBBHist, numberSyst+1);
     TString normBbbShiftHistStr  = SVD_PlotName(channel, particle, quantity, special, syst, "NORMBBBSHIFT");
-    SVD_SetTitles1D(normBBBShiftHist, normBbbShiftHistStr, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in \%", numberSyst);
+    SVD_SetTitles1D(normBBBShiftHist, normBbbShiftHistStr, quantityTex, "Syst. Shift on {#sigma}_{bin} / {#sigma}_{tot} in %", numberSyst);
     
     
     
@@ -7751,7 +7751,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, stabHist, "Stab.", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, effHist, "Eff.", "HIST", "", 1, numberSyst+1); 
         SVD_Array2Stack(theRegStack, theLegend, probHist, "Prob. i #rightarrow i", "HIST", "", 4, numberSyst+1);
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in \%", "", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Pur., Stab., Eff. in %", "", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationEffStabPurr"); 
      
     
@@ -7771,7 +7771,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, "");   
         SVD_Array2Stack(theRegStack, theLegend, beffHist, "Gen. Eff.", "HIST", "", 2, numberSyst+1);
         SVD_Array2Stack(theRegStack, theLegend, effHist, "Efficiency", "HIST", "", 1, numberSyst+1); 
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency \%", "", 0, true, rangeL, rangeR, true);  
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Efficiency %", "", 0, true, rangeL, rangeR, true);  
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "MigrationEfficiency");
     
     
@@ -7834,8 +7834,8 @@ double TopSVDFunctions::SVD_Unfold(
         // Only for the nominal sample
         glcHist->UseCurrentStyle(); 
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
-        SVD_Array2Stack(theRegStack, theLegend, glcHist, "#rho_{i} in \%", "HIST", "", 4, 1);  
-        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Glob. Corr. #rho_{i} in \%", "HIST ", 0, true, rangeL, rangeR, true);
+        SVD_Array2Stack(theRegStack, theLegend, glcHist, "#rho_{i} in %", "HIST", "", 4, 1);  
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Glob. Corr. #rho_{i} in %", "HIST ", 0, true, rangeL, rangeR, true);
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultGlobalCorr");
  
  
@@ -7845,7 +7845,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, bbbErrHist, "BBB Unc.", "HIST", "", 4, 1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Stat. Error in %", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultErrorUnfBbb");
             
     
@@ -7856,7 +7856,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_Array2Stack(theRegStack, theLegend, totErrHist, "Tot. Unc.", "HIST", "", 1, 1);  
         SVD_Array2Stack(theRegStack, theLegend, statErrHist, "Unf. Unc.", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, mcErrHist, "MC Unc.", "HIST", "", 4, 1);   
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "MC Stat. Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "MC Stat. Error in %", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultErrorStatMcTotal");
    
 
@@ -7884,7 +7884,7 @@ double TopSVDFunctions::SVD_Unfold(
         SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);  
         SVD_Array2Stack(theRegStack, theLegend, normStatErrHist, "Unf. Err. #sigma_{bin}/#sigma_{tot}", "HIST", "", 3, 1);  
         SVD_Array2Stack(theRegStack, theLegend, normBBBErrHist, "BBB Err. #sigma_{bin}/#sigma_{tot}", "HIST", "", 4, 1);  
-        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in \%", "HIST ", 0, true, rangeL, rangeR, true); 
+        SVD_DrawStackZero(theRegStack, theLegend, quantityTex, "Error in %", "HIST ", 0, true, rangeL, rangeR, true); 
         SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormErrorUnfBbb");
    
  
@@ -7906,7 +7906,7 @@ double TopSVDFunctions::SVD_Unfold(
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, unfShiftHist, "Unfolding",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, bbbShiftHist, "BBB", "HIST", "", 2, numberSyst);  
-        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in \%", "", 0, false, rangeL, rangeR, true);  
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift in %", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultShifts");
         
             // Shift Hist as Ratio
@@ -7919,7 +7919,7 @@ double TopSVDFunctions::SVD_Unfold(
             SVD_ClearStackLeg(theRegStack, theLegend, CPQTex, SystTex, RegTex);   
             SVD_Array2Stack(theRegStack, theLegend, normUnfShiftHist, "Unf.",  "HIST", "", 1, numberSyst);
             SVD_Array2Stack(theRegStack, theLegend, normBBBShiftHist, "BBB", "HIST", "", 2, numberSyst);  
-        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on #sigma_{bin} / #sigma_{tot} in \%", "", 0, false, rangeL, rangeR, true);  
+        SVD_DrawStackAutoRange(theRegStack, theLegend, quantityTex, "Syst. Shift on #sigma_{bin} / #sigma_{tot} in %", "", 0, false, rangeL, rangeR, true);  
             SVD_PrintPage(canvas, outputfilenamePs, outputfilenameEps, "ResultNormShifts"); 
                  
         }  
