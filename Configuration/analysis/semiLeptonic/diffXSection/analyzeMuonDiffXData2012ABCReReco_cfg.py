@@ -31,8 +31,8 @@ jsonFile = 'Cert_190456-198523_8TeV_201213Jul06Aug24AugReRecos_Collisions12_JSON
 ## get the mother file
 execfile("analyzeTopDiffXSec_cfg.py")
 
-## adjust global tag: 5_3-X PROMPTRECO
-process.GlobalTag.globaltag = cms.string('GR_P_V42_AN3::All')
+## adjust global tag: 5_3-X RERECO
+process.GlobalTag.globaltag = cms.string('GR_R_53_V17::All')
 
 ## choose data set
 if(decayChannel == 'muon'):
