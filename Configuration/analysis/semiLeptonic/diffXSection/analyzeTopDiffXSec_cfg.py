@@ -103,7 +103,7 @@ if(not globals().has_key('BtagReweigthing')):
 
 ## choose b tag algo
 if(not globals().has_key('bTagAlgo')):
-    bTagAlgo =  'combinedSecondaryVertexBJet' # 'simpleSecondaryVertexHighEffBJet'
+    bTagAlgo =  'combinedSecondaryVertexBJetTags' # 'simpleSecondaryVertexHighEffBJetTags'
 
 ## choose b tag working point (discriminator cut value)
 if(not globals().has_key('bTagDiscrCut')):
@@ -858,12 +858,20 @@ process.hadLvObjectMonitoring = cms.Sequence(process.genAllElectronKinematics *
 ##    Set up selection for b-jet multiplicity
 ## ---
 
-## switch to desired btagging algo
-process.tightBottomPFJets.src = bTagAlgo+"s"
+## switch to desired btagging value
+process.tightBottomPFJets.src = 'goodJetsPF30'
+process.tightBottomPFJets.cut=cms.string('bDiscriminator("'+str(bTagAlgo)+'")>'+str(bTagDiscrCut))
 ## select number of b tags
+
 process.btagSelection1 = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 1, maxNumber = 99999)
 process.btagSelection = process.bottomJetSelection.clone(src = 'tightBottomPFJets', minNumber = 2, maxNumber = 99999)
 process.btagSelectionSSV=process.btagSelection.clone(src = 'simpleSecondaryVertexHighEffBJets')
+
+## ---
+##    Set up selection for light jets (because kinfir needs 2 light jets)
+## ---
+process.tightLightPFJets  = process.selectedPatJets.clone(src = 'goodJetsPF30', cut=cms.string('bDiscriminator("'+str(bTagAlgo)+'")<'+str(bTagDiscrCut)))
+process.lightJetSelection = process.bottomJetSelection.clone(src = 'tightLightPFJets', minNumber = 2, maxNumber = 99999)
 
 ## kinematic contributions
 ## muon
@@ -1122,7 +1130,7 @@ process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
-process.kinFitTtSemiLepEventHypothesis.bTagAlgo = bTagAlgo+"Tags" # "simpleSecondaryVertexHighEffBJetTags"
+process.kinFitTtSemiLepEventHypothesis.bTagAlgo = bTagAlgo # "simpleSecondaryVertexHighEffBJetTags"
 
 # TCHE  discr.values 7TeV: 1.70,  3.30  , 10.20
 # SSVHE discr.values 7TeV: x.xx,  1.74  ,  x.xx
@@ -1361,7 +1369,9 @@ if(applyKinFit==True):
     if(runningOnData=="MC"):
         ## case 1a): ttbar semileptonic mu-signal
         if(eventFilter=='signal only'):
-            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+            process.kinFit    = cms.Sequence(process.tightLightPFJets                        +
+                                             process.lightJetSelection                       +
+                                             process.makeTtSemiLepEvent                      +
                                              process.compositedKinematicsTagged              +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
@@ -1408,7 +1418,9 @@ if(applyKinFit==True):
 
         ## case 1b): other MC
         else:
-            process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+            process.kinFit    = cms.Sequence(process.tightLightPFJets                        +
+                                             process.lightJetSelection                       +
+                                             process.makeTtSemiLepEvent                      +
                                              process.compositedKinematicsTagged              +
                                              process.filterRecoKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
@@ -1422,7 +1434,9 @@ if(applyKinFit==True):
             process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
     ## case 2: data sample
     elif(runningOnData=="data"):
-        process.kinFit    = cms.Sequence(process.makeTtSemiLepEvent                      +
+        process.kinFit    = cms.Sequence(process.tightLightPFJets                        +
+                                         process.lightJetSelection                       +
+                                         process.makeTtSemiLepEvent                      +
                                          process.compositedKinematicsTagged              +
                                          process.filterRecoKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
@@ -1581,7 +1595,7 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 process.load("TopAnalysis.TopUtils.BTagSFEventWeight_cfi")
 ## DB only accepts short tagger algo names
 bTagAlgoShort = "CSVM"
-if(bTagAlgo =='simpleSecondaryVertexHighEffBJet'):
+if(bTagAlgo =='simpleSecondaryVertexHighEffBJetTags'):
     bTagAlgoShort = "SSVHEM"
 process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
 process.bTagSFEventWeight.bTagAlgo=bTagAlgoShort
