@@ -148,7 +148,7 @@ void createTheoryDataRatios(bool extrapolate=false, bool hadron=true, int verbos
   TString PS = extrapolate ? "" : "PhaseSpace";
   TString LV="Parton";
   if(!extrapolate&&hadron) LV="Hadron";
-  TString outputFolder="./diffXSecFromSignal/plots/combined/2011/xSec/";
+  TString outputFolder="./diffXSecFromSignal/plots/combined/2012/xSec/";
   TString outputFile="diffXSecTopSemiLep"+LV+PS+".root";
 
   // loop variables
