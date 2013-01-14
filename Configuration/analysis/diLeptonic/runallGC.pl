@@ -101,7 +101,12 @@ while(my $line = <$IN>) {
         split / {2,}/, $line;
         
     next unless $outputFile;
-    
+
+    print "checking dataset $dataset...\n";
+    my @dbsquery=`dbs search --query="find sum(file.numevents) where dataset=$dataset"`;
+    my $eventsPerJob=int($dbsquery[4]/$numJobs); 
+    print "running with $eventsPerJob events per Job\n";
+
     my $path = "${globalGcWorkingdir}/$workDirWithTime/GC-$outputFile";
     mkpath($path);
     my $joboutdir = "output-$outputFile"; #. strftime("%FT%H-%M-%S",localtime);
@@ -118,7 +123,7 @@ while(my $line = <$IN>) {
        # s/##JOBS##/$arg{j} ? $arg{j} : ''/eg;
         s/##CMSSW_BASE##/$ENV{CMSSW_BASE}/g;
         s/##CMSSWConfigFile##/$cfgfilename/eg;
-        s/##JOBS##/$numJobs/g;
+        s/##EVENTSPERJOB##/$eventsPerJob/g;
         s/##DATASET##/$dataset/g;
         s/##OUTPUTFILE##/$outputFile/g;
         s/##HN_USER##/$hypernewsName/g;
@@ -222,7 +227,7 @@ config     =    ##GLITE_LOCATION##/etc/cms/glite_wms.conf
 
 [jobs]
 
-jobs = ##JOBS##
+; jobs = ##JOBS##
 wall time    = 40:59:00 ;queue dingens // thats the 12 hour cue!!!
 ; in queue     = $maxjobsinqueue ; 1000 -1
 memory       = 3700
@@ -238,7 +243,7 @@ prepare config     = True
 arguments          = ##OPTIONS## outputFile=##OUTPUTFILE##  ; 
 
 dataset splitter   = EventBoundarySplitter
-events per job     = -1 ;##EVENTS_PER_JOB##   ;
+events per job     = ##EVENTSPERJOB##;
 
 
 dataset            = ##DATASET## ;
