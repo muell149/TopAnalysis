@@ -346,27 +346,27 @@ if(not options.sample=="none"):
         usedSample="TopAnalysis/Configuration/Summer12/DYJetsToLL_M_50_scaledown_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	additionalEventWeights=False      
 	outputFileName+="ZjetsScaleDown"
-# INFO: single top scale systematics are inclusive samples
+    # INFO: single top scale systematics are exclusive samples
     elif(options.sample=="singleTopS"):        
         usedSample="TopAnalysis/Configuration/Summer12/T_s_channel_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	outputFileName+="SingleTopS"
-    elif(options.sample=="singleTopSScaleDown"):        
-        usedSample="TopAnalysis/Configuration/Fall11/TToLeptons_s_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+    elif(options.sample=="singleTopSScaleDown"):
+        usedSample="TopAnalysis/Configuration/Summer12/TToLeptons_s_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         additionalEventWeights=False   
         outputFileName+="SingleTopSScaleDown"
     elif(options.sample=="singleTopSScaleUp"):        
-        usedSample="TopAnalysis/Configuration/Fall11/TToLeptons_s_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        usedSample="TopAnalysis/Configuration/Summer12/TToLeptons_s_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         additionalEventWeights=False
         outputFileName+="SingleTopSScaleUp"        
     elif(options.sample=="singleAntiTopS"):        
         usedSample="TopAnalysis/Configuration/Summer12/Tbar_s_channel_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
   	outputFileName+="SingleAntiTopS"        
     elif(options.sample=="singleAntiTopSScaleDown"):        
-        usedSample="TopAnalysis/Configuration/Fall11/TBarToLeptons_s_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToLeptons_s_channel_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         additionalEventWeights=False
         outputFileName+="SingleAntiTopSScaleDown"
     elif(options.sample=="singleAntiTopSScaleUp"):        
-        usedSample="TopAnalysis/Configuration/Fall11/TBarToLeptons_s_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToLeptons_s_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         additionalEventWeights=False
 	outputFileName+="SingleAntiTopSScaleUp"
     elif(options.sample=="singleTopT"):        
@@ -377,7 +377,7 @@ if(not options.sample=="none"):
    	additionalEventWeights=False
    	outputFileName+="SingleTopTScaleDown"
     elif(options.sample=="singleTopTScaleUp"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TBarToLeptons_t_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff.py"
+        usedSample="TopAnalysis/Configuration/Summer12/TToLeptons_t_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"        
    	additionalEventWeights=False
    	outputFileName+="SingleTopTScaleUp"
     elif(options.sample=="singleAntiTopT"):       
@@ -388,15 +388,15 @@ if(not options.sample=="none"):
    	additionalEventWeights=False
    	outputFileName+="SingleAntiTopTScaleDown"
     elif(options.sample=="singleAntiTopTScaleUp"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TToLeptons_t_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff" 
+        usedSample="TopAnalysis/Configuration/Summer12/TBarToLeptons_t_channel_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
    	additionalEventWeights=False
-   	outputFileName+="SingleAntiTopTScaleUp"
+   	outputFileName+="SingleAntiTopTScaleUp"        
     elif(options.sample=="singleTopTw"):        
         usedSample="TopAnalysis/Configuration/Summer12/T_tW_channel_DR_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	outputFileName+="SingleTopTW"
     elif(options.sample=="singleTopTwScaleDown1"):        
         usedSample="TopAnalysis/Configuration/Summer12/TToDilepton_tW_channel_DR_scaledown_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-   	additionalEventWeights=False             
+   	additionalEventWeights=False
    	outputFileName+="SingleTopTWScaleDown1"   
     elif(options.sample=="singleTopTwScaleUp1"):
         usedSample="TopAnalysis/Configuration/Summer12/TToDilepton_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
