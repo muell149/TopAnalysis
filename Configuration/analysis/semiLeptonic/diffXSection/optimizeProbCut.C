@@ -19,16 +19,20 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   gStyle->SetOptStat(0);
 
   // set optimization parameter
-  // TString optimize = "#frac{sig}{#sqrt{bkg}}"; // "#frac{sig}{#sqrt{sig+bkg}}"
+  // optimize the product signal efficiency times signal purity:
+  // TString optimize = "#frac{sig}{#sqrt{sig+bkg}}";
+  // optimize the product signal efficiency times signal to background ratio:
+  // TString optimize = "#frac{sig}{#sqrt{bkg}}"; 
+  // optimize signal purity (don't use this one!):
+  // TString optimize = "#frac{sig}{sig+bkg}";
 
   // read files
-  TString path1 = "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/";
-  TString path2 = "/scratch/hh/current/cms/user/henderle/";
+  TString path = "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/";
   std::vector<TFile*> files_;
-  if(lep=="both" || lep=="muon")files_.push_back(new TFile(path2+"20120313T181125_naf_MuttbarSG/muonDiffXSecSigFall11PF.root"));
-  if(lep=="both" || lep=="electron")  files_.push_back(new TFile(path2+"20120314T101158_naf_ElttbarSG/elecDiffXSecSigFall11PF.root"));
-  if(lep=="both" || lep=="muon")  files_.push_back(new TFile(path1+"HighStatsSamples/muonDiffXSecBkgFall11PF.root"));
-  if(lep=="both" || lep=="electron")  files_.push_back(new TFile(path1+"HighStatsSamples/elecDiffXSecBkgFall11PF.root"));
+  if(lep=="both" || lep=="muon")files_.push_back(new TFile(path+"muonDiffXSecSigSummer12PF.root"));
+  if(lep=="both" || lep=="electron")  files_.push_back(new TFile(path+"elecDiffXSecSigSummer12PF.root"));
+  if(lep=="both" || lep=="muon")  files_.push_back(new TFile(path+"muonDiffXSecBkgSummer12PF.root"));
+  if(lep=="both" || lep=="electron")  files_.push_back(new TFile(path+"elecDiffXSecBkgSummer12PF.root"));
 
   // get trees
   vector<TTree*> trees_;
@@ -86,20 +90,20 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   // golden section search for optimal cut value
   for ( int i = 0 ; i < 100 ; i++ ) {
     if( optimalProb!=newLowProb ){
-      // calculate s/sqrt(s+b) for lowProb
+      // calculate s/sqrt(s+b) or s/sqrt(b) for lowProb
       SoBLowProb = getSoB(sigHisto,bkgHisto,newLowProb,optimize);
       probVec.push_back(newLowProb);
       SoBVec.push_back(SoBLowProb);
       SeffVec.push_back(sigHisto->Integral(sigHisto->FindBin(newLowProb),sigHisto->GetNbinsX()+1)/sigEvents);
-      cout << "newLowProb: " << newLowProb << " -> s/sqrt(s+b): " << SoBLowProb << endl;
+      cout << "newLowProb: " << newLowProb << " -> "+optimize+": " << SoBLowProb << endl;
     }
     if(optimalProb!=newHighProb){
-      // calculate s/sqrt(s+b) for highProb
+      // calculate s/sqrt(s+b) or s/sqrt(b) for highProb
       SoBHighProb = getSoB(sigHisto,bkgHisto,newHighProb,optimize);
       probVec.push_back(newHighProb);
       SoBVec.push_back(SoBHighProb);
       SeffVec.push_back(sigHisto->Integral(sigHisto->FindBin(newHighProb),sigHisto->GetNbinsX()+1)/sigEvents);
-      cout << "newHighProb: " << newHighProb << " -> s/sqrt(s+b): " << SoBHighProb << endl;
+      cout << "newHighProb: " << newHighProb << " -> "+optimize+": " << SoBHighProb << endl;
     }
     if(SoBLowProb>SoBHighProb){
       highProb=newHighProb;
@@ -135,7 +139,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   canv->cd(2)->SetBottomMargin(0.10);
   canv->cd(2)->SetTopMargin   (0.05);
 
-  // draw graph s/sqrt(s+b) or s/sqrt(+b) vs probability
+  // draw graph s/sqrt(s+b) or s/sqrt(b) vs probability
   canv->cd(1);
   TGraph* optSoB = new TGraph((int)probVec.size(),&probVec.front(),&SoBVec.front());
   optSoB->SetMarkerStyle(20);
