@@ -62,9 +62,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   bool setQCDtoZero=false;
   //if(withRatioPlot==true) setQCDtoZero=false;
   // scale ttbar component to measured inclusive xSec	
-  bool scaleToMeasured=false;
+  bool scaleToMeasured=true;
   // add some shape plots comparing some different ttbar MC generators
-  bool compareTTsample=false;
+  bool compareTTsample=true;
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2011 or 2012 data from luminosity
@@ -89,7 +89,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   // b2) hadron PS: hadron=true
   TString LV="Parton";
   if(!extrapolate&&hadron) LV="Hadron";
-  if(decayChannel=="electron"||decayChannel=="muon") outputFileName+=dataSample;
+  //if(decayChannel=="electron"||decayChannel=="muon") outputFileName+=dataSample;
   outputFileName+=LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="differentialXSecMonitoring"+lumi+"pb";
@@ -1163,10 +1163,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      if(plotList_[plot].Contains("bottomJetKinematics/n"))         {min=1.0; max=3.0E06;}
 	      if(plotList_[plot].Contains("tightJetKinematicsTagged/pt"))   {min=1.0; max=1.0E06;}
 	      if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")){min=0.0; max=6.0E03;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt"))   {min=0; max=7.0E03;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY"))    {min=0; max=2.5E03;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")) {min=0; max=6.0E03;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=1.6E03;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt"))   {min=0; max=2.5E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY"))    {min=0; max=1.5E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")) {min=0; max=2.2E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=0.8E04;}
 	    }
 	    // axis style
 	    TString titleY=getStringEntry(axisLabel_[plot],2,";");
@@ -1236,9 +1236,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      if(withRatioPlot||(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarMass")))){
 		
 		DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2-x, 
-			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.05,
+			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.015,
 			  1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength()-x,       
-			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength(), 12
+			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() + 0.035, 12
 			  );
 	      }
 	      double x1=1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25;
