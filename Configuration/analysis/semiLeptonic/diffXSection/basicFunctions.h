@@ -103,12 +103,12 @@ namespace semileptonic {
   const unsigned int constMadgraphColor = kRed+1;
   const unsigned int constMcatnloColor  = kBlue;
   const unsigned int constPowhegColor   = kGreen+1;
-  const unsigned int constNnloColor     = kOrange-3;
+  const unsigned int constNnloColor     = kOrange+4;
 
   // Line style for theory curves
 
   const unsigned int constPowhegStyle  = 7;
-  const unsigned int constNnloStyle    = 5;
+  const unsigned int constNnloStyle    = 2;
 
   // Marker style
 
@@ -505,6 +505,40 @@ namespace semileptonic {
     line->DrawLine(xmin, ymin, xmax, ymax);
   }
 
+  void DrawSteps(TH1F* histo, TString drawOptions=""){
+    // this function draws "histo" in the
+    // active canvas like hist but without 
+    // any vertical lines
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: NONE
+    
+    // adjust markers to be invisible wrt line
+    histo->SetMarkerSize(0);
+    histo->SetMarkerColor(histo->GetLineColor());
+    // remove errors from markers
+    for(int bin=1; bin<=histo->GetNbinsX(); ++bin){
+      histo->SetBinError(bin, 1E-9);
+    }
+    // draw not as histo
+    drawOptions.ReplaceAll("hist","");
+    // draw as marker!
+    drawOptions+=" E";
+    //std::cout << drawOptions << std::endl;
+    // ensure that x range is drawn around marker
+    float_t originalValue=gStyle->GetErrorX();
+    if(originalValue!=0.5){
+      std::cout << "WARNING in DrawSteps: will change";
+      std::cout << " gStyle->SetErrorX from " << originalValue;
+      std::cout << " to 0.5 to make DrawSteps working!!!" << std::endl; 
+      gStyle->SetErrorX(0.5);
+    }
+    //drawing
+    histo->Draw(drawOptions);
+    // restore original configuration
+    //gStyle->SetErrorX(originalValue);
+  }
+  
   int roundToInt(double value, bool roundDown=false)
   {
     // function to round a double "value"
@@ -562,6 +596,26 @@ namespace semileptonic {
     char result[20];
     sprintf(result, "%i", i);
     return (TString)result;
+  }
+
+  int getRelevantDigits(double value){
+    // this function calculated the number 
+    // of digits of "value"+1 if following digit is nonzero
+    // ATTENTION: only the first 10 digits are checked!
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: NONE
+    double modvalue=std::abs(value);
+    for(int i=0; i<10; ++i){
+      if(modvalue>=1){
+	double returnvalue=i;
+	// check if next digit is nonzero
+	if(10*(modvalue-int(modvalue))>=1) returnvalue+=1;
+	return returnvalue;
+      }
+      else modvalue*=10;
+    }
+    return -1;
   }
 
   TString getTStringFromDouble(double d, int precision=2, bool output=false)
@@ -3632,7 +3686,7 @@ namespace semileptonic {
     // --- 
     if(!drawOnlyErrors){ 
       if(smoothcurves) result->Draw("hist c same"); 
-      else result->Draw("hist same");
+      else DrawSteps(result, "same");//result->Draw("hist same");
       if(verbose>0) std::cout << "theory curve drawn" << std::endl;
     }
   }
