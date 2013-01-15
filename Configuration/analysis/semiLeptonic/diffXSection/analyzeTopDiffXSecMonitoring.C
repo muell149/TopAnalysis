@@ -1195,7 +1195,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      argument+=precMain+"."+precSub;
 	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))) argument+="d GeV";
 	      else argument+="f";
-	      std::cout <<  width << ": " << argument << std::endl;
+	      if(verbose>2) std::cout <<  width << ": " << argument << std::endl;
 	      titleY += Form(argument,width);
 	    }
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), titleY, min, max);
