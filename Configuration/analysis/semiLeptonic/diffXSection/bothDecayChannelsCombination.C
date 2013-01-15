@@ -209,19 +209,30 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	//std::cout << xSecFolder+"/"+sysLabel(sysNo)+"/"+xSecVariables_[i] << "/" << plotNameTheo << std::endl;
 	TH1F* plotMu   = combinedEventYields ? 0 : (TH1F*)canvasMu  ->GetPrimitive(plotName+"kData");
 	TH1F* plotEl   = combinedEventYields ? 0 : (TH1F*)canvasEl  ->GetPrimitive(plotName+"kData");
-	TH1F* plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotNameTheo) : (TH1F*)canvasTheo->GetPrimitive(plotNameTheo);
 	// if already combined at yield level:
 	TH1F* plotComb = combinedEventYields ? (TH1F*)canvasComb    ->GetPrimitive(plotName+"kData") : 0;
-	if( plotTheo) plotTheo->SetName(plotName);
+	// theory
+	TH1F* plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotNameTheo) : (TH1F*)canvasTheo->GetPrimitive(plotNameTheo);
 	if(!plotTheo){
+	  if(verbose>0) std::cout << "INFO: can not find " << plotNameTheo << std::endl;
+	  plotNameTheo.ReplaceAll("Theory","");
+	  plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotNameTheo) : (TH1F*)canvasTheo->GetPrimitive(plotNameTheo);
+	}
+	if(!plotTheo){
+	  if(verbose>0) std::cout << "INFO: can not find " << plotNameTheo << std::endl;
+	  plotNameTheo.ReplaceAll("xSec/","");
+	  plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotNameTheo) : (TH1F*)canvasTheo->GetPrimitive(plotNameTheo);
+	}
+	if(!plotTheo){
+	  if(verbose>0) std::cout << "INFO: can not find " << plotNameTheo << std::endl;
 	  // take care of differing naming convention for hadron level plots
 	  if(hadron) plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotName+"Gen") : (TH1F*)canvasTheo->GetPrimitive(plotName+"Gen");
 	  // if theory is not found, load parton level theory plots directly
 	  else plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive("analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName) : (TH1F*)canvasTheo->GetPrimitive("analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName);
-	  if(plotTheo) plotTheo->SetName(plotName);
+	  if(verbose>0) std::cout << "INFO: can not find " << "analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName << std::endl;
 	}
-	
 	if(((plotMu&&plotEl)||plotComb)&&plotTheo){ 
+	  plotTheo->SetName(plotName);
 	  if(verbose>1){
 	    if(!combinedEventYields) std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for both channels found!" << std::endl;
 	    else std::cout << "plot "+plotName+"kData in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for combined event yield found!" << std::endl;
@@ -563,8 +574,63 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    if     (xSecVariables_[i].Contains("lep")){ hadLevelExtend="Lepton"; hadLevelPlotExtend="Gen"; }
 	    else if(xSecVariables_[i].Contains("bq" )){ hadLevelExtend="Bjets" ; hadLevelPlotExtend="Gen"; }
 	  }
+	  // a1) create binned MADGRAPH theory curve
+	  // load it from combined file
+	  TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
+	  plotNameMadgraph.ReplaceAll("Norm","");
+	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
+	  TString plotNameMadgraph2=plotNameMadgraph;
+	  plotNameMadgraph2.ReplaceAll("inclusive", "topPt");
+	  TH1F* plotTheo2 = getTheoryPrediction(plotNameMadgraph2, MGcombFile);
+	  // inclusive cross section
+	  if(xSecVariables_[i]=="inclusive"){
+	    // get events in PS from top pt
+	    double NGenPS=0.5*plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1);
+	    NGenPS*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
+	    // get BR
+	    TH1F* plotTheo3 = getTheoryPrediction("analyzeTopPartonLevelKinematics/topPt", MGcombFile);
+	    double NGen=0.5*plotTheo3->Integral(0,plotTheo2->GetNbinsX()+1);
+	    NGen*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
+	    double BR=NGen*1.0/(ttbarCrossSection*0.5*(constLumiElec+constLumiMuon));
+	    // get predicted inclusive cross section in chosen PS 
+	    double inclxSec=NGenPS/(BR*0.5*(constLumiElec+constLumiMuon));
+	    // fill histo
+	    plotTheo2 = new TH1F( plotTheo->GetName(), plotTheo->GetTitle(), 1, 0., 1.0);
+	    plotTheo2->SetBinContent(1, inclxSec );
+	  }
+	  else{
+	    // other quantities
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
+	    reBinTH1F(*plotTheo2, binning_[plotName], verbose-1);
+	    // Normalization absolute cross sections
+	    if(!normalize){
+	      // luminosity
+	      double luminosity2=luminosity;
+	      if(combinedEventYields) luminosity2= ( constLumiElec + constLumiMuon );
+	      plotTheo2->Scale(1./(luminosity2));
+	      // muon and electron channel are added in the root file
+	      plotTheo2->Scale(1./(2));
+	      // event weight (for signal it does not matter if muon or electron)
+	      plotTheo2->Scale(lumiweight(kSig, luminosity2, sysNo, "muon"));
+	      // large sample correction factor for number of events
+	      // lumiweight is for v1 but large sample is v1+v2
+	      if(largeMGfile) plotTheo2->Scale(3697693./(59613991.+3697693.));
+	      // BR
+	      if(extrapolate) plotTheo2->Scale(1./BRPDG);
+	      if(verbose>1) std::cout << "area from abs diff MC plot: " << plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1) << std::endl;
+	    }
+	    // divide by binwidth
+	    plotTheo2=divideByBinwidth(plotTheo2, verbose-1);
+	    // Normalization normalized cross sections
+	    double XSecInclTheoPS= getInclusiveXSec(plotTheo2,verbose-1);
+	    if(normalize) plotTheo2->Scale(1./(XSecInclTheoPS));
+	  }
+	  // styling
+	  histogramStyle( *plotTheo2, kSig, false);
+	  plotTheo2->SetTitle(plotTheo->GetTitle());
+	  plotTheo2->SetName (plotTheo->GetName() );
 
-	  // c) MCatNLO
+	  // b) MCatNLO
 	  int smoothFactor=0;
 	  int rebinFactor=0;
 	  int errorRebinFactor=0; 
@@ -620,12 +686,13 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    filename=errorBandFilename;
 	  }
 	  //}
-	  // draw errorband
+	  // b1) draw MC@NLO errorband
 	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2, LV);
-	  // draw central curve
+	  // a2) drawing binned madgraph theory curve
+	  plotTheo2->Draw("hist same");
+	  // b2) draw MC@NLO central curve
 	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2, LV);
-	  
-	  // d) POWHEG
+	  // c) POWHEG
 	  // configure configuration
 	  smoothFactor=0;
 	  rebinFactor=0;
@@ -647,24 +714,24 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // draw curve	 
 	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegSummer12PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
-	  // e) reweighted histos for closure test
+	  // d) reweighted histos for closure test
 	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
 	  }
 	  
-	  // f) distorted parton truth histo including zprime
+	  // e) distorted parton truth histo including zprime
 	  if(zprime!=""&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["modified"+plotName][kSig]->Draw("hist same");
 	  }	    	  
 	  
-	  // g) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
+	  // f) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
 	  if(extrapolate && (DrawNNLOPlot || DrawMCFMPlot)){ 
 	    
 	    TString plotname=xSecVariables_[i];	   
 	    plotname.ReplaceAll("Norm", "");
 	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 
-	    // g1) draw NNLO curve for topPt (normalized) and topY (normalized)
+	    // f1) draw NNLO curve for topPt (normalized) and topY (normalized)
 
 	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
 	    
@@ -675,10 +742,11 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 		newPlotNNLOHisto->GetXaxis()->SetRange(0, newPlotNNLOHisto->GetNbinsX()-1); 	
 		//newPlotNNLOHisto->SetName(plotname+"nnlo"); 
 		newPlotNNLOHisto->SetLineColor(constNnloColor);
+		newPlotNNLOHisto->SetLineStyle(constNnloStyle);
 		newPlotNNLOHisto->SetLineWidth(2);
 		newPlotNNLOHisto->SetMarkerStyle(7);
 		newPlotNNLOHisto->SetMarkerColor(constNnloColor);
-		newPlotNNLOHisto->Draw("][ SAME");
+		DrawSteps(newPlotNNLOHisto ,"same");
 	      }
 	      //if(newPlotNNLOGraph){
 	      //	//newPlotNNLOGraph->SetName(plotname+"nnlo_graph"); 
@@ -690,7 +758,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	      //}	     	     
 	    }
 	  
-	    // g2) MCFM curves
+	    // f2) MCFM curves
 
 	    if (DrawMCFMPlot&&xSecVariables_[i].Contains("Norm")){
 
@@ -736,11 +804,9 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    }
 	  }
 
-	  // h) smooth MadGraph Theory curve
+	  // g) smooth MadGraph Theory curve
 	  smoothFactor=0;
 	  rebinFactor=0;
-	  TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
-	  plotNameMadgraph.ReplaceAll("Norm","");
 	  rangeLow  = -1.0;
 	  rangeHigh = -1.0;
 	  if     (xSecVariables_[i].Contains("topPt"    )){ smoothFactor = (largeMGfile ? 1 : 10); rebinFactor = (largeMGfile ? 2 : 10); }
@@ -752,64 +818,9 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = (largeMGfile ? 0 : 4); rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
-	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
 	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
 	  //std::cout << plotNameMadgraph << std::endl;
 	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", DrawSmoothMadgraph2, LV);
-	  // j) re-draw binned MADGRAPH theory curve
-	  // load it from combined file
-	  TString plotNameMadgraph2=plotNameMadgraph;
-	  plotNameMadgraph2.ReplaceAll("inclusive", "topPt");
-	  TH1F* plotTheo2 = getTheoryPrediction(plotNameMadgraph2, MGcombFile);
-	  // inclusive cross section
-	  if(xSecVariables_[i]=="inclusive"){
-	    // get events in PS from top pt
-	    double NGenPS=0.5*plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1);
-	    NGenPS*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
-	    // get BR
-	    TH1F* plotTheo3 = getTheoryPrediction("analyzeTopPartonLevelKinematics/topPt", MGcombFile);
-	    double NGen=0.5*plotTheo3->Integral(0,plotTheo2->GetNbinsX()+1);
-	    NGen*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
-	    double BR=NGen*1.0/(ttbarCrossSection*0.5*(constLumiElec+constLumiMuon));
-	    // get predicted inclusive cross section in chosen PS 
-	    double inclxSec=NGenPS/(BR*0.5*(constLumiElec+constLumiMuon));
-	    // fill histo
-	    plotTheo2 = new TH1F( plotTheo->GetName(), plotTheo->GetTitle(), 1, 0., 1.0);
-	    plotTheo2->SetBinContent(1, inclxSec );
-	  }
-	  else{
-	    // other quantities
-	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
-	    reBinTH1F(*plotTheo2, binning_[plotName], verbose-1);
-	    // Normalization absolute cross sections
-	    if(!normalize){
-	      // luminosity
-	      double luminosity2=luminosity;
-	      if(combinedEventYields) luminosity2= ( constLumiElec + constLumiMuon );
-	      plotTheo2->Scale(1./(luminosity2));
-	      // muon and electron channel are added in the root file
-	      plotTheo2->Scale(1./(2));
-	      // event weight (for signal it does not matter if muon or electron)
-	      plotTheo2->Scale(lumiweight(kSig, luminosity2, sysNo, "muon"));
-	      // large sample correction factor for number of events
-	      // lumiweight is for v1 but large sample is v1+v2
-	      if(largeMGfile) plotTheo2->Scale(3697693./(59613991.+3697693.));
-	      // BR
-	      if(extrapolate) plotTheo2->Scale(1./BRPDG);
-	      if(verbose>1) std::cout << "area from abs diff MC plot: " << plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1) << std::endl;
-	    }
-	    // divide by binwidth
-	    plotTheo2=divideByBinwidth(plotTheo2, verbose-1);
-	    // Normalization normalized cross sections
-	    double XSecInclTheoPS= getInclusiveXSec(plotTheo2,verbose-1);
-	    if(normalize) plotTheo2->Scale(1./(XSecInclTheoPS));
-	  }
-	  // styling
-	  histogramStyle( *plotTheo2, kSig, false);
-	  plotTheo2->SetTitle(plotTheo->GetTitle());
-	  plotTheo2->SetName (plotTheo->GetName() );
-	  // drawing
-	  plotTheo2->Draw("hist same");
 	  
 	  // ==============
 	  //  Legend
@@ -949,7 +960,9 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	}
 	else{ 
 	  std::cout << " ERROR in bothDecayChannelsCombination.C! " << std::endl;
-	  std::cout << " plot " << xSecVariables_[i]+"kData" << " not found in ";
+	  std::cout << " plot " << xSecVariables_[i];
+	  if((plotMu&&plotEl)||plotComb) std::cout << "kData";
+	  std::cout << " not found in ";
 	  std::cout << xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << " for:" << std::endl;
 	  if(!combinedEventYields){
 	    if(!plotMu)   std::cout << "muon channel data"     << std::endl;
