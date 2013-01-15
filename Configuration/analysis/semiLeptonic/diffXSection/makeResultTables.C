@@ -19,8 +19,8 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
   if(extrapolate==true) hadron=false; 
   TString filename="diffXSecTopSemi";
   if(decayChannel=="combined") filename+="Lep";
-  else if(decayChannel=="electron") filename+="Elec2011";
-  else if(decayChannel=="muon"    ) filename+="Mu2011";
+  else if(decayChannel=="electron") filename+="Elec";
+  else if(decayChannel=="muon"    ) filename+="Mu";
   if(extrapolate) filename+="Parton";
   else{
     if(hadron) filename+="Hadron";
