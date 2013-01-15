@@ -1058,7 +1058,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   // =====================
   //
   // a) for plots
-  //
+  //	  
+  double xUp=-999;
+  double xDn=-999;
+  double min = 0;
   int canvasNumber=0;
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1082,6 +1085,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	  }
 	  // first plot
 	  if(first){
+	    xUp=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmax();
+	    xDn=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmin();
 	    // plot to take maximum from
 	    TString maxFrom=plotList_[plot];
 	    if(plotList_[plot].Contains("_JetKinematicsTagged/pt")) maxFrom="tightLead_3_JetKinematicsTagged/pt";
@@ -1099,7 +1104,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 		if(verbose>1) std:: cout << " Take max from data! " << std::endl;
 	      }
 	    }
-	    double min = 0;
+	    min = 0;
 	    // log plots
 	    if(getStringEntry(axisLabel_[plot],3,";")=="1"){
 	      plotCanvas_[canvasNumber]->SetLogy(1);
@@ -1114,70 +1119,84 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(max>3) max = (double)roundToInt(max);
 	    if(plotList_[plot].Contains("btagSimpleSecVtx"))max*=0.8;
 	    // Set x-axis range for special plots
-	    if(getStringEntry(plotList_[plot], 2)=="nHit"  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(10,30 );
+	    if(getStringEntry(plotList_[plot], 2)=="nHit"  ){xDn=10;xUp=30;}
 	    if(getStringEntry(plotList_[plot], 2)=="chi2"  ){ 
-	      if(getStringEntry(plotList_[plot], 1).Contains("analyzeTopRecoKinematicsKinFit")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,60);
-	      else histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,10);
+	      if(getStringEntry(plotList_[plot], 1).Contains("analyzeTopRecoKinematicsKinFit")){xDn=0;xUp=60;}
+	      else{xDn=0;xUp=10;}
 	    }
-	    if(getStringEntry(plotList_[plot], 2)=="dB"    ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.02);
-	    if(plotList_[plot].Contains("relIso")&&!plotList_[plot].Contains("test")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,0.15);
-	    if(plotList_[plot].Contains("tightJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4,10);
-	    if(plotList_[plot].Contains("tightJetKinematicsNjets1/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(1,10);
-	    if(plotList_[plot].Contains("_JetKinematics/en")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,500);
-	    if(plotList_[plot].Contains("_JetKinematics/pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
-	    if(plotList_[plot].Contains("analyzeMETMuon/metSumEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(200,1400);
-	    if(plotList_[plot].Contains("analyzeMETMuon/metEt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,300);
-	    if(plotList_[plot].Contains("bottomJetKinematics")&&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,5);
-	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,350);
-	    if(plotList_[plot].Contains("LeptonKinematicsTagged")&&plotList_[plot].Contains("pt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,150);
-	    if(plotList_[plot].Contains("btagSimpleSecVtx")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,7);	
-	    if(plotList_[plot].Contains("lepPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);
-	    if(plotList_[plot].Contains("lepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
-	    if((plotList_[plot].Contains("Y")||plotList_[plot].Contains("Eta"))&&(plotList_[plot].Contains("lep")||plotList_[plot].Contains("top"))&&(plotList_[plot].Contains("Plus")||plotList_[plot].Contains("Minus"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
-	    if(plotList_[plot].Contains("bqPt"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,250.);
-	    if(plotList_[plot].Contains("bqEta" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
-	    if(plotList_[plot].Contains("topPt" )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0.,400.);
-	    if(plotList_[plot].Contains("topY"  )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);
-	    if(plotList_[plot].Contains("ttbarY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.5,2.5);	
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/leadqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(30,400);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.4,2.4);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-2.4,2.4);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/MJJ")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarMass")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,800);
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(0,400);
-	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-80,80);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-20,20);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1,1);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepEta")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.001,0.001);
-	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqEta"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqEta"))) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.1,0.1);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.02,0.02);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.001,0.001);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPhi")) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-0.5,0.5);
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"     )) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(4.,9.);
-	    if(getStringEntry(plotList_[plot], 2).Contains("topMass")  ) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(100.,500.);
+	    if(getStringEntry(plotList_[plot], 2)=="dB"                                                                ){xDn=0.  ;xUp=0.02;}
+	    if(plotList_[plot].Contains("relIso")&&!plotList_[plot].Contains("test")                                   ){xDn=0.  ;xUp=0.15;}
+	    if(plotList_[plot].Contains("tightJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")){xDn=4.5 ;xUp=10.5;}
+	    if(plotList_[plot].Contains("tightJetKinematicsNjets1/n")                                                  ){xDn=1.5 ;xUp=10.5;}
+	    if(plotList_[plot].Contains("_JetKinematics/en")                                                           ){xDn=0   ;xUp=500; }
+	    if(plotList_[plot].Contains("_JetKinematics/pt")                                                           ){xDn=0   ;xUp=300; }
+	    if(plotList_[plot].Contains("analyzeMETMuon/metSumEt")                                                     ){xDn=200 ;xUp=1400;}
+	    if(plotList_[plot].Contains("analyzeMETMuon/metEt")                                                        ){xDn=0   ;xUp=300; }
+	    if(plotList_[plot].Contains("bottomJetKinematics")&&plotList_[plot].Contains("/n")                         ){xDn=0   ;xUp=5;   }
+	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")                         ){xDn=30  ;xUp=350; }
+	    if(plotList_[plot].Contains("LeptonKinematicsTagged")&&plotList_[plot].Contains("pt")                      ){xDn=30  ;xUp=150; }
+	    if(plotList_[plot].Contains("btagSimpleSecVtx")                                                            ){xDn=-1  ;xUp=7;   }	
+	    if(plotList_[plot].Contains("lepPt" )                                                                      ){xDn=0.  ;xUp=250.;}
+	    if(plotList_[plot].Contains("lepEta")                                                                      ){xDn=-2.5;xUp=2.5; }
+	    if((plotList_[plot].Contains("Y")||plotList_[plot].Contains("Eta"))&&(plotList_[plot].Contains("lep")||plotList_[plot].Contains("top"))&&(plotList_[plot].Contains("Plus")||plotList_[plot].Contains("Minus"))){xDn=-2.5;xUp=2.5;}
+	    if(plotList_[plot].Contains("bqPt"  )                                                                      ){xDn=0.    ;xUp=250.; }
+	    if(plotList_[plot].Contains("bqEta" )                                                                      ){xDn=-2.5  ;xUp=2.5;  }
+	    if(plotList_[plot].Contains("topPt" )                                                                      ){xDn=0.    ;xUp=400.; }
+	    if(plotList_[plot].Contains("topY"  )                                                                      ){xDn=-2.5  ;xUp=2.5;  }
+	    if(plotList_[plot].Contains("ttbarY")                                                                      ){xDn=-2.5  ;xUp=2.5;  }	
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/leadqPt")                                      ){xDn=0     ;xUp=400;  }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")                                   ){xDn=30    ;xUp=400;  }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")                                  ){xDn=-2.4  ;xUp=2.4;  }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY")                                    ){xDn=-2.4  ;xUp=2.4;  }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/MJJ")                                              ){xDn=0     ;xUp=800;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarMass")                                    ){xDn=0     ;xUp=800;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarPt")                                      ){xDn=0     ;xUp=400;  }
+	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))){xDn=-80;xUp=80;}
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")                                        ){xDn=-20   ;xUp=20;   }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")                                       ){xDn=-1    ;xUp=1;    }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepEta")                                      ){xDn=-0.001;xUp=0.001;}
+	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqEta"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqEta"))){xDn=-0.02;xUp=0.02;}
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPhi")                                       ){xDn=-0.1  ;xUp=0.1;  }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPhi")                                       ){xDn=-0.02 ;xUp=0.02; }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPhi")                                      ){xDn=-0.001;xUp=0.001;}
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPhi")                                       ){xDn=-0.5  ;xUp=0.5;  }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"     )                                       ){xDn=4.5   ;xUp=9.5;  }
+	    if(getStringEntry(plotList_[plot], 2).Contains("topMass")                                                  ){xDn=100.  ;xUp=500.; }
+	    if(xUp!=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmax()||xDn!=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmin()) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(xDn,xUp-0.000001);
 	    // Special y-range for paper control plots
 	    if (decayChannel == "combined"){
-	      if(plotList_[plot].Contains("tightJetKinematicsTagged/n"))    {min=1.0; max=1.0E06;}
-	      if(plotList_[plot].Contains("bottomJetKinematics/n"))         {min=1.0; max=3.0E06;}
-	      if(plotList_[plot].Contains("tightJetKinematicsTagged/pt"))   {min=1.0; max=1.0E06;}
-	      if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")){min=0.0; max=6.0E03;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt"))   {min=0; max=2.5E04;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY"))    {min=0; max=1.5E04;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")) {min=0; max=2.2E04;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=0.8E04;}
+	      bool paperPlot=false;
+	      if(plotList_[plot].Contains("tightJetKinematicsTagged/n"))    {min=1.0; max=1.0E06; paperPlot=true;}
+	      if(plotList_[plot].Contains("bottomJetKinematics/n"))         {min=1.0; max=3.0E06; paperPlot=true;}
+	      if(plotList_[plot].Contains("tightJetKinematicsTagged/pt"))   {min=1.0; max=1.0E06; paperPlot=true;}
+	      if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")){min=0.0; max=6.0E03; paperPlot=true;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt"))   {min=0; max=7.0E03; paperPlot=true;} //max=2.5E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY"))    {min=0; max=2.5E03; paperPlot=true;} //max=1.5E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")) {min=0; max=6.0E03; paperPlot=true;} //max=2.2E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=1.6E03; paperPlot=true;} //max=0.8E04;}
+	      if(paperPlot){
+		max*=(luminosity/5000.); // lumi dependence
+		if(dataSample=="2012"){
+		  max*=(234./170.); // sqrt(s) dependence
+		  max*=(xSec/234.); // measured cross section dependence
+		}
+	      }
 	    }
 	    // axis style
 	    TString titleY=getStringEntry(axisLabel_[plot],2,";");
 	    if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||
 	       plotList_[plot].Contains("tightJetKinematicsTagged/pt"   )||
 	       plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")){
-	      
-	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt")))
-		titleY += Form(" / %d GeV",(int)histo_[plotList_[plot]][sample]->GetBinWidth(1));
-	      else 
-		titleY += Form(" / %2.1f",histo_[plotList_[plot]][sample]->GetBinWidth(1));
+	      double width=histo_[plotList_[plot]][sample]->GetBinWidth(1);
+	      TString argument=" / %";
+	      TString precMain="2";
+	      TString precSub=getTStringFromInt(getRelevantDigits(width));
+	      //TString precSub="1";
+	      argument+=precMain+"."+precSub;
+	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))) argument+="d GeV";
+	      else argument+="f";
+	      std::cout <<  width << ": " << argument << std::endl;
+	      titleY += Form(argument,width);
 	    }
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), titleY, min, max);
 	    histo_[plotList_[plot]][sample]->GetXaxis()->SetNoExponent(true);
@@ -1219,27 +1238,24 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    }
 	    // redraw axis 
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->Draw("axis X0 same");
+	    // draw label indicating the analysis cuts applied
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
-	      // draw label indicating event selection, common labels and legend
-	      TString label = "pre-Tagged";
-	      double x=0.25;
-	      if(plotList_[plot].Contains("Tagged") || plotList_[plot].Contains("AfterBtagging")){ 
-		label = "Tagged";
-		if(SSV) label+=" SSV";
-		x=0.18;
-	      }
-	      if(plotList_[plot].Contains("test"  )) label = "N-1 Selection";
-	      if(plotList_[plot].Contains("PreSel")) label = "Pre-Selected";
-	      if(plotList_[plot].Contains("Njets1")) label = "#geq 1 Jet";
-	      if(plotList_[plot].Contains("KinFit")) label = "";
-	      // draw tagged/untagged label not for paper plots
 	      if(withRatioPlot||(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarMass")))){
-		
-		DrawLabel(label, 1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2-x, 
-			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() - 0.015,
-			  1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength()-x,       
-			  1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() + 0.035, 12
-			  );
+		// draw cut label
+		TString cutLabel="1 lepton, #geq4 Jets";
+		if(decayChannel=="muon"    ) cutLabel.ReplaceAll("lepton","#mu");
+		if(decayChannel=="electron") cutLabel.ReplaceAll("lepton","electron");
+		if(decayChannel=="combined") cutLabel.ReplaceAll("lepton","e/#mu");
+		if(plotList_[plot].Contains("Tagged")) cutLabel+=", #geq2 b-tags";
+		else if(plotList_[plot].Contains("KinFit")) cutLabel+=", #geq2 b-tags, KinFit";
+		double positionX=xUp+0.045*(xUp-xDn)*(gStyle->GetCanvasDefW()/600.);
+		double positionY=min;
+		//std::cout << plotList_[plot] << ": " << xUp << "+0.03*(" << xUp << "-" << xDn << ")=" << positionX << std::endl;
+		TLatex *sellabel = new TLatex(positionX,positionY,cutLabel);
+		sellabel->SetTextAlign(11);
+		sellabel->SetTextAngle(90);
+		sellabel->SetTextSize(0.04);
+		sellabel->Draw("same");
 	      }
 	      double x1=1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25;
 	      if(systematicVariation==sysTest) x1-=0.05;
@@ -1251,7 +1267,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 
 	      if(!plotList_[plot].Contains("BGSubNorm"))leg->Draw("SAME");
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
-	      if (decayChannel=="muon") DrawDecayChLabel("#mu + Jets");
+	      if      (decayChannel=="muon"    ) DrawDecayChLabel("#mu + Jets");
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
 	      else DrawDecayChLabel("e/#mu + Jets Combined");	      
 	      DrawCMSLabels(true,luminosity); 
@@ -1263,17 +1279,17 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 		  ratiohists_.push_back( histo_[plotList_[plot]][kSig   ] );
 		  if(histo_[plotList_[plot]].count(kSigMca)>0) ratiohists_.push_back( histo_[plotList_[plot]][kSigMca] );
 		  if(histo_[plotList_[plot]].count(kSigPow)>0) ratiohists_.push_back( histo_[plotList_[plot]][kSigPow] );
-		  double max=1.8;
-		  double min=0.2;
-		  double xmax=-1;
-		  double xmin=-1;
-		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt" )){ xmin=30. ; xmax=400.; }
-		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")){ xmin=-2.4; xmax=2.4 ; }
-		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY"  )){ xmin=-2.4; xmax=2.4 ; }
-		  if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"          )){ xmin=4   ; xmax=9   ; }
+		  double theomax=1.8;
+		  double theomin=0.2;
+		  double theoxmax=-1;
+		  double theoxmin=-1;
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt" )){ theoxmin=30. ; theoxmax=400.; }
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")){ theoxmin=-2.4; theoxmax=2.4 ; }
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY"  )){ theoxmin=-2.4; theoxmax=2.4 ; }
+		  if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"          )){ theoxmin=4   ; theoxmax=9   ; }
 		  // create ratio canvas
 		  std::vector<TCanvas*> plotCanvasRatio_;
-		  plotCanvasRatio_.push_back(drawFinalResultRatio(histo_[plotList_[plot]][kData], min, max, myStyle, 0, ratiohists_, plotCanvas_[canvasNumber], xmin, xmax));
+		  plotCanvasRatio_.push_back(drawFinalResultRatio(histo_[plotList_[plot]][kData], theomin, theomax, myStyle, 0, ratiohists_, plotCanvas_[canvasNumber], theoxmin, theoxmax));
 		  plotCanvasRatio_[0]->Draw();
 		  plotCanvasRatio_[0]->Update();
 		}
