@@ -718,7 +718,9 @@ if [ $fast = false ]; then
     sleep 3
 fi
 
-## FIXME: need to restore compatibility with root 532, use older version in the meantime
+## FIXME: need to restore compatibility with root 532, skip it 
+exit 0
+## and do it by hand using the older rootversion in the meantime via
 #ini root526
 
 ## Compile library
