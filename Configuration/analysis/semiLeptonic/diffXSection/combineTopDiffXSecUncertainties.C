@@ -46,7 +46,8 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
   TGaxis::SetMaxDigits(2);
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
-
+  gStyle->SetErrorX(0.5); // needed to keep the functions alive drawn with DrawSteps
+  
   // ============================
   //  Parameter Configuration
   // ============================
@@ -391,11 +392,12 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 	  else{
 	    if(verbose2>0){ 
 	      std::cout << std::endl;
+	      if(xSecVariables_[i].Contains("inclusive")) std::cout << "channel: " << decayChannel << std::endl;
 	      if(verbose>0) std::cout << xSecVariables_[i] << " bin #" << bin << "/" << Nbins << std::endl;
 	      if(verbose>0) std::cout << "( range " << binEdgeDown << " .. " << binEdgeUp << ")" << std::endl;
 	      std::cout << "std value[pb/binwidth]: " << std::endl;
 	      std::cout << "a) data   : " << stdBinXSecValue << std::endl;
-	      if(verbose>0) std::cout << "b) MC pred: " << MCpredBinVar << std::endl;
+	      if(verbose>0) std::cout << "b) MC pred: " << MCpredBinVar << std::endl;     
 	    }
 	    // create plot that indicates all relative uncertainties
 	    // one plot for every variable in every bin
