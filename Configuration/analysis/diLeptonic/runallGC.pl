@@ -104,7 +104,15 @@ while(my $line = <$IN>) {
 
     print "checking dataset $dataset...\n";
     my @dbsquery=`dbs search --query="find sum(file.numevents) where dataset=$dataset"`;
+
+    if($dbsquery[4] eq "\n"){
+	print "$dataset not found on dbs. Scipping entry\n";
+	next;
+    }
+
     my $eventsPerJob=int($dbsquery[4]/$numJobs); 
+
+
     print "running with $eventsPerJob events per Job\n";
 
     my $path = "${globalGcWorkingdir}/$workDirWithTime/GC-$outputFile";
