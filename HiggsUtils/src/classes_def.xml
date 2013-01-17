@@ -1,0 +1,11 @@
+<lcgdict>
+  
+  <class name="HiggsGenEvent" ClassVersion="10">
+    <version ClassVersion="10" checksum="3204599009"/>
+  </class>
+  <class name="edm::Wrapper<HiggsGenEvent>" />
+  <class name="edm::RefProd<HiggsGenEvent>" />
+    
+</lcgdict>
+
+
