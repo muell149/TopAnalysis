@@ -3,7 +3,7 @@
 #include "../../unfolding/TopSVDFunctions.C" 
 
 void analyzeHypothesisKinFit(double luminosity = 12148.,
-			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=1, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
@@ -133,7 +133,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   TString pdfName="kinFitHypothesis"+lumi+"pb";
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
-  if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0!"; 
+  if(setQCDtoZero&&verbose>1) std::cout << "ATTENTION: qcd will artificially be set to 0 (for everything BUT the inclusive cross section)!"; 
   // redetermine optimal tau
   if(!SVDunfold || systematicVariation!=sysNo) redetermineopttau =false; // never determine tau for syst. var or if not SVD unf. is used
   if(redetermineopttau){
@@ -178,7 +178,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   // exclude Hadronization
   for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude PDF
-  //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
+  for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude shape variation
   for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
@@ -1613,10 +1613,10 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     std::cout << " (" << NBGVV << ") " << std::endl;
   }
   // set QCD to 0
-  if(setQCDtoZero){ 
-    NBG-=NBGQCD;
-    NAllMC-=NBGQCD;
-  }
+  //if(setQCDtoZero){ 
+  //  NBG-=NBGQCD;
+  //  NAllMC-=NBGQCD;
+  //}
   // efficiency calculation
   double NGenPhaseSpace=0.5 * GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
   double eff=NSig/NGenPhaseSpace;
@@ -1664,7 +1664,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     std::cout << " [pb]: ";
     std::cout << xSecResult << " +/- " << sigmaxSec << "(stat.)" << std::endl;
     std::cout << std::endl;
-    //exit(0);
+    //exit(0); // comment in if you just want to see the xSec
   }
   // create histo
   TString inclName = "xSec/inclusive";
