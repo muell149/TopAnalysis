@@ -11,7 +11,7 @@
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose);
 void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName, TString outputFolder);
 
-void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8TeV", TString outputFolder="") {
+void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8TeV", TString outputFolder="", bool qcdSys=true) {
   // ---
   //    list all of all subsamples to be combined 
   // ---
@@ -22,8 +22,8 @@ void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8
   // b) BG processes
   //    (based on enum samples in basicFunctions.h)
   std::vector<int> samples_;
-  samples_.push_back(kQCD  );
-  samples_.push_back(kDiBos);
+  //samples_.push_back(kQCD  );
+  //samples_.push_back(kDiBos);
   samples_.push_back(kSTop );
   // c) systematic variations
   //    (based on enum systematicVariation in basicFunctions.h)
@@ -33,11 +33,11 @@ void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8
   //      - correspond only to a different event weight, e.g. QCD up variation
   //      -> later treated in the macro
   std::vector<int> sysVariation_;
-  sysVariation_.push_back(sysNo     );
-  sysVariation_.push_back(sysJESUp  );
-  sysVariation_.push_back(sysJESDown);
-  sysVariation_.push_back(sysJERUp  );
-  sysVariation_.push_back(sysJERDown);
+  //sysVariation_.push_back(sysNo     );
+  //sysVariation_.push_back(sysJESUp  );
+  //sysVariation_.push_back(sysJESDown);
+  //sysVariation_.push_back(sysJERUp  );
+  //sysVariation_.push_back(sysJERDown);
   sysVariation_.push_back(sysTopScaleUp  );
   sysVariation_.push_back(sysTopScaleDown);
 
@@ -54,7 +54,8 @@ void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8
 	// c)
 	for(unsigned int sys=0; sys<sysVariation_.size(); ++sys){
 	  // scale variation exists only for single top
-	  if(!(((sysVariation_[sys]==sysTopScaleUp)||(sysVariation_[sys]==sysTopScaleDown))&&(samples_[sample]!=kSTop))){
+	  // qcd systematics can be excluded
+	  if(!(((sysVariation_[sys]==sysTopScaleUp)||(sysVariation_[sys]==sysTopScaleDown))&&(samples_[sample]!=kSTop))&&(qcdSys||!(samples_[sample]==kQCD&&sysVariation_[sys]!=sysNo))){
 	    combineAllPlots(sysVariation_[sys], samples_[sample], leptons_[lepton], verbose, inputFolderName, outputFolder);
 	  }
 	}
@@ -104,7 +105,19 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
   // (ii) list subsamples in vector
   std::vector<int> subSamples_;
   for(int subsample=first; subsample<=last; ++subsample){
-    subSamples_.push_back(subsample);
+    if((sysTag!=sysTopScaleUp&&sysTag!=sysTopScaleDown)||(subsample!=kSAToptW&&subsample!=kSToptW)) subSamples_.push_back(subsample);
+    else{ // for single top scale samples Tw is splitted in 3 subsamples
+      if(subsample==kSToptW){
+	subSamples_.push_back(kSToptW1);
+	subSamples_.push_back(kSToptW2);
+	subSamples_.push_back(kSToptW3);
+      }
+      else if(subsample==kSAToptW){
+	subSamples_.push_back(kSAToptW1);
+	subSamples_.push_back(kSAToptW2);
+	subSamples_.push_back(kSAToptW3);
+      }
+    }
   }
 
   // ---
@@ -125,12 +138,13 @@ void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, 
   for(unsigned int subsample=0; subsample<subSamples_.size(); ++subsample){
     // get subsample file name
     TString fileName = inputFolder+"/"+TopFilename(subSamples_[subsample], sysTag, std::string(decayChannel));
+    //std::cout << fileName << ": " << lumiweight(subSamples_[subsample], 1, sysTag, std::string(decayChannel)) << std::endl;
     // check existence & availability of file
     if((fileName!="no")&&(fileName!="")){
       TFile* file =  TFile::Open(fileName);
       if(file&&!(file->IsZombie())){ 
 	// N.B.: a luminosity of 1 pb is used, lumi normalization is done later in the main file 
-	files_.push_back(std::make_pair(file, lumiweight(subSamples_[subsample], 1, sysTag, std::string(decayChannel))));   
+	files_.push_back(std::make_pair(file, lumiweight(subSamples_[subsample], 1, sysTag, std::string(decayChannel))));  	
       }
     }
   }

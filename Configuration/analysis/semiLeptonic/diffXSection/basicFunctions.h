@@ -87,7 +87,13 @@ namespace semileptonic {
 		   /*23*/    /*24*/    /*25*/    /*26*/
 		   kSigPow , kBkgPow,  kSigMca , kBkgMca,
                    /*27*/
-		   ENDOFSAMPLEENUM};
+		   ENDOFSAMPLEENUM,
+		   // stop scale sample is splitted in 3 subsamples:
+		   /*27*/    /*28*/     /*29*/    /*30*/     /*31*/    /*32*/
+		   kSToptW1, kSAToptW1, kSToptW2, kSAToptW2, kSToptW3, kSAToptW3,
+		   /*33*/
+		   ENDOFSAMPLEENUM2
+  };
 
   // Colors for event samples
 
@@ -282,6 +288,12 @@ namespace semileptonic {
     if(sample==kSAToptW) return "Single Antitop tW";
     if(sample==kSATops ) return "Single Antitop s";
     if(sample==kSATopt ) return "Single Antitop t";
+    if(sample==kSToptW1 ) return "Single Top tW dilepton";
+    if(sample==kSAToptW1) return "Single Antitop tW dilepton";
+    if(sample==kSToptW1 ) return "Single Top tW t->had W->lep";
+    if(sample==kSAToptW1) return "Single Antitop tW t->had W->lep";
+    if(sample==kSToptW1 ) return "Single Top tW t->lep W->had";
+    if(sample==kSAToptW1) return "Single Antitop tW t->lep W->had";
     if(sample==kWjets  ) return "W+Jets";
     if(sample==kZjets  ) return "Z+Jets";
     if(sample==kDiBos  ) return "Diboson";
@@ -774,7 +786,7 @@ namespace semileptonic {
     int verbose=0;
     // a) check if input is valid
     // sample existing?
-    if(sample>=ENDOFSAMPLEENUM){
+    if(sample>=ENDOFSAMPLEENUM2||sample==ENDOFSAMPLEENUM){
       std::cout << "ERROR: invalid sample label for lumiweight calculation, no scaling will be done" << std::endl;
       std::cout << "       ( " << calledfunction << " )" << std::endl;
       return 1.;
@@ -901,47 +913,78 @@ namespace semileptonic {
       crossSection= 1.8;
       Nevents     = 139974;
       // scale variation
-      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
-      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
+      if(kSys==sysTopScaleUp  ) Nevents =999812;
+      if(kSys==sysTopScaleDown) Nevents =999849;
     }
     else if(sample==kSTops){
       crossSection= 3.8;
       Nevents     = 259961;
       // scale variation
-      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
-      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
+      if(kSys==sysTopScaleUp  ) Nevents =1998845;
+      if(kSys==sysTopScaleDown) Nevents =1945749;
     }
     else if(sample==kSATopt){
       crossSection= 30.7;
       Nevents     = 1935072;
       // scale variation
-      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
-      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
+      if(kSys==sysTopScaleUp  ) Nevents =979898;
+      if(kSys==sysTopScaleDown) Nevents =979359;
     }
     else if(sample==kSTopt){
       crossSection= 56.4;
       Nevents     = 3758227;
       // scale variation
-      // if(kSys==sysTopScaleUp  ) Nevents = ; // FIXME UPDATE FOR 8 TEV
-      // if(kSys==sysTopScaleDown) Nevents = ; // FIXME UPDATE FOR 8 TEV
+      if(kSys==sysTopScaleUp  ) Nevents =1945116;
+      if(kSys==sysTopScaleDown) Nevents =1951907;
     }
     else if(sample==kSAToptW){
       crossSection= 11.1;
       Nevents     = 493460;
       // scale variation
-      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
-      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
+      // if(kSys==sysTopScaleUp  ) Nevents =; // not existing for 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents =; // not existing for 8 TEV
     }
     else if(sample==kSToptW){
       crossSection= 11.1; 
       Nevents     = 497658;
       // scale variation
-      // if(kSys==sysTopScaleUp  ) Nevents =; // FIXME UPDATE FOR 8 TEV
-      // if(kSys==sysTopScaleDown) Nevents =; // FIXME UPDATE FOR 8 TEV
-    } 
+      // if(kSys==sysTopScaleUp  ) Nevents =; // not existing 8 TEV
+      // if(kSys==sysTopScaleDown) Nevents =; // not existing 8 TEV
+    }
+    // subsamples for stop scale tW channel
+    else if(sample==kSAToptW1){
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =1492534;
+      if(kSys==sysTopScaleDown) Nevents =1493101;
+    }
+    else if(sample==kSToptW1){
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =1492816;
+      if(kSys==sysTopScaleDown) Nevents =1493130;
+    }
+    else if(sample==kSAToptW2){
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =497676;
+      if(kSys==sysTopScaleDown) Nevents =497682;
+    }
+    else if(sample==kSToptW2){
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =455270;
+      if(kSys==sysTopScaleDown) Nevents =496818;
+    }
+    else if(sample==kSAToptW3){
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =497376;
+      if(kSys==sysTopScaleDown) Nevents =497674;
+    }
+    else if(sample==kSToptW3){
+      // scale variation
+      if(kSys==sysTopScaleUp  ) Nevents =442237;
+      if(kSys==sysTopScaleDown) Nevents =453233;
+    }
     // b) combined single top sample
     else if(sample==kSTop){
-      // Summer12: already added in combineMCsamples.C
+      // already added in combineMCsamples.C
       // with cross section as weight,
       // lumi normalization is done here
       Nevents=1;
@@ -1132,10 +1175,10 @@ namespace semileptonic {
     if(sample==kQCDBCE1)fileName = "MergedFiles/"+fileName+"QCDBCE1"; 
     if(sample==kQCDBCE2)fileName = "MergedFiles/"+fileName+"QCDBCE2";
     if(sample==kQCDBCE3)fileName = "MergedFiles/"+fileName+"QCDBCE3";  
-    if(sample==kSToptW )fileName = "MergedFiles/"+fileName+"SingleTopTW";
+    if(sample==kSToptW ||sample==kSToptW1 ||sample==kSToptW2 ||sample==kSToptW3 )fileName = "MergedFiles/"+fileName+"SingleTopTW";
     if(sample==kSTops  )fileName = "MergedFiles/"+fileName+"SingleTopS";
     if(sample==kSTopt  )fileName = "MergedFiles/"+fileName+"SingleTopT";
-    if(sample==kSAToptW)fileName = "MergedFiles/"+fileName+"SingleAntiTopTW";
+    if(sample==kSAToptW||sample==kSAToptW1||sample==kSAToptW2||sample==kSAToptW3)fileName = "MergedFiles/"+fileName+"SingleAntiTopTW";
     if(sample==kSATops )fileName = "MergedFiles/"+fileName+"SingleAntiTopS";
     if(sample==kSATopt )fileName = "MergedFiles/"+fileName+"SingleAntiTopT";
     // take care of systematic variations
@@ -1160,17 +1203,24 @@ namespace semileptonic {
     }
     // data based pt ttbar reweighting
     if(sample==kSig||sample==kBkg){
-      if(sys==sysTest) fileName = "ttbarReweight/"+fileName+"SysDistortdata";                                                                                                     }  
+      if(sys==sysTest) fileName = "ttbarReweight/"+fileName+"SysDistortdata";    
+    }  
     // Q2-Scale
-    // (a) top
-    if((sys==sysTopScaleUp  )&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleUp/"+fileName+"ScaleUp";    
-    if((sys==sysTopScaleDown)&&((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt))) fileName = "ScaleDown/"+fileName+"ScaleDown";
+    // (a) top (ttbar+single top)
+    if((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt)||(sample==kSToptW1)||(sample==kSAToptW1)||(sample==kSToptW2)||(sample==kSAToptW2)||(sample==kSToptW3)||(sample==kSAToptW3)){
+      if     (sys==sysTopScaleUp  ) fileName = "ScaleUp/"+fileName+"ScaleUp";    
+      else if(sys==sysTopScaleDown) fileName = "ScaleDown/"+fileName+"ScaleDown";
+      // additional prefix for tW scale subsamples
+      if     (sample==kSToptW1||sample==kSAToptW1)fileName += "1";
+      else if(sample==kSToptW2||sample==kSAToptW2)fileName += "2";
+      else if(sample==kSToptW3||sample==kSAToptW3)fileName += "3";
+    }
     // (b) V+jets
     if((sys==sysVBosonScaleUp  )&&(sample==kWjets)) fileName = "ScaleUp/"+fileName+"ScaleUp";    
     if((sys==sysVBosonScaleDown)&&(sample==kWjets)) fileName = "ScaleDown/"+fileName+"ScaleDown";
     if((sys==sysVBosonScaleUp  )&&(sample==kZjets)) {fileName = "ScaleUp/"+fileName+"ScaleUp";     }
     if((sys==sysVBosonScaleDown)&&(sample==kZjets)) {fileName = "ScaleDown/"+fileName+"ScaleDown"; }
-    // (c) SingleTop
+    // (c) joint SingleTop
     if((sys==sysSingleTopScaleUp)  &&(sample==kSTop)) fileName = "ScaleUp/"+fileName+"ScaleUp";   
     if((sys==sysSingleTopScaleDown)&&(sample==kSTop)) fileName = "ScaleDown/"+fileName+"ScaleDown";
     // Matching Scale
