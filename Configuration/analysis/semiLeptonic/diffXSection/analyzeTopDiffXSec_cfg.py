@@ -36,6 +36,8 @@ options.register('mctag', 'Summer12',VarParsing.VarParsing.multiplicity.singleto
 # create variable to indicate number of processed events
 # -42 means nothing is changed wrt number typed below
 options.register('eventsToProcess', -42,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int, "events to process")
+# create label to apply/deactivate MC event weights (needed for MC@NLO)
+options.register('MCweighting', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool, "processing MC weights?")
 
 # define the syntax for parsing
 # you need to enter in the cfg file:
@@ -184,7 +186,16 @@ if(not options.sample=="ttbar"):
 # coupled to PU weight, therefore not applicable without
 if(not PUreweigthing):
     sysDistort=''
-
+## enable/ disable MC event weights (needed only for MC@NLO)
+MCweighting = False # True
+if(options.sample=="mcatnlo"):
+    MCweighting = True
+if(not options.MCweighting=='unset'):
+    MCweighting=options.MCweighting
+# take care of data
+if (not runningOnData == "MC"):
+    MCweighting = False
+        
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
 
@@ -541,6 +552,7 @@ print " Analyzed sample:                    ",usedSample+".py"
 print " Output file name:                   ",outputFileName
 print " Synchronization exercise:           ",cutflowSynch
 print " Additional event weights:           ",additionalEventWeights," ---- If 'True' weights are applied to the KinFit analyzers for monitoring, PU, b-tag and lepton eff. variations"
+print " Apply MC weights(MC@NLO):           ",MCweighting 
 print " Apply shape reweighting, variation: ",sysDistort
 print " rm rec path& use full ttbar sample: ",genFull
 print " "
@@ -659,6 +671,8 @@ process.totalKinematicsFilterDefault = process.totalKinematicsFilter.clone(toler
 ## ---
 ## including analysis tools
 ## ---
+## MC weights (needed for MC@NLO)
+process.load("TopAnalysis.TopUtils.EventWeightMC_cfi")
 ## cross section module
 process.load("TopAnalysis.TopAnalyzer.MuonCrossSection_cfi")
 ## jet kinematics analyzer
@@ -967,6 +981,12 @@ process.tightElectronQualityNjets3     = process.tightElectronQuality   .clone()
 ## MET
 process.analyzeMETMuon       = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
 process.analyzeMETMuonTagged = process.analyzeMETMuon.clone()
+
+## ---
+##    MC Event Weight monitoring
+## ---
+process.load("TopAnalysis.TopAnalyzer.EventWeightDistributions_cfi")
+process.EventWeightDistributions.EventWeightSrc           = cms.InputTag("eventWeightMC")
 
 ## ---
 ##    PU reweighting monitoring
@@ -1533,12 +1553,36 @@ PUweightraw     = cms.InputTag("eventWeightPUsysNo",  "eventWeightPU")
 PUweightrawUp   = cms.InputTag("eventWeightPUsysUp",  "eventWeightPUUp")
 PUweightrawDown = cms.InputTag("eventWeightPUsysDown","eventWeightPUDown")
 
+## ---
+##    combine MC event weights with PU event weights
+## ---
+## tool to multiply event weights
+process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
+
+weightlistMCandPU     = cms.VInputTag()
+weightlistMCandPUUp   = cms.VInputTag()
+weightlistMCandPUDown = cms.VInputTag()
+
+weightlistMCandPU     .append("eventWeightMC")
+weightlistMCandPUUp   .append("eventWeightMC")
+weightlistMCandPUDown .append("eventWeightMC")
+
+weightlistMCandPU     .append(PUweightraw)
+weightlistMCandPUUp   .append(PUweightrawUp)
+weightlistMCandPUDown .append(PUweightrawDown)
+
+process.eventWeightMCandPUweight     = process.eventWeightMultiplier.clone(eventWeightTags = weightlistMCandPU    )
+process.eventWeightMCandPUweightUp   = process.eventWeightMultiplier.clone(eventWeightTags = weightlistMCandPUUp  )
+process.eventWeightMCandPUweightDown = process.eventWeightMultiplier.clone(eventWeightTags = weightlistMCandPUDown)
+
+process.combineEventWeightsMCandPU = cms.Sequence( process.eventWeightMCandPUweight    *
+                                                   process.eventWeightMCandPUweightUp  *
+                                                   process.eventWeightMCandPUweightDown )
+
 ## =================================================
 ##    MC ttbar systematic variation reweighting
 ## =================================================
 
-## tool to multiply event weights
-process.load("TopAnalysis.TopUtils.EventWeightMultiplier_cfi")
 ## load weight producer
 process.load("TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi")
 # specify parameters
@@ -1733,6 +1777,46 @@ weightlistBTagSFShapeUpPt100       =cms.VInputTag()
 weightlistBTagSFShapeDownPt100     =cms.VInputTag()
 weightlistBTagSFShapeUpEta0p7      =cms.VInputTag()
 weightlistBTagSFShapeDownEta0p7    =cms.VInputTag()
+
+if (MCweighting):
+    weightlistFinal                    .append("eventWeightMC")
+    weightlistNoEffSFWeight            .append("eventWeightMC")
+    weightlistNoBtagSFWeight           .append("eventWeightMC")
+    weightlistNoPUWeight               .append("eventWeightMC")
+    weightlistPUup                     .append("eventWeightMC")
+    weightlistPUdown                   .append("eventWeightMC")
+    weightlistFlatEffSF                .append("eventWeightMC")
+    weightlistEffSFNormUpStat          .append("eventWeightMC")
+    weightlistEffSFNormDownStat        .append("eventWeightMC")
+    weightlistEffSFShapeUpEta          .append("eventWeightMC")
+    weightlistEffSFShapeDownEta        .append("eventWeightMC")
+    weightlistEffSFShapeUpPt           .append("eventWeightMC")
+    weightlistEffSFShapeDownPt         .append("eventWeightMC")
+    weightlistEffSFShapeUpPt40         .append("eventWeightMC")
+    weightlistEffSFShapeDownPt40       .append("eventWeightMC")
+    weightlistEffSFNormUpSys           .append("eventWeightMC")
+    weightlistEffSFNormDownSys         .append("eventWeightMC")
+    weightlistTriggerEffSFJetNormUp    .append("eventWeightMC")
+    weightlistTriggerEffSFJetNormDown  .append("eventWeightMC")
+    weightlistTriggerEffSFJetShapeUp   .append("eventWeightMC")
+    weightlistTriggerEffSFJetShapeDown .append("eventWeightMC")
+    weightlistFinalSSV                 .append("eventWeightMC")
+    weightlistBtagSFup                 .append("eventWeightMC")
+    weightlistBtagSFdown               .append("eventWeightMC")
+    weightlistMisTagSFup               .append("eventWeightMC")
+    weightlistMisTagSFdown             .append("eventWeightMC")
+    weightlistBTagSFShapeUpPt65        .append("eventWeightMC") 
+    weightlistBTagSFShapeDownPt65      .append("eventWeightMC") 
+    weightlistBTagSFShapeUpEta1p2      .append("eventWeightMC") 
+    weightlistBTagSFShapeDownEta1p2    .append("eventWeightMC") 
+    weightlistBTagSFFullShapeUpPt65    .append("eventWeightMC") 
+    weightlistBTagSFFullShapeDownPt65  .append("eventWeightMC") 
+    weightlistBTagSFFullShapeUpEta0p7  .append("eventWeightMC") 
+    weightlistBTagSFFullShapeDownEta0p7.append("eventWeightMC") 
+    weightlistBTagSFShapeUpPt100       .append("eventWeightMC") 
+    weightlistBTagSFShapeDownPt100     .append("eventWeightMC") 
+    weightlistBTagSFShapeUpEta0p7      .append("eventWeightMC") 
+    weightlistBTagSFShapeDownEta0p7    .append("eventWeightMC") 
 
 if(PUreweigthing):
     weightlistFinal                    .append(PUweight)
@@ -1940,7 +2024,10 @@ PUModuleList = set(['PUControlDistributionsDefault','PUControlDistributionsBefor
 if(runningOnData=="MC" and not PUreweigthing and not effSFReweigthing and not BtagReweigthing):
     for module in modulelist:
         if module not in PUModuleList:
-            getattr(process,module).weight=cms.InputTag("")     
+            if(MCweighting):
+                getattr(process,module).weight=cms.InputTag("eventWeightMC")
+            else:
+                getattr(process,module).weight=cms.InputTag("")
 # b) Re-weighting (PU and/or effSF) for reco-modules
 if(runningOnData=="MC" and (PUreweigthing or effSFReweigthing)):
     if(PUreweigthing):
@@ -1977,28 +2064,42 @@ if(runningOnData=="MC" and BtagReweigthing):
 if(runningOnData=="MC" and PUreweigthing):
     print
     print " The following gen-modules will only use the PU reweighting:"
+    if(MCweighting):
+        print "(and MC weight!)"
     #print genModules1
     #print genModules2
     for module1 in genModules1:
         if(not module1=='makeGenLevelBJets'):
             print module1
-            getattr(process,module1).weight=PUweight
+            if(MCweighting):
+                getattr(process,module1).weight=cms.InputTag("eventWeightMCandPUweight")
+            else:            
+                getattr(process,module1).weight=PUweight
     for module2 in genModules2:
         if(not module2=='makeGenLevelBJets'):
             print module2
-            getattr(process,module2).weight=PUweight
+            if(MCweighting):
+                getattr(process,module2).weight=cms.InputTag("eventWeightMCandPUweight")
+            else:            
+                getattr(process,module2).weight=PUweight
     genModules3 = process.kinFitGenPhaseSpaceHad.moduleNames()
     #print genModules3
     for module3 in genModules3:
         if(not module3=='makeGenLevelBJets'):
             print module3
-            getattr(process,module3).weight=PUweight
+            if(MCweighting):
+                getattr(process,module3).weight=cms.InputTag("eventWeightMCandPUweight")
+            else:            
+                getattr(process,module3).weight=PUweight
     genModules4 = process.hadLvObjectMonitoring.moduleNames()
     #print genModules4
     for module4 in genModules4:
         if(not module4=='makeGenLevelBJets'):
             print module4
-            getattr(process,module4).weight=PUweight
+            if(MCweighting):
+                getattr(process,module4).weight=cms.InputTag("eventWeightMCandPUweight")
+            else:            
+                getattr(process,module4).weight=PUweight
     if(additionalEventWeights and eventFilter=='signal only'):
         print "those gen modules are also cloned in order to also use NoPU, PUup and PUdown event weights "
 
@@ -2011,11 +2112,20 @@ if(runningOnData=="MC" and PUreweigthing):
         genSystExt=["NoPUWeight", "PUup", "PUdown"]
         for sys in genSystExt:
             # get correct weight
-            weightTagName=cms.InputTag("")
+            if(MCweighting):
+                weightTagName=cms.InputTag("eventWeightMC")
+            else:
+                weightTagName=cms.InputTag("")
             if(not sys.find("PUup") == -1):
-                weightTagName=PUweightUp
+                if(MCweighting):
+                    weightTagName=cms.InputTag("eventWeightMCandPUweightUp")
+                else:
+                    weightTagName=PUweightUp
             elif(not sys.find("PUdown") == -1):
-                weightTagName=PUweightDown
+                if(MCweighting):
+                    weightTagName=cms.InputTag("eventWeightMCandPUweightDown")
+                else:
+                    weightTagName=PUweightDown
             # create plots for full PS
             setattr(process,"analyzeTopPartonLevelKinematics"+sys, process.analyzeTopPartonLevelKinematics.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematics"+sys).analyze.useTree = False
@@ -2068,28 +2178,61 @@ if(runningOnData=="MC" and PUreweigthing):
 elif(runningOnData=="MC" and not PUreweigthing):
     for module1 in genModules1:
         if(not module1=='makeGenLevelBJets'):
-            getattr(process,module1).weight=cms.InputTag("")
+            if(MCweighting):
+                getattr(process,module1).weight=cms.InputTag("eventWeightMC")
+            else:
+                getattr(process,module1).weight=cms.InputTag("")
+            
     for module2 in genModules2:
         if(not module2=='makeGenLevelBJets'):
-            getattr(process,module2).weight=cms.InputTag("")
-    #for module3 in genModules3:
-    #    if(not module3=='makeGenLevelBJets'):
-    #        getattr(process,module3).weight=cms.InputTag("")
-    #for module4 in genModules4:
-    #    if(not module4=='makeGenLevelBJets'):
-    #        getattr(process,module4).weight=cms.InputTag("")
+            if(MCweighting):
+                getattr(process,module2).weight=cms.InputTag("eventWeightMC")
+            else:
+                getattr(process,module2).weight=cms.InputTag("")
+##     for module3 in genModules3:
+##        if(not module3=='makeGenLevelBJets'):
+##            if(MCweighting):
+##                getattr(process,module3).weight=cms.InputTag("eventWeightMC")
+##            else:
+##                getattr(process,module3).weight=cms.InputTag("")
+##     for module4 in genModules4:
+##        if(not module4=='makeGenLevelBJets'):
+##            if(MCweighting):
+##                getattr(process,module4).weight=cms.InputTag("eventWeightMC")
+##            else:
+##                getattr(process,module4).weight=cms.InputTag("")
 
 # e) PU Modules - special configuration because of different possible PU weights that are handled in the modules themselves
 if(runningOnData=="MC"):
     if(effSFReweigthing and decayChannel=="muon"):
-        process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("effSFMuonEventWeight")
-        process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("effSFMuonEventWeight")
-    elif(effSFReweigthing and decayChannel=="electron"):     
-        process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("effSFElectronEventWeight")
-        process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("effSFElectronEventWeight")
+        if(MCweighting):
+            weightlistMCandSFMuon=cms.VInputTag()
+            weightlistMCandSFMuon.append("eventWeightMC")
+            weightlistMCandSFMuon.append("effSFMuonEventWeight")
+            process.eventWeightMCandSFMuon=process.eventWeightMultiplier.clone(eventWeightTags = weightlistMCandSFMuon)
+            process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("eventWeightMCandSFMuon")
+            process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("eventWeightMCandSFMuon")
+        else:
+            process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("effSFMuonEventWeight")
+            process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("effSFMuonEventWeight")
+    elif(effSFReweigthing and decayChannel=="electron"):
+        if(MCweighting):
+            weightlistMCandSFElectron=cms.VInputTag()
+            weightlistMCandSFElectron.append("eventWeightMC")
+            weightlistMCandSFElectron.append("effSFElectronEventWeight")
+            process.eventWeightMCandSFElectron=process.eventWeightMultiplier.clone(eventWeightTags = weightlistMCandSFElectron)
+            process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("eventWeightMCandSFElectron")
+            process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("eventWeightMCandSFElectron")
+        else:
+            process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("effSFElectronEventWeight")
+            process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("effSFElectronEventWeight")
     else:
-        process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("")
-        process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("")
+        if(MCweighting):
+            process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("eventWeightMC")
+            process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("eventWeightMC")
+        else:
+            process.PUControlDistributionsDefault.DefEventWeight        = cms.InputTag("")
+            process.PUControlDistributionsBeforeBtagging.DefEventWeight = cms.InputTag("")
     # 'eventWeightNoPUWeight' combines the correct combination of 'effSFReweigthing' and 'BtagReweigthing'
     process.PUControlDistributionsAfterBtagging.DefEventWeight  = cms.InputTag("eventWeightNoPUWeight")    
     ## copies of TopRecoKinematicsKinFit analyzers with varied weights for monitoring and systematic unc.
@@ -2113,7 +2256,10 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         # take care of correct name and non existing weights
         weightTagName=cms.InputTag("eventWeight"+sys)
         if(not sys.find("OnlyPUWeight") == -1):
-            weightTagName=PUweight
+            if(MCweighting):
+                weightTagName=cms.InputTag("eventWeightMCandPUweight")
+            else:
+                weightTagName=PUweight
         noweight=False
         if(not PUreweigthing and not sys.find("PU") == -1):
             noweight=True
@@ -2122,7 +2268,10 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         if(not sys.find("NoWeight") == -1):
             noweight=True
         if(noweight):
-            weightTagName=cms.InputTag("")
+            if(MCweighting):
+                weightTagName=cms.InputTag("eventWeightMC")
+            else:
+                weightTagName=cms.InputTag("")
         # create plots for standard analyzer
         setattr(process,"analyzeTopRecoKinematicsKinFit"+sys, process.analyzeTopRecoKinematicsKinFit.clone(weight=weightTagName))
         getattr(process,"analyzeTopRecoKinematicsKinFit"+sys).analyze.useTree = False
@@ -2711,6 +2860,14 @@ if (PythiaSample=="False" and runningOnData=="MC"):
         for path in allpaths:
             getattr(process,path).insert(0,process.totalKinematicsFilterDefault)
 
+# include MC event weights (needed for MCatNLO)
+if(MCweighting):
+    MCpathlist = [process.p1, process.p2, process.p3, process.p4]#, *process.p5]
+    for path in MCpathlist:
+        path.insert(0,process.eventWeightMC)
+        path.replace(process.makeEventWeightsPU,
+                     process.makeEventWeightsPU  * process.combineEventWeightsMCandPU)
+
 ## Output Module Configuration
 if(writeOutput):
     from PhysicsTools.PatAlgos.patEventContent_cff import *
@@ -2725,6 +2882,7 @@ if(writeOutput):
     process.out.outputCommands += patExtraAodEventContent
     process.outpath = cms.EndPath(process.out)
 
+
 ## possibly remove event reweighting
 
 # define allpaths if not done yet
@@ -2735,7 +2893,8 @@ if(not pfToPAT):
 if(not PUreweigthing or runningOnData=="data"):
     for path in allpaths:
         getattr(process,path).remove( process.makeEventWeightsPU )
-
+        if(MCweighting):
+            getattr(process,path).remove( process.combineEventWeightsMCandPU )         
 # Eff SF
 if(not effSFReweigthing or runningOnData=="data"):
     for path in allpaths:
