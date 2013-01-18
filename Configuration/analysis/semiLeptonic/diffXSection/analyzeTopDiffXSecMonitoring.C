@@ -1188,14 +1188,15 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	       plotList_[plot].Contains("tightJetKinematicsTagged/pt"   )||
 	       plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit")){
 	      double width=histo_[plotList_[plot]][sample]->GetBinWidth(1);
-	      TString argument=" / %";
+	      TString argument2=" / %";
 	      TString precMain="2";
 	      TString precSub=getTStringFromInt(getRelevantDigits(width));
 	      //TString precSub="1";
-	      argument+=precMain+"."+precSub;
-	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))) argument+="d GeV";
-	      else argument+="f";
-	      if(verbose>2) std::cout <<  width << ": " << argument << std::endl;
+	      argument2+=precMain+"."+precSub;
+	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))) argument2+="f GeV";
+	      else argument2+="f";
+	      const char * argument=argument2.Data();
+	      if(verbose>1) std::cout <<  plotList_[plot] << ":" << width << " -> " << argument << " -> " << Form(argument,width) << std::endl;
 	      titleY += Form(argument,width);
 	    }
 	    axesStyle(*histo_[plotList_[plot]][sample], getStringEntry(axisLabel_[plot],1,";"), titleY, min, max);
