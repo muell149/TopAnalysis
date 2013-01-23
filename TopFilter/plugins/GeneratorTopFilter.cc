@@ -275,11 +275,13 @@ bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
     }           
   }
 
+  //store the decay mode
+  std::auto_ptr<int> decay(new int);
+  *decay = decayVl;
+  evt.put(decay, "decayMode");
+  
   for(unsigned int i=0; i<selChSize; i++){
     if(decayVl==selectedChannels.at(i)) {
-        std::auto_ptr<int> decay(new int);
-        *decay = decayVl;
-        evt.put(decay, "decayMode");
         return passed;
     }
   }
@@ -384,6 +386,9 @@ void GeneratorTopFilter::beginJob() {
       }
       else if(chn == "FullHadronic"){ 
 	  selectedChannels.push_back(11); 	  
+      }
+      else if(chn == "none"){
+          //empty
       }
       else{
 	edm::LogError("GeneratorTopFilter") << "Unknown channel short cut in configuration: " << chn;
