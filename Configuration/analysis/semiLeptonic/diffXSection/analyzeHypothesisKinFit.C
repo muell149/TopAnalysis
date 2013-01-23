@@ -3,7 +3,7 @@
 #include "../../unfolding/TopSVDFunctions.C" 
 
 void analyzeHypothesisKinFit(double luminosity = 12148.,
-			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=1, 
+			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
