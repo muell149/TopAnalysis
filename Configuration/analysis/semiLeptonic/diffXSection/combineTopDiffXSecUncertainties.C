@@ -47,7 +47,8 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
   gStyle->SetErrorX(0.5); // needed to keep the functions alive drawn with DrawSteps
-  
+  gROOT->SetBatch(); // you dont want to see all canvas
+
   // ============================
   //  Parameter Configuration
   // ============================
@@ -477,9 +478,9 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 		  // hadron lv PS lepton and b-jet PDF uncertainties
 		  if(!extrapolate&&hadron&&(sys==sysPDFUp||sys==sysPDFDown)&&(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq"))){
 		    if(verbose>1) std::cout << "load unc PDF for " << xSecVariables_[i] << " bin " << bin << std::endl;
-		    TString fileName="/afs/naf.desy.de/group/cms/scratch/tophh/tmp/diffXSecTopSemi";
-		    if(decayChannel=="muon"    ) fileName+="Mu2012";
-		    else if(decayChannel=="electron") fileName+="Elec2012";
+		    TString fileName="/afs/naf.desy.de/group/cms/scratch/tophh/8TeVResults/diffXSecTopSemi";
+		    if(decayChannel=="muon"    ) fileName+="Mu";
+		    else if(decayChannel=="electron") fileName+="Elec";
 		    else if(decayChannel=="combined") fileName+="Lep";
 		    fileName+="PartonPhaseSpace.root";   
 		    TString canvName="relativeUncertainties/"+xSecVariables_[i]+"/relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i];
@@ -1030,9 +1031,12 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 	      //canvas2->SetGrid(1,0);
 	      // draw xSec 
 	      int NxSecBins=3000;
-	      double xSecMax=300.0;
-	      if(!extrapolate) xSecMax=10.;
-	      double xSecMin=0.;
+	      double xSecMin=50.;
+	      double xSecMax=300.;
+	      if(!extrapolate){ 
+		xSecMin=0.;
+		xSecMax=10.;
+	      }	 
 	      TH1F* finalInclusiveXSec = new TH1F( "finalInclusive", "finalInclusive", NxSecBins, xSecMin, xSecMax);
 	      // x axis as xSec[pb] indicator
 	      int xSecBin=roundToInt(histo_["inclusive"][sysNo]->GetBinContent(1)*((double)NxSecBins)/xSecMax)+1;
@@ -1049,12 +1053,12 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 	      finalInclusiveXSec->GetYaxis()->SetTitleSize(0.0);							
 	      finalInclusiveXSec->Draw("axis");
 	      // draw Theory expectation     
-	      double theoryXSecNLL=165.6;
-	      double theoryXSecNLO=157.5;
-	      double theoryErrorNLOUp  =23.2;
-	      double theoryErrorNLODown=24.4;
-	      double theoryErrorNLLUp  =sqrt(6.2*6.2+9.1*9.1);
-	      double theoryErrorNLLDown=sqrt(6.2*6.2+9.1*9.1);
+	      double theoryXSecNLL=234;
+	      double theoryXSecNLO=225.197;
+	      double theoryErrorNLOUp  =23.2/157.5*theoryXSecNLO; // FIXME: use relative uncertainty from 7TeV
+	      double theoryErrorNLODown=24.4/157.5*theoryXSecNLO; // FIXME: use relative uncertainty from 7TeV
+	      double theoryErrorNLLUp  =sqrt(12.*12.+ 10.*10.);
+	      double theoryErrorNLLDown=sqrt(12.*12.+ 7.*7.);
 	      TBox* TheoryError = new TBox(theoryXSecNLO-theoryErrorNLODown, 0.0, theoryXSecNLO+theoryErrorNLOUp, 4.0);
 	      TBox* TheoryError2= new TBox(theoryXSecNLL-theoryErrorNLLDown, 0.0 ,theoryXSecNLL+theoryErrorNLLUp, 4.0);
 	      TheoryError->SetFillColor(kGray);
@@ -1069,15 +1073,15 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 	      double totalErrorUp  = totalErrors_[xSecVariables_[i]]->GetErrorYhigh(1);
 	      double totalErrorDown= totalErrors_[xSecVariables_[i]]->GetErrorYlow(1);
 	      // 2011 CMS dilepton result - 
-	      double cms2010xSecValue=161.9;
-	      double cms2010ErrorUp  =sqrt(2.5*2.5+5.*5.+3.6*3.6);
-	      double cms2010ErrorDown=cms2010ErrorUp;
-	      double cms2010StatError=2.5;
+	      double cmsLJetsxSecValue=228.4;
+	      double cmsLJetsErrorUp  =sqrt(9*9+(29*29+26*26)/2+10.*10.);
+	      double cmsLJetsErrorDown=cmsLJetsErrorUp;
+	      double cmsLJetsStatError=9;
 	      // 2011 CMS 1fb combined result - TOP-11-024 
-	      double cms2011xSecValue=165.8;
-	      double cms2011ErrorUp  =sqrt(2.2*2.2+10.6*10.6+7.8*7.8);
-	      double cms2011ErrorDown=cms2011ErrorUp;
-	      double cms2011StatError=2.2;
+	      double cmsDiLepxSecValue=227;
+	      double cmsDiLepErrorUp  =sqrt(3*3+11*11+10*10);
+	      double cmsDiLepErrorDown=cmsDiLepErrorUp;
+	      double cmsDiLepStatError=3;
 	      if(verbose>0){
 		std::cout << "xSec:            " << xSecValue      << std::endl;
 		std::cout << "stat. error: +/- " << xSecError      << " (" << xSecError/xSecValue      << ")" << std::endl;
@@ -1087,8 +1091,8 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 	      totalErrors_[xSecVariables_[i]+"AllInclusive"] = new TGraphAsymmErrors(3);  // number of data point as argument to constructor
 	      totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPoint(0, xSecValue,        1);
 	      if(extrapolate){
-		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPoint(1, cms2011xSecValue, 2);
-		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPoint(2, cms2010xSecValue, 3);
+		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPoint(1, cmsDiLepxSecValue, 2);
+		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPoint(2, cmsLJetsxSecValue, 3);
 	      }
 	      else{
 		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPoint(1, -1, 2);
@@ -1096,8 +1100,8 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 	      }
 	      totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPointError(0, totalErrorDown,   totalErrorUp,   0, 0);
 	      if(extrapolate){
-		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPointError(1, cms2011ErrorDown, cms2011ErrorUp, 0, 0);
-		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPointError(2, cms2010ErrorDown, cms2010ErrorUp, 0, 0);
+		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPointError(1, cmsDiLepErrorDown, cmsDiLepErrorUp, 0, 0);
+		totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetPointError(2, cmsLJetsErrorDown, cmsLJetsErrorUp, 0, 0);
 	      }
 	      totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetLineWidth(3);
 	      totalErrors_[xSecVariables_[i]+"AllInclusive"]->SetMarkerSize(1.5);
@@ -1107,19 +1111,19 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
 	      finalInclusiveXSec->Draw("axis same");
 	      drawLine(xSecValue-xSecError,               1.0, xSecValue+xSecError,               1.0, kRed+1, 6, 1);
 	      if(extrapolate){
-		drawLine(cms2011xSecValue-cms2011StatError, 2.0, cms2011xSecValue+cms2011StatError, 2.0, kRed+1, 6, 1);	  
-		drawLine(cms2010xSecValue-cms2010StatError, 3.0, cms2010xSecValue+cms2010StatError, 3.0, kRed+1, 6, 1);
+		drawLine(cmsDiLepxSecValue-cmsDiLepStatError, 2.0, cmsDiLepxSecValue+cmsDiLepStatError, 2.0, kRed+1, 6, 1);	  
+		drawLine(cmsLJetsxSecValue-cmsLJetsStatError, 3.0, cmsLJetsxSecValue+cmsLJetsStatError, 3.0, kRed+1, 6, 1);
 	      }
 	      totalErrors_[xSecVariables_[i]+"AllInclusive"]->Draw("p same");
 	      //Labels
 	      if(extrapolate){
-		DrawLabel("CMS 2011 dilepton"   , 0.07, 0.70, 0.4, 0.75); 
-		DrawLabel("2011 data, 2.3/fb"   , 0.07, 0.65, 0.4, 0.70);
-		DrawLabel("(arXiv:1208.2671v1)" , 0.07, 0.60, 0.4, 0.65);
+		DrawLabel("CMS preliminary 8TeV" , 0.07, 0.70, 0.4, 0.75); 
+		DrawLabel("e/#mu + Jets, 2.8/fb"   , 0.07, 0.65, 0.4, 0.70);
+		DrawLabel("(CMS-PAS-TOP-12-006)" , 0.07, 0.60, 0.4, 0.65);
 		
-		DrawLabel("CMS 2011 combined"      , 0.07, 0.50, 0.4, 0.55); 
-		DrawLabel("2011 data, 0.8-1.09/fb" , 0.07, 0.45, 0.4, 0.50);
-		DrawLabel("(TOP-11-024)"           , 0.07, 0.40, 0.4, 0.45);
+		DrawLabel("CMS preliminary 8TeV"   , 0.07, 0.50, 0.4, 0.55); 
+		DrawLabel("#mu#mu/e#mu/ee, 2.4/fb" , 0.07, 0.45, 0.4, 0.50);
+		DrawLabel("(CMS-PAS-TOP-12-007)"   , 0.07, 0.40, 0.4, 0.45);
 	      }
 	      TString channelLabel="unknown";
 	      TString dataLabel=Form(dataSample+" data, %2.1f fb^{-1}",luminosity/1000);
