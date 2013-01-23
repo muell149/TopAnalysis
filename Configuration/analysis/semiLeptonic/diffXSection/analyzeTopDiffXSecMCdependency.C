@@ -31,7 +31,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 12148, std::string decay
   // define names
   // file name for input rootfile
   TString analysisFileName="";
-  TString SampleTag="Fall11";
+  TString SampleTag="Summer12";
   if     (decayChannel=="muon"    ) analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/muonDiffXSecSig"+SampleTag+"PF.root";
   else if(decayChannel=="electron") analysisFileName="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/elecDiffXSecSig"+SampleTag+"PF.root";
   else{
@@ -60,7 +60,7 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 12148, std::string decay
   TString genfolder2=genfolder;
   genfolder+="PhaseSpace";
   // name for folder where plots are saved to
-  TString savePlotsTo="./diffXSecFromSignal/plots/"+decayChannel+"/2011/shapeReweighting";
+  TString savePlotsTo="./diffXSecFromSignal/plots/"+decayChannel+"/2012/shapeReweighting";
   // define variables
   std::vector<TString> variable_;
   TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta"};
