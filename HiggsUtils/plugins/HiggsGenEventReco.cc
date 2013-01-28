@@ -13,7 +13,7 @@
 //
 // Original Author:  Johannes Hauk,,,DESY
 //         Created:  Mon Jan 14 18:52:07 CET 2013
-// $Id$
+// $Id: HiggsGenEventReco.cc,v 1.1 2013/01/17 14:56:42 hauk Exp $
 //
 //
 
@@ -142,11 +142,9 @@ HiggsGenEventReco::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup con
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
 HiggsGenEventReco::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
-  // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
-  desc.setUnknown();
-  descriptions.addDefault(desc);
+  desc.add<edm::InputTag>("src", edm::InputTag("decaySubsetHiggs"));
+  descriptions.add("genEvtHiggs", desc);
 }
 
 //define this as a plug-in

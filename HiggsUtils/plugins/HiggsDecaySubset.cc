@@ -13,7 +13,7 @@
 //
 // Original Author:  Johannes Hauk,,,DESY
 //         Created:  Tue Jan 15 14:35:52 CET 2013
-// $Id: HiggsDecaySubset.cc,v 1.1 2013/01/17 14:43:42 hauk Exp $
+// $Id: HiggsDecaySubset.cc,v 1.2 2013/01/24 10:29:50 hauk Exp $
 //
 //
 
@@ -29,6 +29,8 @@
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -421,11 +423,11 @@ HiggsDecaySubset::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup cons
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
 HiggsDecaySubset::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
-  // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
-  desc.setUnknown();
-  descriptions.addDefault(desc);
+  desc.add<edm::InputTag>("src", edm::InputTag("genParticles"));
+  desc.add<std::string>("fillMode", "kStable");
+  desc.add<bool>("addRadiation", true);
+  descriptions.add("decaySubsetHiggs", desc);
 }
 
 //define this as a plug-in
