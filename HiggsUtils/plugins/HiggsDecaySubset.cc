@@ -13,7 +13,7 @@
 //
 // Original Author:  Johannes Hauk,,,DESY
 //         Created:  Tue Jan 15 14:35:52 CET 2013
-// $Id: HiggsDecaySubset.cc,v 1.2 2013/01/24 10:29:50 hauk Exp $
+// $Id: HiggsDecaySubset.cc,v 1.3 2013/01/28 16:39:33 hauk Exp $
 //
 //
 
@@ -423,10 +423,12 @@ HiggsDecaySubset::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup cons
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
 HiggsDecaySubset::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  // prefer to set the parameters without a default value:
+  // an exception is thrown when the parameter is not defined in the config files, instead of silently using the default given here
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("src", edm::InputTag("genParticles"));
-  desc.add<std::string>("fillMode", "kStable");
-  desc.add<bool>("addRadiation", true);
+  desc.add<edm::InputTag>("src");
+  desc.add<std::string>("fillMode");
+  desc.add<bool>("addRadiation");
   descriptions.add("decaySubsetHiggs", desc);
 }
 

@@ -13,7 +13,7 @@
 //
 // Original Author:  Johannes Hauk,,,DESY
 //         Created:  Mon Jan 14 18:52:07 CET 2013
-// $Id: HiggsGenEventReco.cc,v 1.1 2013/01/17 14:56:42 hauk Exp $
+// $Id: HiggsGenEventReco.cc,v 1.2 2013/01/28 16:39:33 hauk Exp $
 //
 //
 
@@ -143,7 +143,7 @@ HiggsGenEventReco::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup con
 void
 HiggsGenEventReco::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("src", edm::InputTag("decaySubsetHiggs"));
+  desc.add<edm::InputTag>("src");
   descriptions.add("genEvtHiggs", desc);
 }
 
