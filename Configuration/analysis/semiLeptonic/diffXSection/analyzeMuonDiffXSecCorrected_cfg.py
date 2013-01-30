@@ -8,7 +8,7 @@
 execfile("analyzeTopDiffXSec_cfg.py")
 
 ## change input collections to JER-shifted collections (for reco paths only)
-from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+#from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
 pathlist = [process.p1, process.p2]#, process.p5]
 for path in pathlist:
     if(jetType=="particleFlow"):
@@ -24,7 +24,7 @@ for path in pathlist:
         print "unknown jetType"
 
 ## get JER/JES-shifting module
-process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
+#process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
 # set input collection- needed while running on pat tuples
 if(jetType=="particleFlow"):
     process.scaledJetEnergy.inputJets = "selectedPatJetsAK5PF"
