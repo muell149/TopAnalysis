@@ -93,6 +93,10 @@ void TopKinematics::book()
   /**
      Top Variables for Cross Checks
   **/
+  // pt of the leading top candidate
+  hists_["topPtLead"   ] = new TH1F( "topPtLead"     , "topPtLead"   ,  800,  0. ,  800.);  
+  // pt of the subleading top candidate
+  hists_["topPtSubLead"] = new TH1F( "topPtSubLead"  , "topPtSubLead",  800,  0. ,  800.);
   // pt of the hadronically decaying top candidate
   hists_["topPtHad"  ] = new TH1F( "topPtHad"  , "topPtHad"  ,  800,  0. ,  800.);
   // y  of the hadronically decaying top candidate
@@ -389,6 +393,10 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   /**
      Top Variables for Cross Checks
   **/
+  // pt of the leading top candidate
+  hists_["topPtLead"   ] =fs->make<TH1F>( "topPtLead"   , "topPtLead"   , 800, 0. , 800.);  
+  // pt of the subleading top candidate
+  hists_["topPtSubLead"] =fs->make<TH1F>( "topPtSubLead", "topPtSubLead", 800, 0. , 800.);
   // pt of the hadronically decaying top candidate
   hists_["topPtHad"  ] = fs->make<TH1F>( "topPtHad"  , "topPtHad"  ,  800,  0. ,  800.);
   // y  of the hadronically decaying top candidate
@@ -940,7 +948,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       reco::Particle::LorentzVector genTtbar = hadTopGen->p4()+lepTopGen->p4();
       reco::Particle::LorentzVector recTtbar = hadTopRec->p4()+lepTopRec->p4();
       reco::Particle::LorentzVector genBbbar = lepBGen->p4()+hadBGen->p4();
-      reco::Particle::LorentzVector recBbbar = lepBRec->p4()+hadBRec->p4();
+      //reco::Particle::LorentzVector recBbbar = lepBRec->p4()+hadBRec->p4();
  
       /**
          fill parton level truth tree
@@ -1432,6 +1440,17 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   fillValue( "topPtPlus"  , topPlus->p4().pt()       , weight );
   fillValue( "topPtMinus" , topMinus->p4().pt()      , weight );
 
+  double ptLead   =leptonicTop->p4().pt();
+  double ptSubLead=hadronicTop->p4().pt();
+  if(ptLead<ptSubLead){// swop them
+    double temp=ptLead;
+    ptLead=ptSubLead;
+    ptSubLead=temp;
+  }
+  // fill top pt for leading Top candidate
+  fillValue( "topPtLead"   , ptLead   , weight );
+  // fill top pt for subleading Top candidate
+  fillValue( "topPtSubLead", ptSubLead, weight );
 
   // ---
   //    bbbar variables
