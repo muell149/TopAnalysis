@@ -957,8 +957,6 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   )
 if(decayChannel=='electron'):
     process.compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
-process.compositedKinematicsTagged = process.compositedKinematics.clone()
-process.compositedKinematicsTagged.semiLepEvent = cms.InputTag("ttSemiLepEvent")
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
 process.compositedKinematics.btagDiscr=cms.double(0.244) # loose WP for untagged selection
@@ -1214,9 +1212,7 @@ process.analyzeTopPartonLevelKinematics = process.analyzeTopGenKinematics.clone(
 process.analyzeTopPartonLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 ## c) after hadron level phase space selection
 process.analyzeTopHadronLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
-## 5) same as 1) for monitoring before probability selection
-process.analyzeTopRecoKinematicsKinFitBeforeProbSel = process.analyzeTopRecoKinematicsKinFit.clone()
-
+                                             
 ## configure Kin Fit performance analyzers
 process.load("TopAnalysis.TopAnalyzer.HypothesisKinFit_cfi"    )
 hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"),
@@ -1378,6 +1374,11 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   process.bGenJetSelection                     
                                   )
 
+## collect relevant analyzers after probability selection
+process.analyzeTopRecoKinematicsKinFitProbSel = process.analyzeTopRecoKinematicsKinFit.clone()
+process.analyzeTopRecoKinematicsBjetsProbSel  = process.analyzeTopRecoKinematicsBjets.clone()
+process.analyzeTopRecoKinematicsLeptonProbSel = process.analyzeTopRecoKinematicsLepton.clone()
+
 ## ---
 ##    collect KinFit Analyzers depending on sample processed
 ## ---
@@ -1392,10 +1393,7 @@ if(applyKinFit==True):
             process.kinFit    = cms.Sequence(process.tightLightPFJets                        +
                                              process.lightJetSelection                       +
                                              process.makeTtSemiLepEvent                      +
-                                             process.compositedKinematicsTagged              +
                                              process.filterRecoKinFit                        +
-                                             process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                             process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -1409,6 +1407,10 @@ if(applyKinFit==True):
                                              process.analyzeHypoKinFitJetsCorr               +
                                              process.analyzeTopRecoKinematicsBjets           +
                                              process.analyzeTopRecoKinematicsLepton          +
+                                             process.filterProbKinFit                        +
+                                             process.analyzeTopRecoKinematicsKinFitProbSel   +
+                                             process.analyzeTopRecoKinematicsBjetsProbSel    +
+                                             process.analyzeTopRecoKinematicsLeptonProbSel   +                                             
                                              process.filterMatchKinFit
                                              )
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics     +
@@ -1646,9 +1648,9 @@ process.bTagSFEventWeight.bTagAlgo=bTagAlgoShort
 process.bTagSFEventWeight.version="12-470"
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown, 
                                                     # bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta possible;
-process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+bTagAlgoShort+".root"
+#process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+bTagAlgoShort+".root"
 #FIXME: use the following file for the next round of resubmitting:
-#process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency2012.root" 
+process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency2012.root" 
 process.bTagSFEventWeight.verbose=cms.int32(0)
 
 ## for SSV:
@@ -1684,7 +1686,7 @@ process.effSFMuonEventWeight.sysVar   = cms.string("")
 process.effSFMuonEventWeight.filename= "TopAnalysis/Configuration/data/MuonEffSF2012.root"
 process.effSFMuonEventWeight.verbose=cms.int32(0)
 process.effSFMuonEventWeight.additionalFactor=1.0 ## lepton selection and trigger eff. SF both included in loaded histo
-process.effSFMuonEventWeight.additionalFactorErr=0.00 ## 0% sys error to account for non-flatness
+process.effSFMuonEventWeight.additionalFactorErr=0.01 ## 1% sys error to account for non-flatness
 process.effSFMuonEventWeight.meanTriggerEffSF=1.0
 process.effSFMuonEventWeight.shapeDistortionFactor=-1
 
@@ -1709,8 +1711,8 @@ process.effSFElectronEventWeight.sysVar   = cms.string("")
 process.effSFElectronEventWeight.verbose=cms.int32(0)
 process.effSFElectronEventWeight.filenameJetLeg="TopAnalysis/Configuration/data/JetLegTriggerEfficiencyIsoLepTriJetJetMult4.root"
 process.effSFElectronEventWeight.additionalFactor=1. ## lepton selection eff. SF
-process.effSFElectronEventWeight.additionalFactorErr=0.00 ## 0% sys error to account for selection difference Z - ttbar
-process.effSFElectronEventWeight.meanTriggerEffSF=0.97562 ## FIXME: this is currentl used as complete SF, the jet part is set to 1.0
+process.effSFElectronEventWeight.additionalFactorErr=0.03 ## 3% sys error to account for selection difference Z - ttbar
+process.effSFElectronEventWeight.meanTriggerEffSF=0.97562 ## FIXME: this is currently used as complete SF, the jet part is set to 1.0
 process.effSFElectronEventWeight.meanTriggerEffSFErr=0.001
 process.effSFElectronEventWeight.shapeDistortionErr=0.02
 process.effSFElectronEventWeight.jetTriggerEffsSFNormSysErr =0.00 ## not used for 8TeV
@@ -2936,3 +2938,18 @@ if(genFull):
     process.p1=cms.Path(process.dummy)
     process.p2=cms.Path(process.dummy)
         
+## use ecal driven momentum for electron collection
+process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+for path in pathlist:
+    massSearchReplaceAnyInputTag(path, 'selectedPatElectrons', 'ecalMomentum:selectedPatElectrons')
+process.ecalMomentum=process.scaledJetEnergy.clone()
+process.ecalMomentum.scaleFactor         = cms.double(1.0)
+process.ecalMomentum.scaleFactorB        = cms.double(1.0)
+process.ecalMomentum.scaleType           = cms.string("abs")
+process.ecalMomentum.resolutionFactors   = cms.vdouble(1.0)
+process.ecalMomentum.resolutionEtaRanges = cms.vdouble(0, -1)
+process.ecalMomentum.inputElectrons      = cms.InputTag("selectedPatElectrons")
+for path in pathlist:
+    path.replace(process.pf2pat,
+                 process.pf2pat * process.ecalMomentum)
