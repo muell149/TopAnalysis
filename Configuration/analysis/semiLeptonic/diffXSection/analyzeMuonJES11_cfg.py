@@ -16,6 +16,7 @@ elif(jetType=="Calo"):
     process.scaledJetEnergy.payload = "AK5Calo"
 else:
     print "unknown jetType"
+process.scaledJetEnergy.JECUncSrcFile = "TopAnalysis/TopUtils/data/Fall12_V6_DATA_UncertaintySources_AK5PFchs.txt"
 
 ## change output name 
 #process.TFileService.fileName = 'analyzeDiffXSecJESUp_testSig.root'
