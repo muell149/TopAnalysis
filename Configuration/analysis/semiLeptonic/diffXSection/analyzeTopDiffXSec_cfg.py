@@ -1181,7 +1181,7 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## kinfit succeeded?
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
-process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>=0.0"  ) )
+process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>=0.02"  ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## configure top reconstruction analyzers & define PSets
