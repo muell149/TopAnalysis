@@ -94,7 +94,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
   bool largeMGfile=true;
   // add kidonakis plots for full PS
   //if(extrapolate&&smoothcurves) DrawNNLOPlot=true;
-  
+
   //if(extrapolate==false&&hadron==false){
   //  DrawSmoothMadgraph = true;
   //  DrawMCAtNLOPlot = true;
@@ -104,7 +104,8 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
   // useOnlyExternalMCatNLOfile=false: means error bands from external studies
   //                            but central values from std file
   bool useOnlyExternalMCatNLOfile=false;
-
+  // want to draw prediction with SC in addition?
+  bool SC=true; 
   // GOSSIE quick fix: cut of m(ttbar) below 345 GeV
   bool cutTtbarMass=true;
   const double constMassRangeLow  =  345.0;
@@ -565,7 +566,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  //if(xSecVariables_[i].Contains("Norm")){
 	  
 	  // b) binned MadGraph curve
-	  //plotTheo->Draw("hist same");
+	  //plotTheo->Draw("hist same"); // from analyzeHypothesisKinFit.C
 	  
 	  // get labels for folder extensions
 	  TString hadLevelExtend = "";
@@ -574,7 +575,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    if     (xSecVariables_[i].Contains("lep")){ hadLevelExtend="Lepton"; hadLevelPlotExtend="Gen"; }
 	    else if(xSecVariables_[i].Contains("bq" )){ hadLevelExtend="Bjets" ; hadLevelPlotExtend="Gen"; }
 	  }
-	  // a1) create binned MADGRAPH theory curve
+	  // b1) create binned MADGRAPH theory curve (std sample w.o. SC)
 	  // load it from combined file
 	  TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
 	  plotNameMadgraph.ReplaceAll("Norm","");
@@ -588,8 +589,8 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    double NGenPS=0.5*plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1);
 	    NGenPS*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
 	    // get BR
-	    TH1F* plotTheo3 = getTheoryPrediction("analyzeTopPartonLevelKinematics/topPt", MGcombFile);
-	    double NGen=0.5*plotTheo3->Integral(0,plotTheo2->GetNbinsX()+1);
+	    TH1F* plotTheo22 = getTheoryPrediction("analyzeTopPartonLevelKinematics/topPt", MGcombFile);
+	    double NGen=0.5*plotTheo22->Integral(0,plotTheo22->GetNbinsX()+1);
 	    NGen*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
 	    double BR=NGen*1.0/(ttbarCrossSection*0.5*(constLumiElec+constLumiMuon));
 	    // get predicted inclusive cross section in chosen PS 
@@ -614,7 +615,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	      plotTheo2->Scale(lumiweight(kSig, luminosity2, sysNo, "muon"));
 	      // large sample correction factor for number of events
 	      // lumiweight is for v1 but large sample is v1+v2
-	      if(largeMGfile) plotTheo2->Scale(3697693./(59613991.+3697693.));
+	      //if(largeMGfile) plotTheo2->Scale(3697693./(59613991.+3697693.)); // large file not used
 	      // BR
 	      if(extrapolate) plotTheo2->Scale(1./BRPDG);
 	      if(verbose>1) std::cout << "area from abs diff MC plot: " << plotTheo2->Integral(0,plotTheo2->GetNbinsX()+1) << std::endl;
@@ -630,7 +631,60 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  plotTheo2->SetTitle(plotTheo->GetTitle());
 	  plotTheo2->SetName (plotTheo->GetName() );
 
-	  // b) MCatNLO
+	  // b2) create binned MADGRAPH theory curve (large sample including SC)
+	  // load it from combined file
+	  TString MGcombFile2="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
+	  TH1F* plotTheo3 = getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
+	  // inclusive cross section
+	  if(xSecVariables_[i]=="inclusive"){
+	    // get events in PS from top pt
+	    double NGenPS=0.5*plotTheo3->Integral(0,plotTheo3->GetNbinsX()+1);
+	    NGenPS*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
+	    // get BR
+	    TH1F* plotTheo33 = getTheoryPrediction("analyzeTopPartonLevelKinematics/topPt", MGcombFile);
+	    double NGen=0.5*plotTheo33->Integral(0,plotTheo33->GetNbinsX()+1);
+	    NGen*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
+	    double BR=NGen*1.0/(ttbarCrossSection*0.5*(constLumiElec+constLumiMuon));
+	    // get predicted inclusive cross section in chosen PS 
+	    double inclxSec=NGenPS/(BR*0.5*(constLumiElec+constLumiMuon));
+	    // fill histo
+	    plotTheo3 = new TH1F( plotTheo->GetName(), plotTheo->GetTitle(), 1, 0., 1.0);
+	    plotTheo3->SetBinContent(1, inclxSec );
+	  }
+	  else{
+	    // other quantities
+	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
+	    reBinTH1F(*plotTheo3, binning_[plotName], verbose-1);
+	    // Normalization absolute cross sections
+	    if(!normalize){
+	      // luminosity
+	      double luminosity2=luminosity;
+	      if(combinedEventYields) luminosity2= ( constLumiElec + constLumiMuon );
+	      plotTheo3->Scale(1./(luminosity2));
+	      // muon and electron channel are added in the root file
+	      plotTheo3->Scale(1./(2));
+	      // event weight (for signal it does not matter if muon or electron)
+	      plotTheo3->Scale(lumiweight(kSig, luminosity2, sysNo, "muon"));
+	      // large sample correction factor for number of events
+	      // lumiweight is for v1 but large sample is v1+v2
+	      //if(largeMGfile) plotTheo3->Scale(3697693./(59613991.+3697693.)); // large file not used
+	      // BR
+	      if(extrapolate) plotTheo3->Scale(1./BRPDG);
+	      if(verbose>1) std::cout << "area from abs diff MC plot: " << plotTheo3->Integral(0,plotTheo3->GetNbinsX()+1) << std::endl;
+	    }
+	    // divide by binwidth
+	    plotTheo3=divideByBinwidth(plotTheo3, verbose-1);
+	    // Normalization normalized cross sections
+	    double XSecInclTheoPS= getInclusiveXSec(plotTheo3,verbose-1);
+	    if(normalize) plotTheo3->Scale(1./(XSecInclTheoPS));
+	  }
+	  // styling
+	  histogramStyle( *plotTheo3, kSig, false);
+	  plotTheo3->SetLineStyle(2);
+	  plotTheo3->SetLineColor(kMagenta);
+	  plotTheo3->SetTitle(TString(plotTheo->GetTitle())+" SC");
+	  plotTheo3->SetName (TString(plotTheo->GetName()) +" SC");
+	  // c) MCatNLO
 	  int smoothFactor=0;
 	  int rebinFactor=0;
 	  int errorRebinFactor=0; 
@@ -686,13 +740,14 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    filename=errorBandFilename;
 	  }
 	  //}
-	  // b1) draw MC@NLO errorband
+	  // c1) draw MC@NLO errorband
 	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2, LV);
-	  // a2) drawing binned madgraph theory curve
+	  // b3) draw binned madgraph theory curves
 	  plotTheo2->Draw("hist same");
-	  // b2) draw MC@NLO central curve
+	  if(SC) plotTheo3->Draw("hist same"); 
+	  // c2) draw MC@NLO central curve
 	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2, LV);
-	  // c) POWHEG
+	  // d) POWHEG
 	  // configure configuration
 	  smoothFactor=0;
 	  rebinFactor=0;
@@ -714,24 +769,24 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // draw curve	 
 	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegSummer12PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
-	  // d) reweighted histos for closure test
+	  // e) reweighted histos for closure test
 	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
 	  }
 	  
-	  // e) distorted parton truth histo including zprime
+	  // f) distorted parton truth histo including zprime
 	  if(zprime!=""&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["modified"+plotName][kSig]->Draw("hist same");
 	  }	    	  
 	  
-	  // f) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
+	  // g) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
 	  if(extrapolate && (DrawNNLOPlot || DrawMCFMPlot)){ 
 	    
 	    TString plotname=xSecVariables_[i];	   
 	    plotname.ReplaceAll("Norm", "");
 	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 
-	    // f1) draw NNLO curve for topPt (normalized) and topY (normalized)
+	    // g1) draw NNLO curve for topPt (normalized) and topY (normalized)
 
 	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
 	    
@@ -758,7 +813,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	      //}	     	     
 	    }
 	  
-	    // f2) MCFM curves
+	    // g2) MCFM curves
 
 	    if (DrawMCFMPlot&&xSecVariables_[i].Contains("Norm")){
 
@@ -840,7 +895,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // a) Legend - Data label
 	  leg->AddEntry(plotCombination, dataLabel, "P");
 	  
-	  // b) Legend - Theory prediction - MADGRAPH
+	  // b1) Legend - Theory prediction - MADGRAPH no SC
 	  TString nameMADGRAPHcurve=plotName;
 	  TString legLabelMADGRAPH="MadGraph";
 	  if(reweightClosure || zprime!="") legLabelMADGRAPH="#splitline{MadGraph t#bar{t}}{Used in Unf. Setup}";
@@ -848,6 +903,13 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  TH1F* madgraphcurve =(TH1F*)combicanvas->GetPrimitive(nameMADGRAPHcurve);
 	  if(madgraphcurve) leg->AddEntry(madgraphcurve, legLabelMADGRAPH, "L" );
 	  
+ 	  // b2) Legend - Theory prediction - MADGRAPH SC
+	  TString nameMADGRAPHcurve2=plotName+" SC";
+	  TString legLabelMADGRAPH2="MadGraph SC";
+	  nameMADGRAPHcurve2.ReplaceAll("Norm","");
+	  TH1F* madgraphcurve2 =(TH1F*)combicanvas->GetPrimitive(nameMADGRAPHcurve2);
+	  if(madgraphcurve2) leg->AddEntry(madgraphcurve2, legLabelMADGRAPH2, "L" );
+
 	  // c) Legend - Theory prediction - MCatNLO
 	  if(DrawMCAtNLOPlot2){
 	    TString curveName=xSecVariables_[i];
