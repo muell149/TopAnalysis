@@ -6,6 +6,7 @@
 #include "TTree.h"
 
 #include "DataFormats/JetReco/interface/GenJet.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 
@@ -35,10 +36,13 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob();
   // helper functions to get b and bbar jet 
-  // a) from kinfit hypothesis
+  // a) from kinFit hypothesis
   std::pair<const reco::Candidate*,const reco::Candidate*> getbJets(const edm::Handle<TtSemiLeptonicEvent> semiLepEvt, const std::string hypoKey_);
-  // b) from genJet collection
+  // b) from kinFit assignment without kinematic shift
+  std::pair<const reco::Candidate*,const reco::Candidate*> getPreBJets(const edm::Handle<TtSemiLeptonicEvent> semiLepEvt, const std::string hypoKey_, const edm::Handle<std::vector<pat::Jet> > jets);
+  // c) from genJet collection
   const reco::GenJet* getJetFromCollection(const reco::GenJetCollection& genJets, int IX);
+
   // ---
   //    inputs
   // ---
@@ -50,7 +54,9 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   edm::InputTag genJets_;
   // pure b gen jet collection?
   bool bJetCollection_;
-  // output manager
+  // recoJet collection 
+  edm::InputTag recoJets_;
+  // output level manager
   int verbose;
   // event weight
   edm::InputTag weight_;
@@ -58,6 +64,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   bool genPlots_;
   // create rec plots?
   bool recPlots_;
+  // use b-jet kinematics as before the kinematic fit?
+  bool preBjets;
   // from gen level b-jet identification  
   edm::InputTag bHadJetIdx_, antibHadJetIdx_;
   // take minimum dR as criteria to assign rec and gen level b-jets to each other?
@@ -76,6 +84,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   float valueBqPtGen;
   float valueLeadBqPtRec;
   float valueLeadBqPtGen;
+  float valueSubLeadBqPtRec;
+  float valueSubLeadBqPtGen;
   float valueBqEtaRec;
   float valueBqEtaGen;
   float valueBqYRec;
@@ -102,8 +112,11 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH1F* bqPtRec;
   TH1F* bqPtGen;
 
-  TH1F* leadbqPtRec;
-  TH1F* leadbqPtGen;
+  TH1F* bqPtLeadRec;
+  TH1F* bqPtLeadGen;
+
+  TH1F* bqPtSubLeadRec;
+  TH1F* bqPtSubLeadGen;
 
   TH1F* bqEtaRec;
   TH1F* bqEtaGen;
@@ -124,7 +137,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH1F* bbbarMassGen;
 
   TH2F* bqPt_;
-  TH2F* leadbqPt_;
+  TH2F* bqPtLead_;
+  TH2F* bqPtSubLead_;
   TH2F* bqEta_;
   TH2F* bqY_;
   TH2F* bqPtClosestPt_;
