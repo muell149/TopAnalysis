@@ -517,6 +517,7 @@ if(not options.sample=="none"):
     else:
         print "\n ERROR ---- Poolsource file does not exist.\n"
         os._exit(0)
+#process.source.eventsToProcess = cms.untracked.VEventRange('1:1258499') 
 outputFileNamePart=outputFileName
 outputFileName=outputFileNamePart+options.mctag+"PF.root"
 
@@ -1445,13 +1446,12 @@ if(applyKinFit==True):
             process.kinFit    = cms.Sequence(process.tightLightPFJets                        +
                                              process.lightJetSelection                       +
                                              process.makeTtSemiLepEvent                      +
-                                             process.compositedKinematicsTagged              +
                                              process.filterRecoKinFit                        +
-                                             process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                             process.filterProbKinFit                        +
-                                             process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsKinFit          +
-                                             process.compositedKinematicsKinFit
+                                             process.analyzeTopRecoKinematicsKinFitTopAntitop+
+                                             process.compositedKinematicsKinFit              +
+                                             process.filterProbKinFit                        +
+                                             process.analyzeTopRecoKinematicsKinFitProbSel   
                                              )
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
@@ -1461,13 +1461,12 @@ if(applyKinFit==True):
         process.kinFit    = cms.Sequence(process.tightLightPFJets                        +
                                          process.lightJetSelection                       +
                                          process.makeTtSemiLepEvent                      +
-                                         process.compositedKinematicsTagged              +
                                          process.filterRecoKinFit                        +
-                                         process.analyzeTopRecoKinematicsKinFitBeforeProbSel+
-                                         process.filterProbKinFit                        +
                                          process.analyzeTopRecoKinematicsKinFit          +
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop+
-                                         process.compositedKinematicsKinFit
+                                         process.compositedKinematicsKinFit              +
+                                         process.filterProbKinFit                        +
+                                         process.analyzeTopRecoKinematicsKinFitProbSel   
                                          )
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
@@ -2773,7 +2772,6 @@ if(decayChannel=="electron"):
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
         # take care of replacements you do NOT want to do!
         process.compositedKinematics.MuonSrc='tightMuons'
-        process.compositedKinematicsTagged.MuonSrc='tightMuons' 
         process.compositedKinematicsKinFit.MuonSrc='tightMuons'      
         
 allpaths  = process.paths_().keys()
@@ -2836,6 +2834,7 @@ if(pfToPAT):
 	    PFoptions['pfIsoValMuon'] = 0.2
 	    #PFoptions['cutsElec'] = 'pt>5 && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits<2'
     prependPF2PATSequence(process, recoPaths, PFoptions)
+
     # remove electron collections as long as id does not exist in the tuples
     for path in recoPaths:
         #getattr(process,path).remove( process.looseElectronsEJ )
