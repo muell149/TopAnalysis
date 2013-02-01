@@ -1295,6 +1295,8 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     #genJets = cms.InputTag("noOverlapGenJetCollection"),
     genJets = cms.InputTag("bjetGenJetsRaw"),
     bJetCollection = cms.bool(True),
+    recoJets= cms.InputTag('tightLeadingPFJets'),
+    useRecBjetsKinematicsBeforeFit= cms.bool(False),
     output = cms.int32(0),
     weight = cms.InputTag(""),
     genPlots = cms.bool(True),
@@ -1308,9 +1310,9 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     useTree = cms.bool(True)
     )
 
-process.analyzeTopPartonLevelKinematicsBjets=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
-process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
-process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False))
+process.analyzeTopPartonLevelKinematicsBjets=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False),useRecBjetsKinematicsBeforeFit= cms.bool(False))
+process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False),useRecBjetsKinematicsBeforeFit= cms.bool(False))
+process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False),useRecBjetsKinematicsBeforeFit= cms.bool(False))
 process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.genJets = cms.InputTag("bjetGenJets")
 
 #process.analyzeTopRecoKinematicsBjets.genJets = cms.InputTag('ak5GenJets','','HLT')
