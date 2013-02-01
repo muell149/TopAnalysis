@@ -3,7 +3,7 @@
 #include "../../unfolding/TopSVDFunctions.C" 
 
 void analyzeHypothesisKinFit(double luminosity = 12148.,
-			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=0, 
+			     bool save = save, int systematicVariation=sysNo, unsigned int verbose=1, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
@@ -77,6 +77,10 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   //        51: sysShapeUp                 52: sysShapeDown                
   //        53: ENDOFSYSENUM
   
+  // xSec from prob selection step
+  TString addSel="";
+  //TString addSel="BeforeProbSel";
+  if(!extrapolate) addSel="";
   // luminosity uncertainties
   if(systematicVariation==sysLumiUp  )      luminosity*=1.044;
   else if(systematicVariation==sysLumiDown) luminosity*=0.956;
@@ -252,6 +256,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 
   // choose correct input folder for b-quark or b-jet
   TString recPartonBpath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
+  if(sysInputFolderExtension==""&&addSel!="") recPartonBpath+=addSel;
   TString recHadronBpath= "analyzeTopRecoKinematicsBjets" +sysInputFolderExtension;
   TString genPartonBpath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
   TString genHadronBpath= "analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
@@ -262,6 +267,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 
   // choose correct input folder for status 1 or 3 lepton
   TString recPartonLeppath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
+  if(sysInputFolderExtension==""&&addSel!="") recPartonLeppath+=addSel;
   TString recHadronLeppath= "analyzeTopRecoKinematicsLepton" +sysInputFolderExtension;
   TString genPartonLeppath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
   TString genHadronLeppath= "analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sysInputGenFolderExtension;
@@ -270,6 +276,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   TString recLeplabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
   TString genLeplabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
 
+  // add folder extensions for xSec from different selection step if default folder is used
+  // do it after bjet/lepton path to use this only for leptons
+  if(sysInputFolderExtension==""&&addSel!="") sysInputFolderExtension+=addSel;
 
   //  ---
   //     choose plots
@@ -927,6 +936,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   if(verbose>1) std::cout << std::endl;
   std::vector<TString> vecRedundantPartOfNameInData;
   vecRedundantPartOfNameInData.push_back(sysInputFolderExtension);
+  vecRedundantPartOfNameInData[0].ReplaceAll(addSel, "");
   if(decayChannel!="combined") getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
   else{
     getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData);
@@ -1347,7 +1357,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
     if(verbose>1) std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << std::endl;
-    if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
+    if(plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
     // ttbar BG yield for signal fraction
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone(variable);
     // create combined BG reco plot
@@ -2788,7 +2798,10 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 			  // create canvas and set titel corresponding to plotname in .root file
 			  addCanvas(plotCanvas_);
 			  plotCanvas_[plotCanvas_.size()-1]->cd(0);
-			  plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1));
+			  TString canvtitle=getStringEntry(plotList_[plot], 2)+getStringEntry(plotList_[plot], 1);
+			  canvtitle.ReplaceAll(addSel,"");
+			  //std::cout << canvtitle << std::endl;
+			  plotCanvas_[plotCanvas_.size()-1]->SetTitle(canvtitle);
 			  // min / max
 			  double max = 1.3*histo_[plotList_[plot]][sample]->GetMaximum();
 			  // if data file exists
@@ -2927,7 +2940,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	      addCanvas(plotCanvas_);
 	      plotCanvas_[plotCanvas_.size()-1]->cd(0);
 	      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(myStyle.GetPadRightMargin());
-	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample));
+	      TString canvname=getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample);
+	      canvname.ReplaceAll(addSel,"");
+	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(canvname);
 	      if(verbose>1){
 		  std::cout << " Plotting "    << plotList_[plot];
 		  std::cout << " from sample " << sampleLabel(sample,decayChannel);

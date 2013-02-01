@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
-				  bool save = true, int verbose=0, 
+				  bool save = false, int verbose=1, 
 				  TString inputFolderName="RecentAnalysisRun8TeV",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
@@ -114,6 +114,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
+  // xSec from prob selection step
+  TString addSel="";
+  //TString addSel="BeforeProbSel";
+  if(!extrapolate) addSel="";
  
   //  0: sysNo
   //  1: sysLumiUp                   2: sysLumiDown
@@ -261,31 +265,31 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     //"PUControlDistributionsAfterBtagging/npvertex_reweighted_up", 
     //"PUControlDistributionsAfterBtagging/npvertex_reweighted_down", 
     // (III) after kinematic fit 
-    "analyzeTopRecoKinematicsKinFit/topPt",
-    "analyzeTopRecoKinematicsKinFit/topY",
-    "analyzeTopRecoKinematicsKinFit/topMass",
-    "analyzeTopRecoKinematicsKinFit/ttbarPt",
-    "analyzeTopRecoKinematicsKinFit/ttbarY",
-    "analyzeTopRecoKinematicsKinFit/ttbarMass",
-    "analyzeTopRecoKinematicsKinFit/ttbarHT",
-    "analyzeTopRecoKinematicsKinFit/lepPt",
-    "analyzeTopRecoKinematicsKinFit/lepEta",
-    "analyzeTopRecoKinematicsKinFit/lightqPt",
-    "analyzeTopRecoKinematicsKinFit/lightqEta",   
-    "analyzeTopRecoKinematicsKinFit/bqPt",
-    "analyzeTopRecoKinematicsKinFit/bqEta",
-    "analyzeTopRecoKinematicsKinFit/lepEtaPlus",
-    "analyzeTopRecoKinematicsKinFit/lepEtaMinus",
-    "analyzeTopRecoKinematicsKinFit/topEtaPlus",
-    "analyzeTopRecoKinematicsKinFit/topEtaMinus",
-    "analyzeTopRecoKinematicsKinFit/lepYPlus",
-    "analyzeTopRecoKinematicsKinFit/lepYMinus",
-    "analyzeTopRecoKinematicsKinFit/topYPlus",
-    "analyzeTopRecoKinematicsKinFit/topYMinus",
-    "analyzeTopRecoKinematicsKinFit/leadqPt",
-    "analyzeTopRecoKinematicsKinFit/bbbarPt",
-    "analyzeTopRecoKinematicsKinFit/bbbarY",
-    "analyzeTopRecoKinematicsKinFit/bbbarMass",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topY",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topMass",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarY",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarHT",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lepPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lepEta",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lightqPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lightqEta",   
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/bqPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/bqEta",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lepEtaPlus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lepEtaMinus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topEtaPlus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topEtaMinus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lepYPlus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/lepYMinus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topYPlus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topYMinus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/leadqPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarY",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarMass",
     "compositedKinematicsKinFit/MWFitJJ",
     "compositedKinematicsKinFit/MJJ",
     "compositedKinematicsKinFit/mHbb",
@@ -295,8 +299,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "compositedKinematicsKinFit/leadNonttjetPt",
     "compositedKinematicsKinFit/leadNonttjetY",
     "compositedKinematicsKinFit/leadNonttjetEta",
-    "analyzeTopRecoKinematicsKinFit/prob", 
-    "analyzeTopRecoKinematicsKinFit/chi2",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/prob", 
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/chi2",
     "analyzeTopRecoKinematicsKinFitTopAntitop/ttbarDelPhi",
     // gen distributions
     "analyzeTopPartonLevelKinematics/ttbarMass",
@@ -315,10 +319,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "compositedKinematicsKinFit/shiftNuEta",
     "compositedKinematicsKinFit/shiftNuPhi",
     // additional top pt plots with splitted contributions
-    "analyzeTopRecoKinematicsKinFit/topPtPlus",
-    "analyzeTopRecoKinematicsKinFit/topPtMinus",
-    "analyzeTopRecoKinematicsKinFit/topPtHad",
-    "analyzeTopRecoKinematicsKinFit/topPtLep",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtPlus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtMinus",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtHad",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtLep",
   };
 
   TString plots1DLeptons[] = {
@@ -796,7 +800,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   std::vector<TString> selection_;
   selection_.push_back("tightJetKinematics/n"      );
   selection_.push_back("tightJetKinematicsTagged/n");
-  selection_.push_back("analyzeTopRecoKinematicsKinFit/ttbarMass");  
+  selection_.push_back("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass");  
   unsigned int MCBG=ENDOFSAMPLEENUM;
   events_[selection_[0]][MCBG]=0;
   events_[selection_[1]][MCBG]=0; 
@@ -1155,13 +1159,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(plotList_[plot].Contains("topPt" )                                                                      ){xDn=0.    ;xUp=400.; }
 	    if(plotList_[plot].Contains("topY"  )                                                                      ){xDn=-2.5  ;xUp=2.5;  }
 	    if(plotList_[plot].Contains("ttbarY")                                                                      ){xDn=-2.5  ;xUp=2.5;  }	
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/leadqPt")                                      ){xDn=0     ;xUp=400;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/leadqPt")                                      ){xDn=0     ;xUp=400;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")                                   ){xDn=30    ;xUp=400;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")                                  ){xDn=-2.4  ;xUp=2.4;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY")                                    ){xDn=-2.4  ;xUp=2.4;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/MJJ")                                              ){xDn=0     ;xUp=800;  }
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarMass")                                    ){xDn=0     ;xUp=800;  }
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/bbbarPt")                                      ){xDn=0     ;xUp=400;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarMass")                                    ){xDn=0     ;xUp=800;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarPt")                                      ){xDn=0     ;xUp=400;  }
 	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))){xDn=-80;xUp=80;}
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")                                        ){xDn=-20   ;xUp=20;   }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")                                       ){xDn=-1    ;xUp=1;    }
@@ -1174,7 +1178,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"     )                                       ){xDn=4.5   ;xUp=9.5;  }
 	    if(getStringEntry(plotList_[plot], 2).Contains("topMass")                                                  ){xDn=100.  ;xUp=500.; }
 	    if(plotList_[plot].Contains("npvertex_reweighted")                                                         ){xDn=0.    ;xUp=40.;  }
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarMass")                                    ){xDn=0.    ;xUp=1600.;}
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass")                                    ){xDn=0.    ;xUp=1600.;}
 	    // adjust range
 	    if(xUp!=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmax()||xDn!=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmin()) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(xDn,xUp-0.000001);
 	    // adjust labels if overlapping because of too many large numbers
@@ -1187,13 +1191,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      if(plotList_[plot].Contains("bottomJetKinematics/n"))         {min=1.0; max=3.0E06; paperPlot=true;}
 	      if(plotList_[plot].Contains("tightJetKinematicsTagged/pt"))   {min=1.0; max=1.0E06; paperPlot=true;}
 	      if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")){min=0.0; max=6.0E03; paperPlot=true;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt")){
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topPt")){
 		min=0; max=7.0E03; paperPlot=true;  //max=2.5E04;
 		if(getStringEntry(axisLabel_[plot],2,";").Contains("Events")) max*=0.5; // splitted topPt control plots
 	      }
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY"))    {min=0; max=2.5E03; paperPlot=true;} //max=1.5E04;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")) {min=0; max=6.0E03; paperPlot=true;} //max=2.2E04;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY"))  {min=0; max=1.6E03; paperPlot=true;} //max=0.8E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topY"))    {min=0; max=2.5E03; paperPlot=true;} //max=1.5E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt")) {min=0; max=6.0E03; paperPlot=true;} //max=2.2E04;}
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarY"))  {min=0; max=1.6E03; paperPlot=true;} //max=0.8E04;}
 	      if(paperPlot){
 		max*=(luminosity/5000.); // lumi dependence
 		if(dataSample=="2012"){
@@ -1264,7 +1268,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->Draw("axis X0 same");
 	    // draw label indicating the analysis cuts applied
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
-	      if(withRatioPlot||(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/ttbarMass")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFitBeforeProbSel/prob")))){
+	      if(withRatioPlot||(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFitBeforeProbSel/prob")))){
 		// draw cut label
 		TString cutLabel="1 lepton, #geq4 Jets";
 		if(decayChannel=="muon"    ) cutLabel.ReplaceAll("lepton","#mu");
