@@ -1,7 +1,11 @@
 #include "basicFunctionsEff.h"
 
-void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
+void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=false)
 {
+  /// decide whether to do 1D or 2D plots or both
+  bool do1D = false;
+  bool do2D = true;
+  
   /// set style
   // ============================
   //  Set ROOT Style
@@ -34,6 +38,10 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
   gStyle->SetLabelFont(fontstyle1, "XYZ");
   gStyle->SetTextFont(fontstyle1);
   
+  // for 2D histo text
+  gStyle->SetPaintTextFormat("3.3f");
+  gStyle->SetPalette(1);
+  
   /// path where input files are stored
   TString inputPathScratch  ="/afs/naf.desy.de/group/cms/scratch/tophh/efficiencies";
   
@@ -57,7 +65,7 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
   /// standard for nice plots:
   TString mIDarr []= {"m1","m2"};
   /// for different PU scenarios: (also savable in root file)
-  //TString mIDarr []= {"m1", "m1PUup", "m1PUdown", "m2", "m2PUup", "m2PUdown"};
+//   TString mIDarr []= {"m1", "m1PUup", "m1PUdown", "m2", "m2PUup", "m2PUdown"};
 
   std::vector<TString> mID(mIDarr, mIDarr + sizeof(mIDarr)/sizeof(TString));
   int mIDNum = mID.size();
@@ -81,6 +89,11 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
 //   TString drawOpt []= {"","E X0 P same","E X0 P same","E X0 same","E X0 same","E same"};
 //   TString legOpt  []= {"L","P","P","P","P","P"};
 //   bool legOnPlot = false;
+  
+  /// Define pt and eta cuts for TH2 
+  /// TCut does not work for TH2
+  double cutPt2D  = 30.;
+  double cutEta2D = 2.1;
   
   /// option to select different cuts 
   TCut cutEle = "probePt>30. && TMath::Abs(probeEta)<2.1";
@@ -130,14 +143,14 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
 //   TString folderID[]={"tapTriggerEle"};
 //   TString foldersTitle[]={"Trigger"};
   
-     const int folderNum=3;
-   TString folderID[]={"tapTotalSelectionEle", "tapTriggerEle", "tapAllEle"};
-   TString foldersTitle[]={"Overall Selection", "Trigger", "Combined Selection and Trigger"};
+//      const int folderNum=3;
+//    TString folderID[]={"tapTotalSelectionEle", "tapTriggerEle", "tapAllEle"};
+//    TString foldersTitle[]={"Overall Selection", "Trigger", "Combined Selection and Trigger"};
   
-//     const int folderNum=1;
-//     /// to combine selection and trigger efficiencies use tapAll:
-//   TString folderID[]={"tapAllEle"};
-//   TString foldersTitle[]={"Combined Selection and Trigger"};
+/// to combine selection and trigger efficiencies use tapAll:
+    const int folderNum=1;
+  TString folderID[]={"tapAllEle"};
+  TString foldersTitle[]={"Combined Selection and Trigger"};
   
 //   const int folderNum=1;
 //   TString folderID[]={"tapTrigger"};
@@ -146,7 +159,8 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
 
   /// effName = name of the effHisto; variables: corresponding variable to effName; cuts: corresponding cut to effName
 
-   TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","Pt_inclLegend"};
+//    TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","Pt_inclLegend"};
+  TString effIDarr[]      = {"Control", "Pt", "Eta", "PVMult", "MinDR","EtaPt30to35","EtaPt35to40","EtaPtGreater40"};
 //  TString effIDarr[]      = {"Pt_inclLegend"};
    //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","lepLepMass"};
   //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "PtEta0to1p5", "PtEta1p5to2p1"};
@@ -165,6 +179,7 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
     
   /// map with structure that keeps features of histograms
   std::map<TString, std::map<TString, eff*> > eff_;
+  std::map<TString, eff2D*> eff2DPtEta_;
   
   /// title for histo, x and y axis (separated by "/")
   TString title0 ="";
@@ -183,11 +198,11 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
     title = foldersTitle[iFolder]+" Efficiency/ / ";
     eff_["Control"][folderID[iFolder]]        =new eff("Control", cutPtEta, mBinsControl, binsControl_, title, yLo, yHi, -9999.,-9999.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
-    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPt_, title, yLo, yHi, 30.,200.);
+    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtEle_, title, yLo, yHi, 30.,200.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
     eff_["Pt_inclLegend"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.,true);
     title = foldersTitle[iFolder]+" Efficiency/#eta/ ";
-    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEtaEle, binsEtaEle2_, title, yLo, yHi,-2.1,2.1);
+    eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEtaEle, binsEtaEle_, title, yLo, yHi,-2.1,2.1);
     title = foldersTitle[iFolder]+" Efficiency/relIso/ ";
     eff_["RelIso"][folderID[iFolder]]          =new eff("RelIso", cutPtEta, mBinsRelIso, binsRelIso_, title, yLo, yHi);
     title = foldersTitle[iFolder]+" Efficiency/absIso/ ";
@@ -207,14 +222,14 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
     title = foldersTitle[iFolder]+" Efficiency 1.2<#eta<2.1/p_{T} [GeV]/ ";
     eff_["PtEta1p2to2p1"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)>1.2 && TMath::Abs(probeEta)<2.1", mBinsPt, binsPt_, title, yLo, yHi, 30.,200.,true);
     
-    title = foldersTitle[iFolder]+" Efficiency, 30<p_{T}<45/#eta/ ";
-    eff_["EtaPt30to45"][folderID[iFolder]]             =new eff("Eta", "probePt>30. && probePt<45.", mBinsEta, binsEta_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 30<p_{T}<35/#eta/ ";
+    eff_["EtaPt30to35"][folderID[iFolder]]             =new eff("Eta", "probePt>30. && probePt<35.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
     
-    title = foldersTitle[iFolder]+" Efficiency, 45<p_{T}<60/#eta/ ";
-    eff_["EtaPt45to60"][folderID[iFolder]]             =new eff("Eta", "probePt>45. && probePt<60.", mBinsEta, binsEta_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 35<p_{T}<40/#eta/ ";
+    eff_["EtaPt35to40"][folderID[iFolder]]             =new eff("Eta", "probePt>35. && probePt<40.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
     
-    title = foldersTitle[iFolder]+" Efficiency, 60<p_{T}/#eta/ ";
-    eff_["EtaPtGreater60"][folderID[iFolder]]             =new eff("Eta", "probePt>60.", mBinsEta, binsEta_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 40<p_{T}/#eta/ ";
+    eff_["EtaPtGreater40"][folderID[iFolder]]             =new eff("Eta", "probePt>40.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
     
     title = foldersTitle[iFolder]+" Efficiency AN/p_{T} [GeV]/ ";
     eff_["PtAN"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.);
@@ -224,24 +239,35 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
     
     title = foldersTitle[iFolder]+" Efficiency 3 bins/p_{T} [GeV]/ ";
     eff_["Pt3bins"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPt3bins_, title, yLo, yHi, 30.,200.);
+    
+    /// 2D pt:eta
+    title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/#eta/ ";
+    eff2DPtEta_[folderID[iFolder]]             =new eff2D("Pt", "Eta", cutPtEta, mBinsPtEle2D, binsPtEle2D_, mBinsEtaEle2D, binsEtaEle2D_, title, yLo, yHi, 30.+0.001,200.-0.001, -2.1+0.001, 2.1-0.001);
   }
 
   /// ---
   /// get efficiencies from tree or histo
   ///  ---
   for(int iMethod=0; iMethod<mIDNum; iMethod++){
-    for(int iEff=0; iEff<effIDNum; iEff++){
-      for(int iFolder=0; iFolder<folderNum; iFolder++){
-	getEfficiencies(eff_[effID[iEff]][folderID[iFolder]], method_[mID[iMethod]], mID[iMethod], folderID[iFolder], folderID[iFolder]);
+    /// 1D
+    if(do1D){
+      for(int iEff=0; iEff<effIDNum; iEff++){
+	for(int iFolder=0; iFolder<folderNum; iFolder++){
+	  getEfficiencies(eff_[effID[iEff]][folderID[iFolder]], method_[mID[iMethod]], mID[iMethod], folderID[iFolder], folderID[iFolder]);
+	}
+      }
+	for(int iEff=0; iEff<effIDNum2; iEff++){
+	  for(int iFolder=0; iFolder<folderNum; iFolder++){
+	    getEfficiencies(eff_[effID2[iEff]][folderID[iFolder]], method_[mID[iMethod]], mID[iMethod], folderID[iFolder], folderID[iFolder]);
+	  }
       }
     }
-      
-      for(int iEff=0; iEff<effIDNum2; iEff++){
-	for(int iFolder=0; iFolder<folderNum; iFolder++){
-	  getEfficiencies(eff_[effID2[iEff]][folderID[iFolder]], method_[mID[iMethod]], mID[iMethod], folderID[iFolder], folderID[iFolder]);
-	}
-	
-    }
+    /// 2D
+    if(do2D){
+      for(int iFolder=0; iFolder<folderNum; iFolder++){
+	getEfficiencies2D(eff2DPtEta_[folderID[iFolder]], method_[mID[iMethod]], mID[iMethod], folderID[iFolder], folderID[iFolder], cutPt2D, cutEta2D);
+      }
+    }    
   }
 
  /// Draw one Canvas for each folder comparing different methods.
@@ -255,6 +281,12 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
   
   TCanvas* CanvComp2 [folderNum];
   TCanvas* CanvSFComp2 [folderNum];
+  
+  TCanvas* CanvComp2DPtEta [folderNum];
+  TCanvas* CanvComp2DPtEtaSF [folderNum];
+  TCanvas* CanvComp2DPtEtaSFerr [folderNum];
+  TCanvas* CanvComp2DPtEtaPass [folderNum];
+  TCanvas* CanvComp2DPtEtaAll [folderNum];
 
   std::cout<< "Drawing eff. and SF"<<std::endl;
   for(int iFolder=0; iFolder<folderNum; iFolder++) {
@@ -277,37 +309,79 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
     CanvComp2[iFolder]->Divide(4,2);
     CanvSFComp2[iFolder]->Divide(4,2);
   
-    for(int iEff=0; iEff<effIDNum; iEff++){
-      CanvComp[iFolder]->cd(iEff+1);
-//       CanvComp[iFolder]->cd(iEff+1)->SetGrid(1,1);
-//       std::cout<< "Drawing eff."<<std::endl;
-//       drawEfficiencies(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.6,1.0,0.9,eff_[effID[iEff]][folderID[iFolder]]->drawLegend);
-//       CanvSFComp[iFolder]->cd(iEff+1);
-//       std::cout<< "Drawing SF"<<std::endl;
-//       drawSF          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
-//       CanvEffAndSFComp[iFolder]->cd(iEff+1);
-      std::cout<< "Drawing Eff. and SF"<<std::endl;
-      drawEffAndSFinOne          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
-    // if desired plot also raw event number histos
-      if(onlyEffPlots!=1) {
-	std::cout<< "Drawing event numbers"<<std::endl;
-	CanvEvtsComp[iFolder]->cd(iEff+1);
-	drawEventHistos(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend);
-	CanvEvtsNormComp[iFolder]->cd(iEff+1);
-	drawEventHistos(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend,"normInt");
+    /// 1D
+    if(do1D){
+      for(int iEff=0; iEff<effIDNum; iEff++){
+	CanvComp[iFolder]->cd(iEff+1);
+  //       CanvComp[iFolder]->cd(iEff+1)->SetGrid(1,1);
+  //       std::cout<< "Drawing eff."<<std::endl;
+  //       drawEfficiencies(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.6,1.0,0.9,eff_[effID[iEff]][folderID[iFolder]]->drawLegend);
+  //       CanvSFComp[iFolder]->cd(iEff+1);
+  //       std::cout<< "Drawing SF"<<std::endl;
+  //       drawSF          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
+	std::cout<< "Drawing Eff. and SF"<<std::endl;
+	CanvEffAndSFComp[iFolder]->cd(iEff+1);
+	drawEffAndSFinOne          (eff_[effID[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID[iEff]][folderID[iFolder]]->xLo, eff_[effID[iEff]][folderID[iFolder]]->xHi);
+      /// if desired plot also raw event number histos
+	if(onlyEffPlots!=1) {
+	  std::cout<< "Drawing event numbers"<<std::endl;
+	  CanvEvtsComp[iFolder]->cd(iEff+1);
+	  drawEventHistos(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend);
+	  CanvEvtsNormComp[iFolder]->cd(iEff+1);
+	  drawEventHistos(eff_[effID[iEff]][folderID[iFolder]], method_, mID, 0.12,0.15,1.0,0.45,eff_[effID[iEff]][folderID[iFolder]]->drawLegend,"normInt");
+	}
+      }
+      for(int iEff=0; iEff<effIDNum2; iEff++){
+	CanvComp2[iFolder]->cd(iEff+1);
+  //       CanvComp[iFolder]->cd(iEff+1)->SetGrid(1,1);
+	std::cout<< "Drawing eff. 2"<<std::endl;
+	drawEfficiencies(eff_[effID2[iEff]][folderID[iFolder]], method_, mID, 0.12,0.15,1.0,0.45,eff_[effID2[iEff]][folderID[iFolder]]->drawLegend);
+	CanvSFComp2[iFolder]->cd(iEff+1);
+	std::cout<< "Drawing SF"<<std::endl;
+	drawSF          (eff_[effID2[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID2[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID2[iEff]][folderID[iFolder]]->xLo, eff_[effID2[iEff]][folderID[iFolder]]->xHi);
       }
     }
     
-    for(int iEff=0; iEff<effIDNum2; iEff++){
-      CanvComp2[iFolder]->cd(iEff+1);
-//       CanvComp[iFolder]->cd(iEff+1)->SetGrid(1,1);
-      std::cout<< "Drawing eff. 2"<<std::endl;
-      drawEfficiencies(eff_[effID2[iEff]][folderID[iFolder]], method_, mID, 0.12,0.15,1.0,0.45,eff_[effID2[iEff]][folderID[iFolder]]->drawLegend);
-      CanvSFComp2[iFolder]->cd(iEff+1);
-      std::cout<< "Drawing SF"<<std::endl;
-      drawSF          (eff_[effID2[iEff]][folderID[iFolder]], method_, mID, mIDnorm, 0.12,0.15,1.0,0.45,eff_[effID2[iEff]][folderID[iFolder]]->drawLegend, yLoSF, yHiSF, eff_[effID2[iEff]][folderID[iFolder]]->xLo, eff_[effID2[iEff]][folderID[iFolder]]->xHi);
+    /// draw 2D efficiencies
+    if(do2D){
+
+      CanvComp2DPtEta[iFolder] = new TCanvas("Comparison2DPtEta"+folderID[iFolder], "Comparison2DPtEta"+folderID[iFolder], 1700,1000);
+      CanvComp2DPtEta[iFolder]->Divide((mIDNum+1)/2,2);
+      
+      CanvComp2DPtEtaSF[iFolder] = new TCanvas("Comparison2DPtEtaSF"+folderID[iFolder], "Comparison2DPtEtaSF"+folderID[iFolder], 1700,1000);
+      CanvComp2DPtEtaSF[iFolder]->Divide((mIDNum+1)/2,2);
+      
+      CanvComp2DPtEtaSFerr[iFolder] = new TCanvas("Comparison2DPtEtaSFerr"+folderID[iFolder], "Comparison2DPtEtaSFerr"+folderID[iFolder], 1700,1000);
+      CanvComp2DPtEtaSFerr[iFolder]->Divide((mIDNum+1)/2,2);
+      
+      CanvComp2DPtEtaPass[iFolder] = new TCanvas("Comparison2DPtEtaPass"+folderID[iFolder], "Comparison2DPtEtaPass"+folderID[iFolder], 1700,1000);
+      CanvComp2DPtEtaPass[iFolder]->Divide((mIDNum+1)/2,2);
+      
+      CanvComp2DPtEtaAll[iFolder] = new TCanvas("Comparison2DPtEtaAll"+folderID[iFolder], "Comparison2DPtEtaAll"+folderID[iFolder], 1700,1000);
+      CanvComp2DPtEtaAll[iFolder]->Divide((mIDNum+1)/2,2);
+      
+      std::cout<< "Drawing 2D Pt Eta Eff."<<std::endl;
+      for(unsigned int iMethod=0; iMethod<mID.size(); iMethod++){
+	CanvComp2DPtEta[iFolder]->cd(iMethod+1);
+	eff2DPtEta_[folderID[iFolder]]->his[mID[iMethod]]->Draw("colz text");
+	
+	CanvComp2DPtEtaPass[iFolder]->cd(iMethod+1);
+	eff2DPtEta_[folderID[iFolder]]->hisPass[mID[iMethod]]->Draw("colz text");
+	
+	CanvComp2DPtEtaAll[iFolder]->cd(iMethod+1);
+	eff2DPtEta_[folderID[iFolder]]->hisAll[mID[iMethod]]->Draw("colz text");
+
+	/// 2D SF!!!
+	std::cout<< "Drawing 2D SF"<<std::endl;
+	
+	CanvComp2DPtEtaSF[iFolder]->cd(iMethod+1);
+	getSF2D (eff2DPtEta_[folderID[iFolder]], method_, mID, mIDnorm, 0.8, 1.2);
+	eff2DPtEta_[folderID[iFolder]]->hisSF[mID[iMethod]]->Draw("colz text");
+	
+	CanvComp2DPtEtaSFerr[iFolder]->cd(iMethod+1);
+	eff2DPtEta_[folderID[iFolder]]->hisSFerr[mID[iMethod]]->Draw("colz text");
+      }
     }
-    
     
   // draw legend
     CanvLeg->cd();
@@ -318,27 +392,49 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false)
  
     if(save){
       for(unsigned int iFileFormat=0; iFileFormat < fileFormat.size(); iFileFormat++){
-	CanvComp[iFolder]->Print(outputFolder+outputFileName+folderID[iFolder]+"_overview."+fileFormat[iFileFormat]);
-	for(int iEff=0; iEff<effIDNum; iEff++){
-	  CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID[iEff]+"."+fileFormat[iFileFormat]);
-	  CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
-	  CanvEffAndSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_EffAndSF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+	if(do1D){
+	  CanvComp[iFolder]->Print(outputFolder+outputFileName+folderID[iFolder]+"_overview."+fileFormat[iFileFormat]);
+	  for(int iEff=0; iEff<effIDNum; iEff++){
+	  // 	  CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+	  // 	  CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+	    CanvEffAndSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_EffAndSF_"+effID[iEff]+"."+fileFormat[iFileFormat]);
+	  }
+	  for(int iEff=0; iEff<effIDNum2; iEff++){
+	    CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID2[iEff]+"."+fileFormat[iFileFormat]);
+	    CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID2[iEff]+"."+fileFormat[iFileFormat]);
+	  }
 	}
-	
-	for(int iEff=0; iEff<effIDNum2; iEff++){
-	  CanvComp  [iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+effID2[iEff]+"."+fileFormat[iFileFormat]);
-	  CanvSFComp[iFolder]->cd(iEff+1)->Print(outputFolder+outputFileName+folderID[iFolder]+"_SF_"+effID2[iEff]+"."+fileFormat[iFileFormat]);
+	/// 2D
+	if(do2D){
+	  CanvComp2DPtEta[iFolder]->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+"Eff2DPtEta."+fileFormat[iFileFormat]);
+	  CanvComp2DPtEtaSF[iFolder]->Print(outputFolder+outputFileName+folderID[iFolder]+"_"+"SF2DPtEta."+fileFormat[iFileFormat]);
 	}
-	
 	if(iFolder==0) CanvLeg->Print(outputFolder+outputFileName+"_Legend."+fileFormat[iFileFormat]);
 	std::cout<<"Canvas with plots is saved in "<<outputFolder<<std::endl;
       }
-      /// save graph in root file
-//       TFile f("MuonEffSF2011.root", "new");
-//       eff_["Eta"]["tapAll"]->graphSF["m2"]->SetName("tapAllSFeta");
-//       //eff_["Eta"]["tapAll"]->graphSF["m2"]->SetTitle("tapAllSFeta");
-//       eff_["Eta"]["tapAll"]->graphSF["m2"]->Write();
-//       std::cout<<"MuonEffSF.root with TGraphErrors is saved in "<<outputFolder<<std::endl;
+    }
+    /// save graph in root file
+    /// 1D
+    if(saveRoot && do1D){
+      TFile f("EleEffSF2012.root", "recreate");
+      eff_["Eta"]["tapAllEle"]->graphSF["m2"]->SetName("tapAllSFeta");
+      eff_["Eta"]["tapAllEle"]->graphSF["m2"]->Write();
+      eff_["Eta"]["tapAllEle"]->graphSF["m2PUup"]->SetName("tapAllSFetaPUup");
+      eff_["Eta"]["tapAllEle"]->graphSF["m2PUup"]->Write();
+      eff_["Eta"]["tapAllEle"]->graphSF["m2PUdown"]->SetName("tapAllSFetaPUdown");
+      eff_["Eta"]["tapAllEle"]->graphSF["m2PUdown"]->Write();
+      std::cout<<"EleEffSF2012.root with TGraphErrors is saved "<<std::endl;
+    }
+    /// 2D
+    if(saveRoot && do2D){
+      TFile f("EleEffSF2D2012.root", "recreate");
+      eff2DPtEta_[ "tapAllEle"]->hisSF["m2"]->SetName("tapAllSFeta");
+      eff2DPtEta_[ "tapAllEle"]->hisSF["m2"]->Write();
+      eff2DPtEta_[ "tapAllEle"]->hisSF["m2PUup"]->SetName("tapAllSFetaPUup");
+      eff2DPtEta_[ "tapAllEle"]->hisSF["m2PUup"]->Write();
+      eff2DPtEta_[ "tapAllEle"]->hisSF["m2PUdown"]->SetName("tapAllSFetaPUdown");
+      eff2DPtEta_[ "tapAllEle"]->hisSF["m2PUdown"]->Write();
+      std::cout<<"EleEffSF2D2012.root with 2D SF Histos is saved in "<<std::endl;
     }
   }
   std::cout<< "Done"<<std::endl;

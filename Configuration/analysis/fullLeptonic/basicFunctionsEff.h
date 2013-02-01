@@ -83,6 +83,52 @@ struct eff{
   TString errorOpt;
 };
 
+/// ---
+/// 2D structure to keep features of each type of histo plot, like its TH1D, the plotted variable, cuts to apply etc.
+/// ---
+
+struct eff2D{
+  // constructor for initialisation
+  eff2D(TString iniVar1, TString iniVar2, TCut iniCuts, int iniBinMode1, std::vector<double> iniBins1, int iniBinMode2, std::vector<double> iniBins2, TString iniTitles, double iniYLo=-9999., double iniYHi=-9999., double iniX1Lo=-9999., double iniX1Hi=-9999., double iniX2Lo=-9999., double iniX2Hi=-9999., bool iniDrawLegend=false, TString iniErrorOpt="")
+  {
+    var1=iniVar1; var2=iniVar2; cuts=iniCuts; binMode1=iniBinMode1; bins1=iniBins1; binMode2=iniBinMode2; bins2=iniBins2; titles=iniTitles; x1Lo=iniX1Lo; x1Hi=iniX1Hi; x2Lo=iniX2Lo; x2Hi=iniX2Hi; yLo=iniYLo; yHi=iniYHi;  drawLegend=iniDrawLegend; errorOpt = iniErrorOpt;
+  }
+  // members:
+  // map of eff. histos: eff=pass/all (only used if errorOpt==normalBinomial)
+  std::map<TString, TH2F*> his;
+  // map of SF histos:(only used if errorOpt==normalBinomial)
+  std::map<TString, TH2F*> hisSF;
+  // map of SF err histos:(only used if errorOpt==normalBinomial)
+  std::map<TString, TH2F*> hisSFerr;
+  // map of eff. TGraphAsymmErrors: eff=pass/all (used if errorOpt!=normalBinomial)
+  std::map<TString, TGraphAsymmErrors*> graphEff;
+  // map of SF TGraphAsymmErrors (used if errorOpt!=normalBinomial)
+  std::map<TString, TGraphAsymmErrors*> graphSF;
+  // map of histo with events passing
+  std::map<TString, TH2F*> hisPass;
+  // map of histo with all events
+  std::map<TString, TH2F*> hisAll;
+  // name of variable in root file (i.e. tree or histo)
+  TString var1;
+  TString var2;
+  // optional cuts if a tree is used
+  TCut cuts;
+  // binning if a tree is used or rebinning for histo
+  int binMode1;
+  std::vector<double> bins1;
+  int binMode2;
+  std::vector<double> bins2;
+  // string with title/x-axis title/ y-axis title (separated by "/")
+  TString titles;
+  // x- and y-axis range (low, high)
+  double x1Lo, x1Hi, x2Lo, x2Hi, yLo, yHi;
+  // draw legend?
+  bool drawLegend;
+  // option for TGraphError
+  TString errorOpt;
+};
+
+
 
 /// ---
 /// structure to keep features of each type of method (e.g. different samples), like draw options, style, legend etc.
@@ -136,8 +182,10 @@ struct method{
 int mBinsControl= 1;
 int mBinsPt     = -1;
 //int mBinsEta    = -1;
-int mBinsEta    = 20;
-int mBinsEtaEle = -1;
+// int mBinsEta    = 20;
+int mBinsEta    = 28;
+int mBinsEtaEle = 20;
+int mBinsEtaEle2 = 14;
 int mBinsPhi    = 10;
 int mBinsMult   = 10;
 int mBinsRelIso = 8;
@@ -164,12 +212,13 @@ std::vector<double> binsControl_(binsControl, binsControl + sizeof(binsControl)/
 // double binsPt[]     = {  0.,10.,20.,30.,40.,50.,75.,100.,150. };
 // std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
 // double binsEta[]    = { -3.,-2.55,-2.1,-1.65,-1.2,-0.9,-0.45,0.,0.45,0.9,1.2,1.65,2.1,2.55,3. };
-double binsEta[]    = { -3., 3. };
+// double binsEta[]    = { -3., 3. };
+double binsEta[]    = { -2.1, 2.1 };
 std::vector<double> binsEta_(binsEta, binsEta + sizeof(binsEta)/sizeof(double));
 // double binsEtaEle[]    = { -3.,-2.5,-2.0,-1.566,-1.4442,-1.0,-0.5,0.,0.5,1.0,1.4442,1.566,2.0,2.5,3. };
-double binsEtaEle[]    = { -3.,-2.5,-2.,-1.5,-1.0,-0.5,0.,0.5,1.0,1.5,2.,2.5,3. };
+double binsEtaEle[]    = { -2.1, 2.1 };
 std::vector<double> binsEtaEle_(binsEtaEle, binsEtaEle + sizeof(binsEtaEle)/sizeof(double));
-double binsEtaEle2[]    = { -2.5,-2.1,-1.5,-1.0,-0.5,0.,0.5,1.0,1.5,2.1,2.5};
+double binsEtaEle2[]    = { -2.1, 2.1 };
 std::vector<double> binsEtaEle2_(binsEtaEle2, binsEtaEle2 + sizeof(binsEtaEle2)/sizeof(double));
 double binsPhi[]    = { -3.14,   3.14};
 std::vector<double> binsPhi_(binsPhi, binsPhi + sizeof(binsPhi)/sizeof(double));
@@ -199,10 +248,31 @@ std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
 // double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
 double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
 std::vector<double> binsPtAN_(binsPtAN, binsPtAN + sizeof(binsPtAN)/sizeof(double));
+// double binsPtEle[]   = {0., 30., 32., 34., 36., 38., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
+double binsPtEle[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
+std::vector<double> binsPtEle_(binsPtEle, binsPtEle + sizeof(binsPtEle)/sizeof(double));
 double binsPtMedian[]   = {0., 30., 55., 200., 275.};
 std::vector<double> binsPtMedian_(binsPtMedian, binsPtMedian + sizeof(binsPtMedian)/sizeof(double));
 double binsPt3bins[]   = {0., 30., 45., 60., 200., 275.};
 std::vector<double> binsPt3bins_(binsPt3bins, binsPt3bins + sizeof(binsPt3bins)/sizeof(double));
+
+
+/// 2D bins
+int mBinsEtaMu2D    = 20;
+double binsEtaMu2D[]    = { -2.1, 2.1 };
+std::vector<double> binsEtaMu2D_(binsEtaMu2D, binsEtaMu2D + sizeof(binsEtaMu2D)/sizeof(double));
+
+int mBinsPtMu2D     = -1;
+double binsPtMu2D[]   = {0., 30., 45., 200., 275., 400., 1200.};
+std::vector<double> binsPtMu2D_(binsPtMu2D, binsPtMu2D + sizeof(binsPtMu2D)/sizeof(double));
+
+int mBinsEtaEle2D    = 14;
+double binsEtaEle2D[]    = { -2.1, 2.1 };
+std::vector<double> binsEtaEle2D_(binsEtaEle2D, binsEtaEle2D + sizeof(binsEtaEle2D)/sizeof(double));
+
+int mBinsPtEle2D     = -1;
+double binsPtEle2D[]   = {0., 30., 35., 40., 50., 200., 275., 400., 1200.};
+std::vector<double> binsPtEle2D_(binsPtEle2D, binsPtEle2D + sizeof(binsPtEle2D)/sizeof(double));
 
 
 // double binsPt[]     = {  0.,10.,20.,25., 30.,50.,150. };
@@ -245,10 +315,6 @@ void setHistoStyle(T* his, TString titles, int lineStyle, int lineColor, int mar
   his->SetTitle(getStringEntry(titles, 1));
   his->GetXaxis()->SetTitle(getStringEntry(titles, 2));
   his->GetYaxis()->SetTitle(getStringEntry(titles, 3));
-//   his->GetXaxis()->SetTitleSize(0.05);
-//   his->GetXaxis()->SetLabelSize(0.05);
-//   his->GetYaxis()->SetTitleSize(0.05);
-//   his->GetYaxis()->SetLabelSize(0.05);
   if(xLo!=-9999. && xHi!=-9999.) his->GetXaxis()->SetRangeUser(xLo,xHi);
   if(yLo!=-9999. && yHi!=-9999.) his->GetYaxis()->SetRangeUser(yLo,yHi);
   if(getStringEntry(titles, 2)=="relIso") his->GetXaxis()->SetNdivisions(509);
@@ -256,6 +322,26 @@ void setHistoStyle(T* his, TString titles, int lineStyle, int lineColor, int mar
   his->SetLineColor(lineColor);
   his->SetMarkerStyle(markerStyle);
   his->SetMarkerColor(markerColor);
+}
+
+/// ---
+/// 2D histo style
+/// ---
+void setHistoStyle2D(TH2* his, TString titles, int lineStyle, int lineColor, int markerStyle, int markerColor, double x1Lo=-9999., double x1Hi=-9999., double x2Lo=-9999., double x2Hi=-9999., double yLo=-9999., double yHi=-9999.)
+{
+  his->SetTitle(getStringEntry(titles, 1)+" - "+getStringEntry(titles, 5));
+  his->GetXaxis()->SetTitle(getStringEntry(titles, 2));
+  his->GetYaxis()->SetTitle(getStringEntry(titles, 3));
+  his->GetZaxis()->SetTitle(getStringEntry(titles, 4));
+  if(x1Lo!=-9999. && x1Hi!=-9999.) his->GetXaxis()->SetRangeUser(x1Lo,x1Hi);
+  if(x2Lo!=-9999. && x2Hi!=-9999.) his->GetYaxis()->SetRangeUser(x2Lo,x2Hi);
+  if(yLo!=-9999. && yHi!=-9999.) his->GetZaxis()->SetRangeUser(yLo,yHi);
+  if(getStringEntry(titles, 2)=="relIso") his->GetXaxis()->SetNdivisions(509);
+  his->SetLineStyle(lineStyle);
+  his->SetLineColor(lineColor);
+  his->SetMarkerStyle(markerStyle);
+  his->SetMarkerColor(markerColor);
+  his->SetMarkerSize(1.3);
 }
 
 
@@ -306,6 +392,83 @@ void getHisto(TH1D*& his, TString var, TFile* file, TString folder, int binMode,
     }
   }
   else std::cout<<"WARNING!!! Source not chosen correctly!"<<std::endl;
+  his->Sumw2();
+  iHis++;
+  return;
+}
+
+/// ---
+/// get 2D histo from tree (optionally weighted) or from histo in root file
+/// ---
+void getHisto2D(TH2F*& his, TString var1, TString var2, TFile* file, TString folder, int binMode1, std::vector<double> bins1, int binMode2, std::vector<double> bins2, double cutPt, double cutEta, TString passType, TString source="tree", TString weightTag="")
+{
+  TString varString = var1+var2;
+  varString.ReplaceAll("(","");
+  varString.ReplaceAll(")","");
+  varString.ReplaceAll(":","");
+  file->cd();
+  TString hisName = "hnew"+varString+(Long_t)iHis; // create unique name for each histo
+  if(source=="tree" || source=="treeWeight" || source=="treeV2") {
+    if(source=="treeWeight") weightTag="weight";
+    
+    // fixed binning
+    if(binMode1>0 && binMode2>0)        his = new TH2F (hisName, hisName, binMode1, bins1[0], bins1[1], binMode2, bins2[0], bins2[1]);
+    // variable binning
+    else  if(binMode1<0 && binMode2<0)  his = new TH2F (hisName, hisName, bins1.size()-1, &bins1[0], bins2.size()-1, &bins2[0]);
+    else  if(binMode1>0 && binMode2<0)  his = new TH2F (hisName, hisName, binMode1, bins1[0], bins1[1], bins2.size()-1, &bins2[0]);
+    else  if(binMode1<0 && binMode2>0)  his = new TH2F (hisName, hisName, bins1.size()-1, &bins1[0], binMode2, bins2[0], bins2[1]);
+    //if(var=="Control") var="RelIso"; // for control overall eff. integrate relIso distrb
+    TTree *tree =(TTree*) file->Get(folder+"/tree")->Clone();
+    
+    // initialize branches
+    float var1_=-11111;
+    float var2_=-22222;
+    float probePt_=-33333;
+    float probeEta_=-44444;
+    int   pass_=0;
+    float weight_ =1.;
+    tree->SetBranchStatus("*",0);
+    tree->SetBranchStatus(var1,1);
+    tree->SetBranchAddress(var1,(&var1_));
+    tree->SetBranchStatus(var2,1);
+    tree->SetBranchAddress(var2,(&var2_));
+    tree->SetBranchStatus("pass",1);
+    tree->SetBranchAddress("pass",(&pass_));
+    if(var1!="probePt" && var2!="probePt"){
+      tree->SetBranchStatus("probePt",1);
+      tree->SetBranchAddress("probePt",(&probePt_));
+    }
+    if(var1!="probeEta" && var2!="probeEta"){
+      tree->SetBranchStatus("probeEta",1);
+      tree->SetBranchAddress("probeEta",(&probeEta_));
+    }
+    if(weightTag!="") {
+      tree->SetBranchStatus(weightTag,1);
+      tree->SetBranchAddress(weightTag,(&weight_));
+    }
+    
+    for(unsigned int event=0; event<tree->GetEntries(); ++event){
+      tree->GetEntry(event);
+      
+      if(var1=="probePt")       probePt_=var1_; 
+      else if(var2=="probePt")  probePt_=var2_;
+      if(var1=="probeEta")      probeEta_=var1_; 
+      else if(var2=="probeEta") probeEta_=var2_;
+      
+      /// accept events always if not only passed events are required
+      if(passType!="pass") pass_=1;
+      
+      
+      if(probePt_ > cutPt && TMath::Abs(probeEta_) < cutEta && pass_) his->Fill(var1_,var2_,weight_);
+    }
+  }
+  else std::cout<<"WARNING!!! Source not chosen correctly!"<<std::endl;
+  
+  std::cout<<"his->GetNbinsX = " << his->GetNbinsX()<<"; his->GetNbinsY = " << his->GetNbinsY() <<std::endl;
+  
+  std::cout<<"var1:var2:cutPt:cutEta " << var1<<":"<<var2<< cutPt<<":"<<cutEta<<">>"<<hisName <<std::endl;
+  std::cout<< "passType = " << passType << std::endl;
+  
   his->Sumw2();
   iHis++;
   return;
@@ -423,6 +586,43 @@ void getEfficiencies(TH1D*& histoEff, TH1D*& histoPass, TH1D*& histoAll, TString
   
   std::cout<<"his Title: " <<histoPass->GetTitle() <<" Nbins pass: "<<histoPass->GetNbinsX() << " Nbins all " << histoAll->GetNbinsX() <<std::endl;
   std::cout<<"before putStats histoPass N: "<<histoPass->GetEntries() << " histoAll N " << histoAll->GetEntries() <<std::endl;
+  return;
+}
+
+/// ---
+/// gets 2D efficiencies and histos with all and passing events from a tree or histo stored in a root file
+/// Eff = pass / all
+/// uses HISTOS for eff, i.e. only normalBinomial errors possible
+/// ---
+void getEfficiencies2D(TH2F*& histoEff, TH2F*& histoPass, TH2F*& histoAll, TString var1, TString var2, TFile* file, TString folderPass, TString folderAll, TString titles, int binMode1, std::vector<double> bins1, int binMode2, std::vector<double> bins2, double cutPt, double cutEta, int lineStyle=1, int lineColor=1, int markerStyle=1, int markerColor=1, double x1Lo=-9999., double x1Hi=-9999., double x2Lo=-9999., double x2Hi=-9999., double yLo=-9999., double yHi=-9999., TString source="tree", TString weightTag="")
+{
+  file->cd();
+    if(source=="treeV2"){ // this is the new tree version that saves only the kinematic variable for probes + info if passed
+      // if the combined selection and trigger efficiency is desired:
+      if     (folderAll=="tapAll")   {folderAll="tapTotalSelection"; folderPass="tapTrigger";}
+      else if(folderAll=="tapAllEle"){folderAll="tapTotalSelectionEle"; folderPass="tapTriggerEle";}
+      
+      getHisto2D(histoPass, "probe"+var1, "probe"+var2, file, folderPass, binMode1, bins1, binMode2, bins2, cutPt, cutEta, "pass", source, weightTag);
+      // gets histo with all events from tree
+      getHisto2D(histoAll, "probe"+var1, "probe"+var2, file, folderAll, binMode1, bins1, binMode2, bins2, cutPt, cutEta, "all", source, weightTag);
+    }
+    else std::cout<< "ERROR!!!! getEfficiencies2D works only with treeV2" << std::endl;
+  // set histo style
+    setHistoStyle2D(histoPass, getStringEntry(titles, 1)+"/"+getStringEntry(titles, 2)+"/"+getStringEntry(titles, 3)+"/N_{pass}"+"/"+getStringEntry(titles, 5), lineStyle, lineColor, markerStyle, markerColor, x1Lo, x1Hi, x2Lo, x2Hi);
+    setHistoStyle2D(histoAll, getStringEntry(titles, 1)+"/"+getStringEntry(titles, 2)+"/"+getStringEntry(titles, 3)+"/N_{all}"+"/"+getStringEntry(titles, 5), lineStyle, lineColor, markerStyle, markerColor, x1Lo, x1Hi, x2Lo, x2Hi);
+  // calculates eff. histo
+  histoEff  = (TH2F*) histoAll->Clone("histoEff"+var1);
+  histoEff->Reset();
+  histoEff -> Divide(histoPass, histoAll, 1, 1, "B");
+  setHistoStyle2D(histoEff, titles, lineStyle, lineColor, markerStyle, markerColor, x1Lo, x1Hi, x2Lo, x2Hi, yLo, yHi);
+  
+  std::cout<<"titles: " << titles << std::endl;
+  std::cout<<"his Title: " <<histoPass->GetTitle() <<" Nbins pass: "<<histoPass->GetNbinsX() << " Nbins all " << histoAll->GetNbinsX() <<std::endl;
+  std::cout<<"before putStats histoPass N: "<<histoPass->GetEntries() << " histoAll N " << histoAll->GetEntries() <<std::endl;
+  
+  for(int i=1; i <= histoEff->GetNbinsX(); i++){
+    std::cout<<"i= " << i << "; binContent eff: "<<histoEff->GetBinContent(i) << "; binContent pass: "<<histoPass->GetBinContent(i) << "; binContent all: "<<histoAll->GetBinContent(i) <<std::endl;
+  }
   return;
 }
 
@@ -586,6 +786,15 @@ void getEfficiencies(eff*& eff1, method*& method1, TString methodID, TString fol
   if(eff1->errorOpt=="normalBinomial") getEfficiencies(eff1->his[methodID], eff1->hisPass[methodID], eff1->hisAll[methodID], eff1->var, method1->file, folderPass, folderAll, eff1->titles, eff1->binMode, eff1->bins, eff1->cuts && method1->cuts, method1->lineStyle, method1->lineColor, method1->markerStyle, method1->markerColor, eff1->xLo, eff1->xHi, eff1->yLo, eff1->yHi, method1->source, method1->weightTag);
   
   else getEfficiencies(eff1->graphEff[methodID], eff1->hisPass[methodID], eff1->hisAll[methodID], eff1->var, method1->file, folderPass, folderAll, eff1->titles, eff1->binMode, eff1->bins, eff1->cuts && method1->cuts, method1->lineStyle, method1->lineColor, method1->markerStyle, method1->markerColor, eff1->xLo, eff1->xHi, eff1->yLo, eff1->yHi, method1->source, method1->weightTag, eff1->errorOpt);
+  return;
+}
+
+/// ---
+/// same as above for 2D
+/// ---
+void getEfficiencies2D(eff2D*& eff1, method*& method1, TString methodID, TString folderPass, TString folderAll, double cutPt, double cutEta)
+{
+  getEfficiencies2D(eff1->his[methodID], eff1->hisPass[methodID], eff1->hisAll[methodID], eff1->var1, eff1->var2, method1->file, folderPass, folderAll, eff1->titles+"/"+method1->legName, eff1->binMode1, eff1->bins1, eff1->binMode2, eff1->bins2, cutPt, cutEta, method1->lineStyle, method1->lineColor, method1->markerStyle, method1->markerColor, eff1->x1Lo, eff1->x1Hi, eff1->x2Lo, eff1->x2Hi, eff1->yLo, eff1->yHi, method1->source, method1->weightTag);
   return;
 }
 
@@ -812,6 +1021,62 @@ void drawSF(eff*& eff1, std::map<TString, method*> method1, std::vector<TString>
   }
   if(drawLeg) leg.DrawClone();
   
+}
+
+/// ---
+/// SF 2D!!
+/// calculate efficiency scale factor plots of one variable for all methods
+/// ---
+void getSF2D(eff2D*& eff1, std::map<TString, method*> method1, std::vector<TString> mID, TString mIDnorm, double yLo=-9999., double yHi=-9999., double x1Lo=-9999., double x1Hi=-9999., double x2Lo=-9999., double x2Hi=-9999.)
+{
+  /// if mIDnorm is specified in eff structure, i.e.!="", it is taken for normalisation;
+  /// otherwise mIDnorm from the list of arguments of this function is taken
+  
+  TH2F* SFhis;
+  TH2F* SFhisErr;
+  
+  for(unsigned int iMethod=0; iMethod<mID.size(); iMethod++){
+    // check if method contains mIDnorm: then overwrite mIDnorm from function argument
+    if(method1[mID[iMethod]]->mIDnorm!="") mIDnorm = method1[mID[iMethod]]->mIDnorm;
+    std::cout<<"Method ID: "<<mID[iMethod] <<"; normalised to " << mIDnorm <<std::endl;
+    // calculate SF
+      SFhis = (TH2F*)eff1->his[mID[iMethod]]->Clone("SF");
+      SFhis -> Reset();
+      SFhis ->SetTitle(Form("%s SF", eff1->his[mID[iMethod]]->GetTitle()));
+      SFhis ->SetName(Form("%s SF", eff1->his[mID[iMethod]]->GetTitle()));
+      SFhis ->Divide(eff1->his[mID[iMethod]], eff1->his[mIDnorm]);
+      // set y errors to 0 for reference SF
+      if(mID[iMethod]==mIDnorm){
+	double yErr0[100]={0.};
+	SFhis->SetError(yErr0);
+      }
+      // draw SF
+      //if(mID[iMethod]!=mIDnorm){
+	if(x1Lo!=-9999. && x1Hi!=-9999.) SFhis->GetXaxis()->SetRangeUser(x1Lo,x1Hi);
+	if(x2Lo!=-9999. && x2Hi!=-9999.) SFhis->GetYaxis()->SetRangeUser(x2Lo,x2Hi);
+	if(yLo!=-9999. && yHi!=-9999.)   SFhis->GetZaxis()->SetRangeUser(yLo,yHi);
+	SFhis->SetMarkerSize(1.3);
+	SFhis->SetMarkerStyle(1);
+	//SFhis->Draw("COLZ text");
+      //}
+      
+      // calculate SF Err
+      SFhisErr = (TH2F*)SFhis->Clone("SFerr");
+      SFhisErr -> Reset();
+      SFhisErr ->SetTitle(Form("%s SF Err", eff1->his[mID[iMethod]]->GetTitle()));
+      SFhisErr ->SetName(Form("%s SF Err", eff1->his[mID[iMethod]]->GetTitle()));
+      SFhisErr ->GetZaxis()->SetRangeUser(-1,1);
+      for(unsigned int iBinX=0; iBinX<=SFhis->GetNbinsX()+1; iBinX++){
+	for(unsigned int iBinY=0; iBinY<=SFhis->GetNbinsY()+1; iBinY++){
+	  SFhisErr -> SetBinContent(iBinX, iBinY, SFhis -> GetBinError(iBinX, iBinY) );
+	}
+      }
+      
+      
+      /// assign the graph to the eff structure
+      eff1->hisSF[mID[iMethod]]=SFhis;
+      eff1->hisSFerr[mID[iMethod]]=SFhisErr;
+  }
 }
 
 /// ---
