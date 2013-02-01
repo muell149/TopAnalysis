@@ -97,6 +97,10 @@ void TopKinematics::book()
   hists_["topPtLead"   ] = new TH1F( "topPtLead"     , "topPtLead"   ,  800,  0. ,  800.);  
   // pt of the subleading top candidate
   hists_["topPtSubLead"] = new TH1F( "topPtSubLead"  , "topPtSubLead",  800,  0. ,  800.);
+  // y of the leading top candidate
+  hists_["topYLead"   ] = new TH1F( "topYLead"       , "topYLead"   ,   100, -5. ,    5.);
+  // y of the subleading top candidate 
+  hists_["topYSubLead"] = new TH1F( "topYSubLead"    , "topYSubLead",   100, -5. ,    5.);
   // pt of the hadronically decaying top candidate
   hists_["topPtHad"  ] = new TH1F( "topPtHad"  , "topPtHad"  ,  800,  0. ,  800.);
   // y  of the hadronically decaying top candidate
@@ -327,6 +331,11 @@ void TopKinematics::book()
     corrs_["topEtaMinus_"    ] = new TH2F( "topEtaMinus_"  , "topEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["topYPlus_"       ] = new TH2F( "topYPlus_"     , "topYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["topYMinus_"      ] = new TH2F( "topYMinus_"    , "topYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    corrs_["topPtLead_"      ] = new TH2F( "topPtLead_"    , "topPtLead_"    , 800 ,   0. , 800.,  800,   0. , 800.);
+    corrs_["topPtSubLead_"   ] = new TH2F( "topPtSubLead_" , "topPtSubLead_" , 800 ,   0. , 800.,  800,   0. , 800.);
+    corrs_["lepYLead_"       ] = new TH2F( "lepYLead_"     , "lepYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    corrs_["lepYSubLead_"    ] = new TH2F( "lepYSubLead_"  , "lepYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+
   }
 }
 
@@ -397,6 +406,10 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["topPtLead"   ] =fs->make<TH1F>( "topPtLead"   , "topPtLead"   , 800, 0. , 800.);  
   // pt of the subleading top candidate
   hists_["topPtSubLead"] =fs->make<TH1F>( "topPtSubLead", "topPtSubLead", 800, 0. , 800.);
+  // y of the leading top candidate
+  hists_["topYLead"   ] = fs->make<TH1F>( "topYLead"   , "topYLead"   ,  100, -5. ,   5.);
+  // y of the subleading top candidate
+  hists_["topYSubLead"] = fs->make<TH1F>( "topYSubLead", "topYSubLead",  100, -5. ,   5.);
   // pt of the hadronically decaying top candidate
   hists_["topPtHad"  ] = fs->make<TH1F>( "topPtHad"  , "topPtHad"  ,  800,  0. ,  800.);
   // y  of the hadronically decaying top candidate
@@ -626,6 +639,10 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     corrs_["topEtaMinus_"] = fs->make<TH2F>( "topEtaMinus_"  , "topEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["topYPlus_"   ] = fs->make<TH2F>( "topYPlus_"     , "topYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["topYMinus_"  ] = fs->make<TH2F>( "topYMinus_"    , "topYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    corrs_["topPtLead_"   ] = fs->make<TH2F>("topPtLead_"    , "topPtLead_"    ,  800,   0. , 800.,  800,   0. , 800.);
+    corrs_["topPtSubLead_"] = fs->make<TH2F>("topPtSubLead_" , "topPtSubLead_" ,  800,   0. , 800.,  800,   0. , 800.);
+    corrs_["topYLead_"    ] = fs->make<TH2F>("topYLead_"     , "topYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    corrs_["topYSubLead_" ] = fs->make<TH2F>("topYSubLead_"  , "topYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
   }
 
   // book ttree entries
@@ -762,6 +779,15 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "topYMinusPartonTruth"  );
     // top/antitop association with lep/had top
     bookVariable(fs, "lepTopIsTopPlus");
+    // (sub)leading top quarks
+    bookVariable(fs, "topPtLead"   );
+    bookVariable(fs, "topPtSubLead");
+    bookVariable(fs, "topYLead"    );
+    bookVariable(fs, "topYSubLead" );
+    bookVariable(fs, "topPtLeadPartonTruth"   );
+    bookVariable(fs, "topPtSubLeadPartonTruth");
+    bookVariable(fs, "topYLeadPartonTruth"    );
+    bookVariable(fs, "topYSubLeadPartonTruth" );
 
   }
 }
@@ -876,6 +902,10 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double genTopMinusEta   =-9999;
   double genTopPlusPt     =-9999;
   double genTopMinusPt    =-9999;
+  double genptLead        =-9999;
+  double genptSubLead     =-9999;
+  double genyLead         =-9999;
+  double genySubLead      =-9999;
 
   if(useTree_) initializeTrees(-9999, weight);
   // ttbar decay channel
@@ -993,6 +1023,20 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       genTopMinusEta   = topMinusGen->eta();
       genTopPlusPt     = topPlusGen ->pt();
       genTopMinusPt    = topMinusGen->pt();
+      genptLead        = topPlusGen ->pt();
+      genptSubLead     = topMinusGen->pt();
+      genyLead         = topPlusGen ->rapidity();
+      genySubLead      = topMinusGen->rapidity();
+      if(genptLead<genptSubLead){// swop them
+	double gentemp=genptLead;
+	double gentemp2=genyLead;
+	genptLead=genptSubLead;
+	genyLead=genySubLead;
+	genptSubLead=gentemp;
+	genySubLead=gentemp2;
+      }
+
+
 
       if(!hypoKey_.compare("None")==0){
 	// fill pt correlation plot for ttbar pair
@@ -1035,7 +1079,24 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	corrs_.find("topPtMinus_" )->second->Fill( topMinusGen->pt()      , topMinusRec->pt()      , weight );
 	corrs_.find("topYPlus_"   )->second->Fill( topPlusGen ->rapidity(), topPlusRec ->rapidity(), weight );
 	corrs_.find("topYMinus_"  )->second->Fill( topMinusGen->rapidity(), topMinusRec->rapidity(), weight );
-      
+
+	bool plusGen=(topPlusGen->pt() > topMinusGen->pt() ? true : false);
+	bool plusRec=(topPlusRec->pt() > topMinusRec->pt() ? true : false);
+
+	double ptLeadGEN   =( plusGen ? topPlusGen->pt() : topMinusGen->pt());
+	double ptSubLeadGEN=(!plusGen ? topPlusGen->pt() : topMinusGen->pt());
+	double ptLeadREC   =( plusRec ? topPlusRec->pt() : topMinusRec->pt());
+	double ptSubLeadREC=(!plusRec ? topPlusRec->pt() : topMinusRec->pt());
+	double yLeadGEN    =( plusGen ? topPlusGen->rapidity() : topMinusGen->rapidity());
+	double ySubLeadGEN =(!plusGen ? topPlusGen->rapidity() : topMinusGen->rapidity());
+	double yLeadREC    =( plusRec ? topPlusRec->rapidity() : topMinusRec->rapidity());
+	double ySubLeadREC =(!plusRec ? topPlusRec->rapidity() : topMinusRec->rapidity());
+
+	corrs_.find("topPtLead_"   )->second->Fill( ptLeadGEN   , ptLeadREC   , weight);
+	corrs_.find("topPtSubLead_")->second->Fill( ptSubLeadGEN, ptSubLeadREC, weight);
+	corrs_.find("topYLead_"    )->second->Fill( yLeadGEN    , yLeadREC    , weight);
+	corrs_.find("topYSubLead_" )->second->Fill( ySubLeadGEN , ySubLeadREC , weight);
+
 	// fill deltaPhi correlation plot for ttbar pair
 	//corrs_.find("ttbarDelPhi_")->second->Fill(deltaPhi(lepTopGen->phi(), hadTopGen->phi()), 
 	//					deltaPhi(lepTopRec->phi(), hadTopRec->phi()), weight );
@@ -1322,9 +1383,16 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "topYPlusPartonTruth"    , genTopPlusY   , weight );
   fillValue( "topYMinusPartonTruth"   , genTopMinusY  , weight );
   fillValue( "topEtaPlusPartonTruth"  , genTopPlusEta , weight );
-  fillValue( "topPtPlusPartonTruth"   , genTopPlusPt  , weight );
   fillValue( "topEtaMinusPartonTruth" , genTopMinusEta, weight );
-  
+  fillValue( "topPtPlusPartonTruth"   , genTopPlusPt  , weight );
+  fillValue( "topPtMinusPartonTruth"  , genTopMinusPt , weight );
+  fillValue( "topPtLeadPartonTruth"   , genptLead     , weight );
+  fillValue( "topYLeadPartonTruth"    , genyLead      , weight );
+  fillValue( "topPtSubLeadPartonTruth", genptSubLead  , weight );
+  fillValue( "topYSubLeadPartonTruth" , genySubLead   , weight );
+
+
+
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
 }
@@ -1442,15 +1510,24 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
 
   double ptLead   =leptonicTop->p4().pt();
   double ptSubLead=hadronicTop->p4().pt();
+  double yLead   =leptonicTop->p4().Rapidity();
+  double ySubLead=hadronicTop->p4().Rapidity();
   if(ptLead<ptSubLead){// swop them
     double temp=ptLead;
+    double temp2=yLead;
     ptLead=ptSubLead;
+    yLead=ySubLead;
     ptSubLead=temp;
+    ySubLead=temp2;
   }
   // fill top pt for leading Top candidate
   fillValue( "topPtLead"   , ptLead   , weight );
   // fill top pt for subleading Top candidate
   fillValue( "topPtSubLead", ptSubLead, weight );
+  // fill top y for leading Top candidate
+  fillValue( "topYLead"    , yLead    , weight );
+  // fill top y for subleading Top candidate
+  fillValue( "topYSubLead" , ySubLead , weight );
 
   // ---
   //    bbbar variables
