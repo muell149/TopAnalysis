@@ -898,12 +898,12 @@ process.tightMuonQualityTagged     = process.tightMuonQuality.clone();
 process.tightMuonKinematicsSSV  = process.analyzeMuonKinematics.clone (src = 'tightMuons'    )
 process.tightMuonQualitySSV     = process.analyzeMuonQuality.clone    (src = 'tightMuons'    )
 
-process.tightMuonKinematicsNjets1 = process.tightMuonKinematics.clone() 
-process.tightMuonQualityNjets1    = process.tightMuonQuality.clone   ()    
-process.tightMuonKinematicsNjets2 = process.tightMuonKinematics.clone() 
-process.tightMuonQualityNjets2    = process.tightMuonQuality.clone   ()
-process.tightMuonKinematicsNjets3 = process.tightMuonKinematics.clone() 
-process.tightMuonQualityNjets3    = process.tightMuonQuality.clone   ()
+#process.tightMuonKinematicsNjets1 = process.tightMuonKinematics.clone() 
+#process.tightMuonQualityNjets1    = process.tightMuonQuality.clone   ()    
+#process.tightMuonKinematicsNjets2 = process.tightMuonKinematics.clone() 
+#process.tightMuonQualityNjets2    = process.tightMuonQuality.clone   ()
+#process.tightMuonKinematicsNjets3 = process.tightMuonKinematics.clone() 
+#process.tightMuonQualityNjets3    = process.tightMuonQuality.clone   ()
 
 ## jets
 process.tightLead_0_JetKinematics = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = uds0 )
@@ -917,12 +917,12 @@ process.bottomJetQuality          = process.analyzeJetQuality.clone(src = 'tight
 process.tightJetKinematicsSSV  = process.analyzeJetKinematics.clone(src = 'tightLeadingPFJets', analyze = udsAll)
 process.tightJetQualitySSV     = process.analyzeJetQuality.clone   (src = 'tightLeadingPFJets')
 
-process.tightJetKinematicsNjets1=process.tightJetKinematics.clone()
-process.tightJetQualityNjets1   =process.tightJetQuality   .clone()
-process.tightJetKinematicsNjets2=process.tightJetKinematics.clone()
-process.tightJetQualityNjets2   =process.tightJetQuality   .clone()
-process.tightJetKinematicsNjets3=process.tightJetKinematics.clone()
-process.tightJetQualityNjets3   =process.tightJetQuality   .clone()
+## process.tightJetKinematicsNjets1=process.tightJetKinematics.clone()
+## process.tightJetQualityNjets1   =process.tightJetQuality   .clone()
+## process.tightJetKinematicsNjets2=process.tightJetKinematics.clone()
+## process.tightJetQualityNjets2   =process.tightJetQuality   .clone()
+## process.tightJetKinematicsNjets3=process.tightJetKinematics.clone()
+## process.tightJetQualityNjets3   =process.tightJetQuality   .clone()
 
 process.tightLead_0_JetKinematicsTagged  = process.tightLead_0_JetKinematics.clone()
 process.tightLead_1_JetKinematicsTagged  = process.tightLead_1_JetKinematics.clone()
@@ -970,12 +970,12 @@ process.tightElectronQualityTagged     = process.analyzeElectronQuality.clone   
 process.tightElectronKinematicsSSV     = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
 process.tightElectronQualitySSV        = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
 
-process.tightElectronKinematicsNjets1  = process.tightElectronKinematics.clone()
-process.tightElectronQualityNjets1     = process.tightElectronQuality   .clone()
-process.tightElectronKinematicsNjets2  = process.tightElectronKinematics.clone()
-process.tightElectronQualityNjets2     = process.tightElectronQuality   .clone()
-process.tightElectronKinematicsNjets3  = process.tightElectronKinematics.clone()
-process.tightElectronQualityNjets3     = process.tightElectronQuality   .clone()
+## process.tightElectronKinematicsNjets1  = process.tightElectronKinematics.clone()
+## process.tightElectronQualityNjets1     = process.tightElectronQuality   .clone()
+## process.tightElectronKinematicsNjets2  = process.tightElectronKinematics.clone()
+## process.tightElectronQualityNjets2     = process.tightElectronQuality   .clone()
+## process.tightElectronKinematicsNjets3  = process.tightElectronKinematics.clone()
+## process.tightElectronQualityNjets3     = process.tightElectronQuality   .clone()
 
 ## MET
 process.analyzeMETMuon       = process.analyzeMETCorrelations.clone(srcA = 'patMETs', srcB='tightMuons')
@@ -1003,45 +1003,45 @@ process.PUControlDistributionsBeforeBtagging = process.PUControlDistributions.cl
 process.PUControlDistributionsAfterBtagging  = process.PUControlDistributions.clone()
 
 ## collect kinematics
-process.monitorKinematicsNjets1a = cms.Sequence(process.tightJetKinematicsNjets1  +
-                                                process.tightJetQualityNjets1
-                                                )
+## process.monitorKinematicsNjets1a = cms.Sequence(process.tightJetKinematicsNjets1  +
+##                                                 process.tightJetQualityNjets1
+##                                                 )
 
-process.monitorKinematicsNjets2a = cms.Sequence(process.tightJetKinematicsNjets2  +
-                                                process.tightJetQualityNjets2
-                                                )
+## process.monitorKinematicsNjets2a = cms.Sequence(process.tightJetKinematicsNjets2  +
+##                                                 process.tightJetQualityNjets2
+##                                                 )
 
-process.monitorKinematicsNjets3a = cms.Sequence(process.tightJetKinematicsNjets3  +
-                                                process.tightJetQualityNjets3
-                                                )
+## process.monitorKinematicsNjets3a = cms.Sequence(process.tightJetKinematicsNjets3  +
+##                                                 process.tightJetQualityNjets3
+##                                                 )
 
 
-if(decayChannel =='muon'):
-    process.monitorKinematicsNjets1 = cms.Sequence(process.monitorKinematicsNjets1a  +
-                                                   process.tightMuonKinematicsNjets1 +
-                                                   process.tightMuonQualityNjets1    
-                                                   )
-    process.monitorKinematicsNjets2 = cms.Sequence(process.monitorKinematicsNjets2a  +
-                                                   process.tightMuonKinematicsNjets2 +
-                                                   process.tightMuonQualityNjets2    
-                                                   )
-    process.monitorKinematicsNjets3 = cms.Sequence(process.monitorKinematicsNjets3a  +
-                                                   process.tightMuonKinematicsNjets3 +
-                                                   process.tightMuonQualityNjets3    
-                                                   )
-elif(decayChannel =='electron'):
-    process.monitorKinematicsNjets1 = cms.Sequence(process.monitorKinematicsNjets1a      +
-                                                   process.tightElectronKinematicsNjets1 +
-                                                   process.tightElectronQualityNjets1    
-                                                   )
-    process.monitorKinematicsNjets2 = cms.Sequence(process.monitorKinematicsNjets2a      +
-                                                   process.tightElectronKinematicsNjets2 +
-                                                   process.tightElectronQualityNjets2    
-                                                   )
-    process.monitorKinematicsNjets3 = cms.Sequence(process.monitorKinematicsNjets3a      +
-                                                   process.tightElectronKinematicsNjets3 +
-                                                   process.tightElectronQualityNjets3    
-                                                   )
+## if(decayChannel =='muon'):
+##     process.monitorKinematicsNjets1 = cms.Sequence(process.monitorKinematicsNjets1a  +
+##                                                    process.tightMuonKinematicsNjets1 +
+##                                                    process.tightMuonQualityNjets1    
+##                                                    )
+##     process.monitorKinematicsNjets2 = cms.Sequence(process.monitorKinematicsNjets2a  +
+##                                                    process.tightMuonKinematicsNjets2 +
+##                                                    process.tightMuonQualityNjets2    
+##                                                    )
+##     process.monitorKinematicsNjets3 = cms.Sequence(process.monitorKinematicsNjets3a  +
+##                                                    process.tightMuonKinematicsNjets3 +
+##                                                    process.tightMuonQualityNjets3    
+##                                                    )
+## elif(decayChannel =='electron'):
+##     process.monitorKinematicsNjets1 = cms.Sequence(process.monitorKinematicsNjets1a      +
+##                                                    process.tightElectronKinematicsNjets1 +
+##                                                    process.tightElectronQualityNjets1    
+##                                                    )
+##     process.monitorKinematicsNjets2 = cms.Sequence(process.monitorKinematicsNjets2a      +
+##                                                    process.tightElectronKinematicsNjets2 +
+##                                                    process.tightElectronQualityNjets2    
+##                                                    )
+##     process.monitorKinematicsNjets3 = cms.Sequence(process.monitorKinematicsNjets3a      +
+##                                                    process.tightElectronKinematicsNjets3 +
+##                                                    process.tightElectronQualityNjets3    
+##                                                    )
      
     
 process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinematics          +
@@ -1090,11 +1090,11 @@ process.monitorElectronKinematicsAfterBtagging  = cms.Sequence(process.tightElec
 
 # combined jet selection+monitoring
 process.jetSelection = cms.Sequence(process.leadingJetSelectionNjets1 +
-                                    process.monitorKinematicsNjets1   +
+                                    #process.monitorKinematicsNjets1   +
                                     process.leadingJetSelectionNjets2 +
-                                    process.monitorKinematicsNjets2   +
+                                    #process.monitorKinematicsNjets2   +
                                     process.leadingJetSelectionNjets3 +
-                                    process.monitorKinematicsNjets3   +
+                                    #process.monitorKinematicsNjets3   +
                                     process.leadingJetSelectionNjets4 
                                     )
 
