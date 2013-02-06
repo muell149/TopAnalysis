@@ -299,42 +299,45 @@ void TopKinematics::book()
     // gen-rec level correlation for angle between the leptonically decaying top candidate and the neutrino
     //corrs_["MuonNeutrinoAngle_"] = new TH2F( "MuonNeutrinoAngle_", "MuonNeutrinoAngle_", 315,  0.  ,  3.15,   315,  0.  ,  3.15);
     // gen-rec level correlation for leptonPt
-    corrs_["lepPt_"      ] = new TH2F( "lepPt_"      , "lepPt_"      ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["lepPt_"      ] = new TH2F( "lepPt_"      , "lepPt_"      ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for leptonEta
-    corrs_["lepEta_"     ] = new TH2F( "lepEta_"     , "lepEta_"     ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["lepEta_"     ] = new TH2F( "lepEta_"     , "lepEta_"     ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for neutrinoPt
-    corrs_["neutrinoPt_" ] = new TH2F( "neutrinoPt_" , "neutrinoPt_" ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["neutrinoPt_" ] = new TH2F( "neutrinoPt_" , "neutrinoPt_" ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for neutrinoEta
-    corrs_["neutrinoEta_"] = new TH2F( "neutrinoEta_", "neutrinoEta_",  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["neutrinoEta_"] = new TH2F( "neutrinoEta_", "neutrinoEta_",  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for light-quarks Pt
-    corrs_["lightqPt_"   ] = new TH2F( "lightqPt_"   , "lightqPt_"   ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["lightqPt_"   ] = new TH2F( "lightqPt_"   , "lightqPt_"   ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for light-quarks Eta
-    corrs_["lightqEta_"  ] = new TH2F( "lightqEta_"  , "lightqEta_"  ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["lightqEta_"  ] = new TH2F( "lightqEta_"  , "lightqEta_"  ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for b-quarks Pt
-    corrs_["bqPt_"       ] = new TH2F( "bqPt_"       , "bqPt_"       ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["bqPt_"       ] = new TH2F( "bqPt_"       , "bqPt_"       ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for b-quarks Eta
-    corrs_["bqEta_"      ] = new TH2F( "bqEta_"      , "bqEta_"      ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["bqEta_"      ] = new TH2F( "bqEta_"      , "bqEta_"      ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for leading quark Pt
-    corrs_["leadqPt_"    ] = new TH2F( "leadqPt_"    , "leadqPt_"    ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["leadqPt_"    ] = new TH2F( "leadqPt_"    , "leadqPt_"    ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for leading quark Eta
-    corrs_["leadqEta_"   ] = new TH2F( "leadqEta_"   , "leadqEta_"   ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
-    // asymmetry variables
-    corrs_["topPtPlus_"      ] = new TH2F( "topPtPlus_"    , "topPtPlus_"    , 800 ,   0. , 800.,  800,   0. , 800.);
-    corrs_["topPtMinus_"     ] = new TH2F( "topPtMinus_"   , "topPtMinus_"   , 800 ,   0. , 800.,  800,   0. , 800.);
-    corrs_["lepPtPlus_"      ] = new TH2F( "lepPtPlus_"    , "lepPtPlus_"    , 1200 ,  0. , 1200., 1200,  0. ,1200.);
-    corrs_["lepPtMinus_"     ] = new TH2F( "lepPtMinus_"   , "lepPtMinus_"   , 1200 ,  0. , 1200., 1200,  0. ,1200.);
-    corrs_["lepEtaPlus_"     ] = new TH2F( "lepEtaPlus_"   , "lepEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["lepEtaMinus_"    ] = new TH2F( "lepEtaMinus_"  , "lepEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["lepYPlus_"       ] = new TH2F( "lepYPlus_"     , "lepYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["lepYMinus_"      ] = new TH2F( "lepYMinus_"    , "lepYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topEtaPlus_"     ] = new TH2F( "topEtaPlus_"   , "topEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topEtaMinus_"    ] = new TH2F( "topEtaMinus_"  , "topEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topYPlus_"       ] = new TH2F( "topYPlus_"     , "topYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topYMinus_"      ] = new TH2F( "topYMinus_"    , "topYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["leadqEta_"   ] = new TH2F( "leadqEta_"   , "leadqEta_"   ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+
+    // splitting into leading and subleading top quarks
     corrs_["topPtLead_"      ] = new TH2F( "topPtLead_"    , "topPtLead_"    , 800 ,   0. , 800.,  800,   0. , 800.);
     corrs_["topPtSubLead_"   ] = new TH2F( "topPtSubLead_" , "topPtSubLead_" , 800 ,   0. , 800.,  800,   0. , 800.);
     corrs_["lepYLead_"       ] = new TH2F( "lepYLead_"     , "lepYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["lepYSubLead_"    ] = new TH2F( "lepYSubLead_"  , "lepYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+
+    // asymmetry variables
+    //corrs_["topPtPlus_"      ] = new TH2F( "topPtPlus_"    , "topPtPlus_"    , 800 ,   0. , 800.,  800,   0. , 800.);
+    //corrs_["topPtMinus_"     ] = new TH2F( "topPtMinus_"   , "topPtMinus_"   , 800 ,   0. , 800.,  800,   0. , 800.);
+    //corrs_["lepPtPlus_"      ] = new TH2F( "lepPtPlus_"    , "lepPtPlus_"    , 1200 ,  0. , 1200., 1200,  0. ,1200.);
+    //corrs_["lepPtMinus_"     ] = new TH2F( "lepPtMinus_"   , "lepPtMinus_"   , 1200 ,  0. , 1200., 1200,  0. ,1200.);
+    //corrs_["lepEtaPlus_"     ] = new TH2F( "lepEtaPlus_"   , "lepEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["lepEtaMinus_"    ] = new TH2F( "lepEtaMinus_"  , "lepEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["lepYPlus_"       ] = new TH2F( "lepYPlus_"     , "lepYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["lepYMinus_"      ] = new TH2F( "lepYMinus_"    , "lepYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topEtaPlus_"     ] = new TH2F( "topEtaPlus_"   , "topEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topEtaMinus_"    ] = new TH2F( "topEtaMinus_"  , "topEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topYPlus_"       ] = new TH2F( "topYPlus_"     , "topYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topYMinus_"      ] = new TH2F( "topYMinus_"    , "topYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
 
   }
 }
@@ -607,42 +610,46 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     // gen-rec level correlation for angle between the leptonically decaying top candidate and the neutrino
     //corrs_["MuonNeutrinoAngle_"] = fs->make<TH2F>( "MuonNeutrinoAngle_", "MuonNeutrinoAngle_", 315,  0. ,  pi,   315,  0. ,  pi);
     // gen-rec level correlation for leptonPt
-    corrs_["lepPt_"      ] = fs->make<TH2F>( "lepPt_"      , "lepPt_"      ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["lepPt_"      ] = fs->make<TH2F>( "lepPt_"      , "lepPt_"      ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for leptonEta
-    corrs_["lepEta_"     ] = fs->make<TH2F>( "lepEta_"     , "lepEta_"     ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["lepEta_"     ] = fs->make<TH2F>( "lepEta_"     , "lepEta_"     ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for neutrinoPt
-    corrs_["neutrinoPt_" ] = fs->make<TH2F>( "neutrinoPt_" , "neutrinoPt_" ,  120,  0. ,  1200.  ,  120,  0.  ,  1200.);
+    //corrs_["neutrinoPt_" ] = fs->make<TH2F>( "neutrinoPt_" , "neutrinoPt_" ,  120,  0. ,  1200.  ,  120,  0.  ,  1200.);
     // gen-rec level correlation for neutrinoEta
-    corrs_["neutrinoEta_"] = fs->make<TH2F>( "neutrinoEta_", "neutrinoEta_",  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["neutrinoEta_"] = fs->make<TH2F>( "neutrinoEta_", "neutrinoEta_",  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for light-quarks Pt
-    corrs_["lightqPt_"   ] = fs->make<TH2F>( "lightqPt_"   , "lightqPt_"   ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["lightqPt_"   ] = fs->make<TH2F>( "lightqPt_"   , "lightqPt_"   ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for light-quarks Eta
-    corrs_["lightqEta_"  ] = fs->make<TH2F>( "lightqEta_"  , "lightqEta_"  ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["lightqEta_"  ] = fs->make<TH2F>( "lightqEta_"  , "lightqEta_"  ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for b-quarks Pt
-    corrs_["bqPt_"       ] = fs->make<TH2F>( "bqPt_"       , "bqPt_"       ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["bqPt_"       ] = fs->make<TH2F>( "bqPt_"       , "bqPt_"       ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for b-quarks Eta
-    corrs_["bqEta_"      ] = fs->make<TH2F>( "bqEta_"      , "bqEta_"      ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    //corrs_["bqEta_"      ] = fs->make<TH2F>( "bqEta_"      , "bqEta_"      ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
     // gen-rec level correlation for leading quark Pt
-    corrs_["leadqPt_"    ] = fs->make<TH2F>( "leadqPt_"    , "leadqPt_"    ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
+    //corrs_["leadqPt_"    ] = fs->make<TH2F>( "leadqPt_"    , "leadqPt_"    ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for leading quark Eta
-    corrs_["leadqEta_"   ] = fs->make<TH2F>( "leadqEta_"   , "leadqEta_"   ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
-    // asymmetry variables
-    corrs_["topPtPlus_"  ] = fs->make<TH2F>( "topPtPlus_"    , "topPtPlus_"    ,  800,   0. , 800.,  800,   0. , 800.);
-    corrs_["topPtMinus_" ] = fs->make<TH2F>( "topPtMinus_"   , "topPtMinus_"   ,  800,   0. , 800.,  800,   0. , 800.);
-    corrs_["lepPtPlus_"  ] = fs->make<TH2F>( "lepPtPlus_"    , "lepPtPlus_"    , 1200 ,  0. , 1200., 1200,  0. ,1200.);
-    corrs_["lepPtMinus_" ] = fs->make<TH2F>( "lepPtMinus_"   , "lepPtMinus_"   , 1200 ,  0. , 1200., 1200,  0. ,1200.);
-    corrs_["lepEtaPlus_" ] = fs->make<TH2F>( "lepEtaPlus_"   , "lepEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["lepEtaMinus_"] = fs->make<TH2F>( "lepEtaMinus_"  , "lepEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["lepYPlus_"   ] = fs->make<TH2F>( "lepYPlus_"     , "lepYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["lepYMinus_"  ] = fs->make<TH2F>( "lepYMinus_"    , "lepYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topEtaPlus_" ] = fs->make<TH2F>( "topEtaPlus_"   , "topEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topEtaMinus_"] = fs->make<TH2F>( "topEtaMinus_"  , "topEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topYPlus_"   ] = fs->make<TH2F>( "topYPlus_"     , "topYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
-    corrs_["topYMinus_"  ] = fs->make<TH2F>( "topYMinus_"    , "topYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["leadqEta_"   ] = fs->make<TH2F>( "leadqEta_"   , "leadqEta_"   ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+
+    // splitting into leading and subleading top quarks
     corrs_["topPtLead_"   ] = fs->make<TH2F>("topPtLead_"    , "topPtLead_"    ,  800,   0. , 800.,  800,   0. , 800.);
     corrs_["topPtSubLead_"] = fs->make<TH2F>("topPtSubLead_" , "topPtSubLead_" ,  800,   0. , 800.,  800,   0. , 800.);
     corrs_["topYLead_"    ] = fs->make<TH2F>("topYLead_"     , "topYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["topYSubLead_" ] = fs->make<TH2F>("topYSubLead_"  , "topYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+
+    // asymmetry variables
+    //corrs_["topPtPlus_"  ] = fs->make<TH2F>( "topPtPlus_"    , "topPtPlus_"    ,  800,   0. , 800.,  800,   0. , 800.);
+    //corrs_["topPtMinus_" ] = fs->make<TH2F>( "topPtMinus_"   , "topPtMinus_"   ,  800,   0. , 800.,  800,   0. , 800.);
+    //corrs_["lepPtPlus_"  ] = fs->make<TH2F>( "lepPtPlus_"    , "lepPtPlus_"    , 1200 ,  0. , 1200., 1200,  0. ,1200.);
+    //corrs_["lepPtMinus_" ] = fs->make<TH2F>( "lepPtMinus_"   , "lepPtMinus_"   , 1200 ,  0. , 1200., 1200,  0. ,1200.);
+    //corrs_["lepEtaPlus_" ] = fs->make<TH2F>( "lepEtaPlus_"   , "lepEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["lepEtaMinus_"] = fs->make<TH2F>( "lepEtaMinus_"  , "lepEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["lepYPlus_"   ] = fs->make<TH2F>( "lepYPlus_"     , "lepYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["lepYMinus_"  ] = fs->make<TH2F>( "lepYMinus_"    , "lepYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topEtaPlus_" ] = fs->make<TH2F>( "topEtaPlus_"   , "topEtaPlus_"   ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topEtaMinus_"] = fs->make<TH2F>( "topEtaMinus_"  , "topEtaMinus_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topYPlus_"   ] = fs->make<TH2F>( "topYPlus_"     , "topYPlus_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    //corrs_["topYMinus_"  ] = fs->make<TH2F>( "topYMinus_"    , "topYMinus_"    ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+
   }
 
   // book ttree entries
@@ -1063,22 +1070,22 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	// fill phi correlation plot for leptonic top candidate							     
 	//corrs_.find("topPhi_"   )->second->Fill( lepTopGen->phi(), lepTopRec->phi(), weight );
 	// fill asymmetry variables
-	if(tops.singleLepton(hypoKey_)->charge()>0){
-	  corrs_.find("lepEtaPlus_" )->second->Fill( tops.singleLepton()->eta()     , tops.singleLepton(hypoKey_)->eta()     , weight );
-	  corrs_.find("lepYPlus_"   )->second->Fill( tops.singleLepton()->rapidity(), tops.singleLepton(hypoKey_)->rapidity(), weight );
-	  corrs_.find("lepPtPlus_"  )->second->Fill( tops.singleLepton()->pt()      , tops.singleLepton(hypoKey_)->pt()      , weight );
-	}
-	else{			 
-	  corrs_.find("lepEtaMinus_")->second->Fill( tops.singleLepton()->eta()     , tops.singleLepton(hypoKey_)->eta()     , weight );
-	  corrs_.find("lepYMinus_"  )->second->Fill( tops.singleLepton()->rapidity(), tops.singleLepton(hypoKey_)->rapidity(), weight );
-	  corrs_.find("lepPtMinus_" )->second->Fill( tops.singleLepton()->pt()      , tops.singleLepton(hypoKey_)->pt()      , weight );
-	}
-	corrs_.find("topEtaPlus_" )->second->Fill( topPlusGen ->eta()     , topPlusRec ->eta()     , weight );
-	corrs_.find("topEtaMinus_")->second->Fill( topMinusGen->eta()     , topMinusRec->eta()     , weight );
-	corrs_.find("topPtPlus_"  )->second->Fill( topPlusGen ->pt()      , topPlusRec ->pt()      , weight );
-	corrs_.find("topPtMinus_" )->second->Fill( topMinusGen->pt()      , topMinusRec->pt()      , weight );
-	corrs_.find("topYPlus_"   )->second->Fill( topPlusGen ->rapidity(), topPlusRec ->rapidity(), weight );
-	corrs_.find("topYMinus_"  )->second->Fill( topMinusGen->rapidity(), topMinusRec->rapidity(), weight );
+	//if(tops.singleLepton(hypoKey_)->charge()>0){
+	//  corrs_.find("lepEtaPlus_" )->second->Fill( tops.singleLepton()->eta()     , tops.singleLepton(hypoKey_)->eta()     , weight );
+	//  corrs_.find("lepYPlus_"   )->second->Fill( tops.singleLepton()->rapidity(), tops.singleLepton(hypoKey_)->rapidity(), weight );
+	//  corrs_.find("lepPtPlus_"  )->second->Fill( tops.singleLepton()->pt()      , tops.singleLepton(hypoKey_)->pt()      , weight );
+	//}
+	//else{			 
+	//  corrs_.find("lepEtaMinus_")->second->Fill( tops.singleLepton()->eta()     , tops.singleLepton(hypoKey_)->eta()     , weight );
+	//  corrs_.find("lepYMinus_"  )->second->Fill( tops.singleLepton()->rapidity(), tops.singleLepton(hypoKey_)->rapidity(), weight );
+	//  corrs_.find("lepPtMinus_" )->second->Fill( tops.singleLepton()->pt()      , tops.singleLepton(hypoKey_)->pt()      , weight );
+	//}
+	//corrs_.find("topEtaPlus_" )->second->Fill( topPlusGen ->eta()     , topPlusRec ->eta()     , weight );
+	//corrs_.find("topEtaMinus_")->second->Fill( topMinusGen->eta()     , topMinusRec->eta()     , weight );
+	//corrs_.find("topPtPlus_"  )->second->Fill( topPlusGen ->pt()      , topPlusRec ->pt()      , weight );
+	//corrs_.find("topPtMinus_" )->second->Fill( topMinusGen->pt()      , topMinusRec->pt()      , weight );
+	//corrs_.find("topYPlus_"   )->second->Fill( topPlusGen ->rapidity(), topPlusRec ->rapidity(), weight );
+	//corrs_.find("topYMinus_"  )->second->Fill( topMinusGen->rapidity(), topMinusRec->rapidity(), weight );
 
 	bool plusGen=(topPlusGen->pt() > topMinusGen->pt() ? true : false);
 	bool plusRec=(topPlusRec->pt() > topMinusRec->pt() ? true : false);
@@ -1116,65 +1123,65 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       //    fill correlation for ttbar final state object distributions
       // ---  
       // gen-rec level correlation for leptonPt
-      double pt  = tops.singleLepton()->pt();
-      double eta = tops.singleLepton()->eta();
-      if(tops.genEvent().isAvailable()&&((*tops.genEvent()).isSemiLeptonic(WDecay::kTau))&&getFinalStateLepton(*tops.singleLepton())){
-	pt  = getFinalStateLepton(*tops.singleLepton())->pt();
-	eta = getFinalStateLepton(*tops.singleLepton())->eta();
-      }
-      if(!hypoKey_.compare("None")==0){
-	corrs_.find("lepPt_"      )->second->Fill(pt   , tops.singleLepton(hypoKey_)->pt()   , weight); 
-	// gen-rec level correlation for leptonEta
-	corrs_.find("lepEta_"     )->second->Fill(eta  , tops.singleLepton(hypoKey_)->eta()  , weight); 
-	// gen-rec level correlation for neutrinoPt
-	corrs_.find("neutrinoPt_" )->second->Fill(tops.singleNeutrino()->pt() , tops.singleNeutrino(hypoKey_)->pt() , weight); 
-	// gen-rec level correlation for neutrinoEta
-	corrs_.find("neutrinoEta_")->second->Fill(tops.singleNeutrino()->eta(), tops.singleNeutrino(hypoKey_)->eta(), weight); 
-      }
+      //double pt  = tops.singleLepton()->pt();
+      //double eta = tops.singleLepton()->eta();
+      //if(tops.genEvent().isAvailable()&&((*tops.genEvent()).isSemiLeptonic(WDecay::kTau))&&getFinalStateLepton(*tops.singleLepton())){
+      //	pt  = getFinalStateLepton(*tops.singleLepton())->pt();
+      //	eta = getFinalStateLepton(*tops.singleLepton())->eta();
+      //}
+      //if(!hypoKey_.compare("None")==0){
+      //	corrs_.find("lepPt_"      )->second->Fill(pt   , tops.singleLepton(hypoKey_)->pt()   , weight); 
+      //	// gen-rec level correlation for leptonEta
+      //	corrs_.find("lepEta_"     )->second->Fill(eta  , tops.singleLepton(hypoKey_)->eta()  , weight); 
+      //	// gen-rec level correlation for neutrinoPt
+      //	corrs_.find("neutrinoPt_" )->second->Fill(tops.singleNeutrino()->pt() , tops.singleNeutrino(hypoKey_)->pt() , weight); 
+      //	// gen-rec level correlation for neutrinoEta
+      //	corrs_.find("neutrinoEta_")->second->Fill(tops.singleNeutrino()->eta(), tops.singleNeutrino(hypoKey_)->eta(), weight); 
+      //}
       // find q/qbar gen-reco association (closest in pt)
-      bool switchLightQuarks=false;
-      if((std::abs(tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark(hypoKey_)->pt())+std::abs(tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar(hypoKey_)->pt()))>(std::abs(tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuarkBar(hypoKey_)->pt())+std::abs(tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuark(hypoKey_)->pt()))){
-	switchLightQuarks=true;
-      }
-      const reco::GenParticle *QGen   =tops.hadronicDecayQuark   ();
-      const reco::GenParticle *QbarGen=tops.hadronicDecayQuarkBar();
-      const reco::Candidate *QReco   =(switchLightQuarks ? tops.hadronicDecayQuarkBar(hypoKey_) : tops.hadronicDecayQuark   (hypoKey_));
-      const reco::Candidate *QbarReco=(switchLightQuarks ? tops.hadronicDecayQuark   (hypoKey_) : tops.hadronicDecayQuarkBar(hypoKey_));
-      if(!hypoKey_.compare("None")==0){
-	// gen-rec level correlation for light-quarks Pt
-	corrs_.find("lightqPt_" )->second->Fill(QGen   ->pt(), QReco   ->pt(), weight);
-	corrs_.find("lightqPt_" )->second->Fill(QbarGen->pt(), QbarReco->pt(), weight);
-	// gen-rec level correlation for light-quarks Eta
-	corrs_.find("lightqEta_")->second->Fill(QGen   ->eta(), QReco   ->eta(), weight);
-	corrs_.find("lightqEta_")->second->Fill(QbarGen->eta(), QbarReco->eta(), weight);
-	// gen-rec level correlation for b-quarks Pt
-	corrs_.find("bqPt_"     )->second->Fill(tops.hadronicDecayB()->pt() , tops.hadronicDecayB(hypoKey_)->pt() , weight);
-	corrs_.find("bqPt_"     )->second->Fill(tops.leptonicDecayB()->pt() , tops.leptonicDecayB(hypoKey_)->pt() , weight);
-	// gen-rec level correlation for b-quarks Eta
-	corrs_.find("bqEta_"    )->second->Fill(tops.hadronicDecayB()->eta(), tops.hadronicDecayB(hypoKey_)->eta(), weight);
-	corrs_.find("bqEta_"    )->second->Fill(tops.leptonicDecayB()->eta(), tops.leptonicDecayB(hypoKey_)->eta(), weight);
-      }
+      //bool switchLightQuarks=false;
+      //if((std::abs(tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuark(hypoKey_)->pt())+std::abs(tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuarkBar(hypoKey_)->pt()))>(std::abs(tops.hadronicDecayQuark()->pt()-tops.hadronicDecayQuarkBar(hypoKey_)->pt())+std::abs(tops.hadronicDecayQuarkBar()->pt()-tops.hadronicDecayQuark(hypoKey_)->pt()))){
+      //	switchLightQuarks=true;
+      //}
+      //const reco::GenParticle *QGen   =tops.hadronicDecayQuark   ();
+      //const reco::GenParticle *QbarGen=tops.hadronicDecayQuarkBar();
+      //const reco::Candidate *QReco   =(switchLightQuarks ? tops.hadronicDecayQuarkBar(hypoKey_) : tops.hadronicDecayQuark   (hypoKey_));
+      //const reco::Candidate *QbarReco=(switchLightQuarks ? tops.hadronicDecayQuark   (hypoKey_) : tops.hadronicDecayQuarkBar(hypoKey_));
+      //if(!hypoKey_.compare("None")==0){
+      //	// gen-rec level correlation for light-quarks Pt
+      //	corrs_.find("lightqPt_" )->second->Fill(QGen   ->pt(), QReco   ->pt(), weight);
+      //	corrs_.find("lightqPt_" )->second->Fill(QbarGen->pt(), QbarReco->pt(), weight);
+      //	// gen-rec level correlation for light-quarks Eta
+      //	corrs_.find("lightqEta_")->second->Fill(QGen   ->eta(), QReco   ->eta(), weight);
+      //	corrs_.find("lightqEta_")->second->Fill(QbarGen->eta(), QbarReco->eta(), weight);
+      //	// gen-rec level correlation for b-quarks Pt
+      //	corrs_.find("bqPt_"     )->second->Fill(tops.hadronicDecayB()->pt() , tops.hadronicDecayB(hypoKey_)->pt() , weight);
+      //	corrs_.find("bqPt_"     )->second->Fill(tops.leptonicDecayB()->pt() , tops.leptonicDecayB(hypoKey_)->pt() , weight);
+      //	// gen-rec level correlation for b-quarks Eta
+      //	corrs_.find("bqEta_"    )->second->Fill(tops.hadronicDecayB()->eta(), tops.hadronicDecayB(hypoKey_)->eta(), weight);
+      //	corrs_.find("bqEta_"    )->second->Fill(tops.leptonicDecayB()->eta(), tops.leptonicDecayB(hypoKey_)->eta(), weight);
+      //}
       // find leading jet
-      ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadqGen=tops.hadronicDecayB(        )->p4();
-      ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadqRec=tops.hadronicDecayB(hypoKey_)->p4();
-      if(leadqGen.Pt()<(tops.leptonicDecayB()->pt())){
-	leadqGen=tops.leptonicDecayB(        )->p4();
-	leadqRec=tops.leptonicDecayB(hypoKey_)->p4();
-      }
-      if(leadqGen.Pt()<(tops.hadronicDecayQuarkBar()->pt())){
-	leadqGen=tops.hadronicDecayQuarkBar(        )->p4();
-	leadqRec=tops.hadronicDecayQuarkBar(hypoKey_)->p4();
-      }
-      if(leadqGen.Pt()<(tops.hadronicDecayQuark()->pt())){
-	leadqGen=tops.hadronicDecayQuark(        )->p4();
-	leadqRec=tops.hadronicDecayQuark(hypoKey_)->p4();
-      }
-      if(!hypoKey_.compare("None")==0){
-	// gen-rec level correlation for leading quark Pt
-	corrs_.find("leadqPt_"    )->second->Fill(leadqGen.Pt() , leadqRec.Pt() , weight);
-	// gen-rec level correlation for leading quark Eta
-	corrs_.find("leadqEta_"   )->second->Fill(leadqGen.Eta(), leadqRec.Eta(), weight);
-      }
+      //ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadqGen=tops.hadronicDecayB(        )->p4();
+      //ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > leadqRec=tops.hadronicDecayB(hypoKey_)->p4();
+      //if(leadqGen.Pt()<(tops.leptonicDecayB()->pt())){
+      //	leadqGen=tops.leptonicDecayB(        )->p4();
+      //	leadqRec=tops.leptonicDecayB(hypoKey_)->p4();
+      //}
+      //if(leadqGen.Pt()<(tops.hadronicDecayQuarkBar()->pt())){
+      //	leadqGen=tops.hadronicDecayQuarkBar(        )->p4();
+      //	leadqRec=tops.hadronicDecayQuarkBar(hypoKey_)->p4();
+      //}
+      //if(leadqGen.Pt()<(tops.hadronicDecayQuark()->pt())){
+      //	leadqGen=tops.hadronicDecayQuark(        )->p4();
+      //	leadqRec=tops.hadronicDecayQuark(hypoKey_)->p4();
+      //}
+      //if(!hypoKey_.compare("None")==0){
+      //	// gen-rec level correlation for leading quark Pt
+      //	corrs_.find("leadqPt_"    )->second->Fill(leadqGen.Pt() , leadqRec.Pt() , weight);
+      //	// gen-rec level correlation for leading quark Eta
+      //	corrs_.find("leadqEta_"   )->second->Fill(leadqGen.Eta(), leadqRec.Eta(), weight);
+      //}
       /**
 	 fill 2D histos (angle correlation plots)
       **/
