@@ -166,18 +166,18 @@ noChi2Muons     = selectedPatMuons.clone(src = 'dRMuons',
                                                'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
                                                'numberOfMatches>1'
                                          )
-noDbMuons     = selectedPatMuons.clone(src = 'dRMuons',
-                                       cut = 'pt > 30. & abs(eta) < 2.1 &'
-                                             'combinedMuon.isNull = 0 &'
-                                             'isTrackerMuon() =1 &'
-                                             #'(trackIso+caloIso)/pt < 0.05 &'
-                                             '(chargedHadronIso+neutralHadronIso+photonIso)/pt < 0.125&'
-                                             'innerTrack.numberOfValidHits >= 11 &'
-                                             'globalTrack.normalizedChi2 < 10.0 &'
-                                             'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
-                                             'innerTrack.hitPattern.pixelLayersWithMeasurement>=1 &'
-                                             'numberOfMatches>1'                              
-                                       )
+noDbMuons = selectedPatMuons.clone(src = 'vertexSelectedMuons2012',
+                                   cut = 'isGlobalMuon &'
+                                         'isPFMuon &'
+                                         'pt > 30. &'
+                                         'abs(eta) < 2.1 &'
+                                         'globalTrack.normalizedChi2 < 10.0 &'
+                                         'innerTrack.hitPattern.trackerLayersWithMeasurement>5 &'
+                                         'globalTrack.hitPattern.numberOfValidMuonHits>0 &'
+                                         'innerTrack.hitPattern.numberOfValidPixelHits>=1 &'
+                                         'numberOfMatchedStations>1 &'
+                                         '(chargedHadronIso+max((neutralHadronIso+photonIso-0.5*puChargedHadronIso),0.0))/pt < 0.12'
+                                    )
 
 ## N-1 Collections
 selectNMinusOneMuons = cms.Sequence(noDbMuons        *
