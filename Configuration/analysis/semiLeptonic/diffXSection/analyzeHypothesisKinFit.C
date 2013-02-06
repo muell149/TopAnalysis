@@ -3,7 +3,7 @@
 #include "../../unfolding/TopSVDFunctions.C" 
 
 void analyzeHypothesisKinFit(double luminosity = 12148.,
-			     bool save = save, int systematicVariation=sysNo, unsigned int verbose=1, 
+			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
@@ -1357,7 +1357,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
     if(verbose>1) std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << std::endl;
-    if(plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
+    if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
     // ttbar BG yield for signal fraction
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone(variable);
     // create combined BG reco plot
