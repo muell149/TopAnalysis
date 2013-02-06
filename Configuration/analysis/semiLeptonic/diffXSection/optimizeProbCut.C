@@ -49,8 +49,12 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   }
 
   // initialize histograms
+  // only right permutaions
   TH1F* sigHisto = new TH1F("probHistSig","signal probability",1000000,0.,1.);
+  // wrong permutaions and ttbar bkg
   TH1F* bkgHisto = new TH1F("probHistBkg","background probability",1000000,0.,1.);
+  // all ttbar signal (right+wrong permutations)
+  TH1F* ttSigHisto = new TH1F("histTtSig","ttSig probability",1000000,0.,1.);
 
   // fill histograms
   Long64_t nevent = 0;
@@ -59,6 +63,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
       nevent = (Long64_t)trees_[i]->GetEntries();
       for(Long64_t ientry = 0; ientry < nevent; ++ientry){
 	trees_[i]->GetEntry(ientry);
+	if(decayChannel==1 || decayChannel==2)ttSigHisto->Fill(prob,weight);
 	if(qAssignment==0)sigHisto->Fill(prob,weight);
 	else bkgHisto->Fill(prob,weight);
       }
@@ -76,6 +81,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   double newLowProb  = goldSec;
   double newHighProb = 1 - goldSec;
   double sigEvents   = sigHisto->Integral();
+  double ttSigEvents = ttSigHisto->Integral();
   vector<double> probVec;
   vector<double> SoBVec;
   vector<double> SeffVec;
@@ -125,7 +131,8 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
       newHighProb=highProb-goldSec*(highProb-lowProb);
     }
   }
-  cout << "Optimal probability cut at " << optimalProb << " -> signal efficiency: " << optimalEff << endl;
+  double ttSigEff = ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents;
+  cout << "Optimal probability cut at " << optimalProb << " -> right-permutation efficiency: " << optimalEff << ", ttbar-signal efficiency: " << ttSigEff << endl;
 
   // set up canvas
   TCanvas *canv = new TCanvas("canv","probability cut optimisation",10,10,1200,600);
