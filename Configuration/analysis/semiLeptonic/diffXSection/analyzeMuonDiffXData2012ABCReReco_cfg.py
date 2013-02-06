@@ -84,5 +84,7 @@ if(decayChannel == 'muon'):
 elif(decayChannel == 'electron'):
     process.TFileService.fileName = 'analyzeDiffXData2012ABCReRecoElec.root'
 
+process.load('RecoMET.METFilters.ecalLaserCorrFilter_cfi')
+process.p1.insert(0,process.ecalLaserCorrFilter) 
 process.load("EventFilter.HcalRawToDigi.hcallasereventfilter2012_cff")
 process.p1.insert(0,process.hcallLaserEvent2012Filter)
