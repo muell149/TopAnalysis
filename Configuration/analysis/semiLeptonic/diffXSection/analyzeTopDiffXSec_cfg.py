@@ -2923,8 +2923,6 @@ for path in pathlist:
 # reduce module content if reduced==True
 if(reduced):
     for path in allpaths:
-        if(hasattr(process,                      'eventWeightNoBtagSFWeight')):
-            getattr(process,path).remove( process.eventWeightNoBtagSFWeight)
         if(hasattr(process,                      'eventWeightNoPUWeight')):
             getattr(process,path).remove( process.eventWeightNoPUWeight    )
         if(hasattr(process,                      'eventWeightFlatEffSF')):
