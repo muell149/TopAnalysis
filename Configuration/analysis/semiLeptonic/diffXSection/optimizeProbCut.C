@@ -30,8 +30,8 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   TString path = "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/";
   std::vector<TFile*> files_;
   if(lep=="both" || lep=="muon")files_.push_back(new TFile(path+"muonDiffXSecSigSummer12PF.root"));
-  if(lep=="both" || lep=="electron")  files_.push_back(new TFile(path+"elecDiffXSecSigSummer12PF.root"));
   if(lep=="both" || lep=="muon")  files_.push_back(new TFile(path+"muonDiffXSecBkgSummer12PF.root"));
+  if(lep=="both" || lep=="electron")  files_.push_back(new TFile(path+"elecDiffXSecSigSummer12PF.root"));
   if(lep=="both" || lep=="electron")  files_.push_back(new TFile(path+"elecDiffXSecBkgSummer12PF.root"));
 
   // get trees
@@ -63,7 +63,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
       nevent = (Long64_t)trees_[i]->GetEntries();
       for(Long64_t ientry = 0; ientry < nevent; ++ientry){
 	trees_[i]->GetEntry(ientry);
-	if(decayChannel==1 || decayChannel==2)ttSigHisto->Fill(prob,weight);
+	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2))ttSigHisto->Fill(prob,weight);
 	if(qAssignment==0)sigHisto->Fill(prob,weight);
 	else bkgHisto->Fill(prob,weight);
       }
