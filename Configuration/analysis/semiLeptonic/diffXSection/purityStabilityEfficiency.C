@@ -46,6 +46,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
   if(lepton.Contains("combined")) lepton="combined";
   // output folder in case of saving the canvases:
   TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2012/binning";
+  //if(chi2Max<100) outputFolder+="/prob";
   if(useTree&&chi2Max<100){ 
     plotEfficiencyPhaseSpace = false;
     plotAcceptance = false;
@@ -515,9 +516,8 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
       double effGenPS=0.;
       double acceptance=0.;
       double effDenomMigrationOnly = responseMatrix->Integral(iGenBin,iGenBin,0,NxBins+1);
-      if     (genHistPS->GetBinContent(iGenBin)) effDenomPS=genHistPS->GetBinContent(iGenBin);
-      if     (genHist  ->GetBinContent(iGenBin)) effDenom  =genHist  ->GetBinContent(iGenBin);
-      
+      if     (plotEfficiencyPhaseSpace&&genHistPS&&genHistPS->GetNbinsX()>=iGenBin&&genHistPS->GetBinContent(iGenBin)) effDenomPS=genHistPS->GetBinContent(iGenBin);
+      if     (plotEfficiency2         &&genHist  &&genHist  ->GetNbinsX()>=iGenBin&&genHist  ->GetBinContent(iGenBin)) effDenom  =genHist  ->GetBinContent(iGenBin);
       for(int iRecBin=1; iRecBin <=NxBins; iRecBin++){
 	double binContentResponse=0.;
 	double binContentMigration=0.;
@@ -695,11 +695,13 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
     effHistBBBPS->GetYaxis()->SetRangeUser  (0., 0.5);
     effHistBBBPS->Draw("");
 
-    accHistBBB->SetLineColor(kGreen+2);
-    accHistBBB->SetLineStyle(3);
-    accHistBBB->SetLineWidth(4);
-    accHistBBB->Draw("same");
-  
+    if(plotAcceptance){
+      accHistBBB->SetLineColor(kGreen+2);
+      accHistBBB->SetLineStyle(3);
+      accHistBBB->SetLineWidth(4);
+      accHistBBB->Draw("same");
+    }
+
     if(plotAcceptance)           accHistGen->Draw("same");
     if(plotEfficiencyPhaseSpace) effHistGenPS->Draw("same");
   
