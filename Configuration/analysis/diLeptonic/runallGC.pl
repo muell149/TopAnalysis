@@ -23,7 +23,7 @@ be created to contain working directories and output.
 
 Set environment variable HN_USER to your hypernews name!
 
--g      run on the grid
+-g      run on the grid (only then HN_USER must be set)
 
 -r regexp
 If a regexp is given only jobs matching regexp will be submitted (case sensitive).
@@ -58,10 +58,11 @@ my @forHadd;
 my @forJson;
 
 my $hypernewsName = $arg{h} || $ENV{HN_USER};
-die "Who are you? Set your hypernews name (HN_USER).\n" unless $hypernewsName;
+
 die "CMS ENV must be set!" unless $ENV{CMSSW_BASE};
 if($arg{g}) {
     die "glite must be initialized to run grid jobs!!" unless $ENV{GLITE_LOCATION};
+    die "Who are you? Set your hypernews name (HN_USER).\n" unless $hypernewsName;
 }
 
 # prepare workingdir
