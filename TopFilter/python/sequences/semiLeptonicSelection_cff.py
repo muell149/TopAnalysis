@@ -60,7 +60,6 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons       *
                                      vertexSelectedElectrons   *  
                                      looseElectrons            * 
                                      standAloneMuons           *
-                                     looseElectronsEJ          *   
                                      tightElectronsEJ          *
                                      centralJets               *
                                      reliableJets              *
@@ -88,7 +87,6 @@ semiLeptonicSelection = cms.Sequence(vertexSelectedMuons       *
                                      looseMuons                *
                                      tightMuons                *
                                      noKinMuons                *
-                                     unconvTightElectronsEJ    *
                                      goodElectronsEJ           *
                                      noKinTightElectronsEJ     *
                                      trackCountingHighPurBJets *
@@ -143,24 +141,19 @@ semiLeptonicEvents = cms.Sequence(muonSelection       *
 
 ## setup the lepton selection
 
-## 'step3'
+## 'step1'
 tightElectronSelection = countPatElectrons.clone( src = 'tightElectronsEJ', minNumber = 1, maxNumber = 1 )
 
-## 'step4'
+## 'step2'
 muonVeto               = countPatMuons.clone( src = 'looseMuons', maxNumber = 0 )
 
-## 'step5': Z veto for looser electrons with inv. mass between 76 - 106 GeV
-from TopAnalysis.TopFilter.filters.SecondElectronFilter_cfi import *
-secondElectronVeto     = filterLooseElectrons.clone( elecsTight = 'tightElectronsEJ', 
-                                                     elecsLoose = 'looseElectronsEJ'   , 
-                                                     massWindow = cms.vdouble(76.,106.)
-                                                   )  
+## 'step3'
+secondElectronVeto     = countPatElectrons.clone( src = 'looseElectrons',
+                                         maxNumber = 1
+                                         )
 
-## 'step6a'
-convElecHitRejection  = countPatElectrons.clone( src = 'unconvTightElectronsEJ', minNumber = 1, maxNumber = 1 )
-
-## 'step6b'
-convElecTrkRejection  = countPatElectrons.clone( src = 'goodElectronsEJ'     , minNumber = 1, maxNumber = 1 )
+## 'step4'
+convElecRejection  = countPatElectrons.clone( src = 'goodElectronsEJ'     , minNumber = 1, maxNumber = 1 )
 
 
 ## setting up the semi-leptonic event selection;
@@ -169,8 +162,7 @@ convElecTrkRejection  = countPatElectrons.clone( src = 'goodElectronsEJ'     , m
 electronSelection          = cms.Sequence( tightElectronSelection *
                                            muonVeto               *
                                            secondElectronVeto     *
-                                           convElecHitRejection   *
-                                           convElecTrkRejection 
+                                           convElecRejection 
                                          )
 
 semiLeptonicElectronEvents = cms.Sequence( electronSelection      *

@@ -2365,7 +2365,7 @@ process.testIsoElectrons=process.tightElectronsEJ.clone(
     cut = 'et > 30. &abs(eta) <  2.1  &( abs(superCluster.eta) < 1.4442   |  abs(superCluster.eta) > 1.5660 ) &abs(dB)  <  0.02 &test_bit( electronID("eidHyperTight1MC"), 0 )'
     )
 
-process.testIsoElectronSelection= process.convElecTrkRejection.clone (src = 'testIsoElectrons', minNumber = 1, maxNumber = 99999999)
+process.testIsoElectronSelection= process.convElecRejection.clone (src = 'testIsoElectrons', minNumber = 1, maxNumber = 99999999)
 process.testIsoElectronQuality  = process.tightElectronQualityTagged.clone(src = 'testIsoElectrons')
 
 #process.analyzeTopRecoKinematicsBjets.output = cms.int32(2)
@@ -2757,7 +2757,7 @@ if(pfToPAT):
         'resolutionsVersion': 'fall11',
         'runOnOLDcfg': True,
         'cutsMuon': 'pt > 10. & abs(eta) < 2.5',
-        'cutsElec': 'et > 15. & abs(eta) < 2.5',
+        'cutsElec': 'et > 20. & abs(eta) < 2.5',
         'cutsJets': 'pt > 10 & abs(eta) < 5.0', 
         'electronIDs': ['CiC','classical','MVA'],
         'pfIsoConeMuon': 0.4,
@@ -2781,8 +2781,6 @@ if(pfToPAT):
     if(runningOnData=="data"):
         PFoptions['runOnMC']=False
     if(decayChannel=="electron"):
-    # take into account different electron vetos in mu and e channel
-        PFoptions['cutsElec'    ] = 'et > 20. & abs(eta) < 2.5'
     # skip events (and jet calculation) if no lepton is found
     # only done in data, as in MC you need the events for parton truth plots
         #PFoptions['skipIfNoPFElec']=True
