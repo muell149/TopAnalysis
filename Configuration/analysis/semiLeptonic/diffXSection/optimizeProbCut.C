@@ -55,6 +55,8 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   TH1F* bkgHisto = new TH1F("probHistBkg","background probability",1000000,0.,1.);
   // all ttbar signal (right+wrong permutations)
   TH1F* ttSigHisto = new TH1F("histTtSig","ttSig probability",1000000,0.,1.);
+  // all ttbar background
+  TH1F* ttBkgHisto = new TH1F("histTtBkg","ttBkg probability",1000000,0.,1.);
 
   // fill histograms
   Long64_t nevent = 0;
@@ -63,7 +65,8 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
       nevent = (Long64_t)trees_[i]->GetEntries();
       for(Long64_t ientry = 0; ientry < nevent; ++ientry){
 	trees_[i]->GetEntry(ientry);
-	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2))ttSigHisto->Fill(prob,weight);
+	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2 && !(lep=="electron")) || (lep=="electron" && decayChannel==1))ttSigHisto->Fill(prob,weight);
+	else ttBkgHisto->Fill(prob,weight);
 	if(qAssignment==0)sigHisto->Fill(prob,weight);
 	else bkgHisto->Fill(prob,weight);
       }
@@ -82,6 +85,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   double newHighProb = 1 - goldSec;
   double sigEvents   = sigHisto->Integral();
   double ttSigEvents = ttSigHisto->Integral();
+  double ttBkgEvents = ttBkgHisto->Integral();
   vector<double> probVec;
   vector<double> SoBVec;
   vector<double> SeffVec;
@@ -132,7 +136,8 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
     }
   }
   double ttSigEff = ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents;
-  cout << "Optimal probability cut at " << optimalProb << " -> right-permutation efficiency: " << optimalEff << ", ttbar-signal efficiency: " << ttSigEff << endl;
+  double ttBkgEff = ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents;
+  cout << "Optimal probability cut at " << optimalProb << " -> right-permutation efficiency: " << optimalEff << ", ttbar-signal efficiency: " << ttSigEff << ", ttbar-bkg efficiency: " << ttBkgEff << endl;
 
   // set up canvas
   TCanvas *canv = new TCanvas("canv","probability cut optimisation",10,10,1200,600);
@@ -145,6 +150,12 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   canv->cd(2)->SetRightMargin (0.03);
   canv->cd(2)->SetBottomMargin(0.10);
   canv->cd(2)->SetTopMargin   (0.05);
+  TCanvas *canv2 = new TCanvas("canv2","probability",10,10,900,600);
+  canv2->cd()->SetLeftMargin  (0.08);
+  canv2->cd()->SetRightMargin (0.03);
+  canv2->cd()->SetBottomMargin(0.10);
+  canv2->cd()->SetTopMargin   (0.05);
+  canv2->cd()->SetLogy();
 
   // draw graph s/sqrt(s+b) or s/sqrt(b) vs probability
   canv->cd(1);
@@ -155,7 +166,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   sigHisto->GetYaxis()->SetTitle(optimize);
   sigHisto->GetYaxis()->SetTitleOffset(1.65);
   sigHisto->DrawClone("axis");
-  optSoB->Draw("p same");
+  optSoB->DrawClone("p same");
 
   // draw graph signal efficiency vs probability
   canv->cd(2);
@@ -163,8 +174,28 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   eff->SetMarkerStyle(20);
   sigHisto->SetMaximum(1.);
   sigHisto->GetYaxis()->SetTitle("signal efficiency");
-  sigHisto->Draw("axis");
-  eff->Draw("p same");
+  sigHisto->DrawClone("axis");
+  eff->DrawClone("p same");
+
+  // draw prob distribution
+  canv2->cd();
+  sigHisto->SetTitle("");
+  sigHisto->GetXaxis()->SetTitle("Probability");
+  sigHisto->GetYaxis()->SetTitle("Events");
+  sigHisto->GetYaxis()->SetTitleOffset(0.85);
+  sigHisto->Add(bkgHisto);
+  sigHisto->SetMinimum(10);
+  sigHisto->SetFillColor(kRed+1);
+  sigHisto->Rebin(10000);
+  sigHisto->DrawClone("h");
+  bkgHisto->SetFillColor(kRed);
+  bkgHisto->Rebin(10000);
+  bkgHisto->DrawClone("h same");
+  ttBkgHisto->SetFillColor(kRed-7);
+  ttBkgHisto->Rebin(10000);
+  ttBkgHisto->DrawClone("h same");
+  sigHisto->DrawClone("axis same");
+
 }
 
 // calculate s/sqrt(s+b) or s/sqrt(+b)
