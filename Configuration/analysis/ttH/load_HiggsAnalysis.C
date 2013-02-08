@@ -24,7 +24,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
         exit(773); 
     }
     
-    HiggsAnalysis *selector = new HiggsAnalysis();
+    Analysis *selector = new HiggsAnalysis();
     PUReweighter *pu = new PUReweighter();
     pu->setMCDistrSum12("S10");
     std::string pu_path(getenv("CMSSW_BASE"));

@@ -3,7 +3,9 @@
 #include "HiggsAnalysis.h"
 
 
-
+// FIXME: are these values taken from Analysis.C? and can they been overwritten here?
+//constexpr double JETPTCUT = 30;
+//constexpr double JETETACUT = 2.4;
 
 
 HiggsAnalysis::HiggsAnalysis(TTree*)
@@ -20,6 +22,7 @@ HiggsAnalysis::~HiggsAnalysis(){}
 void
 HiggsAnalysis::SlaveBegin(TTree *){
     
+    // FIXME: shouldn't the jetCategories_ declaration be in the constructor?
     jetCategories_.clear();
     jetCategories_.addCategory(2,0);
     jetCategories_.addCategory(2,1);
@@ -69,8 +72,50 @@ HiggsAnalysis::SlaveBegin(TTree *){
     }
     
     
+    // Histograms needed for cutflow tables
+    // FIXME: why not using histogram with single bin ???
+    h_step0 = store(new TH1D("step0","event count (no weight)",10,0,10));
+    h_step1 = store(new TH1D("step1","event count (no weight)",10,0,10));
+    h_step2 = store(new TH1D("step2","event count (no weight)",10,0,10));
+    h_step3 = store(new TH1D("step3","event count (no weight)",10,0,10));
+    h_step4 = store(new TH1D("step4","event count at after 2lepton",10,0,10));
+    h_step5 = store(new TH1D("step5","event count at after Zcut",10,0,10));
+    h_step6 = store(new TH1D("step6","event count at after 2jets",10,0,10));
+    h_step7 = store(new TH1D("step7","event count at after MET",10,0,10));
+    h_step8 = store(new TH1D("step8","event count at after 1btag",10,0,10));
+    h_step9 = store(new TH1D("step9","event count at step after KinReco",10,0,10));
+    h_step0->Sumw2();
+    h_step1->Sumw2();
+    h_step2->Sumw2();
+    h_step3->Sumw2();
+    h_step4->Sumw2();
+    h_step5->Sumw2();
+    h_step6->Sumw2();
+    h_step7->Sumw2();
+    h_step8->Sumw2();
+    h_step9->Sumw2();
     
     
+    // Histograms needed for data-driven scaling of Z samples
+    Allh1_postZcut = store(new TH1D("Allh1_postZcut","DiLepton Mass",40,0,400));
+    Zh1_postZcut = store(new TH1D("Zh1_postZcut","DiLepton Mass in Z Window",40,0,400));
+    TTh1_postZcut = store(new TH1D("TTh1_postZcut","DiLepton Mass out of Z Window",40,0,400));
+    Allh1_post2jets = store(new TH1D("Allh1_post2jets","DiLepton Mass",40,0,400));
+    Zh1_post2jets = store(new TH1D("Zh1_post2jets","DiLepton Mass in Z Window",40,0,400));
+    TTh1_post2jets = store(new TH1D("TTh1_post2jets","DiLepton Mass out of Z Window",40,0,400));
+    Allh1_postMET = store(new TH1D("Allh1_postMET","DiLepton Mass",40,0,400));
+    Zh1_postMET = store(new TH1D("Zh1_postMET","DiLepton Mass in Z Window",40,0,400));
+    TTh1_postMET = store(new TH1D("TTh1_postMET","DiLepton Mass out of Z Window",40,0,400));
+    Allh1_post1btag = store(new TH1D("Allh1_post1btag","DiLepton Mass",40,0,400));
+    Zh1_post1btag = store(new TH1D("Zh1_post1btag","DiLepton Mass in Z Window",40,0,400));
+    TTh1_post1btag = store(new TH1D("TTh1_post1btag","DiLepton Mass out of Z Window",40,0,400));
+    Allh1_postKinReco = store(new TH1D("Allh1_postKinReco","DiLepton Mass",40,0,400));
+    Zh1_postKinReco = store(new TH1D("Zh1_postKinReco","DiLepton Mass in Z Window",40,0,400));
+    TTh1_postKinReco = store(new TH1D("TTh1_postKinReco","DiLepton Mass out of Z Window",40,0,400));
+    Looseh1 = store(new TH1D("Looseh1","DiLepton Mass",40,0,400));
+    
+    
+    // Map for binned control plots
     binnedControlPlots = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
     
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
@@ -88,9 +133,10 @@ HiggsAnalysis::SlaveBegin(TTree *){
 Bool_t
 HiggsAnalysis::Process(Long64_t entry)
 {
-    // FIXME: use this or an event counter independent of root TSelector ?
-    const int eventCounter(entry+1);
-    if(eventCounter % 100000 == 0) std::cout << "Event Counter 1: " << eventCounter << std::endl;
+    if (++EventCounter % 100000 == 0) std::cout << "Event Counter: " << EventCounter << std::endl;
+    
+    // Histogram for controlling correctness of h_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
+    h_step0->Fill(1, 1);
     
     //do we have a DY true level cut?
     if (checkZDecayMode && !checkZDecayMode(entry)) return kTRUE;
@@ -106,9 +152,17 @@ HiggsAnalysis::Process(Long64_t entry)
         bool isViaTau = topDecayMode > 40 || ( topDecayMode % 10 > 4 );
         bool isCorrectChannel = false;
         switch (channelPdgIdProduct) {
-            case -11*13: isCorrectChannel = topDecayMode == 23 || topDecayMode == 32; break;
-            case -11*11: isCorrectChannel = topDecayMode == 22; break;
-            case -13*13: isCorrectChannel = topDecayMode == 33; break;
+            case -11*13: isCorrectChannel = topDecayMode == 23 || topDecayMode == 32 //emu prompt
+                            || topDecayMode == 53 || topDecayMode == 35 //e via tau, mu prompt
+                            || topDecayMode == 26 || topDecayMode == 62 //e prompt, mu via tau
+                            || topDecayMode == 56 || topDecayMode == 65; //both via tau
+                            break;
+            case -11*11: isCorrectChannel = topDecayMode == 22  //ee prompt
+                            || topDecayMode == 52 || topDecayMode == 25 //e prompt, e via tau
+                            || topDecayMode == 55; break; //both via tau
+            case -13*13: isCorrectChannel = topDecayMode == 33
+                            || topDecayMode == 36 || topDecayMode == 63
+                            || topDecayMode == 66; break;
             default: cerr << "Invalid channel! Product = " << channelPdgIdProduct << "\n";
         };
         bool isBackgroundInSignalSample = !isCorrectChannel || isViaTau;
@@ -128,21 +182,19 @@ HiggsAnalysis::Process(Long64_t entry)
     }
     
     
-    // FIXME: these are PDF variations, not needed now, and perhaps never
-    //if (pdf_no) {
-    //    b_weightPDF->GetEntry(entry);
-    //    weightGenerator *= weightPDF->at(pdf_no - 1); //vector is 0 based
-    //}
-    
-    // FIXME: implement cleanselectedjets (?) method here, to select certain jets for plotting
+    // FIXME: here were PDF variations, not needed now, and perhaps never
     
     
-    // FIXME: something here does the kinematic event reconstruction and tells whether there is a solution?
-    
+    // apply all jet cuts
+    cleanJetCollection();
     
     
     double weightPU = 1;
     if (isMC && pureweighter)weightPU = pureweighter->getPUweight(vertMultiTrue);
+    
+    
+    // FIXME: something was done about matching of BHadron to jets for ttbar sample, not needed now
+    
     
     // CSV Loose working point
     double BtagWP = 0.244;
@@ -155,9 +207,14 @@ HiggsAnalysis::Process(Long64_t entry)
     }
     
     
+    // FIXME: here was dealt with ttbar generator information, not needed now
+    
+    
     
     //===CUT===
     // this is step0, so no cut application
+    
+    h_step1->Fill(1, 1);
     
     // ++++ Control Plots ++++
     
@@ -186,6 +243,8 @@ HiggsAnalysis::Process(Long64_t entry)
     size_t NLeadLeptonNumber = 0;
     bool hasLeptonPair = getLeptonPair(LeadLeptonNumber, NLeadLeptonNumber);
     
+    h_step2->Fill(1, 1);
+    
     // ++++ Control Plots ++++
     
     h_jetCategories_step1->Fill(jetCategories_.categoryId(jets->size(),NumberOfBJets(jetBTagCSV)), 1);
@@ -199,6 +258,8 @@ HiggsAnalysis::Process(Long64_t entry)
     if (leptons->at(NLeadLeptonNumber).pt() <= 20) return kTRUE;
     
     LV dilepton = leptons->at(LeadLeptonNumber) + leptons->at(NLeadLeptonNumber);
+    
+    h_step3->Fill(1, 1);
     
     // ++++ Control Plots ++++
     
@@ -254,6 +315,8 @@ HiggsAnalysis::Process(Long64_t entry)
     weight *= weightPU;
     //h_vertMulti->Fill(vertMulti, weight);
     
+    h_step4->Fill(1, weight);
+    
     //****************************************
     //handle inverted Z cut
     // Fill loose dilepton mass histogram before any jet cuts
@@ -263,9 +326,41 @@ HiggsAnalysis::Process(Long64_t entry)
     bool hasJets = jets->size() > 1;
     bool hasMetOrEmu = channel == "emu" || met->Pt() > 40;
     bool hasBtag = BJetIndex.size() > 0;
-    bool hasSolution = HypTop->size() > 0;
+    //bool hasSolution = HypTop->size() > 0;
+    bool hasSolution = calculateKinReco(leptonMinus, leptonPlus);
     
-    // FIXME: Z plots need to be filled here, in order to rescale the contribution to data
+    // Z window plots need to be filled here, in order to rescale the contribution to data
+    if ( isZregion ) {
+        double fullWeights = weightGenerator*weightPU*weightTrigSF*weightLepSF;
+        Zh1_postZcut->Fill(dilepton.M(), fullWeights);
+        Allh1_postZcut->Fill(dilepton.M(), fullWeights);
+        
+        if ( hasJets ) {
+            Looseh1->Fill(dilepton.M(), fullWeights);
+            Zh1_post2jets->Fill(dilepton.M(), fullWeights);
+            Allh1_post2jets->Fill(dilepton.M(), fullWeights);
+            
+            if ( hasMetOrEmu ) {
+                Zh1_postMET->Fill(dilepton.M(), fullWeights);
+                Allh1_postMET->Fill(dilepton.M(), fullWeights);
+                
+                if ( hasBtag ) {
+                    // FIXME: do not use b-tag scale factor
+		    //weightBtagSF = isMC ? calculateBtagSF() : 1;
+                    //fullWeights *= weightBtagSF;
+                    Zh1_post1btag->Fill(dilepton.M(), fullWeights);
+                    Allh1_post1btag->Fill(dilepton.M(), fullWeights);
+                    
+                    if ( hasSolution ) {
+                        // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
+			//fullWeights *= weightKinFit;
+                        Zh1_postKinReco->Fill(dilepton.M(), fullWeights);
+                        Allh1_postKinReco->Fill(dilepton.M(), fullWeights);
+                    }
+                }
+            }
+        }
+    }
     
     // ++++ Control Plots ++++
     
@@ -277,7 +372,12 @@ HiggsAnalysis::Process(Long64_t entry)
     //Exclude the Z window
     if (channel != "emu" && isZregion) return kTRUE;
     
-    // FIXME: fill also Z window plot for emu for normalisation of ttbar background
+    h_step5->Fill(1, weight);
+    
+    if (!isZregion) { //also apply Z cut in emu!
+        TTh1_postZcut->Fill(dilepton.M(), weight);
+        Allh1_postZcut->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
+    }
     
     // ++++ Control Plots ++++
     
@@ -289,7 +389,12 @@ HiggsAnalysis::Process(Long64_t entry)
     //Require at least two jets > 30 GeV (check for > 30 needed because we might have 20 GeV jets in our NTuple)
     if (! hasJets) return kTRUE;
     
-    // FIXME: fill also Z window plot for emu for normalisation of ttbar background
+    h_step6->Fill(1, weight);
+    
+    if (!isZregion) { //also apply Z cut in emu!
+        TTh1_post2jets->Fill(dilepton.M(), weight);
+        Allh1_post2jets->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
+    }
     
     // ++++ Control Plots ++++
     
@@ -298,10 +403,15 @@ HiggsAnalysis::Process(Long64_t entry)
     
     
     //=== CUT ===
-    //Require MET > 30 GeV in non-emu channels
+    //Require MET > 40 GeV in non-emu channels
     if (!hasMetOrEmu) return kTRUE;
     
-    // FIXME: fill also Z window plot for emu for normalisation of ttbar background
+    h_step7->Fill(1, weight);
+    
+    if (!isZregion) { //also apply Z cut in emu!
+        TTh1_postMET->Fill(dilepton.M(), weight);
+        Allh1_postMET->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
+    }
     
     // ++++ Control Plots ++++
     
@@ -314,8 +424,14 @@ HiggsAnalysis::Process(Long64_t entry)
     if (!hasBtag) return kTRUE;
     
     // FIXME: if b-tagging scale factor is desired, calculate it here ?
+    // weight *= weightBtagSF;
     
-    // FIXME: fill also Z window plot for emu for normalisation of ttbar background
+    h_step8->Fill(1, weight);
+    
+    if (!isZregion) { //also apply Z cut in emu!
+        TTh1_post1btag->Fill(dilepton.M(), weight);
+        Allh1_post1btag->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
+    }
     
     // ++++ Control Plots ++++
     
@@ -326,10 +442,15 @@ HiggsAnalysis::Process(Long64_t entry)
     //=== CUT ===
     //Require at least one solution for the kinematic event reconstruction
     if (!hasSolution) return kTRUE;
-    // FIXME: what is this weight, do we need this?
+    // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
     //weight *= weightKinFit;
     
-    // FIXME: fill also Z window plot for emu for normalisation of ttbar background
+    h_step9->Fill(1, weight);
+    
+    if (!isZregion) { //also apply Z cut in emu!
+        TTh1_postKinReco->Fill(dilepton.M(), weight);
+        Allh1_postKinReco->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
+    }
     
     // ++++ Control Plots ++++
     
@@ -340,13 +461,19 @@ HiggsAnalysis::Process(Long64_t entry)
     
     
     
-    
-    
     return kTRUE;
 }
 
 
 
+void HiggsAnalysis::SetSamplename(TString samplename)
+{
+    this->samplename = samplename;
+    isTtbarPlusTauSample = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") && !(samplename=="ttbarw") && !(samplename=="ttbarz") && !samplename.Contains("bg");
+    // FIXME: for ttbarW, also correction for 3rd W needs to be applied
+    // FIXME: and what about Wlnu sample ?
+    correctMadgraphBR = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs");
+}
 
 
 

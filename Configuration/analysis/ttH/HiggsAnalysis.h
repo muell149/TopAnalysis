@@ -14,6 +14,10 @@ class HiggsAnalysis : public Analysis
 public:
     HiggsAnalysis(TTree* =0);
     ~HiggsAnalysis();
+    
+    // need to overwrite since everything starting with "ttbar" would be seen as "ttbarsignalplustau"
+    virtual void SetSamplename(TString samplename);
+    
 private:
     
     virtual void SlaveBegin(TTree *);
@@ -22,6 +26,7 @@ private:
     
     //std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >* binnedControlPlots_;
     
+    /// Class holding the definition and handling of jet categories (# jets, # b-jets)
     JetCategories jetCategories_;
     
     TH1* h_jetCategories_step0;
@@ -33,6 +38,9 @@ private:
     TH1* h_jetCategories_step6;
     TH1* h_jetCategories_step7;
     TH1* h_jetCategories_step8;
+    
+    // Histograms for cutflow tables which are not contained in Analysis.h
+    TH1 *h_step0, *h_step1, *h_step2;
     
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
     TH1 *h_jetpT___XX;
