@@ -136,28 +136,28 @@ namespace semileptonic {
 			     /*13:*/ sysLepEffSFShapeUpPt,       /*14:*/ sysLepEffSFShapeDownPt,  
 			     //      sysLepEffSFShapeUpPt40,             sysLepEffSFShapeDownPt40,
 		             //      sysLepEffSFNormUpStat,              sysLepEffSFNormUpStat,
-			     /*15:*/ sysTriggerEffSFJetNormUp,   /*16:*/ sysTriggerEffSFJetNormDown,
-			     /*17:*/ sysTriggerEffSFJetShapeUp,  /*18:*/ sysTriggerEffSFJetShapeDown,    
-			     /*19:*/ sysBtagSFUp,                /*20:*/ sysBtagSFDown, 
+			     // old: sysTriggerEffSFJetNormUp,           sysTriggerEffSFJetNormDown,
+			     //      sysTriggerEffSFJetShapeUp,          sysTriggerEffSFJetShapeDown,    
+			     /*15:*/ sysBtagSFUp,                /*16:*/ sysBtagSFDown, 
 			     // old: sysBtagSFShapeUpPt100,              sysBtagSFShapeDownPt100,
 			     //      sysBtagSFShapeUpEta1p2,             sysBtagSFShapeDownEta1p2,
-			     /*21:*/ sysBtagSFShapeUpPt65,       /*22:*/ sysBtagSFShapeDownPt65,
-			     /*23:*/ sysBtagSFShapeUpEta0p7,     /*24:*/ sysBtagSFShapeDownEta0p7,
-			     /*25:*/ sysMisTagSFUp,              /*26:*/ sysMisTagSFDown,
-			     /*27:*/ sysTopScaleUp,              /*28:*/ sysTopScaleDown,            
-			     /*29:*/ sysVBosonScaleUp,           /*30:*/ sysVBosonScaleDown,          
-			     /*31:*/ sysSingleTopScaleUp,        /*32:*/ sysSingleTopScaleDown,     
-			     /*33:*/ sysTopMatchUp,              /*34:*/ sysTopMatchDown,            
-			     /*35:*/ sysVBosonMatchUp,           /*36:*/ sysVBosonMatchDown,         
-			     /*37:*/ sysTopMassUp,               /*38:*/ sysTopMassDown,            
-			     /*39:*/ sysQCDUp,                   /*40:*/ sysQCDDown,                 
-			     /*41:*/ sysSTopUp,                  /*42:*/ sysSTopDown,               
-			     /*43:*/ sysDiBosUp,                 /*44:*/ sysDiBosDown,              
-			     /*45:*/ sysPDFUp,                   /*46:*/ sysPDFDown,
-			     /*47:*/ sysHadUp,                   /*48:*/ sysHadDown,
-			     /*49:*/ sysGenMCatNLO,              /*50:*/ sysGenPowheg,
-			     /*51:*/ sysShapeUp,                 /*52:*/ sysShapeDown,
-			     /*53:*/ ENDOFSYSENUM,               /*54:*/ sysTest };
+			     /*17:*/ sysBtagSFShapeUpPt65,       /*18:*/ sysBtagSFShapeDownPt65,
+			     /*19:*/ sysBtagSFShapeUpEta0p7,     /*20:*/ sysBtagSFShapeDownEta0p7,
+			     /*21:*/ sysMisTagSFUp,              /*22:*/ sysMisTagSFDown,
+			     /*23:*/ sysTopScaleUp,              /*24:*/ sysTopScaleDown,            
+			     /*25:*/ sysVBosonScaleUp,           /*26:*/ sysVBosonScaleDown,          
+			     /*27:*/ sysSingleTopScaleUp,        /*28:*/ sysSingleTopScaleDown,     
+			     /*29:*/ sysTopMatchUp,              /*30:*/ sysTopMatchDown,            
+			     /*31:*/ sysVBosonMatchUp,           /*32:*/ sysVBosonMatchDown,         
+			     /*33:*/ sysTopMassUp,               /*34:*/ sysTopMassDown,            
+			     /*35:*/ sysQCDUp,                   /*36:*/ sysQCDDown,                 
+			     /*37:*/ sysSTopUp,                  /*38:*/ sysSTopDown,               
+			     /*39:*/ sysDiBosUp,                 /*40:*/ sysDiBosDown,              
+			     /*41:*/ sysPDFUp,                   /*42:*/ sysPDFDown,
+			     /*43:*/ sysHadUp,                   /*44:*/ sysHadDown,
+			     /*45:*/ sysGenMCatNLO,              /*46:*/ sysGenPowheg,
+			     /*47:*/ sysShapeUp,                 /*48:*/ sysShapeDown,
+			     /*49:*/ ENDOFSYSENUM,               /*50:*/ sysTest };
 
   // ============================
   //  Numerical Constants
@@ -213,10 +213,10 @@ namespace semileptonic {
    // case sysLepEffSFShapeDownPt40    : return "sysLepEffSFShapeDownPt40";
    // case sysLepEffSFNormUpStat       : return "sysLepEffSFNormUpStat";
    // case sysLepEffSFNormDownStat     : return "sysLepEffSFNormDownStat";
-      case sysTriggerEffSFJetNormUp    : return "sysTriggerEffSFJetNormUp";
-      case sysTriggerEffSFJetNormDown  : return "sysTriggerEffSFJetNormDown";
-      case sysTriggerEffSFJetShapeUp   : return "sysTriggerEffSFJetShapeUp";
-      case sysTriggerEffSFJetShapeDown : return "sysTriggerEffSFJetShapeDown"; 
+   // case sysTriggerEffSFJetNormUp    : return "sysTriggerEffSFJetNormUp";
+   // case sysTriggerEffSFJetNormDown  : return "sysTriggerEffSFJetNormDown";
+   // case sysTriggerEffSFJetShapeUp   : return "sysTriggerEffSFJetShapeUp";
+   // case sysTriggerEffSFJetShapeDown : return "sysTriggerEffSFJetShapeDown"; 
       case sysBtagSFUp                 : return "sysBtagSFUp";
       case sysBtagSFDown               : return "sysBtagSFDown";
    // case sysBtagSFShapeUpPt100       : return "sysBtagSFShapeUpPt100";

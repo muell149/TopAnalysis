@@ -176,8 +176,8 @@ makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be <= 52 (default), see list of systematics below)
-maxSys=52
+## maxSys>0 needs a lot of time (must be <= 48 (default), see list of systematics below)
+maxSys=48
 
 ## Include cross-check variables to get additional differential cross-sections for
 ## a) pT(top) and pT(antitop)
@@ -528,26 +528,24 @@ echo "  7: sysJERUp                    8: sysJERDown                  "
 echo "  9: sysLepEffSFNormUp          10: sysLepEffSFNormDown         "
 echo " 11: sysLepEffSFShapeEtaUp      12: sysLepEffSFShapeEtaDown     "
 echo " 13: sysLepEffSFShapePtUp       14: sysLepEffSFShapePtDown      "
-echo " 15: sysTriggerEffSFJetNormUp   16: sysTriggerEffSFJetNormDown  "
-echo " 17: sysTriggerEffSFJetShapeUp  18: sysTriggerEffSFJetShapeDown "
-echo " 19: sysBtagSFUp                20: sysBtagSFDown               "
-echo " 21: sysBtagSFShapePt65Up       22: sysBtagSFShapePt65Down      "
-echo " 23: sysBtagSFShapeEta0p7Up     24: sysBtagSFShapeEta0p7Down    "
-echo " 25: sysMisTagSFUp              26: sysMisTagSFDown             "
-echo " 27: sysTopScaleUp              28: sysTopScaleDown             "
-echo " 29: sysVBosonScaleUp           30: sysVBosonScaleDown          "
-echo " 31: sysSingleTopScaleUp        32: sysSingleTopScaleDown       "
-echo " 33: sysTopMatchUp              34: sysTopMatchDown             "
-echo " 35: sysVBosonMatchUp           36: sysVBosonMatchDown          "
-echo " 37: sysTopMassUp               38: sysTopMassDown              "
-echo " 39: sysQCDUp                   40: sysQCDDown                  "
-echo " 41: sysSTopUp                  42: sysSTopDown                 "
-echo " 43: sysDiBosUp                 44: sysDiBosDown                "
-echo " 45: sysPDFUp                   46: sysPDFDown                  "
-echo " 47: sysHadUp                   48: sysHadDown                  "
-echo " 49: sysGenMCatNLO              50: sysGenPowheg                "
-echo " 51: sysShapeUp                 52: sysShapeDown                "
-echo " 53: ENDOFSYSENUM                                               "
+echo " 15: sysBtagSFUp                16: sysBtagSFDown               "
+echo " 17: sysBtagSFShapePt65Up       18: sysBtagSFShapePt65Down      "
+echo " 19: sysBtagSFShapeEta0p7Up     20: sysBtagSFShapeEta0p7Down    "
+echo " 21: sysMisTagSFUp              22: sysMisTagSFDown             "
+echo " 23: sysTopScaleUp              24: sysTopScaleDown             "
+echo " 25: sysVBosonScaleUp           26: sysVBosonScaleDown          "
+echo " 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       "
+echo " 29: sysTopMatchUp              30: sysTopMatchDown             "
+echo " 31: sysVBosonMatchUp           32: sysVBosonMatchDown          "
+echo " 33: sysTopMassUp               34: sysTopMassDown              "
+echo " 35: sysQCDUp                   36: sysQCDDown                  "
+echo " 37: sysSTopUp                  38: sysSTopDown                 "
+echo " 39: sysDiBosUp                 40: sysDiBosDown                "
+echo " 41: sysPDFUp                   42: sysPDFDown                  "
+echo " 43: sysHadUp                   44: sysHadDown                  "
+echo " 45: sysGenMCatNLO              46: sysGenPowheg                "
+echo " 47: sysShapeUp                 48: sysShapeDown                "
+echo " 49: ENDOFSYSENUM                                               "
 
 echo
 
@@ -610,7 +608,7 @@ EOF
             ## exclude shape variation
 
 
-	    if [ $systematicVariation == 51 -o $systematicVariation == 52 ]; then
+	    if [ $systematicVariation == 47 -o $systematicVariation == 48 ]; then
 		echo " Shape variations are executed separately."
 	    else
 	    ## run macro for 2012 analysis
@@ -637,7 +635,7 @@ EOF
 	    echo " All regular systematic uncertainties processed .... Now running shape variations."
 	    echo ""
 	    
-	    for (( systematicVariation = 51; systematicVariation <= 52;  systematicVariation++ )); do
+	    for (( systematicVariation = 47; systematicVariation <= 48;  systematicVariation++ )); do
 		
 		if [ -f commandsSysShapeVarRun.cint ]; then    
 		    rm commandsSysShapeVarRun.cint

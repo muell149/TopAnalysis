@@ -38,12 +38,39 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
   // ---
   //    create list of systematics to be treated as uncorrelated between electron and muon channel
   // ---
+  // available systematics:
+  //         0: sysNo                                                       
+  //         1: sysLumiUp                   2: sysLumiDown                 
+  //         3: sysPUUp                     4: sysPUDown                   
+  //         5: sysJESUp                    6: sysJESDown                  
+  //         7: sysJERUp                    8: sysJERDown                  
+  //         9: sysLepEffSFNormUp          10: sysLepEffSFNormDown         
+  //        11: sysLepEffSFShapeUpEta      12: sysLepEffSFShapeDownEta     
+  //        13: sysLepEffSFShapeUpPt       14: sysLepEffSFShapeDownPt      
+  //        15: sysBtagSFUp                16: sysBtagSFDown               
+  //        17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65      
+  //        19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7    
+  //        21: sysMisTagSFUp              22: sysMisTagSFDown             
+  //        23: sysTopScaleUp              24: sysTopScaleDown             
+  //        25: sysVBosonScaleUp           26: sysVBosonScaleDown          
+  //        27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
+  //        29: sysTopMatchUp              30: sysTopMatchDown             
+  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown          
+  //        33: sysTopMassUp               34: sysTopMassDown              
+  //        35: sysQCDUp                   36: sysQCDDown                  
+  //        37: sysSTopUp                  38: sysSTopDown                 
+  //        39: sysDiBosUp                 40: sysDiBosDown                
+  //        41: sysPDFUp                   42: sysPDFDown                  
+  //        43: sysHadUp                   44: sysHadDown                  
+  //        45: sysGenMCatNLO              46: sysGenPowheg  
+  //        47: sysShapeUp                 48: sysShapeDown                
+  //        49: ENDOFSYSENUM
   std::vector<unsigned int> uncorrSys_;
   // trigger 
-  uncorrSys_.push_back(sysTriggerEffSFJetNormUp	);
-  uncorrSys_.push_back(sysTriggerEffSFJetNormDown	);
-  uncorrSys_.push_back(sysTriggerEffSFJetShapeUp	);
-  uncorrSys_.push_back(sysTriggerEffSFJetShapeDown);  
+  //uncorrSys_.push_back(sysTriggerEffSFJetNormUp	);
+  //uncorrSys_.push_back(sysTriggerEffSFJetNormDown	);
+  //uncorrSys_.push_back(sysTriggerEffSFJetShapeUp	);
+  //uncorrSys_.push_back(sysTriggerEffSFJetShapeDown);  
   // lepton eff
   uncorrSys_.push_back(sysLepEffSFNormUp       );        
   uncorrSys_.push_back(sysLepEffSFNormDown     );        
@@ -105,7 +132,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
   //                            but central values from std file
   bool useOnlyExternalMCatNLOfile=false;
   // want to draw prediction with SC in addition?
-  bool SC=true; 
+  bool SC=false; 
   // GOSSIE quick fix: cut of m(ttbar) below 345 GeV
   bool cutTtbarMass=true;
   const double constMassRangeLow  =  345.0;
