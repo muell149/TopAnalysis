@@ -293,7 +293,7 @@ void BCC::MakeHistos()
   HistoSmoothingValue["topYMinus"]   = (largeMGFile) ? 1 :  5;
   HistoSmoothingValue["ttbarMass"]   = (largeMGFile) ? 1 : 10;
   HistoSmoothingValue["ttbarPt"]     = (largeMGFile) ? 1 :  5;
-  HistoSmoothingValue["ttbarY"]      = (largeMGFile) ? 0 :  2;
+  HistoSmoothingValue["ttbarY"]      = (largeMGFile) ? 2 :  2;
   HistoSmoothingValue["bqPt"]        = (largeMGFile) ? 0 :  0;
   HistoSmoothingValue["bqEta"]       = (largeMGFile) ? 2 :  2;
 
