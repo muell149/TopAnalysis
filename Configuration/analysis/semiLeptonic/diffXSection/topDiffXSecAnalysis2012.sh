@@ -716,46 +716,10 @@ if [ $fast = false ]; then
     sleep 3
 fi
 
-## FIXME: need to restore compatibility with root 532, skip it 
-exit 0
-## and do it by hand using the older rootversion in the meantime via
-#ini root526
-
-## Compile library
-
-if [ -f commandsCombineUncPrepare.cint ]; then    
-  
-    rm commandsCombineUncPrepare.cint
-    rm combineTopDiffXSecUncertainties_C.so
-    rm combineTopDiffXSecUncertainties_C.d
-fi
-
-cat >> commandsCombineUncPrepare.cint << EOF
-.L BCC.C++
-.L combineTopDiffXSecUncertainties.C++
-EOF
-
-root -l -b < commandsCombineUncPrepare.cint
-
-## Execute macro
-
-if [ -f commandsCombineUncRun.cint ]; then    
-    rm commandsCombineUncRun.cint
-fi
-    
-cat >> commandsCombineUncRun.cint << EOF
-.L BCC_C.so
-.L combineTopDiffXSecUncertainties_C.so
-combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)
-EOF
-    
 echo ""
-echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $inputFolderName, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
-root -l -b < commandsCombineUncRun.cint
-
-## FIXME: need to restore compatibility with root 532, use older version in the meantime
-#ini -d root526
-
+echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
+root -l -q -b './combineTopDiffXSecUncertainties('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$exclShapeVar', '$extrapolate', '$hadron', '$inclCCVars', '$closureTestSpecifier', '$useBCC')'
+    
 #### ==========================================
 ####  Create ratio plots for final xSecs 
 #### ==========================================
