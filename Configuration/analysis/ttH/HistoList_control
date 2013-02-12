@@ -8,20 +8,20 @@ step1 Standard Events - 1 0 0 0 0 0 0 0 0 0
 step2 Standard Events - 1 0 0 0 0 0 0 0 0 0
 step3 Standard Events - 1 0 0 0 0 0 0 0 0 0
 step4 Standard Events - 1 0 0 0 0 0 0 0 0 0
-step5 Standard Events - 1 1 0 0 0 0 0 0 0 0
-step6 Standard Events - 1 1 0 0 0 0 0 0 0 0
-step7 Standard Events - 1 1 0 0 0 0 0 0 0 0
-step8 Standard Events - 1 1 0 0 0 0 0 0 0 0
+step5 _postZcut Events - 1 1 0 0 0 0 0 0 0 0
+step6 _post2jets Events - 1 1 0 0 0 0 0 0 0 0
+step7 _postMET Events - 1 1 0 0 0 0 0 0 0 0
+step8 _post1btag Events - 1 1 0 0 0 0 0 0 0 0
 step9 Standard Events - 1 1 0 0 0 0 0 0 0 0
 
 JetCategories_step0 Standard - - 1 0 0 0 0 0 0 0 0 0
 JetCategories_step1 Standard - - 1 0 0 0 0 0 0 0 0 0
 JetCategories_step2 Standard - - 1 0 0 0 0 0 0 0 0 0
 JetCategories_step3 Standard - - 1 0 0 0 0 0 0 0 0 0
-JetCategories_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
-JetCategories_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
-JetCategories_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
-JetCategories_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step4 _postZcut - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step5 _post2jets - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step6 _postMET - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step7 _post1btag - - 1 1 0 0 0 0 0 0 0 0
 JetCategories_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 
 bcp_JetCategories_step8_bin_0_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
