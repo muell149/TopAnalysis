@@ -1,8 +1,7 @@
 #include "basicFunctions.h"
-#include "BCC.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, unsigned int verbose=0, TString inputFolderName="RecentAnalysisRun8TeV", TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
+void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
 
   // ============================
   //  Systematic Variations:
@@ -168,77 +167,54 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=false, 
   std::map<TString, std::vector<double> > corrCenterErrors_;
   
   if(useBCC){
-
-    std::cout << " Loading and calculating bin center corrections .... " << std::endl;
-
-    //  basic configuration
-
-    bool mergeLepAndHadTop=true;
-    std::vector<TString> xSecVariableBranchNames_, folderNamesBCC_;
-    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
-      if(!xSecVariables_[i].Contains("Norm")&&xSecVariables_[i]!="inclusive"){
-	// collect names of branch entries and names of cross section folder(s)
-	if(xSecVariables_[i]=="topPt" || xSecVariables_[i]=="topY"){ 
-	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
-	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
-	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
-	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
-	}
-	else if(xSecVariables_[i].Contains("bq")){
-	  if(!extrapolate&&hadron){
-	    xSecVariableBranchNames_.push_back(xSecVariables_[i]+"GenLep");
-	    TString antib=xSecVariables_[i]+"GenHad";
-	    antib.ReplaceAll("bq", "bbarq");
-	    xSecVariableBranchNames_.push_back(antib);
-	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Bjets"+PS);
-	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Bjets"+PS);
-	  }
-	  else{
-	    xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Had");
-	    xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Lep");
-	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
-	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
-	  }
-	}
-	else if(xSecVariables_[i].Contains("lep")&&!extrapolate&&hadron&&!xSecVariables_[i].Contains("Plus")&&!xSecVariables_[i].Contains("Minus")){
-	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Gen");
-	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Lepton"+PS);
-	}
-	else{
-	  xSecVariableBranchNames_.push_back(xSecVariables_[i]);
-	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS); 
-	}
-      }
+    // open file
+    TString fileNameBCC = "/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/diffXSecBCC8TeV.root";
+    std::cout << " Loading bin center corrections from  file " << fileNameBCC << std::endl;
+    TFile* BCCfile=TFile::Open(fileNameBCC, "OPEN");
+    if(!BCCfile||BCCfile->IsZombie()){
+      std::cout << " Corrupt or missing file " << fileNameBCC << std::endl;
+      std::cout << " Aborting execution of macro! " << std::endl;
+      exit(0);
     }
-//     for(int i=0; i<xSecVariableBranchNames_.size(); ++i){
-//       std::cout << folderNamesBCC_[i] << "/" << xSecVariableBranchNames_[i] << std::endl;
-//     }
-    TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigSummer12PFLarge.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
-    fileNameBCC="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+fileNameBCC;
-    //TString fileNameBCC = (decayChannel == "combined") ? "combinedDiffXSecSigFall11PF.root" : TopFilename(kSig, 0, (const std::string)decayChannel);
-    BCC b(fileNameBCC,folderNamesBCC_,xSecVariableBranchNames_,mergeLepAndHadTop,addCrossCheckVariables);
-    b.runBCCCalculation();
-    correctedCenters_ = b.getMapWithCorrectedCentersInX();
-    corrCenterErrors_ = b.getMapWithCenterErrorsInX();
-
+    // loop variables
+    for(unsigned int var=0; var<xSecVariables_.size(); ++var){
+      TString candidate=xSecVariables_[var];
+      candidate.ReplaceAll("Norm","");
+      if(verbose>1) std::cout << "searching for candidate " << "BCC/"+LV+PS+"/"+candidate+"/Template of Vector class" << std::endl;
+      // get object 
+      TVectorT<double>* temp;
+      BCCfile->GetObject("BCC/"+LV+PS+"/"+candidate+"/Template of Vector class", temp);
+      if(temp){
+	if(verbose>1) std::cout << "-> found!" << endl;
+	// convert it to vector
+	std::vector<double> tempvec= std::vector<double>( temp->GetMatrixArray(), temp->GetMatrixArray() + temp->GetNrows() );
+	// save it in map
+	correctedCenters_[candidate]=tempvec;
+	// FIXME: as proper errors do not exist at the moment, use value itself as dummy...
+	corrCenterErrors_[candidate]=tempvec;
+      }
+      else if(verbose>1) std::cout << "-> not found!" << endl;
+    }
+    
     // Output of results
-
+    for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 != correctedCenters_.end(); iter1++ ){
+      std::cout << iter1->first << ": " << std::endl;
+      int count=0;
+      for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++){
+	++count;
+	std::cout << "Bin (" << binning_[iter1->first][count-1] << " .. " <<  binning_[iter1->first][count] << " ): " << (*iter2) << std::endl;
+      }
+    }
     if(verbose>1){
-      for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 != correctedCenters_.end(); iter1++ ){
-	std::cout << iter1->first << ": ";
-	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++) std::cout << (*iter2) << " ";
-	std::cout << std::endl;
-      }    
       for (std::map<TString, std::vector<double> >::iterator iter1 = corrCenterErrors_.begin(); iter1 != corrCenterErrors_.end(); iter1++ ){
-	std::cout << iter1->first << ": ";
+	std::cout << iter1->first << " errors : ";
 	for (std::vector<double>::iterator iter2 = iter1->second.begin(); iter2 != iter1->second.end(); iter2++) std::cout << (*iter2) << " ";
 	std::cout << std::endl;
       }
     }
 
-    std::cout << " .... Executing bin center corrections finished." << std::endl;
+    std::cout << " .... Loading bin center corrections finished." << std::endl;
   }
-   
 
   // ============================
   //  Open rootfile
