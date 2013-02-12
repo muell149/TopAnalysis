@@ -1,0 +1,49 @@
+# Name, Extra, axis labels (y,x), rebin, do_dyscale, logx, logy, ymin, ymax, xmin, xmax, nbins, xbins, bcs
+
+jetpT Standard Jets p_{T} 2 1 0 1 1 1E5 30 400 0 0
+
+
+step0 Standard Events - 1 0 0 0 0 0 0 0 0 0
+step1 Standard Events - 1 0 0 0 0 0 0 0 0 0
+step2 Standard Events - 1 0 0 0 0 0 0 0 0 0
+step3 Standard Events - 1 0 0 0 0 0 0 0 0 0
+step4 Standard Events - 1 0 0 0 0 0 0 0 0 0
+step5 Standard Events - 1 1 0 0 0 0 0 0 0 0
+step6 Standard Events - 1 1 0 0 0 0 0 0 0 0
+step7 Standard Events - 1 1 0 0 0 0 0 0 0 0
+step8 Standard Events - 1 1 0 0 0 0 0 0 0 0
+step9 Standard Events - 1 1 0 0 0 0 0 0 0 0
+
+JetCategories_step0 Standard - - 1 0 0 0 0 0 0 0 0 0
+JetCategories_step1 Standard - - 1 0 0 0 0 0 0 0 0 0
+JetCategories_step2 Standard - - 1 0 0 0 0 0 0 0 0 0
+JetCategories_step3 Standard - - 1 0 0 0 0 0 0 0 0 0
+JetCategories_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+JetCategories_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+bcp_JetCategories_step8_bin_0_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_1_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_2_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_3_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_4_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_5_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_6_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_7_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_8_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_9_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_10_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_11_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_12_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_13_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_14_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_15_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_16_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_17_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_18_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_19_jetpT Standard - - 1 1 0 0 0 0 0 0 0 0
+
+
+# Name, Extra, axis labels (y,x), rebin, do_dyscale, logx, logy, ymin, ymax, xmin, xmax, nbins, xbins, bcs
