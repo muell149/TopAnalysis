@@ -39,6 +39,7 @@
 #include <TGaxis.h>
 #include <TError.h>
 #include <TMath.h>
+#include <TVectorD.h>
 
 #include "HHStyle.h"
 
@@ -1980,7 +1981,7 @@ namespace semileptonic {
   }
 
   template <class T>
-    void saveToRootFile(const TString& outputFile, const T& object, const bool& overwrite=false, const int& verbose=1, const TString& folder="")
+  void saveToRootFile(const TString& outputFile, const T& object, const bool& overwrite=false, const int& verbose=1, const TString& folder="")
     {
       // this function saves objects of class T
       // (such as TH1) in an output rootfile with name outputFile
