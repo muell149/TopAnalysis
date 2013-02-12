@@ -13,15 +13,20 @@ class HiggsAnalysis : public Analysis
 {
 public:
     HiggsAnalysis(TTree* =0);
-    ~HiggsAnalysis();
+    virtual ~HiggsAnalysis();
     
     // need to overwrite since everything starting with "ttbar" would be seen as "ttbarsignalplustau"
     virtual void SetSamplename(TString samplename);
+    ClassDef(HiggsAnalysis,0);
     
 private:
     
     virtual void SlaveBegin(TTree *);
     virtual Bool_t Process(Long64_t entry);
+    
+    virtual bool produceBtagEfficiencies();
+    
+    // FIXME: where to set branches for Higgs generator information stored in nTuples, here or in Analysis.h ?
     
     
     //std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >* binnedControlPlots_;
@@ -39,11 +44,17 @@ private:
     TH1* h_jetCategories_step7;
     TH1* h_jetCategories_step8;
     
-    // Histograms for cutflow tables which are not contained in Analysis.h
+    /// Histograms for cutflow tables which are not contained in Analysis.h
     TH1 *h_step0, *h_step1, *h_step2;
     
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
     TH1 *h_jetpT___XX;
+    
+    
+    
+    
+    
+    
 };
 
 

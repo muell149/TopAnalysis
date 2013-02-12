@@ -5,19 +5,11 @@ COMPFLAGS=`root-config --cflags` -Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c+
 
 all: load_HiggsAnalysis Histo
 
-# HIGGSING
-#load_Analysis: dict.o Analysis.o load_Analysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o
-#	g++ -o $@ $^ $(ROOTLIBS)
-
-#load_Analysis.o: ../diLeptonic/load_Analysis.C
-#	g++ -c -o load_Analysis.o $(COMPFLAGS) $^
-
-load_HiggsAnalysis: dict.o Analysis.o load_HiggsAnalysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o JetCategories.o HiggsAnalysis.o
+load_HiggsAnalysis: dict.o Analysis.o load_HiggsAnalysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o JetCategories.o HiggsAnalysis.o JetCorrUncertainty.o  JetCorrParameters.o SimpleJetCorrUncert.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
 load_HiggsAnalysis.o: load_HiggsAnalysis.C
 	g++ -c -o load_HiggsAnalysis.o $(COMPFLAGS) $^
-# ENDHIGGSING
 
 dict.o: dict.cpp
 	g++ -c -o $@ $(COMPFLAGS) $^
@@ -31,12 +23,8 @@ CommandLineParameters.o: ../diLeptonic/CommandLineParameters.cc ../diLeptonic/Co
 KinReco.o: ../diLeptonic/KinReco.h ../diLeptonic/KinReco.cpp
 	g++ -c -o KinReco.o $(COMPFLAGS) ../diLeptonic/KinReco.cpp
 
-# HIGGSING
-#dict.cpp: ../diLeptonic/Analysis.h ../diLeptonic/classes.h ../diLeptonic/HistoListReader.h ../diLeptonic/LinkDef.h
-#	rootcint -f dict.cpp -c -p Math/LorentzVector.h $^
-dict.cpp: ../diLeptonic/Analysis.h HiggsAnalysis.h ../diLeptonic/classes.h ../diLeptonic/HistoListReader.h ../diLeptonic/LinkDef.h
+dict.cpp: ../diLeptonic/Analysis.h HiggsAnalysis.h ../diLeptonic/classes.h ../diLeptonic/HistoListReader.h LinkDef.h
 	rootcint -f dict.cpp -c -p Math/LorentzVector.h $^
-# ENDHIGGSING
 
 PUReweighter.o: ../diLeptonic/PUReweighter.h ../diLeptonic/PUReweighter.cpp
 	g++ -c -o PUReweighter.o $(COMPFLAGS) ../diLeptonic/PUReweighter.cpp
@@ -44,13 +32,11 @@ PUReweighter.o: ../diLeptonic/PUReweighter.h ../diLeptonic/PUReweighter.cpp
 Analysis.o: ../diLeptonic/Analysis.C ../diLeptonic/Analysis.h ../diLeptonic/HistoListReader.h ../diLeptonic/utils.h ../diLeptonic/KinReco.h
 	g++ -c -o Analysis.o $(COMPFLAGS) ../diLeptonic/Analysis.C
 
-# HIGGSING
 HiggsAnalysis.o: HiggsAnalysis.C HiggsAnalysis.h ../diLeptonic/HistoListReader.h ../diLeptonic/utils.h ../diLeptonic/KinReco.h ../diLeptonic/Analysis.h
 	g++ -c -o HiggsAnalysis.o $(COMPFLAGS) HiggsAnalysis.C
 
 JetCategories.o: JetCategories.C JetCategories.h
 	g++ -c -o JetCategories.o $(COMPFLAGS) JetCategories.C
-# ENDHIGGSING
 
 HistoListReader.o: ../diLeptonic/HistoListReader.h ../diLeptonic/HistoListReader.cpp
 	g++ -c -o HistoListReader.o $(COMPFLAGS) ../diLeptonic/HistoListReader.cpp
@@ -84,6 +70,18 @@ kinRecoEfficienciesAndSF: ../diLeptonic/kinRecoEfficienciesAndSF.cpp utils.o
 
 printGenXsec: ../diLeptonic/printGenXsec.C utils.o
 	g++ -o printGenXsec ../diLeptonic/printGenXsec.C $(COMPFLAGS) $(ROOTLIBS) utils.o
+
+
+
+JetCorrUncertainty.o: ../diLeptonic/JetCorrectionUncertainty.cc JetCorrParameters.o SimpleJetCorrUncert.o
+	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/JetCorrectionUncertainty.cc
+
+JetCorrParameters.o:  ../diLeptonic/JetCorrectorParameters.cc
+	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/JetCorrectorParameters.cc
+
+SimpleJetCorrUncert.o: ../diLeptonic/SimpleJetCorrectionUncertainty.cc
+	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/SimpleJetCorrectionUncertainty.cc
+
 
 
 .PHONY: clean

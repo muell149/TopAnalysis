@@ -24,7 +24,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
         exit(773); 
     }
     
-    Analysis *selector = new HiggsAnalysis();
+    HiggsAnalysis *selector = new HiggsAnalysis();
     PUReweighter *pu = new PUReweighter();
     pu->setMCDistrSum12("S10");
     std::string pu_path(getenv("CMSSW_BASE"));
@@ -63,6 +63,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
         TObjString *systematics_from_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/systematicsName"));
         TObjString *samplename = dynamic_cast<TObjString*>(file.Get("writeNTuple/sampleName"));
         TObjString *o_isSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isSignal"));
+	TObjString *o_isHiggsSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isHiggsSignal"));
         TObjString *o_isMC = dynamic_cast<TObjString*>(file.Get("writeNTuple/isMC"));
         TH1* weightedEvents = dynamic_cast<TH1*>(file.Get("EventsBeforeSelection/weightedEvents"));
         if (!channel_file || !systematics_from_file || !o_isSignal || !o_isMC || !samplename) { 
@@ -71,7 +72,9 @@ void load_HiggsAnalysis(TString validFilenamePattern,
         }
         bool isSignal = o_isSignal->GetString() == "1";
         bool isMC = o_isMC->GetString() == "1";
-        
+        bool isHiggsSignal(false);
+	if(o_isHiggsSignal && o_isHiggsSignal->GetString()=="1")isHiggsSignal = true;
+	
         if (!isMC && systematic != "") {
             cout << "Sample is DATA, so not running again for systematic variation\n";
             continue;
@@ -97,8 +100,10 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             }
         }
         
+	
         for (const auto& channel : channels) {
-            TString btagFile = "BTagEff/Nominal/" + channel + "/" 
+	    
+	    TString btagFile = "BTagEff/Nominal/" + channel + "/" 
                 + channel + "_ttbarsignalplustau.root";
             TString outputfilename { filename };
             if (outputfilename.Contains('/')) {
@@ -131,6 +136,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             selector->SetOutputfilename(outputfilename);
             selector->SetRunViaTau(0);
             selector->SetClosureTest(closure, slope);
+	    
 
             TTree *tree = dynamic_cast<TTree*>(file.Get("writeNTuple/NTuple"));
             if (! tree) { std::cerr << "Error: Tree not found!\n"; exit(854); }
@@ -154,7 +160,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
                 }
             } else {
                 chain.Process(selector);
-                if (isSignal && closure == "") {
+		if (isSignal && closure == "" && !isHiggsSignal) {
                     selector->SetRunViaTau(1);
                     outputfilename.ReplaceAll("signalplustau", "bgviatau");
                     selector->SetOutputfilename(outputfilename);

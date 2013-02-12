@@ -3,9 +3,11 @@
 #include "HiggsAnalysis.h"
 
 
+
 // FIXME: are these values taken from Analysis.C? and can they been overwritten here?
 //constexpr double JETPTCUT = 30;
 //constexpr double JETETACUT = 2.4;
+
 
 
 HiggsAnalysis::HiggsAnalysis(TTree*)
@@ -131,15 +133,12 @@ HiggsAnalysis::SlaveBegin(TTree *){
 
 
 Bool_t
-HiggsAnalysis::Process(Long64_t entry)
-{
+HiggsAnalysis::Process(Long64_t entry){
+    
     if (++EventCounter % 100000 == 0) std::cout << "Event Counter: " << EventCounter << std::endl;
     
     // Histogram for controlling correctness of h_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
     h_step0->Fill(1, 1);
-    
-    //do we have a DY true level cut?
-    if (checkZDecayMode && !checkZDecayMode(entry)) return kTRUE;
     
     //do we have a DY true level cut?
     if (checkZDecayMode && !checkZDecayMode(entry)) return kTRUE;
@@ -183,6 +182,10 @@ HiggsAnalysis::Process(Long64_t entry)
     
     
     // FIXME: here were PDF variations, not needed now, and perhaps never
+    
+    
+    // FIXME: corrections to jet energy resolution/scale, also here ?
+    //if(doJesJer)applyJER_JES();
     
     
     // apply all jet cuts
@@ -477,8 +480,8 @@ void HiggsAnalysis::SetSamplename(TString samplename)
 
 
 
-
-
-
+bool HiggsAnalysis::produceBtagEfficiencies(){
+    return false;
+}
 
 
