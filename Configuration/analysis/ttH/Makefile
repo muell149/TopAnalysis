@@ -56,8 +56,8 @@ TopSVDUnfold.o: ../unfolding/TopSVDUnfold.C
 BaseSVDUnfold.o: ../unfolding/BaseSVDUnfold.C
 	g++ -c -o BaseSVDUnfold.o $(COMPFLAGS) ../unfolding/BaseSVDUnfold.C
 
-plotterclass.o: ../diLeptonic/plotterclass.cpp ../diLeptonic/plotterclass.h utils.o
-	g++ -c -o plotterclass.o $(COMPFLAGS) ../diLeptonic/plotterclass.cpp
+plotterclass.o: plotterclass.cpp plotterclass.h utils.o
+	g++ -c -o plotterclass.o $(COMPFLAGS) plotterclass.cpp
 
 Histo: Histo.o plotterclass.o HistoListReader.o utils.o DilepSVDFunctions.o TopSVDFunctions.o TopSVDUnfold.o BaseSVDUnfold.o CommandLineParameters.o
 	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o DilepSVDFunctions.o TopSVDFunctions.o TopSVDUnfold.o BaseSVDUnfold.o CommandLineParameters.o $(ROOTLIBS)
