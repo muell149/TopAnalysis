@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool exclShapeVar=true, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
+void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
 
   // ============================
   //  Systematic Variations:
@@ -30,7 +30,6 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
   //        41: sysPDFUp                   42: sysPDFDown                  
   //        43: sysHadUp                   44: sysHadDown                  
   //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: sysShapeUp                 48: sysShapeDown                
   //        49: ENDOFSYSENUM
  
   // ============================
@@ -92,12 +91,10 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
   if(extrapolate==false&&hadron==false) useBCC=true;
-  unsigned int mcatnloIdx  = sysShapeDown/2; // index variable (bin number!) to track MCatNLO uncertainty index among all uncertainties, 
-                                             // value might change later, sysShapeDown/2 is the default
-  unsigned int powhegIdx   = sysShapeDown/2; // index variable (bin number!) to track Powheg uncertainty index among all uncertainties,
-                                             // value might change later, sysShapeDown/2 is the default
-  unsigned int shapeVarIdx = sysShapeDown/2; // index variable (bin number!) to track shape variations index among all uncertainties, 
-                                             // value might change later, sysShapeDown/2 is the default
+  unsigned int mcatnloIdx  = sysGenPowheg/2; // index variable (bin number!) to track MCatNLO uncertainty index among all uncertainties, 
+                                             // value might change later, sysGenPowheg/2 is the default
+  unsigned int powhegIdx   = sysGenPowheg/2; // index variable (bin number!) to track Powheg uncertainty index among all uncertainties,
+                                             // value might change later, sysGenPowheg/2 is the default
 
   // No cross-check variables for hadron phase space
   if (hadron) addCrossCheckVariables=false;
@@ -285,8 +282,6 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	    gROOT->cd();	    
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
 	    calculateError_[xSecVariables_[i]][sys]=true;
-	    // FIXME: no shape variation uncertainties considered at all
-	    if(sys==sysShapeDown||sys==sysShapeUp) calculateError_[xSecVariables_[i]][sys]=false;
 	    considerError_[xSecVariables_[i]][sys]=calculateError_[xSecVariables_[i]][sys];
 	    // FIXME: no generator uncertainties considered for final errors
 	    if(sys==sysGenPowheg||sys==sysGenMCatNLO) considerError_[xSecVariables_[i]][sys]=false;
@@ -406,10 +401,6 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		  powhegIdx=nSysCnt;
 		  label="("+label+")";
 		}
-		else if (exclShapeVar && label=="Shape"){
-		  shapeVarIdx=nSysCnt;
-		  label="("+label+")";		  
-		}		
 		relSysPlot->GetXaxis()->SetBinLabel(nSysCnt,label);
 		setNewLabel=0;
 	      }
@@ -484,15 +475,10 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	      if(sys==ENDOFSYSENUM-1){
 		// calculate total systematic uncertainty
 		double maxLepEffSF=0;
-		double maxJetTrigEffSF=0;
 		double maxBtagSF=0;
 		for (unsigned int n=1; n<=nSysTypes; n++){
-		  // exclude shape uncertainties from total uncertainties
-		  if (exclShapeVar && n==shapeVarIdx) {
-		    if(verbose>0) std::cout << " Shape uncertainties are excluded from total systematic uncertainty." << std::endl;
-		  }
 		  // exclude uncertainties from total uncertainties if it is not intended to be considered
-		  else if (considerError_[xSecVariables_[i]][ mapNew2OldSysIndex_[n] ]==false){
+		  if (considerError_[xSecVariables_[i]][ mapNew2OldSysIndex_[n] ]==false){
 		    if(verbose>0) std::cout << " Uncertainties when unfolding with "<< relSysPlot->GetXaxis()->GetBinLabel(n) <<" is excluded from total systematic uncertainty. Idx= "<< n << std::endl;
 		  }
 		  // add errors quadratically for other uncertainties
@@ -506,12 +492,6 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 			if(verbose>0) std::cout << "   Search for the maximum of LepEffSF; now: "<< tempSysLabel << "; with err= " << tempErr << "; maxLepEffSF= " << maxLepEffSF <<std::endl;
 			if(tempSysLabel=="LepEffSFShapePt") tempErr=maxLepEffSF;
 			else                                tempErr=0.;
-		      }
-		      else if(tempSysLabel=="TriggerEffSFJetNorm" || tempSysLabel=="TriggerEffSFJetShape"){
-			maxJetTrigEffSF=TMath::Max(maxJetTrigEffSF, tempErr);
-			if(verbose>0) std::cout << "   Search for the maximum of TriggerEffSFJet; now: "<< tempSysLabel << "; with err= " << tempErr << "; maxJetTrigEffSF= " << maxJetTrigEffSF <<std::endl;
-			if(tempSysLabel=="TriggerEffSFJetShape") tempErr=maxJetTrigEffSF;
-			else                                     tempErr=0.;
 		      }
 		      else if(tempSysLabel=="BtagSF" || tempSysLabel=="BtagSFShapePt65" || tempSysLabel=="BtagSFShapeEta0p7"){
 			maxBtagSF=TMath::Max(maxBtagSF, tempErr);
@@ -617,7 +597,6 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	    }
 	    // std::cout << mcatnloIdx  << std::endl;
 	    // std::cout << powhegIdx   << std::endl;
-	    // std::cout << shapeVarIdx << std::endl;
 	    delete relSysPlot;
 	  }
 	}
@@ -637,8 +616,8 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 
       TString arrayLabelIds[] = {"Up","up","Down","down"};
       
-      TString upTypeLabel   = sysLabel(uncIdx);    
-      TString downTypeLabel = sysLabel(uncIdx+1); // +1 to get next entry
+      TString upTypeLabel   = sysLabel(uncIdx);
+      TString downTypeLabel = uncIdx+1>=ENDOFSYSENUM ? "" : sysLabel(uncIdx+1); // +1 to get next entry
       
       for (unsigned int j=0; j<(sizeof(arrayLabelIds)/sizeof(arrayLabelIds[0])); j++){
 	upTypeLabel.ReplaceAll(arrayLabelIds[j],"");
@@ -746,10 +725,8 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	  histoBinIdx++;
 
 	  TString arrayLabelIds[] = {"Up","up","Down","down"};
-
 	  TString upTypeLabel   = sysLabel(uncIdx);    
-	  TString downTypeLabel = sysLabel(uncIdx+1); // +1 to get next entry
-	  
+	  TString downTypeLabel = uncIdx+1>=ENDOFSYSENUM ? "" : sysLabel(uncIdx+1); // +1 to get next entry
 	  for (unsigned int j=0; j<(sizeof(arrayLabelIds)/sizeof(arrayLabelIds[0])); j++){
 	    upTypeLabel.ReplaceAll(arrayLabelIds[j],"");
 	    downTypeLabel.ReplaceAll(arrayLabelIds[j],"");	    
@@ -873,14 +850,14 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	      
 	    delete tempResult; tempResult = NULL;
-	  }	  	  
+	  }  
 	  delete canvasUncertaintyDistributions; canvasUncertaintyDistributions=NULL;
 	}
 	// fill complete uncertainty table
 	writeToFile(uncList, outputFolder+"/uncertaintyDistributionsOverview/uncertaintyTable_"+decayChannel+"_"+universalplotLabel+".txt", true);
       }
-    }    
-  
+    }
+    std::cout << "uncertainty tables can be found in " << outputFolder+"/uncertaintyDistributionsOverview/uncertaintyTable_"+decayChannel+"_*.txt" << std::endl;
     // close file
     // needed to be able to use the saveToRootFile function, which also opens the file
     file->Close();
@@ -933,7 +910,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	      unsigned int colour=kBlack;
 	      for(int sys=1; sys<=relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX(); ++sys, ++colourCounter){
 		colour = (colourCounter%2==0) ? kYellow-7 : 8;
-		if ((exclShapeVar && (unsigned int)sys==shapeVarIdx) || (unsigned int)sys==mcatnloIdx || (unsigned int)sys==powhegIdx){
+		if ((unsigned int)sys==mcatnloIdx || (unsigned int)sys==powhegIdx){
 		  colour=kGray;
 		  fillStyle=3002;
 		}

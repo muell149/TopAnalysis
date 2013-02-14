@@ -72,8 +72,7 @@ extrapolate=true
 hadron=false
 
 ## Unfolding closure test -> use pseudo data
-## closureTestSpecifier = \"\" / \"Up\" or \"Down\" for ttbar shape distortions
-##                           / \"500\" or \"750\" for corresponding Zprime pseudo data  (default: "")
+## closureTestSpecifier = \"500\" or \"750\" for corresponding Zprime pseudo data  (default: \"\")
 closureTestSpecifier=\"\"
   
 ## run combination based on event yield combination instead of 
@@ -176,8 +175,8 @@ makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be <= 48 (default), see list of systematics below)
-maxSys=48
+## maxSys>0 needs a lot of time (must be <= 46 (default), see list of systematics below)
+maxSys=46
 
 ## Include cross-check variables to get additional differential cross-sections for
 ## a) pT(top) and pT(antitop)
@@ -187,14 +186,6 @@ maxSys=48
 ##
 ## inclCCVars = true / false (default: false)
 inclCCVars=false
-
-## Shape variations:
-## a) Calculate them at all
-##    shapeVar = true / false (default: true) 
-## b) Exclude them from total systematic uncertainty 
-##    exclShapeVar = true / false (default: true)
-shapeVar=true
-exclShapeVar=true
 
 ## disable waiting time to read output
 ## fast = true / false (default: true)
@@ -275,8 +266,6 @@ if [ $decayChannel == \"combined\" ]
 	echo "Re-do control plots:                        $redoControlPlots" 
 	echo "Re-do systematic uncertainties:             $redoSystematics "
 	echo "Number of considered systematics:           $maxSys          "
-	echo "Consider shape variation:                   $shapeVar        " 
-	echo "Exclude shape unc. from total uncertainty:  $exclShapeVar    "
 	echo "Save plots:                                 $save            " 
 	echo
     elif [  $1 == "combined2" ]; then
@@ -291,8 +280,6 @@ if [ $decayChannel == \"combined\" ]
 	echo "Re-do control plots:                        $redoControlPlots" 
 	echo "Re-do systematic uncertainties:             $redoSystematics "
 	echo "Number of considered systematics:           $maxSys          "
-	echo "Consider shape variation:                   $shapeVar        " 
-	echo "Exclude shape unc. from total uncertainty:  $exclShapeVar    "
 	echo "Save plots:                                 $save            " 
 	echo
     else
@@ -462,9 +449,9 @@ fi
 #### ============================
 ####  Prepare PDF uncertainties 
 #### ============================
-BEFOREPDF=$(date +%s)
+BEFORED=$(date +%s)
 echo
-echo "Part PDF: Prepare files for pdf uncertainties"
+echo "Part D: Prepare files for pdf uncertainties"
 
 if [ $decayChannel != \"combined\" -a $redoSystematics = true ]; then
     echo
@@ -474,30 +461,6 @@ elif [ $1 == "combined2" -a $redoSystematics = true ]; then
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"electron\"', '$save', '$verbose', '$inputFolderName', '$eldataSample', 'true', '$inclCCVars')' 
 else
     echo "Done for 2012 analysis (in e/mu channel separate or when combining event yields) and if systematics are requested to be re-done (redoSystematics set to $redoSystematics)."
-fi
-
-#### ======================================================================
-####  Run shape distortion macro to get ROOT files for MC dependency 
-#### ======================================================================
-BEFORED=$(date +%s)
-echo
-echo "Part D: Create rootfiles with shape variations"
-echo
-
-if [ $shapeVar = true -a $redoSystematics = true ]; then
-    
-    if [ $decayChannel != \"combined\" ]; then
-	
-	echo "will be done"
-	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'false', '$inclCCVars')'
-    elif [ $1 == "combined2" ]; then
-	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"muon\"',     '$save', '$verbose', '$inputFolderName', '$mudataSample', 'false', '$inclCCVars')'
-	root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"electron\"', '$save', '$verbose', '$inputFolderName', '$eldataSample', 'false', '$inclCCVars')'
-    else
-	echo "only done for 2012 analysis in e/mu channel separate"
-    fi
-else
-    echo "choose shapeVar = true and redoSystematics = true!"
 fi
 
 #### ==========================================
@@ -544,8 +507,7 @@ echo " 39: sysDiBosUp                 40: sysDiBosDown                "
 echo " 41: sysPDFUp                   42: sysPDFDown                  "
 echo " 43: sysHadUp                   44: sysHadDown                  "
 echo " 45: sysGenMCatNLO              46: sysGenPowheg                "
-echo " 47: sysShapeUp                 48: sysShapeDown                "
-echo " 49: ENDOFSYSENUM                                               "
+echo " 47: ENDOFSYSENUM                                               "
 
 echo
 
@@ -601,55 +563,24 @@ EOF
 
     if [ $redoSystematics = true ]; then
     
-        ## loop all systematic variations (excluding shape variations)
+        ## loop all systematic variations
 	
 	for (( systematicVariation = 1; systematicVariation <= $maxSys;  systematicVariation++ )); do
 
-            ## exclude shape variation
-
-
-	    if [ $systematicVariation == 47 -o $systematicVariation == 48 ]; then
-		echo " Shape variations are executed separately."
-	    else
 	    ## run macro for 2012 analysis
-		
-		if [ -f commandsSysRun.cint ]; then    
-		    rm commandsSysRun.cint
-		fi
-		
-		cat >> commandsSysRun.cint << EOF
+	    
+	    if [ -f commandsSysRun.cint ]; then    
+		rm commandsSysRun.cint
+	    fi
+	    
+	    cat >> commandsSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
 analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)
 EOF
-		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)"
-		root -l -b < commandsSysRun.cint
-	    fi  
+	    echo ""
+	    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)"
+	    root -l -b < commandsSysRun.cint
 	done
-	
-        ##  Processing shape variations
-        
-	if [ $shapeVar = true ]; then
-	    
-	    echo ""
-	    echo " All regular systematic uncertainties processed .... Now running shape variations."
-	    echo ""
-	    
-	    for (( systematicVariation = 47; systematicVariation <= 48;  systematicVariation++ )); do
-		
-		if [ -f commandsSysShapeVarRun.cint ]; then    
-		    rm commandsSysShapeVarRun.cint
-		fi
-		
-		cat >> commandsSysShapeVarRun.cint << EOF
-.L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)
-EOF
-		echo ""
-		echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)"
-		root -l -b < commandsSysShapeVarRun.cint
-	    done
-	fi
     fi
 else
     echo "will be ignored, only done for decayChannel=muon/electron"
@@ -717,8 +648,8 @@ if [ $fast = false ]; then
 fi
 
 echo ""
-echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $exclShapeVar, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
-root -l -q -b './combineTopDiffXSecUncertainties('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$exclShapeVar', '$extrapolate', '$hadron', '$inclCCVars', '$closureTestSpecifier', '$useBCC')'
+echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
+root -l -q -b './combineTopDiffXSecUncertainties.C++('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$extrapolate', '$hadron', '$inclCCVars', '$closureTestSpecifier', '$useBCC')'
     
 #### ==========================================
 ####  Create ratio plots for final xSecs 
@@ -762,8 +693,7 @@ if [ $maxSys -ge 1 ]
 fi
 echo "part A: $(( $BEFOREB   - $START    )) seconds (clean up  )"
 echo "part B: $(( $BEFOREC   - $BEFOREB  )) seconds (monitoring)"
-echo "part C: $(( $BEFOREPDF - $BEFOREC  )) seconds (migration)"
-echo "part D: $(( $BEFORED   - $BEFOREPDF)) seconds (prepare PDF uncertainty run)"
-echo "part E: $(( $BEFOREE   - $BEFORED  )) seconds (shape variations)"
+echo "part C: $(( $BEFORED   - $BEFOREC  )) seconds (migration)"
+echo "part D: $(( $BEFOREE   - $BEFORED  )) seconds (prepare PDF uncertainty run)"
 echo "part F: $(( $BEFOREF   - $BEFOREE  )) seconds (xSec, $maxSys systematic variations considered)"
 echo "part G: $(( $END       - $BEFOREF  )) seconds (errors and final xSec)"

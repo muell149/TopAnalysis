@@ -63,8 +63,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
   //        41: sysPDFUp                   42: sysPDFDown                  
   //        43: sysHadUp                   44: sysHadDown                  
   //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: sysShapeUp                 48: sysShapeDown                
-  //        49: ENDOFSYSENUM
+  //        47: ENDOFSYSENUM
   std::vector<unsigned int> uncorrSys_;
   // trigger 
   //uncorrSys_.push_back(sysTriggerEffSFJetNormUp	);

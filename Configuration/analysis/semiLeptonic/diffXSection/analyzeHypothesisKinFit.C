@@ -72,8 +72,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   //        41: sysPDFUp                   42: sysPDFDown                  
   //        43: sysHadUp                   44: sysHadDown                  
   //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: sysShapeUp                 48: sysShapeDown                
-  //        49: ENDOFSYSENUM
+  //        47: ENDOFSYSENUM
   
   // xSec from prob selection step
   TString addSel="";
@@ -181,8 +180,6 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude PDF
   //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
-  // exclude shape variation
-  for(int sys=sysShapeUp   ; sys<=sysShapeDown  ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
   for(unsigned int i=0; i<ignoreSys_.size(); ++i){
     if(systematicVariation==ignoreSys_[i]) systematicVariationMod=sysNo;

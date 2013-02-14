@@ -157,8 +157,7 @@ namespace semileptonic {
 			     /*41:*/ sysPDFUp,                   /*42:*/ sysPDFDown,
 			     /*43:*/ sysHadUp,                   /*44:*/ sysHadDown,
 			     /*45:*/ sysGenMCatNLO,              /*46:*/ sysGenPowheg,
-			     /*47:*/ sysShapeUp,                 /*48:*/ sysShapeDown,
-			     /*49:*/ ENDOFSYSENUM,               /*50:*/ sysTest };
+			     /*47:*/ ENDOFSYSENUM,               /*48:*/ sysTest };
 
   // ============================
   //  Numerical Constants
@@ -258,8 +257,6 @@ namespace semileptonic {
       case sysHadDown                  : return "sysHadronizationDown";
       case sysGenMCatNLO               : return "sysGenMCatNLO";
       case sysGenPowheg                : return "sysGenPowheg";  
-      case sysShapeUp                  : return "sysShapeUp";              
-      case sysShapeDown                : return "sysShapeDown"; 
       default                          : std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
                                          std::cout << "chosen systematic variation:  " << sys            << std::endl;
                                          std::cout << "maximum systematic variation: " << ENDOFSYSENUM-1 << std::endl;
@@ -1190,13 +1187,7 @@ namespace semileptonic {
     // JER
     if(sys==sysJERUp  ) fileName = "JERUp/"+fileName+"JERUp";
     if(sys==sysJERDown) fileName = "JERDown/"+fileName+"JERDown";
-    // Shape variation
-    // only for new MC and ttbar signal
-    if(sample==kSig){
-      if(sys==sysShapeUp  ) fileName = "MCShapeUp/"+fileName+"MCShapeVarUp";
-      if(sys==sysShapeDown) fileName = "MCShapeDown/"+fileName+"MCShapeVarDown";
-    }
-    // Shape variation
+    // PDF Shape variation
     // only for new MC and ttbar signal
     if(sample==kSig){
       if(sys==sysPDFUp  ) fileName = "PDFUp/"+fileName+"PdfVarUp";

@@ -142,8 +142,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   //        41: sysPDFUp                   42: sysPDFDown                  
   //        43: sysHadUp                   44: sysHadDown                  
   //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: sysShapeUp                 48: sysShapeDown                
-  //        49: ENDOFSYSENUM
+  //        47: ENDOFSYSENUM
 
   int systematicVariation=sysNo; // topPt-reweigthing: sysTest, Powheg: sysGenPowheg, McatNLO: sysGenMCatNLO
   // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
