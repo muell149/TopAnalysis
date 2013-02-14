@@ -320,6 +320,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtMinus",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtHad",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtLep",
+    // neutrino plots
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/neutrinoPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/neutrinoEta",
   };
 
   TString plots1DLeptons[] = {
@@ -542,6 +545,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "p_{T}^{t-} #left[GeV#right];Events;0;20",
     "p_{T}^{t had} #left[GeV#right];Events;0;20",
     "p_{T}^{t lep} #left[GeV#right];Events;0;20",
+    // neutrino plots
+    "p_{T}^{neutrino} #left[GeV#right];Events;0;10",
+    "#eta^{neutrino};Events;0;2",
   };
 
   TString axisLabel1DLeptons[ ] = {
@@ -1176,6 +1182,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(getStringEntry(plotList_[plot], 2).Contains("topMass")                                                  ){xDn=100.  ;xUp=500.; }
 	    if(plotList_[plot].Contains("npvertex_reweighted")                                                         ){xDn=0.    ;xUp=40.;  }
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass")                                    ){xDn=0.    ;xUp=1600.;}
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/neutrinoPt")                         ){xDn=0.    ;xUp=400.;  }
 	    // adjust range
 	    if(xUp!=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmax()||xDn!=histo_[plotList_[plot]][sample]->GetXaxis()->GetXmin()) histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(xDn,xUp-0.000001);
 	    // adjust labels if overlapping because of too many large numbers
