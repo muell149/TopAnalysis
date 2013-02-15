@@ -217,6 +217,10 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
     double mt, xsec, err_u[3], err_d[3];
     in >> mt >> xsec >> err_u[0] >> err_d[0] >> err_u[1] >> err_d[1] >> err_u[2] >> err_d[2];
     if( in.eof() ) break;
+    if(pdfType==kCT) {
+      err_u[1] /= 1.6;
+      err_d[1] /= 1.6;
+    }
     mass [i] = mt;
     sigma[i] = xsec;
     for(unsigned j=0; j<3; j++) {
