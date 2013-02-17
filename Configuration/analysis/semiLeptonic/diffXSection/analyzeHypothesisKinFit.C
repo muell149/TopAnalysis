@@ -200,15 +200,36 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   TString sysInputGenFolderExtension="";
 
   // create list of variables you would like to create the efficiency / cross section for (centrally defined in basicFunctions.h)
-  std::vector<TString> xSecVariables_, xSecLabel_;     
-  xSecVariables_.insert(xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
-  xSecLabel_    .insert(xSecLabel_.begin(),     xSecLabel,     xSecLabel     + sizeof(xSecLabel)/sizeof(TString));
-
-  if (addCrossCheckVariables && !hadron){
-    // cross check variables presently only available for parton level cross-sections
-    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesCCVar, xSecVariablesCCVar + sizeof(xSecVariablesCCVar)/sizeof(TString));
-    xSecLabel_.insert(xSecLabel_.end(), xSecLabelCCVar, xSecLabelCCVar + sizeof(xSecLabelCCVar)/sizeof(TString));
+  std::vector<TString> xSecVariables_, xSecLabel_; 
+  // a) top and ttbar quantities
+  if(!hadron){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit, xSecVariablesKinFit + sizeof(xSecVariablesKinFit)/sizeof(TString));
+    xSecLabel_    .insert(xSecLabel_.end(),     xSecLabelKinFit,     xSecLabelKinFit     + sizeof(xSecLabelKinFit    )/sizeof(TString));
   }
+  // b) lepton and b-jet quantities
+  if(hadron||!extrapolate){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState, xSecVariablesFinalState + sizeof(xSecVariablesFinalState)/sizeof(TString));
+    xSecLabel_    .insert(xSecLabel_.end()    , xSecLabelFinalState    , xSecLabelFinalState     + sizeof(xSecLabelFinalState    )/sizeof(TString));
+  }
+  // c) cross check variables (only available for parton level cross-sections)
+  if (addCrossCheckVariables && !hadron){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesCCVar, xSecVariablesCCVar + sizeof(xSecVariablesCCVar)/sizeof(TString));
+    xSecLabel_    .insert(xSecLabel_.end()    , xSecLabelCCVar    , xSecLabelCCVar     + sizeof(xSecLabelCCVar    )/sizeof(TString));
+  }
+  // check
+  if(xSecVariables_.size()!=xSecLabel_.size()){
+    std::cout << "ERROR: size of xSecVariables_ and xSecLabel_ is unequal!" << std::endl;
+    std::cout << "xSecVariables_" << std::endl;
+    for(unsigned int ix=0; ix<xSecVariables_.size(); ++ix){
+     std::cout << xSecVariables_[ix] << std::endl; 
+    }
+    std::cout << "xSecLabel_" << std::endl;
+    for(unsigned int ix=0; ix<xSecLabel_.size(); ++ix){
+     std::cout << xSecLabel_[ix] << std::endl; 
+    }
+    exit(0);
+  }
+
 
   // get folder prefix for systematics without extra rootfile
   switch (systematicVariationMod)

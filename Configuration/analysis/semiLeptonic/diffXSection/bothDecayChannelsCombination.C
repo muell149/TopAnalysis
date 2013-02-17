@@ -23,14 +23,22 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
   
   // decay channels
   enum channel {kMuon, kElectron, kCombined};
-    
+
   // Define variables for combination (centrally defined in basicFunctions.h)
   std::vector<TString> xSecVariables_;
-  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables,          xSecVariables          + sizeof(xSecVariables)/sizeof(TString)         );
-  xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesNorm,      xSecVariablesNorm      + sizeof(xSecVariablesNorm)/sizeof(TString)     );
+  // a) top and ttbar quantities
+  if(!hadron){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit, xSecVariablesKinFit + sizeof(xSecVariablesKinFit)/sizeof(TString));
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFitNorm, xSecVariablesKinFitNorm + sizeof(xSecVariablesKinFitNorm)/sizeof(TString));
+  }
+  // b) lepton and b-jet quantities
+  if(hadron||!extrapolate){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState    , xSecVariablesFinalState     + sizeof(xSecVariablesFinalState    )/sizeof(TString));
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalStateNorm, xSecVariablesFinalStateNorm + sizeof(xSecVariablesFinalStateNorm)/sizeof(TString));
+  }
+  // c) cross check variables (only available for parton level cross-sections)
   if (addCrossCheckVariables && !hadron){
-    // cross check variables presently only available for parton level cross-sections
-    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
+    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar    , xSecVariablesCCVar     + sizeof(xSecVariablesCCVar    )/sizeof(TString));
     xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
   }
   xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesIncl,      xSecVariablesIncl      + sizeof(xSecVariablesIncl)/sizeof(TString)     );

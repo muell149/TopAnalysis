@@ -27,7 +27,7 @@
 #include <TKey.h>
 #include <TGraphAsymmErrors.h>
 #include <TString.h>
-
+#include <TTree.h>
 #include <TLine.h>
 #include <TBox.h>
 #include <TPaveLabel.h>
@@ -53,14 +53,14 @@ namespace semileptonic {
 
   // basic variables
  
-  TString xSecVariables[]     = {"topPt",     "topY",     "ttbarPt",     "ttbarY",     "ttbarMass",     "lepPt" ,    "lepEta",     "bqPt",     "bqEta"    };
-  TString xSecVariablesNorm[] = {"topPtNorm", "topYNorm", "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "lepPtNorm" ,"lepEtaNorm", "bqPtNorm", "bqEtaNorm"}; 
+  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta"              };
+  TString xSecVariablesKinFit[]     = {"topPt" , "topY"  , "ttbarPt", "ttbarY", "ttbarMass"};
+  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm"                  }; 
+  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm"}; 
   TString xSecVariablesIncl[] = {"inclusive"};
 
-  TString xSecLabel[] = {"p_{T}^{t}/[GeV]" ,"y^{t}/ ",
-			 "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", 
-			 "p_{T}^{l}/[GeV]", "#eta^{l}/ ", 
-			 "p_{T}^{b}/[GeV]", "#eta^{b}/ "};
+  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]" ,"y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]"};
+  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ "};
 
   // cross-check variables
  

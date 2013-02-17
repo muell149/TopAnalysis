@@ -41,9 +41,16 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
   // ============================
   // variables to be processed
   std::vector<TString> xSecVariables_;
-  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
+  // a) top and ttbar quantities
+  if(!hadron){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit, xSecVariablesKinFit + sizeof(xSecVariablesKinFit)/sizeof(TString));
+  }
+  // b) lepton and b-jet quantities
+  if(hadron||!extrapolate){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState    , xSecVariablesFinalState     + sizeof(xSecVariablesFinalState    )/sizeof(TString));
+  }
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
-    TString plotName=xSecVariables[i];
+    TString plotName=xSecVariables_[i];
     if(verbose>0) std::cout << std::endl << "variable: " << plotName << std::endl;
     // get canvas for chosen cross section
     TCanvas* canvas = (TCanvas*)(file->Get("finalXSec/"+plotName+"Norm")->Clone());

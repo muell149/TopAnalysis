@@ -142,7 +142,14 @@ void createTheoryDataRatios(bool extrapolate=false, bool hadron=true, int verbos
 
   // list all variables you want to create a ratio for
   std::vector<TString> xSecVariables_;
-  xSecVariables_.insert( xSecVariables_.begin(), xSecVariables, xSecVariables + sizeof(xSecVariables)/sizeof(TString));
+  // a) top and ttbar quantities
+  if(!hadron){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit, xSecVariablesKinFit + sizeof(xSecVariablesKinFit)/sizeof(TString));
+  }
+  // b) lepton and b-jet quantities
+  if(hadron||!extrapolate){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState    , xSecVariablesFinalState     + sizeof(xSecVariablesFinalState    )/sizeof(TString));
+  }
 
   // get correct names
   TString PS = extrapolate ? "" : "PhaseSpace";
