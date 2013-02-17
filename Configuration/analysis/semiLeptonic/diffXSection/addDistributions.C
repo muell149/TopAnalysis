@@ -1,5 +1,6 @@
 #include "basicFunctions.h"
 #include "TObjArray.h"
+#include <TDirectory.h>
 
 void createEntry(TString infostream, std::vector<TString> fileList_, bool save, unsigned int verbose);
 
@@ -7,6 +8,8 @@ void addDistributions(bool save = true, unsigned int verbose=2,
 		      TString inputFolderName="RecentAnalysisRun8TeV",
 		      TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 		      std::string decayChannel = "combined"){
+  // FIXME: bool for testing
+  bool test=true;
 
   // ============================
   //  Prescription
@@ -127,14 +130,16 @@ void addDistributions(bool save = true, unsigned int verbose=2,
     rootFiles_.push_back(getStringEntry(dataFile,42, ":"));
   }
   
-  // FIXME: for testing
-  TString testfile="./muonDiffXSecSigSummer12PF.root";
-  if(testfile!=""){
-    rootFiles_.clear();
-    rootFiles_.push_back(testfile);
-    if(rootFiles_.size()>1){
-      std::cout << "ERROR in testfile setup" << std::endl;
-      exit(0);
+  // testing: use only one local rootfile
+  if(test){
+    TString testfile="./muonDiffXSecSigSummer12PF.root";
+    if(testfile!=""){
+      rootFiles_.clear();
+      rootFiles_.push_back(testfile);
+      if(rootFiles_.size()>1){
+	std::cout << "ERROR in testfile setup" << std::endl;
+	exit(0);
+      }
     }
   }
     
@@ -190,16 +195,8 @@ void createEntry(TString infostream, std::vector<TString> fileList_, bool save, 
     bool ttbarCentral = (ttbarSG&&!(name.Contains("Up")||name.Contains("Down")||name.Contains("Mcatnlo")||name.Contains("Powheg"))) ? true : false;
     // container for values read from tree
     std::map< TString, float > value_;
-
-    // create objects for saving later
-    TTree *recotreeSv=0;
-    TTree *gentreeSv=0;
-    TH1F* newRecPlotSv=0;
-    TH2F* newRecGenPlotSv=0;
-    TH1F* newGenPlotSv=0;
-
     // A open file
-    TFile* file = TFile::Open(name, "UPDATE");
+    TFile* file = TFile::Open(name, "Update");
     if(!file||file->IsZombie()) std::cout << "ERROR: file " << name << " does not exist or is broken" << std::endl;
     else{
       file->cd();
@@ -282,10 +279,19 @@ void createEntry(TString infostream, std::vector<TString> fileList_, bool save, 
 	    newRecGenPlot->Fill(newRecGen2, newRec2, value_["weight"]);	    
 	  }
 	}
-	// copy results
-	recotreeSv=(TTree *)recotree->Clone();
-	newRecPlotSv=(TH1F*)newRecPlot->Clone();
-	newRecGenPlotSv=(TH2F*)newRecGenPlot->Clone();
+	// B5 saving
+	if(save){
+	  if(fileList_.size()==1){
+	    TString debugName=((getStringEntry(name, 42, "/")).ReplaceAll(".root", ""));
+	    if(newRecPlot   ) saveToRootFile("test.root", newRecPlot   , true, 1, outputRecoFolderLocation+"/"+debugName);
+	    if(newRecGenPlot) saveToRootFile("test.root", newRecGenPlot, true, 1, outputRecoFolderLocation+"/"+debugName);
+	  }
+	  file->cd(outputRecoFolderLocation);
+	  if(newRecPlot   ) newRecPlot   ->Write(newRecPlot->GetTitle()   , TObject::kOverwrite);
+	  if(newRecGenPlot) newRecGenPlot->Write(newRecGenPlot->GetTitle(), TObject::kOverwrite);
+	  if(recotree) recotree->Write(recotree->GetTitle(), TObject::kOverwrite);
+	  file->cd();
+	} // end if save
       } // end if recotree
       if(ttbarSG){
 	if(verbose>1) std::cout << "-> ttbarSG file! gen and reco-gen will be derived" << std::endl;
@@ -340,51 +346,23 @@ void createEntry(TString infostream, std::vector<TString> fileList_, bool save, 
 	    newGenPlot->Fill(newGen1, value_["weight"]);
 	    newGenPlot->Fill(newGen2, value_["weight"]);
 	  }
+	  // C4 saving
+	  if(save){
+	    if(fileList_.size()==1){
+	      TString debugName=((getStringEntry(name, 42, "/")).ReplaceAll(".root", ""));
+	      if(newGenPlot   ) saveToRootFile("test.root", newGenPlot   , true, 1, outputGenFolderLocation+"/"+debugName );
+	    }
+	    file->cd(outputGenFolderLocation);
+	    if(newGenPlot) newGenPlot->Write(newGenPlot->GetTitle(), TObject::kOverwrite);
+	    if(gentree ) gentree->Write(gentree->GetTitle(), TObject::kOverwrite);
+	    file->cd();
+	  } // end if save
 	  // D process additional folders
 	  if(verbose>1&&ttbarCentral) std::cout << "   -> central ttbarSG file! need to process additional folders for systematic variations" << std::endl;
-	  // copy results
-	  gentreeSv=(TTree *)gentree->Clone();
-	  newGenPlotSv=(TH1F*)newGenPlot->Clone();
 	} // end if gentree
       } // end if ttbarSG
-      // close file
-      std::cout << "TEST3: " << newRecGenPlotSv->GetTitle() << std::endl;   
-      file->Close();
-      std::cout << "TEST4: " << newRecGenPlotSv->GetTitle() << std::endl;
     } // end if file
-    // E saving 
-    if(save){
-      // E1 for debugging
-      std::cout << "E1" << std::endl;
-      if(fileList_.size()==1){
-	TString debugName=((getStringEntry(name, 42, "/")).ReplaceAll(".root", ""));
-	std::cout << "a)" << std::endl;
-	if(newRecPlotSv   ) saveToRootFile("test.root", newRecPlotSv   , true, 1, outputRecoFolderLocation+"/"+debugName);
-	std::cout << "b)" << std::endl;
-	if(newRecGenPlotSv){
-	  std::cout << "b1)" << std::endl;
-	  std::cout << newRecGenPlotSv->GetTitle() << std::endl;
-	  std::cout << "b2)" << std::endl;
-	  saveToRootFile("test.root", newRecGenPlotSv, true, 1, outputRecoFolderLocation+"/"+debugName);
-	}
-	std::cout << "c)" << std::endl;
-	if(newGenPlotSv   ) saveToRootFile("test.root", newGenPlotSv   , true, 1, outputGenFolderLocation+"/"+debugName );
-      }
-      // E2 1D rec 
-      std::cout << "E2" << std::endl;
-      if(newRecPlotSv   ) saveToRootFile(name, newRecPlotSv   , true, 1, outputRecoFolderLocation);
-      // E3 2D rec-gen
-      std::cout << "E3" << std::endl;
-      if(newRecGenPlotSv) saveToRootFile(name, newRecGenPlotSv, true, 1, outputRecoFolderLocation);
-      // E4 1D gen
-      std::cout << "E4" << std::endl;
-      if(newGenPlotSv   ) saveToRootFile(name, newGenPlotSv   , true, 1, outputGenFolderLocation );
-      // E5 reco tree
-      std::cout << "E5" << std::endl;
-      if(recotreeSv) saveToRootFile(name, recotreeSv, true, 1, outputRecoFolderLocation);
-      // E6 gen tree
-      std::cout << "E6" << std::endl;
-      if(gentreeSv ) saveToRootFile(name, gentreeSv , true, 1, outputGenFolderLocation );
-    } // end if save
+    // close file
+    file->Close();
   } // end loop files
 }
