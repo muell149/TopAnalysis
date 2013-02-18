@@ -126,14 +126,14 @@ echo "--------------------------------------------------------------------------
 echo
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
-## inputFolderName=\"RecentAnalysisRun8TeV\" (default)
-inputFolderName=\"RecentAnalysisRun8TeV\"
+## inputFolderName=\"newRecentAnalysisRun8TeV\" (default)
+inputFolderName=\"newRecentAnalysisRun8TeV\"
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
-mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root\"
-eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root\"
+mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root\"
+eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root\"
 
 if [ $decayChannel == \"electron\" ]; then
     dataLuminosity=12148
