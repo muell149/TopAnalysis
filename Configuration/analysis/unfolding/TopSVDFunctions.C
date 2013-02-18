@@ -1,6 +1,8 @@
+#include <cstdio>
+#include <fstream>
 #include <TROOT.h>
 #include <TSystem.h>
-# include "TopSVDFunctions.h"
+#include "TopSVDFunctions.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////    Function Definitions  ////////////////////////////////////////////
@@ -4234,8 +4236,8 @@ void TopSVDFunctions::SVD_Hists1DToASCII(TH1D* hists, TString textOutputFolderNa
         SVD_MakeFolder(textOutputFolderName);
         filename.Prepend("/");
         filename.Prepend(textOutputFolderName);
-        SVD_RemoveFile(filename);
-        SVD_TouchFile(filename);
+//         SVD_RemoveFile(filename);
+//         SVD_TouchFile(filename);
         
         // Size of Histogram
         int nbins = hists->GetNbinsX();
@@ -4284,8 +4286,9 @@ void TopSVDFunctions::SVD_Hists2DToASCII(TH2D* hists, TString textOutputFolderNa
         SVD_MakeFolder(textOutputFolderName);
         filename.Prepend("/");
         filename.Prepend(textOutputFolderName);
-        SVD_RemoveFile(filename);
-        SVD_TouchFile(filename);
+        
+//         SVD_RemoveFile(filename);
+//         SVD_TouchFile(filename);
         
         // Size of Histogram
         int nbins = hists->GetNbinsX();
@@ -4440,13 +4443,14 @@ void TopSVDFunctions::SVD_TouchFile(TString filepath)
     TString filename = SVD_FindFile(filepath);
      
     // Touch the File
-    TString touchCommand = "cd ";
-    touchCommand.Append(outputpath);
-    touchCommand.Append(" ; touch ");
-    touchCommand.Append(filename);
-    gSystem->Exec(touchCommand); 
+//     TString touchCommand = "cd ";
+//     touchCommand.Append(outputpath);
+//     touchCommand.Append(" ; touch ");
+//     touchCommand.Append(filename);
+//     gSystem->Exec(touchCommand); 
     
-      
+    //WTF?! Why would one call external programs?!
+    std::ofstream touch((outputpath + filename).Data(), std::ios::app);
 }
 
 
@@ -4461,12 +4465,13 @@ void TopSVDFunctions::SVD_RemoveFile(TString filepath)
     TString filename = SVD_FindFile(filepath);
     
     // Remove command
-    TString touchCommand = "cd ";
-    touchCommand.Append(outputpath);
-    touchCommand.Append(" ; rm ");
-    touchCommand.Append(filename);
-    touchCommand.Append(" 2> /dev/null");
-    gSystem->Exec(touchCommand); 
+//     TString touchCommand = "cd ";
+//     touchCommand.Append(outputpath);
+//     touchCommand.Append(" ; rm ");
+//     touchCommand.Append(filename);
+//     touchCommand.Append(" 2> /dev/null");
+//     gSystem->Exec(touchCommand); 
+    std::remove((outputpath+filename).Data());
     
 }
 
