@@ -30,6 +30,24 @@ HiggsGenEvent::numberOfBQuarks(bool fromHiggs) const
 }
 
 
+std::vector<const reco::GenParticle*> 
+HiggsGenEvent::higgsSisters() const
+{
+  std::vector<const reco::GenParticle*> sisters;
+  for(reco::GenParticleCollection::const_iterator part = parts_->begin(); part<parts_->end(); ++part){
+    // choose Higgs sister which do not have a 
+    // mother and are not Higgs itself
+    if( part->numberOfMothers()==0 && part->pdgId()!=25){
+      if( dynamic_cast<const reco::GenParticle*>( &(*part) ) == 0){
+        throw edm::Exception( edm::errors::InvalidReference, "Not a GenParticle" );
+      }
+      sisters.push_back( part->clone() );
+    }
+  }  
+  return sisters;
+}
+
+
 const reco::GenParticle*
 HiggsGenEvent::candidate(int id, unsigned int parentId) const
 {
