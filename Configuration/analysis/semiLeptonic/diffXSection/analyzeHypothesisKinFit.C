@@ -570,6 +570,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
+  };
+
+  TString plots2D_LepBjet[ ] = {
     // d) response matrix lepton quantities
     recLeppath+"/lepPt_"                                                    ,
     recLeppath+"/lepEta_"                                                   ,
@@ -682,13 +685,16 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     //    "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     //    "#phi(leptonic t)-#phi(hadronic t) gen/#phi(leptonic t)-#phi(hadronic t) Kinfit",
     //    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
+  };
+
+  TString axisLabel2D_LepBjet[ ] = {
     // d) response matrix lepton quantities
     xSecLabelName("lepPt"      )+" gen/"+xSecLabelName("lepPt"      )+" reco",
     xSecLabelName("lepEta"     )+" gen/"+xSecLabelName("lepEta"     )+" reco", 
     
     // e) response matrix b-quark/b-jet quantities
     xSecLabelName("bqPt" )+" gen/"+xSecLabelName("bqPt" )+" reco",
-    xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco", 
+    xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco"
   };
 
   TString axisLabel2D_CCVars[ ] = {
@@ -889,7 +895,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   unsigned int N1Dplotsadd     = sizeof(plots1Dadd)/sizeof(TString);
   unsigned int N2Dplots        = sizeof(plots2D)/sizeof(TString);
   unsigned int N2Dplots_CCVars = sizeof(plots2D_CCVars)/sizeof(TString);
-  
+  unsigned int N2Dplots_LepBjet= sizeof(plots2D_LepBjet)/sizeof(TString);
+
   // check if all axis labels exist
   if(N1Dplots        != sizeof(axisLabel1D)/sizeof(TString))       { std::cout << "ERROR: some 1D plots or axis label are missing"          << std::endl; exit(1); }
   if(N1Dplots_CCVars != sizeof(axisLabel1D_CCVars)/sizeof(TString)){ std::cout << "ERROR: some 1D plots (CCVars) or axis label are missing" << std::endl; exit(1); }
@@ -904,12 +911,15 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 
   if(N2Dplots        != sizeof(axisLabel2D)/sizeof(TString))       { std::cout << "ERROR: some 2D plots or axis label are missing"          << std::endl; exit(1); }
   if(N2Dplots_CCVars != sizeof(axisLabel2D_CCVars)/sizeof(TString)){ std::cout << "ERROR: some 2D plots (CCVars) or axis label are missing" << std::endl; exit(1); }
+  if(N2Dplots_LepBjet != sizeof(axisLabel2D_LepBjet)/sizeof(TString)){ std::cout << "ERROR: some 2D plots (lepton, bjet) or axis label are missing" << std::endl; exit(1); }
 
   if (addCrossCheckVariables&&!hadron){
     N1Dplots += N1Dplots_CCVars;
     N2Dplots += N2Dplots_CCVars;
   }
-
+  if(!extrapolate&&hadron){
+    N2Dplots += N2Dplots_LepBjet;
+  }
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 
@@ -933,6 +943,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   if(systematicVariation==sysNo)      plotList_.insert(plotList_.end(), plots1Dadd,     plots1Dadd     + sizeof(plots1Dadd)/sizeof(TString)    );
   plotList_.insert(plotList_.end(),   plots2D, plots2D + sizeof(plots2D)/sizeof(TString));
   if(addCrossCheckVariables&&!hadron) plotList_.insert(plotList_.end(), plots2D_CCVars, plots2D_CCVars + sizeof(plots2D_CCVars)/sizeof(TString));
+  if(!extrapolate&&hadron) plotList_.insert(plotList_.end(), plots2D_LepBjet, plots2D_LepBjet + sizeof(plots2D_LepBjet)/sizeof(TString));
 
   // remove irrelevant plots for systemtic variation to speed up
 
@@ -1329,6 +1340,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   if(systematicVariation==sysNo)        axisLabel_.insert(axisLabel_.end(), axisLabel1Dadd,     axisLabel1Dadd     + sizeof(axisLabel1Dadd)/sizeof(TString)    );
   axisLabel_.insert(axisLabel_.end(),   axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString));
   if(addCrossCheckVariables&&!hadron)   axisLabel_.insert(axisLabel_.end(), axisLabel2D_CCVars, axisLabel2D_CCVars + sizeof(axisLabel2D_CCVars)/sizeof(TString));
+  if(!extrapolate&&hadron)   axisLabel_.insert(axisLabel_.end(), axisLabel2D_LepBjet, axisLabel2D_LepBjet + sizeof(axisLabel2D_LepBjet)/sizeof(TString));
 
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
