@@ -4,8 +4,8 @@ TH1F* distortPDF(const TH1& hist, TString variation, TString variable, TString i
 TH1F* distort   (const TH1& hist, TString variation, TString variable, int verbose);
 double linSF(const double x, const double xmax, const double a, const double b);
 
-void analyzeTopDiffXSecMCdependency(double luminosity = 12148, std::string decayChannel="electron", bool save=false, int verbose=0, TString inputFolderName="RecentAnalysisRun",
-				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
+void analyzeTopDiffXSecMCdependency(double luminosity = 12148, std::string decayChannel="electron", bool save=true, int verbose=2, TString inputFolderName="newRecentAnalysisRun8TeV",
+				    TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
 				    //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
                                     bool doPDFuncertainty=true, bool addCrossCheckVariables=false)
 {
@@ -62,13 +62,13 @@ void analyzeTopDiffXSecMCdependency(double luminosity = 12148, std::string decay
   TString savePlotsTo="./diffXSecFromSignal/plots/"+decayChannel+"/2012/shapeReweighting";
   // define variables
   std::vector<TString> variable_;
-  TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY", "lepPt", "lepEta"};
+  TString variable[] ={"topPt", "topY", "ttbarPt", "ttbarMass", "ttbarY"};//, "lepPt", "lepEta"};
   // cross check variables
   variable_.insert( variable_.begin(), variable, variable + sizeof(variable)/sizeof(TString) );
   if (addCrossCheckVariables) variable_.insert(variable_.end(),   xSecVariablesCCVar,  xSecVariablesCCVar + sizeof( xSecVariablesCCVar)/sizeof(TString));
   // b quark variables only for PDF uncertainties
-  TString bvariables[]={"bqPt", "bqEta"};
-  if(doPDFuncertainty) variable_.insert(variable_.end(), bvariables, bvariables+sizeof(bvariables)/sizeof(TString));
+  //TString bvariables[]={"bqPt", "bqEta"};
+  //if(doPDFuncertainty) variable_.insert(variable_.end(), bvariables, bvariables+sizeof(bvariables)/sizeof(TString));
   
   // container for values read from tree
   std::map< TString, float > value_;
