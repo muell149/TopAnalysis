@@ -11,7 +11,7 @@
 void addDir(const std::string& path, const std::vector< std::pair< TFile*, double > >& files, TFile *target, int verbose);
 void combineAllPlots(int sysTag, int sample, TString decayChannel, int verbose, TString inputFolderName, TString outputFolder);
 
-void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8TeV", TString outputFolder="", bool qcdSys=true) {
+void combineMCsamples(int verbose=1, TString inputFolderName="newRecentAnalysisRun8TeV", TString outputFolder="", bool qcdSys=true) {
   // ---
   //    list all of all subsamples to be combined 
   // ---
@@ -22,8 +22,8 @@ void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8
   // b) BG processes
   //    (based on enum samples in basicFunctions.h)
   std::vector<int> samples_;
-  //samples_.push_back(kQCD  );
-  //samples_.push_back(kDiBos);
+  samples_.push_back(kQCD  );
+  samples_.push_back(kDiBos);
   samples_.push_back(kSTop );
   // c) systematic variations
   //    (based on enum systematicVariation in basicFunctions.h)
@@ -33,11 +33,11 @@ void combineMCsamples(int verbose=1, TString inputFolderName="RecentAnalysisRun8
   //      - correspond only to a different event weight, e.g. QCD up variation
   //      -> later treated in the macro
   std::vector<int> sysVariation_;
-  //sysVariation_.push_back(sysNo     );
-  //sysVariation_.push_back(sysJESUp  );
-  //sysVariation_.push_back(sysJESDown);
-  //sysVariation_.push_back(sysJERUp  );
-  //sysVariation_.push_back(sysJERDown);
+  sysVariation_.push_back(sysNo     );
+  sysVariation_.push_back(sysJESUp  );
+  sysVariation_.push_back(sysJESDown);
+  sysVariation_.push_back(sysJERUp  );
+  sysVariation_.push_back(sysJERDown);
   sysVariation_.push_back(sysTopScaleUp  );
   sysVariation_.push_back(sysTopScaleDown);
 
