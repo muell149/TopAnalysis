@@ -13,7 +13,7 @@
 //
 // Original Author:  Johannes Hauk,,,DESY
 //         Created:  Tue Jan 15 14:35:52 CET 2013
-// $Id: HiggsDecaySubset.cc,v 1.4 2013/01/29 18:42:13 hauk Exp $
+// $Id: HiggsDecaySubset.cc,v 1.5 2013/02/19 17:44:01 hauk Exp $
 //
 //
 
@@ -338,7 +338,7 @@ HiggsDecaySubset::fillListing(const std::vector<const reco::GenParticle*>& v_hig
         // loop over all daughters of the Higgs mother i.e.
         // the Higgs and its potential sisters
         for(reco::GenParticle::const_iterator i_higgsSister = higgs->mother()->begin(); i_higgsSister!=higgs->mother()->end(); ++i_higgsSister){
-            std::cout<<"\t"<<i_higgsSister->pdgId()<<" "<<i_higgsSister->status()<<" "<<i_higgsSister->numberOfDaughters()<<std::endl;
+            //std::cout<<"\t"<<i_higgsSister->pdgId()<<" "<<i_higgsSister->status()<<" "<<i_higgsSister->numberOfDaughters()<<std::endl;
             // add all further particles but the Higgs and potential 
             // cases where the mother of the Higgs has itself as daughter
             if(i_higgsSister->pdgId()!=higgs->pdgId() && i_higgsSister->pdgId()!=higgs->mother()->pdgId()){
