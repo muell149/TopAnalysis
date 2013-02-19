@@ -5,15 +5,26 @@
 // 
 /**\class GeneratorHiggsFilter GeneratorHiggsFilter.cc TopAnalysis/HiggsUtils/plugins/GeneratorHiggsFilter.cc
 
- Description: [one line class summary]
+ Description: EDFilter to select Higgs decays on generator level
+
 
  Implementation:
-     [Notes on implementation]
+     filter for Higgs decay channels on generator level.
+     decay channels are internally coded by integer numbers.
+     since it might be important to implement further selections on the decay chain of the Higgs decay particles, several numbers are kept free:
+     0  decay mode not implemented or strange generator behaviour
+     1  stands for decay to d quarks
+     2  to u quarks
+     3  to s quarks
+     4  to c quarks
+     5  to b quarks
+     30 stands for decay to tau leptons (could use eg. 31-39 for further decay chains)
+     40 stands for decay to W bosons (could use eg. 41-49 for further decay chains)
 */
 //
 // Original Author:  Johannes Hauk,,,DESY
 //         Created:  Mon Feb 18 16:24:42 CET 2013
-// $Id$
+// $Id: GeneratorHiggsFilter.cc,v 1.1 2013/02/18 18:02:09 hauk Exp $
 //
 //
 
@@ -112,7 +123,15 @@ GeneratorHiggsFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     
     int decayMode(0);
+    
+    const reco::Candidate *d(0), *dbar(0);
+    const reco::Candidate *u(0), *ubar(0);
+    const reco::Candidate *s(0), *sbar(0);
+    const reco::Candidate *c(0), *cbar(0);
     const reco::Candidate *b(0), *bbar(0);
+    const reco::Candidate *tauMinus(0), *tauPlus(0);
+    const reco::Candidate *wMinus(0), *wPlus(0);
+    const reco::Candidate *unknown(0), *unknownBar(0);
     
     edm::Handle<HiggsGenEvent> genEvt;
     iEvent.getByLabel(src_, genEvt);
@@ -128,17 +147,48 @@ GeneratorHiggsFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         log << "Particle ID: " << cand->pdgId()  << "\n";
         log << "Status     : " << cand->status() << "\n";
+        log << "# daughters: " << cand->numberOfDaughters() << "\n";
         
         for(size_t i=0; i<cand->numberOfDaughters(); ++i){
             log << "     Daughter PID  : " << cand->daughter(i)->pdgId()  << "\n";
             log << "     Dauther Status: " << cand->daughter(i)->status() << "\n";
-            if(cand->daughter(i)->pdgId()==5)b = cand->daughter(i);
+            if(cand->daughter(i)->pdgId()==1)d = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==-1)dbar = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==2)u = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==-2)ubar = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==3)s = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==-3)sbar = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==4)c = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==-4)cbar = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==5)b = cand->daughter(i);
             else if(cand->daughter(i)->pdgId()==-5)bbar = cand->daughter(i);
-            
+            else if(cand->daughter(i)->pdgId()==15)tauMinus = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==-15)tauPlus = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==24)wPlus = cand->daughter(i);
+            else if(cand->daughter(i)->pdgId()==-24)wMinus = cand->daughter(i);
+            else cand->daughter(i)->pdgId()>0 ? unknown = cand->daughter(i) : unknownBar = cand->daughter(i);
         }
         
     }
-    if(b && bbar)decayMode = 1;
+    if(d && dbar)decayMode = 1;
+    if(u && ubar)decayMode = 2;
+    if(s && sbar)decayMode = 3;
+    if(c && cbar)decayMode = 4;
+    if(b && bbar)decayMode = 5;
+    if(tauMinus && tauPlus)decayMode = 30;
+    if(wMinus && wPlus)decayMode = 40;
+    
+    if(decayMode == 0){
+        edm::LogVerbatim log("GeneratorHiggsFilter");
+        log <<"\n";
+        log <<"  --->\n";
+        log <<"\tNo decayMode assigned to this Higgs decay\n";
+        if(unknown || unknownBar){
+            log << "\tHowever, particle or antiparticle is stored in decay chain.\n";
+            if(unknown)   log << "\tUnknown particle has ID     : " << unknown->pdgId() << "\n";
+            if(unknownBar)log << "\tUnknown anti-particle has ID: " << unknownBar->pdgId() << "\n";
+        }
+    }
     
     // store the decay mode
     std::auto_ptr<int> decay(new int);
@@ -161,13 +211,13 @@ GeneratorHiggsFilter::beginJob()
         for(std::vector<std::string>::const_iterator i_channel = v_channel_.begin(); i_channel != v_channel_.end(); ++i_channel){
             const std::string channel(*i_channel);
             if(channel=="b"){
-                v_selectedChannel_.push_back(1);
-            }
-            else if(channel=="W"){
-                v_selectedChannel_.push_back(2);
+                v_selectedChannel_.push_back(5);
             }
             else if(channel=="tau"){
-                v_selectedChannel_.push_back(3);
+                v_selectedChannel_.push_back(30);
+            }
+            else if(channel=="W"){
+                v_selectedChannel_.push_back(40);
             }
             else if(channel=="none"){
                 // empty
