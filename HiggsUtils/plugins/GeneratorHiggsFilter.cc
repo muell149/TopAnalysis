@@ -24,7 +24,7 @@
 //
 // Original Author:  Johannes Hauk,,,DESY
 //         Created:  Mon Feb 18 16:24:42 CET 2013
-// $Id: GeneratorHiggsFilter.cc,v 1.1 2013/02/18 18:02:09 hauk Exp $
+// $Id: GeneratorHiggsFilter.cc,v 1.2 2013/02/19 20:03:05 hauk Exp $
 //
 //
 
@@ -276,8 +276,10 @@ GeneratorHiggsFilter::fillDescriptions(edm::ConfigurationDescriptions& descripti
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
-  desc.setUnknown();
-  descriptions.addDefault(desc);
+  desc.add<edm::InputTag>("src");
+  desc.add<std::vector<std::string> >("channels");
+  desc.add<bool>("invert_selection");
+  descriptions.add("generatorHiggsFilter", desc);
 }
 //define this as a plug-in
 DEFINE_FWK_MODULE(GeneratorHiggsFilter);
