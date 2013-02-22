@@ -1026,7 +1026,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  plotCombination->Draw("e X0 same"); 
 	  leg->Draw("same");  
 	  gPad->RedrawAxis(); 
-	  DrawCMSLabels(false,luminosity);
+	  DrawCMSLabels(true,luminosity);
 	  DrawDecayChLabel("e/#mu + Jets Combined");
 	  if(DrawNNLOPlot&&extrapolate){
 	    if (xSecVariables_[i].Contains("topPtNorm")) DrawLabel("(arXiv:1205.3453)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
