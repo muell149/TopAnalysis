@@ -281,9 +281,9 @@ void BCC::MakeHistos()
   HistoBins["bqPt"]        = 160;
   HistoBins["bqEta"]       = 200;
 
-  HistoSmoothingValue["lepEta"]      = (largeMGFile) ? 1 :  4;
-  HistoSmoothingValue["lepEtaPlus"]  = (largeMGFile) ? 1 :  4;
-  HistoSmoothingValue["lepEtaMinus"] = (largeMGFile) ? 1 :  4;
+  HistoSmoothingValue["lepEta"]      = (largeMGFile) ? 2 :  4;
+  HistoSmoothingValue["lepEtaPlus"]  = (largeMGFile) ? 2 :  4;
+  HistoSmoothingValue["lepEtaMinus"] = (largeMGFile) ? 2 :  4;
   HistoSmoothingValue["lepPt"]       = (largeMGFile) ? 0 :  0;
   HistoSmoothingValue["topPtPlus"]   = (largeMGFile) ? 1 : 10;
   HistoSmoothingValue["topPtMinus"]  = (largeMGFile) ? 1 : 10; 
