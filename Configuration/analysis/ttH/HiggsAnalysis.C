@@ -469,11 +469,11 @@ HiggsAnalysis::Process(Long64_t entry){
 
 
 
-void HiggsAnalysis::SetSamplename(TString samplename)
+void HiggsAnalysis::SetSamplename(TString samplename, TString)
 {
     this->samplename = samplename;
     isTtbarPlusTauSample = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") && !(samplename=="ttbarw") && !(samplename=="ttbarz") && !samplename.Contains("bg");
-    // FIXME: for ttbarW, also correction for 3rd W needs to be applied
+    // FIXME: for ttbarW, also correction for 3rd W needs to be applied, for ttbarhiggs corrections for 2 or 4 Ws needed, depending on Higgs decay (H->WW?)
     // FIXME: and what about Wlnu sample ?
     correctMadgraphBR = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs");
 }

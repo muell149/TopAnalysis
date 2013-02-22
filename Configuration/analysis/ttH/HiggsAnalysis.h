@@ -16,7 +16,7 @@ public:
     virtual ~HiggsAnalysis();
     
     // need to overwrite since everything starting with "ttbar" would be seen as "ttbarsignalplustau"
-    virtual void SetSamplename(TString samplename);
+    virtual void SetSamplename(TString samplename, TString systematic_from_file="");
     ClassDef(HiggsAnalysis,0);
     
 private:
