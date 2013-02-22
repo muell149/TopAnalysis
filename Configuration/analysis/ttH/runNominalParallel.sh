@@ -10,19 +10,17 @@ for c in ee emu mumu; do
     ./load_HiggsAnalysis -f ttbarH -c $c &
 done
 
-#wait
-
-
 for c in ee emu mumu; do
-    w
     ./load_HiggsAnalysis -f ${c}_run2012A -c $c &
     ./load_HiggsAnalysis -f ${c}_run2012B -c $c &
     ./load_HiggsAnalysis -f ${c}_run2012C -c $c &
 done 
 
-for i in qcd single ttbarbg wtol ww wz zz; do
+for i in qcd single ttbarbg.root wtol ww wz zz ttbarW ttbarZ; do
     w
-    ./load_HiggsAnalysis -f $i &
+    ./load_HiggsAnalysis -f $i -c ee&
+    ./load_HiggsAnalysis -f $i -c emu&
+    ./load_HiggsAnalysis -f $i -c mumu&
 done
 
 wait
