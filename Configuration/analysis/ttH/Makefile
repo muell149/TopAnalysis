@@ -41,37 +41,14 @@ JetCategories.o: JetCategories.C JetCategories.h
 HistoListReader.o: ../diLeptonic/HistoListReader.h ../diLeptonic/HistoListReader.cpp
 	g++ -c -o HistoListReader.o $(COMPFLAGS) ../diLeptonic/HistoListReader.cpp
 
-Histo.o: ../diLeptonic/Histo.C
-	g++ -c -o Histo.o $(COMPFLAGS) ../diLeptonic/Histo.C
+Histo.o: Histo.C
+	g++ -c -o Histo.o $(COMPFLAGS) Histo.C
 	
-DilepSVDFunctions.o: ../diLeptonic/DilepSVDFunctions.h ../diLeptonic/DilepSVDFunctions.C 
-	g++ -c -o DilepSVDFunctions.o $(COMPFLAGS) ../diLeptonic/DilepSVDFunctions.C 
-
-TopSVDFunctions.o: ../unfolding/TopSVDFunctions.C 
-	g++ -c -o TopSVDFunctions.o $(COMPFLAGS) ../unfolding/TopSVDFunctions.C 
-	
-TopSVDUnfold.o: ../unfolding/TopSVDUnfold.C
-	g++ -c -o TopSVDUnfold.o $(COMPFLAGS) ../unfolding/TopSVDUnfold.C
-
-BaseSVDUnfold.o: ../unfolding/BaseSVDUnfold.C
-	g++ -c -o BaseSVDUnfold.o $(COMPFLAGS) ../unfolding/BaseSVDUnfold.C
-
 plotterclass.o: plotterclass.cpp plotterclass.h utils.o
 	g++ -c -o plotterclass.o $(COMPFLAGS) plotterclass.cpp
 
-Histo: Histo.o plotterclass.o HistoListReader.o utils.o DilepSVDFunctions.o TopSVDFunctions.o TopSVDUnfold.o BaseSVDUnfold.o CommandLineParameters.o
-	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o DilepSVDFunctions.o TopSVDFunctions.o TopSVDUnfold.o BaseSVDUnfold.o CommandLineParameters.o $(ROOTLIBS)
-
-TypicalError: GetTypicalErrors.C CommandLineParameters.o
-	g++ -o TypicalError GetTypicalErrors.C $(COMPFLAGS) $(ROOTLIBS) CommandLineParameters.o
-
-kinRecoEfficienciesAndSF: ../diLeptonic/kinRecoEfficienciesAndSF.cpp utils.o
-	g++ -o kinRecoEfficienciesAndSF ../diLeptonic/kinRecoEfficienciesAndSF.cpp $(COMPFLAGS) $(ROOTLIBS) utils.o
-
-printGenXsec: ../diLeptonic/printGenXsec.C utils.o
-	g++ -o printGenXsec ../diLeptonic/printGenXsec.C $(COMPFLAGS) $(ROOTLIBS) utils.o
-
-
+Histo: Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o
+	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o $(ROOTLIBS)
 
 JetCorrUncertainty.o: ../diLeptonic/JetCorrectionUncertainty.cc JetCorrParameters.o SimpleJetCorrUncert.o
 	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/JetCorrectionUncertainty.cc
@@ -81,7 +58,6 @@ JetCorrParameters.o:  ../diLeptonic/JetCorrectorParameters.cc
 
 SimpleJetCorrUncert.o: ../diLeptonic/SimpleJetCorrectionUncertainty.cc
 	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/SimpleJetCorrectionUncertainty.cc
-
 
 
 .PHONY: clean

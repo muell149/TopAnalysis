@@ -19,10 +19,17 @@
 #include <TString.h>
 #include <TH1.h>
 
+// HIGGSING
+//#include "utils.h"
 #include "../diLeptonic/utils.h"
+#include "TGaxis.h"
+#include "TPaveText.h"
+// ENDHIGGSING
   
   // DAVID
-#include "../diLeptonic/DilepSVDFunctions.h"
+// HIGGSING
+//#include "../diLeptonic/DilepSVDFunctions.h"
+// ENDHIGGSING
 
 using namespace std;
 
@@ -264,7 +271,8 @@ void Plotter::DYScaleFactor(TString SpecialComment){
 
 
 void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString SystematicUp, TString SystematicDown, double flat_Syst){
-
+// HIGGSING
+/*
     cout << endl;
     cout << endl;
     cout << "    Preparing to Calculate " << Systematic << "-Uncertainty ... " << endl;
@@ -538,6 +546,8 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
     }
     
     ResultsFile.close();
+*/
+// ENDHIGGSING
 }
 
 Plotter::Plotter()
@@ -1648,6 +1658,8 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 }
 
 void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
+// HIGGSING
+/*
     cout<<"\n\n Preparing to calculate the central value of DiffXSection in channel '"<<Channel<<"' for systematic '"<<Systematic<<"'"<<endl;
     
     double Xbins[XAxisbins.size()];
@@ -1855,6 +1867,8 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
     }
     ResultsFile.close();
     ResultsLateX.close();
+*/
+// ENDHIGGSING
 }
 
 void Plotter::PlotDiffXSec(TString Channel){
