@@ -4,10 +4,10 @@
 
 void analyzeHypothesisKinFit(double luminosity = 12148.,
 			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
-			     TString inputFolderName="RecentAnalysisRun8TeV",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+			     TString inputFolderName="newRecentAnalysisRun8TeV",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
 {
@@ -74,6 +74,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   //        45: sysGenMCatNLO              46: sysGenPowheg  
   //        47: ENDOFSYSENUM
   
+  // errorbands for yield plots
+  bool errorbands=false;
   // xSec from prob selection step
   TString addSel="";
   //TString addSel="BeforeProbSel";
@@ -2623,7 +2625,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   // ===============================================================
   
   if(verbose>0) std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
-  makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
+  if(errorbands) makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
   if(verbose>0) std::cout << " .... Finished." << std::endl; 
 
   // =========================================
@@ -2660,7 +2662,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     }
   }
   // add entry for uncertainty to legends
-  if (histoErrorBand_.size() > 0 && plotList_.size() > 0){
+  if (errorbands && histoErrorBand_.size() > 0 && plotList_.size() > 0){
       leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
       leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
   }
@@ -2929,29 +2931,31 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 		  first=false;	
 		  // draw uncertainty bands, add legend and labels and re-draw axis
 		  if(sample==kData){
-		      // configure style of and draw uncertainty bands
-		      if (!plotList_[plot].Contains("xSec")){
-			  histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
-			  histoErrorBand_[plotList_[plot]]->SetFillColor(1);
-			  histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
-			  gStyle->SetErrorX(0.5);  
-			  histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");	 	     
-			  // draw legend for recoYield plots
-			  TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
-			  if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
-			    if(!plotList_[plot].Contains("qAssignment")&&!plotList_[plot].Contains("decayChannel")) leg->Draw("SAME");
-			  }	 
-			  // labels
-			  TString plotType=getStringEntry(plotList_[plot], 1);
-			  if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-			      if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
-			      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
-			      else if(decayChannel=="electron") DrawDecayChLabel("e/#mu + Jets Combined");
-			      DrawCMSLabels(true,luminosity);
-			  }
-			  // redraw axis
-			  histo_[plotList_[plot]][42]->Draw("axis same");
+		    // configure style of and draw uncertainty bands
+		    if (!plotList_[plot].Contains("xSec")){
+		      if(errorbands){
+			histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
+			histoErrorBand_[plotList_[plot]]->SetFillColor(1);
+			histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
+			gStyle->SetErrorX(0.5);  
+			histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");
+		      } 	     
+		      // draw legend for recoYield plots
+		      TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
+		      if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
+			if(!plotList_[plot].Contains("qAssignment")&&!plotList_[plot].Contains("decayChannel")) leg->Draw("SAME");
+		      }	 
+		      // labels
+		      TString plotType=getStringEntry(plotList_[plot], 1);
+		      if(plotType.Contains("xSec")||plotType.Contains("Reco")){
+			if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
+			else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+			else if(decayChannel=="combined") DrawDecayChLabel("e/#mu + Jets Combined");
+			DrawCMSLabels(true,luminosity);
 		      }
+		      // redraw axis
+		      histo_[plotList_[plot]][42]->Draw("axis same");
+		    }
 		  }
 	      }
 	  }
