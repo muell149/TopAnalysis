@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include "BCC.C"
 
-void applyBCCs(TString inputFolderName="RecentAnalysisRun8TeV", bool save=true, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool mergeLepHad=true, bool addCrossCheckVariables=false)
+void applyBCCs(TString inputFolderName="newRecentAnalysisRun8TeV", bool save=true, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool mergeLepHad=true, bool addCrossCheckVariables=false)
 {
     // INFO: this is the macro part to process the variables needed for differenetial cross sections
 
@@ -26,15 +26,15 @@ void applyBCCs(TString inputFolderName="RecentAnalysisRun8TeV", bool save=true, 
     // list of variables of interest
     std::vector<TString> xSecVariables_;
     // a) top and ttbar quantities
-    if(!hadron){
-      xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit    , xSecVariablesKinFit     + sizeof(xSecVariablesKinFit    )/sizeof(TString));
-      xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFitNorm, xSecVariablesKinFitNorm + sizeof(xSecVariablesKinFitNorm)/sizeof(TString));
-    }
+    //if(!hadron){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit    , xSecVariablesKinFit     + sizeof(xSecVariablesKinFit    )/sizeof(TString));
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFitNorm, xSecVariablesKinFitNorm + sizeof(xSecVariablesKinFitNorm)/sizeof(TString));
+      //}
     // b) lepton and b-jet quantities
-    if(hadron||!extrapolate){
-      xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState    , xSecVariablesFinalState     + sizeof(xSecVariablesFinalState    )/sizeof(TString));
-      xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalStateNorm, xSecVariablesFinalStateNorm + sizeof(xSecVariablesFinalStateNorm)/sizeof(TString));
-    }
+    //if(hadron||!extrapolate){
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState    , xSecVariablesFinalState     + sizeof(xSecVariablesFinalState    )/sizeof(TString));
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalStateNorm, xSecVariablesFinalStateNorm + sizeof(xSecVariablesFinalStateNorm)/sizeof(TString));
+    //}
     // c) cross check variables (only available for parton level cross-sections)
     if (addCrossCheckVariables && !hadron){
       xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar)/sizeof(TString)    );
