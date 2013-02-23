@@ -1,11 +1,11 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
-				  bool save = false, int verbose=1, 
-				  TString inputFolderName="RecentAnalysisRun8TeV",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  bool save = true, int verbose=0, 
+				  TString inputFolderName="newRecentAnalysisRun8TeV",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  const std::string decayChannel = "combined", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
 { 
@@ -700,7 +700,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     getAllPlots(filesEl_, plotListEl_, histoEl_, histo2El_, N1Dplots, Nplots, verbose, "electron", &vecRedundantPartOfNameInData, SSV);
     getAllPlots(filesMu_, plotListMu_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose, "muon"    , &vecRedundantPartOfNameInData, SSV);
   }
-  
+
   // ==========================================
   //  Lumiweighting for choosen luminosity
   // ==========================================
@@ -966,7 +966,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     }
   }
 
-
   // Uncertainty band
   if(histoErrorBand_.size() > 0 && plotList_.size() > 0){
     leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
@@ -978,8 +977,15 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   if(scaleToMeasured){
     for(unsigned int sample=kSig; sample<=kBkg; ++sample){
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0))
+	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
+	  //if(plotList_[plot].Contains("PUControlDistributionsAfterBtagging/npvertex_reweighted")) std::cout << sampleLabel(sample, decayChannel) << " before rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //if(plotList_[plot].Contains("tightJetKinematicsTagged/n")) std::cout << sampleLabel(sample, decayChannel) << " njets before rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //std::cout << plotList_[plot] << std::endl;
 	  histo_[plotList_[plot]][sample]->Scale(xSec/ttbarCrossSection);
+	  //if(plotList_[plot].Contains("PUControlDistributionsAfterBtagging/npvertex_reweighted")) std::cout << sampleLabel(sample, decayChannel) << " after rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //if(plotList_[plot].Contains("tightJetKinematicsTagged/n")) std::cout << sampleLabel(sample, decayChannel) << " njets after rescale: "  << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //std::cout << "ok" << std::endl;
+	}
       }
     }
   }
@@ -1191,7 +1197,21 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPhi")                                       ){xDn=-0.5  ;xUp=0.5;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/Njets"     )                                       ){xDn=4.5   ;xUp=9.5;  }
 	    if(getStringEntry(plotList_[plot], 2).Contains("topMass")                                                  ){xDn=100.  ;xUp=500.; }
-	    if(plotList_[plot].Contains("npvertex_reweighted")                                                         ){xDn=0.    ;xUp=40.;  }
+	    if(plotList_[plot].Contains("npvertex_reweighted")                                                         ){
+	      xDn=0.    ;xUp=40.;  
+	      //if(plotList_[plot].Contains("AferBtagging")){
+	      //for(unsigned int testsample=kSig; testsample<=kData; ++testsample){
+	      //std::cout << sampleLabel(testsample, decayChannel)  << " stacked: " << histo_[plotList_[plot]][testsample ]->Integral(xDn,xUp) << std::endl;
+	      //std::cout << sampleLabel(testsample, decayChannel)  << " njets  : " << histo_["tightJetKinematicsTagged/n"][testsample]->Integral(0,100) << std::endl;
+	      //}
+	      //}
+	    }
+	    // FIXME: intermediate by hand fix of the vertex distribution
+	    if(plotList_[plot].Contains("PUControlDistributionsAfterBtagging/npvertex_reweighted")){
+	      for(unsigned int testsample=kSig; testsample<=kData; ++testsample){
+		histo_[plotList_[plot]][testsample ]->Scale(histo_["tightJetKinematicsTagged/n"][testsample]->Integral(0,100)/histo_[plotList_[plot]][testsample ]->Integral(xDn,xUp));
+	      }
+	    }
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass")                                    ){xDn=0.    ;xUp=1600.;}
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/neutrinoPt")                         ){xDn=0.    ;xUp=400.;  }
 	    // adjust range
