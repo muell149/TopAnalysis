@@ -25,32 +25,20 @@ public:
     void   setDataSet(TString, TString);
     bool   fillHisto();
     void   setStyle(TH1*, unsigned int, bool = false);
-    void   unfolding();
     void   preunfolding(TString Channel="", TString Systematic="");
     void   write(TString, TString);
     void   setLumi(double);
     
-    double CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift);
     void MakeTable();
 
 
-    void PlotXSec();
-    //  void CalcDiffXSec(TH1* varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* genReco2d, double DiffXSecVec[4][10], double DiffXSecStatErrorVec[4][10]); 
-    void CalcDiffXSec(TString, TString);
-    void CalcDiffSystematics(TString, TString, TString, TString, double);
-    void PlotDiffXSec(TString);
 
     void DYScaleFactor(TString);
 
-    void PrintResultTotxtFile(TString, double[], TGraphAsymmErrors *, TGraphAsymmErrors *);
-    void GetDiffToNominal(TString, TString, TString);
-    void CalcUpDownDifference ( TString Channel, TString Syst_Up, TString Syst_Down, TString Variable);
 
     TLegend* getNewLegend();
     TLegend* getNewLegendpre();
 
-    TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
-    TH1* GetNloCurve(TString NewName, TString Generator);
     TH1F* ConvertGraphToHisto(TGraphErrors *pGraph);
     TH1F* reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotname, bool rescale);
 
@@ -61,13 +49,8 @@ public:
     std::vector<TString> InputFileList(TString mode, TString Systematic);
 
     // DAVID
-    void UnfoldingOptions(bool doSVD);
-    void SetOutpath(TString path); 
     TLegend* ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> legends, TLegend *leg);
-    void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, int centering, double textSize);
 
-    void ListOfSystematics(std::set<TString>);
-    std::set<TString> ListOfSyst;
 
 private:
 
@@ -102,13 +85,7 @@ private:
 
     double SignalEventswithWeight;
     
-    // DAVID
-    bool doUnfolding; 
-    bool doSystematics;
-    bool drawNLOCurves, drawMadSpinCorr, drawMCATNLO, drawKidonakis, drawPOWHEG;
-    TString outpath;
     TString outpathPlots;
-    TString outpathResults;
     TString subfolderChannel;
     TString subfolderSpecial;
 
