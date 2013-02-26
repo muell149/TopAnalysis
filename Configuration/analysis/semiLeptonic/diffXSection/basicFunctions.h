@@ -116,6 +116,7 @@ namespace semileptonic {
 
   const unsigned int constPowhegStyle  = 7;
   const unsigned int constNnloStyle    = 2;
+  const unsigned int constMcatnloStyle = 5;
 
   // Marker style
 
@@ -1820,7 +1821,7 @@ namespace semileptonic {
       double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0};  
       // PAS binning: double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
-      result["topPt"]      = bins_;
+      result["topPt"   ]   = bins_;
       if (addCrossCheckVariables){
 	result["topPtPlus"]  = bins_;
 	result["topPtMinus"] = bins_;
@@ -1831,7 +1832,7 @@ namespace semileptonic {
       double topYBins[]={-2.5, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.5}; 
       // PAS binning: double topYBins[]={-5., -2.5, -1.5, -1., -0.5, 0., 0.5, 1., 1.5, 2.5, 5.};
       bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
-      result["topY"]      = bins_;
+      result["topY"   ]   = bins_;
       if (addCrossCheckVariables){
 	result["topYPlus"]  = bins_;
 	result["topYMinus"] = bins_;
@@ -2149,7 +2150,7 @@ namespace semileptonic {
       file->Close();
     }
 
-  int drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0), TString ratioLabelNominator="N_{data}", TString ratioLabelDenominator="N_{MC}", TString ratioDrawOption="p e X0", int ratioDrawColor=kBlack)
+  int drawRatio(const TH1* histNumerator, TH1* histDenominator, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, const std::vector<double> err_=std::vector<double>(0), TString ratioLabelNominator="N_{data}", TString ratioLabelDenominator="N_{MC}", TString ratioDrawOption="p e X0", int ratioDrawColor=kBlack, bool error=true, double ratioMarkersize=1.2)
   {
     // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'
     // the range of the ratio is 'ratioMin' to 'ratioMax'
@@ -2157,7 +2158,7 @@ namespace semileptonic {
     // per default only the gaussian error of the 'histNumerator' is considered:
     // (error(bin i) = sqrt(histNumerator->GetBinContent(i))/histDenominator->GetBinContent(i))
     // if 'err_' is present and its size equals the number of bins in the histos,
-    // its valus are considered as error for the ratio
+    // its valus are considered as error for the ratio (if error=true)
     // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
     // modified quantities: none
     // used functions: none
@@ -2184,7 +2185,7 @@ namespace semileptonic {
 	ratio->SetBinError(bin, err_[bin-1]);
       }
     }
-    else{
+    else if (error==true){
       // b) default: only gaussian error of histNumerator
       if(verbose>0) std::cout << "ratio error from statistical error of " << histNumerator->GetName() << " only" << std::endl;
       for(int bin=1; bin<=histNumerator->GetNbinsX(); bin++){
@@ -2256,7 +2257,7 @@ namespace semileptonic {
     // draw ratio plot
     ratio->SetLineColor(ratioDrawColor);
     ratio->DrawClone(ratioDrawOption);
-    ratio->SetMarkerSize(1.2);
+    ratio->SetMarkerSize(ratioMarkersize);
     ratio->SetMarkerColor(ratioDrawColor);
     ratio->DrawClone(ratioDrawOption+" same");
     rPad->SetTopMargin(0.0);
@@ -2298,6 +2299,17 @@ namespace semileptonic {
     if(theo.Contains("nnlo"   )||theo.Contains("kidonakis")) return constNnloColor;
     if(theo.Contains("data")) return kBlack;
     return constMadgraphColor;
+  }
+
+  unsigned int theoryStyle(TString theo="madgraph"){
+    // this function returns the default line style for a given theory specified by "theo"
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+    if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return constMcatnloStyle;
+    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return constPowhegStyle; 
+    if(theo.Contains("nnlo"   )||theo.Contains("kidonakis")) return constNnloStyle;
+    return 1;
   }
 
   TString xSecLabelName(TString variable="", bool noUnit=false){
@@ -2472,7 +2484,8 @@ namespace semileptonic {
 	ratio_[nTheory]->SetFillColor(color-4);
 	ratio_[nTheory]->SetFillStyle(0);
 	ratio_[nTheory]->SetMarkerSize(0.2);
-	ratio_[nTheory]->SetLineStyle(histDenominatorTheory_[nTheory]->GetLineStyle());
+	unsigned int style =theoryStyle((TString)histDenominatorTheory_[nTheory]->GetName());
+	ratio_[nTheory]->SetLineStyle(style);
 	// configure axis of ratio_[nTheory] plot
 	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
 	ratio_[nTheory]->GetXaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleOffset()*0.9);
