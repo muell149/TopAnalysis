@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include <stdlib.h>
 
-void makeResultTables(std::string decayChannel = "combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, int verbose=0){
+void makeResultTables(std::string decayChannel = "combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, int verbose=1){
   
   // ============================
   //  Set Root Style
@@ -60,8 +60,11 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
     }
     // GET DATA: with final errors from canvas
     TGraphAsymmErrors* dataTot  = (TGraphAsymmErrors*)canvas->GetPrimitive("dataTotalError");
-    TGraphAsymmErrors* dataStat  = (TGraphAsymmErrors*)canvas->GetPrimitive("dataStatError");
+    TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)canvas->GetPrimitive("dataStatError" );
     TH1F* binned = (TH1F*)canvas->GetPrimitive(plotName);
+    TH1F* binnedMCatNLO = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO");
+    TH1F* binnedPowheg  = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG");
+    TH1F* binnedNNLO    = (TH1F*)canvas->GetPrimitive(plotName+"nnlo");
     if(!dataTot){
       std::cout << "ERROR: can not load TGraphAsymmErrors dataTotalError in canvas finalXSec/"+plotName+"Norm" << std::endl;
       exit(0);
@@ -74,11 +77,38 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
       std::cout << "ERROR: can not load TH1F topPt in canvas finalXSec/"+plotName << std::endl;
       exit(0);
     }
+    // define range of relevant plots
+    // INFO: keep this consistent with the range as defined in setXAxisRange
+    //       and makevariableBinning in basicFunctions.h
+    double xMin=-999999999;
+    double xMax= 999999999;
+    if(plotName.Contains     ("topPt"    )){ xMin=0.   ; xMax=401. ;} 
+    else if(plotName.Contains("topY"     )){ xMin=-2.51; xMax=2.51 ;}
+    else if(plotName.Contains("ttbarY"   )){ xMin=-2.51; xMax=2.51 ;}
+    else if(plotName.Contains("ttbarMass")){ xMin=344. ; xMax=1601.;}
+    else if(plotName.Contains("ttbarPt"  )){ xMin=0.   ; xMax=301. ;}
+    else if(plotName.Contains("lepPt"    )){ xMin=29   ; xMax=201. ;}
+    else if(plotName.Contains("lepEta"   )){ xMin=-2.11; xMax=2.11 ;}
+    else if(plotName.Contains("bqPt"     )){ xMin=29.  ; xMax=401. ;}
+    else if(plotName.Contains("bqEta"    )){ xMin=-2.41; xMax=2.41 ;}
+
+    // initialize ndof counter
+    int ndof=0;    
+    // initialize global chi2
+    double chi2=0;
+    double chi2Mc=0;
+    double chi2Po=0;
+    double chi2NN=0;
     //  loop all bins
     for(int bin=1; bin<=binned->GetNbinsX(); ++bin){
-      if(verbose>0) std::cout << "bin #" << bin << std::endl;
+      if(verbose>1) std::cout << "bin #" << bin;
       // collect information
-      double MCxSec=binned->GetBinContent(bin);
+      double MCxSec  =binned       ->GetBinContent(bin);
+      double MCxSecMc=binnedMCatNLO ? binnedMCatNLO->GetBinContent(bin) : 0;
+      double MCxSecPo=binnedPowheg  ? binnedPowheg ->GetBinContent(bin) : 0;
+      double MCxSecNN=binnedNNLO    ? binnedNNLO   ->GetBinContent(bin) : 0;
+      // FIXME: current topY NNLO prediction is shifted by one! make sure this is still the case if you update the new prediction
+      if(plotName.Contains("topY")) MCxSecNN=binnedNNLO ? binnedNNLO->GetBinContent(bin+1) : 0;
       double xSec=dataTot->GetY()[bin];
       double totError=dataTot->GetErrorYhigh(bin);
       double statError=dataStat->GetErrorYhigh(bin);
@@ -86,6 +116,7 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
       double BCCxValue=dataTot->GetX()[bin];
       double xValueUp=binned->GetBinLowEdge(bin+1);
       double xValueDn=binned->GetBinLowEdge(bin);      
+      if(verbose>1) std::cout << std::setprecision(2) << std::fixed << ", xvalue: " << BCCxValue << " (" << xValueDn << ".." << xValueUp << ")" << std::endl;
       // combine information in Latex line style in one TString
       int precXSec=6;
       int precErr=1;
@@ -129,21 +160,50 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
       out+=" &  ";				    
       out+=getTStringFromDouble(100*(totError/xSec ),  precErr);
       out+=" \\\\ ";
-      //if(plotName.Contains("ttbarY")) std::cout << out << std::endl;
       bool append= (bin==1 ? false : true);
       TString txtfile="./diffXSecFromSignal/"+filename;
       txtfile.ReplaceAll(".root",plotName+".txt");
       writeToFile(out, txtfile, append);
+      // chi2 for this distribution
+      if(xValueDn>=xMin&&xValueUp<=xMax){
+	++ndof;
+	chi2+=                 ((std::abs(MCxSec  -xSec)/totError)*(std::abs(MCxSec  -xSec)/totError));
+	if(MCxSecMc!=0)chi2Mc+=((std::abs(MCxSecMc-xSec)/totError)*(std::abs(MCxSecMc-xSec)/totError));
+	if(MCxSecPo!=0)chi2Po+=((std::abs(MCxSecPo-xSec)/totError)*(std::abs(MCxSecPo-xSec)/totError));
+	if(MCxSecNN!=0)chi2NN+=((std::abs(MCxSecNN-xSec)/totError)*(std::abs(MCxSecNN-xSec)/totError));
+	if(verbose>1) std::cout << "-> considered for chi2" << std::endl;
+      }
       //std::cout << out << std::endl;
       //std::cout << BCCxValue << " &  " << xValueDn << " to  " << xValueUp << " & " << MCxSec << "  & " << xSec << " &  " << statError/xSec << " &  " << sysError/xSec << " &  " << totError/xSec << " \\\\ " << std::endl;
-      if(verbose>0) std::cout << std::setprecision(7) << std::fixed<< xSec << "+/-" << statError << "+/-" << sysError << std::endl;
-      if(verbose>0) std::cout << std::setprecision(7) << std::fixed << "xvalue: " << BCCxValue << " (" << xValueDn << ".." << xValueUp << ")" << std::endl;
-      if(verbose>0){
-	double rel=(xSec-MCxSec)/xSec;
-	double relvar=(xSec-MCxSec)/totError;
-	std::cout << "MadGraph prediction wrt data: " << std::setprecision(2) << std::fixed << rel << std::endl;
-	//system("Color 1A");
-	std::cout << std::setprecision(1) << std::fixed << "( " << relvar << " std variations)" << std::endl;
+      if(verbose>1){
+	std::cout << std::setprecision(7) << std::fixed << "data:     " << xSec << "+/-" << statError << "+/-" << sysError << std::endl;
+	std::cout << std::setprecision(7) << std::fixed << "MadGraph: " << MCxSec; 
+	std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSec  -xSec)/totError << " std variations)" << std::endl;
+	if(MCxSecMc!=0){
+	std::cout << std::setprecision(7) << std::fixed << "MC@NLO:   " << MCxSecMc;
+	std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSecMc-xSec)/totError << " std variations)" << std::endl;
+	}
+	if(MCxSecPo!=0){
+	  std::cout << std::setprecision(7) << std::fixed << "Powheg:   " << MCxSecPo;
+	  std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSecPo-xSec)/totError << " std variations)" << std::endl;
+	}
+	if(MCxSecNN!=0){
+	   std::cout << std::setprecision(7) << std::fixed << "NNLO:     " << MCxSecNN;
+	   std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSecNN-xSec)/totError << " std variations)" << std::endl;
+	}
+      }
+      if(bin==binned->GetNbinsX()&&ndof!=0){
+	chi2  /=ndof;
+	chi2Mc/=ndof;
+	chi2Po/=ndof;
+	chi2NN/=ndof;
+	if(verbose>0){
+	  if(verbose>1) std::cout << std::endl;
+	  if(chi2  !=0) std::cout << "chi2(MadGraph): " << chi2   << std::endl;
+	  if(chi2Mc!=0) std::cout << "chi2(MC@NLO  ): " << chi2Mc << std::endl;
+	  if(chi2Po!=0) std::cout << "chi2(Powheg  ): " << chi2Po << std::endl;
+	  if(chi2NN!=0) std::cout << "chi2(NNLO    ): " << chi2NN << std::endl;
+	}
       }
     }
   }
