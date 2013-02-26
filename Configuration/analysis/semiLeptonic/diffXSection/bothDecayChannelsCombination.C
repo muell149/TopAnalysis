@@ -951,7 +951,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    curveName+="MC@NLOerrorBand";
 	    TGraphAsymmErrors *mcatnlocurve =(TGraphAsymmErrors*)combicanvas->GetPrimitive(curveName);
 	    if(mcatnlocurve){
-	      mcatnlocurve->SetLineStyle(5);
+	      mcatnlocurve->SetLineStyle(constMcatnloStyle);
 	      leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
 	      if(verbose>0) std::cout << curveName << " found!" << std::endl;
 	    }	    
