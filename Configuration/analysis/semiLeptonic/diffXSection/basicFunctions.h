@@ -2736,6 +2736,7 @@ namespace semileptonic {
     }
     gROOT->cd();
     TH1F* result = (TH1F*)(targetPlot->Clone());
+    result->Sumw2();
     file->Close();
     delete file;
     return result;
