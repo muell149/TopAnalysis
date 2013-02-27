@@ -5,9 +5,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 				  TString inputFolderName="newRecentAnalysisRun8TeV",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false)
+				  bool withRatioPlot = false, bool extrapolate=true, bool hadron=false)
 { 
   // ============================
   //  Set Root Style
@@ -735,10 +735,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	if(verbose>1) std::cout << sampleLabel(sample, decayChannel) << std::endl;
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-	if(verbose>1) std::cout << plotList_[plot] << " " << plotListMu_[plot] << " " << plotListEl_[plot] << " : " ;
+	//if(sample==kData&&plotList_[plot].Contains("topPt")&&plotList_[plot].Contains("Lead")) verbose=2;
+	if(verbose>1) std::cout << "comb: " << plotList_[plot] << ", mu: " << plotListMu_[plot] << ", el: " << plotListEl_[plot] << std::endl;
 	// a) 1D
 	if((plot<N1Dplots)&&(histoMu_.count(plotListMu_[plot])>0)&&(histoMu_[plotListMu_[plot]].count(sample)>0)&&(histoEl_.count(plotListEl_[plot])>0)&&(histoEl_[plotListEl_[plot]].count(sample)>0)){ 
-	  if(verbose>1) std::cout << "1D" << std::endl;
+	  if(verbose>1) std::cout << "-> 1D" << std::endl;
 	  histo_[plotList_[plot]][sample]=     (TH1F*)(histoMu_[plotListMu_[plot]][sample]->Clone());
 	  if (plotListMu_[plot]=="tightMuonKinematics/pt"){
 	    histo_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_["tightElectronKinematics/et"][sample]->Clone()));
@@ -747,14 +748,21 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	}
 	// b) 2D
 	else if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
-	  if(verbose>1) std::cout << "2D" << std::endl;
+	  if(verbose>1) std::cout << "-> 2D" << std::endl;
 	  histo2_[plotList_[plot]][sample]=     (TH2F*)(histo2Mu_[plotListMu_[plot]][sample]->Clone());
 	  histo2_[plotList_[plot]][sample]->Add((TH2F*)(histo2El_[plotListEl_[plot]][sample]->Clone()));
 	}
 	else{
-	  if(verbose>1) std::cout << "NOT FOUND" << std::endl;
+	  if(verbose>1){
+	    std::cout << "WARNING: " << plotList_[plot] << "NOT FOUND" << std::endl;
+	    if(!histoMu_.count(plotListMu_[plot])>0) std::cout << "in histoMu" << std::endl;
+	    if( histoMu_.count(plotListMu_[plot])>0&&!histoMu_[plotListMu_[plot]].count(sample)>0) std::cout << "in mu sample " << sampleLabel(sample, "muon"    ) << std::endl;
+	    if(!histoEl_.count(plotListEl_[plot])>0) std::cout << "in histoEl" << std::endl;
+	    if( histoEl_.count(plotListEl_[plot])>0&&!histoEl_[plotListEl_[plot]].count(sample)>0) std::cout << "in el sample " << sampleLabel(sample, "electron") << std::endl;
+	  }
 	}
-      }   
+	//if(sample==kData&&plotList_[plot].Contains("topPt")&&plotList_[plot].Contains("Lead")) verbose=0;
+      } 
     }
   }
 
@@ -1252,7 +1260,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      TString precSub=getTStringFromInt(getRelevantDigits(width));
 	      //TString precSub="1";
 	      argument2+=precMain+"."+precSub;
-	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))) argument2+="f GeV";
+	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Mass"))) argument2+="f GeV";
 	      else argument2+="f";
 	      const char * argument=argument2.Data();
 	      if(verbose>1) std::cout <<  plotList_[plot] << ":" << width << " -> " << argument << " -> " << Form(argument,width) << std::endl;
@@ -1274,7 +1282,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      if(histo_[plotList_[plot]].count(kSigMca)>0) histo_[plotList_[plot]][kSigMca]->Draw("hist X0 same");
 	      if(histo_[plotList_[plot]].count(kSigPow)>0) histo_[plotList_[plot]][kSigPow]->Draw("hist X0 same");
 	      // draw small legend
-	      legTheo->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
+	      legTheo->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.2);
 	      legTheo->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() +0.05 - 0.03 * leg->GetNRows());
 	      legTheo->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      legTheo->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
@@ -1303,7 +1311,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->Draw("axis X0 same");
 	    // draw label indicating the analysis cuts applied
 	    if((unsigned int)canvasNumber<plotCanvas_.size()-Nlegends){
-	      if(withRatioPlot||(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFitBeforeProbSel/prob")))){
+	      if(withRatioPlot||(!(plotList_[plot].Contains("bottomJetKinematics/n")||plotList_[plot].Contains("tightJetKinematicsTagged/n")||plotList_[plot].Contains("tightJetKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topPt")||plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarY")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass")||plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit/prob")))){
 		// draw cut label
 		TString cutLabel="1 lepton, #geq4 Jets";
 		if(decayChannel=="muon"    ) cutLabel.ReplaceAll("lepton","#mu");
@@ -1322,7 +1330,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      }
 	      double x1=1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25;
 	      if(systematicVariation==sysTest) x1-=0.05;
-	      leg->SetX1NDC(x1);
+	      leg->SetX1NDC(x1+0.015);
 	      leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin() - gStyle->GetTickLength() -0.05 - 0.03 * leg->GetNRows());
 	      leg->SetX2NDC(1.03- gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	      leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-0.8*gStyle->GetTickLength());
