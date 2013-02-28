@@ -19,25 +19,20 @@
 #include <TString.h>
 #include <TH1.h>
 
-// HIGGSING
-//#include "utils.h"
-#include "../diLeptonic/utils.h"
 #include "TGaxis.h"
 #include "TPaveText.h"
-// ENDHIGGSING
-  
-  // DAVID
-// HIGGSING
-//#include "../diLeptonic/DilepSVDFunctions.h"
-// ENDHIGGSING
 
-using namespace std;
+#include "../diLeptonic/utils.h"
 
-const double Plotter::topxsec = 253.849; //again changes with normalization, must be set outside of the class
+
+
+const double Plotter::topxsec_ = 253.849; //again changes with normalization, must be set outside of the class
+
+
 
 void Plotter::setLumi(double newLumi)
 {
-    this->lumi = newLumi;
+    this->lumi_ = newLumi;
 }
 
 
@@ -48,18 +43,19 @@ void Plotter::preunfolding(TString Channel, TString Systematic)
 }
 
 
+
 void Plotter::DYScaleFactor(TString SpecialComment){
 
-    DYScale = {1,1,1,1}; 
+    DYScale_ = {1,1,1,1}; 
 
-    if(!doDYScale) return; //need to make a switch for control plots that don't want DYScale
+    if(!doDYScale_) return; //need to make a switch for control plots that don't want DYScale
 
     TString nameAppendix = "";
     if ( !SpecialComment.BeginsWith("_post") &&  SpecialComment != "Standard" ){
-        cout<<"\n\n*******************************************************************"<<endl;
-        cout<<"ERROR: When calculating the DY Scale factor you must specify in which step you want to calculate the DY SF:"<<endl;
-        cout<<" '_postZcut', '_post2jets', '_postMET', '_post1btag', '_postKinReco' or 'Standard' = _postKinReco"<<endl;
-        cout<<"*******************************************************************\n\n"<<endl;
+        std::cout<<"\n\n*******************************************************************"<<std::endl;
+        std::cout<<"ERROR: When calculating the DY Scale factor you must specify in which step you want to calculate the DY SF:"<<std::endl;
+        std::cout<<" '_postZcut', '_post2jets', '_postMET', '_post1btag', '_postKinReco' or 'Standard' = _postKinReco"<<std::endl;
+        std::cout<<"*******************************************************************\n\n"<<std::endl;
         exit(444);
     }
     if (SpecialComment.BeginsWith("_post")){
@@ -68,10 +64,10 @@ void Plotter::DYScaleFactor(TString SpecialComment){
         nameAppendix = "_postKinReco";
     }
 
-    cout<<"\n\nBegin DYSCALE FACTOR calculation at selection step "<<nameAppendix<<endl;
+    std::cout<<"\n\nBegin DYSCALE FACTOR calculation at selection step "<<nameAppendix<<std::endl;
     
-    vector<TString> Vec_Files = InputFileList("combined", "Nominal");//Read the hardcoded list of files
-    if(Vec_Files.size()<1) {cout<<"WARNING(in DYScaleFactor)!!! No datasets available to calculate DY SF. EXITING!!"<<endl; return;}
+    std::vector<TString> Vec_Files = InputFileList("combined", "Nominal");//Read the hardcoded list of files
+    if(Vec_Files.size()<1) {std::cout<<"WARNING(in DYScaleFactor)!!! No datasets available to calculate DY SF. EXITING!!"<<std::endl; return;}
     
     double NoutEEDYMC=0, NinEEDYMC=0, NoutMuMuDYMC=0, NinMuMuDYMC=0;//Number of events in/out of z-veto region for the DY MC
     double NinEE=0, NinMuMu=0, NinEMu=0;//Number of events in z-veto region for data
@@ -83,8 +79,8 @@ void Plotter::DYScaleFactor(TString SpecialComment){
         double allWeights=LumiWeight;//calculate here all the flat-weights we apply: Lumi*others*...
         if(Vec_Files.at(i).Contains("ee") || Vec_Files.at(i).Contains("mumu")){
             if(Vec_Files.at(i).Contains("run")){
-                TH1D *htemp = fileReader->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-                TH1D *htemp1 = fileReader->GetClone<TH1D>(Vec_Files.at(i), "Looseh1");
+                TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
+                TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), "Looseh1");
                 ApplyFlatWeights(htemp, allWeights);
                 ApplyFlatWeights(htemp1, allWeights);
                 if(Vec_Files.at(i).Contains("ee")){
@@ -98,8 +94,8 @@ void Plotter::DYScaleFactor(TString SpecialComment){
             }
             else if(Vec_Files.at(i).Contains("dy")){
                 if(Vec_Files.at(i).Contains("50inf")){
-                    TH1D *htemp = fileReader->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-                    TH1D *htemp1 = fileReader->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
+                    TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
+                    TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
                     ApplyFlatWeights(htemp, LumiWeight);
                     ApplyFlatWeights(htemp1, LumiWeight);
                     if(Vec_Files.at(i).Contains("ee")){
@@ -113,7 +109,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
                     delete htemp; delete htemp1;
                 }
                 else{
-                    TH1D *htemp = fileReader->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
+                    TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
                     ApplyFlatWeights(htemp, LumiWeight);
                     if(Vec_Files.at(i).Contains("ee")){   NoutEEDYMC+=htemp->Integral();}
                     if(Vec_Files.at(i).Contains("mumu")){ NoutMuMuDYMC+=htemp->Integral();}
@@ -121,7 +117,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
                 }
             }
             else{
-                TH1D *htemp = fileReader->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
+                TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
                 ApplyFlatWeights(htemp, LumiWeight);
                 if(Vec_Files.at(i).Contains("ee")){   NinEEMC+=htemp->Integral();   }
                 if(Vec_Files.at(i).Contains("mumu")){ NinMuMuMC+=htemp->Integral(); }
@@ -130,7 +126,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
         }
         
         if(Vec_Files.at(i).Contains("emu") && Vec_Files.at(i).Contains("run")){
-            TH1D *htemp = fileReader->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
+            TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
             ApplyFlatWeights(htemp, LumiWeight);
             NinEMu+=htemp->Integral();
             delete htemp;
@@ -150,181 +146,183 @@ void Plotter::DYScaleFactor(TString SpecialComment){
     double DYSFEE = NoutMCEE/NoutEEDYMC;
     double DYSFMuMu = NoutMCMuMu/NoutMuMuDYMC;
 
-    cout << endl;
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << "Calculation of DY Scale Factors for '" << name << "'  at selection step "<<nameAppendix << endl;
+    std::cout << std::endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+    std::cout << "Calculation of DY Scale Factors for '" << name_ << "'  at selection step "<<nameAppendix << std::endl;
 
-    cout<<"DYSFEE:                 "<<DYSFEE<<endl;
-    cout<<"DYSFMuMu:               "<<DYSFMuMu<<endl;
+    std::cout<<"DYSFEE:                 "<<DYSFEE<<std::endl;
+    std::cout<<"DYSFMuMu:               "<<DYSFMuMu<<std::endl;
 
-    cout<<"NinEEloose:             "<<NinEEloose<<endl;
-    cout<<"NinMMloose:             "<<NinMuMuloose<<endl;
+    std::cout<<"NinEEloose:             "<<NinEEloose<<std::endl;
+    std::cout<<"NinMMloose:             "<<NinMuMuloose<<std::endl;
 
-    cout<<"kee:                    "<<kee<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
-    cout<<"kmumu:                  "<<kmumu<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
+    std::cout<<"kee:                    "<<kee<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<std::endl;
+    std::cout<<"kmumu:                  "<<kmumu<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<std::endl;
 
-    cout<<"Rout/Rin ee:            "<<RoutinEE<<endl;
-    cout<<"Rout/Rin Mumu:          "<<RoutinMuMu<<endl;
+    std::cout<<"Rout/Rin ee:            "<<RoutinEE<<std::endl;
+    std::cout<<"Rout/Rin Mumu:          "<<RoutinMuMu<<std::endl;
 
-    cout<<"Est. From Data(ee):     "<<NoutMCEE<<endl;
-    cout<<"Est. From Data(mumu):   "<<NoutMCMuMu<<endl;
+    std::cout<<"Est. From Data(ee):     "<<NoutMCEE<<std::endl;
+    std::cout<<"Est. From Data(mumu):   "<<NoutMCMuMu<<std::endl;
 
-    cout<<"Est. From MC(ee):       "<<NoutEEDYMC<<endl;
-    cout<<"Est. From MC(mumu):     "<<NoutMuMuDYMC<<endl;
+    std::cout<<"Est. From MC(ee):       "<<NoutEEDYMC<<std::endl;
+    std::cout<<"Est. From MC(mumu):     "<<NoutMuMuDYMC<<std::endl;
 
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+    std::cout << std::endl;
 
     
-    DYScale.at(0)=DYSFEE;
-    DYScale.at(1)=DYSFMuMu;
-    DYScale.at(2)=1.;
-    DYScale.at(3)=(DYSFEE+DYSFMuMu)/2;//not correct, but close, fix later
+    DYScale_.at(0)=DYSFEE;
+    DYScale_.at(1)=DYSFMuMu;
+    DYScale_.at(2)=1.;
+    DYScale_.at(3)=(DYSFEE+DYSFMuMu)/2;//not correct, but close, fix later
 
-    cout<<"End DYSCALE FACTOR calculation\n"<<endl;
+    std::cout<<"End DYSCALE FACTOR calculation\n"<<std::endl;
 
 }
-
 
 
 
 Plotter::Plotter()
 {
-    name="defaultName";
-    specialComment="Standard";
-    rangemin=0;
-    rangemax=3;
-    YAxis="N_{events}";
-    initialized=false;
-    datafiles = 0;
+    name_ = "defaultName";
+    specialComment_ = "Standard";
+    rangemin_ = 0;
+    rangemax_ = 3;
+    YAxis_ = "N_{events}";
+    initialized_ = false;
+    datafiles_ = 0;
 
-    channelLabel.insert(channelLabel.begin(),4, "");
+    channelLabel_.insert(channelLabel_.begin(),4, "");
 
     
     //Ivan: Initialize list of systematics
-    fileReader = RootFileReader::getInstance();
+    fileReader_ = RootFileReader::getInstance();
 }
 
-void Plotter::setOptions(TString name_, TString specialComment_, TString YAxis_, TString XAxis_, int rebin_, bool doDYScale_, bool logX_, bool logY_, double ymin_, double ymax_, double rangemin_, double rangemax_, int bins_, std::vector<double> XAxisbins_, std::vector<double> XAxisbinCenters_)
+
+
+void Plotter::setOptions(TString name__XX, TString specialComment__XX, TString YAxis__XX, TString XAxis__XX, int rebin__XX, bool doDYScale__XX, bool logX__XX, bool logY__XX, double ymin__XX, double ymax__XX, double rangemin__XX, double rangemax__XX, int bins__XX, std::vector<double> XAxisbins__XX, std::vector<double> XAxisbinCenters__XX)
 {
-    name=name_; //Variable name you want to plot
-    specialComment=specialComment_; 
-    YAxis=YAxis_; //Y-axis title
-    XAxis=XAxis_; //X-axis title
-    rebin=rebin_; //Nr. of bins to be merged together
-    doDYScale = doDYScale_; //Apply DY scale factor?
-    logX = logX_; //Draw X-axis in Log scale
-    logY = logY_; //Draw Y-axis in Log scale
-    ymin = ymin_; //Min. value in Y-axis
-    ymax = ymax_; //Max. value in Y-axis
-    rangemin=rangemin_; //Min. value in X-axis
-    rangemax=rangemax_; //Max. value in X-axis
-    bins=bins_; //Number of bins to plot
-    XAxisbins.clear(); 
-    XAxisbins = XAxisbins_; // Bins edges=bins+1
-    XAxisbinCenters.clear();
-    XAxisbinCenters = XAxisbinCenters_; //Central point for BinCenterCorrection=bins
+    name_ = name__XX; //Variable name you want to plot
+    specialComment_ = specialComment__XX; 
+    YAxis_ = YAxis__XX; //Y-axis title
+    XAxis_ = XAxis__XX; //X-axis title
+    rebin_ = rebin__XX; //Nr. of bins to be merged together
+    doDYScale_ = doDYScale__XX; //Apply DY scale factor?
+    logX_ = logX__XX; //Draw X-axis in Log scale
+    logY_ = logY__XX; //Draw Y-axis in Log scale
+    ymin_ = ymin__XX; //Min. value in Y-axis
+    ymax_ = ymax__XX; //Max. value in Y-axis
+    rangemin_ = rangemin__XX; //Min. value in X-axis
+    rangemax_ = rangemax__XX; //Max. value in X-axis
+    bins_ = bins__XX; //Number of bins to plot
+    XAxisbins_.clear(); 
+    XAxisbins_ = XAxisbins__XX; // Bins edges=bins+1
+    XAxisbinCenters_.clear();
+    XAxisbinCenters_ = XAxisbinCenters__XX; //Central point for BinCenterCorrection=bins
 
     //Modify the X/Y-axis labels
-    if(XAxis.Contains("band#bar{b}")){//Histogram naming convention has to be smarter
-        XAxis.ReplaceAll("band#bar{b}",11,"b and #bar{b}",13);
+    if(XAxis_.Contains("band#bar{b}")){//Histogram naming convention has to be smarter
+        XAxis_.ReplaceAll("band#bar{b}",11,"b and #bar{b}",13);
     }
-    if(XAxis.Contains("tand#bar{t}")){//Histogram naming convention has to be smarter
-        XAxis.ReplaceAll("tand#bar{t}",11,"t and #bar{t}",13);
+    if(XAxis_.Contains("tand#bar{t}")){//Histogram naming convention has to be smarter
+        XAxis_.ReplaceAll("tand#bar{t}",11,"t and #bar{t}",13);
     }
-    if(XAxis.Contains("l^{+}andl^{-}")){//Histogram naming convention has to be smarter
-        XAxis.ReplaceAll("l^{+}andl^{-}",13,"l^{+} and l^{-}",15);
+    if(XAxis_.Contains("l^{+}andl^{-}")){//Histogram naming convention has to be smarter
+        XAxis_.ReplaceAll("l^{+}andl^{-}",13,"l^{+} and l^{-}",15);
     }
-    if(YAxis.Contains("Toppairs")){
-        YAxis.ReplaceAll("Toppairs",8,"Top-quark pairs",15);
+    if(YAxis_.Contains("Toppairs")){
+        YAxis_.ReplaceAll("Toppairs",8,"Top-quark pairs",15);
     }
-    if(YAxis.Contains("Topquarks")){
-        YAxis.ReplaceAll("Topquarks",9, "Top quarks",10);
+    if(YAxis_.Contains("Topquarks")){
+        YAxis_.ReplaceAll("Topquarks",9, "Top quarks",10);
     }
-    if(YAxis.Contains("Numberof")){
-        YAxis.ReplaceAll("Numberof", 8, "Number of ",10);
+    if(YAxis_.Contains("Numberof")){
+        YAxis_.ReplaceAll("Numberof", 8, "Number of ",10);
     }
 
-    DYScale.insert(DYScale.begin(), 4, 1.);//Initialize the DY scale-factor to (1., 1., 1., 1.)
+    DYScale_.insert(DYScale_.begin(), 4, 1.);//Initialize the DY scale-factor to (1., 1., 1., 1.)
 }
 
 
-void Plotter::setDataSet(std::vector<TString> dataset_, std::vector<double> scales_, std::vector<TString> legends_, std::vector<int> colors_, TString DYEntry_)
+
+void Plotter::setDataSet(std::vector<TString> dataset__XX, std::vector<double> scales__XX, std::vector<TString> legends__XX, std::vector<int> colors__XX, TString DYEntry__XX)
 {
-    dataset.clear();
-    scales.clear();
-    legends.clear();
-    legendsSyst.clear();
-    colors.clear();
-    dataset=dataset_;
-    scales=scales_;
-    legends=legends_;
-    colors=colors_;
-    DYEntry=DYEntry_;
+    dataset_.clear();
+    scales_.clear();
+    legends_.clear();
+    colors_.clear();
+    dataset_ = dataset__XX;
+    scales_ = scales__XX;
+    legends_ = legends__XX;
+    colors_ = colors__XX;
+    DYEntry_ = DYEntry__XX;
 }
+
+
 
 void Plotter::setDataSet(TString mode, TString Systematic)
 {
-    initialized=false;
-    legendsSyst.clear();
+    initialized_ = false;
 
-    if(channelLabel.size()<4){channelLabel.insert(channelLabel.begin(), 4, "");}
+    if(channelLabel_.size()<4){channelLabel_.insert(channelLabel_.begin(), 4, "");}
 
-    if(mode =="ee"){channelType=0;channelLabel.at(0)="ee";}
-    if(mode =="mumu"){channelType=1;channelLabel.at(1)="#mu#mu";}
-    if(mode =="emu"){channelType=2;channelLabel.at(2)="e#mu";}
-    if(mode =="combined"){channelType=3;channelLabel.at(3)="Dilepton Combined";}
+    if(mode =="ee"){channelType_=0; channelLabel_.at(0)="ee";}
+    if(mode =="mumu"){channelType_=1; channelLabel_.at(1)="#mu#mu";}
+    if(mode =="emu"){channelType_=2; channelLabel_.at(2)="e#mu";}
+    if(mode =="combined"){channelType_=3; channelLabel_.at(3)="Dilepton Combined";}
 
     // Set dataset specific subfolders
-    outpathPlots = "./Plots";
-    subfolderChannel = mode;
-    subfolderChannel.Prepend("/");
-    subfolderSpecial = "";
-    if ( specialComment.CompareTo("Standard") != 0 ) {
-        //subfolderSpecial = specialComment.Prepend("/");
+    outpathPlots_ = "./Plots";
+    subfolderChannel_ = mode;
+    subfolderChannel_.Prepend("/");
+    subfolderSpecial_ = "";
+    if ( specialComment_.CompareTo("Standard") != 0 ) {
+        //subfolderSpecial_ = specialComment_.Prepend("/");
     }
 
-    DYEntry = "Z / #gamma* #rightarrow ee/#mu#mu";
+    DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
 
     if(Systematic.Contains("DY_") || Systematic.Contains("BG_")){Systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
 
     TString histoListName = "FileLists/HistoFileList_"+Systematic+"_"+mode+".txt";
-    cout << "reading " << histoListName << endl;
+    std::cout << "reading " << histoListName << std::endl;
     ifstream FileList(histoListName);
     if (FileList.fail()) {
-        cerr << "Error reading " << histoListName << endl;
+        std::cerr << "Error reading " << histoListName << std::endl;
         exit(1);
     }
     TString filename;
-    datafiles=0;
+    datafiles_ = 0;
 
-    dataset.clear();
-    legends.clear();
-    colors.clear();
+    dataset_.clear();
+    legends_.clear();
+    colors_.clear();
 
     while(!FileList.eof()){
         FileList>>filename;
         if(filename==""){continue;}//Skip empty lines
-        dataset.push_back(filename);
-        if(filename.Contains("run")){legends.push_back("Data"); colors.push_back(kBlack);datafiles++;}
-        else if(filename.Contains("ttbarsignal")){legends.push_back("t#bar{t} Signal"); colors.push_back(kRed+1);}
-        else if(filename.Contains("ttbarbg")){legends.push_back("t#bar{t} Other"); colors.push_back(kRed-7);}
-        else if(filename.Contains("single")){legends.push_back("Single Top"); colors.push_back(kMagenta);}
-        else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends.push_back("Diboson"); colors.push_back(10);}
-        else if(filename.Contains("dytautau")){legends.push_back("Z / #gamma* #rightarrow #tau#tau"); colors.push_back(kAzure+8);}
-        else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors.push_back(kAzure-2);}
-        else if(filename.Contains("wtolnu")){legends.push_back("W+Jets"); colors.push_back(kGreen-3);}
-        else if(filename.Contains("qcd")){legends.push_back("QCD Multijet"); colors.push_back(kYellow);}
+        dataset_.push_back(filename);
+        if(filename.Contains("run")){legends_.push_back("Data"); colors_.push_back(kBlack);datafiles_++;}
+        else if(filename.Contains("ttbarsignal")){legends_.push_back("t#bar{t} Signal"); colors_.push_back(kRed+1);}
+        else if(filename.Contains("ttbarbg")){legends_.push_back("t#bar{t} Other"); colors_.push_back(kRed-7);}
+        else if(filename.Contains("single")){legends_.push_back("Single Top"); colors_.push_back(kMagenta);}
+        else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends_.push_back("Diboson"); colors_.push_back(10);}
+        else if(filename.Contains("dytautau")){legends_.push_back("Z / #gamma* #rightarrow #tau#tau"); colors_.push_back(kAzure+8);}
+        else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends_.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors_.push_back(kAzure-2);}
+        else if(filename.Contains("wtolnu")){legends_.push_back("W+Jets"); colors_.push_back(kGreen-3);}
+        else if(filename.Contains("qcd")){legends_.push_back("QCD Multijet"); colors_.push_back(kYellow);}
 	// HIGGSING
-	else if(filename.Contains("ttbarH125inclusive")){legends.push_back("t#bar{t}H (incl.)"); colors.push_back(kSpring);}
-        else if(filename.Contains("ttbarH125tobbbar")){legends.push_back("t#bar{t}H (b#bar{b})"); colors.push_back(kOrange-7);}
+	else if(filename.Contains("ttbarH125inclusive")){legends_.push_back("t#bar{t}H (incl.)"); colors_.push_back(kSpring);}
+        else if(filename.Contains("ttbarH125tobbbar")){legends_.push_back("t#bar{t}H (b#bar{b})"); colors_.push_back(kOrange-7);}
 	// ENDHIGGSING
     }
 }
 
 
 
-
+// This method is only used for DY rescaling
 std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
 {
     // Use only nominal samples and do not apply systematics
@@ -334,15 +332,15 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
     
     
     if( mode.CompareTo("combined") && mode.CompareTo("ee") && mode.CompareTo("emu") && mode.CompareTo("mumu")){
-        cout<<"The decay channel you provided is not supported."<<endl;
-        cout<<"Please use: ee, emu, mumu, combined"<<endl;
+        std::cout<<"The decay channel you provided is not supported."<<std::endl;
+        std::cout<<"Please use: ee, emu, mumu, combined"<<std::endl;
         return FileVector;
     }
     
     if(!mode.CompareTo("combined")){
-        vector<TString> eemode   = Plotter::InputFileList(TString("ee"), Systematic);
-        vector<TString> emumode  = Plotter::InputFileList(TString("emu"), Systematic);
-        vector<TString> mumumode = Plotter::InputFileList(TString("mumu"), Systematic);
+        std::vector<TString> eemode   = Plotter::InputFileList(TString("ee"), Systematic);
+        std::vector<TString> emumode  = Plotter::InputFileList(TString("emu"), Systematic);
+        std::vector<TString> mumumode = Plotter::InputFileList(TString("mumu"), Systematic);
         FileVector.insert(FileVector.end(), eemode.begin(), eemode.end());
         FileVector.insert(FileVector.end(), emumode.begin(), emumode.end());
         FileVector.insert(FileVector.end(), mumumode.begin(), mumumode.end());
@@ -390,34 +388,37 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
 }
 
 
+
 bool Plotter::fillHisto()
 {   
-    if (initialized) { return true; }
+    if (initialized_) { return true; }
     TH1::AddDirectory(kFALSE);
-    hists.clear();
-    for(unsigned int i=0; i<dataset.size(); i++){
-        TH1D *hist = fileReader->GetClone<TH1D>(dataset.at(i), name, true);
+    hists_.clear();
+    for(unsigned int i=0; i<dataset_.size(); i++){
+        TH1D *hist = fileReader_->GetClone<TH1D>(dataset_.at(i), name_, true);
         if (!hist) return false;
 
         //Rescaling to the data luminosity
-        double LumiWeight = CalcLumiWeight(dataset.at(i));
+        double LumiWeight = CalcLumiWeight(dataset_.at(i));
         ApplyFlatWeights(hist, LumiWeight);
 
         setHHStyle(*gStyle);
 
-        hists.push_back(*hist);
+        hists_.push_back(*hist);
     }
-    initialized=true;
+    initialized_ = true;
     return true;
 }
+
+
 
 void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking, legending, and write in file 
 {
     setDataSet(Channel,Systematic);
     if (!fillHisto()) return;
 
-    if (hists.size() == 0) { 
-        cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << endl; 
+    if (hists_.size() == 0) { 
+        std::cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << std::endl; 
         exit(11); 
     }
         
@@ -432,9 +433,9 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
     leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
 
-    TH1 *drawhists[hists.size()];
+    TH1 *drawhists[hists_.size()];
     std::stringstream ss;
-    ss << DYScale[channelType];
+    ss << DYScale_[channelType_];
     TString scale;
     scale=(TString)ss.str();
     int legchange=0;
@@ -447,49 +448,49 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     c->SetTitle("");
 
 
-    TString newname = name;
+    TString newname = name_;
 
 
 
 
-    for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
-        drawhists[i]=(TH1D*) hists[i].Clone();//rebin and scale the histograms
-        if(rebin>1) drawhists[i]->Rebin(rebin);
+    for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and leg
+        drawhists[i]=(TH1D*) hists_[i].Clone();//rebin and scale the histograms
+        if(rebin_>1) drawhists[i]->Rebin(rebin_);
         setStyle(drawhists[i], i, true);
     }
 
 
-    for(unsigned int i=0; i<hists.size() ; ++i){ // prepare histos and leg
-    if(legends.at(i) != "Data"){
+    for(unsigned int i=0; i<hists_.size() ; ++i){ // prepare histos and leg
+    if(legends_.at(i) != "Data"){
         if(i > 1){
-            if(legends.at(i) != legends.at(i-1)){
+            if(legends_.at(i) != legends_.at(i-1)){
                 legchange = i; 
-                if((legends.at(i) == DYEntry)&& DYScale[channelType] != 1) leg->AddEntry(drawhists[i], legends.at(i),"f");
-                else leg->AddEntry(drawhists[i], legends.at(i) ,"f");
+                if((legends_.at(i) == DYEntry_)&& DYScale_[channelType_] != 1) leg->AddEntry(drawhists[i], legends_.at(i),"f");
+                else leg->AddEntry(drawhists[i], legends_.at(i) ,"f");
             }else{
                 drawhists[legchange]->Add(drawhists[i]);
             }
         }
 
-        if(i!=(hists.size()-1)){
-            if(legends.at(i)!=legends.at(i+1)){
+        if(i!=(hists_.size()-1)){
+            if(legends_.at(i)!=legends_.at(i+1)){
                 drawhists[i]->SetLineColor(1);
             }
         }else{
             drawhists[i]->SetLineColor(1);
         }
-        if(legends.at(i) != legends.at(i-1)){
+        if(legends_.at(i) != legends_.at(i-1)){
             drawhists[i]->SetLineColor(1);
             stack->Add(drawhists[i]); 
         }
     }
     else{
-        if(i==0) leg->AddEntry(drawhists[i], legends.at(i) ,"pe");
+        if(i==0) leg->AddEntry(drawhists[i], legends_.at(i) ,"pe");
         if(i>0){
-            if(legends.at(i) != legends.at(i-1)){
-                leg->AddEntry(drawhists[i], legends.at(i) ,"pe");
+            if(legends_.at(i) != legends_.at(i-1)){
+                leg->AddEntry(drawhists[i], legends_.at(i) ,"pe");
             }
-            if(legends.at(i) == legends.at(0)){
+            if(legends_.at(i) == legends_.at(0)){
                 drawhists[0]->Add(drawhists[i]);
             }
         }
@@ -498,7 +499,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
 
 
 
-    leg = ControlLegend(hists.size(), drawhists, legends, leg);
+    leg = ControlLegend(hists_.size(), drawhists, legends_, leg);
     
     // Needed for event yield tables
     MakeTable();
@@ -517,19 +518,19 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         syshist->SetBinContent(i, binc);
     }
 
-    if(logY)c->SetLogy();
+    if(logY_)c->SetLogy();
     syshist->SetFillStyle(3004);
     syshist->SetFillColor(kBlack);
 
-    drawhists[0]->SetMinimum(ymin);
+    drawhists[0]->SetMinimum(ymin_);
 
-    if(rangemin!=0 || rangemax!=0) {drawhists[0]->SetAxisRange(rangemin, rangemax, "X");}
+    if(rangemin_!=0 || rangemax_!=0) {drawhists[0]->SetAxisRange(rangemin_, rangemax_, "X");}
 
-    if(ymax==0){
-        if(logY){drawhists[0]->SetMaximum(18  * drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
-        else    {drawhists[0]->SetMaximum(1.5 * drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
+    if(ymax_==0){
+        if(logY_){drawhists[0]->SetMaximum(18  * drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
+        else{drawhists[0]->SetMaximum(1.5 * drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
     }
-    else{drawhists[0]->SetMaximum(ymax);}
+    else{drawhists[0]->SetMaximum(ymax_);}
 
     drawhists[0]->GetXaxis()->SetNoExponent(kTRUE);
 
@@ -543,8 +544,8 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     std::ostringstream width;
     width<<binwidth;
 
-    if(name.Contains("Rapidity") || name.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
-    else if(name.Contains("pT") || name.Contains("Mass") || name.Contains("mass") || name.Contains("MET") || name.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
+    if(name_.Contains("Rapidity") || name_.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
+    else if(name_.Contains("pT") || name_.Contains("Mass") || name_.Contains("mass") || name_.Contains("MET") || name_.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
     drawhists[0]->GetYaxis()->SetTitle(ytitle);
     drawhists[0]->Draw("e1");
 
@@ -559,34 +560,34 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     drawhists[0]->Draw("same,e1");
 
     DrawCMSLabels(1, 8);
-    DrawDecayChLabel(channelLabel[channelType]);
+    DrawDecayChLabel(channelLabel_[channelType_]);
     leg->Draw("SAME");
     drawRatio(drawhists[0], stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots 
-    gSystem->mkdir(outpathPlots+"/"+subfolderChannel+"/"+Systematic, true);
-    c->Print(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+".eps");
+    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+Systematic, true);
+    c->Print(outpathPlots_+subfolderChannel_+"/"+Systematic+"/"+name_+".eps");
     
     TH1 *sumMC = 0; 
     TH1 *sumttbar = 0;
-    for (size_t i = 0; i < hists.size(); ++i) {
-        if (legends.at(i) != "Data") {
+    for (size_t i = 0; i < hists_.size(); ++i) {
+        if (legends_.at(i) != "Data") {
             if (sumMC) sumMC->Add(drawhists[i]);
             else sumMC = static_cast<TH1*>(drawhists[i]->Clone());
         }
-        if (legends.at(i) == "t#bar{t} Signal") {
+        if (legends_.at(i) == "t#bar{t} Signal") {
             if (sumttbar) sumttbar->Add(drawhists[i]);
             else sumttbar = static_cast<TH1*>(drawhists[i]->Clone());
         }
     }
-    sumMC->SetName(name);
+    sumMC->SetName(name_);
     
     //save Canvas AND sources in a root file
-    TFile out_root(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+"_source.root", "RECREATE");
-    drawhists[0]->Write(name+"_data");
-    sumttbar->Write(name+"_signalmc");
-    sumMC->Write(name+"_allmc");
-    c->Write(name + "_canvas");
+    TFile out_root(outpathPlots_+subfolderChannel_+"/"+Systematic+"/"+name_+"_source.root", "RECREATE");
+    drawhists[0]->Write(name_+"_data");
+    sumttbar->Write(name_+"_signalmc");
+    sumMC->Write(name_+"_allmc");
+    c->Write(name_ + "_canvas");
     out_root.Close();
     
     c->Clear();
@@ -595,13 +596,15 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     delete leg;
 }
 
+
+
 void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
 {
-    hist->SetFillColor(colors[i]);
-    hist->SetLineColor(colors[i]);
+    hist->SetFillColor(colors_[i]);
+    hist->SetLineColor(colors_[i]);
     hist->SetLineWidth(1);
 
-    if(legends.at(i) == "Data"){
+    if(legends_.at(i) == "Data"){
         hist->SetFillColor(0);
         hist->SetMarkerStyle(20);
         hist->SetMarkerSize(1.);
@@ -612,37 +615,36 @@ void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
         hist->GetYaxis()->SetTitleFont(42);
         hist->GetYaxis()->SetTitleOffset(1.7);
         hist->GetXaxis()->SetTitleOffset(1.25);
-        if ((name.Contains("pT") || name.Contains("Mass")) && !name.Contains("Rapidity")) {
-            hist->GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
-            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}"+" #left[GeV^{-1}#right]"); 
+        if ((name_.Contains("pT") || name_.Contains("Mass")) && !name_.Contains("Rapidity")) {
+            hist->GetXaxis()->SetTitle(XAxis_+" #left[GeV#right]");
+            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis_+"}"+" #left[GeV^{-1}#right]"); 
         } else {
-            hist->GetXaxis()->SetTitle(XAxis);
-            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");     
+            hist->GetXaxis()->SetTitle(XAxis_);
+            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis_+"}");     
         }
-        if (isControlPlot) hist->GetYaxis()->SetTitle(YAxis);
+        if (isControlPlot) hist->GetYaxis()->SetTitle(YAxis_);
     }
 }
 
 
 
-
 void Plotter::MakeTable(){
 
-    TH1D *numhists5[hists.size()];
-    TH1D *numhists6[hists.size()];
-    TH1D *numhists7[hists.size()];
-    TH1D *numhists8[hists.size()];
-    TH1D *numhists9[hists.size()];
+    TH1D *numhists5[hists_.size()];
+    TH1D *numhists6[hists_.size()];
+    TH1D *numhists7[hists_.size()];
+    TH1D *numhists8[hists_.size()];
+    TH1D *numhists9[hists_.size()];
 
-    for(unsigned int i=0; i<dataset.size(); i++){
+    for(unsigned int i=0; i<dataset_.size(); i++){
 
-        TH1D *temp_hist5 = fileReader->GetClone<TH1D>(dataset[i], "step5");
-        TH1D *temp_hist6 = fileReader->GetClone<TH1D>(dataset[i], "step6");
-        TH1D *temp_hist7 = fileReader->GetClone<TH1D>(dataset[i], "step7");
-        TH1D *temp_hist8 = fileReader->GetClone<TH1D>(dataset[i], "step8");
-        TH1D *temp_hist9 = fileReader->GetClone<TH1D>(dataset[i], "step9");
+        TH1D *temp_hist5 = fileReader_->GetClone<TH1D>(dataset_[i], "step5");
+        TH1D *temp_hist6 = fileReader_->GetClone<TH1D>(dataset_[i], "step6");
+        TH1D *temp_hist7 = fileReader_->GetClone<TH1D>(dataset_[i], "step7");
+        TH1D *temp_hist8 = fileReader_->GetClone<TH1D>(dataset_[i], "step8");
+        TH1D *temp_hist9 = fileReader_->GetClone<TH1D>(dataset_[i], "step9");
         
-        double LumiWeight = CalcLumiWeight(dataset.at(i));
+        double LumiWeight = CalcLumiWeight(dataset_.at(i));
         ApplyFlatWeights(temp_hist5, LumiWeight);
         ApplyFlatWeights(temp_hist6, LumiWeight);
         ApplyFlatWeights(temp_hist7, LumiWeight);
@@ -657,13 +659,13 @@ void Plotter::MakeTable(){
 
     }
 
-    for(unsigned int i=0; i<hists.size() ; i++){ // prepare histos and leg
-        if((legends.at(i) == DYEntry) && channelType!=2){
+    for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and leg
+        if((legends_.at(i) == DYEntry_) && channelType_!=2){
             //numhists5[i]->Scale(DYScale[channelType]);//DYscale not applied in step5 and 6?
             //numhists6[i]->Scale(DYScale[channelType]);
-            numhists7[i]->Scale(DYScale.at(channelType));
-            numhists8[i]->Scale(DYScale.at(channelType));
-            numhists9[i]->Scale(DYScale.at(channelType));
+            numhists7[i]->Scale(DYScale_.at(channelType_));
+            numhists8[i]->Scale(DYScale_.at(channelType_));
+            numhists9[i]->Scale(DYScale_.at(channelType_));
         }
     }
 
@@ -679,15 +681,15 @@ void Plotter::MakeTable(){
     ofstream EventFile7;
     ofstream EventFile8;
     ofstream EventFile9;
-    string EventFilestring = outpathPlots.Data();
-    EventFilestring.append(subfolderChannel.Data());
-    EventFilestring.append(subfolderSpecial.Data());
-    gSystem->mkdir(outpathPlots+"/"+subfolderChannel+"/"+subfolderSpecial, true);  
-    string EventFilestring5;
-    string EventFilestring6;
-    string EventFilestring7;
-    string EventFilestring8;
-    string EventFilestring9;
+    std::string EventFilestring = outpathPlots_.Data();
+    EventFilestring.append(subfolderChannel_.Data());
+    EventFilestring.append(subfolderSpecial_.Data());
+    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+subfolderSpecial_, true);  
+    std::string EventFilestring5;
+    std::string EventFilestring6;
+    std::string EventFilestring7;
+    std::string EventFilestring8;
+    std::string EventFilestring9;
     EventFilestring5 =EventFilestring;EventFilestring5.append("/Events5.txt");
     EventFilestring6 =EventFilestring;EventFilestring6.append("/Events6.txt");
     EventFilestring7 =EventFilestring;EventFilestring7.append("/Events7.txt");
@@ -704,19 +706,19 @@ void Plotter::MakeTable(){
     double bg_num8 = 0;
     double bg_num9 = 0;
 
-    for(unsigned int i=0; i<hists.size() ; i++){
+    for(unsigned int i=0; i<hists_.size() ; i++){
         tmp_num5+=numhists5[i]->Integral();
         tmp_num6+=numhists6[i]->Integral();
         tmp_num7+=numhists7[i]->Integral();
         tmp_num8+=numhists8[i]->Integral();
         tmp_num9+=numhists9[i]->Integral();
 
-        if(i==(hists.size()-1)){
-            EventFile5<<legends.at(i)<<": "<<tmp_num5<<endl;
-            EventFile6<<legends.at(i)<<": "<<tmp_num6<<endl;
-            EventFile7<<legends.at(i)<<": "<<tmp_num7<<endl;
-            EventFile8<<legends.at(i)<<": "<<tmp_num8<<endl;
-            EventFile9<<legends.at(i)<<": "<<tmp_num9<<endl;
+        if(i==(hists_.size()-1)){
+            EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
+            EventFile6<<legends_.at(i)<<": "<<tmp_num6<<std::endl;
+            EventFile7<<legends_.at(i)<<": "<<tmp_num7<<std::endl;
+            EventFile8<<legends_.at(i)<<": "<<tmp_num8<<std::endl;
+            EventFile9<<legends_.at(i)<<": "<<tmp_num9<<std::endl;
             bg_num5+=tmp_num5;
             bg_num6+=tmp_num6;
             bg_num7+=tmp_num7;
@@ -728,13 +730,13 @@ void Plotter::MakeTable(){
             tmp_num8=0;
             tmp_num9=0;
         }
-        else if(legends.at(i)!=legends.at(i+1)){
-            EventFile5<<legends.at(i)<<": "<<tmp_num5<<endl;
-            EventFile6<<legends.at(i)<<": "<<tmp_num6<<endl;
-            EventFile7<<legends.at(i)<<": "<<tmp_num7<<endl;
-            EventFile8<<legends.at(i)<<": "<<tmp_num8<<endl;
-            EventFile9<<legends.at(i)<<": "<<tmp_num9<<endl;
-            if(legends.at(i)!="Data"){
+        else if(legends_.at(i)!=legends_.at(i+1)){
+            EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
+            EventFile6<<legends_.at(i)<<": "<<tmp_num6<<std::endl;
+            EventFile7<<legends_.at(i)<<": "<<tmp_num7<<std::endl;
+            EventFile8<<legends_.at(i)<<": "<<tmp_num8<<std::endl;
+            EventFile9<<legends_.at(i)<<": "<<tmp_num9<<std::endl;
+            if(legends_.at(i)!="Data"){
                 bg_num5+=tmp_num5;
                 bg_num6+=tmp_num6;
                 bg_num7+=tmp_num7;
@@ -748,155 +750,20 @@ void Plotter::MakeTable(){
             tmp_num9=0;
         }
     }
-    EventFile5<<"Total background: "<<bg_num5<<endl;
+    EventFile5<<"Total background: "<<bg_num5<<std::endl;
     EventFile5.close();
-    EventFile6<<"Total background: "<<bg_num6<<endl;
+    EventFile6<<"Total background: "<<bg_num6<<std::endl;
     EventFile6.close();
-    EventFile7<<"Total background: "<<bg_num7<<endl;
+    EventFile7<<"Total background: "<<bg_num7<<std::endl;
     EventFile7.close();
-    EventFile8<<"Total background: "<<bg_num8<<endl;
+    EventFile8<<"Total background: "<<bg_num8<<std::endl;
     EventFile8.close();
-    EventFile9<<"Total background: "<<bg_num9<<endl;
+    EventFile9<<"Total background: "<<bg_num9<<std::endl;
     EventFile9.close();
-    cout<<"\nEvent yields saved in "<<EventFilestring5.c_str()<<"\n"<<endl;
+    std::cout<<"\nEvent yields saved in "<<EventFilestring5.c_str()<<"\n"<<std::endl;
 }
 
 
-
-
-
-
-
-// get new legend
-TLegend* Plotter::getNewLegend() {
-  TLegend *leg = new TLegend();
-  leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
-  leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.20);
-  leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
-  leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
-  leg->SetTextFont(42);
-  leg->SetTextSize(0.03);
-  leg->SetFillStyle(0);
-  leg->SetBorderSize(0);
-  leg->SetTextAlign(12);
-  return leg;
-}
-
-// get new legend
-TLegend* Plotter::getNewLegendpre() {
-  TLegend *leg = new TLegend();
-  leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
-  leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.30);
-  leg->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength());
-  leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
-  leg->SetTextFont(42);
-  leg->SetTextSize(0.03);
-  leg->SetFillStyle(0);
-  leg->SetBorderSize(0);
-  leg->SetTextAlign(12);
-  return leg;
-}
-
-TH1F* Plotter::ConvertGraphToHisto(TGraphErrors *pGraph){
-  // takes data from a graph, determines binning and fills data into histogram
-  Int_t NPoints = pGraph->GetN();
-  Double_t BinLimits[NPoints+1];
-  // sort graph
-  pGraph->Sort();
-  // determine lower limit of histogram: half the distance to next point
-  Double_t x0,x1,y;
-  pGraph->GetPoint(0,x0,y);
-  pGraph->GetPoint(1,x1,y);
-  Double_t Distance = TMath::Abs(x0-x1);
-  BinLimits[0] = x0 - Distance/2.;
-  // now set upper limits for all the other points
-  for (Int_t k = 0 ; k<NPoints-1;k++){
-    pGraph->GetPoint(k,x0,y);
-    pGraph->GetPoint(k+1,x1,y);
-    Distance = TMath::Abs(x0-x1);
-    BinLimits[k+1] = x0 + Distance/2.;}
-  // for the last point set upper limit similar to first point:
-  pGraph->GetPoint(NPoints-2,x0,y);
-  pGraph->GetPoint(NPoints-1,x1,y);
-  Distance = TMath::Abs(x0-x1);
-  BinLimits[NPoints] = x1 + Distance/2.;
-  // now we know the binning and can create the histogram:
-  TString Name = "ConvertedHisto"; 
-  // make name unique 
-  Name+= rand();
-  TH1F *ThisHist = new TH1F(Name,"Converted Histogram",NPoints,BinLimits);
-  // now fill the histogram
-  for (Int_t i = 0; i<pGraph->GetN();i++){
-    Double_t x2,y2;
-    pGraph->GetPoint(i,x2,y2);
-    ThisHist->SetBinContent(i+1,y2);
-  }
-  return ThisHist;
-}
-
-//TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, const std::vector<double> &vecBinning, TString plotname, bool rescale=1){
-TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotname, bool rescale){
-  //  This function rebins a histogram using a variable binning
-  // 
-  //  (1) It is not required to have an equidistant binning.
-  //  (2) Any type of ROOT-histgramme can be used, so the template 
-  //      arguments should be 
-  //      (a) histoT = TH1D,   TH1F,  ....
-  //      (b) varT   = double, float, ....
-  //  
-  //  modified quantities: none
-  //  used functions:      none
-  //  used enumerators:    none
-  //  
-  //  "histoOldBinning":   plot to be re-binned
-  //  "vecBinning":        vector containing all bin edges 
-  //                       from xaxis.min to xaxis.max
-  //  "rescale":           rescale the rebinned histogramme
-  //                       (applicable for cross-section e.g.) 
-  cout << endl;
-  cout << endl;
-  cout << "asdfasdfasdfasdfasdf hallo david " << plotname << " " << rescale << endl;
-  cout << "histoOldBinning = ";
-  for ( int i = 0 ; i < histoOldBinning->GetXaxis()->GetNbins() + 1; i++ ) cout << " " << histoOldBinning->GetXaxis()->GetBinLowEdge(i+1);
-  cout << endl;
-  cout << endl;
-  cout << endl;
-  
-   
-  unsigned int vecIndex=0;
-
-  // fill vector into array to use appropriate constructor of TH1-classes
-  const double *binArray = XAxisbins.data();
-	
-  // create histo with new binning
-  TH1F *histoNewBinning = new TH1F("histoNewBinning"+plotname,"histoNewBinning"+plotname,XAxisbins.size()-1,binArray);
-	
-  // fill contents of histoOldBinning into histoNewBinning and rescale if applicable
-  for (vecIndex = 0; vecIndex < XAxisbins.size()-1; vecIndex++){
-	    
-    double lowEdge      = XAxisbins[vecIndex]; 
-    if (plotname=="topPt"&&vecIndex==0&&lowEdge==0.0) lowEdge+=10;  // adhoc fix to compensate for minimum top-Pt cut in NNLO curve
-    double highEdge     = XAxisbins[vecIndex+1];
-    double newBinWidth  = highEdge - lowEdge;
-    double newBinCenter = 0.5*(highEdge+lowEdge);
-    double binSum       = 0.0;	    	  
-	    
-    for (int j=1; j<histoOldBinning->GetNbinsX(); j++){
-		
-      double oldBin = histoOldBinning->GetBinCenter(j);
-		
-      if( (oldBin>=lowEdge) && (oldBin<highEdge) ){		   
-	if (rescale) binSum+=histoOldBinning->GetBinContent(j) * histoOldBinning->GetBinWidth(j);
-	else         binSum+=histoOldBinning->GetBinContent(j);
-      }
-    }
-
-    if (rescale) histoNewBinning->Fill(newBinCenter,binSum/newBinWidth);
-    else histoNewBinning->Fill(newBinCenter,binSum);
-  }
-
-  return (TH1F*)histoNewBinning->Clone();
-}
 
 TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> Legends, TLegend *leg){
     //hardcoded ControlPlot legend
@@ -946,10 +813,11 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TSt
 
 void Plotter::ApplyFlatWeights(TH1* varhists, const double weight){
 
-    if(weight == 0) {cout<<"Warning: the weight your applying is 0. This will remove your distribution."<<endl;}
-    //if(weight >=1e3){cout<<"Warning: the weight your applying is >= 1e3. This will enlarge too much your distribution."<<endl;}
+    if(weight == 0) {std::cout<<"Warning: the weight your applying is 0. This will remove your distribution."<<std::endl;}
+    //if(weight >=1e3){std::cout<<"Warning: the weight your applying is >= 1e3. This will enlarge too much your distribution."<<std::endl;}
     varhists->Scale(weight);
 }
+
 
 
 double Plotter::CalcLumiWeight(const TString& WhichSample){
@@ -958,22 +826,23 @@ double Plotter::CalcLumiWeight(const TString& WhichSample){
     if(WhichSample!=""){
         double XSection = SampleXSection(WhichSample);
         if(XSection <= 0.){
-            cout<<"Sample XSection is <0. Can't calculate luminosity weight!! returning"<<endl;
+            std::cout<<"Sample XSection is <0. Can't calculate luminosity weight!! returning"<<std::endl;
             return 0;
         }
         
         //From 'filename' get the number of weighted (MC weights) event processed.
-        const TH1 *h_NrOfEvts = fileReader->Get<TH1>(WhichSample, "weightedEvents");
+        const TH1 *h_NrOfEvts = fileReader_->Get<TH1>(WhichSample, "weightedEvents");
         double NrOfEvts = h_NrOfEvts->GetBinContent(1);
-        lumiWeight = lumi*XSection/NrOfEvts;
+        lumiWeight = lumi_*XSection/NrOfEvts;
     }
     
     if (lumiWeight == 0) {
-        cout << WhichSample << " has lumi weight 0\n";
+        std::cout << WhichSample << " has lumi weight 0\n";
     }
 
     return lumiWeight;
 }
+
 
 
 double Plotter::SampleXSection(const TString& filename){
@@ -985,7 +854,7 @@ double Plotter::SampleXSection(const TString& filename){
     if(filename.Contains("run"))              {return 1;}
     // HIGGSING
     //else if(filename.Contains("ttbar"))       {return topxsec;}
-    else if(filename.Contains("ttbar") && !filename.Contains("ttbarH") && !filename.Contains("ttbarW") && !filename.Contains("ttbarZ")){return topxsec;}
+    else if(filename.Contains("ttbar") && !filename.Contains("ttbarH") && !filename.Contains("ttbarW") && !filename.Contains("ttbarZ")){return topxsec_;}
     // ENDHIGGSING
     else if(filename.Contains("single"))      {return 11.1;}
     else if(filename.Contains("ww"))          {return 54.838;}
@@ -1015,6 +884,7 @@ double Plotter::SampleXSection(const TString& filename){
 }
 
 
+
 // Draw label for Decay Channel in upper left corner of plot
 void Plotter::DrawDecayChLabel(TString decaychannel, double textSize) {
 
@@ -1034,6 +904,8 @@ void Plotter::DrawDecayChLabel(TString decaychannel, double textSize) {
     decch->Draw("same");
 }
 
+
+
 // Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
 void Plotter::DrawCMSLabels(int cmsprelim, double energy, double textSize) {
 
@@ -1052,7 +924,7 @@ void Plotter::DrawCMSLabels(int cmsprelim, double energy, double textSize) {
     label->SetX2NDC(1.0-gStyle->GetPadRightMargin());
     label->SetY2NDC(1.0);
     label->SetTextFont(42);
-    label->AddText(Form(text, lumi/1000, energy));
+    label->AddText(Form(text, lumi_/1000, energy));
     label->SetFillStyle(0);
     label->SetBorderSize(0);
     if (textSize!=0) label->SetTextSize(textSize);
