@@ -350,7 +350,11 @@ TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t 
     // change by Joern
     if(normType==3) unfresNorm = IntNormalizeSVDDistribution(unfres);
     // for other normalisation types return empty histo
-    else return unfcovNorm;
+    else {
+        delete unfres; 
+        delete unfresNorm;
+        return unfcovNorm;
+    }
 
     for (Int_t j=1; j<=fNdim; j++) {
       toymean    ->SetBinContent(j, toymean    ->GetBinContent(j) + unfres    ->GetBinContent(j)/ntoys);
@@ -412,6 +416,7 @@ TH2D* TopSVDUnfold::GetUnfoldCovMatrixNorm( const TH2D* cov, Int_t ntoys, Int_t 
   delete Lt;
   delete toymean;
   delete toymeanNorm;
+  delete unfcov;
   fToyMode = kFALSE;
    
 //     for (Int_t j=1; j<=fNdim; j++) {

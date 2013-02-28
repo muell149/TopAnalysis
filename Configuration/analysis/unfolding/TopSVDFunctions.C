@@ -7170,6 +7170,7 @@ double TopSVDFunctions::SVD_Unfold(
         if ( flag_norm == 2 ) SVD_IntNormalizeSVDDistribution(normUnfHist, normUnfCovHist, unfHist, statCovHist, numberSyst+1); 
         if ( flag_norm == 3 ) SVD_PseudatNormalizeSVDDistribution(normUnfHist, normUnfCovHist, unfHist, statCovHistNorm, numberSyst+1); 
     } else {
+        delete[] normUnfHist;
         normUnfHist =  SVD_CloneHists1D(normBBBHist, numberSyst+1); 
         for ( int i=1; i<=nbins; i++ ) {
             for ( int j = 1; j <= nbins ; j++ ) {
