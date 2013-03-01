@@ -401,7 +401,6 @@ TH2D* BaseSVDUnfold::GetUnfoldCovMatrix( const TH2D* cov, Int_t ntoys, Int_t see
    // Note that this covariance matrix will contain effects of forced normalisation if spectrum is normalised to unit area. 
 
    fToyMode = true;
-   TH1D* unfres = 0;
    TH2D* unfcov = (TH2D*)fAdet->Clone("unfcovmat");
    unfcov->SetTitle("Toy covariance matrix");
    for(int i=1; i<=fNdim; i++)
@@ -454,11 +453,12 @@ TH2D* BaseSVDUnfold::GetUnfoldCovMatrix( const TH2D* cov, Int_t ntoys, Int_t see
          fToyhisto->SetBinError(j,fBdat->GetBinError(j));
       }
 
-      unfres = Unfold(GetKReg());
+      TH1D* unfres = Unfold(GetKReg());
 
       for (Int_t j=1; j<=fNdim; j++) {
          toymean->SetBinContent(j, toymean->GetBinContent(j) + unfres->GetBinContent(j)/ntoys);
       }
+      delete unfres;
    }
 
    // Reset the random seed
@@ -479,16 +479,16 @@ TH2D* BaseSVDUnfold::GetUnfoldCovMatrix( const TH2D* cov, Int_t ntoys, Int_t see
          fToyhisto->SetBinContent( j, fBdat->GetBinContent(j)+g(j-1) );
          fToyhisto->SetBinError  ( j, fBdat->GetBinError(j) );
       }
-      unfres = Unfold(GetKReg());
+      TH1D* unfres = Unfold(GetKReg());
 
       for (Int_t j=1; j<=fNdim; j++) {
          for (Int_t k=1; k<=fNdim; k++) {
             unfcov->SetBinContent(j,k,unfcov->GetBinContent(j,k) + ( (unfres->GetBinContent(j) - toymean->GetBinContent(j))* (unfres->GetBinContent(k) - toymean->GetBinContent(k))/(ntoys-1)) );
          }
       }
+      delete unfres;
    }
    delete Lt;
-   delete unfres;
    fToyMode = kFALSE;
    
    return unfcov;
@@ -503,7 +503,6 @@ TH2D* BaseSVDUnfold::GetAdetCovMatrix( Int_t ntoys, Int_t seed )
    // "seed"   - seed for pseudo experiments
 
    fMatToyMode = true;
-   TH1D* unfres = 0;
    TH2D* unfcov = (TH2D*)fAdet->Clone("unfcovmat");
    unfcov->SetTitle("Toy covariance matrix");
    for(int i=1; i<=fNdim; i++)
@@ -526,11 +525,12 @@ TH2D* BaseSVDUnfold::GetAdetCovMatrix( Int_t ntoys, Int_t seed )
          }
       }
 
-      unfres = Unfold(GetKReg());
+      TH1D *unfres = Unfold(GetKReg());
 
       for (Int_t j=1; j<=fNdim; j++) {
          toymean->SetBinContent(j, toymean->GetBinContent(j) + unfres->GetBinContent(j)/ntoys);
       }
+      delete unfres;
    }
 
    // Reset the random seed
@@ -544,15 +544,15 @@ TH2D* BaseSVDUnfold::GetAdetCovMatrix( Int_t ntoys, Int_t seed )
          }
       }
 
-      unfres = Unfold(GetKReg());
+      TH1D *unfres = Unfold(GetKReg());
 
       for (Int_t j=1; j<=fNdim; j++) {
          for (Int_t k=1; k<=fNdim; k++) {
             unfcov->SetBinContent(j,k,unfcov->GetBinContent(j,k) + ( (unfres->GetBinContent(j) - toymean->GetBinContent(j))*(unfres->GetBinContent(k) - toymean->GetBinContent(k))/(ntoys-1)) );
          }
       }
+      delete unfres;
    }
-   delete unfres;
    fMatToyMode = kFALSE;
    
    return unfcov;
