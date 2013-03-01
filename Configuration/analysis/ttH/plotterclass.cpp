@@ -202,25 +202,25 @@ Plotter::Plotter()
 
 
 
-void Plotter::setOptions(TString name__XX, TString specialComment__XX, TString YAxis__XX, TString XAxis__XX, int rebin__XX, bool doDYScale__XX, bool logX__XX, bool logY__XX, double ymin__XX, double ymax__XX, double rangemin__XX, double rangemax__XX, int bins__XX, std::vector<double> XAxisbins__XX, std::vector<double> XAxisbinCenters__XX)
+void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TString XAxis, int rebin, bool doDYScale, bool logX, bool logY, double ymin, double ymax, double rangemin, double rangemax, int bins, std::vector<double> XAxisbins, std::vector<double> XAxisbinCenters)
 {
-    name_ = name__XX; //Variable name you want to plot
-    specialComment_ = specialComment__XX; 
-    YAxis_ = YAxis__XX; //Y-axis title
-    XAxis_ = XAxis__XX; //X-axis title
-    rebin_ = rebin__XX; //Nr. of bins to be merged together
-    doDYScale_ = doDYScale__XX; //Apply DY scale factor?
-    logX_ = logX__XX; //Draw X-axis in Log scale
-    logY_ = logY__XX; //Draw Y-axis in Log scale
-    ymin_ = ymin__XX; //Min. value in Y-axis
-    ymax_ = ymax__XX; //Max. value in Y-axis
-    rangemin_ = rangemin__XX; //Min. value in X-axis
-    rangemax_ = rangemax__XX; //Max. value in X-axis
-    bins_ = bins__XX; //Number of bins to plot
+    name_ = name; //Variable name you want to plot
+    specialComment_ = specialComment; 
+    YAxis_ = YAxis; //Y-axis title
+    XAxis_ = XAxis; //X-axis title
+    rebin_ = rebin; //Nr. of bins to be merged together
+    doDYScale_ = doDYScale; //Apply DY scale factor?
+    logX_ = logX; //Draw X-axis in Log scale
+    logY_ = logY; //Draw Y-axis in Log scale
+    ymin_ = ymin; //Min. value in Y-axis
+    ymax_ = ymax; //Max. value in Y-axis
+    rangemin_ = rangemin; //Min. value in X-axis
+    rangemax_ = rangemax; //Max. value in X-axis
+    bins_ = bins; //Number of bins to plot
     XAxisbins_.clear(); 
-    XAxisbins_ = XAxisbins__XX; // Bins edges=bins+1
+    XAxisbins_ = XAxisbins; // Bins edges=bins+1
     XAxisbinCenters_.clear();
-    XAxisbinCenters_ = XAxisbinCenters__XX; //Central point for BinCenterCorrection=bins
+    XAxisbinCenters_ = XAxisbinCenters; //Central point for BinCenterCorrection=bins
 
     //Modify the X/Y-axis labels
     if(XAxis_.Contains("band#bar{b}")){//Histogram naming convention has to be smarter
@@ -247,17 +247,17 @@ void Plotter::setOptions(TString name__XX, TString specialComment__XX, TString Y
 
 
 
-void Plotter::setDataSet(std::vector<TString> dataset__XX, std::vector<double> scales__XX, std::vector<TString> legends__XX, std::vector<int> colors__XX, TString DYEntry__XX)
+void Plotter::setDataSet(std::vector<TString> dataset, std::vector<double> scales, std::vector<TString> legends, std::vector<int> colors, TString DYEntry)
 {
     dataset_.clear();
     scales_.clear();
     legends_.clear();
     colors_.clear();
-    dataset_ = dataset__XX;
-    scales_ = scales__XX;
-    legends_ = legends__XX;
-    colors_ = colors__XX;
-    DYEntry_ = DYEntry__XX;
+    dataset_ = dataset;
+    scales_ = scales;
+    legends_ = legends;
+    colors_ = colors;
+    DYEntry_ = DYEntry;
 }
 
 
@@ -421,17 +421,17 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         std::cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << std::endl; 
         exit(11); 
     }
-        
-    TCanvas * c = new TCanvas("","");
+    
+    TCanvas * canvas = new TCanvas("","");
 
-    THStack * stack=  new THStack("def", "def");
-    TLegend * leg =  new TLegend(0.70,0.55,0.98,0.85);
-    leg->SetFillStyle(0);
-    leg->SetBorderSize(0);
-    leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
-    leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 - leg->GetNRows()*0.04);
-    leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
-    leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
+    THStack * stack = new THStack("def", "def");
+    TLegend * legend = new TLegend(0.70,0.55,0.98,0.85);
+    legend->SetFillStyle(0);
+    legend->SetBorderSize(0);
+    legend->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
+    legend->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 - legend->GetNRows()*0.04);
+    legend->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+    legend->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
 
     TH1 *drawhists[hists_.size()];
     std::stringstream ss;
@@ -439,34 +439,41 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     TString scale;
     scale=(TString)ss.str();
     int legchange=0;
-    leg->Clear();
-    c->Clear();
-    leg->SetFillStyle(0);
-    leg->SetBorderSize(0);
-    c->SetName("");
-
-    c->SetTitle("");
-
-
+    legend->Clear();
+    canvas->Clear();
+    legend->SetFillStyle(0);
+    legend->SetBorderSize(0);
+    canvas->SetName("");
+    canvas->SetTitle("");
+    
     TString newname = name_;
-
-
-
-
-    for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and leg
-        drawhists[i]=(TH1D*) hists_[i].Clone();//rebin and scale the histograms
+    
+    // Error messages in case of undefined legends or colors
+    if(legends_.size()!=colors_.size()){
+        std::cerr<<"Incorrect number of legend entries ("<<legends_.size()<<"), ie. not equal to defined colors ("<<colors_.size()<<"). CANNOT continue!!!\n";
+	exit(77);
+    }
+    if(hists_.size()>legends_.size()){
+        std::cerr<<"Incorrect number of legend entries ("<<legends_.size()<<"), ie. less than sample files ("<<hists_.size()<<"). CANNOT continue!!!\n";
+	exit(77);
+    }
+    
+    // Here fill colors and line width are adjusted
+    for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and legend
+        drawhists[i]=(TH1D*) hists_[i].Clone();//rebin the histograms
         if(rebin_>1) drawhists[i]->Rebin(rebin_);
         setStyle(drawhists[i], i, true);
     }
-
-
-    for(unsigned int i=0; i<hists_.size() ; ++i){ // prepare histos and leg
+    
+    // Here the shape in the legend is adjusted, and black lines are drawn between samples with different legends,
+    // and the stack is created
+    for(unsigned int i=0; i<hists_.size() ; ++i){ // prepare histos and legend
     if(legends_.at(i) != "Data"){
         if(i > 1){
             if(legends_.at(i) != legends_.at(i-1)){
                 legchange = i; 
-                if((legends_.at(i) == DYEntry_)&& DYScale_[channelType_] != 1) leg->AddEntry(drawhists[i], legends_.at(i),"f");
-                else leg->AddEntry(drawhists[i], legends_.at(i) ,"f");
+                if((legends_.at(i) == DYEntry_)&& DYScale_[channelType_] != 1) legend->AddEntry(drawhists[i], legends_.at(i),"f");
+                else legend->AddEntry(drawhists[i], legends_.at(i) ,"f");
             }else{
                 drawhists[legchange]->Add(drawhists[i]);
             }
@@ -485,10 +492,10 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         }
     }
     else{
-        if(i==0) leg->AddEntry(drawhists[i], legends_.at(i) ,"pe");
+        if(i==0) legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
         if(i>0){
             if(legends_.at(i) != legends_.at(i-1)){
-                leg->AddEntry(drawhists[i], legends_.at(i) ,"pe");
+                legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
             }
             if(legends_.at(i) == legends_.at(0)){
                 drawhists[0]->Add(drawhists[i]);
@@ -496,20 +503,22 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         }
     }
     }
-
-
-
-    leg = ControlLegend(hists_.size(), drawhists, legends_, leg);
     
-    // Needed for event yield tables
+    
+    // FIXME: why using this at all (legends are ordered but stack stays the same), isn't it better to have input correctly ?
+    // in fact the legend is filled oppositely than the stack, so it is used for turning the order (but not completely, sth. is messed up !?)
+    legend = ControlLegend(hists_.size(), drawhists, legends_, legend);
+    
+    // FIXME: Needed for event yield tables, but should be run only once, and not for each histogram
     MakeTable();
-
-
-    TList* l = stack->GetHists(); 
-    TH1D* stacksum = (TH1D*) l->At(0)->Clone();
-
-    for (int i = 1; i < l->GetEntries(); ++i) { stacksum->Add((TH1D*)l->At(i));}
-
+    
+    
+    TList* list = stack->GetHists(); 
+    // Create a histogram with the sum of all stacked hists
+    TH1D* stacksum = (TH1D*) list->At(0)->Clone();
+    for (int i = 1; i < list->GetEntries(); ++i) { stacksum->Add((TH1D*)list->At(i));}
+    
+    // FIXME: is this histo for error band on stack? but it is commented out ?!
     TH1D* syshist =0;
     syshist = (TH1D*)stacksum->Clone();
     for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
@@ -517,10 +526,11 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         binc += stacksum->GetBinContent(i);
         syshist->SetBinContent(i, binc);
     }
-
-    if(logY_)c->SetLogy();
     syshist->SetFillStyle(3004);
     syshist->SetFillColor(kBlack);
+    
+    // Set x and y axis
+    if(logY_)canvas->SetLogy();
 
     drawhists[0]->SetMinimum(ymin_);
 
@@ -537,37 +547,38 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     TGaxis::SetMaxDigits(2);
 
 
-    //Add the binwidth to the yaxis in yield plots
-
+    //Add the binwidth to the yaxis in yield plots (works only correctly for equidistant bins)
     TString ytitle = TString(drawhists[0]->GetYaxis()->GetTitle()).Copy();
     double binwidth = drawhists[0]->GetXaxis()->GetBinWidth(1);
     std::ostringstream width;
     width<<binwidth;
-
     if(name_.Contains("Rapidity") || name_.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
     else if(name_.Contains("pT") || name_.Contains("Mass") || name_.Contains("mass") || name_.Contains("MET") || name_.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
     drawhists[0]->GetYaxis()->SetTitle(ytitle);
+    
+    // Draw data histogram and stack and error bars
     drawhists[0]->Draw("e1");
-
     stack->Draw("same HIST");
     gPad->RedrawAxis();
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");//this is frustrating and stupid but apparently necessary...
-    setex1->Draw();
+    setex1->Draw();  // error bars for data
     syshist->SetMarkerStyle(0);
-    //syshist->Draw("same,E2");
+    //syshist->Draw("same,E2");  // error bars for stack (which, stat or combined with syst ?)
     TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
-    setex2->Draw();
+    setex2->Draw();  // remove error bars for data in x-direction
     drawhists[0]->Draw("same,e1");
-
+    
+    // Put additional stuff to histogram
     DrawCMSLabels(1, 8);
     DrawDecayChLabel(channelLabel_[channelType_]);
-    leg->Draw("SAME");
+    legend->Draw("SAME");
     drawRatio(drawhists[0], stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots 
     gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+Systematic, true);
-    c->Print(outpathPlots_+subfolderChannel_+"/"+Systematic+"/"+name_+".eps");
+    canvas->Print(outpathPlots_+subfolderChannel_+"/"+Systematic+"/"+name_+".eps");
     
+    // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
     TH1 *sumttbar = 0;
     for (size_t i = 0; i < hists_.size(); ++i) {
@@ -587,13 +598,13 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     drawhists[0]->Write(name_+"_data");
     sumttbar->Write(name_+"_signalmc");
     sumMC->Write(name_+"_allmc");
-    c->Write(name_ + "_canvas");
+    canvas->Write(name_ + "_canvas");
     out_root.Close();
     
-    c->Clear();
-    leg->Clear();
-    delete c;
-    delete leg;
+    canvas->Clear();
+    legend->Clear();
+    delete canvas;
+    delete legend;
 }
 
 
@@ -629,7 +640,12 @@ void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
 
 
 void Plotter::MakeTable(){
-
+    
+    TH1D *numhists0[hists_.size()];
+    TH1D *numhists1[hists_.size()];
+    TH1D *numhists2[hists_.size()];
+    TH1D *numhists3[hists_.size()];
+    TH1D *numhists4[hists_.size()];
     TH1D *numhists5[hists_.size()];
     TH1D *numhists6[hists_.size()];
     TH1D *numhists7[hists_.size()];
@@ -637,21 +653,35 @@ void Plotter::MakeTable(){
     TH1D *numhists9[hists_.size()];
 
     for(unsigned int i=0; i<dataset_.size(); i++){
-
-        TH1D *temp_hist5 = fileReader_->GetClone<TH1D>(dataset_[i], "step5");
+        TH1D *temp_hist0 = fileReader_->GetClone<TH1D>(dataset_[i], "step0");
+        TH1D *temp_hist1 = fileReader_->GetClone<TH1D>(dataset_[i], "step1");
+        TH1D *temp_hist2 = fileReader_->GetClone<TH1D>(dataset_[i], "step2");
+        TH1D *temp_hist3 = fileReader_->GetClone<TH1D>(dataset_[i], "step3");
+        TH1D *temp_hist4 = fileReader_->GetClone<TH1D>(dataset_[i], "step4");
+	TH1D *temp_hist5 = fileReader_->GetClone<TH1D>(dataset_[i], "step5");
         TH1D *temp_hist6 = fileReader_->GetClone<TH1D>(dataset_[i], "step6");
         TH1D *temp_hist7 = fileReader_->GetClone<TH1D>(dataset_[i], "step7");
         TH1D *temp_hist8 = fileReader_->GetClone<TH1D>(dataset_[i], "step8");
         TH1D *temp_hist9 = fileReader_->GetClone<TH1D>(dataset_[i], "step9");
         
         double LumiWeight = CalcLumiWeight(dataset_.at(i));
-        ApplyFlatWeights(temp_hist5, LumiWeight);
+        ApplyFlatWeights(temp_hist0, LumiWeight);
+        ApplyFlatWeights(temp_hist1, LumiWeight);
+        ApplyFlatWeights(temp_hist2, LumiWeight);
+        ApplyFlatWeights(temp_hist3, LumiWeight);
+        ApplyFlatWeights(temp_hist4, LumiWeight);
+	ApplyFlatWeights(temp_hist5, LumiWeight);
         ApplyFlatWeights(temp_hist6, LumiWeight);
         ApplyFlatWeights(temp_hist7, LumiWeight);
         ApplyFlatWeights(temp_hist8, LumiWeight);
         ApplyFlatWeights(temp_hist9, LumiWeight);
-
-        numhists5[i]=temp_hist5;
+	
+        numhists0[i]=temp_hist0;
+        numhists1[i]=temp_hist1;
+        numhists2[i]=temp_hist2;
+        numhists3[i]=temp_hist3;
+        numhists4[i]=temp_hist4;
+	numhists5[i]=temp_hist5;
         numhists6[i]=temp_hist6;
         numhists7[i]=temp_hist7;
         numhists8[i]=temp_hist8;
@@ -661,8 +691,9 @@ void Plotter::MakeTable(){
 
     for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and leg
         if((legends_.at(i) == DYEntry_) && channelType_!=2){
-            //numhists5[i]->Scale(DYScale[channelType]);//DYscale not applied in step5 and 6?
-            //numhists6[i]->Scale(DYScale[channelType]);
+	    // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
+	    numhists5[i]->Scale(DYScale_.at(channelType_));
+            numhists6[i]->Scale(DYScale_.at(channelType_));
             numhists7[i]->Scale(DYScale_.at(channelType_));
             numhists8[i]->Scale(DYScale_.at(channelType_));
             numhists9[i]->Scale(DYScale_.at(channelType_));
@@ -670,12 +701,22 @@ void Plotter::MakeTable(){
     }
 
     ////////////////////////////Make output for tables
+    double tmp_num0 = 0;
+    double tmp_num1 = 0;
+    double tmp_num2 = 0;
+    double tmp_num3 = 0;
+    double tmp_num4 = 0;
     double tmp_num5 = 0;
     double tmp_num6 = 0;
     double tmp_num7 = 0;
     double tmp_num8 = 0;
     double tmp_num9 = 0;
 
+    ofstream EventFile0;
+    ofstream EventFile1;
+    ofstream EventFile2;
+    ofstream EventFile3;
+    ofstream EventFile4;
     ofstream EventFile5;
     ofstream EventFile6;
     ofstream EventFile7;
@@ -685,21 +726,41 @@ void Plotter::MakeTable(){
     EventFilestring.append(subfolderChannel_.Data());
     EventFilestring.append(subfolderSpecial_.Data());
     gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+subfolderSpecial_, true);  
+    std::string EventFilestring0;
+    std::string EventFilestring1;
+    std::string EventFilestring2;
+    std::string EventFilestring3;
+    std::string EventFilestring4;
     std::string EventFilestring5;
     std::string EventFilestring6;
     std::string EventFilestring7;
     std::string EventFilestring8;
     std::string EventFilestring9;
+    EventFilestring0 =EventFilestring;EventFilestring0.append("/Events0.txt");
+    EventFilestring1 =EventFilestring;EventFilestring1.append("/Events1.txt");
+    EventFilestring2 =EventFilestring;EventFilestring2.append("/Events2.txt");
+    EventFilestring3 =EventFilestring;EventFilestring3.append("/Events3.txt");
+    EventFilestring4 =EventFilestring;EventFilestring4.append("/Events4.txt");
     EventFilestring5 =EventFilestring;EventFilestring5.append("/Events5.txt");
     EventFilestring6 =EventFilestring;EventFilestring6.append("/Events6.txt");
     EventFilestring7 =EventFilestring;EventFilestring7.append("/Events7.txt");
     EventFilestring8 =EventFilestring;EventFilestring8.append("/Events8.txt");
     EventFilestring9 =EventFilestring;EventFilestring9.append("/Events9.txt");
+    EventFile0.open(EventFilestring0.c_str());
+    EventFile1.open(EventFilestring1.c_str());
+    EventFile2.open(EventFilestring2.c_str());
+    EventFile3.open(EventFilestring3.c_str());
+    EventFile4.open(EventFilestring4.c_str());
     EventFile5.open(EventFilestring5.c_str());
     EventFile6.open(EventFilestring6.c_str());
     EventFile7.open(EventFilestring7.c_str());
     EventFile8.open(EventFilestring8.c_str());
     EventFile9.open(EventFilestring9.c_str());
+    double bg_num0 = 0;
+    double bg_num1 = 0;
+    double bg_num2 = 0;
+    double bg_num3 = 0;
+    double bg_num4 = 0;
     double bg_num5 = 0;
     double bg_num6 = 0;
     double bg_num7 = 0;
@@ -707,49 +768,94 @@ void Plotter::MakeTable(){
     double bg_num9 = 0;
 
     for(unsigned int i=0; i<hists_.size() ; i++){
-        tmp_num5+=numhists5[i]->Integral();
+        tmp_num0+=numhists0[i]->Integral();
+        tmp_num1+=numhists1[i]->Integral();
+        tmp_num2+=numhists2[i]->Integral();
+        tmp_num3+=numhists3[i]->Integral();
+        tmp_num4+=numhists4[i]->Integral();
+	tmp_num5+=numhists5[i]->Integral();
         tmp_num6+=numhists6[i]->Integral();
         tmp_num7+=numhists7[i]->Integral();
         tmp_num8+=numhists8[i]->Integral();
         tmp_num9+=numhists9[i]->Integral();
 
         if(i==(hists_.size()-1)){
-            EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
+            EventFile0<<legends_.at(i)<<": "<<tmp_num0<<std::endl;
+            EventFile1<<legends_.at(i)<<": "<<tmp_num1<<std::endl;
+            EventFile2<<legends_.at(i)<<": "<<tmp_num2<<std::endl;
+            EventFile3<<legends_.at(i)<<": "<<tmp_num3<<std::endl;
+            EventFile4<<legends_.at(i)<<": "<<tmp_num4<<std::endl;
+	    EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
             EventFile6<<legends_.at(i)<<": "<<tmp_num6<<std::endl;
             EventFile7<<legends_.at(i)<<": "<<tmp_num7<<std::endl;
             EventFile8<<legends_.at(i)<<": "<<tmp_num8<<std::endl;
             EventFile9<<legends_.at(i)<<": "<<tmp_num9<<std::endl;
-            bg_num5+=tmp_num5;
+            bg_num0+=tmp_num0;
+            bg_num1+=tmp_num1;
+            bg_num2+=tmp_num2;
+            bg_num3+=tmp_num3;
+            bg_num4+=tmp_num4;
+	    bg_num5+=tmp_num5;
             bg_num6+=tmp_num6;
             bg_num7+=tmp_num7;
             bg_num8+=tmp_num8;
             bg_num9+=tmp_num9;
-            tmp_num5=0;
+            tmp_num0=0;
+            tmp_num1=0;
+            tmp_num2=0;
+            tmp_num3=0;
+            tmp_num4=0;
+	    tmp_num5=0;
             tmp_num6=0;
             tmp_num7=0;
             tmp_num8=0;
             tmp_num9=0;
         }
         else if(legends_.at(i)!=legends_.at(i+1)){
-            EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
+            EventFile0<<legends_.at(i)<<": "<<tmp_num0<<std::endl;
+            EventFile1<<legends_.at(i)<<": "<<tmp_num1<<std::endl;
+            EventFile2<<legends_.at(i)<<": "<<tmp_num2<<std::endl;
+            EventFile3<<legends_.at(i)<<": "<<tmp_num3<<std::endl;
+            EventFile4<<legends_.at(i)<<": "<<tmp_num4<<std::endl;
+	    EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
             EventFile6<<legends_.at(i)<<": "<<tmp_num6<<std::endl;
             EventFile7<<legends_.at(i)<<": "<<tmp_num7<<std::endl;
             EventFile8<<legends_.at(i)<<": "<<tmp_num8<<std::endl;
             EventFile9<<legends_.at(i)<<": "<<tmp_num9<<std::endl;
             if(legends_.at(i)!="Data"){
-                bg_num5+=tmp_num5;
+                bg_num0+=tmp_num0;
+                bg_num1+=tmp_num1;
+                bg_num2+=tmp_num2;
+                bg_num3+=tmp_num3;
+                bg_num4+=tmp_num4;
+		bg_num5+=tmp_num5;
                 bg_num6+=tmp_num6;
                 bg_num7+=tmp_num7;
                 bg_num8+=tmp_num8;
                 bg_num9+=tmp_num9;
             }
-            tmp_num5=0;
+            tmp_num0=0;
+            tmp_num1=0;
+            tmp_num2=0;
+            tmp_num3=0;
+            tmp_num4=0;
+	    tmp_num5=0;
             tmp_num6=0;
             tmp_num7=0;
             tmp_num8=0;
             tmp_num9=0;
         }
     }
+    EventFile0<<"Total background: "<<bg_num0<<std::endl;
+    EventFile0.close();
+    EventFile1<<"Total background: "<<bg_num1<<std::endl;
+    EventFile1.close();
+    EventFile2<<"Total background: "<<bg_num2<<std::endl;
+    EventFile2.close();
+    EventFile3<<"Total background: "<<bg_num3<<std::endl;
+    EventFile3.close();
+    EventFile4<<"Total background: "<<bg_num4<<std::endl;
+    EventFile4.close();
     EventFile5<<"Total background: "<<bg_num5<<std::endl;
     EventFile5.close();
     EventFile6<<"Total background: "<<bg_num6<<std::endl;
@@ -760,7 +866,7 @@ void Plotter::MakeTable(){
     EventFile8.close();
     EventFile9<<"Total background: "<<bg_num9<<std::endl;
     EventFile9.close();
-    std::cout<<"\nEvent yields saved in "<<EventFilestring5.c_str()<<"\n"<<std::endl;
+    std::cout<<"\nEvent yields saved in e.g."<<EventFilestring5.c_str()<<"\n"<<std::endl;
 }
 
 
