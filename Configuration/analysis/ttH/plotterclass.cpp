@@ -23,6 +23,7 @@
 #include "TPaveText.h"
 
 #include "../diLeptonic/utils.h"
+#include <iomanip>
 
 
 
@@ -33,13 +34,6 @@ const double Plotter::topxsec_ = 253.849; //again changes with normalization, mu
 void Plotter::setLumi(double newLumi)
 {
     this->lumi_ = newLumi;
-}
-
-
-
-void Plotter::preunfolding(TString Channel, TString Systematic)
-{
-    write(Channel, Systematic);
 }
 
 
@@ -412,8 +406,9 @@ bool Plotter::fillHisto()
 
 
 
-void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking, legending, and write in file 
+void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // do scaling, stacking, legending, and write in file 
 {
+    
     setDataSet(Channel,Systematic);
     if (!fillHisto()) return;
 
@@ -451,11 +446,11 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     // Error messages in case of undefined legends or colors
     if(legends_.size()!=colors_.size()){
         std::cerr<<"Incorrect number of legend entries ("<<legends_.size()<<"), ie. not equal to defined colors ("<<colors_.size()<<"). CANNOT continue!!!\n";
-	exit(77);
+        exit(77);
     }
     if(hists_.size()>legends_.size()){
         std::cerr<<"Incorrect number of legend entries ("<<legends_.size()<<"), ie. less than sample files ("<<hists_.size()<<"). CANNOT continue!!!\n";
-	exit(77);
+        exit(77);
     }
     
     // Here fill colors and line width are adjusted
@@ -465,58 +460,113 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         setStyle(drawhists[i], i, true);
     }
     
+    
+    // Check whether Higgs sample should be drawn overlaid and/or scaled
+    TH1D* overlayHist(0);
+    std::vector<bool> v_isHiggsSignal;
+    bool drawHiggsOverlaid(false);
+    bool drawHiggsScaled(false);
+    if(drawMode==overlaid){drawHiggsOverlaid = true;}
+    else if(drawMode==scaledoverlaid){drawHiggsOverlaid = true; drawHiggsScaled = true;}
+    for(unsigned int i=0; i<hists_.size(); ++i){
+        bool isHiggsSignal(false);
+        if(legends_.at(i) == "t#bar{t}H (b#bar{b})")isHiggsSignal = true;
+        v_isHiggsSignal.push_back(isHiggsSignal);
+    }
+    
+    
     // Here the shape in the legend is adjusted, and black lines are drawn between samples with different legends,
     // and the stack is created
+    unsigned int legendEntryHiggs(0);
     for(unsigned int i=0; i<hists_.size() ; ++i){ // prepare histos and legend
-    if(legends_.at(i) != "Data"){
-        if(i > 1){
-            if(legends_.at(i) != legends_.at(i-1)){
-                legchange = i; 
-                if((legends_.at(i) == DYEntry_)&& DYScale_[channelType_] != 1) legend->AddEntry(drawhists[i], legends_.at(i),"f");
-                else legend->AddEntry(drawhists[i], legends_.at(i) ,"f");
-            }else{
-                drawhists[legchange]->Add(drawhists[i]);
+        //std::cout<<"IsHiggs: "<<v_isHiggsSignal.at(i)<<" , "<<drawHiggsOverlaid<<"\n";
+        if(legends_.at(i) != "Data" && !(v_isHiggsSignal.at(i) && drawHiggsOverlaid)){
+            //std::cout<<"legend in mc stack: "<<legends_.at(i)<<"\n";
+            if(i > 1){
+                if(legends_.at(i) != legends_.at(i-1)){
+                    legchange = i; 
+                    legend->AddEntry(drawhists[i], legends_.at(i),"f");
+                    ++legendEntryHiggs;
+                }else{
+                    drawhists[legchange]->Add(drawhists[i]);
+                }
             }
-        }
-
-        if(i!=(hists_.size()-1)){
-            if(legends_.at(i)!=legends_.at(i+1)){
+            
+            if(i!=(hists_.size()-1)){
+                if(legends_.at(i)!=legends_.at(i+1)){
+                    drawhists[i]->SetLineColor(1);
+                }
+            }else{
                 drawhists[i]->SetLineColor(1);
             }
-        }else{
-            drawhists[i]->SetLineColor(1);
-        }
-        if(legends_.at(i) != legends_.at(i-1)){
-            drawhists[i]->SetLineColor(1);
-            stack->Add(drawhists[i]); 
-        }
-    }
-    else{
-        if(i==0) legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
-        if(i>0){
+            
             if(legends_.at(i) != legends_.at(i-1)){
-                legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
+                drawhists[i]->SetLineColor(1);
+                stack->Add(drawhists[i]); 
             }
-            if(legends_.at(i) == legends_.at(0)){
-                drawhists[0]->Add(drawhists[i]);
+        }
+        else if(legends_.at(i) != "Data"){
+            //std::cout<<"legend in higgs overlaid: "<<legends_.at(i)<<"\n";
+            if(!overlayHist)overlayHist = (TH1D*) drawhists[i]->Clone();
+            else overlayHist->Add(drawhists[i]);
+            overlayHist->SetFillStyle(0);
+            overlayHist->SetLineWidth(2);
+        }
+        else{
+            if(i==0) legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
+            if(i>0){
+                if(legends_.at(i) != legends_.at(i-1)){
+                    ++legendEntryHiggs;
+                    legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
+                }
+                if(legends_.at(i) == legends_.at(0)){
+                    drawhists[0]->Add(drawhists[i]);
+                }
             }
         }
     }
-    }
-    
-    
-    // FIXME: why using this at all (legends are ordered but stack stays the same), isn't it better to have input correctly ?
-    // in fact the legend is filled oppositely than the stack, so it is used for turning the order (but not completely, sth. is messed up !?)
-    legend = ControlLegend(hists_.size(), drawhists, legends_, legend);
-    
-    // FIXME: Needed for event yield tables, but should be run only once, and not for each histogram
-    MakeTable();
     
     
     TList* list = stack->GetHists(); 
     // Create a histogram with the sum of all stacked hists
     TH1D* stacksum = (TH1D*) list->At(0)->Clone();
     for (int i = 1; i < list->GetEntries(); ++i) { stacksum->Add((TH1D*)list->At(i));}
+    // If Higgs signal overlaid: add legend entry
+    // If Higgs signal scaled: scale sample and add modified legend entry
+    double signalScaleFactor(1);
+    std::vector<TString> v_higgsLabel;
+    if(drawHiggsScaled){
+        std::stringstream ss_scaleFactor;
+        signalScaleFactor = stacksum->Integral()/overlayHist->Integral();
+        const int precision(signalScaleFactor>=100 ? 0 : 1);
+        ss_scaleFactor<<" x"<<std::fixed<<std::setprecision(precision)<<signalScaleFactor;
+        overlayHist->Scale(signalScaleFactor);
+        int iSample=0;
+        for(std::vector<bool>::const_iterator i_isHiggsSignal = v_isHiggsSignal.begin(); i_isHiggsSignal != v_isHiggsSignal.end();++iSample, ++i_isHiggsSignal){
+            if(*i_isHiggsSignal){
+                ++legendEntryHiggs;
+                TString label(legends_.at(iSample));
+                label.Append(ss_scaleFactor.str());
+                v_higgsLabel.push_back(label);
+                //std::cout<<"Label: "<<label<<" , "<<iSample<<" , "<<legendEntryHiggs<<"\n";
+                
+                if(iSample==0){
+                    legend->AddEntry(overlayHist, label, "l");
+                }
+                else if(legends_.at(iSample) != legends_.at(iSample-1)){
+                    legend->AddEntry(overlayHist, label, "l");
+                }
+            }
+            //if(*i_isHiggsSignal)std::cout<<"\n\t\tHiggsLegend "<<legend->GetListOfPrimitives()->Print()<<"\n";
+        }
+    }
+    
+    // FIXME: why using this at all (legends are ordered but stack stays the same), isn't it better to have input correctly ?
+    // in fact the legend is filled oppositely than the stack, so it is used for turning the order (but not completely, sth. is messed up !?)
+    legend = ControlLegend(hists_.size(), drawhists, legends_, legend, drawHiggsOverlaid, v_higgsLabel);
+    
+    // FIXME: Needed for event yield tables, but should be run only once, and not for each histogram
+    MakeTable();
     
     // FIXME: is this histo for error band on stack? but it is commented out ?!
     TH1D* syshist =0;
@@ -567,6 +617,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     setex2->Draw();  // remove error bars for data in x-direction
     drawhists[0]->Draw("same,e1");
+    if(overlayHist)overlayHist->Draw("same");
     
     // Put additional stuff to histogram
     DrawCMSLabels(1, 8);
@@ -871,7 +922,7 @@ void Plotter::MakeTable(){
 
 
 
-TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> Legends, TLegend *leg){
+TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> Legends, TLegend *leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel){
     //hardcoded ControlPlot legend
     std::vector<TString> OrderedLegends;    
     OrderedLegends.push_back("Data");
@@ -903,6 +954,16 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TSt
             if (OrderedLegends[i] == Legends[j]){
                 if( OrderedLegends[i] == "Data"){
                     leg->AddEntry(drawhists[j], OrderedLegends[i], "pe");
+                    break;
+                }
+                else if(OrderedLegends[i].Contains("t#bar{t}H (b#bar{b})")){
+                    TString legendTitle(OrderedLegends[i]);
+                    TString legendOptions("f");
+                    if(drawHiggsOverlaid)legendOptions = "l";
+                    for(std::vector<TString>::const_iterator i_higgsLabel = v_higgsLabel.begin(); i_higgsLabel != v_higgsLabel.end(); ++i_higgsLabel){
+                        if(i_higgsLabel->Contains(legendTitle))legendTitle = *i_higgsLabel;
+                    }
+                    leg->AddEntry(drawhists[j], legendTitle, legendOptions);
                     break;
                 }
                 else{

@@ -18,14 +18,15 @@ class TLegend;
 class Plotter {
 
 public:
+    enum DrawMode{stacked, overlaid, scaledoverlaid, undefined};
+  
     Plotter();
     void   setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
     void   setDataSet(std::vector<TString>, std::vector<double>, std::vector<TString>, std::vector<int>, TString);
     void   setDataSet(TString, TString);
     bool   fillHisto();
     void   setStyle(TH1*, unsigned int, bool = false);
-    void   preunfolding(TString Channel="", TString Systematic="");
-    void   write(TString, TString);
+    void   write(TString, TString, DrawMode);
     void   setLumi(double);
     
     void MakeTable();
@@ -42,7 +43,7 @@ public:
     double CalcLumiWeight(const TString& WhichSample);
     std::vector<TString> InputFileList(TString mode, TString Systematic);
 
-    TLegend* ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> legends, TLegend *leg);
+    TLegend* ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> legends, TLegend *leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
 
 
 private:
