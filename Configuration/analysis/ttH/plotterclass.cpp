@@ -307,10 +307,10 @@ void Plotter::setDataSet(TString mode, TString Systematic)
         else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends_.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors_.push_back(kAzure-2);}
         else if(filename.Contains("wtolnu")){legends_.push_back("W+Jets"); colors_.push_back(kGreen-3);}
         else if(filename.Contains("qcd")){legends_.push_back("QCD Multijet"); colors_.push_back(kYellow);}
-	// HIGGSING
-	else if(filename.Contains("ttbarH125inclusive")){legends_.push_back("t#bar{t}H (incl.)"); colors_.push_back(kSpring);}
+    // HIGGSING
+    else if(filename.Contains("ttbarH125inclusive")){legends_.push_back("t#bar{t}H (incl.)"); colors_.push_back(kSpring);}
         else if(filename.Contains("ttbarH125tobbbar")){legends_.push_back("t#bar{t}H (b#bar{b})"); colors_.push_back(kOrange-7);}
-	// ENDHIGGSING
+    // ENDHIGGSING
     }
 }
 
@@ -692,232 +692,62 @@ void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
 
 void Plotter::MakeTable(){
     
-    TH1D *numhists0[hists_.size()];
-    TH1D *numhists1[hists_.size()];
-    TH1D *numhists2[hists_.size()];
-    TH1D *numhists3[hists_.size()];
-    TH1D *numhists4[hists_.size()];
-    TH1D *numhists5[hists_.size()];
-    TH1D *numhists6[hists_.size()];
-    TH1D *numhists7[hists_.size()];
-    TH1D *numhists8[hists_.size()];
-    TH1D *numhists9[hists_.size()];
-
-    for(unsigned int i=0; i<dataset_.size(); i++){
-        TH1D *temp_hist0 = fileReader_->GetClone<TH1D>(dataset_[i], "step0");
-        TH1D *temp_hist1 = fileReader_->GetClone<TH1D>(dataset_[i], "step1");
-        TH1D *temp_hist2 = fileReader_->GetClone<TH1D>(dataset_[i], "step2");
-        TH1D *temp_hist3 = fileReader_->GetClone<TH1D>(dataset_[i], "step3");
-        TH1D *temp_hist4 = fileReader_->GetClone<TH1D>(dataset_[i], "step4");
-	TH1D *temp_hist5 = fileReader_->GetClone<TH1D>(dataset_[i], "step5");
-        TH1D *temp_hist6 = fileReader_->GetClone<TH1D>(dataset_[i], "step6");
-        TH1D *temp_hist7 = fileReader_->GetClone<TH1D>(dataset_[i], "step7");
-        TH1D *temp_hist8 = fileReader_->GetClone<TH1D>(dataset_[i], "step8");
-        TH1D *temp_hist9 = fileReader_->GetClone<TH1D>(dataset_[i], "step9");
+    // Find and loop over all histograms containing information for cutflow table
+    std::vector<TString> v_eventHistoName;
+    v_eventHistoName = fileReader_->findHistos(dataset_[0], "step");
+    for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         
-        double LumiWeight = CalcLumiWeight(dataset_.at(i));
-        ApplyFlatWeights(temp_hist0, LumiWeight);
-        ApplyFlatWeights(temp_hist1, LumiWeight);
-        ApplyFlatWeights(temp_hist2, LumiWeight);
-        ApplyFlatWeights(temp_hist3, LumiWeight);
-        ApplyFlatWeights(temp_hist4, LumiWeight);
-	ApplyFlatWeights(temp_hist5, LumiWeight);
-        ApplyFlatWeights(temp_hist6, LumiWeight);
-        ApplyFlatWeights(temp_hist7, LumiWeight);
-        ApplyFlatWeights(temp_hist8, LumiWeight);
-        ApplyFlatWeights(temp_hist9, LumiWeight);
-	
-        numhists0[i]=temp_hist0;
-        numhists1[i]=temp_hist1;
-        numhists2[i]=temp_hist2;
-        numhists3[i]=temp_hist3;
-        numhists4[i]=temp_hist4;
-	numhists5[i]=temp_hist5;
-        numhists6[i]=temp_hist6;
-        numhists7[i]=temp_hist7;
-        numhists8[i]=temp_hist8;
-        numhists9[i]=temp_hist9;
-
-    }
-
-    for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and leg
-        if((legends_.at(i) == DYEntry_) && channelType_!=2){
-	    // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
-	    numhists5[i]->Scale(DYScale_.at(channelType_));
-            numhists6[i]->Scale(DYScale_.at(channelType_));
-            numhists7[i]->Scale(DYScale_.at(channelType_));
-            numhists8[i]->Scale(DYScale_.at(channelType_));
-            numhists9[i]->Scale(DYScale_.at(channelType_));
+        // loop over samples and get lumi-weighted histogram
+        std::vector<TH1D*> v_numhist;
+        for(unsigned int i=0; i<dataset_.size(); i++){
+             TH1D *temp_hist = fileReader_->GetClone<TH1D>(dataset_[i], *i_eventHistoName);
+             
+             double LumiWeight = CalcLumiWeight(dataset_.at(i));
+             ApplyFlatWeights(temp_hist, LumiWeight);
+             v_numhist.push_back(temp_hist);
         }
-    }
-
-    ////////////////////////////Make output for tables
-    double tmp_num0 = 0;
-    double tmp_num1 = 0;
-    double tmp_num2 = 0;
-    double tmp_num3 = 0;
-    double tmp_num4 = 0;
-    double tmp_num5 = 0;
-    double tmp_num6 = 0;
-    double tmp_num7 = 0;
-    double tmp_num8 = 0;
-    double tmp_num9 = 0;
-
-    ofstream EventFile0;
-    ofstream EventFile1;
-    ofstream EventFile2;
-    ofstream EventFile3;
-    ofstream EventFile4;
-    ofstream EventFile5;
-    ofstream EventFile6;
-    ofstream EventFile7;
-    ofstream EventFile8;
-    ofstream EventFile9;
-    std::string EventFilestring = outpathPlots_.Data();
-    EventFilestring.append(subfolderChannel_.Data());
-    EventFilestring.append(subfolderSpecial_.Data());
-    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+subfolderSpecial_, true);  
-    std::string EventFilestring0;
-    std::string EventFilestring1;
-    std::string EventFilestring2;
-    std::string EventFilestring3;
-    std::string EventFilestring4;
-    std::string EventFilestring5;
-    std::string EventFilestring6;
-    std::string EventFilestring7;
-    std::string EventFilestring8;
-    std::string EventFilestring9;
-    EventFilestring0 =EventFilestring;EventFilestring0.append("/Events0.txt");
-    EventFilestring1 =EventFilestring;EventFilestring1.append("/Events1.txt");
-    EventFilestring2 =EventFilestring;EventFilestring2.append("/Events2.txt");
-    EventFilestring3 =EventFilestring;EventFilestring3.append("/Events3.txt");
-    EventFilestring4 =EventFilestring;EventFilestring4.append("/Events4.txt");
-    EventFilestring5 =EventFilestring;EventFilestring5.append("/Events5.txt");
-    EventFilestring6 =EventFilestring;EventFilestring6.append("/Events6.txt");
-    EventFilestring7 =EventFilestring;EventFilestring7.append("/Events7.txt");
-    EventFilestring8 =EventFilestring;EventFilestring8.append("/Events8.txt");
-    EventFilestring9 =EventFilestring;EventFilestring9.append("/Events9.txt");
-    EventFile0.open(EventFilestring0.c_str());
-    EventFile1.open(EventFilestring1.c_str());
-    EventFile2.open(EventFilestring2.c_str());
-    EventFile3.open(EventFilestring3.c_str());
-    EventFile4.open(EventFilestring4.c_str());
-    EventFile5.open(EventFilestring5.c_str());
-    EventFile6.open(EventFilestring6.c_str());
-    EventFile7.open(EventFilestring7.c_str());
-    EventFile8.open(EventFilestring8.c_str());
-    EventFile9.open(EventFilestring9.c_str());
-    double bg_num0 = 0;
-    double bg_num1 = 0;
-    double bg_num2 = 0;
-    double bg_num3 = 0;
-    double bg_num4 = 0;
-    double bg_num5 = 0;
-    double bg_num6 = 0;
-    double bg_num7 = 0;
-    double bg_num8 = 0;
-    double bg_num9 = 0;
-
-    for(unsigned int i=0; i<hists_.size() ; i++){
-        tmp_num0+=numhists0[i]->Integral();
-        tmp_num1+=numhists1[i]->Integral();
-        tmp_num2+=numhists2[i]->Integral();
-        tmp_num3+=numhists3[i]->Integral();
-        tmp_num4+=numhists4[i]->Integral();
-	tmp_num5+=numhists5[i]->Integral();
-        tmp_num6+=numhists6[i]->Integral();
-        tmp_num7+=numhists7[i]->Integral();
-        tmp_num8+=numhists8[i]->Integral();
-        tmp_num9+=numhists9[i]->Integral();
-
-        if(i==(hists_.size()-1)){
-            EventFile0<<legends_.at(i)<<": "<<tmp_num0<<std::endl;
-            EventFile1<<legends_.at(i)<<": "<<tmp_num1<<std::endl;
-            EventFile2<<legends_.at(i)<<": "<<tmp_num2<<std::endl;
-            EventFile3<<legends_.at(i)<<": "<<tmp_num3<<std::endl;
-            EventFile4<<legends_.at(i)<<": "<<tmp_num4<<std::endl;
-	    EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
-            EventFile6<<legends_.at(i)<<": "<<tmp_num6<<std::endl;
-            EventFile7<<legends_.at(i)<<": "<<tmp_num7<<std::endl;
-            EventFile8<<legends_.at(i)<<": "<<tmp_num8<<std::endl;
-            EventFile9<<legends_.at(i)<<": "<<tmp_num9<<std::endl;
-            bg_num0+=tmp_num0;
-            bg_num1+=tmp_num1;
-            bg_num2+=tmp_num2;
-            bg_num3+=tmp_num3;
-            bg_num4+=tmp_num4;
-	    bg_num5+=tmp_num5;
-            bg_num6+=tmp_num6;
-            bg_num7+=tmp_num7;
-            bg_num8+=tmp_num8;
-            bg_num9+=tmp_num9;
-            tmp_num0=0;
-            tmp_num1=0;
-            tmp_num2=0;
-            tmp_num3=0;
-            tmp_num4=0;
-	    tmp_num5=0;
-            tmp_num6=0;
-            tmp_num7=0;
-            tmp_num8=0;
-            tmp_num9=0;
-        }
-        else if(legends_.at(i)!=legends_.at(i+1)){
-            EventFile0<<legends_.at(i)<<": "<<tmp_num0<<std::endl;
-            EventFile1<<legends_.at(i)<<": "<<tmp_num1<<std::endl;
-            EventFile2<<legends_.at(i)<<": "<<tmp_num2<<std::endl;
-            EventFile3<<legends_.at(i)<<": "<<tmp_num3<<std::endl;
-            EventFile4<<legends_.at(i)<<": "<<tmp_num4<<std::endl;
-	    EventFile5<<legends_.at(i)<<": "<<tmp_num5<<std::endl;
-            EventFile6<<legends_.at(i)<<": "<<tmp_num6<<std::endl;
-            EventFile7<<legends_.at(i)<<": "<<tmp_num7<<std::endl;
-            EventFile8<<legends_.at(i)<<": "<<tmp_num8<<std::endl;
-            EventFile9<<legends_.at(i)<<": "<<tmp_num9<<std::endl;
-            if(legends_.at(i)!="Data"){
-                bg_num0+=tmp_num0;
-                bg_num1+=tmp_num1;
-                bg_num2+=tmp_num2;
-                bg_num3+=tmp_num3;
-                bg_num4+=tmp_num4;
-		bg_num5+=tmp_num5;
-                bg_num6+=tmp_num6;
-                bg_num7+=tmp_num7;
-                bg_num8+=tmp_num8;
-                bg_num9+=tmp_num9;
+        
+        // Scale Drell-Yan contribution
+        for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and leg
+            if((legends_.at(i) == DYEntry_) && channelType_!=2){
+                // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
+                v_numhist[i]->Scale(DYScale_.at(channelType_));
             }
-            tmp_num0=0;
-            tmp_num1=0;
-            tmp_num2=0;
-            tmp_num3=0;
-            tmp_num4=0;
-	    tmp_num5=0;
-            tmp_num6=0;
-            tmp_num7=0;
-            tmp_num8=0;
-            tmp_num9=0;
         }
+        
+        // Prepare output folder and text file
+        ofstream EventFile;
+        std::string EventFilestring = outpathPlots_.Data();
+        EventFilestring.append(subfolderChannel_.Data());
+        EventFilestring.append(subfolderSpecial_.Data());
+        gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+subfolderSpecial_, true);
+        EventFilestring.append("/"+*i_eventHistoName+".txt");
+        EventFile.open(EventFilestring.c_str());
+        
+        // Make output for tables
+        double tmp_num = 0;
+        double bg_num = 0;
+        for(unsigned int i=0; i<hists_.size() ; i++){
+            tmp_num += v_numhist[i]->Integral();
+            if(i==(hists_.size()-1)){
+                EventFile<<legends_.at(i)<<": "<<tmp_num<<std::endl;
+                bg_num += tmp_num;
+                tmp_num = 0;
+            }
+            else if(legends_.at(i)!=legends_.at(i+1)){
+                EventFile<<legends_.at(i)<<": "<<tmp_num<<std::endl;
+                if(legends_.at(i)!="Data"){
+                    bg_num+=tmp_num;
+                }
+                tmp_num = 0;
+            }
+        }
+        EventFile<<"Total background: "<<bg_num<<std::endl;
+        
+        // Close text file
+        EventFile.close();
+        std::cout<<"\nEvent yields saved in "<<EventFilestring.c_str()<<"\n"<<std::endl;
     }
-    EventFile0<<"Total background: "<<bg_num0<<std::endl;
-    EventFile0.close();
-    EventFile1<<"Total background: "<<bg_num1<<std::endl;
-    EventFile1.close();
-    EventFile2<<"Total background: "<<bg_num2<<std::endl;
-    EventFile2.close();
-    EventFile3<<"Total background: "<<bg_num3<<std::endl;
-    EventFile3.close();
-    EventFile4<<"Total background: "<<bg_num4<<std::endl;
-    EventFile4.close();
-    EventFile5<<"Total background: "<<bg_num5<<std::endl;
-    EventFile5.close();
-    EventFile6<<"Total background: "<<bg_num6<<std::endl;
-    EventFile6.close();
-    EventFile7<<"Total background: "<<bg_num7<<std::endl;
-    EventFile7.close();
-    EventFile8<<"Total background: "<<bg_num8<<std::endl;
-    EventFile8.close();
-    EventFile9<<"Total background: "<<bg_num9<<std::endl;
-    EventFile9.close();
-    std::cout<<"\nEvent yields saved in e.g."<<EventFilestring5.c_str()<<"\n"<<std::endl;
 }
 
 
