@@ -1,8 +1,5 @@
 # Name, Extra, axis labels (y,x), rebin, do_dyscale, logx, logy, ymin, ymax, xmin, xmax, nbins, xbins, bcs
 
-jetpT Standard Jets p_{T} 2 1 0 1 1 1E5 30 400 0 0
-
-
 step0 Standard Events - 1 0 0 0 0 0 0 0 0 0
 step1 Standard Events - 1 0 0 0 0 0 0 0 0 0
 step2 Standard Events - 1 0 0 0 0 0 0 0 0 0
@@ -13,6 +10,10 @@ step6 _post2jets Events - 1 1 0 0 0 0 0 0 0 0
 step7 _postMET Events - 1 1 0 0 0 0 0 0 0 0
 step8 _post1btag Events - 1 1 0 0 0 0 0 0 0 0
 step9 _postKinReco Events - 1 1 0 0 0 0 0 0 0 0
+
+
+
+jetpT Standard Jets p_{T} 2 1 0 1 1 1E5 30 400 0 0
 
 JetCategories_step0 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0
 JetCategories_step1 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0

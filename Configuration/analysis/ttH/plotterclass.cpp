@@ -308,7 +308,7 @@ void Plotter::setDataSet(TString mode, TString Systematic)
         else if(filename.Contains("wtolnu")){legends_.push_back("W+Jets"); colors_.push_back(kGreen-3);}
         else if(filename.Contains("qcd")){legends_.push_back("QCD Multijet"); colors_.push_back(kYellow);}
     // HIGGSING
-    else if(filename.Contains("ttbarH125inclusive")){legends_.push_back("t#bar{t}H (incl.)"); colors_.push_back(kSpring);}
+        else if(filename.Contains("ttbarH125inclusive")){legends_.push_back("t#bar{t}H (incl.)"); colors_.push_back(kSpring);}
         else if(filename.Contains("ttbarH125tobbbar")){legends_.push_back("t#bar{t}H (b#bar{b})"); colors_.push_back(kOrange-7);}
     // ENDHIGGSING
     }
@@ -416,6 +416,9 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
         std::cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << std::endl; 
         exit(11); 
     }
+    
+    // FIXME: Needed for event yield tables, but should be run only once, and not for each histogram
+    if(name_=="JetCategories_step0")MakeTable();
     
     TCanvas * canvas = new TCanvas("","");
 
@@ -565,8 +568,6 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
     // in fact the legend is filled oppositely than the stack, so it is used for turning the order (but not completely, sth. is messed up !?)
     legend = ControlLegend(hists_.size(), drawhists, legends_, legend, drawHiggsOverlaid, v_higgsLabel);
     
-    // FIXME: Needed for event yield tables, but should be run only once, and not for each histogram
-    MakeTable();
     
     // FIXME: is this histo for error band on stack? but it is commented out ?!
     TH1D* syshist =0;
@@ -708,7 +709,7 @@ void Plotter::MakeTable(){
         }
         
         // Scale Drell-Yan contribution
-        for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and leg
+        for(unsigned int i=0; i<dataset_.size() ; i++){ // prepare histos and leg
             if((legends_.at(i) == DYEntry_) && channelType_!=2){
                 // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
                 v_numhist[i]->Scale(DYScale_.at(channelType_));
@@ -727,7 +728,7 @@ void Plotter::MakeTable(){
         // Make output for tables
         double tmp_num = 0;
         double bg_num = 0;
-        for(unsigned int i=0; i<hists_.size() ; i++){
+        for(unsigned int i=0; i<dataset_.size() ; i++){
             tmp_num += v_numhist[i]->Integral();
             if(i==(hists_.size()-1)){
                 EventFile<<legends_.at(i)<<": "<<tmp_num<<std::endl;
