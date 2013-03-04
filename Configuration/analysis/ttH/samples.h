@@ -18,7 +18,7 @@ class Sample{
         Sample(TString legendEntry, int color, double crossSection, SampleType sampleType=dummy);
         ~Sample(){};
         
-        void setInputFile(const TString& inputFile);
+        void setInputFile(const TString& inputFileName);
         TString inputFile()const;
         
     private:
@@ -27,7 +27,7 @@ class Sample{
         double crossSection_;
         SampleType sampleType_;
         
-        TString inputFile_;
+        TString inputFileName_;
         
         Channel channel_;
         TString systematic_;
@@ -38,18 +38,20 @@ class Sample{
 namespace Tools{
     Sample::Channel convertChannel(const std::string&);
     std::string convertChannel(const Sample::Channel&);
+    // FIXME: net yet implemented, only dummy so far
     void orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample);
 }
 
 
 class Samples{
     public:
-        Samples():m_systematicChannelSample_(0){};
+        Samples(){};
         ~Samples(){};
-        std::vector<Sample> getSamples(Sample::Channel channel, TString systematic);
-        void addSamples(Sample::Channel channel, TString systematic);
+        const std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >& getSystematicChannelSamples();
+        std::vector<Sample> getSamples(const Sample::Channel& channel, const TString& systematic);
+        void addSamples(const Sample::Channel& channel, const TString& systematic);
     private:
-        std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >* m_systematicChannelSample_;
+        std::map<TString, std::map<Sample::Channel, std::vector<Sample> > > m_systematicChannelSample_;
 };
 
 

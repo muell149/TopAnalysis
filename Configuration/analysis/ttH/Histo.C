@@ -19,7 +19,7 @@
 
 void Histo(Plotter::DrawMode drawMode,
            std::vector<std::string> plots, 
-           std::vector<std::string> systematics, 
+           std::vector<TString> systematics,
            std::vector<Sample::Channel> v_channel) 
 {
     
@@ -32,7 +32,6 @@ void Histo(Plotter::DrawMode drawMode,
             samples.addSamples(channel, systematic);
         }
     }
-    
     
     // Loop over all histograms in histoList
     HistoListReader histoList("HistoList_control");
@@ -67,9 +66,13 @@ void Histo(Plotter::DrawMode drawMode,
                                  plotProperties.bins, plotProperties.xbinbounds, plotProperties.bincenters);
         h_generalPlot.DYScaleFactor(plotProperties.specialComment);
         
-        for (auto channel : v_channel) {
-            for (auto systematic : systematics) {
-                h_generalPlot.write(Tools::convertChannel(channel), systematic, drawMode);
+        // Loop over all systematics and all channels and write histograms
+        const std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >& m_systematicChannelSample(samples.getSystematicChannelSamples());
+        for(auto systematicChannelSample : m_systematicChannelSample){
+            const TString& systematic(systematicChannelSample.first);
+            for(auto channelSample : systematicChannelSample.second){
+                const Sample::Channel& channel(channelSample.first);
+                h_generalPlot.write(channel, systematic, drawMode, channelSample.second);
             }
         }
     }
@@ -120,13 +123,11 @@ int main(int argc, char** argv) {
         }
     }
     std::cout << "Processing channels: "; 
-    for (auto channel: v_channel) {
-        std::cout << Tools::convertChannel(channel) << " ";
-    }
+    for (auto channel: v_channel)std::cout << Tools::convertChannel(channel) << " ";
     std::cout << "\n";
     
 	// Use only nominal samples for now
-    std::vector<std::string> systematics { "Nominal" };
+    std::vector<TString> systematics { "Nominal" };
     std::cout << "Processing systematics (use >>-s all<< to process all knwon systematics): "; 
     for (auto sys: systematics) std::cout << sys << " "; std::cout << "\n";
     

@@ -13,7 +13,7 @@ sampleType_(sampleType)
 
 
 void
-Samples::addSamples(Sample::Channel channel, TString systematic){
+Samples::addSamples(const Sample::Channel& channel, const TString& systematic){
     
     // Define all samples as they are needed
     Sample data("Data", kBlack, 1., Sample::SampleType::data);
@@ -125,14 +125,12 @@ Samples::addSamples(Sample::Channel channel, TString systematic){
     Tools::orderByLegend(v_sample);
     
     // Create map of maps, containing Sample per channel per systematic
-    std::map<TString, std::map<Sample::Channel, std::vector<Sample> > > m_systematicChannelSample;
     for(auto sample : v_sample){
         sample.second.setInputFile(sample.first);
-        m_systematicChannelSample[systematic][channel].push_back(sample.second);
+        m_systematicChannelSample_[systematic][channel].push_back(sample.second);
         //std::cout<<"\n\t\tInput file: "<<(--(m_systematicChannelSample[systematic][channel].end()))->inputFile()<<"\n";
     }
-    m_systematicChannelSample_ = &m_systematicChannelSample;
-    //for(auto systematicChannelSample : *m_systematicChannelSample_){
+    //for(auto systematicChannelSample : m_systematicChannelSample_){
     //    for(auto channelSample : systematicChannelSample.second){
     //        for(auto sample : channelSample.second){
     //            std::cout<<"We have samples: "<<systematic<<" , "<<Tools::convertChannel(channel)
@@ -140,25 +138,30 @@ Samples::addSamples(Sample::Channel channel, TString systematic){
     //        }
     //    }
     //}
-    
 }
 
 
 void 
-Sample::setInputFile(const TString& inputFile){
-    inputFile_ = inputFile;
+Sample::setInputFile(const TString& inputFileName){
+    inputFileName_ = inputFileName;
 }
 
 
 TString
 Sample::inputFile()const{
-    return inputFile_;
+    return inputFileName_;
 }
 
 
-std::vector<Sample> 
-Samples::getSamples(Sample::Channel channel, TString systematic){
-    return (*m_systematicChannelSample_)[systematic][channel];
+const std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >&
+Samples::getSystematicChannelSamples(){
+    return m_systematicChannelSample_;
+}
+
+
+std::vector<Sample>
+Samples::getSamples(const Sample::Channel& channel, const TString& systematic){
+    return m_systematicChannelSample_[systematic][channel];
 }
 
 

@@ -256,8 +256,10 @@ void Plotter::setDataSet(std::vector<TString> dataset, std::vector<double> scale
 
 
 
-void Plotter::setDataSet(TString mode, TString Systematic)
+void Plotter::setDataSet(Sample::Channel channel, TString Systematic)
 {
+    // FIXME: replace "mode" by "channel"
+    TString mode(Tools::convertChannel(channel));
     initialized_ = false;
 
     if(channelLabel_.size()<4){channelLabel_.insert(channelLabel_.begin(), 4, "");}
@@ -269,15 +271,15 @@ void Plotter::setDataSet(TString mode, TString Systematic)
 
     // Set dataset specific subfolders
     outpathPlots_ = "./Plots";
-    subfolderChannel_ = mode;
+    subfolderChannel_ = Tools::convertChannel(channel);
     subfolderChannel_.Prepend("/");
     subfolderSpecial_ = "";
     if ( specialComment_.CompareTo("Standard") != 0 ) {
         //subfolderSpecial_ = specialComment_.Prepend("/");
     }
-
+    
     DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
-
+    
     if(Systematic.Contains("DY_") || Systematic.Contains("BG_")){Systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
 
     TString histoListName = "FileLists/HistoFileList_"+Systematic+"_"+mode+".txt";
@@ -406,14 +408,17 @@ bool Plotter::fillHisto()
 
 
 
-void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // do scaling, stacking, legending, and write in file 
+void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMode, std::vector<Sample> v_sample) // do scaling, stacking, legending, and write in file 
 {
+    // Get vector of input samples
+    v_sample_ = v_sample;
+    //std::cout<<"Sample size: "<<v_sample_.size()<<"\n";
     
-    setDataSet(Channel,Systematic);
+    setDataSet(channel, systematic);
     if (!fillHisto()) return;
 
     if (hists_.size() == 0) { 
-        std::cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << std::endl; 
+        std::cerr << "***ERROR! No histograms available for (channel/systematic): " << Tools::convertChannel(channel) << "/" << systematic << std::endl; 
         exit(11); 
     }
     
@@ -444,7 +449,6 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
     canvas->SetName("");
     canvas->SetTitle("");
     
-    TString newname = name_;
     
     // Error messages in case of undefined legends or colors
     if(legends_.size()!=colors_.size()){
@@ -480,7 +484,6 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
     
     // Here the shape in the legend is adjusted, and black lines are drawn between samples with different legends,
     // and the stack is created
-    unsigned int legendEntryHiggs(0);
     for(unsigned int i=0; i<hists_.size() ; ++i){ // prepare histos and legend
         //std::cout<<"IsHiggs: "<<v_isHiggsSignal.at(i)<<" , "<<drawHiggsOverlaid<<"\n";
         if(legends_.at(i) != "Data" && !(v_isHiggsSignal.at(i) && drawHiggsOverlaid)){
@@ -489,7 +492,6 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
                 if(legends_.at(i) != legends_.at(i-1)){
                     legchange = i; 
                     legend->AddEntry(drawhists[i], legends_.at(i),"f");
-                    ++legendEntryHiggs;
                 }else{
                     drawhists[legchange]->Add(drawhists[i]);
                 }
@@ -519,7 +521,6 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
             if(i==0) legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
             if(i>0){
                 if(legends_.at(i) != legends_.at(i-1)){
-                    ++legendEntryHiggs;
                     legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
                 }
                 if(legends_.at(i) == legends_.at(0)){
@@ -547,11 +548,10 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
         int iSample=0;
         for(std::vector<bool>::const_iterator i_isHiggsSignal = v_isHiggsSignal.begin(); i_isHiggsSignal != v_isHiggsSignal.end();++iSample, ++i_isHiggsSignal){
             if(*i_isHiggsSignal){
-                ++legendEntryHiggs;
                 TString label(legends_.at(iSample));
                 label.Append(ss_scaleFactor.str());
                 v_higgsLabel.push_back(label);
-                //std::cout<<"Label: "<<label<<" , "<<iSample<<" , "<<legendEntryHiggs<<"\n";
+                //std::cout<<"Label: "<<label<<" , "<<iSample<<"\n";
                 
                 if(iSample==0){
                     legend->AddEntry(overlayHist, label, "l");
@@ -627,8 +627,8 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
     drawRatio(drawhists[0], stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots 
-    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+Systematic, true);
-    canvas->Print(outpathPlots_+subfolderChannel_+"/"+Systematic+"/"+name_+".eps");
+    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+systematic, true);
+    canvas->Print(outpathPlots_+subfolderChannel_+"/"+systematic+"/"+name_+".eps");
     
     // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
@@ -646,7 +646,7 @@ void Plotter::write(TString Channel, TString Systematic, DrawMode drawMode) // d
     sumMC->SetName(name_);
     
     //save Canvas AND sources in a root file
-    TFile out_root(outpathPlots_+subfolderChannel_+"/"+Systematic+"/"+name_+"_source.root", "RECREATE");
+    TFile out_root(outpathPlots_+subfolderChannel_+"/"+systematic+"/"+name_+"_source.root", "RECREATE");
     drawhists[0]->Write(name_+"_data");
     sumttbar->Write(name_+"_signalmc");
     sumMC->Write(name_+"_allmc");
