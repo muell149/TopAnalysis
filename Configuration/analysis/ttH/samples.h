@@ -14,9 +14,14 @@ class Sample{
         //Channel convertChannel(const std::string&)const;
         //std::string convertChannel(const Channel&)const;
         
-        Sample(){};
+        Sample();
         Sample(TString legendEntry, int color, double crossSection, SampleType sampleType=dummy);
         ~Sample(){};
+        
+        TString legendEntry()const;
+        int color()const;
+        double crossSection()const;
+        SampleType sampleType()const;
         
         void setInputFile(const TString& inputFileName);
         TString inputFile()const;
@@ -28,10 +33,6 @@ class Sample{
         SampleType sampleType_;
         
         TString inputFileName_;
-        
-        Channel channel_;
-        TString systematic_;
-        
 };
 
 

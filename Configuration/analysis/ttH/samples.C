@@ -6,9 +6,15 @@
 
 
 
+
+Sample::Sample():
+legendEntry_(""), color_(0), crossSection_(0), sampleType_(dummy), inputFileName_("")
+{}
+
+
 Sample::Sample(TString legendEntry, int color, double crossSection, SampleType sampleType):
 legendEntry_(legendEntry), color_(color), crossSection_(crossSection),
-sampleType_(sampleType)
+sampleType_(sampleType), inputFileName_("")
 {}
 
 
@@ -139,6 +145,22 @@ Samples::addSamples(const Sample::Channel& channel, const TString& systematic){
     //    }
     //}
 }
+
+
+TString
+Sample::legendEntry()const{return legendEntry_;}
+
+
+int
+Sample::color()const{return color_;}
+
+
+double
+Sample::crossSection()const{return crossSection_;}
+
+
+Sample::SampleType
+Sample::sampleType()const{return sampleType_;}
 
 
 void 

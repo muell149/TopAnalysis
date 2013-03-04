@@ -256,19 +256,17 @@ void Plotter::setDataSet(std::vector<TString> dataset, std::vector<double> scale
 
 
 
-void Plotter::setDataSet(Sample::Channel channel, TString Systematic)
+void Plotter::setDataSet(Sample::Channel channel, TString systematic)
 {
-    // FIXME: replace "mode" by "channel"
-    TString mode(Tools::convertChannel(channel));
     initialized_ = false;
-
+    
     if(channelLabel_.size()<4){channelLabel_.insert(channelLabel_.begin(), 4, "");}
-
-    if(mode =="ee"){channelType_=0; channelLabel_.at(0)="ee";}
-    if(mode =="mumu"){channelType_=1; channelLabel_.at(1)="#mu#mu";}
-    if(mode =="emu"){channelType_=2; channelLabel_.at(2)="e#mu";}
-    if(mode =="combined"){channelType_=3; channelLabel_.at(3)="Dilepton Combined";}
-
+    
+    if(channel == Sample::ee){channelType_=0; channelLabel_.at(0)="ee";}
+    if(channel == Sample::mumu){channelType_=1; channelLabel_.at(1)="#mu#mu";}
+    if(channel == Sample::emu){channelType_=2; channelLabel_.at(2)="e#mu";}
+    if(channel == Sample::combined){channelType_=3; channelLabel_.at(3)="Dilepton Combined";}
+    
     // Set dataset specific subfolders
     outpathPlots_ = "./Plots";
     subfolderChannel_ = Tools::convertChannel(channel);
@@ -278,42 +276,32 @@ void Plotter::setDataSet(Sample::Channel channel, TString Systematic)
         //subfolderSpecial_ = specialComment_.Prepend("/");
     }
     
+    // FIXME: this variable is completely useless, or ?
     DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
     
-    if(Systematic.Contains("DY_") || Systematic.Contains("BG_")){Systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
+    if(systematic.Contains("DY_") || systematic.Contains("BG_")){systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
 
-    TString histoListName = "FileLists/HistoFileList_"+Systematic+"_"+mode+".txt";
+    TString histoListName = "FileLists/HistoFileList_"+systematic+"_"+Tools::convertChannel(channel)+".txt";
     std::cout << "reading " << histoListName << std::endl;
     ifstream FileList(histoListName);
     if (FileList.fail()) {
         std::cerr << "Error reading " << histoListName << std::endl;
         exit(1);
     }
-    TString filename;
+    
+    // FIXME: Workaround for now, these variables should not be needed anymore after full Sample implementation
     datafiles_ = 0;
-
     dataset_.clear();
     legends_.clear();
     colors_.clear();
-
-    while(!FileList.eof()){
-        FileList>>filename;
-        if(filename==""){continue;}//Skip empty lines
-        dataset_.push_back(filename);
-        if(filename.Contains("run")){legends_.push_back("Data"); colors_.push_back(kBlack);datafiles_++;}
-        else if(filename.Contains("ttbarsignal")){legends_.push_back("t#bar{t} Signal"); colors_.push_back(kRed+1);}
-        else if(filename.Contains("ttbarbg")){legends_.push_back("t#bar{t} Other"); colors_.push_back(kRed-7);}
-        else if(filename.Contains("single")){legends_.push_back("Single Top"); colors_.push_back(kMagenta);}
-        else if(filename.Contains("ww") ||filename.Contains("wz")||filename.Contains("zz")){legends_.push_back("Diboson"); colors_.push_back(10);}
-        else if(filename.Contains("dytautau")){legends_.push_back("Z / #gamma* #rightarrow #tau#tau"); colors_.push_back(kAzure+8);}
-        else if(filename.Contains("dymumu")||filename.Contains("dyee")){legends_.push_back("Z / #gamma* #rightarrow ee/#mu#mu"); colors_.push_back(kAzure-2);}
-        else if(filename.Contains("wtolnu")){legends_.push_back("W+Jets"); colors_.push_back(kGreen-3);}
-        else if(filename.Contains("qcd")){legends_.push_back("QCD Multijet"); colors_.push_back(kYellow);}
-    // HIGGSING
-        else if(filename.Contains("ttbarH125inclusive")){legends_.push_back("t#bar{t}H (incl.)"); colors_.push_back(kSpring);}
-        else if(filename.Contains("ttbarH125tobbbar")){legends_.push_back("t#bar{t}H (b#bar{b})"); colors_.push_back(kOrange-7);}
-    // ENDHIGGSING
+    
+    for(auto sample : v_sample_){
+        dataset_.push_back(sample.inputFile());
+        legends_.push_back(sample.legendEntry());
+        colors_.push_back(sample.color());
+        if(sample.sampleType()==Sample::SampleType::data)++datafiles_;
     }
+    
 }
 
 
@@ -390,18 +378,18 @@ bool Plotter::fillHisto()
     if (initialized_) { return true; }
     TH1::AddDirectory(kFALSE);
     hists_.clear();
-    for(unsigned int i=0; i<dataset_.size(); i++){
-        TH1D *hist = fileReader_->GetClone<TH1D>(dataset_.at(i), name_, true);
+    for(auto sample : v_sample_){
+        TH1D *hist = fileReader_->GetClone<TH1D>(sample.inputFile(), name_, true);
         if (!hist) return false;
-
+        
         //Rescaling to the data luminosity
-        double LumiWeight = CalcLumiWeight(dataset_.at(i));
-        ApplyFlatWeights(hist, LumiWeight);
-
+        double lumiWeight = CalcLumiWeight(sample.inputFile());
+        ApplyFlatWeights(hist, lumiWeight);
+        
         setHHStyle(*gStyle);
-
         hists_.push_back(*hist);
     }
+    
     initialized_ = true;
     return true;
 }
@@ -698,21 +686,19 @@ void Plotter::MakeTable(){
     v_eventHistoName = fileReader_->findHistos(dataset_[0], "step");
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         
-        // loop over samples and get lumi-weighted histogram
-        std::vector<TH1D*> v_numhist;
-        for(unsigned int i=0; i<dataset_.size(); i++){
-             TH1D *temp_hist = fileReader_->GetClone<TH1D>(dataset_[i], *i_eventHistoName);
-             
-             double LumiWeight = CalcLumiWeight(dataset_.at(i));
-             ApplyFlatWeights(temp_hist, LumiWeight);
-             v_numhist.push_back(temp_hist);
+        std::vector<std::pair<TH1D*, Sample> > v_numhist;
+        for(auto sample : v_sample_){
+            TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), *i_eventHistoName);
+            double lumiWeight = CalcLumiWeight(sample.inputFile());
+            ApplyFlatWeights(temp_hist, lumiWeight);
+            v_numhist.push_back(std::pair<TH1D*, Sample>(temp_hist, sample));
         }
         
-        // Scale Drell-Yan contribution
-        for(unsigned int i=0; i<dataset_.size() ; i++){ // prepare histos and leg
-            if((legends_.at(i) == DYEntry_) && channelType_!=2){
+        for(auto numhist : v_numhist){
+            const bool isDyll(numhist.second.sampleType() == Sample::SampleType::dyll);
+            if(isDyll && channelType_!=2){
                 // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
-                v_numhist[i]->Scale(DYScale_.at(channelType_));
+                numhist.first->Scale(DYScale_.at(channelType_));
             }
         }
         
@@ -728,16 +714,18 @@ void Plotter::MakeTable(){
         // Make output for tables
         double tmp_num = 0;
         double bg_num = 0;
-        for(unsigned int i=0; i<dataset_.size() ; i++){
-            tmp_num += v_numhist[i]->Integral();
-            if(i==(hists_.size()-1)){
-                EventFile<<legends_.at(i)<<": "<<tmp_num<<std::endl;
+        for(auto i_numhist = v_numhist.begin(); i_numhist != v_numhist.end(); ++i_numhist){
+            auto iterator = i_numhist;
+            ++iterator;
+            tmp_num += i_numhist->first->Integral();
+            if(i_numhist == --(v_numhist.end())){
+                EventFile<<i_numhist->second.legendEntry()<<": "<<tmp_num<<std::endl;
                 bg_num += tmp_num;
                 tmp_num = 0;
             }
-            else if(legends_.at(i)!=legends_.at(i+1)){
-                EventFile<<legends_.at(i)<<": "<<tmp_num<<std::endl;
-                if(legends_.at(i)!="Data"){
+            else if(i_numhist->second.legendEntry() != iterator->second.legendEntry()){
+                EventFile<<i_numhist->second.legendEntry()<<": "<<tmp_num<<std::endl;
+                if(i_numhist->second.sampleType() != Sample::SampleType::data){
                     bg_num+=tmp_num;
                 }
                 tmp_num = 0;

@@ -22,7 +22,7 @@ void Histo(Plotter::DrawMode drawMode,
            std::vector<TString> systematics,
            std::vector<Sample::Channel> v_channel) 
 {
-    
+    // Set data luminosity
     const double lumi = 12210;
     
     // Access all samples
@@ -56,6 +56,7 @@ void Histo(Plotter::DrawMode drawMode,
             continue;
         }
         
+        
         // Create Plotter 
         Plotter h_generalPlot;
         h_generalPlot.setLumi(lumi);
@@ -65,6 +66,7 @@ void Histo(Plotter::DrawMode drawMode,
                                  plotProperties.ymin, plotProperties.ymax, plotProperties.xmin, plotProperties.xmax,
                                  plotProperties.bins, plotProperties.xbinbounds, plotProperties.bincenters);
         h_generalPlot.DYScaleFactor(plotProperties.specialComment);
+        
         
         // Loop over all systematics and all channels and write histograms
         const std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >& m_systematicChannelSample(samples.getSystematicChannelSamples());
