@@ -47,8 +47,8 @@ Histo.o: Histo.C
 plotterclass.o: plotterclass.cpp plotterclass.h utils.o
 	g++ -c -o plotterclass.o $(COMPFLAGS) plotterclass.cpp
 
-Histo: Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o
-	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o $(ROOTLIBS)
+Histo: Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o samples.o
+	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o samples.o $(ROOTLIBS)
 
 JetCorrUncertainty.o: ../diLeptonic/JetCorrectionUncertainty.cc JetCorrParameters.o SimpleJetCorrUncert.o
 	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/JetCorrectionUncertainty.cc
@@ -58,6 +58,10 @@ JetCorrParameters.o:  ../diLeptonic/JetCorrectorParameters.cc
 
 SimpleJetCorrUncert.o: ../diLeptonic/SimpleJetCorrectionUncertainty.cc
 	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/SimpleJetCorrectionUncertainty.cc
+
+
+samples.o: samples.C samples.h
+	g++ -c -o samples.o $(COMPFLAGS) samples.C
 
 
 .PHONY: clean

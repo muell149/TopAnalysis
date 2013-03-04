@@ -13,18 +13,26 @@
 #include "../diLeptonic/HistoListReader.h"
 #include "../diLeptonic/CommandLineParameters.hh"
 
-
+#include "samples.h"
 
 
 
 void Histo(Plotter::DrawMode drawMode,
            std::vector<std::string> plots, 
            std::vector<std::string> systematics, 
-           std::vector<std::string> channels) 
+           std::vector<Sample::Channel> v_channel) 
 {
     
-
     const double lumi = 12210;
+    
+    // Access all samples
+    Samples samples;
+    for (auto channel : v_channel) {
+        for (auto systematic : systematics) {
+            samples.addSamples(channel, systematic);
+        }
+    }
+    
     
     // Loop over all histograms in histoList
     HistoListReader histoList("HistoList_control");
@@ -59,9 +67,9 @@ void Histo(Plotter::DrawMode drawMode,
                                  plotProperties.bins, plotProperties.xbinbounds, plotProperties.bincenters);
         h_generalPlot.DYScaleFactor(plotProperties.specialComment);
         
-        for (auto channel : channels) {
+        for (auto channel : v_channel) {
             for (auto systematic : systematics) {
-                h_generalPlot.write(channel, systematic, drawMode);
+                h_generalPlot.write(Tools::convertChannel(channel), systematic, drawMode);
             }
         }
     }
@@ -82,6 +90,7 @@ std::function<bool(const std::string &s)> makeStringChecker(const std::vector<co
 }
 
 int main(int argc, char** argv) {
+    // Get and check configuration parameters
     CLParameter<std::string> opt_drawMode("m", "Specify draw mode of Higgs sample, valid: stacked, overlaid, scaledoverlaid. Default: scaledoverlaid", false, 1, 1,
         makeStringChecker({"stacked", "overlaid", "scaledoverlaid"}));
     CLParameter<std::string> opt_plots("p", "Name (pattern) of plot; multiple patterns possible; use '+Name' to match name exactly", false, 1, 100);
@@ -91,6 +100,7 @@ int main(int argc, char** argv) {
         makeStringChecker({"Nominal"}));
     CLAnalyser::interpretGlobal(argc, argv);
     
+    // Set up draw mode
     Plotter::DrawMode drawMode(Plotter::undefined);
     if(opt_drawMode.isSet()){
         if (opt_drawMode[0] == "stacked") drawMode = Plotter::stacked;
@@ -100,12 +110,22 @@ int main(int argc, char** argv) {
     }
     else drawMode = Plotter::scaledoverlaid;
     
-    std::vector<std::string> channels { "emu", "ee", "mumu", "combined" };
-    if (opt_channel.isSet()) channels = opt_channel.getArguments();
+    // Set up channels
+    std::vector<Sample::Channel> v_channel {Sample::Channel::emu, Sample::Channel::ee, Sample::Channel::mumu, Sample::Channel::combined};
+    std::vector<std::string> channels = opt_channel.getArguments();
+    if(opt_channel.isSet()){
+        v_channel.clear();
+        for (auto channel: channels) {
+            v_channel.push_back(Tools::convertChannel(channel));
+        }
+    }
     std::cout << "Processing channels: "; 
-    for (auto ch: channels) std::cout << ch << " "; std::cout << "\n";
-        
-	// Use only nominal for now
+    for (auto channel: v_channel) {
+        std::cout << Tools::convertChannel(channel) << " ";
+    }
+    std::cout << "\n";
+    
+	// Use only nominal samples for now
     std::vector<std::string> systematics { "Nominal" };
     std::cout << "Processing systematics (use >>-s all<< to process all knwon systematics): "; 
     for (auto sys: systematics) std::cout << sys << " "; std::cout << "\n";
@@ -113,5 +133,5 @@ int main(int argc, char** argv) {
     std::vector<std::string> plots { "" };
     if (opt_plots.isSet()) plots = opt_plots.getArguments();
 
-    Histo(drawMode, plots, systematics, channels);
+    Histo(drawMode, plots, systematics, v_channel);
 }
