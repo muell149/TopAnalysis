@@ -23,12 +23,10 @@ public:
   
     Plotter();
     void   setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
-    void   setDataSet(std::vector<TString>, std::vector<double>, std::vector<TString>, std::vector<int>, TString);
-    void   setDataSet(Sample::Channel, TString);
-    bool   fillHisto();
     void   setStyle(TH1*, unsigned int, bool = false);
     void   write(Sample::Channel, TString, DrawMode, std::vector<Sample>);
     void   setLumi(double);
+    
     
     void MakeTable();
 
@@ -48,6 +46,8 @@ public:
 
 
 private:
+    
+    bool prepareDataset(Sample::Channel&, TString&, std::vector<Sample>&);
     
     void DrawDecayChLabel(TString decaychannel="", double textSize=0.04);
     void DrawCMSLabels(int cmsprelim=true, double energy=8, double textSize=0.04);
@@ -88,7 +88,8 @@ private:
     RootFileReader *fileReader_;
     
     
-    std::vector<Sample> v_sample_;
+    typedef std::pair<Sample, TH1D*> SampleHistPair;
+    std::vector<SampleHistPair> v_sampleHistPair_;
 };
 
 #endif

@@ -241,71 +241,6 @@ void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TS
 
 
 
-void Plotter::setDataSet(std::vector<TString> dataset, std::vector<double> scales, std::vector<TString> legends, std::vector<int> colors, TString DYEntry)
-{
-    dataset_.clear();
-    scales_.clear();
-    legends_.clear();
-    colors_.clear();
-    dataset_ = dataset;
-    scales_ = scales;
-    legends_ = legends;
-    colors_ = colors;
-    DYEntry_ = DYEntry;
-}
-
-
-
-void Plotter::setDataSet(Sample::Channel channel, TString systematic)
-{
-    initialized_ = false;
-    
-    if(channelLabel_.size()<4){channelLabel_.insert(channelLabel_.begin(), 4, "");}
-    
-    if(channel == Sample::ee){channelType_=0; channelLabel_.at(0)="ee";}
-    if(channel == Sample::mumu){channelType_=1; channelLabel_.at(1)="#mu#mu";}
-    if(channel == Sample::emu){channelType_=2; channelLabel_.at(2)="e#mu";}
-    if(channel == Sample::combined){channelType_=3; channelLabel_.at(3)="Dilepton Combined";}
-    
-    // Set dataset specific subfolders
-    outpathPlots_ = "./Plots";
-    subfolderChannel_ = Tools::convertChannel(channel);
-    subfolderChannel_.Prepend("/");
-    subfolderSpecial_ = "";
-    if ( specialComment_.CompareTo("Standard") != 0 ) {
-        //subfolderSpecial_ = specialComment_.Prepend("/");
-    }
-    
-    // FIXME: this variable is completely useless, or ?
-    DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
-    
-    if(systematic.Contains("DY_") || systematic.Contains("BG_")){systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
-
-    TString histoListName = "FileLists/HistoFileList_"+systematic+"_"+Tools::convertChannel(channel)+".txt";
-    std::cout << "reading " << histoListName << std::endl;
-    ifstream FileList(histoListName);
-    if (FileList.fail()) {
-        std::cerr << "Error reading " << histoListName << std::endl;
-        exit(1);
-    }
-    
-    // FIXME: Workaround for now, these variables should not be needed anymore after full Sample implementation
-    datafiles_ = 0;
-    dataset_.clear();
-    legends_.clear();
-    colors_.clear();
-    
-    for(auto sample : v_sample_){
-        dataset_.push_back(sample.inputFile());
-        legends_.push_back(sample.legendEntry());
-        colors_.push_back(sample.color());
-        if(sample.sampleType()==Sample::SampleType::data)++datafiles_;
-    }
-    
-}
-
-
-
 // This method is only used for DY rescaling
 std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
 {
@@ -368,47 +303,97 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
     FileVector.push_back(ttbarbgviatau);
     
     return FileVector;
-    
 }
 
 
 
-bool Plotter::fillHisto()
-{   
-    if (initialized_) { return true; }
+bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std::vector<Sample>& v_sample)
+{
+    bool allHistosAvailable(true);
+    
+    // FIXME: this variable should also become obsolete
+    initialized_ = false;
+    
+    // Associate histogram to dataset if histogram can be found
+    v_sampleHistPair_.clear();
     TH1::AddDirectory(kFALSE);
-    hists_.clear();
-    for(auto sample : v_sample_){
+    for(auto sample : v_sample){
+        SampleHistPair p_sampleHist;
         TH1D *hist = fileReader_->GetClone<TH1D>(sample.inputFile(), name_, true);
-        if (!hist) return false;
-        
-        //Rescaling to the data luminosity
-        double lumiWeight = CalcLumiWeight(sample.inputFile());
-        ApplyFlatWeights(hist, lumiWeight);
-        
-        setHHStyle(*gStyle);
-        hists_.push_back(*hist);
+        if (!hist){
+            std::cout<<"Histogram ("<<name_<<") not found in file ("<<sample.inputFile()<<")\n";
+            p_sampleHist = SampleHistPair(sample, 0);
+            allHistosAvailable = false;
+        }
+        else{
+            //Rescaling to the data luminosity
+            double lumiWeight = CalcLumiWeight(sample.inputFile());
+            ApplyFlatWeights(hist, lumiWeight);
+            setHHStyle(*gStyle);
+            p_sampleHist = SampleHistPair(sample, hist);
+        }
+        v_sampleHistPair_.push_back(p_sampleHist);
+    }
+    //std::cout<<"Number of samples used for histogram ("<<name_<<"): "<<v_sampleHistPair_.size()<<"\n";
+    initialized_ = true;
+    
+    // Adjustments for different channels
+    if(channelLabel_.size()<4){channelLabel_.insert(channelLabel_.begin(), 4, "");}
+    
+    if(channel == Sample::ee){channelType_=0; channelLabel_.at(0)="ee";}
+    if(channel == Sample::mumu){channelType_=1; channelLabel_.at(1)="#mu#mu";}
+    if(channel == Sample::emu){channelType_=2; channelLabel_.at(2)="e#mu";}
+    if(channel == Sample::combined){channelType_=3; channelLabel_.at(3)="Dilepton Combined";}
+    
+    // Set dataset specific subfolders
+    outpathPlots_ = "./Plots";
+    subfolderChannel_ = Tools::convertChannel(channel);
+    subfolderChannel_.Prepend("/");
+    subfolderSpecial_ = "";
+    if ( specialComment_.CompareTo("Standard") != 0 ) {
+        //subfolderSpecial_ = specialComment_.Prepend("/");
     }
     
-    initialized_ = true;
-    return true;
+    // FIXME: this variable is completely useless, or ?
+    DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
+    
+    if(systematic.Contains("DY_") || systematic.Contains("BG_")){systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
+
+    TString histoListName = "FileLists/HistoFileList_"+systematic+"_"+Tools::convertChannel(channel)+".txt";
+    std::cout << "reading " << histoListName << std::endl;
+    ifstream FileList(histoListName);
+    if (FileList.fail()) {
+        std::cerr << "Error reading " << histoListName << std::endl;
+        exit(1);
+    }
+    
+    // FIXME: Workaround for now, these variables should not be needed anymore after full Sample implementation
+    datafiles_ = 0;
+    dataset_.clear();
+    legends_.clear();
+    colors_.clear();
+    hists_.clear();
+    for(auto sampleHistPair : v_sampleHistPair_){
+        if(sampleHistPair.first.sampleType()==Sample::SampleType::data)++datafiles_;
+        dataset_.push_back(sampleHistPair.first.inputFile());
+        legends_.push_back(sampleHistPair.first.legendEntry());
+        colors_.push_back(sampleHistPair.first.color());
+        hists_.push_back(*(sampleHistPair.second));
+    }
+    
+    return allHistosAvailable;
 }
 
 
 
 void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMode, std::vector<Sample> v_sample) // do scaling, stacking, legending, and write in file 
 {
-    // Get vector of input samples
-    v_sample_ = v_sample;
-    //std::cout<<"Sample size: "<<v_sample_.size()<<"\n";
-    
-    setDataSet(channel, systematic);
-    if (!fillHisto()) return;
-
-    if (hists_.size() == 0) { 
-        std::cerr << "***ERROR! No histograms available for (channel/systematic): " << Tools::convertChannel(channel) << "/" << systematic << std::endl; 
-        exit(11); 
+    if(!prepareDataset(channel, systematic, v_sample)){
+        std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): " << Tools::convertChannel(channel) << "/" << systematic
+                 <<"\n... skip this plot\n";
+        return;
     }
+    
     
     // FIXME: Needed for event yield tables, but should be run only once, and not for each histogram
     if(name_=="JetCategories_step0")MakeTable();
@@ -437,16 +422,6 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     canvas->SetName("");
     canvas->SetTitle("");
     
-    
-    // Error messages in case of undefined legends or colors
-    if(legends_.size()!=colors_.size()){
-        std::cerr<<"Incorrect number of legend entries ("<<legends_.size()<<"), ie. not equal to defined colors ("<<colors_.size()<<"). CANNOT continue!!!\n";
-        exit(77);
-    }
-    if(hists_.size()>legends_.size()){
-        std::cerr<<"Incorrect number of legend entries ("<<legends_.size()<<"), ie. less than sample files ("<<hists_.size()<<"). CANNOT continue!!!\n";
-        exit(77);
-    }
     
     // Here fill colors and line width are adjusted
     for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and legend
@@ -687,11 +662,11 @@ void Plotter::MakeTable(){
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         
         std::vector<std::pair<TH1D*, Sample> > v_numhist;
-        for(auto sample : v_sample_){
-            TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), *i_eventHistoName);
-            double lumiWeight = CalcLumiWeight(sample.inputFile());
+        for(auto sample : v_sampleHistPair_){
+            TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.first.inputFile(), *i_eventHistoName);
+            double lumiWeight = CalcLumiWeight(sample.first.inputFile());
             ApplyFlatWeights(temp_hist, lumiWeight);
-            v_numhist.push_back(std::pair<TH1D*, Sample>(temp_hist, sample));
+            v_numhist.push_back(std::pair<TH1D*, Sample>(temp_hist, sample.first));
         }
         
         for(auto numhist : v_numhist){
