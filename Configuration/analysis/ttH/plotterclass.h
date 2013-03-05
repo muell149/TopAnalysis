@@ -58,14 +58,11 @@ private:
     TString name_;
 
     TString specialComment_;
-    int bins_, datafiles_, rebin_;
+    int bins_, rebin_;
     double rangemin_, rangemax_, ymin_, ymax_;
 
-    std::vector<TString> dataset_;
     // The variable scales_ is not used at all...
     std::vector<double> scales_;
-    std::vector<TString> legends_;
-    std::vector<int> colors_;
     std::vector<double> XAxisbins_, XAxisbinCenters_;
 
     std::vector<double> DYScale_;
@@ -74,7 +71,6 @@ private:
     TString XAxis_;
     int channelType_; //0=ee 1==mumu 2==emu 3==combined  
 
-    std::vector<TH1D> hists_;
 
     // The variable logX_ is not used at all...
     bool logX_, logY_, doDYScale_;
@@ -92,6 +88,8 @@ private:
     
     
     std::vector<SampleHistPair> v_sampleHistPair_;
+protected:
+    void hists_();
 };
 
 #endif

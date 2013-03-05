@@ -184,10 +184,8 @@ Plotter::Plotter()
     rangemin_ = 0;
     rangemax_ = 3;
     YAxis_ = "N_{events}";
-    datafiles_ = 0;
 
     channelLabel_.insert(channelLabel_.begin(),4, "");
-
     
     //Ivan: Initialize list of systematics
     fileReader_ = RootFileReader::getInstance();
@@ -364,20 +362,6 @@ bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std:
         exit(1);
     }
     
-    // FIXME: Workaround for now, these variables should not be needed anymore after full Sample implementation
-    datafiles_ = 0;
-    dataset_.clear();
-    legends_.clear();
-    colors_.clear();
-    hists_.clear();
-    for(auto sampleHistPair : v_sampleHistPair_){
-        if(sampleHistPair.first.sampleType()==Sample::SampleType::data)++datafiles_;
-        dataset_.push_back(sampleHistPair.first.inputFile());
-        legends_.push_back(sampleHistPair.first.legendEntry());
-        colors_.push_back(sampleHistPair.first.color());
-        hists_.push_back(*(sampleHistPair.second));
-    }
-    
     return allHistosAvailable;
 }
 
@@ -444,9 +428,9 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     
     // FIXME: keep temporarily and remove later
     std::vector<bool> v_isHiggsSignal;
-    for(unsigned int i=0; i<hists_.size(); ++i){
+    for(auto sampleHistPair : v_sampleHistPair_){
         bool isHiggsSignal(false);
-        if(legends_.at(i) == "t#bar{t}H (b#bar{b})")isHiggsSignal = true;
+        if(sampleHistPair.first.sampleType() == Sample::SampleType::higgssignal)isHiggsSignal = true;
         v_isHiggsSignal.push_back(isHiggsSignal);
     }
     
@@ -681,7 +665,7 @@ void Plotter::MakeTable(){
     
     // Find and loop over all histograms containing information for cutflow table
     std::vector<TString> v_eventHistoName;
-    v_eventHistoName = fileReader_->findHistos(dataset_[0], "step");
+    v_eventHistoName = fileReader_->findHistos(v_sampleHistPair_[0].first.inputFile(), "step");
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         
         std::vector<std::pair<TH1D*, Sample> > v_numhist;
