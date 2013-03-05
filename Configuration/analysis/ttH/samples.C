@@ -46,7 +46,8 @@ Samples::addSamples(const Sample::Channel& channel, const TString& systematic){
     Sample qcdbcem2030("QCD Multijet", kYellow, 2.886E8*5.800E-4);
     Sample qcdbcem3080("QCD Multijet", kYellow, 7.424E7*2.250E-3);
     Sample qcdbcem80170("QCD Multijet", kYellow, 1.191E6*10.90E-3);
-    Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302, Sample::SampleType::higgssignal);
+    //Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302, Sample::SampleType::higgssignal);
+    Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302);
     Sample ttbarHtobbbar("t#bar{t}H (b#bar{b})", kOrange-7, 0.1302*0.577, Sample::SampleType::higgssignal);
     
     

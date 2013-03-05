@@ -20,12 +20,13 @@ class Plotter {
 
 public:
     enum DrawMode{stacked, overlaid, scaledoverlaid, undefined};
-  
+    
+    typedef std::pair<Sample, TH1D*> SampleHistPair;
+    
     Plotter();
-    void   setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
-    void   setStyle(TH1*, unsigned int, bool = false);
-    void   write(Sample::Channel, TString, DrawMode, std::vector<Sample>);
-    void   setLumi(double);
+    void setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
+    void write(Sample::Channel, TString, DrawMode, std::vector<Sample>);
+    void setLumi(double);
     
     
     void MakeTable();
@@ -42,10 +43,12 @@ public:
     double CalcLumiWeight(const TString& WhichSample);
     std::vector<TString> InputFileList(TString mode, TString Systematic);
 
-    TLegend* ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> legends, TLegend *leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
-
+    
 
 private:
+    TLegend* ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, TLegend* leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
+    
+    void setStyle(SampleHistPair&, bool =false);
     
     bool prepareDataset(Sample::Channel&, TString&, std::vector<Sample>&);
     
@@ -74,7 +77,7 @@ private:
     std::vector<TH1D> hists_;
 
     // The variable logX_ is not used at all...
-    bool initialized_, logX_, logY_, doDYScale_;
+    bool logX_, logY_, doDYScale_;
     double lumi_;
 
     std::vector<TString> channelLabel_;
@@ -88,7 +91,6 @@ private:
     RootFileReader *fileReader_;
     
     
-    typedef std::pair<Sample, TH1D*> SampleHistPair;
     std::vector<SampleHistPair> v_sampleHistPair_;
 };
 

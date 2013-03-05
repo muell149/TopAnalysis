@@ -184,7 +184,6 @@ Plotter::Plotter()
     rangemin_ = 0;
     rangemax_ = 3;
     YAxis_ = "N_{events}";
-    initialized_ = false;
     datafiles_ = 0;
 
     channelLabel_.insert(channelLabel_.begin(),4, "");
@@ -311,9 +310,6 @@ bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std:
 {
     bool allHistosAvailable(true);
     
-    // FIXME: this variable should also become obsolete
-    initialized_ = false;
-    
     // Associate histogram to dataset if histogram can be found
     v_sampleHistPair_.clear();
     TH1::AddDirectory(kFALSE);
@@ -330,12 +326,13 @@ bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std:
             double lumiWeight = CalcLumiWeight(sample.inputFile());
             ApplyFlatWeights(hist, lumiWeight);
             setHHStyle(*gStyle);
-            p_sampleHist = SampleHistPair(sample, hist);
+            // Clone histogram directly here
+            TH1D* histClone = (TH1D*) hist->Clone();
+            p_sampleHist = SampleHistPair(sample, histClone);
         }
         v_sampleHistPair_.push_back(p_sampleHist);
     }
     //std::cout<<"Number of samples used for histogram ("<<name_<<"): "<<v_sampleHistPair_.size()<<"\n";
-    initialized_ = true;
     
     // Adjustments for different channels
     if(channelLabel_.size()<4){channelLabel_.insert(channelLabel_.begin(), 4, "");}
@@ -409,11 +406,10 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     legend->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
     legend->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
 
-    TH1 *drawhists[hists_.size()];
-    std::stringstream ss;
-    ss << DYScale_[channelType_];
-    TString scale;
-    scale=(TString)ss.str();
+    //std::stringstream ss;
+    //ss << DYScale_[channelType_];
+    //TString scale;
+    //scale=(TString)ss.str();
     int legchange=0;
     legend->Clear();
     canvas->Clear();
@@ -424,20 +420,30 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     
     
     // Here fill colors and line width are adjusted
-    for(unsigned int i=0; i<hists_.size() ; i++){ // prepare histos and legend
-        drawhists[i]=(TH1D*) hists_[i].Clone();//rebin the histograms
-        if(rebin_>1) drawhists[i]->Rebin(rebin_);
-        setStyle(drawhists[i], i, true);
+    for(auto sampleHistPair : v_sampleHistPair_){
+        TH1D* tmp_hist = sampleHistPair.second;
+        if(rebin_>1) tmp_hist->Rebin(rebin_);
+        setStyle(sampleHistPair, true);
     }
     
     
     // Check whether Higgs sample should be drawn overlaid and/or scaled
-    TH1D* overlayHist(0);
-    std::vector<bool> v_isHiggsSignal;
     bool drawHiggsOverlaid(false);
     bool drawHiggsScaled(false);
     if(drawMode==overlaid){drawHiggsOverlaid = true;}
     else if(drawMode==scaledoverlaid){drawHiggsOverlaid = true; drawHiggsScaled = true;}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // FIXME: keep temporarily and remove later
+    std::vector<bool> v_isHiggsSignal;
     for(unsigned int i=0; i<hists_.size(); ++i){
         bool isHiggsSignal(false);
         if(legends_.at(i) == "t#bar{t}H (b#bar{b})")isHiggsSignal = true;
@@ -445,56 +451,78 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     }
     
     
+    
+    // FIXME: make it a map (of legendEntry) for generalisation
+    TH1D* overlayHist(0);
+    
     // Here the shape in the legend is adjusted, and black lines are drawn between samples with different legends,
     // and the stack is created
-    for(unsigned int i=0; i<hists_.size() ; ++i){ // prepare histos and legend
-        //std::cout<<"IsHiggs: "<<v_isHiggsSignal.at(i)<<" , "<<drawHiggsOverlaid<<"\n";
-        if(legends_.at(i) != "Data" && !(v_isHiggsSignal.at(i) && drawHiggsOverlaid)){
-            //std::cout<<"legend in mc stack: "<<legends_.at(i)<<"\n";
-            if(i > 1){
-                if(legends_.at(i) != legends_.at(i-1)){
-                    legchange = i; 
-                    legend->AddEntry(drawhists[i], legends_.at(i),"f");
-                }else{
-                    drawhists[legchange]->Add(drawhists[i]);
+    // FIXME: works only if first histogram is data...
+    // FIXME: put this in own method, and get mcStack, dataHist, vector<overlayHist> ?!
+    for(auto i_sampleHistPair = v_sampleHistPair_.begin(); i_sampleHistPair != v_sampleHistPair_.end(); ++i_sampleHistPair){
+        auto decrementIterator = i_sampleHistPair;
+        if(i_sampleHistPair != v_sampleHistPair_.begin())--decrementIterator;
+        auto incrementIterator = i_sampleHistPair;
+        if(i_sampleHistPair != v_sampleHistPair_.end())++incrementIterator;
+        const Sample::SampleType& sampleType = i_sampleHistPair->first.sampleType();
+        const TString& legendEntry = i_sampleHistPair->first.legendEntry();
+        TH1D* hist = i_sampleHistPair->second;
+        //std::cout<<"IsHiggs: "<<int(sampleType==Sample::SampleType::higgssignal)<<" , "<<drawHiggsOverlaid<<"\n";
+        if(sampleType!=Sample::SampleType::data && !(sampleType==Sample::SampleType::higgssignal && drawHiggsOverlaid)){
+            //std::cout<<"Legend in mc stack: "<<legendEntry<<"\n";
+            if(i_sampleHistPair != v_sampleHistPair_.begin()){
+                if(legendEntry != decrementIterator->first.legendEntry()){
+                    int distance = std::distance(v_sampleHistPair_.begin(), i_sampleHistPair);
+                    legchange = distance;
+                    legend->AddEntry(hist, legendEntry,"f");
+                }
+                else{
+                    v_sampleHistPair_[legchange].second->Add(hist);
                 }
             }
             
-            if(i!=(hists_.size()-1)){
-                if(legends_.at(i)!=legends_.at(i+1)){
-                    drawhists[i]->SetLineColor(1);
+            if(incrementIterator != v_sampleHistPair_.end()){
+                if(legendEntry != incrementIterator->first.legendEntry()){
+                    hist->SetLineColor(1);
                 }
-            }else{
-                drawhists[i]->SetLineColor(1);
+            }
+            else{
+                hist->SetLineColor(1);
             }
             
-            if(legends_.at(i) != legends_.at(i-1)){
-                drawhists[i]->SetLineColor(1);
-                stack->Add(drawhists[i]); 
+            if(legendEntry != decrementIterator->first.legendEntry()){
+                hist->SetLineColor(1);
+                stack->Add(hist);
             }
         }
-        else if(legends_.at(i) != "Data"){
-            //std::cout<<"legend in higgs overlaid: "<<legends_.at(i)<<"\n";
-            if(!overlayHist)overlayHist = (TH1D*) drawhists[i]->Clone();
-            else overlayHist->Add(drawhists[i]);
+        else if(sampleType!=Sample::SampleType::data){
+            //std::cout<<"Legend in higgs overlaid: "<<legendEntry<<"\n";
+            if(!overlayHist)overlayHist = (TH1D*) hist->Clone();
+            else overlayHist->Add(hist);
             overlayHist->SetFillStyle(0);
             overlayHist->SetLineWidth(2);
         }
         else{
-            if(i==0) legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
-            if(i>0){
-                if(legends_.at(i) != legends_.at(i-1)){
-                    legend->AddEntry(drawhists[i], legends_.at(i) ,"pe");
+            //std::cout<<"Legend in data: "<<legendEntry<<"\n";
+            if(i_sampleHistPair == v_sampleHistPair_.begin()){
+                legend->AddEntry(hist, legendEntry,"pe");
+            }
+            else{
+                if(legendEntry != decrementIterator->first.legendEntry()){
+                    legend->AddEntry(hist, legendEntry,"pe");
                 }
-                if(legends_.at(i) == legends_.at(0)){
-                    drawhists[0]->Add(drawhists[i]);
+                else{
+                    // requires first Sample in vector to be of type data
+                    v_sampleHistPair_[0].second->Add(hist);
                 }
             }
         }
     }
     
     
-    TList* list = stack->GetHists(); 
+    
+    TList* list = stack->GetHists();
+    //std::cout<<"\nSizes: "<<v_sampleHistPair_.size()<<" , "<<list->GetEntries()<<"\n";
     // Create a histogram with the sum of all stacked hists
     TH1D* stacksum = (TH1D*) list->At(0)->Clone();
     for (int i = 1; i < list->GetEntries(); ++i) { stacksum->Add((TH1D*)list->At(i));}
@@ -508,28 +536,19 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
         const int precision(signalScaleFactor>=100 ? 0 : 1);
         ss_scaleFactor<<" x"<<std::fixed<<std::setprecision(precision)<<signalScaleFactor;
         overlayHist->Scale(signalScaleFactor);
-        int iSample=0;
-        for(std::vector<bool>::const_iterator i_isHiggsSignal = v_isHiggsSignal.begin(); i_isHiggsSignal != v_isHiggsSignal.end();++iSample, ++i_isHiggsSignal){
-            if(*i_isHiggsSignal){
-                TString label(legends_.at(iSample));
+        for(auto sampleHistPair : v_sampleHistPair_){
+            if(sampleHistPair.first.sampleType() == Sample::SampleType::higgssignal){
+                TString label(sampleHistPair.first.legendEntry());
                 label.Append(ss_scaleFactor.str());
                 v_higgsLabel.push_back(label);
-                //std::cout<<"Label: "<<label<<" , "<<iSample<<"\n";
-                
-                if(iSample==0){
-                    legend->AddEntry(overlayHist, label, "l");
-                }
-                else if(legends_.at(iSample) != legends_.at(iSample-1)){
-                    legend->AddEntry(overlayHist, label, "l");
-                }
+                legend->AddEntry(overlayHist, label, "l");
             }
-            //if(*i_isHiggsSignal)std::cout<<"\n\t\tHiggsLegend "<<legend->GetListOfPrimitives()->Print()<<"\n";
         }
     }
     
     // FIXME: why using this at all (legends are ordered but stack stays the same), isn't it better to have input correctly ?
     // in fact the legend is filled oppositely than the stack, so it is used for turning the order (but not completely, sth. is messed up !?)
-    legend = ControlLegend(hists_.size(), drawhists, legends_, legend, drawHiggsOverlaid, v_higgsLabel);
+    legend = ControlLegend(v_sampleHistPair_, legend, drawHiggsOverlaid, v_higgsLabel);
     
     
     // FIXME: is this histo for error band on stack? but it is commented out ?!
@@ -546,32 +565,32 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     // Set x and y axis
     if(logY_)canvas->SetLogy();
 
-    drawhists[0]->SetMinimum(ymin_);
+    v_sampleHistPair_[0].second->SetMinimum(ymin_);
 
-    if(rangemin_!=0 || rangemax_!=0) {drawhists[0]->SetAxisRange(rangemin_, rangemax_, "X");}
+    if(rangemin_!=0 || rangemax_!=0) {v_sampleHistPair_[0].second->SetAxisRange(rangemin_, rangemax_, "X");}
 
     if(ymax_==0){
-        if(logY_){drawhists[0]->SetMaximum(18  * drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
-        else{drawhists[0]->SetMaximum(1.5 * drawhists[0]->GetBinContent(drawhists[0]->GetMaximumBin()));}
+        if(logY_){v_sampleHistPair_[0].second->SetMaximum(18  * v_sampleHistPair_[0].second->GetBinContent(v_sampleHistPair_[0].second->GetMaximumBin()));}
+        else{v_sampleHistPair_[0].second->SetMaximum(1.5 * v_sampleHistPair_[0].second->GetBinContent(v_sampleHistPair_[0].second->GetMaximumBin()));}
     }
-    else{drawhists[0]->SetMaximum(ymax_);}
+    else{v_sampleHistPair_[0].second->SetMaximum(ymax_);}
 
-    drawhists[0]->GetXaxis()->SetNoExponent(kTRUE);
+    v_sampleHistPair_[0].second->GetXaxis()->SetNoExponent(kTRUE);
 
     TGaxis::SetMaxDigits(2);
 
 
-    //Add the binwidth to the yaxis in yield plots (works only correctly for equidistant bins)
-    TString ytitle = TString(drawhists[0]->GetYaxis()->GetTitle()).Copy();
-    double binwidth = drawhists[0]->GetXaxis()->GetBinWidth(1);
+    //Add the binwidth to the yaxis in yield plots (FIXME: works only correctly for equidistant bins)
+    TString ytitle = TString(v_sampleHistPair_[0].second->GetYaxis()->GetTitle()).Copy();
+    double binwidth = v_sampleHistPair_[0].second->GetXaxis()->GetBinWidth(1);
     std::ostringstream width;
     width<<binwidth;
     if(name_.Contains("Rapidity") || name_.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
     else if(name_.Contains("pT") || name_.Contains("Mass") || name_.Contains("mass") || name_.Contains("MET") || name_.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
-    drawhists[0]->GetYaxis()->SetTitle(ytitle);
+    v_sampleHistPair_[0].second->GetYaxis()->SetTitle(ytitle);
     
     // Draw data histogram and stack and error bars
-    drawhists[0]->Draw("e1");
+    v_sampleHistPair_[0].second->Draw("e1");
     stack->Draw("same HIST");
     gPad->RedrawAxis();
     TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0.5)");//this is frustrating and stupid but apparently necessary...
@@ -580,14 +599,14 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     //syshist->Draw("same,E2");  // error bars for stack (which, stat or combined with syst ?)
     TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     setex2->Draw();  // remove error bars for data in x-direction
-    drawhists[0]->Draw("same,e1");
+    v_sampleHistPair_[0].second->Draw("same,e1");
     if(overlayHist)overlayHist->Draw("same");
     
     // Put additional stuff to histogram
     DrawCMSLabels(1, 8);
     DrawDecayChLabel(channelLabel_[channelType_]);
     legend->Draw("SAME");
-    drawRatio(drawhists[0], stacksum, 0.5, 1.7);
+    drawRatio(v_sampleHistPair_[0].second, stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots 
     gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+systematic, true);
@@ -595,23 +614,25 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     
     // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
-    TH1 *sumttbar = 0;
-    for (size_t i = 0; i < hists_.size(); ++i) {
-        if (legends_.at(i) != "Data") {
-            if (sumMC) sumMC->Add(drawhists[i]);
-            else sumMC = static_cast<TH1*>(drawhists[i]->Clone());
+    TH1 *sumSignal = 0;
+    for(auto sampleHistPair : v_sampleHistPair_){
+        if(sampleHistPair.first.sampleType() == Sample::SampleType::higgssignal){
+            if (sumSignal) sumSignal->Add(sampleHistPair.second);
+            else sumSignal = static_cast<TH1*>(sampleHistPair.second->Clone());
+            // Do not add Higgs samples to sumMC (all MC samples) in case of overlaid drawing
+            if(drawHiggsOverlaid)continue;
         }
-        if (legends_.at(i) == "t#bar{t} Signal") {
-            if (sumttbar) sumttbar->Add(drawhists[i]);
-            else sumttbar = static_cast<TH1*>(drawhists[i]->Clone());
+        if(sampleHistPair.first.sampleType() != Sample::SampleType::data){
+            if (sumMC) sumMC->Add(sampleHistPair.second);
+            else sumMC = static_cast<TH1*>(sampleHistPair.second->Clone());
         }
     }
     sumMC->SetName(name_);
     
     //save Canvas AND sources in a root file
     TFile out_root(outpathPlots_+subfolderChannel_+"/"+systematic+"/"+name_+"_source.root", "RECREATE");
-    drawhists[0]->Write(name_+"_data");
-    sumttbar->Write(name_+"_signalmc");
+    v_sampleHistPair_[0].second->Write(name_+"_data");
+    sumSignal->Write(name_+"_signalmc");
     sumMC->Write(name_+"_allmc");
     canvas->Write(name_ + "_canvas");
     out_root.Close();
@@ -624,13 +645,15 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
 
 
 
-void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
+void Plotter::setStyle(SampleHistPair& sampleHistPair, bool isControlPlot)
 {
-    hist->SetFillColor(colors_[i]);
-    hist->SetLineColor(colors_[i]);
+    TH1* hist(sampleHistPair.second);
+    
+    hist->SetFillColor(sampleHistPair.first.color());
+    hist->SetLineColor(sampleHistPair.first.color());
     hist->SetLineWidth(1);
 
-    if(legends_.at(i) == "Data"){
+    if(sampleHistPair.first.sampleType() == Sample::SampleType::data){
         hist->SetFillColor(0);
         hist->SetMarkerStyle(20);
         hist->SetMarkerSize(1.);
@@ -716,21 +739,21 @@ void Plotter::MakeTable(){
 
 
 
-TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TString> Legends, TLegend *leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel){
+TLegend* Plotter::ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, TLegend* leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel){
     //hardcoded ControlPlot legend
-    std::vector<TString> OrderedLegends;    
-    OrderedLegends.push_back("Data");
-    OrderedLegends.push_back("t#bar{t} Signal");
-    OrderedLegends.push_back("t#bar{t} Other");
-    OrderedLegends.push_back("Single Top");
-    OrderedLegends.push_back("W+Jets");
-    OrderedLegends.push_back("Z / #gamma* #rightarrow ee/#mu#mu");
-    OrderedLegends.push_back("Z / #gamma* #rightarrow #tau#tau");
-    OrderedLegends.push_back("Diboson");
-    OrderedLegends.push_back("QCD Multijet");
+    std::vector<TString> v_orderedLegend;    
+    v_orderedLegend.push_back("Data");
+    v_orderedLegend.push_back("t#bar{t} Signal");
+    v_orderedLegend.push_back("t#bar{t} Other");
+    v_orderedLegend.push_back("Single Top");
+    v_orderedLegend.push_back("W+Jets");
+    v_orderedLegend.push_back("Z / #gamma* #rightarrow ee/#mu#mu");
+    v_orderedLegend.push_back("Z / #gamma* #rightarrow #tau#tau");
+    v_orderedLegend.push_back("Diboson");
+    v_orderedLegend.push_back("QCD Multijet");
     // HIGGSING
-    OrderedLegends.push_back("t#bar{t}H (incl.)");
-    OrderedLegends.push_back("t#bar{t}H (b#bar{b})");
+    v_orderedLegend.push_back("t#bar{t}H (incl.)");
+    v_orderedLegend.push_back("t#bar{t}H (b#bar{b})");
     // ENDHIGGSING
     
     leg->Clear();
@@ -743,27 +766,28 @@ TLegend* Plotter::ControlLegend(int HistsSize, TH1* drawhists[], std::vector<TSt
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     leg->SetTextAlign(12);
-    for(int i=0; i<(int)OrderedLegends.size(); ++i){
-        for(int j=0; j<HistsSize; ++j){
-            if (OrderedLegends[i] == Legends[j]){
-                if( OrderedLegends[i] == "Data"){
-                    leg->AddEntry(drawhists[j], OrderedLegends[i], "pe");
-                    break;
+    for(auto orderedLegend : v_orderedLegend){
+        for(auto sampleHistPair : v_sampleHistPair){
+            const TString& legendEntry(sampleHistPair.first.legendEntry());
+            if(orderedLegend != legendEntry)continue;
+            const Sample::SampleType& sampleType(sampleHistPair.first.sampleType());
+            if(sampleType==Sample::SampleType::data){
+                leg->AddEntry(sampleHistPair.second, orderedLegend, "pe");
+                break;
+            }
+            else if(sampleType==Sample::SampleType::higgssignal){
+                TString legendTitle(orderedLegend);
+                TString legendOptions("f");
+                if(drawHiggsOverlaid)legendOptions = "l";
+                for(std::vector<TString>::const_iterator i_higgsLabel = v_higgsLabel.begin(); i_higgsLabel != v_higgsLabel.end(); ++i_higgsLabel){
+                    if(i_higgsLabel->Contains(legendTitle))legendTitle = *i_higgsLabel;
                 }
-                else if(OrderedLegends[i].Contains("t#bar{t}H (b#bar{b})")){
-                    TString legendTitle(OrderedLegends[i]);
-                    TString legendOptions("f");
-                    if(drawHiggsOverlaid)legendOptions = "l";
-                    for(std::vector<TString>::const_iterator i_higgsLabel = v_higgsLabel.begin(); i_higgsLabel != v_higgsLabel.end(); ++i_higgsLabel){
-                        if(i_higgsLabel->Contains(legendTitle))legendTitle = *i_higgsLabel;
-                    }
-                    leg->AddEntry(drawhists[j], legendTitle, legendOptions);
-                    break;
-                }
-                else{
-                    leg->AddEntry(drawhists[j], OrderedLegends[i], "f");
-                    break;
-                }
+                leg->AddEntry(sampleHistPair.second, legendTitle, legendOptions);
+                break;
+            }
+            else{
+                leg->AddEntry(sampleHistPair.second, orderedLegend, "f");
+                break;
             }
         }
     }
