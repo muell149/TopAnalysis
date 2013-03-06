@@ -8,11 +8,11 @@
 
 class Sample{
     public:
-        enum SampleType{data, dyll, higgssignal, dummy};
+        enum Systematic{nominal, undefinedSystematic};
         
-        enum Channel{ee, emu, mumu, combined, undefined};
-        //Channel convertChannel(const std::string&)const;
-        //std::string convertChannel(const Channel&)const;
+        enum Channel{ee, emu, mumu, combined, undefinedChannel};
+        
+        enum SampleType{data, dyll, higgssignal, dummy};
         
         Sample();
         Sample(TString legendEntry, int color, double crossSection, SampleType sampleType=dummy);
@@ -36,28 +36,34 @@ class Sample{
 };
 
 
-namespace Tools{
-    Sample::Channel convertChannel(const std::string&);
-    std::string convertChannel(const Sample::Channel&);
-    // FIXME: net yet implemented, only dummy so far
-    void orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample);
-}
-
-
 class Samples{
     public:
         Samples(){};
         ~Samples(){};
-        const std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >& getSystematicChannelSamples();
-        std::vector<Sample> getSamples(const Sample::Channel& channel, const TString& systematic);
-        void addSamples(const Sample::Channel& channel, const TString& systematic);
+        const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >& getSystematicChannelSamples();
+        std::vector<Sample> getSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
+        void addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
     private:
-        std::map<TString, std::map<Sample::Channel, std::vector<Sample> > > m_systematicChannelSample_;
+        std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > > m_systematicChannelSample_;
 };
+
+
+namespace Tools{
+    // FIXME: net yet implemented, only dummy so far
+    void orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample);
+    
+    Sample::Channel convertChannel(const std::string&);
+    std::string convertChannel(const Sample::Channel&);
+    std::string channelLabel(const Sample::Channel&);
+    
+    Sample::Systematic convertSystematic(const std::string&);
+    std::string convertSystematic(const Sample::Systematic&);
+}
 
 
 
 #endif // Samples_h
+
 
 
 

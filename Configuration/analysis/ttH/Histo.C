@@ -19,16 +19,16 @@
 
 void Histo(Plotter::DrawMode drawMode,
            std::vector<std::string> plots, 
-           std::vector<TString> systematics,
-           std::vector<Sample::Channel> v_channel) 
+           std::vector<Sample::Channel> v_channel,
+           std::vector<Sample::Systematic> v_systematic)
 {
     // Set data luminosity
     const double lumi = 12210;
     
     // Access all samples
     Samples samples;
-    for (auto channel : v_channel) {
-        for (auto systematic : systematics) {
+    for (auto systematic : v_systematic) {
+        for (auto channel : v_channel) {
             samples.addSamples(channel, systematic);
         }
     }
@@ -69,9 +69,9 @@ void Histo(Plotter::DrawMode drawMode,
         
         
         // Loop over all systematics and all channels and write histograms
-        const std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >& m_systematicChannelSample(samples.getSystematicChannelSamples());
+        const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >& m_systematicChannelSample(samples.getSystematicChannelSamples());
         for(auto systematicChannelSample : m_systematicChannelSample){
-            const TString& systematic(systematicChannelSample.first);
+            const Sample::Systematic& systematic(systematicChannelSample.first);
             for(auto channelSample : systematicChannelSample.second){
                 const Sample::Channel& channel(channelSample.first);
                 h_generalPlot.write(channel, systematic, drawMode, channelSample.second);
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
     CLParameter<std::string> opt_plots("p", "Name (pattern) of plot; multiple patterns possible; use '+Name' to match name exactly", false, 1, 100);
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: all channels", false, 1, 4,
         makeStringChecker({"ee", "emu", "mumu", "combined"}));
-    CLParameter<std::string> opt_sys("s", "Systematic variation - default is Nominal, use 'all' for all", false, 1, 100,
+    CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal, use 'all' for all", false, 1, 100,
         makeStringChecker({"Nominal"}));
     CLAnalyser::interpretGlobal(argc, argv);
     
@@ -128,13 +128,20 @@ int main(int argc, char** argv) {
     for (auto channel: v_channel)std::cout << Tools::convertChannel(channel) << " ";
     std::cout << "\n";
     
-	// Use only nominal samples for now
-    std::vector<TString> systematics { "Nominal" };
-    std::cout << "Processing systematics (use >>-s all<< to process all knwon systematics): "; 
-    for (auto sys: systematics) std::cout << sys << " "; std::cout << "\n";
+	// Set up systematics (use only nominal samples for now)
+    std::vector<Sample::Systematic> v_systematic { Sample::Systematic::nominal };
+    std::vector<std::string> systematics = opt_systematic.getArguments();
+    if(opt_systematic.isSet()){
+        v_systematic.clear();
+        for(auto systematic : systematics){
+            v_systematic.push_back(Tools::convertSystematic(systematic));
+        }
+    }
+    std::cout << "Processing systematics (use >>-s all<< to process all known systematics): "; 
+    for (auto systematic: v_systematic) std::cout << Tools::convertSystematic(systematic) << " "; std::cout << "\n";
     
     std::vector<std::string> plots { "" };
     if (opt_plots.isSet()) plots = opt_plots.getArguments();
 
-    Histo(drawMode, plots, systematics, v_channel);
+    Histo(drawMode, plots, v_channel, v_systematic);
 }

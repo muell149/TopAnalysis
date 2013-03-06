@@ -23,6 +23,7 @@
 #include "TPaveText.h"
 
 #include "../diLeptonic/utils.h"
+#include "higgsUtils.h"
 #include <iomanip>
 
 
@@ -60,7 +61,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
 
     std::cout<<"\n\nBegin DYSCALE FACTOR calculation at selection step "<<nameAppendix<<std::endl;
     
-    std::vector<TString> Vec_Files = InputFileList("combined", "Nominal");//Read the hardcoded list of files
+    std::vector<TString> Vec_Files = InputFileList(Sample::Channel::combined, Sample::Systematic::nominal);//Read the hardcoded list of files
     if(Vec_Files.size()<1) {std::cout<<"WARNING(in DYScaleFactor)!!! No datasets available to calculate DY SF. EXITING!!"<<std::endl; return;}
     
     double NoutEEDYMC=0, NinEEDYMC=0, NoutMuMuDYMC=0, NinMuMuDYMC=0;//Number of events in/out of z-veto region for the DY MC
@@ -75,8 +76,8 @@ void Plotter::DYScaleFactor(TString SpecialComment){
             if(Vec_Files.at(i).Contains("run")){
                 TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
                 TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), "Looseh1");
-                ApplyFlatWeights(htemp, allWeights);
-                ApplyFlatWeights(htemp1, allWeights);
+                Tools::applyFlatWeight(htemp, allWeights);
+                Tools::applyFlatWeight(htemp1, allWeights);
                 if(Vec_Files.at(i).Contains("ee")){
                     NinEE+=htemp->Integral();
                     NinEEloose+=htemp1->Integral();
@@ -90,8 +91,8 @@ void Plotter::DYScaleFactor(TString SpecialComment){
                 if(Vec_Files.at(i).Contains("50inf")){
                     TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
                     TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
-                    ApplyFlatWeights(htemp, LumiWeight);
-                    ApplyFlatWeights(htemp1, LumiWeight);
+                    Tools::applyFlatWeight(htemp, LumiWeight);
+                    Tools::applyFlatWeight(htemp1, LumiWeight);
                     if(Vec_Files.at(i).Contains("ee")){
                         NinEEDYMC+=htemp->Integral();
                         NoutEEDYMC+=htemp1->Integral();
@@ -104,7 +105,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
                 }
                 else{
                     TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
-                    ApplyFlatWeights(htemp, LumiWeight);
+                    Tools::applyFlatWeight(htemp, LumiWeight);
                     if(Vec_Files.at(i).Contains("ee")){   NoutEEDYMC+=htemp->Integral();}
                     if(Vec_Files.at(i).Contains("mumu")){ NoutMuMuDYMC+=htemp->Integral();}
                     delete htemp;
@@ -112,7 +113,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
             }
             else{
                 TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-                ApplyFlatWeights(htemp, LumiWeight);
+                Tools::applyFlatWeight(htemp, LumiWeight);
                 if(Vec_Files.at(i).Contains("ee")){   NinEEMC+=htemp->Integral();   }
                 if(Vec_Files.at(i).Contains("mumu")){ NinMuMuMC+=htemp->Integral(); }
                 delete htemp;
@@ -121,7 +122,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
         
         if(Vec_Files.at(i).Contains("emu") && Vec_Files.at(i).Contains("run")){
             TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-            ApplyFlatWeights(htemp, LumiWeight);
+            Tools::applyFlatWeight(htemp, LumiWeight);
             NinEMu+=htemp->Integral();
             delete htemp;
         }
@@ -239,8 +240,11 @@ void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TS
 
 
 // This method is only used for DY rescaling
-std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
+std::vector<TString> Plotter::InputFileList(const Sample::Channel& channel, const Sample::Systematic& systematic)
 {
+    const TString mode(Tools::convertChannel(channel));
+    const TString Systematic(Tools::convertSystematic(systematic));
+    
     // Use only nominal samples and do not apply systematics
     
     std::vector<TString> FileVector;
@@ -254,9 +258,9 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
     }
     
     if(!mode.CompareTo("combined")){
-        std::vector<TString> eemode   = Plotter::InputFileList(TString("ee"), Systematic);
-        std::vector<TString> emumode  = Plotter::InputFileList(TString("emu"), Systematic);
-        std::vector<TString> mumumode = Plotter::InputFileList(TString("mumu"), Systematic);
+        std::vector<TString> eemode   = Plotter::InputFileList(Sample::Channel::ee, systematic);
+        std::vector<TString> emumode  = Plotter::InputFileList(Sample::Channel::emu, systematic);
+        std::vector<TString> mumumode = Plotter::InputFileList(Sample::Channel::mumu, systematic);
         FileVector.insert(FileVector.end(), eemode.begin(), eemode.end());
         FileVector.insert(FileVector.end(), emumode.begin(), emumode.end());
         FileVector.insert(FileVector.end(), mumumode.begin(), mumumode.end());
@@ -304,7 +308,7 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
 
 
 
-bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std::vector<Sample>& v_sample)
+bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& systematic, std::vector<Sample>& v_sample)
 {
     bool allHistosAvailable(true);
     
@@ -321,8 +325,9 @@ bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std:
         }
         else{
             //Rescaling to the data luminosity
-            double lumiWeight = CalcLumiWeight(sample.inputFile());
-            ApplyFlatWeights(hist, lumiWeight);
+            //double lumiWeight = CalcLumiWeight(sample.inputFile());
+            double lumiWeight = Tools::luminosityWeight(sample, lumi_, fileReader_);
+            Tools::applyFlatWeight(hist, lumiWeight);
             setHHStyle(*gStyle);
             // Clone histogram directly here
             TH1D* histClone = (TH1D*) hist->Clone();
@@ -352,9 +357,8 @@ bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std:
     // FIXME: this variable is completely useless, or ?
     DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
     
-    if(systematic.Contains("DY_") || systematic.Contains("BG_")){systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
 
-    TString histoListName = "FileLists/HistoFileList_"+systematic+"_"+Tools::convertChannel(channel)+".txt";
+    TString histoListName = "FileLists/HistoFileList_"+Tools::convertSystematic(systematic)+"_"+Tools::convertChannel(channel)+".txt";
     std::cout << "reading " << histoListName << std::endl;
     ifstream FileList(histoListName);
     if (FileList.fail()) {
@@ -367,10 +371,10 @@ bool Plotter::prepareDataset(Sample::Channel& channel, TString& systematic, std:
 
 
 
-void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMode, std::vector<Sample> v_sample) // do scaling, stacking, legending, and write in file 
+void Plotter::write(Sample::Channel channel, Sample::Systematic systematic, DrawMode drawMode, std::vector<Sample> v_sample) // do scaling, stacking, legending, and write in file 
 {
     if(!prepareDataset(channel, systematic, v_sample)){
-        std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): " << Tools::convertChannel(channel) << "/" << systematic
+        std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): " << Tools::convertChannel(channel) << "/" << Tools::convertSystematic(systematic)
                  <<"\n... skip this plot\n";
         return;
     }
@@ -587,14 +591,14 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     if(overlayHist)overlayHist->Draw("same");
     
     // Put additional stuff to histogram
-    DrawCMSLabels(1, 8);
-    DrawDecayChLabel(channelLabel_[channelType_]);
+    drawCmsLabels(1, 8);
+    drawDecayChannelLabel(channel);
     legend->Draw("SAME");
     drawRatio(v_sampleHistPair_[0].second, stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots 
-    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+systematic, true);
-    canvas->Print(outpathPlots_+subfolderChannel_+"/"+systematic+"/"+name_+".eps");
+    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+Tools::convertSystematic(systematic), true);
+    canvas->Print(outpathPlots_+subfolderChannel_+"/"+Tools::convertSystematic(systematic)+"/"+name_+".eps");
     
     // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
@@ -614,7 +618,7 @@ void Plotter::write(Sample::Channel channel, TString systematic, DrawMode drawMo
     sumMC->SetName(name_);
     
     //save Canvas AND sources in a root file
-    TFile out_root(outpathPlots_+subfolderChannel_+"/"+systematic+"/"+name_+"_source.root", "RECREATE");
+    TFile out_root(outpathPlots_+subfolderChannel_+"/"+Tools::convertSystematic(systematic)+"/"+name_+"_source.root", "RECREATE");
     v_sampleHistPair_[0].second->Write(name_+"_data");
     sumSignal->Write(name_+"_signalmc");
     sumMC->Write(name_+"_allmc");
@@ -672,7 +676,7 @@ void Plotter::MakeTable(){
         for(auto sample : v_sampleHistPair_){
             TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.first.inputFile(), *i_eventHistoName);
             double lumiWeight = CalcLumiWeight(sample.first.inputFile());
-            ApplyFlatWeights(temp_hist, lumiWeight);
+            Tools::applyFlatWeight(temp_hist, lumiWeight);
             v_numhist.push_back(std::pair<TH1D*, Sample>(temp_hist, sample.first));
         }
         
@@ -779,16 +783,6 @@ TLegend* Plotter::ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, T
 }
 
 
-
-void Plotter::ApplyFlatWeights(TH1* varhists, const double weight){
-
-    if(weight == 0) {std::cout<<"Warning: the weight your applying is 0. This will remove your distribution."<<std::endl;}
-    //if(weight >=1e3){std::cout<<"Warning: the weight your applying is >= 1e3. This will enlarge too much your distribution."<<std::endl;}
-    varhists->Scale(weight);
-}
-
-
-
 double Plotter::CalcLumiWeight(const TString& WhichSample){
     if (WhichSample.Contains("run")) return 1;
     double lumiWeight=0;
@@ -855,28 +849,27 @@ double Plotter::SampleXSection(const TString& filename){
 
 
 // Draw label for Decay Channel in upper left corner of plot
-void Plotter::DrawDecayChLabel(TString decaychannel, double textSize) {
+void Plotter::drawDecayChannelLabel(const Sample::Channel& channel, double textSize) {
+    TPaveText *decayChannel = new TPaveText();
 
-    TPaveText *decch = new TPaveText();
+    decayChannel->AddText(Tools::channelLabel(channel).c_str());
 
-    decch->AddText(decaychannel);
+    decayChannel->SetX1NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength()        );
+    decayChannel->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 );
+    decayChannel->SetX2NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.15 );
+    decayChannel->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength()        );
 
-    decch->SetX1NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength()        );
-    decch->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 );
-    decch->SetX2NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength() + 0.15 );
-    decch->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength()        );
-
-    decch->SetFillStyle(0);
-    decch->SetBorderSize(0);
-    if (textSize!=0) decch->SetTextSize(textSize);
-    decch->SetTextAlign(12);
-    decch->Draw("same");
+    decayChannel->SetFillStyle(0);
+    decayChannel->SetBorderSize(0);
+    if (textSize!=0) decayChannel->SetTextSize(textSize);
+    decayChannel->SetTextAlign(12);
+    decayChannel->Draw("same");
 }
 
 
 
 // Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
-void Plotter::DrawCMSLabels(int cmsprelim, double energy, double textSize) {
+void Plotter::drawCmsLabels(int cmsprelim, double energy, double textSize) {
 
     const char *text;
     if(cmsprelim ==2 ) {//Private work for PhDs students

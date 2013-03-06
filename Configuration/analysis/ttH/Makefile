@@ -17,6 +17,9 @@ dict.o: dict.cpp
 utils.o: ../diLeptonic/utils.cpp ../diLeptonic/utils.h
 	g++ -c -o utils.o $(COMPFLAGS) ../diLeptonic/utils.cpp
 
+higgsUtils.o: higgsUtils.C higgsUtils.h
+	g++ -c -o higgsUtils.o $(COMPFLAGS) higgsUtils.C
+
 CommandLineParameters.o: ../diLeptonic/CommandLineParameters.cc ../diLeptonic/CommandLineParameters.hh
 	g++ -c -o CommandLineParameters.o $(COMPFLAGS) ../diLeptonic/CommandLineParameters.cc
 
@@ -44,11 +47,11 @@ HistoListReader.o: ../diLeptonic/HistoListReader.h ../diLeptonic/HistoListReader
 Histo.o: Histo.C
 	g++ -c -o Histo.o $(COMPFLAGS) Histo.C
 	
-plotterclass.o: plotterclass.cpp plotterclass.h utils.o
+plotterclass.o: plotterclass.cpp plotterclass.h utils.o higgsUtils.o
 	g++ -c -o plotterclass.o $(COMPFLAGS) plotterclass.cpp
 
-Histo: Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o samples.o
-	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o CommandLineParameters.o samples.o $(ROOTLIBS)
+Histo: Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o
+	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o $(ROOTLIBS)
 
 JetCorrUncertainty.o: ../diLeptonic/JetCorrectionUncertainty.cc JetCorrParameters.o SimpleJetCorrUncert.o
 	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/JetCorrectionUncertainty.cc

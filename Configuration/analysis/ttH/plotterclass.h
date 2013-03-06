@@ -25,7 +25,7 @@ public:
     
     Plotter();
     void setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
-    void write(Sample::Channel, TString, DrawMode, std::vector<Sample>);
+    void write(Sample::Channel, Sample::Systematic, DrawMode, std::vector<Sample>);
     void setLumi(double);
     
     
@@ -38,22 +38,22 @@ public:
 
 
     //IVAN's Scaling Code
-    void ApplyFlatWeights(TH1* varhists,   const double weight);
     double SampleXSection(const TString& filename);
     double CalcLumiWeight(const TString& WhichSample);
-    std::vector<TString> InputFileList(TString mode, TString Systematic);
+    std::vector<TString> InputFileList(const Sample::Channel& channel, const Sample::Systematic& systematic);
 
     
 
 private:
     TLegend* ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, TLegend* leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
     
+    
     void setStyle(SampleHistPair&, bool =false);
     
-    bool prepareDataset(Sample::Channel&, TString&, std::vector<Sample>&);
+    bool prepareDataset(Sample::Channel&, Sample::Systematic&, std::vector<Sample>&);
     
-    void DrawDecayChLabel(TString decaychannel="", double textSize=0.04);
-    void DrawCMSLabels(int cmsprelim=true, double energy=8, double textSize=0.04);
+    void drawDecayChannelLabel(const Sample::Channel&, double textSize=0.04);
+    void drawCmsLabels(int cmsprelim=1, double energy=8, double textSize=0.04);
     
     TString name_;
 
@@ -86,10 +86,7 @@ private:
     static const double topxsec_;
     RootFileReader *fileReader_;
     
-    
     std::vector<SampleHistPair> v_sampleHistPair_;
-protected:
-    void hists_();
 };
 
 #endif

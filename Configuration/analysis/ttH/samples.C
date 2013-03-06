@@ -19,7 +19,7 @@ sampleType_(sampleType), inputFileName_("")
 
 
 void
-Samples::addSamples(const Sample::Channel& channel, const TString& systematic){
+Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
     
     // Define all samples as they are needed
     Sample data("Data", kBlack, 1., Sample::SampleType::data);
@@ -52,7 +52,7 @@ Samples::addSamples(const Sample::Channel& channel, const TString& systematic){
     
     
     // Access FileList containing list of input root files
-    const TString histoListName("FileLists/HistoFileList_" + systematic + "_" + Tools::convertChannel(channel) + ".txt");
+    const TString histoListName("FileLists/HistoFileList_" + Tools::convertSystematic(systematic) + "_" + Tools::convertChannel(channel) + ".txt");
     std::cout << "Reading file: " << histoListName << std::endl;
     ifstream fileList(histoListName);
     if (fileList.fail()) {
@@ -140,7 +140,7 @@ Samples::addSamples(const Sample::Channel& channel, const TString& systematic){
     //for(auto systematicChannelSample : m_systematicChannelSample_){
     //    for(auto channelSample : systematicChannelSample.second){
     //        for(auto sample : channelSample.second){
-    //            std::cout<<"We have samples: "<<systematic<<" , "<<Tools::convertChannel(channel)
+    //            std::cout<<"We have samples: "<<Tools::convertSystematic(systematic)<<" , "<<Tools::convertChannel(channel)
     //                <<" , "<<sample.inputFile()<<"\n";
     //        }
     //    }
@@ -176,15 +176,24 @@ Sample::inputFile()const{
 }
 
 
-const std::map<TString, std::map<Sample::Channel, std::vector<Sample> > >&
+const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >&
 Samples::getSystematicChannelSamples(){
     return m_systematicChannelSample_;
 }
 
 
 std::vector<Sample>
-Samples::getSamples(const Sample::Channel& channel, const TString& systematic){
+Samples::getSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
     return m_systematicChannelSample_[systematic][channel];
+}
+
+
+
+
+
+void
+Tools::orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample){
+    // FIXME: place here automated ordering by legendEntry
 }
 
 
@@ -194,7 +203,7 @@ Tools::convertChannel(const std::string& channel){
     else if(channel == "emu")return Sample::Channel::emu;
     else if(channel == "mumu")return Sample::Channel::mumu;
     else if(channel == "combined")return Sample::Channel::combined;
-    else return Sample::Channel::undefined;
+    else return Sample::Channel::undefinedChannel;
 }
 
 
@@ -208,14 +217,35 @@ Tools::convertChannel(const Sample::Channel& channel){
 }
 
 
-void
-Tools::orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample){
-    // FIXME: place here automated ordering by legendEntry
+std::string
+Tools::channelLabel(const Sample::Channel& channel){
+    if(channel == Sample::Channel::ee)return "ee";
+    else if(channel == Sample::Channel::emu)return "e#mu";
+    else if(channel == Sample::Channel::mumu)return "#mu#mu";
+    else if(channel == Sample::Channel::combined)return "Dilepton Combined";
+    else return "";
 }
 
 
+Sample::Systematic
+Tools::convertSystematic(const std::string& systematic){
+    if(systematic == "Nominal")return Sample::Systematic::nominal;
+    else{
+        std::cout<<"Warning! The following systematic is not implemented: "<<systematic<<std::endl;
+        return Sample::Systematic::undefinedSystematic;
+    }
+}
 
 
+std::string
+Tools::convertSystematic(const Sample::Systematic& systematic){
+    if(systematic == Sample::Systematic::nominal)return "Nominal";
+    else if(systematic == Sample::Systematic::undefinedSystematic)return "";
+    else{
+        std::cout<<"Error! Systematic is not implemented, break...\n";
+        exit(99);
+    }
+}
 
 
 
