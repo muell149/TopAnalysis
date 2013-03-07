@@ -5,7 +5,7 @@ COMPFLAGS=`root-config --cflags` -Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c+
 
 all: load_HiggsAnalysis Histo
 
-load_HiggsAnalysis: dict.o Analysis.o load_HiggsAnalysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o JetCategories.o HiggsAnalysis.o JetCorrUncertainty.o  JetCorrParameters.o SimpleJetCorrUncert.o
+load_HiggsAnalysis: dict.o Analysis.o load_HiggsAnalysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o JetCategories.o HiggsAnalysis.o dyScalingHistograms.o JetCorrUncertainty.o  JetCorrParameters.o SimpleJetCorrUncert.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
 load_HiggsAnalysis.o: load_HiggsAnalysis.C
@@ -13,6 +13,9 @@ load_HiggsAnalysis.o: load_HiggsAnalysis.C
 
 dict.o: dict.cpp
 	g++ -c -o $@ $(COMPFLAGS) $^
+
+dyScalingHistograms.o: dyScalingHistograms.C dyScalingHistograms.h
+	g++ -c -o dyScalingHistograms.o $(COMPFLAGS) dyScalingHistograms.C
 
 utils.o: ../diLeptonic/utils.cpp ../diLeptonic/utils.h
 	g++ -c -o utils.o $(COMPFLAGS) ../diLeptonic/utils.cpp
@@ -35,7 +38,7 @@ PUReweighter.o: ../diLeptonic/PUReweighter.h ../diLeptonic/PUReweighter.cpp
 Analysis.o: ../diLeptonic/Analysis.C ../diLeptonic/Analysis.h ../diLeptonic/HistoListReader.h ../diLeptonic/utils.h ../diLeptonic/KinReco.h
 	g++ -c -o Analysis.o $(COMPFLAGS) ../diLeptonic/Analysis.C
 
-HiggsAnalysis.o: HiggsAnalysis.C HiggsAnalysis.h ../diLeptonic/HistoListReader.h ../diLeptonic/utils.h ../diLeptonic/KinReco.h ../diLeptonic/Analysis.h
+HiggsAnalysis.o: HiggsAnalysis.C HiggsAnalysis.h ../diLeptonic/HistoListReader.h ../diLeptonic/utils.h ../diLeptonic/KinReco.h ../diLeptonic/Analysis.h dyScalingHistograms.h
 	g++ -c -o HiggsAnalysis.o $(COMPFLAGS) HiggsAnalysis.C
 
 JetCategories.o: JetCategories.C JetCategories.h

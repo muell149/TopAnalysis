@@ -5,7 +5,7 @@
 
 #include "../diLeptonic/Analysis.h"
 #include "JetCategories.h"
-
+#include "dyScalingHistograms.h"
 
 
 
@@ -45,7 +45,11 @@ private:
     TH1* h_jetCategories_step8;
     
     /// Histograms for cutflow tables which are not contained in Analysis.h
-    TH1 *h_step0, *h_step1, *h_step2;
+    TH1 *h_events_step0, *h_events_step1, *h_events_step2, *h_events_step3, *h_events_step4,
+        *h_events_step5, *h_events_step6, *h_events_step7, *h_events_step8, *h_events_step9;
+    
+    /// Histograms for Drell-Yan scaling
+    DyScalingHistograms dyScalingHistograms_;
     
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
     TH1 *h_jetpT___XX;
