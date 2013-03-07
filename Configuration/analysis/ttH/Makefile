@@ -17,6 +17,9 @@ dict.o: dict.cpp
 dyScalingHistograms.o: dyScalingHistograms.C dyScalingHistograms.h
 	g++ -c -o dyScalingHistograms.o $(COMPFLAGS) dyScalingHistograms.C
 
+dyScaleFactors.o: dyScaleFactors.C dyScaleFactors.h
+	g++ -c -o dyScaleFactors.o $(COMPFLAGS) dyScaleFactors.C
+
 utils.o: ../diLeptonic/utils.cpp ../diLeptonic/utils.h
 	g++ -c -o utils.o $(COMPFLAGS) ../diLeptonic/utils.cpp
 
@@ -53,8 +56,8 @@ Histo.o: Histo.C
 plotterclass.o: plotterclass.cpp plotterclass.h utils.o higgsUtils.o
 	g++ -c -o plotterclass.o $(COMPFLAGS) plotterclass.cpp
 
-Histo: Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o eventYields.o
-	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o eventYields.o $(ROOTLIBS)
+Histo: Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o eventYields.o dyScaleFactors.o
+	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o eventYields.o dyScaleFactors.o $(ROOTLIBS)
 
 eventYields.o: eventYields.C eventYields.h utils.o
 	g++ -c -o eventYields.o $(COMPFLAGS) eventYields.C

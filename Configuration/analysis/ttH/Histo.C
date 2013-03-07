@@ -15,6 +15,7 @@
 
 #include "samples.h"
 #include "eventYields.h"
+#include "dyScaleFactors.h"
 
 
 void Histo(Plotter::DrawMode drawMode,
@@ -23,7 +24,7 @@ void Histo(Plotter::DrawMode drawMode,
            std::vector<Sample::Systematic> v_systematic)
 {
     // Set data luminosity
-    const double lumi = 12210;
+    const double luminosity = 12210;
     
     // Access all samples
     Samples samples;
@@ -35,9 +36,12 @@ void Histo(Plotter::DrawMode drawMode,
     
     // Produce Drell-Yan scalings
     // FIXME: need to use these in eventYields and Plotter
+    DyScaleFactors dyScaleFactors;
+    DyScaleFactors::DyScaleFactorMap m_dyScaleFactors;
+    m_dyScaleFactors = dyScaleFactors.getScaleFactors(samples, luminosity);
     
     // Produce event yields
-    EventYields eventYields(samples, lumi);
+    EventYields eventYields(samples, luminosity);
     
     // Loop over all histograms in histoList
     HistoListReader histoList("HistoList_control");
@@ -65,7 +69,7 @@ void Histo(Plotter::DrawMode drawMode,
         
         // Create Plotter 
         Plotter h_generalPlot;
-        h_generalPlot.setLumi(lumi);
+        h_generalPlot.setLumi(luminosity);
         
         h_generalPlot.setOptions(plotProperties.name,plotProperties.specialComment,plotProperties.ytitle,plotProperties.xtitle, 
                                  plotProperties.rebin, plotProperties.do_dyscale, plotProperties.logX, plotProperties.logY, 

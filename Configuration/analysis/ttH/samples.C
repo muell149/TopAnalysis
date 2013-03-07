@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include "TString.h"
-
+#include "TColor.h"
 
 
 
@@ -31,8 +31,8 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
     Sample zz("Diboson", 10, 17.654);
     Sample dytautau1050("Z / #gamma* #rightarrow #tau#tau", kAzure+8, 860.5);
     Sample dytautau50inf("Z / #gamma* #rightarrow #tau#tau", kAzure+8, 3532.8);
-    Sample dyll1050("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 860.5, Sample::dyll);
-    Sample dyll50inf("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 3532.8, Sample::dyll);
+    Sample dyll1050("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 860.5, Sample::dyllbelow50);
+    Sample dyll50inf("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 3532.8, Sample::dyll50inf);
     Sample wlnu("W+Jets", kGreen-3, 36257.2);
     Sample qcdmu15("QCD Multijet", kYellow, 3.640E8*3.7E-4);
     Sample qcdmu2030("QCD Multijet", kYellow, 2.870E8*6.500E-3);

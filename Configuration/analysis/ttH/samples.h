@@ -13,7 +13,7 @@ class Sample{
         
         enum Channel{ee, emu, mumu, combined, undefinedChannel};
         
-        enum SampleType{data, dyll, higgssignal, dummy};
+        enum SampleType{data, dyllbelow50, dyll50inf, higgssignal, dummy};
         
         Sample();
         Sample(TString legendEntry, int color, double crossSection, SampleType sampleType=dummy);
