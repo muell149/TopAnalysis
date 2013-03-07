@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include "TString.h"
+#include "TH1D.h"
 
 
 class Sample{
@@ -36,15 +37,18 @@ class Sample{
 };
 
 
+typedef std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > > SystematicChannelSamples;
+
+
 class Samples{
     public:
         Samples(){};
         ~Samples(){};
-        const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >& getSystematicChannelSamples();
+        const SystematicChannelSamples& getSystematicChannelSamples();
         std::vector<Sample> getSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
         void addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
     private:
-        std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > > m_systematicChannelSample_;
+        SystematicChannelSamples m_systematicChannelSample_;
 };
 
 
@@ -60,6 +64,8 @@ namespace Tools{
     std::string convertSystematic(const Sample::Systematic&);
 }
 
+
+typedef std::pair<Sample, TH1D*> SampleHistPair;
 
 
 #endif // Samples_h

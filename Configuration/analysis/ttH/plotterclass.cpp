@@ -71,6 +71,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
 
     for(size_t i=0; i < Vec_Files.size(); i++){
         double LumiWeight = CalcLumiWeight(Vec_Files.at(i));
+        //double lumiWeight = Tools::luminosityWeight(sample, lumi_, fileReader_);
         double allWeights=LumiWeight;//calculate here all the flat-weights we apply: Lumi*others*...
         if(Vec_Files.at(i).Contains("ee") || Vec_Files.at(i).Contains("mumu")){
             if(Vec_Files.at(i).Contains("run")){
@@ -325,7 +326,6 @@ bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& syste
         }
         else{
             //Rescaling to the data luminosity
-            //double lumiWeight = CalcLumiWeight(sample.inputFile());
             double lumiWeight = Tools::luminosityWeight(sample, lumi_, fileReader_);
             Tools::applyFlatWeight(hist, lumiWeight);
             setHHStyle(*gStyle);
@@ -358,14 +358,6 @@ bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& syste
     DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
     
 
-    TString histoListName = "FileLists/HistoFileList_"+Tools::convertSystematic(systematic)+"_"+Tools::convertChannel(channel)+".txt";
-    std::cout << "reading " << histoListName << std::endl;
-    ifstream FileList(histoListName);
-    if (FileList.fail()) {
-        std::cerr << "Error reading " << histoListName << std::endl;
-        exit(1);
-    }
-    
     return allHistosAvailable;
 }
 
@@ -379,9 +371,6 @@ void Plotter::write(Sample::Channel channel, Sample::Systematic systematic, Draw
         return;
     }
     
-    
-    // FIXME: Needed for event yield tables, but should be run only once, and not for each histogram
-    if(name_=="JetCategories_step0")MakeTable();
     
     TCanvas * canvas = new TCanvas("","");
 
@@ -660,68 +649,6 @@ void Plotter::setStyle(SampleHistPair& sampleHistPair, bool isControlPlot)
             hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis_+"}");     
         }
         if (isControlPlot) hist->GetYaxis()->SetTitle(YAxis_);
-    }
-}
-
-
-
-void Plotter::MakeTable(){
-    
-    // Find and loop over all histograms containing information for cutflow table
-    std::vector<TString> v_eventHistoName;
-    v_eventHistoName = fileReader_->findHistos(v_sampleHistPair_[0].first.inputFile(), "step");
-    for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
-        
-        std::vector<std::pair<TH1D*, Sample> > v_numhist;
-        for(auto sample : v_sampleHistPair_){
-            TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.first.inputFile(), *i_eventHistoName);
-            double lumiWeight = CalcLumiWeight(sample.first.inputFile());
-            Tools::applyFlatWeight(temp_hist, lumiWeight);
-            v_numhist.push_back(std::pair<TH1D*, Sample>(temp_hist, sample.first));
-        }
-        
-        for(auto numhist : v_numhist){
-            const bool isDyll(numhist.second.sampleType() == Sample::SampleType::dyll);
-            if(isDyll && channelType_!=2){
-                // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
-                numhist.first->Scale(DYScale_.at(channelType_));
-            }
-        }
-        
-        // Prepare output folder and text file
-        ofstream EventFile;
-        std::string EventFilestring = outpathPlots_.Data();
-        EventFilestring.append(subfolderChannel_.Data());
-        EventFilestring.append(subfolderSpecial_.Data());
-        gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+subfolderSpecial_, true);
-        EventFilestring.append("/"+*i_eventHistoName+".txt");
-        EventFile.open(EventFilestring.c_str());
-        
-        // Make output for tables
-        double tmp_num = 0;
-        double bg_num = 0;
-        for(auto i_numhist = v_numhist.begin(); i_numhist != v_numhist.end(); ++i_numhist){
-            auto iterator = i_numhist;
-            ++iterator;
-            tmp_num += i_numhist->first->Integral();
-            if(i_numhist == --(v_numhist.end())){
-                EventFile<<i_numhist->second.legendEntry()<<": "<<tmp_num<<std::endl;
-                bg_num += tmp_num;
-                tmp_num = 0;
-            }
-            else if(i_numhist->second.legendEntry() != iterator->second.legendEntry()){
-                EventFile<<i_numhist->second.legendEntry()<<": "<<tmp_num<<std::endl;
-                if(i_numhist->second.sampleType() != Sample::SampleType::data){
-                    bg_num+=tmp_num;
-                }
-                tmp_num = 0;
-            }
-        }
-        EventFile<<"Total background: "<<bg_num<<std::endl;
-        
-        // Close text file
-        EventFile.close();
-        std::cout<<"\nEvent yields saved in "<<EventFilestring.c_str()<<"\n"<<std::endl;
     }
 }
 

@@ -14,7 +14,7 @@
 #include "../diLeptonic/CommandLineParameters.hh"
 
 #include "samples.h"
-
+#include "eventYields.h"
 
 
 void Histo(Plotter::DrawMode drawMode,
@@ -32,6 +32,12 @@ void Histo(Plotter::DrawMode drawMode,
             samples.addSamples(channel, systematic);
         }
     }
+    
+    // Produce Drell-Yan scalings
+    // FIXME: need to use these in eventYields and Plotter
+    
+    // Produce event yields
+    EventYields eventYields(samples, lumi);
     
     // Loop over all histograms in histoList
     HistoListReader histoList("HistoList_control");
@@ -69,7 +75,7 @@ void Histo(Plotter::DrawMode drawMode,
         
         
         // Loop over all systematics and all channels and write histograms
-        const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >& m_systematicChannelSample(samples.getSystematicChannelSamples());
+        const SystematicChannelSamples& m_systematicChannelSample(samples.getSystematicChannelSamples());
         for(auto systematicChannelSample : m_systematicChannelSample){
             const Sample::Systematic& systematic(systematicChannelSample.first);
             for(auto channelSample : systematicChannelSample.second){

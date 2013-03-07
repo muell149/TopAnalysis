@@ -25,15 +25,22 @@ Tools::luminosityWeight(const Sample& sample, const double luminosity, RootFileR
     const TH1* h_weightedEvents = fileReader->Get<TH1>(inputFile, "weightedEvents");
     const double weightedEvents(h_weightedEvents->GetBinContent(1));
     luminosityWeight = luminosity*crossSection/weightedEvents;
-    std::cout<<"Input file: "<<inputFile<<std::endl;
-    std::cout<<"Luminosity, Xsection, weighted events, lumi weight: "
-             <<luminosity<<" , "<<crossSection<<" , "<<weightedEvents<<" , "<<luminosityWeight<<std::endl;
+    //std::cout<<"Input file: "<<inputFile<<std::endl;
+    //std::cout<<"Luminosity, Xsection, weighted events, lumi weight: "
+    //         <<luminosity<<" , "<<crossSection<<" , "<<weightedEvents<<" , "<<luminosityWeight<<std::endl;
     
     return luminosityWeight;
 }
 
 
 
+TString
+Tools::assignFolder(const Sample::Channel& channel){
+    TString outpathPlots = "./Plots";
+    outpathPlots.Append("/");
+    TString subfolderChannel = Tools::convertChannel(channel);
+    return outpathPlots+subfolderChannel;
+}
 
 
 

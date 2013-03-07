@@ -21,7 +21,6 @@ class Plotter {
 public:
     enum DrawMode{stacked, overlaid, scaledoverlaid, undefined};
     
-    typedef std::pair<Sample, TH1D*> SampleHistPair;
     
     Plotter();
     void setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
@@ -29,8 +28,6 @@ public:
     void setLumi(double);
     
     
-    void MakeTable();
-
 
 
     void DYScaleFactor(TString);
