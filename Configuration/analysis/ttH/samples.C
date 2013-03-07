@@ -22,7 +22,7 @@ void
 Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
     
     // Define all samples as they are needed
-    Sample data("Data", kBlack, 1., Sample::SampleType::data);
+    Sample data("Data", kBlack, 1., Sample::data);
     Sample ttbarsignal("t#bar{t} Signal", kRed+1, 253.849);
     Sample ttbarbkg("t#bar{t} Other", kRed-7, 253.849);
     Sample singletop("Single Top", kMagenta, 11.1);
@@ -31,8 +31,8 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
     Sample zz("Diboson", 10, 17.654);
     Sample dytautau1050("Z / #gamma* #rightarrow #tau#tau", kAzure+8, 860.5);
     Sample dytautau50inf("Z / #gamma* #rightarrow #tau#tau", kAzure+8, 3532.8);
-    Sample dyll1050("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 860.5, Sample::SampleType::dyll);
-    Sample dyll50inf("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 3532.8, Sample::SampleType::dyll);
+    Sample dyll1050("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 860.5, Sample::dyll);
+    Sample dyll50inf("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 3532.8, Sample::dyll);
     Sample wlnu("W+Jets", kGreen-3, 36257.2);
     Sample qcdmu15("QCD Multijet", kYellow, 3.640E8*3.7E-4);
     Sample qcdmu2030("QCD Multijet", kYellow, 2.870E8*6.500E-3);
@@ -48,7 +48,7 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
     Sample qcdbcem80170("QCD Multijet", kYellow, 1.191E6*10.90E-3);
     //Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302, Sample::SampleType::higgssignal);
     Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302);
-    Sample ttbarHtobbbar("t#bar{t}H (b#bar{b})", kOrange-7, 0.1302*0.577, Sample::SampleType::higgssignal);
+    Sample ttbarHtobbbar("t#bar{t}H (b#bar{b})", kOrange-7, 0.1302*0.577, Sample::higgssignal);
     
     
     // Access FileList containing list of input root files
@@ -148,6 +148,10 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
 }
 
 
+
+
+
+
 TString
 Sample::legendEntry()const{return legendEntry_;}
 
@@ -176,6 +180,10 @@ Sample::inputFile()const{
 }
 
 
+
+
+
+
 const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >&
 Samples::getSystematicChannelSamples(){
     return m_systematicChannelSample_;
@@ -199,48 +207,48 @@ Tools::orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample){
 
 Sample::Channel 
 Tools::convertChannel(const std::string& channel){
-    if(channel == "ee")return Sample::Channel::ee;
-    else if(channel == "emu")return Sample::Channel::emu;
-    else if(channel == "mumu")return Sample::Channel::mumu;
-    else if(channel == "combined")return Sample::Channel::combined;
+    if(channel == "ee")return Sample::ee;
+    else if(channel == "emu")return Sample::emu;
+    else if(channel == "mumu")return Sample::mumu;
+    else if(channel == "combined")return Sample::combined;
     else return Sample::Channel::undefinedChannel;
 }
 
 
 std::string
 Tools::convertChannel(const Sample::Channel& channel){
-    if(channel == Sample::Channel::ee)return "ee";
-    else if(channel == Sample::Channel::emu)return "emu";
-    else if(channel == Sample::Channel::mumu)return "mumu";
-    else if(channel == Sample::Channel::combined)return "combined";
+    if(channel == Sample::ee)return "ee";
+    else if(channel == Sample::emu)return "emu";
+    else if(channel == Sample::mumu)return "mumu";
+    else if(channel == Sample::combined)return "combined";
     else return "";
 }
 
 
 std::string
 Tools::channelLabel(const Sample::Channel& channel){
-    if(channel == Sample::Channel::ee)return "ee";
-    else if(channel == Sample::Channel::emu)return "e#mu";
-    else if(channel == Sample::Channel::mumu)return "#mu#mu";
-    else if(channel == Sample::Channel::combined)return "Dilepton Combined";
+    if(channel == Sample::ee)return "ee";
+    else if(channel == Sample::emu)return "e#mu";
+    else if(channel == Sample::mumu)return "#mu#mu";
+    else if(channel == Sample::combined)return "Dilepton Combined";
     else return "";
 }
 
 
 Sample::Systematic
 Tools::convertSystematic(const std::string& systematic){
-    if(systematic == "Nominal")return Sample::Systematic::nominal;
+    if(systematic == "Nominal")return Sample::nominal;
     else{
         std::cout<<"Warning! The following systematic is not implemented: "<<systematic<<std::endl;
-        return Sample::Systematic::undefinedSystematic;
+        return Sample::undefinedSystematic;
     }
 }
 
 
 std::string
 Tools::convertSystematic(const Sample::Systematic& systematic){
-    if(systematic == Sample::Systematic::nominal)return "Nominal";
-    else if(systematic == Sample::Systematic::undefinedSystematic)return "";
+    if(systematic == Sample::nominal)return "Nominal";
+    else if(systematic == Sample::undefinedSystematic)return "";
     else{
         std::cout<<"Error! Systematic is not implemented, break...\n";
         exit(99);

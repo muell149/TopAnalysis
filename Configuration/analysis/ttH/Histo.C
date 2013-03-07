@@ -76,9 +76,9 @@ void Histo(Plotter::DrawMode drawMode,
         
         // Loop over all systematics and all channels and write histograms
         const SystematicChannelSamples& m_systematicChannelSample(samples.getSystematicChannelSamples());
-        for(auto systematicChannelSample : m_systematicChannelSample){
-            const Sample::Systematic& systematic(systematicChannelSample.first);
-            for(auto channelSample : systematicChannelSample.second){
+        for(auto systematicChannelSamples : m_systematicChannelSample){
+            const Sample::Systematic& systematic(systematicChannelSamples.first);
+            for(auto channelSample : systematicChannelSamples.second){
                 const Sample::Channel& channel(channelSample.first);
                 h_generalPlot.write(channel, systematic, drawMode, channelSample.second);
             }
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
     else drawMode = Plotter::scaledoverlaid;
     
     // Set up channels
-    std::vector<Sample::Channel> v_channel {Sample::Channel::emu, Sample::Channel::ee, Sample::Channel::mumu, Sample::Channel::combined};
+    std::vector<Sample::Channel> v_channel {Sample::emu, Sample::ee, Sample::mumu, Sample::combined};
     std::vector<std::string> channels = opt_channel.getArguments();
     if(opt_channel.isSet()){
         v_channel.clear();
@@ -146,6 +146,7 @@ int main(int argc, char** argv) {
     std::cout << "Processing systematics (use >>-s all<< to process all known systematics): "; 
     for (auto systematic: v_systematic) std::cout << Tools::convertSystematic(systematic) << " "; std::cout << "\n";
     
+    // Set up plots
     std::vector<std::string> plots { "" };
     if (opt_plots.isSet()) plots = opt_plots.getArguments();
 
