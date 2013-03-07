@@ -2,6 +2,7 @@
 #include "higgsUtils.h"
 
 #include <fstream>
+#include <sstream>
 #include "TSystem.h"
 
 
@@ -18,7 +19,13 @@ void EventYields::produceYields(){
     
     // Find all histograms containing information for cutflow table (in systematic Nominal and channel emu, first histogram)
     std::vector<TString> v_eventHistoName;
-    v_eventHistoName = fileReader_->findHistos(samples_.getSamples(Sample::emu, Sample::nominal)[0].inputFile(), "step");
+    v_eventHistoName = fileReader_->findHistos(samples_.getSamples(Sample::emu, Sample::nominal)[0].inputFile(), "events_step");
+    std::stringstream ss_step;
+    for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
+        const TString& step = Tools::extractSelectionStep(*i_eventHistoName);
+        ss_step<<step<<", ";
+    }
+    std::cout<<"Found selection steps: "<<ss_step.str()<<std::endl;
     
     // Loop over systematics (exclude all but Nominal - so outer loop could be removed) and channels
     for(auto systematicChannelSamples : samples_.getSystematicChannelSamples()){

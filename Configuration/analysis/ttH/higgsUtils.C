@@ -3,6 +3,8 @@
 #include <iostream>
 
 
+#include "TObjArray.h"
+
 
 void
 Tools::applyFlatWeight(TH1* hist, const double weight){
@@ -40,6 +42,40 @@ Tools::assignFolder(const Sample::Channel& channel){
     outpathPlots.Append("/");
     TString subfolderChannel = Tools::convertChannel(channel);
     return outpathPlots+subfolderChannel;
+}
+
+
+
+TString
+Tools::stepFragmentByToken(const TString& filenameFragment, const TString& token){
+    TString stepFragment;
+    TObjArray* a_nameFragment = TString(filenameFragment).Tokenize(token);
+    bool stepAlreadyFound(false);
+    for(Int_t iFragment= 0; iFragment < a_nameFragment->GetEntriesFast(); ++iFragment){
+        const TString& fragment = a_nameFragment->At(iFragment)->GetName();
+        if(fragment.Contains("step")){
+            if(stepAlreadyFound){
+                std::cerr<<"Ambiguous string, file name contains \"step\" more than once in fragment: "<<filenameFragment
+                         <<"\n...cannot extract selection step, so break\n";
+                exit(33);
+            }
+            stepAlreadyFound = true;
+            stepFragment = fragment;
+        }
+    }
+    return stepFragment;
+}
+
+
+TString
+Tools::extractSelectionStep(const TString& histogramName){
+    TString step(histogramName);
+    // Remove .root
+    step = Tools::stepFragmentByToken(step, ".");
+    // Further separation by "_" to find string containing step
+    step = Tools::stepFragmentByToken(step, "_");
+    //std::cout<<"The extracted selection step is (step/histogram name): "<<step<<" / "<<histogramName<<std::endl;
+    return step;
 }
 
 

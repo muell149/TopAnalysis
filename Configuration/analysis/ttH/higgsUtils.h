@@ -13,6 +13,8 @@ namespace Tools{
     void applyFlatWeight(TH1* hist, const double weight);
     double luminosityWeight(const Sample& sample, const double luminosity, RootFileReader* fileReader);
     TString assignFolder(const Sample::Channel& channel);
+    TString stepFragmentByToken(const TString& filename, const TString& token);
+    TString extractSelectionStep(const TString& filename);
 }
 
 
