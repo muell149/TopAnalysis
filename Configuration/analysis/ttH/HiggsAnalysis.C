@@ -76,7 +76,8 @@ HiggsAnalysis::SlaveBegin(TTree *){
     
     // Histograms needed for cutflow tables
     // FIXME: why not using histogram with single bin ???
-    h_events_step0 = store(new TH1D("events_step0","event count (no weight)",10,0,10));
+    h_events_step0a = store(new TH1D("events_step0a","event count (no weight)",10,0,10));
+    h_events_step0b = store(new TH1D("events_step0b","event count (no weight)",10,0,10));
     h_events_step1 = store(new TH1D("events_step1","event count (no weight)",10,0,10));
     h_events_step2 = store(new TH1D("events_step2","event count (no weight)",10,0,10));
     h_events_step3 = store(new TH1D("events_step3","event count (no weight)",10,0,10));
@@ -85,8 +86,8 @@ HiggsAnalysis::SlaveBegin(TTree *){
     h_events_step6 = store(new TH1D("events_step6","event count at after 2jets",10,0,10));
     h_events_step7 = store(new TH1D("events_step7","event count at after MET",10,0,10));
     h_events_step8 = store(new TH1D("events_step8","event count at after 1btag",10,0,10));
-    h_events_step9 = store(new TH1D("events_step9","event count at step after KinReco",10,0,10));
-    h_events_step0->Sumw2();
+    h_events_step0a->Sumw2();
+    h_events_step0b->Sumw2();
     h_events_step1->Sumw2();
     h_events_step2->Sumw2();
     h_events_step3->Sumw2();
@@ -95,16 +96,15 @@ HiggsAnalysis::SlaveBegin(TTree *){
     h_events_step6->Sumw2();
     h_events_step7->Sumw2();
     h_events_step8->Sumw2();
-    h_events_step9->Sumw2();
     
     
     // Histograms needed for data-driven scaling of Z samples
     dyScalingHistograms_ = DyScalingHistograms(fOutput);
-    dyScalingHistograms_.addStep("step4");
-    dyScalingHistograms_.addStep("step5");
-    dyScalingHistograms_.addStep("step6");
-    dyScalingHistograms_.addStep("step7");
-    dyScalingHistograms_.addStep("step8");
+    dyScalingHistograms_.addStep("4");
+    dyScalingHistograms_.addStep("5");
+    dyScalingHistograms_.addStep("6");
+    dyScalingHistograms_.addStep("7");
+    dyScalingHistograms_.addStep("8");
     
     
     // Map for binned control plots
@@ -129,7 +129,7 @@ HiggsAnalysis::Process(Long64_t entry){
     if (++EventCounter % 100000 == 0) std::cout << "Event Counter: " << EventCounter << std::endl;
     
     // Histogram for controlling correctness of h_events_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
-    h_events_step0->Fill(1, 1);
+    h_events_step0a->Fill(1, 1);
     
     //do we have a DY true level cut?
     if (checkZDecayMode && !checkZDecayMode(entry)) return kTRUE;
@@ -208,7 +208,7 @@ HiggsAnalysis::Process(Long64_t entry){
     //===CUT===
     // this is step0, so no cut application
     
-    h_events_step1->Fill(1, 1);
+    h_events_step0b->Fill(1, 1);
     
     // ++++ Control Plots ++++
     
@@ -237,7 +237,7 @@ HiggsAnalysis::Process(Long64_t entry){
     size_t NLeadLeptonNumber = 0;
     bool hasLeptonPair = getLeptonPair(LeadLeptonNumber, NLeadLeptonNumber);
     
-    h_events_step2->Fill(1, 1);
+    h_events_step1->Fill(1, 1);
     
     // ++++ Control Plots ++++
     
@@ -253,7 +253,7 @@ HiggsAnalysis::Process(Long64_t entry){
     
     LV dilepton = leptons->at(LeadLeptonNumber) + leptons->at(NLeadLeptonNumber);
     
-    h_events_step3->Fill(1, 1);
+    h_events_step2->Fill(1, 1);
     
     // ++++ Control Plots ++++
     
@@ -309,7 +309,7 @@ HiggsAnalysis::Process(Long64_t entry){
     weight *= weightPU;
     //h_vertMulti->Fill(vertMulti, weight);
     
-    h_events_step4->Fill(1, weight);
+    h_events_step3->Fill(1, weight);
     
     // ****************************************
     //handle inverted Z cut
@@ -326,25 +326,25 @@ HiggsAnalysis::Process(Long64_t entry){
     // Z window plots need to be filled here, in order to rescale the contribution to data
     if ( isZregion ) {
         double fullWeights = weightGenerator*weightPU*weightTrigSF*weightLepSF;
-        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "step4");
+        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "4");
         
         if ( hasJets ) {
             dyScalingHistograms_.fillLoose(dilepton.M(), fullWeights);
-            dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "step5");
+            dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "5");
             
             if ( hasMetOrEmu ) {
-                dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "step6");
+                dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "6");
                 
                 if ( hasBtag ) {
                     // FIXME: do not use b-tag scale factor
                     //weightBtagSF = isMC ? calculateBtagSF() : 1;
                     //fullWeights *= weightBtagSF;
-                    dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "step7");
+                    dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "7");
                     
                     if ( hasSolution ) {
                         // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
                         //fullWeights *= weightKinFit;
-                        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "step8");
+                        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "8");
                     }
                 }
             }
@@ -361,10 +361,10 @@ HiggsAnalysis::Process(Long64_t entry){
     //Exclude the Z window
     if (channel != "emu" && isZregion) return kTRUE;
     
-    h_events_step5->Fill(1, weight);
+    h_events_step4->Fill(1, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "step4");
+        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "4");
     }
     
     // ++++ Control Plots ++++
@@ -377,10 +377,10 @@ HiggsAnalysis::Process(Long64_t entry){
     //Require at least two jets > 30 GeV (check for > 30 needed because we might have 20 GeV jets in our NTuple)
     if (! hasJets) return kTRUE;
     
-    h_events_step6->Fill(1, weight);
+    h_events_step5->Fill(1, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "step5");
+        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "5");
     }
     
     // ++++ Control Plots ++++
@@ -393,10 +393,10 @@ HiggsAnalysis::Process(Long64_t entry){
     //Require MET > 40 GeV in non-emu channels
     if (!hasMetOrEmu) return kTRUE;
     
-    h_events_step7->Fill(1, weight);
+    h_events_step6->Fill(1, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "step6");
+        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "6");
     }
     
     // ++++ Control Plots ++++
@@ -412,10 +412,10 @@ HiggsAnalysis::Process(Long64_t entry){
     // FIXME: if b-tagging scale factor is desired, calculate it here ?
     // weight *= weightBtagSF;
     
-    h_events_step8->Fill(1, weight);
+    h_events_step7->Fill(1, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "step7");
+        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "7");
     }
     
     // ++++ Control Plots ++++
@@ -430,10 +430,10 @@ HiggsAnalysis::Process(Long64_t entry){
     // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
     //weight *= weightKinFit;
     
-    h_events_step9->Fill(1, weight);
+    h_events_step8->Fill(1, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "step8");
+        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "8");
     }
     
     // ++++ Control Plots ++++

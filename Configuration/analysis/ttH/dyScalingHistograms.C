@@ -32,9 +32,9 @@ DyScalingHistograms::bookHisto(TH1D* histo, const TString& name){
 void
 DyScalingHistograms::bookHistos(const TString& step){
     DyStepHistograms dyStepHistograms;
-    dyStepHistograms.h_all_ = this->bookHisto(dyStepHistograms.h_all_, "Allh1_" + step);
-    dyStepHistograms.h_zVeto_ = this->bookHisto(dyStepHistograms.h_zVeto_, "TTh1_" + step);
-    dyStepHistograms.h_zWindow_ = this->bookHisto(dyStepHistograms.h_zWindow_, "Zh1_" + step);
+    dyStepHistograms.h_all_ = this->bookHisto(dyStepHistograms.h_all_, "Allh1_step" + step);
+    dyStepHistograms.h_zVeto_ = this->bookHisto(dyStepHistograms.h_zVeto_, "TTh1_step" + step);
+    dyStepHistograms.h_zWindow_ = this->bookHisto(dyStepHistograms.h_zWindow_, "Zh1_step" + step);
     m_stepHistograms_[step] = dyStepHistograms;
 }
 

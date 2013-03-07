@@ -48,8 +48,16 @@ private:
     TH1* h_jetCategories_step8;
     
     /// Histograms for cutflow tables which are not contained in Analysis.h
-    TH1 *h_events_step0, *h_events_step1, *h_events_step2, *h_events_step3, *h_events_step4,
-        *h_events_step5, *h_events_step6, *h_events_step7, *h_events_step8, *h_events_step9;
+    TH1* h_events_step0a;
+    TH1* h_events_step0b;
+    TH1* h_events_step1;
+    TH1* h_events_step2;
+    TH1* h_events_step3;
+    TH1* h_events_step4;
+    TH1* h_events_step5;
+    TH1* h_events_step6;
+    TH1* h_events_step7;
+    TH1* h_events_step8;
     
     /// Histograms for Drell-Yan scaling
     DyScalingHistograms dyScalingHistograms_;
