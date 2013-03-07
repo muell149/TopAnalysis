@@ -29,11 +29,14 @@ private:
     // FIXME: where to set branches for Higgs generator information stored in nTuples, here or in Analysis.h ?
     
     
+    /// Map for the binned control plots
     //std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >* binnedControlPlots_;
+    
     
     /// Class holding the definition and handling of jet categories (# jets, # b-jets)
     JetCategories jetCategories_;
     
+    /// Histograms for the jet categories
     TH1* h_jetCategories_step0;
     TH1* h_jetCategories_step1;
     TH1* h_jetCategories_step2;

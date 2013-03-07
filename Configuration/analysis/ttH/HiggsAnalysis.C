@@ -108,7 +108,7 @@ HiggsAnalysis::SlaveBegin(TTree *){
     
     
     // Map for binned control plots
-    binnedControlPlots = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
+    binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
     
     
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
@@ -134,7 +134,7 @@ HiggsAnalysis::Process(Long64_t entry){
     //do we have a DY true level cut?
     if (checkZDecayMode && !checkZDecayMode(entry)) return kTRUE;
     
-    if (isTtbarPlusTauSample || correctMadgraphBR) b_TopDecayMode->GetEntry(entry);
+    if (isTtbarPlusTauSample || correctMadgraphBR) getTopDecayMode(entry);
     //decayMode contains the decay of the top (*10) + the decay of the antitop
     //1=hadron, 2=e, 3=mu, 4=tau->hadron, 5=tau->e, 6=tau->mu
     //i.e. 23 == top decays to e, tbar decays to mu
