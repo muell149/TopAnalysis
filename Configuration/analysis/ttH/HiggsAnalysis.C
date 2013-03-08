@@ -108,7 +108,7 @@ HiggsAnalysis::SlaveBegin(TTree *){
     
     
     // Map for binned control plots
-    binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
+    binnedControlPlots = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
     
     
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
