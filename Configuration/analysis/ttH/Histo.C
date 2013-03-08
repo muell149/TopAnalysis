@@ -35,10 +35,18 @@ void Histo(Plotter::DrawMode drawMode,
     }
     
     // Produce Drell-Yan scalings
+    // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
     // FIXME: need to use these in eventYields and Plotter
+    std::vector<Sample::Channel> v_dyScalingChannel {Sample::ee, Sample::emu, Sample::mumu};
+    Samples dyScalingSamples;
+    for (auto systematic : v_systematic) {
+        for (auto channel : v_dyScalingChannel) {
+            dyScalingSamples.addSamples(channel, systematic);
+        }
+    }
     DyScaleFactors dyScaleFactors;
     DyScaleFactors::DyScaleFactorMap m_dyScaleFactors;
-    m_dyScaleFactors = dyScaleFactors.getScaleFactors(samples, luminosity);
+    m_dyScaleFactors = dyScaleFactors.getScaleFactors(dyScalingSamples, luminosity);
     
     // Produce event yields
     EventYields eventYields(samples, luminosity);

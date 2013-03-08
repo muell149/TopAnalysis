@@ -58,6 +58,13 @@ void Plotter::DYScaleFactor(TString SpecialComment){
     } else if ( SpecialComment == "Standard") {
         nameAppendix = "_postKinReco";
     }
+    
+    
+    if (SpecialComment == "_postZcut")nameAppendix = "_step4";
+    if (SpecialComment == "_post2jets")nameAppendix = "_step5";
+    if (SpecialComment == "_postMET")nameAppendix = "_step6";
+    if (SpecialComment == "_post1btag")nameAppendix = "_step7";
+    if (SpecialComment == "_postKinReco" || SpecialComment == "Standard")nameAppendix = "_step8";
 
     std::cout<<"\n\nBegin DYSCALE FACTOR calculation at selection step "<<nameAppendix<<std::endl;
     
@@ -79,11 +86,11 @@ void Plotter::DYScaleFactor(TString SpecialComment){
                 TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), "Looseh1");
                 Tools::applyFlatWeight(htemp, allWeights);
                 Tools::applyFlatWeight(htemp1, allWeights);
-                if(Vec_Files.at(i).Contains("ee")){
+                if(Vec_Files.at(i).Contains("/ee/")){
                     NinEE+=htemp->Integral();
                     NinEEloose+=htemp1->Integral();
                 }
-                if(Vec_Files.at(i).Contains("mumu")){
+                if(Vec_Files.at(i).Contains("/mumu/")){
                     NinMuMu+=htemp->Integral();
                     NinMuMuloose+=htemp1->Integral();
                 }
@@ -94,11 +101,11 @@ void Plotter::DYScaleFactor(TString SpecialComment){
                     TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
                     Tools::applyFlatWeight(htemp, LumiWeight);
                     Tools::applyFlatWeight(htemp1, LumiWeight);
-                    if(Vec_Files.at(i).Contains("ee")){
+                    if(Vec_Files.at(i).Contains("/ee/")){
                         NinEEDYMC+=htemp->Integral();
                         NoutEEDYMC+=htemp1->Integral();
                     }
-                    if(Vec_Files.at(i).Contains("mumu")){
+                    if(Vec_Files.at(i).Contains("/mumu/")){
                         NinMuMuDYMC+=htemp->Integral();
                         NoutMuMuDYMC+=htemp1->Integral();
                     }
@@ -107,21 +114,21 @@ void Plotter::DYScaleFactor(TString SpecialComment){
                 else{
                     TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
                     Tools::applyFlatWeight(htemp, LumiWeight);
-                    if(Vec_Files.at(i).Contains("ee")){   NoutEEDYMC+=htemp->Integral();}
-                    if(Vec_Files.at(i).Contains("mumu")){ NoutMuMuDYMC+=htemp->Integral();}
+                    if(Vec_Files.at(i).Contains("/ee/")){   NoutEEDYMC+=htemp->Integral();}
+                    if(Vec_Files.at(i).Contains("/mumu/")){ NoutMuMuDYMC+=htemp->Integral();}
                     delete htemp;
                 }
             }
             else{
                 TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
                 Tools::applyFlatWeight(htemp, LumiWeight);
-                if(Vec_Files.at(i).Contains("ee")){   NinEEMC+=htemp->Integral();   }
-                if(Vec_Files.at(i).Contains("mumu")){ NinMuMuMC+=htemp->Integral(); }
+                if(Vec_Files.at(i).Contains("/ee/")){   NinEEMC+=htemp->Integral();   }
+                if(Vec_Files.at(i).Contains("/mumu/")){ NinMuMuMC+=htemp->Integral(); }
                 delete htemp;
             }
         }
         
-        if(Vec_Files.at(i).Contains("emu") && Vec_Files.at(i).Contains("run")){
+        if(Vec_Files.at(i).Contains("/emu/") && Vec_Files.at(i).Contains("run")){
             TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
             Tools::applyFlatWeight(htemp, LumiWeight);
             NinEMu+=htemp->Integral();
@@ -129,6 +136,13 @@ void Plotter::DYScaleFactor(TString SpecialComment){
         }
 
     }
+    
+    std::cout<<"\nNumbers out/in:\n\t"
+             <<NoutEEDYMC<<"\t"<<NinEEDYMC
+             <<"\n\t"<<NoutMuMuDYMC<<"\t"<<NinMuMuDYMC
+             <<"\n\t"<<NinEE<<"\t"<<NinMuMu<<"\t"<<NinEMu
+             <<"\n\t"<<NinEEloose<<"\t"<<NinMuMuloose
+             <<"\n\t"<<NinEEMC<<"\t"<<NinMuMuMC<<"\n\n";
     
     double kee = sqrt(NinEEloose/NinMuMuloose);
     double kmumu = sqrt(NinMuMuloose/NinEEloose);
@@ -743,7 +757,7 @@ double Plotter::SampleXSection(const TString& filename){
     
     if(filename.Contains("run"))              {return 1;}
     // HIGGSING
-    //else if(filename.Contains("ttbar"))       {return topxsec;}
+    //else if(filename.Contains("ttbar"))       {return topxsec_;}
     else if(filename.Contains("ttbar") && !filename.Contains("ttbarH") && !filename.Contains("ttbarW") && !filename.Contains("ttbarZ")){return topxsec_;}
     // ENDHIGGSING
     else if(filename.Contains("single"))      {return 11.1;}

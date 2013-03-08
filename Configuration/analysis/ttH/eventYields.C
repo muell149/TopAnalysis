@@ -55,7 +55,7 @@ void EventYields::writeYields(const Sample::Channel& channel, const std::vector<
         
         // Apply Drell-Yan scaling
         for(auto sampleHistPair : v_numhist){
-            const bool isDyll(sampleHistPair.first.sampleType() == Sample::dyllbelow50 || sampleHistPair.first.sampleType() == Sample::dyll50inf);
+            const bool isDyll(sampleHistPair.first.sampleType() == Sample::dyll);
             if(isDyll && channel!=Sample::emu){
                 // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
                 sampleHistPair.second->Scale(1.);
