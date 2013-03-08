@@ -24,6 +24,9 @@ class Sample{
         double crossSection()const;
         SampleType sampleType()const;
         
+        void setFinalState(const Channel&);
+        Channel finalState()const;
+        
         void setInputFile(const TString& inputFileName);
         TString inputFile()const;
         
@@ -32,6 +35,9 @@ class Sample{
         int color_;
         double crossSection_;
         SampleType sampleType_;
+        
+        /// Real final state of sample, ie. only "ee", "emu", "mumu", but not "combined"
+        Channel finalState_;
         
         TString inputFileName_;
 };
@@ -48,6 +54,8 @@ class Samples{
         std::vector<Sample> getSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
         void addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
     private:
+        Sample::Channel assignFinalState(const TString& filename);
+        
         SystematicChannelSamples m_systematicChannelSample_;
 };
 
