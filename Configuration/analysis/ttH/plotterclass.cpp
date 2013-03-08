@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <sstream>
 #include <cmath>
+#include <iomanip>
 
 #include <TCanvas.h>
 #include <TLegend.h>
@@ -18,201 +19,28 @@
 #include <TFile.h>
 #include <TString.h>
 #include <TH1.h>
-
 #include "TGaxis.h"
 #include "TPaveText.h"
 
 #include "../diLeptonic/utils.h"
 #include "higgsUtils.h"
-#include <iomanip>
 
 
 
-const double Plotter::topxsec_ = 253.849; //again changes with normalization, must be set outside of the class
 
 
-
-void Plotter::setLumi(double newLumi)
-{
-    this->lumi_ = newLumi;
-}
-
-
-
-void Plotter::DYScaleFactor(TString SpecialComment){
-
-    DYScale_ = {1,1,1,1}; 
-
-    if(!doDYScale_) return; //need to make a switch for control plots that don't want DYScale
-
-    TString nameAppendix = "";
-    if ( !SpecialComment.BeginsWith("_post") &&  SpecialComment != "Standard" ){
-        std::cout<<"\n\n*******************************************************************"<<std::endl;
-        std::cout<<"ERROR: When calculating the DY Scale factor you must specify in which step you want to calculate the DY SF:"<<std::endl;
-        std::cout<<" '_postZcut', '_post2jets', '_postMET', '_post1btag', '_postKinReco' or 'Standard' = _postKinReco"<<std::endl;
-        std::cout<<"*******************************************************************\n\n"<<std::endl;
-        exit(444);
-    }
-    if (SpecialComment.BeginsWith("_post")){
-        nameAppendix = SpecialComment;
-    } else if ( SpecialComment == "Standard") {
-        nameAppendix = "_postKinReco";
-    }
-    
-    
-    if (SpecialComment == "_postZcut")nameAppendix = "_step4";
-    if (SpecialComment == "_post2jets")nameAppendix = "_step5";
-    if (SpecialComment == "_postMET")nameAppendix = "_step6";
-    if (SpecialComment == "_post1btag")nameAppendix = "_step7";
-    if (SpecialComment == "_postKinReco" || SpecialComment == "Standard")nameAppendix = "_step8";
-
-    std::cout<<"\n\nBegin DYSCALE FACTOR calculation at selection step "<<nameAppendix<<std::endl;
-    
-    std::vector<TString> Vec_Files = InputFileList(Sample::Channel::combined, Sample::Systematic::nominal);//Read the hardcoded list of files
-    if(Vec_Files.size()<1) {std::cout<<"WARNING(in DYScaleFactor)!!! No datasets available to calculate DY SF. EXITING!!"<<std::endl; return;}
-    
-    double NoutEEDYMC=0, NinEEDYMC=0, NoutMuMuDYMC=0, NinMuMuDYMC=0;//Number of events in/out of z-veto region for the DY MC
-    double NinEE=0, NinMuMu=0, NinEMu=0;//Number of events in z-veto region for data
-    double NinEEloose=0, NinMuMuloose=0;//Number of data events in Z-Veto region with MET cut
-    double NinEEMC=0, NinMuMuMC=0;//All other MC events
-
-    for(size_t i=0; i < Vec_Files.size(); i++){
-        double LumiWeight = CalcLumiWeight(Vec_Files.at(i));
-        //double lumiWeight = Tools::luminosityWeight(sample, lumi_, fileReader_);
-        double allWeights=LumiWeight;//calculate here all the flat-weights we apply: Lumi*others*...
-        if(Vec_Files.at(i).Contains("ee") || Vec_Files.at(i).Contains("mumu")){
-            if(Vec_Files.at(i).Contains("run")){
-                TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-                TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), "Looseh1");
-                Tools::applyFlatWeight(htemp, allWeights);
-                Tools::applyFlatWeight(htemp1, allWeights);
-                if(Vec_Files.at(i).Contains("/ee/")){
-                    NinEE+=htemp->Integral();
-                    NinEEloose+=htemp1->Integral();
-                }
-                if(Vec_Files.at(i).Contains("/mumu/")){
-                    NinMuMu+=htemp->Integral();
-                    NinMuMuloose+=htemp1->Integral();
-                }
-            }
-            else if(Vec_Files.at(i).Contains("dy")){
-                if(Vec_Files.at(i).Contains("50inf")){
-                    TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-                    TH1D *htemp1 = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
-                    Tools::applyFlatWeight(htemp, LumiWeight);
-                    Tools::applyFlatWeight(htemp1, LumiWeight);
-                    if(Vec_Files.at(i).Contains("/ee/")){
-                        NinEEDYMC+=htemp->Integral();
-                        NoutEEDYMC+=htemp1->Integral();
-                    }
-                    if(Vec_Files.at(i).Contains("/mumu/")){
-                        NinMuMuDYMC+=htemp->Integral();
-                        NoutMuMuDYMC+=htemp1->Integral();
-                    }
-                    delete htemp; delete htemp1;
-                }
-                else{
-                    TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("TTh1").Append(nameAppendix));
-                    Tools::applyFlatWeight(htemp, LumiWeight);
-                    if(Vec_Files.at(i).Contains("/ee/")){   NoutEEDYMC+=htemp->Integral();}
-                    if(Vec_Files.at(i).Contains("/mumu/")){ NoutMuMuDYMC+=htemp->Integral();}
-                    delete htemp;
-                }
-            }
-            else{
-                TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-                Tools::applyFlatWeight(htemp, LumiWeight);
-                if(Vec_Files.at(i).Contains("/ee/")){   NinEEMC+=htemp->Integral();   }
-                if(Vec_Files.at(i).Contains("/mumu/")){ NinMuMuMC+=htemp->Integral(); }
-                delete htemp;
-            }
-        }
-        
-        if(Vec_Files.at(i).Contains("/emu/") && Vec_Files.at(i).Contains("run")){
-            TH1D *htemp = fileReader_->GetClone<TH1D>(Vec_Files.at(i), TString("Zh1").Append(nameAppendix));
-            Tools::applyFlatWeight(htemp, LumiWeight);
-            NinEMu+=htemp->Integral();
-            delete htemp;
-        }
-
-    }
-    
-    std::cout<<"\nNumbers out/in:\n\t"
-             <<NoutEEDYMC<<"\t"<<NinEEDYMC
-             <<"\n\t"<<NoutMuMuDYMC<<"\t"<<NinMuMuDYMC
-             <<"\n\t"<<NinEE<<"\t"<<NinMuMu<<"\t"<<NinEMu
-             <<"\n\t"<<NinEEloose<<"\t"<<NinMuMuloose
-             <<"\n\t"<<NinEEMC<<"\t"<<NinMuMuMC<<"\n\n";
-    
-    double kee = sqrt(NinEEloose/NinMuMuloose);
-    double kmumu = sqrt(NinMuMuloose/NinEEloose);
-    
-    double RoutinEE = NoutEEDYMC/NinEEDYMC;
-    double RoutinMuMu = NoutMuMuDYMC/NinMuMuDYMC;
-    
-    double NoutMCEE = RoutinEE*(NinEE - 0.5*NinEMu*kee);
-    double NoutMCMuMu = RoutinMuMu*(NinMuMu - 0.5*NinEMu*kmumu);
-
-    double DYSFEE = NoutMCEE/NoutEEDYMC;
-    double DYSFMuMu = NoutMCMuMu/NoutMuMuDYMC;
-
-    std::cout << std::endl;
-    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
-    std::cout << "Calculation of DY Scale Factors for '" << name_ << "'  at selection step "<<nameAppendix << std::endl;
-
-    std::cout<<"DYSFEE:                 "<<DYSFEE<<std::endl;
-    std::cout<<"DYSFMuMu:               "<<DYSFMuMu<<std::endl;
-
-    std::cout<<"NinEEloose:             "<<NinEEloose<<std::endl;
-    std::cout<<"NinMMloose:             "<<NinMuMuloose<<std::endl;
-
-    std::cout<<"kee:                    "<<kee<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<std::endl;
-    std::cout<<"kmumu:                  "<<kmumu<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<std::endl;
-
-    std::cout<<"Rout/Rin ee:            "<<RoutinEE<<std::endl;
-    std::cout<<"Rout/Rin Mumu:          "<<RoutinMuMu<<std::endl;
-
-    std::cout<<"Est. From Data(ee):     "<<NoutMCEE<<std::endl;
-    std::cout<<"Est. From Data(mumu):   "<<NoutMCMuMu<<std::endl;
-
-    std::cout<<"Est. From MC(ee):       "<<NoutEEDYMC<<std::endl;
-    std::cout<<"Est. From MC(mumu):     "<<NoutMuMuDYMC<<std::endl;
-
-    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
-    std::cout << std::endl;
-
-    
-    DYScale_.at(0)=DYSFEE;
-    DYScale_.at(1)=DYSFMuMu;
-    DYScale_.at(2)=1.;
-    DYScale_.at(3)=(DYSFEE+DYSFMuMu)/2;//not correct, but close, fix later
-
-    std::cout<<"End DYSCALE FACTOR calculation\n"<<std::endl;
-
-}
-
-
-
-Plotter::Plotter()
-{
-    name_ = "defaultName";
-    specialComment_ = "Standard";
-    rangemin_ = 0;
-    rangemax_ = 3;
-    YAxis_ = "N_{events}";
-
-    channelLabel_.insert(channelLabel_.begin(),4, "");
-    
-    //Ivan: Initialize list of systematics
-    fileReader_ = RootFileReader::getInstance();
-}
+Plotter::Plotter(const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors):
+luminosity_(luminosity), m_dyScaleFactors_(m_dyScaleFactors),
+fileReader_(RootFileReader::getInstance()),
+name_("defaultName"), rangemin_(0), rangemax_(3),
+YAxis_("N_{events}")
+{}
 
 
 
 void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TString XAxis, int rebin, bool doDYScale, bool logX, bool logY, double ymin, double ymax, double rangemin, double rangemax, int bins, std::vector<double> XAxisbins, std::vector<double> XAxisbinCenters)
 {
     name_ = name; //Variable name you want to plot
-    specialComment_ = specialComment; 
     YAxis_ = YAxis; //Y-axis title
     XAxis_ = XAxis; //X-axis title
     rebin_ = rebin; //Nr. of bins to be merged together
@@ -248,83 +76,14 @@ void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TS
     if(YAxis_.Contains("Numberof")){
         YAxis_.ReplaceAll("Numberof", 8, "Number of ",10);
     }
-
-    DYScale_.insert(DYScale_.begin(), 4, 1.);//Initialize the DY scale-factor to (1., 1., 1., 1.)
-}
-
-
-
-// This method is only used for DY rescaling
-std::vector<TString> Plotter::InputFileList(const Sample::Channel& channel, const Sample::Systematic& systematic)
-{
-    const TString mode(Tools::convertChannel(channel));
-    const TString Systematic(Tools::convertSystematic(systematic));
-    
-    // Use only nominal samples and do not apply systematics
-    
-    std::vector<TString> FileVector;
-    FileVector.clear();
-    
-    
-    if( mode.CompareTo("combined") && mode.CompareTo("ee") && mode.CompareTo("emu") && mode.CompareTo("mumu")){
-        std::cout<<"The decay channel you provided is not supported."<<std::endl;
-        std::cout<<"Please use: ee, emu, mumu, combined"<<std::endl;
-        return FileVector;
-    }
-    
-    if(!mode.CompareTo("combined")){
-        std::vector<TString> eemode   = Plotter::InputFileList(Sample::Channel::ee, systematic);
-        std::vector<TString> emumode  = Plotter::InputFileList(Sample::Channel::emu, systematic);
-        std::vector<TString> mumumode = Plotter::InputFileList(Sample::Channel::mumu, systematic);
-        FileVector.insert(FileVector.end(), eemode.begin(), eemode.end());
-        FileVector.insert(FileVector.end(), emumode.begin(), emumode.end());
-        FileVector.insert(FileVector.end(), mumumode.begin(), mumumode.end());
-        return FileVector;
-    }
-
-    //data is only stored in the Nominal directory
-    FileVector.push_back(TString("selectionRoot/Nominal/").Append(mode.Copy()).Append("/").Append(mode.Copy()).Append("_run2012A.root"));
-    FileVector.push_back(TString("selectionRoot/Nominal/").Append(mode.Copy()).Append("/").Append(mode.Copy()).Append("_run2012Arecover.root"));
-    FileVector.push_back(TString("selectionRoot/Nominal/").Append(mode.Copy()).Append("/").Append(mode.Copy()).Append("_run2012B.root"));
-    FileVector.push_back(TString("selectionRoot/Nominal/").Append(mode.Copy()).Append("/").Append(mode.Copy()).Append("_run2012C_24Aug.root"));
-    FileVector.push_back(TString("selectionRoot/Nominal/").Append(mode.Copy()).Append("/").Append(mode.Copy()).Append("_run2012C_PromptReco.root"));
-    
-    //MC depends on the specific Systematic: Signal systematics only use different signal samples
-    TString tempName;
-    tempName = TString("selectionRoot/Nominal/") + mode + "/" + mode;
-    
-    FileVector.push_back(tempName + "_dyee1050.root");
-    FileVector.push_back(tempName + "_dyee50inf.root");
-    FileVector.push_back(tempName + "_dymumu1050.root");
-    FileVector.push_back(tempName + "_dymumu50inf.root");
-    FileVector.push_back(tempName + "_singleantitop_tw.root");
-    FileVector.push_back(tempName + "_singletop_tw.root");
-    FileVector.push_back(tempName + "_wtolnu.root");
-    FileVector.push_back(tempName + "_wwtoall.root");
-    FileVector.push_back(tempName + "_wztoall.root");
-    FileVector.push_back(tempName + "_zztoall.root");
-    FileVector.push_back(tempName + "_dytautau1050.root");
-    FileVector.push_back(tempName + "_dytautau50inf.root");
-    FileVector.push_back(tempName + "_qcdem2030.root");
-    FileVector.push_back(tempName + "_qcdem3080.root");
-    FileVector.push_back(tempName + "_qcdem80170.root");
-    FileVector.push_back(tempName + "_qcdmu15.root");
-    
-    TString ttbarsignalplustau = tempName + "_ttbarsignalplustau.root";
-    TString ttbarbgviatau      = tempName + "_ttbarbgviatau.root";
-    TString ttbarbg            = tempName + "_ttbarbg.root";
-
-    FileVector.push_back(ttbarsignalplustau);
-    FileVector.push_back(ttbarbg);
-    FileVector.push_back(ttbarbgviatau);
-    
-    return FileVector;
 }
 
 
 
 bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& systematic, std::vector<Sample>& v_sample)
 {
+    std::cout<<"DY SF map: "<<m_dyScaleFactors_.size()<<std::endl;
+    
     bool allHistosAvailable(true);
     
     // Associate histogram to dataset if histogram can be found
@@ -340,7 +99,7 @@ bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& syste
         }
         else{
             //Rescaling to the data luminosity
-            double lumiWeight = Tools::luminosityWeight(sample, lumi_, fileReader_);
+            double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
             Tools::applyFlatWeight(hist, lumiWeight);
             setHHStyle(*gStyle);
             // Clone histogram directly here
@@ -351,27 +110,13 @@ bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& syste
     }
     //std::cout<<"Number of samples used for histogram ("<<name_<<"): "<<v_sampleHistPair_.size()<<"\n";
     
-    // Adjustments for different channels
-    if(channelLabel_.size()<4){channelLabel_.insert(channelLabel_.begin(), 4, "");}
-    
-    if(channel == Sample::ee){channelType_=0; channelLabel_.at(0)="ee";}
-    if(channel == Sample::mumu){channelType_=1; channelLabel_.at(1)="#mu#mu";}
-    if(channel == Sample::emu){channelType_=2; channelLabel_.at(2)="e#mu";}
-    if(channel == Sample::combined){channelType_=3; channelLabel_.at(3)="Dilepton Combined";}
     
     // Set dataset specific subfolders
     outpathPlots_ = "./Plots";
     subfolderChannel_ = Tools::convertChannel(channel);
     subfolderChannel_.Prepend("/");
     subfolderSpecial_ = "";
-    if ( specialComment_.CompareTo("Standard") != 0 ) {
-        //subfolderSpecial_ = specialComment_.Prepend("/");
-    }
     
-    // FIXME: this variable is completely useless, or ?
-    DYEntry_ = "Z / #gamma* #rightarrow ee/#mu#mu";
-    
-
     return allHistosAvailable;
 }
 
@@ -397,10 +142,6 @@ void Plotter::write(Sample::Channel channel, Sample::Systematic systematic, Draw
     legend->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
     legend->SetY2NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength());
 
-    //std::stringstream ss;
-    //ss << DYScale_[channelType_];
-    //TString scale;
-    //scale=(TString)ss.str();
     int legchange=0;
     legend->Clear();
     canvas->Clear();
@@ -428,9 +169,14 @@ void Plotter::write(Sample::Channel channel, Sample::Systematic systematic, Draw
     
     
     
-    
-    
-    
+    // FIXME: where and how to apply DY scale factors ?
+    //if(!doDYScale_) return; //need to make a switch for control plots that don't want DYScale
+    //DYScale_.at(0) = m_dyScaleFactors_[nameAppendix][Sample::nominal][Sample::ee];
+    //DYScale_.at(1) = m_dyScaleFactors_[nameAppendix][Sample::nominal][Sample::mumu];
+    //DYScale_.at(2) = 1.;
+    //DYScale_.at(3) = (DYScale_.at(0) + DYScale_.at(1))/2;//not correct, but close, fix later
+
+
     
     
     // FIXME: keep temporarily and remove later
@@ -724,70 +470,6 @@ TLegend* Plotter::ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, T
 }
 
 
-double Plotter::CalcLumiWeight(const TString& WhichSample){
-    if (WhichSample.Contains("run")) return 1;
-    double lumiWeight=0;
-    if(WhichSample!=""){
-        double XSection = SampleXSection(WhichSample);
-        if(XSection <= 0.){
-            std::cout<<"Sample XSection is <0. Can't calculate luminosity weight!! returning"<<std::endl;
-            return 0;
-        }
-        
-        //From 'filename' get the number of weighted (MC weights) event processed.
-        const TH1 *h_NrOfEvts = fileReader_->Get<TH1>(WhichSample, "weightedEvents");
-        double NrOfEvts = h_NrOfEvts->GetBinContent(1);
-        lumiWeight = lumi_*XSection/NrOfEvts;
-    }
-    
-    if (lumiWeight == 0) {
-        std::cout << WhichSample << " has lumi weight 0\n";
-    }
-
-    return lumiWeight;
-}
-
-
-
-double Plotter::SampleXSection(const TString& filename){
-    
-    //MC cross sections taken from:
-    //  https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat8TeV
-    //  AN-12/194    AN-12/228
-    
-    if(filename.Contains("run"))              {return 1;}
-    // HIGGSING
-    //else if(filename.Contains("ttbar"))       {return topxsec_;}
-    else if(filename.Contains("ttbar") && !filename.Contains("ttbarH") && !filename.Contains("ttbarW") && !filename.Contains("ttbarZ")){return topxsec_;}
-    // ENDHIGGSING
-    else if(filename.Contains("single"))      {return 11.1;}
-    else if(filename.Contains("ww"))          {return 54.838;}
-    else if(filename.Contains("wz"))          {return 33.21;}
-    else if(filename.Contains("zz"))          {return 17.654;}
-    else if(filename.Contains("1050"))        {return 860.5;}
-    else if(filename.Contains("50inf"))       {return 3532.8;}
-    else if(filename.Contains("wtolnu"))      {return 36257.2;}
-    else if(filename.Contains("qcdmu15"))     {return 3.640E8*3.7E-4;}
-    else if(filename.Contains("qcdmu2030"))   {return 2.870E8*6.500E-3;}
-    else if(filename.Contains("qcdmu3050"))   {return 6.609E7*12.20E-3;}
-    else if(filename.Contains("qcdmu5080"))   {return 8.802E6*21.80E-3;}
-    else if(filename.Contains("qcdmu80120"))  {return 1.024E6*39.50E-3;}
-    else if(filename.Contains("qcdmu120170")) {return 1.578E5*47.30E-3;}
-    else if(filename.Contains("qcdem2030"))   {return 2.886E8*10.10E-3;}
-    else if(filename.Contains("qcdem3080"))   {return 7.433E7*62.10E-3;}
-    else if(filename.Contains("qcdem80170"))  {return 1.191E6*153.9E-3;}
-    else if(filename.Contains("qcdbcem2030")) {return 2.886E8*5.800E-4;}
-    else if(filename.Contains("qcdbcem3080")) {return 7.424E7*2.250E-3;}
-    else if(filename.Contains("qcdbcem80170")){return 1.191E6*10.90E-3;}
-    // HIGGSING
-    else if(filename.Contains("ttbarH125inclusive")){return 0.1302;}
-    else if(filename.Contains("ttbarH125tobbbar")){return 0.1302*0.577;}
-    // ENDHIGGSING
-    
-    return -1;
-}
-
-
 
 // Draw label for Decay Channel in upper left corner of plot
 void Plotter::drawDecayChannelLabel(const Sample::Channel& channel, double textSize) {
@@ -827,7 +509,7 @@ void Plotter::drawCmsLabels(int cmsprelim, double energy, double textSize) {
     label->SetX2NDC(1.0-gStyle->GetPadRightMargin());
     label->SetY2NDC(1.0);
     label->SetTextFont(42);
-    label->AddText(Form(text, lumi_/1000, energy));
+    label->AddText(Form(text, luminosity_/1000, energy));
     label->SetFillStyle(0);
     label->SetBorderSize(0);
     if (textSize!=0) label->SetTextSize(textSize);

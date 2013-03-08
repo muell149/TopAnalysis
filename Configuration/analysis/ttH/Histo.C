@@ -49,7 +49,7 @@ void Histo(Plotter::DrawMode drawMode,
     m_dyScaleFactors = dyScaleFactors.getScaleFactors(dyScalingSamples, luminosity);
     
     // Produce event yields
-    EventYields eventYields(samples, luminosity);
+    EventYields eventYields(samples, luminosity, m_dyScaleFactors);
     
     // Loop over all histograms in histoList
     HistoListReader histoList("HistoList_control");
@@ -76,14 +76,11 @@ void Histo(Plotter::DrawMode drawMode,
         
         
         // Create Plotter 
-        Plotter h_generalPlot;
-        h_generalPlot.setLumi(luminosity);
-        
+        Plotter h_generalPlot(luminosity, m_dyScaleFactors);
         h_generalPlot.setOptions(plotProperties.name,plotProperties.specialComment,plotProperties.ytitle,plotProperties.xtitle, 
                                  plotProperties.rebin, plotProperties.do_dyscale, plotProperties.logX, plotProperties.logY, 
                                  plotProperties.ymin, plotProperties.ymax, plotProperties.xmin, plotProperties.xmax,
                                  plotProperties.bins, plotProperties.xbinbounds, plotProperties.bincenters);
-        h_generalPlot.DYScaleFactor(plotProperties.specialComment);
         
         
         // Loop over all systematics and all channels and write histograms

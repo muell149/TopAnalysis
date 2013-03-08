@@ -7,8 +7,9 @@
 
 
 
-EventYields::EventYields(const Samples& samples, const double luminosity):
-samples_(samples), luminosity_(luminosity), fileReader_(RootFileReader::getInstance())
+EventYields::EventYields(const Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors):
+samples_(samples), luminosity_(luminosity),
+m_dyScaleFactors_(m_dyScaleFactors), fileReader_(RootFileReader::getInstance())
 {
     this->produceYields();
 }
