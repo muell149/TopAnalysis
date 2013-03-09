@@ -41,7 +41,7 @@ void EventYields::produceYields(){
 }
 
 
-void EventYields::writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, std::vector<TString>& v_eventHistoName){
+void EventYields::writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName){
     // Loop over all selection steps writing out event yields
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         

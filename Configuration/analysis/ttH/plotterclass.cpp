@@ -274,20 +274,20 @@ void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& sy
     
     SampleHistPairsByLegend m_sampleHistPairsByLegend;
     m_sampleHistPairsByLegend = Tools::associateSampleHistPairsByLegend(v_sampleHistPair_);
-    std::cout<<"Legends: "<<m_sampleHistPairsByLegend.size()<<std::endl;
+//    std::cout<<"Legends: "<<m_sampleHistPairsByLegend.size()<<std::endl;
     THStack* stack2(0);
     std::vector<TH1D*> overlayHists;
     TH1D* dataHist(0);
     TLegend* legend2;
     for(auto sampleHistPairsByLegend : m_sampleHistPairsByLegend){
         const TString& legendEntry(sampleHistPairsByLegend.first);
-        std::cout<<" bla : "<<legendEntry<<"\n";
+//        std::cout<<" bla : "<<legendEntry<<"\n";
         TH1D* legendHist(0);
         for(SampleHistPair sampleHistPair : sampleHistPairsByLegend.second){
             if(!legendHist)legendHist = sampleHistPair.second;
             else legendHist->Add(sampleHistPair.second);
         }
-        
+        // First scale all the histograms, but what with overlay ones, cannot be scaled beforehand...
         
     }
     

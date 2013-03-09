@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "TString.h"
 #include "TColor.h"
 
@@ -13,16 +14,16 @@ sampleType_(dummy), finalState_(undefinedChannel), inputFileName_("")
 {}
 
 
-Sample::Sample(TString legendEntry, int color, double crossSection, SampleType sampleType):
+Sample::Sample(const TString legendEntry, const int color, const double crossSection, const SampleType sampleType):
 legendEntry_(legendEntry), color_(color), crossSection_(crossSection),
 sampleType_(sampleType), finalState_(undefinedChannel), inputFileName_("")
 {}
 
 
-void
-Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
+std::vector< std::pair< TString, Sample > >
+Samples::setSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
     
-    // Define all samples as they are needed
+    // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
     Sample ttbarsignal("t#bar{t} Signal", kRed+1, 253.849);
     Sample ttbarbkg("t#bar{t} Other", kRed-7, 253.849);
@@ -62,7 +63,7 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
     }
     
     
-    // Fill vector with samples defined above
+    // Fill vector with samples defined above, based on their filename
     std::vector<std::pair<TString, Sample> > v_filenameSamplePair;
     while(!fileList.eof()){
         TString filename;
@@ -129,44 +130,13 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
         }
     }
     
-    // Order files by legendEntry
-    Tools::orderByLegend(v_filenameSamplePair);
-    
-    // Create map of maps, containing Sample per channel per systematic
-    for(auto filenameSamplePair : v_filenameSamplePair){
-        // Assign dilepton final state to each sample
-        filenameSamplePair.second.setFinalState(this->assignFinalState(filenameSamplePair.first));
-        filenameSamplePair.second.setInputFile(filenameSamplePair.first);
-        m_systematicChannelSample_[systematic][channel].push_back(filenameSamplePair.second);
-        //std::cout<<"\n\t\tInput file: "<<(--(m_systematicChannelSample[systematic][channel].end()))->inputFile()<<"\n";
-    }
-    //for(auto systematicChannelSample : m_systematicChannelSample_){
-    //    for(auto channelSample : systematicChannelSample.second){
-    //        for(auto sample : channelSample.second){
-    //            std::cout<<"We have samples: "<<Tools::convertSystematic(systematic)
-    //                <<" , "<<Tools::convertChannel(channel)
-    //                <<" , "<<sample.inputFile()
-    //                <<" , "<<Tools::convertChannel(sample.finalState())<<"\n";
-    //        }
-    //    }
-    //}
+    return v_filenameSamplePair;
 }
 
 
-Sample::Channel
-Samples::assignFinalState(const TString& filename){
-    std::vector<Sample::Channel> v_channel {Sample::ee, Sample::emu, Sample::mumu};
-    for(auto channel : v_channel){
-        TString finalState(Tools::convertChannel(channel));
-        finalState.Prepend("/");
-        finalState.Append("/");
-        if(filename.Contains(finalState)){
-            return channel;
-        }
-    }
-    return Sample::undefinedChannel;
-}
 
+
+// --- Methods of class Sample ---
 
 
 TString
@@ -195,8 +165,25 @@ Sample::Channel
 Sample::finalState()const{return finalState_;}
 
 
+void
+Sample::setSystematic(const Sample::Systematic& systematic){
+    systematic_ = systematic;
+}
+
+
+Sample::Systematic
+Sample::systematic()const{return systematic_;}
+
+
 void 
 Sample::setInputFile(const TString& inputFileName){
+    // Check if input file really exists
+    std::cout<<"Filename: "<<inputFileName<<"\n";
+    ifstream ifile(inputFileName);
+    if(ifile.fail()){
+        std::cerr<<"Cannot find requested file: "<<inputFileName<<"\n...breaking\n";
+        exit(17);
+    }
     inputFileName_ = inputFileName;
 }
 
@@ -208,6 +195,128 @@ Sample::inputFile()const{return inputFileName_;}
 
 
 
+// --- Methods of class Samples ---
+
+
+void
+Samples::addSamples(const std::vector< Sample::Channel >& v_channel, const std::vector< Sample::Systematic >& v_systematic){
+    for (auto systematic : v_systematic) {
+        for (auto channel : v_channel) {
+            this->addSamples(channel, systematic);
+        }
+    }
+}
+
+
+
+void
+Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
+    
+    // Add all samples as they are defined in setSamples()
+    std::vector< std::pair< TString, Sample > > v_filenameSamplePair(this->setSamples(channel, systematic));
+    
+    // Set sample options via filename
+    std::vector<Sample> v_sample(this->setSampleOptions(systematic, v_filenameSamplePair));
+    
+    // Order files by legendEntry
+    this->orderByLegend(v_sample);
+    
+    // Create map of maps, containing Sample per channel per systematic
+    m_systematicChannelSample_[systematic][channel] = v_sample;
+    
+    //for(auto systematicChannelSample : m_systematicChannelSample_){
+    //    for(auto channelSample : systematicChannelSample.second){
+    //        for(auto sample : channelSample.second){
+    //            std::cout<<"We have samples: "<<Tools::convertSystematic(systematic)
+    //                <<" , "<<Tools::convertChannel(channel)
+    //                <<" , "<<sample.inputFile()
+    //                <<" , "<<Tools::convertChannel(sample.finalState())<<"\n";
+    //        }
+    //    }
+    //}
+}
+
+
+std::vector<Sample>
+Samples::setSampleOptions(const Sample::Systematic& systematic, const std::vector< std::pair<TString, Sample> >& v_filenameSamplePair){
+    std::vector<Sample> v_sample;
+    
+    for(auto filenameSamplePair : v_filenameSamplePair){
+        TString filename(filenameSamplePair.first);
+        Sample sample(filenameSamplePair.second);
+        // Assign dilepton final state to each sample
+        sample.setFinalState(this->assignFinalState(filename));
+        // Assign specific systematic to each sample and adjust filename accordingly
+        sample.setSystematic(this->assignSystematic(filename, systematic));
+        // Check if input file really exists and set it
+        sample.setInputFile(filename);
+        v_sample.push_back(sample);
+    }
+    
+    return v_sample;
+}
+
+
+void
+Samples::orderByLegend(std::vector<Sample>& v_sample){
+    
+    // Associate vector constituents to legend entry
+    // and store all unequal legend entries
+    std::vector<std::pair<TString, Sample> > v_legendSamplePair;
+    std::vector<TString> v_legendEntry;
+    for(auto sample : v_sample){
+        const TString& legendEntry(sample.legendEntry());
+        //std::cout<<"Legends before: "<<legendEntry<<std::endl;
+        v_legendSamplePair.push_back(std::pair<TString, Sample>(legendEntry, sample));
+        if(std::find(v_legendEntry.begin(), v_legendEntry.end(), legendEntry) != v_legendEntry.end())continue;
+        else v_legendEntry.push_back(legendEntry);
+    }
+    
+    // Clear vector and fill it again in correct order
+    v_sample.clear();
+    for(auto legendEntry : v_legendEntry){
+        int testColor(-999); 
+        for(auto legendSamplePair : v_legendSamplePair){
+             if(legendSamplePair.first != legendEntry)continue;
+             
+             //std::cout<<"Legends after: "<<legendEntry<<std::endl;
+             v_sample.push_back(legendSamplePair.second);
+             
+             // Check if all with same legend do have same colour
+             int color = legendSamplePair.second.color();
+             if(testColor == -999)testColor = color;
+             else if(testColor != color){
+                 std::cerr<<"ERROR! Samples have different colors but same legends: "<<legendEntry
+                          <<"\n...break\n";
+                 exit(999);
+             }
+         }
+    }
+}
+
+
+Sample::Channel
+Samples::assignFinalState(const TString& filename){
+    std::vector<Sample::Channel> v_channel {Sample::ee, Sample::emu, Sample::mumu};
+    for(auto channel : v_channel){
+        TString finalState(Tools::convertChannel(channel));
+        finalState.Prepend("/");
+        finalState.Append("/");
+        if(filename.Contains(finalState)){
+            return channel;
+        }
+    }
+    return Sample::undefinedChannel;
+}
+
+
+Sample::Systematic
+Samples::assignSystematic(TString& filename, const Sample::Systematic& systematic){
+    // FIXME: adjust filename corresponding to specific systematic
+    
+    return Sample::undefinedSystematic;
+}
+
 
 const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >&
 Samples::getSystematicChannelSamples(){
@@ -215,13 +324,17 @@ Samples::getSystematicChannelSamples(){
 }
 
 
-std::vector<Sample>
+const std::vector<Sample>&
 Samples::getSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
     return m_systematicChannelSample_[systematic][channel];
 }
 
 
 
+
+
+
+// --- Functions defined in namespace Tools ---
 
 
 SampleHistPairsByLegend
@@ -232,12 +345,6 @@ Tools::associateSampleHistPairsByLegend(const std::vector<SampleHistPair>& v_sam
         resultMap[legend].push_back(sampleHistPair);
     }
     return resultMap;
-}
-
-
-void
-Tools::orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample){
-    // FIXME: place here automated ordering by legendEntry
 }
 
 

@@ -29,23 +29,15 @@ void Histo(Plotter::DrawMode drawMode,
     
     // Access all samples
     Samples samples;
-    for (auto systematic : v_systematic) {
-        for (auto channel : v_channel) {
-            samples.addSamples(channel, systematic);
-        }
-    }
+    samples.addSamples(v_channel, v_systematic);
     
-    // Produce Drell-Yan scalings
+    // Produce Drell-Yan scalings and access map containing scale factors
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
     std::vector<Sample::Channel> v_dyScalingChannel {Sample::ee, Sample::emu, Sample::mumu};
     Samples dyScalingSamples;
-    for (auto systematic : v_systematic) {
-        for (auto channel : v_dyScalingChannel) {
-            dyScalingSamples.addSamples(channel, systematic);
-        }
-    }
-    DyScaleFactors dyScaleFactors;
+    dyScalingSamples.addSamples(v_channel, v_systematic);
     DyScaleFactors::DyScaleFactorMap m_dyScaleFactors;
+    DyScaleFactors dyScaleFactors;
     m_dyScaleFactors = dyScaleFactors.getScaleFactors(dyScalingSamples, luminosity);
     
     // Produce event yields

@@ -15,7 +15,7 @@ class EventYields{
         ~EventYields(){};
     private:
         void produceYields();
-        void writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, std::vector<TString>& v_eventHistoName);
+        void writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName);
         Samples samples_;
         double luminosity_;
         
