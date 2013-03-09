@@ -45,6 +45,7 @@ void Histo(Plotter::DrawMode drawMode,
     
     // Create Plotter 
     Plotter h_generalPlot(samples, luminosity, m_dyScaleFactors, drawMode);
+    std::cout<<"--- Beginning with the plotting\n\n";
     
     // Loop over all histograms in histoList and print them
     HistoListReader histoList("HistoList_control");
@@ -77,7 +78,7 @@ void Histo(Plotter::DrawMode drawMode,
         // Loop over all systematics and all channels and write histograms
         h_generalPlot.producePlots();
     }
-    std::cout << "Done with the plotting\n";
+    std::cout<<"\n=== Finishing with the plotting\n\n";
 }
 
 
@@ -125,9 +126,10 @@ int main(int argc, char** argv) {
             v_channel.push_back(Tools::convertChannel(channel));
         }
     }
+    std::cout << "\n";
     std::cout << "Processing channels: "; 
     for (auto channel: v_channel)std::cout << Tools::convertChannel(channel) << " ";
-    std::cout << "\n";
+    std::cout << "\n\n";
     
 	// Set up systematics (use only nominal samples for now)
     std::vector<Sample::Systematic> v_systematic { Sample::Systematic::nominal };
@@ -139,7 +141,8 @@ int main(int argc, char** argv) {
         }
     }
     std::cout << "Processing systematics (use >>-s all<< to process all known systematics): "; 
-    for (auto systematic: v_systematic) std::cout << Tools::convertSystematic(systematic) << " "; std::cout << "\n";
+    for (auto systematic: v_systematic) std::cout << Tools::convertSystematic(systematic) << " ";
+    std::cout << "\n\n";
     
     // Set up plots
     std::vector<std::string> plots { "" };

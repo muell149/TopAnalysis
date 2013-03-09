@@ -16,11 +16,10 @@ m_dyScaleFactors_(m_dyScaleFactors), fileReader_(RootFileReader::getInstance())
 
 
 void EventYields::produceYields(){
-    std::cout<<"Beginning event yield table processing\n";
+    std::cout<<"--- Beginning event yield table processing\n\n";
     
     // Find all histograms containing information for cutflow table (in systematic Nominal and channel emu, first histogram)
-    std::vector<TString> v_eventHistoName;
-    v_eventHistoName = fileReader_->findHistos(samples_.getSamples(Sample::emu, Sample::nominal)[0].inputFile(), "events_step");
+    const std::vector<TString>& v_eventHistoName = fileReader_->findHistos(samples_.getSamples(Sample::emu, Sample::nominal).at(0).inputFile(), "events_step");
     std::stringstream ss_step;
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         const TString& step = Tools::extractSelectionStep(*i_eventHistoName);
@@ -37,11 +36,11 @@ void EventYields::produceYields(){
             this->writeYields(channel, channelSample.second, v_eventHistoName);
         }
     }
-    std::cout<<"Finishing event yield table processing\n";
+    std::cout<<"\n=== Finishing event yield table processing\n\n";
 }
 
 
-void EventYields::writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName){
+void EventYields::writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const{
     // Loop over all selection steps writing out event yields
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         

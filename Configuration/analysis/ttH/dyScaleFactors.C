@@ -12,7 +12,7 @@
 
 DyScaleFactors::DyScaleFactorMap
 DyScaleFactors::getScaleFactors(Samples& samples, const double luminosity){
-    std::cout<<"Beginning production of Drell-Yan scale factors\n\n";
+    std::cout<<"--- Beginning production of Drell-Yan scale factors\n\n";
     
     // Get histograms for Drell-Yan scaling from first file in map
     std::vector<TString> v_eventHistoName;
@@ -28,7 +28,7 @@ DyScaleFactors::getScaleFactors(Samples& samples, const double luminosity){
         v_step.push_back(step);
         ss_step<<step<<", ";
     }
-    std::cout<<"Found selection steps: "<<ss_step.str()<<"\n\n";
+    std::cout<<"Found selection steps: "<<ss_step.str()<<"\n";
     
     // Loop over selection steps and systematics
     for(TString step : v_step){
@@ -51,7 +51,7 @@ DyScaleFactors::getScaleFactors(Samples& samples, const double luminosity){
     //        }
     //    }
     //}
-    std::cout<<"Finishing production of Drell-Yan scale factors\n\n";
+    std::cout<<"\n=== Finishing production of Drell-Yan scale factors\n\n";
     return m_dyScaleFactors_;
 }
 

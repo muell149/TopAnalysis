@@ -83,6 +83,8 @@ void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TS
 
 void
 Plotter::producePlots(){
+    //std::cout<<"--- Beginning of plot production\n\n";
+    
     const SystematicChannelSamples& m_systematicChannelSample(samples_.getSystematicChannelSamples());
     for(auto systematicChannelSamples : m_systematicChannelSample){
         const Sample::Systematic& systematic(systematicChannelSamples.first);
@@ -98,13 +100,14 @@ Plotter::producePlots(){
             this->write(channel, systematic);
         }
     }
+    
+    //std::cout<<"\n=== Finishing of plot production\n\n";
 }
 
 
 
 bool Plotter::prepareDataset(const Sample::Channel& channel, const Sample::Systematic&, const std::vector<Sample>& v_sample)
 {
-    std::cout<<"DY SF map: "<<m_dyScaleFactors_.size()<<std::endl;
     
     bool allHistosAvailable(true);
     

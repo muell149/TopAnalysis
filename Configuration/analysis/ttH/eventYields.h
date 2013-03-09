@@ -9,21 +9,38 @@
 
 
 class EventYields{
-    public:
-        EventYields(){};
-        EventYields(const Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors);
-        ~EventYields(){};
-    private:
-        void produceYields();
-        void writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName);
-        Samples samples_;
-        double luminosity_;
-        
-        /// Map containing the Drell-Yan scale factors
-        DyScaleFactors::DyScaleFactorMap m_dyScaleFactors_;
-        
-        /// File reader for accessing specific histogram from given file
-        RootFileReader* fileReader_;
+    
+public:
+    
+    /// Constructor for producing event yield tables
+    EventYields(const Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors);
+    
+    /// Default destructor
+    ~EventYields(){};
+    
+    
+    
+private:
+    
+    /// Produce the yields
+    void produceYields();
+    
+    /// Write the yields to txt files
+    void writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const;
+    
+    
+    
+    /// Samples to be analysed
+    Samples samples_;
+    
+    /// Luminosity
+    const double luminosity_;
+    
+    /// Map containing the Drell-Yan scale factors
+    const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors_;
+    
+    /// File reader for accessing specific histogram from given file
+    RootFileReader* fileReader_;
 };
 
 

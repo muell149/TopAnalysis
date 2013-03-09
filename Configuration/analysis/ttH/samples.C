@@ -178,7 +178,6 @@ Sample::systematic()const{return systematic_;}
 void 
 Sample::setInputFile(const TString& inputFileName){
     // Check if input file really exists
-    std::cout<<"Filename: "<<inputFileName<<"\n";
     ifstream ifile(inputFileName);
     if(ifile.fail()){
         std::cerr<<"Cannot find requested file: "<<inputFileName<<"\n...breaking\n";
@@ -200,11 +199,14 @@ Sample::inputFile()const{return inputFileName_;}
 
 void
 Samples::addSamples(const std::vector< Sample::Channel >& v_channel, const std::vector< Sample::Systematic >& v_systematic){
+    std::cout<<"--- Beginning to set up the samples\n\n";
+    
     for (auto systematic : v_systematic) {
         for (auto channel : v_channel) {
             this->addSamples(channel, systematic);
         }
     }
+    std::cout<<"\n=== Finishing to set up the samples\n\n";
 }
 
 
