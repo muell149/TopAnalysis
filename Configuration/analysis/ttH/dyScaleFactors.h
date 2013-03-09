@@ -9,6 +9,8 @@
 #include "../diLeptonic/utils.h"
 #include "samples.h"
 
+
+
 class DyScaleFactors{
 
 public:
@@ -16,18 +18,28 @@ public:
     /// Typedef for the map containing the Drell-Yan scale factors
     typedef std::map<TString, std::map<Sample::Systematic, std::map<Sample::Channel, double> > > DyScaleFactorMap;
     
-    /// Default constructor
-    DyScaleFactors():fileReader_(RootFileReader::getInstance()){}
+    
+    
+    /// Constructor for estimating Drell-Yan scale factors
+    DyScaleFactors(Samples& samples, const double& luminosity);
+    
     /// Default destructor
     ~DyScaleFactors(){}
     
+    
+    
     /// Produce and get the map containing the Drell-Yan scale factors
-    DyScaleFactorMap getScaleFactors(Samples& samples, const double luminosity);
+    DyScaleFactorMap getScaleFactors()const;
+    
+    
     
 private:
     
     /// Produce the Drell-Yan scale factors
-    void produceScaleFactors(const TString& step, const Sample::Systematic& systematic, std::map<Sample::Channel, std::vector<Sample> >& channelSamples, const double luminosity);
+    void produceScaleFactors(Samples& samples);
+    
+    /// Produce the Drell-Yan scale factors for each selection step and each systematic
+    void produceScaleFactors(const TString& step, const Sample::Systematic& systematic, std::map<Sample::Channel, std::vector<Sample> >& channelSamples);
     
     /// Print full information about all ingoing numbers (deactivated by default)
     void printFullInformation(const double dyScaleFactor_ee, const double dyScaleFactor_mumu, 
@@ -39,13 +51,18 @@ private:
                               const double nIn_ee_dy, const double nIn_mumu_dy,
                               const double nOut_ee_mc, const double nOut_mumu_mc,
                               const double nOut_ee_dy, const double nOut_mumu_dy,
-                              const TString& step);
+                              const TString& step)const;
     
-    /// Map containing the Drell-Yan scale factors
-    DyScaleFactorMap m_dyScaleFactors_;
+    
+    
+    /// Luminosity
+    const double luminosity_;
     
     /// File reader for accessing specific histogram from given file
     RootFileReader* fileReader_;
+    
+    /// Map containing the Drell-Yan scale factors
+    DyScaleFactorMap m_dyScaleFactors_;
 };
 
 
@@ -54,11 +71,9 @@ private:
 
 
 
-
-
-
-
-
-
-
 #endif //dyScaleFactors_h
+
+
+
+
+

@@ -10,13 +10,13 @@
 #include <set>
 #include <functional>
 
-#include "plotterclass.h"
 #include "../diLeptonic/HistoListReader.h"
 #include "../diLeptonic/CommandLineParameters.hh"
 
 #include "samples.h"
 #include "eventYields.h"
 #include "dyScaleFactors.h"
+#include "plotterclass.h"
 
 
 void Histo(Plotter::DrawMode drawMode,
@@ -28,28 +28,27 @@ void Histo(Plotter::DrawMode drawMode,
     const double luminosity = 12210;
     
     // Access all samples
-    Samples samples;
-    samples.addSamples(v_channel, v_systematic);
+    Samples samples(v_channel, v_systematic);
     
     // Produce Drell-Yan scalings and access map containing scale factors
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
     std::vector<Sample::Channel> v_dyScalingChannel {Sample::ee, Sample::emu, Sample::mumu};
-    Samples dyScalingSamples;
-    dyScalingSamples.addSamples(v_dyScalingChannel, v_systematic);
+    Samples dyScalingSamples(v_dyScalingChannel, v_systematic);
+    DyScaleFactors dyScaleFactors(dyScalingSamples, luminosity);
     DyScaleFactors::DyScaleFactorMap m_dyScaleFactors;
-    DyScaleFactors dyScaleFactors;
-    m_dyScaleFactors = dyScaleFactors.getScaleFactors(dyScalingSamples, luminosity);
+    m_dyScaleFactors = dyScaleFactors.getScaleFactors();
     
     // Produce event yields
     EventYields eventYields(samples, luminosity, m_dyScaleFactors);
     
     // Create Plotter 
-    Plotter h_generalPlot(samples, luminosity, m_dyScaleFactors, drawMode);
-    std::cout<<"--- Beginning with the plotting\n\n";
+    Plotter generalPlot(samples, luminosity, m_dyScaleFactors, drawMode);
+    
     
     // Loop over all histograms in histoList and print them
     HistoListReader histoList("HistoList_control");
     if (histoList.IsZombie()) exit(12);
+    std::cout<<"--- Beginning with the plotting\n\n";
     for (auto it = histoList.begin(); it != histoList.end(); ++it) {
         const PlotProperties& plotProperties = it->second;
         std::cout << "\nchecking " << plotProperties.name << std::endl;
@@ -71,12 +70,12 @@ void Histo(Plotter::DrawMode drawMode,
         }
         
         // Set plot properties
-        h_generalPlot.setOptions(plotProperties.name,plotProperties.specialComment,plotProperties.ytitle,plotProperties.xtitle, 
+        generalPlot.setOptions(plotProperties.name,plotProperties.specialComment,plotProperties.ytitle,plotProperties.xtitle, 
                                  plotProperties.rebin, plotProperties.do_dyscale, plotProperties.logX, plotProperties.logY, 
                                  plotProperties.ymin, plotProperties.ymax, plotProperties.xmin, plotProperties.xmax,
                                  plotProperties.bins, plotProperties.xbinbounds, plotProperties.bincenters);
         // Loop over all systematics and all channels and write histograms
-        h_generalPlot.producePlots();
+        generalPlot.producePlots();
     }
     std::cout<<"\n=== Finishing with the plotting\n\n";
 }

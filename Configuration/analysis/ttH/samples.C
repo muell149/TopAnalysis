@@ -197,8 +197,11 @@ Sample::inputFile()const{return inputFileName_;}
 // --- Methods of class Samples ---
 
 
-void
-Samples::addSamples(const std::vector< Sample::Channel >& v_channel, const std::vector< Sample::Systematic >& v_systematic){
+Samples::Samples(){}
+
+
+Samples::Samples(const std::vector< Sample::Channel >& v_channel, const std::vector< Sample::Systematic >& v_systematic){
+    
     std::cout<<"--- Beginning to set up the samples\n\n";
     
     for (auto systematic : v_systematic) {
@@ -206,9 +209,9 @@ Samples::addSamples(const std::vector< Sample::Channel >& v_channel, const std::
             this->addSamples(channel, systematic);
         }
     }
+    
     std::cout<<"\n=== Finishing to set up the samples\n\n";
 }
-
 
 
 void

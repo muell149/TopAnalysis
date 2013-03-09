@@ -112,7 +112,10 @@ class Samples{
 public:
     
     /// Default constructor
-    Samples(){};
+    Samples();
+    
+    /// Constructor setting up samples
+    Samples(const std::vector<Sample::Channel>& v_channel, const std::vector<Sample::Systematic>& v_systematic);
     
     /// Default destructor
     ~Samples(){};
@@ -125,10 +128,7 @@ public:
     /// Get all samples of specific dilepton analysis channel and specific systematic
     const std::vector<Sample>& getSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
     
-    /// Add samples for given channels and systematics
-    void addSamples(const std::vector<Sample::Channel>& v_channel, const std::vector<Sample::Systematic>& v_systematic);
-    
-    
+        
     
 private:
     

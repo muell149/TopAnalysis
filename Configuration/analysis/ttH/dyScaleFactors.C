@@ -10,8 +10,16 @@
 
 
 
-DyScaleFactors::DyScaleFactorMap
-DyScaleFactors::getScaleFactors(Samples& samples, const double luminosity){
+DyScaleFactors::DyScaleFactors(Samples& samples, const double& luminosity):
+luminosity_(luminosity), fileReader_(RootFileReader::getInstance())
+{
+    this->produceScaleFactors(samples);
+}
+
+
+
+void
+DyScaleFactors::produceScaleFactors(Samples& samples){
     std::cout<<"--- Beginning production of Drell-Yan scale factors\n\n";
     
     // Get histograms for Drell-Yan scaling from first file in map
@@ -34,11 +42,10 @@ DyScaleFactors::getScaleFactors(Samples& samples, const double luminosity){
     for(TString step : v_step){
         for(auto systematicChannelSamples : m_systematicChannelSamples){
             const Sample::Systematic& systematic(systematicChannelSamples.first);
-            this->produceScaleFactors(step, systematic, systematicChannelSamples.second, luminosity);
+            this->produceScaleFactors(step, systematic, systematicChannelSamples.second);
         }
     }
     
-    // Return estimated scale factors
     //for(auto dyScaleFactorsPerStep : m_dyScaleFactors_){
     //    const TString& step(dyScaleFactorsPerStep.first);
     //    for(auto dyScaleFactorsPerSystematic : dyScaleFactorsPerStep.second){
@@ -52,13 +59,17 @@ DyScaleFactors::getScaleFactors(Samples& samples, const double luminosity){
     //    }
     //}
     std::cout<<"\n=== Finishing production of Drell-Yan scale factors\n\n";
-    return m_dyScaleFactors_;
 }
 
 
 
+DyScaleFactors::DyScaleFactorMap
+DyScaleFactors::getScaleFactors()const{return m_dyScaleFactors_;}
+
+
+
 void
-DyScaleFactors::produceScaleFactors(const TString& step, const Sample::Systematic& systematic, std::map<Sample::Channel, std::vector<Sample> >& channelSamples, const double luminosity){
+DyScaleFactors::produceScaleFactors(const TString& step, const Sample::Systematic& systematic, std::map<Sample::Channel, std::vector<Sample> >& channelSamples){
     
     const std::vector<Sample::Channel> v_channel {Sample::ee, Sample::emu, Sample::mumu};
     
@@ -70,11 +81,11 @@ DyScaleFactors::produceScaleFactors(const TString& step, const Sample::Systemati
     
     
     for(Sample::Channel channel : v_channel){
-        std::vector<Sample>& v_sample(channelSamples[channel]);
+        const std::vector<Sample>& v_sample(channelSamples[channel]);
         for(Sample sample : v_sample){
             if(sample.sampleType()==Sample::higgssignal)continue;
             
-            const double luminosityWeight(Tools::luminosityWeight(sample, luminosity, fileReader_));
+            const double luminosityWeight(Tools::luminosityWeight(sample, luminosity_, fileReader_));
             const double allWeights = luminosityWeight; // calculate here all the flat-weights we apply: Lumi*others*...
             
             TH1D* h_loose = fileReader_->GetClone<TH1D>(sample.inputFile(), "Looseh1");
@@ -163,7 +174,7 @@ DyScaleFactors::printFullInformation(const double dyScaleFactor_ee, const double
                                      const double nIn_ee_dy, const double nIn_mumu_dy,
                                      const double nOut_ee_mc, const double nOut_mumu_mc,
                                      const double nOut_ee_dy, const double nOut_mumu_dy,
-                                     const TString& step){
+                                     const TString& step)const{
     
     std::cout<<"Numbers (out/in) or (ee/mumu/emu) for selection step: "<<step<<"\n\t"
              <<"DY ee (out/in):          "<<std::setw(10)<<nOut_ee_dy<<" "<<std::setw(10)<<nIn_ee_dy<<"\n\t"

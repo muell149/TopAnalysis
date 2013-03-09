@@ -13,7 +13,7 @@ class EventYields{
 public:
     
     /// Constructor for producing event yield tables
-    EventYields(const Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors);
+    EventYields(Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors);
     
     /// Default destructor
     ~EventYields(){};
@@ -23,15 +23,12 @@ public:
 private:
     
     /// Produce the yields
-    void produceYields();
+    void produceYields(Samples& samples);
     
     /// Write the yields to txt files
     void writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const;
     
     
-    
-    /// Samples to be analysed
-    Samples samples_;
     
     /// Luminosity
     const double luminosity_;
