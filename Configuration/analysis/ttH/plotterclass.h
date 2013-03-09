@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <TH2.h>
+#include <TH1D.h>
 
 #include "../diLeptonic/utils.h"
 #include "samples.h"
@@ -29,12 +30,13 @@ public:
     ~Plotter(){};
     
     void setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
-    void write(Sample::Channel, Sample::Systematic, DrawMode, std::vector<Sample>);
-    
+    void producePlots(Samples& samples, const DrawMode& drawMode);
     
 private:
     
-    bool prepareDataset(Sample::Channel&, Sample::Systematic&, std::vector<Sample>&);
+    bool prepareDataset(const Sample::Channel&, const Sample::Systematic&, const std::vector<Sample>&);
+
+    void write(const Sample::Channel&, const Sample::Systematic&, const DrawMode&);
     
     TLegend* ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, TLegend* leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
     

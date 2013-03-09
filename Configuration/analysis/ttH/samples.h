@@ -60,7 +60,13 @@ class Samples{
 };
 
 
+typedef std::pair<Sample, TH1D*> SampleHistPair;
+typedef std::map<TString, std::vector<SampleHistPair> > SampleHistPairsByLegend;
+
+
 namespace Tools{
+    SampleHistPairsByLegend associateSampleHistPairsByLegend(const std::vector<SampleHistPair>& v_sampleHistPair);
+    
     // FIXME: net yet implemented, only dummy so far
     void orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample);
     
@@ -73,7 +79,6 @@ namespace Tools{
 }
 
 
-typedef std::pair<Sample, TH1D*> SampleHistPair;
 
 
 #endif // Samples_h

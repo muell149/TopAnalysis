@@ -224,6 +224,17 @@ Samples::getSamples(const Sample::Channel& channel, const Sample::Systematic& sy
 
 
 
+SampleHistPairsByLegend
+Tools::associateSampleHistPairsByLegend(const std::vector<SampleHistPair>& v_sampleHistPair){
+    SampleHistPairsByLegend resultMap;
+    for(auto sampleHistPair : v_sampleHistPair){
+        const TString& legend(sampleHistPair.first.legendEntry());
+        resultMap[legend].push_back(sampleHistPair);
+    }
+    return resultMap;
+}
+
+
 void
 Tools::orderByLegend(std::vector<std::pair<TString, Sample> >& v_sample){
     // FIXME: place here automated ordering by legendEntry

@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <set>
+#include <functional>
 
 #include "plotterclass.h"
 #include "../diLeptonic/HistoListReader.h"
@@ -36,7 +37,6 @@ void Histo(Plotter::DrawMode drawMode,
     
     // Produce Drell-Yan scalings
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
-    // FIXME: need to use these in eventYields and Plotter
     std::vector<Sample::Channel> v_dyScalingChannel {Sample::ee, Sample::emu, Sample::mumu};
     Samples dyScalingSamples;
     for (auto systematic : v_systematic) {
@@ -74,27 +74,18 @@ void Histo(Plotter::DrawMode drawMode,
             continue;
         }
         
-        
         // Create Plotter 
         Plotter h_generalPlot(luminosity, m_dyScaleFactors);
         h_generalPlot.setOptions(plotProperties.name,plotProperties.specialComment,plotProperties.ytitle,plotProperties.xtitle, 
                                  plotProperties.rebin, plotProperties.do_dyscale, plotProperties.logX, plotProperties.logY, 
                                  plotProperties.ymin, plotProperties.ymax, plotProperties.xmin, plotProperties.xmax,
                                  plotProperties.bins, plotProperties.xbinbounds, plotProperties.bincenters);
-        
-        
         // Loop over all systematics and all channels and write histograms
-        const SystematicChannelSamples& m_systematicChannelSample(samples.getSystematicChannelSamples());
-        for(auto systematicChannelSamples : m_systematicChannelSample){
-            const Sample::Systematic& systematic(systematicChannelSamples.first);
-            for(auto channelSample : systematicChannelSamples.second){
-                const Sample::Channel& channel(channelSample.first);
-                h_generalPlot.write(channel, systematic, drawMode, channelSample.second);
-            }
-        }
+        h_generalPlot.producePlots(samples, drawMode);
     }
     std::cout << "Done with the plotting\n";
 }
+
 
 /**
  * Helper function to create a function which checks if a string found is in the
@@ -108,6 +99,7 @@ std::function<bool(const std::string &s)> makeStringChecker(const std::vector<co
         return std::find(begin(allowed), end(allowed), test) != end(allowed);
     };
 }
+
 
 int main(int argc, char** argv) {
     // Get and check configuration parameters
@@ -161,3 +153,6 @@ int main(int argc, char** argv) {
 
     Histo(drawMode, plots, v_channel, v_systematic);
 }
+
+
+

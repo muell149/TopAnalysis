@@ -80,7 +80,28 @@ void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TS
 
 
 
-bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& systematic, std::vector<Sample>& v_sample)
+void
+Plotter::producePlots(Samples& samples, const Plotter::DrawMode& drawMode){
+    const SystematicChannelSamples& m_systematicChannelSample(samples.getSystematicChannelSamples());
+    for(auto systematicChannelSamples : m_systematicChannelSample){
+        const Sample::Systematic& systematic(systematicChannelSamples.first);
+        for(auto channelSample : systematicChannelSamples.second){
+            const Sample::Channel& channel(channelSample.first);
+            std::vector<Sample>& v_sample(channelSample.second);
+            if(!this->prepareDataset(channel, systematic, v_sample)){
+                std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): "
+                         << Tools::convertChannel(channel) << "/" << Tools::convertSystematic(systematic)
+                         <<"\n... skip this plot\n";
+                return;
+            }
+            this->write(channel, systematic, drawMode);
+        }
+    }
+}
+
+
+
+bool Plotter::prepareDataset(const Sample::Channel& channel, const Sample::Systematic&, const std::vector<Sample>& v_sample)
 {
     std::cout<<"DY SF map: "<<m_dyScaleFactors_.size()<<std::endl;
     
@@ -122,15 +143,9 @@ bool Plotter::prepareDataset(Sample::Channel& channel, Sample::Systematic& syste
 
 
 
-void Plotter::write(Sample::Channel channel, Sample::Systematic systematic, DrawMode drawMode, std::vector<Sample> v_sample) // do scaling, stacking, legending, and write in file 
+ // do scaling, stacking, legending, and write in file 
+void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& systematic, const DrawMode& drawMode)
 {
-    if(!prepareDataset(channel, systematic, v_sample)){
-        std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): " << Tools::convertChannel(channel) << "/" << Tools::convertSystematic(systematic)
-                 <<"\n... skip this plot\n";
-        return;
-    }
-    
-    
     TCanvas * canvas = new TCanvas("","");
 
     THStack * stack = new THStack("def", "def");
@@ -254,6 +269,26 @@ void Plotter::write(Sample::Channel channel, Sample::Systematic systematic, Draw
                 }
             }
         }
+    }
+    
+    
+    SampleHistPairsByLegend m_sampleHistPairsByLegend;
+    m_sampleHistPairsByLegend = Tools::associateSampleHistPairsByLegend(v_sampleHistPair_);
+    std::cout<<"Legends: "<<m_sampleHistPairsByLegend.size()<<std::endl;
+    THStack* stack2(0);
+    std::vector<TH1D*> overlayHists;
+    TH1D* dataHist(0);
+    TLegend* legend2;
+    for(auto sampleHistPairsByLegend : m_sampleHistPairsByLegend){
+        const TString& legendEntry(sampleHistPairsByLegend.first);
+        std::cout<<" bla : "<<legendEntry<<"\n";
+        TH1D* legendHist(0);
+        for(SampleHistPair sampleHistPair : sampleHistPairsByLegend.second){
+            if(!legendHist)legendHist = sampleHistPair.second;
+            else legendHist->Add(sampleHistPair.second);
+        }
+        
+        
     }
     
     
