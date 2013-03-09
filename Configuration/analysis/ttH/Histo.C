@@ -35,7 +35,7 @@ void Histo(Plotter::DrawMode drawMode,
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
     std::vector<Sample::Channel> v_dyScalingChannel {Sample::ee, Sample::emu, Sample::mumu};
     Samples dyScalingSamples;
-    dyScalingSamples.addSamples(v_channel, v_systematic);
+    dyScalingSamples.addSamples(v_dyScalingChannel, v_systematic);
     DyScaleFactors::DyScaleFactorMap m_dyScaleFactors;
     DyScaleFactors dyScaleFactors;
     m_dyScaleFactors = dyScaleFactors.getScaleFactors(dyScalingSamples, luminosity);
@@ -43,7 +43,10 @@ void Histo(Plotter::DrawMode drawMode,
     // Produce event yields
     EventYields eventYields(samples, luminosity, m_dyScaleFactors);
     
-    // Loop over all histograms in histoList
+    // Create Plotter 
+    Plotter h_generalPlot(samples, luminosity, m_dyScaleFactors, drawMode);
+    
+    // Loop over all histograms in histoList and print them
     HistoListReader histoList("HistoList_control");
     if (histoList.IsZombie()) exit(12);
     for (auto it = histoList.begin(); it != histoList.end(); ++it) {
@@ -66,14 +69,13 @@ void Histo(Plotter::DrawMode drawMode,
             continue;
         }
         
-        // Create Plotter 
-        Plotter h_generalPlot(luminosity, m_dyScaleFactors);
+        // Set plot properties
         h_generalPlot.setOptions(plotProperties.name,plotProperties.specialComment,plotProperties.ytitle,plotProperties.xtitle, 
                                  plotProperties.rebin, plotProperties.do_dyscale, plotProperties.logX, plotProperties.logY, 
                                  plotProperties.ymin, plotProperties.ymax, plotProperties.xmin, plotProperties.xmax,
                                  plotProperties.bins, plotProperties.xbinbounds, plotProperties.bincenters);
         // Loop over all systematics and all channels and write histograms
-        h_generalPlot.producePlots(samples, drawMode);
+        h_generalPlot.producePlots();
     }
     std::cout << "Done with the plotting\n";
 }

@@ -25,18 +25,17 @@ public:
     
     enum DrawMode{stacked, overlaid, scaledoverlaid, undefined};
     
-    Plotter(){};
-    Plotter(const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors);
+    Plotter(const Samples& samples, const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors, const DrawMode& drawMode);
     ~Plotter(){};
     
     void setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
-    void producePlots(Samples& samples, const DrawMode& drawMode);
+    void producePlots();
     
 private:
     
     bool prepareDataset(const Sample::Channel&, const Sample::Systematic&, const std::vector<Sample>&);
 
-    void write(const Sample::Channel&, const Sample::Systematic&, const DrawMode&);
+    void write(const Sample::Channel&, const Sample::Systematic&);
     
     TLegend* ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, TLegend* leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
     
@@ -46,11 +45,17 @@ private:
     
     
     
+    /// Samples to be analysed
+    Samples samples_;
+    
     /// Luminosity
-    double luminosity_;
+    const double luminosity_;
     
     /// Map containing the Drell-Yan scale factors
-    DyScaleFactors::DyScaleFactorMap m_dyScaleFactors_;
+    const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors_;
+    
+    /// Draw mode for Higgs
+    const DrawMode drawMode_;
     
     /// File reader for accessing specific histogram from given file
     RootFileReader *fileReader_;

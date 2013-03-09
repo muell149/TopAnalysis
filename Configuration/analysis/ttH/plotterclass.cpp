@@ -29,8 +29,9 @@
 
 
 
-Plotter::Plotter(const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors):
-luminosity_(luminosity), m_dyScaleFactors_(m_dyScaleFactors),
+Plotter::Plotter(const Samples& samples, const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors, const DrawMode& drawMode):
+samples_(samples), luminosity_(luminosity),
+m_dyScaleFactors_(m_dyScaleFactors), drawMode_(drawMode),
 fileReader_(RootFileReader::getInstance()),
 name_("defaultName"), rangemin_(0), rangemax_(3),
 YAxis_("N_{events}")
@@ -81,8 +82,8 @@ void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TS
 
 
 void
-Plotter::producePlots(Samples& samples, const Plotter::DrawMode& drawMode){
-    const SystematicChannelSamples& m_systematicChannelSample(samples.getSystematicChannelSamples());
+Plotter::producePlots(){
+    const SystematicChannelSamples& m_systematicChannelSample(samples_.getSystematicChannelSamples());
     for(auto systematicChannelSamples : m_systematicChannelSample){
         const Sample::Systematic& systematic(systematicChannelSamples.first);
         for(auto channelSample : systematicChannelSamples.second){
@@ -94,7 +95,7 @@ Plotter::producePlots(Samples& samples, const Plotter::DrawMode& drawMode){
                          <<"\n... skip this plot\n";
                 return;
             }
-            this->write(channel, systematic, drawMode);
+            this->write(channel, systematic);
         }
     }
 }
@@ -144,7 +145,7 @@ bool Plotter::prepareDataset(const Sample::Channel& channel, const Sample::Syste
 
 
  // do scaling, stacking, legending, and write in file 
-void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& systematic, const DrawMode& drawMode)
+void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& systematic)
 {
     TCanvas * canvas = new TCanvas("","");
 
@@ -177,8 +178,8 @@ void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& sy
     // Check whether Higgs sample should be drawn overlaid and/or scaled
     bool drawHiggsOverlaid(false);
     bool drawHiggsScaled(false);
-    if(drawMode==overlaid){drawHiggsOverlaid = true;}
-    else if(drawMode==scaledoverlaid){drawHiggsOverlaid = true; drawHiggsScaled = true;}
+    if(drawMode_==overlaid){drawHiggsOverlaid = true;}
+    else if(drawMode_==scaledoverlaid){drawHiggsOverlaid = true; drawHiggsScaled = true;}
     
     
     
