@@ -89,7 +89,7 @@ Plotter::producePlots(){
         for(auto channelSample : systematicChannelSamples.second){
             const Channel::Channel& channel(channelSample.first);
             std::vector<Sample>& v_sample(channelSample.second);
-            if(!this->prepareDataset(channel, systematic, v_sample)){
+            if(!this->prepareDataset(v_sample)){
                 std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): "
                          << Channel::convertChannel(channel) << "/" << Systematic::convertSystematic(systematic)
                          <<"\n... skip this plot\n";
@@ -104,7 +104,7 @@ Plotter::producePlots(){
 
 
 
-bool Plotter::prepareDataset(const Channel::Channel& channel, const Systematic::Systematic&, const std::vector<Sample>& v_sample)
+bool Plotter::prepareDataset(const std::vector<Sample>& v_sample)
 {
     
     bool allHistosAvailable(true);
@@ -133,12 +133,6 @@ bool Plotter::prepareDataset(const Channel::Channel& channel, const Systematic::
     }
     //std::cout<<"Number of samples used for histogram ("<<name_<<"): "<<v_sampleHistPair_.size()<<"\n";
     
-    
-    // Set dataset specific subfolders
-    outpathPlots_ = "./Plots";
-    subfolderChannel_ = Channel::convertChannel(channel);
-    subfolderChannel_.Prepend("/");
-    subfolderSpecial_ = "";
     
     return allHistosAvailable;
 }
@@ -382,9 +376,9 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     legend->Draw("SAME");
     drawRatio(v_sampleHistPair_[0].second, stacksum, 0.5, 1.7);
 
-    // Create Directory for Output Plots 
-    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+Systematic::convertSystematic(systematic), true);
-    canvas->Print(outpathPlots_+subfolderChannel_+"/"+Systematic::convertSystematic(systematic)+"/"+name_+".eps");
+    // Create Directory for Output Plots
+    gSystem->mkdir(Tools::assignFolder(channel, systematic), true);
+    canvas->Print(Tools::assignFolder(channel, systematic)+"/"+name_+".eps");
     
     // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
@@ -404,7 +398,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     sumMC->SetName(name_);
     
     //save Canvas AND sources in a root file
-    TFile out_root(outpathPlots_+subfolderChannel_+"/"+Systematic::convertSystematic(systematic)+"/"+name_+"_source.root", "RECREATE");
+    TFile out_root(Tools::assignFolder(channel, systematic)+"/"+name_+"_source.root", "RECREATE");
     v_sampleHistPair_[0].second->Write(name_+"_data");
     sumSignal->Write(name_+"_signalmc");
     sumMC->Write(name_+"_allmc");

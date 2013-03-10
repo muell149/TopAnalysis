@@ -117,10 +117,31 @@ Channel::convertChannels(const std::vector<Channel>& channels){
 
 TString
 Tools::assignFolder(const Channel::Channel& channel){
-    TString outpathPlots = "./Plots";
-    outpathPlots.Append("/");
+    const TString outpathPlots = "./Plots";
     TString subfolderChannel = Channel::convertChannel(channel);
+    subfolderChannel.Prepend("/");
     return outpathPlots + subfolderChannel;
 }
+
+
+TString
+Tools::assignFolder(const Channel::Channel& channel, const Systematic::Systematic& systematic){
+    const TString path = assignFolder(channel);
+    TString subfolderSystematic = Systematic::convertSystematic(systematic);
+    subfolderSystematic.Prepend("/");
+    return path + subfolderSystematic;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 

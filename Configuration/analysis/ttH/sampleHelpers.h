@@ -85,6 +85,8 @@ namespace Tools{
     /// Assign an output folder depending on the channel
     TString assignFolder(const Channel::Channel& channel);
     
+    /// Assign an output folder depending on the channel and systematic
+    TString assignFolder(const Channel::Channel& channel, const Systematic::Systematic& systematic);
 }
 
 

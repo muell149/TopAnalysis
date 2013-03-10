@@ -31,7 +31,7 @@ public:
     
 private:
     
-    bool prepareDataset(const Channel::Channel&, const Systematic::Systematic&, const std::vector<Sample>&);
+    bool prepareDataset(const std::vector<Sample>&);
 
     void write(const Channel::Channel&, const Systematic::Systematic&);
     
@@ -77,10 +77,6 @@ private:
     
     /// Pair of histogram to print and corresponding sample
     std::vector<SampleHistPair> v_sampleHistPair_;
-    
-    TString outpathPlots_;
-    TString subfolderChannel_;
-    TString subfolderSpecial_;
     
     
 };
