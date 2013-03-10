@@ -10,20 +10,25 @@
 #include "../diLeptonic/utils.h"
 
 
+
+
+
 Sample::Sample():
 legendEntry_(""), color_(0), crossSection_(0),
-sampleType_(dummy), finalState_(undefinedChannel), inputFileName_("")
+sampleType_(dummy), finalState_(Channel::undefined), systematic_(Systematic::undefined),
+inputFileName_("")
 {}
 
 
 Sample::Sample(const TString legendEntry, const int color, const double crossSection, const SampleType sampleType):
 legendEntry_(legendEntry), color_(color), crossSection_(crossSection),
-sampleType_(sampleType), finalState_(undefinedChannel), inputFileName_("")
+sampleType_(sampleType), finalState_(Channel::undefined), systematic_(Systematic::undefined),
+inputFileName_("")
 {}
 
 
 std::vector< std::pair< TString, Sample > >
-Samples::setSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
+Samples::setSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic){
     
     // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
@@ -56,7 +61,7 @@ Samples::setSamples(const Sample::Channel& channel, const Sample::Systematic& sy
     
     
     // Access FileList containing list of input root files
-    const TString histoListName("FileLists/HistoFileList_" + Tools::convertSystematic(systematic) + "_" + Tools::convertChannel(channel) + ".txt");
+    const TString histoListName("FileLists/HistoFileList_" + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
     std::cout << "Reading file: " << histoListName << std::endl;
     ifstream fileList(histoListName);
     if (fileList.fail()) {
@@ -158,22 +163,22 @@ Sample::sampleType()const{return sampleType_;}
 
 
 void
-Sample::setFinalState(const Sample::Channel& finalState){
+Sample::setFinalState(const Channel::Channel& finalState){
     finalState_ = finalState;
 }
 
 
-Sample::Channel
+Channel::Channel
 Sample::finalState()const{return finalState_;}
 
 
 void
-Sample::setSystematic(const Sample::Systematic& systematic){
+Sample::setSystematic(const Systematic::Systematic& systematic){
     systematic_ = systematic;
 }
 
 
-Sample::Systematic
+Systematic::Systematic
 Sample::systematic()const{return systematic_;}
 
 
@@ -202,7 +207,7 @@ Sample::inputFile()const{return inputFileName_;}
 Samples::Samples(){}
 
 
-Samples::Samples(const std::vector< Sample::Channel >& v_channel, const std::vector< Sample::Systematic >& v_systematic){
+Samples::Samples(const std::vector< Channel::Channel >& v_channel, const std::vector< Systematic::Systematic >& v_systematic){
     
     std::cout<<"--- Beginning to set up the samples\n\n";
     
@@ -217,7 +222,7 @@ Samples::Samples(const std::vector< Sample::Channel >& v_channel, const std::vec
 
 
 void
-Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
+Samples::addSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic){
     
     // Add all samples as they are defined in setSamples()
     std::vector< std::pair< TString, Sample > > v_filenameSamplePair(this->setSamples(channel, systematic));
@@ -234,10 +239,10 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
     //for(auto systematicChannelSample : m_systematicChannelSample_){
     //    for(auto channelSample : systematicChannelSample.second){
     //        for(auto sample : channelSample.second){
-    //            std::cout<<"We have samples: "<<Tools::convertSystematic(systematic)
-    //                <<" , "<<Tools::convertChannel(channel)
+    //            std::cout<<"We have samples: "<<Systematic::convertSystematic(systematic)
+    //                <<" , "<<Channel::convertChannel(channel)
     //                <<" , "<<sample.inputFile()
-    //                <<" , "<<Tools::convertChannel(sample.finalState())<<"\n";
+    //                <<" , "<<Channel::convertChannel(sample.finalState())<<"\n";
     //        }
     //    }
     //}
@@ -245,7 +250,7 @@ Samples::addSamples(const Sample::Channel& channel, const Sample::Systematic& sy
 
 
 std::vector<Sample>
-Samples::setSampleOptions(const Sample::Systematic& systematic, const std::vector< std::pair<TString, Sample> >& v_filenameSamplePair){
+Samples::setSampleOptions(const Systematic::Systematic& systematic, const std::vector< std::pair<TString, Sample> >& v_filenameSamplePair){
     std::vector<Sample> v_sample;
     
     for(auto filenameSamplePair : v_filenameSamplePair){
@@ -302,26 +307,28 @@ Samples::orderByLegend(std::vector<Sample>& v_sample){
 }
 
 
-Sample::Channel
+Channel::Channel
 Samples::assignFinalState(const TString& filename){
-    std::vector<Sample::Channel> v_channel {Sample::ee, Sample::emu, Sample::mumu};
+    std::vector<Channel::Channel> v_channel {Channel::ee, Channel::emu, Channel::mumu};
     for(auto channel : v_channel){
-        TString finalState(Tools::convertChannel(channel));
+        TString finalState(Channel::convertChannel(channel));
         finalState.Prepend("/");
         finalState.Append("/");
         if(filename.Contains(finalState)){
             return channel;
         }
     }
-    return Sample::undefinedChannel;
+    return Channel::undefined
+;
 }
 
 
-Sample::Systematic
-Samples::assignSystematic(TString& filename, const Sample::Systematic& systematic){
+Systematic::Systematic
+Samples::assignSystematic(TString& filename, const Systematic::Systematic& systematic){
     // FIXME: adjust filename corresponding to specific systematic
     
-    return Sample::undefinedSystematic;
+    return Systematic::undefined
+;
 }
 
 
@@ -332,7 +339,7 @@ Samples::getSystematicChannelSamples(){
 
 
 const std::vector<Sample>&
-Samples::getSamples(const Sample::Channel& channel, const Sample::Systematic& systematic){
+Samples::getSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic){
     return m_systematicChannelSample_[systematic][channel];
 }
 
@@ -344,6 +351,7 @@ Samples::getSamples(const Sample::Channel& channel, const Sample::Systematic& sy
 // --- Functions defined in namespace Tools ---
 
 
+
 SampleHistPairsByLegend
 Tools::associateSampleHistPairsByLegend(const std::vector<SampleHistPair>& v_sampleHistPair){
     SampleHistPairsByLegend resultMap;
@@ -352,66 +360,6 @@ Tools::associateSampleHistPairsByLegend(const std::vector<SampleHistPair>& v_sam
         resultMap[legend].push_back(sampleHistPair);
     }
     return resultMap;
-}
-
-
-Sample::Channel 
-Tools::convertChannel(const std::string& channel){
-    if(channel == "ee")return Sample::ee;
-    else if(channel == "emu")return Sample::emu;
-    else if(channel == "mumu")return Sample::mumu;
-    else if(channel == "combined")return Sample::combined;
-    else return Sample::Channel::undefinedChannel;
-}
-
-
-std::string
-Tools::convertChannel(const Sample::Channel& channel){
-    if(channel == Sample::ee)return "ee";
-    else if(channel == Sample::emu)return "emu";
-    else if(channel == Sample::mumu)return "mumu";
-    else if(channel == Sample::combined)return "combined";
-    else return "";
-}
-
-
-std::string
-Tools::channelLabel(const Sample::Channel& channel){
-    if(channel == Sample::ee)return "ee";
-    else if(channel == Sample::emu)return "e#mu";
-    else if(channel == Sample::mumu)return "#mu#mu";
-    else if(channel == Sample::combined)return "Dilepton Combined";
-    else return "";
-}
-
-
-Sample::Systematic
-Tools::convertSystematic(const std::string& systematic){
-    if(systematic == "Nominal")return Sample::nominal;
-    else{
-        std::cout<<"Warning! The following systematic is not implemented: "<<systematic<<std::endl;
-        return Sample::undefinedSystematic;
-    }
-}
-
-
-std::string
-Tools::convertSystematic(const Sample::Systematic& systematic){
-    if(systematic == Sample::nominal)return "Nominal";
-    else if(systematic == Sample::undefinedSystematic)return "";
-    else{
-        std::cout<<"Error! Systematic is not implemented, break...\n";
-        exit(99);
-    }
-}
-
-
-TString
-Tools::assignFolder(const Sample::Channel& channel){
-    TString outpathPlots = "./Plots";
-    outpathPlots.Append("/");
-    TString subfolderChannel = Tools::convertChannel(channel);
-    return outpathPlots + subfolderChannel;
 }
 
 

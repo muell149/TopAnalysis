@@ -14,18 +14,20 @@
 #include "../diLeptonic/HistoListReader.h"
 #include "../diLeptonic/CommandLineParameters.hh"
 
+#include "sampleHelpers.h"
 #include "samples.h"
 #include "dyScaleFactors.h"
 #include "eventYields.h"
+#include "plotterHelpers.h"
 #include "plotterclass.h"
 
 
 
 
-void Histo(const Plotter::DrawMode drawMode,
+void Histo(const DrawMode::DrawMode drawMode,
            const std::vector<std::string> plots, 
-           const std::vector<Sample::Channel> v_channel,
-           const std::vector<Sample::Systematic> v_systematic)
+           const std::vector<Channel::Channel> v_channel,
+           const std::vector<Systematic::Systematic> v_systematic)
 {
     // Set data luminosity
     const double luminosity = 12210;
@@ -35,7 +37,7 @@ void Histo(const Plotter::DrawMode drawMode,
     
     // Produce Drell-Yan scalings and access map containing scale factors
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
-    std::vector<Sample::Channel> v_dyScalingChannel {Sample::ee, Sample::emu, Sample::mumu};
+    std::vector<Channel::Channel> v_dyScalingChannel {Channel::ee, Channel::emu, Channel::mumu};
     Samples dyScalingSamples(v_dyScalingChannel, v_systematic);
     const DyScaleFactors dyScaleFactors(dyScalingSamples, luminosity);
     const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors(dyScaleFactors.getScaleFactors());
@@ -43,7 +45,7 @@ void Histo(const Plotter::DrawMode drawMode,
     // Produce event yields
     const EventYields eventYields(samples, luminosity, m_dyScaleFactors);
     
-    // Create Plotter 
+    // Create Plotter
     Plotter generalPlot(samples, luminosity, m_dyScaleFactors, drawMode);
     
     // Loop over all histograms in histoList and print them
@@ -112,51 +114,38 @@ std::function<bool(const std::string &s)> makeStringChecker(const std::vector<st
 
 int main(int argc, char** argv) {
     
-    // Set vector of possible Higgs draw mode arguments
-    std::vector<std::string> drawModes{"stacked", "overlaid", "scaledoverlaid"};
-    // Set vector of possible channel arguments
-    std::vector<std::string> channels{"ee", "emu", "mumu", "combined"};
-    // Set vector of possible systematic arguments
-    std::vector<std::string> systematics{"Nominal"};
-    
     // Get and check configuration parameters
     CLParameter<std::string> opt_drawMode("m", "Specify draw mode of Higgs sample, valid: stacked, overlaid, scaledoverlaid. Default: scaledoverlaid", false, 1, 1,
-        makeStringChecker(drawModes));
+        makeStringChecker(DrawMode::convertDrawModes(DrawMode::allowedDrawModes)));
     CLParameter<std::string> opt_plots("p", "Name (pattern) of plot; multiple patterns possible; use '+Name' to match name exactly", false, 1, 100);
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: all channels", false, 1, 4,
-        makeStringChecker(channels));
+        makeStringChecker(Channel::convertChannels(Channel::allowedChannels)));
     CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal, use 'all' for all", false, 1, 100,
-        makeStringChecker(systematics));
+        makeStringChecker(Systematic::convertSystematics(Systematic::allowedSystematics)));
     CLAnalyser::interpretGlobal(argc, argv);
     
     // Set up draw mode (default is scaledOverlaid)
-    Plotter::DrawMode drawMode(Plotter::undefined);
-    if(opt_drawMode.isSet()) drawMode = Tools::convertDrawMode(opt_drawMode[0]);
-    else drawMode = Plotter::scaledoverlaid;
+    DrawMode::DrawMode drawMode(DrawMode::undefined);
+    if(opt_drawMode.isSet()) drawMode = DrawMode::convertDrawMode(opt_drawMode[0]);
+    else drawMode = DrawMode::scaledoverlaid;
     std::cout << "\n";
-    std::cout << "Draw mode of Higgs sample: "<<Tools::convertDrawMode(drawMode);
+    std::cout << "Draw mode of Higgs sample: "<<DrawMode::convertDrawMode(drawMode);
     std::cout << "\n\n";
     
     // Set up channels
-    if(opt_channel.isSet()) channels = opt_channel.getArguments();
-    std::vector<Sample::Channel> v_channel;
-    for (auto channel: channels) {
-        v_channel.push_back(Tools::convertChannel(channel));
-    }
-    std::cout << "Processing channels: "; 
-    for (auto channel : v_channel)std::cout << Tools::convertChannel(channel) << " ";
+    std::vector<Channel::Channel> v_channel(Channel::allowedChannels);
+    if(opt_channel.isSet()) v_channel = Channel::convertChannels(opt_channel.getArguments());
+    std::cout << "Processing channels: ";
+    for (auto channel : v_channel)std::cout << Channel::convertChannel(channel) << " ";
     std::cout << "\n\n";
     
 	// Set up systematics
-    if(opt_systematic.isSet() && opt_systematic[0]!="all") systematics = opt_systematic.getArguments();
+    std::vector<Systematic::Systematic> v_systematic(Systematic::allowedSystematics);
+    if(opt_systematic.isSet() && opt_systematic[0]!="all") v_systematic = Systematic::convertSystematics(opt_systematic.getArguments());
     else if(opt_systematic.isSet() && opt_systematic[0]=="all"); // do nothing
-    else {systematics.clear(); systematics.push_back(Tools::convertSystematic(Sample::nominal));}
-    std::vector<Sample::Systematic> v_systematic;
-    for(auto systematic : systematics){
-        v_systematic.push_back(Tools::convertSystematic(systematic));
-    }
+    else {v_systematic.clear(); v_systematic.push_back(Systematic::nominal);}
     std::cout << "Processing systematics (use >>-s all<< to process all known systematics): "; 
-    for (auto systematic : v_systematic) std::cout << Tools::convertSystematic(systematic) << " ";
+    for (auto systematic : v_systematic) std::cout << Systematic::convertSystematic(systematic) << " ";
     std::cout << "\n\n";
     
     // Set up plots

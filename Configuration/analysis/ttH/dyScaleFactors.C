@@ -42,7 +42,7 @@ DyScaleFactors::produceScaleFactors(Samples& samples){
     // Loop over selection steps and systematics
     for(TString step : v_step){
         for(auto systematicChannelSamples : m_systematicChannelSamples){
-            const Sample::Systematic& systematic(systematicChannelSamples.first);
+            const Systematic::Systematic& systematic(systematicChannelSamples.first);
             this->produceScaleFactors(step, systematic, systematicChannelSamples.second);
         }
     }
@@ -50,9 +50,9 @@ DyScaleFactors::produceScaleFactors(Samples& samples){
     //for(auto dyScaleFactorsPerStep : m_dyScaleFactors_){
     //    const TString& step(dyScaleFactorsPerStep.first);
     //    for(auto dyScaleFactorsPerSystematic : dyScaleFactorsPerStep.second){
-    //        const Sample::Systematic& systematic(dyScaleFactorsPerSystematic.first);
+    //        const Systematic::Systematic& systematic(dyScaleFactorsPerSystematic.first);
     //        for(auto dyScaleFactorsPerChannel : dyScaleFactorsPerSystematic.second){
-    //            const Sample::Channel& channel(dyScaleFactorsPerChannel.first);
+    //            const Channel::Channel& channel(dyScaleFactorsPerChannel.first);
     //            const double& scaleFactor(dyScaleFactorsPerChannel.second);
     //            std::cout<<"DY scale factors: "<<step<<" , "<<Tools::convertSystematic(systematic)<<" , "
     //                     <<Tools::convertChannel(channel)<<" , "<<scaleFactor<<"\n";
@@ -70,9 +70,9 @@ DyScaleFactors::getScaleFactors()const{return m_dyScaleFactors_;}
 
 
 void
-DyScaleFactors::produceScaleFactors(const TString& step, const Sample::Systematic& systematic, std::map<Sample::Channel, std::vector<Sample> >& channelSamples){
+DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::Systematic& systematic, std::map<Channel::Channel, std::vector<Sample> >& channelSamples){
     
-    const std::vector<Sample::Channel> v_channel {Sample::ee, Sample::emu, Sample::mumu};
+    const std::vector<Channel::Channel> v_channel {Channel::ee, Channel::emu, Channel::mumu};
     
     
     double nOut_ee_dy=0, nIn_ee_dy=0, nOut_mumu_dy=0, nIn_mumu_dy=0;//Number of events in/out of z-veto region for the DY MC
@@ -81,7 +81,7 @@ DyScaleFactors::produceScaleFactors(const TString& step, const Sample::Systemati
     double nIn_ee_mc=0, nIn_mumu_mc=0;//All other MC events
     
     
-    for(Sample::Channel channel : v_channel){
+    for(Channel::Channel channel : v_channel){
         const std::vector<Sample>& v_sample(channelSamples[channel]);
         for(Sample sample : v_sample){
             if(sample.sampleType()==Sample::higgssignal)continue;
@@ -101,36 +101,36 @@ DyScaleFactors::produceScaleFactors(const TString& step, const Sample::Systemati
             
             // FIXME: here Integral() is used, but this does not account for the overflow, so it is wrong !?
             if(sample.sampleType()==Sample::data){
-                if(channel==Sample::ee){
+                if(channel==Channel::ee){
                     nIn_ee_data += h_zWindow->Integral();
                     nIn_ee_data_loose += h_loose->Integral();
                 }
-                else if(channel==Sample::mumu){
+                else if(channel==Channel::mumu){
                     nIn_mumu_data += h_zWindow->Integral();
                     nIn_mumu_data_loose += h_loose->Integral();
                 }
-                else if(channel==Sample::emu){
+                else if(channel==Channel::emu){
                     nIn_emu_data += h_zWindow->Integral();
                 }
                 continue;
             }
-            if(!channel==Sample::ee && !channel==Sample::mumu)continue;
+            if(!channel==Channel::ee && !channel==Channel::mumu)continue;
             
             if(sample.sampleType()==Sample::dyll || sample.sampleType()==Sample::dytautau){
-                if(channel==Sample::ee){
+                if(channel==Channel::ee){
                     nIn_ee_dy += h_zWindow->Integral();
                     nOut_ee_dy += h_zVeto->Integral();
                 }
-                else if(channel==Sample::mumu){
+                else if(channel==Channel::mumu){
                     nIn_mumu_dy += h_zWindow->Integral();
                     nOut_mumu_dy += h_zVeto->Integral();
                 }
             }
             else{
-                if(channel==Sample::ee){
+                if(channel==Channel::ee){
                     nIn_ee_mc += h_zWindow->Integral();
                 }
-                else if(channel==Sample::mumu){
+                else if(channel==Channel::mumu){
                     nIn_mumu_mc += h_zWindow->Integral();
                 }
             }
@@ -159,8 +159,8 @@ DyScaleFactors::produceScaleFactors(const TString& step, const Sample::Systemati
     //                           nIn_ee_mc, nIn_mumu_mc, nIn_ee_dy, nIn_mumu_dy,
     //                           nOut_ee_mc, nOut_mumu_mc, nOut_ee_dy, nOut_mumu_dy, step);
     
-    m_dyScaleFactors_[step][systematic][Sample::ee] = dyScaleFactor_ee;
-    m_dyScaleFactors_[step][systematic][Sample::mumu] = dyScaleFactor_mumu;
+    m_dyScaleFactors_[step][systematic][Channel::ee] = dyScaleFactor_ee;
+    m_dyScaleFactors_[step][systematic][Channel::mumu] = dyScaleFactor_mumu;
 }
 
 

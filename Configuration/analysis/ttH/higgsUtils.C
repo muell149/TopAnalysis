@@ -16,6 +16,18 @@ Tools::applyFlatWeight(TH1* hist, const double weight){
 
 
 TString
+Tools::extractSelectionStep(const TString& histogramName){
+    TString step(histogramName);
+    // Remove .root
+    step = Tools::stepFragmentByToken(step, ".");
+    // Further separation by "_" to find string containing step
+    step = Tools::stepFragmentByToken(step, "_");
+    //std::cout<<"The extracted selection step is (step/histogram name): "<<step<<" / "<<histogramName<<std::endl;
+    return step;
+}
+
+
+TString
 Tools::stepFragmentByToken(const TString& filenameFragment, const TString& token){
     TString stepFragment;
     TObjArray* a_nameFragment = TString(filenameFragment).Tokenize(token);
@@ -33,18 +45,6 @@ Tools::stepFragmentByToken(const TString& filenameFragment, const TString& token
         }
     }
     return stepFragment;
-}
-
-
-TString
-Tools::extractSelectionStep(const TString& histogramName){
-    TString step(histogramName);
-    // Remove .root
-    step = Tools::stepFragmentByToken(step, ".");
-    // Further separation by "_" to find string containing step
-    step = Tools::stepFragmentByToken(step, "_");
-    //std::cout<<"The extracted selection step is (step/histogram name): "<<step<<" / "<<histogramName<<std::endl;
-    return step;
 }
 
 

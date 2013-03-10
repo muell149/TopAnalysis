@@ -27,7 +27,7 @@ private:
     void produceYields(Samples& samples);
     
     /// Write the yields to txt files
-    void writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const;
+    void writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const;
     
     
     

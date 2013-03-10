@@ -22,7 +22,7 @@ void EventYields::produceYields(Samples& samples){
     std::cout<<"--- Beginning event yield table processing\n\n";
     
     // Find all histograms containing information for cutflow table (in systematic Nominal and channel emu, first histogram)
-    const std::vector<TString>& v_eventHistoName = fileReader_->findHistos(samples.getSamples(Sample::emu, Sample::nominal).at(0).inputFile(), "events_step");
+    const std::vector<TString>& v_eventHistoName = fileReader_->findHistos(samples.getSamples(Channel::emu, Systematic::nominal).at(0).inputFile(), "events_step");
     std::stringstream ss_step;
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         const TString& step = Tools::extractSelectionStep(*i_eventHistoName);
@@ -32,10 +32,10 @@ void EventYields::produceYields(Samples& samples){
     
     // Loop over systematics (exclude all but Nominal - so outer loop could be removed) and channels
     for(auto systematicChannelSamples : samples.getSystematicChannelSamples()){
-        const Sample::Systematic& systematic(systematicChannelSamples.first);
-        if(systematic!=Sample::nominal)continue;
+        const Systematic::Systematic& systematic(systematicChannelSamples.first);
+        if(systematic != Systematic::nominal)continue;
         for(auto channelSample : systematicChannelSamples.second){
-            const Sample::Channel& channel(channelSample.first);
+            const Channel::Channel& channel(channelSample.first);
             this->writeYields(channel, channelSample.second, v_eventHistoName);
         }
     }
@@ -43,7 +43,7 @@ void EventYields::produceYields(Samples& samples){
 }
 
 
-void EventYields::writeYields(const Sample::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const{
+void EventYields::writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const{
     // Loop over all selection steps writing out event yields
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         
@@ -60,7 +60,7 @@ void EventYields::writeYields(const Sample::Channel& channel, const std::vector<
         for(auto sampleHistPair : v_numhist){
             const bool isDyll(sampleHistPair.first.sampleType() == Sample::dyll);
             // FIXME: why not scaling the DYee and DYmumu for each channel ?
-            if(isDyll && channel!=Sample::emu){
+            if(isDyll && channel!=Channel::emu){
                 // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
                 sampleHistPair.second->Scale(1.);
                 //numhist.first->Scale(dyScaleFactors_(channel));

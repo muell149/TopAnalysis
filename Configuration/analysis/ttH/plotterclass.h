@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 
+#include "plotterHelpers.h"
 #include "samples.h"
 #include "dyScaleFactors.h"
 
@@ -20,24 +21,24 @@ class Plotter {
 
 public:
     
-    enum DrawMode{stacked, overlaid, scaledoverlaid, undefined};
-    
-    Plotter(const Samples& samples, const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors, const DrawMode& drawMode);
+    Plotter(const Samples& samples, const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors, const DrawMode::DrawMode& drawMode);
     ~Plotter(){};
     
     void setOptions(TString, TString, TString, TString, int, bool, bool, bool, double, double, double, double, int, std::vector<double>, std::vector<double>);
     void producePlots();
     
+    
+    
 private:
     
-    bool prepareDataset(const Sample::Channel&, const Sample::Systematic&, const std::vector<Sample>&);
+    bool prepareDataset(const Channel::Channel&, const Systematic::Systematic&, const std::vector<Sample>&);
 
-    void write(const Sample::Channel&, const Sample::Systematic&);
+    void write(const Channel::Channel&, const Systematic::Systematic&);
     
     TLegend* ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, TLegend* leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
     
     void setStyle(SampleHistPair&, bool =false);
-    void drawDecayChannelLabel(const Sample::Channel&, double textSize=0.04);
+    void drawDecayChannelLabel(const Channel::Channel&, double textSize=0.04);
     void drawCmsLabels(int cmsprelim=1, double energy=8, double textSize=0.04);
     
     
@@ -52,7 +53,7 @@ private:
     const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors_;
     
     /// Draw mode for Higgs
-    const DrawMode drawMode_;
+    const DrawMode::DrawMode drawMode_;
     
     /// File reader for accessing specific histogram from given file
     RootFileReader* fileReader_;
@@ -85,15 +86,6 @@ private:
 };
 
 
-
-namespace Tools{
-    
-    /// Convert a DrawMode from string to typedef
-    Plotter::DrawMode convertDrawMode(const std::string& drawMode);
-    
-    /// Convert a DrawMode from typedef to string
-    std::string convertDrawMode(const Plotter::DrawMode& drawMode);
-}
 
 
 

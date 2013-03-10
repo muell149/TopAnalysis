@@ -23,7 +23,7 @@ dyScaleFactors.o: dyScaleFactors.C dyScaleFactors.h
 utils.o: ../diLeptonic/utils.cpp ../diLeptonic/utils.h
 	g++ -c -o utils.o $(COMPFLAGS) ../diLeptonic/utils.cpp
 
-higgsUtils.o: higgsUtils.C higgsUtils.h utils.o
+higgsUtils.o: higgsUtils.C higgsUtils.h
 	g++ -c -o higgsUtils.o $(COMPFLAGS) higgsUtils.C
 
 CommandLineParameters.o: ../diLeptonic/CommandLineParameters.cc ../diLeptonic/CommandLineParameters.hh
@@ -53,11 +53,14 @@ HistoListReader.o: ../diLeptonic/HistoListReader.h ../diLeptonic/HistoListReader
 Histo.o: Histo.C
 	g++ -c -o Histo.o $(COMPFLAGS) Histo.C
 	
-plotterclass.o: plotterclass.cpp plotterclass.h utils.o higgsUtils.o
+plotterHelpers.o: plotterHelpers.C plotterHelpers.h
+	g++ -c -o plotterHelpers.o $(COMPFLAGS) plotterHelpers.C
+
+plotterclass.o: plotterclass.cpp plotterclass.h utils.o higgsUtils.o plotterHelpers.o
 	g++ -c -o plotterclass.o $(COMPFLAGS) plotterclass.cpp
 
-Histo: Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o eventYields.o dyScaleFactors.o
-	g++ -o Histo Histo.o plotterclass.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o samples.o eventYields.o dyScaleFactors.o $(ROOTLIBS)
+Histo: Histo.o plotterclass.o plotterHelpers.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o sampleHelpers.o samples.o eventYields.o dyScaleFactors.o
+	g++ -o Histo Histo.o plotterclass.o plotterHelpers.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o sampleHelpers.o samples.o eventYields.o dyScaleFactors.o $(ROOTLIBS)
 
 eventYields.o: eventYields.C eventYields.h utils.o
 	g++ -c -o eventYields.o $(COMPFLAGS) eventYields.C
@@ -71,8 +74,10 @@ JetCorrParameters.o:  ../diLeptonic/JetCorrectorParameters.cc
 SimpleJetCorrUncert.o: ../diLeptonic/SimpleJetCorrectionUncertainty.cc
 	g++ -c -o $@ $(COMPFLAGS) ../diLeptonic/SimpleJetCorrectionUncertainty.cc
 
+sampleHelpers.o: sampleHelpers.C sampleHelpers.h
+	g++ -c -o sampleHelpers.o $(COMPFLAGS) sampleHelpers.C
 
-samples.o: samples.C samples.h
+samples.o: samples.C samples.h sampleHelpers.o
 	g++ -c -o samples.o $(COMPFLAGS) samples.C
 
 

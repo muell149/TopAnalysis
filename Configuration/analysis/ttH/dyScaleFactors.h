@@ -18,7 +18,7 @@ class DyScaleFactors{
 public:
     
     /// Typedef for the map containing the Drell-Yan scale factors
-    typedef std::map<TString, std::map<Sample::Systematic, std::map<Sample::Channel, double> > > DyScaleFactorMap;
+    typedef std::map<TString, std::map<Systematic::Systematic, std::map<Channel::Channel, double> > > DyScaleFactorMap;
     
     
     
@@ -41,7 +41,7 @@ private:
     void produceScaleFactors(Samples& samples);
     
     /// Produce the Drell-Yan scale factors for each selection step and each systematic
-    void produceScaleFactors(const TString& step, const Sample::Systematic& systematic, std::map<Sample::Channel, std::vector<Sample> >& channelSamples);
+    void produceScaleFactors(const TString& step, const Systematic::Systematic& systematic, std::map<Channel::Channel, std::vector<Sample> >& channelSamples);
     
     /// Print full information about all ingoing numbers (deactivated by default)
     void printFullInformation(const double dyScaleFactor_ee, const double dyScaleFactor_mumu, 

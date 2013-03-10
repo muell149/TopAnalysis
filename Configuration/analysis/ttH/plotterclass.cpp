@@ -27,7 +27,7 @@
 
 
 
-Plotter::Plotter(const Samples& samples, const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors, const DrawMode& drawMode):
+Plotter::Plotter(const Samples& samples, const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors, const DrawMode::DrawMode& drawMode):
 samples_(samples), luminosity_(luminosity),
 m_dyScaleFactors_(m_dyScaleFactors), drawMode_(drawMode),
 fileReader_(RootFileReader::getInstance()),
@@ -85,13 +85,13 @@ Plotter::producePlots(){
     
     const SystematicChannelSamples& m_systematicChannelSample(samples_.getSystematicChannelSamples());
     for(auto systematicChannelSamples : m_systematicChannelSample){
-        const Sample::Systematic& systematic(systematicChannelSamples.first);
+        const Systematic::Systematic& systematic(systematicChannelSamples.first);
         for(auto channelSample : systematicChannelSamples.second){
-            const Sample::Channel& channel(channelSample.first);
+            const Channel::Channel& channel(channelSample.first);
             std::vector<Sample>& v_sample(channelSample.second);
             if(!this->prepareDataset(channel, systematic, v_sample)){
                 std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): "
-                         << Tools::convertChannel(channel) << "/" << Tools::convertSystematic(systematic)
+                         << Channel::convertChannel(channel) << "/" << Systematic::convertSystematic(systematic)
                          <<"\n... skip this plot\n";
                 return;
             }
@@ -104,7 +104,7 @@ Plotter::producePlots(){
 
 
 
-bool Plotter::prepareDataset(const Sample::Channel& channel, const Sample::Systematic&, const std::vector<Sample>& v_sample)
+bool Plotter::prepareDataset(const Channel::Channel& channel, const Systematic::Systematic&, const std::vector<Sample>& v_sample)
 {
     
     bool allHistosAvailable(true);
@@ -136,7 +136,7 @@ bool Plotter::prepareDataset(const Sample::Channel& channel, const Sample::Syste
     
     // Set dataset specific subfolders
     outpathPlots_ = "./Plots";
-    subfolderChannel_ = Tools::convertChannel(channel);
+    subfolderChannel_ = Channel::convertChannel(channel);
     subfolderChannel_.Prepend("/");
     subfolderSpecial_ = "";
     
@@ -146,7 +146,7 @@ bool Plotter::prepareDataset(const Sample::Channel& channel, const Sample::Syste
 
 
  // do scaling, stacking, legending, and write in file 
-void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& systematic)
+void Plotter::write(const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
     TCanvas * canvas = new TCanvas("","");
 
@@ -179,8 +179,8 @@ void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& sy
     // Check whether Higgs sample should be drawn overlaid and/or scaled
     bool drawHiggsOverlaid(false);
     bool drawHiggsScaled(false);
-    if(drawMode_==overlaid){drawHiggsOverlaid = true;}
-    else if(drawMode_==scaledoverlaid){drawHiggsOverlaid = true; drawHiggsScaled = true;}
+    if(drawMode_ == DrawMode::overlaid){drawHiggsOverlaid = true;}
+    else if(drawMode_ == DrawMode::scaledoverlaid){drawHiggsOverlaid = true; drawHiggsScaled = true;}
     
     
     
@@ -383,8 +383,8 @@ void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& sy
     drawRatio(v_sampleHistPair_[0].second, stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots 
-    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+Tools::convertSystematic(systematic), true);
-    canvas->Print(outpathPlots_+subfolderChannel_+"/"+Tools::convertSystematic(systematic)+"/"+name_+".eps");
+    gSystem->mkdir(outpathPlots_+"/"+subfolderChannel_+"/"+Systematic::convertSystematic(systematic), true);
+    canvas->Print(outpathPlots_+subfolderChannel_+"/"+Systematic::convertSystematic(systematic)+"/"+name_+".eps");
     
     // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
@@ -404,7 +404,7 @@ void Plotter::write(const Sample::Channel& channel, const Sample::Systematic& sy
     sumMC->SetName(name_);
     
     //save Canvas AND sources in a root file
-    TFile out_root(outpathPlots_+subfolderChannel_+"/"+Tools::convertSystematic(systematic)+"/"+name_+"_source.root", "RECREATE");
+    TFile out_root(outpathPlots_+subfolderChannel_+"/"+Systematic::convertSystematic(systematic)+"/"+name_+"_source.root", "RECREATE");
     v_sampleHistPair_[0].second->Write(name_+"_data");
     sumSignal->Write(name_+"_signalmc");
     sumMC->Write(name_+"_allmc");
@@ -509,10 +509,10 @@ TLegend* Plotter::ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, T
 
 
 // Draw label for Decay Channel in upper left corner of plot
-void Plotter::drawDecayChannelLabel(const Sample::Channel& channel, double textSize) {
+void Plotter::drawDecayChannelLabel(const Channel::Channel& channel, double textSize) {
     TPaveText *decayChannel = new TPaveText();
 
-    decayChannel->AddText(Tools::channelLabel(channel).c_str());
+    decayChannel->AddText(Channel::channelLabel(channel).c_str());
 
     decayChannel->SetX1NDC(      gStyle->GetPadLeftMargin() + gStyle->GetTickLength()        );
     decayChannel->SetY1NDC(1.0 - gStyle->GetPadTopMargin()  - gStyle->GetTickLength() - 0.05 );
@@ -560,24 +560,6 @@ void Plotter::drawCmsLabels(int cmsprelim, double energy, double textSize) {
 
 
 
-
-
-Plotter::DrawMode
-Tools::convertDrawMode(const std::string& drawMode){
-    if (drawMode == "stacked") return Plotter::stacked;
-    else if (drawMode == "overlaid") return Plotter::overlaid;
-    else if (drawMode == "scaledoverlaid") return Plotter::scaledoverlaid;
-    else return Plotter::undefined;
-}
-
-
-std::string
-Tools::convertDrawMode(const Plotter::DrawMode& drawMode){
-    if (drawMode == Plotter::stacked) return "stacked";
-    else if (drawMode == Plotter::overlaid) return "overlaid";
-    else if (drawMode == Plotter::scaledoverlaid) return "scaledoverlaid";
-    else return "";
-}
 
 
 
