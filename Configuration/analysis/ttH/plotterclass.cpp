@@ -1,5 +1,3 @@
-#include "plotterclass.h"
-
 #include <fstream>
 #include <iostream>
 #include <cstdio>
@@ -14,17 +12,17 @@
 #include <TStyle.h>
 #include <TMath.h>
 #include <TROOT.h>
-#include <TGraphErrors.h>
 #include <THStack.h>
 #include <TFile.h>
 #include <TString.h>
 #include <TH1.h>
-#include "TGaxis.h"
-#include "TPaveText.h"
+#include <TGaxis.h>
+#include <TPaveText.h>
+#include <TH1D.h>
 
+#include "plotterclass.h"
 #include "../diLeptonic/utils.h"
 #include "higgsUtils.h"
-
 
 
 

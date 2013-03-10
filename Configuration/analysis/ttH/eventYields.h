@@ -1,10 +1,11 @@
 #ifndef eventYields_h
 #define eventYields_h
 
-
 #include "samples.h"
 #include "dyScaleFactors.h"
-#include "../diLeptonic/utils.h"
+
+class RootFileReader;
+
 
 
 

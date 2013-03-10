@@ -1,3 +1,9 @@
+#include <vector>
+#include <iostream>
+#include <set>
+#include <functional>
+#include <algorithm>
+
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <THStack.h>
@@ -5,18 +11,15 @@
 #include <TString.h>
 #include <TH1.h>
 
-#include <vector>
-#include <iostream>
-#include <set>
-#include <functional>
-
 #include "../diLeptonic/HistoListReader.h"
 #include "../diLeptonic/CommandLineParameters.hh"
 
 #include "samples.h"
-#include "eventYields.h"
 #include "dyScaleFactors.h"
+#include "eventYields.h"
 #include "plotterclass.h"
+
+
 
 
 void Histo(const Plotter::DrawMode drawMode,

@@ -3,8 +3,12 @@
 
 #include <vector>
 #include <map>
-#include "TString.h"
-#include "TH1D.h"
+
+#include <TString.h>
+
+class RootFileReader;
+class TH1D;
+
 
 
 
@@ -195,6 +199,16 @@ namespace Tools{
     
     /// Convert a systematic from typedef to string
     std::string convertSystematic(const Sample::Systematic& systematic);
+    
+    
+    
+    /// Assign an output folder depending on the channel
+    TString assignFolder(const Sample::Channel& channel);
+    
+    
+    
+    /// Get the luminosity weight for a specific sample
+    double luminosityWeight(const Sample& sample, const double luminosity, RootFileReader* fileReader);
 }
 
 

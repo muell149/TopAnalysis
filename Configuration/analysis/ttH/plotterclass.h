@@ -1,22 +1,19 @@
 #ifndef plotterclass_h
 #define plotterclass_h
 
-#include <TString.h>
-#include <TH1.h>
-#include <TGraphAsymmErrors.h>
 #include <vector>
 #include <map>
 #include <set>
-#include <TH2.h>
-#include <TH1D.h>
 
-#include "../diLeptonic/utils.h"
 #include "samples.h"
 #include "dyScaleFactors.h"
 
-
 class TGraphErrors;
 class TLegend;
+class RootFileReader;
+class TString;
+
+
 
 
 class Plotter {
@@ -58,7 +55,7 @@ private:
     const DrawMode drawMode_;
     
     /// File reader for accessing specific histogram from given file
-    RootFileReader *fileReader_;
+    RootFileReader* fileReader_;
     
     
     
