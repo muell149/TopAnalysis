@@ -561,3 +561,25 @@ void Plotter::drawCmsLabels(int cmsprelim, double energy, double textSize) {
 
 
 
+
+
+
+Plotter::DrawMode
+Tools::convertDrawMode(const std::string& drawMode){
+    if (drawMode == "stacked") return Plotter::stacked;
+    else if (drawMode == "overlaid") return Plotter::overlaid;
+    else if (drawMode == "scaledoverlaid") return Plotter::scaledoverlaid;
+    else return Plotter::undefined;
+}
+
+
+std::string
+Tools::convertDrawMode(const Plotter::DrawMode& drawMode){
+    if (drawMode == Plotter::stacked) return "stacked";
+    else if (drawMode == Plotter::overlaid) return "overlaid";
+    else if (drawMode == Plotter::scaledoverlaid) return "scaledoverlaid";
+    else return "";
+}
+
+
+

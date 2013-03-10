@@ -77,7 +77,7 @@ private:
     
     
     
-    
+    /// Pair of histogram to print and corresponding sample
     std::vector<SampleHistPair> v_sampleHistPair_;
     
     TString outpathPlots_;
@@ -87,4 +87,26 @@ private:
     
 };
 
+
+
+namespace Tools{
+    
+    /// Convert a DrawMode from string to typedef
+    Plotter::DrawMode convertDrawMode(const std::string& drawMode);
+    
+    /// Convert a DrawMode from typedef to string
+    std::string convertDrawMode(const Plotter::DrawMode& drawMode);
+}
+
+
+
+
+
 #endif
+
+
+
+
+
+
+

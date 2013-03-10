@@ -138,6 +138,9 @@ private:
     /// Place where to define the samples as they will be used in the analysis
     std::vector<std::pair<TString, Sample> > setSamples(const Sample::Channel& channel, const Sample::Systematic& systematic);
     
+    /// Assign options to each sample via its filename
+    std::vector<Sample> setSampleOptions(const Sample::Systematic& systematic, const std::vector< std::pair< TString, Sample > >& v_filenameSamplePair);
+    
     /// Order samples by their legend
     /// when a legend already exists, the sample is moved directly behind it
     void orderByLegend(std::vector<Sample>& v_sample);
@@ -148,9 +151,6 @@ private:
     /// Assign the real systematic to each sample, i.e. what should be used for given systematic (nominal or specific systematic)
     /// and modify filename accordingly
     Sample::Systematic assignSystematic(TString& filename, const Sample::Systematic& systematic);
-    
-    /// Assign options to each sample via its filename
-    std::vector<Sample> setSampleOptions(const Sample::Systematic& systematic, const std::vector< std::pair< TString, Sample > >& v_filenameSamplePair);
     
     
     
