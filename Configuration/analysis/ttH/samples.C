@@ -323,7 +323,7 @@ Samples::assignSystematic(TString& filename, const Sample::Systematic& systemati
 }
 
 
-const std::map<Sample::Systematic, std::map<Sample::Channel, std::vector<Sample> > >&
+const SystematicChannelSamples&
 Samples::getSystematicChannelSamples(){
     return m_systematicChannelSample_;
 }

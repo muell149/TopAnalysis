@@ -19,10 +19,10 @@
 #include "plotterclass.h"
 
 
-void Histo(Plotter::DrawMode drawMode,
-           std::vector<std::string> plots, 
-           std::vector<Sample::Channel> v_channel,
-           std::vector<Sample::Systematic> v_systematic)
+void Histo(const Plotter::DrawMode drawMode,
+           const std::vector<std::string> plots, 
+           const std::vector<Sample::Channel> v_channel,
+           const std::vector<Sample::Systematic> v_systematic)
 {
     // Set data luminosity
     const double luminosity = 12210;
@@ -34,12 +34,11 @@ void Histo(Plotter::DrawMode drawMode,
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
     std::vector<Sample::Channel> v_dyScalingChannel {Sample::ee, Sample::emu, Sample::mumu};
     Samples dyScalingSamples(v_dyScalingChannel, v_systematic);
-    DyScaleFactors dyScaleFactors(dyScalingSamples, luminosity);
-    DyScaleFactors::DyScaleFactorMap m_dyScaleFactors;
-    m_dyScaleFactors = dyScaleFactors.getScaleFactors();
+    const DyScaleFactors dyScaleFactors(dyScalingSamples, luminosity);
+    const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors(dyScaleFactors.getScaleFactors());
     
     // Produce event yields
-    EventYields eventYields(samples, luminosity, m_dyScaleFactors);
+    const EventYields eventYields(samples, luminosity, m_dyScaleFactors);
     
     // Create Plotter 
     Plotter generalPlot(samples, luminosity, m_dyScaleFactors, drawMode);
@@ -80,18 +79,32 @@ void Histo(Plotter::DrawMode drawMode,
 }
 
 
+
 /**
  * Helper function to create a function which checks if a string found is in the
  * passed vector of string.
  * 
  * @param allowed a vector of allowed strings (char*s)
- * @return a function taking a std::string and returning a bool
+ * @return a function taking a const char* and returning a bool
  */
 std::function<bool(const std::string &s)> makeStringChecker(const std::vector<const char *> allowed) {
     return [allowed](const std::string &test) {
         return std::find(begin(allowed), end(allowed), test) != end(allowed);
     };
 }
+/**
+ * Helper function to create a function which checks if a string found is in the
+ * passed vector of string.
+ * 
+ * @param v_string a vector of allowed strings (std::string)
+ * @return a function taking a std::string and returning a bool
+ */
+std::function<bool(const std::string &s)> makeStringChecker(const std::vector<std::string> v_string) {
+    std::vector<const char*> v_char;
+    for(auto string : v_string) v_char.push_back(string.data());
+    return makeStringChecker(v_char);
+}
+
 
 
 int main(int argc, char** argv) {
@@ -103,27 +116,23 @@ int main(int argc, char** argv) {
     // Set vector of possible systematic arguments
     std::vector<std::string> systematics{"Nominal"};
     
-    // Prepare all StringCheckers
-    std::vector<const char*> allowedDrawModes;
-    for(auto drawMode : drawModes) allowedDrawModes.push_back(drawMode.data());
-    std::vector<const char*> allowedChannels;
-    for(auto channel : channels) allowedChannels.push_back(channel.data());
-    std::vector<const char*> allowedSystematics;
-    for(auto systematic : systematics) allowedSystematics.push_back(systematic.data());
-    
     // Get and check configuration parameters
     CLParameter<std::string> opt_drawMode("m", "Specify draw mode of Higgs sample, valid: stacked, overlaid, scaledoverlaid. Default: scaledoverlaid", false, 1, 1,
-        makeStringChecker(allowedDrawModes));
+        makeStringChecker(drawModes));
     CLParameter<std::string> opt_plots("p", "Name (pattern) of plot; multiple patterns possible; use '+Name' to match name exactly", false, 1, 100);
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: all channels", false, 1, 4,
-        makeStringChecker(allowedChannels));
+        makeStringChecker(channels));
     CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal, use 'all' for all", false, 1, 100,
-        makeStringChecker(allowedSystematics));
+        makeStringChecker(systematics));
     CLAnalyser::interpretGlobal(argc, argv);
     
-    // Set up draw mode (required)
+    // Set up draw mode (default is scaledOverlaid)
     Plotter::DrawMode drawMode(Plotter::undefined);
     if(opt_drawMode.isSet()) drawMode = Tools::convertDrawMode(opt_drawMode[0]);
+    else drawMode = Plotter::scaledoverlaid;
+    std::cout << "\n";
+    std::cout << "Draw mode of Higgs sample: "<<Tools::convertDrawMode(drawMode);
+    std::cout << "\n\n";
     
     // Set up channels
     if(opt_channel.isSet()) channels = opt_channel.getArguments();
@@ -131,13 +140,14 @@ int main(int argc, char** argv) {
     for (auto channel: channels) {
         v_channel.push_back(Tools::convertChannel(channel));
     }
-    std::cout << "\n";
     std::cout << "Processing channels: "; 
     for (auto channel : v_channel)std::cout << Tools::convertChannel(channel) << " ";
     std::cout << "\n\n";
     
 	// Set up systematics
-    if(opt_systematic.isSet()) systematics = opt_systematic.getArguments();
+    if(opt_systematic.isSet() && opt_systematic[0]!="all") systematics = opt_systematic.getArguments();
+    else if(opt_systematic.isSet() && opt_systematic[0]=="all"); // do nothing
+    else {systematics.clear(); systematics.push_back(Tools::convertSystematic(Sample::nominal));}
     std::vector<Sample::Systematic> v_systematic;
     for(auto systematic : systematics){
         v_systematic.push_back(Tools::convertSystematic(systematic));
@@ -148,7 +158,12 @@ int main(int argc, char** argv) {
     
     // Set up plots
     std::vector<std::string> plots {""};
-    if (opt_plots.isSet()) plots = opt_plots.getArguments();
+    if (opt_plots.isSet()){
+        plots = opt_plots.getArguments();
+        std::cout<< "Processing only histograms containing in name: ";
+        for(auto plot : plots)std::cout<< plot << " ";
+        std::cout << "\n\n";
+    }
     
     // Start analysis
     Histo(drawMode, plots, v_channel, v_systematic);
