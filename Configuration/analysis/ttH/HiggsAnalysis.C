@@ -114,7 +114,7 @@ HiggsAnalysis::SlaveBegin(TTree *){
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
     h_jetpT___XX = store(new TH1D ( "jetpT", "jet pT", 80, 0, 400 ));
     // FIXME: now needs HistoList, to be changed
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetpT___XX);
+    CreateBinnedControlPlots(h_jetCategories_step8, h_jetpT___XX, false);
     
     
     // FIXME: nothing yet about b-tagging scale factors, ever needed ?
