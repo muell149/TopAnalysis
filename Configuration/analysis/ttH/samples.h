@@ -165,17 +165,11 @@ private:
 /// Type for associating a specific histogram of the input file to the sample
 typedef std::pair<Sample, TH1D*> SampleHistPair;
 
-/// Type which maps different samples (and the associated histogram) by same legend entries
-typedef std::map<TString, std::vector<SampleHistPair> > SampleHistPairsByLegend;
-
 
 
 
 
 namespace Tools{
-    
-    /// Associate different samples (and the associated histogram) by same legend entries
-    SampleHistPairsByLegend associateSampleHistPairsByLegend(const std::vector<SampleHistPair>& v_sampleHistPair);
     
     /// Get the luminosity weight for a specific sample
     double luminosityWeight(const Sample& sample, const double luminosity, RootFileReader* fileReader);

@@ -31,12 +31,13 @@ public:
     
 private:
     
+    typedef std::pair<TString, TH1D*> LegendHistPair;
+    
     bool prepareDataset(const std::vector<Sample>&);
 
     void write(const Channel::Channel&, const Systematic::Systematic&);
     
-    TLegend* ControlLegend(std::vector<SampleHistPair>& v_sampleHistPair, TLegend* leg, bool drawHiggsOverlaid, std::vector<TString> v_higgsLabel);
-    
+    TLegend* ControlLegend(const LegendHistPair& dataHist, const std::vector<LegendHistPair>& stackHists, const std::vector<LegendHistPair>& higgsHists, TLegend* leg);
     void setStyle(SampleHistPair&, bool =false);
     void drawDecayChannelLabel(const Channel::Channel&, double textSize=0.04);
     void drawCmsLabels(int cmsprelim=1, double energy=8, double textSize=0.04);
