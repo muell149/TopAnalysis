@@ -326,6 +326,8 @@ void TopKinematics::book()
     corrs_["topPtSubLead_"   ] = new TH2F( "topPtSubLead_" , "topPtSubLead_" , 800 ,   0. , 800.,  800,   0. , 800.);
     corrs_["lepYLead_"       ] = new TH2F( "lepYLead_"     , "lepYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["lepYSubLead_"    ] = new TH2F( "lepYSubLead_"  , "lepYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    // pt of the top candidates in the ttbar restframe
+    corrs_["topPtTtbarSys_"      ] = new TH2F( "topPtTtbarSys_"    , "topPtTtbarSys_"    , 800 ,   0. , 800.,  800,   0. , 800.);
 
     // asymmetry variables
     //corrs_["topPtPlus_"      ] = new TH2F( "topPtPlus_"    , "topPtPlus_"    , 800 ,   0. , 800.,  800,   0. , 800.);
@@ -639,6 +641,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     corrs_["topPtSubLead_"] = fs->make<TH2F>("topPtSubLead_" , "topPtSubLead_" ,  800,   0. , 800.,  800,   0. , 800.);
     corrs_["topYLead_"    ] = fs->make<TH2F>("topYLead_"     , "topYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["topYSubLead_" ] = fs->make<TH2F>("topYSubLead_"  , "topYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
+    // pt of the top candidates in the ttbar restframe
+    corrs_["topPtTtbarSys_" ] = fs->make<TH2F>( "topPtTtbarSys_", "topPtTtbarSys_", 800, 0., 800., 800, 0., 800.);
 
     // asymmetry variables
     //corrs_["topPtPlus_"  ] = fs->make<TH2F>( "topPtPlus_"    , "topPtPlus_"    ,  800,   0. , 800.,  800,   0. , 800.);
@@ -1065,7 +1069,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	corrs_.find("topPt_")->second->Fill( hadTopGen->pt(), hadTopRec->pt(), weight );
 	// fill pt correlation plot for leptonic top candidate
 	corrs_.find("topPt_")->second->Fill( lepTopGen->pt(), lepTopRec->pt(), weight );
-
+	
 	// fill y correlation plot for hadronic top candidate
 	corrs_.find("topY_")->second->Fill( hadTopGen->rapidity(), hadTopRec->rapidity(), weight );
 	// fill y correlation plot for leptonic top candidate
@@ -1227,6 +1231,9 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       genHadronicDecayBBoosted   = CoMBoostGenTtbar (genHadronicDecayBBoosted  );
       recHadronicDecayBBoosted   = CoMBoostRecTtbar (recHadronicDecayBBoosted  );
       gentopPtTtbarSystem=genHadronicDecayTopBoosted.pt();
+
+      // fill correlation plot for top pt in ttbar system
+      corrs_.find("topPtTtbarSys_")->second->Fill( gentopPtTtbarSystem, recHadronicDecayTopBoosted.pt(), weight );
 
       // fill correlation plot for the angle between b jets
       //corrs_.find("bbbarAngle_")->second->Fill( ROOT::Math::VectorUtil::Angle(genLeptonicDecayBBoosted, genHadronicDecayBBoosted), 
