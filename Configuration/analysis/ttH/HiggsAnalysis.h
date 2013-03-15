@@ -34,17 +34,20 @@ private:
     
     
     /// Class holding the definition and handling of jet categories (# jets, # b-jets)
+    JetCategories jetCategories_overview_;
     JetCategories jetCategories_;
     
     /// Histograms for the jet categories
-    TH1* h_jetCategories_step0;
-    TH1* h_jetCategories_step1;
-    TH1* h_jetCategories_step2;
-    TH1* h_jetCategories_step3;
-    TH1* h_jetCategories_step4;
-    TH1* h_jetCategories_step5;
-    TH1* h_jetCategories_step6;
-    TH1* h_jetCategories_step7;
+    TH1* h_jetCategories_overview_step0;
+    TH1* h_jetCategories_overview_step1;
+    TH1* h_jetCategories_overview_step2;
+    TH1* h_jetCategories_overview_step3;
+    TH1* h_jetCategories_overview_step4;
+    TH1* h_jetCategories_overview_step5;
+    TH1* h_jetCategories_overview_step6;
+    TH1* h_jetCategories_overview_step7;
+    TH1* h_jetCategories_overview_step8;
+    
     TH1* h_jetCategories_step8;
     
     /// Histograms for cutflow tables which are not contained in Analysis.h
@@ -58,6 +61,8 @@ private:
     TH1* h_events_step6;
     TH1* h_events_step7;
     TH1* h_events_step8;
+    
+    TH1* h_events_step9;
     
     /// Histograms for Drell-Yan scaling
     DyScalingHistograms dyScalingHistograms_;
