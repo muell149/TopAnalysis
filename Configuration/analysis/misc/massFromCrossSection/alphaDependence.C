@@ -21,7 +21,7 @@ void printInfo()
 
 int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const TString& fileName)
 {
-  const TString theoName = (theory ? "Top++ 1.4" : "Hathor 1.3");
+  const TString theoName = (theory ? "Top++ 2.0" : "Hathor 1.3");
 
   const TString massName = (pole ? "m_{t}^{pole}" : "m_{t}^{#bar{MS}}");
 
@@ -92,7 +92,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
     xsec[iAlphaCentral] = 1.;
 
     char title[99];
-    sprintf(title, "Approx. NNLO from %s with %s and %s = %.0f GeV", theoName.Data(), pdfName.Data(), massName.Data(), mt);
+    sprintf(title, "NNLO+NNLL from %s with %s and %s = %.0f GeV", theoName.Data(), pdfName.Data(), massName.Data(), mt);
 
     std::cout << "mt: " << mt << std::endl;
 
