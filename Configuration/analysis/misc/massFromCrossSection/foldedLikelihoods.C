@@ -202,6 +202,7 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
     fileName += "_off";
   fileName += ".tab";
   
+  std::cout << "Reading " << fileName << " ..." << std::endl;
   ifstream in;
   in.open(fileName);
 
@@ -240,7 +241,7 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
       std::cout << "Spurious cross section of " << sigma[i] << " in line " << i+1 << " of " << fileName << std::endl;
       abort();
     }
-    i++;      
+    i++;
   }
 
   in.close();
@@ -517,7 +518,7 @@ void drawAlphaVsMass(const std::vector<const RooFormulaVar*>& predVec, const std
     h2[i]->Draw("cont3 same");
   }
   leg.Draw();
-  TLatex text(0.,0., "Approx. NNLO, #sigma_{t#bar{t}} (7 TeV) = 162 pb");
+  TLatex text(0.,0., "NNLO+NNLL, #sigma_{t#bar{t}} (7 TeV) = 162 pb");
   text.SetNDC();
   text.SetTextAlign(13);
   text.SetX(gPad->GetLeftMargin());
@@ -557,7 +558,7 @@ void plotProjectedPDF(const FinalLikeliResults1D* result, RooPlot* frame, const 
 
 TLatex* cmsTxt(const bool targetAlpha)
 {
-  TString txt = "2.3 fb^{-1} of 2011 CMS data #times approx. NNLO for #sigma_{#lower[-0.2]{t#bar{t}}}, #sqrt{s} = 7 TeV, ";
+  TString txt = "2.3 fb^{-1} of 2011 CMS data  #times NNLO+NNLL for #sigma_{#lower[-0.2]{t#bar{t}}}, #sqrt{s} = 7 TeV, ";
   if(targetAlpha)
     txt += "m_{#kern[0.3]{#lower[-0.1]{t}}} = 173.2 #pm 1.4 GeV";
   else
@@ -698,7 +699,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   std::vector<TF1*> mit_funcs[nPdfSets][4];
 
   const TString pdfName [nPdfSets ] = {"MSTW2008", "HERAPDF1.5", "ABM11", "NNPDF2.3", "CT10"};
-  const TString theoName[nTheories] = {"HATHOR 1.3", "Top++ 1.4"};
+  const TString theoName[nTheories] = {"HATHOR 1.3", "Top++ 2.0"};
 
   TString theoTitle[nPdfSets][nTheories];
   for(unsigned h=0; h<nPdfSets; h++)
@@ -737,7 +738,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     }
 
     gStyle->SetOptTitle(1);
-    
+
     if(pole) {
       for(unsigned j=0; j<2; j++)
 	mit_funcs[h][j] = getAndDrawRelativeUncertainty(mit_vec[h].at(j), canvas, pole, errName[j],
@@ -940,7 +941,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   predXSecDefAlphaMitCT.SetMarkerSize(2.0);
   predXSecDefAlphaMitCT.SetMarkerStyle(20);
 
-  RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.110, 0.125));
+  RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.108, 0.122));
   frame_alpha->addObject(&measXSecWithErrAlpha, "3");
   frame_alpha->addObject(&measXSecWithErrAlpha, "CX");
   frame_alpha->addObject(&predXSecAlphaMitNNPDF, "3");
@@ -1037,7 +1038,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 
   RooPlot* frame_mass;
   if(pole)
-    frame_mass = mass.frame(160., 190.);
+    frame_mass = mass.frame(165., 190.);
   else
     frame_mass = mass.frame(155., 185.);
   frame_mass->addObject(&measXSecWithErrMass, "3");
@@ -1065,7 +1066,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   frame_mass->SetMinimum(115.);
   frame_mass->Draw();
   alphaText.Draw();
-  TLegend legMassDep = TLegend(0.48, 0.54, 0.93, 0.92);
+  TLegend legMassDep = TLegend(0.47, 0.54, 0.92, 0.92);
   legMassDep.SetFillStyle(0);
   legMassDep.SetBorderSize(0);
   legMassDep.AddEntry(&measXSecWithErrMass, "CMS 2011, 2.3 fb^{-1}", "FL");
@@ -1106,6 +1107,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 	mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, mass,
 						RooArgList(measXSecPDF,predXSec[h][1]->prob),
 						alpha, alpha2012_mean, alpha2012_unc);
+      //alpha, alphaABM_mean, alphaABM_unc);
     }
   }
 
@@ -1133,14 +1135,14 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   }
 
   if(targetAlpha) {
-    mitSummaryGraphTotErr.GetXaxis()->SetLimits(0.1095, 0.1255);
+    mitSummaryGraphTotErr.GetXaxis()->SetLimits(0.108, 0.122);
     mocSummaryGraphTotErr.GetXaxis()->SetLimits(0.1095, 0.1255);
     mitSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
     mocSummaryGraphTotErr.GetXaxis()->SetTitle(alpha.getTitle());
   }
   else {
     if(pole) {
-      mitSummaryGraphTotErr.GetXaxis()->SetLimits(160., 180.);
+      mitSummaryGraphTotErr.GetXaxis()->SetLimits(166., 185.);
       mocSummaryGraphTotErr.GetXaxis()->SetLimits(163., 185.);
     }
     else
@@ -1207,7 +1209,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   textAlpha2012_right.SetTextFont(43);
   textAlpha2012_right.SetTextSizePixels(23);
 
-  const double xLeftTextPdfSet[2] = {160.5, 0.1100};
+  const double xLeftTextPdfSet[2] = {166.5, 0.1085};
 
   TBox boxAlphaNNPDF(alphaNNPDF_mean.getVal()-alphaNNPDF_unc.getVal(), 7.9,
 		     alphaNNPDF_mean.getVal()+alphaNNPDF_unc.getVal(), 9.1);
@@ -1375,8 +1377,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     if(pole) {
       if(topppOnly) {
 	TString format = (targetAlpha ?
-			  "With %s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
-			  "With %s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+			  "%s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
+			  "%s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
 	sprintf(tmpTxt, format, pdfName[hOrdered[h]].Data(),
 		mitResult[hOrdered[h]]->bestX,
 		mitResult[hOrdered[h]]->highErrTotal,
@@ -1467,11 +1469,11 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 
       RooPlot* frame;
       if(targetAlpha) {
-	frame = alpha.frame(RooFit::Range(0.11, 0.130));
+	frame = alpha.frame(RooFit::Range(0.107, 0.125));
 	plotProjectedPDF(result, frame, kRed, 1001, alpha);
       }
       else {
-	frame = mass.frame(RooFit::Range(160., 185.));
+	frame = mass.frame(RooFit::Range(167., 190.));
 	plotProjectedPDF(result, frame, kRed, 1001, mass);
       }
       frame->Draw();
