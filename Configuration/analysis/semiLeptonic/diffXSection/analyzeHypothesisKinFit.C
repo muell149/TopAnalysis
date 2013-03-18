@@ -9,7 +9,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="")
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
   // ============================
   //  Set ROOT Style
@@ -76,10 +76,16 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   
   // errorbands for yield plots
   bool errorbands=false;
-  // xSec from prob selection step
-  TString addSel="";
-  //TString addSel="BeforeProbSel";
+  // addSel: xSec from prob selection step
+  //TString addSel="ProbSel";
   if(!extrapolate) addSel="";
+  // for systematic variations done in central signal sample (e.g. PU, effSF, btagSF):
+  // use MC rootfiles from subfolder /Prob and ignore addSel plotname extension
+  TString addSelData="";
+  if(addSel=="ProbSel"&&((systematicVariation>=sysPUUp&&systematicVariation<=sysPUDown)||(systematicVariation>=sysLepEffSFNormUp&&systematicVariation<=sysMisTagSFDown))){
+    inputFolderName+="/Prob";
+    addSelData=addSel;
+  }
   // luminosity uncertainties
   if(systematicVariation==sysLumiUp  )      luminosity*=1.044;
   else if(systematicVariation==sysLumiDown) luminosity*=0.956;
@@ -292,7 +298,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 
   // add folder extensions for xSec from different selection step if default folder is used
   // do it after bjet/lepton path to use this only for leptons
-  if(sysInputFolderExtension==""&&addSel!="") sysInputFolderExtension+=addSel;
+  if(addSel!="") sysInputFolderExtension+=addSel;
 
   //  ---
   //     choose plots
@@ -929,12 +935,14 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   //  Open standard analysis files
   // ===================================
   std::map<unsigned int, TFile*> files_, filesMu_, filesEl_;
-  if(decayChannel!="combined") files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel, ttbarMC);
+  // open files depending on the decay channel
+  if(decayChannel!="combined"){
+    files_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFile, decayChannel, ttbarMC);
+  }
   else{
     filesMu_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFileMu, "muon"    , ttbarMC);
     filesEl_ = getStdTopAnalysisFiles(inputFolder, systematicVariationMod, dataFileEl, "electron", ttbarMC);
   }
-
   // =====================
   //  Loading histos
   // =====================
@@ -964,8 +972,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   vecRedundantPartOfNameInData[0].ReplaceAll(addSel, "");
   if(decayChannel!="combined") getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
   else{
-    getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData);
-    getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose-1, "muon"    , &vecRedundantPartOfNameInData);
+    getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData, false, addSelData);
+    getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose-1, "muon"    , &vecRedundantPartOfNameInData, false, addSelData);
   }
   
   // ===============================================
