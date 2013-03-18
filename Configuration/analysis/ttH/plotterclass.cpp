@@ -258,7 +258,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     }
     
     // In fact the legend is filled oppositely than the stack, so this is used for turning the order (but not completely)
-    legend = ControlLegend(dataHist, stackHists, higgsHists, legend);
+//    legend = ControlLegend(dataHist, stackHists, higgsHists, legend);
     
     
     

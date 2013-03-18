@@ -55,6 +55,8 @@ Samples::setSamples(const Channel::Channel& channel, const Systematic::Systemati
     Sample qcdbcem2030("QCD Multijet", kYellow, 2.886E8*5.800E-4);
     Sample qcdbcem3080("QCD Multijet", kYellow, 7.424E7*2.250E-3);
     Sample qcdbcem80170("QCD Multijet", kYellow, 1.191E6*10.90E-3);
+    Sample ttbarW("t#bar{t}W", kBlue, 0.232);
+    Sample ttbarZ("t#bar{t}Z", kBlue-10, 0.2057);
     Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302, Sample::SampleType::higgssignal);
     //Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302);
     Sample ttbarHtobbbar("t#bar{t}H (b#bar{b})", kOrange-7, 0.1302*0.577, Sample::higgssignal);
@@ -127,6 +129,10 @@ Samples::setSamples(const Channel::Channel& channel, const Systematic::Systemati
         else if(filename.Contains("qcdbcem80170"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, qcdbcem80170));
         
+        else if(filename.Contains("ttbarW"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarW));
+        else if(filename.Contains("ttbarZ"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarZ));
         else if(filename.Contains("ttbarH125inclusive"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHincl));
         else if(filename.Contains("ttbarH125tobbbar"))
