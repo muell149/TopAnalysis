@@ -1302,7 +1302,7 @@ namespace semileptonic {
       return files_;
     }
 
-  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0, bool SSV=false)
+  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0, bool SSV=false, TString ignorePartNameInMC="")
   {
     // this function searches for every plot listed in "plotList_" in all files listed in "files_",
     // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -1316,6 +1316,7 @@ namespace semileptonic {
     // "redundantPartOfNameInData": delete this part in the (folder)name when loading the plots from data
     //                              (needed to handle systematic variations where foldername in data and MC is different)
     // "SSV": for all btagging plots SSV control plots are used instead of the default (CSV) plots
+    // "ignorePartNameInMC": like redundantPartOfNameInData, but for MC instead of data
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1323,13 +1324,25 @@ namespace semileptonic {
       bool hugo=plotList_[plot].Contains(testPlotNameForTrackingDownErrors) ? true : false;
       // check if plot exists in any sample
       bool existsInAnySample=false;
-      if(hugo) std::cout << plotList_[plot] << std::endl;
+      if(hugo){
+	std::cout << "name of target plot: " << plotList_[plot] << std::endl;
+	std::cout << "ignore in name for MC: " << ignorePartNameInMC << std::endl;
+	if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
+	  std::cout << "ignore in name for data: ";
+	  std::vector<TString>::iterator iter;
+	  for (iter = (vecRedundantPartOfNameInData->begin()); iter != (vecRedundantPartOfNameInData->end()); iter++){
+	     std::cout << *iter;
+	     if(iter != (vecRedundantPartOfNameInData->end()-1))  std::cout << ", ";
+	     else  std::cout << std::endl;
+	  }
+	}
+      }
       // loop samples
       for(unsigned int sample=kSig; sample<=kSAToptW; ++sample){
 	// check existence of sample
-	if(hugo) std::cout << TopFilename(sample, sysNo, decayChannel) << std::endl;
+	if(hugo) std::cout << "-> file " << files_[sample]->GetName() << std::endl;
 	if(files_.count(sample)!=0){
-	  if(hugo) std::cout << "-> file found!" << std::endl;
+	  if(hugo) std::cout << "-> found!" << std::endl;
 	  // create plot container
 	  TH1* targetPlot;
 	  // delete additional part of MC foldername
@@ -1343,16 +1356,17 @@ namespace semileptonic {
 	      }
 	    }
 	  }
-	  if(hugo) std::cout << "-> searching " << plotname << std::endl;
-	  files_[sample]->GetObject(plotList_[plot], targetPlot);
+	  else plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	  if(hugo) std::cout << "-> searching plot " << plotname << std::endl;
+	  files_[sample]->GetObject(plotname, targetPlot);
 	  // Check existence of plot
 	  if(targetPlot){ 
 	    existsInAnySample=true;
 	    // go to end of loop
 	    sample=kSAToptW;
-	    if(hugo) std::cout << "-> found! " << plotname << std::endl;
+	    if(hugo) std::cout << "-> found! " << std::endl;
 	  }
-	  else if(hugo){std::cout << "-> NOT found! " << plotname << std::endl;}
+	  else if(hugo){std::cout << "-> NOT found! " << std::endl;}
 	}
       }
       // end program and draw error if plot does not exist at all
@@ -1377,6 +1391,7 @@ namespace semileptonic {
 	      }
 	    }
 	  }
+	  else plotname.ReplaceAll(ignorePartNameInMC, ""); 
 	  // check if file exists
 	  // give warning if file does not exist
 	  if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample,decayChannel) << " does not exist- continue and neglect this sample" << std::endl;
@@ -1388,6 +1403,7 @@ namespace semileptonic {
 	      std::cout << "plot: " << plot << ", " << plotname << std::endl;
 	    }
 	    files_[sample]->GetObject(plotname, targetPlot);
+	    if(hugo) std::cout << files_[sample]->GetName() << " -> " << plotname << std::endl;
 	    // Check if plot exits
 	    // give warning if plot does not exist
 	    if((!targetPlot)&&(verbose>0)) std::cout << "can not find plot "+plotname << " in file "+(TString)(files_[sample]->GetName()) << " - continue and neglect this plot" << std::endl;
