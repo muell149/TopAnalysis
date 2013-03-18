@@ -778,8 +778,10 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   RooRealVar alphaABM_mean("alphaABM_mean", "alphaABM_mean", 0.1134);
   RooRealVar alphaABM_unc ("alphaABM_unc" , "alphaABM_unc" , 0.0011);
 
-  RooRealVar alphaNNPDF_mean("alphaNNPDF_mean", "alphaNNPDF_mean", 0.1190);
-  RooRealVar alphaNNPDF_unc ("alphaNNPDF_unc" , "alphaNNPDF_unc" , 0.0012);
+  RooRealVar alphaNNPDF_mean("alphaNNPDF_mean", "alphaNNPDF_mean", 0.1173); //arXiv:1110.2483 (based on NNPDF2.1)
+  RooRealVar alphaNNPDF_unc ("alphaNNPDF_unc" , "alphaNNPDF_unc" , 0.0007); //arXiv:1110.2483 (based on NNPDF2.1)
+  RooRealVar alphaNNPDF_main("alphaNNPDF_main", "alphaNNPDF_main", 0.1190); //here we used the central value of the
+                                                                            //scan range as reference for most studies
 
   RooRealVar alphaCT_mean("alphaCT_mean", "alphaCT_mean", 0.1180);
   RooRealVar alphaCT_unc ("alphaCT_unc" , "alphaCT_unc" , 0.0020);
@@ -859,7 +861,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     if(pole) {
       mitAlphaFile = new TFile(alphaFileNameMit, "READ");    
       predXSec[h][1] = new PredXSec("mit"+suf, xsec, mass, alpha, mit[h]->GetFunction("f1"), mit_funcs[h],
-				    mitAlphaFile, defaultAlphas.at(h));
+				    mitAlphaFile, (h==kNNPDF ? alphaNNPDF_main : defaultAlphas.at(h)));
       mitAlphaFile->Close();
       delete mitAlphaFile;
 
@@ -871,7 +873,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     }
     mocAlphaFile = new TFile(alphaFileNameMoc, "READ");
     predXSec[h][0] = new PredXSec("moc"+suf, xsec, mass, alpha, moc[h]->GetFunction("f1"), moc_funcs[h],
-				  mocAlphaFile, defaultAlphas.at(h));
+				  mocAlphaFile, (h==kNNPDF ? alphaNNPDF_main : defaultAlphas.at(h)));
     mocAlphaFile->Close();
     delete mocAlphaFile;
 
