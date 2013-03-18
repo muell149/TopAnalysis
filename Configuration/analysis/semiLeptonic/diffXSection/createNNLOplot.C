@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-void createNNLOplot(TString theory="kidonakis")
+void createNNLOplot(TString theory="ahrens")
 {
   TString outputRootFile="test.root";
   // NB: add new datset name here
@@ -30,7 +30,7 @@ void createNNLOplot(TString theory="kidonakis")
     // --------------------------
     // NB: add new datset file names here
     TGraph * rawHist;
-    if(theory=="ahrens"   ) rawHist= new TGraph("AhrensTheory_Mtt_7000_172.5_Mtt_norm.dat");
+    if(theory=="ahrens"   ) rawHist= new TGraph("AhrensTheory_Mtt_8000_172.5_Mtt_norm.dat");
     else if(theory=="kidonakis"){
       if(variable.Contains("topPt")) rawHist= new TGraph("pttopnnloapprox8lhc173m.dat");//"ptnormalNNLO7lhc173m.dat");
       if(variable.Contains("topY" )) rawHist= new TGraph("ytopnnloapprox8lhc173m.dat" );//"ynormalNNLO7lhc173m.dat" );
@@ -59,8 +59,8 @@ void createNNLOplot(TString theory="kidonakis")
     if(theory=="ahrens"){
       xmin= 345.;
       xmax=2720.;
-      binwidth=25.;
-    } 
+      binwidth=5.;
+    }
     else if(theory=="kidonakis"){ 
       if(variable.Contains("topPt")){
 	xmin=   0.;
@@ -93,7 +93,8 @@ void createNNLOplot(TString theory="kidonakis")
 	}
       }
       else{
-	x=hist->GetBinCenter(bin); // get bin center
+	x=hist->GetBinCenter(bin);  // get bin center
+	y=rawHist->GetY()[bin-1];
       }
       if(x!=-999){
 	std::cout << "data bin: " << bin;
