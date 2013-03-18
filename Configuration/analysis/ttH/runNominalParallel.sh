@@ -7,7 +7,7 @@ for c in ee emu mumu; do
     ./load_HiggsAnalysis -f dy -d 13 -c $c &
     ./load_HiggsAnalysis -f dy -d 15 -c $c &
     ./load_HiggsAnalysis -f ttbarsignalplustau.root -c $c &
-    ./load_HiggsAnalysis -f ttbarH -c $c &
+    ./load_HiggsAnalysis -f ttbarH125 -c $c &
 done
 
 for c in ee emu mumu; do
