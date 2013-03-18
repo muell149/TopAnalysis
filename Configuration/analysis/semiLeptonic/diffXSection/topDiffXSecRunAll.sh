@@ -5,7 +5,7 @@
 # combined channel analysis on event yield level
 ./topDiffXSecAnalysis2012.sh combined2 extrapolate parton
 ./topDiffXSecAnalysis2012.sh combined2 visible hadron
-./topDiffXSecAnalysis2012.sh combined2 visible parton
+#./topDiffXSecAnalysis2012.sh combined2 visible parton
 
 ## single channels
 
@@ -20,8 +20,8 @@
 #./topDiffXSecAnalysis2012.sh combined visible hadron
 
 ## Parton level visible phase space
-./topDiffXSecAnalysis2012.sh muon visible parton
-./topDiffXSecAnalysis2012.sh electron visible parton
+#./topDiffXSecAnalysis2012.sh muon visible parton
+#./topDiffXSecAnalysis2012.sh electron visible parton
 #./topDiffXSecAnalysis2012.sh combined visible parton
 
 
