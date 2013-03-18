@@ -7,7 +7,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = false, bool extrapolate=true, bool hadron=false)
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="ProbSel")
 { 
   // ============================
   //  Set Root Style
@@ -114,9 +114,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
-  // xSec from prob selection step
-  TString addSel="";
-  //TString addSel="BeforeProbSel";
+  // addSel: xSec from prob selection step?
   if(!extrapolate) addSel="";
   //         0: sysNo                                                       
   //         1: sysLumiUp                   2: sysLumiDown                 
@@ -261,6 +259,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     //"PUControlDistributionsAfterBtagging/npvertex_reweighted_up", 
     //"PUControlDistributionsAfterBtagging/npvertex_reweighted_down", 
     // (III) after kinematic fit 
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarAngle",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topY",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topMass",
@@ -492,6 +491,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     //"Number of Vertices (Reweighted sysUp);Events;0;10", 
     //"Number of Vertices (Reweighted sysDown);Events;0;10", 
     // (III) after kinematic fit 
+    "#angle(t,#bar{t});Events;0;15",
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
     "y^{t};Top quarks;0;1",
     "m^{t};Top quarks;0;10",
