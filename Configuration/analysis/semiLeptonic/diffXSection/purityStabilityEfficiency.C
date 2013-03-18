@@ -23,9 +23,9 @@
 #include "basicFunctions.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TString lepton="combined", 
+void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, TString lepton="combined", 
 			       TString inputFolderName="RecentAnalysisRun8TeV", bool plotAcceptance = true, 
-			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=99999, int
+			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=7.824, int
 			       verbose=1, bool hadron=false, int qAssignment=-1,
 			       bool fitGaussRes=false, bool printSeparateRes = false)
 {
@@ -43,6 +43,9 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
   // printSeparateRes save the residuum plots separately
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
   if(!useTree) chi2Max=99999; // can be done only with tree
+  // if chi2 sel is applied-plot pur and stab without chi2 sel in addition?
+  bool plotDefToCompare=true;
+  if(chi2Max>100) plotDefToCompare=false;
   if(lepton.Contains("combined")) lepton="combined";
   // output folder in case of saving the canvases:
   TString outputFolder = "./diffXSecFromSignal/plots/"+lepton+"/2012/binning";
@@ -207,6 +210,8 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
   //if(useTree) myHist2d->Reset("ICES"); // Scale(0);
   if(useTree) myHist2d = new TH2F("correlationMatrix", "correlationMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
   else        myHist2d = (TH2F*)(((TH2F*)myFile1->Get(folderRecoKin+"/"+variable+"_"))->Clone());
+  // control histo to compare e.g. results for chi2 selection wrt. default
+  TH2F* myHist2d2 = (TH2F*)myHist2d->Clone();
   // create response matrix with and without efficiency correction in final binning; will be only filled if useTree==true
   TH2F* responseMatrix = new TH2F("responseMatrix", "responseMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
   TH2F* migrationMatrix = new TH2F("migrationMatrix", "migrationMatrix", NxBins, &xBins[0], NxBins, &xBins[0]);
@@ -334,6 +339,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
 	    }
 	  }
 	}
+	if((qAssignment==-1 || qAssignment==value_["qAssignment"])) myHist2d2->Fill(gen, rec, weight);
 	// fill all events
 	all->Fill(rec, weight);
       }
@@ -367,6 +373,16 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
 
   double myenum=0.;
 
+  vector<double> purityvec2;
+  double purity2=0.;
+  double puritydenom2=0.;
+
+  vector<double> stabilityvec2;
+  double stability2=0.;
+  double stabilitydenom2=0.;
+
+  double myenum2=0.;
+
   int iSave=0;
   
   // calculate purity and stability
@@ -380,9 +396,11 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
       for(int j=0; j<=xbins+1; j++)
       {
 	// denominator for purity (number of reconstructed events)
-	puritydenom+=myHist2d->GetBinContent(j,i);
+	puritydenom +=myHist2d ->GetBinContent(j,i);
+	puritydenom2+=myHist2d2->GetBinContent(j,i);
 	// denominator for stability (number of generated events)
-	stabilitydenom+=myHist2d->GetBinContent(i,j);
+	stabilitydenom +=myHist2d ->GetBinContent(i,j);
+	stabilitydenom2+=myHist2d2->GetBinContent(i,j);
       }
       // loop over bins starting from lower edge of the final bin
       for(int k=iSave; k<=i; k++)
@@ -391,29 +409,38 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
 	  for(int l=iSave; l<=i; l++)
 	    {
 	      // enumerator
-	      myenum+=myHist2d->GetBinContent(l,k);
+	      myenum +=myHist2d->GetBinContent(l,k);
+	      myenum2+=myHist2d2->GetBinContent(l,k);
 	    }
 	}
       // calculate purity (avoid dividing by zero)
       if(puritydenom)purity=myenum/puritydenom;
       else purity=0;
+      if(puritydenom2)purity2=myenum2/puritydenom2;
+      else purity2=0;
       // calculate stability (avoid dividing by zero)
       if(stabilitydenom)stability=myenum/stabilitydenom;
       else stability=0;
-
+      if(stabilitydenom2)stability2=myenum2/stabilitydenom2;
+      else stability2=0;
       if( (numberOfBins+1 < NxBins+1 && myHist2d->GetBinCenter(i+1) > xBins[numberOfBins+1]) || i==xbins){
 	    // write results to vector
 	    purityvec.push_back(purity);
 	    stabilityvec.push_back(stability);
 	    binvec.push_back(myHist2d->GetBinLowEdge(iSave));
+	    purityvec2.push_back(purity2);
+	    stabilityvec2.push_back(stability2);
 	    // count bins
 	    numberOfBins++;
 	    // reset variables
 	    puritydenom=0.;
 	    stabilitydenom=0.;
+	    puritydenom2=0.;
+	    stabilitydenom2=0.;
 	    iSave=0;
 	  }
       myenum=0.;
+      myenum2=0.;
     }
   binvec.push_back(xmax);
 
@@ -430,11 +457,15 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
   // calculate stability & purity histogram with the determined binning
   TH1F* purityhist    = new TH1F("purityhist"   ,"purityhist"   ,numberOfBins, &(binvec.front()));
   TH1F* stabilityhist = new TH1F("stabilityhist","stabilityhist",numberOfBins, &(binvec.front()));
+  TH1F* purityhist2    = new TH1F("purityhist2"   ,"purityhist2"   ,numberOfBins, &(binvec.front()));
+  TH1F* stabilityhist2 = new TH1F("stabilityhist2","stabilityhist2",numberOfBins, &(binvec.front()));
   
   for(int i=0; i<numberOfBins; i++)
   {
-    purityhist->SetBinContent(i+1,purityvec[i]);
-    stabilityhist->SetBinContent(i+1,stabilityvec[i]);
+    purityhist   ->SetBinContent (i+1,purityvec[i]    );
+    stabilityhist->SetBinContent (i+1,stabilityvec[i] );
+    purityhist2   ->SetBinContent(i+1,purityvec2[i]   );
+    stabilityhist2->SetBinContent(i+1,stabilityvec2[i]);
   }
   
   //------------------------------------------------------------------------------------
@@ -609,12 +640,21 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
     accHistGen->GetYaxis()->SetNoExponent(true);
     purityhist->SetStats(kFALSE);
     purityhist->GetYaxis()->SetNdivisions(511);
+    purityhist2->SetLineColor(8);
+    purityhist2->SetLineWidth(4);
+    stabilityhist2->SetLineColor(7);
+    stabilityhist2->SetLineStyle(2);
+    stabilityhist2->SetLineWidth(4);
 
   //gPad->SetBottomMargin(0.19);
     purstab->cd();
     //purstab->SetGrid(1,1);
     purityhist->Draw();
     stabilityhist->Draw("same");
+    if(plotDefToCompare){
+      purityhist2   ->Draw("same");
+      stabilityhist2->Draw("same");
+    }
     if(plotAcceptance)accHistGen->Draw("same");
     if(plotEfficiencyPhaseSpace){
       effHistGenPS->SetLineColor(1);
@@ -634,7 +674,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
       all     = (TH1F*)all    ->Rebin(binvec.size()-1, all->GetName()    , &(binvec.front()));
       chi2eff->Divide(all);
       chi2eff->SetLineColor(1);
-    //chi2eff->SetLineStyle(2);
+      if(plotDefToCompare) chi2eff->SetLineStyle(9);
       chi2eff->SetLineWidth(4);
       chi2eff->Draw("same");
     }
@@ -643,26 +683,28 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
     else if(lepton=="combined") DrawDecayChLabel("e/#mu + Jets Combined");
     //double legEdge = 0.4;
     //if(plotAcceptance)legEdge = effHistBBB->GetMinimum();
-    TLegend* leg=new TLegend(0.47,0.68,0.67,0.87);
-    leg->SetTextSize(0.05);
+    TLegend* leg=new TLegend(0.47,0.63,0.67,0.82);
+    leg->SetTextSize(0.03);
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
-    leg->AddEntry(purityhist,   "Purity"    ,"l");
-    leg->AddEntry(stabilityhist,"Stability" ,"l");
+    TString addLabel=plotDefToCompare ? " (#chi^{2}<"+getTStringFromDouble(chi2Max)+")" : "";
+    if(plotDefToCompare) leg->AddEntry(purityhist2,   "Purity"    ,"l");
+    leg->AddEntry(purityhist,   TString("Purity"   )+addLabel ,"l");
+    if(plotDefToCompare) leg->AddEntry(stabilityhist2,"Stability" ,"l");
+    leg->AddEntry(stabilityhist,TString("Stability")+addLabel ,"l");
   //purityhist->GetYaxis()->SetRangeUser  (0, 0.2);
   //if(plotAcceptance)leg->AddEntry(effHistBBB,"Eff*A full PS Spring11","l");
     if(plotEfficiencyPhaseSpace)leg->AddEntry(effHistGenPS,"Efficiency","l");
     if(plotAcceptance)leg->AddEntry(accHistGen,"Acceptance","l");
     if(plotEfficiency2)leg->AddEntry(effHistBBB2,"eff.*A full PS Summer11","l");
     if(useTree && chi2Max<100){
-      TString entry="#chi^{2} < ";
-      entry+=chi2Max;
-      entry+=" cut eff.";
+      TString entry="eff (#chi^{2} < ";
+      entry+=getTStringFromDouble(chi2Max)+")";
       leg->AddEntry(chi2eff,entry,"l");
     }
     leg->SetFillColor(0);
     leg->SetBorderSize(0);
-    //if(variable == "topPt"||chi2Max<100) leg->Draw("same");
+    if(variable == "topPt") leg->Draw("same");
     
     TLegend* legFull=new TLegend(0.,0.,1.,1.);
     legFull->SetFillStyle(0);
@@ -958,7 +1000,7 @@ void purityStabilityEfficiency(TString variable = "ttbarPt", bool save=true, TSt
     TString chi="";
     if(chi2Max<100){ 
       chi+="chi";
-      chi+=chi2Max;
+      chi+=getTStringFromDouble(chi2Max);
     }
     TString qAssStr="";
     if(qAssignment>=0){ 
