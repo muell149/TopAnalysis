@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
 void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun8TeV",
-				  TString inputFolderName="RecentAnalysisRun8TeV",
+				  TString inputFolderName="newRecentAnalysisRun8TeV",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
 
   // run automatically in batch mode
@@ -822,13 +822,12 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 
 	    // g1) draw NNLO curve for topPt (normalized) and topY (normalized)
 
-	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
-	    
-	      TFile  *file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisApproxNNLO8TeV.root");
+	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm")||xSecVariables_[i].Contains("ttbarMassNorm"))){
+	      TFile  *file = xSecVariables_[i].Contains("ttbarMassNorm") ? new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/AhrensNNLL8TeV.root") : new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisApproxNNLO8TeV.root");
 	      TH1F   *newPlotNNLOHisto = (TH1F*)(file->Get(plotname)->Clone(plotname+"nnlo"));
 	      //TGraph *newPlotNNLOGraph = (TGraph*)(file->Get(plotname+"_graph")->Clone(plotname+"nnlo_graph"));
 	      if(newPlotNNLOHisto){
-		newPlotNNLOHisto->GetXaxis()->SetRange(0, newPlotNNLOHisto->GetNbinsX()-1); 	
+		if(!xSecVariables_[i].Contains("ttbarMassNorm")) newPlotNNLOHisto->GetXaxis()->SetRange(0, newPlotNNLOHisto->GetNbinsX()-1);
 		//newPlotNNLOHisto->SetName(plotname+"nnlo"); 
 		newPlotNNLOHisto->SetLineColor(constNnloColor);
 		newPlotNNLOHisto->SetLineStyle(constNnloStyle);
@@ -836,6 +835,11 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 		newPlotNNLOHisto->SetMarkerStyle(7);
 		newPlotNNLOHisto->SetMarkerColor(constNnloColor);
 		DrawSteps(newPlotNNLOHisto ,"same");
+		if(xSecVariables_[i].Contains("ttbarMassNorm")){
+		  newPlotNNLOHisto->SetLineColor(constNnloColor2);
+		  newPlotNNLOHisto->SetMarkerColor(constNnloColor2);
+		  newPlotNNLOHisto->SetLineStyle(constNnloStyle2);
+		}
 	      }
 	      //if(newPlotNNLOGraph){
 	      //	//newPlotNNLOGraph->SetName(plotname+"nnlo_graph"); 
@@ -986,17 +990,19 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  if(DrawNNLOPlot){
 	    TH1F* nnlocurve = 0;
 	    if      (xSecVariables_[i].Contains("topPtNorm")){
-	      //std::cout << "searching " << "topPtnnlo" << std::endl; 	      
 	      nnlocurve =(TH1F*)combicanvas->GetPrimitive("topPtnnlo");
 	    }
 	    else if (xSecVariables_[i].Contains("topYNorm" )){
-	      //std::cout << "searching " << "topYnnlo" << std::endl; 	    
 	      nnlocurve =(TH1F*)combicanvas->GetPrimitive("topYnnlo"); 
-
-}
+	    }
+	    else if (xSecVariables_[i].Contains("ttbarMassNorm" )){
+	      nnlocurve =(TH1F*)combicanvas->GetPrimitive("ttbarMassnnlo");
+	    }
 	    if(nnlocurve){
-	      leg->AddEntry(nnlocurve, "Approx. NNLO", "L");
-	      //std::cout << "found!" << std::endl;
+	      if (xSecVariables_[i].Contains("ttbarMassNorm" )) leg->AddEntry(nnlocurve, "NLO+NNLL", "L");
+	      else if (xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm" )){
+		leg->AddEntry(nnlocurve, "Approx. NNLO", "L");
+	      }
 	    }
 	  }
 
@@ -1031,7 +1037,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  if(DrawNNLOPlot&&extrapolate){
 	    if (xSecVariables_[i].Contains("topPtNorm")) DrawLabel("(arXiv:1205.3453)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 	    if (xSecVariables_[i].Contains("topYNorm" )) DrawLabel("(arXiv:1205.3453)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
-	    //if (xSecVariables_[i].Contains("ttbarMassNorm")) DrawLabel("(arXiv:1003.5827)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
+	    if (xSecVariables_[i].Contains("ttbarMassNorm")) DrawLabel("(arXiv:1003.5827)", leg->GetX1NDC()+0.06, leg->GetY1NDC()-0.025, leg->GetX2NDC(), leg->GetY1NDC(), 12, 0.025);
 	  }
 
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plotCombination->Clone());
