@@ -190,7 +190,7 @@ part of the code which you haven't touched at all, consider a "make clean" first
 
 
 ========================
-  Debug code in the IDE
+ Debug code in the IDE
 ========================
 
 In modern IDEs like Eclipse or KDevelop you can debug your code, i.e. run it step by step
@@ -200,16 +200,29 @@ As an example, in KDevelop go to "Run -> Configure Launches" and select your exe
 the right side under "Program file". Now you can run your program step-by-step with F10/F11.
 Hover your mouse over a variable to inspect its value.
 
+Extended description (if you have mounted the work area via sshfs):
+  on the workgroup server (replace 12877 with any unique number > 1024 and <= 65535):
+  a) create a file called gdbinit_loadAnalysis with the following content:
+        target extended-remote desy-cms012.desy.de:12877
+        file load_Analysis
+  b) run
+        gdbserver :12877 load_Analysis
+  c) in KDevelop, Run, Configure Launches
+      on the left click on "Debugging", then on the right you should have
+      a field "gdb configuration file": select the gdbinit file here.
+
 As poor man's solution (which will also work on the workgroup server), you can also use 
 the ddd (data display debugger) program to debug. Just run 
 ddd executable parameters
 (where executable could be Histo)
 Right click on the white space of a given line to set a break point. Then click on "run".
 Your program will run up to the given line. Then you can click on a variable to inspect/modify
-its value.
+its value. Now create a breakpoint (click left of the line number) and press F9 to start your
+program.
+
 
 ========================
-   Opimising the code
+  Optimising the code
 ========================
 
 Using google's performance tools, we can check which parts of our code need the longest
