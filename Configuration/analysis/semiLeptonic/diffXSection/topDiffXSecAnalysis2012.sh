@@ -81,6 +81,10 @@ closureTestSpecifier=\"\"
 ##            and is automatically adjusted with input string "combined2"
 combinedEventYields=false
 
+## use prob sel analysis
+addSel=\"ProbSel\"
+chi2Max=7.824
+
 ## take arguments
 clear
 echo "-------------------------------------------------------------------------------------"
@@ -402,7 +406,7 @@ EOF
 	    
 	    cat >> commandsMonRun.cint << EOF
 .L analyzeTopDiffXSecMonitoring_C.so
-analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, $label, $extrapolate, $hadron) 
+analyzeTopDiffXSecMonitoring($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, $label, $extrapolate, $hadron, $addSel) 
 EOF
 	    echo ""
 	    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, $extrapolate, $hadron)"
@@ -440,7 +444,7 @@ if [ $redoPurStab = true -a $redoControlPlots = true ]
   
     # loop over all systematic variations
     for (( iVar=0; iVar<${#listVar_[@]}; iVar++ )); do
-	root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, 99999, 0, '$hadron')'
+	root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, '$chi2Max', 0, '$hadron')'
     done
 fi
 
@@ -549,11 +553,11 @@ EOF
     
     cat >> commandsNoSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)
+analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier, $addSel)
 EOF
 
     echo ""
-    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron ,$inclCCVars, $redetTau, $closureTestSpecifier)"
+    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron ,$inclCCVars, $redetTau, $closureTestSpecifier, $addSel)"
     root -l -b < commandsNoSysRun.cint
 
 
@@ -575,10 +579,10 @@ EOF
 	    
 	    cat >> commandsSysRun.cint << EOF
 .L analyzeHypothesisKinFit_C.so
-analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)
+analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier, $addSel)
 EOF
 	    echo ""
-	    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier)"
+	    echo " Processing .... analyzeHypothesisKinFit($dataLuminosity, $save, $systematicVariation, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $inclCCVars, $redetTau, $closureTestSpecifier, $addSel)"
 	    root -l -b < commandsSysRun.cint
 	done
     fi
