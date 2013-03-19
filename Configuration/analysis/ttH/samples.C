@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include <TString.h>
-#include <TColor.h>
+#include <TColorWheel.h>
 #include <TH1D.h>
 
 #include "samples.h"
@@ -57,8 +57,8 @@ Samples::setSamples(const Channel::Channel& channel, const Systematic::Systemati
     Sample qcdbcem80170("QCD Multijet", kYellow, 1.191E6*10.90E-3);
     Sample ttbarW("t#bar{t}W", kBlue, 0.232);
     Sample ttbarZ("t#bar{t}Z", kBlue-10, 0.2057);
-    Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302, Sample::SampleType::higgssignal);
-    //Sample ttbarHincl("t#bar{t}H (incl.)", kSpring, 0.1302);
+    Sample ttbarHinclusiveOther("t#bar{t}H Other", kSpring, 0.1302, Sample::higgssignal);
+    Sample ttbarHinclusiveBbbar("t#bar{t}H (b#bar{b} via incl.)", kSpring+9, 0.1302, Sample::higgssignal);
     Sample ttbarHtobbbar("t#bar{t}H (b#bar{b})", kOrange-7, 0.1302*0.577, Sample::higgssignal);
     
     
@@ -133,9 +133,11 @@ Samples::setSamples(const Channel::Channel& channel, const Systematic::Systemati
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarW));
         else if(filename.Contains("ttbarZ"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarZ));
-        else if(filename.Contains("ttbarH125inclusive"))
-            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHincl));
-        else if(filename.Contains("ttbarH125tobbbar"))
+        else if(filename.Contains("ttbarH") && filename.Contains("inclusiveOther"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHinclusiveOther));
+        else if(filename.Contains("ttbarH") && filename.Contains("inclusiveBbbar"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHinclusiveBbbar));
+        else if(filename.Contains("ttbarH") && filename.Contains("tobbbar"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHtobbbar));
         else{
             std::cout<<"Sample of FileList ("<<filename<<") is not defined in default samples, skip it...\n";
