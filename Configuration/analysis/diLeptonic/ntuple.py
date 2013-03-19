@@ -141,13 +141,15 @@ else:
         process.GlobalTag.globaltag = cms.string('START53_V7G::All')
     else:
         if 'run2012A.root' in options.outputFile or 'run2012B.root' in options.outputFile:
-            process.GlobalTag.globaltag = cms.string('FT_53_V6_AN3::All')
+            process.GlobalTag.globaltag = cms.string('FT_53_V6C_AN4::All')
         elif 'run2012Arecover.root' in options.outputFile:
-            process.GlobalTag.globaltag = cms.string('FT_53_V6C_AN3::All')
+            process.GlobalTag.globaltag = cms.string('FT_53_V6C_AN4::All')
         elif 'run2012C_24Aug.root' in options.outputFile:
-            process.GlobalTag.globaltag = cms.string('FT53_V10A_AN3::All')
+            process.GlobalTag.globaltag = cms.string('FT53_V10A_AN4::All')
         elif 'run2012C_PromptReco.root' in options.outputFile:
-            process.GlobalTag.globaltag = cms.string('GR_P_V41_AN3::All')
+            process.GlobalTag.globaltag = cms.string('GR_P_V42_AN4::All')
+        elif 'run2012D_PromptReco.root' in options.outputFile:
+            process.GlobalTag.globaltag = cms.string('GR_P_V42_AN4::All')
         else:
             print "Please check the global tag for this data period!"
             exit(1)
