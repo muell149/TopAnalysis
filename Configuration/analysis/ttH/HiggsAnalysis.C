@@ -164,7 +164,7 @@ HiggsAnalysis::Process(Long64_t entry){
     // Histogram for controlling correctness of h_events_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
     h_events_step0a->Fill(1, 1);
     
-    GetHiggsSignalBranches(entry);
+    if(isHiggsSignal)GetHiggsSignalBranches(entry);
     if(!bbbarDecayFromInclusiveHiggs_ && higgsDecayMode==5)return kTRUE;
     if(bbbarDecayFromInclusiveHiggs_ && higgsDecayMode!=5)return kTRUE;
     
