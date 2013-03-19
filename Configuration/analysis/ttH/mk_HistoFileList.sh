@@ -3,7 +3,7 @@
 mkdir -p FileLists
 rm FileLists/Histo*
 
-foreach sample (run qcd dyee dymumu dytautau ww wz zz wtolnu single ttbarbg ttbarsignal ttbarH125inclusive ttbarH125tobbbar ttbarW ttbarZ)
+foreach sample (run qcd dyee dymumu dytautau ww wz zz wtolnu single ttbarbg ttbarsignal ttbarH ttbarW ttbarZ)
 
    foreach channel (ee emu mumu)
      
