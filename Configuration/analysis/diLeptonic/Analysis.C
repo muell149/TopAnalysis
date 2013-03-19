@@ -2036,6 +2036,7 @@ void Analysis::Terminate()
     TObjString(systematic).Write("systematicsName");
     TObjString(samplename).Write("sampleName");
     TObjString(isSignal ? "1" : "0").Write("isSignal");
+    TObjString(isHiggsSignal ? "1" : "0").Write("isHiggsSignal");
     TObjString(isMC ? "1" : "0").Write("isMC");
     f.Close();
     cout<<"Created: \033[1;1m"<<f_savename<<"\033[1;m\n\n";
@@ -2274,6 +2275,11 @@ void Analysis::SetSignal(bool isSignal)
     this->isSignal = isSignal;
 }
 
+void Analysis::SetHiggsSignal(const bool higgsSignal)
+{
+    this->isHiggsSignal = higgsSignal;
+}
+
 void Analysis::SetSystematic(TString systematic)
 {
     this->systematic = systematic;
@@ -2381,7 +2387,10 @@ void Analysis::Init ( TTree *tree )
     HypAntiNeutrino = 0;
     HypBJet = 0;
     HypAntiBJet = 0;
-
+    
+    JetChargeGlobalPtWeighted = 0;
+    JetChargeRelativePtWeighted = 0;
+    
     //for the signal
 //     genJets = 0;
     allGenJets = 0;
@@ -2406,7 +2415,12 @@ void Analysis::Init ( TTree *tree )
     GenTop = 0;
     GenAntiTop = 0;
     GenMet = 0;
-
+    
+    GenH = 0;
+    GenBFromH = 0;
+    GenAntiBFromH = 0;
+    higgsDecayMode = 0;
+    
     // Set branch addresses and branch pointers
     if ( !tree ) return;
     fChain = tree;
@@ -2457,6 +2471,13 @@ void Analysis::Init ( TTree *tree )
     fChain->SetBranchAddress("TopDecayMode", &topDecayMode, &b_TopDecayMode );
     fChain->SetBranchAddress("ZDecayMode", &ZDecayMode, &b_ZDecayMode);
     
+    if(fChain->GetBranch("jetChargeGlobalPtWeighted"))
+        fChain->SetBranchAddress("jetChargeGlobalPtWeighted", &JetChargeGlobalPtWeighted, &b_JetChargeGlobalPtWeighted);
+    else b_JetChargeGlobalPtWeighted = 0;
+    if(fChain->GetBranch("jetChargeRelativePtWeighted"))
+        fChain->SetBranchAddress("jetChargeRelativePtWeighted", &JetChargeRelativePtWeighted, &b_JetChargeRelativePtWeighted);
+    else b_JetChargeRelativePtWeighted = 0;
+    
     if (isSignal) {
         fChain->SetBranchAddress("GenTop", &GenTop, &b_GenTop );
         fChain->SetBranchAddress("GenAntiTop", &GenAntiTop, &b_GenAntiTop );
@@ -2482,7 +2503,14 @@ void Analysis::Init ( TTree *tree )
         fChain->SetBranchAddress("GenMET", &GenMet, &b_GenMet);
 //         fChain->SetBranchAddress("GenJetHadronB.", &BHadronJet_, &b_BHadronJet_);
 //         fChain->SetBranchAddress("GenJetHadronAntiB", &AntiBHadronJet_, &b_AntiBHadronJet_);
-    }    
+    }
+    
+    if(isHiggsSignal){
+        fChain->SetBranchAddress("GenH", &GenH, &b_GenH);
+        fChain->SetBranchAddress("GenBFromH", &GenBFromH, &b_GenBFromH);
+        fChain->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH, &b_GenAntiBFromH);
+        fChain->SetBranchAddress("HiggsDecayMode", &higgsDecayMode, &b_HiggsDecayMode);
+    }
 }
 
 Bool_t Analysis::Notify()
@@ -2556,7 +2584,9 @@ void Analysis::GetRecoBranches ( Long64_t & entry )
     */
     b_HypJet0index->GetEntry(entry);
     b_HypJet1index->GetEntry(entry);
-
+    
+    if(b_JetChargeGlobalPtWeighted)b_JetChargeGlobalPtWeighted->GetEntry(entry);
+    if(b_JetChargeRelativePtWeighted)b_JetChargeRelativePtWeighted->GetEntry(entry);
 }
 
 void Analysis::GetSignalBranches ( Long64_t & entry )
@@ -2590,6 +2620,14 @@ void Analysis::GetSignalBranches ( Long64_t & entry )
     b_BHadronJet->GetEntry(entry);   //!
     b_AntiBHadronJet->GetEntry(entry);   //!
     */
+}
+
+void Analysis::GetHiggsSignalBranches ( Long64_t & entry )
+{
+    b_GenH->GetEntry(entry);
+    b_GenBFromH->GetEntry(entry);
+    b_GenAntiBFromH->GetEntry(entry);
+    b_HiggsDecayMode->GetEntry(entry);
 }
 
 bool Analysis::getLeptonPair(size_t &LeadLeptonNumber, size_t &NLeadLeptonNumber)

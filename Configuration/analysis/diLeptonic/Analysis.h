@@ -37,8 +37,10 @@ using namespace std; //yes, shouldnt be in the header...
 class Analysis : public TSelector
 {
 public:
-    Analysis ( TTree * = 0 ) : unc {nullptr}, doJesJer {false},
-        checkZDecayMode {nullptr}, 
+    Analysis ( TTree * = 0 ) :
+        unc {nullptr}, doJesJer {false},
+        checkZDecayMode {nullptr},
+        isHiggsSignal {false},
         runViaTau {false}, pdf_no {-1}, pureweighter {nullptr}, kinRecoOnTheFly {false},
         doClosureTest {false}, closureFunction {nullptr}
         {};
@@ -46,6 +48,7 @@ public:
     void SetBTagFile(TString btagFile);
     void SetChannel(TString channel);
     void SetSignal(bool isSignal);
+    void SetHiggsSignal(const bool higgsSignal);
     void SetSystematic(TString systematic);
     virtual void SetSamplename(TString samplename, TString systematic_from_file);
     void SetOutputfilename(TString outputfilename);
@@ -110,6 +113,8 @@ protected:
         return b_TopDecayMode->GetEntry(entry);
     }
     void GetRecoBranches ( Long64_t & );
+    void GetSignalBranches ( Long64_t & );
+    void GetHiggsSignalBranches ( Long64_t & );
     
     void cleanJetCollection();
     int NumberOfBJets(vector<double>* bjets);
@@ -193,6 +198,13 @@ protected:
     Int_t           topDecayMode;
     vector<int>     *ZDecayMode;
     
+    Int_t           higgsDecayMode;
+    LV              *GenH;
+    LV              *GenBFromH;
+    LV              *GenAntiBFromH;
+    
+    std::vector<double> *JetChargeGlobalPtWeighted;
+    std::vector<double> *JetChargeRelativePtWeighted;
     
     // Further variables added from the outside
     TString btagFile;
@@ -204,6 +216,7 @@ protected:
     bool correctMadgraphBR;
     TString outputfilename;
     bool isSignal;
+    bool isHiggsSignal;
     bool isMC;
     bool getLeptonPair(size_t& LeadLeptonNumber, size_t& NLeadLeptonNumber);
     bool runViaTau;
@@ -225,8 +238,6 @@ protected:
     
     
 private:
-    
-    void GetSignalBranches ( Long64_t & );
     
     const std::string topDecayModeString();
     
@@ -348,7 +359,14 @@ private:
     TBranch        *b_TopDecayMode;   //!
     TBranch        *b_ZDecayMode;
     
-
+    TBranch        *b_HiggsDecayMode;
+    TBranch        *b_GenH;
+    TBranch        *b_GenBFromH;
+    TBranch        *b_GenAntiBFromH;
+    
+    TBranch        *b_JetChargeGlobalPtWeighted;
+    TBranch        *b_JetChargeRelativePtWeighted;
+    
     // Histograms
     TH2 *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT;
     TH2 *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;//, *h_GenRecoBJetE, *h_GenRecoAntiBJetE;;
