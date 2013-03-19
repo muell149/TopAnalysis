@@ -137,12 +137,18 @@ HiggsAnalysis::SlaveBegin(TTree *){
     // Map for binned control plots
     binnedControlPlots = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
     
-    
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
-    h_jetpT___XX = store(new TH1D ( "jetpT", "jet pT", 80, 0, 400 ));
-    // FIXME: now needs HistoList, to be changed
+    h_jetpT___XX = store(new TH1D ( "jetpT", "jet pT", 40, 0, 400 ));
+    
+    
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetpT___XX, false);
     
+    
+    h_jetChargeGlobalPtWeighted = store(new TH1D("jetChargeGlobalPtWeighted", "jetChargeGlobalPtWeighted", 110, -1.1, 1.1));
+    h_jetChargeRelativePtWeighted = store(new TH1D("jetChargeRelativePtWeighted", "jetChargeRelativePtWeighted", 110, -1.1, 1.1));
+    
+    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted, false);
+    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted, false);
     
     // FIXME: nothing yet about b-tagging scale factors, ever needed ?
 }
@@ -157,6 +163,10 @@ HiggsAnalysis::Process(Long64_t entry){
     
     // Histogram for controlling correctness of h_events_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
     h_events_step0a->Fill(1, 1);
+    
+    GetHiggsSignalBranches(entry);
+    if(!bbbarDecayFromInclusiveHiggs_ && higgsDecayMode==5)return kTRUE;
+    if(bbbarDecayFromInclusiveHiggs_ && higgsDecayMode!=5)return kTRUE;
     
     //do we have a DY true level cut?
     if (checkZDecayMode && !checkZDecayMode(entry)) return kTRUE;
@@ -197,6 +207,10 @@ HiggsAnalysis::Process(Long64_t entry){
             weightGenerator *= (0.108*9) * (0.108*9);
         }
     }
+    
+    
+    
+    
     
     
     // FIXME: here were PDF variations, not needed now, and perhaps never
@@ -474,6 +488,22 @@ HiggsAnalysis::Process(Long64_t entry){
     }
     
     
+    for(auto jetChargeGlobalPtWeighted : *JetChargeGlobalPtWeighted){
+        h_jetChargeGlobalPtWeighted->Fill(jetChargeGlobalPtWeighted, weight);
+        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets->size(),NumberOfBJets(jetBTagCSV)), h_jetChargeGlobalPtWeighted, jetChargeGlobalPtWeighted, weight);
+    }
+    
+    for(auto jetChargeRelativePtWeighted : *JetChargeRelativePtWeighted){
+        h_jetChargeRelativePtWeighted->Fill(jetChargeRelativePtWeighted, weight);
+        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets->size(),NumberOfBJets(jetBTagCSV)), h_jetChargeRelativePtWeighted, jetChargeRelativePtWeighted, weight);
+    }
+    
+    
+    
+    
+    
+    
+    
     
     return kTRUE;
 }
@@ -495,4 +525,9 @@ bool HiggsAnalysis::produceBtagEfficiencies(){
     return false;
 }
 
+
+
+void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs){
+    bbbarDecayFromInclusiveHiggs_ = bbbarDecayFromInclusiveHiggs;
+}
 

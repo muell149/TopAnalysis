@@ -63,7 +63,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
         TObjString *systematics_from_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/systematicsName"));
         TObjString *samplename = dynamic_cast<TObjString*>(file.Get("writeNTuple/sampleName"));
         TObjString *o_isSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isSignal"));
-	TObjString *o_isHiggsSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isHiggsSignal"));
+        TObjString *o_isHiggsSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isHiggsSignal"));
         TObjString *o_isMC = dynamic_cast<TObjString*>(file.Get("writeNTuple/isMC"));
         TH1* weightedEvents = dynamic_cast<TH1*>(file.Get("EventsBeforeSelection/weightedEvents"));
         if (!channel_file || !systematics_from_file || !o_isSignal || !o_isMC || !samplename) { 
@@ -73,8 +73,10 @@ void load_HiggsAnalysis(TString validFilenamePattern,
         bool isSignal = o_isSignal->GetString() == "1";
         bool isMC = o_isMC->GetString() == "1";
         bool isHiggsSignal(false);
-	if(o_isHiggsSignal && o_isHiggsSignal->GetString()=="1")isHiggsSignal = true;
-	
+        if(o_isHiggsSignal && o_isHiggsSignal->GetString()=="1")isHiggsSignal = true;
+        bool isHiggsInclusive(false);
+        if(isHiggsSignal && samplename->GetString()=="ttbarhiggsinclusive")isHiggsInclusive = true;
+        
         if (!isMC && systematic != "") {
             cout << "Sample is DATA, so not running again for systematic variation\n";
             continue;
@@ -113,9 +115,14 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             if (!outputfilename.Contains(channel + "_")) outputfilename.Prepend(channel + "_");
             //outputfile is now channel_filename.root
             
+            std::cout<<"Output name 1: "<<outputfilename<<"\n";
+            if(isHiggsInclusive)outputfilename.ReplaceAll("inclusive", "inclusiveOther");
+            std::cout<<"Output name 2: "<<outputfilename<<"\n";
+            
             selector->SetBTagFile(btagFile);
             selector->SetChannel(channel);
             selector->SetSignal(isSignal);
+            selector->SetHiggsSignal(isHiggsSignal);
             selector->SetMC(isMC);
             selector->SetTrueLevelDYChannel(dy);
             if (dy) {
@@ -136,10 +143,13 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             selector->SetOutputfilename(outputfilename);
             selector->SetRunViaTau(0);
             selector->SetClosureTest(closure, slope);
-	    
-
+            selector->SetHiggsInclusiveSeparation(false);
+            
             TTree *tree = dynamic_cast<TTree*>(file.Get("writeNTuple/NTuple"));
-            if (! tree) { std::cerr << "Error: Tree not found!\n"; exit(854); }
+            if (!tree){
+                std::cerr << "Error: Tree not found!\n";
+                exit(854);
+            }
             
             TChain chain("writeNTuple/NTuple");
             chain.Add(filename);
@@ -147,7 +157,10 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             
             if (systematic == "PDF") {
                 TH1* pdfWeights = dynamic_cast<TH1*>(file.Get("EventsBeforeSelection/pdfEventWeights"));
-                if (!pdfWeights) { std::cerr << "Error: pdfEventWeights histo missing!\n"; exit(831); }
+                if (!pdfWeights){
+                    std::cerr << "Error: pdfEventWeights histo missing!\n";
+                    exit(831);
+                }
                 for (int pdf_no = 1; pdfWeights->GetBinContent(pdf_no) > 0; ++pdf_no) {
                     TString pdfName("PDF_");
                     pdfName += (pdf_no+1)/2;
@@ -158,11 +171,18 @@ void load_HiggsAnalysis(TString validFilenamePattern,
                     selector->SetPDF(pdf_no);
                     chain.Process(selector);
                 }
-            } else {
+            }
+            else {
                 chain.Process(selector);
-		if (isSignal && closure == "" && !isHiggsSignal) {
+                if (isSignal && closure=="" && !isHiggsSignal) {
                     selector->SetRunViaTau(1);
                     outputfilename.ReplaceAll("signalplustau", "bgviatau");
+                    selector->SetOutputfilename(outputfilename);
+                    chain.Process(selector);
+                }
+                if(isHiggsInclusive){
+                    selector->SetHiggsInclusiveSeparation(true);
+                    outputfilename.ReplaceAll("Other", "Bbbar");
                     selector->SetOutputfilename(outputfilename);
                     chain.Process(selector);
                 }

@@ -19,7 +19,11 @@ public:
     virtual void SetSamplename(TString samplename, TString systematic_from_file="");
     ClassDef(HiggsAnalysis,0);
     
+    void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
+    
 private:
+    
+    bool bbbarDecayFromInclusiveHiggs_;
     
     virtual void SlaveBegin(TTree *);
     virtual Bool_t Process(Long64_t entry);
@@ -68,11 +72,12 @@ private:
     DyScalingHistograms dyScalingHistograms_;
     
     // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
-    TH1 *h_jetpT___XX;
+    TH1* h_jetpT___XX;
     
     
     
-    
+    TH1* h_jetChargeGlobalPtWeighted;
+    TH1* h_jetChargeRelativePtWeighted;
     
     
 };
