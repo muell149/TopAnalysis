@@ -2978,7 +2978,13 @@ void Analysis::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, con
         if(histoList.IsZombie()) { cout << "Need a HistoList to create binned control plots!\n"; exit(273); }
         pair.first = histoList.getPlotProperties(h_differential->GetName()).getClonedHistogram();
     }
-    else pair.first = (TH1*) h_differential->Clone();
+    else{
+        bool old = TH1::AddDirectoryStatus();
+        TH1::AddDirectory(false);
+        TH1* clone = static_cast<TH1*>(h_differential->Clone());
+        TH1::AddDirectory(old);
+        pair.first = clone;
+    }
     std::string name = "bcp_";
     name.append(h_differential->GetName()).append("_bin_");
     //create maps if we are called for the first time with a certain h_differential
