@@ -19,10 +19,12 @@ public:
     virtual void SetSamplename(TString samplename, TString systematic_from_file="");
     ClassDef(HiggsAnalysis,0);
     
+    void SetHiggsInclusiveSample(const bool isInclusiveHiggs);
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
     
 private:
     
+    bool isInclusiveHiggs_;
     bool bbbarDecayFromInclusiveHiggs_;
     
     virtual void SlaveBegin(TTree *);

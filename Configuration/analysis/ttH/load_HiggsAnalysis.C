@@ -143,6 +143,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             selector->SetOutputfilename(outputfilename);
             selector->SetRunViaTau(0);
             selector->SetClosureTest(closure, slope);
+            selector->SetHiggsInclusiveSample(isHiggsInclusive);
             selector->SetHiggsInclusiveSeparation(false);
             
             TTree *tree = dynamic_cast<TTree*>(file.Get("writeNTuple/NTuple"));

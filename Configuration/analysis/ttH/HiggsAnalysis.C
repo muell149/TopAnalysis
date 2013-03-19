@@ -165,8 +165,8 @@ HiggsAnalysis::Process(Long64_t entry){
     h_events_step0a->Fill(1, 1);
     
     if(isHiggsSignal)GetHiggsSignalBranches(entry);
-    if(!bbbarDecayFromInclusiveHiggs_ && higgsDecayMode==5)return kTRUE;
-    if(bbbarDecayFromInclusiveHiggs_ && higgsDecayMode!=5)return kTRUE;
+    if(isInclusiveHiggs_ && !bbbarDecayFromInclusiveHiggs_ && higgsDecayMode==5)return kTRUE;
+    if(isInclusiveHiggs_ && bbbarDecayFromInclusiveHiggs_ && higgsDecayMode!=5)return kTRUE;
     
     //do we have a DY true level cut?
     if (checkZDecayMode && !checkZDecayMode(entry)) return kTRUE;
@@ -523,6 +523,12 @@ void HiggsAnalysis::SetSamplename(TString samplename, TString)
 
 bool HiggsAnalysis::produceBtagEfficiencies(){
     return false;
+}
+
+
+
+void HiggsAnalysis::SetHiggsInclusiveSample(const bool isInclusiveHiggs){
+    isInclusiveHiggs_ = isInclusiveHiggs;
 }
 
 
