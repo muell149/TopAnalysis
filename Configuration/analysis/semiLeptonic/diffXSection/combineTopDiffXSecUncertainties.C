@@ -1147,7 +1147,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		canvas->GetListOfPrimitives()->Remove(canvas->GetPrimitive(plotName+"kData"));
 	      }
 	      // Draw errors into Canvas
-	      totalErrors_[xSecVariables_[i]]->Draw("][ p e same");
+	      totalErrors_[xSecVariables_[i]]->Draw("][ p z same");
 	      canvas->SetName(xSecVariables_[i]);
 	    }
 	    // save Canvas
