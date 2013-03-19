@@ -78,7 +78,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   bool errorbands=false;
   // addSel: xSec from prob selection step
   //TString addSel="ProbSel";
-  if(!extrapolate) addSel="";
+  //if(!extrapolate) addSel="";
   // for systematic variations done in central signal sample (e.g. PU, effSF, btagSF):
   // use MC rootfiles from subfolder /Prob and ignore addSel plotname extension
   TString addSelData="";
@@ -2039,7 +2039,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       // number of systematic samples to unfold 
       int numSys=0;
       // Regularization parameter
-      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier);
+      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier, (addSel=="ProbSel" ? true : false) );
       // Regularization Modus 
       //         0 means: Default setting. Same as 2
       //         1 means: Bin by Bin Unfolding
@@ -2178,7 +2178,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
       int scanpoints= (scan==2 ? 3 : 0);
-      //scanpoints=1; // FIXME: fast tauscan results
+      // scanpoints=1; // FIXME: fast tauscan results
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
