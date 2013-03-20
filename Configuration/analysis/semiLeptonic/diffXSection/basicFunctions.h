@@ -118,7 +118,7 @@ namespace semileptonic {
   const unsigned int constPowhegStyle  = 7;
   const unsigned int constNnloStyle    = 2;
   const unsigned int constMcatnloStyle = 5;
-  const unsigned int constNnloStyle2   = 1;
+  const unsigned int constNnloStyle2   = 9;
 
   // Marker style
 
@@ -2404,25 +2404,41 @@ namespace semileptonic {
       
       // create ratios
       std::vector<TH1*> ratio_;
-      for(unsigned int nTheory=0; nTheory<histDenominatorTheory_.size(); ++nTheory){
+      // sort for drawing order: MADGRAPH, MC@NLO, POWHEG, higher order theory calculation
+      std::vector<TH1F*> histDenominatorTheoryOrdered_=histDenominatorTheory_;
+/*       unsigned int count =0; */
+/*       while(histDenominatorTheoryOrdered_.size()!=histDenominatorTheory_.size()){ */
+/* 	++count; */
+/* 	for(unsigned int nTheory=0; nTheory<histDenominatorTheory_.size(); ++nTheory){  */
+/* 	  TString theo=(TString)histDenominatorTheory_[nTheory]->GetName(); */
+/* 	  if((count==1)&&!(theo.Contains("errorBand"))) histDenominatorTheoryOrdered_.push_back((TH1*)(histDenominatorTheory_[nTheory]->Clone())); */
+/* 	  if((count==2)&&!(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")||theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")||theo.Contains("nnlo"))) histDenominatorTheoryOrdered_.push_back((TH1*)(histDenominatorTheory_[nTheory]->Clone())); */
+/* 	  else if((count==3)&&!(theo.Contains("errorBand"))&&(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo"))) histDenominatorTheoryOrdered_.push_back((TH1*)(histDenominatorTheory_[nTheory]->Clone())); */
+/* 	  else if((count==4)&&(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg"))) histDenominatorTheoryOrdered_.push_back((TH1*)(histDenominatorTheory_[nTheory]->Clone())); */
+/* 	  else if((count>=5)&&(theo.Contains("nnlo"))) histDenominatorTheoryOrdered_.push_back((TH1*)(histDenominatorTheory_[nTheory]->Clone())); */
+/* 	  if(count>histDenominatorTheory_.size()){ std::cout << "ERROR in drawFinalResultRatio when trying to order theory curves- new or unknown curve???" << std::endl; exit(0);} */
+/* 	} */
+/*       } */
+      
+      for(unsigned int nTheory=0; nTheory<histDenominatorTheoryOrdered_.size(); ++nTheory){
 	if(verbose>1){
 	  std::cout << "ratio for theory #" << nTheory;
-	  std::cout << "  (" << histDenominatorTheory_[nTheory]->GetName();
+	  std::cout << "  (" << histDenominatorTheoryOrdered_[nTheory]->GetName();
 	  std::cout << " / " << histNumeratorData->GetName() << ")" << std::endl;
 	}
 	// clone theory curve
-	TH1F* tempRatio = (TH1F*)histDenominatorTheory_[nTheory]->Clone();
+	TH1F* tempRatio = (TH1F*)histDenominatorTheoryOrdered_[nTheory]->Clone();
 	tempRatio->Reset("icms");
 	// loop bins
-	for(int bin=1; bin<=histDenominatorTheory_[nTheory]->GetNbinsX(); ++bin){
+	for(int bin=1; bin<=histDenominatorTheoryOrdered_[nTheory]->GetNbinsX(); ++bin){
 	  //std::cout << "bin: " << bin << std::endl;
 	  if(histNumeratorData->GetBinWidth(bin)!=0.&& histNumeratorData->GetBinContent(bin)!=0){
 	    // set content
-	    //std::cout << "histDenominatorTheory_[nTheory]->GetBinContent(bin): "<< histDenominatorTheory_[nTheory]->GetBinContent(bin) << std::endl;
+	    //std::cout << "histDenominatorTheoryOrdered_[nTheory]->GetBinContent(bin): "<< histDenominatorTheoryOrdered_[nTheory]->GetBinContent(bin) << std::endl;
 	    //std::cout << "histNumeratorData->GetBinContent(bin): " << histNumeratorData->GetBinContent(bin) << std::endl;
-	    tempRatio->SetBinContent(bin, histDenominatorTheory_[nTheory]->GetBinContent(bin) / histNumeratorData->GetBinContent(bin));
+	    tempRatio->SetBinContent(bin, histDenominatorTheoryOrdered_[nTheory]->GetBinContent(bin) / histNumeratorData->GetBinContent(bin));
 	    // set error: simple gaussian error propagation neglecting the theory error
-	    tempRatio->SetBinError  (bin, ( histDenominatorTheory_[nTheory]->GetBinContent(bin) / ( histNumeratorData->GetBinContent(bin)* histNumeratorData->GetBinContent(bin)) ) * histNumeratorData->GetBinError(bin));	    
+	    tempRatio->SetBinError  (bin, ( histDenominatorTheoryOrdered_[nTheory]->GetBinContent(bin) / ( histNumeratorData->GetBinContent(bin)* histNumeratorData->GetBinContent(bin)) ) * histNumeratorData->GetBinError(bin));
 	  }
 	  // set technical bins with width==0 to zero
 	  else{
@@ -2430,7 +2446,7 @@ namespace semileptonic {
 	    tempRatio->SetBinContent(bin, 1  );
 	  }
 	  if(verbose>1) {
-	    std::cout << histDenominatorTheory_[nTheory]->GetName() << " bin " << bin << ":" << tempRatio->GetBinContent(bin) << "+-" << tempRatio->GetBinError(bin) << std::endl;
+	    std::cout << histDenominatorTheoryOrdered_[nTheory]->GetName() << " bin " << bin << ":" << tempRatio->GetBinContent(bin) << "+-" << tempRatio->GetBinError(bin) << std::endl;
 	    std::cout << "rel err ratio: " << tempRatio->GetBinError(bin)/tempRatio->GetBinContent(bin) << std::endl;
 	    std::cout << "rel err data:  " << histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin) << std::endl;
 	  }
@@ -2489,43 +2505,47 @@ namespace semileptonic {
       rPad->SetTicky(1);
       // draw grid
       TPad *grid =(TPad*)rPad->Clone("grid");
-      grid->SetGrid(1,1);
+      grid->SetGrid(0,1);
       grid->Draw("");
-      rPad->SetGrid(1,1);
+      rPad->SetGrid(0,1);
       rPad->Draw("");
       rPad->cd();
+      //TH1F* one2;
+      TH1F* errorband2;
+      TLegend *leg  = new TLegend(); 
       for(unsigned int nTheory=0; nTheory<ratio_.size(); ++nTheory){
 	ratio_[nTheory]->SetStats(kFALSE);
 	ratio_[nTheory]->SetTitle("");
 	ratio_[nTheory]->SetMaximum(ratioMax);
 	ratio_[nTheory]->SetMinimum(ratioMin);
-	unsigned int color = histDenominatorTheory_[nTheory]->GetMarkerColor();
-	if(color==kBlack) color=theoryColor((TString)histDenominatorTheory_[nTheory]->GetName());
+	unsigned int color = histDenominatorTheoryOrdered_[nTheory]->GetMarkerColor();
+	if(color==kBlack) color=theoryColor((TString)histDenominatorTheoryOrdered_[nTheory]->GetName());
 	ratio_[nTheory]->SetLineColor(color);
-	double linewidth=histDenominatorTheory_[nTheory]->GetLineWidth();
+	double linewidth=histDenominatorTheoryOrdered_[nTheory]->GetLineWidth();
 	linewidth=2;
 	ratio_[nTheory]->SetLineWidth(linewidth);
 	ratio_[nTheory]->SetMarkerColor(color);
 	ratio_[nTheory]->SetFillColor(color-4);
 	ratio_[nTheory]->SetFillStyle(0);
 	ratio_[nTheory]->SetMarkerSize(0.2);
-	unsigned int style =theoryStyle((TString)histDenominatorTheory_[nTheory]->GetName());
+	unsigned int style =theoryStyle((TString)histDenominatorTheoryOrdered_[nTheory]->GetName());
 	ratio_[nTheory]->SetLineStyle(style);
 	// configure axis of ratio_[nTheory] plot
-	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
-	ratio_[nTheory]->GetXaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitleOffset()*0.9);
-	ratio_[nTheory]->GetXaxis()->SetLabelSize(histDenominatorTheory_[nTheory]->GetXaxis()->GetLabelSize()*scaleFactor*1.4);
-	ratio_[nTheory]->GetXaxis()->SetTitle(histDenominatorTheory_[nTheory]->GetXaxis()->GetTitle());
-	ratio_[nTheory]->GetXaxis()->SetNdivisions(histDenominatorTheory_[nTheory]->GetNdivisions());
+	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
+	ratio_[nTheory]->GetXaxis()->SetTitleOffset(histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->GetTitleOffset()*0.9);
+	ratio_[nTheory]->GetXaxis()->SetLabelSize(histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->GetLabelSize()*scaleFactor*1.4);
+	ratio_[nTheory]->GetXaxis()->SetTitle(histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->GetTitle());
+	ratio_[nTheory]->GetXaxis()->SetNdivisions(histDenominatorTheoryOrdered_[nTheory]->GetNdivisions());
 	ratio_[nTheory]->GetYaxis()->CenterTitle();
 	ratio_[nTheory]->GetYaxis()->SetTitle("#frac{theory}{data}");
-	ratio_[nTheory]->GetYaxis()->SetTitleSize(histDenominatorTheory_[nTheory]->GetYaxis()->GetTitleSize()*scaleFactor);
-	ratio_[nTheory]->GetYaxis()->SetTitleOffset(histDenominatorTheory_[nTheory]->GetYaxis()->GetTitleOffset()/scaleFactor);
-	ratio_[nTheory]->GetYaxis()->SetLabelSize(histDenominatorTheory_[nTheory]->GetYaxis()->GetLabelSize()*scaleFactor);
-	ratio_[nTheory]->GetYaxis()->SetLabelOffset(histDenominatorTheory_[nTheory]->GetYaxis()->GetLabelOffset()*3.3);
+	ratio_[nTheory]->GetYaxis()->SetTitleSize(histDenominatorTheoryOrdered_[nTheory]->GetYaxis()->GetTitleSize()*scaleFactor);
+	ratio_[nTheory]->GetYaxis()->SetTitleOffset(histDenominatorTheoryOrdered_[nTheory]->GetYaxis()->GetTitleOffset()/scaleFactor);
+	ratio_[nTheory]->GetYaxis()->SetLabelSize(histDenominatorTheoryOrdered_[nTheory]->GetYaxis()->GetLabelSize()*scaleFactor);
+	ratio_[nTheory]->GetYaxis()->SetLabelOffset(histDenominatorTheoryOrdered_[nTheory]->GetYaxis()->GetLabelOffset()*3.3);
 	ratio_[nTheory]->GetYaxis()->SetTickLength(0.03);
 	ratio_[nTheory]->GetYaxis()->SetNdivisions(505);
 	ratio_[nTheory]->GetXaxis()->SetRange(histNumeratorData->GetXaxis()->GetFirst(), histNumeratorData->GetXaxis()->GetLast());
+	// first plot
 	if(nTheory==0){
 	  setXAxisRange(ratio_[nTheory], (TString)ratio_[nTheory]->GetName());
 	  if(rangeMin!=-1.&&rangeMax!=-1.){
@@ -2533,26 +2553,41 @@ namespace semileptonic {
 	    ratio_[nTheory]->GetXaxis()->SetRange(ratio_[nTheory]->FindBin(rangeMin),ratio_[nTheory]->FindBin(rangeMax));
 	  }
 	}
+	// MC@NLO errorbands
+	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBand")){
+	  int color2=kGray;
+	  if(((TString)ratio_[nTheory]->GetName()).Contains("Dn"))color2=10;
+	  ratio_[nTheory]->SetLineColor(color2);
+	  ratio_[nTheory]->SetMarkerColor(color2);
+	  ratio_[nTheory]->SetFillColor(color2);
+	  ratio_[nTheory]->SetFillStyle(1001);
+	  ratio_[nTheory]->SetLineWidth(1);
+	  ratio_[nTheory]->SetLineStyle(1);
+	}
 	TString titleX=histNumeratorData->GetXaxis()->GetTitle();
 	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
 	titleX=(TString)(histNumeratorData->GetXaxis()->GetTitle());
 	if(titleX!="") ratio_[nTheory]->GetXaxis()->SetTitle(titleX);
 	ratio_[nTheory]->GetXaxis()->SetNoExponent(true);
 	// delete axis of initial plot
-	histDenominatorTheory_[nTheory]->GetXaxis()->SetLabelSize(0);
-	histDenominatorTheory_[nTheory]->GetXaxis()->SetTitleSize(0);
+	histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->SetLabelSize(0);
+	histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->SetTitleSize(0);
 	// draw ratio_[nTheory] plot
 	if(nTheory==0){
 	  // line at 1
 	  TH1F* one=(TH1F*)ratio_[nTheory]->Clone();
 	  one->Divide(one);
-	  one->SetLineWidth(1);
-	  one->SetLineColor(kBlack);
+	  one->SetLineWidth(3);
+	  one->SetLineStyle(1);
+	  one->SetLineColor(0);
 	  one->SetFillStyle(0);
-	  one->DrawClone("hist");
+	  TString add= nTheory==0 ? "" : " same";
+	  //one2=(TH1F*)one->Clone();
+	  one->DrawClone("hist"+add);
 	  // line at upper border
 	  TH1F* up=(TH1F*)one->Clone("up");
 	  up->SetLineWidth(3);
+	  up->SetLineColor(kBlack);
 	  up->Scale(ratioMax);
 	  up->DrawClone("hist same");
 	  // errorband for data error around 1
@@ -2560,37 +2595,38 @@ namespace semileptonic {
 	  for(int bin=1; bin<=errorband->GetNbinsX(); ++bin){
 	    errorband->SetBinContent(bin, 1);
 	    errorband->SetBinError  (bin, histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin));
-	    errorband->SetMarkerColor(kYellow);
-	    errorband->SetFillColor(kYellow);
-	    errorband->SetFillStyle(1001);
 	  }
-	  errorband->DrawClone("e2 p same");
-	TLegend *leg  = new TLegend(); 
-	//leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.20);
-	//leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - 0.03*leg->GetNRows());
-	//leg->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength()+0.20);
-	//leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength()-0.20);
-	leg->SetX1NDC(0.2);
-	leg->SetY1NDC(1.0);
-	leg->SetX2NDC(0.4);
-	leg->SetY2NDC(0.8);
-	leg ->SetFillStyle(0);
-	leg ->SetBorderSize(0);
-	leg ->SetTextSize(0.1);
-	leg ->SetTextAlign(12);
-	leg ->AddEntry(errorband, "data stat+sys error", "F");
-	leg ->DrawClone("same");
+	  int errcolor=kOrange+1;
+	  errorband->SetLineWidth(0);
+	  errorband->SetLineColor(0);
+	  errorband->SetMarkerColor(errcolor);
+	  errorband->SetFillColor(errcolor);
+	  errorband->SetFillStyle(3352);//44);
+	  errorband2=(TH1F*)errorband->Clone();
+	  leg->SetX1NDC(0.22);
+	  leg->SetY1NDC(0.99);
+	  leg->SetX2NDC(0.58);
+	  leg->SetY2NDC(0.79);
+	  leg ->SetFillStyle(1001);
+	  leg ->SetFillColor(10);
+	  leg ->SetBorderSize(0);
+	  leg ->SetTextSize(0.1);
+	  leg ->SetTextAlign(12);
+	  leg ->AddEntry(errorband, "data stat+sys error", "F");
 	}
-	//if(nTheory==0) ratio_[nTheory]->DrawClone("hist");
 	ratio_[nTheory]->DrawClone("hist same");
-	//ratio_[nTheory]->DrawClone("p e X0 same");
-	//ratio_[nTheory]->Print("./"+(TString)(ratio_[nTheory]->GetName())+"ratio.png");
+	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBandDn")){
+	  errorband2->Draw("e2 p same");
+	  //one2->Draw("hist same");
+	}
       }
       rPad->SetTopMargin(0.0);
       rPad->SetBottomMargin(0.15*scaleFactor);
       rPad->SetRightMargin(right);
       gPad->SetLeftMargin(left);
+      gPad->RedrawAxis("g");
       gPad->RedrawAxis();
+      leg->DrawClone("same");
       //rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
       gPad->cd();
       rPad->Draw();
@@ -2600,7 +2636,7 @@ namespace semileptonic {
       if(verbose>0){ 
 	std::cout << "calling drawFinalResultRatio for ";
 	if(histNumeratorData) std::cout << histNumeratorData->GetName();
-	else  std::cout << "missing data curve";
+	else  std::cout << " !WARNING! missing data curve";
 	std::cout << " and " << histDenominatorTheory_.size() << " theory curves" << std::endl;
       }
     }

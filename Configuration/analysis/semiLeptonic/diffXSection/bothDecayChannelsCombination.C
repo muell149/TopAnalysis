@@ -779,6 +779,21 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // b3) draw binned madgraph theory curves
 	  plotTheo2->Draw("hist same");
 	  if(SC) plotTheo3->Draw("hist same"); 
+	  // g1) draw NLO+NNLL curve for topMass (normalized)
+	  if(extrapolate && DrawNNLOPlot && (xSecVariables_[i].Contains("ttbarMassNorm"))){
+	    TString plotname=xSecVariables_[i];	   
+	    plotname.ReplaceAll("Norm", "");
+	    TFile  *file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/AhrensNNLL8TeV.root");
+	    TH1F   *newPlotNNLOHisto = (TH1F*)(file->Get(plotname)->Clone(plotname+"nnlo"));
+	    if(newPlotNNLOHisto){
+	      newPlotNNLOHisto->SetLineColor(constNnloColor2);
+	      newPlotNNLOHisto->SetMarkerColor(constNnloColor2);
+	      newPlotNNLOHisto->SetLineStyle(constNnloStyle2);
+	      newPlotNNLOHisto->SetLineWidth(2);
+	      newPlotNNLOHisto->SetMarkerStyle(7);
+	      DrawSteps(newPlotNNLOHisto ,"same");
+	    }
+	  }
 	  // c2) draw MC@NLO central curve
 	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2, LV);
 	  // d) POWHEG
@@ -820,38 +835,21 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	    plotname.ReplaceAll("Norm", "");
 	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
 
-	    // g1) draw NNLO curve for topPt (normalized) and topY (normalized)
-
-	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm")||xSecVariables_[i].Contains("ttbarMassNorm"))){
-	      TFile  *file = xSecVariables_[i].Contains("ttbarMassNorm") ? new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/AhrensNNLL8TeV.root") : new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisApproxNNLO8TeV.root");
+	    // g2) draw NNLO curve for topPt (normalized) and topY (normalized)
+	    if(DrawNNLOPlot&&(xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm"))){
+	      TFile  *file = new TFile("/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/kidonakisApproxNNLO8TeV.root");
 	      TH1F   *newPlotNNLOHisto = (TH1F*)(file->Get(plotname)->Clone(plotname+"nnlo"));
-	      //TGraph *newPlotNNLOGraph = (TGraph*)(file->Get(plotname+"_graph")->Clone(plotname+"nnlo_graph"));
 	      if(newPlotNNLOHisto){
-		if(!xSecVariables_[i].Contains("ttbarMassNorm")) newPlotNNLOHisto->GetXaxis()->SetRange(0, newPlotNNLOHisto->GetNbinsX()-1);
-		//newPlotNNLOHisto->SetName(plotname+"nnlo"); 
+		newPlotNNLOHisto->GetXaxis()->SetRange(0, newPlotNNLOHisto->GetNbinsX()-1);
 		newPlotNNLOHisto->SetLineColor(constNnloColor);
 		newPlotNNLOHisto->SetLineStyle(constNnloStyle);
 		newPlotNNLOHisto->SetLineWidth(2);
 		newPlotNNLOHisto->SetMarkerStyle(7);
 		newPlotNNLOHisto->SetMarkerColor(constNnloColor);
 		DrawSteps(newPlotNNLOHisto ,"same");
-		if(xSecVariables_[i].Contains("ttbarMassNorm")){
-		  newPlotNNLOHisto->SetLineColor(constNnloColor2);
-		  newPlotNNLOHisto->SetMarkerColor(constNnloColor2);
-		  newPlotNNLOHisto->SetLineStyle(constNnloStyle2);
-		}
 	      }
-	      //if(newPlotNNLOGraph){
-	      //	//newPlotNNLOGraph->SetName(plotname+"nnlo_graph"); 
-	      //	newPlotNNLOGraph->SetLineColor(constNnloColor);
-	      //	newPlotNNLOGraph->SetLineWidth(2);
-	      //	newPlotNNLOGraph->SetMarkerStyle(7);
-	      //	newPlotNNLOGraph->SetMarkerColor(constNnloColor);
-	      //	newPlotNNLOGraph->Draw("LP");		
-	      //}	     	     
-	    }
-	  
-	    // g2) MCFM curves
+	    }	  
+	    // g3) MCFM curves
 
 	    if (DrawMCFMPlot&&xSecVariables_[i].Contains("Norm")){
 

@@ -57,19 +57,19 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   TH1F* plotMadGraph = (TH1F*)canvas->GetPrimitive(plotName          );
   TH1F* plotmcatnlo  = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO2");
   if(!plotmcatnlo) plotmcatnlo  = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO");
+  TGraphAsymmErrors* plotmcatnloerror = (TGraphAsymmErrors*)canvas->GetPrimitive(plotName+"MC@NLOerrorBand");
   TH1F* plotpowheg   = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG");
   std::vector<TH1F*>hist_;
   // GET THEORY: delete empty bins
-  if(plotmcatnlo ) hist_.push_back( killEmptyBins(plotmcatnlo , verbose) );
-  if(plotpowheg  ) hist_.push_back( killEmptyBins(plotpowheg  , verbose) );
-  if(plotMadGraph) hist_.push_back( killEmptyBins(plotMadGraph, verbose) );
-  if(plotNNLO    ){
+  // a) peturbative QCD
+  TH1F* finalNNLO=0;
+  if(plotNNLO        ){
     // delete empty bins
     TH1F* tempNNLO=killEmptyBins(plotNNLO, verbose);
     std::cout << tempNNLO->GetName() << std::endl;  
     // delete bins put of range
     int Nnnlobins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*10;
-    TH1F* finalNNLO=new TH1F(tempNNLO->GetName(),tempNNLO->GetTitle(), Nnnlobins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
+    finalNNLO=new TH1F(tempNNLO->GetName(),tempNNLO->GetTitle(), Nnnlobins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
     reBinTH1F(*finalNNLO, binning_[plotName], 0);
     for(int bin=0; bin<=tempNNLO->GetNbinsX()+1; ++bin){
       double binlowedge=tempNNLO->GetBinLowEdge(bin); 
@@ -84,10 +84,28 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
 	}
       }
     }
-    hist_.push_back( finalNNLO);
-    //hist_.push_back( killEmptyBins(plotNNLO    , verbose) );
   }
-  
+  // b) MC@NLO errorbands
+  if(plotmcatnloerror&&plotmcatnlo){
+    TH1F*   plotmcatnloerror1 =(TH1F*)((killEmptyBins(plotmcatnlo, verbose))->Clone((TString)plotmcatnloerror->GetName()+"Up"));
+    TH1F*   plotmcatnloerror2 =(TH1F*)((killEmptyBins(plotmcatnlo, verbose))->Clone((TString)plotmcatnloerror->GetName()+"Dn"));
+    for(int p=0; p<plotmcatnloerror->GetN(); ++p){
+      plotmcatnloerror1->SetBinContent(p, plotmcatnloerror->GetErrorYhigh(p)+plotmcatnloerror->GetY()[p]);
+      plotmcatnloerror2->SetBinContent(p, plotmcatnloerror->GetY()[p]-plotmcatnloerror->GetErrorYlow(p));
+    }
+    plotmcatnloerror1->SetLineStyle(1);
+    plotmcatnloerror2->SetLineStyle(1);
+    hist_.push_back( killEmptyBins(plotmcatnloerror1, verbose) );
+    hist_.push_back( killEmptyBins(plotmcatnloerror2, verbose) );
+  }
+  // a1) Ahrens
+  if(finalNNLO&&plotName.Contains("ttbarMass")) hist_.push_back(finalNNLO);
+  // c) MC theories
+  if(plotMadGraph    ) hist_.push_back( killEmptyBins(plotMadGraph    , verbose) );
+  if(plotmcatnlo     ) hist_.push_back( killEmptyBins(plotmcatnlo     , verbose) );
+  if(plotpowheg      ) hist_.push_back( killEmptyBins(plotpowheg      , verbose) );
+  // a2) Kidonakis
+  if(finalNNLO&&(plotName.Contains("topY")||plotName.Contains("topPt"))) hist_.push_back(finalNNLO);
   if(compare){
     // reference results from a different analysis setup
     // GET DATA2: with final errors from canvas
@@ -127,8 +145,8 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   
   // create ratio canvas
   std::vector<TCanvas*> plotCanvas_;
-  double max= plotName.Contains("ttbarMass") ? 2.9 : 1.7;
-  double min= plotName.Contains("ttbarMass") ? 0 : 0.3;
+  double max= 1.7;
+  double min= 0.3;
   plotCanvas_.push_back(drawFinalResultRatio(data, min, max, myStyle, 0, hist_, (TCanvas*)(canvas->Clone())));
   plotCanvas_[0]->Draw();
   plotCanvas_[0]->Update();
@@ -138,7 +156,7 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   return plotCanvas_[0];
 }
 
-void createTheoryDataRatios(bool extrapolate=false, bool hadron=true, int verbose=0){
+void createTheoryDataRatios(bool extrapolate=true, bool hadron=false, int verbose=0){
 
   // list all variables you want to create a ratio for
   std::vector<TString> xSecVariables_;
