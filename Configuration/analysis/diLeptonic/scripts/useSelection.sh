@@ -6,7 +6,7 @@ if [ "$1" = "" ]; then
     echo "Please provide a name - your analysis folders will be symlinked"
     echo "For example: ./useSelection.sh testCut"
     echo " this would ln -s selectionRoot_testCut selectionRoot"
-    echo " also the BTag, Plots, and Unfolding folders will be symlinked"
+    echo " also the BTag, Plots, preunfolded, and Unfolding folders will be symlinked"
     echo ""
     echo "If you provide 'clean' as argument, only the old symlinks will be removed."
     exit
@@ -14,7 +14,7 @@ else
     name="$1"
 fi
 
-folders="BTagEff Plots selectionRoot SVD  UnfoldingResults"
+folders="BTagEff Plots selectionRoot SVD UnfoldingResults preunfolded"
 for i in $folders; do
     if [ -h "$i" ]; then
         rm "$i"
