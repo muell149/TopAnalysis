@@ -910,7 +910,7 @@ void AnalysisBase::prepareTriggerSF()
 {
     h_TrigSFeta = nullptr;
     
-    TFile trigEfficiencies(TString("triggerSummary_").Append(channel_).Append(".root"));
+    TFile trigEfficiencies(DATA_PATH() + "/triggerSummary_" + channel_ + ".root");
     if (trigEfficiencies.IsZombie()) {
         std::cout << "Trigger efficiencies not found. Assuming ScaleFactor = 1.\n";
         std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
@@ -959,14 +959,14 @@ double AnalysisBase::getLeptonIDSF(const LV& lep1, const LV& lep2, int lep1pdgId
 void AnalysisBase::prepareLeptonIDSF() {
     h_MuonIDSFpteta = nullptr; h_ElectronIDSFpteta = nullptr;
     
-    TFile MuonEfficiencies(TString("MuonSFtop12028.root"));
+    TFile MuonEfficiencies(DATA_PATH() + "/MuonSFtop12028.root");
     if (MuonEfficiencies.IsZombie()) {
         std::cout << "Muon Id/Iso efficiencies not found. Assuming ScaleFactor = 1.\n";
 ///        std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
         return;
     }
 
-    TFile ElecEfficiencies(TString("ElectronSFtop12028.root"));
+    TFile ElecEfficiencies(DATA_PATH() + "/ElectronSFtop12028.root");
     if (ElecEfficiencies.IsZombie()) {
         std::cout << "Electron Id/Iso efficiencies not found. Assuming ScaleFactor = 1.\n";
 ///        std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
@@ -1217,10 +1217,10 @@ const std::string AnalysisBase::topDecayModeString() {
  */
 void AnalysisBase::prepareJER_JES()
 {    
-    std::string pathToFile = CMSSW_BASE() + "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt";
+    TString pathToFile(DATA_PATH() + "/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt");
     doJesJer_ = false;
     if (systematic_ == "JES_UP" || systematic_ == "JES_DOWN") {
-        unc_ = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.data(), "Total"));
+        unc_ = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.Data(), "Total"));
         doJesJer_ = true;
     }
     if (systematic_ == "JER_UP" || systematic_ == "JER_DOWN") {

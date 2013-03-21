@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source parallelTools.sh
+source $(dirname `readlink -f $0`)/parallelTools.sh
 
 for sys in JES_UP JES_DOWN JER_UP JER_DOWN \
            PU_UP PU_DOWN \

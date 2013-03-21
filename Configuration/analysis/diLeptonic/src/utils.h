@@ -110,5 +110,6 @@ TH1* SummedStackHisto(const THStack *stack);
 
 double Median(TH1 * h1);
 const std::string CMSSW_BASE();
+const TString DATA_PATH();
 
 #endif

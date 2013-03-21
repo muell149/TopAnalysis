@@ -97,6 +97,10 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
                         unfoldJobs.push_back(std::async(std::launch::async, [ch](Plotter p) -> void { 
                             p.unfolding(ch);
                         }, h_generalPlot));
+                        //FIXME:
+                        //it seems unfolding is not thread safe! 
+                        //fix that and remove the next line
+                        unfoldJobs.at(unfoldJobs.size()-1).wait();
                     }
                 }
                 //wait for the 3 channels to finish

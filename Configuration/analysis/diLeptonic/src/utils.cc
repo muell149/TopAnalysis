@@ -498,3 +498,10 @@ const std::string CMSSW_BASE()
     std::string result(cmssw_base);
     return result;
 }
+
+const TString DATA_PATH()
+{
+    TString result(CMSSW_BASE());
+    result.Append("/src/TopAnalysis/Configuration/analysis/diLeptonic/data");
+    return result;
+}

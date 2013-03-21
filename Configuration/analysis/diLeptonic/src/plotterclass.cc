@@ -901,8 +901,8 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         exit(11); 
     }
         
-    std::unique_ptr<TCanvas> c { new TCanvas("","") };
-    std::unique_ptr<THStack> stack { new THStack("def", "def") };
+    auto c = make_shared<TCanvas>("","");
+    auto stack = make_shared<THStack>("def", "def");
     TLegend *leg { new TLegend(0.70,0.55,0.98,0.85) };
 
     leg->SetFillStyle(0);
@@ -2350,8 +2350,7 @@ void Plotter::PlotDiffXSec(TString Channel){
     TH1* powheghistBinned = 0;
     TH1* spincorrhistBinned = 0;
     
-    TH1F *Kidoth1_Binned = 0;
-    TFile *KidoFile = 0;
+    TH1 *Kidoth1_Binned = 0;
     
     bool canDrawMCATNLO = true;
     
@@ -2482,12 +2481,15 @@ void Plotter::PlotDiffXSec(TString Channel){
     }
     
     if(drawNLOCurves && drawKidonakis && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
-        KidoFile=TFile::Open("dilepton_kidonakisNNLO.root");
+        TString kidoFile = DATA_PATH() + "/dilepton_kidonakisNNLO.root";
+        //KidoFile=TFile::Open(DATA_PATH() + "dilepton_kidonakisNNLO.root");
         if(name.Contains("ToppT")){
-            Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
+            //Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
+            Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topPt");
         }
         else if(name.Contains("TopRapidity")){
-            Kidoth1_Binned = (TH1F*)KidoFile->Get("topY");
+            //Kidoth1_Binned = (TH1F*)KidoFile->Get("topY");
+            Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topY");
         }
     }
 
@@ -2808,49 +2810,36 @@ void Plotter::PlotDiffXSec(TString Channel){
 // get generator cross section curve for NLO prediction
 TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char *generator){
 
-  TH1::AddDirectory(kFALSE);
-  TString histname;
-  if(strcmp(particle, "TopQuarks")==0||strcmp(particle, "TtBar")==0){
-    histname="total_";
-  }else{
-    histname="visible_";
-  }
-  histname.Append(particle);
-  histname.Append(quantity);
-  histname.Append("_");
-  histname.Append(generator);
-  
-  TH1* hist;
-  
-  TFile* file = 0;
-  if(strcmp(generator, "Powheg")==0){file = TFile::Open("selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root","READ");}
-  else if(strcmp(generator, "MCatNLO")==0){file = TFile::Open("MCatNLO_status3_v20120729.root","READ");}
-  else if(strcmp(generator, "MCNLOup")==0){file = TFile::Open("MCatNLO_Uncert_Up_status3_v20120729.root","READ");}
-  else if(strcmp(generator, "MCNLOdown")==0){file = TFile::Open("MCatNLO_Uncert_Down_status3_v20120729.root","READ");}
-  
-  if (file && !file->IsZombie()) {
-    file->GetObject<TH1>(histname, hist);
-
-    if(!hist){
-      std::cerr << "WARNING in GetNloCurve: input histogram '" << histname << "' could not been opened! Returning dummy!" << endl;
-      hist = new TH1D();
-      return hist;
+    TH1::AddDirectory(kFALSE);
+    TString histname;
+    if (strcmp(particle, "TopQuarks") == 0 || strcmp(particle, "TtBar") == 0) {
+        histname="total_";
+    } else {
+        histname="visible_";
     }
+    histname.Append(particle);
+    histname.Append(quantity);
+    histname.Append("_");
+    histname.Append(generator);
     
-    TH1D* rethist = (TH1D*)hist->Clone();
-    TH1D* weight = (TH1D*)file->Get(TString("total_LeptonsPt_").Append(generator));
     
-    if(!weight){
-      std::cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl;
-    }
-
-    return rethist;
-  }
-  
-  std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << endl;
-  hist = new TH1D();
-  delete file;
-  return hist;
+    TString filename;
+    if(strcmp(generator, "Powheg")==0){filename = "selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root";}
+    else if(strcmp(generator, "MCatNLO")==0){filename = DATA_PATH() + "/MCatNLO_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOup")==0){filename = DATA_PATH() + "/MCatNLO_Uncert_Up_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOdown")==0){filename = DATA_PATH() + "/MCatNLO_Uncert_Down_status3_v20120729.root";}
+    
+    TH1 *hist = fileReader->GetClone<TH1>(filename, histname, true);
+    if (hist) {
+        TH1* weight = fileReader->GetClone<TH1>(filename, TString("total_LeptonsPt_").Append(generator).Data(), true);
+        if(!weight){
+            std::cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl;
+        }
+        return hist;
+    }  
+    std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << endl;
+    hist = new TH1D();
+    return hist; //I'd prefer to return nullptr
 }
 
 TH1* Plotter::GetNloCurve(TString NewName, TString Generator){

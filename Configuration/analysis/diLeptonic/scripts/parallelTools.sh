@@ -2,6 +2,7 @@
 
 SCRIPT=$(readlink -f $0)
 SCRIPTPATH=$(dirname "$SCRIPT")
+BIN="$CMSSW_BASE/src/TopAnalysis/Configuration/analysis/diLeptonic/build"
 
 if [ `hostname | grep "naf.desy.de"` ]; then
     echo "Running on the NAF - so let's submit our jobs, job output will be stored in batch_output/..."
@@ -13,8 +14,8 @@ if [ `hostname | grep "naf.desy.de"` ]; then
     }
 
     isNAF=1
-    LA="qsub -@ $SCRIPTPATH/qsubParams.txt ./load_Analysis"
-    HISTO="qsub -@ $SCRIPTPATH/qsubParams.txt -l h_vmem=6000M ./Histo"
+    LA="qsub -@ $SCRIPTPATH/qsubParams.txt $BIN/load_Analysis"
+    HISTO="qsub -@ $SCRIPTPATH/qsubParams.txt -l h_vmem=6000M $BIN/Histo"
 else
     w() {
         while [ `ps ax | grep -E 'load_Analysis|Histo' | wc -l` -gt 10 ]; do
@@ -23,6 +24,6 @@ else
     }
 
     isNAF=0
-    LA=./load_Analysis
-    HISTO=./Histo 
+    LA=$BIN/load_Analysis
+    HISTO=$BIN/Histo 
 fi

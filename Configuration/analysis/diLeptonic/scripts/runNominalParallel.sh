@@ -9,7 +9,7 @@
 # $LA -f mumu_run2012C -c mumu
 #
 
-source parallelTools.sh
+source $(dirname `readlink -f $0`)/parallelTools.sh
 
 for c in ee emu mumu; do
     $LA -f dy -d 11 -c $c &

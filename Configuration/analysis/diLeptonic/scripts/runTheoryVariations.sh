@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source parallelTools.sh
+source $(dirname `readlink -f $0`)/parallelTools.sh
 
 #start the longest job first
 for syst in FullLeptMadgraphWithSpinCorrelation SemiLeptMadgraphWithSpinCorrelation HadronicMadgraphWithSpinCorrelation; do

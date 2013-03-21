@@ -22,11 +22,11 @@ runSpecificVariation() {
     # calculate inclusive xsection
     if [ -d "Plots_temp/$variation" ] ; then mv "Plots_temp/${variation}" Plots ; fi
     mkdir -p Plots/combined
-    ./Histo -t cp -p XSec -s Nominal
+    build/Histo -t cp -p XSec -s Nominal
     # now calculate differential distributions
     for plot in `awk '{print $1}' HistoList | grep Hyp`; do
     #for plot in HypTTBarMass; do
-        ./Histo -t unfold -p +$plot -s Nominal &
+        build/Histo -t unfold -p +$plot -s Nominal &
     done
     wait
     mv -f Plots "Plots_temp/${variation}"
@@ -34,7 +34,7 @@ runSpecificVariation() {
 }
 
 
-./mk_HistoFileList.sh
+scripts/mk_HistoFileList.sh
 
 for i in ee emu mumu combined; do
     grep -v ttbarsignalplustau.root < FileLists/HistoFileList_Nominal_$i.txt >| HistoFileList_Nominal_$i.txt 
@@ -48,7 +48,7 @@ for no in `seq 1 22`; do
     done
 done
 
-./mk_HistoFileList.sh
+scripts/mk_HistoFileList.sh
 
 echo "Done"
 echo "Don't forget to switch doSystematics back to true and recompile"

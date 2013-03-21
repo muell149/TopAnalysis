@@ -13,8 +13,8 @@ for slope in 0.002 0.004 0.006 0.008 -0.002 -0.004 -0.006 -0.008; do
        cat closure_${ch}mc.txt >> FileLists/HistoFileList_Nominal_${ch}.txt
    done
 
-   ./Histo -t cp -p +hyptoppt
-   ./Histo -t unfold -p +hyptoppt
+   build/Histo -t cp -p +hyptoppt
+   build/Histo -t unfold -p +hyptoppt
    grep -v Bin < Plots/combined/ToppTResultsLaTeXAfter.txt | awk '{print $7}' > closure_result_pt_${slope}.txt
 
    mv Plots PlotsPt$slope
@@ -44,8 +44,8 @@ for slope in 0.080 0.160 0.240 0.320 -0.080 -0.160 -0.240 -0.320; do
         cat closure_${ch}mc.txt >> FileLists/HistoFileList_Nominal_${ch}.txt
     done
 
-    ./Histo -t cp -p +hyptoprapidity
-    ./Histo -t unfold -p +hyptoprapidity
+    build/Histo -t cp -p +hyptoprapidity
+    build/Histo -t unfold -p +hyptoprapidity
     grep -v Bin < Plots/combined/TopRapidityResultsLaTeXAfter.txt | awk '{print $7}' > closure_result_y_${slope}.txt
     
     mv Plots PlotsRap$slope
