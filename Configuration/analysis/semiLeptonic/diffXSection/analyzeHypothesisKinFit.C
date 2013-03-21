@@ -9,7 +9,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="")
 {
   // ============================
   //  Set ROOT Style
@@ -274,9 +274,12 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   }
   // additional (control plot folders): NoWeight, OnlyPUWeight, NoBtagSFWeight;
 
+  // add folder extensions for xSec from different selection step if renamed default folder is used
+  if(addSel!="") sysInputFolderExtension+=addSel;
+
   // choose correct input folder for b-quark or b-jet
   TString recPartonBpath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
-  if(sysInputFolderExtension==""&&addSel!="") recPartonBpath+=addSel;
+  //if(addSel!="") recPartonBpath+=addSel;
   TString recHadronBpath= "analyzeTopRecoKinematicsBjets" +sysInputFolderExtension;
   TString genPartonBpath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
   TString genHadronBpath= "analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
@@ -287,7 +290,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 
   // choose correct input folder for status 1 or 3 lepton
   TString recPartonLeppath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
-  if(sysInputFolderExtension==""&&addSel!="") recPartonLeppath+=addSel;
+  //if(addSel!="") recPartonLeppath+=addSel;
   TString recHadronLeppath= "analyzeTopRecoKinematicsLepton" +sysInputFolderExtension;
   TString genPartonLeppath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
   TString genHadronLeppath= "analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sysInputGenFolderExtension;
@@ -295,10 +298,6 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   TString genLeppath  = ( (!extrapolate&&hadron) ? genHadronLeppath : genPartonLeppath );
   TString recLeplabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
   TString genLeplabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
-
-  // add folder extensions for xSec from different selection step if default folder is used
-  // do it after bjet/lepton path to use this only for leptons
-  if(addSel!="") sysInputFolderExtension+=addSel;
 
   //  ---
   //     choose plots
@@ -970,7 +969,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   std::vector<TString> vecRedundantPartOfNameInData;
   vecRedundantPartOfNameInData.push_back(sysInputFolderExtension);
   vecRedundantPartOfNameInData[0].ReplaceAll(addSel, "");
-  if(decayChannel!="combined") getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData);
+  if(decayChannel!="combined") getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1, decayChannel, &vecRedundantPartOfNameInData, false, addSelData);
   else{
     getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData, false, addSelData);
     getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose-1, "muon"    , &vecRedundantPartOfNameInData, false, addSelData);
@@ -993,6 +992,11 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       TString pathL2=recPartonLeppath;
       // loop samples
       for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
+	// get input path/folder
+	path=recPartonBpath;
+	path2=recPartonBpath;
+	pathL=recPartonLeppath;
+	pathL2=recPartonLeppath;
 	if(sample==kData){
 	  if (vecRedundantPartOfNameInData.size() != 0){
 	    std::vector<TString>::iterator iter;
@@ -1001,6 +1005,10 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	      pathL.ReplaceAll((*iter), "");
 	    }
 	  }
+	}
+	else{
+	   path.ReplaceAll (addSelData, ""); 
+	   pathL.ReplaceAll(addSelData, "");
 	}
 	if(verbose>2){
 	  std::cout << std::endl << sampleLabel(sample, decayChannel) << std::endl;
@@ -1082,6 +1090,10 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       TString pathL2=recPartonLeppath;
       // loop samples
       for(unsigned int sample=kBkg; sample<=kSAToptW; ++sample){
+      path=recPartonBpath;
+      path2=recPartonBpath;
+      pathL=recPartonLeppath;
+      pathL2=recPartonLeppath;
 	if(sample==kData){
 	  if (vecRedundantPartOfNameInData.size() != 0){
 	    std::vector<TString>::iterator iter;
@@ -1091,8 +1103,12 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	    }
 	  }
 	}
+	else{
+	  path.ReplaceAll (addSelData, ""); 
+	  pathL.ReplaceAll(addSelData, "");
+	}
 	if(verbose>2){
-	  std::cout << std::endl << sampleLabel(sample, decayChannel) << std::endl;
+	  std::cout << std::endl << sampleLabel(sample,decayChannel) << std::endl;
 	  std::cout << path+"/bqPt"    << " -> " << path2+"/bqPt"    << std::endl;
 	  std::cout << path+"/bqEta"   << " -> " << path2+"/bqEta"   << std::endl;
 	  std::cout << pathL+"/lepPt"  << " -> " << pathL2+"/lepPt"  << std::endl;
@@ -1109,7 +1125,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	TH1* targetMuPlotLepEta=0;
 	// check if file exists
 	if(filesMu_[sample]&&filesEl_[sample]){
-	  //std::cout << "file for " << sampleLabel(sample, decayChannel) << " there" << std::endl;
+	  if(verbose>2) std::cout << "-> file for exists" << std::endl;
 	  // get plot
 	  filesEl_[sample]->GetObject(path+"/bqPt"   , targetPlotBqPt  );
 	  filesEl_[sample]->GetObject(path+"/bqEta"  , targetPlotBqEta );
@@ -1390,28 +1406,28 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
   int kAllMC=kSAToptW+1;
   for(unsigned int var=0; var<xSecVariables_.size(); ++var){
     TString variable=xSecVariables_[var];
-    if(verbose>1) std::cout << "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << std::endl;
-    if(!plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kBkg)) std::cout << " ERROR - Variable does not exist: " << variable << std::endl;
+    TString varname="analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable;
+    if(!plotExists(histo_, varname, kBkg)) std::cout << " ERROR - Variable " << varname << " can not be found for MC BG, check name, also for separate loading for lep/bq quantities in hadron level PS" << std::endl;
     // ttbar BG yield for signal fraction
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone(variable);
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg]=(TH1F*)histo_[varname][kBkg]->Clone(variable);
     // create combined BG reco plot
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kBkg]->Clone(variable);
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]=(TH1F*)histo_[varname][kBkg]->Clone(variable);
     for(int bgsample=kZjets; bgsample<=kDiBos; ++bgsample){
-      if(!histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]){
+      if(!histo_[varname][bgsample]){
 	  std::cout << "missing plot: analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable << " for sample " << sampleLabel(bgsample,decayChannel) << std::endl;
 	exit(1);
       }
       if(verbose>1) std::cout << sampleLabel(bgsample,decayChannel) << std::endl;
-      histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][bgsample]->Clone(variable));
+      histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC]->Add((TH1F*)histo_[varname][bgsample]->Clone(variable));
     }
     // data event yield
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable);
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData]=(TH1F*)histo_[varname][kData]->Clone(variable);
     // signal reco plot
-    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone(variable);
+    histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_[varname][kSig]->Clone(variable);
     // signal gen plot
     histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone(variable);
     // response matrix plot
-    histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable+"_"][kSig]->Clone(variable);
+    histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_[varname+"_"][kSig]->Clone(variable);
   }
   
   // ============================
@@ -1483,16 +1499,6 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
       // divide by gen plot
       histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone()));
-//       if(sys==sysHadronisationUp){
-// 	double SF=1;
-// 	for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
-// 	  histo_[efficiency][kSig]->SetBinContent(bin histo_[efficiency][kSig]->GetBinContent(bin)*SF);
-// 	}
-//       }
-      // std::cout << "gen(bin1): "  <<  histo_["analyzeTopPartonLevelKinematics/"+variable  ][kSig]->GetBinContent(1) << std::endl;
-      // std::cout << "reco(bin1): " <<  histo_["analyzeTopRecoKinematicsKinFit/"+variable][kSig]->GetBinContent(1) << std::endl;
-      // std::cout << "eff(bin1): "  <<  histo_[efficiency][kSig]->GetBinContent(1) << std::endl;
-
       // add plot to list of plots
       plotList_.push_back(efficiency);
       // add axis configuration
