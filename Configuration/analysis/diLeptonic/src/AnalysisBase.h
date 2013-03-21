@@ -342,7 +342,10 @@ protected:
     inline Int_t GetTopDecayModeEntry(Long64_t entry) { return b_TopDecayMode->GetEntry(entry); }
     inline Int_t GetPDFEntry(Long64_t entry) { return b_weightPDF->GetEntry(entry); }
     
-    ClassDef ( AnalysisBase, 3 );
+    //no idea why this is needed! But Process() isn't called otherwise! Argh!
+    virtual int Version() const { return 3; }
+    
+    ClassDef ( AnalysisBase, 0 );
 
 };
 

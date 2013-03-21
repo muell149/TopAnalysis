@@ -172,7 +172,7 @@ public:
 private:
     double calculateClosureTestWeight();
     
-    ClassDef(TopAnalysis, 4);
+    ClassDef(TopAnalysis, 0);
 };
 
 #endif
