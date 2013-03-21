@@ -108,4 +108,7 @@ const LV TLVtoLV(const TLorentzVector& lv);
 class THStack;
 TH1* SummedStackHisto(const THStack *stack);
 
+double Median(TH1 * h1);
+const std::string CMSSW_BASE();
+
 #endif

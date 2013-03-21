@@ -9,9 +9,11 @@
 #include <iostream>
 #include <set>
 
+#include <future>
+
 #include "plotterclass.h"
 #include "HistoListReader.h"
-#include "CommandLineParameters.hh"
+#include "CommandLineParameters.h"
 
 using namespace std;
 
@@ -86,7 +88,26 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
             }
         }
         if (doUnfold) {
-            if (!doDiffXSPlotOnly) h_generalPlot.unfolding();
+            if (!doDiffXSPlotOnly) {
+                //unfold all channels except combined in parallel
+                std::vector<std::future<void>> unfoldJobs;
+                for (auto channel:channels) {
+                    if (channel != "combined") {
+                        TString ch(channel.c_str());
+                        unfoldJobs.push_back(std::async(std::launch::async, [ch](Plotter p) -> void { 
+                            p.unfolding(ch);
+                        }, h_generalPlot));
+                    }
+                }
+                //wait for the 3 channels to finish
+                for (auto &i : unfoldJobs) {
+                    i.get();
+                }
+                //only now do combined (if requested)
+                for (auto channel:channels) {
+                    if (channel == "combined") h_generalPlot.unfolding(channel);
+                }
+            }
             for (auto channel:channels){
                 h_generalPlot.PlotDiffXSec(channel);
             }

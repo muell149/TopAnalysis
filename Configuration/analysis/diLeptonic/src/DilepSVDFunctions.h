@@ -2,7 +2,7 @@
 #define DILEPSVDFUNCTIONS_H
 
 // Include parent class
-#include "../unfolding/TopSVDFunctions.h"
+#include "../../unfolding/TopSVDFunctions.h"
 
 
 // Namespaces

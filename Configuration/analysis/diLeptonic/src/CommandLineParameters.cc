@@ -1,4 +1,4 @@
-#include "CommandLineParameters.hh"
+#include "CommandLineParameters.h"
 
 #include <fstream>
 CLParameterBase::CLParameterBase( const std::string &identifier,

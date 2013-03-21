@@ -60,7 +60,7 @@ void Plotter::SetOutpath(TString path)
 }
 
 
-void Plotter::unfolding()
+void Plotter::unfolding(TString channel)
 {
 //    vector<TString> vec_systematic {"JES_", "PU_"};
 //    vector<double> vec_flat_value {0, 0};
@@ -70,61 +70,57 @@ void Plotter::unfolding()
     //Right now BTAG = 0.5% = Sqrt(BTAG_ETA ** 2 + BTAG_PT ** 2 + BTAG_LJET_ETA ** 2 + BTAG_LJET_PT ** 2)
     //assumed  BTAG_ETA = BTAG_PT = BTAG_LJET_ETA = BTAG_LJET_PT = 0.25% so a total error of 0.5% comes up in BTag
     
-    vector<TString> vec_channel {"ee","mumu","emu","combined"};
-
     if(vec_systematic.size() != vec_flat_value.size()){
         cout<<"WARNING (in unfolding)!!!\n You are using 2 different size vectors: 'vec_systematic' and 'vec_flat_value'.\n Fix this and rerun again"<<endl;
         return;
     }
 
-    for(int chan = 0; chan < (int)vec_channel.size(); chan++){ //loop over channels
+
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << "Starting Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "':" << endl;
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
     
-        cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-        cout << "Starting Calculation of Diff. X Section for '" << name << "' in Channel '" << vec_channel.at(chan) << "':" << endl;
-        cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-        
-        CalcDiffXSec(vec_channel.at(chan),"Nominal");
-        
-        cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-        cout << "Finished Calculation of Diff. X Section for '" << name << "' in Channel '" << vec_channel.at(chan) << "':" << endl;
-        cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    CalcDiffXSec(channel,"Nominal");
+    
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    cout << "Finished Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "':" << endl;
+    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
 
-        //############### Syst ################
-        if (doSystematics) { 
-            for(int sys = 0; sys < (int)vec_systematic.size(); sys++){ //loop over systematics
-                cout << endl;
-                cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-                cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << vec_channel.at(chan) << "':" << endl;
-                cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    //############### Syst ################
+    if (doSystematics) { 
+        for(int sys = 0; sys < (int)vec_systematic.size(); sys++){ //loop over systematics
+            cout << endl;
+            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+            cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
+            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
 
-                if ( !vec_systematic.at(sys).BeginsWith("HAD_") ) {
-                     CalcDiffSystematics(vec_channel.at(chan), 
-                                        vec_systematic.at(sys), 
-                                        vec_systematic.at(sys)+"UP",
-                                        vec_systematic.at(sys)+"DOWN",
-                                        vec_flat_value.at(sys));
-                } else {
-                    if(vec_channel.at(chan) != "combined"){
-		        write(vec_channel.at(chan),"POWHEG");//make sure the preunfolded files exist
-		        write(vec_channel.at(chan),"MCATNLO");
-                        CalcDiffXSec(vec_channel.at(chan), "POWHEG");
-                        CalcDiffXSec(vec_channel.at(chan), "MCATNLO");
-                        GetDiffToNominal(vec_channel.at(chan), TString("POWHEG"), name);
-                        GetDiffToNominal(vec_channel.at(chan), TString("MCATNLO"), name);
-                        CalcUpDownDifference(vec_channel.at(chan), "POWHEG", "MCATNLO", name);
-                    }
-                    else if (vec_channel.at(chan) == "combined"){
-                        CalcDiffSystematics(vec_channel.at(chan), vec_systematic.at(sys), vec_systematic.at(sys), vec_systematic.at(sys),vec_flat_value.at(sys));
-                    }
+            if ( !vec_systematic.at(sys).BeginsWith("HAD_") ) {
+                 CalcDiffSystematics(channel, 
+                                    vec_systematic.at(sys), 
+                                    vec_systematic.at(sys)+"UP",
+                                    vec_systematic.at(sys)+"DOWN",
+                                    vec_flat_value.at(sys));
+            } else {
+                if(channel != "combined"){
+    	        write(channel,"POWHEG");//make sure the preunfolded files exist
+    	        write(channel,"MCATNLO");
+                    CalcDiffXSec(channel, "POWHEG");
+                    CalcDiffXSec(channel, "MCATNLO");
+                    GetDiffToNominal(channel, TString("POWHEG"), name);
+                    GetDiffToNominal(channel, TString("MCATNLO"), name);
+                    CalcUpDownDifference(channel, "POWHEG", "MCATNLO", name);
                 }
+                else if (channel == "combined"){
+                    CalcDiffSystematics(channel, vec_systematic.at(sys), vec_systematic.at(sys), vec_systematic.at(sys),vec_flat_value.at(sys));
+                }
+            }
 
-                cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-                cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << vec_channel.at(chan) << endl;
-                cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-                cout << endl;
-            }//systematic loop
-        }
-    }//channel loop
+            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+            cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << endl;
+            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+            cout << endl;
+        }//systematic loop
+    }
 
 }
 

@@ -21,7 +21,7 @@ public:
     void   setDataSet(TString, TString);
     bool   fillHisto();
     void   setStyle(TH1*, unsigned int, bool = false);
-    void   unfolding();
+    void   unfolding(TString channel);
     void   preunfolding(TString Channel="", TString Systematic="");
     
     ///add addThis to addToThis (and delete it afterwards) - or assign it it to addToThis if addToThis is nullptr.

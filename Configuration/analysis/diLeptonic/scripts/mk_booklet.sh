@@ -114,45 +114,50 @@ mv *pdf $PDFDIR
 cd $PDFDIR
 
 #create the header
-echo "\documentclass[12pt, a4paper, titlepage]{article}" >> $BOOKLETSRC
-echo "\usepackage[utf8]{inputenc}" >> $BOOKLETSRC
-echo "\usepackage[T1]{fontenc}" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-echo "%all the graphics will be contained in here" >> $BOOKLETSRC
-echo "\usepackage{graphicx, float, pdflscape, caption, subfigure, fullpage, fancyhdr}" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-echo "%setting the plot environments" >> $BOOKLETSRC
-echo "%work in progress ..." >> $BOOKLETSRC
-echo "%\newenvironment{pictures}{" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-echo "%subfigure manual suggested this option ..." >> $BOOKLETSRC
-echo "%\subfiglabelskip=Opt" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-echo "%we create the header for the document ... it carries the filename ..." >> $BOOKLETSRC
-echo "\pagestyle{fancy} " >> $BOOKLETSRC
-echo "\lhead{\texttt{"$BSN"}}" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-echo "\begin{document}" >> $BOOKLETSRC
-echo "" >> $BOOKLETSRC
-echo "%generic titlepage creation" >> $BOOKLETSRC
-echo "\begin{titlepage}" >> $BOOKLETSRC
-echo "" >> $BOOKLETSRC
-echo "\begin{center}" >> $BOOKLETSRC
-echo "\vspace{6cm}" >> $BOOKLETSRC
-echo "  \LARGE{Histogram plots -- current}\\\\" >> $BOOKLETSRC
-echo "  \vspace{5cm}" >> $BOOKLETSRC
-echo "  \large{Booklet filename -- "$BSN"}" >> $BOOKLETSRC
-echo "\end{center}" >> $BOOKLETSRC
-echo "\vfill" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-echo "\small{Date: \today}" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-echo "\end{titlepage}" >> $BOOKLETSRC
-echo " " >> $BOOKLETSRC
-#echo "\section{Plots}" >> $BOOKLETSRC
-echo "\pagebreak" >> $BOOKLETSRC
+echo <<LATEX >> $BOOKLETSRC
+\documentclass[12pt, a4paper, titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+ 
+%all the graphics will be contained in here
+\usepackage{graphicx, float, pdflscape, caption, subfigure, fullpage, fancyhdr}
+ 
+%setting the plot environments
+%work in progress ...
+%\newenvironment{pictures}{
+ 
+%subfigure manual suggested this option ...
+%\subfiglabelskip=Opt
+ 
+%we create the header for the document ... it carries the filename ...
+\pagestyle{fancy} 
+\lhead{\texttt{"$BSN"}}
+ 
+\begin{document}
+
+%generic titlepage creation
+\begin{titlepage}
+
+\begin{center}
+\vspace{6cm}
+  \LARGE{Histogram plots -- current}\\\\
+  \vspace{5cm}
+  \large{Booklet filename -- "$BSN"}
+\end{center}
+\vfill
+ 
+\small{Date: \today}
+ 
+\end{titlepage}
+ 
+\pagebreak
+
+
+LATEX
 
 echo "\begin{figure}" >> $BOOKLETSRC
+
+
 
 #actual plots start here 
 for PLOT_IN_PDF in $( cat $INFILE ); do

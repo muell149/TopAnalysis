@@ -468,3 +468,33 @@ TH1* SummedStackHisto(const THStack *stack)
     }
     return result;
 }
+
+/** Calculate the median of a histogram
+ * 
+ */
+double Median(TH1 * h1)
+{ 
+   int n = h1->GetXaxis()->GetNbins();
+   std::vector<double>  x(n);
+   h1->GetXaxis()->GetCenter( &x[0] );
+   TH1D* h1D = dynamic_cast<TH1D*>(h1);
+   if (!h1D) { std::cerr << "Median needs a TH1D!\n"; exit(7); }
+   const double * y = h1D->GetArray(); 
+   // exclude underflow/overflows from bin content array y
+   return TMath::Median(n, &x[0], &y[1]); 
+}
+
+/// return CMSSW_BASE environment variable as string, with error checking
+const std::string CMSSW_BASE()
+{
+    const char *cmssw_base = getenv("CMSSW_BASE");
+    if (!cmssw_base) {
+        std::cerr << "Error! Environmental variable CMSSW_BASE not set!\n"
+                  << "Please run cmsenv first.\n"
+                  << "When running without CMSSW, you still need this variable so that the\n"
+                  << "certain files can be found.\n";
+        std::exit(1);            
+    }
+    std::string result(cmssw_base);
+    return result;
+}
