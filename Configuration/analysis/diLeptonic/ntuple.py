@@ -148,6 +148,8 @@ else:
             process.GlobalTag.globaltag = cms.string('FT53_V10A_AN4::All')
         elif 'run2012C_PromptReco.root' in options.outputFile:
             process.GlobalTag.globaltag = cms.string('GR_P_V42_AN4::All')
+        elif 'run2012C_EcalRecover.root' in options.outputFile:
+            process.GlobalTag.globaltag = cms.string('FT_P_V42C_AN4::All')
         elif 'run2012D_PromptReco.root' in options.outputFile:
             process.GlobalTag.globaltag = cms.string('GR_P_V42_AN4::All')
         else:
