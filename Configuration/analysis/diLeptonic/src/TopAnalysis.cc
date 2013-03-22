@@ -35,6 +35,27 @@ constexpr double JETPTCUT = 30;
 constexpr double JETETACUT = 2.4;
 
 
+
+
+void TopAnalysis::Begin(TTree* )
+{
+    AnalysisBase::Begin(0);
+    
+    bEff = 0;
+    
+    prepareBtagSF();
+    prepareKinRecoSF();
+}
+
+
+void TopAnalysis::Terminate()
+{
+    AnalysisBase::Terminate();
+}
+
+
+
+
 /** Initialise all histograms used in the analysis
  * 
  * @param TTree parameter is not used!

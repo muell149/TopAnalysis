@@ -278,8 +278,8 @@ public:
     void SetPDF(int pdf_no);
     void orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2);
     virtual void SetClosureTest(TString, double) {};
-    virtual void Begin ( TTree* );
-    virtual void Init ( TTree *tree );
+    virtual void Begin (TTree*);
+    virtual void Init (TTree *tree);
     virtual void SlaveTerminate();
     virtual void Terminate();
 
@@ -326,13 +326,17 @@ protected:
     
     // Methods for trigger and lepton SF
     void prepareTriggerSF();
-    void prepareBtagSF();
     void prepareLeptonIDSF();
-    void prepareKinRecoSF();
-    void prepareJER_JES();
     double get2DSF(TH2* histo, double x, double y);
     
+    // Methods for KinReco SF
+    void prepareKinRecoSF();
+    
+    // Methods for JER,JES
+    void prepareJER_JES();
+    
     // Methods for b-tag SF
+    void prepareBtagSF();
     double BJetSF ( double, double );
     double CJetSF ( double, double );
     double LJetSF ( double , double , TString );

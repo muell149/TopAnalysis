@@ -164,8 +164,10 @@ class TopAnalysis : public AnalysisBase
     
 public:
     
+    virtual void Begin(TTree*);
     virtual void SlaveBegin(TTree*);
     virtual void SlaveTerminate();
+    virtual void Terminate();
     virtual Bool_t Process(Long64_t entry);
     virtual void SetClosureTest(TString closure, double slope);
     

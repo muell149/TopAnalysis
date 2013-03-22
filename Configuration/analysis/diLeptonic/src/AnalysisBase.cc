@@ -19,17 +19,6 @@
 #include "utils.h"
 #include "KinReco.h"
 
-///top production xsec in pb
-constexpr double TOPXSEC = 234;
-/// Luminosity in 1/fb
-constexpr double LUMI = 12.21; 
-
-///do we want to run the sync excercise?
-constexpr bool RUNSYNC = false;
-
-
-constexpr double JETPTCUT = 30;
-constexpr double JETETACUT = 2.4;
 
 
 /** Prepare some variables before going to the event loop
@@ -43,14 +32,10 @@ constexpr double JETETACUT = 2.4;
 void AnalysisBase::Begin ( TTree * )
 {
     EventCounter_ = 0;
-    bEff = 0;
     
     prepareTriggerSF();
     prepareLeptonIDSF();
-    prepareBtagSF();
-    prepareKinRecoSF();
     prepareJER_JES();
-
 }
 
 
@@ -73,7 +58,7 @@ void AnalysisBase::orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const L
 }
 
 
-///apply pT and eta cuts on our jets
+/// apply pT and eta cuts on our jets
 void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
     for (int i = jets_->size() - 1; i >= 0; --i) {
         if (jets_->at(i).pt() < ptcut || std::abs(jets_->at(i).eta()) > etacut) {
@@ -252,7 +237,8 @@ void AnalysisBase::Terminate()
     }
     fOutput->SetOwner();
     fOutput->Clear();
-    delete unc_; unc_ = nullptr;
+    delete unc_;
+    unc_ = nullptr;
 }
 
 double AnalysisBase::BJetSF( double pt, double eta )
@@ -414,7 +400,7 @@ void AnalysisBase::SetSamplename(TString samplename, TString systematic_from_fil
 {
     this->samplename_ = samplename;
     isTtbarPlusTauSample_ = samplename.BeginsWith("ttbar") && !samplename.Contains("bg");
-    correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !samplename.Contains("higgs") && !systematic_from_file.Contains("SPIN") &&
+    correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !systematic_from_file.Contains("SPIN") &&
                         !systematic_from_file.Contains("POWHEG") && !systematic_from_file.Contains("MCATNLO");
 }
 
