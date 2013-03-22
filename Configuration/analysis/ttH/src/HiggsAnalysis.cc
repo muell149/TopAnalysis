@@ -16,23 +16,9 @@ constexpr double BtagWP = 0.244;
 
 
 
-HiggsAnalysis::HiggsAnalysis(TTree*)
-{
-}
-
-
-
-HiggsAnalysis::~HiggsAnalysis(){}
-
-
-
-
-void
-HiggsAnalysis::SlaveBegin(TTree *){
+HiggsAnalysis::HiggsAnalysis(TTree*){
     
-    AnalysisBase::SlaveBegin(0);
-    
-    // FIXME: shouldn't the jetCategories_(overview_) declaration be in the constructor?
+    // Define categories for analysis
     jetCategories_.clear();
     jetCategories_.addCategory(2,0);
     jetCategories_.addCategory(2,1);
@@ -45,8 +31,9 @@ HiggsAnalysis::SlaveBegin(TTree *){
     jetCategories_.addCategory(4,1,true);
     jetCategories_.addCategory(4,2,true);
     jetCategories_.addCategory(4,3,true,true);
-    const int numberOfCategories(jetCategories_.numberOfCategories());
+    std::cout<<"\nNumber of analysis categories: "<<jetCategories_.numberOfCategories()<<"\n";
     
+    // Define categories for overview
     jetCategories_overview_.clear();
     jetCategories_overview_.addCategory(2,0);
     jetCategories_overview_.addCategory(2,1);
@@ -66,11 +53,51 @@ HiggsAnalysis::SlaveBegin(TTree *){
     jetCategories_overview_.addCategory(5,3,true);
     jetCategories_overview_.addCategory(5,4,true);
     jetCategories_overview_.addCategory(5,5,true,true);
-    const int numberOfCategories_overview(jetCategories_overview_.numberOfCategories());
-    //std::cout<<"\n\tNumber of categories: "<<numberOfCategories_overview<<"\n\n";
+    std::cout<<"Number of overview categories: "<<jetCategories_overview_.numberOfCategories()<<"\n\n";
+}
+
+
+
+HiggsAnalysis::~HiggsAnalysis(){}
+
+
+
+void
+HiggsAnalysis::Begin(TTree*){
+    AnalysisBase::Begin(0);
+}
+
+
+
+void
+HiggsAnalysis::Terminate(){
+    AnalysisBase::Terminate();
+}
+
+
+
+void
+HiggsAnalysis::SlaveBegin(TTree *){
     
+    // Defaults from AnalysisBase
+    AnalysisBase::SlaveBegin(0);
+    
+    
+    // Analysis categories
+    const int numberOfCategories(jetCategories_.numberOfCategories());
     
     h_jetCategories_step8 = store(new TH1D("JetCategories_step8","Jet categories;# jets/b-jets; # events", numberOfCategories, 0, numberOfCategories));
+    
+    const std::vector<TString> v_binLabel(jetCategories_.binLabels());
+    for(std::vector<TString>::const_iterator i_binLabel = v_binLabel.begin(); i_binLabel != v_binLabel.end(); ++i_binLabel){
+        const TString binLabel(*i_binLabel);
+        int position = std::distance(v_binLabel.begin(), i_binLabel) +1;
+        h_jetCategories_step8->GetXaxis()->SetBinLabel(position, binLabel);
+    }
+    
+    
+    // Overview categories
+    const int numberOfCategories_overview(jetCategories_overview_.numberOfCategories());
     
     h_jetCategories_overview_step0 = store(new TH1D("JetCategories_overview_step0","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
     h_jetCategories_overview_step1 = store(new TH1D("JetCategories_overview_step1","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
@@ -81,13 +108,6 @@ HiggsAnalysis::SlaveBegin(TTree *){
     h_jetCategories_overview_step6 = store(new TH1D("JetCategories_overview_step6","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
     h_jetCategories_overview_step7 = store(new TH1D("JetCategories_overview_step7","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
     h_jetCategories_overview_step8 = store(new TH1D("JetCategories_overview_step8","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    
-    const std::vector<TString> v_binLabel(jetCategories_.binLabels());
-    for(std::vector<TString>::const_iterator i_binLabel = v_binLabel.begin(); i_binLabel != v_binLabel.end(); ++i_binLabel){
-        const TString binLabel(*i_binLabel);
-        int position = std::distance(v_binLabel.begin(), i_binLabel) +1;
-        h_jetCategories_step8->GetXaxis()->SetBinLabel(position, binLabel);
-    }
     
     const std::vector<TString> v_binLabel_overview(jetCategories_overview_.binLabels());
     for(std::vector<TString>::const_iterator i_binLabel = v_binLabel_overview.begin(); i_binLabel != v_binLabel_overview.end(); ++i_binLabel){
@@ -107,17 +127,16 @@ HiggsAnalysis::SlaveBegin(TTree *){
     
     
     // Histograms needed for cutflow tables
-    // FIXME: why not using histogram with single bin ???
-    h_events_step0a = store(new TH1D("events_step0a","event count (no weight)",10,0,10));
-    h_events_step0b = store(new TH1D("events_step0b","event count (no weight)",10,0,10));
-    h_events_step1 = store(new TH1D("events_step1","event count (no weight)",10,0,10));
-    h_events_step2 = store(new TH1D("events_step2","event count (no weight)",10,0,10));
-    h_events_step3 = store(new TH1D("events_step3","event count (no weight)",10,0,10));
-    h_events_step4 = store(new TH1D("events_step4","event count at after 2lepton",10,0,10));
-    h_events_step5 = store(new TH1D("events_step5","event count at after Zcut",10,0,10));
-    h_events_step6 = store(new TH1D("events_step6","event count at after 2jets",10,0,10));
-    h_events_step7 = store(new TH1D("events_step7","event count at after MET",10,0,10));
-    h_events_step8 = store(new TH1D("events_step8","event count at after 1btag",10,0,10));
+    h_events_step0a = store(new TH1D("events_step0a","event count (no weight)",8,0,8));
+    h_events_step0b = store(new TH1D("events_step0b","event count (no weight)",8,0,8));
+    h_events_step1 = store(new TH1D("events_step1","event count (no weight)",8,0,8));
+    h_events_step2 = store(new TH1D("events_step2","event count (no weight)",8,0,8));
+    h_events_step3 = store(new TH1D("events_step3","event count (no weight)",8,0,8));
+    h_events_step4 = store(new TH1D("events_step4","event count at after 2lepton",8,0,8));
+    h_events_step5 = store(new TH1D("events_step5","event count at after Zcut",8,0,8));
+    h_events_step6 = store(new TH1D("events_step6","event count at after 2jets",8,0,8));
+    h_events_step7 = store(new TH1D("events_step7","event count at after MET",8,0,8));
+    h_events_step8 = store(new TH1D("events_step8","event count at after 1btag",8,0,8));
     h_events_step0a->Sumw2();
     h_events_step0b->Sumw2();
     h_events_step1->Sumw2();
@@ -129,7 +148,8 @@ HiggsAnalysis::SlaveBegin(TTree *){
     h_events_step7->Sumw2();
     h_events_step8->Sumw2();
     
-    h_events_step9 = store(new TH1D("events_step9","event count for specific bin",10,0,10));
+    // FIXME: make event counts dependent on bins (in addition to steps)
+    h_events_step9 = store(new TH1D("events_step9","event count for specific bin",8,0,8));
     h_events_step9->Sumw2();
     
     
@@ -142,20 +162,16 @@ HiggsAnalysis::SlaveBegin(TTree *){
     dyScalingHistograms_.addStep("8");
     
     
-    // FIXME: remove ___XX after Analysis.h is split from DileptonAnalysis.h
-    h_jetpT___XX = store(new TH1D ( "jetpT", "jet pT", 40, 0, 400 ));
-    
-    
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetpT___XX, false);
-    
-    
+    // Control plots
+    h_jetpT = store(new TH1D ( "jetpT", "jet pT", 40, 0, 400 ));
     h_jetChargeGlobalPtWeighted = store(new TH1D("jetChargeGlobalPtWeighted", "jetChargeGlobalPtWeighted", 110, -1.1, 1.1));
     h_jetChargeRelativePtWeighted = store(new TH1D("jetChargeRelativePtWeighted", "jetChargeRelativePtWeighted", 110, -1.1, 1.1));
     
+    
+    // Binned control plots
+    CreateBinnedControlPlots(h_jetCategories_step8, h_jetpT, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted, false);
-    
-    // FIXME: nothing yet about b-tagging scale factors, ever needed ?
 }
 
 
@@ -492,7 +508,7 @@ HiggsAnalysis::Process(Long64_t entry){
     h_jetCategories_step8->Fill(jetCategories_.categoryId(jets_->size(),numberOfBJets), weight);
     h_jetCategories_overview_step8->Fill(jetCategories_overview_.categoryId(jets_->size(),numberOfBJets), weight);
     for(unsigned int iJet = 0; iJet < jets_->size(); ++iJet){
-        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetpT___XX, jets_->at(iJet).Pt(), weight);
+        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetpT, jets_->at(iJet).Pt(), weight);
     }
     
     

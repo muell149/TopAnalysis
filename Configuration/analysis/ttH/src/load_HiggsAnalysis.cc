@@ -128,10 +128,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             }
             if (!outputfilename.Contains(channel + "_")) outputfilename.Prepend(channel + "_");
             //outputfile is now channel_filename.root
-            
-            std::cout<<"Output name 1: "<<outputfilename<<"\n";
             if(isHiggsInclusive)outputfilename.ReplaceAll("inclusive", "inclusiveOther");
-            std::cout<<"Output name 2: "<<outputfilename<<"\n";
             
             selector->SetBTagFile(btagFile);
             selector->SetChannel(channel);
@@ -170,8 +167,6 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             chain.Add(filename);
             // chain.SetProof(); //will work from 5.34 onwards
             
-            std::cout<<"\nFilename: "<<filename<<" , "<<chain.Sizeof()<<"\n\n";
-            
             if (systematic == "PDF") {
                 TH1* pdfWeights = dynamic_cast<TH1*>(file.Get("EventsBeforeSelection/pdfEventWeights"));
                 if (!pdfWeights){
@@ -190,12 +185,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
                 }
             }
             else {
-                std::cout<<"\n\tTEST 1a\n\n";
-                
                 chain.Process(selector);
-                
-                std::cout<<"\n\tTEST 1b\n\n";
-                
                 if (isSignal && closure=="" && !isHiggsSignal) {
                     selector->SetRunViaTau(1);
                     outputfilename.ReplaceAll("signalplustau", "bgviatau");
