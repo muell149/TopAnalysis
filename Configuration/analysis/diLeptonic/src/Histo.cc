@@ -4,6 +4,7 @@
 #include <TFile.h>
 #include <TString.h>
 #include <TH1.h>
+#include <TMath.h>
 
 #include <vector>
 #include <iostream>

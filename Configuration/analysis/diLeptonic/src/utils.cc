@@ -13,6 +13,8 @@
 #include <TLorentzVector.h>
 #include <TFile.h>
 #include <THStack.h>
+#include <TString.h>
+
 
 void LVtod4(const LV lv, double *d) {
     d[0] = lv.E();

@@ -1,19 +1,20 @@
 #ifndef util_h
 #define util_h
 
-#include "classes.h"
 #include <map>
 #include <iostream>
 #include <type_traits>
 #include <cstdlib>
 
-#include <TH1.h>
-#include <TString.h>
 #include <TStyle.h>
-#include <TLorentzVector.h>
-#include <TMath.h>
 
 class TFile;
+class TLorentzVector;
+class TH1;
+class TString;
+
+#include "classes.h"
+
 
 //convert LorentzVector to an array[E, px, py, pz]
 void LVtod4(const LV lv, double *d);

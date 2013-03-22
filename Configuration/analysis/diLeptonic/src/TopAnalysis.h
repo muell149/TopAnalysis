@@ -1,6 +1,8 @@
 #ifndef TopAnalysis_h
 #define TopAnalysis_h
 
+class TH1D;
+
 #include "AnalysisBase.h"
 
 class TopAnalysis : public AnalysisBase

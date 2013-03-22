@@ -4,24 +4,21 @@
 #include <vector>
 #include <map>
 #include <utility>
-#include <iostream>
-#include <fstream>
-#include <memory>
-#include <sstream>
 #include <functional>
 
-#include <TROOT.h>
-#include <TChain.h>
-#include <TFile.h>
 #include <TSelector.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TMath.h>
-#include <TROOT.h>
+#include <TSelectorList.h>
+#include <TParameter.h>
+#include <Rtypes.h>
+
+class TBranch;
+class TTree;
+class TH1;
+class TH2;
+class TString;
 
 #include "JetCorrectorParameters.h"
 #include "JetCorrectionUncertainty.h"
-
 #include "classes.h"
 #include "PUReweighter.h"
 
@@ -343,8 +340,8 @@ protected:
     double BJetSFAbsErr ( double );
     double CJetSFAbsErr ( double );
     
-    inline Int_t GetTopDecayModeEntry(Long64_t entry) { return b_TopDecayMode->GetEntry(entry); }
-    inline Int_t GetPDFEntry(Long64_t entry) { return b_weightPDF->GetEntry(entry); }
+    Int_t GetTopDecayModeEntry(Long64_t entry);
+    Int_t GetPDFEntry(Long64_t entry);
     
     //no idea why this is needed! But Process() isn't called otherwise! Argh!
     virtual int Version() const { return 3; }

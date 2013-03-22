@@ -1,6 +1,6 @@
 //
 // Original Author:  Fedor Ratnikov Nov 9, 2007
-// $Id: JetCorrectorParameters.h,v 1.2 2013/03/18 16:53:09 wbehrenh Exp $
+// $Id: JetCorrectorParameters.h,v 1.1 2013/03/21 10:16:48 wbehrenh Exp $
 //
 // Generic parameters for Jet corrections
 //
@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <iostream>
 //#include "FWCore/Utilities/interface/Exception.h"
 
 class JetCorrectorParameters 

@@ -1,8 +1,14 @@
 #include "HistoListReader.h"
+
 #include <TH1.h>
+#include <TString.h>
+
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <fstream>
+
+
 
 HistoListReader::HistoListReader(const char* filename) : 
     filename_ ( filename ),

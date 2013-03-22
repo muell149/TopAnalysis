@@ -1,11 +1,13 @@
 #ifndef HistoListReader_h
 #define HistoListReader_h
 
-#include <fstream>
 #include <vector>
 #include <map>
 #include <TString.h>
-#include <TH1.h>
+
+class TH1;
+
+
 
 struct PlotProperties {
     TString name;

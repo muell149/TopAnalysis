@@ -1,11 +1,15 @@
 #include <iostream>
 #include <fstream>
+
 #include <TString.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TProof.h>
 #include <TSelector.h>
 #include <TObjString.h>
+#include <TChain.h>
+#include <TH1.h>
+
 #include "TopAnalysis.h"
 #include "PUReweighter.h"
 #include "CommandLineParameters.h"

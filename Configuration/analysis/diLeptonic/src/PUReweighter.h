@@ -1,10 +1,10 @@
 #ifndef reweightPU_h
 #define reweightPU_h
 
-#include "TH1D.h"
 #include <vector>
-#include "TString.h"
 
+class TH1;
+class TString;
 
 //! PU reweighting. Now provides a PU variation of +-1.
 //! contradicts to the official recommendation to use different data distributions with varied total inelastic cross section by +-5%

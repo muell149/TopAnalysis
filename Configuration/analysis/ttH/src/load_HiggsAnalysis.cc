@@ -1,11 +1,14 @@
 #include <iostream>
 #include <fstream>
+
 #include <TString.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TProof.h>
 #include <TSelector.h>
 #include <TObjString.h>
+#include <TChain.h>
+
 #include "HiggsAnalysis.h"
 #include "../../diLeptonic/src/utils.h"
 #include "../../diLeptonic/src/PUReweighter.h"

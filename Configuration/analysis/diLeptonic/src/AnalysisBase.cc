@@ -1,21 +1,26 @@
-#include "AnalysisBase.h"
-#include "HistoListReader.h"
-#include <TH1.h>
-#include <TH2.h>
-#include <TStyle.h>
 #include <fstream>
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
+#include <limits>
+#include <iomanip>
+
+#include <TROOT.h>
 #include <TMath.h>
 #include <TSystem.h>
 #include <Math/VectorUtil.h>
 #include <TLorentzVector.h>
-#include <set>
-#include <cmath>
+#include <TStyle.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TBranch.h>
+#include <TH1.h>
+#include <TH2.h>
 #include <TString.h>
-#include <limits>
-#include <iomanip>
+
+#include "AnalysisBase.h"
+#include "HistoListReader.h"
 #include "utils.h"
 #include "KinReco.h"
 
@@ -1385,3 +1390,17 @@ void AnalysisBase::applyJER_JES()
 bool AnalysisBase::produceBtagEfficiencies(){
     return isSignal_;
 }
+
+
+
+Int_t AnalysisBase::GetTopDecayModeEntry(Long64_t entry){
+    return b_TopDecayMode->GetEntry(entry);
+}
+
+
+
+Int_t AnalysisBase::GetPDFEntry(Long64_t entry){
+    return b_weightPDF->GetEntry(entry);
+}
+
+
