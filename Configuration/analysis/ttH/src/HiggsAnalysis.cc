@@ -1,5 +1,7 @@
 #define HiggsAnalysis_cxx
 
+#include <TH1.h>
+
 #include "HiggsAnalysis.h"
 
 
@@ -10,6 +12,9 @@ constexpr double JETETACUT = 2.4;
 
 // CSV Loose working point
 constexpr double BtagWP = 0.244;
+
+
+
 
 HiggsAnalysis::HiggsAnalysis(TTree*)
 {

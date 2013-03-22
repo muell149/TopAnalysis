@@ -3,10 +3,11 @@
 
 #include <map>
 
-#include "TH1.h"
-#include "TH1D.h"
-#include "TString.h"
-#include "TSelectorList.h"
+#include <TSelectorList.h>
+
+class TString;
+class TH1D;
+
 
 
 class DyScalingHistograms{

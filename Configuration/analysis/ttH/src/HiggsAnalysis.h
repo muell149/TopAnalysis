@@ -1,7 +1,11 @@
 #ifndef HiggsAnalysis_h
 #define HiggsAnalysis_h
 
-#include "TH1.h"
+#include <Rtypes.h>
+
+class TTree;
+class TH1;
+class TString;
 
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "JetCategories.h"

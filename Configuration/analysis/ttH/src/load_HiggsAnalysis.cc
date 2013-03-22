@@ -8,6 +8,7 @@
 #include <TSelector.h>
 #include <TObjString.h>
 #include <TChain.h>
+#include <TH1.h>
 
 #include "HiggsAnalysis.h"
 #include "../../diLeptonic/src/utils.h"

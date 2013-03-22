@@ -1,11 +1,11 @@
 #define DyScalingHistograms_cxx
 
-
-#include "DyScalingHistograms.h"
-
-
 #include <iostream>
 
+#include <TH1D.h>
+#include <TString.h>
+
+#include "DyScalingHistograms.h"
 
 
 

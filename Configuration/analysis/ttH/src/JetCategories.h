@@ -3,7 +3,9 @@
 
 #include <vector>
 
-#include "TString.h"
+class TString;
+
+
 
 class JetCategories{
 
@@ -32,4 +34,9 @@ private:
     std::vector<JetCategory> v_jetCategory_;
 };
 
+
+
 #endif // JetCategories_h
+
+
+
