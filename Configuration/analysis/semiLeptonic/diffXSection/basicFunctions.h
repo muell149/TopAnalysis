@@ -118,7 +118,7 @@ namespace semileptonic {
   const unsigned int constPowhegStyle  = 7;
   const unsigned int constNnloStyle    = 2;
   const unsigned int constMcatnloStyle = 5;
-  const unsigned int constNnloStyle2   = 9;
+  const unsigned int constNnloStyle2   = 10;
 
   // Marker style
 
@@ -3905,10 +3905,10 @@ namespace semileptonic {
 	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 4.61 : 5.49 ) : 5.54; 
 	      else if(variable.Contains("ttbarY")   ) k = (fullPS) ? (probSel ? 6.63 : 7.93 ) : 7.93; 
 	      else if(variable.Contains("ttbarMass")) k = (fullPS) ? (probSel ? 3.61 : 4.44 ) : 4.44; 
-	      else if(variable.Contains("lepPt")    ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ? 8.47    : 6.60   ) : 7.65 );
-	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ? 1.5e-06 : 7.7e-06) : 3.00 ); 
-	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 16.42   : 12.51  ) : 10.53); 
-	      else if(variable.Contains("bqEta")    ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ? 11.40   : 9.19   ) : 11.11);
+	      else if(variable.Contains("lepPt")    ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ? 4.93    : 6.60   ) : 7.65 );
+	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ? 2.9e-07 : 7.7e-06) : 3.00 ); 
+	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 8.56   : 12.51  ) : 10.53); 
+	      else if(variable.Contains("bqEta")    ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ? 6.78   : 9.19   ) : 11.11);
 	    }
 	}
 	else{
