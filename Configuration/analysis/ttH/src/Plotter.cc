@@ -20,8 +20,8 @@
 #include <TPaveText.h>
 #include <TH1D.h>
 
-#include "plotterclass.h"
-#include "../diLeptonic/utils.h"
+#include "Plotter.h"
+#include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
 
 

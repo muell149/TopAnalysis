@@ -5,6 +5,8 @@ COMPFLAGS=`root-config --cflags` -Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c+
 
 all: load_HiggsAnalysis Histo
 
+
+
 load_HiggsAnalysis: dict.o AnalysisBase.o load_HiggsAnalysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o JetCategories.o HiggsAnalysis.o DyScalingHistograms.o JetCorrectionUncertainty.o  JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
@@ -17,14 +19,8 @@ dict.o: dict.cc
 DyScalingHistograms.o: DyScalingHistograms.cc DyScalingHistograms.h
 	g++ -c -o DyScalingHistograms.o $(COMPFLAGS) DyScalingHistograms.cc
 
-dyScaleFactors.o: dyScaleFactors.C dyScaleFactors.h
-	g++ -c -o dyScaleFactors.o $(COMPFLAGS) dyScaleFactors.C
-
 utils.o: ../../diLeptonic/src/utils.cc ../../diLeptonic/src/utils.h
 	g++ -c -o utils.o $(COMPFLAGS) ../../diLeptonic/src/utils.cc
-
-higgsUtils.o: higgsUtils.C higgsUtils.h
-	g++ -c -o higgsUtils.o $(COMPFLAGS) higgsUtils.C
 
 CommandLineParameters.o: ../../diLeptonic/src/CommandLineParameters.cc ../../diLeptonic/src/CommandLineParameters.h
 	g++ -c -o CommandLineParameters.o $(COMPFLAGS) ../../diLeptonic/src/CommandLineParameters.cc
@@ -50,21 +46,6 @@ JetCategories.o: JetCategories.cc JetCategories.h
 HistoListReader.o: ../../diLeptonic/src/HistoListReader.h ../../diLeptonic/src/HistoListReader.cc
 	g++ -c -o HistoListReader.o $(COMPFLAGS) ../../diLeptonic/src/HistoListReader.cc
 
-Histo.o: Histo.C
-	g++ -c -o Histo.o $(COMPFLAGS) Histo.C
-	
-plotterHelpers.o: plotterHelpers.C plotterHelpers.h
-	g++ -c -o plotterHelpers.o $(COMPFLAGS) plotterHelpers.C
-
-plotterclass.o: plotterclass.cpp plotterclass.h utils.o higgsUtils.o plotterHelpers.o
-	g++ -c -o plotterclass.o $(COMPFLAGS) plotterclass.cpp
-
-Histo: Histo.o plotterclass.o plotterHelpers.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o sampleHelpers.o samples.o eventYields.o dyScaleFactors.o
-	g++ -o Histo Histo.o plotterclass.o plotterHelpers.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o sampleHelpers.o samples.o eventYields.o dyScaleFactors.o $(ROOTLIBS)
-
-eventYields.o: eventYields.C eventYields.h utils.o
-	g++ -c -o eventYields.o $(COMPFLAGS) eventYields.C
-
 JetCorrectionUncertainty.o: ../../diLeptonic/src/JetCorrectionUncertainty.cc JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o
 	g++ -c -o $@ $(COMPFLAGS) ../../diLeptonic/src/JetCorrectionUncertainty.cc
 
@@ -74,11 +55,35 @@ JetCorrectorParameters.o:  ../../diLeptonic/src/JetCorrectorParameters.cc
 SimpleJetCorrectionUncertainty.o: ../../diLeptonic/src/SimpleJetCorrectionUncertainty.cc
 	g++ -c -o $@ $(COMPFLAGS) ../../diLeptonic/src/SimpleJetCorrectionUncertainty.cc
 
-sampleHelpers.o: sampleHelpers.C sampleHelpers.h
-	g++ -c -o sampleHelpers.o $(COMPFLAGS) sampleHelpers.C
 
-samples.o: samples.C samples.h sampleHelpers.o
-	g++ -c -o samples.o $(COMPFLAGS) samples.C
+
+Histo: Histo.o Plotter.o plotterHelpers.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o
+	g++ -o Histo Histo.o Plotter.o plotterHelpers.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o $(ROOTLIBS)
+
+higgsUtils.o: higgsUtils.cc higgsUtils.h
+	g++ -c -o higgsUtils.o $(COMPFLAGS) higgsUtils.cc
+
+sampleHelpers.o: sampleHelpers.cc sampleHelpers.h
+	g++ -c -o sampleHelpers.o $(COMPFLAGS) sampleHelpers.cc
+
+Samples.o: Samples.cc Samples.h sampleHelpers.o
+	g++ -c -o Samples.o $(COMPFLAGS) Samples.cc
+
+DyScaleFactors.o: DyScaleFactors.cc DyScaleFactors.h
+	g++ -c -o DyScaleFactors.o $(COMPFLAGS) DyScaleFactors.cc
+
+EventYields.o: EventYields.cc EventYields.h utils.o
+	g++ -c -o EventYields.o $(COMPFLAGS) EventYields.cc
+
+plotterHelpers.o: plotterHelpers.cc plotterHelpers.h
+	g++ -c -o plotterHelpers.o $(COMPFLAGS) plotterHelpers.cc
+
+Plotter.o: Plotter.cc Plotter.h utils.o higgsUtils.o plotterHelpers.o
+	g++ -c -o Plotter.o $(COMPFLAGS) Plotter.cc
+
+Histo.o: Histo.cc
+	g++ -c -o Histo.o $(COMPFLAGS) Histo.cc
+
 
 
 .PHONY: clean

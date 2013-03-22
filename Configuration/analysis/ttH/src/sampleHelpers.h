@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <TString.h>
-
-
+class TString;
 
 
 

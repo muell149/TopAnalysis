@@ -6,8 +6,8 @@
 #include <TColorWheel.h>
 #include <TH1D.h>
 
-#include "samples.h"
-#include "../diLeptonic/utils.h"
+#include "Samples.h"
+#include "../../diLeptonic/src/utils.h"
 
 
 

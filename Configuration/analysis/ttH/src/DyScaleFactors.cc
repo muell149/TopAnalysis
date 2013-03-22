@@ -3,10 +3,13 @@
 #include <sstream>
 
 #include <TH1D.h>
+#include <TMath.h>
+#include <TString.h>
 
-#include "dyScaleFactors.h"
-#include "../diLeptonic/utils.h"
+#include "DyScaleFactors.h"
+#include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
+#include "Samples.h"
 
 
 

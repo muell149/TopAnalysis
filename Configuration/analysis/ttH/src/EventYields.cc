@@ -2,10 +2,12 @@
 #include <sstream>
 
 #include <TSystem.h>
+#include <TH1D.h>
 
-#include "eventYields.h"
-#include "../diLeptonic/utils.h"
+#include "EventYields.h"
+#include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
+#include "Samples.h"
 
 
 

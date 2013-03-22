@@ -1,11 +1,11 @@
 #ifndef eventYields_h
 #define eventYields_h
 
-#include "samples.h"
-#include "dyScaleFactors.h"
+#include "DyScaleFactors.h"
 
 class RootFileReader;
-
+class Sample;
+class Samples;
 
 
 

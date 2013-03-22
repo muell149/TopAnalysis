@@ -4,13 +4,11 @@
 #include <vector>
 #include <map>
 
-#include <TString.h>
-
 #include "sampleHelpers.h"
 
 class RootFileReader;
 class TH1D;
-
+class TString;
 
 
 

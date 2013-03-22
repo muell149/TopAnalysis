@@ -6,14 +6,14 @@
 #include <set>
 
 #include "plotterHelpers.h"
-#include "samples.h"
-#include "dyScaleFactors.h"
+#include "DyScaleFactors.h"
+#include "sampleHelpers.h"
+#include "Samples.h"
 
 class TGraphErrors;
 class TLegend;
 class RootFileReader;
 class TString;
-
 
 
 

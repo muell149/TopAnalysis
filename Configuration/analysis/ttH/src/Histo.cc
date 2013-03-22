@@ -1,25 +1,18 @@
 #include <vector>
 #include <iostream>
-#include <set>
 #include <functional>
 #include <algorithm>
 
-#include <TCanvas.h>
-#include <TLegend.h>
-#include <THStack.h>
-#include <TFile.h>
 #include <TString.h>
-#include <TH1.h>
 
-#include "../diLeptonic/HistoListReader.h"
-#include "../diLeptonic/CommandLineParameters.hh"
-
+#include "../../diLeptonic/src/HistoListReader.h"
+#include "../../diLeptonic/src/CommandLineParameters.h"
 #include "sampleHelpers.h"
-#include "samples.h"
-#include "dyScaleFactors.h"
-#include "eventYields.h"
+#include "Samples.h"
+#include "DyScaleFactors.h"
+#include "EventYields.h"
 #include "plotterHelpers.h"
-#include "plotterclass.h"
+#include "Plotter.h"
 
 
 
