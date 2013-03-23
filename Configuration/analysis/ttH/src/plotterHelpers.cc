@@ -1,3 +1,6 @@
+#include <iostream>
+#include <cstdlib>
+
 #include "plotterHelpers.h"
 
 
@@ -7,19 +10,24 @@
 
 DrawMode::DrawMode
 DrawMode::convertDrawMode(const std::string& drawMode){
-    if (drawMode == "stacked") return stacked;
-    else if (drawMode == "overlaid") return overlaid;
-    else if (drawMode == "scaledoverlaid") return scaledoverlaid;
-    else return undefined;
+    if(drawMode == "stacked") return stacked;
+    if(drawMode == "overlaid") return overlaid;
+    if(drawMode == "scaledoverlaid") return scaledoverlaid;
+    if(drawMode == "scaledoverlaidfixed") return scaledoverlaidfixed;
+    std::cout<<"Warning! The following draw mode conversion is not implemented: "<<drawMode<<std::endl;
+    return undefined;
 }
 
 
 std::string
 DrawMode::convertDrawMode(const DrawMode& drawMode){
-    if (drawMode == stacked) return "stacked";
-    else if (drawMode == overlaid) return "overlaid";
-    else if (drawMode == scaledoverlaid) return "scaledoverlaid";
-    else return "";
+    if(drawMode == stacked) return "stacked";
+    if(drawMode == overlaid) return "overlaid";
+    if(drawMode == scaledoverlaid) return "scaledoverlaid";
+    if(drawMode == scaledoverlaidfixed) return "scaledoverlaidfixed";
+    if(drawMode == undefined) return "";
+    std::cout<<"Error! Draw mode conversion is not implemented, break...\n"<<std::endl;
+    exit(97);
 }
 
 

@@ -11,13 +11,13 @@
 namespace DrawMode{
     
     /// Draw modes for Higgs samples for analysis
-    enum DrawMode{stacked, overlaid, scaledoverlaid, undefined};
+    enum DrawMode{stacked, overlaid, scaledoverlaid, scaledoverlaidfixed, undefined};
     
     
     
     /// All draw modes allowed for Higgs samples for analysis
     const std::vector<DrawMode> allowedDrawModes
-        {stacked, overlaid, scaledoverlaid};
+        {stacked, overlaid, scaledoverlaid, scaledoverlaidfixed};
     
     
     

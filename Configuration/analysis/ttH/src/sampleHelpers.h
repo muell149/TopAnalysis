@@ -12,13 +12,13 @@ class TString;
 namespace Systematic{
     
     /// Systematics for analysis
-    enum Systematic{nominal, undefined};
+    enum Systematic{nominal, mH110, mH115, mH120, mH1225, mH1275, mH130, mH135, mH140, undefined};
     
     
     
     /// All systematics allowed for analysis
     const std::vector<Systematic> allowedSystematics
-        {nominal};
+        {nominal, mH110, mH115, mH120, mH1225, mH1275, mH130, mH135, mH140};
     
     
     
