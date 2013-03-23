@@ -1,6 +1,9 @@
-#include "JetCategories.h"
+#include "src/JetCategories.h"
 
 #include <iostream>
+
+#include <TString.h>
+
 
 
 void testJetCategories(){
