@@ -55,7 +55,7 @@ void load_Analysis(TString validFilenamePattern,
         exit(773); 
     }
     
-    AnalysisBase *selector = new TopAnalysis();
+    TopAnalysis *selector = new TopAnalysis();
     PUReweighter *pu = new PUReweighter();
     pu->setMCDistrSum12("S10");
     pu->setDataTruePUInput(getPUPath(systematic).c_str());

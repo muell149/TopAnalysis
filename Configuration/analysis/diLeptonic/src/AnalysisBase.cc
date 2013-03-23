@@ -26,6 +26,7 @@
 
 
 
+
 /** Prepare some variables before going to the event loop
  * 
  * This function is used to calculate all scale factors and
@@ -42,6 +43,7 @@ void AnalysisBase::Begin ( TTree * )
     prepareLeptonIDSF();
     prepareJER_JES();
 }
+
 
 
 /** order two LorentzVectors by pt
@@ -63,6 +65,7 @@ void AnalysisBase::orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const L
 }
 
 
+
 /// apply pT and eta cuts on our jets
 void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
     for (int i = jets_->size() - 1; i >= 0; --i) {
@@ -73,6 +76,8 @@ void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
         }        
     }
 }
+
+
 
 void AnalysisBase::SlaveBegin(TTree* tree)
 {
@@ -92,6 +97,8 @@ void AnalysisBase::SlaveTerminate()
     }
     delete binnedControlPlots;
 }
+
+
 
 void AnalysisBase::Terminate()
 {
@@ -113,22 +120,22 @@ void AnalysisBase::Terminate()
     std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<samplename_<<"!!!!!!!!!!!!!!!!!!!!!!!!!\n";
 
     //calculate an overall weight due to the shape reweighting
-    double gloablNormalisationFactor = 1;
+    double globalNormalisationFactor = 1;
     if (doClosureTest_) {
         TH1 *total = dynamic_cast<TH1*>(fOutput->FindObject("ClosureTotalWeight"));
         if (!total) {
             std::cerr << "ClosureTotalWeight histogram is missing!\n"; exit(1);
         }
-        gloablNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
-        std::cout << "gloablNormalisationFactor = " << gloablNormalisationFactor << "\n";
+        globalNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
+        std::cout << "gloablNormalisationFactor = " << globalNormalisationFactor << "\n";
     }
     if (pdf_no_ >= 0) {
         TH1 *total = dynamic_cast<TH1*>(fOutput->FindObject("PDFTotalWeight"));
         if (!total) {
             std::cerr << "PDFTotalWeight histogram is missing!\n"; exit(1);
         }
-        gloablNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
-        std::cout << "PDF Weight Normalisation = " << gloablNormalisationFactor << "\n";
+        globalNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
+        std::cout << "PDF Weight Normalisation = " << globalNormalisationFactor << "\n";
     }
     
     //write stuff into file
@@ -138,7 +145,7 @@ void AnalysisBase::Terminate()
     while (TObject* obj = it->Next()) {
         TH1 *h = dynamic_cast<TH1*>(obj);
         if (h) { 
-            h->Scale(gloablNormalisationFactor); 
+            h->Scale(globalNormalisationFactor); 
             //std::cout << "Scaling: " << h->GetName() << "\n";
         } else { 
             //std::cout << "Not scaling: " << obj->GetName() << "\n"; 
@@ -246,6 +253,8 @@ void AnalysisBase::Terminate()
     unc_ = nullptr;
 }
 
+
+
 double AnalysisBase::BJetSF( double pt, double eta )
 {
     //CSVL b-jet SF
@@ -267,6 +276,8 @@ double AnalysisBase::BJetSF( double pt, double eta )
     return 0.981149*((1.+(-0.000713295*pt))/(1.+(-0.000703264*pt)));
 }
 
+
+
 double AnalysisBase::CJetSF ( double pt, double eta )
 {
     //CSVL c-jet SF
@@ -275,6 +286,8 @@ double AnalysisBase::CJetSF ( double pt, double eta )
 
     return 2 * BJetSF( pt, eta );
 }
+
+
 
 double AnalysisBase::LJetSF ( double pt, double eta, TString typevar )
 {
@@ -335,6 +348,8 @@ double AnalysisBase::LJetSF ( double pt, double eta, TString typevar )
 
 }
 
+
+
 double AnalysisBase::BJetSFAbsErr ( double pt )
 {
     //If needed go to https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC
@@ -367,15 +382,21 @@ double AnalysisBase::BJetSFAbsErr ( double pt )
     };
 }
 
+
+
 double AnalysisBase::CJetSFAbsErr ( double pt)
 {
     return 2 * BJetSFAbsErr ( pt );
 }
 
+
+
 void AnalysisBase::SetBTagFile(TString btagFile)
 {
     this->btagFile_ = btagFile;
 }
+
+
 
 void AnalysisBase::SetChannel(TString channel)
 {
@@ -386,20 +407,28 @@ void AnalysisBase::SetChannel(TString channel)
         : -13*13;
 }
 
+
+
 void AnalysisBase::SetSignal(bool isSignal)
 {
     this->isSignal_ = isSignal;
 }
+
+
 
 void AnalysisBase::SetHiggsSignal(const bool higgsSignal)
 {
     this->isHiggsSignal_ = higgsSignal;
 }
 
+
+
 void AnalysisBase::SetSystematic(TString systematic)
 {
     this->systematic_ = systematic;
 }
+
+
 
 void AnalysisBase::SetSamplename(TString samplename, TString systematic_from_file)
 {
@@ -409,10 +438,14 @@ void AnalysisBase::SetSamplename(TString samplename, TString systematic_from_fil
                         !systematic_from_file.Contains("POWHEG") && !systematic_from_file.Contains("MCATNLO");
 }
 
+
+
 void AnalysisBase::SetMC(bool isMC)
 {
     this->isMC_ = isMC;
 }
+
+
 
 void AnalysisBase::SetTrueLevelDYChannel(int dy)
 {
@@ -441,7 +474,6 @@ void AnalysisBase::SetTrueLevelDYChannel(int dy)
     }
 }
 
-    
 
 
 void AnalysisBase::SetPDF(int pdf_no)
@@ -450,15 +482,20 @@ void AnalysisBase::SetPDF(int pdf_no)
 }
 
 
+
 void AnalysisBase::SetOutputfilename(TString outputfilename)
 {
     this->outputfilename_ = outputfilename;
 }
 
+
+
 void AnalysisBase::SetWeightedEvents(TH1* weightedEvents)
 {
     this->h_weightedEvents = weightedEvents;
 }
+
+
 
 void AnalysisBase::SetRunViaTau(bool runViaTau)
 {
@@ -466,10 +503,14 @@ void AnalysisBase::SetRunViaTau(bool runViaTau)
     if (runViaTau) isSignal_ = 0;
 }
 
+
+
 void AnalysisBase::SetPUReweighter(PUReweighter* pu)
 {
     pureweighter_ = pu;
 }
+
+
 
 void AnalysisBase::Init ( TTree *tree )
 {
@@ -480,21 +521,60 @@ void AnalysisBase::Init ( TTree *tree )
     // code, but the routine can be extended by the user if needed.
     // Init() will be called many times when running on PROOF
     // (once per file to be processed).
-
-    // Set object pointer
+    
+    
+    // Set values to null for branches relevant for reconstruction level
+    // Concerning physics objects
     leptons_ = 0;
     lepPdgId_ = 0;
+    //lepID_ = 0;
     lepPfIso_ = 0;
+    //lepChargedHadronIso_ = 0;
+    //lepNeutralHadronIso_ = 0;
+    //lepPhotonIso_ = 0;
+    //lepPuChargedHadronIso_ = 0;
     lepCombIso_ = 0;
     lepDxyVertex0_ = 0;
+    //lepTrigger_ = 0;
     jets_ = 0;
+    jetsForMET_ = 0;
+    associatedGenJet_ = 0;
+    associatedGenJetForMET_ = 0;
+    jetJERSF_ = 0;
+    jetForMETJERSF_ = 0;
     jetBTagTCHE_ = 0;
-    jetBTagCSV_ = 0;
+    //jetBTagTCHP_ = 0;
     jetBTagSSVHE_ = 0;
+    //jetBTagSSVHP_ = 0;
+    //jetBTagJetProbability_ = 0;
+    //jetBTagJetBProbability_ = 0;
+    jetBTagCSV_ = 0;
+    //jetBTagCSVMVA_ = 0;
     jetPartonFlavour_ = 0;
+    allGenJets_ = 0;
+    associatedGenJet_ = 0;
+    associatedGenJetForMET_ = 0;
+    jetChargeGlobalPtWeighted_ = 0;
+    jetChargeRelativePtWeighted_ = 0;
+    //jetChargeGlobalPtWeighted_ = 0;
+    //jetChargeRelativePtWeighted_ = 0;
     met_ = 0;
-    HypJet0index_ = 0;
-    HypJet1index_ = 0;
+    // Concerning event
+    runNumber_ = 0;
+    lumiBlock_ = 0;
+    eventNumber_ = 0;
+    //recoInChannel_ = 0;
+    triggerBits_ = 0;
+    //triggerBitsTau_ = 0;
+    //firedTriggers_ = 0;
+    vertMulti_ = 0;
+    // Concerning MC event
+    vertMultiTrue_ = 0;
+    weightGenerator_ = 0;
+    weightPDF_ = 0;
+    
+    
+    // Set values to null for branches of kinematic reconstruction
     HypTop_ = 0;
     HypAntiTop_ = 0;
     HypLepton_ = 0;
@@ -503,44 +583,78 @@ void AnalysisBase::Init ( TTree *tree )
     HypAntiNeutrino_ = 0;
     HypBJet_ = 0;
     HypAntiBJet_ = 0;
+    //HypWPlus_ = 0;
+    //HypWMinus_ = 0;
+    HypJet0index_ = 0;
+    HypJet1index_ = 0;
     
-    JetChargeGlobalPtWeighted_ = 0;
-    JetChargeRelativePtWeighted_ = 0;
     
-    //for the signal
-//     genJets = 0;
-    allGenJets_ = 0;
-    associatedGenJet_ = 0;
-    associatedGenJetForMET_ = 0;
-    BHadrons_ = 0;
-    GenWPlus_ = 0;
-    GenWMinus_ = 0;
-    AntiBHadrons_ = 0;
-    BHadJetIndex_ = 0;
-    AntiBHadJetIndex_ = 0;
-    BHadronFromTopB_ = 0;
-    AntiBHadronFromTopB_ = 0;
-    BHadronVsJet_ = 0;
-    AntiBHadronVsJet_ = 0;
+    // Set values to null for Drell-Yan decay branch
+    ZDecayMode_ = 0;
+    
+    
+    // Set values to null for Top decay branch
+    topDecayMode_ = 0;
+    
+    
+    // Set values to null for Top signal sample branches
+    GenMet_ = 0;
+    GenTop_ = 0;
+    GenAntiTop_ = 0;
+    GenLepton_ = 0;
+    GenAntiLepton_ = 0;
+    //GenLeptonPdgId_ = 0;
+    //GenAntiLeptonPdgId_ = 0;
+    //GenTau_ = 0;
+    //GenAntiTau_ = 0;
     GenNeutrino_ = 0;
     GenAntiNeutrino_ = 0;
     GenB_ = 0;
     GenAntiB_ = 0;
-    GenLepton_ = 0;
-    GenAntiLepton_ = 0;
-    GenTop_ = 0;
-    GenAntiTop_ = 0;
-    GenMet_ = 0;
+    GenWPlus_ = 0;
+    GenWMinus_ = 0;
+    //GenParticleP4_= 0;
+    //GenParticlePdgId_= 0;
+    //GenParticleStatus_= 0;
+    BHadJetIndex_ = 0;
+    AntiBHadJetIndex_ = 0;
+    BHadrons_ = 0;
+    AntiBHadrons_ = 0;
+    BHadronFromTopB_ = 0;
+    AntiBHadronFromTopB_ = 0;
+    BHadronVsJet_ = 0;
+    AntiBHadronVsJet_ = 0;
+    genParticlePdg_ = 0;
+    genParticleStatus_ = 0;
+    genParticleIndices_ = 0;
+    genParticle_ = 0;
+    bHadIndex_ = 0;
+    bHadFlavour_ = 0;
+    bHadJetIndex_ = 0;
     
+    
+    // Set values to null for Higgs signal sample branches
+    higgsDecayMode_ = 0;
     GenH_ = 0;
     GenBFromH_ = 0;
     GenAntiBFromH_ = 0;
-    higgsDecayMode_ = 0;
+    
     
     // Set branch addresses and branch pointers
     if ( !tree ) return;
     fChain = tree;
-    fChain->SetMakeClass ( 0 );
+    fChain->SetMakeClass(0);
+    this->SetRecoBranchAddresses();
+    this->SetKinRecoBranchAddresses();
+    this->SetDyDecayBranchAddress();
+    this->SetTopDecayBranchAddress();
+    if(isSignal_) this->SetTopSignalBranchAddresses();
+    if(isHiggsSignal_) this->SetHiggsSignalBranchAddresses();
+}
+
+
+
+void AnalysisBase::SetRecoBranchAddresses(){
     fChain->SetBranchAddress("leptons", &leptons_, &b_lepton );
     fChain->SetBranchAddress("lepPdgId", &lepPdgId_, &b_lepPdgId );
     fChain->SetBranchAddress("lepPfIso", &lepPfIso_, &b_lepPfIso );
@@ -568,9 +682,19 @@ void AnalysisBase::Init ( TTree *tree )
     if (pdf_no_ >= 0) fChain->SetBranchAddress("pdfWeights", &weightPDF_, &b_weightPDF);
     fChain->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti );
     fChain->SetBranchAddress("vertMultiTrue", &vertMultiTrue_, &b_vertMultiTrue );
-
-
     fChain->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets );
+    
+    if(fChain->GetBranch("jetChargeGlobalPtWeighted"))
+        fChain->SetBranchAddress("jetChargeGlobalPtWeighted", &jetChargeGlobalPtWeighted_, &b_jetChargeGlobalPtWeighted);
+    else b_jetChargeGlobalPtWeighted = 0;
+    if(fChain->GetBranch("jetChargeRelativePtWeighted"))
+        fChain->SetBranchAddress("jetChargeRelativePtWeighted", &jetChargeRelativePtWeighted_, &b_jetChargeRelativePtWeighted);
+    else b_jetChargeRelativePtWeighted = 0;
+}
+
+
+
+void AnalysisBase::SetKinRecoBranchAddresses(){
     fChain->SetBranchAddress("HypTop", &HypTop_, &b_HypTop );
     fChain->SetBranchAddress("HypAntiTop", &HypAntiTop_, &b_HypAntiTop );
     fChain->SetBranchAddress("HypLepton", &HypLepton_, &b_HypLepton );
@@ -579,55 +703,60 @@ void AnalysisBase::Init ( TTree *tree )
     fChain->SetBranchAddress("HypAntiNeutrino", &HypAntiNeutrino_, &b_HypAntiNeutrino);
     fChain->SetBranchAddress("HypB", &HypBJet_, &b_HypB );
     fChain->SetBranchAddress("HypAntiB", &HypAntiBJet_, &b_HypAntiB );
-    /*   fChain->SetBranchAddress("HypWPlus", &HypWPlus_, &b_HypWPlus_);
-    fChain->SetBranchAddress("HypWMinus", &HypWMinus_, &b_HypWMinus_);
-    */
+    //fChain->SetBranchAddress("HypWPlus", &HypWPlus_, &b_HypWPlus_);
+    //fChain->SetBranchAddress("HypWMinus", &HypWMinus_, &b_HypWMinus_);
     fChain->SetBranchAddress("HypJet0index", &HypJet0index_, &b_HypJet0index );
     fChain->SetBranchAddress("HypJet1index", &HypJet1index_, &b_HypJet1index );
-    fChain->SetBranchAddress("TopDecayMode", &topDecayMode_, &b_TopDecayMode );
-    fChain->SetBranchAddress("ZDecayMode", &ZDecayMode_, &b_ZDecayMode);
-    
-    if(fChain->GetBranch("jetChargeGlobalPtWeighted"))
-        fChain->SetBranchAddress("jetChargeGlobalPtWeighted", &JetChargeGlobalPtWeighted_, &b_JetChargeGlobalPtWeighted);
-    else b_JetChargeGlobalPtWeighted = 0;
-    if(fChain->GetBranch("jetChargeRelativePtWeighted"))
-        fChain->SetBranchAddress("jetChargeRelativePtWeighted", &JetChargeRelativePtWeighted_, &b_JetChargeRelativePtWeighted);
-    else b_JetChargeRelativePtWeighted = 0;
-    
-    if (isSignal_) {
-        fChain->SetBranchAddress("GenTop", &GenTop_, &b_GenTop );
-        fChain->SetBranchAddress("GenAntiTop", &GenAntiTop_, &b_GenAntiTop );
-        fChain->SetBranchAddress("GenLepton", &GenLepton_, &b_GenLepton );
-        fChain->SetBranchAddress("GenAntiLepton", &GenAntiLepton_, &b_GenAntiLepton );
-        fChain->SetBranchAddress("GenNeutrino", &GenNeutrino_, &b_GenNeutrino);
-        fChain->SetBranchAddress("GenAntiNeutrino", &GenAntiNeutrino_, &b_GenAntiNeutrino);
-        fChain->SetBranchAddress("GenB", &GenB_, &b_GenB );
-        fChain->SetBranchAddress("GenAntiB", &GenAntiB_, &b_GenAntiB );
-        /*  
-        fChain->SetBranchAddress("GenWPlus.fCoordinates.fX", &GenWPluspX, &b_GenWPluspX);
-        fChain->SetBranchAddress("GenWMinus.fCoordinates.fX", &GenWMinuspX, &b_GenWMinuspX);
-        */
-        fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex_, &b_BHadJetIndex );
-        fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex_, &b_AntiBHadJetIndex );
-        fChain->SetBranchAddress("BHadrons", &BHadrons_, &b_BHadrons );
-        fChain->SetBranchAddress("AntiBHadrons", &AntiBHadrons_, &b_AntiBHadrons);
-        fChain->SetBranchAddress("BHadronFromTop", &BHadronFromTopB_, &b_BHadronFromTopB );
-        fChain->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB );
-        fChain->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet );
-        fChain->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet );
-
-        fChain->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
-//         fChain->SetBranchAddress("GenJetHadronB.", &BHadronJet_, &b_BHadronJet_);
-//         fChain->SetBranchAddress("GenJetHadronAntiB", &AntiBHadronJet_, &b_AntiBHadronJet_);
-    }
-    
-    if(isHiggsSignal_){
-        fChain->SetBranchAddress("GenH", &GenH_, &b_GenH);
-        fChain->SetBranchAddress("GenBFromH", &GenBFromH_, &b_GenBFromH);
-        fChain->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH_, &b_GenAntiBFromH);
-        fChain->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
-    }
 }
+
+
+
+void AnalysisBase::SetDyDecayBranchAddress(){
+    fChain->SetBranchAddress("ZDecayMode", &ZDecayMode_, &b_ZDecayMode);
+}
+
+
+
+void AnalysisBase::SetTopDecayBranchAddress(){
+    fChain->SetBranchAddress("TopDecayMode", &topDecayMode_, &b_TopDecayMode );
+}
+
+
+
+void AnalysisBase::SetTopSignalBranchAddresses(){
+    fChain->SetBranchAddress("GenTop", &GenTop_, &b_GenTop );
+    fChain->SetBranchAddress("GenAntiTop", &GenAntiTop_, &b_GenAntiTop );
+    fChain->SetBranchAddress("GenLepton", &GenLepton_, &b_GenLepton );
+    fChain->SetBranchAddress("GenAntiLepton", &GenAntiLepton_, &b_GenAntiLepton );
+    fChain->SetBranchAddress("GenNeutrino", &GenNeutrino_, &b_GenNeutrino);
+    fChain->SetBranchAddress("GenAntiNeutrino", &GenAntiNeutrino_, &b_GenAntiNeutrino);
+    fChain->SetBranchAddress("GenB", &GenB_, &b_GenB );
+    fChain->SetBranchAddress("GenAntiB", &GenAntiB_, &b_GenAntiB );
+    //fChain->SetBranchAddress("GenWPlus.fCoordinates.fX", &GenWPluspX, &b_GenWPluspX);
+    //fChain->SetBranchAddress("GenWMinus.fCoordinates.fX", &GenWMinuspX, &b_GenWMinuspX);
+    fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex_, &b_BHadJetIndex );
+    fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex_, &b_AntiBHadJetIndex );
+    fChain->SetBranchAddress("BHadrons", &BHadrons_, &b_BHadrons );
+    fChain->SetBranchAddress("AntiBHadrons", &AntiBHadrons_, &b_AntiBHadrons);
+    fChain->SetBranchAddress("BHadronFromTop", &BHadronFromTopB_, &b_BHadronFromTopB );
+    fChain->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB );
+    fChain->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet );
+    fChain->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet );
+    fChain->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
+    //fChain->SetBranchAddress("GenJetHadronB.", &BHadronJet_, &b_BHadronJet_);
+    //fChain->SetBranchAddress("GenJetHadronAntiB", &AntiBHadronJet_, &b_AntiBHadronJet_);
+}
+
+
+
+void AnalysisBase::SetHiggsSignalBranchAddresses(){
+    fChain->SetBranchAddress("GenH", &GenH_, &b_GenH);
+    fChain->SetBranchAddress("GenBFromH", &GenBFromH_, &b_GenBFromH);
+    fChain->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH_, &b_GenAntiBFromH);
+    fChain->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
+}
+
+
 
 void AnalysisBase::GetRecoBranches ( Long64_t & entry )
 {    
@@ -665,6 +794,14 @@ void AnalysisBase::GetRecoBranches ( Long64_t & entry )
     //b_genJet->GetEntry(entry); //!
     b_allGenJets->GetEntry(entry); //!
 
+    
+    if(b_jetChargeGlobalPtWeighted)b_jetChargeGlobalPtWeighted->GetEntry(entry);
+    if(b_jetChargeRelativePtWeighted)b_jetChargeRelativePtWeighted->GetEntry(entry);
+}
+
+
+
+void AnalysisBase::GetKinRecoBranches(Long64_t& entry){
     b_HypTop->GetEntry(entry); //!
     b_HypAntiTop->GetEntry(entry); //!
     b_HypLepton->GetEntry(entry); //!
@@ -688,12 +825,11 @@ void AnalysisBase::GetRecoBranches ( Long64_t & entry )
     */
     b_HypJet0index->GetEntry(entry);
     b_HypJet1index->GetEntry(entry);
-    
-    if(b_JetChargeGlobalPtWeighted)b_JetChargeGlobalPtWeighted->GetEntry(entry);
-    if(b_JetChargeRelativePtWeighted)b_JetChargeRelativePtWeighted->GetEntry(entry);
 }
 
-void AnalysisBase::GetSignalBranches ( Long64_t & entry )
+
+
+void AnalysisBase::GetTopSignalBranches ( Long64_t & entry )
 {
     b_GenTop->GetEntry(entry); //!
     b_GenAntiTop->GetEntry(entry); //!
@@ -726,6 +862,8 @@ void AnalysisBase::GetSignalBranches ( Long64_t & entry )
     */
 }
 
+
+
 void AnalysisBase::GetHiggsSignalBranches ( Long64_t & entry )
 {
     b_GenH->GetEntry(entry);
@@ -733,6 +871,8 @@ void AnalysisBase::GetHiggsSignalBranches ( Long64_t & entry )
     b_GenAntiBFromH->GetEntry(entry);
     b_HiggsDecayMode->GetEntry(entry);
 }
+
+
 
 /** determine indices of the two selected leptons in the analysis:
  * 
@@ -767,6 +907,8 @@ bool AnalysisBase::getLeptonPair(size_t &LeadLeptonNumber, size_t &NLeadLeptonNu
     return false;
 }
 
+
+
 double AnalysisBase::get2DSF(TH2* histo, double x, double y)
 {
     int xbin, ybin, dummy;
@@ -776,6 +918,7 @@ double AnalysisBase::get2DSF(TH2* histo, double x, double y)
     ybin = std::min(ybin, histo->GetNbinsY());
     return histo->GetBinContent(xbin, ybin);
 }
+
 
 
 double AnalysisBase::calculateBtagSF()
@@ -886,6 +1029,8 @@ double AnalysisBase::calculateBtagSF()
     return scale_factor;
 }
 
+
+
 double AnalysisBase::getJetHT(const VLV& jet, int pt_cut)
 {
     double result = 0;
@@ -896,6 +1041,8 @@ double AnalysisBase::getJetHT(const VLV& jet, int pt_cut)
     }
     return result;
 }
+
+
 
 void AnalysisBase::prepareTriggerSF()
 {
@@ -929,6 +1076,8 @@ void AnalysisBase::prepareTriggerSF()
     trigEfficiencies.Close();
 }
 
+
+
 double AnalysisBase::getTriggerSF(const LV& lep1, const LV& lep2) {
     
     //For 'ee' and 'mumu' channels Xaxis of the 2D plots is the highest pT lepton
@@ -938,6 +1087,8 @@ double AnalysisBase::getTriggerSF(const LV& lep1, const LV& lep2) {
     return get2DSF(h_TrigSFeta, std::abs(lep1.eta()), std::abs(lep2.eta()));
 }
 
+
+
 double AnalysisBase::getLeptonIDSF(const LV& lep1, const LV& lep2, int lep1pdgId, int lep2pdgId) {
     if (!h_MuonIDSFpteta || !h_ElectronIDSFpteta) return 1;
     if (std::abs(lep1pdgId)==11 && std::abs(lep2pdgId)==11) return get2DSF(h_ElectronIDSFpteta, lep1.Eta(), lep1.pt()) * get2DSF(h_ElectronIDSFpteta, lep2.Eta(), lep2.pt());
@@ -946,6 +1097,8 @@ double AnalysisBase::getLeptonIDSF(const LV& lep1, const LV& lep2, int lep1pdgId
     else return get2DSF(h_ElectronIDSFpteta, lep1.Eta(), lep1.pt())
         * get2DSF(h_MuonIDSFpteta, lep2.Eta(), lep2.pt());
 }
+
+
 
 void AnalysisBase::prepareLeptonIDSF() {
     h_MuonIDSFpteta = nullptr; h_ElectronIDSFpteta = nullptr;
@@ -1000,6 +1153,7 @@ void AnalysisBase::prepareLeptonIDSF() {
 
 
 }
+
 
 
 void AnalysisBase::prepareBtagSF()
@@ -1065,6 +1219,8 @@ void AnalysisBase::prepareBtagSF()
 
 }
 
+
+
 void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue, 
                                      TH1* h_control, double value, double weight)
 {
@@ -1079,6 +1235,8 @@ void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue,
     }
     h->Fill(value, weight);
 }
+
+
 
 ///create control plots for the h_control distribution in bins of h_differential
 void AnalysisBase::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList)
@@ -1117,6 +1275,8 @@ void AnalysisBase::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control,
                      h_control->GetBinLowEdge(h_control->GetNbinsX()+1)));
     }
 }
+
+
 
 /** do the kinematic reconstruction 
  * 
@@ -1162,6 +1322,7 @@ bool AnalysisBase::calculateKinReco(const LV& leptonMinus, const LV& leptonPlus)
 }
 
 
+
 /** Set up the SF for the Kin Reco
  * 
  * Currently a flat per-channel SF is used. For the systematic KIN_UP and KIN_DOWN,
@@ -1188,6 +1349,8 @@ void AnalysisBase::prepareKinRecoSF() {
     else if (systematic_ == "KIN_DOWN") weightKinFit_ -= sfUnc.at(channel_);
 }
 
+
+
 /** return a string describing the true level W+/W- decays from the ttbar system
  * 
  * @return a string like e/tau->mu describing the decay to the W+/W- from the top/tbar decay
@@ -1204,6 +1367,7 @@ const std::string AnalysisBase::topDecayModeString() {
     std::string result = WMode[top] + "/" + WMode[antitop];
     return result;    
 }
+
 
 
 /** prepare JER/JES systematics
@@ -1224,6 +1388,8 @@ void AnalysisBase::prepareJER_JES()
         doJesJer_ = true;
     }
 }
+
+
 
 /** Apply the JER or JES systematic
  * 

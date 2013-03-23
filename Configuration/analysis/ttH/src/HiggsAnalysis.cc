@@ -512,12 +512,12 @@ HiggsAnalysis::Process(Long64_t entry){
     }
     
     
-    for(auto jetChargeGlobalPtWeighted : *JetChargeGlobalPtWeighted_){
+    for(auto jetChargeGlobalPtWeighted : *jetChargeGlobalPtWeighted_){
         h_jetChargeGlobalPtWeighted->Fill(jetChargeGlobalPtWeighted, weight);
         FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetChargeGlobalPtWeighted, jetChargeGlobalPtWeighted, weight);
     }
     
-    for(auto jetChargeRelativePtWeighted : *JetChargeRelativePtWeighted_){
+    for(auto jetChargeRelativePtWeighted : *jetChargeRelativePtWeighted_){
         h_jetChargeRelativePtWeighted->Fill(jetChargeRelativePtWeighted, weight);
         FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetChargeRelativePtWeighted, jetChargeRelativePtWeighted, weight);
     }

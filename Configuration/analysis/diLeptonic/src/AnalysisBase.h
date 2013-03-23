@@ -24,88 +24,137 @@ class TString;
 
 class AnalysisBase : public TSelector
 {
+    
+// Variables accesing the root-file content (nTuple branches and information stored in TObjStrings and histograms)
 protected:    
-    // Variables for accessing the nTuple branches
-    VLV             *leptons_;
-    std::vector<int>     *lepPdgId_;
-    std::vector<double>  *lepPfIso_;
-    std::vector<double>  *lepCombIso_;
-    std::vector<double>  *lepDxyVertex0_;
-    VLV             *jets_;
-    VLV             *jetsForMET_;
-    VLV             *associatedGenJet_;
-    VLV             *associatedGenJetForMET_;
-    std::vector<double>  *jetJERSF_;
-    std::vector<double>  *jetForMETJERSF_;
-    std::vector<double>  *jetBTagTCHE_;
-    std::vector<double>  *jetBTagCSV_;
-    std::vector<double>  *jetBTagSSVHE_;
-    std::vector<int>     *jetPartonFlavour_;
-    //VLV             *genJets;
-    LV              *met_;
-    UInt_t          runNumber_;
-    UInt_t          lumiBlock_;
-    UInt_t          eventNumber_;
-    UInt_t          triggerBits_;
-    Double_t        weightGenerator_;
-    std::vector<double>  *weightPDF_;
-    Int_t           vertMulti_;
-    Int_t           vertMultiTrue_;
-
-    JetCorrectionUncertainty *unc_;
-    bool            doJesJer_;
     
-#ifndef __CINT__   
+// Variables associated to nTuple branches
+    
+    /// nTuple branches relevant for reconstruction level
+    // Concerning physics objects
+    VLV                 *leptons_;
+    std::vector<int>    *lepPdgId_;
+    //std::vector<double> *lepID_;
+    std::vector<double> *lepPfIso_;
+    //std::vector<double> *lepChargedHadronIso_;
+    //std::vector<double> *lepNeutralHadronIso_;
+    //std::vector<double> *lepPhotonIso_;
+    //std::vector<double> *lepPuChargedHadronIso_;
+    std::vector<double> *lepCombIso_;
+    std::vector<double> *lepDxyVertex0_;
+    //std::vector<int>    *lepTrigger_;
+    VLV                 *jets_;
+    std::vector<double> *jetJERSF_;
+    VLV                 *jetsForMET_;
+    std::vector<double> *jetForMETJERSF_;
+    std::vector<double> *jetBTagTCHE_;
+    //std::vector<double> *jetBTagTCHP_;
+    std::vector<double> *jetBTagSSVHE_;
+    //std::vector<double> *jetBTagSSVHP_;
+    //std::vector<double> *jetBTagJetProbability_;
+    //std::vector<double> *jetBTagJetBProbability_;
+    std::vector<double> *jetBTagCSV_;
+    //std::vector<double> *jetBTagCSVMVA_;
+    std::vector<int>    *jetPartonFlavour_;
+    VLV                 *allGenJets_;
+    VLV                 *associatedGenJet_;
+    VLV                 *associatedGenJetForMET_;
+    std::vector<double> *jetChargeGlobalPtWeighted_;
+    std::vector<double> *jetChargeRelativePtWeighted_;
+    //std::vector<int>    *jetAssociatedPartonPdgId_;
+    //std::vector<LV>     *jetAssociatedParton_;
+    LV                  *met_;
+    // Concerning event
+    UInt_t runNumber_;
+    UInt_t lumiBlock_;
+    UInt_t eventNumber_;
+    //int    recoInChannel_;
+    UInt_t triggerBits_;
+    //UInt_t triggerBitsTau_;
+    //std::vector<std::string> *firedTriggers_;
+    Int_t  vertMulti_;
+    // Concerning MC event
+    Int_t               vertMultiTrue_;
+    Double_t            weightGenerator_;
+    std::vector<double> *weightPDF_;
+    
+    
+    /// nTuple branches of kinematic reconstruction
+    VLV              *HypTop_;
+    VLV              *HypAntiTop_;
+    VLV              *HypLepton_;
+    VLV              *HypAntiLepton_;
+    VLV              *HypNeutrino_;
+    VLV              *HypAntiNeutrino_;
+    VLV              *HypBJet_;
+    VLV              *HypAntiBJet_;
+    //VLV              *HypWPlus_;
+    //VLV              *HypWMinus_;
+    std::vector<int> *HypJet0index_;
+    std::vector<int> *HypJet1index_;
+    
+    
+    /// nTuple branch for Drell-Yan decay mode
+    std::vector<int> *ZDecayMode_;
+    #ifndef __CINT__   
     std::function<bool(Long64_t)> checkZDecayMode_;
-#endif
+    #endif
     
-    LV              *GenWPlus_;
-    LV              *GenWMinus_;
-    LV              *GenNeutrino_;
-    LV              *GenAntiNeutrino_;
-    LV              *GenB_;
-    LV              *GenAntiB_;
-    LV              *GenLepton_;
-    LV              *GenAntiLepton_;
-    LV              *GenTop_;
-    LV              *GenAntiTop_;
-    LV              *GenMet_;
-    VLV             *allGenJets_;
-    std::vector<int>     *BHadJetIndex_;
-    std::vector<int>     *AntiBHadJetIndex_;
-
-    VLV             *BHadrons_;
-    VLV             *AntiBHadrons_;
-    std::vector<bool>    *BHadronFromTopB_;
-    std::vector<bool>    *AntiBHadronFromTopB_;
-    std::vector<int>     *BHadronVsJet_;
-    std::vector<int>     *AntiBHadronVsJet_;
-
-    /*   VLV           *BHadronJet;
-    VLV           *AntiBHadronJet;
-    */
-    VLV             *HypTop_;
-    VLV             *HypAntiTop_;
-    VLV             *HypLepton_;
-    VLV             *HypAntiLepton_;
-    VLV             *HypNeutrino_;
-    VLV             *HypAntiNeutrino_;
-    VLV             *HypBJet_;
-    VLV             *HypAntiBJet_;
-//     VLV           *HypWPlus;
-//     VLV           *HypWMinus;
-    std::vector<int>     *HypJet0index_;
-    std::vector<int>     *HypJet1index_;
-    Int_t           topDecayMode_;
-    std::vector<int>     *ZDecayMode_;
     
-    Int_t           higgsDecayMode_;
-    LV              *GenH_;
-    LV              *GenBFromH_;
-    LV              *GenAntiBFromH_;
+    /// nTuple branch for Top decay mode
+    Int_t topDecayMode_;
     
-    std::vector<double> *JetChargeGlobalPtWeighted_;
-    std::vector<double> *JetChargeRelativePtWeighted_;
+    
+    /// nTuple branches for Top signal samples on generator level
+    LV                *GenMet_;
+    LV                *GenTop_;
+    LV                *GenAntiTop_;
+    LV                *GenLepton_;
+    LV                *GenAntiLepton_;
+    //int               GenLeptonPdgId_;
+    //int               GenAntiLeptonPdgId_;
+    //LV                *GenTau_;
+    //LV                *GenAntiTau_;
+    LV                *GenNeutrino_;
+    LV                *GenAntiNeutrino_;
+    LV                *GenB_;
+    LV                *GenAntiB_;
+    LV                *GenWPlus_;
+    LV                *GenWMinus_;
+    //std::vector<LV>   *GenParticleP4_;
+    //std::vector<int>  *GenParticlePdgId_;
+    //std::vector<int>  *GenParticleStatus_;
+    std::vector<int>  *BHadJetIndex_;
+    std::vector<int>  *AntiBHadJetIndex_;
+    VLV               *BHadrons_;
+    VLV               *AntiBHadrons_;
+    std::vector<bool> *BHadronFromTopB_;
+    std::vector<bool> *AntiBHadronFromTopB_;
+    std::vector<int>  *BHadronVsJet_;
+    std::vector<int>  *AntiBHadronVsJet_;
+    std::vector<int>  *genParticlePdg_;
+    std::vector<int>  *genParticleStatus_;
+    std::vector<std::vector<int> > *genParticleIndices_;
+    std::vector<LV>   *genParticle_;
+    std::vector<int>  *bHadIndex_;
+    std::vector<int>  *bHadFlavour_;
+    std::vector<int>  *bHadJetIndex_;
+    
+    
+    /// nTuple branches for Higgs signal samples on generator level
+    Int_t higgsDecayMode_;
+    LV    *GenH_;
+    LV    *GenBFromH_;
+    LV    *GenAntiBFromH_;
+    
+    
+    
+    
+    
+    
+    
+    JetCorrectionUncertainty *unc_;
+    bool doJesJer_;
     
     // Further variables added from the outside
     TString btagFile_;
@@ -123,10 +172,18 @@ protected:
     bool runViaTau_;
     int pdf_no_;
     int trueDYchannelCut_;
+    
+    /// Histogram holding the weighted events of the full sample
     TH1* h_weightedEvents;
+    
+    
+    
+    
+    /// Pileup reweighter
     PUReweighter *pureweighter_;
     
     
+    /// Map holding binned control plots
     //binnedControlPlots contains:
     //map of name of differential distribution
     // -> pair( histogram with the binning of the differential distribution,
@@ -134,86 +191,106 @@ protected:
     std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > > *binnedControlPlots;
     
     
-    // Event counter
-    Int_t           EventCounter_;
+    /// Event counter
+    Int_t EventCounter_;
     
+    
+    
+    
+    
+    
+    
+// Private member data
 private:    
     TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 
-    // List of branches
-    TBranch        *b_lepton;   //!
-    TBranch        *b_lepPdgId;   //!
-    TBranch        *b_lepPfIso;   //!
-    TBranch        *b_lepCombIso;   //!
-    TBranch        *b_lepDxyVertex0;
-    TBranch        *b_associatedGenJet;   //!
-    TBranch        *b_associatedGenJetForMET;
-    TBranch        *b_jet;   //!
-    TBranch        *b_jetJERSF;   //!
-    TBranch        *b_jetForMET;   //!
-    TBranch        *b_jetForMETJERSF;   //!
-    TBranch        *b_jetBTagTCHE;   //!
-    TBranch        *b_jetBTagCSV;   //!
-    TBranch        *b_jetBTagSSVHE;   //!
-    TBranch        *b_jetPartonFlavour;   //!
-    //TBranch        *b_genJet;   //!
-    TBranch        *b_met;   //!
-    TBranch        *b_runNumber;   //!
-    TBranch        *b_lumiBlock;   //!
-    TBranch        *b_eventNumber;   //!
-    TBranch        *b_triggerBits;   //!
-    TBranch        *b_weightGenerator;   //!
-    TBranch        *b_weightPDF;
-    TBranch        *b_vertMulti;   //!
-    TBranch        *b_vertMultiTrue;
-
-    TBranch        *b_GenTop;   //!
-    TBranch        *b_GenAntiTop;   //!
-    TBranch        *b_GenLepton;   //!
-    TBranch        *b_GenAntiLepton;   //!
-    TBranch        *b_GenNeutrino;   //!
-    TBranch        *b_GenAntiNeutrino;   //!
-    TBranch        *b_GenB;   //!
-    TBranch        *b_GenAntiB;   //!
-    TBranch        *b_GenWPlus;   //!
-    TBranch        *b_GenWMinus;   //!
-    TBranch        *b_allGenJets;   //!
-    TBranch        *b_BHadJetIndex;   //!
-    TBranch        *b_AntiBHadJetIndex;   //!
-    TBranch        *b_GenMet;
-
-    TBranch        *b_BHadrons;   //!
-    TBranch        *b_AntiBHadrons;   //!
-    TBranch        *b_BHadronFromTopB;   //!
-    TBranch        *b_AntiBHadronFromTopB;   //!
-    TBranch        *b_BHadronVsJet;   //!
-    TBranch        *b_AntiBHadronVsJet;   //!
-
-    //TBranch        *b_BHadronJet_;   //!
-    //TBranch        *b_AntiBHadronJet_;   //!
-
-    TBranch        *b_HypTop;   //!
-    TBranch        *b_HypAntiTop;   //!
-    TBranch        *b_HypLepton;   //!
-    TBranch        *b_HypAntiLepton;   //!
-    TBranch        *b_HypNeutrino;   //!
-    TBranch        *b_HypAntiNeutrino;   //!
-    TBranch        *b_HypB;   //!
-    TBranch        *b_HypAntiB;   //!
-    TBranch        *b_HypWPlus;   //!
-    TBranch        *b_HypWMinus;   //!
-    TBranch        *b_HypJet0index;   //!
-    TBranch        *b_HypJet1index;   //!
-    TBranch        *b_TopDecayMode;   //!
-    TBranch        *b_ZDecayMode;
+    /// nTuple branches relevant for reconstruction level
+    // Concerning physics objects
+    TBranch *b_lepton;   //!
+    TBranch *b_lepPdgId;   //!
+    TBranch *b_lepPfIso;   //!
+    TBranch *b_lepCombIso;   //!
+    TBranch *b_lepDxyVertex0;
+    TBranch *b_associatedGenJet;   //!
+    TBranch *b_associatedGenJetForMET;
+    TBranch *b_jet;   //!
+    TBranch *b_jetJERSF;   //!
+    TBranch *b_jetForMET;   //!
+    TBranch *b_jetForMETJERSF;   //!
+    TBranch *b_jetBTagTCHE;   //!
+    TBranch *b_jetBTagCSV;   //!
+    TBranch *b_jetBTagSSVHE;   //!
+    TBranch *b_jetPartonFlavour;   //!
+    TBranch *b_met;   //!
+    TBranch *b_jetChargeGlobalPtWeighted;
+    TBranch *b_jetChargeRelativePtWeighted;
+    // Concerning event
+    TBranch *b_runNumber;   //!
+    TBranch *b_lumiBlock;   //!
+    TBranch *b_eventNumber;   //!
+    TBranch *b_triggerBits;   //!
+    TBranch *b_vertMulti;   //!
+    // Concerning MC event
+    TBranch *b_weightGenerator;   //!
+    TBranch *b_weightPDF;
+    TBranch *b_vertMultiTrue;
     
-    TBranch        *b_HiggsDecayMode;
-    TBranch        *b_GenH;
-    TBranch        *b_GenBFromH;
-    TBranch        *b_GenAntiBFromH;
     
-    TBranch        *b_JetChargeGlobalPtWeighted;
-    TBranch        *b_JetChargeRelativePtWeighted;
+    /// nTuple branches of kinematic reconstruction
+    TBranch *b_HypTop;   //!
+    TBranch *b_HypAntiTop;   //!
+    TBranch *b_HypLepton;   //!
+    TBranch *b_HypAntiLepton;   //!
+    TBranch *b_HypNeutrino;   //!
+    TBranch *b_HypAntiNeutrino;   //!
+    TBranch *b_HypB;   //!
+    TBranch *b_HypAntiB;   //!
+    TBranch *b_HypWPlus;   //!
+    TBranch *b_HypWMinus;   //!
+    TBranch *b_HypJet0index;   //!
+    TBranch *b_HypJet1index;   //!
+    
+    
+    /// nTuple branch for Drell-Yan decay mode
+    TBranch *b_ZDecayMode;
+    
+    
+    /// nTuple branch for Top decay mode
+    TBranch *b_TopDecayMode;   //!
+    
+    
+    /// nTuple branches for Top signal samples on generator level
+    TBranch *b_GenTop;   //!
+    TBranch *b_GenAntiTop;   //!
+    TBranch *b_GenLepton;   //!
+    TBranch *b_GenAntiLepton;   //!
+    TBranch *b_GenNeutrino;   //!
+    TBranch *b_GenAntiNeutrino;   //!
+    TBranch *b_GenB;   //!
+    TBranch *b_GenAntiB;   //!
+    TBranch *b_GenWPlus;   //!
+    TBranch *b_GenWMinus;   //!
+    TBranch *b_allGenJets;   //!
+    TBranch *b_BHadJetIndex;   //!
+    TBranch *b_AntiBHadJetIndex;   //!
+    TBranch *b_GenMet;
+    TBranch *b_BHadrons;   //!
+    TBranch *b_AntiBHadrons;   //!
+    TBranch *b_BHadronFromTopB;   //!
+    TBranch *b_AntiBHadronFromTopB;   //!
+    TBranch *b_BHadronVsJet;   //!
+    TBranch *b_AntiBHadronVsJet;   //!
+    
+
+    /// nTuple branches for Higgs signal samples on generator level
+    TBranch *b_HiggsDecayMode;
+    TBranch *b_GenH;
+    TBranch *b_GenBFromH;
+    TBranch *b_GenAntiBFromH;
+    
+    
+    
+    
     
 protected:
     TH1 *h_ClosureTotalWeight;
@@ -252,11 +329,16 @@ protected:
     
 public:
     AnalysisBase ( TTree * = 0 ) :
-        unc_ {nullptr}, doJesJer_ {false},
         checkZDecayMode_ {nullptr},
+        unc_ {nullptr},
+        doJesJer_ {false},
         isHiggsSignal_ {false},
-        runViaTau_ {false}, pdf_no_ {-1}, pureweighter_ {nullptr}, kinRecoOnTheFly_ {false},
-        doClosureTest_ {false}, closureFunction_ {nullptr}
+        runViaTau_ {false},
+        pdf_no_ {-1},
+        pureweighter_ {nullptr},
+        kinRecoOnTheFly_ {false},
+        doClosureTest_ {false},
+        closureFunction_ {nullptr}
         {};
     virtual ~AnalysisBase(){};
     virtual void SlaveBegin(TTree *);
@@ -281,6 +363,23 @@ public:
     virtual void Terminate();
 
     
+private:
+    
+    /// Set addresses of nTuple branches relevant for reconstruction level
+    void SetRecoBranchAddresses();
+    /// Set addresses of nTuple branches of kinematic reconstruction
+    void SetKinRecoBranchAddresses();
+    /// Set addresses of nTuple branch for Drell-Yan decay mode
+    void SetDyDecayBranchAddress();
+    /// Set addresses of nTuple branch for Top decay mode
+    void SetTopDecayBranchAddress();
+    /// Set addresses of nTuple branches for Top signal samples on generator level
+    void SetTopSignalBranchAddresses();
+    /// Set addresses of nTuple branches for Higgs signal samples on generator level
+    void SetHiggsSignalBranchAddresses();
+    
+    
+    
 protected:
     
     // store the object in the output list and return it
@@ -302,10 +401,18 @@ protected:
     // Methods which need to be overwritable
     virtual bool produceBtagEfficiencies();
     
-    // Other methods which need to be protected
-    void GetRecoBranches ( Long64_t & );
-    void GetSignalBranches ( Long64_t & );
-    void GetHiggsSignalBranches ( Long64_t & );
+    /// Access event entry for nTuple branches relevant for reconstruction level
+    void GetRecoBranches(Long64_t &);
+    /// Access event entry for nTuple branches of kinematic reconstruction
+    void GetKinRecoBranches(Long64_t &);
+    /// Access event entry for nTuple branch for Drell-Yan decay mode
+    void GetDyDecayBranch(Long64_t &);
+    /// Access event entry for nTuple branch for Drell-Yan decay mode
+    void GetTopDecayBranch(Long64_t &);
+    /// Access event entry for nTuple branches for Top signal samples on generator level
+    void GetTopSignalBranches(Long64_t &);
+    /// Access event entry for nTuple branches for Higgs signal samples on generator level
+    void GetHiggsSignalBranches(Long64_t &);
     
     void cleanJetCollection(double ptcut, double etacut);
     bool calculateKinReco(const LV &leptonMinus, const LV &leptonPlus);

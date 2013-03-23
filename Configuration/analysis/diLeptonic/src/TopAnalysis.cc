@@ -662,6 +662,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     }
 
     GetRecoBranches(entry);
+    GetKinRecoBranches(entry);
     //We must correct for the madGraph branching fraction being 1/9 for dileptons (PDG average is .108)
     if ( correctMadgraphBR_ ) {
         if ( topDecayMode_ == 11 ) { //all hadronic decay
@@ -707,7 +708,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     int AntiBHadronIndex=-1;
     
     if (isSignal_) {
-        GetSignalBranches(entry);
+        GetTopSignalBranches(entry);
 
         std::vector<size_t> idx_leadbHadJet;
         std::vector<size_t> idx_nleadbHadJet;
