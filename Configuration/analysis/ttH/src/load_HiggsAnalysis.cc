@@ -153,7 +153,6 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             selector->SetSamplename(samplename->GetString(), systematics_from_file->GetString());
             selector->SetOutputfilename(outputfilename);
             selector->SetRunViaTau(0);
-            selector->SetClosureTest(closure, slope);
             selector->SetHiggsInclusiveSample(isHiggsInclusive);
             selector->SetHiggsInclusiveSeparation(false);
             
@@ -180,7 +179,6 @@ void load_HiggsAnalysis(TString validFilenamePattern,
                     selector->SetSystematic(pdfName);
                     weightedEvents->SetBinContent(1, pdfWeights->GetBinContent(pdf_no));
                     selector->SetWeightedEvents(weightedEvents);
-                    selector->SetPDF(pdf_no);
                     chain.Process(selector);
                 }
             }

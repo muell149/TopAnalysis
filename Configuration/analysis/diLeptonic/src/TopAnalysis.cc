@@ -24,17 +24,28 @@
 using ROOT::Math::VectorUtil::DeltaPhi;
 using ROOT::Math::VectorUtil::DeltaR;
 
+
+
+
+
 ///top production xsec in pb
 constexpr double TOPXSEC = 234;
+
 /// Luminosity in 1/fb
 constexpr double LUMI = 12.21; 
 
 ///do we want to run the sync excercise?
 constexpr bool RUNSYNC = false;
 
-
+/// Cut value for jet pt
 constexpr double JETPTCUT = 30;
+
+/// Cut value for jet eta
 constexpr double JETETACUT = 2.4;
+
+/// CSV Loose working point
+constexpr double BtagWP = 0.244;
+
 
 
 
@@ -43,18 +54,21 @@ void TopAnalysis::Begin(TTree* )
 {
     AnalysisBase::Begin(0);
     
-    bEff = 0;
-    
+    prepareTriggerSF();
+    prepareLeptonIDSF();
+    prepareJER_JES();
     prepareBtagSF();
     prepareKinRecoSF();
 }
 
 
+
 void TopAnalysis::Terminate()
 {
     AnalysisBase::Terminate();
+    
+    if(isSignal_)produceBtagEfficiencies();
 }
-
 
 
 
@@ -601,17 +615,7 @@ void TopAnalysis::SlaveBegin ( TTree * )
     
     
     //btagSF
-    const int PtMax = 11;
-    const int EtaMax = 5;
-    Double_t ptbins[PtMax+1] = {20.,30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,800.};
-    Double_t etabins[EtaMax+1] = {0.0,0.5,1.0,1.5,2.0,2.4};
-    
-    h_bjets = store(new TH2D("bjets2D", "unTagged Bjets", PtMax, ptbins, EtaMax, etabins));              h_bjets->Sumw2();
-    h_btaggedjets = store(new TH2D("bjetsTagged2D", "Tagged Bjets", PtMax, ptbins, EtaMax, etabins));    h_btaggedjets->Sumw2();
-    h_cjets = store(new TH2D("cjets2D", "unTagged Cjets", PtMax, ptbins, EtaMax, etabins));              h_cjets->Sumw2();
-    h_ctaggedjets = store(new TH2D("cjetsTagged2D", "Tagged Cjets", PtMax, ptbins, EtaMax, etabins));    h_ctaggedjets->Sumw2();
-    h_ljets = store(new TH2D("ljets2D", "unTagged Ljets", PtMax, ptbins, EtaMax, etabins));              h_ljets->Sumw2();
-    h_ltaggedjets = store(new TH2D("ljetsTagged2D", "Tagged Ljets", PtMax, ptbins, EtaMax, etabins));    h_ltaggedjets->Sumw2();
+    this->bookBtagHistograms();
     
     h_PUSF = store(new TH1D("PUSF", "PU SF per event", 200, 0.5, 1.5));
     h_TrigSF = store(new TH1D("TrigSF", "Trigger SF per event", 200, 0.5, 1.5));
@@ -623,10 +627,14 @@ void TopAnalysis::SlaveBegin ( TTree * )
 
 }
 
+
+
 void TopAnalysis::SlaveTerminate()
 {
     AnalysisBase::SlaveTerminate();
 }
+
+
 
 Bool_t TopAnalysis::Process ( Long64_t entry )
 {    
@@ -636,7 +644,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     //do we have a DY true level cut?
     if (checkZDecayMode_ && !checkZDecayMode_(entry)) return kTRUE;
     
-    if (isTtbarPlusTauSample_ || correctMadgraphBR_) GetTopDecayModeEntry(entry); 
+    if (isTtbarPlusTauSample_ || correctMadgraphBR_) GetTopDecayModeEntry(entry);
     //decayMode contains the decay of the top (*10) + the decay of the antitop
     //1=hadron, 2=e, 3=mu, 4=tau->hadron, 5=tau->e, 6=tau->mu
     //i.e. 23 == top decays to e, tbar decays to mu
@@ -863,7 +871,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     }
 
     
-    double BtagWP = 0.244; //CSV Loose working point
     std::vector<int> BJetIndex;
     for ( auto it = jetBTagCSV_->begin(); it<jetBTagCSV_->end(); it++ ) {
         if ( *it > BtagWP) {
@@ -1401,31 +1408,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     //finally do the btag efficiency calculation stuff
     if(isSignal_){
-        for (size_t i = 0; i < jets_->size(); ++i) {
-            if (jets_->at(i).Pt() <= JETPTCUT) break;
-            double absJetEta = abs(jets_->at(i).Eta());
-            if (absJetEta<2.4) {
-                int partonFlavour = abs(jetPartonFlavour_->at(i));
-                if(partonFlavour == 5){//b-quark
-                    h_bjets->Fill(jets_->at(i).Pt(), absJetEta);
-                    if((*jetBTagCSV_)[i]>BtagWP){
-                        h_btaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
-                    }
-                }
-                else if (partonFlavour == 4){//c-quark
-                    h_cjets->Fill(jets_->at(i).Pt(), absJetEta);
-                    if((*jetBTagCSV_)[i]>BtagWP){
-                        h_ctaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
-                    }
-                }
-                else if (partonFlavour != 0){//l-quark
-                    h_ljets->Fill(jets_->at(i).Pt(), absJetEta);
-                    if((*jetBTagCSV_)[i]>BtagWP){
-                        h_ltaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
-                    }
-                }
-            }
-        }
+        this->fillBtagHistograms(JETPTCUT, BtagWP);
     }
     
     if (weightBtagSF == -1) weightBtagSF = isMC_ ? calculateBtagSF() : 1; //avoid calculation of the btagSF twice
@@ -1880,12 +1863,13 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 }
 
 
-double TopAnalysis::calculateClosureTestWeight()
+
+void TopAnalysis::SetPDF(int pdf_no)
 {
-    double weight = closureFunction_();
-    h_ClosureTotalWeight->Fill(1, weight);
-    return weight;
+    this->pdf_no_ = pdf_no;
 }
+
+
 
 void TopAnalysis::SetClosureTest(TString closure, double slope)
 {
@@ -1926,4 +1910,64 @@ void TopAnalysis::SetClosureTest(TString closure, double slope)
         samplename_.Append("_fakedata");
     }
 }
+
+
+
+double TopAnalysis::calculateClosureTestWeight()
+{
+    double weight = closureFunction_();
+    h_ClosureTotalWeight->Fill(1, weight);
+    return weight;
+}
+
+
+
+double TopAnalysis::globalNormalisationFactorClosureTest()
+{
+    double globalNormalisationFactor(1);
+    if (doClosureTest_) {
+        TH1 *total = dynamic_cast<TH1*>(fOutput->FindObject("ClosureTotalWeight"));
+        if (!total) {
+            std::cerr << "ClosureTotalWeight histogram is missing!\n"; exit(1);
+        }
+        globalNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
+        std::cout << "Global normalisation factor of closure test: " << globalNormalisationFactor << "\n";
+    }
+    return globalNormalisationFactor;
+}
+
+
+
+double TopAnalysis::globalNormalisationFactorPDF()
+{
+    double globalNormalisationFactor(1);
+    if (pdf_no_ >= 0) {
+        TH1 *total = dynamic_cast<TH1*>(fOutput->FindObject("PDFTotalWeight"));
+        if (!total) {
+            std::cerr << "PDFTotalWeight histogram is missing!\n"; exit(1);
+        }
+        globalNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
+        std::cout << "PDF Weight Normalisation = " << globalNormalisationFactor << "\n";
+    }
+    return globalNormalisationFactor;
+}
+
+
+
+double TopAnalysis::overallGlobalNormalisationFactor()
+{
+    double globalNormalisationFactor(1);
+    globalNormalisationFactor *= globalNormalisationFactorClosureTest();
+    globalNormalisationFactor *= globalNormalisationFactorPDF();
+    return globalNormalisationFactor;
+}
+
+
+
+
+
+
+
+
+
 

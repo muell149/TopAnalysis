@@ -65,6 +65,10 @@ HiggsAnalysis::~HiggsAnalysis(){}
 void
 HiggsAnalysis::Begin(TTree*){
     AnalysisBase::Begin(0);
+    
+    prepareTriggerSF();
+    prepareLeptonIDSF();
+    prepareJER_JES();
 }
 
 
@@ -541,12 +545,6 @@ void HiggsAnalysis::SetSamplename(TString samplename, TString)
     // FIXME: for ttbarW, also correction for 3rd W needs to be applied, for ttbarhiggs corrections for 2 or 4 Ws needed, depending on Higgs decay (H->WW?)
     // FIXME: and what about Wlnu sample ?
     correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs");
-}
-
-
-
-bool HiggsAnalysis::produceBtagEfficiencies(){
-    return false;
 }
 
 

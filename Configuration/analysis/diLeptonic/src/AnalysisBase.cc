@@ -27,6 +27,30 @@
 
 
 
+AnalysisBase::AnalysisBase(TTree*):
+samplename_(""), channel_(""), systematic_(""),
+isMC_(false), isSignal_(false), isHiggsSignal_(false),
+isTtbarPlusTauSample_(false), correctMadgraphBR_(false),
+channelPdgIdProduct_(0), trueDYchannelCut_(0),
+checkZDecayMode_(nullptr), outputfilename_(""),
+runViaTau_(false),
+pureweighter_(nullptr),
+doJesJer_(false), weightKinFit_(0),
+binnedControlPlots_(0), EventCounter_(0),
+chain_(0), h_weightedEvents(0),
+unc_(nullptr), btagFile_(""),
+h_bjets(0), h_cjets(0), h_ljets(0),
+h_btaggedjets(0), h_ctaggedjets(0), h_ltaggedjets(0),
+bEff(0), cEff(0), lEff(0),
+h_TrigSFeta(0), h_MuonIDSFpteta(0), h_ElectronIDSFpteta(0),
+btag_ptmedian_(0), btag_etamedian_(0)
+{
+    this->clearBranches();
+    this->clearBranchVariables();
+}
+
+
+
 /** Prepare some variables before going to the event loop
  * 
  * This function is used to calculate all scale factors and
@@ -35,13 +59,9 @@
  * For some event-dependent scale factors, histograms for a 
  * lookup are read.
  */
-void AnalysisBase::Begin ( TTree * )
+void AnalysisBase::Begin(TTree*)
 {
-    EventCounter_ = 0;
-    
-    prepareTriggerSF();
-    prepareLeptonIDSF();
-    prepareJER_JES();
+    TSelector::Begin(0);
 }
 
 
@@ -79,10 +99,10 @@ void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
 
 
 
-void AnalysisBase::SlaveBegin(TTree* tree)
+void AnalysisBase::SlaveBegin(TTree*)
 {
-    TSelector::SlaveBegin(tree);
-    binnedControlPlots = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
+    TSelector::SlaveBegin(0);
+    binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
 }
 
 
@@ -92,10 +112,10 @@ void AnalysisBase::SlaveTerminate()
     // The SlaveTerminate() function is called after all entries or objects
     // have been processed. When running with PROOF SlaveTerminate() is called
     // on each slave server.
-    for (auto it = binnedControlPlots->begin(); it != binnedControlPlots->end(); ++it) {
+    for (auto it = binnedControlPlots_->begin(); it != binnedControlPlots_->end(); ++it) {
         delete (*it).second.first;
     }
-    delete binnedControlPlots;
+    delete binnedControlPlots_;
 }
 
 
@@ -105,7 +125,9 @@ void AnalysisBase::Terminate()
     // The Terminate() function is the last function to be called during
     // a query. It always runs on the client, it can be used to present
     // the results graphically or save the results to file.
-
+    
+    
+    // Set up output file path and name, and open file for writing
     std::string f_savename = "selectionRoot/";
     gSystem->MakeDirectory( f_savename.c_str() );
     f_savename.append ( systematic_ );
@@ -116,43 +138,25 @@ void AnalysisBase::Terminate()
     f_savename.append ( "/" );
     f_savename.append ( outputfilename_ );
     //f_savename.append ( ".root" );
-
     std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<samplename_<<"!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-
-    //calculate an overall weight due to the shape reweighting
-    double globalNormalisationFactor = 1;
-    if (doClosureTest_) {
-        TH1 *total = dynamic_cast<TH1*>(fOutput->FindObject("ClosureTotalWeight"));
-        if (!total) {
-            std::cerr << "ClosureTotalWeight histogram is missing!\n"; exit(1);
-        }
-        globalNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
-        std::cout << "gloablNormalisationFactor = " << globalNormalisationFactor << "\n";
-    }
-    if (pdf_no_ >= 0) {
-        TH1 *total = dynamic_cast<TH1*>(fOutput->FindObject("PDFTotalWeight"));
-        if (!total) {
-            std::cerr << "PDFTotalWeight histogram is missing!\n"; exit(1);
-        }
-        globalNormalisationFactor *= total->GetEntries() / total->GetBinContent(1);
-        std::cout << "PDF Weight Normalisation = " << globalNormalisationFactor << "\n";
+    TFile outputFile(f_savename.c_str(), "RECREATE");
+    if (outputFile.IsZombie()) {
+        std::cerr << "Cannot open " << f_savename << " for writing!\n";
+        exit(2);
     }
     
-    //write stuff into file
-    TFile f(f_savename.c_str(), "RECREATE");
-    if (f.IsZombie()) { std::cerr << "Cannot open " << f_savename << " for writing!\n"; exit(2); }
+    
+    //calculate an overall weight due to the shape reweighting, and apply it
+    const double globalNormalisationFactor = overallGlobalNormalisationFactor();
     TIterator* it = fOutput->MakeIterator();
     while (TObject* obj = it->Next()) {
-        TH1 *h = dynamic_cast<TH1*>(obj);
-        if (h) { 
-            h->Scale(globalNormalisationFactor); 
-            //std::cout << "Scaling: " << h->GetName() << "\n";
-        } else { 
-            //std::cout << "Not scaling: " << obj->GetName() << "\n"; 
-        }
+        TH1 *hist = dynamic_cast<TH1*>(obj);
+        if (hist) hist->Scale(globalNormalisationFactor); 
         obj->Write();
-        //std::cout << obj->GetName() << "\n";
     }
+    
+    
+    // Write additional information into file
     h_weightedEvents->Write();
     TObjString(channel_).Write("channelName");
     TObjString(systematic_).Write("systematicsName");
@@ -160,97 +164,112 @@ void AnalysisBase::Terminate()
     TObjString(isSignal_ ? "1" : "0").Write("isSignal");
     TObjString(isHiggsSignal_ ? "1" : "0").Write("isHiggsSignal");
     TObjString(isMC_ ? "1" : "0").Write("isMC");
-    f.Close();
+    outputFile.Close();
     std::cout<<"Created: \033[1;1m"<<f_savename<<"\033[1;m\n\n";
     
-    if (produceBtagEfficiencies()) {
-        std::cout << "Signal sample, writing out btag efficiencies\n";
-        f_savename = "selectionRoot/BTagEff";
-        gSystem->MakeDirectory(f_savename.c_str());
-        f_savename.append("/");
-        f_savename.append(systematic_); 
-        gSystem->MakeDirectory(f_savename.c_str());
-        f_savename.append("/");
-        f_savename.append(channel_); 
-        gSystem->MakeDirectory(f_savename.c_str());
-        f_savename.append("/");
-        f_savename.append(outputfilename_);
-        
-        h_bjets = dynamic_cast<TH2*>( fOutput->FindObject("bjets2D") );
-        h_btaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("bjetsTagged2D") );
-        h_cjets = dynamic_cast<TH2*>( fOutput->FindObject("cjets2D") );
-        h_ctaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("cjetsTagged2D") );
-        h_ljets = dynamic_cast<TH2*>( fOutput->FindObject("ljets2D") );
-        h_ltaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("ljetsTagged2D") );
-        if (!h_bjets || !h_btaggedjets || !h_cjets || !h_ctaggedjets || !h_ljets || !h_ltaggedjets) {
-            std::cerr << "At least one of the btag histograms is missing\n";
-            exit(4);
-        }
-        TFile fbtag(f_savename.c_str(),"RECREATE");
-        h_bjets->Write();
-        h_btaggedjets->Write();
-        h_cjets->Write();
-        h_ctaggedjets->Write();
-        h_ljets->Write();
-        h_ltaggedjets->Write();
-        
-        TH1 *btaggedPt = h_btaggedjets->ProjectionX(); TH1 *btaggedEta = h_btaggedjets->ProjectionY();
-        TH1 *ctaggedPt = h_ctaggedjets->ProjectionX(); TH1 *ctaggedEta = h_ctaggedjets->ProjectionY();
-        TH1 *ltaggedPt = h_ltaggedjets->ProjectionX(); TH1 *ltaggedEta = h_ltaggedjets->ProjectionY();
-        
-        TH1 *bUntaggedPt = h_bjets->ProjectionX(); TH1 *bEta = h_bjets->ProjectionY();
-        TH1 *cUntaggedPt = h_cjets->ProjectionX(); TH1 *cEta = h_cjets->ProjectionY();
-        TH1 *lUntaggedPt = h_ljets->ProjectionX(); TH1 *lEta = h_ljets->ProjectionY();
-        
-        //Calculate the medians and save them in a txt file
-        double PtMedian = Median(btaggedPt);
-        double EtaMedian = Median(btaggedEta);
-        printf("Median: pT = %.0f, eta = %.2f\n", PtMedian, EtaMedian);
-        TH1* medianHist = new TH1D("Medians", "medians", 2, -0.5, 1.5);
-        medianHist->GetXaxis()->SetBinLabel(1, "pT");
-        medianHist->GetXaxis()->SetBinLabel(2, "eta");
-        medianHist->SetBinContent(1, PtMedian);
-        medianHist->SetBinContent(2, EtaMedian);
-        medianHist->Write();
-        
-        TH1 *beffPt =(TH1*) btaggedPt->Clone("beffPt");
-        TH1 *ceffPt =(TH1*) ctaggedPt->Clone("ceffPt");
-        TH1 *leffPt =(TH1*) ltaggedPt->Clone("leffPt");
-        
-        TH1 *beffEta =(TH1*) btaggedEta->Clone("beffEta");  
-        TH1 *ceffEta =(TH1*) ctaggedEta->Clone("ceffEta");  
-        TH1 *leffEta =(TH1*) ltaggedEta->Clone("leffEta");  
-        
-        //Calculate Efficiency: N_tageed/N_all
-        //Calculate also the binomial error (option "B" does it)!!
-        beffPt->Divide(btaggedPt, bUntaggedPt, 1, 1, "B"); 
-        ceffPt->Divide(ctaggedPt, cUntaggedPt, 1, 1, "B"); 
-        leffPt->Divide(ltaggedPt, lUntaggedPt, 1, 1, "B");
-        beffEta->Divide(btaggedEta, bEta, 1, 1, "B"); 
-        ceffEta->Divide(ctaggedEta, cEta, 1, 1, "B"); 
-        leffEta->Divide(ltaggedEta, lEta, 1, 1, "B"); 
-        h_btaggedjets->Divide(h_btaggedjets, h_bjets, 1, 1, "B"); 
-        h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); 
-        h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); 
-
-        //Save histograms in ROOT file
-        beffPt->Write("BEffPt"); 
-        ceffPt->Write("CEffPt"); 
-        leffPt->Write("LEffPt"); 
-        beffEta->Write("BEffEta"); 
-        ceffEta->Write("CEffEta"); 
-        leffEta->Write("LEffEta"); 
-        h_btaggedjets->Write("BEffPerJet");
-        h_ctaggedjets->Write("CEffPerJet");
-        h_ltaggedjets->Write("LEffPerJet");
-        
-        fbtag.Close();
-        std::cout << "Done.\n\n\n";
-    }
+    
+    // Cleanup
     fOutput->SetOwner();
     fOutput->Clear();
     delete unc_;
     unc_ = nullptr;
+}
+
+
+
+void AnalysisBase::produceBtagEfficiencies()
+{
+    std::cout << "Signal sample, writing out btag efficiencies\n";
+    std::string f_savename = "selectionRoot/BTagEff";
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/");
+    f_savename.append(systematic_); 
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/");
+    f_savename.append(channel_); 
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/");
+    f_savename.append(outputfilename_);
+    
+    h_bjets = dynamic_cast<TH2*>( fOutput->FindObject("bjets2D") );
+    h_btaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("bjetsTagged2D") );
+    h_cjets = dynamic_cast<TH2*>( fOutput->FindObject("cjets2D") );
+    h_ctaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("cjetsTagged2D") );
+    h_ljets = dynamic_cast<TH2*>( fOutput->FindObject("ljets2D") );
+    h_ltaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("ljetsTagged2D") );
+    if (!h_bjets || !h_btaggedjets || !h_cjets || !h_ctaggedjets || !h_ljets || !h_ltaggedjets) {
+        std::cerr << "At least one of the btag histograms is missing\n";
+        exit(4);
+    }
+    TFile fbtag(f_savename.c_str(),"RECREATE");
+    h_bjets->Write();
+    h_btaggedjets->Write();
+    h_cjets->Write();
+    h_ctaggedjets->Write();
+    h_ljets->Write();
+    h_ltaggedjets->Write();
+    
+    TH1 *btaggedPt = h_btaggedjets->ProjectionX(); TH1 *btaggedEta = h_btaggedjets->ProjectionY();
+    TH1 *ctaggedPt = h_ctaggedjets->ProjectionX(); TH1 *ctaggedEta = h_ctaggedjets->ProjectionY();
+    TH1 *ltaggedPt = h_ltaggedjets->ProjectionX(); TH1 *ltaggedEta = h_ltaggedjets->ProjectionY();
+    
+    TH1 *bUntaggedPt = h_bjets->ProjectionX(); TH1 *bEta = h_bjets->ProjectionY();
+    TH1 *cUntaggedPt = h_cjets->ProjectionX(); TH1 *cEta = h_cjets->ProjectionY();
+    TH1 *lUntaggedPt = h_ljets->ProjectionX(); TH1 *lEta = h_ljets->ProjectionY();
+    
+    //Calculate the medians and save them in a txt file
+    double PtMedian = Median(btaggedPt);
+    double EtaMedian = Median(btaggedEta);
+    printf("Median: pT = %.0f, eta = %.2f\n", PtMedian, EtaMedian);
+    TH1* medianHist = new TH1D("Medians", "medians", 2, -0.5, 1.5);
+    medianHist->GetXaxis()->SetBinLabel(1, "pT");
+    medianHist->GetXaxis()->SetBinLabel(2, "eta");
+    medianHist->SetBinContent(1, PtMedian);
+    medianHist->SetBinContent(2, EtaMedian);
+    medianHist->Write();
+    
+    TH1 *beffPt =(TH1*) btaggedPt->Clone("beffPt");
+    TH1 *ceffPt =(TH1*) ctaggedPt->Clone("ceffPt");
+    TH1 *leffPt =(TH1*) ltaggedPt->Clone("leffPt");
+    
+    TH1 *beffEta =(TH1*) btaggedEta->Clone("beffEta");  
+    TH1 *ceffEta =(TH1*) ctaggedEta->Clone("ceffEta");  
+    TH1 *leffEta =(TH1*) ltaggedEta->Clone("leffEta");  
+    
+    //Calculate Efficiency: N_tageed/N_all
+    //Calculate also the binomial error (option "B" does it)!!
+    beffPt->Divide(btaggedPt, bUntaggedPt, 1, 1, "B"); 
+    ceffPt->Divide(ctaggedPt, cUntaggedPt, 1, 1, "B"); 
+    leffPt->Divide(ltaggedPt, lUntaggedPt, 1, 1, "B");
+    beffEta->Divide(btaggedEta, bEta, 1, 1, "B"); 
+    ceffEta->Divide(ctaggedEta, cEta, 1, 1, "B"); 
+    leffEta->Divide(ltaggedEta, lEta, 1, 1, "B"); 
+    h_btaggedjets->Divide(h_btaggedjets, h_bjets, 1, 1, "B"); 
+    h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); 
+    h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); 
+
+    //Save histograms in ROOT file
+    beffPt->Write("BEffPt"); 
+    ceffPt->Write("CEffPt"); 
+    leffPt->Write("LEffPt"); 
+    beffEta->Write("BEffEta"); 
+    ceffEta->Write("CEffEta"); 
+    leffEta->Write("LEffEta"); 
+    h_btaggedjets->Write("BEffPerJet");
+    h_ctaggedjets->Write("CEffPerJet");
+    h_ltaggedjets->Write("LEffPerJet");
+    
+    fbtag.Close();
+    std::cout << "Done.\n\n\n";
+}
+
+
+
+double AnalysisBase::overallGlobalNormalisationFactor()
+{
+    // Overwrite this method in your analysis if you want to apply a global normalisation factor
+    double globalNormalisationFactor(1);
+    return globalNormalisationFactor;
 }
 
 
@@ -447,13 +466,6 @@ void AnalysisBase::SetMC(bool isMC)
 
 
 
-void AnalysisBase::SetPDF(int pdf_no)
-{
-    this->pdf_no_ = pdf_no;
-}
-
-
-
 void AnalysisBase::SetOutputfilename(TString outputfilename)
 {
     this->outputfilename_ = outputfilename;
@@ -499,8 +511,8 @@ void AnalysisBase::Init ( TTree *tree )
     
     // Set branch addresses and branch pointers
     if(!tree) return;
-    fChain = tree;
-    fChain->SetMakeClass(0);
+    chain_ = tree;
+    chain_->SetMakeClass(0);
     this->SetRecoBranchAddresses();
     this->SetKinRecoBranchAddresses();
     this->SetPdfBranchAddress();
@@ -767,160 +779,160 @@ void AnalysisBase::clearBranchVariables()
 void AnalysisBase::SetRecoBranchAddresses()
 {
     // Concerning physics objects
-    fChain->SetBranchAddress("leptons", &leptons_, &b_lepton);
-    fChain->SetBranchAddress("lepPdgId", &lepPdgId_, &b_lepPdgId);
-    //fChain->SetBranchAddress("lepID", &lepID_, &b_lepID);
-    fChain->SetBranchAddress("lepPfIso", &lepPfIso_, &b_lepPfIso);
-    //fChain->SetBranchAddress("lepChargedHadronIso", &lepChargedHadronIso_, &b_lepChargedHadronIso);
-    //fChain->SetBranchAddress("lepNeutralHadronIso", &lepNeutralHadronIso_, &b_lepNeutralHadronIso);
-    //fChain->SetBranchAddress("lepPhotonIso", &lepPhotonIso_, &b_lepPhotonIso);
-    //fChain->SetBranchAddress("lepPuChargedHadronIso", &lepPuChargedHadronIso_, &b_lepPuChargedHadronIso);
-    fChain->SetBranchAddress("lepCombIso", &lepCombIso_, &b_lepCombIso);
-    fChain->SetBranchAddress("lepDxyVertex0", &lepDxyVertex0_, &b_lepDxyVertex0);
-    //fChain->SetBranchAddress("lepTrigger", &lepTrigger_, &b_lepTrigger);
-    fChain->SetBranchAddress("jets", &jets_, &b_jet);
-    fChain->SetBranchAddress("jetBTagTCHE", &jetBTagTCHE_, &b_jetBTagTCHE);
-    //fChain->SetBranchAddress("jetBTagTCHP", &jetBTagTCHP_, &b_jetBTagTCHP);
-    fChain->SetBranchAddress("jetBTagSSVHE", &jetBTagSSVHE_, &b_jetBTagSSVHE);
-    //fChain->SetBranchAddress("jetBTagSSVHP", &jetBTagSSVHP_, &b_jetBTagSSVHP);
-    //fChain->SetBranchAddress("jetBTagJetProbability", &jetBTagJetProbability_, &b_jetBTagJetProbability);
-    //fChain->SetBranchAddress("jetBTagJetBProbability", &jetBTagJetBProbability_, &b_jetBTagJetBProbability);
-    fChain->SetBranchAddress("jetBTagCSV", &jetBTagCSV_, &b_jetBTagCSV);
-    //fChain->SetBranchAddress("jetBTagCSVMVA", &jetBTagCSVMVA_, &b_jetBTagCSVMVA);
-    fChain->SetBranchAddress("jetPartonFlavour", &jetPartonFlavour_, &b_jetPartonFlavour);
-    fChain->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets);
-    fChain->SetBranchAddress("associatedGenJet", &associatedGenJet_, &b_associatedGenJet);
-    if(fChain->GetBranch("jetChargeGlobalPtWeighted")) // new variable, keep check a while for compatibility
-        fChain->SetBranchAddress("jetChargeGlobalPtWeighted", &jetChargeGlobalPtWeighted_, &b_jetChargeGlobalPtWeighted);
+    chain_->SetBranchAddress("leptons", &leptons_, &b_lepton);
+    chain_->SetBranchAddress("lepPdgId", &lepPdgId_, &b_lepPdgId);
+    //chain_->SetBranchAddress("lepID", &lepID_, &b_lepID);
+    chain_->SetBranchAddress("lepPfIso", &lepPfIso_, &b_lepPfIso);
+    //chain_->SetBranchAddress("lepChargedHadronIso", &lepChargedHadronIso_, &b_lepChargedHadronIso);
+    //chain_->SetBranchAddress("lepNeutralHadronIso", &lepNeutralHadronIso_, &b_lepNeutralHadronIso);
+    //chain_->SetBranchAddress("lepPhotonIso", &lepPhotonIso_, &b_lepPhotonIso);
+    //chain_->SetBranchAddress("lepPuChargedHadronIso", &lepPuChargedHadronIso_, &b_lepPuChargedHadronIso);
+    chain_->SetBranchAddress("lepCombIso", &lepCombIso_, &b_lepCombIso);
+    chain_->SetBranchAddress("lepDxyVertex0", &lepDxyVertex0_, &b_lepDxyVertex0);
+    //chain_->SetBranchAddress("lepTrigger", &lepTrigger_, &b_lepTrigger);
+    chain_->SetBranchAddress("jets", &jets_, &b_jet);
+    chain_->SetBranchAddress("jetBTagTCHE", &jetBTagTCHE_, &b_jetBTagTCHE);
+    //chain_->SetBranchAddress("jetBTagTCHP", &jetBTagTCHP_, &b_jetBTagTCHP);
+    chain_->SetBranchAddress("jetBTagSSVHE", &jetBTagSSVHE_, &b_jetBTagSSVHE);
+    //chain_->SetBranchAddress("jetBTagSSVHP", &jetBTagSSVHP_, &b_jetBTagSSVHP);
+    //chain_->SetBranchAddress("jetBTagJetProbability", &jetBTagJetProbability_, &b_jetBTagJetProbability);
+    //chain_->SetBranchAddress("jetBTagJetBProbability", &jetBTagJetBProbability_, &b_jetBTagJetBProbability);
+    chain_->SetBranchAddress("jetBTagCSV", &jetBTagCSV_, &b_jetBTagCSV);
+    //chain_->SetBranchAddress("jetBTagCSVMVA", &jetBTagCSVMVA_, &b_jetBTagCSVMVA);
+    chain_->SetBranchAddress("jetPartonFlavour", &jetPartonFlavour_, &b_jetPartonFlavour);
+    chain_->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets);
+    chain_->SetBranchAddress("associatedGenJet", &associatedGenJet_, &b_associatedGenJet);
+    if(chain_->GetBranch("jetChargeGlobalPtWeighted")) // new variable, keep check a while for compatibility
+        chain_->SetBranchAddress("jetChargeGlobalPtWeighted", &jetChargeGlobalPtWeighted_, &b_jetChargeGlobalPtWeighted);
     else b_jetChargeGlobalPtWeighted = 0;
-    if(fChain->GetBranch("jetChargeRelativePtWeighted")) // new variable, keep check a while for compatibility
-        fChain->SetBranchAddress("jetChargeRelativePtWeighted", &jetChargeRelativePtWeighted_, &b_jetChargeRelativePtWeighted);
+    if(chain_->GetBranch("jetChargeRelativePtWeighted")) // new variable, keep check a while for compatibility
+        chain_->SetBranchAddress("jetChargeRelativePtWeighted", &jetChargeRelativePtWeighted_, &b_jetChargeRelativePtWeighted);
     else b_jetChargeRelativePtWeighted = 0;
-    //fChain->SetBranchAddress("jetAssociatedPartonPdgId", &jetAssociatedPartonPdgId_, &b_jetAssociatedPartonPdgId);
-    //fChain->SetBranchAddress("jetAssociatedParton", &jetAssociatedParton_, &b_jetAssociatedParton);
-    fChain->SetBranchAddress("met", &met_, &b_met);
+    //chain_->SetBranchAddress("jetAssociatedPartonPdgId", &jetAssociatedPartonPdgId_, &b_jetAssociatedPartonPdgId);
+    //chain_->SetBranchAddress("jetAssociatedParton", &jetAssociatedParton_, &b_jetAssociatedParton);
+    chain_->SetBranchAddress("met", &met_, &b_met);
     if (doJesJer_) {
-        fChain->SetBranchAddress("jetJERSF", &jetJERSF_, &b_jetJERSF);
-        fChain->SetBranchAddress("jetsForMET", &jetsForMET_, &b_jetForMET);
-        fChain->SetBranchAddress("jetForMETJERSF", &jetForMETJERSF_, &b_jetForMETJERSF);
-        fChain->SetBranchAddress("associatedGenJetForMET", &associatedGenJetForMET_, &b_associatedGenJetForMET);
+        chain_->SetBranchAddress("jetJERSF", &jetJERSF_, &b_jetJERSF);
+        chain_->SetBranchAddress("jetsForMET", &jetsForMET_, &b_jetForMET);
+        chain_->SetBranchAddress("jetForMETJERSF", &jetForMETJERSF_, &b_jetForMETJERSF);
+        chain_->SetBranchAddress("associatedGenJetForMET", &associatedGenJetForMET_, &b_associatedGenJetForMET);
     }
     
     // Concerning event
-    fChain->SetBranchAddress("runNumber", &runNumber_, &b_runNumber);
-    fChain->SetBranchAddress("lumiBlock", &lumiBlock_, &b_lumiBlock);
-    fChain->SetBranchAddress("eventNumber", &eventNumber_, &b_eventNumber);
-    //fChain->SetBranchAddress("recoInChannel", &recoInChannel_, &b_recoInChannel);
-    fChain->SetBranchAddress("triggerBits", &triggerBits_, &b_triggerBits);
-    //fChain->SetBranchAddress("triggerBitsTau", &triggerBitsTau_, &b_triggerBitsTau);
-    //fChain->SetBranchAddress("firedTriggers", &firedTriggers_, &b_firedTriggers);
-    fChain->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti);
+    chain_->SetBranchAddress("runNumber", &runNumber_, &b_runNumber);
+    chain_->SetBranchAddress("lumiBlock", &lumiBlock_, &b_lumiBlock);
+    chain_->SetBranchAddress("eventNumber", &eventNumber_, &b_eventNumber);
+    //chain_->SetBranchAddress("recoInChannel", &recoInChannel_, &b_recoInChannel);
+    chain_->SetBranchAddress("triggerBits", &triggerBits_, &b_triggerBits);
+    //chain_->SetBranchAddress("triggerBitsTau", &triggerBitsTau_, &b_triggerBitsTau);
+    //chain_->SetBranchAddress("firedTriggers", &firedTriggers_, &b_firedTriggers);
+    chain_->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti);
     
     // Concerning MC event
-    fChain->SetBranchAddress("vertMultiTrue", &vertMultiTrue_, &b_vertMultiTrue);
-    fChain->SetBranchAddress("weightGenerator", &weightGenerator_, &b_weightGenerator);
+    chain_->SetBranchAddress("vertMultiTrue", &vertMultiTrue_, &b_vertMultiTrue);
+    chain_->SetBranchAddress("weightGenerator", &weightGenerator_, &b_weightGenerator);
 }
 
 
 
 void AnalysisBase::SetKinRecoBranchAddresses()
 {
-    fChain->SetBranchAddress("HypTop", &HypTop_, &b_HypTop);
-    fChain->SetBranchAddress("HypAntiTop", &HypAntiTop_, &b_HypAntiTop);
-    fChain->SetBranchAddress("HypLepton", &HypLepton_, &b_HypLepton);
-    fChain->SetBranchAddress("HypAntiLepton", &HypAntiLepton_, &b_HypAntiLepton);
-    fChain->SetBranchAddress("HypNeutrino", &HypNeutrino_, &b_HypNeutrino);
-    fChain->SetBranchAddress("HypAntiNeutrino", &HypAntiNeutrino_, &b_HypAntiNeutrino);
-    fChain->SetBranchAddress("HypB", &HypBJet_, &b_HypB);
-    fChain->SetBranchAddress("HypAntiB", &HypAntiBJet_, &b_HypAntiB);
-    //fChain->SetBranchAddress("HypWPlus", &HypWPlus_, &b_HypWPlus_);
-    //fChain->SetBranchAddress("HypWMinus", &HypWMinus_, &b_HypWMinus_);
-    fChain->SetBranchAddress("HypJet0index", &HypJet0index_, &b_HypJet0index);
-    fChain->SetBranchAddress("HypJet1index", &HypJet1index_, &b_HypJet1index);
+    chain_->SetBranchAddress("HypTop", &HypTop_, &b_HypTop);
+    chain_->SetBranchAddress("HypAntiTop", &HypAntiTop_, &b_HypAntiTop);
+    chain_->SetBranchAddress("HypLepton", &HypLepton_, &b_HypLepton);
+    chain_->SetBranchAddress("HypAntiLepton", &HypAntiLepton_, &b_HypAntiLepton);
+    chain_->SetBranchAddress("HypNeutrino", &HypNeutrino_, &b_HypNeutrino);
+    chain_->SetBranchAddress("HypAntiNeutrino", &HypAntiNeutrino_, &b_HypAntiNeutrino);
+    chain_->SetBranchAddress("HypB", &HypBJet_, &b_HypB);
+    chain_->SetBranchAddress("HypAntiB", &HypAntiBJet_, &b_HypAntiB);
+    //chain_->SetBranchAddress("HypWPlus", &HypWPlus_, &b_HypWPlus_);
+    //chain_->SetBranchAddress("HypWMinus", &HypWMinus_, &b_HypWMinus_);
+    chain_->SetBranchAddress("HypJet0index", &HypJet0index_, &b_HypJet0index);
+    chain_->SetBranchAddress("HypJet1index", &HypJet1index_, &b_HypJet1index);
 }
 
 
 
 void AnalysisBase::SetPdfBranchAddress()
 {
-    if (pdf_no_ >= 0) fChain->SetBranchAddress("pdfWeights", &weightPDF_, &b_weightPDF);
+    if(chain_->GetBranch("pdfWeights")) chain_->SetBranchAddress("pdfWeights", &weightPDF_, &b_weightPDF);
 }
 
 
 
 void AnalysisBase::SetDyDecayBranchAddress()
 {
-    fChain->SetBranchAddress("ZDecayMode", &ZDecayMode_, &b_ZDecayMode);
+    chain_->SetBranchAddress("ZDecayMode", &ZDecayMode_, &b_ZDecayMode);
 }
 
 
 
 void AnalysisBase::SetTopDecayBranchAddress()
 {
-    fChain->SetBranchAddress("TopDecayMode", &topDecayMode_, &b_TopDecayMode);
+    chain_->SetBranchAddress("TopDecayMode", &topDecayMode_, &b_TopDecayMode);
 }
 
     
     
 void AnalysisBase::SetTopSignalBranchAddresses()
 {
-    fChain->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
-    fChain->SetBranchAddress("GenTop", &GenTop_, &b_GenTop);
-    fChain->SetBranchAddress("GenAntiTop", &GenAntiTop_, &b_GenAntiTop);
-    fChain->SetBranchAddress("GenLepton", &GenLepton_, &b_GenLepton);
-    fChain->SetBranchAddress("GenAntiLepton", &GenAntiLepton_, &b_GenAntiLepton);
-    //fChain->SetBranchAddress("GenLeptonPdgId", &GenLeptonPdgId_, &b_GenLeptonPdgId);
-    //fChain->SetBranchAddress("GenAntiLeptonPdgId", &GenAntiLeptonPdgId_, &b_GenAntiLeptonPdgId);
-    //fChain->SetBranchAddress("GenTau", &GenTau_, &b_GenTau);
-    //fChain->SetBranchAddress("GenAntiTau", &GenAntiTau_, &b_GenAntiTau);
-    fChain->SetBranchAddress("GenNeutrino", &GenNeutrino_, &b_GenNeutrino);
-    fChain->SetBranchAddress("GenAntiNeutrino", &GenAntiNeutrino_, &b_GenAntiNeutrino);
-    fChain->SetBranchAddress("GenB", &GenB_, &b_GenB);
-    fChain->SetBranchAddress("GenAntiB", &GenAntiB_, &b_GenAntiB);
-    //fChain->SetBranchAddress("GenWPlus", &GenWPlus_, &b_GenWPlus);
-    //fChain->SetBranchAddress("GenWMinus", &GenWMinus_, &b_GenWMinus);
-    //fChain->SetBranchAddress("GenWPlus.fCoordinates.fX", &GenWPluspX, &b_GenWPluspX);
-    //fChain->SetBranchAddress("GenWMinus.fCoordinates.fX", &GenWMinuspX, &b_GenWMinuspX);
-    //fChain->SetBranchAddress("GenParticleP4", &GenParticleP4_, &b_GenParticleP4);
-    //fChain->SetBranchAddress("GenParticlePdgId", &GenParticlePdgId_, &b_GenParticlePdgId);
-    //fChain->SetBranchAddress("GenParticleStatus", &GenParticleStatus_, &b_GenParticleStatus);
-    fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex_, &b_BHadJetIndex);
-    fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex_, &b_AntiBHadJetIndex);
-    fChain->SetBranchAddress("BHadrons", &BHadrons_, &b_BHadrons);
-    fChain->SetBranchAddress("AntiBHadrons", &AntiBHadrons_, &b_AntiBHadrons);
-    fChain->SetBranchAddress("BHadronFromTop", &BHadronFromTopB_, &b_BHadronFromTopB);
-    fChain->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB);
-    fChain->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet);
-    fChain->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet);
-    if(fChain->GetBranch("genParticlePdg")) // need to check whether branch exists
-        fChain->SetBranchAddress("genParticlePdg", &genParticlePdg_, &b_genParticlePdg);
-    if(fChain->GetBranch("genParticleStatus")) // need to check whether branch exists
-        fChain->SetBranchAddress("genParticleStatus", &genParticleStatus_, &b_genParticleStatus);
-    if(fChain->GetBranch("genParticleIndices")) // need to check whether branch exists
-        fChain->SetBranchAddress("genParticleIndices", &genParticleIndices_, &b_genParticleIndices);
-    if(fChain->GetBranch("genParticle")) // need to check whether branch exists
-        fChain->SetBranchAddress("genParticle", &genParticle_, &b_genParticle);
-    if(fChain->GetBranch("bHadIndex")) // need to check whether branch exists
-        fChain->SetBranchAddress("bHadIndex", &bHadIndex_, &b_bHadIndex);
-    if(fChain->GetBranch("bHadFlavour")) // need to check whether branch exists
-        fChain->SetBranchAddress("bHadFlavour", &bHadFlavour_, &b_bHadFlavour);
-    if(fChain->GetBranch("bHadJetIndex")) // need to check whether branch exists
-        fChain->SetBranchAddress("bHadJetIndex", &bHadJetIndex_, &b_bHadJetIndex);
+    chain_->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
+    chain_->SetBranchAddress("GenTop", &GenTop_, &b_GenTop);
+    chain_->SetBranchAddress("GenAntiTop", &GenAntiTop_, &b_GenAntiTop);
+    chain_->SetBranchAddress("GenLepton", &GenLepton_, &b_GenLepton);
+    chain_->SetBranchAddress("GenAntiLepton", &GenAntiLepton_, &b_GenAntiLepton);
+    //chain_->SetBranchAddress("GenLeptonPdgId", &GenLeptonPdgId_, &b_GenLeptonPdgId);
+    //chain_->SetBranchAddress("GenAntiLeptonPdgId", &GenAntiLeptonPdgId_, &b_GenAntiLeptonPdgId);
+    //chain_->SetBranchAddress("GenTau", &GenTau_, &b_GenTau);
+    //chain_->SetBranchAddress("GenAntiTau", &GenAntiTau_, &b_GenAntiTau);
+    chain_->SetBranchAddress("GenNeutrino", &GenNeutrino_, &b_GenNeutrino);
+    chain_->SetBranchAddress("GenAntiNeutrino", &GenAntiNeutrino_, &b_GenAntiNeutrino);
+    chain_->SetBranchAddress("GenB", &GenB_, &b_GenB);
+    chain_->SetBranchAddress("GenAntiB", &GenAntiB_, &b_GenAntiB);
+    //chain_->SetBranchAddress("GenWPlus", &GenWPlus_, &b_GenWPlus);
+    //chain_->SetBranchAddress("GenWMinus", &GenWMinus_, &b_GenWMinus);
+    //chain_->SetBranchAddress("GenWPlus.fCoordinates.fX", &GenWPluspX, &b_GenWPluspX);
+    //chain_->SetBranchAddress("GenWMinus.fCoordinates.fX", &GenWMinuspX, &b_GenWMinuspX);
+    //chain_->SetBranchAddress("GenParticleP4", &GenParticleP4_, &b_GenParticleP4);
+    //chain_->SetBranchAddress("GenParticlePdgId", &GenParticlePdgId_, &b_GenParticlePdgId);
+    //chain_->SetBranchAddress("GenParticleStatus", &GenParticleStatus_, &b_GenParticleStatus);
+    chain_->SetBranchAddress("BHadJetIndex", &BHadJetIndex_, &b_BHadJetIndex);
+    chain_->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex_, &b_AntiBHadJetIndex);
+    chain_->SetBranchAddress("BHadrons", &BHadrons_, &b_BHadrons);
+    chain_->SetBranchAddress("AntiBHadrons", &AntiBHadrons_, &b_AntiBHadrons);
+    chain_->SetBranchAddress("BHadronFromTop", &BHadronFromTopB_, &b_BHadronFromTopB);
+    chain_->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB);
+    chain_->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet);
+    chain_->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet);
+    if(chain_->GetBranch("genParticlePdg")) // need to check whether branch exists
+        chain_->SetBranchAddress("genParticlePdg", &genParticlePdg_, &b_genParticlePdg);
+    if(chain_->GetBranch("genParticleStatus")) // need to check whether branch exists
+        chain_->SetBranchAddress("genParticleStatus", &genParticleStatus_, &b_genParticleStatus);
+    if(chain_->GetBranch("genParticleIndices")) // need to check whether branch exists
+        chain_->SetBranchAddress("genParticleIndices", &genParticleIndices_, &b_genParticleIndices);
+    if(chain_->GetBranch("genParticle")) // need to check whether branch exists
+        chain_->SetBranchAddress("genParticle", &genParticle_, &b_genParticle);
+    if(chain_->GetBranch("bHadIndex")) // need to check whether branch exists
+        chain_->SetBranchAddress("bHadIndex", &bHadIndex_, &b_bHadIndex);
+    if(chain_->GetBranch("bHadFlavour")) // need to check whether branch exists
+        chain_->SetBranchAddress("bHadFlavour", &bHadFlavour_, &b_bHadFlavour);
+    if(chain_->GetBranch("bHadJetIndex")) // need to check whether branch exists
+        chain_->SetBranchAddress("bHadJetIndex", &bHadJetIndex_, &b_bHadJetIndex);
 }
 
 
 
 void AnalysisBase::SetHiggsSignalBranchAddresses()
 {
-    fChain->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
-    fChain->SetBranchAddress("GenH", &GenH_, &b_GenH);
-    fChain->SetBranchAddress("GenBFromH", &GenBFromH_, &b_GenBFromH);
-    fChain->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH_, &b_GenAntiBFromH);
+    chain_->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
+    chain_->SetBranchAddress("GenH", &GenH_, &b_GenH);
+    chain_->SetBranchAddress("GenBFromH", &GenBFromH_, &b_GenBFromH);
+    chain_->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH_, &b_GenAntiBFromH);
 }
 
 
 
-void AnalysisBase::GetRecoBranchesEntry(Long64_t & entry)
+void AnalysisBase::GetRecoBranchesEntry(Long64_t& entry)
 {    
     // Concerning physics objects
     b_lepton->GetEntry(entry);
@@ -992,8 +1004,8 @@ void AnalysisBase::GetKinRecoBranchesEntry(Long64_t& entry){
 
 
 
-Int_t AnalysisBase::GetPDFEntry(Long64_t entry){
-    return b_weightPDF->GetEntry(entry);
+void AnalysisBase::GetPDFEntry(Long64_t& entry){
+    b_weightPDF->GetEntry(entry);
 }
 
 
@@ -1027,13 +1039,14 @@ void AnalysisBase::SetTrueLevelDYChannel(int dy)
 
 
 
-void AnalysisBase::GetTopDecayModeEntry(Long64_t entry){
+void AnalysisBase::GetTopDecayModeEntry(Long64_t& entry)
+{
     b_TopDecayMode->GetEntry(entry);
 }
 
 
 
-void AnalysisBase::GetTopSignalBranchesEntry(Long64_t & entry)
+void AnalysisBase::GetTopSignalBranchesEntry(Long64_t& entry)
 {
     b_GenMet->GetEntry(entry);
     b_GenTop->GetEntry(entry);
@@ -1072,7 +1085,7 @@ void AnalysisBase::GetTopSignalBranchesEntry(Long64_t & entry)
 
 
 
-void AnalysisBase::GetHiggsSignalBranchesEntry(Long64_t & entry)
+void AnalysisBase::GetHiggsSignalBranchesEntry(Long64_t& entry)
 {
     b_HiggsDecayMode->GetEntry(entry);
     b_GenH->GetEntry(entry);
@@ -1309,7 +1322,8 @@ double AnalysisBase::getLeptonIDSF(const LV& lep1, const LV& lep2, int lep1pdgId
 
 
 void AnalysisBase::prepareLeptonIDSF() {
-    h_MuonIDSFpteta = nullptr; h_ElectronIDSFpteta = nullptr;
+    h_MuonIDSFpteta = nullptr;
+    h_ElectronIDSFpteta = nullptr;
     
     TFile MuonEfficiencies(DATA_PATH() + "/MuonSFtop12028.root");
     if (MuonEfficiencies.IsZombie()) {
@@ -1432,7 +1446,7 @@ void AnalysisBase::prepareBtagSF()
 void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue, 
                                      TH1* h_control, double value, double weight)
 {
-    auto pair = (*binnedControlPlots)[h_differential->GetName()];
+    auto pair = (*binnedControlPlots_)[h_differential->GetName()];
     auto bin = pair.first->FindBin(binvalue);
     auto m = pair.second.at(bin);
     TH1* h = m[h_control->GetName()];
@@ -1449,7 +1463,7 @@ void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue,
 ///create control plots for the h_control distribution in bins of h_differential
 void AnalysisBase::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList)
 {
-    auto &pair = (*binnedControlPlots)[h_differential->GetName()];
+    auto &pair = (*binnedControlPlots_)[h_differential->GetName()];
     if(fromHistoList){
         HistoListReader histoList("HistoList");
         if(histoList.IsZombie()) { std::cout << "Need a HistoList to create binned control plots!\n"; exit(273); }
@@ -1761,9 +1775,58 @@ void AnalysisBase::applyJER_JES()
 
 
 
-bool AnalysisBase::produceBtagEfficiencies(){
-    return isSignal_;
+void AnalysisBase::bookBtagHistograms()
+{
+    const int PtMax = 11;
+    const int EtaMax = 5;
+    Double_t ptbins[PtMax+1] = {20.,30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,800.};
+    Double_t etabins[EtaMax+1] = {0.0,0.5,1.0,1.5,2.0,2.4};
+    
+    h_bjets = store(new TH2D("bjets2D", "unTagged Bjets", PtMax, ptbins, EtaMax, etabins));
+    h_btaggedjets = store(new TH2D("bjetsTagged2D", "Tagged Bjets", PtMax, ptbins, EtaMax, etabins));
+    h_cjets = store(new TH2D("cjets2D", "unTagged Cjets", PtMax, ptbins, EtaMax, etabins));
+    h_ctaggedjets = store(new TH2D("cjetsTagged2D", "Tagged Cjets", PtMax, ptbins, EtaMax, etabins));
+    h_ljets = store(new TH2D("ljets2D", "unTagged Ljets", PtMax, ptbins, EtaMax, etabins));
+    h_ltaggedjets = store(new TH2D("ljetsTagged2D", "Tagged Ljets", PtMax, ptbins, EtaMax, etabins));
+    
+    h_bjets->Sumw2();
+    h_btaggedjets->Sumw2();
+    h_cjets->Sumw2();
+    h_ctaggedjets->Sumw2();
+    h_ljets->Sumw2();    
+    h_ltaggedjets->Sumw2();
 }
+
+
+void AnalysisBase::fillBtagHistograms(const double jetPtCut, const double btagWP)
+{
+    for (size_t i = 0; i < jets_->size(); ++i) {
+        if (jets_->at(i).Pt() <= jetPtCut) break;
+        double absJetEta = abs(jets_->at(i).Eta());
+        if (absJetEta<2.4) {
+            int partonFlavour = abs(jetPartonFlavour_->at(i));
+            if(partonFlavour == 5){//b-quark
+                h_bjets->Fill(jets_->at(i).Pt(), absJetEta);
+                if((*jetBTagCSV_)[i]>btagWP){
+                    h_btaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
+                }
+            }
+            else if (partonFlavour == 4){//c-quark
+                h_cjets->Fill(jets_->at(i).Pt(), absJetEta);
+                if((*jetBTagCSV_)[i]>btagWP){
+                    h_ctaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
+                }
+            }
+            else if (partonFlavour != 0){//l-quark
+                h_ljets->Fill(jets_->at(i).Pt(), absJetEta);
+                if((*jetBTagCSV_)[i]>btagWP){
+                    h_ltaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
+                }
+            }
+        }
+    }
+}
+
 
 
 

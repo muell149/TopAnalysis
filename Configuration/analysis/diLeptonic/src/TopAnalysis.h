@@ -5,10 +5,12 @@ class TH1D;
 
 #include "AnalysisBase.h"
 
+
+
 class TopAnalysis : public AnalysisBase
 {
     
-    // Histograms
+    /// Histograms
     TH2 *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT;
     TH2 *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;//, *h_GenRecoBJetE, *h_GenRecoAntiBJetE;;
     TH2 *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
@@ -133,8 +135,14 @@ class TopAnalysis : public AnalysisBase
 //     TH2 *h_GenRecoJetMultpt40, *h_GenRecoJetMultpt60, *h_GenRecoJetMultQ0, *h_GenRecoJetMultTotal;
 //     //End: Plots for Carmen
     
+    
+    
+    /// Histograms for event weights due to specific scale factor
+    TH1 *h_PUSF, *h_TrigSF, *h_LepSF, *h_BTagSF, *h_KinRecoSF, *h_EventWeight;
 
-    // ++++ Control Plots ++++
+    
+    
+    /// Control Plots
     TH1 *h_AllLeptonEta_step0, *h_AllLeptonpT_step0, *h_AllJetsEta_step0, *h_AllJetspT_step0;
     TH1 *h_AllLeptonEta_step1, *h_AllLeptonpT_step1, *h_AllJetsEta_step1, *h_AllJetspT_step1;
     TH1 *h_AllLeptonEta_step2, *h_AllLeptonpT_step2, *h_AllJetsEta_step2, *h_AllJetspT_step2;
@@ -161,22 +169,79 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_LeptonMult_step5, *h_JetsMult_step5, *h_BJetsMult_step5;
     TH1 *h_LeptonMult_step6, *h_JetsMult_step6, *h_BJetsMult_step6;
     TH1 *h_LeptonMult_step7, *h_JetsMult_step7, *h_BJetsMult_step7;
-    TH1 *h_LeptonMult_step8, *h_JetsMult_step8, *h_BJetsMult_step8;    
-
+    TH1 *h_LeptonMult_step8, *h_JetsMult_step8, *h_BJetsMult_step8;
+    
+    
+    /// Do kinematic reconstruction on nTuple level
+    bool kinRecoOnTheFly_;
+    
+    
+    /// Histogram for total weight of closure test
+    TH1 *h_ClosureTotalWeight;
+    
+    /// Histogram for total weight of PDF variations
+    TH1 *h_PDFTotalWeight;
+    
+    /// Whether to apply closure test
+    bool doClosureTest_;
+    
+    /// Variables added from the outside
+    int pdf_no_;
+    
+    
+    /// Data for closure test
+#ifndef __CINT__
+    std::function<double()> closureFunction_;
+#endif
+    int closureMaxEvents_;
+    
+    
     
 public:
     
+    /// Constructor
+    TopAnalysis():
+        kinRecoOnTheFly_(false),
+        doClosureTest_(false),
+        pdf_no_(-1),
+        closureFunction_(nullptr)
+        {}
+    
+    /// Inherited from AnalysisBase and overwritten for needs of TopAnalysis
     virtual void Begin(TTree*);
     virtual void SlaveBegin(TTree*);
     virtual void SlaveTerminate();
     virtual void Terminate();
     virtual Bool_t Process(Long64_t entry);
-    virtual void SetClosureTest(TString closure, double slope);
+    
+    /// Set up closure test
+    void SetClosureTest(TString closure, double slope);
+    
+    /// Set PDF variation for PDF systematics
+    void SetPDF(int pdf_no);
+    
+    /// Class definition
+    ClassDef(TopAnalysis, 0);
+    
+    
+    
+protected:
+    
+    /// Set global normalisation factors
+    virtual double overallGlobalNormalisationFactor();
+    
+    
     
 private:
-    double calculateClosureTestWeight();
     
-    ClassDef(TopAnalysis, 0);
+    /// Set global normalisation factor due to closure test
+    double globalNormalisationFactorClosureTest();
+    
+    /// Set global normalisation factor due to PDF systematics
+    double globalNormalisationFactorPDF();
+
+    /// Get weight of closure test
+    double calculateClosureTestWeight();
 };
 
 #endif

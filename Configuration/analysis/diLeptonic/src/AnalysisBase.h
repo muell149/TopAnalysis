@@ -22,15 +22,15 @@ class TString;
 #include "classes.h"
 #include "PUReweighter.h"
 
+
+
 class AnalysisBase : public TSelector
 {
     
-// Variables accesing the root-file content (nTuple branches and information stored in TObjStrings and histograms)
+// Protected member data
 protected:    
     
-// Variables associated to nTuple branches
-    
-    /// nTuple branches relevant for reconstruction level
+    /// Variables associated to nTuple branches relevant for reconstruction level
     
     // Concerning physics objects
     VLV                 *leptons_;
@@ -81,7 +81,7 @@ protected:
     Double_t            weightGenerator_;
     
     
-    /// nTuple branches of kinematic reconstruction
+    /// Variables associated to nTuple branches of kinematic reconstruction
     VLV              *HypTop_;
     VLV              *HypAntiTop_;
     VLV              *HypLepton_;
@@ -96,22 +96,19 @@ protected:
     std::vector<int> *HypJet1index_;
     
     
-    /// nTuple branch for PDF weights
+    /// Variables associated to nTuple branch for PDF weights
     std::vector<double> *weightPDF_;
     
     
-    /// nTuple branch for Drell-Yan decay mode
+    /// Variables associated to nTuple branch for Drell-Yan decay mode
     std::vector<int> *ZDecayMode_;
-    #ifndef __CINT__   
-    std::function<bool(Long64_t)> checkZDecayMode_;
-    #endif
     
     
-    /// nTuple branch for Top decay mode
+    /// Variables associated to nTuple branch for Top decay mode
     Int_t topDecayMode_;
     
     
-    /// nTuple branches for Top signal samples on generator level
+    /// Variables associated to nTuple branches for Top signal samples on generator level
     LV                *GenMet_;
     LV                *GenTop_;
     LV                *GenAntiTop_;
@@ -147,46 +144,44 @@ protected:
     std::vector<int>  *bHadJetIndex_;
     
     
-    /// nTuple branches for Higgs signal samples on generator level
+    /// Variables associated to nTuple branches for Higgs signal samples on generator level
     Int_t higgsDecayMode_;
     LV    *GenH_;
     LV    *GenBFromH_;
     LV    *GenAntiBFromH_;
     
     
-    
-    
-    
-    
-    
-    JetCorrectionUncertainty *unc_;
-    bool doJesJer_;
-    
-    // Further variables added from the outside
-    TString btagFile_;
-    TString channel_;
-    int channelPdgIdProduct_;
-    TString systematic_;
+    /// Information in nTuple stored in TObjString once per file, but added from outside and potentially configured
     TString samplename_;
-    bool isTtbarPlusTauSample_;
-    bool correctMadgraphBR_;
-    TString outputfilename_;
+    TString channel_;
+    TString systematic_;
+    bool isMC_;
     bool isSignal_;
     bool isHiggsSignal_;
-    bool isMC_;
-    bool getLeptonPair(size_t& LeadLeptonNumber, size_t& NLeadLeptonNumber);
+    
+    
+    /// Further variables added from the outside
+    bool isTtbarPlusTauSample_;
+    bool correctMadgraphBR_;
+    int channelPdgIdProduct_;
+    int trueDYchannelCut_;   // is this variable used at all?
+    #ifndef __CINT__   
+    std::function<bool(Long64_t)> checkZDecayMode_;
+    #endif
+    TString outputfilename_;
     bool runViaTau_;
-    int pdf_no_;
-    int trueDYchannelCut_;
-    
-    /// Histogram holding the weighted events of the full sample
-    TH1* h_weightedEvents;
     
     
-    
-    
-    /// Pileup reweighter
+    /// Pileup reweighter, configured from outside
     PUReweighter *pureweighter_;
+    
+    
+    /// Apply JER/JES systematics
+    bool doJesJer_;
+    
+    
+    /// Scale factor due to kinematic reconstruction
+    double weightKinFit_; //this is per channel and does not need to be calculated inside the event loop
     
     
     /// Map holding binned control plots
@@ -194,22 +189,19 @@ protected:
     //map of name of differential distribution
     // -> pair( histogram with the binning of the differential distribution,
     //          vector(bin) -> map( control plot name -> TH1*))
-    std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > > *binnedControlPlots;
+    std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > > *binnedControlPlots_;
     
     
     /// Event counter
     Int_t EventCounter_;
     
     
-    
-    
-    
-    
-    
+        
 // Private member data
 private:    
     
-    TTree *fChain;   //!pointer to the analyzed TTree or TChain
+    /// Pointer to the analyzed TTree or TChain
+    TTree *chain_;
     
     
     /// nTuple branches relevant for reconstruction level
@@ -333,83 +325,177 @@ private:
     TBranch *b_GenAntiBFromH;
     
     
+    /// Histogram holding the number of weighted events of the full sample, configured from outside
+    TH1* h_weightedEvents;
     
     
+    /// Uncertainty for JES systematics
+    JetCorrectionUncertainty *unc_;
     
-protected:
-    TH1 *h_ClosureTotalWeight;
-    TH1 *h_PDFTotalWeight;
     
-    // BEGIN of btag SF stuff
-    TH2 *h_bjets, *h_btaggedjets;
-    TH2 *h_cjets, *h_ctaggedjets;
-    TH2 *h_ljets, *h_ltaggedjets;
+    /// Filename of file holding b-tag efficiency histograms, configured from outside
+    TString btagFile_;
     
-    //btag calculation
+    
+    /// Histograms for writing out b-tagging efficiencies
+    TH2 *h_bjets, *h_cjets, *h_ljets;
+    TH2 *h_btaggedjets, *h_ctaggedjets, *h_ltaggedjets;
+    
+    
+    /// Histograms of per-jet b-tagging efficiencies, used to calculate per-event SF
+    /// Need to be written out to file previously
     TH2 *bEff, *cEff, *lEff;
-    TH1 *h_PUSF, *h_TrigSF, *h_LepSF, *h_BTagSF, *h_KinRecoSF, *h_EventWeight;
-
-    // END of btag SF stuff
     
-    // Trigger and lepton SF
+    
+    /// Trigger and lepton scale factors differential in eta, pt
     TH2 *h_TrigSFeta, *h_MuonIDSFpteta, *h_ElectronIDSFpteta;
     
-    // Data for b-tag SF
+    
+    /// Medians in eta, pt for b-tag SF
     double btag_ptmedian_, btag_etamedian_;
     
-    //Data for other SF
-    double weightKinFit_; //this is per channel and does not need to be calculated inside the event loop
     
-    // For kinematic reconstruction
-    bool kinRecoOnTheFly_;
-    
-    
-    bool doClosureTest_;
-#ifndef __CINT__
-    std::function<double()> closureFunction_;
-#endif
-    int closureMaxEvents_;
-    
-    
+
+// Public methods
 public:
-    AnalysisBase ( TTree * = 0 ) :
-        checkZDecayMode_ {nullptr},
-        unc_ {nullptr},
-        doJesJer_ {false},
-        isHiggsSignal_ {false},
-        runViaTau_ {false},
-        pdf_no_ {-1},
-        pureweighter_ {nullptr},
-        kinRecoOnTheFly_ {false},
-        doClosureTest_ {false},
-        closureFunction_ {nullptr}
-        {};
+    
+    /// Constructor
+    AnalysisBase(TTree* =0);
+    
+    /// Destructor
     virtual ~AnalysisBase(){};
-    virtual void SlaveBegin(TTree *);
-    void SetBTagFile(TString btagFile);
-    void SetChannel(TString channel);
-    void SetSignal(bool isSignal);
-    void SetHiggsSignal(const bool higgsSignal);
-    void SetSystematic(TString systematic);
+    
+    /// Inherited TSelector methods
+    virtual void Begin(TTree*);
+    virtual void SlaveBegin(TTree*);
+    virtual void Init(TTree*);
+    virtual void SlaveTerminate();
+    virtual void Terminate();
+    
+    /// Set sample name
     virtual void SetSamplename(TString samplename, TString systematic_from_file);
-    void SetOutputfilename(TString outputfilename);
+    /// Set Channel
+    void SetChannel(TString channel);
+    /// Set systematic
+    void SetSystematic(TString systematic);
+    /// Set whether it is MC sample
     void SetMC(bool isMC);
+    /// Set whether it is Top signal sample
+    void SetSignal(bool isSignal);
+    /// Set whether it is Higgs signal sample
+    void SetHiggsSignal(const bool higgsSignal);
     
     /// Set Drell-Yan decay channel for selection, access decay mode from nTuple branch
     void SetTrueLevelDYChannel(int dy);
-    
-    void SetWeightedEvents(TH1* weightedEvents);
+    /// Set name of output file
+    void SetOutputfilename(TString outputfilename);
+    /// Bool for separating direct dileptonic ttbar decays and decays via intermediate taus
     void SetRunViaTau(bool runViaTau);
-    void SetPUReweighter(PUReweighter *pu);
-    void SetPDF(int pdf_no);
-    void orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2);
-    virtual void SetClosureTest(TString, double) {};
-    virtual void Begin (TTree*);
-    virtual void Init (TTree *tree);
-    virtual void SlaveTerminate();
-    virtual void Terminate();
-
     
+    /// Set input file for b-tagging efficiencies
+    void SetBTagFile(TString btagFile);
+    
+    /// Set the pileup reweighter
+    void SetPUReweighter(PUReweighter *pu);
+    
+    /// Set histogram containing the number of weighted events in full sample
+    void SetWeightedEvents(TH1* weightedEvents);
+    
+    /// Get version
+    //no idea why this is needed! But Process() isn't called otherwise! Argh!
+    virtual int Version() const { return 3; }
+    
+    /// Class definition
+    ClassDef(AnalysisBase, 0);
+    
+    
+    
+// Protected methods
+protected:
+    
+    /// Set global normalisation factors (needs to be overwritable)
+    virtual double overallGlobalNormalisationFactor();
+    
+    /// Access event entry for nTuple branches relevant for reconstruction level
+    void GetRecoBranchesEntry(Long64_t&);
+    /// Access event entry for nTuple branches of kinematic reconstruction
+    void GetKinRecoBranchesEntry(Long64_t&);
+    /// Access event entry for nTuple branch for PDF weights
+    void GetPDFEntry(Long64_t&);
+    /// Access event entry for nTuple branch for Top decay mode
+    void GetTopDecayModeEntry(Long64_t&);
+    /// Access event entry for nTuple branches for Top signal samples on generator level
+    void GetTopSignalBranchesEntry(Long64_t&);
+    /// Access event entry for nTuple branches for Higgs signal samples on generator level
+    void GetHiggsSignalBranchesEntry(Long64_t&);
+    
+    /// Get string telling the Top decay mode
+    const std::string topDecayModeString();
+    
+    /// Book histograms needed for b-tag efficiencies
+    void bookBtagHistograms();
+    /// Fill histograms needed for b-tag efficiencies
+    void fillBtagHistograms(const double jetPtCut, const double btagWP);
+    /// Produce b-tag efficiencies
+    void produceBtagEfficiencies();
+    
+    /// Prepare trigger scale factor
+    void prepareTriggerSF();
+    /// Get trigger per-event scale factor
+    double getTriggerSF(const LV& lep1, const LV& lep2);
+    
+    /// Prepare lepton scale factor
+    void prepareLeptonIDSF();
+    /// Get lepton per-event scale factor
+    double getLeptonIDSF(const LV& lep1, const LV& lep2, int x, int y);
+    
+    /// Prepare b-tagging scale factor
+    void prepareBtagSF();
+    /// Get b-tag per-event scale factor
+    double calculateBtagSF();
+    
+    /// Prepare kinematic reconstruction scale factor
+    void prepareKinRecoSF();
+    /// Calculate the kinematic reconstruction and return whether at least one solution exists
+    bool calculateKinReco(const LV &leptonMinus, const LV &leptonPlus);
+    
+    /// Prepare JER/JES systematics
+    void prepareJER_JES();
+    /// Apply JER/JES systematics
+    void applyJER_JES();
+    
+    /// Get 2-dimensional scale factor from histogram
+    double get2DSF(TH2* histo, double x, double y);
+    
+    /// Order two Lorentz vectors by pt
+    void orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2);
+    /// Find lepton leading in pt, and next-to-leading lepton
+    bool getLeptonPair(size_t& LeadLeptonNumber, size_t& NLeadLeptonNumber);
+    /// Clean the jet collection for given cuts on pt, eta
+    void cleanJetCollection(double ptcut, double etacut);
+    /// Get H_t of jets
+    double getJetHT(const VLV& jet, int pt_cut);
+    
+    /// Create binned control plots
+    // Create Nbins control plots for the differential distribution h_differential
+    // Use h_control for the control plot name and binning
+    void CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList =true);
+    
+    /// Fill binned control plots
+    // h: differential distribution histogram
+    // binvalue: the value of the quantity in the differential distribution histogram
+    // the control plot histogram
+    // the value for the control plot
+    // weight: event weight
+    void FillBinnedControlPlot(TH1* h_differential, double binvalue, 
+                               TH1 *h_control, double value, double weight);
+    
+    /// Store the object in the output list and return it
+    template<class T> T* store(T* obj);
+    
+    
+    
+// Private methods
 private:
     
     /// Clear all branches
@@ -432,88 +518,14 @@ private:
     /// Set addresses of nTuple branches for Higgs signal samples on generator level
     void SetHiggsSignalBranchAddresses();
     
-    
-    
-protected:
-    
-    // store the object in the output list and return it
-    template<class T> T* store(T* obj);
-    
-    // Create Nbins control plots for the differential distribution h_differential
-    // Use h_control for the control plot name and binning
-    void CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList =true);
-    // h: differential distribution histogram
-    // binvalue: the value of the quantity in the differential distribution histogram
-    // the control plot histogram
-    // the value for the control plot
-    // weight: event weight
-    void FillBinnedControlPlot(TH1* h_differential, double binvalue, 
-                               TH1 *h_control, double value, double weight);
-    
-    
-    // Method which needs to be overwritable
-    virtual bool produceBtagEfficiencies();
-    
-    
-    
-    /// Access event entry for nTuple branches relevant for reconstruction level
-    void GetRecoBranchesEntry(Long64_t &);
-    /// Access event entry for nTuple branches of kinematic reconstruction
-    void GetKinRecoBranchesEntry(Long64_t &);
-    /// Access event entry for nTuple branch for PDF weights
-    Int_t GetPDFEntry(Long64_t entry);
-    /// Access event entry for nTuple branch for Top decay mode
-    void GetTopDecayModeEntry(Long64_t entry);
-    /// Access event entry for nTuple branches for Top signal samples on generator level
-    void GetTopSignalBranchesEntry(Long64_t &);
-    /// Access event entry for nTuple branches for Higgs signal samples on generator level
-    void GetHiggsSignalBranchesEntry(Long64_t &);
-    
-    
-    
-    
-    
-    
-    void cleanJetCollection(double ptcut, double etacut);
-    bool calculateKinReco(const LV &leptonMinus, const LV &leptonPlus);
-    
-    double getTriggerSF(const LV& lep1, const LV& lep2);
-    double getLeptonIDSF(const LV& lep1, const LV& lep2, int x, int y);
-    
-    double calculateBtagSF();
-    double getJetHT(const VLV& jet, int pt_cut);
-    
-    const std::string topDecayModeString();
-    
-    void applyJER_JES();
-    
-    
-    // Methods for trigger and lepton SF
-    void prepareTriggerSF();
-    void prepareLeptonIDSF();
-    double get2DSF(TH2* histo, double x, double y);
-    
-    // Methods for KinReco SF
-    void prepareKinRecoSF();
-    
-    // Methods for JER,JES
-    void prepareJER_JES();
-    
-    // Methods for b-tag SF
-    void prepareBtagSF();
-    double BJetSF ( double, double );
-    double CJetSF ( double, double );
-    double LJetSF ( double , double , TString );
-    double BJetSFAbsErr ( double );
-    double CJetSFAbsErr ( double );
-    
-    
-    //no idea why this is needed! But Process() isn't called otherwise! Argh!
-    virtual int Version() const { return 3; }
-    
-    ClassDef ( AnalysisBase, 0 );
-
+    /// Methods needed for b-tag scale factor calculation
+    double BJetSF(double, double);
+    double CJetSF(double, double);
+    double LJetSF(double, double, TString);
+    double BJetSFAbsErr(double);
+    double CJetSFAbsErr(double);
 };
+
 
 
 /** helper function to store a TObject in the output list

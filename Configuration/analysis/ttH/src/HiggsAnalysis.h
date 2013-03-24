@@ -39,9 +39,6 @@ public:
     
 private:
     
-    // Need to overwrite in order not to produce b-tag efficiencies like top-group does
-    virtual bool produceBtagEfficiencies();
-    
     /// Is it a ttH sample inclusive in Higgs decay
     bool isInclusiveHiggs_;
     
