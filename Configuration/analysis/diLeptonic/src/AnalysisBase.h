@@ -31,6 +31,7 @@ protected:
 // Variables associated to nTuple branches
     
     /// nTuple branches relevant for reconstruction level
+    
     // Concerning physics objects
     VLV                 *leptons_;
     std::vector<int>    *lepPdgId_;
@@ -44,9 +45,6 @@ protected:
     std::vector<double> *lepDxyVertex0_;
     //std::vector<int>    *lepTrigger_;
     VLV                 *jets_;
-    std::vector<double> *jetJERSF_;
-    VLV                 *jetsForMET_;
-    std::vector<double> *jetForMETJERSF_;
     std::vector<double> *jetBTagTCHE_;
     //std::vector<double> *jetBTagTCHP_;
     std::vector<double> *jetBTagSSVHE_;
@@ -58,12 +56,16 @@ protected:
     std::vector<int>    *jetPartonFlavour_;
     VLV                 *allGenJets_;
     VLV                 *associatedGenJet_;
-    VLV                 *associatedGenJetForMET_;
     std::vector<double> *jetChargeGlobalPtWeighted_;
     std::vector<double> *jetChargeRelativePtWeighted_;
     //std::vector<int>    *jetAssociatedPartonPdgId_;
     //std::vector<LV>     *jetAssociatedParton_;
     LV                  *met_;
+    std::vector<double> *jetJERSF_;
+    VLV                 *jetsForMET_;
+    std::vector<double> *jetForMETJERSF_;
+    VLV                 *associatedGenJetForMET_;
+    
     // Concerning event
     UInt_t runNumber_;
     UInt_t lumiBlock_;
@@ -73,10 +75,10 @@ protected:
     //UInt_t triggerBitsTau_;
     //std::vector<std::string> *firedTriggers_;
     Int_t  vertMulti_;
+    
     // Concerning MC event
     Int_t               vertMultiTrue_;
     Double_t            weightGenerator_;
-    std::vector<double> *weightPDF_;
     
     
     /// nTuple branches of kinematic reconstruction
@@ -92,6 +94,10 @@ protected:
     //VLV              *HypWMinus_;
     std::vector<int> *HypJet0index_;
     std::vector<int> *HypJet1index_;
+    
+    
+    /// nTuple branch for PDF weights
+    std::vector<double> *weightPDF_;
     
     
     /// nTuple branch for Drell-Yan decay mode
@@ -202,53 +208,78 @@ protected:
     
 // Private member data
 private:    
-    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-
+    
+    TTree *fChain;   //!pointer to the analyzed TTree or TChain
+    
+    
     /// nTuple branches relevant for reconstruction level
+    
     // Concerning physics objects
-    TBranch *b_lepton;   //!
-    TBranch *b_lepPdgId;   //!
-    TBranch *b_lepPfIso;   //!
-    TBranch *b_lepCombIso;   //!
+    TBranch *b_lepton;
+    TBranch *b_lepPdgId;
+    TBranch *b_lepID;
+    TBranch *b_lepPfIso;
+    TBranch *b_lepChargedHadronIso;
+    TBranch *b_lepNeutralHadronIso;
+    TBranch *b_lepPhotonIso;
+    TBranch *b_lepPuChargedHadronIso;
+    TBranch *b_lepCombIso;
     TBranch *b_lepDxyVertex0;
-    TBranch *b_associatedGenJet;   //!
-    TBranch *b_associatedGenJetForMET;
-    TBranch *b_jet;   //!
-    TBranch *b_jetJERSF;   //!
-    TBranch *b_jetForMET;   //!
-    TBranch *b_jetForMETJERSF;   //!
-    TBranch *b_jetBTagTCHE;   //!
-    TBranch *b_jetBTagCSV;   //!
-    TBranch *b_jetBTagSSVHE;   //!
-    TBranch *b_jetPartonFlavour;   //!
-    TBranch *b_met;   //!
+    TBranch *b_lepTrigger;
+    TBranch *b_jet;
+    TBranch *b_jetBTagTCHE;
+    TBranch *b_jetBTagTCHP;
+    TBranch *b_jetBTagSSVHE;
+    TBranch *b_jetBTagSSVHP;
+    TBranch *b_jetBTagJetProbability;
+    TBranch *b_jetBTagJetBProbability;
+    TBranch *b_jetBTagCSV;
+    TBranch *b_jetBTagCSVMVA;
+    TBranch *b_jetPartonFlavour;
+    TBranch *b_allGenJets;
+    TBranch *b_associatedGenJet;
     TBranch *b_jetChargeGlobalPtWeighted;
     TBranch *b_jetChargeRelativePtWeighted;
+    TBranch *b_jetAssociatedPartonPdgId;
+    TBranch *b_jetAssociatedParton;
+    TBranch *b_met;
+    TBranch *b_jetJERSF;
+    TBranch *b_jetForMET;
+    TBranch *b_jetForMETJERSF;
+    TBranch *b_associatedGenJetForMET;
+    
     // Concerning event
-    TBranch *b_runNumber;   //!
-    TBranch *b_lumiBlock;   //!
-    TBranch *b_eventNumber;   //!
-    TBranch *b_triggerBits;   //!
-    TBranch *b_vertMulti;   //!
+    TBranch *b_runNumber;
+    TBranch *b_lumiBlock;
+    TBranch *b_eventNumber;
+    TBranch *b_recoInChannel;
+    TBranch *b_triggerBits;
+    TBranch *b_triggerBitsTau;
+    TBranch *b_firedTriggers;
+    TBranch *b_vertMulti;
+    
     // Concerning MC event
-    TBranch *b_weightGenerator;   //!
-    TBranch *b_weightPDF;
     TBranch *b_vertMultiTrue;
+    TBranch *b_weightGenerator;
     
     
     /// nTuple branches of kinematic reconstruction
-    TBranch *b_HypTop;   //!
-    TBranch *b_HypAntiTop;   //!
-    TBranch *b_HypLepton;   //!
-    TBranch *b_HypAntiLepton;   //!
-    TBranch *b_HypNeutrino;   //!
-    TBranch *b_HypAntiNeutrino;   //!
-    TBranch *b_HypB;   //!
-    TBranch *b_HypAntiB;   //!
-    TBranch *b_HypWPlus;   //!
-    TBranch *b_HypWMinus;   //!
-    TBranch *b_HypJet0index;   //!
-    TBranch *b_HypJet1index;   //!
+    TBranch *b_HypTop;
+    TBranch *b_HypAntiTop;
+    TBranch *b_HypLepton;
+    TBranch *b_HypAntiLepton;
+    TBranch *b_HypNeutrino;
+    TBranch *b_HypAntiNeutrino;
+    TBranch *b_HypB;
+    TBranch *b_HypAntiB;
+    TBranch *b_HypWPlus;
+    TBranch *b_HypWMinus;
+    TBranch *b_HypJet0index;
+    TBranch *b_HypJet1index;
+    
+    
+    /// nTuple branch for PDF weights
+    TBranch *b_weightPDF;
     
     
     /// nTuple branch for Drell-Yan decay mode
@@ -256,30 +287,43 @@ private:
     
     
     /// nTuple branch for Top decay mode
-    TBranch *b_TopDecayMode;   //!
+    TBranch *b_TopDecayMode;
     
     
     /// nTuple branches for Top signal samples on generator level
-    TBranch *b_GenTop;   //!
-    TBranch *b_GenAntiTop;   //!
-    TBranch *b_GenLepton;   //!
-    TBranch *b_GenAntiLepton;   //!
-    TBranch *b_GenNeutrino;   //!
-    TBranch *b_GenAntiNeutrino;   //!
-    TBranch *b_GenB;   //!
-    TBranch *b_GenAntiB;   //!
-    TBranch *b_GenWPlus;   //!
-    TBranch *b_GenWMinus;   //!
-    TBranch *b_allGenJets;   //!
-    TBranch *b_BHadJetIndex;   //!
-    TBranch *b_AntiBHadJetIndex;   //!
     TBranch *b_GenMet;
-    TBranch *b_BHadrons;   //!
-    TBranch *b_AntiBHadrons;   //!
-    TBranch *b_BHadronFromTopB;   //!
-    TBranch *b_AntiBHadronFromTopB;   //!
-    TBranch *b_BHadronVsJet;   //!
-    TBranch *b_AntiBHadronVsJet;   //!
+    TBranch *b_GenTop;
+    TBranch *b_GenAntiTop;
+    TBranch *b_GenLepton;
+    TBranch *b_GenAntiLepton;
+    TBranch *b_GenLeptonPdgId;
+    TBranch *b_GenAntiLeptonPdgId;
+    TBranch *b_GenTau;
+    TBranch *b_GenAntiTau;
+    TBranch *b_GenNeutrino;
+    TBranch *b_GenAntiNeutrino;
+    TBranch *b_GenB;
+    TBranch *b_GenAntiB;
+    TBranch *b_GenWPlus;
+    TBranch *b_GenWMinus;
+    TBranch *b_GenParticleP4;
+    TBranch *b_GenParticlePdgId;
+    TBranch *b_GenParticleStatus;
+    TBranch *b_BHadJetIndex;
+    TBranch *b_AntiBHadJetIndex;
+    TBranch *b_BHadrons;
+    TBranch *b_AntiBHadrons;
+    TBranch *b_BHadronFromTopB;
+    TBranch *b_AntiBHadronFromTopB;
+    TBranch *b_BHadronVsJet;
+    TBranch *b_AntiBHadronVsJet;
+    TBranch *b_genParticlePdg;
+    TBranch *b_genParticleStatus;
+    TBranch *b_genParticleIndices;
+    TBranch *b_genParticle;
+    TBranch *b_bHadIndex;
+    TBranch *b_bHadFlavour;
+    TBranch *b_bHadJetIndex;
     
 
     /// nTuple branches for Higgs signal samples on generator level
@@ -350,7 +394,10 @@ public:
     virtual void SetSamplename(TString samplename, TString systematic_from_file);
     void SetOutputfilename(TString outputfilename);
     void SetMC(bool isMC);
+    
+    /// Set Drell-Yan decay channel for selection, access decay mode from nTuple branch
     void SetTrueLevelDYChannel(int dy);
+    
     void SetWeightedEvents(TH1* weightedEvents);
     void SetRunViaTau(bool runViaTau);
     void SetPUReweighter(PUReweighter *pu);
@@ -365,13 +412,20 @@ public:
     
 private:
     
+    /// Clear all branches
+    void clearBranches();
+    /// Clear all variables assigned to branches
+    void clearBranchVariables();
+    
     /// Set addresses of nTuple branches relevant for reconstruction level
     void SetRecoBranchAddresses();
     /// Set addresses of nTuple branches of kinematic reconstruction
     void SetKinRecoBranchAddresses();
-    /// Set addresses of nTuple branch for Drell-Yan decay mode
+    /// Set address of nTuple branch for PDF weights
+    void SetPdfBranchAddress();
+    /// Set address of nTuple branch for Drell-Yan decay mode
     void SetDyDecayBranchAddress();
-    /// Set addresses of nTuple branch for Top decay mode
+    /// Set address of nTuple branch for Top decay mode
     void SetTopDecayBranchAddress();
     /// Set addresses of nTuple branches for Top signal samples on generator level
     void SetTopSignalBranchAddresses();
@@ -383,8 +437,7 @@ private:
 protected:
     
     // store the object in the output list and return it
-    template<class T> 
-    T* store(T* obj);
+    template<class T> T* store(T* obj);
     
     // Create Nbins control plots for the differential distribution h_differential
     // Use h_control for the control plot name and binning
@@ -398,21 +451,28 @@ protected:
                                TH1 *h_control, double value, double weight);
     
     
-    // Methods which need to be overwritable
+    // Method which needs to be overwritable
     virtual bool produceBtagEfficiencies();
     
+    
+    
     /// Access event entry for nTuple branches relevant for reconstruction level
-    void GetRecoBranches(Long64_t &);
+    void GetRecoBranchesEntry(Long64_t &);
     /// Access event entry for nTuple branches of kinematic reconstruction
-    void GetKinRecoBranches(Long64_t &);
-    /// Access event entry for nTuple branch for Drell-Yan decay mode
-    void GetDyDecayBranch(Long64_t &);
-    /// Access event entry for nTuple branch for Drell-Yan decay mode
-    void GetTopDecayBranch(Long64_t &);
+    void GetKinRecoBranchesEntry(Long64_t &);
+    /// Access event entry for nTuple branch for PDF weights
+    Int_t GetPDFEntry(Long64_t entry);
+    /// Access event entry for nTuple branch for Top decay mode
+    void GetTopDecayModeEntry(Long64_t entry);
     /// Access event entry for nTuple branches for Top signal samples on generator level
-    void GetTopSignalBranches(Long64_t &);
+    void GetTopSignalBranchesEntry(Long64_t &);
     /// Access event entry for nTuple branches for Higgs signal samples on generator level
-    void GetHiggsSignalBranches(Long64_t &);
+    void GetHiggsSignalBranchesEntry(Long64_t &);
+    
+    
+    
+    
+    
     
     void cleanJetCollection(double ptcut, double etacut);
     bool calculateKinReco(const LV &leptonMinus, const LV &leptonPlus);
@@ -447,8 +507,6 @@ protected:
     double BJetSFAbsErr ( double );
     double CJetSFAbsErr ( double );
     
-    Int_t GetTopDecayModeEntry(Long64_t entry);
-    Int_t GetPDFEntry(Long64_t entry);
     
     //no idea why this is needed! But Process() isn't called otherwise! Argh!
     virtual int Version() const { return 3; }

@@ -447,35 +447,6 @@ void AnalysisBase::SetMC(bool isMC)
 
 
 
-void AnalysisBase::SetTrueLevelDYChannel(int dy)
-{
-    trueDYchannelCut_ = dy;
-    if (dy) {
-        std::cout << "Include true-level filter for Z decay to pdgid " << dy << "\n";
-        
-        //create function to check the DY decay channel
-        checkZDecayMode_ = [&, dy](Long64_t entry) -> bool {
-            b_ZDecayMode->GetEntry(entry);
-            bool pass = false;
-            for (const auto decayMode : *ZDecayMode_) {
-                if ((dy == 15 && decayMode > 15110000) ||
-                    (dy == 13 && decayMode == 1313) ||
-                    (dy == 11 && decayMode == 1111))
-                {
-                    pass = true;
-                    break;
-                }
-            }
-            return pass;
-        };
-        
-    } else {
-        checkZDecayMode_ = nullptr;
-    }
-}
-
-
-
 void AnalysisBase::SetPDF(int pdf_no)
 {
     this->pdf_no_ = pdf_no;
@@ -522,7 +493,153 @@ void AnalysisBase::Init ( TTree *tree )
     // Init() will be called many times when running on PROOF
     // (once per file to be processed).
     
+    // Reset all branches and their associated variables
+    this->clearBranches();
+    this->clearBranchVariables();
     
+    // Set branch addresses and branch pointers
+    if(!tree) return;
+    fChain = tree;
+    fChain->SetMakeClass(0);
+    this->SetRecoBranchAddresses();
+    this->SetKinRecoBranchAddresses();
+    this->SetPdfBranchAddress();
+    this->SetDyDecayBranchAddress();
+    this->SetTopDecayBranchAddress();
+    if(isSignal_) this->SetTopSignalBranchAddresses();
+    if(isHiggsSignal_) this->SetHiggsSignalBranchAddresses();
+}
+
+
+
+void AnalysisBase::clearBranches()
+{
+    // nTuple branches relevant for reconstruction level
+    // Concerning physics objects
+    b_lepton = 0;
+    b_lepPdgId = 0;
+    b_lepID = 0;
+    b_lepPfIso = 0;
+    b_lepChargedHadronIso = 0;
+    b_lepNeutralHadronIso = 0;
+    b_lepPhotonIso = 0;
+    b_lepPuChargedHadronIso = 0;
+    b_lepCombIso = 0;
+    b_lepDxyVertex0 = 0;
+    b_lepTrigger = 0;
+    b_jet = 0;
+    b_jetBTagTCHE = 0;
+    b_jetBTagTCHP = 0;
+    b_jetBTagSSVHE = 0;
+    b_jetBTagSSVHP = 0;
+    b_jetBTagJetProbability = 0;
+    b_jetBTagJetBProbability = 0;
+    b_jetBTagCSV = 0;
+    b_jetBTagCSVMVA = 0;
+    b_jetPartonFlavour = 0;
+    b_allGenJets = 0;
+    b_associatedGenJet = 0;
+    b_jetChargeGlobalPtWeighted = 0;
+    b_jetChargeRelativePtWeighted = 0;
+    b_jetAssociatedPartonPdgId = 0;
+    b_jetAssociatedParton = 0;
+    b_met = 0;
+    b_jetJERSF = 0;
+    b_jetForMET = 0;
+    b_jetForMETJERSF = 0;
+    b_associatedGenJetForMET = 0;
+    
+    // nTuple branches relevant for reconstruction level
+    // Concerning event
+    b_runNumber = 0;
+    b_lumiBlock = 0;
+    b_eventNumber = 0;
+    b_recoInChannel = 0;
+    b_triggerBits = 0;
+    b_triggerBitsTau = 0;
+    b_firedTriggers = 0;
+    b_vertMulti = 0;
+    
+    // nTuple branches relevant for reconstruction level
+    // Concerning MC event
+    b_vertMultiTrue = 0;
+    b_weightGenerator = 0;
+    
+    
+    // nTuple branches of kinematic reconstruction
+    b_HypTop = 0;
+    b_HypAntiTop = 0;
+    b_HypLepton = 0;
+    b_HypAntiLepton = 0;
+    b_HypNeutrino = 0;
+    b_HypAntiNeutrino = 0;
+    b_HypB = 0;
+    b_HypAntiB = 0;
+    b_HypWPlus = 0;
+    b_HypWMinus = 0;
+    b_HypJet0index = 0;
+    b_HypJet1index = 0;
+    
+    
+    // nTuple branch for PDF weights
+    b_weightPDF = 0;
+    
+    
+    // nTuple branch for Drell-Yan decay mode
+    b_ZDecayMode = 0;
+    
+    
+    // nTuple branch for Top decay mode
+    b_TopDecayMode = 0;
+    
+    
+    // nTuple branches for Top signal samples on generator level
+    b_GenMet = 0;
+    b_GenTop = 0;
+    b_GenAntiTop = 0;
+    b_GenLepton = 0;
+    b_GenAntiLepton = 0;
+    b_GenLeptonPdgId = 0;
+    b_GenAntiLeptonPdgId = 0;
+    b_GenTau = 0;
+    b_GenAntiTau = 0;
+    b_GenNeutrino = 0;
+    b_GenAntiNeutrino = 0;
+    b_GenB = 0;
+    b_GenAntiB = 0;
+    b_GenWPlus = 0;
+    b_GenWMinus = 0;
+    b_GenParticleP4 = 0;
+    b_GenParticlePdgId = 0;
+    b_GenParticleStatus = 0;
+    b_BHadJetIndex = 0;
+    b_AntiBHadJetIndex = 0;
+    b_BHadrons = 0;
+    b_AntiBHadrons = 0;
+    b_BHadronFromTopB = 0;
+    b_AntiBHadronFromTopB = 0;
+    b_BHadronVsJet = 0;
+    b_AntiBHadronVsJet = 0;
+    b_genParticlePdg = 0;
+    b_genParticleStatus = 0;
+    b_genParticleIndices = 0;
+    b_genParticle = 0;
+    b_bHadIndex = 0;
+    b_bHadFlavour = 0;
+    b_bHadJetIndex = 0;
+    
+    
+    // nTuple branches for Higgs signal samples on generator level
+    b_HiggsDecayMode = 0;
+    b_GenH = 0;
+    b_GenBFromH = 0;
+    b_GenAntiBFromH = 0;
+}
+
+
+
+void AnalysisBase::clearBranchVariables()
+{
     // Set values to null for branches relevant for reconstruction level
     // Concerning physics objects
     leptons_ = 0;
@@ -537,11 +654,6 @@ void AnalysisBase::Init ( TTree *tree )
     lepDxyVertex0_ = 0;
     //lepTrigger_ = 0;
     jets_ = 0;
-    jetsForMET_ = 0;
-    associatedGenJet_ = 0;
-    associatedGenJetForMET_ = 0;
-    jetJERSF_ = 0;
-    jetForMETJERSF_ = 0;
     jetBTagTCHE_ = 0;
     //jetBTagTCHP_ = 0;
     jetBTagSSVHE_ = 0;
@@ -553,12 +665,17 @@ void AnalysisBase::Init ( TTree *tree )
     jetPartonFlavour_ = 0;
     allGenJets_ = 0;
     associatedGenJet_ = 0;
-    associatedGenJetForMET_ = 0;
     jetChargeGlobalPtWeighted_ = 0;
     jetChargeRelativePtWeighted_ = 0;
-    //jetChargeGlobalPtWeighted_ = 0;
-    //jetChargeRelativePtWeighted_ = 0;
+    //jetAssociatedPartonPdgId_ = 0;
+    //jetAssociatedParton_ = 0;
     met_ = 0;
+    jetJERSF_ = 0;
+    jetsForMET_ = 0;
+    jetForMETJERSF_ = 0;
+    associatedGenJetForMET_ = 0;
+    
+    // Set values to null for branches relevant for reconstruction level
     // Concerning event
     runNumber_ = 0;
     lumiBlock_ = 0;
@@ -568,10 +685,11 @@ void AnalysisBase::Init ( TTree *tree )
     //triggerBitsTau_ = 0;
     //firedTriggers_ = 0;
     vertMulti_ = 0;
+    
+    // Set values to null for branches relevant for reconstruction level
     // Concerning MC event
     vertMultiTrue_ = 0;
     weightGenerator_ = 0;
-    weightPDF_ = 0;
     
     
     // Set values to null for branches of kinematic reconstruction
@@ -587,6 +705,10 @@ void AnalysisBase::Init ( TTree *tree )
     //HypWMinus_ = 0;
     HypJet0index_ = 0;
     HypJet1index_ = 0;
+    
+    
+    // Set values to null for PDF weight
+    weightPDF_ = 0;
     
     
     // Set values to null for Drell-Yan decay branch
@@ -611,8 +733,8 @@ void AnalysisBase::Init ( TTree *tree )
     GenAntiNeutrino_ = 0;
     GenB_ = 0;
     GenAntiB_ = 0;
-    GenWPlus_ = 0;
-    GenWMinus_ = 0;
+    //GenWPlus_ = 0;
+    //GenWMinus_ = 0;
     //GenParticleP4_= 0;
     //GenParticlePdgId_= 0;
     //GenParticleStatus_= 0;
@@ -638,238 +760,324 @@ void AnalysisBase::Init ( TTree *tree )
     GenH_ = 0;
     GenBFromH_ = 0;
     GenAntiBFromH_ = 0;
-    
-    
-    // Set branch addresses and branch pointers
-    if ( !tree ) return;
-    fChain = tree;
-    fChain->SetMakeClass(0);
-    this->SetRecoBranchAddresses();
-    this->SetKinRecoBranchAddresses();
-    this->SetDyDecayBranchAddress();
-    this->SetTopDecayBranchAddress();
-    if(isSignal_) this->SetTopSignalBranchAddresses();
-    if(isHiggsSignal_) this->SetHiggsSignalBranchAddresses();
 }
 
 
 
-void AnalysisBase::SetRecoBranchAddresses(){
-    fChain->SetBranchAddress("leptons", &leptons_, &b_lepton );
-    fChain->SetBranchAddress("lepPdgId", &lepPdgId_, &b_lepPdgId );
-    fChain->SetBranchAddress("lepPfIso", &lepPfIso_, &b_lepPfIso );
-    fChain->SetBranchAddress("lepCombIso", &lepCombIso_, &b_lepCombIso );
+void AnalysisBase::SetRecoBranchAddresses()
+{
+    // Concerning physics objects
+    fChain->SetBranchAddress("leptons", &leptons_, &b_lepton);
+    fChain->SetBranchAddress("lepPdgId", &lepPdgId_, &b_lepPdgId);
+    //fChain->SetBranchAddress("lepID", &lepID_, &b_lepID);
+    fChain->SetBranchAddress("lepPfIso", &lepPfIso_, &b_lepPfIso);
+    //fChain->SetBranchAddress("lepChargedHadronIso", &lepChargedHadronIso_, &b_lepChargedHadronIso);
+    //fChain->SetBranchAddress("lepNeutralHadronIso", &lepNeutralHadronIso_, &b_lepNeutralHadronIso);
+    //fChain->SetBranchAddress("lepPhotonIso", &lepPhotonIso_, &b_lepPhotonIso);
+    //fChain->SetBranchAddress("lepPuChargedHadronIso", &lepPuChargedHadronIso_, &b_lepPuChargedHadronIso);
+    fChain->SetBranchAddress("lepCombIso", &lepCombIso_, &b_lepCombIso);
     fChain->SetBranchAddress("lepDxyVertex0", &lepDxyVertex0_, &b_lepDxyVertex0);
-    fChain->SetBranchAddress("associatedGenJet", &associatedGenJet_, &b_associatedGenJet );
-    if (doJesJer_) {
-        fChain->SetBranchAddress("associatedGenJetForMET", &associatedGenJetForMET_, &b_associatedGenJetForMET );
-        fChain->SetBranchAddress("jetsForMET", &jetsForMET_, &b_jetForMET );
-        fChain->SetBranchAddress("jetJERSF", &jetJERSF_, &b_jetJERSF );
-        fChain->SetBranchAddress("jetForMETJERSF", &jetForMETJERSF_, &b_jetForMETJERSF );
-    }
-    fChain->SetBranchAddress("jets", &jets_, &b_jet );
-    fChain->SetBranchAddress("jetBTagTCHE", &jetBTagTCHE_, &b_jetBTagTCHE );
-    fChain->SetBranchAddress("jetBTagCSV", &jetBTagCSV_, &b_jetBTagCSV );
-    fChain->SetBranchAddress("jetBTagSSVHE", &jetBTagSSVHE_, &b_jetBTagSSVHE );
-    fChain->SetBranchAddress("jetPartonFlavour", &jetPartonFlavour_, &b_jetPartonFlavour );
-    //fChain->SetBranchAddress("genJet", &genJets, &b_genJet );
-    fChain->SetBranchAddress("met", &met_, &b_met );
-    fChain->SetBranchAddress("runNumber", &runNumber_, &b_runNumber );
-    fChain->SetBranchAddress("triggerBits", &triggerBits_, &b_triggerBits );
-    fChain->SetBranchAddress("lumiBlock", &lumiBlock_, &b_lumiBlock );
-    fChain->SetBranchAddress("eventNumber", &eventNumber_, &b_eventNumber );
-    fChain->SetBranchAddress("weightGenerator", &weightGenerator_, &b_weightGenerator );
-    if (pdf_no_ >= 0) fChain->SetBranchAddress("pdfWeights", &weightPDF_, &b_weightPDF);
-    fChain->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti );
-    fChain->SetBranchAddress("vertMultiTrue", &vertMultiTrue_, &b_vertMultiTrue );
-    fChain->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets );
-    
-    if(fChain->GetBranch("jetChargeGlobalPtWeighted"))
+    //fChain->SetBranchAddress("lepTrigger", &lepTrigger_, &b_lepTrigger);
+    fChain->SetBranchAddress("jets", &jets_, &b_jet);
+    fChain->SetBranchAddress("jetBTagTCHE", &jetBTagTCHE_, &b_jetBTagTCHE);
+    //fChain->SetBranchAddress("jetBTagTCHP", &jetBTagTCHP_, &b_jetBTagTCHP);
+    fChain->SetBranchAddress("jetBTagSSVHE", &jetBTagSSVHE_, &b_jetBTagSSVHE);
+    //fChain->SetBranchAddress("jetBTagSSVHP", &jetBTagSSVHP_, &b_jetBTagSSVHP);
+    //fChain->SetBranchAddress("jetBTagJetProbability", &jetBTagJetProbability_, &b_jetBTagJetProbability);
+    //fChain->SetBranchAddress("jetBTagJetBProbability", &jetBTagJetBProbability_, &b_jetBTagJetBProbability);
+    fChain->SetBranchAddress("jetBTagCSV", &jetBTagCSV_, &b_jetBTagCSV);
+    //fChain->SetBranchAddress("jetBTagCSVMVA", &jetBTagCSVMVA_, &b_jetBTagCSVMVA);
+    fChain->SetBranchAddress("jetPartonFlavour", &jetPartonFlavour_, &b_jetPartonFlavour);
+    fChain->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets);
+    fChain->SetBranchAddress("associatedGenJet", &associatedGenJet_, &b_associatedGenJet);
+    if(fChain->GetBranch("jetChargeGlobalPtWeighted")) // new variable, keep check a while for compatibility
         fChain->SetBranchAddress("jetChargeGlobalPtWeighted", &jetChargeGlobalPtWeighted_, &b_jetChargeGlobalPtWeighted);
     else b_jetChargeGlobalPtWeighted = 0;
-    if(fChain->GetBranch("jetChargeRelativePtWeighted"))
+    if(fChain->GetBranch("jetChargeRelativePtWeighted")) // new variable, keep check a while for compatibility
         fChain->SetBranchAddress("jetChargeRelativePtWeighted", &jetChargeRelativePtWeighted_, &b_jetChargeRelativePtWeighted);
     else b_jetChargeRelativePtWeighted = 0;
+    //fChain->SetBranchAddress("jetAssociatedPartonPdgId", &jetAssociatedPartonPdgId_, &b_jetAssociatedPartonPdgId);
+    //fChain->SetBranchAddress("jetAssociatedParton", &jetAssociatedParton_, &b_jetAssociatedParton);
+    fChain->SetBranchAddress("met", &met_, &b_met);
+    if (doJesJer_) {
+        fChain->SetBranchAddress("jetJERSF", &jetJERSF_, &b_jetJERSF);
+        fChain->SetBranchAddress("jetsForMET", &jetsForMET_, &b_jetForMET);
+        fChain->SetBranchAddress("jetForMETJERSF", &jetForMETJERSF_, &b_jetForMETJERSF);
+        fChain->SetBranchAddress("associatedGenJetForMET", &associatedGenJetForMET_, &b_associatedGenJetForMET);
+    }
+    
+    // Concerning event
+    fChain->SetBranchAddress("runNumber", &runNumber_, &b_runNumber);
+    fChain->SetBranchAddress("lumiBlock", &lumiBlock_, &b_lumiBlock);
+    fChain->SetBranchAddress("eventNumber", &eventNumber_, &b_eventNumber);
+    //fChain->SetBranchAddress("recoInChannel", &recoInChannel_, &b_recoInChannel);
+    fChain->SetBranchAddress("triggerBits", &triggerBits_, &b_triggerBits);
+    //fChain->SetBranchAddress("triggerBitsTau", &triggerBitsTau_, &b_triggerBitsTau);
+    //fChain->SetBranchAddress("firedTriggers", &firedTriggers_, &b_firedTriggers);
+    fChain->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti);
+    
+    // Concerning MC event
+    fChain->SetBranchAddress("vertMultiTrue", &vertMultiTrue_, &b_vertMultiTrue);
+    fChain->SetBranchAddress("weightGenerator", &weightGenerator_, &b_weightGenerator);
 }
 
 
 
-void AnalysisBase::SetKinRecoBranchAddresses(){
-    fChain->SetBranchAddress("HypTop", &HypTop_, &b_HypTop );
-    fChain->SetBranchAddress("HypAntiTop", &HypAntiTop_, &b_HypAntiTop );
-    fChain->SetBranchAddress("HypLepton", &HypLepton_, &b_HypLepton );
-    fChain->SetBranchAddress("HypAntiLepton", &HypAntiLepton_, &b_HypAntiLepton );
+void AnalysisBase::SetKinRecoBranchAddresses()
+{
+    fChain->SetBranchAddress("HypTop", &HypTop_, &b_HypTop);
+    fChain->SetBranchAddress("HypAntiTop", &HypAntiTop_, &b_HypAntiTop);
+    fChain->SetBranchAddress("HypLepton", &HypLepton_, &b_HypLepton);
+    fChain->SetBranchAddress("HypAntiLepton", &HypAntiLepton_, &b_HypAntiLepton);
     fChain->SetBranchAddress("HypNeutrino", &HypNeutrino_, &b_HypNeutrino);
     fChain->SetBranchAddress("HypAntiNeutrino", &HypAntiNeutrino_, &b_HypAntiNeutrino);
-    fChain->SetBranchAddress("HypB", &HypBJet_, &b_HypB );
-    fChain->SetBranchAddress("HypAntiB", &HypAntiBJet_, &b_HypAntiB );
+    fChain->SetBranchAddress("HypB", &HypBJet_, &b_HypB);
+    fChain->SetBranchAddress("HypAntiB", &HypAntiBJet_, &b_HypAntiB);
     //fChain->SetBranchAddress("HypWPlus", &HypWPlus_, &b_HypWPlus_);
     //fChain->SetBranchAddress("HypWMinus", &HypWMinus_, &b_HypWMinus_);
-    fChain->SetBranchAddress("HypJet0index", &HypJet0index_, &b_HypJet0index );
-    fChain->SetBranchAddress("HypJet1index", &HypJet1index_, &b_HypJet1index );
+    fChain->SetBranchAddress("HypJet0index", &HypJet0index_, &b_HypJet0index);
+    fChain->SetBranchAddress("HypJet1index", &HypJet1index_, &b_HypJet1index);
 }
 
 
 
-void AnalysisBase::SetDyDecayBranchAddress(){
+void AnalysisBase::SetPdfBranchAddress()
+{
+    if (pdf_no_ >= 0) fChain->SetBranchAddress("pdfWeights", &weightPDF_, &b_weightPDF);
+}
+
+
+
+void AnalysisBase::SetDyDecayBranchAddress()
+{
     fChain->SetBranchAddress("ZDecayMode", &ZDecayMode_, &b_ZDecayMode);
 }
 
 
 
-void AnalysisBase::SetTopDecayBranchAddress(){
-    fChain->SetBranchAddress("TopDecayMode", &topDecayMode_, &b_TopDecayMode );
+void AnalysisBase::SetTopDecayBranchAddress()
+{
+    fChain->SetBranchAddress("TopDecayMode", &topDecayMode_, &b_TopDecayMode);
 }
 
-
-
-void AnalysisBase::SetTopSignalBranchAddresses(){
-    fChain->SetBranchAddress("GenTop", &GenTop_, &b_GenTop );
-    fChain->SetBranchAddress("GenAntiTop", &GenAntiTop_, &b_GenAntiTop );
-    fChain->SetBranchAddress("GenLepton", &GenLepton_, &b_GenLepton );
-    fChain->SetBranchAddress("GenAntiLepton", &GenAntiLepton_, &b_GenAntiLepton );
+    
+    
+void AnalysisBase::SetTopSignalBranchAddresses()
+{
+    fChain->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
+    fChain->SetBranchAddress("GenTop", &GenTop_, &b_GenTop);
+    fChain->SetBranchAddress("GenAntiTop", &GenAntiTop_, &b_GenAntiTop);
+    fChain->SetBranchAddress("GenLepton", &GenLepton_, &b_GenLepton);
+    fChain->SetBranchAddress("GenAntiLepton", &GenAntiLepton_, &b_GenAntiLepton);
+    //fChain->SetBranchAddress("GenLeptonPdgId", &GenLeptonPdgId_, &b_GenLeptonPdgId);
+    //fChain->SetBranchAddress("GenAntiLeptonPdgId", &GenAntiLeptonPdgId_, &b_GenAntiLeptonPdgId);
+    //fChain->SetBranchAddress("GenTau", &GenTau_, &b_GenTau);
+    //fChain->SetBranchAddress("GenAntiTau", &GenAntiTau_, &b_GenAntiTau);
     fChain->SetBranchAddress("GenNeutrino", &GenNeutrino_, &b_GenNeutrino);
     fChain->SetBranchAddress("GenAntiNeutrino", &GenAntiNeutrino_, &b_GenAntiNeutrino);
-    fChain->SetBranchAddress("GenB", &GenB_, &b_GenB );
-    fChain->SetBranchAddress("GenAntiB", &GenAntiB_, &b_GenAntiB );
+    fChain->SetBranchAddress("GenB", &GenB_, &b_GenB);
+    fChain->SetBranchAddress("GenAntiB", &GenAntiB_, &b_GenAntiB);
+    //fChain->SetBranchAddress("GenWPlus", &GenWPlus_, &b_GenWPlus);
+    //fChain->SetBranchAddress("GenWMinus", &GenWMinus_, &b_GenWMinus);
     //fChain->SetBranchAddress("GenWPlus.fCoordinates.fX", &GenWPluspX, &b_GenWPluspX);
     //fChain->SetBranchAddress("GenWMinus.fCoordinates.fX", &GenWMinuspX, &b_GenWMinuspX);
-    fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex_, &b_BHadJetIndex );
-    fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex_, &b_AntiBHadJetIndex );
-    fChain->SetBranchAddress("BHadrons", &BHadrons_, &b_BHadrons );
+    //fChain->SetBranchAddress("GenParticleP4", &GenParticleP4_, &b_GenParticleP4);
+    //fChain->SetBranchAddress("GenParticlePdgId", &GenParticlePdgId_, &b_GenParticlePdgId);
+    //fChain->SetBranchAddress("GenParticleStatus", &GenParticleStatus_, &b_GenParticleStatus);
+    fChain->SetBranchAddress("BHadJetIndex", &BHadJetIndex_, &b_BHadJetIndex);
+    fChain->SetBranchAddress("AntiBHadJetIndex", &AntiBHadJetIndex_, &b_AntiBHadJetIndex);
+    fChain->SetBranchAddress("BHadrons", &BHadrons_, &b_BHadrons);
     fChain->SetBranchAddress("AntiBHadrons", &AntiBHadrons_, &b_AntiBHadrons);
-    fChain->SetBranchAddress("BHadronFromTop", &BHadronFromTopB_, &b_BHadronFromTopB );
-    fChain->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB );
-    fChain->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet );
-    fChain->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet );
-    fChain->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
-    //fChain->SetBranchAddress("GenJetHadronB.", &BHadronJet_, &b_BHadronJet_);
-    //fChain->SetBranchAddress("GenJetHadronAntiB", &AntiBHadronJet_, &b_AntiBHadronJet_);
+    fChain->SetBranchAddress("BHadronFromTop", &BHadronFromTopB_, &b_BHadronFromTopB);
+    fChain->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB);
+    fChain->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet);
+    fChain->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet);
+    if(fChain->GetBranch("genParticlePdg")) // need to check whether branch exists
+        fChain->SetBranchAddress("genParticlePdg", &genParticlePdg_, &b_genParticlePdg);
+    if(fChain->GetBranch("genParticleStatus")) // need to check whether branch exists
+        fChain->SetBranchAddress("genParticleStatus", &genParticleStatus_, &b_genParticleStatus);
+    if(fChain->GetBranch("genParticleIndices")) // need to check whether branch exists
+        fChain->SetBranchAddress("genParticleIndices", &genParticleIndices_, &b_genParticleIndices);
+    if(fChain->GetBranch("genParticle")) // need to check whether branch exists
+        fChain->SetBranchAddress("genParticle", &genParticle_, &b_genParticle);
+    if(fChain->GetBranch("bHadIndex")) // need to check whether branch exists
+        fChain->SetBranchAddress("bHadIndex", &bHadIndex_, &b_bHadIndex);
+    if(fChain->GetBranch("bHadFlavour")) // need to check whether branch exists
+        fChain->SetBranchAddress("bHadFlavour", &bHadFlavour_, &b_bHadFlavour);
+    if(fChain->GetBranch("bHadJetIndex")) // need to check whether branch exists
+        fChain->SetBranchAddress("bHadJetIndex", &bHadJetIndex_, &b_bHadJetIndex);
 }
 
 
 
-void AnalysisBase::SetHiggsSignalBranchAddresses(){
+void AnalysisBase::SetHiggsSignalBranchAddresses()
+{
+    fChain->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
     fChain->SetBranchAddress("GenH", &GenH_, &b_GenH);
     fChain->SetBranchAddress("GenBFromH", &GenBFromH_, &b_GenBFromH);
     fChain->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH_, &b_GenAntiBFromH);
-    fChain->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
 }
 
 
 
-void AnalysisBase::GetRecoBranches ( Long64_t & entry )
+void AnalysisBase::GetRecoBranchesEntry(Long64_t & entry)
 {    
-    b_lepton->GetEntry(entry); //!
-    b_lepPdgId->GetEntry(entry); //!
-    b_jet->GetEntry(entry); //!
-    b_met->GetEntry(entry); //!
-    b_associatedGenJet->GetEntry(entry); //!
-    if (doJesJer_) {
-        b_associatedGenJetForMET->GetEntry(entry); //!
-        b_jetForMET->GetEntry(entry); //!
-        b_jetJERSF->GetEntry(entry); //!
-        b_jetForMETJERSF->GetEntry(entry); //!
-    }
-    b_eventNumber->GetEntry(entry); //!
-    b_runNumber->GetEntry(entry); //!
-    b_lumiBlock->GetEntry(entry); //!
-    //special variables, not used currently
-//     b_lepPfIso->GetEntry(entry); //!
-//     b_lepCombIso->GetEntry(entry); //!
-//     b_lepDxyVertex0->GetEntry(entry);
-    
-    
-    //We only need CSV
-//     b_jetBTagTCHE->GetEntry(entry); //!
-    b_jetBTagCSV->GetEntry(entry); //!
-//     b_jetBTagSSVHE->GetEntry(entry); //!
-    b_weightGenerator->GetEntry(entry);
-
-    b_jetPartonFlavour->GetEntry(entry); //!
-    b_triggerBits->GetEntry(entry); //!
-    b_vertMulti->GetEntry(entry); //!
-    b_vertMultiTrue->GetEntry(entry); //!
-
-    //b_genJet->GetEntry(entry); //!
-    b_allGenJets->GetEntry(entry); //!
-
-    
+    // Concerning physics objects
+    b_lepton->GetEntry(entry);
+    b_lepPdgId->GetEntry(entry);
+    //b_lepID->GetEntry(entry);
+    //b_lepPfIso->GetEntry(entry);
+    //b_lepChargedHadronIso->GetEntry(entry);
+    //b_lepNeutralHadronIso->GetEntry(entry);
+    //b_lepPhotonIso->GetEntry(entry);
+    //b_lepPuChargedHadronIso->GetEntry(entry);
+    //b_lepCombIso->GetEntry(entry);
+    //b_lepDxyVertex0->GetEntry(entry);
+    //b_lepTrigger->GetEntry(entry);
+    b_jet->GetEntry(entry);
+    //b_jetBTagTCHE->GetEntry(entry);
+    //b_jetBTagTCHP->GetEntry(entry);
+    //b_jetBTagSSVHE->GetEntry(entry);
+    //b_jetBTagSSVHP->GetEntry(entry);
+    //b_jetBTagJetProbability->GetEntry(entry);
+    //b_jetBTagJetBProbability->GetEntry(entry);
+    b_jetBTagCSV->GetEntry(entry);
+    //b_jetBTagCSVMVA->GetEntry(entry);
+    b_jetPartonFlavour->GetEntry(entry);
+    b_allGenJets->GetEntry(entry);
+    b_associatedGenJet->GetEntry(entry);
     if(b_jetChargeGlobalPtWeighted)b_jetChargeGlobalPtWeighted->GetEntry(entry);
     if(b_jetChargeRelativePtWeighted)b_jetChargeRelativePtWeighted->GetEntry(entry);
+    //if(b_jetAssociatedPartonPdgId)b_jetAssociatedPartonPdgId->GetEntry(entry);
+    //if(b_jetAssociatedParton)b_jetAssociatedParton->GetEntry(entry);
+    b_met->GetEntry(entry);
+    if (doJesJer_) {
+        b_jetJERSF->GetEntry(entry);
+        b_jetForMET->GetEntry(entry);
+        b_jetForMETJERSF->GetEntry(entry);
+        b_associatedGenJetForMET->GetEntry(entry);
+    }
+    
+    // Concerning event
+    b_runNumber->GetEntry(entry);
+    b_lumiBlock->GetEntry(entry);
+    b_eventNumber->GetEntry(entry);
+    //b_recoInChannel
+    b_triggerBits->GetEntry(entry);
+    //b_triggerBitsTau
+    //b_firedTriggers
+    b_vertMulti->GetEntry(entry);
+    
+    // Concerning MC event
+    b_vertMultiTrue->GetEntry(entry);
+    b_weightGenerator->GetEntry(entry);
 }
 
 
 
-void AnalysisBase::GetKinRecoBranches(Long64_t& entry){
-    b_HypTop->GetEntry(entry); //!
-    b_HypAntiTop->GetEntry(entry); //!
-    b_HypLepton->GetEntry(entry); //!
-    b_HypAntiLepton->GetEntry(entry); //!
-    b_HypB->GetEntry(entry); //!
-    b_HypAntiB->GetEntry(entry); //!
-    b_HypNeutrino->GetEntry(entry);   //!
-    b_HypAntiNeutrino->GetEntry(entry);   //!
-
-    /* b_HypWPlus_->GetEntry(entry);   //!
-    b_HypWPluspX->GetEntry(entry);   //!
-    b_HypWPluspY->GetEntry(entry);   //!
-    b_HypWPluspZ->GetEntry(entry);   //!
-    b_HypWPlusE->GetEntry(entry);   //!
-
-    b_HypWMinus_->GetEntry(entry);   //!
-    b_HypWMinuspX->GetEntry(entry);   //!
-    b_HypWMinuspY->GetEntry(entry);   //!
-    b_HypWMinuspZ->GetEntry(entry);   //!
-    b_HypWMinusE->GetEntry(entry);   //!
-    */
+void AnalysisBase::GetKinRecoBranchesEntry(Long64_t& entry){
+    b_HypTop->GetEntry(entry);
+    b_HypAntiTop->GetEntry(entry);
+    b_HypLepton->GetEntry(entry);
+    b_HypAntiLepton->GetEntry(entry);
+    b_HypNeutrino->GetEntry(entry);
+    b_HypAntiNeutrino->GetEntry(entry);
+    b_HypB->GetEntry(entry);
+    b_HypAntiB->GetEntry(entry);
+    //b_HypWPlus->GetEntry(entry);
+    //b_HypWMinus->GetEntry(entry);
     b_HypJet0index->GetEntry(entry);
     b_HypJet1index->GetEntry(entry);
 }
 
 
 
-void AnalysisBase::GetTopSignalBranches ( Long64_t & entry )
-{
-    b_GenTop->GetEntry(entry); //!
-    b_GenAntiTop->GetEntry(entry); //!
-    b_GenLepton->GetEntry(entry); //!
-    b_GenAntiLepton->GetEntry(entry); //!
-    b_GenB->GetEntry(entry); //!
-    b_GenAntiB->GetEntry(entry); //!
-    b_GenNeutrino->GetEntry(entry);   //!
-    b_GenAntiNeutrino->GetEntry(entry);   //!
-
-    b_GenMet->GetEntry(entry);
-    /*
-    b_GenWPluspX->GetEntry(entry);   //!
-    b_GenWMinuspX->GetEntry(entry);   //!
-    */
-    b_BHadJetIndex->GetEntry(entry); //!
-    b_AntiBHadJetIndex->GetEntry(entry); //!
-
-    b_BHadrons->GetEntry(entry); //!
-    b_AntiBHadrons->GetEntry(entry); //!
-
-    b_BHadronFromTopB->GetEntry(entry); //!
-    b_AntiBHadronFromTopB->GetEntry(entry); //!
-    b_BHadronVsJet->GetEntry(entry); //!
-    b_AntiBHadronVsJet->GetEntry(entry); //!
-
-    /*  
-    b_BHadronJet->GetEntry(entry);   //!
-    b_AntiBHadronJet->GetEntry(entry);   //!
-    */
+Int_t AnalysisBase::GetPDFEntry(Long64_t entry){
+    return b_weightPDF->GetEntry(entry);
 }
 
 
 
-void AnalysisBase::GetHiggsSignalBranches ( Long64_t & entry )
+void AnalysisBase::SetTrueLevelDYChannel(int dy)
 {
+    trueDYchannelCut_ = dy;
+    if (dy) {
+        std::cout << "Include true-level filter for Z decay to pdgid " << dy << "\n";
+        
+        //create function to check the DY decay channel
+        checkZDecayMode_ = [&, dy](Long64_t entry) -> bool {
+            b_ZDecayMode->GetEntry(entry);
+            bool pass = false;
+            for (const auto decayMode : *ZDecayMode_) {
+                if ((dy == 15 && decayMode > 15110000) ||
+                    (dy == 13 && decayMode == 1313) ||
+                    (dy == 11 && decayMode == 1111))
+                {
+                    pass = true;
+                    break;
+                }
+            }
+            return pass;
+        };
+        
+    } else {
+        checkZDecayMode_ = nullptr;
+    }
+}
+
+
+
+void AnalysisBase::GetTopDecayModeEntry(Long64_t entry){
+    b_TopDecayMode->GetEntry(entry);
+}
+
+
+
+void AnalysisBase::GetTopSignalBranchesEntry(Long64_t & entry)
+{
+    b_GenMet->GetEntry(entry);
+    b_GenTop->GetEntry(entry);
+    b_GenAntiTop->GetEntry(entry);
+    b_GenLepton->GetEntry(entry);
+    b_GenAntiLepton->GetEntry(entry);
+    //b_GenLeptonPdgId->GetEntry(entry);
+    //b_GenAntiLeptonPdgId->GetEntry(entry);
+    //b_GenTau->GetEntry(entry);
+    //b_GenAntiTau->GetEntry(entry);
+    b_GenNeutrino->GetEntry(entry);
+    b_GenAntiNeutrino->GetEntry(entry);
+    b_GenB->GetEntry(entry);
+    b_GenAntiB->GetEntry(entry);
+    //b_GenWPlus->GetEntry(entry);
+    //b_GenWMinus->GetEntry(entry);
+    //b_GenParticleP4->GetEntry(entry);
+    //b_GenParticlePdgId->GetEntry(entry);
+    //b_GenParticleStatus->GetEntry(entry);
+    b_BHadJetIndex->GetEntry(entry);
+    b_AntiBHadJetIndex->GetEntry(entry);
+    b_BHadrons->GetEntry(entry);
+    b_AntiBHadrons->GetEntry(entry);
+    b_BHadronFromTopB->GetEntry(entry);
+    b_AntiBHadronFromTopB->GetEntry(entry);
+    b_BHadronVsJet->GetEntry(entry);
+    b_AntiBHadronVsJet->GetEntry(entry);
+    if(b_genParticlePdg) b_genParticlePdg->GetEntry(entry);
+    if(b_genParticleStatus) b_genParticleStatus->GetEntry(entry);
+    if(b_genParticleIndices) b_genParticleIndices->GetEntry(entry);
+    if(b_genParticle) b_genParticle->GetEntry(entry);
+    if(b_bHadIndex) b_bHadIndex->GetEntry(entry);
+    if(b_bHadFlavour) b_bHadFlavour->GetEntry(entry);
+    if(b_bHadJetIndex) b_bHadJetIndex->GetEntry(entry);
+}
+
+
+
+void AnalysisBase::GetHiggsSignalBranchesEntry(Long64_t & entry)
+{
+    b_HiggsDecayMode->GetEntry(entry);
     b_GenH->GetEntry(entry);
     b_GenBFromH->GetEntry(entry);
     b_GenAntiBFromH->GetEntry(entry);
-    b_HiggsDecayMode->GetEntry(entry);
 }
 
 
@@ -1557,16 +1765,5 @@ bool AnalysisBase::produceBtagEfficiencies(){
     return isSignal_;
 }
 
-
-
-Int_t AnalysisBase::GetTopDecayModeEntry(Long64_t entry){
-    return b_TopDecayMode->GetEntry(entry);
-}
-
-
-
-Int_t AnalysisBase::GetPDFEntry(Long64_t entry){
-    return b_weightPDF->GetEntry(entry);
-}
 
 

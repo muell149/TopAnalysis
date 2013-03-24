@@ -660,9 +660,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         bool isBackgroundInSignalSample = !isCorrectChannel || isViaTau;
         if (runViaTau_ != isBackgroundInSignalSample) return kTRUE;
     }
-
-    GetRecoBranches(entry);
-    GetKinRecoBranches(entry);
+    
+    GetRecoBranchesEntry(entry);
+    GetKinRecoBranchesEntry(entry);
     //We must correct for the madGraph branching fraction being 1/9 for dileptons (PDG average is .108)
     if ( correctMadgraphBR_ ) {
         if ( topDecayMode_ == 11 ) { //all hadronic decay
@@ -708,7 +708,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     int AntiBHadronIndex=-1;
     
     if (isSignal_) {
-        GetTopSignalBranches(entry);
+        GetTopSignalBranchesEntry(entry);
 
         std::vector<size_t> idx_leadbHadJet;
         std::vector<size_t> idx_nleadbHadJet;

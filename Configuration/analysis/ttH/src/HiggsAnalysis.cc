@@ -190,7 +190,7 @@ HiggsAnalysis::Process(Long64_t entry){
     // Histogram for controlling correctness of h_events_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
     h_events_step0a->Fill(1, 1);
     
-    if(isHiggsSignal_)GetHiggsSignalBranches(entry);
+    if(isHiggsSignal_)GetHiggsSignalBranchesEntry(entry);
     if(isInclusiveHiggs_ && !bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_==5)return kTRUE;
     if(isInclusiveHiggs_ && bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_!=5)return kTRUE;
     
@@ -222,7 +222,7 @@ HiggsAnalysis::Process(Long64_t entry){
         if (runViaTau_ != isBackgroundInSignalSample) return kTRUE;
     }
     
-    GetRecoBranches(entry);
+    GetRecoBranchesEntry(entry);
     //We must correct for the madGraph branching fraction being 1/9 for dileptons (PDG average is .108)
     if ( correctMadgraphBR_ ) {
         if ( topDecayMode_ == 11 ) { //all hadronic decay
