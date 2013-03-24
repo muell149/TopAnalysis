@@ -62,6 +62,22 @@ btag_ptmedian_(0), btag_etamedian_(0)
 void AnalysisBase::Begin(TTree*)
 {
     TSelector::Begin(0);
+    
+    EventCounter_ = 0;
+    bEff = 0;
+    cEff = 0;
+    lEff = 0;
+    h_TrigSFeta = 0;
+    h_MuonIDSFpteta = 0;
+    h_ElectronIDSFpteta = 0;
+    btag_ptmedian_ = 0;
+    btag_etamedian_ = 0;
+    h_bjets = 0;
+    h_cjets = 0;
+    h_ljets = 0;
+    h_btaggedjets = 0;
+    h_ctaggedjets = 0;
+    h_ltaggedjets = 0;
 }
 
 
