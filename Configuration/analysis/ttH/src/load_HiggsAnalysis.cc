@@ -38,10 +38,8 @@ const std::string getPUPath(TString systematic) {
 void load_HiggsAnalysis(TString validFilenamePattern, 
                    TString givenChannel, 
                    TString systematic, 
-                   int dy,
-                   TString closure,
-                   double slope
-                  )
+                   int dy
+                   )
 {   
     ifstream infile ("../selectionList.txt");
     if (!infile.good()) { 
@@ -116,21 +114,22 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             }
         }
         
-	
+        
         for (const auto& channel : channels) {
-	    
-	    TString btagFile = "BTagEff/Nominal/" + channel + "/" 
-                + channel + "_ttbarsignalplustau.root";
-            TString outputfilename { filename };
+        
+            TString outputfilename(filename);
+            std::cout<<"Output filename 1: "<<outputfilename<<"\n";
             if (outputfilename.Contains('/')) {
                 Ssiz_t last = outputfilename.Last('/');
                 outputfilename = outputfilename.Data() + last + 1;
             }
-            if (!outputfilename.Contains(channel + "_")) outputfilename.Prepend(channel + "_");
+            std::cout<<"Output filename 2: "<<outputfilename<<"\n";
+            if (!outputfilename.BeginsWith(channel + "_")) outputfilename.Prepend(channel + "_");
             //outputfile is now channel_filename.root
             if(isHiggsInclusive)outputfilename.ReplaceAll("inclusive", "inclusiveOther");
+            std::cout<<"Output filename 3: "<<outputfilename<<"\n";
             
-            selector->SetBTagFile(btagFile);
+            selector->SetBTagFile("");
             selector->SetChannel(channel);
             selector->SetSignal(isSignal);
             selector->SetHiggsSignal(isHiggsSignal);
@@ -184,7 +183,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             }
             else {
                 chain.Process(selector);
-                if (isSignal && closure=="" && !isHiggsSignal) {
+                if (isSignal && !isHiggsSignal) {
                     selector->SetRunViaTau(1);
                     outputfilename.ReplaceAll("signalplustau", "bgviatau");
                     selector->SetOutputfilename(outputfilename);
@@ -209,10 +208,6 @@ int main(int argc, char** argv) {
             [](const std::string &ch){return ch == "" || ch == "ee" || ch == "emu" || ch == "mumu";});
     CLParameter<int> opt_dy("d", "Drell-Yan mode (11 for ee, 13 for mumu, 15 for tautau)", false, 1, 1,
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
-    CLParameter<std::string> opt_closure("closure", "Enable the closure test. Valid: pttop|ytop", false, 1, 1,
-            [](const std::string &c){return c == "pttop" || c == "ytop";});
-    CLParameter<double> opt_closureSlope("slope", "Slope for closure test, use -0.01 to 0.01 for pt and -0.4 to 0.4", false, 1, 1,
-            [](double s){return abs(s) < 1;});
                                          
     CLAnalyser::interpretGlobal(argc, argv);
     
@@ -220,16 +215,8 @@ int main(int argc, char** argv) {
     TString syst = opt_s.isSet() ? opt_s[0] : "";
     TString channel = opt_c.isSet() ? opt_c[0] : "";
     int dy = opt_dy.isSet() ? opt_dy[0] : 0;
-    TString closure = opt_closure.isSet() ? opt_closure[0] : "";    
-    double slope = 0;
-    if (closure != "") {
-        if (!opt_closureSlope.isSet()) {
-            std::cerr << "closure test: need slope!\n"; exit(1);
-        } else {
-            slope = opt_closureSlope[0];
-        }
-    }
+    
 //     TProof* p = TProof::Open(""); // not before ROOT 5.34
-    load_HiggsAnalysis(validFilenamePattern, channel, syst, dy, closure, slope);
+    load_HiggsAnalysis(validFilenamePattern, channel, syst, dy);
 //     delete p;
 }
