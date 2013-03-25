@@ -6,12 +6,22 @@
 #include "TString.h"
 #include "TH1D.h"
 #include "TFile.h"
-
+#include "utils.h"
 #include "PUReweighter.h"
 
 //! PU reweighting. Now provides a PU variation of +-1.
 //! contradicts to the official recommendation to use different data distributions with varied total inelastic cross section by +-5%
 //! so reweighting is changed by changing the input distributions provided at (naf afs) kiesej/public
+
+/// Please be aware that the file naming convention is: 
+/// $CMSSW_BASE/src/TopAnalysis/TopUtils/data/NominalPUFile.rootfile
+/// $CMSSW_BASE/src/TopAnalysis/TopUtils/data/NominalPUFile_sysUp.root
+/// $CMSSW_BASE/src/TopAnalysis/TopUtils/data/NominalPUFile_sysDown.root
+/// So please keep it also when generating a new PU ROOT files
+/// For future updates please place the PU ROOT files in $CMSSW_BASE/src/TopAnalysis/Configuration/analysis/diLeptonic/data
+
+const std::string NominalPUFile = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
+
 
 void PUReweighter::setDataTruePUInput(TH1* dataPUdist){
     datapu_.clear();
@@ -21,7 +31,7 @@ void PUReweighter::setDataTruePUInput(TH1* dataPUdist){
         datapu_.push_back(dataPUdist->GetBinContent(bin));
     }
     dataint_ = 0;
-    for(size_t i=1; i<datapu_.size(); i++) dataint_ += datapu_[i];
+    for(size_t i=1; i<datapu_.size(); i++) dataint_ += datapu_.at(i);
 
     std::cout << "Data PU distribution set" << std::endl;
 }
@@ -97,3 +107,24 @@ void PUReweighter::clear()
     mcpu_.clear();
 }
 
+
+
+///determine the path to the PU distribution files, depending on systematic
+const std::string PUReweighter::getPUPath(TString systematic) {
+    std::string pu_path(CMSSW_BASE());
+    if (systematic == "PU_UP") {
+        pu_path.append(NominalPUFile+"_sysUp.root");
+        std::cout << "using pilup-up distribution\n";
+    } else if (systematic == "PU_DOWN") {
+        pu_path.append(NominalPUFile+"_sysDown.root");
+        std::cout << "using pilup-down distribution\n";
+    } else {
+        pu_path.append(NominalPUFile+".root");
+        if (systematic != "") {
+            std::cout << "Using Nominal PU distribution for " << systematic << " systematic!\n";
+        }
+    }
+    std::cout<<"\nUsing "+pu_path+" PU input file\n"<<std::endl;
+    
+    return pu_path;
+}

@@ -2,6 +2,7 @@
 #define reweightPU_h
 
 #include <vector>
+#include <string>
 
 class TH1;
 class TString;
@@ -13,6 +14,7 @@ class TString;
 class PUReweighter {
 
 public:
+    const std::string getPUPath(TString systematic);
     void setDataTruePUInput(TH1* dataPUdist);
     void setDataTruePUInput(const char * rootfile);
     double getPUweight(size_t trueBX);
