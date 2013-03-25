@@ -1288,7 +1288,7 @@ void AnalysisBase::prepareTriggerSF()
     TFile trigEfficiencies(DATA_PATH() + "/triggerSummary_" + channel_ + ".root");
     if (trigEfficiencies.IsZombie()) {
         std::cout << "Trigger efficiencies not found. Assuming ScaleFactor = 1.\n";
-        std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
+        std::cout << "Currently triggerEfficieny files can be found in diLeptonic/data folder\n\n";
         return;
     }
     
@@ -1417,9 +1417,9 @@ void AnalysisBase::prepareBtagSF()
         std::cout << "\n******************************************************\n"
              << "File " << btagFile_ << " does not exist. Running without btagsf!!!\n"
              << "To create the file, run:\n" 
-             << "   ./load_Analysis -f ttbarsignalplustau.root -c emu\n"
-             << "   ./load_Analysis -f ttbarsignalplustau.root -c ee\n"
-             << "   ./load_Analysis -f ttbarsignalplustau.root -c mumu\n"
+             << "   build/load_Analysis -f ttbarsignalplustau.root -c emu\n"
+             << "   build/load_Analysis -f ttbarsignalplustau.root -c ee\n"
+             << "   build/load_Analysis -f ttbarsignalplustau.root -c mumu\n"
              << "and copy the selectionRoot/BTagEff directory to the cwd:\n"
              << "   cp -r selectionRoot/BTagEff .\n"
              << "This error is NOT fatal, using a btag SF = 1 everywhere\n"

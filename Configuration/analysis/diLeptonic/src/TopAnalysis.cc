@@ -65,9 +65,8 @@ void TopAnalysis::Begin(TTree* )
 
 void TopAnalysis::Terminate()
 {
-    AnalysisBase::Terminate();
-    
     if(isSignal_)produceBtagEfficiencies();
+    AnalysisBase::Terminate();
 }
 
 
@@ -1439,7 +1438,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_leptonEtaBeforeKinReco->Fill(leptonPlus.Eta(), weight);
     h_METBeforeKinReco->Fill(met_->Pt(), weight);
     for (size_t i = 0; i < BJetIndex.size(); ++i)
-        h_bjetetaBeforeKinReco->Fill(jets_->at(i).Eta(), weight);
+        h_bjetetaBeforeKinReco->Fill(jets_->at(BJetIndex.at(i)).Eta(), weight);
 
     // ++++ Control Plots ++++
     for (int i=0; i<(int) leptons_->size(); ++i){
@@ -1482,7 +1481,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_leptonEtaAfterKinReco->Fill(leptonPlus.Eta(), weight);
     h_METAfterKinReco->Fill(met_->Pt(), weight);
     for (size_t i = 0; i < BJetIndex.size(); ++i)
-        h_bjetetaAfterKinReco->Fill(jets_->at(i).Eta(), weight);
+        h_bjetetaAfterKinReco->Fill(jets_->at(BJetIndex.at(i)).Eta(), weight);
     
     h_KinRecoSF->Fill(weightKinFit_, 1);
     h_EventWeight->Fill(weight, 1);

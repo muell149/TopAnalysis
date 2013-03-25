@@ -15,23 +15,6 @@
 #include "CommandLineParameters.h"
 #include "utils.h"
 
-///determine the path to the PU distribution files, depending on systematic
-const std::string getPUPath(TString systematic) {
-    std::string pu_path(CMSSW_BASE());
-    if (systematic == "PU_UP") {
-        pu_path.append("/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb_sysUp.root");
-        std::cout << "using pilup-up distribution\n";
-    } else if (systematic == "PU_DOWN") {
-        pu_path.append("/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb_sysDown.root");
-        std::cout << "using pilup-down distribution\n";
-    } else {
-        pu_path.append("/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb.root");
-        if (systematic != "") {
-            std::cout << "Using Nominal PU distribution for " << systematic << " systematic!\n";
-        }
-    }
-    return pu_path;
-}
 
 const TString pdfDirName(int pdf_no) {
     TString result("PDF_");
@@ -58,7 +41,7 @@ void load_Analysis(TString validFilenamePattern,
     TopAnalysis *selector = new TopAnalysis();
     PUReweighter *pu = new PUReweighter();
     pu->setMCDistrSum12("S10");
-    pu->setDataTruePUInput(getPUPath(systematic).c_str());
+    pu->setDataTruePUInput(pu->getPUPath(systematic).c_str());
     selector->SetPUReweighter(pu);
 
     int filecounter = 0;
