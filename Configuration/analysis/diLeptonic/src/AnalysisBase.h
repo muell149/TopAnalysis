@@ -192,10 +192,6 @@ protected:
     std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > > *binnedControlPlots_;
     
     
-    /// Event counter
-    Int_t EventCounter_;
-    
-    
         
 // Private member data
 private:    
@@ -353,6 +349,10 @@ private:
     
     /// Medians in eta, pt for b-tag SF
     double btag_ptmedian_, btag_etamedian_;
+    
+    
+    /// Event counter
+    Int_t eventCounter_;
     
     
 

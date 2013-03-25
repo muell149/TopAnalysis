@@ -36,14 +36,15 @@ checkZDecayMode_(nullptr), outputfilename_(""),
 runViaTau_(false),
 pureweighter_(nullptr),
 doJesJer_(false), weightKinFit_(0),
-binnedControlPlots_(0), EventCounter_(0),
+binnedControlPlots_(0),
 chain_(0), h_weightedEvents(0),
 unc_(nullptr), btagFile_(""),
 h_bjets(0), h_cjets(0), h_ljets(0),
 h_btaggedjets(0), h_ctaggedjets(0), h_ltaggedjets(0),
 bEff(0), cEff(0), lEff(0),
 h_TrigSFeta(0), h_MuonIDSFpteta(0), h_ElectronIDSFpteta(0),
-btag_ptmedian_(0), btag_etamedian_(0)
+btag_ptmedian_(0), btag_etamedian_(0),
+eventCounter_(0)
 {
     this->clearBranches();
     this->clearBranchVariables();
@@ -66,7 +67,6 @@ void AnalysisBase::Begin(TTree*)
     
     TSelector::Begin(0);
     
-    EventCounter_ = 0;
     bEff = 0;
     cEff = 0;
     lEff = 0;
@@ -81,6 +81,7 @@ void AnalysisBase::Begin(TTree*)
     h_btaggedjets = 0;
     h_ctaggedjets = 0;
     h_ltaggedjets = 0;
+    eventCounter_ = 0;
 }
 
 
@@ -146,7 +147,7 @@ Bool_t AnalysisBase::Process(Long64_t)
 {
     /// WARNING! In general do not make changes here, but in your analysis' Process function
     
-    if ( ++EventCounter_ % 100000 == 0 ) std::cout << "Event Counter: " << EventCounter_ << std::endl;
+    if ( ++eventCounter_ % 100000 == 0 ) std::cout << "Event Counter: " << eventCounter_ << std::endl;
     return kTRUE;
 }
 
