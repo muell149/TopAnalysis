@@ -61,6 +61,9 @@ btag_ptmedian_(0), btag_etamedian_(0)
  */
 void AnalysisBase::Begin(TTree*)
 {
+    /// WARNING! In general do not make changes here, but in your analysis' Begin function
+
+    
     TSelector::Begin(0);
     
     EventCounter_ = 0;
@@ -117,6 +120,8 @@ void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
 
 void AnalysisBase::SlaveBegin(TTree*)
 {
+    /// WARNING! In general do not make changes here, but in your analysis' SlaveBegin function
+
     TSelector::SlaveBegin(0);
     binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
 }
@@ -125,6 +130,9 @@ void AnalysisBase::SlaveBegin(TTree*)
 
 void AnalysisBase::SlaveTerminate()
 {
+
+    /// WARNING! In general do not make changes here, but in your analysis' SlaveTerminate function
+
     // The SlaveTerminate() function is called after all entries or objects
     // have been processed. When running with PROOF SlaveTerminate() is called
     // on each slave server.
@@ -134,10 +142,18 @@ void AnalysisBase::SlaveTerminate()
     delete binnedControlPlots_;
 }
 
-
+Bool_t AnalysisBase::Process(Long64_t)
+{
+    /// WARNING! In general do not make changes here, but in your analysis' Process function
+    
+    if ( ++EventCounter_ % 100000 == 0 ) std::cout << "Event Counter: " << EventCounter_ << std::endl;
+    return kTRUE;
+}
 
 void AnalysisBase::Terminate()
 {
+    /// WARNING! In general do not make changes here, but in your analysis' Terminate function
+    
     // The Terminate() function is the last function to be called during
     // a query. It always runs on the client, it can be used to present
     // the results graphically or save the results to file.

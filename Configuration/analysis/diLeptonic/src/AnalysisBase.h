@@ -368,6 +368,7 @@ public:
     /// Inherited TSelector methods
     virtual void Begin(TTree*);
     virtual void SlaveBegin(TTree*);
+    virtual Bool_t Process(Long64_t);
     virtual void Init(TTree*);
     virtual void SlaveTerminate();
     virtual void Terminate();

@@ -637,9 +637,9 @@ void TopAnalysis::SlaveTerminate()
 
 Bool_t TopAnalysis::Process ( Long64_t entry )
 {    
-    if ( ++EventCounter_ % 100000 == 0 ) std::cout << "Event Counter: " << EventCounter_ << std::endl;
     
-    
+    AnalysisBase::Process(entry);
+
     //do we have a DY true level cut?
     if (checkZDecayMode_ && !checkZDecayMode_(entry)) return kTRUE;
     
