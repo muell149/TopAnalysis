@@ -213,7 +213,9 @@ void AnalysisBase::Terminate()
 void AnalysisBase::produceBtagEfficiencies()
 {
     std::cout << "Signal sample, writing out btag efficiencies\n";
-    std::string f_savename = "selectionRoot/BTagEff";
+    std::string f_savename = "selectionRoot";
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/BTagEff");
     gSystem->MakeDirectory(f_savename.c_str());
     f_savename.append("/");
     f_savename.append(systematic_); 
