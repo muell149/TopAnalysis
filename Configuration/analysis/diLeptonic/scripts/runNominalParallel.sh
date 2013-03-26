@@ -19,6 +19,7 @@ for c in ee emu mumu; do
 done
 
 for c in ee emu mumu; do
+    w
     $LA -f ${c}_run2012A -c $c &
     $LA -f ${c}_run2012B -c $c &
     $LA -f ${c}_run2012C -c $c &
