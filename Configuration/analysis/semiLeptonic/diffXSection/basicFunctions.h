@@ -2338,7 +2338,7 @@ namespace semileptonic {
     if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return constMcatnloStyle;
     if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return constPowhegStyle; 
     if(theo.Contains("nnlo")){
-      if(theo.Contains("ahrens")||theo.Contains("ttbarMass")) return constNnloColor2;
+      if(theo.Contains("ahrens")||theo.Contains("ttbarMass")) return constNnloStyle2;
       return constNnloStyle;
     }
     if(theo.Contains("nnlo"    )||theo.Contains("kidonakis")) return constNnloStyle;
@@ -2540,6 +2540,7 @@ namespace semileptonic {
 	ratio_[nTheory]->SetFillStyle(0);
 	ratio_[nTheory]->SetMarkerSize(0.2);
 	unsigned int style =theoryStyle((TString)histDenominatorTheoryOrdered_[nTheory]->GetName());
+	//std::cout << histDenominatorTheoryOrdered_[nTheory]->GetName() << ": " << style << std::endl;
 	ratio_[nTheory]->SetLineStyle(style);
 	// configure axis of ratio_[nTheory] plot
 	ratio_[nTheory]->GetXaxis()->SetTitleSize(histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
