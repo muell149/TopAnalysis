@@ -189,7 +189,7 @@ HiggsAnalysis::SlaveBegin(TTree *){
     // Histograms concerning MVA
     
     h_meanDeltaPhi_b_met_step8 = store(new TH1D("meanDeltaPhi_b_met_step8", "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2));
-    h_massDiff_recoil_bbbar_step8 = store(new TH1D("massDiff_recoil_Bbbar_step8", "massDiff_recoil_Bbbar; m_{jets}^{recoil}-m_{b#bar{b}}  [GeV];# jet pairs",16,-600,600));
+    h_massDiff_recoil_bbbar_step8 = store(new TH1D("massDiff_recoil_bbbar_step8", "massDiff_recoil_Bbbar; m_{jets}^{recoil}-m_{b#bar{b}}  [GeV];# jet pairs",16,-600,600));
     h_pt_b_antiLepton_step8 = store(new TH1D("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}(b,l^{+})  [GeV];# jet pairs",20,0,500));
     h_pt_antiB_lepton_step8 = store(new TH1D("pt_antiB_lepton_step8", "pt_antiB_lepton; p_{T}(#bar{b},l^{-})  [GeV];# jet pairs",20,0,500));
     h_deltaR_b_antiLepton_step8 = store(new TH1D("deltaR_b_antiLepton_step8", "deltaR_b_antiLepton; #Delta{R}(b,l^{+});# jet pairs",25,0,5));
@@ -201,6 +201,7 @@ HiggsAnalysis::SlaveBegin(TTree *){
     h_massSum_antiBLepton_bAntiLepton_step8 = store(new TH1D("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}+m_{bl^{+}}  [GeV];# jet pairs",21,0,840));
     h_massDiff_antiBLepton_bAntiLepton_step8 = store(new TH1D("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}-m_{bl^{+}}  [GeV];# jet pairs",41,-400,420));
     
+    h_meanMTAlt_b_met_step8 = store(new TH1D("meanMTAlt_b_met_step8", "meanMTAlt_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420));
 }
 
 
@@ -610,6 +611,9 @@ HiggsAnalysis::Process(Long64_t entry){
             const double massSum_antiBLepton_bAntiLepton = antiBLeptonSystem.M() + bAntiLeptonSystem.M();
             const double massDiff_antiBLepton_bAntiLepton = antiBLeptonSystem.M() - bAntiLeptonSystem.M();
             
+            const double meanMTAlt_b_met = 0.5*(std::sqrt(2.*bJet.Et()*(met_->E())*(1.-std::cos(DeltaPhi(bJet, *met_))))
+                                              + std::sqrt(2.*antiBJet.Et()*(met_->E())*(1.-std::cos(DeltaPhi(antiBJet, *met_)))));
+            
             h_meanDeltaPhi_b_met_step8->Fill(meanDeltaPhi_b_met, weight);
             h_massDiff_recoil_bbbar_step8->Fill(massDiff_recoil_bbbar, weight);
             h_pt_b_antiLepton_step8->Fill(pt_b_antiLepton, weight);
@@ -622,6 +626,8 @@ HiggsAnalysis::Process(Long64_t entry){
             h_meanMT_b_met_step8->Fill(meanMT_b_met, weight);
             h_massSum_antiBLepton_bAntiLepton_step8->Fill(massSum_antiBLepton_bAntiLepton, weight);
             h_massDiff_antiBLepton_bAntiLepton_step8->Fill(massDiff_antiBLepton_bAntiLepton, weight);
+            
+            h_meanMTAlt_b_met_step8->Fill(meanMTAlt_b_met, weight);
         }
     }
     

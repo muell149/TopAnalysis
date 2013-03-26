@@ -32,8 +32,8 @@ Samples::setSamples(const Channel::Channel& channel, const Systematic::Systemati
     
     // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
-    Sample ttbarsignal("t#bar{t} Signal", kRed+1, 253.849);
-    Sample ttbarbkg("t#bar{t} Other", kRed-7, 253.849);
+    Sample ttbarsignal("t#bar{t} Signal", kRed+1, 234);
+    Sample ttbarbkg("t#bar{t} Other", kRed-7, 234);
     Sample singletop("Single Top", kMagenta, 11.1);
     Sample ww("Diboson", 10, 54.838);
     Sample wz("Diboson", 10, 33.21);

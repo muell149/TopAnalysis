@@ -100,6 +100,8 @@ private:
     TH1* h_massSum_antiBLepton_bAntiLepton_step8;
     TH1* h_massDiff_antiBLepton_bAntiLepton_step8;
     
+    TH1* h_meanMTAlt_b_met_step8;
+    
     
 };
 

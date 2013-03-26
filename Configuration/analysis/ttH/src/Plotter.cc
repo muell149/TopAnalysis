@@ -35,7 +35,7 @@ name_("defaultName"),
 bins_(0), rebin_(1),
 rangemin_(0), rangemax_(3),
 ymin_(0), ymax_(0),
-YAxis_("N_{events}"), XAxis_(""),
+YAxis_(""), XAxis_(""),
 logX_(false), logY_(false),
 doDYScale_(false)
 {}
@@ -365,7 +365,10 @@ void Plotter::setStyle(SampleHistPair& sampleHistPair, bool isControlPlot)
     hist->SetFillColor(sampleHistPair.first.color());
     hist->SetLineColor(sampleHistPair.first.color());
     hist->SetLineWidth(1);
-
+    
+    if(XAxis_ == "-")XAxis_ = hist->GetXaxis()->GetTitle();
+    if(YAxis_ == "-")YAxis_ = hist->GetYaxis()->GetTitle();
+    
     if(sampleHistPair.first.sampleType() == Sample::SampleType::data){
         hist->SetFillColor(0);
         hist->SetMarkerStyle(20);

@@ -41,7 +41,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
                    int dy
                    )
 {   
-    ifstream infile ("../selectionList.txt");
+    ifstream infile ("selectionList.txt");
     if (!infile.good()) { 
         std::cerr << "Error! Please check the selectionList.txt file!\n" << std::endl; 
         exit(773); 
