@@ -82,9 +82,25 @@ private:
     DyScalingHistograms dyScalingHistograms_;
     
     /// Control plots
-    TH1* h_jetpT;
-    TH1* h_jetChargeGlobalPtWeighted;
-    TH1* h_jetChargeRelativePtWeighted;
+    TH1* h_jetpT_step8;
+    TH1* h_jetChargeGlobalPtWeighted_step8;
+    TH1* h_jetChargeRelativePtWeighted_step8;
+    
+    /// Histograms concerning the variables used for finding b-jets from ttbar system with MVA
+    TH1* h_meanDeltaPhi_b_met_step8;
+    TH1* h_massDiff_recoil_bbbar_step8;
+    TH1* h_pt_b_antiLepton_step8;
+    TH1* h_pt_antiB_lepton_step8;
+    TH1* h_deltaR_b_antiLepton_step8;
+    TH1* h_deltaR_antiB_lepton_step8;
+    TH1* h_btagDiscriminatorSum_step8;
+    TH1* h_deltaPhi_antiBLepton_bAntiLepton_step8;
+    TH1* h_massDiff_fullBLepton_bbbar_step8;
+    TH1* h_meanMT_b_met_step8;
+    TH1* h_massSum_antiBLepton_bAntiLepton_step8;
+    TH1* h_massDiff_antiBLepton_bAntiLepton_step8;
+    
+    
 };
 
 

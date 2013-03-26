@@ -1,6 +1,10 @@
 #define HiggsAnalysis_cxx
 
+#include <iostream>
+#include <cmath>
+
 #include <TH1.h>
+#include <Math/VectorUtil.h>
 
 #include "HiggsAnalysis.h"
 
@@ -13,6 +17,11 @@ constexpr double JETETACUT = 2.4;
 // CSV Loose working point
 constexpr double BtagWP = 0.244;
 
+
+
+
+using ROOT::Math::VectorUtil::DeltaPhi;
+using ROOT::Math::VectorUtil::DeltaR;
 
 
 
@@ -167,15 +176,31 @@ HiggsAnalysis::SlaveBegin(TTree *){
     
     
     // Control plots
-    h_jetpT = store(new TH1D ( "jetpT", "jet pT", 40, 0, 400 ));
-    h_jetChargeGlobalPtWeighted = store(new TH1D("jetChargeGlobalPtWeighted", "jetChargeGlobalPtWeighted", 110, -1.1, 1.1));
-    h_jetChargeRelativePtWeighted = store(new TH1D("jetChargeRelativePtWeighted", "jetChargeRelativePtWeighted", 110, -1.1, 1.1));
+    h_jetpT_step8 = store(new TH1D ( "jetpT_step8", "jet pT", 40, 0, 400 ));
+    h_jetChargeGlobalPtWeighted_step8 = store(new TH1D("jetChargeGlobalPtWeighted_step8", "jetChargeGlobalPtWeighted", 110, -1.1, 1.1));
+    h_jetChargeRelativePtWeighted_step8 = store(new TH1D("jetChargeRelativePtWeighted_step8", "jetChargeRelativePtWeighted", 110, -1.1, 1.1));
     
     
     // Binned control plots
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetpT, false);
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted, false);
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted, false);
+    CreateBinnedControlPlots(h_jetCategories_step8, h_jetpT_step8, false);
+    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted_step8, false);
+    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
+    
+    // Histograms concerning MVA
+    
+    h_meanDeltaPhi_b_met_step8 = store(new TH1D("meanDeltaPhi_b_met_step8", "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2));
+    h_massDiff_recoil_bbbar_step8 = store(new TH1D("massDiff_recoil_Bbbar_step8", "massDiff_recoil_Bbbar; m_{jets}^{recoil}-m_{b#bar{b}}  [GeV];# jet pairs",16,-600,600));
+    h_pt_b_antiLepton_step8 = store(new TH1D("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}(b,l^{+})  [GeV];# jet pairs",20,0,500));
+    h_pt_antiB_lepton_step8 = store(new TH1D("pt_antiB_lepton_step8", "pt_antiB_lepton; p_{T}(#bar{b},l^{-})  [GeV];# jet pairs",20,0,500));
+    h_deltaR_b_antiLepton_step8 = store(new TH1D("deltaR_b_antiLepton_step8", "deltaR_b_antiLepton; #Delta{R}(b,l^{+});# jet pairs",25,0,5));
+    h_deltaR_antiB_lepton_step8 = store(new TH1D("deltaR_antiB_lepton_step8", "deltaR_antiB_lepton; #Delta{R}(#bar{b},l^{-});# jet pairs",25,0,5));
+    h_btagDiscriminatorSum_step8 = store(new TH1D("btagDiscriminatorSum_step8", "btagDiscriminatorSum; d(b)+d(#bar{b});# jet pairs",20,0,2));
+    h_deltaPhi_antiBLepton_bAntiLepton_step8 = store(new TH1D("deltaPhi_antiBLepton_bAntiLepton_step8", "deltaPhi_antiBLepton_bAntiLepton; |#Delta#phi(bl^{+},#bar{b}l^{-})|  [rad];# jet pairs",10,0,3.2));
+    h_massDiff_fullBLepton_bbbar_step8 = store(new TH1D("massDiff_fullBLepton_bbbar_step8", "massDiff_fullBLepton_bbbar; m_{b#bar{b}l^{+}l^{-}}-m_{b#bar{b}}  [GeV];# jet pairs",13,0,1050));
+    h_meanMT_b_met_step8 = store(new TH1D("meanMT_b_met_step8", "meanMT_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420));
+    h_massSum_antiBLepton_bAntiLepton_step8 = store(new TH1D("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}+m_{bl^{+}}  [GeV];# jet pairs",21,0,840));
+    h_massDiff_antiBLepton_bAntiLepton_step8 = store(new TH1D("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}-m_{bl^{+}}  [GeV];# jet pairs",41,-400,420));
+    
 }
 
 
@@ -189,7 +214,7 @@ void HiggsAnalysis::SlaveTerminate()
 Bool_t
 HiggsAnalysis::Process(Long64_t entry){
     
-    if (++EventCounter_ % 100000 == 0) std::cout << "Event Counter: " << EventCounter_ << std::endl;
+    if(!AnalysisBase::Process(entry))return kFALSE;
     
     // Histogram for controlling correctness of h_events_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
     h_events_step0a->Fill(1, 1);
@@ -243,7 +268,6 @@ HiggsAnalysis::Process(Long64_t entry){
     
     
     
-    // FIXME: here were PDF variations, not needed now, and perhaps never
     
     
     // FIXME: corrections to jet energy resolution/scale, also here ?
@@ -265,7 +289,7 @@ HiggsAnalysis::Process(Long64_t entry){
     std::vector<int> v_bJetIndex;
     for ( std::vector<double>::iterator it = jetBTagCSV_->begin(); it<jetBTagCSV_->end(); it++ ) {
         if ( *it > BtagWP) {
-            v_bJetIndex.push_back((it-jetBTagCSV_->begin())); //change asked by Tyler
+            v_bJetIndex.push_back((it-jetBTagCSV_->begin()));
         }
     }
     const int numberOfBJets = v_bJetIndex.size();
@@ -512,23 +536,94 @@ HiggsAnalysis::Process(Long64_t entry){
     h_jetCategories_step8->Fill(jetCategories_.categoryId(jets_->size(),numberOfBJets), weight);
     h_jetCategories_overview_step8->Fill(jetCategories_overview_.categoryId(jets_->size(),numberOfBJets), weight);
     for(unsigned int iJet = 0; iJet < jets_->size(); ++iJet){
-        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetpT, jets_->at(iJet).Pt(), weight);
+        h_jetpT_step8->Fill(jets_->at(iJet).Pt(), weight);
+        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetpT_step8, jets_->at(iJet).Pt(), weight);
     }
     
     
     for(auto jetChargeGlobalPtWeighted : *jetChargeGlobalPtWeighted_){
-        h_jetChargeGlobalPtWeighted->Fill(jetChargeGlobalPtWeighted, weight);
-        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetChargeGlobalPtWeighted, jetChargeGlobalPtWeighted, weight);
+        h_jetChargeGlobalPtWeighted_step8->Fill(jetChargeGlobalPtWeighted, weight);
+        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetChargeGlobalPtWeighted_step8, jetChargeGlobalPtWeighted, weight);
     }
     
     for(auto jetChargeRelativePtWeighted : *jetChargeRelativePtWeighted_){
-        h_jetChargeRelativePtWeighted->Fill(jetChargeRelativePtWeighted, weight);
-        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetChargeRelativePtWeighted, jetChargeRelativePtWeighted, weight);
+        h_jetChargeRelativePtWeighted_step8->Fill(jetChargeRelativePtWeighted, weight);
+        FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(jets_->size(),numberOfBJets), h_jetChargeRelativePtWeighted_step8, jetChargeRelativePtWeighted, weight);
     }
     
     
     
     
+    
+    // Loop over all jet combinations
+    // FIXME: which events exactly to fill? For now all with at least 4 jets
+    if(jets_->size()<4)return kTRUE;
+//    std::cout<<"\nNew jet pairings: "<<jets_->size()<<"\n\n";
+    for(VLV::iterator i_jet = jets_->begin(); i_jet != --(jets_->end()); ++i_jet){
+        VLV::iterator incrementIterator(i_jet);
+        ++incrementIterator;
+        for(VLV::iterator j_jet = incrementIterator; j_jet != jets_->end(); ++j_jet){
+            int iDistance = std::distance(jets_->begin(), i_jet);
+            int jDistance = std::distance(jets_->begin(), j_jet);
+//            std::cout<<"\tJet pairing: "<<iDistance<<" , "<<jDistance<<"\n";
+            int bIndex(-1);
+            int antiBIndex(-1);
+            if(jetChargeRelativePtWeighted_->at(iDistance) >= jetChargeRelativePtWeighted_->at(jDistance)){
+                bIndex = jDistance;
+                antiBIndex = iDistance;
+            }
+            else{
+                bIndex = iDistance;
+                antiBIndex = jDistance;
+            }
+//            std::cout<<"b, antib: "<<bIndex<<" , "<<antiBIndex<<"\n";
+//            std::cout<<"charges: "<<jetChargeRelativePtWeighted_->at(bIndex)
+//                     <<" , "<<jetChargeRelativePtWeighted_->at(antiBIndex)<<"\n";
+            
+            // Variables of interest
+            const LV& bJet = jets_->at(bIndex);
+            const LV& antiBJet = jets_->at(antiBIndex);
+            VLV recoilJets;
+            for(Size_t iJet = 0; iJet<jets_->size(); ++iJet){
+                if(iJet == bIndex || iJet == antiBIndex) continue;
+                recoilJets.push_back(jets_->at(iJet));
+            }
+            const LV bbbarSystem = bJet + antiBJet;
+            const LV bAntiLeptonSystem = bJet + leptonPlus;
+            const LV antiBLeptonSystem = antiBJet + leptonMinus;
+            const LV fullBLeptonSystem = bAntiLeptonSystem + antiBLeptonSystem;
+            
+            LV jetRecoil;
+            for(auto recoilJet : recoilJets)jetRecoil += recoilJet;
+//            std::cout<<"Recoil jets: "<<recoilJets.size()<<" , "<<bbbarSystem.M()<<" , "<<jetRecoil.M()<<"\n\n";
+            
+            const double meanDeltaPhi_b_met = 0.5*(std::abs(DeltaPhi(bJet, *met_)) + std::abs(DeltaPhi(antiBJet, *met_)));
+            const double massDiff_recoil_bbbar = jetRecoil.M() - bbbarSystem.M();
+            const double pt_b_antiLepton = bAntiLeptonSystem.pt();
+            const double pt_antiB_lepton = antiBLeptonSystem.pt();
+            const double deltaR_b_antiLepton = DeltaR(bJet, leptonPlus);
+            const double deltaR_antiB_lepton = DeltaR(antiBJet, leptonMinus);
+            const double btagDiscriminatorSum = jetBTagCSV_->at(bIndex) + jetBTagCSV_->at(antiBIndex);
+            const double deltaPhi_antiBLepton_bAntiLepton = std::abs(DeltaPhi(antiBLeptonSystem, bAntiLeptonSystem));
+            const double massDiff_fullBLepton_bbbar = fullBLeptonSystem.M() - bbbarSystem.M();
+            const double meanMT_b_met = 0.5*((bJet + *met_).Mt() + (antiBJet + *met_).Mt());
+            const double massSum_antiBLepton_bAntiLepton = antiBLeptonSystem.M() + bAntiLeptonSystem.M();
+            const double massDiff_antiBLepton_bAntiLepton = antiBLeptonSystem.M() - bAntiLeptonSystem.M();
+            
+            h_meanDeltaPhi_b_met_step8->Fill(meanDeltaPhi_b_met, weight);
+            h_massDiff_recoil_bbbar_step8->Fill(massDiff_recoil_bbbar, weight);
+            h_pt_b_antiLepton_step8->Fill(pt_b_antiLepton, weight);
+            h_pt_antiB_lepton_step8->Fill(pt_antiB_lepton, weight);
+            h_deltaR_b_antiLepton_step8->Fill(deltaR_b_antiLepton, weight);
+            h_deltaR_antiB_lepton_step8->Fill(deltaR_antiB_lepton, weight);
+            h_btagDiscriminatorSum_step8->Fill(btagDiscriminatorSum, weight);
+            h_deltaPhi_antiBLepton_bAntiLepton_step8->Fill(deltaPhi_antiBLepton_bAntiLepton, weight);
+            h_massDiff_fullBLepton_bbbar_step8->Fill(massDiff_fullBLepton_bbbar, weight);
+            h_meanMT_b_met_step8->Fill(meanMT_b_met, weight);
+            h_massSum_antiBLepton_bAntiLepton_step8->Fill(massSum_antiBLepton_bAntiLepton, weight);
+            h_massDiff_antiBLepton_bAntiLepton_step8->Fill(massDiff_antiBLepton_bAntiLepton, weight);
+        }
+    }
     
     
     
