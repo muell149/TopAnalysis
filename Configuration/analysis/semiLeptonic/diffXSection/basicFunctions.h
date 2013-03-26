@@ -166,9 +166,16 @@ namespace semileptonic {
   //  Numerical Constants
   // ============================
 
-  const double ttbarCrossSection=234;                      // NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
-  const double ttbarCrossSectionError=sqrt(12.*12.+((10.+7.)/2.)*((10.+7.)/2.)); // Scale and PDF uncertainties on NNLO value
+  //const double ttbarCrossSection=234;                      // approx.NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
+  //const double ttbarCrossSectionError=sqrt(12.*12.+((10.+7.)/2.)*((10.+7.)/2.)); // Scale and PDF uncertainties on NNLO value
                                                              // --> the scale contributions has been symetrized
+
+  const double ttbarCrossSection=245.8;// NNNLO+NNLL Mitov, calculated for mtop=173.3 GeV (arXiv:1303.6254)
+  const double ttbarCrossSectionError=sqrt(((6.2+8.4)/2.)*((6.2+8.4)/2.)+((6.2+6.4)/2.)*((6.2+6.4)/2.)); // Scale and PDF uncertainties 
+                                                             // --> up/down contributions have been symetrized
+
+
+
 
   const double SF_TopMassDownUncertainty=0.9/11.0; // scale factors for top mass uncertainty
   const double SF_TopMassUpUncertainty  =0.9/12.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
@@ -2113,6 +2120,7 @@ namespace semileptonic {
 	    if(verbose>1) std::cout << "these are " << Nfolders << " subdirectories" << std::endl;
 	    // loop subdirectories
 	    for(unsigned int subfolderNumber=1; subfolderNumber<=Nfolders; ++subfolderNumber){
+	      if(verbose>1) std::cout << "#" << subfolderNumber << std::endl;
 	      TString subfolder= getStringEntry(folder, subfolderNumber, "/");
 	      if(gDirectory->GetDirectory(subfolder)==0){
 		if(verbose>1) std::cout << "subfolder " << subfolder  << " not existing - will create it" << std::endl;
@@ -2365,7 +2373,7 @@ namespace semileptonic {
     else return "Default Label for variable "+variable;
   }
 
-  TCanvas* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0), TCanvas* canv=0, double rangeMin=-1., double rangeMax=-1.)
+  TCanvas* drawFinalResultRatio(TH1F* histNumeratorData, const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle, int verbose=0, std::vector<TH1F*> histDenominatorTheory_=std::vector<TH1F*>(0), TCanvas* canv=0, double rangeMin=-1., double rangeMax=-1., TGraphAsymmErrors* histStatData=0, bool addXBinGrid=true)
   {
     // this function draws a pad with the ratio "histNumeratorData" over "histDenominatorTheoryX" 
     // for up to five specified theory curves, using "histNumeratorDataDown" and "histNumeratorDataUp"
@@ -2373,12 +2381,14 @@ namespace semileptonic {
     // to the systematic variation "sys" of the enumerator "systematicVariation"
     // the uncertainty of "histNumeratorData" only is considered for the uncertainty of the ratio:
     // ( error(bin i) = sqrt(1/histNumerator->GetBinContent(i)) / histDenominator->GetBinContent(i) )
+    // 'addXBinGrid': a vertical grid is drawn at the bin boundaries if true
+    // 'histStatData': statistical errors are drawn in the ratio and the BCC x
+    //                 position from this object is used also for the ratio plots
     // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
     // modified quantities: none
-    // used functions: setXAxisRange, theoryColor
+    // used functions: setXAxisRange, theoryColor, drawLine
     // used enumerators: none
-
-
+    
     // some basic printout
     if(histDenominatorTheory_.size()>0&&histNumeratorData){
       if(verbose>0) std::cout << "calling drawFinalResultRatio for " << histNumeratorData->GetName() << " and " << histDenominatorTheory_.size() << " theory curves" << std::endl;
@@ -2511,7 +2521,8 @@ namespace semileptonic {
       rPad->Draw("");
       rPad->cd();
       //TH1F* one2;
-      TH1F* errorband2;
+      TGraphAsymmErrors* errorband2=0;
+      TGraphAsymmErrors* errorbandStat2=0;
       TLegend *leg  = new TLegend(); 
       for(unsigned int nTheory=0; nTheory<ratio_.size(); ++nTheory){
 	ratio_[nTheory]->SetStats(kFALSE);
@@ -2590,19 +2601,37 @@ namespace semileptonic {
 	  up->SetLineColor(kBlack);
 	  up->Scale(ratioMax);
 	  up->DrawClone("hist same");
-	  // errorband for data error around 1
-	  TH1F* errorband=(TH1F*)one->Clone("errorband");
-	  for(int bin=1; bin<=errorband->GetNbinsX(); ++bin){
-	    errorband->SetBinContent(bin, 1);
-	    errorband->SetBinError  (bin, histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin));
+	  // errorband for data total error around 1
+	  TGraphAsymmErrors* errorband=histStatData ? (TGraphAsymmErrors*)(histStatData->Clone("errorband")) : new TGraphAsymmErrors(one->GetNbinsX()+1);
+	  for(int bin=1; bin<=one->GetNbinsX(); ++bin){
+	    double totY=histNumeratorData->GetBinContent(bin);
+	    double totX=histStatData ? histStatData->GetX()[bin] : histNumeratorData->GetBinCenter(bin);
+	    double totErrY=histNumeratorData->GetBinError(bin);
+	    errorband->SetPoint(bin, totX, 1);
+	    errorband->SetPointError(bin, 0, 0,totErrY/totY, totErrY/totY);
+	    //errorband->SetBinContent(bin, 1);
+	    //errorband->SetBinError  (bin, histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin));	  
+	    //std::cout << bin << ": (x,dy/y)=(" << totX << "," << totErrY/totY << "), (x,y)=(" << totX << "," << totY << "+/-" << totErrY << ")" << std::endl;
 	  }
-	  int errcolor=kOrange+1;
-	  errorband->SetLineWidth(0);
-	  errorband->SetLineColor(0);
-	  errorband->SetMarkerColor(errcolor);
-	  errorband->SetFillColor(errcolor);
-	  errorband->SetFillStyle(3352);//44);
-	  errorband2=(TH1F*)errorband->Clone();
+	  int errcolor=kBlack;
+	  errorband->SetLineWidth(5.0);
+	  errorband->SetLineColor(errcolor);
+	  errorband2=(TGraphAsymmErrors*)errorband->Clone();
+	  // errorband for data stat error around 1
+	  if(histStatData){
+	    TGraphAsymmErrors* errorbandStat=(TGraphAsymmErrors*)(histStatData->Clone("errorbandStat"));
+	    for(int bin=1; bin<=one->GetNbinsX(); ++bin){
+	      double statY=histStatData->GetY()[bin];
+	      double statX=histStatData->GetX()[bin];
+	      double statErrY=histStatData->GetEYlow()[bin];
+	      errorbandStat->SetPoint(bin, statX, 1);
+	      errorbandStat->SetPointError(bin, 0, 0, statErrY/statY, statErrY/statY);
+	      //std::cout << bin << ": (x,dy/y)=(" << statX << "," << statErrY/statY << "), (x,y)=(" << statX << "," << statY << "+/-" << statErrY << ")" << std::endl;
+	    }
+	    errorbandStat->SetLineWidth(2.0);
+	    errorbandStat->SetLineColor(errcolor);
+	    errorbandStat2=(TGraphAsymmErrors*)errorbandStat->Clone();
+	  }
 	  leg->SetX1NDC(0.22);
 	  leg->SetY1NDC(0.99);
 	  leg->SetX2NDC(0.58);
@@ -2615,18 +2644,27 @@ namespace semileptonic {
 	  leg ->AddEntry(errorband, "data stat+sys error", "F");
 	}
 	ratio_[nTheory]->DrawClone("hist same");
-	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBandDn")){
-	  errorband2->Draw("e2 p same");
+	//if(((TString)ratio_[nTheory]->GetName()).Contains("errorBandDn")){
+	if(nTheory==ratio_.size()-1){
+	  gPad->RedrawAxis("g");
+	  gPad->RedrawAxis();
+	  errorband2->Draw("p z same");
+	  gStyle->SetEndErrorSize(8);
+	  if(errorbandStat2) errorbandStat2->Draw("p e same");
 	  //one2->Draw("hist same");
+	}
+      }
+      if(addXBinGrid){
+	for(int bin=2; bin<=histNumeratorData->GetNbinsX(); ++bin){
+	  double xBorder=histNumeratorData->GetBinLowEdge(bin);
+	  drawLine(xBorder, ratioMin, xBorder, ratioMax, kBlack, 1, 3);
 	}
       }
       rPad->SetTopMargin(0.0);
       rPad->SetBottomMargin(0.15*scaleFactor);
       rPad->SetRightMargin(right);
       gPad->SetLeftMargin(left);
-      gPad->RedrawAxis("g");
-      gPad->RedrawAxis();
-      leg->DrawClone("same");
+      //leg->DrawClone("same");
       //rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
       gPad->cd();
       rPad->Draw();

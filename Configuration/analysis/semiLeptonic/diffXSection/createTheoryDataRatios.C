@@ -4,7 +4,6 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   // ============================
   //  Set Root Style
   // ============================
-
   TStyle myStyle("HHStyle","HHStyle");
   setHHStyle(myStyle);
   TGaxis::SetMaxDigits(2);
@@ -23,7 +22,7 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   TCanvas* canvas = (TCanvas*)(file->Get("finalXSec/"+plotName+"Norm")->Clone());
   // GET DATA: with final errors from canvas
   TGraphAsymmErrors* dataRaw  = (TGraphAsymmErrors*)canvas->GetPrimitive("dataTotalError");
-  //TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)canvas->GetPrimitive("dataStatError");
+  TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)canvas->GetPrimitive("dataStatError");
   // GET DATA: create rebinned histo
   std::map< TString, std::vector<double> > binning_ = makeVariableBinning();
   int Nbins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*10;
@@ -113,7 +112,7 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
     modfile+=outputFile;
     TFile* file2 = TFile::Open(modfile, "READ");
     TCanvas* canvas2 = (TCanvas*)(file2->Get("finalXSec/"+plotName+"Norm")->Clone());
-    TGraphAsymmErrors* data2Raw  = (TGraphAsymmErrors*)canvas2->GetPrimitive("dataTotalError");
+    TGraphAsymmErrors* data2Raw     = (TGraphAsymmErrors*)canvas2->GetPrimitive("dataTotalError");
     TH1F* data2temp= new TH1F("data"+plotName, "data"+plotName, Nbins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
     reBinTH1F(*data2temp, binning_[plotName], 0);
     // GET DATA2: refill TGraphAsymmErrors to rebinned histo
@@ -145,9 +144,9 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   
   // create ratio canvas
   std::vector<TCanvas*> plotCanvas_;
-  double max= 1.7;
-  double min= 0.3;
-  plotCanvas_.push_back(drawFinalResultRatio(data, min, max, myStyle, 0, hist_, (TCanvas*)(canvas->Clone())));
+  double max= 1.5;
+  double min= 0.5;
+  plotCanvas_.push_back(drawFinalResultRatio(data, min, max, myStyle, 0, hist_, (TCanvas*)(canvas->Clone()), -1, -1, dataStat, true));
   plotCanvas_[0]->Draw();
   plotCanvas_[0]->Update();
   // close file
@@ -157,6 +156,16 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
 }
 
 void createTheoryDataRatios(bool extrapolate=true, bool hadron=false, int verbose=0){
+  // ============================
+  //  Set Root Style
+  // ============================
+//   TStyle myStyle("HHStyle2","HHStyle2");
+//   setHHStyle(myStyle);
+//   TGaxis::SetMaxDigits(2);
+//   myStyle.cd();
+//   gROOT->SetStyle("HHStyle2");
+
+  gStyle->SetEndErrorSize(8);
 
   // list all variables you want to create a ratio for
   std::vector<TString> xSecVariables_;
