@@ -116,6 +116,7 @@ public:
   RooGaussian gaussianProb;
   RooGenericPdf rectangularProb;
   RooGenericPdf prob;
+  //  RooGaussian prob;
 
 };
 
@@ -141,12 +142,21 @@ PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_
 										  alpha_p2.polyVar)),
   xsec(label+"_xsec", label+"_xsec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)*(@5/@6)/(@0*@0*@0*@0)",
        RooArgSet(mass_var, p0, p1, p2, p3, alphaDep, alphaDepCorr)),
+  //  xsec(label+"_xsec", label+"_xsec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)*(@5/@6)/(@0*@0*@0*@0)*(1+TMath::Abs(@7))",
+  //       RooArgSet(mass_var, p0, p1, p2, p3, alphaDep, alphaDepCorr, relUncScaleUp.polyVar)),
+  //  xsec(label+"_xsec", label+"_xsec", "(@1+@2*@0+@3*@0*@0+@4*@0*@0*@0)*(@5/@6)/(@0*@0*@0*@0)*(1-TMath::Abs(@7))",
+  //       RooArgSet(mass_var, p0, p1, p2, p3, alphaDep, alphaDepCorr, relUncScaleDn.polyVar)),
   xsecScaleUp(label+"_xsecScaleUp", label+"_xsecScaleUp", "@0+@0*TMath::Abs(@1)",
 	      RooArgSet(xsec, relUncScaleUp.polyVar)),
   xsecScaleDown(label+"_xsecScaleDown", label+"_xsecScaleDown", "@0-@0*TMath::Abs(@1)",
 		RooArgSet(xsec, relUncScaleDown.polyVar)),
   gaussianUnc(label+"_gaussianUnc", label+"_gaussianUnc", "@0*TMath::Abs(@1)",
 	      RooArgSet(xsec, relUncPdf.polyVar)),
+  //  gaussianUnc(label+"_gaussianUnc", label+"_gaussianUnc",
+  //  "@0*TMath::Sqrt(TMath::Abs(@1)*TMath::Abs(@1)+TMath::Power(TMath::Max(TMath::Abs(@2),TMath::Abs(@3)),2))", //max
+  //  "@0*TMath::Sqrt(TMath::Abs(@1)*TMath::Abs(@1)+TMath::Power((TMath::Abs(@2)+TMath::Abs(@3))/2.,2))",        //sym
+  //	      RooArgSet(xsec, relUncPdf.polyVar, relUncScaleUp.polyVar, relUncScaleDown.polyVar)),
+	      //	      RooArgSet(xsec, relUncPdf.polyVar)),
   mcIntegratorCfg(*RooAbsReal::defaultIntegratorConfig()),
   gaussianProb(label+"_gaussianProb", label+"_gaussianProb", xsec_var, xsec, gaussianUnc),
   rectangularProb(label+"_rectangularProb", label+"_rectangularProb",
@@ -154,6 +164,7 @@ PredXSec::PredXSec(const TString& label, RooRealVar& xsec_var, RooRealVar& mass_
   prob(label+"_prob", label+"_prob",
        "1/(2*(@3-@2))*(TMath::Erf((@3-@0)/(@1*TMath::Sqrt(2)))-TMath::Erf((@2-@0)/(@1*TMath::Sqrt(2))))",
        RooArgList(xsec_var, gaussianUnc, xsecScaleDown, xsecScaleUp))
+  //  prob(label+"_prob", label+"_prob", xsec_var, xsec, gaussianUnc)
 {
   mcIntegratorCfg.method1D().setLabel("RooMCIntegrator");
   rectangularProb.setIntegratorConfig(mcIntegratorCfg);
