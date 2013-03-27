@@ -169,9 +169,17 @@ verbose=0
 ## redoControlPlots = true / false (default: true)
 redoControlPlots=true
 
-## Re-create systematic plots
+## Re-create systematically varied results
 ## redoSystematics = true / false (default: true)
 redoSystematics=true
+
+## Re-create systematically PDF shifted signal files 
+## redoPDFReweighting = true / false (default: true)
+redoPDFReweighting=true
+
+## Produce final xSec plots, ratios and uncertainties 
+## produceResults = true / false (default: true)
+produceResults=true
 
 ## Make pt plots logarithmic
 ## makeLogPlots = true / false (default: false)
@@ -457,14 +465,14 @@ BEFORED=$(date +%s)
 echo
 echo "Part D: Prepare files for pdf uncertainties"
 
-if [ $decayChannel != \"combined\" -a $redoSystematics = true ]; then
+if [ $decayChannel != \"combined\" -a $redoSystematics = true -a $redoPDFReweighting = true ]; then
     echo
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true', '$inclCCVars')' 
-elif [ $1 == "combined2" -a $redoSystematics = true ]; then
+elif [ $1 == "combined2" -a $redoSystematics = true -a $redoPDFReweighting = true ]; then
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"muon\"',     '$save', '$verbose', '$inputFolderName', '$mudataSample', 'true', '$inclCCVars')' 
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"electron\"', '$save', '$verbose', '$inputFolderName', '$eldataSample', 'true', '$inclCCVars')' 
 else
-    echo "Done for 2012 analysis (in e/mu channel separate or when combining event yields) and if systematics are requested to be re-done (redoSystematics set to $redoSystematics)."
+    echo "Done for 2012 analysis (in e/mu channel separate or when combining event yields) and if systematics and PDF files are requested to be re-done (redoSystematics set to $redoSystematics, redoPDFReweighting set to $redoPDFReweighting)."
 fi
 
 #### ==========================================
@@ -599,7 +607,7 @@ if [ $fast = false ]; then
     sleep 2
 fi
 
-if [ $decayChannel == \"combined\" ]; then
+if [ $decayChannel == \"combined\" -a $produceResults = true ]; then
     
     echo "Cross sections for all systematic variations and decay channels"
     echo
@@ -633,7 +641,7 @@ EOF
     root -l -b < commandsCombineChannelsRun.cint
 
 else
-    echo "will be ignored, only done for decayChannel=combined"
+    echo "will be ignored, only done for decayChannel=combined and if final results are produced (produceResults is set to $produceResults)"
 fi
 echo
 
@@ -651,28 +659,36 @@ if [ $fast = false ]; then
     sleep 3
 fi
 
-echo ""
-echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
-root -l -q -b './combineTopDiffXSecUncertainties.C++('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$extrapolate', '$hadron', '$inclCCVars', '$closureTestSpecifier', '$useBCC')'
-    
+if [ $produceResults = true ]; then
+    echo ""
+    echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
+    root -l -q -b './combineTopDiffXSecUncertainties.C++('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$extrapolate', '$hadron', '$inclCCVars', '$closureTestSpecifier', '$useBCC')'
+else
+    echo "will be ignored, only done if final results are produced (produceResults is set to $produceResults)"
+fi  
+
 #### ==========================================
 ####  Create ratio plots for final xSecs 
 #### ==========================================
 
-if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" ]; then
+if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" -a $produceResults = true ]; then
     echo ""
     echo " Processing .... createTheoryDataRatios($extrapolate, $hadron, $verbose)"
     root -l -q -b './createTheoryDataRatios.C++('$extrapolate', '$hadron', '$verbose')'
+else
+    echo "will be ignored, only done if final results are produced (produceResults is set to $produceResults)"
 fi
 
 
 #### ===================================================
 ####  Create latex code result tables for final xSecs 
 #### ===================================================
-if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" ]; then
+if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" -a $produceResults = true ]; then
     echo ""
     echo " Processing .... makeResultTables($decayChannel, $extrapolate, $hadron, $inclCCVars)"
     root -l -q -b './makeResultTables.C++('$decayChannel', '$extrapolate', '$hadron', '$inclCCVars')'
+else
+    echo "will be ignored, only done if final results are produced (produceResults is set to $produceResults)"
 fi
 
 #### ==========================================
