@@ -52,15 +52,14 @@ namespace semileptonic {
   // ==========================================
 
   // basic variables
- 
-  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta"              };
-  TString xSecVariablesKinFit[]     = {"topPt" , "topY"  , "ttbarPt", "ttbarY", "ttbarMass"};
-  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm"                  }; 
-  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm"}; 
+  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt" };
+  TString xSecVariablesKinFit[]     = {"topPt" , "topY"  , "ttbarPt", "ttbarY", "ttbarMass"            };
+  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm"};  
+  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm"               }; 
   TString xSecVariablesIncl[] = {"inclusive"};
 
   TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]" ,"y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]"};
-  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ "};
+  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "p_{T}^{b#bar{b}}/[GeV]", "m^{b#bar{b}}/[GeV]"};
 
   // cross-check variables
  
@@ -1915,6 +1914,20 @@ namespace semileptonic {
       bins_.insert( bins_.begin(), bqEtaBins, bqEtaBins + sizeof(bqEtaBins)/sizeof(double) );
       result["bqEta"]=bins_;
       bins_.clear();
+
+
+      // pt(bbbar)
+      double bbbarPtBins[]={0.0, 35.0, 70.0 , 100.0, 130.0, 180.0, 800.0};
+      bins_.insert( bins_.begin(), bbbarPtBins, bbbarPtBins + sizeof(bbbarPtBins)/sizeof(double) );
+      result["bbbarPt"]=bins_;
+      bins_.clear();
+
+      // m(bbbar)
+      double bbbarMassBins[]={0.0, 80.0, 120.0, 180, 250.0, 400.0, 700.0, 1200.0};
+      bins_.insert( bins_.begin(), bbbarMassBins, bbbarMassBins + sizeof(bbbarMassBins)/sizeof(double) );
+      result["bbbarMass"]=bins_;
+      bins_.clear();
+
       return result;
     }
 
@@ -2370,6 +2383,8 @@ namespace semileptonic {
     else if(variable == "lepEtaMinus") return "#eta^{l^{-}}";
     else if(variable == "bqPt"       ) return "p_{T}^{b}"+strUnitGeV;
     else if(variable == "bqEta"      ) return "#eta^{b}";
+    else if(variable == "bbbarPt"    ) return "p_{T}^{b#bar{b}}"+strUnitGeV;
+    else if(variable == "bbbarMass"  ) return "m^{b#bar{b}}"+strUnitGeV;
     else return "Default Label for variable "+variable;
   }
 
@@ -3907,7 +3922,6 @@ namespace semileptonic {
 	      if(closureTestSpecifier==""){
 		// optimized parameters 
 		// top & ttbar:  hadron level not important
-		// prob sel value: only for full PS top & ttbar
 		if     (variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 5.94 : 7.18) : 7.22; 
 		else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 5.90 : 6.93) : 6.92; 
 		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 3.34 : 3.94) : 3.94; 
@@ -3917,13 +3931,14 @@ namespace semileptonic {
 		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 2.36 : ((hadronPS) ? (probSel ? 3.5e-05 : 1.8e-04) : 2.36); 
 		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 7.30 : ((hadronPS) ? (probSel ? 11.46   : 8.81   ) : 7.33); 
 		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 7.93 : ((hadronPS) ? (probSel ? 8.06    : 6.52   ) : 7.93);
+		else if(variable.Contains("bbbarMass")) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 1.07 : 1.70) : 8);
+		else if(variable.Contains("bbbarPt"  )) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 5.86 : 7.94) : 8); 
 	      }
 	    }
 	    else if (decayChannel.Contains("electron")){
 	      if(closureTestSpecifier==""){
 		// optimized parameters 
 		// top & ttbar:  hadron level not important
-		// prob sel value: only for full PS top & ttbar
 		if     (variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
 		else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 5.52 : 6.51) : 6.53; 
 		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 3.18 : 3.84) : 3.91; 
@@ -3933,12 +3948,13 @@ namespace semileptonic {
 		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.86 : ((hadronPS) ? (probSel ? 7.6e-06 : 3.9e-05) : 1.86); 
 		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 7.54 : ((hadronPS) ? (probSel ? 11.75   : 8.87   ) : 7.54); 
 		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 7.80 : ((hadronPS) ? (probSel ? 8.05    : 6.45   ) : 7.80);
+		else if(variable.Contains("bbbarMass")) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 1.08 : 1.95) : 8);
+		else if(variable.Contains("bbbarPt"  )) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 5.73 : 7.83) : 8); 
 	      }
 	    }
 	    else if(decayChannel.Contains("combined")){ 
 	      // optimized parameters 
 	      // top & ttbar:  hadron level not important
-	      // prob sel value: only for full PS top & ttbar
 	      if     (variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 8.64 : 10.37) : 10.36; 
 	      else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 8.0  : 9.51 ) : 9.51; 
 	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 4.61 : 5.49 ) : 5.54; 
@@ -3948,6 +3964,8 @@ namespace semileptonic {
 	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ? 2.9e-07 : 7.7e-06) : 3.00 ); 
 	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 8.56   : 12.51  ) : 10.53); 
 	      else if(variable.Contains("bqEta")    ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ? 6.78   : 9.19   ) : 11.11);
+	      else if(variable.Contains("bbbarMass")) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 1.51 : 2.57 ) : 8);
+	      else if(variable.Contains("bbbarPt"  )) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 8.20 : 11.14) : 8); 
 	    }
 	}
 	else{
@@ -3962,6 +3980,8 @@ namespace semileptonic {
 	  else if(variable.Contains("lepEta")   ) k = 14;
 	  else if(variable.Contains("bqPt")     ) k =  5;
 	  else if(variable.Contains("bqEta")    ) k =  8;
+	  else if(variable.Contains("bbbarPt"  )) k =  6;
+	  else if(variable.Contains("bbbarMass")) k =  7;
 	}
 	// output
 	if(verbose>1){
