@@ -49,6 +49,12 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
   if(hadron||!extrapolate){
     xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState    , xSecVariablesFinalState     + sizeof(xSecVariablesFinalState    )/sizeof(TString));
   }
+  // c) cross check variables presently only available for parton level cross-sections
+  if (addCrossCheckVariables && !hadron){
+    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVar,     xSecVariablesCCVar     + sizeof(xSecVariablesCCVar    )/sizeof(TString)    );
+    xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesCCVarNorm, xSecVariablesCCVarNorm + sizeof(xSecVariablesCCVarNorm)/sizeof(TString));
+  }
+
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     TString plotName=xSecVariables_[i];
     if(verbose>0) std::cout << std::endl << "variable: " << plotName << std::endl;
