@@ -68,6 +68,10 @@ void applyBCCs(TString inputFolderName="newRecentAnalysisRun8TeV", bool save=tru
 	    folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+PS);
 	  }
 	}
+	else if(xSecVariables_[i].Contains("bbbar")){
+	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Gen");
+	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Bjets"+PS);
+	}
 	else if(xSecVariables_[i].Contains("lep")&&!extrapolate&&hadron&&!xSecVariables_[i].Contains("Plus")&&!xSecVariables_[i].Contains("Minus")){
 	  xSecVariableBranchNames_.push_back(xSecVariables_[i]+"Gen");
 	  folderNamesBCC_.push_back("analyzeTop"+LV+"LevelKinematics"+"Lepton"+PS);
