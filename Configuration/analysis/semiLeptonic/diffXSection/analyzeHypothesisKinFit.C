@@ -9,7 +9,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="")
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
   // ============================
   //  Set ROOT Style
@@ -358,6 +358,14 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     // generated b-quark/b-jet quantities	
     genBpath+"/bqPt"+genBlabel,                 // XSec relevant! GEN
     genBpath+"/bqEta"+genBlabel,                // XSec relevant! GEN
+
+    // reconstructed b-quark/b-jet quantities	
+    recBpath+"/bbbarPt"+recBlabel,              // XSec relevant! REC
+    recBpath+"/bbbarMass"+recBlabel,            // XSec relevant! REC
+    // generated bbbar quantities	
+    genBpath+"/bbbarPt"+genBlabel,              // XSec relevant! GEN
+    genBpath+"/bbbarMass"+genBlabel,            // XSec relevant! GEN
+
     // ttbar other composition
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/decayChannel"
   }; 
@@ -586,6 +594,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     // e) response matrix b-quark/b-jet quantities
     recBpath+"/bqPt_"                                                       ,
     recBpath+"/bqEta_"                                                      ,   
+    // f) response matrix bbbar quantities
+    recBpath+"/bbbarPt_"                                                    ,
+    recBpath+"/bbbarMass_"                                                  ,   
   };
 
   TString plots2D_CCVars[ ] = {
@@ -656,6 +667,12 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     // generated b-quark/b-jet quantities
     xSecLabelName("bqPt" )+" parton truth/events/0/1",
     xSecLabelName("bqEta")+" parton truth/events/0/1",
+    // reconstructed bbar quantities
+    xSecLabelName("bbbarPt"  )+"/events #left[GeV^{-1}#right]/0/1",
+    xSecLabelName("bbbarMass")+"/events #left[GeV^{-1}#right]/0/1" ,
+    // generated bbbar quantities
+    xSecLabelName("bbbarPt"  )+" parton truth/events/0/1",
+    xSecLabelName("bbbarMass")+" parton truth/events/0/1",
     // ttbar other composition
     "t#bar{t} other decay channel/events/0/1"
   };
@@ -698,10 +715,12 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     // d) response matrix lepton quantities
     xSecLabelName("lepPt"      )+" gen/"+xSecLabelName("lepPt"      )+" reco",
     xSecLabelName("lepEta"     )+" gen/"+xSecLabelName("lepEta"     )+" reco", 
-    
     // e) response matrix b-quark/b-jet quantities
     xSecLabelName("bqPt" )+" gen/"+xSecLabelName("bqPt" )+" reco",
-    xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco"
+    xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco",
+    // f) response matrix bbbar quantities
+    xSecLabelName("bbbarPt"  )+" gen/"+xSecLabelName("bbbarPt"  )+" reco",
+    xSecLabelName("bbbarMass")+" gen/"+xSecLabelName("bbbarMass")+" reco"
   };
 
   TString axisLabel2D_CCVars[ ] = {
@@ -983,6 +1002,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     if(decayChannel!="combined"){
       bool bqPtExistsInAnySample =false;
       bool bqEtaExistsInAnySample=false;
+      bool bbbarPtExistsInAnySample =false;
+      bool bbbarMassExistsInAnySample=false;
       bool lepPtExistsInAnySample =false;
       bool lepEtaExistsInAnySample=false;
       // get input path/folder
@@ -1014,12 +1035,16 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	  std::cout << std::endl << sampleLabel(sample, decayChannel) << std::endl;
 	  std::cout << path+"/bqPt"    << " -> " << path2+"/bqPt"    << std::endl;
 	  std::cout << path+"/bqEta"   << " -> " << path2+"/bqEta"   << std::endl;
+	  std::cout << path+"/bbbarPt"    << " -> " << path2+"/bbbarPt"    << std::endl;
+	  std::cout << path+"/bbbarMass"  << " -> " << path2+"/bbbarMass"  << std::endl;
 	  std::cout << pathL+"/lepPt"  << " -> " << pathL2+"/lepPt"  << std::endl;
 	  std::cout << pathL+"/lepEta" << " -> " << pathL2+"/lepEta" << std::endl;
 	}
 	// create plot container
 	TH1* targetPlotBqPt  =0;
 	TH1* targetPlotBqEta =0;
+	TH1* targetPlotBbbarPt  =0;
+	TH1* targetPlotBbbarMass=0;
 	TH1* targetPlotLepPt =0;
 	TH1* targetPlotLepEta=0;
 	// check if file exists
@@ -1027,6 +1052,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	  // get plot
 	  files_[sample]->GetObject(path+"/bqPt" , targetPlotBqPt );
 	  files_[sample]->GetObject(path+"/bqEta", targetPlotBqEta);
+	  files_[sample]->GetObject(path+"/bbbarPt"  , targetPlotBbbarPt  );
+	  files_[sample]->GetObject(path+"/bbbarMass", targetPlotBbbarMass);
 	  files_[sample]->GetObject(pathL+"/lepPt" , targetPlotLepPt );
 	  files_[sample]->GetObject(pathL+"/lepEta", targetPlotLepEta);
 	  // Check existence of plot
@@ -1037,6 +1064,14 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	  if(targetPlotBqEta){
 	    histo_[path2+"/bqEta"][sample]=(TH1F*)targetPlotBqEta->Clone(path+"/bqEta");
 	    bqEtaExistsInAnySample=true;
+	  }
+	  if(targetPlotBbbarPt){ 
+	    histo_[path2+"/bbbarPt"  ][sample]=(TH1F*)targetPlotBbbarPt->Clone(path+"/bbbarPt");
+	    bbbarPtExistsInAnySample=true;
+	  }
+	  if(targetPlotBbbarMass){
+	    histo_[path2+"/bbbarMass"][sample]=(TH1F*)targetPlotBbbarMass->Clone(path+"/bbbarMass");
+	    bbbarMassExistsInAnySample=true;
 	  }
 	  if(targetPlotLepPt){ 
 	    histo_[pathL2+"/lepPt" ][sample]=(TH1F*)targetPlotLepPt ->Clone(pathL+"/lepPt" ); 
@@ -1049,7 +1084,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	  if(verbose>1){
 	    std::cout << sampleLabel(sample,decayChannel) << ":" << std::endl;
 	    std::cout << "targetPlotBqPt  : " <<  targetPlotBqPt   << std::endl;
-	    std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	 << std::endl;
+	    std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	<< std::endl;
+	    std::cout << "targetPlotBbbarPt  : " << targetPlotBbbarPt   << std::endl;
+	    std::cout << "targetPlotBbbarMass: " << targetPlotBbbarMass << std::endl;
 	    std::cout << "targetPlotLepPt : " <<  targetPlotLepPt  << std::endl;
 	    std::cout << "targetPlotLepEta: " <<  targetPlotLepEta << std::endl;
 	  }
@@ -1057,6 +1094,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	// delete plot container
 	delete targetPlotBqPt;
 	delete targetPlotBqEta;
+	delete targetPlotBbbarPt;
+	delete targetPlotBbbarMass;
 	delete targetPlotLepPt;
 	delete targetPlotLepEta;
       }
@@ -1067,6 +1106,14 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       }
       if(!bqEtaExistsInAnySample){
 	std::cout << "no plot found with label " << path+"/bqEta for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!bbbarPtExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bbbarPt for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!bbbarMassExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bbbarMass for non ttbar signal" << std::endl;
 	exit(0);
       }
       if(!lepPtExistsInAnySample){
@@ -1081,6 +1128,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     else{
       bool bqPtExistsInAnySample =false;
       bool bqEtaExistsInAnySample=false;
+      bool bbbarPtExistsInAnySample =false;
+      bool bbbarMassExistsInAnySample=false;
       bool lepPtExistsInAnySample =false;
       bool lepEtaExistsInAnySample=false;
       // get input path/folder
@@ -1111,16 +1160,22 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	  std::cout << std::endl << sampleLabel(sample,decayChannel) << std::endl;
 	  std::cout << path+"/bqPt"    << " -> " << path2+"/bqPt"    << std::endl;
 	  std::cout << path+"/bqEta"   << " -> " << path2+"/bqEta"   << std::endl;
+	  std::cout << path+"/bbbarPt"    << " -> " << path2+"/bbbarPt"    << std::endl;
+	  std::cout << path+"/bbbarMass"  << " -> " << path2+"/bbbarMass"  << std::endl;
 	  std::cout << pathL+"/lepPt"  << " -> " << pathL2+"/lepPt"  << std::endl;
 	  std::cout << pathL+"/lepEta" << " -> " << pathL2+"/lepEta" << std::endl;
 	}
 	// create plot container
 	TH1* targetPlotBqPt  =0;
 	TH1* targetPlotBqEta =0;
+	TH1* targetPlotBbbarPt  =0;
+	TH1* targetPlotBbbarMass=0;
 	TH1* targetPlotLepPt =0;
 	TH1* targetPlotLepEta=0;
 	TH1* targetMuPlotBqPt  =0;
 	TH1* targetMuPlotBqEta =0;
+	TH1* targetMuPlotBbbarPt  =0;
+	TH1* targetMuPlotBbbarMass=0;
 	TH1* targetMuPlotLepPt =0;
 	TH1* targetMuPlotLepEta=0;
 	// check if file exists
@@ -1129,10 +1184,14 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	  // get plot
 	  filesEl_[sample]->GetObject(path+"/bqPt"   , targetPlotBqPt  );
 	  filesEl_[sample]->GetObject(path+"/bqEta"  , targetPlotBqEta );
+	  filesEl_[sample]->GetObject(path+"/bbbarPt"  , targetPlotBbbarPt  );
+	  filesEl_[sample]->GetObject(path+"/bbbarMass", targetPlotBbbarMass);
 	  filesEl_[sample]->GetObject(pathL+"/lepPt" , targetPlotLepPt );
 	  filesEl_[sample]->GetObject(pathL+"/lepEta", targetPlotLepEta);
 	  filesMu_[sample]->GetObject(path+"/bqPt"   , targetMuPlotBqPt  );
 	  filesMu_[sample]->GetObject(path+"/bqEta"  , targetMuPlotBqEta );
+	  filesMu_[sample]->GetObject(path+"/bbbarPt"  , targetMuPlotBbbarPt  );
+	  filesMu_[sample]->GetObject(path+"/bbbarMass", targetMuPlotBbbarMass);
 	  filesMu_[sample]->GetObject(pathL+"/lepPt" , targetMuPlotLepPt );
 	  filesMu_[sample]->GetObject(pathL+"/lepEta", targetMuPlotLepEta);
 	  // Check existence of plot
@@ -1147,6 +1206,17 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	    histoMu_[path2+"/bqEta"][sample]=(TH1F*)targetMuPlotBqEta->Clone(path+"/bqEta");
 	    bqEtaExistsInAnySample=true;
 	  }
+
+	  if(targetPlotBbbarPt){ 
+	    histoEl_[path2+"/bbbarPt"  ][sample]=(TH1F*)targetPlotBbbarPt  ->Clone(path+"/bbbarPt");
+	    histoMu_[path2+"/bbbarPt"  ][sample]=(TH1F*)targetMuPlotBbbarPt->Clone(path+"/bbbarPt");
+	    bbbarPtExistsInAnySample=true;
+	  }
+	  if(targetPlotBbbarMass){
+	    histoEl_[path2+"/bbbarMass"][sample]=(TH1F*)targetPlotBbbarMass  ->Clone(path+"/bbbarMass");
+	    histoMu_[path2+"/bbbarMass"][sample]=(TH1F*)targetMuPlotBbbarMass->Clone(path+"/bbbarMass");
+	    bbbarMassExistsInAnySample=true;
+	  }
 	  if(targetPlotLepPt&&targetMuPlotLepPt){ 
 	    histoEl_[pathL2+"/lepPt" ][sample]=(TH1F*)targetPlotLepPt  ->Clone(pathL+"/lepPt" );
 	    histoMu_[pathL2+"/lepPt" ][sample]=(TH1F*)targetMuPlotLepPt->Clone(pathL+"/lepPt" );  
@@ -1160,7 +1230,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	  if(verbose>1){
 	    std::cout << sampleLabel(sample,decayChannel) << ":" << std::endl;
 	    std::cout << "targetPlotBqPt  : " <<  targetPlotBqPt   << std::endl;
-	    std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	 << std::endl;
+	    std::cout << "targetPlotBqEta : " <<  targetPlotBqEta	<< std::endl;
+	    std::cout << "targetPlotBbbarPt  : " << targetPlotBbbarPt	<< std::endl;
+	    std::cout << "targetPlotBbbarMass: " << targetPlotBbbarMass << std::endl;
 	    std::cout << "targetPlotLepPt : " <<  targetPlotLepPt  << std::endl;
 	    std::cout << "targetPlotLepEta: " <<  targetPlotLepEta << std::endl;
 	  }
@@ -1168,10 +1240,14 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 	// delete plot container
 	delete targetPlotBqPt;
 	delete targetPlotBqEta;
+	delete targetPlotBbbarPt;
+	delete targetPlotBbbarMass;
 	delete targetPlotLepPt;
 	delete targetPlotLepEta;
 	delete targetMuPlotBqPt;
 	delete targetMuPlotBqEta;
+	delete targetMuPlotBbbarPt;
+	delete targetMuPlotBbbarMass;
 	delete targetMuPlotLepPt;
 	delete targetMuPlotLepEta;
       }
@@ -1182,6 +1258,14 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       }
       if(!bqEtaExistsInAnySample){
 	std::cout << "no plot found with label " << path+"/bqEta for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!bbbarPtExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bbbarPt for non ttbar signal" << std::endl;
+	exit(0);
+      }
+      if(!bbbarMassExistsInAnySample){
+	std::cout << "no plot found with label " << path+"/bbbarMass for non ttbar signal" << std::endl;
 	exit(0);
       }
       if(!lepPtExistsInAnySample){
@@ -2018,7 +2102,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       // =====================
       // particle
       TString particle="";
-      variable.Contains("ttbar") ? particle="t#bar{t}" : (variable.Contains("lep") ? particle="lepton" : (variable.Contains("top") ? particle="t" : (variable.Contains("bq") ? particle="b" : particle="unknown") ) );
+      variable.Contains("ttbar") ? particle="t#bar{t}" : (variable.Contains("lep") ? particle="lepton" : (variable.Contains("top") ? particle="t" : (variable.Contains("bq") ? particle="b" : ( variable.Contains("bbbar") ? particle="b#bar{b}" : particle="unknown") ) ) );
     
       TString particleTex=particle;
       particle.ReplaceAll("#","");
@@ -2184,7 +2268,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
       int scanpoints= (scan==2 ? 3 : 0);
-      // scanpoints=1; // FIXME: fast tauscan results
+      //scanpoints=1; // FIXME: fast tauscan results
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
