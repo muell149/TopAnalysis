@@ -2535,7 +2535,7 @@ namespace semileptonic {
       rPad->SetGrid(0,1);
       rPad->Draw("");
       rPad->cd();
-      //TH1F* one2;
+      TH1F* one2;
       TGraphAsymmErrors* errorband2=0;
       TGraphAsymmErrors* errorbandStat2=0;
       TLegend *leg  = new TLegend(); 
@@ -2604,12 +2604,13 @@ namespace semileptonic {
 	  // line at 1
 	  TH1F* one=(TH1F*)ratio_[nTheory]->Clone();
 	  one->Divide(one);
-	  one->SetLineWidth(3);
+	  one->SetLineWidth(1);
 	  one->SetLineStyle(1);
-	  one->SetLineColor(0);
+	  one->SetLineColor(kBlack);
 	  one->SetFillStyle(0);
+
 	  TString add= nTheory==0 ? "" : " same";
-	  //one2=(TH1F*)one->Clone();
+	  one2=(TH1F*)one->Clone();
 	  one->DrawClone("hist"+add);
 	  // line at upper border
 	  TH1F* up=(TH1F*)one->Clone("up");
@@ -2630,7 +2631,7 @@ namespace semileptonic {
 	    //std::cout << bin << ": (x,dy/y)=(" << totX << "," << totErrY/totY << "), (x,y)=(" << totX << "," << totY << "+/-" << totErrY << ")" << std::endl;
 	  }
 	  int errcolor=kBlack;
-	  errorband->SetLineWidth(5.0);
+	  errorband->SetLineWidth(3.5);
 	  errorband->SetLineColor(errcolor);
 	  errorband2=(TGraphAsymmErrors*)errorband->Clone();
 	  // errorband for data stat error around 1
@@ -2644,7 +2645,7 @@ namespace semileptonic {
 	      errorbandStat->SetPointError(bin, 0, 0, statErrY/statY, statErrY/statY);
 	      //std::cout << bin << ": (x,dy/y)=(" << statX << "," << statErrY/statY << "), (x,y)=(" << statX << "," << statY << "+/-" << statErrY << ")" << std::endl;
 	    }
-	    errorbandStat->SetLineWidth(2.0);
+	    errorbandStat->SetLineWidth(3.5);
 	    errorbandStat->SetLineColor(errcolor);
 	    errorbandStat2=(TGraphAsymmErrors*)errorbandStat->Clone();
 	  }
@@ -2660,14 +2661,14 @@ namespace semileptonic {
 	  leg ->AddEntry(errorband, "data stat+sys error", "F");
 	}
 	ratio_[nTheory]->DrawClone("hist same");
-	//if(((TString)ratio_[nTheory]->GetName()).Contains("errorBandDn")){
+	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBandDn")) one2->Draw("hist same");
+
 	if(nTheory==ratio_.size()-1){
 	  gPad->RedrawAxis("g");
 	  gPad->RedrawAxis();
 	  errorband2->Draw("p z same");
 	  gStyle->SetEndErrorSize(8);
 	  if(errorbandStat2) errorbandStat2->Draw("p e same");
-	  //one2->Draw("hist same");
 	}
       }
       if(addXBinGrid){
