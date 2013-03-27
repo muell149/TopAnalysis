@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
-				  bool save = true, int verbose=0, 
+				  bool save = false, int verbose=0, 
 				  TString inputFolderName="newRecentAnalysisRun8TeV",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
@@ -61,7 +61,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   // b) options to be configured only once
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
-  //if(withRatioPlot==true) setQCDtoZero=false;
+  if(addSel=="ProbSel") setQCDtoZero=false;
   // scale ttbar component to measured inclusive xSec	
   bool scaleToMeasured=true;
   // add some shape plots comparing some different ttbar MC generators
@@ -1178,7 +1178,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(plotList_[plot].Contains("bottomJetKinematics")&&plotList_[plot].Contains("/n")                         ){xDn=0   ;xUp=5;   }
 	    if(plotList_[plot].Contains("JetKinematicsTagged")&&plotList_[plot].Contains("pt")                         ){xDn=30  ;xUp=350; }
 	    if(plotList_[plot].Contains("LeptonKinematicsTagged")&&plotList_[plot].Contains("pt")                      ){xDn=30  ;xUp=150; }
-	    if(plotList_[plot].Contains("btagSimpleSecVtx")                                                            ){xDn=-1  ;xUp=7;   }	
+	    if(plotList_[plot].Contains("btagSimpleSecVtx")                                                            ){xDn=-1  ;xUp=7;   }
+	    if(plotList_[plot].Contains("btagCombSecVtx")                                                              ){xDn=0.  ;xUp=1.;  }
 	    if(plotList_[plot].Contains("lepPt" )                                                                      ){xDn=0.  ;xUp=250.;}
 	    if(plotList_[plot].Contains("lepEta")                                                                      ){xDn=-2.5;xUp=2.5; }
 	    if((plotList_[plot].Contains("Y")||plotList_[plot].Contains("Eta"))&&(plotList_[plot].Contains("lep")||plotList_[plot].Contains("top"))&&(plotList_[plot].Contains("Plus")||plotList_[plot].Contains("Minus"))){xDn=-2.5;xUp=2.5;}
@@ -1187,13 +1188,13 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(plotList_[plot].Contains("topPt" )                                                                      ){xDn=0.    ;xUp=400.; }
 	    if(plotList_[plot].Contains("topY"  )                                                                      ){xDn=-2.5  ;xUp=2.5;  }
 	    if(plotList_[plot].Contains("ttbarY")                                                                      ){xDn=-2.5  ;xUp=2.5;  }	
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/leadqPt")                                      ){xDn=0     ;xUp=400;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/leadqPt")                            ){xDn=0     ;xUp=400;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")                                   ){xDn=30    ;xUp=400;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetEta")                                  ){xDn=-2.4  ;xUp=2.4;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetY")                                    ){xDn=-2.4  ;xUp=2.4;  }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/MJJ")                                              ){xDn=0     ;xUp=800;  }
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarMass")                                    ){xDn=0     ;xUp=800;  }
-	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarPt")                                      ){xDn=0     ;xUp=400;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarMass")                          ){xDn=0     ;xUp=800;  }
+	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarPt")                            ){xDn=0     ;xUp=400;  }
 	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))){xDn=-80;xUp=80;}
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")                                        ){xDn=-20   ;xUp=20;   }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")                                       ){xDn=-1    ;xUp=1;    }
@@ -1247,6 +1248,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 		  max*=(234./170.); // sqrt(s) dependence
 		  max*=(xSec/234.); // measured cross section dependence
 		}
+		if(addSel=="ProbSel")  max*=0.6;
 	      }
 	    }
 	    // axis style
@@ -1319,6 +1321,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 		if(decayChannel=="combined") cutLabel.ReplaceAll("lepton","e/#mu");
 		if(plotList_[plot].Contains("Tagged")||plotList_[plot].Contains("AfterBtagging")) cutLabel+=", #geq2 b-tags";
 		else if(plotList_[plot].Contains("KinFit")) cutLabel+=", #geq2 b-tags, KinFit";
+		if(plotList_[plot].Contains("ProbSel")) cutLabel.ReplaceAll("KinFit","prob>0.02");
 		double positionX=xUp+0.045*(xUp-xDn)*(gStyle->GetCanvasDefW()/600.);
 		double positionY=min;
 		//std::cout << plotList_[plot] << ": " << xUp << "+0.03*(" << xUp << "-" << xDn << ")=" << positionX << std::endl;
