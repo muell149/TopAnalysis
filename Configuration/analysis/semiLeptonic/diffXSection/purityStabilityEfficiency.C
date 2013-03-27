@@ -23,10 +23,10 @@
 #include "basicFunctions.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, TString lepton="combined", 
-			       TString inputFolderName="RecentAnalysisRun8TeV", bool plotAcceptance = true, 
-			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=7.824, int
-			       verbose=1, bool hadron=false, int qAssignment=-1,
+void purityStabilityEfficiency(TString variable = "ttbararMass", bool save=true, TString lepton="combined", 
+			       TString inputFolderName="newRecentAnalysisRun8TeV", bool plotAcceptance = true, 
+			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=999999, int
+			       verbose=1, bool hadron=true, int qAssignment=-1,
 			       bool fitGaussRes=false, bool printSeparateRes = false)
 {
   // ARGUMENTS of function:
@@ -42,6 +42,7 @@ void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, T
   // fitGaussRes:    fit a Gauss to the residuum plots to obtain the resolution
   // printSeparateRes save the residuum plots separately
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
+  if(variable.Contains("bbbar")) useTree=false; // FIXME: bbbar variables are missing in the tree for the moment...
   if(!useTree) chi2Max=99999; // can be done only with tree
   // if chi2 sel is applied-plot pur and stab without chi2 sel in addition?
   bool plotDefToCompare=true;
@@ -100,7 +101,7 @@ void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, T
   
   // if hadron level
   if(hadron){
-    if(variable.Contains("bq")){
+    if(variable.Contains("bq")||variable.Contains("bbbar")){
       folderRecoKin          = "analyzeTopRecoKinematicsBjets";
       folderGenKinPhaseSpace = "analyzeTopHadronLevelKinematicsBjetsPhaseSpace";
       folderGenKin           = "analyzeTopHadronLevelKinematicsBjetsPhaseSpace";
@@ -138,10 +139,12 @@ void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, T
   else if ( variable == "ttbarY")    { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -2.0;  resEdgeR=  2.0;  relResEdgeL = -2.0; relResEdgeR=2.0; }
   else if ( variable == "ttbarMass") { rangeUserLeft = 345+0.001 ; rangeUserRight = 1600-0.001; resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
   else if ( variable == "lepPt" )    { rangeUserLeft = 30        ; rangeUserRight = 400-0.001;  resEdgeL =  -35.0;  resEdgeR= 35.0;  relResEdgeL = -0.2; relResEdgeR=0.2; /*textOpt="";*/}
-  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =  -0.005;  resEdgeR= 0.005;  relResEdgeL = -0.5; relResEdgeR=0.5; /*textOpt="";*/}
+  else if ( variable == "lepEta")    { rangeUserLeft = -2.1+0.001; rangeUserRight = 2.1-0.001;  resEdgeL =  -0.005; resEdgeR= 0.005; relResEdgeL = -0.5; relResEdgeR=0.5; /*textOpt="";*/}
   else if ( variable == "bqPt")      { rangeUserLeft = 30+0.001  ; rangeUserRight = 350-0.001;  resEdgeL = -200.0;  resEdgeR=200.0;  relResEdgeL = -1.0; relResEdgeR=2.0 ;}
   else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
-  
+  else if ( variable == "bbbarPt")   { rangeUserLeft = 0         ; rangeUserRight =1000-0.001;  resEdgeL = -400.0;  resEdgeR=  400;  relResEdgeL = -1.5; relResEdgeR=4.0; }
+  else if ( variable == "bbbarMass") { rangeUserLeft = 0         ; rangeUserRight =1500-0.001;  resEdgeL = -400.0;  resEdgeR=  400;  relResEdgeL = -1.5; relResEdgeR=4.0; }
+
   //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepPt"  && lepton == "elec")    { rangeUserLeft = 30  ; rangeUserRight = 400-0.001; }
   //else if ( variable == "lepEta" && lepton == "muon")    { rangeUserLeft = -2.1; rangeUserRight = 2.1-0.001; }
@@ -220,8 +223,9 @@ void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, T
   TH1F* all     = NULL;
   // loading tree
   if (useTree){
+    std::cout << "file " << myFile1->GetName() << ", folder " << folderRecoKin << "/tree" << std::endl;
     TTree *tree=(TTree*)(myFile1->Get(folderRecoKin+"/tree"));
-    // for hadron level, the specific RecoKin folder does not contain a complete tree with all variavles;
+    // for hadron level, the specific RecoKin folder does not contain a complete tree with all variables;
     //  add the general tree
     TTree *treeGeneral=(TTree*)(myFile1->Get(folderRecoKinGeneral+"/tree"));
     if(!tree||tree->IsZombie()){
@@ -297,6 +301,7 @@ void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, T
     }
       
     for(unsigned int i=0; i<variable_.size(); ++i){
+      if(verbose>1) std::cout << "searching branch " << variable_[i]+recExtTree << " in " << tree->GetName() << std::endl;
       // activate branches
       tree->SetBranchStatus(variable_[i]+recExtTree,1);
       tree->SetBranchStatus(variable_[i]+genExtTree,1);
@@ -1080,6 +1085,13 @@ void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, T
   gErrorIgnoreLevel=initialIgnoreLevel;
   std::cout << std::endl << variable << "(" << lepton << "):" << std::endl;
   std::cout << "--------------------" << std::endl;
+  std::cout << "a) purity" << std::endl;
+  if(verbose>1){
+    for(int bin=1; bin<=purityhist->GetNbinsX(); ++bin){
+      std::cout << "[" << purityhist->GetBinLowEdge(bin) << ".." <<  purityhist->GetBinLowEdge(bin+1) << "]: ";
+      std::cout << std::setprecision(2) << std::fixed << purityhist->GetBinContent(bin) << std::endl;
+    }
+  }
   std::cout << std::setprecision(2) << std::fixed << minPur  << " (<" << variable; 
   std::cout << ">=" << std::setprecision(0) << std::fixed;
   std::cout << purityhist->GetBinCenter(purityMinimumBin) << ") < purity < ";
@@ -1088,6 +1100,14 @@ void purityStabilityEfficiency(TString variable = "ttbarMass", bool save=true, T
   std::cout << purityhist->GetBinCenter(purityMaximumBin) << ")" << std::endl;
   std::cout << "( purity > " << std::setprecision(2) << std::fixed;
   std::cout << minMigr << " in " << NPurok << "/" << Nbins << " bins)" << std::endl;
+  std::cout << "--------------------" << std::endl;
+  std::cout << "b) stability" << std::endl;
+  if(verbose>1){
+    for(int bin=1; bin<=stabilityhist->GetNbinsX(); ++bin){
+      std::cout << "[" << stabilityhist->GetBinLowEdge(bin) << ".." <<  stabilityhist->GetBinLowEdge(bin+1) << "]: ";
+      std::cout << std::setprecision(2) << std::fixed << stabilityhist->GetBinContent(bin) << std::endl;
+    }
+  }
   std::cout << std::setprecision(2) << std::fixed << minStab << " (<" << variable;
   std::cout << ">=" << std::setprecision(0) << std::fixed;
   std::cout << stabilityhist->GetBinCenter(stabilityMinimumBin) << ") < stability < ";
