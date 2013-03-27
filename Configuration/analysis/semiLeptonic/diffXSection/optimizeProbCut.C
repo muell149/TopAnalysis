@@ -8,8 +8,15 @@
 #include "TGraph.h"
 #include "TMath.h"
 #include "TCanvas.h"
+#include "TLegend.h"
+#include "TLine.h"
+#include "TString.h"
 
 double getSoB(TH1F* sig, TH1F* bkg, double probCut, TString opt);
+void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color, const double lineWidth, const unsigned int lineStyle);
+TString getTStringFromInt(int i);
+TString getTStringFromDouble(double d, int precision, bool output);
+void drawArrow(const double xmin, const double y, const double xmax, const unsigned int color, const double lineWidth, const unsigned int lineStyle, double stretchFactor);
 
 void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString lep = "both")
 {
@@ -57,7 +64,21 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   TH1F* ttSigHisto = new TH1F("histTtSig","ttSig probability",1000000,0.,1.);
   // all ttbar background
   TH1F* ttBkgHisto = new TH1F("histTtBkg","ttBkg probability",1000000,0.,1.);
-
+  // kinFit permutations
+  TH1F* permutation     = new TH1F("permutation","permutation", 10, -0.5, 9.5 );
+  permutation->GetXaxis()->SetBinLabel(1, "ok"      );
+  permutation->GetXaxis()->SetBinLabel(2, "bb"      );
+  permutation->GetXaxis()->SetBinLabel(3, "blepq"   );
+  permutation->GetXaxis()->SetBinLabel(4, "bhadq"   );
+  permutation->GetXaxis()->SetBinLabel(5, "bbqlep"  );    
+  permutation->GetXaxis()->SetBinLabel(6, "bbqhad"  );
+  permutation->GetXaxis()->SetBinLabel(7, "bbqq"       );
+  permutation->GetXaxis()->SetBinLabel(8, "low pt jet" );
+  permutation->GetXaxis()->SetBinLabel(9, "wrong jet"  );
+  permutation->GetXaxis()->SetBinLabel(10,"no match"   );
+  // kinFit permutations for a optimal probability selection
+  TH1F* permutationProb = (TH1F*)(permutation->Clone("permutationProb"));
+  
   // fill histograms
   Long64_t nevent = 0;
   for(UInt_t i = 0; i < files_.size(); i++)
@@ -137,7 +158,39 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   }
   double ttSigEff = ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents;
   double ttBkgEff = ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents;
-  cout << "Optimal probability cut at " << optimalProb << " -> right-permutation efficiency: " << optimalEff << ", ttbar-signal efficiency: " << ttSigEff << ", ttbar-bkg efficiency: " << ttBkgEff << endl;
+  double ttEff    = (ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)+ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1))/(ttSigEvents+ttBkgEvents);
+  cout << endl << "Optimal probability cut: prob > " << optimalProb << endl;
+  cout << " -> "<< endl;
+  cout << " eff(all ttbar          ): " << ttEff << endl;
+  cout << " eff(correct permutation): " << optimalEff << endl;
+  cout << " eff(ttbar-signal       ): " << ttSigEff << endl;
+  cout << " eff(ttbar-bkg          ): " << ttBkgEff << endl;
+  cout << " "<< optimize << "        : " << getSoB(sigHisto,bkgHisto,-1,optimize);
+  cout << "  (" << getSoB(sigHisto,bkgHisto,optimalProb,optimize) << "   for prob>" << optimalProb << ")" << endl;
+  cout << " ttbar SG / ttbar BG               : " <<  ttSigEvents/ttBkgEvents;
+  cout << "  (" <<  ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)/ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1)  << "  for prob>" << optimalProb << ")" << endl;
+  cout << " correct permutation / all ttbar SG: " <<  sigHisto->Integral(0,sigHisto->GetNbinsX()+1)/ttSigEvents;
+  cout << " (" <<  sigHisto->Integral(sigHisto->FindBin(optimalProb),sigHisto->GetNbinsX()+1)/ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1) << " for prob>" << optimalProb << ")" << endl;
+
+
+  // fill permutation histos
+  for(UInt_t i = 0; i < files_.size(); i++)
+    {
+      nevent = (Long64_t)trees_[i]->GetEntries();
+      for(Long64_t ientry = 0; ientry < nevent; ++ientry){
+	trees_[i]->GetEntry(ientry);
+	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2 && !(lep=="electron")) || (lep=="electron" && decayChannel==1)){
+	  permutation->Fill(qAssignment,weight);
+	  if(prob>optimalProb) permutationProb->Fill(qAssignment,weight);
+	}
+      }
+    }
+  // get efficiency per permutation
+  TH1F* effPermu = (TH1F*)(permutationProb->Clone("effPermu"));
+  effPermu->Divide((TH1F*)(permutation->Clone()));
+  // normalize permutation histos
+  permutation    ->Scale(1./permutation    ->Integral(0,permutation    ->GetNbinsX()+1));
+  permutationProb->Scale(1./permutationProb->Integral(0,permutationProb->GetNbinsX()+1));
 
   // set up canvas
   TCanvas *canv = new TCanvas("canv","probability cut optimisation",10,10,1200,600);
@@ -156,6 +209,22 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   canv2->cd()->SetBottomMargin(0.10);
   canv2->cd()->SetTopMargin   (0.05);
   canv2->cd()->SetLogy();
+  TCanvas *canv3 = new TCanvas("canv3","probabilityFraction",10,10,900,600);
+  canv3->cd()->SetLeftMargin  (0.08);
+  canv3->cd()->SetRightMargin (0.03);
+  canv3->cd()->SetBottomMargin(0.10);
+  canv3->cd()->SetTopMargin   (0.05);
+  canv3->cd()->SetLogy();
+  TCanvas *canv4 = new TCanvas("canv4","permutation",10,10,900,600);
+  canv4->cd()->SetLeftMargin  (0.08);
+  canv4->cd()->SetRightMargin (0.03);
+  canv4->cd()->SetBottomMargin(0.10);
+  canv4->cd()->SetTopMargin   (0.05);
+  TCanvas *canv5 = new TCanvas("canv5","effPerPermutation",10,10,900,600);
+  canv5->cd()->SetLeftMargin  (0.08);
+  canv5->cd()->SetRightMargin (0.03);
+  canv5->cd()->SetBottomMargin(0.10);
+  canv5->cd()->SetTopMargin   (0.05);
 
   // draw graph s/sqrt(s+b) or s/sqrt(b) vs probability
   canv->cd(1);
@@ -180,22 +249,116 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   // draw prob distribution
   canv2->cd();
   sigHisto->SetTitle("");
-  sigHisto->GetXaxis()->SetTitle("Probability");
+  sigHisto->GetXaxis()->SetTitle("Probability (best hypothesis)");
   sigHisto->GetYaxis()->SetTitle("Events");
   sigHisto->GetYaxis()->SetTitleOffset(0.85);
-  sigHisto->Add(bkgHisto);
-  sigHisto->SetMinimum(10);
+  TH1F* sigFracHisto=(TH1F*)sigHisto->Clone("sigFracHisto");
+  sigFracHisto->SetLineColor(kRed+1);
+  sigFracHisto->SetLineWidth(3);
+  sigFracHisto->SetMinimum(0.001);
+  sigFracHisto->SetMaximum(1.00);
+  sigFracHisto->GetYaxis()->SetTitle("rel. Events");
   sigHisto->SetFillColor(kRed+1);
+  sigHisto->Add(bkgHisto);
   sigHisto->Rebin(10000);
+  sigHisto->SetMinimum(10);
+  sigFracHisto->Rebin(10000);
   sigHisto->DrawClone("h");
-  bkgHisto->SetFillColor(kRed);
+  TH1F* bkgFracHisto=(TH1F*)bkgHisto->Clone("bkgFracHisto");
+  bkgFracHisto->SetLineWidth(3);
+  bkgFracHisto->SetLineStyle(9);
+  bkgFracHisto->SetLineColor(kRed);
+  bkgHisto->SetFillStyle(1001);
+  bkgHisto->SetFillColor(10);
+  bkgFracHisto->Rebin(10000);
   bkgHisto->Rebin(10000);
   bkgHisto->DrawClone("h same");
-  ttBkgHisto->SetFillColor(kRed-7);
+  bkgHisto->SetFillStyle(3001);
+  bkgHisto->SetFillColor(kRed);
+  bkgHisto->DrawClone("h same");
+  TH1F* ttBkgFracHisto=(TH1F*)ttBkgHisto->Clone("ttBkgFracHisto");
+  int ttBkgColor=kBlue;//kRed-7
+  ttBkgFracHisto->SetLineColor(ttBkgColor);
+  ttBkgFracHisto->SetLineWidth(3);
+  ttBkgFracHisto->SetLineStyle(2);
+  ttBkgHisto->SetFillColor(10);
+  ttBkgHisto->SetFillStyle(1001);
   ttBkgHisto->Rebin(10000);
+  ttBkgFracHisto->Rebin(10000);
   ttBkgHisto->DrawClone("h same");
+  ttBkgHisto->SetFillColor(ttBkgColor);
+  ttBkgHisto->SetFillStyle(3144);
+  ttBkgHisto->DrawClone("h same");
+  // draw legend
+  TLegend *leg  = new TLegend(); 
+  leg->SetX1NDC(0.3);
+  leg->SetY1NDC(0.6);
+  leg->SetX2NDC(0.9);
+  leg->SetY2NDC(0.9);
+  leg ->SetFillStyle(1001);
+  leg ->SetFillColor(10);
+  leg ->SetBorderSize(0);
+  //leg ->SetTextSize(0.1);
+  leg ->SetTextAlign(12);
+  leg ->SetHeader(" t#bar{t} Simulation");
+  TLegend *leg2=(TLegend *)leg->Clone();
+  leg ->AddEntry(sigHisto, "SG correct permutation"  , "F");
+  leg ->AddEntry(bkgHisto, "SG other permutation"    , "F");
+  leg ->AddEntry(ttBkgHisto, "BG (non prompt l+jets signal)", "F");
+  leg ->AddEntry(effPermu, "optimal cut: prob>"+getTStringFromDouble(optimalProb, 4, false), "L");
+  leg2 ->AddEntry(sigFracHisto, "SG correct permutation"  , "L");
+  leg2 ->AddEntry(bkgFracHisto, "SG other permutation"    , "L");
+  leg2 ->AddEntry(ttBkgFracHisto, "BG (non prompt l+jets signal)", "L");
+  leg2 ->AddEntry(effPermu, "optimal cut: prob>"+getTStringFromDouble(optimalProb, 4, false), "L");
+  leg ->Draw("same");
+  drawLine(optimalProb, sigHisto->GetMinimum(), optimalProb, 0.6*sigHisto->GetMaximum(), kBlack, 2, 1);
+  drawArrow(optimalProb, sigHisto->GetMaximum()/10, optimalProb+0.05, kBlack, 2, 1, 1.2);
   sigHisto->DrawClone("axis same");
 
+  // draw normalized prob distribution
+  canv3->cd();
+  sigFracHisto->DrawClone("axis");
+  sigFracHisto->DrawNormalized("same");
+  bkgFracHisto->DrawNormalized("same");
+  ttBkgFracHisto->DrawNormalized("same");
+  drawLine(optimalProb, sigFracHisto->GetMinimum(), optimalProb, 0.6*sigFracHisto->GetMaximum(), kBlack, 2, 1);
+  drawArrow(optimalProb, sigFracHisto->GetMaximum()/10, optimalProb+0.05, kBlack, 2, 1, 1.2);
+  sigFracHisto->DrawClone("axis same");
+  leg2->Draw("same");
+  // draw permutation distribution
+  canv4->cd();
+  permutation->SetTitle("");
+  permutation->GetXaxis()->SetTitle("jet permutation of kinematic fit wrt. parton truth");
+  permutation->GetYaxis()->SetTitle("rel. Events");
+  permutation    ->SetLineWidth(3);
+  permutation    ->SetLineColor(kBlue);
+  permutation    ->SetLineStyle(1);
+  permutation    ->Draw();
+  permutationProb->SetLineWidth(3);
+  permutationProb->SetLineStyle(2);
+  permutationProb->SetLineColor(kRed);
+  permutationProb->Draw("same");
+  TLegend *leg3  = new TLegend(); 
+  leg3->SetX1NDC(0.3);
+  leg3->SetY1NDC(0.6);
+  leg3->SetX2NDC(0.7);
+  leg3->SetY2NDC(0.9);
+  leg3 ->SetFillStyle(1001);
+  leg3 ->SetFillColor(10);
+  leg3 ->SetBorderSize(0);
+  leg3 ->SetTextAlign(12);
+  leg3->AddEntry(permutation, "t#bar{t}#rightarrowl+jets prompt", "L");
+  leg3->AddEntry(permutationProb, "  + prob>"+getTStringFromDouble(optimalProb, 4, false), "L");
+  leg3->Draw("same");
+  // draw efficiency per permutation
+  canv5->cd();
+  effPermu->SetTitle("");
+  effPermu->GetXaxis()->SetTitle("jet permutation of kinematic fit wrt. parton truth");
+  effPermu->GetYaxis()->SetTitle("eff(prob>"+getTStringFromDouble(optimalProb, 4, false)+")");
+  effPermu    ->SetLineWidth(3);
+  effPermu    ->SetLineColor(kBlack);
+  effPermu    ->SetLineStyle(1);
+  effPermu    ->Draw();
 }
 
 // calculate s/sqrt(s+b) or s/sqrt(+b)
@@ -207,4 +370,45 @@ double getSoB(TH1F* sig, TH1F* bkg, double probCut, TString opt)
   if(opt=="#frac{sig}{#sqrt{bkg}}")result = signal/TMath::Sqrt(backgr);
   if(opt=="#frac{sig}{#sqrt{sig+bkg}}")result = signal/TMath::Sqrt(signal+backgr);
   return result;
+}
+
+void drawLine(const double xmin, const double ymin, const double xmax, const double ymax, const unsigned int color, const double lineWidth, const unsigned int lineStyle)
+{
+  // this function draws a line withe the chosen coordinates,
+  // color and width into the active canvas
+  TLine *line = new TLine();
+  line->SetLineWidth(lineWidth);
+  line->SetLineStyle(lineStyle);
+  line->SetLineColor(color);
+  line->DrawLine(xmin, ymin, xmax, ymax);
+}
+
+TString getTStringFromInt(int i)
+{
+  // function to convert an int "i" to
+  // a TString and return this one
+  char result[20];
+  sprintf(result, "%i", i);
+  return (TString)result;
+}
+
+TString getTStringFromDouble(double d, int precision, bool output)
+{
+  // function to convert an double "d" to
+  // a TString and return this one
+  TString conv="%.";
+  conv+=getTStringFromInt(precision);
+  conv+="f";
+  char result[30];
+  if(output) std::cout << "sprintf(result, conv, d)=sprintf(" << result << ", " << conv << ", " << d << ")" << std::endl;
+  sprintf(result, conv, d);
+  return (TString)result;
+}
+
+void drawArrow(const double xmin, const double y, const double xmax, const unsigned int color, const double lineWidth, const unsigned int lineStyle, double stretchFactor)
+{
+  // this function draws an arrow line with the chosen coordinates,
+  drawLine(xmin, y, xmax, y, color, lineWidth, lineStyle);
+  drawLine(0.8*xmax, y*stretchFactor, xmax, y, color, lineWidth, lineStyle);
+  drawLine(0.8*xmax, y/stretchFactor, xmax, y, color, lineWidth, lineStyle);
 }
