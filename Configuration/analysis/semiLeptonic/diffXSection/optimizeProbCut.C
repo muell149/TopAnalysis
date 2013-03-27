@@ -27,7 +27,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   // TString optimize = "#frac{sig}{sig+bkg}";
 
   // read files
-  TString path = "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/";
+  TString path = "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/";
   std::vector<TFile*> files_;
   if(lep=="both" || lep=="muon")files_.push_back(new TFile(path+"muonDiffXSecSigSummer12PF.root"));
   if(lep=="both" || lep=="muon")  files_.push_back(new TFile(path+"muonDiffXSecBkgSummer12PF.root"));
@@ -41,7 +41,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   float qAssignment;
   float weight;
   for(UInt_t i = 0; i < files_.size(); i++){
-    trees_.push_back((TTree*)files_[i]->Get("analyzeTopRecoKinematicsKinFitBeforeProbSel/tree"));
+    trees_.push_back((TTree*)files_[i]->Get("analyzeTopRecoKinematicsKinFit/tree"));
     trees_[i]->SetBranchAddress("decayChannel",&decayChannel);
     trees_[i]->SetBranchAddress("prob",&prob);
     trees_[i]->SetBranchAddress("qAssignment",&qAssignment);
