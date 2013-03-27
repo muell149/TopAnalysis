@@ -197,9 +197,27 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	// FIXME: as proper errors do not exist at the moment, use value itself as dummy...
 	corrCenterErrors_[candidate]=tempvec;
       }
-      else if(verbose>1) std::cout << "-> not found!" << endl;
+      else if(!(candidate.Contains("inclusive"))){
+	// draw warning if BCC are missing for a specific variable
+	std::cout << "WARNING: BCC for "+candidate+" not found" << endl;
+	std::cout << "-> will use the the geometrical bin center" << endl;
+	// get geometrical mean from bin borders in makeVariableBinning (basicFunctions.h)
+	std::vector<double> tempvec;
+	// debug output
+	if(verbose>1){
+	  std::cout << "searching "+candidate+" in binning_" << std::endl;
+	  std::cout << "found? " << binning_.count(candidate) << std::endl;
+	}
+	// loop all bins
+	for(int bin=0; bin<(int)binning_[candidate].size()-1; ++bin){
+	  tempvec.push_back(0.5*(binning_[candidate][bin]+binning_[candidate][bin+1]));
+	}
+	// save centers in map
+	correctedCenters_[candidate]=tempvec;
+	// FIXME: as proper errors do not exist at the moment, use value itself as dummy...
+	corrCenterErrors_[candidate]=tempvec;
+      }
     }
-    
     // Output of results
     for (std::map<TString, std::vector<double> >::iterator iter1 = correctedCenters_.begin(); iter1 != correctedCenters_.end(); iter1++ ){
       std::cout << iter1->first << ": " << std::endl;
@@ -592,7 +610,8 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitle("Relative Uncertainty (symmetrized) [%]");
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitleOffset(1.2);
 		// save asymmetric errors in map totalErrors_
-		combinedErrors->SetLineWidth(1.0);
+		combinedErrors->SetLineWidth(3.5);
+		combinedErrors->SetMarkerSize(0.8);
 		combinedErrors->SetLineColor(histo_[xSecVariables_[i]][sysNo]->GetLineColor());
 		totalErrors_[xSecVariables_[i]]=(TGraphAsymmErrors*)(combinedErrors->Clone());
 		whipEmptyBinsAway(totalErrors_[xSecVariables_[i]], verbose);
@@ -1010,12 +1029,12 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	      finalInclusiveXSec->GetYaxis()->SetTitleSize(0.0);							
 	      finalInclusiveXSec->Draw("axis");
 	      // draw Theory expectation     
-	      double theoryXSecNLL=234;
+	      double theoryXSecNLL=245.8;
 	      double theoryXSecNLO=225.197;
 	      double theoryErrorNLOUp  =23.2/157.5*theoryXSecNLO; // FIXME: use relative uncertainty from 7TeV
 	      double theoryErrorNLODown=24.4/157.5*theoryXSecNLO; // FIXME: use relative uncertainty from 7TeV
-	      double theoryErrorNLLUp  =sqrt(12.*12.+ 10.*10.);
-	      double theoryErrorNLLDown=sqrt(12.*12.+ 7.*7.);
+	      double theoryErrorNLLUp  =sqrt(6.2*6.2+6.2*6.2);
+	      double theoryErrorNLLDown=sqrt(8.4*8.4+6.4*6.4);
 	      TBox* TheoryError = new TBox(theoryXSecNLO-theoryErrorNLODown, 0.0, theoryXSecNLO+theoryErrorNLOUp, 4.0);
 	      TBox* TheoryError2= new TBox(theoryXSecNLL-theoryErrorNLLDown, 0.0 ,theoryXSecNLL+theoryErrorNLLUp, 4.0);
 	      TheoryError->SetFillColor(kGray);
@@ -1118,7 +1137,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		// convert to TGraphAsymmErrors
 		TGraphAsymmErrors* statErrors= new TGraphAsymmErrors(dataStat->GetNbinsX());
 		statErrors->SetName("dataStatError");
-		statErrors->SetLineWidth(1.0) ; // totalErrors_[xSecVariables_[i]]->GetLineWidth());
+		statErrors->SetLineWidth(3.5) ; // totalErrors_[xSecVariables_[i]]->GetLineWidth());
 		statErrors->SetLineColor(totalErrors_[xSecVariables_[i]]->GetLineColor());
 		for(int bin=1; bin<=dataStat->GetNbinsX(); ++bin){
 		  // exclude over/underflow bins with empty bin content or zero width 
