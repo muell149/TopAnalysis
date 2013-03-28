@@ -10,7 +10,7 @@ class TString;
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "JetCategories.h"
 #include "DyScalingHistograms.h"
-
+#include "MvaInputVariables.h"
 
 
 class HiggsAnalysis : public AnalysisBase{
@@ -37,6 +37,10 @@ public:
     /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
     
+    /// Whether to produce MVA input information
+    void SetProduceMvaInput(const bool produceMvaInput);
+    
+    
 private:
     
     /// Is it a ttH sample inclusive in Higgs decay
@@ -45,10 +49,44 @@ private:
     /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
     bool bbbarDecayFromInclusiveHiggs_;
     
-    
     /// Class holding the definition and handling of jet categories (# jets, # b-jets)
     JetCategories jetCategories_overview_;
     JetCategories jetCategories_;
+    
+    
+    
+    
+    
+    
+    /// Template function to order two indices by comparison operator for the two elements of a vector
+    /// corresponding to the indices of a given variable
+    /// Result is: index2 < index1
+    template<class T> void orderIndices(int& index1, int& index2, const std::vector<T>& v_variable);
+    
+    /// Get indices of generated b jet and anti-b jet for particles with given PDG ID
+    /// Returns whether a unique solution is found, and only in this case indices are set unequal to -1
+    bool getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, const int pdgId);
+    
+    /// Match the two generated input jets to the reco jet collection
+    bool matchRecoToGenJets(int& matchedBJetIndex, int&matchedAntiBJetIndex, const LV* genBJet, const LV* genAntiBJet);
+    
+    /// Fill class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
+    void fillMvaInputTopJetsVariables(const LV& lepton, const LV& antilepton,
+                                      const int matchedBJetIndex, const int matchedAntiBJetIndex,
+                                      const bool successfulMatching, const double& eventWeight);
+    
+    /// Whether to produce MVA input
+    bool produceMvaInput_;
+    
+    /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
+    MvaInputTopJetsVariables mvaInputTopJetsVariables_;
+    
+    
+    
+    
+    
+    
+    
     
     /// Histograms for the overview jet categories
     TH1* h_jetCategories_overview_step0;
@@ -82,30 +120,44 @@ private:
     DyScalingHistograms dyScalingHistograms_;
     
     /// Control plots
-    TH1* h_jetpT_step8;
+    TH1* h_jetPt_step8;
     TH1* h_jetChargeGlobalPtWeighted_step8;
     TH1* h_jetChargeRelativePtWeighted_step8;
     
-    /// Histograms concerning the variables used for finding b-jets from ttbar system with MVA
-    TH1* h_meanDeltaPhi_b_met_step8;
-    TH1* h_massDiff_recoil_bbbar_step8;
-    TH1* h_pt_b_antiLepton_step8;
-    TH1* h_pt_antiB_lepton_step8;
-    TH1* h_deltaR_b_antiLepton_step8;
-    TH1* h_deltaR_antiB_lepton_step8;
-    TH1* h_btagDiscriminatorSum_step8;
-    TH1* h_deltaPhi_antiBLepton_bAntiLepton_step8;
-    TH1* h_massDiff_fullBLepton_bbbar_step8;
-    TH1* h_meanMT_b_met_step8;
-    TH1* h_massSum_antiBLepton_bAntiLepton_step8;
-    TH1* h_massDiff_antiBLepton_bAntiLepton_step8;
     
-    TH1* h_meanMTAlt_b_met_step8;
+    TH1* h_jetMultiplicity_step7;
+    TH1* h_jetMultiplicity_step8;
     
-    
+    TH1* h_matchedBjetsFromTop_step8;
 };
 
 
 
 
+
+template<class T> void HiggsAnalysis::orderIndices(int& index1, int& index2, const std::vector<T>& v_variable)
+{
+    const T& variable1 = v_variable.at(index1);
+    const T& variable2 = v_variable.at(index2);
+    if(variable2<variable1){
+        // Order is already correct
+        return;
+    }
+    else {
+        const int tmpIndex2 = index1;
+        index1 = index2;
+        index2 = tmpIndex2;
+    }
+}
+
+
+
+
+
+
+
 #endif //HiggsAnalysis_h
+
+
+
+

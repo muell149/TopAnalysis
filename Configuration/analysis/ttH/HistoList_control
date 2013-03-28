@@ -15,7 +15,7 @@ events_step9 _post1btag Events - 1 1 0 0 0 0 0 0 0 0
 
 
 
-jetpT_step8 Standard Jets p_{T} 2 1 0 1 1 1E5 30 400 0 0
+jetPt_step8 Standard Jets p_{T} 2 1 0 1 1 1E5 30 400 0 0
 
 JetCategories_overview_step0 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0
 JetCategories_overview_step1 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0
@@ -29,19 +29,19 @@ JetCategories_overview_step8 _postKinReco events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0
 
 JetCategories_step8 _postKinReco events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
 
-bcp_JetCategories_step8_bin_0_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_1_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_2_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_3_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_4_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_5_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_6_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_7_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_8_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_9_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_10_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_11_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
-bcp_JetCategories_step8_bin_12_jetpT_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_0_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_1_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_2_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_3_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_4_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_5_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_6_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_7_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_8_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_9_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_10_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_11_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_12_jetPt_step8 Standard jets p_{t} 1 1 0 0 0 0 0 0 0 0
 
 jetChargeGlobalPtWeighted_step8 Standard jets c_{jet}^{glob} 1 1 0 0 0 0 0 0 0 0
 jetChargeRelativePtWeighted_step8 Standard jets c_{jet}^{rel} 1 1 0 0 0 0 0 0 0 0
@@ -62,6 +62,10 @@ meanMT_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 massSum_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 massDiff_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 meanMTAlt_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+jetMultiplicity_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+jetMultiplicity_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+
 
 
 # Name, Extra, axis labels (y,x), rebin, do_dyscale, logx, logy, ymin, ymax, xmin, xmax, nbins, xbins, bcs

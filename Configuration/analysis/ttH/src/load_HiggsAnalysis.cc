@@ -38,8 +38,8 @@ const std::string getPUPath(TString systematic) {
 void load_HiggsAnalysis(TString validFilenamePattern, 
                    TString givenChannel, 
                    TString systematic, 
-                   int dy
-                   )
+                   int dy,
+                   const bool produceMvaInput)
 {   
     ifstream infile ("selectionList.txt");
     if (!infile.good()) { 
@@ -152,6 +152,7 @@ void load_HiggsAnalysis(TString validFilenamePattern,
             selector->SetRunViaTau(0);
             selector->SetHiggsInclusiveSample(isHiggsInclusive);
             selector->SetHiggsInclusiveSeparation(false);
+            selector->SetProduceMvaInput(produceMvaInput);
             
             // Check whether nTuple can be found
             TTree *tree = dynamic_cast<TTree*>(file.Get("writeNTuple/NTuple"));
@@ -201,7 +202,10 @@ int main(int argc, char** argv) {
     TString channel = opt_c.isSet() ? opt_c[0] : "";
     int dy = opt_dy.isSet() ? opt_dy[0] : 0;
     
+    // FIXME: use here configuration parameter
+    bool produceMvaInput(true);
+    
 //     TProof* p = TProof::Open(""); // not before ROOT 5.34
-    load_HiggsAnalysis(validFilenamePattern, channel, syst, dy);
+    load_HiggsAnalysis(validFilenamePattern, channel, syst, dy, produceMvaInput);
 //     delete p;
 }

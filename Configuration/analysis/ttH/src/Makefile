@@ -7,7 +7,7 @@ all: load_HiggsAnalysis Histo
 
 
 
-load_HiggsAnalysis: dict.o AnalysisBase.o load_HiggsAnalysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o JetCategories.o HiggsAnalysis.o DyScalingHistograms.o JetCorrectionUncertainty.o  JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o
+load_HiggsAnalysis: dict.o AnalysisBase.o load_HiggsAnalysis.o PUReweighter.o utils.o HistoListReader.o KinReco.o CommandLineParameters.o JetCategories.o HiggsAnalysis.o DyScalingHistograms.o JetCorrectionUncertainty.o  JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
 load_HiggsAnalysis.o: load_HiggsAnalysis.cc
@@ -34,7 +34,7 @@ dict.cc: ../../diLeptonic/src/AnalysisBase.h HiggsAnalysis.h ../../diLeptonic/sr
 PUReweighter.o: ../../diLeptonic/src/PUReweighter.h ../../diLeptonic/src/PUReweighter.cc
 	g++ -c -o PUReweighter.o $(COMPFLAGS) ../../diLeptonic/src/PUReweighter.cc
 
-AnalysisBase.o: ../../diLeptonic/src/AnalysisBase.cc ../../diLeptonic/src/AnalysisBase.h ../../diLeptonic/src/HistoListReader.h ../../diLeptonic/src/utils.h ../../diLeptonic/src/KinReco.h
+AnalysisBase.o: ../../diLeptonic/src/AnalysisBase.cc ../../diLeptonic/src/AnalysisBase.h ../../diLeptonic/src/HistoListReader.h ../../diLeptonic/src/utils.h ../../diLeptonic/src/KinReco.h MvaInputVariables.h
 	g++ -c -o AnalysisBase.o $(COMPFLAGS) ../../diLeptonic/src/AnalysisBase.cc
 
 HiggsAnalysis.o: HiggsAnalysis.cc HiggsAnalysis.h ../../diLeptonic/src/HistoListReader.h ../../diLeptonic/src/utils.h ../../diLeptonic/src/KinReco.h ../../diLeptonic/src/AnalysisBase.h DyScalingHistograms.h
@@ -55,6 +55,8 @@ JetCorrectorParameters.o:  ../../diLeptonic/src/JetCorrectorParameters.cc
 SimpleJetCorrectionUncertainty.o: ../../diLeptonic/src/SimpleJetCorrectionUncertainty.cc
 	g++ -c -o $@ $(COMPFLAGS) ../../diLeptonic/src/SimpleJetCorrectionUncertainty.cc
 
+MvaInputVariables.o: MvaInputVariables.cc MvaInputVariables.h
+	g++ -c -o MvaInputVariables.o $(COMPFLAGS) MvaInputVariables.cc
 
 
 Histo: Histo.o Plotter.o plotterHelpers.o HistoListReader.o utils.o higgsUtils.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o
