@@ -16,8 +16,14 @@ namespace Systematic{
     
     
     
-    /// All systematics allowed for analysis
-    const std::vector<Systematic> allowedSystematics
+    /// All systematics allowed for analysis step
+    /// Only systematics which run on the nominal ntuples, e.g. pileup reweighting
+    /// (allow undefined to set default behaviour if no option is set, i.e. option is empty)
+    const std::vector<Systematic> allowedSystematicsAnalysis
+        {nominal, undefined};
+    
+    /// All systematics allowed for plotting step
+    const std::vector<Systematic> allowedSystematicsPlotting
         {nominal, mH110, mH115, mH120, mH1225, mH1275, mH130, mH135, mH140};
     
     
@@ -47,8 +53,13 @@ namespace Channel{
     
     
     
-    /// All dileptonic decay channels allowed for analysis
-    const std::vector<Channel> allowedChannels
+    /// All dileptonic decay channels allowed for analysis step
+    /// (allow undefined to select all channels if no option is set, i.e. option is empty)
+    const std::vector<Channel> allowedChannelsAnalysis
+        {ee, emu, mumu, undefined};
+    
+    /// All dileptonic decay channels allowed for plotting step
+    const std::vector<Channel> allowedChannelsPlotting
         {ee, emu, mumu, combined};
     
     
@@ -67,8 +78,6 @@ namespace Channel{
     
     /// Convert a vector of channels from string to typedef
     std::vector<std::string> convertChannels(const std::vector<Channel>& channels);
-    
-    
 }
 
 

@@ -12,6 +12,10 @@
 #include <Math/VectorUtil.h>
 
 #include "HiggsAnalysis.h"
+#include "higgsUtils.h"
+#include "../../diLeptonic/src/PUReweighter.h"
+
+
 
 
 
@@ -23,10 +27,6 @@ constexpr double JETETACUT = 2.4;
 constexpr double BtagWP = 0.244;
 
 
-
-
-using ROOT::Math::VectorUtil::DeltaPhi;
-using ROOT::Math::VectorUtil::DeltaR;
 
 
 
@@ -84,8 +84,10 @@ HiggsAnalysis::Begin(TTree*){
     prepareLeptonIDSF();
     prepareJER_JES();
     
-    mvaInputTopJetsVariables_.clear();
-    mvaInputTopJetsVariables_ = MvaInputTopJetsVariables(fOutput);
+    if(analysisMode_ == AnalysisMode::mva){
+        mvaInputTopJetsVariables_.clear();
+        mvaInputTopJetsVariables_ = MvaInputTopJetsVariables(fOutput);
+    }
 }
 
 
@@ -94,22 +96,24 @@ HiggsAnalysis::Begin(TTree*){
 void
 HiggsAnalysis::Terminate(){
     
-    std::string f_savename = "selectionRoot";
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/mvaInput");
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(systematic_); 
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(channel_); 
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(outputfilename_);
-    mvaInputTopJetsVariables_.produceMvaInputTree(f_savename);
-    
-    mvaInputTopJetsVariables_.mvaInputTopJetsVariablesControlPlots();
-    
+    if(analysisMode_ == AnalysisMode::mva){
+        std::string f_savename = "selectionRoot";
+        gSystem->MakeDirectory(f_savename.c_str());
+        f_savename.append("/mvaInput");
+        gSystem->MakeDirectory(f_savename.c_str());
+        f_savename.append("/");
+        f_savename.append(systematic_); 
+        gSystem->MakeDirectory(f_savename.c_str());
+        f_savename.append("/");
+        f_savename.append(channel_); 
+        gSystem->MakeDirectory(f_savename.c_str());
+        f_savename.append("/");
+        f_savename.append(outputfilename_);
+        
+        mvaInputTopJetsVariables_.produceMvaInputTree(f_savename);
+        
+        mvaInputTopJetsVariables_.mvaInputTopJetsVariablesControlPlots();
+    }
     
     AnalysisBase::Terminate();
 }
@@ -219,7 +223,6 @@ HiggsAnalysis::SlaveBegin(TTree *){
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
-    
 }
 
 
@@ -232,14 +235,14 @@ void HiggsAnalysis::SlaveTerminate()
 
 
 Bool_t
-HiggsAnalysis::Process(Long64_t entry){
-    
+HiggsAnalysis::Process(Long64_t entry)
+{
     if(!AnalysisBase::Process(entry))return kFALSE;
     
     // Histogram for controlling correctness of h_events_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
     h_events_step0a->Fill(1, 1);
     
-    if(isHiggsSignal_)GetHiggsSignalBranchesEntry(entry);
+    if(isHiggsSignal_)GetHiggsDecayModeEntry(entry);
     if(isInclusiveHiggs_ && !bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_==5)return kTRUE;
     if(isInclusiveHiggs_ && bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_!=5)return kTRUE;
     
@@ -581,6 +584,9 @@ HiggsAnalysis::Process(Long64_t entry){
     
     
     
+    if(analysisMode_ != AnalysisMode::mva)return kTRUE;
+    
+    
     
     // FIXME: which events exactly to fill? For now all with at least 4 jets
     if(jets_->size()<4)return kTRUE;
@@ -589,7 +595,7 @@ HiggsAnalysis::Process(Long64_t entry){
     // Find b jet and anti-b jet corresponding to (anti)b from (anti)top
     LV* genBJet(0);
     LV* genAntiBJet(0);
-    if(isSignal_){
+    if(isTopSignal_){
         this->GetTopSignalBranchesEntry(entry);
         int genBJetIndex(-1);
         int genAntiBJetIndex(-1);
@@ -635,10 +641,7 @@ void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& ant
             // Get the indices of b and anti-b jet defined by jet charge
             int bIndex = std::distance(jets_->begin(), i_jet);
             int antiBIndex = std::distance(jets_->begin(), j_jet);
-            this->orderIndices(antiBIndex, bIndex, *jetChargeRelativePtWeighted_);
-//             std::cout<<"b, antib: "<<bIndex<<" , "<<antiBIndex<<"\n";
-//             std::cout<<"charges: "<<jetChargeRelativePtWeighted_->at(bIndex)
-//                      <<" , "<<jetChargeRelativePtWeighted_->at(antiBIndex)<<"\n";
+            Tools::orderIndices(antiBIndex, bIndex, *jetChargeRelativePtWeighted_);
             
             // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
             bool isSwappedPair(false);
@@ -732,6 +735,8 @@ bool HiggsAnalysis::getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, 
 
 bool HiggsAnalysis::matchRecoToGenJets(int& matchedBJetIndex, int& matchedAntiBJetIndex, const LV* genBJet, const LV* genAntiBJet)
 {
+    using ROOT::Math::VectorUtil::DeltaR;
+    
     // Find closest jet and its distance in deltaR
     double deltaRBJet(999.);
     double deltaRAntiBJet(999.);
@@ -804,9 +809,9 @@ void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusi
 
 
 
-void HiggsAnalysis::SetProduceMvaInput(const bool produceMvaInput)
+void HiggsAnalysis::SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMode)
 {
-    produceMvaInput_ = produceMvaInput;
+    analysisMode_ = analysisMode;
 }
 
 

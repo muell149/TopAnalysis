@@ -20,6 +20,7 @@
 #include "KinReco.h"
 #include "TopAnalysis.h"
 #include "HistoListReader.h"
+#include "PUReweighter.h"
 
 using ROOT::Math::VectorUtil::DeltaPhi;
 using ROOT::Math::VectorUtil::DeltaR;
@@ -65,7 +66,7 @@ void TopAnalysis::Begin(TTree* )
 
 void TopAnalysis::Terminate()
 {
-    if(isSignal_)produceBtagEfficiencies();
+    if(isTopSignal_)produceBtagEfficiencies();
     AnalysisBase::Terminate();
 }
 
@@ -714,7 +715,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     int BHadronIndex=-1;
     int AntiBHadronIndex=-1;
     
-    if (isSignal_) {
+    if (isTopSignal_) {
         GetTopSignalBranchesEntry(entry);
 
         std::vector<size_t> idx_leadbHadJet;
@@ -885,7 +886,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     double genHT = -1;
     
     
-    if ( isSignal_ ) {
+    if ( isTopSignal_ ) {
         if (doClosureTest_) weightGenerator_ *= calculateClosureTestWeight();
         double trueLevelWeight = weightGenerator_ * weightPU;
         h_GenAll->Fill(GenTop_->M(), trueLevelWeight);
@@ -1406,7 +1407,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (!hasBtag) return kTRUE;
 
     //finally do the btag efficiency calculation stuff
-    if(isSignal_){
+    if(isTopSignal_){
         this->fillBtagHistograms(JETPTCUT, BtagWP);
     }
     
@@ -1722,7 +1723,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     //=== CUT ===
     //Following histograms only filled for the signal sample
-    if (! isSignal_) return kTRUE;
+    if (! isTopSignal_) return kTRUE;
 
 //     if ( GenLepton->Pt() > 20 && GenAntiLepton->Pt() > 20 
 //          && abs(GenLepton->Eta()) < 2.4 && abs(GenAntiLepton->Eta()) < 2.4 ) 

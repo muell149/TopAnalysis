@@ -1,6 +1,7 @@
 #ifndef eventYields_h
 #define eventYields_h
 
+#include "sampleHelpers.h"
 #include "DyScaleFactors.h"
 
 class RootFileReader;

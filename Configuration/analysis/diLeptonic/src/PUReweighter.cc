@@ -4,8 +4,10 @@
 #include <string>
 
 #include "TString.h"
-#include "TH1D.h"
+#include "TH1.h"
 #include "TFile.h"
+#include "Rtypes.h"
+
 #include "utils.h"
 #include "PUReweighter.h"
 

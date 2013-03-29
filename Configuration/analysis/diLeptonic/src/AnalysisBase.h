@@ -17,10 +17,12 @@ class TH1;
 class TH2;
 class TString;
 
-#include "JetCorrectorParameters.h"
-#include "JetCorrectionUncertainty.h"
 #include "classes.h"
-#include "PUReweighter.h"
+
+class PUReweighter;
+class JetCorrectionUncertainty;
+
+
 
 
 
@@ -108,6 +110,11 @@ protected:
     Int_t topDecayMode_;
     
     
+    /// Variables associated to nTuple branch for Higgs decay mode
+    Int_t higgsDecayMode_;
+    
+    
+    
     /// Variables associated to nTuple branches for Top signal samples on generator level
     LV                *GenMet_;
     LV                *GenTop_;
@@ -145,7 +152,6 @@ protected:
     
     
     /// Variables associated to nTuple branches for Higgs signal samples on generator level
-    Int_t higgsDecayMode_;
     LV    *GenH_;
     LV    *GenBFromH_;
     LV    *GenAntiBFromH_;
@@ -156,7 +162,7 @@ protected:
     TString channel_;
     TString systematic_;
     bool isMC_;
-    bool isSignal_;
+    bool isTopSignal_;
     bool isHiggsSignal_;
     
     
@@ -278,6 +284,10 @@ private:
     TBranch *b_TopDecayMode;
     
     
+    /// nTuple branch for Higgs decay mode
+    TBranch *b_HiggsDecayMode;
+    
+    
     /// nTuple branches for Top signal samples on generator level
     TBranch *b_GenMet;
     TBranch *b_GenTop;
@@ -315,7 +325,6 @@ private:
     
 
     /// nTuple branches for Higgs signal samples on generator level
-    TBranch *b_HiggsDecayMode;
     TBranch *b_GenH;
     TBranch *b_GenBFromH;
     TBranch *b_GenAntiBFromH;
@@ -382,7 +391,7 @@ public:
     /// Set whether it is MC sample
     void SetMC(bool isMC);
     /// Set whether it is Top signal sample
-    void SetSignal(bool isSignal);
+    void SetTopSignal(bool isTopSignal);
     /// Set whether it is Higgs signal sample
     void SetHiggsSignal(const bool higgsSignal);
     
@@ -425,6 +434,8 @@ protected:
     void GetPDFEntry(Long64_t&);
     /// Access event entry for nTuple branch for Top decay mode
     void GetTopDecayModeEntry(Long64_t&);
+    /// Access event entry for nTuple branch for Higgs decay mode
+    void GetHiggsDecayModeEntry(Long64_t&);
     /// Access event entry for nTuple branches for Top signal samples on generator level
     void GetTopSignalBranchesEntry(Long64_t&);
     /// Access event entry for nTuple branches for Higgs signal samples on generator level
@@ -514,6 +525,8 @@ private:
     void SetDyDecayBranchAddress();
     /// Set address of nTuple branch for Top decay mode
     void SetTopDecayBranchAddress();
+    /// Set address of nTuple branch for Higgs decay mode
+    void SetHiggsDecayBranchAddress();
     /// Set addresses of nTuple branches for Top signal samples on generator level
     void SetTopSignalBranchAddresses();
     /// Set addresses of nTuple branches for Higgs signal samples on generator level

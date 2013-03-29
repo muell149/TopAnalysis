@@ -11,6 +11,7 @@ class TString;
 #include "JetCategories.h"
 #include "DyScalingHistograms.h"
 #include "MvaInputVariables.h"
+#include "analysisHelpers.h"
 
 
 class HiggsAnalysis : public AnalysisBase{
@@ -38,30 +39,10 @@ public:
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
     
     /// Whether to produce MVA input information
-    void SetProduceMvaInput(const bool produceMvaInput);
+    void SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMode);
     
     
 private:
-    
-    /// Is it a ttH sample inclusive in Higgs decay
-    bool isInclusiveHiggs_;
-    
-    /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
-    bool bbbarDecayFromInclusiveHiggs_;
-    
-    /// Class holding the definition and handling of jet categories (# jets, # b-jets)
-    JetCategories jetCategories_overview_;
-    JetCategories jetCategories_;
-    
-    
-    
-    
-    
-    
-    /// Template function to order two indices by comparison operator for the two elements of a vector
-    /// corresponding to the indices of a given variable
-    /// Result is: index2 < index1
-    template<class T> void orderIndices(int& index1, int& index2, const std::vector<T>& v_variable);
     
     /// Get indices of generated b jet and anti-b jet for particles with given PDG ID
     /// Returns whether a unique solution is found, and only in this case indices are set unequal to -1
@@ -75,16 +56,27 @@ private:
                                       const int matchedBJetIndex, const int matchedAntiBJetIndex,
                                       const bool successfulMatching, const double& eventWeight);
     
-    /// Whether to produce MVA input
-    bool produceMvaInput_;
+    
+    
+    /// Enum for analysis modes
+    AnalysisMode::AnalysisMode analysisMode_;
+    
+    
+    
+    /// Is it a ttH sample inclusive in Higgs decay
+    bool isInclusiveHiggs_;
+    
+    /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
+    bool bbbarDecayFromInclusiveHiggs_;
+    
+    
+    
+    /// Class holding the definition and handling of jet categories (# jets, # b-jets)
+    JetCategories jetCategories_overview_;
+    JetCategories jetCategories_;
     
     /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     MvaInputTopJetsVariables mvaInputTopJetsVariables_;
-    
-    
-    
-    
-    
     
     
     
@@ -130,27 +122,6 @@ private:
     
     TH1* h_matchedBjetsFromTop_step8;
 };
-
-
-
-
-
-template<class T> void HiggsAnalysis::orderIndices(int& index1, int& index2, const std::vector<T>& v_variable)
-{
-    const T& variable1 = v_variable.at(index1);
-    const T& variable2 = v_variable.at(index2);
-    if(variable2<variable1){
-        // Order is already correct
-        return;
-    }
-    else {
-        const int tmpIndex2 = index1;
-        index1 = index2;
-        index2 = tmpIndex2;
-    }
-}
-
-
 
 
 

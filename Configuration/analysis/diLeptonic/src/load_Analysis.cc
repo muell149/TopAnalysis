@@ -110,7 +110,7 @@ void load_Analysis(TString validFilenamePattern,
             
             selector->SetBTagFile(btagFile);
             selector->SetChannel(channel);
-            selector->SetSignal(isSignal);
+            selector->SetTopSignal(isSignal);
             selector->SetMC(isMC);
             selector->SetTrueLevelDYChannel(dy);
             if (dy) {

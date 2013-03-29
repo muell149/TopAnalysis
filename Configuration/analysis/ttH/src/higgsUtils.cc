@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 
 #include <TObjArray.h>
 #include <TH1.h>
@@ -7,12 +8,16 @@
 #include "higgsUtils.h"
 
 
+
+
+
 void
 Tools::applyFlatWeight(TH1* hist, const double weight){
     if(weight == 0) {std::cout<<"Warning! The weight your applying is 0. This will remove your distribution."<<std::endl;}
     //if(weight >=1e3){std::cout<<"Warning: the weight your applying is >= 1e3. This will enlarge too much your distribution."<<std::endl;}
     hist->Scale(weight);
 }
+
 
 
 TString
@@ -25,6 +30,7 @@ Tools::extractSelectionStep(const TString& histogramName){
     //std::cout<<"The extracted selection step is (step/histogram name): "<<step<<" / "<<histogramName<<std::endl;
     return step;
 }
+
 
 
 TString
@@ -49,8 +55,11 @@ Tools::stepFragmentByToken(const TString& filenameFragment, const TString& token
 
 
 
-
-
-
+std::function<bool(const std::string &s)>
+Tools::makeStringCheck(const std::vector<std::string> v_string) {
+    return [v_string](const std::string &test){
+        return std::find(begin(v_string), end(v_string), test) != end(v_string);
+    };
+}
 
 

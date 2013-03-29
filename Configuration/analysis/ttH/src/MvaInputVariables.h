@@ -10,7 +10,10 @@ class TTree;
 #include "../../diLeptonic/src/classes.h"
 
 
- /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
+
+
+
+/// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
 class MvaInputTopJetsVariables{
     
 public:

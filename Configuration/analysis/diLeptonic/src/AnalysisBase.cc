@@ -23,13 +23,16 @@
 #include "HistoListReader.h"
 #include "utils.h"
 #include "KinReco.h"
+#include "JetCorrectorParameters.h"
+#include "JetCorrectionUncertainty.h"
+
 
 
 
 
 AnalysisBase::AnalysisBase(TTree*):
 samplename_(""), channel_(""), systematic_(""),
-isMC_(false), isSignal_(false), isHiggsSignal_(false),
+isMC_(false), isTopSignal_(false), isHiggsSignal_(false),
 isTtbarPlusTauSample_(false), correctMadgraphBR_(false),
 channelPdgIdProduct_(0), trueDYchannelCut_(0),
 checkZDecayMode_(nullptr), outputfilename_(""),
@@ -64,7 +67,6 @@ void AnalysisBase::Begin(TTree*)
 {
     /// WARNING! In general do not make changes here, but in your analysis' Begin function
 
-    
     TSelector::Begin(0);
     
     bEff = 0;
@@ -86,44 +88,12 @@ void AnalysisBase::Begin(TTree*)
 
 
 
-/** order two LorentzVectors by pt
- * 
- * @param leading the LV with the higher pt (output)
- * @param Nleading the LV with the lower pt (output)
- * @param lv1 input LV to compare with lv2
- * @param lv2 input LV to compare with lv1
- * 
- * Compare lv1 and lv2. The LV with the larger pt is copied to leading,
- * the LV with the smaller pt is copied to Nleading
- */
-void AnalysisBase::orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2) {
-    if (lv1.Pt() > lv2.Pt()) {
-        leading = lv1; Nleading = lv2;
-    } else {
-        leading = lv2; Nleading = lv1;
-    }
-}
-
-
-
-/// apply pT and eta cuts on our jets
-void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
-    for (int i = jets_->size() - 1; i >= 0; --i) {
-        if (jets_->at(i).pt() < ptcut || std::abs(jets_->at(i).eta()) > etacut) {
-            jets_->erase(begin(*jets_) + i);
-            jetBTagCSV_->erase(begin(*jetBTagCSV_) + i);
-            if (isMC_) associatedGenJet_->erase(begin(*associatedGenJet_) + i);
-        }        
-    }
-}
-
-
-
 void AnalysisBase::SlaveBegin(TTree*)
 {
     /// WARNING! In general do not make changes here, but in your analysis' SlaveBegin function
 
     TSelector::SlaveBegin(0);
+    
     binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
 }
 
@@ -131,17 +101,19 @@ void AnalysisBase::SlaveBegin(TTree*)
 
 void AnalysisBase::SlaveTerminate()
 {
-
     /// WARNING! In general do not make changes here, but in your analysis' SlaveTerminate function
 
     // The SlaveTerminate() function is called after all entries or objects
     // have been processed. When running with PROOF SlaveTerminate() is called
     // on each slave server.
+    
     for (auto it = binnedControlPlots_->begin(); it != binnedControlPlots_->end(); ++it) {
         delete (*it).second.first;
     }
     delete binnedControlPlots_;
 }
+
+
 
 Bool_t AnalysisBase::Process(Long64_t)
 {
@@ -150,6 +122,8 @@ Bool_t AnalysisBase::Process(Long64_t)
     if ( ++eventCounter_ % 100000 == 0 ) std::cout << "Event Counter: " << eventCounter_ << std::endl;
     return kTRUE;
 }
+
+
 
 void AnalysisBase::Terminate()
 {
@@ -194,7 +168,7 @@ void AnalysisBase::Terminate()
     TObjString(channel_).Write("channelName");
     TObjString(systematic_).Write("systematicsName");
     TObjString(samplename_).Write("sampleName");
-    TObjString(isSignal_ ? "1" : "0").Write("isSignal");
+    TObjString(isTopSignal_ ? "1" : "0").Write("isSignal");
     TObjString(isHiggsSignal_ ? "1" : "0").Write("isHiggsSignal");
     TObjString(isMC_ ? "1" : "0").Write("isMC");
     outputFile.Close();
@@ -210,237 +184,45 @@ void AnalysisBase::Terminate()
 
 
 
-void AnalysisBase::produceBtagEfficiencies()
+void AnalysisBase::Init(TTree *tree)
 {
-    std::cout << "Signal sample, writing out btag efficiencies\n";
-    std::string f_savename = "selectionRoot";
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/BTagEff");
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(systematic_); 
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(channel_); 
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(outputfilename_);
+    /// WARNING! In general do not make changes here, but in your analysis' Init function
     
-    h_bjets = dynamic_cast<TH2*>( fOutput->FindObject("bjets2D") );
-    h_btaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("bjetsTagged2D") );
-    h_cjets = dynamic_cast<TH2*>( fOutput->FindObject("cjets2D") );
-    h_ctaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("cjetsTagged2D") );
-    h_ljets = dynamic_cast<TH2*>( fOutput->FindObject("ljets2D") );
-    h_ltaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("ljetsTagged2D") );
-    if (!h_bjets || !h_btaggedjets || !h_cjets || !h_ctaggedjets || !h_ljets || !h_ltaggedjets) {
-        std::cerr << "At least one of the btag histograms is missing\n";
-        exit(4);
-    }
-    TFile fbtag(f_savename.c_str(),"RECREATE");
-    h_bjets->Write();
-    h_btaggedjets->Write();
-    h_cjets->Write();
-    h_ctaggedjets->Write();
-    h_ljets->Write();
-    h_ltaggedjets->Write();
+    // The Init() function is called when the selector needs to initialize
+    // a new tree or chain. Typically here the branch addresses and branch
+    // pointers of the tree will be set.
+    // It is normally not necessary to make changes to the generated
+    // code, but the routine can be extended by the user if needed.
+    // Init() will be called many times when running on PROOF
+    // (once per file to be processed).
     
-    TH1 *btaggedPt = h_btaggedjets->ProjectionX(); TH1 *btaggedEta = h_btaggedjets->ProjectionY();
-    TH1 *ctaggedPt = h_ctaggedjets->ProjectionX(); TH1 *ctaggedEta = h_ctaggedjets->ProjectionY();
-    TH1 *ltaggedPt = h_ltaggedjets->ProjectionX(); TH1 *ltaggedEta = h_ltaggedjets->ProjectionY();
+    // Reset all branches and their associated variables
+    this->clearBranches();
+    this->clearBranchVariables();
     
-    TH1 *bUntaggedPt = h_bjets->ProjectionX(); TH1 *bEta = h_bjets->ProjectionY();
-    TH1 *cUntaggedPt = h_cjets->ProjectionX(); TH1 *cEta = h_cjets->ProjectionY();
-    TH1 *lUntaggedPt = h_ljets->ProjectionX(); TH1 *lEta = h_ljets->ProjectionY();
-    
-    //Calculate the medians and save them in a txt file
-    double PtMedian = Median(btaggedPt);
-    double EtaMedian = Median(btaggedEta);
-    printf("Median: pT = %.0f, eta = %.2f\n", PtMedian, EtaMedian);
-    TH1* medianHist = new TH1D("Medians", "medians", 2, -0.5, 1.5);
-    medianHist->GetXaxis()->SetBinLabel(1, "pT");
-    medianHist->GetXaxis()->SetBinLabel(2, "eta");
-    medianHist->SetBinContent(1, PtMedian);
-    medianHist->SetBinContent(2, EtaMedian);
-    medianHist->Write();
-    
-    TH1 *beffPt =(TH1*) btaggedPt->Clone("beffPt");
-    TH1 *ceffPt =(TH1*) ctaggedPt->Clone("ceffPt");
-    TH1 *leffPt =(TH1*) ltaggedPt->Clone("leffPt");
-    
-    TH1 *beffEta =(TH1*) btaggedEta->Clone("beffEta");  
-    TH1 *ceffEta =(TH1*) ctaggedEta->Clone("ceffEta");  
-    TH1 *leffEta =(TH1*) ltaggedEta->Clone("leffEta");  
-    
-    //Calculate Efficiency: N_tageed/N_all
-    //Calculate also the binomial error (option "B" does it)!!
-    beffPt->Divide(btaggedPt, bUntaggedPt, 1, 1, "B"); 
-    ceffPt->Divide(ctaggedPt, cUntaggedPt, 1, 1, "B"); 
-    leffPt->Divide(ltaggedPt, lUntaggedPt, 1, 1, "B");
-    beffEta->Divide(btaggedEta, bEta, 1, 1, "B"); 
-    ceffEta->Divide(ctaggedEta, cEta, 1, 1, "B"); 
-    leffEta->Divide(ltaggedEta, lEta, 1, 1, "B"); 
-    h_btaggedjets->Divide(h_btaggedjets, h_bjets, 1, 1, "B"); 
-    h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); 
-    h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); 
-
-    //Save histograms in ROOT file
-    beffPt->Write("BEffPt"); 
-    ceffPt->Write("CEffPt"); 
-    leffPt->Write("LEffPt"); 
-    beffEta->Write("BEffEta"); 
-    ceffEta->Write("CEffEta"); 
-    leffEta->Write("LEffEta"); 
-    h_btaggedjets->Write("BEffPerJet");
-    h_ctaggedjets->Write("CEffPerJet");
-    h_ltaggedjets->Write("LEffPerJet");
-    
-    fbtag.Close();
-    std::cout << "Done.\n\n\n";
+    // Set branch addresses and branch pointers
+    if(!tree) return;
+    chain_ = tree;
+    chain_->SetMakeClass(0);
+    this->SetRecoBranchAddresses();
+    this->SetKinRecoBranchAddresses();
+    this->SetPdfBranchAddress();
+    this->SetDyDecayBranchAddress();
+    this->SetTopDecayBranchAddress();
+    if(isHiggsSignal_) this->SetHiggsDecayBranchAddress();
+    if(isTopSignal_) this->SetTopSignalBranchAddresses();
+    if(isHiggsSignal_) this->SetHiggsSignalBranchAddresses();
 }
 
 
 
 double AnalysisBase::overallGlobalNormalisationFactor()
 {
-    // Overwrite this method in your analysis if you want to apply a global normalisation factor
-    double globalNormalisationFactor(1);
-    return globalNormalisationFactor;
-}
-
-
-
-double AnalysisBase::BJetSF( double pt, double eta )
-{
-    //CSVL b-jet SF
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.tptt (ICHEP 2012 prescription)
-    //From: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.tptt  (Moriond 2013 prescription)
-
-    if ( std::abs(eta) > 2.4 ) {
-        std::cout<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
-        exit(9);
-    }
-    if ( pt < 30 ){
-        std::cout<<"Jet pT="<<pt<<" Out of the selected range (pt>30GeV). Check it\n";
-        exit(9);
-    }
-
-    if ( pt < 20 ) pt = 20;
-    if ( pt > 800 ) pt = 800;
-
-    return 0.981149*((1.+(-0.000713295*pt))/(1.+(-0.000703264*pt)));
-}
-
-
-
-double AnalysisBase::CJetSF ( double pt, double eta )
-{
-    //CSVL c-jet SF
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC (ICHEP 2012 prescription)
-    //From https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_Moriond13_presc  (Moriond 2013 prescription)
-
-    return 2 * BJetSF( pt, eta );
-}
-
-
-
-double AnalysisBase::LJetSF ( double pt, double eta, TString typevar )
-{
-    //CSVL ligth jet mistag SF. Includes also the SF for variations up and down
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C (ICHEP 2012 prescription)
-    //From https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C  (Moriond 2013 prescription)
-
-    double eta_abs = std::abs(eta);
-    if ( eta_abs > 2.4 ) {
-        std::cout<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
-        exit(91);
-    }
-    if ( pt < 30 ){
-        std::cout<<"Jet pT="<<pt<<" out of the selected range. Check it\n";
-        exit(91);
-    }
-
-    if ( pt > 800 && eta_abs <= 1.5 ) {
-        pt = 800;
-    }    else if (pt > 700 && eta_abs > 1.5 ) {
-        pt = 700;
-    }
-
-    if ( typevar == "central" ){
-        if ( eta_abs <= 0.5 ) {
-            return ((1.04901+(0.00152181*pt))+(-3.43568e-06*(pt*pt)))+(2.17219e-09*(pt*(pt*pt)));
-        } else if ( eta_abs <= 1.0 ) {
-            return ((0.991915+(0.00172552*pt))+(-3.92652e-06*(pt*pt)))+(2.56816e-09*(pt*(pt*pt)));
-        } else if ( eta_abs <= 1.5 ) {
-            return ((0.962127+(0.00192796*pt))+(-4.53385e-06*(pt*pt)))+(3.0605e-09*(pt*(pt*pt)));
-        } else {
-            return ((1.06121+(0.000332747*pt))+(-8.81201e-07*(pt*pt)))+(7.43896e-10*(pt*(pt*pt)));
-        }
-    }  else if ( typevar == "up" ){
-        if ( eta_abs <= 0.5 ) {
-            return ((1.12424+(0.00201136*pt))+(-4.64021e-06*(pt*pt)))+(2.97219e-09*(pt*(pt*pt)));
-        } else if ( eta_abs <= 1.0 ) {
-            return ((1.06231+(0.00215815*pt))+(-4.9844e-06*(pt*pt)))+(3.27623e-09*(pt*(pt*pt)));
-        } else if ( eta_abs <= 1.5 ) {
-            return ((1.02883+(0.00231985*pt))+(-5.57924e-06*(pt*pt)))+(3.81235e-09*(pt*(pt*pt)));
-        } else {
-            return ((1.1388+(0.000468418*pt))+(-1.36341e-06*(pt*pt)))+(1.19256e-09*(pt*(pt*pt)));
-        }
-    } else if ( typevar == "down" ){
-        if ( eta_abs <= 0.5 ) {
-            return ((0.973773+(0.00103049*pt))+(-2.2277e-06*(pt*pt)))+(1.37208e-09*(pt*(pt*pt)));
-        } else if ( eta_abs <= 1.0 ) {
-            return ((0.921518+(0.00129098*pt))+(-2.86488e-06*(pt*pt)))+(1.86022e-09*(pt*(pt*pt)));
-        } else if ( eta_abs <= 1.5 ) {
-            return ((0.895419+(0.00153387*pt))+(-3.48409e-06*(pt*pt)))+(2.30899e-09*(pt*(pt*pt)));
-        } else {
-            return ((0.983607+(0.000196747*pt))+(-3.98327e-07*(pt*pt)))+(2.95764e-10*(pt*(pt*pt)));
-        }
-    } else {
-        std::cout<<"Type of variation not valid. Check it\n";
-        exit(92);
-    }
-
-}
-
-
-
-double AnalysisBase::BJetSFAbsErr ( double pt )
-{
-    //If needed go to https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC
-    //this pt range MUST match the binning of the error array provided by the BTV in the above link
-
-    double ptarray[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600, 800};
-    double SFb_error[] = { 0.0484285,  0.0126178,  0.0120027,  0.0141137, 0.0145441, 0.0131145, 0.0168479, 0.0160836, 0.0126209, 0.0136017, 0.019182, 0.0198805, 0.0386531, 0.0392831, 0.0481008, 0.0474291 };
-
-    int ptbin = -1;
-    int ptarray_Size = sizeof(ptarray) / sizeof(ptarray[0]);
-    int SFb_error_array_Size = sizeof(SFb_error) / sizeof(SFb_error[0]);
+    /// WARNING: In general do not make changes here, but in your analysis:
+    /// Overwrite this dummy method in your analysis if you want to apply a global normalisation factor
     
-    if( ptarray_Size != SFb_error_array_Size+1 ) {
-        std::cout<<"You wrote 2 arrays with sizes that don't agree together!! Fix this.\n";
-        exit(100);
-    }
-    for ( int i=0; i<(ptarray_Size-1); i++){
-        if ( pt > ptarray[i] && pt < ptarray[i+1]) {
-            ptbin = i;
-            break;
-        }
-    }
-
-    if ( ptbin > ptarray_Size ) {
-        return 2 * SFb_error[ptarray_Size];
-    } else if ( ptbin < 0){
-        return 2 * SFb_error[0];
-    } else {
-        return SFb_error[ptbin];
-    };
-}
-
-
-
-double AnalysisBase::CJetSFAbsErr ( double pt)
-{
-    return 2 * BJetSFAbsErr ( pt );
+    const double globalNormalisationFactor(1);
+    return globalNormalisationFactor;
 }
 
 
@@ -463,9 +245,9 @@ void AnalysisBase::SetChannel(TString channel)
 
 
 
-void AnalysisBase::SetSignal(bool isSignal)
+void AnalysisBase::SetTopSignal(bool isTopSignal)
 {
-    this->isSignal_ = isSignal;
+    this->isTopSignal_ = isTopSignal;
 }
 
 
@@ -518,7 +300,7 @@ void AnalysisBase::SetWeightedEvents(TH1* weightedEvents)
 void AnalysisBase::SetRunViaTau(bool runViaTau)
 {
     this->runViaTau_ = runViaTau;
-    if (runViaTau) isSignal_ = 0;
+    if (runViaTau) isTopSignal_ = 0;
 }
 
 
@@ -526,35 +308,6 @@ void AnalysisBase::SetRunViaTau(bool runViaTau)
 void AnalysisBase::SetPUReweighter(PUReweighter* pu)
 {
     pureweighter_ = pu;
-}
-
-
-
-void AnalysisBase::Init ( TTree *tree )
-{
-    // The Init() function is called when the selector needs to initialize
-    // a new tree or chain. Typically here the branch addresses and branch
-    // pointers of the tree will be set.
-    // It is normally not necessary to make changes to the generated
-    // code, but the routine can be extended by the user if needed.
-    // Init() will be called many times when running on PROOF
-    // (once per file to be processed).
-    
-    // Reset all branches and their associated variables
-    this->clearBranches();
-    this->clearBranchVariables();
-    
-    // Set branch addresses and branch pointers
-    if(!tree) return;
-    chain_ = tree;
-    chain_->SetMakeClass(0);
-    this->SetRecoBranchAddresses();
-    this->SetKinRecoBranchAddresses();
-    this->SetPdfBranchAddress();
-    this->SetDyDecayBranchAddress();
-    this->SetTopDecayBranchAddress();
-    if(isSignal_) this->SetTopSignalBranchAddresses();
-    if(isHiggsSignal_) this->SetHiggsSignalBranchAddresses();
 }
 
 
@@ -640,6 +393,10 @@ void AnalysisBase::clearBranches()
     b_TopDecayMode = 0;
     
     
+    // nTuple branch for Higgs decay mode
+    b_HiggsDecayMode = 0;
+    
+    
     // nTuple branches for Top signal samples on generator level
     b_GenMet = 0;
     b_GenTop = 0;
@@ -677,7 +434,6 @@ void AnalysisBase::clearBranches()
     
     
     // nTuple branches for Higgs signal samples on generator level
-    b_HiggsDecayMode = 0;
     b_GenH = 0;
     b_GenBFromH = 0;
     b_GenAntiBFromH = 0;
@@ -766,6 +522,10 @@ void AnalysisBase::clearBranchVariables()
     topDecayMode_ = 0;
     
     
+    // Set values to null for Higgs decay branch
+    higgsDecayMode_ = 0;
+    
+    
     // Set values to null for Top signal sample branches
     GenMet_ = 0;
     GenTop_ = 0;
@@ -803,7 +563,6 @@ void AnalysisBase::clearBranchVariables()
     
     
     // Set values to null for Higgs signal sample branches
-    higgsDecayMode_ = 0;
     GenH_ = 0;
     GenBFromH_ = 0;
     GenAntiBFromH_ = 0;
@@ -907,8 +666,15 @@ void AnalysisBase::SetTopDecayBranchAddress()
     chain_->SetBranchAddress("TopDecayMode", &topDecayMode_, &b_TopDecayMode);
 }
 
-    
-    
+
+
+void AnalysisBase::SetHiggsDecayBranchAddress()
+{
+    chain_->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
+}
+
+
+
 void AnalysisBase::SetTopSignalBranchAddresses()
 {
     chain_->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
@@ -959,7 +725,6 @@ void AnalysisBase::SetTopSignalBranchAddresses()
 
 void AnalysisBase::SetHiggsSignalBranchAddresses()
 {
-    chain_->SetBranchAddress("HiggsDecayMode", &higgsDecayMode_, &b_HiggsDecayMode);
     chain_->SetBranchAddress("GenH", &GenH_, &b_GenH);
     chain_->SetBranchAddress("GenBFromH", &GenBFromH_, &b_GenBFromH);
     chain_->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH_, &b_GenAntiBFromH);
@@ -1081,6 +846,13 @@ void AnalysisBase::GetTopDecayModeEntry(Long64_t& entry)
 
 
 
+void AnalysisBase::GetHiggsDecayModeEntry(Long64_t& entry)
+{
+    b_HiggsDecayMode->GetEntry(entry);
+}
+
+
+
 void AnalysisBase::GetTopSignalBranchesEntry(Long64_t& entry)
 {
     b_GenMet->GetEntry(entry);
@@ -1122,7 +894,6 @@ void AnalysisBase::GetTopSignalBranchesEntry(Long64_t& entry)
 
 void AnalysisBase::GetHiggsSignalBranchesEntry(Long64_t& entry)
 {
-    b_HiggsDecayMode->GetEntry(entry);
     b_GenH->GetEntry(entry);
     b_GenBFromH->GetEntry(entry);
     b_GenAntiBFromH->GetEntry(entry);
@@ -1173,116 +944,6 @@ double AnalysisBase::get2DSF(TH2* histo, double x, double y)
     xbin = std::min(xbin, histo->GetNbinsX());
     ybin = std::min(ybin, histo->GetNbinsY());
     return histo->GetBinContent(xbin, ybin);
-}
-
-
-
-double AnalysisBase::calculateBtagSF()
-{
-    if (!bEff) return 1; //no btag file given, so return 1
-    
-    double OneMinusEff=1;
-    double OneMinusSEff=1;
-    double SFPerJet=1, eff=1;
-    for ( size_t i = 0; i < jets_->size(); ++i ) {
-        double pt = jets_->at(i).Pt();
-        double eta = std::abs(jets_->at(i).Eta());
-        if ( pt > 30 && eta < 2.4 ) {
-            int partonFlavour = std::abs(jetPartonFlavour_->at(i)); //store absolute value
-            if (partonFlavour == 0) continue;
-            int ptbin, etabin, dummy;
-            bEff->GetBinXYZ(bEff->FindBin(pt, eta), ptbin, etabin, dummy);
-            //overflow to last bin
-            ptbin = std::min(ptbin, bEff->GetNbinsX());
-            etabin = std::min(etabin, bEff->GetNbinsY());
-            //do the type-jet selection & Eff and SF obtention
-            double SF_Error=0;
-            if ( partonFlavour == 5 ) { //b-quark
-                eff=bEff->GetBinContent ( ptbin, etabin );
-                if(systematic_.Contains("BEFF_UP")){eff = eff + bEff->GetBinError ( ptbin, etabin );}
-                else if(systematic_.Contains("BEFF_DOWN")){eff = eff - bEff->GetBinError ( ptbin, etabin );} 
-                SFPerJet = BJetSF( pt, eta );
-                SF_Error = BJetSFAbsErr ( pt );
-            } else if ( partonFlavour == 4 ) { //c-quark
-                eff=cEff->GetBinContent ( ptbin, etabin );
-                if(systematic_.Contains("CEFF_UP")){eff = eff + cEff->GetBinError ( ptbin, etabin );}
-                else if(systematic_.Contains("CEFF_DOWN")){eff = eff - cEff->GetBinError ( ptbin, etabin );} 
-                SFPerJet = CJetSF( pt, eta );
-                SF_Error = CJetSFAbsErr ( pt );
-            } else if ( partonFlavour != 0 ) { //l-quark
-                eff=lEff->GetBinContent ( ptbin, etabin );
-                if(systematic_.Contains("LEFF_UP")){eff = eff + lEff->GetBinError ( ptbin, etabin );}
-                else if(systematic_.Contains("LEFF_DOWN")){eff = eff - lEff->GetBinError ( ptbin, etabin );} 
-                SFPerJet = LJetSF( pt, eta, "central");
-                if ( systematic_.BeginsWith("BTAG_LJET_UP") ) {   //systematic variation of l-jets for inclusive XSection measurement
-                    SFPerJet = LJetSF ( pt, eta, "up");
-                } else if ( systematic_.BeginsWith("BTAG_LJET_DOWN") ) { //systematic variation of l-jets for inclusive XSection measurement
-                    SFPerJet = LJetSF ( pt, eta, "down");
-                } else if ( systematic_.BeginsWith("BTAG_LJET_") ){ //systematic variations for differential XSection
-                    if ( (systematic_.Contains("PT_UP") && pt>btag_ptmedian_) || (systematic_.Contains("PT_DOWN") && pt<btag_ptmedian_)
-                        || (systematic_.Contains("ETA_UP") && eta>btag_etamedian_) || (systematic_.Contains("ETA_DOWN") && eta<btag_etamedian_) ){
-                        SFPerJet = LJetSF ( pt, eta, "up");
-                    }
-                    else {
-                        SFPerJet = LJetSF ( pt, eta, "down");
-                    }
-                }
-            } else {
-                std::cout<<"I found a jet in event "<<eventNumber_<<" which is not b, c nor light: "<<partonFlavour<<std::endl;
-                return kFALSE;
-            }
-            if ( eff <= 0 ) eff = 1;
-            //calculate both numerator and denominator for per-event SF calculation
-            //consider also the UP and DOWN variation for systematics calculation. Same procedure as PU
-            OneMinusEff = OneMinusEff* ( 1-eff );
-            double sf = SFPerJet;
-            if ( systematic_.Contains("LJET") ) { SF_Error = 0; } //For l-jet systematics set to 0 the b- and c-jet errors
-            if ( systematic_ == "BTAG_UP" ) {
-                sf = SFPerJet + SF_Error;
-            }
-            else if ( systematic_ == "BTAG_DOWN" ) {
-                sf = SFPerJet - SF_Error;
-            }
-            else if ( systematic_ == "BTAG_PT_UP" ) {
-                if ( pt>btag_ptmedian_ )  {
-                    sf = SFPerJet - 0.5 * SF_Error;
-                } else {
-                    sf = SFPerJet + 0.5 * SF_Error;
-                }
-            }
-            else if ( systematic_ == "BTAG_PT_DOWN" ) {
-                if ( pt>btag_ptmedian_ )  {
-                    sf = SFPerJet + 0.5 * SF_Error;
-                } else {
-                    sf = SFPerJet - 0.5 * SF_Error; 
-                }
-            }
-            else if ( systematic_ == "BTAG_ETA_UP" ) {
-                if ( eta>btag_etamedian_ )  {
-                    sf = SFPerJet - 0.5 * SF_Error;
-                } else {
-                    sf = SFPerJet + 0.5 * SF_Error;
-                }
-            }
-            else if ( systematic_ == "BTAG_ETA_DOWN" ) {
-                if ( eta>btag_etamedian_ )  {
-                    sf = SFPerJet + 0.5 * SF_Error;
-                } else {
-                    sf = SFPerJet - 0.5 * SF_Error;
-                }
-            }
-            OneMinusSEff *= 1 - eff * sf;
-        }
-    }
-
-    if( std::abs(1.-OneMinusEff) < 1e-8 || std::abs(1.-OneMinusSEff) < 1e-8 ) return 1;
-
-    //per-event SF calculation (also the UP and DOWN variations)
-    double scale_factor = ( 1.-OneMinusSEff ) / ( 1.-OneMinusEff );
-    
-    if ( std::abs(scale_factor - 1.)>0.05 ){scale_factor = 1;}
-    
-    return scale_factor;
 }
 
 
@@ -1478,24 +1139,116 @@ void AnalysisBase::prepareBtagSF()
 
 
 
-void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue, 
-                                     TH1* h_control, double value, double weight)
+double AnalysisBase::calculateBtagSF()
 {
-    auto pair = (*binnedControlPlots_)[h_differential->GetName()];
-    auto bin = pair.first->FindBin(binvalue);
-    auto m = pair.second.at(bin);
-    TH1* h = m[h_control->GetName()];
-    if (!h) { 
-        std::cerr << "Error: please CreateBinnedControlPlots for " << h_differential->GetName() 
-            << " and " << h_control->GetName() << std::endl;
-        exit(911);
+    if (!bEff) return 1; //no btag file given, so return 1
+    
+    double OneMinusEff=1;
+    double OneMinusSEff=1;
+    double SFPerJet=1, eff=1;
+    for ( size_t i = 0; i < jets_->size(); ++i ) {
+        double pt = jets_->at(i).Pt();
+        double eta = std::abs(jets_->at(i).Eta());
+        if ( pt > 30 && eta < 2.4 ) {
+            int partonFlavour = std::abs(jetPartonFlavour_->at(i)); //store absolute value
+            if (partonFlavour == 0) continue;
+            int ptbin, etabin, dummy;
+            bEff->GetBinXYZ(bEff->FindBin(pt, eta), ptbin, etabin, dummy);
+            //overflow to last bin
+            ptbin = std::min(ptbin, bEff->GetNbinsX());
+            etabin = std::min(etabin, bEff->GetNbinsY());
+            //do the type-jet selection & Eff and SF obtention
+            double SF_Error=0;
+            if ( partonFlavour == 5 ) { //b-quark
+                eff=bEff->GetBinContent ( ptbin, etabin );
+                if(systematic_.Contains("BEFF_UP")){eff = eff + bEff->GetBinError ( ptbin, etabin );}
+                else if(systematic_.Contains("BEFF_DOWN")){eff = eff - bEff->GetBinError ( ptbin, etabin );} 
+                SFPerJet = BJetSF( pt, eta );
+                SF_Error = BJetSFAbsErr ( pt );
+            } else if ( partonFlavour == 4 ) { //c-quark
+                eff=cEff->GetBinContent ( ptbin, etabin );
+                if(systematic_.Contains("CEFF_UP")){eff = eff + cEff->GetBinError ( ptbin, etabin );}
+                else if(systematic_.Contains("CEFF_DOWN")){eff = eff - cEff->GetBinError ( ptbin, etabin );} 
+                SFPerJet = CJetSF( pt, eta );
+                SF_Error = CJetSFAbsErr ( pt );
+            } else if ( partonFlavour != 0 ) { //l-quark
+                eff=lEff->GetBinContent ( ptbin, etabin );
+                if(systematic_.Contains("LEFF_UP")){eff = eff + lEff->GetBinError ( ptbin, etabin );}
+                else if(systematic_.Contains("LEFF_DOWN")){eff = eff - lEff->GetBinError ( ptbin, etabin );} 
+                SFPerJet = LJetSF( pt, eta, "central");
+                if ( systematic_.BeginsWith("BTAG_LJET_UP") ) {   //systematic variation of l-jets for inclusive XSection measurement
+                    SFPerJet = LJetSF ( pt, eta, "up");
+                } else if ( systematic_.BeginsWith("BTAG_LJET_DOWN") ) { //systematic variation of l-jets for inclusive XSection measurement
+                    SFPerJet = LJetSF ( pt, eta, "down");
+                } else if ( systematic_.BeginsWith("BTAG_LJET_") ){ //systematic variations for differential XSection
+                    if ( (systematic_.Contains("PT_UP") && pt>btag_ptmedian_) || (systematic_.Contains("PT_DOWN") && pt<btag_ptmedian_)
+                        || (systematic_.Contains("ETA_UP") && eta>btag_etamedian_) || (systematic_.Contains("ETA_DOWN") && eta<btag_etamedian_) ){
+                        SFPerJet = LJetSF ( pt, eta, "up");
+                    }
+                    else {
+                        SFPerJet = LJetSF ( pt, eta, "down");
+                    }
+                }
+            } else {
+                std::cout<<"I found a jet in event "<<eventNumber_<<" which is not b, c nor light: "<<partonFlavour<<std::endl;
+                return kFALSE;
+            }
+            if ( eff <= 0 ) eff = 1;
+            //calculate both numerator and denominator for per-event SF calculation
+            //consider also the UP and DOWN variation for systematics calculation. Same procedure as PU
+            OneMinusEff = OneMinusEff* ( 1-eff );
+            double sf = SFPerJet;
+            if ( systematic_.Contains("LJET") ) { SF_Error = 0; } //For l-jet systematics set to 0 the b- and c-jet errors
+            if ( systematic_ == "BTAG_UP" ) {
+                sf = SFPerJet + SF_Error;
+            }
+            else if ( systematic_ == "BTAG_DOWN" ) {
+                sf = SFPerJet - SF_Error;
+            }
+            else if ( systematic_ == "BTAG_PT_UP" ) {
+                if ( pt>btag_ptmedian_ )  {
+                    sf = SFPerJet - 0.5 * SF_Error;
+                } else {
+                    sf = SFPerJet + 0.5 * SF_Error;
+                }
+            }
+            else if ( systematic_ == "BTAG_PT_DOWN" ) {
+                if ( pt>btag_ptmedian_ )  {
+                    sf = SFPerJet + 0.5 * SF_Error;
+                } else {
+                    sf = SFPerJet - 0.5 * SF_Error; 
+                }
+            }
+            else if ( systematic_ == "BTAG_ETA_UP" ) {
+                if ( eta>btag_etamedian_ )  {
+                    sf = SFPerJet - 0.5 * SF_Error;
+                } else {
+                    sf = SFPerJet + 0.5 * SF_Error;
+                }
+            }
+            else if ( systematic_ == "BTAG_ETA_DOWN" ) {
+                if ( eta>btag_etamedian_ )  {
+                    sf = SFPerJet + 0.5 * SF_Error;
+                } else {
+                    sf = SFPerJet - 0.5 * SF_Error;
+                }
+            }
+            OneMinusSEff *= 1 - eff * sf;
+        }
     }
-    h->Fill(value, weight);
+
+    if( std::abs(1.-OneMinusEff) < 1e-8 || std::abs(1.-OneMinusSEff) < 1e-8 ) return 1;
+
+    //per-event SF calculation (also the UP and DOWN variations)
+    double scale_factor = ( 1.-OneMinusSEff ) / ( 1.-OneMinusEff );
+    
+    if ( std::abs(scale_factor - 1.)>0.05 ){scale_factor = 1;}
+    
+    return scale_factor;
 }
 
 
 
-///create control plots for the h_control distribution in bins of h_differential
 void AnalysisBase::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList)
 {
     auto &pair = (*binnedControlPlots_)[h_differential->GetName()];
@@ -1531,6 +1284,51 @@ void AnalysisBase::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control,
                      h_control->GetNbinsX(), h_control->GetBinLowEdge(1), 
                      h_control->GetBinLowEdge(h_control->GetNbinsX()+1)));
     }
+}
+
+
+
+void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue, 
+                                     TH1* h_control, double value, double weight)
+{
+    auto pair = (*binnedControlPlots_)[h_differential->GetName()];
+    auto bin = pair.first->FindBin(binvalue);
+    auto m = pair.second.at(bin);
+    TH1* h = m[h_control->GetName()];
+    if (!h) { 
+        std::cerr << "Error: please CreateBinnedControlPlots for " << h_differential->GetName() 
+            << " and " << h_control->GetName() << std::endl;
+        exit(911);
+    }
+    h->Fill(value, weight);
+}
+
+
+
+/** Set up the SF for the Kin Reco
+ * 
+ * Currently a flat per-channel SF is used. For the systematic KIN_UP and KIN_DOWN,
+ * the SF is modified by its uncertainty.
+ * 
+ * To calculate the SF, you need to set the SF to 1 and rerun. Then determine the
+ * SF with kinRecoEfficienciesAndSF
+ */
+void AnalysisBase::prepareKinRecoSF() {
+    //uncomment the following line to determine the Kin Reco SFs
+    //then make && ./runNominalParallel.sh && ./Histo -t cp -p akr bkr step && ./kinRecoEfficienciesAndSF
+//     weightKinFit=1; return;
+    if (!isMC_) { weightKinFit_ = 1; return; }
+    //SF for mass(top) = 100..300 GeV
+    const static std::map<TString, double> sfNominal { {"ee", 0.9779}, {"emu", 0.9871}, {"mumu", 0.9879} };
+    const static std::map<TString, double> sfUnc { {"ee", 0.0066}, {"emu", 0.0032}, {"mumu", 0.0056} };
+    
+    //SF for mass(top) = 173 GeV
+//     const static std::map<TString, double> sfNominal { {"ee", 0.9696}, {"emu", 0.9732}, {"mumu", 0.9930} };
+//     const static std::map<TString, double> sfUnc { {"ee", 0.0123}, {"emu", 0.0060}, {"mumu", 0.0105} };
+    
+    weightKinFit_ = sfNominal.at(channel_);
+    if (systematic_ == "KIN_UP") weightKinFit_ += sfUnc.at(channel_);
+    else if (systematic_ == "KIN_DOWN") weightKinFit_ -= sfUnc.at(channel_);
 }
 
 
@@ -1576,34 +1374,6 @@ bool AnalysisBase::calculateKinReco(const LV& leptonMinus, const LV& leptonPlus)
         }
     }
     return sols.size() > 0;
-}
-
-
-
-/** Set up the SF for the Kin Reco
- * 
- * Currently a flat per-channel SF is used. For the systematic KIN_UP and KIN_DOWN,
- * the SF is modified by its uncertainty.
- * 
- * To calculate the SF, you need to set the SF to 1 and rerun. Then determine the
- * SF with kinRecoEfficienciesAndSF
- */
-void AnalysisBase::prepareKinRecoSF() {
-    //uncomment the following line to determine the Kin Reco SFs
-    //then make && ./runNominalParallel.sh && ./Histo -t cp -p akr bkr step && ./kinRecoEfficienciesAndSF
-//     weightKinFit=1; return;
-    if (!isMC_) { weightKinFit_ = 1; return; }
-    //SF for mass(top) = 100..300 GeV
-    const static std::map<TString, double> sfNominal { {"ee", 0.9779}, {"emu", 0.9871}, {"mumu", 0.9879} };
-    const static std::map<TString, double> sfUnc { {"ee", 0.0066}, {"emu", 0.0032}, {"mumu", 0.0056} };
-    
-    //SF for mass(top) = 173 GeV
-//     const static std::map<TString, double> sfNominal { {"ee", 0.9696}, {"emu", 0.9732}, {"mumu", 0.9930} };
-//     const static std::map<TString, double> sfUnc { {"ee", 0.0123}, {"emu", 0.0060}, {"mumu", 0.0105} };
-    
-    weightKinFit_ = sfNominal.at(channel_);
-    if (systematic_ == "KIN_UP") weightKinFit_ += sfUnc.at(channel_);
-    else if (systematic_ == "KIN_DOWN") weightKinFit_ -= sfUnc.at(channel_);
 }
 
 
@@ -1833,6 +1603,7 @@ void AnalysisBase::bookBtagHistograms()
 }
 
 
+
 void AnalysisBase::fillBtagHistograms(const double jetPtCut, const double btagWP)
 {
     for (size_t i = 0; i < jets_->size(); ++i) {
@@ -1861,6 +1632,270 @@ void AnalysisBase::fillBtagHistograms(const double jetPtCut, const double btagWP
         }
     }
 }
+
+
+
+void AnalysisBase::produceBtagEfficiencies()
+{
+    std::cout << "Writing out btag efficiencies\n";
+    std::string f_savename = "selectionRoot";
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/BTagEff");
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/");
+    f_savename.append(systematic_); 
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/");
+    f_savename.append(channel_); 
+    gSystem->MakeDirectory(f_savename.c_str());
+    f_savename.append("/");
+    f_savename.append(outputfilename_);
+    
+    h_bjets = dynamic_cast<TH2*>( fOutput->FindObject("bjets2D") );
+    h_btaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("bjetsTagged2D") );
+    h_cjets = dynamic_cast<TH2*>( fOutput->FindObject("cjets2D") );
+    h_ctaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("cjetsTagged2D") );
+    h_ljets = dynamic_cast<TH2*>( fOutput->FindObject("ljets2D") );
+    h_ltaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("ljetsTagged2D") );
+    if (!h_bjets || !h_btaggedjets || !h_cjets || !h_ctaggedjets || !h_ljets || !h_ltaggedjets) {
+        std::cerr << "At least one of the btag histograms is missing\n";
+        exit(4);
+    }
+    TFile fbtag(f_savename.c_str(),"RECREATE");
+    h_bjets->Write();
+    h_btaggedjets->Write();
+    h_cjets->Write();
+    h_ctaggedjets->Write();
+    h_ljets->Write();
+    h_ltaggedjets->Write();
+    
+    TH1 *btaggedPt = h_btaggedjets->ProjectionX(); TH1 *btaggedEta = h_btaggedjets->ProjectionY();
+    TH1 *ctaggedPt = h_ctaggedjets->ProjectionX(); TH1 *ctaggedEta = h_ctaggedjets->ProjectionY();
+    TH1 *ltaggedPt = h_ltaggedjets->ProjectionX(); TH1 *ltaggedEta = h_ltaggedjets->ProjectionY();
+    
+    TH1 *bUntaggedPt = h_bjets->ProjectionX(); TH1 *bEta = h_bjets->ProjectionY();
+    TH1 *cUntaggedPt = h_cjets->ProjectionX(); TH1 *cEta = h_cjets->ProjectionY();
+    TH1 *lUntaggedPt = h_ljets->ProjectionX(); TH1 *lEta = h_ljets->ProjectionY();
+    
+    //Calculate the medians and save them in a txt file
+    double PtMedian = Median(btaggedPt);
+    double EtaMedian = Median(btaggedEta);
+    printf("Median: pT = %.0f, eta = %.2f\n", PtMedian, EtaMedian);
+    TH1* medianHist = new TH1D("Medians", "medians", 2, -0.5, 1.5);
+    medianHist->GetXaxis()->SetBinLabel(1, "pT");
+    medianHist->GetXaxis()->SetBinLabel(2, "eta");
+    medianHist->SetBinContent(1, PtMedian);
+    medianHist->SetBinContent(2, EtaMedian);
+    medianHist->Write();
+    
+    TH1 *beffPt =(TH1*) btaggedPt->Clone("beffPt");
+    TH1 *ceffPt =(TH1*) ctaggedPt->Clone("ceffPt");
+    TH1 *leffPt =(TH1*) ltaggedPt->Clone("leffPt");
+    
+    TH1 *beffEta =(TH1*) btaggedEta->Clone("beffEta");  
+    TH1 *ceffEta =(TH1*) ctaggedEta->Clone("ceffEta");  
+    TH1 *leffEta =(TH1*) ltaggedEta->Clone("leffEta");  
+    
+    //Calculate Efficiency: N_tageed/N_all
+    //Calculate also the binomial error (option "B" does it)!!
+    beffPt->Divide(btaggedPt, bUntaggedPt, 1, 1, "B"); 
+    ceffPt->Divide(ctaggedPt, cUntaggedPt, 1, 1, "B"); 
+    leffPt->Divide(ltaggedPt, lUntaggedPt, 1, 1, "B");
+    beffEta->Divide(btaggedEta, bEta, 1, 1, "B"); 
+    ceffEta->Divide(ctaggedEta, cEta, 1, 1, "B"); 
+    leffEta->Divide(ltaggedEta, lEta, 1, 1, "B"); 
+    h_btaggedjets->Divide(h_btaggedjets, h_bjets, 1, 1, "B"); 
+    h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); 
+    h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); 
+
+    //Save histograms in ROOT file
+    beffPt->Write("BEffPt"); 
+    ceffPt->Write("CEffPt"); 
+    leffPt->Write("LEffPt"); 
+    beffEta->Write("BEffEta"); 
+    ceffEta->Write("CEffEta"); 
+    leffEta->Write("LEffEta"); 
+    h_btaggedjets->Write("BEffPerJet");
+    h_ctaggedjets->Write("CEffPerJet");
+    h_ltaggedjets->Write("LEffPerJet");
+    
+    fbtag.Close();
+    std::cout << "Done.\n\n\n";
+}
+
+
+
+double AnalysisBase::BJetSF( double pt, double eta )
+{
+    //CSVL b-jet SF
+    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.tptt (ICHEP 2012 prescription)
+    //From: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.tptt  (Moriond 2013 prescription)
+
+    if ( std::abs(eta) > 2.4 ) {
+        std::cout<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
+        exit(9);
+    }
+    if ( pt < 30 ){
+        std::cout<<"Jet pT="<<pt<<" Out of the selected range (pt>30GeV). Check it\n";
+        exit(9);
+    }
+
+    if ( pt < 20 ) pt = 20;
+    if ( pt > 800 ) pt = 800;
+
+    return 0.981149*((1.+(-0.000713295*pt))/(1.+(-0.000703264*pt)));
+}
+
+
+
+double AnalysisBase::CJetSF ( double pt, double eta )
+{
+    //CSVL c-jet SF
+    //From BTV-11-004 and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC (ICHEP 2012 prescription)
+    //From https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_Moriond13_presc  (Moriond 2013 prescription)
+
+    return 2 * BJetSF( pt, eta );
+}
+
+
+
+double AnalysisBase::LJetSF ( double pt, double eta, TString typevar )
+{
+    //CSVL ligth jet mistag SF. Includes also the SF for variations up and down
+    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C (ICHEP 2012 prescription)
+    //From https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C  (Moriond 2013 prescription)
+
+    double eta_abs = std::abs(eta);
+    if ( eta_abs > 2.4 ) {
+        std::cout<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
+        exit(91);
+    }
+    if ( pt < 30 ){
+        std::cout<<"Jet pT="<<pt<<" out of the selected range. Check it\n";
+        exit(91);
+    }
+
+    if ( pt > 800 && eta_abs <= 1.5 ) {
+        pt = 800;
+    }    else if (pt > 700 && eta_abs > 1.5 ) {
+        pt = 700;
+    }
+
+    if ( typevar == "central" ){
+        if ( eta_abs <= 0.5 ) {
+            return ((1.04901+(0.00152181*pt))+(-3.43568e-06*(pt*pt)))+(2.17219e-09*(pt*(pt*pt)));
+        } else if ( eta_abs <= 1.0 ) {
+            return ((0.991915+(0.00172552*pt))+(-3.92652e-06*(pt*pt)))+(2.56816e-09*(pt*(pt*pt)));
+        } else if ( eta_abs <= 1.5 ) {
+            return ((0.962127+(0.00192796*pt))+(-4.53385e-06*(pt*pt)))+(3.0605e-09*(pt*(pt*pt)));
+        } else {
+            return ((1.06121+(0.000332747*pt))+(-8.81201e-07*(pt*pt)))+(7.43896e-10*(pt*(pt*pt)));
+        }
+    }  else if ( typevar == "up" ){
+        if ( eta_abs <= 0.5 ) {
+            return ((1.12424+(0.00201136*pt))+(-4.64021e-06*(pt*pt)))+(2.97219e-09*(pt*(pt*pt)));
+        } else if ( eta_abs <= 1.0 ) {
+            return ((1.06231+(0.00215815*pt))+(-4.9844e-06*(pt*pt)))+(3.27623e-09*(pt*(pt*pt)));
+        } else if ( eta_abs <= 1.5 ) {
+            return ((1.02883+(0.00231985*pt))+(-5.57924e-06*(pt*pt)))+(3.81235e-09*(pt*(pt*pt)));
+        } else {
+            return ((1.1388+(0.000468418*pt))+(-1.36341e-06*(pt*pt)))+(1.19256e-09*(pt*(pt*pt)));
+        }
+    } else if ( typevar == "down" ){
+        if ( eta_abs <= 0.5 ) {
+            return ((0.973773+(0.00103049*pt))+(-2.2277e-06*(pt*pt)))+(1.37208e-09*(pt*(pt*pt)));
+        } else if ( eta_abs <= 1.0 ) {
+            return ((0.921518+(0.00129098*pt))+(-2.86488e-06*(pt*pt)))+(1.86022e-09*(pt*(pt*pt)));
+        } else if ( eta_abs <= 1.5 ) {
+            return ((0.895419+(0.00153387*pt))+(-3.48409e-06*(pt*pt)))+(2.30899e-09*(pt*(pt*pt)));
+        } else {
+            return ((0.983607+(0.000196747*pt))+(-3.98327e-07*(pt*pt)))+(2.95764e-10*(pt*(pt*pt)));
+        }
+    } else {
+        std::cout<<"Type of variation not valid. Check it\n";
+        exit(92);
+    }
+
+}
+
+
+
+double AnalysisBase::BJetSFAbsErr ( double pt )
+{
+    //If needed go to https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC
+    //this pt range MUST match the binning of the error array provided by the BTV in the above link
+
+    double ptarray[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600, 800};
+    double SFb_error[] = { 0.0484285,  0.0126178,  0.0120027,  0.0141137, 0.0145441, 0.0131145, 0.0168479, 0.0160836, 0.0126209, 0.0136017, 0.019182, 0.0198805, 0.0386531, 0.0392831, 0.0481008, 0.0474291 };
+
+    int ptbin = -1;
+    int ptarray_Size = sizeof(ptarray) / sizeof(ptarray[0]);
+    int SFb_error_array_Size = sizeof(SFb_error) / sizeof(SFb_error[0]);
+    
+    if( ptarray_Size != SFb_error_array_Size+1 ) {
+        std::cout<<"You wrote 2 arrays with sizes that don't agree together!! Fix this.\n";
+        exit(100);
+    }
+    for ( int i=0; i<(ptarray_Size-1); i++){
+        if ( pt > ptarray[i] && pt < ptarray[i+1]) {
+            ptbin = i;
+            break;
+        }
+    }
+
+    if ( ptbin > ptarray_Size ) {
+        return 2 * SFb_error[ptarray_Size];
+    } else if ( ptbin < 0){
+        return 2 * SFb_error[0];
+    } else {
+        return SFb_error[ptbin];
+    };
+}
+
+
+
+double AnalysisBase::CJetSFAbsErr ( double pt)
+{
+    return 2 * BJetSFAbsErr ( pt );
+}
+
+
+
+/** order two LorentzVectors by pt
+ * 
+ * @param leading the LV with the higher pt (output)
+ * @param Nleading the LV with the lower pt (output)
+ * @param lv1 input LV to compare with lv2
+ * @param lv2 input LV to compare with lv1
+ * 
+ * Compare lv1 and lv2. The LV with the larger pt is copied to leading,
+ * the LV with the smaller pt is copied to Nleading
+ */
+void AnalysisBase::orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2) {
+    if (lv1.Pt() > lv2.Pt()) {
+        leading = lv1; Nleading = lv2;
+    } else {
+        leading = lv2; Nleading = lv1;
+    }
+}
+
+
+
+/// apply pT and eta cuts on our jets
+void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
+    for (int i = jets_->size() - 1; i >= 0; --i) {
+        if (jets_->at(i).pt() < ptcut || std::abs(jets_->at(i).eta()) > etacut) {
+            jets_->erase(begin(*jets_) + i);
+            jetBTagCSV_->erase(begin(*jetBTagCSV_) + i);
+            if (isMC_) associatedGenJet_->erase(begin(*associatedGenJet_) + i);
+        }        
+    }
+}
+
+
+
+
+
 
 
 

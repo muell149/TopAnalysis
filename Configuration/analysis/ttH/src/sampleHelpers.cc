@@ -24,7 +24,7 @@ Systematic::convertSystematic(const std::string& systematic){
     if(systematic == "mH130") return mH130;
     if(systematic == "mH135") return mH135;
     if(systematic == "mH140") return mH140;
-    std::cout<<"Warning! The following systematic conversion is not implemented: "<<systematic<<std::endl;
+    std::cout<<"Warning! The following systematic conversion is not implemented: "<<systematic<<std::endl<<std::endl;
     return undefined;
 }
 
@@ -77,7 +77,7 @@ Channel::convertChannel(const std::string& channel){
     if(channel == "emu") return emu;
     if(channel == "mumu") return mumu;
     if(channel == "combined") return combined;
-    std::cout<<"Warning! The following channel conversion is not implemented: "<<channel<<std::endl;
+    std::cout<<"Warning! The following channel conversion is not implemented: "<<channel<<std::endl<<std::endl;
     return undefined;
 }
 
