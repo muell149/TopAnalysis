@@ -41,7 +41,7 @@ load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysi
 	g++ -c -o load_HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/load_HiggsAnalysis.cc
 
 dict.o: dict.cc
-	g++ -c -o $@ $(COMPFLAGS) $^
+	g++ -c -o $@ $(COMPFLAGS) dict.cc
 
 dict.cc: $(TopDir)/AnalysisBase.h $(HiggsDir)/HiggsAnalysis.h $(TopDir)/classes.h $(TopDir)/HistoListReader.h $(TopDir)/PUReweighter.h $(HiggsDir)/LinkDef.h
 	rootcint -f dict.cc -c -p Math/LorentzVector.h Math/PtEtaPhiM4D.h $^
@@ -61,7 +61,7 @@ PUReweighter.o: $(TopDir)/PUReweighter.cc $(TopDir)/PUReweighter.h
 KinReco.o: $(TopDir)/KinReco.cc $(TopDir)/KinReco.h $(TopDir)/classes.h
 	g++ -c -o KinReco.o $(COMPFLAGS) $(TopDir)/KinReco.cc
 
-MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classes.h
+MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classes.h $(HiggsDir)/higgsUtils.h
 	g++ -c -o MvaInputVariables.o $(COMPFLAGS) $(HiggsDir)/MvaInputVariables.cc
 
 JetCorrectionUncertainty.o: $(TopDir)/JetCorrectionUncertainty.cc $(TopDir)/JetCorrectionUncertainty.h
@@ -73,7 +73,7 @@ JetCorrectorParameters.o: $(TopDir)/JetCorrectorParameters.cc $(TopDir)/JetCorre
 SimpleJetCorrectionUncertainty.o: $(TopDir)/SimpleJetCorrectionUncertainty.cc $(TopDir)/SimpleJetCorrectionUncertainty.h
 	g++ -c -o $@ $(COMPFLAGS) $(TopDir)/SimpleJetCorrectionUncertainty.cc
 
-AnalysisHistograms.o: $(HiggsDir)/AnalysisHistograms.cc $(HiggsDir)/AnalysisHistograms.h
+AnalysisHistograms.o: $(HiggsDir)/AnalysisHistograms.cc $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/higgsUtils.h
 	g++ -c -o AnalysisHistograms.o $(COMPFLAGS) $(HiggsDir)/AnalysisHistograms.cc
 
 JetCategories.o: $(HiggsDir)/JetCategories.cc $(HiggsDir)/JetCategories.h

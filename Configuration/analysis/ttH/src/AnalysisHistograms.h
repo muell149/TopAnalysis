@@ -3,10 +3,12 @@
 
 #include <map>
 
-#include <TSelectorList.h>
-
 class TString;
 class TH1D;
+class TSelectorList;
+
+#include "higgsUtils.h"
+
 
 
 
@@ -23,7 +25,11 @@ public:
     ~AnalysisHistogramsBase(){};
     
     /// Add a new selection step
-    void addStep(const TString& step);
+    void addStep(const TString& step, TSelectorList* output);
+    
+    /// Clear all steps
+    void clear();
+    
     
     
 protected:
@@ -39,14 +45,14 @@ protected:
         std::map<TString, TH1D*> m_histogram_;
     };
     
-    /// Book all histograms for given selection step (dummy method, override in specific AnalysisHistograms)
+    /// Book all histograms for given selection step (dummy method, override in inherited AnalysisHistograms)
     virtual void bookHistos(const TString& step);
     
     /// Check whether a given selection step already exists
-    bool checkExistence(const TString& step);
+    bool checkExistence(const TString& step)const;
     
     /// Store the object in the output list and return it
-    template<class T> T* store(T* obj);
+    template<class T> T* store(T* obj){return Tools::store(obj, selectorList_);}
     
     /// Pointer for bookkeeping of histograms
     TSelectorList* selectorList_;
@@ -59,18 +65,10 @@ protected:
 
 
 
-template<class T>
-inline T* AnalysisHistogramsBase::store(T* obj){
-    selectorList_->Add(obj);
-    return obj;
-}
 
 
 
-
-
-
-
+/// Class for histograms needed for Drell-Yan reweighting
 class DyScalingHistograms : public AnalysisHistogramsBase{
     
 public:
@@ -78,17 +76,11 @@ public:
     /// Empty constructor
     DyScalingHistograms():h_loose_(0){}
     
-    /// Constructor initialising the output list
-    DyScalingHistograms(TSelectorList* selectorList):h_loose_(0)
-    {
-        selectorList_ = selectorList;
-    }
-    
     /// Destructor
     ~DyScalingHistograms(){}
     
     /// Fill loose histogram
-    void fillLoose(const double& dileptonMass, const double& weight);
+    void fillLoose(const double& dileptonMass, const double& weight)const;
     
     /// Fill histograms inside the Z window
     void fillZWindow(const double& dileptonMass, const double& weight, const TString& step);

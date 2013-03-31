@@ -83,8 +83,6 @@ HiggsAnalysis::Begin(TTree*){
     prepareTriggerSF();
     prepareLeptonIDSF();
     prepareJER_JES();
-    
-    mvaInputTopJetsVariables_.clear();
 }
 
 
@@ -112,6 +110,8 @@ HiggsAnalysis::Terminate(){
         
         mvaInputTopJetsVariables_.mvaInputTopJetsVariablesControlPlots(fOutput);
     }
+    
+    mvaInputTopJetsVariables_.clear();
     
     AnalysisBase::Terminate();
 }
@@ -196,12 +196,11 @@ HiggsAnalysis::SlaveBegin(TTree *){
     
     
     // Histograms needed for data-driven scaling of Z samples
-    dyScalingHistograms_ = DyScalingHistograms(fOutput);
-    dyScalingHistograms_.addStep("4");
-    dyScalingHistograms_.addStep("5");
-    dyScalingHistograms_.addStep("6");
-    dyScalingHistograms_.addStep("7");
-    dyScalingHistograms_.addStep("8");
+    dyScalingHistograms_.addStep("4", fOutput);
+    dyScalingHistograms_.addStep("5", fOutput);
+    dyScalingHistograms_.addStep("6", fOutput);
+    dyScalingHistograms_.addStep("7", fOutput);
+    dyScalingHistograms_.addStep("8", fOutput);
     
     
     // Control plots
@@ -227,6 +226,8 @@ HiggsAnalysis::SlaveBegin(TTree *){
 
 void HiggsAnalysis::SlaveTerminate()
 {
+    dyScalingHistograms_.clear();
+    
     AnalysisBase::SlaveTerminate();
 }
 

@@ -1,7 +1,10 @@
 #ifndef ROOT_TREE_VECTOR_LINKDEF_H 
 #define ROOT_TREE_VECTOR_LINKDEF_H 1
 
+
 #ifdef __CINT__
+
+
 
 #pragma link off all classes;
 
@@ -17,7 +20,10 @@
 #pragma link C++ class PUReweighter+;
 
 
-#endif
+
+
+#endif // __CINT__
+
 
 #endif // ROOT_TREE_VECTOR_LINKDEF_H
 

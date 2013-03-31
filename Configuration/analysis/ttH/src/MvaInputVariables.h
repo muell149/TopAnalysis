@@ -3,11 +3,11 @@
 
 #include <vector>
 
-#include <TSelectorList.h>
-
 class TTree;
+class TSelectorList;
 
 #include "../../diLeptonic/src/classes.h"
+#include "higgsUtils.h"
 
 
 
@@ -100,7 +100,7 @@ public:
 private:
     
     /// Store the object in the output list and return it
-    template<class T> T* store(T* obj);
+    template<class T> T* store(T* obj){return Tools::store(obj, selectorList_);}
     
     
     
@@ -118,15 +118,6 @@ private:
 };
 
 
-
-
-
-
-template<class T>
-inline T* MvaInputTopJetsVariables::store(T* obj){
-    selectorList_->Add(obj);
-    return obj;
-}
 
 
 

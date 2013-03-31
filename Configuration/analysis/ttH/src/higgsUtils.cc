@@ -4,6 +4,7 @@
 #include <TObjArray.h>
 #include <TH1.h>
 #include <TString.h>
+#include <Rtypes.h>
 
 #include "higgsUtils.h"
 
