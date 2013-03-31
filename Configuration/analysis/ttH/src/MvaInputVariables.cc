@@ -1,10 +1,12 @@
 #include <iostream>
+#include <cmath>
 
 #include <TTree.h>
 #include <TSystem.h>
 #include <TH1.h>
 #include <TFile.h>
 #include <Math/VectorUtil.h>
+#include <TSelectorList.h>
 
 #include "MvaInputVariables.h"
 
@@ -38,13 +40,7 @@ meanMTAlt_b_met_(-999.)
 
 
 MvaInputTopJetsVariables::MvaInputTopJetsVariables():
-t_mvaInput_(0), selectorList_(0)
-{}
-
-
-
-MvaInputTopJetsVariables::MvaInputTopJetsVariables(TSelectorList* selectorList):
-t_mvaInput_(0), selectorList_(selectorList)
+selectorList_(0), t_mvaInput_(0)
 {}
 
 
@@ -88,13 +84,6 @@ void MvaInputTopJetsVariables::addEntry(const LV& lepton, const LV& antiLepton,
     mvaInputTopJetsStruct.meanMTAlt_b_met_ = 0.5*(std::sqrt(2.*bJet.Et()*(met.E())*(1.-std::cos(DeltaPhi(bJet, met))))
                                       + std::sqrt(2.*antiBJet.Et()*(met.E())*(1.-std::cos(DeltaPhi(antiBJet, met)))));
     
-    this->addEntry(mvaInputTopJetsStruct);
-}
-
-
-
-void MvaInputTopJetsVariables::addEntry(const MvaInputTopJetsVariables::MvaInputTopJetsStruct& mvaInputTopJetsStruct)
-{
     v_mvaInputStruct_.push_back(mvaInputTopJetsStruct);
 }
 
@@ -136,6 +125,8 @@ std::vector<MvaInputTopJetsVariables::MvaInputTopJetsStruct> MvaInputTopJetsVari
 void MvaInputTopJetsVariables::clear()
 {
     v_mvaInputStruct_.clear();
+    t_mvaInput_ = 0;
+    selectorList_ = 0;
 }
 
 
@@ -154,36 +145,77 @@ void MvaInputTopJetsVariables::fillMvaInputBranches()
 
 void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& f_savename)
 {
-    std::cout<<"--- Beginning production MVA input tree\n";
     
     // Output file
     TFile outputFile(f_savename.c_str(),"RECREATE");
-    std::cout<<"Output file: "<<f_savename<<"\n";
+    std::cout<<"\nOutput file for MVA input tree: "<<f_savename<<"\n";
+    
+    // Produce MVA input TTree and store it in output
+    TSelectorList* output = new TSelectorList();
+    this->produceMvaInputTree(output);
+    
+    // Write file and cleanup
+    TIterator* it = output->MakeIterator();
+    while (TObject* obj = it->Next()) {
+        obj->Write();
+    }
+    outputFile.Close();
+    output->SetOwner();
+    output->Clear();
+}
+
+
+
+void MvaInputTopJetsVariables::produceMvaInputTree(TSelectorList* output)
+{
+    std::cout<<"--- Beginning production MVA input tree\n";
+    
+    // Set pointer to output, so that TTree is owned by it
+    selectorList_ = output;
     
     // TTree for MVA input
     TTree* tree(0);
     tree = store(new TTree("mvaInputTopJets", "mvaInputTopJets"));
-    //tree = dynamic_cast<TTree*>(selectorList_->FindObject("mvaInputTopJets"));
+    //tree = dynamic_cast<TTree*>(output->FindObject("mvaInputTopJets"));
     
-    // Create and fill tree
+    // Create branches and fill tree
     this->createMvaInputBranches(tree);
     this->fillMvaInputBranches();
-    
-    // Write file and cleanup
-    tree->Write();
-    outputFile.Close();
-    selectorList_->Remove(tree);
-    std::cout<<"Variables for MVA: "<<this->mvaInputStructs().size()<<"\n";
+    std::cout<<"Number of variables for MVA: "<<this->mvaInputStructs().size()<<"\n";
     std::cout<<"=== Finishing production MVA input tree\n\n";
 }
 
 
 
-void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots()
+void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(const std::string& f_savename)
 {
-    // FIXME: should also use optionally own output file
+    // Output file
+    TFile outputFile(f_savename.c_str(),"RECREATE");
+    std::cout<<"\nOutput file for MVA input control plots: "<<f_savename<<"\n";
     
+    // Produce MVA input control plots and store them in output
+    TSelectorList* output = new TSelectorList();
+    this->mvaInputTopJetsVariablesControlPlots(output);
+    
+    // Write file and cleanup
+    TIterator* it = output->MakeIterator();
+    while (TObject* obj = it->Next()) {
+        obj->Write();
+    }
+    outputFile.Close();
+    output->SetOwner();
+    output->Clear();
+}
+
+
+
+void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorList* output)
+{
     std::cout<<"--- Beginning control plots for MVA variables\n";
+    
+    // Set pointer to output, so that histograms are owned by it
+    selectorList_ = output;
+    
     // Book histograms concerning MVA
     TH1* h_trueStatus_step8 = store(new TH1D("trueStatus_step8", "True status of matched jets;Status;# jet pairs",2,0,2));
     h_trueStatus_step8->GetXaxis()->SetBinLabel(1, "swapped");
@@ -203,7 +235,6 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots()
     TH1* h_massDiff_antiBLepton_bAntiLepton_step8 = store(new TH1D("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}-m_{bl^{+}}  [GeV];# jet pairs",41,-400,420));
     
     TH1* h_meanMTAlt_b_met_step8 = store(new TH1D("meanMTAlt_b_met_step8", "meanMTAlt_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420));
-    
     
     // Fill histograms
     for(const auto& mvaInputTopJetsStruct : this->mvaInputStructs()){

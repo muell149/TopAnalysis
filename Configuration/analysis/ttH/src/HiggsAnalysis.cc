@@ -84,10 +84,7 @@ HiggsAnalysis::Begin(TTree*){
     prepareLeptonIDSF();
     prepareJER_JES();
     
-    if(analysisMode_ == AnalysisMode::mva){
-        mvaInputTopJetsVariables_.clear();
-        mvaInputTopJetsVariables_ = MvaInputTopJetsVariables(fOutput);
-    }
+    mvaInputTopJetsVariables_.clear();
 }
 
 
@@ -111,8 +108,9 @@ HiggsAnalysis::Terminate(){
         f_savename.append(outputfilename_);
         
         mvaInputTopJetsVariables_.produceMvaInputTree(f_savename);
+        //mvaInputTopJetsVariables_.produceMvaInputTree(fOutput);
         
-        mvaInputTopJetsVariables_.mvaInputTopJetsVariablesControlPlots();
+        mvaInputTopJetsVariables_.mvaInputTopJetsVariablesControlPlots(fOutput);
     }
     
     AnalysisBase::Terminate();

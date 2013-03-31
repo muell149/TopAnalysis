@@ -13,11 +13,14 @@ class TTree;
 
 
 
-/// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
+/// Class holding the input variables for MVA,
+/// trying to identify the jets coming from (anti)b's from (anti)tops
 class MvaInputTopJetsVariables{
     
-public:
+private:
     
+    /// Stuct holding the input variables for one entry for MVA,
+    /// i.e. one entry of each quantity per selected jet combination
     struct MvaInputTopJetsStruct{
         MvaInputTopJetsStruct();
         
@@ -48,20 +51,17 @@ public:
     };
     
     
-    
+public:
     
     /// Empty constructor
     MvaInputTopJetsVariables();
     
-    /// Constructor for writing via selector
-    MvaInputTopJetsVariables(TSelectorList* selectorList);
-        
     /// Destructor
     ~MvaInputTopJetsVariables(){};
-
-    /// Create branches for TTree holding the input variables for MVA
-    void createMvaInputBranches(TTree* tree);
     
+    
+    
+    /// Add an entry
     void addEntry(const LV& lepton, const LV& antiLepton,
                   const LV& bJet, const LV& antiBJet,
                   const double& bJetBtagDiscriminator, const double& antiBJetBtagDiscriminator,
@@ -69,34 +69,55 @@ public:
                   const bool bQuarkRecoJetMatched, const bool correctCombination, const bool swappedCombination,
                   const double& eventWeight);
     
-    std::vector<MvaInputTopJetsStruct> mvaInputStructs()const;
+    /// Create branches for TTree holding the input variables for MVA
+    void createMvaInputBranches(TTree* tree);
     
-    void clear();
-    
+    /// Fill branches of MVA input TTree
     void fillMvaInputBranches();
     
+    /// Produce MVA input TTree in own file with given filename
     void produceMvaInputTree(const std::string& f_savename);
     
-    void mvaInputTopJetsVariablesControlPlots();
+    /// Produce MVA input TTree owned by a given selectorList
+    void produceMvaInputTree(TSelectorList* output);
+    
+    /// Produce control plots  for MVA input in own file with given filename
+    void mvaInputTopJetsVariablesControlPlots(const std::string& f_savename);
+    
+    /// Produce control plots  for MVA input owned by a given selector list
+    void mvaInputTopJetsVariablesControlPlots(TSelectorList* output);
+    
+    /// Clear the class instance
+    void clear();
+    
+    
+    
+    /// Get the MVA input structs
+    std::vector<MvaInputTopJetsStruct> mvaInputStructs()const;
     
     
     
 private:
     
-    void addEntry(const MvaInputTopJetsStruct& mvaInputTopJetsStruct);
-    
-    
-    // store the object in the output list and return it
+    /// Store the object in the output list and return it
     template<class T> T* store(T* obj);
     
+    
+    
+    /// Pointer for bookkeeping of histograms, trees, etc.
+    TSelectorList* selectorList_;
+    
+    /// Pointer for steering I/O of MVA input TTree
     TTree* t_mvaInput_;
     
+    /// Struct for setting addresses of MVA input tree branches
     MvaInputTopJetsStruct mvaInputStruct_;
     
+    /// Storage of all entries for the MVA
     std::vector<MvaInputTopJetsStruct> v_mvaInputStruct_;
-    
-    TSelectorList* selectorList_;
 };
+
+
 
 
 
@@ -112,6 +133,7 @@ inline T* MvaInputTopJetsVariables::store(T* obj){
 
 
 #endif // MvaInputVariables_h
+
 
 
 
