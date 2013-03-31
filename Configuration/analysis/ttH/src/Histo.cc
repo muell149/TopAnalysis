@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
     for (auto channel : v_channel)std::cout << Channel::convertChannel(channel) << " ";
     std::cout << "\n\n";
     
-	// Set up systematics
+    // Set up systematics
     std::vector<Systematic::Systematic> v_systematic(Systematic::allowedSystematicsPlotting);
     if(opt_systematic.isSet() && opt_systematic[0]!="all") v_systematic = Systematic::convertSystematics(opt_systematic.getArguments());
     else if(opt_systematic.isSet() && opt_systematic[0]=="all"); // do nothing

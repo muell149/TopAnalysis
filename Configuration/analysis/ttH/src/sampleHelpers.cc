@@ -10,11 +10,12 @@
 
 
 
-// --- Functions defined in namespace Systematic ---
+// --------------------- Functions defined in namespace Systematic -------------------------
 
 
-Systematic::Systematic
-Systematic::convertSystematic(const std::string& systematic){
+
+Systematic::Systematic Systematic::convertSystematic(const std::string& systematic)
+{
     if(systematic == "Nominal") return nominal;
     if(systematic == "mH110") return mH110;
     if(systematic == "mH115") return mH115;
@@ -29,8 +30,9 @@ Systematic::convertSystematic(const std::string& systematic){
 }
 
 
-std::string
-Systematic::convertSystematic(const Systematic& systematic){
+
+std::string Systematic::convertSystematic(const Systematic& systematic)
+{
     if(systematic == nominal) return "Nominal";
     if(systematic == mH110) return "mH110";
     if(systematic == mH115) return "mH115";
@@ -46,16 +48,18 @@ Systematic::convertSystematic(const Systematic& systematic){
 }
 
 
-std::vector<Systematic::Systematic>
-Systematic::convertSystematics(const std::vector<std::string>& systematics){
+
+std::vector<Systematic::Systematic> Systematic::convertSystematics(const std::vector<std::string>& systematics)
+{
     std::vector<Systematic> v_systematic;
     for(auto systematic : systematics)v_systematic.push_back(convertSystematic(systematic));
     return v_systematic;
 }
 
 
-std::vector<std::string>
-Systematic::convertSystematics(const std::vector<Systematic>& systematics){
+
+std::vector<std::string> Systematic::convertSystematics(const std::vector<Systematic>& systematics)
+{
     std::vector<std::string> v_systematic;
     for(auto systematic : systematics)v_systematic.push_back(convertSystematic(systematic));
     return v_systematic;
@@ -68,11 +72,12 @@ Systematic::convertSystematics(const std::vector<Systematic>& systematics){
 
 
 
-// --- Functions defined in namespace Channel ---
+// --------------------- Functions defined in namespace Channel -------------------------
 
 
-Channel::Channel 
-Channel::convertChannel(const std::string& channel){
+
+Channel::Channel Channel::convertChannel(const std::string& channel)
+{
     if(channel == "ee") return ee;
     if(channel == "emu") return emu;
     if(channel == "mumu") return mumu;
@@ -82,8 +87,9 @@ Channel::convertChannel(const std::string& channel){
 }
 
 
-std::string
-Channel::convertChannel(const Channel& channel){
+
+std::string Channel::convertChannel(const Channel& channel)
+{
     if(channel == ee) return "ee";
     if(channel == emu) return "emu";
     if(channel == mumu) return "mumu";
@@ -94,8 +100,9 @@ Channel::convertChannel(const Channel& channel){
 }
 
 
-std::string
-Channel::channelLabel(const Channel& channel){
+
+std::string Channel::channelLabel(const Channel& channel)
+{
     if(channel == ee) return "ee";
     if(channel == emu) return "e#mu";
     if(channel == mumu) return "#mu#mu";
@@ -106,16 +113,18 @@ Channel::channelLabel(const Channel& channel){
 }
 
 
-std::vector<Channel::Channel>
-Channel::convertChannels(const std::vector<std::string>& channels){
+
+std::vector<Channel::Channel> Channel::convertChannels(const std::vector<std::string>& channels)
+{
     std::vector<Channel> v_channel;
     for(auto channel : channels)v_channel.push_back(convertChannel(channel));
     return v_channel;
 }
 
 
-std::vector<std::string>
-Channel::convertChannels(const std::vector<Channel>& channels){
+
+std::vector<std::string> Channel::convertChannels(const std::vector<Channel>& channels)
+{
     std::vector<std::string> v_channel;
     for(auto channel : channels)v_channel.push_back(convertChannel(channel));
     return v_channel;
@@ -129,11 +138,12 @@ Channel::convertChannels(const std::vector<Channel>& channels){
 
 
 
-// --- Functions defined in namespace Tools ---
+// --------------------- Functions defined in namespace Tools -------------------------
 
 
-TString
-Tools::assignFolder(const Channel::Channel& channel){
+
+TString Tools::assignFolder(const Channel::Channel& channel)
+{
     const TString outpathPlots = "./Plots";
     TString subfolderChannel = Channel::convertChannel(channel);
     subfolderChannel.Prepend("/");
@@ -141,8 +151,9 @@ Tools::assignFolder(const Channel::Channel& channel){
 }
 
 
-TString
-Tools::assignFolder(const Channel::Channel& channel, const Systematic::Systematic& systematic){
+
+TString Tools::assignFolder(const Channel::Channel& channel, const Systematic::Systematic& systematic)
+{
     const TString path = assignFolder(channel);
     TString subfolderSystematic = Systematic::convertSystematic(systematic);
     subfolderSystematic.Prepend("/");

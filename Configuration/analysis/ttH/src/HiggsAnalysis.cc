@@ -30,8 +30,8 @@ constexpr double BtagWP = 0.244;
 
 
 
-HiggsAnalysis::HiggsAnalysis(TTree*){
-    
+HiggsAnalysis::HiggsAnalysis(TTree*)
+{
     // Define categories for analysis
     jetCategories_.clear();
     jetCategories_.addCategory(2,0);
@@ -76,8 +76,8 @@ HiggsAnalysis::~HiggsAnalysis(){}
 
 
 
-void
-HiggsAnalysis::Begin(TTree*){
+void HiggsAnalysis::Begin(TTree*)
+{
     AnalysisBase::Begin(0);
     
     prepareTriggerSF();
@@ -88,9 +88,8 @@ HiggsAnalysis::Begin(TTree*){
 
 
 
-void
-HiggsAnalysis::Terminate(){
-    
+void HiggsAnalysis::Terminate()
+{
     if(analysisMode_ == AnalysisMode::mva){
         std::string f_savename = "selectionRoot";
         gSystem->MakeDirectory(f_savename.c_str());
@@ -118,9 +117,8 @@ HiggsAnalysis::Terminate(){
 
 
 
-void
-HiggsAnalysis::SlaveBegin(TTree *){
-    
+void HiggsAnalysis::SlaveBegin(TTree *)
+{
     // Defaults from AnalysisBase
     AnalysisBase::SlaveBegin(0);
     
@@ -233,8 +231,7 @@ void HiggsAnalysis::SlaveTerminate()
 
 
 
-Bool_t
-HiggsAnalysis::Process(Long64_t entry)
+Bool_t HiggsAnalysis::Process(Long64_t entry)
 {
     if(!AnalysisBase::Process(entry))return kFALSE;
     
@@ -627,6 +624,7 @@ HiggsAnalysis::Process(Long64_t entry)
 }
 
 
+
 void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& antiLepton,
                                                  const int matchedBJetIndex, const int matchedAntiBJetIndex,
                                                  const bool successfulMatching, const double& eventWeight)
@@ -780,8 +778,6 @@ bool HiggsAnalysis::matchRecoToGenJets(int& matchedBJetIndex, int& matchedAntiBJ
     
     return true;
 }
-
-
 
 
 

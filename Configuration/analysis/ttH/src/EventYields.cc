@@ -12,15 +12,19 @@
 
 
 
+
 EventYields::EventYields(Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors):
-luminosity_(luminosity), m_dyScaleFactors_(m_dyScaleFactors),
+luminosity_(luminosity),
+m_dyScaleFactors_(m_dyScaleFactors),
 fileReader_(RootFileReader::getInstance())
 {
     this->produceYields(samples);
 }
 
 
-void EventYields::produceYields(Samples& samples){
+
+void EventYields::produceYields(Samples& samples)
+{
     std::cout<<"--- Beginning event yield table processing\n\n";
     
     // Find all histograms containing information for cutflow table (in systematic Nominal and channel emu, first histogram)
@@ -45,7 +49,9 @@ void EventYields::produceYields(Samples& samples){
 }
 
 
-void EventYields::writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const{
+
+void EventYields::writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const
+{
     // Loop over all selection steps writing out event yields
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         
@@ -70,7 +76,7 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
         }
         
         // Prepare output folder and text file
-        ofstream eventFile;
+        std::ofstream eventFile;
         TString eventFilestring = Tools::assignFolder(channel);
         gSystem->mkdir(eventFilestring, true);
         eventFilestring.Append("/"+*i_eventHistoName+".txt");

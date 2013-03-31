@@ -14,16 +14,18 @@
 
 
 
+
 DyScaleFactors::DyScaleFactors(Samples& samples, const double& luminosity):
-luminosity_(luminosity), fileReader_(RootFileReader::getInstance())
+luminosity_(luminosity),
+fileReader_(RootFileReader::getInstance())
 {
     this->produceScaleFactors(samples);
 }
 
 
 
-void
-DyScaleFactors::produceScaleFactors(Samples& samples){
+void DyScaleFactors::produceScaleFactors(Samples& samples)
+{
     std::cout<<"--- Beginning production of Drell-Yan scale factors\n\n";
     
     // Get histograms for Drell-Yan scaling from first file in map
@@ -67,13 +69,15 @@ DyScaleFactors::produceScaleFactors(Samples& samples){
 
 
 
-DyScaleFactors::DyScaleFactorMap
-DyScaleFactors::getScaleFactors()const{return m_dyScaleFactors_;}
+DyScaleFactors::DyScaleFactorMap DyScaleFactors::getScaleFactors()const
+{
+    return m_dyScaleFactors_;
+}
 
 
 
-void
-DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::Systematic& systematic, std::map<Channel::Channel, std::vector<Sample> >& channelSamples){
+void DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::Systematic& systematic, std::map<Channel::Channel, std::vector<Sample> >& channelSamples)
+{
     
     const std::vector<Channel::Channel> v_channel {Channel::ee, Channel::emu, Channel::mumu};
     
@@ -168,8 +172,7 @@ DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::Syste
 
 
 
-void
-DyScaleFactors::printFullInformation(const double dyScaleFactor_ee, const double dyScaleFactor_mumu, 
+void DyScaleFactors::printFullInformation(const double dyScaleFactor_ee, const double dyScaleFactor_mumu, 
                                      const double k_ee, const double k_mumu,
                                      const double rOutIn_ee, const double rOutIn_mumu,
                                      const double nIn_ee_data_loose, const double nIn_mumu_data_loose,
@@ -178,8 +181,8 @@ DyScaleFactors::printFullInformation(const double dyScaleFactor_ee, const double
                                      const double nIn_ee_dy, const double nIn_mumu_dy,
                                      const double nOut_ee_mc, const double nOut_mumu_mc,
                                      const double nOut_ee_dy, const double nOut_mumu_dy,
-                                     const TString& step)const{
-    
+                                     const TString& step)const
+{
     std::cout<<"Numbers (out/in) or (ee/mumu/emu) for selection step: "<<step<<"\n\t"
              <<"DY ee (out/in):          "<<std::setw(10)<<nOut_ee_dy<<" "<<std::setw(10)<<nIn_ee_dy<<"\n\t"
              <<"DY mumu (out/in):        "<<std::setw(10)<<nOut_mumu_dy<<" "<<std::setw(10)<<nIn_mumu_dy<<"\n\t"

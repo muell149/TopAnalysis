@@ -20,6 +20,7 @@ inputFileName_("")
 {}
 
 
+
 Sample::Sample(const TString legendEntry, const int color, const double crossSection, const SampleType sampleType):
 legendEntry_(legendEntry), color_(color), crossSection_(crossSection),
 sampleType_(sampleType), finalState_(Channel::undefined), systematic_(Systematic::undefined),
@@ -27,9 +28,9 @@ inputFileName_("")
 {}
 
 
-std::vector< std::pair< TString, Sample > >
-Samples::setSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic){
-    
+
+std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)
+{
     // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
     Sample ttbarsignal("t#bar{t} Signal", kRed+1, 234);
@@ -151,47 +152,48 @@ Samples::setSamples(const Channel::Channel& channel, const Systematic::Systemati
 
 
 
-// --- Methods of class Sample ---
 
 
-TString
-Sample::legendEntry()const{return legendEntry_;}
 
 
-int
-Sample::color()const{return color_;}
+// ------------------------------------ Further methods of class Sample ---------------------------------------
 
 
-double
-Sample::crossSection()const{return crossSection_;}
+
+TString Sample::legendEntry()const{return legendEntry_;}
 
 
-Sample::SampleType
-Sample::sampleType()const{return sampleType_;}
+
+int Sample::color()const{return color_;}
 
 
-void
-Sample::setFinalState(const Channel::Channel& finalState){
-    finalState_ = finalState;
-}
+
+double Sample::crossSection()const{return crossSection_;}
 
 
-Channel::Channel
-Sample::finalState()const{return finalState_;}
+
+Sample::SampleType Sample::sampleType()const{return sampleType_;}
 
 
-void
-Sample::setSystematic(const Systematic::Systematic& systematic){
-    systematic_ = systematic;
-}
+
+void Sample::setFinalState(const Channel::Channel& finalState){finalState_ = finalState;}
 
 
-Systematic::Systematic
-Sample::systematic()const{return systematic_;}
+
+Channel::Channel Sample::finalState()const{return finalState_;}
 
 
-void 
-Sample::setInputFile(const TString& inputFileName){
+
+void Sample::setSystematic(const Systematic::Systematic& systematic){systematic_ = systematic;}
+
+
+
+Systematic::Systematic Sample::systematic()const{return systematic_;}
+
+
+
+void Sample::setInputFile(const TString& inputFileName)
+{
     // Check if input file really exists
     ifstream ifile(inputFileName);
     if(ifile.fail()){
@@ -202,21 +204,27 @@ Sample::setInputFile(const TString& inputFileName){
 }
 
 
-TString
-Sample::inputFile()const{return inputFileName_;}
+
+TString Sample::inputFile()const{return inputFileName_;}
 
 
 
 
 
-// --- Methods of class Samples ---
+
+
+
+
+// ------------------------------------ Further methods of class Samples ---------------------------------------
+
 
 
 Samples::Samples(){}
 
 
-Samples::Samples(const std::vector< Channel::Channel >& v_channel, const std::vector< Systematic::Systematic >& v_systematic){
-    
+
+Samples::Samples(const std::vector< Channel::Channel >& v_channel, const std::vector< Systematic::Systematic >& v_systematic)
+{
     std::cout<<"--- Beginning to set up the samples\n\n";
     
     for (auto systematic : v_systematic) {
@@ -229,9 +237,9 @@ Samples::Samples(const std::vector< Channel::Channel >& v_channel, const std::ve
 }
 
 
-void
-Samples::addSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic){
-    
+
+void Samples::addSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)
+{
     // Add all samples as they are defined in setSamples()
     std::vector< std::pair< TString, Sample > > v_filenameSamplePair(this->setSamples(channel, systematic));
     
@@ -257,8 +265,9 @@ Samples::addSamples(const Channel::Channel& channel, const Systematic::Systemati
 }
 
 
-std::vector<Sample>
-Samples::setSampleOptions(const Systematic::Systematic& systematic, const std::vector< std::pair<TString, Sample> >& v_filenameSamplePair){
+
+std::vector<Sample> Samples::setSampleOptions(const Systematic::Systematic& systematic, const std::vector< std::pair<TString, Sample> >& v_filenameSamplePair)
+{
     std::vector<Sample> v_sample;
     
     for(auto filenameSamplePair : v_filenameSamplePair){
@@ -277,9 +286,9 @@ Samples::setSampleOptions(const Systematic::Systematic& systematic, const std::v
 }
 
 
-void
-Samples::orderByLegend(std::vector<Sample>& v_sample){
-    
+
+void Samples::orderByLegend(std::vector<Sample>& v_sample)
+{
     // Associate vector constituents to legend entry
     // and store all unequal legend entries
     std::vector<std::pair<TString, Sample> > v_legendSamplePair;
@@ -315,8 +324,9 @@ Samples::orderByLegend(std::vector<Sample>& v_sample){
 }
 
 
-Channel::Channel
-Samples::assignFinalState(const TString& filename){
+
+Channel::Channel Samples::assignFinalState(const TString& filename)
+{
     std::vector<Channel::Channel> v_channel {Channel::ee, Channel::emu, Channel::mumu};
     for(auto channel : v_channel){
         TString finalState(Channel::convertChannel(channel));
@@ -326,28 +336,29 @@ Samples::assignFinalState(const TString& filename){
             return channel;
         }
     }
-    return Channel::undefined
-;
+    return Channel::undefined;
 }
 
 
-Systematic::Systematic
-Samples::assignSystematic(TString& filename, const Systematic::Systematic& systematic){
+
+Systematic::Systematic Samples::assignSystematic(TString& filename, const Systematic::Systematic& systematic)
+{
     // FIXME: adjust filename corresponding to specific systematic
     
-    return Systematic::undefined
-;
+    return Systematic::undefined;
 }
 
 
-const SystematicChannelSamples&
-Samples::getSystematicChannelSamples(){
+
+const SystematicChannelSamples& Samples::getSystematicChannelSamples()
+{
     return m_systematicChannelSample_;
 }
 
 
-const std::vector<Sample>&
-Samples::getSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic){
+
+const std::vector<Sample>& Samples::getSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)
+{
     return m_systematicChannelSample_[systematic][channel];
 }
 
@@ -356,12 +367,14 @@ Samples::getSamples(const Channel::Channel& channel, const Systematic::Systemati
 
 
 
-// --- Functions defined in namespace Tools ---
+
+
+// ------------------------------------ Functions defined in namespace Tools ---------------------------------------
 
 
 
-double
-Tools::luminosityWeight(const Sample& sample, const double luminosity, RootFileReader* fileReader){
+double Tools::luminosityWeight(const Sample& sample, const double luminosity, RootFileReader* fileReader)
+{
     double luminosityWeight=0;
     if(sample.sampleType() == Sample::SampleType::data)return 1;
     const TString& inputFile(sample.inputFile());

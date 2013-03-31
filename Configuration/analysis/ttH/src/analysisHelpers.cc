@@ -8,8 +8,8 @@
 
 
 
-AnalysisMode::AnalysisMode
-AnalysisMode::convertAnalysisMode(const std::string& analysisMode){
+AnalysisMode::AnalysisMode AnalysisMode::convertAnalysisMode(const std::string& analysisMode)
+{
     if(analysisMode == "cp") return cp;
     if(analysisMode == "mva") return mva;
     std::cout<<"Warning! The following analysis mode conversion is not implemented: "<<analysisMode<<std::endl;
@@ -17,8 +17,9 @@ AnalysisMode::convertAnalysisMode(const std::string& analysisMode){
 }
 
 
-std::string
-AnalysisMode::convertAnalysisMode(const AnalysisMode& analysisMode){
+
+std::string AnalysisMode::convertAnalysisMode(const AnalysisMode& analysisMode)
+{
     if(analysisMode == cp) return "cp";
     if(analysisMode == mva) return "mva";
     if(analysisMode == undefined) return "";
@@ -27,16 +28,18 @@ AnalysisMode::convertAnalysisMode(const AnalysisMode& analysisMode){
 }
 
 
-std::vector<AnalysisMode::AnalysisMode>
-AnalysisMode::convertAnalysisModes(const std::vector<std::string>& analysisModes){
+
+std::vector<AnalysisMode::AnalysisMode> AnalysisMode::convertAnalysisModes(const std::vector<std::string>& analysisModes)
+{
     std::vector<AnalysisMode> v_analysisMode;
     for(auto analysisMode : analysisModes)v_analysisMode.push_back(convertAnalysisMode(analysisMode));
     return v_analysisMode;
 }
 
 
-std::vector<std::string>
-AnalysisMode::convertAnalysisModes(const std::vector<AnalysisMode>& analysisModes){
+
+std::vector<std::string> AnalysisMode::convertAnalysisModes(const std::vector<AnalysisMode>& analysisModes)
+{
     std::vector<std::string> v_analysisMode;
     for(auto analysisMode : analysisModes)v_analysisMode.push_back(convertAnalysisMode(analysisMode));
     return v_analysisMode;

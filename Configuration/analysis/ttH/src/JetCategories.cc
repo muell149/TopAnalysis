@@ -11,22 +11,34 @@
 
 
 
+
+
+
+
+// --------------------------------- Methods of struct JetCategory ------------------------------------------
+
+
 JetCategories::JetCategory::JetCategory():
-numberOfJets_(0), numberOfBjets_(0),
-greaterEqualJetNumber_(0), greaterEqualBjetNumber_(0)
+numberOfJets_(0),
+numberOfBjets_(0),
+greaterEqualJetNumber_(0),
+greaterEqualBjetNumber_(0)
 {}
 
 
 
 JetCategories::JetCategory::JetCategory(const int numberOfJets, const int numberOfBjets,
                                         const bool greaterEqualJetNumber, const bool greaterEqualBjetNumber):
-numberOfJets_(numberOfJets), numberOfBjets_(numberOfBjets),
-greaterEqualJetNumber_(greaterEqualJetNumber), greaterEqualBjetNumber_(greaterEqualBjetNumber)
+numberOfJets_(numberOfJets),
+numberOfBjets_(numberOfBjets),
+greaterEqualJetNumber_(greaterEqualJetNumber),
+greaterEqualBjetNumber_(greaterEqualBjetNumber)
 {}
 
 
 
-TString JetCategories::JetCategory::binLabel(const bool rootLabel)const{
+TString JetCategories::JetCategory::binLabel(const bool rootLabel)const
+{
     const std::string greaterEqual(rootLabel ? "#geq" : ">=");
     
     std::stringstream ss_label;
@@ -41,15 +53,24 @@ TString JetCategories::JetCategory::binLabel(const bool rootLabel)const{
 
 
 
+
+
+
+// --------------------------------- Methods of class JetCategories ------------------------------------------
+
+
+
 JetCategories::JetCategories(){}
+
 
 
 JetCategories::~JetCategories(){}
 
 
-void
-JetCategories::addCategory(const int numberOfJets, const int numberOfBjets,
-                           const bool greaterEqualJetNumber, const bool greaterEqualBjetNumber){
+
+void JetCategories::addCategory(const int numberOfJets, const int numberOfBjets,
+                                const bool greaterEqualJetNumber, const bool greaterEqualBjetNumber)
+{
     JetCategory jetCategory(numberOfJets, numberOfBjets, greaterEqualJetNumber, greaterEqualBjetNumber);
     if(ambiguousCategory(jetCategory)){
         std::cout<<"... Category is not added\n\n";
@@ -70,8 +91,8 @@ JetCategories::addCategory(const int numberOfJets, const int numberOfBjets,
 
 
 
-bool
-JetCategories::ambiguousCategory(const JetCategories::JetCategory& jetCategory){
+bool JetCategories::ambiguousCategory(const JetCategories::JetCategory& jetCategory)
+{
     if(jetCategory.numberOfJets_<0 || jetCategory.numberOfBjets_<0){
         std::cerr<<"\nBad Jet Category, negative number of (b-)jets: "<<jetCategory.binLabel()
                  <<"\n...break\n\n";
@@ -105,7 +126,8 @@ JetCategories::ambiguousCategory(const JetCategories::JetCategory& jetCategory){
 
 
 bool JetCategories::hasOverlap(const int numberOfJets1, const bool greaterEqualJetNumber1,
-                               const int numberOfJets2, const bool greaterEqualJetNumber2){
+                               const int numberOfJets2, const bool greaterEqualJetNumber2)
+{
     if(numberOfJets1 == numberOfJets2)return true;
     if(greaterEqualJetNumber1 && numberOfJets1<numberOfJets2)return true;
     if(greaterEqualJetNumber2 && numberOfJets1>numberOfJets2)return true;
@@ -114,22 +136,22 @@ bool JetCategories::hasOverlap(const int numberOfJets1, const bool greaterEqualJ
 
 
 
-void
-JetCategories::clear(){
+void JetCategories::clear()
+{
     v_jetCategory_.clear();
 }
 
 
 
-int
-JetCategories::numberOfCategories(){
+int JetCategories::numberOfCategories()
+{
     return v_jetCategory_.size();
 }
 
 
 
-int
-JetCategories::categoryId(const int numberOfJets, const int numberOfBjets){
+int JetCategories::categoryId(const int numberOfJets, const int numberOfBjets)
+{
     // Events belonging to specific category should get value >=0
     // If the category definition is bad, it should end up in the underflow (return value <0, depending on error)
     // If the category definition is fine, but the event does not belong to any category,
@@ -159,8 +181,8 @@ JetCategories::categoryId(const int numberOfJets, const int numberOfBjets){
 
 
 
-std::vector<TString>
-JetCategories::binLabels(){
+std::vector<TString> JetCategories::binLabels()
+{
     std::vector<TString> v_label;
     for(std::vector<JetCategory>::const_iterator i_jetCategory = v_jetCategory_.begin(); i_jetCategory != v_jetCategory_.end(); ++i_jetCategory){
         v_label.push_back(i_jetCategory->binLabel());
