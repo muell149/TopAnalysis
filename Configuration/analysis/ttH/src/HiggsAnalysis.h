@@ -9,7 +9,7 @@ class TString;
 
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "JetCategories.h"
-#include "DyScalingHistograms.h"
+#include "AnalysisHistograms.h"
 #include "MvaInputVariables.h"
 #include "analysisHelpers.h"
 

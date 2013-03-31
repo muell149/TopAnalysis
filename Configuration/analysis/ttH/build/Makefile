@@ -34,7 +34,7 @@ sampleHelpers.o: $(HiggsDir)/sampleHelpers.cc $(HiggsDir)/sampleHelpers.h
 
 
 
-load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o higgsUtils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o DyScalingHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o
+load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o higgsUtils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
 load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(TopDir)/utils.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h
@@ -52,7 +52,7 @@ analysisHelpers.o: $(HiggsDir)/analysisHelpers.cc $(HiggsDir)/analysisHelpers.h
 AnalysisBase.o: $(TopDir)/AnalysisBase.cc $(TopDir)/AnalysisBase.h $(TopDir)/classes.h
 	g++ -c -o AnalysisBase.o $(COMPFLAGS) $(TopDir)/AnalysisBase.cc
 
-HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(TopDir)/AnalysisBase.h $(HiggsDir)/DyScalingHistograms.h $(HiggsDir)/JetCategories.h $(HiggsDir)/MvaInputVariables.h
+HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(TopDir)/AnalysisBase.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/JetCategories.h $(HiggsDir)/MvaInputVariables.h
 	g++ -c -o HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/HiggsAnalysis.cc
 
 PUReweighter.o: $(TopDir)/PUReweighter.cc $(TopDir)/PUReweighter.h
@@ -73,8 +73,8 @@ JetCorrectorParameters.o: $(TopDir)/JetCorrectorParameters.cc $(TopDir)/JetCorre
 SimpleJetCorrectionUncertainty.o: $(TopDir)/SimpleJetCorrectionUncertainty.cc $(TopDir)/SimpleJetCorrectionUncertainty.h
 	g++ -c -o $@ $(COMPFLAGS) $(TopDir)/SimpleJetCorrectionUncertainty.cc
 
-DyScalingHistograms.o: $(HiggsDir)/DyScalingHistograms.cc $(HiggsDir)/DyScalingHistograms.h
-	g++ -c -o DyScalingHistograms.o $(COMPFLAGS) $(HiggsDir)/DyScalingHistograms.cc
+AnalysisHistograms.o: $(HiggsDir)/AnalysisHistograms.cc $(HiggsDir)/AnalysisHistograms.h
+	g++ -c -o AnalysisHistograms.o $(COMPFLAGS) $(HiggsDir)/AnalysisHistograms.cc
 
 JetCategories.o: $(HiggsDir)/JetCategories.cc $(HiggsDir)/JetCategories.h
 	g++ -c -o JetCategories.o $(COMPFLAGS) $(HiggsDir)/JetCategories.cc
