@@ -645,17 +645,6 @@ void TopAnalysis::SlaveTerminate()
 
 
 
-double TopAnalysis::weightPdf(Long64_t entry)
-{
-    if(pdf_no_ < 0) return 1.;
-    GetPDFEntry(entry);
-    double pdfWeight = weightPDF_->at(pdf_no_); //vector is 0 based
-    h_PDFTotalWeight->Fill(1, pdfWeight);
-    return pdfWeight;
-}
-
-
-
 Bool_t TopAnalysis::Process ( Long64_t entry )
 {    
     // Defaults from AnalysisBase
@@ -1670,6 +1659,17 @@ double TopAnalysis::overallGlobalNormalisationFactor()
     globalNormalisationFactor *= globalNormalisationFactorClosureTest();
     globalNormalisationFactor *= globalNormalisationFactorPDF();
     return globalNormalisationFactor;
+}
+
+
+
+double TopAnalysis::weightPdf(Long64_t entry)
+{
+    if(pdf_no_ < 0) return 1.;
+    GetPDFEntry(entry);
+    double pdfWeight = weightPDF_->at(pdf_no_); //vector is 0 based
+    h_PDFTotalWeight->Fill(1, pdfWeight);
+    return pdfWeight;
 }
 
 
