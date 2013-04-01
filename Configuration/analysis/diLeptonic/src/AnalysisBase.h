@@ -34,7 +34,6 @@ class AnalysisBase : public TSelector
 protected:    
     
     /// Variables associated to nTuple branches relevant for reconstruction level
-    
     // Concerning physics objects
     VLV                 *leptons_;
     std::vector<int>    *lepPdgId_;
@@ -56,18 +55,12 @@ protected:
     //std::vector<double> *jetBTagJetBProbability_;
     std::vector<double> *jetBTagCSV_;
     //std::vector<double> *jetBTagCSVMVA_;
-    std::vector<int>    *jetPartonFlavour_;
-    VLV                 *allGenJets_;
-    VLV                 *associatedGenJet_;
     std::vector<double> *jetChargeGlobalPtWeighted_;
     std::vector<double> *jetChargeRelativePtWeighted_;
-    //std::vector<int>    *jetAssociatedPartonPdgId_;
-    //std::vector<LV>     *jetAssociatedParton_;
     LV                  *met_;
     std::vector<double> *jetJERSF_;
     VLV                 *jetsForMET_;
     std::vector<double> *jetForMETJERSF_;
-    VLV                 *associatedGenJetForMET_;
     
     // Concerning event
     UInt_t runNumber_;
@@ -79,9 +72,15 @@ protected:
     //std::vector<std::string> *firedTriggers_;
     Int_t  vertMulti_;
     
-    // Concerning MC event
-    Int_t               vertMultiTrue_;
-    Double_t            weightGenerator_;
+    
+    /// Variables associated to nTuple branches holding generator information for all MC samples
+    // Concerning physics objects
+    VLV                *allGenJets_;
+    std::vector<int>   *jetPartonFlavour_;
+    VLV                *associatedGenJet_;
+    VLV                *associatedGenJetForMET_;
+    //std::vector<int>   *jetAssociatedPartonPdgId_;
+    //std::vector<LV>    *jetAssociatedParton_;
     
     
     /// Variables associated to nTuple branches of kinematic reconstruction
@@ -97,6 +96,14 @@ protected:
     //VLV              *HypWMinus_;
     std::vector<int> *HypJet0index_;
     std::vector<int> *HypJet1index_;
+    
+    
+    /// Variables associated to nTuple branch of true vertex multiplicity
+    Int_t vertMultiTrue_;
+    
+    
+    /// Variables associated to nTuple branch for generator event weight 
+    Double_t weightGenerator_;
     
     
     /// Variables associated to nTuple branch for PDF weights
@@ -208,7 +215,6 @@ private:
     
     
     /// nTuple branches relevant for reconstruction level
-    
     // Concerning physics objects
     TBranch *b_lepton;
     TBranch *b_lepPdgId;
@@ -230,18 +236,12 @@ private:
     TBranch *b_jetBTagJetBProbability;
     TBranch *b_jetBTagCSV;
     TBranch *b_jetBTagCSVMVA;
-    TBranch *b_jetPartonFlavour;
-    TBranch *b_allGenJets;
-    TBranch *b_associatedGenJet;
     TBranch *b_jetChargeGlobalPtWeighted;
     TBranch *b_jetChargeRelativePtWeighted;
-    TBranch *b_jetAssociatedPartonPdgId;
-    TBranch *b_jetAssociatedParton;
     TBranch *b_met;
     TBranch *b_jetJERSF;
     TBranch *b_jetForMET;
     TBranch *b_jetForMETJERSF;
-    TBranch *b_associatedGenJetForMET;
     
     // Concerning event
     TBranch *b_runNumber;
@@ -253,9 +253,15 @@ private:
     TBranch *b_firedTriggers;
     TBranch *b_vertMulti;
     
-    // Concerning MC event
-    TBranch *b_vertMultiTrue;
-    TBranch *b_weightGenerator;
+    
+    /// nTuple branches holding generator information for all MC samples
+    // Concerning physics objects
+    TBranch *b_allGenJets;
+    TBranch *b_jetPartonFlavour;
+    TBranch *b_associatedGenJet;
+    TBranch *b_associatedGenJetForMET;
+    TBranch *b_jetAssociatedPartonPdgId;
+    TBranch *b_jetAssociatedParton;
     
     
     /// nTuple branches of kinematic reconstruction
@@ -271,6 +277,14 @@ private:
     TBranch *b_HypWMinus;
     TBranch *b_HypJet0index;
     TBranch *b_HypJet1index;
+    
+    
+    /// nTuple branch of true vertex multiplicity
+    TBranch *b_vertMultiTrue;
+    
+    
+    /// nTuple branch for generator event weight
+    TBranch *b_weightGenerator;
     
     
     /// nTuple branch for PDF weights
@@ -426,8 +440,14 @@ protected:
     
     /// Access event entry for nTuple branches relevant for reconstruction level
     void GetRecoBranchesEntry(Long64_t&);
+    /// Access event entry for nTuple branches holding generator information for all MC samples
+    void GetCommonGenBranchesEntry(Long64_t&);
     /// Access event entry for nTuple branches of kinematic reconstruction
     void GetKinRecoBranchesEntry(Long64_t&);
+    /// Access event entry for nTuple branch of true vertex multiplicity
+    void GetVertMultiTrueEntry(Long64_t&);
+    /// Access event entry for nTuple branch for generator event weight
+    void GetWeightGeneratorEntry(Long64_t&);
     /// Access event entry for nTuple branch for PDF weights
     void GetPDFEntry(Long64_t&);
     /// Access event entry for nTuple branch for Top decay mode
@@ -498,7 +518,8 @@ protected:
     /// Correct branching ratios of W decays in MadGraph samples
     double madgraphWDecayCorrection(Long64_t&);
     
-    
+    /// Get weight due to pileup reweighting
+    double weightPileup(Long64_t&);
     
     
     
@@ -534,8 +555,14 @@ private:
     
     /// Set addresses of nTuple branches relevant for reconstruction level
     void SetRecoBranchAddresses();
+    /// Set addresses of nTuple branches holding generator information for all MC samples
+    void SetCommonGenBranchAddresses();
     /// Set addresses of nTuple branches of kinematic reconstruction
     void SetKinRecoBranchAddresses();
+    /// Set address of nTuple branch of true vertex multiplicity
+    void SetVertMultiTrueBranchAddress();
+    /// Set address of nTuple branch for generator event weight
+    void SetWeightGeneratorBranchAddress();
     /// Set address of nTuple branch for PDF weights
     void SetPdfBranchAddress();
     /// Set address of nTuple branch for Drell-Yan decay mode

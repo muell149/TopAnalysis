@@ -26,6 +26,7 @@
 #include "KinReco.h"
 #include "JetCorrectorParameters.h"
 #include "JetCorrectionUncertainty.h"
+#include "PUReweighter.h"
 
 
 
@@ -209,7 +210,10 @@ void AnalysisBase::Init(TTree *tree)
     chain_ = tree;
     chain_->SetMakeClass(0);
     this->SetRecoBranchAddresses();
+    if(isMC_) this->SetCommonGenBranchAddresses();
     this->SetKinRecoBranchAddresses();
+    if(isMC_) this->SetVertMultiTrueBranchAddress();
+    if(isMC_) this->SetWeightGeneratorBranchAddress();
     this->SetPdfBranchAddress();
     this->SetDyDecayBranchAddress();
     this->SetTopDecayBranchAddress();
@@ -331,18 +335,12 @@ void AnalysisBase::clearBranches()
     b_jetBTagJetBProbability = 0;
     b_jetBTagCSV = 0;
     b_jetBTagCSVMVA = 0;
-    b_jetPartonFlavour = 0;
-    b_allGenJets = 0;
-    b_associatedGenJet = 0;
     b_jetChargeGlobalPtWeighted = 0;
     b_jetChargeRelativePtWeighted = 0;
-    b_jetAssociatedPartonPdgId = 0;
-    b_jetAssociatedParton = 0;
     b_met = 0;
     b_jetJERSF = 0;
     b_jetForMET = 0;
     b_jetForMETJERSF = 0;
-    b_associatedGenJetForMET = 0;
     
     // nTuple branches relevant for reconstruction level
     // Concerning event
@@ -355,10 +353,15 @@ void AnalysisBase::clearBranches()
     b_firedTriggers = 0;
     b_vertMulti = 0;
     
-    // nTuple branches relevant for reconstruction level
-    // Concerning MC event
-    b_vertMultiTrue = 0;
-    b_weightGenerator = 0;
+    
+    // nTuple branches holding generator information for all MC samples
+    // Concerning physics objects
+    b_allGenJets = 0;
+    b_jetPartonFlavour = 0;
+    b_associatedGenJet = 0;
+    b_associatedGenJetForMET = 0;
+    b_jetAssociatedPartonPdgId = 0;
+    b_jetAssociatedParton = 0;
     
     
     // nTuple branches of kinematic reconstruction
@@ -374,6 +377,14 @@ void AnalysisBase::clearBranches()
     b_HypWMinus = 0;
     b_HypJet0index = 0;
     b_HypJet1index = 0;
+    
+    
+    // nTuple branch for true vertex multiplicity
+    b_vertMultiTrue = 0;
+    
+    
+    // nTuple branch for generator event weight
+    b_weightGenerator = 0;
     
     
     // nTuple branch for PDF weights
@@ -460,18 +471,12 @@ void AnalysisBase::clearBranchVariables()
     //jetBTagJetBProbability_ = 0;
     jetBTagCSV_ = 0;
     //jetBTagCSVMVA_ = 0;
-    jetPartonFlavour_ = 0;
-    allGenJets_ = 0;
-    associatedGenJet_ = 0;
     jetChargeGlobalPtWeighted_ = 0;
     jetChargeRelativePtWeighted_ = 0;
-    //jetAssociatedPartonPdgId_ = 0;
-    //jetAssociatedParton_ = 0;
     met_ = 0;
     jetJERSF_ = 0;
     jetsForMET_ = 0;
     jetForMETJERSF_ = 0;
-    associatedGenJetForMET_ = 0;
     
     // Set values to null for branches relevant for reconstruction level
     // Concerning event
@@ -484,10 +489,15 @@ void AnalysisBase::clearBranchVariables()
     //firedTriggers_ = 0;
     vertMulti_ = 0;
     
-    // Set values to null for branches relevant for reconstruction level
-    // Concerning MC event
-    vertMultiTrue_ = 0;
-    weightGenerator_ = 0;
+    
+    // Set values to null for branches holding generator information for all MC samples
+    // Concerning physics objects
+    allGenJets_ = 0;
+    jetPartonFlavour_ = 0;
+    associatedGenJet_ = 0;
+    associatedGenJetForMET_ = 0;
+    //jetAssociatedPartonPdgId_ = 0;
+    //jetAssociatedParton_ = 0;
     
     
     // Set values to null for branches of kinematic reconstruction
@@ -503,6 +513,14 @@ void AnalysisBase::clearBranchVariables()
     //HypWMinus_ = 0;
     HypJet0index_ = 0;
     HypJet1index_ = 0;
+    
+    
+    // Set values to null for true vertex multiplicity
+    vertMultiTrue_ = 0;
+    
+    
+    // Set values to null for generator event weight
+    weightGenerator_ = 0;
     
     
     // Set values to null for PDF weight
@@ -588,23 +606,17 @@ void AnalysisBase::SetRecoBranchAddresses()
     //chain_->SetBranchAddress("jetBTagJetBProbability", &jetBTagJetBProbability_, &b_jetBTagJetBProbability);
     chain_->SetBranchAddress("jetBTagCSV", &jetBTagCSV_, &b_jetBTagCSV);
     //chain_->SetBranchAddress("jetBTagCSVMVA", &jetBTagCSVMVA_, &b_jetBTagCSVMVA);
-    chain_->SetBranchAddress("jetPartonFlavour", &jetPartonFlavour_, &b_jetPartonFlavour);
-    chain_->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets);
-    chain_->SetBranchAddress("associatedGenJet", &associatedGenJet_, &b_associatedGenJet);
     if(chain_->GetBranch("jetChargeGlobalPtWeighted")) // new variable, keep check a while for compatibility
         chain_->SetBranchAddress("jetChargeGlobalPtWeighted", &jetChargeGlobalPtWeighted_, &b_jetChargeGlobalPtWeighted);
     else b_jetChargeGlobalPtWeighted = 0;
     if(chain_->GetBranch("jetChargeRelativePtWeighted")) // new variable, keep check a while for compatibility
         chain_->SetBranchAddress("jetChargeRelativePtWeighted", &jetChargeRelativePtWeighted_, &b_jetChargeRelativePtWeighted);
     else b_jetChargeRelativePtWeighted = 0;
-    //chain_->SetBranchAddress("jetAssociatedPartonPdgId", &jetAssociatedPartonPdgId_, &b_jetAssociatedPartonPdgId);
-    //chain_->SetBranchAddress("jetAssociatedParton", &jetAssociatedParton_, &b_jetAssociatedParton);
     chain_->SetBranchAddress("met", &met_, &b_met);
-    if (doJesJer_) {
+    if(doJesJer_){
         chain_->SetBranchAddress("jetJERSF", &jetJERSF_, &b_jetJERSF);
         chain_->SetBranchAddress("jetsForMET", &jetsForMET_, &b_jetForMET);
         chain_->SetBranchAddress("jetForMETJERSF", &jetForMETJERSF_, &b_jetForMETJERSF);
-        chain_->SetBranchAddress("associatedGenJetForMET", &associatedGenJetForMET_, &b_associatedGenJetForMET);
     }
     
     // Concerning event
@@ -616,10 +628,21 @@ void AnalysisBase::SetRecoBranchAddresses()
     //chain_->SetBranchAddress("triggerBitsTau", &triggerBitsTau_, &b_triggerBitsTau);
     //chain_->SetBranchAddress("firedTriggers", &firedTriggers_, &b_firedTriggers);
     chain_->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti);
-    
-    // Concerning MC event
-    chain_->SetBranchAddress("vertMultiTrue", &vertMultiTrue_, &b_vertMultiTrue);
-    chain_->SetBranchAddress("weightGenerator", &weightGenerator_, &b_weightGenerator);
+}
+
+
+
+void AnalysisBase::SetCommonGenBranchAddresses()
+{
+    // Concerning physics objects
+    chain_->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets);
+    chain_->SetBranchAddress("jetPartonFlavour", &jetPartonFlavour_, &b_jetPartonFlavour);
+    chain_->SetBranchAddress("associatedGenJet", &associatedGenJet_, &b_associatedGenJet);
+    if(doJesJer_){
+        chain_->SetBranchAddress("associatedGenJetForMET", &associatedGenJetForMET_, &b_associatedGenJetForMET);
+    }
+    //chain_->SetBranchAddress("jetAssociatedPartonPdgId", &jetAssociatedPartonPdgId_, &b_jetAssociatedPartonPdgId);
+    //chain_->SetBranchAddress("jetAssociatedParton", &jetAssociatedParton_, &b_jetAssociatedParton);
 }
 
 
@@ -638,6 +661,20 @@ void AnalysisBase::SetKinRecoBranchAddresses()
     //chain_->SetBranchAddress("HypWMinus", &HypWMinus_, &b_HypWMinus_);
     chain_->SetBranchAddress("HypJet0index", &HypJet0index_, &b_HypJet0index);
     chain_->SetBranchAddress("HypJet1index", &HypJet1index_, &b_HypJet1index);
+}
+
+
+
+void AnalysisBase::SetVertMultiTrueBranchAddress()
+{
+    chain_->SetBranchAddress("vertMultiTrue", &vertMultiTrue_, &b_vertMultiTrue);
+}
+
+
+
+void AnalysisBase::SetWeightGeneratorBranchAddress()
+{
+    chain_->SetBranchAddress("weightGenerator", &weightGenerator_, &b_weightGenerator);
 }
 
 
@@ -750,19 +787,13 @@ void AnalysisBase::GetRecoBranchesEntry(Long64_t& entry)
     //b_jetBTagJetBProbability->GetEntry(entry);
     b_jetBTagCSV->GetEntry(entry);
     //b_jetBTagCSVMVA->GetEntry(entry);
-    b_jetPartonFlavour->GetEntry(entry);
-    b_allGenJets->GetEntry(entry);
-    b_associatedGenJet->GetEntry(entry);
     if(b_jetChargeGlobalPtWeighted)b_jetChargeGlobalPtWeighted->GetEntry(entry);
     if(b_jetChargeRelativePtWeighted)b_jetChargeRelativePtWeighted->GetEntry(entry);
-    //if(b_jetAssociatedPartonPdgId)b_jetAssociatedPartonPdgId->GetEntry(entry);
-    //if(b_jetAssociatedParton)b_jetAssociatedParton->GetEntry(entry);
     b_met->GetEntry(entry);
-    if (doJesJer_) {
+    if(doJesJer_){
         b_jetJERSF->GetEntry(entry);
         b_jetForMET->GetEntry(entry);
         b_jetForMETJERSF->GetEntry(entry);
-        b_associatedGenJetForMET->GetEntry(entry);
     }
     
     // Concerning event
@@ -774,10 +805,21 @@ void AnalysisBase::GetRecoBranchesEntry(Long64_t& entry)
     //b_triggerBitsTau
     //b_firedTriggers
     b_vertMulti->GetEntry(entry);
-    
-    // Concerning MC event
-    b_vertMultiTrue->GetEntry(entry);
-    b_weightGenerator->GetEntry(entry);
+}
+
+
+
+void AnalysisBase::GetCommonGenBranchesEntry(Long64_t& entry)
+{
+    // Concerning physics objects
+    b_allGenJets->GetEntry(entry);
+    b_jetPartonFlavour->GetEntry(entry);
+    b_associatedGenJet->GetEntry(entry);
+    if(doJesJer_){
+        b_associatedGenJetForMET->GetEntry(entry);
+    }
+    //if(b_jetAssociatedPartonPdgId)b_jetAssociatedPartonPdgId->GetEntry(entry);
+    //if(b_jetAssociatedParton)b_jetAssociatedParton->GetEntry(entry);
 }
 
 
@@ -795,6 +837,20 @@ void AnalysisBase::GetKinRecoBranchesEntry(Long64_t& entry){
     //b_HypWMinus->GetEntry(entry);
     b_HypJet0index->GetEntry(entry);
     b_HypJet1index->GetEntry(entry);
+}
+
+
+
+void AnalysisBase::GetVertMultiTrueEntry(Long64_t& entry)
+{
+    b_vertMultiTrue->GetEntry(entry);
+}
+
+
+
+void AnalysisBase::GetWeightGeneratorEntry(Long64_t& entry)
+{
+    b_weightGenerator->GetEntry(entry);
 }
 
 
@@ -1962,6 +2018,12 @@ double AnalysisBase::madgraphWDecayCorrection(Long64_t& entry)
 }
 
 
+double AnalysisBase::weightPileup(Long64_t& entry)
+{
+    if(!isMC_ || !pureweighter_)return 1.;
+    this->GetVertMultiTrueEntry(entry);
+    return pureweighter_->getPUweight(vertMultiTrue_);
+}
 
 
 

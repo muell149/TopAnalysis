@@ -243,11 +243,9 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     if(!AnalysisBase::Process(entry))return kFALSE;
     
     
-    
     // Histogram for controlling correctness of af workflow,
     // which should be the same as h_events_step0b for all samples except those preselected on generator level
     h_events_step0a->Fill(1, 1);
-    
     
     
     //===CUT===
@@ -262,36 +260,25 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Separate inclusive ttH sample in decays H->bbbar and others
     if(failsHiggsGeneratorSelection(entry)) return kTRUE;
     
-    GetRecoBranchesEntry(entry);
     // Correct for the MadGraph branching fraction being 1/9 for dileptons (PDG average is .108)
-    weightGenerator_ *= madgraphWDecayCorrection(entry);
+    const double weightMadgraphCorrection = madgraphWDecayCorrection(entry);
     
-       
+    // Get weight due to pileup reweighting
+    const double weightPU = this->weightPileup(entry);
     
-    
-    
-    // FIXME: here was dealt with ttbar generator information, not needed now
-    
-    
-    
-    // FIXME: something was done about matching of BHadron to jets for ttbar sample, not needed now
-    
+    // Access weightGenerator_ and modify it
+    if(isMC_){
+        GetWeightGeneratorEntry(entry);
+        weightGenerator_ *= weightMadgraphCorrection;
+    }
     
     
+    // Access reco information
+    this->GetRecoBranchesEntry(entry);
     
-    double weightPU = 1;
-    if (isMC_ && pureweighter_)weightPU = pureweighter_->getPUweight(vertMultiTrue_);
-    
-    
-    
-    
-    
-    //===CUT===
-    // this is step0b, no cut application, only object preselection
-    
-    
-    // FIXME: systematics for jet energy resolution/scale, not needed for now
-    //if(doJesJer)applyJER_JES();
+    // Systematics for jet energy resolution/scale
+    // Corrections for: jets_, jetsForMET_, met_
+    //if(doJesJer_)applyJER_JES();
     
     // Apply jet cuts in eta, pt
     cleanJetCollection(JETPTCUT, JETETACUT);
@@ -306,6 +293,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     const int numberOfBJets = v_bJetIndex.size();
     
     
+    //===CUT===
+    // this is step0b, no cut application, only object preselection
     
     h_events_step0b->Fill(1, 1);
     

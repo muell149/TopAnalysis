@@ -238,6 +238,19 @@ private:
 
     /// Get weight of closure test
     double calculateClosureTestWeight();
+    
+    /// Get weight of PDF variation
+    double weightPdf(Long64_t entry);
+    
+    /// Get indices of B hadron and anti-B hadron
+    void bHadronIndices(int& bHadronIndex, int& antiBHadronIndex);
+    
+    void generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
+                           LV& leadGenLepton, LV& nLeadGenLepton,
+                           LV& leadGenBJet, LV& nLeadGenBJet,
+                           double& genHT,
+                           const int bHadronIndex, const int antiBHadronIndex,
+                           const double weightPU);
 };
 
 #endif
