@@ -19,12 +19,21 @@
 
 
 
-// Values to be used in analysis
+// Jet selection to be used in analysis
 constexpr double JETPTCUT = 30;
 constexpr double JETETACUT = 2.4;
 
 // CSV Loose working point
 constexpr double BtagWP = 0.244;
+
+
+/// Folder for storage of MVA input TTree
+constexpr const char* MvaInputDIR = "selectionRoot/mvaInput";
+
+
+
+
+
 
 
 
@@ -78,8 +87,10 @@ HiggsAnalysis::~HiggsAnalysis(){}
 
 void HiggsAnalysis::Begin(TTree*)
 {
+    // Defaults from AnalysisBase
     AnalysisBase::Begin(0);
     
+    // Prepare things for analysis
     prepareTriggerSF();
     prepareLeptonIDSF();
     prepareJER_JES();
@@ -91,27 +102,21 @@ void HiggsAnalysis::Begin(TTree*)
 void HiggsAnalysis::Terminate()
 {
     if(analysisMode_ == AnalysisMode::mva){
-        std::string f_savename = "selectionRoot";
-        gSystem->MakeDirectory(f_savename.c_str());
-        f_savename.append("/mvaInput");
-        gSystem->MakeDirectory(f_savename.c_str());
-        f_savename.append("/");
-        f_savename.append(systematic_); 
-        gSystem->MakeDirectory(f_savename.c_str());
-        f_savename.append("/");
-        f_savename.append(channel_); 
-        gSystem->MakeDirectory(f_savename.c_str());
-        f_savename.append("/");
-        f_savename.append(outputfilename_);
         
+        // Create output directory for MVA input tree, and produce and write tree
+        std::string f_savename = this->assignFolder(MvaInputDIR, channel_, systematic_);
+        f_savename.append(outputfilename_);
         mvaInputTopJetsVariables_.produceMvaInputTree(f_savename);
         //mvaInputTopJetsVariables_.produceMvaInputTree(fOutput);
         
+        // Create and store control plots in fOutput
         mvaInputTopJetsVariables_.mvaInputTopJetsVariablesControlPlots(fOutput);
     }
     
+    // Cleanup
     mvaInputTopJetsVariables_.clear();
     
+    // Defaults from AnalysisBase
     AnalysisBase::Terminate();
 }
 
@@ -226,6 +231,7 @@ void HiggsAnalysis::SlaveTerminate()
 {
     dyScalingHistograms_.clear();
     
+    // Defaults from AnalysisBase
     AnalysisBase::SlaveTerminate();
 }
 
@@ -233,78 +239,64 @@ void HiggsAnalysis::SlaveTerminate()
 
 Bool_t HiggsAnalysis::Process(Long64_t entry)
 {
+    // Defaults from AnalysisBase
     if(!AnalysisBase::Process(entry))return kFALSE;
     
-    // Histogram for controlling correctness of h_events_step1, which should be the same for all samples except Zjets and ttbarsignalplustau
+    
+    
+    // Histogram for controlling correctness of af workflow,
+    // which should be the same as h_events_step0b for all samples except those preselected on generator level
     h_events_step0a->Fill(1, 1);
     
-    if(isHiggsSignal_)GetHiggsDecayModeEntry(entry);
-    if(isInclusiveHiggs_ && !bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_==5)return kTRUE;
-    if(isInclusiveHiggs_ && bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_!=5)return kTRUE;
     
-    //do we have a DY true level cut?
-    if (checkZDecayMode_ && !checkZDecayMode_(entry)) return kTRUE;
     
-    if (isTtbarPlusTauSample_ || correctMadgraphBR_) GetTopDecayModeEntry(entry);
-    //decayMode contains the decay of the top (*10) + the decay of the antitop
-    //1=hadron, 2=e, 3=mu, 4=tau->hadron, 5=tau->e, 6=tau->mu
-    //i.e. 23 == top decays to e, tbar decays to mu
-    if (isTtbarPlusTauSample_) {
-        bool isViaTau = topDecayMode_ > 40 || ( topDecayMode_ % 10 > 4 );
-        bool isCorrectChannel = false;
-        switch (channelPdgIdProduct_) {
-            case -11*13: isCorrectChannel = topDecayMode_ == 23 || topDecayMode_ == 32 //emu prompt
-                            || topDecayMode_ == 53 || topDecayMode_ == 35 //e via tau, mu prompt
-                            || topDecayMode_ == 26 || topDecayMode_ == 62 //e prompt, mu via tau
-                            || topDecayMode_ == 56 || topDecayMode_ == 65; //both via tau
-                            break;
-            case -11*11: isCorrectChannel = topDecayMode_ == 22  //ee prompt
-                            || topDecayMode_ == 52 || topDecayMode_ == 25 //e prompt, e via tau
-                            || topDecayMode_ == 55; break; //both via tau
-            case -13*13: isCorrectChannel = topDecayMode_ == 33
-                            || topDecayMode_ == 36 || topDecayMode_ == 63
-                            || topDecayMode_ == 66; break;
-            default: std::cerr << "Invalid channel! Product = " << channelPdgIdProduct_ << "\n";
-        };
-        bool isBackgroundInSignalSample = !isCorrectChannel || isViaTau;
-        if (runViaTau_ != isBackgroundInSignalSample) return kTRUE;
-    }
+    //===CUT===
+    // this is step0a, for specific samples events are deselected on generator level
+    
+    // Separate DY dilepton decays in lepton flavours
+    if(failsDrellYanGeneratorSelection(entry)) return kTRUE;
+    
+    // Separate dileptonic ttbar decays via tau
+    if(failsTopGeneratorSelection(entry)) return kTRUE;
+    
+    // Separate inclusive ttH sample in decays H->bbbar and others
+    if(failsHiggsGeneratorSelection(entry)) return kTRUE;
     
     GetRecoBranchesEntry(entry);
-    //We must correct for the madGraph branching fraction being 1/9 for dileptons (PDG average is .108)
-    if ( correctMadgraphBR_ ) {
-        if ( topDecayMode_ == 11 ) { //all hadronic decay
-            weightGenerator_ *= (0.676*1.5) * (0.676*1.5);
-        } else if ( topDecayMode_< 20 || ( topDecayMode_ % 10 == 1) ) { //semileptonic Decay
-            weightGenerator_ *= (0.108*9) * (0.676*1.5);
-        } else {//dileptonic decay (including taus!)
-            weightGenerator_ *= (0.108*9) * (0.108*9);
-        }
-    }
+    // Correct for the MadGraph branching fraction being 1/9 for dileptons (PDG average is .108)
+    weightGenerator_ *= madgraphWDecayCorrection(entry);
+    
+       
     
     
     
+    // FIXME: here was dealt with ttbar generator information, not needed now
     
-    
-    
-    
-    
-    // FIXME: corrections to jet energy resolution/scale, also here ?
-    //if(doJesJer)applyJER_JES();
-    
-    
-    // apply all jet cuts
-    cleanJetCollection(JETPTCUT, JETETACUT);
-    
-    
-    double weightPU = 1;
-    if (isMC_ && pureweighter_)weightPU = pureweighter_->getPUweight(vertMultiTrue_);
     
     
     // FIXME: something was done about matching of BHadron to jets for ttbar sample, not needed now
     
     
     
+    
+    double weightPU = 1;
+    if (isMC_ && pureweighter_)weightPU = pureweighter_->getPUweight(vertMultiTrue_);
+    
+    
+    
+    
+    
+    //===CUT===
+    // this is step0b, no cut application, only object preselection
+    
+    
+    // FIXME: systematics for jet energy resolution/scale, not needed for now
+    //if(doJesJer)applyJER_JES();
+    
+    // Apply jet cuts in eta, pt
+    cleanJetCollection(JETPTCUT, JETETACUT);
+    
+    // Select b-jets for given working point
     std::vector<int> v_bJetIndex;
     for ( std::vector<double>::iterator it = jetBTagCSV_->begin(); it<jetBTagCSV_->end(); it++ ) {
         if ( *it > BtagWP) {
@@ -313,12 +305,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     }
     const int numberOfBJets = v_bJetIndex.size();
     
-    // FIXME: here was dealt with ttbar generator information, not needed now
     
-    
-    
-    //===CUT===
-    // this is step0, so no cut application
     
     h_events_step0b->Fill(1, 1);
     
@@ -781,24 +768,15 @@ bool HiggsAnalysis::matchRecoToGenJets(int& matchedBJetIndex, int& matchedAntiBJ
 
 
 
-void HiggsAnalysis::SetSamplename(TString samplename, TString)
+void HiggsAnalysis::SetHiggsInclusiveSample(const bool isInclusiveHiggs)
 {
-    samplename_ = samplename;
-    isTtbarPlusTauSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") && !(samplename=="ttbarw") && !(samplename=="ttbarz") && !samplename.Contains("bg");
-    // FIXME: for ttbarW, also correction for 3rd W needs to be applied, for ttbarhiggs corrections for 2 or 4 Ws needed, depending on Higgs decay (H->WW?)
-    // FIXME: and what about Wlnu sample ?
-    correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs");
-}
-
-
-
-void HiggsAnalysis::SetHiggsInclusiveSample(const bool isInclusiveHiggs){
     isInclusiveHiggs_ = isInclusiveHiggs;
 }
 
 
 
-void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs){
+void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs)
+{
     bbbarDecayFromInclusiveHiggs_ = bbbarDecayFromInclusiveHiggs;
 }
 
@@ -807,6 +785,18 @@ void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusi
 void HiggsAnalysis::SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMode)
 {
     analysisMode_ = analysisMode;
+}
+
+
+
+bool HiggsAnalysis::failsHiggsGeneratorSelection(Long64_t& entry)
+{
+    if(!isHiggsSignal_) return false;
+    GetHiggsDecayModeEntry(entry);
+    // Separate ttH events from inclusve decay into H->bbbar and other decays
+    if(isInclusiveHiggs_ && !bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_==5) return true;
+    if(isInclusiveHiggs_ && bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_!=5) return true;
+    return false;
 }
 
 

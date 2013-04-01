@@ -14,23 +14,30 @@ class TString;
 #include "analysisHelpers.h"
 
 
+
+
+
+
+/// Class for the analysis step of the Higgs analysis, reading the nTuples
 class HiggsAnalysis : public AnalysisBase{
 
 public:
     
+    /// Constructor
     HiggsAnalysis(TTree* =0);
+    
+    /// Destructor
     virtual ~HiggsAnalysis();
     
+    /// Methods inherited from AnalysisBase
     virtual void Begin(TTree*);
     virtual void SlaveBegin(TTree*);
     virtual Bool_t Process(Long64_t entry);
     virtual void SlaveTerminate();
     virtual void Terminate();
     
+    /// Class definition
     ClassDef(HiggsAnalysis, 0);
-    
-    // need to overwrite since everything starting with "ttbar" would be seen as "ttbarsignalplustau"
-    virtual void SetSamplename(TString samplename, TString systematic_from_file="");
     
     /// Is it a ttH sample inclusive in Higgs decay
     void SetHiggsInclusiveSample(const bool isInclusiveHiggs);
@@ -43,6 +50,11 @@ public:
     
     
 private:
+    
+    /// Select events from Higgs signal samples which need to be removed due to generator selection
+    bool failsHiggsGeneratorSelection(Long64_t&);
+    
+    
     
     /// Get indices of generated b jet and anti-b jet for particles with given PDG ID
     /// Returns whether a unique solution is found, and only in this case indices are set unequal to -1
