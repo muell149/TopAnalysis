@@ -225,14 +225,10 @@ public:
     
     
     
-protected:
+private:
     
     /// Set global normalisation factors
-    virtual double overallGlobalNormalisationFactor();
-    
-    
-    
-private:
+    double overallGlobalNormalisationFactor();
     
     /// Set global normalisation factor due to closure test
     double globalNormalisationFactorClosureTest();

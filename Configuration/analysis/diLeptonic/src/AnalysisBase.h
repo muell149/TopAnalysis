@@ -1,6 +1,7 @@
 #ifndef AnalysisBase_h
 #define AnalysisBase_h
 
+#include <string>
 #include <vector>
 #include <map>
 #include <utility>
@@ -383,7 +384,7 @@ public:
     virtual void Terminate();
     
     /// Set sample name
-    virtual void SetSamplename(TString samplename, TString systematic_from_file);
+    void SetSamplename(TString samplename, TString systematic_from_file);
     /// Set Channel
     void SetChannel(TString channel);
     /// Set systematic
@@ -422,9 +423,6 @@ public:
     
 // Protected methods
 protected:
-    
-    /// Set global normalisation factors (needs to be overwritable)
-    virtual double overallGlobalNormalisationFactor();
     
     /// Access event entry for nTuple branches relevant for reconstruction level
     void GetRecoBranchesEntry(Long64_t&);
@@ -488,6 +486,22 @@ protected:
     /// Get H_t of jets
     double getJetHT(const VLV& jet, int pt_cut);
     
+    
+    
+    
+    /// Select events from Drell-Yan samples which need to be removed due to generator selection
+    bool failsDrellYanGeneratorSelection(Long64_t&)const;
+    
+    /// Select events from Top signal samples which need to be removed due to generator selection
+    bool failsTopGeneratorSelection(Long64_t&);
+    
+    /// Correct branching ratios of W decays in MadGraph samples
+    double madgraphWDecayCorrection(Long64_t&);
+    
+    
+    
+    
+    
     /// Create binned control plots
     // Create Nbins control plots for the differential distribution h_differential
     // Use h_control for the control plot name and binning
@@ -501,6 +515,9 @@ protected:
     // weight: event weight
     void FillBinnedControlPlot(TH1* h_differential, double binvalue, 
                                TH1 *h_control, double value, double weight);
+    
+    /// Assign a folder depending on channel and systematic
+    std::string assignFolder(const char* baseDir, const TString& channel, const TString& systematic)const;
     
     /// Store the object in the output list and return it
     template<class T> T* store(T* obj);

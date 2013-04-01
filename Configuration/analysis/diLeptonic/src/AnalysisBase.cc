@@ -18,6 +18,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TString.h>
+#include <TObjArray.h>
 
 #include "AnalysisBase.h"
 #include "HistoListReader.h"
@@ -25,6 +26,20 @@
 #include "KinReco.h"
 #include "JetCorrectorParameters.h"
 #include "JetCorrectionUncertainty.h"
+
+
+
+
+
+
+
+/// Folder for basic analysis output
+constexpr const char* BaseDIR = "selectionRoot";
+
+/// Folder for b-tag efficiency file storage
+constexpr const char* BTagEffDIR = "selectionRoot/BTagEff";
+
+
 
 
 
@@ -134,17 +149,9 @@ void AnalysisBase::Terminate()
     // the results graphically or save the results to file.
     
     
-    // Set up output file path and name, and open file for writing
-    std::string f_savename = "selectionRoot/";
-    gSystem->MakeDirectory( f_savename.c_str() );
-    f_savename.append ( systematic_ );
-    gSystem->MakeDirectory( f_savename.c_str() );
-    f_savename.append ( "/" );
-    f_savename.append ( channel_ );
-    gSystem->MakeDirectory( f_savename.c_str() );
-    f_savename.append ( "/" );
-    f_savename.append ( outputfilename_ );
-    //f_savename.append ( ".root" );
+    // Open output file for writing
+    std::string f_savename = this->assignFolder(BaseDIR, channel_, systematic_);
+    f_savename.append(outputfilename_);
     std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<samplename_<<"!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     TFile outputFile(f_savename.c_str(), "RECREATE");
     if (outputFile.IsZombie()) {
@@ -153,12 +160,9 @@ void AnalysisBase::Terminate()
     }
     
     
-    //calculate an overall weight due to the shape reweighting, and apply it
-    const double globalNormalisationFactor = overallGlobalNormalisationFactor();
-    TIterator* it = fOutput->MakeIterator();
-    while (TObject* obj = it->Next()) {
-        TH1 *hist = dynamic_cast<TH1*>(obj);
-        if (hist) hist->Scale(globalNormalisationFactor); 
+    // Write everything held by fOutput
+    TIterator* iterator = fOutput->MakeIterator();
+    while (TObject* obj = iterator->Next()) {
         obj->Write();
     }
     
@@ -216,28 +220,17 @@ void AnalysisBase::Init(TTree *tree)
 
 
 
-double AnalysisBase::overallGlobalNormalisationFactor()
-{
-    /// WARNING: In general do not make changes here, but in your analysis:
-    /// Overwrite this dummy method in your analysis if you want to apply a global normalisation factor
-    
-    const double globalNormalisationFactor(1);
-    return globalNormalisationFactor;
-}
-
-
-
 void AnalysisBase::SetBTagFile(TString btagFile)
 {
-    this->btagFile_ = btagFile;
+    btagFile_ = btagFile;
 }
 
 
 
 void AnalysisBase::SetChannel(TString channel)
 {
-    this->channel_ = channel;
-    this->channelPdgIdProduct_ = 
+    channel_ = channel;
+    channelPdgIdProduct_ = 
         channel == "ee" ? -11*11
         : channel == "emu" ? -11*13
         : -13*13;
@@ -247,29 +240,31 @@ void AnalysisBase::SetChannel(TString channel)
 
 void AnalysisBase::SetTopSignal(bool isTopSignal)
 {
-    this->isTopSignal_ = isTopSignal;
+    isTopSignal_ = isTopSignal;
 }
 
 
 
 void AnalysisBase::SetHiggsSignal(const bool higgsSignal)
 {
-    this->isHiggsSignal_ = higgsSignal;
+    isHiggsSignal_ = higgsSignal;
 }
 
 
 
 void AnalysisBase::SetSystematic(TString systematic)
 {
-    this->systematic_ = systematic;
+    systematic_ = systematic;
 }
 
 
 
 void AnalysisBase::SetSamplename(TString samplename, TString systematic_from_file)
 {
-    this->samplename_ = samplename;
-    isTtbarPlusTauSample_ = samplename.BeginsWith("ttbar") && !samplename.Contains("bg");
+    samplename_ = samplename;
+    isTtbarPlusTauSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") &&
+                            !(samplename=="ttbarw") && !(samplename=="ttbarz") &&
+                            !samplename.BeginsWith("ttbarbg");
     correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !systematic_from_file.Contains("SPIN") &&
                         !systematic_from_file.Contains("POWHEG") && !systematic_from_file.Contains("MCATNLO");
 }
@@ -278,28 +273,28 @@ void AnalysisBase::SetSamplename(TString samplename, TString systematic_from_fil
 
 void AnalysisBase::SetMC(bool isMC)
 {
-    this->isMC_ = isMC;
+    isMC_ = isMC;
 }
 
 
 
 void AnalysisBase::SetOutputfilename(TString outputfilename)
 {
-    this->outputfilename_ = outputfilename;
+    outputfilename_ = outputfilename;
 }
 
 
 
 void AnalysisBase::SetWeightedEvents(TH1* weightedEvents)
 {
-    this->h_weightedEvents = weightedEvents;
+    h_weightedEvents = weightedEvents;
 }
 
 
 
 void AnalysisBase::SetRunViaTau(bool runViaTau)
 {
-    this->runViaTau_ = runViaTau;
+    runViaTau_ = runViaTau;
     if (runViaTau) isTopSignal_ = 0;
 }
 
@@ -1638,17 +1633,7 @@ void AnalysisBase::fillBtagHistograms(const double jetPtCut, const double btagWP
 void AnalysisBase::produceBtagEfficiencies()
 {
     std::cout << "Writing out btag efficiencies\n";
-    std::string f_savename = "selectionRoot";
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/BTagEff");
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(systematic_); 
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
-    f_savename.append(channel_); 
-    gSystem->MakeDirectory(f_savename.c_str());
-    f_savename.append("/");
+    std::string f_savename = this->assignFolder(BTagEffDIR, channel_, systematic_);
     f_savename.append(outputfilename_);
     
     h_bjets = dynamic_cast<TH2*>( fOutput->FindObject("bjets2D") );
@@ -1891,6 +1876,91 @@ void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
         }        
     }
 }
+
+
+
+std::string AnalysisBase::assignFolder(const char* baseDir, const TString& channel, const TString& systematic)const
+{
+    std::string path("");
+    
+    // Create all subdirectories contained in baseDir
+    TObjArray* a_subDir = TString(baseDir).Tokenize("/");
+    for(Int_t iSubDir = 0; iSubDir < a_subDir->GetEntriesFast(); ++iSubDir){
+        const TString& subDir = a_subDir->At(iSubDir)->GetName();
+        path.append(subDir);
+        path.append("/");
+        gSystem->MakeDirectory(path.c_str());
+    }
+    
+    // Create subdirectories for systematic and channel
+    path.append(systematic);
+    path.append("/");
+    gSystem->MakeDirectory(path.c_str());
+    path.append(channel);
+    path.append("/");
+    gSystem->MakeDirectory(path.c_str());
+    
+    return path;
+}
+
+
+
+bool AnalysisBase::failsDrellYanGeneratorSelection(Long64_t& entry)const
+{
+    if(checkZDecayMode_ && !checkZDecayMode_(entry)) return true;
+    return false;
+}
+
+
+
+bool AnalysisBase::failsTopGeneratorSelection(Long64_t& entry)
+{
+    if(!isTtbarPlusTauSample_) return false;
+    GetTopDecayModeEntry(entry);
+    
+    //decayMode contains the decay of the top (*10) + the decay of the antitop
+    //1=hadron, 2=e, 3=mu, 4=tau->hadron, 5=tau->e, 6=tau->mu
+    //i.e. 23 == top decays to e, tbar decays to mu
+    bool isViaTau = topDecayMode_ > 40 || (topDecayMode_ % 10 > 4);
+    bool isCorrectChannel = false;
+    switch (channelPdgIdProduct_) {
+        case -11*13: isCorrectChannel = topDecayMode_ == 23 || topDecayMode_ == 32 //emu prompt
+                        || topDecayMode_ == 53 || topDecayMode_ == 35 //e via tau, mu prompt
+                        || topDecayMode_ == 26 || topDecayMode_ == 62 //e prompt, mu via tau
+                        || topDecayMode_ == 56 || topDecayMode_ == 65; //both via tau
+                        break;
+        case -11*11: isCorrectChannel = topDecayMode_ == 22  //ee prompt
+                        || topDecayMode_ == 52 || topDecayMode_ == 25 //e prompt, e via tau
+                        || topDecayMode_ == 55; break; //both via tau
+        case -13*13: isCorrectChannel = topDecayMode_ == 33  //mumu prompt
+                        || topDecayMode_ == 36 || topDecayMode_ == 63 //mu prompt, mu via tau
+                        || topDecayMode_ == 66; break; //both via tau
+        default: std::cerr << "Invalid channel! Product = " << channelPdgIdProduct_ << "\n";
+    };
+    bool isBackgroundInSignalSample = !isCorrectChannel || isViaTau;
+    if(runViaTau_ != isBackgroundInSignalSample) return true;
+    return false;
+}
+
+
+
+double AnalysisBase::madgraphWDecayCorrection(Long64_t& entry)
+{
+    if(!correctMadgraphBR_) return 1.;
+    GetTopDecayModeEntry(entry);
+    
+    // We must correct for the madGraph branching fraction being 1/9 for dileptons (PDG average is .108)
+    if(topDecayMode_ == 11){ //all hadronic decay
+        return (0.676*1.5) * (0.676*1.5);
+    }
+    else if(topDecayMode_< 20 || ( topDecayMode_ % 10 == 1)){ //semileptonic Decay
+        return (0.108*9.) * (0.676*1.5);
+    }
+    else{ //dileptonic decay (including taus!)
+        return (0.108*9.) * (0.108*9.);
+    }
+}
+
 
 
 

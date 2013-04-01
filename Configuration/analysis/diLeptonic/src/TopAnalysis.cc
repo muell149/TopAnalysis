@@ -67,6 +67,15 @@ void TopAnalysis::Begin(TTree* )
 void TopAnalysis::Terminate()
 {
     if(isTopSignal_)produceBtagEfficiencies();
+    
+    //calculate an overall weight due to the shape reweighting, and apply it
+    const double globalNormalisationFactor = overallGlobalNormalisationFactor();
+    TIterator* it = fOutput->MakeIterator();
+    while (TObject* obj = it->Next()) {
+        TH1 *hist = dynamic_cast<TH1*>(obj);
+        if (hist) hist->Scale(globalNormalisationFactor); 
+    }
+    
     AnalysisBase::Terminate();
 }
 
@@ -638,49 +647,20 @@ void TopAnalysis::SlaveTerminate()
 
 Bool_t TopAnalysis::Process ( Long64_t entry )
 {    
-    
+    // Defaults from AnalysisBase
     AnalysisBase::Process(entry);
 
-    //do we have a DY true level cut?
-    if (checkZDecayMode_ && !checkZDecayMode_(entry)) return kTRUE;
     
-    if (isTtbarPlusTauSample_ || correctMadgraphBR_) GetTopDecayModeEntry(entry);
-    //decayMode contains the decay of the top (*10) + the decay of the antitop
-    //1=hadron, 2=e, 3=mu, 4=tau->hadron, 5=tau->e, 6=tau->mu
-    //i.e. 23 == top decays to e, tbar decays to mu
-    if (isTtbarPlusTauSample_) {
-        bool isViaTau = topDecayMode_ > 40 || ( topDecayMode_ % 10 > 4 );
-        bool isCorrectChannel = false;
-        switch (channelPdgIdProduct_) {
-            case -11*13: isCorrectChannel = topDecayMode_ == 23 || topDecayMode_ == 32 //emu prompt
-                            || topDecayMode_ == 53 || topDecayMode_ == 35 //e via tau, mu prompt
-                            || topDecayMode_ == 26 || topDecayMode_ == 62 //e prompt, mu via tau
-                            || topDecayMode_ == 56 || topDecayMode_ == 65; //both via tau
-                            break;
-            case -11*11: isCorrectChannel = topDecayMode_ == 22  //ee prompt
-                            || topDecayMode_ == 52 || topDecayMode_ == 25 //e prompt, e via tau
-                            || topDecayMode_ == 55; break; //both via tau
-            case -13*13: isCorrectChannel = topDecayMode_ == 33
-                            || topDecayMode_ == 36 || topDecayMode_ == 63
-                            || topDecayMode_ == 66; break;
-            default: std::cerr << "Invalid channel! Product = " << channelPdgIdProduct_ << "\n";
-        };
-        bool isBackgroundInSignalSample = !isCorrectChannel || isViaTau;
-        if (runViaTau_ != isBackgroundInSignalSample) return kTRUE;
-    }
+    // Separate DY dilepton decays in lepton flavours
+    if(failsDrellYanGeneratorSelection(entry)) return kTRUE;
+    
+    // Separate dileptonic ttbar decays via tau
+    if(failsTopGeneratorSelection(entry)) return kTRUE;
     
     GetRecoBranchesEntry(entry);
-    GetKinRecoBranchesEntry(entry);
-    //We must correct for the madGraph branching fraction being 1/9 for dileptons (PDG average is .108)
-    if ( correctMadgraphBR_ ) {
-        if ( topDecayMode_ == 11 ) { //all hadronic decay
-            weightGenerator_ *= (0.676*1.5) * (0.676*1.5);
-        } else if ( topDecayMode_< 20 || ( topDecayMode_ % 10 == 1) ) { //semileptonic Decay
-            weightGenerator_ *= (0.108*9) * (0.676*1.5);
-        } else {//dileptonic decay (including taus!)
-            weightGenerator_ *= (0.108*9) * (0.108*9);
-        }
-    }
+    // Correct for the MadGraph branching fraction being 1/9 for dileptons (PDG average is .108)
+    weightGenerator_ *= madgraphWDecayCorrection(entry);
+    
     
     if (pdf_no_ >= 0) {
         GetPDFEntry(entry);
@@ -1036,7 +1016,11 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         //End: Fill histograms with Leading pT and 2nd Leading pT: Top
         
     }//for visible top events
-
+    
+    
+    GetKinRecoBranchesEntry(entry);
+    
+    
     // ++++ Control Plots ++++
     for (int i=0; i<(int) leptons_->size(); ++i){
         h_AllLeptonEta_step0->Fill(leptons_->at(i).Eta(), 1);
