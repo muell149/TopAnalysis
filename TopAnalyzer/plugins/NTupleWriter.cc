@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.32 2013/04/02 13:01:17 nbartosi Exp $
+// $Id: NTupleWriter.cc,v 1.33 2013/04/02 13:04:03 nbartosi Exp $
 //
 //
 
@@ -213,6 +213,7 @@ private:
     std::vector<LV> VjetForMET;
     std::vector<double> VjetJERSF;
     std::vector<double> VjetForMETJERSF;
+    std::vector<int> VjetPartonFlavourForMET;
     std::vector<int> VjetPartonFlavour;
     std::vector<double> VjetBTagTCHE;
     std::vector<double> VjetBTagTCHP;
@@ -928,7 +929,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
           VjetForMET.push_back(jetsForMET->at(jet_it).polarP4());
           VjetForMETJERSF.push_back(jetsForMET->at(jet_it).userFloat("jerSF"));
 	  if (! iEvent.isRealData()) {
-	    VjetPartonFlavour.push_back( jetsForMET->at(jet_it).partonFlavour());
+	    VjetPartonFlavourForMET.push_back( jetsForMET->at(jet_it).partonFlavour());
 
 	    if (jetsForMET->at(jet_it).genJet()) {
 	      VassociatedGenJetForMET.push_back(jetsForMET->at(jet_it).genJet()->polarP4());
@@ -1080,6 +1081,7 @@ NTupleWriter::beginJob()
     Ntuple->Branch("jetBTagCSVMVA", &VjetBTagCSVMVA);
     Ntuple->Branch("pdfWeights", &VPdfWeights);
     Ntuple->Branch("jetPartonFlavour", &VjetPartonFlavour);
+    Ntuple->Branch("jetPartonFlavourForMET", &VjetPartonFlavourForMET);
     Ntuple->Branch("allGenJets", &VallGenJets);
     Ntuple->Branch("associatedGenJet", &VassociatedGenJet);
     Ntuple->Branch("associatedGenJetForMET", &VassociatedGenJetForMET);
@@ -1257,6 +1259,7 @@ void NTupleWriter::clearVariables()
     VjetForMET.clear();
     VjetForMETJERSF.clear();
     VjetPartonFlavour.clear();
+    VjetPartonFlavourForMET.clear();
     VjetBTagTCHE.clear();
     VjetBTagTCHP.clear();
     VjetBTagSSVHE.clear();
