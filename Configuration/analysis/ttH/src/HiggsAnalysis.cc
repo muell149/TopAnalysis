@@ -276,6 +276,9 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Access reco information
     this->GetRecoBranchesEntry(entry);
     
+    // FIXME: needed here for now, since cleanJetCollection requires it
+    if(isMC_) this->GetCommonGenBranchesEntry(entry);
+    
     // Systematics for jet energy resolution/scale
     // Corrections for: jets_, jetsForMET_, met_
     //if(doJesJer_)applyJER_JES();
