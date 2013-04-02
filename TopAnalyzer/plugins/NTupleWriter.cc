@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.30.2.19 2013/04/02 12:42:55 nbartosi Exp $
+// $Id: NTupleWriter.cc,v 1.32 2013/04/02 13:01:17 nbartosi Exp $
 //
 //
 
@@ -1146,7 +1146,7 @@ NTupleWriter::beginJob()
 	Ntuple->Branch("genBHadPlusMothers", &VbHadMothers);
 
 	if(saveHadronMothers) {
-		Ntuple->Branch("genBHadPlusMothersPdg", &VbHadMothersPdg);
+		Ntuple->Branch("genBHadPlusMothersPdgId", &VbHadMothersPdg);
 		Ntuple->Branch("genBHadPlusMothersStatus", &VbHadMothersStatus);
 		Ntuple->Branch("genBHadPlusMothersIndices", &VbHadMothersIndices);
 	}
