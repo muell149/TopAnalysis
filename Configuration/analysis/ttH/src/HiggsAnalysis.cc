@@ -271,7 +271,10 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         GetWeightGeneratorEntry(entry);
         weightGenerator_ *= weightMadgraphCorrection;
     }
-    
+    else{
+        // Since weights are also filled for data, this value needs to be set
+        weightGenerator_ = 1.;
+    }
     
     // Access reco information
     this->GetRecoBranchesEntry(entry);
