@@ -672,6 +672,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         weightGenerator_ *= weightMadgraphCorrection;
         weightGenerator_ *= pdfWeight;
     }
+    else{
+        // Since weights are also filled for data, this value needs to be set
+        weightGenerator_ = 1.;
+    }
     
     // Count events for closure test here, where no more taus are available
     if (doClosureTest_) {
