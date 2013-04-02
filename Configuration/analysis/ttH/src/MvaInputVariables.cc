@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <cstdlib>
 
 #include <TTree.h>
 #include <TSystem.h>
@@ -7,6 +8,7 @@
 #include <TFile.h>
 #include <Math/VectorUtil.h>
 #include <TSelectorList.h>
+#include <Rtypes.h>
 
 #include "MvaInputVariables.h"
 
@@ -259,6 +261,88 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorLis
         h_meanMTAlt_b_met_step8->Fill(mvaInputTopJetsStruct.meanMTAlt_b_met_, eventWeight);
     }
     std::cout<<"=== Finishing control plots for MVA variables\n\n";
+}
+
+
+
+void MvaInputTopJetsVariables::importTree(const std::string& f_savename)
+{
+    std::cout<<"--- Beginning import of TTree for MVA variables\n";
+    
+    TFile* inputFile = TFile::Open(f_savename.c_str());
+    if(inputFile->IsZombie()){
+        std::cerr<<"ERROR! Cannot open input file to import TTree, filename is: "<<f_savename<<"\n...break\n"<<std::endl;
+        exit(77);
+    }
+    
+    constexpr const char* treeName("mvaInputTopJets");
+    TTree* tree(0);
+    tree = dynamic_cast<TTree*>(inputFile->Get(treeName));
+    if (!tree){
+        std::cerr << "ERROR: TTree not found in file, tree name is: "<<treeName<<"\n...break\n"<<std::endl;
+        exit(78);
+    }
+    
+    this->importBranches(tree);
+    
+    tree = 0;
+    inputFile->Close();
+    std::cout<<"=== Finishing import of TTree for MVA variables\n\n";
+}
+
+
+
+
+void MvaInputTopJetsVariables::importBranches(TTree* tree)
+{
+    // Set up variables struct and branches
+    MvaInputTopJetsStruct mvaInputStruct;
+    
+    TBranch* b_bQuarkRecoJetMatched(0);
+    TBranch* b_correctCombination(0);
+    TBranch* b_swappedCombination(0);
+    
+    TBranch* b_meanDeltaPhi_b_met(0);
+    TBranch* b_massDiff_recoil_bbbar(0);
+    TBranch* b_pt_b_antiLepton(0);
+    TBranch* b_pt_antiB_lepton(0);
+    TBranch* b_deltaR_b_antiLepton(0);
+    TBranch* b_deltaR_antiB_lepton(0);
+    TBranch* b_btagDiscriminatorSum(0);
+    TBranch* b_deltaPhi_antiBLepton_bAntiLepton(0);
+    TBranch* b_massDiff_fullBLepton_bbbar(0);
+    TBranch* b_meanMT_b_met(0);
+    TBranch* b_massSum_antiBLepton_bAntiLepton(0);
+    TBranch* b_massDiff_antiBLepton_bAntiLepton(0);
+    
+    TBranch* b_meanMTAlt_b_met(0);
+    
+    // Set branch addresses
+    tree->SetBranchAddress("bQuarkRecoJetMatched", &mvaInputStruct.bQuarkRecoJetMatched_, &b_bQuarkRecoJetMatched);
+    tree->SetBranchAddress("correctCombination", &mvaInputStruct.correctCombination_, &b_correctCombination);
+    tree->SetBranchAddress("swappedCombination", &mvaInputStruct.swappedCombination_, &b_swappedCombination);
+    
+    tree->SetBranchAddress("meanDeltaPhi_b_met", &mvaInputStruct.meanDeltaPhi_b_met_, &b_meanDeltaPhi_b_met);
+    tree->SetBranchAddress("massDiff_recoil_bbbar", &mvaInputStruct.massDiff_recoil_bbbar_, &b_massDiff_recoil_bbbar);
+    tree->SetBranchAddress("pt_b_antiLepton", &mvaInputStruct.pt_b_antiLepton_, &b_pt_b_antiLepton);
+    tree->SetBranchAddress("pt_antiB_lepton", &mvaInputStruct.pt_antiB_lepton_, &b_pt_antiB_lepton);
+    tree->SetBranchAddress("deltaR_b_antiLepton", &mvaInputStruct.deltaR_b_antiLepton_, &b_deltaR_b_antiLepton);
+    tree->SetBranchAddress("deltaR_antiB_lepton", &mvaInputStruct.deltaR_antiB_lepton_, &b_deltaR_antiB_lepton);
+    tree->SetBranchAddress("btagDiscriminatorSum", &mvaInputStruct.btagDiscriminatorSum_, &b_btagDiscriminatorSum);
+    tree->SetBranchAddress("deltaPhi_antiBLepton_bAntiLepton", &mvaInputStruct.deltaPhi_antiBLepton_bAntiLepton_, &b_deltaPhi_antiBLepton_bAntiLepton);
+    tree->SetBranchAddress("massDiff_fullBLepton_bbbar", &mvaInputStruct.massDiff_fullBLepton_bbbar_, &b_massDiff_fullBLepton_bbbar);
+    tree->SetBranchAddress("meanMT_b_met", &mvaInputStruct.meanMT_b_met_, &b_meanMT_b_met);
+    tree->SetBranchAddress("massSum_antiBLepton_bAntiLepton", &mvaInputStruct.massSum_antiBLepton_bAntiLepton_, &b_massSum_antiBLepton_bAntiLepton);
+    tree->SetBranchAddress("massDiff_antiBLepton_bAntiLepton", &mvaInputStruct.massDiff_antiBLepton_bAntiLepton_, &b_massDiff_antiBLepton_bAntiLepton);
+    
+    tree->SetBranchAddress("meanMTAlt_b_met", &mvaInputStruct.meanMTAlt_b_met_, &b_meanMTAlt_b_met);
+    
+    // Loop over all tree entries and fill vector of structs
+    v_mvaInputStruct_.clear();
+    for(Long64_t iEntry = 0; iEntry < tree->GetEntries(); ++iEntry){
+        tree->GetEntry(iEntry);
+        v_mvaInputStruct_.push_back(mvaInputStruct);
+    }
 }
 
 

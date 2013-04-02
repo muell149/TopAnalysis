@@ -2,6 +2,7 @@
 #define MvaInputVariables_h
 
 #include <vector>
+#include <string>
 
 class TTree;
 class TSelectorList;
@@ -90,7 +91,8 @@ public:
     /// Clear the class instance
     void clear();
     
-    
+    /// Import a written TTree
+    void importTree(const std::string& f_savename);
     
     /// Get the MVA input structs
     std::vector<MvaInputTopJetsStruct> mvaInputStructs()const;
@@ -98,6 +100,9 @@ public:
     
     
 private:
+    
+    /// Import all branches from TTree
+    void importBranches(TTree* tree);
     
     /// Store the object in the output list and return it
     template<class T> T* store(T* obj){return Tools::store(obj, selectorList_);}
