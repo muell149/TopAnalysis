@@ -34,26 +34,27 @@ namespace ztop{
       flush(std::cout);
     }
   }
-}
-TH2D divideTH2DBinomial(TH2D &h1, TH2D &h2){ //! out = h1 / h2
-  TH2D out=h1; 
-  if(h1.GetNbinsX() != h2.GetNbinsX() || h1.GetNbinsY() != h2.GetNbinsY()){
-    std::cout << "divideTH2DBinomial: Error! histograms must have same binning!" << std::endl;
-    return h1;
-  }
-  for(int binx=1;binx<=h1.GetNbinsX()+1;binx++){
-    for(int biny=1;biny<=h1.GetNbinsY()+1;biny++){
-      double cont=0;
-      double err=1;
-      if(h2.GetBinContent(binx,biny) !=0){
-	cont=h1.GetBinContent(binx,biny) / h2.GetBinContent(binx,biny);
-	err=sqrt(cont*(1-cont)/ h1.GetBinContent(binx,biny));
-      }
-      out.SetBinContent(binx,biny,cont);
-      out.SetBinError(binx,biny,err);
+
+  TH2D divideTH2DBinomial(TH2D &h1, TH2D &h2){ //! out = h1 / h2
+    TH2D out=h1; 
+    if(h1.GetNbinsX() != h2.GetNbinsX() || h1.GetNbinsY() != h2.GetNbinsY()){
+      std::cout << "divideTH2DBinomial: Error! histograms must have same binning!" << std::endl;
+      return h1;
     }
+    for(int binx=1;binx<=h1.GetNbinsX()+1;binx++){
+      for(int biny=1;biny<=h1.GetNbinsY()+1;biny++){
+	double cont=0;
+	double err=1;
+	if(h2.GetBinContent(binx,biny) !=0){
+	  cont=h1.GetBinContent(binx,biny) / h2.GetBinContent(binx,biny);
+	  err=sqrt(cont*(1-cont)/ h1.GetBinContent(binx,biny));
+	}
+	out.SetBinContent(binx,biny,cont);
+	out.SetBinError(binx,biny,err);
+      }
+    }
+    return out;
   }
-  return out;
 
   TH2D divideTH2D(TH2D &h1, TH2D &h2){ 
     TH2D out=h1; 
