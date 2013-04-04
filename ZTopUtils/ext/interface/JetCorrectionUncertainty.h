@@ -1,13 +1,16 @@
-#ifndef JetCorrectionUncertainty_h
-#define JetCorrectionUncertainty_h
+#ifndef JetCorrectionUncertainty_h_ztop
+#define JetCorrectionUncertainty_h_ztop
 
 #include <string>
 #include <vector>
-class SimpleJetCorrectionUncertainty;
-class JetCorrectorParameters;
 
-class JetCorrectionUncertainty 
-{
+namespace ztop{//needs to be done to avoid possible conflicts
+
+  class SimpleJetCorrectionUncertainty;
+  class JetCorrectorParameters;
+
+  class JetCorrectionUncertainty 
+  {
   public:
     JetCorrectionUncertainty();
     JetCorrectionUncertainty(const std::string& fDataFile);
@@ -26,31 +29,31 @@ class JetCorrectionUncertainty
     void setAddLepToJet (bool fAddLepToJet) {mAddLepToJet = fAddLepToJet;}
     float getUncertainty(bool fDirection);
 
- private:
-  JetCorrectionUncertainty(const JetCorrectionUncertainty&);
-  JetCorrectionUncertainty& operator= (const JetCorrectionUncertainty&);
-  std::vector<float> fillVector(const std::vector<std::string>& fNames);
-  float getPtRel();
-  //---- Member Data ---------
-  float mJetE;
-  float mJetEta;
-  float mJetPt;
-  float mJetPhi;
-  float mJetEMF; 
-  float mLepPx;
-  float mLepPy;
-  float mLepPz;
-  bool  mAddLepToJet;
-  bool  mIsJetEset;
-  bool  mIsJetPtset;
-  bool  mIsJetPhiset;
-  bool  mIsJetEtaset;
-  bool  mIsJetEMFset; 
-  bool  mIsLepPxset;
-  bool  mIsLepPyset;
-  bool  mIsLepPzset;
-  SimpleJetCorrectionUncertainty* mUncertainty;
-};
-
+  private:
+    JetCorrectionUncertainty(const JetCorrectionUncertainty&);
+    JetCorrectionUncertainty& operator= (const JetCorrectionUncertainty&);
+    std::vector<float> fillVector(const std::vector<std::string>& fNames);
+    float getPtRel();
+    //---- Member Data ---------
+    float mJetE;
+    float mJetEta;
+    float mJetPt;
+    float mJetPhi;
+    float mJetEMF; 
+    float mLepPx;
+    float mLepPy;
+    float mLepPz;
+    bool  mAddLepToJet;
+    bool  mIsJetEset;
+    bool  mIsJetPtset;
+    bool  mIsJetPhiset;
+    bool  mIsJetEtaset;
+    bool  mIsJetEMFset; 
+    bool  mIsLepPxset;
+    bool  mIsLepPyset;
+    bool  mIsLepPzset;
+    SimpleJetCorrectionUncertainty* mUncertainty;
+  };
+}
 #endif
 

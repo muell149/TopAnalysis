@@ -12,7 +12,7 @@
 
 
 namespace ztop{
-  // typedef ROOT::Math::PolarLorentzVector<ROOT::Math::PxPyPzE4D<double> > PolarLorentzVector;
+ 
 
 
   class JECBase{
@@ -40,8 +40,8 @@ namespace ztop{
   protected:
 
     std::string pathToFile_;
-    std::vector<JetCorrectionUncertainty*> vsrc_;
-    JetCorrectionUncertainty* totalunc_;
+    std::vector<ztop::JetCorrectionUncertainty*> vsrc_;
+    ztop::JetCorrectionUncertainty* totalunc_;
     int noupdown_;
     std::vector<unsigned int> sources_;
     bool is2012_;

@@ -5,16 +5,16 @@
 
 #include "../ext/interface/JetCorrectorParameters.h"
 #include "../ext/interface/JetCorrectionUncertainty.h"
-#include "../ext/interface/FactorizedJetCorrector.h"
+//#include "../ext/interface/FactorizedJetCorrector.h"
 #include "../ext/interface/SimpleJetCorrectionUncertainty.h"
-#include "../ext/interface/SimpleJetCorrector.h"
+//#include "../ext/interface/SimpleJetCorrector.h"
 #include "../ext/interface/JetCorrectorParameters.h"
 
 
 namespace
 {
   struct dict {
-
+    
     std::vector<double> klklkl;
     std::vector<TString> kkj;
     std::pair<TString,std::vector<double> > jj;
@@ -35,18 +35,18 @@ namespace
     std::vector<ztop::JERBase> ksdskV;
 
 
-///external
+    ///external
 
 
-JetCorrectorParameters corr;
-JetCorrectorParameters::Definitions def;
-JetCorrectorParameters::Record record;
-std::vector<JetCorrectorParameters> corrv;
-std::vector<JetCorrectorParameters::Record> recordv;
-JetCorrectorParametersCollection coll;
-JetCorrectorParametersCollection::pair_type pair_type;
-JetCorrectorParametersCollection::collection_type colltype;
-std::vector<JetCorrectorParametersCollection> collv;
+    ztop::JetCorrectorParameters corr;
+    ztop::JetCorrectorParameters::Definitions def;
+    ztop::JetCorrectorParameters::Record record;
+    std::vector<ztop::JetCorrectorParameters> corrv;
+    std::vector<ztop::JetCorrectorParameters::Record> recordv;
+    ztop::JetCorrectorParametersCollection coll;
+    ztop::JetCorrectorParametersCollection::pair_type pair_type;
+    ztop::JetCorrectorParametersCollection::collection_type colltype;
+    std::vector<ztop::JetCorrectorParametersCollection> collv;
 
   };
 }
