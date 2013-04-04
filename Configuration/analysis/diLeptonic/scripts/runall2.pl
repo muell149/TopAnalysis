@@ -15,10 +15,10 @@ unless ($arg{R} || $arg{r} || !-e $arg{d}) {
 unless ($arg{d} && $arg{c} && -f $arg{c}) {
     print <<'USAGE';
 Syntax:
- $ runall.pl -d directoryName -c configFile.py [-r regexp] [-s]
+ $ runall2.pl -d directoryName -c configFile.py [-r regexp] [-s]
         [-j NJobs] [-x factor] [-m maxEventsPerJob] [-f files.txt]
 
-Run runall.pl to run over all data samples given in files.txt using the
+Run runall2.pl to run over all data samples given in files.txt using the
 configuration file configFile.py.
 
 -r regexp
