@@ -1928,8 +1928,10 @@ void AnalysisBase::cleanJetCollection(double ptcut, double etacut) {
         if (jets_->at(i).pt() < ptcut || std::abs(jets_->at(i).eta()) > etacut) {
             jets_->erase(begin(*jets_) + i);
             jetBTagCSV_->erase(begin(*jetBTagCSV_) + i);
-            jetPartonFlavour_->erase(begin(*jetPartonFlavour_) + i);
-            if (isMC_) associatedGenJet_->erase(begin(*associatedGenJet_) + i);
+            if (isMC_){
+	        jetPartonFlavour_->erase(begin(*jetPartonFlavour_) + i);
+	        associatedGenJet_->erase(begin(*associatedGenJet_) + i);
+	    }
         }        
     }
 }
