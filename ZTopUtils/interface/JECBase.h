@@ -1,8 +1,8 @@
 #ifndef JECBASE_H
 #define JECBASE_H
 
-#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
-#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "../ext/interface/JetCorrectorParameters.h"
+#include "../ext/interface/JetCorrectionUncertainty.h"
 #include <vector>
 #include <fstream>
 #include <iostream>

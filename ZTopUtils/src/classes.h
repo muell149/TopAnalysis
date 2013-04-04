@@ -3,11 +3,17 @@
 #include "../interface/JECBase.h"
 #include "../interface/bTagBase.h"
 
+#include "../ext/interface/JetCorrectorParameters.h"
+#include "../ext/interface/JetCorrectionUncertainty.h"
+#include "../ext/interface/FactorizedJetCorrector.h"
+#include "../ext/interface/SimpleJetCorrectionUncertainty.h"
+#include "../ext/interface/SimpleJetCorrector.h"
+#include "../ext/interface/JetCorrectorParameters.h"
 
 
 namespace
 {
-  struct dictionary {
+  struct dict {
 
     std::vector<double> klklkl;
     std::vector<TString> kkj;
@@ -28,6 +34,19 @@ namespace
     std::vector<ztop::JECBase> kkssV;
     std::vector<ztop::JERBase> ksdskV;
 
+
+///external
+
+
+JetCorrectorParameters corr;
+JetCorrectorParameters::Definitions def;
+JetCorrectorParameters::Record record;
+std::vector<JetCorrectorParameters> corrv;
+std::vector<JetCorrectorParameters::Record> recordv;
+JetCorrectorParametersCollection coll;
+JetCorrectorParametersCollection::pair_type pair_type;
+JetCorrectorParametersCollection::collection_type colltype;
+std::vector<JetCorrectorParametersCollection> collv;
 
   };
 }
