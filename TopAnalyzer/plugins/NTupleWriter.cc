@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Jan Kieseler,,,DESY
 //         Created:  Thu Aug 11 16:37:05 CEST 2011
-// $Id: NTupleWriter.cc,v 1.34 2013/04/02 13:33:45 iasincru Exp $
+// $Id: NTupleWriter.cc,v 1.35 2013/04/02 14:26:31 hauk Exp $
 //
 //
 
@@ -113,11 +113,11 @@ private:
     edm::InputTag BHadrons_, AntiBHadrons_;
     edm::InputTag BHadronFromTopB_, AntiBHadronFromTopB_;
     edm::InputTag BHadronVsJet_, AntiBHadronVsJet_;
-    
-    edm::InputTag bHadMothers_, bHadMothersIndices_;
-    edm::InputTag bHadIndex_, bHadFlavour_, bHadJetIndex_;
+
+    edm::InputTag genBHadPlusMothers_, genBHadPlusMothersIndices_;
+    edm::InputTag genBHadIndex_, genBHadFlavour_, genBHadJetIndex_;
     bool saveHadronMothers;
-    
+
     bool includeTrig_;
     bool isTtBarSample_, isHiggsSample_;
     bool includePDFWeights_;
@@ -128,18 +128,18 @@ private:
     double sampleCrossSection_;
     double dataLumi_;
     edm::InputTag trigResults_, decayMode_, higgsDecayMode_;
-    
+
     bool includeZdecay_;
     edm::InputTag zDecayTag_;
-    
+
     TTree* Ntuple;
-    
+
     unsigned int runno;
     unsigned int lumibl;
     unsigned int eventno;
     unsigned int triggerBits;
     unsigned int triggerBitsTau;
-    
+
     ////////dileptons and leptons/////
     std::vector<LV>     Vlep;
     std::vector<int>    VlepPdgId;
@@ -174,10 +174,10 @@ private:
     std::vector<bool>     VBHadFromTop, VAntiBHadFromTop;
     std::vector<int>      VBHadVsJet, VAntiBHadVsJet;
 
-    std::vector<LV>                VbHadMothers;
-    std::vector<int>               VbHadMothersPdgId, VbHadMothersStatus;
-    std::vector<std::vector<int> > VbHadMothersIndices;
-    std::vector<int>               VbHadIndex, VbHadFlavour, VbHadJetIndex;
+    std::vector<LV>              VgenBHadPlusMothers;
+    std::vector<int>             VgenBHadPlusMothersPdg, VgenBHadPlusMothersStatus;
+    std::vector<std::vector<int> >  VgenBHadPlusMothersIndices;
+    std::vector<int>             VgenBHadIndex, VgenBHadFlavour, VgenBHadJetIndex;
 
 
     //Complete true level info
@@ -294,11 +294,11 @@ NTupleWriter::NTupleWriter(const edm::ParameterSet& iConfig):
     BHadronVsJet_(iConfig.getParameter<edm::InputTag> ("BHadronVsJet")),
     AntiBHadronVsJet_(iConfig.getParameter<edm::InputTag> ("AntiBHadronVsJet")),
 
-    bHadMothers_(iConfig.getParameter<edm::InputTag> ("bHadMothers")),
-    bHadMothersIndices_(iConfig.getParameter<edm::InputTag> ("bHadMothersIndices")),
-    bHadIndex_(iConfig.getParameter<edm::InputTag> ("bHadIndex")),
-    bHadFlavour_(iConfig.getParameter<edm::InputTag> ("bHadFlavour")),
-    bHadJetIndex_(iConfig.getParameter<edm::InputTag> ("bHadJetIndex")),
+    genBHadPlusMothers_(iConfig.getParameter<edm::InputTag> ("genBHadPlusMothers")),
+    genBHadPlusMothersIndices_(iConfig.getParameter<edm::InputTag> ("genBHadPlusMothersIndices")),
+    genBHadIndex_(iConfig.getParameter<edm::InputTag> ("genBHadIndex")),
+    genBHadFlavour_(iConfig.getParameter<edm::InputTag> ("genBHadFlavour")),
+    genBHadJetIndex_(iConfig.getParameter<edm::InputTag> ("genBHadJetIndex")),
 
     saveHadronMothers(iConfig.getParameter<bool>("saveHadronMothers")),
 
@@ -621,55 +621,54 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
             for (size_t i=0; i<AntiBHadronVsJet->size(); ++i) {
                 VAntiBHadVsJet.push_back(AntiBHadronVsJet->at(i));
             }
-            
-            
-            edm::Handle<std::vector<int> > bHadIndex;
-            iEvent.getByLabel(bHadIndex_, bHadIndex);
-            if(!bHadIndex.failedToGet()) {
-                for (std::vector<int>::const_iterator it=bHadIndex->begin(); it!=bHadIndex->end(); ++it) {
-                    VbHadIndex.push_back(*it);
+
+
+            edm::Handle<std::vector<int> > genBHadIndex;
+            iEvent.getByLabel(genBHadIndex_, genBHadIndex);
+            if(!genBHadIndex.failedToGet()) {
+                for (std::vector<int>::const_iterator it=genBHadIndex->begin(); it!=genBHadIndex->end(); ++it) {
+                    VgenBHadIndex.push_back(*it);
                 }
             }
 
-            edm::Handle<std::vector<reco::GenParticle> > bHadMothers;
-            iEvent.getByLabel(bHadMothers_, bHadMothers);
-            if(!bHadMothers.failedToGet()) {
-                if(saveHadronMothers) {    // If all particles have to be stored
-                    for (std::vector<reco::GenParticle>::const_iterator it=bHadMothers->begin(); it!=bHadMothers->end(); ++it){
-                        VbHadMothers.push_back(it->polarP4());
-                        VbHadMothersPdgId.push_back(it->pdgId());
-                        VbHadMothersStatus.push_back(it->status());
-                    }    // End of loop over all particles
+            edm::Handle<std::vector<reco::GenParticle> > genBHadPlusMothers;
+            iEvent.getByLabel(genBHadPlusMothers_, genBHadPlusMothers);
+            if(!genBHadPlusMothers.failedToGet()) {
+                if(saveHadronMothers) {         // If all particles have to be stored
+                    for (std::vector<reco::GenParticle>::const_iterator it=genBHadPlusMothers->begin(); it!=genBHadPlusMothers->end(); ++it){
+                        VgenBHadPlusMothers.push_back(it->polarP4());
+                        VgenBHadPlusMothersPdg.push_back(it->pdgId());
+                        VgenBHadPlusMothersStatus.push_back(it->status());
+                    }       // End of loop over all particles
+                }   else {      // If only hadrons have to be stored
+                    for (unsigned int i=0; i<genBHadIndex->size(); ++i) {
+                        VgenBHadPlusMothers.push_back(genBHadPlusMothers->at(VgenBHadIndex[i]).polarP4());
+                        VgenBHadIndex[i]=i;
+                    }       // End of loop over hadrons
                 }
-                else {    // If only hadrons have to be stored
-                    for (unsigned int i=0; i<bHadIndex->size(); ++i) {
-                        VbHadMothers.push_back(bHadMothers->at(VbHadIndex[i]).polarP4());
-                        VbHadIndex[i]=i;
-                    }    // End of loop over hadrons
-                }
-            }    // If bHadMothers is not empty
-            
-            
-            edm::Handle<std::vector<std::vector<int> > > bHadMothersIndices;
-            iEvent.getByLabel(bHadMothersIndices_, bHadMothersIndices);
-            if(!bHadMothersIndices.failedToGet() && saveHadronMothers) {    // Only if all hadron mothers have to be stored
-                for (std::vector<std::vector<int> >::const_iterator it=bHadMothersIndices->begin(); it!=bHadMothersIndices->end(); ++it) {
-                    VbHadMothersIndices.push_back(*it);
-                }
-            }
-            
-            edm::Handle<std::vector<int> > bHadFlavour;
-            iEvent.getByLabel(bHadFlavour_, bHadFlavour);
-            if(!bHadFlavour.failedToGet()) {
-                for (std::vector<int>::const_iterator it=bHadFlavour->begin(); it!=bHadFlavour->end(); ++it) {
-                    VbHadFlavour.push_back(*it);
+            }       // If genBHadPlusMothers is not empty
+
+
+            edm::Handle<std::vector<std::vector<int> > > genBHadPlusMothersIndices;
+            iEvent.getByLabel(genBHadPlusMothersIndices_, genBHadPlusMothersIndices);
+            if(!genBHadPlusMothersIndices.failedToGet() && saveHadronMothers) {         // Only if all hadron mothers have to be stored
+                for (std::vector<std::vector<int> >::const_iterator it=genBHadPlusMothersIndices->begin(); it!=genBHadPlusMothersIndices->end(); ++it) {
+                    VgenBHadPlusMothersIndices.push_back(*it);
                 }
             }
-            edm::Handle<std::vector<int> > bHadJetIndex;
-            iEvent.getByLabel(bHadJetIndex_, bHadJetIndex);
-            if(!bHadJetIndex.failedToGet()) {
-                for (std::vector<int>::const_iterator it=bHadJetIndex->begin(); it!=bHadJetIndex->end(); ++it) {
-                    VbHadJetIndex.push_back(*it);
+
+            edm::Handle<std::vector<int> > genBHadFlavour;
+            iEvent.getByLabel(genBHadFlavour_, genBHadFlavour);
+            if(!genBHadFlavour.failedToGet()) {
+                for (std::vector<int>::const_iterator it=genBHadFlavour->begin(); it!=genBHadFlavour->end(); ++it) {
+                    VgenBHadFlavour.push_back(*it);
+                }
+            }
+            edm::Handle<std::vector<int> > genBHadJetIndex;
+            iEvent.getByLabel(genBHadJetIndex_, genBHadJetIndex);
+            if(!genBHadJetIndex.failedToGet()) {
+                for (std::vector<int>::const_iterator it=genBHadJetIndex->begin(); it!=genBHadJetIndex->end(); ++it) {
+                    VgenBHadJetIndex.push_back(*it);
                 }
             }
         }
@@ -786,11 +785,11 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         if ( writeelec )
         {
             //Fill elestuff
-            
+
             //Electron MVAID values
-            
+
             std::vector<std::pair<std::string,float> > electronMVAIDs = anelectron->electronIDs();
-            
+
             double idtemp = -9999.0;
             for(unsigned int id = 0; id < electronMVAIDs.size(); id++){
                 if(electronMVAIDs[id].first == "mvaTrigV0"){
@@ -798,7 +797,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
                     break;
                 }
             }
-            
+
             VlepID.push_back(idtemp);
             const reco::GsfTrack &track = *(anelectron->gsfTrack());
             VlepDxyVertex0.push_back(track.dxy(vertices->at(0).position()));
@@ -812,7 +811,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
                                                + anelectron->photonIso()
                                                - 0.5*anelectron->puChargedHadronIso())
                                 ) / anelectron->pt());
-            
+
             Vlep.push_back(anelectron->polarP4());
             VlepPdgId.push_back(anelectron->pdgId());
 
@@ -840,7 +839,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
             ++anelectron;
         }
     }
-    
+
     //store the information in which channel the lepton is reconstructed
     for (size_t i = 1; i < VlepPdgId.size(); ++i) {
         int product = VlepPdgId.at(0) * VlepPdgId.at(i);
@@ -860,7 +859,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetJERSF.push_back(ajet->userFloat("jerSF"));
         if (! iEvent.isRealData()) {
             VjetPartonFlavour.push_back( ajet->partonFlavour());
-            
+
             if (ajet->genJet()) {
                 VassociatedGenJet.push_back(ajet->genJet()->polarP4());
             }
@@ -877,18 +876,18 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetBTagCSV.push_back(ajet->bDiscriminator("combinedSecondaryVertexBJetTags"));
         VjetBTagCSVMVA.push_back(ajet->bDiscriminator("combinedSecondaryVertexMVABJetTags"));
     }
-    
+
     for(std::vector<JetProperties>::const_iterator i_jetProperties = jetPropertiesHandle->begin(); i_jetProperties != jetPropertiesHandle->end(); ++i_jetProperties){
         VjetChargeGlobalPtWeighted.push_back(i_jetProperties->jetChargeGlobalPtWeighted());
         VjetChargeRelativePtWeighted.push_back(i_jetProperties->jetChargeRelativePtWeighted());
         VjetAssociatedPartonPdgId.push_back(i_jetProperties->jetAssociatedPartonPdgId());
         VjetAssociatedParton.push_back(i_jetProperties->jetAssociatedParton());
     }
-    
-    
+
+
     //Here I create a separate jet collection needed for the on-the-fly calculation of jet uncertainties
     //because even bad-id jets are used for the MET
-    
+
     //    for ( edm::View<pat::Jet>::const_iterator ajet  = jetsForMETuncorr->begin() ; ajet != jetsForMETuncorr->end(); ++ajet )
     for ( size_t jet_it =  0 ; jet_it < jetsForMETuncorr->size(); ++jet_it )
     {
@@ -900,7 +899,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
             VjetForMETJERSF.push_back(jetsForMET->at(jet_it).userFloat("jerSF"));
             if (! iEvent.isRealData()) {
                 VjetPartonFlavourForMET.push_back( jetsForMET->at(jet_it).partonFlavour());
-                
+
                 if (jetsForMET->at(jet_it).genJet()) {
                     VassociatedGenJetForMET.push_back(jetsForMET->at(jet_it).genJet()->polarP4());
                 }
@@ -939,7 +938,7 @@ int NTupleWriter::getTriggerBits (const edm::Event &iEvent, const edm::Handle< e
     int n_Triggers = trigResults->size();
     edm::TriggerNames trigName = iEvent.triggerNames(*trigResults);
     int result = 0;
-    
+
     for ( int i_Trig = 0; i_Trig<n_Triggers; ++i_Trig )
     {
         if ( trigResults.product()->accept(i_Trig))
@@ -1161,17 +1160,17 @@ NTupleWriter::beginJob()
         Ntuple->Branch("AntiBHadronFromTopB", &VAntiBHadFromTop);
         Ntuple->Branch("BHadronVsJet", &VBHadVsJet);
         Ntuple->Branch("AntiBHadronVsJet", &VAntiBHadVsJet);
-        
-        Ntuple->Branch("genBHadPlusMothers", &VbHadMothers);
+
+        Ntuple->Branch("genBHadPlusMothers", &VgenBHadPlusMothers);
         if(saveHadronMothers) {
-            Ntuple->Branch("genBHadPlusMothersPdgId", &VbHadMothersPdgId);
-            Ntuple->Branch("genBHadPlusMothersStatus", &VbHadMothersStatus);
-            Ntuple->Branch("genBHadPlusMothersIndices", &VbHadMothersIndices);
+            Ntuple->Branch("genBHadPlusMothersPdgId", &VgenBHadPlusMothersPdg);
+            Ntuple->Branch("genBHadPlusMothersStatus", &VgenBHadPlusMothersStatus);
+            Ntuple->Branch("genBHadPlusMothersIndices", &VgenBHadPlusMothersIndices);
         }
-        Ntuple->Branch("genBHadIndex", &VbHadIndex);
-        Ntuple->Branch("genBHadFlavour", &VbHadFlavour);
-        Ntuple->Branch("genBHadJetIndex", &VbHadJetIndex);
-        
+        Ntuple->Branch("genBHadIndex", &VgenBHadIndex);
+        Ntuple->Branch("genBHadFlavour", &VgenBHadFlavour);
+        Ntuple->Branch("genBHadJetIndex", &VgenBHadJetIndex);
+
         Ntuple->Branch("jetAssociatedParton", &VjetAssociatedParton);
     }
 
@@ -1264,11 +1263,13 @@ void NTupleWriter::clearVariables()
     VBHadVsJet.clear();
     VAntiBHadVsJet.clear();
 
-    VbHadMothers.clear();
-    VbHadMothersIndices.clear();
-    VbHadIndex.clear();
-    VbHadFlavour.clear();
-    VbHadJetIndex.clear();
+    VgenBHadPlusMothers.clear();
+    VgenBHadPlusMothersIndices.clear();
+    VgenBHadPlusMothersStatus.clear();
+    VgenBHadPlusMothersPdg.clear();
+    VgenBHadIndex.clear();
+    VgenBHadFlavour.clear();
+    VgenBHadJetIndex.clear();
 
     /////////Triggers/////////
     VfiredTriggers.clear();

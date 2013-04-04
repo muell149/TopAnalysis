@@ -485,11 +485,11 @@ process.writeNTuple = writeNTuple.clone(
     AntiBHadronFromTopB = cms.InputTag(genLevelBJetProducerInput, "AntiBHadronFromTopB"),
     BHadronVsJet = cms.InputTag(genLevelBJetProducerInput, "BHadronVsJet"),
     AntiBHadronVsJet = cms.InputTag(genLevelBJetProducerInput, "AntiBHadronVsJet"),
-    bHadMothers = cms.InputTag(genLevelBJetProducerInput,"bHadMothers"),
-    bHadMothersIndices = cms.InputTag(genLevelBJetProducerInput,"bHadMothersIndices"),
-    bHadIndex = cms.InputTag(genLevelBJetProducerInput,"bHadIndex"),
-    bHadFlavour = cms.InputTag(genLevelBJetProducerInput,"bHadFlavour"),
-    bHadJetIndex = cms.InputTag(genLevelBJetProducerInput,"bHadJetIndex"),
+    genBHadPlusMothers = cms.InputTag(genLevelBJetProducerInput,"genBHadPlusMothers"),
+    genBHadPlusMothersIndices = cms.InputTag(genLevelBJetProducerInput,"genBHadPlusMothersIndices"),
+    genBHadIndex = cms.InputTag(genLevelBJetProducerInput,"genBHadIndex"),
+    genBHadFlavour = cms.InputTag(genLevelBJetProducerInput,"genBHadFlavour"),
+    genBHadJetIndex = cms.InputTag(genLevelBJetProducerInput,"genBHadJetIndex"),
 )
 
 process.writeNTuple.jetsForMET    = cms.InputTag("scaledJetEnergy:selectedPatJets")
