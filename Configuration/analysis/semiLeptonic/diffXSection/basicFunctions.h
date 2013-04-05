@@ -34,7 +34,7 @@
 #include <TPaveText.h>
 #include <TLatex.h>
 #include <TStyle.h>
-#include <TF1.h>
+#include <TF1.h> 
 #include <TBox.h>
 #include <TGaxis.h>
 #include <TError.h>
@@ -826,7 +826,7 @@ namespace semileptonic {
     if((sample==kSig)||(sample==kBkg)){
       crossSection=ttbarCrossSection; 
       // Summer12
-      Nevents = 6923750;
+      Nevents = 6923750*0.99974;// 8 TEV PU SF from gen ttbarSG Integral/entries
       // Systematic samples
       if(kSys==sysTopScaleUp  ) Nevents=5009488;
       if(kSys==sysTopScaleDown) Nevents=5387181;
@@ -838,7 +838,7 @@ namespace semileptonic {
     else if((sample==kSigPow)||(sample==kBkgPow)){
       crossSection=ttbarCrossSection; 
       // Summer12
-      Nevents = 21675970;
+      Nevents = 21675970*0.9998;// 8 TEV PU SF from gen ttbarSG Integral/entries
     }
     else if((sample==kSigMca)||(sample==kBkgMca)){
       crossSection=ttbarCrossSection; 
@@ -849,7 +849,7 @@ namespace semileptonic {
       //     2467324 negative  weights (11.35%)
       //    16810548 effective weights
       // each |weight| = 190.41256 -> number directly from LHE
-      Nevents = 32852589*190.41256; // FIXME UPDATE av. weight FOR 8 TEV
+      Nevents = 32852589.*210.92; // 8 TEV convoluted PU*weight SF from gen ttbarSG Integral/entries
     }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
