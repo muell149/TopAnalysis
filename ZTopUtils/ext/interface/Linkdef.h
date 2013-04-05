@@ -7,6 +7,6 @@
 #pragma link C++ class ztop::JetCorrectorParameters+;
 #pragma link C++ class ztop::JetCorrectorParameters::Definitions+;
 #pragma link C++ class ztop::JetCorrectorParameters::Record+;
-#pragma link C++ class ztop::SimpleJetCorrector+;
-#pragma link C++ class ztop::FactorizedJetCorrector+;
+//#pragma link C++ class ztop::SimpleJetCorrector+;
+//#pragma link C++ class ztop::FactorizedJetCorrector+;
 #endif // __CINT__
