@@ -16,7 +16,7 @@
 
 
 
-
+#include "TMVA/Config.h"
 
 
 /// The MVA input base folder
@@ -44,6 +44,11 @@ void trainBdtTopSystemJetAssignment()
     gSystem->MakeDirectory(mvaOutputFilename);
     mvaOutputFilename.Append("test1.root");
     TFile* outputFile = TFile::Open(mvaOutputFilename, "RECREATE");
+    
+    // Set the output directory for the weights (if not specified, default is "weights")
+    TString mvaOutputWeightsFilename(MvaOutputDIR);
+    mvaOutputWeightsFilename.Append("/weights");
+    (TMVA::gConfig().GetIONames()).fWeightFileDir = mvaOutputWeightsFilename;
     
     // Create the factory
     TMVA::Factory* factory(0);
