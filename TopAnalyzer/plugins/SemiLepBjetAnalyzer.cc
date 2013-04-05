@@ -399,10 +399,18 @@ SemiLepBjetAnalyzer::beginJob()
     tree->Branch("bbarqEtaGen", &valueBbarqEtaGen, "bbarqEtaGen/F");
     tree->Branch("bbarqYRec"  , &valueBbarqYRec  , "bbarqYRec/F"  );
     tree->Branch("bbarqYGen"  , &valueBbarqYGen  , "bbarqYGen/F"  );
-    tree->Branch("bqPtLeadRec"  , &valueLeadBqPtRec   , "bqPtLeadRec/F");
-    tree->Branch("bqPtLeadGen"  , &valueLeadBqPtGen   , "bqPtLeadGen/F");
-    tree->Branch("bqPtSubLeadRec"  , &valueSubLeadBqPtRec, "bqPtSubLeadRec/F");
-    tree->Branch("bqPtSubLeadGen"  , &valueSubLeadBqPtGen, "bqPtSubLeadGen/F");
+    tree->Branch("bbbarMassRec", &valueBbbarMassRec, "bbbarMassRec/F" );
+    tree->Branch("bbbarMassGen", &valueBbbarMassGen, "bbbarMassGen/F" );
+    tree->Branch("bbbarPtRec"  , &valueBbbarPtRec  , "bbbarPtRec/F"   );
+    tree->Branch("bbbarPtGen"  , &valueBbbarPtGen  , "bbbarPtGen/F"   );
+    tree->Branch("bbbarYRec"   , &valueBbbarYRec   , "bbbarYRec/F"   );
+    tree->Branch("bbbarYGen"   , &valueBbbarYGen   , "bbbarYGen/F"   );
+    tree->Branch("bbbarEtaRec" , &valueBbbarEtaRec , "bbbarEtaRec/F"   );
+    tree->Branch("bbbarEtaGen" , &valueBbbarEtaGen , "bbbarEtaGen/F"   );
+    tree->Branch("bqPtLeadRec" , &valueLeadBqPtRec , "bqPtLeadRec/F");
+    tree->Branch("bqPtLeadGen" , &valueLeadBqPtGen , "bqPtLeadGen/F");
+    tree->Branch("bqPtSubLeadRec", &valueSubLeadBqPtRec, "bqPtSubLeadRec/F");
+    tree->Branch("bqPtSubLeadGen", &valueSubLeadBqPtGen, "bqPtSubLeadGen/F");
     // boolean = true if swapping gives better results
     tree->Branch("bbSwapBetter"  , &bbSwapBetter  , "bbSwapBetter/O"  );
   }
