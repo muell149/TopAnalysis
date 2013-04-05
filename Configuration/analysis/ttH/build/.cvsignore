@@ -1,5 +1,6 @@
 load_HiggsAnalysis
 Histo
+mva
 *.o
 dict.*
 

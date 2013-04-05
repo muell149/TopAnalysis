@@ -95,6 +95,8 @@ void MvaInputTopJetsVariables::createMvaInputBranches(TTree* tree)
 {
     t_mvaInput_ = tree;
     
+    t_mvaInput_->Branch("eventWeight", &mvaInputStruct_.eventWeight_, "eventWeight/D");
+    
     t_mvaInput_->Branch("bQuarkRecoJetMatched", &mvaInputStruct_.bQuarkRecoJetMatched_, "bQuarkRecoJetMatched/O");
     t_mvaInput_->Branch("correctCombination", &mvaInputStruct_.correctCombination_, "correctCombination/O");
     t_mvaInput_->Branch("swappedCombination", &mvaInputStruct_.swappedCombination_, "swappedCombination/O");
@@ -240,7 +242,7 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorLis
     
     // Fill histograms
     for(const auto& mvaInputTopJetsStruct : this->mvaInputStructs()){
-        const bool bQuarkRecoJetMatched = mvaInputTopJetsStruct.bQuarkRecoJetMatched_;
+        //const bool bQuarkRecoJetMatched = mvaInputTopJetsStruct.bQuarkRecoJetMatched_;
         const double eventWeight(mvaInputTopJetsStruct.eventWeight_);
         if(mvaInputTopJetsStruct.swappedCombination_)h_trueStatus_step8->Fill(0.1, eventWeight);
         if(mvaInputTopJetsStruct.correctCombination_)h_trueStatus_step8->Fill(1.1, eventWeight);
@@ -298,6 +300,8 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     // Set up variables struct and branches
     MvaInputTopJetsStruct mvaInputStruct;
     
+    TBranch* b_eventWeight(0);
+    
     TBranch* b_bQuarkRecoJetMatched(0);
     TBranch* b_correctCombination(0);
     TBranch* b_swappedCombination(0);
@@ -318,6 +322,8 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     TBranch* b_meanMTAlt_b_met(0);
     
     // Set branch addresses
+    tree->SetBranchAddress("eventWeight", &mvaInputStruct.eventWeight_, &b_eventWeight);
+    
     tree->SetBranchAddress("bQuarkRecoJetMatched", &mvaInputStruct.bQuarkRecoJetMatched_, &b_bQuarkRecoJetMatched);
     tree->SetBranchAddress("correctCombination", &mvaInputStruct.correctCombination_, &b_correctCombination);
     tree->SetBranchAddress("swappedCombination", &mvaInputStruct.swappedCombination_, &b_swappedCombination);

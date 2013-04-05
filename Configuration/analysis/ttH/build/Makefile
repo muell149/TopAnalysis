@@ -1,4 +1,6 @@
-ROOTLIBS=`root-config --ldflags --libs` -Wl,--no-as-needed -lGenVector
+#ROOTLIBS=`root-config --ldflags --libs` -Wl,--no-as-needed -lGenVector
+#ROOTLIBS=`root-config --ldflags --libs` -Wl,--no-as-needed -lGenVector -lTMVA
+ROOTLIBS=`root-config --ldflags --libs` -Wl,--no-as-needed -lGenVector -lTMVA -lHistPainter
 COMPFLAGS=`root-config --cflags` -Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c++0x -DSTANDALONE_COMPILE
 #COMPFLAGS=`root-config --cflags` -Wall -Wextra -O2 -g -std=c++0x -DSTANDALONE_COMPILE
 
@@ -9,7 +11,7 @@ HiggsDir=$(CMSSW_BASE)/src/TopAnalysis/Configuration/analysis/ttH/src
 
 
 
-all: load_HiggsAnalysis Histo
+all: load_HiggsAnalysis Histo mva
 
 
 
@@ -108,9 +110,22 @@ Plotter.o: $(HiggsDir)/Plotter.cc $(HiggsDir)/Plotter.h $(HiggsDir)/plotterHelpe
 
 
 
+mva: mva.o
+	g++ -o mva $^ $(ROOTLIBS)
+
+mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc
+	g++ -c -o mva.o $(COMPFLAGS) $(HiggsDir)/train_bdt_topSystemJetAssignment.cc
+
+
+
+
+
 .PHONY: clean
 clean:
-	-rm dict.cc dict.h
 	-rm *.o
+	-rm dict.cc dict.h
 	-rm load_HiggsAnalysis
 	-rm Histo
+	-rm mva
+
+
