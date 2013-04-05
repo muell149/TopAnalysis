@@ -44,6 +44,7 @@ void Plotter::UnfoldingOptions(bool doSVD)
   doSystematics = true;
   drawNLOCurves = true; // boolean to draw/not-draw extra theory curves in the Diff.XSection plots
 
+  drawPlotRatio    = true;
   drawSmoothMadgraph = true;
   drawMadSpinCorr  = false;
   drawMCATNLO      = true;
@@ -1131,7 +1132,10 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     DrawCMSLabels(1, 8);
     DrawDecayChLabel(channelLabel[channelType]);
     leg->Draw("SAME");
-    //drawRatio(drawhists[0], stacksum, 0.5, 1.7);
+    if(drawPlotRatio){
+      TH1* stacksum = SummedStackHisto(stack.get());
+      drawRatio(drawhists[0], stacksum, 0.5, 1.7); 
+    }
 
     // Create Directory for Output Plots 
     gSystem->mkdir(outpathPlots+"/"+subfolderChannel+"/"+Systematic, true);
@@ -1508,6 +1512,10 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
     double BranchingFraction[4]={0.01166, 0.01166, 0.02332, 0.04666};//[ee, mumu, emu, combined] not including tau
 
+    double NrOfEvts_VisGen_afterSelection = 0;
+    double NrOfEvts_afterSelection = 0;
+    double NrOfEvts = 0;
+
     TH1D *numhists[hists.size()];
     double numbers[5]={0., 0., 0., 0., 0.};//[0]=data, [1]=Signal, [2]Signal(only lumi & PU weights), [3]ttbar background, [4]background(non-ttbar)
     double error_numbers[5]={0., 0., 0., 0., 0.};//Square of error: [0]=data, [1]=Signal, [2]Signal(only lumi & PU weights), [3]ttbar background, [4]background(non-ttbar)
@@ -1543,6 +1551,14 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
             TH1D *GenPlot = fileReader->GetClone<TH1D>(datasetVec.at(i), "GenAll");
             ApplyFlatWeights(GenPlot, LumiWeight);
 
+            TH1D *GenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "GenAll_noweight");
+            TH1D *VisGenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "VisGenAll_noweight");
+	    TH1 *h_NrOfEvts = fileReader->GetClone<TH1>(datasetVec.at(i), "weightedEvents");
+	
+	    NrOfEvts = h_NrOfEvts->GetBinContent(1);
+	    NrOfEvts_afterSelection += GenPlot_noweight->Integral();
+	    NrOfEvts_VisGen_afterSelection += VisGenPlot_noweight->Integral();
+	    
             numbers[2]+=GenPlot->Integral();
             error_numbers[2]+=GenPlot->GetBinError(18) * GenPlot->GetBinError(18); //This bin selection is hardcoded please change it if changes when filling in Analysis.C
 
@@ -1609,7 +1625,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
             if(legends.at(i)!="Data")bg_num+=tmp_num;
             tmp_num=0;
         }
-
+	
     }
     EventFile<<"Total MCs: "<<bg_num<<endl;
     EventFile<<"\nDataEvents= "<<numbers[0]<<endl;
@@ -1619,6 +1635,12 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     EventFile<<"All Backgd= "<<numbers[4]<<endl;
     EventFile<<"Efficiency= "<<(numbers[1]/numbers[2])<<endl;
     EventFile<<"BrancRatio= "<<BranchingFraction[channelType]<<endl;
+    EventFile<<"Total Gen Events (no weights)= "<<NrOfEvts<<endl;
+    EventFile<<"Gen Events after Selection (no weights)= "<<NrOfEvts_afterSelection<<endl;
+    EventFile<<"Visible Gen Events after Selection (no weights)= "<<NrOfEvts_VisGen_afterSelection<<endl;
+    EventFile<<"Acceptance= "<<NrOfEvts_afterSelection/NrOfEvts<<endl;
+    EventFile<<"Visible Acceptance= "<<NrOfEvts_VisGen_afterSelection/NrOfEvts<<endl;
+
 
     double xsec = ( (numbers[0]-numbers[4]) * (numbers[1]/(numbers[1]+numbers[3])) ) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
     //    double xsecstaterror = xsec * ( TMath::Sqrt(error_numbers[0]) + TMath::Sqrt(error_numbers[4]) ) / (numbers[0] - numbers[4]);  //relative statistical error
