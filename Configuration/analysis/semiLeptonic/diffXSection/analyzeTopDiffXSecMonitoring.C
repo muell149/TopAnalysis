@@ -1,13 +1,13 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
-				  bool save = false, int verbose=0, 
+				  bool save = true, int verbose=0, 
 				  TString inputFolderName="newRecentAnalysisRun8TeV",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="ProbSel")
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
 { 
   // ============================
   //  Set Root Style
@@ -142,7 +142,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   //        45: sysGenMCatNLO              46: sysGenPowheg  
   //        47: ENDOFSYSENUM
 
-  int systematicVariation=sysNo; // topPt-reweigthing: sysTest, Powheg: sysGenPowheg, McatNLO: sysGenMCatNLO
+  int systematicVariation=sysNo; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg: sysGenPowheg, McatNLO: sysGenMCatNLO
   // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
   if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
@@ -844,6 +844,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   double NttbarPS  = histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
   double BR=0.145888;
   double A=NttbarPS/NttbarFull;
+  if(verbose>2) std::cout << "NallttbarGenSG=" << NttbarFull << std::endl;
   // loop pretagged/tagged
   for(unsigned int step=0; step<selection_.size(); ++step){    
     // print label
@@ -858,6 +859,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // all MC events
     double NAllMC=events_[selection_[step]][kSig]+events_[selection_[step]][MCBG];
     double NData=events_[selection_[step]][kData];
+    if(verbose>2) std::cout << "data/MC=" << NData/NAllMC << std::endl;
     // print yield and composition
     if(verbose>=0&&withRatioPlot){
       std::cout << " Events observed in data: " << NData << std::endl;
@@ -983,6 +985,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 
   // scale ttbar component to measured xSec	
   if(scaleToMeasured){
+    if(verbose>2) std::cout << "data/NNLO=" << xSec/ttbarCrossSection << std::endl;
     for(unsigned int sample=kSig; sample<=kBkg; ++sample){
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
@@ -1007,6 +1010,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     createStackPlot(plotList_, histo_, plot, N1Dplots, verbose, decayChannel);
   }
   if(verbose>1) std::cout << std::endl;
+  if(verbose>2) std::cout << "reweighted difference: " << histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kSig]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kSig]->GetNbinsX()+1)-histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kData]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kData]->GetNbinsX()+1) << std::endl;
 
   // ============================
   // introduce some BG subtracted
