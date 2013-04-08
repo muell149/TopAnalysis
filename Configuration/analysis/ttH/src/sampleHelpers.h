@@ -62,6 +62,10 @@ namespace Channel{
     const std::vector<Channel> allowedChannelsPlotting
         {ee, emu, mumu, combined};
     
+    /// Real analysis channels, i.e. all channels which describe a real final state
+    const std::vector<Channel> realChannels
+        {ee, emu, mumu};
+    
     
     
     /// Convert a channel from string to typedef
@@ -89,8 +93,11 @@ namespace Channel{
 
 namespace Tools{
     
-    /// Assign an output folder depending on the channel and systematic
+    /// Create and assign an output folder depending on the channel and systematic
     TString assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic);
+    
+    /// Access an already existing input folder
+    TString accessFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic);
 }
 
 

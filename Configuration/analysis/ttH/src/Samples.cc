@@ -13,6 +13,13 @@
 
 
 
+/// Input base for the file lists containing the samples to be processed
+constexpr const char* FileListBASE = "FileLists_plot/HistoFileList_";
+
+
+
+
+
 Sample::Sample():
 legendEntry_(""), color_(0), crossSection_(0),
 sampleType_(dummy), finalState_(Channel::undefined), systematic_(Systematic::undefined),
@@ -64,7 +71,7 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
     
     
     // Access FileList containing list of input root files
-    const TString histoListName("FileLists/HistoFileList_" + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
+    const TString histoListName(FileListBASE + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
     std::cout << "Reading file: " << histoListName << std::endl;
     ifstream fileList(histoListName);
     if (fileList.fail()) {

@@ -173,6 +173,27 @@ TString Tools::assignFolder(const char* baseDir, const Channel::Channel& channel
 
 
 
+TString Tools::accessFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
+{
+    // Build directory path
+    std::string path(baseDir);
+    path.append("/");
+    path.append(Systematic::convertSystematic(systematic));
+    path.append("/");
+    path.append(Channel::convertChannel(channel));
+    path.append("/");
+    
+    // Check if directory really exists
+    if(!gSystem->OpenDirectory(path.c_str())){
+        std::cerr<<"ERROR! Request to access directory is not possible, because it does not exist. Directory name: "<<path
+                 <<"\n...break\n"<<std::endl;
+        exit(237);
+    }
+    
+    return path;
+}
+
+
 
 
 

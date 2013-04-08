@@ -36,8 +36,7 @@ void Histo(const std::vector<std::string> plots,
     
     // Produce Drell-Yan scalings and access map containing scale factors
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
-    const std::vector<Channel::Channel> v_dyScalingChannel {Channel::ee, Channel::emu, Channel::mumu};
-    Samples dyScalingSamples(v_dyScalingChannel, v_systematic);
+    Samples dyScalingSamples(Channel::realChannels, v_systematic);
     const DyScaleFactors dyScaleFactors(dyScalingSamples, Luminosity);
     const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors(dyScaleFactors.getScaleFactors());
     
