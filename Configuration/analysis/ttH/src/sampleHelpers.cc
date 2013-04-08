@@ -2,6 +2,8 @@
 #include <cstdlib>
 
 #include <TString.h>
+#include <TSystem.h>
+#include <TObjArray.h>
 
 #include "sampleHelpers.h"
 
@@ -142,22 +144,31 @@ std::vector<std::string> Channel::convertChannels(const std::vector<Channel>& ch
 
 
 
-TString Tools::assignFolder(const Channel::Channel& channel)
+TString Tools::assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
-    const TString outpathPlots = "./Plots";
-    TString subfolderChannel = Channel::convertChannel(channel);
-    subfolderChannel.Prepend("/");
-    return outpathPlots + subfolderChannel;
-}
-
-
-
-TString Tools::assignFolder(const Channel::Channel& channel, const Systematic::Systematic& systematic)
-{
-    const TString path = assignFolder(channel);
-    TString subfolderSystematic = Systematic::convertSystematic(systematic);
-    subfolderSystematic.Prepend("/");
-    return path + subfolderSystematic;
+    std::string path("");
+    
+    // Create all subdirectories contained in baseDir
+    TObjArray* a_subDir = TString(baseDir).Tokenize("/");
+    for(Int_t iSubDir = 0; iSubDir < a_subDir->GetEntriesFast(); ++iSubDir){
+        const TString& subDir = a_subDir->At(iSubDir)->GetName();
+        path.append(subDir);
+        path.append("/");
+        gSystem->MakeDirectory(path.c_str());
+    }
+    
+    // Create subdirectories for systematic and channel
+    path.append(Systematic::convertSystematic(systematic));
+    path.append("/");
+    gSystem->MakeDirectory(path.c_str());
+    path.append(Channel::convertChannel(channel));
+    path.append("/");
+    gSystem->MakeDirectory(path.c_str());
+    
+    // FIXME: why not using directly gSystem->mkdir("...", true);   ???
+    // Should recursively create all needed directories
+    
+    return path;
 }
 
 

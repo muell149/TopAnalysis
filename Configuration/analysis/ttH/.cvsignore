@@ -1,6 +1,8 @@
 FileLists*
-Plots*
 selectionRoot*
+Plots*
+EventYields*
+mvaInput*
 mvaOutput*
 selectionList*.txt
 

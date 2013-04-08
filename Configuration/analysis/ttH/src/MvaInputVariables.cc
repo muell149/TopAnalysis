@@ -50,6 +50,7 @@ selectorList_(0), t_mvaInput_(0)
 void MvaInputTopJetsVariables::addEntry(const LV& lepton, const LV& antiLepton,
                                         const LV& bJet, const LV& antiBJet,
                                         const double& bJetBtagDiscriminator, const double& antiBJetBtagDiscriminator,
+                                        const double& jetChargeDiff,
                                         const LV& jetRecoil, const LV& met,
                                         const bool bQuarkRecoJetMatched, const bool correctCombination, const bool swappedCombination,
                                         const double& eventWeight)
@@ -69,6 +70,7 @@ void MvaInputTopJetsVariables::addEntry(const LV& lepton, const LV& antiLepton,
     mvaInputTopJetsStruct.correctCombination_ = correctCombination;
     mvaInputTopJetsStruct.swappedCombination_ = swappedCombination;
     mvaInputTopJetsStruct.eventWeight_ = eventWeight;
+    mvaInputTopJetsStruct.jetChargeDiff_ = jetChargeDiff;
     
     mvaInputTopJetsStruct.meanDeltaPhi_b_met_ = 0.5*(std::abs(DeltaPhi(bJet, met)) + std::abs(DeltaPhi(antiBJet, met)));
     mvaInputTopJetsStruct.massDiff_recoil_bbbar_ = jetRecoil.M() - bbbarSystem.M();
@@ -100,6 +102,8 @@ void MvaInputTopJetsVariables::createMvaInputBranches(TTree* tree)
     t_mvaInput_->Branch("bQuarkRecoJetMatched", &mvaInputStruct_.bQuarkRecoJetMatched_, "bQuarkRecoJetMatched/O");
     t_mvaInput_->Branch("correctCombination", &mvaInputStruct_.correctCombination_, "correctCombination/O");
     t_mvaInput_->Branch("swappedCombination", &mvaInputStruct_.swappedCombination_, "swappedCombination/O");
+    
+    t_mvaInput_->Branch("jetChargeDiff", &mvaInputStruct_.jetChargeDiff_, "jetChargeDiff/D");
     
     t_mvaInput_->Branch("meanDeltaPhi_b_met", &mvaInputStruct_.meanDeltaPhi_b_met_, "meanDeltaPhi_b_met/D");
     t_mvaInput_->Branch("massDiff_recoil_bbbar", &mvaInputStruct_.massDiff_recoil_bbbar_, "massDiff_recoil_bbbar/D");
@@ -225,6 +229,8 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorLis
     h_trueStatus_step8->GetXaxis()->SetBinLabel(1, "swapped");
     h_trueStatus_step8->GetXaxis()->SetBinLabel(2, "correct");
     
+    TH1* h_jetChargeDiff_step8 = store(new TH1D("jetChargeDiff_step8", "jetChargeDiff_step8;#Deltac_{jet};# jet pairs",50,0,2));
+    
     TH1* h_meanDeltaPhi_b_met_step8 = store(new TH1D("meanDeltaPhi_b_met_step8", "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2));
     TH1* h_massDiff_recoil_bbbar_step8 = store(new TH1D("massDiff_recoil_bbbar_step8", "massDiff_recoil_Bbbar; m_{jets}^{recoil}-m_{b#bar{b}}  [GeV];# jet pairs",16,-600,600));
     TH1* h_pt_b_antiLepton_step8 = store(new TH1D("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}(b,l^{+})  [GeV];# jet pairs",20,0,500));
@@ -246,6 +252,8 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorLis
         const double eventWeight(mvaInputTopJetsStruct.eventWeight_);
         if(mvaInputTopJetsStruct.swappedCombination_)h_trueStatus_step8->Fill(0.1, eventWeight);
         if(mvaInputTopJetsStruct.correctCombination_)h_trueStatus_step8->Fill(1.1, eventWeight);
+        
+        h_jetChargeDiff_step8->Fill(mvaInputTopJetsStruct.jetChargeDiff_, eventWeight);
         
         h_meanDeltaPhi_b_met_step8->Fill(mvaInputTopJetsStruct.meanDeltaPhi_b_met_, eventWeight);
         h_massDiff_recoil_bbbar_step8->Fill(mvaInputTopJetsStruct.massDiff_recoil_bbbar_, eventWeight);
@@ -306,6 +314,8 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     TBranch* b_correctCombination(0);
     TBranch* b_swappedCombination(0);
     
+    TBranch* b_jetChargeDiff(0);
+    
     TBranch* b_meanDeltaPhi_b_met(0);
     TBranch* b_massDiff_recoil_bbbar(0);
     TBranch* b_pt_b_antiLepton(0);
@@ -327,6 +337,8 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     tree->SetBranchAddress("bQuarkRecoJetMatched", &mvaInputStruct.bQuarkRecoJetMatched_, &b_bQuarkRecoJetMatched);
     tree->SetBranchAddress("correctCombination", &mvaInputStruct.correctCombination_, &b_correctCombination);
     tree->SetBranchAddress("swappedCombination", &mvaInputStruct.swappedCombination_, &b_swappedCombination);
+    
+    tree->SetBranchAddress("jetChargeDiff", &mvaInputStruct.jetChargeDiff_, &b_jetChargeDiff);
     
     tree->SetBranchAddress("meanDeltaPhi_b_met", &mvaInputStruct.meanDeltaPhi_b_met_, &b_meanDeltaPhi_b_met);
     tree->SetBranchAddress("massDiff_recoil_bbbar", &mvaInputStruct.massDiff_recoil_bbbar_, &b_massDiff_recoil_bbbar);

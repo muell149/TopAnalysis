@@ -4,4 +4,5 @@ mva
 *.o
 dict.*
 
+*.kdev4
 

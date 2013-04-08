@@ -1,13 +1,19 @@
 #include <fstream>
 #include <sstream>
 
-#include <TSystem.h>
 #include <TH1D.h>
 
 #include "EventYields.h"
 #include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
 #include "Samples.h"
+
+
+
+
+
+/// Folder for event yields output
+constexpr const char* BaseDIR = "EventYields";
 
 
 
@@ -76,11 +82,11 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
         }
         
         // Prepare output folder and text file
+        // At present, event yields are only possible for nominal systematic
         std::ofstream eventFile;
-        TString eventFilestring = Tools::assignFolder(channel);
-        gSystem->mkdir(eventFilestring, true);
-        eventFilestring.Append("/"+*i_eventHistoName+".txt");
-        eventFile.open(eventFilestring.Data());
+        TString eventFileString = Tools::assignFolder(BaseDIR, channel, Systematic::nominal);
+        eventFileString.Append(*i_eventHistoName+".txt");
+        eventFile.open(eventFileString.Data());
         
         // Make output for tables
         double tmp_num = 0;

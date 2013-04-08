@@ -49,6 +49,9 @@ jetChargeRelativePtWeighted_step8 Standard jets c_{jet}^{rel} 1 1 0 0 0 0 0 0 0 
 bcp_JetCategories_step8_bin_11_jetChargeGlobalPtWeighted_step8 Standard jets c_{jet}^{glob} 1 1 0 0 0 0 0 0 0 0
 bcp_JetCategories_step8_bin_11_jetChargeRelativePtWeighted_step8 Standard jets c_{jet}^{rel} 1 1 0 0 0 0 0 0 0 0
 
+
+# Control plots for MVA input, perhaps these should have an own HistoList_mvaControlPlots
+jetChargeDiff_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 meanDeltaPhi_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 massDiff_recoil_bbbar_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 pt_b_antiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0

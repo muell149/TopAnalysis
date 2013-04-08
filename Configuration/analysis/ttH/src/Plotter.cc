@@ -7,7 +7,6 @@
 
 #include <TCanvas.h>
 #include <TLegend.h>
-#include <TSystem.h>
 #include <TExec.h>
 #include <TStyle.h>
 #include <TMath.h>
@@ -23,6 +22,14 @@
 #include "Plotter.h"
 #include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
+
+
+
+
+
+/// Folder for Control Plots output
+constexpr const char* BaseDIR = "Plots";
+
 
 
 
@@ -321,9 +328,9 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     legend->Draw("SAME");
     drawRatio(dataHist.second, stacksum, 0.5, 1.7);
 
-    // Create Directory for Output Plots
-    gSystem->mkdir(Tools::assignFolder(channel, systematic), true);
-    canvas->Print(Tools::assignFolder(channel, systematic)+"/"+name_+".eps");
+    // Create Directory for Output Plots and write them
+    const TString eventFileString = Tools::assignFolder(BaseDIR, channel, systematic);
+    canvas->Print(eventFileString+name_+".eps");
     
     // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
@@ -343,7 +350,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     sumMC->SetName(name_);
     
     //save Canvas AND sources in a root file
-    TFile out_root(Tools::assignFolder(channel, systematic)+"/"+name_+"_source.root", "RECREATE");
+    TFile out_root(eventFileString+name_+"_source.root", "RECREATE");
     dataHist.second->Write(name_+"_data");
     sumSignal->Write(name_+"_signalmc");
     sumMC->Write(name_+"_allmc");

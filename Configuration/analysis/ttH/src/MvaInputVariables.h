@@ -35,6 +35,9 @@ private:
         /// Estimated event weight including all scale factors, at least for plotting needed
         double eventWeight_;
         
+        /// Difference of the jet charges for (anti-b jet - b jet), i.e. it is within [0,2]
+        double jetChargeDiff_;
+        
         /// Variables for MVA
         double meanDeltaPhi_b_met_;
         double massDiff_recoil_bbbar_;
@@ -66,6 +69,7 @@ public:
     void addEntry(const LV& lepton, const LV& antiLepton,
                   const LV& bJet, const LV& antiBJet,
                   const double& bJetBtagDiscriminator, const double& antiBJetBtagDiscriminator,
+                  const double& jetChargeDiff,
                   const LV& jetRecoil, const LV& met,
                   const bool bQuarkRecoJetMatched, const bool correctCombination, const bool swappedCombination,
                   const double& eventWeight);

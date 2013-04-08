@@ -28,7 +28,7 @@ constexpr double BtagWP = 0.244;
 
 
 /// Folder for storage of MVA input TTree
-constexpr const char* MvaInputDIR = "selectionRoot/mvaInput";
+constexpr const char* MvaInputDIR = "mvaInput";
 
 
 
@@ -621,6 +621,12 @@ void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& ant
             int bIndex = std::distance(jets_->begin(), i_jet);
             int antiBIndex = std::distance(jets_->begin(), j_jet);
             Tools::orderIndices(antiBIndex, bIndex, *jetChargeRelativePtWeighted_);
+            const double jetChargeDiff = jetChargeRelativePtWeighted_->at(antiBIndex) - jetChargeRelativePtWeighted_->at(bIndex);
+            if(jetChargeDiff<0. || jetChargeDiff>2.){
+                std::cerr<<"ERROR! Difference in jet charge is (value = "<<jetChargeDiff
+                         <<"), but definition allows only values in [0,2]\n...break\n"<<std::endl;
+                exit(555);
+            }
             
             // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
             bool isSwappedPair(false);
@@ -652,6 +658,7 @@ void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& ant
             mvaInputTopJetsVariables_.addEntry(lepton, antiLepton,
                                                bJet, antiBJet,
                                                bJetBtagDiscriminator, antiBJetBtagDiscriminator,
+                                               jetChargeDiff,
                                                jetRecoil, met,
                                                successfulMatching, isCorrectPair, isSwappedPair,
                                                eventWeight);
