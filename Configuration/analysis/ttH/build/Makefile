@@ -110,10 +110,10 @@ Plotter.o: $(HiggsDir)/Plotter.cc $(HiggsDir)/Plotter.h $(HiggsDir)/plotterHelpe
 
 
 
-mva: mva.o
+mva: mva.o sampleHelpers.o
 	g++ -o mva $^ $(ROOTLIBS)
 
-mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc
+mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc $(HiggsDir)/sampleHelpers.h
 	g++ -c -o mva.o $(COMPFLAGS) $(HiggsDir)/train_bdt_topSystemJetAssignment.cc
 
 

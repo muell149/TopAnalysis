@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "TCut.h"
 #include "TFile.h"
@@ -9,22 +10,24 @@
 #include "TMVA/Tools.h"
 #include "TMVA/Factory.h"
 #include "TMVA/Types.h"
+#include "TMVA/Config.h"
 
-
+#include "sampleHelpers.h"
 
 //#include "TMVAGui.C"
 
 
 
-#include "TMVA/Config.h"
 
 
 /// The MVA input base folder
-constexpr const char* MvaInputDIR = "selectionRoot/mvaInput";
+constexpr const char* MvaInputDIR = "mvaInput";
 
 /// The MVA output base folder
 constexpr const char* MvaOutputDIR = "mvaOutput";
 
+/// Input base for the file lists containing the samples to be processed
+constexpr const char* FileListBASE = "FileLists_mva/HistoFileList_";
 
 
 
@@ -32,8 +35,7 @@ constexpr const char* MvaOutputDIR = "mvaOutput";
 
 void trainBdtTopSystemJetAssignment()
 {
-    std::cout << std::endl;
-    std::cout << "==> Start TMVAClassification" << std::endl;
+    std::cout<<"\n--- Beginning MVA training\n";
     
     // Get a TMVA instance
     TMVA::Tools::Instance();
@@ -74,43 +76,70 @@ void trainBdtTopSystemJetAssignment()
     factory->AddSpectator("correctCombination", 'I');
     factory->AddSpectator("swappedCombination", 'I');
     
-    // Set up MVA input directory
-    TString inputtt(MvaInputDIR);
-    TString channel("emu");
-    TString systematic("Nominal");
-    inputtt.Append("/");
-    inputtt.Append(systematic);
-    inputtt.Append("/");
-    inputtt.Append(channel);
-    inputtt.Append("/");
-    inputtt.Append(channel);
-    inputtt.Append("_");
+    // Access all MVA input file names
+    std::vector<TString> v_inputFileNameTraining;
+    std::vector<TString> v_inputFileNameTesting;
+    for(const auto& systematic : Systematic::allowedSystematicsPlotting){
+        const Channel::Channel channel(Channel::combined);
+        
+        // Access FileList containing list of input root files
+        // FIXME: almost same functionality as in Samples.cc, unify after MVA training is established
+        const TString histoListName(FileListBASE + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
+        std::cout << "Reading file: " << histoListName << std::endl;
+        ifstream fileList(histoListName);
+        if (fileList.fail()) {
+            std::cerr << "Error reading file: " << histoListName << std::endl;
+            exit(1);
+        }
+        while(!fileList.eof()){
+            TString filename;
+            fileList>>filename;
+            if(filename==""){continue;} // Skip empty lines
+            if(filename.BeginsWith("#")){continue;} // Comment lines in FileList with '#'
+            
+            if(filename.Contains("ttbarH") && filename.Contains("inclusiveBbbar"))
+                v_inputFileNameTraining.push_back(filename);
+            else if(filename.Contains("ttbarH") && filename.Contains("tobbbar"))
+                v_inputFileNameTesting.push_back(filename);
+            else continue;
+        }
+    }
     
-    // Open the input files
-    TFile* inputFile_ee_ttbarH125inclusiveBbbar(0);
-    TFile* inputFile_emu_ttbarH125inclusiveBbbar(0);
-    TFile* inputFile_mumu_ttbarH125inclusiveBbbar(0);
+    // Open the input files and access the MVA input training trees
+    std::vector<TTree*> v_treeTraining;
+    for(const auto& inputFileName : v_inputFileNameTraining){
+        // FIXME: need to check whether input file and input tree really exist
+        TFile* inputFile(0);
+        inputFile = TFile::Open(inputFileName);
+        TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
+        v_treeTraining.push_back(inputTree);
+    }
     
-    TFile* inputFile_ee_ttbarH125tobbbar(0);
-    TFile* inputFile_emu_ttbarH125tobbbar(0);
-    TFile* inputFile_mumu_ttbarH125tobbbar(0);
-    
-    inputFile_emu_ttbarH125inclusiveBbbar = TFile::Open(inputtt.Copy().Append("ttbarH125inclusiveBbbar.root"));
-    inputFile_emu_ttbarH125tobbbar = TFile::Open(inputtt.Copy().Append("ttbarH125tobbbar.root"));
+    // Open the input files and access the MVA input testing trees
+    std::vector<TTree*> v_treeTesting;
+    for(const auto& inputFileName : v_inputFileNameTraining){
+        // FIXME: need to check whether input file and input tree really exist
+        TFile* inputFile(0);
+        inputFile = TFile::Open(inputFileName);
+        TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
+        v_treeTesting.push_back(inputTree);
+    }
     
     // Set global weights for individual input
     Double_t signalWeight = 1.;
     Double_t backgroundWeight = 1.;
     
     // Register the training trees
-    TTree* treeTraining = (TTree*)inputFile_emu_ttbarH125inclusiveBbbar->Get("mvaInputTopJets");
-    factory->AddSignalTree(treeTraining, signalWeight, TMVA::Types::kTraining);
-    factory->AddBackgroundTree(treeTraining, backgroundWeight, TMVA::Types::kTraining);
+    for(const auto& treeTraining : v_treeTraining){
+        factory->AddSignalTree(treeTraining, signalWeight, TMVA::Types::kTraining);
+        factory->AddBackgroundTree(treeTraining, backgroundWeight, TMVA::Types::kTraining);
+    }
     
     // Register the testing trees
-    TTree* treeTesting = (TTree*)inputFile_emu_ttbarH125tobbbar->Get("mvaInputTopJets");    
-    factory->AddSignalTree(treeTesting, signalWeight, TMVA::Types::kTesting);
-    factory->AddBackgroundTree(treeTesting, backgroundWeight, TMVA::Types::kTesting);
+    for(const auto& treeTesting : v_treeTesting){
+        factory->AddSignalTree(treeTesting, signalWeight, TMVA::Types::kTesting);
+        factory->AddBackgroundTree(treeTesting, backgroundWeight, TMVA::Types::kTesting);
+    }
     
     // Set the branch from which the event weight is taken
     factory->SetSignalWeightExpression("eventWeight");
@@ -136,6 +165,8 @@ void trainBdtTopSystemJetAssignment()
     // Cleanup
     outputFile->Close();
     delete factory;
+    
+    std::cout<<"=== Finishing MVA training\n\n";
 }
 
 
