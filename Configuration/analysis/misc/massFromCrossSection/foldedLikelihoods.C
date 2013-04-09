@@ -1391,13 +1391,13 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   outfile << "\\hline" << std::endl;
   const TString oneOrTwoEmptyCols = (topppOnly ? " & " : " & & ");
   if(targetAlpha)
-    outfile << oneOrTwoEmptyCols << "Most likely & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "Most likely        & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
   else
-    outfile << oneOrTwoEmptyCols << "Most likely & \\multicolumn{2}{c|}{Uncertainty / GeV} \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "Most likely \\mtop & \\multicolumn{2}{c|}{Uncertainty (GeV)} \\\\" << std::endl;
   if(targetAlpha)
-    outfile << oneOrTwoEmptyCols << "value       & Total & From $\\delta m_{t}$ \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "\\alpha_{S} value  & Total & From $\\delta \\mtop$ \\\\" << std::endl;
   else
-    outfile << oneOrTwoEmptyCols << "value / GeV & Total & From $\\delta \\alpha_{S}$ \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "value (GeV)        & Total & From $\\delta \\alpha_{S}$ \\\\" << std::endl;
   outfile << "\\hline" << std::endl;
   const unsigned hOrdered[nPdfSets] = {2, 4, 1, 0, 3};
   for(unsigned h=0; h<nPdfSets; h++) {
