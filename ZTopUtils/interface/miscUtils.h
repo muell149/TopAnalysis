@@ -49,6 +49,7 @@ namespace ztop{
 
 
   void addRelError(TH2D &h, double err);
+  void addRelError(TH1D &h, double err);
 
 
   TH1D divideTH1DBinomial(TH1D &h1, TH1D &h2);

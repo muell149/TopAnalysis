@@ -12,6 +12,13 @@ namespace ztop{
       }
     }
   }
+  void addRelError(TH1D &h, double err){
+    for(int binx=1;binx<=h.GetNbinsX()+1;binx++){
+      double add=h.GetBinContent(binx) * err;
+      double newerr=sqrt(pow(h.GetBinError(binx),2) + pow(add,2));
+      h.SetBinError(binx,newerr);  
+    }
+  }
 
 
   void displayStatusBar(Long64_t event, Long64_t nEvents){
