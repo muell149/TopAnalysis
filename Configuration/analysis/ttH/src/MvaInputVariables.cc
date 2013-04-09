@@ -6,6 +6,7 @@
 #include <TSystem.h>
 #include <TH1.h>
 #include <TFile.h>
+#include <TString.h>
 #include <Math/VectorUtil.h>
 #include <TSelectorList.h>
 #include <Rtypes.h>
@@ -135,8 +136,8 @@ void MvaInputTopJetsVariables::clear()
     v_mvaInputStruct_.clear();
     t_mvaInput_ = 0;
     selectorList_ = 0;
+    m_plotStruct_.clear();
 }
-
 
 
 
@@ -147,7 +148,6 @@ void MvaInputTopJetsVariables::fillMvaInputBranches()
         t_mvaInput_->Fill();
     }
 }
-
 
 
 
@@ -164,7 +164,7 @@ void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& f_savename
     
     // Write file and cleanup
     TIterator* it = output->MakeIterator();
-    while (TObject* obj = it->Next()) {
+    while(TObject* obj = it->Next()){
         obj->Write();
     }
     outputFile.Close();
@@ -195,7 +195,7 @@ void MvaInputTopJetsVariables::produceMvaInputTree(TSelectorList* output)
 
 
 
-void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(const std::string& f_savename)
+void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(const std::string& f_savename)
 {
     // Output file
     TFile outputFile(f_savename.c_str(),"RECREATE");
@@ -203,11 +203,11 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(const std::s
     
     // Produce MVA input control plots and store them in output
     TSelectorList* output = new TSelectorList();
-    this->mvaInputTopJetsVariablesControlPlots(output);
+    this->mvaInputVariablesControlPlots(output);
     
     // Write file and cleanup
     TIterator* it = output->MakeIterator();
-    while (TObject* obj = it->Next()) {
+    while(TObject* obj = it->Next()){
         obj->Write();
     }
     outputFile.Close();
@@ -217,7 +217,7 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(const std::s
 
 
 
-void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorList* output)
+void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* output)
 {
     std::cout<<"--- Beginning control plots for MVA variables\n";
     
@@ -229,22 +229,22 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorLis
     h_trueStatus_step8->GetXaxis()->SetBinLabel(1, "swapped");
     h_trueStatus_step8->GetXaxis()->SetBinLabel(2, "correct");
     
-    TH1* h_jetChargeDiff_step8 = store(new TH1D("jetChargeDiff_step8", "jetChargeDiff_step8;#Deltac_{jet};# jet pairs",50,0,2));
+    this->bookHistograms("jetChargeDiff_step8", "jetChargeDiff_step8;#Deltac_{jet};# jet pairs",50,0,2);
     
-    TH1* h_meanDeltaPhi_b_met_step8 = store(new TH1D("meanDeltaPhi_b_met_step8", "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2));
-    TH1* h_massDiff_recoil_bbbar_step8 = store(new TH1D("massDiff_recoil_bbbar_step8", "massDiff_recoil_Bbbar; m_{jets}^{recoil}-m_{b#bar{b}}  [GeV];# jet pairs",16,-600,600));
-    TH1* h_pt_b_antiLepton_step8 = store(new TH1D("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}(b,l^{+})  [GeV];# jet pairs",20,0,500));
-    TH1* h_pt_antiB_lepton_step8 = store(new TH1D("pt_antiB_lepton_step8", "pt_antiB_lepton; p_{T}(#bar{b},l^{-})  [GeV];# jet pairs",20,0,500));
-    TH1* h_deltaR_b_antiLepton_step8 = store(new TH1D("deltaR_b_antiLepton_step8", "deltaR_b_antiLepton; #Delta{R}(b,l^{+});# jet pairs",25,0,5));
-    TH1* h_deltaR_antiB_lepton_step8 = store(new TH1D("deltaR_antiB_lepton_step8", "deltaR_antiB_lepton; #Delta{R}(#bar{b},l^{-});# jet pairs",25,0,5));
-    TH1* h_btagDiscriminatorSum_step8 = store(new TH1D("btagDiscriminatorSum_step8", "btagDiscriminatorSum; d(b)+d(#bar{b});# jet pairs",20,0,2));
-    TH1* h_deltaPhi_antiBLepton_bAntiLepton_step8 = store(new TH1D("deltaPhi_antiBLepton_bAntiLepton_step8", "deltaPhi_antiBLepton_bAntiLepton; |#Delta#phi(bl^{+},#bar{b}l^{-})|  [rad];# jet pairs",10,0,3.2));
-    TH1* h_massDiff_fullBLepton_bbbar_step8 = store(new TH1D("massDiff_fullBLepton_bbbar_step8", "massDiff_fullBLepton_bbbar; m_{b#bar{b}l^{+}l^{-}}-m_{b#bar{b}}  [GeV];# jet pairs",13,0,1050));
-    TH1* h_meanMT_b_met_step8 = store(new TH1D("meanMT_b_met_step8", "meanMT_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420));
-    TH1* h_massSum_antiBLepton_bAntiLepton_step8 = store(new TH1D("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}+m_{bl^{+}}  [GeV];# jet pairs",21,0,840));
-    TH1* h_massDiff_antiBLepton_bAntiLepton_step8 = store(new TH1D("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}-m_{bl^{+}}  [GeV];# jet pairs",41,-400,420));
+    this->bookHistograms("meanDeltaPhi_b_met_step8", "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2);
+    this->bookHistograms("massDiff_recoil_bbbar_step8", "massDiff_recoil_Bbbar; m_{jets}^{recoil}-m_{b#bar{b}}  [GeV];# jet pairs",16,-600,600);
+    this->bookHistograms("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}(b,l^{+})  [GeV];# jet pairs",20,0,500);
+    this->bookHistograms("pt_antiB_lepton_step8", "pt_antiB_lepton; p_{T}(#bar{b},l^{-})  [GeV];# jet pairs",20,0,500);
+    this->bookHistograms("deltaR_b_antiLepton_step8", "deltaR_b_antiLepton; #DeltaR(b,l^{+});# jet pairs",25,0,5);
+    this->bookHistograms("deltaR_antiB_lepton_step8", "deltaR_antiB_lepton; #DeltaR(#bar{b},l^{-});# jet pairs",25,0,5);
+    this->bookHistograms("btagDiscriminatorSum_step8", "btagDiscriminatorSum; d(b)+d(#bar{b});# jet pairs",20,0,2);
+    this->bookHistograms("deltaPhi_antiBLepton_bAntiLepton_step8", "deltaPhi_antiBLepton_bAntiLepton; |#Delta#phi(bl^{+},#bar{b}l^{-})|  [rad];# jet pairs",10,0,3.2);
+    this->bookHistograms("massDiff_fullBLepton_bbbar_step8", "massDiff_fullBLepton_bbbar; m_{b#bar{b}l^{+}l^{-}}-m_{b#bar{b}}  [GeV];# jet pairs",13,0,1050);
+    this->bookHistograms("meanMT_b_met_step8", "meanMT_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420);
+    this->bookHistograms("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}+m_{bl^{+}}  [GeV];# jet pairs",21,0,840);
+    this->bookHistograms("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}-m_{bl^{+}}  [GeV];# jet pairs",41,-400,420);
     
-    TH1* h_meanMTAlt_b_met_step8 = store(new TH1D("meanMTAlt_b_met_step8", "meanMTAlt_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420));
+    this->bookHistograms("meanMTAlt_b_met_step8", "meanMTAlt_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420);
     
     // Fill histograms
     for(const auto& mvaInputTopJetsStruct : this->mvaInputStructs()){
@@ -253,29 +253,30 @@ void MvaInputTopJetsVariables::mvaInputTopJetsVariablesControlPlots(TSelectorLis
         if(mvaInputTopJetsStruct.swappedCombination_)h_trueStatus_step8->Fill(0.1, eventWeight);
         if(mvaInputTopJetsStruct.correctCombination_)h_trueStatus_step8->Fill(1.1, eventWeight);
         
-        h_jetChargeDiff_step8->Fill(mvaInputTopJetsStruct.jetChargeDiff_, eventWeight);
+        this->fillHistograms("jetChargeDiff_step8", mvaInputTopJetsStruct.jetChargeDiff_, mvaInputTopJetsStruct);
         
-        h_meanDeltaPhi_b_met_step8->Fill(mvaInputTopJetsStruct.meanDeltaPhi_b_met_, eventWeight);
-        h_massDiff_recoil_bbbar_step8->Fill(mvaInputTopJetsStruct.massDiff_recoil_bbbar_, eventWeight);
-        h_pt_b_antiLepton_step8->Fill(mvaInputTopJetsStruct.pt_b_antiLepton_, eventWeight);
-        h_pt_antiB_lepton_step8->Fill(mvaInputTopJetsStruct.pt_antiB_lepton_, eventWeight);
-        h_deltaR_b_antiLepton_step8->Fill(mvaInputTopJetsStruct.deltaR_b_antiLepton_, eventWeight);
-        h_deltaR_antiB_lepton_step8->Fill(mvaInputTopJetsStruct.deltaR_antiB_lepton_, eventWeight);
-        h_btagDiscriminatorSum_step8->Fill(mvaInputTopJetsStruct.btagDiscriminatorSum_, eventWeight);
-        h_deltaPhi_antiBLepton_bAntiLepton_step8->Fill(mvaInputTopJetsStruct.deltaPhi_antiBLepton_bAntiLepton_, eventWeight);
-        h_massDiff_fullBLepton_bbbar_step8->Fill(mvaInputTopJetsStruct.massDiff_fullBLepton_bbbar_, eventWeight);
-        h_meanMT_b_met_step8->Fill(mvaInputTopJetsStruct.meanMT_b_met_, eventWeight);
-        h_massSum_antiBLepton_bAntiLepton_step8->Fill(mvaInputTopJetsStruct.massSum_antiBLepton_bAntiLepton_, eventWeight);
-        h_massDiff_antiBLepton_bAntiLepton_step8->Fill(mvaInputTopJetsStruct.massDiff_antiBLepton_bAntiLepton_, eventWeight);
+        this->fillHistograms("meanDeltaPhi_b_met_step8", mvaInputTopJetsStruct.meanDeltaPhi_b_met_, mvaInputTopJetsStruct);
+        this->fillHistograms("massDiff_recoil_bbbar_step8", mvaInputTopJetsStruct.massDiff_recoil_bbbar_, mvaInputTopJetsStruct);
+        this->fillHistograms("pt_b_antiLepton_step8", mvaInputTopJetsStruct.pt_b_antiLepton_, mvaInputTopJetsStruct);
+        this->fillHistograms("pt_antiB_lepton_step8", mvaInputTopJetsStruct.pt_antiB_lepton_, mvaInputTopJetsStruct);
+        this->fillHistograms("deltaR_b_antiLepton_step8", mvaInputTopJetsStruct.deltaR_b_antiLepton_, mvaInputTopJetsStruct);
+        this->fillHistograms("deltaR_antiB_lepton_step8", mvaInputTopJetsStruct.deltaR_antiB_lepton_, mvaInputTopJetsStruct);
+        this->fillHistograms("btagDiscriminatorSum_step8", mvaInputTopJetsStruct.btagDiscriminatorSum_, mvaInputTopJetsStruct);
+        this->fillHistograms("deltaPhi_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.deltaPhi_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
+        this->fillHistograms("massDiff_fullBLepton_bbbar_step8", mvaInputTopJetsStruct.massDiff_fullBLepton_bbbar_, mvaInputTopJetsStruct);
+        this->fillHistograms("meanMT_b_met_step8", mvaInputTopJetsStruct.meanMT_b_met_, mvaInputTopJetsStruct);
+        this->fillHistograms("massSum_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.massSum_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
+        this->fillHistograms("massDiff_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.massDiff_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
         
-        h_meanMTAlt_b_met_step8->Fill(mvaInputTopJetsStruct.meanMTAlt_b_met_, eventWeight);
+        this->fillHistograms("meanMTAlt_b_met_step8", mvaInputTopJetsStruct.meanMTAlt_b_met_, mvaInputTopJetsStruct);
     }
+    
     std::cout<<"=== Finishing control plots for MVA variables\n\n";
 }
 
 
 
-void MvaInputTopJetsVariables::importTree(const std::string& f_savename)
+void MvaInputTopJetsVariables::importTree(const std::string& f_savename, const std::string& treeName)
 {
     std::cout<<"--- Beginning import of TTree for MVA variables\n";
     
@@ -285,9 +286,8 @@ void MvaInputTopJetsVariables::importTree(const std::string& f_savename)
         exit(77);
     }
     
-    constexpr const char* treeName("mvaInputTopJets");
     TTree* tree(0);
-    tree = dynamic_cast<TTree*>(inputFile->Get(treeName));
+    tree = dynamic_cast<TTree*>(inputFile->Get(treeName.c_str()));
     if (!tree){
         std::cerr << "ERROR: TTree not found in file, tree name is: "<<treeName<<"\n...break\n"<<std::endl;
         exit(78);
@@ -297,9 +297,9 @@ void MvaInputTopJetsVariables::importTree(const std::string& f_savename)
     
     tree = 0;
     inputFile->Close();
+    std::cout<<"\nNUMBER: "<<v_mvaInputStruct_.size()<<"\n\n";
     std::cout<<"=== Finishing import of TTree for MVA variables\n\n";
 }
-
 
 
 
@@ -362,6 +362,61 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
         v_mvaInputStruct_.push_back(mvaInputStruct);
     }
 }
+
+
+
+void MvaInputTopJetsVariables::bookHistograms(const TString& name, const TString& title, const int nBin, const double& xMin, const double& xMax)
+{
+    // Check if histograms with given name already exist
+    if(m_plotStruct_.find(name) != m_plotStruct_.end()){
+        std::cerr<<"ERROR! Trial of booking already existing histogram with name: "<<name
+                 <<"\n...break\n"<<std::endl;
+        exit(876);
+    }
+    
+    const TString nameCorrect("correct_" + name);
+    const TString nameSwapped("swapped_" + name);
+    const TString nameWrong("wrong_" + name);
+    
+    // Book histograms
+    PlotStruct plotStruct;
+    plotStruct.h_correctCombination = store(new TH1D(nameCorrect, title, nBin, xMin, xMax));
+    plotStruct.h_swappedCombination = store(new TH1D(nameSwapped, title, nBin, xMin, xMax));
+    plotStruct.h_wrongCombinations = store(new TH1D(nameWrong, title, nBin, xMin, xMax));
+    plotStruct.h_allCombinations = store(new TH1D(name, title, nBin, xMin, xMax));
+    m_plotStruct_[name] = plotStruct;
+}
+
+
+
+void MvaInputTopJetsVariables::fillHistograms(const TString& name, const double& variable, const MvaInputTopJetsVariables::MvaInputTopJetsStruct& mvaInputTopJetsStruct)
+{
+    // Check if histograms with given name already exist
+    if(m_plotStruct_.find(name) == m_plotStruct_.end()){
+        std::cerr<<"ERROR! Trial of filling non-existing histogram with name: "<<name
+                 <<"\n...break\n"<<std::endl;
+        exit(876);
+    }
+    PlotStruct& plotStruct = m_plotStruct_.at(name);
+    
+    // Access relevant information
+    const double& eventWeight(mvaInputTopJetsStruct.eventWeight_);
+    const bool correctCombination(mvaInputTopJetsStruct.correctCombination_);
+    const bool swappedCombination(mvaInputTopJetsStruct.swappedCombination_);
+    
+    // Fill histograms
+    if(correctCombination) plotStruct.h_correctCombination->Fill(variable, eventWeight);
+    else plotStruct.h_wrongCombinations->Fill(variable, eventWeight);
+    if(swappedCombination) plotStruct.h_swappedCombination->Fill(variable, eventWeight);
+    plotStruct.h_allCombinations->Fill(variable, eventWeight);
+}
+
+
+
+
+
+
+
 
 
 

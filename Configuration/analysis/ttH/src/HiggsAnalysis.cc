@@ -110,7 +110,7 @@ void HiggsAnalysis::Terminate()
         //mvaInputTopJetsVariables_.produceMvaInputTree(fOutput);
         
         // Create and store control plots in fOutput
-        mvaInputTopJetsVariables_.mvaInputTopJetsVariablesControlPlots(fOutput);
+        mvaInputTopJetsVariables_.mvaInputVariablesControlPlots(fOutput);
     }
     
     // Cleanup

@@ -3,9 +3,12 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 class TTree;
 class TSelectorList;
+class TH1;
+class TString;
 
 #include "../../diLeptonic/src/classes.h"
 #include "higgsUtils.h"
@@ -32,7 +35,7 @@ private:
         /// Is it the true but swapped jet combination
         bool swappedCombination_;
         
-        /// Estimated event weight including all scale factors, at least for plotting needed
+        /// Estimated event weight including all scale factors
         double eventWeight_;
         
         /// Difference of the jet charges for (anti-b jet - b jet), i.e. it is within [0,2]
@@ -53,6 +56,18 @@ private:
         double massDiff_antiBLepton_bAntiLepton_;
         double meanMTAlt_b_met_;
     };
+    
+    /// Stuct holding histograms showing the full distributions and the separation power of variables
+    struct PlotStruct{
+        PlotStruct():
+            h_correctCombination(0), h_swappedCombination(0),
+            h_wrongCombinations(0), h_allCombinations(0){};
+        TH1* h_correctCombination;
+        TH1* h_swappedCombination;
+        TH1* h_wrongCombinations;
+        TH1* h_allCombinations;
+    };
+    
     
     
 public:
@@ -86,17 +101,17 @@ public:
     /// Produce MVA input TTree owned by a given selectorList
     void produceMvaInputTree(TSelectorList* output);
     
-    /// Produce control plots  for MVA input in own file with given filename
-    void mvaInputTopJetsVariablesControlPlots(const std::string& f_savename);
+    /// Produce control plots for MVA input in own file with given filename
+    void mvaInputVariablesControlPlots(const std::string& f_savename);
     
-    /// Produce control plots  for MVA input owned by a given selector list
-    void mvaInputTopJetsVariablesControlPlots(TSelectorList* output);
+    /// Produce control plots for MVA input owned by a given selector list
+    void mvaInputVariablesControlPlots(TSelectorList* output);
     
     /// Clear the class instance
     void clear();
     
     /// Import a written TTree
-    void importTree(const std::string& f_savename);
+    void importTree(const std::string& f_savename, const std::string& treeName ="mvaInputTopJets");
     
     /// Get the MVA input structs
     std::vector<MvaInputTopJetsStruct> mvaInputStructs()const;
@@ -107,6 +122,12 @@ private:
     
     /// Import all branches from TTree
     void importBranches(TTree* tree);
+    
+    /// Book histograms to be hold by m_histogram_
+    void bookHistograms(const TString& name, const TString& title, const int nBin, const double& xMin, const double& xMax);
+    
+    /// Fill histograms held by m_histogram_
+    void fillHistograms(const TString& name, const double& variable, const MvaInputTopJetsStruct& mvaInputTopJetsStruct);
     
     /// Store the object in the output list and return it
     template<class T> T* store(T* obj){return Tools::store(obj, selectorList_);}
@@ -124,6 +145,9 @@ private:
     
     /// Storage of all entries for the MVA
     std::vector<MvaInputTopJetsStruct> v_mvaInputStruct_;
+    
+    /// Storage for the histograms to be filled
+    std::map<TString, PlotStruct> m_plotStruct_;
 };
 
 

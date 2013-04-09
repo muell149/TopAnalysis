@@ -6,6 +6,7 @@
 #include "TTree.h"
 #include "TString.h"
 #include "TSystem.h"
+#include "TList.h"
 
 #include "TMVA/Tools.h"
 #include "TMVA/Factory.h"
@@ -13,6 +14,7 @@
 #include "TMVA/Config.h"
 
 #include "sampleHelpers.h"
+#include "MvaInputVariables.h"
 
 //#include "TMVAGui.C"
 
@@ -36,6 +38,92 @@ constexpr const char* FileListBASE = "FileLists_mva/HistoFileList_";
 void trainBdtTopSystemJetAssignment()
 {
     std::cout<<"\n--- Beginning MVA training\n";
+    
+    // Access all MVA input file names
+    std::vector<TString> v_inputFileNameTraining;
+    std::vector<TString> v_inputFileNameTesting;
+    for(const auto& systematic : Systematic::allowedSystematicsPlotting){
+        const Channel::Channel channel(Channel::combined);
+        
+        // Access FileList containing list of input root files
+        // FIXME: almost same functionality as in Samples.cc, unify after MVA training is established
+        const TString histoListName(FileListBASE + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
+        //std::cout << "Reading file: " << histoListName << std::endl;
+        ifstream fileList(histoListName);
+        if (fileList.fail()) {
+            std::cerr << "Error reading file: " << histoListName << std::endl;
+            exit(1);
+        }
+        while(!fileList.eof()){
+            TString filename;
+            fileList>>filename;
+            if(filename==""){continue;} // Skip empty lines
+            if(filename.BeginsWith("#")){continue;} // Comment lines in FileList with '#'
+            
+            if(filename.Contains("ttbarH") && filename.Contains("inclusiveBbbar"))
+                v_inputFileNameTraining.push_back(filename);
+            else if(filename.Contains("ttbarH") && filename.Contains("tobbbar"))
+                v_inputFileNameTesting.push_back(filename);
+            else continue;
+        }
+    }
+    
+    // Open the input files and access the MVA input training trees
+    std::vector<TTree*> v_treeTraining;
+    TList* listTraining = new TList;
+    for(const auto& inputFileName : v_inputFileNameTraining){
+        std::cout<<"File for training: "<<inputFileName<<std::endl;
+        
+        // FIXME: need to check whether input file and input tree really exist
+        TFile* inputFile(0);
+        inputFile = TFile::Open(inputFileName);
+        TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
+//        v_treeTraining.push_back(inputTree);
+        listTraining->Add(inputTree);
+    }
+    std::cout<<std::endl;
+    
+    // Open the input files and access the MVA input testing trees
+    std::vector<TTree*> v_treeTesting;
+    TList* listTesting = new TList;
+    for(const auto& inputFileName : v_inputFileNameTesting){
+        std::cout<<"File for testing: "<<inputFileName<<std::endl;
+        
+        // FIXME: need to check whether input file and input tree really exist
+        TFile* inputFile(0);
+        inputFile = TFile::Open(inputFileName);
+        TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
+//        v_treeTesting.push_back(inputTree);
+        listTesting->Add(inputTree);
+    }
+    
+    // Unfortunately this output file is needed to prevent from strange ROOT message
+    TString mergedTreesName(MvaOutputDIR);
+    mergedTreesName.Append("/");
+    gSystem->MakeDirectory(mergedTreesName);
+    mergedTreesName.Append("mergedTrees.root");
+    TFile* mergedTrees = new TFile(mergedTreesName, "RECREATE");
+    TTree* treeTraining1 = TTree::MergeTrees(listTraining);
+    treeTraining1->SetName("mvaInputTopJets_training");
+    TTree* treeTesting1 = TTree::MergeTrees(listTesting);
+    treeTesting1->SetName("mvaInputTopJets_testing");
+    treeTraining1->Write();
+    treeTesting1->Write();
+    mergedTrees->Close();
+    
+    TString outputPlots(MvaOutputDIR);
+    outputPlots.Append("/plots.root");
+    MvaInputTopJetsVariables mvaInputTopJetsVariables;
+    mvaInputTopJetsVariables.importTree(mergedTreesName.Data(), "mvaInputTopJets_training");
+    mvaInputTopJetsVariables.mvaInputVariablesControlPlots(outputPlots.Data());
+    
+    mergedTrees = TFile::Open(mergedTreesName);
+    treeTraining1 = (TTree*)mergedTrees->Get("mvaInputTopJets_training");
+    treeTesting1 = (TTree*)mergedTrees->Get("mvaInputTopJets_testing");
+    
+    
+    
+    
     
     // Get a TMVA instance
     TMVA::Tools::Instance();
@@ -76,70 +164,25 @@ void trainBdtTopSystemJetAssignment()
     factory->AddSpectator("correctCombination", 'I');
     factory->AddSpectator("swappedCombination", 'I');
     
-    // Access all MVA input file names
-    std::vector<TString> v_inputFileNameTraining;
-    std::vector<TString> v_inputFileNameTesting;
-    for(const auto& systematic : Systematic::allowedSystematicsPlotting){
-        const Channel::Channel channel(Channel::combined);
-        
-        // Access FileList containing list of input root files
-        // FIXME: almost same functionality as in Samples.cc, unify after MVA training is established
-        const TString histoListName(FileListBASE + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
-        std::cout << "Reading file: " << histoListName << std::endl;
-        ifstream fileList(histoListName);
-        if (fileList.fail()) {
-            std::cerr << "Error reading file: " << histoListName << std::endl;
-            exit(1);
-        }
-        while(!fileList.eof()){
-            TString filename;
-            fileList>>filename;
-            if(filename==""){continue;} // Skip empty lines
-            if(filename.BeginsWith("#")){continue;} // Comment lines in FileList with '#'
-            
-            if(filename.Contains("ttbarH") && filename.Contains("inclusiveBbbar"))
-                v_inputFileNameTraining.push_back(filename);
-            else if(filename.Contains("ttbarH") && filename.Contains("tobbbar"))
-                v_inputFileNameTesting.push_back(filename);
-            else continue;
-        }
-    }
-    
-    // Open the input files and access the MVA input training trees
-    std::vector<TTree*> v_treeTraining;
-    for(const auto& inputFileName : v_inputFileNameTraining){
-        // FIXME: need to check whether input file and input tree really exist
-        TFile* inputFile(0);
-        inputFile = TFile::Open(inputFileName);
-        TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
-        v_treeTraining.push_back(inputTree);
-    }
-    
-    // Open the input files and access the MVA input testing trees
-    std::vector<TTree*> v_treeTesting;
-    for(const auto& inputFileName : v_inputFileNameTraining){
-        // FIXME: need to check whether input file and input tree really exist
-        TFile* inputFile(0);
-        inputFile = TFile::Open(inputFileName);
-        TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
-        v_treeTesting.push_back(inputTree);
-    }
-    
     // Set global weights for individual input
     Double_t signalWeight = 1.;
     Double_t backgroundWeight = 1.;
     
     // Register the training trees
-    for(const auto& treeTraining : v_treeTraining){
-        factory->AddSignalTree(treeTraining, signalWeight, TMVA::Types::kTraining);
-        factory->AddBackgroundTree(treeTraining, backgroundWeight, TMVA::Types::kTraining);
-    }
+    factory->AddSignalTree(treeTraining1, signalWeight, TMVA::Types::kTraining);
+    factory->AddBackgroundTree(treeTraining1, backgroundWeight, TMVA::Types::kTraining);
+//     for(const auto& treeTraining : v_treeTraining){
+//         factory->AddSignalTree(treeTraining, signalWeight, TMVA::Types::kTraining);
+//         factory->AddBackgroundTree(treeTraining, backgroundWeight, TMVA::Types::kTraining);
+//     }
     
     // Register the testing trees
-    for(const auto& treeTesting : v_treeTesting){
-        factory->AddSignalTree(treeTesting, signalWeight, TMVA::Types::kTesting);
-        factory->AddBackgroundTree(treeTesting, backgroundWeight, TMVA::Types::kTesting);
-    }
+    factory->AddSignalTree(treeTesting1, signalWeight, TMVA::Types::kTesting);
+    factory->AddBackgroundTree(treeTesting1, backgroundWeight, TMVA::Types::kTesting);
+//     for(const auto& treeTesting : v_treeTesting){
+//         factory->AddSignalTree(treeTesting, signalWeight, TMVA::Types::kTesting);
+//         factory->AddBackgroundTree(treeTesting, backgroundWeight, TMVA::Types::kTesting);
+//     }
     
     // Set the branch from which the event weight is taken
     factory->SetSignalWeightExpression("eventWeight");
