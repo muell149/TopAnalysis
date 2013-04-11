@@ -1655,7 +1655,7 @@ void AnalysisBase::bookBtagHistograms()
 
 
 
-void AnalysisBase::fillBtagHistograms(const double jetPtCut, const double btagWP)
+void AnalysisBase::fillBtagHistograms(const double jetPtCut, const double btagWP, const double weight)
 {
     for (size_t i = 0; i < jets_->size(); ++i) {
         if (jets_->at(i).Pt() <= jetPtCut) break;
@@ -1663,21 +1663,21 @@ void AnalysisBase::fillBtagHistograms(const double jetPtCut, const double btagWP
         if (absJetEta<2.4) {
             int partonFlavour = abs(jetPartonFlavour_->at(i));
             if(partonFlavour == 5){//b-quark
-                h_bjets->Fill(jets_->at(i).Pt(), absJetEta);
+                h_bjets->Fill(jets_->at(i).Pt(), absJetEta, weight);
                 if((*jetBTagCSV_)[i]>btagWP){
-                    h_btaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
+                    h_btaggedjets->Fill(jets_->at(i).Pt(), absJetEta, weight);
                 }
             }
             else if (partonFlavour == 4){//c-quark
-                h_cjets->Fill(jets_->at(i).Pt(), absJetEta);
+                h_cjets->Fill(jets_->at(i).Pt(), absJetEta, weight);
                 if((*jetBTagCSV_)[i]>btagWP){
-                    h_ctaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
+                    h_ctaggedjets->Fill(jets_->at(i).Pt(), absJetEta, weight);
                 }
             }
             else if (partonFlavour != 0){//l-quark
-                h_ljets->Fill(jets_->at(i).Pt(), absJetEta);
+                h_ljets->Fill(jets_->at(i).Pt(), absJetEta, weight);
                 if((*jetBTagCSV_)[i]>btagWP){
-                    h_ltaggedjets->Fill(jets_->at(i).Pt(), absJetEta);
+                    h_ltaggedjets->Fill(jets_->at(i).Pt(), absJetEta, weight);
                 }
             }
         }

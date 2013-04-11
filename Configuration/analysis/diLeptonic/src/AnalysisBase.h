@@ -465,7 +465,7 @@ protected:
     /// Book histograms needed for b-tag efficiencies
     void bookBtagHistograms();
     /// Fill histograms needed for b-tag efficiencies
-    void fillBtagHistograms(const double jetPtCut, const double btagWP);
+    void fillBtagHistograms(const double jetPtCut, const double btagWP, const double weight = 1);
     /// Produce b-tag efficiencies
     void produceBtagEfficiencies();
     

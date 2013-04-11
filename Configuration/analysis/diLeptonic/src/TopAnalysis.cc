@@ -1105,15 +1105,15 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         Allh1_postMET->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
     }
     
+    //finally do the btag efficiency calculation stuff
+    if(isTopSignal_){
+        this->fillBtagHistograms(JETPTCUT, BtagWP, weight);
+    }
+    
     //=== CUT ===
     //Require at least one b tagged jet
     if (!hasBtag) return kTRUE;
 
-    //finally do the btag efficiency calculation stuff
-    if(isTopSignal_){
-        this->fillBtagHistograms(JETPTCUT, BtagWP);
-    }
-    
     if (weightBtagSF == -1) weightBtagSF = isMC_ ? calculateBtagSF() : 1; //avoid calculation of the btagSF twice
     weight *= weightBtagSF;
     h_BTagSF->Fill(weightBtagSF );
