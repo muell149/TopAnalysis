@@ -5,7 +5,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 				  TString inputFolderName="newRecentAnalysisRun8TeV",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/Prob/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/Prob/analyzeDiffXData2012ABCAllMuon.root",
 				  const std::string decayChannel = "combined", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
 { 
@@ -66,6 +66,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   bool scaleToMeasured=true;
   // add some shape plots comparing some different ttbar MC generators
   bool compareTTsample=true;
+  // produce additional efficiency and acceptance control plots 
+  bool effA=true;
+  if(decayChannel!="combined") effA=false;
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2011 or 2012 data from luminosity
@@ -150,6 +153,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   if(ttbarMC!="Madgraph"){
     pdfName+=ttbarMC;
     outputFolder+=ttbarMC;
+    effA=false;
+    compareTTsample=false;
   }
   
   // ============================
@@ -261,6 +266,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // (III) after kinematic fit 
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarAngle",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt",
+    //"analyzeTopRecoKinematicsKinFit"+addSel+"/topPtTtbarSys",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topY",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topMass",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt",
@@ -343,7 +349,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "tightLeptonQuality/relIso",
     // (III) after btagging 
     "tightLeptonQualityTagged/relIso",
-    "tightLeptonKinematicsTagged/pt"
+    "tightLeptonKinematicsTagged/pt",
    };
 
   TString plots1Dmu[ ] = { 
@@ -362,7 +368,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "tightMuonQuality/matches",
    // (III) after btagging 
     "tightMuonKinematicsTagged/eta",
-    "tightMuonKinematicsTagged/phi" 			 
+    "tightMuonKinematicsTagged/phi",			 
   };
 
   TString plots1De[ ] = { 
@@ -379,7 +385,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "tightElectronQuality/convDist",
     // (III) after btagging 
     "tightElectronKinematicsTagged/eta",
-    "tightElectronKinematicsTagged/phi"
+    "tightElectronKinematicsTagged/phi",
+  };
+
+  TString plots1Deff[ ] = { 
+    // gen distributions for efficiency and acceptance control plots
+    "analyzeTopPartonLevelKinematics/topPt",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/topPt",
+    "analyzeTopPartonLevelKinematics/topY",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/topY",
+    "analyzeTopPartonLevelKinematics/ttbarPt",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarPt",
+    "analyzeTopPartonLevelKinematics/ttbarY",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarY",
   };
 	
   TString plots2D[ ] = {};	
@@ -493,6 +511,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // (III) after kinematic fit 
     "#angle(t,#bar{t});Events;0;15",
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
+    //"p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
     "y^{t};Top quarks;0;1",
     "m^{t};Top quarks;0;10",
     "p_{T}^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
@@ -589,7 +608,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "N_{matched #mu segments};muons;0;1",
     // (III) after btagging 
     "#eta;muons;0;1",
-    "#phi;muons;0;10"
+    "#phi;muons;0;10",
   };
 
   TString axisLabel1De[ ] = {
@@ -605,7 +624,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "convDist;electrons;0;5",
     // (III) after btagging 
     "#eta;electrons;0;1",
-    "#phi;electrons;0;10"
+    "#phi;electrons;0;10",
+  };
+
+  TString axisLabel1Deff[ ] = { 
+    // gen distributions for efficiency and acceptance control plots
+    "parton truth p_{T}^{t} #left[GeV#right];Top quarks;0;20",
+    "parton truth PS p_{T}^{t} #left[GeV#right];Top quarks;0;20",
+    "parton truth y^{t};Top quarks;0;1",
+    "parton truth PS y^{t};Top quarks;0;1",
+    "parton truth p_{T}^{t#bar{t}} #left[GeV#right];Top quarks;0;20",
+    "parton truth PS p_{T}^{t#bar{t}} #left[GeV#right];Top quarks;0;20",
+    "parton truth y^{t#bar{t}};Top quarks;0;1",
+    "parton truth PS y^{t#bar{t}};Top quarks;0;1",
   };
 
   // 2D: "x-axis title"/"y-axis title"
@@ -615,13 +646,15 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   //  Count number of plots + cross-check to number of axis-label defined 
   // ======================================================================
   unsigned int N1Dplots = sizeof(plots1D)/sizeof(TString) + sizeof(plots1DLeptons)/sizeof(TString);
-  if(decayChannel=="electron") N1Dplots += sizeof(plots1De )/sizeof(TString);
-  if(decayChannel=="muon"    ) N1Dplots += sizeof(plots1Dmu)/sizeof(TString);
+  if(decayChannel=="electron") N1Dplots += sizeof(plots1De  )/sizeof(TString);
+  if(decayChannel=="muon"    ) N1Dplots += sizeof(plots1Dmu )/sizeof(TString);
+  if(effA                    ) N1Dplots += sizeof(plots1Deff)/sizeof(TString);
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
   // get number fo axis labels and check if it corresponds to number of plots
   unsigned int Naxislabels = sizeof(axisLabel1D)/sizeof(TString) + sizeof(axisLabel1DLeptons)/sizeof(TString);
-  if(decayChannel=="electron") Naxislabels += sizeof(axisLabel1De )/sizeof(TString);
-  if(decayChannel=="muon"    ) Naxislabels += sizeof(axisLabel1Dmu)/sizeof(TString);
+  if(decayChannel=="electron") Naxislabels += sizeof(axisLabel1De  )/sizeof(TString);
+  if(decayChannel=="muon"    ) Naxislabels += sizeof(axisLabel1Dmu )/sizeof(TString);
+  if(effA                    ) Naxislabels += sizeof(axisLabel1Deff)/sizeof(TString);
   if(N1Dplots != Naxislabels){
     std::cout << "ERROR - 1D plots: Number of plots and axis label do not correspond .... Exiting macro!" << std::endl;
     exit(1);
@@ -652,6 +685,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   plotList_.insert(plotList_.end(),   plots1DLeptons, plots1DLeptons + sizeof(plots1DLeptons)/sizeof(TString));
   if(decayChannel=="electron") plotList_.insert(plotList_.end(), plots1De,  plots1De  + sizeof(plots1De )/sizeof(TString));
   if(decayChannel=="muon"    ) plotList_.insert(plotList_.end(), plots1Dmu, plots1Dmu + sizeof(plots1Dmu)/sizeof(TString)); 
+  if(effA) plotList_.insert(plotList_.end(), plots1Deff,     plots1Deff     + sizeof(plots1Deff    )/sizeof(TString));
   plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );	
 
   // Rename lepton plots according to chosen decay channel
@@ -775,6 +809,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   axisLabel_.insert(axisLabel_.end(),   axisLabel1DLeptons, axisLabel1DLeptons + sizeof(axisLabel1DLeptons)/sizeof(TString));
   if(decayChannel=="electron") axisLabel_.insert( axisLabel_.end(), axisLabel1De , axisLabel1De +sizeof(axisLabel1De )/sizeof(TString) );
   if(decayChannel=="muon"    ) axisLabel_.insert( axisLabel_.end(), axisLabel1Dmu, axisLabel1Dmu+sizeof(axisLabel1Dmu)/sizeof(TString) );
+  if(effA) axisLabel_.insert(axisLabel_.end(), axisLabel1Deff,     axisLabel1Deff     + sizeof(axisLabel1Deff)/sizeof(TString));
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
   if(verbose>1){
     std::cout << "(plot, x Axis label, y Axis label, log scale?, rebinning factor):" << std::endl;
@@ -1088,6 +1123,175 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
       }
     }
   }
+
+  // =================================
+  // introduce some acceptance and 
+  // efficiency generator comparisons
+  // =================================
+  TLegend *legTheo2= new TLegend();
+  legendStyle(*legTheo2,"t#bar{t} SG simulations");
+  if(effA){
+    // get POWHEG and MC@NLO ttbar signal files
+    files_[kSigMca]=TFile::Open(inputFolder+"/"+TopFilename(kSigMca, systematicVariation, "muon"    ));
+    files_[kBkgMca]=TFile::Open(inputFolder+"/"+TopFilename(kSigMca, systematicVariation, "electron"));
+    files_[kSigPow]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "muon"    ));
+    files_[kBkgPow]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "electron"));
+    // create other theory prediction plots
+    unsigned int koneMca= (decayChannel!="electron" ? kSigMca : kBkgMca);
+    unsigned int ktwoMca= (decayChannel=="combined" ? kBkgMca : 999);
+    unsigned int konePow= (decayChannel!="electron" ? kSigPow : kBkgPow);
+    unsigned int ktwoPow= (decayChannel=="combined" ? kBkgPow : 999);
+    // collect interesting variables
+    std::vector<TString> variables_;
+    TString effVariables[] = {"topPt" , "topY"  , "ttbarPt", "ttbarY", "ttbarMass"};
+    variables_.insert(variables_.end(), effVariables, effVariables + sizeof(effVariables)/sizeof(TString));
+    for(int var=0; var<int(variables_.size()); ++var){
+      TString name=variables_[var];
+      TString genall="analyzeTopPartonLevelKinematics/"+name;
+      TString genPS ="analyzeTopPartonLevelKinematicsPhaseSpace/"+name;
+      TString reco  ="analyzeTopRecoKinematicsKinFit"+addSel+"/"+name;
+      // std::cout << "a)" << genall << std::endl;
+      // std::cout << "b)" << genPS  << std::endl;
+      // std::cout << "c)" << reco   << std::endl;
+      TString ext="BGfree";
+      // get ttbar SG MadGraph MC
+      //std::cout << "get MadGraph" << std::endl;
+      //std::cout << "a)" << std::endl;
+      histo_[genall+ext][kSig]=(TH1F*)(filesEl_[kSig]->Get(genall)->Clone(genall+ext));
+      histo_[genall+ext][kSig]->Sumw2();
+      histo_[genall+ext][kSig]->Add((TH1F*)filesMu_[kSig]->Get(genall)->Clone(genall+ext));
+      //histo_[genall+ext ][kSig]=(TH1F*)histo_[genall ][kSig]->Clone(genall+ext);
+      //std::cout << "b)" << std::endl;
+      histo_[genPS+ext][kSig]=(TH1F*)(filesEl_[kSig]->Get(genPS)->Clone(genPS+ext));
+      histo_[genPS+ext][kSig]->Sumw2();
+      histo_[genPS+ext][kSig]->Add((TH1F*)filesMu_[kSig]->Get(genPS)->Clone(genPS+ext));
+      //histo_[genPS+ext ][kSig]=(TH1F*)histo_[genPS ][kSig]->Clone(genPS+ext);
+      //std::cout << "c)" << std::endl;
+      histo_[reco+ext][kSig]=(TH1F*)(filesEl_[kSig]->Get(reco)->Clone(reco+ext));
+      histo_[reco+ext][kSig]->Sumw2();
+      histo_[reco+ext][kSig]->Add((TH1F*)filesMu_[kSig]->Get(reco)->Clone(reco+ext));
+      //histo_[reco+ext  ][kSig]=(TH1F*)histo_[reco  ][kSig]->Clone(reco+ext);
+      // get MC@NLO SG MC 
+      //std::cout << "get MC@NLO" << std::endl;
+      if(files_[kSigMca]&&files_[kBkgMca]){
+	histo_[genall+ext][kSigMca]=(TH1F*)(files_[koneMca]->Get(genall)->Clone(genall+ext));
+	histo_[genPS+ext ][kSigMca]=(TH1F*)(files_[koneMca]->Get(genPS )->Clone(genPS+ext ));
+	histo_[reco+ext  ][kSigMca]=(TH1F*)(files_[koneMca]->Get(reco  )->Clone(reco+ext  ));
+	histo_[genall+ext][kSigMca]->Sumw2();
+	histo_[genPS+ext ][kSigMca]->Sumw2();
+	histo_[reco+ext  ][kSigMca]->Sumw2();
+	if(ktwoMca!=999){
+	  // add both channels for combined decayChannel
+	  histo_[genall+ext][kSigMca]->Add((TH1F*)(files_[ktwoMca]->Get(genall)->Clone(genall+ext)));
+	  histo_[genPS+ext ][kSigMca]->Add((TH1F*)(files_[ktwoMca]->Get(genPS )->Clone(genPS+ext )));
+	  histo_[reco+ext  ][kSigMca]->Add((TH1F*)(files_[ktwoMca]->Get(reco  )->Clone(reco+ext  )));  
+	}
+      }
+      // get POWHEG SG MC 
+      //std::cout << "get POWHEG" << std::endl;
+      if(files_[kSigPow]&&files_[kBkgPow]){
+	histo_[genall+ext][kSigPow]=(TH1F*)(files_[konePow]->Get(genall)->Clone(genall+ext));
+	histo_[genPS+ext ][kSigPow]=(TH1F*)(files_[konePow]->Get(genPS )->Clone(genPS+ext ));
+	histo_[reco+ext  ][kSigPow]=(TH1F*)(files_[konePow]->Get(reco  )->Clone(reco+ext  ));
+	histo_[genall+ext][kSigPow]->Sumw2();
+	histo_[genPS+ext ][kSigPow]->Sumw2();
+	histo_[reco+ext  ][kSigPow]->Sumw2();
+	if(ktwoPow!=999){
+	  // add both channels for combined decayChannel
+	  histo_[genall+ext][kSigPow]->Add((TH1F*)(files_[ktwoPow]->Get(genall)->Clone(genall+ext)));
+	  histo_[genPS+ext ][kSigPow]->Add((TH1F*)(files_[ktwoPow]->Get(genPS )->Clone(genPS+ext )));
+	  histo_[reco+ext  ][kSigPow]->Add((TH1F*)(files_[ktwoPow]->Get(reco  )->Clone(reco+ext  )));  
+	}
+      }
+      // Rebinning
+      // WARNING: adjust to factors listed in corresponding axislabels above
+      //          to have same binning for all MCs and PSs
+      double reBinFactor = ( name.Contains("Pt") ? 20 : (name.Contains("ttbarMass") ? 50 : 1 ) );
+      if(reBinFactor>1){
+	equalReBinTH1(reBinFactor, histo_, genall+ext, kSig);
+	if(files_[kSigPow]&&files_[kBkgPow]) equalReBinTH1(reBinFactor, histo_, genall+ext, kSigPow);
+	if(files_[kSigMca]&&files_[kBkgMca]) equalReBinTH1(reBinFactor, histo_, genall+ext, kSigMca);
+	equalReBinTH1(reBinFactor, histo_, genPS+ext , kSig);
+	if(files_[kSigPow]&&files_[kBkgPow]) equalReBinTH1(reBinFactor, histo_, genPS+ext , kSigPow);
+	if(files_[kSigMca]&&files_[kBkgMca]) equalReBinTH1(reBinFactor, histo_, genPS+ext , kSigMca);
+	equalReBinTH1(reBinFactor, histo_, reco+ext  , kSig);
+	if(files_[kSigPow]&&files_[kBkgPow]) equalReBinTH1(reBinFactor, histo_, reco+ext  , kSigPow);
+	if(files_[kSigMca]&&files_[kBkgMca]) equalReBinTH1(reBinFactor, histo_, reco+ext  , kSigMca);
+      }
+      // Calculate efficiency / acceptance
+      TString eff="efficiencyOnly/"+name;
+      TString Acc="acceptanceOnly/"+name;
+      // MadGraph
+      histo_[eff][kSig]= (TH1F*)histo_[reco+ext  ][kSig]->Clone(eff);
+      histo_[eff][kSig]->Divide(histo_[genPS+ext ][kSig]);
+      histo_[Acc][kSig]= (TH1F*)histo_[genPS+ext ][kSig]->Clone(Acc);
+      histo_[Acc][kSig]->Divide(histo_[genall+ext][kSig]);  
+      // MC@NLO
+      histo_[eff][kSigMca]= (TH1F*)histo_[reco+ext  ][kSigMca]->Clone(eff);
+      histo_[eff][kSigMca]->Divide(histo_[genPS+ext ][kSigMca]);
+      histo_[Acc][kSigMca]= (TH1F*)histo_[genPS+ext ][kSigMca]->Clone(Acc);
+      histo_[Acc][kSigMca]->Divide(histo_[genall+ext][kSigMca]);  
+      // POWHEG
+      histo_[eff][kSigPow]= (TH1F*)histo_[reco+ext  ][kSigPow]->Clone(eff);
+      histo_[eff][kSigPow]->Divide(histo_[genPS+ext ][kSigPow]);
+      histo_[Acc][kSigPow]= (TH1F*)histo_[genPS+ext ][kSigPow]->Clone(Acc);
+      histo_[Acc][kSigPow]->Divide(histo_[genall+ext][kSigPow]);  
+      // add efficiency and acceptance to plotList
+      plotList_ .insert(plotList_ .end(), eff);
+      plotList_ .insert(plotList_ .end(), Acc);
+      // add corresponding axis labels
+      TString effLabel [] = {"p_{T}^{t} [GeV]" ,"y^{t}", "p_{T}^{t#bar{t}} [GeV]", "y^{t#bar{t}}", "m^{t#bar{t}} [GeV]"};
+      axisLabel_.insert(axisLabel_.end(), effLabel[var]+";eff = N_{reco} / N_{gen}^{parton PS};0;1"   );
+      axisLabel_.insert(axisLabel_.end(), effLabel[var]+";A = N_{gen}^{parton PS} / N_{gen}^{all};0;1");
+      // increase 1 D plots
+      N1Dplots++; 
+      N1Dplots++;
+      // choose style
+      // MadGraph
+      histo_[eff][kSig]->SetLineColor(constMadgraphColor);
+      histo_[eff][kSig]->SetMarkerColor(constMadgraphColor);
+      histo_[eff][kSig]->SetLineWidth(2);
+      histo_[eff][kSig]->SetLineStyle(1);
+      histo_[eff][kSig]->SetFillStyle(0);
+      histo_[Acc][kSig]->SetLineColor(constMadgraphColor);
+      histo_[Acc][kSig]->SetMarkerColor(constMadgraphColor);
+      histo_[Acc][kSig]->SetLineWidth(2);
+      histo_[Acc][kSig]->SetLineStyle(1);
+      histo_[Acc][kSig]->SetFillStyle(0);
+      // MC@NLO
+      if(files_[kSigMca]&&files_[kBkgMca]){
+	histo_[eff][kSigMca]->SetLineColor(constMcatnloColor);
+	histo_[eff][kSigMca]->SetMarkerColor(constMcatnloColor);
+	histo_[eff][kSigMca]->SetLineWidth(2);
+	histo_[eff][kSigMca]->SetLineStyle(constMcatnloStyle);
+	histo_[eff][kSigMca]->SetFillStyle(0);
+	histo_[Acc][kSigMca]->SetLineColor(constMcatnloColor);
+	histo_[Acc][kSigMca]->SetMarkerColor(constMcatnloColor);
+	histo_[Acc][kSigMca]->SetLineWidth(2);
+	histo_[Acc][kSigMca]->SetLineStyle(constMcatnloStyle);
+	histo_[Acc][kSigMca]->SetFillStyle(0);
+      }
+      // POWHEG
+      if(files_[kSigPow]&&files_[kBkgPow]){
+	histo_[eff][kSigPow]->SetLineColor(constPowhegColor );
+	histo_[eff][kSigPow]->SetMarkerColor(constPowhegColor );
+	histo_[eff][kSigPow]->SetLineWidth(2);
+	histo_[eff][kSigPow]->SetLineStyle(constPowhegStyle);
+	histo_[eff][kSigPow]->SetFillStyle(0);
+	histo_[Acc][kSigPow]->SetLineColor(constPowhegColor );
+	histo_[Acc][kSigPow]->SetMarkerColor(constPowhegColor );
+	histo_[Acc][kSigPow]->SetLineWidth(2);
+	histo_[Acc][kSigPow]->SetLineStyle(constPowhegStyle);
+	histo_[Acc][kSigPow]->SetFillStyle(0);
+      }
+      // create small legend
+      if(var==0){
+	legTheo2->AddEntry(histo_[eff][kSig], "MadGraph", "L");
+	if(files_[kSigPow]&&files_[kBkgPow]) legTheo2->AddEntry(histo_[eff][kSigPow], "POWHEG"  , "L");
+	if(files_[kSigMca]&&files_[kBkgMca]) legTheo2->AddEntry(histo_[eff][kSigMca], "MC@NLO"  , "L");
+      }
+    }
+  }
   // =====================
   //  Create canvas
   // =====================
@@ -1294,6 +1498,19 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      legTheo->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 	      if(plotList_[plot].Contains("compositedKinematicsKinFit/leadNonttjetPt")||plotList_[plot].Contains("compositedKinematicsKinFit/Njets"))legTheo->Draw("same");
 	    }
+	    // draw other theory predictions for efficiency and acceptance study in same plot
+	    if(plotList_[plot].Contains("efficiencyOnly")||plotList_[plot].Contains("acceptanceOnly")){
+	      if(histo_[plotList_[plot]].count(kSigMca)>0) histo_[plotList_[plot]][kSigMca]->Draw("hist same");
+	      if(histo_[plotList_[plot]].count(kSigPow)>0) histo_[plotList_[plot]][kSigPow]->Draw("hist same");
+	      // draw small legend
+	      legTheo2->SetX1NDC(0.73);
+	      legTheo2->SetY1NDC(0.69);
+	      legTheo2->SetX2NDC(0.91);
+	      legTheo2->SetY2NDC(0.88);
+	      legTheo2->Draw("same");
+	      // turn on grid
+	      plotCanvas_[canvasNumber]->SetGrid(1,1);
+	    }
 	  }
 	  // draw other plots into same canvas 
 	  else{ 
@@ -1343,7 +1560,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      leg->SetY2NDC(1.0-gStyle->GetPadTopMargin()-0.8*gStyle->GetTickLength());
 	      leg->SetTextSize(0.035);
 
-	      if(!plotList_[plot].Contains("BGSubNorm"))leg->Draw("SAME");
+	      if(!plotList_[plot].Contains("BGSubNorm")&&!(plotList_[plot].Contains("efficiency")||plotList_[plot].Contains("acceptance"))&&!(plotList_[plot].Contains("efficiency")||plotList_[plot].Contains("acceptance")))leg->Draw("SAME");
 	      // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
 	      if      (decayChannel=="muon"    ) DrawDecayChLabel("#mu + Jets");
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
@@ -1377,6 +1594,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 		}
 	      }
 	    }
+	  }
+	  // efficiency and acceptance ratios: theory ratios wrt MadGraph
+	  if(withRatioPlot&&(plotList_[plot].Contains("efficiency")||plotList_[plot].Contains("acceptance"))){
+	    std::vector<double> zeroerr_;
+	    for(int bin=0; bin<histo_[plotList_[plot]][kSig]->GetNbinsX(); ++bin) zeroerr_.push_back(0);
+	    int rval1 = drawRatio(histo_[plotList_[plot]][kSigMca], histo_[plotList_[plot]][kSig], 0.7, 1.3, myStyle, verbose, zeroerr_, "simulation", "MadGraph", "hist"     , constMcatnloColor, false, 0.1);
+	    int rval2 = drawRatio(histo_[plotList_[plot]][kSigPow], histo_[plotList_[plot]][kSig], 0.7, 1.3, myStyle, verbose, zeroerr_, "simulation", "MadGraph", "hist same", constPowhegColor , false, 0.1);
+	    if (rval1!=0||rval2!=0) std::cout << " Problem occured when creating ratio plot for " << plotList_[plot] << std::endl;
 	  }
       	} // end: plot existing?
       } // end: 1D plots
@@ -1430,8 +1655,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
       TString title=(TString)(plotCanvas_[idx])->GetTitle();
       if(!title.Contains("canv")){
-	plotCanvas_[idx]->Print(outputFolder+title+".eps"); 
-	plotCanvas_[idx]->Print(outputFolder+title+".png");
+	TString outputFolder2=outputFolder;
+	if(title.Contains("efficiencyOnly")||title.Contains("acceptanceOnly")){
+	  outputFolder2.ReplaceAll("monitoring", "effAndAcc");
+	}
+	plotCanvas_[idx]->Print(outputFolder2+title+".eps"); 
+	plotCanvas_[idx]->Print(outputFolder2+title+".png");
       }
       // kinfitshift as pdf
       if(title.Contains("shift")){
