@@ -2244,6 +2244,7 @@ namespace semileptonic {
     double canvAsym = 4./3.;
     // ratio size of pad with plot and pad with ratio
     double ratioSize = 0.36;
+    double scaleFactor = 1./(canvAsym*ratioSize);
     // change old pad
     gPad->SetBottomMargin(ratioSize);
     gPad->SetRightMargin(right);
@@ -2251,79 +2252,85 @@ namespace semileptonic {
     gPad->SetBorderMode(0);
     gPad->SetBorderSize(0);
     gPad->SetFillColor(10);
-    // create new pad for ratio plot
-    TPad *rPad;
-    rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
+
+    if(!ratioDrawOption.Contains("same")){
+      // create new pad for ratio plot
+      TPad *rPad;
+      rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
 #ifdef DILEPTON_MACRO
-    rPad->SetFillColor(10);
+      rPad->SetFillColor(10);
 #else
-    rPad->SetFillStyle(0);
-    rPad->SetFillColor(0);
+      rPad->SetFillStyle(0);
+      rPad->SetFillColor(0);
 #endif
-    rPad->SetBorderSize(0);
-    rPad->SetBorderMode(0);
-    rPad->Draw();
-    // configure ratio plot
-    rPad->cd();
-    rPad->SetLogy(0);
-    rPad->SetLogx(logx);
-    rPad->SetTicky(1);
-    double scaleFactor = 1./(canvAsym*ratioSize);
-    ratio->SetStats(kFALSE);
-    ratio->SetTitle("");
-    ratio->SetMaximum(ratioMax);
-    ratio->SetMinimum(ratioMin);
-    ratio->SetLineWidth(2);
-    // configure axis of ratio plot
-    ratio->GetXaxis()->SetTitleSize(histDenominator->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
-    ratio->GetXaxis()->SetTitleOffset(histDenominator->GetXaxis()->GetTitleOffset()*0.9);
-    ratio->GetXaxis()->SetLabelSize(histDenominator->GetXaxis()->GetLabelSize()*scaleFactor*1.4);
-    ratio->GetXaxis()->SetTitle(histDenominator->GetXaxis()->GetTitle());
-    ratio->GetXaxis()->SetNdivisions(histDenominator->GetNdivisions());
-    ratio->GetYaxis()->CenterTitle();
-    ratio->GetYaxis()->SetTitle("#frac{"+ratioLabelNominator+"}{"+ratioLabelDenominator+"}");
-    ratio->GetYaxis()->SetTitleSize(histDenominator->GetYaxis()->GetTitleSize()*scaleFactor);
-    ratio->GetYaxis()->SetTitleOffset(histDenominator->GetYaxis()->GetTitleOffset()/scaleFactor);
-    ratio->GetYaxis()->SetLabelSize(histDenominator->GetYaxis()->GetLabelSize()*scaleFactor);
-    ratio->GetYaxis()->SetLabelOffset(histDenominator->GetYaxis()->GetLabelOffset()*3.3);
-    ratio->GetYaxis()->SetTickLength(0.03);
-    ratio->GetYaxis()->SetNdivisions(505);
-    ratio->GetXaxis()->SetRange(histDenominator->GetXaxis()->GetFirst(), histDenominator->GetXaxis()->GetLast());
-    ratio->GetXaxis()->SetNoExponent(true);
-    // delete axis of initial plot
-    histDenominator->GetXaxis()->SetLabelSize(0);
-    histDenominator->GetXaxis()->SetTitleSize(0);
+      rPad->SetBorderSize(0);
+      rPad->SetBorderMode(0);
+      rPad->Draw();
+      // configure ratio plot
+      rPad->cd();
+      rPad->SetLogy(0);
+      rPad->SetLogx(logx);
+      rPad->SetTicky(1);
+      rPad->SetTopMargin(0.0);
+      rPad->SetBottomMargin(0.15*scaleFactor);
+      rPad->SetRightMargin(right);
+      // draw grid
+      rPad->SetGrid(1,1);
+
+      ratio->SetStats(kFALSE);
+      ratio->SetTitle("");
+      ratio->SetMaximum(ratioMax);
+      ratio->SetMinimum(ratioMin);
+      // configure axis of ratio plot
+      ratio->GetXaxis()->SetTitleSize(histDenominator->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
+      ratio->GetXaxis()->SetTitleOffset(histDenominator->GetXaxis()->GetTitleOffset()*0.9);
+      ratio->GetXaxis()->SetLabelSize(histDenominator->GetXaxis()->GetLabelSize()*scaleFactor*1.4);
+      ratio->GetXaxis()->SetTitle(histDenominator->GetXaxis()->GetTitle());
+      ratio->GetXaxis()->SetNdivisions(histDenominator->GetNdivisions());
+      ratio->GetYaxis()->CenterTitle();
+      ratio->GetYaxis()->SetTitle("#frac{"+ratioLabelNominator+"}{"+ratioLabelDenominator+"}");
+      ratio->GetYaxis()->SetTitleSize(histDenominator->GetYaxis()->GetTitleSize()*scaleFactor);
+      ratio->GetYaxis()->SetTitleOffset(histDenominator->GetYaxis()->GetTitleOffset()/scaleFactor);
+      ratio->GetYaxis()->SetLabelSize(histDenominator->GetYaxis()->GetLabelSize()*scaleFactor);
+      ratio->GetYaxis()->SetLabelOffset(histDenominator->GetYaxis()->GetLabelOffset()*3.3);
+      ratio->GetYaxis()->SetTickLength(0.03);
+      ratio->GetYaxis()->SetNdivisions(505);
+      ratio->GetXaxis()->SetRange(histDenominator->GetXaxis()->GetFirst(), histDenominator->GetXaxis()->GetLast());
+      ratio->GetXaxis()->SetNoExponent(true);
+      // delete axis of initial plot
+      histDenominator->GetXaxis()->SetLabelSize(0);
+      histDenominator->GetXaxis()->SetTitleSize(0);
+    }
     // draw ratio plot
+    ratio->SetLineWidth(2);
     ratio->SetLineColor(ratioDrawColor);
     ratio->DrawClone(ratioDrawOption);
     ratio->SetMarkerSize(ratioMarkersize);
     ratio->SetMarkerColor(ratioDrawColor);
     ratio->DrawClone(ratioDrawOption+" same");
-    rPad->SetTopMargin(0.0);
-    rPad->SetBottomMargin(0.15*scaleFactor);
-    rPad->SetRightMargin(right);
+
     gPad->SetLeftMargin(left);
     gPad->RedrawAxis();
-    // draw grid
-    rPad->SetGrid(1,1);
 
-    // draw a horizontal lines on a given histogram
-    // a) at 1
-    Double_t xmin = ratio->GetXaxis()->GetXmin();
-    Double_t xmax = ratio->GetXaxis()->GetXmax();
-    TString height = ""; height += 1;
-    TF1 *f = new TF1("f", height, xmin, xmax);
-    f->SetLineStyle(1);
-    f->SetLineWidth(1);
-    f->SetLineColor(kBlack);
-    f->Draw("L same");
-    // b) at upper end of ratio pad
-    TString height2 = ""; height2 += ratioMax;
-    TF1 *f2 = new TF1("f2", height2, xmin, xmax);
-    f2->SetLineStyle(1);
-    f2->SetLineWidth(1);
-    f2->SetLineColor(kBlack);
-    f2->Draw("L same");
+    if(!ratioDrawOption.Contains("same")){
+      // draw a horizontal lines on a given histogram
+      // a) at 1
+      Double_t xmin = ratio->GetXaxis()->GetXmin();
+      Double_t xmax = ratio->GetXaxis()->GetXmax();
+      TString height = ""; height += 1;
+      TF1 *f = new TF1("f", height, xmin, xmax);
+      f->SetLineStyle(1);
+      f->SetLineWidth(1);
+      f->SetLineColor(kBlack);
+      f->Draw("L same");
+      // b) at upper end of ratio pad
+      TString height2 = ""; height2 += ratioMax;
+      TF1 *f2 = new TF1("f2", height2, xmin, xmax);
+      f2->SetLineStyle(1);
+      f2->SetLineWidth(1);
+      f2->SetLineColor(kBlack);
+      f2->Draw("L same");
+    }
 
     return 0;    
   }
