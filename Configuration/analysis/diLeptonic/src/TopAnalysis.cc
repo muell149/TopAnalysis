@@ -144,7 +144,9 @@ void TopAnalysis::SlaveBegin ( TTree * )
     h_RecoAntiLeptonEta = store(new TH1D ( "RecoAntiLeptonEta","Eta of AntiLepton (HYP)",100,-5,5 ));
 
     h_VisGenAll = store(new TH1D ( "VisGenAll", "All Visible Generated particles (IM)", 40, 0, 400 ));
+    h_VisGenAll_noweight = store(new TH1D ( "VisGenAll_noweight", "All Visible Generated particles (IM)", 40, 0, 400 ));
     h_GenAll = store(new TH1D ( "GenAll", "AllGenerated particles (IM)", 40, 0, 400 ));         h_GenAll->Sumw2();
+    h_GenAll_noweight = store(new TH1D ( "GenAll_noweight", "AllGenerated particles (IM)", 40, 0, 400 ));         h_GenAll_noweight->Sumw2();
     Allh1_postKinReco = store(new TH1D ( "Allh1_postKinReco", "DiLepton Mass", 40, 0, 400 ));
     h_diLepMassFull = store(new TH1D ( "DIMFull", "DiLepton Mass (Full Range)", 100, 0, 300 ));
     h_diLepMassFull_fullSel = store(new TH1D ( "DIMFull_fullSel", "DiLepton Mass (Full Range)", 100, 0, 300 ));
@@ -650,7 +652,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Defaults from AnalysisBase
     AnalysisBase::Process(entry);
 
-    
     // Separate DY dilepton decays in lepton flavours
     if(this->failsDrellYanGeneratorSelection(entry)) return kTRUE;
     
@@ -704,6 +705,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     LV LeadGenLepton, NLeadGenLepton;
     LV LeadGenBJet, NLeadGenBJet;
     double genHT = -1;
+
     this->generatorTopEvent(LeadGenTop, NLeadGenTop,
                             LeadGenLepton, NLeadGenLepton,
                             LeadGenBJet, NLeadGenBJet,
@@ -744,12 +746,13 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     for (int i=0; i<(int) leptons_->size(); ++i){
         h_AllLeptonEta_step0->Fill(leptons_->at(i).Eta(), 1);
         h_AllLeptonpT_step0->Fill(leptons_->at(i).Pt(), 1);
-    }
+    }    
     
     for (int i=0; i<(int) jets_->size(); ++i){
         h_AllJetsEta_step0->Fill(jets_->at(i).Eta(), 1);
         h_AllJetspT_step0->Fill(jets_->at(i).Pt(), 1);
     }
+
     h_LeptonMult_step0->Fill(leptons_->size(), 1);
     h_JetsMult_step0->Fill(jets_->size(), 1);
     int nbjets_step0 = NumberOfBJets;
@@ -757,7 +760,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     h_PUSF->Fill(weightPU, 1);
 
-    
     //===CUT===
     // check if event was triggered
     //our triggers (bits: see the ntuplewriter!)    
@@ -1864,6 +1866,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     
     double trueLevelWeight = weightGenerator_ * weightPU;
     h_GenAll->Fill(GenTop_->M(), trueLevelWeight);
+    h_GenAll_noweight->Fill(GenTop_->M(), weightGenerator_);
     
     //Begin: Select & Fill histograms with Leading pT and 2nd Leading pT: Lepton and BJet
     orderLVByPt(LeadGenLepton, NLeadGenLepton, *GenLepton_, *GenAntiLepton_);
@@ -1884,6 +1887,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
             {
 
                 h_VisGenAll->Fill(GenTop_->M(), trueLevelWeight);
+                h_VisGenAll_noweight->Fill(GenTop_->M(), weightGenerator_);
 
                 h_VisGenLLBarpT->Fill(( *GenLepton_ + *GenAntiLepton_ ).Pt(), trueLevelWeight );
                 h_VisGenLLBarMass->Fill(( *GenLepton_ + *GenAntiLepton_ ).M(), trueLevelWeight );

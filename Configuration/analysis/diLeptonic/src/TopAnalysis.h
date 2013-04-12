@@ -24,9 +24,9 @@ class TopAnalysis : public AnalysisBase
     TH1D *TTh1_post1btag, *Allh1_post1btag, *Zh1_post1btag;
     TH1D *TTh1_postKinReco, *Allh1_postKinReco, *Zh1_postKinReco;
     
-    TH1 *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_jetMulti, *h_jetMulti_noBTag,
+    TH1 *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_GenAll_noweight, *h_jetMulti, *h_jetMulti_noBTag,
       *h_jetMulti_diLep, *h_BjetMulti, *h_BjetMulti_noBTag,*h_jetMultiXSec,*h_jetMultiAll, 
-         *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_diLepMassFull, 
+      *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_VisGenAll_noweight, *h_diLepMassFull, 
          *h_diLepMassFull_fullSel;
 
     TH1 *h_HypTTBarMass, *h_HypTTBarRapidity, *h_HypTTBarpT;
