@@ -7,6 +7,7 @@
 #include <utility>
 #include <functional>
 
+#include <TRandom3.h>
 #include <TSelector.h>
 #include <TSelectorList.h>
 #include <TParameter.h>
@@ -22,8 +23,6 @@ class TString;
 
 class PUReweighter;
 class JetCorrectionUncertainty;
-
-
 
 
 
@@ -483,7 +482,15 @@ protected:
     void prepareBtagSF();
     /// Get b-tag per-event scale factor
     double calculateBtagSF();
-    
+
+    std::vector<int> IndexOfBTags ( double TagCut = 0.244);
+    bool makeeffs;
+    bool IsTagged(LV Jet, double TagValue, int Flavour, double TagCut = 0.244);
+    double GetEfficiency(LV jet, int partonFlavour);
+    double GetSF(double pt, double abs_eta, int flavour);
+    double VarySF (double pt, double eta, int flavour, double ptmedian, double etamedian);
+
+
     /// Prepare kinematic reconstruction scale factor
     void prepareKinRecoSF();
     /// Calculate the kinematic reconstruction and return whether at least one solution exists

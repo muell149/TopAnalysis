@@ -1124,12 +1124,18 @@ void AnalysisBase::prepareLeptonIDSF() {
 }
 
 
-
+/// Function to:
+///   -> decide to do or not do the b-tag efficiency calculation
+///   -> loading of the efficiency histograms
+///   -> get the pt and eta median values
 void AnalysisBase::prepareBtagSF()
 {
     //some defaults for the median, overwritten if btag files exist
     btag_ptmedian_ = 75;
     btag_etamedian_ = 0.75;
+    
+    //some defaults for b-tagging efficiency calculation, overwritten if bTag efficiency plots exist
+    makeeffs = false;
 
     //By now defined the per-jet SFs vary according to:
     //   BTag_Up   ==> pt>ptmedian vary DOWN, pt<ptmedian vary UP
@@ -1153,8 +1159,10 @@ void AnalysisBase::prepareBtagSF()
              << "   build/load_Analysis -f ttbarsignalplustau.root -c mumu\n"
              << "and copy the selectionRoot/BTagEff directory to the cwd:\n"
              << "   cp -r selectionRoot/BTagEff .\n"
-             << "This error is NOT fatal, using a btag SF = 1 everywhere\n"
+             //<< "This error is NOT fatal, using a btag SF = 1 everywhere\n"
+             << "This is error is NOT fatal, not applying the randomization of the jet tagger values\n"
              << "*******************************************************\n\n";
+        makeeffs = true;
         return;
     }
     bEff = dynamic_cast<TH2*>(bEfficiencies->Get("BEffPerJet"));
@@ -1189,6 +1197,160 @@ void AnalysisBase::prepareBtagSF()
 }
 
 
+
+/// 'Random' decision to tag or not tag a jet.
+/// Method explained in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFUtil
+/// and in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#2a_Jet_by_jet_updating_of_the_b
+bool AnalysisBase::IsTagged(LV Jet, double TagValue, int Flavour, double TagCut)
+{
+    bool isBTagged = TagValue > TagCut;
+    bool newBTag = isBTagged;
+    double Btag_eff = GetEfficiency(Jet, Flavour);
+    double Btag_SF = GetSF(Jet.Pt(), std::fabs(Jet.Eta()),Flavour);
+
+    if (Btag_SF == 1) return newBTag; //no correction needed
+
+    //throw die
+    // The seed is choosen as in https://twiki.cern.ch/twiki/pub/CMS/BTagSFUtil/test.C
+    double seed = std::abs(static_cast<int>(1e6 * sin(1e6*Jet.Phi())));
+    float coin = TRandom3(seed).Uniform(1.0);
+    
+    if ( Btag_SF > 1 ) {  // use this if SF>1
+        if ( !isBTagged ) {
+            //fraction of jets that need to be upgraded
+            float mistagPercent = (1.0 - Btag_SF) / (1.0 - (1.0/Btag_eff) );
+
+            //upgrade to tagged
+            if( coin < mistagPercent ) {newBTag = true;}
+        }
+    } else {  // use this if SF<1
+        //downgrade tagged to untagged
+        if ( isBTagged && coin > Btag_SF ) {newBTag = false;}
+    }
+
+    return newBTag;
+
+}
+
+///Decide wich type of BTag variation is going to be done according to 
+///  systematics name 
+///  median value (if applicable)
+double AnalysisBase::VarySF (double pt, double abs_eta, int flavour, double ptmedian, double etamedian){
+    /// No variation for non b-tag systematic
+    if ( !systematic_.BeginsWith("BTAG_")) return 0;
+
+    /// Systematic only for l-jet but the jet is not light: no variation to be done
+    if (systematic_.BeginsWith("BTAG_LJET") && (std::abs(flavour) == 5 || std::abs(flavour) == 4)){
+        return 0;
+    } else if (!systematic_.BeginsWith("BTAG_LJET") && std::abs(flavour) != 5 && std::abs(flavour) != 4) {
+        return 0;
+    }
+
+    if ( (systematic_.Contains("PT_UP") && pt>ptmedian)   ||
+         (systematic_.Contains("PT_DOWN") && pt<ptmedian) ||
+         (systematic_.Contains("ETA_UP") && abs_eta>etamedian) ||
+         (systematic_.Contains("ETA_DOWN") && abs_eta<etamedian) )
+        {
+            return -0.5;
+    } else if ( 
+        (systematic_.Contains("PT_UP") && pt<ptmedian)   ||
+        (systematic_.Contains("PT_DOWN") && pt>ptmedian) ||
+        (systematic_.Contains("ETA_UP") && abs_eta<etamedian) ||
+        (systematic_.Contains("ETA_DOWN") && abs_eta>etamedian) )
+        {
+            return 0.5;
+        }
+
+    /// Absolute scale up or down
+    if ( systematic_.Contains("UP") )      { return 1; }
+    else if (systematic_.Contains("DOWN")) { return -1; }
+    return 0;
+}
+
+
+double AnalysisBase::GetSF(double pt, double abs_eta, int flavour)
+{
+    double tmpsf = 1.;
+    double tmperr=0.;
+    double sign = VarySF(pt, abs_eta, flavour, btag_ptmedian_, btag_etamedian_);
+
+    if ( std::abs(flavour) == 5 ){ //b-jets
+        tmpsf  = BJetSF( pt, abs_eta );
+        tmperr = BJetSFAbsErr(pt);
+    } else if ( std::abs(flavour) == 4 ) { //c-jets
+        tmpsf  = CJetSF( pt, abs_eta );
+        tmperr = CJetSFAbsErr(pt);
+    } else if ( std::abs(flavour) != 0 ) { //l-jets
+        TString variation = TString("central");
+        if( systematic_.BeginsWith("BTAG_LJET_") ){
+            if( (systematic_.Contains("PT_UP") && pt>btag_ptmedian_) ||
+                (systematic_.Contains("PT_DOWN") && pt<btag_ptmedian_) ||
+                (systematic_.Contains("ETA_UP") && abs_eta>btag_etamedian_ ) ||
+                (systematic_.Contains("ETA_DOWN") && abs_eta<btag_etamedian_ ) ||
+                systematic_.BeginsWith("BTAG_LJET_UP")){
+                    variation = TString("up");
+                }
+            else variation = TString ("down");
+        }
+        tmpsf  = LJetSF( pt, abs_eta, variation );
+        tmperr = 0.;
+    }
+
+    return tmpsf + sign * tmperr;
+}
+
+double AnalysisBase::GetEfficiency(LV jet, int partonFlavour)
+{
+    if (std::abs(partonFlavour) == 0)
+    {
+        std::cout<<"AnalysisBase::GetEfficiency: the jet parton flavour is 0"<<std::endl;
+        std::cout<<"              Returning efficiency 1.0"<<std::endl;
+        return 1;
+    }
+
+    double pt = jet.Pt();
+    double eta = std::fabs(jet.Eta());
+    int ptbin = -1, etabin = -1, dummy = -1;
+
+    if (std::abs(partonFlavour) == 5 )
+    {
+        bEff->GetBinXYZ(bEff->FindBin(pt, eta), ptbin, etabin, dummy);
+        return bEff->GetBinContent(ptbin, etabin);
+    } else if (std::abs(partonFlavour) == 4 ) {
+        cEff->GetBinXYZ(cEff->FindBin(pt, eta), ptbin, etabin, dummy);
+        return cEff->GetBinContent(ptbin, etabin);
+    } else if (std::abs(partonFlavour) != 0 ) {
+        lEff->GetBinXYZ(lEff->FindBin(pt, eta), ptbin, etabin, dummy);
+        return lEff->GetBinContent(ptbin, etabin);
+    }
+    return 1.;
+}
+
+
+/// Return the indexes of the jet that are b-tagged after randomization
+std::vector<int> AnalysisBase::IndexOfBTags (double TagCut)
+{
+    if ( jets_->size() != jetBTagCSV_->size() || jets_->size() != jetPartonFlavour_->size() )
+    {
+        std::cout<<"AnalysisBase::IndexOfBTags: jets_->size() != jetPartonFlavour_->size() ";
+        std::cout<<"or jets_->size != jetBTagCSV_->size(). Check it!"<<std::endl;
+        std::cout<<"                            EXITING!"<<std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    std::vector<int> tagged_indexes;
+    for (size_t i = 0; i<jets_->size(); ++i)
+    {
+        //Skip jets where there is no partonFlavour
+        if ( jetPartonFlavour_->at(i) == 0 ) continue;
+
+        if (IsTagged(jets_->at(i), jetBTagCSV_->at(i), jetPartonFlavour_->at(i), TagCut))
+        {
+            tagged_indexes.push_back(i);
+        }
+    }
+    return tagged_indexes;
+}
 
 double AnalysisBase::calculateBtagSF()
 {
