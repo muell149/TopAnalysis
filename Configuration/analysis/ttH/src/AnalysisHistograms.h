@@ -2,7 +2,6 @@
 #define AnalysisHistograms_h
 
 #include <map>
-#include <set>
 
 class TString;
 class TH1D;
