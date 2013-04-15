@@ -1008,10 +1008,10 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
             }else{
                 //Here we take into account the systematic shifts needed for BG systematic because it only modifies the nominal dataset
                 if(Systematic == "BG_UP"){
-                    drawhists[i]->Scale(1.5);
+                    drawhists[i]->Scale(1.3);
                 }
                 if(Systematic == "BG_DOWN"){
-                    drawhists[i]->Scale(0.5);
+                    drawhists[i]->Scale(0.7);
                 }
                 addAndDelete_or_Assign(aBgrHist, drawhists[i]->Rebin(bins,"aBgrHist",Xbins));
             }
@@ -1133,8 +1133,8 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     DrawDecayChLabel(channelLabel[channelType]);
     leg->Draw("SAME");
     if(drawPlotRatio){
-      TH1* stacksum = SummedStackHisto(stack.get());
-      drawRatio(drawhists[0], stacksum, 0.5, 1.7); 
+        TH1* stacksum = SummedStackHisto(stack.get());
+        drawRatio(drawhists[0], stacksum, 0.5, 1.7);
     }
 
     // Create Directory for Output Plots 
@@ -1142,7 +1142,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     c->Print(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+".eps");
     //c->Print(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+".root");
     //c->Print(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+".C");
-    
+
     std::unique_ptr<TH1> sumMC;
     std::unique_ptr<TH1> sumttbar;
     for (size_t i = 0; i < hists.size(); ++i) {
@@ -1156,7 +1156,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         }
     }
     sumMC->SetName(name);
-    
+
     //save Canvas AND sources in a root file
     TFile out_root(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+"_source.root", "RECREATE");
     drawhists[0]->Write(name+"_data");
@@ -1164,10 +1164,10 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     sumMC->Write(name+"_allmc");
     c->Write(name + "_canvas");
     out_root.Close();
-    
+
     c->Clear();
 //     leg->Clear();
-    
+
     for (TH1* h : drawhists) delete h;
 }
 
@@ -1364,7 +1364,7 @@ void Plotter::PlotXSec(){
     box2->Draw("SAME");
     box3->Draw("SAME");
     box4->Draw("SAME");
-   gSystem->mkdir(outpathPlots+subfolderChannel+subfolderSpecial, true);
+    gSystem->mkdir(outpathPlots+subfolderChannel+subfolderSpecial, true);
     c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+"InclusiveXSec.eps");
     c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+"InclusiveXSec.C");
     c->Clear();
@@ -1388,7 +1388,7 @@ void Plotter::MakeTable(){
         TH1D *temp_hist7 = fileReader->GetClone<TH1D>(dataset[i], "step7");
         TH1D *temp_hist8 = fileReader->GetClone<TH1D>(dataset[i], "step8");
         TH1D *temp_hist9 = fileReader->GetClone<TH1D>(dataset[i], "step9");
-        
+
         double LumiWeight = CalcLumiWeight(dataset.at(i));
         ApplyFlatWeights(temp_hist5, LumiWeight);
         ApplyFlatWeights(temp_hist6, LumiWeight);
@@ -1553,12 +1553,12 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
             TH1D *GenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "GenAll_noweight");
             TH1D *VisGenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "VisGenAll_noweight");
-	    TH1 *h_NrOfEvts = fileReader->GetClone<TH1>(datasetVec.at(i), "weightedEvents");
-	
-	    NrOfEvts = h_NrOfEvts->GetBinContent(1);
-	    NrOfEvts_afterSelection += GenPlot_noweight->Integral();
-	    NrOfEvts_VisGen_afterSelection += VisGenPlot_noweight->Integral();
-	    
+            TH1 *h_NrOfEvts = fileReader->GetClone<TH1>(datasetVec.at(i), "weightedEvents");
+
+            NrOfEvts = h_NrOfEvts->GetBinContent(1);
+            NrOfEvts_afterSelection += GenPlot_noweight->Integral();
+            NrOfEvts_VisGen_afterSelection += VisGenPlot_noweight->Integral();
+
             numbers[2]+=GenPlot->Integral();
             error_numbers[2]+=GenPlot->GetBinError(18) * GenPlot->GetBinError(18); //This bin selection is hardcoded please change it if changes when filling in Analysis.C
 
@@ -1625,7 +1625,6 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
             if(legends.at(i)!="Data")bg_num+=tmp_num;
             tmp_num=0;
         }
-	
     }
     EventFile<<"Total MCs: "<<bg_num<<endl;
     EventFile<<"\nDataEvents= "<<numbers[0]<<endl;
@@ -1700,7 +1699,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
 void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
     cout<<"\n\n Preparing to calculate the central value of DiffXSection in channel '"<<Channel<<"' for systematic '"<<Systematic<<"'"<<endl;
-    
+
     double Xbins[XAxisbins.size()];
     double binWidth[XAxisbinCenters.size()];
     for(unsigned int i = 0; i<XAxisbins.size();i++){Xbins[i]=XAxisbins[i];}
@@ -1727,7 +1726,7 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
     if(Channel=="mumu"){channelType=1;}
     if(Channel=="emu"){channelType=2;}
     if(Channel=="combined"){channelType=3;}
-    
+
     // DAVID 
     if ( doUnfolding == true && channelType !=3) {//do the unfolding only in the individual channels: ee, emu, mumu
 
@@ -1820,20 +1819,20 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
             }
         }
     }
-    
+
     if (doUnfolding && channelType==3){//for 'combined' channel: do an statistical combination of the the 3 independent channels
-        
+
         TString eefilename="UnfoldingResults/Nominal/ee/"+name+"Results.txt";
         TString emufilename="UnfoldingResults/Nominal/emu/"+name+"Results.txt";
         TString mumufilename="UnfoldingResults/Nominal/mumu/"+name+"Results.txt";
-        
+
         //check the existence of the file
         if(gSystem->AccessPathName(eefilename) || gSystem->AccessPathName(emufilename) || gSystem->AccessPathName(mumufilename) ){
             cout<<"WARNING (in CalcDiffXSec)!!"<<endl;
             cout<<"One of the input files you use for the combined XSection measurement doesn't exist!! Exiting!!"<<endl;
             return;
         }
-        
+
         ifstream ResultsEE(eefilename);
         ifstream ResultsEMu(emufilename);
         ifstream ResultsMuMu(mumufilename);
@@ -1845,16 +1844,14 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
             ResultsEE>>Dummy>>XAxisbinCenters[bin]>>Dummy>>Xbins[bin]>>Dummy>>Xbins[bin+1]>>Dummy>>perChannelDiffXSecPlot[0][bin]>>Dummy>>perChannelDiffXSecStatError[0][bin]>>Dummy>>perChannelGenDiffXSec[0][bin];
             ResultsMuMu>>Dummy>>XAxisbinCenters[bin]>>Dummy>>Xbins[bin]>>Dummy>>Xbins[bin+1]>>Dummy>>perChannelDiffXSecPlot[1][bin]>>Dummy>>perChannelDiffXSecStatError[1][bin]>>Dummy>>perChannelGenDiffXSec[1][bin];
             ResultsEMu>>Dummy>>XAxisbinCenters[bin]>>Dummy>>Xbins[bin]>>Dummy>>Xbins[bin+1]>>Dummy>>perChannelDiffXSecPlot[2][bin]>>Dummy>>perChannelDiffXSecStatError[2][bin]>>Dummy>>perChannelGenDiffXSec[2][bin];
-            //cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<endl;
-            //cout<<"GenDiffXSecPlot[bin]: "<<GenDiffXSecPlot[bin]<<endl;
         }
         ResultsEE.close(); ResultsEMu.close(); ResultsMuMu.close();
-        
+
         //for gen level distribution
         for (Int_t i=0; i<bins; ++i) {
             SignalEventswithWeight+=GenSignalSum[i];
         }
-        
+
         //do the actual combined Diff.XSection calculation
         for(int i=0; i<bins; i++){
             binWidth[i] = Xbins[i+1]-Xbins[i];
@@ -1876,7 +1873,7 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
             GenDiffXSecVec[channelType][i] = (GenSignalSum[i]*topxsec)/(SignalEventswithWeight*binWidth[i]);//DIRTY (signal*topxsec)/(total events*binwidth)
         }
     }
-    
+
     ofstream ResultsFile, ResultsLateX;
 
     gSystem->mkdir("UnfoldingResults/"+Systematic+"/"+Channel, true);
@@ -1907,7 +1904,7 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
     }
     ResultsFile.close();
     ResultsLateX.close();
-    
+
     //clean up
     delete theDataHist;
     delete theBgrHist;
@@ -1926,7 +1923,7 @@ void Plotter::PlotDiffXSec(TString Channel){
     if(Channel=="mumu"){channelType=1;}
     if(Channel=="emu"){channelType=2;}
     if(Channel=="combined"){channelType=3;}
-    
+
     subfolderChannel = Channel;
     subfolderChannel.Prepend("/");
 
@@ -1958,9 +1955,9 @@ void Plotter::PlotDiffXSec(TString Channel){
 
     TString ftemp = "preunfolded/Nominal/"+Channel+"/"+name+"_UnfoldingHistos.root";
 
-    //    theDataHist =  fileReader->GetClone<TH1D>(ftemp, "aDataHist");
-    //theBgrHist =  fileReader->GetClone<TH1D>(ftemp, "aBgrHist");
-    //theTtBgrHist =  fileReader->GetClone<TH1D>(ftemp, "aTtBgrHist");
+//     theDataHist =  fileReader->GetClone<TH1D>(ftemp, "aDataHist");
+//     theBgrHist =  fileReader->GetClone<TH1D>(ftemp, "aBgrHist");
+//     theTtBgrHist =  fileReader->GetClone<TH1D>(ftemp, "aTtBgrHist");
 //     RecoPlot =  fileReader->GetClone<TH1D>(ftemp, "aRecHist");
     TH1 *GenPlotTheory =  fileReader->GetClone<TH1D>(ftemp, "aGenHist");
     TH2 *genReco2d =  fileReader->GetClone<TH2D>(ftemp, "aRespHist");
@@ -1997,7 +1994,7 @@ void Plotter::PlotDiffXSec(TString Channel){
             }else{
                 varhistsPlotting[i]->SetLineColor(1);
             }
-            
+
             if(legends.at(i) != legends.at(i-1)){
                 varhistsPlotting[i]->SetLineColor(1);
                 stack->Add(varhistsPlotting[i]);
@@ -2017,8 +2014,8 @@ void Plotter::PlotDiffXSec(TString Channel){
     }
 
     ///////////////////////////////////
-    //purity and stability plots as taken from CombinedCrossSection... ...
-    
+    //purity and stability plots as taken from CombinedCrossSection...
+
     TH1* genHist = (TH1*)GenPlot->Clone();
     TH1* genRecHist = new TH1D("","",bins,Xbins);
     int intbinsX[XAxisbins.size()];
@@ -2132,11 +2129,11 @@ void Plotter::PlotDiffXSec(TString Channel){
         if(legends.at(hist) == "Data"){
             for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
                 DataSum[bin]+=varhists[hist]->GetBinContent(bin+1);
-	    }
+            }
         }
         else if((legends.at(hist) == "t#bar{t} Signal")&&init==false){
-	  signalHist=hist;
-          init=true;
+            signalHist=hist;
+            init=true;
             for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 //                 efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
                 GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
@@ -2243,14 +2240,14 @@ void Plotter::PlotDiffXSec(TString Channel){
         ResultsSystLaTeX.append("SystematicsLaTeX.txt");
         FILE *systfile;
         systfile = fopen(ResultsSystLaTeX.c_str(), "w");
-        
+
         for(int systs =0; systs<(int)vec_systematic.size(); systs++){
             if (vec_systematic.at(systs) == "BTAG_ETA_" || vec_systematic.at(systs) == "BTAG_LJET_ETA_") {continue;}//Skip the BTAG_ETA systematic because it's added in quadrature to BTAG_PT
             TH1D* systtemp = (TH1D*)varhists[0]->Clone();
             systtemp->Reset();
             double TotalSyst=0.0, TotalSqSyst=0.0;
             double AvgSyst= 0.0, SqAvgSys=0.0;
-            
+
             for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
                 if(vec_systematic.at(systs) == "BTAG_PT_" || vec_systematic.at(systs) == "BTAG_LJET_PT_"){
                     DiffXSecSysErrorbySysPlot[bin][systs]= TMath::Sqrt(
@@ -2278,7 +2275,7 @@ void Plotter::PlotDiffXSec(TString Channel){
         }
         SystHists->Draw();
         fclose(systfile);
-        
+
         if(name.Contains("pT") ||name.Contains("Mass") ){
             SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
             if(name.Contains("Rapidity")) SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
@@ -2286,8 +2283,8 @@ void Plotter::PlotDiffXSec(TString Channel){
         else  SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
         SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
         SystHists->GetXaxis()->SetNoExponent(kTRUE);
-        
-        
+
+
         leg10->SetFillColor(0);
         leg10->Draw("SAME");
         c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".eps");
@@ -2295,7 +2292,7 @@ void Plotter::PlotDiffXSec(TString Channel){
         //c10->Clear();
         delete leg10;
         delete c10;
-        
+
         //The Experimental/Model/Statistical plot
         TCanvas * c11 = new TCanvas("EMS","EMS");
         TH1D* ExpHist = (TH1D*)varhists[0]->Clone();    ExpHist->Reset();
@@ -2353,41 +2350,41 @@ void Plotter::PlotDiffXSec(TString Channel){
 //     GenPlotTheory->Rebin(2);
     double genscale = 1./GenPlotTheory->Integral("width");
     GenPlotTheory->Scale(genscale);
-    
+
     genscale = 1./ h_GenDiffXSec->Integral("width");
     h_GenDiffXSec->Scale(genscale);
-    
+
     cout << "+++ Generated cross sections";
     for (int i = 1; i <= h_GenDiffXSec->GetNbinsX(); ++i) cout << "\n" << i << "\t" << h_GenDiffXSec->GetBinContent(i);
     cout << "\n\n";
-    
+
     bool binned_theory=true; //############
-  
+
     TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *spincorrhist=0;
     TH1* mcnlohistnorm=0;
     TGraph *mcatnloBand=0;
-    
+
     TH1* mcnlohistnormBinned = 0, *mcnlohistupBinned = 0;
     TH1 *mcnlohistdownBinned = 0, *mcnlohistBinned = 0;
     TH1* powheghistBinned = 0;
     TH1* spincorrhistBinned = 0;
-    
+
     TH1 *Kidoth1_Binned = 0;
-    
+
     bool canDrawMCATNLO = true;
-    
+
     if (drawNLOCurves && drawMCATNLO) {
         mcnlohist = GetNloCurve(newname,"MCATNLO");
         double mcnloscale = 1./mcnlohist->Integral("width");
         if (binned_theory==false) mcnlohist->Rebin(2);mcnlohist->Scale(0.5); //#####
         mcnlohist->Scale(mcnloscale);
-        
+
         mcnlohistBinned = mcnlohist->Rebin(bins,"mcnloplot",Xbins);
         for (Int_t bin=0; bin<bins; bin++){
             mcnlohistBinned->SetBinContent(bin+1,mcnlohistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/mcnlohist->GetBinWidth(1)));
         }
         mcnlohistBinned->Scale(1./mcnlohistBinned->Integral("width"));
-        
+
         if(name.Contains("LeptonpT")){mcnlohistnorm = GetNloCurve("Leptons","Pt","MCatNLO");}//temprorary until I change the naming convention in the root file
         else if(name.Contains("LeptonEta")){mcnlohistnorm = GetNloCurve("Leptons","Eta","MCatNLO");}
         else if(name.Contains("LLBarpT")){mcnlohistnorm = GetNloCurve("LepPair","Pt","MCatNLO");}
@@ -2400,7 +2397,7 @@ void Plotter::PlotDiffXSec(TString Channel){
         else if(name.Contains("BJetpT")){mcnlohistnorm = GetNloCurve("Jets","Pt","MCatNLO");}
         else if(name.Contains("BJetEta")){mcnlohistnorm = GetNloCurve("Jets","Eta","MCatNLO");}
         //else if(name.Contains("LeptonBJetMass")){mcnlohistnorm = GetNloCurve("Jets","Eta","MCatNLO");}
-        
+
         //    if (binned_theory==false) mcnlohistnorm->Rebin(5);mcnlohistnorm->Scale(0.2);
         if (mcnlohistnorm) {
             mcnlohistnormBinned = mcnlohistnorm->Rebin(bins,"genBinHistNorm", Xbins);
@@ -2454,18 +2451,18 @@ void Plotter::PlotDiffXSec(TString Channel){
             Double_t errup[bins];
             Double_t errdn[bins];
             Double_t errorband[2*bins];
-            
+
             for( Int_t j = 0; j< bins; j++ ){
                 x[j]=mcnlohistBinned->GetBinCenter(j+1);
                 errup[j]=(mcnlohistupBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
                 errdn[j]=(mcnlohistdownBinned->GetBinContent(j+1)/mcnlohistnormBinned->GetBinContent(j+1))*mcnlohistBinned->GetBinContent(j+1);
-                
+
                 xband[j] = x[j];
                 errorband[j] = errdn[j]; //lower band
                 xband[2*bins-j-1] = x[j];
                 errorband[2*bins-j-1] = errup[j]; //upper band
             }
-            
+
             mcatnloBand = new TGraph(2*bins, xband, errorband);
             mcatnloBand->SetFillColor(kGray);
             mcatnloBand->SetFillStyle(1001);
@@ -2488,7 +2485,7 @@ void Plotter::PlotDiffXSec(TString Channel){
         }
         powheghistBinned->Scale(1./powheghistBinned->Integral("width"));
     }
-    
+
     if(drawNLOCurves && drawMadSpinCorr){
         spincorrhist = GetNloCurve(newname, "SPINCORR");
         double spincorrhistscale = 1./spincorrhist->Integral("width");
@@ -2530,7 +2527,7 @@ void Plotter::PlotDiffXSec(TString Channel){
     //    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
     //    else{cout<<"probably going to crash soon"<<endl;}
     }
-    
+
     TCanvas * c = new TCanvas("DiffXS","DiffXS");
     if(logY){
       c->SetLogy();
@@ -2538,17 +2535,16 @@ void Plotter::PlotDiffXSec(TString Channel){
     h_DiffXSec->SetMarkerStyle(20);
     //MCFMHist->SetMarkerStyle(2);
     if(ymax!=0){
-      
-      if(logY){  
-	h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
-      }
-      else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
+        if(logY){
+            h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
+        }
+        else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     }
     h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
     if (name.Contains("Rapidity") || name.Contains("Eta")){h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);}
     h_GenDiffXSec->Draw();
     if (ymax!=0) h_GenDiffXSec->SetMaximum(ymax);
-    //    h_DiffXSec->Draw("SAME, EP0");
+
     gStyle->SetEndErrorSize(8);
     if (drawNLOCurves && drawMCATNLO && canDrawMCATNLO) {
     //    mcatnloBand->Draw("same, F");
@@ -2582,7 +2578,6 @@ void Plotter::PlotDiffXSec(TString Channel){
         powheghistBinned->SetLineColor(kGreen+1); //#####################
         powheghistBinned->SetLineWidth(2);
         powheghistBinned->SetLineStyle(7);
-        
         if(binned_theory==false){powheghist->Draw("SAME,C");}
         else{powheghistBinned->Draw("SAME");}
     }
@@ -2592,7 +2587,6 @@ void Plotter::PlotDiffXSec(TString Channel){
         spincorrhistBinned->SetLineColor(kOrange+3); //#####################
         spincorrhistBinned->SetLineWidth(2);
         spincorrhistBinned->SetLineStyle(2);
-        
         if(binned_theory==false){spincorrhist->Draw("SAME,C");}
         else{spincorrhistBinned->Draw("SAME");}
     }
@@ -2602,7 +2596,7 @@ void Plotter::PlotDiffXSec(TString Channel){
         Kidoth1_Binned->SetLineStyle(2);
         Kidoth1_Binned->Draw("SAME][");
     }
-    
+
     if (drawSmoothMadgraph){
         if( name.Contains("HypTTBarMass")){
             GenPlotTheory->Rebin(15);
@@ -2682,11 +2676,11 @@ void Plotter::PlotDiffXSec(TString Channel){
     leg2->AddEntry(h_DiffXSec, "Data", "p");
     leg2->AddEntry(GenPlotTheory, "MadGraph","l");
     if (drawNLOCurves) {
-        if (drawMCATNLO && canDrawMCATNLO && mcnlohistup->GetEntries() && mcnlohistdown->GetEntries())   leg2->AddEntry(mcatnloBand,      "MC@NLO",  "fl");
-        else if (drawMCATNLO && mcnlohist->GetEntries()) leg2->AddEntry(mcnlohist,      "MC@NLO",  "l");
-        if (drawPOWHEG && powheghist->GetEntries())                                    leg2->AddEntry(powheghistBinned, "POWHEG",  "l");
-        if (drawMadSpinCorr && spincorrhist->GetEntries())                             leg2->AddEntry(spincorrhistBinned, "MadGraph SC",  "l");
-        if (drawKidonakis && !name.Contains("Lead") && (name.Contains("ToppT") || name.Contains("TopRapidity"))) leg2->AddEntry(Kidoth1_Binned,   "Approx. NNLO",  "l");
+        if (drawMCATNLO && canDrawMCATNLO && mcnlohistup->GetEntries() && mcnlohistdown->GetEntries())  leg2->AddEntry(mcatnloBand, "MC@NLO",  "fl");
+        else if (drawMCATNLO && mcnlohist->GetEntries())                                                leg2->AddEntry(mcnlohist, "MC@NLO",  "l");
+        if (drawPOWHEG && powheghist->GetEntries())                                                     leg2->AddEntry(powheghistBinned, "POWHEG",  "l");
+        if (drawMadSpinCorr && spincorrhist->GetEntries())                                              leg2->AddEntry(spincorrhistBinned, "MadGraph SC",  "l");
+        if (drawKidonakis && !name.Contains("Lead") && (name.Contains("ToppT") || name.Contains("TopRapidity"))) leg2->AddEntry(Kidoth1_Binned, "Approx. NNLO",  "l");
     }
     leg2->SetFillStyle(0);
     leg2->SetBorderSize(0);
@@ -2700,7 +2694,7 @@ void Plotter::PlotDiffXSec(TString Channel){
         DrawLabel("(arXiv:1210.7813)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
     }
     h_GenDiffXSec->Draw("SAME");
-    
+
     gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
@@ -2717,7 +2711,6 @@ void Plotter::PlotDiffXSec(TString Channel){
     delete c;
     gStyle->SetEndErrorSize(0);
 
-//    cout <<powheghistBinned<< " - " <<mcnlohistBinned<< " - "<<Kidoth1_Binned<<"!\n";
     cout<<"-------------------------------------------------------------------"<<endl;
     cout<<"Starting the calculation of Chi2/ndof\n"<<endl;
     double chi2 = GetChi2 (tga_DiffXSecPlotwithSys, h_GenDiffXSec);
@@ -2736,39 +2729,38 @@ void Plotter::PlotDiffXSec(TString Channel){
         cout<<"The CHI2/ndof (vs Kidonakis) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2Kidonakis<<endl;
     }
     cout<<"-------------------------------------------------------------------"<<endl;
-    
+
     PrintResultTotxtFile(Channel, binCenters, tga_DiffXSecPlot, tga_DiffXSecPlotwithSys);
 
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
     TH1* stacksum = SummedStackHisto(stack);
-    
+
     for(unsigned int i=1; i<hists.size() ; i++){ // sum all data plots to first histogram
-      if(legends.at(i) == legends.at(0)){
-	varhists[0]->Add(varhists[i]);
-      }
+        if(legends.at(i) == legends.at(0)){
+            varhists[0]->Add(varhists[i]);
+        }
     }
     TH1D* syshist =0;
     syshist = (TH1D*)stacksum->Clone();
     double lumierr = 0.045;
     //stat uncertainty::make a function 
     for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
-      
-      Double_t binc = 0;
-      binc += stacksum->GetBinContent(i);
-      syshist->SetBinContent(i, binc);
-      // calculate uncertainty: lumi uncertainty
-      Double_t binerr2 = binc*binc*lumierr*lumierr;
-      Double_t topunc = 0; // uncertainty on top xsec
-      
-      double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
-      
-      double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
-      //Functionality for multiple signal histograms
-      topunc += varhists[signalHist]->GetBinContent(i)*topRelUnc;
-      binerr2 += (topunc*topunc);
-      syshist->SetLineColor(1);
-      syshist->SetBinError(i, TMath::Sqrt(binerr2));
-    }    
+        Double_t binc = 0;
+        binc += stacksum->GetBinContent(i);
+        syshist->SetBinContent(i, binc);
+        // calculate uncertainty: lumi uncertainty
+        Double_t binerr2 = binc*binc*lumierr*lumierr;
+        Double_t topunc = 0; // uncertainty on top xsec
+
+        double topxsecErr2 = 2.2*2.2 + 11.6*11.6;
+
+        double topRelUnc =  TMath::Sqrt(topxsecErr2)/topxsec;
+        //Functionality for multiple signal histograms
+        topunc += varhists[signalHist]->GetBinContent(i)*topRelUnc;
+        binerr2 += (topunc*topunc);
+        syshist->SetLineColor(1);
+        syshist->SetBinError(i, TMath::Sqrt(binerr2));
+    }
 
     ControlLegend(varhistsPlotting, legends, leg);
     syshist->SetFillStyle(3004);
@@ -2781,8 +2773,8 @@ void Plotter::PlotDiffXSec(TString Channel){
     varhists[0]->SetMinimum(0);
     varhists[0]->GetYaxis()->SetTitle("events");
     varhists[0]->GetXaxis()->SetNoExponent(kTRUE);
-    varhists[0]->Draw("e"); 
-    
+    varhists[0]->Draw("e");
+
     //Add the binwidth to the yaxis in yield plots
     TString ytitle = TString(varhists[0]->GetYaxis()->GetTitle()).Copy();
     double binwidth = varhists[0]->GetXaxis()->GetBinWidth(1);
@@ -3017,34 +3009,33 @@ TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotn
   cout << endl;
   cout << endl;
   cout << endl;
-  
-   
+
   unsigned int vecIndex=0;
 
   // fill vector into array to use appropriate constructor of TH1-classes
   const double *binArray = XAxisbins.data();
-	
+
   // create histo with new binning
   TH1F *histoNewBinning = new TH1F("histoNewBinning"+plotname,"histoNewBinning"+plotname,XAxisbins.size()-1,binArray);
-	
+
   // fill contents of histoOldBinning into histoNewBinning and rescale if applicable
   for (vecIndex = 0; vecIndex < XAxisbins.size()-1; vecIndex++){
-	    
+
     double lowEdge      = XAxisbins[vecIndex]; 
     if (plotname=="topPt"&&vecIndex==0&&lowEdge==0.0) lowEdge+=10;  // adhoc fix to compensate for minimum top-Pt cut in NNLO curve
     double highEdge     = XAxisbins[vecIndex+1];
     double newBinWidth  = highEdge - lowEdge;
     double newBinCenter = 0.5*(highEdge+lowEdge);
     double binSum       = 0.0;  
-	    
+
     for (int j=1; j<histoOldBinning->GetNbinsX(); j++){
-		
-      double oldBin = histoOldBinning->GetBinCenter(j);
-		
-      if( (oldBin>=lowEdge) && (oldBin<highEdge) ){		   
-	if (rescale) binSum+=histoOldBinning->GetBinContent(j) * histoOldBinning->GetBinWidth(j);
-	else         binSum+=histoOldBinning->GetBinContent(j);
-      }
+
+    double oldBin = histoOldBinning->GetBinCenter(j);
+
+    if( (oldBin>=lowEdge) && (oldBin<highEdge) ){		   
+        if (rescale) binSum+=histoOldBinning->GetBinContent(j) * histoOldBinning->GetBinWidth(j);
+        else         binSum+=histoOldBinning->GetBinContent(j);
+    }
     }
 
     if (rescale) histoNewBinning->Fill(newBinCenter,binSum/newBinWidth);
