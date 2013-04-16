@@ -13,17 +13,17 @@
 
 #include "HiggsAnalysis.h"
 #include "higgsUtils.h"
-#include "../../diLeptonic/src/PUReweighter.h"
 
 
 
 
 
-// Jet selection to be used in analysis
+/// Jet selection to be used in analysis
 constexpr double JETPTCUT = 30;
 constexpr double JETETACUT = 2.4;
 
-// CSV Loose working point
+/// b-tag working point
+/// CSV Loose: 0.244
 constexpr double BtagWP = 0.244;
 
 
@@ -675,16 +675,16 @@ bool HiggsAnalysis::getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, 
                  <<"\n...break\n\n";
         exit(71);
     }
-
-    for(size_t iBHadron=0; iBHadron<bHadFlavour_->size(); ++iBHadron){
-        int flavour = bHadFlavour_->at(iBHadron);
+    
+    for(size_t iBHadron=0; iBHadron<genBHadFlavour_->size(); ++iBHadron){
+        const int flavour = genBHadFlavour_->at(iBHadron);
         if(abs(flavour) != abs(pdgId)) continue;     // Skipping hadrons with the wrong flavour
         // Assigning jet index of corresponding hadron. Set to -2 if >1 hadrons found for the same flavour
-        if(flavour>0) genBJetIndex = (genBJetIndex==-1)?bHadJetIndex_->at(iBHadron):-2;
-        else if(flavour<0) genAntiBJetIndex = (genAntiBJetIndex==-1)?bHadJetIndex_->at(iBHadron):-2;
+        if(flavour>0) genBJetIndex = (genBJetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
+        else if(flavour<0) genAntiBJetIndex = (genAntiBJetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
     }
-
-    // If no unique match of jets from (anti)b from (anti)top is found, reset both
+    
+    // If no unique match of jets from (anti)b from (anti)top is found, return false
     if(genBJetIndex<0 || genAntiBJetIndex<0){
         return false;
     }

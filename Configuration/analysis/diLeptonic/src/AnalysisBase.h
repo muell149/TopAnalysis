@@ -7,7 +7,6 @@
 #include <utility>
 #include <functional>
 
-#include <TRandom3.h>
 #include <TSelector.h>
 #include <TSelectorList.h>
 #include <TParameter.h>
@@ -149,13 +148,13 @@ protected:
     std::vector<bool> *AntiBHadronFromTopB_;
     std::vector<int>  *BHadronVsJet_;
     std::vector<int>  *AntiBHadronVsJet_;
-    std::vector<int>  *genParticlePdg_;
-    std::vector<int>  *genParticleStatus_;
-    std::vector<std::vector<int> > *genParticleIndices_;
-    std::vector<LV>   *genParticle_;
-    std::vector<int>  *bHadIndex_;
-    std::vector<int>  *bHadFlavour_;
-    std::vector<int>  *bHadJetIndex_;
+    //std::vector<int>  *genBHadPlusMothersPdgId_;
+    //std::vector<int>  *genBHadPlusMothersStatus_;
+    //std::vector<std::vector<int> > *genBHadPlusMothersIndices_;
+    std::vector<LV>   *genBHadPlusMothers_;
+    std::vector<int>  *genBHadIndex_;
+    std::vector<int>  *genBHadFlavour_;
+    std::vector<int>  *genBHadJetIndex_;
     
     
     /// Variables associated to nTuple branches for Higgs signal samples on generator level
@@ -329,13 +328,13 @@ private:
     TBranch *b_AntiBHadronFromTopB;
     TBranch *b_BHadronVsJet;
     TBranch *b_AntiBHadronVsJet;
-    TBranch *b_genParticlePdg;
-    TBranch *b_genParticleStatus;
-    TBranch *b_genParticleIndices;
-    TBranch *b_genParticle;
-    TBranch *b_bHadIndex;
-    TBranch *b_bHadFlavour;
-    TBranch *b_bHadJetIndex;
+    TBranch *b_genBHadPlusMothersPdgId;
+    TBranch *b_genBHadPlusMothersStatus;
+    TBranch *b_genBHadPlusMothersIndices;
+    TBranch *b_genBHadPlusMothers;
+    TBranch *b_genBHadIndex;
+    TBranch *b_genBHadFlavour;
+    TBranch *b_genBHadJetIndex;
     
 
     /// nTuple branches for Higgs signal samples on generator level

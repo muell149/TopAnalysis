@@ -19,6 +19,7 @@
 #include <TH2.h>
 #include <TString.h>
 #include <TObjArray.h>
+#include <TRandom3.h>
 
 #include "AnalysisBase.h"
 #include "HistoListReader.h"
@@ -430,13 +431,13 @@ void AnalysisBase::clearBranches()
     b_AntiBHadronFromTopB = 0;
     b_BHadronVsJet = 0;
     b_AntiBHadronVsJet = 0;
-    b_genParticlePdg = 0;
-    b_genParticleStatus = 0;
-    b_genParticleIndices = 0;
-    b_genParticle = 0;
-    b_bHadIndex = 0;
-    b_bHadFlavour = 0;
-    b_bHadJetIndex = 0;
+    b_genBHadPlusMothersPdgId = 0;
+    b_genBHadPlusMothersStatus = 0;
+    b_genBHadPlusMothersIndices = 0;
+    b_genBHadPlusMothers = 0;
+    b_genBHadIndex = 0;
+    b_genBHadFlavour = 0;
+    b_genBHadJetIndex = 0;
     
     
     // nTuple branches for Higgs signal samples on generator level
@@ -566,13 +567,13 @@ void AnalysisBase::clearBranchVariables()
     AntiBHadronFromTopB_ = 0;
     BHadronVsJet_ = 0;
     AntiBHadronVsJet_ = 0;
-    genParticlePdg_ = 0;
-    genParticleStatus_ = 0;
-    genParticleIndices_ = 0;
-    genParticle_ = 0;
-    bHadIndex_ = 0;
-    bHadFlavour_ = 0;
-    bHadJetIndex_ = 0;
+    //genBHadPlusMothersPdgId_ = 0;
+    //genBHadPlusMothersStatus_ = 0;
+    //genBHadPlusMothersIndices_ = 0;
+    genBHadPlusMothers_ = 0;
+    genBHadIndex_ = 0;
+    genBHadFlavour_ = 0;
+    genBHadJetIndex_ = 0;
     
     
     // Set values to null for Higgs signal sample branches
@@ -737,20 +738,20 @@ void AnalysisBase::SetTopSignalBranchAddresses()
     chain_->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB);
     chain_->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet);
     chain_->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet);
-    if(chain_->GetBranch("genParticlePdg")) // need to check whether branch exists
-        chain_->SetBranchAddress("genParticlePdg", &genParticlePdg_, &b_genParticlePdg);
-    if(chain_->GetBranch("genParticleStatus")) // need to check whether branch exists
-        chain_->SetBranchAddress("genParticleStatus", &genParticleStatus_, &b_genParticleStatus);
-    if(chain_->GetBranch("genParticleIndices")) // need to check whether branch exists
-        chain_->SetBranchAddress("genParticleIndices", &genParticleIndices_, &b_genParticleIndices);
-    if(chain_->GetBranch("genParticle")) // need to check whether branch exists
-        chain_->SetBranchAddress("genParticle", &genParticle_, &b_genParticle);
-    if(chain_->GetBranch("bHadIndex")) // need to check whether branch exists
-        chain_->SetBranchAddress("bHadIndex", &bHadIndex_, &b_bHadIndex);
-    if(chain_->GetBranch("bHadFlavour")) // need to check whether branch exists
-        chain_->SetBranchAddress("bHadFlavour", &bHadFlavour_, &b_bHadFlavour);
-    if(chain_->GetBranch("bHadJetIndex")) // need to check whether branch exists
-        chain_->SetBranchAddress("bHadJetIndex", &bHadJetIndex_, &b_bHadJetIndex);
+    //if(chain_->GetBranch("genBHadPlusMothersPdgId")) // need to check whether branch exists
+    //    chain_->SetBranchAddress("genBHadPlusMothersPdgId", &genBHadPlusMothersPdgId_, &b_genBHadPlusMothersPdgId);
+    //if(chain_->GetBranch("genBHadPlusMothersStatus")) // need to check whether branch exists
+    //    chain_->SetBranchAddress("genBHadPlusMothersStatus", &genBHadPlusMothersStatus_, &b_genBHadPlusMothersStatus);
+    //if(chain_->GetBranch("genBHadPlusMothersIndices")) // need to check whether branch exists
+    //    chain_->SetBranchAddress("genBHadPlusMothersIndices", &genBHadPlusMothersIndices_, &b_genBHadPlusMothersIndices);
+    if(chain_->GetBranch("genBHadPlusMothers")) // need to check whether branch exists
+        chain_->SetBranchAddress("genBHadPlusMothers", &genBHadPlusMothers_, &b_genBHadPlusMothers);
+    if(chain_->GetBranch("genBHadIndex")) // need to check whether branch exists
+        chain_->SetBranchAddress("genBHadIndex", &genBHadIndex_, &b_genBHadIndex);
+    if(chain_->GetBranch("genBHadFlavour")) // need to check whether branch exists
+        chain_->SetBranchAddress("genBHadFlavour", &genBHadFlavour_, &b_genBHadFlavour);
+    if(chain_->GetBranch("genBHadJetIndex")) // need to check whether branch exists
+        chain_->SetBranchAddress("genBHadJetIndex", &genBHadJetIndex_, &b_genBHadJetIndex);
 }
 
 
@@ -932,13 +933,13 @@ void AnalysisBase::GetTopSignalBranchesEntry(Long64_t& entry)
     b_AntiBHadronFromTopB->GetEntry(entry);
     b_BHadronVsJet->GetEntry(entry);
     b_AntiBHadronVsJet->GetEntry(entry);
-    if(b_genParticlePdg) b_genParticlePdg->GetEntry(entry);
-    if(b_genParticleStatus) b_genParticleStatus->GetEntry(entry);
-    if(b_genParticleIndices) b_genParticleIndices->GetEntry(entry);
-    if(b_genParticle) b_genParticle->GetEntry(entry);
-    if(b_bHadIndex) b_bHadIndex->GetEntry(entry);
-    if(b_bHadFlavour) b_bHadFlavour->GetEntry(entry);
-    if(b_bHadJetIndex) b_bHadJetIndex->GetEntry(entry);
+    if(b_genBHadPlusMothersPdgId) b_genBHadPlusMothersPdgId->GetEntry(entry);
+    if(b_genBHadPlusMothersStatus) b_genBHadPlusMothersStatus->GetEntry(entry);
+    if(b_genBHadPlusMothersIndices) b_genBHadPlusMothersIndices->GetEntry(entry);
+    if(b_genBHadPlusMothers) b_genBHadPlusMothers->GetEntry(entry);
+    if(b_genBHadIndex) b_genBHadIndex->GetEntry(entry);
+    if(b_genBHadFlavour) b_genBHadFlavour->GetEntry(entry);
+    if(b_genBHadJetIndex) b_genBHadJetIndex->GetEntry(entry);
 }
 
 
