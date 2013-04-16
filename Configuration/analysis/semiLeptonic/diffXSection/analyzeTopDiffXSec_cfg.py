@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 ##    example to run this cfg file
 ## ---
-## cmsRun analyzeTopDiffXSec_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,mctag=Summer12,eventsToProcess=5000
+## cmsRun analyzeMuonDiffXSecCorrected_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,mctag=Summer12,eventsToProcess=5000
 
 ## ---
 ##    options
@@ -1258,24 +1258,30 @@ process.makeGenLevelBJets=process.produceGenLevelBJets.clone(
     ttGenEvent = cms.InputTag('genEvt'),
     #genJets = cms.InputTag('ak5GenJets','','HLT'),
     genJets = cms.InputTag("cleanedGenJetCollection"),
-    deltaR = cms.double(1.0),
+    deltaR = cms.double(0.5),
+    flavour = cms.int32(5),
     resolveParticleName = cms.bool(False),
     requireTopBquark = cms.bool(True),
-    noBBbarResonances = cms.bool(True)
+    noBBbarResonances = cms.bool(True),
+    doImprovedHadronMatching = cms.bool(False),
+    doValidationPlotsForImprovedHadronMatching = cms.bool(False)
 )
 process.altermakeGenLevelBJets=process.produceGenLevelBJets.clone(
     ttGenEvent = cms.InputTag('genEvt'),
     #genJets = cms.InputTag('ak5GenJets','','HLT'),
     genJets = cms.InputTag("noOverlapGenJetCollection"),
     deltaR = cms.double(5.0),
+    flavour = cms.int32(5),
     resolveParticleName = cms.bool(False),
     requireTopBquark = cms.bool(True),
-    noBBbarResonances = cms.bool(True)
+    noBBbarResonances = cms.bool(True),
+    doImprovedHadronMatching = cms.bool(False),
+    doValidationPlotsForImprovedHadronMatching = cms.bool(False)
 )
 
 ## tool to select identified bjets from genJet collection
-process.load("TopAnalysis.TopUtils.GenJetSelector_cfi")
-process.bjetGenJetsRaw=process.selectedGenJets.clone(
+process.load("TopAnalysis.TopUtils.UhhGenJetSelector_cfi")
+process.bjetGenJetsRaw=process.uhhSelectedGenJets.clone(
     genJet = cms.InputTag("cleanedGenJetCollection"),
     #genJet = cms.InputTag("ak5GenJets"),
     BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
@@ -1284,7 +1290,7 @@ process.bjetGenJetsRaw=process.selectedGenJets.clone(
     eta=cms.double(5.0)                          
     )
 
-process.bjetGenJets=process.selectedGenJets.clone(
+process.bjetGenJets=process.uhhSelectedGenJets.clone(
     genJet = cms.InputTag("noOverlapGenJetCollection"),
     BHadJetIndex     = cms.InputTag("altermakeGenLevelBJets", "BHadJetIndex"    ),
     AntiBHadJetIndex = cms.InputTag("altermakeGenLevelBJets", "AntiBHadJetIndex"),
@@ -1300,6 +1306,7 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     #genJets = cms.InputTag('ak5GenJets','','HLT'),
     #genJets = cms.InputTag("noOverlapGenJetCollection"),
     genJets = cms.InputTag("bjetGenJetsRaw"),
+    genLeptons = cms.InputTag('isolatedGenMuons'),
     bJetCollection = cms.bool(True),
     recoJets= cms.InputTag('tightLeadingPFJets'),
     useRecBjetsKinematicsBeforeFit= cms.bool(False),
@@ -1315,6 +1322,9 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     useClosestDrBs= cms.bool(True),
     useTree = cms.bool(True)
     )
+
+if(decayChannel=="electron"):
+    process.analyzeTopRecoKinematicsBjets.genLeptons = cms.InputTag('isolatedGenElectrons')
 
 process.analyzeTopPartonLevelKinematicsBjets=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False),useRecBjetsKinematicsBeforeFit= cms.bool(False))
 process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False),useRecBjetsKinematicsBeforeFit= cms.bool(False))
@@ -2367,8 +2377,6 @@ process.testIsoElectrons=process.tightElectronsEJ.clone(
 
 process.testIsoElectronSelection= process.convElecRejection.clone (src = 'testIsoElectrons', minNumber = 1, maxNumber = 99999999)
 process.testIsoElectronQuality  = process.tightElectronQualityTagged.clone(src = 'testIsoElectrons')
-
-#process.analyzeTopRecoKinematicsBjets.output = cms.int32(2)
 
 ## ---
 ##    run the final sequences
