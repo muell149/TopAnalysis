@@ -42,6 +42,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   std::pair<const reco::Candidate*,const reco::Candidate*> getPreBJets(const edm::Handle<TtSemiLeptonicEvent> semiLepEvt, const std::string hypoKey_, const edm::Handle<std::vector<pat::Jet> > jets);
   // c) from genJet collection
   const reco::GenJet* getJetFromCollection(const reco::GenJetCollection& genJets, int IX);
+  // helper function to get the jet-parton matching result for the KinFit reco jet assignment
+  double checkPartonAssignment(const edm::Handle<TtSemiLeptonicEvent> semiLepEvt, int maxNJets);
 
   // ---
   //    inputs
@@ -52,6 +54,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   std::string hypoKey_;
   // genJet collection 
   edm::InputTag genJets_;
+  // genLepton collection 
+  edm::InputTag genLeptons_;
   // pure b gen jet collection?
   bool bJetCollection_;
   // recoJet collection 
@@ -104,7 +108,10 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   float valueBbbarYGen;
   float valueBbbarMassRec;
   float valueBbbarMassGen;
+  float valueLbMassRec;
+  float valueLbMassGen;
   bool bbSwapBetter;
+  float valueAssignment;
 
   // ---
   //    histos
@@ -136,6 +143,9 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH1F* bbbarMassRec;
   TH1F* bbbarMassGen;
 
+  TH1F* lbMassRec;
+  TH1F* lbMassGen;
+
   TH2F* bqPt_;
   TH2F* bqPtLead_;
   TH2F* bqPtSubLead_;
@@ -148,6 +158,7 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH2F* bbbarEta_;
   TH2F* bbbarY_;
   TH2F* bbbarMass_;
+  TH2F* lbMass_;
 };
 
 #endif
