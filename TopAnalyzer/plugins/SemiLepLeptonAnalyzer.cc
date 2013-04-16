@@ -64,7 +64,7 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   if(recPlots_) event.getByLabel(semiLepEvt_, semiLepEvt);
   // c) get a handle for genLepton collection
   if(verbose>1) std::cout << "c) genLeptonCollection" << std::endl;
-  // get jet collection
+  // get lepton collection
   edm::Handle<std::vector<reco::GenParticle> > genLeptons;
   if(genPlots_) event.getByLabel(genLeptons_, genLeptons);
   // ---
