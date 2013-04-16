@@ -81,12 +81,11 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
         }
         
         // Configure information about samples
-        bool isTopSignal = o_isSignal->GetString() == "1";
-        bool isMC = o_isMC->GetString() == "1";
-        bool isHiggsSignal(false);
-        if(o_isHiggsSignal && o_isHiggsSignal->GetString()=="1")isHiggsSignal = true;
-        bool isHiggsInclusive(false);
-        if(isHiggsSignal && samplename->GetString()=="ttbarhiggsinclusive")isHiggsInclusive = true;
+        const bool isTopSignal = o_isSignal->GetString() == "1";
+        const bool isMC = o_isMC->GetString() == "1";
+        const bool isHiggsSignal(o_isHiggsSignal && o_isHiggsSignal->GetString()=="1");
+        const bool isHiggsInclusive(isHiggsSignal && samplename->GetString()=="ttbarhiggsinclusive");
+        const bool isTtbarV(samplename->GetString()=="ttbarw" || samplename->GetString()=="ttbarz");
         
         if (!isMC && systematic!=Systematic::undefined) {
             std::cout << "Sample is DATA, so not running again for systematic variation\n";
@@ -160,7 +159,7 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
             chain.Process(selector);
             
             // For splitting of ttbarsignal in component with intermediate taus and without
-            if(isTopSignal && !isHiggsSignal) {
+            if(isTopSignal && !isHiggsSignal && !isTtbarV){
                 selector->SetRunViaTau(1);
                 outputfilename.ReplaceAll("signalplustau", "bgviatau");
                 selector->SetOutputfilename(outputfilename);
