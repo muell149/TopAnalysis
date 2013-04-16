@@ -25,6 +25,7 @@ for c in ee emu mumu; do
     $LA -f ${c}_run2012A -c $c $@ &
     $LA -f ${c}_run2012B -c $c $@ &
     $LA -f ${c}_run2012C -c $c $@ &
+    $LA -f ${c}_run2012D -c $c $@ &
 done 
 
 for i in qcd single ttbarbg.root wtol ww wz zz ttbarW ttbarZ; do
