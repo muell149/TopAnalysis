@@ -10,7 +10,7 @@ add_custom_command(
 )
 
 add_library(miscTools
-    HistoListReader utils CommandLineParameters
+    HistoListReader utils CommandLineParameters analysisUtils
 )
 
 add_library(unfolding

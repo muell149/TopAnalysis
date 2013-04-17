@@ -36,7 +36,7 @@ sampleHelpers.o: $(HiggsDir)/sampleHelpers.cc $(HiggsDir)/sampleHelpers.h
 
 
 
-load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o higgsUtils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o
+load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o higgsUtils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
 load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(TopDir)/utils.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h
@@ -56,6 +56,9 @@ AnalysisBase.o: $(TopDir)/AnalysisBase.cc $(TopDir)/AnalysisBase.h $(TopDir)/cla
 
 HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(TopDir)/AnalysisBase.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/JetCategories.h $(HiggsDir)/MvaInputVariables.h
 	g++ -c -o HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/HiggsAnalysis.cc
+
+analysisUtils.o: $(TopDir)/analysisUtils.cc $(TopDir)/analysisUtils.h $(TopDir)/classes.h
+	g++ -c -o analysisUtils.o $(COMPFLAGS) $(TopDir)/analysisUtils.cc
 
 PUReweighter.o: $(TopDir)/PUReweighter.cc $(TopDir)/PUReweighter.h
 	g++ -c -o PUReweighter.o $(COMPFLAGS) $(TopDir)/PUReweighter.cc

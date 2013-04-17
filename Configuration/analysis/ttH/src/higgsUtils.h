@@ -31,18 +31,6 @@ namespace Tools{
     
     
     
-    /// Template function to order two indices by comparison operator for the two elements of a vector
-    /// corresponding to the indices of a given variable
-    /// Result is: index1 > index2
-    template<class T> void orderIndices(int& index1, int& index2, const std::vector<T>& v_variable);
-    
-    /// Template function to order vector of indices by comparison operator for the two elements of a vector
-    /// corresponding to the indices of a given variable
-    /// Result is: index1 > index2 > ... > indexN
-    template<class T> void orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable);
-    
-    
-    
     /// Store the object in the given selectorList and return it
     template<class T> T* store(T* obj, TSelectorList* selectorList);
     
@@ -62,45 +50,6 @@ namespace Tools{
 
 
 
-
-
-
-template<class T> void Tools::orderIndices(int& index1, int& index2, const std::vector<T>& v_variable)
-{
-    const T& variable1 = v_variable.at(index1);
-    const T& variable2 = v_variable.at(index2);
-    if(variable1<variable2){const int tmpIndex2 = index1;
-        index1 = index2;
-        index2 = tmpIndex2;
-    }
-}
-
-
-
-template<class T> void Tools::orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable)
-{
-    std::vector<int> v_indexResult;
-    for(std::vector<int>::const_iterator i_index2 = v_index.begin(); i_index2 != v_index.end(); ++i_index2){
-        const int index2(*i_index2);
-        if(i_index2 == v_index.begin()){
-            v_indexResult.push_back(index2);
-            continue;
-        }
-        const T& variable2 = v_variable.at(index2);
-        
-        bool isInserted(false);
-        for(std::vector<int>::iterator i_index1 = v_indexResult.begin(); i_index1 != v_indexResult.end(); ++i_index1){
-            const T& variable1 = v_variable.at(*i_index1);
-            if(variable1<variable2){
-                v_indexResult.insert(i_index1, index2);
-                isInserted = true;
-                break;
-            }
-        }
-        if(!isInserted) v_indexResult.push_back(index2);
-    }
-    v_index = v_indexResult;
-}
 
 
 

@@ -362,7 +362,7 @@ private:
     
     /// Histograms of per-jet b-tagging efficiencies, used to calculate per-event SF
     /// Need to be written out to file previously
-    TH2 *bEff, *cEff, *lEff;
+    TH2 *h2_bEff, *h2_cEff, *h2_lEff;
     
     
     /// Trigger and lepton scale factors differential in eta, pt
@@ -463,7 +463,7 @@ protected:
     /// Book histograms needed for b-tag efficiencies
     void bookBtagHistograms();
     /// Fill histograms needed for b-tag efficiencies
-    void fillBtagHistograms(const double jetPtCut, const double btagWP, const double weight = 1);
+    void fillBtagHistograms(const std::vector<int>& jetIndices, const std::vector<int>& bjetIndices, const double weight = 1);
     /// Produce b-tag efficiencies
     void produceBtagEfficiencies();
     
@@ -480,15 +480,19 @@ protected:
     /// Prepare b-tagging scale factor
     void prepareBtagSF();
     /// Get b-tag per-event scale factor
-    double calculateBtagSF();
-
-    std::vector<int> IndexOfBTags ( double TagCut = 0.244);
+    double calculateBtagSF(const std::vector<int>& jetIndices);
+    
+    
+    
+    // FIXME: these methods will be moved to own b-tagging class (several anyway would be private)
+    std::vector<int> indexOfBtags(const std::vector<int>& jetIndices, const double TagCut = 0.244);
+    bool isTagged(LV Jet, double TagValue, int Flavour, double TagCut = 0.244);
+    double getEfficiency(LV jet, int partonFlavour);
+    double getSF(double pt, double abs_eta, int flavour);
+    double varySF(double pt, double eta, int flavour, double ptmedian, double etamedian);
     bool makeeffs;
-    bool IsTagged(LV Jet, double TagValue, int Flavour, double TagCut = 0.244);
-    double GetEfficiency(LV jet, int partonFlavour);
-    double GetSF(double pt, double abs_eta, int flavour);
-    double VarySF (double pt, double eta, int flavour, double ptmedian, double etamedian);
-
+    
+    
 
     /// Prepare kinematic reconstruction scale factor
     void prepareKinRecoSF();
@@ -507,10 +511,8 @@ protected:
     void orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2);
     /// Find lepton leading in pt, and next-to-leading lepton
     bool getLeptonPair(size_t& LeadLeptonNumber, size_t& NLeadLeptonNumber);
-    /// Clean the jet collection for given cuts on pt, eta
-    void cleanJetCollection(double ptcut, double etacut);
     /// Get H_t of jets
-    double getJetHT(const VLV& jet, int pt_cut);
+    double getJetHT(const std::vector<int>& jetIndices, const VLV& jets);
     
     
     

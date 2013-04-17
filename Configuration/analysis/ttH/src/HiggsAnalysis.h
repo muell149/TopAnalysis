@@ -61,10 +61,13 @@ private:
     bool getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, const int pdgId);
     
     /// Match the two generated input jets to the reco jet collection
-    bool matchRecoToGenJets(int& matchedBJetIndex, int&matchedAntiBJetIndex, const LV* genBJet, const LV* genAntiBJet);
+    bool matchRecoToGenJets(int& matchedBJetIndex, int&matchedAntiBJetIndex,
+                            const std::vector<int>& jetIndices,
+                            const LV* genBJet, const LV* genAntiBJet);
     
     /// Fill class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     void fillMvaInputTopJetsVariables(const LV& lepton, const LV& antilepton,
+                                      const std::vector<int>& jetIndices,
                                       const int matchedBJetIndex, const int matchedAntiBJetIndex,
                                       const bool successfulMatching, const double& eventWeight);
     

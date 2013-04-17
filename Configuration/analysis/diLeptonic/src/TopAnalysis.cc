@@ -20,9 +20,9 @@
 #include "KinReco.h"
 #include "TopAnalysis.h"
 #include "HistoListReader.h"
+#include "analysisUtils.h"
 
-using ROOT::Math::VectorUtil::DeltaPhi;
-using ROOT::Math::VectorUtil::DeltaR;
+
 
 
 
@@ -38,10 +38,10 @@ constexpr double LUMI = 12.21;
 constexpr bool RUNSYNC = false;
 
 /// Cut value for jet pt
-constexpr double JETPTCUT = 30;
+constexpr double JetPtCUT = 30;
 
 /// Cut value for jet eta
-constexpr double JETETACUT = 2.4;
+constexpr double JetEtaCUT = 2.4;
 
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
@@ -50,6 +50,9 @@ constexpr double BtagWP = 0.244;
 /// Select the b-tagging method: Apply SF to the histogram or re-tag a jet via a random method
 ///  default method is the re-tagging of the jetBTagCSV_: true
 constexpr bool ReTagJet = false;
+
+
+
 
 
 
@@ -582,8 +585,13 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 {    
     // Defaults from AnalysisBase
     AnalysisBase::Process(entry);
-
-
+    
+    
+    // Use utilities without namespaces
+    using ROOT::Math::VectorUtil::DeltaPhi;
+    using namespace ttbar;
+    
+    
     // Separate DY dilepton decays in lepton flavours
     if(this->failsDrellYanGeneratorSelection(entry)) return kTRUE;
     
@@ -658,18 +666,20 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Systematics for jet energy resolution/scale
     // Corrections for: jets_, jetsForMET_, met_
     if (doJesJer_) applyJER_JES();
-
-    // Apply jet cuts in eta, pt
-    cleanJetCollection(JETPTCUT, JETETACUT);
     
-    // Select b-jets for given working point
-    std::vector<int> BJetIndex;
-    for ( auto it = jetBTagCSV_->begin(); it<jetBTagCSV_->end(); it++ ) {
-        if ( *it > BtagWP) {
-            BJetIndex.push_back((it-jetBTagCSV_->begin())); //change asked by Tyler
-        }
-    }
-    const int NumberOfBJets = BJetIndex.size();
+    // Get jet indices, apply selection cuts and order them by pt (beginning with the highest value)
+    std::vector<int> jetIndices = initialiseIndices(*jets_);
+    selectIndices(jetIndices, *jets_, LVeta, JetEtaCUT, false);
+    selectIndices(jetIndices, *jets_, LVeta, -JetEtaCUT);
+    selectIndices(jetIndices, *jets_, LVpt, JetPtCUT);
+    orderIndices(jetIndices, *jets_, LVpt);
+    const int numberOfJets = jetIndices.size();
+    
+    // Get b-jet indices, apply selection cuts and order them by btag discriminator (beginning with the highest value)
+    std::vector<int> bjetIndices = jetIndices;
+    selectIndices(bjetIndices, *jetBTagCSV_, BtagWP);
+    orderIndices(bjetIndices, *jetBTagCSV_);
+    const int numberOfBjets = bjetIndices.size();
     
     
     // ++++ Control Plots ++++
@@ -678,13 +688,13 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_AllLeptonpT_step0->Fill(leptons_->at(i).Pt(), 1);
     }
     
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step0->Fill(jets_->at(i).Eta(), 1);
-        h_AllJetspT_step0->Fill(jets_->at(i).Pt(), 1);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step0->Fill(jets_->at(index).Eta(), 1);
+        h_AllJetspT_step0->Fill(jets_->at(index).Pt(), 1);
     }
     h_LeptonMult_step0->Fill(leptons_->size(), 1);
-    h_JetsMult_step0->Fill(jets_->size(), 1);
-    int nbjets_step0 = NumberOfBJets;
+    h_JetsMult_step0->Fill(numberOfJets, 1);
+    int nbjets_step0 = numberOfBjets;
     h_BJetsMult_step0->Fill(nbjets_step0, 1);
     
     h_PUSF->Fill(weightPU, 1);
@@ -720,13 +730,13 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_LeptonpT_step1->Fill(leptons_->at(1).Pt(), 1);
     }
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step1->Fill(jets_->at(i).Eta(), 1);
-        h_AllJetspT_step1->Fill(jets_->at(i).Pt(), 1);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step1->Fill(jets_->at(index).Eta(), 1);
+        h_AllJetspT_step1->Fill(jets_->at(index).Pt(), 1);
     }
     h_LeptonMult_step1->Fill(leptons_->size(), 1);
-    h_JetsMult_step1->Fill(jets_->size(), 1);
-    int nbjets_step1 = NumberOfBJets;
+    h_JetsMult_step1->Fill(numberOfJets, 1);
+    int nbjets_step1 = numberOfBjets;
     h_BJetsMult_step1->Fill(nbjets_step1, 1);
     
     
@@ -746,19 +756,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_LeptonEta_step2->Fill(leptons_->at(1).Eta(), 1);
     h_LeptonpT_step2->Fill(leptons_->at(1).Pt(), 1);
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step2->Fill(jets_->at(i).Eta(), 1);
-        h_AllJetspT_step2->Fill(jets_->at(i).Pt(), 1);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step2->Fill(jets_->at(index).Eta(), 1);
+        h_AllJetspT_step2->Fill(jets_->at(index).Pt(), 1);
     }
-    if(jets_->size()>1){
+    if(numberOfJets>1){
         h_JetsEta_step2->Fill(jets_->at(0).Eta(), 1);
         h_JetspT_step2->Fill(jets_->at(0).Pt(), 1);
         h_JetsEta_step2->Fill(jets_->at(1).Eta(), 1);
         h_JetspT_step2->Fill(jets_->at(1).Pt(), 1);
     }
     h_LeptonMult_step2->Fill(leptons_->size(), 1);
-    h_JetsMult_step2->Fill(jets_->size(), 1);
-    int nbjets_step2 = NumberOfBJets;
+    h_JetsMult_step2->Fill(numberOfJets, 1);
+    int nbjets_step2 = numberOfBjets;
     h_BJetsMult_step2->Fill(nbjets_step2, 1);
     
 
@@ -814,7 +824,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_TrigSF->Fill(weightTrigSF, 1);
     h_LepSF->Fill(weightLepSF, 1);
     
-    h_jetMulti_diLep->Fill(jets_->size(), weight);
+    h_jetMulti_diLep->Fill(numberOfJets, weight);
     h_diLepMassFull->Fill(dilepton.M(), weight);
 
     
@@ -822,22 +832,22 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     //handle inverted Z cut
     // Fill loose dilepton mass histogram before any jet cuts
     bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
-    bool hasJets = jets_->size() > 1;
+    bool hasJets = numberOfJets > 1;
     bool hasMetOrEmu = channel_ == "emu" || met_->Pt() > 40;
 
     /// Begin: New random method for b-tagging
     if (isMC_ && !makeeffs && ReTagJet){
         //If b-tag efficiencies do not exit ==> do not re-tag the jets' b-tag value
-        BJetIndex.clear();
-        BJetIndex = IndexOfBTags(BtagWP);
+        bjetIndices.clear();
+        bjetIndices = indexOfBtags(jetIndices, BtagWP);
     }
     /// End: New random method for b-tagging
 
-    bool hasBtag = BJetIndex.size() > 0;
+    bool hasBtag = numberOfBjets > 0;
 
     /// Begin: Old method for b-tagging SF calcualtion
     double weightBtagSF = 1.;
-    if (!ReTagJet) weightBtagSF = isMC_ ? calculateBtagSF() : 1;
+    if (!ReTagJet) weightBtagSF = isMC_ ? calculateBtagSF(jetIndices) : 1;
     /// End: Old method for b-tagging SF calcualtion
 
 
@@ -886,19 +896,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_LeptonEta_step3->Fill(leptons_->at(1).Eta(), weight);
     h_LeptonpT_step3->Fill(leptons_->at(1).Pt(), weight);
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step3->Fill(jets_->at(i).Eta(), weight);
-        h_AllJetspT_step3->Fill(jets_->at(i).Pt(), weight);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step3->Fill(jets_->at(index).Eta(), weight);
+        h_AllJetspT_step3->Fill(jets_->at(index).Pt(), weight);
     }
-    if(jets_->size()>1){
+    if(numberOfJets>1){
         h_JetsEta_step3->Fill(jets_->at(0).Eta(), weight);
         h_JetspT_step3->Fill(jets_->at(0).Pt(), weight);
         h_JetsEta_step3->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step3->Fill(jets_->at(1).Pt(), weight);
     }
     h_LeptonMult_step3->Fill(leptons_->size(), weight);
-    h_JetsMult_step3->Fill(jets_->size(), weight);
-    int nbjets_step3 = NumberOfBJets;
+    h_JetsMult_step3->Fill(numberOfJets, weight);
+    int nbjets_step3 = numberOfBjets;
     h_BJetsMult_step3->Fill(nbjets_step3, weight);
     
     //=== CUT ===
@@ -934,19 +944,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_LeptonEta_step4->Fill(leptons_->at(1).Eta(), weight);
     h_LeptonpT_step4->Fill(leptons_->at(1).Pt(), weight);
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step4->Fill(jets_->at(i).Eta(), weight);
-        h_AllJetspT_step4->Fill(jets_->at(i).Pt(), weight);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step4->Fill(jets_->at(index).Eta(), weight);
+        h_AllJetspT_step4->Fill(jets_->at(index).Pt(), weight);
     }
-    if(jets_->size()>1){
+    if(numberOfJets>1){
         h_JetsEta_step4->Fill(jets_->at(0).Eta(), weight);
         h_JetspT_step4->Fill(jets_->at(0).Pt(), weight);
         h_JetsEta_step4->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step4->Fill(jets_->at(1).Pt(), weight);
     }
     h_LeptonMult_step4->Fill(leptons_->size(), weight);
-    h_JetsMult_step4->Fill(jets_->size(), weight);
-    int nbjets_step4 = NumberOfBJets;
+    h_JetsMult_step4->Fill(numberOfJets, weight);
+    int nbjets_step4 = numberOfBjets;
     h_BJetsMult_step4->Fill(nbjets_step4, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
@@ -969,19 +979,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_LeptonEta_step5->Fill(leptons_->at(1).Eta(), weight);
     h_LeptonpT_step5->Fill(leptons_->at(1).Pt(), weight);
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step5->Fill(jets_->at(i).Eta(), weight);
-        h_AllJetspT_step5->Fill(jets_->at(i).Pt(), weight);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step5->Fill(jets_->at(index).Eta(), weight);
+        h_AllJetspT_step5->Fill(jets_->at(index).Pt(), weight);
     }
-    if(jets_->size()>1){
+    if(numberOfJets>1){
         h_JetsEta_step5->Fill(jets_->at(0).Eta(), weight);
         h_JetspT_step5->Fill(jets_->at(0).Pt(), weight);
         h_JetsEta_step5->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step5->Fill(jets_->at(1).Pt(), weight);
     }
     h_LeptonMult_step5->Fill(leptons_->size(), weight);
-    h_JetsMult_step5->Fill(jets_->size(), weight);
-    int nbjets_step5 = NumberOfBJets;
+    h_JetsMult_step5->Fill(numberOfJets, weight);
+    int nbjets_step5 = numberOfBjets;
     h_BJetsMult_step5->Fill(nbjets_step5, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
@@ -1011,14 +1021,15 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         }
     }
     
-    h_jetMulti_noBTag->Fill(jets_->size(), weight);
-    h_BjetMulti_noBTag->Fill(BJetIndex.size(), weight);
+    h_jetMulti_noBTag->Fill(numberOfJets, weight);
+    h_BjetMulti_noBTag->Fill(numberOfBjets, weight);
 
-    double jetHT = getJetHT(*jets_, JETPTCUT);
+    double jetHT = getJetHT(jetIndices, *jets_);
     h_jetHT->Fill(jetHT, weight);
 
     for ( size_t i = 0; i < 2; ++i ) {
-        h_jetpT->Fill(jets_->at(i).Pt(), weight);
+        const int index = jetIndices.at(i);
+        h_jetpT->Fill(jets_->at(index).Pt(), weight);
     }
 
     // ++++ Control Plots ++++
@@ -1031,19 +1042,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_LeptonEta_step6->Fill(leptons_->at(1).Eta(), weight);
     h_LeptonpT_step6->Fill(leptons_->at(1).Pt(), weight);
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step6->Fill(jets_->at(i).Eta(), weight);
-        h_AllJetspT_step6->Fill(jets_->at(i).Pt(), weight);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step6->Fill(jets_->at(index).Eta(), weight);
+        h_AllJetspT_step6->Fill(jets_->at(index).Pt(), weight);
     }
-    if(jets_->size()>1){
+    if(numberOfJets>1){
         h_JetsEta_step6->Fill(jets_->at(0).Eta(), weight);
         h_JetspT_step6->Fill(jets_->at(0).Pt(), weight);
         h_JetsEta_step6->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step6->Fill(jets_->at(1).Pt(), weight);
     }
     h_LeptonMult_step6->Fill(leptons_->size(), weight);
-    h_JetsMult_step6->Fill(jets_->size(), weight);
-    int nbjets_step6 = NumberOfBJets;
+    h_JetsMult_step6->Fill(numberOfJets, weight);
+    int nbjets_step6 = numberOfBjets;
     h_BJetsMult_step6->Fill(nbjets_step6, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
@@ -1053,7 +1064,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     /// Fill the b-tagging efficiency plots
     if(isTopSignal_ && makeeffs){
-        this->fillBtagHistograms(JETPTCUT, BtagWP, weight);
+        this->fillBtagHistograms(jetIndices, bjetIndices, weight);
     }
     
     //=== CUT ===
@@ -1075,24 +1086,24 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
             std::cout << "Selected#\tRun\tEvent\tlep+\tlep-\tMll\tNJets\tjet0\tjet1\tNTags\tGenJet1\tGenJet2\tMet\tGenMet\tt/tbar_decay\n"
             << std::setprecision(2) << std::fixed;
             std::cout << "Event#" << ++fullSelectionCounter << ":\t" << runNumber_ << "\t" << eventNumber_ << "\t" << leptonPlus << "\t" << leptonMinus << "\t"
-            << dilepton.M() << "\t" << jets_->size() << "\t"
-            << jets_->at(0) << "\t" << jets_->at(1) << "\t" << BJetIndex.size() << "\t"
-            << associatedGenJet_->at(0) << "\t" << associatedGenJet_->at(1) << "\t"
+            << dilepton.M() << "\t" << numberOfJets << "\t"
+            << jets_->at(jetIndices.at(0)) << "\t" << jets_->at(jetIndices.at(1)) << "\t" << numberOfBjets << "\t"
+            << associatedGenJet_->at(jetIndices.at(0)) << "\t" << associatedGenJet_->at(jetIndices.at(1)) << "\t"
             << met_->Pt() << "\t" << GenMet_->Pt() << "\t"
             << topDecayModeString()
             << "\n";
     }
     
-    h_BjetMulti->Fill(BJetIndex.size(), weight);
-    h_jetMulti->Fill(jets_->size(), weight);
+    h_BjetMulti->Fill(numberOfBjets, weight);
+    h_jetMulti->Fill(numberOfJets, weight);
     
     h_leptonPtBeforeKinReco->Fill(leptonMinus.Pt(), weight);
     h_leptonPtBeforeKinReco->Fill(leptonPlus.Pt(), weight);
     h_leptonEtaBeforeKinReco->Fill(leptonMinus.Eta(), weight);
     h_leptonEtaBeforeKinReco->Fill(leptonPlus.Eta(), weight);
     h_METBeforeKinReco->Fill(met_->Pt(), weight);
-    for (size_t i = 0; i < BJetIndex.size(); ++i)
-        h_bjetetaBeforeKinReco->Fill(jets_->at(BJetIndex.at(i)).Eta(), weight);
+    for (const int index : bjetIndices)
+        h_bjetetaBeforeKinReco->Fill(jets_->at(index).Eta(), weight);
 
     // ++++ Control Plots ++++
     for (int i=0; i<(int) leptons_->size(); ++i){
@@ -1104,19 +1115,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_LeptonEta_step7->Fill(leptons_->at(1).Eta(), weight);
     h_LeptonpT_step7->Fill(leptons_->at(1).Pt(), weight);
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step7->Fill(jets_->at(i).Eta(), weight);
-        h_AllJetspT_step7->Fill(jets_->at(i).Pt(), weight);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step7->Fill(jets_->at(index).Eta(), weight);
+        h_AllJetspT_step7->Fill(jets_->at(index).Pt(), weight);
     }
-    if(jets_->size()>1){
+    if(numberOfJets>1){
         h_JetsEta_step7->Fill(jets_->at(0).Eta(), weight);
         h_JetspT_step7->Fill(jets_->at(0).Pt(), weight);
         h_JetsEta_step7->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step7->Fill(jets_->at(1).Pt(), weight);
     }
     h_LeptonMult_step7->Fill(leptons_->size(), weight);
-    h_JetsMult_step7->Fill(jets_->size(), weight);
-    int nbjets_step7 = NumberOfBJets;
+    h_JetsMult_step7->Fill(numberOfJets, weight);
+    int nbjets_step7 = numberOfBjets;
     h_BJetsMult_step7->Fill(nbjets_step7, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
@@ -1134,8 +1145,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_leptonEtaAfterKinReco->Fill(leptonMinus.Eta(), weight);
     h_leptonEtaAfterKinReco->Fill(leptonPlus.Eta(), weight);
     h_METAfterKinReco->Fill(met_->Pt(), weight);
-    for (size_t i = 0; i < BJetIndex.size(); ++i)
-        h_bjetetaAfterKinReco->Fill(jets_->at(BJetIndex.at(i)).Eta(), weight);
+    for (const int index : bjetIndices)
+        h_bjetetaAfterKinReco->Fill(jets_->at(index).Eta(), weight);
     
     h_KinRecoSF->Fill(weightKinFit_, 1);
     h_EventWeight->Fill(weight, 1);
@@ -1150,24 +1161,24 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_LeptonEta_step8->Fill(leptons_->at(1).Eta(), weight);
     h_LeptonpT_step8->Fill(leptons_->at(1).Pt(), weight);
 
-    for (int i=0; i<(int) jets_->size(); ++i){
-        h_AllJetsEta_step8->Fill(jets_->at(i).Eta(), weight);
-        h_AllJetspT_step8->Fill(jets_->at(i).Pt(), weight);
+    for (const int index : jetIndices){
+        h_AllJetsEta_step8->Fill(jets_->at(index).Eta(), weight);
+        h_AllJetspT_step8->Fill(jets_->at(index).Pt(), weight);
     }
-    if(jets_->size()>1){
+    if(numberOfJets>1){
         h_JetsEta_step8->Fill(jets_->at(0).Eta(), weight);
         h_JetspT_step8->Fill(jets_->at(0).Pt(), weight);
         h_JetsEta_step8->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step8->Fill(jets_->at(1).Pt(), weight);
     }
     h_LeptonMult_step8->Fill(leptons_->size(), weight);
-    h_JetsMult_step8->Fill(jets_->size(), weight);
-    int nbjets_step8 = NumberOfBJets;
+    h_JetsMult_step8->Fill(numberOfJets, weight);
+    int nbjets_step8 = numberOfBjets;
     h_BJetsMult_step8->Fill(nbjets_step8, weight);
     
     h_step9->Fill(1, weight);
-    h_jetMultiXSec->Fill(jets_->size(), weight);
-    h_jetMultiNoPU->Fill(jets_->size(), weight / weightPU );
+    h_jetMultiXSec->Fill(numberOfJets, weight);
+    h_jetMultiNoPU->Fill(numberOfJets, weight / weightPU );
     h_diLepMassFull_fullSel->Fill(dilepton.M(), weight);
         
     //create helper variables
@@ -1412,9 +1423,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     }
     
     if ( BHadronIndex>=0 && AntiBHadronIndex>=0 ) {
-        h_GenRecoJetMult->Fill(jets_->size(), allGenJets_->size(), weight );
+        h_GenRecoJetMult->Fill(numberOfJets, allGenJets_->size(), weight );
     } else {
-        h_GenRecoJetMult->Fill(jets_->size(), -1000., weight );
+        h_GenRecoJetMult->Fill(numberOfJets, -1000., weight );
     }
 
     LV genllbar(*GenLepton_ + *GenAntiLepton_);
@@ -1584,7 +1595,7 @@ void TopAnalysis::bHadronIndices(int& bHadronIndex, int& antiBHadronIndex)
     //while (jet->size() > 0 && jet->back().Pt() < JETPTCUT) jet->pop_back();
     
     for ( size_t genJet = 0; 
-          genJet < allGenJets_->size() && allGenJets_->at(genJet).pt() >= JETPTCUT; 
+          genJet < allGenJets_->size() && allGenJets_->at(genJet).pt() >= JetPtCUT; 
           ++genJet ) 
     {
         for ( size_t bHadron=0; bHadron < BHadrons_->size(); bHadron++ ) {
@@ -1711,6 +1722,8 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                                     const int bHadronIndex, const int antiBHadronIndex,
                                     const double weightPU)
 {
+    using ROOT::Math::VectorUtil::DeltaPhi;
+    
     LV& LeadGenTop(leadGenTop);
     LV& NLeadGenTop(nLeadGenTop);
     LV& LeadGenLepton(leadGenLepton);
@@ -1742,9 +1755,9 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
           && abs( GenLepton_->eta() ) < 2.4 && abs ( GenAntiLepton_->eta() ) < 2.4 ) {
         //if (LVGenBQuark.Pt()>JETPTCUT && LVGenAntiBQuark.Pt()>JETPTCUT && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
         if ( BHadronIndex != -1 && AntiBHadronIndex != -1 ) {
-            if ( allGenJets_->at(BHadronIndex).pt() > JETPTCUT &&
+            if ( allGenJets_->at(BHadronIndex).pt() > JetPtCUT &&
                 abs ( allGenJets_->at(BHadronIndex).eta() ) < 2.4 &&
-                allGenJets_->at(AntiBHadronIndex).pt() > JETPTCUT &&
+                allGenJets_->at(AntiBHadronIndex).pt() > JetPtCUT &&
                 abs ( allGenJets_->at(AntiBHadronIndex).Eta() ) < 2.4 )
             {
 
@@ -1768,8 +1781,10 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                 h_VisGenAntiBJetpT->Fill(allGenJets_->at(AntiBHadronIndex).Pt(), trueLevelWeight );
                 h_VisGenMet->Fill(GenMet_->Pt(), trueLevelWeight);
                 
-                //for HT, count only >= JETPTCUT
-                genHT = getJetHT(*allGenJets_, JETPTCUT);
+                //for HT, count only >= JetPtCUT
+                std::vector<int> genJetIndices = ttbar::initialiseIndices(*allGenJets_);
+                ttbar::selectIndices(genJetIndices, *allGenJets_, ttbar::LVpt, JetPtCUT);
+                genHT = getJetHT(genJetIndices, *allGenJets_);
                 h_VisGenHT->Fill(genHT, trueLevelWeight);
 
                 h_VisGenLLBarDPhi->Fill(abs( DeltaPhi(*GenLepton_, *GenAntiLepton_)), trueLevelWeight );
