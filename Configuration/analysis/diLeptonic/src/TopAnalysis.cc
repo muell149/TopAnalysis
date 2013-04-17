@@ -853,7 +853,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     bool hasSolution = HypTop_->size() > 0;
     if (kinRecoOnTheFly_ || true) 
-        hasSolution = calculateKinReco(leptonMinus, leptonPlus);
+        hasSolution = calculateKinReco(leptonMinus, leptonPlus, jetIndices, *met_);
     
     if ( isZregion ) {
         double fullWeights = weightGenerator_*weightPU*weightTrigSF*weightLepSF;

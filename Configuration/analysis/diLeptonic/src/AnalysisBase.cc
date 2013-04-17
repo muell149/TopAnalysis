@@ -1548,9 +1548,15 @@ void AnalysisBase::prepareKinRecoSF() {
  * 
  * @return true iff there is at least one solution.
  */
-bool AnalysisBase::calculateKinReco(const LV& leptonMinus, const LV& leptonPlus)
+bool AnalysisBase::calculateKinReco(const LV& leptonMinus, const LV& leptonPlus, const std::vector<int>& jetIndices, const LV& met)
 {
-    auto sols = GetKinSolutions(leptonMinus, leptonPlus, jets_, jetBTagCSV_, met_);
+    VLV jets;
+    std::vector<double> btagValues;
+    for(const int index : jetIndices){
+        jets.push_back(jets_->at(index));
+        btagValues.push_back(jetBTagCSV_->at(index));
+    }
+    auto sols = GetKinSolutions(leptonMinus, leptonPlus, &jets, &btagValues, &met);
     if (sols.size()) {
         const TtDilepEvtSolution &sol = sols[0];
         HypTop_->clear();        HypTop_->push_back(TLVtoLV(sol.top));

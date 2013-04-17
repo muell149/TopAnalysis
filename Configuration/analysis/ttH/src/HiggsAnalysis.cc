@@ -434,7 +434,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     bool hasMetOrEmu = channel_ == "emu" || met_->Pt() > 40;
     bool hasBtag = numberOfBjets > 0;
     //bool hasSolution = HypTop->size() > 0;
-    bool hasSolution = calculateKinReco(leptonMinus, leptonPlus);
+    bool hasSolution = calculateKinReco(leptonMinus, leptonPlus, jetIndices, *met_);
 
     // Z window plots need to be filled here, in order to rescale the contribution to data
     if ( isZregion ) {

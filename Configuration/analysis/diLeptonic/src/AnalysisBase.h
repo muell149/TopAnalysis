@@ -497,7 +497,7 @@ protected:
     /// Prepare kinematic reconstruction scale factor
     void prepareKinRecoSF();
     /// Calculate the kinematic reconstruction and return whether at least one solution exists
-    bool calculateKinReco(const LV &leptonMinus, const LV &leptonPlus);
+    bool calculateKinReco(const LV& leptonMinus, const LV& leptonPlus, const std::vector<int>& jetIndices, const LV& met);
     
     /// Prepare JER/JES systematics
     void prepareJER_JES();
