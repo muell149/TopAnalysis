@@ -14,7 +14,7 @@ class TString;
 class PUReweighter {
 
 public:
-    const std::string getPUPath(TString systematic);
+    const std::string getPUPath(TString systematic, const char* filePU);
     void setDataTruePUInput(TH1* dataPUdist);
     void setDataTruePUInput(const char * rootfile);
     double getPUweight(size_t trueBX);

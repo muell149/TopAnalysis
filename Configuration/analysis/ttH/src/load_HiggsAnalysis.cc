@@ -20,6 +20,17 @@
 
 
 
+
+
+/// Set pileup distribution file corresponding to data sample in use
+/// The file ending is automatically adjusted for different systematics
+//constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
+constexpr const char* FilePU = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+
+
+
+
+
 void load_HiggsAnalysis(const TString validFilenamePattern, 
                         const Channel::Channel channel,
                         const Systematic::Systematic systematic,
@@ -37,7 +48,7 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
     HiggsAnalysis* selector = new HiggsAnalysis();
     PUReweighter* pu = new PUReweighter();
     pu->setMCDistrSum12("S10");
-    pu->setDataTruePUInput(pu->getPUPath(Systematic::convertSystematic(systematic)).c_str());
+    pu->setDataTruePUInput(pu->getPUPath(Systematic::convertSystematic(systematic), FilePU).c_str());
     selector->SetPUReweighter(pu);
     
     // Loop over all input files

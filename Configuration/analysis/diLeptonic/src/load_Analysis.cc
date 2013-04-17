@@ -16,6 +16,18 @@
 #include "utils.h"
 
 
+
+
+
+/// Set pileup distribution file corresponding to data sample in use
+/// The file ending is automatically adjusted for different systematics
+constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
+//constexpr const char* FilePU = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+
+
+
+
+
 const TString pdfDirName(int pdf_no) {
     TString result("PDF_");
     if (pdf_no == 0) result += "CENTRAL";
@@ -41,7 +53,7 @@ void load_Analysis(TString validFilenamePattern,
     TopAnalysis *selector = new TopAnalysis();
     PUReweighter *pu = new PUReweighter();
     pu->setMCDistrSum12("S10");
-    pu->setDataTruePUInput(pu->getPUPath(systematic).c_str());
+    pu->setDataTruePUInput(pu->getPUPath(systematic, FilePU).c_str());
     selector->SetPUReweighter(pu);
 
     int filecounter = 0;

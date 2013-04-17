@@ -15,14 +15,7 @@
 //! contradicts to the official recommendation to use different data distributions with varied total inelastic cross section by +-5%
 //! so reweighting is changed by changing the input distributions provided at (naf afs) kiesej/public
 
-/// Please be aware that the file naming convention is: 
-/// $CMSSW_BASE/src/TopAnalysis/TopUtils/data/NominalPUFile.rootfile
-/// $CMSSW_BASE/src/TopAnalysis/TopUtils/data/NominalPUFile_sysUp.root
-/// $CMSSW_BASE/src/TopAnalysis/TopUtils/data/NominalPUFile_sysDown.root
-/// So please keep it also when generating a new PU ROOT files
-/// For future updates please place the PU ROOT files in $CMSSW_BASE/src/TopAnalysis/Configuration/analysis/diLeptonic/data
 
-const std::string NominalPUFile = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
 
 
 void PUReweighter::setDataTruePUInput(TH1* dataPUdist){
@@ -112,16 +105,17 @@ void PUReweighter::clear()
 
 
 ///determine the path to the PU distribution files, depending on systematic
-const std::string PUReweighter::getPUPath(TString systematic) {
+const std::string PUReweighter::getPUPath(TString systematic, const char* filePU) {
     std::string pu_path(CMSSW_BASE());
+    pu_path.append(filePU);
     if (systematic == "PU_UP") {
-        pu_path.append(NominalPUFile+"_sysUp.root");
-        std::cout << "using pilup-up distribution\n";
+        pu_path.append("_sysUp.root");
+        std::cout << "using pileup-up distribution\n";
     } else if (systematic == "PU_DOWN") {
-        pu_path.append(NominalPUFile+"_sysDown.root");
-        std::cout << "using pilup-down distribution\n";
+        pu_path.append("_sysDown.root");
+        std::cout << "using pileup-down distribution\n";
     } else {
-        pu_path.append(NominalPUFile+".root");
+        pu_path.append(".root");
         if (systematic != "") {
             std::cout << "Using Nominal PU distribution for " << systematic << " systematic!\n";
         }
