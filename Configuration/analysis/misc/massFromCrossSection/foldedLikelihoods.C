@@ -219,8 +219,8 @@ std::vector<TGraphAsymmErrors*> readTheory(const TString name, const bool pole, 
     in >> mt >> xsec >> err_u[0] >> err_d[0] >> err_u[1] >> err_d[1] >> err_u[2] >> err_d[2];
     if( in.eof() ) break;
     if(pdfType==kCT) {
-      err_u[1] /= 1.6;
-      err_d[1] /= 1.6;
+      err_u[1] /= 1.64;
+      err_d[1] /= 1.64;
     }
     mass [i] = mt;
     sigma[i] = xsec;
@@ -344,7 +344,7 @@ std::vector<TF1*> getAndDrawRelativeUncertainty(const TGraphAsymmErrors* graph, 
     relUncUp->GetXaxis()->SetTitle("m_{t}^{#bar{MS}} (GeV)");
   relUncUp->GetYaxis()->SetTitle("#delta#sigma_{t#bar{t}} / #sigma_{t#bar{t}}");
   relUncUp->GetYaxis()->CenterTitle();
-  relUncUp->GetYaxis()->SetRangeUser(.0, .115);
+  relUncUp->GetYaxis()->SetRangeUser(.0, .07);
   relUncUp  ->SetMarkerStyle(26);
   relUncDown->SetMarkerStyle(32);
   relUncUp->Draw("AP");
@@ -756,8 +756,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     gStyle->SetOptTitle(0);
   }
 
-  //  canvas->Print(printNameBase+".ps]");
-  //  return 0;
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
 
   RooRealVar mass("mass", "m_{t}", 140., 190., "GeV");
   if(!pole)
@@ -1097,8 +1097,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   FinalLikeliResults1D* mocResult[nPdfSets];
   FinalLikeliResults1D* mitResult[nPdfSets];
 
-  //  for(unsigned h=0; h<nPdfSets; h++) {
-  for(unsigned h=3; h<4; h++) {
+  for(unsigned h=0; h<nPdfSets; h++) {
+    //  for(unsigned h=3; h<4; h++) {
     const TString suf[nPdfSets] = {"MSTW", "HERA", "ABM", "NNPDF", "CT"};
 
     if(targetAlpha) {
@@ -1121,23 +1121,23 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     }
   }
 
-  if(pole) {
-    char tmpTxt[99];
-    if(topppOnly) {
-      TString format = (targetAlpha ?
-			"%s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
-			"%s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
-      sprintf(tmpTxt, format, pdfName[kNNPDF].Data(),
-	      mitResult[kNNPDF]->bestX,
-	      mitResult[kNNPDF]->highErrTotal,
-	      mitResult[kNNPDF]->lowErrTotal,
-	      mitResult[kNNPDF]->highErrFromConstraintUncertainty,
-	      mitResult[kNNPDF]->lowErrFromConstraintUncertainty);
-      std::cout << tmpTxt << std::endl;
-    }
-  }
-  canvas->Print(printNameBase+".ps]");
-  return 0;
+//  if(pole) {
+//    char tmpTxt[99];
+//    if(topppOnly) {
+//      TString format = (targetAlpha ?
+//			"%s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
+//			"%s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+//      sprintf(tmpTxt, format, pdfName[kNNPDF].Data(),
+//	      mitResult[kNNPDF]->bestX,
+//	      mitResult[kNNPDF]->highErrTotal,
+//	      mitResult[kNNPDF]->lowErrTotal,
+//	      mitResult[kNNPDF]->highErrFromConstraintUncertainty,
+//	      mitResult[kNNPDF]->lowErrFromConstraintUncertainty);
+//      std::cout << tmpTxt << std::endl;
+//    }
+//  }
+//  canvas->Print(printNameBase+".ps]");
+//  return 0;
 
   const unsigned nSummaryPoints = nPdfSets*nTheories;
   TGraphAsymmErrors mocSummaryGraphInnErr(nPdfSets);
@@ -1395,7 +1395,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   else
     outfile << oneOrTwoEmptyCols << "Most likely \\mtop & \\multicolumn{2}{c|}{Uncertainty (GeV)} \\\\" << std::endl;
   if(targetAlpha)
-    outfile << oneOrTwoEmptyCols << "\\alpha_{S} value  & Total & From $\\delta \\mtop$ \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "$\\alpha_S (\\mZ)$ value  & Total & From $\\delta \\mtop$ \\\\" << std::endl;
   else
     outfile << oneOrTwoEmptyCols << "value (GeV)        & Total & From $\\delta \\alpha_{S}$ \\\\" << std::endl;
   outfile << "\\hline" << std::endl;
