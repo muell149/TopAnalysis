@@ -50,25 +50,188 @@ bcp_JetCategories_step8_bin_11_jetChargeGlobalPtWeighted_step8 Standard jets c_{
 bcp_JetCategories_step8_bin_11_jetChargeRelativePtWeighted_step8 Standard jets c_{jet}^{rel} 1 1 0 0 0 0 0 0 0 0
 
 
-# Control plots for MVA input, perhaps these should have an own HistoList_mvaControlPlots
-jetChargeDiff_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-meanDeltaPhi_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-massDiff_recoil_bbbar_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-pt_b_antiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-pt_antiB_lepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-deltaR_b_antiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-deltaR_antiB_lepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-btagDiscriminatorSum_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-deltaPhi_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-massDiff_fullBLepton_bbbar_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-meanMT_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-massSum_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-massDiff_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-meanMTAlt_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
-
 jetMultiplicity_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
 jetMultiplicity_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
 
+####### Control plots for MVA input (perhaps should have an own HistoList_mvaControlPlots)
+# jetChargeDiff_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# meanDeltaPhi_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# massDiff_recoil_bbbar_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# pt_b_antiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# pt_antiB_lepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# deltaR_b_antiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# deltaR_antiB_lepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# btagDiscriminatorSum_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# deltaPhi_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# massDiff_fullBLepton_bbbar_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# meanMT_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# massSum_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# massDiff_antiBLepton_bAntiLepton_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+# meanMTAlt_b_met_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+####### Basic control plots
+basicLeptonMult_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonPt_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonEta_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonPhi_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonPt_1st_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonEta_1st_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonPhi_1st_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonPt_2nd_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonEta_2nd_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicLeptonPhi_2nd_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicDiLeptonMass_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicDiLeptonPt_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicDiLeptonRap_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicDiLeptonDEta_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicDiLeptonDPhi_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetMult_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetPt_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetEta_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetPhi_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetBTagOut_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetBMult_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetBPt_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetBEta_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicJetBPhi_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicMEt_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+basicMEtPhi_step8 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+# basicLeptonMult_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_1st_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_1st_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_1st_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_2nd_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_2nd_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_2nd_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonMass_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonPt_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonRap_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDEta_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDPhi_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetMult_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPt_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetEta_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPhi_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBTagOut_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBMult_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPt_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBEta_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPhi_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEt_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEtPhi_step7 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+# basicLeptonMult_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_1st_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_1st_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_1st_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_2nd_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_2nd_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_2nd_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonMass_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonPt_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonRap_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDEta_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDPhi_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetMult_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPt_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetEta_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPhi_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBTagOut_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBMult_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPt_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBEta_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPhi_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEt_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEtPhi_step6 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+# basicLeptonMult_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_1st_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_1st_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_1st_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_2nd_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_2nd_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_2nd_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonMass_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonPt_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonRap_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDEta_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDPhi_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetMult_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPt_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetEta_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPhi_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBTagOut_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBMult_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPt_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBEta_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPhi_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEt_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEtPhi_step5 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+# basicLeptonMult_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_1st_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_1st_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_1st_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_2nd_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_2nd_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_2nd_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonMass_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonPt_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonRap_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDEta_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDPhi_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetMult_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPt_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetEta_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPhi_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBTagOut_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBMult_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPt_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBEta_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPhi_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEt_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEtPhi_step4 Standard - - 1 1 0 0 0 0 0 0 0 0
+
+# basicLeptonMult_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_1st_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_1st_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_1st_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPt_2nd_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonEta_2nd_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicLeptonPhi_2nd_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonMass_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonPt_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonRap_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDEta_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicDiLeptonDPhi_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetMult_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPt_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetEta_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetPhi_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBTagOut_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBMult_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPt_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBEta_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicJetBPhi_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEt_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
+# basicMEtPhi_step3 Standard - - 1 1 0 0 0 0 0 0 0 0
 
 
 # Name, Extra, axis labels (y,x), rebin, do_dyscale, logx, logy, ymin, ymax, xmin, xmax, nbins, xbins, bcs
+
