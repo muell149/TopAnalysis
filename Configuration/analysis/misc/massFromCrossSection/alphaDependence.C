@@ -124,7 +124,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
 
   if(graph[0].GetFunction("pol2")) {
     char title[99];
-    sprintf(title, "Approx. NNLO from %s with %s and %s = %.0f-%.0f GeV",
+    sprintf(title, "NNLO+NNLL from %s with %s and %s = %.0f-%.0f GeV",
 	    theoName.Data(), pdfName.Data(), massName.Data(), (double)minMass, (double)maxMass);
     graph[0].GetFunction("pol2")->SetTitle(title);
     graph[0].GetFunction("pol2")->GetXaxis()->SetTitle("#alpha_{S}");
@@ -165,7 +165,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
   for(unsigned p=0; p<3; p++) {
     graph_par[p] = TGraph(nPointsMass, mass, par[p]);
     char title[99];
-    sprintf(title, "Approx. NNLO from %s with %s", theoName.Data(), pdfName.Data());
+    sprintf(title, "NNLO+NNLL from %s with %s", theoName.Data(), pdfName.Data());
     graph_par[p].SetTitle(title);
     graph_par[p].GetXaxis()->SetTitle(massName + " [GeV]");
     char parName[99];
@@ -173,7 +173,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
     graph_par[p].GetYaxis()->SetTitle(parName);
     graph_par[p].Draw("A*");
     if(pdf==kNNPDF)
-      graph_par[p].Fit("pol1", "Q", "", 155., 175.);
+      graph_par[p].Fit("pol1", "Q", "", 156., 174.);
     else
       graph_par[p].Fit("pol1", "Q");
     if(graph_par[p].GetFunction("pol1")) {
@@ -181,7 +181,7 @@ int alphaDep(const TheoryType theory, const bool pole, const PdfType pdf, const 
       graph_par[p].GetFunction("pol1")->SetLineColor(kBlue);
     }
     if(pdf==kNNPDF)
-      graph_par[p].Fit("pol2", "+", "", 155., 175.);
+      graph_par[p].Fit("pol2", "+", "", 156., 174.);
     else
       graph_par[p].Fit("pol2", "+");
     sprintf(parName, "graph_p%i", p);
