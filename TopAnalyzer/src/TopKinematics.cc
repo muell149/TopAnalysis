@@ -84,7 +84,7 @@ void TopKinematics::book()
   // deltaPhi between both top quarks
   hists_["ttbarDelPhi"] = new TH1F( "ttbarDelPhi", "ttbarDelPhi",  800, -4 ,     4.);
   // deltaY between both top quarks
-  hists_["ttbarDelY"  ] = new TH1F( "ttbarDelY"  , "ttbarDelY"  ,  100, -5. ,    5.);
+  hists_["ttbarDelY"  ] = new TH1F( "ttbarDelY"  , "ttbarDelY"  , 1000, -5. ,    5.);
   // sum of y of both top quarks
   hists_["ttbarSumY"  ] = new TH1F( "ttbarSumY"  , "ttbarSumY"  ,  100, -5. ,    5.);
   // HT of the 4 jets assigned to the ttbar decay
@@ -128,7 +128,8 @@ void TopKinematics::book()
   hists_["bbbarPt"  ] = new TH1F( "bbbarPt"   , "bbbarPt"   , 1000,  0.,  1000.);
   hists_["bbbarY"   ] = new TH1F( "bbbarY"    , "bbbarY"    , 1000, -5.,  5.   );
   hists_["bbbarMass"] = new TH1F( "bbbarMass" , "bbbarMass" , 1500,  0.,  1500.);
-
+  hists_["lbMass"   ] = new TH1F( "lbMass"    , "lbMass"    , 500,   0.,  500. );
+ 
   /**
      asymmetry variables
   **/
@@ -289,9 +290,9 @@ void TopKinematics::book()
     // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
     //corrs_["ttbarHT_"    ] = new TH2F( "ttbarHT_"    , "ttbarHT_"     , 1500,    0., 1500.,    1500,   0., 1500.);
     // gen-rec level correlation ttbar deltaPhi
-    //corrs_["ttbarDelPhi_"] = new TH2F( "ttbarDelPhi_", "ttbarDelPhi_" , 628 , -3.14,  3.14,     628,-3.14,  3.14);
+    corrs_["ttbarDelPhi_"] = new TH2F( "ttbarDelPhi_", "ttbarDelPhi_" , 800 ,   -4.,    4.,     800,  -4.,    4.);
     // gen-rec level correlation ttbar deltaY
-    //corrs_["ttbarDelY_"  ] = new TH2F( "ttbarDelY_"  , "ttbarDelY_"   , 1000,   -5.,    5.,    1000,  -5.,    5.);
+    corrs_["ttbarDelY_"  ] = new TH2F( "ttbarDelY_"  , "ttbarDelY_"   , 1000,   -5.,    5.,    1000,  -5.,    5.);
     // gen-rec level correlation ttbar sumY
     //corrs_["ttbarSumY_"  ] = new TH2F( "ttbarSumY_"  , "ttbarSumY_"   , 1000,   -5.,    5.,    1000,  -5.,    5.);
     // gen-rec level correlation angle between b jets
@@ -398,9 +399,9 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   // ttbar pair invariant mass
   hists_["ttbarMass"  ] = fs->make<TH1F>( "ttbarMass"  , "ttbarMass"  , 2500,  0. , 2500 );
   // deltaPhi between both top quarks
-  hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi", "ttbarDelPhi",  628, -pi , pi   );
+  hists_["ttbarDelPhi"] = fs->make<TH1F>( "ttbarDelPhi", "ttbarDelPhi",  800, -4. ,    4.);
   // deltaY between both top quarks
-  hists_["ttbarDelY"  ] = fs->make<TH1F>( "ttbarDelY"  , "ttbarDelY"  ,  100, -5. ,    5.);
+  hists_["ttbarDelY"  ] = fs->make<TH1F>( "ttbarDelY"  , "ttbarDelY"  , 1000, -5. ,    5.);
   // sum of y of both top quarks
   hists_["ttbarSumY"  ] = fs->make<TH1F>( "ttbarSumY"  , "ttbarSumY"  ,  100, -5. ,    5.);
   // HT of the 4 jets assigned to the ttbar decay
@@ -444,6 +445,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["bbbarPt"   ] = fs->make<TH1F>( "bbbarPt"   , "bbbarPt"   , 1000,  0.,  1000.);
   hists_["bbbarY"    ] = fs->make<TH1F>( "bbbarY"    , "bbbarY"    , 100,  -5.,  5.   );
   hists_["bbbarMass" ] = fs->make<TH1F>( "bbbarMass" , "bbbarMass" , 1500,  0.,  1500.);
+  hists_["lbMass"    ] = fs->make<TH1F>( "lbMass"    , "lbMass"    , 500,   0.,  500. );
 
   /**
      asymmetry variables
@@ -604,9 +606,9 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     // gen-rec level correlation HT of the 4 jets assigned to the ttbar decay
     //corrs_["ttbarHT_"   ] = fs->make<TH2F>( "ttbarHT_"    , "ttbarHT_"   ,  150,    0., 1500.,     150,   0., 1500.);
     // gen-rec level correlation ttbar deltaPhi
-    //corrs_["ttbarDelPhi_"]= fs->make<TH2F>( "ttbarDelPhi_", "ttbarDelPhi_", 314,   -pi,   pi ,     314,  -pi,   pi );
+    corrs_["ttbarDelPhi_"]= fs->make<TH2F>( "ttbarDelPhi_", "ttbarDelPhi_",  800.,   -4,     4.,     800.,  -4.,   4.);
     // gen-rec level correlation ttbar deltaY
-    //corrs_["ttbarDelY_" ] = fs->make<TH2F>( "ttbarDelY_"  , "ttbarDelY_" ,   50,   -5.,    5.,      50,  -5.,    5.);
+    corrs_["ttbarDelY_" ] = fs->make<TH2F>( "ttbarDelY_"  , "ttbarDelY_"  , 1000.,   -5.,    5.,    1000.,  -5.,   5.);
     // gen-rec level correlation ttbar sumY
     //corrs_["ttbarSumY_" ] = fs->make<TH2F>( "ttbarSumY_"  , "ttbarSumY_" ,   50,   -5.,    5.,      50,  -5.,    5.);
     // gen-rec level correlation angle between b jets
@@ -747,6 +749,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "bbbarPt"     );
     bookVariable(fs, "bbbarY"      );
     bookVariable(fs, "bbbarMass"   );
+    bookVariable(fs, "lbMass"      );
     // parton truth value
     // ttbar quantities    
     bookVariable(fs, "topPtTtbarSysPartonTruth");
@@ -787,6 +790,7 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "bbbarPtPartonTruth"     );
     bookVariable(fs, "bbbarYPartonTruth"      );
     bookVariable(fs, "bbbarMassPartonTruth"   );
+    bookVariable(fs, "lbMassPartonTruth"      );
     // top quantities (= top plus)
     bookVariable(fs, "topEtaPlusPartonTruth");
     bookVariable(fs, "topPtPlusPartonTruth" );
@@ -890,6 +894,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double genBbbarPt       =-9999;
   double genBbbarY        =-9999;
   double genBbbarMass     =-9999; 
+  double genlbMass        =-9999;
   double genNuPt          =-9999;
   double genNuEta         =-9999;
   double genQPt           =-9999;
@@ -1036,6 +1041,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       genBbbarPt       = genBbbar.pt();
       genBbbarY        = genBbbar.Rapidity();
       genBbbarMass     = genBbbar.mass();
+      genlbMass        = (tops.leptonicDecayB()->p4()+tops.singleLepton()->p4()).mass();
       genTopPlusY      = topPlusGen ->rapidity();
       genTopMinusY     = topMinusGen->rapidity();
       genTopPlusEta    = topPlusGen ->eta();
@@ -1115,11 +1121,11 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	corrs_.find("topYSubLead_" )->second->Fill( ySubLeadGEN , ySubLeadREC , weight);
 
 	// fill deltaPhi correlation plot for ttbar pair
-	//corrs_.find("ttbarDelPhi_")->second->Fill(deltaPhi(lepTopGen->phi(), hadTopGen->phi()), 
-	//					deltaPhi(lepTopRec->phi(), hadTopRec->phi()), weight );
+	if(switchLepAndHadTop) corrs_.find("ttbarDelPhi_")->second->Fill(deltaPhi(hadTopGen->phi(), lepTopGen->phi()), deltaPhi(hadTopRec->phi(), lepTopRec->phi()), weight);
+	else                   corrs_.find("ttbarDelPhi_")->second->Fill(deltaPhi(lepTopGen->phi(), hadTopGen->phi()), deltaPhi(lepTopRec->phi(), hadTopRec->phi()), weight);
 	// fill deltaY correlation plot for ttbar
-	//corrs_.find("ttbarDelY_"  )->second->Fill(lepTopGen->rapidity()-hadTopGen->rapidity(), 
-	//lepTopRec->rapidity()-hadTopRec->rapidity(), weight);
+	if(switchLepAndHadTop) corrs_.find("ttbarDelY_"  )->second->Fill(hadTopGen->rapidity()-lepTopGen->rapidity(), hadTopRec->rapidity()-lepTopRec->rapidity(), weight);
+	else                   corrs_.find("ttbarDelY_"  )->second->Fill(lepTopGen->rapidity()-hadTopGen->rapidity(), lepTopRec->rapidity()-hadTopRec->rapidity(), weight);
 	// fill sumY correlation plot for ttbar pair
 	//corrs_.find("ttbarSumY_"  )->second->Fill(lepTopGen->rapidity()+hadTopGen->rapidity(),
 	//lepTopRec->rapidity()+hadTopRec->rapidity(),
@@ -1402,6 +1408,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "bbbarPtPartonTruth"     , genBbbarPt  , weight );
   fillValue( "bbbarYPartonTruth"      , genBbbarY   , weight );
   fillValue( "bbbarMassPartonTruth"   , genBbbarMass, weight );
+  fillValue( "lbMassPartonTruth"      , genlbMass   , weight );
   fillValue( "topYPlusPartonTruth"    , genTopPlusY   , weight );
   fillValue( "topYMinusPartonTruth"   , genTopMinusY  , weight );
   fillValue( "topEtaPlusPartonTruth"  , genTopPlusEta , weight );
@@ -1515,9 +1522,12 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   // fill ttbar invariant mass
   fillValue( "ttbarMass", ttBar.mass(), weight );
   // fill deltaPhi between both top quarks 
-  fillValue( "ttbarDelPhi", deltaPhi(leptonicTop->phi(), hadronicTop->phi()), weight );
+  bool switchLepAndHadTop= charge<0 ? true : false;
+  if(switchLepAndHadTop)  fillValue( "ttbarDelPhi", deltaPhi(hadronicTop->phi(), leptonicTop->phi()), weight );
+  else                    fillValue( "ttbarDelPhi", deltaPhi(leptonicTop->phi(), hadronicTop->phi()), weight );
   // fill deltaY between both top quarks 
-  fillValue( "ttbarDelY", leptonicTop->rapidity()-hadronicTop->rapidity(), weight );
+  if(switchLepAndHadTop) fillValue( "ttbarDelY", hadronicTop->rapidity()-leptonicTop->rapidity(), weight );
+  else                   fillValue( "ttbarDelY", leptonicTop->rapidity()-hadronicTop->rapidity(), weight );
   // fill sum of y of both top quarks 
   fillValue( "ttbarSumY", leptonicTop->rapidity()+hadronicTop->rapidity(), weight );
   // fill HT of the 4 jets assigned to the ttbar decay
@@ -1560,7 +1570,6 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   //fillValue( "bbbarPt"  , bbBar.pt()      , weight );
   //fillValue( "bbbarY"   , bbBar.Rapidity(), weight );
   //fillValue( "bbbarMass", bbBar.mass()    , weight );
-
 }
 
 /// histogram filling for kinematic 1D histos using only events with Ngen&&Nreco 
@@ -1902,7 +1911,8 @@ TopKinematics::fillFinalStateObjects(const ROOT::Math::LorentzVector<ROOT::Math:
   fillValue("leadqPt" , leadq.Pt()  , weight);
   // leading quark Eta
   fillValue("leadqEta", leadq.Eta() , weight);
-
+  // lepton b-quark system
+  fillValue( "lbMass", (lepton+lepB).mass()   , weight );
 }
 
 // get the decay mode
