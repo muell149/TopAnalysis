@@ -1797,19 +1797,19 @@ void AnalysisBase::bookBtagHistograms()
     const int EtaMax = 5;
     Double_t ptbins[PtMax+1] = {20.,30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,800.};
     Double_t etabins[EtaMax+1] = {0.0,0.5,1.0,1.5,2.0,2.4};
-    
+
     h_bjets = store(new TH2D("bjets2D", "unTagged Bjets", PtMax, ptbins, EtaMax, etabins));
     h_btaggedjets = store(new TH2D("bjetsTagged2D", "Tagged Bjets", PtMax, ptbins, EtaMax, etabins));
     h_cjets = store(new TH2D("cjets2D", "unTagged Cjets", PtMax, ptbins, EtaMax, etabins));
     h_ctaggedjets = store(new TH2D("cjetsTagged2D", "Tagged Cjets", PtMax, ptbins, EtaMax, etabins));
     h_ljets = store(new TH2D("ljets2D", "unTagged Ljets", PtMax, ptbins, EtaMax, etabins));
     h_ltaggedjets = store(new TH2D("ljetsTagged2D", "Tagged Ljets", PtMax, ptbins, EtaMax, etabins));
-    
+
     h_bjets->Sumw2();
     h_btaggedjets->Sumw2();
     h_cjets->Sumw2();
     h_ctaggedjets->Sumw2();
-    h_ljets->Sumw2();    
+    h_ljets->Sumw2();
     h_ltaggedjets->Sumw2();
 }
 
@@ -1821,21 +1821,22 @@ void AnalysisBase::fillBtagHistograms(const std::vector<int>& jetIndices, const 
         const double absJetEta = std::abs(jets_->at(index).eta());
         const double jetPt = jets_->at(index).pt();
         const int partonFlavour = std::abs(jetPartonFlavour_->at(index));
+        const bool hasBTag = std::find(bjetIndices.begin(), bjetIndices.end(), index) != bjetIndices.end();
         if(partonFlavour == 5){//b-quark
             h_bjets->Fill(jetPt, absJetEta, weight);
-            if(std::find(bjetIndices.begin(), bjetIndices.end(), index) != bjetIndices.end()){
+            if(hasBTag){
                 h_btaggedjets->Fill(jetPt, absJetEta, weight);
             }
         }
         else if (partonFlavour == 4){//c-quark
             h_cjets->Fill(jetPt, absJetEta, weight);
-            if(std::find(bjetIndices.begin(), bjetIndices.end(), index) != bjetIndices.end()){
+            if(hasBTag){
                 h_ctaggedjets->Fill(jetPt, absJetEta, weight);
             }
         }
         else if (partonFlavour != 0){//l-quark
             h_ljets->Fill(jetPt, absJetEta, weight);
-            if(std::find(bjetIndices.begin(), bjetIndices.end(), index) != bjetIndices.end()){
+            if(hasBTag){
                 h_ltaggedjets->Fill(jetPt, absJetEta, weight);
             }
         }
@@ -1934,10 +1935,6 @@ double AnalysisBase::BJetSF( double pt, double eta )
         std::cout<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
         exit(9);
     }
-    if ( pt < 30 ){
-        std::cout<<"Jet pT="<<pt<<" Out of the selected range (pt>30GeV). Check it\n";
-        exit(9);
-    }
 
     if ( pt < 20 ) pt = 20;
     if ( pt > 800 ) pt = 800;
@@ -1953,7 +1950,7 @@ double AnalysisBase::CJetSF ( double pt, double eta )
     //From BTV-11-004 and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC (ICHEP 2012 prescription)
     //From https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_Moriond13_presc  (Moriond 2013 prescription)
 
-    return 2 * BJetSF( pt, eta );
+    return BJetSF( pt, eta );
 }
 
 
@@ -1969,7 +1966,7 @@ double AnalysisBase::LJetSF ( double pt, double eta, TString typevar )
         std::cout<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
         exit(91);
     }
-    if ( pt < 30 ){
+    if ( pt < 20 ){
         std::cout<<"Jet pT="<<pt<<" out of the selected range. Check it\n";
         exit(91);
     }
