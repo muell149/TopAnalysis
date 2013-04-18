@@ -1756,9 +1756,9 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
         //if (LVGenBQuark.Pt()>JETPTCUT && LVGenAntiBQuark.Pt()>JETPTCUT && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
         if ( BHadronIndex != -1 && AntiBHadronIndex != -1 ) {
             if ( allGenJets_->at(BHadronIndex).pt() > JetPtCUT &&
-                abs ( allGenJets_->at(BHadronIndex).eta() ) < 2.4 &&
+                abs ( allGenJets_->at(BHadronIndex).eta() ) < JetEtaCUT &&
                 allGenJets_->at(AntiBHadronIndex).pt() > JetPtCUT &&
-                abs ( allGenJets_->at(AntiBHadronIndex).Eta() ) < 2.4 )
+                abs ( allGenJets_->at(AntiBHadronIndex).Eta() ) < JetEtaCUT )
             {
 
                 h_VisGenAll->Fill(GenTop_->M(), trueLevelWeight);

@@ -1555,7 +1555,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
             TH1D *VisGenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "VisGenAll_noweight");
             TH1 *h_NrOfEvts = fileReader->GetClone<TH1>(datasetVec.at(i), "weightedEvents");
 
-            NrOfEvts = h_NrOfEvts->GetBinContent(1);
+            NrOfEvts += h_NrOfEvts->GetBinContent(1);
             NrOfEvts_afterSelection += GenPlot_noweight->Integral();
             NrOfEvts_VisGen_afterSelection += VisGenPlot_noweight->Integral();
 
