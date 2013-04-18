@@ -6,14 +6,24 @@ events_step1 Standard Events - 1 0 0 0 0 0 0 0 0 0
 events_step2 Standard Events - 1 0 0 0 0 0 0 0 0 0
 events_step3 Standard Events - 1 0 0 0 0 0 0 0 0 0
 events_step4 Standard Events - 1 0 0 0 0 0 0 0 0 0
-events_step5 _postZcut Events - 1 1 0 0 0 0 0 0 0 0
-events_step6 _post2jets Events - 1 1 0 0 0 0 0 0 0 0
-events_step7 _postMET Events - 1 1 0 0 0 0 0 0 0 0
-events_step8 _post1btag Events - 1 1 0 0 0 0 0 0 0 0
+events_step5 - Events - 1 1 0 0 0 0 0 0 0 0
+events_step6 - Events - 1 1 0 0 0 0 0 0 0 0
+events_step7 - Events - 1 1 0 0 0 0 0 0 0 0
+events_step8 - Events - 1 1 0 0 0 0 0 0 0 0
 
-events_step9 _post1btag Events - 1 1 0 0 0 0 0 0 0 0
-
-
+bcp_JetCategories_step8_bin_0_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_1_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_2_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_3_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_4_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_5_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_6_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_7_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_8_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_9_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_10_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_11_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
+bcp_JetCategories_step8_bin_12_events_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
 jetPt_step8 Standard Jets p_{T} 2 1 0 1 1 1E5 30 400 0 0
 
@@ -21,11 +31,11 @@ JetCategories_overview_step0 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0
 JetCategories_overview_step1 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0
 JetCategories_overview_step2 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0
 JetCategories_overview_step3 Standard events N_{jet,b-jet} 1 0 0 0 0 0 0 0 0 0
-JetCategories_overview_step4 _postZcut events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
-JetCategories_overview_step5 _post2jets events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
-JetCategories_overview_step6 _postMET events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
-JetCategories_overview_step7 _post1btag events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
-JetCategories_overview_step8 _postKinReco events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
+JetCategories_overview_step4 - events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
+JetCategories_overview_step5 - events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
+JetCategories_overview_step6 - events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
+JetCategories_overview_step7 - events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
+JetCategories_overview_step8 - events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
 
 JetCategories_step8 _postKinReco events N_{jet,b-jet} 1 1 0 0 0 0 0 0 0 0
 
