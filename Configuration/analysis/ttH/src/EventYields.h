@@ -1,6 +1,11 @@
 #ifndef eventYields_h
 #define eventYields_h
 
+#include <utility>
+#include <vector>
+
+class TString;
+
 #include "sampleHelpers.h"
 #include "DyScaleFactors.h"
 
@@ -28,7 +33,8 @@ private:
     void produceYields(Samples& samples);
     
     /// Write the yields to txt files
-    void writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const;
+    void writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample,
+                     const std::vector<std::pair<TString, TString> >& v_nameStepPair)const;
     
     
     

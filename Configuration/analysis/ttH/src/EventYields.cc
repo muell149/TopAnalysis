@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include <TH1D.h>
+#include <TString.h>
 
 #include "EventYields.h"
 #include "../../diLeptonic/src/utils.h"
@@ -34,13 +35,15 @@ void EventYields::produceYields(Samples& samples)
     std::cout<<"--- Beginning event yield table processing\n\n";
     
     // Find all histograms containing information for cutflow table (in systematic Nominal and channel emu, first histogram)
-    const std::vector<TString>& v_eventHistoName = fileReader_->findHistos(samples.getSamples(Channel::emu, Systematic::nominal).at(0).inputFile(), "events_step");
+    const std::vector<TString>& v_eventHistoName = fileReader_->findHistos(samples.getSamples(Channel::emu, Systematic::nominal).at(0).inputFile(), "events_step", false);
+    std::vector<std::pair<TString, TString> > v_nameStepPair;
     std::stringstream ss_step;
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
-        const TString& step = Tools::extractSelectionStep(*i_eventHistoName);
+        const TString& step = Tools::extractSelectionStepAndCategoryBin(*i_eventHistoName);
+        v_nameStepPair.push_back(std::make_pair(*i_eventHistoName, step));
         ss_step<<step<<", ";
     }
-    std::cout<<"Found selection steps: "<<ss_step.str()<<std::endl;
+    std::cout<<"Found selection steps:\n"<<ss_step.str()<<std::endl;
     
     // Loop over systematics (exclude all but Nominal - so outer loop could be removed) and channels
     for(auto systematicChannelSamples : samples.getSystematicChannelSamples()){
@@ -48,7 +51,7 @@ void EventYields::produceYields(Samples& samples)
         if(systematic != Systematic::nominal)continue;
         for(auto channelSample : systematicChannelSamples.second){
             const Channel::Channel& channel(channelSample.first);
-            this->writeYields(channel, channelSample.second, v_eventHistoName);
+            this->writeYields(channel, channelSample.second, v_nameStepPair);
         }
     }
     std::cout<<"\n=== Finishing event yield table processing\n\n";
@@ -56,15 +59,16 @@ void EventYields::produceYields(Samples& samples)
 
 
 
-void EventYields::writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample, const std::vector<TString>& v_eventHistoName)const
+void EventYields::writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample,
+                              const std::vector<std::pair<TString, TString> >& v_nameStepPair)const
 {
     // Loop over all selection steps writing out event yields
-    for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
+    for(std::vector<std::pair<TString, TString> >::const_iterator i_nameStepPair = v_nameStepPair.begin(); i_nameStepPair != v_nameStepPair.end(); ++i_nameStepPair){
         
         // Assign histogram to sample
         std::vector<SampleHistPair> v_numhist;
         for(auto sample : v_sample){
-            TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), *i_eventHistoName);
+            TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), i_nameStepPair->first);
             double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
             Tools::applyFlatWeight(temp_hist, lumiWeight);
             v_numhist.push_back(SampleHistPair(sample, temp_hist));
@@ -85,7 +89,7 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
         // At present, event yields are only possible for nominal systematic
         std::ofstream eventFile;
         TString eventFileString = Tools::assignFolder(BaseDIR, channel, Systematic::nominal);
-        eventFileString.Append(*i_eventHistoName+".txt");
+        eventFileString.Append("events_" + i_nameStepPair->second + ".txt");
         eventFile.open(eventFileString.Data());
         
         // Make output for tables

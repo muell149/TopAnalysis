@@ -193,10 +193,6 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     h_events_step7->Sumw2();
     h_events_step8->Sumw2();
 
-    // FIXME: make event counts dependent on bins (in addition to steps)
-    h_events_step9 = store(new TH1D("events_step9","event count for specific bin",8,0,8));
-    h_events_step9->Sumw2();
-
 
     // Histograms needed for data-driven scaling of Z samples
     dyScalingHistograms_.addStep("4", fOutput);
@@ -220,6 +216,7 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(3, "Matched");
 
     // Binned control plots
+    CreateBinnedControlPlots(h_jetCategories_step8, h_events_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
@@ -555,9 +552,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
 
     h_jetMultiplicity_step8->Fill(numberOfJets, weight);
-
-    // FIXME: workaround for now, we need to create event yields based on step AND bin
-    if(jetCategories_.categoryId(numberOfJets,numberOfBjets) == 10)h_events_step9->Fill(1, weight);
+    FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(numberOfJets,numberOfBjets), h_events_step8, 1, weight);
 
     h_jetCategories_step8->Fill(jetCategories_.categoryId(numberOfJets,numberOfBjets), weight);
     h_jetCategories_overview_step8->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);

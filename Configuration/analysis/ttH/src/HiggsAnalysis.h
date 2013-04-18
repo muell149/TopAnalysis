@@ -121,8 +121,6 @@ private:
     TH1* h_events_step7;
     TH1* h_events_step8;
     
-    TH1* h_events_step9;
-    
     /// Histograms for Drell-Yan scaling
     DyScalingHistograms dyScalingHistograms_;
     
