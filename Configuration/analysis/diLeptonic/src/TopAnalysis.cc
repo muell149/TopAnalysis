@@ -49,7 +49,7 @@ constexpr double BtagWP = 0.244;
 
 /// Select the b-tagging method: Apply SF to the histogram or re-tag a jet via a random method
 ///  default method is the re-tagging of the jetBTagCSV_: true
-constexpr bool ReTagJet = false;
+constexpr bool ReTagJet = true;
 
 
 
@@ -852,9 +852,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
 
     bool hasSolution = HypTop_->size() > 0;
-    if (kinRecoOnTheFly_ || true) 
+    if (kinRecoOnTheFly_ || true)
         hasSolution = calculateKinReco(leptonMinus, leptonPlus, jetIndices, *met_);
-    
+
     if ( isZregion ) {
         double fullWeights = weightGenerator_*weightPU*weightTrigSF*weightLepSF;
         Zh1_postZcut->Fill(dilepton.M(), fullWeights);
