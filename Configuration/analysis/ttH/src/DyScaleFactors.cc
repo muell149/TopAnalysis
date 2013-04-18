@@ -42,7 +42,7 @@ void DyScaleFactors::produceScaleFactors(Samples& samples)
         v_step.push_back(step);
         ss_step<<step<<", ";
     }
-    std::cout<<"Found selection steps: "<<ss_step.str()<<"\n";
+    //std::cout<<"Found selection steps: "<<ss_step.str()<<"\n";
     
     // Loop over selection steps and systematics
     for(TString step : v_step){
@@ -52,18 +52,26 @@ void DyScaleFactors::produceScaleFactors(Samples& samples)
         }
     }
     
-    //for(auto dyScaleFactorsPerStep : m_dyScaleFactors_){
-    //    const TString& step(dyScaleFactorsPerStep.first);
-    //    for(auto dyScaleFactorsPerSystematic : dyScaleFactorsPerStep.second){
-    //        const Systematic::Systematic& systematic(dyScaleFactorsPerSystematic.first);
-    //        for(auto dyScaleFactorsPerChannel : dyScaleFactorsPerSystematic.second){
-    //            const Channel::Channel& channel(dyScaleFactorsPerChannel.first);
-    //            const double& scaleFactor(dyScaleFactorsPerChannel.second);
-    //            std::cout<<"DY scale factors: "<<step<<" , "<<Tools::convertSystematic(systematic)<<" , "
-    //                     <<Tools::convertChannel(channel)<<" , "<<scaleFactor<<"\n";
-    //        }
-    //    }
-    //}
+    std::cout<<"Step\t\tSystematic\tScale factors (ee, mumu)\n";
+    std::cout<<"--------\t----------\t------------------------\n";
+    for(auto dyScaleFactorsPerStep : m_dyScaleFactors_){
+       const TString& step(dyScaleFactorsPerStep.first);
+       for(auto dyScaleFactorsPerSystematic : dyScaleFactorsPerStep.second){
+           const Systematic::Systematic& systematic(dyScaleFactorsPerSystematic.first);
+           double eeScaleFactor(0.);
+           double mumuScaleFactor(0.);
+           for(auto dyScaleFactorsPerChannel : dyScaleFactorsPerSystematic.second){
+               const Channel::Channel& channel(dyScaleFactorsPerChannel.first);
+               const double& scaleFactor(dyScaleFactorsPerChannel.second);
+               if(channel == Channel::ee) eeScaleFactor = scaleFactor;
+               else if(channel == Channel::mumu) mumuScaleFactor = scaleFactor;
+               //std::cout<<"DY scale factors: "<<step<<" , "<<Systematic::convertSystematic(systematic)<<" , "
+               //         <<Channel::convertChannel(channel)<<" , "<<scaleFactor<<"\n";
+           }
+           std::cout<<step<<"\t\t"<<Systematic::convertSystematic(systematic)<<"\t\t"
+                    <<std::fixed<<std::setprecision(3)<<eeScaleFactor<<" , "<<mumuScaleFactor<<"\n";
+       }
+    }
     std::cout<<"\n=== Finishing production of Drell-Yan scale factors\n\n";
 }
 
