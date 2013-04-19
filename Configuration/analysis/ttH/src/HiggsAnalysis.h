@@ -58,17 +58,18 @@ private:
     
     /// Get indices of generated b jet and anti-b jet for particles with given PDG ID
     /// Returns whether a unique solution is found, and only in this case indices are set unequal to -1
-    bool getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, const int pdgId);
+    bool getGenBJetIndices(int& genBjetIndex, int& genAntiBjetIndex, const int pdgId);
     
     /// Match the two generated input jets to the reco jet collection
-    bool matchRecoToGenJets(int& matchedBJetIndex, int&matchedAntiBJetIndex,
+    bool matchRecoToGenJets(int& matchedBjetIndex, int& matchedAntiBjetIndex,
                             const std::vector<int>& jetIndices,
-                            const LV* genBJet, const LV* genAntiBJet);
+                            const LV* genBjet, const LV* genAntiBjet);
     
     /// Fill class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
-    void fillMvaInputTopJetsVariables(const LV& lepton, const LV& antilepton,
+    void fillMvaInputTopJetsVariables(const int leptonIndex, const int antiLeptonIndex,
                                       const std::vector<int>& jetIndices,
-                                      const int matchedBJetIndex, const int matchedAntiBJetIndex,
+                                      const int matchedBjetIndex, const int matchedAntiBjetIndex,
+                                      const LV& met,
                                       const bool successfulMatching, const double& eventWeight);
     
     

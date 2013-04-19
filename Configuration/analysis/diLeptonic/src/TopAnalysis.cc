@@ -37,11 +37,17 @@ constexpr double LUMI = 12.21;
 ///do we want to run the sync excercise?
 constexpr bool RUNSYNC = false;
 
-/// Cut value for jet pt
-constexpr double JetPtCUT = 30;
+/// Lepton eta selection (absolute value)
+constexpr double LeptonEtaCUT = 2.4;
+
+/// Lepton pt selection in GeV
+constexpr double LeptonPtCut = 20.;
 
 /// Cut value for jet eta
 constexpr double JetEtaCUT = 2.4;
+
+/// Cut value for jet pt
+constexpr double JetPtCUT = 30;
 
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
@@ -592,6 +598,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     using namespace ttbar;
     
     
+    //===CUT===
+    // select events on generator level and access true level weights
+
     // Separate DY dilepton decays in lepton flavours
     if(this->failsDrellYanGeneratorSelection(entry)) return kTRUE;
     
@@ -625,14 +634,14 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         weightGenerator_ = 1;
     }
     
-    // Access MC general generator info
-    if(isMC_) this->GetCommonGenBranchesEntry(entry);
-    
     // Access Top signal generator info
     if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
     
     // Set closure test weight using top generator info
     if(isTopSignal_ && doClosureTest_) weightGenerator_ *= calculateClosureTestWeight();
+    
+    // Access MC general generator info
+    if(isMC_) this->GetCommonGenBranchesEntry(entry);
     
     // Get indices of B and anti-B hadrons steming from ttbar system
     int BHadronIndex=-1;
@@ -657,15 +666,61 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     //                         <<genHT<<"\n";
     
     
+    
+    
+    
+    
+    // === FULL OBJECT SELECTION === (can thus be used at each selection step)
+    
     // Access reco information
     this->GetRecoBranchesEntry(entry);
-    
-    // Access kinematic reconstruction info
-    this->GetKinRecoBranchesEntry(entry);
     
     // Systematics for jet energy resolution/scale
     // Corrections for: jets_, jetsForMET_, met_
     if (doJesJer_) applyJER_JES();
+    
+    // Get allLepton indices, apply selection cuts and order them by pt (beginning with the highest value)
+    std::vector<int> allLeptonIndices = initialiseIndices(*leptons_);
+    selectIndices(allLeptonIndices, *leptons_, LVeta, LeptonEtaCUT, false);
+    selectIndices(allLeptonIndices, *leptons_, LVeta, -LeptonEtaCUT);
+    selectIndices(allLeptonIndices, *leptons_, LVpt, LeptonPtCut);
+    orderIndices(allLeptonIndices, *leptons_, LVpt);
+    const int numberOfAllLeptons = allLeptonIndices.size();
+    
+    // Get indices of leptons and antiLeptons separated by charge, and get the leading ones if they exist
+    std::vector<int> leptonIndices = allLeptonIndices;
+    std::vector<int> antiLeptonIndices = allLeptonIndices;
+    selectIndices(leptonIndices, *lepPdgId_, 0, false);
+    selectIndices(antiLeptonIndices, *lepPdgId_, 0);
+    const int numberOfLeptons = leptonIndices.size();
+    const int numberOfAntiLeptons = antiLeptonIndices.size();
+    const int leptonIndex = numberOfLeptons>0 ? leptonIndices.at(0) : -1;
+    const int antiLeptonIndex = numberOfAntiLeptons>0 ? antiLeptonIndices.at(0) : -1;
+    
+    // In case of an existing opposite-charge dilepton system, get indices for leading and next-to-leading lepton
+    int leadingLeptonIndex(-1);
+    int nLeadingLeptonIndex(-1);
+    if(numberOfLeptons>0 && numberOfAntiLeptons>0){
+        leadingLeptonIndex = leptonIndex;
+        nLeadingLeptonIndex = antiLeptonIndex;
+        orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *leptons_, LVpt);
+    }
+    const bool hasLeptonPair = this->hasLeptonPair(leadingLeptonIndex, nLeadingLeptonIndex);
+    
+    // Get two indices of the two leptons in the right order for trigger scale factor, if existing
+    int leptonXIndex(leadingLeptonIndex);
+    int leptonYIndex(nLeadingLeptonIndex);
+    if(hasLeptonPair){
+        //in ee and mumu channel leptonX must be the highest pt lepton, i.e. this is already correct
+        // in emu channel leptonX must be electron
+        if(std::abs(lepPdgId_->at(leptonXIndex)) != std::abs(lepPdgId_->at(leptonYIndex))){
+            orderIndices(leptonYIndex, leptonXIndex, *lepPdgId_, true);
+        }
+    }
+    
+    // Get dilepton system, if existing
+    const LV dummyLV(0.,0.,0.,0.);
+    const LV dilepton(hasLeptonPair ? leptons_->at(leadingLeptonIndex)+leptons_->at(nLeadingLeptonIndex) : dummyLV);
     
     // Get jet indices, apply selection cuts and order them by pt (beginning with the highest value)
     std::vector<int> jetIndices = initialiseIndices(*jets_);
@@ -681,82 +736,68 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     orderIndices(bjetIndices, *jetBTagCSV_);
     const int numberOfBjets = bjetIndices.size();
     
+    // Get MET
+    const LV& met(*met_);
     
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step0->Fill(leptons_->at(i).Eta(), 1);
-        h_AllLeptonpT_step0->Fill(leptons_->at(i).Pt(), 1);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step0->Fill(leptons_->at(index).Eta(), 1);
+        h_AllLeptonpT_step0->Fill(leptons_->at(index).Pt(), 1);
     }
     
-    for (const int index : jetIndices){
+    for(const int index : jetIndices){
         h_AllJetsEta_step0->Fill(jets_->at(index).Eta(), 1);
         h_AllJetspT_step0->Fill(jets_->at(index).Pt(), 1);
     }
-    h_LeptonMult_step0->Fill(leptons_->size(), 1);
+    h_LeptonMult_step0->Fill(numberOfAllLeptons, 1);
     h_JetsMult_step0->Fill(numberOfJets, 1);
-    int nbjets_step0 = numberOfBjets;
-    h_BJetsMult_step0->Fill(nbjets_step0, 1);
+    h_BJetsMult_step0->Fill(numberOfBjets, 1);
     
     h_PUSF->Fill(weightPU, 1);
-
+    
+    
     
     //===CUT===
     // check if event was triggered
-    //our triggers (bits: see the ntuplewriter!)    
-    constexpr int mumuTriggers = 0x8 + 0x20; //17/8 + 17Tr8
-    constexpr int emuTriggers = 0x2000 + 0x4000;
-    constexpr int eeTriggers = 0x40000;
-    
-    if (!(((triggerBits_ & mumuTriggers) && channelPdgIdProduct_ == -13*13)    //mumu triggers in rightmost byte
-          ||((triggerBits_ & emuTriggers) && channelPdgIdProduct_ == -11*13)     //emu in 2nd byte
-          ||((triggerBits_ & eeTriggers) && channelPdgIdProduct_ == -11*11)))    //ee in 3rd byte
-    {
-        return kTRUE;
-    }
-
-    size_t LeadLeptonNumber = 0;
-    size_t NLeadLeptonNumber = 0;
-    bool hasLeptonPair = getLeptonPair(LeadLeptonNumber, NLeadLeptonNumber);
+    if(this->failsDileptonTrigger(entry)) return kTRUE;
 
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step1->Fill(leptons_->at(i).Eta(), 1);
-        h_AllLeptonpT_step1->Fill(leptons_->at(i).Pt(), 1);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step1->Fill(leptons_->at(index).Eta(), 1);
+        h_AllLeptonpT_step1->Fill(leptons_->at(index).Pt(), 1);
     }
-    if(leptons_->size()>1){
-        h_LeptonEta_step1->Fill(leptons_->at(0).Eta(), 1);
-        h_LeptonpT_step1->Fill(leptons_->at(0).Pt(), 1);
-        h_LeptonEta_step1->Fill(leptons_->at(1).Eta(), 1);
-        h_LeptonpT_step1->Fill(leptons_->at(1).Pt(), 1);
+    if(numberOfAllLeptons>1){
+        h_LeptonEta_step1->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), 1);
+        h_LeptonpT_step1->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), 1);
+        h_LeptonEta_step1->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), 1);
+        h_LeptonpT_step1->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), 1);
     }
 
-    for (const int index : jetIndices){
+    for(const int index : jetIndices){
         h_AllJetsEta_step1->Fill(jets_->at(index).Eta(), 1);
         h_AllJetspT_step1->Fill(jets_->at(index).Pt(), 1);
     }
-    h_LeptonMult_step1->Fill(leptons_->size(), 1);
+    h_LeptonMult_step1->Fill(numberOfAllLeptons, 1);
     h_JetsMult_step1->Fill(numberOfJets, 1);
-    int nbjets_step1 = numberOfBjets;
-    h_BJetsMult_step1->Fill(nbjets_step1, 1);
+    h_BJetsMult_step1->Fill(numberOfBjets, 1);
+    
     
     
     //===CUT===
     // we need an OS lepton pair
     if (! hasLeptonPair) return kTRUE;
     
-    LV dilepton = leptons_->at(LeadLeptonNumber) + leptons_->at(NLeadLeptonNumber);
-    
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step2->Fill(leptons_->at(i).Eta(), 1);
-        h_AllLeptonpT_step2->Fill(leptons_->at(i).Pt(), 1);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step2->Fill(leptons_->at(index).Eta(), 1);
+        h_AllLeptonpT_step2->Fill(leptons_->at(index).Pt(), 1);
     }
-    h_LeptonEta_step2->Fill(leptons_->at(0).Eta(), 1);
-    h_LeptonpT_step2->Fill(leptons_->at(0).Pt(), 1);
-    h_LeptonEta_step2->Fill(leptons_->at(1).Eta(), 1);
-    h_LeptonpT_step2->Fill(leptons_->at(1).Pt(), 1);
+    h_LeptonEta_step2->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), 1);
+    h_LeptonpT_step2->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), 1);
+    h_LeptonEta_step2->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), 1);
+    h_LeptonpT_step2->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), 1);
 
-    for (const int index : jetIndices){
+    for(const int index : jetIndices){
         h_AllJetsEta_step2->Fill(jets_->at(index).Eta(), 1);
         h_AllJetspT_step2->Fill(jets_->at(index).Pt(), 1);
     }
@@ -766,57 +807,27 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_JetsEta_step2->Fill(jets_->at(1).Eta(), 1);
         h_JetspT_step2->Fill(jets_->at(1).Pt(), 1);
     }
-    h_LeptonMult_step2->Fill(leptons_->size(), 1);
+    h_LeptonMult_step2->Fill(numberOfAllLeptons, 1);
     h_JetsMult_step2->Fill(numberOfJets, 1);
-    int nbjets_step2 = numberOfBjets;
-    h_BJetsMult_step2->Fill(nbjets_step2, 1);
+    h_BJetsMult_step2->Fill(numberOfBjets, 1);
     
-
+    
+    
     //===CUT===
-    //with at least 12 GeV invariant mass
+    // with at least 20 GeV invariant mass
     if (dilepton.M() < 20) return kTRUE;
     
-    // find l+ and l-
-    LV leptonPlus;
-    LV leptonMinus;
-    if (lepPdgId_->at(LeadLeptonNumber) < 0) {
-        leptonPlus = leptons_->at(LeadLeptonNumber);
-        leptonMinus = leptons_->at(NLeadLeptonNumber);
-    } else {
-        leptonMinus = leptons_->at(LeadLeptonNumber);
-        leptonPlus = leptons_->at(NLeadLeptonNumber);
-    }
-
-    //This is necessary due to the ordering in the trigger 2D-plots
-    LV leptonX, leptonY;
-    if ( abs( lepPdgId_->at(LeadLeptonNumber) ) == abs( lepPdgId_->at(NLeadLeptonNumber) ) ){
-        //in ee and mumu channel leptonX must be the highest pT lepton
-        leptonX = leptons_->at(LeadLeptonNumber);
-        leptonY = leptons_->at(NLeadLeptonNumber);
-    } else {
-        // in emu channel lepX should be electron
-        if (abs(lepPdgId_->at(LeadLeptonNumber)) == 11) {
-            leptonX = leptons_->at(LeadLeptonNumber);
-            leptonY = leptons_->at(NLeadLeptonNumber);
-        } else {
-            leptonX = leptons_->at(NLeadLeptonNumber);
-            leptonY = leptons_->at(LeadLeptonNumber);
-        }
-    }
+    // Now determine the lepton trigger and ID scale factors
+    double weightLepSF = isMC_ ? getLeptonIDSF(leadingLeptonIndex, nLeadingLeptonIndex) : 1.;
+    double weightTrigSF = isMC_ ? getTriggerSF(leptonXIndex, leptonYIndex) : 1.;
     
-    int LleptonId = lepPdgId_->at(LeadLeptonNumber);
-    int NLleptonId = lepPdgId_->at(NLeadLeptonNumber);
-    //Now determine the lepton trigger and ID scale factors
-    double weightLepSF = isMC_ ? getLeptonIDSF(leptons_->at(LeadLeptonNumber), leptons_->at(NLeadLeptonNumber), LleptonId, NLleptonId) : 1;  
-    double weightTrigSF = isMC_ ? getTriggerSF(leptonX, leptonY) : 1;
-    
-    //First control plots after dilepton selection (without Z cut)
+    // First control plots after dilepton selection (without Z cut)
     double weight = weightGenerator_*weightTrigSF*weightLepSF;
 
-    //weight even without PU reweighting
+    // weight even without PU reweighting
     h_vertMulti_noPU->Fill(vertMulti_, weight);
     
-    //apply PU reweighting - continue with control plots
+    //apply PU reweighting
     weight *= weightPU;
     h_vertMulti->Fill(vertMulti_, weight);
     
@@ -849,11 +860,15 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     double weightBtagSF = 1.;
     if (!ReTagJet) weightBtagSF = isMC_ ? calculateBtagSF(jetIndices) : 1;
     /// End: Old method for b-tagging SF calcualtion
-
-
+    
+    
+    
+    // Access kinematic reconstruction info
+    this->GetKinRecoBranchesEntry(entry);
+    
     bool hasSolution = HypTop_->size() > 0;
     if (kinRecoOnTheFly_ || true)
-        hasSolution = calculateKinReco(leptonMinus, leptonPlus, jetIndices, *met_);
+        hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, met);
 
     if ( isZregion ) {
         double fullWeights = weightGenerator_*weightPU*weightTrigSF*weightLepSF;
@@ -887,16 +902,16 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     }
     
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step3->Fill(leptons_->at(i).Eta(), weight);
-        h_AllLeptonpT_step3->Fill(leptons_->at(i).Pt(), weight);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step3->Fill(leptons_->at(index).Eta(), weight);
+        h_AllLeptonpT_step3->Fill(leptons_->at(index).Pt(), weight);
     }
-    h_LeptonEta_step3->Fill(leptons_->at(0).Eta(), weight);
-    h_LeptonpT_step3->Fill(leptons_->at(0).Pt(), weight);
-    h_LeptonEta_step3->Fill(leptons_->at(1).Eta(), weight);
-    h_LeptonpT_step3->Fill(leptons_->at(1).Pt(), weight);
+    h_LeptonEta_step3->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), weight);
+    h_LeptonpT_step3->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), weight);
+    h_LeptonEta_step3->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), weight);
+    h_LeptonpT_step3->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), weight);
 
-    for (const int index : jetIndices){
+    for(const int index : jetIndices){
         h_AllJetsEta_step3->Fill(jets_->at(index).Eta(), weight);
         h_AllJetspT_step3->Fill(jets_->at(index).Pt(), weight);
     }
@@ -906,45 +921,46 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_JetsEta_step3->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step3->Fill(jets_->at(1).Pt(), weight);
     }
-    h_LeptonMult_step3->Fill(leptons_->size(), weight);
+    h_LeptonMult_step3->Fill(numberOfAllLeptons, weight);
     h_JetsMult_step3->Fill(numberOfJets, weight);
-    int nbjets_step3 = numberOfBjets;
-    h_BJetsMult_step3->Fill(nbjets_step3, weight);
+    h_BJetsMult_step3->Fill(numberOfBjets, weight);
+    
+    
     
     //=== CUT ===
     //Exclude the Z window
     if (channel_ != "emu" && isZregion) return kTRUE;
     
     h_step5->Fill(1, weight);
-    h_LeptonpT_diLep->Fill(leptonMinus.Pt(), weight);
-    h_AntiLeptonpT_diLep->Fill(leptonPlus.Pt(), weight);
-    h_LeptonEta_diLep->Fill(leptonMinus.Eta(), weight);
-    h_AntiLeptonEta_diLep->Fill(leptonPlus.Eta(), weight);
+    h_LeptonpT_diLep->Fill(leptons_->at(leptonIndex).Pt(), weight);
+    h_AntiLeptonpT_diLep->Fill(leptons_->at(antiLeptonIndex).Pt(), weight);
+    h_LeptonEta_diLep->Fill(leptons_->at(leptonIndex).Eta(), weight);
+    h_AntiLeptonEta_diLep->Fill(leptons_->at(antiLeptonIndex).Eta(), weight);
     
-    h_MET->Fill(met_->Pt(), weight);
+    h_MET->Fill(met.Pt(), weight);
     //loop over both leptons
-    for (auto i : {LeadLeptonNumber, NLeadLeptonNumber}) {
-        if ( std::abs(lepPdgId_->at(i)) == 11 ) {
-            h_ElectronpT->Fill(leptons_->at(i).Pt(), weight);
-            h_ElectronEta->Fill(leptons_->at(i).Eta(), weight);
+    for (const int index : {leadingLeptonIndex, nLeadingLeptonIndex}) {
+        if ( std::abs(lepPdgId_->at(index)) == 11 ) {
+            h_ElectronpT->Fill(leptons_->at(index).Pt(), weight);
+            h_ElectronEta->Fill(leptons_->at(index).Eta(), weight);
         }
-        if ( std::abs(lepPdgId_->at(i)) == 13 ) {
-            h_MuonpT->Fill(leptons_->at(i).Pt(), weight);
-            h_MuonEta->Fill(leptons_->at(i).Eta(), weight);
+        else if ( std::abs(lepPdgId_->at(index)) == 13 ) {
+            h_MuonpT->Fill(leptons_->at(index).Pt(), weight);
+            h_MuonEta->Fill(leptons_->at(index).Eta(), weight);
         }
     }
     
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step4->Fill(leptons_->at(i).Eta(), weight);
-        h_AllLeptonpT_step4->Fill(leptons_->at(i).Pt(), weight);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step4->Fill(leptons_->at(index).Eta(), weight);
+        h_AllLeptonpT_step4->Fill(leptons_->at(index).Pt(), weight);
     }
-    h_LeptonEta_step4->Fill(leptons_->at(0).Eta(), weight);
-    h_LeptonpT_step4->Fill(leptons_->at(0).Pt(), weight);
-    h_LeptonEta_step4->Fill(leptons_->at(1).Eta(), weight);
-    h_LeptonpT_step4->Fill(leptons_->at(1).Pt(), weight);
+    h_LeptonEta_step4->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), weight);
+    h_LeptonpT_step4->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), weight);
+    h_LeptonEta_step4->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), weight);
+    h_LeptonpT_step4->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), weight);
 
-    for (const int index : jetIndices){
+    for(const int index : jetIndices){
         h_AllJetsEta_step4->Fill(jets_->at(index).Eta(), weight);
         h_AllJetspT_step4->Fill(jets_->at(index).Pt(), weight);
     }
@@ -954,10 +970,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_JetsEta_step4->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step4->Fill(jets_->at(1).Pt(), weight);
     }
-    h_LeptonMult_step4->Fill(leptons_->size(), weight);
+    h_LeptonMult_step4->Fill(numberOfAllLeptons, weight);
     h_JetsMult_step4->Fill(numberOfJets, weight);
-    int nbjets_step4 = numberOfBjets;
-    h_BJetsMult_step4->Fill(nbjets_step4, weight);
+    h_BJetsMult_step4->Fill(numberOfBjets, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
         TTh1_postZcut->Fill(dilepton.M(), weight);
@@ -970,14 +985,14 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_step6->Fill(1, weight);
     
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step5->Fill(leptons_->at(i).Eta(), weight);
-        h_AllLeptonpT_step5->Fill(leptons_->at(i).Pt(), weight);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step5->Fill(leptons_->at(index).Eta(), weight);
+        h_AllLeptonpT_step5->Fill(leptons_->at(index).Pt(), weight);
     }
-    h_LeptonEta_step5->Fill(leptons_->at(0).Eta(), weight);
-    h_LeptonpT_step5->Fill(leptons_->at(0).Pt(), weight);
-    h_LeptonEta_step5->Fill(leptons_->at(1).Eta(), weight);
-    h_LeptonpT_step5->Fill(leptons_->at(1).Pt(), weight);
+    h_LeptonEta_step5->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), weight);
+    h_LeptonpT_step5->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), weight);
+    h_LeptonEta_step5->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), weight);
+    h_LeptonpT_step5->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), weight);
 
     for (const int index : jetIndices){
         h_AllJetsEta_step5->Fill(jets_->at(index).Eta(), weight);
@@ -989,10 +1004,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_JetsEta_step5->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step5->Fill(jets_->at(1).Pt(), weight);
     }
-    h_LeptonMult_step5->Fill(leptons_->size(), weight);
+    h_LeptonMult_step5->Fill(numberOfAllLeptons, weight);
     h_JetsMult_step5->Fill(numberOfJets, weight);
-    int nbjets_step5 = numberOfBjets;
-    h_BJetsMult_step5->Fill(nbjets_step5, weight);
+    h_BJetsMult_step5->Fill(numberOfBjets, weight);
     
     if (!isZregion) { //also apply Z cut in emu!
         TTh1_post2jets->Fill(dilepton.M(), weight);
@@ -1004,20 +1018,20 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (!hasMetOrEmu) return kTRUE;
     h_step7->Fill(1, weight);
  
-    h_LeptonpT_postMETcut->Fill(leptonMinus.Pt(), weight);
-    h_AntiLeptonpT_postMETcut->Fill(leptonPlus.Pt(), weight);
-    h_LeptonEta_postMETcut->Fill(leptonMinus.Eta(), weight);
-    h_AntiLeptonEta_postMETcut->Fill(leptonPlus.Eta(), weight);
+    h_LeptonpT_postMETcut->Fill(leptons_->at(leptonIndex).Pt(), weight);
+    h_AntiLeptonpT_postMETcut->Fill(leptons_->at(antiLeptonIndex).Pt(), weight);
+    h_LeptonEta_postMETcut->Fill(leptons_->at(leptonIndex).Eta(), weight);
+    h_AntiLeptonEta_postMETcut->Fill(leptons_->at(antiLeptonIndex).Eta(), weight);
 
     //loop over both leptons
-    for (auto i : {LeadLeptonNumber, NLeadLeptonNumber}) {
-        if ( std::abs(lepPdgId_->at(i)) == 11 ) {
-            h_ElectronpT_postMETcut->Fill(leptons_->at(i).Pt(), weight);
-            h_ElectronEta_postMETcut->Fill(leptons_->at(i).Eta(), weight);
+    for(const int index : {leadingLeptonIndex, nLeadingLeptonIndex}){
+        if ( std::abs(lepPdgId_->at(index)) == 11 ) {
+            h_ElectronpT_postMETcut->Fill(leptons_->at(index).Pt(), weight);
+            h_ElectronEta_postMETcut->Fill(leptons_->at(index).Eta(), weight);
         }
-        if ( std::abs(lepPdgId_->at(i)) == 13 ) {
-            h_MuonpT_postMETcut->Fill(leptons_->at(i).Pt(), weight);
-            h_MuonEta_postMETcut->Fill(leptons_->at(i).Eta(), weight);
+        else if ( std::abs(lepPdgId_->at(index)) == 13 ) {
+            h_MuonpT_postMETcut->Fill(leptons_->at(index).Pt(), weight);
+            h_MuonEta_postMETcut->Fill(leptons_->at(index).Eta(), weight);
         }
     }
     
@@ -1033,14 +1047,14 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     }
 
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step6->Fill(leptons_->at(i).Eta(), weight);
-        h_AllLeptonpT_step6->Fill(leptons_->at(i).Pt(), weight);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step6->Fill(leptons_->at(index).Eta(), weight);
+        h_AllLeptonpT_step6->Fill(leptons_->at(index).Pt(), weight);
     }
-    h_LeptonEta_step6->Fill(leptons_->at(0).Eta(), weight);  
-    h_LeptonpT_step6->Fill(leptons_->at(0).Pt(), weight);    
-    h_LeptonEta_step6->Fill(leptons_->at(1).Eta(), weight);
-    h_LeptonpT_step6->Fill(leptons_->at(1).Pt(), weight);
+    h_LeptonEta_step6->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), weight);  
+    h_LeptonpT_step6->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), weight);    
+    h_LeptonEta_step6->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), weight);
+    h_LeptonpT_step6->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), weight);
 
     for (const int index : jetIndices){
         h_AllJetsEta_step6->Fill(jets_->at(index).Eta(), weight);
@@ -1052,7 +1066,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_JetsEta_step6->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step6->Fill(jets_->at(1).Pt(), weight);
     }
-    h_LeptonMult_step6->Fill(leptons_->size(), weight);
+    h_LeptonMult_step6->Fill(numberOfAllLeptons, weight);
     h_JetsMult_step6->Fill(numberOfJets, weight);
     int nbjets_step6 = numberOfBjets;
     h_BJetsMult_step6->Fill(nbjets_step6, weight);
@@ -1085,11 +1099,11 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         if (fullSelectionCounter == 0)
             std::cout << "Selected#\tRun\tEvent\tlep+\tlep-\tMll\tNJets\tjet0\tjet1\tNTags\tGenJet1\tGenJet2\tMet\tGenMet\tt/tbar_decay\n"
             << std::setprecision(2) << std::fixed;
-            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << runNumber_ << "\t" << eventNumber_ << "\t" << leptonPlus << "\t" << leptonMinus << "\t"
+            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << runNumber_ << "\t" << eventNumber_ << "\t" << leptons_->at(antiLeptonIndex) << "\t" << leptons_->at(leptonIndex) << "\t"
             << dilepton.M() << "\t" << numberOfJets << "\t"
             << jets_->at(jetIndices.at(0)) << "\t" << jets_->at(jetIndices.at(1)) << "\t" << numberOfBjets << "\t"
             << associatedGenJet_->at(jetIndices.at(0)) << "\t" << associatedGenJet_->at(jetIndices.at(1)) << "\t"
-            << met_->Pt() << "\t" << GenMet_->Pt() << "\t"
+            << met.Pt() << "\t" << GenMet_->Pt() << "\t"
             << topDecayModeString()
             << "\n";
     }
@@ -1097,23 +1111,23 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_BjetMulti->Fill(numberOfBjets, weight);
     h_jetMulti->Fill(numberOfJets, weight);
     
-    h_leptonPtBeforeKinReco->Fill(leptonMinus.Pt(), weight);
-    h_leptonPtBeforeKinReco->Fill(leptonPlus.Pt(), weight);
-    h_leptonEtaBeforeKinReco->Fill(leptonMinus.Eta(), weight);
-    h_leptonEtaBeforeKinReco->Fill(leptonPlus.Eta(), weight);
+    h_leptonPtBeforeKinReco->Fill(leptons_->at(leptonIndex).Pt(), weight);
+    h_leptonPtBeforeKinReco->Fill(leptons_->at(antiLeptonIndex).Pt(), weight);
+    h_leptonEtaBeforeKinReco->Fill(leptons_->at(leptonIndex).Eta(), weight);
+    h_leptonEtaBeforeKinReco->Fill(leptons_->at(antiLeptonIndex).Eta(), weight);
     h_METBeforeKinReco->Fill(met_->Pt(), weight);
     for (const int index : bjetIndices)
         h_bjetetaBeforeKinReco->Fill(jets_->at(index).Eta(), weight);
 
     // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step7->Fill(leptons_->at(i).Eta(), weight);
-        h_AllLeptonpT_step7->Fill(leptons_->at(i).Pt(), weight);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step7->Fill(leptons_->at(index).Eta(), weight);
+        h_AllLeptonpT_step7->Fill(leptons_->at(index).Pt(), weight);
     }
-    h_LeptonEta_step7->Fill(leptons_->at(0).Eta(), weight);
-    h_LeptonpT_step7->Fill(leptons_->at(0).Pt(), weight);
-    h_LeptonEta_step7->Fill(leptons_->at(1).Eta(), weight);
-    h_LeptonpT_step7->Fill(leptons_->at(1).Pt(), weight);
+    h_LeptonEta_step7->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), weight);
+    h_LeptonpT_step7->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), weight);
+    h_LeptonEta_step7->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), weight);
+    h_LeptonpT_step7->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), weight);
 
     for (const int index : jetIndices){
         h_AllJetsEta_step7->Fill(jets_->at(index).Eta(), weight);
@@ -1125,7 +1139,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_JetsEta_step7->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step7->Fill(jets_->at(1).Pt(), weight);
     }
-    h_LeptonMult_step7->Fill(leptons_->size(), weight);
+    h_LeptonMult_step7->Fill(numberOfAllLeptons, weight);
     h_JetsMult_step7->Fill(numberOfJets, weight);
     int nbjets_step7 = numberOfBjets;
     h_BJetsMult_step7->Fill(nbjets_step7, weight);
@@ -1140,10 +1154,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (!hasSolution) return kTRUE;
     weight *= weightKinFit_;
     
-    h_leptonPtAfterKinReco->Fill(leptonMinus.Pt(), weight);
-    h_leptonPtAfterKinReco->Fill(leptonPlus.Pt(), weight);
-    h_leptonEtaAfterKinReco->Fill(leptonMinus.Eta(), weight);
-    h_leptonEtaAfterKinReco->Fill(leptonPlus.Eta(), weight);
+    h_leptonPtAfterKinReco->Fill(leptons_->at(leptonIndex).Pt(), weight);
+    h_leptonPtAfterKinReco->Fill(leptons_->at(antiLeptonIndex).Pt(), weight);
+    h_leptonEtaAfterKinReco->Fill(leptons_->at(leptonIndex).Eta(), weight);
+    h_leptonEtaAfterKinReco->Fill(leptons_->at(antiLeptonIndex).Eta(), weight);
     h_METAfterKinReco->Fill(met_->Pt(), weight);
     for (const int index : bjetIndices)
         h_bjetetaAfterKinReco->Fill(jets_->at(index).Eta(), weight);
@@ -1152,14 +1166,14 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_EventWeight->Fill(weight, 1);
     
      // ++++ Control Plots ++++
-    for (int i=0; i<(int) leptons_->size(); ++i){
-        h_AllLeptonEta_step8->Fill(leptons_->at(i).Eta(), weight);
-        h_AllLeptonpT_step8->Fill(leptons_->at(i).Pt(), weight);
+    for(const int index : allLeptonIndices){
+        h_AllLeptonEta_step8->Fill(leptons_->at(index).Eta(), weight);
+        h_AllLeptonpT_step8->Fill(leptons_->at(index).Pt(), weight);
     }
-    h_LeptonEta_step8->Fill(leptons_->at(0).Eta(), weight);
-    h_LeptonpT_step8->Fill(leptons_->at(0).Pt(), weight);
-    h_LeptonEta_step8->Fill(leptons_->at(1).Eta(), weight);
-    h_LeptonpT_step8->Fill(leptons_->at(1).Pt(), weight);
+    h_LeptonEta_step8->Fill(leptons_->at(allLeptonIndices.at(0)).Eta(), weight);
+    h_LeptonpT_step8->Fill(leptons_->at(allLeptonIndices.at(0)).Pt(), weight);
+    h_LeptonEta_step8->Fill(leptons_->at(allLeptonIndices.at(1)).Eta(), weight);
+    h_LeptonpT_step8->Fill(leptons_->at(allLeptonIndices.at(1)).Pt(), weight);
 
     for (const int index : jetIndices){
         h_AllJetsEta_step8->Fill(jets_->at(index).Eta(), weight);
@@ -1171,7 +1185,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_JetsEta_step8->Fill(jets_->at(1).Eta(), weight);
         h_JetspT_step8->Fill(jets_->at(1).Pt(), weight);
     }
-    h_LeptonMult_step8->Fill(leptons_->size(), weight);
+    h_LeptonMult_step8->Fill(numberOfAllLeptons, weight);
     h_JetsMult_step8->Fill(numberOfJets, weight);
     int nbjets_step8 = numberOfBjets;
     h_BJetsMult_step8->Fill(nbjets_step8, weight);
@@ -1182,17 +1196,15 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_diLepMassFull_fullSel->Fill(dilepton.M(), weight);
         
     //create helper variables
+    size_t solutionIndex = 0; //always zero!
     
-    //Begin: find 1st (and 2nd) leading pT particles: Top, Lepton, BJetIndex
+    // Find 1st (and 2nd) leading pT particles: Top, Lepton, BJetIndex
     LV LeadHypTop, NLeadHypTop;
     LV LeadHypLepton, NLeadHypLepton;
     LV LeadHypBJet, NLeadHypBJet;
-    
-    size_t solutionIndex = 0; //always zero!
-    orderLVByPt(LeadHypTop, NLeadHypTop, HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex));
-    orderLVByPt(LeadHypLepton, NLeadHypLepton, HypLepton_->at(solutionIndex), HypAntiLepton_->at(solutionIndex));
-    orderLVByPt(LeadHypBJet, NLeadHypBJet, HypBJet_->at(solutionIndex), HypAntiBJet_->at(solutionIndex));
-    //End: find 1st (and 2nd) leading pT particles: Top, Lepton, BJetIndex
+    orderLV(LeadHypTop, NLeadHypTop, HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex), LVpt);
+    orderLV(LeadHypLepton, NLeadHypLepton, HypLepton_->at(solutionIndex), HypAntiLepton_->at(solutionIndex), LVpt);
+    orderLV(LeadHypBJet, NLeadHypBJet, HypBJet_->at(solutionIndex), HypAntiBJet_->at(solutionIndex), LVpt);
     
     //create ll and tt system
     LV hypllbar(HypLepton_->at(solutionIndex) + HypAntiLepton_->at(solutionIndex));
@@ -1310,18 +1322,18 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     //make sure you have called CreateBinnedControlPlots in the SlaveBegin first
     for (const auto& i : { HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex) } ) {
-        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonpT, leptonMinus.Pt(), weight);
-        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonpT, leptonPlus.Pt(), weight);
+        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonpT, leptons_->at(leptonIndex).Pt(), weight);
+        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonpT, leptons_->at(antiLeptonIndex).Pt(), weight);
         FillBinnedControlPlot(h_HypToppT, i.Pt(), h_diLepMassFull, dilepton.M(), weight);
-        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonEta, leptonMinus.Eta(), weight);
-        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonEta, leptonPlus.Eta(), weight);
+        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonEta, leptons_->at(leptonIndex).Eta(), weight);
+        FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonEta, leptons_->at(antiLeptonIndex).Eta(), weight);
         FillBinnedControlPlot(h_HypToppT, i.Pt(), h_MET, met_->Pt(), weight);
         
-        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonpT, leptonMinus.Pt(), weight);
-        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonpT, leptonPlus.Pt(), weight);
+        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonpT, leptons_->at(leptonIndex).Pt(), weight);
+        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonpT, leptons_->at(antiLeptonIndex).Pt(), weight);
         FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_diLepMassFull, dilepton.M(), weight);
-        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonEta, leptonMinus.Eta(), weight);
-        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonEta, leptonPlus.Eta(), weight);
+        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonEta, leptons_->at(leptonIndex).Eta(), weight);
+        FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_LeptonEta, leptons_->at(antiLeptonIndex).Eta(), weight);
         FillBinnedControlPlot(h_HypTopRapidity, i.Rapidity(), h_MET, met_->Pt(), weight);
     }
 
@@ -1722,6 +1734,8 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                                     const int bHadronIndex, const int antiBHadronIndex,
                                     const double weightPU)
 {
+    // Use utilities without namespaces
+    using namespace ttbar;
     using ROOT::Math::VectorUtil::DeltaPhi;
     
     LV& LeadGenTop(leadGenTop);
@@ -1744,11 +1758,10 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     h_GenAll_noweight->Fill(GenTop_->M(), weightGenerator_);
     
     //Begin: Select & Fill histograms with Leading pT and 2nd Leading pT: Lepton and BJet
-    orderLVByPt(LeadGenLepton, NLeadGenLepton, *GenLepton_, *GenAntiLepton_);
+    orderLV(LeadGenLepton, NLeadGenLepton, *GenLepton_, *GenAntiLepton_, LVpt);
     
     if (BHadronIndex != -1 && AntiBHadronIndex != -1) {
-        orderLVByPt(LeadGenBJet, NLeadGenBJet, 
-                    allGenJets_->at(BHadronIndex), allGenJets_->at(AntiBHadronIndex));
+        orderLV(LeadGenBJet, NLeadGenBJet, allGenJets_->at(BHadronIndex), allGenJets_->at(AntiBHadronIndex), LVpt);
     }
     
     if ( GenLepton_->pt() > 20 && GenAntiLepton_->pt() > 20 
@@ -1782,8 +1795,8 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                 h_VisGenMet->Fill(GenMet_->Pt(), trueLevelWeight);
                 
                 //for HT, count only >= JetPtCUT
-                std::vector<int> genJetIndices = ttbar::initialiseIndices(*allGenJets_);
-                ttbar::selectIndices(genJetIndices, *allGenJets_, ttbar::LVpt, JetPtCUT);
+                std::vector<int> genJetIndices = initialiseIndices(*allGenJets_);
+                selectIndices(genJetIndices, *allGenJets_, LVpt, JetPtCUT);
                 genHT = getJetHT(genJetIndices, *allGenJets_);
                 h_VisGenHT->Fill(genHT, trueLevelWeight);
 
@@ -1823,7 +1836,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     h_VisGenAntiNeutrinopT->Fill(GenAntiNeutrino_->Pt(), trueLevelWeight);
     
     //Begin: Fill histograms with Leading pT and 2nd Leading pT: Top
-    orderLVByPt(LeadGenTop, NLeadGenTop, *GenTop_, *GenAntiTop_);
+    orderLV(LeadGenTop, NLeadGenTop, *GenTop_, *GenAntiTop_, LVpt);
     h_VisGenToppTLead->Fill(LeadGenTop.Pt(), trueLevelWeight);
     h_VisGenToppTNLead->Fill(NLeadGenTop.Pt(), trueLevelWeight);
     h_VisGenTopRapidityLead->Fill(LeadGenTop.Rapidity(), trueLevelWeight);

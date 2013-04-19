@@ -18,9 +18,18 @@
 
 
 
-/// Jet selection to be used in analysis
-constexpr double JetPtCUT = 30.;
+
+/// Lepton eta selection (absolute value)
+constexpr double LeptonEtaCUT = 2.4;
+
+/// Lepton pt selection in GeV
+constexpr double LeptonPtCut = 20.;
+
+/// Jet eta selection (absolute value)
 constexpr double JetEtaCUT = 2.4;
+
+/// Jet pt selection in GeV
+constexpr double JetPtCUT = 30.;
 
 /// b-tag working point
 /// CSV Loose: 0.244
@@ -244,14 +253,20 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     using namespace ttbar;
     
     
+    
     //===CUT===
-    // this is step0a, for specific samples events are deselected on generator level
+    // this is step0a, no cut application
     
-    
+    // ++++ Control Plots ++++
+
     // Histogram for controlling correctness of af workflow,
     // which should be the same as h_events_step0b for all samples except those preselected on generator level
     h_events_step0a->Fill(1, 1);
-
+    
+    
+    
+    //===CUT===
+    // this is step0b, select events on generator level and access true level weights
 
     // Separate DY dilepton decays in lepton flavours
     if(failsDrellYanGeneratorSelection(entry)) return kTRUE;
@@ -278,28 +293,73 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         weightGenerator_ = 1.;
     }
     
+    // ++++ Control Plots ++++
+
+    h_events_step0b->Fill(1, 1);
+    
+    
+    
+    //===CUT===
+    // Check if event was triggered with the same dilepton trigger as the specified analysis channel
+    if(this->failsDileptonTrigger(entry)) return kTRUE;
+    
+    
+    
+    // === FULL OBJECT SELECTION === (can thus be used at each selection step)
+    
     // Access reco information
     this->GetRecoBranchesEntry(entry);
     
-    // FIXME: needed here for now, since cleanJetCollection requires it
+    // Access generator information common to all MC samples
     if(isMC_) this->GetCommonGenBranchesEntry(entry);
     
     // Systematics for jet energy resolution/scale
     // Corrections for: jets_, jetsForMET_, met_
     //if(doJesJer_)applyJER_JES();
-/*    
-    // Apply jet cuts in eta, pt
-    cleanJetCollection(JetPtCUT, JetEtaCUT);
     
-    // Select b-jets for given working point
-    std::vector<int> v_bJetIndex;
-    for ( std::vector<double>::iterator it = jetBTagCSV_->begin(); it<jetBTagCSV_->end(); it++ ) {
-        if ( *it > BtagWP) {
-            v_bJetIndex.push_back((it-jetBTagCSV_->begin()));
+    // Get allLepton indices, apply selection cuts and order them by pt (beginning with the highest value)
+    std::vector<int> allLeptonIndices = initialiseIndices(*leptons_);
+    selectIndices(allLeptonIndices, *leptons_, LVeta, LeptonEtaCUT, false);
+    selectIndices(allLeptonIndices, *leptons_, LVeta, -LeptonEtaCUT);
+    selectIndices(allLeptonIndices, *leptons_, LVpt, LeptonPtCut);
+    orderIndices(allLeptonIndices, *leptons_, LVpt);
+    const int numberOfAllLeptons = allLeptonIndices.size();
+    
+    // Get indices of leptons and antiLeptons separated by charge, and get the leading ones if they exist
+    std::vector<int> leptonIndices = allLeptonIndices;
+    std::vector<int> antiLeptonIndices = allLeptonIndices;
+    selectIndices(leptonIndices, *lepPdgId_, 0, false);
+    selectIndices(antiLeptonIndices, *lepPdgId_, 0);
+    const int numberOfLeptons = leptonIndices.size();
+    const int numberOfAntiLeptons = antiLeptonIndices.size();
+    const int leptonIndex = numberOfLeptons>0 ? leptonIndices.at(0) : -1;
+    const int antiLeptonIndex = numberOfAntiLeptons>0 ? antiLeptonIndices.at(0) : -1;
+    
+    // In case of an existing opposite-charge dilepton system,
+    // get their indices for leading and next-to-leading lepton
+    int leadingLeptonIndex(-1);
+    int nLeadingLeptonIndex(-1);
+    if(numberOfLeptons>0 && numberOfAntiLeptons>0){
+        leadingLeptonIndex = leptonIndex;
+        nLeadingLeptonIndex = antiLeptonIndex;
+        orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *leptons_, LVpt);
+    }
+    const bool hasLeptonPair = this->hasLeptonPair(leadingLeptonIndex, nLeadingLeptonIndex);
+    
+    // Get two indices of the two leptons in the right order for trigger scale factor, if existing
+    int leptonXIndex(leadingLeptonIndex);
+    int leptonYIndex(nLeadingLeptonIndex);
+    if(hasLeptonPair){
+        //in ee and mumu channel leptonX must be the highest pt lepton, i.e. this is already correct
+        // in emu channel leptonX must be electron
+        if(std::abs(lepPdgId_->at(leptonXIndex)) != std::abs(lepPdgId_->at(leptonYIndex))){
+            orderIndices(leptonYIndex, leptonXIndex, *lepPdgId_, true);
         }
     }
-    const int numberOfBJets = v_bJetIndex.size();
-*/    
+    
+    // Get dilepton system, if existing
+    const LV dummyLV(0.,0.,0.,0.);
+    const LV dilepton(hasLeptonPair ? leptons_->at(leadingLeptonIndex)+leptons_->at(nLeadingLeptonIndex) : dummyLV);
     
     // Get jet indices, apply selection cuts and order them by pt (beginning with the highest value)
     std::vector<int> jetIndices = initialiseIndices(*jets_);
@@ -315,112 +375,48 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     orderIndices(bjetIndices, *jetBTagCSV_);
     const int numberOfBjets = bjetIndices.size();
     
-    //===CUT===
-    // this is step0b, no cut application, only object preselection
-
-    h_events_step0b->Fill(1, 1);
-
+    // Get MET
+    const LV& met(*met_);
+    
     // ++++ Control Plots ++++
-
-    h_jetCategories_overview_step0->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), 1);
-
-    // is this histo needed for anything ?
-    //h_PUSF->Fill(weightPU, 1);
-
-
-
-    //===CUT===
-    // check if event was triggered
-    //our triggers (bits: see the ntuplewriter!)
-    constexpr int mumuTriggers = 0x8 + 0x20; //17/8 + 17Tr8
-    constexpr int emuTriggers = 0x2000 + 0x4000;
-    constexpr int eeTriggers = 0x40000;
-
-    if (!(((triggerBits_ & mumuTriggers) && channelPdgIdProduct_ == -13*13)    //mumu triggers in rightmost byte
-          ||((triggerBits_ & emuTriggers) && channelPdgIdProduct_ == -11*13)     //emu in 2nd byte
-          ||((triggerBits_ & eeTriggers) && channelPdgIdProduct_ == -11*11)))    //ee in 3rd byte
-    {
-        return kTRUE;
-    }
-
-    size_t LeadLeptonNumber = 0;
-    size_t NLeadLeptonNumber = 0;
-    bool hasLeptonPair = getLeptonPair(LeadLeptonNumber, NLeadLeptonNumber);
-
+    
     h_events_step1->Fill(1, 1);
-
-    // ++++ Control Plots ++++
-
     h_jetCategories_overview_step1->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), 1);
-
-
-
+    
+    
+    
     //===CUT===
     // we need an OS lepton pair
-    if (! hasLeptonPair) return kTRUE;
-    // lepton pt cut > 20, sufficient to test the second leading lepton
-    if (leptons_->at(NLeadLeptonNumber).pt() <= 20) return kTRUE;
-
-    LV dilepton = leptons_->at(LeadLeptonNumber) + leptons_->at(NLeadLeptonNumber);
-
-    h_events_step2->Fill(1, 1);
-
+    if (!hasLeptonPair) return kTRUE;
+    
     // ++++ Control Plots ++++
-
+    
+    h_events_step2->Fill(1, 1);
     h_jetCategories_overview_step2->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), 1);
 
 
 
     //===CUT===
-    //with at least 20 GeV invariant mass
-    if (dilepton.M() < 20) return kTRUE;
+    // with at least 20 GeV invariant mass
+    if (dilepton.M() < 20.) return kTRUE;
 
-    // find l+ and l-
-    LV leptonPlus;
-    LV leptonMinus;
-    if (lepPdgId_->at(LeadLeptonNumber) < 0) {
-        leptonPlus = leptons_->at(LeadLeptonNumber);
-        leptonMinus = leptons_->at(NLeadLeptonNumber);
-    } else {
-        leptonMinus = leptons_->at(LeadLeptonNumber);
-        leptonPlus = leptons_->at(NLeadLeptonNumber);
-    }
-
-    //This is necessary due to the ordering in the trigger 2D-plots
-    LV leptonX, leptonY;
-    if ( abs( lepPdgId_->at(LeadLeptonNumber) ) == abs( lepPdgId_->at(NLeadLeptonNumber) ) ){
-        //in ee and mumu channel leptonX must be the highest pT lepton
-        leptonX = leptons_->at(LeadLeptonNumber);
-        leptonY = leptons_->at(NLeadLeptonNumber);
-    } else {
-        // in emu channel lepX should be electron
-        if (abs(lepPdgId_->at(LeadLeptonNumber)) == 11) {
-            leptonX = leptons_->at(LeadLeptonNumber);
-            leptonY = leptons_->at(NLeadLeptonNumber);
-        } else {
-            leptonX = leptons_->at(NLeadLeptonNumber);
-            leptonY = leptons_->at(LeadLeptonNumber);
-        }
-    }
-
-    int LleptonId = lepPdgId_->at(LeadLeptonNumber);
-    int NLleptonId = lepPdgId_->at(NLeadLeptonNumber);
-    //Now determine the lepton trigger and ID scale factors
-    double weightLepSF = isMC_ ? getLeptonIDSF(leptons_->at(LeadLeptonNumber), leptons_->at(NLeadLeptonNumber), LleptonId, NLleptonId) : 1;
-    double weightTrigSF = isMC_ ? getTriggerSF(leptonX, leptonY) : 1;
-
-    //First control plots after dilepton selection (without Z cut)
+    // Now determine the lepton trigger and ID scale factors
+    double weightLepSF = isMC_ ? getLeptonIDSF(leadingLeptonIndex, nLeadingLeptonIndex) : 1.;
+    double weightTrigSF = isMC_ ? getTriggerSF(leptonXIndex, leptonYIndex) : 1.;
+    
+    // First control plots after dilepton selection (without Z cut)
     double weight = weightGenerator_*weightTrigSF*weightLepSF;
 
-    //weight even without PU reweighting --- FIXME: commented plot probably interesting
-    //h_vertMulti_noPU->Fill(vertMulti, weight);
-
-    //apply PU reweighting - continue with control plots --- FIXME: commented plot probably interesting
+    //apply PU reweighting
     weight *= weightPU;
-    //h_vertMulti->Fill(vertMulti, weight);
-
+    
+    // ++++ Control Plots ++++
+    
     h_events_step3->Fill(1, weight);
-
+    h_jetCategories_overview_step3->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
+    
+    
+    
     // ****************************************
     //handle inverted Z cut
     // Fill loose dilepton mass histogram before any jet cuts
@@ -428,30 +424,29 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // FIXME: define jet pt cut and select with following line
     //bool hasJets = numberOfJets > 1 && jets->at(1).Pt() > JETPTCUT;
     bool hasJets = numberOfJets > 1;
-    bool hasMetOrEmu = channel_ == "emu" || met_->Pt() > 40;
+    bool hasMetOrEmu = channel_ == "emu" || met.Pt() > 40;
     bool hasBtag = numberOfBjets > 0;
-    //bool hasSolution = HypTop->size() > 0;
-    bool hasSolution = calculateKinReco(leptonMinus, leptonPlus, jetIndices, *met_);
-
+    bool hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, met);
+    
     // Z window plots need to be filled here, in order to rescale the contribution to data
-    if ( isZregion ) {
+    if(isZregion){
         double fullWeights = weightGenerator_*weightPU*weightTrigSF*weightLepSF;
         dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "4");
 
-        if ( hasJets ) {
+        if(hasJets){
             dyScalingHistograms_.fillLoose(dilepton.M(), fullWeights);
             dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "5");
 
-            if ( hasMetOrEmu ) {
+            if(hasMetOrEmu){
                 dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "6");
 
-                if ( hasBtag ) {
+                if(hasBtag){
                     // FIXME: do not use b-tag scale factor
                     //weightBtagSF = isMC ? calculateBtagSF() : 1;
                     //fullWeights *= weightBtagSF;
                     dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "7");
-
-                    if ( hasSolution ) {
+                    
+                    if(hasSolution){
                         // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
                         //fullWeights *= weightKinFit;
                         dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "8");
@@ -460,96 +455,84 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
             }
         }
     }
-
-    // ++++ Control Plots ++++
-
-    h_jetCategories_overview_step3->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
-
-
-
+    
+    
+    
     //=== CUT ===
     //Exclude the Z window
-    if (channel_!="emu" && isZregion) return kTRUE;
+    if(channel_!="emu" && isZregion) return kTRUE;
 
-    h_events_step4->Fill(1, weight);
+    // ++++ Control Plots ++++
 
-    if (!isZregion) { //also apply Z cut in emu!
+    if(!isZregion){ //also apply Z cut in emu!
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "4");
     }
-
-    // ++++ Control Plots ++++
-
+    h_events_step4->Fill(1, weight);
     h_jetCategories_overview_step4->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
-
-
-
+    
+    
+    
     //=== CUT ===
     //Require at least two jets > 30 GeV (check for > 30 needed because we might have 20 GeV jets in our NTuple)
-    if (! hasJets) return kTRUE;
-
-    h_events_step5->Fill(1, weight);
-
-    if (!isZregion) { //also apply Z cut in emu!
+    if(!hasJets) return kTRUE;
+    
+    // ++++ Control Plots ++++
+    
+    if(!isZregion){ //also apply Z cut in emu!
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "5");
     }
-
-    // ++++ Control Plots ++++
-
+    h_events_step5->Fill(1, weight);
     h_jetCategories_overview_step5->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
-
-
-
+    
+    
+    
     //=== CUT ===
     //Require MET > 40 GeV in non-emu channels
-    if (!hasMetOrEmu) return kTRUE;
-
-    h_events_step6->Fill(1, weight);
-
-    if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "6");
-    }
+    if(!hasMetOrEmu) return kTRUE;
 
     // ++++ Control Plots ++++
-
+    
+    if(!isZregion){ //also apply Z cut in emu!
+        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "6");
+    }
+    h_events_step6->Fill(1, weight);
     h_jetCategories_overview_step6->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
-
-
-
+    
+    
+    
     //=== CUT ===
     //Require at least one b tagged jet
-    if (!hasBtag) return kTRUE;
+    if(!hasBtag) return kTRUE;
 
     // FIXME: if b-tagging scale factor is desired, calculate it here ?
     // weight *= weightBtagSF;
 
-    h_events_step7->Fill(1, weight);
-
-    if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "7");
-    }
+    
 
     // ++++ Control Plots ++++
 
+    if(!isZregion){ //also apply Z cut in emu!
+        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "7");
+    }
+    h_events_step7->Fill(1, weight);
+    
     h_jetCategories_overview_step7->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
-
     h_jetMultiplicity_step7->Fill(numberOfJets, weight);
-
-
-
+    
+    
+    
     //=== CUT ===
     //Require at least one solution for the kinematic event reconstruction
-    if (!hasSolution) return kTRUE;
+    if(!hasSolution) return kTRUE;
     // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
     //weight *= weightKinFit;
-
-    h_events_step8->Fill(1, weight);
-
+    
+    // ++++ Control Plots ++++
+    
     if (!isZregion) { //also apply Z cut in emu!
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "8");
     }
-
-    // ++++ Control Plots ++++
-
+    h_events_step8->Fill(1, weight);
 
     h_jetMultiplicity_step8->Fill(numberOfJets, weight);
     FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(numberOfJets,numberOfBjets), h_events_step8, 1, weight);
@@ -575,19 +558,19 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
     // FIXME: which events exactly to fill? For now all with at least 4 jets
     if(numberOfJets<4)return kTRUE;
-//    std::cout<<"\nNew jet pairings: "<<numberOfJets<<"\n\n";
-
+    
+    
     // Find b jet and anti-b jet corresponding to (anti)b from (anti)top
-    LV* genBJet(0);
-    LV* genAntiBJet(0);
+    LV* genBjet(0);
+    LV* genAntiBjet(0);
     if(isTopSignal_){
         this->GetTopSignalBranchesEntry(entry);
-        int genBJetIndex(-1);
-        int genAntiBJetIndex(-1);
+        int genBjetIndex(-1);
+        int genAntiBjetIndex(-1);
         // FIXME: should one clean the genJetCollection to remove low-pt (or low-eta) jets?
-        if(this->getGenBJetIndices(genBJetIndex, genAntiBJetIndex, 6)){
-            genBJet = &(allGenJets_->at(genBJetIndex));
-            genAntiBJet = &(allGenJets_->at(genAntiBJetIndex));
+        if(this->getGenBJetIndices(genBjetIndex, genAntiBjetIndex, 6)){
+            genBjet = &(allGenJets_->at(genBjetIndex));
+            genAntiBjet = &(allGenJets_->at(genAntiBjetIndex));
         }
         else{
             h_matchedBjetsFromTop_step8->Fill(0.1, weight);
@@ -595,19 +578,20 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     }
 
     // Match recoJets to the two selected genJets
-    int matchedBJetIndex(-1);
-    int matchedAntiBJetIndex(-1);
+    int matchedBjetIndex(-1);
+    int matchedAntiBjetIndex(-1);
     bool successfulMatching(false);
-    if(genBJet && genAntiBJet){
-        successfulMatching = this->matchRecoToGenJets(matchedBJetIndex, matchedAntiBJetIndex, jetIndices, genBJet, genAntiBJet);
+    if(genBjet && genAntiBjet){
+        successfulMatching = this->matchRecoToGenJets(matchedBjetIndex, matchedAntiBjetIndex, jetIndices, genBjet, genAntiBjet);
         if(!successfulMatching)h_matchedBjetsFromTop_step8->Fill(1.1, weight);
         else h_matchedBjetsFromTop_step8->Fill(2.1, weight);
     }
 
     // Loop over all jet combinations and fill the MVA TTree
-    this->fillMvaInputTopJetsVariables(leptonMinus, leptonPlus,
+    this->fillMvaInputTopJetsVariables(leptonIndex, antiLeptonIndex,
                                        jetIndices,
-                                       matchedBJetIndex, matchedAntiBJetIndex,
+                                       matchedBjetIndex, matchedAntiBjetIndex,
+                                       met,
                                        successfulMatching, weight);
 
     return kTRUE;
@@ -615,11 +599,15 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
 
 
-void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& antiLepton,
+void HiggsAnalysis::fillMvaInputTopJetsVariables(const int leptonIndex, const int antiLeptonIndex,
                                                  const std::vector<int>& jetIndices,
-                                                 const int matchedBJetIndex, const int matchedAntiBJetIndex,
+                                                 const int matchedBjetIndex, const int matchedAntiBjetIndex,
+                                                 const LV& met,
                                                  const bool successfulMatching, const double& eventWeight)
 {
+    const LV& lepton(leptons_->at(leptonIndex));
+    const LV& antiLepton(leptons_->at(antiLeptonIndex));
+    
     // Loop over all jet combinations
     for(std::vector<int>::const_iterator i_jetIndex = jetIndices.begin(); i_jetIndex != --(jetIndices.end()); ++i_jetIndex){
         std::vector<int>::const_iterator incrementIterator(i_jetIndex);
@@ -641,17 +629,17 @@ void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& ant
             bool isSwappedPair(false);
             bool isCorrectPair(false);
             if(successfulMatching){
-                if(matchedBJetIndex==bIndex && matchedAntiBJetIndex==antiBIndex){
+                if(matchedBjetIndex==bIndex && matchedAntiBjetIndex==antiBIndex){
                     isCorrectPair = true;
                 }
-                else if(matchedBJetIndex==antiBIndex && matchedAntiBJetIndex==bIndex){
+                else if(matchedBjetIndex==antiBIndex && matchedAntiBjetIndex==bIndex){
                     isSwappedPair = true;
                 }
             }
             
             // Variables for MVA
-            const LV& bJet = jets_->at(bIndex);
-            const LV& antiBJet = jets_->at(antiBIndex);
+            const LV& bjet = jets_->at(bIndex);
+            const LV& antiBjet = jets_->at(antiBIndex);
             VLV recoilJets;
             for(const int index : jetIndices){
                 if(index == bIndex || index == antiBIndex) continue;
@@ -659,14 +647,13 @@ void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& ant
             }
             LV jetRecoil;
             for(auto recoilJet : recoilJets)jetRecoil += recoilJet;
-            const LV& met = *met_;
-            const double& bJetBtagDiscriminator = jetBTagCSV_->at(bIndex);
-            const double& antiBJetBtagDiscriminator = jetBTagCSV_->at(antiBIndex);
+            const double& bjetBtagDiscriminator = jetBTagCSV_->at(bIndex);
+            const double& antiBjetBtagDiscriminator = jetBTagCSV_->at(antiBIndex);
 
             // Add entry to MVA input
             mvaInputTopJetsVariables_.addEntry(lepton, antiLepton,
-                                               bJet, antiBJet,
-                                               bJetBtagDiscriminator, antiBJetBtagDiscriminator,
+                                               bjet, antiBjet,
+                                               bjetBtagDiscriminator, antiBjetBtagDiscriminator,
                                                jetChargeDiff,
                                                jetRecoil, met,
                                                successfulMatching, isCorrectPair, isSwappedPair,
@@ -677,7 +664,7 @@ void HiggsAnalysis::fillMvaInputTopJetsVariables(const LV& lepton, const LV& ant
 
 
 
-bool HiggsAnalysis::getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, const int pdgId)
+bool HiggsAnalysis::getGenBJetIndices(int& genBjetIndex, int& genAntiBjetIndex, const int pdgId)
 {
     if(!pdgId>0){
         std::cerr<<"ERROR! Method getGenBJetIndices needs a pdgId>0, but used is: "<<pdgId
@@ -689,12 +676,12 @@ bool HiggsAnalysis::getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, 
         const int flavour = genBHadFlavour_->at(iBHadron);
         if(abs(flavour) != abs(pdgId)) continue;     // Skipping hadrons with the wrong flavour
         // Assigning jet index of corresponding hadron. Set to -2 if >1 hadrons found for the same flavour
-        if(flavour>0) genBJetIndex = (genBJetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
-        else if(flavour<0) genAntiBJetIndex = (genAntiBJetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
+        if(flavour>0) genBjetIndex = (genBjetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
+        else if(flavour<0) genAntiBjetIndex = (genAntiBjetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
     }
     
     // If no unique match of jets from (anti)b from (anti)top is found, return false
-    if(genBJetIndex<0 || genAntiBJetIndex<0){
+    if(genBjetIndex<0 || genAntiBjetIndex<0){
         return false;
     }
     return true;
@@ -702,34 +689,34 @@ bool HiggsAnalysis::getGenBJetIndices(int& genBJetIndex, int& genAntiBJetIndex, 
 
 
 
-bool HiggsAnalysis::matchRecoToGenJets(int& matchedBJetIndex, int& matchedAntiBJetIndex,
+bool HiggsAnalysis::matchRecoToGenJets(int& matchedBjetIndex, int& matchedAntiBjetIndex,
                                        const std::vector<int>& jetIndices,
-                                       const LV* genBJet, const LV* genAntiBJet)
+                                       const LV* genBjet, const LV* genAntiBjet)
 {
     using ROOT::Math::VectorUtil::DeltaR;
 
     // Find closest jet and its distance in deltaR
-    double deltaRBJet(999.);
-    double deltaRAntiBJet(999.);
+    double deltaRBjet(999.);
+    double deltaRAntiBjet(999.);
     for(const auto& index : jetIndices){
-        float deltaR = DeltaR(*genBJet, jets_->at(index));
-        if(deltaR < deltaRBJet){
-            deltaRBJet = deltaR;
-            matchedBJetIndex = index;
+        float deltaR = DeltaR(*genBjet, jets_->at(index));
+        if(deltaR < deltaRBjet){
+            deltaRBjet = deltaR;
+            matchedBjetIndex = index;
         }
-        deltaR = DeltaR(*genAntiBJet, jets_->at(index));
-        if(deltaR < deltaRAntiBJet){
-            deltaRAntiBJet = deltaR;
-            matchedAntiBJetIndex = index;
+        deltaR = DeltaR(*genAntiBjet, jets_->at(index));
+        if(deltaR < deltaRAntiBjet){
+            deltaRAntiBjet = deltaR;
+            matchedAntiBjetIndex = index;
         }
     }
 
     // Call a jet matched if it is close enough (should this be a configurable parameter?)
-    if(deltaRBJet>0.3) matchedBJetIndex = -1;
-    if(deltaRAntiBJet>0.3) matchedAntiBJetIndex = -1;
+    if(deltaRBjet>0.3) matchedBjetIndex = -1;
+    if(deltaRAntiBjet>0.3) matchedAntiBjetIndex = -1;
 
     // Check if both gen jets are successfully matched to different reco jets
-    if(matchedBJetIndex==-1 || matchedAntiBJetIndex==-1 || matchedBJetIndex == matchedAntiBJetIndex) return false;
+    if(matchedBjetIndex==-1 || matchedAntiBjetIndex==-1 || matchedBjetIndex == matchedAntiBjetIndex) return false;
 
     return true;
 }

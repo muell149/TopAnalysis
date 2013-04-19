@@ -212,6 +212,7 @@ void AnalysisBase::Init(TTree *tree)
     chain_ = tree;
     chain_->SetMakeClass(0);
     this->SetRecoBranchAddresses();
+    this->SetTriggerBranchAddresses();
     if(isMC_) this->SetCommonGenBranchAddresses();
     this->SetKinRecoBranchAddresses();
     if(isMC_) this->SetVertMultiTrueBranchAddress();
@@ -350,10 +351,13 @@ void AnalysisBase::clearBranches()
     b_lumiBlock = 0;
     b_eventNumber = 0;
     b_recoInChannel = 0;
+    b_vertMulti = 0;
+    
+    
+    // nTuple branches holding trigger bits
     b_triggerBits = 0;
     b_triggerBitsTau = 0;
     b_firedTriggers = 0;
-    b_vertMulti = 0;
     
     
     // nTuple branches holding generator information for all MC samples
@@ -626,10 +630,16 @@ void AnalysisBase::SetRecoBranchAddresses()
     chain_->SetBranchAddress("lumiBlock", &lumiBlock_, &b_lumiBlock);
     chain_->SetBranchAddress("eventNumber", &eventNumber_, &b_eventNumber);
     //chain_->SetBranchAddress("recoInChannel", &recoInChannel_, &b_recoInChannel);
+    chain_->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti);
+}
+
+
+
+void AnalysisBase::SetTriggerBranchAddresses()
+{
     chain_->SetBranchAddress("triggerBits", &triggerBits_, &b_triggerBits);
     //chain_->SetBranchAddress("triggerBitsTau", &triggerBitsTau_, &b_triggerBitsTau);
     //chain_->SetBranchAddress("firedTriggers", &firedTriggers_, &b_firedTriggers);
-    chain_->SetBranchAddress("vertMulti", &vertMulti_, &b_vertMulti);
 }
 
 
@@ -802,11 +812,17 @@ void AnalysisBase::GetRecoBranchesEntry(Long64_t& entry)
     b_runNumber->GetEntry(entry);
     b_lumiBlock->GetEntry(entry);
     b_eventNumber->GetEntry(entry);
-    //b_recoInChannel
-    b_triggerBits->GetEntry(entry);
-    //b_triggerBitsTau
-    //b_firedTriggers
+    //b_recoInChannel->GetEntry(entry);
     b_vertMulti->GetEntry(entry);
+}
+
+
+
+void AnalysisBase::GetTriggerBranchesEntry(Long64_t& entry)
+{
+    b_triggerBits->GetEntry(entry);
+    //b_triggerBitsTau->GetEntry(entry);
+    //b_firedTriggers->GetEntry(entry); 
 }
 
 
@@ -954,41 +970,6 @@ void AnalysisBase::GetHiggsSignalBranchesEntry(Long64_t& entry)
 
 
 
-/** determine indices of the two selected leptons in the analysis:
- * 
- * @param LeadLeptonNumber (output) the pt-leading lepton index
- * @param NLeadLeptonNumber (output) the second leading lepton index
- * 
- * @return true iff a the function was able to find a lepton pair
- */
-bool AnalysisBase::getLeptonPair(size_t &LeadLeptonNumber, size_t &NLeadLeptonNumber)
-{
-    //find opposite-charge leading two leptons
-    //the first lepton is always at index 0 because we only have two different charges
-    
-    // ---> this would be true if the electrons and muons had all cuts applied
-    auto leptonPassesCut = [](const LV &lep){ return std::abs(lep.eta()) < 2.4 && lep.pt() > 20;};
-    
-    //find first lepton:
-    for (LeadLeptonNumber = 0; LeadLeptonNumber < leptons_->size(); ++LeadLeptonNumber) {
-        if (leptonPassesCut(leptons_->at(LeadLeptonNumber))) break;
-    }
-    
-    //find second lepton
-    for (size_t i = LeadLeptonNumber + 1; i < leptons_->size(); ++i) {
-        if (!leptonPassesCut(leptons_->at(i))) continue;
-        int product = lepPdgId_->at(LeadLeptonNumber) * lepPdgId_->at(i);
-        if (product < 0) {
-            NLeadLeptonNumber = i;
-            return product == channelPdgIdProduct_;
-        }            
-    }
-    
-    return false;
-}
-
-
-
 double AnalysisBase::get2DSF(TH2* histo, double x, double y)
 {
     int xbin, ybin, dummy;
@@ -1047,24 +1028,33 @@ void AnalysisBase::prepareTriggerSF()
 
 
 
-double AnalysisBase::getTriggerSF(const LV& lep1, const LV& lep2) {
+double AnalysisBase::getTriggerSF(const int leptonXIndex, const int leptonYIndex)
+{
+    if (!h_TrigSFeta) return 1.;
     
     //For 'ee' and 'mumu' channels Xaxis of the 2D plots is the highest pT lepton
     // for the 'emu' channel Xaxis is the electron and Y axis muon
-    
-    if (!h_TrigSFeta) return 1;
-    return get2DSF(h_TrigSFeta, std::abs(lep1.eta()), std::abs(lep2.eta()));
+    const LV& leptonX(leptons_->at(leptonXIndex));
+    const LV& leptonY(leptons_->at(leptonYIndex));
+    return get2DSF(h_TrigSFeta, std::abs(leptonX.eta()), std::abs(leptonY.eta()));
 }
 
 
 
-double AnalysisBase::getLeptonIDSF(const LV& lep1, const LV& lep2, int lep1pdgId, int lep2pdgId) {
-    if (!h_MuonIDSFpteta || !h_ElectronIDSFpteta) return 1;
-    if (std::abs(lep1pdgId)==11 && std::abs(lep2pdgId)==11) return get2DSF(h_ElectronIDSFpteta, lep1.Eta(), lep1.pt()) * get2DSF(h_ElectronIDSFpteta, lep2.Eta(), lep2.pt());
-    else if (std::abs(lep1pdgId)==13 && std::abs(lep2pdgId)==13) return get2DSF(h_MuonIDSFpteta, lep1.Eta(), lep1.pt()) * get2DSF(h_MuonIDSFpteta, lep2.Eta(), lep2.pt());
-    else if (std::abs(lep1pdgId)==13 && std::abs(lep2pdgId)== 11) return get2DSF(h_MuonIDSFpteta, lep1.Eta(), lep1.pt()) * get2DSF(h_ElectronIDSFpteta, lep2.Eta(), lep2.pt());
-    else return get2DSF(h_ElectronIDSFpteta, lep1.Eta(), lep1.pt())
-        * get2DSF(h_MuonIDSFpteta, lep2.Eta(), lep2.pt());
+double AnalysisBase::getLeptonIDSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex){
+    if(!h_MuonIDSFpteta || !h_ElectronIDSFpteta) return 1.;
+    
+    const LV& leadingLepton(leptons_->at(leadingLeptonIndex));
+    const LV& nLeadingLepton(leptons_->at(nLeadingLeptonIndex));
+    const int leadingPdgId(std::abs(lepPdgId_->at(leadingLeptonIndex)));
+    const int nLeadingPdgId(std::abs(lepPdgId_->at(nLeadingLeptonIndex)));
+    if(leadingPdgId==11 && nLeadingPdgId==11) return get2DSF(h_ElectronIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_ElectronIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
+    if(leadingPdgId==13 && nLeadingPdgId==13) return get2DSF(h_MuonIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_MuonIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
+    if(leadingPdgId==13 && nLeadingPdgId==11) return get2DSF(h_MuonIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_ElectronIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
+    if(leadingPdgId==11 && nLeadingPdgId==13) return get2DSF(h_ElectronIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_MuonIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
+    std::cout<<"Warning in method getLeptonIDSF! LeptonPdgIds are not as expected (pdgId1, pdgId2): "
+             <<leadingPdgId<<" , "<<nLeadingPdgId<<"\n...will return scale factor =1\n";
+    return 1.;
 }
 
 
@@ -1548,8 +1538,10 @@ void AnalysisBase::prepareKinRecoSF() {
  * 
  * @return true iff there is at least one solution.
  */
-bool AnalysisBase::calculateKinReco(const LV& leptonMinus, const LV& leptonPlus, const std::vector<int>& jetIndices, const LV& met)
+bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices, const LV& met)
 {
+    const LV& leptonMinus(leptons_->at(leptonIndex));
+    const LV& leptonPlus(leptons_->at(antiLeptonIndex));
     VLV jets;
     std::vector<double> btagValues;
     for(const int index : jetIndices){
@@ -2057,26 +2049,6 @@ double AnalysisBase::CJetSFAbsErr ( double pt)
 
 
 
-/** order two LorentzVectors by pt
- * 
- * @param leading the LV with the higher pt (output)
- * @param Nleading the LV with the lower pt (output)
- * @param lv1 input LV to compare with lv2
- * @param lv2 input LV to compare with lv1
- * 
- * Compare lv1 and lv2. The LV with the larger pt is copied to leading,
- * the LV with the smaller pt is copied to Nleading
- */
-void AnalysisBase::orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2) {
-    if (lv1.Pt() > lv2.Pt()) {
-        leading = lv1; Nleading = lv2;
-    } else {
-        leading = lv2; Nleading = lv1;
-    }
-}
-
-
-
 std::string AnalysisBase::assignFolder(const char* baseDir, const TString& channel, const TString& systematic)const
 {
     std::string path("");
@@ -2169,8 +2141,35 @@ double AnalysisBase::weightPileup(Long64_t& entry)
 
 
 
+bool AnalysisBase::hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex)
+{
+    bool hasLeptonPair(false);
+    if(leadingLeptonIndex!=-1 && nLeadingLeptonIndex!=-1){
+        // Check if lepton pair is correct flavour combination for the specified analysis channel (ee, emu, mumu)
+        const int pdgIdProduct = lepPdgId_->at(leadingLeptonIndex) * lepPdgId_->at(nLeadingLeptonIndex);
+        if(pdgIdProduct == channelPdgIdProduct_) hasLeptonPair = true;
+    }
+    return hasLeptonPair;
+}
 
 
 
+bool AnalysisBase::failsDileptonTrigger(Long64_t& entry)
+{
+    this->GetTriggerBranchesEntry(entry);
+    
+    //our triggers (bits: see the ntuplewriter!)
+    constexpr int mumuTriggers = 0x8 + 0x20; //17/8 + 17Tr8
+    constexpr int emuTriggers = 0x2000 + 0x4000;
+    constexpr int eeTriggers = 0x40000;
+
+    if (((triggerBits_ & mumuTriggers) && channelPdgIdProduct_ == -13*13)     // mumu triggers in rightmost byte
+        || ((triggerBits_ & emuTriggers) && channelPdgIdProduct_ == -11*13)   // emu in 2nd byte
+        || ((triggerBits_ & eeTriggers) && channelPdgIdProduct_ == -11*11))  // ee in 3rd byte
+    {
+        return false;
+    }
+    return true;
+}
 
 

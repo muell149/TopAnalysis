@@ -65,10 +65,13 @@ protected:
     UInt_t lumiBlock_;
     UInt_t eventNumber_;
     //int    recoInChannel_;
+    Int_t  vertMulti_;
+    
+    
+    /// Variables associated to nTuple branches holding trigger bits
     UInt_t triggerBits_;
     //UInt_t triggerBitsTau_;
     //std::vector<std::string> *firedTriggers_;
-    Int_t  vertMulti_;
     
     
     /// Variables associated to nTuple branches holding generator information for all MC samples
@@ -246,10 +249,13 @@ private:
     TBranch *b_lumiBlock;
     TBranch *b_eventNumber;
     TBranch *b_recoInChannel;
+    TBranch *b_vertMulti;
+    
+    
+    /// nTuple branches holding trigger bits
     TBranch *b_triggerBits;
     TBranch *b_triggerBitsTau;
     TBranch *b_firedTriggers;
-    TBranch *b_vertMulti;
     
     
     /// nTuple branches holding generator information for all MC samples
@@ -438,6 +444,8 @@ protected:
     
     /// Access event entry for nTuple branches relevant for reconstruction level
     void GetRecoBranchesEntry(Long64_t&);
+    /// Access event entry for nTuple branches for trigger bits
+    void GetTriggerBranchesEntry(Long64_t&);
     /// Access event entry for nTuple branches holding generator information for all MC samples
     void GetCommonGenBranchesEntry(Long64_t&);
     /// Access event entry for nTuple branches of kinematic reconstruction
@@ -470,12 +478,12 @@ protected:
     /// Prepare trigger scale factor
     void prepareTriggerSF();
     /// Get trigger per-event scale factor
-    double getTriggerSF(const LV& lep1, const LV& lep2);
+    double getTriggerSF(const int leptonXIndex, const int leptonYIndex);
     
     /// Prepare lepton scale factor
     void prepareLeptonIDSF();
     /// Get lepton per-event scale factor
-    double getLeptonIDSF(const LV& lep1, const LV& lep2, int x, int y);
+    double getLeptonIDSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex);
     
     /// Prepare b-tagging scale factor
     void prepareBtagSF();
@@ -497,7 +505,7 @@ protected:
     /// Prepare kinematic reconstruction scale factor
     void prepareKinRecoSF();
     /// Calculate the kinematic reconstruction and return whether at least one solution exists
-    bool calculateKinReco(const LV& leptonMinus, const LV& leptonPlus, const std::vector<int>& jetIndices, const LV& met);
+    bool calculateKinReco(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices, const LV& met);
     
     /// Prepare JER/JES systematics
     void prepareJER_JES();
@@ -507,13 +515,15 @@ protected:
     /// Get 2-dimensional scale factor from histogram
     double get2DSF(TH2* histo, double x, double y);
     
-    /// Order two Lorentz vectors by pt
-    void orderLVByPt(LV &leading, LV &Nleading, const LV &lv1, const LV &lv2);
-    /// Find lepton leading in pt, and next-to-leading lepton
-    bool getLeptonPair(size_t& LeadLeptonNumber, size_t& NLeadLeptonNumber);
+    /// Check if opposite-charge dilepton combination exists,
+    /// and check if lepton pair is correct flavour combination for the specified analysis channel (ee, emu, mumu)
+    bool hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex);
+    
+    /// Check if event was triggered with the same dilepton trigger as the specified analysis channel
+    bool failsDileptonTrigger(Long64_t&);
+    
     /// Get H_t of jets
     double getJetHT(const std::vector<int>& jetIndices, const VLV& jets);
-    
     
     
     
@@ -563,6 +573,8 @@ private:
     
     /// Set addresses of nTuple branches relevant for reconstruction level
     void SetRecoBranchAddresses();
+    /// Set address of nTuple branches for trigger bits
+    void SetTriggerBranchAddresses();
     /// Set addresses of nTuple branches holding generator information for all MC samples
     void SetCommonGenBranchAddresses();
     /// Set addresses of nTuple branches of kinematic reconstruction

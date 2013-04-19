@@ -2,6 +2,7 @@
 #define analysisUtils_h
 
 #include <vector>
+#include <cmath>
 
 #include "classes.h"
 
@@ -20,13 +21,15 @@ namespace ttbar{
     
     /// Template function to order two indices by comparison operator for the two elements of a vector
     /// corresponding to the indices of a given variable
-    /// Result is: variable.at(index1) > variable.at(index2)
-    template<class T> void orderIndices(int& index1, int& index2, const std::vector<T>& v_variable);
+    /// Result is (if absoluteValue==false): variable.at(index1) > variable.at(index2)
+    /// Result is (if absoluteValue==true): |variable.at(index1)| > |variable.at(index2)|
+    template<class T> void orderIndices(int& index1, int& index2, const std::vector<T>& v_variable, const bool absoluteValue =false);
     
     /// Template function to order a vector of indices by comparison operator for the two elements of a vector
     /// corresponding to the indices of a given variable
-    /// Result is: variable.at(index1) > variable.at(index2) > ... > variable.at(indexN)
-    template<class T> void orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable);
+    /// Result is (if absoluteValue==false): variable.at(index1) > variable.at(index2) > ... > variable.at(indexN)
+    /// Result is (if absoluteValue==true): |variable.at(index1)| > |variable.at(index2)| > ... > |variable.at(indexN)|
+    template<class T> void orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable, const bool absoluteValue =false);
     
     /// Template function to select from a vector of indices those whose corresponding value in the vector
     /// survive the cut, i.e. variable.at(index) > cutValue (if lowerThreshold==true) or
@@ -44,18 +47,27 @@ namespace ttbar{
     
     /// Function to order two indices by comparison operator for the parameter of the LVs of a vector
     /// corresponding to the indices of a given variable
-    /// Result is: LV.at(index1).parameter > LV.at(index2).parameter
-    void orderIndices(int& index1, int& index2, const VLV& v_lv, const LVParameter& parameter);
+    /// Result is (if absoluteValue==false): LV.at(index1).parameter > LV.at(index2).parameter
+    /// Result is (if absoluteValue==true): |LV.at(index1).parameter| > |LV.at(index2).parameter|
+    void orderIndices(int& index1, int& index2, const VLV& v_lv, const LVParameter& parameter, const bool absoluteValue =false);
     
     /// Function to order a vector of indices by comparison operator for the parameter of the lorentz vectors of a vector
     /// corresponding to the indices of a given variable
-    /// Result is: LV.at(index1).parameter > LV.at(index2).parameter
-    void orderIndices(std::vector<int>& v_index, const VLV& v_lv, const LVParameter& parameter);
+    /// Result is (if absoluteValue==false): LV.at(index1).parameter > LV.at(index2).parameter > ... > LV.at(indexN).parameter
+    /// Result is (if absoluteValue==true): |LV.at(index1).parameter| > |LV.at(index2).parameter| > ... > |LV.at(indexN).parameter|
+    void orderIndices(std::vector<int>& v_index, const VLV& v_lv, const LVParameter& parameter, const bool absoluteValue =false);
     
     /// Function to select from a vector of indices those whose corresponding value of a LV parameter
     /// in the vector survive the cut
     void selectIndices(std::vector<int>& v_index, const VLV& v_lv, const LVParameter& parameter,
                                          const double cutValue, const bool lowerThreshold =true);
+    
+    
+    
+    /// Function to order two Lorentz vectors by comparison operator for the parameter of the LVs
+    /// Result is (if absoluteValue==false): lv1.parameter > lv2.parameter
+    /// Result is (if absoluteValue==true): |lv1.parameter| > |lv2.parameter|
+    void orderLV(LV& lv1, LV& lv2, const LV& inputLv1, const LV& inputLv2, const LVParameter& parameter, const bool absoluteValue =false);
 }
 
 
@@ -70,10 +82,10 @@ template<class T> std::vector<int> ttbar::initialiseIndices(const std::vector<T>
 
 
 
-template<class T> void ttbar::orderIndices(int& index1, int& index2, const std::vector<T>& v_variable)
+template<class T> void ttbar::orderIndices(int& index1, int& index2, const std::vector<T>& v_variable, const bool absoluteValue)
 {
-    const T& variable1 = v_variable.at(index1);
-    const T& variable2 = v_variable.at(index2);
+    const T& variable1 = absoluteValue ? std::abs(v_variable.at(index1)) : v_variable.at(index1);
+    const T& variable2 = absoluteValue ? std::abs(v_variable.at(index2)) : v_variable.at(index2);
     if(variable1<variable2){
         const int tmpIndex2 = index1;
         index1 = index2;
@@ -83,7 +95,7 @@ template<class T> void ttbar::orderIndices(int& index1, int& index2, const std::
 
 
 
-template<class T> void ttbar::orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable)
+template<class T> void ttbar::orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable, const bool absoluteValue)
 {
     std::vector<int> v_indexResult;
     for(std::vector<int>::const_iterator i_index2 = v_index.begin(); i_index2 != v_index.end(); ++i_index2){
@@ -92,11 +104,11 @@ template<class T> void ttbar::orderIndices(std::vector<int>& v_index, const std:
             v_indexResult.push_back(index2);
             continue;
         }
-        const T& variable2 = v_variable.at(index2);
+        const T& variable2 = absoluteValue ? std::abs(v_variable.at(index2)) : v_variable.at(index2);
         
         bool isInserted(false);
         for(std::vector<int>::iterator i_index1 = v_indexResult.begin(); i_index1 != v_indexResult.end(); ++i_index1){
-            const T& variable1 = v_variable.at(*i_index1);
+            const T& variable1 = absoluteValue ? std::abs(v_variable.at(*i_index1)) : v_variable.at(*i_index1);
             if(variable1<variable2){
                 v_indexResult.insert(i_index1, index2);
                 isInserted = true;
@@ -113,7 +125,7 @@ template<class T> void ttbar::orderIndices(std::vector<int>& v_index, const std:
 
 
 template<class T> void ttbar::selectIndices(std::vector<int>& v_index, const std::vector<T>& v_variable,
-                                     const T& cutValue, const bool lowerThreshold)
+                                            const T& cutValue, const bool lowerThreshold)
 {
     std::vector<int> result;
     for(const int index : v_index){
