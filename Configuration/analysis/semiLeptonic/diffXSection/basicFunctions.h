@@ -2275,7 +2275,7 @@ namespace semileptonic {
       rPad->SetBottomMargin(0.15*scaleFactor);
       rPad->SetRightMargin(right);
       // draw grid
-      rPad->SetGrid(1,1);
+      rPad->SetGrid(0,1);
 
       ratio->SetStats(kFALSE);
       ratio->SetTitle("");
