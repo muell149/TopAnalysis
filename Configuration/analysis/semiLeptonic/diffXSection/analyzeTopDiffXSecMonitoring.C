@@ -308,8 +308,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "analyzeTopRecoKinematicsKinFit"+addSel+"/chi2",
     "analyzeTopRecoKinematicsKinFitTopAntitop/ttbarDelPhi",
     // gen distributions
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/decayChannel", 
     "analyzeTopPartonLevelKinematics/ttbarMass",
     "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass",
+    "analyzeTopHadronLevelKinematicsPhaseSpace/ttbarMass",
     // kinfit object shifts
     "compositedKinematicsKinFit/shiftLqPt",
     "compositedKinematicsKinFit/shiftLqEta",
@@ -398,6 +400,21 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarPt",
     "analyzeTopPartonLevelKinematics/ttbarY",
     "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarY",
+    "analyzeTopPartonLevelKinematics/lepPt",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/lepPt",
+    "analyzeTopPartonLevelKinematics/lepEta",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/lepEta",
+    "analyzeTopPartonLevelKinematics/bqPt",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/bqPt",
+    "analyzeTopPartonLevelKinematics/bqEta",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/bqEta",
+    "analyzeTopPartonLevelKinematics/leadqPt",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/leadqPt",
+    "analyzeTopPartonLevelKinematics/leadqEta",
+    "analyzeTopPartonLevelKinematicsPhaseSpace/leadqEta",
+    // reco distributions for efficiency and acceptance control plots
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/leadqPt",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/leadqEta",
   };
 	
   TString plots2D[ ] = {};	
@@ -553,8 +570,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "#chi^{2} (best fit hypothesis);Events;0;10",
     "#Delta#Phi(t,#bar{t});Events;0;4",
     // gen distributions
+    "t#bar{t} other decay channel;events;0;1",
     "m^{t#bar{t}} #left[GeV#right] parton all truth;Events;1;1",
-    "m^{t#bar{t}} #left[GeV#right] parton lv truth;Events;1;1",
+    "m^{t#bar{t}} #left[GeV#right] parton lv PS parton truth;Events;1;1",
+    "m^{t#bar{t}} #left[GeV#right] hadron lv PS parton truth;Events;1;1",
     // kinfit object shifts
     "#Delta p_{T}^{light jets} #left[GeV#right];Events;0;20",
     "#Delta #eta^{light jets};Events;0;1",
@@ -637,6 +656,21 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "parton truth PS p_{T}^{t#bar{t}} #left[GeV#right];Top quarks;0;20",
     "parton truth y^{t#bar{t}};Top quarks;0;1",
     "parton truth PS y^{t#bar{t}};Top quarks;0;1",
+    "parton truth p_{T}^{l} #left[GeV#right];Events;0;20",
+    "parton truth PS p_{T}^{l} #left[GeV#right];Events;0;20",
+    "parton truth #eta^{l};Events;0;1",
+    "parton truth PS #eta^{l};Events;0;1",
+    "parton truth p_{T}^{b} #left[GeV#right];b-quarks;0;20",
+    "parton truth PS p_{T}^{b} #left[GeV#right];b-quarks;0;20",
+    "parton truth #eta^{b};b-quarks;0;1",
+    "parton truth PS #eta^{b};b-quarks;0;1",
+    "parton truth p_{T}^{lead q} #left[GeV#right];Events;0;20",
+    "parton truth PS p_{T}^{lead q} #left[GeV#right];Events;0;20",
+    "parton truth #eta^{lead q};Events;0;1",
+    "parton truth PS #eta^{lead q};Events;0;1",
+    // reco distributions for efficiency and acceptance control plots
+    "p_{T}^{lead q} #left[GeV#right];Events;0;20",
+    "#eta^{lead q};Events;0;1",
   };
 
   // 2D: "x-axis title"/"y-axis title"
@@ -875,10 +909,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   }
   // b) print composition (only if ratio is also drawn)
   double xSec=0;
-  double NttbarFull= histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->GetNbinsX()+1);
-  double NttbarPS  = histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
+  double NttbarFull  = histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->GetNbinsX()+1);
+  double NttbarPSHad = histo_["analyzeTopHadronLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopHadronLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
+  double NttbarPS    = histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
   double BR=0.145888;
-  double A=NttbarPS/NttbarFull;
+  double A   =NttbarPS   /NttbarFull;
+  double AHad=NttbarPSHad/NttbarFull;
   if(verbose>2) std::cout << "NallttbarGenSG=" << NttbarFull << std::endl;
   // loop pretagged/tagged
   for(unsigned int step=0; step<selection_.size(); ++step){    
@@ -927,7 +963,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     if(verbose>=0&&withRatioPlot) std::cout << " DiBoson:    " << std::setprecision(4) << std::fixed << events_[selection_[step]][kDiBos] / NAllMC << std::endl;
     double NnonTtbarBG=NAllMC-events_[selection_[step]][kSig]-events_[selection_[step]][kBkg];
     double ttbarSigFrac=events_[selection_[step]][kSig]/(events_[selection_[step]][kSig]+events_[selection_[step]][kBkg]);
-    double eff=events_[selection_[step]][kSig]/NttbarPS;  
+    double eff   =events_[selection_[step]][kSig]/NttbarPS;
+    double effHad=events_[selection_[step]][kSig]/NttbarPSHad;
     double luminosity2=luminosity;
     if(decayChannel=="combined") luminosity2=luminosityMu+luminosityEl;
     xSec=(NData-NnonTtbarBG)*ttbarSigFrac/(A*eff*BR*luminosity2);
@@ -939,6 +976,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
       std::cout << "      BR:            " << std::setprecision(3) << std::fixed << BR  << std::endl;
       std::cout << "      efficiency:    " << std::setprecision(3) << std::fixed << eff << std::endl;
       std::cout << "      acceptance:    " << std::setprecision(3) << std::fixed << A   << std::endl;
+      std::cout << "hadLV efficiency:    " << std::setprecision(3) << std::fixed << effHad << std::endl;
+      std::cout << "hadLV acceptance:    " << std::setprecision(3) << std::fixed << AHad   << std::endl;
       std::cout << "      eff. lumi[pb]: " << std::setprecision(3) << std::fixed << luminosity2 << std::endl;
     }
   }
@@ -1143,7 +1182,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     unsigned int ktwoPow= (decayChannel=="combined" ? kBkgPow : 999);
     // collect interesting variables
     std::vector<TString> variables_;
-    TString effVariables[] = {"topPt" , "topY"  , "ttbarPt", "ttbarY", "ttbarMass"};
+    TString effVariables[] = {"topPt" , "topY"  , "ttbarPt", "ttbarY", "ttbarMass", "lepPt", "lepEta", "bqPt", "bqEta", "leadqPt", "leadqEta"};
     variables_.insert(variables_.end(), effVariables, effVariables + sizeof(effVariables)/sizeof(TString));
     for(int var=0; var<int(variables_.size()); ++var){
       TString name=variables_[var];
@@ -1240,7 +1279,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
       plotList_ .insert(plotList_ .end(), eff);
       plotList_ .insert(plotList_ .end(), Acc);
       // add corresponding axis labels
-      TString effLabel [] = {"p_{T}^{t} [GeV]" ,"y^{t}", "p_{T}^{t#bar{t}} [GeV]", "y^{t#bar{t}}", "m^{t#bar{t}} [GeV]"};
+      TString effLabel [] = {"p_{T}^{t} [GeV]" ,"y^{t}", "p_{T}^{t#bar{t}} [GeV]", "y^{t#bar{t}}", "m^{t#bar{t}} [GeV]",
+      "p_{T}^{l} [GeV]", "#eta^{l}", "p_{T}^{b} [GeV]", "#eta^{b}", "p_{T}^{lead q} [GeV]", "#eta^{lead q}"};
       axisLabel_.insert(axisLabel_.end(), effLabel[var]+";eff = N_{reco} / N_{gen}^{parton PS};0;1"   );
       axisLabel_.insert(axisLabel_.end(), effLabel[var]+";A = N_{gen}^{parton PS} / N_{gen}^{all};0;1");
       // increase 1 D plots
@@ -1292,6 +1332,160 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
       }
     }
   }
+
+  // ==========================
+  // compare tt BG composition
+  // ==========================
+  if(compareTTsample){
+    // normalization
+    bool area=true;
+    bool SGnorm=true;
+    // names
+    TString loadName="analyzeTopRecoKinematicsKinFit"+addSel+"/decayChannel";
+    TString newName=loadName+"GeneratorComparison";
+    // get MadGraph, MC@NLO and Powheg ttbar Bkg files 
+    files_[kSigMca+50]=TFile::Open(inputFolder+"/"+TopFilename(kBkgMca, systematicVariation, "muon"    ));
+    files_[kBkgMca+50]=TFile::Open(inputFolder+"/"+TopFilename(kBkgMca, systematicVariation, "electron"));
+    files_[kSigPow+50]=TFile::Open(inputFolder+"/"+TopFilename(kBkgPow, systematicVariation, "muon"    ));
+    files_[kBkgPow+50]=TFile::Open(inputFolder+"/"+TopFilename(kBkgPow, systematicVariation, "electron"));
+    files_[kSig+50   ]=TFile::Open(inputFolder+"/"+TopFilename(kBkg   , systematicVariation, "muon"    ));
+    files_[kBkg+50   ]=TFile::Open(inputFolder+"/"+TopFilename(kBkg   , systematicVariation, "electron"));   
+    // get MadGraph, MC@NLO and Powheg ttbar Sig files 
+    files_[kSigMca+100]=TFile::Open(inputFolder+"/"+TopFilename(kSigMca, systematicVariation, "muon"    ));
+    files_[kBkgMca+100]=TFile::Open(inputFolder+"/"+TopFilename(kSigMca, systematicVariation, "electron"));
+    files_[kSigPow+100]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "muon"    ));
+    files_[kBkgPow+100]=TFile::Open(inputFolder+"/"+TopFilename(kSigPow, systematicVariation, "electron"));
+    files_[kSig+100   ]=TFile::Open(inputFolder+"/"+TopFilename(kSig   , systematicVariation, "muon"    ));
+    files_[kBkg+100   ]=TFile::Open(inputFolder+"/"+TopFilename(kSig   , systematicVariation, "electron")); 
+    // choose files for correct final state
+    std::string one= decayChannel!="electron" ? "muon": "electron";
+    std::string two= decayChannel=="combined" ? "electron": "";
+    unsigned int koneMca= (decayChannel!="electron" ? kSigMca+50 : kBkgMca+50);
+    unsigned int ktwoMca= (decayChannel=="combined" ? kBkgMca+50 : 999);
+    unsigned int konePow= (decayChannel!="electron" ? kSigPow+50 : kBkgPow+50);
+    unsigned int ktwoPow= (decayChannel=="combined" ? kBkgPow+50 : 999);   
+    unsigned int koneMad= (decayChannel!="electron" ? kSig+50 : kBkg+50);
+    unsigned int ktwoMad= (decayChannel=="combined" ? kBkg+50 : 999);
+    // plot
+    // a) MC@NLO
+    if(files_[kSigMca+50]&&files_[kBkgMca+50]){
+      histo_[newName][kSigMca]=(TH1F*)(files_[koneMca]->Get(loadName)->Clone(newName));
+      histo_[newName][kSigMca]->Scale(lumiweight(kBkgMca, luminosity, systematicVariation, one));
+      if(ktwoMca!=999){
+	TH1F* temp=(TH1F*)(files_[ktwoMca]->Get(loadName)->Clone(newName));
+	temp->Scale(lumiweight(kBkgMca, luminosity, systematicVariation, two));
+	histo_[newName][kSigMca]->Add((TH1F*)temp->Clone());
+      }
+    }
+    // b) Powheg
+    if(files_[kSigPow+50]&&files_[kBkgPow+50]){
+      histo_[newName][kSigPow]=(TH1F*)(files_[konePow]->Get(loadName)->Clone(newName));
+      histo_[newName][kSigPow]->Scale(lumiweight(kBkgPow, luminosity, systematicVariation, one));
+      if(ktwoPow!=999){
+	TH1F* temp=(TH1F*)(files_[ktwoPow]->Get(loadName)->Clone(newName));
+	temp->Scale(lumiweight(kBkgPow, luminosity, systematicVariation, two));
+	histo_[newName][kSigPow]->Add((TH1F*)temp->Clone());
+      }
+    }
+    // c) MadGraph
+    if(files_[kSig+50]&&files_[kBkg+50]){
+      histo_[newName][kSig]=(TH1F*)(files_[koneMad]->Get(loadName)->Clone(newName));
+      histo_[newName][kSig]->Scale(lumiweight(kBkg, luminosity, systematicVariation, one));
+      if(ktwoMad!=999){
+	TH1F* temp=(TH1F*)(files_[ktwoMad]->Get(loadName)->Clone(newName));
+	temp->Scale(lumiweight(kBkg, luminosity, systematicVariation, two));
+	histo_[newName][kSig]->Add((TH1F*)temp->Clone());
+      }
+    }
+    // adapt style 
+    // MadGraph
+    histo_[newName][kSig]->SetLineColor(constMadgraphColor);
+    histo_[newName][kSig]->SetMarkerColor(constMadgraphColor);
+    histo_[newName][kSig]->SetLineWidth(2);
+    histo_[newName][kSig]->SetLineStyle(1);
+    histo_[newName][kSig]->SetFillStyle(0);
+    // MC@NLO
+    if(files_[kSigMca+50]&&files_[kBkgMca+50]){
+      histo_[newName][kSigMca]->SetLineColor(constMcatnloColor);
+      histo_[newName][kSigMca]->SetMarkerColor(constMcatnloColor);
+      histo_[newName][kSigMca]->SetLineWidth(2);
+      histo_[newName][kSigMca]->SetLineStyle(constMcatnloStyle);
+      histo_[newName][kSigMca]->SetFillStyle(0);
+    }
+    // POWHEG
+    if(files_[kSigPow+50]&&files_[kBkgPow+50]){
+      histo_[newName][kSigPow]->SetLineColor(constPowhegColor );
+      histo_[newName][kSigPow]->SetMarkerColor(constPowhegColor );
+      histo_[newName][kSigPow]->SetLineWidth(2);
+      histo_[newName][kSigPow]->SetLineStyle(constPowhegStyle);
+      histo_[newName][kSigPow]->SetFillStyle(0);
+    }
+    // normalization
+    // a) to unity
+    if(area){
+      histo_[newName+"Fraction"][kSig   ]=(TH1F*)histo_[newName][kSig   ]->Clone(newName+"Fraction");
+      histo_[newName+"Fraction"][kSigPow]=(TH1F*)histo_[newName][kSigPow]->Clone(newName+"Fraction");
+      histo_[newName+"Fraction"][kSigMca]=(TH1F*)histo_[newName][kSigMca]->Clone(newName+"Fraction");
+      histo_[newName+"Fraction"][kSig   ]->Scale(1./(histo_[newName+"Fraction"][kSig   ]->Integral(0,histo_[newName+"Fraction"][kSig   ]->GetNbinsX()+1)));
+      histo_[newName+"Fraction"][kSigPow]->Scale(1./(histo_[newName+"Fraction"][kSigPow]->Integral(0,histo_[newName+"Fraction"][kSigPow]->GetNbinsX()+1)));
+      histo_[newName+"Fraction"][kSigMca]->Scale(1./(histo_[newName+"Fraction"][kSigMca]->Integral(0,histo_[newName+"Fraction"][kSigMca]->GetNbinsX()+1)));
+    }
+    // b) to ttbar N(ttbar SG)
+    if(SGnorm){
+      // a) MC@NLO
+      if(files_[kSigMca+100]&&files_[kBkgMca+100]){
+	TH1F* temp1=(TH1F*)(files_[koneMca+50]->Get(loadName)->Clone("temp1"));
+	double NMcaSG=temp1->Integral(0,temp1->GetNbinsX()+1)*lumiweight(kSigMca, luminosity, systematicVariation, one);
+	if(ktwoMca!=999){
+	  TH1F* temp2=(TH1F*)(files_[ktwoMca+50]->Get(loadName)->Clone("temp2"));
+	  NMcaSG+=temp2->Integral(0,temp2->GetNbinsX()+1)*lumiweight(kSigMca, luminosity, systematicVariation,two);
+	}
+	std::cout<< "N(ttSG)/N(ttBG)[MC@NLO]=" << NMcaSG/histo_[newName][kSigMca]->Integral(0,histo_[newName][kSigMca]->GetNbinsX()+1) << std::endl;
+	histo_[newName+"WRTSG"][kSigMca]=(TH1F*)histo_[newName][kSigMca]->Clone(newName+"WRTSG");
+	histo_[newName+"WRTSG"][kSigMca]->Scale(1./NMcaSG);
+      }
+      // b) Powheg
+      if(files_[kSigPow+100]&&files_[kBkgPow+100]){
+	TH1F* temp1=(TH1F*)(files_[konePow+50]->Get(loadName)->Clone("temp1"));
+	double NPowSG=temp1->Integral(0,temp1->GetNbinsX()+1)*lumiweight(kSigPow, luminosity, systematicVariation, one);
+	if(ktwoPow!=999){
+	  TH1F* temp2=(TH1F*)(files_[ktwoPow+50]->Get(loadName)->Clone("temp2"));
+	  NPowSG+=temp2->Integral(0,temp2->GetNbinsX()+1)*lumiweight(kSigPow, luminosity, systematicVariation, two);
+	}
+	std::cout<< "N(ttSG)/N(ttBG)[POWHEG]=" << NPowSG/histo_[newName][kSigPow]->Integral(0,histo_[newName][kSigPow]->GetNbinsX()+1) << std::endl;
+	histo_[newName+"WRTSG"][kSigPow]=(TH1F*)histo_[newName][kSigPow]->Clone(newName+"WRTSG");
+	histo_[newName+"WRTSG"][kSigPow]->Scale(1./NPowSG);
+      }
+      // c) MadGraph
+      if(files_[kSig+100]&&files_[kBkg+100]){
+	TH1F* temp1=(TH1F*)(files_[koneMad+50]->Get(loadName)->Clone("temp1"));
+	double NMadSG=temp1->Integral(0,temp1->GetNbinsX()+1)*lumiweight(kSig, luminosity, systematicVariation, one);	
+	if(ktwoMad!=999){
+	  TH1F* temp2=(TH1F*)(files_[ktwoMad+50]->Get(loadName)->Clone("temp2"));
+	  NMadSG+=temp2->Integral(0,temp2->GetNbinsX()+1)*lumiweight(kSig, luminosity, systematicVariation, two);
+	}
+	std::cout<< "N(ttSG)/N(ttBG)[MADGRA]=" << NMadSG/histo_[newName][kSig]->Integral(0,histo_[newName][kSig]->GetNbinsX()+1) << std::endl;
+	histo_[newName+"WRTSG"][kSig]=(TH1F*)histo_[newName][kSig]->Clone(newName+"WRTSG");
+	histo_[newName+"WRTSG"][kSig]->Scale(1./NMadSG);
+      }
+    }
+
+    // new plot to plotlist
+    plotList_ .insert(plotList_ .end(), newName );
+    if(area  ) plotList_ .insert(plotList_ .end(), newName+"Fraction" );
+    if(SGnorm) plotList_ .insert(plotList_ .end(), newName+"WRTSG"    );
+    
+    // add corresponding axis labels
+    axisLabel_.insert(axisLabel_.end(), "t#bar{t} other final state;N(t#bar{t} other);0;1");
+    if(area  ) axisLabel_.insert(axisLabel_.end(), "t#bar{t} other final state;fraction (t#bar{t} other);0;1");
+    if(SGnorm) axisLabel_.insert(axisLabel_.end(), "t#bar{t} other final state;N(t#bar{t} other)/N(t#bar{t} SG);0;1");
+    
+    // increase 1 D plots
+    N1Dplots++; 
+    if(area  ) N1Dplots++;
+    if(SGnorm) N1Dplots++;
+  }
+  
   // =====================
   //  Create canvas
   // =====================
@@ -1509,7 +1703,22 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      legTheo2->SetY2NDC(0.88);
 	      legTheo2->Draw("same");
 	      // turn on grid
-	      plotCanvas_[canvasNumber]->SetGrid(1,1);
+	      plotCanvas_[canvasNumber]->SetGrid(0,1);
+	    }
+	    // draw other theory predictions for ttbar other composition in same plot
+	    if(plotList_[plot].Contains("decayChannel")&&plotList_[plot].Contains("GeneratorComparison")){
+	      if(histo_[plotList_[plot]].count(kSigMca)>0) histo_[plotList_[plot]][kSigMca]->Draw("hist same");
+	      if(histo_[plotList_[plot]].count(kSigPow)>0) histo_[plotList_[plot]][kSigPow]->Draw("hist same");
+	      // turn on grid
+	      plotCanvas_[canvasNumber]->SetGrid(0,1);
+	      // theory ratios wrt MadGraph
+	      if(withRatioPlot){
+		std::vector<double> zeroerr_;
+		for(int bin=0; bin<histo_[plotList_[plot]][kSig]->GetNbinsX(); ++bin) zeroerr_.push_back(0);
+		int rval1 = drawRatio(histo_[plotList_[plot]][kSigMca], histo_[plotList_[plot]][kSig], 0.5, 1.19, myStyle, verbose, zeroerr_, "simulation", "MadGraph", "hist"     , constMcatnloColor, false, 0.1);
+		int rval2 = drawRatio(histo_[plotList_[plot]][kSigPow], histo_[plotList_[plot]][kSig], 0.5, 1.19, myStyle, verbose, zeroerr_, "simulation", "MadGraph", "hist same", constPowhegColor , false, 0.1);
+		if (rval1!=0||rval2!=0) std::cout << " Problem occured when creating ratio plot for " << plotList_[plot] << std::endl;
+	      }
 	    }
 	  }
 	  // draw other plots into same canvas 
