@@ -12,6 +12,7 @@ class TFile;
 class TLorentzVector;
 class TH1;
 class TString;
+class TObject;
 
 #include "classes.h"
 
@@ -44,11 +45,12 @@ class RootFileReader {
     RootFileReader() {};
     ~RootFileReader();
 public:
-    //returns the singleton instnce
+    //returns the singleton instance
     static RootFileReader* getInstance();
     
-    // 
-    std::vector<TString> findHistos(const char* filename, const char* histonameBegin);
+    // Find in a given file histograms whose names contain the given fragment,
+    // either anywhere in the name, or only at the begin of the name
+    std::vector<TString> findHistos(const char* filename, const char* histonameFragment, const bool fragmentAtBegin =true);
     
     //need to put code for templated functions in the header file to allow compilation
     

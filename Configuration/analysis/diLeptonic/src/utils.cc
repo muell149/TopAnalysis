@@ -399,12 +399,13 @@ TObject *RootFileReader::GetObj(const char * filename, const char * histoname, b
 }
 
 
-std::vector<TString> RootFileReader::findHistos(const char* filename, const char* histonameBegin){
+std::vector<TString> RootFileReader::findHistos(const char* filename, const char* histonameFragment, const bool fragmentAtBegin){
     
     TFile* file = TFile::Open(filename);
     if (!file) {
+        const std::string helpText(fragmentAtBegin ? "beginning with: " : "containing: ");
         std::cerr << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n\n"
-                  << "The file " << filename << " does not exist, thus cannot search for histogram beginning with " << histonameBegin 
+                  << "The file "<<filename<<" does not exist, thus cannot search for histogram "<<helpText<<histonameFragment
                   << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n"
                   << std::endl;
         exit(1);
@@ -415,9 +416,12 @@ std::vector<TString> RootFileReader::findHistos(const char* filename, const char
         TObject* i_histoList = histoList->At(i);
         TString* histoName(0);
         histoName = new TString(i_histoList->GetName());
-        if(histoName->BeginsWith(histonameBegin)){
-            //std::cout<<"\n\tName of object: "<<*histoName<<"\n\n";
-            result.push_back(*histoName);
+        //std::cout<<"\n\tName of object: "<<*histoName<<"\n\n";
+        if(fragmentAtBegin){
+            if(histoName->BeginsWith(histonameFragment)) result.push_back(*histoName);
+        }
+        else{
+            if(histoName->Contains(histonameFragment)) result.push_back(*histoName);
         }
     }
     return result;
