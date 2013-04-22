@@ -1512,8 +1512,9 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
     double BranchingFraction[4]={0.01166, 0.01166, 0.02332, 0.04666};//[ee, mumu, emu, combined] not including tau
 
-    double NrOfEvts_VisGen_afterSelection = 0;
-    double NrOfEvts_afterSelection = 0;
+    double NrOfEvts_VisGen_afterSelection_noweight = 0, NrOfEvts_VisGen_afterSelection = 0;
+    double NrOfEvts_afterSelection_noweight = 0, NrOfEvts_afterSelection = 0;
+    double NrOfEvts_Gen_afterRecoSelection_noweight = 0, NrOfEvts_Gen_afterRecoSelection = 0;
     double NrOfEvts = 0;
 
     TH1D *numhists[hists.size()];
@@ -1549,15 +1550,28 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
             error_numbers[1]+=NoPUPlot->GetBinError(2) * NoPUPlot->GetBinError(2); //This bin selection is hardcoded please change it if changes when filling in Analysis.C
 
             TH1D *GenPlot = fileReader->GetClone<TH1D>(datasetVec.at(i), "GenAll");
-            ApplyFlatWeights(GenPlot, LumiWeight);
-
             TH1D *GenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "GenAll_noweight");
+            TH1D *VisGenPlot = fileReader->GetClone<TH1D>(datasetVec.at(i), "VisGenAll");
             TH1D *VisGenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "VisGenAll_noweight");
+            TH1D *RecoGenPlot = fileReader->GetClone<TH1D>(datasetVec.at(i), "GenAll_RecoCuts");
+            TH1D *RecoGenPlot_noweight = fileReader->GetClone<TH1D>(datasetVec.at(i), "GenAll_RecoCuts_noweight");
             TH1 *h_NrOfEvts = fileReader->GetClone<TH1>(datasetVec.at(i), "weightedEvents");
 
+            ApplyFlatWeights(GenPlot, LumiWeight);
+            ApplyFlatWeights(GenPlot_noweight, LumiWeight);
+            ApplyFlatWeights(VisGenPlot, LumiWeight);
+            ApplyFlatWeights(VisGenPlot_noweight, LumiWeight);
+            ApplyFlatWeights(RecoGenPlot, LumiWeight);
+            ApplyFlatWeights(RecoGenPlot_noweight, LumiWeight);
+            ApplyFlatWeights(h_NrOfEvts, LumiWeight);
+            
             NrOfEvts += h_NrOfEvts->GetBinContent(1);
-            NrOfEvts_afterSelection += GenPlot_noweight->Integral();
-            NrOfEvts_VisGen_afterSelection += VisGenPlot_noweight->Integral();
+            NrOfEvts_afterSelection += GenPlot->Integral();
+            NrOfEvts_afterSelection_noweight += GenPlot_noweight->Integral();
+            NrOfEvts_VisGen_afterSelection += VisGenPlot->Integral();
+            NrOfEvts_Gen_afterRecoSelection += RecoGenPlot->Integral();
+            NrOfEvts_Gen_afterRecoSelection_noweight += RecoGenPlot_noweight->Integral();
+            NrOfEvts_VisGen_afterSelection_noweight += VisGenPlot_noweight->Integral();
 
             numbers[2]+=GenPlot->Integral();
             error_numbers[2]+=GenPlot->GetBinError(18) * GenPlot->GetBinError(18); //This bin selection is hardcoded please change it if changes when filling in Analysis.C
@@ -1635,10 +1649,26 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     EventFile<<"Efficiency= "<<(numbers[1]/numbers[2])<<endl;
     EventFile<<"BrancRatio= "<<BranchingFraction[channelType]<<endl;
     EventFile<<"Total Gen Events (no weights)= "<<NrOfEvts<<endl;
-    EventFile<<"Gen Events after Selection (no weights)= "<<NrOfEvts_afterSelection<<endl;
-    EventFile<<"Visible Gen Events after Selection (no weights)= "<<NrOfEvts_VisGen_afterSelection<<endl;
-    EventFile<<"Acceptance= "<<NrOfEvts_afterSelection/NrOfEvts<<endl;
-    EventFile<<"Visible Acceptance= "<<NrOfEvts_VisGen_afterSelection/NrOfEvts<<endl;
+    EventFile<<"Gen Events after Selection (no weights)= "<<NrOfEvts_afterSelection_noweight<<endl;
+    EventFile<<"Visible Gen Events after Selection (no weights)= "<<NrOfEvts_VisGen_afterSelection_noweight<<endl;
+    EventFile<<"Acceptance= "<<NrOfEvts_afterSelection_noweight/NrOfEvts<<endl;
+    EventFile<<"Visible Acceptance= "<<NrOfEvts_VisGen_afterSelection_noweight/NrOfEvts<<endl;
+    EventFile<<"------------------------------------------------------------------------------"<<endl;
+    EventFile<<"Efficiency and acceptance definitions as proposed by the TopXSection conveners\n"<<endl;
+    EventFile<<"N_rec = "<<numbers[1]<<endl;
+    EventFile<<"N_gen (with cuts at parton level) = "<<NrOfEvts_VisGen_afterSelection<<endl;
+    EventFile<<"N_gen (with cuts at parton level, no weights) = "<<NrOfEvts_VisGen_afterSelection_noweight<<endl;
+    EventFile<<"N_gen (with cuts at reco level) = "<<NrOfEvts_Gen_afterRecoSelection<<endl;
+    EventFile<<"N_gen (with cuts at reco level, no weights) = "<<NrOfEvts_Gen_afterRecoSelection_noweight<<endl;
+    EventFile<<"N_gen = "<<numbers[2]<<endl;
+    EventFile<<"\nEfficiency = N_rec / N_gen (with cuts at parton level) = "<<numbers[1]/NrOfEvts_VisGen_afterSelection<<endl;
+    EventFile<<"Efficiency = N_rec / N_gen (with cuts at parton level && noweights) = "<<numbers[1]/NrOfEvts_VisGen_afterSelection_noweight<<endl;
+    EventFile<<"\nEfficiency' = N_rec / N_gen (with cuts at reco level) = "<<numbers[1]/NrOfEvts_Gen_afterRecoSelection<<endl;
+    EventFile<<"Efficiency' = N_rec / N_gen (with cuts at reco level && noweights) = "<<numbers[1]/NrOfEvts_Gen_afterRecoSelection_noweight<<endl;
+    EventFile<<"\nAcceptance = N_gen (with cuts at parton level) / N_gen = "<<NrOfEvts_VisGen_afterSelection/numbers[2]<<endl;
+    EventFile<<"Acceptance = N_gen (with cuts at parton level && noweights) / N_gen = "<<NrOfEvts_VisGen_afterSelection_noweight/numbers[2]<<endl;
+    EventFile<<"Eff * Acc = "<<numbers[1] / numbers[2]<<endl;
+    EventFile<<"------------------------------------------------------------------------------"<<endl;
 
 
     double xsec = ( (numbers[0]-numbers[4]) * (numbers[1]/(numbers[1]+numbers[3])) ) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
