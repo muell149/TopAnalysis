@@ -1,5 +1,3 @@
-#include "plotterclass.h"
-
 #include <fstream>
 #include <iostream>
 #include <cstdio>
@@ -19,9 +17,14 @@
 #include <TFile.h>
 #include <TString.h>
 #include <TH1.h>
+#include <TH1F.h>
+#include <TH1D.h>
 #include <TList.h>
+#include <TGraphAsymmErrors.h>
 
-#include "utils.h"
+#include "RootFileReader.h"
+#include "plotterclass.h"
+
   
   // DAVID
 #include "DilepSVDFunctions.h"

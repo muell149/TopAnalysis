@@ -1,16 +1,22 @@
 #ifndef plotterclass_h
 #define plotterclass_h
 
-#include <TString.h>
-#include <TH1.h>
-#include <TGraphAsymmErrors.h>
 #include <vector>
-#include <map>
 #include <set>
-#include "utils.h"
 
 class TGraphErrors;
 class TLegend;
+class TGraphAsymmErrors;
+class TH1;
+class TString;
+class TH1F;
+class TH1D;
+
+class RootFileReader;
+
+
+
+
 
 class Plotter {
 

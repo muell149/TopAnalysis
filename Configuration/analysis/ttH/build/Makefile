@@ -88,7 +88,7 @@ JetCategories.o: $(HiggsDir)/JetCategories.cc $(HiggsDir)/JetCategories.h
 
 
 
-Histo: Histo.o Plotter.o plotterHelpers.o utils.o higgsUtils.o HistoListReader.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o
+Histo: Histo.o Plotter.o plotterHelpers.o utils.o higgsUtils.o HistoListReader.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o RootFileReader.o
 	g++ -o Histo $^ $(ROOTLIBS)
 
 Histo.o: $(HiggsDir)/Histo.cc $(HiggsDir)/sampleHelpers.h $(HiggsDir)/Samples.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/EventYields.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/Plotter.h $(HiggsDir)/higgsUtils.h $(TopDir)/HistoListReader.h $(TopDir)/CommandLineParameters.h
@@ -108,6 +108,9 @@ EventYields.o: $(HiggsDir)/EventYields.cc $(HiggsDir)/EventYields.h $(HiggsDir)/
 
 Plotter.o: $(HiggsDir)/Plotter.cc $(HiggsDir)/Plotter.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/Samples.h
 	g++ -c -o Plotter.o $(COMPFLAGS) $(HiggsDir)/Plotter.cc
+
+RootFileReader.o: $(TopDir)/RootFileReader.cc $(TopDir)/RootFileReader.h
+	g++ -c -o RootFileReader.o $(COMPFLAGS) $(TopDir)/RootFileReader.cc
 
 
 

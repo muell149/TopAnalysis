@@ -12,6 +12,7 @@ class TString;
 class RootFileReader;
 class Sample;
 class Samples;
+class TString;
 
 
 

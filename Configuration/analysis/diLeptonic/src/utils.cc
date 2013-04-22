@@ -1,51 +1,60 @@
-#include "utils.h"
-
-#include <cmath>
-#include <string>
 #include <iostream>
-#include <algorithm>
-#include <stdlib.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
 
+#include <TLorentzVector.h>
+#include <TH1.h>
+#include <TString.h>
+#include <THStack.h>
+#include <TList.h>
+#include <TH1D.h>
 #include <TPad.h>
 #include <TF1.h>
-#include <TPaveText.h>
 #include <TMath.h>
-#include <TLorentzVector.h>
-#include <TFile.h>
-#include <THStack.h>
-#include <TString.h>
+
+#include "utils.h"
 
 
-void LVtod4(const LV lv, double *d) {
+
+
+
+void LVtod4(const LV& lv, double* d)
+{
     d[0] = lv.E();
     d[1] = lv.Px();
     d[2] = lv.Py();
     d[3] = lv.Pz();
 }
 
-std::string d2s(double d) {
+
+
+std::string d2s(const double& d)
+{
     char result[100];
     if (std::abs(d) < 5) {
-        sprintf(result, "%.3f", d);
+        std::sprintf(result, "%.3f", d);
         std::string s = std::string(result);
         while (s.length() > 0 && s[s.length()-1] == '0') s.erase(s.end()-1);
         if (s.length() > 0 && s[s.length()-1] == '.') s.erase(s.end()-1);
         return s;
     } else {
-        sprintf(result, "%.0f", d);
+        std::sprintf(result, "%.0f", d);
         return std::string(result);
     }
 }
 
+
+
 void drawRatio(const TH1* histNumerator, const TH1* histDenominator, 
-               const Double_t ratioMin, const Double_t ratioMax, 
-               const TStyle &myStyle, int verbose, const std::vector<double> err)
+               const Double_t& ratioMin, const Double_t& ratioMax, 
+               const TStyle& myStyle, const int verbose, const std::vector<double>& err)
 {
     // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'
     // the range of the ratio is 'ratioMin' to 'ratioMax'
     // to the systematic variation "sys" of the enumerator "systematicVariation"
     // per default only the gaussian error of the 'histNumerator' is considered:
-    // (error(bin i) = sqrt(histNumerator->GetBinContent(i))/histDenominator->GetBinContent(i))
+    // (error(bin i) = std::sqrt(histNumerator->GetBinContent(i))/histDenominator->GetBinContent(i))
     // if 'err_' is present and its size equals the number of bins in the histos,
     // its valus are considered as error for the ratio
     // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
@@ -77,7 +86,7 @@ void drawRatio(const TH1* histNumerator, const TH1* histDenominator,
         // b) default: only gaussian error of histNumerator
         if(verbose>0) std::cout << "ratio error from statistical error of " << histNumerator->GetName() << " only" << std::endl;
         for(int bin=1; bin<=histNumerator->GetNbinsX(); bin++){
-            ratio->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator->GetBinContent(bin));
+            ratio->SetBinError(bin, std::sqrt(histNumerator->GetBinContent(bin))/histDenominator->GetBinContent(bin));
         }
     }
     // get some values from old pad
@@ -171,6 +180,7 @@ void drawRatio(const TH1* histNumerator, const TH1* histDenominator,
     f2->SetLineColor(kBlack);
     f2->Draw("L same");
 }
+
 
 
 void setHHStyle(TStyle& HHStyle)
@@ -362,138 +372,53 @@ void setHHStyle(TStyle& HHStyle)
 }
 
 
-///////////////////////////////////////////
 
-TObject *RootFileReader::GetObj(const char * filename, const char * histoname, bool allowNonexisting) {
-    auto& file = fileMap[filename];
-    if (!file) {
-        file = TFile::Open(filename);
-        if (!file) {
-            if (allowNonexisting) return nullptr;
-            std::cerr << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n\n"
-                      << "The file " << filename << " does not exist, thus cannot get histogram " << histoname 
-                      << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n"
-                      << std::endl;
-            exit(1);
-        }
-        ++opened[filename];
-    } else {
-        fileOrder.erase(std::remove_if(begin(fileOrder), end(fileOrder), 
-                                        [=](const TString &str){ return str == filename;}),
-                        end(fileOrder));
-    }
-    
-    fileOrder.push_back(filename);
-    ++accessed[filename];
-    //at max, keep 20 files open
-    if (fileMap.size() > 20) {
-        //delete 0th element
-        delete fileMap[fileOrder[0]];
-        fileMap.erase(fileOrder[0]);
-        fileOrder.erase(fileOrder.begin());
-    }
-    TObject* result = file->Get(histoname);
-    TH1* as_histo = dynamic_cast<TH1*>(result);
-    if (as_histo) as_histo->SetDirectory(file);
-    return result;
-}
-
-
-std::vector<TString> RootFileReader::findHistos(const char* filename, const char* histonameFragment, const bool fragmentAtBegin){
-    
-    TFile* file = TFile::Open(filename);
-    if (!file) {
-        const std::string helpText(fragmentAtBegin ? "beginning with: " : "containing: ");
-        std::cerr << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n\n"
-                  << "The file "<<filename<<" does not exist, thus cannot search for histogram "<<helpText<<histonameFragment
-                  << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n"
-                  << std::endl;
-        exit(1);
-    }
-    std::vector<TString> result;
-    TList* histoList = file->GetListOfKeys();
-    for(int i=0; i<histoList->GetSize(); ++i){
-        TObject* i_histoList = histoList->At(i);
-        TString* histoName(0);
-        histoName = new TString(i_histoList->GetName());
-        //std::cout<<"\n\tName of object: "<<*histoName<<"\n\n";
-        if(fragmentAtBegin){
-            if(histoName->BeginsWith(histonameFragment)) result.push_back(*histoName);
-        }
-        else{
-            if(histoName->Contains(histonameFragment)) result.push_back(*histoName);
-        }
-    }
-    return result;
-}
-
-
-RootFileReader::~RootFileReader()
+const TLorentzVector LVtoTLV(const LV& lv)
 {
-//     std::cout << "Deleting RootFileReader\n";
-//     for (const auto& i : fileMap) {
-//         delete i.second;
-//     }
-//     for (const auto& i : accessed) {
-//         std::cout << "accessed: " << i.first << " " << i.second << std::endl;
-//     }
-//     for (const auto& i : opened) {
-//         std::cout << "opened: " << i.first << " " << i.second << std::endl;
-//     }
-//     
-}
-
-RootFileReader* RootFileReader::getInstance() {
-    static RootFileReader instance;
-    return &instance;
-}
-
-/////////////////////////////////////////////////////////
-
-
-const TLorentzVector LVtoTLV(const LV& lv) {
     return TLorentzVector(lv.X(), lv.Y(), lv.Z(), lv.T());
 }
 
-const LV TLVtoLV(const TLorentzVector& lv) {
+
+
+const LV TLVtoLV(const TLorentzVector& lv)
+{
     LV result; 
     result.SetXYZT(lv.X(), lv.Y(), lv.Z(), lv.T());
     return result;
 }
 
-/** Sum the histograms in a stack and
- * return the sum in a new TH1
- */
+
+
 TH1* SummedStackHisto(const THStack *stack)
 {
-    TList *l { stack->GetHists() }; //the TList is owned by the stack
-    if (l->GetEntries() == 0) return 0;
-    TH1* result = (TH1*) l->At(0)->Clone();
-    for (int i = 1; i < l->GetEntries(); ++i) {
-        result->Add((TH1*)l->At(i));
+    TList *list { stack->GetHists() }; //the TList is owned by the stack
+    if (list->GetEntries() == 0) return 0;
+    TH1* result = (TH1*) list->At(0)->Clone();
+    for (int i = 1; i < list->GetEntries(); ++i) {
+        result->Add((TH1*)list->At(i));
     }
     return result;
 }
 
-/** Calculate the median of a histogram
- * 
- */
-double Median(TH1 * h1)
+
+
+double Median(TH1* h1)
 { 
-   int n = h1->GetXaxis()->GetNbins();
-   std::vector<double>  x(n);
+   int nBin = h1->GetXaxis()->GetNbins();
+   std::vector<double> x(nBin);
    h1->GetXaxis()->GetCenter( &x[0] );
    TH1D* h1D = dynamic_cast<TH1D*>(h1);
    if (!h1D) { std::cerr << "Median needs a TH1D!\n"; exit(7); }
    const double * y = h1D->GetArray(); 
    // exclude underflow/overflows from bin content array y
-   return TMath::Median(n, &x[0], &y[1]); 
+   return TMath::Median(nBin, &x[0], &y[1]); 
 }
 
-/// return CMSSW_BASE environment variable as string, with error checking
+
+
 const std::string CMSSW_BASE()
 {
-    const char *cmssw_base = getenv("CMSSW_BASE");
+    const char *cmssw_base = std::getenv("CMSSW_BASE");
     if (!cmssw_base) {
         std::cerr << "Error! Environmental variable CMSSW_BASE not set!\n"
                   << "Please run cmsenv first.\n"
@@ -504,6 +429,8 @@ const std::string CMSSW_BASE()
     std::string result(cmssw_base);
     return result;
 }
+
+
 
 const TString DATA_PATH()
 {

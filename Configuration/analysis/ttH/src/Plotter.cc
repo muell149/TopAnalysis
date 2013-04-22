@@ -15,11 +15,13 @@
 #include <TFile.h>
 #include <TString.h>
 #include <TH1.h>
+#include <TH1D.h>
 #include <TGaxis.h>
 #include <TPaveText.h>
 #include <TH1D.h>
 
 #include "Plotter.h"
+#include "../../diLeptonic/src/RootFileReader.h"
 #include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
 
@@ -183,7 +185,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     
     // Here fill colors and line width are adjusted, and potentially rebinning applied
     for(auto sampleHistPair : v_sampleHistPair_){
-        TH1D* tmp_hist = sampleHistPair.second;
+        TH1* tmp_hist = sampleHistPair.second;
         if(rebin_>1) tmp_hist->Rebin(rebin_);
         setStyle(sampleHistPair, true);
     }
@@ -205,7 +207,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     {
         const Sample::SampleType& sampleType(i_sampleHistPair->first.sampleType());
         const TString& legendEntry(i_sampleHistPair->first.legendEntry());
-        TH1D* hist = i_sampleHistPair->second;
+        TH1* hist = i_sampleHistPair->second;
         
         std::vector<SampleHistPair>::iterator incrementIterator(i_sampleHistPair);
         ++incrementIterator;

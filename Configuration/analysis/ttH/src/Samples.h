@@ -7,7 +7,7 @@
 #include "sampleHelpers.h"
 
 class RootFileReader;
-class TH1D;
+class TH1;
 class TString;
 
 
@@ -161,7 +161,7 @@ private:
 
 
 /// Type for associating a specific histogram of the input file to the sample
-typedef std::pair<Sample, TH1D*> SampleHistPair;
+typedef std::pair<Sample, TH1*> SampleHistPair;
 
 
 

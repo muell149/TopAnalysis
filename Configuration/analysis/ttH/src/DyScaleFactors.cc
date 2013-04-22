@@ -7,7 +7,7 @@
 #include <TString.h>
 
 #include "DyScaleFactors.h"
-#include "../../diLeptonic/src/utils.h"
+#include "../../diLeptonic/src/RootFileReader.h"
 #include "higgsUtils.h"
 #include "Samples.h"
 

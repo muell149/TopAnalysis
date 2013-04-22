@@ -244,7 +244,7 @@ void BasicHistograms::fill(const Input& input, const double& weight, const TStri
     // Updating  titles of the histograms for b jets
     //if(m_stepHistograms_[step].m_histogram_["basicBjetMultiplicity"]->GetEntries()<1) {
     //    char addStr[20];
-    //    sprintf(addStr," (#geq %.2f)", BtagWP);
+    //    std::sprintf(addStr," (#geq %.2f)", BtagWP);
     //    
     //    TH1* histo;
     //    histo = m_stepHistograms_[step].m_histogram_["basicBjetMultiplicity"];

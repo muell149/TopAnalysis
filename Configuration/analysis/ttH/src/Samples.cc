@@ -4,10 +4,10 @@
 
 #include <TString.h>
 #include <TColorWheel.h>
-#include <TH1D.h>
+#include <TH1.h>
 
 #include "Samples.h"
-#include "../../diLeptonic/src/utils.h"
+#include "../../diLeptonic/src/RootFileReader.h"
 
 
 

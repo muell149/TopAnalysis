@@ -5,15 +5,18 @@
 #include <map>
 #include <set>
 
+class TGraphErrors;
+class TLegend;
+class RootFileReader;
+class TString;
+class TH1;
+
 #include "plotterHelpers.h"
 #include "DyScaleFactors.h"
 #include "sampleHelpers.h"
 #include "Samples.h"
 
-class TGraphErrors;
-class TLegend;
-class RootFileReader;
-class TString;
+
 
 
 
@@ -31,7 +34,7 @@ public:
     
 private:
     
-    typedef std::pair<TString, TH1D*> LegendHistPair;
+    typedef std::pair<TString, TH1*> LegendHistPair;
     
     bool prepareDataset(const std::vector<Sample>&);
 
