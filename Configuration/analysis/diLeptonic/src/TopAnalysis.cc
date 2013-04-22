@@ -458,18 +458,6 @@ void TopAnalysis::SlaveBegin ( TTree * )
     CreateBinnedControlPlots(h_HypTopRapidity, h_MET);
     CreateBinnedControlPlots(h_HypTopRapidity, h_diLepMassFull);
     
-    
-    
-    h_AllLeptonpT_step0 = store(new TH1D("AllLeptonpT_step0", "p_{T} of all leptons before trigger", 80, 0, 400));
-    h_AllLeptonEta_step0 = store(new TH1D("AllLeptonEta_step0", "#eta of all leptons before trigger", 20, -2.4, 2.4));
-    h_LeptonpT_step0 = store(new TH1D("LeptonpT_step0", "p_{T} of  leptons before trigger", 80, 0, 400));
-    h_LeptonEta_step0 = store(new TH1D("LeptonEta_step0", "#eta of  leptons before trigger", 20, -2.4, 2.4));
-    h_LeptonMult_step0 = store(new TH1D("LeptonMult_step0", "Number of all leptons before trigger", 20, -0.5, 20.5));
-    h_AllJetspT_step0 = store(new TH1D("AllJetpT_step0", "p_{T} of all jets before trigger", 80, 0, 400));
-    h_AllJetsEta_step0 = store(new TH1D("AllJetEta_step0", "#eta of all jets before trigger", 20, -2.4, 2.4));
-    h_JetsMult_step0 = store(new TH1D("JetsMult_step0", "Number of the jets before trigger", 20, -0.5, 20.5));
-    h_BJetsMult_step0 = store(new TH1D("BJetsMult_step0", "Number of the jets before trigger", 20, -0.5, 20.5));
-    
     h_AllLeptonpT_step1 = store(new TH1D("AllLeptonpT_step1", "p_{T} of all leptons before 2 lepton", 80, 0, 400));
     h_AllLeptonEta_step1 = store(new TH1D("AllLeptonEta_step1", "#eta of all leptons before 2 lepton", 20, -2.4, 2.4));
     h_LeptonpT_step1 = store(new TH1D("LeptonpT_step1", "p_{T} of  leptons before 2 lepton", 80, 0, 400));
