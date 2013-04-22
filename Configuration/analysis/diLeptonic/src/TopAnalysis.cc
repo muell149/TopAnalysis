@@ -667,10 +667,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     //                         <<LeadGenBJet.pt()<<" , "<<NLeadGenBJet.pt()<<" , "
     //                         <<genHT<<"\n";
     
-    
-    
-    
-    
+
+    //===CUT===
+    // check if event was triggered
+    if(this->failsDileptonTrigger(entry)) return kTRUE;
     
     // === FULL OBJECT SELECTION === (can thus be used at each selection step)
     
@@ -741,27 +741,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Get MET
     const LV& met(*met_);
     
-    // ++++ Control Plots ++++
-    for(const int index : allLeptonIndices){
-        h_AllLeptonEta_step0->Fill(leptons_->at(index).Eta(), 1);
-        h_AllLeptonpT_step0->Fill(leptons_->at(index).Pt(), 1);
-    }
-    
-    for(const int index : jetIndices){
-        h_AllJetsEta_step0->Fill(jets_->at(index).Eta(), 1);
-        h_AllJetspT_step0->Fill(jets_->at(index).Pt(), 1);
-    }
-    h_LeptonMult_step0->Fill(numberOfAllLeptons, 1);
-    h_JetsMult_step0->Fill(numberOfJets, 1);
-    h_BJetsMult_step0->Fill(numberOfBjets, 1);
-    
     h_PUSF->Fill(weightPU, 1);
-    
-    
-    
-    //===CUT===
-    // check if event was triggered
-    if(this->failsDileptonTrigger(entry)) return kTRUE;
 
     // ++++ Control Plots ++++
     for(const int index : allLeptonIndices){
