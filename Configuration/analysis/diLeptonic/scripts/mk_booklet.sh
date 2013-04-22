@@ -73,7 +73,7 @@
 TIME=$(date +%F--%H%M)
 
 CDIR=$(pwd) #current working directory
-PDIR=Plots/combined #plot dir
+PDIR=Plots/combined/Nominal #plot dir
 PDFPREF=pdf-s #pdf prefix
 PDFDIR=$CDIR/$PDIR/$PDFPREF #pdf dir
 COUNTER=0 #counter
@@ -82,31 +82,31 @@ BSN=booklet-$TIME #base name
 BOOKLETSRC=$PDFDIR/$BSN.tex #booklet .tex source file
 BOOKLETN=$PDFDIR/$BSN.pdf #self-explainatory
 
-INFILE=$CDIR/mk_booklet.lst #input control file
+INFILE=$CDIR/scripts/mk_booklet.lst #input control file
 BOOKLETDIR=$CDIR/Booklets #directory where we save the stuff
 
 cd $CDIR/$PDIR
 
 if [ -d $PDFDIR ]; then
 
-	rm -R $PDFDIR
-	mkdir -p $PDFDIR
+    rm -R $PDFDIR
+    mkdir -p $PDFDIR
 
 else
 
-	mkdir -p $PDFDIR
+    mkdir -p $PDFDIR
 
 fi
 
 for EPS_FILES in $( cat $INFILE ); do
 
-	echo $EPS_FILES
+    echo $EPS_FILES
 
-	if [ "$EPS_FILES" != "NL" ] && [ -a $EPS_FILES.eps ]; then
-		epstopdf $EPS_FILES.eps
-	else
-		echo "There is no $EPS_FILES.eps ..."
-	fi
+    if [ "$EPS_FILES" != "NL" ] && [ -a $EPS_FILES.eps ]; then
+        epstopdf $EPS_FILES.eps
+    else
+        echo "There is no $EPS_FILES.eps ..."
+    fi
 done
 
 mv *pdf $PDFDIR
@@ -114,25 +114,26 @@ mv *pdf $PDFDIR
 cd $PDFDIR
 
 #create the header
-echo <<LATEX >> $BOOKLETSRC
+cat <<LATEX >> $BOOKLETSRC
+
 \documentclass[12pt, a4paper, titlepage]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
- 
+
 %all the graphics will be contained in here
 \usepackage{graphicx, float, pdflscape, caption, subfigure, fullpage, fancyhdr}
- 
+
 %setting the plot environments
 %work in progress ...
 %\newenvironment{pictures}{
- 
+
 %subfigure manual suggested this option ...
 %\subfiglabelskip=Opt
- 
+
 %we create the header for the document ... it carries the filename ...
 \pagestyle{fancy} 
 \lhead{\texttt{"$BSN"}}
- 
+
 \begin{document}
 
 %generic titlepage creation
@@ -145,11 +146,11 @@ echo <<LATEX >> $BOOKLETSRC
   \large{Booklet filename -- "$BSN"}
 \end{center}
 \vfill
- 
+
 \small{Date: \today}
- 
+
 \end{titlepage}
- 
+
 \pagebreak
 
 
