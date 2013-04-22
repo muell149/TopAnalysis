@@ -848,6 +848,12 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     bool hasJets = numberOfJets > 1;
     bool hasMetOrEmu = channel_ == "emu" || met_->Pt() > 40;
 
+    if(isTopSignal_ && hasLeptonPair && hasJets)
+    {// Set of histograms needed to estimate the efficiency and acceptance requested by the TopXSection conveners
+        h_GenAll_RecoCuts_noweight->Fill(GenTop_->M(), weightGenerator_);
+        h_GenAll_RecoCuts->Fill(GenTop_->M(), weight);
+    }
+
     /// Begin: New random method for b-tagging
     if (isMC_ && !makeeffs && ReTagJet){
         //If b-tag efficiencies do not exit ==> do not re-tag the jets' b-tag value
@@ -1156,17 +1162,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (!hasSolution) return kTRUE;
     weight *= weightKinFit_;
     
-    if(isTopSignal_)
-    {// Set of histograms needed to estimate the efficiency and acceptance requested by the TopXSection conveners
-        h_GenAll_RecoCuts_noweight->Fill(GenTop_->M(), weightGenerator_);
-        h_GenAll_RecoCuts->Fill(GenTop_->M(), weight);
-    }
-    
     h_leptonPtAfterKinReco->Fill(leptons_->at(leptonIndex).Pt(), weight);
     h_leptonPtAfterKinReco->Fill(leptons_->at(antiLeptonIndex).Pt(), weight);
     h_leptonEtaAfterKinReco->Fill(leptons_->at(leptonIndex).Eta(), weight);
     h_leptonEtaAfterKinReco->Fill(leptons_->at(antiLeptonIndex).Eta(), weight);
-
     h_METAfterKinReco->Fill(met_->Pt(), weight);
     for (const int index : bjetIndices)
         h_bjetetaAfterKinReco->Fill(jets_->at(index).Eta(), weight);
