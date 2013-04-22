@@ -107,7 +107,7 @@ private:
     TH1* h_jetCategories_overview_step7;
     TH1* h_jetCategories_overview_step8;
     
-     /// Histograms for the analysis jet categories
+    /// Histograms for the analysis jet categories
     TH1* h_jetCategories_step8;
     
     /// Histograms for cutflow tables which are not contained in Analysis.h
@@ -125,14 +125,13 @@ private:
     /// Histograms for Drell-Yan scaling
     DyScalingHistograms dyScalingHistograms_;
     
+    /// Basic histograms
+    BasicHistograms basicHistograms_;
+    
     /// Control plots
     TH1* h_jetPt_step8;
     TH1* h_jetChargeGlobalPtWeighted_step8;
     TH1* h_jetChargeRelativePtWeighted_step8;
-    
-    
-    TH1* h_jetMultiplicity_step7;
-    TH1* h_jetMultiplicity_step8;
     
     TH1* h_matchedBjetsFromTop_step8;
 };

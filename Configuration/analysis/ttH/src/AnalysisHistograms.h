@@ -2,9 +2,10 @@
 #define AnalysisHistograms_h
 
 #include <map>
+#include <vector>
 
 class TString;
-class TH1D;
+class TH1;
 class TSelectorList;
 
 #include "higgsUtils.h"
@@ -43,7 +44,7 @@ protected:
         ~StepHistograms(){};
 
         /// The map with all the histograms for one selection step
-        std::map<TString, TH1D*> m_histogram_;
+        std::map<TString, TH1*> m_histogram_;
     };
 
     /// Book all histograms for given selection step (dummy method, override in inherited AnalysisHistograms)
@@ -97,10 +98,10 @@ private:
     virtual void bookHistos(const TString& step);
 
     /// Store histogram in output
-    TH1D* bookHisto(TH1D* histo, const TString& name);
+    TH1* bookHisto(TH1* histo, const TString& name);
 
     /// Loose histogram, required only once, thus not part of histograms for specific selection steps
-    TH1D* h_loose_;
+    TH1* h_loose_;
 
 };
 
@@ -110,18 +111,40 @@ private:
 
 
 /// Class for basic histograms that are filled simultaneously for any step
-class AnalysisBasicHistograms : public AnalysisHistogramsBase{
+class BasicHistograms : public AnalysisHistogramsBase{
 
 public:
-
+    
+    /// Struct holding all input variables needed for BasicHistograms
+    struct Input{
+        Input(const std::vector<int>& leptonIndices, const std::vector<int>& antiLeptonIndices,
+              const std::vector<int>& jetIndices, const std::vector<int>& bjetIndices,
+              const VLV& allLeptons, const VLV& jets, const LV& met,
+              const std::vector<double>& btagDiscriminators);
+        ~Input(){}
+        
+        const std::vector<int>& leptonIndices_;
+        const std::vector<int>& antiLeptonIndices_;
+        const std::vector<int>& jetIndices_;
+        const std::vector<int>& bjetIndices_;
+        
+        const VLV& allLeptons_;
+        const VLV& jets_;
+        const LV& met_;
+        
+        const std::vector<double>& btagDiscriminators_;
+    };
+    
+    
+    
     /// Empty constructor
-    AnalysisBasicHistograms(){}
+    BasicHistograms(){}
 
     /// Destructor
-    ~AnalysisBasicHistograms(){}
+    ~BasicHistograms(){}
 
-    /// Fill histograms for the Z veto region, i.e. outside the Z window
-    void fill(const VLV* leptons, const int& LeadLeptonId, const int& NLeadLeptonId, const VLV* jets, const std::vector<int>* SelJetIds, const std::vector<double>* bTagOutput, const double& BTagWP, const LV* MEt, const double& weight, const TString& step);
+    /// Fill basic histograms
+    void fill(const Input& input, const double& weight, const TString& step);
 
 
 

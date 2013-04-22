@@ -90,7 +90,8 @@ HiggsAnalysis::HiggsAnalysis(TTree*)
 
 
 
-HiggsAnalysis::~HiggsAnalysis(){}
+HiggsAnalysis::~HiggsAnalysis()
+{}
 
 
 
@@ -140,7 +141,7 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     // Analysis categories
     const int numberOfCategories(jetCategories_.numberOfCategories());
 
-    h_jetCategories_step8 = store(new TH1D("JetCategories_step8","Jet categories;# jets/b-jets; # events", numberOfCategories, 0, numberOfCategories));
+    h_jetCategories_step8 = store(new TH1D("jetCategories_step8","Jet categories;# jets/b-jets; # events", numberOfCategories, 0, numberOfCategories));
 
     const std::vector<TString> v_binLabel(jetCategories_.binLabels());
     for(std::vector<TString>::const_iterator i_binLabel = v_binLabel.begin(); i_binLabel != v_binLabel.end(); ++i_binLabel){
@@ -153,15 +154,15 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     // Overview categories
     const int numberOfCategories_overview(jetCategories_overview_.numberOfCategories());
 
-    h_jetCategories_overview_step0 = store(new TH1D("JetCategories_overview_step0","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step1 = store(new TH1D("JetCategories_overview_step1","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step2 = store(new TH1D("JetCategories_overview_step2","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step3 = store(new TH1D("JetCategories_overview_step3","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step4 = store(new TH1D("JetCategories_overview_step4","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step5 = store(new TH1D("JetCategories_overview_step5","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step6 = store(new TH1D("JetCategories_overview_step6","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step7 = store(new TH1D("JetCategories_overview_step7","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step8 = store(new TH1D("JetCategories_overview_step8","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step0 = store(new TH1D("jetCategories_overview_step0","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step1 = store(new TH1D("jetCategories_overview_step1","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step2 = store(new TH1D("jetCategories_overview_step2","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step3 = store(new TH1D("jetCategories_overview_step3","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step4 = store(new TH1D("jetCategories_overview_step4","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step5 = store(new TH1D("jetCategories_overview_step5","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step6 = store(new TH1D("jetCategories_overview_step6","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step7 = store(new TH1D("jetCategories_overview_step7","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
+    h_jetCategories_overview_step8 = store(new TH1D("jetCategories_overview_step8","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
 
     const std::vector<TString> v_binLabel_overview(jetCategories_overview_.binLabels());
     for(std::vector<TString>::const_iterator i_binLabel = v_binLabel_overview.begin(); i_binLabel != v_binLabel_overview.end(); ++i_binLabel){
@@ -181,16 +182,16 @@ void HiggsAnalysis::SlaveBegin(TTree *)
 
 
     // Histograms needed for cutflow tables
-    h_events_step0a = store(new TH1D("events_step0a","event count (no weight)",8,0,8));
-    h_events_step0b = store(new TH1D("events_step0b","event count (no weight)",8,0,8));
-    h_events_step1 = store(new TH1D("events_step1","event count (no weight)",8,0,8));
-    h_events_step2 = store(new TH1D("events_step2","event count (no weight)",8,0,8));
-    h_events_step3 = store(new TH1D("events_step3","event count (no weight)",8,0,8));
-    h_events_step4 = store(new TH1D("events_step4","event count at after 2lepton",8,0,8));
-    h_events_step5 = store(new TH1D("events_step5","event count at after Zcut",8,0,8));
-    h_events_step6 = store(new TH1D("events_step6","event count at after 2jets",8,0,8));
-    h_events_step7 = store(new TH1D("events_step7","event count at after MET",8,0,8));
-    h_events_step8 = store(new TH1D("events_step8","event count at after 1btag",8,0,8));
+    h_events_step0a = store(new TH1D("events_step0a","event count (no weight);;# events",8,0,8));
+    h_events_step0b = store(new TH1D("events_step0b","event count (no weight);;# events",8,0,8));
+    h_events_step1 = store(new TH1D("events_step1","event count (no weight);;# events",8,0,8));
+    h_events_step2 = store(new TH1D("events_step2","event count (no weight);;# events",8,0,8));
+    h_events_step3 = store(new TH1D("events_step3","event count (no weight);;# events",8,0,8));
+    h_events_step4 = store(new TH1D("events_step4","event count at after 2lepton;;# events",8,0,8));
+    h_events_step5 = store(new TH1D("events_step5","event count at after Zcut;;# events",8,0,8));
+    h_events_step6 = store(new TH1D("events_step6","event count at after 2jets;;# events",8,0,8));
+    h_events_step7 = store(new TH1D("events_step7","event count at after MET;;# events",8,0,8));
+    h_events_step8 = store(new TH1D("events_step8","event count at after 1btag;;# events",8,0,8));
     h_events_step0a->Sumw2();
     h_events_step0b->Sumw2();
     h_events_step1->Sumw2();
@@ -209,17 +210,25 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     dyScalingHistograms_.addStep("6", fOutput);
     dyScalingHistograms_.addStep("7", fOutput);
     dyScalingHistograms_.addStep("8", fOutput);
-
-
+    
+    
+    // Basic histograms
+    basicHistograms_.addStep("1", fOutput);
+    basicHistograms_.addStep("2", fOutput);
+    basicHistograms_.addStep("3", fOutput);
+    basicHistograms_.addStep("4", fOutput);
+    basicHistograms_.addStep("5", fOutput);
+    basicHistograms_.addStep("6", fOutput);
+    basicHistograms_.addStep("7", fOutput);
+    basicHistograms_.addStep("8", fOutput);
+    
+    
     // Control plots
-    h_jetPt_step8 = store(new TH1D("jetPt_step8", "jet pT", 40, 0, 400));
-    h_jetChargeGlobalPtWeighted_step8 = store(new TH1D("jetChargeGlobalPtWeighted_step8", "jetChargeGlobalPtWeighted", 110, -1.1, 1.1));
-    h_jetChargeRelativePtWeighted_step8 = store(new TH1D("jetChargeRelativePtWeighted_step8", "jetChargeRelativePtWeighted", 110, -1.1, 1.1));
+    h_jetPt_step8 = store(new TH1D("jetPt_step8", "jet pt;p_{t}  [GeV];# jets", 40, 0, 400));
+    h_jetChargeGlobalPtWeighted_step8 = store(new TH1D("jetChargeGlobalPtWeighted_step8", "jetChargeGlobalPtWeighted; c_{jet}^{glob};# jets", 110, -1.1, 1.1));
+    h_jetChargeRelativePtWeighted_step8 = store(new TH1D("jetChargeRelativePtWeighted_step8", "jetChargeRelativePtWeighted; c_{jet}^{rel};# jets", 110, -1.1, 1.1));
 
-    h_jetMultiplicity_step7 = store(new TH1D("jetMultiplicity_step7","jetMultiplicity",15,0,15));
-    h_jetMultiplicity_step8 = store(new TH1D("jetMultiplicity_step8","jetMultiplicity",15,0,15));
-
-    h_matchedBjetsFromTop_step8 = store(new TH1D("matchedBjetsFromTop_step8","matchedBjetsFromTop",3,0,3));
+    h_matchedBjetsFromTop_step8 = store(new TH1D("matchedBjetsFromTop_step8","matchedBjetsFromTop;;# events",3,0,3));
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(1, "bQuark-genJet fail");
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(2, "genJet-recoJet fail");
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(3, "Matched");
@@ -236,6 +245,7 @@ void HiggsAnalysis::SlaveBegin(TTree *)
 void HiggsAnalysis::SlaveTerminate()
 {
     dyScalingHistograms_.clear();
+    basicHistograms_.clear();
 
     // Defaults from AnalysisBase
     AnalysisBase::SlaveTerminate();
@@ -378,9 +388,16 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Get MET
     const LV& met(*met_);
     
+    BasicHistograms::Input basicHistogramsInput(leptonIndices, antiLeptonIndices,
+                                                jetIndices, bjetIndices,
+                                                *leptons_, *jets_, met,
+                                                *jetBTagCSV_);
+    
+    
     // ++++ Control Plots ++++
     
     h_events_step1->Fill(1, 1);
+    basicHistograms_.fill(basicHistogramsInput, 1, "1");
     h_jetCategories_overview_step1->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), 1);
     
     
@@ -392,6 +409,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // ++++ Control Plots ++++
     
     h_events_step2->Fill(1, 1);
+    basicHistograms_.fill(basicHistogramsInput, 1, "2");
     h_jetCategories_overview_step2->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), 1);
 
 
@@ -413,6 +431,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // ++++ Control Plots ++++
     
     h_events_step3->Fill(1, weight);
+    basicHistograms_.fill(basicHistogramsInput, weight, "3");
     h_jetCategories_overview_step3->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
     
     
@@ -468,6 +487,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "4");
     }
     h_events_step4->Fill(1, weight);
+    basicHistograms_.fill(basicHistogramsInput, weight, "4");
     h_jetCategories_overview_step4->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
     
     
@@ -482,6 +502,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "5");
     }
     h_events_step5->Fill(1, weight);
+    basicHistograms_.fill(basicHistogramsInput, weight, "5");
     h_jetCategories_overview_step5->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
     
     
@@ -496,6 +517,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "6");
     }
     h_events_step6->Fill(1, weight);
+    basicHistograms_.fill(basicHistogramsInput, weight, "6");
     h_jetCategories_overview_step6->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
     
     
@@ -515,9 +537,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "7");
     }
     h_events_step7->Fill(1, weight);
-    
+    basicHistograms_.fill(basicHistogramsInput, weight, "7");
     h_jetCategories_overview_step7->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
-    h_jetMultiplicity_step7->Fill(numberOfJets, weight);
     
     
     
@@ -533,8 +554,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "8");
     }
     h_events_step8->Fill(1, weight);
-
-    h_jetMultiplicity_step8->Fill(numberOfJets, weight);
+    basicHistograms_.fill(basicHistogramsInput, weight, "8");
     FillBinnedControlPlot(h_jetCategories_step8, jetCategories_.categoryId(numberOfJets,numberOfBjets), h_events_step8, 1, weight);
 
     h_jetCategories_step8->Fill(jetCategories_.categoryId(numberOfJets,numberOfBjets), weight);

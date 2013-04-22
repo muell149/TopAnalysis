@@ -1,13 +1,16 @@
 #define AnalysisHistograms_cxx
 
 #include <iostream>
-#include <algorithm>
 
+#include <TH1.h>
 #include <TH1D.h>
 #include <TString.h>
+#include <TSelectorList.h>
 #include <Math/VectorUtil.h>
 
 #include "AnalysisHistograms.h"
+#include "../../diLeptonic/src/analysisUtils.h"
+#include "../../diLeptonic/src/classes.h"
 
 
 
@@ -24,7 +27,7 @@ void AnalysisHistogramsBase::addStep(const TString& step, TSelectorList* output)
 
     // Check whether step already exists
     if(this->checkExistence(step)){
-        std::cout<<"Warning in addStep()! Drell-Yan scaling already contains selection step: "<<step
+        std::cout<<"Warning in addStep()! Selection step already contained: "<<step
                  <<"\n...skip this one\n";
         return;
     }
@@ -47,6 +50,7 @@ void AnalysisHistogramsBase::bookHistos(const TString&)
 {
     // WARNING: this is empty template method, overwrite for inherited histogram class
 }
+
 
 
 void AnalysisHistogramsBase::clear()
@@ -75,7 +79,7 @@ void DyScalingHistograms::bookHistos(const TString& step)
         h_loose_ = this->bookHisto(h_loose_, "Looseh1");
     }
 
-    std::map<TString, TH1D*>& m_histogram = m_stepHistograms_[step].m_histogram_;
+    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
     m_histogram["h_all"] = this->bookHisto(m_histogram["h_all"], "Allh1_step" + step);
     m_histogram["h_zVeto"] = this->bookHisto(m_histogram["h_zVeto"], "TTh1_step" + step);
     m_histogram["h_zWindow"] = this->bookHisto(m_histogram["h_zWindow"], "Zh1_step" + step);
@@ -83,9 +87,9 @@ void DyScalingHistograms::bookHistos(const TString& step)
 
 
 
-TH1D* DyScalingHistograms::bookHisto(TH1D* histo, const TString& name)
+TH1* DyScalingHistograms::bookHisto(TH1* histo, const TString& name)
 {
-    histo = this->store(new TH1D(name,"Dilepton Mass",40,0,400));
+    histo = this->store(new TH1D(name,"Dilepton Mass; m_{ll}; events",40,0,400));
     return histo;
 }
 
@@ -103,8 +107,8 @@ void DyScalingHistograms::fillZWindow(const double& dileptonMass, const double& 
     // Check if step exists
     const bool stepExists(this->checkExistence(step));
     if(!stepExists){
-        std::cerr<<"Error in fillZWindow(): The following step is not defined for Drell-Yan scaling: "<<step
-                 <<"\n...exiting\n";
+        std::cerr<<"Error in fillZWindow() of DyScalingHistograms! The following step is not defined for Drell-Yan scaling: "
+                 <<step<<"\n...exiting\n";
         exit(22);
     }
 
@@ -120,9 +124,9 @@ void DyScalingHistograms::fillZVeto(const double& dileptonMass, const double& we
     // Check if step exists
     const bool stepExists(this->checkExistence(step));
     if(!stepExists){
-        std::cerr<<"Error in fillZVeto(): The following step is not defined for Drell-Yan scaling: "<<step
-                 <<"\n...exiting\n";
-        exit(22);
+        std::cerr<<"Error in fillZVeto() of DyScalingHistograms! The following step is not defined for Drell-Yan scaling: "
+                 <<step<<"\n...exiting\n";
+        exit(23);
     }
 
     // Fill histograms
@@ -137,168 +141,197 @@ void DyScalingHistograms::fillZVeto(const double& dileptonMass, const double& we
 
 
 
-// --------------------------- Methods for AnalysisBasicHistograms ---------------------------------------------
+// --------------------------- Methods for BasicHistograms ---------------------------------------------
 
 
 
-void AnalysisBasicHistograms::bookHistos(const TString& step)
+BasicHistograms::Input::Input(const std::vector<int>& leptonIndices, const std::vector<int>& antiLeptonIndices,
+                              const std::vector<int>& jetIndices, const std::vector<int>& bjetIndices,
+                              const VLV& allLeptons, const VLV& jets, const LV& met,
+                              const std::vector<double>& btagDiscriminators):
+leptonIndices_(leptonIndices),
+antiLeptonIndices_(antiLeptonIndices),
+jetIndices_(jetIndices),
+bjetIndices_(bjetIndices),
+allLeptons_(allLeptons),
+jets_(jets),
+met_(met),
+btagDiscriminators_(btagDiscriminators)
+{}
+
+
+
+void BasicHistograms::bookHistos(const TString& step)
 {
-
-    std::map<TString, TH1D*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    int nBins = 50;
+    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
     TString name;
 
     // Leptons
-    name="basicLeptonMult";
+    name = "basicLeptonMultiplicity";
     m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Lepton Multiplicity;N leptons;Events",10,0,10));
-    name="basicLeptonPt";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Lepton Pt;Pt(l) [GeV];Leptons",nBins,0,250));
-    name="basicLeptonEta";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Lepton #eta;#eta(l);Leptons",nBins,-2.6,2.6));
-    name="basicLeptonPhi";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Lepton #phi;#phi(l);Leptons",nBins,-3.2,3.2));
-    name="basicLeptonPt_1st";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "1-st Lepton Pt;Pt(l_{1}) [GeV];Leptons",nBins,0,250));
-    name="basicLeptonEta_1st";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "1-st Lepton #eta;#eta(l_{1});Leptons",nBins,-2.6,2.6));
-    name="basicLeptonPhi_1st";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "1-st Lepton #phi;#phi(l_{1});Leptons",nBins,-3.2,3.2));
-    name="basicLeptonPt_2nd";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "2-nd Lepton Pt;Pt(l_{2}) [GeV];Leptons",nBins,0,250));
-    name="basicLeptonEta_2nd";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "2-nd Lepton #eta;#eta(l_{2});Leptons",nBins,-2.6,2.6));
-    name="basicLeptonPhi_2nd";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "2-nd Lepton #phi;#phi(l_{2});Leptons",nBins,-3.2,3.2));
+    name = "basicLeptonPt";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Lepton Pt;Pt(l) [GeV];Leptons",50,0,250));
+    name = "basicLeptonEta";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Lepton #eta;#eta(l);Leptons",50,-2.6,2.6));
+    name = "basicLeptonPhi";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Lepton #phi;#phi(l);Leptons",50,-3.2,3.2));
+    name = "basicLeptonPt_1st";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "1-st Lepton Pt;Pt(l_{1}) [GeV];Leptons",50,0,250));
+    name = "basicLeptonEta_1st";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "1-st Lepton #eta;#eta(l_{1});Leptons",50,-2.6,2.6));
+    name = "basicLeptonPhi_1st";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "1-st Lepton #phi;#phi(l_{1});Leptons",50,-3.2,3.2));
+    name = "basicLeptonPt_2nd";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "2-nd Lepton Pt;Pt(l_{2}) [GeV];Leptons",50,0,250));
+    name = "basicLeptonEta_2nd";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "2-nd Lepton #eta;#eta(l_{2});Leptons",50,-2.6,2.6));
+    name = "basicLeptonPhi_2nd";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "2-nd Lepton #phi;#phi(l_{2});Leptons",50,-3.2,3.2));
 
     // diLepton
-    name="basicDiLeptonMass";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "DiLepton Mass;Mass(l^{+}+l^{-}) [GeV];Events",nBins,0,350));
-    name="basicDiLeptonPt";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "DiLepton Pt;Pt(l^{+}+l^{-}) [GeV];Events",nBins,0,300));
-    name="basicDiLeptonRap";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "DiLepton Rapidity;Rapidity(l^{+}+l^{-});Events",nBins,-2.6,2.6));
-    name="basicDiLeptonDEta";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "DiLepton d#eta;|#eta(l^{+})-#eta(l^{-})|;Events",nBins,0,4));
-    name="basicDiLeptonDPhi";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "DiLepton d#phi;|#phi(l^{+})-#phi(l^{-})|;Events",nBins,0,3.2));
+    name = "basicDileptonMass";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Dilepton Mass;Mass(l^{+}+l^{-}) [GeV];Events",50,0,350));
+    name = "basicDileptonPt";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Dilepton Pt;Pt(l^{+}+l^{-}) [GeV];Events",50,0,300));
+    name = "basicDileptonRapidity";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Dilepton Rapidity;Rapidity(l^{+}+l^{-});Events",50,-2.6,2.6));
+    name = "basicDileptonDeltaEta";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Dilepton #Delta#eta;|#eta(l^{+})-#eta(l^{-})|;Events",50,-5,5));
+    name = "basicDileptonDeltaPhi";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Dilepton #Delta#phi;|#phi(l^{+})-#phi(l^{-})|;Events",50,-3.2,3.2));
 
     // Jets
-    name="basicJetMult";
+    name = "basicJetMultiplicity";
     m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet Multiplicity;N jets;Events",20,0,20));
-    name="basicJetPt";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet Pt;Pt(jet) [GeV];Jets",nBins,0,300));
-    name="basicJetEta";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet #eta;#eta(jet);Jets",nBins,-2.6,2.6));
-    name="basicJetPhi";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet #phi;#phi(jet);Jets",nBins,-3.2,3.2));
-    name="basicJetBTagOut";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet bTag output;BTag Value;Jets",nBins+1,0.0-1.0/nBins,1.001));
-    name="basicJetBMult";
+    name = "basicJetPt";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet Pt;Pt(jet) [GeV];Jets",50,0,300));
+    name = "basicJetEta";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet #eta;#eta(jet);Jets",50,-2.6,2.6));
+    name = "basicJetPhi";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet #phi;#phi(jet);Jets",50,-3.2,3.2));
+    name = "basicJetBtagDiscriminator";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "b tag Discriminator d;d;Jets",60,0.1,1.1));
+    name = "basicBjetMultiplicity";
     m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet Multiplicity;N b-jets;Events",20,0,20));
-    name="basicJetBPt";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet Pt;Pt(b-jet) [GeV];B-Jets",nBins,0,300));
-    name="basicJetBEta";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet #eta;#eta(b-jet);B-Jets",nBins,-2.6,2.6));
-    name="basicJetBPhi";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet #phi;#phi(b-jet);B-Jets",nBins,-3.2,3.2));
+    name = "basicBjetPt";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet Pt;Pt(b-jet) [GeV];B-Jets",50,0,300));
+    name = "basicBjetEta";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet #eta;#eta(b-jet);B-Jets",50,-2.6,2.6));
+    name = "basicBjetPhi";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet #phi;#phi(b-jet);B-Jets",50,-3.2,3.2));
 
     // MEt
-    name="basicMEt";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Missing Et;MEt;Events",nBins,0,300));
-    name="basicMEtPhi";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Missing Et #phi;#phi(MEt);Events",nBins,-3.2,3.2));
+    name = "basicMet";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Missing Et;met;Events",50,0,300));
+    name = "basicMetPhi";
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Missing Et #phi;#phi(met);Events",50,-3.2,3.2));
 }
 
 
-void AnalysisBasicHistograms::fill(const VLV* leptons, const int& LeadLeptonId, const int& NLeadLeptonId, const VLV* jets, const std::vector<int>* SelJetIds, const std::vector<double>* bTagOutput, const double& BTagWP, const LV* MEt, const double& weight, const TString& step)
-{
 
+void BasicHistograms::fill(const Input& input, const double& weight, const TString& step)
+{
     // Check if step exists
     const bool stepExists(this->checkExistence(step));
     if(!stepExists){
-        std::cerr<<"Error in fill(): The following step is not defined for basic histograms: "<<step
-                 <<"\n...exiting\n";
-        exit(22);
+        std::cerr<<"Error in fill() of BasicHistograms! The following step is not defined for basic histograms: "
+                 <<step<<"\n...exiting\n";
+        exit(24);
     }
-
-
-    // Updating  titles of the histograms for B-Jets
-    if(m_stepHistograms_[step].m_histogram_["basicJetBMult"]->GetEntries()<1) {
-        char addStr[20];
-        sprintf(addStr," (#geq %.2f)",BTagWP);
-
-        TH1* histo;
-        histo = m_stepHistograms_[step].m_histogram_["basicJetBMult"];
-        histo->SetTitle(TString(histo->GetTitle())+addStr);
-        histo = m_stepHistograms_[step].m_histogram_["basicJetBPt"];
-        histo->SetTitle(TString(histo->GetTitle())+addStr);
-        histo = m_stepHistograms_[step].m_histogram_["basicJetBEta"];
-        histo->SetTitle(TString(histo->GetTitle())+addStr);
-        histo = m_stepHistograms_[step].m_histogram_["basicJetBPhi"];
-        histo->SetTitle(TString(histo->GetTitle())+addStr);
-    }
-
-
+    
+    
+    // Switch this off for now, potentially add again if desired
+    // Updating  titles of the histograms for b jets
+    //if(m_stepHistograms_[step].m_histogram_["basicBjetMultiplicity"]->GetEntries()<1) {
+    //    char addStr[20];
+    //    sprintf(addStr," (#geq %.2f)", BtagWP);
+    //    
+    //    TH1* histo;
+    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetMultiplicity"];
+    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
+    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetPt"];
+    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
+    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetEta"];
+    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
+    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetPhi"];
+    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
+    //}
+    
+    
     // Leptons
-    m_stepHistograms_[step].m_histogram_["basicLeptonMult"]->Fill(leptons->size(), weight);
-    for(size_t iLep=0; iLep<leptons->size(); iLep++) {
-        m_stepHistograms_[step].m_histogram_["basicLeptonPt"]->Fill(leptons->at(iLep).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLeptonEta"]->Fill(leptons->at(iLep).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLeptonPhi"]->Fill(leptons->at(iLep).Phi(), weight);
-        if(LeadLeptonId==(int)iLep) {
-            m_stepHistograms_[step].m_histogram_["basicLeptonPt_1st"]->Fill(leptons->at(iLep).Pt(), weight);
-            m_stepHistograms_[step].m_histogram_["basicLeptonEta_1st"]->Fill(leptons->at(iLep).Eta(), weight);
-            m_stepHistograms_[step].m_histogram_["basicLeptonPhi_1st"]->Fill(leptons->at(iLep).Phi(), weight);
-        }
-        if(NLeadLeptonId==(int)iLep) {
-            m_stepHistograms_[step].m_histogram_["basicLeptonPt_2nd"]->Fill(leptons->at(iLep).Pt(), weight);
-            m_stepHistograms_[step].m_histogram_["basicLeptonEta_2nd"]->Fill(leptons->at(iLep).Eta(), weight);
-            m_stepHistograms_[step].m_histogram_["basicLeptonPhi_2nd"]->Fill(leptons->at(iLep).Phi(), weight);
-        }
+    m_stepHistograms_[step].m_histogram_["basicLeptonMultiplicity"]->Fill(input.allLeptons_.size(), weight);
+    for(const int index : input.leptonIndices_){
+        m_stepHistograms_[step].m_histogram_["basicLeptonPt"]->Fill(input.allLeptons_.at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonEta"]->Fill(input.allLeptons_.at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonPhi"]->Fill(input.allLeptons_.at(index).Phi(), weight);
     }
+    for(const int index : input.antiLeptonIndices_){
+        m_stepHistograms_[step].m_histogram_["basicLeptonPt"]->Fill(input.allLeptons_.at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonEta"]->Fill(input.allLeptons_.at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonPhi"]->Fill(input.allLeptons_.at(index).Phi(), weight);
+    }
+    
+    const int leptonIndex = input.leptonIndices_.size()>0 ? input.leptonIndices_.at(0) : -1;
+    const int antiLeptonIndex = input.antiLeptonIndices_.size()>0 ? input.antiLeptonIndices_.at(0) : -1;
+    const bool hasLeptonPair = (leptonIndex!=-1 && antiLeptonIndex!=-1);
+    
+    int leadingLeptonIndex(leptonIndex);
+    int nLeadingLeptonIndex(antiLeptonIndex);
+    if(hasLeptonPair){
+        ttbar::orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, input.allLeptons_, ttbar::LVpt);
+        
+        m_stepHistograms_[step].m_histogram_["basicLeptonPt_1st"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonEta_1st"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonPhi_1st"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Phi(), weight);
+        
+        m_stepHistograms_[step].m_histogram_["basicLeptonPt_2nd"]->Fill(input.allLeptons_.at(nLeadingLeptonIndex).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonEta_2nd"]->Fill(input.allLeptons_.at(nLeadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLeptonPhi_2nd"]->Fill(input.allLeptons_.at(nLeadingLeptonIndex).Phi(), weight);
+    }
+    
+    
+    // Dilepton
+    if(hasLeptonPair){
+        LV dilepton(0.,0.,0.,0.);
+        dilepton = input.allLeptons_.at(leadingLeptonIndex) + input.allLeptons_.at(nLeadingLeptonIndex);
+        
+        m_stepHistograms_[step].m_histogram_["basicDileptonMass"]->Fill(dilepton.M(), weight);
+        m_stepHistograms_[step].m_histogram_["basicDileptonPt"]->Fill(dilepton.Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicDileptonRapidity"]->Fill(dilepton.Rapidity(), weight);
 
-    // diLepton
-    while(LeadLeptonId>=0 && NLeadLeptonId>=0) {
-        if(LeadLeptonId == NLeadLeptonId) break;
-        if(LeadLeptonId >= (int)leptons->size() || NLeadLeptonId >= (int)leptons->size()) break;
-        LV diLepton = leptons->at(LeadLeptonId) + leptons->at(NLeadLeptonId);
-
-        m_stepHistograms_[step].m_histogram_["basicDiLeptonMass"]->Fill(diLepton.M(), weight);
-        m_stepHistograms_[step].m_histogram_["basicDiLeptonPt"]->Fill(diLepton.Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicDiLeptonRap"]->Fill(diLepton.Rapidity(), weight);
-
-        m_stepHistograms_[step].m_histogram_["basicDiLeptonDPhi"]->Fill(fabs( ROOT::Math::VectorUtil::DeltaPhi(leptons->at(LeadLeptonId), leptons->at(NLeadLeptonId)) ), weight);
-        m_stepHistograms_[step].m_histogram_["basicDiLeptonDEta"]->Fill(fabs( leptons->at(LeadLeptonId).Eta() - leptons->at(NLeadLeptonId).Eta() ), weight);
-
-        break;
+        m_stepHistograms_[step].m_histogram_["basicDileptonDeltaPhi"]->Fill(ROOT::Math::VectorUtil::DeltaPhi(input.allLeptons_.at(leadingLeptonIndex), input.allLeptons_.at(nLeadingLeptonIndex)), weight);
+        m_stepHistograms_[step].m_histogram_["basicDileptonDeltaEta"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Eta() - input.allLeptons_.at(nLeadingLeptonIndex).Eta(), weight);
     }
 
 
     // Jets
-    int nBJets = 0;
-    m_stepHistograms_[step].m_histogram_["basicJetMult"]->Fill(jets->size(), weight);
-    for(size_t iJet=0; iJet<jets->size(); iJet++) {
-        if(SelJetIds) {     // Skipping jets that are not included in the list of selected jets
-            if( std::find(SelJetIds->begin(), SelJetIds->end(), (int)iJet) == SelJetIds->end() ) continue;
-        }
-
-        m_stepHistograms_[step].m_histogram_["basicJetPt"]->Fill(jets->at(iJet).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJetEta"]->Fill(jets->at(iJet).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJetPhi"]->Fill(jets->at(iJet).Phi(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJetBTagOut"]->Fill(bTagOutput->at(iJet), weight);
-        if(bTagOutput->at(iJet)<BTagWP) continue;
-
-        // B-Jets
-        nBJets++;
-        m_stepHistograms_[step].m_histogram_["basicJetBPt"]->Fill(jets->at(iJet).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJetBEta"]->Fill(jets->at(iJet).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJetBPhi"]->Fill(jets->at(iJet).Phi(), weight);
+    m_stepHistograms_[step].m_histogram_["basicJetMultiplicity"]->Fill(input.jetIndices_.size(), weight);
+    for(const int index : input.jetIndices_){
+        m_stepHistograms_[step].m_histogram_["basicJetPt"]->Fill(input.jets_.at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJetEta"]->Fill(input.jets_.at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJetPhi"]->Fill(input.jets_.at(index).Phi(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJetBtagDiscriminator"]->Fill(input.btagDiscriminators_.at(index), weight);
     }
-    m_stepHistograms_[step].m_histogram_["basicJetBMult"]->Fill(nBJets, weight);
-
-    // MEt
-    m_stepHistograms_[step].m_histogram_["basicMEt"]->Fill(MEt->E(), weight);
-    m_stepHistograms_[step].m_histogram_["basicMEtPhi"]->Fill(MEt->Phi(), weight);
-
+    
+    
+    // b jets
+     m_stepHistograms_[step].m_histogram_["basicBjetMultiplicity"]->Fill(input.bjetIndices_.size(), weight);
+    for(const int index : input.bjetIndices_){
+        m_stepHistograms_[step].m_histogram_["basicBjetPt"]->Fill(input.jets_.at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicBjetEta"]->Fill(input.jets_.at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicBjetPhi"]->Fill(input.jets_.at(index).Phi(), weight);
+    }
+    
+    
+    // Met
+    m_stepHistograms_[step].m_histogram_["basicMet"]->Fill(input.met_.E(), weight);
+    m_stepHistograms_[step].m_histogram_["basicMetPhi"]->Fill(input.met_.Phi(), weight);
 }
+
+
+
+
+
+
+
 
