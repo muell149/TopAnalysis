@@ -1,8 +1,6 @@
 #ifndef TopAnalysis_h
 #define TopAnalysis_h
 
-class TH1D;
-
 #include "AnalysisBase.h"
 
 
@@ -12,22 +10,23 @@ class TopAnalysis : public AnalysisBase
     
     /// Histograms
     TH2 *h_GenRecoLeptonpT,*h_GenRecoAntiLeptonpT,*h_GenRecoLeptonEta,*h_GenRecoAntiLeptonEta, *h_GenRecoLLBarMass, *h_GenRecoLLBarpT;
-    TH2 *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;//, *h_GenRecoBJetE, *h_GenRecoAntiBJetE;;
+    TH2 *h_GenRecoBJetpT,*h_GenRecoAntiBJetpT, *h_GenRecoBJetEta,*h_GenRecoAntiBJetEta, *h_GenRecoBJetRapidity, *h_GenRecoAntiBJetRapidity;
     TH2 *h_GenRecoToppT,*h_GenRecoAntiToppT,*h_GenRecoTopRapidity,*h_GenRecoAntiTopRapidity, *h_GenRecoTTBarMass, *h_GenRecoTTBarpT, *h_GenRecoTTBarRapidity;
     TH2 *h_GenRecoMet;
     
     TH1 *h_NJetMatching;
 
-    TH1D *TTh1_postZcut, *Allh1_postZcut, *Zh1_postZcut;
-    TH1D *TTh1_post2jets, *Allh1_post2jets, *Zh1_post2jets;
-    TH1D *TTh1_postMET, *Allh1_postMET, *Zh1_postMET;
-    TH1D *TTh1_post1btag, *Allh1_post1btag, *Zh1_post1btag;
-    TH1D *TTh1_postKinReco, *Allh1_postKinReco, *Zh1_postKinReco;
+    TH1 *TTh1_postZcut, *Allh1_postZcut, *Zh1_postZcut;
+    TH1 *TTh1_post2jets, *Allh1_post2jets, *Zh1_post2jets;
+    TH1 *TTh1_postMET, *Allh1_postMET, *Zh1_postMET;
+    TH1 *TTh1_post1btag, *Allh1_post1btag, *Zh1_post1btag;
+    TH1 *TTh1_postKinReco, *Allh1_postKinReco, *Zh1_postKinReco;
     
-    TH1 *Looseh1, *Allh1, *Zh1, *TTh1, *h_GenAll, *h_GenAll_noweight, *h_jetMulti, *h_jetMulti_noBTag,
-      *h_jetMulti_diLep, *h_BjetMulti, *h_BjetMulti_noBTag,*h_jetMultiXSec,*h_jetMultiAll, 
-      *h_jetMultiNoPU, *h_jetMultiVisTop, *h_VisGenAll, *h_VisGenAll_noweight, *h_diLepMassFull, 
-         *h_diLepMassFull_fullSel;
+    TH1 *Looseh1, *Allh1, *Zh1, *TTh1, *h_diLepMassFull, *h_diLepMassFull_fullSel,
+        *h_jetMultiXSec,*h_jetMultiAll, *h_jetMultiNoPU, *h_jetMultiVisTop,
+        *h_jetMulti, *h_jetMulti_noBTag, *h_jetMulti_diLep, *h_BjetMulti, *h_BjetMulti_noBTag;
+
+    TH1 *h_GenAll_RecoCuts, *h_GenAll_RecoCuts_noweight, *h_GenAll, *h_GenAll_noweight, *h_VisGenAll, *h_VisGenAll_noweight;
 
     TH1 *h_HypTTBarMass, *h_HypTTBarRapidity, *h_HypTTBarpT;
     TH1 *h_HypLLBarMass, *h_HypLLBarpT;
@@ -117,31 +116,9 @@ class TopAnalysis : public AnalysisBase
     TH2 *h_GenRecoLeptonpTLead, *h_GenRecoLeptonpTNLead, *h_GenRecoLeptonEtaLead,   *h_GenRecoLeptonEtaNLead;
     TH2 *h_GenRecoBJetpTLead,   *h_GenRecoBJetpTNLead,   *h_GenRecoBJetEtaLead,     *h_GenRecoBJetEtaNLead;
 
-    
-//     //Begin: Plots for Carmen
-//     TH1 *h_RecoLeadingJetpT,    *h_RecoNLeadingJetpT,    *h_RecoLeadingJetEta,    *h_RecoNLeadingJetEta;
-//     TH1 *h_HypLeadingJetpT,     *h_HypNLeadingJetpT,     *h_HypLeadingJetEta,     *h_HypNLeadingJetEta;
-//     TH2 *h_GenRecoLeadingJetpT, *h_GenRecoLeadingJetEta, *h_GenRecoNLeadingJetpT, *h_GenRecoNLeadingJetEta;
-//     TH1 *h_VisGenLeadingJetpT,  *h_VisGenLeadingJetEta,  *h_VisGenNLeadingJetpT,  *h_VisGenNLeadingJetEta;
-// 
-//     //Begin: Plots for Carmen
-//     TH1 *h_RecoExtraJetpT,  *h_HypExtraJetpT, *h_VisGenExtraJetpT, *h_RecoExtraJetEta, *h_HypExtraJetEta, *h_VisGenExtraJetEta;
-//     TH1 *h_RecoExtraJetpT2, *h_HypExtraJetpT2, *h_VisGenExtraJetpT2, *h_RecoExtraJetEta2, *h_HypExtraJetEta2, *h_VisGenExtraJetEta2;
-//     TH1 *h_RecoExtraJetpT3, *h_HypExtraJetpT3, *h_VisGenExtraJetpT3, *h_RecoExtraJetEta3, *h_HypExtraJetEta3, *h_VisGenExtraJetEta3;
-//     TH1 *h_RecoExtraJetpT4, *h_HypExtraJetpT4, *h_VisGenExtraJetpT4, *h_RecoExtraJetEta4, *h_HypExtraJetEta4, *h_VisGenExtraJetEta4;
-//     TH2 *h_GenRecoExtraJetpT, *h_GenRecoExtraJetEta, *h_GenRecoExtraJetpT2, *h_GenRecoExtraJetEta2, *h_GenRecoExtraJetpT3, *h_GenRecoExtraJetEta3, *h_GenRecoExtraJetpT4, *h_GenRecoExtraJetEta4;
-// 
-//     TH1 *h_RecoJetMultpt40, *h_HypJetMultpt40, *h_VisGenJetMultpt40, *h_RecoJetMultpt60, *h_HypJetMultpt60, *h_VisGenJetMultpt60;
-//     TH2 *h_GenRecoJetMultpt40, *h_GenRecoJetMultpt60, *h_GenRecoJetMultQ0, *h_GenRecoJetMultTotal;
-//     //End: Plots for Carmen
-    
-    
-    
     /// Histograms for event weights due to specific scale factor
     TH1 *h_PUSF, *h_TrigSF, *h_LepSF, *h_BTagSF, *h_KinRecoSF, *h_EventWeight;
 
-    
-    
     /// Control Plots
     TH1 *h_AllLeptonEta_step0, *h_AllLeptonpT_step0, *h_AllJetsEta_step0, *h_AllJetspT_step0;
     TH1 *h_AllLeptonEta_step1, *h_AllLeptonpT_step1, *h_AllJetsEta_step1, *h_AllJetspT_step1;

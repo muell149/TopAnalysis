@@ -55,7 +55,7 @@ constexpr double BtagWP = 0.244;
 
 /// Select the b-tagging method: Apply SF to the histogram or re-tag a jet via a random method
 ///  default method is the re-tagging of the jetBTagCSV_: true
-constexpr bool ReTagJet = true;
+constexpr bool ReTagJet = false;
 
 
 
@@ -159,6 +159,8 @@ void TopAnalysis::SlaveBegin ( TTree * )
     h_VisGenAll_noweight = store(new TH1D ( "VisGenAll_noweight", "All Visible Generated particles (IM)", 40, 0, 400 ));
     h_GenAll = store(new TH1D ( "GenAll", "AllGenerated particles (IM)", 40, 0, 400 ));         h_GenAll->Sumw2();
     h_GenAll_noweight = store(new TH1D ( "GenAll_noweight", "AllGenerated particles (IM)", 40, 0, 400 ));         h_GenAll_noweight->Sumw2();
+    h_GenAll_RecoCuts = store(new TH1D ( "GenAll_RecoCuts", "AllGenerated particles (IM)", 40, 0, 400 ));         h_GenAll_RecoCuts->Sumw2();
+    h_GenAll_RecoCuts_noweight= store(new TH1D ( "GenAll_RecoCuts_noweight", "AllGenerated particles (IM)", 40, 0, 400 ));         h_GenAll_RecoCuts_noweight->Sumw2();
     Allh1_postKinReco = store(new TH1D ( "Allh1_postKinReco", "DiLepton Mass", 40, 0, 400 ));
     h_diLepMassFull = store(new TH1D ( "DIMFull", "DiLepton Mass (Full Range)", 100, 0, 300 ));
     h_diLepMassFull_fullSel = store(new TH1D ( "DIMFull_fullSel", "DiLepton Mass (Full Range)", 100, 0, 300 ));
@@ -1154,10 +1156,17 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (!hasSolution) return kTRUE;
     weight *= weightKinFit_;
     
+    if(isTopSignal_)
+    {// Set of histograms needed to estimate the efficiency and acceptance requested by the TopXSection conveners
+        h_GenAll_RecoCuts_noweight->Fill(GenTop_->M(), weightGenerator_);
+        h_GenAll_RecoCuts->Fill(GenTop_->M(), weight);
+    }
+    
     h_leptonPtAfterKinReco->Fill(leptons_->at(leptonIndex).Pt(), weight);
     h_leptonPtAfterKinReco->Fill(leptons_->at(antiLeptonIndex).Pt(), weight);
     h_leptonEtaAfterKinReco->Fill(leptons_->at(leptonIndex).Eta(), weight);
     h_leptonEtaAfterKinReco->Fill(leptons_->at(antiLeptonIndex).Eta(), weight);
+
     h_METAfterKinReco->Fill(met_->Pt(), weight);
     for (const int index : bjetIndices)
         h_bjetetaAfterKinReco->Fill(jets_->at(index).Eta(), weight);
