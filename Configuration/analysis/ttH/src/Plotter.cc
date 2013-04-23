@@ -18,13 +18,13 @@
 #include <TH1D.h>
 #include <TGaxis.h>
 #include <TPaveText.h>
-#include <TH1D.h>
 
 #include "Plotter.h"
 #include "../../diLeptonic/src/RootFileReader.h"
 #include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
 #include "Samples.h"
+#include "DyScaleFactors.h"
 
 
 
@@ -39,11 +39,11 @@ constexpr const char* BaseDIR = "Plots";
 
 Plotter::Plotter(const Samples& samples,
                  const double& luminosity,
-                 const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors,
+                 const DyScaleFactors& dyScaleFactors,
                  const DrawMode::DrawMode& drawMode):
 samples_(samples),
 luminosity_(luminosity),
-m_dyScaleFactors_(m_dyScaleFactors),
+dyScaleFactors_(dyScaleFactors),
 drawMode_(drawMode),
 fileReader_(RootFileReader::getInstance()),
 name_("defaultName"),

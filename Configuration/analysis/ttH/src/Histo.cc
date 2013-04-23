@@ -19,7 +19,7 @@
 
 
 /// Set data luminosity in pb-1
-constexpr double Luminosity = 19624;
+constexpr double Luminosity = 19624.8;
 
 
 
@@ -32,19 +32,18 @@ void Histo(const std::vector<std::string> plots,
 {
     
     // Access all samples
-    Samples samples(v_channel, v_systematic);
+    const Samples samples(v_channel, v_systematic);
     
     // Produce Drell-Yan scalings and access map containing scale factors
     // Requires Samples for channels "ee" "emu" "mumu", independent of selected channels for analysis
-    Samples dyScalingSamples(Channel::realChannels, v_systematic);
+    const Samples dyScalingSamples(Channel::realChannels, v_systematic);
     const DyScaleFactors dyScaleFactors(dyScalingSamples, Luminosity);
-    const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors(dyScaleFactors.getScaleFactors());
     
     // Produce event yields
-    const EventYields eventYields(samples, Luminosity, m_dyScaleFactors);
+    const EventYields eventYields(samples, Luminosity, dyScaleFactors);
     
     // Create Plotter
-    Plotter generalPlot(samples, Luminosity, m_dyScaleFactors, drawMode);
+    Plotter generalPlot(samples, Luminosity, dyScaleFactors, drawMode);
     
     // Loop over all histograms in histoList and print them
     HistoListReader histoList("HistoList_control");

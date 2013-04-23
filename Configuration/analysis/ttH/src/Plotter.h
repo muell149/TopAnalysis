@@ -3,19 +3,17 @@
 
 #include <vector>
 #include <map>
-#include <set>
 
-class TGraphErrors;
 class TLegend;
 class RootFileReader;
 class TString;
 class TH1;
 
 #include "plotterHelpers.h"
-#include "DyScaleFactors.h"
 #include "sampleHelpers.h"
 #include "SamplesFwd.h"
 
+class DyScaleFactors;
 
 
 
@@ -26,7 +24,7 @@ public:
     
     Plotter(const Samples& samples,
             const double& luminosity,
-            const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors,
+            const DyScaleFactors& dyScaleFactors,
             const DrawMode::DrawMode& drawMode);
     ~Plotter(){};
     
@@ -58,10 +56,10 @@ private:
     const Samples& samples_;
     
     /// Luminosity
-    const double luminosity_;
+    const double& luminosity_;
     
     /// Map containing the Drell-Yan scale factors
-    const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors_;
+    const DyScaleFactors& dyScaleFactors_;
     
     /// Draw mode for Higgs
     const DrawMode::DrawMode drawMode_;

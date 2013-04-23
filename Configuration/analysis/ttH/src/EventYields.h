@@ -1,5 +1,5 @@
-#ifndef eventYields_h
-#define eventYields_h
+#ifndef EventYields_h
+#define EventYields_h
 
 #include <utility>
 #include <vector>
@@ -7,12 +7,13 @@
 class TString;
 
 #include "sampleHelpers.h"
-#include "DyScaleFactors.h"
 
 class RootFileReader;
 class Sample;
 class Samples;
-class TString;
+class DyScaleFactors;
+
+
 
 
 
@@ -21,7 +22,7 @@ class EventYields{
 public:
     
     /// Constructor for producing event yield tables
-    EventYields(Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors);
+    EventYields(const Samples& samples, const double& luminosity, const DyScaleFactors& m_dyScaleFactors);
     
     /// Default destructor
     ~EventYields(){};
@@ -31,7 +32,7 @@ public:
 private:
     
     /// Produce the yields
-    void produceYields(Samples& samples);
+    void produceYields(const Samples& samples)const;
     
     /// Write the yields to txt files
     void writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample,
@@ -40,10 +41,10 @@ private:
     
     
     /// Luminosity
-    const double luminosity_;
+    const double& luminosity_;
     
     /// Map containing the Drell-Yan scale factors
-    const DyScaleFactors::DyScaleFactorMap m_dyScaleFactors_;
+    const DyScaleFactors& dyScaleFactors_;
     
     /// File reader for accessing specific histogram from given file
     RootFileReader* fileReader_;
@@ -53,4 +54,9 @@ private:
 
 
 
-#endif //eventYields_h
+#endif // EventYields_h
+
+
+
+
+

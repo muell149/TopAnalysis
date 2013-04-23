@@ -16,7 +16,7 @@
 
 
 
-DyScaleFactors::DyScaleFactors(Samples& samples, const double& luminosity):
+DyScaleFactors::DyScaleFactors(const Samples& samples, const double& luminosity):
 luminosity_(luminosity),
 fileReader_(RootFileReader::getInstance())
 {
@@ -25,7 +25,7 @@ fileReader_(RootFileReader::getInstance())
 
 
 
-void DyScaleFactors::produceScaleFactors(Samples& samples)
+void DyScaleFactors::produceScaleFactors(const Samples& samples)
 {
     std::cout<<"--- Beginning production of Drell-Yan scale factors\n\n";
     
@@ -212,7 +212,7 @@ void DyScaleFactors::printFullInformation(const double dyScaleFactor_ee, const d
 
 
 
-double DyScaleFactors::dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel)
+double DyScaleFactors::dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel)const
 {
     if(m_dyScaleFactors_.find(step)==m_dyScaleFactors_.end()){
         std::cerr<<"Drell-Yan scale factor requested, but not existent for Step: "<<step
@@ -235,7 +235,8 @@ double DyScaleFactors::dyScaleFactor(const TString& step, const Systematic::Syst
 
 
 void DyScaleFactors::applyDyScaleFactor(TH1* histogram, const TString& histogramName,
-                               const Sample& sample, const Systematic::Systematic& systematic)
+                                        const Sample& sample, const Systematic::Systematic& systematic,
+                                        const bool allowNonexistingStep)const
 {
     // FIXME: DY reweighting for all samples (dyee, dymumu) as final state where event is selected in (ee, mumu),
     // FIXME: i.e. using e.g. mumu SF for all or for only correct ones (dyee<-->ee, dymumu<-->mumu)?
@@ -246,9 +247,15 @@ void DyScaleFactors::applyDyScaleFactor(TH1* histogram, const TString& histogram
     
     const TString& step = Tools::extractSelectionStep(histogramName);
     if(step==""){
-        std::cerr<<"Drell-Yan scale factor requested, but step could not be extracted from histogram name: "<<histogramName
-                 <<"\n...break\n"<<std::endl;
-        exit(14);
+        if(allowNonexistingStep){
+            // It is allowed that no Drell-Yan scale factor exists for this step, so silently do not apply one
+            return;            
+        }
+        else{
+            std::cerr<<"Drell-Yan scale factor requested, but step could not be extracted from histogram name: "<<histogramName
+                     <<"\n...break\n"<<std::endl;
+            exit(14);
+        }
     }
     
     const double dyScaleFactor = this->dyScaleFactor(step, systematic, finalState);

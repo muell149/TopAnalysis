@@ -26,29 +26,31 @@ public:
     
     
     
-    /// Constructor for estimating Drell-Yan scale factors
-    DyScaleFactors(Samples& samples, const double& luminosity);
+    /// Constructor for producing Drell-Yan scale factors
+    DyScaleFactors(const Samples& samples, const double& luminosity);
     
     /// Default destructor
     ~DyScaleFactors(){}
     
     
     
-    /// Produce and get the map containing the Drell-Yan scale factors
+    /// Get the map containing the Drell-Yan scale factors
     DyScaleFactorMap getScaleFactors()const;
     
-    double dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel);
+    /// Get Drell-Yan scale factor for given selection step, systematic and channel
+    double dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel)const;
     
     /// Apply Drell-Yan scale factor to histogram automatically depending on its name
     void applyDyScaleFactor(TH1* histogram, const TString& histogramName,
-                            const Sample& sample, const Systematic::Systematic& systematic);
+                            const Sample& sample, const Systematic::Systematic& systematic,
+                            const bool allowNonexistingStep)const;
     
     
     
 private:
     
     /// Produce the Drell-Yan scale factors
-    void produceScaleFactors(Samples& samples);
+    void produceScaleFactors(const Samples& samples);
     
     /// Produce the Drell-Yan scale factors for each selection step and each systematic
     void produceScaleFactors(const TString& step, const Systematic::Systematic& systematic, std::map<Channel::Channel, std::vector<Sample> >& channelSamples);
@@ -68,7 +70,7 @@ private:
     
     
     /// Luminosity
-    const double luminosity_;
+    const double& luminosity_;
     
     /// File reader for accessing specific histogram from given file
     RootFileReader* fileReader_;

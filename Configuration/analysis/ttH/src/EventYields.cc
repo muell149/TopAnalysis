@@ -8,6 +8,7 @@
 #include "../../diLeptonic/src/RootFileReader.h"
 #include "higgsUtils.h"
 #include "Samples.h"
+#include "DyScaleFactors.h"
 
 
 
@@ -20,9 +21,9 @@ constexpr const char* BaseDIR = "EventYields";
 
 
 
-EventYields::EventYields(Samples& samples, const double luminosity, const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors):
+EventYields::EventYields(const Samples& samples, const double& luminosity, const DyScaleFactors& dyScaleFactors):
 luminosity_(luminosity),
-m_dyScaleFactors_(m_dyScaleFactors),
+dyScaleFactors_(dyScaleFactors),
 fileReader_(RootFileReader::getInstance())
 {
     this->produceYields(samples);
@@ -30,7 +31,7 @@ fileReader_(RootFileReader::getInstance())
 
 
 
-void EventYields::produceYields(Samples& samples)
+void EventYields::produceYields(const Samples& samples)const
 {
     std::cout<<"--- Beginning event yield table processing\n\n";
     
@@ -67,8 +68,8 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
         
         // Assign histogram to sample
         std::vector<SampleHistPair> v_numhist;
-        for(auto sample : v_sample){
-            TH1D *temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), i_nameStepPair->first);
+        for(const auto& sample : v_sample){
+            TH1D* temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), i_nameStepPair->first);
             double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
             Tools::applyFlatWeight(temp_hist, lumiWeight);
             v_numhist.push_back(SampleHistPair(sample, temp_hist));
