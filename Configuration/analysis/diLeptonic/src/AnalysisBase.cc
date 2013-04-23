@@ -998,7 +998,8 @@ void AnalysisBase::prepareTriggerSF()
 {
     h_TrigSFeta = nullptr;
     
-    TFile trigEfficiencies(DATA_PATH() + "/triggerSummary_" + channel_ + ".root");
+//    TFile trigEfficiencies(DATA_PATH() + "/triggerSummary_" + channel_ + ".root");
+    TFile trigEfficiencies(DATA_PATH() + "/triggerSummary_" + channel_ + "_19fb.root");
     if (trigEfficiencies.IsZombie()) {
         std::cout << "Trigger efficiencies not found. Assuming ScaleFactor = 1.\n";
         std::cout << "Currently triggerEfficieny files can be found in diLeptonic/data folder\n\n";
@@ -1006,7 +1007,8 @@ void AnalysisBase::prepareTriggerSF()
     }
     
     //Right now pT efficiency flat ==> Not used
-    h_TrigSFeta = dynamic_cast<TH2*>(trigEfficiencies.Get("scalefactor eta2d with syst"));
+//    h_TrigSFeta = dynamic_cast<TH2*>(trigEfficiencies.Get("scalefactor eta2d with syst"));
+    h_TrigSFeta = dynamic_cast<TH2*>(trigEfficiencies.Get("lepton_eta2d_sf"));
     if ( !h_TrigSFeta ) {
         std::cout<<"TH2 >>TH scalefactor eta<< is not in the file "<<trigEfficiencies.GetName()<<"\n";
         return;
@@ -1063,14 +1065,16 @@ void AnalysisBase::prepareLeptonIDSF() {
     h_MuonIDSFpteta = nullptr;
     h_ElectronIDSFpteta = nullptr;
     
-    TFile MuonEfficiencies(DATA_PATH() + "/MuonSFtop12028.root");
+//    TFile MuonEfficiencies(DATA_PATH() + "/MuonSFtop12028.root");    
+    TFile MuonEfficiencies(DATA_PATH() + "/MuonSFtop12028_19fb.root");
     if (MuonEfficiencies.IsZombie()) {
         std::cout << "Muon Id/Iso efficiencies not found. Assuming ScaleFactor = 1.\n";
 ///        std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
         return;
     }
 
-    TFile ElecEfficiencies(DATA_PATH() + "/ElectronSFtop12028.root");
+//    TFile ElecEfficiencies(DATA_PATH() + "/ElectronSFtop12028.root");
+    TFile ElecEfficiencies(DATA_PATH() + "/ElectronSFtop12028_19fb.root");
     if (ElecEfficiencies.IsZombie()) {
         std::cout << "Electron Id/Iso efficiencies not found. Assuming ScaleFactor = 1.\n";
 ///        std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
@@ -1084,7 +1088,8 @@ void AnalysisBase::prepareLeptonIDSF() {
         return;
     }
 
-    h_ElectronIDSFpteta = dynamic_cast<TH2*>(ElecEfficiencies.Get("GlobalSF"));
+//    h_ElectronIDSFpteta = dynamic_cast<TH2*>(ElecEfficiencies.Get("GlobalSF"));
+    h_ElectronIDSFpteta = dynamic_cast<TH2*>(ElecEfficiencies.Get("ElectronSFtop12028"));
     if ( !h_ElectronIDSFpteta ) {
         std::cout<<"TH2 >>TH scalefactor << is not in the file "<<ElecEfficiencies.GetName()<<"\n";
         return;
