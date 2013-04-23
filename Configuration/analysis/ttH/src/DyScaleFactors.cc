@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include <TH1.h>
 #include <TH1D.h>
 #include <TMath.h>
 #include <TString.h>
@@ -36,13 +37,10 @@ void DyScaleFactors::produceScaleFactors(Samples& samples)
     
     // Extract selection steps
     std::vector<TString> v_step;
-    std::stringstream ss_step;
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
         const TString& step = Tools::extractSelectionStep(*i_eventHistoName);
         v_step.push_back(step);
-        ss_step<<step<<", ";
     }
-    //std::cout<<"Found selection steps: "<<ss_step.str()<<"\n";
     
     // Loop over selection steps and systematics
     for(TString step : v_step){
@@ -131,7 +129,7 @@ void DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::
             }
             if(!channel==Channel::ee && !channel==Channel::mumu)continue;
             
-            if(sample.sampleType()==Sample::dyll || sample.sampleType()==Sample::dytautau){
+            if(sample.sampleType()==Sample::dyee || sample.sampleType()==Sample::dymumu || sample.sampleType()==Sample::dytautau){
                 if(channel==Channel::ee){
                     nIn_ee_dy += h_zWindow->Integral();
                     nOut_ee_dy += h_zVeto->Integral();
@@ -213,6 +211,53 @@ void DyScaleFactors::printFullInformation(const double dyScaleFactor_ee, const d
 }
 
 
+
+double DyScaleFactors::dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel)
+{
+    if(m_dyScaleFactors_.find(step)==m_dyScaleFactors_.end()){
+        std::cerr<<"Drell-Yan scale factor requested, but not existent for Step: "<<step
+                 <<"\n...break\n"<<std::endl;
+        exit(15);
+    }
+    if(m_dyScaleFactors_.at(step).find(systematic) == m_dyScaleFactors_.at(step).end()){
+        std::cerr<<"Drell-Yan scale factor requested, but not existent for Systematic: "<<Systematic::convertSystematic(systematic)
+                 <<"\n...break\n"<<std::endl;
+        exit(16);
+    }
+    if(channel != Channel::ee && channel!=Channel::mumu){
+        std::cerr<<"Drell-Yan scale factor requested for invalid channel: "<<Channel::convertChannel(channel)
+                 <<"\n...break\n"<<std::endl;
+        exit(17);
+    }
+    return m_dyScaleFactors_.at(step).at(systematic).at(channel);
+}
+
+
+
+void DyScaleFactors::applyDyScaleFactor(TH1* histogram, const TString& histogramName,
+                               const Sample& sample, const Systematic::Systematic& systematic)
+{
+    // FIXME: DY reweighting for all samples (dyee, dymumu) as final state where event is selected in (ee, mumu),
+    // FIXME: i.e. using e.g. mumu SF for all or for only correct ones (dyee<-->ee, dymumu<-->mumu)?
+    // FIXME: And what about dytautau sample and emu final state?
+    if(sample.sampleType()!=Sample::dyee && sample.sampleType()!=Sample::dymumu) return;
+    const Channel::Channel& finalState = sample.finalState();
+    if(finalState!=Channel::ee && finalState!=Channel::mumu) return;
+    
+    const TString& step = Tools::extractSelectionStep(histogramName);
+    if(step==""){
+        std::cerr<<"Drell-Yan scale factor requested, but step could not be extracted from histogram name: "<<histogramName
+                 <<"\n...break\n"<<std::endl;
+        exit(14);
+    }
+    
+    const double dyScaleFactor = this->dyScaleFactor(step, systematic, finalState);
+    
+    Tools::applyFlatWeight(histogram, dyScaleFactor);
+    std::cout<<"\nDY: "<<step<<" , "<<histogramName<<" , "
+             <<Systematic::convertSystematic(systematic)<<" , "<<Channel::convertChannel(finalState)<<" , "
+             <<dyScaleFactor<<"\n\n";
+}
 
 
 

@@ -97,7 +97,7 @@ Histo.o: $(HiggsDir)/Histo.cc $(HiggsDir)/sampleHelpers.h $(HiggsDir)/Samples.h 
 plotterHelpers.o: $(HiggsDir)/plotterHelpers.cc $(HiggsDir)/plotterHelpers.h
 	g++ -c -o plotterHelpers.o $(COMPFLAGS) $(HiggsDir)/plotterHelpers.cc
 
-Samples.o: $(HiggsDir)/Samples.cc $(HiggsDir)/Samples.h $(HiggsDir)/sampleHelpers.h
+Samples.o: $(HiggsDir)/Samples.cc $(HiggsDir)/Samples.h $(HiggsDir)/SamplesFwd.h $(HiggsDir)/sampleHelpers.h
 	g++ -c -o Samples.o $(COMPFLAGS) $(HiggsDir)/Samples.cc
 
 DyScaleFactors.o: $(HiggsDir)/DyScaleFactors.cc $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/sampleHelpers.h
@@ -106,7 +106,7 @@ DyScaleFactors.o: $(HiggsDir)/DyScaleFactors.cc $(HiggsDir)/DyScaleFactors.h $(H
 EventYields.o: $(HiggsDir)/EventYields.cc $(HiggsDir)/EventYields.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/sampleHelpers.h
 	g++ -c -o EventYields.o $(COMPFLAGS) $(HiggsDir)/EventYields.cc
 
-Plotter.o: $(HiggsDir)/Plotter.cc $(HiggsDir)/Plotter.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/Samples.h
+Plotter.o: $(HiggsDir)/Plotter.cc $(HiggsDir)/Plotter.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/SamplesFwd.h
 	g++ -c -o Plotter.o $(COMPFLAGS) $(HiggsDir)/Plotter.cc
 
 RootFileReader.o: $(TopDir)/RootFileReader.cc $(TopDir)/RootFileReader.h

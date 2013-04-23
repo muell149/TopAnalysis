@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <cstdlib>
 
 #include <TString.h>
 #include <TColorWheel.h>
@@ -46,10 +47,12 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
     Sample ww("Diboson", 10, 54.838);
     Sample wz("Diboson", 10, 33.21);
     Sample zz("Diboson", 10, 17.654);
+    Sample dyee1050("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 860.5, Sample::dyee);
+    Sample dyee50inf("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 3532.8, Sample::dyee);
+    Sample dymumu1050("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 860.5, Sample::dymumu);
+    Sample dymumu50inf("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 3532.8, Sample::dymumu);
     Sample dytautau1050("Z / #gamma* #rightarrow #tau#tau", kAzure+8, 860.5, Sample::dytautau);
     Sample dytautau50inf("Z / #gamma* #rightarrow #tau#tau", kAzure+8, 3532.8, Sample::dytautau);
-    Sample dyll1050("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 860.5, Sample::dyll);
-    Sample dyll50inf("Z / #gamma* #rightarrow ee/#mu#mu", kAzure-2, 3532.8, Sample::dyll);
     Sample wlnu("W+Jets", kGreen-3, 36257.2);
     Sample qcdmu15("QCD Multijet", kYellow, 3.640E8*3.7E-4);
     Sample qcdmu2030("QCD Multijet", kYellow, 2.870E8*6.500E-3);
@@ -101,14 +104,18 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, wz));
         else if(filename.Contains("zz"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, zz));
+        else if(filename.Contains("dyee") && filename.Contains("1050"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dyee1050));
+        else if(filename.Contains("dyee") && filename.Contains("50inf"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dyee50inf));
+        else if(filename.Contains("dymumu") && filename.Contains("1050"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dymumu1050));
+        else if(filename.Contains("dymumu") && filename.Contains("50inf"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dymumu50inf));
         else if(filename.Contains("dytautau") && filename.Contains("1050"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dytautau1050));
         else if(filename.Contains("dytautau") && filename.Contains("50inf"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dytautau50inf));
-        else if((filename.Contains("dymumu") || filename.Contains("dyee")) && filename.Contains("1050"))
-            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dyll1050));
-        else if((filename.Contains("dymumu") || filename.Contains("dyee")) && filename.Contains("50inf"))
-            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dyll50inf));
         else if(filename.Contains("wtolnu"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, wlnu));
         
@@ -357,16 +364,26 @@ Systematic::Systematic Samples::assignSystematic(TString& filename, const System
 
 
 
-const SystematicChannelSamples& Samples::getSystematicChannelSamples()
+const SystematicChannelSamples& Samples::getSystematicChannelSamples()const
 {
     return m_systematicChannelSample_;
 }
 
 
 
-const std::vector<Sample>& Samples::getSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)
+const std::vector<Sample>& Samples::getSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)const
 {
-    return m_systematicChannelSample_[systematic][channel];
+    if(m_systematicChannelSample_.find(systematic) == m_systematicChannelSample_.end()){
+        std::cerr<<"ERROR in getSamples! No samples available for requested systematic: "<<Systematic::convertSystematic(systematic)
+                 <<"\n...break\n"<<std::endl;
+        exit(321);
+    }
+    if(m_systematicChannelSample_.at(systematic).find(channel) == m_systematicChannelSample_.at(systematic).end()){
+        std::cerr<<"ERROR in getSamples! No samples available for requested channel: "<<Channel::convertChannel(channel)
+                 <<"\n...break\n"<<std::endl;
+        exit(322);
+    }
+    return m_systematicChannelSample_.at(systematic).at(channel);
 }
 
 

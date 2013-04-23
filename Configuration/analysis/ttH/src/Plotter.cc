@@ -24,6 +24,7 @@
 #include "../../diLeptonic/src/RootFileReader.h"
 #include "../../diLeptonic/src/utils.h"
 #include "higgsUtils.h"
+#include "Samples.h"
 
 
 
@@ -36,22 +37,39 @@ constexpr const char* BaseDIR = "Plots";
 
 
 
-Plotter::Plotter(const Samples& samples, const double& luminosity, DyScaleFactors::DyScaleFactorMap m_dyScaleFactors, const DrawMode::DrawMode& drawMode):
-samples_(samples), luminosity_(luminosity),
-m_dyScaleFactors_(m_dyScaleFactors), drawMode_(drawMode),
+Plotter::Plotter(const Samples& samples,
+                 const double& luminosity,
+                 const DyScaleFactors::DyScaleFactorMap& m_dyScaleFactors,
+                 const DrawMode::DrawMode& drawMode):
+samples_(samples),
+luminosity_(luminosity),
+m_dyScaleFactors_(m_dyScaleFactors),
+drawMode_(drawMode),
 fileReader_(RootFileReader::getInstance()),
 name_("defaultName"),
-bins_(0), rebin_(1),
-rangemin_(0), rangemax_(3),
-ymin_(0), ymax_(0),
-YAxis_(""), XAxis_(""),
-logX_(false), logY_(false),
+bins_(0),
+rebin_(1),
+rangemin_(0),
+rangemax_(3),
+ymin_(0),
+ymax_(0),
+YAxis_(""),
+XAxis_(""),
+logX_(false),
+logY_(false),
 doDYScale_(false)
 {}
 
 
 
-void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TString XAxis, int rebin, bool doDYScale, bool logX, bool logY, double ymin, double ymax, double rangemin, double rangemax, int bins, std::vector<double> XAxisbins, std::vector<double> XAxisbinCenters)
+void Plotter::setOptions(const TString& name, const TString& specialComment,
+                         const TString& YAxis, const TString& XAxis,
+                         const int rebin, const bool doDYScale,
+                         const bool logX, const bool logY,
+                         const double& ymin, const double& ymax,
+                         const double& rangemin, const double& rangemax,
+                         const int bins,
+                         const std::vector<double>& XAxisbins, const std::vector<double>& XAxisbinCenters)
 {
     name_ = name; //Variable name you want to plot
     YAxis_ = YAxis; //Y-axis title
@@ -69,26 +87,6 @@ void Plotter::setOptions(TString name, TString specialComment, TString YAxis, TS
     XAxisbins_ = XAxisbins; // Bins edges=bins+1
     XAxisbinCenters_.clear();
     XAxisbinCenters_ = XAxisbinCenters; //Central point for BinCenterCorrection=bins
-
-    //Modify the X/Y-axis labels
-    if(XAxis_.Contains("band#bar{b}")){//Histogram naming convention has to be smarter
-        XAxis_.ReplaceAll("band#bar{b}",11,"b and #bar{b}",13);
-    }
-    if(XAxis_.Contains("tand#bar{t}")){//Histogram naming convention has to be smarter
-        XAxis_.ReplaceAll("tand#bar{t}",11,"t and #bar{t}",13);
-    }
-    if(XAxis_.Contains("l^{+}andl^{-}")){//Histogram naming convention has to be smarter
-        XAxis_.ReplaceAll("l^{+}andl^{-}",13,"l^{+} and l^{-}",15);
-    }
-    if(YAxis_.Contains("Toppairs")){
-        YAxis_.ReplaceAll("Toppairs",8,"Top-quark pairs",15);
-    }
-    if(YAxis_.Contains("Topquarks")){
-        YAxis_.ReplaceAll("Topquarks",9, "Top quarks",10);
-    }
-    if(YAxis_.Contains("Numberof")){
-        YAxis_.ReplaceAll("Numberof", 8, "Number of ",10);
-    }
 }
 
 
@@ -98,12 +96,12 @@ Plotter::producePlots(){
     //std::cout<<"--- Beginning of plot production\n\n";
     
     const SystematicChannelSamples& m_systematicChannelSample(samples_.getSystematicChannelSamples());
-    for(auto systematicChannelSamples : m_systematicChannelSample){
+    for(const auto& systematicChannelSamples : m_systematicChannelSample){
         const Systematic::Systematic& systematic(systematicChannelSamples.first);
-        for(auto channelSample : systematicChannelSamples.second){
+        for(const auto& channelSample : systematicChannelSamples.second){
             const Channel::Channel& channel(channelSample.first);
-            std::vector<Sample>& v_sample(channelSample.second);
-            if(!this->prepareDataset(v_sample)){
+            const std::vector<Sample>& v_sample(channelSample.second);
+            if(!this->prepareDataset(v_sample, systematic)){
                 std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): "
                          << Channel::convertChannel(channel) << "/" << Systematic::convertSystematic(systematic)
                          <<"\n... skip this plot\n";
@@ -118,37 +116,36 @@ Plotter::producePlots(){
 
 
 
-bool Plotter::prepareDataset(const std::vector<Sample>& v_sample)
+bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systematic::Systematic& systematic)
 {
-    
     bool allHistosAvailable(true);
     
     // Associate histogram to dataset if histogram can be found
     v_sampleHistPair_.clear();
     TH1::AddDirectory(kFALSE);
-    for(auto sample : v_sample){
+    for(const auto& sample : v_sample){
         SampleHistPair p_sampleHist;
         TH1D *hist = fileReader_->GetClone<TH1D>(sample.inputFile(), name_, true);
         if (!hist){
-            std::cout<<"Histogram ("<<name_<<") not found in file ("<<sample.inputFile()<<")\n";
+            // Print message only for one histogram
+            if(allHistosAvailable)
+                std::cout<<"Histogram ("<<name_<<") not found e.g. in file ("<<sample.inputFile()<<")\n";
             p_sampleHist = SampleHistPair(sample, 0);
             allHistosAvailable = false;
         }
         else{
             //Rescaling to the data luminosity
-            double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
+            const double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
             if(sample.sampleType() != Sample::data)Tools::applyFlatWeight(hist, lumiWeight);
+            
             // Set style
             setHHStyle(*gStyle);
-            // FIXME: do DY reweighting
-            if(sample.sampleType() == Sample::dyll && doDYScale_){
-                // FIXME: what about sampleType == Sample::dytautau ?
-                
-                //DYScale_.at(0) = m_dyScaleFactors_[nameAppendix][Sample::nominal][Sample::ee];
-                //DYScale_.at(1) = m_dyScaleFactors_[nameAppendix][Sample::nominal][Sample::mumu];
-                //DYScale_.at(2) = 1.;
-                //DYScale_.at(3) = (DYScale_.at(0) + DYScale_.at(1))/2;//not correct, but close, fix later
+            
+            // Drell-Yan reweighting
+            if(doDYScale_){
+                // FIXME: apply DY SF
             }
+            
             // Clone histogram directly here
             TH1D* histClone = (TH1D*) hist->Clone();
             p_sampleHist = SampleHistPair(sample, histClone);
@@ -207,7 +204,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     {
         const Sample::SampleType& sampleType(i_sampleHistPair->first.sampleType());
         const TString& legendEntry(i_sampleHistPair->first.legendEntry());
-        TH1* hist = i_sampleHistPair->second;
+        const TH1* hist = i_sampleHistPair->second;
         
         std::vector<SampleHistPair>::iterator incrementIterator(i_sampleHistPair);
         ++incrementIterator;
@@ -255,12 +252,12 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     // Create the stack and add entries to legend
     THStack* stack = new THStack("def", "def");
     legend->AddEntry(dataHist.second, dataHist.first,"pe");
-    for(auto stackHist : stackHists){
+    for(const auto& stackHist : stackHists){
         stackHist.second->SetLineColor(1);
         legend->AddEntry(stackHist.second, stackHist.first,"f");
         stack->Add(stackHist.second);
     }
-    for(auto higgsHist : higgsHists){
+    for(const auto& higgsHist : higgsHists){
         higgsHist.second->SetFillStyle(0);
         higgsHist.second->SetLineWidth(2);
         legend->AddEntry(higgsHist.second, higgsHist.first,"l");
@@ -302,9 +299,9 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
 
     //Add the binwidth to the yaxis in yield plots (FIXME: works only correctly for equidistant bins)
     TString ytitle = TString(dataHist.second->GetYaxis()->GetTitle()).Copy();
-    double binwidth = dataHist.second->GetXaxis()->GetBinWidth(1);
+    const double binWidth = dataHist.second->GetXaxis()->GetBinWidth(1);
     std::ostringstream width;
-    width<<binwidth;
+    width<<binWidth;
     if(name_.Contains("Rapidity") || name_.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
     else if(name_.Contains("pT") || name_.Contains("Mass") || name_.Contains("mass") || name_.Contains("MET") || name_.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
     dataHist.second->GetYaxis()->SetTitle(ytitle);
@@ -320,7 +317,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     TExec *setex2 = new TExec("setex2","gStyle->SetErrorX(0.)");
     setex2->Draw();  // remove error bars for data in x-direction
     dataHist.second->Draw("same,e1");
-    for(auto higgsHist : higgsHists){
+    for(const auto& higgsHist : higgsHists){
         higgsHist.second->Draw("same");
     }
     
@@ -337,7 +334,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     // Prepare additional histograms for root-file
     TH1 *sumMC = 0; 
     TH1 *sumSignal = 0;
-    for(auto sampleHistPair : v_sampleHistPair_){
+    for(const auto& sampleHistPair : v_sampleHistPair_){
         if(sampleHistPair.first.sampleType() == Sample::SampleType::higgssignal){
             if (sumSignal) sumSignal->Add(sampleHistPair.second);
             else sumSignal = static_cast<TH1*>(sampleHistPair.second->Clone());
@@ -367,7 +364,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
 
 
 
-void Plotter::setStyle(SampleHistPair& sampleHistPair, bool isControlPlot)
+void Plotter::setStyle(SampleHistPair& sampleHistPair, const bool isControlPlot)
 {
     TH1* hist(sampleHistPair.second);
     
@@ -402,7 +399,9 @@ void Plotter::setStyle(SampleHistPair& sampleHistPair, bool isControlPlot)
 
 
 
-TLegend* Plotter::ControlLegend(const LegendHistPair& dataHist, const std::vector<LegendHistPair>& stackHists, const std::vector<LegendHistPair>& higgsHists, TLegend* leg){
+TLegend* Plotter::controlLegend(const LegendHistPair& dataHist, const std::vector<LegendHistPair>& stackHists,
+                                const std::vector<LegendHistPair>& higgsHists, TLegend* leg)
+{
     //hardcoded ControlPlot legend
     std::vector<TString> v_orderedLegend;
     v_orderedLegend.push_back("Data");
@@ -427,18 +426,18 @@ TLegend* Plotter::ControlLegend(const LegendHistPair& dataHist, const std::vecto
     leg->SetFillStyle(0);
     leg->SetBorderSize(0);
     leg->SetTextAlign(12);
-    for(auto orderedLegend : v_orderedLegend){
+    for(const auto& orderedLegend : v_orderedLegend){
         if(dataHist.first.Contains(orderedLegend)){
             leg->AddEntry(dataHist.second, dataHist.first, "pe");
             continue;
         }
-        for(auto stackHist : stackHists){
+        for(const auto& stackHist : stackHists){
             if(stackHist.first.Contains(orderedLegend)){
                 leg->AddEntry(stackHist.second, stackHist.first, "f");
                 break;
             }
         }
-        for(auto higgsHist : higgsHists){
+        for(const auto& higgsHist : higgsHists){
             if(higgsHist.first.Contains(orderedLegend)){
                 leg->AddEntry(higgsHist.second, higgsHist.first, "l");
                 break;
@@ -451,8 +450,9 @@ TLegend* Plotter::ControlLegend(const LegendHistPair& dataHist, const std::vecto
 
 
 // Draw label for Decay Channel in upper left corner of plot
-void Plotter::drawDecayChannelLabel(const Channel::Channel& channel, double textSize) {
-    TPaveText *decayChannel = new TPaveText();
+void Plotter::drawDecayChannelLabel(const Channel::Channel& channel, const double& textSize)
+{
+    TPaveText* decayChannel = new TPaveText();
 
     decayChannel->AddText(Channel::channelLabel(channel).c_str());
 
@@ -471,9 +471,9 @@ void Plotter::drawDecayChannelLabel(const Channel::Channel& channel, double text
 
 
 // Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
-void Plotter::drawCmsLabels(int cmsprelim, double energy, double textSize) {
-
-    const char *text;
+void Plotter::drawCmsLabels(const int cmsprelim, const double& energy, const double& textSize)
+{
+    const char* text;
     if(cmsprelim ==2 ) {//Private work for PhDs students
         text = "Private Work, %2.1f fb^{-1} at #sqrt{s} = %2.f TeV";
     } else if (cmsprelim==1) {//CMS preliminary label

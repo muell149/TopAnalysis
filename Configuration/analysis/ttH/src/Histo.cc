@@ -18,7 +18,7 @@
 
 
 
-// Set data luminosity in pb-1
+/// Set data luminosity in pb-1
 constexpr double Luminosity = 19624;
 
 

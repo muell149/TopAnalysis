@@ -5,9 +5,9 @@
 #include <map>
 
 #include "sampleHelpers.h"
+#include "SamplesFwd.h"
 
 class RootFileReader;
-class TH1;
 class TString;
 
 
@@ -18,7 +18,7 @@ class Sample{
 public:
     
     /// Specific type of sample as needed to be known for eg. plotting or Drell-Yan scale factor calculation
-    enum SampleType{data, dyll, dytautau, higgssignal, dummy};
+    enum SampleType{data, dyee, dymumu, dytautau, higgssignal, dummy};
     
     
     
@@ -96,14 +96,6 @@ private:
 
 
 
-/// Storage type of all samples to be used in current analysis
-/// These are all samples per dilepton analysis channel and per systematic
-typedef std::map<Systematic::Systematic, std::map<Channel::Channel, std::vector<Sample> > > SystematicChannelSamples;
-
-
-
-
-
 /// Class for administration of all samples, all dilepton channels and all systematics
 class Samples{
     
@@ -121,10 +113,10 @@ public:
     
     
     /// Get map containing all samples per dilepton analysis channel and per systematic
-    const SystematicChannelSamples& getSystematicChannelSamples();
+    const SystematicChannelSamples& getSystematicChannelSamples()const;
     
     /// Get all samples of specific dilepton analysis channel and specific systematic
-    const std::vector<Sample>& getSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic);
+    const std::vector<Sample>& getSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)const;
     
         
     
@@ -155,13 +147,6 @@ private:
     /// Map containing all samples per dilepton analysis channel and per systematic
     SystematicChannelSamples m_systematicChannelSample_;
 };
-
-
-
-
-
-/// Type for associating a specific histogram of the input file to the sample
-typedef std::pair<Sample, TH1*> SampleHistPair;
 
 
 

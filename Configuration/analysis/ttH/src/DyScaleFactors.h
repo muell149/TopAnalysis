@@ -5,12 +5,15 @@
 #include <map>
 
 class TString;
+class TH1;
 
 #include "sampleHelpers.h"
 
 class RootFileReader;
 class Sample;
 class Samples;
+
+
 
 
 
@@ -33,6 +36,12 @@ public:
     
     /// Produce and get the map containing the Drell-Yan scale factors
     DyScaleFactorMap getScaleFactors()const;
+    
+    double dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel);
+    
+    /// Apply Drell-Yan scale factor to histogram automatically depending on its name
+    void applyDyScaleFactor(TH1* histogram, const TString& histogramName,
+                            const Sample& sample, const Systematic::Systematic& systematic);
     
     
     
