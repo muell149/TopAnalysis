@@ -16,6 +16,9 @@
 #include "HistoListReader.h"
 #include "CommandLineParameters.h"
 
+//constexpr double lumi = 12210; 
+constexpr double lumi = 19624.8;
+
 using namespace std;
 
 const std::vector<const char*> VectorOfValidSystematics 
@@ -40,8 +43,6 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
     //to stay compatible with old code
     std::set<TString> SetOfValidSystematics;
     for (auto s: VectorOfValidSystematics) SetOfValidSystematics.insert(s);
-
-    const double lumi = 12210;
 
     HistoListReader histoList(doControlPlots ? "HistoList_control" : "HistoList");
     if (histoList.IsZombie()) exit(12);
