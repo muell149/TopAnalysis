@@ -123,6 +123,7 @@ public:
               const std::vector<double>& btagDiscriminators);
         ~Input(){}
         
+        #ifndef __CINT__
         const std::vector<int>& leptonIndices_;
         const std::vector<int>& antiLeptonIndices_;
         const std::vector<int>& jetIndices_;
@@ -133,6 +134,7 @@ public:
         const LV& met_;
         
         const std::vector<double>& btagDiscriminators_;
+        #endif
     };
     
     
