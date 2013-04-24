@@ -101,9 +101,10 @@ void HiggsAnalysis::Begin(TTree*)
     AnalysisBase::Begin(0);
 
     // Prepare things for analysis
-    prepareTriggerSF();
-    prepareLeptonIDSF();
-    prepareJER_JES();
+    this->prepareTriggerSF();
+    this->prepareLeptonIDSF();
+    this->prepareJER_JES();
+    this->prepareBtagSF();
 }
 
 
@@ -111,6 +112,10 @@ void HiggsAnalysis::Begin(TTree*)
 
 void HiggsAnalysis::Terminate()
 {
+    // Produce b-tag efficiencies
+    if(isTtbarSample_ && isTopSignal_) produceBtagEfficiencies();
+    
+    // Do everything needed for MVA
     if(analysisMode_ == AnalysisMode::mva){
 
         // Create output directory for MVA input tree, and produce and write tree
@@ -238,6 +243,9 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
+    
+    // Histograms for b-tagging efficiencies
+    this->bookBtagHistograms();
 }
 
 
@@ -385,6 +393,13 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     orderIndices(bjetIndices, *jetBTagCSV_);
     const int numberOfBjets = bjetIndices.size();
     
+    // Apply b-tag efficiency MC correction using random number based tag flipping
+    if (isMC_ && !makeeffs){
+        //If b-tag efficiencies do not exit ==> do not re-tag the jets' b-tag value
+        bjetIndices.clear();
+        bjetIndices = indexOfBtags(jetIndices, BtagWP);
+    }
+    
     // Get MET
     const LV& met(*met_);
     
@@ -519,6 +534,11 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     h_events_step6->Fill(1, weight);
     basicHistograms_.fill(basicHistogramsInput, weight, "6");
     h_jetCategories_overview_step6->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
+    
+    // Fill the b-tagging efficiency plots
+    if(isTtbarSample_ && isTopSignal_ && makeeffs){
+        this->fillBtagHistograms(jetIndices, bjetIndices, weight);
+    }
     
     
     
