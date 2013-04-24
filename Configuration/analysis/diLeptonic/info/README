@@ -148,6 +148,22 @@ channel (ee, emu, mumu) in all files
 it parses the content and for one specific systematic takes the average ('typical') systematic error.
 
 ========
+
+Merging all the lots into single PDF file:
+
+There is an scripts that can be used to plot 6 plots into a single page of a PDF file.
+The plots that will be plotted can be set in 
+
+scripts/mk_booklet.lst
+
+The directory from which the plots will be read can be set in 
+
+scripts/mk_booklet.sh
+
+under the parameters  'PDIR', the default is 'Plots/combined/Nominal' for the control plots of the combined channel
+The output PDF file will be stored in 'Booklets' directory and will include a date tag, and will be named 'booklet-$date.pdf'
+
+========
 PDF:
 
 Requirement: you have already run the Nominal (i.e. ./runNominalParallel.sh)
