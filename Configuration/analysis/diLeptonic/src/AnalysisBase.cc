@@ -49,22 +49,42 @@ constexpr const char* BTagEffDIR = "selectionRoot/BTagEff";
 
 
 AnalysisBase::AnalysisBase(TTree*):
-samplename_(""), channel_(""), systematic_(""),
-isMC_(false), isTopSignal_(false), isHiggsSignal_(false),
-isTtbarPlusTauSample_(false), correctMadgraphBR_(false),
-channelPdgIdProduct_(0), trueDYchannelCut_(0),
-checkZDecayMode_(nullptr), outputfilename_(""),
+samplename_(""),
+channel_(""),
+systematic_(""),
+isMC_(false),
+isTopSignal_(false),
+isHiggsSignal_(false),
+isTtbarPlusTauSample_(false),
+correctMadgraphBR_(false),
+channelPdgIdProduct_(0),
+trueDYchannelCut_(0),
+checkZDecayMode_(nullptr),
+outputfilename_(""),
 runViaTau_(false),
-pureweighter_(nullptr),
-doJesJer_(false), weightKinFit_(0),
+        puReweighter_(nullptr),
+doJesJer_(false),
+weightKinFit_(0),
+isTtbarSample_(false),
 binnedControlPlots_(0),
-chain_(0), h_weightedEvents(0),
-unc_(nullptr), btagFile_(""),
-h_bjets(0), h_cjets(0), h_ljets(0),
-h_btaggedjets(0), h_ctaggedjets(0), h_ltaggedjets(0),
-h2_bEff(0), h2_cEff(0), h2_lEff(0),
-h_TrigSFeta(0), h_MuonIDSFpteta(0), h_ElectronIDSFpteta(0),
-btag_ptmedian_(0), btag_etamedian_(0),
+chain_(0),
+h_weightedEvents(0),
+unc_(nullptr),
+btagFile_(""),
+h_bjets(0),
+h_cjets(0),
+h_ljets(0),
+h_btaggedjets(0),
+h_ctaggedjets(0),
+h_ltaggedjets(0),
+h2_bEff(0),
+h2_cEff(0),
+h2_lEff(0),
+h_TrigSFeta(0),
+h_MuonIDSFpteta(0),
+h_ElectronIDSFpteta(0),
+btag_ptmedian_(0),
+btag_etamedian_(0),
 eventCounter_(0)
 {
     this->clearBranches();
@@ -269,9 +289,9 @@ void AnalysisBase::SetSystematic(TString systematic)
 void AnalysisBase::SetSamplename(TString samplename, TString systematic_from_file)
 {
     samplename_ = samplename;
-    isTtbarPlusTauSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") &&
-                            !(samplename=="ttbarw") && !(samplename=="ttbarz") &&
-                            !samplename.BeginsWith("ttbarbg");
+    isTtbarSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") && 
+                     !(samplename=="ttbarw") && !(samplename=="ttbarz");
+    isTtbarPlusTauSample_ = isTtbarSample_ && !samplename.BeginsWith("ttbarbg");
     correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !systematic_from_file.Contains("SPIN") &&
                         !systematic_from_file.Contains("POWHEG") && !systematic_from_file.Contains("MCATNLO");
 }
@@ -307,9 +327,9 @@ void AnalysisBase::SetRunViaTau(bool runViaTau)
 
 
 
-void AnalysisBase::SetPUReweighter(PUReweighter* pu)
+void AnalysisBase::SetPUReweighter(PUReweighter* puReweighter)
 {
-    pureweighter_ = pu;
+    puReweighter_ = puReweighter;
 }
 
 
@@ -2139,9 +2159,11 @@ double AnalysisBase::madgraphWDecayCorrection(Long64_t& entry)
 
 double AnalysisBase::weightPileup(Long64_t& entry)
 {
-    if(!isMC_ || !pureweighter_)return 1.;
+    if(!isMC_ || !puReweighter_
+)return 1.;
     this->GetVertMultiTrueEntry(entry);
-    return pureweighter_->getPUweight(vertMultiTrue_);
+    return puReweighter_
+->getPUweight(vertMultiTrue_);
 }
 
 

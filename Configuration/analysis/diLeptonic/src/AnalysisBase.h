@@ -188,7 +188,7 @@ protected:
     
     
     /// Pileup reweighter, configured from outside
-    PUReweighter *pureweighter_;
+    PUReweighter *puReweighter_;
     
     
     /// Apply JER/JES systematics
@@ -197,6 +197,10 @@ protected:
     
     /// Scale factor due to kinematic reconstruction
     double weightKinFit_; //this is per channel and does not need to be calculated inside the event loop
+    
+    
+    /// Whether it is a ttbar sample (and not ttbarH, ttbarW, ttbarZ, or any other thing)
+    bool isTtbarSample_;
     
     
     /// Map holding binned control plots
@@ -425,7 +429,7 @@ public:
     void SetBTagFile(TString btagFile);
     
     /// Set the pileup reweighter
-    void SetPUReweighter(PUReweighter *pu);
+    void SetPUReweighter(PUReweighter* puReweighter);
     
     /// Set histogram containing the number of weighted events in full sample
     void SetWeightedEvents(TH1* weightedEvents);
