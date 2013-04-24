@@ -34,20 +34,27 @@ public:
     
     
     
-    /// Get the map containing the Drell-Yan scale factors
-    DyScaleFactorMap getScaleFactors()const;
-    
-    /// Get Drell-Yan scale factor for given selection step, systematic and channel
-    double dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel)const;
-    
     /// Apply Drell-Yan scale factor to histogram automatically depending on its name
-    void applyDyScaleFactor(TH1* histogram, const TString& histogramName,
-                            const Sample& sample, const Systematic::Systematic& systematic,
-                            const bool allowNonexistingStep)const;
+    /// Returns 0 if it is not a Drell-Yan sample and nothing needs to be done
+    /// Returns -1 in case of no available scale factor for this step (if non-existing step is allowed)
+    /// Returns +1 in case of successful application of scale factor
+    int applyDyScaleFactor(TH1* histogram, const Sample& sample,
+                           const Systematic::Systematic& systematic,
+                           const bool allowNonexistingStep =false)const;
     
     
     
 private:
+    
+    /// Get the map containing the Drell-Yan scale factors
+    //const DyScaleFactorMap& getScaleFactors()const;
+    
+    /// Get Drell-Yan scale factor for given selection step, systematic and channel
+    const double& dyScaleFactor(const TString& step,
+                                const Systematic::Systematic& systematic,
+                                const Channel::Channel& channel)const;
+    
+    
     
     /// Produce the Drell-Yan scale factors
     void produceScaleFactors(const Samples& samples);

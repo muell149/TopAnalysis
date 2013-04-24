@@ -53,6 +53,7 @@ void EventYields::produceYields(const Samples& samples)const
         for(auto channelSample : systematicChannelSamples.second){
             const Channel::Channel& channel(channelSample.first);
             this->writeYields(channel, channelSample.second, v_nameStepPair);
+            this->writeYields(channel, channelSample.second, v_nameStepPair, true);
         }
     }
     std::cout<<"\n=== Finishing event yield table processing\n\n";
@@ -61,12 +62,13 @@ void EventYields::produceYields(const Samples& samples)const
 
 
 void EventYields::writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample,
-                              const std::vector<std::pair<TString, TString> >& v_nameStepPair)const
+                              const std::vector<std::pair<TString, TString> >& v_nameStepPair,
+                              const bool useCorrections)const
 {
     // Loop over all selection steps writing out event yields
     for(std::vector<std::pair<TString, TString> >::const_iterator i_nameStepPair = v_nameStepPair.begin(); i_nameStepPair != v_nameStepPair.end(); ++i_nameStepPair){
         
-        // Assign histogram to sample
+        // Assign histogram to sample and weight it to luminosity
         std::vector<SampleHistPair> v_numhist;
         for(const auto& sample : v_sample){
             TH1D* temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), i_nameStepPair->first);
@@ -75,21 +77,31 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
             v_numhist.push_back(SampleHistPair(sample, temp_hist));
         }
         
-        // Apply Drell-Yan scaling
-        for(auto sampleHistPair : v_numhist){
-            const bool isDyll(sampleHistPair.first.sampleType() == Sample::dyee || sampleHistPair.first.sampleType() == Sample::dymumu);
-            // FIXME: why not scaling the DYee and DYmumu for each channel ?
-            if(isDyll && channel!=Channel::emu){
-                // FIXME: which DY scale factor is here applied, isn't it always the same instead of the step dependent one ?
-                sampleHistPair.second->Scale(1.);
-                //numhist.first->Scale(dyScaleFactors_(channel));
+        // Apply possible corrections to yields
+        bool dyScalingApplied(false);
+        if(useCorrections){
+            // Apply Drell-Yan scaling
+            for(auto sampleHistPair : v_numhist){
+                const int dyScaleStatus = dyScaleFactors_.applyDyScaleFactor(sampleHistPair.second, sampleHistPair.first,
+                                                                             Systematic::nominal, true);
+                if(dyScaleStatus==-1){
+                    dyScalingApplied = false;
+                    break;
+                }
+                else if(dyScaleStatus==1){
+                    dyScalingApplied = true;
+                }
             }
         }
+        
+        // If useCorrections is set, but no corrections are applied, no need to store output
+        if(useCorrections && !dyScalingApplied) continue;
         
         // Prepare output folder and text file
         // At present, event yields are only possible for nominal systematic
         std::ofstream eventFile;
         TString eventFileString = Tools::assignFolder(BaseDIR, channel, Systematic::nominal);
+        if(useCorrections) eventFileString.Append("corrected_");
         eventFileString.Append("events_" + i_nameStepPair->second + ".txt");
         eventFile.open(eventFileString.Data());
         

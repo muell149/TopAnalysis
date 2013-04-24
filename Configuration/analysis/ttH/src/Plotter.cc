@@ -91,8 +91,8 @@ void Plotter::setOptions(const TString& name, const TString& specialComment,
 
 
 
-void
-Plotter::producePlots(){
+void Plotter::producePlots()
+{
     //std::cout<<"--- Beginning of plot production\n\n";
     
     const SystematicChannelSamples& m_systematicChannelSample(samples_.getSystematicChannelSamples());
@@ -135,16 +135,18 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
         }
         else{
             //Rescaling to the data luminosity
-            const double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
-            if(sample.sampleType() != Sample::data)Tools::applyFlatWeight(hist, lumiWeight);
-            
-            // Set style
-            setHHStyle(*gStyle);
+            if(sample.sampleType() != Sample::data){
+                const double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
+                Tools::applyFlatWeight(hist, lumiWeight);
+            }
             
             // Drell-Yan reweighting
             if(doDYScale_){
-                // FIXME: apply DY SF
+                dyScaleFactors_.applyDyScaleFactor(hist, sample, systematic);
             }
+            
+            // Set style
+            setHHStyle(*gStyle);
             
             // Clone histogram directly here
             TH1D* histClone = (TH1D*) hist->Clone();
@@ -160,7 +162,6 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
 
 
 
- // do scaling, stacking, legending, and write in file 
 void Plotter::write(const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
     // Prepare canvas and legend
@@ -449,7 +450,6 @@ TLegend* Plotter::controlLegend(const LegendHistPair& dataHist, const std::vecto
 
 
 
-// Draw label for Decay Channel in upper left corner of plot
 void Plotter::drawDecayChannelLabel(const Channel::Channel& channel, const double& textSize)
 {
     TPaveText* decayChannel = new TPaveText();
@@ -470,7 +470,6 @@ void Plotter::drawDecayChannelLabel(const Channel::Channel& channel, const doubl
 
 
 
-// Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
 void Plotter::drawCmsLabels(const int cmsprelim, const double& energy, const double& textSize)
 {
     const char* text;

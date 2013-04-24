@@ -75,10 +75,10 @@ void DyScaleFactors::produceScaleFactors(const Samples& samples)
 
 
 
-DyScaleFactors::DyScaleFactorMap DyScaleFactors::getScaleFactors()const
-{
-    return m_dyScaleFactors_;
-}
+//const DyScaleFactors::DyScaleFactorMap& DyScaleFactors::getScaleFactors()const
+//{
+//    return m_dyScaleFactors_;
+//}
 
 
 
@@ -212,7 +212,9 @@ void DyScaleFactors::printFullInformation(const double dyScaleFactor_ee, const d
 
 
 
-double DyScaleFactors::dyScaleFactor(const TString& step, const Systematic::Systematic& systematic, const Channel::Channel& channel)const
+const double& DyScaleFactors::dyScaleFactor(const TString& step,
+                                            const Systematic::Systematic& systematic,
+                                            const Channel::Channel& channel)const
 {
     if(m_dyScaleFactors_.find(step)==m_dyScaleFactors_.end()){
         std::cerr<<"Drell-Yan scale factor requested, but not existent for Step: "<<step
@@ -224,7 +226,7 @@ double DyScaleFactors::dyScaleFactor(const TString& step, const Systematic::Syst
                  <<"\n...break\n"<<std::endl;
         exit(16);
     }
-    if(channel != Channel::ee && channel!=Channel::mumu){
+    if(channel!=Channel::ee && channel!=Channel::mumu){
         std::cerr<<"Drell-Yan scale factor requested for invalid channel: "<<Channel::convertChannel(channel)
                  <<"\n...break\n"<<std::endl;
         exit(17);
@@ -234,22 +236,17 @@ double DyScaleFactors::dyScaleFactor(const TString& step, const Systematic::Syst
 
 
 
-void DyScaleFactors::applyDyScaleFactor(TH1* histogram, const TString& histogramName,
-                                        const Sample& sample, const Systematic::Systematic& systematic,
-                                        const bool allowNonexistingStep)const
+int DyScaleFactors::applyDyScaleFactor(TH1* histogram, const Sample& sample,
+                                       const Systematic::Systematic& systematic,
+                                       const bool allowNonexistingStep)const
 {
-    // FIXME: DY reweighting for all samples (dyee, dymumu) as final state where event is selected in (ee, mumu),
-    // FIXME: i.e. using e.g. mumu SF for all or for only correct ones (dyee<-->ee, dymumu<-->mumu)?
-    // FIXME: And what about dytautau sample and emu final state?
-    if(sample.sampleType()!=Sample::dyee && sample.sampleType()!=Sample::dymumu) return;
-    const Channel::Channel& finalState = sample.finalState();
-    if(finalState!=Channel::ee && finalState!=Channel::mumu) return;
-    
-    const TString& step = Tools::extractSelectionStep(histogramName);
-    if(step==""){
+    // Check if step can be extracted from histogram name
+    const TString histogramName(histogram->GetName());
+    const TString step = Tools::extractSelectionStep(histogramName);
+    if(step == ""){
         if(allowNonexistingStep){
             // It is allowed that no Drell-Yan scale factor exists for this step, so silently do not apply one
-            return;            
+            return -1;
         }
         else{
             std::cerr<<"Drell-Yan scale factor requested, but step could not be extracted from histogram name: "<<histogramName
@@ -258,12 +255,30 @@ void DyScaleFactors::applyDyScaleFactor(TH1* histogram, const TString& histogram
         }
     }
     
-    const double dyScaleFactor = this->dyScaleFactor(step, systematic, finalState);
+    // Check if Drell-Yan scale factor exists for extracted step
+    if(m_dyScaleFactors_.find(step) == m_dyScaleFactors_.end()){
+        if(allowNonexistingStep){
+            // It is allowed that no Drell-Yan scale factor exists for this step, so silently do not apply one
+            return -1;
+        }
+    }
     
+    // Check whether the sample is a Drell-Yan sample and whether it should be scaled
+    // FIXME: DY reweighting for all samples (dyee, dymumu) as final state where event is selected in (ee, mumu),
+    // FIXME: i.e. using e.g. mumu SF for all or for only correct ones (dyee<-->ee, dymumu<-->mumu)?
+    // FIXME: And what about dytautau sample and emu final state?
+    const bool isDyll = sample.sampleType()==Sample::dyee || sample.sampleType()==Sample::dymumu;
+    if(!isDyll) return 0;
+    const Channel::Channel& finalState = sample.finalState();
+    if(finalState!=Channel::ee && finalState!=Channel::mumu) return 0;
+    
+    // Access the Drell-Yan scale factor and apply it to the histogram
+    const double& dyScaleFactor = this->dyScaleFactor(step, systematic, finalState);
     Tools::applyFlatWeight(histogram, dyScaleFactor);
-    std::cout<<"\nDY: "<<step<<" , "<<histogramName<<" , "
-             <<Systematic::convertSystematic(systematic)<<" , "<<Channel::convertChannel(finalState)<<" , "
-             <<dyScaleFactor<<"\n\n";
+    //std::cout<<"\nDY: "<<step<<" , "<<histogramName<<" , "
+    //         <<Systematic::convertSystematic(systematic)<<" , "<<Channel::convertChannel(finalState)<<" , "
+    //         <<dyScaleFactor<<"\n\n";
+    return 1;
 }
 
 

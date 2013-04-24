@@ -34,9 +34,10 @@ private:
     /// Produce the yields
     void produceYields(const Samples& samples)const;
     
-    /// Write the yields to txt files
+    /// Write the yields to txt files, either without or with additional corrections (e.g. Drell-Yan scaling)
     void writeYields(const Channel::Channel& channel, const std::vector<Sample>& v_sample,
-                     const std::vector<std::pair<TString, TString> >& v_nameStepPair)const;
+                     const std::vector<std::pair<TString, TString> >& v_nameStepPair,
+                     const bool useCorrections =false)const;
     
     
     
