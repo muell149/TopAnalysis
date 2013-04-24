@@ -39,13 +39,13 @@ sampleHelpers.o: $(HiggsDir)/sampleHelpers.cc $(HiggsDir)/sampleHelpers.h
 load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o higgsUtils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
-load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(TopDir)/utils.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h
+load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc
 	g++ -c -o load_HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/load_HiggsAnalysis.cc
 
 dict.o: dict.cc
 	g++ -c -o $@ $(COMPFLAGS) dict.cc
 
-dict.cc: $(TopDir)/AnalysisBase.h $(HiggsDir)/HiggsAnalysis.h $(TopDir)/classes.h $(TopDir)/HistoListReader.h $(TopDir)/PUReweighter.h $(HiggsDir)/LinkDef.h
+dict.cc: $(TopDir)/AnalysisBase.h $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/AnalysisHistograms.h $(TopDir)/classes.h $(TopDir)/HistoListReader.h $(TopDir)/PUReweighter.h $(HiggsDir)/LinkDef.h
 	rootcint -f dict.cc -c -p Math/LorentzVector.h Math/PtEtaPhiM4D.h $^
 
 analysisHelpers.o: $(HiggsDir)/analysisHelpers.cc $(HiggsDir)/analysisHelpers.h
@@ -91,7 +91,7 @@ JetCategories.o: $(HiggsDir)/JetCategories.cc $(HiggsDir)/JetCategories.h
 Histo: Histo.o Plotter.o plotterHelpers.o utils.o higgsUtils.o HistoListReader.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o RootFileReader.o
 	g++ -o Histo $^ $(ROOTLIBS)
 
-Histo.o: $(HiggsDir)/Histo.cc $(HiggsDir)/sampleHelpers.h $(HiggsDir)/Samples.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/EventYields.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/Plotter.h $(HiggsDir)/higgsUtils.h $(TopDir)/HistoListReader.h $(TopDir)/CommandLineParameters.h
+Histo.o: $(HiggsDir)/Histo.cc
 	g++ -c -o Histo.o $(COMPFLAGS) $(HiggsDir)/Histo.cc
 
 plotterHelpers.o: $(HiggsDir)/plotterHelpers.cc $(HiggsDir)/plotterHelpers.h
@@ -106,7 +106,7 @@ DyScaleFactors.o: $(HiggsDir)/DyScaleFactors.cc $(HiggsDir)/DyScaleFactors.h $(H
 EventYields.o: $(HiggsDir)/EventYields.cc $(HiggsDir)/EventYields.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/sampleHelpers.h
 	g++ -c -o EventYields.o $(COMPFLAGS) $(HiggsDir)/EventYields.cc
 
-Plotter.o: $(HiggsDir)/Plotter.cc $(HiggsDir)/Plotter.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/SamplesFwd.h
+Plotter.o: $(HiggsDir)/Plotter.cc $(HiggsDir)/Plotter.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/SamplesFwd.h
 	g++ -c -o Plotter.o $(COMPFLAGS) $(HiggsDir)/Plotter.cc
 
 RootFileReader.o: $(TopDir)/RootFileReader.cc $(TopDir)/RootFileReader.h
@@ -119,7 +119,7 @@ RootFileReader.o: $(TopDir)/RootFileReader.cc $(TopDir)/RootFileReader.h
 mva: mva.o sampleHelpers.o MvaInputVariables.o
 	g++ -o mva $^ $(ROOTLIBS)
 
-mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc $(HiggsDir)/sampleHelpers.h $(HiggsDir)/MvaInputVariables.h
+mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc
 	g++ -c -o mva.o $(COMPFLAGS) $(HiggsDir)/train_bdt_topSystemJetAssignment.cc
 
 
