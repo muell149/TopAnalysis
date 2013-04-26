@@ -1157,16 +1157,14 @@ void AnalysisBase::prepareBtagSF()
     //   BTag_Up   ==> pt>ptmedian vary DOWN, pt<ptmedian vary UP
     //   BTag_Down ==> pt>ptmedian vary UP, pt<ptmedian vary DOWN
 
-    //load per-jet efficienciies file and Histograms
-    TFile *bEfficiencies;
-    if (btagFile_!="") {
-        bEfficiencies = TFile::Open(btagFile_);
-    } else {
-        std::cout<<"WARNING!!! Provide b tag efficiencies before running\n";
-        return;
+    // Load per-jet efficiencies file, if existing
+    TFile* bEfficiencyFile(0);
+    ifstream inputFileStream;
+    inputFileStream.open(btagFile_);
+    if(inputFileStream.is_open()){
+        bEfficiencyFile = TFile::Open(btagFile_);
     }
-
-    if (!bEfficiencies) {
+    if (!bEfficiencyFile) {
         std::cout << "\n******************************************************\n"
              << "File " << btagFile_ << " does not exist. Running without btagsf!!!\n"
              << "To create the file, run:\n" 
@@ -1181,23 +1179,25 @@ void AnalysisBase::prepareBtagSF()
         makeeffs = true;
         return;
     }
-    h2_bEff = dynamic_cast<TH2*>(bEfficiencies->Get("BEffPerJet"));
+    
+    // Access the histograms holding the scale factors
+    h2_bEff = dynamic_cast<TH2*>(bEfficiencyFile->Get("BEffPerJet"));
     if (!h2_bEff) {
-        std::cout<<"Histogram bEff is not in the file "<<bEfficiencies->GetName();
+        std::cout<<"Histogram bEff is not in the file "<<bEfficiencyFile->GetName();
         return;
     }
-    h2_cEff = dynamic_cast<TH2*>(bEfficiencies->Get("CEffPerJet"));
+    h2_cEff = dynamic_cast<TH2*>(bEfficiencyFile->Get("CEffPerJet"));
     if (!h2_cEff) {
-        std::cout<<"Histogram cEff is not in the file "<<bEfficiencies->GetName();
+        std::cout<<"Histogram cEff is not in the file "<<bEfficiencyFile->GetName();
         return;
     }
-    h2_lEff = dynamic_cast<TH2*>(bEfficiencies->Get("LEffPerJet"));
+    h2_lEff = dynamic_cast<TH2*>(bEfficiencyFile->Get("LEffPerJet"));
     if (!h2_lEff) {
-        std::cout<<"Histogram lEff is not in the file "<<bEfficiencies->GetName();
+        std::cout<<"Histogram lEff is not in the file "<<bEfficiencyFile->GetName();
         return;
     }
     
-    TH1* medians = dynamic_cast<TH1*>(bEfficiencies->Get("Medians"));
+    TH1* medians = dynamic_cast<TH1*>(bEfficiencyFile->Get("Medians"));
     btag_ptmedian_ = medians->GetBinContent(1);
     btag_etamedian_ = medians->GetBinContent(2);
     printf("BTagSF: Using medians: pT = %.0f, eta = %.2f\n", btag_ptmedian_, btag_etamedian_);
@@ -1206,8 +1206,8 @@ void AnalysisBase::prepareBtagSF()
     h2_bEff->SetDirectory(0);
     h2_cEff->SetDirectory(0);
     h2_lEff->SetDirectory(0);
-    bEfficiencies->Close();
-    bEfficiencies->Delete();
+    bEfficiencyFile->Close();
+    bEfficiencyFile->Delete();
     // END: BTag SF calculation neccessary stuff
 
 }
