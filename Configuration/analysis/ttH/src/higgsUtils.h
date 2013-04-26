@@ -56,7 +56,7 @@ namespace Tools{
      * @return a function taking a std::string and returning a bool
      */
     #ifndef __CINT__
-    std::function<bool(const std::string &s)> makeStringCheck(const std::vector<std::string> v_string);
+    std::function<bool(const std::string& s)> makeStringCheck(const std::vector<std::string> v_string);
     #endif
 }
 
@@ -67,6 +67,12 @@ namespace Tools{
 
 template<class T> T* Tools::store(T* obj, TSelectorList* selectorList)
 {
+    if(!obj){
+        std::cerr<<"ERROR in function store()!\n"
+                 <<"Object to be stored in selector list does not exist"
+                 <<"\n...break\n"<<std::endl;
+        exit(72);
+    }
     if(!selectorList){
         std::cerr<<"ERROR in function store()!\n"
                  <<"Selector list does not exist, so cannot store object with name: "<<obj->GetName()

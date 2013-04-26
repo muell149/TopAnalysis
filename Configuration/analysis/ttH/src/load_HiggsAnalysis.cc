@@ -27,6 +27,9 @@
 //constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
 constexpr const char* FilePU = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
 
+/// Folder where to find the b-/c-/l-tagging efficiencies
+constexpr const char* BtagBaseDIR = "BTagEff";
+
 
 
 
@@ -113,12 +116,12 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
                 channels.push_back(channel);
             }
             else{
-                channels = Channel::allowedChannelsAnalysis;
+                channels = Channel::realChannels;
             }
         }
         
         // Loop over channels and run selector
-        for(const auto& selectedChannel : Channel::convertChannels(channels)){
+        for(const auto& selectedChannel : channels){
             
             // Set output file name
             TString outputfilename(filename);
@@ -126,7 +129,8 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
                 Ssiz_t last = outputfilename.Last('/');
                 outputfilename = outputfilename.Data() + last + 1;
             }
-            if (!outputfilename.BeginsWith(selectedChannel + "_")) outputfilename.Prepend(selectedChannel + "_");
+            const TString channelName = Channel::convertChannel(selectedChannel);
+            if (!outputfilename.BeginsWith(channelName + "_")) outputfilename.Prepend(channelName + "_");
             //outputfile is now channel_filename.root
             if (dy) {
                 if (outputfilename.First("_dy") == kNPOS) { 
@@ -134,13 +138,18 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
                     std::cerr << outputfilename << " must start with 'channel_dy'\n";
                     std::exit(1);
                 }
-                outputfilename.ReplaceAll("_dy", TString("_dy").Append(dy == 11 ? "ee" : dy == 13 ? "mumu" : "tautau"));
+                const Channel::Channel dyChannel = dy == 11 ? Channel::ee : dy == 13 ? Channel::mumu : Channel::tautau;
+                outputfilename.ReplaceAll("_dy", TString("_dy").Append(Channel::convertChannel(dyChannel)));
             }
             if(isHiggsInclusive)outputfilename.ReplaceAll("inclusive", "inclusiveOther");
             
+            // Set input filename for b-tag efficiencies
+            TString btagFile = Tools::accessFolder(BtagBaseDIR, selectedChannel, Systematic::nominal, true);
+            if(btagFile != "") btagFile.Append(channelName + "_ttbarsignalplustau.root");
+            
             // Configure selector
-            selector->SetBTagFile("");
-            selector->SetChannel(selectedChannel);
+            selector->SetBTagFile(btagFile);
+            selector->SetChannel(channelName);
             selector->SetTopSignal(isTopSignal);
             selector->SetHiggsSignal(isHiggsSignal);
             selector->SetMC(isMC);

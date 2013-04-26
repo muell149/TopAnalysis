@@ -391,14 +391,15 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     std::vector<int> bjetIndices = jetIndices;
     selectIndices(bjetIndices, *jetBTagCSV_, BtagWP);
     orderIndices(bjetIndices, *jetBTagCSV_);
-    const int numberOfBjets = bjetIndices.size();
     
     // Apply b-tag efficiency MC correction using random number based tag flipping
     if (isMC_ && !makeeffs){
         //If b-tag efficiencies do not exit ==> do not re-tag the jets' b-tag value
         bjetIndices.clear();
         bjetIndices = indexOfBtags(jetIndices, BtagWP);
+        orderIndices(bjetIndices, *jetBTagCSV_);
     }
+    const int numberOfBjets = bjetIndices.size();
     
     // Get MET
     const LV& met(*met_);

@@ -49,7 +49,7 @@ namespace Systematic{
 namespace Channel{
     
     /// Dileptonic decay channels for analysis
-    enum Channel{ee, emu, mumu, combined, undefined};
+    enum Channel{ee, emu, mumu, combined, tautau, undefined};
     
     
     
@@ -65,6 +65,10 @@ namespace Channel{
     /// Real analysis channels, i.e. all channels which describe a real final state
     const std::vector<Channel> realChannels
         {ee, emu, mumu};
+    
+    /// Possible Drell-Yan decay channels
+    const std::vector<Channel> dyDecayChannels
+        {ee, mumu, tautau};
     
     
     
@@ -97,7 +101,8 @@ namespace Tools{
     TString assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic);
     
     /// Access an already existing input folder
-    TString accessFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic);
+    TString accessFolder(const char* baseDir, const Channel::Channel& channel,
+                         const Systematic::Systematic& systematic, const bool allowNonexisting =false);
 }
 
 

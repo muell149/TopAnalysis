@@ -210,7 +210,7 @@ void BasicHistograms::bookHistos(const TString& step)
     name = "basicJetPhi";
     m_histogram[name] = this->store(new TH1D(name+"_step"+step, "Jet #phi;#phi(jet);Jets",50,-3.2,3.2));
     name = "basicJetBtagDiscriminator";
-    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "b tag Discriminator d;d;Jets",60,0.1,1.1));
+    m_histogram[name] = this->store(new TH1D(name+"_step"+step, "b tag Discriminator d;d;Jets",60,-0.1,1.1));
     name = "basicBjetMultiplicity";
     m_histogram[name] = this->store(new TH1D(name+"_step"+step, "B-Jet Multiplicity;N b-jets;Events",20,0,20));
     name = "basicBjetPt";

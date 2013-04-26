@@ -84,6 +84,7 @@ Channel::Channel Channel::convertChannel(const std::string& channel)
     if(channel == "emu") return emu;
     if(channel == "mumu") return mumu;
     if(channel == "combined") return combined;
+    if(channel == "tautau") return tautau;
     std::cout<<"Warning! The following channel conversion is not implemented: "<<channel<<std::endl<<std::endl;
     return undefined;
 }
@@ -96,6 +97,7 @@ std::string Channel::convertChannel(const Channel& channel)
     if(channel == emu) return "emu";
     if(channel == mumu) return "mumu";
     if(channel == combined) return "combined";
+    if(channel == tautau) return "tautau";
     if(channel == undefined) return "";
     std::cout<<"Error! Channel conversion is not implemented, break...\n"<<std::endl;
     exit(98);
@@ -109,6 +111,7 @@ std::string Channel::channelLabel(const Channel& channel)
     if(channel == emu) return "e#mu";
     if(channel == mumu) return "#mu#mu";
     if(channel == combined) return "Dilepton Combined";
+    if(channel == tautau) return "#tau#tau";
     if(channel == undefined) return "";
     std::cout<<"Error! Channel label is not implemented, break...\n"<<std::endl;
     exit(97);
@@ -173,7 +176,8 @@ TString Tools::assignFolder(const char* baseDir, const Channel::Channel& channel
 
 
 
-TString Tools::accessFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
+TString Tools::accessFolder(const char* baseDir, const Channel::Channel& channel,
+                            const Systematic::Systematic& systematic, const bool allowNonexisting)
 {
     // Build directory path
     std::string path(baseDir);
@@ -185,9 +189,15 @@ TString Tools::accessFolder(const char* baseDir, const Channel::Channel& channel
     
     // Check if directory really exists
     if(!gSystem->OpenDirectory(path.c_str())){
-        std::cerr<<"ERROR! Request to access directory is not possible, because it does not exist. Directory name: "<<path
-                 <<"\n...break\n"<<std::endl;
-        exit(237);
+        if(allowNonexisting){
+            // It is allowed to request a folder which does not exist, so return empty string silently
+            return "";
+        }
+        else{
+            std::cerr<<"ERROR! Request to access directory is not possible, because it does not exist. Directory name: "<<path
+                     <<"\n...break\n"<<std::endl;
+            exit(237);
+        }
     }
     
     return path;

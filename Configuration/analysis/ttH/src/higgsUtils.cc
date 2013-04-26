@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 #include <TObjArray.h>
 #include <TH1.h>
@@ -102,9 +103,9 @@ TString Tools::binFragmentByToken(const TString& nameFragment, const TString& to
 
 
 
-std::function<bool(const std::string &s)> Tools::makeStringCheck(const std::vector<std::string> v_string)
+std::function<bool(const std::string& s)> Tools::makeStringCheck(const std::vector<std::string> v_string)
 {
-    return [v_string](const std::string &test){
+    return [v_string](const std::string& test){
         return std::find(begin(v_string), end(v_string), test) != end(v_string);
     };
 }
