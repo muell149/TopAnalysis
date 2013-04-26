@@ -11,19 +11,42 @@ class TString;
 
 namespace Systematic{
     
-    /// Systematics for analysis
-    enum Systematic{nominal, mH110, mH115, mH120, mH1225, mH1275, mH130, mH135, mH140, undefined};
+    /// All systematics as needed in any part of the framework
+    enum Systematic{
+        nominal,    //! nominal, i.e. no systematic variation applied
+        mH110,      //! Higgs mass of 110 GeV
+        mH115,      //! Higgs mass of 115 GeV
+        mH120,      //! Higgs mass of 120 GeV
+        mH1225,     //! Higgs mass of 122.5 GeV
+        mH1275,     //! Higgs mass of 127.5 GeV
+        mH130,      //! Higgs mass of 130 GeV
+        mH135,      //! Higgs mass of 135 GeV
+        mH140,      //! Higgs mass of 140 GeV
+        undefined   //! No systematic defined (also not nominal)
+    };
     
     
     
-    /// All systematics allowed for analysis step
+    /// All systematics allowed for analysis step in Top analysis
     /// Only systematics which run on the nominal ntuples, e.g. pileup reweighting
     /// (allow undefined to set default behaviour if no option is set, i.e. option is empty)
-    const std::vector<Systematic> allowedSystematicsAnalysis
+    const std::vector<Systematic> allowedSystematicsTopAnalysis
         {nominal, undefined};
     
-    /// All systematics allowed for plotting step
-    const std::vector<Systematic> allowedSystematicsPlotting
+    /// All systematics allowed for plotting step in Top analysis
+    const std::vector<Systematic> allowedSystematicsTopPlotting
+        {nominal};
+    
+    
+    
+    /// All systematics allowed for analysis step in Higgs analysis
+    /// Only systematics which run on the nominal ntuples, e.g. pileup reweighting
+    /// (allow undefined to set default behaviour if no option is set, i.e. option is empty)
+    const std::vector<Systematic> allowedSystematicsHiggsAnalysis
+        {nominal, undefined};
+    
+    /// All systematics allowed for plotting step in Higgs analysis
+    const std::vector<Systematic> allowedSystematicsHiggsPlotting
         {nominal, mH110, mH115, mH120, mH1225, mH1275, mH130, mH135, mH140};
     
     
@@ -48,7 +71,7 @@ namespace Systematic{
 
 namespace Channel{
     
-    /// Dileptonic decay channels for analysis
+    /// All dileptonic decay channels as needed in any part of the framework
     enum Channel{ee, emu, mumu, combined, tautau, undefined};
     
     

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
+#include <vector>
 
 #include "TCut.h"
 #include "TFile.h"
@@ -42,7 +44,7 @@ void trainBdtTopSystemJetAssignment()
     // Access all MVA input file names
     std::vector<TString> v_inputFileNameTraining;
     std::vector<TString> v_inputFileNameTesting;
-    for(const auto& systematic : Systematic::allowedSystematicsPlotting){
+    for(const auto& systematic : Systematic::allowedSystematicsHiggsPlotting){
         const Channel::Channel channel(Channel::combined);
         
         // Access FileList containing list of input root files

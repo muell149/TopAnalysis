@@ -4,6 +4,7 @@
 #include <TString.h>
 #include <TSystem.h>
 #include <TObjArray.h>
+#include <Rtypes.h>
 
 #include "sampleHelpers.h"
 
@@ -54,7 +55,7 @@ std::string Systematic::convertSystematic(const Systematic& systematic)
 std::vector<Systematic::Systematic> Systematic::convertSystematics(const std::vector<std::string>& systematics)
 {
     std::vector<Systematic> v_systematic;
-    for(auto systematic : systematics)v_systematic.push_back(convertSystematic(systematic));
+    for(const auto& systematic : systematics) v_systematic.push_back(convertSystematic(systematic));
     return v_systematic;
 }
 
@@ -63,7 +64,7 @@ std::vector<Systematic::Systematic> Systematic::convertSystematics(const std::ve
 std::vector<std::string> Systematic::convertSystematics(const std::vector<Systematic>& systematics)
 {
     std::vector<std::string> v_systematic;
-    for(auto systematic : systematics)v_systematic.push_back(convertSystematic(systematic));
+    for(const auto& systematic : systematics) v_systematic.push_back(convertSystematic(systematic));
     return v_systematic;
 }
 
@@ -122,7 +123,7 @@ std::string Channel::channelLabel(const Channel& channel)
 std::vector<Channel::Channel> Channel::convertChannels(const std::vector<std::string>& channels)
 {
     std::vector<Channel> v_channel;
-    for(auto channel : channels)v_channel.push_back(convertChannel(channel));
+    for(const auto& channel : channels) v_channel.push_back(convertChannel(channel));
     return v_channel;
 }
 
@@ -131,7 +132,7 @@ std::vector<Channel::Channel> Channel::convertChannels(const std::vector<std::st
 std::vector<std::string> Channel::convertChannels(const std::vector<Channel>& channels)
 {
     std::vector<std::string> v_channel;
-    for(auto channel : channels)v_channel.push_back(convertChannel(channel));
+    for(const auto& channel : channels) v_channel.push_back(convertChannel(channel));
     return v_channel;
 }
 

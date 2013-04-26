@@ -1,5 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
+#include <vector>
+#include <string>
+
 
 #include <TString.h>
 #include <TFile.h>
@@ -14,7 +18,6 @@
 #include "higgsUtils.h"
 #include "sampleHelpers.h"
 #include "analysisHelpers.h"
-#include "../../diLeptonic/src/utils.h"
 #include "../../diLeptonic/src/PUReweighter.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
 
@@ -75,19 +78,19 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
         }
         
         // Check whether nTuple can be found
-        TTree *tree = dynamic_cast<TTree*>(file.Get("writeNTuple/NTuple"));
+        TTree* tree = dynamic_cast<TTree*>(file.Get("writeNTuple/NTuple"));
         if (!tree){
             std::cerr << "Error: Tree not found!\n";
             exit(854);
         }
             
         // Access information about samples, stored in the nTuples
-        TObjString *channel_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/channelName"));
-        TObjString *systematics_from_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/systematicsName"));
-        TObjString *samplename = dynamic_cast<TObjString*>(file.Get("writeNTuple/sampleName"));
-        TObjString *o_isSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isSignal"));
-        TObjString *o_isHiggsSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isHiggsSignal"));
-        TObjString *o_isMC = dynamic_cast<TObjString*>(file.Get("writeNTuple/isMC"));
+        TObjString* channel_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/channelName"));
+        TObjString* systematics_from_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/systematicsName"));
+        TObjString* samplename = dynamic_cast<TObjString*>(file.Get("writeNTuple/sampleName"));
+        TObjString* o_isSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isSignal"));
+        TObjString* o_isHiggsSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isHiggsSignal"));
+        TObjString* o_isMC = dynamic_cast<TObjString*>(file.Get("writeNTuple/isMC"));
         TH1* weightedEvents = dynamic_cast<TH1*>(file.Get("EventsBeforeSelection/weightedEvents"));
         if (!channel_file || !systematics_from_file || !o_isSignal || !o_isMC || !samplename) { 
             std::cout << "Error: info about sample missing!" << std::endl; 
@@ -136,7 +139,7 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
                 if (outputfilename.First("_dy") == kNPOS) { 
                     std::cerr << "DY variations must be run on DY samples!\n";
                     std::cerr << outputfilename << " must start with 'channel_dy'\n";
-                    std::exit(1);
+                    exit(1);
                 }
                 const Channel::Channel dyChannel = dy == 11 ? Channel::ee : dy == 13 ? Channel::mumu : Channel::tautau;
                 outputfilename.ReplaceAll("_dy", TString("_dy").Append(Channel::convertChannel(dyChannel)));
@@ -205,7 +208,7 @@ int main(int argc, char** argv) {
     CLParameter<std::string> opt_channel("c", "Specify a certain channel (ee, emu, mumu). No channel specified = run on all channels", false, 1, 1,
             Tools::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
     CLParameter<std::string> opt_systematic("s", "Run with a systematic that runs on the nominal ntuples, e.g. 'PU_UP'", false, 1, 1,
-            Tools::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsAnalysis)));
+            Tools::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsAnalysis)));
     CLParameter<int> opt_dy("d", "Drell-Yan mode (11 for ee, 13 for mumu, 15 for tautau)", false, 1, 1,
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
     CLParameter<std::string> opt_mode("m", "Mode of analysis: control plots (cp), MVA input (mva). Default is cp", false, 1, 1,

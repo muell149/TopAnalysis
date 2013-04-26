@@ -1,18 +1,19 @@
-#include <vector>
 #include <iostream>
+#include <cstdlib>
+#include <vector>
 #include <string>
 
 #include <TString.h>
 
-#include "../../diLeptonic/src/HistoListReader.h"
-#include "../../diLeptonic/src/CommandLineParameters.h"
+#include "higgsUtils.h"
 #include "sampleHelpers.h"
 #include "Samples.h"
 #include "DyScaleFactors.h"
 #include "EventYields.h"
 #include "plotterHelpers.h"
 #include "Plotter.h"
-#include "higgsUtils.h"
+#include "../../diLeptonic/src/HistoListReader.h"
+#include "../../diLeptonic/src/CommandLineParameters.h"
 
 
 
@@ -95,7 +96,7 @@ int main(int argc, char** argv) {
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: all channels", false, 1, 4,
         Tools::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
     CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal, use 'all' for all", false, 1, 100,
-        Tools::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsPlotting)));
+        Tools::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsPlotting)));
     CLParameter<std::string> opt_drawMode("m", "Specify draw mode of Higgs sample, valid: stacked, overlaid, scaledoverlaid. Default: scaledoverlaid", false, 1, 1,
         Tools::makeStringCheck(DrawMode::convertDrawModes(DrawMode::allowedDrawModes)));
     CLAnalyser::interpretGlobal(argc, argv);
@@ -117,7 +118,7 @@ int main(int argc, char** argv) {
     std::cout << "\n\n";
     
     // Set up systematics
-    std::vector<Systematic::Systematic> v_systematic(Systematic::allowedSystematicsPlotting);
+    std::vector<Systematic::Systematic> v_systematic(Systematic::allowedSystematicsHiggsPlotting);
     if(opt_systematic.isSet() && opt_systematic[0]!="all") v_systematic = Systematic::convertSystematics(opt_systematic.getArguments());
     else if(opt_systematic.isSet() && opt_systematic[0]=="all"); // do nothing
     else {v_systematic.clear(); v_systematic.push_back(Systematic::nominal);}
