@@ -1,32 +1,33 @@
-//Kinematic event reconstruction
-
-#include "KinReco.h"
-
 #include <cmath>
 #include <cassert>
 #include <algorithm>
+#include <utility>
+#include <cmath>
+
 #include <TLorentzVector.h>
+#include <TMath.h>
 
+#include "KinReco.h"
 #include "utils.h"
+#include "analysisUtils.h"
+#include "classes.h"
 
-using namespace std;
 
-//helper function to convert a TLorentzVector to a ROOT::Math::LorentzVector
-const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > x(const TLorentzVector &tlv) {
-    ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > res(tlv(0), tlv(1), tlv(2), tlv(3));
-    return res;
-}
+
+
+
 
 TtFullLepKinSolver::TtFullLepKinSolver(const std::vector<double> &nupars, 
                                        double mW, double mB) :
-    mw_(mW),
-    mw_sqr_(mW*mW),
-    mb_(mB),
-    mb_sqr_(mB*mB),
-    nupars_(nupars)
+mw_(mW),
+mw_sqr_(mW*mW),
+mb_(mB),
+mb_sqr_(mB*mB),
+nupars_(nupars)
 {
     assert(nupars.size() == 5);
 }
+
 
 
 TtFullLepKinSolver::NeutrinoSolution
@@ -35,8 +36,7 @@ TtFullLepKinSolver::getNuSolution(const TLorentzVector& LV_antilepton,
                                   const TLorentzVector& LV_b, 
                                   const TLorentzVector& LV_bbar,
                                   const TLorentzVector& LV_met,
-                                  double mt
-                                 )
+                                  const double mt)
 {
     TLorentzVector maxLV_neutrino  = TLorentzVector(0,0,0,0); 
     TLorentzVector maxLV_neutrinoBar = TLorentzVector(0,0,0,0);   
@@ -45,7 +45,7 @@ TtFullLepKinSolver::getNuSolution(const TLorentzVector& LV_antilepton,
     double weightmax = -1;
     double q_coeff[5], q_sol[4];
     FindCoeff(LV_antilepton, LV_lepton, LV_b, LV_bbar, mt, mt, LV_met, q_coeff);
-//     cout << "  --> called FindCoeff(" << q_coeff[0] << "," << q_coeff[1]<< "," << q_coeff[2] << "," << q_coeff[3] << "," << q_coeff[4] << ")\n";
+//     std::cout << "  --> called FindCoeff(" << q_coeff[0] << "," << q_coeff[1]<< "," << q_coeff[2] << "," << q_coeff[3] << "," << q_coeff[4] << ")\n";
     int NSol = quartic(q_coeff, q_sol);
     
     //loop on all solutions
@@ -71,6 +71,8 @@ TtFullLepKinSolver::getNuSolution(const TLorentzVector& LV_antilepton,
     nuSol.weight = weightmax; 
     return nuSol;
 }
+
+
 
 void
 TtFullLepKinSolver::FindCoeff(const TLorentzVector& al, 
@@ -159,7 +161,7 @@ TtFullLepKinSolver::FindCoeff(const TLorentzVector& al,
   koeficienty[4] = -k45*k46*k56-pow(k56,3);
   
   // normalization of coefficients
-  int moc=(int(log10(fabs(koeficienty[0])))+int(log10(fabs(koeficienty[4]))))/2;
+  int moc=(int(std::log10(std::fabs(koeficienty[0])))+int(std::log10(std::fabs(koeficienty[4]))))/2;
   
   double normalisation = 1/TMath::Power(10,moc);
   //transform(koeficienty, koeficienty + 5, koeficienty, [=](double old){return old*normalisation;});
@@ -170,7 +172,9 @@ TtFullLepKinSolver::FindCoeff(const TLorentzVector& al,
   koeficienty[4]*=normalisation;
 }
 
-void TtFullLepKinSolver::NeutrinoRec(double sol)
+
+
+void TtFullLepKinSolver::NeutrinoRec(const double sol)
 {
     double pxp, pyp, pzp, pup, pvp, pwp;
         
@@ -185,6 +189,8 @@ void TtFullLepKinSolver::NeutrinoRec(double sol)
     LV_n.SetXYZM(pup, pvp, pwp, 0.0);
 }
 
+
+
 double
 TtFullLepKinSolver::WeightSolfromShape() const
 {
@@ -192,9 +198,11 @@ TtFullLepKinSolver::WeightSolfromShape() const
                       * TMath::Landau(LV_n_.E(), nupars_[3], nupars_[4], 0);
 
 }
-                     
+
+
+
 int
-TtFullLepKinSolver::quartic(double *koeficienty, double* koreny) const
+TtFullLepKinSolver::quartic(const double *koeficienty, double* koreny) const
 {
   double w, b0, b1, b2;
   double c[4];
@@ -227,14 +235,14 @@ TtFullLepKinSolver::quartic(double *koeficienty, double* koreny) const
 
   int nreal = 0;
   px = koreny;
-  t = sqrt(0.25*sqr(z) - b0);
+  t = std::sqrt(0.25*sqr(z) - b0);
   for(int i=-1; i<=1; i+=2) {
     d0 = -0.5*z + i*t;
     /* coeffs. of quadratic factor */
-    d1 = (t!=0.0)? -i*0.5*b1/t : i*sqrt(-z - b2);
+    d1 = (t!=0.0)? -i*0.5*b1/t : i*std::sqrt(-z - b2);
     h = 0.25*sqr(d1) - d0;
     if (h>=0.0) {
-      h = sqrt(h);
+      h = std::sqrt(h);
       nreal += 2;
       *px++ = -0.5*d1 - h - w;
       *px++ = -0.5*d1 + h - w;
@@ -276,16 +284,16 @@ TtFullLepKinSolver::cubic(const double *coeffs, double* koreny) const
       phi = acos(h);
       p = 2*TMath::Power(-p, 1.0/6.0);
       for(unsigned i=0; i<3; i++) 
-        koreny[i] = p*cos((phi+2*i*TMath::Pi())/3.0) - w;
-      if (koreny[1]<koreny[0]) swap(koreny[0], koreny[1]);
+        koreny[i] = p*std::cos((phi+2*i*TMath::Pi())/3.0) - w;
+      if (koreny[1]<koreny[0]) std::swap(koreny[0], koreny[1]);
       /* sort results */
-      if (koreny[2]<koreny[1]) swap(koreny[1], koreny[2]);
-      if (koreny[1]<koreny[0]) swap(koreny[0], koreny[1]);
+      if (koreny[2]<koreny[1]) std::swap(koreny[1], koreny[2]);
+      if (koreny[1]<koreny[0]) std::swap(koreny[0], koreny[1]);
       nreal = 3;
     }
     else {
       /* only one real solution */
-      dis = sqrt(dis);
+      dis = std::sqrt(dis);
       h = TMath::Power(fabs(q+dis), 1.0/3.0);
       p = TMath::Power(fabs(q-dis), 1.0/3.0);
       koreny[0] = ((q+dis>0.0)? h : -h) + ((q-dis>0.0)? p : -p) -  w;
@@ -330,13 +338,15 @@ TtFullLepKinSolver::cubic(const double *coeffs, double* koreny) const
   return nreal;
 }
 
+
+
 TtDilepEvtSolution 
 TtFullLepKinSolver::GetKinSolution(const TLorentzVector& leptonMinus, const TLorentzVector& leptonPlus, 
-                                   const TLorentzVector &b, const TLorentzVector &bbar, 
-                                   const TLorentzVector &met, double topMass)
+                                   const TLorentzVector& b, const TLorentzVector& bbar, 
+                                   const TLorentzVector& met, const double topMass)
 {
     
-    auto nuSol = getNuSolution(leptonPlus, leptonMinus , b, bbar, met, topMass);
+    const auto nuSol = getNuSolution(leptonPlus, leptonMinus , b, bbar, met, topMass);
     TtDilepEvtSolution sol;
     sol.weight = nuSol.weight;
             
@@ -362,6 +372,8 @@ TtFullLepKinSolver::GetKinSolution(const TLorentzVector& leptonMinus, const TLor
     return sol;
 }
 
+
+
 std::vector<TtDilepEvtSolution> 
 GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus, 
                 const VLV *jets, const std::vector<double> *btags, 
@@ -375,13 +387,13 @@ GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus,
     static TtFullLepKinSolver solver(nu, 80.4, 4.8);
     
     
-    TLorentzVector leptonPlus_tlv = LVtoTLV(leptonPlus);
-    TLorentzVector leptonMinus_tlv = LVtoTLV(leptonMinus);
-    TLorentzVector met_tlv = LVtoTLV(*met);
+    TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
+    TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
+    TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
     
     std::vector<TLorentzVector> jets_tlv;
     for (const auto& jet : *jets) {
-        jets_tlv.push_back(LVtoTLV(jet));
+        jets_tlv.push_back(ttbar::LVtoTLV(jet));
     }
     
     size_t max_jets = jets_tlv.size(); //run over all 'googd' jets
@@ -402,11 +414,11 @@ GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus,
             double weightBest = 0;
             
             
-            //!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!
             //When changing this, please also make sure the SF for the KinReco 
             //is using the correct values!!
             //See prepareKinRecoSF in Analysis.C            
-            //!!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!
             
             for(double topMass = 100; topMass < 300.5; topMass += 1) 
 //             for(double topMass = 163; topMass < 183.5; topMass += 1) 
@@ -453,6 +465,9 @@ GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus,
 }
 
 
+
+
+
 //unused code - Haryo's implementation
 /*
 #ifdef run_sonnenschein
@@ -464,19 +479,19 @@ GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus,
     std::vector<double> pnuychi2, pnunubzchi2, pnuyzchi2, cd_diff;
     int cubic_single_root_cmplx;
     
-    LVtod4(leptonPlus, lp);
-    LVtod4(leptonMinus, lm);
-    LVtod4(HypBJet->at(solutionIndex), b);
-    LVtod4(HypAntiBJet->at(solutionIndex), bb);
+    ttbar::LVtod4(leptonPlus, lp);
+    ttbar::LVtod4(leptonMinus, lm);
+    ttbar::LVtod4(HypBJet->at(solutionIndex), b);
+    ttbar::LVtod4(HypAntiBJet->at(solutionIndex), bb);
 
     ETmiss[0] = met->Px();
     ETmiss[1] = met->Py();
     
     
 if (HypTop->size()) {    
-    cout << "GenMet/RecoMet" << *GenMet << " / " << *met << endl;
-    printf("true level  x=%.2f, y=%.2f\n", GenNeutrino->Px(), GenNeutrino->Py());    
-    printf("OLAANALYSIS x=%.2f, y=%.2f\n", HypNeutrino->at(solutionIndex).Px(), HypNeutrino->at(solutionIndex).Py());
+    std::cout << "GenMet/RecoMet" << *GenMet << " / " << *met << std::endl;
+    std::printf("true level  x=%.2f, y=%.2f\n", GenNeutrino->Px(), GenNeutrino->Py());    
+    std::printf("OLAANALYSIS x=%.2f, y=%.2f\n", HypNeutrino->at(solutionIndex).Px(), HypNeutrino->at(solutionIndex).Py());
 
     solver.solve(ETmiss, b, bb, lp, lm, 80.4, 80.4, 172.5, 172.5, 0, 0,
                  &pnux, &pnuy, &pnuz, &pnubx, &pnuby, &pnubz, &cd_diff, cubic_single_root_cmplx);
@@ -486,8 +501,11 @@ if (HypTop->size()) {
         h_HypTopptSonnenschein->Fill((), weight);
     }
     //exit(100);
-    cout<<endl;
+    std::cout<<std::endl;
 }
 
 #endif
 */
+
+
+

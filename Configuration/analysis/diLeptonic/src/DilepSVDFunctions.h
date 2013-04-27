@@ -5,8 +5,7 @@
 #include "../../unfolding/TopSVDFunctions.h"
 
 
-// Namespaces
-using namespace std;
+
 
 
 class DilepSVDFunctions : public TopSVDFunctions

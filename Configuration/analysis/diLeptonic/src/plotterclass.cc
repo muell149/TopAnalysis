@@ -24,9 +24,11 @@
 
 #include "RootFileReader.h"
 #include "plotterclass.h"
+#include "plotterUtils.h"
+#include "utils.h"
 
-  
-  // DAVID
+
+// DAVID
 #include "DilepSVDFunctions.h"
 
 using namespace std;
@@ -871,7 +873,7 @@ bool Plotter::fillHisto()
 
         ApplyFlatWeights(hist, LumiWeight);
 
-        setHHStyle(*gStyle);
+        ttbar::setHHStyle(*gStyle);
 
         hists.push_back(*hist);
         delete hist;
@@ -1084,7 +1086,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         if(channelType==3) PlotXSec();
     }
 
-    std::unique_ptr<TH1D> syshist { (TH1D*) SummedStackHisto(stack.get()) };
+    std::unique_ptr<TH1D> syshist { (TH1D*) ttbar::summedStackHisto(stack.get()) };
 
     if(logY)c->SetLogy();
     syshist->SetFillStyle(3004);
@@ -1136,8 +1138,8 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     DrawDecayChLabel(channelLabel[channelType]);
     leg->Draw("SAME");
     if(drawPlotRatio){
-        TH1* stacksum = SummedStackHisto(stack.get());
-        drawRatio(drawhists[0], stacksum, 0.5, 1.7);
+        TH1* stacksum = ttbar::summedStackHisto(stack.get());
+        ttbar::drawRatio(drawhists[0], stacksum, 0.5, 1.7);
     }
 
     // Create Directory for Output Plots 
@@ -2533,8 +2535,8 @@ void Plotter::PlotDiffXSec(TString Channel){
     }
     
     if(drawNLOCurves && drawKidonakis && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
-        TString kidoFile = DATA_PATH() + "/dilepton_kidonakisNNLO.root";
-        //KidoFile=TFile::Open(DATA_PATH() + "dilepton_kidonakisNNLO.root");
+        TString kidoFile = ttbar::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
+        //KidoFile=TFile::Open(ttbar::DATA_PATH() + "dilepton_kidonakisNNLO.root");
         if(name.Contains("ToppT")){
             //Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topPt");
@@ -2766,7 +2768,7 @@ void Plotter::PlotDiffXSec(TString Channel){
     PrintResultTotxtFile(Channel, binCenters, tga_DiffXSecPlot, tga_DiffXSecPlotwithSys);
 
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
-    TH1* stacksum = SummedStackHisto(stack);
+    TH1* stacksum = ttbar::summedStackHisto(stack);
 
     for(unsigned int i=1; i<hists.size() ; i++){ // sum all data plots to first histogram
         if(legends.at(i) == legends.at(0)){
@@ -2872,9 +2874,9 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
     
     TString filename;
     if(strcmp(generator, "Powheg")==0){filename = "selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root";}
-    else if(strcmp(generator, "MCatNLO")==0){filename = DATA_PATH() + "/MCatNLO_status3_v20120729.root";}
-    else if(strcmp(generator, "MCNLOup")==0){filename = DATA_PATH() + "/MCatNLO_Uncert_Up_status3_v20120729.root";}
-    else if(strcmp(generator, "MCNLOdown")==0){filename = DATA_PATH() + "/MCatNLO_Uncert_Down_status3_v20120729.root";}
+    else if(strcmp(generator, "MCatNLO")==0){filename = ttbar::DATA_PATH() + "/MCatNLO_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOup")==0){filename = ttbar::DATA_PATH() + "/MCatNLO_Uncert_Up_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOdown")==0){filename = ttbar::DATA_PATH() + "/MCatNLO_Uncert_Down_status3_v20120729.root";}
     
     TH1 *hist = fileReader->GetClone<TH1>(filename, histname, true);
     if (hist) {
