@@ -1,16 +1,42 @@
-#ifndef analysisUtils_h
-#define analysisUtils_h
+#ifndef ttbar_analysisUtils_h
+#define ttbar_analysisUtils_h
 
 #include <vector>
 #include <cmath>
+#include <string>
 
-#include "classes.h"
+class TLorentzVector;
+class TH1;
+
+#include "classesFwd.h"
 
 
 
 
 
+// --- Several conversion functions -------------------------------------------------------------------------------------
 
+namespace ttbar{
+    /// Convert LorentzVector to an array[E, px, py, pz]
+    void LVtod4(const LV& lv, double* d);
+    
+    /// Convert double to string (smart number of digits)
+    std::string d2s(const double& d);
+    
+    
+    /// Conversion from TLorentzVector to our LV type (ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> >)
+    const LV TLVtoLV(const TLorentzVector& lv);
+    
+    
+    /// Conversion from our LV type to TLorentzVector (ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> >)
+    const TLorentzVector LVtoTLV(const LV& lv);
+}
+
+
+
+
+
+// --- Functions concerning the treatment of indices of vectors (for working with data stored in nTuple branches) -------------
 
 namespace ttbar{
     
@@ -146,9 +172,24 @@ template<class T> void ttbar::selectIndices(std::vector<int>& v_index, const std
 
 
 
+// --- Histogram operation functions -----------------------------------------------------------------------------------
+
+namespace ttbar{
+    /** Calculate the median of a histogram
+     * 
+     */
+    double median(TH1* h1);
+}
 
 
-#endif //analysisUtils_h
+
+
+
+
+
+
+
+#endif // ttbar_analysisUtils_h
 
 
 

@@ -1,18 +1,79 @@
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
+#include <cstdio>
+
+#include <TLorentzVector.h>
+#include <TH1.h>
+#include <TH1D.h>
+#include <TMath.h>
 
 #include "analysisUtils.h"
+#include "classes.h"
 
 
 
 
+
+
+// --- Several conversion functions -------------------------------------------------------------------------------------
+
+void ttbar::LVtod4(const LV& lv, double* d)
+{
+    d[0] = lv.E();
+    d[1] = lv.Px();
+    d[2] = lv.Py();
+    d[3] = lv.Pz();
+}
+
+
+
+std::string ttbar::d2s(const double& d)
+{
+    char result[100];
+    if(std::abs(d) < 5) {
+        std::sprintf(result, "%.3f", d);
+        std::string s = std::string(result);
+        while (s.length() > 0 && s[s.length()-1] == '0') s.erase(s.end()-1);
+        if (s.length() > 0 && s[s.length()-1] == '.') s.erase(s.end()-1);
+        return s;
+    }
+    else {
+        std::sprintf(result, "%.0f", d);
+        return std::string(result);
+    }
+}
+
+
+
+const TLorentzVector ttbar::LVtoTLV(const LV& lv)
+{
+    return TLorentzVector(lv.X(), lv.Y(), lv.Z(), lv.T());
+}
+
+
+
+const LV ttbar::TLVtoLV(const TLorentzVector& lv)
+{
+    LV result; 
+    result.SetXYZT(lv.X(), lv.Y(), lv.Z(), lv.T());
+    return result;
+}
+
+
+
+
+
+
+
+// --- Functions concerning the treatment of indices of vectors (for working with data stored in nTuple branches) -------------
 
 std::vector<double> ttbar::parametersLV(const VLV& v_lv, const ttbar::LVParameter& parameter)
 {
     std::vector<double> v_variable;
     for(const LV& lv : v_lv){
-        if(parameter==LVpt) v_variable.push_back(lv.pt());
-        else if (parameter==LVeta) v_variable.push_back(lv.eta());
+        if(parameter == LVpt) v_variable.push_back(lv.pt());
+        else if (parameter == LVeta) v_variable.push_back(lv.eta());
         else{
             std::cerr<<"Error in parametersLV! Lorentz vector parameter is not implemented\n...break\n";
             exit(638);
@@ -80,6 +141,25 @@ void ttbar::orderLV(LV& lv1, LV& lv2, const LV& inputLv1, const LV& inputLv2, co
 }
 
 
+
+
+
+// --- Histogram operation functions -----------------------------------------------------------------------------------
+
+double ttbar::median(TH1* h1)
+{ 
+   int nBin = h1->GetXaxis()->GetNbins();
+   std::vector<double> x(nBin);
+   h1->GetXaxis()->GetCenter( &x[0] );
+   TH1D* h1D = dynamic_cast<TH1D*>(h1);
+   if(!h1D){
+       std::cerr << "Median needs a TH1D!\n";
+       exit(7);
+   }
+   const double * y = h1D->GetArray(); 
+   // exclude underflow/overflows from bin content array y
+   return TMath::Median(nBin, &x[0], &y[1]); 
+}
 
 
 
