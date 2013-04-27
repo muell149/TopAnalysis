@@ -8,8 +8,6 @@
 #include <functional>
 
 #include <TSelector.h>
-#include <TSelectorList.h>
-#include <TParameter.h>
 #include <Rtypes.h>
 
 class TBranch;
@@ -18,10 +16,13 @@ class TH1;
 class TH2;
 class TString;
 
-#include "classes.h"
+#include "classesFwd.h"
+#include "storeTemplate.h"
 
 class PUReweighter;
 class JetCorrectionUncertainty;
+
+
 
 
 
@@ -406,27 +407,27 @@ public:
     virtual void Terminate();
     
     /// Set sample name
-    void SetSamplename(TString samplename, TString systematic_from_file);
+    void SetSamplename(const TString& samplename, const TString& systematic_from_file);
     /// Set Channel
-    void SetChannel(TString channel);
+    void SetChannel(const TString& channel);
     /// Set systematic
-    void SetSystematic(TString systematic);
+    void SetSystematic(const TString& systematic);
     /// Set whether it is MC sample
-    void SetMC(bool isMC);
+    void SetMC(const bool isMC);
     /// Set whether it is Top signal sample
-    void SetTopSignal(bool isTopSignal);
+    void SetTopSignal(const bool isTopSignal);
     /// Set whether it is Higgs signal sample
     void SetHiggsSignal(const bool higgsSignal);
     
     /// Set Drell-Yan decay channel for selection, access decay mode from nTuple branch
-    void SetTrueLevelDYChannel(int dy);
+    void SetTrueLevelDYChannel(const int dy);
     /// Set name of output file
-    void SetOutputfilename(TString outputfilename);
+    void SetOutputfilename(const TString& outputfilename);
     /// Bool for separating direct dileptonic ttbar decays and decays via intermediate taus
-    void SetRunViaTau(bool runViaTau);
+    void SetRunViaTau(const bool runViaTau);
     
     /// Set input file for b-tagging efficiencies
-    void SetBTagFile(TString btagFile);
+    void SetBTagFile(const TString& btagFile);
     
     /// Set the pileup reweighter
     void SetPUReweighter(PUReweighter* puReweighter);
@@ -447,30 +448,38 @@ public:
 protected:
     
     /// Access event entry for nTuple branches relevant for reconstruction level
-    void GetRecoBranchesEntry(Long64_t&);
+    void GetRecoBranchesEntry(const Long64_t&)const;
     /// Access event entry for nTuple branches for trigger bits
-    void GetTriggerBranchesEntry(Long64_t&);
+    void GetTriggerBranchesEntry(const Long64_t&)const;
     /// Access event entry for nTuple branches holding generator information for all MC samples
-    void GetCommonGenBranchesEntry(Long64_t&);
+    void GetCommonGenBranchesEntry(const Long64_t&)const;
     /// Access event entry for nTuple branches of kinematic reconstruction
-    void GetKinRecoBranchesEntry(Long64_t&);
+    void GetKinRecoBranchesEntry(const Long64_t&)const;
     /// Access event entry for nTuple branch of true vertex multiplicity
-    void GetVertMultiTrueEntry(Long64_t&);
+    void GetVertMultiTrueEntry(const Long64_t&)const;
     /// Access event entry for nTuple branch for generator event weight
-    void GetWeightGeneratorEntry(Long64_t&);
+    void GetWeightGeneratorEntry(const Long64_t&)const;
     /// Access event entry for nTuple branch for PDF weights
-    void GetPDFEntry(Long64_t&);
+    void GetPDFEntry(const Long64_t&)const;
     /// Access event entry for nTuple branch for Top decay mode
-    void GetTopDecayModeEntry(Long64_t&);
+    void GetTopDecayModeEntry(const Long64_t&)const;
     /// Access event entry for nTuple branch for Higgs decay mode
-    void GetHiggsDecayModeEntry(Long64_t&);
+    void GetHiggsDecayModeEntry(const Long64_t&)const;
     /// Access event entry for nTuple branches for Top signal samples on generator level
-    void GetTopSignalBranchesEntry(Long64_t&);
+    void GetTopSignalBranchesEntry(const Long64_t&)const;
     /// Access event entry for nTuple branches for Higgs signal samples on generator level
-    void GetHiggsSignalBranchesEntry(Long64_t&);
+    void GetHiggsSignalBranchesEntry(const Long64_t&)const;
     
-    /// Get string telling the Top decay mode
-    const std::string topDecayModeString();
+    /** Return a string describing the true level W+/W- decays from the ttbar system
+     * 
+     * @return a string like e/tau->mu describing the decay to the W+/W- from the top/tbar decay
+     * 
+     * Possible strings are:
+     *   e/e  for the ee channel
+     *   e/tau->mu for the W+ -> e+ decay and the W- -> tau- -> mu- decay
+     *   ... and so on. The first part is from the top/W+, the second from the tbar/W-
+     */
+    const std::string topDecayModeString()const;
     
     /// Book histograms needed for b-tag efficiencies
     void bookBtagHistograms();
@@ -482,66 +491,97 @@ protected:
     /// Prepare trigger scale factor
     void prepareTriggerSF();
     /// Get trigger per-event scale factor
-    double getTriggerSF(const int leptonXIndex, const int leptonYIndex);
+    double getTriggerSF(const int leptonXIndex, const int leptonYIndex)const;
     
     /// Prepare lepton scale factor
     void prepareLeptonIDSF();
     /// Get lepton per-event scale factor
-    double getLeptonIDSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex);
+    double getLeptonIDSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const;
     
-    /// Prepare b-tagging scale factor
+    /// Prepare b-tagging scale factor (efficiency histograms and medians of jet eta, pt)
     void prepareBtagSF();
     /// Get b-tag per-event scale factor
-    double calculateBtagSF(const std::vector<int>& jetIndices);
+    double calculateBtagSF(const std::vector<int>& jetIndices)const;
     
     
     
     // FIXME: these methods will be moved to own b-tagging class (several anyway would be private)
+    /// Return the indexes of the jet that are b-tagged after randomization
     std::vector<int> indexOfBtags(const std::vector<int>& jetIndices, const double TagCut = 0.244);
+    /// 'Random' decision to tag or not tag a jet.
+    /// Method explained in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFUtil
+    /// and in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#2a_Jet_by_jet_updating_of_the_b
     bool isTagged(LV Jet, double TagValue, int Flavour, double TagCut = 0.244);
     double getEfficiency(LV jet, int partonFlavour);
     double getSF(double pt, double abs_eta, int flavour);
+    /// Decide wich type of BTag variation is going to be done according to 
+    ///   systematics name 
+    ///   median value (if applicable)
     double varySF(double pt, double eta, int flavour, double ptmedian, double etamedian);
     bool makeeffs;
     
     
 
-    /// Prepare kinematic reconstruction scale factor
+    /** Set up the scale factor for the Kinematic Reconstruction
+     * 
+     * Currently a flat per-channel SF is used. For the systematic KIN_UP and KIN_DOWN,
+     * the SF is modified by its uncertainty.
+     * 
+     * To calculate the SF, you need to set the SF to 1 and rerun. Then determine the
+     * SF with kinRecoEfficienciesAndSF
+     */
     void prepareKinRecoSF();
-    /// Calculate the kinematic reconstruction and return whether at least one solution exists
-    bool calculateKinReco(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices, const LV& met);
+    /** Calculate the kinematic reconstruction and return whether at least one solution exists
+     * 
+     * reconstruct the top quarks and store the result in the 
+     * Hyp* member variables
+     * 
+     * @param leptonMinus 4-vector of the l-
+     * @param leptonPlus 4-vector of the l+
+     * 
+     * @return true if there is at least one solution
+     */
+    bool calculateKinReco(const int leptonIndex, const int antiLeptonIndex,
+                          const std::vector<int>& jetIndices, const LV& met);
     
-    /// Prepare JER/JES systematics
+    /** prepare JER/JES systematics
+     * 
+     * This function checks if we are asked to run JER or JES. If so,
+     * additional branches need to be enabled and a JES uncertainty file
+     * needs to be read.
+     */
     void prepareJER_JES();
-    /// Apply JER/JES systematics
+    /// Apply the JER or JES systematic
+    /// This function modifies the jets collection and also scales the MET.
+    /// It uses the collections stored just for the jet scaling
     void applyJER_JES();
     
     /// Get 2-dimensional scale factor from histogram
-    double get2DSF(TH2* histo, double x, double y);
+    double get2DSF(TH2* histo, const double x, const double y)const;
     
     /// Check if opposite-charge dilepton combination exists,
     /// and check if lepton pair is correct flavour combination for the specified analysis channel (ee, emu, mumu)
-    bool hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex);
+    bool hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const;
     
     /// Check if event was triggered with the same dilepton trigger as the specified analysis channel
-    bool failsDileptonTrigger(Long64_t&);
+    bool failsDileptonTrigger(const Long64_t&)const;
     
     /// Get H_t of jets
-    double getJetHT(const std::vector<int>& jetIndices, const VLV& jets);
+    double getJetHT(const std::vector<int>& jetIndices, const VLV& jets)const;
     
     
     
     /// Select events from Drell-Yan samples which need to be removed due to generator selection
-    bool failsDrellYanGeneratorSelection(Long64_t&)const;
+    bool failsDrellYanGeneratorSelection(const Long64_t&)const;
     
     /// Select events from Top signal samples which need to be removed due to generator selection
-    bool failsTopGeneratorSelection(Long64_t&);
+    bool failsTopGeneratorSelection(const Long64_t&)const;
     
     /// Correct branching ratios of W decays in MadGraph samples
-    double madgraphWDecayCorrection(Long64_t&);
+    double madgraphWDecayCorrection(const Long64_t&)const;
     
     /// Get weight due to pileup reweighting
-    double weightPileup(Long64_t&);
+    double weightPileup(const Long64_t&)const;
     
     
     
@@ -563,7 +603,7 @@ protected:
     std::string assignFolder(const char* baseDir, const TString& channel, const TString& systematic)const;
     
     /// Store the object in the output list and return it
-    template<class T> T* store(T* obj);
+    template<class T> T* store(T* obj){return ttbar::store(obj, fOutput);}
     
     
     
@@ -601,32 +641,19 @@ private:
     void SetHiggsSignalBranchAddresses();
     
     /// Methods needed for b-tag scale factor calculation
-    double BJetSF(double, double);
-    double CJetSF(double, double);
-    double LJetSF(double, double, TString);
-    double BJetSFAbsErr(double);
-    double CJetSFAbsErr(double);
+    double BJetSF(const double&, const double&)const;
+    double CJetSF(const double&, const double&)const;
+    double LJetSF(const double&, const double&, const TString&)const;
+    double BJetSFAbsErr(const double&)const;
+    double CJetSFAbsErr(const double&)const;
 };
-
-
-
-/** helper function to store a TObject in the output list
- * 
- * @param obj a pointer to a TObject (or any type inheriting from TObject)
- * @return returns the parameter (and the same type)
- * 
- * This function just adds a histogram to the output list and returns 
- * it in a typesafe way. Used to save some typing.
- */
-template<class T>
-inline T* AnalysisBase::store(T* obj)
-{
-    fOutput->Add(obj);
-    return obj;
-}
 
 
 
 
 
 #endif
+
+
+
+
