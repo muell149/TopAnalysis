@@ -4,6 +4,25 @@
 #include <TSystem.h>
 #include "TopSVDFunctions.h"
 
+
+
+#ifdef STANDALONE_COMPILE
+#include "../diLeptonic/src/plotterUtils.h"
+#else
+#include "TopSVDUnfold.C"
+#include "../semiLeptonic/diffXSection/basicFunctions.h"
+#include "../semiLeptonic/diffXSection/HHStyle.h"
+#endif
+
+
+
+
+
+// Namespaces
+using namespace std;
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////    Function Definitions  ////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -7581,7 +7600,11 @@ double TopSVDFunctions::SVD_Unfold(
     if ( flag_ps >= 2 ) { 
         
         // Setup Style
+        #ifdef STANDALONE_COMPILE // needed for setHHStyle in dilepton analysis, where it is in a namespace
+        ttbar::setHHStyle(*gStyle);
+        #else
         setHHStyle(*gStyle);
+        #endif
         gStyle->SetPadTopMargin(0.15);
         gStyle->SetPadRightMargin(0.2);
         gStyle->SetPaintTextFormat(".0f");
@@ -8170,7 +8193,11 @@ double TopSVDFunctions::SVD_Unfold(
     
     
         // Reset Style
-        setHHStyle(*gStyle); 
+        #ifdef STANDALONE_COMPILE // needed for setHHStyle in dilepton analysis, where it is in a namespace
+        ttbar::setHHStyle(*gStyle);
+        #else
+        setHHStyle(*gStyle);
+        #endif
         TGaxis::SetMaxDigits(2);
     
     
