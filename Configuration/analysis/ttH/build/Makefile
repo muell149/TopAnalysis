@@ -17,7 +17,7 @@ all: load_HiggsAnalysis Histo mva
 
 
 
-utils.o: $(TopDir)/utils.cc $(TopDir)/utils.h $(TopDir)/classes.h
+utils.o: $(TopDir)/utils.cc $(TopDir)/utils.h
 	g++ -c -o utils.o $(COMPFLAGS) $(TopDir)/utils.cc
 
 CommandLineParameters.o: $(TopDir)/CommandLineParameters.cc $(TopDir)/CommandLineParameters.h
@@ -36,37 +36,37 @@ sampleHelpers.o: $(HiggsDir)/sampleHelpers.cc $(HiggsDir)/sampleHelpers.h
 
 
 
-load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o higgsUtils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o
+load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
-load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h
+load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/utils.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h
 	g++ -c -o load_HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/load_HiggsAnalysis.cc
 
 dict.o: dict.cc
 	g++ -c -o $@ $(COMPFLAGS) dict.cc
 
-dict.cc: $(TopDir)/AnalysisBase.h $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/AnalysisHistograms.h $(TopDir)/classes.h $(TopDir)/HistoListReader.h $(TopDir)/PUReweighter.h $(HiggsDir)/LinkDef.h
+dict.cc: $(TopDir)/AnalysisBase.h $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/AnalysisHistograms.h $(TopDir)/classes.h $(TopDir)/classesFwd.h $(TopDir)/HistoListReader.h $(TopDir)/PUReweighter.h $(HiggsDir)/LinkDef.h
 	rootcint -f dict.cc -c -p Math/LorentzVector.h Math/PtEtaPhiM4D.h $^
 
 analysisHelpers.o: $(HiggsDir)/analysisHelpers.cc $(HiggsDir)/analysisHelpers.h
 	g++ -c -o analysisHelpers.o $(COMPFLAGS) $(HiggsDir)/analysisHelpers.cc
 
-AnalysisBase.o: $(TopDir)/AnalysisBase.cc $(TopDir)/AnalysisBase.h $(TopDir)/classes.h
+AnalysisBase.o: $(TopDir)/AnalysisBase.cc $(TopDir)/AnalysisBase.h $(TopDir)/storeTemplate.h $(TopDir)/classesFwd.h
 	g++ -c -o AnalysisBase.o $(COMPFLAGS) $(TopDir)/AnalysisBase.cc
 
-HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/higgsUtils.h $(TopDir)/AnalysisBase.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/JetCategories.h $(HiggsDir)/MvaInputVariables.h
+HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/classesFwd.h $(TopDir)/AnalysisBase.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/JetCategories.h $(HiggsDir)/MvaInputVariables.h
 	g++ -c -o HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/HiggsAnalysis.cc
 
-analysisUtils.o: $(TopDir)/analysisUtils.cc $(TopDir)/analysisUtils.h $(TopDir)/classes.h
+analysisUtils.o: $(TopDir)/analysisUtils.cc $(TopDir)/analysisUtils.h $(TopDir)/classesFwd.h
 	g++ -c -o analysisUtils.o $(COMPFLAGS) $(TopDir)/analysisUtils.cc
 
 PUReweighter.o: $(TopDir)/PUReweighter.cc $(TopDir)/PUReweighter.h
 	g++ -c -o PUReweighter.o $(COMPFLAGS) $(TopDir)/PUReweighter.cc
 
-KinReco.o: $(TopDir)/KinReco.cc $(TopDir)/KinReco.h $(TopDir)/classes.h
+KinReco.o: $(TopDir)/KinReco.cc $(TopDir)/KinReco.h $(TopDir)/classesFwd.h
 	g++ -c -o KinReco.o $(COMPFLAGS) $(TopDir)/KinReco.cc
 
-MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classes.h $(HiggsDir)/higgsUtils.h
+MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h
 	g++ -c -o MvaInputVariables.o $(COMPFLAGS) $(HiggsDir)/MvaInputVariables.cc
 
 JetCorrectionUncertainty.o: $(TopDir)/JetCorrectionUncertainty.cc $(TopDir)/JetCorrectionUncertainty.h
@@ -78,7 +78,7 @@ JetCorrectorParameters.o: $(TopDir)/JetCorrectorParameters.cc $(TopDir)/JetCorre
 SimpleJetCorrectionUncertainty.o: $(TopDir)/SimpleJetCorrectionUncertainty.cc $(TopDir)/SimpleJetCorrectionUncertainty.h
 	g++ -c -o $@ $(COMPFLAGS) $(TopDir)/SimpleJetCorrectionUncertainty.cc
 
-AnalysisHistograms.o: $(HiggsDir)/AnalysisHistograms.cc $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/higgsUtils.h $(TopDir)/classes.h
+AnalysisHistograms.o: $(HiggsDir)/AnalysisHistograms.cc $(HiggsDir)/AnalysisHistograms.h $(TopDir)/storeTemplate.h $(TopDir)/classesFwd.h
 	g++ -c -o AnalysisHistograms.o $(COMPFLAGS) $(HiggsDir)/AnalysisHistograms.cc
 
 JetCategories.o: $(HiggsDir)/JetCategories.cc $(HiggsDir)/JetCategories.h
@@ -88,14 +88,17 @@ JetCategories.o: $(HiggsDir)/JetCategories.cc $(HiggsDir)/JetCategories.h
 
 
 
-Histo: Histo.o Plotter.o plotterHelpers.o utils.o higgsUtils.o HistoListReader.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o RootFileReader.o
+Histo: Histo.o Plotter.o plotterHelpers.o utils.o plotterUtils.o higgsUtils.o HistoListReader.o CommandLineParameters.o sampleHelpers.o Samples.o EventYields.o DyScaleFactors.o RootFileReader.o
 	g++ -o Histo $^ $(ROOTLIBS)
 
-Histo.o: $(HiggsDir)/Histo.cc $(HiggsDir)/higgsUtils.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/Samples.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/EventYields.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/Plotter.h $(TopDir)/HistoListReader.h $(TopDir)/CommandLineParameters.h
+Histo.o: $(HiggsDir)/Histo.cc $(TopDir)/utils.h $(HiggsDir)/sampleHelpers.h $(HiggsDir)/Samples.h $(HiggsDir)/DyScaleFactors.h $(HiggsDir)/EventYields.h $(HiggsDir)/plotterHelpers.h $(HiggsDir)/Plotter.h $(TopDir)/HistoListReader.h $(TopDir)/CommandLineParameters.h
 	g++ -c -o Histo.o $(COMPFLAGS) $(HiggsDir)/Histo.cc
 
 plotterHelpers.o: $(HiggsDir)/plotterHelpers.cc $(HiggsDir)/plotterHelpers.h
 	g++ -c -o plotterHelpers.o $(COMPFLAGS) $(HiggsDir)/plotterHelpers.cc
+
+plotterUtils.o: $(TopDir)/plotterUtils.cc $(TopDir)/plotterUtils.h
+	g++ -c -o plotterUtils.o $(COMPFLAGS) $(TopDir)/plotterUtils.cc
 
 Samples.o: $(HiggsDir)/Samples.cc $(HiggsDir)/Samples.h $(HiggsDir)/SamplesFwd.h $(HiggsDir)/sampleHelpers.h
 	g++ -c -o Samples.o $(COMPFLAGS) $(HiggsDir)/Samples.cc

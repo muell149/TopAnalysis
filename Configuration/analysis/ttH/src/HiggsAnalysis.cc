@@ -14,6 +14,7 @@
 #include "HiggsAnalysis.h"
 #include "higgsUtils.h"
 #include "../../diLeptonic/src/analysisUtils.h"
+#include "../../diLeptonic/src/classes.h"
 
 
 

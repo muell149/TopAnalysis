@@ -38,7 +38,7 @@ void DyScaleFactors::produceScaleFactors(const Samples& samples)
     // Extract selection steps
     std::vector<TString> v_step;
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
-        const TString& step = Tools::extractSelectionStep(*i_eventHistoName);
+        const TString& step = tth::extractSelectionStep(*i_eventHistoName);
         v_step.push_back(step);
     }
     
@@ -107,10 +107,10 @@ void DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::
             TH1D* h_zVeto = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("TTh1_").Append(step));
             TH1D* h_all = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("Allh1_").Append(step));
             
-            Tools::applyFlatWeight(h_loose, allWeights);
-            Tools::applyFlatWeight(h_zWindow, allWeights);
-            Tools::applyFlatWeight(h_zVeto, allWeights);
-            Tools::applyFlatWeight(h_all, allWeights);
+            h_loose->Scale(allWeights);
+            h_zWindow->Scale(allWeights);
+            h_zVeto->Scale(allWeights);
+            h_all->Scale(allWeights);
             
             // FIXME: here Integral() is used, but this does not account for the overflow, so it is wrong !?
             if(sample.sampleType()==Sample::data){
@@ -242,7 +242,7 @@ int DyScaleFactors::applyDyScaleFactor(TH1* histogram, const Sample& sample,
 {
     // Check if step can be extracted from histogram name
     const TString histogramName(histogram->GetName());
-    const TString step = Tools::extractSelectionStep(histogramName);
+    const TString step = tth::extractSelectionStep(histogramName);
     if(step == ""){
         if(allowNonexistingStep){
             // It is allowed that no Drell-Yan scale factor exists for this step, so silently do not apply one
@@ -274,7 +274,7 @@ int DyScaleFactors::applyDyScaleFactor(TH1* histogram, const Sample& sample,
     
     // Access the Drell-Yan scale factor and apply it to the histogram
     const double& dyScaleFactor = this->dyScaleFactor(step, systematic, finalState);
-    Tools::applyFlatWeight(histogram, dyScaleFactor);
+    histogram->Scale(dyScaleFactor);
     //std::cout<<"\nDY: "<<step<<" , "<<histogramName<<" , "
     //         <<Systematic::convertSystematic(systematic)<<" , "<<Channel::convertChannel(finalState)<<" , "
     //         <<dyScaleFactor<<"\n\n";

@@ -15,7 +15,7 @@
 #include <TH1.h>
 
 #include "HiggsAnalysis.h"
-#include "higgsUtils.h"
+#include "../../diLeptonic/src/utils.h"
 #include "sampleHelpers.h"
 #include "analysisHelpers.h"
 #include "../../diLeptonic/src/PUReweighter.h"
@@ -206,13 +206,13 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
 int main(int argc, char** argv) {
     CLParameter<std::string> opt_filenamePattern("f", "Restrict to filename pattern, e.g. ttbar", false, 1, 1);
     CLParameter<std::string> opt_channel("c", "Specify a certain channel (ee, emu, mumu). No channel specified = run on all channels", false, 1, 1,
-            Tools::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
+            ttbar::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
     CLParameter<std::string> opt_systematic("s", "Run with a systematic that runs on the nominal ntuples, e.g. 'PU_UP'", false, 1, 1,
-            Tools::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsAnalysis)));
+            ttbar::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsAnalysis)));
     CLParameter<int> opt_dy("d", "Drell-Yan mode (11 for ee, 13 for mumu, 15 for tautau)", false, 1, 1,
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
     CLParameter<std::string> opt_mode("m", "Mode of analysis: control plots (cp), MVA input (mva). Default is cp", false, 1, 1,
-            Tools::makeStringCheck(AnalysisMode::convertAnalysisModes(AnalysisMode::allowedAnalysisModes)));
+            ttbar::makeStringCheck(AnalysisMode::convertAnalysisModes(AnalysisMode::allowedAnalysisModes)));
     CLAnalyser::interpretGlobal(argc, argv);
     
     // Set up a pattern for selecting only files from selectionList containing that pattern in filename

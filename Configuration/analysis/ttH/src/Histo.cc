@@ -5,7 +5,7 @@
 
 #include <TString.h>
 
-#include "higgsUtils.h"
+#include "../../diLeptonic/src/utils.h"
 #include "sampleHelpers.h"
 #include "Samples.h"
 #include "DyScaleFactors.h"
@@ -94,11 +94,11 @@ int main(int argc, char** argv) {
     // Get and check configuration parameters
     CLParameter<std::string> opt_plots("p", "Name (pattern) of plot; multiple patterns possible; use '+Name' to match name exactly", false, 1, 100);
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: all channels", false, 1, 4,
-        Tools::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
+        ttbar::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
     CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal, use 'all' for all", false, 1, 100,
-        Tools::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsPlotting)));
+        ttbar::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsPlotting)));
     CLParameter<std::string> opt_drawMode("m", "Specify draw mode of Higgs sample, valid: stacked, overlaid, scaledoverlaid. Default: scaledoverlaid", false, 1, 1,
-        Tools::makeStringCheck(DrawMode::convertDrawModes(DrawMode::allowedDrawModes)));
+        ttbar::makeStringCheck(DrawMode::convertDrawModes(DrawMode::allowedDrawModes)));
     CLAnalyser::interpretGlobal(argc, argv);
     
     // Set up plots

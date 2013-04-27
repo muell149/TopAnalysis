@@ -21,7 +21,7 @@
 
 #include "Plotter.h"
 #include "../../diLeptonic/src/RootFileReader.h"
-#include "../../diLeptonic/src/utils.h"
+#include "../../diLeptonic/src/plotterUtils.h"
 #include "higgsUtils.h"
 #include "Samples.h"
 #include "DyScaleFactors.h"
@@ -137,7 +137,7 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
             //Rescaling to the data luminosity
             if(sample.sampleType() != Sample::data){
                 const double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
-                Tools::applyFlatWeight(hist, lumiWeight);
+                hist->Scale(lumiWeight);
             }
             
             // Drell-Yan reweighting
@@ -146,7 +146,7 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
             }
             
             // Set style
-            setHHStyle(*gStyle);
+            ttbar::setHHStyle(*gStyle);
             
             // Clone histogram directly here
             TH1D* histClone = (TH1D*) hist->Clone();
@@ -326,7 +326,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     drawCmsLabels(1, 8);
     drawDecayChannelLabel(channel);
     legend->Draw("SAME");
-    drawRatio(dataHist.second, stacksum, 0.5, 1.7);
+    ttbar::drawRatio(dataHist.second, stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots and write them
     const TString eventFileString = Tools::assignFolder(BaseDIR, channel, systematic);

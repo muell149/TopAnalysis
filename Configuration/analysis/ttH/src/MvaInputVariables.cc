@@ -12,9 +12,7 @@
 #include <Rtypes.h>
 
 #include "MvaInputVariables.h"
-
-
-
+#include "../../diLeptonic/src/classes.h"
 
 
 
@@ -41,9 +39,9 @@ meanMTAlt_b_met_(-999.)
 
 
 
-
 MvaInputTopJetsVariables::MvaInputTopJetsVariables():
-selectorList_(0), t_mvaInput_(0)
+selectorList_(0),
+t_mvaInput_(0)
 {}
 
 

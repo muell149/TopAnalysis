@@ -8,8 +8,8 @@ class TString;
 class TH1;
 class TSelectorList;
 
-#include "higgsUtils.h"
-#include "../../diLeptonic/src/classes.h"
+#include "../../diLeptonic/src/storeTemplate.h"
+#include "../../diLeptonic/src/classesFwd.h"
 
 
 
@@ -54,7 +54,7 @@ protected:
     bool checkExistence(const TString& step)const;
 
     /// Store the object in the output list and return it
-    template<class T> T* store(T* obj){return Tools::store(obj, selectorList_);}
+    template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
 
     /// Pointer for bookkeeping of histograms
     TSelectorList* selectorList_;

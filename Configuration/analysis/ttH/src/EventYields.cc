@@ -40,7 +40,7 @@ void EventYields::produceYields(const Samples& samples)const
     std::vector<std::pair<TString, TString> > v_nameStepPair;
     std::stringstream ss_step;
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
-        const TString& step = Tools::extractSelectionStepAndCategoryBin(*i_eventHistoName);
+        const TString& step = tth::extractSelectionStepAndCategoryBin(*i_eventHistoName);
         v_nameStepPair.push_back(std::make_pair(*i_eventHistoName, step));
         ss_step<<step<<", ";
     }
@@ -73,7 +73,7 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
         for(const auto& sample : v_sample){
             TH1D* temp_hist = fileReader_->GetClone<TH1D>(sample.inputFile(), i_nameStepPair->first);
             double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
-            Tools::applyFlatWeight(temp_hist, lumiWeight);
+            temp_hist->Scale(lumiWeight);
             v_numhist.push_back(SampleHistPair(sample, temp_hist));
         }
         

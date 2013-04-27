@@ -18,7 +18,7 @@ class DyScaleFactors;
 
 
 
-class Plotter {
+class Plotter{
 
 public:
     

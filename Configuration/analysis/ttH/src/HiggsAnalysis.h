@@ -7,11 +7,12 @@ class TTree;
 class TH1;
 class TString;
 
-#include "../../diLeptonic/src/AnalysisBase.h"
 #include "JetCategories.h"
 #include "AnalysisHistograms.h"
 #include "MvaInputVariables.h"
 #include "analysisHelpers.h"
+#include "../../diLeptonic/src/AnalysisBase.h"
+#include "../../diLeptonic/src/classesFwd.h"
 
 
 

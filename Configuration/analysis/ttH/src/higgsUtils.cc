@@ -1,9 +1,7 @@
 #include <iostream>
-#include <algorithm>
-#include <functional>
+#include <cstdlib>
 
 #include <TObjArray.h>
-#include <TH1.h>
 #include <TString.h>
 #include <Rtypes.h>
 
@@ -13,42 +11,33 @@
 
 
 
-void Tools::applyFlatWeight(TH1* hist, const double weight)
-{
-    if(weight == 0) {std::cout<<"Warning! The weight your applying is 0. This will remove your distribution."<<std::endl;}
-    //if(weight >=1e3){std::cout<<"Warning: the weight your applying is >= 1e3. This will enlarge too much your distribution."<<std::endl;}
-    hist->Scale(weight);
-}
-
-
-
-TString Tools::extractSelectionStep(const TString& name)
+TString tth::extractSelectionStep(const TString& name)
 {
     TString result(name);
     // Remove e.g. things like .root ??
-    result = Tools::stepFragmentByToken(result, ".");
+    result = helper::stepFragmentByToken(result, ".");
     // Further separation by "_" to find string containing step
-    result = Tools::stepFragmentByToken(result, "_");
+    result = helper::stepFragmentByToken(result, "_");
     //std::cout<<"The extracted selection step is (step/histogram name): "<<result<<" / "<<name<<std::endl;
     return result;
 }
 
 
 
-TString Tools::extractCategoryBin(const TString& name)
+TString tth::extractCategoryBin(const TString& name)
 {
     TString result(name);
     // Remove e.g. things like .root ??
-    result = Tools::binFragmentByToken(result, ".");
+    result = helper::binFragmentByToken(result, ".");
     // Further separation by "_" to find string containing step
-    result = Tools::binFragmentByToken(result, "_");
+    result = helper::binFragmentByToken(result, "_");
     //std::cout<<"The extracted category bin is (bin/histogram name): "<<result<<" / "<<name<<std::endl;
     return result;
 }
 
 
 
-TString Tools::extractSelectionStepAndCategoryBin(const TString& name)
+TString tth::extractSelectionStepAndCategoryBin(const TString& name)
 {
     const TString step(extractSelectionStep(name));
     const TString bin(extractCategoryBin(name));
@@ -58,7 +47,7 @@ TString Tools::extractSelectionStepAndCategoryBin(const TString& name)
 
 
 
-TString Tools::stepFragmentByToken(const TString& nameFragment, const TString& token)
+TString tth::helper::stepFragmentByToken(const TString& nameFragment, const TString& token)
 {
     TString result(nameFragment);
     TObjArray* a_nameFragment = TString(nameFragment).Tokenize(token);
@@ -80,7 +69,7 @@ TString Tools::stepFragmentByToken(const TString& nameFragment, const TString& t
 
 
 
-TString Tools::binFragmentByToken(const TString& nameFragment, const TString& token)
+TString tth::helper::binFragmentByToken(const TString& nameFragment, const TString& token)
 {
     TString result(nameFragment);
     TObjArray* a_nameFragment = TString(nameFragment).Tokenize(token);
@@ -101,13 +90,5 @@ TString Tools::binFragmentByToken(const TString& nameFragment, const TString& to
     return result;
 }
 
-
-
-std::function<bool(const std::string& s)> Tools::makeStringCheck(const std::vector<std::string> v_string)
-{
-    return [v_string](const std::string& test){
-        return std::find(begin(v_string), end(v_string), test) != end(v_string);
-    };
-}
 
 

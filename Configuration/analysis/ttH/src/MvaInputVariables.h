@@ -10,8 +10,8 @@ class TSelectorList;
 class TH1;
 class TString;
 
-#include "../../diLeptonic/src/classes.h"
-#include "higgsUtils.h"
+#include "../../diLeptonic/src/storeTemplate.h"
+#include "../../diLeptonic/src/classesFwd.h"
 
 
 
@@ -130,7 +130,7 @@ private:
     void fillHistograms(const TString& name, const double& variable, const MvaInputTopJetsStruct& mvaInputTopJetsStruct);
     
     /// Store the object in the output list and return it
-    template<class T> T* store(T* obj){return Tools::store(obj, selectorList_);}
+    template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
     
     
     
