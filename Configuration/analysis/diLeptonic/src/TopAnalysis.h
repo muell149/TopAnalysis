@@ -119,6 +119,32 @@ class TopAnalysis : public AnalysisBase
     TH2 *h_GenRecoLeptonpTLead, *h_GenRecoLeptonpTNLead, *h_GenRecoLeptonEtaLead,   *h_GenRecoLeptonEtaNLead;
     TH2 *h_GenRecoBJetpTLead,   *h_GenRecoBJetpTNLead,   *h_GenRecoBJetEtaLead,     *h_GenRecoBJetEtaNLead;
 
+     //Begin: Plots for Carmen
+    TH1 *h_RecoLeadingJetpT,    *h_RecoNLeadingJetpT,    *h_RecoLeadingJetEta,    *h_RecoNLeadingJetEta;
+    TH1 *h_HypLeadingJetpT,     *h_HypNLeadingJetpT,     *h_HypLeadingJetEta,     *h_HypNLeadingJetEta;
+    TH2 *h_GenRecoLeadingJetpT, *h_GenRecoLeadingJetEta, *h_GenRecoNLeadingJetpT, *h_GenRecoNLeadingJetEta;
+    TH1 *h_VisGenLeadingJetpT,  *h_VisGenLeadingJetEta,  *h_VisGenNLeadingJetpT,  *h_VisGenNLeadingJetEta;
+
+    TH1 *h_RecoExtraJetpT,  *h_HypExtraJetpT, *h_VisGenExtraJetpT, *h_RecoExtraJetEta, *h_HypExtraJetEta, *h_VisGenExtraJetEta;
+    TH1 *h_RecoExtraJetpT2, *h_HypExtraJetpT2, *h_VisGenExtraJetpT2, *h_RecoExtraJetEta2, *h_HypExtraJetEta2, *h_VisGenExtraJetEta2;
+    TH1 *h_RecoExtraJetpT3, *h_HypExtraJetpT3, *h_VisGenExtraJetpT3, *h_RecoExtraJetEta3, *h_HypExtraJetEta3, *h_VisGenExtraJetEta3;
+    TH1 *h_RecoExtraJetpT4, *h_HypExtraJetpT4, *h_VisGenExtraJetpT4, *h_RecoExtraJetEta4, *h_HypExtraJetEta4, *h_VisGenExtraJetEta4;
+    TH2 *h_GenRecoExtraJetpT, *h_GenRecoExtraJetEta, *h_GenRecoExtraJetpT2, *h_GenRecoExtraJetEta2, *h_GenRecoExtraJetpT3, *h_GenRecoExtraJetEta3, *h_GenRecoExtraJetpT4, *h_GenRecoExtraJetEta4;
+
+    TH1 *h_RecoJetMultpt30, *h_RecoJetMultpt40, *h_HypJetMultpt30, *h_VisGenJetMultpt30, *h_HypJetMultpt40, *h_VisGenJetMultpt40, *h_RecoJetMultpt60, *h_HypJetMultpt60, *h_VisGenJetMultpt60;
+    TH1 *h_RecoJetMultpt100, *h_HypJetMultpt100, *h_VisGenJetMultpt100;
+    TH2 *h_GenRecoJetMultpt30, *h_GenRecoJetMultpt40, *h_GenRecoJetMultpt60, *h_GenRecoJetMultpt100;
+
+    TH1 *h_HypJetMultQ0, *h_RecoJetMultQ0, *h_VisGenJetMultQ0;
+    TH1 *h_RecoJetMultTotal, *h_HypJetMultTotal, *h_VisGenJetMultTotal;
+    TH1 *h_HypJetMultQsum, *h_RecoJetMultQsum, *h_VisGenJetMultQsum;
+    TH1 *h_HypJetExtra2Q0, *h_RecoJetExtra2Q0, *h_VisGenJetExtra2Q0;
+    TH2 *h_GenRecoJetMultQ0, *h_GenRecoJetExtra2Q0, *h_GenRecoJetMultQsum, *h_GenRecoJetMultTotal;
+
+    TH2 *h_GenRecoDeltaRExtraJet12;
+    TH1 *h_VisGenDeltaRExtraJet12, *h_RecoDeltaRExtraJet12, *h_HypDeltaRExtraJet12;
+    //End: Plots for Carmen
+
     /// Histograms for event weights due to specific scale factor
     TH1 *h_PUSF, *h_TrigSF, *h_LepSF, *h_BTagSF, *h_KinRecoSF, *h_EventWeight;
 
@@ -228,7 +254,19 @@ private:
                            double& genHT,
                            const int bHadronIndex, const int antiBHadronIndex,
                            const double weightPU);
+
+    void generatorTTbarjetsEvent(LV& leadGenLepton, LV& nLeadGenLepton,
+                           LV& leadGenBJet, LV& nLeadGenBJet,
+                           double& jetHTGen,
+                           const int bHadronIndex, const int antiBHadronIndex,
+                           const double weightPU, int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100, double extragenjet[4]);
+
+    /// Reweight funtion estimated by Martin Goerner
+    double TopPtWeight(double pt);
+
+
 };
+
 
 #endif
 

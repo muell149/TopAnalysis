@@ -47,7 +47,7 @@ constexpr double LeptonPtCut = 20.;
 constexpr double JetEtaCUT = 2.4;
 
 /// Cut value for jet pt
-constexpr double JetPtCUT = 30;
+constexpr double JetPtCUT = 20;
 
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
@@ -56,6 +56,10 @@ constexpr double BtagWP = 0.244;
 /// Select the b-tagging method: Apply SF to the histogram or re-tag a jet via a random method
 ///  default method is the re-tagging of the jetBTagCSV_: true
 constexpr bool ReTagJet = false;
+
+
+/// Apply Top Pt reweighting from fit calculated by Martin
+constexpr bool applyTopReweight_ = false;
 
 
 
@@ -444,6 +448,90 @@ void TopAnalysis::SlaveBegin ( TTree * )
     h_RecoBJetEtaNLead = store(new TH1D ( "RecoBJetEtaNLead","NLeading pT BJet Eta",100,-5,5 ));
     h_VisGenBJetEtaNLead = store(new TH1D ( "VisGenBJetEtaNLead","NLeading pT BJet Eta",100,-5,5 ));
     h_GenRecoBJetEtaNLead = store(new TH2D ( "GenRecoBJetEtaNLead", "Gen/Reco Matching", 100,-5,5,100,-5,5 ));
+    h_RecoExtraJetpT   = store(new TH1D("RecoExtraJetpT","pT of additional Jet (HYP)",80,0,400));
+    h_RecoExtraJetEta  = store(new TH1D("RecoExtraJetEta","#eta of additional Jet (HYP)",100,-5,5));
+    h_RecoExtraJetpT2  = store(new TH1D("RecoExtraJetpT2","pT of additional Jet (HYP)",80,0,400));
+    h_RecoExtraJetEta2 = store(new TH1D("RecoExtraJetEta2","#eta of additional Jet (HYP)",100,-5,5));
+    h_RecoExtraJetpT3  = store(new TH1D("RecoExtraJetpT3","pT of additional Jet (HYP)",80,0,400));
+    h_RecoExtraJetEta3 = store(new TH1D("RecoExtraJetEta3","#eta of additional Jet (HYP)",100,-5,5));
+    h_RecoExtraJetpT4  = store(new TH1D("RecoExtraJetpT4","pT of additional Jet (HYP)",80,0,400));
+    h_RecoExtraJetEta4 = store(new TH1D("RecoExtraJetEta4","#eta of additional Jet (HYP)",100,-5,5));
+
+    h_HypExtraJetpT   = store(new TH1D("HypExtraJetpT","pT of additional Jet",80,0,400));
+    h_HypExtraJetEta  = store(new TH1D("HypExtraJetEta","#eta of additional Jet",100,-5,5));
+    h_HypExtraJetpT2  = store(new TH1D("HypExtraJetpT2","pT of additional Jet",80,0,400));
+    h_HypExtraJetEta2 = store(new TH1D("HypExtraJetEta2","#eta of additional Jet",100,-5,5));
+    h_HypExtraJetpT3  = store(new TH1D("HypExtraJetpT3","pT of additional Jet",80,0,400));
+    h_HypExtraJetEta3 = store(new TH1D("HypExtraJetEta3","#eta of additional Jet",100,-5,5));
+    h_HypExtraJetpT4  = store(new TH1D("HypExtraJetpT4","pT of additional Jet",80,0,400));
+    h_HypExtraJetEta4 = store(new TH1D("HypExtraJetEta4","#eta of additional Jet",100,-5,5));
+
+    h_VisGenExtraJetpT   = store(new TH1D("VisGenExtraJetpT","pT of gen additional Jet",80,0,400));
+    h_VisGenExtraJetEta  = store(new TH1D("VisGenExtraJetEta","#eta of gen additional Jet",100,-5,5));
+    h_VisGenExtraJetpT2  = store(new TH1D("VisGenExtraJetpT2","pT of gen additional Jet",80,0,400));
+    h_VisGenExtraJetEta2 = store(new TH1D("VisGenExtraJetEta2","#eta of gen additional Jet",100,-5,5));
+    h_VisGenExtraJetpT3  = store(new TH1D("VisGenExtraJetpT3","pT of gen additional Jet",80,0,400));
+    h_VisGenExtraJetEta3 = store(new TH1D("VisGenExtraJetEta3","#eta of gen additional Jet",100,-5,5));
+    h_VisGenExtraJetpT4  = store(new TH1D("VisGenExtraJetpT4","pT of gen additional Jet",80,0,400));
+    h_VisGenExtraJetEta4 = store(new TH1D("VisGenExtraJetEta4","#eta of gen additional Jet",100,-5,5));
+
+    h_GenRecoExtraJetpT   = store(new TH2D("GenRecoExtraJetpT","Gen/Reco pT of additional Jet",80,0,400,80,0,400));
+    h_GenRecoExtraJetEta  = store(new TH2D("GenRecoExtraJetEta","Gen/Reco #eta of additional Jet",100,-5,5,100,-5,5));
+    h_GenRecoExtraJetpT2  = store(new TH2D("GenRecoExtraJetpT2","Gen/Reco pT of additional Jet",80,0,400,80,0,400));
+    h_GenRecoExtraJetEta2 = store(new TH2D("GenRecoExtraJetEta2","Gen/Reco #eta of additional Jet",100,-5,5,100,-5,5));
+    h_GenRecoExtraJetpT3  = store(new TH2D("GenRecoExtraJetpT3","Gen/Reco pT of additional Jet",80,0,400,80,0,400));
+    h_GenRecoExtraJetEta3 = store(new TH2D("GenRecoExtraJetEta3","Gen/Reco #eta of additional Jet",100,-5,5,100,-5,5));
+    h_GenRecoExtraJetpT4  = store(new TH2D("GenRecoExtraJetpT4","Gen/Reco pT of additional Jet",80,0,400,80,0,400));
+    h_GenRecoExtraJetEta4 = store(new TH2D("GenRecoExtraJetEta4","Gen/Reco #eta of additional Jet",100,-5,5,100,-5,5));
+
+    h_GenRecoJetMultpt30 = store(new TH2D("GenRecoJetMultpt30", "Gen/Reco Matching",10,-0.5,9.5,10,-0.5,9.5));
+    h_RecoJetMultpt30    = store(new TH1D("RecoJetMultpt30", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_HypJetMultpt30     = store(new TH1D("HypJetMultpt30", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_VisGenJetMultpt30  = store(new TH1D("VisGenJetMultpt30", "Jet Multiplicty (VisGEN)",10,-0.5,9.5));
+
+    h_GenRecoJetMultpt40 = store(new TH2D("GenRecoJetMultpt40", "Gen/Reco Matching",10,-0.5,9.5,10,-0.5,9.5));
+    h_RecoJetMultpt40    = store(new TH1D("RecoJetMultpt40", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_HypJetMultpt40     = store(new TH1D("HypJetMultpt40", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_VisGenJetMultpt40  = store(new TH1D("VisGenJetMultpt40", "Jet Multiplicty (VisGEN)",10,-0.5,9.5));
+
+    h_GenRecoJetMultpt60 = store(new TH2D("GenRecoJetMultpt60", "Gen/Reco Matching",10,-0.5,9.5,10,-0.5,9.5));
+    h_RecoJetMultpt60    = store(new TH1D("RecoJetMultpt60", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_HypJetMultpt60     = store(new TH1D("HypJetMultpt60", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_VisGenJetMultpt60  = store(new TH1D("VisGenJetMultpt60", "Jet Multiplicty (VisGEN)",10,-0.5,9.5));
+
+    h_GenRecoJetMultpt100 = store(new TH2D("GenRecoJetMultpt100", "Gen/Reco Matching",10,-0.5,9.5,10,-0.5,9.5));
+    h_RecoJetMultpt100    = store(new TH1D("RecoJetMultpt100", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_HypJetMultpt100     = store(new TH1D("HypJetMultpt100", "Jet Multiplicity (HYP)",10,-0.5,9.5));
+    h_VisGenJetMultpt100  = store(new TH1D("VisGenJetMultpt100", "Jet Multiplicty (VisGEN)",10,-0.5,9.5));
+
+    h_GenRecoDeltaRExtraJet12 = store(new TH2D("GenRecoDeltaRExtraJet12","Gen/Reco #Delta R of additional Jets",100,0.,10,100,0,10));
+    h_RecoDeltaRExtraJet12 = store(new TH1D("RecoDeltaRExtraJet12","Reco #Delta R of additional Jets",100,0,10));
+    h_HypDeltaRExtraJet12 = store(new TH1D("HypDeltaRExtraJet12","Hyp #DeltaR of additional Jets",100,0,10));
+    h_VisGenDeltaRExtraJet12 = store(new TH1D("VisGenDeltaRExtraJet12","#Delta R of additional Jets",100,0,10));
+
+
+    double xbin[20]={30.,40.,50.,60.,70.,80.,90.,100.,120.,140.,160.,180.,200.,220.,240.,260.,280.,320.,360.,400.};
+    
+
+    h_RecoJetMultQ0   = store(new TH1D("RecoJetMultQ0","Gap fraction Q0",19,xbin));
+    h_HypJetMultQ0  = store(new TH1D("HypJetMultQ0",         "Gap fraction Q0 (HYP)", 19,xbin));
+    h_VisGenJetMultQ0 = store(new TH1D("VisGenJetMultQ0",         "Gap fraction Q0 (VisGEN)", 19,xbin));
+    h_GenRecoJetMultQ0 = store(new TH2D("GenRecoJetMultQ0","Gap fraction Q0", 19,xbin,19,xbin));
+
+    h_RecoJetExtra2Q0   = store(new TH1D("RecoJet2Q0","Gap fraction 2nd jet",19,xbin));
+    h_HypJetExtra2Q0  = store(new TH1D("HypJet2Q0",         "Gap fraction 2nd jet (HYP)", 19,xbin));
+    h_VisGenJetExtra2Q0 = store(new TH1D("VisGenJet2Q0",         "Gap fraction 2nd jet (VisGEN)", 19,xbin));
+    h_GenRecoJetExtra2Q0 = store(new TH2D("GenRecoJet2Q0","Gap fraction 2nd jet", 19,xbin,19,xbin));
+
+    h_RecoJetMultQsum   = store(new TH1D("RecoJetMultQsum","Gap fraction Qsum",19,xbin));
+    h_HypJetMultQsum  = store(new TH1D("HypJetMultQsum",         "Gap fraction Qsum (HYP)", 19,xbin));
+    h_VisGenJetMultQsum = store(new TH1D("VisGenJetMultQsum",         "Gap fraction Qsum (VisGEN)", 19,xbin));
+    h_GenRecoJetMultQsum = store(new TH2D("GenRecoJetMultQsum","Gap fraction Qsum", 19,xbin,19,xbin));
+
+    h_RecoJetMultTotal  = store(new TH1D("RecoJetMultTotal",         "Jet Multiplicity (HYP)", 19,xbin));
+    h_HypJetMultTotal  = store(new TH1D("HypJetMultTotal",         "Jet Multiplicity (HYP)", 19,xbin));
+    h_VisGenJetMultTotal = store(new TH1D("VisGenJetMultTotal",         "Gap fraction Qsum (VisGEN)", 19,xbin));
+    h_GenRecoJetMultTotal = store(new TH2D("GenRecoJetMultTotal","Gap fraction Qsum", 19,xbin,19,xbin)); 
     
     h_ClosureTotalWeight = store(new TH1D("ClosureTotalWeight", "Total Weights from closure test",1,0,2));
     h_PDFTotalWeight = store(new TH1D("PDFTotalWeight", "PDF Weights",1,0,2));
@@ -585,6 +673,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     // Use utilities without namespaces
     using ROOT::Math::VectorUtil::DeltaPhi;
+    using ROOT::Math::VectorUtil::DeltaR;
     using namespace ttbar;
     
     
@@ -626,6 +715,11 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     // Access Top signal generator info
     if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
+
+    /// Apply the top-quark pT reweighting if the bool 'applyTopReweight_' says so ;)
+    if(isTopSignal_ && applyTopReweight_){
+        weightGenerator_ *= TMath::Sqrt(this->TopPtWeight(GenTop_->Pt()) * this->TopPtWeight(GenAntiTop_->Pt()));
+    }
     
     // Set closure test weight using top generator info
     if(isTopSignal_ && doClosureTest_) weightGenerator_ *= calculateClosureTestWeight();
@@ -654,7 +748,14 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     //                         <<LeadGenLepton.pt()<<" , "<<NLeadGenLepton.pt()<<" , "
     //                         <<LeadGenBJet.pt()<<" , "<<NLeadGenBJet.pt()<<" , "
     //                         <<genHT<<"\n";
-    
+    double jetHTGen = 0;
+    int GenJets_cut = 0, GenJets_cut40 = 0, GenJets_cut60 = 0, GenJets_cut100=0;
+    double extragenjet[4]={0};
+    this->generatorTTbarjetsEvent(LeadGenLepton, NLeadGenLepton,
+                            LeadGenBJet, NLeadGenBJet,
+                            jetHTGen,
+                            BHadronIndex, AntiBHadronIndex,
+                            weightPU,GenJets_cut,GenJets_cut40,GenJets_cut60,GenJets_cut100, extragenjet);
 
     //===CUT===
     // check if event was triggered
@@ -1296,6 +1397,169 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypBJetEtaLead->Fill(LeadHypBJet.Eta(), weight);
     h_HypBJetEtaNLead->Fill(NLeadHypBJet.Eta(), weight);
 
+    int extrarecojet[4] = {0}; 
+    int jetnumReco = -1; 
+    double jetHTreco = 0;
+    int RecoJets = 0, RecoJets_cut40 = 0, RecoJets_cut60 = 0, RecoJets_cut100 = 0;
+    bool firstJet = 0, secondJet = 0;
+    double cbin[19]={35.,45.,55.,65.,75.,85.,95.,110.,130.,150.,170.,190.,210.,230.,250.,270.,300.,340.,380.};
+
+    for(int k=0; k<(int)jets_->size(); k++){
+         //if(abs(jets->at(k).Eta())>1.5 || abs(jets->at(k).Eta())<0.8) continue;
+       if(abs(jets_->at(k).Eta()) > 2.4) continue;//carmen eta cuts
+       if(jets_->at(k).Pt()< JetPtCUT) {continue;}
+// changed to fill Mult***
+       if (jets_->at(k).Pt()> JetPtCUT ) {
+           RecoJets++;
+			
+	   if(abs(HypAntiBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1 && abs(HypBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1) {
+		  
+           jetHTreco+=jets_->at(k).Pt();
+		
+	   jetnumReco++;
+	   extrarecojet[jetnumReco]= k;
+	
+	   }
+       } 
+
+	   
+         
+       if(jets_->at(k).Pt()>40.) RecoJets_cut40++;
+       if(jets_->at(k).Pt()>60.) RecoJets_cut60++;
+       if(jets_->at(k).Pt()>100.) RecoJets_cut100++;
+     /*    if(!firstJet) {
+             h_RecoLeadingJetpT->Fill(jets->at(k).Pt(),recoWeight);
+             h_RecoLeadingJetEta->Fill(jets->at(k).Eta(),recoWeight);
+             h_HypLeadingJetpT->Fill(jets->at(k).Pt(),weight);
+             h_HypLeadingJetEta->Fill(jets->at(k).Eta(),weight);
+             firstJet=1;
+             continue;
+         }
+         if(firstJet && !secondJet){
+             h_RecoNLeadingJetpT->Fill(jets->at(k).Pt(),recoWeight);
+             h_RecoNLeadingJetEta->Fill(jets->at(k).Eta(),recoWeight);
+             h_HypNLeadingJetpT->Fill(jets->at(k).Pt(),weight);
+             h_HypNLeadingJetEta->Fill(jets->at(k).Eta(),weight);
+             secondJet=1;
+	     //        break;
+	     continue;
+	     }*/
+    }
+/*
+     if(RecoJets>6) RecoJets = 6;
+     if(RecoJets_cut40>6) RecoJets_cut40 = 6;
+     if(RecoJets_cut60>6) RecoJets_cut60 = 6;
+     if(RecoJets_cut100>4) RecoJets_cut100 = 4;
+*/
+
+    h_RecoJetMultpt30->Fill(RecoJets,recoWeight);
+    h_RecoJetMultpt40->Fill(RecoJets_cut40,recoWeight);
+    h_RecoJetMultpt60->Fill(RecoJets_cut60,recoWeight);
+    h_RecoJetMultpt100->Fill(RecoJets_cut100,recoWeight);
+    h_HypJetMultpt30->Fill(RecoJets,weight);
+    h_HypJetMultpt40->Fill(RecoJets_cut40,weight);
+    h_HypJetMultpt60->Fill(RecoJets_cut60,weight);
+    h_HypJetMultpt100->Fill(RecoJets_cut100,weight);
+/*
+     if(jetnumReco>2){
+         h_RecoExtraJetpT4->Fill(jets->at(extrarecojet[3]).Pt(),recoWeight);
+         h_RecoExtraJetEta4->Fill(jets->at(extrarecojet[3]).Eta(),recoWeight);
+         h_HypExtraJetpT4->Fill(jets->at(extrarecojet[3]).Pt(),weight);
+         h_HypExtraJetEta4->Fill(jets->at(extrarecojet[3]).Eta(),weight);
+     }
+
+     if (jetnumReco>1){
+         h_RecoExtraJetpT3->Fill(jets->at(extrarecojet[2]).Pt(),recoWeight);
+         h_RecoExtraJetEta3->Fill(jets->at(extrarecojet[2]).Eta(),recoWeight); 
+         h_HypExtraJetpT3->Fill(jets->at(extrarecojet[2]).Pt(),weight);
+         h_HypExtraJetEta3->Fill(jets->at(extrarecojet[2]).Eta(),weight);
+     }
+     if (jetnumReco>0){
+         h_RecoExtraJetpT2->Fill(jets->at(extrarecojet[1]).Pt(),recoWeight);
+         h_RecoExtraJetEta2->Fill(jets->at(extrarecojet[1]).Eta(),recoWeight);
+         h_HypExtraJetpT2->Fill(jets->at(extrarecojet[1]).Pt(),weight);
+         h_HypExtraJetEta2->Fill(jets->at(extrarecojet[1]).Eta(),weight); 
+         h_RecoDeltaPhiExtraJet12->Fill(TMath::Abs(DeltaR(jets->at(extrarecojet[1]),jets->at(extrarecojet[0]))),recoWeight);
+         h_HypDeltaPhiExtraJet12->Fill(TMath::Abs(DeltaR(jets->at(extrarecojet[1]),jets->at(extrarecojet[0]))),weight);
+     }
+     if (jetnumReco > -1){
+         h_RecoExtraJetpT->Fill(jets->at(extrarecojet[0]).Pt(),recoWeight);
+         h_RecoExtraJetEta->Fill(jets->at(extrarecojet[0]).Eta(),recoWeight);
+         h_HypExtraJetpT->Fill(jets->at(extrarecojet[0]).Pt(),weight);
+         h_HypExtraJetEta->Fill(jets->at(extrarecojet[0]).Eta(),weight);
+     }
+     for(int q0 = 0; q0<19;q0++){
+         h_RecoJetMultTotal->Fill(cbin[q0],recoWeight);
+         h_HypJetMultTotal->Fill(cbin[q0],weight);
+         if(jets->at(extrarecojet[0]).Pt()<= cbin[q0] || jetnumReco <0) {h_RecoJetMultQ0->Fill(cbin[q0],recoWeight);h_HypJetMultQ0->Fill(cbin[q0],weight);}
+         if(jets->at(extrarecojet[1]).Pt()<= cbin[q0] || jetnumReco <1 ) {h_RecoJetExtra2Q0->Fill(cbin[q0],recoWeight);h_HypJetExtra2Q0->Fill(cbin[q0],weight);}
+         if(jetHTreco<=cbin[q0]) {h_RecoJetMultQsum->Fill(cbin[q0],recoWeight); h_HypJetMultQsum->Fill(cbin[q0],weight);}
+     }
+*/
+    int first= -1, second=-1, third=-1, fourth=-1;
+    double ptjet = 0;
+    for(int ord = 0; ord <= jetnumReco; ord++){
+	if(jets_->at(extrarecojet[ord]).Pt()> ptjet) {first = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();}
+	}
+
+    ptjet = 0;
+    for(int ord = 0; ord <= jetnumReco; ord++){
+	if(jets_->at(extrarecojet[ord]).Pt()> ptjet && jets_->at(extrarecojet[ord]).Pt()< jets_->at(extrarecojet[first]).Pt()) {
+	  second = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();
+	}
+    }
+    ptjet = 0;
+    for(int ord = 0; ord <= jetnumReco; ord++){
+	if(jets_->at(extrarecojet[ord]).Pt()> ptjet && jets_->at(extrarecojet[ord]).Pt()< jets_->at(extrarecojet[second]).Pt() ) {
+	  third = ord; ptjet=jets_->at(extrarecojet[third]).Pt();
+	}
+    }
+    ptjet = 0;
+    for(int ord = 0; ord <= jetnumReco; ord++){
+	if(jets_->at(extrarecojet[ord]).Pt()> ptjet && jets_->at(extrarecojet[ord]).Pt()< jets_->at(extrarecojet[third]).Pt() ) {
+	  fourth = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();
+	}
+    }
+
+    if(jetnumReco>2){
+         h_RecoExtraJetpT4->Fill(jets_->at(extrarecojet[fourth]).Pt(),recoWeight);
+         h_RecoExtraJetEta4->Fill(jets_->at(extrarecojet[fourth]).Eta(),recoWeight);
+         h_HypExtraJetpT4->Fill(jets_->at(extrarecojet[fourth]).Pt(),weight);
+         h_HypExtraJetEta4->Fill(jets_->at(extrarecojet[fourth]).Eta(),weight);
+    }
+
+    if (jetnumReco>1){
+         h_RecoExtraJetpT3->Fill(jets_->at(extrarecojet[third]).Pt(),recoWeight);
+         h_RecoExtraJetEta3->Fill(jets_->at(extrarecojet[third]).Eta(),recoWeight); 
+         h_HypExtraJetpT3->Fill(jets_->at(extrarecojet[third]).Pt(),weight);
+         h_HypExtraJetEta3->Fill(jets_->at(extrarecojet[third]).Eta(),weight);
+     }
+     if (jetnumReco>0){
+         h_RecoExtraJetpT2->Fill(jets_->at(extrarecojet[second]).Pt(),recoWeight);
+         h_RecoExtraJetEta2->Fill(jets_->at(extrarecojet[second]).Eta(),recoWeight);
+         h_HypExtraJetpT2->Fill(jets_->at(extrarecojet[second]).Pt(),weight);
+         h_HypExtraJetEta2->Fill(jets_->at(extrarecojet[second]).Eta(),weight); 
+         if(second >-1 && first > -1 ){
+         h_RecoDeltaRExtraJet12->Fill(TMath::Abs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),recoWeight);
+         h_HypDeltaRExtraJet12->Fill(TMath::Abs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),weight);
+         }
+     }
+     if (jetnumReco > -1){
+         h_RecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),recoWeight);
+         h_RecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),recoWeight);
+         h_HypExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),weight);
+         h_HypExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),weight);
+     }
+     for(int q0 = 0; q0<19;q0++){
+         h_RecoJetMultTotal->Fill(cbin[q0],recoWeight);
+         h_HypJetMultTotal->Fill(cbin[q0],weight);
+         if(jets_->at(extrarecojet[first]).Pt()<= cbin[q0] || jetnumReco <0) {h_RecoJetMultQ0->Fill(cbin[q0],recoWeight);h_HypJetMultQ0->Fill(cbin[q0],weight);}
+         if(jets_->at(extrarecojet[second]).Pt()<= cbin[q0] || jetnumReco <1 ) {h_RecoJetExtra2Q0->Fill(cbin[q0],recoWeight);h_HypJetExtra2Q0->Fill(cbin[q0],weight);}
+         if(jetHTreco<=cbin[q0]) {h_RecoJetMultQsum->Fill(cbin[q0],recoWeight); h_HypJetMultQsum->Fill(cbin[q0],weight);}
+     }
+
+//     //New plots from Carmen: End
+
     //make sure you have called CreateBinnedControlPlots in the SlaveBegin first
     for (const auto& i : { HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex) } ) {
         FillBinnedControlPlot(h_HypToppT, i.Pt(), h_LeptonpT, leptons_->at(leptonIndex).Pt(), weight);
@@ -1412,8 +1676,52 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     if ( BHadronIndex>=0 && AntiBHadronIndex>=0 ) {
         h_GenRecoJetMult->Fill(numberOfJets, allGenJets_->size(), weight );
+//carmen
+        h_GenRecoJetMultpt30->Fill(RecoJets,GenJets_cut,weight);
+        h_GenRecoJetMultpt40->Fill(RecoJets_cut40,GenJets_cut40,weight);
+        h_GenRecoJetMultpt60->Fill(RecoJets_cut60,GenJets_cut60,weight);
+        h_GenRecoJetMultpt100->Fill(RecoJets_cut100,GenJets_cut100,weight);
+        if(jetnumReco>2){
+            h_GenRecoExtraJetpT4->Fill(jets_->at(extrarecojet[fourth]).Pt(),allGenJets_->at(extragenjet[3]).Pt(),weight);
+            h_GenRecoExtraJetEta4->Fill(jets_->at(extrarecojet[fourth]).Eta(),allGenJets_->at(extragenjet[3]).Eta(),weight);
+        }
+            else if (jetnumReco>1){
+            h_GenRecoExtraJetpT3->Fill(jets_->at(extrarecojet[third]).Pt(),allGenJets_->at(extragenjet[2]).Pt(),weight);
+            h_GenRecoExtraJetEta3->Fill(jets_->at(extrarecojet[third]).Eta(),allGenJets_->at(extragenjet[2]).Eta(),weight); 
+        }
+        else if (jetnumReco>0){
+            h_GenRecoExtraJetpT2->Fill(jets_->at(extrarecojet[second]).Pt(),allGenJets_->at(extragenjet[1]).Pt(),weight);
+            h_GenRecoExtraJetEta2->Fill(jets_->at(extrarecojet[second]).Eta(),allGenJets_->at(extragenjet[1]).Eta(),weight);
+            h_GenRecoDeltaRExtraJet12->Fill(TMath::Abs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),TMath::Abs(DeltaR(allGenJets_->at(extragenjet[2]),allGenJets_->at(extragenjet[1]))),weight);
+        }
+        else if (jetnumReco >-1 ){
+            h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),allGenJets_->at(extragenjet[0]).Pt(),weight); 
+            h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),allGenJets_->at(extragenjet[0]).Eta(),weight);
+        }
     } else {
         h_GenRecoJetMult->Fill(numberOfJets, -1000., weight );
+        h_GenRecoJetMultpt30->Fill(RecoJets,-1000., weight );
+        h_GenRecoJetMultpt40->Fill(RecoJets_cut40,-1000., weight );
+        h_GenRecoJetMultpt60->Fill(RecoJets_cut60,-1000., weight );
+        h_GenRecoJetMultpt100->Fill(RecoJets_cut100,-1000., weight );
+        if(jetnumReco>2){
+            h_GenRecoExtraJetpT4->Fill(jets_->at(extrarecojet[fourth]).Pt(),-1000.,weight);
+            h_GenRecoExtraJetEta4->Fill(jets_->at(extrarecojet[fourth]).Eta(),-1000.,weight);
+        }
+        else if (jetnumReco>1){
+            h_GenRecoExtraJetpT3->Fill(jets_->at(extrarecojet[third]).Pt(),-1000.,weight);
+            h_GenRecoExtraJetEta3->Fill(jets_->at(extrarecojet[third]).Eta(),-1000.,weight);
+        }
+        else if (jetnumReco>0){
+            h_GenRecoExtraJetpT2->Fill(jets_->at(extrarecojet[second]).Pt(),-1000.,weight);
+            h_GenRecoExtraJetEta2->Fill(jets_->at(extrarecojet[second]).Eta(),-1000.,weight);
+            h_GenRecoDeltaRExtraJet12->Fill(TMath::Abs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),-1000.,weight);
+        }
+        else if (jetnumReco >-1 ){
+            h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),-1000.,weight);
+            h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),-1000.,weight);
+        }
+
     }
 
     LV genllbar(*GenLepton_ + *GenAntiLepton_);
@@ -1701,8 +2009,6 @@ void TopAnalysis::bHadronIndices(int& bHadronIndex, int& antiBHadronIndex)
     //AntiBHadronIndex = idx_nleadbHadJet[3];
 }
 
-
-
 void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                                     LV& leadGenLepton, LV& nLeadGenLepton,
                                     LV& leadGenBJet, LV& nLeadGenBJet,
@@ -1822,7 +2128,121 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     //End: Fill histograms with Leading pT and 2nd Leading pT: Top
 }
 
+void TopAnalysis::generatorTTbarjetsEvent(LV& leadGenLepton, LV& nLeadGenLepton,
+                                    LV& leadGenBJet, LV& nLeadGenBJet,
+                                    double& jetHTGen,
+                                    const int bHadronIndex, const int antiBHadronIndex,
+                                    const double weightPU, int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100, double extragenjet[4])
+{
+    // Use utilities without namespaces
+    using namespace ttbar;
+    using ROOT::Math::VectorUtil::DeltaPhi;
+    using ROOT::Math::VectorUtil::DeltaR;
+    
+    LV& LeadGenLepton(leadGenLepton);
+    LV& NLeadGenLepton(nLeadGenLepton);
+    LV& LeadGenBJet(leadGenBJet);
+    LV& NLeadGenBJet(nLeadGenBJet);
+    
+    double cbin[19]={35.,45.,55.,65.,75.,85.,95.,110.,130.,150.,170.,190.,210.,230.,250.,270.,300.,340.,380.};
+    int jetnum = -1;
+    jetHTGen = 0.;
+    
+    if(!isTopSignal_) return;
+    
+    
+    const int BHadronIndex(bHadronIndex);
+    const int AntiBHadronIndex(antiBHadronIndex);
+    
+    double trueLevelWeight = weightGenerator_ * weightPU;
+    
+    //Begin: Select & Fill histograms with Leading pT and 2nd Leading pT: Lepton and BJet
+    orderLV(LeadGenLepton, NLeadGenLepton, *GenLepton_, *GenAntiLepton_, LVpt);
+    
+    if (BHadronIndex != -1 && AntiBHadronIndex != -1) {
+        orderLV(LeadGenBJet, NLeadGenBJet, allGenJets_->at(BHadronIndex), allGenJets_->at(AntiBHadronIndex), LVpt);
+    }
+    
+    if ( GenLepton_->pt() > 20 && GenAntiLepton_->pt() > 20 
+          && abs( GenLepton_->eta() ) < 2.4 && abs ( GenAntiLepton_->eta() ) < 2.4 ) {
+        //if (LVGenBQuark.Pt()>JETPTCUT && LVGenAntiBQuark.Pt()>JETPTCUT && abs(LVGenBQuark.Eta())<2.4 && abs(LVGenAntiBQuark.Eta())<2.4){
+        if ( BHadronIndex != -1 && AntiBHadronIndex != -1 ) {
+            if ( allGenJets_->at(BHadronIndex).pt() > JetPtCUT &&
+                abs ( allGenJets_->at(BHadronIndex).eta() ) < JetEtaCUT &&
+                allGenJets_->at(AntiBHadronIndex).pt() > JetPtCUT &&
+                abs ( allGenJets_->at(AntiBHadronIndex).Eta() ) < JetEtaCUT )
+            {
+                     //New plots from Carmen: Begin
+                     
+                     for(int genJet=0; genJet<(int)allGenJets_->size(); genJet++){
+   
+                         if(abs(allGenJets_->at(genJet).Eta() ) > 2.4 || allGenJets_->at(genJet).Pt() <= JetPtCUT || TMath::Abs(DeltaR(*GenLepton_, allGenJets_->at(genJet))) < 0.4 || TMath::Abs(DeltaR(*GenAntiLepton_, allGenJets_->at(genJet))) < 0.4 ){
+                             continue;
+                         }
+                         if(allGenJets_->at(genJet).Pt()> JetPtCUT && fabs(allGenJets_->at(genJet).Eta())<2.4) {//CARMEN ETA CUT
+                             GenJets_cut++; 
+                             if(allGenJets_->at(BHadronIndex) != allGenJets_->at(genJet) && allGenJets_->at(AntiBHadronIndex) != allGenJets_->at(genJet)) {
 
+                                 jetHTGen+=allGenJets_->at(genJet).Pt(); 
+                                 if(jetnum < 3) {
+                                     jetnum++;
+                                     extragenjet[jetnum] = genJet;
+                                 }
+                             }
+                             if(allGenJets_->at(genJet).Pt()> 40.0) GenJets_cut40++;
+                             if(allGenJets_->at(genJet).Pt()> 60.0) GenJets_cut60++;
+                             if(allGenJets_->at(genJet).Pt()> 100.0) GenJets_cut100++;
+                         }
+                     }//for
+              /*       if(GenJets_cut>6) GenJets_cut=6;  
+                     if(GenJets_cut40>6) GenJets_cut40=6;
+                     if(GenJets_cut60>6) GenJets_cut60=6;
+                     if(GenJets_cut100>4) GenJets_cut100=4;*/
+              //       if((AntiBHadrons->size() + BHadrons->size())>2) { //more bhadrons
+
+                     h_VisGenJetMultpt30->Fill(GenJets_cut,trueLevelWeight);
+                     h_VisGenJetMultpt40->Fill(GenJets_cut40,trueLevelWeight);
+                     h_VisGenJetMultpt60->Fill(GenJets_cut60,trueLevelWeight);
+                     h_VisGenJetMultpt100->Fill(GenJets_cut100,trueLevelWeight);
+
+                     if(jetnum>2){
+                         h_VisGenExtraJetpT4->Fill(allGenJets_->at(extragenjet[3]).Pt(),trueLevelWeight);
+                         h_VisGenExtraJetEta4->Fill(allGenJets_->at(extragenjet[3]).Eta(),trueLevelWeight);
+                     }
+                     else if(jetnum>1){
+                         h_VisGenExtraJetpT3->Fill(allGenJets_->at(extragenjet[2]).Pt(),trueLevelWeight);
+                         h_VisGenExtraJetEta3->Fill(allGenJets_->at(extragenjet[2]).Eta(),trueLevelWeight);
+                     }
+                     else if(jetnum>0){
+                         h_VisGenExtraJetpT2->Fill(allGenJets_->at(extragenjet[1]).Pt(),trueLevelWeight);
+                         h_VisGenExtraJetEta2->Fill(allGenJets_->at(extragenjet[1]).Eta(),trueLevelWeight);
+                         h_VisGenDeltaRExtraJet12->Fill(TMath::Abs(DeltaR(allGenJets_->at(extragenjet[0]),allGenJets_->at(extragenjet[1]))),trueLevelWeight);
+                     }
+                     else if(jetnum == 0){
+                         h_VisGenExtraJetpT->Fill(allGenJets_->at(extragenjet[0]).Pt(),trueLevelWeight);
+                         h_VisGenExtraJetEta->Fill(allGenJets_->at(extragenjet[0]).Eta(),trueLevelWeight);
+                     }
+
+		     for(int q0 = 0; q0<19; q0++){
+		         h_VisGenJetMultTotal->Fill(cbin[q0],trueLevelWeight);
+		         if(allGenJets_->at(extragenjet[0]).Pt()<=cbin[q0] || jetnum<0 ) h_VisGenJetMultQ0->Fill(cbin[q0],trueLevelWeight);
+		         if(allGenJets_->at(extragenjet[1]).Pt()<=cbin[q0] || jetnum<1 ) h_VisGenJetExtra2Q0->Fill(cbin[q0],trueLevelWeight);
+		         if(jetHTGen<=cbin[q0]) h_VisGenJetMultQsum->Fill(cbin[q0],trueLevelWeight);
+		     }
+             //        }//if more btags at gen level!!!!!!!!!!!!!  
+                     //New plots from Carmen: End
+
+            }
+        }
+    }
+    
+}
+
+
+double TopAnalysis::TopPtWeight(double pt)
+{
+    return TMath::Exp(0.156-0.00137*pt);
+}
 
 
 
