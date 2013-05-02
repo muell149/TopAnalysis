@@ -4,9 +4,6 @@
 #include <cstdio>
 
 #include <TLorentzVector.h>
-#include <TH1.h>
-#include <TH1D.h>
-#include <TMath.h>
 
 #include "analysisUtils.h"
 #include "classes.h"
@@ -140,26 +137,6 @@ void ttbar::orderLV(LV& lv1, LV& lv2, const LV& inputLv1, const LV& inputLv2, co
     }
 }
 
-
-
-
-
-// --- Histogram operation functions -----------------------------------------------------------------------------------
-
-double ttbar::median(TH1* h1)
-{ 
-   int nBin = h1->GetXaxis()->GetNbins();
-   std::vector<double> x(nBin);
-   h1->GetXaxis()->GetCenter( &x[0] );
-   TH1D* h1D = dynamic_cast<TH1D*>(h1);
-   if(!h1D){
-       std::cerr << "Median needs a TH1D!\n";
-       exit(7);
-   }
-   const double * y = h1D->GetArray(); 
-   // exclude underflow/overflows from bin content array y
-   return TMath::Median(nBin, &x[0], &y[1]); 
-}
 
 
 

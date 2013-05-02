@@ -6,7 +6,6 @@
 #include <string>
 
 class TLorentzVector;
-class TH1;
 
 #include "classesFwd.h"
 
@@ -167,20 +166,6 @@ template<class T> void ttbar::selectIndices(std::vector<int>& v_index, const std
     v_index.clear();
     v_index = result;
 }
-
-
-
-
-
-// --- Histogram operation functions -----------------------------------------------------------------------------------
-
-namespace ttbar{
-    /** Calculate the median of a histogram
-     * 
-     */
-    double median(TH1* h1);
-}
-
 
 
 
