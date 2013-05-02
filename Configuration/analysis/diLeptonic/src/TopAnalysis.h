@@ -253,18 +253,15 @@ private:
                            LV& leadGenBJet, LV& nLeadGenBJet,
                            double& genHT,
                            const int bHadronIndex, const int antiBHadronIndex,
-                           const double weightPU);
+                           const double trueLevelWeightNoPileup, const double trueLevelWeight);
 
     void generatorTTbarjetsEvent(LV& leadGenLepton, LV& nLeadGenLepton,
-                           LV& leadGenBJet, LV& nLeadGenBJet,
-                           double& jetHTGen,
-                           const int bHadronIndex, const int antiBHadronIndex,
-                           const double weightPU, int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100, double extragenjet[4]);
-
-    /// Reweight funtion estimated by Martin Goerner
-    double TopPtWeight(double pt);
-
-
+                                 LV& leadGenBJet, LV& nLeadGenBJet,
+                                 double& jetHTGen,
+                                 const int bHadronIndex, const int antiBHadronIndex,
+                                 const double trueLevelWeight,
+                                 int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100,
+                                 double extragenjet[4]);
 };
 
 

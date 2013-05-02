@@ -15,6 +15,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TStyle.h>
+#include <TIterator.h>
 
 #include "utils.h"
 #include "KinReco.h"
@@ -22,7 +23,7 @@
 #include "HistoListReader.h"
 #include "analysisUtils.h"
 #include "classes.h"
-
+#include "ScaleFactors.h"
 
 
 
@@ -47,7 +48,7 @@ constexpr double LeptonPtCut = 20.;
 constexpr double JetEtaCUT = 2.4;
 
 /// Cut value for jet pt
-constexpr double JetPtCUT = 20;
+constexpr double JetPtCUT = 30.;
 
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
@@ -59,7 +60,7 @@ constexpr bool ReTagJet = false;
 
 
 /// Apply Top Pt reweighting from fit calculated by Martin
-constexpr bool applyTopReweight_ = false;
+constexpr bool ApplyTopPtReweight = false;
 
 
 
@@ -68,12 +69,12 @@ constexpr bool applyTopReweight_ = false;
 
 void TopAnalysis::Begin(TTree* )
 {
+    // Defaults from AnalysisBase
     AnalysisBase::Begin(0);
     
-    prepareTriggerSF();
-    prepareLeptonIDSF();
     prepareJER_JES();
-    prepareBtagSF();
+    
+    // FIXME: move this also in ScaleFactors.h ?
     prepareKinRecoSF();
     
 }
@@ -82,9 +83,10 @@ void TopAnalysis::Begin(TTree* )
 
 void TopAnalysis::Terminate()
 {
-    if(isTopSignal_)produceBtagEfficiencies();
+    // Produce b-tag efficiencies
+    if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
     
-    //calculate an overall weight due to the shape reweighting, and apply it
+    // Calculate an overall weight due to the shape reweighting, and apply it
     const double globalNormalisationFactor = overallGlobalNormalisationFactor();
     TIterator* it = fOutput->MakeIterator();
     while (TObject* obj = it->Next()) {
@@ -92,17 +94,15 @@ void TopAnalysis::Terminate()
         if (hist) hist->Scale(globalNormalisationFactor); 
     }
     
+    // Defaults from AnalysisBase
     AnalysisBase::Terminate();
 }
 
 
 
-/** Initialise all histograms used in the analysis
- * 
- * @param TTree parameter is not used!
- */
-void TopAnalysis::SlaveBegin ( TTree * )
+void TopAnalysis::SlaveBegin(TTree*)
 {
+    // Defaults from AnalysisBase
     AnalysisBase::SlaveBegin(0);
     
     h_step4 = store(new TH1D ( "step4", "event count at after 2lepton", 10, 0, 10 ));       h_step4->Sumw2();
@@ -643,9 +643,9 @@ void TopAnalysis::SlaveBegin ( TTree * )
     h_BJetsMult_step8 = store(new TH1D("BJetsMult_step8", "Number of the jets after kinReco", 20, -0.5, 20.5));
     
     
-    //btagSF
-    this->bookBtagHistograms();
-
+    // Histograms for b-tagging efficiencies
+    if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
+    
     h_PUSF = store(new TH1D("PUSF", "PU SF per event", 200, 0.5, 1.5));
     h_TrigSF = store(new TH1D("TrigSF", "Trigger SF per event", 200, 0.5, 1.5));
     h_LepSF = store(new TH1D("LepSF", "Lep. Id and Isol. SF per event", 200, 0.75, 1.25));
@@ -686,6 +686,12 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Separate dileptonic ttbar decays via tau
     if(this->failsTopGeneratorSelection(entry)) return kTRUE;
     
+    // Count events for closure test here, where no more taus are available
+    if (doClosureTest_) {
+        static int closureTestEventCounter = 0;
+        if (++closureTestEventCounter > closureMaxEvents_) return kTRUE;
+    }
+    
     // Correct for the MadGraph branching fraction being 1/9 for dileptons (PDG average is .108)
     const double weightMadgraphCorrection = this->madgraphWDecayCorrection(entry);
     
@@ -695,34 +701,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Get weight due to pileup reweighting
     const double weightPU = this->weightPileup(entry);
     
-    // Access weightGenerator_ and modify it
-    if(isMC_){
-        GetWeightGeneratorEntry(entry);
-        weightGenerator_ *= weightMadgraphCorrection;
-        weightGenerator_ *= pdfWeight;
-    }
-    else{
-        // Since weights are also filled for data, this value needs to be set
-        weightGenerator_ = 1.;
-    }
-    
-    // Count events for closure test here, where no more taus are available
-    if (doClosureTest_) {
-        static int closureTestEventCounter = 0;
-        if (++closureTestEventCounter > closureMaxEvents_) return kTRUE;
-        weightGenerator_ = 1;
-    }
+    // Get weight due to generator weights
+    const double weightGenerator = this->weightGenerator(entry);
     
     // Access Top signal generator info
     if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
 
-    /// Apply the top-quark pT reweighting if the bool 'applyTopReweight_' says so ;)
-    if(isTopSignal_ && applyTopReweight_){
-        weightGenerator_ *= TMath::Sqrt(this->TopPtWeight(GenTop_->Pt()) * this->TopPtWeight(GenAntiTop_->Pt()));
-    }
+    // Apply the top-quark pT reweighting if the bool 'ApplyTopReweight' says so ;)
+    const double weightTopPtReweighting = ApplyTopPtReweight ? this->weightTopPtReweighting(GenTop_->Pt(), GenAntiTop_->Pt()) : 1.;
     
-    // Set closure test weight using top generator info
-    if(isTopSignal_ && doClosureTest_) weightGenerator_ *= calculateClosureTestWeight();
+    // Get true level weights
+    const double trueLevelWeightNoPileupNoClosure = weightGenerator*weightMadgraphCorrection*pdfWeight*weightTopPtReweighting;
+    const double trueLevelWeightNoPileup = doClosureTest_ ? calculateClosureTestWeight() : trueLevelWeightNoPileupNoClosure;
+    const double trueLevelWeight = trueLevelWeightNoPileup*weightPU;
     
     // Access MC general generator info
     if(isMC_) this->GetCommonGenBranchesEntry(entry);
@@ -743,7 +734,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
                             LeadGenBJet, NLeadGenBJet,
                             genHT,
                             BHadronIndex, AntiBHadronIndex,
-                            weightPU);
+                            trueLevelWeightNoPileup, trueLevelWeight);
     //std::cout<<"\nGenEvent: "<<LeadGenTop.pt()<<" , "<<NLeadGenTop.pt()<<" , "
     //                         <<LeadGenLepton.pt()<<" , "<<NLeadGenLepton.pt()<<" , "
     //                         <<LeadGenBJet.pt()<<" , "<<NLeadGenBJet.pt()<<" , "
@@ -752,10 +743,12 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     int GenJets_cut = 0, GenJets_cut40 = 0, GenJets_cut60 = 0, GenJets_cut100=0;
     double extragenjet[4]={0};
     this->generatorTTbarjetsEvent(LeadGenLepton, NLeadGenLepton,
-                            LeadGenBJet, NLeadGenBJet,
-                            jetHTGen,
-                            BHadronIndex, AntiBHadronIndex,
-                            weightPU,GenJets_cut,GenJets_cut40,GenJets_cut60,GenJets_cut100, extragenjet);
+                                  LeadGenBJet, NLeadGenBJet,
+                                  jetHTGen,
+                                  BHadronIndex, AntiBHadronIndex,
+                                  trueLevelWeight,
+                                  GenJets_cut, GenJets_cut40, GenJets_cut60, GenJets_cut100,
+                                  extragenjet);
 
     //===CUT===
     // check if event was triggered
@@ -820,15 +813,36 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     selectIndices(jetIndices, *jets_, LVpt, JetPtCUT);
     orderIndices(jetIndices, *jets_, LVpt);
     const int numberOfJets = jetIndices.size();
+    const bool has2Jets = numberOfJets > 1;
     
-    // Get b-jet indices, apply selection cuts and order them by btag discriminator (beginning with the highest value)
+    // Get b-jet indices, apply selection cuts
+    // and order b-jets by btag discriminator (beginning with the highest value)
     std::vector<int> bjetIndices = jetIndices;
     selectIndices(bjetIndices, *jetBTagCSV_, BtagWP);
+    if(isMC_ && !(btagScaleFactors_->makeEfficiencies()) && ReTagJet){
+        // Apply b-tag efficiency MC correction using random number based tag flipping
+        btagScaleFactors_->indexOfBtags(bjetIndices, jetIndices,
+                                        *jets_, *jetPartonFlavour_, *jetBTagCSV_,
+                                        BtagWP, static_cast<std::string>(channel_));
+    }
     orderIndices(bjetIndices, *jetBTagCSV_);
     const int numberOfBjets = bjetIndices.size();
+    const bool hasBtag = numberOfBjets > 0;
     
     // Get MET
     const LV& met(*met_);
+    const bool hasMetOrEmu = channel_=="emu" || met.Pt()>40;
+    
+    // Determine all reco level weights
+    const double weightLeptonSF = this->weightLeptonSF(leadingLeptonIndex, nLeadingLeptonIndex);
+    const double weightTriggerSF = this->weightTriggerSF(leptonXIndex, leptonYIndex);
+    const double weightNoPileup = trueLevelWeightNoPileup*weightTriggerSF*weightLeptonSF;
+    const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices);
+    
+    // The weight to be used for filling the histograms
+    double weight = weightNoPileup*weightPU;
+    
+    
     
     h_PUSF->Fill(weightPU, 1);
 
@@ -888,71 +902,43 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // with at least 20 GeV invariant mass
     if (dilepton.M() < 20) return kTRUE;
     
-    // Now determine the lepton trigger and ID scale factors
-    double weightLepSF = isMC_ ? getLeptonIDSF(leadingLeptonIndex, nLeadingLeptonIndex) : 1.;
-    double weightTrigSF = isMC_ ? getTriggerSF(leptonXIndex, leptonYIndex) : 1.;
-    
-    // First control plots after dilepton selection (without Z cut)
-    double weight = weightGenerator_*weightTrigSF*weightLepSF;
-
     // weight even without PU reweighting
-    h_vertMulti_noPU->Fill(vertMulti_, weight);
+    h_vertMulti_noPU->Fill(vertMulti_, weightNoPileup);
     
-    //apply PU reweighting
-    weight *= weightPU;
     h_vertMulti->Fill(vertMulti_, weight);
     
     h_step4->Fill(1, weight);
-    h_TrigSF->Fill(weightTrigSF, 1);
-    h_LepSF->Fill(weightLepSF, 1);
+    h_TrigSF->Fill(weightTriggerSF, 1);
+    h_LepSF->Fill(weightLeptonSF, 1);
     
     h_jetMulti_diLep->Fill(numberOfJets, weight);
     h_diLepMassFull->Fill(dilepton.M(), weight);
-
     
-    //****************************************
-    //handle inverted Z cut
-    // Fill loose dilepton mass histogram before any jet cuts
-    bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
-    bool hasJets = numberOfJets > 1;
-    bool hasMetOrEmu = channel_ == "emu" || met_->Pt() > 40;
-
-    if(isTopSignal_ && hasLeptonPair && hasJets)
+    if(isTopSignal_ && hasLeptonPair && has2Jets)
     {// Set of histograms needed to estimate the efficiency and acceptance requested by the TopXSection conveners
-        h_GenAll_RecoCuts_noweight->Fill(GenTop_->M(), weightGenerator_);
+        h_GenAll_RecoCuts_noweight->Fill(GenTop_->M(), trueLevelWeightNoPileup);
         h_GenAll_RecoCuts->Fill(GenTop_->M(), weight);
     }
 
-    /// Begin: New random method for b-tagging
-    if (isMC_ && !makeeffs && ReTagJet){
-        //If b-tag efficiencies do not exit ==> do not re-tag the jets' b-tag value
-        bjetIndices.clear();
-        bjetIndices = indexOfBtags(jetIndices, BtagWP);
-    }
-    /// End: New random method for b-tagging
+    
+    
+    //****************************************
+    //handle inverted Z cut
+    const bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
 
-    bool hasBtag = numberOfBjets > 0;
-
-    /// Begin: Old method for b-tagging SF calcualtion
-    double weightBtagSF = 1.;
-    if (!ReTagJet) weightBtagSF = isMC_ ? calculateBtagSF(jetIndices) : 1;
-    /// End: Old method for b-tagging SF calcualtion
-    
-    
-    
     // Access kinematic reconstruction info
     this->GetKinRecoBranchesEntry(entry);
-    
     bool hasSolution = HypTop_->size() > 0;
     if (kinRecoOnTheFly_ || true)
         hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, met);
 
     if ( isZregion ) {
-        double fullWeights = weightGenerator_*weightPU*weightTrigSF*weightLepSF;
+        double fullWeights = weight;
         Zh1_postZcut->Fill(dilepton.M(), fullWeights);
         Allh1_postZcut->Fill(dilepton.M(), fullWeights);
         
-        if ( hasJets ) {
+        if ( has2Jets ) {
+            // Fill loose dilepton mass histogram before any jet cuts
             Looseh1->Fill(dilepton.M(), fullWeights);
             Zh1_post2jets->Fill(dilepton.M(), fullWeights);
             Allh1_post2jets->Fill(dilepton.M(), fullWeights);
@@ -962,9 +948,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
                 Allh1_postMET->Fill(dilepton.M(), fullWeights);
 
                 if ( hasBtag ) {
-                    /// Begin: Old method for b-tagging SF calcualtion
-                    if (!ReTagJet) fullWeights *= weightBtagSF;
-                    /// End: Old method for b-tagging SF calcualtion
+                    fullWeights *= weightBtagSF;
                     Zh1_post1btag->Fill(dilepton.M(), fullWeights);
                     Allh1_post1btag->Fill(dilepton.M(), fullWeights);
 
@@ -1058,7 +1042,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     //=== CUT ===
     //Require at least two jets > 30 GeV (check for > 30 needed because we might have 20 GeV jets in our NTuple)
-    if (! hasJets) return kTRUE;
+    if(!has2Jets) return kTRUE;
     h_step6->Fill(1, weight);
     
     // ++++ Control Plots ++++
@@ -1153,23 +1137,21 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         Allh1_postMET->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
     }
     
-    /// Fill the b-tagging efficiency plots
-    if(isTopSignal_ && makeeffs){
-        this->fillBtagHistograms(jetIndices, bjetIndices, weight);
+    // Fill the b-tagging efficiency plots
+    if(this->makeBtagEfficiencies()){
+        btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
+                                              *jets_, *jetPartonFlavour_,
+                                              weight, static_cast<std::string>(channel_));
     }
     
     //=== CUT ===
     //Require at least one b tagged jet
     if (!hasBtag) return kTRUE;
 
-    /// Begin: Old method for b-tagging SF calcualtion
-    if (!ReTagJet){
-        weight *= weightBtagSF;
-        h_BTagSF->Fill(weightBtagSF);
-    }
-    /// End: Old method for b-tagging SF calcualtion
+    weight *= weightBtagSF;
+    h_BTagSF->Fill(weightBtagSF);
     
-    h_step8->Fill(1, weight );
+    h_step8->Fill(1, weight);
     
     if (RUNSYNC) {
         static int fullSelectionCounter = 0;
@@ -1288,7 +1270,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     LV hypttbar(HypTop_->at(solutionIndex)+HypAntiTop_->at(solutionIndex));
     
     //First fill the reco histograms (which have no scaling factors applied)
-    double recoWeight = weightGenerator_ * weightPU;
+    const double recoWeight = trueLevelWeight;
     h_RecoTTBarMass->Fill(hypttbar.M(), recoWeight);
     h_RecoTTBarRapidity->Fill(hypttbar.Rapidity(), recoWeight);
     h_RecoTTBarpT->Fill(hypttbar.Pt(), recoWeight);
@@ -1789,6 +1771,7 @@ void TopAnalysis::SetClosureTest(TString closure, double slope)
 
 double TopAnalysis::calculateClosureTestWeight()
 {
+    if(!doClosureTest_ || !isTopSignal_) return 1.;
     double weight = closureFunction_();
     h_ClosureTotalWeight->Fill(1, weight);
     return weight;
@@ -2014,7 +1997,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                                     LV& leadGenBJet, LV& nLeadGenBJet,
                                     double& genHT,
                                     const int bHadronIndex, const int antiBHadronIndex,
-                                    const double weightPU)
+                                    const double trueLevelWeightNoPileup, const double trueLevelWeight)
 {
     // Use utilities without namespaces
     using namespace ttbar;
@@ -2035,9 +2018,8 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     const int BHadronIndex(bHadronIndex);
     const int AntiBHadronIndex(antiBHadronIndex);
     
-    double trueLevelWeight = weightGenerator_ * weightPU;
     h_GenAll->Fill(GenTop_->M(), trueLevelWeight);
-    h_GenAll_noweight->Fill(GenTop_->M(), weightGenerator_);
+    h_GenAll_noweight->Fill(GenTop_->M(), trueLevelWeightNoPileup);
     
     //Begin: Select & Fill histograms with Leading pT and 2nd Leading pT: Lepton and BJet
     orderLV(LeadGenLepton, NLeadGenLepton, *GenLepton_, *GenAntiLepton_, LVpt);
@@ -2057,7 +2039,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
             {
 
                 h_VisGenAll->Fill(GenTop_->M(), trueLevelWeight);
-                h_VisGenAll_noweight->Fill(GenTop_->M(), weightGenerator_);
+                h_VisGenAll_noweight->Fill(GenTop_->M(), trueLevelWeightNoPileup);
 
                 h_VisGenLLBarpT->Fill(( *GenLepton_ + *GenAntiLepton_ ).Pt(), trueLevelWeight );
                 h_VisGenLLBarMass->Fill(( *GenLepton_ + *GenAntiLepton_ ).M(), trueLevelWeight );
@@ -2129,10 +2111,12 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
 }
 
 void TopAnalysis::generatorTTbarjetsEvent(LV& leadGenLepton, LV& nLeadGenLepton,
-                                    LV& leadGenBJet, LV& nLeadGenBJet,
-                                    double& jetHTGen,
-                                    const int bHadronIndex, const int antiBHadronIndex,
-                                    const double weightPU, int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100, double extragenjet[4])
+                                          LV& leadGenBJet, LV& nLeadGenBJet,
+                                          double& jetHTGen,
+                                          const int bHadronIndex, const int antiBHadronIndex,
+                                          const double trueLevelWeight,
+                                          int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100,
+                                          double extragenjet[4])
 {
     // Use utilities without namespaces
     using namespace ttbar;
@@ -2150,11 +2134,8 @@ void TopAnalysis::generatorTTbarjetsEvent(LV& leadGenLepton, LV& nLeadGenLepton,
     
     if(!isTopSignal_) return;
     
-    
     const int BHadronIndex(bHadronIndex);
     const int AntiBHadronIndex(antiBHadronIndex);
-    
-    double trueLevelWeight = weightGenerator_ * weightPU;
     
     //Begin: Select & Fill histograms with Leading pT and 2nd Leading pT: Lepton and BJet
     orderLV(LeadGenLepton, NLeadGenLepton, *GenLepton_, *GenAntiLepton_, LVpt);
@@ -2239,10 +2220,6 @@ void TopAnalysis::generatorTTbarjetsEvent(LV& leadGenLepton, LV& nLeadGenLepton,
 }
 
 
-double TopAnalysis::TopPtWeight(double pt)
-{
-    return TMath::Exp(0.156-0.00137*pt);
-}
 
 
 
