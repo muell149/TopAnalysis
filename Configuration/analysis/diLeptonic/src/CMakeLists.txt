@@ -10,7 +10,7 @@ add_custom_command(
 )
 
 add_library(miscTools
-    HistoListReader utils CommandLineParameters analysisUtils plotterUtils RootFileReader
+    HistoListReader utils CommandLineParameters analysisUtils plotterUtils RootFileReader ScaleFactors
 )
 
 add_library(unfolding
