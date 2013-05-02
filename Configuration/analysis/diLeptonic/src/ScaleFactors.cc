@@ -475,11 +475,11 @@ systematic_(nominal)
         if(!inputFileStream.is_open()){
             std::cout<< "******************************************************\n"
                      << "File " << btagInputFile << " does not exist. Running without btagsf!!!\n"
-                     << "To create the file, run:\n" 
-                     << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c emu\n"
-                     << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c ee\n"
-                     << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c mumu\n"
-                     << "and move the selectionRoot/BTagEff directory to the cwd:\n"
+                     << "To create the file, run (for each systematic 'SYST'):\n" 
+                     << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c emu -s SYST\n"
+                     << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c ee -s SYST\n"
+                     << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c mumu -s SYST\n"
+                     << " and move the selectionRoot/BTagEff directory to the cwd:\n"
                      << "\t> mv selectionRoot/BTagEff .\n"
                      << "This error is NOT fatal, not applying any b-tag rescaling\n"
                      << "*******************************************************\n";
