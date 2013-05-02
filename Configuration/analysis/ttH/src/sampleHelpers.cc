@@ -28,6 +28,10 @@ Systematic::Systematic Systematic::convertSystematic(const std::string& systemat
     if(systematic == "mH130") return mH130;
     if(systematic == "mH135") return mH135;
     if(systematic == "mH140") return mH140;
+    if(systematic == "LEPT_UP") return lept_up;
+    if(systematic == "LEPT_DOWN") return lept_down;
+    if(systematic == "TRIG_UP") return trig_up;
+    if(systematic == "TRIG_DOWN") return trig_down;
     std::cout<<"Warning! The following systematic conversion is not implemented: "<<systematic<<std::endl<<std::endl;
     return undefined;
 }
@@ -45,6 +49,10 @@ std::string Systematic::convertSystematic(const Systematic& systematic)
     if(systematic == mH130) return "mH130";
     if(systematic == mH135) return "mH135";
     if(systematic == mH140) return "mH140";
+    if(systematic == lept_up) return "LEPT_UP";
+    if(systematic == lept_down) return "LEPT_DOWN";
+    if(systematic == trig_up) return "TRIG_UP";
+    if(systematic == trig_down) return "TRIG_DOWN";
     if(systematic == undefined) return "";
     std::cout<<"Error! Systematic conversion is not implemented, break...\n"<<std::endl;
     exit(99);

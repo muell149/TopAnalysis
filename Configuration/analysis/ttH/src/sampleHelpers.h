@@ -22,6 +22,10 @@ namespace Systematic{
         mH130,      //! Higgs mass of 130 GeV
         mH135,      //! Higgs mass of 135 GeV
         mH140,      //! Higgs mass of 140 GeV
+        lept_up,    //! scale up lepton ID/ISO data-to-MC scale factors
+        lept_down,  //! scale down lepton ID/ISO data-to-MC scale factors
+        trig_up,    //! scale up trigger data-to-MC scale factors
+        trig_down,  //! scale down trigger ID/ISO data-to-MC scale factors
         undefined   //! No systematic defined (also not nominal)
     };
     
@@ -43,7 +47,7 @@ namespace Systematic{
     /// Only systematics which run on the nominal ntuples, e.g. pileup reweighting
     /// (allow undefined to set default behaviour if no option is set, i.e. option is empty)
     const std::vector<Systematic> allowedSystematicsHiggsAnalysis
-        {nominal, undefined};
+        {nominal, lept_up, lept_down, trig_up, trig_down, undefined};
     
     /// All systematics allowed for plotting step in Higgs analysis
     const std::vector<Systematic> allowedSystematicsHiggsPlotting

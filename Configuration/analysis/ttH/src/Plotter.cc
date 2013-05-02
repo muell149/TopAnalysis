@@ -31,7 +31,7 @@
 
 
 /// Folder for Control Plots output
-constexpr const char* BaseDIR = "Plots";
+constexpr const char* ControlPlotDIR = "Plots";
 
 
 
@@ -329,7 +329,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     ttbar::drawRatio(dataHist.second, stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots and write them
-    const TString eventFileString = Tools::assignFolder(BaseDIR, channel, systematic);
+    const TString eventFileString = Tools::assignFolder(ControlPlotDIR, channel, systematic);
     canvas->Print(eventFileString+name_+".eps");
     
     // Prepare additional histograms for root-file

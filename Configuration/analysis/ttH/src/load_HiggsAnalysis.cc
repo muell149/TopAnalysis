@@ -20,6 +20,7 @@
 #include "analysisHelpers.h"
 #include "../../diLeptonic/src/PUReweighter.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
+#include "../../diLeptonic/src/ScaleFactors.h"
 
 
 
@@ -28,10 +29,41 @@
 /// Set pileup distribution file corresponding to data sample in use
 /// The file ending is automatically adjusted for different systematics
 //constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
-constexpr const char* FilePU = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+
+
+
+/// Input file for electron ID scale factor
+//constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028.root";
+constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028_19fb.root";
+
+/// Input file for muon ID scale factor
+//constexpr const char* MuonSFInputFILE = "MuonSFtop12028.root";
+constexpr const char* MuonSFInputFILE = "MuonSFtop12028_19fb.root";
+
+
+
+/// File ending of dilepton trigger scale factors input file
+//constexpr const char* TriggerSFInputSUFFIX = ".root";
+constexpr const char* TriggerSFInputSUFFIX = "_19fb.root";
+
+
+
 
 /// Folder where to find the b-/c-/l-tagging efficiencies
-constexpr const char* BtagBaseDIR = "BTagEff";
+constexpr const char* BtagEfficiencyInputDIR = "BTagEff";
+
+/// Folder for b-tag efficiency file storage (in case efficiencies are produced)
+constexpr const char* BtagEfficiencyOutputDIR = "selectionRoot/BTagEff";
+
+
+
+/// Folder for basic analysis output
+constexpr const char* AnalysisOutputDIR = "selectionRoot";
+
+
+
+
 
 
 
@@ -43,19 +75,58 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
                         const int dy,
                         const AnalysisMode::AnalysisMode analysisMode)
 {   
-    // Access selectionList containing all input sample nTuples
-    ifstream infile ("selectionList.txt");
-    if (!infile.good()) { 
-        std::cerr << "Error! Please check the selectionList.txt file!\n" << std::endl; 
-        exit(773); 
+    // Set up the channels to run over
+    std::vector<Channel::Channel> channels;
+    if(channel != Channel::undefined){
+        channels.push_back(channel);
+    }
+    else{
+        channels = Channel::realChannels;
     }
     
     // Set up pileup reweighter
+    std::cout<<std::endl;
+    std::cout<<"--- Beginning preparation of pileup reweighter\n";
+    PUReweighter* puReweighter = new PUReweighter();
+    puReweighter->setMCDistrSum12("S10");
+    puReweighter->setDataTruePUInput(puReweighter->getPUPath(Systematic::convertSystematic(systematic), PileupInputFILE).c_str());
+    std::cout<<"=== Finishing preparation of pileup reweighter\n\n";
+    
+    // Set up lepton efficiency scale factors
+    LeptonScaleFactors::Systematic leptonSFSystematic(LeptonScaleFactors::nominal);
+    if(systematic == Systematic::lept_up) leptonSFSystematic = LeptonScaleFactors::vary_up;
+    else if(systematic == Systematic::lept_down) leptonSFSystematic = LeptonScaleFactors::vary_down;
+    const LeptonScaleFactors leptonScaleFactors(ElectronSFInputFILE, MuonSFInputFILE, leptonSFSystematic);
+    
+    // Set up trigger efficiency scale factors (do it for all channels)
+    TriggerScaleFactors::Systematic triggerSFSystematic(TriggerScaleFactors::nominal);
+    if(systematic == Systematic::trig_up) triggerSFSystematic = TriggerScaleFactors::vary_up;
+    else if(systematic == Systematic::trig_down) triggerSFSystematic = TriggerScaleFactors::vary_down;
+    const TriggerScaleFactors triggerScaleFactors(TriggerSFInputSUFFIX,
+                                                  Channel::convertChannels(Channel::realChannels),
+                                                  triggerSFSystematic);
+    
+    // Set up btag efficiency scale factors (do it for all channels)
+    BtagScaleFactors btagScaleFactors(BtagEfficiencyInputDIR,
+                                      BtagEfficiencyOutputDIR,
+                                      Channel::convertChannels(Channel::realChannels),
+                                      Systematic::convertSystematic(systematic));
+    
+    
+    // Set up the analysis
     HiggsAnalysis* selector = new HiggsAnalysis();
-    PUReweighter* pu = new PUReweighter();
-    pu->setMCDistrSum12("S10");
-    pu->setDataTruePUInput(pu->getPUPath(Systematic::convertSystematic(systematic), FilePU).c_str());
-    selector->SetPUReweighter(pu);
+    selector->SetAnalysisOutputBase(AnalysisOutputDIR);
+    selector->SetPUReweighter(puReweighter);
+    selector->SetLeptonScaleFactors(leptonScaleFactors);
+    selector->SetTriggerScaleFactors(triggerScaleFactors);
+    selector->SetBtagScaleFactors(btagScaleFactors);
+    
+    // Access selectionList containing all input sample nTuples
+    ifstream infile("selectionList.txt");
+    if(!infile.good()){ 
+        std::cerr<<"Error! Please check the selectionList.txt file!\n"<<std::endl; 
+        exit(773); 
+    }
     
     // Loop over all input files
     int filecounter = 0;
@@ -63,37 +134,37 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
         
         // Access nTuple input filename from selectionList
         TString filename;
-        infile >> filename;
-        if (filename == "" || filename[0] == '#') continue; //empty or commented line? --> skip
-        if (!filename.Contains(validFilenamePattern)) continue;
-        std::cout << std::endl;
-        std::cout << "PROCESSING File " << ++filecounter << " ("<< filename << ") from selectionList.txt" << std::endl;
-        std::cout << std::endl;
+        infile>>filename;
+        if(filename=="" || filename[0]=='#') continue; //empty or commented line? --> skip
+        if(!filename.Contains(validFilenamePattern)) continue;
+        std::cout<<std::endl;
+        std::cout<<"PROCESSING File "<<++filecounter<<" ("<<filename<<") from selectionList.txt"<<std::endl;
+        std::cout<<std::endl;
         
         // Open nTuple file
         TFile file(filename);
-        if (file.IsZombie()){
-            std::cerr << "Cannot open " << filename << std::endl;
-            return;
+        if(file.IsZombie()){
+            std::cerr<<"ERROR! Cannot open nTuple file with name: "<<filename<<std::endl;
+            exit(853);
         }
         
         // Check whether nTuple can be found
         TTree* tree = dynamic_cast<TTree*>(file.Get("writeNTuple/NTuple"));
-        if (!tree){
-            std::cerr << "Error: Tree not found!\n";
+        if(!tree){
+            std::cerr<<"ERROR! TTree (=nTuple) not found in file!\n"<<std::endl;
             exit(854);
         }
             
         // Access information about samples, stored in the nTuples
-        TObjString* channel_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/channelName"));
+        TObjString* channel_from_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/channelName"));
         TObjString* systematics_from_file = dynamic_cast<TObjString*>(file.Get("writeNTuple/systematicsName"));
         TObjString* samplename = dynamic_cast<TObjString*>(file.Get("writeNTuple/sampleName"));
         TObjString* o_isSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isSignal"));
         TObjString* o_isHiggsSignal = dynamic_cast<TObjString*>(file.Get("writeNTuple/isHiggsSignal"));
         TObjString* o_isMC = dynamic_cast<TObjString*>(file.Get("writeNTuple/isMC"));
         TH1* weightedEvents = dynamic_cast<TH1*>(file.Get("EventsBeforeSelection/weightedEvents"));
-        if (!channel_file || !systematics_from_file || !o_isSignal || !o_isMC || !samplename) { 
-            std::cout << "Error: info about sample missing!" << std::endl; 
+        if(!channel_from_file || !systematics_from_file || !o_isSignal || !o_isMC || !samplename){ 
+            std::cout<<"Error: info about sample missing!"<<std::endl; 
             return;  
         }
         
@@ -104,23 +175,16 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
         const bool isHiggsInclusive(isHiggsSignal && samplename->GetString()=="ttbarhiggsinclusive");
         const bool isTtbarV(samplename->GetString()=="ttbarw" || samplename->GetString()=="ttbarz");
         
-        if (!isMC && systematic!=Systematic::undefined) {
-            std::cout << "Sample is DATA, so not running again for systematic variation\n";
+        if(!isMC && systematic!=Systematic::undefined){
+            std::cout<<"Sample is DATA, so not running again for systematic variation\n";
             continue;
         }
         
-        //determine the channels to run over
-        std::vector<Channel::Channel> channels;
-        if(channel_file->GetString() != ""){
-            channels.push_back(Channel::convertChannel(static_cast<std::string>(channel_file->GetString())));
-        }
-        else{
-            if(channel != Channel::undefined){
-                channels.push_back(channel);
-            }
-            else{
-                channels = Channel::realChannels;
-            }
+        // Is the channel given in the file?
+        // FIXME: In case of data, use the channel as specified in the file, or what is this for?
+        if(channel_from_file->GetString() != ""){
+            channels.clear();
+            channels.push_back(Channel::convertChannel(static_cast<std::string>(channel_from_file->GetString())));
         }
         
         // Loop over channels and run selector
@@ -128,15 +192,15 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
             
             // Set output file name
             TString outputfilename(filename);
-            if (outputfilename.Contains('/')) {
+            if(outputfilename.Contains('/')){
                 Ssiz_t last = outputfilename.Last('/');
                 outputfilename = outputfilename.Data() + last + 1;
             }
             const TString channelName = Channel::convertChannel(selectedChannel);
-            if (!outputfilename.BeginsWith(channelName + "_")) outputfilename.Prepend(channelName + "_");
+            if(!outputfilename.BeginsWith(channelName + "_")) outputfilename.Prepend(channelName + "_");
             //outputfile is now channel_filename.root
-            if (dy) {
-                if (outputfilename.First("_dy") == kNPOS) { 
+            if(dy){
+                if(outputfilename.First("_dy") == kNPOS){ 
                     std::cerr << "DY variations must be run on DY samples!\n";
                     std::cerr << outputfilename << " must start with 'channel_dy'\n";
                     exit(1);
@@ -146,18 +210,13 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
             }
             if(isHiggsInclusive)outputfilename.ReplaceAll("inclusive", "inclusiveOther");
             
-            // Set input filename for b-tag efficiencies
-            TString btagFile = Tools::accessFolder(BtagBaseDIR, selectedChannel, Systematic::nominal, true);
-            if(btagFile != "") btagFile.Append(channelName + "_ttbarsignalplustau.root");
-            
             // Configure selector
-            selector->SetBTagFile(btagFile);
             selector->SetChannel(channelName);
             selector->SetTopSignal(isTopSignal);
             selector->SetHiggsSignal(isHiggsSignal);
             selector->SetMC(isMC);
             selector->SetTrueLevelDYChannel(dy);
-            if (systematic == Systematic::undefined){
+            if(systematic == Systematic::undefined){
                 selector->SetSystematic(systematics_from_file->GetString());
             }
             else{
@@ -181,7 +240,7 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
             // chain.SetProof(); //will work from 5.34 onwards
             chain.Process(selector);
             
-            // For splitting of ttbarsignal in component with intermediate taus and without
+            // For splitting of dileptonic ttbar in component with intermediate taus and without
             if(isTopSignal && !isHiggsSignal && !isTtbarV){
                 selector->SetRunViaTau(1);
                 outputfilename.ReplaceAll("signalplustau", "bgviatau");

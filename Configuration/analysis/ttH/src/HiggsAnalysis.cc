@@ -15,6 +15,7 @@
 #include "higgsUtils.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/classes.h"
+#include "../../diLeptonic/src/ScaleFactors.h"
 
 
 
@@ -37,6 +38,7 @@ constexpr double JetPtCUT = 30.;
 constexpr double BtagWP = 0.244;
 
 
+// FIXME: move this also to load_HiggsAnalysis
 /// Folder for storage of MVA input TTree
 constexpr const char* MvaInputDIR = "mvaInput";
 
@@ -102,10 +104,7 @@ void HiggsAnalysis::Begin(TTree*)
     AnalysisBase::Begin(0);
 
     // Prepare things for analysis
-    this->prepareTriggerSF();
-    this->prepareLeptonIDSF();
     this->prepareJER_JES();
-    this->prepareBtagSF();
 }
 
 
@@ -114,13 +113,13 @@ void HiggsAnalysis::Begin(TTree*)
 void HiggsAnalysis::Terminate()
 {
     // Produce b-tag efficiencies
-    if(isTtbarSample_ && isTopSignal_) produceBtagEfficiencies();
+    if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
     
     // Do everything needed for MVA
     if(analysisMode_ == AnalysisMode::mva){
 
         // Create output directory for MVA input tree, and produce and write tree
-        std::string f_savename = this->assignFolder(MvaInputDIR, channel_, systematic_);
+        std::string f_savename = ttbar::assignFolder(MvaInputDIR, channel_, systematic_);
         f_savename.append(outputfilename_);
         mvaInputTopJetsVariables_.produceMvaInputTree(f_savename);
         //mvaInputTopJetsVariables_.produceMvaInputTree(fOutput);
@@ -131,7 +130,8 @@ void HiggsAnalysis::Terminate()
 
     // Cleanup
     mvaInputTopJetsVariables_.clear();
-
+    // FIXME: shouldn't we also clear b-tagging efficiency histograms if they are produced ?
+    
     // Defaults from AnalysisBase
     AnalysisBase::Terminate();
 }
@@ -246,7 +246,7 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
     
     // Histograms for b-tagging efficiencies
-    this->bookBtagHistograms();
+    if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
 }
 
 
@@ -288,29 +288,26 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // this is step0b, select events on generator level and access true level weights
 
     // Separate DY dilepton decays in lepton flavours
-    if(failsDrellYanGeneratorSelection(entry)) return kTRUE;
+    if(this->failsDrellYanGeneratorSelection(entry)) return kTRUE;
     
     // Separate dileptonic ttbar decays via tau
-    if(failsTopGeneratorSelection(entry)) return kTRUE;
+    if(this->failsTopGeneratorSelection(entry)) return kTRUE;
     
     // Separate inclusive ttH sample in decays H->bbbar and others
-    if(failsHiggsGeneratorSelection(entry)) return kTRUE;
+    if(this->failsHiggsGeneratorSelection(entry)) return kTRUE;
     
     // Correct for the MadGraph branching fraction being 1/9 for dileptons (PDG average is .108)
-    const double weightMadgraphCorrection = madgraphWDecayCorrection(entry);
+    const double weightMadgraphCorrection = this->madgraphWDecayCorrection(entry);
 
     // Get weight due to pileup reweighting
     const double weightPU = this->weightPileup(entry);
 
-    // Access weightGenerator_ and modify it
-    if(isMC_){
-        GetWeightGeneratorEntry(entry);
-        weightGenerator_ *= weightMadgraphCorrection;
-    }
-    else{
-        // Since weights are also filled for data, this value needs to be set
-        weightGenerator_ = 1.;
-    }
+    // Get weight due to generator weights
+    const double weightGenerator = this->weightGenerator(entry);
+    
+    // Get true level weights
+    const double trueLevelWeightNoPileup = weightGenerator*weightMadgraphCorrection;
+    const double trueLevelWeight = trueLevelWeightNoPileup*weightPU;
     
     // ++++ Control Plots ++++
 
@@ -387,28 +384,42 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectIndices(jetIndices, *jets_, LVpt, JetPtCUT);
     orderIndices(jetIndices, *jets_, LVpt);
     const int numberOfJets = jetIndices.size();
+    const bool has2Jets = numberOfJets > 1;
     
-    // Get b-jet indices, apply selection cuts and order them by btag discriminator (beginning with the highest value)
+    // Get b-jet indices, apply selection cuts
+    // and order b-jets by btag discriminator (beginning with the highest value)
     std::vector<int> bjetIndices = jetIndices;
     selectIndices(bjetIndices, *jetBTagCSV_, BtagWP);
-    orderIndices(bjetIndices, *jetBTagCSV_);
-    
-    // Apply b-tag efficiency MC correction using random number based tag flipping
-    if (isMC_ && !makeeffs){
-        //If b-tag efficiencies do not exit ==> do not re-tag the jets' b-tag value
-        bjetIndices.clear();
-        bjetIndices = indexOfBtags(jetIndices, BtagWP);
-        orderIndices(bjetIndices, *jetBTagCSV_);
+    if (isMC_ && !(btagScaleFactors_->makeEfficiencies())){
+        // Apply b-tag efficiency MC correction using random number based tag flipping
+        btagScaleFactors_->indexOfBtags(bjetIndices, jetIndices,
+                                        *jets_, *jetPartonFlavour_, *jetBTagCSV_,
+                                        BtagWP, static_cast<std::string>(channel_));
     }
+    orderIndices(bjetIndices, *jetBTagCSV_);
     const int numberOfBjets = bjetIndices.size();
+    const bool hasBtag = numberOfBjets > 0;
     
     // Get MET
     const LV& met(*met_);
+    const bool hasMetOrEmu = channel_=="emu" || met.Pt()>40;
     
     BasicHistograms::Input basicHistogramsInput(leptonIndices, antiLeptonIndices,
                                                 jetIndices, bjetIndices,
                                                 *leptons_, *jets_, met,
                                                 *jetBTagCSV_);
+    
+    
+    // Determine all reco level weights
+    const double weightLeptonSF = this->weightLeptonSF(leadingLeptonIndex, nLeadingLeptonIndex);
+    const double weightTriggerSF = this->weightTriggerSF(leptonXIndex, leptonYIndex);
+    const double weightNoPileup = trueLevelWeightNoPileup*weightTriggerSF*weightLeptonSF;
+    // We do not apply a b-tag scale factor
+    //const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices);
+    constexpr double weightBtagSF = 1.;
+    
+    // The weight to be used for filling the histograms
+    double weight = weightNoPileup*weightPU;
     
     
     // ++++ Control Plots ++++
@@ -425,6 +436,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     // ++++ Control Plots ++++
     
+    // FIXME: should also here apply weights
     h_events_step2->Fill(1, 1);
     basicHistograms_.fill(basicHistogramsInput, 1, "2");
     h_jetCategories_overview_step2->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), 1);
@@ -435,16 +447,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // with at least 20 GeV invariant mass
     if (dilepton.M() < 20.) return kTRUE;
 
-    // Now determine the lepton trigger and ID scale factors
-    double weightLepSF = isMC_ ? getLeptonIDSF(leadingLeptonIndex, nLeadingLeptonIndex) : 1.;
-    double weightTrigSF = isMC_ ? getTriggerSF(leptonXIndex, leptonYIndex) : 1.;
-    
-    // First control plots after dilepton selection (without Z cut)
-    double weight = weightGenerator_*weightTrigSF*weightLepSF;
-
-    //apply PU reweighting
-    weight *= weightPU;
-    
     // ++++ Control Plots ++++
     
     h_events_step3->Fill(1, weight);
@@ -455,21 +457,16 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     // ****************************************
     //handle inverted Z cut
-    // Fill loose dilepton mass histogram before any jet cuts
-    bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
-    // FIXME: define jet pt cut and select with following line
-    //bool hasJets = numberOfJets > 1 && jets->at(1).Pt() > JETPTCUT;
-    bool hasJets = numberOfJets > 1;
-    bool hasMetOrEmu = channel_ == "emu" || met.Pt() > 40;
-    bool hasBtag = numberOfBjets > 0;
-    bool hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, met);
+    const bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
+    const bool hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, met);
     
     // Z window plots need to be filled here, in order to rescale the contribution to data
     if(isZregion){
-        double fullWeights = weightGenerator_*weightPU*weightTrigSF*weightLepSF;
+        double fullWeights = weight;
         dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "4");
 
-        if(hasJets){
+        if(has2Jets){
+            // Fill loose dilepton mass histogram before any jet cuts
             dyScalingHistograms_.fillLoose(dilepton.M(), fullWeights);
             dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "5");
 
@@ -510,8 +507,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     
     //=== CUT ===
-    //Require at least two jets > 30 GeV (check for > 30 needed because we might have 20 GeV jets in our NTuple)
-    if(!hasJets) return kTRUE;
+    //Require at least two jets > 30 GeV
+    if(!has2Jets) return kTRUE;
     
     // ++++ Control Plots ++++
     
@@ -538,8 +535,10 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     h_jetCategories_overview_step6->Fill(jetCategories_overview_.categoryId(numberOfJets,numberOfBjets), weight);
     
     // Fill the b-tagging efficiency plots
-    if(isTtbarSample_ && isTopSignal_ && makeeffs){
-        this->fillBtagHistograms(jetIndices, bjetIndices, weight);
+    if(this->makeBtagEfficiencies()){
+        btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
+                                              *jets_, *jetPartonFlavour_,
+                                              weight, static_cast<std::string>(channel_));
     }
     
     
@@ -548,10 +547,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     //Require at least one b tagged jet
     if(!hasBtag) return kTRUE;
 
-    // FIXME: if b-tagging scale factor is desired, calculate it here ?
-    // weight *= weightBtagSF;
-
-    
+    weight *= weightBtagSF;
 
     // ++++ Control Plots ++++
 
