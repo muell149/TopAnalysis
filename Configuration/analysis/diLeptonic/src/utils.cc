@@ -2,8 +2,6 @@
 #include <cstdlib>
 #include <algorithm>
 
-#include <TString.h>
-
 #include "utils.h"
 
 
@@ -26,10 +24,10 @@ const std::string ttbar::CMSSW_BASE()
 
 
 
-const TString ttbar::DATA_PATH()
+const std::string ttbar::DATA_PATH()
 {
-    TString result(CMSSW_BASE());
-    result.Append("/src/TopAnalysis/Configuration/analysis/diLeptonic/data");
+    std::string result(CMSSW_BASE());
+    result.append("/src/TopAnalysis/Configuration/analysis/diLeptonic/data");
     return result;
 }
 

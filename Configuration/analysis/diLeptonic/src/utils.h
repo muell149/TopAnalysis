@@ -5,8 +5,6 @@
 #include <functional>
 #include <vector>
 
-class TString;
-
 
 
 
@@ -17,7 +15,7 @@ namespace ttbar{
     const std::string CMSSW_BASE();
 
     /// Return the path where relevant input data (e.g. histograms for scale factors) is stored
-    const TString DATA_PATH();
+    const std::string DATA_PATH();
     
     
     

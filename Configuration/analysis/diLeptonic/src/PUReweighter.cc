@@ -70,7 +70,7 @@ void PUReweighter::setMCDistrSum12(TString scenario){
     }
     ////////for other PU scenarios!!!
 
-    std::cout << "setting MC pileup distribution to summer12_"+scenario << std::endl;
+    std::cout << "Setting MC pileup distribution to: summer12_"+scenario << std::endl;
     //    V.insert(V.begin(),1); //fill zero bin
     mcpu_=V;
     mcint_=0;
@@ -120,7 +120,7 @@ const std::string PUReweighter::getPUPath(TString systematic, const char* filePU
             std::cout << "Using Nominal PU distribution for " << systematic << " systematic!\n";
         }
     }
-    std::cout<<"\nUsing "+pu_path+" PU input file\n"<<std::endl;
+    std::cout<<"Using PU input file :"<<pu_path<<std::endl;
     
     return pu_path;
 }
