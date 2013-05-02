@@ -10,7 +10,7 @@ find_package(ROOT REQUIRED)
 include_directories(${ROOT_INCLUDE_DIR})
 
 #set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-as-needed")
-set(ROOT_LIBRARIES ${ROOT_LIBRARIES} -lGenVector)
+set(ROOT_LIBRARIES ${ROOT_LIBRARIES} -lGenVector -lHistPainter)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c++0x")
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -pedantic -Wno-vla -O0 -g -std=c++0x")
 add_definitions(-DSTANDALONE_COMPILE)
