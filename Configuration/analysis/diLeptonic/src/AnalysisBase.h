@@ -21,7 +21,9 @@ class TString;
 
 class PUReweighter;
 class JetCorrectionUncertainty;
-
+class TriggerScaleFactors;
+class LeptonScaleFactors;
+class BtagScaleFactors;
 
 
 
@@ -188,8 +190,17 @@ protected:
     bool runViaTau_;
     
     
-    /// Pileup reweighter, configured from outside
+    /// Pointer to the pileup reweighter instance
     PUReweighter *puReweighter_;
+    
+    /// Pointer to lepton scale factors instance 
+    const LeptonScaleFactors* leptonScaleFactors_;
+    
+    /// Pointer to trigger scale factors instance 
+    const TriggerScaleFactors* triggerScaleFactors_;
+    
+    /// Pointer to btag scale factors instance 
+    BtagScaleFactors* btagScaleFactors_;
     
     
     /// Apply JER/JES systematics
@@ -209,7 +220,9 @@ protected:
     //map of name of differential distribution
     // -> pair( histogram with the binning of the differential distribution,
     //          vector(bin) -> map( control plot name -> TH1*))
-    std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > > *binnedControlPlots_;
+    std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >* binnedControlPlots_;
+    
+    
     
     
         
@@ -362,30 +375,14 @@ private:
     JetCorrectionUncertainty *unc_;
     
     
-    /// Filename of file holding b-tag efficiency histograms, configured from outside
-    TString btagFile_;
-    
-    
-    /// Histograms for writing out b-tagging efficiencies
-    TH2 *h_bjets, *h_cjets, *h_ljets;
-    TH2 *h_btaggedjets, *h_ctaggedjets, *h_ltaggedjets;
-    
-    
-    /// Histograms of per-jet b-tagging efficiencies, used to calculate per-event SF
-    /// Need to be written out to file previously
-    TH2 *h2_bEff, *h2_cEff, *h2_lEff;
-    
-    
-    /// Trigger and lepton scale factors differential in eta, pt
-    TH2 *h_TrigSFeta, *h_MuonIDSFpteta, *h_ElectronIDSFpteta;
-    
-    
-    /// Medians in eta, pt for b-tag SF
-    double btag_ptmedian_, btag_etamedian_;
-    
-    
     /// Event counter
     Int_t eventCounter_;
+    
+    
+    /// Directory where to store the analysis output
+    const char* analysisOutputBase_;
+    
+    
     
     
 
@@ -426,11 +423,17 @@ public:
     /// Bool for separating direct dileptonic ttbar decays and decays via intermediate taus
     void SetRunViaTau(const bool runViaTau);
     
-    /// Set input file for b-tagging efficiencies
-    void SetBTagFile(const TString& btagFile);
+    /// Set folder for basic analysis output
+    void SetAnalysisOutputBase(const char* analysisOutputBase);
     
     /// Set the pileup reweighter
     void SetPUReweighter(PUReweighter* puReweighter);
+    /// Set the lepton scale factors
+    void SetLeptonScaleFactors(const LeptonScaleFactors& scaleFactors);
+    /// Set the trigger scale factors
+    void SetTriggerScaleFactors(const TriggerScaleFactors& scaleFactors);
+    /// Set the btag scale factors
+    void SetBtagScaleFactors(BtagScaleFactors& scaleFactors);
     
     /// Set histogram containing the number of weighted events in full sample
     void SetWeightedEvents(TH1* weightedEvents);
@@ -481,47 +484,6 @@ protected:
      */
     const std::string topDecayModeString()const;
     
-    /// Book histograms needed for b-tag efficiencies
-    void bookBtagHistograms();
-    /// Fill histograms needed for b-tag efficiencies
-    void fillBtagHistograms(const std::vector<int>& jetIndices, const std::vector<int>& bjetIndices, const double weight = 1);
-    /// Produce b-tag efficiencies
-    void produceBtagEfficiencies();
-    
-    /// Prepare trigger scale factor
-    void prepareTriggerSF();
-    /// Get trigger per-event scale factor
-    double getTriggerSF(const int leptonXIndex, const int leptonYIndex)const;
-    
-    /// Prepare lepton scale factor
-    void prepareLeptonIDSF();
-    /// Get lepton per-event scale factor
-    double getLeptonIDSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const;
-    
-    /// Prepare b-tagging scale factor (efficiency histograms and medians of jet eta, pt)
-    void prepareBtagSF();
-    /// Get b-tag per-event scale factor
-    double calculateBtagSF(const std::vector<int>& jetIndices)const;
-    
-    
-    
-    // FIXME: these methods will be moved to own b-tagging class (several anyway would be private)
-    /// Return the indexes of the jet that are b-tagged after randomization
-    std::vector<int> indexOfBtags(const std::vector<int>& jetIndices, const double TagCut = 0.244);
-    /// 'Random' decision to tag or not tag a jet.
-    /// Method explained in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFUtil
-    /// and in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#2a_Jet_by_jet_updating_of_the_b
-    bool isTagged(LV Jet, double TagValue, int Flavour, double TagCut = 0.244);
-    double getEfficiency(LV jet, int partonFlavour);
-    double getSF(double pt, double abs_eta, int flavour);
-    /// Decide wich type of BTag variation is going to be done according to 
-    ///   systematics name 
-    ///   median value (if applicable)
-    double varySF(double pt, double eta, int flavour, double ptmedian, double etamedian);
-    bool makeeffs;
-    
-    
-
     /** Set up the scale factor for the Kinematic Reconstruction
      * 
      * Currently a flat per-channel SF is used. For the systematic KIN_UP and KIN_DOWN,
@@ -556,9 +518,6 @@ protected:
     /// It uses the collections stored just for the jet scaling
     void applyJER_JES();
     
-    /// Get 2-dimensional scale factor from histogram
-    double get2DSF(TH2* histo, const double x, const double y)const;
-    
     /// Check if opposite-charge dilepton combination exists,
     /// and check if lepton pair is correct flavour combination for the specified analysis channel (ee, emu, mumu)
     bool hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const;
@@ -583,6 +542,21 @@ protected:
     /// Get weight due to pileup reweighting
     double weightPileup(const Long64_t&)const;
     
+    /// Get weight due to generator weights
+    double weightGenerator(const Long64_t&)const;
+    
+    /// Get weight due to top pt reweighting
+    double weightTopPtReweighting(const double& topPt, const double& antiTopPt)const;
+    
+    /// Get weight due to lepton efficiency MC-to-data scale factors
+    double weightLeptonSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const;
+    
+    /// Get weight due to trigger efficiency MC-to-data scale factors
+    double weightTriggerSF(const int leptonXIndex, const int leptonYIndex)const;
+    
+    /// Get weight due to b-tagging efficiency MC-to-data scale factors
+    double weightBtagSF(const std::vector<int>& jetIndices)const;
+    
     
     
     /// Create binned control plots
@@ -599,11 +573,11 @@ protected:
     void FillBinnedControlPlot(TH1* h_differential, double binvalue, 
                                TH1 *h_control, double value, double weight);
     
-    /// Assign a folder depending on channel and systematic
-    std::string assignFolder(const char* baseDir, const TString& channel, const TString& systematic)const;
-    
     /// Store the object in the output list and return it
     template<class T> T* store(T* obj){return ttbar::store(obj, fOutput);}
+    
+    /// Whether to or not to produce b-tag efficiencies for the analysed sample
+    bool makeBtagEfficiencies()const;
     
     
     
@@ -640,12 +614,8 @@ private:
     /// Set addresses of nTuple branches for Higgs signal samples on generator level
     void SetHiggsSignalBranchAddresses();
     
-    /// Methods needed for b-tag scale factor calculation
-    double BJetSF(const double&, const double&)const;
-    double CJetSF(const double&, const double&)const;
-    double LJetSF(const double&, const double&, const TString&)const;
-    double BJetSFAbsErr(const double&)const;
-    double CJetSFAbsErr(const double&)const;
+    /// Reweight funtion estimated by Martin Goerner
+    double topPtReweightValue(const double& pt)const;
 };
 
 

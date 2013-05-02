@@ -31,18 +31,7 @@
 #include "PUReweighter.h"
 #include "analysisUtils.h"
 #include "classes.h"
-
-
-
-
-
-
-/// Folder for basic analysis output
-constexpr const char* BaseDIR = "selectionRoot";
-
-/// Folder for b-tag efficiency file storage
-constexpr const char* BTagEffDIR = "selectionRoot/BTagEff";
-
+#include "ScaleFactors.h"
 
 
 
@@ -64,6 +53,9 @@ checkZDecayMode_(nullptr),
 outputfilename_(""),
 runViaTau_(false),
 puReweighter_(nullptr),
+leptonScaleFactors_(0),
+triggerScaleFactors_(0),
+btagScaleFactors_(0),
 doJesJer_(false),
 weightKinFit_(0),
 isTtbarSample_(false),
@@ -71,22 +63,8 @@ binnedControlPlots_(0),
 chain_(0),
 h_weightedEvents(0),
 unc_(nullptr),
-btagFile_(""),
-h_bjets(0),
-h_cjets(0),
-h_ljets(0),
-h_btaggedjets(0),
-h_ctaggedjets(0),
-h_ltaggedjets(0),
-h2_bEff(0),
-h2_cEff(0),
-h2_lEff(0),
-h_TrigSFeta(0),
-h_MuonIDSFpteta(0),
-h_ElectronIDSFpteta(0),
-btag_ptmedian_(0),
-btag_etamedian_(0),
-eventCounter_(0)
+eventCounter_(0),
+analysisOutputBase_(0)
 {
     this->clearBranches();
     this->clearBranchVariables();
@@ -100,20 +78,6 @@ void AnalysisBase::Begin(TTree*)
 
     TSelector::Begin(0);
     
-    h2_bEff = 0;
-    h2_cEff = 0;
-    h2_lEff = 0;
-    h_TrigSFeta = 0;
-    h_MuonIDSFpteta = 0;
-    h_ElectronIDSFpteta = 0;
-    btag_ptmedian_ = 0;
-    btag_etamedian_ = 0;
-    h_bjets = 0;
-    h_cjets = 0;
-    h_ljets = 0;
-    h_btaggedjets = 0;
-    h_ctaggedjets = 0;
-    h_ltaggedjets = 0;
     eventCounter_ = 0;
 }
 
@@ -166,7 +130,11 @@ void AnalysisBase::Terminate()
     
     
     // Open output file for writing
-    std::string f_savename = this->assignFolder(BaseDIR, channel_, systematic_);
+    if(!analysisOutputBase_){
+        std::cerr<<"ERROR! No base directory for analysis output specified\n...break\n"<<std::endl;
+        exit(3);
+    }
+    std::string f_savename = ttbar::assignFolder(analysisOutputBase_, channel_, systematic_);
     f_savename.append(outputfilename_);
     std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<samplename_<<"!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     TFile outputFile(f_savename.c_str(), "RECREATE");
@@ -236,13 +204,6 @@ void AnalysisBase::Init(TTree *tree)
     if(isHiggsSignal_) this->SetHiggsDecayBranchAddress();
     if(isTopSignal_) this->SetTopSignalBranchAddresses();
     if(isHiggsSignal_) this->SetHiggsSignalBranchAddresses();
-}
-
-
-
-void AnalysisBase::SetBTagFile(const TString& btagFile)
-{
-    btagFile_ = btagFile;
 }
 
 
@@ -320,9 +281,37 @@ void AnalysisBase::SetRunViaTau(const bool runViaTau)
 
 
 
+void AnalysisBase::SetAnalysisOutputBase(const char* analysisOutputBase)
+{
+    analysisOutputBase_ = analysisOutputBase;
+}
+
+
+
 void AnalysisBase::SetPUReweighter(PUReweighter* puReweighter)
 {
     puReweighter_ = puReweighter;
+}
+
+
+
+void AnalysisBase::SetLeptonScaleFactors(const LeptonScaleFactors& scaleFactors)
+{
+    leptonScaleFactors_ = &scaleFactors;
+}
+
+
+
+void AnalysisBase::SetTriggerScaleFactors(const TriggerScaleFactors& scaleFactors)
+{
+    triggerScaleFactors_ = &scaleFactors;
+}
+
+
+
+void AnalysisBase::SetBtagScaleFactors(BtagScaleFactors& scaleFactors)
+{
+    btagScaleFactors_ = &scaleFactors;
 }
 
 
@@ -985,18 +974,6 @@ void AnalysisBase::GetHiggsSignalBranchesEntry(const Long64_t& entry)const
 
 
 
-double AnalysisBase::get2DSF(TH2* histo, const double x, const double y)const
-{
-    int xbin, ybin, dummy;
-    histo->GetBinXYZ(histo->FindBin(x, y), xbin, ybin, dummy);
-    //overflow to last bin
-    xbin = std::min(xbin, histo->GetNbinsX());
-    ybin = std::min(ybin, histo->GetNbinsY());
-    return histo->GetBinContent(xbin, ybin);
-}
-
-
-
 double AnalysisBase::getJetHT(const std::vector<int>& jetIndices, const VLV& jets)const
 {
     double result = 0;
@@ -1005,457 +982,6 @@ double AnalysisBase::getJetHT(const std::vector<int>& jetIndices, const VLV& jet
         result += pt;
     }
     return result;
-}
-
-
-
-void AnalysisBase::prepareTriggerSF()
-{
-    h_TrigSFeta = nullptr;
-    
-//    TFile trigEfficiencies(ttbar::DATA_PATH() + "/triggerSummary_" + channel_ + ".root");
-    TFile trigEfficiencies(ttbar::DATA_PATH() + "/triggerSummary_" + channel_ + "_19fb.root");
-    if (trigEfficiencies.IsZombie()) {
-        std::cout << "Trigger efficiencies not found. Assuming ScaleFactor = 1.\n";
-        std::cout << "Currently triggerEfficieny files can be found in diLeptonic/data folder\n\n";
-        return;
-    }
-    
-    //Right now pT efficiency flat ==> Not used
-//    h_TrigSFeta = dynamic_cast<TH2*>(trigEfficiencies.Get("scalefactor eta2d with syst"));
-    h_TrigSFeta = dynamic_cast<TH2*>(trigEfficiencies.Get("lepton_eta2d_sf"));
-    if ( !h_TrigSFeta ) {
-        std::cout<<"TH2 >>TH scalefactor eta<< is not in the file "<<trigEfficiencies.GetName()<<"\n";
-        return;
-    }
-    
-    if (systematic_.BeginsWith("TRIG_")) {
-        double factor = systematic_.EndsWith("_UP") ? 1 : -1;
-        for (int i = 1; i <= h_TrigSFeta->GetNbinsX(); ++i) {
-            for (int j = 1; j <= h_TrigSFeta->GetNbinsY(); ++j) {
-                h_TrigSFeta->SetBinContent(i, j,
-                    h_TrigSFeta->GetBinContent(i,j) + factor*h_TrigSFeta->GetBinError(i,j));
-            }
-        }
-    }
-    
-    h_TrigSFeta->SetDirectory(0);
-    trigEfficiencies.Close();
-}
-
-
-
-double AnalysisBase::getTriggerSF(const int leptonXIndex, const int leptonYIndex)const
-{
-    if (!h_TrigSFeta) return 1.;
-    
-    //For 'ee' and 'mumu' channels Xaxis of the 2D plots is the highest pT lepton
-    // for the 'emu' channel Xaxis is the electron and Y axis muon
-    const LV& leptonX(leptons_->at(leptonXIndex));
-    const LV& leptonY(leptons_->at(leptonYIndex));
-    return get2DSF(h_TrigSFeta, std::abs(leptonX.eta()), std::abs(leptonY.eta()));
-}
-
-
-
-double AnalysisBase::getLeptonIDSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const
-{
-    if(!h_MuonIDSFpteta || !h_ElectronIDSFpteta) return 1.;
-    
-    const LV& leadingLepton(leptons_->at(leadingLeptonIndex));
-    const LV& nLeadingLepton(leptons_->at(nLeadingLeptonIndex));
-    const int leadingPdgId(std::abs(lepPdgId_->at(leadingLeptonIndex)));
-    const int nLeadingPdgId(std::abs(lepPdgId_->at(nLeadingLeptonIndex)));
-    if(leadingPdgId==11 && nLeadingPdgId==11) return get2DSF(h_ElectronIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_ElectronIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
-    if(leadingPdgId==13 && nLeadingPdgId==13) return get2DSF(h_MuonIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_MuonIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
-    if(leadingPdgId==13 && nLeadingPdgId==11) return get2DSF(h_MuonIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_ElectronIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
-    if(leadingPdgId==11 && nLeadingPdgId==13) return get2DSF(h_ElectronIDSFpteta, leadingLepton.Eta(), leadingLepton.pt()) * get2DSF(h_MuonIDSFpteta, nLeadingLepton.Eta(), nLeadingLepton.pt());
-    std::cout<<"Warning in method getLeptonIDSF! LeptonPdgIds are not as expected (pdgId1, pdgId2): "
-             <<leadingPdgId<<" , "<<nLeadingPdgId<<"\n...will return scale factor =1\n";
-    return 1.;
-}
-
-
-
-void AnalysisBase::prepareLeptonIDSF()
-{
-    h_MuonIDSFpteta = nullptr;
-    h_ElectronIDSFpteta = nullptr;
-    
-//    TFile MuonEfficiencies(ttbar::DATA_PATH() + "/MuonSFtop12028.root");    
-    TFile MuonEfficiencies(ttbar::DATA_PATH() + "/MuonSFtop12028_19fb.root");
-    if (MuonEfficiencies.IsZombie()) {
-        std::cout << "Muon Id/Iso efficiencies not found. Assuming ScaleFactor = 1.\n";
-//        std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
-        return;
-    }
-
-//    TFile ElecEfficiencies(ttbar::DATA_PATH() + "/ElectronSFtop12028.root");
-    TFile ElecEfficiencies(ttbar::DATA_PATH() + "/ElectronSFtop12028_19fb.root");
-    if (ElecEfficiencies.IsZombie()) {
-        std::cout << "Electron Id/Iso efficiencies not found. Assuming ScaleFactor = 1.\n";
-//        std::cout << "Currently triggerEfficieny files can be found in the HEAD version of diLeptonic folder\n\n";
-        return;
-    }
-    
-    //Right now pT efficiency flat ==> Not used
-    h_MuonIDSFpteta = dynamic_cast<TH2*>(MuonEfficiencies.Get("MuonSFtop12028"));
-    if ( !h_MuonIDSFpteta ) {
-        std::cout<<"TH2 >>TH scalefactor << is not in the file "<<MuonEfficiencies.GetName()<<"\n";
-        return;
-    }
-
-//    h_ElectronIDSFpteta = dynamic_cast<TH2*>(ElecEfficiencies.Get("GlobalSF"));
-    h_ElectronIDSFpteta = dynamic_cast<TH2*>(ElecEfficiencies.Get("ElectronSFtop12028"));
-    if ( !h_ElectronIDSFpteta ) {
-        std::cout<<"TH2 >>TH scalefactor << is not in the file "<<ElecEfficiencies.GetName()<<"\n";
-        return;
-    }
-
-    if (systematic_.BeginsWith("LEPT_")) {
-        double factor = systematic_.EndsWith("_UP") ? 1 : -1;
-        for (int i = 1; i <= h_MuonIDSFpteta->GetNbinsX(); ++i) {
-            for (int j = 1; j <= h_MuonIDSFpteta->GetNbinsY(); ++j) {
-                h_MuonIDSFpteta->SetBinContent(i, j,
-                    h_MuonIDSFpteta->GetBinContent(i,j) + factor*h_MuonIDSFpteta->GetBinError(i,j));
-            }
-        }
-
-        for (int i = 1; i <= h_ElectronIDSFpteta->GetNbinsX(); ++i) {
-            for (int j = 1; j <= h_ElectronIDSFpteta->GetNbinsY(); ++j) {
-                h_ElectronIDSFpteta->SetBinContent(i, j,h_ElectronIDSFpteta->GetBinContent(i,j) + factor*h_ElectronIDSFpteta->GetBinError(i,j));
-            }
-        }
-    }
-
-    h_MuonIDSFpteta->SetDirectory(0);
-    MuonEfficiencies.Close();
-    h_ElectronIDSFpteta->SetDirectory(0);
-    ElecEfficiencies.Close();
-}
-
-
-
-void AnalysisBase::prepareBtagSF()
-{
-    //some defaults for the median, overwritten if btag files exist
-    btag_ptmedian_ = 75;
-    btag_etamedian_ = 0.75;
-    
-    //some defaults for b-tagging efficiency calculation, overwritten if bTag efficiency plots exist
-    makeeffs = false;
-
-    //By now defined the per-jet SFs vary according to:
-    //   BTag_Up   ==> pt>ptmedian vary DOWN, pt<ptmedian vary UP
-    //   BTag_Down ==> pt>ptmedian vary UP, pt<ptmedian vary DOWN
-
-    // Load per-jet efficiencies file, if existing
-    TFile* bEfficiencyFile(0);
-    ifstream inputFileStream;
-    inputFileStream.open(btagFile_);
-    if(inputFileStream.is_open()){
-        bEfficiencyFile = TFile::Open(btagFile_);
-    }
-    if (!bEfficiencyFile) {
-        std::cout << "\n******************************************************\n"
-             << "File " << btagFile_ << " does not exist. Running without btagsf!!!\n"
-             << "To create the file, run:\n" 
-             << "   build/load_Analysis -f ttbarsignalplustau.root -c emu\n"
-             << "   build/load_Analysis -f ttbarsignalplustau.root -c ee\n"
-             << "   build/load_Analysis -f ttbarsignalplustau.root -c mumu\n"
-             << "and copy the selectionRoot/BTagEff directory to the cwd:\n"
-             << "   cp -r selectionRoot/BTagEff .\n"
-             //<< "This error is NOT fatal, using a btag SF = 1 everywhere\n"
-             << "This is error is NOT fatal, not applying the randomization of the jet tagger values\n"
-             << "*******************************************************\n\n";
-        makeeffs = true;
-        return;
-    }
-    
-    // Access the histograms holding the scale factors
-    h2_bEff = dynamic_cast<TH2*>(bEfficiencyFile->Get("BEffPerJet"));
-    if (!h2_bEff) {
-        std::cout<<"Histogram bEff is not in the file "<<bEfficiencyFile->GetName();
-        return;
-    }
-    h2_cEff = dynamic_cast<TH2*>(bEfficiencyFile->Get("CEffPerJet"));
-    if (!h2_cEff) {
-        std::cout<<"Histogram cEff is not in the file "<<bEfficiencyFile->GetName();
-        return;
-    }
-    h2_lEff = dynamic_cast<TH2*>(bEfficiencyFile->Get("LEffPerJet"));
-    if (!h2_lEff) {
-        std::cout<<"Histogram lEff is not in the file "<<bEfficiencyFile->GetName();
-        return;
-    }
-    
-    TH1* medians = dynamic_cast<TH1*>(bEfficiencyFile->Get("Medians"));
-    btag_ptmedian_ = medians->GetBinContent(1);
-    btag_etamedian_ = medians->GetBinContent(2);
-    printf("BTagSF: Using medians: pT = %.0f, eta = %.2f\n", btag_ptmedian_, btag_etamedian_);
-
-    //load the histograms in memory, to avoid memory leaks
-    h2_bEff->SetDirectory(0);
-    h2_cEff->SetDirectory(0);
-    h2_lEff->SetDirectory(0);
-    bEfficiencyFile->Close();
-    bEfficiencyFile->Delete();
-}
-
-
-
-bool AnalysisBase::isTagged(LV Jet, double TagValue, int Flavour, double TagCut)
-{
-    bool isBTagged = TagValue > TagCut;
-    bool newBTag = isBTagged;
-    double Btag_eff = getEfficiency(Jet, Flavour);
-    double Btag_SF = getSF(Jet.Pt(), std::fabs(Jet.Eta()),Flavour);
-
-    if (Btag_SF == 1) return newBTag; //no correction needed
-
-    //throw die
-    // The seed is choosen as in https://twiki.cern.ch/twiki/pub/CMS/BTagSFUtil/test.C
-    double seed = std::abs(static_cast<int>(1e6 * sin(1e6*Jet.Phi())));
-    float coin = TRandom3(seed).Uniform(1.0);
-    
-    if ( Btag_SF > 1 ) {  // use this if SF>1
-        if ( !isBTagged ) {
-            //fraction of jets that need to be upgraded
-            float mistagPercent = (1.0 - Btag_SF) / (1.0 - (1.0/Btag_eff) );
-
-            //upgrade to tagged
-            if( coin < mistagPercent ) {newBTag = true;}
-        }
-    } else {  // use this if SF<1
-        //downgrade tagged to untagged
-        if ( isBTagged && coin > Btag_SF ) {newBTag = false;}
-    }
-
-    return newBTag;
-
-}
-
-
-
-double AnalysisBase::varySF (double pt, double abs_eta, int flavour, double ptmedian, double etamedian){
-    /// No variation for non b-tag systematic
-    if ( !systematic_.BeginsWith("BTAG_")) return 0;
-
-    /// Systematic only for l-jet but the jet is not light: no variation to be done
-    if (systematic_.BeginsWith("BTAG_LJET") && (std::abs(flavour) == 5 || std::abs(flavour) == 4)){
-        return 0;
-    } else if (!systematic_.BeginsWith("BTAG_LJET") && std::abs(flavour) != 5 && std::abs(flavour) != 4) {
-        return 0;
-    }
-
-    if ( (systematic_.Contains("PT_UP") && pt>ptmedian)   ||
-         (systematic_.Contains("PT_DOWN") && pt<ptmedian) ||
-         (systematic_.Contains("ETA_UP") && abs_eta>etamedian) ||
-         (systematic_.Contains("ETA_DOWN") && abs_eta<etamedian) )
-        {
-            return -0.5;
-    } else if ( 
-        (systematic_.Contains("PT_UP") && pt<ptmedian)   ||
-        (systematic_.Contains("PT_DOWN") && pt>ptmedian) ||
-        (systematic_.Contains("ETA_UP") && abs_eta<etamedian) ||
-        (systematic_.Contains("ETA_DOWN") && abs_eta>etamedian) )
-        {
-            return 0.5;
-        }
-
-    /// Absolute scale up or down
-    if ( systematic_.Contains("UP") )      { return 1; }
-    else if (systematic_.Contains("DOWN")) { return -1; }
-    return 0;
-}
-
-
-
-double AnalysisBase::getSF(double pt, double abs_eta, int flavour)
-{
-    double tmpsf = 1.;
-    double tmperr=0.;
-    double sign = varySF(pt, abs_eta, flavour, btag_ptmedian_, btag_etamedian_);
-
-    if ( std::abs(flavour) == 5 ){ //b-jets
-        tmpsf  = BJetSF( pt, abs_eta );
-        tmperr = BJetSFAbsErr(pt);
-    } else if ( std::abs(flavour) == 4 ) { //c-jets
-        tmpsf  = CJetSF( pt, abs_eta );
-        tmperr = CJetSFAbsErr(pt);
-    } else if ( std::abs(flavour) != 0 ) { //l-jets
-        TString variation = TString("central");
-        if( systematic_.BeginsWith("BTAG_LJET_") ){
-            if( (systematic_.Contains("PT_UP") && pt>btag_ptmedian_) ||
-                (systematic_.Contains("PT_DOWN") && pt<btag_ptmedian_) ||
-                (systematic_.Contains("ETA_UP") && abs_eta>btag_etamedian_ ) ||
-                (systematic_.Contains("ETA_DOWN") && abs_eta<btag_etamedian_ ) ||
-                systematic_.BeginsWith("BTAG_LJET_UP")){
-                    variation = TString("up");
-                }
-            else variation = TString ("down");
-        }
-        tmpsf  = LJetSF( pt, abs_eta, variation );
-        tmperr = 0.;
-    }
-
-    return tmpsf + sign * tmperr;
-}
-
-
-
-double AnalysisBase::getEfficiency(LV jet, int partonFlavour)
-{
-    if (std::abs(partonFlavour) == 0)
-    {
-        std::cout<<"AnalysisBase::GetEfficiency: the jet parton flavour is 0"<<std::endl;
-        std::cout<<"              Returning efficiency 1.0"<<std::endl;
-        return 1;
-    }
-
-    double pt = jet.Pt();
-    double eta = std::fabs(jet.Eta());
-    int ptbin = -1, etabin = -1, dummy = -1;
-
-    if (std::abs(partonFlavour) == 5 )
-    {
-        h2_bEff->GetBinXYZ(h2_bEff->FindBin(pt, eta), ptbin, etabin, dummy);
-        return h2_bEff->GetBinContent(ptbin, etabin);
-    } else if (std::abs(partonFlavour) == 4 ) {
-        h2_cEff->GetBinXYZ(h2_cEff->FindBin(pt, eta), ptbin, etabin, dummy);
-        return h2_cEff->GetBinContent(ptbin, etabin);
-    } else if (std::abs(partonFlavour) != 0 ) {
-        h2_lEff->GetBinXYZ(h2_lEff->FindBin(pt, eta), ptbin, etabin, dummy);
-        return h2_lEff->GetBinContent(ptbin, etabin);
-    }
-    return 1.;
-}
-
-
-
-std::vector<int> AnalysisBase::indexOfBtags (const std::vector<int>& jetIndices, const double TagCut)
-{
-    std::vector<int> tagged_indexes;
-    for(const int index : jetIndices)
-    {
-        //Skip jets where there is no partonFlavour
-        if(jetPartonFlavour_->at(index) == 0) continue;
-        
-        if(isTagged(jets_->at(index), jetBTagCSV_->at(index), jetPartonFlavour_->at(index), TagCut))
-        {
-            tagged_indexes.push_back(index);
-        }
-    }
-    return tagged_indexes;
-}
-
-
-
-double AnalysisBase::calculateBtagSF(const std::vector<int>& jetIndices)const
-{
-    if (!h2_bEff) return 1; //no btag file given, so return 1
-    
-    double OneMinusEff=1;
-    double OneMinusSEff=1;
-    double SFPerJet=1, eff=1;
-    for(const int index : jetIndices){
-        double pt = jets_->at(index).Pt();
-        double eta = std::abs(jets_->at(index).Eta());
-        
-        int partonFlavour = std::abs(jetPartonFlavour_->at(index)); //store absolute value
-        if (partonFlavour == 0) continue;
-        int ptbin, etabin, dummy;
-        h2_bEff->GetBinXYZ(h2_bEff->FindBin(pt, eta), ptbin, etabin, dummy);
-        // overflow to last bin
-        ptbin = std::min(ptbin, h2_bEff->GetNbinsX());
-        etabin = std::min(etabin, h2_bEff->GetNbinsY());
-        // do the type-jet selection & Eff and SF obtention
-        double SF_Error=0;
-        if ( partonFlavour == 5 ) { //b-quark
-            eff=h2_bEff->GetBinContent ( ptbin, etabin );
-            if(systematic_.Contains("BEFF_UP")){eff = eff + h2_bEff->GetBinError ( ptbin, etabin );}
-            else if(systematic_.Contains("BEFF_DOWN")){eff = eff - h2_bEff->GetBinError ( ptbin, etabin );} 
-            SFPerJet = BJetSF( pt, eta );
-            SF_Error = BJetSFAbsErr ( pt );
-        } else if ( partonFlavour == 4 ) { //c-quark
-            eff=h2_cEff->GetBinContent ( ptbin, etabin );
-            if(systematic_.Contains("CEFF_UP")){eff = eff + h2_cEff->GetBinError ( ptbin, etabin );}
-            else if(systematic_.Contains("CEFF_DOWN")){eff = eff - h2_cEff->GetBinError ( ptbin, etabin );} 
-            SFPerJet = CJetSF( pt, eta );
-            SF_Error = CJetSFAbsErr ( pt );
-        } else if ( partonFlavour != 0 ) { //l-quark
-            eff=h2_lEff->GetBinContent ( ptbin, etabin );
-            if(systematic_.Contains("LEFF_UP")){eff = eff + h2_lEff->GetBinError ( ptbin, etabin );}
-            else if(systematic_.Contains("LEFF_DOWN")){eff = eff - h2_lEff->GetBinError ( ptbin, etabin );} 
-            SFPerJet = LJetSF( pt, eta, "central");
-            if ( systematic_.BeginsWith("BTAG_LJET_UP") ) {   //systematic variation of l-jets for inclusive XSection measurement
-                SFPerJet = LJetSF ( pt, eta, "up");
-            } else if ( systematic_.BeginsWith("BTAG_LJET_DOWN") ) { //systematic variation of l-jets for inclusive XSection measurement
-                SFPerJet = LJetSF ( pt, eta, "down");
-            } else if ( systematic_.BeginsWith("BTAG_LJET_") ){ //systematic variations for differential XSection
-                if ( (systematic_.Contains("PT_UP") && pt>btag_ptmedian_) || (systematic_.Contains("PT_DOWN") && pt<btag_ptmedian_)
-                    || (systematic_.Contains("ETA_UP") && eta>btag_etamedian_) || (systematic_.Contains("ETA_DOWN") && eta<btag_etamedian_) ){
-                    SFPerJet = LJetSF ( pt, eta, "up");
-                }
-                else {
-                    SFPerJet = LJetSF ( pt, eta, "down");
-                }
-            }
-        } else {
-            std::cout<<"I found a jet in event "<<eventNumber_<<" which is not b, c nor light: "<<partonFlavour<<std::endl;
-            return kFALSE;
-        }
-        if ( eff <= 0 ) eff = 1;
-        // calculate both numerator and denominator for per-event SF calculation
-        // consider also the UP and DOWN variation for systematics calculation. Same procedure as PU
-        OneMinusEff = OneMinusEff* ( 1-eff );
-        double sf = SFPerJet;
-        if ( systematic_.Contains("LJET") ) { SF_Error = 0; } //For l-jet systematics set to 0 the b- and c-jet errors
-        if ( systematic_ == "BTAG_UP" ) {
-            sf = SFPerJet + SF_Error;
-        }
-        else if ( systematic_ == "BTAG_DOWN" ) {
-            sf = SFPerJet - SF_Error;
-        }
-        else if ( systematic_ == "BTAG_PT_UP" ) {
-            if ( pt>btag_ptmedian_ )  {
-                sf = SFPerJet - 0.5 * SF_Error;
-            } else {
-                sf = SFPerJet + 0.5 * SF_Error;
-            }
-        }
-        else if ( systematic_ == "BTAG_PT_DOWN" ) {
-            if ( pt>btag_ptmedian_ )  {
-                sf = SFPerJet + 0.5 * SF_Error;
-            } else {
-                sf = SFPerJet - 0.5 * SF_Error; 
-            }
-        }
-        else if ( systematic_ == "BTAG_ETA_UP" ) {
-            if ( eta>btag_etamedian_ )  {
-                sf = SFPerJet - 0.5 * SF_Error;
-            } else {
-                sf = SFPerJet + 0.5 * SF_Error;
-            }
-        }
-        else if ( systematic_ == "BTAG_ETA_DOWN" ) {
-            if ( eta>btag_etamedian_ )  {
-                sf = SFPerJet + 0.5 * SF_Error;
-            } else {
-                sf = SFPerJet - 0.5 * SF_Error;
-            }
-        }
-        OneMinusSEff *= 1 - eff * sf;
-    }
-
-    if( std::abs(1.-OneMinusEff) < 1e-8 || std::abs(1.-OneMinusSEff) < 1e-8 ) return 1;
-
-    // per-event SF calculation (also the UP and DOWN variations)
-    double scale_factor = ( 1.-OneMinusSEff ) / ( 1.-OneMinusEff );
-    
-    if ( std::abs(scale_factor - 1.)>0.05 ){scale_factor = 1;}
-    
-    return scale_factor;
 }
 
 
@@ -1764,300 +1290,6 @@ void AnalysisBase::applyJER_JES()
 
 
 
-void AnalysisBase::bookBtagHistograms()
-{
-    constexpr int PtMax = 11;
-    constexpr int EtaMax = 5;
-    constexpr Double_t ptbins[PtMax+1] = {20.,30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,800.};
-    constexpr Double_t etabins[EtaMax+1] = {0.0,0.5,1.0,1.5,2.0,2.4};
-
-    h_bjets = store(new TH2D("bjets2D", "unTagged Bjets", PtMax, ptbins, EtaMax, etabins));
-    h_btaggedjets = store(new TH2D("bjetsTagged2D", "Tagged Bjets", PtMax, ptbins, EtaMax, etabins));
-    h_cjets = store(new TH2D("cjets2D", "unTagged Cjets", PtMax, ptbins, EtaMax, etabins));
-    h_ctaggedjets = store(new TH2D("cjetsTagged2D", "Tagged Cjets", PtMax, ptbins, EtaMax, etabins));
-    h_ljets = store(new TH2D("ljets2D", "unTagged Ljets", PtMax, ptbins, EtaMax, etabins));
-    h_ltaggedjets = store(new TH2D("ljetsTagged2D", "Tagged Ljets", PtMax, ptbins, EtaMax, etabins));
-
-    h_bjets->Sumw2();
-    h_btaggedjets->Sumw2();
-    h_cjets->Sumw2();
-    h_ctaggedjets->Sumw2();
-    h_ljets->Sumw2();
-    h_ltaggedjets->Sumw2();
-}
-
-
-
-void AnalysisBase::fillBtagHistograms(const std::vector<int>& jetIndices, const std::vector<int>& bjetIndices, const double weight)
-{
-    for(const int index : jetIndices){
-        const double absJetEta = std::abs(jets_->at(index).eta());
-        const double jetPt = jets_->at(index).pt();
-        const int partonFlavour = std::abs(jetPartonFlavour_->at(index));
-        const bool hasBTag = std::find(bjetIndices.begin(), bjetIndices.end(), index) != bjetIndices.end();
-        if(partonFlavour == 5){//b-quark
-            h_bjets->Fill(jetPt, absJetEta, weight);
-            if(hasBTag){
-                h_btaggedjets->Fill(jetPt, absJetEta, weight);
-            }
-        }
-        else if (partonFlavour == 4){//c-quark
-            h_cjets->Fill(jetPt, absJetEta, weight);
-            if(hasBTag){
-                h_ctaggedjets->Fill(jetPt, absJetEta, weight);
-            }
-        }
-        else if (partonFlavour != 0){//l-quark
-            h_ljets->Fill(jetPt, absJetEta, weight);
-            if(hasBTag){
-                h_ltaggedjets->Fill(jetPt, absJetEta, weight);
-            }
-        }
-    }
-}
-
-
-
-void AnalysisBase::produceBtagEfficiencies()
-{
-    std::cout << "Writing out btag efficiencies\n";
-    std::string f_savename = this->assignFolder(BTagEffDIR, channel_, systematic_);
-    f_savename.append(outputfilename_);
-    
-    h_bjets = dynamic_cast<TH2*>( fOutput->FindObject("bjets2D") );
-    h_btaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("bjetsTagged2D") );
-    h_cjets = dynamic_cast<TH2*>( fOutput->FindObject("cjets2D") );
-    h_ctaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("cjetsTagged2D") );
-    h_ljets = dynamic_cast<TH2*>( fOutput->FindObject("ljets2D") );
-    h_ltaggedjets = dynamic_cast<TH2*>( fOutput->FindObject("ljetsTagged2D") );
-    if (!h_bjets || !h_btaggedjets || !h_cjets || !h_ctaggedjets || !h_ljets || !h_ltaggedjets) {
-        std::cerr << "At least one of the btag histograms is missing\n";
-        exit(4);
-    }
-    TFile fbtag(f_savename.c_str(),"RECREATE");
-    h_bjets->Write();
-    h_btaggedjets->Write();
-    h_cjets->Write();
-    h_ctaggedjets->Write();
-    h_ljets->Write();
-    h_ltaggedjets->Write();
-    
-    TH1 *btaggedPt = h_btaggedjets->ProjectionX(); TH1 *btaggedEta = h_btaggedjets->ProjectionY();
-    TH1 *ctaggedPt = h_ctaggedjets->ProjectionX(); TH1 *ctaggedEta = h_ctaggedjets->ProjectionY();
-    TH1 *ltaggedPt = h_ltaggedjets->ProjectionX(); TH1 *ltaggedEta = h_ltaggedjets->ProjectionY();
-    
-    TH1 *bUntaggedPt = h_bjets->ProjectionX(); TH1 *bEta = h_bjets->ProjectionY();
-    TH1 *cUntaggedPt = h_cjets->ProjectionX(); TH1 *cEta = h_cjets->ProjectionY();
-    TH1 *lUntaggedPt = h_ljets->ProjectionX(); TH1 *lEta = h_ljets->ProjectionY();
-    
-    //Calculate the medians and save them in a txt file
-    double ptMedian = ttbar::median(btaggedPt);
-    double etaMedian = ttbar::median(btaggedEta);
-    printf("Median: pT = %.0f, eta = %.2f\n", ptMedian, etaMedian);
-    TH1* medianHist = new TH1D("Medians", "medians", 2, -0.5, 1.5);
-    medianHist->GetXaxis()->SetBinLabel(1, "pT");
-    medianHist->GetXaxis()->SetBinLabel(2, "eta");
-    medianHist->SetBinContent(1, ptMedian);
-    medianHist->SetBinContent(2, etaMedian);
-    medianHist->Write();
-    
-    TH1 *beffPt =(TH1*) btaggedPt->Clone("beffPt");
-    TH1 *ceffPt =(TH1*) ctaggedPt->Clone("ceffPt");
-    TH1 *leffPt =(TH1*) ltaggedPt->Clone("leffPt");
-    
-    TH1 *beffEta =(TH1*) btaggedEta->Clone("beffEta");  
-    TH1 *ceffEta =(TH1*) ctaggedEta->Clone("ceffEta");  
-    TH1 *leffEta =(TH1*) ltaggedEta->Clone("leffEta");  
-    
-    //Calculate Efficiency: N_tageed/N_all
-    //Calculate also the binomial error (option "B" does it)!!
-    beffPt->Divide(btaggedPt, bUntaggedPt, 1, 1, "B"); 
-    ceffPt->Divide(ctaggedPt, cUntaggedPt, 1, 1, "B"); 
-    leffPt->Divide(ltaggedPt, lUntaggedPt, 1, 1, "B");
-    beffEta->Divide(btaggedEta, bEta, 1, 1, "B"); 
-    ceffEta->Divide(ctaggedEta, cEta, 1, 1, "B"); 
-    leffEta->Divide(ltaggedEta, lEta, 1, 1, "B"); 
-    h_btaggedjets->Divide(h_btaggedjets, h_bjets, 1, 1, "B"); 
-    h_ctaggedjets->Divide(h_ctaggedjets, h_cjets, 1, 1, "B"); 
-    h_ltaggedjets->Divide(h_ltaggedjets, h_ljets, 1, 1, "B"); 
-
-    //Save histograms in ROOT file
-    beffPt->Write("BEffPt"); 
-    ceffPt->Write("CEffPt"); 
-    leffPt->Write("LEffPt"); 
-    beffEta->Write("BEffEta"); 
-    ceffEta->Write("CEffEta"); 
-    leffEta->Write("LEffEta"); 
-    h_btaggedjets->Write("BEffPerJet");
-    h_ctaggedjets->Write("CEffPerJet");
-    h_ltaggedjets->Write("LEffPerJet");
-    
-    fbtag.Close();
-    std::cout << "Done.\n\n\n";
-}
-
-
-
-double AnalysisBase::BJetSF(const double& pt, const double& eta)const
-{
-    //CSVL b-jet SF
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.tptt (ICHEP 2012 prescription)
-    //From: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.tptt  (Moriond 2013 prescription)
-    
-    if ( std::abs(eta) > 2.4 ) {
-        std::cerr<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
-        exit(9);
-    }
-    
-    double jetPt(pt);
-    if ( jetPt < 20 ) jetPt = 20;
-    if ( jetPt > 800 ) jetPt = 800;
-
-    return 0.981149*((1.+(-0.000713295*jetPt))/(1.+(-0.000703264*jetPt)));
-}
-
-
-
-double AnalysisBase::CJetSF(const double& pt, const double& eta)const
-{
-    //CSVL c-jet SF
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC (ICHEP 2012 prescription)
-    //From https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_Moriond13_presc  (Moriond 2013 prescription)
-
-    return BJetSF(pt, eta);
-}
-
-
-
-double AnalysisBase::LJetSF(const double& pt, const double& eta, const TString& typevar)const
-{
-    //CSVL ligth jet mistag SF. Includes also the SF for variations up and down
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C (ICHEP 2012 prescription)
-    //From https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C  (Moriond 2013 prescription)
-
-    const double eta_abs = std::abs(eta);
-    if ( eta_abs > 2.4 ) {
-        std::cout<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
-        exit(91);
-    }
-    if ( pt < 20 ){
-        std::cout<<"Jet pT="<<pt<<" out of the selected range. Check it\n";
-        exit(91);
-    }
-    
-    double jetPt(pt);
-    if ( jetPt > 800 && eta_abs <= 1.5 ) {
-        jetPt = 800;
-    }    else if (jetPt > 700 && eta_abs > 1.5 ) {
-        jetPt = 700;
-    }
-
-    if ( typevar == "central" ){
-        if ( eta_abs <= 0.5 ) {
-            return ((1.04901+(0.00152181*jetPt))+(-3.43568e-06*(jetPt*jetPt)))+(2.17219e-09*(jetPt*(jetPt*jetPt)));
-        } else if ( eta_abs <= 1.0 ) {
-            return ((0.991915+(0.00172552*jetPt))+(-3.92652e-06*(jetPt*jetPt)))+(2.56816e-09*(jetPt*(jetPt*jetPt)));
-        } else if ( eta_abs <= 1.5 ) {
-            return ((0.962127+(0.00192796*jetPt))+(-4.53385e-06*(jetPt*jetPt)))+(3.0605e-09*(jetPt*(jetPt*jetPt)));
-        } else {
-            return ((1.06121+(0.000332747*jetPt))+(-8.81201e-07*(jetPt*jetPt)))+(7.43896e-10*(jetPt*(jetPt*jetPt)));
-        }
-    }  else if ( typevar == "up" ){
-        if ( eta_abs <= 0.5 ) {
-            return ((1.12424+(0.00201136*jetPt))+(-4.64021e-06*(jetPt*jetPt)))+(2.97219e-09*(jetPt*(jetPt*jetPt)));
-        } else if ( eta_abs <= 1.0 ) {
-            return ((1.06231+(0.00215815*jetPt))+(-4.9844e-06*(jetPt*jetPt)))+(3.27623e-09*(jetPt*(jetPt*jetPt)));
-        } else if ( eta_abs <= 1.5 ) {
-            return ((1.02883+(0.00231985*jetPt))+(-5.57924e-06*(jetPt*jetPt)))+(3.81235e-09*(jetPt*(jetPt*jetPt)));
-        } else {
-            return ((1.1388+(0.000468418*jetPt))+(-1.36341e-06*(jetPt*jetPt)))+(1.19256e-09*(jetPt*(jetPt*jetPt)));
-        }
-    } else if ( typevar == "down" ){
-        if ( eta_abs <= 0.5 ) {
-            return ((0.973773+(0.00103049*jetPt))+(-2.2277e-06*(jetPt*jetPt)))+(1.37208e-09*(jetPt*(jetPt*jetPt)));
-        } else if ( eta_abs <= 1.0 ) {
-            return ((0.921518+(0.00129098*jetPt))+(-2.86488e-06*(jetPt*jetPt)))+(1.86022e-09*(jetPt*(jetPt*jetPt)));
-        } else if ( eta_abs <= 1.5 ) {
-            return ((0.895419+(0.00153387*jetPt))+(-3.48409e-06*(jetPt*jetPt)))+(2.30899e-09*(jetPt*(jetPt*jetPt)));
-        } else {
-            return ((0.983607+(0.000196747*jetPt))+(-3.98327e-07*(jetPt*jetPt)))+(2.95764e-10*(jetPt*(jetPt*jetPt)));
-        }
-    } else {
-        std::cout<<"Type of variation not valid. Check it\n";
-        exit(92);
-    }
-
-}
-
-
-
-double AnalysisBase::BJetSFAbsErr(const double& pt)const
-{
-    //If needed go to https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC
-    //this pt range MUST match the binning of the error array provided by the BTV in the above link
-
-    constexpr double ptarray[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600, 800};
-    constexpr double SFb_error[] = { 0.0484285,  0.0126178,  0.0120027,  0.0141137, 0.0145441, 0.0131145, 0.0168479, 0.0160836, 0.0126209, 0.0136017, 0.019182, 0.0198805, 0.0386531, 0.0392831, 0.0481008, 0.0474291 };
-
-    int ptbin = -1;
-    int ptarray_Size = sizeof(ptarray) / sizeof(ptarray[0]);
-    int SFb_error_array_Size = sizeof(SFb_error) / sizeof(SFb_error[0]);
-    
-    if( ptarray_Size != SFb_error_array_Size+1 ) {
-        std::cout<<"You wrote 2 arrays with sizes that don't agree together!! Fix this.\n";
-        exit(100);
-    }
-    for ( int i=0; i<(ptarray_Size-1); i++){
-        if ( pt > ptarray[i] && pt < ptarray[i+1]) {
-            ptbin = i;
-            break;
-        }
-    }
-
-    if ( ptbin > ptarray_Size ) {
-        return 2 * SFb_error[ptarray_Size];
-    } else if ( ptbin < 0){
-        return 2 * SFb_error[0];
-    } else {
-        return SFb_error[ptbin];
-    };
-}
-
-
-
-double AnalysisBase::CJetSFAbsErr(const double& pt)const
-{
-    return 2 * BJetSFAbsErr(pt);
-}
-
-
-
-std::string AnalysisBase::assignFolder(const char* baseDir, const TString& channel, const TString& systematic)const
-{
-    std::string path("");
-    
-    // Create all subdirectories contained in baseDir
-    TObjArray* a_subDir = TString(baseDir).Tokenize("/");
-    for(Int_t iSubDir = 0; iSubDir < a_subDir->GetEntriesFast(); ++iSubDir){
-        const TString& subDir = a_subDir->At(iSubDir)->GetName();
-        path.append(subDir);
-        path.append("/");
-        gSystem->MakeDirectory(path.c_str());
-    }
-    
-    // Create subdirectories for systematic and channel
-    path.append(systematic);
-    path.append("/");
-    gSystem->MakeDirectory(path.c_str());
-    path.append(channel);
-    path.append("/");
-    gSystem->MakeDirectory(path.c_str());
-    
-    return path;
-}
-
-
-
 bool AnalysisBase::failsDrellYanGeneratorSelection(const Long64_t& entry)const
 {
     if(checkZDecayMode_ && !checkZDecayMode_(entry)) return true;
@@ -2125,6 +1357,51 @@ double AnalysisBase::weightPileup(const Long64_t& entry)const
 
 
 
+double AnalysisBase::weightGenerator(const Long64_t& entry)const
+{
+    if(!isMC_) return 1.;
+    GetWeightGeneratorEntry(entry);
+    return weightGenerator_;
+}
+
+
+
+double AnalysisBase::weightTopPtReweighting(const double& topPt, const double& antiTopPt)const
+{
+    if(!isMC_ && !isTopSignal_ && !isTtbarSample_) return 1.;
+    return TMath::Sqrt(this->topPtReweightValue(topPt) * this->topPtReweightValue(antiTopPt));
+}
+
+
+
+double AnalysisBase::weightLeptonSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex) const
+{
+    if(!isMC_) return 1.;
+    if(leadingLeptonIndex<0 || nLeadingLeptonIndex<0) return 1.;
+    return leptonScaleFactors_->getLeptonIDSF(leadingLeptonIndex, nLeadingLeptonIndex, *leptons_, *lepPdgId_);
+}
+
+
+
+double AnalysisBase::weightTriggerSF(const int leptonXIndex, const int leptonYIndex) const
+{
+    if(!isMC_) return 1.;
+    if(leptonXIndex<0 || leptonYIndex<0) return 1.;
+    return triggerScaleFactors_->getTriggerSF(leptonXIndex, leptonYIndex, *leptons_, channel_);
+}
+
+
+
+double AnalysisBase::weightBtagSF(const std::vector<int>& jetIndices)const
+{
+    if(!isMC_) return 1.;
+    if(btagScaleFactors_->makeEfficiencies()) return 1.;
+    return btagScaleFactors_->calculateBtagSF(jetIndices, *jets_,
+                                              *jetPartonFlavour_, static_cast<std::string>(channel_));
+}
+
+
+
 bool AnalysisBase::hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const
 {
     bool hasLeptonPair(false);
@@ -2155,6 +1432,26 @@ bool AnalysisBase::failsDileptonTrigger(const Long64_t& entry)const
     }
     return true;
 }
+
+
+
+bool AnalysisBase::makeBtagEfficiencies()const
+{
+    return btagScaleFactors_->makeEfficiencies() && isTtbarSample_ && isTopSignal_;
+}
+
+
+
+double AnalysisBase::topPtReweightValue(const double& pt)const
+{
+    return TMath::Exp(0.156-0.00137*pt);
+}
+
+
+
+
+
+
 
 
 
