@@ -13,20 +13,20 @@ namespace Systematic{
     
     /// All systematics as needed in any part of the framework
     enum Systematic{
-        nominal,    //! nominal, i.e. no systematic variation applied
-        mH110,      //! Higgs mass of 110 GeV
-        mH115,      //! Higgs mass of 115 GeV
-        mH120,      //! Higgs mass of 120 GeV
-        mH1225,     //! Higgs mass of 122.5 GeV
-        mH1275,     //! Higgs mass of 127.5 GeV
-        mH130,      //! Higgs mass of 130 GeV
-        mH135,      //! Higgs mass of 135 GeV
-        mH140,      //! Higgs mass of 140 GeV
-        lept_up,    //! scale up lepton ID/ISO data-to-MC scale factors
-        lept_down,  //! scale down lepton ID/ISO data-to-MC scale factors
-        trig_up,    //! scale up trigger data-to-MC scale factors
-        trig_down,  //! scale down trigger ID/ISO data-to-MC scale factors
-        undefined   //! No systematic defined (also not nominal)
+        nominal,    // nominal, i.e. no systematic variation applied
+        mH110,      // Higgs mass of 110 GeV
+        mH115,      // Higgs mass of 115 GeV
+        mH120,      // Higgs mass of 120 GeV
+        mH1225,     // Higgs mass of 122.5 GeV
+        mH1275,     // Higgs mass of 127.5 GeV
+        mH130,      // Higgs mass of 130 GeV
+        mH135,      // Higgs mass of 135 GeV
+        mH140,      // Higgs mass of 140 GeV
+        lept_up,    // scale up lepton ID/ISO data-to-MC scale factors
+        lept_down,  // scale down lepton ID/ISO data-to-MC scale factors
+        trig_up,    // scale up trigger data-to-MC scale factors
+        trig_down,  // scale down trigger ID/ISO data-to-MC scale factors
+        undefined   // No systematic defined (also not nominal)
     };
     
     
