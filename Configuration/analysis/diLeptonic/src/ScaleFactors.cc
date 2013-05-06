@@ -324,7 +324,7 @@ TH2* TriggerScaleFactors::prepareTriggerSF(const TString& fileName, const System
     
     //Right now pT efficiency flat ==> Not used
     TH2* h_TrigSFeta(0);
-    h_TrigSFeta = dynamic_cast<TH2*>(trigEfficiencies.Get("lepton_eta2d_sf"));
+    h_TrigSFeta = dynamic_cast<TH2*>(trigEfficiencies.Get("scalefactor eta2d with syst"));
     if(!h_TrigSFeta){
         std::cout<<"TH2 >>TH scalefactor eta<< is not in the file "<<trigEfficiencies.GetName()<<"\n";
         return 0;
