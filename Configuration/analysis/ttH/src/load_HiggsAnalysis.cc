@@ -15,9 +15,10 @@
 #include <TH1.h>
 
 #include "HiggsAnalysis.h"
-#include "../../diLeptonic/src/utils.h"
 #include "sampleHelpers.h"
 #include "analysisHelpers.h"
+#include "JetCategories.h"
+#include "../../diLeptonic/src/utils.h"
 #include "../../diLeptonic/src/PUReweighter.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
 #include "../../diLeptonic/src/ScaleFactors.h"
@@ -69,11 +70,11 @@ constexpr const char* AnalysisOutputDIR = "selectionRoot";
 
 
 
-void load_HiggsAnalysis(const TString validFilenamePattern, 
-                        const Channel::Channel channel,
-                        const Systematic::Systematic systematic,
+void load_HiggsAnalysis(const TString& validFilenamePattern, 
+                        const Channel::Channel& channel,
+                        const Systematic::Systematic& systematic,
                         const int dy,
-                        const AnalysisMode::AnalysisMode analysisMode)
+                        const AnalysisMode::AnalysisMode& analysisMode)
 {   
     // Set up the channels to run over
     std::vector<Channel::Channel> channels;
@@ -112,6 +113,11 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
                                       Channel::convertChannels(Channel::realChannels),
                                       Systematic::convertSystematic(systematic));
     
+    // Set up jet categories for overview
+    const JetCategories jetCategories_overview(2, 5, 0, 5, true, true);
+    
+    // Set up jet categories for analysis
+    const JetCategories jetCategories(2, 4, 0, 3, true, true);
     
     // Set up the analysis
     HiggsAnalysis* selector = new HiggsAnalysis();
@@ -120,6 +126,8 @@ void load_HiggsAnalysis(const TString validFilenamePattern,
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);
     selector->SetBtagScaleFactors(btagScaleFactors);
+    selector->SetJetCategoriesOverview(jetCategories_overview);
+    selector->SetJetCategoriesAnalysis(jetCategories);
     
     // Access selectionList containing all input sample nTuples
     ifstream infile("selectionList.txt");

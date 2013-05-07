@@ -7,13 +7,13 @@ class TTree;
 class TH1;
 class TString;
 
-#include "JetCategories.h"
 #include "AnalysisHistograms.h"
 #include "MvaInputVariables.h"
 #include "analysisHelpers.h"
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "../../diLeptonic/src/classesFwd.h"
 
+class JetCategories;
 
 
 
@@ -48,6 +48,13 @@ public:
     
     /// Whether to produce MVA input information
     void SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMode);
+    
+    /// Set up the jet categories (# jets, # b-jets) for overview
+    void SetJetCategoriesOverview(const JetCategories& jetCategories);
+    
+    /// Set up the jet categories (# jets, # b-jets) for analysis
+    void SetJetCategoriesAnalysis(const JetCategories& jetCategories);
+    
     
     
 private:
@@ -88,9 +95,11 @@ private:
     
     
     
-    /// Class holding the definition and handling of jet categories (# jets, # b-jets)
-    JetCategories jetCategories_overview_;
-    JetCategories jetCategories_;
+    /// Class holding the definition and handling of jet categories (# jets, # b-jets) for overview
+    const JetCategories* jetCategories_overview_;
+    
+    /// Class holding the definition and handling of jet categories (# jets, # b-jets) for analysis
+    const JetCategories* jetCategories_;
     
     /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     MvaInputTopJetsVariables mvaInputTopJetsVariables_;
