@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include <algorithm>
 
 #include <TString.h>
 
@@ -60,7 +61,65 @@ TString JetCategories::JetCategory::binLabel(const bool rootLabel)const
 
 
 
-JetCategories::JetCategories(){}
+JetCategories::JetCategories()
+{
+    this->clear();
+}
+
+
+
+JetCategories::JetCategories(const int minNumberOfJets, const int maxNumberOfJets,
+                             const int minNumberOfBjets, const int maxNumberOfBjets,
+                             const bool greaterEqualJetNumber, const bool greaterEqualBjetNumber)
+{
+    std::cout<<"--- Beginning setting up jet categories\n";
+    this->clear();
+    
+    // Check sanity of input
+    if(minNumberOfJets > maxNumberOfJets){
+        std::cerr<<"ERROR in JetCategories! Minimum number of jets bigger than maximum number (min, max): "
+                 <<minNumberOfJets<<" , "<<maxNumberOfJets<<"...break\n"<<std::endl;
+        exit(307);
+    }
+    if(minNumberOfBjets > maxNumberOfBjets){
+        std::cerr<<"ERROR in JetCategories! Minimum number of b-jets bigger than maximum number (min, max): "
+                 <<minNumberOfBjets<<" , "<<maxNumberOfBjets<<"...break\n"<<std::endl;
+        exit(308);
+    }
+    if(minNumberOfJets < minNumberOfBjets){
+        std::cerr<<"ERROR in JetCategories! Minimum number of jets smaller than minimum number of b-jets (jets, b-jets): "
+                 <<minNumberOfJets<<" , "<<minNumberOfBjets<<"...break\n"<<std::endl;
+        exit(309);
+    }
+    if(maxNumberOfJets < maxNumberOfBjets){
+        std::cerr<<"ERROR in JetCategories! Maximum number of jets smaller than maximum number of b-jets (jets, b-jets): "
+                 <<maxNumberOfJets<<" , "<<maxNumberOfBjets<<"...break\n"<<std::endl;
+        exit(310);
+    }
+    
+    // Add all categories by looping over requested number of jets and number of b-jets
+    for(int nJets = minNumberOfJets; nJets <= maxNumberOfJets; ++nJets){
+        const int maxNumberOfBjetsForNumberOfJets = std::min(nJets, maxNumberOfBjets);
+        for(int nBjets = minNumberOfBjets; nBjets <= maxNumberOfBjetsForNumberOfJets; ++nBjets){
+            if(nJets<maxNumberOfJets && nBjets<maxNumberOfBjets){
+                this->addCategory(nJets, nBjets, false, false);
+            }
+            else if(nJets<maxNumberOfJets && nBjets==maxNumberOfBjets){
+                const bool greaterEqual = nJets>maxNumberOfBjets ? greaterEqualBjetNumber : false;
+                this->addCategory(nJets, nBjets, false, greaterEqual);
+            }
+            else if(nJets==maxNumberOfJets && nBjets<maxNumberOfBjets){
+                this->addCategory(nJets, nBjets, greaterEqualJetNumber, false);
+            }
+            else if(nJets==maxNumberOfJets && nBjets==maxNumberOfBjets){
+                this->addCategory(nJets, nBjets, greaterEqualJetNumber, greaterEqualBjetNumber);
+            }
+        }
+    }
+    std::cout<<"Number of categories: "<<this->numberOfCategories()<<"\n";
+    
+    std::cout<<"=== Finishing setting up jet categories\n\n";
+}
 
 
 
@@ -71,7 +130,7 @@ JetCategories::~JetCategories(){}
 void JetCategories::addCategory(const int numberOfJets, const int numberOfBjets,
                                 const bool greaterEqualJetNumber, const bool greaterEqualBjetNumber)
 {
-    JetCategory jetCategory(numberOfJets, numberOfBjets, greaterEqualJetNumber, greaterEqualBjetNumber);
+    const JetCategory jetCategory(numberOfJets, numberOfBjets, greaterEqualJetNumber, greaterEqualBjetNumber);
     if(ambiguousCategory(jetCategory)){
         std::cout<<"... Category is not added\n\n";
         return;
@@ -91,7 +150,7 @@ void JetCategories::addCategory(const int numberOfJets, const int numberOfBjets,
 
 
 
-bool JetCategories::ambiguousCategory(const JetCategories::JetCategory& jetCategory)
+bool JetCategories::ambiguousCategory(const JetCategories::JetCategory& jetCategory)const
 {
     if(jetCategory.numberOfJets_<0 || jetCategory.numberOfBjets_<0){
         std::cerr<<"\nBad Jet Category, negative number of (b-)jets: "<<jetCategory.binLabel()
@@ -126,7 +185,7 @@ bool JetCategories::ambiguousCategory(const JetCategories::JetCategory& jetCateg
 
 
 bool JetCategories::hasOverlap(const int numberOfJets1, const bool greaterEqualJetNumber1,
-                               const int numberOfJets2, const bool greaterEqualJetNumber2)
+                               const int numberOfJets2, const bool greaterEqualJetNumber2)const
 {
     if(numberOfJets1 == numberOfJets2)return true;
     if(greaterEqualJetNumber1 && numberOfJets1<numberOfJets2)return true;
@@ -143,14 +202,14 @@ void JetCategories::clear()
 
 
 
-int JetCategories::numberOfCategories()
+int JetCategories::numberOfCategories()const
 {
     return v_jetCategory_.size();
 }
 
 
 
-int JetCategories::categoryId(const int numberOfJets, const int numberOfBjets)
+int JetCategories::categoryId(const int numberOfJets, const int numberOfBjets)const
 {
     // Events belonging to specific category should get value >=0
     // If the category definition is bad, it should end up in the underflow (return value <0, depending on error)
@@ -160,7 +219,7 @@ int JetCategories::categoryId(const int numberOfJets, const int numberOfBjets)
     if(v_jetCategory_.size()==0)return -1;
     bool alreadyInCategory(false);
     int position(-99);
-    std::vector<JetCategory>::iterator i_jetCategory;
+    std::vector<JetCategory>::const_iterator i_jetCategory;
     for(i_jetCategory = v_jetCategory_.begin(); i_jetCategory != v_jetCategory_.end(); ++i_jetCategory){
         if(numberOfJets<i_jetCategory->numberOfJets_)continue;
         if(!i_jetCategory->greaterEqualJetNumber_ && numberOfJets>i_jetCategory->numberOfJets_)continue;
@@ -181,7 +240,7 @@ int JetCategories::categoryId(const int numberOfJets, const int numberOfBjets)
 
 
 
-std::vector<TString> JetCategories::binLabels()
+std::vector<TString> JetCategories::binLabels()const
 {
     std::vector<TString> v_label;
     for(std::vector<JetCategory>::const_iterator i_jetCategory = v_jetCategory_.begin(); i_jetCategory != v_jetCategory_.end(); ++i_jetCategory){
