@@ -51,10 +51,9 @@ private:
         double btagDiscriminatorSum_;
         double deltaPhi_antiBLepton_bAntiLepton_;
         double massDiff_fullBLepton_bbbar_;
-        double meanMT_b_met_;
+        double meanMt_b_met_;
         double massSum_antiBLepton_bAntiLepton_;
         double massDiff_antiBLepton_bAntiLepton_;
-        double meanMTAlt_b_met_;
     };
     
     /// Stuct holding histograms showing the full distributions and the separation power of variables

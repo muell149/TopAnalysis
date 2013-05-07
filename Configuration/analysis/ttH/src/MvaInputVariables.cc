@@ -31,10 +31,9 @@ deltaR_antiB_lepton_(-999.),
 btagDiscriminatorSum_(-999.),
 deltaPhi_antiBLepton_bAntiLepton_(-999.),
 massDiff_fullBLepton_bbbar_(-999.),
-meanMT_b_met_(-999.),
+meanMt_b_met_(-999.),
 massSum_antiBLepton_bAntiLepton_(-999.),
-massDiff_antiBLepton_bAntiLepton_(-999.),
-meanMTAlt_b_met_(-999.)
+massDiff_antiBLepton_bAntiLepton_(-999.)
 {}
 
 
@@ -80,12 +79,9 @@ void MvaInputTopJetsVariables::addEntry(const LV& lepton, const LV& antiLepton,
     mvaInputTopJetsStruct.btagDiscriminatorSum_ = bJetBtagDiscriminator + antiBJetBtagDiscriminator;
     mvaInputTopJetsStruct.deltaPhi_antiBLepton_bAntiLepton_ = std::abs(DeltaPhi(antiBLeptonSystem, bAntiLeptonSystem));
     mvaInputTopJetsStruct.massDiff_fullBLepton_bbbar_ = fullBLeptonSystem.M() - bbbarSystem.M();
-    mvaInputTopJetsStruct.meanMT_b_met_ = 0.5*((bJet + met).Mt() + (antiBJet + met).Mt());
+    mvaInputTopJetsStruct.meanMt_b_met_ = 0.5*((bJet + met).Mt() + (antiBJet + met).Mt());
     mvaInputTopJetsStruct.massSum_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() + bAntiLeptonSystem.M();
     mvaInputTopJetsStruct.massDiff_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() - bAntiLeptonSystem.M();
-    
-    mvaInputTopJetsStruct.meanMTAlt_b_met_ = 0.5*(std::sqrt(2.*bJet.Et()*(met.E())*(1.-std::cos(DeltaPhi(bJet, met))))
-                                      + std::sqrt(2.*antiBJet.Et()*(met.E())*(1.-std::cos(DeltaPhi(antiBJet, met)))));
     
     v_mvaInputStruct_.push_back(mvaInputTopJetsStruct);
 }
@@ -113,11 +109,9 @@ void MvaInputTopJetsVariables::createMvaInputBranches(TTree* tree)
     t_mvaInput_->Branch("btagDiscriminatorSum", &mvaInputStruct_.btagDiscriminatorSum_, "btagDiscriminatorSum/D");
     t_mvaInput_->Branch("deltaPhi_antiBLepton_bAntiLepton", &mvaInputStruct_.deltaPhi_antiBLepton_bAntiLepton_, "deltaPhi_antiBLepton_bAntiLepton/D");
     t_mvaInput_->Branch("massDiff_fullBLepton_bbbar", &mvaInputStruct_.massDiff_fullBLepton_bbbar_, "massDiff_fullBLepton_bbbar/D");
-    t_mvaInput_->Branch("meanMT_b_met", &mvaInputStruct_.meanMT_b_met_, "meanMT_b_met/D");
+    t_mvaInput_->Branch("meanMt_b_met", &mvaInputStruct_.meanMt_b_met_, "meanMt_b_met/D");
     t_mvaInput_->Branch("massSum_antiBLepton_bAntiLepton", &mvaInputStruct_.massSum_antiBLepton_bAntiLepton_, "massSum_antiBLepton_bAntiLepton/D");
     t_mvaInput_->Branch("massDiff_antiBLepton_bAntiLepton", &mvaInputStruct_.massDiff_antiBLepton_bAntiLepton_, "massDiff_antiBLepton_bAntiLepton/D");
-    
-    t_mvaInput_->Branch("meanMTAlt_b_met", &mvaInputStruct_.meanMTAlt_b_met_, "meanMTAlt_b_met/D");
 }
 
 
@@ -227,22 +221,20 @@ void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* outp
     h_trueStatus_step8->GetXaxis()->SetBinLabel(1, "swapped");
     h_trueStatus_step8->GetXaxis()->SetBinLabel(2, "correct");
     
-    this->bookHistograms("jetChargeDiff_step8", "jetChargeDiff_step8;#Deltac_{jet};# jet pairs",50,0,2);
+    this->bookHistograms("jetChargeDiff_step8", "jetChargeDiff_step8;#Deltac_{rel}^{jet};# jet pairs",50,0,2);
     
     this->bookHistograms("meanDeltaPhi_b_met_step8", "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2);
-    this->bookHistograms("massDiff_recoil_bbbar_step8", "massDiff_recoil_Bbbar; m_{jets}^{recoil}-m_{b#bar{b}}  [GeV];# jet pairs",16,-600,600);
-    this->bookHistograms("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}(b,l^{+})  [GeV];# jet pairs",20,0,500);
-    this->bookHistograms("pt_antiB_lepton_step8", "pt_antiB_lepton; p_{T}(#bar{b},l^{-})  [GeV];# jet pairs",20,0,500);
+    this->bookHistograms("massDiff_recoil_bbbar_step8", "massDiff_recoil_Bbbar; m_{recoil}^{jets}-m^{b#bar{b}}  [GeV];# jet pairs",16,-600,600);
+    this->bookHistograms("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}^{bl^{+}}  [GeV];# jet pairs",20,0,500);
+    this->bookHistograms("pt_antiB_lepton_step8", "pt_antiB_lepton; p_{T}^{#bar{b}l^{-}}  [GeV];# jet pairs",20,0,500);
     this->bookHistograms("deltaR_b_antiLepton_step8", "deltaR_b_antiLepton; #DeltaR(b,l^{+});# jet pairs",25,0,5);
     this->bookHistograms("deltaR_antiB_lepton_step8", "deltaR_antiB_lepton; #DeltaR(#bar{b},l^{-});# jet pairs",25,0,5);
-    this->bookHistograms("btagDiscriminatorSum_step8", "btagDiscriminatorSum; d(b)+d(#bar{b});# jet pairs",20,0,2);
+    this->bookHistograms("btagDiscriminatorSum_step8", "btagDiscriminatorSum; d^{b}+d^{#bar{b}};# jet pairs",20,0,2);
     this->bookHistograms("deltaPhi_antiBLepton_bAntiLepton_step8", "deltaPhi_antiBLepton_bAntiLepton; |#Delta#phi(bl^{+},#bar{b}l^{-})|  [rad];# jet pairs",10,0,3.2);
-    this->bookHistograms("massDiff_fullBLepton_bbbar_step8", "massDiff_fullBLepton_bbbar; m_{b#bar{b}l^{+}l^{-}}-m_{b#bar{b}}  [GeV];# jet pairs",13,0,1050);
-    this->bookHistograms("meanMT_b_met_step8", "meanMT_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420);
-    this->bookHistograms("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}+m_{bl^{+}}  [GeV];# jet pairs",21,0,840);
-    this->bookHistograms("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m_{#bar{b}l^{-}}-m_{bl^{+}}  [GeV];# jet pairs",41,-400,420);
-    
-    this->bookHistograms("meanMTAlt_b_met_step8", "meanMTAlt_b_met; 0.5(m_{T}(b,MET)+m_{T}(#bar{b},MET))  [GeV];# jet pairs",21,0,420);
+    this->bookHistograms("massDiff_fullBLepton_bbbar_step8", "massDiff_fullBLepton_bbbar; m^{b#bar{b}l^{+}l^{-}}-m^{b#bar{b}}  [GeV];# jet pairs",13,0,1050);
+    this->bookHistograms("meanMt_b_met_step8", "meanMt_b_met; 0.5(m_{T}^{b,MET}+m_{T}^{#bar{b},MET)}  [GeV];# jet pairs",21,0,630);
+    this->bookHistograms("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}+m^{bl^{+}}  [GeV];# jet pairs",21,0,840);
+    this->bookHistograms("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}-m^{bl^{+}}  [GeV];# jet pairs",41,-400,420);
     
     // Fill histograms
     for(const auto& mvaInputTopJetsStruct : this->mvaInputStructs()){
@@ -262,11 +254,9 @@ void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* outp
         this->fillHistograms("btagDiscriminatorSum_step8", mvaInputTopJetsStruct.btagDiscriminatorSum_, mvaInputTopJetsStruct);
         this->fillHistograms("deltaPhi_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.deltaPhi_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
         this->fillHistograms("massDiff_fullBLepton_bbbar_step8", mvaInputTopJetsStruct.massDiff_fullBLepton_bbbar_, mvaInputTopJetsStruct);
-        this->fillHistograms("meanMT_b_met_step8", mvaInputTopJetsStruct.meanMT_b_met_, mvaInputTopJetsStruct);
+        this->fillHistograms("meanMt_b_met_step8", mvaInputTopJetsStruct.meanMt_b_met_, mvaInputTopJetsStruct);
         this->fillHistograms("massSum_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.massSum_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
         this->fillHistograms("massDiff_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.massDiff_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
-        
-        this->fillHistograms("meanMTAlt_b_met_step8", mvaInputTopJetsStruct.meanMTAlt_b_met_, mvaInputTopJetsStruct);
     }
     
     std::cout<<"=== Finishing control plots for MVA variables\n\n";
@@ -323,11 +313,9 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     TBranch* b_btagDiscriminatorSum(0);
     TBranch* b_deltaPhi_antiBLepton_bAntiLepton(0);
     TBranch* b_massDiff_fullBLepton_bbbar(0);
-    TBranch* b_meanMT_b_met(0);
+    TBranch* b_meanMt_b_met(0);
     TBranch* b_massSum_antiBLepton_bAntiLepton(0);
     TBranch* b_massDiff_antiBLepton_bAntiLepton(0);
-    
-    TBranch* b_meanMTAlt_b_met(0);
     
     // Set branch addresses
     tree->SetBranchAddress("eventWeight", &mvaInputStruct.eventWeight_, &b_eventWeight);
@@ -347,11 +335,9 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     tree->SetBranchAddress("btagDiscriminatorSum", &mvaInputStruct.btagDiscriminatorSum_, &b_btagDiscriminatorSum);
     tree->SetBranchAddress("deltaPhi_antiBLepton_bAntiLepton", &mvaInputStruct.deltaPhi_antiBLepton_bAntiLepton_, &b_deltaPhi_antiBLepton_bAntiLepton);
     tree->SetBranchAddress("massDiff_fullBLepton_bbbar", &mvaInputStruct.massDiff_fullBLepton_bbbar_, &b_massDiff_fullBLepton_bbbar);
-    tree->SetBranchAddress("meanMT_b_met", &mvaInputStruct.meanMT_b_met_, &b_meanMT_b_met);
+    tree->SetBranchAddress("meanMt_b_met", &mvaInputStruct.meanMt_b_met_, &b_meanMt_b_met);
     tree->SetBranchAddress("massSum_antiBLepton_bAntiLepton", &mvaInputStruct.massSum_antiBLepton_bAntiLepton_, &b_massSum_antiBLepton_bAntiLepton);
     tree->SetBranchAddress("massDiff_antiBLepton_bAntiLepton", &mvaInputStruct.massDiff_antiBLepton_bAntiLepton_, &b_massDiff_antiBLepton_bAntiLepton);
-    
-    tree->SetBranchAddress("meanMTAlt_b_met", &mvaInputStruct.meanMTAlt_b_met_, &b_meanMTAlt_b_met);
     
     // Loop over all tree entries and fill vector of structs
     v_mvaInputStruct_.clear();
