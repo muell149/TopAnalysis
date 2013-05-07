@@ -26,6 +26,40 @@ namespace Systematic{
         lept_down,  // scale down lepton ID/ISO data-to-MC scale factors
         trig_up,    // scale up trigger data-to-MC scale factors
         trig_down,  // scale down trigger ID/ISO data-to-MC scale factors
+        pu_up,
+        pu_down,
+        dy_up,
+        dy_down,
+        bg_up,
+        bg_down,
+        kin_up,
+        kin_down,
+        btag_up,    // scale up b-tagging data-to-MC scale factors of the b-/c-jets
+        btag_down,  // scale down b-tagging data-to-MC scale factors of the b-/c-jets
+        btagPt_up,
+        btagPt_down,
+        btagEta_up,
+        btagEta_down,
+        btagLjet_up,   // scale up b-tagging data-to-MC scale factors of the l-jets
+        btagLjet_down, // scale down b-tagging data-to-MC scale factors of the l-jets
+        btagLjetPt_up,
+        btagLjetPt_down,
+        btagLjetEta_up,
+        btagLjetEta_down,
+        btagBeff_up,
+        btagBeff_down,
+        btagCeff_up,
+        btagCeff_down,
+        btagLeff_up,
+        btagLeff_down,
+        mass_up,
+        mass_down,
+        match_up,
+        match_down,
+        scale_up,
+        scale_down,
+        powheg,
+        mcatnlo,
         undefined   // No systematic defined (also not nominal)
     };
     
