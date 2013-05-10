@@ -1750,7 +1750,7 @@ void TopAnalysis::bHadronIndices(int& bHadronIndex, int& antiBHadronIndex)
     //while (jet->size() > 0 && jet->back().Pt() < JETPTCUT) jet->pop_back();
     
     for ( size_t genJet = 0;
-          genJet < allGenJets_->size() && allGenJets_->at(genJet).pt() >= JetPtCUT; 
+          genJet < allGenJets_->size() && allGenJets_->at(genJet).pt() >= JetPtCUT && std::fabs(allGenJets_->at(genJet).eta()) < JetEtaCUT; 
           ++genJet )
     {
         for ( size_t bHadron=0; bHadron < BHadrons_->size(); bHadron++ ) {
