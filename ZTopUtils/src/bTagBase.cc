@@ -253,6 +253,62 @@ namespace ztop{
       std::cout << "bTagBase::setSystematic: option " << set << " not available. Possible options: heavy up, heavy down, light up, light down, def";
       exit(EXIT_FAILURE);}
   }
+
+
+  void bTagBase::writeToTFile(TFile * f, std::string treename){
+
+    bool madenew=false;
+    TTree * t=0;
+    if(f->Get((treename).data())){
+      t = (TTree*) f->Get(treename.data());
+    }
+    else{
+      madenew=true;
+      t = new TTree(treename.data(),treename.data());
+    }
+    if(t->GetBranch("allbTagBase")){ //branch does  exist
+      
+      bTagBase * bt=this;
+      t->SetBranchAddress("allbTagBase", &bt);
+
+    }
+    else{
+      t->Branch("allbTagBase",this);
+      std::cout << "bTagBase::writeToTFile: added branch" << std::endl;
+    }
+    t->Fill();
+    t->Write("",TObject::kOverwrite);
+    if(madenew)
+      delete t;
+  }
+
+
+
+
+  void bTagBase::readFromTFile(TFile * f, std::string treename){
+
+    TTree * t = (TTree*) f->Get(treename.data());
+    bTagBase * bt=0;
+    t->SetBranchAddress("allbTagBase", &bt); 
+    int entries=t->GetEntries();
+    if(entries>1)
+      std::cout << "bTagBase::readFromTFile: warning more than one bTagBase Class found. chose first entry" << std::endl;
+    for(float n=0;n<t->GetEntries();n++){
+      t->GetEntry(n);
+      if(bt){
+	*this=*bt;
+	return;
+      }
+    }
+  }
+
+ 
+
+
+
+
+
+
   //////////////////////////////////////////// BTV INPUT ///////////////////////////////////////
 
   double bTagBase::BJetSF( double pt, double eta , int sys, double multiplier){
@@ -402,6 +458,8 @@ namespace ztop{
     }
     return sf;
   }
+
+
 
 
 
