@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 #include <TString.h>
 #include <TFile.h>
@@ -131,7 +132,7 @@ void load_Analysis(TString validFilenamePattern,
     ifstream infile("selectionList.txt");
     if(!infile.good()){ 
         std::cerr<<"Error! Please check the selectionList.txt file!\n"<<std::endl; 
-        exit(773); 
+        exit(773);
     }
     
     // Loop over all input files
@@ -171,7 +172,7 @@ void load_Analysis(TString validFilenamePattern,
         TH1* weightedEvents = dynamic_cast<TH1*>(file.Get("EventsBeforeSelection/weightedEvents"));
         if(!channel_from_file || !systematics_from_file || !o_isSignal || !o_isMC || !samplename){ 
             std::cout<<"Error: info about sample missing!"<<std::endl; 
-            return;  
+            return;
         }
         
         // Configure information about samples
@@ -280,16 +281,16 @@ int main(int argc, char** argv) {
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
     CLParameter<std::string> opt_closure("closure", "Enable the closure test. Valid: pttop|ytop|nominal", false, 1, 1,
             [](const std::string &c){return c == "pttop" || c == "ytop" || c == "nominal";});
-    CLParameter<double> opt_closureSlope("slope", "Slope for closure test, use -0.01 to 0.01 for pt and -0.4 to 0.4", false, 1, 1,
-            [](double s){return abs(s) < 1;});
-                                         
+    CLParameter<double> opt_closureSlope("slope", "Slope for closure test, use -0.01 to 0.01 for pt and -0.4 to 0.4 for ytop", false, 1, 1,
+            [](double s){return std::abs(s) < 1;});
+
     CLAnalyser::interpretGlobal(argc, argv);
-    
+
     TString validFilenamePattern = opt_f.isSet() ? opt_f[0] : "";
     TString syst = opt_s.isSet() ? opt_s[0] : "";
     TString channel = opt_c.isSet() ? opt_c[0] : "";
     int dy = opt_dy.isSet() ? opt_dy[0] : 0;
-    TString closure = opt_closure.isSet() ? opt_closure[0] : "";    
+    TString closure = opt_closure.isSet() ? opt_closure[0] : "";
     double slope = 0;
     if (closure != "" && closure != "nominal") {
         if (!opt_closureSlope.isSet()) {

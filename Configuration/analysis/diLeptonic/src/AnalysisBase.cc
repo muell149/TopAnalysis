@@ -1169,7 +1169,7 @@ void AnalysisBase::applyJER_JES()
 
         for (size_t j = 0; j < 5; ++j){
 
-          if (std::abs(jets_->at(i).eta()) < ResolutionEtaRange[j]){
+          if (std::fabs(jets_->at(i).eta()) < ResolutionEtaRange[j]){
             jetEtaBin = j;
             break;
           }
@@ -1196,7 +1196,7 @@ void AnalysisBase::applyJER_JES()
         
         for (size_t j = 0; j < 5; ++j){
 
-          if (std::abs(jetsForMET_->at(i).eta()) < ResolutionEtaRange[j]){
+          if (std::fabs(jetsForMET_->at(i).eta()) < ResolutionEtaRange[j]){
             jetEtaBin = j;
             break;
           }
@@ -1214,7 +1214,7 @@ void AnalysisBase::applyJER_JES()
 
           JEC_dpX += jetsForMET_->at(i).px() - dpX;
           JEC_dpY += jetsForMET_->at(i).py() - dpY;
-          //      if(std::abs(factor - jetForMETJERSF->at(i)) > 0.1){
+          //      if(std::fabs(factor - jetForMETJERSF->at(i)) > 0.1){
           //std::cout<<"Scale Factor is: "<<factor<<std::endl;
           // std::cout<<"JERSF is       : "<<jetForMETJERSF->at(i)<<std::endl<<std::endl;
           //}
@@ -1224,7 +1224,7 @@ void AnalysisBase::applyJER_JES()
       double scaledMETPx = met_->px() - JEC_dpX;
       double scaledMETPy = met_->py() - JEC_dpY;
       
-      met_->SetPt(sqrt(scaledMETPx*scaledMETPx + scaledMETPy*scaledMETPy));
+      met_->SetPt(std::sqrt(scaledMETPx*scaledMETPx + scaledMETPy*scaledMETPy));
 
     }
 

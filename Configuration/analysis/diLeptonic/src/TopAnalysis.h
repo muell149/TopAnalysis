@@ -255,9 +255,7 @@ private:
                            const int bHadronIndex, const int antiBHadronIndex,
                            const double trueLevelWeightNoPileup, const double trueLevelWeight);
 
-    void generatorTTbarjetsEvent(LV& leadGenLepton, LV& nLeadGenLepton,
-                                 LV& leadGenBJet, LV& nLeadGenBJet,
-                                 double& jetHTGen,
+    void generatorTTbarjetsEvent(double& jetHTGen,
                                  const int bHadronIndex, const int antiBHadronIndex,
                                  const double trueLevelWeight,
                                  int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100,
