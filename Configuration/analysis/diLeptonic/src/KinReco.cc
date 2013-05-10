@@ -276,7 +276,7 @@ TtFullLepKinSolver::cubic(const double *coeffs, double* koreny) const
     /* discriminant */
     if (dis<0.0) {
       /* 3 real solutions */
-      h = q/sqrt(-p);
+      h = q/std::sqrt(-p);
       if (h>1.0) h = 1.0;
       /* confine the argument of */
       if (h<-1.0) h = -1.0;
@@ -294,8 +294,8 @@ TtFullLepKinSolver::cubic(const double *coeffs, double* koreny) const
     else {
       /* only one real solution */
       dis = std::sqrt(dis);
-      h = TMath::Power(fabs(q+dis), 1.0/3.0);
-      p = TMath::Power(fabs(q-dis), 1.0/3.0);
+      h = TMath::Power(std::fabs(q+dis), 1.0/3.0);
+      p = TMath::Power(std::fabs(q-dis), 1.0/3.0);
       koreny[0] = ((q+dis>0.0)? h : -h) + ((q-dis>0.0)? p : -p) -  w;
       nreal = 1;
     }
@@ -315,7 +315,7 @@ TtFullLepKinSolver::cubic(const double *coeffs, double* koreny) const
     dis = sqr(p) - coeffs[0]/coeffs[2];
     if (dis>=0.0) {
       /* two real solutions */
-      dis = sqrt(dis);
+      dis = std::sqrt(dis);
       koreny[0] = -p - dis;
       koreny[1] = -p + dis;
       nreal = 2;

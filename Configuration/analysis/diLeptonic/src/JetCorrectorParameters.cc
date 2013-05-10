@@ -1,6 +1,6 @@
 //
 // Original Author:  Fedor Ratnikov Nov 9, 2007
-// $Id: JetCorrectorParameters.cc,v 1.1 2013/03/21 10:16:47 wbehrenh Exp $
+// $Id: JetCorrectorParameters.cc,v 1.2 2013/03/22 13:11:18 hauk Exp $
 //
 // Generic parameters for Jet corrections
 //
@@ -201,7 +201,7 @@ int JetCorrectorParameters::neighbourBin(unsigned fIndex, unsigned fVar, bool fN
     {
       tmp = 0;
       for (unsigned j=0;j<fVar;j++)
-        if (fabs(record(i).xMin(j)-record(fIndex).xMin(j))<0.0001)
+        if (std::fabs(record(i).xMin(j)-record(fIndex).xMin(j))<0.0001)
           tmp+=1;
       for (unsigned j=fVar+1;j<N;j++)
         if (fabs(record(i).xMin(j)-record(fIndex).xMin(j))<0.0001)
@@ -211,10 +211,10 @@ int JetCorrectorParameters::neighbourBin(unsigned fIndex, unsigned fVar, bool fN
       if (tmp==N-1)
         {
           if (fNext)
-            if (fabs(record(i).xMin(fVar)-record(fIndex).xMax(fVar))<0.0001)
+            if (std::fabs(record(i).xMin(fVar)-record(fIndex).xMax(fVar))<0.0001)
               tmp+=1;
           if (!fNext)
-            if (fabs(record(i).xMax(fVar)-record(fIndex).xMin(fVar))<0.0001)
+            if (std::fabs(record(i).xMax(fVar)-record(fIndex).xMin(fVar))<0.0001)
               tmp+=1;
         } 
       if (tmp==N)

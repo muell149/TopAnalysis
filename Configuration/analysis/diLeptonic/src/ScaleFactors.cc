@@ -372,7 +372,7 @@ double TriggerScaleFactors::getTriggerSF(const int leptonXIndex, const int lepto
     // for the 'emu' channel Xaxis is the electron and Y axis muon
     const LV& leptonX(leptons.at(leptonXIndex));
     const LV& leptonY(leptons.at(leptonYIndex));
-    return ScaleFactorHelpers::get2DSF(h_TrigSFeta, std::abs(leptonX.eta()), std::abs(leptonY.eta()));
+    return ScaleFactorHelpers::get2DSF(h_TrigSFeta, std::fabs(leptonX.eta()), std::fabs(leptonY.eta()));
 }
 
 
@@ -626,7 +626,7 @@ bool BtagScaleFactors::isTagged(const LV& jet, const double tagValue, const int 
 
     //throw die
     // The seed is choosen as in https://twiki.cern.ch/twiki/pub/CMS/BTagSFUtil/test.C
-    double seed = std::abs(static_cast<int>(1e6 * sin(1e6*jet.Phi())));
+    double seed = std::fabs(static_cast<int>(1.e6 * sin(1.e6*jet.Phi())));
     float coin = TRandom3(seed).Uniform(1.0);
     
     if ( Btag_SF > 1 ) {  // use this if SF>1
@@ -764,7 +764,7 @@ double BtagScaleFactors::calculateBtagSF(const std::vector<int>& jetIndices,
     double perJetSF = 1.;
     for(const int index : jetIndices){
         double pt = jets.at(index).Pt();
-        double eta = std::abs(jets.at(index).Eta());
+        double eta = std::fabs(jets.at(index).Eta());
         int partonFlavour = std::abs(jetPartonFlavours.at(index)); //store absolute value
         if (partonFlavour == 0) continue;
         
@@ -849,12 +849,12 @@ double BtagScaleFactors::calculateBtagSF(const std::vector<int>& jetIndices,
         oneMinusSFEfficiency *= 1. - efficiency*perEventSFAtLeastOneTag;
     }
 
-    if(std::abs(1.-oneMinusEfficiency)<1e-8 || std::abs(1.-oneMinusSFEfficiency)<1e-8) return 1.;
+    if(std::fabs(1.-oneMinusEfficiency)<1.e-8 || std::fabs(1.-oneMinusSFEfficiency)<1.e-8) return 1.;
 
     // per-event SF calculation (also the UP and DOWN variations)
     double scale_factor = (1.-oneMinusSFEfficiency) / (1.-oneMinusEfficiency);
     
-    if(std::abs(scale_factor-1.) > 0.05) scale_factor = 1.;
+    if(std::fabs(scale_factor-1.) > 0.05) scale_factor = 1.;
     
     return scale_factor;
 }
@@ -913,7 +913,7 @@ void BtagScaleFactors::fillBtagHistograms(const std::vector<int>& jetIndices,
     ChannelStruct& channelStruct = this->getChannelStruct(channel);
     
     for(const int index : jetIndices){
-        const double absJetEta = std::abs(jets.at(index).eta());
+        const double absJetEta = std::fabs(jets.at(index).eta());
         const double jetPt = jets.at(index).pt();
         const int partonFlavour = std::abs(jetPartonFlavours.at(index));
         const bool hasBTag = std::find(bjetIndices.begin(), bjetIndices.end(), index) != bjetIndices.end();
@@ -1038,7 +1038,7 @@ double BtagScaleFactors::BJetSF(const double& pt, const double& eta)const
     //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.tptt (ICHEP 2012 prescription)
     //From: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.tptt  (Moriond 2013 prescription)
     
-    if(std::abs(eta) > 2.4){
+    if(std::fabs(eta) > 2.4){
         std::cerr<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
         exit(29);
     }
@@ -1069,7 +1069,7 @@ double BtagScaleFactors::LJetSF(const double& pt, const double& eta, const TStri
     //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C (ICHEP 2012 prescription)
     //From https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C  (Moriond 2013 prescription)
 
-    const double eta_abs = std::abs(eta);
+    const double eta_abs = std::fabs(eta);
     if(eta_abs > 2.4){
         std::cerr<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
         exit(30);
