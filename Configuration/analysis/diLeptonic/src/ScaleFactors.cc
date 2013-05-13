@@ -617,33 +617,35 @@ bool BtagScaleFactors::isTagged(const LV& jet, const double tagValue, const int 
 {
     const ChannelStruct& channelStruct = m_channelChannelStruct_.at(channel);
     
-    bool isBTagged = tagValue > tagCut;
-    bool newBTag = isBTagged;
-    double Btag_eff = getEfficiency(jet, flavour, channelStruct);
-    double Btag_SF = getSF(jet.Pt(), std::fabs(jet.Eta()), flavour, channelStruct);
-
-    if (Btag_SF == 1) return newBTag; //no correction needed
-
-    //throw die
-    // The seed is choosen as in https://twiki.cern.ch/twiki/pub/CMS/BTagSFUtil/test.C
-    double seed = std::fabs(static_cast<int>(1.e6 * sin(1.e6*jet.Phi())));
-    float coin = TRandom3(seed).Uniform(1.0);
+    const bool isBTagged = tagValue > tagCut;
+    const double Btag_eff = getEfficiency(jet, flavour, channelStruct);
+    const double Btag_SF = getSF(jet.Pt(), std::fabs(jet.Eta()), flavour, channelStruct);
     
-    if ( Btag_SF > 1 ) {  // use this if SF>1
+    // Throw die
+    // The seed is choosen as in https://twiki.cern.ch/twiki/pub/CMS/BTagSFUtil/test.C
+    const UInt_t seed = std::abs(static_cast<int>(1.e6 * sin(1.e6*jet.Phi())));
+    const float coin = TRandom3(seed).Uniform(1.0);
+    
+    // Flip the b-tag decision based on random number
+    if ( Btag_SF > 1. ) {  // use this if SF>1
         if ( !isBTagged ) {
-            //fraction of jets that need to be upgraded
-            float mistagPercent = (1.0 - Btag_SF) / (1.0 - (1.0/Btag_eff) );
+            // fraction of jets that need to be upgraded
+            const float mistagPercent = (1.0 - Btag_SF) / (1.0 - (1.0/Btag_eff) );
 
             //upgrade to tagged
-            if( coin < mistagPercent ) {newBTag = true;}
+            if( coin < mistagPercent ) return true;
         }
-    } else {  // use this if SF<1
-        //downgrade tagged to untagged
-        if ( isBTagged && coin > Btag_SF ) {newBTag = false;}
     }
-
-    return newBTag;
-
+    else if ( Btag_SF < 1. ) {  // use this if SF<1
+        // downgrade tagged to untagged
+        if ( isBTagged && coin > Btag_SF ) return false;
+    }
+    else {  // no change if exactly SF==1
+        return isBTagged;
+    }
+    
+    // If nothing is changed, return original value
+    return isBTagged;
 }
 
 
