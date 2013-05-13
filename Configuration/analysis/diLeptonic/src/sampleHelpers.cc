@@ -224,7 +224,7 @@ std::vector<std::string> Channel::convertChannels(const std::vector<Channel>& ch
 
 
 
-// --------------------- Functions defined in namespace Tools -------------------------
+// --------------------- Functions defined in namespace ttbar -------------------------
 
 
 
