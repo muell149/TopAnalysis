@@ -60,6 +60,7 @@ namespace Systematic{
         scale_down,
         powheg,
         mcatnlo,
+        pdf,        // PDF variations
         undefined   // No systematic defined (also not nominal)
     };
     

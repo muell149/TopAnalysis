@@ -66,6 +66,7 @@ Systematic::Systematic Systematic::convertSystematic(const std::string& systemat
     if(systematic == "SCALE_DOWN") return scale_down;
     if(systematic == "POWHEG") return powheg;
     if(systematic == "MCATNLO") return mcatnlo;
+    if(systematic == "PDF") return pdf;
     std::cout<<"Warning! The following systematic conversion is not implemented: "<<systematic<<std::endl<<std::endl;
     return undefined;
 }
@@ -121,6 +122,7 @@ std::string Systematic::convertSystematic(const Systematic& systematic)
     if(systematic == scale_down) return "SCALE_DOWN";
     if(systematic == powheg) return "POWHEG";
     if(systematic == mcatnlo) return "MCATNLO";
+    if(systematic == pdf) return "PDF";
     if(systematic == undefined) return "";
     std::cout<<"Error! Systematic conversion is not implemented, break...\n"<<std::endl;
     exit(99);
