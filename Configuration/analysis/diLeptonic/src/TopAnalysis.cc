@@ -56,7 +56,7 @@ constexpr double BtagWP = 0.244;
 
 /// Select the b-tagging method: Apply SF to the histogram or re-tag a jet via a random method
 ///  default method is the re-tagging of the jetBTagCSV_: true
-constexpr bool ReTagJet = false;
+constexpr bool ReTagJet = true;
 
 
 /// Apply Top Pt reweighting from fit calculated by Martin
@@ -1332,6 +1332,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypBJetEtaLead->Fill(LeadHypBJet.Eta(), weight);
     h_HypBJetEtaNLead->Fill(NLeadHypBJet.Eta(), weight);
 
+    //New plots from Carmen: Begin
     int extrarecojet[4] = {0};
     int jetnumReco = -1;
     double jetHTreco = 0;
@@ -1346,7 +1347,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         if (jets_->at(k).Pt()> JetPtCUT)
         {
             RecoJets++;
-            if(std::fabs(HypAntiBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1 && std::fabs(HypBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1) {
+            if(std::fabs(HypAntiBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1 && std::fabs(HypBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1 && jetnumReco<4) {
             jetHTreco+=jets_->at(k).Pt();
             jetnumReco++;
             extrarecojet[jetnumReco]= k;
@@ -1365,35 +1366,35 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypJetMultpt40->Fill(RecoJets_cut40,weight);
     h_HypJetMultpt60->Fill(RecoJets_cut60,weight);
     h_HypJetMultpt100->Fill(RecoJets_cut100,weight);
-
     int first= -1, second=-1, third=-1, fourth=-1;
     double ptjet = 0;
     for(int ord = 0; ord <= jetnumReco; ord++)
     {
-        if(jets_->at(extrarecojet[ord]).Pt()> ptjet) {first = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();}
+        if(jets_->at(extrarecojet[ord]).Pt()> ptjet) {
+            first = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();
+        }
     }
     ptjet = 0;
-    for(int ord = 0; ord <= jetnumReco; ord++)
+    for(int ord = 0; ord <= jetnumReco && jetnumReco>0; ord++)
     {
         if(jets_->at(extrarecojet[ord]).Pt()> ptjet && jets_->at(extrarecojet[ord]).Pt()< jets_->at(extrarecojet[first]).Pt()) {
             second = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();
         }
     }
     ptjet = 0;
-    for(int ord = 0; ord <= jetnumReco; ord++)
+    for(int ord = 0; ord <= jetnumReco && jetnumReco>1; ord++)
     {
         if(jets_->at(extrarecojet[ord]).Pt()> ptjet && jets_->at(extrarecojet[ord]).Pt()< jets_->at(extrarecojet[second]).Pt() ) {
-            third = ord; ptjet=jets_->at(extrarecojet[third]).Pt();
+            third = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();
         }
     }
     ptjet = 0;
-    for(int ord = 0; ord <= jetnumReco; ord++)
+    for(int ord = 0; ord <= jetnumReco && jetnumReco>2; ord++)
     {
         if(jets_->at(extrarecojet[ord]).Pt()> ptjet && jets_->at(extrarecojet[ord]).Pt()< jets_->at(extrarecojet[third]).Pt() ) {
             fourth = ord; ptjet=jets_->at(extrarecojet[ord]).Pt();
         }
     }
-
     if(jetnumReco>2)
     {
         h_RecoExtraJetpT4->Fill(jets_->at(extrarecojet[fourth]).Pt(),recoWeight);
@@ -1430,8 +1431,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     for(int q0 = 0; q0<19;q0++){
         h_RecoJetMultTotal->Fill(cbin[q0],recoWeight);
         h_HypJetMultTotal->Fill(cbin[q0],weight);
-        if(jets_->at(extrarecojet[first]).Pt()<= cbin[q0] || jetnumReco <0) {h_RecoJetMultQ0->Fill(cbin[q0],recoWeight);h_HypJetMultQ0->Fill(cbin[q0],weight);}
-        if(jets_->at(extrarecojet[second]).Pt()<= cbin[q0] || jetnumReco <1 ) {h_RecoJetExtra2Q0->Fill(cbin[q0],recoWeight);h_HypJetExtra2Q0->Fill(cbin[q0],weight);}
+        if((first >-1 && jets_->at(extrarecojet[first]).Pt()<= cbin[q0] )|| jetnumReco <0) {h_RecoJetMultQ0->Fill(cbin[q0],recoWeight);h_HypJetMultQ0->Fill(cbin[q0],weight);}
+        if((second >-1 && jets_->at(extrarecojet[second]).Pt()<= cbin[q0]) || jetnumReco <1 ) {h_RecoJetExtra2Q0->Fill(cbin[q0],recoWeight);h_HypJetExtra2Q0->Fill(cbin[q0],weight);}
         if(jetHTreco<=cbin[q0]) {h_RecoJetMultQsum->Fill(cbin[q0],recoWeight); h_HypJetMultQsum->Fill(cbin[q0],weight);}
     }
 //     //New plots from Carmen: End
@@ -1531,7 +1532,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_GenRecoAntiBJetEta->Fill(HypAntiBJet_->at(solutionIndex).Eta(), -1000., weight );
         h_GenRecoLeptonantiBjetMass->Fill(( HypLepton_->at(solutionIndex) + HypAntiBJet_->at(solutionIndex) ).M(), -1000., weight );
     }
-    
+
     if ( BHadronIndex>=0 && AntiBHadronIndex>=0 ) {
         h_GenRecoJetMult->Fill(numberOfJets, allGenJets_->size(), weight );
 //carmen
