@@ -38,7 +38,14 @@ options.register('PUscenario', '11_178078', VarParsing.VarParsing.multiplicity.s
 ## trigger results tag
 options.register('triggerTag', 'HLT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "tag of trigger Results")
 ## use the *totalKinematicsFilter*
-options.register('useTotalKinFilter', True, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "use totalKinematicsFilter")
+options.register('useTotalKinFilter', True, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "use totalKinematicsFilter")
+## do only skimming, no analysis to be done
+options.register('onlySkimming', False, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "do only skimming, no analysis to be done")
+## use the skimmed event content (usually only applies for event mixing)
+options.register('useSkimmedEventContent', False, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "use skimmed event content")
+## derive b-tagging efficiencies
+options.register('bTagEfficiencyDetermination', False, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "derive b-tagging efficiencies")
+
 
 # get and parse the command line arguments
 if hasattr(sys, "argv") :
@@ -49,26 +56,33 @@ if hasattr(sys, "argv") :
             if len(val)==2 :
                 setattr(options, val[0], val[1])
 
-print "eventFilter . . . . :", options.eventFilter
-print "usePF . . . . . . . :", options.usePF
-print "jesType . . . . . . :", options.jesType
-print "jesFactor . . . . . :", options.jesFactor
-print "jetEResol . . . . . :", options.jetEResol
-print "fitResol  . . . . . :", options.fitResol
-print "writeOutput . . . . :", options.writeOutput
-print "maxPtHat  . . . . . :", options.maxPtHat
-print "minPtHat  . . . . . :", options.minPtHat
-print "pdfUncertainty  . . :", options.pdfUn
-print "backgroundEstimation:", options.backgroundEstimation
-print "runOnAOD  . . . . . :", options.runOnAOD
-print "bTagAlgoWP  . . . . :", options.bTagAlgoWP
-print "mvaSelection  . . . :", options.mvaSelection
-print "mcWeight  . . . . . :", options.mcWeight
-print "PUscenario  . . . . :", options.PUscenario
-print "triggerTag  . . . . :", options.triggerTag
+print "eventFilter  . . . . . . . :", options.eventFilter
+print "usePF  . . . . . . . . . . :", options.usePF
+print "jesType  . . . . . . . . . :", options.jesType
+print "jesFactor  . . . . . . . . :", options.jesFactor
+print "jetEResol  . . . . . . . . :", options.jetEResol
+print "fitResol . . . . . . . . . :", options.fitResol
+print "writeOutput  . . . . . . . :", options.writeOutput
+print "maxPtHat . . . . . . . . . :", options.maxPtHat
+print "minPtHat . . . . . . . . . :", options.minPtHat
+print "pdfUncertainty . . . . . . :", options.pdfUn
+print "backgroundEstimation . . . :", options.backgroundEstimation
+print "runOnAOD . . . . . . . . . :", options.runOnAOD
+print "bTagAlgoWP . . . . . . . . :", options.bTagAlgoWP
+print "mvaSelection . . . . . . . :", options.mvaSelection
+print "mcWeight . . . . . . . . . :", options.mcWeight
+print "PUscenario . . . . . . . . :", options.PUscenario
+print "triggerTag . . . . . . . . :", options.triggerTag
+print "useTotalKinFilter  . . . . :", options.useTotalKinFilter
+print "onlySkimming . . . . . . . :", options.onlySkimming
+print "useSkimmedEventContent . . :", options.useSkimmedEventContent
+print "bTagEfficiencyDetermination:", options.bTagEfficiencyDetermination
 
 ## use the FullHadTreeWriter to produce a TTree with the desired information
-process = cms.Process("FullHadTreeWriter")
+if options.useSkimmedEventContent :
+    process = cms.Process("FullHadTreeWriterSkimmed")
+else :
+    process = cms.Process("FullHadTreeWriter")
 
 ## configure message logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -84,232 +98,113 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
         #'file:patTuple.root',
         #'file:patTuple_selected.root',
+        #'file:patTuple_selected_large.root',
         #'file:/tmp/eschliec/tmp.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_100_1_tD3.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_102_1_Ckt.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_103_1_ZEY.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_105_1_DLF.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_106_1_RH3.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_107_1_zib.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_108_1_Frn.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_101_1_zkj.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_111_1_6Ki.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_104_1_4ye.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_109_1_gDj.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_114_1_HuE.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_10_1_fFx.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_110_1_A49.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_117_1_QwS.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_118_1_4wm.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_11_1_yCb.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_12_3_XC1.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_13_1_MZO.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_112_1_s3Z.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_113_1_QbL.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_16_1_UNX.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_17_1_CYE.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_115_2_SbK.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_19_8_F3X.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_116_1_lym.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_14_1_U4g.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_21_1_Mqx.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_15_1_24A.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_23_3_kFA.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_24_1_h10.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_18_3_Hl0.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_1_1_xVJ.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_27_1_32t.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_28_1_0hk.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_20_3_JQc.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_22_1_7fL.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_25_8_8Gk.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_31_1_Z15.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_26_1_kgC.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_29_1_2kq.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_34_2_eSt.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_2_1_lLz.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_36_1_9aN.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_37_1_3mZ.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_30_1_tiw.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_39_1_Cne.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_3_1_RCs.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_32_1_gQ7.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_41_1_n72.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_33_1_rUu.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_43_1_L2e.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_35_1_tnB.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_38_1_Bw3.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_40_3_0yO.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_42_1_zxh.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_48_1_PRK.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_44_1_x5M.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_45_1_Ky0.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_50_1_zra.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_46_1_XgK.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_52_1_lAm.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_53_1_TMH.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_54_1_xmE.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_55_1_dv5.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_56_1_0WT.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_57_1_pWz.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_47_1_K9G.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_59_1_mL2.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_5_1_k6m.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_60_3_rJv.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_61_3_ixs.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_62_1_8Hq.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_49_1_wEn.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_64_1_Drj.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_65_1_AW8.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_4_1_MFu.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_51_1_3N9.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_68_1_43r.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_58_1_AaL.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_6_3_rnn.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_70_1_Lap.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_71_1_ihL.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_63_3_KeJ.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_73_1_8Qo.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_74_1_Wyu.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_66_1_ylZ.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_76_1_L9v.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_67_1_a1n.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_69_1_HEx.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_79_1_nCY.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_7_1_y8Z.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_80_1_804.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_81_1_i6b.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_72_1_6SA.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_83_3_4LK.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_84_1_UGb.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_85_1_SQL.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_75_1_ZCk.root',
-        #'/store/user/eschliec/MultiJet/Run2011B_v11_PATWithPF_v4/6a10ecb4d7010b1a5a33c1afedbebe5b/patTuple_87_1_str.root',
-        #'/store/user/eschliec/MultiJet/Run2011A_v42_PATWithPF_v4/9610e89f650df43cf8a89da2e1021a9c/patTuple_9_1_LMr.root',
-        #'/store/user/eschliec/MultiJet/Run2011A_v42_PATWithPF_v4/9610e89f650df43cf8a89da2e1021a9c/patTuple_8_1_OjE.root',
-        #'/store/mc/Fall10/TTJets_TuneD6T_7TeV-madgraph-tauola/AODSIM/START38_V12-v2/0022/2A4828B2-FCE3-DF11-ABDD-0015C5E673AE.root',
-        #'/store/user/eschliec/TTJets_TuneD6T_mass166_5_7TeV-madgraph-tauola/PATWithPF_v4/e59efddd8a1547799dca5b47d5556447/patTuple_21_1_rkC.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/8A5EC185-0098-E011-BAEE-0018F3D0968A.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/4AA93931-0498-E011-8542-001A928116F2.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/4C123530-8098-E011-81AF-002618943896.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/4CA5D2CB-EB97-E011-9049-002618943918.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/50A22F5C-5C98-E011-A2F0-00304867915A.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/50E84A29-7E98-E011-BE33-003048679076.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/52F85166-F197-E011-A69C-0026189437F9.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/54CE112F-0E98-E011-BF35-0030486790B0.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/566A92D3-8198-E011-B00A-00261894391F.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/56B5966B-8698-E011-80E2-001A92810ACA.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/58080F8B-FB9A-E011-9961-001A92810AE0.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/58147179-0698-E011-8F48-0030486790B0.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/5835C219-F497-E011-9654-0026189438F3.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/5A71E3FA-8098-E011-9985-0026189438C0.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/5AC5BEBF-E797-E011-AF5F-00261894397A.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/5AF8B0C6-E897-E011-AD4C-003048679214.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/74733820-F097-E011-9F9A-002618943975.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7650FAF5-9B98-E011-90C7-001A92971B94.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/76A12412-5098-E011-8FC9-001A92971B80.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/76E7B7AC-9F98-E011-AAAA-0018F3D096AE.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/78436557-0D98-E011-8881-001A9281170A.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/78AA6168-8498-E011-B586-00261894387E.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7A12CB9B-E297-E011-BCBD-0018F3D0961E.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7AA6A623-8198-E011-AB19-003048679076.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7C571269-FF97-E011-BAA7-001A92810AEC.root',
-        #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/7C66C165-EF97-E011-B33B-003048678FFA.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_0.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_100.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_101.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_102.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_103.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_104.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_105.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_106.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_107.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_108.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_109.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_10.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_110.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_111.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_112.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_113.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_114.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_115.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_116.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_117.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_118.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_119.root',
-        #'file:/scratch/hh/dust/naf/cms/user/gosseli/alljets/bbbar_6jets_7TeV_pythia6_GEN/bbbar_6jets_7TeV_pythia6_GEN_11.root',
-        #'/store/mc/Fall11/TT_TuneZ2_7TeV-mcatnlo/AODSIM/PU_S6_START42_V14B-v1/0000/C8F655E6-242A-E111-9138-002618943959.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/3E5BE6DC-A407-E111-8CE7-00261894391B.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/9A058174-A807-E111-B212-002618943971.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/1ED5B8A4-D807-E111-B4C4-0026189438E9.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/F46D6B0A-C007-E111-AC42-0026189438FE.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/AE505B03-6D07-E111-943A-003048678B70.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/7C1177BF-CE07-E111-8F41-001A92971B84.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/B8AE9828-CA07-E111-A278-00261894386B.root',
-        #'/store/mc/Fall11/QCD_Pt-1800_TuneZ2_7TeV_pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/0A61134D-FD08-E111-8EB6-003048678F9C.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/PU_S3_START42_V11-v2/0000/70D2C5F9-5B7E-E011-863E-00261894384A.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/PU_S3_START42_V11-v2/0000/A4454F2E-657E-E011-B2F9-00304867D836.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/PU_S3_START42_V11-v2/0000/06729103-837E-E011-9C68-00261894396A.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/PU_S3_START42_V11-v2/0000/DA7E0F7C-477E-E011-A5B1-002618943910.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune23_Flat_7TeV_herwigpp/AODSIM/PU_S3_START42_V11-v2/0000/0270B432-F682-E011-81D9-003048D437E4.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune23_Flat_7TeV_herwigpp/AODSIM/PU_S3_START42_V11-v2/0000/3213CDB1-F982-E011-B8B8-003048D437DA.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune23_Flat_7TeV_herwigpp/AODSIM/PU_S3_START42_V11-v2/0000/6E01A1B3-F982-E011-AA05-002481E0D500.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune23_Flat_7TeV_herwigpp/AODSIM/PU_S3_START42_V11-v2/0000/A45BCF02-1983-E011-B9C6-0030487E55BB.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune4C_Flat_7TeV_pythia8/AODSIM/PU_S3_START42_V11-v2/0000/06A76BA6-FB80-E011-AB94-0030487F1A73.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune4C_Flat_7TeV_pythia8/AODSIM/PU_S3_START42_V11-v2/0000/44F38536-0381-E011-A170-0030487F929B.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune4C_Flat_7TeV_pythia8/AODSIM/PU_S3_START42_V11-v2/0000/844976AF-1C81-E011-926A-0030487F1309.root',
-        #'/store/mc/Summer11/QCD_Pt-15to3000_Tune4C_Flat_7TeV_pythia8/AODSIM/PU_S3_START42_V11-v2/0000/B0EAC171-3C81-E011-8640-003048D436B2.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/966C784E-990F-E111-B38E-0026189438C0.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/2E589998-B40F-E111-AC7C-002618943821.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/62F47942-8C0F-E111-99F1-002618943963.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/92B23A64-840F-E111-953E-002618943934.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/C0599B54-9F0F-E111-91A6-0018F3D09614.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/F842E41D-7B0F-E111-8976-001A928116AE.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/280B696F-8E0F-E111-B29C-002618943838.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/5C6E2116-B10F-E111-92B8-0018F3D09688.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/8E125AA7-840F-E111-B3C4-0026189438D3.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/BAEB5248-AE0F-E111-9471-0018F3D09676.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/F0412FEC-AB0F-E111-9C97-0018F3D096B4.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/363CF1DA-880F-E111-939F-002618943836.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/68661986-770F-E111-A3EF-003048678FC4.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/9A7DCDFB-A90F-E111-8321-001BFCDBD19E.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/C82E52FC-950F-E111-9467-001A9281173C.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/FEAFDD76-B50F-E111-9AA3-0018F3D096CA.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/2651DC56-9F0F-E111-AF40-0018F3D096E0.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/5AB3D000-B10F-E111-A37F-0026189437F0.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/8C73B70F-BF0F-E111-B29E-003048678FD6.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/BA85231B-A80F-E111-B8F9-003048679180.root',
-        '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6_START42_V14B-v2/0000/EEEE4B35-AF0F-E111-A2F4-002618943950.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/209D26E9-AEE1-E111-BAA6-0030487D5D8D.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/54145FEE-1AE2-E111-8B8E-003048C69408.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8CA6B320-CFE1-E111-A04C-003048D2BB22.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/B6D6C237-DBE1-E111-B65F-002481E0DC4C.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/E88CC8A4-85E1-E111-9EFF-0030487F1A55.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2289830F-84E1-E111-9B1A-0030487F1717.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/56A8FFAD-29E2-E111-BB50-003048F0E55A.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8EFC5ECD-D3E1-E111-BC9F-0030487F1737.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BA1CA24C-CFE1-E111-8991-003048D436D4.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/EA0F572E-93E1-E111-9521-0025901D4936.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/28609559-8CE1-E111-9836-003048F0E18E.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5898B1DB-6CE1-E111-86F5-00266CFB8D74.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/92900233-DDE1-E111-A7F8-0030487D710F.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BCD8A9A3-EEE1-E111-B148-003048C69402.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/ECCFBCDD-89E1-E111-96C9-0025901D4936.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2ADEA5DB-00E2-E111-AF20-0030487E4EBF.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5CEE2644-2AE2-E111-AAE8-0030487F9151.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9636845B-06E2-E111-8F7B-0030487DA061.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C0E610CD-CEE1-E111-AEF3-00266CF1074C.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F097145C-E7E1-E111-A64E-0030487E0A2D.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2E5C881C-75E1-E111-AC25-0025901D4AF0.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/624FA788-7CE1-E111-B1EC-0030487FA607.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9899EDC7-8FE1-E111-ADBD-0025904B1446.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C4169660-82E1-E111-BFA3-0030487F9297.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F60F0652-C8E1-E111-BE82-002481E94B26.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/324A56C4-94E1-E111-87C2-003048C68A90.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/66279F97-99E1-E111-83BC-003048C68A8A.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9A494832-27E2-E111-983A-0030487F1BCF.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6DA98EE-80E1-E111-8A16-002481E0D480.root',
-        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FA1056FA-06E2-E111-BE82-0030487EBB25.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/209D26E9-AEE1-E111-BAA6-0030487D5D8D.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/54145FEE-1AE2-E111-8B8E-003048C69408.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8CA6B320-CFE1-E111-A04C-003048D2BB22.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/B6D6C237-DBE1-E111-B65F-002481E0DC4C.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/E88CC8A4-85E1-E111-9EFF-0030487F1A55.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2289830F-84E1-E111-9B1A-0030487F1717.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/56A8FFAD-29E2-E111-BB50-003048F0E55A.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8EFC5ECD-D3E1-E111-BC9F-0030487F1737.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BA1CA24C-CFE1-E111-8991-003048D436D4.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/EA0F572E-93E1-E111-9521-0025901D4936.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/28609559-8CE1-E111-9836-003048F0E18E.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5898B1DB-6CE1-E111-86F5-00266CFB8D74.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/92900233-DDE1-E111-A7F8-0030487D710F.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BCD8A9A3-EEE1-E111-B148-003048C69402.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/ECCFBCDD-89E1-E111-96C9-0025901D4936.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2ADEA5DB-00E2-E111-AF20-0030487E4EBF.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5CEE2644-2AE2-E111-AAE8-0030487F9151.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9636845B-06E2-E111-8F7B-0030487DA061.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C0E610CD-CEE1-E111-AEF3-00266CF1074C.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F097145C-E7E1-E111-A64E-0030487E0A2D.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2E5C881C-75E1-E111-AC25-0025901D4AF0.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/624FA788-7CE1-E111-B1EC-0030487FA607.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9899EDC7-8FE1-E111-ADBD-0025904B1446.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C4169660-82E1-E111-BFA3-0030487F9297.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F60F0652-C8E1-E111-BE82-002481E94B26.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/324A56C4-94E1-E111-87C2-003048C68A90.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/66279F97-99E1-E111-83BC-003048C68A8A.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9A494832-27E2-E111-983A-0030487F1BCF.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6DA98EE-80E1-E111-8A16-002481E0D480.root',
+        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FA1056FA-06E2-E111-BE82-0030487EBB25.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B0B4B764-38D6-E111-97B2-0026189438B8.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/C896D297-09D6-E111-9664-002618943981.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/9E1AC7FF-24D7-E111-BEDD-001A9281170C.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/4EF06138-31D6-E111-A977-003048FFCBFC.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6CAF3A97-09D5-E111-B813-002618943960.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/0643C4AE-D1D4-E111-9A8C-002618943845.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/647639EB-E8D4-E111-A994-00248C55CC9D.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/90DD56B4-FFD5-E111-91BB-003048FFD756.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/7CB00378-E0D4-E111-B5D1-00304867902E.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3C8258EC-A3D4-E111-8E96-00261894393C.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6C976CFF-D6D5-E111-8483-00248C55CC3C.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BAA172B7-F8D4-E111-A33C-003048679180.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0002/8CD24D3C-9BD4-E111-9AEF-0026189438E7.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/5E0407D4-FFD4-E111-9C46-003048D15DB6.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/66A12C7E-E0D4-E111-A11C-0018F3D09710.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BA181933-0FD5-E111-A707-003048FFCBFC.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/CCED3020-F1D4-E111-AEEE-00304867C026.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/C226ED78-F8D4-E111-A29E-001A9281170A.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/D009BCB1-30D6-E111-8579-00248C55CC3C.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/48F56E4C-CCD4-E111-B38E-0018F3D0966C.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6A113A81-A2D4-E111-99E7-0030486792B6.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/32FDBDE8-3DD6-E111-A91F-0018F3D09700.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BE40606F-A1D4-E111-8BEB-002618943972.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/D29C800E-C7D4-E111-A428-002618943875.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/469C0A2B-DFD4-E111-9B3C-00261894393D.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BEC944FB-00D6-E111-AFC4-002618943933.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/DA962CCD-18D5-E111-B9B7-00261894395B.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/36477A50-6ED4-E111-9B2D-002618943901.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/842F9897-B9D4-E111-BD7A-001A92971B94.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6E971145-F4D5-E111-87FF-0026189438E8.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/A898D2BD-F8D4-E111-859D-00261894392F.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BE62CE17-2FD7-E111-9D97-002618943939.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/74A83952-F3D5-E111-BC26-00304867916E.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/507B704E-E4D5-E111-8CF8-00248C0BE014.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/125B194A-F4D4-E111-B075-00304866C398.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/58B97953-DCD4-E111-B077-002618943800.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/04892EF6-2FD6-E111-92AD-001A92810A98.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/A2DB1E3F-C6D4-E111-943B-003048678FB2.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/30AEBD9E-42D6-E111-9518-0026189438C9.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/64C5C45E-F8D6-E111-8386-00304867924E.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/7AEA46A5-B5D4-E111-A95E-0026189438FE.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/FA4DB4BA-28D3-E111-B707-00261894393E.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/DABDCB44-0DD5-E111-BED5-001A928116E2.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/F035E4F4-44D3-E111-8BFB-001A928116BC.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/F04DFA64-E1D4-E111-A54A-003048678E52.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/8C293053-96D4-E111-BE5C-002618943857.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6AA79317-E5D4-E111-B102-0018F3D0969A.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/AE434F20-DBD5-E111-82AB-0026189438EB.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/FEEE7FEB-EED4-E111-96C7-002618943809.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E2F4E9FF-FDD5-E111-8F37-002618943939.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BE683B39-23D6-E111-B583-0018F3D096CE.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/F6DB0B98-E0D4-E111-8170-003048FF86CA.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/74487D9A-BED4-E111-AD5D-003048678B70.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/EEB32C42-C8D4-E111-82B5-0018F3D096DC.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/2A0D66A7-D5D4-E111-8DAF-0018F3D096DE.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/1A45E231-E8D4-E111-AA64-003048FFCB8C.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3613E522-EBD5-E111-9D53-00304867920C.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/02386C4C-F4D5-E111-B44A-0018F3D09680.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/7800CC07-F0D5-E111-A675-0026189438C1.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/201FF7D7-F6D5-E111-B2E9-0018F3D096A0.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3A520B10-51D3-E111-A54C-003048FFCBA4.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/04A62579-9FD4-E111-8F5F-0018F3D095EE.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/14C7DE62-7BD4-E111-ACFE-002618FDA263.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/961E3F4B-34D6-E111-82B0-003048FFD736.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/429DAFB0-2ED6-E111-85AC-003048678B38.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B2FEC746-F0D5-E111-83CC-002618943836.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E6DF28FD-1BD3-E111-8056-00261894394D.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3EF758E0-F5D5-E111-8847-00304867BFB2.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/A87FF6AE-93D4-E111-B69B-002618943857.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E87AF240-54D7-E111-A28A-001A92971B90.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/9871741E-C9D4-E111-A764-0026189438D8.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/1856E847-69D3-E111-9178-002618943914.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/64AC3443-9CD4-E111-8158-003048678FFE.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B8137AD1-DAD4-E111-BF6D-00261894398D.root',
+        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B67A7A58-1FD6-E111-A066-003048FFCB8C.root',
         ),
                             skipEvents = cms.untracked.uint32(0)
                             )
@@ -347,7 +242,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(options.eventFilter=='data'):
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
-        process.GlobalTag.globaltag = cms.string('GR_R_53_V16::All')
+        process.GlobalTag.globaltag = cms.string('GR_R_53_V19::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         #process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
         #process.GlobalTag.globaltag = cms.string('GR_R_42_V14::All')
@@ -358,7 +253,7 @@ if(options.eventFilter=='data'):
         
 else:
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
-        process.GlobalTag.globaltag = cms.string('START53_V14::All')
+        process.GlobalTag.globaltag = cms.string('START53_V15::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         #process.GlobalTag.globaltag = cms.string('START42_V12::All')
         #process.GlobalTag.globaltag = cms.string('START42_V13::All')
@@ -389,7 +284,6 @@ process.ttFullHadronicFilter = process.ttDecaySelection.clone()
 
 ## ptHat filter
 process.load("TopAnalysis.TopFilter.filters.PtHatFilter_cfi")
-process.filterPtHat = process.filterPtHat.clone()
 
 ## additional jet energy smearing for MC
 if options.jetEResol == 0:
@@ -413,17 +307,26 @@ elif options.jetEResol == 11:
 else:
     exit('jetEResol: ' + str(options.jetEResol) + ' not supported, choose -1/0/+1/9/10/11')
 
-process.load("TopAnalysis.TopUtils.JetEnergyScale_cfi")
-process.scaledJetEnergy = process.scaledJetEnergy.clone( inputJets            = cms.InputTag("selectedPatJetsAK5PF"),
-                                                         inputMETs            = cms.InputTag("patMETsPF"),
-                                                         payload              = cms.string("AK5PFchs"),
-                                                         scaleFactor          = cms.double(options.jesFactor),
-                                                         scaleType            = cms.string("abs"), #abs, rel, top:up, top:down, jes:up, jes:down
-                                                         jetPTThresholdForMET = cms.double(20.),
-                                                         jetEMLimitForMET     = cms.double(0.9),
-                                                         resolutionFactors    = cms.vdouble(resolutions),
-                                                         resolutionEtaRanges  = cms.vdouble(etaRanges)
-                                                       )
+from TopAnalysis.TopUtils.JetEnergyScale_cfi import scaledJetEnergy
+process.scaledJetEnergy = scaledJetEnergy.clone( inputJets            = "selectedPatJetsAK5PF",
+                                                 inputMETs            = "patMETsPF",
+                                                 payload              = "AK5PFchs",
+                                                 scaleFactor          = options.jesFactor,
+                                                 scaleType            = "abs", #abs, rel, top:up, top:down, jes:up, jes:down
+                                                 jetPTThresholdForMET = 20.,
+                                                 jetEMLimitForMET     = 0.9,
+                                                 resolutionFactors    = resolutions,
+                                                 resolutionEtaRanges  = etaRanges,
+                                                 JECUncSrcFile        = "TopAnalysis/TopUtils/data/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt",
+                                                 )
+
+## don't scale MET if skimmed event content is used
+if options.useSkimmedEventContent :
+    process.scaledJetEnergy.inputMETs = ""
+
+## take proper JEC uncertainties for 2011 data
+if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_'):
+    process.scaledJetEnergy.JECUncSrcFile = "TopAnalysis/TopUtils/data/JEC11_V10_AK5PF_UncertaintySources.txt"
 
 ## set set energy scaling factors
 if options.jesType == 'jes' :
@@ -439,11 +342,11 @@ elif options.jesType == 'flavor' :
         process.scaledJetEnergy.scaleType = "flavor:down"
 
 ## residual jet corrector for data
-process.load("TopAnalysis.TopUtils.ResidualJetCorrector_cfi")
-process.residualCorrectedJets = process.residualCorrectedJets.clone()
+from TopAnalysis.TopUtils.ResidualJetCorrector_cfi import residualCorrectedJets
+process.residualCorrectedJets = residualCorrectedJets.clone()
 
 if options.eventFilter=='data' :
-    ## sequence with jet energy corrections specially suited for data
+    ## dummy sequence, will be removed later on in the process
     process.filterSequence = cms.Sequence(process.residualCorrectedJets
                                           )
     
@@ -486,6 +389,7 @@ elif options.eventFilter=='toyMC' :
     ## convert GenJets to PatJets
     process.load("TopAnalysis.TopUtils.convertGenToPatJets_cff")
     process.filterSequence = cms.Sequence(process.fullHadGenJetSelection*process.convertGenToPatJets)
+    process.combinedSecondaryVertexBJetTags.jetsToTag = [2,3]
     
 else:
     raise NameError, "'"+options.eventFilter+"' is not a proper eventFilter!"
@@ -514,7 +418,7 @@ addTtFullHadHypotheses(process,
                        )
 
 ## remove the genMatch if not running on signal events
-if not options.eventFilter=='sig' :
+if options.useSkimmedEventContent or not options.eventFilter=='sig' :
     removeTtFullHadHypGenMatch(process)
 
 ## load the background estimation modules
@@ -575,15 +479,29 @@ removeMonitoringOfCutflow(process)
 ## THE treeWriter itself
 process.load("TopAnalysis.TopAnalyzer.FullHadTreeWriter_cfi")
 
+## register TreeRegistryService
+process.load("TopMass.TopEventTree.TreeRegistryService_cfi")
+process.TreeRegistryService.treeName  = "eventTree"
+process.TreeRegistryService.treeTitle = "Tree for UHH top-quark analysis\nParticles are in order {TTBar0, Top1, Top2, W1, W2, B1, LightQ1, LightQBar1, B2, LightQ2, LightQBar2}"
+
+## load HypothesisAnalyzer
+from TopMass.TopEventTree.EventHypothesisAnalyzer_cfi import analyzeHypothesis
+process.analyzeKinFit = analyzeHypothesis.clone(hypoClassKey = "ttFullHadHypKinFit:Key", ttEvent = "ttFullHadEvent", ttEventGen2 = "ttFullHadEvent2", jets = "tightLeadingJets", gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'), maxNJets = cms.int32(20))
+from TopMass.TopEventTree.JetEventAnalyzer_cfi import analyzeJets
+process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets")
+from TopMass.TopEventTree.WeightEventAnalyzer_cfi import analyzeWeights
+process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets", puWeightSrc = cms.InputTag("eventWeightPU", "eventWeightPU"), savePDFWeights = True)
+
 ## switch tree writer to appropriate jet source
 process.FullHadTreeWriter = process.writeFullHadTree.clone(JetSrc = "tightLeadingJets")
 
 ## set correct MC weight
 process.FullHadTreeWriter.MCweight = options.mcWeight
 
+## calculate PU weight factor
 process.load("TopAnalysis.TopUtils.EventWeightPU_cfi")
 if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
-    process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer2012.root", MCSampleHistoName = "puhisto")
+    process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root", MCSampleHistoName = "puhisto")
 elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
     #process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_Summer11_TTJets_TuneZ2_7TeV_madgraph_tauola.root")
     #process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/Fall11/MC_PUDist_Fall11_TTJets_TuneZ2_7TeV_MadGraph.root")
@@ -594,7 +512,7 @@ elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
     process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_WJets_Spring11.root", MCSampleHistoName = "pileup")
 
 if options.PUscenario == '2012':
-    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012AB.root"
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012BC.root"
     process.eventWeightPU.DataHistoName = "pileup"
 elif options.PUscenario == '11_178078':
     #process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/MyDataPileupHistogram_precaleWeighted_new.root"
@@ -620,6 +538,23 @@ elif options.PUscenario == 'EPS':
 elif not options.eventFilter == 'data':
     exit('PU SCENARIO * ' + options.PUscenario + " * NOT SUPPORTED, STOP PROCESSING")
 
+## calculate btag weight factor
+from TopAnalysis.TopUtils.BTagSFEventWeight_cfi import bTagSFEventWeight
+#process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "12-470", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+options.bTagAlgoWP+".root")
+process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "12-470", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiencyCSVM.root")
+process.bTagSFEventWeightBTagSFUp     = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
+process.bTagSFEventWeightBTagSFDown   = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
+process.bTagSFEventWeightMisTagSFUp   = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")
+process.bTagSFEventWeightMisTagSFDown = process.bTagSFEventWeight.clone(sysVar = "misTagSFDown")
+
+## calculate b tag efficiencies
+process.load("TopAnalysis.TopAnalyzer.BTagEfficiencyAnalyzer_cfi")
+## NOTE: process needs to be named bTagEff, so that BTagSFEventWeight.cc can find the histo
+process.bTagEff = process.analyzeBTagEfficiency.clone(jets         = "tightLeadingJets",
+                                                      bTagAlgo     = "combinedSecondaryVertexBJetTags",
+                                                      bTagDiscrCut = 0.898, ## CVST
+                                                      weight       = cms.InputTag("eventWeightPU", "eventWeightPU")
+                                                     )
 ## remove PDF uncertainties
 removePDFUncertainties(process)
 if not options.pdfUn==0 :
@@ -633,14 +568,22 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 ##    run the final sequence
 ## ---
 process.p1 = cms.Path(## do the genEvent selection
-                      process.filterSequence *
+                      process.filterSequence
                       ## do the filtering
-                      process.createJetCollections *
-                      process.leadingJetSelection  *
-                      process.eventWeightPU        *
-                      process.makeTtFullHadEvent   *
+                      *process.createJetCollections
+                      *process.leadingJetSelection
+                      *process.eventWeightPU
+                      *process.bTagSFEventWeight
+                      *process.bTagSFEventWeightBTagSFUp
+                      *process.bTagSFEventWeightBTagSFDown
+                      *process.bTagSFEventWeightMisTagSFUp
+                      *process.bTagSFEventWeightMisTagSFDown
+                      *process.makeTtFullHadEvent
                       ## write the tree
-                      process.FullHadTreeWriter
+                      *process.FullHadTreeWriter
+                      *process.analyzeKinFit
+                      *process.analyzeJets
+                      *process.analyzeWeights
                       )
 
 if options.mvaSelection:
@@ -669,16 +612,49 @@ if options.backgroundEstimation != 0:
 
     if options.backgroundEstimation == 2:
         process.p1.remove(process.FullHadTreeWriter)
-        if options.usePF:
-            getattr(process, process.tightBottomJets.src.getModuleLabel()).src = cms.InputTag("goodJetsPF")
-                     
-        if(options.eventFilter=='toyMC'):
-            process.analyzeFullHadEventMixer.speedUp = 10.0
-        process.p1 += cms.Sequence( getattr(process, process.tightBottomJets.src.getModuleLabel())
-                                  * process.tightBottomJets
-                                  * process.tightBottomJetSelection
-                                  * process.analyzeFullHadEventMixer
-                                  )
+        #if options.usePF:
+        #    getattr(process, process.tightBottomJets.src.getModuleLabel()).src = cms.InputTag("goodJetsPF")
+        #             
+        #if(options.eventFilter=='toyMC'):
+        #    process.analyzeFullHadEventMixer.speedUp = 10.0
+        #process.p1 += cms.Sequence( getattr(process, process.tightBottomJets.src.getModuleLabel())
+        #                          * process.tightBottomJets
+        #                          * process.tightBottomJetSelection
+        #                          * process.analyzeFullHadEventMixer
+        #                          )
+
+        if hasattr(process,'scaledJetEnergy'):
+            process.p1.remove(process.scaledJetEnergy)
+        if hasattr(process,'goodJetsPF'):
+            process.p1.remove(process.goodJetsPF)
+        if hasattr(process,'tight4LeadingJets'):
+            process.p1.remove(process.tight4LeadingJets)
+        if hasattr(process,'tight5LeadingJets'):
+            process.p1.remove(process.tight5LeadingJets)
+        if hasattr(process,'tight6LeadingJets'):
+            process.p1.remove(process.tight6LeadingJets)
+        if hasattr(process,'tightLeadingJets'):
+            process.p1.remove(process.tightLeadingJets)
+        if hasattr(process,'leading4JetSelection'):
+            process.p1.remove(process.leading4JetSelection)
+        if hasattr(process,'leading5JetSelection'):
+            process.p1.remove(process.leading5JetSelection)
+        if hasattr(process,'leading6JetSelection'):
+            process.p1.remove(process.leading6JetSelection)
+
+        from TopMass.TopEventTree.JetEventMixer_cfi import mixJets
+        process.tightLeadingJets = mixJets.clone()
+        process.tightLeadingJets.input.fileNames = process.source.fileNames
+        #process.tightLeadingJets.input.skipEvents = cms.untracked.uint32(0) ## DOES NOT WORK
+        process.source = cms.Source("EmptySource")
+        #process.p1.replace(process.leading6JetSelection, process.leading6JetSelection*process.mixJets)
+        #process.p1.replace(process.gen4JetSelector, process.mixJets*process.gen4JetSelector)
+        process.eventContentAnalyzer = cms.EDAnalyzer("EventContentAnalyzer")
+        process.p1.insert(0, process.tightLeadingJets)#*process.eventContentAnalyzer)
+        #process.p1 = cms.Path(process.tightLeadingJets*process.eventContentAnalyzer)
+        PUSource = cms.InputTag("tightLeadingJets", "addPileupInfo")
+        process.eventWeightPU.PUSource = PUSource
+        process.analyzeWeights.puSrc = PUSource
 
         process.TFileService.fileName = 'QCDEstimation_2_'+options.eventFilter+'.root'
 
@@ -702,12 +678,19 @@ if(options.pdfUn==2):
 if options.eventFilter=='data':
     process.p1.remove(process.filterSequence)
     process.p1.remove(process.eventWeightPU)
+    process.p1.remove(process.bTagSFEventWeight)
+    process.p1.remove(process.bTagSFEventWeightBTagSFUp)
+    process.p1.remove(process.bTagSFEventWeightBTagSFDown)
+    process.p1.remove(process.bTagSFEventWeightMisTagSFUp)
+    process.p1.remove(process.bTagSFEventWeightMisTagSFDown)
 else:
-    # different energy resolution of jets in simulation
+    # different energy resolution of jets in simulation (has to be propagated to MET)
     if(hasattr(process, 'goodJets') & hasattr(process, 'scaledJetEnergy')):
         process.goodJets.src   = cms.InputTag('scaledJetEnergy', 'selectedPatJets', process.name_())
+        process.FullHadTreeWriter.METSrc = cms.InputTag('scaledJetEnergy', 'patMETs', process.name_())
     if(hasattr(process, 'goodJetsPF') & hasattr(process, 'scaledJetEnergy')):
         process.goodJetsPF.src = cms.InputTag('scaledJetEnergy', 'selectedPatJetsAK5PF', process.name_())
+        process.FullHadTreeWriter.METSrc = cms.InputTag('scaledJetEnergy', 'patMETsPF', process.name_())
     # change input for toyMC
     if(options.eventFilter=='toyMC'):
         from TopAnalysis.TopUtils.convertGenToPatJets_cff import selectedPatJets as mySelectedPatJets
@@ -715,6 +698,11 @@ else:
         process.goodJetsPF.src = cms.InputTag('selectedPatJets', '', process.name_())
         process.goodJetsPF.cut = "abs(eta) < 2.4 & pt > 20."
         process.p1.remove(process.eventWeightPU)
+        process.p1.remove(process.bTagSFEventWeight)
+        process.p1.remove(process.bTagSFEventWeightBTagSFUp)
+        process.p1.remove(process.bTagSFEventWeightBTagSFDown)
+        process.p1.remove(process.bTagSFEventWeightMisTagSFUp)
+        process.p1.remove(process.bTagSFEventWeightMisTagSFDown)
         #process.p1.remove(process.FullHadTreeWriter)
         process.FullHadTreeWriter.MultiJetMVADiscSrc = ""
         process.FullHadTreeWriter.PUweightSrc        = ""
@@ -727,6 +715,14 @@ else:
         #process.FullHadTreeWriter.bTagVal            = cms.vstring()
         #process.FullHadTreeWriter.bTagName           = cms.vstring()
 
+if options.useSkimmedEventContent:
+    process.FullHadTreeWriter.ElectronSrc = ""
+    process.FullHadTreeWriter.METSrc      = ""
+    process.FullHadTreeWriter.VertexSrc   = ""
+    process.FullHadTreeWriter.MuonSrc     = ""
+    process.FullHadTreeWriter.GenSrc      = ""
+
+    process.analyzeWeights.genEventSrc = ""
 
 if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
     
@@ -757,7 +753,10 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
         pf2patOptions['runOnAOD'] = True
     if options.writeOutput:
         pf2patOptions['switchOffEmbedding'] = False
-    prependPF2PATSequence(process, options = pf2patOptions)
+    pf2patOptions['addGluonTags'] = True
+
+    if not options.useSkimmedEventContent:
+        prependPF2PATSequence(process, options = pf2patOptions)
 
     ## load bugfix for wrongly generated MC files (MadGraph / Powheg + Pythia6)
     process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
@@ -770,16 +769,20 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
         ## move the ttGenEvent filter to the beginning of the sequence
         if options.eventFilter=='sig' or options.eventFilter=='bkg' :
             getattr(process, pathname).remove(process.ttFullHadronicFilter)
-            #getattr(process, pathname).insert(0,process.ttFullHadronicFilter)
             getattr(process, pathname).remove(process.genEvt)
-            getattr(process, pathname).insert(0,process.genEvt)
             getattr(process, pathname).remove(process.decaySubset)
-            getattr(process, pathname).insert(0,process.decaySubset)
             getattr(process, pathname).remove(process.initSubset)
-            getattr(process, pathname).insert(0,process.initSubset)
+            ## if skimmed event content is used TtGenEvent is not needed
+            if not options.useSkimmedEventContent :
+                #getattr(process, pathname).insert(0,process.ttFullHadronicFilter)
+                getattr(process, pathname).insert(0,process.genEvt)
+                getattr(process, pathname).insert(0,process.decaySubset)
+                getattr(process, pathname).insert(0,process.initSubset)
         ## move the trigger to the beginning of the sequence
         getattr(process, pathname).remove(process.trigger)
-        getattr(process, pathname).insert(0,process.trigger)
+        ## if skimmed event content is used triggering was done already
+        if not options.useSkimmedEventContent:
+            getattr(process, pathname).insert(0,process.trigger)
         if hasattr(process,'readAK5PF') :
             getattr(process, pathname).insert(0,process.readAK5PF)
         
@@ -787,10 +790,16 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
         if not options.eventFilter == 'data' and options.useTotalKinFilter == True:
             getattr(process, pathname).insert(0,process.totalKinematicsFilter)
 
-
+        ## add filter for hcal laser events
+        if options.eventFilter == 'data' and os.getenv('CMSSW_VERSION').startswith('CMSSW_5_'):
+            process.hcalLaserFilter = hltHighLevel.clone( TriggerResultsTag = cms.InputTag('TriggerResults')
+                                                        , HLTPaths = cms.vstring('user_step')
+                                                        )
+            getattr(process, pathname).insert(0,process.hcalLaserFilter)
+ 
+        from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
         ## change tag of triggerResults
         if not options.triggerTag=='HLT' :
-            from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
             massSearchReplaceAnyInputTag(getattr(process, pathname), cms.InputTag("TriggerResults","","HLT"), cms.InputTag("TriggerResults","",options.triggerTag))
             process.patTrigger.processName      = options.triggerTag
             process.patTriggerEvent.processName = options.triggerTag
@@ -799,21 +808,61 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
         if os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_') and (options.triggerTag=='HLT' or options.triggerTag=='REDIGI38X') :
             getattr(process, pathname).remove(process.eventWeightPU)
          
-        ############################
-        #### TEST GLUON TAGGING ####
-        ############################
+        ## do the replaceings, usually done in PF2PAT, here (again) in case PF2PAT was not run
+        massSearchReplaceAnyInputTag(getattr(process,pathname), 'selectedPatJetsAK5PF', 'selectedPatJets')
+        massSearchReplaceAnyInputTag(getattr(process,pathname), 'patMETsPF', 'patMETs')
+        massSearchReplaceAnyInputTag(getattr(process,pathname), cms.InputTag('scaledJetEnergy', 'selectedPatJetsAK5PF', process.name_()), cms.InputTag('scaledJetEnergy', 'selectedPatJets', process.name_()))
 
-        process.GluonTagProducer = cms.EDProducer('GluonTag',
-                                                  src    = cms.untracked.string('tightLeadingJets'),
-                                                  xmldir = cms.untracked.string('VBFZ/GluonTag/data/'),
-                                                  mva    = cms.untracked.string('Likelihood')
-                                                  )
+    ## if skimmed event content is used or
+    ## bTag efficiency determination is done,
+    ## many modules are not needed
+    if not options.useSkimmedEventContent :
+        if options.onlySkimming or options.bTagEfficiencyDetermination:
+            if hasattr(process,'mvaDisc')                        :
+                process.p1.remove(process.mvaDisc)                          
+            if hasattr(process,'ttFullHadJetPartonMatch')        :
+                process.p1.remove(process.ttFullHadJetPartonMatch)          
+            if hasattr(process,'ttFullHadHypGenMatch')           :
+                process.p1.remove(process.ttFullHadHypGenMatch)             
+            if hasattr(process,'kinFitTtFullHadEventHypothesis') :
+                process.p1.remove(process.kinFitTtFullHadEventHypothesis)   
+            if hasattr(process,'ttFullHadHypKinFit')             :
+                process.p1.remove(process.ttFullHadHypKinFit)               
+            if hasattr(process,'ttFullHadEvent')                 :
+                process.p1.remove(process.ttFullHadEvent)                   
+            if hasattr(process,'ttFullHadJetPartonMatch2')       :
+                process.p1.remove(process.ttFullHadJetPartonMatch2)         
+            if hasattr(process,'ttFullHadHypGenMatch2')          :
+                process.p1.remove(process.ttFullHadHypGenMatch2)            
+            if hasattr(process,'ttFullHadEvent2')                :
+                process.p1.remove(process.ttFullHadEvent2)                  
+            if hasattr(process,'bTagSFEventWeight')              :
+                process.p1.remove(process.bTagSFEventWeight)
+            if hasattr(process,'bTagSFEventWeightBTagSFUp')      :
+                process.p1.remove(process.bTagSFEventWeightBTagSFUp)
+            if hasattr(process,'bTagSFEventWeightBTagSFDown')    :
+                process.p1.remove(process.bTagSFEventWeightBTagSFDown)
+            if hasattr(process,'bTagSFEventWeightMisTagSFUp')    :
+                process.p1.remove(process.bTagSFEventWeightMisTagSFUp)
+            if hasattr(process,'bTagSFEventWeightMisTagSFDown')  :
+                process.p1.remove(process.bTagSFEventWeightMisTagSFDown)
+            if hasattr(process,'FullHadTreeWriter')              :
+                process.p1.remove(process.FullHadTreeWriter)                
+            if hasattr(process,'analyzeKinFit')                  :
+                process.p1.remove(process.analyzeKinFit)                    
+            if hasattr(process,'analyzeJets')                    :
+                process.p1.remove(process.analyzeJets)                      
+            if hasattr(process,'analyzeWeights')                 :
+                process.p1.remove(process.analyzeWeights)
+            ## when skimming is done, remove PUweight, too
+            if options.onlySkimming:
+                if hasattr(process,'eventWeightPU'):
+                    process.p1.remove(process.eventWeightPU)
+             ## when bTag efficiency is determined PUweight and bTagEff are needed
+            if options.bTagEfficiencyDetermination:
+                process.p1 += process.bTagEff
+                process.TFileService.fileName = 'bTagEff_test.root'
 
-        getattr(process, pathname).replace(process.tightLeadingJets, process.tightLeadingJets*process.GluonTagProducer)
-        #process.FullHadTreeWriter.GluonTagSrc = ''
-
-        ############################
-        ############################
 
 ## Output Module Configuration
 if options.writeOutput:
@@ -825,20 +874,22 @@ if options.writeOutput:
                                          dropMetaData = cms.untracked.string('DROPPED'),
                                          # save output (comment to keep everything...)
                                          outputCommands = cms.untracked.vstring('drop *',
-                                                                                'keep *_generator_*_*',
-                                                                                'keep *_TriggerResults_*_HLT',
+                                                                                #'keep *_generator_*_*',
+                                                                                #'keep *_TriggerResults_*_HLT',
                                                                                 'keep *_addPileupInfo_*_*',
-                                                                                'keep *_genEvt_*_FullHadTreeWriter',
-                                                                                'keep *_decaySubset_*_FullHadTreeWriter',
-                                                                                'keep *_initSubset_*_FullHadTreeWriter',
-                                                                                'keep *_ttFullHadEvent_*_FullHadTreeWriter',
-                                                                                'keep *_mvaDisc_*_*',
-                                                                                'keep *_eventWeightPU_*_*',
-                                                                                'keep *_selectedPatJets_*_*',
-                                                                                'keep *_selectedPatElectrons_*_*',
-                                                                                'keep *_selectedPatMuons_*_*',
-                                                                                'keep *_patMETs_*_*',
-                                                                                ) 
+                                                                                #'keep *_genEvt_*_FullHadTreeWriter',
+                                                                                #'keep *_decaySubset_*_FullHadTreeWriter',
+                                                                                #'keep *_initSubset_*_FullHadTreeWriter',
+                                                                                #'keep *_ttFullHadEvent_*_FullHadTreeWriter',
+                                                                                #'keep *_mvaDisc_*_*',
+                                                                                #'keep *_eventWeightPU_*_*',
+                                                                                #'keep *_selectedPatJets_*_*',
+                                                                                'keep *_tightLeadingJets_*_*',
+                                                                                #'keep *_selectedPatElectrons_*_*',
+                                                                                #'keep *_selectedPatMuons_*_*',
+                                                                                #'keep *_patMETs_*_*',
+                                                                                'keep *_goodOfflinePrimaryVertices_*_*',
+                                                                                )
                                          )
     process.outpath = cms.EndPath(process.outModule)
 
