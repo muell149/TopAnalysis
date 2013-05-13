@@ -15,9 +15,9 @@
 #include <TH1.h>
 
 #include "HiggsAnalysis.h"
-#include "sampleHelpers.h"
 #include "analysisHelpers.h"
 #include "JetCategories.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/utils.h"
 #include "../../diLeptonic/src/PUReweighter.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"

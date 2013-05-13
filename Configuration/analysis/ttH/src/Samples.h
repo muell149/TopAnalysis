@@ -4,8 +4,8 @@
 #include <vector>
 #include <map>
 
-#include "sampleHelpers.h"
 #include "SamplesFwd.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 
 class RootFileReader;
 class TString;

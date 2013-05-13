@@ -16,6 +16,7 @@
 #include "CommandLineParameters.h"
 #include "utils.h"
 #include "ScaleFactors.h"
+#include "sampleHelpers.h"
 
 
 

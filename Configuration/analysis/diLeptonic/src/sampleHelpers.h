@@ -9,6 +9,10 @@ class TString;
 
 
 
+
+
+
+/// Namespace to treat systematics as enum types
 namespace Systematic{
     
     /// All systematics as needed in any part of the framework
@@ -61,6 +65,7 @@ namespace Systematic{
         powheg,
         mcatnlo,
         pdf,        // PDF variations
+        all,        // All allowed systematics
         undefined   // No systematic defined (also not nominal)
     };
     
@@ -108,6 +113,8 @@ namespace Systematic{
 
 
 
+
+/// Namespace to treat decay channels as enum types
 namespace Channel{
     
     /// All dileptonic decay channels as needed in any part of the framework
@@ -156,8 +163,7 @@ namespace Channel{
 
 
 
-
-namespace Tools{
+namespace ttbar{
     
     /// Create and assign an output folder depending on the channel and systematic
     TString assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic);
@@ -172,7 +178,8 @@ namespace Tools{
 
 
 
-#endif // sampleHelpers_h
+
+#endif
 
 
 

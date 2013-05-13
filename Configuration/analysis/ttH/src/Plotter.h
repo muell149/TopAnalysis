@@ -10,8 +10,8 @@ class TString;
 class TH1;
 
 #include "plotterHelpers.h"
-#include "sampleHelpers.h"
 #include "SamplesFwd.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 
 class DyScaleFactors;
 

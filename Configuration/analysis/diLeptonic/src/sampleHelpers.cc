@@ -67,6 +67,7 @@ Systematic::Systematic Systematic::convertSystematic(const std::string& systemat
     if(systematic == "POWHEG") return powheg;
     if(systematic == "MCATNLO") return mcatnlo;
     if(systematic == "PDF") return pdf;
+    if(systematic == "all") return all;
     std::cout<<"Warning! The following systematic conversion is not implemented: "<<systematic<<std::endl<<std::endl;
     return undefined;
 }
@@ -123,6 +124,7 @@ std::string Systematic::convertSystematic(const Systematic& systematic)
     if(systematic == powheg) return "POWHEG";
     if(systematic == mcatnlo) return "MCATNLO";
     if(systematic == pdf) return "PDF";
+    if(systematic == all) return "all";
     if(systematic == undefined) return "";
     std::cout<<"Error! Systematic conversion is not implemented, break...\n"<<std::endl;
     exit(99);
@@ -226,7 +228,7 @@ std::vector<std::string> Channel::convertChannels(const std::vector<Channel>& ch
 
 
 
-TString Tools::assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
+TString ttbar::assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
     std::string path("");
     
@@ -255,7 +257,7 @@ TString Tools::assignFolder(const char* baseDir, const Channel::Channel& channel
 
 
 
-TString Tools::accessFolder(const char* baseDir, const Channel::Channel& channel,
+TString ttbar::accessFolder(const char* baseDir, const Channel::Channel& channel,
                             const Systematic::Systematic& systematic, const bool allowNonexisting)
 {
     // Build directory path

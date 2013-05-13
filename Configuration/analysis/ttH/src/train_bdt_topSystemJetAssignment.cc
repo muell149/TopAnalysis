@@ -15,8 +15,8 @@
 #include "TMVA/Types.h"
 #include "TMVA/Config.h"
 
-#include "sampleHelpers.h"
 #include "MvaInputVariables.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 
 //#include "TMVAGui.C"
 

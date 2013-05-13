@@ -20,11 +20,12 @@
 #include <TPaveText.h>
 
 #include "Plotter.h"
-#include "../../diLeptonic/src/RootFileReader.h"
-#include "../../diLeptonic/src/plotterUtils.h"
 #include "higgsUtils.h"
 #include "Samples.h"
 #include "DyScaleFactors.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../diLeptonic/src/RootFileReader.h"
+#include "../../diLeptonic/src/plotterUtils.h"
 
 
 
@@ -329,7 +330,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     ttbar::drawRatio(dataHist.second, stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots and write them
-    const TString eventFileString = Tools::assignFolder(ControlPlotDIR, channel, systematic);
+    const TString eventFileString = ttbar::assignFolder(ControlPlotDIR, channel, systematic);
     canvas->Print(eventFileString+name_+".eps");
     
     // Prepare additional histograms for root-file

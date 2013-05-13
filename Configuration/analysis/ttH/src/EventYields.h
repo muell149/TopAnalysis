@@ -6,7 +6,7 @@
 
 class TString;
 
-#include "sampleHelpers.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 
 class RootFileReader;
 class Sample;
