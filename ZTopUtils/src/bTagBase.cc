@@ -1,4 +1,5 @@
 #include "../interface/bTagBase.h"
+#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
  
 namespace ztop{
 
@@ -10,6 +11,7 @@ namespace ztop{
     syst_=0;
     is2011_=false;
     cbflatineta_=true;
+    TH1::AddDirectory(kFALSE); 
   }
   void bTagBase::setSampleName(const std::string & samplename){
     //set pointers
@@ -255,8 +257,9 @@ namespace ztop{
   }
 
 
-  void bTagBase::writeToTFile(TFile * f, std::string treename){
-
+  void bTagBase::writeToTFile(TString filename, std::string treename){
+    AutoLibraryLoader::enable();
+    TFile * f = new TFile(filename,"RECREATE");
     bool madenew=false;
     TTree * t=0;
     if(f->Get((treename).data())){
@@ -276,17 +279,22 @@ namespace ztop{
       t->Branch("allbTagBase",this);
       std::cout << "bTagBase::writeToTFile: added branch" << std::endl;
     }
+    setMakeEff(false);
+    cleanptr();
     t->Fill();
     t->Write("",TObject::kOverwrite);
     if(madenew)
-      delete t;
+       delete t;
+    f->Close();
+    delete f;
   }
 
 
 
 
-  void bTagBase::readFromTFile(TFile * f, std::string treename){
-
+  void bTagBase::readFromTFile(TString filename, std::string treename){
+    AutoLibraryLoader::enable();
+    TFile * f = new TFile(filename);
     TTree * t = (TTree*) f->Get(treename.data());
     bTagBase * bt=0;
     t->SetBranchAddress("allbTagBase", &bt); 
@@ -300,6 +308,8 @@ namespace ztop{
 	return;
       }
     }
+    f->Close();
+    delete f;
   }
 
  

@@ -33,10 +33,12 @@ namespace ztop{
   class bTagBase {
   public:
     bTagBase();
-    ~bTagBase(){};
+    ~bTagBase(){cleanptr();}
+
+    void cleanptr(){histp_=0; effhistp_=0;}
 
     void setIs2011(bool is){is2011_=is;}
-  
+    
     void setSampleName(const std::string &); //checks if effs should be made, if sample exists,..
 
     void setMakeEff(bool makee){makeeffs_=makee;}
@@ -55,8 +57,8 @@ namespace ztop{
 
     void setSystematic(const std::string &); //! up, down, def + heavy, light (check if string contains) - not protected agains weird input like "heavy up down light" etc
 
-    void writeToTFile(TFile *, std::string treename="stored_objects"); //! writes whole class to TFile
-    void readFromTFile(TFile *, std::string treename="stored_objects");  //! reads whole class from TFile
+    void writeToTFile(TString, std::string treename="stored_objects"); //! writes whole class to TFile
+    void readFromTFile(TString , std::string treename="stored_objects");  //! reads whole class from TFile
 
     //don't forget to set makeeffs_ to false after read-in
 
@@ -80,10 +82,13 @@ namespace ztop{
 
     bool makeeffs_;
 
+    // void copy();
+
     //some temps
     std::string tempsamplename_;  
     std::vector<TH2D> * histp_;
     std::vector<TH2D> * effhistp_;
+
 
 
     //SFs btv input

@@ -21,10 +21,12 @@ namespace ztop{
   }
 
   JECBase::~JECBase(){
+  
     if(totalunc_) delete totalunc_;
     for(unsigned int i=0;i<vsrc_.size();i++){
       if(vsrc_.at(i)) delete vsrc_.at(i);
     }
+    
   }
   
 
