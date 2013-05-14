@@ -1551,7 +1551,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         else if (jetnumReco>0){
             h_GenRecoExtraJetpT2->Fill(jets_->at(extrarecojet[second]).Pt(),allGenJets_->at(extragenjet[1]).Pt(),weight);
             h_GenRecoExtraJetEta2->Fill(jets_->at(extrarecojet[second]).Eta(),allGenJets_->at(extragenjet[1]).Eta(),weight);
-            h_GenRecoDeltaRExtraJet12->Fill(std::fabs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),std::fabs(DeltaR(allGenJets_->at(extragenjet[2]),allGenJets_->at(extragenjet[1]))),weight);
+            h_GenRecoDeltaRExtraJet12->Fill(std::fabs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),std::fabs(DeltaR(allGenJets_->at(extragenjet[1]),allGenJets_->at(extragenjet[0]))),weight);
         }
         else if (jetnumReco >-1 ){
             h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),allGenJets_->at(extragenjet[0]).Pt(),weight); 
