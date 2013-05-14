@@ -140,9 +140,16 @@ the plots will be put into a directory called Plots according to the channel in 
 
 Once the plots has been created you can get the typical systematic errors for the Diff. XSection via:
 
-./TypicalError
+build/TypicalErrors
 
-This runs GetTypicalErrors.C which checks for one specific systematic variation, and one specific
+Please be aware that should be compiled via:
+
+cd build
+cmake ..
+make TypicalErrors
+cd ..
+
+This runs TypicalErrors.cc which checks for one specific systematic variation, and one specific
 channel (ee, emu, mumu) in all files 
     Plots/channel/*Systematics.txt
 it parses the content and for one specific systematic takes the average ('typical') systematic error.
