@@ -282,9 +282,15 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     syshist->SetFillColor(kBlack);
     
     // Set x and y axis
-    if(logY_)canvas->SetLogy();
+    if(logY_) {
+      // Setting minimum to >0 value 
+      // FIXME: Should we automatically calculate minimum value instead of the fixed value?
+      dataHist.second->SetMinimum(1e-1);
+      if(ymin_>0) dataHist.second->SetMinimum(ymin_);
+      canvas->SetLogy();
+    }
 
-    dataHist.second->SetMinimum(ymin_);
+    if(!logY_) dataHist.second->SetMinimum(ymin_);
 
     if(rangemin_!=0 || rangemax_!=0) {dataHist.second->SetAxisRange(rangemin_, rangemax_, "X");}
 
