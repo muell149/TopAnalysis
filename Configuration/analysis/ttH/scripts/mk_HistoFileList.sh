@@ -5,12 +5,17 @@
 if [ $# -ge 2 ] ; then
   echo "Usage: $0"
   echo "Usage: $0 mva"
+  echo "Usage: $0 <selectionRoot directory>"
   exit 1
 fi
 
 
 inputDir="selectionRoot"
 outputDir="FileLists_plot"
+
+if [[ "x$1" != "x" ]] ; then
+    inputDir="$1"
+fi
 
 
 if [[ "$1" == mva ]] ; then
