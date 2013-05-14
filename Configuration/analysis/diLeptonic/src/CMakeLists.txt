@@ -34,3 +34,8 @@ add_executable(Histo
 )
 TARGET_LINK_LIBRARIES(Histo ${ROOT_LIBRARIES} miscTools unfolding) 
     
+add_executable(TypicalErrors
+    TypicalErrors
+)
+TARGET_LINK_LIBRARIES(TypicalErrors ${ROOT_LIBRARIES} miscTools) 
+    
