@@ -145,11 +145,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   //        45: sysGenMCatNLO              46: sysGenPowheg  
   //        47: ENDOFSYSENUM
 
-  int systematicVariation=sysNo; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg: sysGenPowheg, McatNLO: sysGenMCatNLO
+  int systematicVariation=sysNo; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg: sysGenPowheg/sysTestPowheg, McatNLO: sysGenMCatNLO/sysTestMCatNLO
   // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
-  if(systematicVariation==sysGenMCatNLO) ttbarMC="Mcatnlo";
-  else if(systematicVariation==sysGenPowheg)  ttbarMC="Powheg";
+  if     (systematicVariation==sysGenMCatNLO||systematicVariation==sysTestMCatNLO) ttbarMC="Mcatnlo";
+  else if(systematicVariation==sysGenPowheg ||systematicVariation==sysTestPowheg ) ttbarMC="Powheg";
   if(ttbarMC!="Madgraph"){
     pdfName+=ttbarMC;
     outputFolder+=ttbarMC;

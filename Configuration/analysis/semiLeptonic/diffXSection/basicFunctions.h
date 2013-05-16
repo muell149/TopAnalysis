@@ -159,7 +159,11 @@ namespace semileptonic {
 			     /*41:*/ sysPDFUp,                   /*42:*/ sysPDFDown,
 			     /*43:*/ sysHadUp,                   /*44:*/ sysHadDown,
 			     /*45:*/ sysGenMCatNLO,              /*46:*/ sysGenPowheg,
-			     /*47:*/ ENDOFSYSENUM,               /*48:*/ sysTest };
+			     /*47:*/ ENDOFSYSENUM,               /*48:*/ sysTest, 
+			     /*49:*/ sysTestMCatNLO,             /*50:*/ sysTestPowheg,
+			     /*51:*/ ENDOFSYSENUM2
+
+};
 
   // ============================
   //  Numerical Constants
@@ -329,7 +333,7 @@ namespace semileptonic {
     // chosen, the corresponding systematic shifted
     // SF is returned
 
-    if(sys>=ENDOFSYSENUM&&sys!=sysTest){
+    if(sys>=ENDOFSYSENUM2){
       std::cout << "ERROR in effSFAB:" << std::endl;
       std::cout << "sys must be smaller than " << ENDOFSYSENUM << std::endl;
     }
@@ -618,7 +622,7 @@ namespace semileptonic {
   }
 
   int getRelevantDigits(double value){
-    // this function calculated the number 
+    // this function calculates the number 
     // of digits of "value"+1 if following digit is nonzero
     // ATTENTION: only the first 10 digits are checked!
     // modified quantities: NONE
@@ -1203,9 +1207,7 @@ namespace semileptonic {
       if(sys==sysPDFDown) fileName = "PDFDown/"+fileName+"PdfVarDown";
     }
     // data based pt ttbar reweighting
-    if(sample==kSig||sample==kBkg){
-      if(sys==sysTest) fileName = "ttbarReweight/"+fileName+"SysDistortdata";    
-    }  
+    if( (sys==sysTest&&(sample==kSig||sample==kBkg))||(sys==sysTestPowheg&&(sample==kSigPow||sample==kBkgPow))||(sys==sysTestMCatNLO&&(sample==kSigMca||sample==kBkgMca)) ) fileName = "ttbarReweight/"+fileName+"SysDistortdata";    
     // Q2-Scale
     // (a) top (ttbar+single top)
     if((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt)||(sample==kSToptW1)||(sample==kSAToptW1)||(sample==kSToptW2)||(sample==kSAToptW2)||(sample==kSToptW3)||(sample==kSAToptW3)){
@@ -1239,6 +1241,8 @@ namespace semileptonic {
     // label for MC production cycle
     fileName += "Summer12";
     fileName += "PF.root";
+    // debug
+    if(sys==sysTestMCatNLO) std::cout << fileName << std::endl;
     // return output
     return fileName;
   }
