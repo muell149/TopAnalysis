@@ -18,8 +18,7 @@ using namespace std;
 
 vector<TString> Channels(){
     
-  vector<TString> channel {"ee", "emu", "mumu", "combined"};
-    
+    vector<TString> channel {"ee", "emu", "mumu", "combined"};
     return channel;
 }
 
@@ -27,7 +26,7 @@ vector<TString> Variables(){
     
     vector<TString> variables {"ToppTLead", "ToppTNLead", "ToppT",
                                "TopRapidityLead", "TopRapidityNLead", "TopRapidity",
-                               "BJetpTLead", "BJetpT",
+                               "BJetpTLead", "BJetpTNLead", "BJetpT",
                                "BJetEtaLead", "BJetEtaNLead", "BJetEta",
                                "LeptonpTLead", "LeptonpTNLead", "LeptonpT",
                                "LeptonEtaLead", "LeptonEtaNLead", "LeptonEta",
@@ -40,13 +39,19 @@ vector<TString> Variables(){
 
 vector<TString> Systematics (){
 
-  vector<TString> systematics {"BTAG_", "BTAG_LJET_", "BTAG_BEFF_",
-                                 "BTAG_PT_", "BTAG_ETA_", "BTAG_LJET_PT_", "BTAG_LJET_ETA_", 
-      "MASS_", "SCALE_", "MATCH_", "HAD_", "KIN_", "LEPT_",
-      "JES_", "JER_", "PU_", "TRIG_", "DY_", "BG_", "PDF_"
+    vector<TString> systematics {"BTAG_", "BTAG_LJET_", 
+                                "BTAG_PT_", "BTAG_ETA_",
+                                "BTAG_LJET_PT_", "BTAG_LJET_ETA_", 
+                                "MASS_", "SCALE_", "MATCH_", "HAD_",
+                                "KIN_", "LEPT_",
+                                "JES_", "JER_",
+                                "PU_", "TRIG_",
+                                "DY_", "BG_",
+                                "PDF_"
                                 };
 
-    return systematics;
+
+        return systematics;
 }
 
 
