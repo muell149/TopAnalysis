@@ -164,9 +164,9 @@ protected:
     
     
     /// Variables associated to nTuple branches for Higgs signal samples on generator level
-    LV    *GenH_;
-    LV    *GenBFromH_;
-    LV    *GenAntiBFromH_;
+    LV *GenH_;
+    LV *GenBFromH_;
+    LV *GenAntiBFromH_;
     
     
     /// Information in nTuple stored in TObjString once per file, but added from outside and potentially configured
@@ -372,7 +372,7 @@ private:
     
     
     /// Uncertainty for JES systematics
-    JetCorrectionUncertainty *unc_;
+    JetCorrectionUncertainty* jetCorrectionUncertainty_;
     
     
     /// Event counter
@@ -616,6 +616,160 @@ private:
     
     /// Reweight funtion estimated by Martin Goerner
     double topPtReweightValue(const double& pt)const;
+    
+    
+protected:
+    
+    /// Struct for holding variables associated to nTuple branches relevant for reconstruction level
+    struct RecoObjects{
+        RecoObjects();
+        ~RecoObjects(){}
+        void clear();
+        
+        bool isInitialised_;
+        
+        // Concerning physics objects
+        VLV* allLeptons_;
+        std::vector<int>* lepPdgId_;
+        //std::vector<double>* lepID_;
+        std::vector<double>* lepPfIso_;
+        //std::vector<double>* lepChargedHadronIso_;
+        //std::vector<double>* lepNeutralHadronIso_;
+        //std::vector<double>* lepPhotonIso_;
+        //std::vector<double>* lepPuChargedHadronIso_;
+        std::vector<double>* lepCombIso_;
+        std::vector<double>* lepDxyVertex0_;
+        //std::vector<int>* lepTrigger_;
+        VLV* jets_;
+        std::vector<double>* jetBTagTCHE_;
+        //std::vector<double>* jetBTagTCHP_;
+        std::vector<double>* jetBTagSSVHE_;
+        //std::vector<double>* jetBTagSSVHP_;
+        //std::vector<double>* jetBTagJetProbability_;
+        //std::vector<double>* jetBTagJetBProbability_;
+        std::vector<double>* jetBTagCSV_;
+        //std::vector<double>* jetBTagCSVMVA_;
+        std::vector<double>* jetChargeGlobalPtWeighted_;
+        std::vector<double>* jetChargeRelativePtWeighted_;
+        LV* met_;
+        std::vector<double>* jetJERSF_;
+        VLV* jetsForMET_;
+        std::vector<double>* jetForMETJERSF_;
+        
+        // Concerning event
+        UInt_t* runNumber_;
+        UInt_t* lumiBlock_;
+        UInt_t* eventNumber_;
+        //int* recoInChannel_;
+        Int_t* vertMulti_;
+    };
+    
+    /// Struct for holding variables associated to nTuple branches holding generator information for all MC samples
+    struct CommonGenObjects{
+        CommonGenObjects();
+        ~CommonGenObjects(){}
+        void clear();
+        
+        bool isInitialised_;
+        
+        // Concerning physics objects
+        VLV* allGenJets_;
+        std::vector<int>* jetPartonFlavour_;
+        VLV* associatedGenJet_;
+        VLV* associatedGenJetForMET_;
+        //std::vector<int>* jetAssociatedPartonPdgId_;
+        //std::vector<LV>* jetAssociatedParton_;
+    };
+    
+    /// Struct for holding variables associated to nTuple branches for Top signal samples on generator level
+    struct TopGenObjects{
+        TopGenObjects();
+        ~TopGenObjects(){}
+        void clear();
+        
+        bool isInitialised_;
+        
+        LV* GenMet_;
+        LV* GenTop_;
+        LV* GenAntiTop_;
+        LV* GenLepton_;
+        LV* GenAntiLepton_;
+        //int* GenLeptonPdgId_;
+        //int* GenAntiLeptonPdgId_;
+        //LV* GenTau_;
+        //LV* GenAntiTau_;
+        LV* GenNeutrino_;
+        LV* GenAntiNeutrino_;
+        LV* GenB_;
+        LV* GenAntiB_;
+        LV* GenWPlus_;
+        LV* GenWMinus_;
+        //std::vector<LV>* GenParticleP4_;
+        //std::vector<int>* GenParticlePdgId_;
+        //std::vector<int>* GenParticleStatus_;
+        std::vector<int>* BHadJetIndex_;
+        std::vector<int>* AntiBHadJetIndex_;
+        VLV* BHadrons_;
+        VLV* AntiBHadrons_;
+        std::vector<bool>* BHadronFromTopB_;
+        std::vector<bool>* AntiBHadronFromTopB_;
+        std::vector<int>* BHadronVsJet_;
+        std::vector<int>* AntiBHadronVsJet_;
+        //std::vector<int>* genBHadPlusMothersPdgId_;
+        //std::vector<int>* genBHadPlusMothersStatus_;
+        //std::vector<std::vector<int> >* genBHadPlusMothersIndices_;
+        std::vector<LV>* genBHadPlusMothers_;
+        std::vector<int>* genBHadIndex_;
+        std::vector<int>* genBHadFlavour_;
+        std::vector<int>* genBHadJetIndex_;
+    };
+    
+    /// Struct for holding variables associated to nTuple branches for Higgs signal samples on generator level
+    struct HiggsGenObjects{
+        HiggsGenObjects();
+        ~HiggsGenObjects(){}
+        void clear();
+        
+        bool isInitialised_;
+        
+        LV* GenH_;
+        LV* GenBFromH_;
+        LV* GenAntiBFromH_;
+    };
+    
+    
+    /// Get a constant reference to nTuple branches relevant for reconstruction level
+    const RecoObjects& getRecoObjects(const Long64_t& entry);
+    
+    /// Get a constant reference to nTuple branches holding generator information for all MC samples
+    const CommonGenObjects& getCommonGenObjects(const Long64_t& entry);
+    
+    /// Get a constant reference to nTuple branches for Top signal samples on generator level
+    const TopGenObjects& getTopGenObjects(const Long64_t& entry);
+    
+    /// Get a constant reference to nTuple branches for Higgs signal samples on generator level
+    const HiggsGenObjects& getHiggsGenObjects(const Long64_t& entry);
+    
+    
+    void applyJesSystematics(RecoObjects& recoObjects);
+    void applyJerSystematics(RecoObjects& recoObjects, const Long64_t& entry);
+    
+    
+private:
+    
+    /// Struct for holding variables associated to nTuple branches relevant for reconstruction level
+    RecoObjects recoObjects_;
+    
+    /// Struct for holding variables associated to nTuple branches holding generator information for all MC samples
+    CommonGenObjects commonGenObjects_;
+    
+    /// Struct for holding variables associated to nTuple branches for Top signal samples on generator level
+    TopGenObjects topGenObjects_;
+    
+    /// Struct for holding variables associated to nTuple branches for Higgs signal samples on generator level
+    HiggsGenObjects higgsGenObjects_;
+    
+    
 };
 
 
