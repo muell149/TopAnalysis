@@ -89,6 +89,8 @@ void TopKinematics::book()
   hists_["ttbarSumY"  ] = new TH1F( "ttbarSumY"  , "ttbarSumY"  ,  100, -5. ,    5.);
   // HT of the 4 jets assigned to the ttbar decay
   hists_["ttbarHT"    ] = new TH1F( "ttbarHT"    , "ttbarHT"    , 1500,  0. , 1500.);
+  // ttbar phiStar
+  hists_["ttbarPhiStar"] = new TH1F( "ttbarPhiStar" , "ttbarPhiStar" , 200, 0., 2.);  
 
   /**
      Top Variables for Cross Checks
@@ -128,8 +130,11 @@ void TopKinematics::book()
   hists_["bbbarPt"  ] = new TH1F( "bbbarPt"   , "bbbarPt"   , 1000,  0.,  1000.);
   hists_["bbbarY"   ] = new TH1F( "bbbarY"    , "bbbarY"    , 1000, -5.,  5.   );
   hists_["bbbarMass"] = new TH1F( "bbbarMass" , "bbbarMass" , 1500,  0.,  1500.);
+  // leptonic b + lepton invariant mass
   hists_["lbMass"   ] = new TH1F( "lbMass"    , "lbMass"    , 500,   0.,  500. );
- 
+  // b-top hadronization variable
+  hists_["xB"       ] = new TH1F( "xB"        , "xB"        , 200,  -0.5,  1.5 );
+
   /**
      asymmetry variables
   **/
@@ -321,6 +326,8 @@ void TopKinematics::book()
     //corrs_["leadqPt_"    ] = new TH2F( "leadqPt_"    , "leadqPt_"    ,  1200,  0. ,  1200. ,  1200,  0. ,  1200.);
     // gen-rec level correlation for leading quark Eta
     //corrs_["leadqEta_"   ] = new TH2F( "leadqEta_"   , "leadqEta_"   ,  100,  -5. ,  5.    ,  100,  -5. ,  5.   );
+    // ttbar phiStar
+    corrs_["ttbarPhiStar_"] = new TH2F( "ttbarPhiStar_" , "ttbarPhiStar_" , 200, 0., 2., 200, 0., 2.); 
 
     // splitting into leading and subleading top quarks
     corrs_["topPtLead_"      ] = new TH2F( "topPtLead_"    , "topPtLead_"    , 800 ,   0. , 800.,  800,   0. , 800.);
@@ -328,8 +335,9 @@ void TopKinematics::book()
     corrs_["lepYLead_"       ] = new TH2F( "lepYLead_"     , "lepYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["lepYSubLead_"    ] = new TH2F( "lepYSubLead_"  , "lepYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     // pt of the top candidates in the ttbar restframe
-    corrs_["topPtTtbarSys_"      ] = new TH2F( "topPtTtbarSys_"    , "topPtTtbarSys_"    , 800 ,   0. , 800.,  800,   0. , 800.);
-
+    corrs_["topPtTtbarSys_"  ] = new TH2F( "topPtTtbarSys_"    , "topPtTtbarSys_"    , 800 ,   0. , 800.,  800,   0. , 800.);
+    // b-top hadronization variable
+    corrs_["xB_"             ] = new TH2F( "xB_"           , "xB_"           , 200 ,  -0.5 ,  1.5 ,  200, -0.5 , 1.5 );
     // asymmetry variables
     //corrs_["topPtPlus_"      ] = new TH2F( "topPtPlus_"    , "topPtPlus_"    , 800 ,   0. , 800.,  800,   0. , 800.);
     //corrs_["topPtMinus_"     ] = new TH2F( "topPtMinus_"   , "topPtMinus_"   , 800 ,   0. , 800.,  800,   0. , 800.);
@@ -406,7 +414,9 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["ttbarSumY"  ] = fs->make<TH1F>( "ttbarSumY"  , "ttbarSumY"  ,  100, -5. ,    5.);
   // HT of the 4 jets assigned to the ttbar decay
   hists_["ttbarHT"    ] = fs->make<TH1F>( "ttbarHT"    , "ttbarHT"    , 1500,  0. , 1500.);
-
+  // ttbar phiStar
+  hists_["ttbarPhiStar"] = fs->make<TH1F>( "ttbarPhiStar" , "ttbarPhiStar" , 200, 0., 2.);
+  
   /**
      Top Variables for Cross Checks
   **/
@@ -445,7 +455,10 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
   hists_["bbbarPt"   ] = fs->make<TH1F>( "bbbarPt"   , "bbbarPt"   , 1000,  0.,  1000.);
   hists_["bbbarY"    ] = fs->make<TH1F>( "bbbarY"    , "bbbarY"    , 100,  -5.,  5.   );
   hists_["bbbarMass" ] = fs->make<TH1F>( "bbbarMass" , "bbbarMass" , 1500,  0.,  1500.);
+  // leptonic b + lepton invariant mass
   hists_["lbMass"    ] = fs->make<TH1F>( "lbMass"    , "lbMass"    , 500,   0.,  500. );
+  // b-top hadronization variable
+  hists_["xB"        ] = fs->make<TH1F>( "xB"        , "xB"        , 200, -0.5,  1.5  );
 
   /**
      asymmetry variables
@@ -611,6 +624,8 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     corrs_["ttbarDelY_" ] = fs->make<TH2F>( "ttbarDelY_"  , "ttbarDelY_"  , 1000.,   -5.,    5.,    1000.,  -5.,   5.);
     // gen-rec level correlation ttbar sumY
     //corrs_["ttbarSumY_" ] = fs->make<TH2F>( "ttbarSumY_"  , "ttbarSumY_" ,   50,   -5.,    5.,      50,  -5.,    5.);
+    // gen-rec level correlation ttbar phiStar
+    corrs_["ttbarPhiStar_"] = fs->make<TH2F>( "ttbarPhiStar_" , "ttbarPhiStar_" , 200, 0., 2., 200, 0., 2.);  
     // gen-rec level correlation angle between b jets
     //corrs_["bbbarAngle_"] = fs->make<TH2F>( "bbbarAngle_" , "bbbarAngle_",  315,    0.,    pi,     315,   0.,   pi );
     // gen-rec level correlation for lepton charge
@@ -644,8 +659,9 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     corrs_["topYLead_"    ] = fs->make<TH2F>("topYLead_"     , "topYLead_"     ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     corrs_["topYSubLead_" ] = fs->make<TH2F>("topYSubLead_"  , "topYSubLead_"  ,  100,  -5. ,  5. ,  100,  -5. ,  5. );
     // pt of the top candidates in the ttbar restframe
-    corrs_["topPtTtbarSys_" ] = fs->make<TH2F>( "topPtTtbarSys_", "topPtTtbarSys_", 800, 0., 800., 800, 0., 800.);
-
+    corrs_["topPtTtbarSys_" ] = fs->make<TH2F>( "topPtTtbarSys_", "topPtTtbarSys_", 800, 0., 800. , 800, 0., 800.);
+    // b-top hadronization variable xB=(1/(1-mW^1/mt^2)) * 2pBpT/mt^2
+    corrs_["xB_"            ] = fs->make<TH2F>( "xB_"           , "xB_"           , 200, -0.5, 1.5, 200, -0.5, 1.5);
     // asymmetry variables
     //corrs_["topPtPlus_"  ] = fs->make<TH2F>( "topPtPlus_"    , "topPtPlus_"    ,  800,   0. , 800.,  800,   0. , 800.);
     //corrs_["topPtMinus_" ] = fs->make<TH2F>( "topPtMinus_"   , "topPtMinus_"   ,  800,   0. , 800.,  800,   0. , 800.);
@@ -680,16 +696,19 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "ttbarDelY"  );
     bookVariable(fs, "ttbarSumY"  );
     bookVariable(fs, "ttbarHT"    );
+    bookVariable(fs, "ttbarPhiStar");
     // hadronic top quantities
     bookVariable(fs, "topPtHad"  );
     bookVariable(fs, "topYHad"   );
     bookVariable(fs, "topPhiHad" );
     bookVariable(fs, "hadTopMass");
+    bookVariable(fs, "xBHad"     );
     // leptonic top quantities
     bookVariable(fs, "topPtLep"  );
     bookVariable(fs, "topYLep"   );  
     bookVariable(fs, "topPhiLep" );
     bookVariable(fs, "lepTopMass");
+    bookVariable(fs, "xBLep"     );
     // top quantities (= top plus)
     bookVariable(fs, "topPtPlus" );
     bookVariable(fs, "topEtaPlus");
@@ -761,16 +780,19 @@ void TopKinematics::book(edm::Service<TFileService>& fs)
     bookVariable(fs, "ttbarDelYPartonTruth"  );
     bookVariable(fs, "ttbarSumYPartonTruth"  );
     bookVariable(fs, "ttbarHTPartonTruth"    );
+    bookVariable(fs, "ttbarPhiStarPartonTruth"); 
     // hadronic top quantities
     bookVariable(fs, "topPtHadPartonTruth"  );
     bookVariable(fs, "topYHadPartonTruth"   );
     bookVariable(fs, "topPhiHadPartonTruth" );
     bookVariable(fs, "hadTopMassPartonTruth");
+    bookVariable(fs, "xBHadPartonTruth"     );
     // leptonic top quantities
     bookVariable(fs, "topPtLepPartonTruth"  );
     bookVariable(fs, "topYLepPartonTruth"   );  
     bookVariable(fs, "topPhiLepPartonTruth" );
     bookVariable(fs, "lepTopMassPartonTruth");
+    bookVariable(fs, "xBLepPartonTruth"     );
     // lepton quantities
     bookVariable(fs, "lepPtPartonTruth"     );
     bookVariable(fs, "lepEtaPartonTruth"    );
@@ -851,7 +873,7 @@ TopKinematics::fill(const TtGenEvent& tops, const double& weight)
     // ---
     //    fill all 1D histos
     // ---
-    fill(lepTop, hadTop, topPlus, topMinus, lepW, hadW, HT,  tops.singleLepton()->charge(), weight);
+    fill(lepTop, hadTop, topPlus, topMinus, lepW, hadW, lepB, hadB, HT, tops.singleLepton()->charge(), weight);
     // ---
     //    fill 1D angle histos
     // ---
@@ -911,10 +933,12 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double hadTopGenRapidity=-9999;
   double hadTopGenPhi     =-9999;
   double hadTopGenMass    =-9999;
+  double hadxBGen         =-9999;
   double lepTopGenPt      =-9999;
   double lepTopGenRapidity=-9999;  
   double lepTopGenPhi     =-9999;
   double lepTopGenMass    =-9999;
+  double lepxBGen         =-9999;
   double HTrec            =-9999;
   double prob             =-9999;
   double chi2             =-9999;
@@ -930,6 +954,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   double genyLead         =-9999;
   double genySubLead      =-9999;
   double gentopPtTtbarSystem =-9999;
+  double genTtbarPhiStar=-9999;
+  double ttbarPhiStarRec=-9999;
 
   if(useTree_) initializeTrees(-9999, weight);
   // ttbar decay channel
@@ -992,7 +1018,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	 if matchForStabilityAndPurity_ is true
       **/
       if( matchForStabilityAndPurity_ ){
-	fill(lepTopRec, lepTopGen, hadTopRec, hadTopGen, lepWRec, lepWGen, hadWRec, hadWGen, HTrec, HTgen, weight);
+	fillGenRec(lepTopRec, lepTopGen, hadTopRec, hadTopGen, lepWRec, lepWGen, hadWRec, hadWGen, HTrec, HTgen, weight);
 	oneDplotsFilled=true;
       }
       /**
@@ -1013,6 +1039,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       genTtbarMass     = genTtbar.mass();
       genDeltaPhi      = deltaPhi(lepTopGen->phi(), hadTopGen->phi());
       genDeltaRapidity = lepTopGen->rapidity()-hadTopGen->rapidity();
+      genTtbarPhiStar  = TMath::Tan(0.5*(pi-std::abs(genDeltaPhi)))/TMath::CosH(0.5*(lepTopGen->eta()-hadTopGen->eta()));
+      ttbarPhiStarRec  = TMath::Tan(0.5*(pi-std::abs(deltaPhi(lepTopRec->phi(),hadTopRec->phi()))))/TMath::CosH(0.5*(lepTopRec->eta()-hadTopRec->eta()));
       sumRapidity      = lepTopGen->rapidity()+hadTopGen->rapidity();
       hadTopGenPt      = hadTopGen->pt();
       hadTopGenRapidity= hadTopGen->rapidity();
@@ -1052,6 +1080,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
       genptSubLead     = topMinusGen->pt();
       genyLead         = topPlusGen ->rapidity();
       genySubLead      = topMinusGen->rapidity();
+
+      // find leading top
       if(genptLead<genptSubLead){// swop them
 	double gentemp=genptLead;
 	double gentemp2=genyLead;
@@ -1060,8 +1090,23 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	genptSubLead=gentemp;
 	genySubLead=gentemp2;
       }
-
+      // b-top hadronization variable
+      // (1/(1-mW^1/mt^2)) * pBpT/mt^2
+      // gen
+      lepxBGen =(1/(1-((lepWGen->p4()).mass2())/((lepTopGen->p4()).mass2()))) * 2*((lepBGen->p4()).Dot(lepTopGen->p4()))/((lepTopGen->p4()).mass2());
+      hadxBGen =(1/(1-((hadWGen->p4()).mass2())/((hadTopGen->p4()).mass2()))) * 2*((hadBGen->p4()).Dot(hadTopGen->p4()))/((hadTopGen->p4()).mass2());
+      // rec
+      double lepxBRec =(1/(1-((lepWRec->p4()).mass2())/((lepTopRec->p4()).mass2()))) * 2*((lepBRec->p4()).Dot(lepTopRec->p4()))/((lepTopRec->p4()).mass2());
+      double hadxBRec =(1/(1-((hadWRec->p4()).mass2())/((hadTopRec->p4()).mass2()))) * 2*((hadBRec->p4()).Dot(hadTopRec->p4()))/((hadTopRec->p4()).mass2());
+      //std::cout << "lepxBRec =(1/(1-((lepWRec->p4()).mass2())/((lepTopRec->p4()).mass2()))) * 2*((lepBRec->p4()).Dot(lepTopRec->p4()))/((lepTopRec->p4()).mass2())" << std::endl;
+      //std::cout << "((lepWRec->p4()).mass2())/((lepTopRec->p4()).mass2()=" << ((lepWRec->p4()).mass2())/((lepTopRec->p4()).mass2()) << std::endl;
+      //std::cout << "((lepBRec->p4()).Dot(lepTopRec->p4()))=" << ((lepBRec->p4()).Dot(lepTopRec->p4())) << std::endl;
+      //std::cout << "(lepTopRec->p4()).mass2()=" << (lepTopRec->p4()).mass2() << std::endl;
+      //std::cout << "->xB=" << lepxBRec << std::endl;													 
       if(!hypoKey_.compare("None")==0){
+	// fill xB correlation plot
+	corrs_.find("xB_")->second->Fill( lepxBGen, lepxBRec, weight );
+	corrs_.find("xB_")->second->Fill( hadxBGen, hadxBRec, weight );
 	// fill pt correlation plot for ttbar pair
 	corrs_.find("ttbarPt_"  )->second->Fill( genTtbar.pt()      , recTtbar.pt()       , weight );
 	// fill y correlation plot for ttbar pair
@@ -1070,7 +1115,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	corrs_.find("ttbarMass_")->second->Fill( genTtbar.mass()    , recTtbar.mass()     , weight );    
 	// fill HT correlation plot for the 4 jets assigned to the ttbar decay
 	//corrs_.find("ttbarHT_"  )->second->Fill( HTgen              , HTrec               , weight ); 
-
+	// fill ttbar phi star 
+	corrs_.find("ttbarPhiStar_")->second->Fill( genTtbarPhiStar, ttbarPhiStarRec, weight );
 	// fill pt correlation plot for hadronic top candidate
 	corrs_.find("topPt_")->second->Fill( hadTopGen->pt(), hadTopRec->pt(), weight );
 	// fill pt correlation plot for leptonic top candidate
@@ -1103,6 +1149,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
 	//corrs_.find("topYPlus_"   )->second->Fill( topPlusGen ->rapidity(), topPlusRec ->rapidity(), weight );
 	//corrs_.find("topYMinus_"  )->second->Fill( topMinusGen->rapidity(), topMinusRec->rapidity(), weight );
 
+	// find leading top
 	bool plusGen=(topPlusGen->pt() > topMinusGen->pt() ? true : false);
 	bool plusRec=(topPlusRec->pt() > topMinusRec->pt() ? true : false);
 
@@ -1270,7 +1317,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
     // if matchForStabilityAndPurity_=false: 1D plots for all events with valid hypothesis
     if( !oneDplotsFilled ){  
       // fill kinematic 1D histos
-      fill(lepTopRec, hadTopRec, topPlusRec, topMinusRec, lepWRec, hadWRec, HTrec, tops.singleLepton(hypoKey_)->charge(), weight);
+      fill(lepTopRec, hadTopRec, topPlusRec, topMinusRec, lepWRec, hadWRec, lepBRec, hadBRec, HTrec, tops.singleLepton(hypoKey_)->charge(), weight);
       // fill angle histos
       fillAngles(tops.hadronicDecayB       (hypoKey_)->p4(), tops.hadronicDecayQuark(hypoKey_)->p4(), 
 		 tops.hadronicDecayQuarkBar(hypoKey_)->p4(), tops.leptonicDecayB    (hypoKey_)->p4(), 
@@ -1385,6 +1432,7 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "ttbarDelYPartonTruth"  , genDeltaRapidity, weight );
   fillValue( "ttbarSumYPartonTruth"  , sumRapidity     , weight );
   fillValue( "ttbarHTPartonTruth"    , HTgen           , weight );
+  fillValue( "ttbarPhiStarPartonTruth", genTtbarPhiStar , weight );
   fillValue( "topPtHadPartonTruth"   , hadTopGenPt      , weight );
   fillValue( "topYHadPartonTruth"    , hadTopGenRapidity, weight );
   fillValue( "topPhiHadPartonTruth"  , hadTopGenPhi     , weight );
@@ -1419,8 +1467,8 @@ TopKinematics::fill(const TtSemiLeptonicEvent& tops, const double& weight)
   fillValue( "topYLeadPartonTruth"    , genyLead      , weight );
   fillValue( "topPtSubLeadPartonTruth", genptSubLead  , weight );
   fillValue( "topYSubLeadPartonTruth" , genySubLead   , weight );
-
-
+  fillValue( "xBLepPartonTruth"       , lepxBGen      , weight );
+  fillValue( "xBHadPartonTruth"       , hadxBGen      , weight );
 
   // fill the tree, if any variable should be put in
   if(treeVars_.size()) tree->Fill();
@@ -1431,6 +1479,7 @@ void
 TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, 
 		    const reco::Candidate* topPlus    , const reco::Candidate* topMinus   , 
 		    const reco::Candidate* leptonicW  , const reco::Candidate* hadronicW, 
+		    const reco::Candidate* leptonicB  , const reco::Candidate* hadronicB,
 		    double HT, const double& charge, const double& weight)
 {
   /** 
@@ -1466,7 +1515,6 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   //    top variables (as no branch is created, they exist only as plot)
   // ---
   // fill top pt in ttbar restframe 
-  //std::cout << "lepTop : " << LeptonicDecayTopBoosted.pt() << ", hadTop : " << HadronicDecayTopBoosted.pt() << std::endl;
   fillValue( "topPtTtbarSys", HadronicDecayTopBoosted.pt() , weight );
   // fill top pt for leptonicTop candidate in combined histogram
   fillValue( "topPt", leptonicTop->p4().pt()     , weight );
@@ -1532,6 +1580,9 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   fillValue( "ttbarSumY", leptonicTop->rapidity()+hadronicTop->rapidity(), weight );
   // fill HT of the 4 jets assigned to the ttbar decay
   fillValue( "ttbarHT", HT, weight );
+  // fill ttbar phi star
+  double ttbarPhiStar  = TMath::Tan(0.5*(pi-std::abs(deltaPhi(leptonicTop->phi(),hadronicTop->phi()))))/TMath::CosH(0.5*(leptonicTop->eta()-hadronicTop->eta()));
+  fillValue( "ttbarPhiStar", ttbarPhiStar, weight );
 
   // ---
   //    asymmetry variables
@@ -1543,6 +1594,7 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   fillValue( "topPtPlus"  , topPlus->p4().pt()       , weight );
   fillValue( "topPtMinus" , topMinus->p4().pt()      , weight );
 
+  // find leading top
   double ptLead   =leptonicTop->p4().pt();
   double ptSubLead=hadronicTop->p4().pt();
   double yLead   =leptonicTop->p4().Rapidity();
@@ -1564,22 +1616,29 @@ TopKinematics::fill(const reco::Candidate* leptonicTop, const reco::Candidate* h
   // fill top y for subleading Top candidate
   fillValue( "topYSubLead" , ySubLead , weight );
 
-  // ---
-  //    bbbar variables
-  // ---
+  // fill  bbbar variables
   //fillValue( "bbbarPt"  , bbBar.pt()      , weight );
   //fillValue( "bbbarY"   , bbBar.Rapidity(), weight );
   //fillValue( "bbbarMass", bbBar.mass()    , weight );
+
+  // fill b-top hadronization variable
+  // (1/(1-mW^1/mt^2)) * 2pBpT/mt^2
+  double lepxBRec =(1/(1-((leptonicW->p4()).mass2())/((leptonicTop->p4()).mass2()))) * 2*((leptonicB->p4()).Dot(leptonicTop->p4()))/((leptonicTop->p4()).mass2());
+  double hadxBRec =(1/(1-((hadronicW->p4()).mass2())/((hadronicTop->p4()).mass2()))) * 2*((hadronicB->p4()).Dot(hadronicTop->p4()))/((hadronicTop->p4()).mass2());
+  fillValue( "xB"   , lepxBRec, weight );
+  fillValue( "xB"   , hadxBRec, weight );
+  fillValue( "xBLep", lepxBRec, weight );
+  fillValue( "xBHad", hadxBRec, weight );
 }
 
 /// histogram filling for kinematic 1D histos using only events with Ngen&&Nreco 
 /// in the same bin wrt the binning defined above
 void 
-TopKinematics::fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, 
-		    const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, 
-		    const reco::Candidate* leptonicWRec  , const reco::Candidate* leptonicWGen, 
-		    const reco::Candidate* hadronicWRec  , const reco::Candidate* hadronicWGen,
-		    double HTrec, double HTgen, const double& weight)
+TopKinematics::fillGenRec(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, 
+			  const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, 
+			  const reco::Candidate* leptonicWRec  , const reco::Candidate* leptonicWGen, 
+			  const reco::Candidate* hadronicWRec  , const reco::Candidate* hadronicWGen,
+			  double HTrec, double HTgen, const double& weight)
 {
   /** 
       calculate boosted Lorentz vectors

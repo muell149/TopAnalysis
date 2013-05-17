@@ -18,20 +18,6 @@
 */
 double pi = TMath::Pi();
 
-namespace CrossSection{
- // binning for top & ttbar cross section histograms
- double topPt      [] = {             0. ,    10. ,    35. ,    65. ,   100. ,   135. ,   170. ,   215. ,   300. ,   400.  };
- double topY       [] = {   -4. ,    -3. ,  -1.92 ,   -1.2 ,  -0.48 ,     0. ,   0.48 ,    1.2 ,   1.92 ,     3. ,     4.  };
- double topPhi     [] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
- double ttbarMass  [] = {                                      300. ,   345. ,   400. ,   490. ,   615. ,   790. ,  1000.  };
- double ttbarPt    [] = {                      0. ,    10. ,    20. ,    30. ,    40. ,    60. ,    80. ,   130. ,   200.  };
- double ttbarY     [] = {   -5. ,    -4. ,    -3. ,   -2.3 ,   -1.6 ,     0. ,    1.6 ,    2.3 ,     3. ,     4. ,     5.  };
- double ttbarPhi   [] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
- double ttbarDelPhi[] = {                                       -pi ,   -2.0 ,   -1.0 ,     0. ,     1. ,     2. ,     pi  };
- double topWAngle  [] = {                                        0. , 1./6*pi, 1./3*pi, 1./2*pi, 2./3*pi, 5./6*pi,     pi  };
- double ttbarHT    [] = {                                       50. ,   150. ,   225. ,   300. ,   400. ,   600. ,  1000.  };
-}
-
 class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   
  public:
@@ -111,11 +97,17 @@ class TopKinematics : public SingleObject<TtSemiLeptonicEvent> {
   /// histogram filling for candidates topA and topB
   void fill(const reco::Candidate* leptonicTop, const reco::Candidate* hadronicTop, 
 	    const reco::Candidate* topPlus    , const reco::Candidate* topMinus   , 
-	    const reco::Candidate* leptonicW, const reco::Candidate* hadronicW    , 
+	    const reco::Candidate* leptonicW  , const reco::Candidate* hadronicW  , 
+	    const reco::Candidate* leptonicB  , const reco::Candidate* hadronicB  , 
 	    double HT, const double& charge, const double& weight=1.);
 
   /// histogram filling for candidate topA and topB (for stability and purity calculation)
-  void fill(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, const reco::Candidate* leptonicWRec, const reco::Candidate* leptonicWGen, const reco::Candidate* hadronicWRec, const reco::Candidate* hadronicWGen, double HTrec, double HTgen, const double& weight=1.);
+  void fillGenRec(const reco::Candidate* leptonicTopRec, const reco::Candidate* leptonicTopGen, 
+	    const reco::Candidate* hadronicTopRec, const reco::Candidate* hadronicTopGen, 
+	    const reco::Candidate* leptonicWRec  , const reco::Candidate* leptonicWGen  , 
+	    const reco::Candidate* hadronicWRec  , const reco::Candidate* hadronicWGen  , 
+	    double HTrec, double HTgen, const double& weight=1.);
+
   /// helper function for determining stability and purity
   void match(const std::string& histo, const double& genValue, const double& recValue, const double& weight);
   ///  helper functions to fill 1D angle histos
