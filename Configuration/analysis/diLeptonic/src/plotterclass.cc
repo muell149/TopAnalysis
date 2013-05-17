@@ -775,7 +775,9 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
         FileVector.push_back(nominalPath + "_run2012Arecover.root");
         FileVector.push_back(nominalPath + "_run2012B.root");
         FileVector.push_back(nominalPath + "_run2012C_24Aug.root");
+        FileVector.push_back(nominalPath + "_run2012C_EcalRecover.root");
         FileVector.push_back(nominalPath + "_run2012C_PromptReco.root");
+        FileVector.push_back(nominalPath + "_run2012D_PromptReco.root");
     } else {
         FileVector.push_back(nominalPath + "_ttbarsignalplustau_fakerun_nominal.root");
     }
