@@ -43,6 +43,7 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/uncertaintyDistributions
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/monitoring/withoutRatioPlots
+## mkdir -p diffXSecFromSignal/plots/combined/2012/xSecRatio
 
 ## b) you don't need to copy root files needed for the Analysis 
 ##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
@@ -82,8 +83,10 @@ closureTestSpecifier=\"\"
 combinedEventYields=false
 
 ## use prob sel analysis
-addSel=\"ProbSel\"
-chi2Max=7.824
+addSel=\"\"
+chi2Max=99999
+#addSel=\"ProbSel\"
+#chi2Max=7.824
 
 ## take arguments
 clear
