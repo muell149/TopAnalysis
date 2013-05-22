@@ -42,6 +42,7 @@ namespace ztop{
     void setSampleName(const std::string &); //checks if effs should be made, if sample exists,..
 
     void setMakeEff(bool makee){makeeffs_=makee;}
+    bool makesEff(){return makeeffs_;}
     void fillEff(const ztop::PolarLorentzVector & , int, double, double);      //p4 and genpartonFlavour, bDiscrValue  and PUweight
     void fillEff(const ztop::LorentzVector & v, int i , double d, double dd){
       ztop::PolarLorentzVector vp;
@@ -67,6 +68,9 @@ namespace ztop{
 
 //    TH2D * getEffHisto(const std::string &, const std::string &); //! returns efficiency histo for samplename, histoname
 //    TH2D * getHisto(const std::string &, const std::string &);    //! returns histo for samplename, histoname
+
+    bTagBase operator + (bTagBase  second);//just adds additional information. Fails if samplename exists twice!
+
 
     // protected: //only commented for testing reasons
 
