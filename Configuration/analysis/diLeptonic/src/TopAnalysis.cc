@@ -33,7 +33,7 @@
 constexpr double TOPXSEC = 234.;
 
 /// Luminosity in 1/fb
-constexpr double LUMI = 12.21;
+constexpr double LUMI = 19.6248;
 
 ///do we want to run the sync excercise?
 constexpr bool RUNSYNC = false;
@@ -729,8 +729,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Get indices of leptons and antiLeptons separated by charge, and get the leading ones if they exist
     std::vector<int> leptonIndices = allLeptonIndices;
     std::vector<int> antiLeptonIndices = allLeptonIndices;
-    selectIndices(leptonIndices, *lepPdgId_, 0, false);
-    selectIndices(antiLeptonIndices, *lepPdgId_, 0);
+    selectIndices(leptonIndices, *lepPdgId_, 0);
+    selectIndices(antiLeptonIndices, *lepPdgId_, 0, false);
     const int numberOfLeptons = leptonIndices.size();
     const int numberOfAntiLeptons = antiLeptonIndices.size();
     const int leptonIndex = numberOfLeptons>0 ? leptonIndices.at(0) : -1;
