@@ -39,7 +39,7 @@ namespace ztop{
 
     void setIs2011(bool is){is2011_=is;}
     
-    void setSampleName(const std::string &); //checks if effs should be made, if sample exists,..
+    int setSampleName(const std::string &); //checks if effs should be made, if sample exists,..
 
     void setMakeEff(bool makee){makeeffs_=makee;}
     bool makesEff(){return makeeffs_;}

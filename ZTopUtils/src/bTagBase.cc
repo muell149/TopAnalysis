@@ -13,7 +13,7 @@ namespace ztop{
     cbflatineta_=true;
     TH1::AddDirectory(kFALSE); 
   }
-  void bTagBase::setSampleName(const std::string & samplename){
+  int bTagBase::setSampleName(const std::string & samplename){
     //set pointers
     std::map<std::string,std::vector<TH2D> >::iterator sampleit=histos_.find(samplename);
     if(sampleit!=histos_.end())
@@ -28,11 +28,11 @@ namespace ztop{
 
     if(!makeeffs_ && effhistp_ && histp_){
       std::cout << "loaded b-tag efficiency histos for " << samplename << std::endl;
-      return;
+      return 1;
     }
     else if(!makeeffs_ &&!effhistp_){
       std::cout << " bTagBase::setSampleName: efficiency for " << samplename << " not derived, yet! exit." << std::endl;
-      std::exit(EXIT_FAILURE);
+      return -1;
     }
 
     // efficiencies not determined yet -> prepare efficiency histos
@@ -74,6 +74,8 @@ namespace ztop{
     temp << beff << ceff << leff;
     effhistos_[samplename]=temp;
     effhistp_=&(effhistos_.find(samplename)->second);
+
+    return 0;
     
   }
 
@@ -305,6 +307,7 @@ namespace ztop{
       t->GetEntry(n);
       if(bt){
 	*this=*bt;
+	setMakeEff(false);
 	return;
       }
     }
