@@ -1149,8 +1149,8 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
