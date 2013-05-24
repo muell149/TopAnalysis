@@ -93,6 +93,12 @@ meanMt_b_met_step8 - - - 1 1 0 0 0 0 0 0 0 0
 massSum_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
 massDiff_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
+dijetMass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaBasedDijetMass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+dijetMvaWeight_step8 - - - 1 1 0 0 0 0 0 0 0 0
+dijetBestMvaWeight_step8 - - - 1 1 0 0 0 0 0 0 0 0
+
+
 
 
 ##

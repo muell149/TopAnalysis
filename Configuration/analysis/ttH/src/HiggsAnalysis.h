@@ -1,11 +1,14 @@
 #ifndef HiggsAnalysis_h
 #define HiggsAnalysis_h
 
+#include <utility>
+
 #include <Rtypes.h>
 
 class TTree;
 class TH1;
 class TString;
+class TProfile;
 
 #include "AnalysisHistograms.h"
 #include "MvaInputVariables.h"
@@ -55,9 +58,16 @@ public:
     /// Set up the jet categories (# jets, # b-jets) for analysis
     void SetJetCategoriesAnalysis(const JetCategories& jetCategories);
     
+    /// Set up the MVA weights input
+    void SetMvaWeightsInput(MvaInputTopJetsVariables& mvaInputTopJetsVariables);
+    
     
     
 private:
+    
+    /// Typedef for simple treatment of pair of indices of a vector
+    typedef std::vector<std::pair<int, int> > IndexPairs;
+    
     
     /// Select events from Higgs signal samples which need to be removed due to generator selection
     bool failsHiggsGeneratorSelection(Long64_t&);
@@ -74,11 +84,12 @@ private:
                             const LV* genBjet, const LV* genAntiBjet);
     
     /// Fill class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
-    void fillMvaInputTopJetsVariables(const int leptonIndex, const int antiLeptonIndex,
-                                      const std::vector<int>& jetIndices,
+    std::vector<MvaInputTopJetsVariables::Input> fillMvaInputTopJetsVariables(
+                                      const int leptonIndex, const int antiLeptonIndex,
+                                      const IndexPairs& jetIndexPairs, const VLV& jetRecoils,
                                       const int matchedBjetIndex, const int matchedAntiBjetIndex,
                                       const LV& met,
-                                      const bool successfulMatching, const double& eventWeight);
+                                      const bool successfulMatching, const double& eventWeight)const;
     
     
     
@@ -103,6 +114,20 @@ private:
     
     /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     MvaInputTopJetsVariables mvaInputTopJetsVariables_;
+    
+    /// Class holding the weights as calculated by MVA
+    MvaInputTopJetsVariables* mvaInputWeights_;
+    
+    
+    
+    ///
+    IndexPairs chargeOrderedJetPairIndices(const std::vector<int>& jetIndices,
+                                           const std::vector<double>& jetCharges);
+    
+    /// Calculate the jet recoil for a given jet pair, i.e. vector sum of all jets except selected jet pair
+    VLV recoilForJetPairs(const IndexPairs& jetIndexPairs,
+                          const std::vector<int>& jetIndices,
+                          const VLV& jets);
     
     
     
@@ -143,7 +168,26 @@ private:
     TH1* h_jetChargeGlobalPtWeighted_step8;
     TH1* h_jetChargeRelativePtWeighted_step8;
     
+    
     TH1* h_matchedBjetsFromTop_step8;
+    TH1* h_matchedBjetsFromHiggs_step8;
+    
+    TH1* h_mvaBasedJetsFromTop_step8;
+    TH1* h_mvaBasedJetsFromHiggs_step8;
+    
+    TH1* h_dijetMass_step8;
+    TH1* h_mvaBasedDijetMass_step8;
+    
+    TH1* h_dijetMvaWeight_step8;
+    TH1* h_dijetBestMvaWeight_step8;
+    
+    TProfile* p_dijetMassVsJetCategories;
+    TProfile* p_dijetMassVsMvaWeightHigh;
+    TProfile* p_dijetMassVsMvaWeightDiff;
+    
+    TProfile* p_mvaBasedDijetMassVsJetCategories;
+    TProfile* p_mvaBasedDijetMassVsMvaWeightHigh;
+    TProfile* p_mvaBasedDijetMassVsMvaWeightDiff;
 };
 
 

@@ -17,6 +17,7 @@
 #include "HiggsAnalysis.h"
 #include "analysisHelpers.h"
 #include "JetCategories.h"
+#include "MvaInputVariables.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/utils.h"
 #include "../../diLeptonic/src/PUReweighter.h"
@@ -56,6 +57,14 @@ constexpr const char* BtagEfficiencyInputDIR = "BTagEff";
 
 /// Folder for b-tag efficiency file storage (in case efficiencies are produced)
 constexpr const char* BtagEfficiencyOutputDIR = "selectionRoot/BTagEff";
+
+
+
+/// Folder for storage of MVA input TTree
+constexpr const char* MvaInputDIR = "mvaInput";
+
+/// File containing MVA weights
+constexpr const char* MvaWeightsFILE = "mvaOutput/weights/MVA_test2.weights.xml";
 
 
 
@@ -119,6 +128,12 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up jet categories for analysis
     const JetCategories jetCategories(2, 4, 0, 3, true, true);
     
+    // Set up MVA steering tool for: a) production of MVA input TTree, b) reading in MVA weights
+    // FIXME: now used here for reading weights only, and another one within HiggsAnalysis for for TTree production
+    // Cannot be const due to the internal structure at present
+    MvaInputTopJetsVariables mvaInputWeights(MvaWeightsFILE);
+    
+    
     // Set up the analysis
     HiggsAnalysis* selector = new HiggsAnalysis();
     selector->SetAnalysisOutputBase(AnalysisOutputDIR);
@@ -128,6 +143,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetBtagScaleFactors(btagScaleFactors);
     selector->SetJetCategoriesOverview(jetCategories_overview);
     selector->SetJetCategoriesAnalysis(jetCategories);
+    selector->SetMvaWeightsInput(mvaInputWeights);
     
     // Access selectionList containing all input sample nTuples
     ifstream infile("selectionList.txt");

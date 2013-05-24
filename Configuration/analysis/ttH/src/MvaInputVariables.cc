@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <cstdlib>
 
@@ -10,6 +11,7 @@
 #include <Math/VectorUtil.h>
 #include <TSelectorList.h>
 #include <Rtypes.h>
+#include <TMVA/Reader.h>
 
 #include "MvaInputVariables.h"
 #include "../../diLeptonic/src/classes.h"
@@ -18,7 +20,7 @@
 
 
 
-MvaInputTopJetsVariables::MvaInputTopJetsStruct::MvaInputTopJetsStruct():
+MvaInputTopJetsVariables::Input::Input():
 bQuarkRecoJetMatched_(false),
 correctCombination_(false),
 swappedCombination_(false),
@@ -38,52 +40,101 @@ massDiff_antiBLepton_bAntiLepton_(-999.)
 
 
 
-MvaInputTopJetsVariables::MvaInputTopJetsVariables():
-selectorList_(0),
-t_mvaInput_(0)
-{}
-
-
-
-void MvaInputTopJetsVariables::addEntry(const LV& lepton, const LV& antiLepton,
-                                        const LV& bJet, const LV& antiBJet,
-                                        const double& bJetBtagDiscriminator, const double& antiBJetBtagDiscriminator,
-                                        const double& jetChargeDiff,
-                                        const LV& jetRecoil, const LV& met,
-                                        const bool bQuarkRecoJetMatched, const bool correctCombination, const bool swappedCombination,
-                                        const double& eventWeight)
+MvaInputTopJetsVariables::Input::Input(const LV& lepton, const LV& antiLepton,
+                                       const LV& bJet, const LV& antiBJet,
+                                       const double& bJetBtagDiscriminator, const double& antiBJetBtagDiscriminator,
+                                       const double& jetChargeDiff,
+                                       const LV& jetRecoil, const LV& met,
+                                       const bool bQuarkRecoJetMatched,
+                                       const bool correctCombination, const bool swappedCombination,
+                                       const double& eventWeight)
 {
     using ROOT::Math::VectorUtil::DeltaPhi;
     using ROOT::Math::VectorUtil::DeltaR;
     
     // Helper variables for MVA
-    const LV bbbarSystem = bJet + antiBJet;
+    const LV bAntiBSystem = bJet + antiBJet;
     const LV bAntiLeptonSystem = bJet + antiLepton;
     const LV antiBLeptonSystem = antiBJet + lepton;
     const LV fullBLeptonSystem = bAntiLeptonSystem + antiBLeptonSystem;
     
-    // Fill the struct with the variables for MVA TTree
-    MvaInputTopJetsStruct mvaInputTopJetsStruct;
-    mvaInputTopJetsStruct.bQuarkRecoJetMatched_ = bQuarkRecoJetMatched;
-    mvaInputTopJetsStruct.correctCombination_ = correctCombination;
-    mvaInputTopJetsStruct.swappedCombination_ = swappedCombination;
-    mvaInputTopJetsStruct.eventWeight_ = eventWeight;
-    mvaInputTopJetsStruct.jetChargeDiff_ = jetChargeDiff;
+    // Fill the variables for MVA TTree
+    bQuarkRecoJetMatched_ = bQuarkRecoJetMatched;
+    correctCombination_ = correctCombination;
+    swappedCombination_ = swappedCombination;
+    eventWeight_ = eventWeight;
+    jetChargeDiff_ = jetChargeDiff;
     
-    mvaInputTopJetsStruct.meanDeltaPhi_b_met_ = 0.5*(std::abs(DeltaPhi(bJet, met)) + std::abs(DeltaPhi(antiBJet, met)));
-    mvaInputTopJetsStruct.massDiff_recoil_bbbar_ = jetRecoil.M() - bbbarSystem.M();
-    mvaInputTopJetsStruct.pt_b_antiLepton_ = bAntiLeptonSystem.pt();
-    mvaInputTopJetsStruct.pt_antiB_lepton_ = antiBLeptonSystem.pt();
-    mvaInputTopJetsStruct.deltaR_b_antiLepton_ = DeltaR(bJet, antiLepton);
-    mvaInputTopJetsStruct.deltaR_antiB_lepton_ = DeltaR(antiBJet, lepton);
-    mvaInputTopJetsStruct.btagDiscriminatorSum_ = bJetBtagDiscriminator + antiBJetBtagDiscriminator;
-    mvaInputTopJetsStruct.deltaPhi_antiBLepton_bAntiLepton_ = std::abs(DeltaPhi(antiBLeptonSystem, bAntiLeptonSystem));
-    mvaInputTopJetsStruct.massDiff_fullBLepton_bbbar_ = fullBLeptonSystem.M() - bbbarSystem.M();
-    mvaInputTopJetsStruct.meanMt_b_met_ = 0.5*((bJet + met).Mt() + (antiBJet + met).Mt());
-    mvaInputTopJetsStruct.massSum_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() + bAntiLeptonSystem.M();
-    mvaInputTopJetsStruct.massDiff_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() - bAntiLeptonSystem.M();
+    meanDeltaPhi_b_met_ = 0.5*(std::abs(DeltaPhi(bJet, met)) + std::abs(DeltaPhi(antiBJet, met)));
+    massDiff_recoil_bbbar_ = jetRecoil.M() - bAntiBSystem.M();
+    pt_b_antiLepton_ = bAntiLeptonSystem.pt();
+    pt_antiB_lepton_ = antiBLeptonSystem.pt();
+    deltaR_b_antiLepton_ = DeltaR(bJet, antiLepton);
+    deltaR_antiB_lepton_ = DeltaR(antiBJet, lepton);
+    btagDiscriminatorSum_ = bJetBtagDiscriminator + antiBJetBtagDiscriminator;
+    deltaPhi_antiBLepton_bAntiLepton_ = std::abs(DeltaPhi(antiBLeptonSystem, bAntiLeptonSystem));
+    massDiff_fullBLepton_bbbar_ = fullBLeptonSystem.M() - bAntiBSystem.M();
+    meanMt_b_met_ = 0.5*((bJet + met).Mt() + (antiBJet + met).Mt());
+    massSum_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() + bAntiLeptonSystem.M();
+    massDiff_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() - bAntiLeptonSystem.M();
+}
+
+
+
+MvaInputTopJetsVariables::MvaInputTopJetsVariables():
+selectorList_(0),
+t_mvaInput_(0),
+mvaWeightsReader_(0)
+{}
+
+
+
+MvaInputTopJetsVariables::MvaInputTopJetsVariables(const char* mvaWeightsFile):
+selectorList_(0),
+t_mvaInput_(0),
+mvaWeightsReader_(0)
+{
+    std::cout<<"--- Beginning setting up MVA weights from file\n";
     
-    v_mvaInputStruct_.push_back(mvaInputTopJetsStruct);
+    ifstream inputFile(mvaWeightsFile);
+    if(inputFile.fail()){
+        std::cout<<"Input file containing MVA weights not found: "<<mvaWeightsFile
+                 <<"\n...running without MVA weights, i.e. setting them all to 1.\n";
+    }
+    else{
+        mvaWeightsReader_ = new TMVA::Reader("Color");
+
+        Input& mvaInputStruct = mvaWeightsStruct_;
+
+        mvaWeightsReader_->AddVariable("meanDeltaPhi_b_met", &mvaInputStruct.meanDeltaPhi_b_met_);
+        mvaWeightsReader_->AddVariable("massDiff_recoil_bbbar", &mvaInputStruct.massDiff_recoil_bbbar_);
+        mvaWeightsReader_->AddVariable("pt_b_antiLepton", &mvaInputStruct.pt_b_antiLepton_);
+        mvaWeightsReader_->AddVariable("pt_antiB_lepton", &mvaInputStruct.pt_antiB_lepton_);
+        mvaWeightsReader_->AddVariable("deltaR_b_antiLepton", &mvaInputStruct.deltaR_b_antiLepton_);
+        mvaWeightsReader_->AddVariable("deltaR_antiB_lepton", &mvaInputStruct.deltaR_antiB_lepton_);
+        mvaWeightsReader_->AddVariable("btagDiscriminatorSum", &mvaInputStruct.btagDiscriminatorSum_);
+        mvaWeightsReader_->AddVariable("deltaPhi_antiBLepton_bAntiLepton", &mvaInputStruct.deltaPhi_antiBLepton_bAntiLepton_);
+        mvaWeightsReader_->AddVariable("massDiff_fullBLepton_bbbar", &mvaInputStruct.massDiff_fullBLepton_bbbar_);
+        mvaWeightsReader_->AddVariable("meanMt_b_met", &mvaInputStruct.meanMt_b_met_);
+        mvaWeightsReader_->AddVariable("massSum_antiBLepton_bAntiLepton", &mvaInputStruct.massSum_antiBLepton_bAntiLepton_);
+        mvaWeightsReader_->AddVariable("massDiff_antiBLepton_bAntiLepton", &mvaInputStruct.massDiff_antiBLepton_bAntiLepton_);
+
+        mvaWeightsReader_->AddSpectator("bQuarkRecoJetMatched", &mvaInputStruct.bQuarkRecoJetMatched_);
+        mvaWeightsReader_->AddSpectator("correctCombination", &mvaInputStruct.correctCombination_);
+        mvaWeightsReader_->AddSpectator("swappedCombination", &mvaInputStruct.swappedCombination_);
+
+        // FIXME: what is first argument, should it be "BDTG" or "BDT method" ???
+        mvaWeightsReader_->BookMVA("BDT method", mvaWeightsFile);
+    }
+    
+    std::cout<<"=== Finishing setting up MVA weights from file\n\n";
+}
+
+
+
+void MvaInputTopJetsVariables::addEntries(const std::vector<Input>& v_input)
+{
+    v_inputStruct_.insert(v_inputStruct_.end(), v_input. begin(), v_input.end());
 }
 
 
@@ -92,51 +143,55 @@ void MvaInputTopJetsVariables::createMvaInputBranches(TTree* tree)
 {
     t_mvaInput_ = tree;
     
-    t_mvaInput_->Branch("eventWeight", &mvaInputStruct_.eventWeight_, "eventWeight/D");
+    t_mvaInput_->Branch("eventWeight", &inputStruct_.eventWeight_, "eventWeight/F");
     
-    t_mvaInput_->Branch("bQuarkRecoJetMatched", &mvaInputStruct_.bQuarkRecoJetMatched_, "bQuarkRecoJetMatched/O");
-    t_mvaInput_->Branch("correctCombination", &mvaInputStruct_.correctCombination_, "correctCombination/O");
-    t_mvaInput_->Branch("swappedCombination", &mvaInputStruct_.swappedCombination_, "swappedCombination/O");
+    t_mvaInput_->Branch("bQuarkRecoJetMatched", &inputStruct_.bQuarkRecoJetMatched_, "bQuarkRecoJetMatched/I");
+    t_mvaInput_->Branch("correctCombination", &inputStruct_.correctCombination_, "correctCombination/I");
+    t_mvaInput_->Branch("swappedCombination", &inputStruct_.swappedCombination_, "swappedCombination/I");
     
-    t_mvaInput_->Branch("jetChargeDiff", &mvaInputStruct_.jetChargeDiff_, "jetChargeDiff/D");
+    t_mvaInput_->Branch("jetChargeDiff", &inputStruct_.jetChargeDiff_, "jetChargeDiff/F");
     
-    t_mvaInput_->Branch("meanDeltaPhi_b_met", &mvaInputStruct_.meanDeltaPhi_b_met_, "meanDeltaPhi_b_met/D");
-    t_mvaInput_->Branch("massDiff_recoil_bbbar", &mvaInputStruct_.massDiff_recoil_bbbar_, "massDiff_recoil_bbbar/D");
-    t_mvaInput_->Branch("pt_b_antiLepton", &mvaInputStruct_.pt_b_antiLepton_, "pt_b_antiLepton/D");
-    t_mvaInput_->Branch("pt_antiB_lepton", &mvaInputStruct_.pt_antiB_lepton_, "pt_antiB_lepton/D");
-    t_mvaInput_->Branch("deltaR_b_antiLepton", &mvaInputStruct_.deltaR_b_antiLepton_, "deltaR_b_antiLepton/D");
-    t_mvaInput_->Branch("deltaR_antiB_lepton", &mvaInputStruct_.deltaR_antiB_lepton_, "deltaR_antiB_lepton/D");
-    t_mvaInput_->Branch("btagDiscriminatorSum", &mvaInputStruct_.btagDiscriminatorSum_, "btagDiscriminatorSum/D");
-    t_mvaInput_->Branch("deltaPhi_antiBLepton_bAntiLepton", &mvaInputStruct_.deltaPhi_antiBLepton_bAntiLepton_, "deltaPhi_antiBLepton_bAntiLepton/D");
-    t_mvaInput_->Branch("massDiff_fullBLepton_bbbar", &mvaInputStruct_.massDiff_fullBLepton_bbbar_, "massDiff_fullBLepton_bbbar/D");
-    t_mvaInput_->Branch("meanMt_b_met", &mvaInputStruct_.meanMt_b_met_, "meanMt_b_met/D");
-    t_mvaInput_->Branch("massSum_antiBLepton_bAntiLepton", &mvaInputStruct_.massSum_antiBLepton_bAntiLepton_, "massSum_antiBLepton_bAntiLepton/D");
-    t_mvaInput_->Branch("massDiff_antiBLepton_bAntiLepton", &mvaInputStruct_.massDiff_antiBLepton_bAntiLepton_, "massDiff_antiBLepton_bAntiLepton/D");
+    t_mvaInput_->Branch("meanDeltaPhi_b_met", &inputStruct_.meanDeltaPhi_b_met_, "meanDeltaPhi_b_met/F");
+    t_mvaInput_->Branch("massDiff_recoil_bbbar", &inputStruct_.massDiff_recoil_bbbar_, "massDiff_recoil_bbbar/F");
+    t_mvaInput_->Branch("pt_b_antiLepton", &inputStruct_.pt_b_antiLepton_, "pt_b_antiLepton/F");
+    t_mvaInput_->Branch("pt_antiB_lepton", &inputStruct_.pt_antiB_lepton_, "pt_antiB_lepton/F");
+    t_mvaInput_->Branch("deltaR_b_antiLepton", &inputStruct_.deltaR_b_antiLepton_, "deltaR_b_antiLepton/F");
+    t_mvaInput_->Branch("deltaR_antiB_lepton", &inputStruct_.deltaR_antiB_lepton_, "deltaR_antiB_lepton/F");
+    t_mvaInput_->Branch("btagDiscriminatorSum", &inputStruct_.btagDiscriminatorSum_, "btagDiscriminatorSum/F");
+    t_mvaInput_->Branch("deltaPhi_antiBLepton_bAntiLepton", &inputStruct_.deltaPhi_antiBLepton_bAntiLepton_, "deltaPhi_antiBLepton_bAntiLepton/F");
+    t_mvaInput_->Branch("massDiff_fullBLepton_bbbar", &inputStruct_.massDiff_fullBLepton_bbbar_, "massDiff_fullBLepton_bbbar/F");
+    t_mvaInput_->Branch("meanMt_b_met", &inputStruct_.meanMt_b_met_, "meanMt_b_met/F");
+    t_mvaInput_->Branch("massSum_antiBLepton_bAntiLepton", &inputStruct_.massSum_antiBLepton_bAntiLepton_, "massSum_antiBLepton_bAntiLepton/F");
+    t_mvaInput_->Branch("massDiff_antiBLepton_bAntiLepton", &inputStruct_.massDiff_antiBLepton_bAntiLepton_, "massDiff_antiBLepton_bAntiLepton/F");
 }
 
 
 
-std::vector<MvaInputTopJetsVariables::MvaInputTopJetsStruct> MvaInputTopJetsVariables::mvaInputStructs()const
+std::vector<MvaInputTopJetsVariables::Input> MvaInputTopJetsVariables::inputStructs()const
 {
-    return v_mvaInputStruct_;
+    return v_inputStruct_;
 }
 
 
 
 void MvaInputTopJetsVariables::clear()
 {
-    v_mvaInputStruct_.clear();
+    v_inputStruct_.clear();
     t_mvaInput_ = 0;
     selectorList_ = 0;
     m_plotStruct_.clear();
+    if(mvaWeightsReader_){
+        mvaWeightsReader_->Clear();
+        mvaWeightsReader_->Delete();
+    }
 }
 
 
 
 void MvaInputTopJetsVariables::fillMvaInputBranches()
 {
-    for(const auto& mvaInputStruct : v_mvaInputStruct_){
-        mvaInputStruct_ = mvaInputStruct;
+    for(const auto& inputStruct : v_inputStruct_){
+        inputStruct_ = inputStruct;
         t_mvaInput_->Fill();
     }
 }
@@ -145,7 +200,6 @@ void MvaInputTopJetsVariables::fillMvaInputBranches()
 
 void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& f_savename)
 {
-    
     // Output file
     TFile outputFile(f_savename.c_str(),"RECREATE");
     std::cout<<"\nOutput file for MVA input tree: "<<f_savename<<"\n";
@@ -181,7 +235,8 @@ void MvaInputTopJetsVariables::produceMvaInputTree(TSelectorList* output)
     // Create branches and fill tree
     this->createMvaInputBranches(tree);
     this->fillMvaInputBranches();
-    std::cout<<"Number of variables for MVA: "<<this->mvaInputStructs().size()<<"\n";
+    
+    std::cout<<"Number of variables for MVA: "<<this->inputStructs().size()<<"\n";
     std::cout<<"=== Finishing production MVA input tree\n\n";
 }
 
@@ -237,7 +292,7 @@ void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* outp
     this->bookHistograms("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}-m^{bl^{+}}  [GeV];# jet pairs",41,-400,420);
     
     // Fill histograms
-    for(const auto& mvaInputTopJetsStruct : this->mvaInputStructs()){
+    for(const auto& mvaInputTopJetsStruct : this->inputStructs()){
         //const bool bQuarkRecoJetMatched = mvaInputTopJetsStruct.bQuarkRecoJetMatched_;
         const double eventWeight(mvaInputTopJetsStruct.eventWeight_);
         if(mvaInputTopJetsStruct.swappedCombination_)h_trueStatus_step8->Fill(0.1, eventWeight);
@@ -285,7 +340,7 @@ void MvaInputTopJetsVariables::importTree(const std::string& f_savename, const s
     
     tree = 0;
     inputFile->Close();
-    std::cout<<"\nNUMBER: "<<v_mvaInputStruct_.size()<<"\n\n";
+    std::cout<<"\nNUMBER: "<<v_inputStruct_.size()<<"\n\n";
     std::cout<<"=== Finishing import of TTree for MVA variables\n\n";
 }
 
@@ -294,7 +349,7 @@ void MvaInputTopJetsVariables::importTree(const std::string& f_savename, const s
 void MvaInputTopJetsVariables::importBranches(TTree* tree)
 {
     // Set up variables struct and branches
-    MvaInputTopJetsStruct mvaInputStruct;
+    Input mvaInputStruct;
     
     TBranch* b_eventWeight(0);
     
@@ -340,16 +395,16 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     tree->SetBranchAddress("massDiff_antiBLepton_bAntiLepton", &mvaInputStruct.massDiff_antiBLepton_bAntiLepton_, &b_massDiff_antiBLepton_bAntiLepton);
     
     // Loop over all tree entries and fill vector of structs
-    v_mvaInputStruct_.clear();
+    v_inputStruct_.clear();
     for(Long64_t iEntry = 0; iEntry < tree->GetEntries(); ++iEntry){
         tree->GetEntry(iEntry);
-        v_mvaInputStruct_.push_back(mvaInputStruct);
+        v_inputStruct_.push_back(mvaInputStruct);
     }
 }
 
 
 
-void MvaInputTopJetsVariables::bookHistograms(const TString& name, const TString& title, const int nBin, const double& xMin, const double& xMax)
+void MvaInputTopJetsVariables::bookHistograms(const TString& name, const TString& title, const int nBin, const double xMin, const double xMax)
 {
     // Check if histograms with given name already exist
     if(m_plotStruct_.find(name) != m_plotStruct_.end()){
@@ -373,7 +428,7 @@ void MvaInputTopJetsVariables::bookHistograms(const TString& name, const TString
 
 
 
-void MvaInputTopJetsVariables::fillHistograms(const TString& name, const double& variable, const MvaInputTopJetsVariables::MvaInputTopJetsStruct& mvaInputTopJetsStruct)
+void MvaInputTopJetsVariables::fillHistograms(const TString& name, const double& variable, const MvaInputTopJetsVariables::Input& mvaInputTopJetsStruct)
 {
     // Check if histograms with given name already exist
     if(m_plotStruct_.find(name) == m_plotStruct_.end()){
@@ -397,7 +452,22 @@ void MvaInputTopJetsVariables::fillHistograms(const TString& name, const double&
 
 
 
-
+std::vector<float> MvaInputTopJetsVariables::mvaWeights(const std::vector<MvaInputTopJetsVariables::Input>& v_input)
+{
+    std::vector<float> result;
+    
+    for(const Input& input : v_input){
+        if(!mvaWeightsReader_){
+            result.push_back(1.);
+            continue;
+        }
+        mvaWeightsStruct_ = input;
+        const float weight = mvaWeightsReader_->EvaluateMVA("BDT method");
+        result.push_back(weight);
+    }
+    
+    return result;
+}
 
 
 

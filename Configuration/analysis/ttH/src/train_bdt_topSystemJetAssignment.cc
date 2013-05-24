@@ -52,8 +52,8 @@ void trainBdtTopSystemJetAssignment()
         const TString histoListName(FileListBASE + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
         //std::cout << "Reading file: " << histoListName << std::endl;
         ifstream fileList(histoListName);
-        if (fileList.fail()) {
-            std::cerr << "Error reading file: " << histoListName << std::endl;
+        if(fileList.fail()){
+            std::cerr<<"Error reading file: "<<histoListName<<std::endl;
             exit(1);
         }
         while(!fileList.eof()){
@@ -156,7 +156,7 @@ void trainBdtTopSystemJetAssignment()
     factory->AddVariable("btagDiscriminatorSum", 'F');
     factory->AddVariable("deltaPhi_antiBLepton_bAntiLepton", 'F');
     factory->AddVariable("massDiff_fullBLepton_bbbar", 'F');
-    factory->AddVariable("meanMT_b_met", 'F');
+    factory->AddVariable("meanMt_b_met", 'F');
     factory->AddVariable("massSum_antiBLepton_bAntiLepton", 'F');
     factory->AddVariable("massDiff_antiBLepton_bAntiLepton", 'F');
     
@@ -202,7 +202,7 @@ void trainBdtTopSystemJetAssignment()
     // Book the MVA method (e.g. boosted decision tree with specific setup)
     factory->BookMethod(TMVA::Types::kBDT,
                         "test2",
-                        "!H:!V:NTrees=600:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=6:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1");
+                        "!H:!V:NTrees=600:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=12:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1");
     factory->TrainAllMethods();
     factory->TestAllMethods();
     factory->EvaluateAllMethods();

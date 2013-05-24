@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+#include <utility>
 
 #include <TH1.h>
 #include <TTree.h>
@@ -10,6 +11,7 @@
 #include <TFile.h>
 #include <TSystem.h>
 #include <Math/VectorUtil.h>
+#include <TProfile.h>
 
 #include "HiggsAnalysis.h"
 #include "higgsUtils.h"
@@ -200,7 +202,45 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(1, "bQuark-genJet fail");
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(2, "genJet-recoJet fail");
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(3, "Matched");
-
+    
+    h_matchedBjetsFromHiggs_step8 = store(new TH1D("matchedBjetsFromHiggs_step8","matchedBjetsFromHiggs;;# events",3,0,3));
+    h_matchedBjetsFromHiggs_step8->GetXaxis()->SetBinLabel(1, "bQuark-genJet fail");
+    h_matchedBjetsFromHiggs_step8->GetXaxis()->SetBinLabel(2, "genJet-recoJet fail");
+    h_matchedBjetsFromHiggs_step8->GetXaxis()->SetBinLabel(3, "Matched");
+    
+    h_mvaBasedJetsFromTop_step8 = store(new TH1D("mvaBasedJetsFromTop_step8","mvaBasedJetsFromTop;;# events",4,0,4));
+    h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(1, "matched Top jets");
+    h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(2, "pair from Top");
+    h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(3, "correct pair");
+    h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(4, "swapped pair");
+    
+    h_mvaBasedJetsFromHiggs_step8 = store(new TH1D("mvaBasedJetsFromHiggs_step8","mvaBasedJetsFromHiggs;;# events",4,0,4));
+    h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(1, "matched Higgs jets");
+    h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(2, "pair from Higgs");
+    h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(3, "overlap with Top");
+    h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(4, "Fully solved");
+    
+    h_dijetMass_step8 = store(new TH1D("dijetMass_step8", "dijetMass;m_{jj} [GeV];# events", 100, 0, 500));
+    h_mvaBasedDijetMass_step8 = store(new TH1D("mvaBasedDijetMass_step8", "mvaBasedDijetMass;m_{jj} [GeV];# events", 100, 0, 500));
+    
+    p_dijetMassVsJetCategories = store(new TProfile("dijetMassVsJetCategories", "dijetMassVsJetCategories;# jets/b-jets;m_{jj} [GeV]",numberOfCategories_overview, 0, numberOfCategories_overview, "s"));
+    p_dijetMassVsMvaWeightHigh = store(new TProfile("dijetMassVsMvaWeightHigh", "dijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1, 0, "s"));
+    p_dijetMassVsMvaWeightDiff = store(new TProfile("dijetMassVsMvaWeightDiff", "dijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 2, "s"));
+    
+    p_mvaBasedDijetMassVsJetCategories = store(new TProfile("mvaBasedDijetMassVsJetCategories", "mvaBasedDijetMassVsJetCategories;# jets/b-jets;m_{jj} [GeV]",numberOfCategories_overview, 0, numberOfCategories_overview, "s"));
+    p_mvaBasedDijetMassVsMvaWeightHigh = store(new TProfile("mvaBasedDijetMassVsMvaWeightHigh", "mvaBasedDijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1, 0, "s"));
+    p_mvaBasedDijetMassVsMvaWeightDiff = store(new TProfile("mvaBasedDijetMassVsMvaWeightDiff", "mvaBasedDijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 2, "s"));
+    
+    for(std::vector<TString>::const_iterator i_binLabel = v_binLabel_overview.begin(); i_binLabel != v_binLabel_overview.end(); ++i_binLabel){
+        const TString binLabel(*i_binLabel);
+        int position = std::distance(v_binLabel_overview.begin(), i_binLabel) +1;
+        p_dijetMassVsJetCategories->GetXaxis()->SetBinLabel(position, binLabel);
+        p_mvaBasedDijetMassVsJetCategories->GetXaxis()->SetBinLabel(position, binLabel);
+    }
+    
+    h_dijetMvaWeight_step8 = store(new TH1D("dijetMvaWeight_step8", "dijet MVA weight;w_{MVA};# jet pairs", 50, -1, 0));
+    h_dijetBestMvaWeight_step8 = store(new TH1D("dijetBestMvaWeight_step8", "dijet best MVA weight;w_{MVA,1};# jet pairs", 50, -1, 0));
+    
     // Binned control plots
     CreateBinnedControlPlots(h_jetCategories_step8, h_events_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
@@ -306,8 +346,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Get indices of leptons and antiLeptons separated by charge, and get the leading ones if they exist
     std::vector<int> leptonIndices = allLeptonIndices;
     std::vector<int> antiLeptonIndices = allLeptonIndices;
-    selectIndices(leptonIndices, *lepPdgId_, 0, false);
-    selectIndices(antiLeptonIndices, *lepPdgId_, 0);
+    selectIndices(leptonIndices, *lepPdgId_, 0);
+    selectIndices(antiLeptonIndices, *lepPdgId_, 0, false);
     const int numberOfLeptons = leptonIndices.size();
     const int numberOfAntiLeptons = antiLeptonIndices.size();
     const int leptonIndex = numberOfLeptons>0 ? leptonIndices.at(0) : -1;
@@ -554,61 +594,202 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     
     
+    
+    
     if(analysisMode_ != AnalysisMode::mva)return kTRUE;
-
-
 
     // FIXME: which events exactly to fill? For now all with at least 4 jets
     if(numberOfJets<4)return kTRUE;
     
     
     // Find b jet and anti-b jet corresponding to (anti)b from (anti)top
-    LV* genBjet(0);
-    LV* genAntiBjet(0);
+    LV* genBjetFromTop(0);
+    LV* genAntiBjetFromTop(0);
     if(isTopSignal_){
         this->GetTopSignalBranchesEntry(entry);
         int genBjetIndex(-1);
         int genAntiBjetIndex(-1);
         // FIXME: should one clean the genJetCollection to remove low-pt (or low-eta) jets?
         if(this->getGenBJetIndices(genBjetIndex, genAntiBjetIndex, 6)){
-            genBjet = &(allGenJets_->at(genBjetIndex));
-            genAntiBjet = &(allGenJets_->at(genAntiBjetIndex));
+            genBjetFromTop = &(allGenJets_->at(genBjetIndex));
+            genAntiBjetFromTop = &(allGenJets_->at(genAntiBjetIndex));
         }
         else{
             h_matchedBjetsFromTop_step8->Fill(0.1, weight);
         }
     }
-
-    // Match recoJets to the two selected genJets
-    int matchedBjetIndex(-1);
-    int matchedAntiBjetIndex(-1);
-    bool successfulMatching(false);
-    if(genBjet && genAntiBjet){
-        successfulMatching = this->matchRecoToGenJets(matchedBjetIndex, matchedAntiBjetIndex, jetIndices, genBjet, genAntiBjet);
-        if(!successfulMatching)h_matchedBjetsFromTop_step8->Fill(1.1, weight);
+    
+    // Match recoJets to the two selected genJets from (anti)top
+    int matchedBjetFromTopIndex(-1);
+    int matchedAntiBjetFromTopIndex(-1);
+    bool successfulTopMatching(false);
+    if(genBjetFromTop && genAntiBjetFromTop){
+        successfulTopMatching = this->matchRecoToGenJets(matchedBjetFromTopIndex, matchedAntiBjetFromTopIndex,
+                                                         jetIndices,
+                                                         genBjetFromTop, genAntiBjetFromTop);
+        if(!successfulTopMatching) h_matchedBjetsFromTop_step8->Fill(1.1, weight);
         else h_matchedBjetsFromTop_step8->Fill(2.1, weight);
     }
-
-    // Loop over all jet combinations and fill the MVA TTree
-    this->fillMvaInputTopJetsVariables(leptonIndex, antiLeptonIndex,
-                                       jetIndices,
-                                       matchedBjetIndex, matchedAntiBjetIndex,
-                                       met,
-                                       successfulMatching, weight);
-
+    
+    // Fill a vector with all jet pair indices, while sorting each pair by the jet charge:
+    // first entry is antiBIndex i.e. with higher jet charge, second entry is bIndex
+    const IndexPairs& jetIndexPairs = this->chargeOrderedJetPairIndices(jetIndices, *jetChargeRelativePtWeighted_);
+    
+    // Calculate the jet recoil for each jet pair, and put it in a vector of same size
+    const VLV& jetRecoils = this->recoilForJetPairs(jetIndexPairs, jetIndices, *jets_);
+    
+    // Loop over all jet combinations and get MVA input variables
+    const std::vector<MvaInputTopJetsVariables::Input>& v_mvaInput = 
+                        this->fillMvaInputTopJetsVariables(leptonIndex, antiLeptonIndex,
+                                                           jetIndexPairs, jetRecoils,
+                                                           matchedBjetFromTopIndex, matchedAntiBjetFromTopIndex,
+                                                           met,
+                                                           successfulTopMatching, weight);
+    
+    // Fill the MVA TTree
+    mvaInputTopJetsVariables_.addEntries(v_mvaInput);
+    
+    // Get the MVA weights from weights file as vector, one entry per jet pair
+    const std::vector<float>& mvaWeights = mvaInputWeights_->mvaWeights(v_mvaInput);
+    for(const auto& mvaWeight : mvaWeights) h_dijetMvaWeight_step8->Fill(mvaWeight, weight);
+    h_dijetBestMvaWeight_step8->Fill(mvaWeights.at(0), weight);
+    
+//    if(mvaWeights.at(0) < -0.2) return kTRUE;
+    
+    // Get the indices of the jet pairs and order them by MVA weights, biggest value first
+    std::vector<int> jetIndexPairsIndices = initialiseIndices(jetIndexPairs);
+    orderIndices(jetIndexPairsIndices, mvaWeights);
+    
+//    std::cout<<"\n\nMVA weights: "<<entry<<"\n";
+//    for(const int i : jetIndexPairsIndices){
+//        std::cout<<"\t"<<i<<"\t"<<mvaWeights.at(i)<<"\n";
+//    }
+    
+    // Get jet pair leading in MVA weight, and extract bIndex and antiBIndex
+    const std::pair<int, int>& leadingJetIndexPair = jetIndexPairs.at(jetIndexPairsIndices.at(0));
+    const int antiBFromTopIndex = leadingJetIndexPair.first;
+    const int bFromTopIndex = leadingJetIndexPair.second;
+    
+    // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
+    bool isSwappedPairFromTop(false);
+    bool isCorrectPairFromTop(false);
+    if(successfulTopMatching){
+        h_mvaBasedJetsFromTop_step8->Fill(0.1, weight);
+        if(matchedBjetFromTopIndex==bFromTopIndex && matchedAntiBjetFromTopIndex==antiBFromTopIndex){
+            isCorrectPairFromTop = true;
+            h_mvaBasedJetsFromTop_step8->Fill(1.1, weight);
+            h_mvaBasedJetsFromTop_step8->Fill(2.1, weight);
+        }
+        else if(matchedBjetFromTopIndex==antiBFromTopIndex && matchedAntiBjetFromTopIndex==bFromTopIndex){
+            isSwappedPairFromTop = true;
+            h_mvaBasedJetsFromTop_step8->Fill(1.1, weight);
+            h_mvaBasedJetsFromTop_step8->Fill(3.1, weight);
+        }
+    }
+    else{
+        h_mvaBasedJetsFromTop_step8->Fill(-999., weight);
+    }
+//    std::cout<<"Matching Top: "<<successfulTopMatching<<" , "<<isCorrectPairFromTop<<" , "<<isSwappedPairFromTop<<"\n";
+    
+    // Get all jets except the ones assigned to ttbar system, and order them by b-tag discriminator value
+    std::vector<int> remainingJetIndices;
+    for(const int index : jetIndices){
+        if(index==antiBFromTopIndex || index==bFromTopIndex) continue;
+        remainingJetIndices.push_back(index);
+    }
+    orderIndices(remainingJetIndices, *jetBTagCSV_);
+    
+    // Get the two jets assigned to Higgs
+    const int jet1FromHiggsIndex = remainingJetIndices.at(0);
+    const int jet2FromHiggsIndex = remainingJetIndices.at(1);
+//    std::cout<<"Btag values: "<<jetBTagCSV_->at(remainingJetIndices.at(0))
+//             <<" ,\t"<<jetBTagCSV_->at(remainingJetIndices.at(1))<<"\n\n";
+    
+    
+    // Find b jet and anti-b jet corresponding to (anti)b from Higgs
+    LV* genBjetFromHiggs(0);
+    LV* genAntiBjetFromHiggs(0);
+    if(isHiggsSignal_){
+        int genBjetIndex(-1);
+        int genAntiBjetIndex(-1);
+        // FIXME: should one clean the genJetCollection to remove low-pt (or low-eta) jets?
+        if(this->getGenBJetIndices(genBjetIndex, genAntiBjetIndex, 25)){
+            genBjetFromHiggs = &(allGenJets_->at(genBjetIndex));
+            genAntiBjetFromHiggs = &(allGenJets_->at(genAntiBjetIndex));
+        }
+        else{
+            h_matchedBjetsFromHiggs_step8->Fill(0.1, weight);
+        }
+    }
+//    std::cout<<"Gen b jets: "<<genBjetFromHiggs<<" , "<<genAntiBjetFromHiggs<<"\n";
+    
+    // Match recoJets to the two selected genJets from Higgs
+    int matchedBjetFromHiggsIndex(-1);
+    int matchedAntiBjetFromHiggsIndex(-1);
+    bool successfulHiggsMatching(false);
+    if(higgsDecayMode_==5 && (genBjetFromHiggs && genAntiBjetFromHiggs)){
+        successfulHiggsMatching = this->matchRecoToGenJets(matchedBjetFromHiggsIndex, matchedAntiBjetFromHiggsIndex,
+                                                           jetIndices,
+                                                           genBjetFromHiggs, genAntiBjetFromHiggs);
+        if(!successfulHiggsMatching) h_matchedBjetsFromHiggs_step8->Fill(1.1, weight);
+        else h_matchedBjetsFromHiggs_step8->Fill(2.1, weight);
+    }
+//    std::cout<<"Indices: "<<matchedBjetFromHiggsIndex<<" , "<<matchedAntiBjetFromHiggsIndex<<"\n";
+    
+    // Check whether the two jets correspond to the b's from Higgs
+    bool isPairFromHiggs(false);
+    if(successfulHiggsMatching){
+        if(matchedBjetFromHiggsIndex==jet1FromHiggsIndex && matchedAntiBjetFromHiggsIndex==jet2FromHiggsIndex){
+            isPairFromHiggs = true;
+        }
+        else if(matchedBjetFromHiggsIndex==jet2FromHiggsIndex && matchedAntiBjetFromHiggsIndex==jet1FromHiggsIndex){
+            isPairFromHiggs = true;
+        }
+    }
+    
+    // Check whether the b jets from Higgs are identical to those from (anti)top
+    bool ambiguousJetMatchings(false);
+    if(!successfulTopMatching || !successfulHiggsMatching) ambiguousJetMatchings = true;
+    else if(matchedBjetFromTopIndex==matchedBjetFromHiggsIndex || matchedAntiBjetFromTopIndex==matchedBjetFromHiggsIndex || 
+            matchedBjetFromTopIndex==matchedAntiBjetFromHiggsIndex ||matchedAntiBjetFromTopIndex==matchedAntiBjetFromHiggsIndex)
+        ambiguousJetMatchings = true;
+//    std::cout<<"Matching Higgs: "<<successfulHiggsMatching<<" , "<<isPairFromHiggs<<" ,\tAmbiguity: "<<ambiguousJetMatchings<<"\n";
+    
+    if(successfulHiggsMatching){
+        h_mvaBasedJetsFromHiggs_step8->Fill(0.1, weight);
+        if(isPairFromHiggs){
+            h_mvaBasedJetsFromHiggs_step8->Fill(1.1, weight);
+            if(ambiguousJetMatchings) h_mvaBasedJetsFromHiggs_step8->Fill(2.1, weight);
+            else if(isCorrectPairFromTop || isSwappedPairFromTop) h_mvaBasedJetsFromHiggs_step8->Fill(3.1, weight);
+        }
+    }
+    else{
+        h_mvaBasedJetsFromHiggs_step8->Fill(-999., weight);
+    }
+    
+    for(const auto& jetIndexPair : jetIndexPairs){
+        const LV dijet = jets_->at(jetIndexPair.first) + jets_->at(jetIndexPair.second);
+        h_dijetMass_step8->Fill(dijet.M(), weight);
+        p_dijetMassVsJetCategories->Fill(jetCategoryId_overview, dijet.M(), weight);
+        p_dijetMassVsMvaWeightHigh->Fill(mvaWeights.at(0), dijet.M(), weight);
+        p_dijetMassVsMvaWeightDiff->Fill(mvaWeights.at(0)-mvaWeights.at(1), dijet.M(), weight);
+    }
+    
+    const LV dijet = jets_->at(jet1FromHiggsIndex) + jets_->at(jet2FromHiggsIndex);
+    h_mvaBasedDijetMass_step8->Fill(dijet.M(), weight);
+    p_mvaBasedDijetMassVsJetCategories->Fill(jetCategoryId_overview, dijet.M(), weight);
+    p_mvaBasedDijetMassVsMvaWeightHigh->Fill(mvaWeights.at(0), dijet.M(), weight);
+    p_mvaBasedDijetMassVsMvaWeightDiff->Fill(mvaWeights.at(0)-mvaWeights.at(1), dijet.M(), weight);
+    
     return kTRUE;
 }
 
 
 
-void HiggsAnalysis::fillMvaInputTopJetsVariables(const int leptonIndex, const int antiLeptonIndex,
-                                                 const std::vector<int>& jetIndices,
-                                                 const int matchedBjetIndex, const int matchedAntiBjetIndex,
-                                                 const LV& met,
-                                                 const bool successfulMatching, const double& eventWeight)
+HiggsAnalysis::IndexPairs HiggsAnalysis::chargeOrderedJetPairIndices(const std::vector<int>& jetIndices,
+                                                                     const std::vector<double>& jetCharges)
 {
-    const LV& lepton(leptons_->at(leptonIndex));
-    const LV& antiLepton(leptons_->at(antiLeptonIndex));
+    IndexPairs result;
     
     // Loop over all jet combinations
     for(std::vector<int>::const_iterator i_jetIndex = jetIndices.begin(); i_jetIndex != --(jetIndices.end()); ++i_jetIndex){
@@ -619,49 +800,97 @@ void HiggsAnalysis::fillMvaInputTopJetsVariables(const int leptonIndex, const in
             // Get the indices of b and anti-b jet defined by jet charge
             int bIndex = *i_jetIndex;
             int antiBIndex = *j_jetIndex;
-            ttbar::orderIndices(antiBIndex, bIndex, *jetChargeRelativePtWeighted_);
-            const double jetChargeDiff = jetChargeRelativePtWeighted_->at(antiBIndex) - jetChargeRelativePtWeighted_->at(bIndex);
-            if(jetChargeDiff<0. || jetChargeDiff>2.){
-                std::cerr<<"ERROR! Difference in jet charge is (value = "<<jetChargeDiff
-                         <<"), but definition allows only values in [0,2]\n...break\n"<<std::endl;
-                exit(555);
-            }
+            ttbar::orderIndices(antiBIndex, bIndex, jetCharges);
             
-            // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
-            bool isSwappedPair(false);
-            bool isCorrectPair(false);
-            if(successfulMatching){
-                if(matchedBjetIndex==bIndex && matchedAntiBjetIndex==antiBIndex){
-                    isCorrectPair = true;
-                }
-                else if(matchedBjetIndex==antiBIndex && matchedAntiBjetIndex==bIndex){
-                    isSwappedPair = true;
-                }
-            }
-            
-            // Variables for MVA
-            const LV& bjet = jets_->at(bIndex);
-            const LV& antiBjet = jets_->at(antiBIndex);
-            VLV recoilJets;
-            for(const int index : jetIndices){
-                if(index == bIndex || index == antiBIndex) continue;
-                recoilJets.push_back(jets_->at(index));
-            }
-            LV jetRecoil;
-            for(auto recoilJet : recoilJets)jetRecoil += recoilJet;
-            const double& bjetBtagDiscriminator = jetBTagCSV_->at(bIndex);
-            const double& antiBjetBtagDiscriminator = jetBTagCSV_->at(antiBIndex);
-
-            // Add entry to MVA input
-            mvaInputTopJetsVariables_.addEntry(lepton, antiLepton,
-                                               bjet, antiBjet,
-                                               bjetBtagDiscriminator, antiBjetBtagDiscriminator,
-                                               jetChargeDiff,
-                                               jetRecoil, met,
-                                               successfulMatching, isCorrectPair, isSwappedPair,
-                                               eventWeight);
+            result.push_back(std::make_pair(antiBIndex, bIndex));
         }
     }
+    
+    return result;
+}
+
+
+
+VLV HiggsAnalysis::recoilForJetPairs(const HiggsAnalysis::IndexPairs& jetIndexPairs,
+                                     const std::vector<int>& jetIndices,
+                                     const VLV& jets)
+{
+    VLV result;
+    
+    for(const auto& jetIndexPair : jetIndexPairs){
+        const int antiBIndex = jetIndexPair.first;
+        const int bIndex = jetIndexPair.second;
+        
+        LV jetRecoil;
+        for(const int index : jetIndices){
+            if(index == bIndex || index == antiBIndex) continue;
+            jetRecoil += jets.at(index);
+        }
+        
+        result.push_back(jetRecoil);
+    }
+    
+    return result;
+}
+
+
+std::vector<MvaInputTopJetsVariables::Input> HiggsAnalysis::fillMvaInputTopJetsVariables(
+                                                const int leptonIndex, const int antiLeptonIndex,
+                                                const IndexPairs& jetIndexPairs, const VLV& jetRecoils,
+                                                const int matchedBjetIndex, const int matchedAntiBjetIndex,
+                                                const LV& met,
+                                                const bool successfulMatching, const double& eventWeight)const
+{
+    std::vector<MvaInputTopJetsVariables::Input> result;
+    
+    const LV& lepton(leptons_->at(leptonIndex));
+    const LV& antiLepton(leptons_->at(antiLeptonIndex));
+    
+    // Loop over all jet pairs
+    for(size_t iJetIndexPairs = 0; iJetIndexPairs < jetIndexPairs.size(); ++iJetIndexPairs){
+        
+        // Get the indices of b and anti-b jet defined by jet charge
+        const int antiBIndex = jetIndexPairs.at(iJetIndexPairs).first;
+        const int bIndex = jetIndexPairs.at(iJetIndexPairs).second;
+        
+        // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
+        bool isSwappedPair(false);
+        bool isCorrectPair(false);
+        if(successfulMatching){
+            if(matchedBjetIndex==bIndex && matchedAntiBjetIndex==antiBIndex){
+                isCorrectPair = true;
+            }
+            else if(matchedBjetIndex==antiBIndex && matchedAntiBjetIndex==bIndex){
+                isSwappedPair = true;
+            }
+        }
+        
+        // Variables for MVA
+        const LV& bjet = jets_->at(bIndex);
+        const LV& antiBjet = jets_->at(antiBIndex);
+        const double& bjetBtagDiscriminator = jetBTagCSV_->at(bIndex);
+        const double& antiBjetBtagDiscriminator = jetBTagCSV_->at(antiBIndex);
+        const double jetChargeDiff = jetChargeRelativePtWeighted_->at(antiBIndex) - jetChargeRelativePtWeighted_->at(bIndex);
+        if(jetChargeDiff<0. || jetChargeDiff>2.){
+            std::cerr<<"ERROR! Difference in jet charge is (value = "<<jetChargeDiff
+                     <<"), but definition allows only values in [0,2]\n...break\n"<<std::endl;
+            exit(555);
+        }
+        const LV& jetRecoil = jetRecoils.at(iJetIndexPairs);
+        
+        const MvaInputTopJetsVariables::Input mvaInput(lepton, antiLepton,
+                                                       bjet, antiBjet,
+                                                       bjetBtagDiscriminator, antiBjetBtagDiscriminator,
+                                                       jetChargeDiff,
+                                                       jetRecoil, met,
+                                                       successfulMatching,
+                                                       isCorrectPair, isSwappedPair,
+                                                       eventWeight);
+        
+        result.push_back(mvaInput);
+    }
+    
+    return result;
 }
 
 
@@ -749,6 +978,13 @@ void HiggsAnalysis::SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMo
 void HiggsAnalysis::SetJetCategoriesOverview(const JetCategories& jetCategories)
 {
     jetCategories_overview_ = &jetCategories;
+}
+
+
+
+void HiggsAnalysis::SetMvaWeightsInput(MvaInputTopJetsVariables& mvaInputTopJetsVariables)
+{
+    mvaInputWeights_ = &mvaInputTopJetsVariables;
 }
 
 
