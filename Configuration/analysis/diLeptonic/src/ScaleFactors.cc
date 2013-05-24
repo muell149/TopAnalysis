@@ -442,27 +442,6 @@ systematic_(nominal)
 {
     std::cout<<"--- Beginning preparation of b-tagging scale factors\n";
     
-    // Set systematic if it is an allowed one for btag efficiencies, else set to nominal
-    if(systematic == "BTAG_UP") systematic_ = BtagScaleFactors::btag_up;
-    else if(systematic == "BTAG_DOWN") systematic_ = BtagScaleFactors::btag_down;
-    else if(systematic == "BTAG_PT_UP") systematic_ = BtagScaleFactors::btagPt_up;
-    else if(systematic == "BTAG_PT_DOWN") systematic_ = BtagScaleFactors::btagPt_down;
-    else if(systematic == "BTAG_ETA_UP") systematic_ = BtagScaleFactors::btagEta_up;
-    else if(systematic == "BTAG_ETA_DOWN") systematic_ = BtagScaleFactors::btagEta_down;
-    else if(systematic == "BTAG_LJET_UP") systematic_ = BtagScaleFactors::btagLjet_up;
-    else if(systematic == "BTAG_LJET_DOWN") systematic_ = BtagScaleFactors::btagLjet_down;
-    else if(systematic == "BTAG_LJET_PT_UP") systematic_ = BtagScaleFactors::btagLjetPt_up;
-    else if(systematic == "BTAG_LJET_PT_DOWN") systematic_ = BtagScaleFactors::btagLjetPt_down;
-    else if(systematic == "BTAG_LJET_ETA_UP") systematic_ = BtagScaleFactors::btagLjetEta_up;
-    else if(systematic == "BTAG_LJET_ETA_DOWN") systematic_ = BtagScaleFactors::btagLjetEta_down;
-    else if(systematic == "BTAG_BEFF_UP") systematic_ = BtagScaleFactors::btagBeff_up;
-    else if(systematic == "BTAG_BEFF_DOWN") systematic_ = BtagScaleFactors::btagBeff_down;
-    else if(systematic == "BTAG_CEFF_UP") systematic_ = BtagScaleFactors::btagCeff_up;
-    else if(systematic == "BTAG_CEFF_DOWN") systematic_ = BtagScaleFactors::btagCeff_down;
-    else if(systematic == "BTAG_LEFF_UP") systematic_ = BtagScaleFactors::btagLeff_up;
-    else if(systematic == "BTAG_LEFF_DOWN") systematic_ = BtagScaleFactors::btagLeff_down;
-    else systematic = "Nominal";
-    
     // Check if all relevant input files are available
     bool allInputFilesAvailable(true);
     for(const auto& channel : channels){
@@ -523,6 +502,27 @@ systematic_(nominal)
             printf("Using medians for channel %s: pt = %.0f , eta = %.2f\n", channelName.c_str(), channelStruct.btag_ptmedian_, channelStruct.btag_etamedian_);
         }
     }
+    
+    // Set systematic if it is an allowed one for btag efficiencies, else set to nominal
+    if(systematic == "BTAG_UP") systematic_ = BtagScaleFactors::btag_up;
+    else if(systematic == "BTAG_DOWN") systematic_ = BtagScaleFactors::btag_down;
+    else if(systematic == "BTAG_PT_UP") systematic_ = BtagScaleFactors::btagPt_up;
+    else if(systematic == "BTAG_PT_DOWN") systematic_ = BtagScaleFactors::btagPt_down;
+    else if(systematic == "BTAG_ETA_UP") systematic_ = BtagScaleFactors::btagEta_up;
+    else if(systematic == "BTAG_ETA_DOWN") systematic_ = BtagScaleFactors::btagEta_down;
+    else if(systematic == "BTAG_LJET_UP") systematic_ = BtagScaleFactors::btagLjet_up;
+    else if(systematic == "BTAG_LJET_DOWN") systematic_ = BtagScaleFactors::btagLjet_down;
+    else if(systematic == "BTAG_LJET_PT_UP") systematic_ = BtagScaleFactors::btagLjetPt_up;
+    else if(systematic == "BTAG_LJET_PT_DOWN") systematic_ = BtagScaleFactors::btagLjetPt_down;
+    else if(systematic == "BTAG_LJET_ETA_UP") systematic_ = BtagScaleFactors::btagLjetEta_up;
+    else if(systematic == "BTAG_LJET_ETA_DOWN") systematic_ = BtagScaleFactors::btagLjetEta_down;
+    else if(systematic == "BTAG_BEFF_UP") systematic_ = BtagScaleFactors::btagBeff_up;
+    else if(systematic == "BTAG_BEFF_DOWN") systematic_ = BtagScaleFactors::btagBeff_down;
+    else if(systematic == "BTAG_CEFF_UP") systematic_ = BtagScaleFactors::btagCeff_up;
+    else if(systematic == "BTAG_CEFF_DOWN") systematic_ = BtagScaleFactors::btagCeff_down;
+    else if(systematic == "BTAG_LEFF_UP") systematic_ = BtagScaleFactors::btagLeff_up;
+    else if(systematic == "BTAG_LEFF_DOWN") systematic_ = BtagScaleFactors::btagLeff_down;
+    else systematic = "Nominal";
     
     std::cout<<"=== Finishing preparation of b-tagging scale factors\n\n";
 }
