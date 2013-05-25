@@ -183,10 +183,11 @@ if(not globals().has_key('additionalEventWeights')):
 ## enable/ disable systematic shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
     sysDistort =  ''
+    #sysDistort =  'data'
     #sysDistort =  'Up'
     #sysDistort =  'Down'
 # only done for ttbar
-if(not options.sample=="ttbar"):
+if(not options.sample=="ttbar" and not options.sample=="mcatnlo" and not options.sample=="powheg"):
     sysDistort=''
 # coupled to PU weight, therefore not applicable without
 if(not PUreweigthing):
@@ -263,7 +264,7 @@ if(not options.sample=="none"):
 	elif(eventFilter=='background only'):
 	    outputFileName+="Bkg"
 	if(sysDistort!=""):
-	    additionalEventWeights=False
+	    if(sysDistort!="data")additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
 	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
@@ -274,6 +275,9 @@ if(not options.sample=="none"):
             outputFileName+="SigPowheg"
         elif(eventFilter=='background only'):
             outputFileName+="BkgPowheg"
+        if(sysDistort!=""):
+	    if(sysDistort!="data")additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="mcatnlo"):
         usedSample="TopAnalysis/Configuration/Summer12/TT_8TeV_mcatnlo_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         PythiaSample="True"
@@ -281,6 +285,9 @@ if(not options.sample=="none"):
             outputFileName+="SigMcatnlo"
         elif(eventFilter=='background only'):
             outputFileName+="BkgMcatnlo"
+        if(sysDistort!=""):
+	    if(sysDistort!="data")additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="ttbarMatchingDown"):        
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MatchingDown_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	additionalEventWeights=False
@@ -1607,11 +1614,11 @@ process.load("TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi")
 #process.eventWeightDileptonModelVariation.variation=cms.string(sysDistort)
 #process.eventWeightDileptonModelVariation.ttGenEvent=cms.InputTag('genEvt')
 process.eventWeightDileptonModelVariation.ttGenEvent = cms.InputTag('genEvt')
-process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass') #valid values: toppt, topeta, ttbarmass
-process.eventWeightDileptonModelVariation.slope = cms.double(0.03)
-process.eventWeightDileptonModelVariation.weight1x = cms.double(350)  #position where weight is 1
+process.eventWeightDileptonModelVariation.weightVariable = cms.string('data') #valid values: toppt, topeta, ttbarmass, data
+process.eventWeightDileptonModelVariation.slope = cms.double(0.00137)
+process.eventWeightDileptonModelVariation.weight1x = cms.double(113.9)  #position where weight is 1
 process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-off, at least 0.1 event weight
-process.eventWeightDileptonModelVariation.maxWeight = cms.double(100)  #high cut-off, at most 2 event weight
+process.eventWeightDileptonModelVariation.maxWeight = cms.double(2)  #high cut-off, at most 2 event weight
 process.eventWeightDileptonModelVariation.landauMPV = cms.double(420)
 process.eventWeightDileptonModelVariation.landauSigma = cms.double(34)
 if(sysDistort=='Up'):
