@@ -1045,11 +1045,11 @@ namespace semileptonic {
     // e) systematic shifts
     double weight2=weight;
     // e0) ttbar data basd reweighting
-    if(kSys==sysTest){ // FIXME UPDATE FOR 8 TEV
-      if(sample==kSig&&decayChannel.compare("electron")==0) weight2*=549.162/557.161;
-      if(sample==kSig&&decayChannel.compare("muon"    )==0) weight2*=546.5/567.8;
-      if(sample==kBkg&&decayChannel.compare("electron")==0) weight2*=3148.5/3193.74;
-      if(sample==kBkg&&decayChannel.compare("muon"    )==0) weight2*=3151.23/3196.51;
+    if(kSys==sysTest){ // FIXME UPDATE FOR 8 TEV (update derived from ttbar signal)
+      if(sample==kSig&&decayChannel.compare("electron")==0) weight*=1.02674242/1.02511720;//549.162/557.161;
+      if(sample==kSig&&decayChannel.compare("muon"    )==0) weight*=1.02521244/1.02378495;//546.5/567.8;
+      if(sample==kBkg&&decayChannel.compare("electron")==0) weight*=1.02674242/1.02511720;//3148.5/3193.74;
+      if(sample==kBkg&&decayChannel.compare("muon"    )==0) weight*=1.02521244/1.02378495;//3151.23/3196.51;
     }
     if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
     // e1) for ttbar->lnu: BR correction
