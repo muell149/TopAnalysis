@@ -264,7 +264,8 @@ if(not options.sample=="none"):
 	elif(eventFilter=='background only'):
 	    outputFileName+="Bkg"
 	if(sysDistort!=""):
-	    if(sysDistort!="data")additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
 	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
@@ -276,7 +277,8 @@ if(not options.sample=="none"):
         elif(eventFilter=='background only'):
             outputFileName+="BkgPowheg"
         if(sysDistort!=""):
-	    if(sysDistort!="data")additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
 	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="mcatnlo"):
         usedSample="TopAnalysis/Configuration/Summer12/TT_8TeV_mcatnlo_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
@@ -286,7 +288,8 @@ if(not options.sample=="none"):
         elif(eventFilter=='background only'):
             outputFileName+="BkgMcatnlo"
         if(sysDistort!=""):
-	    if(sysDistort!="data")additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
 	    outputFileName+="SysDistort"+sysDistort
     elif(options.sample=="ttbarMatchingDown"):        
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MatchingDown_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
