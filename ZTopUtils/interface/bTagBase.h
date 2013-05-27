@@ -57,6 +57,8 @@ namespace ztop{
 
 
     void setSystematic(const std::string &); //! up, down, def + heavy, light (check if string contains) - not protected agains weird input like "heavy up down light" etc
+    void setSystematic(int sys){syst_=sys;}
+    int getSystematic(){return syst_;}
 
     void writeToTFile(TString, std::string treename="stored_objects"); //! writes whole class to TFile
     void readFromTFile(TString , std::string treename="stored_objects");  //! reads whole class from TFile
