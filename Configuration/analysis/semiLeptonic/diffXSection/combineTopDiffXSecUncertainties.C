@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=true){
+void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
 
   // ============================
   //  Systematic Variations:
@@ -467,7 +467,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		  // hadron lv PS lepton and b-jet PDF uncertainties
 		  if(!extrapolate&&hadron&&(sys==sysPDFUp||sys==sysPDFDown)&&(xSecVariables_[i].Contains("lep")||xSecVariables_[i].Contains("bq"))){
 		    if(verbose>1) std::cout << "load unc PDF for " << xSecVariables_[i] << " bin " << bin << std::endl;
-		    TString fileName="/afs/naf.desy.de/group/cms/scratch/tophh/8TeVResults/diffXSecTopSemi";
+		    TString fileName="/afs/naf.desy.de/group/cms/scratch/tophh/tmp/2012/diffXSecTopSemi";
 		    if(decayChannel=="muon"    ) fileName+="Mu";
 		    else if(decayChannel=="electron") fileName+="Elec";
 		    else if(decayChannel=="combined") fileName+="Lep";
