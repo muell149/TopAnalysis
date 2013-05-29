@@ -4014,28 +4014,28 @@ namespace semileptonic {
       // get file
       TFile* file = TFile::Open(fileName);
       if(!file||(file->IsZombie())){ 
-	std::cout << "WARNING in getUncFromRootFile: file " << fileName << " not found" << std::endl;
+	std::cout << "WARNING in getValue: file " << fileName << " not found" << std::endl;
 	return 0.;
       }
       // get canvas
       TCanvas* canv=(TCanvas*)file->Get(canvName);
       if(!canv){ 
-	std::cout << "WARNING in getUncFromRootFile: canvas " << canvName << " in file " << fileName << " not found" << std::endl;
+	std::cout << "WARNING in getValue: canvas " << canvName << " in file " << fileName << " not found" << std::endl;
 	return 0.;
       }
       // get plot
       TH1F* plot  = (TH1F*)canv->GetPrimitive(plotName);
       if(!plot){ 
-	std::cout << "WARNING in getUncFromRootFile: plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found" << std::endl;
+	std::cout << "WARNING in getValue: plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found" << std::endl;
 	return 0.;
       }
       // get uncertainty value
       if(plot->GetNbinsX()+1<bin||bin<0){
-	std::cout << "WARNING in getUncFromRootFile: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found (" << plot->GetNbinsX() << " bins)" << std::endl;
+	std::cout << "WARNING in getValue: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found (" << plot->GetNbinsX() << " bins)" << std::endl;
 	return 0.;
       }
       if(plot->GetBinContent(bin)<0){
-	std::cout << "WARNING in getUncFromRootFile: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " has a negative value" << std::endl;
+	std::cout << "WARNING in getValue: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " has a negative value" << std::endl;
       }
       std::cout << plot->GetBinContent(bin) << std::endl;
       return plot->GetBinContent(bin);
