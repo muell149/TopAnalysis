@@ -68,37 +68,37 @@ void Plotter::SetOutpath(TString path)
 
 void Plotter::unfolding(TString channel)
 {
-//    vector<TString> vec_systematic {"JES_", "PU_"};
-//    vector<double> vec_flat_value {0, 0};
+//    std::vector<TString> vec_systematic {"JES_", "PU_"};
+//    std::vector<double> vec_flat_value {0, 0};
 
-     vector<TString> vec_systematic {"HAD_", "LEPT_", "KIN_", "DY_","BG_","PU_", "TRIG_","MASS_", "MATCH_", "SCALE_", "BTAG_ETA_","BTAG_PT_", "BTAG_LJET_ETA_", "BTAG_LJET_PT_", "JER_", "JES_"};
-     vector<double> vec_flat_value {0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 0.0025, 0.0025, 0.0025, 0.0025, 0, 0}; 
+     std::vector<TString> vec_systematic {"HAD_", "LEPT_", "KIN_", "DY_","BG_","PU_", "TRIG_","MASS_", "MATCH_", "SCALE_", "BTAG_ETA_","BTAG_PT_", "BTAG_LJET_ETA_", "BTAG_LJET_PT_", "JER_", "JES_"};
+     std::vector<double> vec_flat_value {0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 0.0025, 0.0025, 0.0025, 0.0025, 0, 0}; 
     //Right now BTAG = 0.5% = Sqrt(BTAG_ETA ** 2 + BTAG_PT ** 2 + BTAG_LJET_ETA ** 2 + BTAG_LJET_PT ** 2)
     //assumed  BTAG_ETA = BTAG_PT = BTAG_LJET_ETA = BTAG_LJET_PT = 0.25% so a total error of 0.5% comes up in BTag
     
     if(vec_systematic.size() != vec_flat_value.size()){
-        cout<<"WARNING (in unfolding)!!!\n You are using 2 different size vectors: 'vec_systematic' and 'vec_flat_value'.\n Fix this and rerun again"<<endl;
+        std::cout<<"WARNING (in unfolding)!!!\n You are using 2 different size vectors: 'vec_systematic' and 'vec_flat_value'.\n Fix this and rerun again"<<std::endl;
         return;
     }
 
 
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << "Starting Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "':" << endl;
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+    std::cout << "Starting Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "':" << std::endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
     
     CalcDiffXSec(channel,"Nominal");
     
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << "Finished Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "':" << endl;
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+    std::cout << "Finished Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "':" << std::endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
 
     //############### Syst ################
     if (doSystematics) { 
         for(int sys = 0; sys < (int)vec_systematic.size(); sys++){ //loop over systematics
-            cout << endl;
-            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-            cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << endl;
-            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
+            std::cout << std::endl;
+            std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+            std::cout << "Starting Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << "':" << std::endl;
+            std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
 
             if ( !vec_systematic.at(sys).BeginsWith("HAD_") ) {
                  CalcDiffSystematics(channel, 
@@ -121,10 +121,10 @@ void Plotter::unfolding(TString channel)
                 }
             }
 
-            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-            cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << endl;
-            cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-            cout << endl;
+            std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+            std::cout << "Finished Calculation of Differential Systematics for '" << name << "' in Channel '" << channel << std::endl;
+            std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+            std::cout << std::endl;
         }//systematic loop
     }
 
@@ -144,10 +144,10 @@ void Plotter::DYScaleFactor(TString SpecialComment){
 
     TString nameAppendix = "";
     if ( !SpecialComment.BeginsWith("_post") &&  SpecialComment != "Standard" ){
-        cout<<"\n\n*******************************************************************"<<endl;
-        cout<<"ERROR: When calculating the DY Scale factor you must specify in which step you want to calculate the DY SF:"<<endl;
-        cout<<" '_postZcut', '_post2jets', '_postMET', '_post1btag', '_postKinReco' or 'Standard' = _postKinReco"<<endl;
-        cout<<"*******************************************************************\n\n"<<endl;
+        std::cout<<"\n\n*******************************************************************"<<std::endl;
+        std::cout<<"ERROR: When calculating the DY Scale factor you must specify in which step you want to calculate the DY SF:"<<std::endl;
+        std::cout<<" '_postZcut', '_post2jets', '_postMET', '_post1btag', '_postKinReco' or 'Standard' = _postKinReco"<<std::endl;
+        std::cout<<"*******************************************************************\n\n"<<std::endl;
         exit(444);
     }
     if (SpecialComment.BeginsWith("_post")){
@@ -156,10 +156,10 @@ void Plotter::DYScaleFactor(TString SpecialComment){
         nameAppendix = "_postKinReco";
     }
 
-    cout<<"\n\nBegin DYSCALE FACTOR calculation at selection step "<<nameAppendix<<endl;
+    std::cout<<"\n\nBegin DYSCALE FACTOR calculation at selection step "<<nameAppendix<<std::endl;
     
-    vector<TString> Vec_Files = InputFileList("combined", "Nominal");//Read the hardcoded list of files
-    if(Vec_Files.size()<1) {cout<<"WARNING(in DYScaleFactor)!!! No datasets available to calculate DY SF. EXITING!!"<<endl; return;}
+    std::vector<TString> Vec_Files = InputFileList("combined", "Nominal");//Read the hardcoded list of files
+    if(Vec_Files.size()<1) {std::cout<<"WARNING(in DYScaleFactor)!!! No datasets available to calculate DY SF. EXITING!!"<<std::endl; return;}
     
     double NoutEEDYMC=0, NinEEDYMC=0, NoutMuMuDYMC=0, NinMuMuDYMC=0;//Number of events in/out of z-veto region for the DY MC
     double NinEE=0, NinMuMu=0, NinEMu=0;//Number of events in z-veto region for data
@@ -246,33 +246,33 @@ void Plotter::DYScaleFactor(TString SpecialComment){
     double DYSFEE = NoutMCEE/NoutEEDYMC;
     double DYSFMuMu = NoutMCMuMu/NoutMuMuDYMC;
 
-    cout << endl;
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << "Calculation of DY Scale Factors for '" << name << "'  at selection step "<<nameAppendix << endl;
+    std::cout << std::endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+    std::cout << "Calculation of DY Scale Factors for '" << name << "'  at selection step "<<nameAppendix << std::endl;
 
-    cout<<"DYSFEE:                 "<<DYSFEE<<endl;
-    cout<<"DYSFMuMu:               "<<DYSFMuMu<<endl;
+    std::cout<<"DYSFEE:                 "<<DYSFEE<<std::endl;
+    std::cout<<"DYSFMuMu:               "<<DYSFMuMu<<std::endl;
 
-    cout<<"NinEEloose:             "<<NinEEloose<<endl;
-    cout<<"NinMMloose:             "<<NinMuMuloose<<endl;
+    std::cout<<"NinEEloose:             "<<NinEEloose<<std::endl;
+    std::cout<<"NinMMloose:             "<<NinMuMuloose<<std::endl;
 
-    cout<<"kee:                    "<<kee<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
-    cout<<"kmumu:                  "<<kmumu<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<endl;
+    std::cout<<"kee:                    "<<kee<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<std::endl;
+    std::cout<<"kmumu:                  "<<kmumu<<" +- "<<0.5*TMath::Sqrt(1./NinMuMuloose + 1./NinEEloose)<<std::endl;
 
-    cout<<"Rout/Rin ee:            "<<RoutinEE<<endl;
-    cout<<"Rout/Rin Mumu:          "<<RoutinMuMu<<endl;
+    std::cout<<"Rout/Rin ee:            "<<RoutinEE<<std::endl;
+    std::cout<<"Rout/Rin Mumu:          "<<RoutinMuMu<<std::endl;
 
-    cout<<"Est. From Data(ee):     "<<NoutMCEE<<endl;
-    cout<<"Est. From Data(mumu):   "<<NoutMCMuMu<<endl;
+    std::cout<<"Est. From Data(ee):     "<<NoutMCEE<<std::endl;
+    std::cout<<"Est. From Data(mumu):   "<<NoutMCMuMu<<std::endl;
 
-    cout<<"Est. From MC(ee):       "<<NoutEEDYMC<<endl;
-    cout<<"Est. From MC(mumu):     "<<NoutMuMuDYMC<<endl;
+    std::cout<<"Est. From MC(ee):       "<<NoutEEDYMC<<std::endl;
+    std::cout<<"Est. From MC(mumu):     "<<NoutMuMuDYMC<<std::endl;
 
-    cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endl;
-    cout << endl;
+    std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
+    std::cout << std::endl;
 
     if (DYSFEE < 0.2 || DYSFMuMu < 0.2) {
-        cout << "The DY SF is too low (below 0.2). Something is probably wrong.\n";
+        std::cout << "The DY SF is too low (below 0.2). Something is probably wrong.\n";
         std::exit(1);
     }
     
@@ -281,7 +281,7 @@ void Plotter::DYScaleFactor(TString SpecialComment){
     DYScale.at(2)=1.;
     DYScale.at(3)=(DYSFEE+DYSFMuMu)/2;//not correct, but close, fix later
 
-    cout<<"End DYSCALE FACTOR calculation\n"<<endl;
+    std::cout<<"End DYSCALE FACTOR calculation\n"<<std::endl;
 
 }
 
@@ -289,9 +289,9 @@ void Plotter::DYScaleFactor(TString SpecialComment){
 
 void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString SystematicUp, TString SystematicDown, double flat_Syst){
 
-    cout << endl;
-    cout << endl;
-    cout << "    Preparing to Calculate " << Systematic << "-Uncertainty ... " << endl;
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "    Preparing to Calculate " << Systematic << "-Uncertainty ... " << std::endl;
 
     ofstream ResultsFile;
 
@@ -305,7 +305,7 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
     ResultsFilestring.append("/");
     ResultsFilestring.append(name);
     ResultsFilestring.append("Results.txt");
-    cout<<ResultsFilestring<<endl;
+    std::cout<<ResultsFilestring<<std::endl;
     ResultsFile.open(ResultsFilestring.c_str());
         
     double Xbins[XAxisbins.size()];
@@ -313,7 +313,7 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
 
     if(flat_Syst > 0.0){// flat systematics will be: flat_Syst != 0.0
         for(size_t bin = 0; bin < XAxisbinCenters.size(); bin++){
-            ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" SystematicError: "<<flat_Syst<<endl;
+            ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" SystematicError: "<<flat_Syst<<std::endl;
         }
     }
 
@@ -413,8 +413,8 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
         } 
         TString theSystematicName = Systematic; 
 
-        cout << endl;
-        cout << endl;
+        std::cout << std::endl;
+        std::cout << std::endl;
     
         // Get the integrals for the normalization
         double totalDataEventsNom  = TopSVDFunctions::SVD_Integral1D(theDataHist, 0, false);
@@ -460,24 +460,24 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
         //Symetrize Eta and Rapidity distributions
         if (theQuantityName == "Eta" || theQuantityName == "Rapidity" ){
             for(int j=0; j<(int) symmSysErrors->GetNbinsX(); ++j){
-                cout<<"In bin "<<j<<" binCenter "<<symmSysErrors->GetBinCenter(j+1)<<" Content "<<symmSysErrors->GetBinContent(j+1)<<endl;
+                std::cout<<"In bin "<<j<<" binCenter "<<symmSysErrors->GetBinCenter(j+1)<<" Content "<<symmSysErrors->GetBinContent(j+1)<<std::endl;
             }
 
             int Nbins = theDataHist->GetNbinsX();
-            cout<<"Nbins in "<<symmSysErrors->GetName()<<" = "<<symmSysErrors->GetNbinsX()<<endl;
+            std::cout<<"Nbins in "<<symmSysErrors->GetName()<<" = "<<symmSysErrors->GetNbinsX()<<std::endl;
             //There are 2 extra bins coming from the unfolding ==>  skip the underflow+1 bin from left and and overflow+1 bin from right
             for(int i=0; i<Nbins; ++i){
-                cout<<"(2nd loop) In bin "<<i<<" binCenter "<<symmSysErrors->GetBinCenter(i+2)<<" Content "<<symmSysErrors->GetBinContent(i+2)<<endl;
-                cout<<"                     binCenter "<<symmSysErrors->GetBinCenter(Nbins-i+1)<<" Content "<<symmSysErrors->GetBinContent(Nbins-i+1)<<endl;
+                std::cout<<"(2nd loop) In bin "<<i<<" binCenter "<<symmSysErrors->GetBinCenter(i+2)<<" Content "<<symmSysErrors->GetBinContent(i+2)<<std::endl;
+                std::cout<<"                     binCenter "<<symmSysErrors->GetBinCenter(Nbins-i+1)<<" Content "<<symmSysErrors->GetBinContent(Nbins-i+1)<<std::endl;
                 Sys_Error = 0.5*(symmSysErrors->GetBinContent(i+2)+symmSysErrors->GetBinContent(Nbins+1-i));
-                cout<<"Symetrized error "<<Sys_Error<<endl;
+                std::cout<<"Symetrized error "<<Sys_Error<<std::endl;
                 if(Systematic == "MASS_"){
                     Sys_Error = Sys_Error/12.;
                 }
                 // Save it
 
-                //cout<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[i]<<" bin: "<<Xbins[i]<<" to "<<Xbins[i+1]<<" SystematicError: "<<Sys_Error<<endl;
-                ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[i]<<" bin: "<<Xbins[i]<<" to "<<Xbins[i+1]<<" SystematicRelError: "<<Sys_Error<<endl;
+                //std::cout<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[i]<<" bin: "<<Xbins[i]<<" to "<<Xbins[i+1]<<" SystematicError: "<<Sys_Error<<std::endl;
+                ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[i]<<" bin: "<<Xbins[i]<<" to "<<Xbins[i+1]<<" SystematicRelError: "<<Sys_Error<<std::endl;
             }
         }
         else{
@@ -488,8 +488,8 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
                     Sys_Error = Sys_Error/12.;
                 }
                 // Save it
-                //cout<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" SystematicError: "<<Sys_Error<<endl;
-                ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" SystematicRelError: "<<Sys_Error<<endl;
+                //std::cout<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" SystematicError: "<<Sys_Error<<std::endl;
+                ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" SystematicRelError: "<<Sys_Error<<std::endl;
             }
         }
         
@@ -528,8 +528,8 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
         //check the existence of the file
         if(gSystem->AccessPathName(eefilename) || gSystem->AccessPathName(emufilename) || gSystem->AccessPathName(mumufilename) ||
            gSystem->AccessPathName(eeErrfilename) || gSystem->AccessPathName(emuErrfilename) || gSystem->AccessPathName(mumuErrfilename)){
-            cout<<"WARNING (in CalcDiffSystematics)!!"<<endl;
-            cout<<"One of the input files you use for the combined XSection measurement doesn't exist!! Exiting!!"<<endl;
+            std::cout<<"WARNING (in CalcDiffSystematics)!!"<<std::endl;
+            std::cout<<"One of the input files you use for the combined XSection measurement doesn't exist!! Exiting!!"<<std::endl;
             exit(22);
         }
         
@@ -577,7 +577,7 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
                                    (1/(perChannelDiffXSecStatError[2][i]*perChannelDiffXSecStatError[2][i])));
             
             double Sys_Error = fabs(DiffXSecVecVaried[i]-perChannelDiffXSecPlot[3][i])/perChannelDiffXSecPlot[3][i];
-            ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[i]<<" bin: "<<Xbins[i]<<" to "<<Xbins[i+1]<<" SystematicRelError: "<<Sys_Error<<endl;
+            ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[i]<<" bin: "<<Xbins[i]<<" to "<<Xbins[i+1]<<" SystematicRelError: "<<Sys_Error<<std::endl;
         }
     }
     
@@ -693,10 +693,10 @@ void Plotter::setDataSet(TString mode, TString Systematic)
     if(Systematic.Contains("DY_") || Systematic.Contains("BG_")){Systematic = "Nominal";}//We just need to vary the nominal DY and BG systematics
 
     TString histoListName = "FileLists/HistoFileList_"+Systematic+"_"+mode+".txt";
-    cout << "reading " << histoListName << endl;
+    std::cout << "reading " << histoListName << std::endl;
     ifstream FileList(histoListName);
     if (FileList.fail()) {
-        cerr << "Error reading " << histoListName << endl;
+        std::cerr << "Error reading " << histoListName << std::endl;
         exit(1);
     }
     TString filename;
@@ -743,22 +743,22 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
     FileVector.clear();
     
     if(ListOfSyst.find(Systematic) == ListOfSyst.end()){
-        cout<<"WARNING(in InputFileList)!!! Using a non valid systematic: "<<Systematic<<endl;
-        cout<<"Please use one among the supported ones:"<<endl;
-        for(set<TString>::iterator iter = ListOfSyst.begin(); iter!=ListOfSyst.end(); ++iter){ cout<<*iter<<endl;}
+        std::cout<<"WARNING(in InputFileList)!!! Using a non valid systematic: "<<Systematic<<std::endl;
+        std::cout<<"Please use one among the supported ones:"<<std::endl;
+        for(set<TString>::iterator iter = ListOfSyst.begin(); iter!=ListOfSyst.end(); ++iter){ std::cout<<*iter<<std::endl;}
         return FileVector;
     }
     
     if( mode.CompareTo("combined") && mode.CompareTo("ee") && mode.CompareTo("emu") && mode.CompareTo("mumu")){
-        cout<<"The decay channel you provided is not supported."<<endl;
-        cout<<"Please use: ee, emu, mumu, combined"<<endl;
+        std::cout<<"The decay channel you provided is not supported."<<std::endl;
+        std::cout<<"Please use: ee, emu, mumu, combined"<<std::endl;
         return FileVector;
     }
     
     if(!mode.CompareTo("combined")){
-        vector<TString> eemode   = Plotter::InputFileList(TString("ee"), Systematic);
-        vector<TString> emumode  = Plotter::InputFileList(TString("emu"), Systematic);
-        vector<TString> mumumode = Plotter::InputFileList(TString("mumu"), Systematic);
+        std::vector<TString> eemode   = Plotter::InputFileList(TString("ee"), Systematic);
+        std::vector<TString> emumode  = Plotter::InputFileList(TString("emu"), Systematic);
+        std::vector<TString> mumumode = Plotter::InputFileList(TString("mumu"), Systematic);
         FileVector.insert(FileVector.end(), eemode.begin(), eemode.end());
         FileVector.insert(FileVector.end(), emumode.begin(), emumode.end());
         FileVector.insert(FileVector.end(), mumumode.begin(), mumumode.end());
@@ -854,7 +854,7 @@ bool Plotter::fillHisto()
     if (initialized) { return true; }
     hists.clear();
     for(unsigned int i=0; i<dataset.size(); i++){
-//         cout << i << ": " << dataset.at(i) << endl;
+//         std::cout << i << ": " << dataset.at(i) << std::endl;
         TH1D *hist = fileReader->GetClone<TH1D>(dataset.at(i), name, true);
         if (!hist) return false;
         if (!name.Contains("_step") && !name.Contains("bcp_") && !name.Contains("Lead") && !name.EndsWith("bkr") && !name.EndsWith("akr")
@@ -866,12 +866,12 @@ bool Plotter::fillHisto()
             else if(name.Contains("Top"))  {stemp.ReplaceAll("Top",3,"AntiTop",7);}
             const TH1D* other = fileReader->Get<TH1D>(dataset.at(i), stemp);
             if (other) hist->Add(other); 
-            else cerr << "Cannot find corresponding anti-quantity histogram: "<<stemp<<endl;
+            else std::cerr << "Cannot find corresponding anti-quantity histogram: "<<stemp<<std::endl;
         }
 
         //Rescaling to the data luminosity
         double LumiWeight = CalcLumiWeight(dataset.at(i));
-        //cout << "File " << dataset.at(i) << " has weight " << LumiWeight << "\n";
+        //std::cout << "File " << dataset.at(i) << " has weight " << LumiWeight << "\n";
 
         ApplyFlatWeights(hist, LumiWeight);
 
@@ -905,7 +905,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     setDataSet(Channel,Systematic);
     if (!fillHisto()) return;
     if (hists.size() == 0) { 
-        cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << endl; 
+        std::cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << std::endl; 
         exit(11); 
     }
         
@@ -965,7 +965,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
 
 
     for(unsigned int i=0; i<hists.size() ; ++i){ // prepare histos and leg
-//         cout << "Legend ["<<i<<"] = " << legends.at(i) << endl;
+//         std::cout << "Legend ["<<i<<"] = " << legends.at(i) << std::endl;
     if(legends.at(i) != "Data"){
         //      drawhists[i]->Scale(12.1/5.1);
 
@@ -993,11 +993,11 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
 		aRespHist->Scale(LumiWeight);
 		aGenHist->Scale(LumiWeight);
 	    }
-            //cout<<"Legend: "<<legends.at(i)<<endl;
+            //std::cout<<"Legend: "<<legends.at(i)<<std::endl;
             if(legends.at(i) == "t#bar{t} Signal"){
                 signalHist = i; //What is happening for the combined channel?? only 1 integer value??
                 aRecHist = drawhists[i]->Rebin(bins,"aRecHist",Xbins); //What happens in the combined channel? Are the 3 channels summed up?? NO!!
-                //cout<<"Added "<<legends.at(i)<<" to aRecHist"<<endl;
+                //std::cout<<"Added "<<legends.at(i)<<" to aRecHist"<<std::endl;
             }else if(legends.at(i) == "t#bar{t} Other"){//IMPORTANT: TTbar Other are added to the ttbarbackground histogram AND the Background Hist gram
                 addAndDelete_or_Assign(aTtBgrHist, drawhists[i]->Rebin(bins,"aTtBgrHist",Xbins));
                 addAndDelete_or_Assign(aBgrHist, drawhists[i]->Rebin(bins,"aTtBgrHist",Xbins));
@@ -1062,7 +1062,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
 
     if(XAxisbins.size()>1){//only distributions we want to unfold will have a binning vector
         aDataHist = drawhists[0]->Rebin(bins,"aDataHist",Xbins);
-        //  cout<<"Added data to aDataHist"<<endl;
+        //  std::cout<<"Added data to aDataHist"<<std::endl;
 
         TFile *f15 = new TFile("preunfolded/"+Systematic+"/"+Channel+"/"+name+"_UnfoldingHistos.root","RECREATE");
         aDataHist->Write("aDataHist"); delete aDataHist;
@@ -1200,7 +1200,7 @@ void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
             hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}"+" #left[GeV^{-1}#right]"); 
         } else {
             hist->GetXaxis()->SetTitle(XAxis);
-            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");     
+            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}");
         }
         if (isControlPlot) hist->GetYaxis()->SetTitle(YAxis);
     }
@@ -1213,8 +1213,8 @@ void Plotter::PlotXSec(){
 
     TString channel_array[] = {"ee","mumu","emu","combined"};
     TString sys_array[] = {"PDF_", "HAD_", "MATCH_", "MASS_", "SCALE_", "BTAG_", "BTAG_LJET_", "KIN_", "LEPT_", "TRIG_", "BG_", "DY_", "PU_", "JER_", "JES_"};//For the time being uintil all systematics are finalished
-    vector<TString> vec_systematic (sys_array, sys_array + sizeof(sys_array)/sizeof(sys_array[0]));
-    vector<TString> vec_channel (channel_array, channel_array + sizeof(channel_array)/sizeof(channel_array[0]));
+    std::vector<TString> vec_systematic (sys_array, sys_array + sizeof(sys_array)/sizeof(sys_array[0]));
+    std::vector<TString> vec_channel (channel_array, channel_array + sizeof(channel_array)/sizeof(channel_array[0]));
 
     double BR_Error = 0.015;
     double Lumi_Error = 0.044;
@@ -1228,7 +1228,7 @@ void Plotter::PlotXSec(){
         SysResultsList.close();
 
         ofstream OutputFile(string("Plots/"+vec_channel.at(j)+"/InclXSecResultLateX.txt"));
-        OutputFile<<"Inclusive XSection Numerical Results for channel "<<vec_channel.at(j)<<endl;
+        OutputFile<<"Inclusive XSection Numerical Results for channel "<<vec_channel.at(j)<<std::endl;
 
         double syst_square_for_channel=0.0;
         for (int i=0; i<(int) vec_systematic.size(); i++){
@@ -1253,10 +1253,10 @@ void Plotter::PlotXSec(){
             double sys_err=(TMath::Abs(InclusiveXsectionPlot[j]-VarUp)+TMath::Abs(InclusiveXsectionPlot[j]-VarDown))*0.5/InclusiveXsectionPlot[j];
             if(vec_systematic.at(i).Contains("MASS_")) {sys_err = sys_err/12;}
             syst_square_for_channel+=sys_err*sys_err;
-            OutputFile<<vec_systematic.at(i)<<" (%): "<<setprecision(3)<<sys_err*100<<endl;
+            OutputFile<<vec_systematic.at(i)<<" (%): "<<setprecision(3)<<sys_err*100<<std::endl;
         }
-        OutputFile<<"BranchingRatio (%): "<<setprecision(3)<<BR_Error*100<<endl;
-        OutputFile<<"Luminosity (%): "<<setprecision(3)<<Lumi_Error*100<<endl;
+        OutputFile<<"BranchingRatio (%): "<<setprecision(3)<<BR_Error*100<<std::endl;
+        OutputFile<<"Luminosity (%): "<<setprecision(3)<<Lumi_Error*100<<std::endl;
 
         InclusiveXsectionSysErrorPlot[j]=TMath::Sqrt(syst_square_for_channel + BR_Error * BR_Error + Lumi_Error * Lumi_Error);
 
@@ -1265,7 +1265,7 @@ void Plotter::PlotXSec(){
                                                  );
 
         OutputFile<<"\n\n*******************************************************************************\n\n";
-        OutputFile<<" InclXsec[pb]     Stat.[pb]    Syst.[pb]   Total[pb]"<<endl;
+        OutputFile<<" InclXsec[pb]     Stat.[pb]    Syst.[pb]   Total[pb]"<<std::endl;
         OutputFile<<setprecision(6)<<InclusiveXsectionPlot[j]<<" +- "<<setprecision(3)<<InclusiveXsectionStatErrorPlot[j]<<" +- "<<setprecision(4)<<InclusiveXsectionSysErrorPlot[j]*InclusiveXsectionPlot[j]<<" +- "<<setprecision(4)<<InclusiveXsectionTotalErrorPlot[j];
         OutputFile.close();
     }
@@ -1466,11 +1466,11 @@ void Plotter::MakeTable(){
         tmp_num9+=numhists9[i]->Integral();
 
         if(i==(hists.size()-1)){
-            EventFile5<<legends.at(i)<<": "<<tmp_num5<<endl;
-            EventFile6<<legends.at(i)<<": "<<tmp_num6<<endl;
-            EventFile7<<legends.at(i)<<": "<<tmp_num7<<endl;
-            EventFile8<<legends.at(i)<<": "<<tmp_num8<<endl;
-            EventFile9<<legends.at(i)<<": "<<tmp_num9<<endl;
+            EventFile5<<legends.at(i)<<": "<<tmp_num5<<std::endl;
+            EventFile6<<legends.at(i)<<": "<<tmp_num6<<std::endl;
+            EventFile7<<legends.at(i)<<": "<<tmp_num7<<std::endl;
+            EventFile8<<legends.at(i)<<": "<<tmp_num8<<std::endl;
+            EventFile9<<legends.at(i)<<": "<<tmp_num9<<std::endl;
             bg_num5+=tmp_num5;
             bg_num6+=tmp_num6;
             bg_num7+=tmp_num7;
@@ -1483,11 +1483,11 @@ void Plotter::MakeTable(){
             tmp_num9=0;
         }
         else if(legends.at(i)!=legends.at(i+1)){
-            EventFile5<<legends.at(i)<<": "<<tmp_num5<<endl;
-            EventFile6<<legends.at(i)<<": "<<tmp_num6<<endl;
-            EventFile7<<legends.at(i)<<": "<<tmp_num7<<endl;
-            EventFile8<<legends.at(i)<<": "<<tmp_num8<<endl;
-            EventFile9<<legends.at(i)<<": "<<tmp_num9<<endl;
+            EventFile5<<legends.at(i)<<": "<<tmp_num5<<std::endl;
+            EventFile6<<legends.at(i)<<": "<<tmp_num6<<std::endl;
+            EventFile7<<legends.at(i)<<": "<<tmp_num7<<std::endl;
+            EventFile8<<legends.at(i)<<": "<<tmp_num8<<std::endl;
+            EventFile9<<legends.at(i)<<": "<<tmp_num9<<std::endl;
             if(legends.at(i)!="Data"){
                 bg_num5+=tmp_num5;
                 bg_num6+=tmp_num6;
@@ -1502,17 +1502,17 @@ void Plotter::MakeTable(){
             tmp_num9=0;
         }
     }
-    EventFile5<<"Total background: "<<bg_num5<<endl;
+    EventFile5<<"Total background: "<<bg_num5<<std::endl;
     EventFile5.close();
-    EventFile6<<"Total background: "<<bg_num6<<endl;
+    EventFile6<<"Total background: "<<bg_num6<<std::endl;
     EventFile6.close();
-    EventFile7<<"Total background: "<<bg_num7<<endl;
+    EventFile7<<"Total background: "<<bg_num7<<std::endl;
     EventFile7.close();
-    EventFile8<<"Total background: "<<bg_num8<<endl;
+    EventFile8<<"Total background: "<<bg_num8<<std::endl;
     EventFile8.close();
-    EventFile9<<"Total background: "<<bg_num9<<endl;
+    EventFile9<<"Total background: "<<bg_num9<<std::endl;
     EventFile9.close();
-    cout<<"\nEvent yields saved in "<<EventFilestring5.c_str()<<"\n"<<endl;
+    std::cout<<"\nEvent yields saved in "<<EventFilestring5.c_str()<<"\n"<<std::endl;
 }
 
 double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift){
@@ -1637,45 +1637,45 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
         tmp_num+=numhists[i]->Integral();
 
         if(i==(hists.size()-1)){
-            EventFile<<legends.at(i)<<": "<<tmp_num<<endl;
+            EventFile<<legends.at(i)<<": "<<tmp_num<<std::endl;
             bg_num+=tmp_num;
             tmp_num=0;
         }
         else if(legends.at(i)!=legends.at(i+1)){
-            EventFile<<legends.at(i)<<": "<<tmp_num<<endl;
+            EventFile<<legends.at(i)<<": "<<tmp_num<<std::endl;
             if(legends.at(i)!="Data")bg_num+=tmp_num;
             tmp_num=0;
         }
     }
-    EventFile<<"Total MCs: "<<bg_num<<endl;
-    EventFile<<"\nDataEvents= "<<numbers[0]<<endl;
-    EventFile<<"SignalReco= "<<numbers[1]<<endl;
-    EventFile<<"SignalGen = "<<numbers[2]<<endl;
-    EventFile<<"ttbar bags= "<<numbers[3]<<endl;
-    EventFile<<"All Backgd= "<<numbers[4]<<endl;
-    EventFile<<"Efficiency= "<<(numbers[1]/numbers[2])<<endl;
-    EventFile<<"BrancRatio= "<<BranchingFraction[channelType]<<endl;
-    EventFile<<"Total Gen Events (no weights)= "<<NrOfEvts<<endl;
-    EventFile<<"Gen Events after Selection (no weights)= "<<NrOfEvts_afterSelection_noweight<<endl;
-    EventFile<<"Visible Gen Events after Selection (no weights)= "<<NrOfEvts_VisGen_afterSelection_noweight<<endl;
-    EventFile<<"Acceptance= "<<NrOfEvts_afterSelection_noweight/NrOfEvts<<endl;
-    EventFile<<"Visible Acceptance= "<<NrOfEvts_VisGen_afterSelection_noweight/NrOfEvts<<endl;
-    EventFile<<"------------------------------------------------------------------------------"<<endl;
-    EventFile<<"Efficiency and acceptance definitions as proposed by the TopXSection conveners\n"<<endl;
-    EventFile<<"N_rec = "<<numbers[1]<<endl;
-    EventFile<<"N_gen (with cuts at parton level) = "<<NrOfEvts_VisGen_afterSelection<<endl;
-    EventFile<<"N_gen (with cuts at parton level, no weights) = "<<NrOfEvts_VisGen_afterSelection_noweight<<endl;
-    EventFile<<"N_gen (with cuts at reco level) = "<<NrOfEvts_Gen_afterRecoSelection<<endl;
-    EventFile<<"N_gen (with cuts at reco level, no weights) = "<<NrOfEvts_Gen_afterRecoSelection_noweight<<endl;
-    EventFile<<"N_gen = "<<numbers[2]<<endl;
-    EventFile<<"\nEfficiency = N_rec / N_gen (with cuts at parton level) = "<<numbers[1]/NrOfEvts_VisGen_afterSelection<<endl;
-    EventFile<<"Efficiency = N_rec / N_gen (with cuts at parton level && noweights) = "<<numbers[1]/NrOfEvts_VisGen_afterSelection_noweight<<endl;
-    EventFile<<"\nEfficiency' = N_rec / N_gen (with cuts at reco level) = "<<numbers[1]/NrOfEvts_Gen_afterRecoSelection<<endl;
-    EventFile<<"Efficiency' = N_rec / N_gen (with cuts at reco level && noweights) = "<<numbers[1]/NrOfEvts_Gen_afterRecoSelection_noweight<<endl;
-    EventFile<<"\nAcceptance = N_gen (with cuts at parton level) / N_gen = "<<NrOfEvts_VisGen_afterSelection/numbers[2]<<endl;
-    EventFile<<"Acceptance = N_gen (with cuts at parton level && noweights) / N_gen = "<<NrOfEvts_VisGen_afterSelection_noweight/numbers[2]<<endl;
-    EventFile<<"Eff * Acc = "<<numbers[1] / numbers[2]<<endl;
-    EventFile<<"------------------------------------------------------------------------------"<<endl;
+    EventFile<<"Total MCs: "<<bg_num<<std::endl;
+    EventFile<<"\nDataEvents= "<<numbers[0]<<std::endl;
+    EventFile<<"SignalReco= "<<numbers[1]<<std::endl;
+    EventFile<<"SignalGen = "<<numbers[2]<<std::endl;
+    EventFile<<"ttbar bags= "<<numbers[3]<<std::endl;
+    EventFile<<"All Backgd= "<<numbers[4]<<std::endl;
+    EventFile<<"Efficiency= "<<(numbers[1]/numbers[2])<<std::endl;
+    EventFile<<"BrancRatio= "<<BranchingFraction[channelType]<<std::endl;
+    EventFile<<"Total Gen Events (no weights)= "<<NrOfEvts<<std::endl;
+    EventFile<<"Gen Events after Selection (no weights)= "<<NrOfEvts_afterSelection_noweight<<std::endl;
+    EventFile<<"Visible Gen Events after Selection (no weights)= "<<NrOfEvts_VisGen_afterSelection_noweight<<std::endl;
+    EventFile<<"Acceptance= "<<NrOfEvts_afterSelection_noweight/NrOfEvts<<std::endl;
+    EventFile<<"Visible Acceptance= "<<NrOfEvts_VisGen_afterSelection_noweight/NrOfEvts<<std::endl;
+    EventFile<<"------------------------------------------------------------------------------"<<std::endl;
+    EventFile<<"Efficiency and acceptance definitions as proposed by the TopXSection conveners\n"<<std::endl;
+    EventFile<<"N_rec = "<<numbers[1]<<std::endl;
+    EventFile<<"N_gen (with cuts at parton level) = "<<NrOfEvts_VisGen_afterSelection<<std::endl;
+    EventFile<<"N_gen (with cuts at parton level, no weights) = "<<NrOfEvts_VisGen_afterSelection_noweight<<std::endl;
+    EventFile<<"N_gen (with cuts at reco level) = "<<NrOfEvts_Gen_afterRecoSelection<<std::endl;
+    EventFile<<"N_gen (with cuts at reco level, no weights) = "<<NrOfEvts_Gen_afterRecoSelection_noweight<<std::endl;
+    EventFile<<"N_gen = "<<numbers[2]<<std::endl;
+    EventFile<<"\nEfficiency = N_rec / N_gen (with cuts at parton level) = "<<numbers[1]/NrOfEvts_VisGen_afterSelection<<std::endl;
+    EventFile<<"Efficiency = N_rec / N_gen (with cuts at parton level && noweights) = "<<numbers[1]/NrOfEvts_VisGen_afterSelection_noweight<<std::endl;
+    EventFile<<"\nEfficiency' = N_rec / N_gen (with cuts at reco level) = "<<numbers[1]/NrOfEvts_Gen_afterRecoSelection<<std::endl;
+    EventFile<<"Efficiency' = N_rec / N_gen (with cuts at reco level && noweights) = "<<numbers[1]/NrOfEvts_Gen_afterRecoSelection_noweight<<std::endl;
+    EventFile<<"\nAcceptance = N_gen (with cuts at parton level) / N_gen = "<<NrOfEvts_VisGen_afterSelection/numbers[2]<<std::endl;
+    EventFile<<"Acceptance = N_gen (with cuts at parton level && noweights) / N_gen = "<<NrOfEvts_VisGen_afterSelection_noweight/numbers[2]<<std::endl;
+    EventFile<<"Eff * Acc = "<<numbers[1] / numbers[2]<<std::endl;
+    EventFile<<"------------------------------------------------------------------------------"<<std::endl;
 
 
     double xsec = ( (numbers[0]-numbers[4]) * (numbers[1]/(numbers[1]+numbers[3])) ) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
@@ -1693,8 +1693,8 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
         //check the existence of the file
         if( gSystem->AccessPathName(eefilename) || gSystem->AccessPathName(emufilename) || gSystem->AccessPathName(mumufilename)){
-            cout<<"WARNING (in CalcXSec)!!"<<endl;
-            cout<<"One of the input files you use for the combined XSection measurement doesn't exist!! Exiting!!"<<endl;
+            std::cout<<"WARNING (in CalcXSec)!!"<<std::endl;
+            std::cout<<"One of the input files you use for the combined XSection measurement doesn't exist!! Exiting!!"<<std::endl;
             return 0;
         }
 
@@ -1725,17 +1725,17 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
                                             +(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]))
                                                                     ));
     }
-    EventFile<<"XSection  = "<<InclusiveXsectionVec[channelType]<<endl;
-    EventFile<<"XSecStaErr= "<<InclusiveXsectionStatErrorVec[channelType]<<endl;
+    EventFile<<"XSection  = "<<InclusiveXsectionVec[channelType]<<std::endl;
+    EventFile<<"XSecStaErr= "<<InclusiveXsectionStatErrorVec[channelType]<<std::endl;
     EventFile.close();
-    XSecFile<<"Systematic: "<<Systematic<<" Channel: "<<subfolderChannel<<" InclXSection: "<<InclusiveXsectionVec[channelType]<<" AbsStatError: "<<InclusiveXsectionStatErrorVec[channelType]<<endl;
+    XSecFile<<"Systematic: "<<Systematic<<" Channel: "<<subfolderChannel<<" InclXSection: "<<InclusiveXsectionVec[channelType]<<" AbsStatError: "<<InclusiveXsectionStatErrorVec[channelType]<<std::endl;
     XSecFile.close();
-    cout<<"Inclusive XSection information saved in: "<<XSecFileString.c_str()<<endl;
+    std::cout<<"Inclusive XSection information saved in: "<<XSecFileString.c_str()<<std::endl;
     return xsec;
 }
 
 void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
-    cout<<"\n\n Preparing to calculate the central value of DiffXSection in channel '"<<Channel<<"' for systematic '"<<Systematic<<"'"<<endl;
+    std::cout<<"\n\n Preparing to calculate the central value of DiffXSection in channel '"<<Channel<<"' for systematic '"<<Systematic<<"'"<<std::endl;
 
     double Xbins[XAxisbins.size()];
     double binWidth[XAxisbinCenters.size()];
@@ -1865,8 +1865,8 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
 
         //check the existence of the file
         if(gSystem->AccessPathName(eefilename) || gSystem->AccessPathName(emufilename) || gSystem->AccessPathName(mumufilename) ){
-            cout<<"WARNING (in CalcDiffXSec)!!"<<endl;
-            cout<<"One of the input files you use for the combined XSection measurement doesn't exist!! Exiting!!"<<endl;
+            std::cout<<"WARNING (in CalcDiffXSec)!!"<<std::endl;
+            std::cout<<"One of the input files you use for the combined XSection measurement doesn't exist!! Exiting!!"<<std::endl;
             return;
         }
 
@@ -1934,10 +1934,10 @@ void Plotter::CalcDiffXSec(TString Channel, TString Systematic){
     ResultsFilestringLatex.append(name);
     ResultsFilestringLatex.append("ResultsLaTeX.txt");
     ResultsLateX.open(ResultsFilestringLatex.c_str());
-    ResultsLateX<<"Bin Center & Bin & 1/#sigma d#sigma/dX & stat(%) & syst(%) & total(%)"<<endl;
+    ResultsLateX<<"Bin Center & Bin & 1/#sigma d#sigma/dX & stat(%) & syst(%) & total(%)"<<std::endl;
     for (Int_t bin=0; bin<bins; bin++){//condense matrices to arrays for plotting
-        //cout<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecVec[channelType][bin]<<" StatError: "<<DiffXSecStatErrorVec[channelType][bin]<<" GenDiffXsec: "<<GenDiffXSecVec[channelType][bin]<<endl;
-        ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecVec[channelType][bin]<<" StatError: "<<DiffXSecStatErrorVec[channelType][bin]<<" GenDiffXsec: "<<GenDiffXSecVec[channelType][bin]<<endl;
+        //std::cout<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecVec[channelType][bin]<<" StatError: "<<DiffXSecStatErrorVec[channelType][bin]<<" GenDiffXsec: "<<GenDiffXSecVec[channelType][bin]<<std::endl;
+        ResultsFile<<"XAxisbinCenters[bin]: "<<XAxisbinCenters[bin]<<" bin: "<<Xbins[bin]<<" to "<<Xbins[bin+1]<<" DiffXsec: "<<DiffXSecVec[channelType][bin]<<" StatError: "<<DiffXSecStatErrorVec[channelType][bin]<<" GenDiffXsec: "<<GenDiffXSecVec[channelType][bin]<<std::endl;
     }
     ResultsFile.close();
     ResultsLateX.close();
@@ -2025,7 +2025,7 @@ void Plotter::PlotDiffXSec(TString Channel){
 
             if(i!=(hists.size()-1)){
                 if(legends.at(i)!=legends.at(i+1)){
-                //cout<<legends.at(i)<<endl;
+                //std::cout<<legends.at(i)<<std::endl;
                 varhistsPlotting[i]->SetLineColor(1);
                 }
             }else{
@@ -2089,14 +2089,14 @@ void Plotter::PlotDiffXSec(TString Channel){
     for(Int_t i=1; i<=genRecHist->GetNbinsX(); ++i){
       if(genRecHist->GetBinContent(i) > recBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,recBinHist->GetBinContent(i));
-        cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
+        std::cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin" << i
              << " = " << genRecHist->GetBinContent(i) << " is larger than number of reconstructed events in that bin"
-             << " = " << recBinHist->GetBinContent(i) << endl;
+             << " = " << recBinHist->GetBinContent(i) << std::endl;
       }
       if(genRecHist->GetBinContent(i) > genBinHist->GetBinContent(i)){
         genRecHist->SetBinContent(i,genBinHist->GetBinContent(i));
-            cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
-                 << " is larger than number of generated events in that bin" << endl;
+            std::cout << "WARNING in PlotDifferentialCrossSections: number of events generated and reconstructed in bin " << i
+                 << " is larger than number of generated events in that bin" << std::endl;
       }
     }
 
@@ -2174,7 +2174,7 @@ void Plotter::PlotDiffXSec(TString Channel){
             for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
 //                 efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
                 GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
-                //cout<<"efficiencies[bin]: "<<efficiencies[bin]<<endl;
+                //std::cout<<"efficiencies[bin]: "<<efficiencies[bin]<<std::endl;
             }
         }
         else{
@@ -2195,7 +2195,7 @@ void Plotter::PlotDiffXSec(TString Channel){
 
     //The systematic array is filled in the order in which the Stack is filled
     TString sys_array[] = {"PDF_", "HAD_", "MATCH_", "MASS_", "SCALE_", "BTAG_PT_", "BTAG_ETA_", "BTAG_LJET_PT_", "BTAG_LJET_ETA_", "KIN_", "LEPT_", "TRIG_", "BG_", "DY_", "PU_", "JER_", "JES_"};//For the time being uintil all systematics are finalished
-    vector<TString> vec_systematic (sys_array, sys_array + sizeof(sys_array)/sizeof(sys_array[0]));
+    std::vector<TString> vec_systematic (sys_array, sys_array + sizeof(sys_array)/sizeof(sys_array[0]));
 
     double DiffXSecPlot[XAxisbinCenters.size()];
     double DiffXSecStatErrorPlot[XAxisbinCenters.size()];
@@ -2221,8 +2221,8 @@ void Plotter::PlotDiffXSec(TString Channel){
     ifstream ResultsList("UnfoldingResults/Nominal/"+Channel+"/"+name+"Results.txt");
     for (Int_t bin=0; bin<bins; bin++){//Retrieve arrays for plotting
         ResultsList>>Dummy>>XAxisbinCenters[bin]>>Dummy>>Xbins[bin]>>Dummy>>Xbins[bin+1]>>Dummy>>DiffXSecPlot[bin]>>Dummy>>DiffXSecStatErrorPlot[bin]>>Dummy>>GenDiffXSecPlot[bin];
-        //cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<endl;
-        //cout<<"GenDiffXSecPlot[bin]: "<<GenDiffXSecPlot[bin]<<endl;
+        //std::cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<std::endl;
+        //std::cout<<"GenDiffXSecPlot[bin]: "<<GenDiffXSecPlot[bin]<<std::endl;
     }
 
     for (Int_t i=0; i<bins; ++i) {
@@ -2391,9 +2391,9 @@ void Plotter::PlotDiffXSec(TString Channel){
     genscale = 1./ h_GenDiffXSec->Integral("width");
     h_GenDiffXSec->Scale(genscale);
 
-    cout << "+++ Generated cross sections";
-    for (int i = 1; i <= h_GenDiffXSec->GetNbinsX(); ++i) cout << "\n" << i << "\t" << h_GenDiffXSec->GetBinContent(i);
-    cout << "\n\n";
+    std::cout << "+++ Generated cross sections";
+    for (int i = 1; i <= h_GenDiffXSec->GetNbinsX(); ++i) std::cout << "\n" << i << "\t" << h_GenDiffXSec->GetBinContent(i);
+    std::cout << "\n\n";
 
     bool binned_theory=true; //############
 
@@ -2562,7 +2562,7 @@ void Plotter::PlotDiffXSec(TString Channel){
     //    else if(name.Contains("TTBarpT")){MCFMfile->GetObject<TH1>("pt_tt", MCFMHist);}
     //    else if(name.Contains("TTBarRapidity")){MCFMfile->GetObject<TH1>("y_tt", MCFMHist);}
     //    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
-    //    else{cout<<"probably going to crash soon"<<endl;}
+    //    else{std::cout<<"probably going to crash soon"<<std::endl;}
     }
 
     TCanvas * c = new TCanvas("DiffXS","DiffXS");
@@ -2748,24 +2748,24 @@ void Plotter::PlotDiffXSec(TString Channel){
     delete c;
     gStyle->SetEndErrorSize(0);
 
-    cout<<"-------------------------------------------------------------------"<<endl;
-    cout<<"Starting the calculation of Chi2/ndof\n"<<endl;
+    std::cout<<"-------------------------------------------------------------------"<<std::endl;
+    std::cout<<"Starting the calculation of Chi2/ndof\n"<<std::endl;
     double chi2 = GetChi2 (tga_DiffXSecPlotwithSys, h_GenDiffXSec);
-    cout<<"The CHI2/ndof (vs Madgraph) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2<<endl;
+    std::cout<<"The CHI2/ndof (vs Madgraph) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2<<std::endl;
 
     if(drawPOWHEG && powheghistBinned && powheghistBinned->GetEntries()){
         double chi2Powheg = GetChi2 (tga_DiffXSecPlotwithSys, powheghistBinned);
-        cout<<"The CHI2/ndof (vs POWHEG) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2Powheg<<endl;
+        std::cout<<"The CHI2/ndof (vs POWHEG) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2Powheg<<std::endl;
     }
     if(drawMCATNLO && mcnlohistBinned && mcnlohistBinned->GetEntries()){
         double chi2McAtNlo = GetChi2 (tga_DiffXSecPlotwithSys, mcnlohistBinned);
-        cout<<"The CHI2/ndof (vs MC@NLO) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2McAtNlo<<endl;
+        std::cout<<"The CHI2/ndof (vs MC@NLO) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2McAtNlo<<std::endl;
     }
     if(drawKidonakis && Kidoth1_Binned && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
         double chi2Kidonakis = GetChi2 (tga_DiffXSecPlotwithSys, Kidoth1_Binned);
-        cout<<"The CHI2/ndof (vs Kidonakis) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2Kidonakis<<endl;
+        std::cout<<"The CHI2/ndof (vs Kidonakis) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2Kidonakis<<std::endl;
     }
-    cout<<"-------------------------------------------------------------------"<<endl;
+    std::cout<<"-------------------------------------------------------------------"<<std::endl;
 
     PrintResultTotxtFile(Channel, binCenters, tga_DiffXSecPlot, tga_DiffXSecPlotwithSys);
 
@@ -2884,11 +2884,11 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
     if (hist) {
         TH1* weight = fileReader->GetClone<TH1>(filename, TString("total_LeptonsPt_").Append(generator).Data(), true);
         if(!weight){
-            std::cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << endl;
+            std::cerr << "WARNING in GetNloCurve: histogram to extract original number of events could not be opened! No weighting applied!" << std::endl;
         }
         return hist;
     }  
-    std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << endl;
+    std::cerr << "WARNING in GetNloCurve: input file could not been opened! Returning dummy!" << std::endl;
     hist = new TH1D();
     return hist; //I'd prefer to return nullptr
 }
@@ -2914,7 +2914,7 @@ TH1* Plotter::GetNloCurve(TString NewName, TString Generator){
     for (int i = 0; i <= 2; ++i) {
         if (channelType == i || channelType == 3) {
             files.push_back("selectionRoot/"+Generator+"/"+channelName.at(i)+"/"+channelName.at(i) + filename);
-            cout << "Getting NLO curve from: " << files.at(files.size()-1) << endl;
+            std::cout << "Getting NLO curve from: " << files.at(files.size()-1) << std::endl;
         }
     }
     
@@ -3009,11 +3009,11 @@ double Plotter::GetChi2 (TGraphAsymmErrors *data, TH1 *mc){
     
     for ( int i=0; i<(int)data->GetN(); ++i ) {
         if (data->GetErrorYhigh(i) == 0 || data->GetErrorYlow(i) == 0) {
-            cout<<"When calculating the Chi2 the DATA TGraph has error 0 in bin "<<i<<endl;
+            std::cout<<"When calculating the Chi2 the DATA TGraph has error 0 in bin "<<i<<std::endl;
             exit(42);
         }
         chi2 += TMath::Abs( (data->GetY()[i]-mc->GetBinContent(mc->FindBin(data->GetX()[i])) ) * (data->GetY()[i]-mc->GetBinContent(mc->FindBin(data->GetX()[i])) ))/ (((data->GetErrorYhigh(i) + data->GetErrorYlow(i))/2) * (data->GetErrorYhigh(i) + data->GetErrorYlow(i))/2);
-//         cout<<"Data "<<data->GetY()[i]<<"  MC "<<mc->GetBinContent(mc->FindBin(data->GetX()[i]))<<"  DataErrorhigh "<<data->GetErrorYhigh(i)<<"  DataErrorlow "<<data->GetErrorYlow(i)<<"  Chi2 "<<chi2<<endl;
+//         std::cout<<"Data "<<data->GetY()[i]<<"  MC "<<mc->GetBinContent(mc->FindBin(data->GetX()[i]))<<"  DataErrorhigh "<<data->GetErrorYhigh(i)<<"  DataErrorlow "<<data->GetErrorYlow(i)<<"  Chi2 "<<chi2<<std::endl;
     }
     return chi2/data->GetN();
 }
@@ -3038,14 +3038,14 @@ TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotn
   //                       from xaxis.min to xaxis.max
   //  "rescale":           rescale the rebinned histogramme
   //                       (applicable for cross-section e.g.) 
-  cout << endl;
-  cout << endl;
-  cout << "asdfasdfasdfasdfasdf hallo david " << plotname << " " << rescale << endl;
-  cout << "histoOldBinning = ";
-  for ( int i = 0 ; i < histoOldBinning->GetXaxis()->GetNbins() + 1; i++ ) cout << " " << histoOldBinning->GetXaxis()->GetBinLowEdge(i+1);
-  cout << endl;
-  cout << endl;
-  cout << endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << "asdfasdfasdfasdfasdf hallo david " << plotname << " " << rescale << std::endl;
+  std::cout << "histoOldBinning = ";
+  for ( int i = 0 ; i < histoOldBinning->GetXaxis()->GetNbins() + 1; i++ ) std::cout << " " << histoOldBinning->GetXaxis()->GetBinLowEdge(i+1);
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
 
   unsigned int vecIndex=0;
 
@@ -3082,7 +3082,7 @@ TH1F* Plotter::reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotn
   return (TH1F*)histoNewBinning->Clone();
 }
 
-void Plotter::ControlLegend(std::vector< TH1* > drawhists, vector< TString > legends, TLegend* leg){
+void Plotter::ControlLegend(std::vector< TH1* > drawhists, std::vector< TString > legends, TLegend* leg){
     //hardcoded ControlPlot legend
     std::vector<TString> OrderedLegends;    
     OrderedLegends.push_back("Data");
@@ -3137,8 +3137,8 @@ void Plotter::DrawLabel(TString text, const double x1, const double y1, const do
 
 void Plotter::ApplyFlatWeights(TH1* varhists, const double weight){
 
-    if(weight == 0) {cout<<"Warning: the weight your applying is 0. This will remove your distribution."<<endl;}
-    //if(weight >=1e3){cout<<"Warning: the weight your applying is >= 1e3. This will enlarge too much your distribution."<<endl;}
+    if(weight == 0) {std::cout<<"Warning: the weight your applying is 0. This will remove your distribution."<<std::endl;}
+    //if(weight >=1e3){std::cout<<"Warning: the weight your applying is >= 1e3. This will enlarge too much your distribution."<<std::endl;}
     varhists->Scale(weight);
 }
 
@@ -3148,7 +3148,7 @@ double Plotter::CalcLumiWeight(const TString& WhichSample){
     if(WhichSample!=""){
         double XSection = SampleXSection(WhichSample);
         if(XSection <= 0.){
-            cout<<"Sample XSection is <0. Can't calculate luminosity weight!! returning"<<endl;
+            std::cout<<"Sample XSection is <0. Can't calculate luminosity weight!! returning"<<std::endl;
             return 0;
         }
         
@@ -3159,7 +3159,7 @@ double Plotter::CalcLumiWeight(const TString& WhichSample){
     }
     
     if (lumiWeight == 0) {
-        cout << WhichSample << " has lumi weight 0\n";
+        std::cout << WhichSample << " has lumi weight 0\n";
     }
 
     return lumiWeight;
@@ -3252,9 +3252,9 @@ void Plotter::PrintResultTotxtFile (TString channel, double binCenters[], TGraph
     string filename = string("Plots/"+channel+"/"+name+"LaTeX.txt");
     SavingFile.open(filename.c_str(), ios_base::out);
     
-    SavingFile<<"Variable: "<<name<<"   Channel: "<<channelLabel.at(channelType)<<endl;
-    SavingFile<<"BinCenter & LowXbinEdge  &  HighXbinEdge  &   DiffXSec  &  StatError(\\%)  & SystError(\\%)  & TotalError(\\%) \\\\"<<endl;
-    SavingFile<<"\\hline"<<endl;
+    SavingFile<<"Variable: "<<name<<"   Channel: "<<channelLabel.at(channelType)<<std::endl;
+    SavingFile<<"BinCenter & LowXbinEdge  &  HighXbinEdge  &   DiffXSec  &  StatError(\\%)  & SystError(\\%)  & TotalError(\\%) \\\\"<<std::endl;
+    SavingFile<<"\\hline"<<std::endl;
     for(int i=0; i<(int)tga_DiffXSecPlot->GetN(); i++){
         double DiffXSec=tga_DiffXSecPlot->GetY()[i];
         double RelStatErr=0, RelSysErr=0, RelTotErr=0;
@@ -3265,7 +3265,7 @@ void Plotter::PrintResultTotxtFile (TString channel, double binCenters[], TGraph
         }
         SavingFile<<"$"<<setprecision(3)<<binCenters[i]<<"$ & $"<<XAxisbins.at(i)<<"$ to $"<<setprecision(3)<<XAxisbins.at(i+1)<<"$   &  ";
         SavingFile<<setprecision(5)<<DiffXSec<<"  &   "<<setprecision(3)<<RelStatErr<<" &    "<<setprecision(3)<<RelSysErr<<" &    ";
-        SavingFile<<setprecision(3)<<RelTotErr<<" \\\\"<<endl;
+        SavingFile<<setprecision(3)<<RelTotErr<<" \\\\"<<std::endl;
     }
     SavingFile.close();
 }
@@ -3293,7 +3293,7 @@ void Plotter::GetDiffToNominal(TString Channel, TString Systematic, TString Vari
     
     
     if (!NominalFile.is_open() || !SystematicFile.is_open()){
-        cout<<"The input file cannot be opened. Exiting!!"<<endl;
+        std::cout<<"The input file cannot be opened. Exiting!!"<<std::endl;
         exit(443);}
     for (Int_t bin=0; bin<bins; bin++){
         double XAxisbinCenters_Nom = 0, XLowEdge_Nom = 0, XHigEdge_Nom = 0;
@@ -3304,9 +3304,9 @@ void Plotter::GetDiffToNominal(TString Channel, TString Systematic, TString Vari
         SystematicFile>>Dummy>>XAxisbinCenters_Sys>>Dummy>>XLowEdge_Sys>>Dummy>>XHigEdge_Sys>>Dummy>>CentralValue_Sys>>Dummy>>StatError_Sys>>Dummy>>GenXSec_Sys;
         if( abs(XAxisbinCenters_Nom-XAxisbinCenters_Sys)>1e3 || 
             abs(XLowEdge_Nom-XLowEdge_Sys)>1e3 || abs(XHigEdge_Nom-XHigEdge_Sys)>1e3){
-                cout<<"You are trying to read Unfolding results containing different bin centers and/or bin ranges."<<endl;
-                cout<<"This is not a fatal error but you should check it"<<endl;
-                cout<<"Variable '"<<Variable<<"' in channel '"<<Channel<<"'"<<endl;
+                std::cout<<"You are trying to read Unfolding results containing different bin centers and/or bin ranges."<<std::endl;
+                std::cout<<"This is not a fatal error but you should check it"<<std::endl;
+                std::cout<<"Variable '"<<Variable<<"' in channel '"<<Channel<<"'"<<std::endl;
             }
         BinCenters.push_back(XAxisbinCenters_Nom);
         BinLowEdge.push_back(XLowEdge_Nom);
@@ -3324,11 +3324,11 @@ void Plotter::GetDiffToNominal(TString Channel, TString Systematic, TString Vari
     ofstream SystematicRelError;
     SystematicRelError.open(systematicfilename, ios::trunc);
     if(!SystematicRelError.is_open()){
-        cout<<"The output file cannot be opened. Exiting!!"<<endl;
+        std::cout<<"The output file cannot be opened. Exiting!!"<<std::endl;
         exit(444);
     }
     for (int bin = 0; bin<(int)SystematicValue.size(); bin++){
-        SystematicRelError<<"XAxisbinCenters[bin]: "<<BinCenters.at(bin)<<" bin: "<<BinLowEdge.at(bin)<<" to "<<BinHigEdge.at(bin)<<" SystematicRelError: "<<RelativeError.at(bin)<<endl;
+        SystematicRelError<<"XAxisbinCenters[bin]: "<<BinCenters.at(bin)<<" bin: "<<BinLowEdge.at(bin)<<" to "<<BinHigEdge.at(bin)<<" SystematicRelError: "<<RelativeError.at(bin)<<std::endl;
     }
     SystematicRelError.close();
 
@@ -3347,8 +3347,8 @@ void Plotter::CalcUpDownDifference( TString Channel, TString Syst_Up, TString Sy
     string upfilename = string ("UnfoldingResults/"+Syst_Up+"/"+Channel+"/"+Variable+"Results.txt");
     string downfilename = string ("UnfoldingResults/"+Syst_Down+"/"+Channel+"/"+Variable+"Results.txt");
     
-    cout<<"\n\n\n"<<upfilename<<endl;
-    cout<<downfilename<<endl;
+    std::cout<<"\n\n\n"<<upfilename<<std::endl;
+    std::cout<<downfilename<<std::endl;
     
     UpFile.open(upfilename);
     DownFile.open(downfilename);
@@ -3359,7 +3359,7 @@ void Plotter::CalcUpDownDifference( TString Channel, TString Syst_Up, TString Sy
     TString Dummy = "";
     
     if (!UpFile.is_open() || !DownFile.is_open()){
-        cout<<"The input file cannot be opened. Exiting!!"<<endl;
+        std::cout<<"The input file cannot be opened. Exiting!!"<<std::endl;
         exit(433);}
     for (Int_t bin=0; bin<bins; bin++){
         double XAxisbinCenters_Up = 0, XLowEdge_Up = 0, XHigEdge_Up = 0;
@@ -3387,11 +3387,11 @@ void Plotter::CalcUpDownDifference( TString Channel, TString Syst_Up, TString Sy
     gSystem->mkdir("UnfoldingResults/HAD_/"+Channel, true);
     SystematicRelError.open(systematicfilename, ios::trunc);
     if(!SystematicRelError.is_open()){
-        cout<<"The output file cannot be opened. Exiting!!"<<endl;
+        std::cout<<"The output file cannot be opened. Exiting!!"<<std::endl;
         exit(434);
     }
     for (int bin = 0; bin<(int)RelativeError.size(); bin++){
-        SystematicRelError<<"XAxisbinCenters[bin]: "<<BinCenters.at(bin)<<" bin: "<<BinLowEdge.at(bin)<<" to "<<BinHigEdge.at(bin)<<" SystematicRelError: "<<RelativeError.at(bin)<<endl;
+        SystematicRelError<<"XAxisbinCenters[bin]: "<<BinCenters.at(bin)<<" bin: "<<BinLowEdge.at(bin)<<" to "<<BinHigEdge.at(bin)<<" SystematicRelError: "<<RelativeError.at(bin)<<std::endl;
     }
     SystematicRelError.close();
 
