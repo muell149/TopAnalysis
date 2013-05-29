@@ -106,9 +106,9 @@ push @delSEOut, $environmentcheck;
 
 push @runCs, "echo creating directories on dCache...\n";
 push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output >| /dev/null\n";
-push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n";
+push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n sleep 1\n\n";
 
-push @getCs, "\necho copying output from SE to workdir/res...\n";
+push @getCs, "\necho copying output from SE to workdir/res <WARNING NOT DONE>...\n";
 
 push @delSEOut, "\necho deleting temporary files from SE";
 push @delSEOut, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastyRecursiveSRMremove.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n";
@@ -168,10 +168,11 @@ while(my $line = <$IN>) {
     print $OUT $t;
     close $OUT;
     
-    push @runCs, "echo 'starting $cConfig'\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\necho already initialized!\nelse\ncrab -create -submit -cfg $cConfig\ntouch $wdpath/first_sub\nfi\n\n";
+    push @runCs, "echo 'starting $cConfig'\nsleep 1\n\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\necho already initialized!\nelse\ncrab -create -submit -cfg $cConfig\ntouch $wdpath/first_sub\nfi\n\n";
     push @checkCs, "echo 'checking $cConfig'\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\ncrab -status -c $wdpath\ncrab -getoutput -c $wdpath\nelse\necho not yet submitted\nfi\n";
   #  push @getCs, "crab -getoutput -c $wdpath\ncrab -copyData -c $wdpath\n\n";
-    push @getCs, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastySRMcp.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$sedir $wdpath/res";
+  #  push @getCs, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastySRMcp.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$sedir $wdpath/res";
+    push @getCs, "/afs/naf.desy.de/user/k/kieseler/public/copyFromSE.sh $wdpath $wdpath/res\n\n";
     push @killCs, "echo 'killing $cConfig'\ncrab -kill all -c $wdpath\nsleep 5\n";
     push @forHadd, "hadd ${globalCWorkingdir}/$workDirWithTime/${outputFile}.root $wdpath/res/*.root\n";
     push @forJson, "crab -report -c $wdpath\ncp $wdpath/res/lumiSummary.json ${globalCWorkingdir}/$workDirWithTime/${outputFile}_lumi.json\n\n";
