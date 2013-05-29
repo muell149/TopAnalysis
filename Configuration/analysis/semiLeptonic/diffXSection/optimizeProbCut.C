@@ -331,10 +331,10 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   rPad->Draw("");
   rPad->cd();
   sigHisto->GetXaxis()->SetRangeUser(optimalProb/2.,2.*optimalProb);
-  sigHisto->GetYaxis()->SetRangeUser(111.7, 112.5);
+  sigHisto->GetYaxis()->SetRangeUser(optimalSoB-0.4, optimalSoB+0.4);
   sigHisto->GetYaxis()->SetTitle("");
   sigHisto->DrawClone("axis");
-  drawLine(optimalProb, 111.7, optimalProb, 112.45, kRed, 3, 1);
+  drawLine(optimalProb, optimalSoB-0.4, optimalProb, optimalSoB+0.35, kRed, 3, 1);
   optSoB->DrawClone("p same");  
   // draw graph signal efficiency vs probability
   canv->cd(2);
