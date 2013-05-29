@@ -2,7 +2,7 @@
 
 void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun8TeV",
 				  TString inputFolderName="newRecentAnalysisRun8TeV",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier=""){
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier="", bool smoothcurves=false){
 
   // run automatically in batch mode
   gROOT->SetBatch();
@@ -109,13 +109,12 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
   
   // Choose additional theory curves to plot
   // Version 1: data, MadGraph, MC@NLO, POWHEG, NNLO (Kidonakis)
-  bool DrawSmoothMadgraph = true;
+  bool DrawSmoothMadgraph = false;
   bool DrawMCAtNLOPlot    = true;
   bool DrawPOWHEGPlot     = true;
   bool DrawNNLOPlot       = true;
   bool DrawMCFMPlot       = false;
   // smooth instead of binned theory curves
-  bool smoothcurves=false;
   if(smoothcurves){
     DrawSmoothMadgraph = true;
     DrawPOWHEGPlot     = true;

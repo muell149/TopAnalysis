@@ -225,8 +225,8 @@ redetTau=false
 redoPurStab=true
 
 ## Use bin-centre corrections (BCC)
-## useBCC = true / false (default: true)
-useBCC=true
+## useBCC = true / false (default: false)
+useBCC=false
 
 #### =====================
 ####  Prepare running
@@ -639,10 +639,10 @@ EOF
     
     cat >> commandsCombineChannelsRun.cint << EOF
 .L bothDecayChannelsCombination_C.so
-bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier)
+bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier, $useBCC)
 EOF
     echo ""
-    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier)"
+    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier, $useBCC)"
     root -l -b < commandsCombineChannelsRun.cint
 
 else
