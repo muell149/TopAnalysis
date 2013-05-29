@@ -263,10 +263,15 @@ void getMCcorrectionfactors(TString func = "exp"){
   // ---
   //    legend
   // ---
-  TLegend *leg0 = new TLegend(0.3, 0.55, 0.93, 0.85);
+  TLegend *leg0 = new TLegend(0.2, 0.7, 0.67, 0.88);
   leg0->SetFillStyle(0);
   leg0->SetBorderSize(0);
-  leg0->SetHeader("#font[22]{data / MadGraph+PYTHIA(CTEQ6L1)}");
+  leg0->SetHeader("#font[22]{Data / MadGraph+PYTHIA(CTEQ6L1)}");
+
+  TLegend *leg1 = new TLegend(0.36, 0.49, 0.9, 0.69);
+  leg1->SetFillStyle(0);
+  leg1->SetBorderSize(0);
+  leg1->SetHeader("#font[22]{Fit: exp(a+b*x)}");
 
   // canvas
   std::vector<TCanvas*> plotCanvas_;
@@ -309,12 +314,70 @@ void getMCcorrectionfactors(TString func = "exp"){
   for(int i=0; i<function7->GetNumberFreeParameters(); i++){
     function7->SetParameter(i,round(function7->GetParameter(i),3));
   }
-  TString fitEntry7="fit 7 TeV: ";
-  fitEntry7+=function7->GetExpFormula("p");
+  //TString fitEntry7="fit 7 TeV: ";
+  //fitEntry7+=function7->GetExpFormula("p");
   //fitEntry7+=",  #chi^{2}/ndof=";
   //fitEntry7+=getTStringFromDouble(function7->GetChisquare())+"/"+getTStringFromInt(function7->GetNDF());
-  fitEntry7.ReplaceAll("+(","");
-  fitEntry7.ReplaceAll("))",")");
+  //fitEntry7.ReplaceAll("+(","");
+  //fitEntry7.ReplaceAll("))",")");
+  TString fitEntry7="7 TeV:               ";
+  fitEntry7+="a=";
+  fitEntry7+=getTStringFromDouble(function7->GetParameter(0), 3);
+  fitEntry7+="#pm";
+  fitEntry7+=getTStringFromDouble(function7->GetParError(0) , 3);
+  fitEntry7+=", b=";
+  fitEntry7+=getTStringFromDouble(function7->GetParameter(1), 5);
+  fitEntry7+="#pm";
+  fitEntry7+=getTStringFromDouble(function7->GetParError(1) , 5);
+
+  // b1) to l+jets 7 TeV points
+  TF1* functionljets7=new TF1("functionljets7",def,fitLowEdge, fitHighEdge);
+  functionljets7->SetLineColor(kRed+1);
+  functionljets7->SetLineWidth(2);
+  SFljets->Fit(functionljets7,"R","same",fitLowEdge, fitHighEdge);
+  for(int i=0; i<functionljets7->GetNumberFreeParameters(); i++){
+    functionljets7->SetParameter(i,round(functionljets7->GetParameter(i),3));
+  }
+  //TString fitEntryljets7="fit 7 TeV l+jets: ";
+  //fitEntryljets7+=functionljets7->GetExpFormula("p");
+  //fitEntryljets7+=",  #chi^{2}/ndof=";
+  //fitEntryljets7+=getTStringFromDouble(functionljets7->GetChisquare())+"/"+getTStringFromInt(functionljets7->GetNDF());
+  //fitEntryljets7.ReplaceAll("+(","");
+  //fitEntryljets7.ReplaceAll("))",")");
+  TString fitEntryljets7="7 TeV l+jets:     ";
+  fitEntryljets7+="a=";
+  fitEntryljets7+=getTStringFromDouble(functionljets7->GetParameter(0), 3);
+  fitEntryljets7+="#pm";
+  fitEntryljets7+=getTStringFromDouble(functionljets7->GetParError(0) , 3);
+  fitEntryljets7+=", b=";
+  fitEntryljets7+=getTStringFromDouble(functionljets7->GetParameter(1), 5);
+  fitEntryljets7+="#pm";
+  fitEntryljets7+=getTStringFromDouble(functionljets7->GetParError(1) , 5);
+
+  // b2) to dilepton 7 TeV points
+  TF1* functiondilep7=new TF1("functiondilep7",def,fitLowEdge, fitHighEdge);
+  functiondilep7->SetLineColor(kOrange+7);
+  functiondilep7->SetLineWidth(2);
+  SFdilep->Fit(functiondilep7,"R","same",fitLowEdge, fitHighEdge);
+  for(int i=0; i<functiondilep7->GetNumberFreeParameters(); i++){
+    functiondilep7->SetParameter(i,round(functiondilep7->GetParameter(i),3));
+  }
+  //TString fitEntrydilep7="fit 7 TeV dilepton: ";
+  //fitEntrydilep7+=functiondilep7->GetExpFormula("p");
+  //fitEntrydilep7+=",  #chi^{2}/ndof=";
+  //fitEntrydilep7+=getTStringFromDouble(functiondilep7->GetChisquare())+"/"+getTStringFromInt(functiondilep7->GetNDF());
+  //fitEntrydilep7.ReplaceAll("+(","");
+  //fitEntrydilep7.ReplaceAll("))",")");
+  TString fitEntrydilep7="7 TeV dilepton: ";
+  fitEntrydilep7+="a=";
+  fitEntrydilep7+=getTStringFromDouble(functiondilep7->GetParameter(0), 3);
+  fitEntrydilep7+="#pm";
+  fitEntrydilep7+=getTStringFromDouble(functiondilep7->GetParError(0) , 3);
+  fitEntrydilep7+=", b=";
+  fitEntrydilep7+=getTStringFromDouble(functiondilep7->GetParameter(1), 5);
+  fitEntrydilep7+="#pm";
+  fitEntrydilep7+=getTStringFromDouble(functiondilep7->GetParError(1) , 5);
+
   // c) to all 8 TeV points
   TF1* function8=new TF1("function8",def,fitLowEdge, fitHighEdge);
   function8->SetLineWidth(2);
@@ -323,20 +386,83 @@ void getMCcorrectionfactors(TString func = "exp"){
   for(int i=0; i<function8->GetNumberFreeParameters(); i++){
     function8->SetParameter(i,round(function8->GetParameter(i),3));
   }
-  TString fitEntry8="fit 8 TeV: ";
-  fitEntry8+=function8->GetExpFormula("p");
+  //TString fitEntry8="fit 8 TeV: ";
+  //fitEntry8+=function8->GetExpFormula("p");
   //fitEntry8+=",  #chi^{2}/ndof=";
   //fitEntry8+=getTStringFromDouble(function8->GetChisquare())+"/"+getTStringFromInt(function8->GetNDF());
-  fitEntry8.ReplaceAll("+(","");
-  fitEntry8.ReplaceAll("))",")");
+  //fitEntry8.ReplaceAll("+(","");
+  //fitEntry8.ReplaceAll("))",")");
+  TString fitEntry8="8 TeV:               ";
+  fitEntry8+="a=";
+  fitEntry8+=getTStringFromDouble(function8->GetParameter(0), 3);
+  fitEntry8+="#pm";
+  fitEntry8+=getTStringFromDouble(function8->GetParError(0) , 3);
+  fitEntry8+=", b=";
+  fitEntry8+=getTStringFromDouble(function8->GetParameter(1), 5);
+  fitEntry8+="#pm";
+  fitEntry8+=getTStringFromDouble(function8->GetParError(1) , 5);
+
+  // c1) to l+jets 8 TeV points
+  TF1* functionljets8=new TF1("functionljets8",def,fitLowEdge, fitHighEdge);
+  functionljets8->SetLineColor(kBlue);
+  functionljets8->SetLineWidth(2);
+  SFljets8->Fit(functionljets8,"R","same",fitLowEdge, fitHighEdge);
+  for(int i=0; i<functionljets8->GetNumberFreeParameters(); i++){
+    functionljets8->SetParameter(i,round(functionljets8->GetParameter(i),3));
+  }
+  //TString fitEntryljets8="fit 8 TeV l+jets: ";
+  //fitEntryljets8+=functionljets8->GetExpFormula("p");
+  //fitEntryljets8+=",  #chi^{2}/ndof=";
+  //fitEntryljets8+=getTStringFromDouble(functionljets8->GetChisquare())+"/"+getTStringFromInt(functionljets8->GetNDF());
+  //fitEntryljets8.ReplaceAll("+(","");
+  //fitEntryljets8.ReplaceAll("))",")");
+  TString fitEntryljets8="8 TeV l+jets:     ";
+  fitEntryljets8+="a=";
+  fitEntryljets8+=getTStringFromDouble(functionljets8->GetParameter(0), 3);
+  fitEntryljets8+="#pm";
+  fitEntryljets8+=getTStringFromDouble(functionljets8->GetParError(0) , 3);
+  fitEntryljets8+=", b=";
+  fitEntryljets8+=getTStringFromDouble(functionljets8->GetParameter(1), 5);
+  fitEntryljets8+="#pm";
+  fitEntryljets8+=getTStringFromDouble(functionljets8->GetParError(1) , 5);
+
+  // c2) to dilepton 8 TeV points
+  TF1* functiondilep8=new TF1("functiondilep8",def,fitLowEdge, fitHighEdge);
+  functiondilep8->SetLineColor(kAzure+6);
+  functiondilep8->SetLineWidth(2);
+  SFdilep8->Fit(functiondilep8,"R","same",fitLowEdge, fitHighEdge);
+  for(int i=0; i<functiondilep8->GetNumberFreeParameters(); i++){
+    functiondilep8->SetParameter(i,round(functiondilep8->GetParameter(i),3));
+  }
+  //TString fitEntrydilep8="fit 8 TeV dilepton: ";
+  //fitEntrydilep8+=functiondilep8->GetExpFormula("p");
+  //fitEntrydilep8+=",  #chi^{2}/ndof=";
+  //fitEntrydilep8+=getTStringFromDouble(functiondilep8->GetChisquare())+"/"+getTStringFromInt(functiondilep8->GetNDF());
+  //fitEntrydilep8.ReplaceAll("+(","");
+  //fitEntrydilep8.ReplaceAll("))",")");
+  TString fitEntrydilep8="8 TeV dilepton: ";
+  fitEntrydilep8+="a=";
+  fitEntrydilep8+=getTStringFromDouble(functiondilep8->GetParameter(0), 3);
+  fitEntrydilep8+="#pm";
+  fitEntrydilep8+=getTStringFromDouble(functiondilep8->GetParError(0) , 3);
+  fitEntrydilep8+=", b=";
+  fitEntrydilep8+=getTStringFromDouble(functiondilep8->GetParameter(1), 5);
+  fitEntrydilep8+="#pm";
+  fitEntrydilep8+=getTStringFromDouble(functiondilep8->GetParError(1) , 5);
+
   // Draw legend
   leg0->AddEntry(SFljets, "7 TeV e/#mu+jets  (TOP-11-013)"   , "PL");
   leg0->AddEntry(SFdilep, "7 TeV ee/e#mu/#mu#mu (TOP-11-013)", "PL");
-  leg0->AddEntry( function7, fitEntry7, "L");
   leg0->AddEntry(SFljets8,"8 TeV e/#mu+jets  (TOP-12-027)"   , "PL");
   leg0->AddEntry(SFdilep8,"8 TeV ee/e#mu/#mu#mu (TOP-12-028)", "PL");
-  leg0->AddEntry( function8, fitEntry8, "L");
   leg0->Draw("same");
+  leg1->AddEntry( function7, fitEntry7, "L");
+  leg1->AddEntry( functiondilep7, fitEntrydilep7, "L");
+  leg1->AddEntry( functionljets7, fitEntryljets7, "L");
+  leg1->AddEntry( function8, fitEntry8, "L");
+  leg1->AddEntry( functiondilep8, fitEntrydilep8, "L");
+  leg1->AddEntry( functionljets8, fitEntryljets8, "L");
+  leg1->Draw("same");
   // Draw cms label
   TPaveText *label = new TPaveText();
   label -> SetX1NDC(gStyle->GetPadLeftMargin());
