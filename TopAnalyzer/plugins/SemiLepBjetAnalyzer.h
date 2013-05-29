@@ -110,6 +110,10 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   float valueBbbarMassGen;
   float valueLbMassRec;
   float valueLbMassGen;
+  //float valuexBHadRec;
+  //float valuexBHadGen;
+  //float valuexBLepRec;
+  //float valuexBLepGen;
   bool bbSwapBetter;
   float valueAssignment;
 
@@ -146,6 +150,13 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH1F* lbMassRec;
   TH1F* lbMassGen;
 
+  //TH1F* xBLepRec;
+  //TH1F* xBLepGen;
+  //TH1F* xBHadRec;
+  //TH1F* xBHadGen;
+  //TH1F* xBRec;
+  //TH1F* xBGen;
+
   TH2F* bqPt_;
   TH2F* bqPtLead_;
   TH2F* bqPtSubLead_;
@@ -159,6 +170,7 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   TH2F* bbbarY_;
   TH2F* bbbarMass_;
   TH2F* lbMass_;
+  //TH2F* xB_;
 };
 
 #endif

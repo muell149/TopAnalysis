@@ -52,6 +52,10 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   valueBbbarMassGen(-999),
   valueLbMassRec(-999),
   valueLbMassGen(-999),
+  //valuexBHadRec(-999),
+  //valuexBHadGen(-999),
+  //valuexBLepRec(-999),
+  //valuexBLepGen(-999),
   bbSwapBetter(false),
   valueAssignment(-999)
 {
@@ -155,13 +159,35 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::Candidate* zero=0;
   std::pair<const reco::Candidate*,const reco::Candidate*> recBJets = recPlots_ ? getbJets(semiLepEvt, hypoKey_) : std::make_pair(zero,zero);
   // get rec b and bbar (assignment from kinfit hypothesis but no shifted kinematics)
+  // (not used for xB)
   if(preBjets) recBJets = recPlots_ ? getPreBJets(semiLepEvt, hypoKey_, recoJets) : std::make_pair(zero,zero);
   const reco::Candidate* b   = recBJets.first ;
   const reco::Candidate* bbar= recBJets.second;
+
   double reclbm=-1;
+  //double recxBhad = -1; 
+  //double recxBlep = -1;
+
   // fill rec histograms
   if(b&&bbar){
-    reclbm=(semiLepEvt->singleLepton(hypoKey_)->p4()+semiLepEvt->leptonicDecayB(hypoKey_)->p4()).mass();
+    // reconstructed top and W
+    
+    //reco::Particle::LorentzVector hadWRec=semiLepEvt->hadronicDecayW(hypoKey_)->p4();
+    //reco::Particle::LorentzVector lepWRec=semiLepEvt->leptonicDecayW(hypoKey_)->p4();
+    //reco::Particle::LorentzVector hadTopRec=semiLepEvt->hadronicDecayTop(hypoKey_)->p4();
+    //reco::Particle::LorentzVector lepTopRec=semiLepEvt->leptonicDecayTop(hypoKey_)->p4();
+    
+    // pick b(lepton/hadron) wrt lepton charge
+    double lepChargeRec= semiLepEvt->singleLepton(hypoKey_)->charge();
+    // q(lep) < 0 -> bjet(leptonic)>0 -> bjet(leptonic)=bbar
+    reco::Particle::LorentzVector lepBRec = lepChargeRec < 0 ? bbar->p4() : b   ->p4();
+    reco::Particle::LorentzVector hadBRec = lepChargeRec < 0 ? b   ->p4() : bbar->p4();
+
+    // calculate more complex variables
+    reclbm=(semiLepEvt->singleLepton(hypoKey_)->p4()+lepBRec).mass();
+    //recxBhad=(1/(1-(hadWRec.mass2())/(hadTopRec.mass2()))) * 2*(hadBRec.Dot(hadTopRec)/(hadTopRec.mass2()));
+    //recxBlep=(1/(1-(lepWRec.mass2())/(lepTopRec.mass2()))) * 2*(lepBRec.Dot(lepTopRec)/(lepTopRec.mass2()));
+
     // fill tree variables   
     if(useTree_){
       valueBqPtRec =b->pt();
@@ -177,6 +203,8 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       valueBbbarYRec   =(b->p4()+bbar->p4()).Rapidity();
       valueBbbarMassRec=(b->p4()+bbar->p4()).mass();
       valueLbMassRec   =reclbm;
+      //valuexBHadRec    =recxBhad;
+      //valuexBLepRec    =recxBlep;
     }
     // debug output
     if(verbose>1) std::cout << "do filling" << std::endl;
@@ -194,6 +222,10 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bbbarYRec   ->Fill( (b->p4()+bbar->p4()).Rapidity(), weight);
     bbbarMassRec->Fill( (b->p4()+bbar->p4()).mass()    , weight);
     lbMassRec->Fill(reclbm, weight);
+    //xBLepRec->Fill(recxBlep, weight);
+    //xBHadRec->Fill(recxBhad, weight);
+    //xBRec   ->Fill(recxBlep, weight);
+    //xBRec   ->Fill(recxBhad, weight);
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
  
@@ -212,15 +244,28 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::GenParticle* genLepton = genPlots_ ? &genLeptons->at(0) : 0;
 
   double genlbm=-1;
-  double genlbm2=-1;
+  //double genxBhad=-1;
+  //double genxBlep=-1;
   // fill gen histograms
   if(genb&&genbbar){
-    // identify jet coming from leptonic top: 
-    //   b-jet and lepton must have opposite charges!!!
-    double genLepCharge=genLepton->charge();
-    if(verbose>2) std::cout << "charge lept: " << genLepCharge  << std::endl;
-    genlbm = (genLepCharge<0) ? (genLepton->p4()+genbbar->p4()).mass() : (genLepton->p4()+genb   ->p4()).mass();
-    genlbm2= (genLepCharge<0) ? (genLepton->p4()+   genb->p4()).mass() : (genLepton->p4()+genbbar->p4()).mass();
+    // top and W from parton truth
+    
+    //reco::Particle::LorentzVector hadWGen=semiLepEvt->hadronicDecayW()->p4();
+    //reco::Particle::LorentzVector lepWGen=semiLepEvt->leptonicDecayW()->p4();
+    //reco::Particle::LorentzVector hadTopGen=semiLepEvt->hadronicDecayTop()->p4();
+    //reco::Particle::LorentzVector lepTopGen=semiLepEvt->leptonicDecayTop()->p4();
+    
+    // pick b(lepton/hadron) wrt lepton charge
+    double lepChargeGen=genLepton->charge();
+    // q(lep) < 0 -> bjet(leptonic)>0 -> bjet(leptonic)=bbar
+    reco::Particle::LorentzVector lepBGen = lepChargeGen < 0 ? genbbar->p4() : genb   ->p4();
+    reco::Particle::LorentzVector hadBGen = lepChargeGen < 0 ? genb   ->p4() : genbbar->p4();
+
+    // calculate more complex variables
+    genlbm = (genLepton->p4()+lepBGen).mass();
+    //genxBhad=(1/(1-(hadWGen.mass2())/(hadTopGen.mass2()))) * 2*(hadBGen.Dot(hadTopGen)/(hadTopGen.mass2()));
+    //genxBlep=(1/(1-(lepWGen.mass2())/(lepTopGen.mass2()))) * 2*(lepBGen.Dot(lepTopGen)/(lepTopGen.mass2()));
+
     // fill tree variables   
     if(useTree_){
       valueBqPtGen =genb->pt();
@@ -236,6 +281,8 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       valueBbbarYGen   =(genb->p4()+genbbar->p4()).Rapidity();
       valueBbbarMassGen=(genb->p4()+genbbar->p4()).mass();
       valueLbMassGen   =genlbm;
+      //valuexBHadGen=genxBhad;
+      //valuexBLepGen=genxBlep;
     }
     // debug output
     if(!recPlots_&&valueBqPtGen>0&&valueBbarqPtGen>0&&verbose>1){ 
@@ -258,6 +305,10 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bbbarYGen   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), weight);
     bbbarMassGen->Fill( (genb->p4()+genbbar->p4()).mass()    , weight);
     lbMassGen   ->Fill( genlbm, weight);
+    //xBLepGen->Fill(genxBlep, weight);
+    //xBHadGen->Fill(genxBhad, weight);
+    //xBGen   ->Fill(genxBlep, weight);
+    //xBGen   ->Fill(genxBhad, weight);
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
 
@@ -271,7 +322,6 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     valueAssignment=checkPartonAssignment(semiLepEvt, 5); // FIXME: N(jets) in KinFit hardcoded for the moment
     if(verbose>1){
       std::cout << "mlb(gen correct)=" << genlbm  << std::endl;
-      std::cout << "mlb(gen bb swap)=" << genlbm2 << std::endl;
       std::cout << "mlb(rec KinFit )=" << reclbm  << std::endl;
       std::cout << "reco jet assignment (kinFit) wrt reco jet-quark matching: " << valueAssignment << std::endl;
     }
@@ -285,6 +335,8 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     bbbarY_   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), (b->p4()+bbar->p4()).Rapidity(), weight);
     bbbarMass_->Fill( (genb->p4()+genbbar->p4()).mass()    , (b->p4()+bbar->p4()).mass()    , weight);
     if(reclbm>=0&&genlbm>=0) lbMass_->Fill( genlbm, reclbm, weight );
+    //if(genxBlep>=0&&recxBlep>=0) xB_->Fill( genxBlep, recxBlep, weight );
+    //if(genxBhad>=0&&recxBhad>=0) xB_->Fill( genxBhad, recxBhad, weight );
     if(verbose>1){
       std::cout << "---" << std::endl;
       std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << b->pt()    << "-- eta: genb   = " << genb->eta()    << "; recb   = " << b->eta() << std::endl;
@@ -391,6 +443,13 @@ SemiLepBjetAnalyzer::beginJob()
   // C) lb-system quantities
   if(recPlots_) lbMassRec= fs->make<TH1F>("lbMassRec" , "m^{lb} (rec) [GeV]"    , 500,  0., 500.);
   if(genPlots_) lbMassGen= fs->make<TH1F>("lbMassGen" , "m^{lb} (gen) [GeV]"    , 500,  0., 500.);
+  // D) hadronization variable
+  //if(recPlots_) xBRec= fs->make<TH1F>("xBRec" , "x_B", 200, -0.5, 1.5 );
+  //if(genPlots_) xBGen= fs->make<TH1F>("xBGen" , "x_B", 200, -0.5, 1.5 );
+  //if(recPlots_) xBHadRec= fs->make<TH1F>("xBHadRec" , "x_B (hadronic branch)", 200, -0.5, 1.5 );
+  //if(genPlots_) xBHadGen= fs->make<TH1F>("xBHadGen" , "x_B (hadronic branch)", 200, -0.5, 1.5 );
+  //if(recPlots_) xBLepRec= fs->make<TH1F>("xBLepRec" , "x_B (leptonic branch)", 200, -0.5, 1.5 );
+  //if(genPlots_) xBLepGen= fs->make<TH1F>("xBLepGen" , "x_B (leptonic branch)", 200, -0.5, 1.5 );
 
   // 2D correlation
   if(recPlots_&&genPlots_){
@@ -407,6 +466,8 @@ SemiLepBjetAnalyzer::beginJob()
     bbbarMass_= fs->make<TH2F>("bbbarMass_" , "m^{b#bar{b}} (gen vs rec) [GeV]"    , 1200,  0., 1200., 1200,  0., 1200.);
     // C) lb-system quantities
     lbMass_   = fs->make<TH2F>("lbMass_"    , "m^{lb} (gen vs rec) [GeV]"          ,  500,  0.,  500.,  500,  0.,  500.);
+    // D) hadronization variable
+    //xB_= fs->make<TH2F>("xB_" , "xB_", 200, -0.5, 1.5, 200, -0.5, 1.5 );
   }
   //---
   //   create branches
@@ -515,6 +576,8 @@ SemiLepBjetAnalyzer::getPreBJets(const edm::Handle<TtSemiLeptonicEvent> semiLepE
     // get charge of lepton 
     bool lminus = ((reco::LeafCandidate*)(semiLepEvt->singleLepton(hypoKey_)))->charge()<0 ? true : false;
     // return candidates
+    // pick b/bbar wrt lepton charge
+    // q(lep) < 0 -> bjet(leptonic)>0 -> bjet(leptonic)=bbar
     if(bhad&&blep){
       if(verbose>0) std::cout << "rec bjet candidates before KinFit found!" << std::endl;
       return std::make_pair((lminus ? bhad : blep),(lminus ? blep : bhad));
