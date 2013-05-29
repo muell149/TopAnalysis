@@ -14,6 +14,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/xSec
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/binning
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/effAndAcc
+## mkdir -p diffXSecFromSignal/plots/combined/2012/effAndAcc/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/shapeReweighting
@@ -44,6 +45,7 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/monitoring/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/xSecRatio
+
 
 ## b) you don't need to copy root files needed for the Analysis 
 ##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
