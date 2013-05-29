@@ -961,7 +961,7 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   METSrc = 'patMETs',
                                   MuonSrc = 'tightMuons',
                                   ElectronSrc = 'goodElectronsEJ',
-                                  GenJetSrc = cms.InputTag('ak5GenJets','','HLT'),
+                                  GenJetSrc = cms.InputTag('ak5GenJets'),
                                   GenMETSrc = 'genMetTrue',
                                   GenLepSrc = 'isolatedGenMuons',
                                   weight = "",
@@ -975,6 +975,7 @@ if(decayChannel=='electron'):
     process.compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
+process.compositedKinematicsKinFit.GenJetSrc= cms.InputTag('noOverlapGenJetCollection')
 process.compositedKinematics.btagDiscr=cms.double(0.244) # loose WP for untagged selection
 
 ## electrons
