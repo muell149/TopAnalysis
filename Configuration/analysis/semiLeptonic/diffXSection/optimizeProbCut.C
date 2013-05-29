@@ -18,7 +18,7 @@ TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d, int precision, bool output);
 void drawArrow(const double xmin, const double y, const double xmax, const unsigned int color, const double lineWidth, const unsigned int lineStyle, double stretchFactor);
 
-void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString lep = "combined", bool save=true)
+void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString lep = "combined", bool save=true)
 {
   // configure style
   gROOT->SetStyle("Plain");
@@ -44,13 +44,13 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   // get trees
   vector<TTree*> trees_;
   float decayChannel;
-  float prob;
+  float chi2;
   float qAssignment;
   float weight;
   for(UInt_t i = 0; i < files_.size(); i++){
     trees_.push_back((TTree*)files_[i]->Get("analyzeTopRecoKinematicsKinFit/tree"));
     trees_[i]->SetBranchAddress("decayChannel",&decayChannel);
-    trees_[i]->SetBranchAddress("prob",&prob);
+    trees_[i]->SetBranchAddress("chi2",&chi2);
     trees_[i]->SetBranchAddress("qAssignment",&qAssignment);
     trees_[i]->SetBranchAddress("weight",&weight);
   }
@@ -109,6 +109,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
       nevent = (Long64_t)trees_[i]->GetEntries();
       for(Long64_t ientry = 0; ientry < nevent; ++ientry){
 	trees_[i]->GetEntry(ientry);
+	double prob = TMath::Prob(chi2,ndof);
 	// ttbar SG
 	//TString fileName=files_[i]->GetName();
 	//if( (fileName.Contains("muon")&&fileName.Contains("Sig")&&(lep=="muon"||lep=="combined")) || (fileName.Contains("elec")&&fileName.Contains("Sig")&&(lep=="electron"||lep=="combined")) ){
@@ -174,46 +175,61 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
     BGeffVec.push_back(ttBkgHisto->Integral(ttBkgHisto->FindBin(i/100.),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents);
   }
 
-  // golden section search for optimal cut value
-  for ( int i = 0 ; i < 100 ; i++ ) {
-    if( optimalProb!=newLowProb ){
-      // calculate s/sqrt(s+b) or s/sqrt(b) for lowProb
-      SoBLowProb = getSoB(sigHisto,bkgHisto,newLowProb,optimize);
-      probVec.push_back(newLowProb);
-      SoBVec.push_back(SoBLowProb);
-      SeffVec .push_back(sigHisto  ->Integral(sigHisto  ->FindBin(newLowProb),sigHisto  ->GetNbinsX()+1)/sigEvents);
-      SGeffVec.push_back(ttSigHisto->Integral(ttSigHisto->FindBin(newLowProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents);
-      BGeffVec.push_back(ttBkgHisto->Integral(ttBkgHisto->FindBin(newLowProb),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents);
-      cout << "newLowProb: " << newLowProb << " -> "+optimize+": " << SoBLowProb << endl;
+  if(forceProb>=0 && forceProb<=1){
+    optimalProb=forceProb;
+    optimalSoB=getSoB(sigHisto,bkgHisto,forceProb,optimize);
+    optimalEff=sigHisto->Integral(sigHisto->FindBin(forceProb),sigHisto->GetNbinsX()+1)/sigEvents;
+    // calculate some points in the region of the forced cut value
+    for ( int i = 0 ; i < 400 ; i++ ) {
+      probVec.push_back(optimalProb-0.01+i/20000.);
+      SoBVec.push_back(getSoB(sigHisto,bkgHisto,optimalProb-0.01+i/20000.,optimize));
+      SeffVec.push_back(sigHisto->Integral(sigHisto->FindBin(optimalProb-0.01+i/20000.),sigHisto->GetNbinsX()+1)/sigEvents);
+      SGeffVec.push_back(ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb-0.01+i/20000.),ttSigHisto->GetNbinsX()+1)/ttSigEvents);
+      BGeffVec.push_back(ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb-0.01+i/20000.),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents);
     }
-    if(optimalProb!=newHighProb){
-      // calculate s/sqrt(s+b) or s/sqrt(b) for highProb
-      SoBHighProb = getSoB(sigHisto,bkgHisto,newHighProb,optimize);
-      probVec.push_back(newHighProb);
-      SoBVec.push_back(SoBHighProb);
-      SeffVec .push_back(sigHisto  ->Integral(sigHisto  ->FindBin(newHighProb),sigHisto  ->GetNbinsX()+1)/sigEvents);
-      SGeffVec.push_back(ttSigHisto->Integral(ttSigHisto->FindBin(newHighProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents);
-      BGeffVec.push_back(ttBkgHisto->Integral(ttBkgHisto->FindBin(newHighProb),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents);
-      cout << "newHighProb: " << newHighProb << " -> "+optimize+": " << SoBHighProb << endl;
-    }
-    if(SoBLowProb>SoBHighProb){
-      highProb=newHighProb;
-      optimalProb=newLowProb;
-      optimalSoB=SoBLowProb;
-      newHighProb=newLowProb;
-      optimalEff=sigHisto->Integral(sigHisto->FindBin(newLowProb),sigHisto->GetNbinsX()+1)/sigEvents;
-      if(TMath::Abs(SoBLowProb-SoBHighProb)/(SoBLowProb+SoBHighProb)<0.0000001)break;
-      SoBHighProb=SoBLowProb;
-      newLowProb=lowProb+goldSec*(highProb-lowProb);
-    } else {
-      lowProb=newLowProb;
-      optimalProb=newHighProb;
-      optimalSoB=SoBHighProb;
-      newLowProb=newHighProb;
-      optimalEff=sigHisto->Integral(sigHisto->FindBin(newHighProb),sigHisto->GetNbinsX()+1)/sigEvents;
-      if(TMath::Abs(SoBLowProb-SoBHighProb)/(SoBLowProb+SoBHighProb)<0.0000001)break;
-      SoBLowProb=SoBHighProb;
-      newHighProb=highProb-goldSec*(highProb-lowProb);
+  }
+  else{
+    // golden section search for optimal cut value
+    for ( int i = 0 ; i < 100 ; i++ ) {
+      if( optimalProb!=newLowProb ){
+	// calculate s/sqrt(s+b) or s/sqrt(b) for lowProb
+	SoBLowProb = getSoB(sigHisto,bkgHisto,newLowProb,optimize);
+	probVec.push_back(newLowProb);
+	SoBVec.push_back(SoBLowProb);
+	SeffVec .push_back(sigHisto  ->Integral(sigHisto  ->FindBin(newLowProb),sigHisto  ->GetNbinsX()+1)/sigEvents);
+	SGeffVec.push_back(ttSigHisto->Integral(ttSigHisto->FindBin(newLowProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents);
+	BGeffVec.push_back(ttBkgHisto->Integral(ttBkgHisto->FindBin(newLowProb),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents);
+	cout << "newLowProb: " << newLowProb << " -> "+optimize+": " << SoBLowProb << endl;
+      }
+      if(optimalProb!=newHighProb){
+	// calculate s/sqrt(s+b) or s/sqrt(b) for highProb
+	SoBHighProb = getSoB(sigHisto,bkgHisto,newHighProb,optimize);
+	probVec.push_back(newHighProb);
+	SoBVec.push_back(SoBHighProb);
+	SeffVec .push_back(sigHisto  ->Integral(sigHisto  ->FindBin(newHighProb),sigHisto  ->GetNbinsX()+1)/sigEvents);
+	SGeffVec.push_back(ttSigHisto->Integral(ttSigHisto->FindBin(newHighProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents);
+	BGeffVec.push_back(ttBkgHisto->Integral(ttBkgHisto->FindBin(newHighProb),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents);
+	cout << "newHighProb: " << newHighProb << " -> "+optimize+": " << SoBHighProb << endl;
+      }
+      if(SoBLowProb>SoBHighProb){
+	highProb=newHighProb;
+	optimalProb=newLowProb;
+	optimalSoB=SoBLowProb;
+	newHighProb=newLowProb;
+	optimalEff=sigHisto->Integral(sigHisto->FindBin(newLowProb),sigHisto->GetNbinsX()+1)/sigEvents;
+	if(TMath::Abs(SoBLowProb-SoBHighProb)/(SoBLowProb+SoBHighProb)<0.0000001)break;
+	SoBHighProb=SoBLowProb;
+	newLowProb=lowProb+goldSec*(highProb-lowProb);
+      } else {
+	lowProb=newLowProb;
+	optimalProb=newHighProb;
+	optimalSoB=SoBHighProb;
+	newLowProb=newHighProb;
+	optimalEff=sigHisto->Integral(sigHisto->FindBin(newHighProb),sigHisto->GetNbinsX()+1)/sigEvents;
+	if(TMath::Abs(SoBLowProb-SoBHighProb)/(SoBLowProb+SoBHighProb)<0.0000001)break;
+	SoBLowProb=SoBHighProb;
+	newHighProb=highProb-goldSec*(highProb-lowProb);
+      }
     }
   }
   double ttSigEff = ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)/ttSigEvents;
@@ -242,6 +258,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
       nevent = (Long64_t)trees_[i]->GetEntries();
       for(Long64_t ientry = 0; ientry < nevent; ++ientry){
 	trees_[i]->GetEntry(ientry);
+	double prob = TMath::Prob(chi2,ndof);
 	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2 && !(lep=="electron")) || (lep=="electron" && decayChannel==1)){
 	  permutation->Fill(qAssignment,weight);
 	  if(prob>optimalProb) permutationProb->Fill(qAssignment,weight);
@@ -330,11 +347,11 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   rPad->SetTicky(1);
   rPad->Draw("");
   rPad->cd();
-  sigHisto->GetXaxis()->SetRangeUser(optimalProb/2.,2.*optimalProb);
-  sigHisto->GetYaxis()->SetRangeUser(optimalSoB-0.4, optimalSoB+0.4);
+  sigHisto->GetXaxis()->SetRangeUser(optimalProb-0.01,optimalProb+0.01);
+  sigHisto->GetYaxis()->SetRangeUser(optimalSoB-0.4, optimalSoB+0.1);
   sigHisto->GetYaxis()->SetTitle("");
   sigHisto->DrawClone("axis");
-  drawLine(optimalProb, optimalSoB-0.4, optimalProb, optimalSoB+0.35, kRed, 3, 1);
+  drawLine(optimalProb, optimalSoB-0.4, optimalProb, optimalSoB+0.05, kRed, 3, 1);
   optSoB->DrawClone("p same");  
   // draw graph signal efficiency vs probability
   canv->cd(2);
@@ -448,6 +465,8 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   leg2->Draw("same");
   // draw permutation distribution
   canv4->cd();
+  double maxPerm     = permutation->GetMaximum();
+  double maxPermProb = permutationProb->GetMaximum();
   permutation->SetTitle("");
   permutation->GetXaxis()->SetTitle("jet permutation wrt. machted parton truth");
   permutation->GetYaxis()->SetTitle("rel. Events");
@@ -460,6 +479,7 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   permutation->SetFillStyle(1001);
   permutation->SetBarWidth(0.4);
   permutation->SetBarOffset(0.55);
+  permutation->SetMaximum(1.05*(maxPerm<maxPermProb ? maxPermProb : maxPerm));
   permutation->DrawClone("hbar");
   permutationProb->SetLineWidth(3);
   permutationProb->SetLineStyle(1);
@@ -542,12 +562,12 @@ void optimizeProbCut(TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString le
   if(save){
     TString outputFolder="diffXSecFromSignal/plots/"+lep+"/2012/kinFitPerformance/";
     canv ->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
-    canv2->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
-    canv3->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
-    canv4->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
-    canv5->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
-    canv6->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
-    canv7->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
+    canv2->Print(outputFolder+(TString)(canv2->GetTitle())+".eps");
+    canv3->Print(outputFolder+(TString)(canv3->GetTitle())+".eps");
+    canv4->Print(outputFolder+(TString)(canv4->GetTitle())+".eps");
+    canv5->Print(outputFolder+(TString)(canv5->GetTitle())+".eps");
+    canv6->Print(outputFolder+(TString)(canv6->GetTitle())+".eps");
+    canv7->Print(outputFolder+(TString)(canv7->GetTitle())+".eps");
   }
 }
 
