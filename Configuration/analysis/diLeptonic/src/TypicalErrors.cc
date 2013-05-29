@@ -64,7 +64,7 @@ vector<TString> Files(TString channel = "", TString variable = ""){
     else{WhichVariable = Variables();}
 
     for (int j=0; j<(int)WhichVariable.size(); j++){
-        FileVector.push_back(TString("Plots/").Append(channel).Append("/").Append(WhichVariable.at(j)).Append("SystematicsLaTeX.txt"));
+        FileVector.push_back(TString("Plots/FinalResults").Append(channel).Append("/").Append(WhichVariable.at(j)).Append("SystematicsLaTeX.txt"));
     }
 
     return FileVector;

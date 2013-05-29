@@ -26,6 +26,7 @@
 #include "plotterclass.h"
 #include "plotterUtils.h"
 #include "utils.h"
+#include "ScaleFactors.h"
 
 
 // DAVID
@@ -68,14 +69,12 @@ void Plotter::SetOutpath(TString path)
 
 void Plotter::unfolding(TString channel)
 {
-//    std::vector<TString> vec_systematic {"JES_", "PU_"};
-//    std::vector<double> vec_flat_value {0, 0};
+    std::vector<TString> vec_systematic {"HAD_", "LEPT_", "KIN_", "DY_","BG_","PU_", "TRIG_","MASS_", "MATCH_", "SCALE_", "BTAG_ETA_","BTAG_PT_", "BTAG_LJET_ETA_", "BTAG_LJET_PT_", "JER_", "JES_"};
+    std::vector<double> vec_flat_value {0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 0.0025, 0.0025, 0.0025, 0.0025, 0, 0};
 
-     std::vector<TString> vec_systematic {"HAD_", "LEPT_", "KIN_", "DY_","BG_","PU_", "TRIG_","MASS_", "MATCH_", "SCALE_", "BTAG_ETA_","BTAG_PT_", "BTAG_LJET_ETA_", "BTAG_LJET_PT_", "JER_", "JES_"};
-     std::vector<double> vec_flat_value {0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 0.0025, 0.0025, 0.0025, 0.0025, 0, 0}; 
     //Right now BTAG = 0.5% = Sqrt(BTAG_ETA ** 2 + BTAG_PT ** 2 + BTAG_LJET_ETA ** 2 + BTAG_LJET_PT ** 2)
     //assumed  BTAG_ETA = BTAG_PT = BTAG_LJET_ETA = BTAG_LJET_PT = 0.25% so a total error of 0.5% comes up in BTag
-    
+
     if(vec_systematic.size() != vec_flat_value.size()){
         std::cout<<"WARNING (in unfolding)!!!\n You are using 2 different size vectors: 'vec_systematic' and 'vec_flat_value'.\n Fix this and rerun again"<<std::endl;
         return;
@@ -906,7 +905,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     if (!fillHisto()) return;
     if (hists.size() == 0) { 
         std::cerr << "***ERROR! No histograms available! " << Channel << "/" << Systematic << std::endl; 
-        exit(11); 
+        exit(11);
     }
         
     auto c = make_shared<TCanvas>("","");
@@ -961,9 +960,6 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     }
 
 
-    gSystem->mkdir("preunfolded/"+Systematic+"/"+Channel, true);
-
-
     for(unsigned int i=0; i<hists.size() ; ++i){ // prepare histos and leg
 //         std::cout << "Legend ["<<i<<"] = " << legends.at(i) << std::endl;
     if(legends.at(i) != "Data"){
@@ -972,7 +968,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         if(XAxisbins.size()>1){//only distributions we want to unfold will have a binning vector
             if(legends.at(i) == "t#bar{t} Signal"){
                 TString ftemp = dataset.at(i);
-		double LumiWeight = CalcLumiWeight(dataset.at(i));
+                double LumiWeight = CalcLumiWeight(dataset.at(i));
                 if (!init) {
                     aRespHist = fileReader->GetClone<TH2>(ftemp, "GenReco"+newname);
                     aGenHist = fileReader->GetClone<TH1D>(ftemp, "VisGen"+newname);
@@ -990,9 +986,9 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
                         aRespHist->Add(fileReader->Get<TH2>(ftemp, "GenRecoAnti"+newname));
                     }
                 }
-		aRespHist->Scale(LumiWeight);
-		aGenHist->Scale(LumiWeight);
-	    }
+                aRespHist->Scale(LumiWeight);
+                aGenHist->Scale(LumiWeight);
+            }
             //std::cout<<"Legend: "<<legends.at(i)<<std::endl;
             if(legends.at(i) == "t#bar{t} Signal"){
                 signalHist = i; //What is happening for the combined channel?? only 1 integer value??
@@ -1059,12 +1055,11 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     }
     }
 
-
     if(XAxisbins.size()>1){//only distributions we want to unfold will have a binning vector
         aDataHist = drawhists[0]->Rebin(bins,"aDataHist",Xbins);
-        //  std::cout<<"Added data to aDataHist"<<std::endl;
 
-        TFile *f15 = new TFile("preunfolded/"+Systematic+"/"+Channel+"/"+name+"_UnfoldingHistos.root","RECREATE");
+        TString outdir = ttbar::assignFolder("preunfolded", Channel, Systematic);
+        TFile *f15 = new TFile(outdir.Copy()+name+"_UnfoldingHistos.root","RECREATE");
         aDataHist->Write("aDataHist"); delete aDataHist;
         aTtBgrHist->Write("aTtBgrHist"); delete aTtBgrHist;
         aBgrHist->Write("aBgrHist"); delete aBgrHist;
@@ -1074,7 +1069,6 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
 
         f15->Close();
         delete f15;
-        
     }
 
     ControlLegend(drawhists, legends, leg);
@@ -1084,8 +1078,8 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         double InclusiveXsectionWrite[4], InclusiveXsectionStatErrorWrite[4];
         CalcXSec(dataset, InclusiveXsectionWrite, InclusiveXsectionStatErrorWrite, Systematic,"");
 
-        MakeTable();
-        if(channelType==3) PlotXSec();
+        Plotter::MakeTable(Channel, Systematic);
+        if(channelType==3) Plotter::PlotXSec(Channel);
     }
 
     std::unique_ptr<TH1D> syshist { (TH1D*) ttbar::summedStackHisto(stack.get()) };
@@ -1145,10 +1139,8 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     }
 
     // Create Directory for Output Plots 
-    gSystem->mkdir(outpathPlots+"/"+subfolderChannel+"/"+Systematic, true);
-    c->Print(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+".eps");
-    //c->Print(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+".root");
-    //c->Print(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+".C");
+    TString outdir = ttbar::assignFolder(outpathPlots, Channel, Systematic);
+    c->Print(outdir.Copy()+name+".eps");
 
     std::unique_ptr<TH1> sumMC;
     std::unique_ptr<TH1> sumttbar;
@@ -1165,7 +1157,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     sumMC->SetName(name);
 
     //save Canvas AND sources in a root file
-    TFile out_root(outpathPlots+subfolderChannel+"/"+Systematic+"/"+name+"_source.root", "RECREATE");
+    TFile out_root(outdir.Copy()+name+"_source.root", "RECREATE");
     drawhists[0]->Write(name+"_data");
     sumttbar->Write(name+"_signalmc");
     sumMC->Write(name+"_allmc");
@@ -1173,7 +1165,6 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     out_root.Close();
 
     c->Clear();
-//     leg->Clear();
 
     for (TH1* h : drawhists) delete h;
 }
@@ -1207,27 +1198,25 @@ void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
 }
 
 
-void Plotter::PlotXSec(){
+void Plotter::PlotXSec(TString Channel){
 
     TH1::AddDirectory(kFALSE);
 
-    TString channel_array[] = {"ee","mumu","emu","combined"};
-    TString sys_array[] = {"PDF_", "HAD_", "MATCH_", "MASS_", "SCALE_", "BTAG_", "BTAG_LJET_", "KIN_", "LEPT_", "TRIG_", "BG_", "DY_", "PU_", "JER_", "JES_"};//For the time being uintil all systematics are finalished
-    std::vector<TString> vec_systematic (sys_array, sys_array + sizeof(sys_array)/sizeof(sys_array[0]));
-    std::vector<TString> vec_channel (channel_array, channel_array + sizeof(channel_array)/sizeof(channel_array[0]));
+    std::vector<TString> vec_systematic {"PDF_", "HAD_", "MATCH_", "MASS_", "SCALE_", "BTAG_", "BTAG_LJET_", "KIN_", "LEPT_", "TRIG_", "BG_", "DY_", "PU_", "JER_", "JES_"};//For the time being uintil all systematics are finalished
+    std::vector<TString> vec_channel {"ee","mumu","emu","combined"};
 
     double BR_Error = 0.015;
     double Lumi_Error = 0.044;
 
     double InclusiveXsectionPlot[4], InclusiveXsectionStatErrorPlot[4], InclusiveXsectionSysErrorPlot[4], InclusiveXsectionTotalErrorPlot[4];
     for (int j=0; j<(int)vec_channel.size(); j++){
-
-        ifstream SysResultsList("Plots/Nominal/"+vec_channel.at(j)+"/InclXSec.txt");
+        TString outdir = ttbar::assignFolder(outpathPlots, vec_channel.at(j), TString("FinalResults"));
+        ifstream SysResultsList("Plots/Nominal/"+vec_channel.at(j)+"/InclusiveXSec.txt");
         TString DUMMY;
         SysResultsList>>DUMMY>>DUMMY>>DUMMY>>DUMMY>>DUMMY>>InclusiveXsectionPlot[j]>>DUMMY>>InclusiveXsectionStatErrorPlot[j];
         SysResultsList.close();
 
-        ofstream OutputFile(string("Plots/"+vec_channel.at(j)+"/InclXSecResultLateX.txt"));
+        ofstream OutputFile(outdir.Copy()+"InclusiveXSecResultLateX.txt");
         OutputFile<<"Inclusive XSection Numerical Results for channel "<<vec_channel.at(j)<<std::endl;
 
         double syst_square_for_channel=0.0;
@@ -1236,11 +1225,11 @@ void Plotter::PlotXSec(){
             ifstream SysUP, SysDOWN;
 
             if(vec_systematic.at(i) != "HAD_"){
-                SysUP.open("Plots/"+vec_systematic.at(i)+"UP/"+vec_channel.at(j)+"/InclXSec.txt");
-                SysDOWN.open("Plots/"+vec_systematic.at(i)+"DOWN/"+vec_channel.at(j)+"/InclXSec.txt");
+                SysUP.open("Plots/"+vec_systematic.at(i)+"UP/"+vec_channel.at(j)+"/InclusiveXSec.txt");
+                SysDOWN.open("Plots/"+vec_systematic.at(i)+"DOWN/"+vec_channel.at(j)+"/InclusiveXSec.txt");
             } else{
-                SysUP.open("Plots/MCATNLO/"+vec_channel.at(j)+"/InclXSec.txt");
-                SysDOWN.open("Plots/POWHEG/"+vec_channel.at(j)+"/InclXSec.txt");
+                SysUP.open("Plots/MCATNLO/"+vec_channel.at(j)+"/InclusiveXSec.txt");
+                SysDOWN.open("Plots/POWHEG/"+vec_channel.at(j)+"/InclusiveXSec.txt");
             }
             double VarUp = 0, VarDown = 0, StatErrUp = 0, StatErrDown = 0;
 
@@ -1371,16 +1360,17 @@ void Plotter::PlotXSec(){
     box2->Draw("SAME");
     box3->Draw("SAME");
     box4->Draw("SAME");
-    gSystem->mkdir(outpathPlots+subfolderChannel+subfolderSpecial, true);
-    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+"InclusiveXSec.eps");
-    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/"+"InclusiveXSec.C");
+
+    TString outdir = ttbar::assignFolder(outpathPlots, Channel, TString("FinalResults"));
+    c->Print(outdir.Copy()+"InclusiveXSec.eps");
+    c->Print(outdir.Copy()+"InclusiveXSec.C");
     c->Clear();
     delete c;
 
 }
 
 
-void Plotter::MakeTable(){
+void Plotter::MakeTable(TString Channel, TString Systematic){
 
     TH1D *numhists5[hists.size()];
     TH1D *numhists6[hists.size()];
@@ -1428,30 +1418,13 @@ void Plotter::MakeTable(){
     double tmp_num8 = 0;
     double tmp_num9 = 0;
 
-    ofstream EventFile5;
-    ofstream EventFile6;
-    ofstream EventFile7;
-    ofstream EventFile8;
-    ofstream EventFile9;
-    string EventFilestring = outpathPlots.Data();
-    EventFilestring.append(subfolderChannel.Data());
-    EventFilestring.append(subfolderSpecial.Data());
-    gSystem->mkdir(outpathPlots+"/"+subfolderChannel+"/"+subfolderSpecial, true);  
-    string EventFilestring5;
-    string EventFilestring6;
-    string EventFilestring7;
-    string EventFilestring8;
-    string EventFilestring9;
-    EventFilestring5 =EventFilestring;EventFilestring5.append("/Events5.txt");
-    EventFilestring6 =EventFilestring;EventFilestring6.append("/Events6.txt");
-    EventFilestring7 =EventFilestring;EventFilestring7.append("/Events7.txt");
-    EventFilestring8 =EventFilestring;EventFilestring8.append("/Events8.txt");
-    EventFilestring9 =EventFilestring;EventFilestring9.append("/Events9.txt");
-    EventFile5.open(EventFilestring5.c_str());
-    EventFile6.open(EventFilestring6.c_str());
-    EventFile7.open(EventFilestring7.c_str());
-    EventFile8.open(EventFilestring8.c_str());
-    EventFile9.open(EventFilestring9.c_str());
+    TString outdir = ttbar::assignFolder(outpathPlots, Channel, Systematic);
+    ofstream EventFile5; EventFile5.open(outdir.Copy()+"Events5.txt");
+    ofstream EventFile6; EventFile6.open(outdir.Copy()+"Events6.txt");
+    ofstream EventFile7; EventFile7.open(outdir.Copy()+"Events7.txt");
+    ofstream EventFile8; EventFile8.open(outdir.Copy()+"Events8.txt");
+    ofstream EventFile9; EventFile9.open(outdir.Copy()+"Events9.txt");
+    
     double bg_num5 = 0;
     double bg_num6 = 0;
     double bg_num7 = 0;
@@ -1512,7 +1485,7 @@ void Plotter::MakeTable(){
     EventFile8.close();
     EventFile9<<"Total background: "<<bg_num9<<std::endl;
     EventFile9.close();
-    std::cout<<"\nEvent yields saved in "<<EventFilestring5.c_str()<<"\n"<<std::endl;
+    std::cout<<"\nEvent yields saved in "<<outdir<<std::endl;
 }
 
 double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift){
@@ -1613,27 +1586,13 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
     double tmp_num = 0;
 
-//   double signalFraction = 0; 
-
-//   signalFraction = numbers[1]/(numbers[1]+TTbarBGnum); // is 1 right now, since TTbarBGnum is 0
-
     ofstream EventFile, XSecFile;
-    string EventFilestring = outpathPlots.Data();
-    EventFilestring.append("/");
-    EventFilestring.append(Systematic.Data());
-    gSystem->MakeDirectory(EventFilestring.c_str());
-    EventFilestring.append(subfolderChannel.Data());
-    gSystem->MakeDirectory(EventFilestring.c_str());
-    EventFilestring.append(subfolderSpecial.Data());
-    gSystem->MakeDirectory(EventFilestring.c_str());
-    string XSecFileString = EventFilestring;
-    EventFilestring.append("/Events.txt");
-    XSecFileString.append("/InclXSec.txt");// File to store the Inclusive XSection and stat error to be reused later to make the plots.
-    EventFile.open(EventFilestring.c_str());
-    XSecFile.open(XSecFileString.c_str());
+    TString outdir = ttbar::assignFolder(outpathPlots, subfolderChannel.Copy().Remove(0,1), Systematic);
+    EventFile.open(outdir.Copy()+"Events.txt");
+    XSecFile.open(outdir.Copy()+"InclusiveXSec.txt");
 
     double bg_num = 0;
-    for(unsigned int i=0; i<hists.size() ; i++){ 
+    for(unsigned int i=0; i<hists.size() ; i++){
         tmp_num+=numhists[i]->Integral();
 
         if(i==(hists.size()-1)){
@@ -1679,7 +1638,6 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
 
 
     double xsec = ( (numbers[0]-numbers[4]) * (numbers[1]/(numbers[1]+numbers[3])) ) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
-    //    double xsecstaterror = xsec * ( TMath::Sqrt(error_numbers[0]) + TMath::Sqrt(error_numbers[4]) ) / (numbers[0] - numbers[4]);  //relative statistical error
     double xsecstaterror = TMath::Sqrt(error_numbers[0]) * (numbers[1]/(numbers[1]+numbers[3])) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
 
     if(channelType!=3){
@@ -1687,9 +1645,9 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
         InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
     }
     else{
-        TString eefilename="Plots/"+Systematic+"/ee/InclXSec.txt";
-        TString mumufilename="Plots/"+Systematic+"/mumu/InclXSec.txt";
-        TString emufilename="Plots/"+Systematic+"/emu/InclXSec.txt";
+        TString eefilename="Plots/"+Systematic+"/ee/InclusiveXSec.txt";
+        TString mumufilename="Plots/"+Systematic+"/mumu/InclusiveXSec.txt";
+        TString emufilename="Plots/"+Systematic+"/emu/InclusiveXSec.txt";
 
         //check the existence of the file
         if( gSystem->AccessPathName(eefilename) || gSystem->AccessPathName(emufilename) || gSystem->AccessPathName(mumufilename)){
@@ -1730,7 +1688,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     EventFile.close();
     XSecFile<<"Systematic: "<<Systematic<<" Channel: "<<subfolderChannel<<" InclXSection: "<<InclusiveXsectionVec[channelType]<<" AbsStatError: "<<InclusiveXsectionStatErrorVec[channelType]<<std::endl;
     XSecFile.close();
-    std::cout<<"Inclusive XSection information saved in: "<<XSecFileString.c_str()<<std::endl;
+    std::cout<<"\nInclusive XSection information saved in: "<<outdir<<std::endl;
     return xsec;
 }
 
@@ -2154,14 +2112,12 @@ void Plotter::PlotDiffXSec(TString Channel){
     leg3->AddEntry(grS, "Stability", "p" );
     leg3->Draw("SAME");
 
-
-    cESP->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/ESP_"+name+".eps");
-    //cESP->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/ESP_"+name+".C");
+    TString outdir = ttbar::assignFolder(outpathPlots, subfolderChannel.Copy().Remove(0,1), TString("FinalResults"));
+    cESP->Print(outdir.Copy()+"ESP_"+name+".eps");
     cESP->Clear();
     delete cESP;
-//     double efficiencies[XAxisbinCenters.size()];
-    init = false;
 
+    init = false;
     for (unsigned int hist =0; hist<hists.size(); hist++){
         if(legends.at(hist) == "Data"){
             for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
@@ -2172,9 +2128,7 @@ void Plotter::PlotDiffXSec(TString Channel){
             signalHist=hist;
             init=true;
             for (Int_t bin=0; bin<bins; ++bin) {//poor for loop placement, but needed because genplot is the sum of all signal histograms
-//                 efficiencies[bin] = (RecoPlot->GetBinContent(bin+1)) / (GenPlot->GetBinContent(bin+1));
                 GenSignalSum[bin] += GenPlot->GetBinContent(bin+1);
-                //std::cout<<"efficiencies[bin]: "<<efficiencies[bin]<<std::endl;
             }
         }
         else{
@@ -2189,13 +2143,11 @@ void Plotter::PlotDiffXSec(TString Channel){
         totalDataSum+=DataSum[bin];
     }
 
-    TH1 *h_DiffXSec    = (TH1D*)varhists[0]->Clone();   
-    h_DiffXSec->Reset();
-    TH1 *h_GenDiffXSec = (TH1D*)varhists[0]->Clone();   h_GenDiffXSec->Reset();
+    TH1 *h_DiffXSec    = (TH1D*)varhists[0]->Clone(); h_DiffXSec->Reset();
+    TH1 *h_GenDiffXSec = (TH1D*)varhists[0]->Clone(); h_GenDiffXSec->Reset();
 
     //The systematic array is filled in the order in which the Stack is filled
-    TString sys_array[] = {"PDF_", "HAD_", "MATCH_", "MASS_", "SCALE_", "BTAG_PT_", "BTAG_ETA_", "BTAG_LJET_PT_", "BTAG_LJET_ETA_", "KIN_", "LEPT_", "TRIG_", "BG_", "DY_", "PU_", "JER_", "JES_"};//For the time being uintil all systematics are finalished
-    std::vector<TString> vec_systematic (sys_array, sys_array + sizeof(sys_array)/sizeof(sys_array[0]));
+    std::vector<TString> vec_systematic {"PDF_", "HAD_", "MATCH_", "MASS_", "SCALE_", "BTAG_PT_", "BTAG_ETA_", "BTAG_LJET_PT_", "BTAG_LJET_ETA_", "KIN_", "LEPT_", "TRIG_", "BG_", "DY_", "PU_", "JER_", "JES_"};//For the time being uintil all systematics are finalished
 
     double DiffXSecPlot[XAxisbinCenters.size()];
     double DiffXSecStatErrorPlot[XAxisbinCenters.size()];
@@ -2221,14 +2173,9 @@ void Plotter::PlotDiffXSec(TString Channel){
     ifstream ResultsList("UnfoldingResults/Nominal/"+Channel+"/"+name+"Results.txt");
     for (Int_t bin=0; bin<bins; bin++){//Retrieve arrays for plotting
         ResultsList>>Dummy>>XAxisbinCenters[bin]>>Dummy>>Xbins[bin]>>Dummy>>Xbins[bin+1]>>Dummy>>DiffXSecPlot[bin]>>Dummy>>DiffXSecStatErrorPlot[bin]>>Dummy>>GenDiffXSecPlot[bin];
-        //std::cout<<"DiffXSecPlot[bin]: "<<DiffXSecPlot[bin]<<std::endl;
-        //std::cout<<"GenDiffXSecPlot[bin]: "<<GenDiffXSecPlot[bin]<<std::endl;
-    }
-
-    for (Int_t i=0; i<bins; ++i) {
-        h_DiffXSec->SetBinContent(i+1,DiffXSecPlot[i]);
-        h_DiffXSec->SetBinError(i+1,DiffXSecStatErrorPlot[i]);
-        h_GenDiffXSec->SetBinContent(i+1,GenDiffXSecPlot[i]);
+        h_DiffXSec->SetBinContent(bin+1,DiffXSecPlot[bin]);
+        h_DiffXSec->SetBinError(bin+1,DiffXSecStatErrorPlot[bin]);
+        h_GenDiffXSec->SetBinContent(bin+1,GenDiffXSecPlot[bin]);
     }
 
     double TotalVisXSection = 1.; //this can currently be set to 1. because David's code takes care of the normalization, but just incase we need it
@@ -2260,7 +2207,6 @@ void Plotter::PlotDiffXSec(TString Channel){
         DiffXSecSysErrorPlot[bin]=sqrt(DiffXSecSysErrorPlot[bin])*DiffXSecPlot[bin]; //absolute systematic error in bin 'bin'
         DiffXSecTotalErrorPlot[bin]=sqrt(DiffXSecSysErrorPlot[bin]*DiffXSecSysErrorPlot[bin] + DiffXSecStatErrorPlot[bin]*DiffXSecStatErrorPlot[bin]);//absolute total error
     }
-
     if(doSystematics){
 
         //The Markus plots
@@ -2268,16 +2214,8 @@ void Plotter::PlotDiffXSec(TString Channel){
         THStack* SystHists = new THStack("MSTACK","MSTACK");
         TLegend * leg10 =  new TLegend(0.20,0.65,0.45,0.90);
 
-        ofstream ResultsSysFilestring; 
-        string ResultsSystLaTeX = outpathPlots.Data();
-        ResultsSystLaTeX.append(subfolderChannel.Data());
-        ResultsSystLaTeX.append(subfolderSpecial.Data());
-        ResultsSystLaTeX.append("/");
-        ResultsSystLaTeX.append(newname);
-        ResultsSystLaTeX.append("SystematicsLaTeX.txt");
         FILE *systfile;
-        systfile = fopen(ResultsSystLaTeX.c_str(), "w");
-
+        systfile = fopen(outdir.Copy()+newname+"_SystematicsLaTeX.txt", "w");
         for(int systs =0; systs<(int)vec_systematic.size(); systs++){
             if (vec_systematic.at(systs) == "BTAG_ETA_" || vec_systematic.at(systs) == "BTAG_LJET_ETA_") {continue;}//Skip the BTAG_ETA systematic because it's added in quadrature to BTAG_PT
             TH1D* systtemp = (TH1D*)varhists[0]->Clone();
@@ -2321,12 +2259,9 @@ void Plotter::PlotDiffXSec(TString Channel){
         SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
         SystHists->GetXaxis()->SetNoExponent(kTRUE);
 
-
         leg10->SetFillColor(0);
         leg10->Draw("SAME");
-        c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".eps");
-        //c10->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/MSP_"+name+".C");
-        //c10->Clear();
+        c10->Print(outdir.Copy()+"MSP_"+name+".eps");
         delete leg10;
         delete c10;
 
@@ -2357,11 +2292,8 @@ void Plotter::PlotDiffXSec(TString Channel){
         TotalHist->Draw();ModelHist->Draw("SAME");ExpHist->Draw("SAME");StatHist->Draw("SAME");
         leg11->Draw("SAME");
         TotalHist->GetXaxis()->SetNoExponent(kTRUE);
-        c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".eps");
-        //c11->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/SEM_"+name+".C");
+        c11->Print(outdir.Copy()+"SEM_"+name+".eps");
         c11->Clear();
-        //delete ExpHist;delete StatHist;delete ModelHist;delete TotalHist;
-        //delete leg11;
         delete c11;
     }
     Double_t mexl[XAxisbinCenters.size()];
@@ -2409,7 +2341,6 @@ void Plotter::PlotDiffXSec(TString Channel){
     TH1 *Kidoth1_Binned = 0;
 
     bool canDrawMCATNLO = true;
-
     if (drawNLOCurves && drawMCATNLO) {
         mcnlohist = GetNloCurve(newname,"MCATNLO");
         double mcnloscale = 1./mcnlohist->Integral("width");
@@ -2547,22 +2478,6 @@ void Plotter::PlotDiffXSec(TString Channel){
             //Kidoth1_Binned = (TH1F*)KidoFile->Get("topY");
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topY");
         }
-    }
-
-    if(drawNLOCurves){
-    //    TH1 *MCFMHist;
-    //    TFile* MCFMfile = new TFile("diffCrossSections_normalized_tt_bbl_todk_MSTW200_172_172_ful_central.root","READ");
-    //
-    //    if(name.Contains("LeptonpT")){MCFMfile->GetObject<TH1>("pt_l", MCFMHist);}
-    //    else if(name.Contains("LeptonEta")){MCFMfile->GetObject<TH1>("eta_l", MCFMHist);}
-    //    else if(name.Contains("LLBarpT")){MCFMfile->GetObject<TH1>("pt_ll", MCFMHist);}
-    //    else if(name.Contains("LLBarMass")){MCFMfile->GetObject<TH1>("m_ll", MCFMHist);}
-    //    else if(name.Contains("ToppT")){MCFMfile->GetObject<TH1>("pt_t", MCFMHist);}
-    //    else if(name.Contains("TopRapidity")){MCFMfile->GetObject<TH1>("y_t", MCFMHist);}
-    //    else if(name.Contains("TTBarpT")){MCFMfile->GetObject<TH1>("pt_tt", MCFMHist);}
-    //    else if(name.Contains("TTBarRapidity")){MCFMfile->GetObject<TH1>("y_tt", MCFMHist);}
-    //    else if(name.Contains("TTBarMass")){MCFMfile->GetObject<TH1>("m_tt", MCFMHist);}
-    //    else{std::cout<<"probably going to crash soon"<<std::endl;}
     }
 
     TCanvas * c = new TCanvas("DiffXS","DiffXS");
@@ -2736,15 +2651,13 @@ void Plotter::PlotDiffXSec(TString Channel){
     tga_DiffXSecPlot->Draw("p, SAME");
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
-    c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".eps"); 
-    TFile out_source(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+"_source.root", "RECREATE");
+    c->Print(outdir.Copy()+"DiffXS_"+name+".eps");
+    TFile out_source(outdir.Copy()+"DiffXS_"+name+"_source.root", "RECREATE");
     c->Write("canvas");
     tga_DiffXSecPlot->Write("data_staterror_only");
     tga_DiffXSecPlotwithSys->Write("data");
     h_GenDiffXSec->Write("mc");
     out_source.Close();
-    //c->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/DiffXS_"+name+".C"); 
-    //c->Clear();
     delete c;
     gStyle->SetEndErrorSize(0);
 
@@ -2833,19 +2746,14 @@ void Plotter::PlotDiffXSec(TString Channel){
     varhists[0]->Draw("same, e1"); //############
     //varhists[0]->Draw("same, e"); 
     DrawCMSLabels(1, 8);
-    DrawDecayChLabel(channelLabel[channelType]);    
+    DrawDecayChLabel(channelLabel[channelType]);
     leg->Draw("SAME");
     gPad->RedrawAxis();
-    //    TFile *f1 = new TFile("KinFitPlots.root","UPDATE");
-    //stacksum->Write(name+"_"+channel+"_MC");
-    //varhists[0]->Write(name+"_"+channel+"_Data");
-    //f1->Close();
-    c1->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/preunfolded_"+name+".eps");
-    //c1->Print(outpathPlots+subfolderChannel+subfolderSpecial+"/preunfolded_"+name+".C");
-    //Draw
-    TFile out_root(outpathPlots+subfolderChannel+subfolderSpecial+"/preunfolded_"+name+"_source.root", "RECREATE");
+
+    c1->Print(outdir.Copy()+"preunfolded_"+name+".eps");
+    TFile out_root(outdir.Copy()+"preunfolded_"+name+"_source.root", "RECREATE");
+
     varhists[0]->Write(name+"_data");
-//     ->Write(name+"_signalmc");
     stacksum->Write(name+"_allmc");
     c1->Write(name + "_canvas");
     out_root.Close();
@@ -2854,7 +2762,6 @@ void Plotter::PlotDiffXSec(TString Channel){
     delete stacksum;
     for (unsigned int i =0; i<hists.size(); i++){
         delete varhists[i];
-        //delete varhistsPlotting[i];
     }
 }
 

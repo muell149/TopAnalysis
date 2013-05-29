@@ -124,7 +124,7 @@ To unfold all distributions from your HistoList in parallel, use the
 script. Again, on the workgroup server, it will run up to 10 jobs in parallel,
 while it will submit one job per distribution to the batch system if run on the NAF.
 
-This runs Histo.C which essentially calls function from plotterclass.cpp.
+This runs Histo.C which essentially calls function from plotterclass.cc.
 
 For each histogram you want
 
@@ -135,7 +135,7 @@ CalcXsec explains itself
 plotDiffXsec also does
 write writes the histogram
 
-the plots will be put into a directory called Plots according to the channel in .eps format which is the best
+The plots will be put into a directory called Plots according to the channel in .eps format which is the best
 
 
 Once the plots has been created you can get the typical systematic errors for the Diff. XSection via:
@@ -151,7 +151,7 @@ cd ..
 
 This runs TypicalErrors.cc which checks for one specific systematic variation, and one specific
 channel (ee, emu, mumu) in all files 
-    Plots/channel/*Systematics.txt
+    Plots/FinalResults/channel/*Systematics.txt
 it parses the content and for one specific systematic takes the average ('typical') systematic error.
 
 ========
@@ -167,7 +167,7 @@ The directory from which the plots will be read can be set in
 
 scripts/mk_booklet.sh
 
-under the parameters  'PDIR', the default is 'Plots/combined/Nominal' for the control plots of the combined channel
+under the parameters  'PDIR', the default is 'Plots/Nominal/combined' for the control plots of the combined channel
 The output PDF file will be stored in 'Booklets' directory and will include a date tag, and will be named 'booklet-$date.pdf'
 
 ========

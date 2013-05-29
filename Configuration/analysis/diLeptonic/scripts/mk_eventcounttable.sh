@@ -1,5 +1,5 @@
 #!/bin/zsh
-#this must be run inside of Plots
+#this must be run inside of Plots/Nominal
 for sample in ee emu mumu combined
 do
   for step in 5 6 7 8 9

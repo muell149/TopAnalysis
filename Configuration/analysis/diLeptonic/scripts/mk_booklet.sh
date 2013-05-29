@@ -73,7 +73,7 @@
 TIME=$(date +%F--%H%M)
 
 CDIR=$(pwd) #current working directory
-PDIR=Plots/combined/Nominal #plot dir
+PDIR=Plots/Nominal/combined #plot dir
 PDFPREF=pdf-s #pdf prefix
 PDFDIR=$CDIR/$PDIR/$PDFPREF #pdf dir
 COUNTER=0 #counter

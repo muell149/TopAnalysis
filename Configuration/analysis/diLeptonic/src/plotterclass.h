@@ -36,10 +36,10 @@ public:
     void   setLumi(double);
     
     double CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift);
-    void MakeTable();
+    void MakeTable(TString Channel, TString Systematic);
 
 
-    void PlotXSec();
+    void PlotXSec(TString Channel);
     //  void CalcDiffXSec(TH1* varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* genReco2d, double DiffXSecVec[4][10], double DiffXSecStatErrorVec[4][10]); 
     void CalcDiffXSec(TString, TString);
     void CalcDiffSystematics(TString, TString, TString, TString, double);
