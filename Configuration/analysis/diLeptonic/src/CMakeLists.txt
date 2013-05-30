@@ -25,6 +25,8 @@ add_executable(load_Analysis
     JetCorrectionUncertainty JetCorrectorParameters SimpleJetCorrectionUncertainty
     PUReweighter
     KinReco
+    KinematicReconstruction
+    KinematicReconstruction_LSroutines
 )
 TARGET_LINK_LIBRARIES(load_Analysis ${ROOT_LIBRARIES} miscTools) 
 
