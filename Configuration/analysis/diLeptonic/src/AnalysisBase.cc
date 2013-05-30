@@ -32,6 +32,7 @@
 #include "analysisUtils.h"
 #include "classes.h"
 #include "ScaleFactors.h"
+#include "KinematicReconstruction.h"
 
 
 
@@ -1091,6 +1092,27 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         HypJet0index_->clear();  HypJet0index_->push_back(sol.jetB_index);
         HypJet1index_->clear();  HypJet1index_->push_back(sol.jetBbar_index);
     }
+    //FIXME 
+    //Developing improved Kinematic Reconstruction (commented for the moment)
+//     KinematicReconstruction new_topsol(leptonMinus, leptonPlus, &jets, &btagValues, &met);
+//      if(new_topsol.GetNSol()>0)
+//      {
+//      	struct_KinematicReconstruction new_sol = new_topsol.GetSol();
+//      
+//      
+//      
+//      	HypTop_->clear();        HypTop_->push_back(ttbar::TLVtoLV(new_sol.top)); 
+//              HypAntiTop_->clear();    HypAntiTop_->push_back(ttbar::TLVtoLV(new_sol.topBar));
+//              HypLepton_->clear();     HypLepton_->push_back(ttbar::TLVtoLV(new_sol.lm));
+//              HypAntiLepton_->clear(); HypAntiLepton_->push_back(ttbar::TLVtoLV(new_sol.lp));
+//              HypBJet_->clear();       HypBJet_->push_back(ttbar::TLVtoLV(new_sol.jetB));
+//              HypAntiBJet_->clear();   HypAntiBJet_->push_back(ttbar::TLVtoLV(new_sol.jetBbar));
+//              HypNeutrino_->clear();   HypNeutrino_->push_back(ttbar::TLVtoLV(new_sol.neutrino));
+//              HypAntiNeutrino_->clear(); HypAntiNeutrino_->push_back(ttbar::TLVtoLV(new_sol.neutrinoBar));
+//              HypJet0index_->clear();  HypJet0index_->push_back(new_sol.jetB_index);
+//              HypJet1index_->clear();  HypJet1index_->push_back(new_sol.jetBbar_index);
+//      }
+
     //check for strange events
     if (false && HypTop_->size()) {
         double Ecm = (HypTop_->at(0) + HypAntiTop_->at(0) 
@@ -1106,6 +1128,8 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         }
     }
     return sols.size() > 0;
+    //Return the improved Kinematic Solution (developing)
+    //return new_topsol.GetNSol()>0;
 }
 
 
