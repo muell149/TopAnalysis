@@ -320,14 +320,14 @@ if(not options.sample=="none"):
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgScaleUp"
     elif(options.sample=="ttbarMassDown"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass169_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigTopMassDown"
 	elif(eventFilter=='background only'):
 	    outputFileName+="BkgTopMassDown"
     elif(options.sample=="ttbarMassUp"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass184_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass175_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	additionalEventWeights=False
 	if(eventFilter=='signal only'):
 	    outputFileName+="SigTopMassUp"
