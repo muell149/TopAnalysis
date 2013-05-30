@@ -1160,8 +1160,8 @@ process.kinFitTtSemiLepEventHypothesis.maxNJets = 5
 process.kinFitTtSemiLepEventHypothesis.maxNComb = 3
 
 # set constraints:: 1: Whad-mass, 2: Wlep-mass, 3: thad-mass, 4: tlep-mass, 5: nu-mass, 6: equal t-masses, 7: Pt balance
-#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
-process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4]
+#process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6] # set ndof to 2
+process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 3, 4] # set ndof to 3
 process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
 
 # consider b-tagging in event reconstruction
@@ -1198,7 +1198,9 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
 ## kinfit succeeded?
 process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cfi")
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
-process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitProb>=0.02"  ) )
+# the cut on the fit probability is not working properly as the inherent ndof is wrong. Therefore, the cut (fitProb>=0.02) is converted to a cut on chi^2.
+process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitChi2<=9.8374093111925935418" ) ) # for ndof=3
+#process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && fitChi2<=7.8240460108562923658" ) ) # for ndof=2
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## configure top reconstruction analyzers & define PSets
@@ -1207,23 +1209,23 @@ process.load("TopAnalysis.TopAnalyzer.TopKinematics_cfi")
 ## 1)  plots built from event hypothesis kinFit after reco selection
 recoKinFit        = cms.PSet(hypoKey=cms.string('kKinFit'  ), lepton=cms.string(decayChannel), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
-                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(2))
+                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(3))
 process.analyzeTopRecoKinematicsKinFit = process.analyzeTopRecKinematics.clone(analyze=recoKinFit)
 ## 2)  same as 1) but for top/antitop instead of leptonic/hadronic top
 recoKinFitTopAntitop = cms.PSet(hypoKey=cms.string('kKinFit'  ), lepton=cms.string(decayChannel), useTree=cms.bool(True),
                                 matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(True),
-                                maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(2))
+                                maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(3))
 process.analyzeTopRecoKinematicsKinFitTopAntitop = process.analyzeTopRecKinematics.clone(analyze=recoKinFitTopAntitop)
 ## 3)  plots built from event hypothesis of objects from genmatch to partons (ttSemiLepJetPartonMatch) after reco selection
 recoGenMatch      = cms.PSet(hypoKey=cms.string('kGenMatch'), lepton=cms.string(decayChannel), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
-                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(2))
+                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(3))
 process.analyzeTopRecoKinematicsGenMatch      = process.analyzeTopRecKinematics.clone(analyze=recoGenMatch)
 ## 4) plots built from parton level objects
 ## a) after parton level phase space selection
 genTtbarSemiMu    = cms.PSet(hypoKey=cms.string("None"     ), lepton=cms.string(decayChannel), useTree=cms.bool(True),
                              matchForStabilityAndPurity=cms.bool(False), ttbarInsteadOfLepHadTop = cms.bool(False),
-                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(2))
+                             maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets, ndof = cms.int32(3))
 process.analyzeTopPartonLevelKinematics = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
 ## b) without phase space selection
 process.analyzeTopPartonLevelKinematicsPhaseSpace = process.analyzeTopGenKinematics.clone(analyze=genTtbarSemiMu)
@@ -1236,7 +1238,7 @@ hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"),
                       lepton  = cms.string(decayChannel),
                       wantTree = cms.bool(True),
                       maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets,
-                      ndof = cms.int32(2))
+                      ndof = cms.int32(3))
 process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKinFit)
 
 
