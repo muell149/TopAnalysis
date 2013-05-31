@@ -42,8 +42,9 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
 {
     // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
-    Sample ttbarsignal("t#bar{t}", kRed+1, 234);
-    Sample ttbarbkg("t#bar{t}", kRed+1, 234);
+    Sample ttbarsignalPlusBbbar("t#bar{t}b#bar{b}", kRed+1, 234);
+    Sample ttbarsignalPlusOther("t#bar{t}Other", kOrange+1, 234);
+    Sample ttbarbkg("t#bar{t} Bkg", kOrange+8, 234);
     Sample singletop("Single Top", kMagenta, 11.1);
     Sample ww("Diboson", 10, 54.838);
     Sample wz("Diboson", 10, 33.21);
@@ -93,8 +94,10 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
         if(filename.BeginsWith("#")){continue;} // Comment lines in FileList with '#'
         if(filename.Contains("run"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, data));
-        else if(filename.Contains("ttbarsignal"))
-            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarsignal));
+        else if(filename.Contains("ttbarsignal") && filename.Contains("PlusBbbar"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarsignalPlusBbbar));
+        else if(filename.Contains("ttbarsignal") && filename.Contains("PlusOther"))
+            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarsignalPlusOther));
         else if(filename.Contains("ttbarbg"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarbkg));
         else if(filename.Contains("single"))
