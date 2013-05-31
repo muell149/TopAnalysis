@@ -18,6 +18,7 @@
 #include "analysisHelpers.h"
 #include "JetCategories.h"
 #include "MvaInputVariables.h"
+#include "DijetAnalyzer.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/utils.h"
 #include "../../diLeptonic/src/PUReweighter.h"
@@ -83,7 +84,8 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                         const Channel::Channel& channel,
                         const Systematic::Systematic& systematic,
                         const int dy,
-                        const AnalysisMode::AnalysisMode& analysisMode)
+                        const AnalysisMode::AnalysisMode& analysisMode,
+                        const bool runDijetAnalyzer)
 {   
     // Set up the channels to run over
     std::vector<Channel::Channel> channels;
@@ -127,6 +129,12 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     
     // Set up jet categories for analysis
     const JetCategories jetCategories(2, 4, 0, 3, true, true);
+
+    // Set up jet categories for DijetAnalyzer
+    const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
+
+    // Set up DijetAnalyzer
+    DijetAnalyzer* dijetAnalyzer;
     
     // Set up MVA steering tool for: a) production of MVA input TTree, b) reading in MVA weights
     // FIXME: now used here for reading weights only, and another one within HiggsAnalysis for for TTree production
@@ -144,6 +152,13 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetJetCategoriesOverview(jetCategories_overview);
     selector->SetJetCategoriesAnalysis(jetCategories);
     selector->SetMvaWeightsInput(mvaInputWeights);
+
+    if(runDijetAnalyzer) {
+        dijetAnalyzer= new DijetAnalyzer();
+        dijetAnalyzer->SetJetCategories(jetCategories_dijetAnalyzer);
+        selector->SetDijetAnalyzer(dijetAnalyzer);
+        std::cout<<"=== Will run dijet analyzer\n"<<std::endl;
+    }
     
     // Access selectionList containing all input sample nTuples
     ifstream infile("selectionList.txt");
@@ -233,6 +248,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                 outputfilename.ReplaceAll("_dy", TString("_dy").Append(Channel::convertChannel(dyChannel)));
             }
             if(isHiggsInclusive)outputfilename.ReplaceAll("inclusive", "inclusiveOther");
+            if(isTopSignal)outputfilename.ReplaceAll("signalplustau", "signalPlusOther");
             
             // Configure selector
             selector->SetChannel(channelName);
@@ -254,6 +270,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
             selector->SetSamplename(samplename->GetString(), systematics_from_file->GetString());
             selector->SetOutputfilename(outputfilename);
             selector->SetRunViaTau(0);
+            selector->SetRunWithTtbb(0);
             selector->SetHiggsInclusiveSample(isHiggsInclusive);
             selector->SetHiggsInclusiveSeparation(false);
             selector->SetAnalysisMode(analysisMode);
@@ -264,10 +281,10 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
             // chain.SetProof(); //will work from 5.34 onwards
             chain.Process(selector);
             
-            // For splitting of dileptonic ttbar in component with intermediate taus and without
+            // For splitting of dileptonic ttbar in tt+bb and tt+other
             if(isTopSignal && !isHiggsSignal && !isTtbarV){
-                selector->SetRunViaTau(1);
-                outputfilename.ReplaceAll("signalplustau", "bgviatau");
+                selector->SetRunWithTtbb(1);
+                outputfilename.ReplaceAll("Other", "Bbbar");
                 selector->SetOutputfilename(outputfilename);
                 chain.Process(selector);
             }
@@ -296,6 +313,7 @@ int main(int argc, char** argv) {
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
     CLParameter<std::string> opt_mode("m", "Mode of analysis: control plots (cp), MVA input (mva). Default is cp", false, 1, 1,
             ttbar::makeStringCheck(AnalysisMode::convertAnalysisModes(AnalysisMode::allowedAnalysisModes)));
+    CLParameter<std::string> opt_runDijetAnalyzer("dj", "\tRun dijet analyzer", false, 0, 0);
     CLAnalyser::interpretGlobal(argc, argv);
     
     // Set up a pattern for selecting only files from selectionList containing that pattern in filename
@@ -315,10 +333,13 @@ int main(int argc, char** argv) {
     // Set up analysis mode
     AnalysisMode::AnalysisMode analysisMode(AnalysisMode::cp);
     if(opt_mode.isSet()) analysisMode = AnalysisMode::convertAnalysisMode(opt_mode[0]);
+
+    // Set up flag for running dijet analyzer
+    const bool runDijetAnalyzer = opt_runDijetAnalyzer.isSet() ? true : false;
     
     // Start plotting
     //TProof* p = TProof::Open(""); // not before ROOT 5.34
-    load_HiggsAnalysis(validFilenamePattern, channel, systematic, dy, analysisMode);
+    load_HiggsAnalysis(validFilenamePattern, channel, systematic, dy, analysisMode, runDijetAnalyzer);
     //delete p;
 }
 

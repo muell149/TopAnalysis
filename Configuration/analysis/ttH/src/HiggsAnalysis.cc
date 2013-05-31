@@ -38,6 +38,8 @@ constexpr double JetPtCUT = 30.;
 
 /// b-tag working point
 /// CSV Loose: 0.244
+/// CSV Medium: 0.679
+/// CSV Medium: 0.898
 constexpr double BtagWP = 0.244;
 
 
@@ -54,7 +56,9 @@ constexpr const char* MvaInputDIR = "mvaInput";
 
 
 
-HiggsAnalysis::HiggsAnalysis(TTree*)
+HiggsAnalysis::HiggsAnalysis(TTree*):
+runWithTtbb_(false),
+dijetAnalyzer_(0)
 {}
 
 
@@ -80,7 +84,7 @@ void HiggsAnalysis::Terminate()
 {
     // Produce b-tag efficiencies
     if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
-    
+
     // Do everything needed for MVA
     if(analysisMode_ == AnalysisMode::mva){
 
@@ -97,7 +101,11 @@ void HiggsAnalysis::Terminate()
     // Cleanup
     mvaInputTopJetsVariables_.clear();
     // FIXME: shouldn't we also clear b-tagging efficiency histograms if they are produced ?
-    
+
+    // Cleaning DijetAnalyzer
+    if(dijetAnalyzer_) dijetAnalyzer_->clear();
+
+
     // Defaults from AnalysisBase
     AnalysisBase::Terminate();
 }
@@ -108,6 +116,9 @@ void HiggsAnalysis::SlaveBegin(TTree *)
 {
     // Defaults from AnalysisBase
     AnalysisBase::SlaveBegin(0);
+
+    // Setting the output for DijetAnalyzer
+    if(dijetAnalyzer_) dijetAnalyzer_->setOutputSelectorList(fOutput);
 
 
     // Analysis categories
@@ -180,8 +191,8 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     dyScalingHistograms_.addStep("6", fOutput);
     dyScalingHistograms_.addStep("7", fOutput);
     dyScalingHistograms_.addStep("8", fOutput);
-    
-    
+
+
     // Basic histograms
     basicHistograms_.addStep("1", fOutput);
     basicHistograms_.addStep("2", fOutput);
@@ -191,8 +202,8 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     basicHistograms_.addStep("6", fOutput);
     basicHistograms_.addStep("7", fOutput);
     basicHistograms_.addStep("8", fOutput);
-    
-    
+
+
     // Control plots
     h_jetPt_step8 = store(new TH1D("jetPt_step8", "jet pt;p_{t}  [GeV];# jets", 40, 0, 400));
     h_jetChargeGlobalPtWeighted_step8 = store(new TH1D("jetChargeGlobalPtWeighted_step8", "jetChargeGlobalPtWeighted; c_{jet}^{glob};# jets", 110, -1.1, 1.1));
@@ -202,51 +213,51 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(1, "bQuark-genJet fail");
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(2, "genJet-recoJet fail");
     h_matchedBjetsFromTop_step8->GetXaxis()->SetBinLabel(3, "Matched");
-    
+
     h_matchedBjetsFromHiggs_step8 = store(new TH1D("matchedBjetsFromHiggs_step8","matchedBjetsFromHiggs;;# events",3,0,3));
     h_matchedBjetsFromHiggs_step8->GetXaxis()->SetBinLabel(1, "bQuark-genJet fail");
     h_matchedBjetsFromHiggs_step8->GetXaxis()->SetBinLabel(2, "genJet-recoJet fail");
     h_matchedBjetsFromHiggs_step8->GetXaxis()->SetBinLabel(3, "Matched");
-    
+
     h_mvaBasedJetsFromTop_step8 = store(new TH1D("mvaBasedJetsFromTop_step8","mvaBasedJetsFromTop;;# events",4,0,4));
     h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(1, "matched Top jets");
     h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(2, "pair from Top");
     h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(3, "correct pair");
     h_mvaBasedJetsFromTop_step8->GetXaxis()->SetBinLabel(4, "swapped pair");
-    
+
     h_mvaBasedJetsFromHiggs_step8 = store(new TH1D("mvaBasedJetsFromHiggs_step8","mvaBasedJetsFromHiggs;;# events",4,0,4));
     h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(1, "matched Higgs jets");
     h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(2, "pair from Higgs");
     h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(3, "overlap with Top");
     h_mvaBasedJetsFromHiggs_step8->GetXaxis()->SetBinLabel(4, "Fully solved");
-    
+
     h_dijetMass_step8 = store(new TH1D("dijetMass_step8", "dijetMass;m_{jj} [GeV];# events", 100, 0, 500));
     h_mvaBasedDijetMass_step8 = store(new TH1D("mvaBasedDijetMass_step8", "mvaBasedDijetMass;m_{jj} [GeV];# events", 100, 0, 500));
-    
+
     p_dijetMassVsJetCategories = store(new TProfile("dijetMassVsJetCategories", "dijetMassVsJetCategories;# jets/b-jets;m_{jj} [GeV]",numberOfCategories_overview, 0, numberOfCategories_overview, "s"));
     p_dijetMassVsMvaWeightHigh = store(new TProfile("dijetMassVsMvaWeightHigh", "dijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1, 0, "s"));
     p_dijetMassVsMvaWeightDiff = store(new TProfile("dijetMassVsMvaWeightDiff", "dijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 2, "s"));
-    
+
     p_mvaBasedDijetMassVsJetCategories = store(new TProfile("mvaBasedDijetMassVsJetCategories", "mvaBasedDijetMassVsJetCategories;# jets/b-jets;m_{jj} [GeV]",numberOfCategories_overview, 0, numberOfCategories_overview, "s"));
     p_mvaBasedDijetMassVsMvaWeightHigh = store(new TProfile("mvaBasedDijetMassVsMvaWeightHigh", "mvaBasedDijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1, 0, "s"));
     p_mvaBasedDijetMassVsMvaWeightDiff = store(new TProfile("mvaBasedDijetMassVsMvaWeightDiff", "mvaBasedDijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 2, "s"));
-    
+
     for(std::vector<TString>::const_iterator i_binLabel = v_binLabel_overview.begin(); i_binLabel != v_binLabel_overview.end(); ++i_binLabel){
         const TString binLabel(*i_binLabel);
         int position = std::distance(v_binLabel_overview.begin(), i_binLabel) +1;
         p_dijetMassVsJetCategories->GetXaxis()->SetBinLabel(position, binLabel);
         p_mvaBasedDijetMassVsJetCategories->GetXaxis()->SetBinLabel(position, binLabel);
     }
-    
+
     h_dijetMvaWeight_step8 = store(new TH1D("dijetMvaWeight_step8", "dijet MVA weight;w_{MVA};# jet pairs", 50, -1, 0));
     h_dijetBestMvaWeight_step8 = store(new TH1D("dijetBestMvaWeight_step8", "dijet best MVA weight;w_{MVA,1};# jet pairs", 50, -1, 0));
-    
+
     // Binned control plots
     CreateBinnedControlPlots(h_jetCategories_step8, h_events_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
-    
+
     // Histograms for b-tagging efficiencies
     if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
 }
@@ -268,36 +279,39 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 {
     // Defaults from AnalysisBase
     if(!AnalysisBase::Process(entry))return kFALSE;
-    
-    
+
+
     // Use utilities without namespaces
     using namespace ttbar;
-    
-    
-    
+
+
+
     //===CUT===
     // this is step0a, no cut application
-    
+
     // ++++ Control Plots ++++
 
     // Histogram for controlling correctness of af workflow,
     // which should be the same as h_events_step0b for all samples except those preselected on generator level
     h_events_step0a->Fill(1, 1);
-    
-    
-    
+
+
+
     //===CUT===
     // this is step0b, select events on generator level and access true level weights
 
     // Separate DY dilepton decays in lepton flavours
     if(this->failsDrellYanGeneratorSelection(entry)) return kTRUE;
-    
-    // Separate dileptonic ttbar decays via tau
-    if(this->failsTopGeneratorSelection(entry)) return kTRUE;
-    
+
+//     // Separate dileptonic ttbar decays via tau
+//     if(this->failsTopGeneratorSelection(entry)) return kTRUE;
+
     // Separate inclusive ttH sample in decays H->bbbar and others
     if(this->failsHiggsGeneratorSelection(entry)) return kTRUE;
-    
+
+    // Separate tt+bb from tt+other
+    if(this->failsAdditionalJetFlavourSelection(entry)) return kTRUE;
+
     // Correct for the MadGraph branching fraction being 1/9 for dileptons (PDG average is .108)
     const double weightMadgraphCorrection = this->madgraphWDecayCorrection(entry);
 
@@ -306,35 +320,35 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
     // Get weight due to generator weights
     const double weightGenerator = this->weightGenerator(entry);
-    
+
     // Get true level weights
     const double trueLevelWeightNoPileup = weightGenerator*weightMadgraphCorrection;
     const double trueLevelWeight = trueLevelWeightNoPileup*weightPU;
-    
+
     // ++++ Control Plots ++++
 
     h_events_step0b->Fill(1, 1);
-    
-    
-    
+
+
+
     //===CUT===
     // Check if event was triggered with the same dilepton trigger as the specified analysis channel
     if(this->failsDileptonTrigger(entry)) return kTRUE;
-    
-    
-    
+
+
+
     // === FULL OBJECT SELECTION === (can thus be used at each selection step)
-    
+
     // Access reco information
     this->GetRecoBranchesEntry(entry);
-    
+
     // Access generator information common to all MC samples
     if(isMC_) this->GetCommonGenBranchesEntry(entry);
-    
+
     // Systematics for jet energy resolution/scale
     // Corrections for: jets_, jetsForMET_, met_
     //if(doJesJer_)applyJER_JES();
-    
+
     // Get allLepton indices, apply selection cuts and order them by pt (beginning with the highest value)
     std::vector<int> allLeptonIndices = initialiseIndices(*leptons_);
     selectIndices(allLeptonIndices, *leptons_, LVeta, LeptonEtaCUT, false);
@@ -342,7 +356,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectIndices(allLeptonIndices, *leptons_, LVpt, LeptonPtCut);
     orderIndices(allLeptonIndices, *leptons_, LVpt);
     const int numberOfAllLeptons = allLeptonIndices.size();
-    
+
     // Get indices of leptons and antiLeptons separated by charge, and get the leading ones if they exist
     std::vector<int> leptonIndices = allLeptonIndices;
     std::vector<int> antiLeptonIndices = allLeptonIndices;
@@ -352,7 +366,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     const int numberOfAntiLeptons = antiLeptonIndices.size();
     const int leptonIndex = numberOfLeptons>0 ? leptonIndices.at(0) : -1;
     const int antiLeptonIndex = numberOfAntiLeptons>0 ? antiLeptonIndices.at(0) : -1;
-    
+
     // In case of an existing opposite-charge dilepton system,
     // get their indices for leading and next-to-leading lepton
     int leadingLeptonIndex(-1);
@@ -363,7 +377,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *leptons_, LVpt);
     }
     const bool hasLeptonPair = this->hasLeptonPair(leadingLeptonIndex, nLeadingLeptonIndex);
-    
+
     // Get two indices of the two leptons in the right order for trigger scale factor, if existing
     int leptonXIndex(leadingLeptonIndex);
     int leptonYIndex(nLeadingLeptonIndex);
@@ -374,11 +388,11 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
             orderIndices(leptonYIndex, leptonXIndex, *lepPdgId_, true);
         }
     }
-    
+
     // Get dilepton system, if existing
     const LV dummyLV(0.,0.,0.,0.);
     const LV dilepton(hasLeptonPair ? leptons_->at(leadingLeptonIndex)+leptons_->at(nLeadingLeptonIndex) : dummyLV);
-    
+
     // Get jet indices, apply selection cuts and order them by pt (beginning with the highest value)
     std::vector<int> jetIndices = initialiseIndices(*jets_);
     selectIndices(jetIndices, *jets_, LVeta, JetEtaCUT, false);
@@ -387,7 +401,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     orderIndices(jetIndices, *jets_, LVpt);
     const int numberOfJets = jetIndices.size();
     const bool has2Jets = numberOfJets > 1;
-    
+
     // Get b-jet indices, apply selection cuts
     // and order b-jets by btag discriminator (beginning with the highest value)
     std::vector<int> bjetIndices = jetIndices;
@@ -401,19 +415,19 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     orderIndices(bjetIndices, *jetBTagCSV_);
     const int numberOfBjets = bjetIndices.size();
     const bool hasBtag = numberOfBjets > 0;
-    
+
     // Get MET
     const LV& met(*met_);
     const bool hasMetOrEmu = channel_=="emu" || met.Pt()>40;
-    
+
     const int jetCategoryId_overview = jetCategories_overview_->categoryId(numberOfJets,numberOfBjets);
     const int jetCategoryId = jetCategories_->categoryId(numberOfJets,numberOfBjets);
     const BasicHistograms::Input basicHistogramsInput(leptonIndices, antiLeptonIndices,
                                                       jetIndices, bjetIndices,
                                                       *leptons_, *jets_, met,
                                                       *jetBTagCSV_);
-    
-    
+
+
     // Determine all reco level weights
     const double weightLeptonSF = this->weightLeptonSF(leadingLeptonIndex, nLeadingLeptonIndex);
     const double weightTriggerSF = this->weightTriggerSF(leptonXIndex, leptonYIndex);
@@ -421,25 +435,25 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // We do not apply a b-tag scale factor
     //const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices);
     constexpr double weightBtagSF = 1.;
-    
+
     // The weight to be used for filling the histograms
     double weight = weightNoPileup*weightPU;
-    
-    
+
+
     // ++++ Control Plots ++++
-    
+
     h_events_step1->Fill(1, 1);
     basicHistograms_.fill(basicHistogramsInput, 1, "1");
     h_jetCategories_overview_step1->Fill(jetCategoryId_overview, 1);
-    
-    
-    
+
+
+
     //===CUT===
     // we need an OS lepton pair
     if (!hasLeptonPair) return kTRUE;
-    
+
     // ++++ Control Plots ++++
-    
+
     // FIXME: should also here apply weights
     h_events_step2->Fill(1, 1);
     basicHistograms_.fill(basicHistogramsInput, 1, "2");
@@ -452,18 +466,18 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     if (dilepton.M() < 20.) return kTRUE;
 
     // ++++ Control Plots ++++
-    
+
     h_events_step3->Fill(1, weight);
     basicHistograms_.fill(basicHistogramsInput, weight, "3");
     h_jetCategories_overview_step3->Fill(jetCategoryId_overview, weight);
-    
-    
-    
+
+
+
     // ****************************************
     //handle inverted Z cut
     const bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
     const bool hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, met);
-    
+
     // Z window plots need to be filled here, in order to rescale the contribution to data
     if(isZregion){
         double fullWeights = weight;
@@ -482,7 +496,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                     //weightBtagSF = isMC ? calculateBtagSF() : 1;
                     //fullWeights *= weightBtagSF;
                     dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "7");
-                    
+
                     if(hasSolution){
                         // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
                         //fullWeights *= weightKinFit;
@@ -492,9 +506,9 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
             }
         }
     }
-    
-    
-    
+
+
+
     //=== CUT ===
     //Exclude the Z window
     if(channel_!="emu" && isZregion) return kTRUE;
@@ -507,46 +521,46 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     h_events_step4->Fill(1, weight);
     basicHistograms_.fill(basicHistogramsInput, weight, "4");
     h_jetCategories_overview_step4->Fill(jetCategoryId_overview, weight);
-    
-    
-    
+
+
+
     //=== CUT ===
     //Require at least two jets > 30 GeV
     if(!has2Jets) return kTRUE;
-    
+
     // ++++ Control Plots ++++
-    
+
     if(!isZregion){ //also apply Z cut in emu!
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "5");
     }
     h_events_step5->Fill(1, weight);
     basicHistograms_.fill(basicHistogramsInput, weight, "5");
     h_jetCategories_overview_step5->Fill(jetCategoryId_overview, weight);
-    
-    
-    
+
+
+
     //=== CUT ===
     //Require MET > 40 GeV in non-emu channels
     if(!hasMetOrEmu) return kTRUE;
 
     // ++++ Control Plots ++++
-    
+
     if(!isZregion){ //also apply Z cut in emu!
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "6");
     }
     h_events_step6->Fill(1, weight);
     basicHistograms_.fill(basicHistogramsInput, weight, "6");
     h_jetCategories_overview_step6->Fill(jetCategoryId_overview, weight);
-    
+
     // Fill the b-tagging efficiency plots
     if(this->makeBtagEfficiencies()){
         btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
                                               *jets_, *jetPartonFlavour_,
                                               weight, static_cast<std::string>(channel_));
     }
-    
-    
-    
+
+
+
     //=== CUT ===
     //Require at least one b tagged jet
     if(!hasBtag) return kTRUE;
@@ -561,17 +575,18 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     h_events_step7->Fill(1, weight);
     basicHistograms_.fill(basicHistogramsInput, weight, "7");
     h_jetCategories_overview_step7->Fill(jetCategoryId_overview, weight);
-    
-    
-    
+
+
+
+
     //=== CUT ===
     //Require at least one solution for the kinematic event reconstruction
     if(!hasSolution) return kTRUE;
     // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
     //weight *= weightKinFit;
-    
+
     // ++++ Control Plots ++++
-    
+
     if (!isZregion) { //also apply Z cut in emu!
         dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "8");
     }
@@ -581,7 +596,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
     h_jetCategories_step8->Fill(jetCategoryId, weight);
     h_jetCategories_overview_step8->Fill(jetCategoryId_overview, weight);
-    
+
     // Fill jet quantities
     for(const auto& index : jetIndices){
         h_jetPt_step8->Fill(jets_->at(index).Pt(), weight);
@@ -591,17 +606,33 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_jetChargeGlobalPtWeighted_step8, jetChargeGlobalPtWeighted_->at(index), weight);
         FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_jetChargeRelativePtWeighted_step8, jetChargeRelativePtWeighted_->at(index), weight);
     }
-    
-    
-    
-    
-    
+
+
+
+
+    // Passing information to DijetAnalyzer
+    if(dijetAnalyzer_) {
+        if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
+        // Push_back indices of top b-jets identified by kinematic reconstruction
+        std::vector<int> topJetIds;
+
+        DijetAnalyzer::Input dijetInput(*jets_, jetIndices, bjetIndices,
+                                        topJetIds, *allGenJets_,
+                                        *genBHadJetIndex_, *genBHadFlavour_,
+                                        met, leptons_->at(leptonIndex), leptons_->at(antiLeptonIndex)
+                                       );
+
+        dijetAnalyzer_->fill(dijetInput,weight);
+    }
+
+
+
     if(analysisMode_ != AnalysisMode::mva)return kTRUE;
 
     // FIXME: which events exactly to fill? For now all with at least 4 jets
     if(numberOfJets<4)return kTRUE;
-    
-    
+
+
     // Find b jet and anti-b jet corresponding to (anti)b from (anti)top
     LV* genBjetFromTop(0);
     LV* genAntiBjetFromTop(0);
@@ -618,7 +649,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
             h_matchedBjetsFromTop_step8->Fill(0.1, weight);
         }
     }
-    
+
     // Match recoJets to the two selected genJets from (anti)top
     int matchedBjetFromTopIndex(-1);
     int matchedAntiBjetFromTopIndex(-1);
@@ -630,46 +661,46 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         if(!successfulTopMatching) h_matchedBjetsFromTop_step8->Fill(1.1, weight);
         else h_matchedBjetsFromTop_step8->Fill(2.1, weight);
     }
-    
+
     // Fill a vector with all jet pair indices, while sorting each pair by the jet charge:
     // first entry is antiBIndex i.e. with higher jet charge, second entry is bIndex
     const IndexPairs& jetIndexPairs = this->chargeOrderedJetPairIndices(jetIndices, *jetChargeRelativePtWeighted_);
-    
+
     // Calculate the jet recoil for each jet pair, and put it in a vector of same size
     const VLV& jetRecoils = this->recoilForJetPairs(jetIndexPairs, jetIndices, *jets_);
-    
+
     // Loop over all jet combinations and get MVA input variables
-    const std::vector<MvaInputTopJetsVariables::Input>& v_mvaInput = 
+    const std::vector<MvaInputTopJetsVariables::Input>& v_mvaInput =
                         this->fillMvaInputTopJetsVariables(leptonIndex, antiLeptonIndex,
                                                            jetIndexPairs, jetRecoils,
                                                            matchedBjetFromTopIndex, matchedAntiBjetFromTopIndex,
                                                            met,
                                                            successfulTopMatching, weight);
-    
+
     // Fill the MVA TTree
     mvaInputTopJetsVariables_.addEntries(v_mvaInput);
-    
+
     // Get the MVA weights from weights file as vector, one entry per jet pair
     const std::vector<float>& mvaWeights = mvaInputWeights_->mvaWeights(v_mvaInput);
     for(const auto& mvaWeight : mvaWeights) h_dijetMvaWeight_step8->Fill(mvaWeight, weight);
     h_dijetBestMvaWeight_step8->Fill(mvaWeights.at(0), weight);
-    
+
 //    if(mvaWeights.at(0) < -0.2) return kTRUE;
-    
+
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     std::vector<int> jetIndexPairsIndices = initialiseIndices(jetIndexPairs);
     orderIndices(jetIndexPairsIndices, mvaWeights);
-    
+
 //    std::cout<<"\n\nMVA weights: "<<entry<<"\n";
 //    for(const int i : jetIndexPairsIndices){
 //        std::cout<<"\t"<<i<<"\t"<<mvaWeights.at(i)<<"\n";
 //    }
-    
+
     // Get jet pair leading in MVA weight, and extract bIndex and antiBIndex
     const std::pair<int, int>& leadingJetIndexPair = jetIndexPairs.at(jetIndexPairsIndices.at(0));
     const int antiBFromTopIndex = leadingJetIndexPair.first;
     const int bFromTopIndex = leadingJetIndexPair.second;
-    
+
     // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
     bool isSwappedPairFromTop(false);
     bool isCorrectPairFromTop(false);
@@ -690,7 +721,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         h_mvaBasedJetsFromTop_step8->Fill(-999., weight);
     }
 //    std::cout<<"Matching Top: "<<successfulTopMatching<<" , "<<isCorrectPairFromTop<<" , "<<isSwappedPairFromTop<<"\n";
-    
+
     // Get all jets except the ones assigned to ttbar system, and order them by b-tag discriminator value
     std::vector<int> remainingJetIndices;
     for(const int index : jetIndices){
@@ -698,14 +729,14 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         remainingJetIndices.push_back(index);
     }
     orderIndices(remainingJetIndices, *jetBTagCSV_);
-    
+
     // Get the two jets assigned to Higgs
     const int jet1FromHiggsIndex = remainingJetIndices.at(0);
     const int jet2FromHiggsIndex = remainingJetIndices.at(1);
 //    std::cout<<"Btag values: "<<jetBTagCSV_->at(remainingJetIndices.at(0))
 //             <<" ,\t"<<jetBTagCSV_->at(remainingJetIndices.at(1))<<"\n\n";
-    
-    
+
+
     // Find b jet and anti-b jet corresponding to (anti)b from Higgs
     LV* genBjetFromHiggs(0);
     LV* genAntiBjetFromHiggs(0);
@@ -722,7 +753,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         }
     }
 //    std::cout<<"Gen b jets: "<<genBjetFromHiggs<<" , "<<genAntiBjetFromHiggs<<"\n";
-    
+
     // Match recoJets to the two selected genJets from Higgs
     int matchedBjetFromHiggsIndex(-1);
     int matchedAntiBjetFromHiggsIndex(-1);
@@ -735,7 +766,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         else h_matchedBjetsFromHiggs_step8->Fill(2.1, weight);
     }
 //    std::cout<<"Indices: "<<matchedBjetFromHiggsIndex<<" , "<<matchedAntiBjetFromHiggsIndex<<"\n";
-    
+
     // Check whether the two jets correspond to the b's from Higgs
     bool isPairFromHiggs(false);
     if(successfulHiggsMatching){
@@ -746,15 +777,15 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
             isPairFromHiggs = true;
         }
     }
-    
+
     // Check whether the b jets from Higgs are identical to those from (anti)top
     bool ambiguousJetMatchings(false);
     if(!successfulTopMatching || !successfulHiggsMatching) ambiguousJetMatchings = true;
-    else if(matchedBjetFromTopIndex==matchedBjetFromHiggsIndex || matchedAntiBjetFromTopIndex==matchedBjetFromHiggsIndex || 
+    else if(matchedBjetFromTopIndex==matchedBjetFromHiggsIndex || matchedAntiBjetFromTopIndex==matchedBjetFromHiggsIndex ||
             matchedBjetFromTopIndex==matchedAntiBjetFromHiggsIndex ||matchedAntiBjetFromTopIndex==matchedAntiBjetFromHiggsIndex)
         ambiguousJetMatchings = true;
 //    std::cout<<"Matching Higgs: "<<successfulHiggsMatching<<" , "<<isPairFromHiggs<<" ,\tAmbiguity: "<<ambiguousJetMatchings<<"\n";
-    
+
     if(successfulHiggsMatching){
         h_mvaBasedJetsFromHiggs_step8->Fill(0.1, weight);
         if(isPairFromHiggs){
@@ -766,7 +797,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     else{
         h_mvaBasedJetsFromHiggs_step8->Fill(-999., weight);
     }
-    
+
     for(const auto& jetIndexPair : jetIndexPairs){
         const LV dijet = jets_->at(jetIndexPair.first) + jets_->at(jetIndexPair.second);
         h_dijetMass_step8->Fill(dijet.M(), weight);
@@ -774,13 +805,13 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         p_dijetMassVsMvaWeightHigh->Fill(mvaWeights.at(0), dijet.M(), weight);
         p_dijetMassVsMvaWeightDiff->Fill(mvaWeights.at(0)-mvaWeights.at(1), dijet.M(), weight);
     }
-    
+
     const LV dijet = jets_->at(jet1FromHiggsIndex) + jets_->at(jet2FromHiggsIndex);
     h_mvaBasedDijetMass_step8->Fill(dijet.M(), weight);
     p_mvaBasedDijetMassVsJetCategories->Fill(jetCategoryId_overview, dijet.M(), weight);
     p_mvaBasedDijetMassVsMvaWeightHigh->Fill(mvaWeights.at(0), dijet.M(), weight);
     p_mvaBasedDijetMassVsMvaWeightDiff->Fill(mvaWeights.at(0)-mvaWeights.at(1), dijet.M(), weight);
-    
+
     return kTRUE;
 }
 
@@ -790,22 +821,22 @@ HiggsAnalysis::IndexPairs HiggsAnalysis::chargeOrderedJetPairIndices(const std::
                                                                      const std::vector<double>& jetCharges)
 {
     IndexPairs result;
-    
+
     // Loop over all jet combinations
     for(std::vector<int>::const_iterator i_jetIndex = jetIndices.begin(); i_jetIndex != --(jetIndices.end()); ++i_jetIndex){
         std::vector<int>::const_iterator incrementIterator(i_jetIndex);
         ++incrementIterator;
         for(std::vector<int>::const_iterator j_jetIndex = incrementIterator; j_jetIndex != jetIndices.end(); ++j_jetIndex){
-            
+
             // Get the indices of b and anti-b jet defined by jet charge
             int bIndex = *i_jetIndex;
             int antiBIndex = *j_jetIndex;
             ttbar::orderIndices(antiBIndex, bIndex, jetCharges);
-            
+
             result.push_back(std::make_pair(antiBIndex, bIndex));
         }
     }
-    
+
     return result;
 }
 
@@ -816,20 +847,20 @@ VLV HiggsAnalysis::recoilForJetPairs(const HiggsAnalysis::IndexPairs& jetIndexPa
                                      const VLV& jets)
 {
     VLV result;
-    
+
     for(const auto& jetIndexPair : jetIndexPairs){
         const int antiBIndex = jetIndexPair.first;
         const int bIndex = jetIndexPair.second;
-        
+
         LV jetRecoil;
         for(const int index : jetIndices){
             if(index == bIndex || index == antiBIndex) continue;
             jetRecoil += jets.at(index);
         }
-        
+
         result.push_back(jetRecoil);
     }
-    
+
     return result;
 }
 
@@ -842,17 +873,17 @@ std::vector<MvaInputTopJetsVariables::Input> HiggsAnalysis::fillMvaInputTopJetsV
                                                 const bool successfulMatching, const double& eventWeight)const
 {
     std::vector<MvaInputTopJetsVariables::Input> result;
-    
+
     const LV& lepton(leptons_->at(leptonIndex));
     const LV& antiLepton(leptons_->at(antiLeptonIndex));
-    
+
     // Loop over all jet pairs
     for(size_t iJetIndexPairs = 0; iJetIndexPairs < jetIndexPairs.size(); ++iJetIndexPairs){
-        
+
         // Get the indices of b and anti-b jet defined by jet charge
         const int antiBIndex = jetIndexPairs.at(iJetIndexPairs).first;
         const int bIndex = jetIndexPairs.at(iJetIndexPairs).second;
-        
+
         // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
         bool isSwappedPair(false);
         bool isCorrectPair(false);
@@ -864,7 +895,7 @@ std::vector<MvaInputTopJetsVariables::Input> HiggsAnalysis::fillMvaInputTopJetsV
                 isSwappedPair = true;
             }
         }
-        
+
         // Variables for MVA
         const LV& bjet = jets_->at(bIndex);
         const LV& antiBjet = jets_->at(antiBIndex);
@@ -877,7 +908,7 @@ std::vector<MvaInputTopJetsVariables::Input> HiggsAnalysis::fillMvaInputTopJetsV
             exit(555);
         }
         const LV& jetRecoil = jetRecoils.at(iJetIndexPairs);
-        
+
         const MvaInputTopJetsVariables::Input mvaInput(lepton, antiLepton,
                                                        bjet, antiBjet,
                                                        bjetBtagDiscriminator, antiBjetBtagDiscriminator,
@@ -886,10 +917,10 @@ std::vector<MvaInputTopJetsVariables::Input> HiggsAnalysis::fillMvaInputTopJetsV
                                                        successfulMatching,
                                                        isCorrectPair, isSwappedPair,
                                                        eventWeight);
-        
+
         result.push_back(mvaInput);
     }
-    
+
     return result;
 }
 
@@ -902,7 +933,7 @@ bool HiggsAnalysis::getGenBJetIndices(int& genBjetIndex, int& genAntiBjetIndex, 
                  <<"\n...break\n\n";
         exit(71);
     }
-    
+
     for(size_t iBHadron=0; iBHadron<genBHadFlavour_->size(); ++iBHadron){
         const int flavour = genBHadFlavour_->at(iBHadron);
         if(abs(flavour) != abs(pdgId)) continue;     // Skipping hadrons with the wrong flavour
@@ -910,7 +941,7 @@ bool HiggsAnalysis::getGenBJetIndices(int& genBjetIndex, int& genAntiBjetIndex, 
         if(flavour>0) genBjetIndex = (genBjetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
         else if(flavour<0) genAntiBjetIndex = (genAntiBjetIndex==-1) ? genBHadJetIndex_->at(iBHadron) : -2;
     }
-    
+
     // If no unique match of jets from (anti)b from (anti)top is found, return false
     if(genBjetIndex<0 || genAntiBjetIndex<0){
         return false;
@@ -1007,6 +1038,32 @@ bool HiggsAnalysis::failsHiggsGeneratorSelection(Long64_t& entry)
 }
 
 
+void HiggsAnalysis::SetDijetAnalyzer(DijetAnalyzer* analyzer)
+{
+    dijetAnalyzer_ = analyzer;
+}
+
+
+bool HiggsAnalysis::failsAdditionalJetFlavourSelection(const Long64_t& entry)const
+{
+    if(!isTopSignal_) return false;
+    if(isHiggsSignal_) return false;
+
+    this->GetTopSignalBranchesEntry(entry);
+
+    int nGenBJets = genBHadIndex_->size();
+    if(runWithTtbb_ && nGenBJets<=2) return true;
+    if(!runWithTtbb_ && nGenBJets>2) return true;
+
+    return false;
+}
+
+
+
+void HiggsAnalysis::SetRunWithTtbb(const bool runWithTtbb)
+{
+    runWithTtbb_ = runWithTtbb;
+}
 
 
 
