@@ -53,12 +53,12 @@ namespace semileptonic {
 
   // basic variables
   TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt" };
-  TString xSecVariablesKinFit[]     = {"topPt" , "topY"  , "ttbarPt", "ttbarY", "ttbarMass"            };
+  TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass" };
   TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm"};  
-  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm"               }; 
+  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm"}; 
   TString xSecVariablesIncl[] = {"inclusive"};
 
-  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]" ,"y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]"};
+  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]"};
   TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "p_{T}^{b#bar{b}}/[GeV]", "m^{b#bar{b}}/[GeV]"};
 
   // cross-check variables
@@ -1849,7 +1849,9 @@ namespace semileptonic {
       double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0};  
       // PAS binning: double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
-      result["topPt"   ]   = bins_;
+      result["topPt"       ] = bins_;
+      result["topPtLead"   ] = bins_;
+      result["topPtSubLead"] = bins_;
       if (addCrossCheckVariables){
 	result["topPtPlus"]  = bins_;
 	result["topPtMinus"] = bins_;
@@ -2379,23 +2381,25 @@ namespace semileptonic {
     TString strUnitGeV = " #left[GeV#right]";
     if(noUnit) strUnitGeV="";
 
-    if     (variable == "topPt"      ) return "p_{T}^{t}"+strUnitGeV;
-    else if(variable == "topPtPlus"  ) return "p_{T}^{t}"+strUnitGeV;
-    else if(variable == "topPtMinus" ) return "p_{T}^{#bar{t}}"+strUnitGeV;
-    else if(variable == "topY"       ) return "y^{t}";
-    else if(variable == "topYPlus"   ) return "y^{t}";
-    else if(variable == "topYMinus"  ) return "y^{#bar{t}}";
-    else if(variable == "ttbarPt"    ) return "p_{T}^{t#bar{t}}"+strUnitGeV;
-    else if(variable == "ttbarY"     ) return "y^{t#bar{t}}";
-    else if(variable == "ttbarMass"  ) return "m^{t#bar{t}}"+strUnitGeV;
-    else if(variable == "lepPt"      ) return "p_{T}^{l}"+strUnitGeV;
-    else if(variable == "lepEta"     ) return "#eta^{l}"; 
-    else if(variable == "lepEtaPlus" ) return "#eta^{l^{+}}";
-    else if(variable == "lepEtaMinus") return "#eta^{l^{-}}";
-    else if(variable == "bqPt"       ) return "p_{T}^{b}"+strUnitGeV;
-    else if(variable == "bqEta"      ) return "#eta^{b}";
-    else if(variable == "bbbarPt"    ) return "p_{T}^{b#bar{b}}"+strUnitGeV;
-    else if(variable == "bbbarMass"  ) return "m^{b#bar{b}}"+strUnitGeV;
+    if     (variable == "topPt"       ) return "p_{T}^{t}"+strUnitGeV;
+    if     (variable == "topPtLead"   ) return "p_{T}^{lead t}"+strUnitGeV;
+    if     (variable == "topPtSubLead") return "p_{T}^{sublead t}"+strUnitGeV;
+    else if(variable == "topPtPlus"   ) return "p_{T}^{t}"+strUnitGeV;
+    else if(variable == "topPtMinus"  ) return "p_{T}^{#bar{t}}"+strUnitGeV;
+    else if(variable == "topY"        ) return "y^{t}";
+    else if(variable == "topYPlus"    ) return "y^{t}";
+    else if(variable == "topYMinus"   ) return "y^{#bar{t}}";
+    else if(variable == "ttbarPt"     ) return "p_{T}^{t#bar{t}}"+strUnitGeV;
+    else if(variable == "ttbarY"      ) return "y^{t#bar{t}}";
+    else if(variable == "ttbarMass"   ) return "m^{t#bar{t}}"+strUnitGeV;
+    else if(variable == "lepPt"       ) return "p_{T}^{l}"+strUnitGeV;
+    else if(variable == "lepEta"      ) return "#eta^{l}"; 
+    else if(variable == "lepEtaPlus"  ) return "#eta^{l^{+}}";
+    else if(variable == "lepEtaMinus" ) return "#eta^{l^{-}}";
+    else if(variable == "bqPt"        ) return "p_{T}^{b}"+strUnitGeV;
+    else if(variable == "bqEta"       ) return "#eta^{b}";
+    else if(variable == "bbbarPt"     ) return "p_{T}^{b#bar{b}}"+strUnitGeV;
+    else if(variable == "bbbarMass"   ) return "m^{b#bar{b}}"+strUnitGeV;
     else return "Default Label for variable "+variable;
   }
 
@@ -3929,6 +3933,7 @@ namespace semileptonic {
 
 	// Unfolding with optimal tau
 	if(tau){
+	  if(variable!="topPt"&&variable.Contains("topPt")) return regParameter("topPt", decayChannel, 0, fullPS, tau, hadronPS, closureTestSpecifier, probSel);
 	  // optimized parameters for each PS, final state, selection and closure test configuration
 	    if(decayChannel.Contains("muon")){
 	      if(closureTestSpecifier==""){

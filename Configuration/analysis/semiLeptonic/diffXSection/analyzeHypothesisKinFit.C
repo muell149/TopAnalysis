@@ -9,7 +9,7 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="")
 {
   // ============================
   //  Set ROOT Style
@@ -309,7 +309,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/delChi2"    ,
     // reconstructed top quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topMass"    ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"      , // XSec relevant! REC                   
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"      , // XSec relevant! REC   
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLead"  , // XSec relevant! REC   
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtSubLead",// XSec relevant! REC   
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi"     ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY"       , // XSec relevant! REC
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtHad"   ,
@@ -321,6 +323,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     // generated top quantities
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topMass"      , 
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"           , // XSec relevant! GEN  
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtLead"       , // XSec relevant! GEN  
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtSubLead"    , // XSec relevant! GEN  
     "analyzeTop"+LV+"LevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt" , 
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhi"       ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topY"         , // XSec relevant! GEN
@@ -573,7 +577,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
     "analyzeHypoKinFit/mapKinFit_"                                          ,
     // b) response matrix top quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,   
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,  
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLead_"      ,
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtSubLead_"      ,
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_",
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"     ,
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
@@ -618,7 +624,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
     // reconstructed top quantities
     "m^{t} #left[GeV#right]/#frac{dN}{dm^{t}} #left[GeV^{-1}#right]/0/10",
-    xSecLabelName("topPt")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1", //20"
+    xSecLabelName("topPt")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1",
+    xSecLabelName("topPtLead")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1",
+    xSecLabelName("topPtSubLead")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1",
     "#phi^{t}/#frac{dN}{d#phi^{t}}/0/4",
     xSecLabelName("topY")+"/#frac{dN}{dy^{t}}/0/1",//5"
     "p_{T}(hadronic t) #left[GeV#right]/#frac{dN}{dp_{T}^{had. t}} #left[GeV^{-1}#right]/0/20",                         
@@ -629,7 +637,9 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,    
     // generated top quantities
     "m^{t} parton truth #left[GeV#right]/events/0/10",
-    xSecLabelName("topPt")+" parton truth/events/0/1",//20"
+    xSecLabelName("topPt"       )+" parton truth/events/0/1",//20"
+    xSecLabelName("topPtLead"   )+" parton truth/events/0/1",
+    xSecLabelName("topPtSubLead")+" parton truth/events/0/1",
     xSecLabelName("topPt")+" parton truth Phase Space/events/0/1",//20"
     "#phi(t) parton truth/events/0/4",
     xSecLabelName("topY")+" parton truth/events/0/1",//5"
@@ -698,6 +708,8 @@ void analyzeHypothesisKinFit(double luminosity = 12148.,
     "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) response matrix Top quantities
     xSecLabelName("topPt"    )+" gen/"+xSecLabelName("topPt"     )+" reco",
+    xSecLabelName("topPtLead")+" gen/"+xSecLabelName("topPtLead" )+" reco",
+    xSecLabelName("topPtSubLead")+" gen/"+xSecLabelName("topPtSubLead")+" reco",
     // "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
     xSecLabelName("topY"     )+" gen/"+xSecLabelName("topY"     )+" reco",
     // "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
