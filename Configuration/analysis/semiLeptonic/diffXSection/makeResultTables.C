@@ -97,6 +97,8 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
     else if(plotName.Contains("lepEta"   )){ xMin=-2.11; xMax=2.11 ;}
     else if(plotName.Contains("bqPt"     )){ xMin=29.  ; xMax=401. ;}
     else if(plotName.Contains("bqEta"    )){ xMin=-2.41; xMax=2.41 ;}
+    else if(plotName.Contains("bbbarPt"  )){ xMin=0.   ; xMax=800. ;}
+    else if(plotName.Contains("bbbarMass")){ xMin=0.   ; xMax=1200.;}
 
     // initialize ndof counter
     int ndof=0;    
