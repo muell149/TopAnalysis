@@ -18,13 +18,15 @@
 #include "sampleHelpers.h"
 
 
-//constexpr double lumi = 12210; 
+//constexpr double lumi = 12210;
 constexpr double lumi = 19624.8;
 
 using namespace std;
 
+///Please put the variation of each systematics one after each other, satarting from the UP variation.
+///    NOT valid example: MATCH_UP, MASS_DOWN, MASS_UP
 const std::vector<const char*> VectorOfValidSystematics 
-    {"Nominal", 
+    {"Nominal",
     "JER_UP", "JER_DOWN", "JES_UP", "JES_DOWN",
     "PU_UP", "PU_DOWN", "TRIG_UP", "TRIG_DOWN", "LEPT_UP", "LEPT_DOWN",
     "DY_UP", "DY_DOWN", "BG_UP", "BG_DOWN", 
@@ -50,7 +52,7 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
     if (histoList.IsZombie()) exit(12);
     for (auto it = histoList.begin(); it != histoList.end(); ++it) {
         const PlotProperties& p = it->second;
-        cout << "checking " << p.name << endl;
+        std::cout << "checking " << p.name << std::endl;
         bool found = false;
         for (auto plot : plots) {
             if (plot.size() && plot[0] == '+') {
@@ -92,14 +94,15 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
             }
         }
         if (doUnfold) {
-            if (!doDiffXSPlotOnly) {
+            for (auto systematic:systematics){
                 //unfold all channels except combined in parallel
                 std::vector<std::future<void>> unfoldJobs;
                 for (auto channel:channels) {
                     if (channel != "combined") {
                         TString ch(channel.c_str());
-                        unfoldJobs.push_back(std::async(std::launch::async, [ch](Plotter p) -> void { 
-                            p.unfolding(ch);
+                        TString sys(systematic.c_str());
+                        unfoldJobs.push_back(std::async(std::launch::async, [ch, sys](Plotter p) -> void { 
+                            p.unfolding(ch,sys);
                         }, h_generalPlot));
                         //FIXME:
                         //it seems unfolding is not thread safe! 
@@ -113,15 +116,24 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
                 }
                 //only now do combined (if requested)
                 for (auto channel:channels) {
-                    if (channel == "combined") h_generalPlot.unfolding(channel);
+                    if (channel == "combined") h_generalPlot.unfolding(channel,systematic);
                 }
             }
+        std::cout << "Done with the unfolding\n";
+        }
+        if (doDiffXSPlotOnly) {
             for (auto channel:channels){
-                h_generalPlot.PlotDiffXSec(channel);
+                std::vector<TString> syst (systematics.begin(), systematics.end());
+                std::vector<TString> valid_sys;
+                for (size_t sys=0; sys<syst.size(); ++sys){
+                    ///Ugly method to use the systematic convention used up to now
+                    if(syst.at(sys) == TString("Nominal") || syst.at(sys).Contains("_DOWN")){continue;}
+                    valid_sys.push_back(syst.at(sys).Remove(syst.at(sys).Length()-2, 2));
+                };
+                h_generalPlot.PlotDiffXSec(channel, valid_sys);
             }
         }
     }
-    cout << "Done with the unfolding\n";
 }
 
 /**
@@ -150,7 +162,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> channels { "emu", "ee", "mumu", "combined" };
     if (opt_channel.isSet()) channels = opt_channel.getArguments();
     std::cout << "Processing channels: "; 
-    for (auto ch: channels) cout << ch << " "; cout << "\n";
+    for (auto ch: channels) std::cout << ch << " "; std::cout << "\n";
         
     std::vector<std::string> systematics { "Nominal" };
     if (opt_sys.isSet()) {
@@ -161,15 +173,15 @@ int main(int argc, char** argv) {
                 if (syst != "all") systematics.push_back(syst);
             }
         }
-    }    
+    }
     std::cout << "Processing systematics (use >>-s all<< to process all knwon systematics): "; 
-    for (auto sys: systematics) cout << sys << " "; cout << "\n";
-    
+    for (auto sys: systematics) std::cout << sys << " "; std::cout << "\n";
+
     std::vector<std::string> plots { "" };
     if (opt_plots.isSet()) plots = opt_plots.getArguments();
 
     bool doControlPlots = opt_type[0] == "cp";
     bool doDiffXSPlotOnly = opt_type[0] == "plot";
-    bool doUnfold = opt_type[0] == "unfold" || doDiffXSPlotOnly;
+    bool doUnfold = opt_type[0] == "unfold";
     Histo(doControlPlots, doUnfold, doDiffXSPlotOnly, plots, systematics, channels);
 }

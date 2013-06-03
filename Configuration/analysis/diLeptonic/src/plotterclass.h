@@ -27,7 +27,7 @@ public:
     void   setDataSet(TString, TString);
     bool   fillHisto();
     void   setStyle(TH1*, unsigned int, bool = false);
-    void   unfolding(TString channel);
+    void   unfolding(TString channel, TString systematic);
     void   preunfolding(TString Channel="", TString Systematic="");
     
     ///add addThis to addToThis (and delete it afterwards) - or assign it it to addToThis if addToThis is nullptr.
@@ -41,14 +41,14 @@ public:
 
     void PlotXSec(TString Channel);
     //  void CalcDiffXSec(TH1* varhists[], TH1* RecoPlot, TH1* GenPlot, TH2* genReco2d, double DiffXSecVec[4][10], double DiffXSecStatErrorVec[4][10]); 
-    void CalcDiffXSec(TString, TString);
+    int CalcDiffXSec(TString, TString);
     void CalcDiffSystematics(TString, TString, TString, TString, double);
-    void PlotDiffXSec(TString);
+    void PlotDiffXSec(TString, std::vector<TString>);
+    void PlotSingleDiffXSec(TString, TString);
 
     void DYScaleFactor(TString);
 
     void PrintResultTotxtFile(TString, double[], TGraphAsymmErrors *, TGraphAsymmErrors *);
-    void GetDiffToNominal(TString, TString, TString);
     void CalcUpDownDifference ( TString Channel, TString Syst_Up, TString Syst_Down, TString Variable);
 
     TLegend* getNewLegend();
