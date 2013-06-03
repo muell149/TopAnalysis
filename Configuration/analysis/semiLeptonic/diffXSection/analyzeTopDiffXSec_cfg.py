@@ -38,6 +38,8 @@ options.register('mctag', 'Summer12',VarParsing.VarParsing.multiplicity.singleto
 options.register('eventsToProcess', -42,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.int, "events to process")
 # create label to apply/deactivate MC event weights (needed for MC@NLO)
 options.register('MCweighting', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool, "processing MC weights?")
+# create tag for jet energy variations (JERUp, JERDown, JESUp, JESDown)
+options.register('JEtag', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen jet energy tag")
 
 # define the syntax for parsing
 # you need to enter in the cfg file:
@@ -149,10 +151,16 @@ if(not globals().has_key('implement0TagPath')):
 #    print "path with ==0 btagged jets included" 
 #if(implement0TagPath==False):
 #    print "path with ==0 btagged jets excluded"
-    
+
 ## eventfilter is to select a special ttbar decay channel from ttbarSample by genmatching (ttbar MC only, other MC: choose 'all')
 if(not globals().has_key('eventFilter')):
     eventFilter  = 'signal only' # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
+if("BG" in options.sample):
+    eventFilter='background only'
+    print "ttbar decay subset filter is inverted semileptonic muon decay"
+if(not "ttbar" in options.sample and not "powheg" in options.sample and not "mcatnlo" in options.sample):
+    removeGenTtbar = True
+    eventFilter='all'
 if (cutflowSynch):
     eventFilter  = 'all'
     
@@ -177,6 +185,11 @@ if(not globals().has_key('reduced')):
     reduced=True
     
 ## choose whether additional event weights should be applied
+if(options.JEtag=="none"):
+    additionalEventWeights  = True
+else:
+    additionalEventWeights  = False
+
 if(not globals().has_key('additionalEventWeights')): 
     additionalEventWeights  = True
 
@@ -187,14 +200,14 @@ if(not globals().has_key('sysDistort')):
     #sysDistort =  'Up'
     #sysDistort =  'Down'
 # only done for ttbar
-if(not options.sample=="ttbar" and not options.sample=="mcatnlo" and not options.sample=="powheg"):
+if(not "ttbar" in options.sample and not "mcatnlo" in options.sample and not "powheg" in options.sample):
     sysDistort=''
 # coupled to PU weight, therefore not applicable without
 if(not PUreweigthing):
     sysDistort=''
 ## enable/ disable MC event weights (needed only for MC@NLO)
 MCweighting = False # True
-if(options.sample=="mcatnlo"):
+if("mcatnlo" in options.sample):
     MCweighting = True
 if(not options.MCweighting=='unset'):
     MCweighting=options.MCweighting
@@ -253,7 +266,7 @@ usedSample="none"
 ## automatically load the correct (AOD) .root file list for each MC sample
 if(not options.sample=="none"):
     outputFileName+="DiffXSec"    
-    if(options.sample=="ttbar"):
+    if("ttbar" in options.sample):
         # limited statistics (wo spin correlation inclusive sample)
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         # full statistics: FIXME not available yet
@@ -267,10 +280,34 @@ if(not options.sample=="none"):
             if(sysDistort!="data"):
                 additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
 	    outputFileName+="SysDistort"+sysDistort
+        if("ttbarMatchingDown" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_MatchingDown_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="MatchDown"
+        elif("ttbarMatchingUp" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_MatchingUp_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="MatchUp"
+        elif("ttbarScaleDown" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_ScaleDown_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="ScaleDown"
+        elif("ttbarScaleUp" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_ScaleUp_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="ScaleUp"
+        elif("ttbarMassDown" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass169_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassDown"
+        elif("ttbarMassUp" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass175_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassUp"
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
-    elif(options.sample=="powheg"):
+    elif("powheg" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TT_CT10_TuneZ2star_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v2_cff" 
         if(eventFilter=='signal only'):
             outputFileName+="SigPowheg"
@@ -280,7 +317,7 @@ if(not options.sample=="none"):
             if(sysDistort!="data"):
                 additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
 	    outputFileName+="SysDistort"+sysDistort
-    elif(options.sample=="mcatnlo"):
+    elif("mcatnlo" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TT_8TeV_mcatnlo_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         PythiaSample="True"
         if(eventFilter=='signal only'):
@@ -291,48 +328,6 @@ if(not options.sample=="none"):
             if(sysDistort!="data"):
                 additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
 	    outputFileName+="SysDistort"+sysDistort
-    elif(options.sample=="ttbarMatchingDown"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_MatchingDown_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-	additionalEventWeights=False
-	if(eventFilter=='signal only'):
-	    outputFileName+="SigMatchDown"
-	elif(eventFilter=='background only'):
-	    outputFileName+="BkgMatchDown"
-    elif(options.sample=="ttbarMatchingUp"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_MatchingUp_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-	additionalEventWeights=False
-	if(eventFilter=='signal only'):
-	    outputFileName+="SigMatchUp"
-	elif(eventFilter=='background only'):
-	    outputFileName+="BkgMatchUp"
-    elif(options.sample=="ttbarScaleDown"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_ScaleDown_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-	additionalEventWeights=False
-	if(eventFilter=='signal only'):
-	    outputFileName+="SigScaleDown"
-	elif(eventFilter=='background only'):
-	    outputFileName+="BkgScaleDown"
-    elif(options.sample=="ttbarScaleUp"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_ScaleUp_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-	additionalEventWeights=False
-	if(eventFilter=='signal only'):
-	    outputFileName+="SigScaleUp"
-	elif(eventFilter=='background only'):
-	    outputFileName+="BkgScaleUp"
-    elif(options.sample=="ttbarMassDown"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass169_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-	additionalEventWeights=False
-	if(eventFilter=='signal only'):
-	    outputFileName+="SigTopMassDown"
-	elif(eventFilter=='background only'):
-	    outputFileName+="BkgTopMassDown"
-    elif(options.sample=="ttbarMassUp"):        
-        usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass175_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
-	additionalEventWeights=False
-	if(eventFilter=='signal only'):
-	    outputFileName+="SigTopMassUp"
-	elif(eventFilter=='background only'):
-	    outputFileName+="BkgTopMassUp"
     elif(options.sample=="wjets"):        
         usedSample="TopAnalysis/Configuration/Summer12/WJetsToLNu_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v2_cff"
 	outputFileName+="Wjets"
@@ -533,6 +528,8 @@ if(not options.sample=="none"):
         os._exit(0)
 #process.source.eventsToProcess = cms.untracked.VEventRange('1:1258499') 
 outputFileNamePart=outputFileName
+if(options.JEtag!="none"):
+    outputFileNamePart+=options.JEtag
 outputFileName=outputFileNamePart+options.mctag+"PF.root"
 
 #### =================================================
@@ -3010,3 +3007,58 @@ if(reduced):
             getattr(process,path).remove( process.tightElectronKinematicsNjets3)
         if(hasattr(process,                      'tightElectronQualityNjets3')):
             getattr(process,path).remove( process.tightElectronQualityNjets3   )
+            
+if(runningOnData=="MC"):
+    ## change input collections to JER-shifted collections (for reco paths only)
+    #from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    pathlist = [process.p1, process.p2]#, process.p5]
+    for path in pathlist:
+        if(jetType=="particleFlow"):
+            massSearchReplaceAnyInputTag(path, 'selectedPatJetsAK5PF', 'scaledJetEnergy:selectedPatJetsAK5PF')
+            massSearchReplaceAnyInputTag(path, 'patMETsPF'           , 'scaledJetEnergy:patMETsPF'           )
+        elif(jetType=="Calo"):
+            massSearchReplaceAnyInputTag(path, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets') 
+            massSearchReplaceAnyInputTag(path, 'patMETs'        , 'scaledJetEnergy:patMETs'        )
+        if(pfToPAT==True):
+            massSearchReplaceAnyInputTag(path, 'selectedPatJets', 'scaledJetEnergy:selectedPatJets')
+            massSearchReplaceAnyInputTag(path, 'patMETs'        , 'scaledJetEnergy:patMETs'        )
+        else:
+            print "unknown jetType"
+
+    # eta-dependent smearing of the jet energy
+    process.scaledJetEnergy.resolutionFactors   = cms.vdouble( 1.052 , 1.057 , 1.096 , 1.134 , 1.288 )
+    process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.0,0.5,0.5,1.1,1.1,1.7,1.7,2.3,2.3,-1.)
+    if(options.JEtag=="JERUp"):
+        process.scaledJetEnergy.resolutionFactors   = cms.vdouble( 1.115 , 1.114 , 1.161 , 1.228 , 1.488 )
+    elif(options.JEtag=="JERDown"):
+        process.scaledJetEnergy.resolutionFactors   = cms.vdouble( 0.990 , 1.001 , 1.032 , 1.042 , 1.089 )
+
+    # up and down scaling of the jet energy
+    if(jetType=="particleFlow"):
+        process.scaledJetEnergy.inputJets = "selectedPatJetsAK5PF"
+        process.scaledJetEnergy.inputMETs = "patMETsPF"
+        process.scaledJetEnergy.payload   = "AK5PF"
+    elif(jetType=="Calo"):
+        process.scaledJetEnergy.inputJets = "selectedPatJets"
+        process.scaledJetEnergy.inputMETs = "patMETs"
+        process.scaledJetEnergy.payload   = "AK5Calo"
+    else:
+        print "unknown jetType"
+    if(pfToPAT==True):
+        process.scaledJetEnergy.inputJets = "selectedPatJets"
+        process.scaledJetEnergy.inputMETs = "patMETs"
+
+    process.scaledJetEnergy.JECUncSrcFile = "TopAnalysis/TopUtils/data/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt"
+    if(options.JEtag=="JESUp"):
+        process.scaledJetEnergy.scaleType   = "jes:up"
+    elif(options.JEtag=="JESDown"):
+        process.scaledJetEnergy.scaleType   = "jes:down"
+
+    ## include module to create JES-shifted collection
+    for path in pathlist:
+        path.replace(process.selectedPatJets,
+                     process.selectedPatJets * process.scaledJetEnergy)
+
+    if(applyKinFit==True):
+    # use status 3 particles (!)
+        process.decaySubset.fillMode = cms.string("kME")
