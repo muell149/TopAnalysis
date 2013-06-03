@@ -124,7 +124,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
     // FIXME: -> use the one running the sample itself
   }	
   // use large 40M ttbar sample?
-  bool largeMGfile=true;
+  bool largeMGfile=false;
   // add kidonakis plots for full PS
   //if(extrapolate&&smoothcurves) DrawNNLOPlot=true;
 
@@ -671,6 +671,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // b2) create binned MADGRAPH theory curve (large sample including SC)
 	  // load it from combined file
 	  TString MGcombFile2="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
+	  if(!largeMGfile) MGcombFile2.ReplaceAll("Large","");
 	  TH1F* plotTheo3 = getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
 	  // inclusive cross section
 	  if(xSecVariables_[i]=="inclusive"){
@@ -754,7 +755,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // choose mcatnlo file
 	  // -> file from standalone external studies for errorBands
 	  // -> std simulation file else
-	  TString filename="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root";
+	  TString filename="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigMcatnloSummer12PF.root";
 	  TString errorBandFilename="/afs/naf.desy.de/group/cms/scratch/tophh/CommonFiles/ttbarNtupleCteq6m.root";
 	  // error bands for MCatNLO curves
 	  // plotname for std simulation file = madgraph-plotname from analyzer structure
@@ -762,10 +763,10 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  plotNameMCAtNLO2.ReplaceAll("Norm","");
 	  plotNameMCAtNLO2.ReplaceAll("Minus","");
 	  plotNameMCAtNLO2.ReplaceAll("Plus","");
-	  // for bbbar quantities
+	  // for bbbar and lead/sublead quantities
 	  // -> no error bands
 	  bool errorbands=true; 
- 	  if(xSecVariables_[i].Contains("bbbar")){
+ 	  if(xSecVariables_[i].Contains("bbbar")||xSecVariables_[i].Contains("Lead")){
 	    errorbands=false;
 	    // check if only external file should be used
  	    // -> then: no mcatnlo curve
