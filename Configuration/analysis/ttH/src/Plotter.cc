@@ -58,7 +58,8 @@ YAxis_(""),
 XAxis_(""),
 logX_(false),
 logY_(false),
-doDYScale_(false)
+doDYScale_(false),
+scaleMCtoData_(false)
 {}
 
 
@@ -230,8 +231,17 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     // Create histogram corresponding to the sum of all stacked histograms
     TH1D* stacksum = (TH1D*) stackHists.at(0).second->Clone();
     for (unsigned int i = 1; i < stackHists.size(); ++i) { stacksum->Add((TH1D*)stackHists.at(i).second);}
-    if(!drawHiggsOverlaid) for(auto higgsHist :higgsHists) {stacksum->Add((TH1D*)higgsHist.second);}
-    
+    if(!drawHiggsOverlaid) for(auto higgsHist :higgsHists) { stacksum->Add((TH1D*)higgsHist.second);}
+
+
+    // Drawing signal significance for dijet_mass H->bb
+    TString histo_name = TString(higgsHists.at(0).second->GetName());
+    TPaveText* sigSignLabel = 0;
+    if(histo_name.Contains("diJetAn_dijet_mass") && higgsHists.size()>0) {
+        sigSignLabel = drawSigSign(higgsHists.at(0).second,stacksum,85,135);
+    }
+
+
     // If Higgs signal scaled: scale sample and modify legend entry
     if(drawHiggsScaled){
         for(auto& higgsHist : higgsHists){
@@ -244,12 +254,24 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
             higgsHist.first.Append(ss_scaleFactor.str());
         }
     }
-    
+
+
+    // Scale the summed MC sample to the data
+    if(scaleMCtoData_) {
+        // Estimate the scaling factor for MC histos to have the same integral as Data
+        float MCtoData = (float)dataHist.second->Integral()/(float)stacksum->Integral();
+        // Scaling MC to match data
+        for (unsigned int i = 0, iN = stackHists.size(); i < iN; ++i) { stackHists.at(i).second->Scale(MCtoData);}
+        stacksum->Scale(MCtoData);
+    }
+   
+
     // If Higgs samples should be stacked, add them to stack histograms and clear Higgs vector
     if(!drawHiggsOverlaid){
         stackHists.insert(stackHists.end(), higgsHists.begin(), higgsHists.end());
         higgsHists.clear();
     }
+
     
     // Create the stack and add entries to legend
     THStack* stack = new THStack("def", "def");
@@ -332,6 +354,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     // Put additional stuff to histogram
     drawCmsLabels(1, 8);
     drawDecayChannelLabel(channel);
+    if(sigSignLabel) sigSignLabel->Draw("same");
     legend->Draw("SAME");
     ttbar::drawRatio(dataHist.second, stacksum, 0.5, 1.7);
 
@@ -504,6 +527,50 @@ void Plotter::drawCmsLabels(const int cmsprelim, const double& energy, const dou
 
 
 
+TPaveText* Plotter::drawSigSign(TH1* signal, TH1* bkg, float min, float max)
+{
+    if(max<=min) {
+        std::cout<<"Wrong range for signal significance in  histogram ("<<name_<<")\n";
+        return 0;
+    }
+
+
+    // Creating the signal histogram scaled to background
+    float sigToBkg = bkg->Integral()/signal->Integral();
+    TH1* signalScaled = (TH1*)signal->Clone();
+    signalScaled->Scale(sigToBkg);
+
+    // Finding the bin range corresponding to [min;max]
+    int bin1 = signal->FindBin(min); 
+    int bin2 = signal->FindBin(max);
+
+    // Calculating integral of the signal and background
+    float sigInt = signalScaled->Integral(bin1,bin2);
+    float bkgInt = bkg->Integral(bin1,bin2);
+
+    sigInt-=bkgInt;
+    sigInt/=sigToBkg;       // Scale signal integral back to the original scale
+
+    float sigSign = sigInt/sqrt(sigInt + bkgInt);
+
+    char text[40];
+    sprintf(text,"#frac{S}{#sqrt{S+B}} = %.3f",sigSign);
+
+    TPaveText *label = new TPaveText();
+    label->SetX1NDC(gStyle->GetPadLeftMargin()+0.4);
+    label->SetX2NDC(label->GetX1NDC()+0.1);
+    label->SetY2NDC(1.0-gStyle->GetPadTopMargin()-0.15);
+    label->SetY1NDC(label->GetY2NDC()-0.05);
+    label->SetTextFont(42);
+    label->AddText(text);
+    label->SetFillStyle(0);
+    label->SetBorderSize(0);
+    label->SetTextSize(0.035);
+    label->SetTextAlign(32);
+    // label->Draw("same");
+
+    return label;
+}
 
 
 

@@ -8,6 +8,7 @@ class TLegend;
 class RootFileReader;
 class TString;
 class TH1;
+class TPaveText;
 
 #include "plotterHelpers.h"
 #include "SamplesFwd.h"
@@ -67,6 +68,9 @@ private:
     
     /// Draw official labels (CMS [Preliminary], luminosity and CM energy) above plot
     void drawCmsLabels(const int cmsprelim=1, const double& energy=8, const double& textSize=0.04);
+
+    /// Draw signal significance label over the plot
+    TPaveText* drawSigSign(TH1* signal, TH1* bkg, float Xmin,  float Xmax);
     
     
     
@@ -102,6 +106,9 @@ private:
     TString YAxis_;
     TString XAxis_;
     bool logX_, logY_, doDYScale_; // The variable logX_ is not used at all...
+
+    /// Temporary hardcoded options
+    bool scaleMCtoData_;
 };
 
 
