@@ -1094,14 +1094,14 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     }
     //FIXME 
     //Developing improved Kinematic Reconstruction (commented for the moment)
-//     KinematicReconstruction new_topsol(leptonMinus, leptonPlus, &jets, &btagValues, &met);
+//     KinematicReconstruction new_topsol(leptonMinus, leptonPlus, &jets, &btagValues, &met, true); //Option true - mass_loop ON; Option false - smearing ON; NO boolean option - smearing ON
 //      if(new_topsol.GetNSol()>0)
 //      {
 //      	struct_KinematicReconstruction new_sol = new_topsol.GetSol();
 //      
 //      
 //      
-//      	HypTop_->clear();        HypTop_->push_back(ttbar::TLVtoLV(new_sol.top)); 
+//      	     HypTop_->clear();        HypTop_->push_back(ttbar::TLVtoLV(new_sol.top)); 
 //              HypAntiTop_->clear();    HypAntiTop_->push_back(ttbar::TLVtoLV(new_sol.topBar));
 //              HypLepton_->clear();     HypLepton_->push_back(ttbar::TLVtoLV(new_sol.lm));
 //              HypAntiLepton_->clear(); HypAntiLepton_->push_back(ttbar::TLVtoLV(new_sol.lp));
