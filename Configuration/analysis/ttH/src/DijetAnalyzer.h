@@ -61,10 +61,17 @@ public:
     void fill(const Input& input, const double& weight);
 
     /// Find index of genJet corresponding to the specified reco jet. Returns -1 if not found
-    int genJetIdOfRecoJet(const LV& recoJet, const VLV& genJets);
+    int genJetIdOfRecoJet(const LV& recoJet, const VLV& genJets, const float dR_max=0.3);
 
-    /// Identify the flavours of all hadrons associated to the gen b-jet. Returns -1 if no hadron was associated to it
-    bool flavoursGenJet(int genJetId, const std::vector<int>& bHadJetIndex, const std::vector<int>& bHadFlavour, std::vector<int>& flavours);
+    /// Get vector of indices of hadrons that are associted to the given gen jet
+    std::vector<int> bHadIdsInGenJet(const int jetId, const std::vector<int>& hadJetIndices);
+
+    /// Get vector of flavours of hadrons that are associted to the given gen jet
+    std::vector<int> bHadFlavoursInGenJet(const int jetId, const std::vector<int>& hadJetIndices,
+                                          const std::vector<int>& hadFlavours, const bool absFlavour = true);
+
+    /// Whether index is in the vector of indices
+    bool isInVector(const std::vector<int>& idVector, const int id);
 
     /// Clearing the class instance
     void clear();
