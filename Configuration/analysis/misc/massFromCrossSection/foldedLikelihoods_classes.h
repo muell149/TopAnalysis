@@ -179,8 +179,8 @@ class FinalLikeliResults1D {
 
 public:
   
-  FinalLikeliResults1D(const TString& label, RooRealVar& xsec_var, RooRealVar& target_var, const RooArgList& prodPdfList,
-		       RooRealVar& constrained_var,
+  FinalLikeliResults1D(const TString& label, RooRealVar& meas_xsec, RooRealVar& xsec_var, RooRealVar& target_var,
+		       const RooArgList& prodPdfList, RooRealVar& constrained_var,
 		       const RooRealVar& constrained_var_mean, const RooRealVar& constrained_var_unc);
 
   void addPointToGraphs(TGraphAsymmErrors& graphInnerError, TGraphAsymmErrors& graphTotalError,
@@ -197,14 +197,16 @@ public:
   double bestX;
   double lowErrFromIntegral;
   double lowErrFromConstraintUncertainty;
+  double lowErrFromBeamUncertainty;
   double lowErrTotal;
   double highErrFromIntegral;
   double highErrFromConstraintUncertainty;
+  double highErrFromBeamUncertainty;
   double highErrTotal;
 
 };
 
-FinalLikeliResults1D::FinalLikeliResults1D(const TString& label,
+FinalLikeliResults1D::FinalLikeliResults1D(const TString& label, RooRealVar& meas_xsec,
 					   RooRealVar& xsec_var, RooRealVar& target_var, const RooArgList& prodPdfList,
 					   RooRealVar& constrained_var,
 					   const RooRealVar& constrained_var_mean,
@@ -231,15 +233,24 @@ FinalLikeliResults1D::FinalLikeliResults1D(const TString& label,
     }
   }
   constrained_var.setVal(constrained_var_mean.getVal()-constrained_var_unc.getVal());
-  const double variationA = f1->GetMaximumX();
+  double variationA = f1->GetMaximumX();
   constrained_var.setVal(constrained_var_mean.getVal()+constrained_var_unc.getVal());
-  const double variationB = f1->GetMaximumX();
+  double variationB = f1->GetMaximumX();
   lowErrFromConstraintUncertainty  = bestX - TMath::Min(TMath::Min(variationA, variationB), bestX);
   highErrFromConstraintUncertainty = TMath::Max(TMath::Max(variationA, variationB), bestX) - bestX;
-  lowErrTotal  = TMath::Sqrt(TMath::Power(lowErrFromIntegral , 2) + TMath::Power(lowErrFromConstraintUncertainty , 2));
-  highErrTotal = TMath::Sqrt(TMath::Power(highErrFromIntegral, 2) + TMath::Power(highErrFromConstraintUncertainty, 2));
-  std::cout << "lowErrTotal, highErrTotal : " << lowErrTotal << ", " << highErrTotal << std::endl;
   constrained_var.setVal(constrained_var_mean.getVal());
+  const double measXSecSave = meas_xsec.getVal();
+  meas_xsec.setVal(1.018*measXSecSave);
+  variationA = f1->GetMaximumX();
+  meas_xsec.setVal(0.982*measXSecSave);
+  variationB = f1->GetMaximumX();
+  lowErrFromBeamUncertainty  = bestX - TMath::Min(TMath::Min(variationA, variationB), bestX);
+  highErrFromBeamUncertainty = TMath::Max(TMath::Max(variationA, variationB), bestX) - bestX;
+  meas_xsec.setVal(measXSecSave);
+  lowErrTotal  = TMath::Sqrt(TMath::Power(lowErrFromIntegral , 2) + TMath::Power(lowErrFromConstraintUncertainty , 2)
+			     + TMath::Power(lowErrFromBeamUncertainty , 2));
+  highErrTotal = TMath::Sqrt(TMath::Power(highErrFromIntegral, 2) + TMath::Power(highErrFromConstraintUncertainty, 2)
+			     + TMath::Power(highErrFromBeamUncertainty , 2));
 }
 
 void

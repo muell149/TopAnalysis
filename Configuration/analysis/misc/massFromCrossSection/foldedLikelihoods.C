@@ -1025,6 +1025,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   legAlphaDep.SetY1NDC(0.54);
   legAlphaDep.Draw();
   massText.Draw();
+
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_alpha.eps");
 
@@ -1103,18 +1104,18 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 
     if(targetAlpha) {
       if(!topppOnly)
-	mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, alpha,
+	mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], measXSec, xsec, alpha,
 						RooArgList(measXSecPDF,predXSec[h][0]->prob), mass, mass_mean, mass_unc);
-      mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, alpha, RooArgList(measXSecPDF,predXSec[h][1]->prob),
-					      mass, mass_mean, mass_unc);
+      mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], measXSec, xsec, alpha,
+					      RooArgList(measXSecPDF,predXSec[h][1]->prob), mass, mass_mean, mass_unc);
     }
     else {
       if(!topppOnly)
-	mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], xsec, mass,
+	mocResult[h] = new FinalLikeliResults1D("mocResult"+suf[h], measXSec, xsec, mass,
 						RooArgList(measXSecPDF,predXSec[h][0]->prob),
 						alpha, alpha2012_mean, alpha2012_unc);
       if(pole)
-	mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], xsec, mass,
+	mitResult[h] = new FinalLikeliResults1D("mitResult"+suf[h], measXSec, xsec, mass,
 						RooArgList(measXSecPDF,predXSec[h][1]->prob),
 						alpha, alpha2012_mean, alpha2012_unc);
       //alpha, alphaABM_mean, alphaABM_unc);
@@ -1125,14 +1126,16 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 //    char tmpTxt[99];
 //    if(topppOnly) {
 //      TString format = (targetAlpha ?
-//			"%s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
-//			"%s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+//			"%s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$\\\\" :
+//			"%s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$\\\\");
 //      sprintf(tmpTxt, format, pdfName[kNNPDF].Data(),
 //	      mitResult[kNNPDF]->bestX,
 //	      mitResult[kNNPDF]->highErrTotal,
 //	      mitResult[kNNPDF]->lowErrTotal,
 //	      mitResult[kNNPDF]->highErrFromConstraintUncertainty,
-//	      mitResult[kNNPDF]->lowErrFromConstraintUncertainty);
+//	      mitResult[kNNPDF]->lowErrFromConstraintUncertainty,
+//	      mitResult[kNNPDF]->highErrFromBeamUncertainty,
+//	      mitResult[kNNPDF]->lowErrFromBeamUncertainty);
 //      std::cout << tmpTxt << std::endl;
 //    }
 //  }
@@ -1385,34 +1388,36 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   ofstream outfile;
   outfile.open(outfile_name);
   if(topppOnly)
-    outfile << "\\begin{tabular}{|l|c|c|c|}" << std::endl;
+    outfile << "\\begin{tabular}{|l|c|c|c|c|}" << std::endl;
   else
-    outfile << "\\begin{tabular}{|ll|c|c|c|}" << std::endl;
+    outfile << "\\begin{tabular}{|ll|c|c|c|c|}" << std::endl;
   outfile << "\\hline" << std::endl;
   const TString oneOrTwoEmptyCols = (topppOnly ? " & " : " & & ");
   if(targetAlpha)
-    outfile << oneOrTwoEmptyCols << "Most likely        & \\multicolumn{2}{c|}{Uncertainty} \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "Most likely        & \\multicolumn{3}{c|}{Uncertainty} \\\\" << std::endl;
   else
-    outfile << oneOrTwoEmptyCols << "Most likely \\mtop & \\multicolumn{2}{c|}{Uncertainty (GeV)} \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "Most likely \\mtop & \\multicolumn{3}{c|}{Uncertainty (GeV)} \\\\" << std::endl;
   if(targetAlpha)
-    outfile << oneOrTwoEmptyCols << "$\\alpha_S (\\mZ)$ value  & Total & From $\\delta \\mtop$ \\\\" << std::endl;
+    outfile << oneOrTwoEmptyCols << "$\\alpha_S (\\mZ)$ value  & Total & From $\\delta \\mtop$" << std::endl;
   else
-    outfile << oneOrTwoEmptyCols << "value (GeV)        & Total & From $\\delta \\alpha_{S}$ \\\\" << std::endl;
-  outfile << "\\hline" << std::endl;
+    outfile << oneOrTwoEmptyCols << "value (GeV)        & Total & From $\\delta \\alpha_{S}$" << std::endl;
+  outfile << " & From $\\delta E_{\\text{LHC}}$ \\\\" << std::endl << "\\hline" << std::endl;
   const unsigned hOrdered[nPdfSets] = {2, 4, 1, 0, 3};
   for(unsigned h=0; h<nPdfSets; h++) {
     char tmpTxt[99];
     if(pole) {
       if(topppOnly) {
 	TString format = (targetAlpha ?
-			  "%s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ \\\\" :
-			  "%s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ \\\\");
+			  "%s &  %.4f & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$ & ${}^{+%.4f}_{-%.4f}$\\\\" :
+			  "%s &  %.1f & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$ & ${}^{+%.1f}_{-%.1f}$\\\\");
 	sprintf(tmpTxt, format, pdfName[hOrdered[h]].Data(),
 		mitResult[hOrdered[h]]->bestX,
 		mitResult[hOrdered[h]]->highErrTotal,
 		mitResult[hOrdered[h]]->lowErrTotal,
 		mitResult[hOrdered[h]]->highErrFromConstraintUncertainty,
-		mitResult[hOrdered[h]]->lowErrFromConstraintUncertainty);
+		mitResult[hOrdered[h]]->lowErrFromConstraintUncertainty,
+		mitResult[hOrdered[h]]->highErrFromBeamUncertainty,
+		mitResult[hOrdered[h]]->lowErrFromBeamUncertainty);
 	outfile << tmpTxt << std::endl;
       }
       else {
