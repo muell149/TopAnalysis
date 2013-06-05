@@ -59,7 +59,7 @@ XAxis_(""),
 logX_(false),
 logY_(false),
 doDYScale_(false),
-scaleMCtoData_(false)
+scaleMCtoData_(true)
 {}
 
 
