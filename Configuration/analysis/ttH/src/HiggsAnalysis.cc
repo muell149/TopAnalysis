@@ -190,7 +190,6 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     dyScalingHistograms_.addStep("5", fOutput);
     dyScalingHistograms_.addStep("6", fOutput);
     dyScalingHistograms_.addStep("7", fOutput);
-    dyScalingHistograms_.addStep("7a", fOutput);
     dyScalingHistograms_.addStep("8", fOutput);
 
 
@@ -202,7 +201,6 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     basicHistograms_.addStep("5", fOutput);
     basicHistograms_.addStep("6", fOutput);
     basicHistograms_.addStep("7", fOutput);
-    basicHistograms_.addStep("7a", fOutput);
     basicHistograms_.addStep("8", fOutput);
 
 
@@ -499,14 +497,10 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                     //fullWeights *= weightBtagSF;
                     dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "7");
 
-                    if(jets_->at(jetIndices.at(0)).Pt()>=30 && jets_->at(jetIndices.at(1)).Pt()>=30) {
-                        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "7a");
-
-                        if(hasSolution){
-                            // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
-                            //fullWeights *= weightKinFit;
-                            dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "8");
-                        }
+                    if(hasSolution){
+                        // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
+                        //fullWeights *= weightKinFit;
+                        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "8");
                     }
                 }
             }
@@ -583,36 +577,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     h_jetCategories_overview_step7->Fill(jetCategoryId_overview, weight);
 
 
-    //=== CUT ===
-    //Require at two leading jets have Pt>=30
-    if(jets_->at(jetIndices.at(0)).Pt()<30 || jets_->at(jetIndices.at(1)).Pt()<30) return kTRUE;
-
-    weight *= weightBtagSF;
-
-    // ++++ Control Plots ++++
-
-    if(!isZregion){ //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "7a");
-    }
-    h_events_step7->Fill(1, weight);
-    basicHistograms_.fill(basicHistogramsInput, weight, "7a");
-    h_jetCategories_overview_step7->Fill(jetCategoryId_overview, weight);
-
-
-    // Passing information to DijetAnalyzer
-    if(dijetAnalyzer_) {
-        if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
-        // Push_back indices of top b-jets identified by kinematic reconstruction
-        std::vector<int> topJetIds;
-
-        DijetAnalyzer::Input dijetInput(*jets_, jetIndices, bjetIndices,
-                                        topJetIds, *allGenJets_,
-                                        *genBHadJetIndex_, *genBHadFlavour_,
-                                        met, leptons_->at(leptonIndex), leptons_->at(antiLeptonIndex)
-                                       );
-
-        dijetAnalyzer_->fill(dijetInput,weight);
-    }
 
 
     //=== CUT ===
@@ -646,6 +610,20 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
 
 
+    // Passing information to DijetAnalyzer
+    if(dijetAnalyzer_) {
+        if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
+        // Push_back indices of top b-jets identified by kinematic reconstruction
+        std::vector<int> topJetIds;
+
+        DijetAnalyzer::Input dijetInput(*jets_, jetIndices, bjetIndices,
+                                        topJetIds, *allGenJets_,
+                                        *genBHadJetIndex_, *genBHadFlavour_,
+                                        met, leptons_->at(leptonIndex), leptons_->at(antiLeptonIndex)
+                                       );
+
+        dijetAnalyzer_->fill(dijetInput,weight);
+    }
 
 
 
