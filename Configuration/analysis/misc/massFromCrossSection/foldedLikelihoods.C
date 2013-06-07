@@ -427,26 +427,34 @@ void drawConvolution(const PredXSec* predXSec, RooRealVar& xsec, RooRealVar& mas
   textTop.SetTextFont(43);
   textTop.SetTextSizePixels(25);
   textTop.Draw();
+  TLatex sqrtSText(0.,0.,"#sqrt{s} = 7 TeV");
+  sqrtSText.SetNDC();
+  sqrtSText.SetTextAlign(23);
+  sqrtSText.SetX(0.32);
+  sqrtSText.SetY(0.90);
+  sqrtSText.SetTextFont(43);
+  sqrtSText.SetTextSizePixels(28);
+  sqrtSText.Draw();
   char tmpTxt[99];
   sprintf(tmpTxt, "%s = %.1f GeV",
 	  mass.getTitle().Data(), mass.getVal());
   TLatex textMass(0.,0.,tmpTxt);
   textMass.SetNDC();
-  textMass.SetTextAlign(13);
-  textMass.SetX(0.22);
-  textMass.SetY(0.90);
+  textMass.SetTextAlign(23);
+  textMass.SetX(0.32);
+  textMass.SetY(0.84);
   textMass.SetTextFont(43);
-  textMass.SetTextSizePixels(24);
+  textMass.SetTextSizePixels(28);
   textMass.Draw();
   sprintf(tmpTxt, "%s = %.4f",
 	  alpha.getTitle().Data(), alpha.getVal());
   TLatex textAlpha(0.,0.,tmpTxt);
   textAlpha.SetNDC();
-  textAlpha.SetTextAlign(13);
-  textAlpha.SetX(0.22);
-  textAlpha.SetY(0.85);
+  textAlpha.SetTextAlign(23);
+  textAlpha.SetX(0.32);
+  textAlpha.SetY(0.78);
   textAlpha.SetTextFont(43);
-  textAlpha.SetTextSizePixels(24);
+  textAlpha.SetTextSizePixels(28);
   textAlpha.Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(epsName);
@@ -554,12 +562,12 @@ void plotProjectedPDF(const FinalLikeliResults1D* result, RooPlot* frame, const 
 						 result->bestX + epsilon), RooFit::NormRange(normRange),
 			    RooFit::LineColor(kBlack), RooFit::LineWidth(2), RooFit::LineStyle(2), RooFit::VLines(),
 			    RooFit::Name("Maximum"));
-  frame->GetYaxis()->SetTitle("Likelihood density");
+  frame->GetYaxis()->SetTitle("Posterior density");
 }
 
 TLatex* cmsTxt(const bool targetAlpha)
 {
-  TString txt = "2.3 fb^{-1} of 2011 CMS data  #times NNLO+NNLL for #sigma_{#lower[-0.2]{t#bar{t}}}, #sqrt{s} = 7 TeV, ";
+  TString txt = "CMS, #sqrt{s} = 7 TeV, L = 2.3 fb^{-1}; NNLO+NNLL for #sigma_{#lower[-0.2]{t#bar{t}}}; ";
   if(targetAlpha)
     txt += "m_{#kern[0.3]{#lower[-0.1]{t}}} = 173.2 #pm 1.4 GeV";
   else
@@ -705,7 +713,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   TString theoTitle[nPdfSets][nTheories];
   for(unsigned h=0; h<nPdfSets; h++)
     for(unsigned i=0; i<nTheories; i++)
-      theoTitle[h][i] = theoName[i] + " with " + pdfName[h];
+      theoTitle[h][i] = theoName[i] + ", " + pdfName[h];
 
   const TString errName [4] = {"Scale", "Experimental PDF", "#alpha_{S}", "Total"};
   const TString errLabel[4] = {"scale", "expPDF", "alphaS", "total"};
@@ -820,7 +828,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   RooRealVar measXSec("measXSec", "measXSec", 161.9, "pb");
   RooRealVar measXSecErr("measXSecErr", "measXSecErr", 6.725, "pb");
 
-  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "(@0*@1)*(1+0.000*(@2-0.1180)/0.0100)",
+  RooFormulaVar measXSecMassDep("measXSecMassDep", "measXSecMassDep", "@0*@1",
 				RooArgSet(measXSecMassDepRel,measXSec,alpha));
   RooFormulaVar measXSecMassDepErr("measXSecMassDepErr", "measXSecMassDepErr",
 				   "TMath::Sqrt(TMath::Power((@0/@1)*@2,2)+TMath::Power((@0/@1)*@2*(1+0.01*TMath::Abs((@3-0.1180)/0.0100)),2))",
@@ -898,6 +906,14 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 
   gStyle->SetEndErrorSize(5*gStyle->GetEndErrorSize());
 
+  TLatex sqrtSText(0.,0.,"#sqrt{s} = 7 TeV");
+  sqrtSText.SetNDC();
+  sqrtSText.SetTextAlign(23);
+  sqrtSText.SetX(0.80);
+  sqrtSText.SetY(0.88);
+  sqrtSText.SetTextFont(43);
+  sqrtSText.SetTextSizePixels(28);
+
   if(pole) {
 
   TGraphErrors measXSecWithErrAlpha = getMeasXSecWithErr(measXSecMassDep, measXSecMassDepErr, alpha, 0.10, 0.13, 30);
@@ -960,10 +976,10 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   frame_alpha->Draw();
   measXSecWithErrAlpha.SetFillColor(kBlue-10);
   measXSecWithErrAlpha.SetLineColor(kBlue+1);
-  TLegend legAlphaDep = TLegend(0.18, 0.81, 0.63, 0.92);
+  TLegend legAlphaDep = TLegend(0.18, 0.81, 0.6, 0.92);
   legAlphaDep.SetFillStyle(0);
   legAlphaDep.SetBorderSize(0);
-  legAlphaDep.AddEntry(&measXSecWithErrAlpha, "CMS 2011, 2.3 fb^{-1}", "FL");
+  legAlphaDep.AddEntry(&measXSecWithErrAlpha, "CMS, L = 2.3 fb^{-1}", "FL");
   frame_alpha->getAttMarker(predXSec[3][1]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerStyle(22);
   frame_alpha->getAttMarker(predXSec[3][1]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerSize(2);
   frame_alpha->getAttFill(predXSec[3][1]->xsec.GetName()+(TString)"_Norm[alpha]")->SetFillColor(kRed-9);
@@ -973,12 +989,13 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   sprintf(massTxt, "%s = %.1f GeV", mass.getTitle().Data(), mass.getVal());
   TLatex massText(0.,0.,massTxt);
   massText.SetNDC();
-  massText.SetTextAlign(13);
-  massText.SetX(0.70);
-  massText.SetY(0.85);
+  massText.SetTextAlign(23);
+  massText.SetX(0.80);
+  massText.SetY(0.82);
   massText.SetTextFont(43);
-  massText.SetTextSizePixels(22);
+  massText.SetTextSizePixels(28);
   massText.Draw();
+  sqrtSText.Draw();
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_alpha_nnpdfOnly.eps");
 //  if(!topppOnly) {
@@ -1016,7 +1033,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   frame_alpha->getAttMarker(predXSec[4][1]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerStyle(20);
   frame_alpha->getAttMarker(predXSec[4][1]->xsec.GetName()+(TString)"_Norm[alpha]")->SetMarkerSize(2.0);
   legAlphaDep.Clear();
-  legAlphaDep.AddEntry(&measXSecWithErrAlpha, "CMS 2011, 2.3 fb^{-1}", "FL");
+  legAlphaDep.AddEntry(&measXSecWithErrAlpha, "CMS, L = 2.3 fb^{-1}", "FL");
   legAlphaDep.AddEntry(frame_alpha->findObject(predXSec[2][1]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[2][1], "LP");
   legAlphaDep.AddEntry(frame_alpha->findObject(predXSec[4][1]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[4][1], "LP");
   legAlphaDep.AddEntry(frame_alpha->findObject(predXSec[1][1]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[1][1], "LP");
@@ -1025,6 +1042,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   legAlphaDep.SetY1NDC(0.54);
   legAlphaDep.Draw();
   massText.Draw();
+  sqrtSText.Draw();
 
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_alpha.eps");
@@ -1038,11 +1056,14 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   sprintf(alphaTxt, "%s = %.4f", alpha.getTitle().Data(), alpha.getVal());
   TLatex alphaText(0.,0.,alphaTxt);
   alphaText.SetNDC();
-  alphaText.SetTextAlign(13);
-  alphaText.SetX(0.25);
-  alphaText.SetY(0.25);
+  alphaText.SetTextAlign(23);
+  alphaText.SetX(0.32);
+  alphaText.SetY(0.24);
   alphaText.SetTextFont(43);
-  alphaText.SetTextSizePixels(22);
+  alphaText.SetTextSizePixels(28);
+
+  sqrtSText.SetX(0.32);
+  sqrtSText.SetY(0.30);
 
   TGraphAsymmErrors predXSecMassMitNNPDF = getPredXSecWithErr(predXSec[kNNPDF][1], mass, 130., 220., 90);
 
@@ -1076,10 +1097,11 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   frame_mass->SetMinimum(115.);
   frame_mass->Draw();
   alphaText.Draw();
-  TLegend legMassDep = TLegend(0.47, 0.54, 0.92, 0.92);
+  sqrtSText.Draw();
+  TLegend legMassDep = TLegend(0.50, 0.54, 0.92, 0.92);
   legMassDep.SetFillStyle(0);
   legMassDep.SetBorderSize(0);
-  legMassDep.AddEntry(&measXSecWithErrMass, "CMS 2011, 2.3 fb^{-1}", "FL");
+  legMassDep.AddEntry(&measXSecWithErrMass, "CMS, L = 2.3 fb^{-1}", "FL");
   legMassDep.AddEntry(frame_mass->findObject(predXSec[2][pole]->xsec.GetName()+(TString)"_Norm[mass]"), theoTitle[2][pole], "L");
   legMassDep.AddEntry(frame_mass->findObject(predXSec[4][pole]->xsec.GetName()+(TString)"_Norm[mass]"), theoTitle[4][pole], "L");
   legMassDep.AddEntry(frame_mass->findObject(predXSec[1][pole]->xsec.GetName()+(TString)"_Norm[mass]"), theoTitle[1][pole], "L");
@@ -1371,7 +1393,18 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     }
   }
   TLatex* cmsLabel = cmsTxt(targetAlpha);
+//  sqrtSText.SetY(0.90);
+//  sqrtSText.SetX(0.75);
+//  sqrtSText.Draw();
   cmsLabel->Draw();
+//  TLatex constrText(0.,0.,(targetAlpha ? "#alpha_{S} (m_{Z}) = 0.1184 #pm 0.0007" : "m_{t} = 173.2 #pm 1.4 GeV"));
+//  constrText.SetNDC();
+//  constrText.SetTextAlign(23);
+//  constrText.SetX(0.75);
+//  constrText.SetY(0.82);
+//  constrText.SetTextFont(43);
+//  constrText.SetTextSizePixels(28);
+//  constrText.Draw();
   if(targetAlpha)
     canvas->Print(printNameBase+"_alphaSummaryPlot.eps");
   else
@@ -1477,7 +1510,7 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
       const FinalLikeliResults1D* result = (t ? mitResult[h] : mocResult[h]);
 
       char tmpTxt[99];
-      sprintf(tmpTxt, "2.3 fb^{-1} of 2011 CMS data #times %s", theoTitle[h][t].Data());
+      sprintf(tmpTxt, "CMS, L = 2.3 fb^{-1}; %s", theoTitle[h][t].Data());
       TLatex text(0.,0.,tmpTxt);
       text.SetNDC();
       text.SetTextAlign(13);
@@ -1494,11 +1527,13 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
 		alpha.getTitle().Data(), alpha.getVal());
       TLatex textConstrVar(0.,0.,tmpTxt);
       textConstrVar.SetNDC();
-      textConstrVar.SetTextAlign(13);
-      textConstrVar.SetX(0.22);
-      textConstrVar.SetY(0.90);
+      textConstrVar.SetTextAlign(23);
+      textConstrVar.SetX(0.32);
+      textConstrVar.SetY(0.84);
       textConstrVar.SetTextFont(43);
-      textConstrVar.SetTextSizePixels(24);
+      textConstrVar.SetTextSizePixels(28);
+      
+      sqrtSText.SetY(0.90);
 
       RooPlot* frame;
       if(targetAlpha) {
@@ -1515,14 +1550,15 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
       TLegend likeLeg = TLegend(0.5, 0.75, 0.9, 0.92);
       likeLeg.SetFillStyle(0);
       likeLeg.SetBorderSize(0);
-      likeLeg.AddEntry("Maximum", "Maximum likelihood"      , "L");
+      likeLeg.AddEntry("Maximum", "Maximum posterior"      , "L");
       likeLeg.AddEntry("Confide", "68% confidence interval" , "F");
       likeLeg.SetTextFont(43);
-      likeLeg.SetTextSizePixels(25);
+      likeLeg.SetTextSizePixels(28);
 
       likeLeg.Draw();
       text.Draw();
       textConstrVar.Draw();
+      sqrtSText.Draw();
       canvas->Print(printNameBase+".ps");
       const TString epsAppendix = (t ? "mitov" : "moch");
       if(targetAlpha)
