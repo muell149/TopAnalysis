@@ -602,12 +602,10 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # 5_3:
 #from Configuration.PyReleaseValidation.autoCond import autoCond
 if(runningOnData=="MC"):
-    process.GlobalTag.globaltag = cms.string('START53_V15::All') # Fall 2012 JEC for up to 11 / fb
-    #process.GlobalTag.globaltag = cms.string('START53_V13::All')
+    process.GlobalTag.globaltag = cms.string('START53_V22::All') # Fall 2012 JEC for full 8 TeV data
 else: 
-    process.GlobalTag.globaltag = cms.string('GR_P_V42_AN3::All') # Fall 2012 JEC for up to 11 / fb
-    #process.GlobalTag.globaltag = cms.string('GR_R_53_V15::All')
-
+    process.GlobalTag.globaltag = cms.string('FT_53_V21_AN4::All') # Fall 2012 JEC for full 8 TeV data
+    
 ## Needed for redoing the ak5GenJets
 #if(runningOnData=="MC" and pfToPAT==False):
 #    process.load("TopAnalysis.TopUtils.GenJetParticles_cff")
