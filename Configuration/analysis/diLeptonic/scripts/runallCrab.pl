@@ -52,7 +52,8 @@ USAGE
 my $source = $arg{f} ? $arg{f} : 'files.txt';
 open my $IN, '<', $source or die "Cannot open input file: $!\n";
 #my @createDirs;
-my @runCs;
+my @createCs;
+my @submitCs;
 my @checkCs;
 my @getCs;
 my @killCs;
@@ -64,7 +65,7 @@ my @getOut;
 my @delSEOut;
 
 
-push @runCs, "#!/bin/sh\n";
+push @createCs, "#!/bin/sh\n";
 push @getCs, "#!/bin/sh\n";
 push @checkCs, "#!/bin/sh\n";
 push @forJson, "#!/bin/sh\n";
@@ -97,21 +98,21 @@ my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 
 my $environmentcheck="if [[ \"\${VOMS_USERCONF}\" != $ENV{VOMS_USERCONF} ]] ;\nthen\necho Need grid proxy\nfi\nif [[ \"\${CRABDIR}\" != $ENV{CRABDIR} ]] ;\nthen\necho Crab env not set\nexit\nfi\nif [[ \"\${CMSSW_BASE}\" != $ENV{CMSSW_BASE} ]] ;\nthen\necho Wrong CMSSW env set. should be $ENV{CMSSW_BASE}\nexit\nfi\n";
 
-push @runCs, $environmentcheck;
+push @createCs, $environmentcheck;
 push @getCs, $environmentcheck;
 push @checkCs, $environmentcheck;
 push @forJson, $environmentcheck;
 push @killCs, $environmentcheck;
 push @delSEOut, $environmentcheck;
 
-push @runCs, "echo creating directories on dCache...\n";
-push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output >| /dev/null\n";
-push @runCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n sleep 1\n\n";
+push @createCs, "echo creating directories on dCache...\n";
+push @createCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output >| /dev/null\n";
+push @createCs, "\nsrmmkdir srm://dcache-se-cms.desy.de:8443/pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\necho 'This might take a while...'\n sleep 10\necho 'This might take 10 secs more - prevents problems when creating the crab jobs...'\nsleep 20\n\n";
 
-push @getCs, "\necho copying output from SE to workdir/res <WARNING NOT DONE>...\n";
+push @getCs, "\necho \"copying output from SE to workdir/res\"\n";
 
-push @delSEOut, "\necho deleting temporary files from SE";
-push @delSEOut, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastyRecursiveSRMremove.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime\n\n";
+push @delSEOut, "\necho 'deleting temporary files from SE...Are you sure? Then answer yes'\nread  -t 100 answer\nif [ \"\${answer}\" = \"yes\" ]; then";
+
 
 while(my $line = <$IN>) {
     chomp $line;
@@ -139,7 +140,11 @@ while(my $line = <$IN>) {
 	$opts=$options;
     }
     my $cConfig = "${wdpath}.cfg";
-    my $sedir = "Crab_output/$workDirWithTime/output_$outputFile";
+    my $sedir = "Crab_output/$workDirWithTime/output_$outputFile ";
+    
+    if($numJobs>1000){
+	print "\n$outputFile:\nsplitting into more than 1000 jobs leads to problems when trying to delete the output from SE! be aware of that!\n\n";
+    }
 
 ### Prepare template    
 
@@ -168,7 +173,8 @@ while(my $line = <$IN>) {
     print $OUT $t;
     close $OUT;
     
-    push @runCs, "echo 'starting $cConfig'\nsleep 1\n\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\necho already initialized!\nelse\ncrab -create -submit -cfg $cConfig\ntouch $wdpath/first_sub\nfi\n\n";
+    push @createCs, "echo\necho\necho 'creating $cConfig'\n\ncrab -create -cfg $cConfig\ntouch $wdpath/first_created\n\n";
+    push @submitCs, "\necho\necho '**********************************************************************'\necho 'submitting $cConfig'\necho '**********************************************************************'\nsleep 1\nif [[ -f \"$wdpath/first_created\" ]]; \nthen\ncrab -submit -c $wdpath\ntouch $wdpath/first_sub\nelse\necho 'not yet created'\nfi\n\n";
     push @checkCs, "echo 'checking $cConfig'\nif [[ -f \"$wdpath/first_sub\" ]]; \nthen\ncrab -status -c $wdpath\ncrab -getoutput -c $wdpath\nelse\necho not yet submitted\nfi\n";
   #  push @getCs, "crab -getoutput -c $wdpath\ncrab -copyData -c $wdpath\n\n";
   #  push @getCs, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastySRMcp.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$sedir $wdpath/res";
@@ -177,16 +183,21 @@ while(my $line = <$IN>) {
     push @forHadd, "hadd ${globalCWorkingdir}/$workDirWithTime/${outputFile}.root $wdpath/res/*.root\n";
     push @forJson, "crab -report -c $wdpath\ncp $wdpath/res/lumiSummary.json ${globalCWorkingdir}/$workDirWithTime/${outputFile}_lumi.json\n\n";
 
+    push @delSEOut, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastyRecursiveSRMremove.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/$sedir ffffffff\n\n";
+
 #lumiSummary.json in res
 
 }
+
+push @delSEOut, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastyRecursiveSRMremove.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime ffffffff\n\nfi";
 
 #let submit script write a file after each submitted task(N jobs) and let checkJobs check if file exists (and only then perform a check
 
 open my $OUT, '>', "${globalCWorkingdir}/$workDirWithTime/createDirsAndRun.sh" or die $!;
 #print $OUT $_ for @createDirs;
 #print $OUT "\n" x 3;
-print $OUT $_ for @runCs;
+print $OUT $_ for @createCs;
+print $OUT $_ for @submitCs;
 close $OUT;
 chmod 0755, "${globalCWorkingdir}/$workDirWithTime/createDirsAndRun.sh";
 print "run ${globalCWorkingdir}/$workDirWithTime/createDirsAndRun.sh to create dirs and submit jobs\n";
@@ -236,10 +247,12 @@ sub getCrabtemplate
 {
     return <<'ENDE_TEMPLATE';
 [CRAB]
-cfg = 
+#cfg = 
 jobtype = cmssw
-scheduler = glite
-use_server = 1
+#scheduler = glite
+#use_server = 1
+scheduler=remoteGlidein
+use_server=0
 
 [CMSSW]
 datasetpath = ##DATASET##
