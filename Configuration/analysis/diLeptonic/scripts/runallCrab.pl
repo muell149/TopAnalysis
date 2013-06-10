@@ -96,7 +96,7 @@ my $fullCMSSWcfpath=File::Spec->rel2abs($arg{c});
 my $cfgfilename = ( split m{/}, $arg{c} )[-1];
 
 
-my $environmentcheck="if [[ \"\${VOMS_USERCONF}\" != $ENV{VOMS_USERCONF} ]] ;\nthen\necho Need grid proxy\nfi\nif [[ \"\${CRABDIR}\" != $ENV{CRABDIR} ]] ;\nthen\necho Crab env not set\nexit\nfi\nif [[ \"\${CMSSW_BASE}\" != $ENV{CMSSW_BASE} ]] ;\nthen\necho Wrong CMSSW env set. should be $ENV{CMSSW_BASE}\nexit\nfi\n";
+my $environmentcheck="if [[ \"\${VOMS_USERCONF}\" != $ENV{VOMS_USERCONF} ]] ;\nthen\necho Need grid proxy\nfi\nif [[ \"\${CRABDIR}\" != $ENV{CRABDIR} ]] ;\nthen\necho Crab env not set\nexit\nfi\nif [[ \"\${CMSSW_BASE}\" != $ENV{CMSSW_BASE} ]] ;\nthen\necho Wrong CMSSW env set. should be $ENV{CMSSW_BASE}\nexit\nfi\n\ncd ${globalCWorkingdir}/$workDirWithTime\n";
 
 push @createCs, $environmentcheck;
 push @getCs, $environmentcheck;
@@ -190,6 +190,13 @@ while(my $line = <$IN>) {
 }
 
 push @delSEOut, "\n/afs/naf.desy.de/user/k/kieseler/public/veryNastyRecursiveSRMremove.sh /pnfs/desy.de/cms/tier2/store/user/$hypernewsName/Crab_output/$workDirWithTime ffffffff\n\nfi";
+
+push @submitCs, "\ncd-\necho \"FINISHED SUBMITTING\"\n";
+push @forHadd, "\necho \"FINISHED HADDING\"\n";
+push @getCs, "\ncd-\necho \"FNISHED COPYING\"\n";
+push @checkCs, "\ncd-\necho \"FINISHED CHECKING\"\n";
+push @forJson, "\ncd-\necho \"FINISHED GETTING JSONS\"\n";
+
 
 #let submit script write a file after each submitted task(N jobs) and let checkJobs check if file exists (and only then perform a check
 
