@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 ## ---
 ##    example to run this cfg file
 ## ---
-## cmsRun analyzeMuonDiffXSecCorrected_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,mctag=Summer12,eventsToProcess=5000
+## cmsRun analyzeTopDiffXSec_cfg.py triggerTag=HLT,sample=ttbar,lepton=muon,mctag=Summer12,eventsToProcess=5000
 
 ## ---
 ##    options
@@ -957,6 +957,7 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   MuonSrc = 'tightMuons',
                                   ElectronSrc = 'goodElectronsEJ',
                                   GenJetSrc = cms.InputTag('ak5GenJets'),
+                                  addGenJetSrc = cms.InputTag('additionalGenJet'),
                                   GenMETSrc = 'genMetTrue',
                                   GenLepSrc = 'isolatedGenMuons',
                                   weight = "",
@@ -964,7 +965,8 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   semiLepEvent = cms.InputTag(""),
                                   hypoKey = cms.string("kKinFit"),
                                   btagAlgo=cms.string("combinedSecondaryVertexBJetTags"),
-                                  btagDiscr=cms.double(0.679)
+                                  btagDiscr=cms.double(0.679),
+                                  addJetPt=cms.double(50.)
                                   )
 if(decayChannel=='electron'):
     process.compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
@@ -1066,8 +1068,8 @@ process.monitorKinematicsBeforeBtagging = cms.Sequence(process.tightMuonKinemati
                                                        process.bottomJetKinematics          +
 						       process.bottomJetQuality             +
                                                        process.analyzeMETMuon               +
-                                                       process.tightMuontightJetsKinematics +
-                                                       process.compositedKinematics
+                                                       process.tightMuontightJetsKinematics 
+                                                       #process.compositedKinematics
                                                        )
 
 
@@ -1347,6 +1349,18 @@ process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.genJets = cms.InputTag("b
 # b gen jet selection
 process.bGenJetSelection    = process.leadingGenJetSelection.clone (src = 'bjetGenJets'   , minNumber = 2)
 process.bGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = 'bjetGenJetsRaw', minNumber = 2)
+process.lightGenJetSelection = process.leadingGenJetSelection.clone (src = cms.InputTag("bjetGenJets", "lightJetsFromTop")  , minNumber = 2)
+process.lightGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = cms.InputTag("bjetGenJetsRaw", "lightJetsFromTop")  , minNumber = 2)
+
+
+process.additionalGenJet=cms.EDFilter("CommonGenJetSelector",
+                                      src = cms.InputTag("bjetGenJets", "lightJetsFromTop"),
+                                      cut = cms.string('abs(eta) < 2.4 & pt > 30.')
+                                      )
+#cms.InputTag("bjetGenJets", "lightJetsFromTop")
+
+
+
 
 ## ---
 ##    lepton hadron level distributions
@@ -1397,7 +1411,9 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   #process.makeGenLevelBJets                         +
                                   # add bjet selection
                                   process.bGenJetSelectionRaw                       +
-                                  process.bGenJetSelection                     
+                                  process.bGenJetSelection                          +
+                                  process.lightGenJetSelectionRaw                   +
+                                  process.lightGenJetSelection
                                   )
 
 ## collect relevant analyzers after probability selection
@@ -1523,8 +1539,8 @@ elif (options.mctag == "Summer12"):
     process.eventWeightPU.DataHistoName            = "pileup"
 
     process.eventWeightPU.MCSampleFile             = "TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root"
-    process.eventWeightPU.DataFile                 = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABC_190456-203755.root"
-    
+    process.eventWeightPU.DataFile                 = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012ABCD22JanReReco_190456-208686_8TeV.root"
+
 process.eventWeightPUsysNo   = process.eventWeightPU.clone()
 process.eventWeightPUsysUp   = process.eventWeightPU.clone()
 process.eventWeightPUsysDown = process.eventWeightPU.clone()
@@ -1537,7 +1553,7 @@ process.eventWeightPUsysNo.WeightName          = "eventWeightPU"
 if ("11" in options.mctag):
     process.eventWeightPUsysNo.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysNo.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABC_190456-203755.root"
+    process.eventWeightPUsysNo.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysNo.CreateWeight3DHisto = False 
@@ -1549,7 +1565,7 @@ process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
 if ("11" in options.mctag):
     process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72870_2012ABC_190456-203755.root"
+    process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72765_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
@@ -1561,7 +1577,7 @@ process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
 if ("11" in options.mctag):
     process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65930_2012ABC_190456-203755.root"
+    process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65835_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
@@ -2402,6 +2418,9 @@ process.p1 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       process.makeGenLevelBJets                     *
                       process.bjetGenJetsRaw                        *
                       process.noOverlapGenJetCollection             *
+                      process.altermakeGenLevelBJets                *
+                      process.bjetGenJets                           * 
+                      process.additionalGenJet                      *
                       ## create PU event weights
                       process.makeEventWeightsPU                    *
                       ## create shape distortion event weights
@@ -2448,6 +2467,8 @@ if(applyKinFit==False or eventFilter!="signal only"):
     process.p1.remove(process.bjetGenJets                  )
     process.p1.remove(process.bjetGenJetsRaw               )
     process.p1.remove(process.cleanedGenJetCollection      )
+    process.p1.remove(process.altermakeGenLevelBJets       )
+    process.p1.remove(process.additionalGenJet             )
     process.p1.remove(process.dummy)
 
 if(runningOnData=="data"):
@@ -2508,7 +2529,8 @@ if(runningOnData=="MC" and not cutflowSynch):
                           process.bjetGenJetsRaw                        *
                           process.noOverlapGenJetCollection             *
                           process.altermakeGenLevelBJets                *
-                          process.bjetGenJets                           *                          
+                          process.bjetGenJets                           * 
+                          process.additionalGenJet                      *                         
                           ## create PU event weights
                           process.makeEventWeightsPU                    *
                           ## create shape distortion event weights
@@ -2543,6 +2565,7 @@ if(runningOnData=="MC" and not cutflowSynch):
         process.p3.remove(process.cleanedGenJetCollection)
         process.p3.remove(process.altermakeGenLevelBJets)
         process.p3.remove(process.makeGenLevelBJets)
+        process.p3.remove(process.additionalGenJet)
     if(eventFilter=='background only'):
         process.p3.remove(process.filterGenPhaseSpace)
         process.p3.remove(process.filterLeptonPhaseSpace)
@@ -2554,6 +2577,7 @@ if(runningOnData=="MC" and not cutflowSynch):
         process.p3.remove(process.cleanedGenJetCollection)
         process.p3.remove(process.altermakeGenLevelBJets)
         process.p3.remove(process.makeGenLevelBJets)
+        process.p3.remove(process.additionalGenJet)
         process.p3.remove(process.dummy)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
@@ -2568,6 +2592,9 @@ if(runningOnData=="MC" and not cutflowSynch):
                               process.isolatedGenLeptons                    *
                               process.semiLeptGenCollections                *
                               process.noOverlapGenJetCollection             *
+                              process.altermakeGenLevelBJets                *
+                              process.bjetGenJets                           * 
+                              process.additionalGenJet                      *
                               ## create PU event weights
                               process.makeEventWeightsPU                    *
                               ## create shape distortion event weights
@@ -2600,12 +2627,18 @@ if(runningOnData=="MC" and not cutflowSynch):
         process.p4.remove(process.genMuonSelection)
         process.p4.remove(process.genJetCuts)
         process.p4.remove(process.noOverlapGenJetCollection)
+        process.p4.remove(process.altermakeGenLevelBJets)
+        process.p4.remove(process.bjetGenJets     )
+        process.p4.remove(process.additionalGenJet)
     if(eventFilter=='background only'):
         process.p4.remove(process.filterGenPhaseSpace)
         process.p4.remove(process.filterLeptonPhaseSpace)
         process.p4.remove(process.genMuonSelection)
         process.p4.remove(process.genJetCuts)
         process.p4.remove(process.noOverlapGenJetCollection)
+        process.p4.remove(process.altermakeGenLevelBJets)
+        process.p4.remove(process.bjetGenJets     )
+        process.p4.remove(process.additionalGenJet)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p4.remove(process.dummy)
