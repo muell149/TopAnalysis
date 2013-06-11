@@ -11,6 +11,8 @@ analyzeCompositedObjects = cms.EDAnalyzer("MixedObjectsAnalyzer",
                                           ElectronSrc = cms.InputTag('selectedPatElectrons'),
                                           ## gen jets
                                           GenJetSrc =  cms.InputTag(""),
+                                          ## gen jets coming not from ttbar decay (additional radiation) 
+                                          addGenJetSrc =  cms.InputTag(""),
                                           ## gen MET
                                           GenMETSrc =  cms.InputTag(""),
                                           ## gen lepton
@@ -26,7 +28,9 @@ analyzeCompositedObjects = cms.EDAnalyzer("MixedObjectsAnalyzer",
                                           ## specify btag algorithm (e.g. used for bjet multiplicity and m(bb))
                                           btagAlgo=cms.string("combinedSecondaryVertexBJetTags"),
                                           ## specify btag cut value (e.g. used for bjet multiplicity and m(bb))
-                                          btagDiscr=cms.double(0.679)
+                                          btagDiscr=cms.double(0.679),
+                                          ## specify pt value to be used for additional (non-ttbar) jets
+                                          addJetPt=cms.double(30.)
                                           )
 
 

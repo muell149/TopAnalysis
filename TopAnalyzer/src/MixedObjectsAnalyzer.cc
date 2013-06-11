@@ -25,6 +25,7 @@ MixedObjectsAnalyzer::MixedObjectsAnalyzer(const edm::ParameterSet& cfg) :
   MuonSrc_           (cfg.getParameter<edm::InputTag>("MuonSrc"     )),
   ElectronSrc_       (cfg.getParameter<edm::InputTag>("ElectronSrc" )),
   GenJetSrc_         (cfg.getParameter<edm::InputTag>("GenJetSrc"   )),
+  addGenJetSrc_      (cfg.getParameter<edm::InputTag>("addGenJetSrc")),
   GenMETSrc_         (cfg.getParameter<edm::InputTag>("GenMETSrc"   )),
   GenLepSrc_         (cfg.getParameter<edm::InputTag>("GenLepSrc"   )),
   weight_            (cfg.getParameter<edm::InputTag>("weight"      )),
@@ -32,7 +33,8 @@ MixedObjectsAnalyzer::MixedObjectsAnalyzer(const edm::ParameterSet& cfg) :
   semiLepEvt_        (cfg.getParameter<edm::InputTag>("semiLepEvent")),
   hypoKey_           (cfg.getParameter<std::string>  ("hypoKey"     )),
   btagAlgo_          (cfg.getParameter<std::string>  ("btagAlgo"    )),
-  btagDiscr_         (cfg.getParameter<double>       ("btagDiscr"   ))
+  btagDiscr_         (cfg.getParameter<double>       ("btagDiscr"   )),
+  addJetPt_          (cfg.getParameter<double>       ("addJetPt"    ))
 {
 }
 
@@ -86,7 +88,9 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("leadNonttjetPt" , &leadNonttjetPt , "leadNonttjetPt/D" );   
   tree->Branch("leadNonttjetY"  , &leadNonttjetY  , "leadNonttjetY/D"  );   
   tree->Branch("leadNonttjetEta", &leadNonttjetEta, "leadNonttjetEta/D");   
-  
+  // m(ttbar+jet)
+  tree->Branch("ttbarJetMass"    , &ttbarJetMass    , "ttbarJetMass/D"    ); 
+
   // object kinematics to check kinfit shift
   tree->Branch("bqhadPtPre"   ,&bqhadPtPre , "bqhadPtPre/D" ); 
   tree->Branch("bqhadEtaPre"  ,&bqhadEtaPre, "bqhadEtaPre/D"); 
@@ -168,23 +172,28 @@ MixedObjectsAnalyzer::beginJob()
   hists_["nPVunweighted"] = fs->make<TH1F>("nPVunweighted", "nPVunweighted", 50, 0., 50.);
   hists_["nPV"          ]->GetXaxis()->SetTitle(VertexSrc_.label().c_str());
   hists_["nPVunweighted"]->GetXaxis()->SetTitle(VertexSrc_.label().c_str());
+  hists_["rhos"         ] = fs->make<TH1F>("rhos"   , "rhos"   , 110,  0. , 1.1);
+  hists_["rhosGen"      ] = fs->make<TH1F>("rhosGen", "rhosGen", 110,  0. , 1.1);
 
   // 2D
   hists2D_["Njets_"  ] = fs->make<TH2F>( "Njets_" , "Njets_" , 15, -0.5, 14.5, 15, -0.5, 14.5);  
-
+  hists2D_["rhos_"   ] = fs->make<TH2F>( "rhos_"  , "rhos_"  , 110,  0. , 1.1, 110,  0. , 1.1);
 }
 
 /// fill variables
 void
 MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 {
+  // activate debug printout
+  bool debug=false;
+
   // Event
   edm::EventAuxiliary aux = event.eventAuxiliary();
   runNumber             = aux.run();
   luminosityBlockNumber = aux.luminosityBlock();
   eventNumber           = aux.event();
 
-  //std::cout << runNumber << ":" << luminosityBlockNumber << ":" << eventNumber << std::endl;
+  if(debug) std::cout << runNumber << ":" << luminosityBlockNumber << ":" << eventNumber << std::endl;
 
   edm::Handle<edm::View< pat::MET > > MET_h;
   event.getByLabel(METSrc_, MET_h);
@@ -200,6 +209,9 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   
   edm::Handle<edm::View< reco::GenJet > > genJets_h;
   event.getByLabel(GenJetSrc_, genJets_h);
+
+  edm::Handle<edm::View< reco::GenJet > > addGenJets_h;
+  event.getByLabel(addGenJetSrc_, addGenJets_h);
 
   edm::Handle<edm::View< reco::GenMET > > genMET_h;
   event.getByLabel(GenMETSrc_, genMET_h);
@@ -271,12 +283,12 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     if(muons_h->size()>0){
       MuNu4J=(muons_h->at(0).p4()+MET_h->at(0).p4()+jets_h->at(0).p4()+jets_h->at(1).p4()+jets_h->at(2).p4()+jets_h->at(3).p4()).mass();
       hists_["MuNu4J"]->Fill(MuNu4J, weight);
-      //std::cout << "mu: " << MuNu4J << std::endl;
+      if(debug) std::cout << "mu: " << MuNu4J << std::endl;
     }
     if(electrons_h->size()>0){ 
       ElNu4J=(electrons_h->at(0).p4()+MET_h->at(0).p4()+jets_h->at(0).p4()+jets_h->at(1).p4()+jets_h->at(2).p4()+jets_h->at(3).p4()).mass();
       hists_["ElNu4J"]->Fill(ElNu4J, weight);
-      //std::cout << "el: " << ElNu4J << std::endl;
+      if(debug) std::cout << "el: " << ElNu4J << std::endl;
     }
   }
 
@@ -362,18 +374,6 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   if(genJets_h.isValid()){
     Ngenjet=0;
     for(edm::View< reco::GenJet >::const_iterator genJets=genJets_h->begin(); genJets!=genJets_h->end(); ++genJets){
-//       std::cout << "#" << genJets-genJets_h->begin() << ":" << std::endl;
-//       std::cout << "(" << genJets->numberOfDaughters() << " daughters)"<< std::endl;
-//       if(genJets->numberOfDaughters()>0){
-// 	for(unsigned int numDaught=0; numDaught<genJets->numberOfDaughters(); ++numDaught){
-// 	  //std::cout << "daughter #" << numDaught << std::endl;
-// 	  if(findAncestor(genJets->daughter(numDaught), "")){
-// 	    std::cout << "ttbar jet!" << std::endl; 
-// 	    break;
-// 	  }
-// 	}
-//       }
-      //std::cout << std::endl;
       if(genJets->pt()>30&&genJets->eta()<2.4){
 	++Ngenjet;
       }
@@ -383,11 +383,11 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   hists_["Nbjets"]->Fill(Nbjets, weight);
   hists_["Nbjets"]->GetXaxis()->SetTitle("N("+TString(btagAlgo_)+" b-jets)");
   hists_["Njets" ]->Fill(Njets , weight);
-  //std::cout << "fill gen jet plot" << std::endl;
+  if(debug) std::cout << "fill gen jet plot" << std::endl;
   hists_["Ngenjets"]->Fill(Ngenjet, weight); 
-  //std::cout << "fill gen-reco jet plot" << std::endl;
+  if(debug) std::cout << "fill gen-reco jet plot" << std::endl;
   hists2D_["Njets_"]->Fill(Ngenjet, Njets, weight); 
-  // std::cout << "done" << std::endl;
+  if(debug) std::cout << "done" << std::endl;
 
   // lead non ttbar jet
   if(leadNonttjet!=-1){
@@ -491,7 +491,37 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   if(lepEtaFit!=-999&&lepEtaPre!=-999) hists_["shiftLepEta"]->Fill( lepEtaFit-lepEtaPre, weight);  
   if(nuEtaFit!=-999 &&nuEtaPre!=-999 ) hists_["shiftNuEta" ]->Fill( nuEtaFit -nuEtaPre , weight);
   if(lepPhiFit!=-999&&lepPhiPre!=-999) hists_["shiftLepPhi"]->Fill( modTwoPi(lepPhiFit-lepPhiPre), weight);  
-  if(nuPhiFit!=-999 &&nuPhiPre!=-999 ) hists_["shiftNuPhi" ]->Fill( modTwoPi(nuPhiFit -nuPhiPre ), weight);
+  if(nuPhiFit!=-999 &&nuPhiPre!=-999 ) hists_["shiftNuPhi" ]->Fill( modTwoPi( nuPhiFit -nuPhiPre), weight);
+
+  // tt+jet distribution
+  ttbarJetMass=ttbarJetMassGen=-999;
+  // gen level
+  if(semiLepEvt_h.isValid()){
+    std::cout << "hypothesis valid" << std::endl;
+    if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)&&(addGenJets_h->at(0)).pt()>=addJetPt_){
+      ttbarJetMassGen=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
+      std::cout << "ttbarJetMassGen=" << ttbarJetMassGen << std::endl;
+    }
+    else if(debug){
+      std::cout << "addGenJets_h.isValid(): " << addGenJets_h.isValid() << std::endl;
+      std::cout << "addGenJets_h->size(): " << addGenJets_h->size() << std::endl;
+      if(addGenJets_h->size()>0) std::cout << "addGenJets_h->at(0).pt(): " << addGenJets_h->at(0).pt() << std::endl;
+    }
+    // reco level
+    if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjet!=-1)&&(leadNonttjetPt>=addJetPt_) ){
+      ttbarJetMass=(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()+(jets_h->at(leadNonttjet)).p4()).mass();
+      std::cout << "ttbarJetMass=" << ttbarJetMass << std::endl;
+    }
+    else if(debug){
+      std::cout << "semiLepEvt_h->isHypoValid(hypoKey_): " << semiLepEvt_h->isHypoValid(hypoKey_) << std::endl;
+      std::cout << "leadNonttjet: "   << leadNonttjet   << std::endl;
+      std::cout << "leadNonttjetPt: " << leadNonttjetPt << std::endl;
+    }
+  }
+  double mtop=172.5;
+  if(ttbarJetMass   !=-999                    ) hists_  ["rhos"   ]->Fill( 2*mtop/ttbarJetMass   , weight);
+  if(ttbarJetMassGen!=-999                    ) hists_  ["rhosGen"]->Fill( 2*mtop/ttbarJetMassGen, weight);
+  if(ttbarJetMass!=-999&&ttbarJetMassGen!=-999) hists2D_["rhos_"  ]->Fill( 2*mtop/ttbarJetMassGen, 2*mtop/ttbarJetMass, weight);
 
   tree->Fill();
 }
