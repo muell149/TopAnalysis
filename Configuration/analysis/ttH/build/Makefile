@@ -124,10 +124,10 @@ RootFileReader.o: $(TopDir)/RootFileReader.cc $(TopDir)/RootFileReader.h
 
 
 
-mva: mva.o sampleHelpers.o MvaInputVariables.o
+mva: mva.o sampleHelpers.o MvaInputVariables.o CommandLineParameters.o utils.o
 	g++ -o mva $^ $(ROOTLIBS)
 
-mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc $(TopDir)/sampleHelpers.h $(HiggsDir)/MvaInputVariables.h
+mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc $(TopDir)/sampleHelpers.h $(HiggsDir)/MvaInputVariables.h $(TopDir)/CommandLineParameters.h $(TopDir)/utils.h
 	g++ -c -o mva.o $(COMPFLAGS) $(HiggsDir)/train_bdt_topSystemJetAssignment.cc
 
 
