@@ -1,161 +1,36 @@
+#include <vector>
+#include <algorithm>
+#include <iostream>
+
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TLegend.h>
+#include <TString.h>
+#include <TPaveStats.h>
+#include <Rtypes.h>
+
+
+
+void mvaSeparationPlots(const TString& inputFileName, const TString& outputDirectory,
+                        const std::vector<TString>& histogramNames, const std::vector<TString>& combinations)
 {
 
+TFile* inputFile = TFile::Open(inputFileName);
 
+TCanvas* canvas(0);
 
-gROOT->SetStyle("Plain");
-gROOT->ForceStyle();
-gStyle->SetOptStat(111110);
-
-gStyle->SetPalette(1);      //Spektralpalette, Default: 0 resp. 50
-//gStyle->SetNumberContours(20);  // Default: 20
-
-double width = 600.;
-
-gStyle->SetCanvasDefW(width);
-gStyle->SetCanvasDefH(width);
-
-gStyle->SetPadLeftMargin(0.15);
-gStyle->SetPadRightMargin(0.10);
-
-gStyle->SetPadTopMargin(0.10);
-gStyle->SetPadBottomMargin(0.15);
-
-gStyle->SetTitleOffset(1.4,"Y");
-gStyle->SetTitleOffset(1.2,"X");
-
-
-TGaxis::SetMaxDigits(3);
-
-
-//TH1::StatOverflows(kTRUE);// compute mean etc including overflow!
-//gStyle->SetHistMinimumZero(kTRUE); // no zero-suppression on y-axis
-//gStyle->SetOptFit(222);         // 1: Fit-Parameter werden angezeigt
-//gStyle->SetCanvasDefX(400);     // canvas (default) upper edge in X
-//gStyle->SetCanvasDefY(200);     // canvas (default) upper edge in Y
-
-//gStyle->SetHistLineWidth(2);
+TLegend* legend(0);
 
 
 
-gStyle->SetTitleX(0.2);         // move upper left corner of title box to specified value
-//gStyle->SetTitleY(0.99);        // move upper left corner of title box to specified value
+const TString labelCorrect = "correct";
+const TString labelSwapped = "swapped";
+const TString labelWrong = "wrong";
 
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-gStyle->SetTitleXSize(0.05);
-gStyle->SetTitleYSize(0.05);
-gStyle->SetTitleSize(0.05,"XY");
-gStyle->SetLabelSize(0.05,"XY");
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-TCanvas* canvas1;
-
-TFile* file1 = TFile::Open("mvaOutput/plots.root");
-//TFile* file2 = TFile::Open("bla2.root");
-
-TH1 *hist1, *hist2;
-
-TLegend* legend1;
-
-TString legendEntry1 = "correct", legendEntry2 = "wrong";
-Double_t yMax1, yMax2;
-Double_t yMin1, yMin2;
-Double_t yMax;
-TString outputDirectory = "mvaOutput/aaa/";
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("jetChargeDiff_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
+const bool drawCorrect = std::find(combinations.begin(), combinations.end(), labelCorrect) != combinations.end();
+const bool drawSwapped = std::find(combinations.begin(), combinations.end(), labelSwapped) != combinations.end();
+const bool drawWrong = std::find(combinations.begin(), combinations.end(), labelWrong) != combinations.end();
 
 
 
@@ -166,1065 +41,119 @@ TString outputDirectory = "mvaOutput/aaa/";
 
 
 
-// 1D-Histo (comparison)
 
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("meanDeltaPhi_b_met_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
 
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
 
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("massDiff_recoil_bbbar_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("pt_b_antiLepton_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("pt_antiB_lepton_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("deltaR_b_antiLepton_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("deltaR_antiB_lepton_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("btagDiscriminatorSum_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("deltaPhi_antiBLepton_bAntiLepton_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("massDiff_fullBLepton_bbbar_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("meanMT_b_met_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("massSum_antiBLepton_bAntiLepton_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-
-// 1D-Histo (comparison)
-
-    canvas1 = new TCanvas("canvas1");
-    canvas1->cd();
-  //canvas1->SetLogy();
-  
-  TString histName("massDiff_antiBLepton_bAntiLepton_step8");
-    file1->GetObject("correct_" + histName + ";1", hist1);
-    file1->GetObject("wrong_" + histName + ";1", hist2);
-
-  hist1->SetTitle("");
-  //hist1->SetXTitle("");
-  //hist1->SetYTitle("# Treffer");
-  //hist1->GetXaxis()->SetNoExponent();
-  hist1->SetLineWidth(2);
-  hist1->SetLineColor(2);
-  
-  hist1->Scale(1./hist1->Integral());
-  hist2->Scale(1./hist2->Integral());
-  
-  yMax1 = hist1->GetMaximum(); yMax2 = hist2->GetMaximum();
-  yMin1 = hist1->GetMinimum(); yMin2 = hist2->GetMinimum();
-  yMax = (yMax2>yMax1) ? yMax2 : yMax1;
-  hist1->GetYaxis()->SetRangeUser(0.,1.4*yMax);
-  hist1->Draw();
-
-  //hist1->SetMarkerColor(4);
-  //hist1->SetMarkerStyle(24);
-  //hist1->SetMarkerSize(1.5);
-  //hist1->SetLineWidth(2);
-  //hist1->Draw("P");            //Draw only Markers
-  
-  //hist2->SetMarkerColor(2);
-  //hist2->SetMarkerStyle(25);
-  //hist2->SetMarkerSize(1.5);
-  //hist2->Draw("Psame");
-
-  hist2->SetLineColor(4);
-  //hist2->SetLineStyle(2);
-  hist2->SetLineWidth(2);
-  hist2->Draw("sameS");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  //TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->At(1);
-  TPaveStats* stats2 = (TPaveStats*)hist2->GetListOfFunctions()->FindObject("stats");
-  stats2->SetY1NDC(0.58);
-  stats2->SetY2NDC(0.78);
-  stats2->SetLineColor(2);
-  stats2->SetTextColor(2);
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  legend1 = new TLegend(0.41,0.84,0.76,0.99);
-  legend1->SetFillColor(0);
-  legend1->SetFillStyle(0);
-  legend1->SetTextSize(0.04);
-  legend1->SetMargin(0.12);
-  legend1->SetFillStyle(1001);
-  //legend1->SetBorderSize(0);
-  legend1->AddEntry(hist1,legendEntry1,"l");
-  legend1->AddEntry(hist2,legendEntry2,"l");
-  legend1->Draw("same");
-
-    canvas1->Modified();
-    canvas1->Update();
-
-  TString plotName(outputDirectory + histName);
-
-    canvas1->Print(plotName + ".eps");
-    canvas1->Print(plotName + ".png");
-
-    legend1->Delete();
-    stats2->Delete();
-    canvas1->Close();
-
-
-
-
-
-
-//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-  hist1->Delete();//hist2->Delete();
-  
-  file1->Close();//file2->Close();
-
-
+for(std::vector<TString>::const_iterator i_histName = histogramNames.begin(); i_histName != histogramNames.end(); ++i_histName){
+    
+    const TString& histName(*i_histName);
+    
+    // Set up canvas
+    canvas = new TCanvas("canvas1");
+    canvas->cd();
+    //canvas->SetLogy();
+    
+    // Set up legend
+    legend = new TLegend(0.41,0.84,0.76,0.99);
+    legend->SetFillColor(0);
+    legend->SetFillStyle(0);
+    legend->SetTextSize(0.04);
+    legend->SetMargin(0.12);
+    legend->SetFillStyle(1001);
+    
+    // set up histograms
+    std::vector<TH1*> v_hist;
+    if(drawCorrect){
+        TH1* hist(0);
+        inputFile->GetObject(labelCorrect + "_" + histName + ";1", hist);
+        hist->SetLineColor(2);
+        legend->AddEntry(hist, labelCorrect, "l");
+        v_hist.push_back(hist);
+    }
+    if(drawSwapped){
+        TH1* hist(0);
+        inputFile->GetObject(labelSwapped + "_" + histName + ";1", hist);
+        hist->SetLineColor(3);
+        legend->AddEntry(hist, labelSwapped, "l");
+        v_hist.push_back(hist);
+    }
+    if(drawWrong){
+        TH1* hist(0);
+        inputFile->GetObject(labelWrong + "_" + histName + ";1", hist);
+        hist->SetLineColor(4);
+        legend->AddEntry(hist, labelWrong, "l");
+        v_hist.push_back(hist);
+    }
+    
+    
+    // Scale histograms and get minimum and maximum value
+    Double_t yMin(99999.);
+    Double_t yMax(-99999.);
+    for(std::vector<TH1*>::iterator i_hist = v_hist.begin(); i_hist != v_hist.end(); ++i_hist){
+        TH1* hist = *i_hist;
+        hist->Scale(1./hist->Integral(0, hist->GetNbinsX()+1));
+        
+        const Double_t yMinHist = hist->GetMinimum();
+        const Double_t yMaxHist = hist->GetMaximum();
+        if(yMin > yMinHist) yMin = yMinHist;
+        if(yMax < yMaxHist) yMax = yMaxHist;
+    }
+    
+    
+    // Draw the histograms
+    for(std::vector<TH1*>::iterator i_hist = v_hist.begin(); i_hist != v_hist.end(); ++i_hist){
+        TH1* hist = *i_hist;
+        const bool firstHist = i_hist==v_hist.begin();
+        hist->SetLineWidth(2);
+        
+        if(firstHist){
+            hist->SetTitle("");
+            hist->GetYaxis()->SetRangeUser(0.,1.4*yMax);
+            hist->Draw();
+            
+            canvas->Modified();
+            canvas->Update();
+        }
+        else{
+            hist->Draw("sameS");
+            
+            canvas->Modified();
+            canvas->Update();
+        }
+    }
+    
+    // Adjust stats boxes, has to be done only after drawing
+    std::vector<TPaveStats*> v_stats;
+    for(size_t iHist = 0; iHist < v_hist.size(); ++iHist){
+        TH1* hist = v_hist.at(iHist);
+        
+        TPaveStats* stats = (TPaveStats*)hist->GetListOfFunctions()->FindObject("stats");
+        const double y2ndc = 0.99 - static_cast<double>(iHist)*0.21;
+        stats->SetY2NDC(y2ndc);
+        stats->SetY1NDC(y2ndc-0.2);
+        stats->SetLineColor(hist->GetLineColor());
+        
+        canvas->Modified();
+        canvas->Update();
+    }
+    
+    legend->Draw("same");
+    canvas->Modified();
+    canvas->Update();
+    
+    const TString plotName(outputDirectory + histName);
+    
+    canvas->Print(plotName + ".eps");
+    canvas->Print(plotName + ".png");
+    
+    legend->Delete();
+    for(size_t iHist = 0; iHist < v_hist.size(); ++iHist) v_hist.at(iHist)->Delete();
+    v_hist.clear();
+    for(size_t iStats = 0; iStats < v_stats.size(); ++iStats) v_stats.at(iStats)->Delete();
+    v_stats.clear();
+    canvas->Close();
+}
+
+inputFile->Close();
 
 }
