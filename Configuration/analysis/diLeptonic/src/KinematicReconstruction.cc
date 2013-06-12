@@ -104,19 +104,19 @@ std::vector<struct_KinematicReconstruction> vect_sol;
                         //if((al_temp+b_temp).M()>180||(l_temp+bbar_temp).M()>180)continue;
 
 				/*smearing*/
-                                TF1 fJet("fJet","[0]*pow((x-0),0.5)+[1]");
-                                    fJet.SetParameters(4.18432,-24.8944);
-                                TF1 fLep("fLep","[0]*pow((x-0),0.5)+[1]");
-                                    fLep.SetParameters(0.575716,-3.11214);
+                                //TF1 fJet("fJet","[0]*pow((x-0),0.5)+[1]");
+                                //    fJet.SetParameters(4.18432,-24.8944);
+                                //TF1 fLep("fLep","[0]*pow((x-0),0.5)+[1]");
+                                //    fLep.SetParameters(0.575716,-3.11214);
 
 
                             TRandom3 r(0);  ///random seed
 //                              TF1 f1("f1","[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x",30,580);
 //                              f1.SetParameters(1.06517e+01,3.58131e-02,7.44249e-04,-1.70968e-06,1.21316e-09);
-                             double bRMS=fJet.Eval(b_temp.E())/b_temp.E(); //%
-                             double bbarRMS=fJet.Eval(bbar_temp.E())/bbar_temp.E(); //%
-                             double lRMS=fLep.Eval(l_temp.E())/l_temp.E(); //%
-                             double alRMS=fLep.Eval(al_temp.E())/al_temp.E(); //%
+                             double bRMS=(4.13*pow((b_temp.E()-0),0.5) - 27.32)/b_temp.E();//fJet.Eval(b_temp.E())/b_temp.E(); //%
+                             double bbarRMS=(4.13*pow((bbar_temp.E()-0),0.5) - 27.32)/bbar_temp.E();//fJet.Eval(bbar_temp.E())/bbar_temp.E(); //%
+                             double lRMS=(0.575716*pow((l_temp.E()-0),0.5) - 3.11214)/l_temp.E();//fLep.Eval(l_temp.E())/l_temp.E(); //%
+                             double alRMS=(0.575716*pow((al_temp.E()-0),0.5) - 3.11214)/al_temp.E();//fLep.Eval(al_temp.E())/al_temp.E(); //%
 
                              TVector3 vX_reco = -b_temp.Vect()-bbar_temp.Vect()-l_temp.Vect()-al_temp.Vect()-met_temp.Vect();
 
@@ -298,19 +298,20 @@ std::vector<struct_KinematicReconstruction> vect_sol;
                         double vw_max=0;
 				/*smearing*/
 				if(!mass_loop_on){
-                                TF1 fJet("fJet","[0]*pow((x-0),0.5)+[1]");
-                                    fJet.SetParameters(4.18432,-24.8944);
-                                TF1 fLep("fLep","[0]*pow((x-0),0.5)+[1]");
-                                    fLep.SetParameters(0.575716,-3.11214);
+//                                 TF1 fJet("fJet","[0]*pow((x-0),0.5)+[1]");
+//                                     fJet.SetParameters(4.18432,-24.8944);
+//                                 TF1 fLep("fLep","[0]*pow((x-0),0.5)+[1]");
+//                                     fLep.SetParameters(0.575716,-3.11214);
 
 
                             TRandom3 r(0);  ///random seed
 //                              TF1 f1("f1","[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x",30,580);
 //                              f1.SetParameters(1.06517e+01,3.58131e-02,7.44249e-04,-1.70968e-06,1.21316e-09);
-                             double bRMS=fJet.Eval(b_temp.E())/b_temp.E(); //%
-                             double bbarRMS=fJet.Eval(bbar_temp.E())/bbar_temp.E(); //%
-                             double lRMS=fLep.Eval(l_temp.E())/l_temp.E(); //%
-                             double alRMS=fLep.Eval(al_temp.E())/al_temp.E(); //%
+                             double bRMS=(4.13*pow((b_temp.E()-0),0.5) - 27.32)/b_temp.E();//fJet.Eval(b_temp.E())/b_temp.E(); //%
+                             double bbarRMS=(4.13*pow((bbar_temp.E()-0),0.5) - 27.32)/bbar_temp.E();//fJet.Eval(bbar_temp.E())/bbar_temp.E(); //%
+                             double lRMS=(0.575716*pow((l_temp.E()-0),0.5) - 3.11214)/l_temp.E();//fLep.Eval(l_temp.E())/l_temp.E(); //%
+                             double alRMS=(0.575716*pow((al_temp.E()-0),0.5) - 3.11214)/al_temp.E();//fLep.Eval(al_temp.E())/al_temp.E(); //%
+
 
                              TVector3 vX_reco = -b_temp.Vect()-bbar_temp.Vect()-l_temp.Vect()-al_temp.Vect()-met_temp.Vect();
 

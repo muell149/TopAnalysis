@@ -16,8 +16,8 @@ KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines()
     mal    = 0.000511; 
     mv=0;
     mav=0;
-    NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
-    NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232); // top_mass = 172.5 GeV  CME = 7 TeV
+   // NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
+   // NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232); // top_mass = 172.5 GeV  CME = 7 TeV
     
 }
 
@@ -33,8 +33,8 @@ KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double ma
     mal    = mass_al;
     mv=0;
     mav=0;
-    NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
-    NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
+   // NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
+   // NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
 }
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm)
@@ -49,8 +49,8 @@ KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double ma
     mal    = mass_al;
     mv=0;
     mav=0;
-    NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
-    NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
+   // NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
+   // NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
 
 
 }
@@ -68,13 +68,13 @@ KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double ma
     mal=mass_al;
     mv=0;
     mav=0;
-    NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
-    NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
+   // NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
+   // NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
 }
 
 KinematicReconstruction_LSroutines::~KinematicReconstruction_LSroutines()
 {
-    delete NeutrinoEventShape;
+    //delete NeutrinoEventShape;
 }
 
 
@@ -167,7 +167,7 @@ void KinematicReconstruction_LSroutines::DoAll()
                 TS_temp.AntiNeutrinoPx=neutrinobar.Px();
                 TS_temp.mTop=top.M();
                 TS_temp.mAntiTop=topbar.M();
-                TS_temp.vw=NeutrinoEventShape->Eval(neutrino.E(),neutrinobar.E());
+                TS_temp.vw=/*NeutrinoEventShape->Eval(neutrino.E(),neutrinobar.E());*/30.641*TMath::Landau(neutrino.E(), 57.941, 22.344)*TMath::Landau(neutrinobar.E(), 57.533, 22.232);
                 TS_temp.top = top;
                 TS_temp.topbar = topbar;
                 TS_temp.wp = w;

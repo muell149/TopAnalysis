@@ -136,7 +136,7 @@ private:
     double mv;
     double mav;
   
-    TF2 * NeutrinoEventShape;  // ()  30.641000 57.941000 22.344000 57.533000 22.232000
+    //TF2 * NeutrinoEventShape;  // ()  30.641000 57.941000 22.344000 57.533000 22.232000
     
    double a1,a2,a3,a4;
    double b1,b2,b3,b4;
