@@ -13,11 +13,11 @@ class TProfile;
 #include "AnalysisHistograms.h"
 #include "MvaInputVariables.h"
 #include "analysisHelpers.h"
-#include "DijetAnalyzer.h"
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "../../diLeptonic/src/classesFwd.h"
 
 class JetCategories;
+class DijetAnalyzer;
 
 
 
@@ -59,8 +59,11 @@ public:
     /// Set up the jet categories (# jets, # b-jets) for analysis
     void SetJetCategoriesAnalysis(const JetCategories& jetCategories);
 
-    /// Set up the MVA weights input
-    void SetMvaWeightsInput(MvaInputTopJetsVariables& mvaInputTopJetsVariables);
+    /// Set up the MVA weights input for correct jet combinations of ttbar system
+    void SetMvaWeightsCorrect(MvaInputTopJetsVariables& mvaInputTopJetsVariables);
+    
+    /// Set up the MVA weights input for swapped jet combinations of ttbar system
+    void SetMvaWeightsSwapped(MvaInputTopJetsVariables& mvaInputTopJetsVariables);
 
     /// Set the pointer to DijetAnalyzer
     void SetDijetAnalyzer(DijetAnalyzer* analyzer);
@@ -128,8 +131,11 @@ private:
     /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     MvaInputTopJetsVariables mvaInputTopJetsVariables_;
 
-    /// Class holding the weights as calculated by MVA
-    MvaInputTopJetsVariables* mvaInputWeights_;
+    /// Class holding the weights as calculated by MVA for correct combinations
+    MvaInputTopJetsVariables* mvaWeightsCorrect_;
+    
+    /// Class holding the weights as calculated by MVA for swapped combinations
+    MvaInputTopJetsVariables* mvaWeightsSwapped_;
 
     /// Class that analyzes dijet pairs from jets that pass selection cuts
     DijetAnalyzer* dijetAnalyzer_;
@@ -193,9 +199,6 @@ private:
 
     TH1* h_dijetMass_step8;
     TH1* h_mvaBasedDijetMass_step8;
-
-    TH1* h_dijetMvaWeight_step8;
-    TH1* h_dijetBestMvaWeight_step8;
 
     TProfile* p_dijetMassVsJetCategories;
     TProfile* p_dijetMassVsMvaWeightHigh;

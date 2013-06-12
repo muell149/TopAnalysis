@@ -64,8 +64,11 @@ constexpr const char* BtagEfficiencyOutputDIR = "selectionRoot/BTagEff";
 /// Folder for storage of MVA input TTree
 constexpr const char* MvaInputDIR = "mvaInput";
 
-/// File containing MVA weights
-constexpr const char* MvaWeightsFILE = "mvaOutput/weights/MVA_test2.weights.xml";
+/// File containing MVA weights for correct combinations of ttbar jets
+constexpr const char* MvaWeightsCorrectFILE = "mvaOutput/weights/MVA_correct.weights.xml";
+
+/// File containing MVA weights for correct combinations of ttbar jets
+constexpr const char* MvaWeightsSwappedFILE = "mvaOutput/weights/MVA_swapped.weights.xml";
 
 
 
@@ -128,7 +131,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     const JetCategories jetCategories_overview(2, 5, 0, 5, true, true);
     
     // Set up jet categories for analysis
-    const JetCategories jetCategories(2, 4, 0, 3, true, true);
+    const JetCategories jetCategories(2, 4, 1, 3, true, true);
 
     // Set up jet categories for DijetAnalyzer
     const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
@@ -139,8 +142,8 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up MVA steering tool for: a) production of MVA input TTree, b) reading in MVA weights
     // FIXME: now used here for reading weights only, and another one within HiggsAnalysis for for TTree production
     // Cannot be const due to the internal structure at present
-    MvaInputTopJetsVariables mvaInputWeights(MvaWeightsFILE);
-    
+    MvaInputTopJetsVariables mvaInputWeightsCorrect(MvaWeightsCorrectFILE);
+    MvaInputTopJetsVariables mvaInputWeightsSwapped(MvaWeightsSwappedFILE);
     
     // Set up the analysis
     HiggsAnalysis* selector = new HiggsAnalysis();
@@ -151,8 +154,9 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetBtagScaleFactors(btagScaleFactors);
     selector->SetJetCategoriesOverview(jetCategories_overview);
     selector->SetJetCategoriesAnalysis(jetCategories);
-    selector->SetMvaWeightsInput(mvaInputWeights);
-
+    selector->SetMvaWeightsCorrect(mvaInputWeightsCorrect);
+    selector->SetMvaWeightsSwapped(mvaInputWeightsSwapped);
+    
     if(runDijetAnalyzer) {
         dijetAnalyzer= new DijetAnalyzer();
         dijetAnalyzer->SetJetCategories(jetCategories_dijetAnalyzer);

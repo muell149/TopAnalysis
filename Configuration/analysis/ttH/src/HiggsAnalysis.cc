@@ -16,6 +16,7 @@
 #include "HiggsAnalysis.h"
 #include "higgsUtils.h"
 #include "JetCategories.h"
+#include "DijetAnalyzer.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/classes.h"
 #include "../../diLeptonic/src/ScaleFactors.h"
@@ -39,7 +40,7 @@ constexpr double JetPtCUT = 30.;
 /// b-tag working point
 /// CSV Loose: 0.244
 /// CSV Medium: 0.679
-/// CSV Medium: 0.898
+/// CSV Tight: 0.898
 constexpr double BtagWP = 0.244;
 
 
@@ -84,7 +85,7 @@ void HiggsAnalysis::Terminate()
 {
     // Produce b-tag efficiencies
     if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
-
+    
     // Do everything needed for MVA
     if(analysisMode_ == AnalysisMode::mva){
 
@@ -97,15 +98,12 @@ void HiggsAnalysis::Terminate()
         // Create and store control plots in fOutput
         mvaInputTopJetsVariables_.mvaInputVariablesControlPlots(fOutput);
     }
-
+    
     // Cleanup
     mvaInputTopJetsVariables_.clear();
-    // FIXME: shouldn't we also clear b-tagging efficiency histograms if they are produced ?
-
-    // Cleaning DijetAnalyzer
     if(dijetAnalyzer_) dijetAnalyzer_->clear();
-
-
+    // FIXME: shouldn't we also clear b-tagging efficiency histograms if they are produced ?
+    
     // Defaults from AnalysisBase
     AnalysisBase::Terminate();
 }
@@ -249,9 +247,6 @@ void HiggsAnalysis::SlaveBegin(TTree *)
         p_mvaBasedDijetMassVsJetCategories->GetXaxis()->SetBinLabel(position, binLabel);
     }
 
-    h_dijetMvaWeight_step8 = store(new TH1D("dijetMvaWeight_step8", "dijet MVA weight;w_{MVA};# jet pairs", 50, -1, 0));
-    h_dijetBestMvaWeight_step8 = store(new TH1D("dijetBestMvaWeight_step8", "dijet best MVA weight;w_{MVA,1};# jet pairs", 50, -1, 0));
-
     // Binned control plots
     CreateBinnedControlPlots(h_jetCategories_step8, h_events_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
@@ -303,8 +298,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Separate DY dilepton decays in lepton flavours
     if(this->failsDrellYanGeneratorSelection(entry)) return kTRUE;
 
-//     // Separate dileptonic ttbar decays via tau
-//     if(this->failsTopGeneratorSelection(entry)) return kTRUE;
+    // Separate dileptonic ttbar decays via tau
+    //if(this->failsTopGeneratorSelection(entry)) return kTRUE;
 
     // Separate inclusive ttH sample in decays H->bbbar and others
     if(this->failsHiggsGeneratorSelection(entry)) return kTRUE;
@@ -677,25 +672,19 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                                                            met,
                                                            successfulTopMatching, weight);
 
-    // Fill the MVA TTree
-    mvaInputTopJetsVariables_.addEntries(v_mvaInput);
-
     // Get the MVA weights from weights file as vector, one entry per jet pair
-    const std::vector<float>& mvaWeights = mvaInputWeights_->mvaWeights(v_mvaInput);
-    for(const auto& mvaWeight : mvaWeights) h_dijetMvaWeight_step8->Fill(mvaWeight, weight);
-    h_dijetBestMvaWeight_step8->Fill(mvaWeights.at(0), weight);
-
-//    if(mvaWeights.at(0) < -0.2) return kTRUE;
-
+    const std::vector<float>& mvaWeightsCorrect = mvaWeightsCorrect_->mvaWeights(v_mvaInput);
+    const std::vector<float>& mvaWeightsSwapped = mvaWeightsSwapped_->mvaWeights(v_mvaInput);
+    
+    // Fill the MVA TTree
+    mvaInputTopJetsVariables_.addEntries(v_mvaInput, mvaWeightsCorrect, mvaWeightsSwapped);
+    
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     std::vector<int> jetIndexPairsIndices = initialiseIndices(jetIndexPairs);
-    orderIndices(jetIndexPairsIndices, mvaWeights);
-
-//    std::cout<<"\n\nMVA weights: "<<entry<<"\n";
-//    for(const int i : jetIndexPairsIndices){
-//        std::cout<<"\t"<<i<<"\t"<<mvaWeights.at(i)<<"\n";
-//    }
-
+    orderIndices(jetIndexPairsIndices, mvaWeightsCorrect);
+    
+    
+    
     // Get jet pair leading in MVA weight, and extract bIndex and antiBIndex
     const std::pair<int, int>& leadingJetIndexPair = jetIndexPairs.at(jetIndexPairsIndices.at(0));
     const int antiBFromTopIndex = leadingJetIndexPair.first;
@@ -802,15 +791,15 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         const LV dijet = jets_->at(jetIndexPair.first) + jets_->at(jetIndexPair.second);
         h_dijetMass_step8->Fill(dijet.M(), weight);
         p_dijetMassVsJetCategories->Fill(jetCategoryId_overview, dijet.M(), weight);
-        p_dijetMassVsMvaWeightHigh->Fill(mvaWeights.at(0), dijet.M(), weight);
-        p_dijetMassVsMvaWeightDiff->Fill(mvaWeights.at(0)-mvaWeights.at(1), dijet.M(), weight);
+        p_dijetMassVsMvaWeightHigh->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
+        p_dijetMassVsMvaWeightDiff->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
     }
 
     const LV dijet = jets_->at(jet1FromHiggsIndex) + jets_->at(jet2FromHiggsIndex);
     h_mvaBasedDijetMass_step8->Fill(dijet.M(), weight);
     p_mvaBasedDijetMassVsJetCategories->Fill(jetCategoryId_overview, dijet.M(), weight);
-    p_mvaBasedDijetMassVsMvaWeightHigh->Fill(mvaWeights.at(0), dijet.M(), weight);
-    p_mvaBasedDijetMassVsMvaWeightDiff->Fill(mvaWeights.at(0)-mvaWeights.at(1), dijet.M(), weight);
+    p_mvaBasedDijetMassVsMvaWeightHigh->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
+    p_mvaBasedDijetMassVsMvaWeightDiff->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
 
     return kTRUE;
 }
@@ -1013,9 +1002,16 @@ void HiggsAnalysis::SetJetCategoriesOverview(const JetCategories& jetCategories)
 
 
 
-void HiggsAnalysis::SetMvaWeightsInput(MvaInputTopJetsVariables& mvaInputTopJetsVariables)
+void HiggsAnalysis::SetMvaWeightsCorrect(MvaInputTopJetsVariables& mvaInputTopJetsVariables)
 {
-    mvaInputWeights_ = &mvaInputTopJetsVariables;
+    mvaWeightsCorrect_ = &mvaInputTopJetsVariables;
+}
+
+
+
+void HiggsAnalysis::SetMvaWeightsSwapped(MvaInputTopJetsVariables& mvaInputTopJetsVariables)
+{
+    mvaWeightsSwapped_ = &mvaInputTopJetsVariables;
 }
 
 
