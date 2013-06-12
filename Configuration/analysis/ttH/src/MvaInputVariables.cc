@@ -6,11 +6,18 @@
 #include <TTree.h>
 #include <TSystem.h>
 #include <TH1.h>
+#include <TH1D.h>
+#include <TH2D.h>
 #include <TFile.h>
 #include <TString.h>
 #include <Math/VectorUtil.h>
 #include <TSelectorList.h>
 #include <Rtypes.h>
+#include <TCut.h>
+#include <TMVA/Tools.h>
+#include <TMVA/Config.h>
+#include <TMVA/Factory.h>
+#include <TMVA/Types.h>
 #include <TMVA/Reader.h>
 
 #include "MvaInputVariables.h"
@@ -21,9 +28,14 @@
 
 
 MvaInputTopJetsVariables::Input::Input():
-bQuarkRecoJetMatched_(false),
-correctCombination_(false),
-swappedCombination_(false),
+bQuarkRecoJetMatched_(0),
+correctCombination_(0),
+swappedCombination_(0),
+eventWeight_(-999.),
+mvaWeightCorrect_(-999.),
+mvaWeightSwapped_(-999.),
+bestMvaWeightCorrect_(-999.),
+bestMvaWeightSwapped_(-999.),
 meanDeltaPhi_b_met_(-999.),
 massDiff_recoil_bbbar_(-999.),
 pt_b_antiLepton_(-999.),
@@ -63,6 +75,10 @@ MvaInputTopJetsVariables::Input::Input(const LV& lepton, const LV& antiLepton,
     correctCombination_ = correctCombination;
     swappedCombination_ = swappedCombination;
     eventWeight_ = eventWeight;
+    mvaWeightCorrect_ = -999.;
+    mvaWeightSwapped_ = -999.;
+    bestMvaWeightCorrect_ = -999.;
+    bestMvaWeightSwapped_ = -999.;
     jetChargeDiff_ = jetChargeDiff;
     
     meanDeltaPhi_b_met_ = 0.5*(std::abs(DeltaPhi(bJet, met)) + std::abs(DeltaPhi(antiBJet, met)));
@@ -77,6 +93,14 @@ MvaInputTopJetsVariables::Input::Input(const LV& lepton, const LV& antiLepton,
     meanMt_b_met_ = 0.5*((bJet + met).Mt() + (antiBJet + met).Mt());
     massSum_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() + bAntiLeptonSystem.M();
     massDiff_antiBLepton_bAntiLepton_ = antiBLeptonSystem.M() - bAntiLeptonSystem.M();
+}
+
+
+
+void MvaInputTopJetsVariables::Input::setMvaWeights(const float weightCorrect, const float weightSwapped)
+{
+    mvaWeightCorrect_ = weightCorrect;
+    mvaWeightSwapped_ = weightSwapped;
 }
 
 
@@ -105,7 +129,9 @@ mvaWeightsReader_(0)
         mvaWeightsReader_ = new TMVA::Reader("Color");
 
         Input& mvaInputStruct = mvaWeightsStruct_;
-
+        
+        mvaWeightsReader_->AddVariable("jetChargeDiff", &mvaInputStruct.jetChargeDiff_);
+        
         mvaWeightsReader_->AddVariable("meanDeltaPhi_b_met", &mvaInputStruct.meanDeltaPhi_b_met_);
         mvaWeightsReader_->AddVariable("massDiff_recoil_bbbar", &mvaInputStruct.massDiff_recoil_bbbar_);
         mvaWeightsReader_->AddVariable("pt_b_antiLepton", &mvaInputStruct.pt_b_antiLepton_);
@@ -139,11 +165,50 @@ void MvaInputTopJetsVariables::addEntries(const std::vector<Input>& v_input)
 
 
 
+void MvaInputTopJetsVariables::addEntries(const std::vector<MvaInputTopJetsVariables::Input>& v_input,
+                                          const std::vector<float>& weightsCorrect, const std::vector<float>& weightsSwapped)
+{
+    float maxWeightCorrect(-999.F);
+    for(const float weight : weightsCorrect){
+        if(weight > maxWeightCorrect) maxWeightCorrect = weight;
+//        std::cout<<"Weights correct: "<<weight<<"\n";
+    }
+    
+//    std::cout<<std::endl;
+    
+    float maxWeightSwapped(-999.F);
+    for(const float weight : weightsSwapped){
+        if(weight > maxWeightSwapped) maxWeightSwapped = weight;
+//        std::cout<<"Weights swapped: "<<weight<<"\n";
+    }
+    
+//    std::cout<<std::endl;
+//    std::cout<<"Max weights: "<<maxWeightCorrect<<" , "<<maxWeightSwapped<<"\n\n\n\n\n";
+    
+    for(size_t i = 0; i < v_input.size(); ++i){
+        Input input = v_input.at(i);
+        input.setMvaWeights(weightsCorrect.at(i), weightsSwapped.at(i));
+        if(i==0){
+            input.bestMvaWeightCorrect_ = maxWeightCorrect;
+            input.bestMvaWeightSwapped_ = maxWeightSwapped;
+        }
+        v_inputStruct_.push_back(input);
+    }
+    
+}
+
+
+
 void MvaInputTopJetsVariables::createMvaInputBranches(TTree* tree)
 {
     t_mvaInput_ = tree;
     
     t_mvaInput_->Branch("eventWeight", &inputStruct_.eventWeight_, "eventWeight/F");
+    
+    t_mvaInput_->Branch("mvaWeightCorrect", &inputStruct_.mvaWeightCorrect_, "mvaWeightCorrect/F");
+    t_mvaInput_->Branch("mvaWeightSwapped", &inputStruct_.mvaWeightSwapped_, "mvaWeightSwapped/F");
+    t_mvaInput_->Branch("bestMvaWeightCorrect", &inputStruct_.bestMvaWeightCorrect_, "bestMvaWeightCorrect/F");
+    t_mvaInput_->Branch("bestMvaWeightSwapped", &inputStruct_.bestMvaWeightSwapped_, "bestMvaWeightSwapped/F");
     
     t_mvaInput_->Branch("bQuarkRecoJetMatched", &inputStruct_.bQuarkRecoJetMatched_, "bQuarkRecoJetMatched/I");
     t_mvaInput_->Branch("correctCombination", &inputStruct_.correctCombination_, "correctCombination/I");
@@ -180,6 +245,7 @@ void MvaInputTopJetsVariables::clear()
     t_mvaInput_ = 0;
     selectorList_ = 0;
     m_plotStruct_.clear();
+    m_plotStruct2D_.clear();
     if(mvaWeightsReader_){
         mvaWeightsReader_->Clear();
         mvaWeightsReader_->Delete();
@@ -291,6 +357,14 @@ void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* outp
     this->bookHistograms("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}+m^{bl^{+}}  [GeV];# jet pairs",21,0,840);
     this->bookHistograms("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}-m^{bl^{+}}  [GeV];# jet pairs",41,-400,420);
     
+    this->bookHistograms("dijet_mvaWeightCorrect_step8", "dijet MVA weight correct;w_{MVA}^{correct};# jet pairs", 80, -1.2, 0.2);
+    this->bookHistograms("dijet_bestMvaWeightCorrect_step8", "dijet best MVA weight correct;w_{MVA,1}^{correct};# events", 80, -1.2, 0.2);
+    this->bookHistograms("dijet_mvaWeightSwapped_step8", "dijet MVA weight swapped;w_{MVA}^{swapped};# jet pairs", 80, -1.2, 0.2);
+    this->bookHistograms("dijet_bestMvaWeightSwapped_step8", "dijet best MVA weight swapped;w_{MVA,1}^{swapped};# events", 80, -1.2, 0.2);
+    
+    this->bookHistograms2D("dijet_mvaWeightCorrectVsSwapped_step8", "dijet MVA weight correct vs. swapped;w_{MVA}^{correct};w_{MVA}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
+    this->bookHistograms2D("dijet_bestMvaWeightCorrectVsSwapped_step8", "dijet best MVA weight correct vs. swapped;w_{MVA,1}^{correct};w_{MVA,1}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
+    
     // Fill histograms
     for(const auto& mvaInputTopJetsStruct : this->inputStructs()){
         //const bool bQuarkRecoJetMatched = mvaInputTopJetsStruct.bQuarkRecoJetMatched_;
@@ -312,6 +386,15 @@ void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* outp
         this->fillHistograms("meanMt_b_met_step8", mvaInputTopJetsStruct.meanMt_b_met_, mvaInputTopJetsStruct);
         this->fillHistograms("massSum_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.massSum_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
         this->fillHistograms("massDiff_antiBLepton_bAntiLepton_step8", mvaInputTopJetsStruct.massDiff_antiBLepton_bAntiLepton_, mvaInputTopJetsStruct);
+        
+        this->fillHistograms("dijet_mvaWeightCorrect_step8", mvaInputTopJetsStruct.mvaWeightCorrect_, mvaInputTopJetsStruct);
+        if(mvaInputTopJetsStruct.bestMvaWeightCorrect_>-990.) this->fillHistograms("dijet_bestMvaWeightCorrect_step8", mvaInputTopJetsStruct.bestMvaWeightCorrect_, mvaInputTopJetsStruct);
+        this->fillHistograms("dijet_mvaWeightSwapped_step8", mvaInputTopJetsStruct.mvaWeightSwapped_, mvaInputTopJetsStruct);
+        if(mvaInputTopJetsStruct.bestMvaWeightSwapped_>-990.) this->fillHistograms("dijet_bestMvaWeightSwapped_step8", mvaInputTopJetsStruct.bestMvaWeightSwapped_, mvaInputTopJetsStruct);
+        
+        this->fillHistograms2D("dijet_mvaWeightCorrectVsSwapped_step8", mvaInputTopJetsStruct.mvaWeightCorrect_, mvaInputTopJetsStruct.mvaWeightSwapped_, mvaInputTopJetsStruct);
+        if(mvaInputTopJetsStruct.bestMvaWeightCorrect_>-990. && mvaInputTopJetsStruct.bestMvaWeightSwapped_>-990.)
+            this->fillHistograms2D("dijet_bestMvaWeightCorrectVsSwapped_step8", mvaInputTopJetsStruct.bestMvaWeightCorrect_, mvaInputTopJetsStruct.bestMvaWeightSwapped_, mvaInputTopJetsStruct);
     }
     
     std::cout<<"=== Finishing control plots for MVA variables\n\n";
@@ -353,6 +436,11 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     
     TBranch* b_eventWeight(0);
     
+    TBranch* b_mvaWeightCorrect(0);
+    TBranch* b_mvaWeightSwapped(0);
+    TBranch* b_bestMvaWeightCorrect(0);
+    TBranch* b_bestMvaWeightSwapped(0);
+    
     TBranch* b_bQuarkRecoJetMatched(0);
     TBranch* b_correctCombination(0);
     TBranch* b_swappedCombination(0);
@@ -374,6 +462,11 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
     
     // Set branch addresses
     tree->SetBranchAddress("eventWeight", &mvaInputStruct.eventWeight_, &b_eventWeight);
+    
+    tree->SetBranchAddress("mvaWeightCorrect", &mvaInputStruct.mvaWeightCorrect_, &b_mvaWeightCorrect);
+    tree->SetBranchAddress("mvaWeightSwapped", &mvaInputStruct.mvaWeightSwapped_, &b_mvaWeightSwapped);
+    tree->SetBranchAddress("bestMvaWeightCorrect", &mvaInputStruct.bestMvaWeightCorrect_, &b_bestMvaWeightCorrect);
+    tree->SetBranchAddress("bestMvaWeightSwapped", &mvaInputStruct.bestMvaWeightSwapped_, &b_bestMvaWeightSwapped);
     
     tree->SetBranchAddress("bQuarkRecoJetMatched", &mvaInputStruct.bQuarkRecoJetMatched_, &b_bQuarkRecoJetMatched);
     tree->SetBranchAddress("correctCombination", &mvaInputStruct.correctCombination_, &b_correctCombination);
@@ -404,7 +497,8 @@ void MvaInputTopJetsVariables::importBranches(TTree* tree)
 
 
 
-void MvaInputTopJetsVariables::bookHistograms(const TString& name, const TString& title, const int nBin, const double xMin, const double xMax)
+void MvaInputTopJetsVariables::bookHistograms(const TString& name, const TString& title,
+                                              const int nBin, const double xMin, const double xMax)
 {
     // Check if histograms with given name already exist
     if(m_plotStruct_.find(name) != m_plotStruct_.end()){
@@ -428,6 +522,30 @@ void MvaInputTopJetsVariables::bookHistograms(const TString& name, const TString
 
 
 
+void MvaInputTopJetsVariables::bookHistograms2D(const TString& name, const TString& title, const int nBinX, const double xMin, const double xMax, const int nBinY, const double yMin, const double yMax)
+{
+    // Check if histograms with given name already exist
+    if(m_plotStruct2D_.find(name) != m_plotStruct2D_.end()){
+        std::cerr<<"ERROR! Trial of booking already existing histogram with name: "<<name
+                 <<"\n...break\n"<<std::endl;
+        exit(876);
+    }
+    
+    const TString nameCorrect("correct_" + name);
+    const TString nameSwapped("swapped_" + name);
+    const TString nameWrong("wrong_" + name);
+    
+    // Book histograms
+    PlotStruct2D plotStruct;
+    plotStruct.h_correctCombination = store(new TH2D(nameCorrect, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+    plotStruct.h_swappedCombination = store(new TH2D(nameSwapped, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+    plotStruct.h_wrongCombinations = store(new TH2D(nameWrong, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+    plotStruct.h_allCombinations = store(new TH2D(name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+    m_plotStruct2D_[name] = plotStruct;
+}
+
+
+
 void MvaInputTopJetsVariables::fillHistograms(const TString& name, const double& variable, const MvaInputTopJetsVariables::Input& mvaInputTopJetsStruct)
 {
     // Check if histograms with given name already exist
@@ -445,9 +563,33 @@ void MvaInputTopJetsVariables::fillHistograms(const TString& name, const double&
     
     // Fill histograms
     if(correctCombination) plotStruct.h_correctCombination->Fill(variable, eventWeight);
+    else if(swappedCombination) plotStruct.h_swappedCombination->Fill(variable, eventWeight);
     else plotStruct.h_wrongCombinations->Fill(variable, eventWeight);
-    if(swappedCombination) plotStruct.h_swappedCombination->Fill(variable, eventWeight);
     plotStruct.h_allCombinations->Fill(variable, eventWeight);
+}
+
+
+
+void MvaInputTopJetsVariables::fillHistograms2D(const TString& name, const double& variable1, const double& variable2, const MvaInputTopJetsVariables::Input& mvaInputTopJetsStruct)
+{
+    // Check if histograms with given name already exist
+    if(m_plotStruct2D_.find(name) == m_plotStruct2D_.end()){
+        std::cerr<<"ERROR! Trial of filling non-existing histogram with name: "<<name
+                 <<"\n...break\n"<<std::endl;
+        exit(876);
+    }
+    PlotStruct2D& plotStruct = m_plotStruct2D_.at(name);
+    
+    // Access relevant information
+    const double& eventWeight(mvaInputTopJetsStruct.eventWeight_);
+    const bool correctCombination(mvaInputTopJetsStruct.correctCombination_);
+    const bool swappedCombination(mvaInputTopJetsStruct.swappedCombination_);
+    
+    // Fill histograms
+    if(correctCombination) plotStruct.h_correctCombination->Fill(variable1, variable2, eventWeight);
+    else if(swappedCombination) plotStruct.h_swappedCombination->Fill(variable1, variable2, eventWeight);
+    else plotStruct.h_wrongCombinations->Fill(variable1, variable2, eventWeight);
+    plotStruct.h_allCombinations->Fill(variable1, variable2, eventWeight);
 }
 
 
@@ -468,6 +610,87 @@ std::vector<float> MvaInputTopJetsVariables::mvaWeights(const std::vector<MvaInp
     
     return result;
 }
+
+
+
+void MvaInputTopJetsVariables::runMva(const char* outputDir, const char* weightFileDir, const char* outputFileName,
+                                      const char* methodName, const TCut& cutSignal, const TCut& cutBackground,
+                                      TTree* treeTraining, TTree* treeTesting)
+{
+    // Get a TMVA instance
+    TMVA::Tools::Instance();
+    
+    // Create a ROOT output file for TMVA
+    TString mvaOutputFilename(outputDir);
+    mvaOutputFilename.Append("/");
+    gSystem->MakeDirectory(mvaOutputFilename);
+    mvaOutputFilename.Append(outputFileName);
+    TFile* outputFile = TFile::Open(mvaOutputFilename, "RECREATE");
+    
+    // Set the output directory for the weights (if not specified, default is "weights")
+    TString mvaOutputWeightsFilename(outputDir);
+    mvaOutputWeightsFilename.Append(weightFileDir);
+    (TMVA::gConfig().GetIONames()).fWeightFileDir = mvaOutputWeightsFilename;
+    
+    // Create the factory
+    TMVA::Factory* factory(0);
+    factory = new TMVA::Factory( "MVA", outputFile, "!V:!Silent");
+    
+    // Set all branches of MVA input which should be used for training
+    factory->AddVariable("jetChargeDiff", 'F');
+    
+    factory->AddVariable("meanDeltaPhi_b_met", 'F');
+    factory->AddVariable("massDiff_recoil_bbbar", 'F');
+    factory->AddVariable("pt_b_antiLepton", 'F');
+    factory->AddVariable("pt_antiB_lepton", 'F');
+    factory->AddVariable("deltaR_b_antiLepton", 'F');
+    factory->AddVariable("deltaR_antiB_lepton", 'F');
+    factory->AddVariable("btagDiscriminatorSum", 'F');
+    factory->AddVariable("deltaPhi_antiBLepton_bAntiLepton", 'F');
+    factory->AddVariable("massDiff_fullBLepton_bbbar", 'F');
+    factory->AddVariable("meanMt_b_met", 'F');
+    factory->AddVariable("massSum_antiBLepton_bAntiLepton", 'F');
+    factory->AddVariable("massDiff_antiBLepton_bAntiLepton", 'F');
+    
+    // Set all branches of MVA input which should NOT be used for training,
+    // but are needed otherwise (e.g. for defining separation cuts)
+    factory->AddSpectator("bQuarkRecoJetMatched", 'I');
+    factory->AddSpectator("correctCombination", 'I');
+    factory->AddSpectator("swappedCombination", 'I');
+    
+    // Set global weights for individual input
+    Double_t signalWeight = 1.;
+    Double_t backgroundWeight = 1.;
+    
+    // Register the training trees
+    factory->AddSignalTree(treeTraining, signalWeight, TMVA::Types::kTraining);
+    factory->AddBackgroundTree(treeTraining, backgroundWeight, TMVA::Types::kTraining);
+    
+    // Register the testing trees
+    factory->AddSignalTree(treeTesting, signalWeight, TMVA::Types::kTesting);
+    factory->AddBackgroundTree(treeTesting, backgroundWeight, TMVA::Types::kTesting);
+    
+    // Set the branch from which the event weight is taken
+    factory->SetSignalWeightExpression("eventWeight");
+    factory->SetBackgroundWeightExpression("eventWeight");
+    
+    // Prepare the training and test trees
+    factory->PrepareTrainingAndTestTree(cutSignal, cutBackground,
+                                        "SplitMode=Block:SplitSeed=0:NormMode=NumEvents:!V" );
+    
+    // Book the MVA method (e.g. boosted decision tree with specific setup)
+    factory->BookMethod(TMVA::Types::kBDT,
+                        methodName,
+                        "!H:!V:NTrees=600:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=13:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1");
+    factory->TrainAllMethods();
+    factory->TestAllMethods();
+    factory->EvaluateAllMethods();
+    
+    // Cleanup
+    outputFile->Close();
+    delete factory;
+}
+
 
 
 
