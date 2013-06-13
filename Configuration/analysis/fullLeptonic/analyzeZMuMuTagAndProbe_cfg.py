@@ -234,11 +234,11 @@ process.hltTriggerFilter = hltHighLevel.clone(TriggerResultsTag = triggerResults
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 print "dataSelector = ", dataSelector
 if(dataSelector == 1):
-     process.GlobalTag.globaltag = cms.string('START53_V15::All')
+     process.GlobalTag.globaltag = cms.string('START53_V22::All')
      jsonFile = ""
      print "dataSelector = 1, global tag: ", process.GlobalTag.globaltag
 elif(dataSelector == 11):
-     process.GlobalTag.globaltag = cms.string('GR_P_V42_AN3::All')
+     process.GlobalTag.globaltag = cms.string('FT_53_V21_AN4::All')
      ##-------------------- Import the JEC services -----------------------
      #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
      ##-------------------- Import the Jet RECO modules -----------------------
@@ -284,21 +284,21 @@ process.eventWeightPUsysDown    = process.eventWeightPU.clone()
 #### Configuration for Nominal PU Weights
 
 process.eventWeightPU.WeightName          = "eventWeightPU"
-process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABC_190456-203755.root"
+process.eventWeightPU.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012ABCD22JanReReco_190456-208686_8TeV.root"
 process.eventWeightPU.CreateWeight3DHisto = False
 process.eventWeightPU.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3D.root"
 
 #### Configuration for PU Up Variations
 
 process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
-process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72870_2012ABC_190456-203755.root"
+process.eventWeightPUsysUp.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72765_2012ABCD22JanReReco_190456-208686_8TeV.root"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
 process.eventWeightPUsysUp.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DUp.root"
 
 #### Configuration for PU Down Variations
 
 process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
-process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65930_2012ABC_190456-203755.root"
+process.eventWeightPUsysDown.DataFile            = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65835_2012ABCD22JanReReco_190456-208686_8TeV.root"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
 process.eventWeightPUsysDown.Weight3DHistoFile   = "TopAnalysis/TopUtils/data/DefaultWeight3DDown.root"
 
@@ -755,8 +755,7 @@ process.probeElectronsBasis = selectedPatElectrons.clone(src = 'selectedPatMuons
 from TopAnalysis.TopFilter.sequences.ElectronVertexDistanceSelector_cfi import *
 process.vertexSelectedElectronsTaP = vertexSelectedElectrons.clone(src='selectedPatMuonsTriggerMatch')
 process.tightElectronsEJTaP        = process.tightElectronsEJ.clone(src='vertexSelectedElectronsTaP')
-process.unconvTightElectronsEJTaP  = process.unconvTightElectronsEJ.clone(src='tightElectronsEJTaP')
-process.goodElectronsEJTaP         = process.goodElectronsEJ.clone(src='unconvTightElectronsEJTaP')
+process.goodElectronsEJTaP         = process.goodElectronsEJ.clone(src='tightElectronsEJTaP')
 
 ## in case of tagAndProbe:
 if(modeSelector == 1):
@@ -779,7 +778,7 @@ if(modeSelector == 1):
         deltaM =  deltaM,
 	leptonId = leptonTypeId
        )
-       process.produceProbeElectrons = cms.Sequence(process.probeElectronsBasis * process.vertexSelectedElectronsTaP * process.tightElectronsEJTaP * process.unconvTightElectronsEJTaP * process.goodElectronsEJTaP *process.tagElectrons * process.probeElectrons)
+       process.produceProbeElectrons = cms.Sequence(process.probeElectronsBasis * process.vertexSelectedElectronsTaP * process.tightElectronsEJTaP * process.goodElectronsEJTaP *process.tagElectrons * process.probeElectrons)
        print "modeSelector =1"
 	
 #-----------------------------------------------------------------------------
@@ -1358,7 +1357,6 @@ if(pfToPAT):
     for path in recoPaths:
         #getattr(process,path).remove( process.looseElectronsEJ )
         #getattr(process,path).remove( process.tightElectronsEJ )
-        #getattr(process,path).remove( process.unconvTightElectronsEJ )
         #getattr(process,path).remove( process.goodElectronsEJ )
         # replace object consistently with names from PF2PAT
         #massSearchReplaceAnyInputTag(getattr(process,path), 'patMETsPF', 'patMETs')
