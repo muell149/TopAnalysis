@@ -126,10 +126,11 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
     double relIso = -1., absIso = -1.;
     if(probeMuon){
       if(pfRelIso_){
-	relIso = (probeMuon->chargedHadronIso() + probeMuon->neutralHadronIso() + 
-                                probeMuon->photonIso()) / probeMuon->pt();
-	absIso = probeMuon->chargedHadronIso() + probeMuon->neutralHadronIso() + 
-	    probeMuon->photonIso();
+	relIso = (probeMuon->chargedHadronIso() + 
+	    TMath::Max((probeMuon->neutralHadronIso() + probeMuon->photonIso() - 0.5*probeMuon->puChargedHadronIso()),0.0)
+		) / probeMuon->pt();
+	absIso = probeMuon->chargedHadronIso() + 
+	    TMath::Max((probeMuon->neutralHadronIso() + probeMuon->photonIso() - 0.5*probeMuon->puChargedHadronIso()),0.0);
       }
       else{
 	relIso = (probeMuon->trackIso() + probeMuon->caloIso()) / probeMuon->pt();
@@ -138,10 +139,11 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
     }
     if(probeElec){
       if(pfRelIso_){
-	relIso = (probeElec->chargedHadronIso() + probeElec->neutralHadronIso() + 
-	                        probeElec->photonIso()) / probeElec->pt();
-	absIso = probeElec->chargedHadronIso() + probeElec->neutralHadronIso() + 
-	    probeElec->photonIso();
+	relIso = (probeElec->chargedHadronIso() + 
+	    TMath::Max((probeElec->neutralHadronIso() + probeElec->photonIso() - 0.5*probeElec->puChargedHadronIso()),0.0)
+		 ) / probeElec->pt();
+	absIso = probeElec->chargedHadronIso() + 
+	    TMath::Max((probeElec->neutralHadronIso() + probeElec->photonIso() - 0.5*probeElec->puChargedHadronIso()),0.0);
       }
       else{
         relIso = (probeElec->dr03TkSumPt() + probeElec->dr03EcalRecHitSumEt()
@@ -204,13 +206,15 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
 	  // calculate tagRelIso
 	  double tagRelIso=-1.;
 	  if(probeMuon){
-	    if(pfRelIso_) tagRelIso = (tagMuon->chargedHadronIso() + tagMuon->neutralHadronIso() + 
-		  tagMuon->photonIso()) / tagMuon->pt();
+	    if(pfRelIso_) tagRelIso = (tagMuon->chargedHadronIso() + 
+		TMath::Max((tagMuon->neutralHadronIso() + tagMuon->photonIso() - 0.5*tagMuon->puChargedHadronIso()),0.0)
+			) / tagMuon->pt();
 	    else tagRelIso = (tagMuon->trackIso() + tagMuon->caloIso()) / tagMuon->pt();
 	  }
 	  if(tagElec){
-	    if(pfRelIso_)tagRelIso = (tagElec->chargedHadronIso() + tagElec->neutralHadronIso() + 
-		  tagElec->photonIso()) / tagElec->pt();
+	    if(pfRelIso_) tagRelIso = (tagElec->chargedHadronIso() + 
+		TMath::Max((tagElec->neutralHadronIso() + tagElec->photonIso() - 0.5*tagElec->puChargedHadronIso()),0.0)
+			) / tagElec->pt();
 	    else tagRelIso = (tagElec->dr03TkSumPt() + tagElec->dr03EcalRecHitSumEt()
 		  + tagElec->dr03HcalTowerSumEt() ) / tagElec->et();
 	  }
@@ -247,10 +251,11 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
       double relIso = -1., absIso = -1.;
       if(testMuon){
 	if(pfRelIso_){
-	   relIso = (testMuon->chargedHadronIso() + testMuon->neutralHadronIso() + 
-	                        testMuon->photonIso()) / testMuon->pt();
-	   absIso = testMuon->chargedHadronIso() + testMuon->neutralHadronIso() + 
-	       testMuon->photonIso();
+	   relIso = (testMuon->chargedHadronIso() + 
+	       TMath::Max((testMuon->neutralHadronIso() + testMuon->photonIso() - 0.5*testMuon->puChargedHadronIso()),0.0)
+		    ) / testMuon->pt();
+	   absIso = testMuon->chargedHadronIso() + 
+	       TMath::Max((testMuon->neutralHadronIso() + testMuon->photonIso() - 0.5*testMuon->puChargedHadronIso()),0.0);
 	}
 	else{
 	   relIso = (testMuon->trackIso() + testMuon->caloIso()) / testMuon->pt();
@@ -259,10 +264,11 @@ TagAndProbeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& setup
       }
       if(testElec){
 	if(pfRelIso_){
-	   relIso = (testElec->chargedHadronIso() + testElec->neutralHadronIso() + 
-	                        testElec->photonIso()) / testElec->pt();
-	   absIso = testElec->chargedHadronIso() + testElec->neutralHadronIso() + 
-	       testElec->photonIso();
+	   relIso = (testElec->chargedHadronIso() + 
+	       TMath::Max((testElec->neutralHadronIso() + testElec->photonIso() - 0.5*testElec->puChargedHadronIso()),0.0)
+		    ) / testElec->pt();
+	   absIso = testElec->chargedHadronIso() + 
+	       TMath::Max((testElec->neutralHadronIso() + testElec->photonIso() - 0.5*testElec->puChargedHadronIso()),0.0);
 	}
 	else{
 	  relIso = (testElec->dr03TkSumPt() + testElec->dr03EcalRecHitSumEt()
