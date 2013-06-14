@@ -85,7 +85,7 @@ void HiggsAnalysis::Terminate()
 {
     // Produce b-tag efficiencies
     if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
-    
+
     // Do everything needed for MVA
     if(analysisMode_ == AnalysisMode::mva){
 
@@ -98,12 +98,12 @@ void HiggsAnalysis::Terminate()
         // Create and store control plots in fOutput
         mvaInputTopJetsVariables_.mvaInputVariablesControlPlots(fOutput);
     }
-    
+
     // Cleanup
     mvaInputTopJetsVariables_.clear();
     if(dijetAnalyzer_) dijetAnalyzer_->clear();
     // FIXME: shouldn't we also clear b-tagging efficiency histograms if they are produced ?
-    
+
     // Defaults from AnalysisBase
     AnalysisBase::Terminate();
 }
@@ -610,9 +610,11 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
         // Push_back indices of top b-jets identified by kinematic reconstruction
         std::vector<int> topJetIds;
+        if(HypJet0index_->size()>0) topJetIds.push_back(HypJet0index_->at(0));
+        if(HypJet1index_->size()>0) topJetIds.push_back(HypJet1index_->at(0));
 
         DijetAnalyzer::Input dijetInput(*jets_, jetIndices, bjetIndices,
-                                        topJetIds, *allGenJets_,
+                                        *jetBTagCSV_, topJetIds, *allGenJets_,
                                         *genBHadJetIndex_, *genBHadFlavour_,
                                         met, leptons_->at(leptonIndex), leptons_->at(antiLeptonIndex)
                                        );
@@ -675,16 +677,16 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Get the MVA weights from weights file as vector, one entry per jet pair
     const std::vector<float>& mvaWeightsCorrect = mvaWeightsCorrect_->mvaWeights(v_mvaInput);
     const std::vector<float>& mvaWeightsSwapped = mvaWeightsSwapped_->mvaWeights(v_mvaInput);
-    
+
     // Fill the MVA TTree
     mvaInputTopJetsVariables_.addEntries(v_mvaInput, mvaWeightsCorrect, mvaWeightsSwapped);
-    
+
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     std::vector<int> jetIndexPairsIndices = initialiseIndices(jetIndexPairs);
     orderIndices(jetIndexPairsIndices, mvaWeightsCorrect);
-    
-    
-    
+
+
+
     // Get jet pair leading in MVA weight, and extract bIndex and antiBIndex
     const std::pair<int, int>& leadingJetIndexPair = jetIndexPairs.at(jetIndexPairsIndices.at(0));
     const int antiBFromTopIndex = leadingJetIndexPair.first;
