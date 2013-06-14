@@ -25,7 +25,7 @@ public:
     /// Struct holding all input variables used in DiJetAnalyzer
     struct Input{
         Input( const VLV& allJets_, const std::vector<int>& jetsId_, const std::vector<int>& bJetsId_,
-               const std::vector<int>& topJetsId_, const VLV& genJets_,
+               const std::vector<double>& allJetsBtagDiscriminant_, const std::vector<int>& topJetsId_, const VLV& genJets_,
                const std::vector<int>& bHadJetIndex_, const std::vector<int>& bHadFlavour_,
                const LV& met_, const LV& lepton_, const LV& antilepton_
              );
@@ -35,6 +35,7 @@ public:
         const VLV& allJets;
         const std::vector<int>& jetsId;
         const std::vector<int>& bJetsId;
+        const std::vector<double>& allJetsBtagDiscriminant;
         const std::vector<int>& topJetsId;
         const VLV& genJets;
         const std::vector<int>& bHadJetIndex;
@@ -71,9 +72,9 @@ public:
                                           const std::vector<int>& hadFlavours, const bool absFlavour = true);
 
     /// Analyze jet pairs of given jets for the given b-jets from top. Returns ration of correct pairs to wrong pairs
-    float correctPairFraction(const VLV& jets, const std::vector<int>& bJetsId,
+    float isCorrectJetPair(const VLV& jets, const std::vector<int>& bJetsId, const std::vector<double>& jetsBtagDiscriminant,
                               const std::vector<int>& topJetsId, const std::vector<int>& higgsJetsId,
-                              const double weight, TH1* h_dijetMass, TH1* h_correctJetMultiplicity);
+                              const double weight, TH1* h_dijetMass, TH1* h_correctJetMultiplicity, const bool fillAllCombinations = false);
 
     /// Whether index is in the vector of indices
     bool isInVector(const std::vector<int>& idVector, const int id);
