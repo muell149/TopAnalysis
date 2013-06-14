@@ -71,9 +71,9 @@ public:
                                           const std::vector<int>& hadFlavours, const bool absFlavour = true);
 
     /// Analyze jet pairs of given jets for the given b-jets from top. Returns ration of correct pairs to wrong pairs
-    float correctToWrongJetPairsRatio(const VLV& jets, const std::vector<int>& bJetsId,
-                                      const std::vector<int>& topJetsId, const std::vector<int>& higgsJetsId,
-                                      const double weight, TH1* h_dijetMass, TH1* h_correctJetMultiplicity);
+    float correctPairFraction(const VLV& jets, const std::vector<int>& bJetsId,
+                              const std::vector<int>& topJetsId, const std::vector<int>& higgsJetsId,
+                              const double weight, TH1* h_dijetMass, TH1* h_correctJetMultiplicity);
 
     /// Whether index is in the vector of indices
     bool isInVector(const std::vector<int>& idVector, const int id);
