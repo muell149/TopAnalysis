@@ -34,7 +34,7 @@ options.register('mvaSelection', True , VarParsing.VarParsing.multiplicity.singl
 ## weight of events (should be used only for MC samples)
 options.register('mcWeight', -1.0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.float, "MC sample event weight")
 ## which PU scenario for PU reweighting
-options.register('PUscenario', '11_178078', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
+options.register('PUscenario', '2012', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "PU distribution used for MC PUweight calculation")
 ## trigger results tag
 options.register('triggerTag', 'HLT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "tag of trigger Results")
 ## use the *totalKinematicsFilter*
@@ -242,7 +242,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(options.eventFilter=='data'):
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
-        process.GlobalTag.globaltag = cms.string('GR_R_53_V19::All')
+        #process.GlobalTag.globaltag = cms.string('GR_R_53_V19::All')
+        process.GlobalTag.globaltag = cms.string('FT_53_V21_AN4::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         #process.GlobalTag.globaltag = cms.string('GR_R_38X_V15::All')
         #process.GlobalTag.globaltag = cms.string('GR_R_42_V14::All')
@@ -253,7 +254,8 @@ if(options.eventFilter=='data'):
         
 else:
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
-        process.GlobalTag.globaltag = cms.string('START53_V15::All')
+        #process.GlobalTag.globaltag = cms.string('START53_V15::All')
+        process.GlobalTag.globaltag = cms.string('START53_V23::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         #process.GlobalTag.globaltag = cms.string('START42_V12::All')
         #process.GlobalTag.globaltag = cms.string('START42_V13::All')
@@ -490,7 +492,11 @@ process.analyzeKinFit = analyzeHypothesis.clone(hypoClassKey = "ttFullHadHypKinF
 from TopMass.TopEventTree.JetEventAnalyzer_cfi import analyzeJets
 process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets")
 from TopMass.TopEventTree.WeightEventAnalyzer_cfi import analyzeWeights
-process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets", puWeightSrc = cms.InputTag("eventWeightPU", "eventWeightPU"), savePDFWeights = True)
+process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets",
+                                              puWeightSrc     = cms.InputTag("eventWeightPU"       , "eventWeightPU"),
+                                              puWeightUpSrc   = cms.InputTag("eventWeightPUSysUp"  , "eventWeightPU"),
+                                              puWeightDownSrc = cms.InputTag("eventWeightPUSysDown", "eventWeightPU"),
+                                              savePDFWeights = True)
 
 ## switch tree writer to appropriate jet source
 process.FullHadTreeWriter = process.writeFullHadTree.clone(JetSrc = "tightLeadingJets")
@@ -512,8 +518,10 @@ elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
     process.eventWeightPU = process.eventWeightPU.clone(MCSampleFile = "TopAnalysis/TopUtils/data/MC_PUDist_WJets_Spring11.root", MCSampleHistoName = "pileup")
 
 if options.PUscenario == '2012':
-    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012BC.root"
+    process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_69400_SysNo.root"
     process.eventWeightPU.DataHistoName = "pileup"
+    process.eventWeightPUSysUp   = process.eventWeightPU.clone(DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_73564_SysUp.root")
+    process.eventWeightPUSysDown = process.eventWeightPU.clone(DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_65236_SysDown.root")
 elif options.PUscenario == '11_178078':
     #process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/MyDataPileupHistogram_precaleWeighted_new.root"
     #process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/MyDataPileupHistogram_precaleWeighted_3545fb-1.root"
@@ -540,8 +548,7 @@ elif not options.eventFilter == 'data':
 
 ## calculate btag weight factor
 from TopAnalysis.TopUtils.BTagSFEventWeight_cfi import bTagSFEventWeight
-#process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "12-470", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+options.bTagAlgoWP+".root")
-process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "12-470", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiencyCSVM.root")
+process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "12-470", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+options.bTagAlgoWP+".root", noHistograms = True)
 process.bTagSFEventWeightBTagSFUp     = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
 process.bTagSFEventWeightBTagSFDown   = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
 process.bTagSFEventWeightMisTagSFUp   = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")
@@ -567,12 +574,15 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 ## ---
 ##    run the final sequence
 ## ---
+process.eventContentAnalyzer = cms.EDAnalyzer("EventContentAnalyzer")
 process.p1 = cms.Path(## do the genEvent selection
                       process.filterSequence
                       ## do the filtering
                       *process.createJetCollections
                       *process.leadingJetSelection
                       *process.eventWeightPU
+                      *process.eventWeightPUSysUp
+                      *process.eventWeightPUSysDown
                       *process.bTagSFEventWeight
                       *process.bTagSFEventWeightBTagSFUp
                       *process.bTagSFEventWeightBTagSFDown
@@ -584,6 +594,7 @@ process.p1 = cms.Path(## do the genEvent selection
                       *process.analyzeKinFit
                       *process.analyzeJets
                       *process.analyzeWeights
+                      #*process.eventContentAnalyzer
                       )
 
 if options.mvaSelection:
@@ -678,6 +689,8 @@ if(options.pdfUn==2):
 if options.eventFilter=='data':
     process.p1.remove(process.filterSequence)
     process.p1.remove(process.eventWeightPU)
+    process.p1.remove(process.eventWeightPUSysUp)
+    process.p1.remove(process.eventWeightPUSysDown)
     process.p1.remove(process.bTagSFEventWeight)
     process.p1.remove(process.bTagSFEventWeightBTagSFUp)
     process.p1.remove(process.bTagSFEventWeightBTagSFDown)
@@ -698,6 +711,8 @@ else:
         process.goodJetsPF.src = cms.InputTag('selectedPatJets', '', process.name_())
         process.goodJetsPF.cut = "abs(eta) < 2.4 & pt > 20."
         process.p1.remove(process.eventWeightPU)
+        process.p1.remove(process.eventWeightPUSysUp)
+        process.p1.remove(process.eventWeightPUSysDown)
         process.p1.remove(process.bTagSFEventWeight)
         process.p1.remove(process.bTagSFEventWeightBTagSFUp)
         process.p1.remove(process.bTagSFEventWeightBTagSFDown)
@@ -858,6 +873,10 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
             if options.onlySkimming:
                 if hasattr(process,'eventWeightPU'):
                     process.p1.remove(process.eventWeightPU)
+                if hasattr(process,'eventWeightPUSysUp'):
+                    process.p1.remove(process.eventWeightPUSysUp)
+                if hasattr(process,'eventWeightPUSysDown'):
+                    process.p1.remove(process.eventWeightPUSysDown)
              ## when bTag efficiency is determined PUweight and bTagEff are needed
             if options.bTagEfficiencyDetermination:
                 process.p1 += process.bTagEff
