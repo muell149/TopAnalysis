@@ -1539,7 +1539,7 @@ elif (options.mctag == "Summer12"):
     process.eventWeightPU.DataHistoName            = "pileup"
 
     process.eventWeightPU.MCSampleFile             = "TopAnalysis/TopUtils/data/MC_PUDist_Summer12_S10.root"
-    process.eventWeightPU.DataFile                 = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012ABCD22JanReReco_190456-208686_8TeV.root"
+    process.eventWeightPU.DataFile                 = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABCD22JanReReco_190456-208686_8TeV.root"
 
 process.eventWeightPUsysNo   = process.eventWeightPU.clone()
 process.eventWeightPUsysUp   = process.eventWeightPU.clone()
@@ -1553,7 +1553,7 @@ process.eventWeightPUsysNo.WeightName          = "eventWeightPU"
 if ("11" in options.mctag):
     process.eventWeightPUsysNo.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysNo.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69300_2012ABCD22JanReReco_190456-208686_8TeV.root"
+    process.eventWeightPUsysNo.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysNo_69400_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysNo.CreateWeight3DHisto = False 
@@ -1565,7 +1565,7 @@ process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
 if ("11" in options.mctag):
     process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72765_2012ABCD22JanReReco_190456-208686_8TeV.root"
+    process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_73564_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
@@ -1577,7 +1577,7 @@ process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
 if ("11" in options.mctag):
     process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65835_2012ABCD22JanReReco_190456-208686_8TeV.root"
+    process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65236_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
