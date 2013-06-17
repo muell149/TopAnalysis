@@ -7,9 +7,7 @@
 #include "TString.h"
 #include "../interface/PUReweighter.h"
 
-//! PU reweighting. Now provides a PU variation of +-1.
-//! contradicts to the official recommendation to use different data distributions with varied total inelastic cross section by +-5%
-//! so reweighting is changed by changing the input distributions provided at (naf afs) kiesej/public
+
 
 namespace ztop{
 
@@ -40,6 +38,37 @@ namespace ztop{
     setDataTruePUInput(datapileup);
     f.Close();
   }
+
+
+  void PUReweighter::setMCTruePUInput(TH1* mcPUdist){
+    mcpu_.clear();
+    mcpu_.push_back(1); //zero bin
+    for(int i = 1; i< mcPUdist->GetNbinsX()+1 ; ++i){
+      int bin = mcPUdist->FindBin(i);
+      mcpu_.push_back(mcPUdist->GetBinContent(bin));
+    }
+    mcint_ = 0;
+    for(size_t i=1; i<mcpu_.size(); i++) mcint_ += mcpu_[i];
+
+    std::cout << "Mc PU distribution set" << std::endl;
+  }
+
+  void PUReweighter::setMCTruePUInput(const char * rootfile){
+    TFile f(rootfile);
+    if (f.IsZombie()) { 
+      std::cerr << "Cannot find PU file: " << rootfile << std::endl; 
+      exit(1);
+    }
+    TH1 *mcpileup = dynamic_cast<TH1*>(f.Get("pileup"));
+    if (!mcpileup) {
+      std::cerr << "Cannot find PU histogram: " << rootfile << std::endl; 
+      exit(2);
+    }
+    setMCTruePUInput(mcpileup);
+    f.Close();
+  }
+
+  /////////
   
   double PUReweighter::getPUweight(size_t trueBX){
     if(trueBX < datapu_.size() && trueBX < mcpu_.size()){
