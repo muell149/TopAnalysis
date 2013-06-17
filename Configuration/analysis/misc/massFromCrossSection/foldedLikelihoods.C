@@ -125,6 +125,30 @@ TGraphErrors getMeasXSecWithErr(const RooFormulaVar& measXSec, const RooFormulaV
   return TGraphErrors(nPoints, x, y, xErr, yErr);
 }
 
+TGraph getRelChangePredXSec(const PredXSec* predXSec, RooRealVar& xvar)
+{
+  const bool isAlpha = (xvar.getTitle().Contains("alpha") ? true : false);
+  const double xOld = xvar.getVal();
+  const unsigned nPoints = (isAlpha ? 21 : 21);
+  const double xMin = (isAlpha ? 0.108 : 163.);
+  const double xMax = (isAlpha ? 0.128 : 183.);
+  const double refX = (isAlpha ? 0.118 : 173.);
+  const double deltaX = (xMax - xMin)/nPoints;
+  double x[nPoints];
+  double y[nPoints];
+  xvar.setVal(refX);
+  const double refY = predXSec->xsec.getVal();
+  double xi = xMin;
+  for(unsigned i=0; i<nPoints; i++) {
+    xvar.setVal(xi);
+    x[i] = xi;
+    y[i] = predXSec->xsec.getVal() / refY;
+    xi += deltaX;
+  }
+  xvar.setVal(xOld);
+  return TGraph(nPoints, x, y);
+}
+
 TGraphAsymmErrors getPredXSecWithErr(const PredXSec* predXSec, RooRealVar& xvar, const double xMin, const double xMax,
 				     const unsigned nPoints, const double xerr=0.)
 {
@@ -913,6 +937,67 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   sqrtSText.SetY(0.88);
   sqrtSText.SetTextFont(43);
   sqrtSText.SetTextSizePixels(28);
+
+  TGraph relChangeAlphaPredXSecNNPDF = getRelChangePredXSec(predXSec[kNNPDF][1], alpha);
+  TGraph relChangeAlphaPredXSecCT    = getRelChangePredXSec(predXSec[kCT   ][1], alpha);
+  TGraph relChangeAlphaPredXSecMSTW  = getRelChangePredXSec(predXSec[kMSTW ][1], alpha);
+  TGraph relChangeAlphaPredXSecHERA  = getRelChangePredXSec(predXSec[kHERA ][1], alpha);
+  TGraph relChangeAlphaPredXSecABM   = getRelChangePredXSec(predXSec[kABM  ][1], alpha);
+  relChangeAlphaPredXSecCT   .SetLineColor(kGreen);
+  relChangeAlphaPredXSecMSTW .SetLineColor(kRed);
+  relChangeAlphaPredXSecHERA .SetLineColor(kMagenta);
+  relChangeAlphaPredXSecABM  .SetLineColor(kBlue);
+  relChangeAlphaPredXSecNNPDF.GetYaxis()->SetRangeUser(0.65, 1.35);
+  relChangeAlphaPredXSecNNPDF.GetYaxis()->SetTitle("#sigma_{t #bar{t}} (#alpha_{S} (m_{Z})) / #sigma_{t #bar{t}} (#alpha_{S} (m_{Z}) = 0.118)");
+  relChangeAlphaPredXSecNNPDF.GetXaxis()->SetTitle("#alpha_{S} (m_{Z})");
+  relChangeAlphaPredXSecNNPDF.GetXaxis()->SetNdivisions(505);
+  relChangeAlphaPredXSecNNPDF.Draw("AC");
+  relChangeAlphaPredXSecCT   .Draw("C");
+  relChangeAlphaPredXSecMSTW .Draw("C");
+  relChangeAlphaPredXSecHERA .Draw("C");
+  relChangeAlphaPredXSecABM  .Draw("C");
+
+  TLegend legRelChangeAlphaPredXSec = TLegend(0.2, 0.6, 0.5, 0.9);
+  legRelChangeAlphaPredXSec.SetFillStyle(0);
+  legRelChangeAlphaPredXSec.SetBorderSize(0);
+  legRelChangeAlphaPredXSec.AddEntry(&relChangeAlphaPredXSecABM  , "ABM"  , "L");
+  legRelChangeAlphaPredXSec.AddEntry(&relChangeAlphaPredXSecCT   , "CT"   , "L");
+  legRelChangeAlphaPredXSec.AddEntry(&relChangeAlphaPredXSecHERA , "HERA" , "L");
+  legRelChangeAlphaPredXSec.AddEntry(&relChangeAlphaPredXSecMSTW , "MSTW" , "L");
+  legRelChangeAlphaPredXSec.AddEntry(&relChangeAlphaPredXSecNNPDF, "NNPDF", "L");
+
+  legRelChangeAlphaPredXSec.Draw();
+
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(printNameBase+"_relChangePredXSec_alpha.eps");
+
+  TGraph relChangeMassPredXSecNNPDF = getRelChangePredXSec(predXSec[kNNPDF][1], mass);
+  TGraph relChangeMassPredXSecCT    = getRelChangePredXSec(predXSec[kCT   ][1], mass);
+  TGraph relChangeMassPredXSecMSTW  = getRelChangePredXSec(predXSec[kMSTW ][1], mass);
+  TGraph relChangeMassPredXSecHERA  = getRelChangePredXSec(predXSec[kHERA ][1], mass);
+  TGraph relChangeMassPredXSecABM   = getRelChangePredXSec(predXSec[kABM  ][1], mass);
+  relChangeMassPredXSecCT   .SetLineColor(kGreen);
+  relChangeMassPredXSecMSTW .SetLineColor(kRed);
+  relChangeMassPredXSecHERA .SetLineColor(kMagenta);
+  relChangeMassPredXSecABM  .SetLineColor(kBlue);
+  relChangeMassPredXSecNNPDF.GetYaxis()->SetRangeUser(0.7, 1.4);
+  relChangeMassPredXSecNNPDF.GetYaxis()->SetTitle("#sigma_{t #bar{t}} (m_{t}) / #sigma_{t #bar{t}} (m_{t} = 173)");
+  relChangeMassPredXSecNNPDF.GetXaxis()->SetTitle("m_{t} (GeV)");
+  relChangeMassPredXSecNNPDF.Draw("AC");
+  relChangeMassPredXSecCT   .Draw("C");
+  relChangeMassPredXSecMSTW .Draw("C");
+  relChangeMassPredXSecHERA .Draw("C");
+  relChangeMassPredXSecABM  .Draw("C");
+
+  legRelChangeAlphaPredXSec.SetX1NDC(0.6);
+  legRelChangeAlphaPredXSec.SetX2NDC(0.9);
+  legRelChangeAlphaPredXSec.Draw();
+
+  canvas->Print(printNameBase+".ps");
+  canvas->Print(printNameBase+"_relChangePredXSec_mass.eps");
+
+  //  canvas->Print(printNameBase+".ps]");
+  //  return 0;
 
   if(pole) {
 
