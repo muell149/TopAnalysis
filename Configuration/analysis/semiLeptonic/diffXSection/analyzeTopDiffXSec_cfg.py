@@ -662,6 +662,9 @@ process.vetoJets.cut=''
 
 ## tool to select muons from gen Particles and save them as new collection
 process.load("TopAnalysis.TopUtils.GenCandSelector_cfi")
+## use status 3 leptons
+process.isolatedGenMuons.target.status = cms.int32( 3)
+process.isolatedGenElectrons.target.status = cms.int32( 3)
 ## generator level based collections and semileptonic selection (muon and jets)
 process.load("TopAnalysis.TopFilter.sequences.genSelection_cff")
 ## generator filter based on direct cuts on lepton and parton pt and eta
