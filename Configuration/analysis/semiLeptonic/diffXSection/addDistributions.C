@@ -227,7 +227,7 @@ void createEntry(TString infostream, std::vector<TString> fileList_, bool save, 
 	int nbins =(getStringEntry(newVarBinning,1,",")).Atoi();
 	double min=(getStringEntry(newVarBinning,2,",")).Atof();
 	double max=(getStringEntry(newVarBinning,3,",")).Atof();
-	TH1F* newRecPlot=new TH1F( newVarName, newVarName, nbins , min , max);
+	TH1F* newRecPlot=new TH1F( newVarName+"Rec", newVarName, nbins , min , max);
 	// B2b create reco branch entry 
 	Float_t newRec1;
 	Float_t newRec2;
@@ -322,7 +322,7 @@ void createEntry(TString infostream, std::vector<TString> fileList_, bool save, 
 	  int nbins =(getStringEntry(newVarBinning,1,",")).Atoi();
 	  double min=(getStringEntry(newVarBinning,2,",")).Atof();
 	  double max=(getStringEntry(newVarBinning,3,",")).Atof();
-	  TH1F* newGenPlot=new TH1F( newVarName, newVarName, nbins , min , max);
+	  TH1F* newGenPlot=new TH1F( newVarName+"Gen", newVarName, nbins , min , max);
 	  // C2b create gen branch entry 
 	  Float_t newGen1;
 	  Float_t newGen2;
