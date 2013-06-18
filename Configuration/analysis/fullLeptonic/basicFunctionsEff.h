@@ -248,8 +248,8 @@ std::vector<double> binsPt_(binsPt, binsPt + sizeof(binsPt)/sizeof(double));
 // double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200., 275., 400., 1200.};
 double binsPtAN[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
 std::vector<double> binsPtAN_(binsPtAN, binsPtAN + sizeof(binsPtAN)/sizeof(double));
-// double binsPtEle[]   = {0., 30., 32., 34., 36., 38., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
-double binsPtEle[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
+double binsPtEle[]   = {0., 30., 31., 32., 33., 34., 36., 38., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
+// double binsPtEle[]   = {0., 30., 35., 40., 45., 50., 60., 70., 80., 100., 130., 200., 275., 400., 1200.};
 std::vector<double> binsPtEle_(binsPtEle, binsPtEle + sizeof(binsPtEle)/sizeof(double));
 double binsPtMedian[]   = {0., 30., 55., 200., 275.};
 std::vector<double> binsPtMedian_(binsPtMedian, binsPtMedian + sizeof(binsPtMedian)/sizeof(double));
@@ -258,12 +258,12 @@ std::vector<double> binsPt3bins_(binsPt3bins, binsPt3bins + sizeof(binsPt3bins)/
 
 
 /// 2D bins
-int mBinsEtaMu2D    = 20;
+int mBinsEtaMu2D    = 28;
 double binsEtaMu2D[]    = { -2.1, 2.1 };
 std::vector<double> binsEtaMu2D_(binsEtaMu2D, binsEtaMu2D + sizeof(binsEtaMu2D)/sizeof(double));
 
 int mBinsPtMu2D     = -1;
-double binsPtMu2D[]   = {0., 30., 45., 200., 275., 400., 1200.};
+double binsPtMu2D[]   = {0., 33., 40., 50., 1200.};
 std::vector<double> binsPtMu2D_(binsPtMu2D, binsPtMu2D + sizeof(binsPtMu2D)/sizeof(double));
 
 int mBinsEtaEle2D    = 14;
@@ -271,7 +271,7 @@ double binsEtaEle2D[]    = { -2.1, 2.1 };
 std::vector<double> binsEtaEle2D_(binsEtaEle2D, binsEtaEle2D + sizeof(binsEtaEle2D)/sizeof(double));
 
 int mBinsPtEle2D     = -1;
-double binsPtEle2D[]   = {0., 30., 35., 40., 50., 200., 275., 400., 1200.};
+double binsPtEle2D[]   = {0., 33., 39., 45., 1200.};
 std::vector<double> binsPtEle2D_(binsPtEle2D, binsPtEle2D + sizeof(binsPtEle2D)/sizeof(double));
 
 

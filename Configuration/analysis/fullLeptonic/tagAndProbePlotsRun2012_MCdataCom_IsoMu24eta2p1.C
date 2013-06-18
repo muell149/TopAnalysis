@@ -69,9 +69,9 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false, bool saveR
   std::map<TString, method*> method_;
 
   /// standard for nice plots:
-  TString mIDarr []= {"m1","m2"};
+//   TString mIDarr []= {"m1","m2"};
   /// for different PU scenarios: (also savable in root file)
-//   TString mIDarr []= {"m1", "m1PUup", "m1PUdown", "m2", "m2PUup", "m2PUdown"};
+  TString mIDarr []= {"m1", "m1PUup", "m1PUdown", "m2", "m2PUup", "m2PUdown"};
 
   std::vector<TString> mID(mIDarr, mIDarr + sizeof(mIDarr)/sizeof(TString));
   int mIDNum = mID.size();
@@ -98,26 +98,26 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false, bool saveR
   
   /// Define pt and eta cuts for TH2 
   /// TCut does not work for TH2
-  double cutPt2D  = 30.;
+  double cutPt2D  = 33.;
   double cutEta2D = 2.1;
   
   /// Constructor for struct method(TString iniFileName, TString iniLegName, int iniLineStyle, int iniLineColor, int iniMarkerStyle, int iniMarkerColor, TString iniDrawOpt, TString iniLepOpt, TString source)
   
    /// Summer12 MC
   fileName=inputPathScratch+"/analyzeZMuMuTagAndProbeMCSummer12_HLT_IsoMu24_eta2p1.root";
-  method_["m1"] = new method(fileName, "Simulation IsoMu24eta2p1", 1, 2, 1, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","eventWeightPUeventWeightPU");
+  method_["m1"] = new method(fileName, "Simulation IsoMu24eta2p1", 1, 2, 1, 1, "E", "L", "treeV2","probePt>33. && TMath::Abs(probeEta)<2.1","eventWeightPUeventWeightPU","m1");
   
-  method_["m1PUup"] = new method(fileName, "Simulation IsoMu24eta2p1 PUrew UP", 1, 2, 1, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","eventWeightPUsysUpeventWeightPUUp","m1PUup");
+  method_["m1PUup"] = new method(fileName, "Simulation IsoMu24eta2p1 PUrew UP", 1, 2, 1, 1, "E", "L", "treeV2","probePt>33. && TMath::Abs(probeEta)<2.1","eventWeightPUsysUpeventWeightPUUp","m1PUup");
   
-  method_["m1PUdown"] = new method(fileName, "Simulation IsoMu24eta2p1 PUrew DOWN", 1, 2, 1, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","eventWeightPUsysDowneventWeightPUDown","m1PUdown");
+  method_["m1PUdown"] = new method(fileName, "Simulation IsoMu24eta2p1 PUrew DOWN", 1, 2, 1, 1, "E", "L", "treeV2","probePt>33. && TMath::Abs(probeEta)<2.1","eventWeightPUsysDowneventWeightPUDown","m1PUdown");
   
   /// data
-  fileName=inputPathScratch+"/analyzeZMuMuTagAndProbeRun2012ABC_HLT_IsoMu24eta2p1.root";
-  method_["m2"] = new method(fileName, "Data IsoMu24eta2p1", 1, 1, 21, 1, "E", "L", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1");
+  fileName=inputPathScratch+"/analyzeZMuMuTagAndProbeRun2012ABCDJan22ReReco_HLT_IsoMu24eta2p1.root";
+  method_["m2"] = new method(fileName, "Data IsoMu24eta2p1", 1, 1, 21, 1, "E", "L", "treeV2","probePt>33. && TMath::Abs(probeEta)<2.1","","m1");
   
-  method_["m2PUup"] = new method(fileName, "Data IsoMu24eta2p1 PU up", 1, 1, 24, 1, "E", "LP", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","","m1PUup");
+  method_["m2PUup"] = new method(fileName, "Data IsoMu24eta2p1 PU up", 1, 1, 24, 1, "E", "LP", "treeV2","probePt>33. && TMath::Abs(probeEta)<2.1","","m1PUup");
   
-  method_["m2PUdown"] = new method(fileName, "Data IsoMu24eta2p1 PU down", 1, 1, 26, 1, "E", "LP", "treeV2","probePt>30. && TMath::Abs(probeEta)<2.1","","m1PUdown");
+  method_["m2PUdown"] = new method(fileName, "Data IsoMu24eta2p1 PU down", 1, 1, 26, 1, "E", "LP", "treeV2","probePt>33. && TMath::Abs(probeEta)<2.1","","m1PUdown");
   
 
   
@@ -151,8 +151,8 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false, bool saveR
   /// effName = name of the effHisto; variables: corresponding variable to effName; cuts: corresponding cut to effName
 
 //     TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","Pt_inclLegend"};
-  TString effIDarr[]      = {"Control", "Pt", "Eta", "PVMult", "Mult", "MinDR", "EtaPt30to45", "EtaPtGreater45"};
-//  TString effIDarr[]      = {"Control", "Pt", "Eta", "EtaPt30to45", "EtaPtGreater45"};
+  TString effIDarr[]      = {"Control", "Pt", "Eta", "PVMult", "MinDR", "EtaPt33to40", "EtaPt40to50", "EtaPtGreater50"};
+//  TString effIDarr[]      = {"Control", "Pt", "Eta", "EtaPt33to45", "EtaPtGreater45"};
    //TString effIDarr[]      = {"Pt_inclLegend"};
    //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","lepLepMass"};
   //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "PtEta0to1p5", "PtEta1p5to2p1"};
@@ -164,7 +164,7 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false, bool saveR
   
   
   TString effIDarr2[]      = {};
-  //TString effIDarr2[]      = {"PtEta0to1p2", "PtEta1p2to2p1", "EtaPt30to45", "EtaPt45to60", "EtaPtGreater60", "PtMedian", "Pt3bins"};
+  //TString effIDarr2[]      = {"PtEta0to1p2", "PtEta1p2to2p1", "EtaPt33to45", "EtaPt45to60", "EtaPtGreater60", "PtMedian", "Pt3bins"};
   std::vector<TString> effID2(effIDarr2, effIDarr2 + sizeof(effIDarr2)/sizeof(TString));
   int effIDNum2 = effID2.size();
   std::cout<< "Number of considered plots 2: " <<  effIDNum2 << std::endl;
@@ -183,16 +183,16 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false, bool saveR
   double yLoSF = 0.9, yHiSF = 1.1-0.0001;
   
   /// Constructor for struct eff(TString iniVar, T  iniCuts, TString iniBins, TString iniTitles, double iniYLo=-9999., double iniYHi=-9999., double iniXLo=-9999., double iniXHi=-9999.)
-  TCut cutPt  = "probePt>30."; // && probeRelIso<0.2 "; /*"(probePt>30. || testPt>30. )";*/
+  TCut cutPt  = "probePt>33."; // && probeRelIso<0.2 "; /*"(probePt>33. || testPt>33. )";*/
   TCut cutEta = "TMath::Abs(probeEta)<2.1"; // && probeRelIso<0.2 "; /*"(TMath::Abs(probeEta)<2.1 || TMath::Abs(testEta)<2.1)";*/
   TCut cutPtEta = cutPt && cutEta;
   for(int iFolder=0; iFolder < folderNum; iFolder++){
     title = foldersTitle[iFolder]+" Efficiency/ / ";
     eff_["Control"][folderID[iFolder]]        =new eff("Control", cutPtEta, mBinsControl, binsControl_, title, yLo, yHi, -9999.,-9999.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
-    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.);
+    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 33.,200.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
-    eff_["Pt_inclLegend"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.,true);
+    eff_["Pt_inclLegend"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 33.,200.,true);
     title = foldersTitle[iFolder]+" Efficiency/#eta/ ";
     eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEta, binsEta_, title, yLo, yHi,-2.1,2.1);
     title = foldersTitle[iFolder]+" Efficiency/relIso/ ";
@@ -209,32 +209,33 @@ void tagAndProbePlotsRun2012_MCdataCom_IsoMu24eta2p1(bool save=false, bool saveR
     eff_["lepLepMass"][folderID[iFolder]]            =new eff("lepLepMass", cutPtEta, mBinsLepLepMass, binsLepLepMass_, title, yLo, yHi);
     
     title = foldersTitle[iFolder]+" Efficiency, 0<#eta<1.2/p_{T} [GeV]/ ";
-    eff_["PtEta0to1p2"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)<1.2", mBinsPt, binsPt_, title, yLo, yHi, 30.,200.);
+    eff_["PtEta0to1p2"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)<1.2", mBinsPt, binsPt_, title, yLo, yHi, 33.,200.);
     
     title = foldersTitle[iFolder]+" Efficiency 1.2<#eta<2.1/p_{T} [GeV]/ ";
-    eff_["PtEta1p2to2p1"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)>1.2 && TMath::Abs(probeEta)<2.1", mBinsPt, binsPt_, title, yLo, yHi, 30.,200.,true);
+    eff_["PtEta1p2to2p1"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)>1.2 && TMath::Abs(probeEta)<2.1", mBinsPt, binsPt_, title, yLo, yHi, 33.,200.,true);
     
-    title = foldersTitle[iFolder]+" Efficiency, 30<p_{T}<45/#eta/ ";
-    eff_["EtaPt30to45"][folderID[iFolder]]             =new eff("Eta", "probePt>30. && probePt<45.", mBinsEta, binsEta_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 33<p_{T}<40/#eta/ ";
+    eff_["EtaPt33to40"][folderID[iFolder]]             =new eff("Eta", "probePt>33. && probePt<45.", mBinsEta, binsEta_, title, yLo, yHi);
+    
     
     title = foldersTitle[iFolder]+" Efficiency, 40<p_{T}<50/#eta/ ";
     eff_["EtaPt40to50"][folderID[iFolder]]             =new eff("Eta", "probePt>40. && probePt<50.", mBinsEta, binsEta_, title, yLo, yHi);
     
-    title = foldersTitle[iFolder]+" Efficiency, 45<p_{T}/#eta/ ";
-    eff_["EtaPtGreater45"][folderID[iFolder]]             =new eff("Eta", "probePt>45.", mBinsEta, binsEta_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 50<p_{T}/#eta/ ";
+    eff_["EtaPtGreater50"][folderID[iFolder]]             =new eff("Eta", "probePt>50.", mBinsEta, binsEta_, title, yLo, yHi);
     
     title = foldersTitle[iFolder]+" Efficiency AN/p_{T} [GeV]/ ";
-    eff_["PtAN"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.);
+    eff_["PtAN"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 33.,200.);
     
     title = foldersTitle[iFolder]+" Efficiency Median/p_{T} [GeV]/ ";
-    eff_["PtMedian"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtMedian_, title, yLo, yHi, 30.,200.);
+    eff_["PtMedian"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtMedian_, title, yLo, yHi, 33.,200.);
     
     title = foldersTitle[iFolder]+" Efficiency 3 bins/p_{T} [GeV]/ ";
-    eff_["Pt3bins"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPt3bins_, title, yLo, yHi, 30.,200.);
+    eff_["Pt3bins"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPt3bins_, title, yLo, yHi, 33.,200.);
     
     /// 2D pt:eta
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/#eta/ ";
-    eff2DPtEta_[folderID[iFolder]]             =new eff2D("Pt", "Eta", cutPtEta, mBinsPtMu2D, binsPtMu2D_, mBinsEtaMu2D, binsEtaMu2D_, title, yLo, yHi, 30.+0.001,200.-0.001, -2.1+0.001, 2.1-0.001);
+    eff2DPtEta_[folderID[iFolder]]             =new eff2D("Pt", "Eta", cutPtEta, mBinsPtMu2D, binsPtMu2D_, mBinsEtaMu2D, binsEtaMu2D_, title, yLo, yHi, 33.+0.001,200.-0.001, -2.1+0.001, 2.1-0.001);
   }
 
   /// ---

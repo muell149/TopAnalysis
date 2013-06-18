@@ -3,7 +3,7 @@
 void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=false)
 {
   /// decide whether to do 1D or 2D plots or both
-  bool do1D = false;
+  bool do1D = true;
   bool do2D = true;
   
   /// set style
@@ -45,7 +45,8 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=
   /// path where input files are stored
   TString inputPathScratch  ="/afs/naf.desy.de/group/cms/scratch/tophh/efficiencies";
   
-  TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2012/singleEle";
+//   TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2012/singleEle";
+  TString outputFolder   = "/afs/desy.de/user/j/jlange/analysis/tagAndProbe/plots/2012/singleEleFineBinned";
  TString outputFileName = "/DataMCcomp_Ele27WP80_";
 
   TString fileFormatArr []= {"root", "png", "eps"};
@@ -63,9 +64,9 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=
   std::map<TString, method*> method_;
   
   /// standard for nice plots:
-  TString mIDarr []= {"m1","m2"};
+//   TString mIDarr []= {"m1","m2"};
   /// for different PU scenarios: (also savable in root file)
-//   TString mIDarr []= {"m1", "m1PUup", "m1PUdown", "m2", "m2PUup", "m2PUdown"};
+  TString mIDarr []= {"m1", "m1PUup", "m1PUdown", "m2", "m2PUup", "m2PUdown"};
 
   std::vector<TString> mID(mIDarr, mIDarr + sizeof(mIDarr)/sizeof(TString));
   int mIDNum = mID.size();
@@ -92,11 +93,11 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=
   
   /// Define pt and eta cuts for TH2 
   /// TCut does not work for TH2
-  double cutPt2D  = 30.;
+  double cutPt2D  = 33.;
   double cutEta2D = 2.1;
   
   /// option to select different cuts 
-  TCut cutEle = "probePt>30. && TMath::Abs(probeEta)<2.1";
+  TCut cutEle = "probePt>33. && TMath::Abs(probeEta)<2.1";
   
   /// Constructor for struct method(TString iniFileName, TString iniLegName, int iniLineStyle, int iniLineColor, int iniMarkerStyle, int iniMarkerColor, TString iniDrawOpt, TString iniLepOpt, TString source)
   
@@ -110,8 +111,8 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=
   
  
   /// data
-  fileName=inputPathScratch+"/analyzeZEleEleTagAndProbeRun2012ABC_HLT_Ele27WP80.root";
-  method_["m2"] = new method(fileName, "Data Ele27WP80", 1, 1, 24, 1, "E", "PL", "treeV2",cutEle, "");
+  fileName=inputPathScratch+"/analyzeZEleEleTagAndProbeRun2012ABCDJan22ReReco_HLT_Ele27WP80.root";
+  method_["m2"] = new method(fileName, "Data Ele27WP80", 1, 1, 24, 1, "E", "PL", "treeV2",cutEle, "","m1");
   
   method_["m2PUup"] = new method(fileName, "Data Ele27WP80 PU up", 1, 1, 25, 1, "E", "LP", "treeV2",cutEle,"","m1PUup");
   
@@ -151,16 +152,13 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=
     const int folderNum=1;
   TString folderID[]={"tapAllEle"};
   TString foldersTitle[]={"Combined Selection and Trigger"};
-  
-//   const int folderNum=1;
-//   TString folderID[]={"tapTrigger"};
-//   TString foldersTitle[]={"Trigger"};
+
 
 
   /// effName = name of the effHisto; variables: corresponding variable to effName; cuts: corresponding cut to effName
 
 //    TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","Pt_inclLegend"};
-  TString effIDarr[]      = {"Control", "Pt", "Eta", "PVMult", "MinDR","EtaPt30to35","EtaPt35to40","EtaPtGreater40"};
+  TString effIDarr[]      = {"Control", "Pt", "Eta", "PVMult", "MinDR","EtaPt33to39","EtaPt39to45","EtaPtGreater45"};
 //  TString effIDarr[]      = {"Pt_inclLegend"};
    //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "MinDR","lepLepMass"};
   //TString effIDarr[]      = {"Control", "Pt", "Eta", "RelIso", "PVMult", "Mult", "PtEta0to1p5", "PtEta1p5to2p1"};
@@ -191,16 +189,16 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=
   double yLoSF = 0.9, yHiSF = 1.1-0.0001;
   
   /// Constructor for struct eff(TString iniVar, T  iniCuts, TString iniBins, TString iniTitles, double iniYLo=-9999., double iniYHi=-9999., double iniXLo=-9999., double iniXHi=-9999.)
-  TCut cutPt  = "probePt>30."; // && probeRelIso<0.2 "; //&& probeMult>1"; /*"(probePt>30. || testPt>30. )";*/
+  TCut cutPt  = "probePt>33."; // && probeRelIso<0.2 "; //&& probeMult>1"; /*"(probePt>30. || testPt>30. )";*/
   TCut cutEta = "TMath::Abs(probeEta)<2.1 "; //&& probeRelIso<0.2 "; //&& probeMult>1"; /*"(TMath::Abs(probeEta)<2.1 || TMath::Abs(testEta)<2.1)";*/
   TCut cutPtEta = cutPt && cutEta;
   for(int iFolder=0; iFolder < folderNum; iFolder++){
     title = foldersTitle[iFolder]+" Efficiency/ / ";
     eff_["Control"][folderID[iFolder]]        =new eff("Control", cutPtEta, mBinsControl, binsControl_, title, yLo, yHi, -9999.,-9999.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
-    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtEle_, title, yLo, yHi, 30.,200.);
+    eff_["Pt"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtEle_, title, yLo, yHi, 33.,200.);
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/ ";
-    eff_["Pt_inclLegend"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.,true);
+    eff_["Pt_inclLegend"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 33.,200.,true);
     title = foldersTitle[iFolder]+" Efficiency/#eta/ ";
     eff_["Eta"][folderID[iFolder]]             =new eff("Eta", cutPt, mBinsEtaEle, binsEtaEle_, title, yLo, yHi,-2.1,2.1);
     title = foldersTitle[iFolder]+" Efficiency/relIso/ ";
@@ -217,32 +215,35 @@ void tagAndProbePlotsRun2012_MCdataCom_Ele27WP80(bool save=false, bool saveRoot=
     eff_["lepLepMass"][folderID[iFolder]]            =new eff("lepLepMass", cutPtEta, mBinsLepLepMass, binsLepLepMass_, title, yLo, yHi);
     
     title = foldersTitle[iFolder]+" Efficiency, 0<#eta<1.2/p_{T} [GeV]/ ";
-    eff_["PtEta0to1p2"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)<1.2", mBinsPt, binsPt_, title, yLo, yHi, 30.,200.);
+    eff_["PtEta0to1p2"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)<1.2", mBinsPt, binsPt_, title, yLo, yHi, 33.,200.);
     
     title = foldersTitle[iFolder]+" Efficiency 1.2<#eta<2.1/p_{T} [GeV]/ ";
-    eff_["PtEta1p2to2p1"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)>1.2 && TMath::Abs(probeEta)<2.1", mBinsPt, binsPt_, title, yLo, yHi, 30.,200.,true);
+    eff_["PtEta1p2to2p1"][folderID[iFolder]]             =new eff("Pt", "TMath::Abs(probeEta)>1.2 && TMath::Abs(probeEta)<2.1", mBinsPt, binsPt_, title, yLo, yHi, 33.,200.,true);
     
-    title = foldersTitle[iFolder]+" Efficiency, 30<p_{T}<35/#eta/ ";
-    eff_["EtaPt30to35"][folderID[iFolder]]             =new eff("Eta", "probePt>30. && probePt<35.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 30<p_{T}<32/#eta/ ";
+    eff_["EtaPt30to32"][folderID[iFolder]]             =new eff("Eta", "probePt>30. && probePt<32.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
     
-    title = foldersTitle[iFolder]+" Efficiency, 35<p_{T}<40/#eta/ ";
-    eff_["EtaPt35to40"][folderID[iFolder]]             =new eff("Eta", "probePt>35. && probePt<40.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 33<p_{T}<39/#eta/ ";
+    eff_["EtaPt33to39"][folderID[iFolder]]             =new eff("Eta", "probePt>33. && probePt<39.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
     
-    title = foldersTitle[iFolder]+" Efficiency, 40<p_{T}/#eta/ ";
-    eff_["EtaPtGreater40"][folderID[iFolder]]             =new eff("Eta", "probePt>40.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
+    title = foldersTitle[iFolder]+" Efficiency, 39<p_{T}<45/#eta/ ";
+    eff_["EtaPt39to45"][folderID[iFolder]]             =new eff("Eta", "probePt>39. && probePt<45.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
+    
+    title = foldersTitle[iFolder]+" Efficiency, 45<p_{T}/#eta/ ";
+    eff_["EtaPtGreater45"][folderID[iFolder]]             =new eff("Eta", "probePt>45.", mBinsEtaEle2, binsEtaEle2_, title, yLo, yHi);
     
     title = foldersTitle[iFolder]+" Efficiency AN/p_{T} [GeV]/ ";
-    eff_["PtAN"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 30.,200.);
+    eff_["PtAN"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtAN_, title, yLo, yHi, 33.,200.);
     
     title = foldersTitle[iFolder]+" Efficiency Median/p_{T} [GeV]/ ";
-    eff_["PtMedian"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtMedian_, title, yLo, yHi, 30.,200.);
+    eff_["PtMedian"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPtMedian_, title, yLo, yHi, 33.,200.);
     
     title = foldersTitle[iFolder]+" Efficiency 3 bins/p_{T} [GeV]/ ";
-    eff_["Pt3bins"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPt3bins_, title, yLo, yHi, 30.,200.);
+    eff_["Pt3bins"][folderID[iFolder]]             =new eff("Pt", cutEta, mBinsPt, binsPt3bins_, title, yLo, yHi, 33.,200.);
     
     /// 2D pt:eta
     title = foldersTitle[iFolder]+" Efficiency/p_{T} [GeV]/#eta/ ";
-    eff2DPtEta_[folderID[iFolder]]             =new eff2D("Pt", "Eta", cutPtEta, mBinsPtEle2D, binsPtEle2D_, mBinsEtaEle2D, binsEtaEle2D_, title, yLo, yHi, 30.+0.001,200.-0.001, -2.1+0.001, 2.1-0.001);
+    eff2DPtEta_[folderID[iFolder]]             =new eff2D("Pt", "Eta", cutPtEta, mBinsPtEle2D, binsPtEle2D_, mBinsEtaEle2D, binsEtaEle2D_, title, yLo, yHi, 33.+0.001,200.-0.001, -2.1+0.001, 2.1-0.001);
   }
 
   /// ---
