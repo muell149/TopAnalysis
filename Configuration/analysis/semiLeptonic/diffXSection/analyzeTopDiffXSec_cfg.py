@@ -1682,7 +1682,7 @@ if(bTagAlgo =='simpleSecondaryVertexHighEffBJetTags'):
     bTagAlgoShort = "SSVHEM"
 process.bTagSFEventWeight.jets=cms.InputTag("tightLeadingPFJets")
 process.bTagSFEventWeight.bTagAlgo=bTagAlgoShort
-process.bTagSFEventWeight.version="12-470"
+process.bTagSFEventWeight.version="2012"
 process.bTagSFEventWeight.sysVar   = cms.string("") # bTagSFUp, bTagSFDown, misTagSFUp, misTagSFDown, 
                                                     # bTagSFShapeUpPt, bTagSFShapeDownPt, bTagSFShapeUpEta, bTagSFShapeDownEta possible;
 #process.bTagSFEventWeight.filename= "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+bTagAlgoShort+".root"
