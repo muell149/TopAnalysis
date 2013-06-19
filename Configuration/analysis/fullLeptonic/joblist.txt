@@ -1,17 +1,25 @@
 
 # DY Summer 2012: 2577 files
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 650 analyzeZMuMuTagAndProbeMCSummer12_HLT_IsoMu24_eta2p1.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 650 analyzeZMuMuTagAndProbeMCSummer12_HLT_IsoMu24_eta2p1.py
 
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 650 analyzeZEleEleTagAndProbeMCSummer12_HLT_Ele27WP80.py
-
-
-# muon data
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZMuMuTagAndProbeRun2012ABCReReco_HLT_IsoMu24eta2p1.py
-
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZMuMuTagAndProbeRun2012CPromptReco_HLT_IsoMu24eta2p1.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 650 analyzeZEleEleTagAndProbeMCSummer12_HLT_Ele27WP80.py
 
 
-# ele data
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZEleEleTagAndProbeRun2012ABCReReco_HLT_Ele27WP80.py
+# muon data (~19,000 files)
+nafJobSplitter.pl -q 48 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 990 analyzeZMuMuTagAndProbeRun2012ABCDJan22ReReco_HLT_IsoMu24eta2p1.py
 
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/jlange/output_5_3 990 analyzeZEleEleTagAndProbeRun2012CPromptReco_HLT_Ele27WP80.py
+
+# ele data (~ 22,000 files)
+nafJobSplitter.pl -q 48 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 990 analyzeZEleEleTagAndProbeRun2012ABCDJan22ReReco_HLT_Ele27WP80.py
+
+# ABC ~ 14000 files
+nafJobSplitter.pl -q 48 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 990 analyzeZEleEleTagAndProbeRun2012ABCJan22ReReco_HLT_Ele27WP80.py
+
+# AB ~ 6500 files
+nafJobSplitter.pl -q 48 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 990 analyzeZEleEleTagAndProbeRun2012ABJan22ReReco_HLT_Ele27WP80.py
+
+# C ~ 7700 files
+nafJobSplitter.pl -q 48 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 990 analyzeZEleEleTagAndProbeRun2012CJan22ReReco_HLT_Ele27WP80.py
+
+# D ~ 8000 files
+nafJobSplitter.pl -q 48 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami`/output_5_3 990 analyzeZEleEleTagAndProbeRun2012DJan22ReReco_HLT_Ele27WP80.py
