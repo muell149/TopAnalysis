@@ -11,6 +11,9 @@ analyzeSemiLepLepton = cms.EDAnalyzer("SemiLepLeptonAnalyzer",
                                       semiLepEvent = cms.InputTag("ttSemiLepEvent"),
                                       # specify kinematic fit hypothesis
                                       hypoKey = cms.string("kKinFit"),
+                                      # choose reco lepton collection
+                                      # NOTE: the leading entry will be interpreted as reco lepton
+                                      recLeptons = cms.InputTag('selectedPatMuons'),
                                       # choose genParticle collection
                                       # NOTE: the leading entry will be interpreted as gen lepton
                                       genLeptons = cms.InputTag('genParticles'),
@@ -23,6 +26,8 @@ analyzeSemiLepLepton = cms.EDAnalyzer("SemiLepLeptonAnalyzer",
                                       genPlots = cms.bool(False), 
                                       # produce rec level plots?
                                       recPlots = cms.bool(True),
+                                      # use lepton kinematics as before the kinematic fit?
+                                      useRecLepKinematicsBeforeFit= cms.bool(False),
                                       # create tree?
                                       useTree = cms.bool(False)
                                       )

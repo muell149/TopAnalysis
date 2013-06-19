@@ -7,16 +7,19 @@
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 
 #include "TopAnalysis/TopAnalyzer/plugins/SemiLepLeptonAnalyzer.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 // default constructor
 SemiLepLeptonAnalyzer::SemiLepLeptonAnalyzer(const edm::ParameterSet& cfg):
   semiLepEvt_(cfg.getParameter<edm::InputTag>("semiLepEvent")),
   hypoKey_   (cfg.getParameter<std::string>  ("hypoKey"     )),
+  recLeptons_(cfg.getParameter<edm::InputTag>("recLeptons"  )),
   genLeptons_(cfg.getParameter<edm::InputTag>("genLeptons"  )),
   verbose    (cfg.getParameter<int>          ("output"      )),
   weight_    (cfg.getParameter<edm::InputTag>("weight"      )),
   genPlots_  (cfg.getParameter<bool>         ("genPlots"    )),
   recPlots_  (cfg.getParameter<bool>         ("recPlots"    )),
+  preLep     (cfg.getParameter<bool>         ("useRecLeptonKinematicsBeforeFit")),
   useTree_   (cfg.getParameter<bool>("useTree")),
   valueLepPtRec(0),
   valueLepPtGen(0),
@@ -71,9 +74,12 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   //     B: rec level plots
   // ---
   if(verbose>0) std::cout << std::endl << "create rec level plots" << std::endl;
-  // get rec lepton (from kinfit hypothesis)
+  edm::Handle<std::vector<pat::Muon> > recLeptons;
+  if(recPlots_) event.getByLabel(recLeptons_, recLeptons);
+  // get rec lepton (from kinfit hypothesis or before kinFit)
   const reco::Candidate* zero=0;
-  const reco::Candidate* recLepton = recPlots_ ? getLepton(semiLepEvt, hypoKey_) : zero;
+  if(!recPlots_) preLep=false;
+  const reco::Candidate* recLepton = !recPlots_ ? zero : (preLep ? &recLeptons->at(0) : getLepton(semiLepEvt, hypoKey_));
   // fill rec histograms
   if(recLepton){
     if(useTree_){

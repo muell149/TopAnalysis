@@ -43,6 +43,8 @@ class SemiLepLeptonAnalyzer : public edm::EDAnalyzer {
   edm::InputTag semiLepEvt_;
   // class key of kinfit hypothesis
   std::string hypoKey_;
+  // reco Lepton collection 
+  edm::InputTag recLeptons_;
   // genLepton collection 
   edm::InputTag genLeptons_;
   // output manager
@@ -53,6 +55,8 @@ class SemiLepLeptonAnalyzer : public edm::EDAnalyzer {
   bool genPlots_;
   // create rec plots?
   bool recPlots_;
+  // use lepton kinematics as before the kinematic fit?
+  bool preLep;
 
   // ---
   //    define Tree for event content
