@@ -1277,8 +1277,7 @@ process.makeGenLevelBJets=process.produceGenLevelBJets.clone(
     requireTopBquark = cms.bool(True),
     noBBbarResonances = cms.bool(True),
     doImprovedHadronMatching = cms.bool(False),
-    doValidationPlotsForImprovedHadronMatching = cms.bool(False)
-)
+    )
 process.altermakeGenLevelBJets=process.produceGenLevelBJets.clone(
     ttGenEvent = cms.InputTag('genEvt'),
     #genJets = cms.InputTag('ak5GenJets','','HLT'),
@@ -1289,8 +1288,7 @@ process.altermakeGenLevelBJets=process.produceGenLevelBJets.clone(
     requireTopBquark = cms.bool(True),
     noBBbarResonances = cms.bool(True),
     doImprovedHadronMatching = cms.bool(False),
-    doValidationPlotsForImprovedHadronMatching = cms.bool(False)
-)
+    )
 
 ## tool to select identified bjets from genJet collection
 process.load("TopAnalysis.TopUtils.UhhGenJetSelector_cfi")
@@ -1322,7 +1320,7 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     genLeptons = cms.InputTag('isolatedGenMuons'),
     bJetCollection = cms.bool(True),
     recoJets= cms.InputTag('tightLeadingPFJets'),
-    useRecBjetsKinematicsBeforeFit= cms.bool(False),
+    useRecBjetsKinematicsBeforeFit= cms.bool(True),
     output = cms.int32(0),
     weight = cms.InputTag(""),
     genPlots = cms.bool(True),
@@ -1372,35 +1370,31 @@ process.load("TopAnalysis.TopAnalyzer.SemiLepLeptonAnalyzer_cfi")
 process.analyzeTopRecoKinematicsLepton=process.analyzeSemiLepLepton.clone(
                                      semiLepEvent = cms.InputTag("ttSemiLepEvent"),
                                      hypoKey = cms.string("kKinFit"),
+                                     recLeptons = cms.InputTag('tightMuons'),
                                      genLeptons = cms.InputTag('isolatedGenMuons'),
                                      output = cms.int32(0),
                                      weight = cms.InputTag(""),
                                      genPlots = cms.bool(True), 
                                      recPlots = cms.bool(True),
+                                     useRecLeptonKinematicsBeforeFit= cms.bool(True),
                                      useTree = cms.bool(True)
                                      )
-    
+if(decayChannel=="electron"):
+    process.analyzeTopRecoKinematicsLepton.recLeptons = cms.InputTag('tightElectronsEJ')
+    process.analyzeTopRecoKinematicsLepton.genLeptons = cms.InputTag('isolatedGenElectrons')
+
 process.analyzeTopPartonLevelKinematicsLepton=process.analyzeTopRecoKinematicsLepton.clone(
-    genLeptons = cms.InputTag('isolatedGenMuons'),
     genPlots = cms.bool(True), 
     recPlots = cms.bool(False)
     )
 process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace=process.analyzeTopRecoKinematicsLepton.clone(
-    genLeptons = cms.InputTag('isolatedGenMuons'),
     genPlots = cms.bool(True), 
     recPlots = cms.bool(False)
     )
 process.analyzeTopHadronLevelKinematicsLeptonPhaseSpace=process.analyzeTopRecoKinematicsLepton.clone(
-    genLeptons = cms.InputTag('isolatedGenMuons'),
     genPlots = cms.bool(True), 
     recPlots = cms.bool(False)
     )
-
-if(decayChannel=="electron"):
-    process.analyzeTopRecoKinematicsLepton.genLeptons = cms.InputTag('isolatedGenElectrons')
-    process.analyzeTopPartonLevelKinematicsLepton.genLeptons = cms.InputTag('isolatedGenElectrons')
-    process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace.genLeptons = cms.InputTag('isolatedGenElectrons')
-    process.analyzeTopHadronLevelKinematicsLeptonPhaseSpace .genLeptons = cms.InputTag('isolatedGenElectrons')
 
 ## ---
 ##    collect hadron level jet selection
@@ -3096,3 +3090,17 @@ if(runningOnData=="MC"):
     if(applyKinFit==True):
     # use status 3 particles (!)
         process.decaySubset.fillMode = cms.string("kME")
+
+
+## adjust lepton pT cut
+import re
+ptval="33" # adjust cut value here! [GeV]
+relevantLeptonCollections = [process.tightElectronsEJ, process.goldenMuons, process.selectedGenMuonCollection, process.selectedGenElectronCollection]
+#exp = re.compile('(ep)t\s?>\s?30')
+exp = re.compile('(?:t\s?>\s?30)') 
+for lep in relevantLeptonCollections:
+    if(exp.search(lep.cut.pythonValue())!=None):
+        tmpExp=exp.sub("t > "+ptval, str(lep.cut.pythonValue()))
+        lep.cut=tmpExp
+        if(tmpExp.find("\'")>-1):
+            lep.cut=tmpExp.strip("'")
