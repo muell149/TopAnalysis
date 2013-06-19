@@ -497,10 +497,10 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   ttbarJetMass=ttbarJetMassGen=-999;
   // gen level
   if(semiLepEvt_h.isValid()){
-    std::cout << "hypothesis valid" << std::endl;
+    if(debug) std::cout << "hypothesis valid" << std::endl;
     if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)&&(addGenJets_h->at(0)).pt()>=addJetPt_){
       ttbarJetMassGen=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
-      std::cout << "ttbarJetMassGen=" << ttbarJetMassGen << std::endl;
+      if(debug) std::cout << "ttbarJetMassGen=" << ttbarJetMassGen << std::endl;
     }
     else if(debug){
       std::cout << "addGenJets_h.isValid(): " << addGenJets_h.isValid() << std::endl;
@@ -510,7 +510,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     // reco level
     if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjet!=-1)&&(leadNonttjetPt>=addJetPt_) ){
       ttbarJetMass=(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()+(jets_h->at(leadNonttjet)).p4()).mass();
-      std::cout << "ttbarJetMass=" << ttbarJetMass << std::endl;
+      if(debug) std::cout << "ttbarJetMass=" << ttbarJetMass << std::endl;
     }
     else if(debug){
       std::cout << "semiLepEvt_h->isHypoValid(hypoKey_): " << semiLepEvt_h->isHypoValid(hypoKey_) << std::endl;
