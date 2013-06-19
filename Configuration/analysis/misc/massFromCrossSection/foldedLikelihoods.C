@@ -1275,8 +1275,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_mass.eps");
 
-  canvas->Print(printNameBase+".ps]");
-  return 0;
+  //  canvas->Print(printNameBase+".ps]");
+  //  return 0;
 
   FinalLikeliResults1D* mocResult[nPdfSets];
   FinalLikeliResults1D* mitResult[nPdfSets];
@@ -1454,6 +1454,19 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   textNNPDF.SetTextSizePixels(26);
   textNNPDF.SetTextAlign(12);
 
+  TBox boxAlphaLegend(0.1085, 11.,
+		      0.1095, 11.8);
+  boxAlphaLegend.SetFillColor(kGreen-9);
+
+  TLine lineAlphaLegend(0.1090, 11.,
+			0.1090, 11.8);
+  lineAlphaLegend.SetLineStyle(3);
+
+  TLatex textAlphaLegend(0.1097, 11.2, "Default #alpha_{S}(m_{Z}) of respective PDF set");
+  textAlphaLegend.SetTextFont(43);
+  textAlphaLegend.SetTextSizePixels(23);
+  textAlphaLegend.SetTextAlign(11);
+
   double yLeft = 0.10;
   double yRight = 0.25;
   if(!moch_highE) {
@@ -1480,6 +1493,9 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   else
     mitSummaryGraphTotErr.Draw("AP");
   if(targetAlpha) {
+    boxAlphaLegend.Draw();
+    lineAlphaLegend.Draw();
+    textAlphaLegend.Draw();
     boxAlphaMSTW.Draw();
     lineAlphaMSTW.Draw();
     boxAlphaHERA.Draw();
