@@ -599,7 +599,6 @@ if topfilter:
     process.produceGenLevelBJetsPlusHadron.deltaR = 5.0
     process.produceGenLevelBJetsPlusHadron.noBBbarResonances = True
     process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
-    process.produceGenLevelBJetsPlusHadron.doValidationPlotsForImprovedHadronMatching = False
 
     process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
 
