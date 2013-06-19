@@ -52,14 +52,14 @@ namespace semileptonic {
   // ==========================================
 
   // basic variables
-  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt" };
-  TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass" };
-  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm"};  
-  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm"}; 
+  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt" }; //lbMass
+  TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass" }; // topPtTtbarSys
+  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm"}; //lbMassNorm
+  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm"}; //topPtTtbarSysNorm
   TString xSecVariablesIncl[] = {"inclusive"};
 
-  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]"};
-  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "p_{T}^{b#bar{b}}/[GeV]", "m^{b#bar{b}}/[GeV]"};
+  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]"}; // "p_{T}^{t} (t#bar{t} restframe)/[GeV]"
+  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "p_{T}^{b#bar{b}}/[GeV]", "m^{b#bar{b}}/[GeV]"};//"m^{lb}/[GeV]"
 
   // cross-check variables
  
@@ -180,16 +180,16 @@ namespace semileptonic {
 
 
 
-  const double SF_TopMassDownUncertainty=0.9/11.0; // scale factors for top mass uncertainty
-  const double SF_TopMassUpUncertainty  =0.9/12.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
-                                                   // --> systematic samples are varied by -11.0/+12.0 GeV 
+  const double SF_TopMassDownUncertainty=0.9/3.0; // scale factors for top mass uncertainty
+  const double SF_TopMassUpUncertainty  =0.9/3.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
+                                                   // --> systematic samples are varied by +/-3.0 GeV 
                                                    // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
   const double globalLumiUncertainty = 0.044; // relative uncertainty 
 	
-  const double constLumiElec = 12148.0; // ABC wo recover
-  const double constLumiMuon = 12148.0; // ABC wo recover
+  const double constLumiElec = 12148.0; // luminosity of ABC dataset wo recover
+  const double constLumiMuon = 12148.0; // luminosity of ABC dataset wo recover
   
   const double BRPDG=0.145888;
 
@@ -1637,6 +1637,44 @@ namespace semileptonic {
     return rest;
   }
 
+  TH1F* cutOffTH1(TH1F* histoOri, const double cutOff, const int verbose=0){
+    // this function removes all bins with x>cutOff and moves their content to the overflow
+    // modified quantities: "histoOri"
+    // ATTENTION: histoUnbinned needs to have an initial equidistant binning
+    // used functions: none
+    // used enumerators: none
+    // "histoUnbinned": plot to be binned
+    // "cutOff": new maximum of the x Axis
+    // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
+    
+    // new #bins
+    double Nbins=-1;
+    // find last remaining bin
+    for(int bin=1; bin<=histoOri->GetNbinsX(); ++bin){
+      if(histoOri->GetBinLowEdge(bin+1)>cutOff){
+	Nbins=bin-1;
+	break;
+      }
+    }
+    if(Nbins>0&&Nbins<histoOri->GetNbinsX()){
+      // create new histo
+      TH1F* result=new TH1F(histoOri->GetName(), histoOri->GetTitle(), Nbins, histoOri->GetBinLowEdge(1), histoOri->GetBinLowEdge(Nbins+1));
+      // fill new histo
+      for(int bin=1; bin<=histoOri->GetNbinsX(); ++bin){
+	if(bin<=Nbins) result->SetBinContent(bin, histoOri->GetBinContent(bin));
+	else  result->SetBinContent(result->GetNbinsX()+1, result->GetBinContent(result->GetNbinsX()+1)+histoOri->GetBinContent(bin));
+      }
+      // histo with new range
+      return result;
+    }
+    else if(verbose>0){
+      std::cout << "WARNING in cutOffTH1: histo " << histoOri->GetName() << " not changed (target cutOff was " << cutOff << ")" << std::endl;
+    }
+    // histo stays untouched
+    return histoOri;
+  }
+
+
   void reBinTH1F(TH1F& histoUnbinned, const std::vector<double> &binlowerEdges_, const int verbose=0)
   {
     // this function rebins an histogram using a variable binning
@@ -1847,13 +1885,13 @@ namespace semileptonic {
 
       // pt(top)
       double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0};  
-      // PAS binning: double topPtBins[]={0., 60., 120., 200., 280., 400., 800.};
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
-      result["topPt"       ] = bins_;
-      result["topPtLead"   ] = bins_;
-      result["topPtSubLead"] = bins_;
+      result["topPt"        ] = bins_;
+      result["topPtLead"    ] = bins_;
+      result["topPtSubLead" ] = bins_;
+      result["topPtTtbarSys"] = bins_;
       if (addCrossCheckVariables){
-	result["topPtPlus"]  = bins_;
+	result["topPtPlus" ] = bins_;
 	result["topPtMinus"] = bins_;
       }
       bins_.clear();
@@ -1932,6 +1970,12 @@ namespace semileptonic {
       double bbbarMassBins[]={0.0, 80.0, 120.0, 180, 250.0, 400.0, 700.0, 1200.0};
       bins_.insert( bins_.begin(), bbbarMassBins, bbbarMassBins + sizeof(bbbarMassBins)/sizeof(double) );
       result["bbbarMass"]=bins_;
+      bins_.clear();
+
+      // m(lb)
+      double lbMassBins[]={0.0, 100.0, 250.0, 350.0, 500.0};
+      bins_.insert( bins_.begin(), lbMassBins, lbMassBins + sizeof(lbMassBins)/sizeof(double) );
+      result["lbMass"]=bins_;
       bins_.clear();
 
       return result;
@@ -2013,6 +2057,39 @@ namespace semileptonic {
       // set value and error
       yield->SetBinContent(bin, xSec     );
       yield->SetBinError  (bin, xSecError);
+    }
+  }
+
+ void DivideTwoYields(TH1F* nom, TH1F* denom)
+  {
+    // this function divides nom by denom
+    // and calculates the correct error in each bin based
+    // on gaussian error propagation
+    // modified quantities: nom
+    // used functions: none
+    // used enumerators: none
+
+    // check if #bins are the same
+    if(nom->GetNbinsX()!=denom->GetNbinsX()){
+      std::cout << "#bins in nom and denom plots are not the same!" << std::endl;
+      exit(1);
+    }
+    // loop all bins
+    for(int bin=1; bin<=nom->GetNbinsX(); ++bin){
+      double Nnom   = nom  ->GetBinContent(bin);
+      double Ndenom = denom->GetBinContent(bin);
+      // value
+      double ratio = Nnom/Ndenom;
+      // error
+      double ratioError = sqrt((ratio*(1-ratio))/Ndenom);
+      // check if denom is 0
+      if(Ndenom==0){
+	ratio=0;
+	ratioError=0;
+      }
+      // set value and error
+      nom->SetBinContent(bin, ratio     );
+      nom->SetBinError  (bin, ratioError);
     }
   }
 
@@ -2381,25 +2458,27 @@ namespace semileptonic {
     TString strUnitGeV = " #left[GeV#right]";
     if(noUnit) strUnitGeV="";
 
-    if     (variable == "topPt"       ) return "p_{T}^{t}"+strUnitGeV;
-    if     (variable == "topPtLead"   ) return "p_{T}^{lead t}"+strUnitGeV;
-    if     (variable == "topPtSubLead") return "p_{T}^{sublead t}"+strUnitGeV;
-    else if(variable == "topPtPlus"   ) return "p_{T}^{t}"+strUnitGeV;
-    else if(variable == "topPtMinus"  ) return "p_{T}^{#bar{t}}"+strUnitGeV;
-    else if(variable == "topY"        ) return "y^{t}";
-    else if(variable == "topYPlus"    ) return "y^{t}";
-    else if(variable == "topYMinus"   ) return "y^{#bar{t}}";
-    else if(variable == "ttbarPt"     ) return "p_{T}^{t#bar{t}}"+strUnitGeV;
-    else if(variable == "ttbarY"      ) return "y^{t#bar{t}}";
-    else if(variable == "ttbarMass"   ) return "m^{t#bar{t}}"+strUnitGeV;
-    else if(variable == "lepPt"       ) return "p_{T}^{l}"+strUnitGeV;
-    else if(variable == "lepEta"      ) return "#eta^{l}"; 
-    else if(variable == "lepEtaPlus"  ) return "#eta^{l^{+}}";
-    else if(variable == "lepEtaMinus" ) return "#eta^{l^{-}}";
-    else if(variable == "bqPt"        ) return "p_{T}^{b}"+strUnitGeV;
-    else if(variable == "bqEta"       ) return "#eta^{b}";
-    else if(variable == "bbbarPt"     ) return "p_{T}^{b#bar{b}}"+strUnitGeV;
-    else if(variable == "bbbarMass"   ) return "m^{b#bar{b}}"+strUnitGeV;
+    if     (variable == "topPt"        ) return "p_{T}^{t}"+strUnitGeV;
+    if     (variable == "topPtTtbarSys") return "p_{T}^{t} (t#bar{t} restframe)"+strUnitGeV;
+    if     (variable == "topPtLead"    ) return "p_{T}^{lead t}"+strUnitGeV;
+    if     (variable == "topPtSubLead" ) return "p_{T}^{sublead t}"+strUnitGeV;
+    else if(variable == "topPtPlus"    ) return "p_{T}^{t}"+strUnitGeV;
+    else if(variable == "topPtMinus"   ) return "p_{T}^{#bar{t}}"+strUnitGeV;
+    else if(variable == "topY"         ) return "y^{t}";
+    else if(variable == "topYPlus"     ) return "y^{t}";
+    else if(variable == "topYMinus"    ) return "y^{#bar{t}}";
+    else if(variable == "ttbarPt"      ) return "p_{T}^{t#bar{t}}"+strUnitGeV;
+    else if(variable == "ttbarY"       ) return "y^{t#bar{t}}";
+    else if(variable == "ttbarMass"    ) return "m^{t#bar{t}}"+strUnitGeV;
+    else if(variable == "lepPt"        ) return "p_{T}^{l}"+strUnitGeV;
+    else if(variable == "lepEta"       ) return "#eta^{l}"; 
+    else if(variable == "lepEtaPlus"   ) return "#eta^{l^{+}}";
+    else if(variable == "lepEtaMinus"  ) return "#eta^{l^{-}}";
+    else if(variable == "bqPt"         ) return "p_{T}^{b}"+strUnitGeV;
+    else if(variable == "bqEta"        ) return "#eta^{b}";
+    else if(variable == "bbbarPt"      ) return "p_{T}^{b#bar{b}}"+strUnitGeV;
+    else if(variable == "bbbarMass"    ) return "m^{b#bar{b}}"+strUnitGeV;
+    else if(variable == "lbMass"       ) return "m^{lb}"+strUnitGeV;
     else return "Default Label for variable "+variable;
   }
 
@@ -3933,7 +4012,10 @@ namespace semileptonic {
 
 	// Unfolding with optimal tau
 	if(tau){
-	  if(variable!="topPt"&&variable.Contains("topPt")) return regParameter("topPt", decayChannel, 0, fullPS, tau, hadronPS, closureTestSpecifier, probSel);
+	  // FIXME: use some value to make it working
+	  if(variable.Contains("lbMass"       )) return 4; 
+	  if(variable.Contains("topPtTtbarSys")) return 7; 
+	  
 	  // optimized parameters for each PS, final state, selection and closure test configuration
 	    if(decayChannel.Contains("muon")){
 	      if(closureTestSpecifier==""){
@@ -3956,7 +4038,9 @@ namespace semileptonic {
 	      if(closureTestSpecifier==""){
 		// optimized parameters 
 		// top & ttbar:  hadron level not important
-		if     (variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
+		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
+		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
+		else if(variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
 		else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 5.52 : 6.51) : 6.53; 
 		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 3.18 : 3.84) : 3.91; 
 		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? (probSel ? 4.58 : 5.46) : 5.47; 
@@ -3972,11 +4056,13 @@ namespace semileptonic {
 	    else if(decayChannel.Contains("combined")){ 
 	      // optimized parameters 
 	      // top & ttbar:  hadron level not important
-	      if     (variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 8.64 : 10.37) : 10.36; 
-	      else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 8.0  : 9.51 ) : 9.51; 
-	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 4.61 : 5.49 ) : 5.54; 
-	      else if(variable.Contains("ttbarY")   ) k = (fullPS) ? (probSel ? 6.63 : 7.93 ) : 7.93; 
-	      else if(variable.Contains("ttbarMass")) k = (fullPS) ? (probSel ? 3.61 : 4.44 ) : 4.44; 
+	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 7.28/*8.64*/ : 10.37) : 10.36; 
+	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 5.13/*8.64*/ : 10.37) : 10.36; 
+	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 8.83/*8.64*/ : 10.37) : 10.36; 
+	      else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 7.77/*8.0 */ : 9.51 ) : 9.51; 
+	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 4.46/*4.61*/ : 5.49 ) : 5.54; 
+	      else if(variable.Contains("ttbarY")   ) k = (fullPS) ? (probSel ? 6.23/*6.63*/ : 7.93 ) : 7.93; 
+	      else if(variable.Contains("ttbarMass")) k = (fullPS) ? (probSel ? 3.00/*3.61*/ : 4.44 ) : 4.44; 
 	      else if(variable.Contains("lepPt")    ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ? 4.93    : 6.60   ) : 7.65 );
 	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ? 2.9e-07 : 7.7e-06) : 3.00 ); 
 	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 8.56   : 12.51  ) : 10.53); 
