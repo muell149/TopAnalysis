@@ -999,6 +999,30 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   //  canvas->Print(printNameBase+".ps]");
   //  return 0;
 
+  TBox boxAlpha2012(alpha2012_mean.getVal()-alpha2012_unc.getVal(), 115.,
+		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), 235.);
+  boxAlpha2012.SetFillColor(kMagenta-9);
+  boxAlpha2012.SetFillStyle(3007);
+  TLine lineAlpha2012(alpha2012_mean.getVal(), 115.,
+		      alpha2012_mean.getVal(), 235.);
+  lineAlpha2012.SetLineStyle(2);
+  TLine lineAlpha2012_left(alpha2012_mean.getVal()-alpha2012_unc.getVal(), 115.,
+			   alpha2012_mean.getVal()-alpha2012_unc.getVal(), 235.);
+  TLine lineAlpha2012_right(alpha2012_mean.getVal()+alpha2012_unc.getVal(), 115.,
+			    alpha2012_mean.getVal()+alpha2012_unc.getVal(), 235.);
+  lineAlpha2012_left .SetLineColor(kMagenta-9);
+  lineAlpha2012_right.SetLineColor(kMagenta-9);
+  TText textAlpha2012_left(alpha2012_mean.getVal()-0.5*alpha2012_unc.getVal(), 135., "PDG");
+  textAlpha2012_left.SetTextAngle(90);
+  textAlpha2012_left.SetTextAlign(32);
+  textAlpha2012_left.SetTextFont(43);
+  textAlpha2012_left.SetTextSizePixels(23);
+  TText textAlpha2012_right(alpha2012_mean.getVal()+0.5*alpha2012_unc.getVal(), 135., "2012");
+  textAlpha2012_right.SetTextAngle(90);
+  textAlpha2012_right.SetTextAlign(32);
+  textAlpha2012_right.SetTextFont(43);
+  textAlpha2012_right.SetTextSizePixels(23);
+
   if(pole) {
 
   TGraphErrors measXSecWithErrAlpha = getMeasXSecWithErr(measXSecMassDep, measXSecMassDepErr, alpha, 0.10, 0.13, 30);
@@ -1048,6 +1072,12 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   predXSecDefAlphaMitCT.SetMarkerStyle(20);
 
   RooPlot* frame_alpha = alpha.frame(RooFit::Range(0.108, 0.122));
+  frame_alpha->addObject(&boxAlpha2012);
+  frame_alpha->addObject(&lineAlpha2012);
+  frame_alpha->addObject(&lineAlpha2012_left);
+  frame_alpha->addObject(&lineAlpha2012_right);
+  frame_alpha->addObject(&textAlpha2012_left);
+  frame_alpha->addObject(&textAlpha2012_right);
   frame_alpha->addObject(&measXSecWithErrAlpha, "3");
   frame_alpha->addObject(&measXSecWithErrAlpha, "CX");
   frame_alpha->addObject(&predXSecAlphaMitNNPDF, "3");
@@ -1126,8 +1156,16 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   legAlphaDep.AddEntry(frame_alpha->findObject(predXSec[3][1]->xsec.GetName()+(TString)"_Norm[alpha]"), theoTitle[3][1], "FLP");
   legAlphaDep.SetY1NDC(0.54);
   legAlphaDep.Draw();
-  massText.Draw();
-  sqrtSText.Draw();
+  TLatex headerXSecVsAlpha(0.,0.,"#sqrt{s} = 7 TeV; m_{#kern[0.5]{#lower[-0.3]{t}}} = 173.2 GeV");
+  headerXSecVsAlpha.SetNDC();
+  headerXSecVsAlpha.SetTextAlign(11);
+  headerXSecVsAlpha.SetX(gPad->GetLeftMargin());
+  headerXSecVsAlpha.SetY(0.96);
+  headerXSecVsAlpha.SetTextFont(43);
+  headerXSecVsAlpha.SetTextSizePixels(25);
+  headerXSecVsAlpha.Draw();
+  //  massText.Draw();
+  //  sqrtSText.Draw();
 
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_alpha.eps");
@@ -1157,6 +1195,36 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
     frame_mass = mass.frame(165., 190.);
   else
     frame_mass = mass.frame(155., 185.);
+  TBox boxMass2012(mass_mean.getVal()-mass_unc.getVal(), 115.,
+		   mass_mean.getVal()+mass_unc.getVal(), 235.);
+  boxMass2012.SetFillColor(kMagenta-9);
+  boxMass2012.SetFillStyle(3007);
+  TLine lineMass2012(mass_mean.getVal(), 115.,
+		     mass_mean.getVal(), 235.);
+  lineMass2012.SetLineStyle(2);
+  TLine lineMass2012_left(mass_mean.getVal()-mass_unc.getVal(), 115.,
+			  mass_mean.getVal()-mass_unc.getVal(), 235.);
+  TLine lineMass2012_right(mass_mean.getVal()+mass_unc.getVal(), 115.,
+			   mass_mean.getVal()+mass_unc.getVal(), 235.);
+  lineMass2012_left .SetLineColor(kMagenta-9);
+  lineMass2012_right.SetLineColor(kMagenta-9);
+  TText textMass2012_left(mass_mean.getVal()-0.5*mass_unc.getVal(), 140., "Tevatron");
+  textMass2012_left.SetTextAngle(90);
+  textMass2012_left.SetTextAlign(32);
+  textMass2012_left.SetTextFont(43);
+  textMass2012_left.SetTextSizePixels(23);
+  TText textMass2012_right(mass_mean.getVal()+0.5*mass_unc.getVal(), 140., "2012");
+  textMass2012_right.SetTextAngle(90);
+  textMass2012_right.SetTextAlign(32);
+  textMass2012_right.SetTextFont(43);
+  textMass2012_right.SetTextSizePixels(23);
+
+  frame_mass->addObject(&boxMass2012);
+  frame_mass->addObject(&lineMass2012);
+  frame_mass->addObject(&lineMass2012_left);
+  frame_mass->addObject(&lineMass2012_right);
+  frame_mass->addObject(&textMass2012_left);
+  frame_mass->addObject(&textMass2012_right);
   frame_mass->addObject(&measXSecWithErrMass, "3");
   frame_mass->addObject(&measXSecWithErrMass, "CX");
   measXSecWithErrMass.SetFillColor(kBlue-10);
@@ -1181,8 +1249,16 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   frame_mass->SetMaximum(235.);
   frame_mass->SetMinimum(115.);
   frame_mass->Draw();
-  alphaText.Draw();
-  sqrtSText.Draw();
+  TLatex headerXSecVsMass(0.,0.,"#sqrt{s} = 7 TeV; #alpha_{#lower[-0.1]{S}}#lower[-0.1]{(}m_{#lower[-0.1]{Z}}#lower[-0.1]{)} = 0.1184");
+  headerXSecVsMass.SetNDC();
+  headerXSecVsMass.SetTextAlign(11);
+  headerXSecVsMass.SetX(gPad->GetLeftMargin());
+  headerXSecVsMass.SetY(0.96);
+  headerXSecVsMass.SetTextFont(43);
+  headerXSecVsMass.SetTextSizePixels(25);
+  headerXSecVsMass.Draw();
+  //  alphaText.Draw();
+  //  sqrtSText.Draw();
   TLegend legMassDep = TLegend(0.50, 0.54, 0.92, 0.92);
   legMassDep.SetFillStyle(0);
   legMassDep.SetBorderSize(0);
@@ -1199,8 +1275,8 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   canvas->Print(printNameBase+".ps");
   canvas->Print(printNameBase+"_xsec_vs_mass.eps");
 
-  //  canvas->Print(printNameBase+".ps]");
-  //  return 0;
+  canvas->Print(printNameBase+".ps]");
+  return 0;
 
   FinalLikeliResults1D* mocResult[nPdfSets];
   FinalLikeliResults1D* mitResult[nPdfSets];
@@ -1299,53 +1375,27 @@ int foldedLikelihoods(const bool targetAlpha, const bool pole)
   mocSummaryGraphTotErr.SetMarkerStyle(22);
   mitSummaryGraphTotErr.SetMarkerStyle(23);
 
-  TBox boxMass2012(mass_mean.getVal()-mass_unc.getVal(), -1,
-		    mass_mean.getVal()+mass_unc.getVal(), nSummaryPoints+3);
-  boxMass2012.SetFillColor(kMagenta-9);
-  boxMass2012.SetFillStyle(3007);
-  TLine lineMass2012(mass_mean.getVal(), -1,
-		      mass_mean.getVal(), nSummaryPoints+3);
-  lineMass2012.SetLineStyle(2);
-  TLine lineMass2012_left(mass_mean.getVal()-mass_unc.getVal(), -1,
-			   mass_mean.getVal()-mass_unc.getVal(), nSummaryPoints+3);
-  TLine lineMass2012_right(mass_mean.getVal()+mass_unc.getVal(), -1,
-			    mass_mean.getVal()+mass_unc.getVal(), nSummaryPoints+3);
-  lineMass2012_left .SetLineColor(kMagenta-9);
-  lineMass2012_right.SetLineColor(kMagenta-9);
-  TText textMass2012_left(mass_mean.getVal()-0.5*mass_unc.getVal(), (nSummaryPoints+3)*0.95, "Tevatron");
-  textMass2012_left.SetTextAngle(90);
-  textMass2012_left.SetTextAlign(32);
-  textMass2012_left.SetTextFont(43);
-  textMass2012_left.SetTextSizePixels(23);
-  TText textMass2012_right(mass_mean.getVal()+0.5*mass_unc.getVal(), (nSummaryPoints+3)*0.95, "2012");
-  textMass2012_right.SetTextAngle(90);
-  textMass2012_right.SetTextAlign(32);
-  textMass2012_right.SetTextFont(43);
-  textMass2012_right.SetTextSizePixels(23);
+  boxMass2012.SetY1(-1);
+  lineMass2012.SetY1(-1);
+  lineMass2012_left.SetY1(-1);
+  lineMass2012_right.SetY1(-1);
+  boxMass2012.SetY2(nSummaryPoints+3);
+  lineMass2012.SetY2(nSummaryPoints+3);
+  lineMass2012_left.SetY2(nSummaryPoints+3);
+  lineMass2012_right.SetY2(nSummaryPoints+3);
+  textMass2012_left.SetY((nSummaryPoints+3)*0.95);
+  textMass2012_right.SetY((nSummaryPoints+3)*0.95);
 
-  TBox boxAlpha2012(alpha2012_mean.getVal()-alpha2012_unc.getVal(), -1,
-		    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+3);
-  boxAlpha2012.SetFillColor(kMagenta-9);
-  boxAlpha2012.SetFillStyle(3007);
-  TLine lineAlpha2012(alpha2012_mean.getVal(), -1,
-		      alpha2012_mean.getVal(), nSummaryPoints+3);
-  lineAlpha2012.SetLineStyle(2);
-  TLine lineAlpha2012_left(alpha2012_mean.getVal()-alpha2012_unc.getVal(), -1,
-			   alpha2012_mean.getVal()-alpha2012_unc.getVal(), nSummaryPoints+3);
-  TLine lineAlpha2012_right(alpha2012_mean.getVal()+alpha2012_unc.getVal(), -1,
-			    alpha2012_mean.getVal()+alpha2012_unc.getVal(), nSummaryPoints+3);
-  lineAlpha2012_left .SetLineColor(kMagenta-9);
-  lineAlpha2012_right.SetLineColor(kMagenta-9);
-  TText textAlpha2012_left(alpha2012_mean.getVal()-0.5*alpha2012_unc.getVal(), (nSummaryPoints+3)*0.95, "PDG");
-  textAlpha2012_left.SetTextAngle(90);
-  textAlpha2012_left.SetTextAlign(32);
-  textAlpha2012_left.SetTextFont(43);
-  textAlpha2012_left.SetTextSizePixels(23);
-  TText textAlpha2012_right(alpha2012_mean.getVal()+0.5*alpha2012_unc.getVal(), (nSummaryPoints+3)*0.95, "2012");
-  textAlpha2012_right.SetTextAngle(90);
-  textAlpha2012_right.SetTextAlign(32);
-  textAlpha2012_right.SetTextFont(43);
-  textAlpha2012_right.SetTextSizePixels(23);
+  boxAlpha2012.SetY1(-1);
+  lineAlpha2012.SetY1(-1);
+  lineAlpha2012_left.SetY1(-1);
+  lineAlpha2012_right.SetY1(-1);
+  boxAlpha2012.SetY2(nSummaryPoints+3);
+  lineAlpha2012.SetY2(nSummaryPoints+3);
+  lineAlpha2012_left.SetY2(nSummaryPoints+3);
+  lineAlpha2012_right.SetY2(nSummaryPoints+3);
+  textAlpha2012_left.SetY((nSummaryPoints+3)*0.95);
+  textAlpha2012_right.SetY((nSummaryPoints+3)*0.95);
 
   const double xLeftTextPdfSet[2] = {166.5, 0.1085};
 
