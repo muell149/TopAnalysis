@@ -80,7 +80,7 @@ private:
 
 
     /// Select events from Higgs signal samples which need to be removed due to generator selection
-    bool failsHiggsGeneratorSelection(Long64_t&);
+    bool failsHiggsGeneratorSelection(const Long64_t&)const;
 
     /// Select events from Top signal that satisfy flavour of the additional jets
     bool failsAdditionalJetFlavourSelection(const Long64_t&)const;
@@ -89,19 +89,21 @@ private:
 
     /// Get indices of generated b jet and anti-b jet for particles with given PDG ID
     /// Returns whether a unique solution is found, and only in this case indices are set unequal to -1
-    bool getGenBJetIndices(int& genBjetIndex, int& genAntiBjetIndex, const int pdgId);
+    bool getGenBJetIndices(int& genBjetIndex, int& genAntiBjetIndex,
+                           const TopGenObjects& topGenObjects, const int pdgId);
 
     /// Match the two generated input jets to the reco jet collection
     bool matchRecoToGenJets(int& matchedBjetIndex, int& matchedAntiBjetIndex,
                             const std::vector<int>& jetIndices,
+                            const VLV& jets,
                             const LV* genBjet, const LV* genAntiBjet);
 
     /// Fill class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     std::vector<MvaInputTopJetsVariables::Input> fillMvaInputTopJetsVariables(
                                       const int leptonIndex, const int antiLeptonIndex,
-                                      const IndexPairs& jetIndexPairs, const VLV& jetRecoils,
+                                      const IndexPairs& jetIndexPairs,
+                                      const RecoObjects& recoObjects, const VLV& jetRecoils,
                                       const int matchedBjetIndex, const int matchedAntiBjetIndex,
-                                      const LV& met,
                                       const bool successfulMatching, const double& eventWeight)const;
 
 

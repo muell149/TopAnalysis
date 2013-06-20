@@ -156,6 +156,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetJetCategoriesAnalysis(jetCategories);
     selector->SetMvaWeightsCorrect(mvaInputWeightsCorrect);
     selector->SetMvaWeightsSwapped(mvaInputWeightsSwapped);
+    selector->SetUseObjectStructs(true);
     
     if(runDijetAnalyzer) {
         dijetAnalyzer= new DijetAnalyzer();
