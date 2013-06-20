@@ -12,31 +12,23 @@
 ################################################################
 
 
-# Data Samples (PromptReco, 2012A, 2012B)
-40   samples.dilepton.MuEG_Run2012A_13Jul2012_v1_cff                            emu_run2012A.root                data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt
-120  samples.dilepton.MuEG_Run2012B_13Jul2012_v1_cff                            emu_run2012B.root                data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt
-10   samples.dilepton.MuEG_Run2012A_recover_06Aug2012_v1_cff                    emu_run2012Arecover.root         data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt
-35   samples.dilepton.MuEG_Run2012C_24Aug2012_v1_cff                            emu_run2012C_24Aug.root          data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_198022-198523_8TeV_24Aug2012ReReco_Collisions12_JSON.txt
-220  samples.dilepton.MuEG_Run2012C_PromptReco_v2_cff                           emu_run2012C_PromptReco.root     data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt
-6    samples.dilepton.MuEG_Run2012C_EcalRecover_11Dec2012_v1_cff                emu_run2012C_EcalRecover.root    data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_201191-201191_8TeV_11Dec2012ReReco-recover_Collisions12_JSON.txt
-200  samples.dilepton.MuEG_Run2012D_PromptReco_cff                              emu_run2012D_PromptReco.root     data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt 
+# Data Samples (, 2012A, 2012B)
+15   samples.dilepton.MuEG_Run2012A_22Jan2013_v1_cff              emu_run2012A.root    data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+120  samples.dilepton.MuEG_Run2012B_22Jan2013_v1_cff              emu_run2012B.root    data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+180  samples.dilepton.MuEG_Run2012C_22Jan2013_v1_cff              emu_run2012C.root    data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+200  samples.dilepton.MuEG_Run2012D_22Jan2013_v1_cff              emu_run2012D.root    data,mode=emu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt 
 
 
-60   samples.dilepton.DoubleMu_Run2012A_13Jul2012_v1_cff                        mumu_run2012A.root               data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt
-200  samples.dilepton.DoubleMu_Run2012B_13Jul2012_v4_cff                        mumu_run2012B.root               data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt
-10   samples.dilepton.DoubleMu_Run2012A_recover_06Aug2012_v1_cff                mumu_run2012Arecover.root        data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt
-35   samples.dilepton.DoubleMu_Run2012C_24Aug2012_v1_cff                        mumu_run2012C_24Aug.root         data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_198022-198523_8TeV_24Aug2012ReReco_Collisions12_JSON.txt
-160  samples.dilepton.DoubleMu_Run2012C_PromptReco_v2_cff                       mumu_run2012C_PromptReco.root    data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt
-6    samples.dilepton.DoubleMu_Run2012C_EcalRecover_11Dec2012_v1_cff            mumu_run2012C_EcalRecover.root   data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_201191-201191_8TeV_11Dec2012ReReco-recover_Collisions12_JSON.txt
-240  samples.dilepton.DoubleMu_Run2012D_PromptReco_cff                          mumu_run2012D_PromptReco.root    data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt 
+40   samples.dilepton.DoubleMu_Run2012A_22Jan2013_v1_cff          mumu_run2012A.root   data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+200  samples.dilepton.DoubleMu_Run2012B_13Jul2012_v1_cff          mumu_run2012B.root   data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+290  samples.dilepton.DoubleMu_Run2012C_22Jan2013_v1_cff          mumu_run2012C.root   data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+300  samples.dilepton.DoubleMu_Run2012D_22Jan2013_v1_cff          mumu_run2012D.root   data,mode=mumu,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt 
 
-60   samples.dilepton.DoubleElectron_Run2012A_13Jul2012_v1_cff                  ee_run2012A.root                 data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt
-200  samples.dilepton.DoubleElectron_Run2012B_13Jul2012_v1_cff                  ee_run2012B.root                 data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt
-10   samples.dilepton.DoubleElectron_Run2012A_recover_06Aug2012_v1_cff          ee_run2012Arecover.root          data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190782-190949_8TeV_06Aug2012ReReco_Collisions12_JSON.txt
-35   samples.dilepton.DoubleElectron_Run2012C_24Aug2012_v1_cff                  ee_run2012C_24Aug.root           data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_198022-198523_8TeV_24Aug2012ReReco_Collisions12_JSON.txt
-160  samples.dilepton.DoubleElectron_Run2012C_PromptReco_v2_cff                 ee_run2012C_PromptReco.root      data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt
-6    samples.dilepton.DoubleElectron_Run2012C_EcalRecover_11Dec2012_v1_cff      ee_run2012C_EcalRecover.root     data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_201191-201191_8TeV_11Dec2012ReReco-recover_Collisions12_JSON.txt
-260  samples.dilepton.DoubleElectron_Run2012D_PromptReco_cff                    ee_run2012D_PromptReco.root      data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt 
+
+60   samples.dilepton.DoubleElectron_Run2012A_22Jan2013_v1_cff    ee_run2012A.root     data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+150  samples.dilepton.DoubleElectron_Run2012B_22Jan2013_v1_cff    ee_run2012B.root     data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+230  samples.dilepton.DoubleElectron_Run2012C_22Jan2013_v1_cff    ee_run2012C.root     data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
+250  samples.dilepton.DoubleElectron_Run2012D_22Jan2013_v1_cff    ee_run2012D.root     data,mode=ee,json=${CMSSW_BASE}/src/TopAnalysis/Configuration/python/samples/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt 
 
 ################################################################
 #############   MC  samples ####################################
