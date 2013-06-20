@@ -24,6 +24,12 @@ class JetCorrectionUncertainty;
 class TriggerScaleFactors;
 class LeptonScaleFactors;
 class BtagScaleFactors;
+class RecoObjects;
+class CommonGenObjects;
+class TopGenObjects;
+class HiggsGenObjects;
+class KinRecoObjects;
+
 
 
 
@@ -233,6 +239,10 @@ private:
     TTree *chain_;
     
     
+    /// Whether to use object structs for nTuple access, or all branches individually
+    bool useObjectStructs_;
+    
+    
     /// nTuple branches relevant for reconstruction level
     // Concerning physics objects
     TBranch *b_lepton;
@@ -438,6 +448,9 @@ public:
     /// Set histogram containing the number of weighted events in full sample
     void SetWeightedEvents(TH1* weightedEvents);
     
+    /// Set whether to use object structs for nTuple branch access, or individual variables
+    void SetUseObjectStructs(const bool useObjectStructs);
+    
     /// Get version
     //no idea why this is needed! But Process() isn't called otherwise! Argh!
     virtual int Version() const { return 3; }
@@ -495,16 +508,17 @@ protected:
     void prepareKinRecoSF();
     /** Calculate the kinematic reconstruction and return whether at least one solution exists
      * 
-     * reconstruct the top quarks and store the result in the 
-     * Hyp* member variables
+     * reconstruct the top quarks and store the result in the Hyp* member variables,
+     * but also in the pointer kinRecoObjects
      * 
      * @param leptonMinus 4-vector of the l-
      * @param leptonPlus 4-vector of the l+
      * 
      * @return true if there is at least one solution
      */
-    bool calculateKinReco(const int leptonIndex, const int antiLeptonIndex,
-                          const std::vector<int>& jetIndices, const LV& met);
+    bool calculateKinReco(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices,
+                          const VLV& allLeptons, const VLV& jets, const std::vector<double>& jetBTagCSV, const LV& met,
+                          KinRecoObjects* kinRecoObjects =0);
     
     /** prepare JER/JES systematics
      * 
@@ -516,11 +530,12 @@ protected:
     /// Apply the JER or JES systematic
     /// This function modifies the jets collection and also scales the MET.
     /// It uses the collections stored just for the jet scaling
-    void applyJER_JES();
+    void applyJER_JES()const;
     
     /// Check if opposite-charge dilepton combination exists,
     /// and check if lepton pair is correct flavour combination for the specified analysis channel (ee, emu, mumu)
-    bool hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const;
+    bool hasLeptonPair(const int leadingLeptonIndex, const int nLeadingLeptonIndex,
+                       const std::vector<int>& lepPdgId)const;
     
     /// Check if event was triggered with the same dilepton trigger as the specified analysis channel
     bool failsDileptonTrigger(const Long64_t&)const;
@@ -549,13 +564,16 @@ protected:
     double weightTopPtReweighting(const double& topPt, const double& antiTopPt)const;
     
     /// Get weight due to lepton efficiency MC-to-data scale factors
-    double weightLeptonSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex)const;
+    double weightLeptonSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex,
+                          const VLV& allLeptons, const std::vector<int>& lepPdgId)const;
     
     /// Get weight due to trigger efficiency MC-to-data scale factors
-    double weightTriggerSF(const int leptonXIndex, const int leptonYIndex)const;
+    double weightTriggerSF(const int leptonXIndex, const int leptonYIndex,
+                           const VLV& allLeptons)const;
     
     /// Get weight due to b-tagging efficiency MC-to-data scale factors
-    double weightBtagSF(const std::vector<int>& jetIndices)const;
+    double weightBtagSF(const std::vector<int>& jetIndices,
+                        const VLV& jets, const std::vector<int>& jetPartonFlavour)const;
     
     
     
@@ -618,157 +636,49 @@ private:
     double topPtReweightValue(const double& pt)const;
     
     
-protected:
     
-    /// Struct for holding variables associated to nTuple branches relevant for reconstruction level
-    struct RecoObjects{
-        RecoObjects();
-        ~RecoObjects(){}
-        void clear();
-        
-        bool isInitialised_;
-        
-        // Concerning physics objects
-        VLV* allLeptons_;
-        std::vector<int>* lepPdgId_;
-        //std::vector<double>* lepID_;
-        std::vector<double>* lepPfIso_;
-        //std::vector<double>* lepChargedHadronIso_;
-        //std::vector<double>* lepNeutralHadronIso_;
-        //std::vector<double>* lepPhotonIso_;
-        //std::vector<double>* lepPuChargedHadronIso_;
-        std::vector<double>* lepCombIso_;
-        std::vector<double>* lepDxyVertex0_;
-        //std::vector<int>* lepTrigger_;
-        VLV* jets_;
-        std::vector<double>* jetBTagTCHE_;
-        //std::vector<double>* jetBTagTCHP_;
-        std::vector<double>* jetBTagSSVHE_;
-        //std::vector<double>* jetBTagSSVHP_;
-        //std::vector<double>* jetBTagJetProbability_;
-        //std::vector<double>* jetBTagJetBProbability_;
-        std::vector<double>* jetBTagCSV_;
-        //std::vector<double>* jetBTagCSVMVA_;
-        std::vector<double>* jetChargeGlobalPtWeighted_;
-        std::vector<double>* jetChargeRelativePtWeighted_;
-        LV* met_;
-        std::vector<double>* jetJERSF_;
-        VLV* jetsForMET_;
-        std::vector<double>* jetForMETJERSF_;
-        
-        // Concerning event
-        UInt_t* runNumber_;
-        UInt_t* lumiBlock_;
-        UInt_t* eventNumber_;
-        //int* recoInChannel_;
-        Int_t* vertMulti_;
-    };
-    
-    /// Struct for holding variables associated to nTuple branches holding generator information for all MC samples
-    struct CommonGenObjects{
-        CommonGenObjects();
-        ~CommonGenObjects(){}
-        void clear();
-        
-        bool isInitialised_;
-        
-        // Concerning physics objects
-        VLV* allGenJets_;
-        std::vector<int>* jetPartonFlavour_;
-        VLV* associatedGenJet_;
-        VLV* associatedGenJetForMET_;
-        //std::vector<int>* jetAssociatedPartonPdgId_;
-        //std::vector<LV>* jetAssociatedParton_;
-    };
-    
-    /// Struct for holding variables associated to nTuple branches for Top signal samples on generator level
-    struct TopGenObjects{
-        TopGenObjects();
-        ~TopGenObjects(){}
-        void clear();
-        
-        bool isInitialised_;
-        
-        LV* GenMet_;
-        LV* GenTop_;
-        LV* GenAntiTop_;
-        LV* GenLepton_;
-        LV* GenAntiLepton_;
-        //int* GenLeptonPdgId_;
-        //int* GenAntiLeptonPdgId_;
-        //LV* GenTau_;
-        //LV* GenAntiTau_;
-        LV* GenNeutrino_;
-        LV* GenAntiNeutrino_;
-        LV* GenB_;
-        LV* GenAntiB_;
-        LV* GenWPlus_;
-        LV* GenWMinus_;
-        //std::vector<LV>* GenParticleP4_;
-        //std::vector<int>* GenParticlePdgId_;
-        //std::vector<int>* GenParticleStatus_;
-        std::vector<int>* BHadJetIndex_;
-        std::vector<int>* AntiBHadJetIndex_;
-        VLV* BHadrons_;
-        VLV* AntiBHadrons_;
-        std::vector<bool>* BHadronFromTopB_;
-        std::vector<bool>* AntiBHadronFromTopB_;
-        std::vector<int>* BHadronVsJet_;
-        std::vector<int>* AntiBHadronVsJet_;
-        //std::vector<int>* genBHadPlusMothersPdgId_;
-        //std::vector<int>* genBHadPlusMothersStatus_;
-        //std::vector<std::vector<int> >* genBHadPlusMothersIndices_;
-        std::vector<LV>* genBHadPlusMothers_;
-        std::vector<int>* genBHadIndex_;
-        std::vector<int>* genBHadFlavour_;
-        std::vector<int>* genBHadJetIndex_;
-    };
-    
-    /// Struct for holding variables associated to nTuple branches for Higgs signal samples on generator level
-    struct HiggsGenObjects{
-        HiggsGenObjects();
-        ~HiggsGenObjects(){}
-        void clear();
-        
-        bool isInitialised_;
-        
-        LV* GenH_;
-        LV* GenBFromH_;
-        LV* GenAntiBFromH_;
-    };
-    
+protected:    
     
     /// Get a constant reference to nTuple branches relevant for reconstruction level
-    const RecoObjects& getRecoObjects(const Long64_t& entry);
+    const RecoObjects& getRecoObjects(const Long64_t& entry)const;
     
     /// Get a constant reference to nTuple branches holding generator information for all MC samples
-    const CommonGenObjects& getCommonGenObjects(const Long64_t& entry);
+    const CommonGenObjects& getCommonGenObjects(const Long64_t& entry)const;
     
     /// Get a constant reference to nTuple branches for Top signal samples on generator level
-    const TopGenObjects& getTopGenObjects(const Long64_t& entry);
+    const TopGenObjects& getTopGenObjects(const Long64_t& entry)const;
     
     /// Get a constant reference to nTuple branches for Higgs signal samples on generator level
-    const HiggsGenObjects& getHiggsGenObjects(const Long64_t& entry);
+    const HiggsGenObjects& getHiggsGenObjects(const Long64_t& entry)const;
     
     
-    void applyJesSystematics(RecoObjects& recoObjects);
-    void applyJerSystematics(RecoObjects& recoObjects, const Long64_t& entry);
+    /// Set for all object structs, that the specific nTuple entry is not read
+    void resetObjectStructEntry()const;
+    
+    
+    void applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
+                             const std::vector<double>* jetJerSf, const std::vector<double>* jetForMetJerSf,
+                             const VLV* associatedGenJet, const VLV* associatedGenJetForMet)const;
+    void applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const;
+    
     
     
 private:
     
     /// Struct for holding variables associated to nTuple branches relevant for reconstruction level
-    RecoObjects recoObjects_;
+    RecoObjects* recoObjects_;
     
     /// Struct for holding variables associated to nTuple branches holding generator information for all MC samples
-    CommonGenObjects commonGenObjects_;
+    CommonGenObjects* commonGenObjects_;
     
     /// Struct for holding variables associated to nTuple branches for Top signal samples on generator level
-    TopGenObjects topGenObjects_;
+    TopGenObjects* topGenObjects_;
     
     /// Struct for holding variables associated to nTuple branches for Higgs signal samples on generator level
-    HiggsGenObjects higgsGenObjects_;
+    HiggsGenObjects* higgsGenObjects_;
     
+    /// Struct for holding variables associated to nTuple branches of kinematic reconstruction
+    KinRecoObjects* kinRecoObjects_;
     
 };
 

@@ -744,7 +744,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         nLeadingLeptonIndex = antiLeptonIndex;
         orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *leptons_, LVpt);
     }
-    const bool hasLeptonPair = this->hasLeptonPair(leadingLeptonIndex, nLeadingLeptonIndex);
+    const bool hasLeptonPair = this->hasLeptonPair(leadingLeptonIndex, nLeadingLeptonIndex, *lepPdgId_);
     
     // Get two indices of the two leptons in the right order for trigger scale factor, if existing
     int leptonXIndex(leadingLeptonIndex);
@@ -789,10 +789,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     const bool hasMetOrEmu = channel_=="emu" || met.Pt()>40;
     
     // Determine all reco level weights
-    const double weightLeptonSF = this->weightLeptonSF(leadingLeptonIndex, nLeadingLeptonIndex);
-    const double weightTriggerSF = this->weightTriggerSF(leptonXIndex, leptonYIndex);
+    const double weightLeptonSF = this->weightLeptonSF(leadingLeptonIndex, nLeadingLeptonIndex, *leptons_, *lepPdgId_);
+    const double weightTriggerSF = this->weightTriggerSF(leptonXIndex, leptonYIndex, *leptons_);
     const double weightNoPileup = trueLevelWeightNoPileup*weightTriggerSF*weightLeptonSF;
-    const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices);
+    const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices, *jets_, *jetPartonFlavour_);
     
     // The weight to be used for filling the histograms
     double weight = weightNoPileup*weightPU;
@@ -883,7 +883,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     this->GetKinRecoBranchesEntry(entry);
     bool hasSolution = HypTop_->size() > 0;
     if (kinRecoOnTheFly_ || true)
-        hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, met);
+        hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, *leptons_, *jets_, *jetBTagCSV_, met);
 
     if ( isZregion ) {
         double fullWeights = weight;
