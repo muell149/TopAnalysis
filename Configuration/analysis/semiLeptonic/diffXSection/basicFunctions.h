@@ -1145,7 +1145,7 @@ namespace semileptonic {
     }
     if(verbose) std::cout << "will return: " <<  result_[entry-1] << std::endl;
     // return output
-    return result_[entry-1];
+    return result;
   }
 
   TString TopFilename(unsigned int sample, unsigned int sys, const std::string decayChannel)
