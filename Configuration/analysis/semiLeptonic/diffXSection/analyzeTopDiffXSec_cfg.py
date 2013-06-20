@@ -144,14 +144,6 @@ if(not globals().has_key('writeOutput')):
 if(not globals().has_key('removeGenTtbar')):
     removeGenTtbar = False 
 
-## implement anti b-tagging path
-if(not globals().has_key('implement0TagPath')):
-    implement0TagPath = False
-#if(implement0TagPath==True):
-#    print "path with ==0 btagged jets included" 
-#if(implement0TagPath==False):
-#    print "path with ==0 btagged jets excluded"
-
 ## eventfilter is to select a special ttbar decay channel from ttbarSample by genmatching (ttbar MC only, other MC: choose 'all')
 if(not globals().has_key('eventFilter')):
     eventFilter  = 'signal only' # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
@@ -553,7 +545,6 @@ print " ttbar filter:                       ",eventFilter," ---- Obsolete if Run
 print " Include tau->l events               ",tau
 print " B-tag algo:                         ",bTagAlgo
 print " B-tag discriminator cut value:      ",bTagDiscrCut
-print " Include 0 b-ttaged jets:            ",implement0TagPath
 print " Apply PU reweighting:               ",PUreweigthing
 print " Apply Btag reweighting:             ",BtagReweigthing
 print " Apply effSF reweighting:            ",effSFReweigthing
