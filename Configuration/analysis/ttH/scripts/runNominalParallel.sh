@@ -38,7 +38,7 @@ done
 wait
 
 if [ "$isNAF" = 1 ]; then
-    echo "Please check your jobs with qstat -u $USER | grep load_HiggsAnalysis"
+    echo "Please check your jobs with qstat -u $USER | grep load_Analysis"
 else
     echo "Processing all nominal samples finished!"
 fi

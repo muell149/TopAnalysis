@@ -11,7 +11,7 @@ HiggsDir=$(CMSSW_BASE)/src/TopAnalysis/Configuration/analysis/ttH/src
 
 
 
-all: load_HiggsAnalysis Histo mva
+all: load_Analysis Histo mva
 
 
 
@@ -36,11 +36,11 @@ sampleHelpers.o: $(TopDir)/sampleHelpers.cc $(TopDir)/sampleHelpers.h
 
 
 
-load_HiggsAnalysis: dict.o load_HiggsAnalysis.o AnalysisBase.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o
+load_Analysis: dict.o load_Analysis.o AnalysisBase.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
-load_HiggsAnalysis.o: $(HiggsDir)/load_HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/utils.h $(TopDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(HiggsDir)/JetCategories.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h $(TopDir)/ScaleFactors.h $(HiggsDir)/MvaInputVariables.h $(HiggsDir)/DijetAnalyzer.h
-	g++ -c -o load_HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/load_HiggsAnalysis.cc
+load_Analysis.o: $(HiggsDir)/load_Analysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/utils.h $(TopDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(HiggsDir)/JetCategories.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h $(TopDir)/ScaleFactors.h $(HiggsDir)/MvaInputVariables.h $(HiggsDir)/DijetAnalyzer.h
+	g++ -c -o load_Analysis.o $(COMPFLAGS) $(HiggsDir)/load_Analysis.cc
 
 dict.o: dict.cc
 	g++ -c -o $@ $(COMPFLAGS) dict.cc
@@ -141,7 +141,7 @@ mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc $(TopDir)/sampleHelpers.h
 clean:
 	-rm *.o
 	-rm dict.cc dict.h
-	-rm load_HiggsAnalysis
+	-rm load_Analysis
 	-rm Histo
 	-rm mva
 
