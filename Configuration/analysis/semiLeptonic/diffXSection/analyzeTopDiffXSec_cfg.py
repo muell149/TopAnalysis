@@ -787,7 +787,7 @@ uds0    = cms.PSet(index = cms.int32(0), correctionLevel = cms.string(corrLevel)
 uds1    = cms.PSet(index = cms.int32(1), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 uds2    = cms.PSet(index = cms.int32(2), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 uds3    = cms.PSet(index = cms.int32(3), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
-udsAll  = cms.PSet(index = cms.int32(-1), correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
+udsAll  = cms.PSet(index = cms.int32(-1),correctionLevel = cms.string(corrLevel), useTree = cms.bool(False) )
 
 ## ---
 ##    Set up selection steps for muon selection
@@ -967,7 +967,12 @@ if(decayChannel=='electron'):
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
 process.compositedKinematicsKinFit.GenJetSrc= cms.InputTag('noOverlapGenJetCollection')
+process.compositedKinematicsProbSel=process.compositedKinematicsKinFit.clone()
 process.compositedKinematics.btagDiscr=cms.double(0.244) # loose WP for untagged selection
+# gen
+process.compositedPartonGen=process.compositedKinematicsKinFit.clone()
+process.compositedPartonGenPhaseSpace=process.compositedPartonGen.clone()
+process.compositedHadronGenPhaseSpace=process.compositedPartonGen.clone()
 
 ## electrons
 process.tightElectronKinematics        = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
@@ -1440,7 +1445,8 @@ if(applyKinFit==True):
                                              process.filterProbKinFit                        +
                                              process.analyzeTopRecoKinematicsKinFitProbSel   +
                                              process.analyzeTopRecoKinematicsBjetsProbSel    +
-                                             process.analyzeTopRecoKinematicsLeptonProbSel   +                                             
+                                             process.analyzeTopRecoKinematicsLeptonProbSel   +
+                                             process.compositedKinematicsProbSel             +
                                              process.filterMatchKinFit
                                              )
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics     +
@@ -1449,7 +1455,9 @@ if(applyKinFit==True):
                                                        # add bjet analyzer
                                                        process.analyzeTopPartonLevelKinematicsBjets +
                                                        # add lepton analyzer
-                                                       process.analyzeTopPartonLevelKinematicsLepton 
+                                                       process.analyzeTopPartonLevelKinematicsLepton +
+                                                       # add mixed object analyzer
+                                                       process.compositedPartonGen
                                                        )
             process.kinFitGenPhaseSpace = cms.Sequence(process.analyzeTopPartonLevelKinematicsPhaseSpace+
                                                        # add bjet indices
@@ -1457,7 +1465,9 @@ if(applyKinFit==True):
                                                        # add bjet analyzer
                                                        process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace +
                                                        # add lepton analyzer
-                                                       process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace
+                                                       process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace +
+                                                       # add mixed object analyzer
+                                                       process.compositedPartonGenPhaseSpace
                                                        )
             process.kinFitGenPhaseSpaceHad = cms.Sequence(
                                                           # default analyzer module
@@ -1465,7 +1475,9 @@ if(applyKinFit==True):
                                                           # add bjet analyzer
                                                           process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace +
                                                           # add lepton analyzer
-                                                          process.analyzeTopHadronLevelKinematicsLeptonPhaseSpace
+                                                          process.analyzeTopHadronLevelKinematicsLeptonPhaseSpace +
+                                                          # add mixed object analyzer
+                                                          process.compositedHadronGenPhaseSpace
                                                           )
 
         ## case 1b): other MC
@@ -2774,8 +2786,13 @@ if(decayChannel=="electron"):
         massSearchReplaceAnyInputTag(path, 'tightMuons', 'goodElectronsEJ')
         # take care of replacements you do NOT want to do!
         process.compositedKinematics.MuonSrc='tightMuons'
-        process.compositedKinematicsKinFit.MuonSrc='tightMuons'      
-        
+        process.compositedKinematicsKinFit.MuonSrc='tightMuons'
+        process.compositedKinematicsProbSel.MuonSrc='tightMuons'
+        #if(eventFilter=='signal only'):
+        process.compositedPartonGen.MuonSrc='tightMuons'
+        process.compositedPartonGenPhaseSpace.MuonSrc='tightMuons'
+        process.compositedHadronGenPhaseSpace.MuonSrc='tightMuons'
+
 allpaths  = process.paths_().keys()
 
 # switch to PF2PAT
@@ -3087,7 +3104,6 @@ if(runningOnData=="MC"):
 import re
 ptval="33" # adjust cut value here! [GeV]
 relevantLeptonCollections = [process.tightElectronsEJ, process.goldenMuons, process.selectedGenMuonCollection, process.selectedGenElectronCollection]
-#exp = re.compile('(ep)t\s?>\s?30')
 exp = re.compile('(?:t\s?>\s?30)') 
 for lep in relevantLeptonCollections:
     if(exp.search(lep.cut.pythonValue())!=None):
