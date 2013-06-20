@@ -87,9 +87,13 @@ MixedObjectsAnalyzer::beginJob()
   // leading jet which is not associated with the ttbar system
   tree->Branch("leadNonttjetPt" , &leadNonttjetPt , "leadNonttjetPt/D" );   
   tree->Branch("leadNonttjetY"  , &leadNonttjetY  , "leadNonttjetY/D"  );   
-  tree->Branch("leadNonttjetEta", &leadNonttjetEta, "leadNonttjetEta/D");   
+  tree->Branch("leadNonttjetEta", &leadNonttjetEta, "leadNonttjetEta/D"); 
+  tree->Branch("leadNonttjetPtTrue" , &leadNonttjetPtTrue , "leadNonttjetPtTrue/D" );   
+  tree->Branch("leadNonttjetYTrue"  , &leadNonttjetYTrue  , "leadNonttjetYTrue/D"  );   
+  tree->Branch("leadNonttjetEtaTrue", &leadNonttjetEtaTrue, "leadNonttjetEtaTrue/D");  
   // m(ttbar+jet)
   tree->Branch("ttbarJetMass"    , &ttbarJetMass    , "ttbarJetMass/D"    ); 
+  tree->Branch("ttbarJetMassTrue", &ttbarJetMassTrue, "ttbarJetMassTrue/D"); 
 
   // object kinematics to check kinfit shift
   tree->Branch("bqhadPtPre"   ,&bqhadPtPre , "bqhadPtPre/D" ); 
@@ -136,6 +140,21 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("lepPhiFit"    ,&lepPhiFit  , "lepEtaFit/D"  );
   tree->Branch("sumEtPre"     ,&sumEtPre   , "sumEtPre/D"   ); 
   tree->Branch("sumEtTrue"    ,&sumEtTrue  , "sumEtTrue/D"  ); 
+  // top and ttbar quantities
+  tree->Branch("topPtLepFit"  ,&topPtLepFit , "topPtLepFit/D" );
+  tree->Branch("topPtHadFit"  ,&topPtHadFit , "topPtHadFit/D" );
+  tree->Branch("topYLepFit"   ,&topYLepFit  , "topYLepFit/D"  );
+  tree->Branch("topYHadFit"   ,&topYHadFit  , "topYHadFit/D"  );
+  tree->Branch("ttbarMassFit" ,&ttbarMassFit, "ttbarMassFit/D");
+  tree->Branch("ttbarYFit"    ,&ttbarYFit   , "ttbarYFit/D"   );
+  tree->Branch("ttbarPtFit"   ,&ttbarPtFit  , "ttbarPtFit/D"  );
+  tree->Branch("topPtLepTrue"  ,&topPtLepTrue , "topPtLepTrue/D" );
+  tree->Branch("topPtHadTrue"  ,&topPtHadTrue , "topPtHadTrue/D" );
+  tree->Branch("topYLepTrue"   ,&topYLepTrue  , "topYLepTrue/D"  );
+  tree->Branch("topYHadTrue"   ,&topYHadTrue  , "topYHadTrue/D"  );
+  tree->Branch("ttbarMassTrue" ,&ttbarMassTrue, "ttbarMassTrue/D");
+  tree->Branch("ttbarYTrue"    ,&ttbarYTrue   , "ttbarYTrue/D"   );
+  tree->Branch("ttbarPtTrue"   ,&ttbarPtTrue  , "ttbarPtTrue/D"  );
 
   // nPV
   nPV=-1;
@@ -156,6 +175,9 @@ MixedObjectsAnalyzer::beginJob()
   hists_["leadNonttjetPt" ] = fs->make<TH1F>( "leadNonttjetPt" , "leadNonttjetPt" , 1500, 0 , 1500.);
   hists_["leadNonttjetY"  ] = fs->make<TH1F>( "leadNonttjetY"  , "leadNonttjetY"  , 100 ,-5., 5    );
   hists_["leadNonttjetEta"] = fs->make<TH1F>( "leadNonttjetEta", "leadNonttjetEta", 100 ,-5., 5    );
+  hists_["leadNonttjetPtTrue" ] = fs->make<TH1F>( "leadNonttjetPtTrue" , "leadNonttjetPtTrue" , 1500, 0 , 1500.);
+  hists_["leadNonttjetYTrue"  ] = fs->make<TH1F>( "leadNonttjetYTrue"  , "leadNonttjetYTrue"  , 100 ,-5., 5    );
+  hists_["leadNonttjetEtaTrue"] = fs->make<TH1F>( "leadNonttjetEtaTrue", "leadNonttjetEtaTrue", 100 ,-5., 5    );
   hists_["shiftBqPt"    ] = fs->make<TH1F>( "shiftBqPt" , "shiftBqPt"   , 2000,  -100. , 100 );
   hists_["shiftLqPt"    ] = fs->make<TH1F>( "shiftLqPt" , "shiftLqPt"   , 2000,  -100. , 100 );
   hists_["shiftBqEta"   ] = fs->make<TH1F>( "shiftBqEta", "shiftBqEta"  , 1000,  -1.   , 1.  );
@@ -232,7 +254,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   weight = weight_h.isValid() ? *weight_h : 1.;
 
   // information concerning PU/NPV   
-  nPV=vertecies_h->size();
+  nPV = vertecies_h.isValid() ? vertecies_h->size() : -999;
   hists_["nPV"          ]->Fill(nPV, weight);
   hists_["nPVunweighted"]->Fill(nPV, 1.    );
   
@@ -279,19 +301,20 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   // invariant masses (measure for mttbar)
   MuNu4J=-1;
   ElNu4J=-1;
-  if(jets_h->size()>3&&MET_h->size()>0){
-    if(muons_h->size()>0){
-      MuNu4J=(muons_h->at(0).p4()+MET_h->at(0).p4()+jets_h->at(0).p4()+jets_h->at(1).p4()+jets_h->at(2).p4()+jets_h->at(3).p4()).mass();
-      hists_["MuNu4J"]->Fill(MuNu4J, weight);
-      if(debug) std::cout << "mu: " << MuNu4J << std::endl;
-    }
-    if(electrons_h->size()>0){ 
-      ElNu4J=(electrons_h->at(0).p4()+MET_h->at(0).p4()+jets_h->at(0).p4()+jets_h->at(1).p4()+jets_h->at(2).p4()+jets_h->at(3).p4()).mass();
-      hists_["ElNu4J"]->Fill(ElNu4J, weight);
-      if(debug) std::cout << "el: " << ElNu4J << std::endl;
+  if(jets_h.isValid()&&MET_h.isValid()&&muons_h.isValid()&&electrons_h.isValid()){
+    if(jets_h->size()>3&&MET_h->size()>0){
+      if(muons_h->size()>0){
+	MuNu4J=(muons_h->at(0).p4()+MET_h->at(0).p4()+jets_h->at(0).p4()+jets_h->at(1).p4()+jets_h->at(2).p4()+jets_h->at(3).p4()).mass();
+	hists_["MuNu4J"]->Fill(MuNu4J, weight);
+	if(debug) std::cout << "mu: " << MuNu4J << std::endl;
+      }
+      if(electrons_h->size()>0){ 
+	ElNu4J=(electrons_h->at(0).p4()+MET_h->at(0).p4()+jets_h->at(0).p4()+jets_h->at(1).p4()+jets_h->at(2).p4()+jets_h->at(3).p4()).mass();
+	hists_["ElNu4J"]->Fill(ElNu4J, weight);
+	if(debug) std::cout << "el: " << ElNu4J << std::endl;
+      }
     }
   }
-
   mJJ=-1;
   mWJJ=-1;
   mWFitJJ=-1;
@@ -300,71 +323,75 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   BindexB=-1;
   BindexC=-1;
   BindexD=-1;
-  Nbjets=0;
-  Njets=0;
+  Nbjets=-1;
+  Njets=-1;
   leadNonttjet=-1;
   leadNonttjetPt=leadNonttjetY=leadNonttjetEta=-999;
   bqhadPtPre=bqhadEtaPre=bqhadPhiPre=bqlepPtPre=bqlepEtaPre=bqlepPhiPre=lqPtPre=lqEtaPre=lqPhiPre=lqbarPtPre=lqbarEtaPre=lqbarPhiPre=-999;
   // loop jets
-  for(edm::View< pat::Jet>::const_iterator jetsA=jets_h->begin(); jetsA!=jets_h->end(); ++jetsA){
-    int tempindex=jetsA-jets_h->begin();
-    // check if kinfit information is available
-    if(semiLepEvt_h.isValid()&&semiLepEvt_h->isHypoValid(hypoKey_)){
-      // jet kinematics before the fit
-      if(tempindex==hadBIndex){
-	bqhadPtPre =jetsA->pt();
-	bqhadEtaPre=jetsA->eta();
-	bqhadPhiPre=jetsA->phi();
-      }
-      else if(tempindex==lepBIndex){
-	bqlepPtPre =jetsA->pt();
-	bqlepEtaPre=jetsA->eta();
-	bqlepPhiPre=jetsA->phi();
-      }
-      else if(tempindex==lightQIndex){
-	lqPtPre =jetsA->pt();
-	lqEtaPre=jetsA->eta();
-	lqPhiPre=jetsA->phi();
-      }
-      else if(tempindex==lightQBarIndex){
-	lqbarPtPre =jetsA->pt();
-	lqbarEtaPre=jetsA->eta();
-	lqbarPhiPre=jetsA->phi();
-      }
-      // search for leading non ttbar jet within the 5 leading jets
-      if(tempindex<=5&&tempindex!=lepBIndex&&tempindex!=hadBIndex&&tempindex!=lightQIndex&&tempindex!=lightQBarIndex){
-	leadNonttjet=tempindex;
-	leadNonttjetPt=jetsA->pt();
-	leadNonttjetY =jetsA->rapidity();
-	leadNonttjetEta =jetsA->eta();
-      }
-    }
-    // count jet multiplicity
-    ++Njets;
-    // count b jet multiplicity (CSVM algo)
-    if(jetsA->bDiscriminator(btagAlgo_) >btagDiscr_){
-      ++Nbjets;
-      // store b-jet index 
-      if(BindexA==-1) BindexA=tempindex;
-      else if(BindexB==-1) BindexB=tempindex;
-      else if(BindexC==-1) BindexC=tempindex;
-      else if(BindexD==-1) BindexD=tempindex;
-    }
-    // 2nd loop for jet-jet masses
-    for(edm::View< pat::Jet>::const_iterator jetsB=jets_h->begin(); jetsB!=jets_h->end(); ++jetsB){      
-      // take care of double counting
-      if(jetsB>jetsA){
-	// a) invariant jet-jet mass for all combinations
-	mJJ=(jetsA->p4()+jetsB->p4()).mass();
-	// b) for combination closest to w mass
-	if(mWJJ==-1) mWJJ=mJJ;
-	else if(std::abs(mJJ-80.4)<std::abs(mWJJ-80.4)) mWJJ=mJJ;
-	// c) for invariant bjet-bjet masses
-	if(jetsA->bDiscriminator(btagAlgo_) >btagDiscr_&&jetsB->bDiscriminator(btagAlgo_) >btagDiscr_){
-	  hists_["mbb"]->Fill((jetsA->p4()+jetsB->p4()).mass(), weight);
+  if(jets_h.isValid()){
+    Nbjets=0;
+    Njets=0;
+    for(edm::View< pat::Jet>::const_iterator jetsA=jets_h->begin(); jetsA!=jets_h->end(); ++jetsA){
+      int tempindex=jetsA-jets_h->begin();
+      // check if kinfit information is available
+      if(semiLepEvt_h.isValid()&&semiLepEvt_h->isHypoValid(hypoKey_)){
+	// jet kinematics before the fit
+	if(tempindex==hadBIndex){
+	  bqhadPtPre =jetsA->pt();
+	  bqhadEtaPre=jetsA->eta();
+	  bqhadPhiPre=jetsA->phi();
 	}
-	// d) for all invariant masses
-	hists_["MJJ"]->Fill(mJJ, weight);
+	else if(tempindex==lepBIndex){
+	  bqlepPtPre =jetsA->pt();
+	  bqlepEtaPre=jetsA->eta();
+	  bqlepPhiPre=jetsA->phi();
+	}
+	else if(tempindex==lightQIndex){
+	  lqPtPre =jetsA->pt();
+	  lqEtaPre=jetsA->eta();
+	  lqPhiPre=jetsA->phi();
+	}
+	else if(tempindex==lightQBarIndex){
+	  lqbarPtPre =jetsA->pt();
+	  lqbarEtaPre=jetsA->eta();
+	  lqbarPhiPre=jetsA->phi();
+	}
+	// search for leading non ttbar jet within the 5 leading jets
+	if(tempindex<=5&&tempindex!=lepBIndex&&tempindex!=hadBIndex&&tempindex!=lightQIndex&&tempindex!=lightQBarIndex){
+	  leadNonttjet=tempindex;
+	  leadNonttjetPt=jetsA->pt();
+	  leadNonttjetY =jetsA->rapidity();
+	  leadNonttjetEta =jetsA->eta();
+	}
+      }
+      // count jet multiplicity
+      ++Njets;
+      // count b jet multiplicity (CSVM algo)
+      if(jetsA->bDiscriminator(btagAlgo_) >btagDiscr_){
+	++Nbjets;
+	// store b-jet index 
+	if(BindexA==-1) BindexA=tempindex;
+	else if(BindexB==-1) BindexB=tempindex;
+	else if(BindexC==-1) BindexC=tempindex;
+	else if(BindexD==-1) BindexD=tempindex;
+      }
+      // 2nd loop for jet-jet masses
+      for(edm::View< pat::Jet>::const_iterator jetsB=jets_h->begin(); jetsB!=jets_h->end(); ++jetsB){      
+	// take care of double counting
+	if(jetsB>jetsA){
+	  // a) invariant jet-jet mass for all combinations
+	  mJJ=(jetsA->p4()+jetsB->p4()).mass();
+	  // b) for combination closest to w mass
+	  if(mWJJ==-1) mWJJ=mJJ;
+	  else if(std::abs(mJJ-80.4)<std::abs(mWJJ-80.4)) mWJJ=mJJ;
+	  // c) for invariant bjet-bjet masses
+	  if(jetsA->bDiscriminator(btagAlgo_) >btagDiscr_&&jetsB->bDiscriminator(btagAlgo_) >btagDiscr_){
+	    hists_["mbb"]->Fill((jetsA->p4()+jetsB->p4()).mass(), weight);
+	  }
+	  // d) for all invariant masses
+	  hists_["MJJ"]->Fill(mJJ, weight);
+	}
       }
     }
   }
@@ -380,13 +407,13 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     }
   }
   // fill multiplicity plots
-  hists_["Nbjets"]->Fill(Nbjets, weight);
+  if(Nbjets>-1) hists_["Nbjets"]->Fill(Nbjets, weight);
   hists_["Nbjets"]->GetXaxis()->SetTitle("N("+TString(btagAlgo_)+" b-jets)");
-  hists_["Njets" ]->Fill(Njets , weight);
+  if(Njets>-1 ) hists_["Njets" ]->Fill(Njets , weight);
   if(debug) std::cout << "fill gen jet plot" << std::endl;
-  hists_["Ngenjets"]->Fill(Ngenjet, weight); 
+  if(Ngenjet>-1) hists_["Ngenjets"]->Fill(Ngenjet, weight); 
   if(debug) std::cout << "fill gen-reco jet plot" << std::endl;
-  hists2D_["Njets_"]->Fill(Ngenjet, Njets, weight); 
+  if(Ngenjet>-1&&Njets>-1) hists2D_["Njets_"]->Fill(Ngenjet, Njets, weight); 
   if(debug) std::cout << "done" << std::endl;
 
   // lead non ttbar jet
@@ -467,17 +494,17 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     }
   }
   lepPtPre=lepEtaPre=lepPhiPre=nuPtPre=nuEtaPre=nuPhiPre=sumEtPre=sumEtTrue=-999;
-  if(muons_h->end()-muons_h->begin()>0){
+  if(muons_h.isValid()&&(muons_h->end()-muons_h->begin()>0)){
     lepPtPre  =muons_h->at(0).pt();
     lepEtaPre =muons_h->at(0).eta();
     lepPhiPre =muons_h->at(0).phi();
   }
-  else if(electrons_h->end()-electrons_h->begin()>0){
+  else if(electrons_h.isValid()&&(electrons_h->end()-electrons_h->begin()>0)){
     lepPtPre  =electrons_h->at(0).pt();
     lepEtaPre =electrons_h->at(0).eta();
     lepPhiPre =electrons_h->at(0).phi();
   }
-  if(MET_h->end()-MET_h->begin()>0){
+  if(MET_h.isValid()&&(MET_h->end()-MET_h->begin()>0)){
     nuPtPre   =MET_h->at(0).pt();
     nuEtaPre  =MET_h->at(0).eta();
     nuPhiPre  =MET_h->at(0).phi();
@@ -493,14 +520,39 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   if(lepPhiFit!=-999&&lepPhiPre!=-999) hists_["shiftLepPhi"]->Fill( modTwoPi(lepPhiFit-lepPhiPre), weight);  
   if(nuPhiFit!=-999 &&nuPhiPre!=-999 ) hists_["shiftNuPhi" ]->Fill( modTwoPi( nuPhiFit -nuPhiPre), weight);
 
+  // top and ttbar distributions
+  // a) reco
+  topPtLepFit=topPtHadFit=topYLepFit=topYHadFit=ttbarMassFit=ttbarYFit=ttbarPtFit=-999;
+  if(semiLepEvt_h.isValid()&&semiLepEvt_h->isHypoValid(hypoKey_) ){
+    topPtLepFit=semiLepEvt_h->leptonicDecayTop(hypoKey_)->pt();
+    topPtHadFit=semiLepEvt_h->hadronicDecayTop(hypoKey_)->pt();
+    topYLepFit =semiLepEvt_h->leptonicDecayTop(hypoKey_)->rapidity();
+    topYHadFit =semiLepEvt_h->hadronicDecayTop(hypoKey_)->rapidity();
+    ttbarMassFit=(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()).mass();
+    ttbarYFit   =(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()).Rapidity();
+    ttbarPtFit  =(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()).pt();
+  }
+  // b) gen
+  topPtLepTrue=topPtHadTrue=topYLepTrue=topYHadTrue=ttbarMassTrue=ttbarYTrue=ttbarPtTrue=-999;
+  if(semiLepEvt_h.isValid()){  
+    topPtLepTrue=semiLepEvt_h->leptonicDecayTop()->pt();
+    topPtHadTrue=semiLepEvt_h->hadronicDecayTop()->pt();
+    topYLepTrue =semiLepEvt_h->leptonicDecayTop()->rapidity();
+    topYHadTrue =semiLepEvt_h->hadronicDecayTop()->rapidity();
+    ttbarMassTrue=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()).mass();
+    ttbarYTrue   =(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()).Rapidity();
+    ttbarPtTrue  =(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()).pt();
+  }
+
+
   // tt+jet distribution
-  ttbarJetMass=ttbarJetMassGen=-999;
+  ttbarJetMass=ttbarJetMassTrue=-999;
   // gen level
   if(semiLepEvt_h.isValid()){
     if(debug) std::cout << "hypothesis valid" << std::endl;
-    if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)&&(addGenJets_h->at(0)).pt()>=addJetPt_){
-      ttbarJetMassGen=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
-      if(debug) std::cout << "ttbarJetMassGen=" << ttbarJetMassGen << std::endl;
+    if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)){
+      ttbarJetMassTrue=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
+      if(debug) std::cout << "ttbarJetMassTrue=" << ttbarJetMassTrue << std::endl;
     }
     else if(debug){
       std::cout << "addGenJets_h.isValid(): " << addGenJets_h.isValid() << std::endl;
@@ -508,7 +560,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       if(addGenJets_h->size()>0) std::cout << "addGenJets_h->at(0).pt(): " << addGenJets_h->at(0).pt() << std::endl;
     }
     // reco level
-    if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjet!=-1)&&(leadNonttjetPt>=addJetPt_) ){
+    if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjet!=-1) ){
       ttbarJetMass=(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()+(jets_h->at(leadNonttjet)).p4()).mass();
       if(debug) std::cout << "ttbarJetMass=" << ttbarJetMass << std::endl;
     }
@@ -519,9 +571,23 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     }
   }
   double mtop=172.5;
-  if(ttbarJetMass   !=-999                    ) hists_  ["rhos"   ]->Fill( 2*mtop/ttbarJetMass   , weight);
-  if(ttbarJetMassGen!=-999                    ) hists_  ["rhosGen"]->Fill( 2*mtop/ttbarJetMassGen, weight);
-  if(ttbarJetMass!=-999&&ttbarJetMassGen!=-999) hists2D_["rhos_"  ]->Fill( 2*mtop/ttbarJetMassGen, 2*mtop/ttbarJetMass, weight);
+
+  if(ttbarJetMass   !=-999&&leadNonttjetPt>=addJetPt_           ) hists_  ["rhos"   ]->Fill( 2*mtop/ttbarJetMass   , weight);
+  if(ttbarJetMassTrue!=-999&&addGenJets_h->at(0).pt()>=addJetPt_) hists_  ["rhosGen"]->Fill( 2*mtop/ttbarJetMassTrue, weight);
+  if(ttbarJetMass!=-999&&ttbarJetMassTrue!=-999&&addGenJets_h->at(0).pt()>=addJetPt_&&leadNonttjetPt>=addJetPt_) hists2D_["rhos_"  ]->Fill( 2*mtop/ttbarJetMassTrue, 2*mtop/ttbarJetMass, weight);
+  
+  leadNonttjetPtTrue=leadNonttjetYTrue=leadNonttjetEtaTrue=-999;
+  if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)){
+    leadNonttjetPtTrue=addGenJets_h->at(0).pt();
+    leadNonttjetEtaTrue=addGenJets_h->at(0).eta();
+    leadNonttjetYTrue=addGenJets_h->at(0).rapidity();
+  }
+  // lead non ttbar jet GEN
+  if(leadNonttjetPtTrue>=0){
+    hists_["leadNonttjetPtTrue" ]->Fill(leadNonttjetPtTrue , weight);
+    hists_["leadNonttjetYTrue"  ]->Fill(leadNonttjetYTrue  , weight);
+    hists_["leadNonttjetEtaTrue"]->Fill(leadNonttjetEtaTrue, weight);
+  }
 
   tree->Fill();
 }
