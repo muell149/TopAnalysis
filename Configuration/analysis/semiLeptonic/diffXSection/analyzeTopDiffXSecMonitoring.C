@@ -649,18 +649,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     "m^{t#bar{t}} #left[GeV#right] parton lv PS parton truth;Events;1;1",
     "m^{t#bar{t}} #left[GeV#right] hadron lv PS parton truth;Events;1;1",
     // kinfit object shifts
-    "#Delta p_{T}^{light jets} #left[GeV#right];Events;0;20",
+    "#Delta p_{T}^{light jets} #left[GeV#right];Events;0;40",
     "#Delta #eta^{light jets};Events;0;1",
-    "#Delta #phi^{light jets};Events;0;10",
-    "#Delta p_{T}^{b jets} #left[GeV#right];Events;0;10",
-    "#Delta #eta^{b jets};Events;0;1",
+    "#Delta #phi^{light jets};Events;0;20",
+    "#Delta p_{T}^{b jets} #left[GeV#right];Events;0;25",
+    "#Delta #eta^{b jets};Events;0;2",
     "#Delta #phi^{b jets};Events;0;2",
     "#Delta p_{T}^{lepton} #left[GeV#right];Events;0;2",
     "#Delta #eta^{lepton};Events;0;1",
     "#Delta #phi^{lepton};Events;0;1",
-    "#Delta p_{T}^{neutrino} #left[GeV#right];Events;0;5",
+    "#Delta p_{T}^{neutrino} #left[GeV#right];Events;0;20",
     "#Delta #eta^{neutrino};Events;0;20",
-    "#Delta #phi^{neutrino};Events;0;2",
+    "#Delta #phi^{neutrino};Events;0;4",
     // additional top pt plots with splitted contributions
     "p_{T}^{t+} #left[GeV#right];Events;0;20",
     "p_{T}^{t-} #left[GeV#right];Events;0;20",
@@ -1796,7 +1796,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarMass")                          ){xDn=0     ;xUp=800;  }
 	    if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/bbbarPt")                            ){xDn=0     ;xUp=400;  }
 	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqPt"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftNuPt"))){xDn=-80;xUp=80;}
-	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")                                        ){xDn=-20   ;xUp=20;   }
+	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqPt")                                        ){xDn=-30   ;xUp=30;   }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepPt")                                       ){xDn=-1    ;xUp=1;    }
 	    if(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLepEta")                                      ){xDn=-0.001;xUp=0.001;}
 	    if((plotList_[plot].Contains("compositedKinematicsKinFit/shiftBqEta"))||(plotList_[plot].Contains("compositedKinematicsKinFit/shiftLqEta"))){xDn=-0.02;xUp=0.02;}
@@ -2013,6 +2013,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 		else{
 		  double ratMin=0.1;
 		  double ratMax=1.9;
+		  if(plotList_[plot].Contains("shift")){ratMin=0.88;ratMax=1.12;}
 		  TString ratioLabelNominator  ="N_{data}";
 		  TString ratioLabelDenominator="N_{MC}";
 		  std::vector<double> err_=std::vector<double>(0);
