@@ -189,7 +189,6 @@ JetKinematics::fill(const edm::View<reco::Jet>& jets, const double& weight)
 	// fill pat/other jet type
 	fillValue( "type" , 0.5 , weight );
 	// energy of the jet
-	fillValue( "en" , 0.5 , weight );
 	fillValue( "en" , jet->correctedJet(correctionStep(), correctionFlavor()).energy() , weight );
 	// transverse momentum of the jet
 	fillValue( "pt" , jet->correctedJet(correctionStep(), correctionFlavor()).pt() , weight );
