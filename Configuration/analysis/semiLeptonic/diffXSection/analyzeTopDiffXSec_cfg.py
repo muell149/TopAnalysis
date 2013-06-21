@@ -75,6 +75,8 @@ else:
 # switch to run on data and remove all gen plots (type 'MC' or 'data')
 if(not globals().has_key('runningOnData')): 
     runningOnData = "MC"
+if("data" in options.sample):
+    runningOnData = "data"
     
 # print chosen sample (e.g. ttbar)
 # value is known from external parsing
@@ -124,6 +126,8 @@ if(not globals().has_key('effSFReweigthing')):
 # L3Absolute for MC, L2L3Residual for data
 if(not globals().has_key('corrLevel')):
     corrLevel='L3Absolute'
+if("data" in options.sample):
+    corrLevel="L2L3Residual"
 
 ## run kinematic fit?
 ## ATTENTION: until the new parameter jetResolutionSmearFactor
@@ -257,8 +261,38 @@ usedSample="none"
 
 ## automatically load the correct (AOD) .root file list for each MC sample
 if(not options.sample=="none"):
-    outputFileName+="DiffXSec"    
-    if("ttbar" in options.sample):
+    outputFileName+="DiffXSec"
+    if(options.sample=="dataABCD"):
+        if(decayChannel=="muon"):
+            usedSample="TopAnalysis/Configuration/samples/SingleMu_Run2012ABCDJan22ReReco_cff"
+        elif(decayChannel=="electron"):
+            usedSample="TopAnalysis/Configuration/samples/SingleElectron_Run2012ABCDJan22ReReco_cff"
+        outputFileName+="Data2012ABCDJanReReco"
+    elif(options.sample=="dataA"):
+        if(decayChannel=="muon"):
+            usedSample="TopAnalysis/Configuration/samples/SingleMu_Run2012AJan22ReReco_cff"
+        elif(decayChannel=="electron"):
+            usedSample="TopAnalysis/Configuration/samples/SingleElectron_Run2012AJan22ReReco_cff"
+        outputFileName+="Data2012AJanReReco"
+    elif(options.sample=="dataB"):
+        if(decayChannel=="muon"):
+            usedSample="TopAnalysis/Configuration/samples/SingleMu_Run2012BJan22ReReco_cff"
+        elif(decayChannel=="electron"):
+            usedSample="TopAnalysis/Configuration/samples/SingleElectron_Run2012BJan22ReReco_cff"
+        outputFileName+="Data2012BJanReReco"
+    elif(options.sample=="dataC"):
+        if(decayChannel=="muon"):
+            usedSample="TopAnalysis/Configuration/samples/SingleMu_Run2012CJan22ReReco_cff"
+        elif(decayChannel=="electron"):
+            usedSample="TopAnalysis/Configuration/samples/SingleElectron_Run2012CJan22ReReco_cff"
+        outputFileName+="Data2012CJanReReco"
+    elif(options.sample=="dataD"):
+        if(decayChannel=="muon"):
+            usedSample="TopAnalysis/Configuration/samples/SingleMu_Run2012DJan22ReReco_cff"
+        elif(decayChannel=="electron"):
+            usedSample="TopAnalysis/Configuration/samples/SingleElectron_Run2012DJan22ReReco_cff"
+        outputFileName+="Data2012DJanReReco"
+    elif("ttbar" in options.sample):
         # limited statistics (wo spin correlation inclusive sample)
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
         # full statistics: FIXME not available yet
@@ -522,7 +556,9 @@ if(not options.sample=="none"):
 outputFileNamePart=outputFileName
 if(options.JEtag!="none"):
     outputFileNamePart+=options.JEtag
-outputFileName=outputFileNamePart+options.mctag+"PF.root"
+if(not "data" in options.sample):
+    outputFileName=outputFileNamePart+options.mctag+"PF"
+outputFileName+=".root"
 
 #### =================================================
 ####  Print out summary of configuration parameters
@@ -607,6 +643,8 @@ else:
 #                          )
 
 ## load JSON file for data
+if("data" in options.sample):
+    jsonFile = 'Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt'
 if(runningOnData=="data"):
     if(jsonFile!=""):
         import FWCore.PythonUtilities.LumiList as LumiList
@@ -2708,7 +2746,7 @@ if(decayChannel=="electron"):
     elif(options.mctag=="Fall11"):
       process.hltFilter.HLTPaths=["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
       process.dummy.HLTPaths=["HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralJet30_v*"]
-    elif(options.mctag=="Summer12"):
+    elif((options.mctag=="Summer12") or ("data" in options.sample)):
       process.hltFilter.HLTPaths=["HLT_Ele27_WP80_v*"]
       process.dummy.HLTPaths=["HLT_Ele27_WP80_v*"]
     # adapt gen filter
