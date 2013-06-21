@@ -1521,19 +1521,21 @@ void AnalysisBase::applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const
     double JEC_dpX =0.;
     double JEC_dpY =0.;
     for(size_t i = 0; i < jetsForMET->size(); ++i){
+
+        const double dpX = jetsForMET->at(i).px();
+        const double dpY = jetsForMET->at(i).py();
+
         jetCorrectionUncertainty_->setJetPt(jetsForMET->at(i).pt()); 
         jetCorrectionUncertainty_->setJetEta(jetsForMET->at(i).eta());
         const double dunc = jetCorrectionUncertainty_->getUncertainty(true);
-        
+
         if(varyUp) jetsForMET->at(i) *= 1. + dunc;
         else jetsForMET->at(i) *= 1. - dunc;
-        
-        const double dpX = jetsForMET->at(i).px();
-        const double dpY = jetsForMET->at(i).py();
+
         JEC_dpX += jetsForMET->at(i).px() - dpX;
         JEC_dpY += jetsForMET->at(i).py() - dpY;
     }
-    
+
     // Adjust the MET
     const double scaledMETPx = met->px() - JEC_dpX;
     const double scaledMETPy = met->py() - JEC_dpY;
