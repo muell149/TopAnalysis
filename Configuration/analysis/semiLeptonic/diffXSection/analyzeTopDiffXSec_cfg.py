@@ -1012,6 +1012,24 @@ process.compositedPartonGen=process.compositedKinematicsKinFit.clone()
 process.compositedPartonGenPhaseSpace=process.compositedPartonGen.clone()
 process.compositedHadronGenPhaseSpace=process.compositedPartonGen.clone()
 
+if(removeGenTtbar==True):
+   process.compositedKinematics.GenJetSrc = cms.InputTag('')
+   process.compositedKinematics.addGenJetSrc = cms.InputTag('')
+   process.compositedKinematics.GenMETSrc = ''
+   process.compositedKinematics.GenLepSrc = ''
+   process.compositedKinematicsKinFit.GenJetSrc = cms.InputTag('')
+   process.compositedKinematicsKinFit.addGenJetSrc = cms.InputTag('')
+   process.compositedKinematicsKinFit.GenMETSrc = ''
+   process.compositedKinematicsKinFit.GenLepSrc = ''
+   process.compositedKinematicsProbSel.GenJetSrc = cms.InputTag('')
+   process.compositedKinematicsProbSel.addGenJetSrc = cms.InputTag('')
+   process.compositedKinematicsProbSel.GenMETSrc = ''
+   process.compositedKinematicsProbSel.GenLepSrc = ''
+   process.compositedKinematics.semiLepEvent = cms.InputTag('')
+   process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag('')
+   process.compositedKinematicsProbSel.semiLepEvent = cms.InputTag('')
+
+
 ## electrons
 process.tightElectronKinematics        = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
 process.tightElectronQuality           = process.analyzeElectronQuality.clone   ( src = 'goodElectronsEJ'  )
