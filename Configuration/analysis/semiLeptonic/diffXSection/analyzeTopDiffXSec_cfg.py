@@ -1012,7 +1012,7 @@ process.compositedPartonGen=process.compositedKinematicsKinFit.clone()
 process.compositedPartonGenPhaseSpace=process.compositedPartonGen.clone()
 process.compositedHadronGenPhaseSpace=process.compositedPartonGen.clone()
 
-if(removeGenTtbar==True):
+if(removeGenTtbar==True or eventFilter!="signal only"):
     process.compositedKinematics.GenJetSrc = cms.InputTag('')
     process.compositedKinematics.addGenJetSrc = cms.InputTag('')
     process.compositedKinematics.GenMETSrc = ''
