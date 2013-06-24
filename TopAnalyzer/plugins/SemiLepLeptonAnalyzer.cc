@@ -7,7 +7,8 @@
 #include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
 
 #include "TopAnalysis/TopAnalyzer/plugins/SemiLepLeptonAnalyzer.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/Common/interface/View.h"
 
 // default constructor
 SemiLepLeptonAnalyzer::SemiLepLeptonAnalyzer(const edm::ParameterSet& cfg):
@@ -74,12 +75,12 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   //     B: rec level plots
   // ---
   if(verbose>0) std::cout << std::endl << "create rec level plots" << std::endl;
-  edm::Handle<std::vector<pat::Muon> > recLeptons;
+  edm::Handle<edm::View<reco::Candidate> > recLeptons;
   if(recPlots_) event.getByLabel(recLeptons_, recLeptons);
   // get rec lepton (from kinfit hypothesis or before kinFit)
   const reco::Candidate* zero=0;
   if(!recPlots_) preLep=false;
-  const reco::Candidate* recLepton = !recPlots_ ? zero : (preLep ? &recLeptons->at(0) : getLepton(semiLepEvt, hypoKey_));
+  const reco::Candidate* recLepton = !recPlots_ ? zero : (preLep ? &(recLeptons->front()) : getLepton(semiLepEvt, hypoKey_));
   // fill rec histograms
   if(recLepton){
     if(useTree_){
