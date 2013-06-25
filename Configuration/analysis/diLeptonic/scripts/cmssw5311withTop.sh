@@ -43,9 +43,15 @@ cd $CMSSW_BASE/src/EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 cd -
 
+###### ParticleFlow #####
+
+cvs co -r V15-02-06       RecoParticleFlow/PFProducer
 
 ###### Hamburg TOP package (plus dependencies) #####
-cvs co -d TopAnalysis UserCode/Bromo/TopAnalysis
+#cvs co -d TopAnalysis UserCode/Bromo/TopAnalysis
+git clone https://git.cern.ch/reps/TopAnalysis
+
+
 
 ### From: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTQAFRecipes#CMSSW_5_3_X  (revision 224)
 addpkg AnalysisDataFormats/TopObjects
