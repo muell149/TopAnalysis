@@ -5,18 +5,18 @@ readFiles = cms.untracked.vstring()
 secFiles = cms.untracked.vstring() 
 source = cms.Source ("PoolSource",fileNames = readFiles, secondaryFileNames = secFiles)
 readFiles.extend( [
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20000/36AF8D64-4B85-E211-AC87-00259058D130.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20000/42600710-C885-E211-8744-003048FE7FD2.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20000/9C42320F-CB85-E211-BB2F-003048FEB996.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20001/62A7EF0A-0487-E211-8737-003048F1CA76.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/1ABAF0CC-688A-E211-9CB3-003048FEC15C.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/38368E38-DE8A-E211-A892-003048D374EC.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/58D2FE0E-F589-E211-BACC-003048F17F00.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/64493493-D58A-E211-876A-003048F237F8.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/C0A174E1-DD8A-E211-AB84-001E673986CE.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/D6478CFE-DD8A-E211-8562-003048F2381A.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/30000/34029203-EA83-E211-B4A6-0025901DD2B0.root',
-       '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/30000/86092250-AF83-E211-B8FA-0025B3203690.root',
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20000/36AF8D64-4B85-E211-AC87-00259058D130.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20000/42600710-C885-E211-8744-003048FE7FD2.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20000/9C42320F-CB85-E211-BB2F-003048FEB996.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20001/62A7EF0A-0487-E211-8737-003048F1CA76.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/1ABAF0CC-688A-E211-9CB3-003048FEC15C.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/38368E38-DE8A-E211-A892-003048D374EC.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/58D2FE0E-F589-E211-BACC-003048F17F00.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/64493493-D58A-E211-876A-003048F237F8.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/C0A174E1-DD8A-E211-AB84-001E673986CE.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/20002/D6478CFE-DD8A-E211-8562-003048F2381A.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/30000/34029203-EA83-E211-B4A6-0025901DD2B0.root',#invalid(DAS)
+       #'/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/30000/86092250-AF83-E211-B8FA-0025B3203690.root',#invalid(DAS)
        '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/10000/00626847-9EAC-E211-ABAA-00259059642E.root',
        '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/10000/0215309C-9AAC-E211-AFE0-0026189438C4.root',
        '/store/data/Run2012C/SingleElectron/AOD/22Jan2013-v1/10000/02D3AA73-6CAC-E211-8D33-00261894395C.root',
