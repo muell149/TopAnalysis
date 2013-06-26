@@ -342,6 +342,13 @@ elif options.jesType == 'flavor' :
         process.scaledJetEnergy.scaleType = "flavor:up"
     elif options.jesFactor < 1.0 :
         process.scaledJetEnergy.scaleType = "flavor:down"
+## set energy scaling factors for a single source
+elif options.jesType == 'CorrelationGroupMPFInSitu' or options.jesType == 'CorrelationGroupFlavor' or options.jesType == 'CorrelationGroupIntercalibration' or options.jesType == 'CorrelationGroupUncorrelated' or options.jesType == 'CorrelationGroupbJES':
+    process.scaledJetEnergy.sourceName = options.jesType
+    if options.jesFactor > 1.0 :
+        process.scaledJetEnergy.scaleType = "source:up"
+    elif options.jesFactor < 1.0 :
+        process.scaledJetEnergy.scaleType = "source:down"
 
 ## residual jet corrector for data
 from TopAnalysis.TopUtils.ResidualJetCorrector_cfi import residualCorrectedJets
