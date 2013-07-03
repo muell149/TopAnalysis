@@ -1015,7 +1015,8 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         }else{
             drawhists[i]->SetLineColor(1);
         }
-        if(legends.at(i) != legends.at(i-1)){
+        if(legends.at(i) != legends.at(i-1) && !legends.at(i).Contains("QCD")){
+
             drawhists[i]->SetLineColor(1);
             stack->Add(drawhists[i]); 
         }
@@ -2238,18 +2239,20 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     SystHists->Draw();
     fclose(systfile);
 
-    if(name.Contains("pT") ||name.Contains("Mass") ){
-        SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
-        if(name.Contains("Rapidity")) SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
-    }
-    else  SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
-    SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
-    SystHists->GetXaxis()->SetNoExponent(kTRUE);
+    if(vec_systematic.size()>0){
+        if(name.Contains("pT") ||name.Contains("Mass") ){
+            SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis.Copy().Append(" #left[GeV#right]"));
+            if(name.Contains("Rapidity")) SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
+        }
+        else  SystHists->GetHistogram()->GetXaxis()->SetTitle(XAxis);
+        SystHists->GetHistogram()->GetYaxis()->SetTitle("#sum #left( #frac{#Delta #sigma}{#sigma} #right)^{2}");
+        SystHists->GetXaxis()->SetNoExponent(kTRUE);
 
-    leg10->SetFillColor(0);
-    leg10->Draw("SAME");
-    c10->Print(outdir.Copy()+"MSP_"+name+".eps");
-    delete leg10;
+        leg10->SetFillColor(0);
+        leg10->Draw("SAME");
+        c10->Print(outdir.Copy()+"MSP_"+name+".eps");
+        delete leg10;
+    }
     delete c10;
 
     //The Experimental/Model/Statistical plot
