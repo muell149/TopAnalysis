@@ -669,7 +669,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if(isTopSignal_) this->GetTopSignalBranchesEntry(entry);
 
     // Apply the top-quark pT reweighting if the bool 'ApplyTopReweight' says so ;)
-    const double weightTopPtReweighting = ApplyTopPtReweight ? this->weightTopPtReweighting(GenTop_->Pt(), GenAntiTop_->Pt()) : 1.;
+    const double weightTopPtReweighting = (ApplyTopPtReweight && isTopSignal_) ? this->weightTopPtReweighting(GenTop_->Pt(), GenAntiTop_->Pt()) : 1.;
     
     // Get true level weights
     const double trueLevelWeightNoPileupNoClosure = weightGenerator*weightMadgraphCorrection*pdfWeight*weightTopPtReweighting;
