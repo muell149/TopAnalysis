@@ -19,28 +19,61 @@ if [ ${1} ]; then
     fi
 fi
 
-for fileName in `ls *.root.*`; do
-    
-    newFileName=`echo ${fileName} | sed -r 's/root.[0-9]+//'`
+numberOfSentJobs=`grep "numberOfJobs =" ./analyzeTopDiffXSec_cfg.py | sed -r 's/numberOfJobs = //'`
+numberOfReadyJobs=`ls -l *.root | wc -l`
 
-    echo "sumTriggerReports2.pl out*.txt >| ${newFileName}txt"
-    eval `echo "sumTriggerReports2.pl out*.txt >| ${newFileName}txt"`
+if [ $numberOfSentJobs = $numberOfReadyJobs ]; then
 
-    echo "fasthadd.pl -j ${nCores} ${newFileName}root *.root"
-    eval `echo "fasthadd.pl -j ${nCores} ${newFileName}root *.root"`
+    if [ -e joined.txt ]; then
+	
+	JOINFILE=joined.txt
+	
+	for fileName in $(cat $JOINFILE); do
+	    
+	    newFileName=`echo ${fileName} | sed -r 's/root//'`
+	    
+	    echo "sumTriggerReports2.pl out*.txt >| ${newFileName}txt"
+	    eval `echo "sumTriggerReports2.pl out*.txt >| ${newFileName}txt"`
+	    
+	    echo "fasthadd.pl -j ${nCores} ${fileName} *.root"
+	    eval `echo "fasthadd.pl -j ${nCores} ${fileName} *.root"`
+	    
+	    if [ -e ${fileName} ]; then
+		
+		echo "rm analyzeTopDiffXSec*.root"
+		for rootFile in `ls analyzeTopDiffXSec*.root`; do
+		    
+		    rm ${rootFile}
+		    
+		done
+		
+	    fi
 
-    if [ -e ${newFileName}root ]; then
+	    if ls *.root.* &> /dev/null; then
+		
+		echo rm `ls *.root.*`
+		rm `ls *.root.*`
 
-	echo "rm ${fileName}"
-	rm ${fileName}
-
-	echo "rm analyzeTopDiffXSec*.root"
-	for rootFile in `ls analyzeTopDiffXSec*.root`; do
-
-	    rm ${rootFile}
-
+	    fi
+	    
 	done
-
+	
+    else
+	
+	echo "There is no joined.txt file -> aborting!"
+	
     fi
 
-done
+elif [ $numberOfSentJobs -gt $numberOfReadyJobs ]; then
+
+    echo "Not enough root files, probably not all jobs done yet -> aborting!"
+
+elif [ $((numberOfSentJobs+1)) = $numberOfReadyJobs ]; then
+
+    echo "There is one root file too many, probably already joined -> aborting!"
+
+else
+
+    echo "Too many root files -> aborting"
+
+fi

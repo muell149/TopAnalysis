@@ -18,10 +18,10 @@ void analyzeFileComparison(bool save = true, int verbose=0){
   //  load rootfiles
   // ============================
   std::vector<TFile* > file_;
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/fixedTopMass171_5/elecDiffXSecSigSummer12PF.root", "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/fixedTopMass171_5/muonDiffXSecSigSummer12PF.root", "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/elecDiffXSecSigSummer12PF.root", "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/muonDiffXSecSigSummer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_PromptReco_12fb_PAS/fixedTopMass171_5/elecDiffXSecSigSummer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_PromptReco_12fb_PAS/fixedTopMass171_5/muonDiffXSecSigSummer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix_PromptReco_12fb/elecDiffXSecSigSummer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix_PromptReco_12fb/muonDiffXSecSigSummer12PF.root", "Open"));
   // list plots of relevance
   std::vector<TString> plotList_, axisLabel_;
   TString plots1D[ ] = {
@@ -312,7 +312,6 @@ void analyzeFileComparison(bool save = true, int verbose=0){
   }
 
   if(save){
-    saveCanvas(plotCanvas_, "./diffXSecFromSignal/plots/combined/2012/monitoring/", "topMassBiasStudy", true, false);
+    saveCanvas(plotCanvas_, "./topMassBias", "topMassBiasStudy", true, true);
   }
-
 }

@@ -188,8 +188,8 @@ namespace semileptonic {
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
   const double globalLumiUncertainty = 0.044; // relative uncertainty 
 	
-  const double constLumiElec = 12148.0; // luminosity of ABC dataset wo recover
-  const double constLumiMuon = 12148.0; // luminosity of ABC dataset wo recover
+  const double constLumiElec = 19800.0; // luminosity of Jan22ReReco ABCD dataset
+  const double constLumiMuon = 19800.0; // luminosity of Jan22ReReco ABCD dataset
   
   const double BRPDG=0.145888;
 
@@ -1749,6 +1749,44 @@ namespace semileptonic {
     }
     delete binLowerEdgeArray;
   }
+
+
+  TH2F* reBinTH2F(TH2F& histoUnbinned, const std::vector<double> &binlowerEdges_, const int verbose=0)
+  {
+    // this function rebins an 2D histogram using a variable binning
+    // modified quantities: "histoUnbinned"
+    // used functions: none
+    // used enumerators: none
+    // "histoUnbinned": plot to be binned
+    // "binlowerEdges": vector containing all lower bin edges starting at xaxis.min, ending with xaxis.max
+    // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
+
+    // fill vector entries in array
+    // because TH1F constructor needs an array
+    const unsigned int arraySize=binlowerEdges_.size();
+    double *binLowerEdgeArray = new double[arraySize];
+    for(unsigned int arrayEntry=0; arrayEntry<arraySize; ++arrayEntry){
+      binLowerEdgeArray[arrayEntry]=binlowerEdges_[arrayEntry];
+      if(verbose>1) std::cout << "array entry #" << arrayEntry << ": " << binLowerEdgeArray[arrayEntry] << " ";
+    }
+    if(verbose>1) std::cout << std::endl;
+    
+    // create 2D histo with new binning
+    if(verbose>1) std::cout << "create binned histo" << std::endl;
+    TH2F* binnedHisto= new TH2F(TString(histoUnbinned.GetName())+"Binned", histoUnbinned.GetTitle(), arraySize-1, binLowerEdgeArray, arraySize-1, binLowerEdgeArray);
+    if(verbose>1) std::cout << "get old axis" << std::endl;
+    TAxis *xaxis = histoUnbinned.GetXaxis();
+    TAxis *yaxis = histoUnbinned.GetYaxis();
+    if(verbose>1) std::cout << "refill values" << std::endl;
+    for(int j=1;j<=yaxis->GetNbins();j++) {
+      for (int i=1;i<=xaxis->GetNbins();i++) {
+	binnedHisto->Fill(xaxis->GetBinCenter(i),yaxis->GetBinCenter(j),histoUnbinned.GetBinContent(i,j));
+      }
+    }
+    delete binLowerEdgeArray;
+    return binnedHisto;
+  }
+
 
     // ===============================================================
     // ===============================================================

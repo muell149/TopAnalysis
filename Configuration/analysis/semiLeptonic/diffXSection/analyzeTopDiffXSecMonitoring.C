@@ -1,17 +1,20 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
-				      bool save = true, int verbose=0,
-				      TString inputFolderName="newRecentAnalysisRunTopMassFix/",
-				      //TString inputFolderName="newRecentAnalysisRun8TeV/",
-				      //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
-				      //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-				      //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
-				      //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllElec.root",
-				      //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllMuon.root",				      
-				      TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllMuon.root",
-				      const std::string decayChannel = "combined", 
-				      bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
+void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
+				  bool save = true, int verbose=0,
+				  //TString inputFolderName="RecentAnalysisRun8TeV_PromptReco_12fb_PAS/",
+				  //TString inputFolderName="newRecentAnalysisRunTopMassFix_PromptReco_12fb/",
+				  TString inputFolderName="RecentAnalysisRun8TeV/",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_PromptReco_12fb_PAS/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_PromptReco_12fb_PAS/analyzeDiffXData2012ABCAllMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllElec.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllMuon.root",				      
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllMuon.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix_PromptReco_12fb/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix_PromptReco_12fb/analyzeDiffXData2012ABCAllMuon.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
+				  const std::string decayChannel = "muon", 
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
 { 
   // ============================
   //  Set Root Style
@@ -76,6 +79,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   // produce additional control plots for probability selection efficiency
   bool diffProbEff=true;
   if(decayChannel!="combined") effA=false;
+  // activate plots added by hand from tree 
+  // will not work with raw .root files!
+  bool extra=false;
   // get the .root files from the following folder:
   TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName;
   // see if its 2011 or 2012 data from luminosity
@@ -274,7 +280,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // (III) after kinematic fit 
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarAngle",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt",
-    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtTtbarSys",
+    //"analyzeTopRecoKinematicsKinFit"+addSel+"/topPtTtbarSys",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topY",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topMass",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt",
@@ -310,7 +316,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // FIXME START
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarAngle",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/topPt",
-    "analyzeTopRecoKinematicsKinFit"+probComplement+"/topPtTtbarSys",
+    //"analyzeTopRecoKinematicsKinFit"+probComplement+"/topPtTtbarSys",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/topY",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/topMass",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarPt",
@@ -457,6 +463,21 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     //"analyzeTopRecoKinematicsKinFit"+addSel+"/leadqPt", // FIXME
     //"analyzeTopRecoKinematicsKinFit"+addSel+"/leadqEta",// FIXME
   };
+
+  TString plots1Dextra[ ] = { 
+    // control plots: topPt in topY slices
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_Yless04",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_Ygreater04less10",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_Ygreater10",
+    // control plots: topPt in ttbarMass slices
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_ttbarMassless420",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_ttbarMassgreater420less580",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_ttbarMassgreater580",
+    // control plots: topPt in ttbarPt slices
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_ttbarPtless40",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_ttbarPtgreater40less130",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt_ttbarPtgreater130",
+  };
 	
   TString plots2D[ ] = {};	
 
@@ -569,7 +590,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // (III) after kinematic fit 
     "#angle(t,#bar{t});Events;0;15",
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
-    "p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
+    //"p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
     "y^{t};Top quarks;0;1",
     "m^{t};Top quarks;0;10",
     "p_{T}^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
@@ -605,7 +626,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     // FIXME START
     "#angle(t,#bar{t});Events;0;15",
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
-    "p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
+    //"p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
     "y^{t};Top quarks;0;1",
     "m^{t};Top quarks;0;10",
     "p_{T}^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
@@ -747,6 +768,21 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
     //"#eta^{lead q};Events;0;1",// FIXME
   };
 
+  TString axisLabel1Dextra[ ] = { 
+    // control plots: topPt in topY slices
+    "p_{T}^{t} #left[GeV#right] (y^{t}<0.4);Top quarks;0;20",
+    "p_{T}^{t} #left[GeV#right] (0.4<y^{t}<1.0);Top quarks;0;20",
+    "p_{T}^{t} #left[GeV#right] (y^{t}>1.0);Top quarks;0;20",
+    // control plots: topPt in ttbarMass slices
+    "p_{T}^{t} #left[GeV#right] (m^{t#bar{t}}<420);Top quarks;0;20",
+    "p_{T}^{t} #left[GeV#right] (420<m^{t#bar{t}}<580);Top quarks;0;20",
+    "p_{T}^{t} #left[GeV#right] (m^{t#bar{t}}>580);Top quarks;0;20",
+    // control plots: topPt in ttbarPt slices
+    "p_{T}^{t} #left[GeV#right] (p_{T}^{t#bar{t}}<40);Top quarks;0;20",
+    "p_{T}^{t} #left[GeV#right] (40<p_{T}^{t#bar{t}}<130);Top quarks;0;20",
+    "p_{T}^{t} #left[GeV#right] (p_{T}^{t#bar{t}}>130);Top quarks;0;20",
+  };
+
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {};
 
@@ -757,12 +793,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   if(decayChannel=="electron") N1Dplots += sizeof(plots1De  )/sizeof(TString);
   if(decayChannel=="muon"    ) N1Dplots += sizeof(plots1Dmu )/sizeof(TString);
   if(effA                    ) N1Dplots += sizeof(plots1Deff)/sizeof(TString);
+  if(extra                   ) N1Dplots += sizeof(plots1Dextra)/sizeof(TString);
   unsigned int N2Dplots = sizeof(plots2D)/sizeof(TString);
   // get number fo axis labels and check if it corresponds to number of plots
   unsigned int Naxislabels = sizeof(axisLabel1D)/sizeof(TString) + sizeof(axisLabel1DLeptons)/sizeof(TString);
   if(decayChannel=="electron") Naxislabels += sizeof(axisLabel1De  )/sizeof(TString);
   if(decayChannel=="muon"    ) Naxislabels += sizeof(axisLabel1Dmu )/sizeof(TString);
   if(effA                    ) Naxislabels += sizeof(axisLabel1Deff)/sizeof(TString);
+  if(extra                   ) Naxislabels += sizeof(axisLabel1Dextra)/sizeof(TString);
   if(N1Dplots != Naxislabels){
     std::cout << "ERROR - 1D plots: Number of plots and axis label do not correspond .... Exiting macro!" << std::endl;
     exit(1);
@@ -794,6 +832,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   if(decayChannel=="electron") plotList_.insert(plotList_.end(), plots1De,  plots1De  + sizeof(plots1De )/sizeof(TString));
   if(decayChannel=="muon"    ) plotList_.insert(plotList_.end(), plots1Dmu, plots1Dmu + sizeof(plots1Dmu)/sizeof(TString)); 
   if(effA) plotList_.insert(plotList_.end(), plots1Deff,     plots1Deff     + sizeof(plots1Deff    )/sizeof(TString));
+  if(extra                   ) plotList_.insert(plotList_.end(), plots1Dextra, plots1Dextra + sizeof(plots1Dextra)/sizeof(TString)); 
   plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );	
 
   // Rename lepton plots according to chosen decay channel
@@ -918,6 +957,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
   if(decayChannel=="electron") axisLabel_.insert( axisLabel_.end(), axisLabel1De , axisLabel1De +sizeof(axisLabel1De )/sizeof(TString) );
   if(decayChannel=="muon"    ) axisLabel_.insert( axisLabel_.end(), axisLabel1Dmu, axisLabel1Dmu+sizeof(axisLabel1Dmu)/sizeof(TString) );
   if(effA) axisLabel_.insert(axisLabel_.end(), axisLabel1Deff,     axisLabel1Deff     + sizeof(axisLabel1Deff)/sizeof(TString));
+  if(extra) axisLabel_.insert(axisLabel_.end(), axisLabel1Dextra,     axisLabel1Dextra     + sizeof(axisLabel1Dextra)/sizeof(TString));
   axisLabel_.insert( axisLabel_.end()  , axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString) );
   if(verbose>1){
     std::cout << "(plot, x Axis label, y Axis label, log scale?, rebinning factor):" << std::endl;
@@ -1840,7 +1880,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 12148,
 	      if(plotList_[plot].Contains("bottomJetKinematics/n"))         {min=1.0; max=3.0E06; paperPlot=true;}
 	      if(plotList_[plot].Contains("tightJetKinematicsTagged/pt"))   {min=1.0; max=1.0E06; paperPlot=true;}
 	      if(plotList_[plot].Contains("tightLeptonKinematicsTagged/pt")){min=0.0; max=6.0E03; paperPlot=true;}
-	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topPt")){
+	      if(plotList_[plot].Contains("analyzeTopRecoKinematicsKinFit"+addSel+"/topPt")&&!plotList_[plot].Contains("_Y")){
 		min=0; max=7.0E03; paperPlot=true;  //max=2.5E04;
 		if(getStringEntry(axisLabel_[plot],2,";").Contains("Events")) max*=0.5; // splitted topPt control plots
 	      }
