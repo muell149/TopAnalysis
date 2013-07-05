@@ -1026,8 +1026,6 @@ if(removeGenTtbar==True or eventFilter!="signal only"):
     process.compositedKinematicsProbSel.GenMETSrc = ''
     process.compositedKinematicsProbSel.GenLepSrc = ''
     process.compositedKinematics.semiLepEvent = cms.InputTag('')
-    process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag('')
-    process.compositedKinematicsProbSel.semiLepEvent = cms.InputTag('')
     
 ## electrons
 process.tightElectronKinematics        = process.analyzeElectronKinematics.clone( src = 'goodElectronsEJ'  )
