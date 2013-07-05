@@ -5,6 +5,50 @@ readFiles = cms.untracked.vstring()
 secFiles = cms.untracked.vstring() 
 source = cms.Source ("PoolSource",fileNames = readFiles, secondaryFileNames = secFiles)
 readFiles.extend( [
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5A182EF0-3D75-E211-B36A-00261894385A.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5E1965E6-3D75-E211-806B-002618943981.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/604469F6-3D75-E211-8481-003048FFCC1E.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/0080A2D7-3D75-E211-A5AF-003048FFD744.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/0859B8A4-3D75-E211-BAB2-00261894394A.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/0A365ED4-3D75-E211-9E62-003048678C06.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/6867A60B-3E75-E211-8395-0026189437EC.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/7EF1D810-3E75-E211-BCD9-00261894395C.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/82D7FBEA-3D75-E211-A688-0026189438BA.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/82F27609-3E75-E211-8171-003048679070.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/968A79FB-3D75-E211-B0B2-0026189438FD.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9C4DDAE0-3D75-E211-83A5-0025905938AA.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/A6706D9E-3D75-E211-B398-00261894392D.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/A81C1746-3E75-E211-8C01-003048678E6E.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/AA30CE92-3D75-E211-B519-002618FDA211.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/ACDFECD1-3D75-E211-B729-00304867D836.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/B6C7D8F8-3D75-E211-8D33-0025905964B4.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D434B301-3E75-E211-992F-003048FFD752.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D65C4794-3D75-E211-8F62-00304867908C.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/E806279E-3D75-E211-A5DC-00261894396A.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/F26DBD27-3E75-E211-BFF4-00304867BF9A.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/F47F9EFB-3D75-E211-BD43-0026189438F4.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/F67D78F4-3D75-E211-87B3-00304867918A.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/F8DB6FE8-3D75-E211-A0BE-0026189438E8.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/34721930-3E75-E211-AD0B-002618943924.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/384848D7-3D75-E211-89F3-002618943982.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/3C0530FC-3D75-E211-BD5A-003048FFD7A2.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/3ED7ABA7-3D75-E211-A438-0026189438F6.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/42A8B329-3E75-E211-867C-0025905964A2.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/4428278F-3D75-E211-A149-003048B835A2.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/44FED50E-3E75-E211-A6FD-002618943979.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/4A86AD12-3E75-E211-BA50-002618943918.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/4CE5C507-3E75-E211-96B1-0025905964BA.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/507B7459-5875-E211-9575-002590593872.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/52245001-3E75-E211-A365-00304867929E.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/58A512E0-3D75-E211-A056-002618B27F8A.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/0CCBEBFA-3D75-E211-A595-003048678B5E.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/0E1B7312-3E75-E211-946D-003048FFD720.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/1067C210-3E75-E211-938F-0025905938D4.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/189C5A31-3E75-E211-AE4E-0025905938AA.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/24544CD1-3D75-E211-B5C9-002618943843.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/2A662014-AF75-E211-BA82-003048678FA6.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/2C63DAF9-3D75-E211-ABC1-0026189438F6.root',
+       #'/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/34400EF0-3D75-E211-AA22-00261894394A.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20011/CC775245-9B68-E211-8024-002354EF3BCE.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20003/FC60CF41-4E69-E211-B39B-003048678A6A.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/FEC66CE6-E068-E211-A992-002590596498.root',
@@ -215,7 +259,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/6A9A568D-C568-E211-83EE-0026189438C4.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/6A945837-B168-E211-9E2F-003048678F84.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/6A809258-B568-E211-9F99-002618943922.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/6A511AD3-C368-E211-B5F7-003048678B0C.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/6A511AD3-C368-E211-B5F7-003048678B0C.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/6A3BEC3C-CB68-E211-91DB-0026189437EC.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/6A312D3E-B168-E211-BCC7-00304867C034.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/669E3699-1569-E211-BE8C-00304867C04E.root',
@@ -259,9 +305,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/42516F77-BB68-E211-8CF5-003048678BB8.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/423D3E56-E068-E211-8C72-003048678B12.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/42221ABC-BE68-E211-A3F2-003048FFD728.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/421F5E90-D668-E211-9F75-003048678B44.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/421F5E90-D668-E211-9F75-003048678B44.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/40D5933B-B068-E211-9453-0030486792B8.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/40821A33-B768-E211-9DF5-002590593878.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20002/4028DC45-D368-E211-B352-003048FFCB96.root',
@@ -471,7 +515,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/E00DAD7F-5268-E211-A4AE-00261894391C.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/E008E730-6268-E211-8705-0026189438B5.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/DEE6FAEC-7468-E211-8030-0026189438BF.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/DEAE2EB3-5368-E211-B19E-0026189438D8.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/DEAE2EB3-5368-E211-B19E-0026189438D8.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/DE947810-8568-E211-A10F-002618FDA262.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/DE7F498B-8568-E211-8A81-003048FFD79C.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/DE540DC2-8D68-E211-A547-002618943921.root',
@@ -515,9 +561,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D40EE063-9168-E211-8AAB-0025905964BE.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D2F8F401-6F68-E211-9592-003048FFCB74.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D2E6BA40-A468-E211-9CD6-0025905822B6.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D2E3A577-8F68-E211-8452-002354EF3BE3.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D2E3A577-8F68-E211-8452-002354EF3BE3.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D2C1231F-7D68-E211-9C42-0026189438A2.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D2B4DD26-AA68-E211-8F7C-003048D3C010.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/D2AF50C3-7268-E211-8E87-002618943960.root',
@@ -727,7 +771,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/A01954B0-7268-E211-BE5A-003048678B14.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/A01119DD-9768-E211-B542-002618943874.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9EBB2134-A468-E211-88BB-003048678FA6.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9E865876-AB68-E211-8E36-003048678FFA.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9E865876-AB68-E211-8E36-003048678FFA.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9E7E3137-6068-E211-BE48-003048678F62.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9E6D1738-7B68-E211-8B84-003048FFD736.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9E4EB771-6668-E211-A4BB-00259059391E.root',
@@ -771,9 +817,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/961E5705-5768-E211-AA22-003048FFD720.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/948734D0-A168-E211-8DB0-003048678FAE.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/94769EB0-7268-E211-B572-00261894397E.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/945B3D49-9C68-E211-BDD7-00261894393E.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/945B3D49-9C68-E211-BDD7-00261894393E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9439DB29-9568-E211-9464-0025905938A4.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9434B841-9B68-E211-AA09-002618943829.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/9417264E-9868-E211-9466-0030486790B0.root',
@@ -983,7 +1027,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5C0FADB5-5368-E211-AA2E-002618943852.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5C07D1FA-9268-E211-9FC3-0025905938A4.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5C00942C-7D68-E211-BB88-003048678FDE.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5AC59567-7868-E211-B39C-003048678BAE.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5AC59567-7868-E211-B39C-003048678BAE.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5A89F970-7968-E211-99DA-003048FF9AC6.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5A4DAE7B-9668-E211-AD5A-002618FDA265.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/5A0D50CF-7268-E211-AEED-003048678B08.root',
@@ -1027,9 +1073,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4EFDC942-A668-E211-BE8B-0026189438C0.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4EB5BFFD-7968-E211-8D5C-0030486790B0.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4EA89936-A668-E211-AF1E-003048FFCBB0.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4E7C4D54-9268-E211-B670-0026189438BA.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4E7C4D54-9268-E211-B670-0026189438BA.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4E6C9F79-8568-E211-A221-00261894383B.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4E693B64-9368-E211-A07C-003048678C06.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/4E4F3605-5D68-E211-B60F-00261894391C.root',
@@ -1239,7 +1283,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/1A43836D-5668-E211-AD3D-003048FFD76E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/1A22C6BA-4168-E211-8C0A-002618943926.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/18EAC30C-6368-E211-9EB3-003048678BAC.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/18E9D781-8568-E211-8E34-0025905938A4.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/18E9D781-8568-E211-8E34-0025905938A4.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/18A6BCF7-9068-E211-978C-0025905938B4.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/1897ECCD-7668-E211-B1FE-0026189438C1.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/184BCF2B-4668-E211-AA8B-002618943967.root',
@@ -1283,9 +1329,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/1005955A-5E68-E211-BDEA-003048FFD7D4.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/0EE99949-A668-E211-9A1B-00259059642E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/0ED4DC14-5D68-E211-8D49-00248C55CC3C.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/0ED43C4C-4368-E211-ADAD-002618943971.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/0ED43C4C-4368-E211-ADAD-002618943971.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/0EBC6573-7E68-E211-A72A-0025905964B4.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/0EBB6B73-7968-E211-B805-00248C0BE013.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20001/0EB84C00-9168-E211-B6C2-00259059649C.root',
@@ -1495,7 +1539,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D8B55292-EB67-E211-BAF9-002618943865.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D89D79E0-2968-E211-9F62-00261894386E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D89C5C3C-0F68-E211-A7C5-003048FFD756.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D8926B30-EE67-E211-A3B4-002618943860.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D8926B30-EE67-E211-A3B4-002618943860.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D81F77AB-0768-E211-AD91-002590593902.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D6F68A56-2868-E211-82EF-00304867929E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/D697C55B-1F68-E211-90C6-003048FFD744.root',
@@ -1539,9 +1585,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CEBD81AC-EA67-E211-B859-002618943970.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CEAE473B-4068-E211-9636-003048FFD71E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CE999B3B-3368-E211-88BB-00304867D836.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CE6EC004-3468-E211-8D00-003048678BE8.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CE6EC004-3468-E211-8D00-003048678BE8.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CE647C1E-3B68-E211-8984-003048FFCC2C.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CE619D23-1868-E211-BA68-002618943916.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/CE0ABE8F-1468-E211-847E-002590593902.root',
@@ -1751,7 +1795,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9AEBA5C1-E967-E211-AF26-00261894390A.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9AD4C860-FD67-E211-92DF-00304866C398.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9AD00841-FF67-E211-A6E1-003048678B26.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9A942823-0268-E211-BF58-0026189438CF.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9A942823-0268-E211-BF58-0026189438CF.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9A8D69E4-2E68-E211-BBB1-0030486790C0.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9A72ED76-E867-E211-9285-002618943970.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9A532E03-3A68-E211-B2FA-002618FDA250.root',
@@ -1795,9 +1841,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/9228DFCF-1C68-E211-876D-0026189438AC.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/920E5EE5-2468-E211-B6FE-003048FFD770.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/90EDFC0F-3D68-E211-8913-0030486792BA.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/90C2227C-2B68-E211-89CB-00261894392C.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/90C2227C-2B68-E211-89CB-00261894392C.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/90A9D3EA-2E68-E211-8FC5-003048678BAE.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/90A8A88F-F267-E211-9C80-002618943884.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/8EE227E2-2468-E211-9F24-003048678FE4.root',
@@ -2007,7 +2051,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5C79193E-4068-E211-AFAE-002618943809.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5C3AAA72-F667-E211-919E-003048678B06.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5C372F9E-1668-E211-BD4B-0026189438F7.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5C19AD88-EA67-E211-BB7E-00304867C1BA.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5C19AD88-EA67-E211-BB7E-00304867C1BA.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5AE8AA8B-EA67-E211-BCFB-003048678D86.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5ADD701B-3B68-E211-8188-002590596468.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5AAEEA65-FB67-E211-9555-0030486792B6.root',
@@ -2051,9 +2097,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/52CE4AEE-EB67-E211-AB10-003048FFCBA4.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/52CA42EF-1B70-E211-BABB-00261894380B.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/52A79237-FF67-E211-8F66-0025905964B4.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5294E2F3-FB67-E211-9538-002618FDA208.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/5294E2F3-FB67-E211-9538-002618FDA208.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/527DDB49-FB67-E211-9FCC-002618943858.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/520AE898-EA67-E211-B388-002618943972.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/50B1A9E9-0568-E211-A7AA-003048FFCC2C.root',
@@ -2263,7 +2307,9 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/20B36AF6-E867-E211-AD31-0025905964BA.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/20890C4A-FF67-E211-84FE-002590593876.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/207741D5-0568-E211-AD8A-002618943923.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/2063A452-FD67-E211-9190-003048FFD7A2.root',
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/2063A452-FD67-E211-9190-003048FFD7A2.root' ] );
+readFiles.extend( [
+
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/204F4480-0268-E211-9BC0-003048FFD732.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/202C6A0A-E967-E211-8F97-0026189438A7.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/2012545A-1E68-E211-9154-002590593876.root',
@@ -2307,9 +2353,7 @@ readFiles.extend( [
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/1802304C-F067-E211-B5E0-003048FFCC1E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/16E5A1F0-1B68-E211-92D9-00304867924A.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/16AAAC67-2A68-E211-A301-0026189438FD.root',
-       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/1680272A-3F68-E211-B3AB-0026189438CF.root' ] );
-readFiles.extend( [
-
+       '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/1680272A-3F68-E211-B3AB-0026189438CF.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/167B6E05-EB67-E211-AEC7-003048FFCC1E.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/1642D8BC-2F68-E211-A834-00261894388A.root',
        '/store/data/Run2012C/DoubleElectron/AOD/22Jan2013-v1/20000/162C8A06-0468-E211-8B1B-003048678B38.root',
