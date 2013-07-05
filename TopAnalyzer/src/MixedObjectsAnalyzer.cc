@@ -262,7 +262,6 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   int lepBIndex=-1, hadBIndex=-1, lightQIndex=-1, lightQBarIndex=-1;
   bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqlepPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=-999;
   lepPtFit=lepEtaFit=lepPhiFit=lepPtTrue=lepEtaTrue=lepPhiTrue=nuPtFit=nuEtaFit=nuPhiFit=nuPtTrue=nuEtaTrue=nuPhiTrue=-999;
-
   if( semiLepEvt_h.isValid()&&semiLepEvt_h->isHypoValid(hypoKey_) ){
     // jet indices
     lepBIndex      = semiLepEvt_h->jetLeptonCombination(hypoKey_)[TtSemiLepEvtPartons::LepB     ];
@@ -534,7 +533,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   }
   // b) gen
   topPtLepTrue=topPtHadTrue=topYLepTrue=topYHadTrue=ttbarMassTrue=ttbarYTrue=ttbarPtTrue=-999;
-  if(semiLepEvt_h.isValid()){  
+  if(semiLepEvt_h.isValid()&&semiLepEvt_h->leptonicDecayTop()&&semiLepEvt_h->hadronicDecayTop()){  
     topPtLepTrue=semiLepEvt_h->leptonicDecayTop()->pt();
     topPtHadTrue=semiLepEvt_h->hadronicDecayTop()->pt();
     topYLepTrue =semiLepEvt_h->leptonicDecayTop()->rapidity();
@@ -548,7 +547,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   // tt+jet distribution
   ttbarJetMass=ttbarJetMassTrue=-999;
   // gen level
-  if(semiLepEvt_h.isValid()){
+  if(semiLepEvt_h.isValid()&&semiLepEvt_h->hadronicDecayTop()&&semiLepEvt_h->leptonicDecayTop()){
     if(debug) std::cout << "hypothesis valid" << std::endl;
     if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)){
       ttbarJetMassTrue=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
