@@ -36,7 +36,7 @@ sampleHelpers.o: $(TopDir)/sampleHelpers.cc $(TopDir)/sampleHelpers.h
 
 
 
-load_Analysis: dict.o load_Analysis.o AnalysisBase.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o
+load_Analysis: dict.o load_Analysis.o AnalysisBase.o KinematicReconstruction.o KinematicReconstruction_LSroutines.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
 load_Analysis.o: $(HiggsDir)/load_Analysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/utils.h $(TopDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(HiggsDir)/JetCategories.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h $(TopDir)/ScaleFactors.h $(HiggsDir)/MvaInputVariables.h $(HiggsDir)/DijetAnalyzer.h
@@ -51,7 +51,7 @@ dict.cc: $(TopDir)/AnalysisBase.h $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/Analys
 analysisHelpers.o: $(HiggsDir)/analysisHelpers.cc $(HiggsDir)/analysisHelpers.h
 	g++ -c -o analysisHelpers.o $(COMPFLAGS) $(HiggsDir)/analysisHelpers.cc
 
-AnalysisBase.o: $(TopDir)/AnalysisBase.cc $(TopDir)/AnalysisBase.h $(TopDir)/storeTemplate.h $(TopDir)/classesFwd.h
+AnalysisBase.o: $(TopDir)/AnalysisBase.cc $(TopDir)/AnalysisBase.h $(TopDir)/storeTemplate.h $(TopDir)/KinematicReconstruction.h $(TopDir)/classesFwd.h
 	g++ -c -o AnalysisBase.o $(COMPFLAGS) $(TopDir)/AnalysisBase.cc
 
 HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/classesFwd.h $(TopDir)/AnalysisBase.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/MvaInputVariables.h
@@ -68,6 +68,12 @@ PUReweighter.o: $(TopDir)/PUReweighter.cc $(TopDir)/PUReweighter.h
 
 KinReco.o: $(TopDir)/KinReco.cc $(TopDir)/KinReco.h $(TopDir)/classesFwd.h
 	g++ -c -o KinReco.o $(COMPFLAGS) $(TopDir)/KinReco.cc
+
+KinematicReconstruction.o: $(TopDir)/KinematicReconstruction.cc $(TopDir)/KinematicReconstruction.h $(TopDir)/classesFwd.h $(TopDir)/KinematicReconstruction_LSroutines.h
+	g++ -c -o KinematicReconstruction.o $(COMPFLAGS) $(TopDir)/KinematicReconstruction.cc
+
+KinematicReconstruction_LSroutines.o: $(TopDir)/KinematicReconstruction_LSroutines.cc $(TopDir)/KinematicReconstruction_LSroutines.h $(TopDir)/classesFwd.h
+	g++ -c -o KinematicReconstruction_LSroutines.o $(COMPFLAGS) $(TopDir)/KinematicReconstruction_LSroutines.cc
 
 MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h
 	g++ -c -o MvaInputVariables.o $(COMPFLAGS) $(HiggsDir)/MvaInputVariables.cc
