@@ -22,7 +22,6 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   inputMETs_           (cfg.getParameter<edm::InputTag>("inputMETs"           )),
   payload_             (cfg.getParameter<std::string>  ("payload"             )),  
   scaleType_           (cfg.getParameter<std::string>  ("scaleType"           )),  
-  sourceName_          (cfg.getParameter<std::string>  ("sourceName"          )),  
   scaleFactor_         (cfg.getParameter<double>       ("scaleFactor"         )),
   scaleFactorB_        (cfg.getParameter<double>       ("scaleFactorB"        )),
   resolutionFactor_    (cfg.getParameter<std::vector<double> > ("resolutionFactors"   )),
@@ -40,8 +39,6 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   allowedTypes_.push_back(std::string("top:down"));
   allowedTypes_.push_back(std::string("flavor:up"));
   allowedTypes_.push_back(std::string("flavor:down"));
-  allowedTypes_.push_back(std::string("source:up"));
-  allowedTypes_.push_back(std::string("source:down"));
 
   // use label of input to create label for output
   outputElectrons_ = inputElectrons_.label();
@@ -81,9 +78,12 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   // access jets
   edm::Handle<std::vector<pat::Jet> > jets;
   event.getByLabel(inputJets_, jets);
+
   // access MET
   edm::Handle<std::vector<pat::MET> > mets;
-  event.getByLabel(inputMETs_, mets);
+  if (! inputMETs_.label().empty()) {
+    event.getByLabel(inputMETs_, mets);
+  }
 
   // keep differences for met rescaling
   double dPx = 0., dPy = 0., dSumEt = 0.;
@@ -189,26 +189,6 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       delete deltaJEC;
       delete param;
     }
-    // Use only a single source for the uncertainty
-    else if(scaleType_.substr(0, scaleType_.find(':'))=="source") {
-      // get the uncertainty parameters from file, see
-      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
-      JetCorrectorParameters* param = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), sourceName_);
-      // instantiate the jec uncertainty object
-      JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(*param);
-      deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
-      
-      if(scaleType_.substr(scaleType_.find(':')+1)=="up") {
-	float jetMetSource = deltaJEC->getUncertainty(true);
-	scaleJetEnergy( scaledJet, 1+jetMetSource );
-      }
-      else if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
-	float jetMetSource = deltaJEC->getUncertainty(false);
-	scaleJetEnergy( scaledJet, 1-jetMetSource );
-      }
-      delete deltaJEC;
-      delete param;
-    }
     scaledJet.addUserFloat("jerSF"  , jerScaleFactor);
     scaledJet.addUserFloat("jesSF"  , scaledJet.pt()/jetPtAfterJERScaling);
     scaledJet.addUserFloat("totalSF", scaledJet.pt()/jet->pt());
@@ -228,15 +208,17 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     }
   }
   
-  // scale MET accordingly
-  pat::MET met = *(mets->begin());
-  //std::cout<<"met before: "<<met.pt()<<std::endl;
+  if(mets.isValid()){
+    // scale MET accordingly
+    pat::MET met = *(mets->begin());
+    //std::cout<<"met before: "<<met.pt()<<std::endl;
 
-  double scaledMETPx = met.px() - dPx;
-  double scaledMETPy = met.py() - dPy;
-  met.setP4(reco::MET::LorentzVector(scaledMETPx, scaledMETPy, 0, sqrt(scaledMETPx*scaledMETPx+scaledMETPy*scaledMETPy)));
-  //std::cout<<"met after: "<<met.pt()<<std::endl;
-  pMETs->push_back( met );
+    double scaledMETPx = met.px() - dPx;
+    double scaledMETPy = met.py() - dPy;
+    met.setP4(reco::MET::LorentzVector(scaledMETPx, scaledMETPy, 0, sqrt(scaledMETPx*scaledMETPx+scaledMETPy*scaledMETPy)));
+    //std::cout<<"met after: "<<met.pt()<<std::endl;
+    pMETs->push_back( met );
+  }
 
   //p4 changes might have changed the pt order, so need to sort the new collections
   sortByPt(pElectrons);
