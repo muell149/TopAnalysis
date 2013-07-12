@@ -74,23 +74,25 @@ reliableJetsPF30 = selectedPatJets.clone(src = 'reliableJetsPF',
                                          cut = 'pt > 30.'
                                          )
 goodJetsPF       = selectedPatJets.clone(src = 'selectedPatJetsAK5PF',
-                                         cut = 'abs(eta) < 2.4 & pt > 20.          &' #new in 2012 (was abs(eta) < 2.4)
+                                         cut = 'abs(eta) < 2.4 & pt > 20.          &'
                                                'chargedHadronEnergyFraction > 0.0  &'
                                                'neutralHadronEnergyFraction < 0.99 &'
-                                               'chargedEmEnergyFraction     < 0.99 &'
-                                               'neutralEmEnergyFraction     < 0.99 &'
-                                               'chargedMultiplicity > 0            &'
-                                               'nConstituents > 1'
+                                               'electronEnergyFraction      < 0.99 &' # was *chargedEmEnergyFraction* which is deprecated
+                                               'photonEnergyFraction        < 0.99 &' # was *neutralEmEnergyFraction* which is deprecated
+                                               '(chargedHadronMultiplicity + electronMultiplicity + muonMultiplicity) > 0 &' # was *chargedMultiplicity* which is deprecated
+                                               'numberOfDaughters > 1' # identical to nConstituents
                                          )
-goodJetsPF20     = selectedPatJets.clone(src = 'noOverlapJetsPF',
-                                         cut = 'abs(eta) < 2.4 & pt > 20.           &' #new in 2012 (was abs(eta) < 2.4)
-                                               'neutralHadronEnergyFraction  < 0.99 &'
-                                               'neutralEmEnergyFraction      < 0.99 &'
-                                               '(chargedHadronEnergyFraction > 0.0  | abs(eta) >= 2.4) &'
-                                               '(chargedEmEnergyFraction     < 0.99 | abs(eta) >= 2.4) &'
-                                               '(chargedMultiplicity         > 0    | abs(eta) >= 2.4) &'
-                                               'numberOfDaughters > 1' #changed in 2012 (was nConstituents)
-                                         )
+goodJetsPF20     = selectedPatJets.clone(src = 'goodJetsPF')
+## currently they are not needed anymore as we are using top projections within PF2PAT
+#goodJetsPF20     = selectedPatJets.clone(src = 'noOverlapJetsPF',
+#                                         cut = 'abs(eta) < 2.4 & pt > 20.           &'
+#                                               'neutralHadronEnergyFraction  < 0.99 &'
+#                                               'neutralEmEnergyFraction      < 0.99 &'
+#                                               '(chargedHadronEnergyFraction > 0.0  | abs(eta) >= 2.4) &'
+#                                               '(chargedEmEnergyFraction     < 0.99 | abs(eta) >= 2.4) &'
+#                                               '(chargedMultiplicity         > 0    | abs(eta) >= 2.4) &'
+#                                               'numberOfDaughters > 1'
+#                                         )
 goodJetsPF25     = selectedPatJets.clone(src = 'goodJetsPF20',
                                          cut = 'pt > 25.'
                                          )
