@@ -51,6 +51,7 @@ class BTagSFEventWeight : public edm::EDProducer {
   double shapeDistortionFactor_;
   int verbose_;
   edm::FileInPath filename_;
+  bool noHistograms_;
   double maxPtDB_;
   double maxPt11004_;
   double maxPt2012_;

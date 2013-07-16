@@ -16,7 +16,8 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
   uncertaintySFb_         ( cfg.getParameter<double>           ("uncertaintySFb"  ) ),
   shapeDistortionFactor_  ( cfg.getParameter<double>           ("shapeDistortionFactor"  ) ),
   verbose_                ( cfg.getParameter<int>              ("verbose" ) ),
-  filename_               ( cfg.getParameter<edm::FileInPath>  ("filename") )
+  filename_               ( cfg.getParameter<edm::FileInPath>  ("filename") ),
+  noHistograms_           ( cfg.getParameter<bool>             ("noHistograms"))
 {
   produces<double>();
   
@@ -24,17 +25,19 @@ BTagSFEventWeight::BTagSFEventWeight(const edm::ParameterSet& cfg):
   maxPtDB_     = 240.;
   maxPtMisTag_ = 520.;
   maxEta_      = 2.4;
-  maxPt2012_  = 800.; // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript
+  maxPt2012_   = 800.; // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript
 
-  // load TFile Service
-  edm::Service<TFileService> fs;
-  if( !fs ){
-    throw edm::Exception( edm::errors::Configuration,
-			  "TFile Service is not registered in cfg file" );
+  if(!noHistograms_){
+    // load TFile Service
+    edm::Service<TFileService> fs;
+    if( !fs ){
+      throw edm::Exception( edm::errors::Configuration,
+			    "TFile Service is not registered in cfg file" );
+    }
+    /// booking of histogram for b tag eff SF
+    hists_["effBTagEventSF"]     = fs->make<TH1F>( "effBTagEventSF", "effBTagEventSF", 100, 0.5, 1.5 );
+    hists_["effBTagEventSFMean"] = fs->make<TH1F>( "effBTagEventSFMean", "effBTagEventSFMean", 1, 0, 1 );
   }
-  /// booking of histogram for b tag eff SF
-  hists_["effBTagEventSF"]     = fs->make<TH1F>( "effBTagEventSF", "effBTagEventSF", 100, 0.5, 1.5 );
-  hists_["effBTagEventSFMean"] = fs->make<TH1F>( "effBTagEventSFMean", "effBTagEventSFMean", 1, 0, 1 );
   
   /// getting efficiency histos from input files
   if(filename_.location()){
@@ -132,7 +135,7 @@ BTagSFEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
 	                    <<" effBTagEvent_scaled = " <<effBTagEvent_scaled
 	                    <<" effBTagEventSF ="       <<effBTagEventSF << std::endl;
    
-   hists_.find("effBTagEventSF" )->second->Fill( effBTagEventSF );
+   if(!noHistograms_) hists_.find("effBTagEventSF" )->second->Fill( effBTagEventSF );
 
   std::auto_ptr<double> bTagSFEventWeight(new double);
   *bTagSFEventWeight = effBTagEventSF;    
@@ -149,9 +152,9 @@ BTagSFEventWeight::produce(edm::Event& evt, const edm::EventSetup& setup)
 double BTagSFEventWeight::effBTagSF11004(double x)
 {
   // function from PAS 11-004; x = jetPt
-  if(bTagAlgo_=="SSVHEM") return 0.896462*((1.+(0.00957275*x))/(1.+(0.00837582*x)));
-  if(bTagAlgo_=="CSVM")   return 0.6981*((1.+(0.414063*x))/(1.+(0.300155*x)));
-  if(bTagAlgo_=="JPM")    return 0.90806*((1.+(0.000236997*x))/(1.+(5.49455e-05*x)));
+  if     (bTagAlgo_=="SSVHEM") return 0.896462*((1.+(0.00957275*x))/(1.+(0.00837582*x)));
+  else if(bTagAlgo_=="CSVM")   return 0.6981*((1.+(0.414063*x))/(1.+(0.300155*x)));
+  else if(bTagAlgo_=="JPM")    return 0.90806*((1.+(0.000236997*x))/(1.+(5.49455e-05*x)));
   else { 
     std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ <<" not in code!!! CHECK!!!"<<std::endl;
     return 1.; 
@@ -161,7 +164,8 @@ double BTagSFEventWeight::effBTagSF11004(double x)
 double BTagSFEventWeight::effBTagSF2012(double x)
 {
   // function from https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagPOG#2012_Data_and_MC_EPS13_prescript; x = jetPt
-  if(bTagAlgo_=="CSVM")   return (0.939158+(0.000158694*x))+(-2.53962e-07*(x*x));
+  if     (bTagAlgo_=="CSVM") return (0.939158+(0.000158694*x))+(-2.53962e-07*(x*x));
+  else if(bTagAlgo_=="CSVT") return (0.927563+(1.55479e-05*x))+(-1.90666e-07*(x*x));
   else { 
     std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " for effBTagSF2012 not in code!!! CHECK!!!" << std::endl;
     return 1.; 
@@ -270,6 +274,24 @@ double BTagSFEventWeight::effBTagSFerr2012(double x)
     0.0740561,
     0.0598311 };
 
+  double SFb_errorCSVT[] = {
+    0.0515703,
+    0.0264008,
+    0.0272757,
+    0.0275565,
+    0.0248745,
+    0.0218456,
+    0.0253845,
+    0.0239588,
+    0.0271791,
+    0.0273912,
+    0.0379822,
+    0.0411624,
+    0.0786307,
+    0.0866832,
+    0.0942053,
+    0.102403 };
+
   /// look for index corresponding to pt
   int iBin = -1;
   for(int i=0; i<15; i++) {
@@ -287,7 +309,8 @@ double BTagSFEventWeight::effBTagSFerr2012(double x)
     // if pt<20: use SFb(20)
     if(x<20 ) iBin=0;
   } 
-  if(bTagAlgo_=="CSVM")   return factor * SFb_errorCSVM[iBin];
+  if     (bTagAlgo_=="CSVM")   return factor * SFb_errorCSVM[iBin];
+  else if(bTagAlgo_=="CSVT")   return factor * SFb_errorCSVT[iBin];
   else { 
     std::cout<< "WARNING!!! b tag SF for "<< bTagAlgo_ << " in effBTagSFerr2012 not in code!!! CHECK!!!"<<std::endl;
     return 1.; 
@@ -405,9 +428,24 @@ double BTagSFEventWeight::effMisTagSF2012(double x, double jetEta, TString meanm
       valMin= ((0.956736+(0.000280197*x))+(-1.42739e-06*(x*x)))+(1.0085e-09*(x*(x*x)));
       valMax= ((1.15575+(0.000693344*x))+(-3.02661e-06*(x*x)))+(2.39752e-09*(x*(x*x)));
     }
-      if( meanminmax == "mean") val= valMean;
-      if( meanminmax == "min" ) val= outOfRange? valMin-(valMean-valMin) : valMin; // if outOfRange -> 2x the uncertainty
-      if( meanminmax == "max" ) val= outOfRange? valMax+(valMax-valMean) : valMax; // if outOfRange -> 2x the uncertainty
+    if( meanminmax == "mean") val= valMean;
+    if( meanminmax == "min" ) val= outOfRange? valMin-(valMean-valMin) : valMin; // if outOfRange -> 2x the uncertainty
+    if( meanminmax == "max" ) val= outOfRange? valMax+(valMax-valMean) : valMax; // if outOfRange -> 2x the uncertainty
+    if(val!=0) return val;
+  }
+  else if(bTagAlgo_=="CSVT"){
+    double val =0, valMean=0, valMin=0, valMax=0;
+    bool outOfRange = false;
+    if(x<20) {x=20; outOfRange = true;}
+    if(jetEta>=0. && jetEta <=2.4){
+      if(x>1000.) {x=1000.; outOfRange = true;}
+      valMean= ((1.00462+(0.00325971*x))+(-7.79184e-06*(x*x)))+(5.22506e-09*(x*(x*x)));
+      valMin = ((0.845757+(0.00186422*x))+(-4.6133e-06*(x*x)))+(3.21723e-09*(x*(x*x)));
+      valMax = ((1.16361+(0.00464695*x))+(-1.09467e-05*(x*x)))+(7.21896e-09*(x*(x*x)));
+    }
+    if( meanminmax == "mean") val= valMean;
+    if( meanminmax == "min" ) val= outOfRange? valMin-(valMean-valMin) : valMin; // if outOfRange -> 2x the uncertainty
+    if( meanminmax == "max" ) val= outOfRange? valMax+(valMax-valMean) : valMax; // if outOfRange -> 2x the uncertainty
     if(val!=0) return val;
   }
   else { 
@@ -426,7 +464,7 @@ double BTagSFEventWeight::effBTag(double jetPt, double jetEta)
     TH2F* his = effHists_.find("EffBJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range of BTV DB
     if(jetPt  >= maxPt2012_) jetPt  = maxPt2012_-1.;
-    if(jetEta >= maxEta_    ) jetEta = maxEta_-0.1;
+    if(jetEta >= maxEta_   ) jetEta = maxEta_-0.1;
     result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
   else {result = 0.7; std::cout<< "WARNING!!! b tag eff. is ALWAYS 0.7!!! CHECK!!!"<<std::endl; }
@@ -518,8 +556,8 @@ double BTagSFEventWeight::effBTagCjet(double jetPt, double jetEta)
   if(filename_.location()) {
     TH2F* his = effHists_.find("EffCJetsTaggedPtEta")->second;
     // ensure that pt is in accepted range
-    if(jetPt >= maxPt2012_) jetPt = maxPt2012_-1.;
-    if(jetEta >= maxEta_) jetEta = maxEta_-0.1;
+    if(jetPt  >= maxPt2012_) jetPt  = maxPt2012_-1.;
+    if(jetEta >= maxEta_   ) jetEta = maxEta_-0.1;
     result = his->GetBinContent( his->FindBin(jetPt, jetEta) );
   }
   else {result = 0.35; std::cout<< "WARNING!!! c tag eff. is ALWAYS 0.35!!! CHECK!!!"<<std::endl; }
@@ -601,56 +639,48 @@ double BTagSFEventWeight::effBTagEvent(std::vector<double> &oneMinusBEffies,
 
   if(verbose_) std::cout << oneMinusBEffies.size() << ": " << std::flush;
 
-  for(std::vector<double>::const_iterator eff = oneMinusBEffies.begin();
-eff != oneMinusBEffies.end(); ++eff){
+  for(std::vector<double>::const_iterator eff = oneMinusBEffies.begin(); eff != oneMinusBEffies.end(); ++eff){
     tmp *= (*eff);
     if(verbose_) std::cout << 1.-(*eff) << ", ";
   }
   if(verbose_) std::cout << oneMinusBMistags.size() << ": " << std::flush;
-  for(std::vector<double>::const_iterator mis =
-oneMinusBMistags.begin(); mis != oneMinusBMistags.end(); ++mis){
+  for(std::vector<double>::const_iterator mis = oneMinusBMistags.begin(); mis != oneMinusBMistags.end(); ++mis){
     tmp *= (*mis);
     if(verbose_) std::cout << 1.-(*mis) << ", ";
   }
   bTaggingEfficiency -= tmp;
-  for(std::vector<double>::const_iterator eff = oneMinusBEffies.begin();
-eff != oneMinusBEffies.end(); ++eff){
+  for(std::vector<double>::const_iterator eff = oneMinusBEffies.begin(); eff != oneMinusBEffies.end(); ++eff){
     tmp = 1.-(*eff);
-    for(std::vector<double>::const_iterator eff2 =
-oneMinusBEffies.begin(); eff2 != oneMinusBEffies.end(); ++eff2){
+    for(std::vector<double>::const_iterator eff2 = oneMinusBEffies.begin(); eff2 != oneMinusBEffies.end(); ++eff2){
       if(eff != eff2) tmp *= (*eff2);
     }
-    for(std::vector<double>::const_iterator mis =
-oneMinusBMistags.begin(); mis != oneMinusBMistags.end(); ++mis){
+    for(std::vector<double>::const_iterator mis = oneMinusBMistags.begin(); mis != oneMinusBMistags.end(); ++mis){
       tmp *= (*mis);
     }
     bTaggingEfficiency -= tmp;
   }
-  for(std::vector<double>::const_iterator mis =
-oneMinusBMistags.begin(); mis != oneMinusBMistags.end(); ++mis){
+  for(std::vector<double>::const_iterator mis = oneMinusBMistags.begin(); mis != oneMinusBMistags.end(); ++mis){
     tmp = 1.-(*mis);
-    for(std::vector<double>::const_iterator eff =
-oneMinusBEffies.begin(); eff != oneMinusBEffies.end(); ++eff){
+    for(std::vector<double>::const_iterator eff = oneMinusBEffies.begin(); eff != oneMinusBEffies.end(); ++eff){
       tmp *= (*eff);
     }
-    for(std::vector<double>::const_iterator mis2 =
-oneMinusBMistags.begin(); mis2 != oneMinusBMistags.end(); ++mis2){
+    for(std::vector<double>::const_iterator mis2 = oneMinusBMistags.begin(); mis2 != oneMinusBMistags.end(); ++mis2){
       if(mis != mis2) tmp *= (*mis2);
     }
     bTaggingEfficiency -= tmp;
   }
   if(verbose_) std::cout << " -> " << bTaggingEfficiency << std::endl;
   return bTaggingEfficiency;
-
 }
 
 // executed at the end after looping over all events
-void 
-    BTagSFEventWeight::endJob() 
+void BTagSFEventWeight::endJob() 
 {
-  double effBTagEventSFMean = hists_.find("effBTagEventSF" )->second->GetMean();
-  hists_.find("effBTagEventSFMean" )->second->Fill(0.5, effBTagEventSFMean );
-  if(verbose_>=1) std::cout<<"Mean effBTagEventSF = "<<effBTagEventSFMean<<std::endl;
+  if(!noHistograms_) {
+    double effBTagEventSFMean = hists_.find("effBTagEventSF" )->second->GetMean();
+    hists_.find("effBTagEventSFMean" )->second->Fill(0.5, effBTagEventSFMean );
+    if(verbose_>=1) std::cout<<"Mean effBTagEventSF = "<<effBTagEventSFMean<<std::endl;
+  }
 }
 
 

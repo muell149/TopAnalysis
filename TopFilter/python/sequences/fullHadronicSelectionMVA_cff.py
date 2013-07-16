@@ -27,8 +27,10 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 
 ## define tight cuts for jet kinematics
 tight4JetCut  = 'pt > 60. & abs(eta) < 2.4'
-tight5JetCut  = 'pt > 50. & abs(eta) < 2.4'
-tight6JetCut  = 'pt > 40. & abs(eta) < 2.4'
+tight5JetCut  = 'pt > 30. & abs(eta) < 2.4'
+tight6JetCut  = 'pt > 30. & abs(eta) < 2.4'
+#tight5JetCut  = 'pt > 50. & abs(eta) < 2.4'
+#tight6JetCut  = 'pt > 40. & abs(eta) < 2.4'
 #tight6JetCut  = 'pt > 30. & abs(eta) < 2.4'
 tightJetCut   = 'pt > 30. & abs(eta) < 2.4'
 
@@ -158,8 +160,9 @@ trigger = hltHighLevel.clone( HLTPaths = [ #2010 trigger ('v*' to be immune to v
                                          #2011 1E33-2E33 trigger ('v*' to be immune to version changes)
                                          , 'HLT_QuadJet50_Jet40_Jet30_v*'
                                          #2012 5E33 trigger ('v*' to be immune to version changes)
-                                         , 'HLT_QuadJet60_DiJet20_v*'
-                                         , 'HLT_QuadJet60_DiJet20_L1FastJet_v*']
+                                         , 'HLT_QuadJet50_v*'] ##TEST
+                                         #, 'HLT_QuadJet60_DiJet20_v*'
+                                         #, 'HLT_QuadJet60_DiJet20_L1FastJet_v*']
                              , throw = False)
 
 ## ---
@@ -207,10 +210,10 @@ kinFitTtFullHadEventHypothesis.maxNJets = -1
 ttFullHadJetPartonMatch.maxNJets        = -1
 
 #setForAllTtFullHadHypotheses(process, 'jetCorrectionLevel', 'had')
-#kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L3Absolute'
-#ttFullHadHypGenMatch.jetCorrectionLevel           = 'L3Absolute'
-kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L7Parton'
-ttFullHadHypGenMatch.jetCorrectionLevel           = 'L7Parton'
+kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L3Absolute'
+ttFullHadHypGenMatch.jetCorrectionLevel           = 'L3Absolute'
+#kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L7Parton'
+#ttFullHadHypGenMatch.jetCorrectionLevel           = 'L7Parton'
 
 #setForAllTtFullHadHypotheses(process, 'jets', 'tightLeadingJets')
 kinFitTtFullHadEventHypothesis.jets = 'tightLeadingJets'
@@ -582,10 +585,10 @@ def runOnData(process):
 
     ## switch to residual jet energy correction for data
     #if(hasattr(process, 'goodJetsPF')):
-    #process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
-    #process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
-    #if(hasattr(process, 'analyzeFullHadEventMixer')):
-    #    process.analyzeFullHadEventMixer.jetCorrectionLevel   = 'L2L3Residual'
+    process.kinFitTtFullHadEventHypothesis.jetCorrectionLevel = 'L2L3Residual'
+    process.ttFullHadHypGenMatch.jetCorrectionLevel           = 'L2L3Residual'
+    if(hasattr(process, 'analyzeFullHadEventMixer')):
+        process.analyzeFullHadEventMixer.jetCorrectionLevel   = 'L2L3Residual'
     
     udsall.correctionLevel  = 'L2L3Residual'
     uds0.correctionLevel    = 'L2L3Residual'
@@ -683,8 +686,8 @@ def runAsBackgroundEstimation(process, whichEstimate):
         print '++++++++++++++++++++++++++++++++++++++++++++'
         
         process.load("TopAnalysis.TopAnalyzer.FullHadEventMixer_cfi")
-        process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets", jetCorrectionLevel = 'L7Parton')
-        #process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets")
+        #process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets", jetCorrectionLevel = 'L7Parton')
+        process.analyzeFullHadEventMixer = process.analyzeFullHadEventMixer.clone(JetSrc = "tightLeadingJets")
         
         #from TopQuarkAnalysis.TopObjectResolutions.stringResolutions_etEtaPhi_cff import *
         process.analyzeFullHadEventMixer.udscResolutions = udscResolutionPF.functions
