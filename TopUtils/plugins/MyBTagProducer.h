@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include <iostream>
 
 #include "FWCore/Framework/interface/Event.h"
@@ -19,7 +20,7 @@ class MyBTagProducer : public edm::EDProducer {
  public:
   explicit MyBTagProducer(const edm::ParameterSet&);
   ~MyBTagProducer();
-  bool containsBHadron(const reco::Candidate* consti);
+  const reco::Candidate* containsBHadron(const reco::Candidate* consti);
   
  private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
@@ -27,6 +28,7 @@ class MyBTagProducer : public edm::EDProducer {
  private:
   edm::InputTag jetSrc_;
   float bDiscValue_;
+  std::vector<int> jetsToTag_;
 
 };
 

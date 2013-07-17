@@ -42,7 +42,7 @@ FullHadTreeWriter::FullHadTreeWriter(const edm::ParameterSet& cfg) :
   bTagName_          (cfg.getParameter<std::vector<std::string> >("bTagName")),
   bTagVal_           (cfg.getParameter<std::vector<std::string> >("bTagVal" )),
   DoPDFUncertainty_  (cfg.getParameter<bool>("DoPDFUncertainty")),
-  kMAX(50), kMAXCombo(10000), checkedIsPFJet(false), isPFJet(false), checkedHasL7PartonCor(false), hasL7PartonCor(false)
+  kMAX(50), kMAXCombo(10000), checkedIsPFJet(false), isPFJet(false), checkedHasL7PartonCor(false), hasL7PartonCor(false), checkedQGTag(false), hasQGTag(false)
 {
 }
 
@@ -841,8 +841,9 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
   edm::Handle<edm::View< pat::Jet > > jets_h;
   event.getByLabel(JetSrc_, jets_h);
   
-  edm::Handle<edm::ValueMap<float> >  gluonTagsHandle;
-  event.getByLabel(GluonTagSrc_, gluonTagsHandle);
+  //edm::Handle<edm::ValueMap<float> >  gluonTagsHandle;
+  //event.getByLabel(GluonTagSrc_, gluonTagsHandle);
+  std::string gluonTagName = GluonTagSrc_.encode();
 
   //edm::Handle<edm::View< reco::GenJet > > genJets_h;
   //event.getByLabel(GenJetSrc_, genJets_h);
@@ -950,12 +951,19 @@ FullHadTreeWriter::analyze(const edm::Event& event, const edm::EventSetup& iSetu
 
       L7PartonCorrection[i] = hasL7PartonCor ? jet->jecFactor("L7Parton", "uds") : 1.0;
 
-      if (gluonTagsHandle.isValid()){
-	edm::RefToBase<pat::Jet> jetRef(edm::Ref<edm::View<pat::Jet> >(jets_h,i));
-	gluonTag[i] = (*gluonTagsHandle)[jetRef];
+      //if (gluonTagsHandle.isValid()){
+      //	edm::RefToBase<pat::Jet> jetRef(edm::Ref<edm::View<pat::Jet> >(jets_h,i));
+      //	gluonTag[i] = (*gluonTagsHandle)[jetRef];
+      //}
+      //else
+      //	gluonTag[i] = -999.;
+      
+      if(!checkedQGTag){
+	if(jet->hasUserFloat(gluonTagName)) hasQGTag = true;
+	checkedHasL7PartonCor = true;
       }
-      else
-	gluonTag[i] = -999.;
+      if(hasQGTag) gluonTag[i] = jet->userFloat(gluonTagName);
+      else gluonTag[i] = -999.;
 
       for(size_t ibTag = 0; ibTag < bTagName_.size(); ++ibTag){
 
@@ -1688,14 +1696,17 @@ FullHadTreeWriter::comboType(short comboTypeID)
     return comboTypeID;
 
   // correct permutations
-  if(comboTypeID == 0 || comboTypeID == 1 || comboTypeID == 24 || comboTypeID == 25 || comboTypeID == 450 || comboTypeID == 451 || comboTypeID == 474 || comboTypeID == 475)
+  if(comboTypeID ==   0 || comboTypeID ==   1 || comboTypeID ==  24 || comboTypeID ==  25 || 
+     comboTypeID == 450 || comboTypeID == 451 || comboTypeID == 474 || comboTypeID == 475)
     return 1;
 
   // one branch mixup
-  if((comboTypeID >= 2 && comboTypeID <= 5) || (comboTypeID >= 26 && comboTypeID <= 29) || 
-     comboTypeID == 120 || comboTypeID <= 121 || comboTypeID == 144 || comboTypeID <= 145 || comboTypeID == 240 || comboTypeID <= 241 || comboTypeID == 264 || comboTypeID <= 265 || 
+  if((comboTypeID >=   2 && comboTypeID <=   5) || (comboTypeID >=  26 && comboTypeID <=  29) || 
+      comboTypeID == 120 || comboTypeID == 121  ||  comboTypeID == 144 || comboTypeID == 145  || 
+      comboTypeID == 240 || comboTypeID == 241  ||  comboTypeID == 264 || comboTypeID == 265  || 
      (comboTypeID >= 452 && comboTypeID <= 455) || (comboTypeID >= 476 && comboTypeID <= 479) || 
-     comboTypeID == 570 || comboTypeID <= 571 || comboTypeID == 594 || comboTypeID <= 595 || comboTypeID == 690 || comboTypeID <= 691 || comboTypeID == 714 || comboTypeID <= 715)
+      comboTypeID == 570 || comboTypeID == 571  ||  comboTypeID == 594 || comboTypeID == 595  || 
+      comboTypeID == 690 || comboTypeID == 691  ||  comboTypeID == 714 || comboTypeID == 715)
     return 2;
 
   // both branches mixup
@@ -1706,10 +1717,10 @@ FullHadTreeWriter::comboType(short comboTypeID)
     return 3;
      
   // mixup cross branches
-  if((comboTypeID >= 6 && comboTypeID <= 23) || (comboTypeID >= 30 && comboTypeID <= 119) || 
+  if((comboTypeID >=   6 && comboTypeID <=  23) || (comboTypeID >=  30 && comboTypeID <= 119) || 
      (comboTypeID >= 126 && comboTypeID <= 143) || (comboTypeID >= 150 && comboTypeID <= 239) || 
      (comboTypeID >= 246 && comboTypeID <= 263) || (comboTypeID >= 270 && comboTypeID <= 449) || 
-     (comboTypeID >= 459 && comboTypeID <= 473) || (comboTypeID >= 480 && comboTypeID <= 569) || 
+     (comboTypeID >= 456 && comboTypeID <= 473) || (comboTypeID >= 480 && comboTypeID <= 569) || 
      (comboTypeID >= 576 && comboTypeID <= 593) || (comboTypeID >= 600 && comboTypeID <= 689) || 
      (comboTypeID >= 696 && comboTypeID <= 713) )
     return 4;

@@ -80,6 +80,9 @@ class FullHadTreeWriter : public edm::EDAnalyzer {
   // check if jet has L7Parton corrections
   bool checkedHasL7PartonCor, hasL7PartonCor;
 
+  // check if QGTag is embedded into the jet
+  bool checkedQGTag, hasQGTag;
+
   /// define variables for tree
   
   // bools
