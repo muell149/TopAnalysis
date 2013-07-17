@@ -331,6 +331,7 @@ genLevelBJetProducerInput = "produceGenLevelBJetsPlusHadron"
 
 if topfilter:
     process.load("TopAnalysis.TopFilter.filters.GeneratorTopFilter_cfi")
+    process.generatorTopFilter.rejectNonBottomDecaysOfTops = False
     if higgsSignal or ttbarV:
         process.generatorTopFilter.invert_selection = True
         process.generatorTopFilter.channels = ["none"] #empty array would use some defaults
