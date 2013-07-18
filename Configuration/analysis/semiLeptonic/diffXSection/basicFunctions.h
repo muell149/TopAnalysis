@@ -52,14 +52,14 @@ namespace semileptonic {
   // ==========================================
 
   // basic variables
-  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt", "lbMass"};
-  TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass", "topPtTtbarSys", "ttbarDelPhi"};
-  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm", "lbMassNorm" };
-  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "topPtTtbarSysNorm", "ttbarDelPhiNorm"};
+  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt", "lbMass", "Njets"};
+  TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass", "topPtTtbarSys", "ttbarDelPhi", "ttbarPhiStar"};
+  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm", "lbMassNorm", "NjetsNorm"};
+  TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "topPtTtbarSysNorm", "ttbarDelPhiNorm", "ttbarPhiStarNorm"};
   TString xSecVariablesIncl[] = {"inclusive"};
 
-  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{t} (t#bar{t} restframe)/[GeV]", "#Delta#phi^{t}/ "};
-  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "p_{T}^{b#bar{b}}/[GeV]", "m^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]"};
+  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{t} (t#bar{t} restframe)/[GeV]", "#Delta#phi^{t}/ ", "#Phi^{#lower[-0.9]{* }}(t,#bar{t})/ "};
+  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "p_{T}^{b#bar{b}}/[GeV]", "m^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]", "N_{jets}/ "};
 
   // cross-check variables
  
@@ -1969,6 +1969,12 @@ namespace semileptonic {
       result["ttbarMass"]=bins_;
       bins_.clear();
 
+      // phistar(t,tbar)
+      double ttbarPhiStarBins[]={0., 0.05, 0.1, 0.2, 0.4, 0.7, 1.2, 2.0};
+      bins_.insert( bins_.begin(), ttbarPhiStarBins, ttbarPhiStarBins + sizeof(ttbarPhiStarBins)/sizeof(double) );
+      result["ttbarPhiStar"]=bins_;
+      bins_.clear();
+
       // pt(lepton)
       double lepPtBins[]={30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200.};
       bins_.insert( bins_.begin(), lepPtBins, lepPtBins + sizeof(lepPtBins)/sizeof(double) );
@@ -2022,6 +2028,11 @@ namespace semileptonic {
       result["ttbarDelPhi"]   = bins_;
       bins_.clear();
 
+      // N(jets)
+      double NjetsBins[]={0.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 14.5};
+      bins_.insert( bins_.begin(), NjetsBins, NjetsBins + sizeof(NjetsBins)/sizeof(double) );
+      result["Njets"]=bins_;
+      bins_.clear();
 
       return result;
     }
@@ -2038,11 +2049,15 @@ namespace semileptonic {
     else if(variable.Contains("topY"     )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
     else if(variable.Contains("ttbarY"   )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
     else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(346., 1599.);
+    else if(variable.Contains("ttbarDelPhi" )) his->GetXaxis()->SetRangeUser(0., 3.149);
+    else if(variable.Contains("ttbarPhiStar")) his->GetXaxis()->SetRangeUser(0., 1.99);
     else if(variable.Contains("ttbarPt"  )) his->GetXaxis()->SetRangeUser(0.  , 299. );
     else if(variable.Contains("lepPt"    )) his->GetXaxis()->SetRangeUser(30  , 199. );
     else if(variable.Contains("lepEta"   )) his->GetXaxis()->SetRangeUser(-2.1, 2.09 );
     else if(variable.Contains("bqPt"     )) his->GetXaxis()->SetRangeUser(30. , 399. );
     else if(variable.Contains("bqEta"    )) his->GetXaxis()->SetRangeUser(-2.4, 2.39 );
+    else if(variable.Contains("lbMass"   )) his->GetXaxis()->SetRangeUser(0., 500);
+    else if(variable.Contains("Njets"    )) his->GetXaxis()->SetRangeUser(3.5, 14.5);
   }
     
   template <class T>
@@ -2515,6 +2530,7 @@ namespace semileptonic {
     else if(variable == "ttbarPt"      ) return "p_{T}^{t#bar{t}}"+strUnitGeV;
     else if(variable == "ttbarY"       ) return "y^{t#bar{t}}";
     else if(variable == "ttbarMass"    ) return "m^{t#bar{t}}"+strUnitGeV;
+    else if(variable == "ttbarPhiStar" ) return "#Phi^{#lower[-0.9]{* }}(t,#bar{t})";
     else if(variable == "ttbarDelPhi"  ) return "#Delta#phi^{t}";
     else if(variable == "lepPt"        ) return "p_{T}^{l}"+strUnitGeV;
     else if(variable == "lepEta"       ) return "#eta^{l}"; 
@@ -2525,6 +2541,7 @@ namespace semileptonic {
     else if(variable == "bbbarPt"      ) return "p_{T}^{b#bar{b}}"+strUnitGeV;
     else if(variable == "bbbarMass"    ) return "m^{b#bar{b}}"+strUnitGeV;
     else if(variable == "lbMass"       ) return "m^{lb}"+strUnitGeV;
+    else if(variable == "Njets"        ) return "N_{jets} (p_{T}>30 GeV, |#eta|<2.4)";
     else return "Default Label for variable "+variable;
   }
 
@@ -4060,8 +4077,10 @@ namespace semileptonic {
 	if(tau){
 	  // FIXME: use some value to make it working
 	  if(variable.Contains("lbMass"       )) return 4; 
+	  if(variable.Contains("Njets"        )) return 6; 
 	  if(variable.Contains("topPtTtbarSys")) return 7; 
 	  if(variable.Contains("ttbarDelPhi"  )) return 8; 
+	  if(variable.Contains("ttbarPhiStar" )) return 8; 
 
 	  // optimized parameters for each PS, final state, selection and closure test configuration
 	    if(decayChannel.Contains("muon")){
