@@ -610,7 +610,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  TString hadLevelPlotExtend = "";
 	  if(hadron){
 	    if     (xSecVariables_[i].Contains("lep")){ hadLevelExtend="Lepton"; hadLevelPlotExtend="Gen"; }
-	    else if(xSecVariables_[i].Contains("bq" )||xSecVariables_[i].Contains("bbbar")){ hadLevelExtend="Bjets" ; hadLevelPlotExtend="Gen"; }
+	    else if(xSecVariables_[i].Contains("bq" )||xSecVariables_[i].Contains("lbMass")||xSecVariables_[i].Contains("bbbar")){ hadLevelExtend="Bjets" ; hadLevelPlotExtend="Gen"; }
 	  }
 	  // b1) create binned MADGRAPH theory curve (std sample w.o. SC)
 	  // load it from combined file
@@ -741,11 +741,13 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor =  5; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor =  5; plotNameMCAtNLO="h"+PSlabel+"TTbarM" ;
 	      if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
 	  else if(xSecVariables_[i].Contains("ttbarDelPhi")){ smoothFactor = 1; rebinFactor = 1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"TTbarDelPhi" ;}
+	  else if(xSecVariables_[i].Contains("ttbarPhiStar")){ smoothFactor = 1; rebinFactor = 1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"TTbarPhiStar" ;}
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 10; rebinFactor =  1; errorRebinFactor =  0; errorSmoothFactor =  2; plotNameMCAtNLO="h"+PSlabel+"LepPt"  ;}
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = 10; rebinFactor = 20; errorRebinFactor = 20; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"LepEta" ;}
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomPt"  ;}
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomEta" ;
 }
+	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"Njets" ;}
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarPt"  ;}
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarMass";}
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarMass";}
@@ -770,7 +772,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  // for bbbar and lead/sublead quantities
 	  // -> no error bands
 	  bool errorbands=true; 
- 	  if(xSecVariables_[i].Contains("lbMass")||xSecVariables_[i].Contains("bbbar")||xSecVariables_[i].Contains("Lead")||xSecVariables_[i].Contains("DelPhi")||xSecVariables_[i].Contains("topPtTtbarSys")){
+ 	  if(xSecVariables_[i].Contains("lbMass")||xSecVariables_[i].Contains("bbbar")||xSecVariables_[i].Contains("Lead")||xSecVariables_[i].Contains("PhiStar")||xSecVariables_[i].Contains("DelPhi")||xSecVariables_[i].Contains("topPtTtbarSys")||xSecVariables_[i].Contains("Njets")){
 	    errorbands=false;
 	    // check if only external file should be used
  	    // -> then: no mcatnlo curve
@@ -821,11 +823,13 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor =  5; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor =  5; rebinFactor= 1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
-	  else if(xSecVariables_[i].Contains("ttbarDelPhi")){ smoothFactor = 1; rebinFactor= 1; }
+	  else if(xSecVariables_[i].Contains("ttbarDelPhi" )){ smoothFactor = 1; rebinFactor= 1; }
+	  else if(xSecVariables_[i].Contains("ttbarPhiStar")){ smoothFactor = 1; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor =  2; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor= 2; }
+	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 1 ; rebinFactor= 1; }
@@ -919,11 +923,13 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor = (largeMGfile ? 1 : 5 ); rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor = (largeMGfile ? 0 : 2 ); rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("ttbarMass"  )){ smoothFactor = (largeMGfile ? 1 : 10);}
-	  else if(xSecVariables_[i].Contains("ttbarDelPhi")){ smoothFactor = 1; rebinFactor = 1; }
+	  else if(xSecVariables_[i].Contains("ttbarDelPhi" )){ smoothFactor = 1; rebinFactor = 1; }
+	  else if(xSecVariables_[i].Contains("ttbarPhiStar")){ smoothFactor = 1; rebinFactor = 1; }
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = (largeMGfile ? 0 : 4); rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 1; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 1; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 1; rebinFactor =  1; }
