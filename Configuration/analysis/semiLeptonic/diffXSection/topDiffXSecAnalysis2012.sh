@@ -1,3 +1,4 @@
+
 #!/bin/sh
 
 ## this shell script runs all macro parts of the 2012 differential cross section analysis 
@@ -135,24 +136,24 @@ echo "--------------------------------------------------------------------------
 echo
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
-## inputFolderName=\"newRecentAnalysisRun8TeV\" (default)
-inputFolderName=\"newRecentAnalysisRun8TeV\"
+## inputFolderName=\"RecentAnalysisRun8TeV\" (default)
+inputFolderName=\"RecentAnalysisRun8TeV\"
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
-mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root\"
-eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root\"
+mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root\"
+eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root\"
 
 if [ $decayChannel == \"electron\" ]; then
-    dataLuminosity=12148
+    dataLuminosity=19800
     dataSample=$eldataSample
 else
     if [ $decayChannel == \"muon\" ]; then
-	dataLuminosity=12148
+	dataLuminosity=19800
 	dataSample=$mudataSample
     else
-	dataLuminosity=12148 # mean value
+	dataLuminosity=19800 # mean value
 	dataSample=$eldataSample\":\"$mudataSample
     fi
 fi
