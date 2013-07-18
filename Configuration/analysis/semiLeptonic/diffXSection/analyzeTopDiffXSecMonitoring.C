@@ -2,18 +2,11 @@
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 				  bool save = true, int verbose=0,
-				  //TString inputFolderName="RecentAnalysisRun8TeV_PromptReco_12fb_PAS/",
-				  //TString inputFolderName="newRecentAnalysisRunTopMassFix_PromptReco_12fb/",
-				  TString inputFolderName="RecentAnalysisRun8TeV/",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/analyzeDiffXData2012ABCAllElec.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_PromptReco_12fb_PAS/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_PromptReco_12fb_PAS/analyzeDiffXData2012ABCAllMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllElec.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllMuon.root",				      
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix/analyzeDiffXData2012ABCAllMuon.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix_PromptReco_12fb/analyzeDiffXData2012ABCAllElec.root:/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRunTopMassFix_PromptReco_12fb/analyzeDiffXData2012ABCAllMuon.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
-				  const std::string decayChannel = "muon", 
+				  TString inputFolderName= "RecentAnalysisRun8TeV",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
+				  const std::string decayChannel = "combined", 
 				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
 { 
   // ============================
@@ -69,7 +62,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
   if(addSel=="ProbSel") setQCDtoZero=false;
-  setQCDtoZero=true; //FIXME
+  setQCDtoZero=true;
   // scale ttbar component to measured inclusive xSec	
   bool scaleToMeasured=true;
   // add some shape plots comparing some different ttbar MC generators
@@ -280,13 +273,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     // (III) after kinematic fit 
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarAngle",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topPt",
-    //"analyzeTopRecoKinematicsKinFit"+addSel+"/topPtTtbarSys",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/topPtTtbarSys",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topY",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/topMass",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPt",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarY",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarMass",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarHT",
+    "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarPhiStar",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/lepPt",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/lepEta",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/lightqPt",
@@ -313,10 +307,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "compositedKinematicsKinFit/MJJ",
     "compositedKinematicsKinFit/mHbb",
     "compositedKinematicsKinFit/mbb",
-    // FIXME START
+    // complementary plots - with or without probability selection to have both versions for sure
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarAngle",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/topPt",
-    //"analyzeTopRecoKinematicsKinFit"+probComplement+"/topPtTtbarSys",
+    "analyzeTopRecoKinematicsKinFit"+probComplement+"/topPtTtbarSys",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/topY",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/topMass",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarPt",
@@ -345,9 +339,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/bbbarPt",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/bbbarY",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/bbbarMass",
-    // FIXME END 
+    // more KinFit plots
     "compositedKinematicsKinFit/Nbjets",
     "compositedKinematicsKinFit/Njets",
+    "compositedKinematicsKinFit/rhos",
     "compositedKinematicsKinFit/leadNonttjetPt",
     "compositedKinematicsKinFit/leadNonttjetY",
     "compositedKinematicsKinFit/leadNonttjetEta",
@@ -590,13 +585,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     // (III) after kinematic fit 
     "#angle(t,#bar{t});Events;0;15",
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
-    //"p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
+    "p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
     "y^{t};Top quarks;0;1",
     "m^{t};Top quarks;0;10",
     "p_{T}^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
     "y^{t#bar{t}};Top-quark pairs;0;1",
     "m^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;50",
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right];#frac{dN}{dH_{T}^{t#bar{t}}};0;20",
+    "#Phi^{*}(t,#bar{t});Events;0;10",
     "p_{T}^{l} #left[GeV#right];N^{l};0;10",    
     "#eta^{l};Leptons;0;1",
     "p_{T}^{q} #left[GeV#right];tt jets;0;20",    
@@ -623,16 +619,16 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "m^{jj} #left[GeV#right];Events;1;10",
     "m^{bb} (KinFit non t#bar{t} b-jets) #left[GeV#right];4 b-tag events;1;50",
     "m^{bb} #left[GeV#right];permutations;1;10",
-    // FIXME START
+    // complementary plots - with or without probability selection to have both versions for sure
     "#angle(t,#bar{t});Events;0;15",
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
-    //"p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
+    "p_{T}^{t} #left[GeV#right] (t#bar{t} system);Events;0;20",
     "y^{t};Top quarks;0;1",
     "m^{t};Top quarks;0;10",
     "p_{T}^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;20",
     "y^{t#bar{t}};Top-quark pairs;0;1",
     "m^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;50",
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right];#frac{dN}{dH_{T}^{t#bar{t}}};0;20",
+    "H_{T}(t#bar{t})=#Sigma(E_{T}(jets)) #left[GeV#right];#frac{dN}{dH_{T}(t#bar{t})};0;20",
     "p_{T}^{l} #left[GeV#right];N^{l};0;10",  // keep synchronized with lepPt (Tagged) in axisLabel1DLeptons for tagged/kinfit ratio
     "#eta^{l};Leptons;0;1",
     "p_{T}^{q} #left[GeV#right];tt jets;0;20",    
@@ -655,9 +651,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "p_{T}^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];Events;0;20",  
     "y^{b#bar{b}}(assigned to t#bar{t} system);Events;0;1",
     "m^{b#bar{b}}(assigned to t#bar{t} system) #left[GeV#right];Events;0;20",
-    // FIXME END
+    // more KinFit plots
     "N_{bjets};Events;1;1",
     "N_{jets};Events;1;1",
+    "#rho_{S}=2m_{0}/m(t#bar{t}+j);Events;1;5",    
     "p_{T}^{leading non t#bar{t}-jet} #left[GeV#right];Events;1;50",
     "y^{leading non t#bar{t}-jet};Events;0;4",
     "#eta^{leading non t#bar{t}-jet};Events;0;4",
@@ -1143,9 +1140,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 
   // Data:
   TString lumilabel = Form("%2.1f fb^{-1}",luminosity/1000);
-  leg ->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], sampleLabel(kData,decayChannel),"P");
-  leg0->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
-  leg1->AddEntry(histo_[plotList_[plotList_.size()-3]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+  leg ->AddEntry(histo_[plotList_[0]][kData], sampleLabel(kData,decayChannel),"P");
+  leg0->AddEntry(histo_[plotList_[0]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
+  leg1->AddEntry(histo_[plotList_[0]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"PL");
  
   // MC samples (add only if sample exists in at least one plot, then quit plot-loop to avoid duplication of entries)
   TLegend *legTheo=(TLegend*)leg->Clone();
@@ -1200,7 +1197,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
   if(verbose>1) std::cout << std::endl;
   if(verbose>2) std::cout << "reweighted difference: " << histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kSig]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kSig]->GetNbinsX()+1)-histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kData]->Integral(0,histo_["analyzeTopRecoKinematicsKinFit"+addSel+"/topPt"][kData]->GetNbinsX()+1) << std::endl;
 
-  // FIXME START
   // differential probability cut efficiency
   std::map<TString, std::vector<double> > errEff_;
   bool foundProbEff=false;
@@ -1277,10 +1273,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 	nameEff2.ReplaceAll("ProbEff","KinFitEff");
 	if(histo_.count(nameBef)>0){
 	  // A MC histos
-	  TH1F* tempSG=(TH1F*)histo_[nameBef][kSig ]->Clone();
 	  // adapt MC bin range
-	  histo_[nameEff2][kSig]=cutOffTH1((TH1F*)histo_[namePur][kSig ]->Clone(), tempSG->GetBinLowEdge(tempSG->GetNbinsX()+1));
-	  tempSG=cutOffTH1(tempSG, histo_[nameEff2][kSig]->GetBinLowEdge(histo_[nameEff2][kSig]->GetNbinsX()+1));
+	  histo_[nameEff2][kSig]=cutOffTH1((TH1F*)histo_[namePur][kSig ]->Clone(namePur+"2"), histo_[nameBef][kSig]->GetBinLowEdge(histo_[nameBef][kSig]->GetNbinsX()+1));
+	  TH1F* tempSG=cutOffTH1((TH1F*)histo_[nameBef][kSig]->Clone("tempSG"), histo_[nameEff2][kSig]->GetBinLowEdge(histo_[nameEff2][kSig]->GetNbinsX()+1));
 	  // MC ratio
 	  histo_[nameEff2][kSig]->Divide(cutOffTH1(tempSG, histo_[nameEff2][kSig]->GetBinLowEdge(histo_[nameEff2][kSig]->GetNbinsX()+1)));
 	  // MC uncertainty: 
@@ -1296,7 +1291,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 	  histo_[nameEff2][kSig]->SetLineColor(kRed);
 	  histo_[nameEff2][kSig]->SetFillColor(kWhite);
 	  // B data histo
-	  TH1F* tempDa=(TH1F*)histo_[nameBef][kData]->Clone();
+	  TH1F* tempDa=(TH1F*)histo_[nameBef][kData]->Clone("tempDa");
 	  // adapt data bin range
 	  histo_[nameEff2][kData]=cutOffTH1((TH1F*)histo_[namePur][kData]->Clone(), tempDa->GetBinLowEdge(tempDa->GetNbinsX()+1));
 	  // data ratio
@@ -1320,9 +1315,6 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
       }
     }
   }
-  // FIXME END
-
-
 
   // ============================
   // introduce some BG subtracted
@@ -1908,7 +1900,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 	      TString precSub=getTStringFromInt(getRelevantDigits(width));
 	      //TString precSub="1";
 	      argument2+=precMain+"."+precSub;
-	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Mass"))) argument2+="f GeV"; //FIXME
+	      if(plotList_[plot].Contains("pt")||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Pt"))||(plotList_[plot].Contains("Mass"))||(plotList_[plot].Contains("HT"))) argument2+="f GeV";
 	      else argument2+="f";
 	      const char * argument=argument2.Data();
 	      if(verbose>1) std::cout <<  plotList_[plot] << ":" << width << " -> " << argument << " -> " << Form(argument,width) << std::endl;
@@ -1930,7 +1922,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 	      histo_[plotList_[plot]][sample]->SetFillStyle(1001);
 	      gStyle->SetErrorX(0.5);  
 	      drawLabel="e2";
-	    } // FIXME
+	    } 
 	    histo_[plotList_[plot]][sample]->Draw(drawLabel);
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM] = (TH1F*)(histo_[plotList_[plot]][sample]->Clone());
 	    histo_[plotList_[plot]][ENDOFSAMPLEENUM]->GetXaxis()->SetNoExponent(true);
@@ -2029,7 +2021,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 	      else DrawDecayChLabel("e/#mu + Jets Combined");	      
 	      DrawCMSLabels(true,luminosity); 
 	      //draw data/MC ratio
-	      if((histo_[plotList_[plot]].count(kSig)>0) && withRatioPlot){
+	      if((histo_[plotList_[plot]].count(kSig)>0) && withRatioPlot && !plotList_[plot].Contains("PartonLevel")){
 		if(plotList_[plot].Contains("BGSubNorm")){
 		  std::vector<TH1F*>ratiohists_;
 		  // get theory
@@ -2053,12 +2045,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 		else{
 		  double ratMin=0.1;
 		  double ratMax=1.9;
-		  if(plotList_[plot].Contains("shift")){ratMin=0.88;ratMax=1.12;}
+		  int ndivisions=505;
+		  if(plotList_[plot].Contains("shift")){ratMin=0.88; ratMax=1.12;}
+		  if(plotList_[plot].Contains("TopRecoKinematics")){ratMin=0.49; ratMax=1.49; ndivisions=405;}
 		  TString ratioLabelNominator  ="N_{data}";
 		  TString ratioLabelDenominator="N_{MC}";
 		  std::vector<double> err_=std::vector<double>(0);
 		  if(plotList_[plot].Contains("KinFitEff")||plotList_[plot].Contains("ProbEff")){legProbEff->Draw("same"); ratMin=0.79; ratMax=1.21; ratioLabelNominator  ="eff_{data}"; ratioLabelDenominator="eff_{MC}"; if(errEff_.count(plotList_[plot])>0){err_=errEff_[plotList_[plot]];}}
-		  int rval = drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], ratMin, ratMax, myStyle, verbose, err_,ratioLabelNominator,ratioLabelDenominator);
+		  int rval = drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], ratMin, ratMax, myStyle, verbose, err_, ratioLabelNominator, ratioLabelDenominator, "p e X0", kBlack, true, 0.8, ndivisions);
 		  if (rval!=0) std::cout << " Problem occured when creating ratio plot for " << plotList_[plot] << std::endl;
 		}
 	      }
