@@ -178,7 +178,6 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   // ---
   int systematicVariationMod=systematicVariation;
   std::vector<int> ignoreSys_;
-  // FIXME: use madgraph instead of mc@nlo for the moment to have madgraph vs. powheg as hadronization uncertainty
   //ignoreSys_.push_back(sysGenMCatNLO);
   // exclude JES and JER
   //for(int sys=sysJESUp     ; sys<=sysJERDown    ; ++sys) ignoreSys_.push_back(sys);
@@ -188,6 +187,8 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   for(int sys=sysHadUp     ; sys<=sysHadDown    ; ++sys) ignoreSys_.push_back(sys);
   // exclude PDF
   //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
+  // FIXME: exclude all
+  //for(int sys=5     ; sys<=46    ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
   for(unsigned int i=0; i<ignoreSys_.size(); ++i){
     if(systematicVariation==ignoreSys_[i]) systematicVariationMod=sysNo;
@@ -299,6 +300,11 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   TString recLeplabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
   TString genLeplabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
 
+  // choose correct input folder for mixed object analyzer
+  TString recMixpath= "compositedKinematics";
+  addSel!="" ? recMixpath+=addSel : recMixpath+="KinFit";
+  TString genMixpath= "composited"+LV+"Gen"+PS;
+  
   //  ---
   //     choose plots
   //  ---
@@ -342,7 +348,8 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarY"     , // XSec relevant! REC
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT"    ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi", // XSec relevant! REC
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi" , // XSec relevant! REC
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPhiStar", // XSec relevant! REC
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY"  ,
     // generated ttbar quantities
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarMass", // XSec relevant! GEN
@@ -350,7 +357,8 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarY"   , // XSec relevant! GEN
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarHT"    ,
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarSumY"  ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarDelPhi", // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarDelPhi",  // XSec relevant! GEN
+    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarPhiStar", // XSec relevant! GEN
     "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarDelY"  ,
     // reconstructed lepton quantities
     recLeppath+"/lepPt"+recLeplabel,            // XSec relevant! REC
@@ -373,7 +381,10 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     // generated bbbar quantities	
     genBpath+"/bbbarPt"+genBlabel,              // XSec relevant! GEN
     genBpath+"/bbbarMass"+genBlabel,            // XSec relevant! GEN
-
+    // reco jet multiplicity
+    recMixpath+"/Njets",
+    // gen jet multiplicity
+    genMixpath+"/Ngenjets",
     // ttbar other composition
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/decayChannel"
   }; 
@@ -595,6 +606,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT_"    ,
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPhiStar_",
     //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
   };
 
@@ -604,10 +616,13 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     recLeppath+"/lepEta_"                                                   ,
     // e) response matrix b-quark/b-jet quantities
     recBpath+"/bqPt_"                                                       ,
-    recBpath+"/bqEta_"                                                      ,       recBpath+"/lbMass_"                                                     ,
+    recBpath+"/bqEta_"                                                      ,      
+    recBpath+"/lbMass_"                                                     ,
     // f) response matrix bbbar quantities
     recBpath+"/bbbarPt_"                                                    ,
     recBpath+"/bbbarMass_"                                                  ,   
+    // g) response matrix jet multiplicity
+    recMixpath+"/Njets_"                                                    ,
   };
 
   TString plots2D_CCVars[ ] = {
@@ -662,7 +677,8 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     xSecLabelName("ttbarY")+"/#frac{dN}{dy^{t#bar{t}}}/0/1",//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right]/#frac{dN}{dH_{T}^{t#bar{t}}}/0/20",
     "y^{t}+y^{#bar{t}}/#frac{dN}{d(y^{t}+y^{#bar{t}})}/0/10",
-    xSecLabelName("ttbarDelPhi")+"/#frac{dN}{d("+xSecLabelName("ttbarDelPhi")+")}/0/1",                
+    xSecLabelName("ttbarDelPhi")+"/#frac{dN}{d("+xSecLabelName("ttbarDelPhi")+")}/0/1",   
+    xSecLabelName("ttbarPhiStar")+"/#frac{dN}{d("+xSecLabelName("ttbarPhiStar")+")}/0/1",                
     "y^{lep. t}-y^{had. t}/#frac{dN}{d(y^(lep. t)-y^{had. t})}/0/4",  
     // generated ttbar quantities	                            
     xSecLabelName("ttbarMass")+" parton truth/events/1/1",//60"
@@ -670,7 +686,8 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     xSecLabelName("ttbarY")+" parton truth/events/0/1",//2
     "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right] parton truth/events/0/20",
     xSecLabelName("ttbarY")+" parton truth/events/0/10",
-    xSecLabelName("ttbarDelPhi")+" parton truth/events/0/1",                
+    xSecLabelName("ttbarDelPhi")+" parton truth/events/0/1", 
+    xSecLabelName("ttbarPhiStar")+" parton truth/events/0/1",               
     "y(leptonic t)-y(hadronic t) parton truth/events/0/4",
     // reconstructed lepton quantities
     xSecLabelName("lepPt" )     +"/events #left[GeV^{-1}#right]/0/1",
@@ -692,6 +709,10 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     // generated bbbar quantities
     xSecLabelName("bbbarPt"  )+" parton truth/events/0/1",
     xSecLabelName("bbbarMass")+" parton truth/events/0/1",
+    // reco jet multiplicity
+    xSecLabelName("Njets"  )+"/events/0/1",
+    // gen jet multiplicity
+    xSecLabelName("Njets"  )+" parton truth/events/0/1",
     // ttbar other composition
     "t#bar{t} other decay channel/events/0/1"
   };
@@ -730,6 +751,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     //    "H_{T}(t#bar{t}) #left[GeV#right] gen/H_{T}(t#bar{t}) #left[GeV#right] reco",
     //    "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
     xSecLabelName("ttbarDelPhi")+" gen/"+xSecLabelName("ttbarDelPhi")+" Kinfit",
+    xSecLabelName("ttbarPhiStar")+" gen/"+xSecLabelName("ttbarPhiStar")+" Kinfit",
     //    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
   };
 
@@ -743,7 +765,9 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     xSecLabelName("lbMass")+" gen/"+xSecLabelName("lbMass")+" reco",
     // f) response matrix bbbar quantities
     xSecLabelName("bbbarPt"  )+" gen/"+xSecLabelName("bbbarPt"  )+" reco",
-    xSecLabelName("bbbarMass")+" gen/"+xSecLabelName("bbbarMass")+" reco"
+    xSecLabelName("bbbarMass")+" gen/"+xSecLabelName("bbbarMass")+" reco",
+    // g) response matrix jet multiplicity
+    xSecLabelName("Njets"    )+" gen/"+xSecLabelName("Njets")+" reco",
   };
 
   TString axisLabel2D_CCVars[ ] = {
@@ -1338,6 +1362,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   //  Renaming of PS specific plot names to parton level PS names to unify naming
   // ====================================================================================
   // loop plots
+
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     TString newName=plotList_[plot];
     // ---
@@ -1373,7 +1398,14 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 	newName.ReplaceAll("Rec", "");
 	newName.ReplaceAll("Topo", "TopReco");
       }
-      // for gen plots
+      // for mixed object analyzer
+      if(plotList_[plot].Contains("composited")){
+	newName.ReplaceAll("composited", "analyzeTop");
+	if(plotList_[plot].Contains("Gen")) newName.ReplaceAll("Gen", "LevelKinematics");
+	else newName.ReplaceAll("analyzeTop", "analyzeTopReco");
+	newName.ReplaceAll("Ngenjets", "Njets");	
+      }
+      // for all gen plots
       if(plotList_[plot].Contains(genHadronLeppath)){ 
 	newName.ReplaceAll(genHadronLeppath, genPartonLeppath);
 	if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
