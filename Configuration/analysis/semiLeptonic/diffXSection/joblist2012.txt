@@ -79,6 +79,10 @@ nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Eltt
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegSG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=muon     540 analyzeTopDiffXSec_cfg.py
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegSG -c mctag=Summer12,triggerTag=HLT,sample=powheg,lepton=electron 540 analyzeTopDiffXSec_cfg.py
 
+# POWHEG+HERWIG
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegHerwigSG -c mctag=Summer12,triggerTag=HLT,sample=powhegherwig,lepton=muon     810 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegHerwigSG -c mctag=Summer12,triggerTag=HLT,sample=powhegherwig,lepton=electron 810 analyzeTopDiffXSec_cfg.py
+
 # MC@NLO
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuMcatnloSG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=muon     829 analyzeTopDiffXSec_cfg.py
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElMcatnloSG -c mctag=Summer12,triggerTag=HLT,sample=mcatnlo,lepton=electron 829 analyzeTopDiffXSec_cfg.py
@@ -123,6 +127,10 @@ nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Eltt
 # POWHEG
 nafJobSplitter.pl -q 12 -M 6500 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powhegBG,lepton=muon     540 analyzeTopDiffXSec_cfg.py
 nafJobSplitter.pl -q 12 -M 6500 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegBG -c mctag=Summer12,triggerTag=HLT,sample=powhegBG,lepton=electron 540 analyzeTopDiffXSec_cfg.py
+
+# POWHEG+HERWIG
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuPowhegHerwigBG -c mctag=Summer12,triggerTag=HLT,sample=powhegherwigBG,lepton=muon     810 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElPowhegHerwigBG -c mctag=Summer12,triggerTag=HLT,sample=powhegherwigBG,lepton=electron 810 analyzeTopDiffXSec_cfg.py
 
 # MC@NLO
 nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuMcatnloBG -c mctag=Summer12,triggerTag=HLT,sample=mcatnloBG,lepton=muon     829 analyzeTopDiffXSec_cfg.py
