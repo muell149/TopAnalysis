@@ -546,27 +546,31 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
 
   // tt+jet distribution
   ttbarJetMass=ttbarJetMassTrue=-999;
-  // gen level
-  if(semiLepEvt_h.isValid()&&semiLepEvt_h->hadronicDecayTop()&&semiLepEvt_h->leptonicDecayTop()){
-    if(debug) std::cout << "hypothesis valid" << std::endl;
-    if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)){
-      ttbarJetMassTrue=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
-      if(debug) std::cout << "ttbarJetMassTrue=" << ttbarJetMassTrue << std::endl;
-    }
-    else if(debug){
-      std::cout << "addGenJets_h.isValid(): " << addGenJets_h.isValid() << std::endl;
-      std::cout << "addGenJets_h->size(): " << addGenJets_h->size() << std::endl;
-      if(addGenJets_h->size()>0) std::cout << "addGenJets_h->at(0).pt(): " << addGenJets_h->at(0).pt() << std::endl;
+  if(semiLepEvt_h.isValid()){
+    // gen level
+    if(semiLepEvt_h->hadronicDecayTop()&&semiLepEvt_h->leptonicDecayTop()){
+      if(debug) std::cout << "hypothesis valid" << std::endl;
+      if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)){
+	ttbarJetMassTrue=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
+	if(debug) std::cout << "ttbarJetMassTrue=" << ttbarJetMassTrue << std::endl;
+      }
+      else if(debug){
+	std::cout << "addGenJets_h.isValid(): " << addGenJets_h.isValid() << std::endl;
+	std::cout << "addGenJets_h->size(): " << addGenJets_h->size() << std::endl;
+	if(addGenJets_h->size()>0) std::cout << "addGenJets_h->at(0).pt(): " << addGenJets_h->at(0).pt() << std::endl;
+      }
     }
     // reco level
-    if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjet!=-1) ){
-      ttbarJetMass=(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()+(jets_h->at(leadNonttjet)).p4()).mass();
-      if(debug) std::cout << "ttbarJetMass=" << ttbarJetMass << std::endl;
-    }
-    else if(debug){
-      std::cout << "semiLepEvt_h->isHypoValid(hypoKey_): " << semiLepEvt_h->isHypoValid(hypoKey_) << std::endl;
-      std::cout << "leadNonttjet: "   << leadNonttjet   << std::endl;
-      std::cout << "leadNonttjetPt: " << leadNonttjetPt << std::endl;
+    if(semiLepEvt_h->hadronicDecayTop(hypoKey_)&&semiLepEvt_h->leptonicDecayTop(hypoKey_)){
+      if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjet!=-1) ){
+	ttbarJetMass=(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()+(jets_h->at(leadNonttjet)).p4()).mass();
+	if(debug) std::cout << "ttbarJetMass=" << ttbarJetMass << std::endl;
+      }
+      else if(debug){
+	std::cout << "semiLepEvt_h->isHypoValid(hypoKey_): " << semiLepEvt_h->isHypoValid(hypoKey_) << std::endl;
+	std::cout << "leadNonttjet: "   << leadNonttjet   << std::endl;
+	std::cout << "leadNonttjetPt: " << leadNonttjetPt << std::endl;
+      }
     }
   }
   double mtop=172.5;
