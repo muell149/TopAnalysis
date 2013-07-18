@@ -197,8 +197,9 @@ private:
     std::vector<LV> HypWMinus;
     std::vector<int> HypJet0index;
     std::vector<int> HypJet1index;
-
-
+    
+    
+    int TopProductionMode;
     int TopDecayMode;
     int HiggsDecayMode;
     std::vector<int> ZDecayMode;
@@ -529,6 +530,11 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         iEvent.getByLabel(genEvent_, genEvt);
         if (! genEvt.failedToGet())
         {
+	    // Decide which process generates the ttbar event: gluon-gluon-fusion (0), quark-quark-annihilation (1), all other processes (2)
+            if (genEvt->fromGluonFusion()) TopProductionMode = 0;
+	    else if (genEvt->fromQuarkAnnihilation()) TopProductionMode = 1;
+	    else TopProductionMode = 2;
+	    
             GenTop = genEvt->top()->polarP4();
             GenAntiTop = genEvt->topBar()->polarP4();
             //for Higgs analysis, also non-leptonic modes might be written
@@ -675,7 +681,8 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         else
         {
             std::cerr << "Error: no gen event?!\n";
-            GenTop = nullP4; GenAntiTop = nullP4;
+            TopProductionMode = -1;
+	    GenTop = nullP4; GenAntiTop = nullP4;
             GenLepton = nullP4; GenAntiLepton = nullP4;
             GenTau = nullP4; GenAntiTau = nullP4;
             GenLeptonPdgId = 0; GenAntiLeptonPdgId = 0;
@@ -1131,7 +1138,8 @@ NTupleWriter::beginJob()
 
     ////////Gen Info
     if (isTtBarSample_) {
-        Ntuple->Branch("GenMET", &GenMET);
+        Ntuple->Branch("TopProductionMode", &TopProductionMode, "TopProductionMode/I");
+	Ntuple->Branch("GenMET", &GenMET);
         Ntuple->Branch("GenTop", &GenTop);
         Ntuple->Branch("GenAntiTop", &GenAntiTop);
         Ntuple->Branch("GenLepton", &GenLepton);

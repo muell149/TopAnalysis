@@ -7,6 +7,8 @@ generatorTopFilter = cms.EDFilter("GeneratorTopFilter",
     #how many event do you want to select?
     n_events = cms.int32(-1),
     
+    rejectNonBottomDecaysOfTops = cms.bool(True),
+    
     ## SHORT CUTS: 
     # if not empty all the other boolean parameters
     # will be ignored (except invert selection)
