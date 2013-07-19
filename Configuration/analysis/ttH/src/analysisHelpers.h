@@ -11,13 +11,20 @@
 namespace AnalysisMode{
     
     /// Analysis modes for analysis
-    enum AnalysisMode{cp, mva, undefined};
+    enum AnalysisMode{
+        cp,         // Basic control plots
+        mvaP,       // Produce MVA input
+        mvaA,       // Access MVA output
+        dijet,      // Dijet analyser
+        playg,      // Playground
+        undefined   // Undefined mode
+    };
     
     
     
     /// All analysis modes allowed for analysis
     const std::vector<AnalysisMode> allowedAnalysisModes
-        {cp, mva};
+        {cp, mvaP, mvaA, dijet, playg};
     
     
     

@@ -11,7 +11,10 @@
 AnalysisMode::AnalysisMode AnalysisMode::convertAnalysisMode(const std::string& analysisMode)
 {
     if(analysisMode == "cp") return cp;
-    if(analysisMode == "mva") return mva;
+    if(analysisMode == "mvaP") return mvaP;
+    if(analysisMode == "mvaA") return mvaA;
+    if(analysisMode == "dijet") return dijet;
+    if(analysisMode == "playg") return playg;
     std::cout<<"Warning! The following analysis mode conversion is not implemented: "<<analysisMode<<std::endl;
     return undefined;
 }
@@ -21,7 +24,10 @@ AnalysisMode::AnalysisMode AnalysisMode::convertAnalysisMode(const std::string& 
 std::string AnalysisMode::convertAnalysisMode(const AnalysisMode& analysisMode)
 {
     if(analysisMode == cp) return "cp";
-    if(analysisMode == mva) return "mva";
+    if(analysisMode == mvaP) return "mvaP";
+    if(analysisMode == mvaA) return "mvaA";
+    if(analysisMode == dijet) return "dijet";
+    if(analysisMode == playg) return "playg";
     if(analysisMode == undefined) return "";
     std::cout<<"Error! Analysis mode conversion is not implemented, break...\n"<<std::endl;
     exit(96);

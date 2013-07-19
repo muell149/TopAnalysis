@@ -1314,7 +1314,7 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     
     //FIXME 
     //Developing improved Kinematic Reconstruction (commented for the moment)
-//     KinematicReconstruction new_topsol(leptonMinus, leptonPlus, &jets, &btagValues, &met, true); //Option true - mass_loop ON; Option false - smearing ON; NO boolean option - smearing ON
+//     KinematicReconstruction new_topsol(leptonMinus, leptonPlus, &jets, &btagValues, &met); //Option true - mass_loop ON; Option false - smearing ON; NO boolean option - weighted average
 //      if(new_topsol.GetNSol()>0)
 //      {
 //      	struct_KinematicReconstruction new_sol = new_topsol.GetSol();
@@ -1351,18 +1351,21 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     // Return the result
     if(sols.size() > 0){
     // Use the improved Kinematic Solution (developing)
-    //if(new_topsol.GetNSol() > 0){
-        if(!kinRecoObjects) kinRecoObjects = new KinRecoObjects;
-        kinRecoObjects->HypTop_ = HypTop_;
-        kinRecoObjects->HypAntiTop_ = HypAntiTop_;
-        kinRecoObjects->HypLepton_ = HypLepton_;
-        kinRecoObjects->HypAntiLepton_ = HypAntiLepton_;
-        kinRecoObjects->HypBJet_ = HypBJet_;
-        kinRecoObjects->HypAntiBJet_ = HypAntiBJet_;
-        kinRecoObjects->HypNeutrino_ = HypNeutrino_;
-        kinRecoObjects->HypAntiNeutrino_ = HypAntiNeutrino_;
-        kinRecoObjects->HypJet0index_ = HypJet0index_;
-        kinRecoObjects->HypJet1index_ = HypJet1index_;
+    // if(new_topsol.GetNSol() > 0){
+        if(useObjectStructs_)
+        { 
+            if(!kinRecoObjects) kinRecoObjects = new KinRecoObjects;
+            kinRecoObjects->HypTop_ = HypTop_;
+            kinRecoObjects->HypAntiTop_ = HypAntiTop_;
+            kinRecoObjects->HypLepton_ = HypLepton_;
+            kinRecoObjects->HypAntiLepton_ = HypAntiLepton_;
+            kinRecoObjects->HypBJet_ = HypBJet_;
+            kinRecoObjects->HypAntiBJet_ = HypAntiBJet_;
+            kinRecoObjects->HypNeutrino_ = HypNeutrino_;
+            kinRecoObjects->HypAntiNeutrino_ = HypAntiNeutrino_;
+            kinRecoObjects->HypJet0index_ = HypJet0index_;
+            kinRecoObjects->HypJet1index_ = HypJet1index_;
+        }
         return true;
     }
     else{

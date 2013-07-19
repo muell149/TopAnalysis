@@ -25,7 +25,7 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)canvas->GetPrimitive("dataStatError");
   // GET DATA: create rebinned histo
   std::map< TString, std::vector<double> > binning_ = makeVariableBinning();
-  int Nbins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*10;
+  int Nbins = std::abs(binning_[plotName][binning_[plotName].size()-1]-binning_[plotName][0])*100;
   if(verbose>1) std::cout << Nbins << std::endl;
   TH1F* datatemp= new TH1F("data"+plotName, "data"+plotName, Nbins, binning_[plotName][0], binning_[plotName][binning_[plotName].size()-1]);
   reBinTH1F(*datatemp, binning_[plotName], 0);

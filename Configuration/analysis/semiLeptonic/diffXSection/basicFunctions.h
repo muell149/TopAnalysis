@@ -59,7 +59,7 @@ namespace semileptonic {
   TString xSecVariablesIncl[] = {"inclusive"};
 
   TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{t} (t#bar{t} restframe)/[GeV]", "#Delta#phi^{t}/ ", "#Phi^{#lower[-0.9]{* }}(t,#bar{t})/ "};
-  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "p_{T}^{b#bar{b}}/[GeV]", "m^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]", "N_{jets}/ "};
+  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "m^{b#bar{b}}/[GeV]", "p_{T}^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]", "N_{jets}/ "};
 
   // cross-check variables
  
@@ -3722,6 +3722,7 @@ namespace semileptonic {
     // variable rebinning for binned curve
     TString plotname3 = plotname2;
     plotname3.ReplaceAll("Gen","");
+    plotname3.ReplaceAll("gen","");
     if(!smoothcurves){
       // check if maxima of x-axes of loaded plot and new binning is the same
       double newMax=binning_[plotname3][binning_[plotname3].size()-1];
@@ -3742,6 +3743,7 @@ namespace semileptonic {
     }
     // rename
     TString name=plotname2;
+    if(name.Contains("Ngenjets")) name.ReplaceAll("Ngenjets", "Njets");
     if(model=="powheg") name+="POWHEG";
     else if(model=="mcatnlo"){
       if(filename.Contains("catnlo" )) name+="MC@NLO";

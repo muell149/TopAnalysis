@@ -10,15 +10,23 @@ class TH1;
 class TString;
 class TProfile;
 
-#include "AnalysisHistograms.h"
 #include "MvaInputVariables.h"
 #include "analysisHelpers.h"
+#include "analysisStructs.h"
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "../../diLeptonic/src/classesFwd.h"
 
 class JetCategories;
 class DijetAnalyzer;
-
+class BasicHistograms;
+class EventYieldHistograms;
+class DyScalingHistograms;
+class Playground;
+namespace tth{
+    class GenLevelWeights;
+    class RecoLevelWeights;
+    class ObjectIndices;
+}
 
 
 
@@ -51,7 +59,7 @@ public:
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
 
     /// Whether to produce MVA input information
-    void SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMode);
+    void SetAnalysisModes(const std::vector<AnalysisMode::AnalysisMode>& analysisModes);
 
     /// Set up the jet categories (# jets, # b-jets) for overview
     void SetJetCategoriesOverview(const JetCategories& jetCategories);
@@ -64,10 +72,22 @@ public:
     
     /// Set up the MVA weights input for swapped jet combinations of ttbar system
     void SetMvaWeightsSwapped(MvaInputTopJetsVariables& mvaInputTopJetsVariables);
-
+    
     /// Set the pointer to DijetAnalyzer
     void SetDijetAnalyzer(DijetAnalyzer* analyzer);
-
+    
+    /// Set event yield histograms
+    void SetEventYieldHistograms(EventYieldHistograms* eventYieldHistograms);
+    
+    /// Set histograms for Drell-Yan scaling
+    void SetDyScalingHistograms(DyScalingHistograms* dyScalingHistograms);
+    
+    /// Set basic histograms
+    void SetBasicHistograms(BasicHistograms* basicHistograms);
+    
+    /// Set playground for histograms
+    void SetPlayground(Playground* playground);
+    
     /// Bool for separating ttbar+bbar events and ttbar+other events
     void SetRunWithTtbb(const bool runWithTtbb_);
 
@@ -109,7 +129,7 @@ private:
 
 
     /// Enum for analysis modes
-    AnalysisMode::AnalysisMode analysisMode_;
+    std::vector<AnalysisMode::AnalysisMode> analysisModes_;
 
 
 
@@ -121,9 +141,9 @@ private:
 
     /// Select tt+bb or tt+other events
     bool runWithTtbb_;
-
-
-
+    
+    
+    
     /// Class holding the definition and handling of jet categories (# jets, # b-jets) for overview
     const JetCategories* jetCategories_overview_;
 
@@ -139,9 +159,6 @@ private:
     /// Class holding the weights as calculated by MVA for swapped combinations
     MvaInputTopJetsVariables* mvaWeightsSwapped_;
 
-    /// Class that analyzes dijet pairs from jets that pass selection cuts
-    DijetAnalyzer* dijetAnalyzer_;
-
 
 
     ///
@@ -152,9 +169,42 @@ private:
     VLV recoilForJetPairs(const IndexPairs& jetIndexPairs,
                           const std::vector<int>& jetIndices,
                           const VLV& jets);
-
-
-
+    
+    
+    /// Fill all analysers and histograms in one method
+    void fillAll(const std::string& selectionStep,
+                 const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                 const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                 const KinRecoObjects& kinRecoObjects,
+                 const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                 const tth::ObjectIndices& objectIndices)const;
+    
+    /// Book all histograms of all analysers for all steps in one method
+    void bookAll();
+    
+    /// Clear all analysers in one method
+    void clearAll();
+    
+    
+    /// Event yield histograms
+    EventYieldHistograms* eventYieldHistograms_;
+    
+    /// Histograms for Drell-Yan scaling
+    DyScalingHistograms* dyScalingHistograms_;
+    
+    /// Basic histograms
+    BasicHistograms* basicHistograms_;
+    
+    /// Playground
+    Playground* playground_;
+    
+    /// Class that analyzes dijet pairs from jets that pass selection cuts
+    DijetAnalyzer* dijetAnalyzer_;
+    
+    
+    
+    
+    
     /// Histograms for the overview jet categories
     TH1* h_jetCategories_overview_step0;
     TH1* h_jetCategories_overview_step1;
@@ -168,25 +218,13 @@ private:
 
     /// Histograms for the analysis jet categories
     TH1* h_jetCategories_step8;
-
+/*
     /// Histograms for cutflow tables which are not contained in Analysis.h
-    TH1* h_events_step0a;
-    TH1* h_events_step0b;
-    TH1* h_events_step1;
-    TH1* h_events_step2;
-    TH1* h_events_step3;
-    TH1* h_events_step4;
-    TH1* h_events_step5;
-    TH1* h_events_step6;
-    TH1* h_events_step7;
     TH1* h_events_step8;
-
-    /// Histograms for Drell-Yan scaling
-    DyScalingHistograms dyScalingHistograms_;
-
-    /// Basic histograms
-    BasicHistograms basicHistograms_;
-
+*/    
+    
+    
+    
     /// Control plots
     TH1* h_jetPt_step8;
     TH1* h_jetChargeGlobalPtWeighted_step8;
