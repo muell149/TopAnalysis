@@ -1250,7 +1250,7 @@ process.kinFitTtSemiLepEventHypothesis.useBTagging       = True
 if(applyKinFit==True):
     process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionScaleFactors = cms.vdouble( 1.052 , 1.057 , 1.096 , 1.134 , 1.288   )
     process.kinFitTtSemiLepEventHypothesis.jetEnergyResolutionEtaBinning = cms.vdouble(0.0  ,  0.5  ,  1.1  ,  1.7  ,  2.3  ,  -1.)
-    
+
 ## keep only events with unambigues parton matches
 ## (no other partons exist in dR=0.3 cone) 
 ## attention: improves purity but reduces efficiency
@@ -1262,7 +1262,7 @@ if(eventFilter=='signal only') and (runningOnData=="MC"):
     process.ttSemiLepJetPartonMatch.maxNJets=-1
     ## choose jet collection considered in jet-parton matching
     process.ttSemiLepJetPartonMatch.jets='tightLeadingPFJets'
-    
+
 ## ---
 ##    configure KinFit Analyzers
 ## ---
@@ -1272,6 +1272,23 @@ process.load("TopQuarkAnalysis.TopEventProducers.producers.TtSemiLepEvtFilter_cf
 process.filterRecoKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit')"  ) )
 process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kKinFit') && "+chi2cut ) )
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
+
+## add a second kinematic fit which calculates the jet permutation as input for the first kin fit
+#cloneTtSemiLepEvent(process)
+#process.kinFitTtSemiLepEventHypothesis2.constraints = [1, 2, 3, 4]
+#process.kinFitTtSemiLepEventHypothesis2.mTop = 172.5
+#process.kinFitTtSemiLepEventHypothesis.match = cms.InputTag("kinFitTtSemiLepEventHypothesis2")
+#process.kinFitTtSemiLepEventHypothesis.useOnlyMatch = cms.bool(True)
+#
+#process.filterRecoKinFit2 = process.ttSemiLepEventFilter.clone( src = cms.InputTag("ttSemiLepEvent2"),
+#                                                                cut = cms.string("isHypoValid('kKinFit')"  ) )
+#
+#process.makeTtSemiLepEvent += process.filterRecoKinFit2
+#
+#process.makeTtSemiLepEvent.replace(process.filterRecoKinFit2,
+#                                   process.filterRecoKinFit2*process.makeTtSemiLepEventBase)
+#
+#process.makeTtSemiLepEvent.remove(process.makeTtSemiLepEventBase)
 
 ## configure top reconstruction analyzers & define PSets
 ## A) for top reconstruction analyzer

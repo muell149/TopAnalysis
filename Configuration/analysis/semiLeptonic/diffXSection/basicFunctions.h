@@ -4137,12 +4137,12 @@ namespace semileptonic {
 	      else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ?  4.60/*3.00*//*3.61*/ :  5.68/* 4.44*/) :  4.44;
 	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.24                 : 13.58         ) :  7   ;
 	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.20                 : 12.88         ) :  7   ;
-	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  7.24/*4.93*/    : 10.02/*6.60*/   ) :  7.65);
+	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  7.24/*4.93*/    : 10.02/* 6.60*/  ) :  7.65);
 	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  2.69/*2.9e-07*/ :  3.75/*7.7e-06*/) :  3.00);
 	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 10.19/*8.56*/    : 16.00/*12.51*/  ) : 10.53);
-	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  8.10/*6.78*/    : 11.47/*9.19*/   ) : 11.11);
-	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  1.92/*1.51*/    :  3.18/* 2.57*/  ) :  8   );
-	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  9.37/*8.20*/    : 14.05/*11.14*/  ) :  8   );
+	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  8.10/*6.78*/    : 11.47/* 9.19*/  ) : 11.11);
+	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.62/*1.51*/    :  5.23/* 2.57*/  ) :  8   );
+	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  7.68/*8.20*/    :  8.33/*11.14*/  ) :  8   );
 	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  9.03            : 11.58           ) :  4   );
 	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.77/*FIXME*/   :  0.77           ) :  1   );
 	    }
