@@ -27,6 +27,7 @@ add_executable(load_Analysis
     KinReco
     KinematicReconstruction
     KinematicReconstruction_LSroutines
+    MeanSol
     analysisObjectStructs
 )
 TARGET_LINK_LIBRARIES(load_Analysis ${ROOT_LIBRARIES} miscTools) 
