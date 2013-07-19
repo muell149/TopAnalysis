@@ -3199,10 +3199,10 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 	TString saveToFolder=outputFolder;
 	TString title=(plotCanvas_[idx])->GetTitle();
 	if(title.Contains("efficiency"                     )) saveToFolder+="effAndAcc/";
-	if(title.Contains("analyzeTopPartonLevelKinematics")) saveToFolder+="partonLevel/";
+	if(title.Contains("analyzeTopPartonLevelKinematics")||title.Contains("compositedPartonGen")) saveToFolder+="partonLevel/";
 	if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
 	if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
-       	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
+       	if(title.Contains("analyzeTopRecoKinematicsKinFit" )||title.Contains("compositedKinematics")) saveToFolder+="recoYield/";
 	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
 	if(!title.Contains("canv")){
 	  // add additional label that indicates PS for all relevant plots
