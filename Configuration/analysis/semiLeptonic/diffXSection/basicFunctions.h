@@ -1922,7 +1922,7 @@ namespace semileptonic {
       std::vector<double> bins_;
 
       // pt(top)
-      double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0};  
+      double topPtBins[]={0.0, 60.0, 100.0, 150.0, 200.0 , 260.0, 320.0, 400.0, 500.0};  
       bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
       result["topPt"        ] = bins_;
       result["topPtLead"    ] = bins_;
@@ -1970,7 +1970,7 @@ namespace semileptonic {
       bins_.clear();
 
       // phistar(t,tbar)
-      double ttbarPhiStarBins[]={0., 0.05, 0.1, 0.2, 0.4, 0.7, 1.2, 2.0};
+      double ttbarPhiStarBins[]={0., 0.04, 0.13, 0.38, 2.0};
       bins_.insert( bins_.begin(), ttbarPhiStarBins, ttbarPhiStarBins + sizeof(ttbarPhiStarBins)/sizeof(double) );
       result["ttbarPhiStar"]=bins_;
       bins_.clear();
@@ -2005,25 +2005,25 @@ namespace semileptonic {
 
 
       // pt(bbbar)
-      double bbbarPtBins[]={0.0, 35.0, 70.0 , 100.0, 130.0, 180.0, 800.0};
+      double bbbarPtBins[]={0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 125.0, 160.0, 200.0, 275.0, 500.0};
       bins_.insert( bins_.begin(), bbbarPtBins, bbbarPtBins + sizeof(bbbarPtBins)/sizeof(double) );
       result["bbbarPt"]=bins_;
       bins_.clear();
 
       // m(bbbar)
-      double bbbarMassBins[]={0.0, 80.0, 120.0, 180, 250.0, 400.0, 700.0, 1200.0};
+      double bbbarMassBins[]={0.0, 45.0, 60.0, 80.0, 105.0, 135.0, 165.0, 205.0, 255.0, 315.0, 390.0, 485.0, 620.0, 800.0};
       bins_.insert( bins_.begin(), bbbarMassBins, bbbarMassBins + sizeof(bbbarMassBins)/sizeof(double) );
       result["bbbarMass"]=bins_;
       bins_.clear();
 
       // m(lb)
-      double lbMassBins[]={0.0, 100.0, 250.0, 350.0, 500.0};
+      double lbMassBins[]={0.0, 70.0, 95.0, 120.0, 140.0, 500.0};
       bins_.insert( bins_.begin(), lbMassBins, lbMassBins + sizeof(lbMassBins)/sizeof(double) );
       result["lbMass"]=bins_;
       bins_.clear();
 
       // Delta phi(tops)
-      double topDelPhiBins[]={0., 1., 1.5, 2.2, 2.6, 2.9, 3.2};
+      double topDelPhiBins[]={0., 2., 2.75, 3., 3.15};
       bins_.insert( bins_.begin(), topDelPhiBins, topDelPhiBins + sizeof(topDelPhiBins)/sizeof(double) );
       result["ttbarDelPhi"]   = bins_;
       bins_.clear();
@@ -4075,66 +4075,76 @@ namespace semileptonic {
 
 	// Unfolding with optimal tau
 	if(tau){
-	  // FIXME: use some value to make it working
-	  if(variable.Contains("lbMass"       )) return 4; 
-	  if(variable.Contains("Njets"        )) return 6; 
-	  if(variable.Contains("topPtTtbarSys")) return 7; 
-	  if(variable.Contains("ttbarDelPhi"  )) return 8; 
-	  if(variable.Contains("ttbarPhiStar" )) return 8; 
-
 	  // optimized parameters for each PS, final state, selection and closure test configuration
 	    if(decayChannel.Contains("muon")){
 	      if(closureTestSpecifier==""){
 		// optimized parameters 
 		// top & ttbar:  hadron level not important
-		if     (variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 5.94 : 7.18) : 7.22; 
-		else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 5.90 : 6.93) : 6.92; 
-		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 3.34 : 3.94) : 3.94; 
-		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? (probSel ? 4.77 : 5.74) : 5.73; 
-		else if(variable.Contains("ttbarMass")) k = (fullPS) ? (probSel ? 2.42 : 2.88) : 2.94; 
-		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 5.37 : ((hadronPS) ? (probSel ? 5.63    : 4.38   ) : 5.37);
-		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 2.36 : ((hadronPS) ? (probSel ? 3.5e-05 : 1.8e-04) : 2.36); 
-		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 7.30 : ((hadronPS) ? (probSel ? 11.46   : 8.81   ) : 7.33); 
-		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 7.93 : ((hadronPS) ? (probSel ? 8.06    : 6.52   ) : 7.93);
-		else if(variable.Contains("bbbarMass")) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 1.07 : 1.70) : 8);
-		else if(variable.Contains("bbbarPt"  )) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 5.86 : 7.94) : 8); 
+		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 4.52         : 6.15        ) : 7.22;
+		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 2.51         : 3.41        ) : 7.22;
+		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 3.15         : 4.27        ) : 7   ;
+		else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 4.98/*5.94*/ : 6.66/*7.18*/) : 7.22;
+		else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ? 6.93/*5.90*/ : 8.71/*6.93*/) : 6.92;
+		else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ? 4.19/*3.34*/ : 4.91/*3.94*/) : 3.94;
+		else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ? 5.75/*4.77*/ : 7.24/*5.74*/) : 5.73;
+		else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ? 3.26/*2.42*/ : 3.72/*2.88*/) : 2.94;
+	        else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 7.41         : 9.76        ) : 7   ;
+	        else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 7.25         : 9.19        ) : 7   ;
+		else if(variable.Contains("lepPt")       ) k = (fullPS) ? 5.37 : ((hadronPS) ? (probSel ? 5.63    : 4.38   ) : 5.37);
+		else if(variable.Contains("lepEta")      ) k = (fullPS) ? 2.36 : ((hadronPS) ? (probSel ? 3.5e-05 : 1.8e-04) : 2.36);
+		else if(variable.Contains("bqPt")        ) k = (fullPS) ? 7.30 : ((hadronPS) ? (probSel ? 11.46   : 8.81   ) : 7.33);
+		else if(variable.Contains("bqEta")       ) k = (fullPS) ? 7.93 : ((hadronPS) ? (probSel ? 8.06    : 6.52   ) : 7.93);
+		else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 1.07    : 1.70   ) : 8   );
+		else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 5.86    : 7.94   ) : 8   );
+	        else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4    : ((hadronPS) ? (probSel ? 4       : 4      ) : 4   );
+		else if(variable.Contains("Njets")       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 1       : 1      ) : 1   );
 	      }
 	    }
 	    else if (decayChannel.Contains("electron")){
 	      if(closureTestSpecifier==""){
 		// optimized parameters 
 		// top & ttbar:  hadron level not important
-		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
-		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
-		else if(variable.Contains("topPt")    ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45; 
-		else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 5.52 : 6.51) : 6.53; 
-		else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 3.18 : 3.84) : 3.91; 
-		else if(variable.Contains("ttbarY")   ) k = (fullPS) ? (probSel ? 4.58 : 5.46) : 5.47; 
-		else if(variable.Contains("ttbarMass")) k = (fullPS) ? (probSel ? 2.73 : 3.36) : 3.31; 
-		else if(variable.Contains("lepPt")    ) k = (fullPS) ? 5.45 : ((hadronPS) ? (probSel ? 6.28    : 4.89   ) :5.45);
-		else if(variable.Contains("lepEta")   ) k = (fullPS) ? 1.86 : ((hadronPS) ? (probSel ? 7.6e-06 : 3.9e-05) : 1.86); 
-		else if(variable.Contains("bqPt")     ) k = (fullPS) ? 7.54 : ((hadronPS) ? (probSel ? 11.75   : 8.87   ) : 7.54); 
-		else if(variable.Contains("bqEta")    ) k = (fullPS) ? 7.80 : ((hadronPS) ? (probSel ? 8.05    : 6.45   ) : 7.80);
-		else if(variable.Contains("bbbarMass")) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 1.08 : 1.95) : 8);
-		else if(variable.Contains("bbbarPt"  )) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 5.73 : 7.83) : 8); 
+		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45;
+		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45;
+		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 7    : 7   ) : 7   ;
+		else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 6.26 : 7.43) : 7.45;
+		else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ? 5.52 : 6.51) : 6.53;
+		else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ? 3.18 : 3.84) : 3.91;
+		else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ? 4.58 : 5.46) : 5.47;
+		else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ? 2.73 : 3.36) : 3.31;
+	        else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 3    : 7   ) : 7   ;
+	        else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 2    : 7   ) : 7   ;
+		else if(variable.Contains("lepPt")       ) k = (fullPS) ? 5.45 : ((hadronPS) ? (probSel ? 6.28    : 4.89   ) : 5.45);
+		else if(variable.Contains("lepEta")      ) k = (fullPS) ? 1.86 : ((hadronPS) ? (probSel ? 7.6e-06 : 3.9e-05) : 1.86);
+		else if(variable.Contains("bqPt")        ) k = (fullPS) ? 7.54 : ((hadronPS) ? (probSel ? 11.75   : 8.87   ) : 7.54);
+		else if(variable.Contains("bqEta")       ) k = (fullPS) ? 7.80 : ((hadronPS) ? (probSel ? 8.05    : 6.45   ) : 7.80);
+		else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 1.08    : 1.95   ) : 8   );
+		else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 5.73    : 7.83   ) : 8   );
+	        else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4    : ((hadronPS) ? (probSel ? 4       : 4      ) : 4   );
+		else if(variable.Contains("Njets")       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 1       : 1      ) : 1   );
 	      }
 	    }
 	    else if(decayChannel.Contains("combined")){ 
 	      // optimized parameters 
 	      // top & ttbar:  hadron level not important
-	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 7.28/*8.64*/ : 10.37) : 10.36; 
-	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 5.13/*8.64*/ : 10.37) : 10.36; 
-	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 8.83/*8.64*/ : 10.37) : 10.36; 
-	      else if(variable.Contains("topY" )    ) k = (fullPS) ? (probSel ? 7.77/*8.0 */ : 9.51 ) : 9.51; 
-	      else if(variable.Contains("ttbarPt")  ) k = (fullPS) ? (probSel ? 4.46/*4.61*/ : 5.49 ) : 5.54; 
-	      else if(variable.Contains("ttbarY")   ) k = (fullPS) ? (probSel ? 6.23/*6.63*/ : 7.93 ) : 7.93; 
-	      else if(variable.Contains("ttbarMass")) k = (fullPS) ? (probSel ? 3.00/*3.61*/ : 4.44 ) : 4.44; 
-	      else if(variable.Contains("lepPt")    ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ? 4.93    : 6.60   ) : 7.65 );
-	      else if(variable.Contains("lepEta")   ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ? 2.9e-07 : 7.7e-06) : 3.00 ); 
-	      else if(variable.Contains("bqPt")     ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 8.56   : 12.51  ) : 10.53); 
-	      else if(variable.Contains("bqEta")    ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ? 6.78   : 9.19   ) : 11.11);
-	      else if(variable.Contains("bbbarMass")) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 1.51 : 2.57 ) : 8);
-	      else if(variable.Contains("bbbarPt"  )) k = (fullPS) ? 8 : ((hadronPS) ? (probSel ? 8.20 : 11.14) : 8); 
+	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ?  6.61/*7.28*//*8.64*/ :  8.82/*10.37*/) : 10.36;
+	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ?  3.59/*5.13*//*8.64*/ :  4.92/*10.37*/) : 10.36;
+	      else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ?  4.54                 :  6.19         ) :  7   ;
+	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ?  7.24/*8.83*//*8.64*/ :  9.73/*10.37*/) : 10.36;
+	      else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ?  9.70/*7.77*//*8.0 */ : 12.00/* 9.51*/) :  9.51;
+	      else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ?  5.89/*4.46*//*4.61*/ :  6.92/* 5.49*/) :  5.54;
+	      else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ?  8.06/*6.23*//*6.63*/ : 10.04/* 7.93*/) :  7.93;
+	      else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ?  4.60/*3.00*//*3.61*/ :  5.68/* 4.44*/) :  4.44;
+	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.24                 : 13.58         ) :  7   ;
+	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.20                 : 12.88         ) :  7   ;
+	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  7.24/*4.93*/    : 10.02/*6.60*/   ) :  7.65);
+	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  2.69/*2.9e-07*/ :  3.75/*7.7e-06*/) :  3.00);
+	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 10.19/*8.56*/    : 16.00/*12.51*/  ) : 10.53);
+	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  8.10/*6.78*/    : 11.47/*9.19*/   ) : 11.11);
+	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  1.92/*1.51*/    :  3.18/* 2.57*/  ) :  8   );
+	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  9.37/*8.20*/    : 14.05/*11.14*/  ) :  8   );
+	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  9.03            : 11.58           ) :  4   );
+	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.77/*FIXME*/   :  0.77           ) :  1   );
 	    }
 	}
 	else{
