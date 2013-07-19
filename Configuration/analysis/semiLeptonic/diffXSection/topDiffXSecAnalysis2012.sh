@@ -441,14 +441,14 @@ if [ $fast = false ]
     sleep 3
 fi
 
-if [ $redoPurStab = true -a $redoControlPlots = true ]
+if [ $redoPurStab = true ]
     then
     # Array of differential variables
-    listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+    listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"topPtTtbarSys\" \"ttbarDelPhi\" \"ttbarPhiStar\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\" \"lbMass\" )
     plotAcceptance=true
     if [ $hadron = true ]; 
 	then 
-	listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\")
+	listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\" \"bbbarPt\" \"bbbarMass\" \"lbMass\")
 	plotAcceptance=false
     fi
     	
