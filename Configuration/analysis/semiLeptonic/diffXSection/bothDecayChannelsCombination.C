@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsigned int verbose=0, //TString inputFolderName="RecentAnalysisRun8TeV",
-				  TString inputFolderName="newRecentAnalysisRun8TeV",
+void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsigned int verbose=0,
+				  TString inputFolderName="RecentAnalysisRun8TeV",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, bool combinedEventYields=true, TString closureTestSpecifier="", bool smoothcurves=false){
 
   // run automatically in batch mode
@@ -610,7 +610,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  TString hadLevelPlotExtend = "";
 	  if(hadron){
 	    if     (xSecVariables_[i].Contains("lep")){ hadLevelExtend="Lepton"; hadLevelPlotExtend="Gen"; }
-	    else if(xSecVariables_[i].Contains("bq" )||xSecVariables_[i].Contains("bbbar")){ hadLevelExtend="Bjets" ; hadLevelPlotExtend="Gen"; }
+	    else if(xSecVariables_[i].Contains("bq" )||xSecVariables_[i].Contains("lbMass")||xSecVariables_[i].Contains("bbbar")){ hadLevelExtend="Bjets" ; hadLevelPlotExtend="Gen"; }
 	  }
 	  // b1) create binned MADGRAPH theory curve (std sample w.o. SC)
 	  // load it from combined file
@@ -672,11 +672,12 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // load it from combined file
 	  TString MGcombFile2="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
 	  if(!largeMGfile) MGcombFile2.ReplaceAll("Large","");
-	  TH1F* plotTheo3 = getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
+	  TH1F* plotTheo03 = getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
+	  TH1F* plotTheo3=0;
 	  // inclusive cross section
 	  if(xSecVariables_[i]=="inclusive"){
 	    // get events in PS from top pt
-	    double NGenPS=0.5*plotTheo3->Integral(0,plotTheo3->GetNbinsX()+1);
+	    double NGenPS=0.5*plotTheo03->Integral(0,plotTheo03->GetNbinsX()+1);
 	    NGenPS*=lumiweight(kSig, 0.5*(constLumiElec+constLumiMuon), sysNo, "muon");
 	    // get BR
 	    TH1F* plotTheo33 = getTheoryPrediction("analyzeTopPartonLevelKinematics/topPt", MGcombFile);
@@ -692,26 +693,26 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  else{
 	    // other quantities
 	    std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
-	    reBinTH1F(*plotTheo3, binning_[plotName], verbose-1);
+	    reBinTH1F(*plotTheo03, binning_[plotName], verbose-1);
 	    // Normalization absolute cross sections
 	    if(!normalize){
 	      // luminosity
 	      double luminosity2=luminosity;
 	      if(combinedEventYields) luminosity2= ( constLumiElec + constLumiMuon );
-	      plotTheo3->Scale(1./(luminosity2));
+	      plotTheo03->Scale(1./(luminosity2));
 	      // muon and electron channel are added in the root file
-	      plotTheo3->Scale(1./(2));
+	      plotTheo03->Scale(1./(2));
 	      // event weight (for signal it does not matter if muon or electron)
-	      plotTheo3->Scale(lumiweight(kSig, luminosity2, sysNo, "muon"));
+	      plotTheo03->Scale(lumiweight(kSig, luminosity2, sysNo, "muon"));
 	      // large sample correction factor for number of events
 	      // lumiweight is for v1 but large sample is v1+v2
 	      //if(largeMGfile) plotTheo3->Scale(3697693./(59613991.+3697693.)); // large file not used
 	      // BR
 	      if(extrapolate) plotTheo3->Scale(1./BRPDG);
-	      if(verbose>1) std::cout << "area from abs diff MC plot: " << plotTheo3->Integral(0,plotTheo3->GetNbinsX()+1) << std::endl;
+	      if(verbose>1) std::cout << "area from abs diff MC plot: " << plotTheo3->Integral(0,plotTheo03->GetNbinsX()+1) << std::endl;
 	    }
 	    // divide by binwidth
-	    plotTheo3=divideByBinwidth(plotTheo3, verbose-1);
+	    plotTheo3=divideByBinwidth(plotTheo03, verbose-1);
 	    // Normalization normalized cross sections
 	    double XSecInclTheoPS= getInclusiveXSec(plotTheo3,verbose-1);
 	    if(normalize) plotTheo3->Scale(1./(XSecInclTheoPS));
@@ -739,13 +740,18 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor =  5; rebinFactor =  1; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"TTbarY" ;}
 	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor =  5; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor =  5; plotNameMCAtNLO="h"+PSlabel+"TTbarM" ;
 	      if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
+	  else if(xSecVariables_[i].Contains("ttbarDelPhi")){ smoothFactor = 1; rebinFactor = 1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"TTbarDelPhi" ;}
+	  else if(xSecVariables_[i].Contains("ttbarPhiStar")){ smoothFactor = 1; rebinFactor = 1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"TTbarPhiStar" ;}
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 10; rebinFactor =  1; errorRebinFactor =  0; errorSmoothFactor =  2; plotNameMCAtNLO="h"+PSlabel+"LepPt"  ;}
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = 10; rebinFactor = 20; errorRebinFactor = 20; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"LepEta" ;}
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomPt"  ;}
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomEta" ;
 }
+	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"Njets" ;}
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarPt"  ;}
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarMass";}
+	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarMass";}
+	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"lbMass";}
 	  else if(DrawMCAtNLOPlot2){
 	    std::cout << " ERROR - Unknown variable " << xSecVariables_[i] << std::endl;
 	    // close file and delete pointer
@@ -766,7 +772,7 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  // for bbbar and lead/sublead quantities
 	  // -> no error bands
 	  bool errorbands=true; 
- 	  if(xSecVariables_[i].Contains("bbbar")||xSecVariables_[i].Contains("Lead")){
+ 	  if(xSecVariables_[i].Contains("lbMass")||xSecVariables_[i].Contains("bbbar")||xSecVariables_[i].Contains("Lead")||xSecVariables_[i].Contains("PhiStar")||xSecVariables_[i].Contains("DelPhi")||xSecVariables_[i].Contains("topPtTtbarSys")||xSecVariables_[i].Contains("Njets")){
 	    errorbands=false;
 	    // check if only external file should be used
  	    // -> then: no mcatnlo curve
@@ -817,12 +823,16 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor =  5; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor =  5; rebinFactor= 1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
+	  else if(xSecVariables_[i].Contains("ttbarDelPhi" )){ smoothFactor = 1; rebinFactor= 1; }
+	  else if(xSecVariables_[i].Contains("ttbarPhiStar")){ smoothFactor = 1; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor =  2; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor= 2; }
+	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 1 ; rebinFactor= 1; }
+	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  // draw curve	 
 	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegSummer12PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
@@ -912,13 +922,17 @@ void bothDecayChannelsCombination(double luminosity=12148, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("topY"     )){ smoothFactor = (largeMGfile ? 1 : 5 ); rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("ttbarPt"  )){ smoothFactor = (largeMGfile ? 1 : 5 ); rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("ttbarY"   )){ smoothFactor = (largeMGfile ? 0 : 2 ); rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("ttbarMass")){ smoothFactor = (largeMGfile ? 1 : 10); rebinFactor =  1; if(cutTtbarMass){rangeLow=constMassRangeLow; rangeHigh=constMassRangeHigh;}}
+	  else if(xSecVariables_[i].Contains("ttbarMass"  )){ smoothFactor = (largeMGfile ? 1 : 10);}
+	  else if(xSecVariables_[i].Contains("ttbarDelPhi" )){ smoothFactor = 1; rebinFactor = 1; }
+	  else if(xSecVariables_[i].Contains("ttbarPhiStar")){ smoothFactor = 1; rebinFactor = 1; }
 	  else if(xSecVariables_[i].Contains("lepPt"    )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("lepEta"   )){ smoothFactor = (largeMGfile ? 0 : 4); rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
-	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 8; rebinFactor =  2; }
-	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 8; rebinFactor =  2; }
+	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 1; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 1; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 1; rebinFactor =  1; }
 	  if(largeMGfile) MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
 	  //std::cout << plotNameMadgraph << std::endl;
 	  if(DrawSmoothMadgraph2) DrawTheoryCurve(MGcombFile, plotNameMadgraph, normalize, smoothFactor, rebinFactor, kRed+1, 1, rangeLow, rangeHigh, false, 1., 1., verbose-1, false, false, "madgraph", DrawSmoothMadgraph2, LV);

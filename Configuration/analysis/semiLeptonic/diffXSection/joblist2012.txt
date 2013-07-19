@@ -6,33 +6,33 @@
 ## 2012A 22JAN2013RERECO  ##
 ############################
 # muon
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012AReReco -c sample=dataA,lepton=muon     103 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012AReReco -c sample=dataA,lepton=muon     206 analyzeTopDiffXSec_cfg.py
 # electron
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012AReReco -c sample=dataA,lepton=electron 144 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012AReReco -c sample=dataA,lepton=electron 288 analyzeTopDiffXSec_cfg.py
 
 ############################
 ## 2012B 22JAN2013RERECO  ##
 ############################
 # muon
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012BReReco -c sample=dataB,lepton=muon     526 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012BReReco -c sample=dataB,lepton=muon     601 analyzeTopDiffXSec_cfg.py
 # electron
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012BReReco -c sample=dataB,lepton=electron 663 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012BReReco -c sample=dataB,lepton=electron 757 analyzeTopDiffXSec_cfg.py
 
 ############################
 ## 2012C 22JAN2013RERECO  ##
 ############################
 # muon
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012CReReco -c sample=dataC,lepton=muon     772 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -J -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012CReReco -c sample=dataC,lepton=muon      882 analyzeTopDiffXSec_cfg.py
 # electron
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012CReReco -c sample=dataC,lepton=electron 964 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -J -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012CReReco -c sample=dataC,lepton=electron 1102 analyzeTopDiffXSec_cfg.py
 
 ############################
 ## 2012D 22JAN2013RERECO  ##
 ############################
 # muon
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012DReReco -c sample=dataD,lepton=muon     946 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -J -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mu2012DReReco -c sample=dataD,lepton=muon     1081 analyzeTopDiffXSec_cfg.py
 # electron
-nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012DReReco -c sample=dataD,lepton=electron 999 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -J -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d El2012DReReco -c sample=dataD,lepton=electron 1145 analyzeTopDiffXSec_cfg.py
 
 ##################
 ## summer 12 MC ##
