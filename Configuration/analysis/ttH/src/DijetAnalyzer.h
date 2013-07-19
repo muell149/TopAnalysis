@@ -46,14 +46,11 @@ public:
         #endif
     };
 
-    /// Empty constructor
-    DijetAnalyzer();
+    /// Constructor for given jet categories
+    DijetAnalyzer(const JetCategories& jetCategories);
 
     /// Empty destructor
     ~DijetAnalyzer(){};
-
-    /// Setting Jet categories
-    void SetJetCategories(const JetCategories& jetCategories);
 
     /// Setting the output selectorList
     void setOutputSelectorList(TSelectorList* output);
@@ -86,6 +83,14 @@ public:
 
 private:
 
+    /// Book all histograms for all jet categories categories
+    void bookAllHistos();
+
+    /// Book histograms for one categoryId with given id and label
+    virtual void bookHistos(int cat, const TString& label);
+    
+    
+    
     /// Struct holding the histograms for one jet category
     struct CatHistograms{
         /// Constructor
@@ -104,17 +109,10 @@ private:
     TSelectorList* selectorList_;
 
     /// Jet categories for which the plots should be filled
-    const JetCategories* jetCategories_;
+    const JetCategories& jetCategories_;
 
     /// Histograms for all jet categories
     std::vector<CatHistograms> histograms_;
-
-    /// Book all histograms for all jet categories categories
-    void bookAllHistos();
-
-    /// Book histograms for one categoryId with given id and label
-    virtual void bookHistos(int cat, const TString& label);
-
 
 };
 
