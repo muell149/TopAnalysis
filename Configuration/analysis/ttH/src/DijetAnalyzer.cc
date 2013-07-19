@@ -18,9 +18,13 @@
 #include "../../diLeptonic/src/classes.h"
 
 
-DijetAnalyzer::DijetAnalyzer():
-selectorList_(0)
-{}
+DijetAnalyzer::DijetAnalyzer(const JetCategories& jetCategories):
+selectorList_(0),
+jetCategories_(jetCategories)
+{
+    std::cout<<"--- Beginning setting up dijet analyzer\n";
+    std::cout<<"=== Finishing setting up dijet analyzer\n\n";
+}
 
 DijetAnalyzer::Input::Input(const VLV& allJets_, const std::vector<int>& jetsId_, const std::vector<int>& bJetsId_,
                             const std::vector<double>& allJetsBtagDiscriminant_, const std::vector<int>& topJetsId_, const VLV& genJets_,
@@ -79,8 +83,8 @@ void DijetAnalyzer::fill(const Input& input, const double& weight)
     unsigned int nJets = jetsId.size();
 
     // Identifying the category
-    int jetCatId = jetCategories_->categoryId(nJets,nBJets);
-    if(jetCatId>=jetCategories_->numberOfCategories() || jetCatId<0) return;        // Skipping if category with such Id doesn't exist
+    int jetCatId = jetCategories_.categoryId(nJets,nBJets);
+    if(jetCatId>=jetCategories_.numberOfCategories() || jetCatId<0) return;        // Skipping if category with such Id doesn't exist
 
 
     // Extracting map of histograms for the current jet category
@@ -450,11 +454,6 @@ void DijetAnalyzer::clear()
 }
 
 
-void DijetAnalyzer::SetJetCategories(const JetCategories& jetCategories)
-{
-    jetCategories_ = &jetCategories;
-}
-
 
 void DijetAnalyzer::setOutputSelectorList(TSelectorList* output)
 {
@@ -463,14 +462,14 @@ void DijetAnalyzer::setOutputSelectorList(TSelectorList* output)
 }
 
 
+
 void DijetAnalyzer::bookAllHistos()
 {
-    const std::vector<TString> v_binLabel(jetCategories_->binLabels());
+    const std::vector<TString> v_binLabel(jetCategories_.binLabels());
     int cat = 0;
     for(std::vector<TString>::const_iterator i_binLabel = v_binLabel.begin(); i_binLabel != v_binLabel.end(); ++i_binLabel){
         const TString binLabel(*i_binLabel);
         bookHistos(cat,binLabel);
         cat++;
     }
-
 }

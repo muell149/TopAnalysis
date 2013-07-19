@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <utility>
+#include <algorithm>
 
 #include <TH1.h>
 #include <TTree.h>
@@ -17,6 +18,9 @@
 #include "higgsUtils.h"
 #include "JetCategories.h"
 #include "DijetAnalyzer.h"
+#include "analysisStructs.h"
+#include "AnalysisHistograms.h"
+#include "Playground.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 #include "../../diLeptonic/src/classes.h"
@@ -64,6 +68,10 @@ constexpr const char* MvaInputDIR = "mvaInput";
 
 HiggsAnalysis::HiggsAnalysis(TTree*):
 runWithTtbb_(false),
+eventYieldHistograms_(0),
+dyScalingHistograms_(0),
+basicHistograms_(0),
+playground_(0),
 dijetAnalyzer_(0)
 {}
 
@@ -92,7 +100,7 @@ void HiggsAnalysis::Terminate()
     if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
 
     // Do everything needed for MVA
-    if(analysisMode_ == AnalysisMode::mva){
+    if(std::find(analysisModes_.begin(), analysisModes_.end(), AnalysisMode::mvaP) != analysisModes_.end()){
 
         // Create output directory for MVA input tree, and produce and write tree
         std::string f_savename = ttbar::assignFolder(MvaInputDIR, channel_, systematic_);
@@ -106,7 +114,6 @@ void HiggsAnalysis::Terminate()
 
     // Cleanup
     mvaInputTopJetsVariables_.clear();
-    if(dijetAnalyzer_) dijetAnalyzer_->clear();
     // FIXME: shouldn't we also clear b-tagging efficiency histograms if they are produced ?
 
     // Defaults from AnalysisBase
@@ -119,9 +126,6 @@ void HiggsAnalysis::SlaveBegin(TTree *)
 {
     // Defaults from AnalysisBase
     AnalysisBase::SlaveBegin(0);
-
-    // Setting the output for DijetAnalyzer
-    if(dijetAnalyzer_) dijetAnalyzer_->setOutputSelectorList(fOutput);
 
 
     // Analysis categories
@@ -164,49 +168,13 @@ void HiggsAnalysis::SlaveBegin(TTree *)
         //std::cout<<"Bin, label: "<<position<<" , "<<binLabel<<"\n";
     }
 
-
+/*
     // Histograms needed for cutflow tables
-    h_events_step0a = store(new TH1D("events_step0a","event count (no weight);;# events",8,0,8));
-    h_events_step0b = store(new TH1D("events_step0b","event count (no weight);;# events",8,0,8));
-    h_events_step1 = store(new TH1D("events_step1","event count (no weight);;# events",8,0,8));
-    h_events_step2 = store(new TH1D("events_step2","event count (no weight);;# events",8,0,8));
-    h_events_step3 = store(new TH1D("events_step3","event count (no weight);;# events",8,0,8));
-    h_events_step4 = store(new TH1D("events_step4","event count at after 2lepton;;# events",8,0,8));
-    h_events_step5 = store(new TH1D("events_step5","event count at after Zcut;;# events",8,0,8));
-    h_events_step6 = store(new TH1D("events_step6","event count at after 2jets;;# events",8,0,8));
-    h_events_step7 = store(new TH1D("events_step7","event count at after MET;;# events",8,0,8));
     h_events_step8 = store(new TH1D("events_step8","event count at after 1btag;;# events",8,0,8));
-    h_events_step0a->Sumw2();
-    h_events_step0b->Sumw2();
-    h_events_step1->Sumw2();
-    h_events_step2->Sumw2();
-    h_events_step3->Sumw2();
-    h_events_step4->Sumw2();
-    h_events_step5->Sumw2();
-    h_events_step6->Sumw2();
-    h_events_step7->Sumw2();
     h_events_step8->Sumw2();
-
-
-    // Histograms needed for data-driven scaling of Z samples
-    dyScalingHistograms_.addStep("4", fOutput);
-    dyScalingHistograms_.addStep("5", fOutput);
-    dyScalingHistograms_.addStep("6", fOutput);
-    dyScalingHistograms_.addStep("7", fOutput);
-    dyScalingHistograms_.addStep("8", fOutput);
-
-
-    // Basic histograms
-    basicHistograms_.addStep("1", fOutput);
-    basicHistograms_.addStep("2", fOutput);
-    basicHistograms_.addStep("3", fOutput);
-    basicHistograms_.addStep("4", fOutput);
-    basicHistograms_.addStep("5", fOutput);
-    basicHistograms_.addStep("6", fOutput);
-    basicHistograms_.addStep("7", fOutput);
-    basicHistograms_.addStep("8", fOutput);
-
-
+*/
+    
+    
     // Control plots
     h_jetPt_step8 = store(new TH1D("jetPt_step8", "jet pt;p_{t}  [GeV];# jets", 40, 0, 400));
     h_jetChargeGlobalPtWeighted_step8 = store(new TH1D("jetChargeGlobalPtWeighted_step8", "jetChargeGlobalPtWeighted; c_{jet}^{glob};# jets", 110, -1.1, 1.1));
@@ -253,22 +221,24 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     }
 
     // Binned control plots
-    CreateBinnedControlPlots(h_jetCategories_step8, h_events_step8, false);
+//    CreateBinnedControlPlots(h_jetCategories_step8, h_events_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted_step8, false);
     CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
 
     // Histograms for b-tagging efficiencies
     if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
+    
+    
+    this->bookAll();
 }
 
 
 
 void HiggsAnalysis::SlaveTerminate()
 {
-    dyScalingHistograms_.clear();
-    basicHistograms_.clear();
-
+    this->clearAll();
+    
     // Defaults from AnalysisBase
     AnalysisBase::SlaveTerminate();
 }
@@ -279,8 +249,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 {
     // Defaults from AnalysisBase
     if(!AnalysisBase::Process(entry))return kFALSE;
-
-
+    
+    
     // Use utilities without namespaces
     using namespace ttbar;
     
@@ -289,21 +259,22 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->resetObjectStructEntry();
     
     
+    // Define the selection steps as strings
+    std::string selectionStep("");
+    
     
     //===CUT===
     // this is step0a, no cut application
-
+    selectionStep = "0a";
+    
     // ++++ Control Plots ++++
 
-    // Histogram for controlling correctness of af workflow,
-    // which should be the same as h_events_step0b for all samples except those preselected on generator level
-    h_events_step0a->Fill(1, 1);
-    
     
     
     //===CUT===
     // this is step0b, select events on generator level and access true level weights
-
+    selectionStep = "0b";
+    
     // Separate DY dilepton decays in lepton flavours
     if(this->failsDrellYanGeneratorSelection(entry)) return kTRUE;
 
@@ -328,14 +299,17 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Get true level weights
     const double trueLevelWeightNoPileup = weightGenerator*weightMadgraphCorrection;
     const double trueLevelWeight = trueLevelWeightNoPileup*weightPU;
-
+    
+    const tth::GenLevelWeights genLevelWeights(weightMadgraphCorrection, weightPU, weightGenerator,
+                                               trueLevelWeightNoPileup, trueLevelWeight);
+    
     // ++++ Control Plots ++++
-
-    h_events_step0b->Fill(1, 1);
     
     
     
     //===CUT===
+    selectionStep = "1";
+    
     // Check if event was triggered with the same dilepton trigger as the specified analysis channel
     if(this->failsDileptonTrigger(entry)) return kTRUE;
 
@@ -346,6 +320,11 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Access reco objects, and common generator objects
     const RecoObjects& recoObjects = this->getRecoObjects(entry);
     const CommonGenObjects& commonGenObjects = this->getCommonGenObjects(entry);
+    
+    // Create dummies for other objects, non-dummies are created only as soon as needed
+    const KinRecoObjects kinRecoObjectsDummy;
+    const TopGenObjects topGenObjectsDummy;
+    const HiggsGenObjects higgsGenObjectsDummy;
     
     // Get allLepton indices, apply selection cuts and order them by pt (beginning with the highest value)
     const VLV& allLeptons = *recoObjects.allLeptons_;
@@ -422,13 +401,17 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // Get MET
     const LV& met = *recoObjects.met_;
     const bool hasMetOrEmu = channel_=="emu" || met.pt()>MetCUT;
-
+    
+    const tth::ObjectIndices objectIndices(allLeptonIndices,
+                                           leptonIndices, antiLeptonIndices,
+                                           leptonIndex, antiLeptonIndex,
+                                           leadingLeptonIndex, nLeadingLeptonIndex,
+                                           leptonXIndex, leptonYIndex,
+                                           jetIndices, bjetIndices);
+    
+    
     const int jetCategoryId_overview = jetCategories_overview_->categoryId(numberOfJets,numberOfBjets);
     const int jetCategoryId = jetCategories_->categoryId(numberOfJets,numberOfBjets);
-    const BasicHistograms::Input basicHistogramsInput(leptonIndices, antiLeptonIndices,
-                                                      jetIndices, bjetIndices,
-                                                      allLeptons, jets, met,
-                                                      jetBTagCSV);
     
     
     // Determine all reco level weights
@@ -443,70 +426,129 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     double weight = weightNoPileup*weightPU;
     
     
+    tth::RecoLevelWeights recoLevelWeights(weightLeptonSF, weightTriggerSF, weightBtagSF,
+                                           weightNoPileup, weight);
+    
+    
     // ++++ Control Plots ++++
-
-    h_events_step1->Fill(1, 1);
-    basicHistograms_.fill(basicHistogramsInput, 1, "1");
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjectsDummy, higgsGenObjectsDummy,
+                  kinRecoObjectsDummy,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
     h_jetCategories_overview_step1->Fill(jetCategoryId_overview, 1);
 
 
 
     //===CUT===
-    // we need an OS lepton pair
+    selectionStep = "2";
+    
+    // we need an OS lepton pair matching the trigger selection...
     if (!hasLeptonPair) return kTRUE;
 
     // ++++ Control Plots ++++
-
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjectsDummy, higgsGenObjectsDummy,
+                  kinRecoObjectsDummy,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
     // FIXME: should also here apply weights
-    h_events_step2->Fill(1, 1);
-    basicHistograms_.fill(basicHistogramsInput, 1, "2");
     h_jetCategories_overview_step2->Fill(jetCategoryId_overview, 1);
 
 
 
     //===CUT===
-    // with at least 20 GeV invariant mass
+    selectionStep = "3";
+    
+    // ...with at least 20 GeV invariant mass
     if (dilepton.M() < 20.) return kTRUE;
-
-    // ++++ Control Plots ++++
-
-    h_events_step3->Fill(1, weight);
-    basicHistograms_.fill(basicHistogramsInput, weight, "3");
-    h_jetCategories_overview_step3->Fill(jetCategoryId_overview, weight);
     
-    
-    
-    // ****************************************
-    //handle inverted Z cut
     const bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
     KinRecoObjects* kinRecoObjectsPtr(0);
     const bool hasSolution = this->calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices,
                                                     allLeptons, jets, jetBTagCSV, met,
                                                     kinRecoObjectsPtr);
     
+    
+    
+    // ++++ Control Plots ++++
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjectsDummy, higgsGenObjectsDummy,
+                  *kinRecoObjectsPtr,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
+    h_jetCategories_overview_step3->Fill(jetCategoryId_overview, weight);
+    
+    
+    
+    // ****************************************
+    //handle inverted Z cut
     // Z window plots need to be filled here, in order to rescale the contribution to data
     if(isZregion){
-        double fullWeights = weight;
-        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "4");
-
+        selectionStep = "4zWindow";
+        
+        this->fillAll(selectionStep,
+                      recoObjects, commonGenObjects,
+                      topGenObjectsDummy, higgsGenObjectsDummy,
+                      kinRecoObjectsDummy,
+                      genLevelWeights, recoLevelWeights,
+                      objectIndices);
+        
         if(has2Jets){
-            // Fill loose dilepton mass histogram before any jet cuts
-            dyScalingHistograms_.fillLoose(dilepton.M(), fullWeights);
-            dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "5");
-
+            selectionStep = "5zWindow";
+            
+            this->fillAll(selectionStep,
+                          recoObjects, commonGenObjects,
+                          topGenObjectsDummy, higgsGenObjectsDummy,
+                          kinRecoObjectsDummy,
+                          genLevelWeights, recoLevelWeights,
+                          objectIndices);
+            
             if(hasMetOrEmu){
-                dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "6");
-
+                selectionStep = "6zWindow";
+                
+                this->fillAll(selectionStep,
+                              recoObjects, commonGenObjects,
+                              topGenObjectsDummy, higgsGenObjectsDummy,
+                              kinRecoObjectsDummy,
+                              genLevelWeights, recoLevelWeights,
+                              objectIndices);
+                
                 if(hasBtag){
+                    selectionStep = "7zWindow";
+                    
                     // FIXME: do not use b-tag scale factor
                     //weightBtagSF = isMC ? calculateBtagSF() : 1;
                     //fullWeights *= weightBtagSF;
-                    dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "7");
-
+                    
+                    this->fillAll(selectionStep,
+                                  recoObjects, commonGenObjects,
+                                  topGenObjectsDummy, higgsGenObjectsDummy,
+                                  kinRecoObjectsDummy,
+                                  genLevelWeights, recoLevelWeights,
+                                  objectIndices);
+                    
                     if(hasSolution){
+                        selectionStep = "8zWindow";
+                        
                         // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
                         //fullWeights *= weightKinFit;
-                        dyScalingHistograms_.fillZWindow(dilepton.M(), fullWeights, "8");
+                        
+                        this->fillAll(selectionStep,
+                                      recoObjects, commonGenObjects,
+                                      topGenObjectsDummy, higgsGenObjectsDummy,
+                                      kinRecoObjectsDummy,
+                                      genLevelWeights, recoLevelWeights,
+                                      objectIndices);
                     }
                 }
             }
@@ -516,46 +558,58 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     
     //=== CUT ===
+    selectionStep = "4";
+    
     //Exclude the Z window
     if(channel_!="emu" && isZregion) return kTRUE;
 
     // ++++ Control Plots ++++
-
-    if(!isZregion){ //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "4");
-    }
-    h_events_step4->Fill(1, weight);
-    basicHistograms_.fill(basicHistogramsInput, weight, "4");
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjectsDummy, higgsGenObjectsDummy,
+                  *kinRecoObjectsPtr,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
     h_jetCategories_overview_step4->Fill(jetCategoryId_overview, weight);
     
     
     
     //=== CUT ===
-    //Require at least two jets > 30 GeV
+    selectionStep = "5";
+    
+    //Require at least two jets
     if(!has2Jets) return kTRUE;
 
     // ++++ Control Plots ++++
-
-    if(!isZregion){ //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "5");
-    }
-    h_events_step5->Fill(1, weight);
-    basicHistograms_.fill(basicHistogramsInput, weight, "5");
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjectsDummy, higgsGenObjectsDummy,
+                  *kinRecoObjectsPtr,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
     h_jetCategories_overview_step5->Fill(jetCategoryId_overview, weight);
 
 
 
     //=== CUT ===
+    selectionStep = "6";
+    
     //Require MET > 40 GeV in non-emu channels
     if(!hasMetOrEmu) return kTRUE;
 
     // ++++ Control Plots ++++
-
-    if(!isZregion){ //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "6");
-    }
-    h_events_step6->Fill(1, weight);
-    basicHistograms_.fill(basicHistogramsInput, weight, "6");
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjectsDummy, higgsGenObjectsDummy,
+                  *kinRecoObjectsPtr,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
     h_jetCategories_overview_step6->Fill(jetCategoryId_overview, weight);
 
     // Fill the b-tagging efficiency plots
@@ -568,37 +622,49 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     
     //=== CUT ===
+    selectionStep = "7";
+    
     //Require at least one b tagged jet
     if(!hasBtag) return kTRUE;
 
     weight *= weightBtagSF;
 
     // ++++ Control Plots ++++
-
-    if(!isZregion){ //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "7");
-    }
-    h_events_step7->Fill(1, weight);
-    basicHistograms_.fill(basicHistogramsInput, weight, "7");
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjectsDummy, higgsGenObjectsDummy,
+                  *kinRecoObjectsPtr,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
     h_jetCategories_overview_step7->Fill(jetCategoryId_overview, weight);
 
 
 
 
     //=== CUT ===
+    selectionStep = "8";
+    
     //Require at least one solution for the kinematic event reconstruction
     if(!hasSolution) return kTRUE;
     // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
     //weight *= weightKinFit;
 
+    // Access top generator object struct, and higgs generator object struct
+    const TopGenObjects& topGenObjects = this->getTopGenObjects(entry);
+    const HiggsGenObjects& higgsGenObjects = this->getHiggsGenObjects(entry);
+    
     // ++++ Control Plots ++++
-
-    if (!isZregion) { //also apply Z cut in emu!
-        dyScalingHistograms_.fillZVeto(dilepton.M(), weight, "8");
-    }
-    h_events_step8->Fill(1, weight);
-    basicHistograms_.fill(basicHistogramsInput, weight, "8");
-    FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_events_step8, 1, weight);
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjects, higgsGenObjects,
+                  *kinRecoObjectsPtr,
+                  genLevelWeights, recoLevelWeights,
+                  objectIndices);
+    
+//    FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_events_step8, 1, weight);
 
     h_jetCategories_step8->Fill(jetCategoryId, weight);
     h_jetCategories_overview_step8->Fill(jetCategoryId_overview, weight);
@@ -615,10 +681,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_jetChargeRelativePtWeighted_step8, jetChargeRelativePtWeighted.at(index), weight);
     }
     
-    
-    // Access top generator object struct, and higgs generator object struct
-    const TopGenObjects& topGenObjects = this->getTopGenObjects(entry);
-    const HiggsGenObjects& higgsGenObjects = this->getHiggsGenObjects(entry);
     
     // Passing information to DijetAnalyzer
     if(dijetAnalyzer_) {
@@ -644,10 +706,10 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     
     
-    if(analysisMode_ != AnalysisMode::mva)return kTRUE;
+    if(std::find(analysisModes_.begin(), analysisModes_.end(), AnalysisMode::mvaP) == analysisModes_.end())return kTRUE;
 
     // FIXME: which events exactly to fill? For now all with at least 4 jets
-    if(numberOfJets<4)return kTRUE;
+    if(numberOfJets<4) return kTRUE;
 
 
     // Find b jet and anti-b jet corresponding to (anti)b from (anti)top
@@ -1025,9 +1087,9 @@ void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusi
 
 
 
-void HiggsAnalysis::SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMode)
+void HiggsAnalysis::SetAnalysisModes(const std::vector<AnalysisMode::AnalysisMode>& analysisModes)
 {
-    analysisMode_ = analysisMode;
+    analysisModes_ = analysisModes;
 }
 
 
@@ -1093,10 +1155,82 @@ bool HiggsAnalysis::failsAdditionalJetFlavourSelection(const Long64_t& entry)con
 
 
 
+void HiggsAnalysis::SetEventYieldHistograms(EventYieldHistograms* eventYieldHistograms)
+{
+    eventYieldHistograms_ = eventYieldHistograms;
+}
+
+
+
+void HiggsAnalysis::SetDyScalingHistograms(DyScalingHistograms* dyScalingHistograms)
+{
+    dyScalingHistograms_ = dyScalingHistograms;
+}
+
+
+
+void HiggsAnalysis::SetBasicHistograms(BasicHistograms* basicHistograms)
+{
+    basicHistograms_ = basicHistograms;
+}
+
+
+
+void HiggsAnalysis::SetPlayground(Playground* playground)
+{
+    playground_ = playground;
+}
+
+
+
 void HiggsAnalysis::SetRunWithTtbb(const bool runWithTtbb)
 {
     runWithTtbb_ = runWithTtbb;
 }
+
+
+
+
+void HiggsAnalysis::fillAll(const std::string& selectionStep,
+                            const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                            const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                            const KinRecoObjects& kinRecoObjects,
+                            const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                            const tth::ObjectIndices& objectIndices)const
+{
+    if(eventYieldHistograms_) eventYieldHistograms_->fill(recoLevelWeights.weight_, selectionStep);
+    if(dyScalingHistograms_) dyScalingHistograms_->fill(recoObjects, objectIndices, recoLevelWeights.weight_, selectionStep);
+    if(basicHistograms_) basicHistograms_->fill(recoObjects, objectIndices, recoLevelWeights, selectionStep);
+    if(playground_) playground_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
+                                      objectIndices, genLevelWeights, recoLevelWeights, recoLevelWeights.weight_,
+                                      selectionStep);
+}
+
+
+
+void HiggsAnalysis::bookAll()
+{
+    if(eventYieldHistograms_) eventYieldHistograms_->book(fOutput);
+    if(dyScalingHistograms_) dyScalingHistograms_->book(fOutput);
+    if(basicHistograms_) basicHistograms_->book(fOutput);
+    if(playground_) playground_->book(fOutput);
+    
+    // Setting the output for DijetAnalyzer
+    // FIXME: where are the steps for dijet analyzer set? not existing ???
+    if(dijetAnalyzer_) dijetAnalyzer_->setOutputSelectorList(fOutput);
+}
+
+
+
+void HiggsAnalysis::clearAll()
+{
+    if(eventYieldHistograms_) eventYieldHistograms_->clear();
+    if(dyScalingHistograms_) dyScalingHistograms_->clear();
+    if(basicHistograms_) basicHistograms_->clear();
+    if(playground_) playground_->clear();
+    if(dijetAnalyzer_) dijetAnalyzer_->clear();
+}
+
 
 
 

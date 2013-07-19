@@ -16,16 +16,41 @@
 CMS_version=CMSSW_5_3_11
 export SCRAM_ARCH=slc5_amd64_gcc462
 
+
+
+minimalInstall="False"
+if [ $# -ge 1 ] ; then
+    if [ $# -ge 2 ] || [ $1 != "min" ] ; then
+        echo "Usage for full installation: $0"
+        echo "Usage for minimal installation (analysis on nTuple level): $0 min"
+        exit 1
+    else
+        minimalInstall="True"
+    fi
+fi
+
 scram p -s CMSSW ${CMS_version}
 cd ${CMS_version}/src
-if [ $? != 0 ]; then
-    exit 1
-fi
 
 echo export SCRAM_ARCH=${SCRAM_ARCH} > SCRAM_ARCH
 chmod u+x SCRAM_ARCH
 
 eval `scramv1 runtime -sh`
+
+
+
+###### Hamburg TOP package (plus dependencies) #####
+#cvs co -d TopAnalysis UserCode/Bromo/TopAnalysis
+git clone https://git.cern.ch/reps/TopAnalysis
+
+
+if [[ "$minimalInstall" == True ]] ; then
+    echo
+    echo "Minimal installation successfully done"
+    exit 0
+fi
+
+
 
 ###### PAT #####
 ### From: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes52X#V08_09_59_CMSSW_5_3_11   (revision 148)
@@ -47,11 +72,8 @@ cd -
 
 cvs co -r V15-02-06       RecoParticleFlow/PFProducer
 
-###### Hamburg TOP package (plus dependencies) #####
-#cvs co -d TopAnalysis UserCode/Bromo/TopAnalysis
-git clone https://git.cern.ch/reps/TopAnalysis
 
-
+###### TQAF #####
 
 ### From: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTQAFRecipes#CMSSW_5_3_X  (revision 224)
 addpkg AnalysisDataFormats/TopObjects
@@ -76,3 +98,7 @@ addpkg ElectroWeakAnalysis/Utilities
 #checkdeps -a
 
 scram b -j 8
+
+echo
+echo "Full installation successfully done"
+
