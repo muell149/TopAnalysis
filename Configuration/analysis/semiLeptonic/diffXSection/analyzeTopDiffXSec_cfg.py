@@ -639,9 +639,9 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 # 5_3:
 #from Configuration.PyReleaseValidation.autoCond import autoCond
 if(runningOnData=="MC"):
-    process.GlobalTag.globaltag = cms.string('START53_V22::All') # Fall 2012 JEC for full 8 TeV data
+    process.GlobalTag.globaltag = cms.string('START53_V27::All') # Fall 2012 JEC for full 8 TeV data
 else: 
-    process.GlobalTag.globaltag = cms.string('FT_53_V21_AN4::All') # Fall 2012 JEC for full 8 TeV data
+    process.GlobalTag.globaltag = cms.string('FT_53_V21_AN5::All') # Fall 2012 JEC for full 8 TeV data
     
 ## Needed for redoing the ak5GenJets
 #if(runningOnData=="MC" and pfToPAT==False):
@@ -1564,7 +1564,8 @@ if(applyKinFit==True):
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.compositedKinematicsKinFit              +
                                              process.filterProbKinFit                        +
-                                             process.analyzeTopRecoKinematicsKinFitProbSel   
+                                             process.analyzeTopRecoKinematicsKinFitProbSel   +
+                                             process.compositedKinematicsProbSel             
                                              )
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
@@ -1579,7 +1580,8 @@ if(applyKinFit==True):
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                          process.compositedKinematicsKinFit              +
                                          process.filterProbKinFit                        +
-                                         process.analyzeTopRecoKinematicsKinFitProbSel   
+                                         process.analyzeTopRecoKinematicsKinFitProbSel   +
+                                         process.compositedKinematicsProbSel             
                                          )
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)

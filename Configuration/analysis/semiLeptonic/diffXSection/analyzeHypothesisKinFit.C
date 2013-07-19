@@ -3,13 +3,13 @@
 #include "../../unfolding/TopSVDFunctions.C" 
 
 void analyzeHypothesisKinFit(double luminosity = 19800.,
-			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0, 
+			     bool save = true, int systematicVariation=0, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=false, bool hadron=true,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="")
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
   // ============================
   //  Set ROOT Style
@@ -188,7 +188,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   // exclude PDF
   //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
   // FIXME: exclude all
-  //for(int sys=5     ; sys<=46    ; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=3     ; sys<=46    ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
   for(unsigned int i=0; i<ignoreSys_.size(); ++i){
     if(systematicVariation==ignoreSys_[i]) systematicVariationMod=sysNo;
@@ -302,9 +302,10 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 
   // choose correct input folder for mixed object analyzer
   TString recMixpath= "compositedKinematics";
-  addSel!="" ? recMixpath+=addSel : recMixpath+="KinFit";
+  //addSel!="" ? recMixpath+=addSel : recMixpath+="KinFit";
+  recMixpath+="KinFit";
   TString genMixpath= "composited"+LV+"Gen"+PS;
-  
+
   //  ---
   //     choose plots
   //  ---
@@ -1362,7 +1363,6 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   //  Renaming of PS specific plot names to parton level PS names to unify naming
   // ====================================================================================
   // loop plots
-
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
     TString newName=plotList_[plot];
     // ---
@@ -1403,7 +1403,8 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 	newName.ReplaceAll("composited", "analyzeTop");
 	if(plotList_[plot].Contains("Gen")) newName.ReplaceAll("Gen", "LevelKinematics");
 	else newName.ReplaceAll("analyzeTop", "analyzeTopReco");
-	newName.ReplaceAll("Ngenjets", "Njets");	
+	newName.ReplaceAll("Ngenjets", "Njets");
+	if(addSel.Contains("ProbSel")) newName.ReplaceAll("KinFit", "KinFitProbSel");
       }
       // for all gen plots
       if(plotList_[plot].Contains(genHadronLeppath)){ 
@@ -3198,10 +3199,10 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 	TString saveToFolder=outputFolder;
 	TString title=(plotCanvas_[idx])->GetTitle();
 	if(title.Contains("efficiency"                     )) saveToFolder+="effAndAcc/";
-	if(title.Contains("analyzeTopPartonLevelKinematics")) saveToFolder+="partonLevel/";
+	if(title.Contains("analyzeTopPartonLevelKinematics")||title.Contains("compositedPartonGen")) saveToFolder+="partonLevel/";
 	if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
 	if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
-       	if(title.Contains("analyzeTopRecoKinematicsKinFit" )) saveToFolder+="recoYield/";
+       	if(title.Contains("analyzeTopRecoKinematicsKinFit" )||title.Contains("compositedKinematics")) saveToFolder+="recoYield/";
 	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
 	if(!title.Contains("canv")){
 	  // add additional label that indicates PS for all relevant plots
