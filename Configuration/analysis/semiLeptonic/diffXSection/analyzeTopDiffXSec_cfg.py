@@ -1564,7 +1564,8 @@ if(applyKinFit==True):
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.compositedKinematicsKinFit              +
                                              process.filterProbKinFit                        +
-                                             process.analyzeTopRecoKinematicsKinFitProbSel   
+                                             process.analyzeTopRecoKinematicsKinFitProbSel   +
+                                             process.compositedKinematicsProbSel             
                                              )
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
@@ -1579,7 +1580,8 @@ if(applyKinFit==True):
                                          process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                          process.compositedKinematicsKinFit              +
                                          process.filterProbKinFit                        +
-                                         process.analyzeTopRecoKinematicsKinFitProbSel   
+                                         process.analyzeTopRecoKinematicsKinFitProbSel   +
+                                         process.compositedKinematicsProbSel             
                                          )
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
