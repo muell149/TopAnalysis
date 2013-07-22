@@ -36,7 +36,7 @@ sampleHelpers.o: $(TopDir)/sampleHelpers.cc $(TopDir)/sampleHelpers.h
 
 
 
-load_Analysis: dict.o load_Analysis.o AnalysisBase.o KinematicReconstruction.o KinematicReconstruction_LSroutines.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o analysisStructs.o Playground.o
+load_Analysis: dict.o load_Analysis.o AnalysisBase.o KinematicReconstruction.o KinematicReconstruction_LSroutines.o MeanSol.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o analysisStructs.o Playground.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
 load_Analysis.o: $(HiggsDir)/load_Analysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/utils.h $(TopDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(HiggsDir)/JetCategories.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h $(TopDir)/ScaleFactors.h $(HiggsDir)/MvaInputVariables.h $(HiggsDir)/DijetAnalyzer.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/Playground.h
@@ -72,11 +72,14 @@ PUReweighter.o: $(TopDir)/PUReweighter.cc $(TopDir)/PUReweighter.h
 KinReco.o: $(TopDir)/KinReco.cc $(TopDir)/KinReco.h $(TopDir)/classesFwd.h
 	g++ -c -o KinReco.o $(COMPFLAGS) $(TopDir)/KinReco.cc
 
-KinematicReconstruction.o: $(TopDir)/KinematicReconstruction.cc $(TopDir)/KinematicReconstruction.h $(TopDir)/classesFwd.h $(TopDir)/KinematicReconstruction_LSroutines.h
+KinematicReconstruction.o: $(TopDir)/KinematicReconstruction.cc $(TopDir)/KinematicReconstruction.h $(TopDir)/classesFwd.h
 	g++ -c -o KinematicReconstruction.o $(COMPFLAGS) $(TopDir)/KinematicReconstruction.cc
 
 KinematicReconstruction_LSroutines.o: $(TopDir)/KinematicReconstruction_LSroutines.cc $(TopDir)/KinematicReconstruction_LSroutines.h $(TopDir)/classesFwd.h
 	g++ -c -o KinematicReconstruction_LSroutines.o $(COMPFLAGS) $(TopDir)/KinematicReconstruction_LSroutines.cc
+
+MeanSol.o: $(TopDir)/MeanSol.cc $(TopDir)/MeanSol.h
+	g++ -c -o  $@ $(COMPFLAGS) $(TopDir)/MeanSol.cc
 
 MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h
 	g++ -c -o MvaInputVariables.o $(COMPFLAGS) $(HiggsDir)/MvaInputVariables.cc
