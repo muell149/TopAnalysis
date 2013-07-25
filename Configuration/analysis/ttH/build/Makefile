@@ -51,13 +51,13 @@ dict.cc: $(TopDir)/AnalysisBase.h $(HiggsDir)/HiggsAnalysis.h $(HiggsDir)/Analys
 analysisHelpers.o: $(HiggsDir)/analysisHelpers.cc $(HiggsDir)/analysisHelpers.h
 	g++ -c -o analysisHelpers.o $(COMPFLAGS) $(HiggsDir)/analysisHelpers.cc
 
-analysisStructs.o: $(HiggsDir)/analysisStructs.cc $(HiggsDir)/analysisStructs.h
+analysisStructs.o: $(HiggsDir)/analysisStructs.cc $(HiggsDir)/analysisStructs.h $(HiggsDir)/analysisStructsFwd.h
 	g++ -c -o analysisStructs.o $(COMPFLAGS) $(HiggsDir)/analysisStructs.cc
 
 AnalysisBase.o: $(TopDir)/AnalysisBase.cc $(TopDir)/AnalysisBase.h $(TopDir)/storeTemplate.h $(TopDir)/classesFwd.h
 	g++ -c -o AnalysisBase.o $(COMPFLAGS) $(TopDir)/AnalysisBase.cc
 
-HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/classesFwd.h $(TopDir)/AnalysisBase.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/MvaInputVariables.h
+HiggsAnalysis.o: $(HiggsDir)/HiggsAnalysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/classesFwd.h $(TopDir)/AnalysisBase.h $(HiggsDir)/analysisHelpers.h $(HiggsDir)/analysisStructsFwd.h
 	g++ -c -o HiggsAnalysis.o $(COMPFLAGS) $(HiggsDir)/HiggsAnalysis.cc
 
 analysisUtils.o: $(TopDir)/analysisUtils.cc $(TopDir)/analysisUtils.h $(TopDir)/classesFwd.h
@@ -81,7 +81,7 @@ KinematicReconstruction_LSroutines.o: $(TopDir)/KinematicReconstruction_LSroutin
 MeanSol.o: $(TopDir)/MeanSol.cc $(TopDir)/MeanSol.h
 	g++ -c -o  $@ $(COMPFLAGS) $(TopDir)/MeanSol.cc
 
-MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h
+MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h $(HiggsDir)/analysisStructsFwd.h
 	g++ -c -o MvaInputVariables.o $(COMPFLAGS) $(HiggsDir)/MvaInputVariables.cc
 
 JetCorrectionUncertainty.o: $(TopDir)/JetCorrectionUncertainty.cc $(TopDir)/JetCorrectionUncertainty.h
@@ -142,7 +142,7 @@ RootFileReader.o: $(TopDir)/RootFileReader.cc $(TopDir)/RootFileReader.h
 
 
 
-mva: mva.o sampleHelpers.o MvaInputVariables.o CommandLineParameters.o utils.o
+mva: mva.o sampleHelpers.o MvaInputVariables.o CommandLineParameters.o utils.o analysisStructs.o
 	g++ -o mva $^ $(ROOTLIBS)
 
 mva.o: $(HiggsDir)/train_bdt_topSystemJetAssignment.cc $(TopDir)/sampleHelpers.h $(HiggsDir)/MvaInputVariables.h $(TopDir)/CommandLineParameters.h $(TopDir)/utils.h

@@ -21,8 +21,9 @@
 #include <TMVA/Reader.h>
 
 #include "MvaInputVariables.h"
+#include "analysisStructs.h"
 #include "../../diLeptonic/src/classes.h"
-
+#include "../../diLeptonic/src/analysisObjectStructs.h"
 
 
 
@@ -171,19 +172,12 @@ void MvaInputTopJetsVariables::addEntries(const std::vector<MvaInputTopJetsVaria
     float maxWeightCorrect(-999.F);
     for(const float weight : weightsCorrect){
         if(weight > maxWeightCorrect) maxWeightCorrect = weight;
-//        std::cout<<"Weights correct: "<<weight<<"\n";
     }
-    
-//    std::cout<<std::endl;
     
     float maxWeightSwapped(-999.F);
     for(const float weight : weightsSwapped){
         if(weight > maxWeightSwapped) maxWeightSwapped = weight;
-//        std::cout<<"Weights swapped: "<<weight<<"\n";
     }
-    
-//    std::cout<<std::endl;
-//    std::cout<<"Max weights: "<<maxWeightCorrect<<" , "<<maxWeightSwapped<<"\n\n\n\n\n";
     
     for(size_t i = 0; i < v_input.size(); ++i){
         Input input = v_input.at(i);
@@ -194,7 +188,6 @@ void MvaInputTopJetsVariables::addEntries(const std::vector<MvaInputTopJetsVaria
         }
         v_inputStruct_.push_back(input);
     }
-    
 }
 
 
@@ -228,6 +221,83 @@ void MvaInputTopJetsVariables::createMvaInputBranches(TTree* tree)
     t_mvaInput_->Branch("meanMt_b_met", &inputStruct_.meanMt_b_met_, "meanMt_b_met/F");
     t_mvaInput_->Branch("massSum_antiBLepton_bAntiLepton", &inputStruct_.massSum_antiBLepton_bAntiLepton_, "massSum_antiBLepton_bAntiLepton/F");
     t_mvaInput_->Branch("massDiff_antiBLepton_bAntiLepton", &inputStruct_.massDiff_antiBLepton_bAntiLepton_, "massDiff_antiBLepton_bAntiLepton/F");
+}
+
+
+
+std::vector<MvaInputTopJetsVariables::Input> MvaInputTopJetsVariables::fillInputStructs(const tth::RecoObjectIndices& recoObjectIndices,
+                                                                                        const tth::GenObjectIndices& genObjectIndices,
+                                                                                        const RecoObjects& recoObjects,
+                                                                                        const double& eventWeight)
+{
+    std::vector<MvaInputTopJetsVariables::Input> result;
+    
+    // Access relevant objects and indices
+    const VLV& allLeptons(*recoObjects.allLeptons_);
+    const VLV& jets(*recoObjects.jets_);
+    const LV& met(*recoObjects.met_);
+    const std::vector<double>& jetBtag(*recoObjects.jetBTagCSV_);
+    const std::vector<double>& jetCharge(*recoObjects.jetChargeRelativePtWeighted_);
+    
+    const LV& lepton(allLeptons.at(recoObjectIndices.leptonIndex_));
+    const LV& antiLepton(allLeptons.at(recoObjectIndices.antiLeptonIndex_));
+    
+    const int& matchedBjetFromTopIndex = genObjectIndices.recoBjetFromTopIndex_;
+    const int& matchedAntiBjetFromTopIndex = genObjectIndices.recoAntiBjetFromTopIndex_;
+    const bool& successfulTopMatching = genObjectIndices.uniqueRecoTopMatching();
+    
+    const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;
+    
+    // Calculate the jet recoil for each jet pair, and put it in a vector of same size
+    const VLV& jetRecoils = MvaInputTopJetsVariables::recoilForJetPairs(jetIndexPairs, recoObjectIndices.jetIndices_, jets);
+    
+    
+    // Loop over all jet pairs
+    for(size_t iJetIndexPairs = 0; iJetIndexPairs < jetIndexPairs.size(); ++iJetIndexPairs){
+
+        // Get the indices of b and anti-b jet defined by jet charge
+        const int antiBIndex = jetIndexPairs.at(iJetIndexPairs).first;
+        const int bIndex = jetIndexPairs.at(iJetIndexPairs).second;
+        
+        // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
+        bool isSwappedPair(false);
+        bool isCorrectPair(false);
+        if(successfulTopMatching){
+            if(matchedBjetFromTopIndex==bIndex && matchedAntiBjetFromTopIndex==antiBIndex){
+                isCorrectPair = true;
+            }
+            else if(matchedBjetFromTopIndex==antiBIndex && matchedAntiBjetFromTopIndex==bIndex){
+                isSwappedPair = true;
+            }
+        }
+        
+        // Variables for MVA
+        const LV& bjet = jets.at(bIndex);
+        const LV& antiBjet = jets.at(antiBIndex);
+        const double& bjetBtagDiscriminator = jetBtag.at(bIndex);
+        const double& antiBjetBtagDiscriminator = jetBtag.at(antiBIndex);
+        const double jetChargeDiff = jetCharge.at(antiBIndex) - jetCharge.at(bIndex);
+        if(jetChargeDiff<0. || jetChargeDiff>2.){
+            std::cerr<<"ERROR! Difference in jet charge is (value = "<<jetChargeDiff
+                     <<"), but definition allows only values in [0,2]\n...break\n"<<std::endl;
+            exit(555);
+        }
+        const LV& jetRecoil = jetRecoils.at(iJetIndexPairs);
+
+        const MvaInputTopJetsVariables::Input mvaInput(lepton, antiLepton,
+                                                       bjet, antiBjet,
+                                                       bjetBtagDiscriminator, antiBjetBtagDiscriminator,
+                                                       jetChargeDiff,
+                                                       jetRecoil, met,
+                                                       successfulTopMatching,
+                                                       isCorrectPair, isSwappedPair,
+                                                       eventWeight);
+
+        result.push_back(mvaInput);
+    }
+    
+    
+   return result; 
 }
 
 
@@ -691,6 +761,29 @@ void MvaInputTopJetsVariables::runMva(const char* outputDir, const char* weightF
     delete factory;
 }
 
+
+
+VLV MvaInputTopJetsVariables::recoilForJetPairs(const tth::IndexPairs& jetIndexPairs,
+                                     const std::vector<int>& jetIndices,
+                                     const VLV& jets)
+{
+    VLV result;
+
+    for(const auto& jetIndexPair : jetIndexPairs){
+        const int antiBIndex = jetIndexPair.first;
+        const int bIndex = jetIndexPair.second;
+
+        LV jetRecoil;
+        for(const int index : jetIndices){
+            if(index == bIndex || index == antiBIndex) continue;
+            jetRecoil += jets.at(index);
+        }
+
+        result.push_back(jetRecoil);
+    }
+
+    return result;
+}
 
 
 
