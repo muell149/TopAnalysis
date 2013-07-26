@@ -54,11 +54,14 @@ namespace semileptonic {
   // basic variables
   TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt", "lbMass", "Njets"};
   TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass", "topPtTtbarSys", "ttbarDelPhi", "ttbarPhiStar"};
+  //TString xSecVariablesKinFit[]     = {"topPt"};
   TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm", "lbMassNorm", "NjetsNorm"};
   TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "topPtTtbarSysNorm", "ttbarDelPhiNorm", "ttbarPhiStarNorm"};
+  //TString xSecVariablesKinFitNorm[]     = {"topPtNorm"};
   TString xSecVariablesIncl[] = {"inclusive"};
 
   TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{t} (t#bar{t} restframe)/[GeV]", "#Delta#phi^{t}/ ", "#Phi^{#lower[-0.9]{* }}(t,#bar{t})/ "};
+  //TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]"};
   TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "m^{b#bar{b}}/[GeV]", "p_{T}^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]", "N_{jets}/ "};
 
   // cross-check variables
@@ -84,18 +87,18 @@ namespace semileptonic {
 		   kWW     , kWZ     , kZZ     , 
 		   /*17*/    /*18*/    /*19*/    /*20*/    /*21*/    /*22*/
 		   kSTops  , kSATops , kSTopt  , kSATopt , kSToptW , kSAToptW,
-		   /*23*/    /*24*/    /*25*/    /*26*/
-		   kSigPow , kBkgPow,  kSigMca , kBkgMca,
-                   /*27*/
+		   /*23*/    /*24*/    /*25*/    /*26*/    /*27*/    /*28*/
+		   kSigPow , kBkgPow,  kSigMca , kBkgMca , kSigPowHer , kBkgPowHer,
+                   /*29*/
 		   ENDOFSAMPLEENUM,
 		   // stop scale sample is splitted in 3 subsamples:
-		   /*27*/    /*28*/     /*29*/    /*30*/     /*31*/    /*32*/
+		   /*30*/    /*31*/     /*32*/    /*33*/     /*34*/    /*35*/
 		   kSToptW1, kSAToptW1, kSToptW2, kSAToptW2, kSToptW3, kSAToptW3,
-		   /*33*/
+		   /*35*/
 		   ENDOFSAMPLEENUM2
   };
 
-  // Colors for event samples
+  // Colors for event samples (<=kSAToptW)
 
   int color_[] ={ kRed+1  , kRed-7  , kAzure-2, kGreen-3, 
 		  kYellow , kMagenta, 10      , kBlack  , 
@@ -109,17 +112,28 @@ namespace semileptonic {
   const unsigned int constMadgraphColor = kRed+1;
   const unsigned int constMcatnloColor  = kBlue;
   const unsigned int constPowhegColor   = kGreen+1;
+  const unsigned int constPowhegColor2  = kGreen+3;
   const unsigned int constNnloColor     = kOrange+4;
   const unsigned int constNnloColor2    = kMagenta+2;
 
   // Line style for theory curves
 
   const unsigned int constPowhegStyle  = 7;
+  const unsigned int constPowhegStyle2 = 4;
   const unsigned int constNnloStyle    = 2;
   const unsigned int constMcatnloStyle = 5;
   const unsigned int constNnloStyle2   = 10;
 
-  // Marker style
+  // legend entries for theory curves
+  const TString constMadGraphPythiaLabel   = "MadGraph+Pythia";
+  const TString constMadGraphPythiaLabelSC = "MadGraph+Pythia SC";
+  const TString constPowhegPythiaLabel  = "Powheg+Pythia";
+  const TString constPowhegHerwigLabel  = "Powheg+Herwig";
+  const TString constNnloLabelKidonakis = "Approx. NNLO";
+  const TString constMcatnloHerwigLabel = "MC@NLO+Herwig";
+  const TString constNloNNLLLabelAhrens = "NLO+NNLL";
+
+  // Marker style (<=kSAToptW)
 
   int marker_[] = {20, 22, 29, 23, 
 		   21, 27, 28, 20, 
@@ -159,11 +173,11 @@ namespace semileptonic {
 			     /*41:*/ sysPDFUp,                   /*42:*/ sysPDFDown,
 			     /*43:*/ sysHadUp,                   /*44:*/ sysHadDown,
 			     /*45:*/ sysGenMCatNLO,              /*46:*/ sysGenPowheg,
-			     /*47:*/ ENDOFSYSENUM,               /*48:*/ sysTest, 
-			     /*49:*/ sysTestMCatNLO,             /*50:*/ sysTestPowheg,
-			     /*51:*/ ENDOFSYSENUM2
-
-};
+			     /*47:*/ sysGenPowhegHerwig,         /*48:*/ ENDOFSYSENUM, 
+			     /*49:*/ sysTest, 			 /*50:*/ sysTestMCatNLO,             
+			     /*51:*/ sysTestPowheg,     	 /*52:*/ sysTestPowhegHerwig,        
+			     /*53:*/ ENDOFSYSENUM2
+  };
 
   // ============================
   //  Numerical Constants
@@ -176,9 +190,6 @@ namespace semileptonic {
   const double ttbarCrossSection=245.8;// NNNLO+NNLL Mitov, calculated for mtop=173.3 GeV (arXiv:1303.6254)
   const double ttbarCrossSectionError=sqrt(((6.2+8.4)/2.)*((6.2+8.4)/2.)+((6.2+6.4)/2.)*((6.2+6.4)/2.)); // Scale and PDF uncertainties 
                                                              // --> up/down contributions have been symetrized
-
-
-
 
   const double SF_TopMassDownUncertainty=0.9/3.0; // scale factors for top mass uncertainty
   const double SF_TopMassUpUncertainty  =0.9/3.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
@@ -270,6 +281,7 @@ namespace semileptonic {
       case sysHadDown                  : return "sysHadronizationDown";
       case sysGenMCatNLO               : return "sysGenMCatNLO";
       case sysGenPowheg                : return "sysGenPowheg";  
+      case sysGenPowhegHerwig          : return "sysGenPowhegHerwig";  
       default                          : std::cout << "ERROR: the chosen input for function sysLabel is not valid" << std::endl;
                                          std::cout << "chosen systematic variation:  " << sys            << std::endl;
                                          std::cout << "maximum systematic variation: " << ENDOFSYSENUM-1 << std::endl;
@@ -286,12 +298,14 @@ namespace semileptonic {
     // used enumerators:    sample
     
     // list all MC process/sample names
-    if(sample==kSig    ) return "t#bar{t} Signal";
-    if(sample==kSigPow ) return "t#bar{t} Signal POWHEG";
-    if(sample==kSigMca ) return "t#bar{t} Signal MC@NLO";
-    if(sample==kBkg    ) return "t#bar{t} Other";
-    if(sample==kBkgPow ) return "t#bar{t} Other POWHEG";
-    if(sample==kBkgMca ) return "t#bar{t} Other MC@NLO";
+    if(sample==kSig      ) return "t#bar{t} Signal";
+    if(sample==kSigPow   ) return "t#bar{t} Signal Powheg+Pythia";
+    if(sample==kSigPowHer) return "t#bar{t} Signal Powheg+Herwig";
+    if(sample==kSigMca   ) return "t#bar{t} Signal MC@NLO+Herwig";
+    if(sample==kBkg       ) return "t#bar{t} Other";
+    if(sample==kBkgPow    ) return "t#bar{t} Other Powheg+Pythia";
+    if(sample==kBkgPowHer ) return "t#bar{t} Other Powheg+Herwig";
+    if(sample==kBkgMca    ) return "t#bar{t} Other MC@NLO+Herwig";
     if(sample==kSTop   ) return "Single Top";
     if(sample==kSToptW ) return "Single Top tW";
     if(sample==kSTops  ) return "Single Top s";
@@ -595,6 +609,7 @@ namespace semileptonic {
 
     // no need for rounding if the value is 0
     if(value==0.)return value;
+    if(k==0) return value;
     Double_t result = value;
     // search window: 10^20 to 10^-20
     for(Int_t i = 20; i > -20; i--){
@@ -662,7 +677,7 @@ namespace semileptonic {
     {
       // function divides the #entries in every bin of the input plot "histo"
       // by its binwidth and returns the result
-      // the errors are recalculated if "calculateError"=1 is choosen
+      // the errors are recalculated if "calculateError"=1 is chosen
       // careful: not done for underflow/overflow
       // modified quantities: NONE
       // used functions: NONE
@@ -830,7 +845,7 @@ namespace semileptonic {
     if((sample==kSig)||(sample==kBkg)){
       crossSection=ttbarCrossSection; 
       // Summer12
-      Nevents = 6923750*0.99974;// 8 TEV PU SF from gen ttbarSG Integral/entries
+      Nevents = 6923750*0.999881;// 8 TEV PU SF from gen ttbarSG Integral/entries
       // Systematic samples
       if(kSys==sysTopScaleUp  ) Nevents=5009488;
       if(kSys==sysTopScaleDown) Nevents=5387181;
@@ -842,10 +857,14 @@ namespace semileptonic {
     else if((sample==kSigPow)||(sample==kBkgPow)){
       crossSection=ttbarCrossSection; 
       // Summer12
-      Nevents = 21675970*0.9998;// 8 TEV PU SF from gen ttbarSG Integral/entries
+      Nevents = 21675970*0.999886;// 8 TEV PU SF from gen ttbarSG Integral/entries
     }
-    else if((sample==kSigMca)||(sample==kBkgMca)){
+    else if((sample==kSigPowHer)||(sample==kBkgPowHer)){
       crossSection=ttbarCrossSection; 
+      // Summer12
+      Nevents = 27684235*0.999985;// 8 TEV PU SF from gen ttbarSG Integral/entries
+    }
+    else if((sample==kSigMca)||(sample==kBkgMca)){      crossSection=ttbarCrossSection; 
       // Summer12
       // MC@NLO: total events is sum of weights
       //    21745196 total     weights
@@ -853,7 +872,7 @@ namespace semileptonic {
       //     2467324 negative  weights (11.35%)
       //    16810548 effective weights
       // each |weight| = 190.41256 -> number directly from LHE
-      Nevents = 32852589.*210.92; // 8 TEV convoluted PU*weight SF from gen ttbarSG Integral/entries
+      Nevents = 32852589.*210.9532; // 8 TEV convoluted PU*weight SF from gen ttbarSG Integral/entries
     }
     // MadGraph: W->lnu+jets
     else if(sample==kWjets){
@@ -1053,7 +1072,7 @@ namespace semileptonic {
     }
     if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
     // e1) for ttbar->lnu: BR correction
-    if((sample==kSig)||(sample==kSigPow)||(sample==kSigMca)) weight *= BRcorrectionSemileptonic;
+    if((sample==kSig)||(sample==kSigPow)||(sample==kSigMca)||(sample==kSigPowHer)) weight *= BRcorrectionSemileptonic;
     // e2) systematic higher/lower BG
     double scale=0;
     // (i) more/less DiBoson
@@ -1084,7 +1103,7 @@ namespace semileptonic {
       }
       std::cout << ": " << weight << std::endl;
       if(verbose>1) std::cout << "ratio: " << weight/weight2 << std::endl;
-      if(weight!=weight2&&((sample==kSig)||(sample==kSigPow)||(sample==kSigMca))) std::cout << "(BR correction applied)" << std::endl;
+      if(weight!=weight2&&((sample==kSig)||(sample==kSigPow)||(sample==kSigPowHer)||(sample==kSigMca))) std::cout << "(BR correction applied)" << std::endl;
     }
     // return result
     if(sample!=kData&&weight==1){
@@ -1151,7 +1170,7 @@ namespace semileptonic {
   TString TopFilename(unsigned int sample, unsigned int sys, const std::string decayChannel)
   {
     // this function contains the basic convention for the MC
-    // .root files and returns the correct names for choosen samplesample"
+    // .root files and returns the correct names for chosen samplesample"
     // and systematic variation "sys"
     // modified quantities: NONE
     // used functions: NONE
@@ -1169,6 +1188,8 @@ namespace semileptonic {
     if(sample==kBkg    )fileName += "Bkg";
     if(sample==kSigPow )fileName += "SigPowheg";
     if(sample==kBkgPow )fileName += "BkgPowheg";
+    if(sample==kSigPowHer )fileName += "SigPowhegHerwig";
+    if(sample==kBkgPowHer )fileName += "BkgPowhegHerwig";
     if(sample==kSigMca )fileName += "SigMcatnlo";
     if(sample==kBkgMca )fileName += "BkgMcatnlo";
     if(sample==kWjets  )fileName += "Wjets";
@@ -1207,7 +1228,7 @@ namespace semileptonic {
       if(sys==sysPDFDown) fileName = "PDFDown/"+fileName+"PdfVarDown";
     }
     // data based pt ttbar reweighting
-    if( (sys==sysTest&&(sample==kSig||sample==kBkg))||(sys==sysTestPowheg&&(sample==kSigPow||sample==kBkgPow))||(sys==sysTestMCatNLO&&(sample==kSigMca||sample==kBkgMca)) ) fileName = "ttbarReweight/"+fileName+"SysDistortdata";    
+    if( (sys==sysTest&&(sample==kSig||sample==kBkg))||(sys==sysTestPowheg&&(sample==kSigPow||sample==kBkgPow))||(sys==sysTestPowhegHerwig&&(sample==kSigPowHer||sample==kBkgPowHer))||(sys==sysTestMCatNLO&&(sample==kSigMca||sample==kBkgMca)) ) fileName = "ttbarReweight/"+fileName+"SysDistortdata";    
     // Q2-Scale
     // (a) top (ttbar+single top)
     if((sample==kSig)||(sample==kBkg)||(sample==kSTop)||(sample==kSToptW)||(sample==kSTops)||(sample==kSTopt)||(sample==kSAToptW)||(sample==kSATops)||(sample==kSATopt)||(sample==kSToptW1)||(sample==kSAToptW1)||(sample==kSToptW2)||(sample==kSAToptW2)||(sample==kSToptW3)||(sample==kSAToptW3)){
@@ -1275,14 +1296,14 @@ namespace semileptonic {
   std::map<unsigned int, TFile*> getStdTopAnalysisFiles( const TString inputFolder, const unsigned int systematicVariation, const TString dataFile, const std::string decayChannel, TString ttbarMC="Madgraph")
     {
       // this function returns a map containing all existing .root in "inputFolder"
-      // corresponding to the choosen systematic variation "systematicVariation"
+      // corresponding to the chosen systematic variation "systematicVariation"
       // and the data file "dataFile" for which the direct path/name.root is needed
       // The MC .root file names correspond to the standard names as defined in the
       // function TopFilename
       // modified quantities: NONE
       // used functions: TopFilename
       // used enumerators: samples
-      // ttbarMC: use "Madgraph", "Mcatnlo" or "Powheg" for the respective samples
+      // ttbarMC: use "Madgraph", "Mcatnlo", "Powheg" or "PowhegHerwig" for the respective samples
 
 
       // open our standard analysis files and save them in a map
@@ -1296,6 +1317,10 @@ namespace semileptonic {
 	    if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Powheg") {
 	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigPow, systematicVariation, decayChannel);
 	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgPow, systematicVariation, decayChannel);
+	    }
+	    else if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="PowhegHerwig") {
+	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigPowHer, systematicVariation, decayChannel);
+	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgPowHer, systematicVariation, decayChannel);
 	    }
 	    else if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Mcatnlo") {
 	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigMca, systematicVariation, decayChannel);
@@ -1454,7 +1479,7 @@ namespace semileptonic {
     // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
     // "luminosity": [/pb]
     // "systematicVariation": specify systematic variation corresponding to enum systematicVariation
-    // ttbarMC: use "Madgraph", "Mcatnlo" or "Powheg" for the respective samples
+    // ttbarMC: use "Madgraph", "Mcatnlo", "Powheg" or "PowhegHerwig" for the respective samples
 
     // loop samples
     for(unsigned int sample=kSig; sample<=kSAToptW; ++sample) {
@@ -1463,7 +1488,11 @@ namespace semileptonic {
 	if(sample==kSig) sample2=kSigPow;
 	if(sample==kBkg) sample2=kBkgPow;
       }
-     if(ttbarMC=="Mcatnlo"){
+      else if(ttbarMC=="PowhegHerwig"){
+	if(sample==kSig) sample2=kSigPowHer;
+	if(sample==kBkg) sample2=kBkgPowHer;
+      }
+      else if(ttbarMC=="Mcatnlo"){
 	if(sample==kSig) sample2=kSigMca;
 	if(sample==kBkg) sample2=kBkgMca;
       }
@@ -1613,27 +1642,36 @@ namespace semileptonic {
     // "a": dividend
     // "b": divisor
 
-    // round a and b to the 3rd decimal place
-    // this should prevent errors due to rounding effects
-    float astar=ceil(a*1000.-0.5)/1000.;
-    float bstar=ceil(b*1000.-0.5)/1000.;
-    //  std::cout << std::endl << astar << " modulo ";
-    //  std::cout << bstar << std::endl;
-    float rest=astar-bstar;
+    // prevent errors due to rounding effects
+    // a) get the last relevant digit "dig" 
+    int dig=getRelevantDigits(a);
+    // b) convert double to int value by multiplying 10^"dig"
+    if(dig<getRelevantDigits(b)) dig=getRelevantDigits(b);
+    float atemp= a;
+    float btemp= b;
+    double shift=1.0;
+    for(int n=0; n < dig; ++n) {
+      atemp*=10.;
+      btemp*=10.;
+      shift*=10.;
+    }
+    // c) use int rounding to get rid of inprecise values
+    int astar= roundToInt(atemp);
+    int bstar= roundToInt(btemp);
+    // control printout
+    //std::cout << std::endl << a << " modulo ";
+    //std::cout << b << std::endl;
+    //std::cout << "-> " << astar << " modulo " << bstar << " / " << shift << std::endl;
+    float rest=a-b;
     if(rest<0){
-      std::cout << "can not compute " << astar << " modulo " << bstar << std::endl;
-      std::cout << "because " << astar << " < " << bstar << std::endl;
+      std::cout << "can not compute " << a << " modulo " << b << std::endl;
+      std::cout << "= " << astar << " modulo " << bstar << " / " << shift << std::endl;
+      std::cout << "because " << a << " < " << b << std::endl;
       exit(1);
     }
-    for(float n=1.; rest>0.; n++){
-      rest=astar-n*bstar;
-      if(rest<0){
-	// allow some precision tolerance because of rounding effects
-	if(rest>-0.000001) rest=0;
-	else rest = astar-(n-1.)*bstar;
-	break;
-      }
-    }
+    // use int modulo function
+    rest=float(astar%bstar)/shift;
+    if(astar%bstar==0) rest=0.;
     return rest;
   }
 
@@ -1704,12 +1742,14 @@ namespace semileptonic {
     }
     // 2) coarseness of chosen binning
     //  double initialBinWidth=(xMax-xMin)/(double)NinitialBins;
-    double initialBinWidth = (double)(roundToInt(10000.*histoUnbinned.GetBinWidth(1)))/10000.;
-
+    double initialBinWidth = round(histoUnbinned.GetBinWidth(1), getRelevantDigits(histoUnbinned.GetBinWidth(1)));
+    //double initialBinWidth = (double)(roundToInt(10000.*histoUnbinned.GetBinWidth(1)))/10000.;
+    
     if(verbose>1) std::cout << "initial binwidth: " << initialBinWidth << std::endl;
     if(binlowerEdges_.size()>1){
       for(unsigned int finalBin=1; finalBin<binlowerEdges_.size()-1; ++finalBin){
 	double finalBinWidth=binlowerEdges_[finalBin]-binlowerEdges_[finalBin-1];
+	//finalBinWidth=round(finalBinWidth, getRelevantDigits(finalBinWidth));
 	if(verbose>1){
 	  std::cout << "bin #" << finalBin << ": ";
 	  std::cout << std::setprecision(20) << std::fixed << finalBinWidth << " modulo ";
@@ -1720,7 +1760,7 @@ namespace semileptonic {
 	  std::cout << "WARNING: histo " << histoUnbinned.GetName() << " may not be rebinned correctly!" << std::endl;
 	  std::cout << "the ininital binning is to coarse for the chosen binning!" << std::endl;
 	  //std::cout << "attention: probably error in modulo function," << std::endl;
-	  std::cout << "bin #" << finalBin << " of the choosen binning has ";
+	  std::cout << "bin #" << finalBin << " of the chosen binning has ";
 	  std::cout << "finalBinWidth modulo initialBinWidth of:" <<std::endl;
 	  std::cout << std::setprecision(20) << std::fixed << finalBinWidth;
 	  std::cout << " modulo " << std::setprecision(20) << std::fixed << initialBinWidth << " = ";
@@ -2484,7 +2524,10 @@ namespace semileptonic {
     // used functions: none
     // used enumerators: none
     if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return constMcatnloColor; 
-    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return constPowhegColor; 
+    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")){
+      if(theo.Contains("herwig" )||theo.Contains("Herwig")||theo.Contains("HERWIG")) return constPowhegColor2; 
+      else return constPowhegColor; 
+    }
     if(theo.Contains("nnlo")){
       if(theo.Contains("ahrens")||theo.Contains("ttbarMass")) return constNnloColor2;
       return constNnloColor;
@@ -2499,7 +2542,10 @@ namespace semileptonic {
     // used functions: none
     // used enumerators: none
     if(theo.Contains("mcatnlo")||theo.Contains("MC@NLO")||theo.Contains("mc@nlo")||theo.Contains("McAtNlo")||theo.Contains("Mc@Nlo")) return constMcatnloStyle;
-    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")) return constPowhegStyle; 
+    if(theo.Contains("powheg" )||theo.Contains("Powheg")||theo.Contains("POWHEG")||theo.Contains("PowHeg")){
+      if(theo.Contains("herwig" )||theo.Contains("Herwig")||theo.Contains("HERWIG")) return constPowhegStyle2; 
+      else  return constPowhegStyle; 
+    }
     if(theo.Contains("nnlo")){
       if(theo.Contains("ahrens")||theo.Contains("ttbarMass")) return constNnloStyle2;
       return constNnloStyle;
@@ -2586,7 +2632,7 @@ namespace semileptonic {
       
       // create ratios
       std::vector<TH1*> ratio_;
-      // sort for drawing order: MADGRAPH, MC@NLO, POWHEG, higher order theory calculation
+      // sort for drawing order: MADGRAPH, MC@NLO, POWHEG, POWHEG+HERWIG, higher order theory calculation
       std::vector<TH1F*> histDenominatorTheoryOrdered_=histDenominatorTheory_;
 /*       unsigned int count =0; */
 /*       while(histDenominatorTheoryOrdered_.size()!=histDenominatorTheory_.size()){ */
@@ -3638,7 +3684,7 @@ namespace semileptonic {
     // drawOnlyErrors: draw only error bands but no central curve
     // drawRawPlot: draw in addition the unbinned and unsmoothed plot 
     //              to see whether rebinning and smoothing has changed the shape 
-    // model: indicates theory (madgraph, powheg or mcatnalo)
+    // model: indicates theory (madgraph, powhegherwig, powheg or mcatnalo)
     // smoothcurves: indicates wheter smooth or binned curve is drawn
     // PS: "Parton", "Hadron"
     
@@ -3649,6 +3695,9 @@ namespace semileptonic {
     plotname2.ReplaceAll("MC@NLO" ,"");
     plotname2.ReplaceAll("MC@NLO2","");
     plotname2.ReplaceAll("POWHEG","" );
+    plotname2.ReplaceAll("Herwig","" );
+    plotname2.ReplaceAll("HERWIG","" );
+    plotname2.ReplaceAll("herwig","" );
     plotname2.ReplaceAll("Top","top" );
     plotname2.ReplaceAll("TTbarM","ttbarMass" );
     plotname2.ReplaceAll("TTbar","ttbar");
@@ -3693,7 +3742,7 @@ namespace semileptonic {
     // N-> <e+mu>
     weight*=0.5;
     // output
-    if(!normalize&&(model=="powheg"||model=="mcatnlo")&&verbose>0){
+    if(!normalize&&(model=="powheg"||model=="powhegherwig"||model=="mcatnlo")&&verbose>0){
       std::cout << "incl xSec(PS): " << 2*weight << " (" << model << ")"<< std::endl;
     }
     // --- 
@@ -3707,7 +3756,7 @@ namespace semileptonic {
       //raw->SetMarkerStyle(29);
       if(normalize) raw->Scale(1./(raw->Integral(0,raw->GetNbinsX()+1)));
       // absolute normalization for POWHEG and MCatNlo curve
-      if(!normalize&&(model=="powheg"||model=="mcatnlo")) raw->Scale(weight/getInclusiveXSec(raw));
+      if(!normalize&&(model=="powheg"||model=="powhegherwig"||model=="mcatnlo")) raw->Scale(weight/getInclusiveXSec(raw));
       raw->Scale(1./(raw->GetBinWidth(1)));
       raw->Draw("c same"); 
     }
@@ -3745,6 +3794,7 @@ namespace semileptonic {
     TString name=plotname2;
     if(name.Contains("Ngenjets")) name.ReplaceAll("Ngenjets", "Njets");
     if(model=="powheg") name+="POWHEG";
+    else if(model=="powhegherwig") name+="POWHEGHERWIG";
     else if(model=="mcatnlo"){
       if(filename.Contains("catnlo" )) name+="MC@NLO";
       else if(filename.Contains("NtupleCteq6m" )) name+="MC@NLO2";
@@ -3773,7 +3823,7 @@ namespace semileptonic {
     // normalize to area
     if(normalize) result->Scale(1./(result->Integral(0,result->GetNbinsX()+1)));
     // absolute normalization for POWHEG and MCatNlo curve
-    if(!normalize&&(model=="powheg"||model=="mcatnlo")) result->Scale(weight/getInclusiveXSec(result));
+    if(!normalize&&(model=="powheg"||model=="powhegherwig"||model=="mcatnlo")) result->Scale(weight/getInclusiveXSec(result));
     // divide by binwidth
     if(smoothcurves) result->Scale(1.0/result->GetBinWidth(1));
     else result=divideByBinwidth(result, false);
