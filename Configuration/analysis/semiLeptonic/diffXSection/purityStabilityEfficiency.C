@@ -23,10 +23,10 @@
 #include "basicFunctions.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "ttbararMass", bool save=true, TString lepton="combined", 
-			       TString inputFolderName="newRecentAnalysisRun8TeV", bool plotAcceptance = true, 
+void purityStabilityEfficiency(TString variable = "topPtTtbarSys", bool save=true, TString lepton="combined", 
+			       TString inputFolderName="RecentAnalysisRun8TeV", bool plotAcceptance = true, 
 			       bool plotEfficiencyPhaseSpace = true, bool plotEfficiency2 = false, double chi2Max=999999, int
-			       verbose=1, bool hadron=true, int qAssignment=-1,
+			       verbose=1, bool hadron=false, int qAssignment=-1,
 			       bool fitGaussRes=false, bool printSeparateRes = false)
 {
   // ARGUMENTS of function:
@@ -101,7 +101,7 @@ void purityStabilityEfficiency(TString variable = "ttbararMass", bool save=true,
   
   // if hadron level
   if(hadron){
-    if(variable.Contains("bq")||variable.Contains("bbbar")){
+    if(variable.Contains("bq")||variable.Contains("bbbar")||variable.Contains("lbMass")){
       folderRecoKin          = "analyzeTopRecoKinematicsBjets";
       folderGenKinPhaseSpace = "analyzeTopHadronLevelKinematicsBjetsPhaseSpace";
       folderGenKin           = "analyzeTopHadronLevelKinematicsBjetsPhaseSpace";
@@ -111,9 +111,14 @@ void purityStabilityEfficiency(TString variable = "ttbararMass", bool save=true,
       folderGenKinPhaseSpace = "analyzeTopHadronLevelKinematicsLeptonPhaseSpace";
       folderGenKin           = "analyzeTopHadronLevelKinematicsLeptonPhaseSpace";
     }
+    //     else if(variable.Contains("Njets")){
+    //       folderRecoKin          = "compositedKinematicsKinFit";
+    //       folderGenKinPhaseSpace = "compositedHadronGenPhaseSpace";
+    //       folderGenKin           = "compositedHadronGenPhaseSpace";
+    //     }
     else{
       std::cout << "--------------------------------------------------------------!" <<std::endl;
-      std::cout << "No hadron level plots calculated!!! Only for b-jet and leptons!" <<std::endl;
+      std::cout << "No hadron level plots calculated!!! Only for b-jet and lepton based quantities!" <<std::endl;
       std::cout << "Exit programme!" <<std::endl;
       return;
     }
@@ -122,6 +127,12 @@ void purityStabilityEfficiency(TString variable = "ttbararMass", bool save=true,
     recExtTree="Rec";
     genExtHisto="Gen";
     recExtHisto="Rec";
+    //     if(variable.Contains("Njets")){
+    //       genExtTree="Gen";
+    //       recExtTree="Rec";
+    //       genExtHisto="Gen";
+    //       recExtHisto="Rec";
+    //     }
   }
   
   ///---------------------------------------------------------------------------------------------
@@ -242,7 +253,7 @@ void purityStabilityEfficiency(TString variable = "ttbararMass", bool save=true,
     }
     // list relevant tree entries
     std::vector<TString> variable_;
-    if(variable.Contains("top")){
+    if(variable.Contains("top")&&!variable.Contains("TtbarSys")){
       variable_.push_back(variable+"Lep");
       variable_.push_back(variable+"Had");
     }
@@ -673,7 +684,7 @@ void purityStabilityEfficiency(TString variable = "ttbararMass", bool save=true,
       effHistBBB2->SetLineWidth(4);
       effHistBBB2->Draw("same");
     }
-  // chi2 cut efficiency
+    // chi2 cut efficiency
     if(useTree && chi2Max<100){    
       chi2eff = (TH1F*)chi2eff->Rebin(binvec.size()-1, chi2eff->GetName(), &(binvec.front()));
       all     = (TH1F*)all    ->Rebin(binvec.size()-1, all->GetName()    , &(binvec.front()));

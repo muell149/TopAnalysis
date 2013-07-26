@@ -10,15 +10,29 @@ class TH1;
 class TString;
 class TProfile;
 
-#include "AnalysisHistograms.h"
-#include "MvaInputVariables.h"
 #include "analysisHelpers.h"
+#include "analysisStructsFwd.h"
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "../../diLeptonic/src/classesFwd.h"
 
+class MvaInputTopJetsVariables;
 class JetCategories;
 class DijetAnalyzer;
-
+class BasicHistograms;
+class EventYieldHistograms;
+class DyScalingHistograms;
+class Playground;
+class RecoObjects;
+class CommonGenObjects;
+class TopGenObjects;
+class HiggsGenObjects;
+class KinRecoObjects;
+namespace tth{
+    class GenLevelWeights;
+    class RecoLevelWeights;
+    class GenObjectIndices;
+    class RecoObjectIndices;
+}
 
 
 
@@ -43,40 +57,52 @@ public:
 
     /// Class definition
     ClassDef(HiggsAnalysis, 0);
-
+    
     /// Is it a ttH sample inclusive in Higgs decay
     void SetHiggsInclusiveSample(const bool isInclusiveHiggs);
-
+    
     /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
-
-    /// Whether to produce MVA input information
-    void SetAnalysisMode(const AnalysisMode::AnalysisMode& analysisMode);
-
+    
+    /// What analysis modes to be run
+    void SetAnalysisModes(const std::vector<AnalysisMode::AnalysisMode>& analysisModes);
+    
     /// Set up the jet categories (# jets, # b-jets) for overview
     void SetJetCategoriesOverview(const JetCategories& jetCategories);
-
+    
     /// Set up the jet categories (# jets, # b-jets) for analysis
     void SetJetCategoriesAnalysis(const JetCategories& jetCategories);
-
+    
+    /// Set up production of MVA input
+    void SetMvaInputProduction(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
+    
     /// Set up the MVA weights input for correct jet combinations of ttbar system
-    void SetMvaWeightsCorrect(MvaInputTopJetsVariables& mvaInputTopJetsVariables);
+    void SetMvaWeightsCorrect(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
     
     /// Set up the MVA weights input for swapped jet combinations of ttbar system
-    void SetMvaWeightsSwapped(MvaInputTopJetsVariables& mvaInputTopJetsVariables);
-
+    void SetMvaWeightsSwapped(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
+    
     /// Set the pointer to DijetAnalyzer
     void SetDijetAnalyzer(DijetAnalyzer* analyzer);
-
+    
+    /// Set event yield histograms
+    void SetEventYieldHistograms(EventYieldHistograms* eventYieldHistograms);
+    
+    /// Set histograms for Drell-Yan scaling
+    void SetDyScalingHistograms(DyScalingHistograms* dyScalingHistograms);
+    
+    /// Set basic histograms
+    void SetBasicHistograms(BasicHistograms* basicHistograms);
+    
+    /// Set playground for histograms
+    void SetPlayground(Playground* playground);
+    
     /// Bool for separating ttbar+bbar events and ttbar+other events
     void SetRunWithTtbb(const bool runWithTtbb_);
 
 
 
 private:
-
-    /// Typedef for simple treatment of pair of indices of a vector
-    typedef std::vector<std::pair<int, int> > IndexPairs;
 
 
     /// Select events from Higgs signal samples which need to be removed due to generator selection
@@ -98,18 +124,10 @@ private:
                             const VLV& jets,
                             const LV* genBjet, const LV* genAntiBjet);
 
-    /// Fill class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
-    std::vector<MvaInputTopJetsVariables::Input> fillMvaInputTopJetsVariables(
-                                      const int leptonIndex, const int antiLeptonIndex,
-                                      const IndexPairs& jetIndexPairs,
-                                      const RecoObjects& recoObjects, const VLV& jetRecoils,
-                                      const int matchedBjetIndex, const int matchedAntiBjetIndex,
-                                      const bool successfulMatching, const double& eventWeight)const;
-
 
 
     /// Enum for analysis modes
-    AnalysisMode::AnalysisMode analysisMode_;
+    std::vector<AnalysisMode::AnalysisMode> analysisModes_;
 
 
 
@@ -121,9 +139,9 @@ private:
 
     /// Select tt+bb or tt+other events
     bool runWithTtbb_;
-
-
-
+    
+    
+    
     /// Class holding the definition and handling of jet categories (# jets, # b-jets) for overview
     const JetCategories* jetCategories_overview_;
 
@@ -131,7 +149,7 @@ private:
     const JetCategories* jetCategories_;
 
     /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
-    MvaInputTopJetsVariables mvaInputTopJetsVariables_;
+    MvaInputTopJetsVariables* mvaInputTopJetsVariables_;
 
     /// Class holding the weights as calculated by MVA for correct combinations
     MvaInputTopJetsVariables* mvaWeightsCorrect_;
@@ -139,22 +157,48 @@ private:
     /// Class holding the weights as calculated by MVA for swapped combinations
     MvaInputTopJetsVariables* mvaWeightsSwapped_;
 
-    /// Class that analyzes dijet pairs from jets that pass selection cuts
-    DijetAnalyzer* dijetAnalyzer_;
-
 
 
     ///
-    IndexPairs chargeOrderedJetPairIndices(const std::vector<int>& jetIndices,
-                                           const std::vector<double>& jetCharges);
+    tth::IndexPairs chargeOrderedJetPairIndices(const std::vector<int>& jetIndices,
+                                                const std::vector<double>& jetCharges);
 
-    /// Calculate the jet recoil for a given jet pair, i.e. vector sum of all jets except selected jet pair
-    VLV recoilForJetPairs(const IndexPairs& jetIndexPairs,
-                          const std::vector<int>& jetIndices,
-                          const VLV& jets);
-
-
-
+    
+    /// Fill all analysers and histograms in one method
+    void fillAll(const std::string& selectionStep,
+                 const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                 const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                 const KinRecoObjects& kinRecoObjects,
+                 const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
+                 const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                 const double& defaultWeight)const;
+    
+    /// Book all histograms of all analysers for all steps in one method
+    void bookAll();
+    
+    /// Clear all analysers in one method
+    void clearAll();
+    
+    
+    /// Event yield histograms
+    EventYieldHistograms* eventYieldHistograms_;
+    
+    /// Histograms for Drell-Yan scaling
+    DyScalingHistograms* dyScalingHistograms_;
+    
+    /// Basic histograms
+    BasicHistograms* basicHistograms_;
+    
+    /// Playground
+    Playground* playground_;
+    
+    /// Class that analyzes dijet pairs from jets that pass selection cuts
+    DijetAnalyzer* dijetAnalyzer_;
+    
+    
+    
+    
+    
     /// Histograms for the overview jet categories
     TH1* h_jetCategories_overview_step0;
     TH1* h_jetCategories_overview_step1;
@@ -168,25 +212,13 @@ private:
 
     /// Histograms for the analysis jet categories
     TH1* h_jetCategories_step8;
-
+/*
     /// Histograms for cutflow tables which are not contained in Analysis.h
-    TH1* h_events_step0a;
-    TH1* h_events_step0b;
-    TH1* h_events_step1;
-    TH1* h_events_step2;
-    TH1* h_events_step3;
-    TH1* h_events_step4;
-    TH1* h_events_step5;
-    TH1* h_events_step6;
-    TH1* h_events_step7;
     TH1* h_events_step8;
-
-    /// Histograms for Drell-Yan scaling
-    DyScalingHistograms dyScalingHistograms_;
-
-    /// Basic histograms
-    BasicHistograms basicHistograms_;
-
+*/    
+    
+    
+    
     /// Control plots
     TH1* h_jetPt_step8;
     TH1* h_jetChargeGlobalPtWeighted_step8;

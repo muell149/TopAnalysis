@@ -24,10 +24,19 @@
   5 tau to electron
   6 tau to muon.
   in two digit numbers the first digit is the top and the second the antitop.
-  so e.g. dimuon channel is 33 or single electron is 21 and 12             
+  so e.g. dimuon channel is 33 or single electron is 21 and 12
+  
+  The scheme listed above is valid in case that both tops decay to b quarks. For the rare cases where at least one of them decays to another quark,
+  the numbering scheme is the same, but a third digit is added in front, in order to indicate these cases:
+  1xx means that one of the two tops does not decay to b quarks
+  2xx means that both tops do not decay to b quarks
 */
 
+
+
 using namespace std;
+
+
 
 class GeneratorTopFilter : public edm::EDFilter {
  public:
@@ -65,6 +74,8 @@ class GeneratorTopFilter : public edm::EDFilter {
   edm::InputTag src_;
   /// how many events do you want to be selected?
   int nEvents_;
+  /// Should top decays where a top does not decay to a bottom quark being rejected?
+  bool rejectNonBottomDecaysOfTops_;
   /// string to save channel short cut from config
   std::vector<std::string> channels_;
   /// counter for number of events
@@ -114,8 +125,10 @@ class GeneratorTopFilter : public edm::EDFilter {
   /// length of vector<int> selectedChannels;
   unsigned int selChSize; 
   
-  /// pointer on bquark
+  /// pointer on bquark from top decay (due to CKM, almost all decay to this)
   const reco::Candidate* bquark;
+  /// pointer on non-bquark from top decay (rare cases where top decays to d or s)
+  const reco::Candidate* otherQuark;
   /// pointer on W boson
   const reco::Candidate* wbos;
   /// pointer on tau
@@ -128,9 +141,11 @@ class GeneratorTopFilter : public edm::EDFilter {
 };
 
 
+
 GeneratorTopFilter::GeneratorTopFilter(const edm::ParameterSet& cfg) :
   src_              (cfg.getParameter<edm::InputTag>("src"       )),
   nEvents_          (cfg.getParameter<int> ("n_events"           )),
+  rejectNonBottomDecaysOfTops_(cfg.getParameter<bool>("rejectNonBottomDecaysOfTops")),
   channels_         (cfg.getParameter<std::vector<std::string> >("channels")),    
   SingleTopHadronic_(cfg.getParameter<bool>("SingleTop_Hadronic" )),  
   SingleTopElectron_(cfg.getParameter<bool>("SingleTop_Electron" )),  
@@ -157,8 +172,11 @@ GeneratorTopFilter::GeneratorTopFilter(const edm::ParameterSet& cfg) :
 }
 
 
+
 GeneratorTopFilter::~GeneratorTopFilter() { 
 }
+
+
 
 bool GeneratorTopFilter::filter(edm::Event& evt, const edm::EventSetup& es) {
     nEvts++;
@@ -166,6 +184,8 @@ bool GeneratorTopFilter::filter(edm::Event& evt, const edm::EventSetup& es) {
     if(result) nHits++;
     return result;
 }
+
+
 
 bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {  
   if(nEvents_!=-1){
@@ -185,6 +205,7 @@ bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
   int decayVl = 0;
   
   bquark = 0;
+  otherQuark = 0;
   wbos = 0;
   tau = 0;
   wdaugh1 = 0;
@@ -206,21 +227,33 @@ bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
       //      std::cout << "     Daughter PID  : " << cand->daughter(i)->pdgId()  << std::endl;
       //      std::cout << "     Dauther Status: " << cand->daughter(i)->status() << std::endl;
 
-      if(abs(cand->daughter(i)->pdgId())==5){
-	bquark = cand->daughter(i);
-      }
-      if(abs(cand->daughter(i)->pdgId())==24){
+      const int absPdgId = std::abs(cand->daughter(i)->pdgId());
+      if(absPdgId==24){
 	wbos = cand->daughter(i);
 	//	for(size_t i=0; i<wbos->numberOfDaughters(); ++i){
 	//	  std::cout << "          W-Daughter PID  : " << wbos->daughter(i)->pdgId()  << std::endl;
 	//	  std::cout << "          W-Dauther Status: " << wbos->daughter(i)->status() << std::endl;
 	//	}
       }
+      else if(absPdgId==5){
+	bquark = cand->daughter(i);
+      }
+      else if(absPdgId==1 || absPdgId==3){
+        otherQuark = cand->daughter(i);
+      }
     }
-    // in few event the top decays to s or d
+    // In few events the top decays to s or d, but these are not incorrect events, thus they should get a top decay number
+    // CAVEAT: if in the MC the W is not in the decay chain but decays hadronically, there will be a quark of type d or s:
+    // these cases cannot be treated properly, since it is not clear which quark comes from the top decay and not from the W,
+    // thus it will not get a top decay number
     if(bquark==0){ 
-      edm::LogInfo("TopDecaySelector") << "Top does not decay to b.";
-      return blocked;
+      if(wbos!=0 && otherQuark!=0){
+        decayVl += 100;
+      }
+      else{
+        edm::LogInfo("TopDecaySelector") << "Top does not decay to b, and also not to d or s quark.";
+        return blocked;
+      }
     }
     // in some MC the w is not in the decay chain but directly its decay products
     if(wbos==0){
@@ -272,21 +305,25 @@ bool GeneratorTopFilter::analyze(edm::Event& evt, const edm::EventSetup& es) {
     }
     else{
       decayVl = decayVl + wNumber;	  
-    }           
+    }
   }
 
-  //store the decay mode
+  // Store the decay mode
   std::auto_ptr<int> decay(new int);
   *decay = decayVl;
   evt.put(decay, "decayMode");
   
+  // Do filtering based on selected channels, and on whether to allow non-bottom decays of top
+  if(!rejectNonBottomDecaysOfTops_) decayVl = decayVl%100;
   for(unsigned int i=0; i<selChSize; i++){
-    if(decayVl==selectedChannels.at(i)) {
+    if(decayVl==selectedChannels.at(i)){
         return passed;
     }
   }
   return blocked;
 }   
+
+
 
 int GeneratorTopFilter::wDecay(){
   if((abs(wdaugh1->pdgId())<6)||(abs(wdaugh2->pdgId())<6)){	  
@@ -310,6 +347,8 @@ int GeneratorTopFilter::wDecay(){
   return -1;
 }
 
+
+
 int GeneratorTopFilter::tauDecay(){  
   for(unsigned int i=0; i<tau->numberOfDaughters();++i){
     if(abs(tau->daughter(i)->pdgId())>99 || abs(tau->daughter(i)->pdgId())<10){ 
@@ -329,6 +368,8 @@ int GeneratorTopFilter::tauDecay(){
   // if tau is stable
   return 7;   
 }
+
+
 
 void GeneratorTopFilter::beginJob() {
   
@@ -598,12 +639,16 @@ void GeneratorTopFilter::beginJob() {
   log << "==============================================================\n";   
 }
 
+
+
 void GeneratorTopFilter::endJob() {  
   edm::LogInfo log("GeneratorTopFilter");
   log << "==============================================================\n";
   log << "       Selected: " << nHits  << " of " << nEvts << "\n";
   log << "==============================================================\n";   
 }
+
+
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(GeneratorTopFilter);

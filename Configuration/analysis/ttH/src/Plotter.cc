@@ -18,6 +18,7 @@
 #include <TH1D.h>
 #include <TGaxis.h>
 #include <TPaveText.h>
+#include <TError.h>
 
 #include "Plotter.h"
 #include "higgsUtils.h"
@@ -60,7 +61,10 @@ logX_(false),
 logY_(false),
 doDYScale_(false),
 scaleMCtoData_(false)
-{}
+{
+    // Suppress default info that canvas is printed
+    gErrorIgnoreLevel = 1001;
+}
 
 
 

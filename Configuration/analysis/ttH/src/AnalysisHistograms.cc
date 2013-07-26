@@ -1,6 +1,7 @@
 #define AnalysisHistograms_cxx
 
 #include <iostream>
+#include <algorithm>
 
 #include <TH1.h>
 #include <TH1D.h>
@@ -9,6 +10,8 @@
 #include <Math/VectorUtil.h>
 
 #include "AnalysisHistograms.h"
+#include "analysisStructs.h"
+#include "../../diLeptonic/src/analysisObjectStructs.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/classes.h"
 
@@ -17,6 +20,22 @@
 
 
 // --------------------------- Methods for AnalysisHistogramBase ---------------------------------------------
+
+
+
+AnalysisHistogramsBase::AnalysisHistogramsBase(const std::vector<TString>& selectionSteps):
+selectorList_(0),
+selectionSteps_(selectionSteps)
+{}
+
+
+
+void AnalysisHistogramsBase::book(TSelectorList* output)
+{
+    for(const auto& step : selectionSteps_){
+        this->addStep(step, output);
+    }
+}
 
 
 
@@ -68,21 +87,85 @@ void AnalysisHistogramsBase::clear()
 
 
 
+// --------------------------- Methods for EventYieldHistograms ---------------------------------------------
+
+
+
+EventYieldHistograms::EventYieldHistograms(const std::vector<TString>& selectionSteps):
+AnalysisHistogramsBase(selectionSteps)
+{
+    std::cout<<"--- Beginning setting up event yield histograms\n";
+    std::cout<<"=== Finishing setting up event yield histograms\n\n";
+}
+
+
+void EventYieldHistograms::bookHistos(const TString& step)
+{
+    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
+    
+    m_histogram["events"] = this->store(new TH1D("events_step"+step,"event count (no weight);;# events",8,0,8));
+    m_histogram["events"]->Sumw2();
+}
+
+
+
+void EventYieldHistograms::fill(const double& weight, const TString& step)
+{
+    // Check if step exists
+    const bool stepExists(this->checkExistence(step));
+    if(!stepExists){
+        return;
+        //std::cerr<<"Error in fill() of EventYieldHistograms! The following step is not defined: "
+        //         <<step<<"\n...exiting\n";
+        //exit(25);
+    }
+    
+    m_stepHistograms_[step].m_histogram_["events"]->Fill(1., weight);
+}
+
+
+
+
+
+
+
+
 
 // --------------------------- Methods for DyScalingHistograms ---------------------------------------------
 
 
 
+DyScalingHistograms::DyScalingHistograms(const std::vector<TString>& selectionSteps, const TString& looseStep):
+AnalysisHistogramsBase(selectionSteps),
+looseStep_(looseStep)
+{
+    std::cout<<"--- Beginning setting up Drell-Yan scaling histograms\n";
+    if(std::find(selectionSteps_.begin(), selectionSteps_.end(), looseStep_) == selectionSteps_.end()){
+        std::cerr<<"ERROR in constructor of DyScalingHistograms!"
+                 <<"Could not find in selection steps the step specified for loose histogram: "<<looseStep_
+                 <<"\n...break\n"<<std::endl;
+    }
+    std::cout<<"=== Finishing setting up Drell-Yan scaling histograms\n\n";
+}
+
+
+
 void DyScalingHistograms::bookHistos(const TString& step)
 {
-    if(!m_stepHistograms_.size()){
-        h_loose_ = this->bookHisto(h_loose_, "Looseh1");
-    }
-
     std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    m_histogram["h_all"] = this->bookHisto(m_histogram["h_all"], "Allh1_step" + step);
-    m_histogram["h_zVeto"] = this->bookHisto(m_histogram["h_zVeto"], "TTh1_step" + step);
-    m_histogram["h_zWindow"] = this->bookHisto(m_histogram["h_zWindow"], "Zh1_step" + step);
+    
+    if(step == looseStep_+"zWindow"){
+        m_histogram["h_loose"] = this->bookHisto(m_histogram["h_loose"], "Looseh1");
+    }
+    
+    if(step.Contains("zWindow")){
+        m_histogram["h_zWindow"] = this->bookHisto(m_histogram["h_zWindow"], "Zh1_step" + step);
+    }
+    else{
+        m_histogram["h_all"] = this->bookHisto(m_histogram["h_all"], "Allh1_step" + step);
+        m_histogram["h_zVeto"] = this->bookHisto(m_histogram["h_zVeto"], "TTh1_step" + step);
+        this->bookHistos(step + "zWindow");
+    }
 }
 
 
@@ -95,43 +178,46 @@ TH1* DyScalingHistograms::bookHisto(TH1* histo, const TString& name)
 
 
 
-void DyScalingHistograms::fillLoose(const double& dileptonMass, const double& weight)const
-{
-    h_loose_->Fill(dileptonMass, weight);
-}
-
-
-
-void DyScalingHistograms::fillZWindow(const double& dileptonMass, const double& weight, const TString& step)
+void DyScalingHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
+                               const double& weight, const TString& step)
 {
     // Check if step exists
     const bool stepExists(this->checkExistence(step));
     if(!stepExists){
-        std::cerr<<"Error in fillZWindow() of DyScalingHistograms! The following step is not defined for Drell-Yan scaling: "
-                 <<step<<"\n...exiting\n";
-        exit(22);
+        return;
+        //std::cerr<<"Error in fillZWindow() of DyScalingHistograms! The following step is not defined: "
+        //         <<step<<"\n...exiting\n";
+        //exit(22);
     }
-
-    // Fill histograms
-    m_stepHistograms_[step].m_histogram_["h_zWindow"]->Fill(dileptonMass, weight);
-    m_stepHistograms_[step].m_histogram_["h_all"]->Fill(dileptonMass, weight);
-}
-
-
-
-void DyScalingHistograms::fillZVeto(const double& dileptonMass, const double& weight, const TString& step)
-{
-    // Check if step exists
-    const bool stepExists(this->checkExistence(step));
-    if(!stepExists){
-        std::cerr<<"Error in fillZVeto() of DyScalingHistograms! The following step is not defined for Drell-Yan scaling: "
-                 <<step<<"\n...exiting\n";
-        exit(23);
+    
+    const int leadingLeptonIndex = recoObjectIndices.leadingLeptonIndex_;
+    const int nLeadingLeptonIndex = recoObjectIndices.nLeadingLeptonIndex_;
+    
+    // FIXME: should use one common function in HiggsAnalysis and here
+    bool hasLeptonPair(false);
+    if(leadingLeptonIndex!=-1 && nLeadingLeptonIndex!=-1){
+        hasLeptonPair = true;
     }
-
+    else return;
+    
+    const LV dilepton = recoObjects.allLeptons_->at(leadingLeptonIndex) + recoObjects.allLeptons_->at(nLeadingLeptonIndex);
+    const double dileptonMass = dilepton.M();
+    const bool isZregion = dileptonMass > 76 && dileptonMass < 106;
+    
+    
     // Fill histograms
-    m_stepHistograms_[step].m_histogram_["h_zVeto"]->Fill(dileptonMass, weight);
-    m_stepHistograms_[step].m_histogram_["h_all"]->Fill(dileptonMass, weight);
+    if(step == looseStep_+"zWindow") m_stepHistograms_[looseStep_+"zWindow"].m_histogram_["h_loose"]->Fill(dileptonMass, weight);
+    
+    if(step.Contains("zWindow")){
+        m_stepHistograms_[step].m_histogram_["h_zWindow"]->Fill(dileptonMass, weight);
+        TString stepNoZ(step);
+        stepNoZ.ReplaceAll("zWindow", "");
+        m_stepHistograms_[stepNoZ].m_histogram_["h_all"]->Fill(dileptonMass, weight);
+    }
+    else if(!isZregion){
+        m_stepHistograms_[step].m_histogram_["h_zVeto"]->Fill(dileptonMass, weight);
+        m_stepHistograms_[step].m_histogram_["h_all"]->Fill(dileptonMass, weight);
+    }
 }
 
 
@@ -145,19 +231,12 @@ void DyScalingHistograms::fillZVeto(const double& dileptonMass, const double& we
 
 
 
-BasicHistograms::Input::Input(const std::vector<int>& leptonIndices, const std::vector<int>& antiLeptonIndices,
-                              const std::vector<int>& jetIndices, const std::vector<int>& bjetIndices,
-                              const VLV& allLeptons, const VLV& jets, const LV& met,
-                              const std::vector<double>& btagDiscriminators):
-leptonIndices_(leptonIndices),
-antiLeptonIndices_(antiLeptonIndices),
-jetIndices_(jetIndices),
-bjetIndices_(bjetIndices),
-allLeptons_(allLeptons),
-jets_(jets),
-met_(met),
-btagDiscriminators_(btagDiscriminators)
-{}
+BasicHistograms::BasicHistograms(const std::vector<TString>& selectionSteps):
+AnalysisHistogramsBase(selectionSteps)
+{
+    std::cout<<"--- Beginning setting up basic histograms\n";
+    std::cout<<"=== Finishing setting up basic histograms\n\n";
+}
 
 
 
@@ -235,105 +314,89 @@ void BasicHistograms::bookHistos(const TString& step)
 
 
 
-void BasicHistograms::fill(const Input& input, const double& weight, const TString& step)
+void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
+                           const double& weight, const TString& step)
 {
     // Check if step exists
     const bool stepExists(this->checkExistence(step));
     if(!stepExists){
-        std::cerr<<"Error in fill() of BasicHistograms! The following step is not defined for basic histograms: "
-                 <<step<<"\n...exiting\n";
-        exit(24);
+        return;
+        //std::cerr<<"Error in fill() of BasicHistograms! The following step is not defined: "
+        //         <<step<<"\n...exiting\n";
+        //exit(24);
     }
-    
-    
-    // Switch this off for now, potentially add again if desired
-    // Updating  titles of the histograms for b jets
-    //if(m_stepHistograms_[step].m_histogram_["basicBjetMultiplicity"]->GetEntries()<1) {
-    //    char addStr[20];
-    //    std::sprintf(addStr," (#geq %.2f)", BtagWP);
-    //    
-    //    TH1* histo;
-    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetMultiplicity"];
-    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
-    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetPt"];
-    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
-    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetEta"];
-    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
-    //    histo = m_stepHistograms_[step].m_histogram_["basicBjetPhi"];
-    //    histo->SetTitle(TString(histo->GetTitle())+addStr);
-    //}
     
     
     // Leptons
-    m_stepHistograms_[step].m_histogram_["basicLepton_multiplicity"]->Fill(input.allLeptons_.size(), weight);
-    for(const int index : input.leptonIndices_){
-        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(input.allLeptons_.at(index).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(input.allLeptons_.at(index).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(input.allLeptons_.at(index).Phi(), weight);
+    m_stepHistograms_[step].m_histogram_["basicLepton_multiplicity"]->Fill(recoObjects.allLeptons_->size(), weight);
+    for(const int index : recoObjectIndices.leptonIndices_){
+        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(recoObjects.allLeptons_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(recoObjects.allLeptons_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(recoObjects.allLeptons_->at(index).Phi(), weight);
     }
-    for(const int index : input.antiLeptonIndices_){
-        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(input.allLeptons_.at(index).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(input.allLeptons_.at(index).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(input.allLeptons_.at(index).Phi(), weight);
+    for(const int index : recoObjectIndices.antiLeptonIndices_){
+        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(recoObjects.allLeptons_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(recoObjects.allLeptons_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(recoObjects.allLeptons_->at(index).Phi(), weight);
     }
     
-    const int leptonIndex = input.leptonIndices_.size()>0 ? input.leptonIndices_.at(0) : -1;
-    const int antiLeptonIndex = input.antiLeptonIndices_.size()>0 ? input.antiLeptonIndices_.at(0) : -1;
+    const int leptonIndex = recoObjectIndices.leptonIndices_.size()>0 ? recoObjectIndices.leptonIndices_.at(0) : -1;
+    const int antiLeptonIndex = recoObjectIndices.antiLeptonIndices_.size()>0 ? recoObjectIndices.antiLeptonIndices_.at(0) : -1;
     const bool hasLeptonPair = (leptonIndex!=-1 && antiLeptonIndex!=-1);
     
     // Leading lepton and antilepton
     int leadingLeptonIndex(leptonIndex);
     int nLeadingLeptonIndex(antiLeptonIndex);
     if(hasLeptonPair){
-        ttbar::orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, input.allLeptons_, ttbar::LVpt);
+        ttbar::orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *recoObjects.allLeptons_, ttbar::LVpt);
         
-        m_stepHistograms_[step].m_histogram_["basicLepton1st_pt"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton1st_eta"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton1st_phi"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Phi(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton1st_pt"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton1st_eta"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton1st_phi"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Phi(), weight);
         
-        m_stepHistograms_[step].m_histogram_["basicLepton2nd_pt"]->Fill(input.allLeptons_.at(nLeadingLeptonIndex).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton2nd_eta"]->Fill(input.allLeptons_.at(nLeadingLeptonIndex).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicLepton2nd_phi"]->Fill(input.allLeptons_.at(nLeadingLeptonIndex).Phi(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton2nd_pt"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton2nd_eta"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton2nd_phi"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Phi(), weight);
     }
     
     
     // Dilepton
     if(hasLeptonPair){
         LV dilepton(0.,0.,0.,0.);
-        dilepton = input.allLeptons_.at(leadingLeptonIndex) + input.allLeptons_.at(nLeadingLeptonIndex);
+        dilepton = recoObjects.allLeptons_->at(leadingLeptonIndex) + recoObjects.allLeptons_->at(nLeadingLeptonIndex);
         
         m_stepHistograms_[step].m_histogram_["basicDilepton_mass"]->Fill(dilepton.M(), weight);
         m_stepHistograms_[step].m_histogram_["basicDilepton_pt"]->Fill(dilepton.Pt(), weight);
         m_stepHistograms_[step].m_histogram_["basicDilepton_rapidity"]->Fill(dilepton.Rapidity(), weight);
         m_stepHistograms_[step].m_histogram_["basicDilepton_phi"]->Fill(dilepton.Phi(), weight);
 
-        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaEta"]->Fill(input.allLeptons_.at(leadingLeptonIndex).Eta() - input.allLeptons_.at(nLeadingLeptonIndex).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaPhi"]->Fill(ROOT::Math::VectorUtil::DeltaPhi(input.allLeptons_.at(leadingLeptonIndex), input.allLeptons_.at(nLeadingLeptonIndex)), weight);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaEta"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Eta() - recoObjects.allLeptons_->at(nLeadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaPhi"]->Fill(ROOT::Math::VectorUtil::DeltaPhi(recoObjects.allLeptons_->at(leadingLeptonIndex), recoObjects.allLeptons_->at(nLeadingLeptonIndex)), weight);
     }
 
 
     // Jets
-    m_stepHistograms_[step].m_histogram_["basicJet_multiplicity"]->Fill(input.jetIndices_.size(), weight);
-    for(const int index : input.jetIndices_){
-        m_stepHistograms_[step].m_histogram_["basicJet_pt"]->Fill(input.jets_.at(index).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJet_eta"]->Fill(input.jets_.at(index).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJet_phi"]->Fill(input.jets_.at(index).Phi(), weight);
-        m_stepHistograms_[step].m_histogram_["basicJet_btagDiscriminator"]->Fill(input.btagDiscriminators_.at(index), weight);
+    m_stepHistograms_[step].m_histogram_["basicJet_multiplicity"]->Fill(recoObjectIndices.jetIndices_.size(), weight);
+    for(const int index : recoObjectIndices.jetIndices_){
+        m_stepHistograms_[step].m_histogram_["basicJet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJet_btagDiscriminator"]->Fill(recoObjects.jetBTagCSV_->at(index), weight);
     }
     
     
     // Bjets
-     m_stepHistograms_[step].m_histogram_["basicBjet_multiplicity"]->Fill(input.bjetIndices_.size(), weight);
-    for(const int index : input.bjetIndices_){
-        m_stepHistograms_[step].m_histogram_["basicBjet_pt"]->Fill(input.jets_.at(index).Pt(), weight);
-        m_stepHistograms_[step].m_histogram_["basicBjet_eta"]->Fill(input.jets_.at(index).Eta(), weight);
-        m_stepHistograms_[step].m_histogram_["basicBjet_phi"]->Fill(input.jets_.at(index).Phi(), weight);
+     m_stepHistograms_[step].m_histogram_["basicBjet_multiplicity"]->Fill(recoObjectIndices.bjetIndices_.size(), weight);
+    for(const int index : recoObjectIndices.bjetIndices_){
+        m_stepHistograms_[step].m_histogram_["basicBjet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicBjet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicBjet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), weight);
     }
     
     
     // Met
-    m_stepHistograms_[step].m_histogram_["basicMet_et"]->Fill(input.met_.E(), weight);
-    m_stepHistograms_[step].m_histogram_["basicMet_phi"]->Fill(input.met_.Phi(), weight);
+    m_stepHistograms_[step].m_histogram_["basicMet_et"]->Fill(recoObjects.met_->E(), weight);
+    m_stepHistograms_[step].m_histogram_["basicMet_phi"]->Fill(recoObjects.met_->Phi(), weight);
 }
 
 
