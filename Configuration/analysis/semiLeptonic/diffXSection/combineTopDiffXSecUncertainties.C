@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
+void combineTopDiffXSecUncertainties(double luminosity=19800., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
 
   // ============================
   //  Systematic Variations:
@@ -30,7 +30,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
   //        41: sysPDFUp                   42: sysPDFDown                  
   //        43: sysHadUp                   44: sysHadDown                  
   //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        49: ENDOFSYSENUM
+  //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
  
   // ============================
   //  Set Root Style
@@ -91,11 +91,6 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample;
   if(extrapolate==false&&hadron==false) useBCC=true;
-  unsigned int mcatnloIdx  = sysGenPowheg/2; // index variable (bin number!) to track MCatNLO uncertainty index among all uncertainties, 
-                                             // value might change later, sysGenPowheg/2 is the default
-  unsigned int powhegIdx   = sysGenPowheg/2; // index variable (bin number!) to track Powheg uncertainty index among all uncertainties,
-                                             // value might change later, sysGenPowheg/2 is the default
-
   // No cross-check variables for hadron phase space
   if (hadron) addCrossCheckVariables=false;
 
@@ -125,7 +120,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
   xSecVariables_.insert( xSecVariables_.end(),   xSecVariablesIncl,      xSecVariablesIncl      + sizeof(xSecVariablesIncl)/sizeof(TString)     );
 
   // chose min/max value[%] for relative uncertainty plots
-  double errMax=40.0;
+  double errMax=15.0;
   double errMin= 0.0;
   // container for plots, uncertainties and uncertainty distributions
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
@@ -194,7 +189,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	std::vector<double> tempvec= std::vector<double>( temp->GetMatrixArray(), temp->GetMatrixArray() + temp->GetNrows() );
 	// save it in map
 	correctedCenters_[candidate]=tempvec;
-	// FIXME: as proper errors do not exist at the moment, use value itself as dummy...
+	// FIXME: as proper errors for x-BCCs do not exist at the moment, use value itself as dummy...
 	corrCenterErrors_[candidate]=tempvec;
       }
       else if(!(candidate.Contains("inclusive"))){
@@ -214,7 +209,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	}
 	// save centers in map
 	correctedCenters_[candidate]=tempvec;
-	// FIXME: as proper errors do not exist at the moment, use value itself as dummy...
+	// FIXME: as proper errors for x-BCCs do not exist at the moment, use value itself as dummy...
 	corrCenterErrors_[candidate]=tempvec;
       }
     }
@@ -308,10 +303,15 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	    histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
 	    calculateError_[xSecVariables_[i]][sys]=true;
 	    considerError_[xSecVariables_[i]][sys]=calculateError_[xSecVariables_[i]][sys];
-	    // FIXME: no generator uncertainties considered for final errors
-	    if(sys==sysGenPowheg||sys==sysGenMCatNLO) considerError_[xSecVariables_[i]][sys]=false;
+	    // no pure generator uncertainties considered for final errors
+	    if(sys==sysGenPowheg||sys==sysGenPowhegHerwig||sys==sysGenMCatNLO) considerError_[xSecVariables_[i]][sys]=false;
 	    // no hadronisation uncertainties considered for INCLUSIVE cross section
 	    if((sys==sysHadUp||sys==sysHadDown) && xSecVariables_[i]=="inclusive") considerError_[xSecVariables_[i]][sys]=false;
+	    // sysHadUp   -> Hadronization: POWHEG+PYTHIA cs. POWHEG+HERWIG
+	    // sysHadDown -> Generator: MC@NLO+HERWIG vs. POWHEG+HERWIG
+	    if(sys==sysHadDown) considerError_[xSecVariables_[i]][sys]=false;
+	    // sysHadronizationOld=MC@NLO+HERWIG vs. POWHEG+PYTHIA
+	    if(sys==ENDOFSYSENUM-1){ calculateError_[xSecVariables_[i]][ENDOFSYSENUM]=true; considerError_[xSecVariables_[i]][ENDOFSYSENUM]=false; }
 	  }
 	  else{
 	    if(verbose>1) std::cout << "ERROR: Plot " << plotName +"kData not found in "+ xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
@@ -401,38 +401,46 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	    TString label="";
 	    for(unsigned int sys=sysNo+1; sys<ENDOFSYSENUM; ++sys){
 	      label = sysLabel(sys);
+	      //if(sys==sysNo+1) std::cout << std::endl;
+	      //std::cout << label << ": ";
 	      // Systemtatic uncertainties are symmetrized later:
 	      // --> take only one into account if 'up' and 'down' variations exist
 	      // --> take in any case into account if not distinguished between 'up' and 'down' 
 	      if      (  label.Contains("Up")   || label.Contains("up"))    nSysTypes++;
-	      else if (!(label.Contains("Down") || label.Contains("down"))) nSysTypes++;
-	    }	    
-	    TH1F* relSysPlot = new TH1F("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], "relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], nSysTypes+3, 0.5, 0.5+nSysTypes+3);
+	      else if (label.Contains("Hadronization")||!(label.Contains("Down") || label.Contains("down"))) nSysTypes++;
+	      //std::cout << nSysTypes << std::endl;
+	    }
+	    nSysTypes++;; // for MC@NLO+Herwig vs. Powheg+Pythia uncertainty
+	    TH1F* relSysPlot = new TH1F("relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], "relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i], nSysTypes+3, 0.5, 0.5+nSysTypes+3); // +3 for total syst., total stat. and total
 	    relSysPlot->GetXaxis()->SetLabelSize(0.025);
 	    // loop systematic variations
-	    for(unsigned int sys=sysNo+1; sys<ENDOFSYSENUM; ++sys){
+	    for(unsigned int sys=sysNo+1; sys<ENDOFSYSENUM+1; ++sys){ // +1 for MC@NLO+Herwig vs. Powheg+Pythia uncertainty
 	      // set labels for relative uncertainties for bin & variable in map relativeUncertainties_
-	      label = sysLabel(sys).ReplaceAll("sys","");
-	      if      (  label.Contains("Up")){nSysCnt++; setNewLabel=1; label = label.ReplaceAll("Up",""); mapNew2OldSysIndex_[nSysCnt]=sys;}
-	      else if (  label.Contains("up")){nSysCnt++; setNewLabel=1; label = label.ReplaceAll("up",""); mapNew2OldSysIndex_[nSysCnt]=sys;}
-	      else if (!(label.Contains("Down") || label.Contains("down"))){nSysCnt++; setNewLabel=1; mapNew2OldSysIndex_[nSysCnt]=sys;}
+	      label = sys<ENDOFSYSENUM ? sysLabel(sys).ReplaceAll("sys","") : "HadronizationOld";
+	      // up/down variations: keep only up variations (symmetrisation already done above)
+	      if      (!(label.Contains("Hadronization"))&&  label.Contains("Up"  )){nSysCnt++; setNewLabel=1; label = label.ReplaceAll("Up",""); mapNew2OldSysIndex_[nSysCnt]=sys;}
+	      else if (!(label.Contains("Hadronization"))&&  label.Contains("up"  )){nSysCnt++; setNewLabel=1; label = label.ReplaceAll("up",""); mapNew2OldSysIndex_[nSysCnt]=sys;}
+	      // other (non- up/down variations)
+	      else if (  label.Contains("Hadronization") ||!(label.Contains("Down") || label.Contains("down"))){nSysCnt++; setNewLabel=1; mapNew2OldSysIndex_[nSysCnt]=sys;}
 	      else setNewLabel=0;
 	      if (setNewLabel){
-		if (label.Contains("GenMCatNLO")){
-		  mcatnloIdx=nSysCnt;
-		  label="("+label+")";
-		}
-		else if (label.Contains("GenPowheg")){
-		  powhegIdx=nSysCnt;
-		  label="("+label+")";
+		if(label.Contains("Hadronization")){
+		  if (label.Contains("Up")){
+		    label="Hadronization";
+		  }
+		  else if (label.Contains("Down")){
+		    label="NLO Generator";
+		  }
 		}
 		relSysPlot->GetXaxis()->SetBinLabel(nSysCnt,label);
 		setNewLabel=0;
 	      }
+	      
 	      // create plot that indicates the relative systematic uncertainty
 	      double sysDiff=0;
 	      if(verbose2>0){
-		std::cout << sysLabel(sys);
+		TString tempi = (sys==ENDOFSYSENUM ? "sysHadronizationOld" : (sys==sysHadDown ? "sysGenerator" : ( sys==sysHadUp ? "sysHadronization" : sysLabel(sys) ) ) );
+		std::cout << tempi;
 		// check if chosen systematic variation should be considered
 		if(calculateError_[xSecVariables_[i]].count(sys)>0&&considerError_[xSecVariables_[i]].count(sys)>0){
 		  if(considerError_[xSecVariables_[i]][sys]==true&&calculateError_[xSecVariables_[i]][sys]==true) std::cout << "(considered): ";
@@ -450,18 +458,12 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	      else{
 		// check if variable has to be considerered for total systematic error
 		if(calculateError_[xSecVariables_[i]][sys]==true){
-		  double sysBinXSecValue=histo_[xSecVariables_[i]][sys]->GetBinContent(bin);
-		  //OUTDATED FIXME MARTIN: use as hadronization uncertainty a plain value or external values
-		  //if(sys==sysHadUp||sys==sysHadDown){
-		  //  // placeholder for bquark quantities and inclusive xSec
-		  //  if(xSecVariables_[i].Contains("bq")||xSecVariables_[i].Contains("inclusive")){
-		  //    sysBinXSecValue=(1.+std::abs(constHadUncertainty))*stdBinXSecValue;
-		  //  }
-		  //  // otherwise from external studies
-		  //  else{
-		  //    double unc=hadUnc_[xSecVariables_[i]]->GetBinContent(bin);
-		  //    sysBinXSecValue = (1.+std::abs(unc))*stdBinXSecValue;
-		  //  }
+		  double sysBinXSecValue=sys<ENDOFSYSENUM ? histo_[xSecVariables_[i]][sys]->GetBinContent(bin) : stdBinXSecValue;
+		  // FIXME TEST MARTIN: chose some fixed test value for empty values
+		  //if(sysBinXSecValue==stdBinXSecValue){
+		  //  double unc =0.08;
+		  //  if(sysLabel(sys).Contains("up")||sysLabel(sys).Contains("Up")) sysBinXSecValue=stdBinXSecValue*(1.+unc);
+		  //  else sysBinXSecValue=stdBinXSecValue*(1.-unc);
 		  //}
 		  sysDiff=std::abs(sysBinXSecValue-stdBinXSecValue);
 		  // hadron lv PS lepton and b-jet PDF uncertainties
@@ -474,36 +476,51 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		    fileName+="PartonPhaseSpace.root";   
 		    TString canvName="relativeUncertainties/"+xSecVariables_[i]+"/relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i];
 		    TString plotName="relSysPlotBin"+getTStringFromInt(bin)+xSecVariables_[i];
-		    int sysBin=23; // FIXME: will change if additional systematics are added to the list
+		    int sysBin=23; // this is the bin in the symmetrised histo plot
 		    sysDiff=stdBinXSecValue*getValue(fileName, canvName, plotName, sysBin)/100.;
 		  }
-		  // adjust hadronization uncertainty for non combined cross section by hand
-		  // as powheg vs mcatnlo
-		  if((!(decayChannel=="combined"))&&(sys==sysHadUp||sys==sysHadDown)&&calculateError_[xSecVariables_[i]][sysGenPowheg]==true&&calculateError_[xSecVariables_[i]][sysGenMCatNLO]==true){
-		    sysDiff=std::abs(histo_[xSecVariables_[i]][sysGenPowheg]->GetBinContent(bin)-histo_[xSecVariables_[i]][sysGenMCatNLO]->GetBinContent(bin)); 
+		  // adjust NEW hadronization uncertainty by hand
+		  // sysHadUp: as powheg+herwig vs powheg+pythia
+		  // sysHadDown: as powheg+herwig vs mcatnlo+herwig
+		  if(sys==sysHadUp&&calculateError_[xSecVariables_[i]][sysGenPowheg        ]==true&&calculateError_[xSecVariables_[i]][sysGenPowhegHerwig]==true){
+		    sysDiff=std::abs(histo_[xSecVariables_[i]][sysGenPowheg      ]->GetBinContent(bin)-histo_[xSecVariables_[i]][sysGenPowhegHerwig]->GetBinContent(bin)); 
 		  }
+		  if(sys==sysHadDown&&calculateError_[xSecVariables_[i]][sysGenPowhegHerwig]==true&&calculateError_[xSecVariables_[i]][sysGenMCatNLO     ]==true){
+		    sysDiff=std::abs(histo_[xSecVariables_[i]][sysGenPowhegHerwig]->GetBinContent(bin)-histo_[xSecVariables_[i]][sysGenMCatNLO     ]->GetBinContent(bin)); 
+		  }		  
+		  // adjust OLD hadronization uncertainty by hand
+		  // powheg+pythia vs mcatnlo+herwig
+		  if(sys==ENDOFSYSENUM&&calculateError_[xSecVariables_[i]][sysGenPowheg        ]==true&&calculateError_[xSecVariables_[i]][sysGenMCatNLO]==true){
+		    sysDiff=std::abs(histo_[xSecVariables_[i]][sysGenPowheg      ]->GetBinContent(bin)-histo_[xSecVariables_[i]][sysGenMCatNLO]->GetBinContent(bin)); 
+		  }		  
+		  // rescale top mass to 0.9 GeV - rescale factor defined in basicFunctions.h
 		  if      (sys==sysTopMassUp)   sysDiff *= SF_TopMassUpUncertainty;   // SF_TopMassUpUncertainty: defined in basicFunctions.h
 		  else if (sys==sysTopMassDown) sysDiff *= SF_TopMassDownUncertainty; // SF_TopMassDownUncertainty: defined in basicFunctions.h
 		}
-		// save relative systematic uncertainties for bin & variable (weight 0.5 due to error symmetrization, not applied for generator uncertainties)
-		if (sys==sysGenPowheg || sys == sysGenMCatNLO) relSysPlot->Fill(nSysCnt, 100.0*sysDiff/stdBinXSecValue); 
+
+		// save relative systematic uncertainties for bin & variable
+		// a) MC generator based uncertainties
+		if (sys==sysGenPowheg || sys==sysGenPowhegHerwig || sys == sysGenMCatNLO || sys==sysHadUp || sys==sysHadDown || sys==ENDOFSYSENUM) relSysPlot->Fill(nSysCnt, 100.0*sysDiff/stdBinXSecValue); 
+		// b) weight 0.5 due to error symmetrization, not applied for
 		else relSysPlot->Fill(nSysCnt, 100.0*0.5*sysDiff/stdBinXSecValue);
 		// print single systematic uncertainty absolut and relative for bin & variable
 		if(verbose2>0) {
 		  std::cout << sysDiff << " ( = " << 100*sysDiff/stdBinXSecValue << "% )" << std::endl;
-		  if(sys>sysNo && sys <sysGenPowheg && sys%2==0){
+		  if(sys>sysNo && sys <sysHadUp && sys%2==0){
 		    std::cout << "Symmetrised:             ----- " << relSysPlot->GetBinContent(nSysCnt)/100.0*stdBinXSecValue << " ( = " << relSysPlot->GetBinContent(nSysCnt)<< "% )" << std::endl;
 		  }
 		}
 	      }
 	      // for last systematic 
-	      if(sys==ENDOFSYSENUM-1){
+	      if(sys==ENDOFSYSENUM){
 		// calculate total systematic uncertainty
 		double maxLepEffSF=0;
 		double maxBtagSF=0;
 		for (unsigned int n=1; n<=nSysTypes; n++){
-		  // exclude uncertainties from total uncertainties if it is not intended to be considered
+		  // exclude uncertainties from total uncertainties and put name in brakets if it is not intended to be considered
 		  if (considerError_[xSecVariables_[i]][ mapNew2OldSysIndex_[n] ]==false){
+		    relSysPlot->GetXaxis()->SetBinLabel(n, TString("(")+relSysPlot->GetXaxis()->GetBinLabel(n)+")");
+
 		    if(verbose>0) std::cout << " Uncertainties when unfolding with "<< relSysPlot->GetXaxis()->GetBinLabel(n) <<" is excluded from total systematic uncertainty. Idx= "<< n << std::endl;
 		  }
 		  // add errors quadratically for other uncertainties
@@ -560,7 +577,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		relativeUncertainties_[xSecVariables_[i]][bin]   -> GetXaxis()->SetBinLabel(nSysTypes+1, "statistical");
 		// b) total systematic uncertainty
 		relativeUncertainties_[xSecVariables_[i]][bin]   -> SetBinContent(nSysTypes+2, 100*totalSystematicError/stdBinXSecValue);
-		relativeUncertainties_[xSecVariables_[i]][bin]   -> GetXaxis()->SetBinLabel(nSysTypes+2, "total syst.");
+		relativeUncertainties_[xSecVariables_[i]][bin]   -> GetXaxis()->SetBinLabel(nSysTypes+2, "total systematic");
 		// c) total stat+systematic uncertainty
 		relativeUncertainties_[xSecVariables_[i]][bin]   -> SetBinContent(nSysTypes+3, 100*combinedErrorBinVar/stdBinXSecValue);
 		relativeUncertainties_[xSecVariables_[i]][bin]   -> GetXaxis()->SetBinLabel(nSysTypes+3, "total");
@@ -604,7 +621,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetMinimum(errMin);
 		double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
 		if (histMax>errMax){
-		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(1.2*histMax);
+		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(((int(histMax)-int(histMax)%5)/5+1)*5); // maximum in 5er steps
 		}
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetStats(kFALSE);
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitle("Relative Uncertainty (symmetrized) [%]");
@@ -683,26 +700,29 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 
 	totalUncertaintyDistributions_[xSecVariables_[i]]->SetLineColor(38);
 	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMinimum(errMin);
-	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMaximum(errMax);
+	double histMax=totalUncertaintyDistributions_[xSecVariables_[i]]->GetBinContent(totalUncertaintyDistributions_[xSecVariables_[i]]->GetMaximumBin());
+	double max = (errMax>histMax ? errMax : ((int(histMax)-int(histMax)%5)/5+2)*5); 
+	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMaximum(max);
 	totalUncertaintyDistributions_[xSecVariables_[i]]->GetYaxis()->SetTitle("Relative Uncertainty [%]");
-
+	
 	statUncertaintyDistributions_[xSecVariables_[i]] ->SetLineColor(2);
-	sysUncertaintyDistributions_[xSecVariables_[i]]  ->SetLineColor(kOrange-3);
+	sysUncertaintyDistributions_ [xSecVariables_[i]] ->SetLineColor(kOrange-3);
 
 	TLegend *uncDistLegend = new TLegend();
 	legendStyle(*uncDistLegend,"");
-	uncDistLegend->AddEntry(totalUncertaintyDistributions_[xSecVariables_[i]],"Total Uncertainty","L");
-	uncDistLegend->AddEntry(statUncertaintyDistributions_[xSecVariables_[i]],"Statistical Uncertainty","L");
-	uncDistLegend->AddEntry(sysUncertaintyDistributions_[xSecVariables_[i]],"Systematic Uncertainty","L");
+	uncDistLegend->AddEntry(totalUncertaintyDistributions_[xSecVariables_[i]],"Total Uncertainty"      ,"L");
+	uncDistLegend->AddEntry(statUncertaintyDistributions_ [xSecVariables_[i]],"Statistical Uncertainty","L");
+	uncDistLegend->AddEntry(sysUncertaintyDistributions_  [xSecVariables_[i]],"Systematic Uncertainty" ,"L");
 	uncDistLegend->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.35);
 	uncDistLegend->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - (double)uncDistLegend->GetNRows()*0.04);
 	uncDistLegend->SetX2NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
 	uncDistLegend->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength());
 
 	canvasUncertaintyDistributions->cd();
+	canvasUncertaintyDistributions->SetTitle(xSecVariables_[i]);
 	totalUncertaintyDistributions_[xSecVariables_[i]]->Draw();
-	statUncertaintyDistributions_[xSecVariables_[i]] ->Draw("SAME");
-	sysUncertaintyDistributions_[xSecVariables_[i]]  ->Draw("SAME");
+	statUncertaintyDistributions_ [xSecVariables_[i]]->Draw("SAME");
+	sysUncertaintyDistributions_  [xSecVariables_[i]]->Draw("SAME");
 	uncDistLegend                                    ->Draw("SAME");
 
 	int initialIgnoreLevel=gErrorIgnoreLevel;
@@ -909,11 +929,12 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	      TCanvas* relUnCertaintyCanvas = new TCanvas(relativeUncertainties_[xSecVariables_[i]][bin]->GetName() ,relativeUncertainties_[xSecVariables_[i]][bin]->GetTitle(), 600, 600);
 	      //canvasStyle(*relUnCertaintyCanvas);
 	      relUnCertaintyCanvas->SetBottomMargin(0.35);
-	      relUnCertaintyCanvas->SetLeftMargin(0.10);
+	      relUnCertaintyCanvas->SetLeftMargin(0.20);
 	      relUnCertaintyCanvas->SetRightMargin(0.10);
 	      relUnCertaintyCanvas->SetTopMargin(0.07);
 	      relUnCertaintyCanvas->cd(0);
 	      relUnCertaintyCanvas->SetGrid(1,1);
+	      relUnCertaintyCanvas->SetTitle(xSecVariables_[i]+"Bin"+getTStringFromInt(bin));
 	      // draw plot into canvas (transparent) for having axis AND grid
 	      relativeUncertainties_[xSecVariables_[i]][bin]->SetFillColor(10);
 	      relativeUncertainties_[xSecVariables_[i]][bin]->SetLineColor(10);
@@ -922,7 +943,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	      // draw axis also on the right side of canvas, uncertainties are only plotted positively after implementing the symmetrization
 	      double xPosition = relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->GetXmax();
 	      double histMax   = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
-	      double max       = ( errMax>histMax ) ? errMax : 1.2*histMax;
+	      double max       = ( errMax>histMax ) ? errMax : ((int(histMax)-int(histMax)%5)/5+1)*5;
 	      double min       = errMin;
 	      TGaxis *axis = new TGaxis(xPosition,min,xPosition,max,min,max,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
 	      axis->SetLabelSize(myStyle.GetLabelSize());
@@ -936,14 +957,10 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	      unsigned int colour=kBlack;
 	      for(int sys=1; sys<=relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX(); ++sys, ++colourCounter){
 		colour = (colourCounter%2==0) ? kYellow-7 : 8;
-		if ((unsigned int)sys==mcatnloIdx || (unsigned int)sys==powhegIdx){
-		  colour=kGray;
+		fillStyle = 1001;
+		if (sys<relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX()-2&&considerError_[xSecVariables_[i]][ mapNew2OldSysIndex_[sys] ]==false){
 		  fillStyle=3002;
 		}
-		else{
-		  colour = (colourCounter%2==0) ? kYellow-7 : 8;
-		  fillStyle = 1001;
-		}	   
 		relUnCertaintyCopy->Reset("ICEMS");
 		relUnCertaintyCopy->SetBinContent(sys, relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(sys));
 		relUnCertaintyCopy->SetFillStyle(fillStyle);
@@ -954,7 +971,7 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		}
 		// statistical uncertainty
 		else if(sys==relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX()-2){
-		  relUnCertaintyCopy->SetFillColor(kRed-7);
+		  relUnCertaintyCopy->SetFillColor(kOrange+7);
 		  relUnCertaintyCopy->DrawCopy("hist same");
 		}
 		// total systematic uncertainty
@@ -966,20 +983,26 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 		else if(sys==relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX()){
 		  relUnCertaintyCopy->SetFillColor(38);
 		  relUnCertaintyCopy->DrawCopy("hist same");
-		  gPad->RedrawAxis();
+		  gPad->RedrawAxis("g");
 		}
 	      }
+	      DrawLabel(xSecVariables_[i]+"Bin"+getTStringFromInt(bin), 0.07, 0.90, 0.4, 1.02);
 	      // save canvas to file
 	      if(save) saveToRootFile( outputFile, relUnCertaintyCanvas, true, verbose, "relativeUncertainties/"+xSecVariables_[i]);
 	      // save canvas as eps
 	      int initialIgnoreLevel=gErrorIgnoreLevel;
 	      if(verbose==0) gErrorIgnoreLevel=kWarning;
 	      if(save){
-		TString saveName=outputFolder+"/uncertainties/relativeUncertainties"+xSecVariables_[i]+"Bin"+getTStringFromInt(bin);
-		if(decayChannel=="combined") saveName+="Combined";
+		TString saveNamePDF=outputFolder+"/uncertainties/relativeUncertainties";
+		TString saveName=saveNamePDF+relUnCertaintyCanvas->GetTitle();		
+		if(decayChannel=="combined"){ saveName+="Combined"; saveNamePDF+="Combined"; }
+		saveNamePDF+=LV+PS;
 		saveName+=universalplotLabel;
 		relUnCertaintyCanvas->Print(saveName+".eps");
 		relUnCertaintyCanvas->Print(saveName+".png");
+		if(i==0&&bin==1) relUnCertaintyCanvas->Print(saveNamePDF+".pdf(");
+		else if (i==xSecVariables_.size()-1&&bin==histo_[xSecVariables_[i]][sysNo]->GetNbinsX()) relUnCertaintyCanvas->Print(saveNamePDF+".pdf)");
+		else relUnCertaintyCanvas->Print(saveNamePDF+".pdf");
 	      }
 	      gErrorIgnoreLevel=initialIgnoreLevel;
 	      // delete canvas
@@ -1175,12 +1198,17 @@ void combineTopDiffXSecUncertainties(double luminosity=12148., bool save=true, u
 	    if(save){
 	      // a) within rootFile
 	      saveToRootFile(outputFile, canvas, true, verbose, "finalXSec");
-	      // b) as eps and png
-	      TString saveName=outputFolder+"/xSec/finalXSec"+xSecVariables_[i];
-	      if(decayChannel=="combined") saveName+="Combined";
+	      // b) as eps, png and pdf
+	      TString saveNamePDF=outputFolder+"/xSec/finalXSec";
+	      TString saveName=saveNamePDF+xSecVariables_[i]; 
+	      if(decayChannel=="combined"){ saveName+="Combined"; saveNamePDF+="Combined"; }
 	      saveName+=universalplotLabel+closureLabel;
+	      saveNamePDF+=LV+PS;
 	      canvas->Print(saveName+".eps");
 	      canvas->Print(saveName+".png");
+	      if(i==0) canvas->Print(saveNamePDF+".pdf(");
+	      else if (i==xSecVariables_.size()-1) canvas->Print(saveNamePDF+".pdf)");
+	      else canvas->Print(saveNamePDF+".pdf");
 	      gErrorIgnoreLevel=initialIgnoreLevel;
 	      //delete statErrors;
 	    }
