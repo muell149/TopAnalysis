@@ -557,7 +557,7 @@ elif not options.eventFilter == 'data':
 
 ## calculate btag weight factor
 from TopAnalysis.TopUtils.BTagSFEventWeight_cfi import bTagSFEventWeight
-process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "12-470", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+options.bTagAlgoWP+".root", noHistograms = True)
+process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "2012", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+options.bTagAlgoWP+".root", noHistograms = True)
 process.bTagSFEventWeightBTagSFUp     = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
 process.bTagSFEventWeightBTagSFDown   = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
 process.bTagSFEventWeightMisTagSFUp   = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")
