@@ -2205,21 +2205,23 @@ namespace semileptonic {
 	  if(verbose>1) std::cout << "searching for object " << saveObjectName << std::endl;
 	  // loop all objects in file
 	  TList * list = gDirectory->GetListOfKeys();
-	  while( list->At( count+1 ) != list->Last()){
-	    ++count;
-	    TObject *folderObject = list->At(count);
-	    TString folderObjectName = (TString)folderObject->GetName();
-	    if(verbose>1) std::cout << "candidate #" << count+1 << ": " << folderObjectName << std::endl;
-	    // check if object you want to save is already existing
-	    // by comparing the names
-	    if(folderObjectName==saveObjectName){
-	      if(verbose>1){
-		std::cout << "already exists in file " << outputFile << std::endl;
-		std::cout << "will keep the old one!" << std::endl << std::endl;
+	  if(list->At(0)){
+	    do{
+	      ++count;
+	      TObject *folderObject = list->At(count);
+	      TString folderObjectName = (TString)folderObject->GetName();
+	      if(verbose>1) std::cout << "candidate #" << count+1 << ": " << folderObjectName << std::endl;
+	      // check if object you want to save is already existing
+	      // by comparing the names
+	      if(folderObjectName==saveObjectName){
+		if(verbose>1){
+		  std::cout << "already exists in file " << outputFile << std::endl;
+		  std::cout << "will keep the old one!" << std::endl << std::endl;
+		}
+		saveObject=false;
+		break;
 	      }
-	      saveObject=false;
-	      break;
-	    }
+	    }while( list->At( count ) != list->Last());
 	  }
 	}
       }
