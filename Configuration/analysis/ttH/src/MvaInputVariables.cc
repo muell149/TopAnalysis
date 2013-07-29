@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
 
 #include <TTree.h>
 #include <TSystem.h>
@@ -106,18 +107,20 @@ void MvaInputTopJetsVariables::Input::setMvaWeights(const float weightCorrect, c
 
 
 
-MvaInputTopJetsVariables::MvaInputTopJetsVariables():
+MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps):
 selectorList_(0),
 t_mvaInput_(0),
-mvaWeightsReader_(0)
+mvaWeightsReader_(0),
+selectionSteps_(selectionSteps)
 {}
 
 
 
-MvaInputTopJetsVariables::MvaInputTopJetsVariables(const char* mvaWeightsFile):
+MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps, const char* mvaWeightsFile):
 selectorList_(0),
 t_mvaInput_(0),
-mvaWeightsReader_(0)
+mvaWeightsReader_(0),
+selectionSteps_(selectionSteps)
 {
     std::cout<<"--- Beginning setting up MVA weights from file\n";
     
@@ -155,6 +158,29 @@ mvaWeightsReader_(0)
     }
     
     std::cout<<"=== Finishing setting up MVA weights from file\n\n";
+}
+
+
+
+void MvaInputTopJetsVariables::fillForInputProduction(const RecoObjects& recoObjects,
+                                                      const tth::GenObjectIndices& genObjectIndices,
+                                                      const tth::RecoObjectIndices& recoObjectIndices,
+                                                      const double& weight,
+                                                      const TString& selectionStep)
+{
+    // Check if step exists
+    if(std::find(selectionSteps_.begin(), selectionSteps_.end(), selectionStep) == selectionSteps_.end()) return;
+    
+    // FIXME: which events exactly to fill? For now all with at least 4 jets
+    const int numberOfJets = recoObjectIndices.jetIndices_.size();
+    if(numberOfJets<4) return;
+    
+    // Loop over all jet combinations and get MVA input variables
+    const std::vector<MvaInputTopJetsVariables::Input>& v_mvaInput =
+        MvaInputTopJetsVariables::fillInputStructs(recoObjectIndices, genObjectIndices, recoObjects, weight);
+    
+    // Fill the MVA TTree
+    this->addEntries(v_mvaInput);
 }
 
 

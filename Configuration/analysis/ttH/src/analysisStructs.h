@@ -61,22 +61,25 @@ namespace tth{
         
         bool uniqueRecoMatching()const;
         
+        bool isCorrectPairFromTop(const int& bIndex, const int& antiBIndex)const;
+        bool isSwappedPairFromTop(const int& bIndex, const int& antiBIndex)const;
+        bool isPairFromTop(const int& bIndex, const int& antiBIndex)const;
+        
+        bool isCorrectPairFromHiggs(const int& bIndex, const int& antiBIndex)const;
+        bool isSwappedPairFromHiggs(const int& bIndex, const int& antiBIndex)const;
+        bool isPairFromHiggs(const int& bIndex, const int& antiBIndex)const;
+        
         #ifndef __CINT__
         const int& genBjetFromTopIndex_;
         const int& genAntiBjetFromTopIndex_;
         const int& recoBjetFromTopIndex_;
         const int& recoAntiBjetFromTopIndex_;
         
-        //const bool& topSystemMatchedToReco_;
         
         const int& genBjetFromHiggsIndex_;
         const int& genAntiBjetFromHiggsIndex_;
         const int& recoBjetFromHiggsIndex_;
         const int& recoAntiBjetFromHiggsIndex_;
-        
-        //const bool& higgsSystemMatchedToReco_;
-        
-        
         #endif
     };
     

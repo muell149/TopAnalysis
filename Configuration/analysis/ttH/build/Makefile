@@ -36,10 +36,10 @@ sampleHelpers.o: $(TopDir)/sampleHelpers.cc $(TopDir)/sampleHelpers.h
 
 
 
-load_Analysis: dict.o load_Analysis.o AnalysisBase.o KinematicReconstruction.o KinematicReconstruction_LSroutines.o MeanSol.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o analysisStructs.o Playground.o
+load_Analysis: dict.o load_Analysis.o AnalysisBase.o KinematicReconstruction.o KinematicReconstruction_LSroutines.o MeanSol.o HiggsAnalysis.o utils.o CommandLineParameters.o HistoListReader.o sampleHelpers.o analysisHelpers.o PUReweighter.o KinReco.o JetCategories.o AnalysisHistograms.o JetCorrectionUncertainty.o JetCorrectorParameters.o SimpleJetCorrectionUncertainty.o MvaInputVariables.o analysisUtils.o ScaleFactors.o DijetAnalyzer.o analysisObjectStructs.o analysisStructs.o Playground.o MvaValidation.o
 	g++ -o $@ $^ $(ROOTLIBS)
 
-load_Analysis.o: $(HiggsDir)/load_Analysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/utils.h $(TopDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(HiggsDir)/JetCategories.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h $(TopDir)/ScaleFactors.h $(HiggsDir)/MvaInputVariables.h $(HiggsDir)/DijetAnalyzer.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/Playground.h
+load_Analysis.o: $(HiggsDir)/load_Analysis.cc $(HiggsDir)/HiggsAnalysis.h $(TopDir)/utils.h $(TopDir)/sampleHelpers.h $(HiggsDir)/analysisHelpers.h $(HiggsDir)/JetCategories.h $(TopDir)/PUReweighter.h $(TopDir)/CommandLineParameters.h $(TopDir)/ScaleFactors.h $(HiggsDir)/MvaInputVariables.h $(HiggsDir)/DijetAnalyzer.h $(HiggsDir)/AnalysisHistograms.h $(HiggsDir)/Playground.h $(HiggsDir)/MvaValidation.h
 	g++ -c -o load_Analysis.o $(COMPFLAGS) $(HiggsDir)/load_Analysis.cc
 
 dict.o: dict.cc
@@ -83,6 +83,9 @@ MeanSol.o: $(TopDir)/MeanSol.cc $(TopDir)/MeanSol.h
 
 MvaInputVariables.o: $(HiggsDir)/MvaInputVariables.cc $(HiggsDir)/MvaInputVariables.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h $(HiggsDir)/analysisStructsFwd.h
 	g++ -c -o MvaInputVariables.o $(COMPFLAGS) $(HiggsDir)/MvaInputVariables.cc
+
+MvaValidation.o: $(HiggsDir)/MvaValidation.cc $(HiggsDir)/MvaValidation.h $(HiggsDir)/AnalysisHistograms.h
+	g++ -c -o $@ $(COMPFLAGS) $(HiggsDir)/MvaValidation.cc
 
 JetCorrectionUncertainty.o: $(TopDir)/JetCorrectionUncertainty.cc $(TopDir)/JetCorrectionUncertainty.h
 	g++ -c -o $@ $(COMPFLAGS) $(TopDir)/JetCorrectionUncertainty.cc

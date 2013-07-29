@@ -84,6 +84,48 @@ bool tth::GenObjectIndices::uniqueRecoMatching()const
 
 
 
+bool tth::GenObjectIndices::isCorrectPairFromTop(const int& bIndex, const int& antiBIndex)const
+{
+    return bIndex==recoBjetFromTopIndex_ && antiBIndex==recoAntiBjetFromTopIndex_;
+}
+
+
+
+bool tth::GenObjectIndices::isSwappedPairFromTop(const int& bIndex, const int& antiBIndex)const
+{
+    return bIndex==recoAntiBjetFromTopIndex_ && antiBIndex==recoBjetFromTopIndex_;
+}
+
+
+
+bool tth::GenObjectIndices::isPairFromTop(const int& bIndex, const int& antiBIndex)const
+{
+    return this->isCorrectPairFromTop(bIndex, antiBIndex) || this->isSwappedPairFromTop(bIndex, antiBIndex);
+}
+
+
+
+bool tth::GenObjectIndices::isCorrectPairFromHiggs(const int& bIndex, const int& antiBIndex)const
+{
+    return bIndex==recoBjetFromHiggsIndex_ && antiBIndex==recoAntiBjetFromHiggsIndex_;
+}
+
+
+
+bool tth::GenObjectIndices::isSwappedPairFromHiggs(const int& bIndex, const int& antiBIndex)const
+{
+    return bIndex==recoAntiBjetFromHiggsIndex_ && antiBIndex==recoBjetFromHiggsIndex_;
+}
+
+
+
+bool tth::GenObjectIndices::isPairFromHiggs(const int& bIndex, const int& antiBIndex)const
+{
+    return this->isCorrectPairFromHiggs(bIndex, antiBIndex) || this->isSwappedPairFromHiggs(bIndex, antiBIndex);
+}
+
+
+
 tth::RecoObjectIndices::RecoObjectIndices(const std::vector<int>& allLeptonIndices,
                                   const std::vector<int>& leptonIndices, const std::vector<int>& antiLeptonIndices,
                                   const int& leptonIndex, const int& antiLeptonIndex,

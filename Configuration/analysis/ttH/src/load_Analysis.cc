@@ -18,6 +18,7 @@
 #include "analysisHelpers.h"
 #include "JetCategories.h"
 #include "MvaInputVariables.h"
+#include "MvaValidation.h"
 #include "DijetAnalyzer.h"
 #include "AnalysisHistograms.h"
 #include "Playground.h"
@@ -161,19 +162,21 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
         dijetAnalyzer= new DijetAnalyzer(jetCategories_dijetAnalyzer);
     }
     
+    // Set up production of MVA input tree
     MvaInputTopJetsVariables* mvaInputTopJetsVariables(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaInputTopJetsVariables = new MvaInputTopJetsVariables();
+        mvaInputTopJetsVariables = new MvaInputTopJetsVariables({"8"});
     }
     
-    // Set up MVA steering tool for: a) production of MVA input TTree, b) reading in MVA weights
-    // FIXME: now used here for reading weights only, and another one within HiggsAnalysis for for TTree production
-    // Cannot be const due to the internal structure at present
-    MvaInputTopJetsVariables* mvaInputWeightsCorrect(0);
-    MvaInputTopJetsVariables* mvaInputWeightsSwapped(0);
+    // Set up MVA validation, including reading in MVA weights in case they exist
+    MvaValidation* mvaValidation(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
-        mvaInputWeightsCorrect = new MvaInputTopJetsVariables(MvaWeightsCorrectFILE);
-        mvaInputWeightsSwapped = new MvaInputTopJetsVariables(MvaWeightsSwappedFILE);
+        // FIXME: Cannot be const due to the internal structure at present
+        MvaInputTopJetsVariables* mvaInputWeightsCorrect(0);
+        MvaInputTopJetsVariables* mvaInputWeightsSwapped(0);
+        mvaInputWeightsCorrect = new MvaInputTopJetsVariables({}, MvaWeightsCorrectFILE);
+        mvaInputWeightsSwapped = new MvaInputTopJetsVariables({}, MvaWeightsSwappedFILE);
+        mvaValidation = new MvaValidation({"8"}, mvaInputWeightsCorrect, mvaInputWeightsSwapped);
     }
     
     // Set up the analysis
@@ -188,8 +191,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetJetCategoriesOverview(jetCategories_overview);
     selector->SetJetCategoriesAnalysis(jetCategories);
     selector->SetMvaInputProduction(mvaInputTopJetsVariables);
-    selector->SetMvaWeightsCorrect(mvaInputWeightsCorrect);
-    selector->SetMvaWeightsSwapped(mvaInputWeightsSwapped);
+    selector->SetMvaValidation(mvaValidation);
     selector->SetEventYieldHistograms(eventYieldHistograms);
     selector->SetDyScalingHistograms(dyScalingHistograms);
     selector->SetBasicHistograms(basicHistograms);

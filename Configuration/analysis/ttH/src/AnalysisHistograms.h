@@ -166,7 +166,7 @@ private:
 
 
 
-#endif // AnalysisHistograms_h
+#endif
 
 
 

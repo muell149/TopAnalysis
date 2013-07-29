@@ -102,15 +102,23 @@ public:
     
     
     /// Empty constructor
-    MvaInputTopJetsVariables();
+    MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps);
     
     /// Constructor for setting input file MVA weights, and creating TMVA Reader
-    MvaInputTopJetsVariables(const char* mvaWeightsFile);
+    MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps, const char* mvaWeightsFile);
     
     /// Destructor
     ~MvaInputTopJetsVariables(){};
     
     
+    
+    
+    /// Fill all variables in the event loop
+    void fillForInputProduction(const RecoObjects& recoObjects,
+                                const tth::GenObjectIndices& genObjectIndices,
+                                const tth::RecoObjectIndices& recoObjectIndices,
+                                const double& weight,
+                                const TString& selectionStep);
     
     /// Add entries to the stored MVA input structs
     void addEntries(const std::vector<Input>& v_input);
@@ -246,6 +254,10 @@ private:
     
     /// Struct for setting addresses of variables for mvaWeightsReader_
     Input mvaWeightsStruct_;
+    
+    
+    /// Selection steps for which to run the MVA tool
+    const std::vector<TString> selectionSteps_;
 };
 
 

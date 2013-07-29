@@ -16,6 +16,7 @@ class TProfile;
 #include "../../diLeptonic/src/classesFwd.h"
 
 class MvaInputTopJetsVariables;
+class MvaValidation;
 class JetCategories;
 class DijetAnalyzer;
 class BasicHistograms;
@@ -76,11 +77,8 @@ public:
     /// Set up production of MVA input
     void SetMvaInputProduction(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
     
-    /// Set up the MVA weights input for correct jet combinations of ttbar system
-    void SetMvaWeightsCorrect(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
-    
-    /// Set up the MVA weights input for swapped jet combinations of ttbar system
-    void SetMvaWeightsSwapped(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
+    /// Set up validation of MVA
+    void SetMvaValidation(MvaValidation* mvaValidation);
     
     /// Set the pointer to DijetAnalyzer
     void SetDijetAnalyzer(DijetAnalyzer* analyzer);
@@ -99,44 +97,44 @@ public:
     
     /// Bool for separating ttbar+bbar events and ttbar+other events
     void SetRunWithTtbb(const bool runWithTtbb_);
-
-
-
+    
+    
+    
 private:
-
-
+    
+    
     /// Select events from Higgs signal samples which need to be removed due to generator selection
     bool failsHiggsGeneratorSelection(const Long64_t&)const;
-
+    
     /// Select events from Top signal that satisfy flavour of the additional jets
     bool failsAdditionalJetFlavourSelection(const Long64_t&)const;
-
-
-
+    
+    
+    
     /// Get indices of generated b jet and anti-b jet for particles with given PDG ID
     /// Returns whether a unique solution is found, and only in this case indices are set unequal to -1
-    bool getGenBJetIndices(int& genBjetIndex, int& genAntiBjetIndex,
+    bool getGenBjetIndices(int& genBjetIndex, int& genAntiBjetIndex,
                            const TopGenObjects& topGenObjects, const int pdgId);
-
+    
     /// Match the two generated input jets to the reco jet collection
     bool matchRecoToGenJets(int& matchedBjetIndex, int& matchedAntiBjetIndex,
                             const std::vector<int>& jetIndices,
                             const VLV& jets,
                             const LV* genBjet, const LV* genAntiBjet);
-
-
-
+    
+    
+    
     /// Enum for analysis modes
     std::vector<AnalysisMode::AnalysisMode> analysisModes_;
-
-
-
+    
+    
+    
     /// Is it a ttH sample inclusive in Higgs decay
     bool isInclusiveHiggs_;
-
+    
     /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
     bool bbbarDecayFromInclusiveHiggs_;
-
+    
     /// Select tt+bb or tt+other events
     bool runWithTtbb_;
     
@@ -144,21 +142,15 @@ private:
     
     /// Class holding the definition and handling of jet categories (# jets, # b-jets) for overview
     const JetCategories* jetCategories_overview_;
-
+    
     /// Class holding the definition and handling of jet categories (# jets, # b-jets) for analysis
     const JetCategories* jetCategories_;
-
+    
     /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     MvaInputTopJetsVariables* mvaInputTopJetsVariables_;
-
-    /// Class holding the weights as calculated by MVA for correct combinations
-    MvaInputTopJetsVariables* mvaWeightsCorrect_;
     
-    /// Class holding the weights as calculated by MVA for swapped combinations
-    MvaInputTopJetsVariables* mvaWeightsSwapped_;
-
-
-
+    
+    
     ///
     tth::IndexPairs chargeOrderedJetPairIndices(const std::vector<int>& jetIndices,
                                                 const std::vector<double>& jetCharges);
@@ -189,6 +181,9 @@ private:
     /// Basic histograms
     BasicHistograms* basicHistograms_;
     
+    /// MVA validation histograms
+    MvaValidation* mvaValidation_;
+    
     /// Playground
     Playground* playground_;
     
@@ -217,37 +212,17 @@ private:
     TH1* h_events_step8;
 */    
     
-    
-    
     /// Control plots
     TH1* h_jetPt_step8;
     TH1* h_jetChargeGlobalPtWeighted_step8;
     TH1* h_jetChargeRelativePtWeighted_step8;
-
-
-    TH1* h_matchedBjetsFromTop_step8;
-    TH1* h_matchedBjetsFromHiggs_step8;
-
-    TH1* h_mvaBasedJetsFromTop_step8;
-    TH1* h_mvaBasedJetsFromHiggs_step8;
-
-    TH1* h_dijetMass_step8;
-    TH1* h_mvaBasedDijetMass_step8;
-
-    TProfile* p_dijetMassVsJetCategories;
-    TProfile* p_dijetMassVsMvaWeightHigh;
-    TProfile* p_dijetMassVsMvaWeightDiff;
-
-    TProfile* p_mvaBasedDijetMassVsJetCategories;
-    TProfile* p_mvaBasedDijetMassVsMvaWeightHigh;
-    TProfile* p_mvaBasedDijetMassVsMvaWeightDiff;
 };
 
 
 
 
 
-#endif //HiggsAnalysis_h
+#endif
 
 
 

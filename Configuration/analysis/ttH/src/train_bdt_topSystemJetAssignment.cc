@@ -122,7 +122,7 @@ void trainBdtTopSystemJetAssignment(const std::vector<std::string>& modes)
     // Print all separation power plots
     TString outputPlots(MvaOutputDIR);
     outputPlots.Append("/").Append(PlotOutputFILE);
-    MvaInputTopJetsVariables mvaInputTopJetsVariables;
+    MvaInputTopJetsVariables mvaInputTopJetsVariables({});
     mvaInputTopJetsVariables.importTree(mergedTreesName.Data(), "mvaInputTopJets_training");
     if(std::find(modes.begin(), modes.end(), "cp") != modes.end()) mvaInputTopJetsVariables.mvaInputVariablesControlPlots(outputPlots.Data());
     
