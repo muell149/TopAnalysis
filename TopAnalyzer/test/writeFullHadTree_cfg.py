@@ -497,7 +497,8 @@ process.TreeRegistryService.treeTitle = "Tree for UHH top-quark analysis\nPartic
 from TopMass.TopEventTree.EventHypothesisAnalyzer_cfi import analyzeHypothesis
 process.analyzeKinFit = analyzeHypothesis.clone(hypoClassKey = "ttFullHadHypKinFit:Key", ttEvent = "ttFullHadEvent", ttEventGen2 = "ttFullHadEvent2", jets = "tightLeadingJets", gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'), maxNJets = cms.int32(20))
 from TopMass.TopEventTree.JetEventAnalyzer_cfi import analyzeJets
-process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets")
+process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets",
+                                        gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'))
 from TopMass.TopEventTree.WeightEventAnalyzer_cfi import analyzeWeights
 process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets",
                                               puWeightSrc     = cms.InputTag("eventWeightPU"       , "eventWeightPU"),
