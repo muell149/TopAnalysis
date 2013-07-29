@@ -501,6 +501,7 @@ process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets",
                                         gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'))
 from TopMass.TopEventTree.WeightEventAnalyzer_cfi import analyzeWeights
 process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets",
+                                              mcWeight = options.mcWeight,
                                               puWeightSrc     = cms.InputTag("eventWeightPU"       , "eventWeightPU"),
                                               puWeightUpSrc   = cms.InputTag("eventWeightPUSysUp"  , "eventWeightPU"),
                                               puWeightDownSrc = cms.InputTag("eventWeightPUSysDown", "eventWeightPU"),
