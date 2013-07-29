@@ -18,9 +18,17 @@ namespace TMVA{
     class Reader;
 }
 
+#include "analysisStructsFwd.h"
 #include "../../diLeptonic/src/storeTemplate.h"
 #include "../../diLeptonic/src/classesFwd.h"
 
+class RecoObjects;
+namespace tth{
+    //class GenLevelWeights;
+    //class RecoLevelWeights;
+    class GenObjectIndices;
+    class RecoObjectIndices;
+}
 
 
 
@@ -135,6 +143,12 @@ public:
     /// Import a written TTree
     void importTree(const std::string& f_savename, const std::string& treeName ="mvaInputTopJets");
     
+    /// Fill the MVA input structs for all jet combinations of one event
+    static std::vector<Input> fillInputStructs(const tth::RecoObjectIndices& recoObjectIndices,
+                                               const tth::GenObjectIndices& genObjectIndices,
+                                               const RecoObjects& recoObjects,
+                                               const double& weight);
+    
     /// Get the MVA input structs
     std::vector<Input> inputStructs()const;
     
@@ -197,6 +211,11 @@ private:
     
     /// Store the object in the output list and return it
     template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
+    
+    /// Calculate the jet recoil for a given jet pair, i.e. vector sum of all jets except selected jet pair
+    static VLV recoilForJetPairs(const tth::IndexPairs& jetIndexPairs,
+                                 const std::vector<int>& jetIndices,
+                                 const VLV& jets);
     
     
     

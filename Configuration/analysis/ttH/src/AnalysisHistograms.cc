@@ -178,7 +178,7 @@ TH1* DyScalingHistograms::bookHisto(TH1* histo, const TString& name)
 
 
 
-void DyScalingHistograms::fill(const RecoObjects& recoObjects, const tth::ObjectIndices& objectIndices,
+void DyScalingHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
                                const double& weight, const TString& step)
 {
     // Check if step exists
@@ -190,8 +190,8 @@ void DyScalingHistograms::fill(const RecoObjects& recoObjects, const tth::Object
         //exit(22);
     }
     
-    const int leadingLeptonIndex = objectIndices.leadingLeptonIndex_;
-    const int nLeadingLeptonIndex = objectIndices.nLeadingLeptonIndex_;
+    const int leadingLeptonIndex = recoObjectIndices.leadingLeptonIndex_;
+    const int nLeadingLeptonIndex = recoObjectIndices.nLeadingLeptonIndex_;
     
     // FIXME: should use one common function in HiggsAnalysis and here
     bool hasLeptonPair(false);
@@ -314,8 +314,8 @@ void BasicHistograms::bookHistos(const TString& step)
 
 
 
-void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::ObjectIndices& objectIndices,
-                           const tth::RecoLevelWeights& recoLevelWeights, const TString& step)
+void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
+                           const double& weight, const TString& step)
 {
     // Check if step exists
     const bool stepExists(this->checkExistence(step));
@@ -328,20 +328,20 @@ void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::ObjectIndi
     
     
     // Leptons
-    m_stepHistograms_[step].m_histogram_["basicLepton_multiplicity"]->Fill(recoObjects.allLeptons_->size(), recoLevelWeights.weight_);
-    for(const int index : objectIndices.leptonIndices_){
-        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(recoObjects.allLeptons_->at(index).Pt(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(recoObjects.allLeptons_->at(index).Eta(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(recoObjects.allLeptons_->at(index).Phi(), recoLevelWeights.weight_);
+    m_stepHistograms_[step].m_histogram_["basicLepton_multiplicity"]->Fill(recoObjects.allLeptons_->size(), weight);
+    for(const int index : recoObjectIndices.leptonIndices_){
+        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(recoObjects.allLeptons_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(recoObjects.allLeptons_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(recoObjects.allLeptons_->at(index).Phi(), weight);
     }
-    for(const int index : objectIndices.antiLeptonIndices_){
-        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(recoObjects.allLeptons_->at(index).Pt(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(recoObjects.allLeptons_->at(index).Eta(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(recoObjects.allLeptons_->at(index).Phi(), recoLevelWeights.weight_);
+    for(const int index : recoObjectIndices.antiLeptonIndices_){
+        m_stepHistograms_[step].m_histogram_["basicLepton_pt"]->Fill(recoObjects.allLeptons_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_eta"]->Fill(recoObjects.allLeptons_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton_phi"]->Fill(recoObjects.allLeptons_->at(index).Phi(), weight);
     }
     
-    const int leptonIndex = objectIndices.leptonIndices_.size()>0 ? objectIndices.leptonIndices_.at(0) : -1;
-    const int antiLeptonIndex = objectIndices.antiLeptonIndices_.size()>0 ? objectIndices.antiLeptonIndices_.at(0) : -1;
+    const int leptonIndex = recoObjectIndices.leptonIndices_.size()>0 ? recoObjectIndices.leptonIndices_.at(0) : -1;
+    const int antiLeptonIndex = recoObjectIndices.antiLeptonIndices_.size()>0 ? recoObjectIndices.antiLeptonIndices_.at(0) : -1;
     const bool hasLeptonPair = (leptonIndex!=-1 && antiLeptonIndex!=-1);
     
     // Leading lepton and antilepton
@@ -350,13 +350,13 @@ void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::ObjectIndi
     if(hasLeptonPair){
         ttbar::orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *recoObjects.allLeptons_, ttbar::LVpt);
         
-        m_stepHistograms_[step].m_histogram_["basicLepton1st_pt"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Pt(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton1st_eta"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Eta(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton1st_phi"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Phi(), recoLevelWeights.weight_);
+        m_stepHistograms_[step].m_histogram_["basicLepton1st_pt"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton1st_eta"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton1st_phi"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Phi(), weight);
         
-        m_stepHistograms_[step].m_histogram_["basicLepton2nd_pt"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Pt(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton2nd_eta"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Eta(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicLepton2nd_phi"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Phi(), recoLevelWeights.weight_);
+        m_stepHistograms_[step].m_histogram_["basicLepton2nd_pt"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton2nd_eta"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicLepton2nd_phi"]->Fill(recoObjects.allLeptons_->at(nLeadingLeptonIndex).Phi(), weight);
     }
     
     
@@ -365,38 +365,38 @@ void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::ObjectIndi
         LV dilepton(0.,0.,0.,0.);
         dilepton = recoObjects.allLeptons_->at(leadingLeptonIndex) + recoObjects.allLeptons_->at(nLeadingLeptonIndex);
         
-        m_stepHistograms_[step].m_histogram_["basicDilepton_mass"]->Fill(dilepton.M(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicDilepton_pt"]->Fill(dilepton.Pt(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicDilepton_rapidity"]->Fill(dilepton.Rapidity(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicDilepton_phi"]->Fill(dilepton.Phi(), recoLevelWeights.weight_);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_mass"]->Fill(dilepton.M(), weight);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_pt"]->Fill(dilepton.Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_rapidity"]->Fill(dilepton.Rapidity(), weight);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_phi"]->Fill(dilepton.Phi(), weight);
 
-        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaEta"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Eta() - recoObjects.allLeptons_->at(nLeadingLeptonIndex).Eta(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaPhi"]->Fill(ROOT::Math::VectorUtil::DeltaPhi(recoObjects.allLeptons_->at(leadingLeptonIndex), recoObjects.allLeptons_->at(nLeadingLeptonIndex)), recoLevelWeights.weight_);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaEta"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Eta() - recoObjects.allLeptons_->at(nLeadingLeptonIndex).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicDilepton_deltaPhi"]->Fill(ROOT::Math::VectorUtil::DeltaPhi(recoObjects.allLeptons_->at(leadingLeptonIndex), recoObjects.allLeptons_->at(nLeadingLeptonIndex)), weight);
     }
 
 
     // Jets
-    m_stepHistograms_[step].m_histogram_["basicJet_multiplicity"]->Fill(objectIndices.jetIndices_.size(), recoLevelWeights.weight_);
-    for(const int index : objectIndices.jetIndices_){
-        m_stepHistograms_[step].m_histogram_["basicJet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicJet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicJet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicJet_btagDiscriminator"]->Fill(recoObjects.jetBTagCSV_->at(index), recoLevelWeights.weight_);
+    m_stepHistograms_[step].m_histogram_["basicJet_multiplicity"]->Fill(recoObjectIndices.jetIndices_.size(), weight);
+    for(const int index : recoObjectIndices.jetIndices_){
+        m_stepHistograms_[step].m_histogram_["basicJet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), weight);
+        m_stepHistograms_[step].m_histogram_["basicJet_btagDiscriminator"]->Fill(recoObjects.jetBTagCSV_->at(index), weight);
     }
     
     
     // Bjets
-     m_stepHistograms_[step].m_histogram_["basicBjet_multiplicity"]->Fill(objectIndices.bjetIndices_.size(), recoLevelWeights.weight_);
-    for(const int index : objectIndices.bjetIndices_){
-        m_stepHistograms_[step].m_histogram_["basicBjet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicBjet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), recoLevelWeights.weight_);
-        m_stepHistograms_[step].m_histogram_["basicBjet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), recoLevelWeights.weight_);
+     m_stepHistograms_[step].m_histogram_["basicBjet_multiplicity"]->Fill(recoObjectIndices.bjetIndices_.size(), weight);
+    for(const int index : recoObjectIndices.bjetIndices_){
+        m_stepHistograms_[step].m_histogram_["basicBjet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), weight);
+        m_stepHistograms_[step].m_histogram_["basicBjet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), weight);
+        m_stepHistograms_[step].m_histogram_["basicBjet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), weight);
     }
     
     
     // Met
-    m_stepHistograms_[step].m_histogram_["basicMet_et"]->Fill(recoObjects.met_->E(), recoLevelWeights.weight_);
-    m_stepHistograms_[step].m_histogram_["basicMet_phi"]->Fill(recoObjects.met_->Phi(), recoLevelWeights.weight_);
+    m_stepHistograms_[step].m_histogram_["basicMet_et"]->Fill(recoObjects.met_->E(), weight);
+    m_stepHistograms_[step].m_histogram_["basicMet_phi"]->Fill(recoObjects.met_->Phi(), weight);
 }
 
 

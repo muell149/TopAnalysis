@@ -13,9 +13,10 @@ class TopGenObjects;
 class HiggsGenObjects;
 class KinRecoObjects;
 namespace tth{
-    class RecoLevelWeights;
     class GenLevelWeights;
-    class ObjectIndices;
+    class RecoLevelWeights;
+    class GenObjectIndices;
+    class RecoObjectIndices;
 }
 
 
@@ -40,7 +41,7 @@ public:
     void fill(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
               const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
               const KinRecoObjects& kinRecoObjects,
-              const tth::ObjectIndices& objectIndices,
+              const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
               const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
               const double& weight, const TString& step);
     
