@@ -95,8 +95,8 @@ dijet_bestMvaWeightCorrect_step8 - - - 1 1 0 0 0 0 0 0 0 0
 dijet_mvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
 dijet_bestMvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
-dijetMass_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaBasedDijetMass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mva_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaBest_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
 
 

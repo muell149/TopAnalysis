@@ -28,8 +28,10 @@ class MvaValidation : public AnalysisHistogramsBase{
 public:
     
     /// Constructor
-    MvaValidation(const std::vector<TString>& selectionSteps,
-                  MvaInputTopJetsVariables* weightsCorrect, MvaInputTopJetsVariables* weightsSwapped);
+    MvaValidation(MvaInputTopJetsVariables* weightsCorrect, MvaInputTopJetsVariables* weightsSwapped,
+                  const std::vector<TString>& selectionStepsNoCategories,
+                  const std::vector<TString>& stepsForCategories =std::vector<TString>(),
+                  const JetCategories* jetCategories =0);
     
     /// Destructor
     ~MvaValidation(){}

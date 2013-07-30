@@ -137,7 +137,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
 
     // Set up event yield histograms
     EventYieldHistograms* eventYieldHistograms(0);
-    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7", "8"});
+    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
     
     // Set up Drell-Yan scaling histograms
     DyScalingHistograms* dyScalingHistograms(0);
@@ -146,12 +146,13 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up basic histograms
     BasicHistograms* basicHistograms(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::cp) != v_analysisMode.end()){
-        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7", "8"});
+        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
     }
     
     // Set up playground
     Playground* playground(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::playg) != v_analysisMode.end()){
+        //playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"},{"7", "8"}, &jetCategories_overview);
         playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"});
     }
     
@@ -176,7 +177,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
         MvaInputTopJetsVariables* mvaInputWeightsSwapped(0);
         mvaInputWeightsCorrect = new MvaInputTopJetsVariables({}, MvaWeightsCorrectFILE);
         mvaInputWeightsSwapped = new MvaInputTopJetsVariables({}, MvaWeightsSwappedFILE);
-        mvaValidation = new MvaValidation({"8"}, mvaInputWeightsCorrect, mvaInputWeightsSwapped);
+        mvaValidation = new MvaValidation(mvaInputWeightsCorrect, mvaInputWeightsSwapped, {"8"});
     }
     
     // Set up the analysis

@@ -959,7 +959,7 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
                             const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
                             const double& defaultWeight)const
 {
-    if(eventYieldHistograms_) eventYieldHistograms_->fill(defaultWeight, selectionStep);
+    if(eventYieldHistograms_) eventYieldHistograms_->fill(recoObjectIndices, defaultWeight, selectionStep);
     if(dyScalingHistograms_) dyScalingHistograms_->fill(recoObjects, recoObjectIndices, defaultWeight, selectionStep);
     if(basicHistograms_) basicHistograms_->fill(recoObjects, recoObjectIndices, defaultWeight, selectionStep);
     if(playground_) playground_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
@@ -969,7 +969,6 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
     if(mvaInputTopJetsVariables_) mvaInputTopJetsVariables_->fillForInputProduction(recoObjects,
                                                                                     genObjectIndices, recoObjectIndices,
                                                                                     defaultWeight, selectionStep);
-
     if(mvaValidation_) mvaValidation_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
 }
 

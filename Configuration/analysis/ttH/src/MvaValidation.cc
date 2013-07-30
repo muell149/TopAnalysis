@@ -23,9 +23,11 @@
 
 
 
-MvaValidation::MvaValidation(const std::vector<TString>& selectionSteps,
-                             MvaInputTopJetsVariables* weightsCorrect, MvaInputTopJetsVariables* weightsSwapped):
-AnalysisHistogramsBase(selectionSteps),
+MvaValidation::MvaValidation(MvaInputTopJetsVariables* weightsCorrect, MvaInputTopJetsVariables* weightsSwapped,
+                             const std::vector<TString>& selectionStepsNoCategories,
+                             const std::vector<TString>& stepsForCategories,
+                             const JetCategories* jetCategories):
+AnalysisHistogramsBase(selectionStepsNoCategories, stepsForCategories, jetCategories),
 weightsCorrect_(weightsCorrect),
 weightsSwapped_(weightsSwapped)
 {
