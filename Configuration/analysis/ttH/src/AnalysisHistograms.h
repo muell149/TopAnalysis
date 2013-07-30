@@ -15,7 +15,7 @@ class RecoObjects;
 namespace tth{
     class RecoLevelWeights;
     //class GenLevelWeights;
-    class ObjectIndices;
+    class RecoObjectIndices;
 }
 
 
@@ -117,7 +117,7 @@ public:
     ~DyScalingHistograms(){}
 
     /// Fill histograms
-    void fill(const RecoObjects& recoObjects, const tth::ObjectIndices& objectIndices,
+    void fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
               const double& weight, const TString& step);
 
 
@@ -151,8 +151,8 @@ public:
     ~BasicHistograms(){}
 
     /// Fill basic histograms
-    void fill(const RecoObjects& recoObjects, const tth::ObjectIndices& objectIndices,
-              const tth::RecoLevelWeights& recoLevelWeights, const TString& step);
+    void fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
+              const double& weight, const TString& step);
 
 
 
@@ -166,7 +166,7 @@ private:
 
 
 
-#endif // AnalysisHistograms_h
+#endif
 
 
 
