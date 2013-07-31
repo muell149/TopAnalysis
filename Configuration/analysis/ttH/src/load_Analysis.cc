@@ -310,7 +310,6 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
             selector->SetRunWithTtbb(0);
             selector->SetHiggsInclusiveSample(isHiggsInclusive);
             selector->SetHiggsInclusiveSeparation(false);
-            selector->SetAnalysisModes(v_analysisMode);
             
             // Set up nTuple chain and run selector
             TChain chain("writeNTuple/NTuple");

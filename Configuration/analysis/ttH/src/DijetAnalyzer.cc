@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
+#include <sstream>
 
 #include <TTree.h>
 #include <TSystem.h>
@@ -15,6 +16,7 @@
 
 #include "DijetAnalyzer.h"
 #include "analysisStructs.h"
+#include "higgsUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/classes.h"
@@ -217,96 +219,104 @@ void DijetAnalyzer::bookHistos(const TString& step)
     std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
     TString name;
     
-    TString label("bla");
-
+    std::stringstream ss_label;
+    TString categoryName = tth::extractJetCategory(step);
+    if(categoryName != ""){
+        categoryName.ReplaceAll("cate", "");
+        int category = atoi(categoryName);
+        ss_label<<" ["<<jetCategories_->binLabels().at(category)<<"]";
+    }
+    const TString label = ss_label.str();
+    
+    
     name = "allJet_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "All jet multiplicity;N jets_{all} ["+label+"];Events",20,0,20));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "All jet multiplicity;N jets_{all}"+label+";Events",20,0,20));
     name = "jet_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet multiplicity;N jets_{reco} ["+label+"];Events",20,0,20));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet multiplicity;N jets_{reco}"+label+";Events",20,0,20));
     name = "jet_pt";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet Pt;jet Pt{reco} ["+label+"];Jets",30,0,300));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet Pt;jet Pt{reco}"+label+";Jets",30,0,300));
     name = "jet_eta";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet Eta;jet #eta{reco} ["+label+"];Jets",30,-2.6,2.6));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet Eta;jet #eta{reco}"+label+";Jets",30,-2.6,2.6));
     name = "jet_btagDiscriminator";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet btagDiscriminator d;jet d{reco} ["+label+"];Jets",36,-0.1,1.1));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet btagDiscriminator d;jet d{reco}"+label+";Jets",36,-0.1,1.1));
 
     name = "bJet_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet multiplicity;N b-jets_{reco} ["+label+"];Events",20,0,20));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet multiplicity;N b-jets_{reco}"+label+";Events",20,0,20));
     name = "bJet_pt";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet Pt;bJet Pt{reco} ["+label+"];Jets",30,0,300));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet Pt;bJet Pt{reco}"+label+";Jets",30,0,300));
     name = "bJet_eta";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet Eta;bJet #eta{reco} ["+label+"];Jets",30,-2.6,2.6));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet Eta;bJet #eta{reco}"+label+";Jets",30,-2.6,2.6));
     name = "bJet_btagDiscriminator";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet btagDiscriminator d;jet d{reco} ["+label+"];Jets",36,-0.1,1.1));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet btagDiscriminator d;jet d{reco}"+label+";Jets",36,-0.1,1.1));
 
     name = "genJet_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. jet multiplicity;N jets_{gen} ["+label+"];Events",50,0,50));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. jet multiplicity;N jets_{gen}"+label+";Events",50,0,50));
     name = "genBJet_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-jet multiplicity;N(b-jet)_{gen} ["+label+"];Events",15,0,15));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-jet multiplicity;N(b-jet)_{gen}"+label+";Events",15,0,15));
     name = "genBJet_pt";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-jet Pt;bJet Pt{gen} ["+label+"];Jets",30,0,300));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-jet Pt;bJet Pt{gen}"+label+";Jets",30,0,300));
     name = "genBJet_eta";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-jet Eta;bJet #eta{gen} ["+label+"];Jets",30,-2.6,2.6));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-jet Eta;bJet #eta{gen}"+label+";Jets",30,-2.6,2.6));
     name = "bHad_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-had multiplicity;N(b-had)_{gen} ["+label+"];Events",15,0,15));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-had multiplicity;N(b-had)_{gen}"+label+";Events",15,0,15));
     name = "bHad_flavour";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-had flavour;Flavour(b-had)_{gen} ["+label+"];B-hadrons",60,-30,30));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-had flavour;Flavour(b-had)_{gen}"+label+";B-hadrons",60,-30,30));
     name = "bHadNoG_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-had multiplicity (not from gluons);N(b-had NoG)_{gen} ["+label+"];Events",15,0,15));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Gen. b-had multiplicity (not from gluons);N(b-had NoG)_{gen}"+label+";Events",15,0,15));
     name = "bHadVsBJet_multiplicity";
-    m_histogram[name] = store(new TH2D(prefix+name+step, "Gen. b-had/b-jet multiplicity;N(b-had)_{gen} ["+label+"];N(b-jet)_{reco}",15,0,15,15,0,15));
+    m_histogram[name] = store(new TH2D(prefix+name+step, "Gen. b-had/b-jet multiplicity;N(b-had)_{gen}"+label+";N(b-jet)_{reco}",15,0,15,15,0,15));
     name = "bHadVsBHadNoT_multiplicity";
-    m_histogram[name] = store(new TH2D(prefix+name+step, "Gen. b-had/b-had^{not t#bar{t}} multiplicity;N(b-had)_{all} ["+label+"];N(b-had)_{not t#bar{t}}",15,0,15,15,0,15));
+    m_histogram[name] = store(new TH2D(prefix+name+step, "Gen. b-had/b-had^{not t#bar{t}} multiplicity;N(b-had)_{all}"+label+";N(b-had)_{not t#bar{t}}",15,0,15,15,0,15));
 
     name = "topJet_multiplicity_true";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Top jet multiplicity (true);N jets_{top}^{true} ["+label+"];Events",5,0,5));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Top jet multiplicity (true);N jets_{top}^{true}"+label+";Events",5,0,5));
     name = "topJet_multiplicity_reco";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Top jet multiplicity (reco);N jets_{top}^{reco} ["+label+"];Events",5,0,5));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Top jet multiplicity (reco);N jets_{top}^{reco}"+label+";Events",5,0,5));
     name = "topBJet_multiplicity_true";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Top b-jet multiplicity (true);N b-tagged jets_{top}^{true} ["+label+"];Events",5,0,5));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Top b-jet multiplicity (true);N b-tagged jets_{top}^{true}"+label+";Events",5,0,5));
     name = "topBJet_multiplicity_reco";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Top b-jet multiplicity (true);N b-tagged jets_{top}^{reco} ["+label+"];Events",5,0,5));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Top b-jet multiplicity (true);N b-tagged jets_{top}^{reco}"+label+";Events",5,0,5));
     name = "higgsJet_multiplicity_true";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Higgs jet multiplicity (true);N jets_{higgs}^{true} ["+label+"];Events",5,0,5));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Higgs jet multiplicity (true);N jets_{higgs}^{true}"+label+";Events",5,0,5));
     name = "higgsBJet_multiplicity_true";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Higgs b-jet multiplicity (true);N b-tagged jets_{higgs}^{true} ["+label+"];Events",5,0,5));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Higgs b-jet multiplicity (true);N b-tagged jets_{higgs}^{true}"+label+";Events",5,0,5));
 
     name = "dijet_correctJet_multiplicity_all";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Number of correct jets;N jets_{correct}^{all} ["+label+"];Jet pairs",4,0,4));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Number of correct jets;N jets_{correct}^{all}"+label+";Jet pairs",4,0,4));
     name = "dijet_correctJet_multiplicity_trueTopJets";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Number of correct jets;N jets_{correct}^{trueTopJets} ["+label+"];Jet pairs",4,0,4));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Number of correct jets;N jets_{correct}^{trueTopJets}"+label+";Jet pairs",4,0,4));
     name = "dijet_correctJet_multiplicity_recoTopJets";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Number of correct jets;N jets_{correct}^{recoTopJets} ["+label+"];Jet pairs",4,0,4));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Number of correct jets;N jets_{correct}^{recoTopJets}"+label+";Jet pairs",4,0,4));
 
     name = "dijet_correctPairFraction_all";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Correct pair fraction;correct/all (all) ["+label+"];Events",15,-0.3,1.2));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Correct pair fraction;correct/all (all)"+label+";Events",15,-0.3,1.2));
     name = "dijet_correctPairFraction_trueTopJets";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Correct pair fraction;correct/all (trueTopJets) ["+label+"];Events",15,-0.3,1.2));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Correct pair fraction;correct/all (trueTopJets)"+label+";Events",15,-0.3,1.2));
     name = "dijet_correctPairFraction_recoTopJets";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Correct pair fraction;correct/all (recoTopJets) ["+label+"];Events",15,-0.3,1.2));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Correct pair fraction;correct/all (recoTopJets)"+label+";Events",15,-0.3,1.2));
 
     name = "dijet_mass_all";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet)_{all} ["+label+"];Jet pairs",25,0,500));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet)_{all}"+label+";Jet pairs",25,0,500));
     name = "dijet_mass_trueTopJets";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet)_{trueTopJets} ["+label+"];Jet pairs",25,0,500));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet)_{trueTopJets}"+label+";Jet pairs",25,0,500));
     name = "dijet_mass_recoTopJets";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet)_{recoTopJets} ["+label+"];Jet pairs",25,0,500));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet)_{recoTopJets}"+label+";Jet pairs",25,0,500));
 
     name = "jet_PtLt30_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet multiplicity (Pt<30);N jets_{reco}^{Pt<30} ["+label+"];Events",20,0,20));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet multiplicity (Pt<30);N jets_{reco}^{Pt<30}"+label+";Events",20,0,20));
     name = "bJet_PtLt30_multiplicity";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet multiplicity (Pt<30);N b-jets_{reco}^{Pt<30} ["+label+"];Events",20,0,20));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet multiplicity (Pt<30);N b-jets_{reco}^{Pt<30}"+label+";Events",20,0,20));
     name = "jet_PtLt30_flavour";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet flavour (Pt<30);flavour(jet)_{Pt<30} ["+label+"];Jets",30,0,30));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet flavour (Pt<30);flavour(jet)_{Pt<30}"+label+";Jets",30,0,30));
     name = "bJet_PtLt30_flavour";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet flavour (Pt<30);flavour(b-jet)_{Pt<30} ["+label+"];B-tagged jets",30,0,30));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet flavour (Pt<30);flavour(b-jet)_{Pt<30}"+label+";B-tagged jets",30,0,30));
     name = "jet_PtLt30_btagDiscriminator";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet btagDiscriminator d (Pt<30);d_{reco}^{Pt<30} ["+label+"];Jets",20,0,1));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet btagDiscriminator d (Pt<30);d_{reco}^{Pt<30}"+label+";Jets",20,0,1));
     name = "bJet_PtLt30_btagDiscriminator";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet btagDiscriminator d (Pt<30);d_{reco}^{Pt<30} ["+label+"];B-tagged jets",20,0,1));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet btagDiscriminator d (Pt<30);d_{reco}^{Pt<30}"+label+";B-tagged jets",20,0,1));
 
     name = "weight";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Weight of the event;weight ["+label+"];Events",30,0,3));
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Weight of the event;weight"+label+";Events",30,0,3));
 
 }
 

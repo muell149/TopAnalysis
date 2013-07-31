@@ -41,7 +41,7 @@ void EventYields::produceYields(const Samples& samples)const
     std::vector<std::pair<TString, TString> > v_nameStepPair;
     std::stringstream ss_step;
     for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
-        const TString& step = tth::extractSelectionStepAndCategoryBin(*i_eventHistoName);
+        const TString& step = tth::extractSelectionStepAndJetCategory(*i_eventHistoName);
         v_nameStepPair.push_back(std::make_pair(*i_eventHistoName, step));
         ss_step<<step<<", ";
     }

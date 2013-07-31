@@ -60,9 +60,6 @@ public:
     /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
     
-    /// What analysis modes to be run
-    void SetAnalysisModes(const std::vector<AnalysisMode::AnalysisMode>& analysisModes);
-    
     /// Set up production of MVA input
     void SetMvaInputProduction(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
     
@@ -113,31 +110,11 @@ private:
     
     
     
-    /// Enum for analysis modes
-    std::vector<AnalysisMode::AnalysisMode> analysisModes_;
-    
-    
-    
-    /// Is it a ttH sample inclusive in Higgs decay
-    bool isInclusiveHiggs_;
-    
-    /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
-    bool bbbarDecayFromInclusiveHiggs_;
-    
-    /// Select tt+bb or tt+other events
-    bool runWithTtbb_;
-    
-    
-    
-    /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
-    MvaInputTopJetsVariables* mvaInputTopJetsVariables_;
-    
-    
-    
-    ///
+    /// Return vector of pair of indices for dijet combinations, each pair ordered by jet charge
     tth::IndexPairs chargeOrderedJetPairIndices(const std::vector<int>& jetIndices,
                                                 const std::vector<double>& jetCharges);
 
+    
     
     /// Fill all analysers and histograms in one method
     void fillAll(const std::string& selectionStep,
@@ -154,6 +131,21 @@ private:
     /// Clear all analysers in one method
     void clearAll();
     
+    
+    
+    /// Is it a ttH sample inclusive in Higgs decay
+    bool isInclusiveHiggs_;
+    
+    /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
+    bool bbbarDecayFromInclusiveHiggs_;
+    
+    /// Select tt+bb or tt+other events
+    bool runWithTtbb_;
+    
+    
+    
+    /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
+    MvaInputTopJetsVariables* mvaInputTopJetsVariables_;
     
     /// Event yield histograms
     EventYieldHistograms* eventYieldHistograms_;

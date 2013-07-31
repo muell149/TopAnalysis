@@ -60,6 +60,8 @@ constexpr double MetCUT = 40.;
 
 
 HiggsAnalysis::HiggsAnalysis(TTree*):
+isInclusiveHiggs_(false),
+bbbarDecayFromInclusiveHiggs_(false),
 runWithTtbb_(false),
 mvaInputTopJetsVariables_(0),
 eventYieldHistograms_(0),
@@ -713,13 +715,6 @@ void HiggsAnalysis::SetHiggsInclusiveSample(const bool isInclusiveHiggs)
 void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs)
 {
     bbbarDecayFromInclusiveHiggs_ = bbbarDecayFromInclusiveHiggs;
-}
-
-
-
-void HiggsAnalysis::SetAnalysisModes(const std::vector<AnalysisMode::AnalysisMode>& analysisModes)
-{
-    analysisModes_ = analysisModes;
 }
 
 
