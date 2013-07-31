@@ -108,7 +108,7 @@ ScaleFactors.o: $(TopDir)/ScaleFactors.cc $(TopDir)/ScaleFactors.h $(TopDir)/sto
 Playground.o: $(HiggsDir)/Playground.cc $(HiggsDir)/Playground.h $(HiggsDir)/AnalysisHistograms.h
 	g++ -c -o Playground.o $(COMPFLAGS) $(HiggsDir)/Playground.cc
 
-DijetAnalyzer.o: $(HiggsDir)/DijetAnalyzer.cc $(HiggsDir)/DijetAnalyzer.h $(HiggsDir)/JetCategories.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h
+DijetAnalyzer.o: $(HiggsDir)/DijetAnalyzer.cc $(HiggsDir)/DijetAnalyzer.h $(HiggsDir)/JetCategories.h $(TopDir)/classesFwd.h $(TopDir)/storeTemplate.h $(HiggsDir)/AnalysisHistograms.h
 	g++ -c -o DijetAnalyzer.o $(COMPFLAGS) $(HiggsDir)/DijetAnalyzer.cc
 
 

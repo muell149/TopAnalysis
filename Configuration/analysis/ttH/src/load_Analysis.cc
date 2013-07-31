@@ -160,7 +160,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     DijetAnalyzer* dijetAnalyzer(0);
     const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end()){
-        dijetAnalyzer= new DijetAnalyzer(jetCategories_dijetAnalyzer);
+        dijetAnalyzer= new DijetAnalyzer({}, {"8"}, &jetCategories_dijetAnalyzer);
     }
     
     // Set up production of MVA input tree

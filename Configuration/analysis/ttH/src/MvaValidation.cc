@@ -77,15 +77,15 @@ void MvaValidation::bookHistos(const TString& step)
     m_histogram[name]->GetXaxis()->SetBinLabel(3, "overlap with Top");
     m_histogram[name]->GetXaxis()->SetBinLabel(4, "Fully solved");
     
-    //name = "mva_dijet_massVsMvaWeightHigh";
-    //m_histogram[name] = this->store(new TProfile(name+"_step"+step, "dijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
-    //name = "mva_dijet_massVsMvaWeightDiff";
-    //m_histogram[name] = this->store(new TProfile(name+"_step"+step, "dijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
+    name = "mva_dijet_massVsMvaWeightHigh";
+    m_histogram[name] = this->store(new TProfile(name+"_step"+step, "dijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
+    name = "mva_dijet_massVsMvaWeightDiff";
+    m_histogram[name] = this->store(new TProfile(name+"_step"+step, "dijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
     
-    //name = "mvaBest_dijet_massVsMvaWeightHigh";
-    //m_histogram[name] = this->store(new TProfile(name+"_step"+step, "bestDijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
-    //name = "mvaBest_dijet_massVsMvaWeightDiff";
-    //m_histogram[name] = this->store(new TProfile(name+"_step"+step, "bestDijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
+    name = "mvaBest_dijet_massVsMvaWeightHigh";
+    m_histogram[name] = this->store(new TProfile(name+"_step"+step, "bestDijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
+    name = "mvaBest_dijet_massVsMvaWeightDiff";
+    m_histogram[name] = this->store(new TProfile(name+"_step"+step, "bestDijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
 }
 
 
@@ -157,15 +157,15 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
     for(const auto& jetIndexPair : jetIndexPairs){
         const LV dijet = recoObjects.jets_->at(jetIndexPair.first) + recoObjects.jets_->at(jetIndexPair.second);
         m_histogram["mva_dijet_mass"]->Fill(dijet.M(), weight);
-        //m_histogram["mva_dijet_massVsMvaWeightHigh"]->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
-        //m_histogram["mva_dijet_massVsMvaWeightDiff"]->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
+        ((TProfile*)m_histogram["mva_dijet_massVsMvaWeightHigh"])->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
+        ((TProfile*)m_histogram["mva_dijet_massVsMvaWeightDiff"])->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
     }
     
     
     const LV dijet = recoObjects.jets_->at(jet1FromHiggsIndex) + recoObjects.jets_->at(jet2FromHiggsIndex);
     m_histogram["mvaBest_dijet_mass"]->Fill(dijet.M(), weight);
-    //m_histogram["mvaBest_dijet_massVsMvaWeightHigh"]->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
-    //m_histogram["mvaBest_dijet_massVsMvaWeightDiff"]->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
+    ((TProfile*)m_histogram["mvaBest_dijet_massVsMvaWeightHigh"])->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
+    ((TProfile*)m_histogram["mvaBest_dijet_massVsMvaWeightDiff"])->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
     
     
     

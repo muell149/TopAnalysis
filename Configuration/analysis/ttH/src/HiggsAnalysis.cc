@@ -609,30 +609,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                   weight);
     
     
-    
-    // Passing information to DijetAnalyzer
-    if(dijetAnalyzer_) {
-        const VLV& allGenJets = *commonGenObjects.allGenJets_;
-        const std::vector<int>& genBHadJetIndex = *topGenObjects.genBHadJetIndex_;
-        const std::vector<int>& genBHadFlavour = *topGenObjects.genBHadFlavour_;
-        
-        // Push_back indices of top b-jets identified by kinematic reconstruction
-        std::vector<int> topJetIds;
-        if(kinRecoObjectsPtr){
-            topJetIds.push_back(kinRecoObjectsPtr->HypJet0index_->at(0));
-            topJetIds.push_back(kinRecoObjectsPtr->HypJet1index_->at(0));
-        }
-        
-        DijetAnalyzer::Input dijetInput(jets, jetIndices, bjetIndices,
-                                        jetBTagCSV, topJetIds, allGenJets,
-                                        genBHadJetIndex, genBHadFlavour,
-                                        met, allLeptons.at(leptonIndex), allLeptons.at(antiLeptonIndex)
-                                       );
-
-        dijetAnalyzer_->fill(dijetInput, weight);
-    }
-    
-    
     return kTRUE;
 }
 
@@ -852,6 +828,8 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
                                                                                     genObjectIndices, recoObjectIndices,
                                                                                     defaultWeight, selectionStep);
     if(mvaValidation_) mvaValidation_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
+    if(dijetAnalyzer_) dijetAnalyzer_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
+                                            genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
 }
 
 
@@ -863,10 +841,7 @@ void HiggsAnalysis::bookAll()
     if(basicHistograms_) basicHistograms_->book(fOutput);
     if(mvaValidation_) mvaValidation_->book(fOutput);
     if(playground_) playground_->book(fOutput);
-    
-    // Setting the output for DijetAnalyzer
-    // FIXME: where are the steps for dijet analyzer set? not existing ???
-    if(dijetAnalyzer_) dijetAnalyzer_->setOutputSelectorList(fOutput);
+    if(dijetAnalyzer_) dijetAnalyzer_->book(fOutput);
 }
 
 
