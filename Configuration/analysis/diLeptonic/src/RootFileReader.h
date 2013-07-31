@@ -36,13 +36,13 @@ public:
     std::vector<TString> findHistos(const char* filename, const char* histonameFragment, const bool fragmentAtBegin =true);
     
     //get a histogram from the file
-    template <typename T> void Get(const char* filename, const char* histoname, T& result, const bool allowNonexisting =false);
+    template <typename T> void Get(const char* filename, const char* histoname, T& result, const bool allowNonexisting =false, const bool verbosity =true);
 
     //get a histogram from the file, you need to pass the type here
     //warning: histo will be deleted once 60 more files have been opened
-    template <typename T> const T* Get(const char* filename, const char* histoname, const bool allowNonexisting =false);
+    template <typename T> const T* Get(const char* filename, const char* histoname, const bool allowNonexisting =false, const bool verbosity =true);
     
-    template <typename T> T* GetClone(const char* filename, const char* histoname, const bool allowNonexisting =false);
+    template <typename T> T* GetClone(const char* filename, const char* histoname, const bool allowNonexisting =false, const bool verbosity =true);
     
     
     
@@ -57,7 +57,7 @@ private:
 
 
 
-template <typename T> void RootFileReader::Get(const char* filename, const char* histoname, T& result, const bool allowNonexisting)
+template <typename T> void RootFileReader::Get(const char* filename, const char* histoname, T& result, const bool allowNonexisting, const bool verbosity)
 {
     //is_assignable seems to be missing in this gcc version
     //static_assert(std::is_assignable<TObject*, T>::value == true, "You must convert to a TObject* like type!");
@@ -65,7 +65,7 @@ template <typename T> void RootFileReader::Get(const char* filename, const char*
     TObject *obj = GetObj(filename, histoname, allowNonexisting);
     if (obj == nullptr) {
         if (allowNonexisting) {
-            std::cerr << "Warning: " << histoname << " is not in " << filename << std::endl;
+            if(verbosity) std::cout << "Warning: " << histoname << " is not in " << filename << std::endl;
             result = nullptr;
             return;
         } else {
@@ -83,19 +83,19 @@ template <typename T> void RootFileReader::Get(const char* filename, const char*
 
 
 
-template <typename T> const T* RootFileReader::Get(const char* filename, const char* histoname, const bool allowNonexisting)
+template <typename T> const T* RootFileReader::Get(const char* filename, const char* histoname, const bool allowNonexisting, const bool verbosity)
 {
     T* result;
-    Get(filename, histoname, result, allowNonexisting);
+    Get(filename, histoname, result, allowNonexisting, verbosity);
     return result;
 }
 
 
 
-template <typename T> T* RootFileReader::GetClone(const char* filename, const char* histoname, const bool allowNonexisting)
+template <typename T> T* RootFileReader::GetClone(const char* filename, const char* histoname, const bool allowNonexisting, const bool verbosity)
 {
     T* result;
-    Get(filename, histoname, result, allowNonexisting);
+    Get(filename, histoname, result, allowNonexisting, verbosity);
     if (!result && allowNonexisting) return nullptr;
     result = static_cast<T*>(result->Clone());
     result->SetDirectory(0);

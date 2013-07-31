@@ -23,6 +23,7 @@
 
 #include "MvaInputVariables.h"
 #include "analysisStructs.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/classes.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 
@@ -107,21 +108,16 @@ void MvaInputTopJetsVariables::Input::setMvaWeights(const float weightCorrect, c
 
 
 
-MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps):
+MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps,
+                                                   const char* mvaWeightsFile, const char* mvaInputDir):
 selectorList_(0),
 t_mvaInput_(0),
 mvaWeightsReader_(0),
-selectionSteps_(selectionSteps)
-{}
-
-
-
-MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps, const char* mvaWeightsFile):
-selectorList_(0),
-t_mvaInput_(0),
-mvaWeightsReader_(0),
-selectionSteps_(selectionSteps)
+selectionSteps_(selectionSteps),
+mvaInputDir_(mvaInputDir)
 {
+    if(!mvaWeightsFile) return;
+    
     std::cout<<"--- Beginning setting up MVA weights from file\n";
     
     ifstream inputFile(mvaWeightsFile);
@@ -360,9 +356,12 @@ void MvaInputTopJetsVariables::fillMvaInputBranches()
 
 
 
-void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& f_savename)
+void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& outputFilename,
+                                                   const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
-    // Output file
+    // Create output file for MVA tree
+    std::string f_savename = static_cast<std::string>(ttbar::assignFolder(mvaInputDir_, channel, systematic));
+    f_savename.append(outputFilename);
     TFile outputFile(f_savename.c_str(),"RECREATE");
     std::cout<<"\nOutput file for MVA input tree: "<<f_savename<<"\n";
     

@@ -158,15 +158,15 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     
     // Set up DijetAnalyzer
     DijetAnalyzer* dijetAnalyzer(0);
+    const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end()){
-        const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
         dijetAnalyzer= new DijetAnalyzer(jetCategories_dijetAnalyzer);
     }
     
     // Set up production of MVA input tree
     MvaInputTopJetsVariables* mvaInputTopJetsVariables(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaInputTopJetsVariables = new MvaInputTopJetsVariables({"8"});
+        mvaInputTopJetsVariables = new MvaInputTopJetsVariables({"8"}, 0, MvaInputDIR);
     }
     
     // Set up MVA validation, including reading in MVA weights in case they exist
@@ -189,8 +189,6 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetBtagScaleFactors(btagScaleFactors);
     selector->SetUseObjectStructs(true);
     
-    selector->SetJetCategoriesOverview(jetCategories_overview);
-    selector->SetJetCategoriesAnalysis(jetCategories);
     selector->SetMvaInputProduction(mvaInputTopJetsVariables);
     selector->SetMvaValidation(mvaValidation);
     selector->SetEventYieldHistograms(eventYieldHistograms);

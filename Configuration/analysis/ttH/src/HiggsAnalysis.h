@@ -1,14 +1,10 @@
 #ifndef HiggsAnalysis_h
 #define HiggsAnalysis_h
 
-#include <utility>
-
 #include <Rtypes.h>
 
 class TTree;
-class TH1;
 class TString;
-class TProfile;
 
 #include "analysisHelpers.h"
 #include "analysisStructsFwd.h"
@@ -17,7 +13,6 @@ class TProfile;
 
 class MvaInputTopJetsVariables;
 class MvaValidation;
-class JetCategories;
 class DijetAnalyzer;
 class BasicHistograms;
 class EventYieldHistograms;
@@ -67,12 +62,6 @@ public:
     
     /// What analysis modes to be run
     void SetAnalysisModes(const std::vector<AnalysisMode::AnalysisMode>& analysisModes);
-    
-    /// Set up the jet categories (# jets, # b-jets) for overview
-    void SetJetCategoriesOverview(const JetCategories& jetCategories);
-    
-    /// Set up the jet categories (# jets, # b-jets) for analysis
-    void SetJetCategoriesAnalysis(const JetCategories& jetCategories);
     
     /// Set up production of MVA input
     void SetMvaInputProduction(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
@@ -140,12 +129,6 @@ private:
     
     
     
-    /// Class holding the definition and handling of jet categories (# jets, # b-jets) for overview
-    const JetCategories* jetCategories_overview_;
-    
-    /// Class holding the definition and handling of jet categories (# jets, # b-jets) for analysis
-    const JetCategories* jetCategories_;
-    
     /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
     MvaInputTopJetsVariables* mvaInputTopJetsVariables_;
     
@@ -189,33 +172,6 @@ private:
     
     /// Class that analyzes dijet pairs from jets that pass selection cuts
     DijetAnalyzer* dijetAnalyzer_;
-    
-    
-    
-    
-    
-    /// Histograms for the overview jet categories
-    TH1* h_jetCategories_overview_step0;
-    TH1* h_jetCategories_overview_step1;
-    TH1* h_jetCategories_overview_step2;
-    TH1* h_jetCategories_overview_step3;
-    TH1* h_jetCategories_overview_step4;
-    TH1* h_jetCategories_overview_step5;
-    TH1* h_jetCategories_overview_step6;
-    TH1* h_jetCategories_overview_step7;
-    TH1* h_jetCategories_overview_step8;
-
-    /// Histograms for the analysis jet categories
-    TH1* h_jetCategories_step8;
-/*
-    /// Histograms for cutflow tables which are not contained in Analysis.h
-    TH1* h_events_step8;
-*/    
-    
-    /// Control plots
-    TH1* h_jetPt_step8;
-    TH1* h_jetChargeGlobalPtWeighted_step8;
-    TH1* h_jetChargeRelativePtWeighted_step8;
 };
 
 

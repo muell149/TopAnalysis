@@ -108,7 +108,7 @@ void Plotter::producePlots()
             const Channel::Channel& channel(channelSample.first);
             const std::vector<Sample>& v_sample(channelSample.second);
             if(!this->prepareDataset(v_sample, systematic)){
-                std::cerr<<"ERROR! Cannot find histograms for all datasets, for (channel/systematic): "
+                std::cout<<"WARNING! Cannot find histograms for all datasets, for (channel/systematic): "
                          << Channel::convertChannel(channel) << "/" << Systematic::convertSystematic(systematic)
                          <<"\n... skip this plot\n";
                 return;
@@ -126,12 +126,13 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
 {
     bool allHistosAvailable(true);
     
+    
     // Associate histogram to dataset if histogram can be found
     v_sampleHistPair_.clear();
     TH1::AddDirectory(kFALSE);
     for(const auto& sample : v_sample){
         SampleHistPair p_sampleHist;
-        TH1D *hist = fileReader_->GetClone<TH1D>(sample.inputFile(), name_, true);
+        TH1D *hist = fileReader_->GetClone<TH1D>(sample.inputFile(), name_, true, false);
         if (!hist){
             // Print message only for one histogram
             if(allHistosAvailable)

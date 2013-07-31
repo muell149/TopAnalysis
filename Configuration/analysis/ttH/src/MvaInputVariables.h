@@ -21,6 +21,7 @@ namespace TMVA{
 #include "analysisStructsFwd.h"
 #include "../../diLeptonic/src/storeTemplate.h"
 #include "../../diLeptonic/src/classesFwd.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 
 class RecoObjects;
 namespace tth{
@@ -101,11 +102,9 @@ public:
     
     
     
-    /// Empty constructor
-    MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps);
-    
-    /// Constructor for setting input file MVA weights, and creating TMVA Reader
-    MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps, const char* mvaWeightsFile);
+    /// Constructor which can optionally set MVA weights and creating TMVA Reader
+    MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps,
+                             const char* mvaWeightsFile =0, const char* mvaInputDir =0);
     
     /// Destructor
     ~MvaInputTopJetsVariables(){};
@@ -133,8 +132,9 @@ public:
     /// Fill branches of MVA input TTree
     void fillMvaInputBranches();
     
-    /// Produce MVA input TTree in own file with given filename
-    void produceMvaInputTree(const std::string& f_savename);
+    /// Produce MVA input TTree in own file
+    void produceMvaInputTree(const std::string& outputFilename,
+                             const Channel::Channel& channel, const Systematic::Systematic& systematic);
     
     /// Produce MVA input TTree owned by a given selectorList
     void produceMvaInputTree(TSelectorList* output);
@@ -258,6 +258,11 @@ private:
     
     /// Selection steps for which to run the MVA tool
     const std::vector<TString> selectionSteps_;
+    
+    
+    /// The folder where to store the input for MVA
+    const char* mvaInputDir_;
+    
 };
 
 
