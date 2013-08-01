@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "analysisStructsFwd.h"
+
 
 
 
@@ -44,14 +46,54 @@ namespace tth{
     
     
     
-    struct ObjectIndices{
-        ObjectIndices(const std::vector<int>& allLeptonIndices,
-                      const std::vector<int>& leptonIndices, const std::vector<int>& antiLeptonIndices,
-                      const int& leptonIndex, const int& antiLeptonIndex,
-                      const int& leadingLeptonIndex, const int& nLeadingLeptonIndex,
-                      const int& leptonXIndex, const int& leptonYIndex,
-                      const std::vector<int>& jetIndices, const std::vector<int>& bjetIndices);
-        ~ObjectIndices(){}
+    struct GenObjectIndices{
+        GenObjectIndices(const int& genBjetFromTopIndex, const int& genAntiBjetFromTopIndex,
+                         const int& recoBjetFromTopIndex, const int& recoAntiBjetFromTopIndex,
+                         const int& genBjetFromHiggsIndex, const int& genAntiBjetFromHiggsIndex,
+                         const int& recoBjetFromHiggsIndex, const int& recoAntiBjetFromHiggsIndex);
+        ~GenObjectIndices(){}
+        
+        bool uniqueGenTopMatching()const;
+        bool uniqueRecoTopMatching()const;
+        
+        bool uniqueGenHiggsMatching()const;
+        bool uniqueRecoHiggsMatching()const;
+        
+        bool uniqueRecoMatching()const;
+        
+        bool isCorrectPairFromTop(const int& bIndex, const int& antiBIndex)const;
+        bool isSwappedPairFromTop(const int& bIndex, const int& antiBIndex)const;
+        bool isPairFromTop(const int& bIndex, const int& antiBIndex)const;
+        
+        bool isCorrectPairFromHiggs(const int& bIndex, const int& antiBIndex)const;
+        bool isSwappedPairFromHiggs(const int& bIndex, const int& antiBIndex)const;
+        bool isPairFromHiggs(const int& bIndex, const int& antiBIndex)const;
+        
+        #ifndef __CINT__
+        const int& genBjetFromTopIndex_;
+        const int& genAntiBjetFromTopIndex_;
+        const int& recoBjetFromTopIndex_;
+        const int& recoAntiBjetFromTopIndex_;
+        
+        
+        const int& genBjetFromHiggsIndex_;
+        const int& genAntiBjetFromHiggsIndex_;
+        const int& recoBjetFromHiggsIndex_;
+        const int& recoAntiBjetFromHiggsIndex_;
+        #endif
+    };
+    
+    
+    
+    struct RecoObjectIndices{
+        RecoObjectIndices(const std::vector<int>& allLeptonIndices,
+                          const std::vector<int>& leptonIndices, const std::vector<int>& antiLeptonIndices,
+                          const int& leptonIndex, const int& antiLeptonIndex,
+                          const int& leadingLeptonIndex, const int& nLeadingLeptonIndex,
+                          const int& leptonXIndex, const int& leptonYIndex,
+                          const std::vector<int>& jetIndices, const IndexPairs& jetIndexPairs,
+                          const std::vector<int>& bjetIndices);
+        ~RecoObjectIndices(){}
         
         #ifndef __CINT__
         const std::vector<int>& allLeptonIndices_;
@@ -65,6 +107,8 @@ namespace tth{
         const int& leptonYIndex_;
         
         const std::vector<int>& jetIndices_;
+        
+        const IndexPairs& jetIndexPairs_;
         
         const std::vector<int>& bjetIndices_;
         

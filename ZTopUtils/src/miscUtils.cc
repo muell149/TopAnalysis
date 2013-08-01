@@ -104,4 +104,11 @@ namespace ztop{
     return out;
   }
 
+  bool fileExists(const char * filename){
+    std::ifstream FileTest(filename);
+      bool exists=FileTest;
+      FileTest.close();
+      return exists;
+  }
+
 }

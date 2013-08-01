@@ -497,9 +497,11 @@ process.TreeRegistryService.treeTitle = "Tree for UHH top-quark analysis\nPartic
 from TopMass.TopEventTree.EventHypothesisAnalyzer_cfi import analyzeHypothesis
 process.analyzeKinFit = analyzeHypothesis.clone(hypoClassKey = "ttFullHadHypKinFit:Key", ttEvent = "ttFullHadEvent", ttEventGen2 = "ttFullHadEvent2", jets = "tightLeadingJets", gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'), maxNJets = cms.int32(20))
 from TopMass.TopEventTree.JetEventAnalyzer_cfi import analyzeJets
-process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets")
+process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets",
+                                        gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'))
 from TopMass.TopEventTree.WeightEventAnalyzer_cfi import analyzeWeights
 process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets",
+                                              mcWeight = options.mcWeight,
                                               puWeightSrc     = cms.InputTag("eventWeightPU"       , "eventWeightPU"),
                                               puWeightUpSrc   = cms.InputTag("eventWeightPUSysUp"  , "eventWeightPU"),
                                               puWeightDownSrc = cms.InputTag("eventWeightPUSysDown", "eventWeightPU"),
@@ -555,7 +557,7 @@ elif not options.eventFilter == 'data':
 
 ## calculate btag weight factor
 from TopAnalysis.TopUtils.BTagSFEventWeight_cfi import bTagSFEventWeight
-process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "12-470", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+options.bTagAlgoWP+".root", noHistograms = True)
+process.bTagSFEventWeight = bTagSFEventWeight.clone(jets = "tightLeadingJets", bTagAlgo = "CSVT", version  = "2012", filename = "TopAnalysis/Configuration/data/analyzeBTagEfficiency"+options.bTagAlgoWP+".root", noHistograms = True)
 process.bTagSFEventWeightBTagSFUp     = process.bTagSFEventWeight.clone(sysVar = "bTagSFUp")
 process.bTagSFEventWeightBTagSFDown   = process.bTagSFEventWeight.clone(sysVar = "bTagSFDown")
 process.bTagSFEventWeightMisTagSFUp   = process.bTagSFEventWeight.clone(sysVar = "misTagSFUp")

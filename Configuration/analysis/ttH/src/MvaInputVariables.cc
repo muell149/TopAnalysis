@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
 
 #include <TTree.h>
 #include <TSystem.h>
@@ -21,8 +22,10 @@
 #include <TMVA/Reader.h>
 
 #include "MvaInputVariables.h"
+#include "analysisStructs.h"
+#include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/classes.h"
-
+#include "../../diLeptonic/src/analysisObjectStructs.h"
 
 
 
@@ -105,19 +108,16 @@ void MvaInputTopJetsVariables::Input::setMvaWeights(const float weightCorrect, c
 
 
 
-MvaInputTopJetsVariables::MvaInputTopJetsVariables():
+MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps,
+                                                   const char* mvaWeightsFile, const char* mvaInputDir):
 selectorList_(0),
 t_mvaInput_(0),
-mvaWeightsReader_(0)
-{}
-
-
-
-MvaInputTopJetsVariables::MvaInputTopJetsVariables(const char* mvaWeightsFile):
-selectorList_(0),
-t_mvaInput_(0),
-mvaWeightsReader_(0)
+mvaWeightsReader_(0),
+selectionSteps_(selectionSteps),
+mvaInputDir_(mvaInputDir)
 {
+    if(!mvaWeightsFile) return;
+    
     std::cout<<"--- Beginning setting up MVA weights from file\n";
     
     ifstream inputFile(mvaWeightsFile);
@@ -158,6 +158,29 @@ mvaWeightsReader_(0)
 
 
 
+void MvaInputTopJetsVariables::fillForInputProduction(const RecoObjects& recoObjects,
+                                                      const tth::GenObjectIndices& genObjectIndices,
+                                                      const tth::RecoObjectIndices& recoObjectIndices,
+                                                      const double& weight,
+                                                      const TString& selectionStep)
+{
+    // Check if step exists
+    if(std::find(selectionSteps_.begin(), selectionSteps_.end(), selectionStep) == selectionSteps_.end()) return;
+    
+    // FIXME: which events exactly to fill? For now all with at least 4 jets
+    const int numberOfJets = recoObjectIndices.jetIndices_.size();
+    if(numberOfJets<4) return;
+    
+    // Loop over all jet combinations and get MVA input variables
+    const std::vector<MvaInputTopJetsVariables::Input>& v_mvaInput =
+        MvaInputTopJetsVariables::fillInputStructs(recoObjectIndices, genObjectIndices, recoObjects, weight);
+    
+    // Fill the MVA TTree
+    this->addEntries(v_mvaInput);
+}
+
+
+
 void MvaInputTopJetsVariables::addEntries(const std::vector<Input>& v_input)
 {
     v_inputStruct_.insert(v_inputStruct_.end(), v_input. begin(), v_input.end());
@@ -171,19 +194,12 @@ void MvaInputTopJetsVariables::addEntries(const std::vector<MvaInputTopJetsVaria
     float maxWeightCorrect(-999.F);
     for(const float weight : weightsCorrect){
         if(weight > maxWeightCorrect) maxWeightCorrect = weight;
-//        std::cout<<"Weights correct: "<<weight<<"\n";
     }
-    
-//    std::cout<<std::endl;
     
     float maxWeightSwapped(-999.F);
     for(const float weight : weightsSwapped){
         if(weight > maxWeightSwapped) maxWeightSwapped = weight;
-//        std::cout<<"Weights swapped: "<<weight<<"\n";
     }
-    
-//    std::cout<<std::endl;
-//    std::cout<<"Max weights: "<<maxWeightCorrect<<" , "<<maxWeightSwapped<<"\n\n\n\n\n";
     
     for(size_t i = 0; i < v_input.size(); ++i){
         Input input = v_input.at(i);
@@ -194,7 +210,6 @@ void MvaInputTopJetsVariables::addEntries(const std::vector<MvaInputTopJetsVaria
         }
         v_inputStruct_.push_back(input);
     }
-    
 }
 
 
@@ -232,6 +247,83 @@ void MvaInputTopJetsVariables::createMvaInputBranches(TTree* tree)
 
 
 
+std::vector<MvaInputTopJetsVariables::Input> MvaInputTopJetsVariables::fillInputStructs(const tth::RecoObjectIndices& recoObjectIndices,
+                                                                                        const tth::GenObjectIndices& genObjectIndices,
+                                                                                        const RecoObjects& recoObjects,
+                                                                                        const double& eventWeight)
+{
+    std::vector<MvaInputTopJetsVariables::Input> result;
+    
+    // Access relevant objects and indices
+    const VLV& allLeptons(*recoObjects.allLeptons_);
+    const VLV& jets(*recoObjects.jets_);
+    const LV& met(*recoObjects.met_);
+    const std::vector<double>& jetBtag(*recoObjects.jetBTagCSV_);
+    const std::vector<double>& jetCharge(*recoObjects.jetChargeRelativePtWeighted_);
+    
+    const LV& lepton(allLeptons.at(recoObjectIndices.leptonIndex_));
+    const LV& antiLepton(allLeptons.at(recoObjectIndices.antiLeptonIndex_));
+    
+    const int& matchedBjetFromTopIndex = genObjectIndices.recoBjetFromTopIndex_;
+    const int& matchedAntiBjetFromTopIndex = genObjectIndices.recoAntiBjetFromTopIndex_;
+    const bool& successfulTopMatching = genObjectIndices.uniqueRecoTopMatching();
+    
+    const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;
+    
+    // Calculate the jet recoil for each jet pair, and put it in a vector of same size
+    const VLV& jetRecoils = MvaInputTopJetsVariables::recoilForJetPairs(jetIndexPairs, recoObjectIndices.jetIndices_, jets);
+    
+    
+    // Loop over all jet pairs
+    for(size_t iJetIndexPairs = 0; iJetIndexPairs < jetIndexPairs.size(); ++iJetIndexPairs){
+
+        // Get the indices of b and anti-b jet defined by jet charge
+        const int antiBIndex = jetIndexPairs.at(iJetIndexPairs).first;
+        const int bIndex = jetIndexPairs.at(iJetIndexPairs).second;
+        
+        // Check whether the two jets correspond to the b's from tops, and if the two are correct or swapped
+        bool isSwappedPair(false);
+        bool isCorrectPair(false);
+        if(successfulTopMatching){
+            if(matchedBjetFromTopIndex==bIndex && matchedAntiBjetFromTopIndex==antiBIndex){
+                isCorrectPair = true;
+            }
+            else if(matchedBjetFromTopIndex==antiBIndex && matchedAntiBjetFromTopIndex==bIndex){
+                isSwappedPair = true;
+            }
+        }
+        
+        // Variables for MVA
+        const LV& bjet = jets.at(bIndex);
+        const LV& antiBjet = jets.at(antiBIndex);
+        const double& bjetBtagDiscriminator = jetBtag.at(bIndex);
+        const double& antiBjetBtagDiscriminator = jetBtag.at(antiBIndex);
+        const double jetChargeDiff = jetCharge.at(antiBIndex) - jetCharge.at(bIndex);
+        if(jetChargeDiff<0. || jetChargeDiff>2.){
+            std::cerr<<"ERROR! Difference in jet charge is (value = "<<jetChargeDiff
+                     <<"), but definition allows only values in [0,2]\n...break\n"<<std::endl;
+            exit(555);
+        }
+        const LV& jetRecoil = jetRecoils.at(iJetIndexPairs);
+
+        const MvaInputTopJetsVariables::Input mvaInput(lepton, antiLepton,
+                                                       bjet, antiBjet,
+                                                       bjetBtagDiscriminator, antiBjetBtagDiscriminator,
+                                                       jetChargeDiff,
+                                                       jetRecoil, met,
+                                                       successfulTopMatching,
+                                                       isCorrectPair, isSwappedPair,
+                                                       eventWeight);
+
+        result.push_back(mvaInput);
+    }
+    
+    
+   return result; 
+}
+
+
+
 std::vector<MvaInputTopJetsVariables::Input> MvaInputTopJetsVariables::inputStructs()const
 {
     return v_inputStruct_;
@@ -264,9 +356,12 @@ void MvaInputTopJetsVariables::fillMvaInputBranches()
 
 
 
-void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& f_savename)
+void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& outputFilename,
+                                                   const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
-    // Output file
+    // Create output file for MVA tree
+    std::string f_savename = static_cast<std::string>(ttbar::assignFolder(mvaInputDir_, channel, systematic));
+    f_savename.append(outputFilename);
     TFile outputFile(f_savename.c_str(),"RECREATE");
     std::cout<<"\nOutput file for MVA input tree: "<<f_savename<<"\n";
     
@@ -691,6 +786,29 @@ void MvaInputTopJetsVariables::runMva(const char* outputDir, const char* weightF
     delete factory;
 }
 
+
+
+VLV MvaInputTopJetsVariables::recoilForJetPairs(const tth::IndexPairs& jetIndexPairs,
+                                     const std::vector<int>& jetIndices,
+                                     const VLV& jets)
+{
+    VLV result;
+
+    for(const auto& jetIndexPair : jetIndexPairs){
+        const int antiBIndex = jetIndexPair.first;
+        const int bIndex = jetIndexPair.second;
+
+        LV jetRecoil;
+        for(const int index : jetIndices){
+            if(index == bIndex || index == antiBIndex) continue;
+            jetRecoil += jets.at(index);
+        }
+
+        result.push_back(jetRecoil);
+    }
+
+    return result;
+}
 
 
 

@@ -18,6 +18,7 @@
 #include "analysisHelpers.h"
 #include "JetCategories.h"
 #include "MvaInputVariables.h"
+#include "MvaValidation.h"
 #include "DijetAnalyzer.h"
 #include "AnalysisHistograms.h"
 #include "Playground.h"
@@ -136,7 +137,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
 
     // Set up event yield histograms
     EventYieldHistograms* eventYieldHistograms(0);
-    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7", "8"});
+    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
     
     // Set up Drell-Yan scaling histograms
     DyScalingHistograms* dyScalingHistograms(0);
@@ -145,28 +146,39 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up basic histograms
     BasicHistograms* basicHistograms(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::cp) != v_analysisMode.end()){
-        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7", "8"});
+        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
     }
     
     // Set up playground
     Playground* playground(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::playg) != v_analysisMode.end()){
+        //playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"},{"7", "8"}, &jetCategories_overview);
         playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"});
     }
     
     // Set up DijetAnalyzer
     DijetAnalyzer* dijetAnalyzer(0);
-    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end())
-    {
-        const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
-        dijetAnalyzer= new DijetAnalyzer(jetCategories_dijetAnalyzer);
+    const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
+    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end()){
+        dijetAnalyzer= new DijetAnalyzer({}, {"8"}, &jetCategories_dijetAnalyzer);
     }
     
-    // Set up MVA steering tool for: a) production of MVA input TTree, b) reading in MVA weights
-    // FIXME: now used here for reading weights only, and another one within HiggsAnalysis for for TTree production
-    // Cannot be const due to the internal structure at present
-    MvaInputTopJetsVariables mvaInputWeightsCorrect(MvaWeightsCorrectFILE);
-    MvaInputTopJetsVariables mvaInputWeightsSwapped(MvaWeightsSwappedFILE);
+    // Set up production of MVA input tree
+    MvaInputTopJetsVariables* mvaInputTopJetsVariables(0);
+    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
+        mvaInputTopJetsVariables = new MvaInputTopJetsVariables({"8"}, 0, MvaInputDIR);
+    }
+    
+    // Set up MVA validation, including reading in MVA weights in case they exist
+    MvaValidation* mvaValidation(0);
+    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
+        // FIXME: Cannot be const due to the internal structure at present
+        MvaInputTopJetsVariables* mvaInputWeightsCorrect(0);
+        MvaInputTopJetsVariables* mvaInputWeightsSwapped(0);
+        mvaInputWeightsCorrect = new MvaInputTopJetsVariables({}, MvaWeightsCorrectFILE);
+        mvaInputWeightsSwapped = new MvaInputTopJetsVariables({}, MvaWeightsSwappedFILE);
+        mvaValidation = new MvaValidation(mvaInputWeightsCorrect, mvaInputWeightsSwapped, {"8"});
+    }
     
     // Set up the analysis
     HiggsAnalysis* selector = new HiggsAnalysis();
@@ -177,10 +189,8 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetBtagScaleFactors(btagScaleFactors);
     selector->SetUseObjectStructs(true);
     
-    selector->SetJetCategoriesOverview(jetCategories_overview);
-    selector->SetJetCategoriesAnalysis(jetCategories);
-    selector->SetMvaWeightsCorrect(mvaInputWeightsCorrect);
-    selector->SetMvaWeightsSwapped(mvaInputWeightsSwapped);
+    selector->SetMvaInputProduction(mvaInputTopJetsVariables);
+    selector->SetMvaValidation(mvaValidation);
     selector->SetEventYieldHistograms(eventYieldHistograms);
     selector->SetDyScalingHistograms(dyScalingHistograms);
     selector->SetBasicHistograms(basicHistograms);
@@ -300,7 +310,6 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
             selector->SetRunWithTtbb(0);
             selector->SetHiggsInclusiveSample(isHiggsInclusive);
             selector->SetHiggsInclusiveSeparation(false);
-            selector->SetAnalysisModes(v_analysisMode);
             
             // Set up nTuple chain and run selector
             TChain chain("writeNTuple/NTuple");
@@ -338,7 +347,7 @@ int main(int argc, char** argv) {
             ttbar::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsAnalysis)));
     CLParameter<int> opt_dy("d", "Drell-Yan mode (11 for ee, 13 for mumu, 15 for tautau)", false, 1, 1,
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
-    CLParameter<std::string> opt_mode("m", "Mode of analysis: control plots (cp), MVA input (mva), dijet analyser (dijet), playground (playg). Default is cp", false, 1, 100,
+    CLParameter<std::string> opt_mode("m", "Mode of analysis: control plots (cp), Produce MVA input (mvaP), Apply MVA weights (mvaA), dijet analyser (dijet), playground (playg). Default is cp", false, 1, 100,
             ttbar::makeStringCheck(AnalysisMode::convertAnalysisModes(AnalysisMode::allowedAnalysisModes)));
     CLAnalyser::interpretGlobal(argc, argv);
     

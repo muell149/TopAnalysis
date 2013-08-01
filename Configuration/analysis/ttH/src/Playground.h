@@ -12,10 +12,12 @@ class CommonGenObjects;
 class TopGenObjects;
 class HiggsGenObjects;
 class KinRecoObjects;
+class JetCategories;
 namespace tth{
-    class RecoLevelWeights;
     class GenLevelWeights;
-    class ObjectIndices;
+    class RecoLevelWeights;
+    class GenObjectIndices;
+    class RecoObjectIndices;
 }
 
 
@@ -25,13 +27,15 @@ namespace tth{
 
 
 
-/// Class for histograms needed for event yields
+/// Playground class, test here whatever you want to test
 class Playground : public AnalysisHistogramsBase{
     
 public:
     
     /// Constructor
-    Playground(const std::vector<TString>& selectionSteps);
+    Playground(const std::vector<TString>& selectionStepsNoCategories,
+               const std::vector<TString>& stepsForCategories =std::vector<TString>(),
+               const JetCategories* jetCategories =0);
     
     /// Destructor
     ~Playground(){}
@@ -40,9 +44,9 @@ public:
     void fill(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
               const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
               const KinRecoObjects& kinRecoObjects,
-              const tth::ObjectIndices& objectIndices,
+              const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
               const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
-              const double& weight, const TString& step);
+              const double& weight, const TString& stepShort);
     
     
     

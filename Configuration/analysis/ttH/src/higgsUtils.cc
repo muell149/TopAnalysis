@@ -24,24 +24,24 @@ TString tth::extractSelectionStep(const TString& name)
 
 
 
-TString tth::extractCategoryBin(const TString& name)
+TString tth::extractJetCategory(const TString& name)
 {
     TString result(name);
     // Remove e.g. things like .root ??
-    result = helper::binFragmentByToken(result, ".");
+    result = helper::categoryFragmentByToken(result, ".");
     // Further separation by "_" to find string containing step
-    result = helper::binFragmentByToken(result, "_");
+    result = helper::categoryFragmentByToken(result, "_");
     //std::cout<<"The extracted category bin is (bin/histogram name): "<<result<<" / "<<name<<std::endl;
     return result;
 }
 
 
 
-TString tth::extractSelectionStepAndCategoryBin(const TString& name)
+TString tth::extractSelectionStepAndJetCategory(const TString& name)
 {
     const TString step(extractSelectionStep(name));
-    const TString bin(extractCategoryBin(name));
-    const TString result(bin==name ? step : step+"_"+bin);
+    const TString cate(extractJetCategory(name));
+    const TString result(cate=="" ? step : step+"_"+cate);
     return result;
 }
 
@@ -49,14 +49,14 @@ TString tth::extractSelectionStepAndCategoryBin(const TString& name)
 
 TString tth::helper::stepFragmentByToken(const TString& nameFragment, const TString& token)
 {
-    TString result(nameFragment);
+    TString result;
     TObjArray* a_nameFragment = TString(nameFragment).Tokenize(token);
     bool alreadyFound(false);
     for(Int_t iFragment= 0; iFragment < a_nameFragment->GetEntriesFast(); ++iFragment){
         const TString& fragment = a_nameFragment->At(iFragment)->GetName();
         if(fragment.Contains("step")){
-            if(alreadyFound && result!=fragment){
-                std::cerr<<"Ambiguous string, histogram name contains \"step\" more than once in fragment, and is ambiguous: "<<nameFragment
+            if(alreadyFound){
+                std::cerr<<"Ambiguous string, histogram name contains \"step\" more than once in fragment: "<<nameFragment
                          <<"\n...cannot extract selection step, so break\n";
                 exit(33);
             }
@@ -69,22 +69,21 @@ TString tth::helper::stepFragmentByToken(const TString& nameFragment, const TStr
 
 
 
-TString tth::helper::binFragmentByToken(const TString& nameFragment, const TString& token)
+TString tth::helper::categoryFragmentByToken(const TString& nameFragment, const TString& token)
 {
-    TString result(nameFragment);
+    TString result;
     TObjArray* a_nameFragment = TString(nameFragment).Tokenize(token);
     bool alreadyFound(false);
     for(Int_t iFragment= 0; iFragment < a_nameFragment->GetEntriesFast(); ++iFragment){
         const TString& fragment = a_nameFragment->At(iFragment)->GetName();
-        if(fragment == "bin"){
+        if(fragment.Contains("cate")){
             if(alreadyFound){
-                std::cerr<<"Ambiguous string, file name contains \"bin\" more than once in fragment: "<<nameFragment
-                         <<"\n...cannot extract bin, so break\n";
+                std::cerr<<"Ambiguous string, file name contains \"cate\" more than once in fragment: "<<nameFragment
+                         <<"\n...cannot extract category, so break\n";
                 exit(34);
             }
             alreadyFound = true;
-            const TString binNo = a_nameFragment->At(iFragment+1)->GetName();
-            result = fragment+binNo;
+            result = fragment;
         }
     }
     return result;
