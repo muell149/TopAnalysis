@@ -109,17 +109,19 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
   TString universalplotLabel = extrapolate ? "FullPS" : LV+"LvPS";
   
   // Choose additional theory curves to plot
-  // Version 1: data, MadGraph, MC@NLO, POWHEG, NNLO (Kidonakis)
-  bool DrawSmoothMadgraph = false;
-  bool DrawMCAtNLOPlot    = true;
-  bool DrawPOWHEGPlot     = true;
-  bool DrawNNLOPlot       = true;
-  bool DrawMCFMPlot       = false;
+  // Version 1: data, MadGraph, MC@NLO, POWHEG NNLO (Kidonakis)
+  bool DrawSmoothMadgraph    = false;
+  bool DrawMCAtNLOPlot       = true;
+  bool DrawPOWHEGPYTHIAPlot  = true;
+  bool DrawPOWHEGHERWIGPlot  = true;
+  bool DrawNNLOPlot          = true;
+  bool DrawMCFMPlot          = false;
   // smooth instead of binned theory curves
   if(smoothcurves){
-    DrawSmoothMadgraph = true;
-    DrawPOWHEGPlot     = true;
-    DrawMCAtNLOPlot    = true;
+    DrawSmoothMadgraph   = true;
+    DrawPOWHEGPYTHIAPlot = true;
+    DrawPOWHEGHERWIGPlot = true;
+    DrawMCAtNLOPlot      = true;
     // FIXME: no smooth mc@nlo curve for hadron PS at the moment
     //if(hadron) DrawMCAtNLOPlot = false;
     // FIXME: -> use the one running the sample itself
@@ -132,7 +134,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
   //if(extrapolate==false&&hadron==false){
   //  DrawSmoothMadgraph = true;
   //  DrawMCAtNLOPlot = true;
-  //  DrawPOWHEGPlot = true;
+  //  DrawPOWHEGPYTHIAPlot = true;
   //}
   // use only mcatnlo plots from external studies 
   // useOnlyExternalMCatNLOfile=false: means error bands from external studies
@@ -298,7 +300,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  for(unsigned int j =0; j<uncorrSys_.size(); ++j){
 	    if(uncorrSys_[j]==sys&&sys!=sysNo) correlated=false;
 	  }
-	  // (i) hadronization uncertainty: use Powheg+Herwig vs Mc@nlo+Pythia 
+	  // (i) hadronization uncertainty: use Powheg+Pythia vs Mc@nlo+Herwig 
 	  if (sys==sysHadUp||sys==sysHadDown){
 	    TH1F* plotMuPow=0;
 	    TH1F* plotElPow=0;
@@ -349,7 +351,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 		double hadUnc = plotCombPow->GetBinContent(bin)-plotCombMca->GetBinContent(bin);
 		// take care of sign: hadDown = -hadUp
 		if(sys==sysHadDown) hadUnc*=-1;
-		// FIXME MARTIN: ignore Hadronization uncertainty in 1st bin because it comes from the difference if the finite and non-finite top mass
+		// FIXME MARTIN: ignore Hadronization uncertainty in 1st bin because it comes from the difference of the finite and non-finite top mass
 		if(xSecVariables_[i].Contains("ttbarMass")&&bin==1) hadUnc=0;
 		// printout
 		if(verbose>1){
@@ -451,10 +453,11 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	      histo_["reweighted"+plotName][kSig]->SetLineColor(kMagenta);
 	    }
 	    // no other theory curves
-	    DrawPOWHEGPlot     = false;
-	    DrawMCAtNLOPlot    = false;
-	    DrawSmoothMadgraph = false;
-	    DrawNNLOPlot       = false;
+	    DrawPOWHEGPYTHIAPlot = false;
+	    DrawPOWHEGHERWIGPlot = false;
+	    DrawMCAtNLOPlot      = false;
+	    DrawSmoothMadgraph   = false;
+	    DrawNNLOPlot         = false;
 	  }
 	  // =================================================
 	  //  Additional histos for z prime closure test
@@ -506,10 +509,11 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	    histogramStyle(*histo_["modified"+plotName][kSig], kSig, false, 1.2, constMadgraphColor);
 	    histo_["modified"+plotName][kSig]->SetLineColor(kMagenta);
 	    // no other theory curves
-	    DrawPOWHEGPlot     = false;
-	    DrawMCAtNLOPlot    = false;
-	    DrawSmoothMadgraph = false;
-	    DrawNNLOPlot       = false;
+	    DrawPOWHEGPYTHIAPlot = false;
+	    DrawPOWHEGHERWIGPlot = false;
+	    DrawMCAtNLOPlot      = false;
+	    DrawSmoothMadgraph   = false;
+	    DrawNNLOPlot         = false;
 	  }
 
 	  // =====================
@@ -578,10 +582,11 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  //  Theory Curves
 	  // =====================
 	  
-	  bool DrawMCAtNLOPlot2    = DrawMCAtNLOPlot;
-	  bool DrawPOWHEGPlot2     = DrawPOWHEGPlot;
-	  bool smoothcurves2       = smoothcurves;
-	  bool DrawSmoothMadgraph2 = DrawSmoothMadgraph;
+	  bool DrawMCAtNLOPlot2      = DrawMCAtNLOPlot;
+	  bool DrawPOWHEGPYTHIAPlot2 = DrawPOWHEGPYTHIAPlot;
+	  bool DrawPOWHEGHERWIGPlot2 = DrawPOWHEGHERWIGPlot;
+	  bool smoothcurves2         = smoothcurves;
+	  bool DrawSmoothMadgraph2   = DrawSmoothMadgraph;
 	  
 	  // ============================
 	  //    !!!! PLEASE READ !!!!
@@ -590,7 +595,8 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  // NO theory CURVES for inclusive xSec
  	  if(plotName=="inclusive"){
  	    DrawMCAtNLOPlot2=false;
-	    DrawPOWHEGPlot2=false;
+	    DrawPOWHEGPYTHIAPlot2=false;
+	    DrawPOWHEGHERWIGPlot2=false;
 	    DrawSmoothMadgraph2=false;
 	    smoothcurves2=false;
 	  }
@@ -601,10 +607,11 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  }
 	  else{
 	    // no theory curves for absolute xSecs at the moment
-	    DrawMCAtNLOPlot2    = false;
-	    DrawPOWHEGPlot2     = false;
-	    smoothcurves2       = false;  
-	    DrawSmoothMadgraph2 = false;
+	    DrawMCAtNLOPlot2      = false;
+	    DrawPOWHEGPYTHIAPlot2 = false;
+	    DrawPOWHEGHERWIGPlot2 = false;
+	    smoothcurves2         = false;  
+	    DrawSmoothMadgraph2   = false;
 	  }
 	  
 	  // a) draw axis of binned MadGraph curve
@@ -797,7 +804,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	    }
 	  }
 	  // c1) draw MC@NLO errorband
-	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2, LV);
+	  if (DrawMCAtNLOPlot2&&errorbands) DrawTheoryCurve(errorBandFilename, plotNameMCAtNLO, normalize, smoothFactor, rebinFactor, constMcatnloColor, constMcatnloStyle, rangeLow, rangeHigh, errorBandFilename, errorRebinFactor, errorSmoothFactor, verbose-1, true, false, "mcatnlo", smoothcurves2, LV);
 	  // b3) draw binned madgraph theory curves
 	  plotTheo2->Draw("hist same");
 	  if(SC) plotTheo3->Draw("hist same"); 
@@ -817,8 +824,8 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	    }
 	  }
 	  // c2) draw MC@NLO central curve
-	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, 5, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2, LV);
-	  // d) POWHEG
+	  if (DrawMCAtNLOPlot2) DrawTheoryCurve(filename, plotNameMCAtNLO2, normalize, smoothFactor, rebinFactor, constMcatnloColor, constMcatnloStyle, rangeLow, rangeHigh, false, errorRebinFactor, errorSmoothFactor, verbose-1, false, false, "mcatnlo", smoothcurves2, LV);
+	  // d) POWHEG 
 	  // configure configuration
 	  smoothFactor=0;
 	  rebinFactor=0;
@@ -844,19 +851,20 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 1 ; rebinFactor= 1; }
-	  // draw curve	 
-	  if(DrawPOWHEGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegSummer12PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, 7, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
+	  // d1) draw curve POWHEG+PYTHIA
+	  if(DrawPOWHEGPYTHIAPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegSummer12PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor, constPowhegStyle, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powheg", smoothcurves2, LV);
 	  
+	  // d2) draw curve POWHEG+HERWIG
+	  if(DrawPOWHEGHERWIGPlot2) DrawTheoryCurve("/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigPowhegHerwigSummer12PF.root", plotNamePOWHEG, normalize, smoothFactor, rebinFactor, constPowhegColor2, constPowhegStyle2, -1./*rangeLow*/, -1./*rangeHigh*/, false, 1., 1., verbose-1, false, false, "powhegherwig", smoothcurves2, LV);
+
 	  // e) reweighted histos for closure test
 	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["reweighted"+plotName][kSig]->Draw("hist same");
-	  }
-	  
+	  }  
 	  // f) distorted parton truth histo including zprime
 	  if(zprime!=""&&sys==sysNo&&plotName!="inclusive"){
 	      histo_["modified"+plotName][kSig]->Draw("hist same");
-	  }	    	  
-	  
+	  }
 	  // g) draw NNLO curve for topPt (normalized) and topY (normalized) and/or MCFM curves
 	  if(extrapolate && (DrawNNLOPlot || DrawMCFMPlot)){ 
 	    
@@ -954,12 +962,12 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  
 	  TLegend *leg = new TLegend();
 	  double legTxtSize         = 0.04;
-	  double x1Subtrahend       = 0.30;
-	  double y1SubtrahendFactor = 0.05;
+	  //double x1Subtrahend       = 0.30;
+	  //double y1SubtrahendFactor = 0.05;
 	  if(reweightClosure || zprime!="") {
 	    legTxtSize         = 0.03;
-	    x1Subtrahend       = 0.35;
-	    y1SubtrahendFactor = 0.10;
+	    //x1Subtrahend       = 0.35;
+	    //y1SubtrahendFactor = 0.10;
 	  }
 	  legendStyle(*leg,"",legTxtSize);
 	  
@@ -968,15 +976,15 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  
 	  // b1) Legend - Theory prediction - MADGRAPH no SC
 	  TString nameMADGRAPHcurve=plotName;
-	  TString legLabelMADGRAPH="MadGraph";
-	  if(reweightClosure || zprime!="") legLabelMADGRAPH="#splitline{MadGraph t#bar{t}}{Used in Unf. Setup}";
+	  TString legLabelMADGRAPH=constMadGraphPythiaLabel;
+	  if(reweightClosure || zprime!="") legLabelMADGRAPH="#splitline{"+constMadGraphPythiaLabel+"}{Used in Unf. Setup}";
 	  nameMADGRAPHcurve.ReplaceAll("Norm","");
 	  TH1F* madgraphcurve =(TH1F*)combicanvas->GetPrimitive(nameMADGRAPHcurve);
 	  if(madgraphcurve) leg->AddEntry(madgraphcurve, legLabelMADGRAPH, "L" );
 	  
  	  // b2) Legend - Theory prediction - MADGRAPH SC
 	  TString nameMADGRAPHcurve2=plotName+" SC";
-	  TString legLabelMADGRAPH2="MadGraph SC";
+	  TString legLabelMADGRAPH2=constMadGraphPythiaLabelSC;
 	  nameMADGRAPHcurve2.ReplaceAll("Norm","");
 	  TH1F* madgraphcurve2 =(TH1F*)combicanvas->GetPrimitive(nameMADGRAPHcurve2);
 	  if(madgraphcurve2) leg->AddEntry(madgraphcurve2, legLabelMADGRAPH2, "L" );
@@ -989,7 +997,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	    TGraphAsymmErrors *mcatnlocurve =(TGraphAsymmErrors*)combicanvas->GetPrimitive(curveName);
 	    if(mcatnlocurve){
 	      mcatnlocurve->SetLineStyle(constMcatnloStyle);
-	      leg->AddEntry(mcatnlocurve, "MC@NLO  ", "FL");
+	      leg->AddEntry(mcatnlocurve, constMcatnloHerwigLabel, "FL");
 	      if(verbose>0) std::cout << curveName << " found!" << std::endl;
 	    }	    
 	    else{
@@ -1001,24 +1009,35 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	      curveName.ReplaceAll("errorBand","");
 	      TH1F* mcatnlocurve2 =(TH1F*)combicanvas->GetPrimitive(curveName);
 	      if(mcatnlocurve2){
-		leg->AddEntry(mcatnlocurve2, "MC@NLO  ", "L");	
+		leg->AddEntry(mcatnlocurve2, constMcatnloHerwigLabel, "L");	
 		if(verbose>0) std::cout << "found!" << std::endl;
 	      }
 	    }
 	  }
 	  
-	  // d) Legend - Theory prediction - POWHEG
-	  if(DrawPOWHEGPlot2){
+	  // d1) Legend - Theory prediction - POWHEG+PYTHIA
+	  if(DrawPOWHEGPYTHIAPlot2){
 	    TString curveName=xSecVariables_[i];
 	    curveName.ReplaceAll("Norm","");
 	    curveName+="POWHEG";
 	    TH1F* powhegcurve =(TH1F*)combicanvas->GetPrimitive(curveName);
 	    if(powhegcurve){
-	      leg->AddEntry(powhegcurve, "POWHEG  ", "L");
+	      leg->AddEntry(powhegcurve, constPowhegPythiaLabel, "L");
 	      //std::cout << "found!" << std::endl;
 	    }
 	  }
-	  
+	  // d2) Legend - Theory prediction - POWHEG+HERWIG
+	  if(DrawPOWHEGHERWIGPlot2){
+	    TString curveName=xSecVariables_[i];
+	    curveName.ReplaceAll("Norm","");
+	    curveName+="POWHEGHERWIG";
+	    TH1F* powhegherwigcurve =(TH1F*)combicanvas->GetPrimitive(curveName);
+	    if(powhegherwigcurve){
+	      leg->AddEntry(powhegherwigcurve, constPowhegHerwigLabel, "L");
+	      //std::cout << "found!" << std::endl;
+	    }
+	  }
+
 	  // e) Legend - Theory prediction - NNLO
 	  if(DrawNNLOPlot){
 	    TH1F* nnlocurve = 0;
@@ -1032,9 +1051,9 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	      nnlocurve =(TH1F*)combicanvas->GetPrimitive("ttbarMassnnlo");
 	    }
 	    if(nnlocurve){
-	      if (xSecVariables_[i].Contains("ttbarMassNorm" )) leg->AddEntry(nnlocurve, "NLO+NNLL", "L");
+	      if (xSecVariables_[i].Contains("ttbarMassNorm" )) leg->AddEntry(nnlocurve, constNloNNLLLabelAhrens, "L");
 	      else if (xSecVariables_[i].Contains("topPtNorm")||xSecVariables_[i].Contains("topYNorm" )){
-		leg->AddEntry(nnlocurve, "Approx. NNLO", "L");
+		leg->AddEntry(nnlocurve, constNnloLabelKidonakis, "L");
 	      }
 	    }
 	  }
@@ -1050,13 +1069,18 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  }
 	  
 	  // g) Legend - Closure test(s)
-	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["reweighted"+plotName][kSig], "#splitline{MadGraph t#bar{t}}{Reweighted}", "L");
+	  if(reweightClosure&&!closureTestSpecifier.Contains("NoDistort")&&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["reweighted"+plotName][kSig], "#splitline{MadGraph+Pythia t#bar{t}}{Reweighted}", "L");
 	  if(zprime!=""     &&sys==sysNo&&plotName!="inclusive") leg->AddEntry(histo_["modified"+plotName][kSig], "t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr, "L");
 	  
-	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - x1Subtrahend);
-	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - y1SubtrahendFactor * (double)(leg->GetNRows()));
-	  leg->SetX2NDC(1.03 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
-	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - 0.8*gStyle->GetTickLength());
+// 	  leg->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - x1Subtrahend);
+// 	  leg->SetY1NDC(1.0 - gStyle->GetPadTopMargin()   - gStyle->GetTickLength() - y1SubtrahendFactor * (double)(leg->GetNRows()));
+// 	  leg->SetX2NDC(1.03 - gStyle->GetPadRightMargin() - gStyle->GetTickLength());
+// 	  leg->SetY2NDC(1.0 - gStyle->GetPadTopMargin()   - 0.8*gStyle->GetTickLength());
+
+	  leg->SetX1NDC(0.587);
+	  leg->SetY1NDC(0.633);
+	  leg->SetX2NDC(0.820);
+	  leg->SetY2NDC(0.867);
 
 	  //}
 

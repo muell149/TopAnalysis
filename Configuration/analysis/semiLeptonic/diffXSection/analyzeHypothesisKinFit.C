@@ -3,13 +3,13 @@
 #include "../../unfolding/TopSVDFunctions.C" 
 
 void analyzeHypothesisKinFit(double luminosity = 19800.,
-			     bool save = true, int systematicVariation=0, unsigned int verbose=0, 
+			     bool save = true, int systematicVariation=4, unsigned int verbose=0, 
 			     TString inputFolderName="RecentAnalysisRun8TeV",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
-			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=false, bool hadron=true,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
+			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="")
 {
   // ============================
   //  Set ROOT Style
@@ -72,7 +72,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   //        41: sysPDFUp                   42: sysPDFDown                  
   //        43: sysHadUp                   44: sysHadDown                  
   //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: ENDOFSYSENUM
+  //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
   
   // errorbands for yield plots
   bool errorbands=false;
@@ -188,15 +188,16 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   // exclude PDF
   //for(int sys=sysPDFUp     ; sys<=sysPDFDown    ; ++sys) ignoreSys_.push_back(sys);
   // FIXME: exclude all
-  //for(int sys=3     ; sys<=46    ; ++sys) ignoreSys_.push_back(sys);
+  //for(int sys=3     ; sys<=47    ; ++sys) ignoreSys_.push_back(sys);
   // use std variable for loading plots in case of listed systematics
   for(unsigned int i=0; i<ignoreSys_.size(); ++i){
     if(systematicVariation==ignoreSys_[i]) systematicVariationMod=sysNo;
   }
-  // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
+  // use different ttbar MC ("Madgraph", "Powheg", "PowhegHerwig", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
-  if(systematicVariationMod==sysGenMCatNLO) ttbarMC="Mcatnlo";
-  else if(systematicVariationMod==sysGenPowheg)  ttbarMC="Powheg";
+  if(systematicVariationMod==sysGenMCatNLO          ) ttbarMC="Mcatnlo";
+  else if(systematicVariationMod==sysGenPowheg      ) ttbarMC="Powheg";
+  else if(systematicVariationMod==sysGenPowhegHerwig) ttbarMC="PowhegHerwig";
   TString ttbarMC2=ttbarMC;  
   if(systematicVariation==sysHadUp||systematicVariation==sysHadDown) ttbarMC2="Powheg"; // this is the old hadronization uncertainty will be overwritten from 'bothDecayChannelCombination'
   // normalization of differential normalized cross sections
@@ -1401,10 +1402,14 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
       // for mixed object analyzer
       if(plotList_[plot].Contains("composited")){
 	newName.ReplaceAll("composited", "analyzeTop");
+	if(sysInputGenFolderExtension!=""&&newName.Contains("Gen"+PS)&&!newName.Contains(sysInputGenFolderExtension)) newName.ReplaceAll("Gen"+PS, "Gen"+PS+sysInputGenFolderExtension);
 	if(plotList_[plot].Contains("Gen")) newName.ReplaceAll("Gen", "LevelKinematics");
 	else newName.ReplaceAll("analyzeTop", "analyzeTopReco");
 	newName.ReplaceAll("Ngenjets", "Njets");
-	if(addSel.Contains("ProbSel")) newName.ReplaceAll("KinFit", "KinFitProbSel");
+	TString syAdd=sysInputFolderExtension;
+	syAdd.ReplaceAll(addSel, "");
+	if(syAdd!=""&&!newName.Contains(syAdd)) newName.ReplaceAll("KinFit","KinFit"+syAdd);
+	if(addSel.Contains("ProbSel")&&!newName.Contains("ProbSel")) newName.ReplaceAll("KinFit", "KinFitProbSel");
       }
       // for all gen plots
       if(plotList_[plot].Contains(genHadronLeppath)){ 
@@ -1809,6 +1814,10 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
       enumSG=kSigPow;
       enumBG=kBkgPow;
     }
+    if(ttbarMC2=="PowhegHerwig"){
+      enumSG=kSigPowHer;
+      enumBG=kBkgPowHer;
+    }
     std::cout << std::endl;
     std::cout << "events expected from MC: " << NAllMC << std::endl;
     std::cout << "expected event composition:"   << std::endl;
@@ -1864,7 +1873,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity2*BR );
   double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity2*BR );
   // text output
-  if(systematicVariation==sysNo||systematicVariation==sysGenMCatNLO||systematicVariation==sysGenPowheg){ 
+  if(systematicVariation==sysNo||systematicVariation==sysGenMCatNLO||systematicVariation==sysGenPowheg||systematicVariation==sysGenPowhegHerwig){ 
     std::cout << std::endl;
     std::cout << "systematic variation: " << sysLabel(systematicVariation) << std::endl;
     std::cout << "Phase space: "; 
