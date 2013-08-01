@@ -722,9 +722,9 @@ namespace semileptonic {
     decch -> Draw("same");
   }
 
-  void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04)
+  void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04, bool cmssimulation=false)
   {
-    // Draw official labels (CMS Preliminary, luminosity and CM energy) above plot
+    // Draw official labels (CMS Preliminary/Simulation, luminosity and CM energy) above plot
 
     TPaveText *label = new TPaveText();
 
@@ -734,7 +734,11 @@ namespace semileptonic {
     label -> SetY2NDC(1.0);
     label -> SetTextFont(42);
 
-    if (cmsprelim)
+    if (cmssimulation)
+      {
+	label -> AddText("CMS Simulation at #sqrt{s} = 8 TeV");
+      }
+    else if (cmsprelim)
       {
 	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s} = 8 TeV",luminosity/1000));
       }
@@ -2437,6 +2441,7 @@ namespace semileptonic {
     gPad->SetBorderSize(0);
     gPad->SetFillColor(10);
 
+    if(ratioDrawOption.Contains("same")&&verbose>1) std::cout << "drawing into same ratio" << std::endl;
     if(!ratioDrawOption.Contains("same")){
       // create new pad for ratio plot
       TPad *rPad;
