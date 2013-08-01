@@ -254,7 +254,8 @@ if(options.eventFilter=='data'):
         
 else:
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
-        #process.GlobalTag.globaltag = cms.string('START53_V15::All')
+        process.GlobalTag.globaltag = cms.string('START53_V15::All')
+    if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_11'):
         process.GlobalTag.globaltag = cms.string('START53_V23::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         #process.GlobalTag.globaltag = cms.string('START42_V12::All')
@@ -491,14 +492,19 @@ process.load("TopAnalysis.TopAnalyzer.FullHadTreeWriter_cfi")
 ## register TreeRegistryService
 process.load("TopMass.TopEventTree.TreeRegistryService_cfi")
 process.TreeRegistryService.treeName  = "eventTree"
-process.TreeRegistryService.treeTitle = "Tree for UHH top-quark analysis\nParticles are in order {TTBar0, Top1, Top2, W1, W2, B1, LightQ1, LightQBar1, B2, LightQ2, LightQBar2}"
+process.TreeRegistryService.treeTitle = "Tree for UHH top-quark analysis.\n//Particles are in order {TTBar0, Top1, Top2, W1, W2, B1, LightQ1, LightQBar1, B2, LightQ2, LightQBar2}"
 
+## import QuarkGluonTagger
+#from QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff import *
+   
 ## load HypothesisAnalyzer
 from TopMass.TopEventTree.EventHypothesisAnalyzer_cfi import analyzeHypothesis
 process.analyzeKinFit = analyzeHypothesis.clone(hypoClassKey = "ttFullHadHypKinFit:Key", ttEvent = "ttFullHadEvent", ttEventGen2 = "ttFullHadEvent2", jets = "tightLeadingJets", gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'), maxNJets = cms.int32(20))
 from TopMass.TopEventTree.JetEventAnalyzer_cfi import analyzeJets
 process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets",
                                         gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'))
+from TopMass.TopEventTree.BRegJetEventAnalyzer_cfi import analyzeBRegJets
+process.analyzeBRegJets = analyzeBRegJets.clone(jets = "tightLeadingJets")
 from TopMass.TopEventTree.WeightEventAnalyzer_cfi import analyzeWeights
 process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets",
                                               mcWeight = options.mcWeight,
@@ -602,6 +608,7 @@ process.p1 = cms.Path(## do the genEvent selection
                       *process.FullHadTreeWriter
                       *process.analyzeKinFit
                       *process.analyzeJets
+                      #*process.analyzeBRegJets
                       *process.analyzeWeights
                       #*process.eventContentAnalyzer
                       )
