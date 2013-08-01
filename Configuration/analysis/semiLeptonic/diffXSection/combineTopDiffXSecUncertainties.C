@@ -310,8 +310,9 @@ void combineTopDiffXSecUncertainties(double luminosity=19800., bool save=true, u
 	    // sysHadUp   -> Hadronization: POWHEG+PYTHIA cs. POWHEG+HERWIG
 	    // sysHadDown -> Generator: MC@NLO+HERWIG vs. POWHEG+HERWIG
 	    if(sys==sysHadDown) considerError_[xSecVariables_[i]][sys]=false;
+	    if(sys==sysHadUp  ) considerError_[xSecVariables_[i]][sys]=false;
 	    // sysHadronizationOld=MC@NLO+HERWIG vs. POWHEG+PYTHIA
-	    if(sys==ENDOFSYSENUM-1){ calculateError_[xSecVariables_[i]][ENDOFSYSENUM]=true; considerError_[xSecVariables_[i]][ENDOFSYSENUM]=false; }
+	    if(sys==ENDOFSYSENUM-1){ calculateError_[xSecVariables_[i]][ENDOFSYSENUM]=true; considerError_[xSecVariables_[i]][ENDOFSYSENUM]=true; }
 	  }
 	  else{
 	    if(verbose>1) std::cout << "ERROR: Plot " << plotName +"kData not found in "+ xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
