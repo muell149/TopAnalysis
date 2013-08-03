@@ -150,13 +150,14 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
   //        41: sysPDFUp                   42: sysPDFDown                  
   //        43: sysHadUp                   44: sysHadDown                  
   //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: ENDOFSYSENUM
+  //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
 
   int systematicVariation=sysNo; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg: sysGenPowheg/sysTestPowheg, McatNLO: sysGenMCatNLO/sysTestMCatNLO
-  // use different ttbar MC ("Madgraph", "Powheg", "McatNLO"), also used for generator uncertainties
+  // use different ttbar MC ("Madgraph", "Powheg", "PowhegHerwig", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
-  if     (systematicVariation==sysGenMCatNLO||systematicVariation==sysTestMCatNLO) ttbarMC="Mcatnlo";
-  else if(systematicVariation==sysGenPowheg ||systematicVariation==sysTestPowheg ) ttbarMC="Powheg";
+  if     (systematicVariation==sysGenMCatNLO||systematicVariation==sysTestMCatNLO            ) ttbarMC="Mcatnlo";
+  else if(systematicVariation==sysGenPowheg ||systematicVariation==sysTestPowheg             ) ttbarMC="Powheg";
+  else if(systematicVariation==sysGenPowhegHerwig ||systematicVariation==sysTestPowhegHerwig ) ttbarMC="PowhegHerwig";
   if(ttbarMC!="Madgraph"){
     pdfName+=ttbarMC;
     outputFolder+=ttbarMC;
@@ -317,6 +318,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarY",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarMass",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarHT",
+    "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarPhiStar",
+    "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarDelPhi",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/lepPt",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/lepEta",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/lightqPt",
@@ -629,6 +632,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "y^{t#bar{t}};Top-quark pairs;0;1",
     "m^{t#bar{t}} #left[GeV#right];Top-quark pairs;0;50",
     "H_{T}(t#bar{t})=#Sigma(E_{T}(jets)) #left[GeV#right];#frac{dN}{dH_{T}(t#bar{t})};0;20",
+    "#Phi^{*}(t,#bar{t});Events;0;10",
+    "#Delta#Phi(t,#bar{t});Events;0;4",
     "p_{T}^{l} #left[GeV#right];N^{l};0;10",  // keep synchronized with lepPt (Tagged) in axisLabel1DLeptons for tagged/kinfit ratio
     "#eta^{l};Leptons;0;1",
     "p_{T}^{q} #left[GeV#right];tt jets;0;20",    
@@ -1209,108 +1214,110 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
       nameEff.ReplaceAll("ProbSel","ProbEff");
       TString namePur=nameOri;
       namePur.ReplaceAll("ProbSel","");
-      plotList_.push_back(nameEff);
-      TString newLabel=getStringEntry(axisLabel_[plot],1,";")+";eff(prob>0.02);"+getStringEntry(axisLabel_[plot],3,";")+";"+getStringEntry(axisLabel_[plot],4,";");
-      // debug output
-      if(verbose>1){
-	std::cout << std::endl << plotList_[plot] << std::endl;
-	std::cout << "-> " << nameEff << std::endl;
-	std::cout << axisLabel_[plot] << std::endl;
-	std::cout << "-> " << newLabel << std::endl;
-      }
-      axisLabel_.push_back(newLabel);
-      // MC histo
-      histo_[nameEff][kSig]        =(TH1F*)histo_[plotList_[plot]][kSig]->Clone();
-      histo_[nameEff][kSig]->Divide((TH1F*)histo_[namePur][kSig]->Clone());
-      // MC unc: consider only statistical uncertainty of ttbar events
-      double NdenomGes=0;
-      std::string lepTag= decayChannel=="combined" ? "muon" : decayChannel;
-      double lumiTag= decayChannel=="combined" ? (luminosityEl+luminosityMu)/2 : luminosity;
-      for(int bin=0; bin<=histo_[nameEff][kSig ]->GetNbinsX(); ++bin){
-	double ratio=histo_[nameEff][kSig]->GetBinContent(bin);
-	double Ndenom=histo_[namePur][kSig]->GetBinContent(bin)-histo_[namePur][kZjets]->GetBinContent(bin);
-	Ndenom/=lumiweight(kSig, lumiTag, systematicVariation, lepTag);
-	if(scaleToMeasured) Ndenom/=(xSec/ttbarCrossSection);
-	if(verbose>1&&plotList_[plot].Contains("ttbarMass")){
-	  std::cout << "ttbarMass bin #" << bin << ": " << Ndenom << std::endl;
-	  NdenomGes+=Ndenom;
-	  if(bin==histo_[nameEff][kSig]->GetNbinsX()){
-	    std::cout << "SUM=" << NdenomGes << std::endl;
-	    std::cout << "lumiweight=" << lumiweight(kSig, lumiTag, systematicVariation, lepTag) << std::endl;
-	  }
+      if(histo_[namePur][kSig]&&histo_[plotList_[plot]][kSig]){
+	plotList_.push_back(nameEff);
+	TString newLabel=getStringEntry(axisLabel_[plot],1,";")+";eff(prob>0.02);"+getStringEntry(axisLabel_[plot],3,";")+";"+getStringEntry(axisLabel_[plot],4,";");
+	// debug output
+	if(verbose>1){
+	  std::cout << std::endl << plotList_[plot] << std::endl;
+	  std::cout << "-> " << nameEff << std::endl;
+	  std::cout << axisLabel_[plot] << std::endl;
+	  std::cout << "-> " << newLabel << std::endl;
 	}
-	double temp_err=sqrt((ratio*(1-ratio))/Ndenom);
-	histo_[nameEff][kSig]->SetBinError(bin,temp_err);
-      }
-      // MC histo style
-      histo_[nameEff][kSig ]->SetLineColor(kRed);
-      histo_[nameEff][kSig ]->SetFillColor(kWhite);
-      // data histo
-      histo_[nameEff][kData]        =(TH1F*)histo_[plotList_[plot]][kData]->Clone();
-      DivideTwoYields(histo_[nameEff][kData], (TH1F*)histo_[namePur][kData]->Clone());
-      N1Dplots++;
-      // uncertainty for MC/data ratio 
-      std::vector<double> tempErr_;
-      for(int bin=1; bin<=histo_[nameEff][kData]->GetNbinsX(); ++bin){
-	double b =histo_[nameEff][kSig ]->GetBinContent(bin);
-	double Db=histo_[nameEff][kSig ]->GetBinError  (bin);
-	double a =histo_[nameEff][kData]->GetBinContent(bin);
-	double Da=histo_[nameEff][kData]->GetBinError  (bin);
-  	tempErr_.push_back(sqrt((a*a*Db*Db)/(b*b*b*b)+(Da*Da)/(b*b)));
-      }
-      errEff_[nameEff]=tempErr_;
-      // legend
-      if(!foundProbEff){
-	legendStyle(*legProbEff,"");
-	legProbEff->AddEntry(histo_[nameEff][kSig ], "all MC", "L");
-	legProbEff->AddEntry(histo_[nameEff][kData], "data"  , "P");
-	foundProbEff=true;
-      }
-      if(plotList_[plot].Contains("lepPt")){
-	// lepPt ratio before/ after KinFit
-	TString nameBef="tightLeptonKinematicsTagged/pt";
-	TString nameEff2=nameEff;
-	nameEff2.ReplaceAll("ProbEff","KinFitEff");
-	if(histo_.count(nameBef)>0){
-	  // A MC histos
-	  // adapt MC bin range
-	  histo_[nameEff2][kSig]=cutOffTH1((TH1F*)histo_[namePur][kSig ]->Clone(namePur+"2"), histo_[nameBef][kSig]->GetBinLowEdge(histo_[nameBef][kSig]->GetNbinsX()+1));
-	  TH1F* tempSG=cutOffTH1((TH1F*)histo_[nameBef][kSig]->Clone("tempSG"), histo_[nameEff2][kSig]->GetBinLowEdge(histo_[nameEff2][kSig]->GetNbinsX()+1));
-	  // MC ratio
-	  histo_[nameEff2][kSig]->Divide(cutOffTH1(tempSG, histo_[nameEff2][kSig]->GetBinLowEdge(histo_[nameEff2][kSig]->GetNbinsX()+1)));
-	  // MC uncertainty: 
-	  for(int bin=0; bin<=histo_[nameEff2][kSig ]->GetNbinsX(); ++bin){
-	    double ratio=histo_[nameEff2][kSig]->GetBinContent(bin);
-	    double Ndenom=histo_[nameBef][kSig]->GetBinContent(bin)-histo_[nameBef][kZjets]->GetBinContent(bin);
-	    Ndenom/=lumiweight(kSig, lumiTag, systematicVariation, lepTag);
-	    if(scaleToMeasured) Ndenom/=(xSec/ttbarCrossSection);
-	    double temp_err=sqrt((ratio*(1-ratio))/Ndenom);
-	    histo_[nameEff2][kSig]->SetBinError(bin,temp_err);
+	axisLabel_.push_back(newLabel);
+	// MC histo
+	histo_[nameEff][kSig]        =(TH1F*)histo_[plotList_[plot]][kSig]->Clone();
+	histo_[nameEff][kSig]->Divide((TH1F*)histo_[namePur][kSig]->Clone());
+	// MC unc: consider only statistical uncertainty of ttbar events
+	double NdenomGes=0;
+	std::string lepTag= decayChannel=="combined" ? "muon" : decayChannel;
+	double lumiTag= decayChannel=="combined" ? (luminosityEl+luminosityMu)/2 : luminosity;
+	for(int bin=0; bin<=histo_[nameEff][kSig ]->GetNbinsX(); ++bin){
+	  double ratio=histo_[nameEff][kSig]->GetBinContent(bin);
+	  double Ndenom=histo_[namePur][kSig]->GetBinContent(bin)-histo_[namePur][kZjets]->GetBinContent(bin);
+	  Ndenom/=lumiweight(kSig, lumiTag, systematicVariation, lepTag);
+	  if(scaleToMeasured) Ndenom/=(xSec/ttbarCrossSection);
+	  if(verbose>1&&plotList_[plot].Contains("ttbarMass")){
+	    std::cout << "ttbarMass bin #" << bin << ": " << Ndenom << std::endl;
+	    NdenomGes+=Ndenom;
+	    if(bin==histo_[nameEff][kSig]->GetNbinsX()){
+	      std::cout << "SUM=" << NdenomGes << std::endl;
+	      std::cout << "lumiweight=" << lumiweight(kSig, lumiTag, systematicVariation, lepTag) << std::endl;
+	    }
 	  }
-	  // MC histo style
-	  histo_[nameEff2][kSig]->SetLineColor(kRed);
-	  histo_[nameEff2][kSig]->SetFillColor(kWhite);
-	  // B data histo
-	  TH1F* tempDa=(TH1F*)histo_[nameBef][kData]->Clone("tempDa");
-	  // adapt data bin range
-	  histo_[nameEff2][kData]=cutOffTH1((TH1F*)histo_[namePur][kData]->Clone(), tempDa->GetBinLowEdge(tempDa->GetNbinsX()+1));
-	  // data ratio
-	  DivideTwoYields(histo_[nameEff2][kData], cutOffTH1(tempDa, histo_[nameEff2][kData]->GetBinLowEdge(histo_[nameEff2][kData]->GetNbinsX()+1)));
-	  // uncertainty for MC/data ratio 
-	  std::vector<double> tempErr2_;
-	  for(int bin=1; bin<=histo_[nameEff2][kData]->GetNbinsX(); ++bin){
-	    double b =histo_[nameEff2][kSig ]->GetBinContent(bin);
-	    double Db=histo_[nameEff2][kSig ]->GetBinError  (bin);
-	    double a =histo_[nameEff2][kData]->GetBinContent(bin);
-	    double Da=histo_[nameEff2][kData]->GetBinError  (bin);
-	    tempErr2_.push_back(sqrt((a*a*Db*Db)/(b*b*b*b)+(Da*Da)/(b*b)));
+	  double temp_err=sqrt((ratio*(1-ratio))/Ndenom);
+	  histo_[nameEff][kSig]->SetBinError(bin,temp_err);
+	}
+	// MC histo style
+	histo_[nameEff][kSig ]->SetLineColor(kRed);
+	histo_[nameEff][kSig ]->SetFillColor(kWhite);
+	// data histo
+	histo_[nameEff][kData]        =(TH1F*)histo_[plotList_[plot]][kData]->Clone();
+	DivideTwoYields(histo_[nameEff][kData], (TH1F*)histo_[namePur][kData]->Clone());
+	N1Dplots++;
+	// uncertainty for MC/data ratio 
+	std::vector<double> tempErr_;
+	for(int bin=1; bin<=histo_[nameEff][kData]->GetNbinsX(); ++bin){
+	  double b =histo_[nameEff][kSig ]->GetBinContent(bin);
+	  double Db=histo_[nameEff][kSig ]->GetBinError  (bin);
+	  double a =histo_[nameEff][kData]->GetBinContent(bin);
+	  double Da=histo_[nameEff][kData]->GetBinError  (bin);
+	  tempErr_.push_back(sqrt((a*a*Db*Db)/(b*b*b*b)+(Da*Da)/(b*b)));
+	}
+	errEff_[nameEff]=tempErr_;
+	// legend
+	if(!foundProbEff){
+	  legendStyle(*legProbEff,"");
+	  legProbEff->AddEntry(histo_[nameEff][kSig ], "all MC", "L");
+	  legProbEff->AddEntry(histo_[nameEff][kData], "data"  , "P");
+	  foundProbEff=true;
+	}
+	if(plotList_[plot].Contains("lepPt")){
+	  // lepPt ratio before/ after KinFit
+	  TString nameBef="tightLeptonKinematicsTagged/pt";
+	  TString nameEff2=nameEff;
+	  nameEff2.ReplaceAll("ProbEff","KinFitEff");
+	  if(histo_.count(nameBef)>0){
+	    // A MC histos
+	    // adapt MC bin range
+	    histo_[nameEff2][kSig]=cutOffTH1((TH1F*)histo_[namePur][kSig ]->Clone(namePur+"2"), histo_[nameBef][kSig]->GetBinLowEdge(histo_[nameBef][kSig]->GetNbinsX()+1));
+	    TH1F* tempSG=cutOffTH1((TH1F*)histo_[nameBef][kSig]->Clone("tempSG"), histo_[nameEff2][kSig]->GetBinLowEdge(histo_[nameEff2][kSig]->GetNbinsX()+1));
+	    // MC ratio
+	    histo_[nameEff2][kSig]->Divide(cutOffTH1(tempSG, histo_[nameEff2][kSig]->GetBinLowEdge(histo_[nameEff2][kSig]->GetNbinsX()+1)));
+	    // MC uncertainty: 
+	    for(int bin=0; bin<=histo_[nameEff2][kSig ]->GetNbinsX(); ++bin){
+	      double ratio=histo_[nameEff2][kSig]->GetBinContent(bin);
+	      double Ndenom=histo_[nameBef][kSig]->GetBinContent(bin)-histo_[nameBef][kZjets]->GetBinContent(bin);
+	      Ndenom/=lumiweight(kSig, lumiTag, systematicVariation, lepTag);
+	      if(scaleToMeasured) Ndenom/=(xSec/ttbarCrossSection);
+	      double temp_err=sqrt((ratio*(1-ratio))/Ndenom);
+	      histo_[nameEff2][kSig]->SetBinError(bin,temp_err);
+	    }
+	    // MC histo style
+	    histo_[nameEff2][kSig]->SetLineColor(kRed);
+	    histo_[nameEff2][kSig]->SetFillColor(kWhite);
+	    // B data histo
+	    TH1F* tempDa=(TH1F*)histo_[nameBef][kData]->Clone("tempDa");
+	    // adapt data bin range
+	    histo_[nameEff2][kData]=cutOffTH1((TH1F*)histo_[namePur][kData]->Clone(), tempDa->GetBinLowEdge(tempDa->GetNbinsX()+1));
+	    // data ratio
+	    DivideTwoYields(histo_[nameEff2][kData], cutOffTH1(tempDa, histo_[nameEff2][kData]->GetBinLowEdge(histo_[nameEff2][kData]->GetNbinsX()+1)));
+	    // uncertainty for MC/data ratio 
+	    std::vector<double> tempErr2_;
+	    for(int bin=1; bin<=histo_[nameEff2][kData]->GetNbinsX(); ++bin){
+	      double b =histo_[nameEff2][kSig ]->GetBinContent(bin);
+	      double Db=histo_[nameEff2][kSig ]->GetBinError  (bin);
+	      double a =histo_[nameEff2][kData]->GetBinContent(bin);
+	      double Da=histo_[nameEff2][kData]->GetBinError  (bin);
+	      tempErr2_.push_back(sqrt((a*a*Db*Db)/(b*b*b*b)+(Da*Da)/(b*b)));
+	    }
+	    errEff_[nameEff2]=tempErr2_;
+	    // add new plot to list
+	    plotList_.push_back(nameEff2);
+	    TString newLabel2=getStringEntry(axisLabel_[plot],1,";")+";eff(kinFit);"+getStringEntry(axisLabel_[plot],3,";")+";"+getStringEntry(axisLabel_[plot],4,";");
+	    axisLabel_.push_back(newLabel2);
+	    N1Dplots++;
 	  }
-	  errEff_[nameEff2]=tempErr2_;
-	  // add new plot to list
-	  plotList_.push_back(nameEff2);
-	  TString newLabel2=getStringEntry(axisLabel_[plot],1,";")+";eff(kinFit);"+getStringEntry(axisLabel_[plot],3,";")+";"+getStringEntry(axisLabel_[plot],4,";");
-	  axisLabel_.push_back(newLabel2);
-	  N1Dplots++;
 	}
       }
     }
@@ -1384,9 +1391,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 	  histo_[newName][kSigPow]->SetFillStyle(0);
 	}
 	if(firstBGsub){
-	  legTheo->AddEntry(histo_[newName][kSig], "MadGraph", "L");
-	  if(files_[kSigPow]&&files_[kBkgPow]) legTheo->AddEntry(histo_[newName][kSigPow], "POWHEG"  , "L");
-	  if(files_[kSigMca]&&files_[kBkgMca]) legTheo->AddEntry(histo_[newName][kSigMca], "MC@NLO"  , "L");
+	  legTheo->AddEntry(histo_[newName][kSig], "MadGraph+Pythia", "L");
+	  if(files_[kSigPow]&&files_[kBkgPow]) legTheo->AddEntry(histo_[newName][kSigPow], "POWHEG+Pythia"  , "L");
+	  if(files_[kSigMca]&&files_[kBkgMca]) legTheo->AddEntry(histo_[newName][kSigMca], "MC@NLO+Herwig"  , "L");
 	  firstBGsub=false;
 	}
       }
@@ -2048,6 +2055,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
 		  int ndivisions=505;
 		  if(plotList_[plot].Contains("shift")){ratMin=0.88; ratMax=1.12;}
 		  if(plotList_[plot].Contains("TopRecoKinematics")){ratMin=0.49; ratMax=1.49; ndivisions=405;}
+		  //if(plotList_[plot].Contains("topMass")){ratMin=0.7; ratMax=2.0;}
 		  TString ratioLabelNominator  ="N_{data}";
 		  TString ratioLabelDenominator="N_{MC}";
 		  std::vector<double> err_=std::vector<double>(0);

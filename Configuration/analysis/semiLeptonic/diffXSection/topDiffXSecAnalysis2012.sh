@@ -193,8 +193,8 @@ makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be <= 46 (default), see list of systematics below)
-maxSys=46
+## maxSys>0 needs a lot of time (must be <= 47 (default), see list of systematics below)
+maxSys=47
 
 ## Include cross-check variables to get additional differential cross-sections for
 ## a) pT(top) and pT(antitop)
@@ -525,7 +525,7 @@ echo " 39: sysDiBosUp                 40: sysDiBosDown                "
 echo " 41: sysPDFUp                   42: sysPDFDown                  "
 echo " 43: sysHadUp                   44: sysHadDown                  "
 echo " 45: sysGenMCatNLO              46: sysGenPowheg                "
-echo " 47: ENDOFSYSENUM                                               "
+echo " 47: sysGenPowhegHerwig         48: ENDOFSYSENUM                "
 
 echo
 

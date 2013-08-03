@@ -22,6 +22,7 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   inputMETs_           (cfg.getParameter<edm::InputTag>("inputMETs"           )),
   payload_             (cfg.getParameter<std::string>  ("payload"             )),  
   scaleType_           (cfg.getParameter<std::string>  ("scaleType"           )),  
+  sourceName_          (cfg.getParameter<std::string>  ("sourceName"          )),  
   scaleFactor_         (cfg.getParameter<double>       ("scaleFactor"         )),
   scaleFactorB_        (cfg.getParameter<double>       ("scaleFactorB"        )),
   resolutionFactor_    (cfg.getParameter<std::vector<double> > ("resolutionFactors"   )),
@@ -39,6 +40,8 @@ JetEnergyScale::JetEnergyScale(const edm::ParameterSet& cfg):
   allowedTypes_.push_back(std::string("top:down"));
   allowedTypes_.push_back(std::string("flavor:up"));
   allowedTypes_.push_back(std::string("flavor:down"));
+  allowedTypes_.push_back(std::string("source:up"));
+  allowedTypes_.push_back(std::string("source:down"));
 
   // use label of input to create label for output
   outputElectrons_ = inputElectrons_.label();
@@ -113,6 +116,20 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
   for(std::vector<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
     pat::Jet scaledJet = *jet;
 
+
+    // GetTotal JES uncertainty to add as userfloat
+    // get the uncertainty parameters from file, see
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
+    JetCorrectorParameters* TotalParam = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), "Total");
+    // instantiate the jec uncertainty object
+    JetCorrectionUncertainty* TotalDeltaJEC = new JetCorrectionUncertainty(*TotalParam);
+    TotalDeltaJEC->setJetEta(jet->eta()); TotalDeltaJEC->setJetPt(jet->pt()); 
+    //set total JESUncertainty
+    double jesTotalUncertainty= TotalDeltaJEC->getUncertainty(true);
+	delete TotalParam; 
+	delete TotalDeltaJEC;
+    
+    
     // JER scaled for all possible methods
     double jerScaleFactor = resolutionFactor(scaledJet);
     scaleJetEnergy( scaledJet, jerScaleFactor );
@@ -189,9 +206,32 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
       delete deltaJEC;
       delete param;
     }
-    scaledJet.addUserFloat("jerSF"  , jerScaleFactor);
-    scaledJet.addUserFloat("jesSF"  , scaledJet.pt()/jetPtAfterJERScaling);
-    scaledJet.addUserFloat("totalSF", scaledJet.pt()/jet->pt());
+
+    // Use only a single source for the uncertainty
+    else if(scaleType_.substr(0, scaleType_.find(':'))=="source") {
+      // get the uncertainty parameters from file, see
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
+      JetCorrectorParameters* param = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), sourceName_);
+      // instantiate the jec uncertainty object
+      JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(*param);
+      deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 
+      
+      if(scaleType_.substr(scaleType_.find(':')+1)=="up") {
+	float jetMetSource = deltaJEC->getUncertainty(true);
+	scaleJetEnergy( scaledJet, 1+jetMetSource );
+      }
+      else if(scaleType_.substr(scaleType_.find(':')+1)=="down"){
+	float jetMetSource = deltaJEC->getUncertainty(false);
+	scaleJetEnergy( scaledJet, 1-jetMetSource );
+      }
+    delete deltaJEC;
+    delete param;
+    }
+
+    scaledJet.addUserFloat("jerSF"     , jerScaleFactor);
+    scaledJet.addUserFloat("jesSF"     , scaledJet.pt()/jetPtAfterJERScaling);
+    scaledJet.addUserFloat("jesTotUnc" , jesTotalUncertainty);
+    scaledJet.addUserFloat("totalSF"   , scaledJet.pt()/jet->pt());
     pJets->push_back( scaledJet );
     
     // consider jet scale shift only if the raw jet pt and emf 
