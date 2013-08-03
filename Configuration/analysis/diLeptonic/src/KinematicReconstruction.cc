@@ -32,22 +32,22 @@ using namespace std;
 KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV& leptonPlus, const VLV *jets, const std::vector<double> *btags, const LV* met)
 {
 
-	TString data_path = ttbar::DATA_PATH();
-	data_path.Append("/wmass.root");
-	TFile wmassfile(data_path);
-	TH1F * h_wmass = (TH1F*)wmassfile.Get("W_mass");
-	gRandom->SetSeed(0);
+    TString data_path = ttbar::DATA_PATH();
+    data_path.Append("/wmass.root");
+    TFile wmassfile(data_path);
+    TH1F * h_wmass = (TH1F*)wmassfile.Get("W_mass");
+    gRandom->SetSeed(0);
 
-	std::vector<struct_KinematicReconstruction> vect_sol;
+    std::vector<struct_KinematicReconstruction> vect_sol;
 
-	TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
-	TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
-	TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
+    TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
+    TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
+    TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
 
     std::vector<TLorentzVector> jets_tlv;
     for (const auto& jet : *jets) {
         jets_tlv.push_back(ttbar::LVtoTLV(jet));
-   	 }
+    }
 
     vector<int> b1_id;
     vector<int> b2_id;
@@ -58,20 +58,20 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
         for(int j=0; j<(int)btags->size(); j++) {
             double wi = btags->at(i);
             double wj = btags->at(j);
-//             if(i==j || (wi<0.244 && wj<0.244) || (wi<0 || wj<0))continue;
+            //             if(i==j || (wi<0.244 && wj<0.244) || (wi<0 || wj<0))continue;
             if(i==j || (wi<0.244 && wj<0.244))continue;
             btag_ww.push_back(wi + wj);
 
-			if(wi>0.244 && wj>0.244){nb_tag.push_back(2); }
-			else{nb_tag.push_back(1); }
+            if(wi>0.244 && wj>0.244){nb_tag.push_back(2); }
+            else{nb_tag.push_back(1); }
 
             b1_id.push_back(i);
             b2_id.push_back(j);
         }
-	}
+    }
 
 
- 	if(b1_id.size()<2){
+    if(b1_id.size()<2){
         nSol=0;
         return;
     }
@@ -97,13 +97,13 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
     }
 
 
-			            ///jets loop
-/// Anya
+    ///jets loop
+    /// Anya
     MeanSol meanSol(172.5);
     double max_sum_weight=0;
     int nbtag=0, isHaveSol;
 
-///
+    ///
 
     nSol=0;
     for(int ib=0; ib<(int)b1_id.size(); ib++) {
@@ -172,18 +172,18 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
             l_sm.SetXYZT(l_sm.Px()*xL, l_sm.Py()*xL, l_sm.Pz()*xL, l_sm.E()*fL);
             al_sm.SetXYZT(al_sm.Px()*xaL, al_sm.Py()*xaL, al_sm.Pz()*xaL, al_sm.E()*faL);
 
-///Anya
+            ///Anya
 //             KinematicReconstruction_LSroutines tp_sm(172.5, 4.8, 80.4, 0.0, 0.0);
             KinematicReconstruction_LSroutines tp_sm(172.5, 4.8, h_wmass->GetRandom(), 0.0, 0.0);
-///
-                           tp_sm.SetConstraints(al_sm, l_sm, b_sm, bbar_sm, met_sm.Px(), met_sm.Py());
+            ///
+            tp_sm.SetConstraints(al_sm, l_sm, b_sm, bbar_sm, met_sm.Px(), met_sm.Py());
 
-        /// Anya
+            /// Anya
             for(int i=0; i<tp_sm.GetNsol(); i++) {
                 meanSol.Add(tp_sm.GetTtSol()->at(i).top, tp_sm.GetTtSol()->at(i).topbar, tp_sm.GetTtSol()->at(i).neutrino, tp_sm.GetTtSol()->at(i).neutrinobar, tp_sm.GetTtSol()->at(i).vw);
             }
             if(tp_sm.GetNsol()>0){isHaveSol=1; nSol++; }
-        ///
+            ///
 ///Anya comment
 //             if(!(tp_sm.GetNsol()<1 || tp_sm.GetNsol()==1 || tp_sm.GetNsol()==3)) {
 //                 if(tp_sm.GetTtSol()->at(0).vw>vw_max){
@@ -316,9 +316,9 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
     std::vector<struct_KinematicReconstruction> vect_sol;
 
 
-	TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
-	TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
-	TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
+    TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
+    TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
+    TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
 
     std::vector<TLorentzVector> jets_tlv;
     for (const auto& jet : *jets) {
@@ -386,7 +386,7 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
         b_temp=jets_tlv.at(j1);
         bbar_temp=jets_tlv.at(j2);
         met_temp.SetXYZM(met->Px(), met->Py(), 0, 0);
-        //if((al_temp + b_temp).M()>180 || (l_temp + bbar_temp).M()>180)continue;
+//         if((al_temp + b_temp).M()>180 || (l_temp + bbar_temp).M()>180)continue;
 
         /*smearing*/
         double vw_max=0;
@@ -433,8 +433,8 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
 
                 double xX=r.Gaus(1, xRMS);
 
-                //met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); // tollko b - jet
-                //met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar) + l_sm.Px()*(1 - xL) + al_sm.Px()*(1 - xaL))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar) + l_sm.Py()*(1 - xL) + al_sm.Py()*(1 - xaL))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); //only b - jet and lep
+//                 met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); // tollko b - jet
+//                 met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar) + l_sm.Px()*(1 - xL) + al_sm.Px()*(1 - xaL))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar) + l_sm.Py()*(1 - xL) + al_sm.Py()*(1 - xaL))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); //only b - jet and lep
 
                 met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar) + l_sm.Px()*(1 - xL) + al_sm.Px()*(1 - xaL) + vX_reco.Px()*(1 - xX))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar) + l_sm.Py()*(1 - xL) + al_sm.Py()*(1 - xaL) + vX_reco.Py()*(1 - xX))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); //all
 
@@ -526,12 +526,12 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
 
     if(nSol>0){
         std::nth_element(begin(vect_sol), begin(vect_sol), end(vect_sol),
-            [](const struct_KinematicReconstruction& a, const struct_KinematicReconstruction& b){
-                                return  b.ntags < a.ntags || (b.ntags == a.ntags && b.weight < a.weight);
-            });
+                         [](const struct_KinematicReconstruction& a, const struct_KinematicReconstruction& b){
+                             return  b.ntags < a.ntags || (b.ntags == a.ntags && b.weight < a.weight);
+                         });
 
         sol=vect_sol[0];
-	}
+    }
 
 }       // End of KinematicReconstruction constructor
 
