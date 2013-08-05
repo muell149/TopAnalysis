@@ -26,9 +26,9 @@ foreach sample (run qcd dyee dymumu dytautau ww wz zz wtolnu single ttbarbg ttba
       end
 
       foreach Sys (DY_UP DY_DOWN BG_UP BG_DOWN)
-        if [ -d selectionRoot/$Syst/$channel ] ; then
-            cp FileLists/HistoFileList_Nominal\_$channel.txt FileLists/HistoFileList_$Syst\_$channel.txt
-            cp FileLists/HistoFileList_Nominal_combined.txt FileLists/HistoFileList_$Syst\_combined.txt
+        if [ -d selectionRoot/Nominal/$channel ] ; then
+            cp FileLists/HistoFileList_Nominal\_$channel.txt FileLists/HistoFileList_$Sys\_$channel.txt
+            cp FileLists/HistoFileList_Nominal_combined.txt FileLists/HistoFileList_$Sys\_combined.txt
         fi
       end
 
