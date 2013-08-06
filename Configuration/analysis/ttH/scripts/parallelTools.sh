@@ -2,7 +2,7 @@
 
 SCRIPT=$(readlink -f $0)
 SCRIPTPATH=$(dirname "$SCRIPT")
-BIN="$CMSSW_BASE/src/TopAnalysis/Configuration/analysis/ttH/build"
+BIN="$CMSSW_BASE/src/TopAnalysis/Configuration/analysis/ttH/install/bin"
 
 if [ `hostname | grep "naf.desy.de"` ]; then
     echo "Running on the NAF - so let's submit our jobs, job output will be stored in batch_output/..."
