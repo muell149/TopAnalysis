@@ -116,7 +116,11 @@ mvaWeightsReader_(0),
 selectionSteps_(selectionSteps),
 mvaInputDir_(mvaInputDir)
 {
-    if(!mvaWeightsFile) return;
+    if(!mvaWeightsFile){
+        std::cout<<"--- Beginning setting up production of MVA input\n";
+        std::cout<<"=== Finishing setting up production of MVA input\n\n";
+        return;
+    }
     
     std::cout<<"--- Beginning setting up MVA weights from file\n";
     
@@ -383,7 +387,7 @@ void MvaInputTopJetsVariables::produceMvaInputTree(const std::string& outputFile
 
 void MvaInputTopJetsVariables::produceMvaInputTree(TSelectorList* output)
 {
-    std::cout<<"--- Beginning production MVA input tree\n";
+    std::cout<<"--- Beginning production of MVA input tree\n";
     
     // Set pointer to output, so that TTree is owned by it
     selectorList_ = output;
@@ -397,8 +401,8 @@ void MvaInputTopJetsVariables::produceMvaInputTree(TSelectorList* output)
     this->createMvaInputBranches(tree);
     this->fillMvaInputBranches();
     
-    std::cout<<"Number of variables for MVA: "<<this->inputStructs().size()<<"\n";
-    std::cout<<"=== Finishing production MVA input tree\n\n";
+    std::cout<<"Number of dijet combinations for MVA: "<<this->inputStructs().size()<<"\n";
+    std::cout<<"=== Finishing production of MVA input tree\n\n";
 }
 
 
