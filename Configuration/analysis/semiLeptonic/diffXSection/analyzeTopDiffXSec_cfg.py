@@ -1407,7 +1407,7 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     genLeptons = cms.InputTag('isolatedGenMuons'),
     bJetCollection = cms.bool(True),
     recoJets= cms.InputTag('tightLeadingPFJets'),
-    useRecBjetsKinematicsBeforeFit= cms.bool(True),
+    useRecBjetsKinematicsBeforeFit= cms.bool(False),
     output = cms.int32(0),
     weight = cms.InputTag(""),
     genPlots = cms.bool(True),
@@ -1463,7 +1463,7 @@ process.analyzeTopRecoKinematicsLepton=process.analyzeSemiLepLepton.clone(
                                      weight = cms.InputTag(""),
                                      genPlots = cms.bool(True), 
                                      recPlots = cms.bool(True),
-                                     useRecLeptonKinematicsBeforeFit= cms.bool(True),
+                                     useRecLeptonKinematicsBeforeFit= cms.bool(False),
                                      useTree = cms.bool(True)
                                      )
 if(decayChannel=="electron"):
@@ -1520,6 +1520,7 @@ if(applyKinFit==True):
                                              process.lightJetSelection                       +
                                              process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
+                                             #process.filterProbKinFit                        + #FIXME MARTIN: prob cut for systematic folder
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -3189,7 +3190,7 @@ if(runningOnData=="MC"):
                      process.selectedPatJets * process.scaledJetEnergy)
 
     if(applyKinFit==True):
-    # use status 3 particles (!)
+        # use status 3 particles (!)
         process.decaySubset.fillMode = cms.string("kME")
 
 
