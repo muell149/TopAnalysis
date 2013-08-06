@@ -536,14 +536,16 @@ KinematicReconstruction::KinematicReconstruction(const LV& leptonMinus, const LV
 }       // End of KinematicReconstruction constructor
 
 
-int KinematicReconstruction::GetNSol()
+
+int KinematicReconstruction::GetNSol()const
 {
-	return nSol;
+    return nSol;
 }
 
 
-struct_KinematicReconstruction KinematicReconstruction::GetSol()
+
+struct_KinematicReconstruction KinematicReconstruction::GetSol()const
 {
-	return sol;
+    return sol;
 }
 

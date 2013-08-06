@@ -367,20 +367,22 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectionStep = "3";
     
     // ...with at least 20 GeV invariant mass
-    if (dilepton.M() < 20.) return kTRUE;
+    if(dilepton.M() < 20.) return kTRUE;
     
     const bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
-    KinRecoObjects* kinRecoObjectsPtr(0);
-    const bool hasSolution = this->calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices,
-                                                    allLeptons, jets, jetBTagCSV, met,
-                                                    kinRecoObjectsPtr);
+    //const KinRecoObjects& kinRecoObjects = this->getKinRecoObjects(entry);
+    const KinRecoObjects& kinRecoObjects = this->getKinRecoObjectsOnTheFly(leptonIndex, antiLeptonIndex, jetIndices,
+                                                                           allLeptons, jets, jetBTagCSV, met);
+    const bool hasSolution = kinRecoObjects.valuesSet_;
+    
+    
     
     // ++++ Control Plots ++++
     
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
@@ -396,7 +398,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         this->fillAll(selectionStep,
                       recoObjects, commonGenObjects,
                       topGenObjectsDummy, higgsGenObjectsDummy,
-                      kinRecoObjectsDummy,
+                      kinRecoObjects,
                       genObjectIndicesDummy, recoObjectIndices,
                       genLevelWeights, recoLevelWeights,
                       weight);
@@ -407,7 +409,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
             this->fillAll(selectionStep,
                           recoObjects, commonGenObjects,
                           topGenObjectsDummy, higgsGenObjectsDummy,
-                          kinRecoObjectsDummy,
+                          kinRecoObjects,
                           genObjectIndicesDummy, recoObjectIndices,
                           genLevelWeights, recoLevelWeights,
                           weight);
@@ -418,7 +420,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                 this->fillAll(selectionStep,
                               recoObjects, commonGenObjects,
                               topGenObjectsDummy, higgsGenObjectsDummy,
-                              kinRecoObjectsDummy,
+                              kinRecoObjects,
                               genObjectIndicesDummy, recoObjectIndices,
                               genLevelWeights, recoLevelWeights,
                               weight);
@@ -433,7 +435,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                     this->fillAll(selectionStep,
                                   recoObjects, commonGenObjects,
                                   topGenObjectsDummy, higgsGenObjectsDummy,
-                                  kinRecoObjectsDummy,
+                                  kinRecoObjects,
                                   genObjectIndicesDummy, recoObjectIndices,
                                   genLevelWeights, recoLevelWeights,
                                   weight);
@@ -447,7 +449,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                         this->fillAll(selectionStep,
                                       recoObjects, commonGenObjects,
                                       topGenObjectsDummy, higgsGenObjectsDummy,
-                                      kinRecoObjectsDummy,
+                                      kinRecoObjects,
                                       genObjectIndicesDummy, recoObjectIndices,
                                       genLevelWeights, recoLevelWeights,
                                       weight);
@@ -470,7 +472,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
@@ -488,7 +490,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
@@ -506,7 +508,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
@@ -533,7 +535,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
@@ -605,7 +607,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjects, higgsGenObjects,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndices, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);

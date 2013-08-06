@@ -517,8 +517,7 @@ protected:
      * @return true if there is at least one solution
      */
     bool calculateKinReco(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices,
-                          const VLV& allLeptons, const VLV& jets, const std::vector<double>& jetBTagCSV, const LV& met,
-                          KinRecoObjects* kinRecoObjects =0);
+                          const VLV& allLeptons, const VLV& jets, const std::vector<double>& jetBTagCSV, const LV& met);
     
     /** prepare JER/JES systematics
      * 
@@ -651,6 +650,14 @@ protected:
     /// Get a constant reference to nTuple branches for Higgs signal samples on generator level
     const HiggsGenObjects& getHiggsGenObjects(const Long64_t& entry)const;
     
+    /// Get a constant reference to nTuple branches for kinematic reconstruction
+    const KinRecoObjects& getKinRecoObjects(const Long64_t& entry)const;
+    
+    /// Get a constant reference to on-the-fly kinematic reconstruction results
+    const KinRecoObjects& getKinRecoObjectsOnTheFly(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices,
+                                                    const VLV& allLeptons, const VLV& jets, const std::vector<double>& jetBTagCSV,
+                                                    const LV& met);
+    
     
     /// Set for all object structs, that the specific nTuple entry is not read
     void resetObjectStructEntry()const;
@@ -659,6 +666,7 @@ protected:
     void applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
                              const std::vector<double>* jetJerSf, const std::vector<double>* jetForMetJerSf,
                              const VLV* associatedGenJet, const VLV* associatedGenJetForMet)const;
+    
     void applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const;
     
     
