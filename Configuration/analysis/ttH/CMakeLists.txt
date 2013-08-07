@@ -102,7 +102,23 @@ MARK_AS_ADVANCED( EXECUTABLE_OUTPUT_PATH LIBRARY_OUTPUT_PATH )
 ADD_SUBDIRECTORY( src )
 
 ##########
+# add doxygen documentation
+##########
 INCLUDE (DOCUMENTATION)
+
+
+##########
+# install the scripts into the bin directory
+##########
+FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/scripts)
+FILE(GLOB scripts RELATIVE  ${PROJECT_SOURCE_DIR}/scripts scripts/*)
+MESSAGE(STATUS "scripts found: ${scripts}")
+FOREACH( script ${scripts})
+  MESSAGE(STATUS "configuring ${script} to  ${CMAKE_BINARY_DIR}/scripts")
+  CONFIGURE_FILE( ${PROJECT_SOURCE_DIR}/scripts/${script} ${CMAKE_BINARY_DIR}/scripts @ONLY )
+  INSTALL(PROGRAMS  ${CMAKE_BINARY_DIR}/scripts/${script}
+    DESTINATION bin )
+ENDFOREACH( script ${scripts} )
 
 
 ########################
