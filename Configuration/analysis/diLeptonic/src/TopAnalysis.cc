@@ -314,6 +314,11 @@ void TopAnalysis::SlaveBegin(TTree*)
     h_RecoAntiNeutrinopT = store(new TH1D("RecoAntiNeutrinopT", "reco nubar pT", 80, 0, 400));
     h_HypAntiNeutrinopT = store(new TH1D("HypAntiNeutrinopT", "hyp nubar pT", 80, 0, 400));
 
+    h_GenRecoTTBarDeltaPhi = store( new TH2D("GenRecoTTBarDeltaPhi", "Gen/Reco #Delta#Phi (ttbar)", 200, 0, 3.5, 200, 0, 3.5));
+    h_RecoTTBarDeltaPhi = store( new TH1D("RecoTTBarDeltaPhi", "#Delta#Phi ofTTBar (RECO)", 200, 0, 3.5));
+    h_HypTTBarDeltaPhi = store( new TH1D("HypTTBarDeltaPhi", "#Delta#Phi ofTTBar (HYP)", 200, 0, 3.5));
+    h_VisGenTTBarDeltaPhi = store( new TH1D("VisGenTTBarDeltaPhi", "#Delta#Phi ofTTBar (VisGen)", 200, 0, 3.5));
+
     h_GenRecoTTBarRapidity = store(new TH2D ( "GenRecoTTBarRapidity", "Rapidity of TTbar System (HYP)", 100, -5, 5, 100, -5, 5 ));
     h_GenRecoTTBarpT = store(new TH2D ( "GenRecoTTBarpT", "pT of TTbar System (HYP)", 500, 0, 500, 500, 0, 500 ));
     h_GenRecoTTBarMass = store(new TH2D ( "GenRecoTTBarMass", "Mass of TTbar System (HYP)", 2000, 0, 2000, 2000, 0, 2000 ));
@@ -1246,6 +1251,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     //First fill the reco histograms (which have no scaling factors applied)
     const double recoWeight = trueLevelWeight;
+    h_RecoTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), recoWeight);
     h_RecoTTBarMass->Fill(hypttbar.M(), recoWeight);
     h_RecoTTBarRapidity->Fill(hypttbar.Rapidity(), recoWeight);
     h_RecoTTBarpT->Fill(hypttbar.Pt(), recoWeight);
@@ -1299,6 +1305,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypTTBarMass->Fill(hypttbar.M(), weight);
     h_HypTTBarRapidity->Fill(hypttbar.Rapidity(), weight);
     h_HypTTBarpT->Fill(hypttbar.Pt(), weight);
+    h_HypTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), weight);
 
     h_HypLLBarMass->Fill(hypllbar.M(), weight);
     h_HypLLBarpT->Fill(hypllbar.Pt(), weight);
@@ -1636,6 +1643,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     LV genttbar(*GenTop_ + *GenAntiTop_);
     h_GenRecoTTBarMass->Fill(hypttbar.M(), genttbar.M(), weight );
     h_GenRecoTTBarpT->Fill(hypttbar.Pt(), genttbar.Pt(), weight );
+    h_GenRecoTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), 
+                                 std::abs(DeltaPhi(*GenTop_, *GenAntiTop_)), weight);
     h_GenRecoTTBarRapidity->Fill(hypttbar.Rapidity(), genttbar.Rapidity(), weight );
 
     return kTRUE;
@@ -2016,6 +2025,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     h_VisGenAntiTopRapidity->Fill(GenAntiTop_->Rapidity(), trueLevelWeight );
     h_VisGenTopEta->Fill(GenTop_->Eta(), trueLevelWeight );
     h_VisGenAntiTopEta->Fill(GenAntiTop_->Eta(), trueLevelWeight );
+    h_VisGenTTBarDeltaPhi->Fill(std::abs(DeltaPhi(*GenTop_, *GenAntiTop_)), trueLevelWeight);
     
     h_VisGenNeutrinopT->Fill(GenNeutrino_->Pt(), trueLevelWeight);
     h_VisGenAntiNeutrinopT->Fill(GenAntiNeutrino_->Pt(), trueLevelWeight);

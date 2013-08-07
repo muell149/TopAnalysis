@@ -98,6 +98,9 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_VisGenAntiLeptonpT, *h_VisGenAntiLeptonEta;
     TH1 *h_VisGenLeptonpT, *h_VisGenLeptonEta;
 
+    TH2 *h_GenRecoTTBarDeltaPhi;
+    TH1 *h_RecoTTBarDeltaPhi, *h_HypTTBarDeltaPhi, *h_VisGenTTBarDeltaPhi;
+    
     TH2 *h_GenRecoLLBarDPhi, *h_GenRecoLeptonantiBjetMass, *h_GenRecoAntiLeptonBjetMass, *h_GenRecoJetMult;
     TH1 *h_VisGenLLBarDPhi,  *h_VisGenLeptonantiBjetMass,  *h_VisGenAntiLeptonBjetMass,  *h_VisGenJetMult;
     TH1 *h_HypLLBarDPhi,     *h_HypLeptonantiBjetMass,     *h_HypAntiLeptonBjetMass,     *h_HypJetMult;
