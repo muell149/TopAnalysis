@@ -35,7 +35,9 @@
 
 using namespace std;
 
-const double Plotter::topxsec = 244.849; //again changes with normalization, must be set outside of the class
+// const double Plotter::topxsec = 244.849; //again changes with normalization, must be set outside of the class
+//const double Plotter::topxsec = 244.794; //Mitov, arXiv:1303.6254
+const double Plotter::topxsec = 247.205; //Measured XSection after normalization to Mitov
 const bool Plotter::doClosureTest = 0; //Signal is MC - so add BG to it and dont do DY scaling
 
 void Plotter::setLumi(double newLumi)
@@ -379,6 +381,7 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
         if ( name.Contains("Top")     ) theParticleName = "TopQuarks";
         if ( name.Contains("TTBar")   ) theParticleName = "TtBar";
         if ( name.Contains("BJet")    ) theParticleName = "BJets";
+        if ( name.Contains("BBBar")   ) theParticleName = "BBbar";
         TString theQuantityName = "";
         if ( name.Contains("pT")      ) theQuantityName = "Pt";
         if ( name.Contains("Eta")     ) theQuantityName = "Eta";
@@ -615,6 +618,9 @@ void Plotter::setOptions(TString name_, TString specialComment_, TString YAxis_,
     if(XAxis.Contains("l^{+}andl^{-}")){//Histogram naming convention has to be smarter
         XAxis.ReplaceAll("l^{+}andl^{-}",13,"l^{+} and l^{-}",15);
     }
+    if(XAxis.Contains("p_{T}^{t}(t#bar{t}R.F.)")){//Histogram naming convention has to be smarter
+        XAxis.ReplaceAll("p_{T}^{t}(t#bar{t}R.F.)",23,"p_{T}^{t}(t#bar{t} Rest Frame)",30);
+    }
     if(YAxis.Contains("Toppairs")){
         YAxis.ReplaceAll("Toppairs",8,"Top-quark pairs",15);
     }
@@ -749,12 +755,9 @@ std::vector<TString> Plotter::InputFileList(TString mode, TString Systematic)
     TString nominalPath = TString("selectionRoot/Nominal/") + mode + "/" + mode;
     if (!doClosureTest) {
         FileVector.push_back(nominalPath + "_run2012A.root");
-        FileVector.push_back(nominalPath + "_run2012Arecover.root");
         FileVector.push_back(nominalPath + "_run2012B.root");
-        FileVector.push_back(nominalPath + "_run2012C_24Aug.root");
-        FileVector.push_back(nominalPath + "_run2012C_EcalRecover.root");
-        FileVector.push_back(nominalPath + "_run2012C_PromptReco.root");
-        FileVector.push_back(nominalPath + "_run2012D_PromptReco.root");
+        FileVector.push_back(nominalPath + "_run2012C.root");
+        FileVector.push_back(nominalPath + "_run2012D.root");
     } else {
         FileVector.push_back(nominalPath + "_ttbarsignalplustau_fakerun_nominal.root");
     }
@@ -1725,6 +1728,7 @@ int Plotter::CalcDiffXSec(TString Channel, TString Systematic){
         if ( name.Contains("LLBar")   ) theParticleName = "LepPair";
         if ( name.Contains("Top")     ) theParticleName = "TopQuarks";
         if ( name.Contains("TTBar")   ) theParticleName = "TtBar";
+        if ( name.Contains("BBBar")   ) theParticleName = "BBbar";
         if ( name.Contains("BJet")    ) theParticleName = "BJets";
         TString theQuantityName = "";
         if ( name.Contains("pT")      ) theQuantityName = "Pt";
@@ -3824,6 +3828,7 @@ void Plotter::CalcUpDownDifference( TString Channel, TString Syst_Up, TString Sy
             double down = CentralValue_Down - CentralValue_Nom;
             double sq_err = (up*up + down*down)/2.;
             double rel_err = TMath::Sqrt(sq_err)/CentralValue_Nom;
+            if(Syst_Down.Contains("MASS") && Syst_Up.Contains("MASS")) rel_err = rel_err/12.;
 
             RelativeError.push_back(rel_err);
         }

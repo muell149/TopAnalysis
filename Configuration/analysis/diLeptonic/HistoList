@@ -32,6 +32,10 @@ HypTTBarpT Standard N_{Events} p_{T}^{t#bar{t}} 1 1 0 0 0.0001 0.025 0 0 4 0 20 
 HypTTBarMass Standard N_{Events} m^{t#bar{t}} 1 1 0 1 0.0001 0.04 0 0 7 340 400 470 550 650 800 1100 1600 365 435 510 600 720 940 1265
 HypTTBarDeltaPhi Standard N_{Events} #Delta#phi^{t#bar{t}} 1 1 0 0 0 0 0 3.15 4 0 2.03 2.73 3.01 3.15 1.015 2.38 2.87 3.08
 
+HypBBBarpT Standard N_{Events} p_{T}^{b#bar{b}} 1 1 0 0 0 0 0 350 6 0 30 60 100 160 280 420 15 45 80 130 220 350
+HypBBBarMass Standard N_{Events} m^{b#bar{b}} 1 1 0 0 0 0 0 600 6 0 60 120 180 250 350 600 30 90 140 215 300 475
+
+HypToppTTTRestFrame Standard N_{Events} p_{T}^{t}(t#bar{t}R.F.) 1 1 0 0 0.00001 0.01 0 0 5 0 80 130 200 300 400 35 105 165 245 350
 
 # just for testing
 HypNeutrinopT Standard N_{2EntriesPerEvent} p_{T}^{#nu} 1 1 0 0 0.00001 0.015 0 0 7 0 20 40 60 90 120 200 400 15 30 50 75 105 150 250

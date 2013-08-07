@@ -1,3 +1,12 @@
+emu_TopQuarks_Pt_HypToppTTTRestFrame                                                                8.36043     4   5   4   7
+ee_TopQuarks_Pt_HypToppTTTRestFrame                                                                 5.10136     4   5   4   7
+mumu_TopQuarks_Pt_HypToppTTTRestFrame                                                               5.54959     4   5   5   7
+mumu_BBbar_Mass_HypBBBarMass                                                                        3.84134     5   6   4   8
+emu_BBbar_Mass_HypBBBarMass                                                                         6.51557     5   6   4   8
+ee_BBbar_Mass_HypBBBarMass                                                                          3.30703     5   6   5   8
+mumu_BBbar_Pt_HypBBBarpT                                                                            2.26832     5   6   5   8
+emu_BBbar_Pt_HypBBBarpT                                                                             6.08643     5   6   3   8
+ee_BBbar_Pt_HypBBBarpT                                                                              3.27631     4   5   4   8
 mumu_TtBar_Pt_HypTTBarDeltaPhi                                                                      4.56122     3   4   3   6
 ee_TtBar_Pt_HypTTBarDeltaPhi                                                                        3.65870     3   4   3   6
 emu_TtBar_Pt_HypTTBarDeltaPhi                                                                       7.23858     3   4   3   6

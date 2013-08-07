@@ -42,6 +42,12 @@ HypLeptonEta Standard Events #eta^{l} 5 1 0 0 0 0 0 0 0 0
 HypLeptonpT Standard Events p_{T}^{l} 5 1 0 0 0 0 0 0 0 0
 HypLeptonBjetMass Standard N_{Events} m^{lb} 10 1 0 0 0 0 0 300 0 0
 
+HypBBBarpT Standard N_{Events} p_{T}^{b#bar{b}} 5 1 0 0 0 0 0 350 0 0
+HypBBBarMass Standard N_{Events} m^{b#bar{b}} 10 1 0 0 0 0 0 600 0 0
+HypToppTTTRestFrame Standard N_{Events} p_{T}^{t}(t#bar{t}R.F.) 10 1 0 0 0 0 0 400 0 0
+
+
+
 TrigSF Standard Events SF_{Trigg.} 1 1 0 0 0 0 0 0 0 0
 LepSF Standard Events SF_{Lept.} 1 1 0 0 0 0 0 0 0 0
 BTagSF Standard Events SF_{#geq1b-tag} 1 1 0 0 0 0 0 0 0 0
