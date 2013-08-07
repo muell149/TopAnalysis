@@ -1097,7 +1097,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     std::ostringstream width;
     width<<binwidth;
 
-    if(name.Contains("Rapidity") || name.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
+    if(name.Contains("Rapidity") || name.Contains("Eta") || name.Contains("Phi")){ytitle.Append(" / ").Append(width.str());}
     else if(name.Contains("pT") || name.Contains("Mass") || name.Contains("mass") || name.Contains("MET") || name.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
     drawhists[0]->GetYaxis()->SetTitle(ytitle);
     drawhists[0]->Draw("e1");
@@ -1168,7 +1168,7 @@ void Plotter::setStyle(TH1 *hist, unsigned int i, bool isControlPlot)
         hist->GetYaxis()->SetTitleFont(42);
         hist->GetYaxis()->SetTitleOffset(1.7);
         hist->GetXaxis()->SetTitleOffset(1.25);
-        if ((name.Contains("pT") || name.Contains("Mass")) && !name.Contains("Rapidity")) {
+        if ((name.Contains("pT") || name.Contains("Mass")) && (!name.Contains("Rapidity") && !name.Contains("Phi"))) {
             hist->GetXaxis()->SetTitle(XAxis+" #left[GeV#right]");
             hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis+"}"+" #left[GeV^{-1}#right]"); 
         } else {
