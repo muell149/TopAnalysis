@@ -49,9 +49,10 @@ where PATTERN is in the file name.
 The output produced is in selectionRoot, the files should be fully compatible with
 the old plotterclass.h
 
-Now, you need to calculate btag efficiencies. This works by running the ttbar sample:
+Now, you need to calculate btag efficiencies. This works by running the ttbar sample for each systematic variation.
+This is automatically done by running:
 
-  for c in ee emu mumu; do build/load_Analysis -f ttbarsignalplustau.root -c $c&;done;wait
+  ./scripts/mk_BTagEffs.sh
 
 Then copy the created btag files:
   
@@ -62,14 +63,15 @@ you are running on the NAF, the NTuples should be stored on the Sonas file syste
 under /scratch/hh/dust/naf/cms/... - and parallel access is amazingly fast. 
 
 To run the selection on the Nominal sample, just do: 
-  ./runNominalParallel.sh
+  ./scripts/runNominalParallel.sh
 
 You also need to generate the signal variations with: 
-  ./runNominalVariations.sh
+  ./scripts/runNominalVariations.sh
 
 In addition you can also run the theory variations (mass, match, scale) and other 
 generators (powheg, mcatnlo and madgraph with spin correlations): 
-  ./runTheoryVariations.sh
+
+  ./scripts/runTheoryVariations.sh
 
 This runs Analysis.C on each event in the root tuple for each sample. All analysis cuts are
 made in Analysis.C and the output are a bunch of user specified histograms. Except for adding 
@@ -93,8 +95,8 @@ NAF:
 Once the selection step is done, we need to setup our data such that the histogram
 tools know where to find which files. You need to run:
 
-scripts/lnData.sh
-scripts/mk_HistoFileList.sh
+  ./scripts/lnData.sh
+  ./scripts/mk_HistoFileList.sh
 
 Here, lnData.sh will create symlinks to the Nominal folder for all files which have
 not been varied in the systematics.
@@ -118,10 +120,12 @@ There are 3 more parameters:
 
 The -p, -c, and -s parameters can also take more than one argument; they can also be
 omitted (-> use default values, i.e. all channels, all plots, Nominal systematic)
- 
-To unfold all distributions from your HistoList in parallel, use the 
- ./unfoldAll.sh 
-script. Again, on the workgroup server, it will run up to 10 jobs in parallel,
+
+To unfold all distributions from your HistoList in parallel, use the script:
+
+  ./scripts/unfoldAll.sh 
+
+Again, on the workgroup server, it will run up to 10 jobs in parallel,
 while it will submit one job per distribution to the batch system if run on the NAF.
 
 This runs Histo.C which essentially calls function from plotterclass.cc.
@@ -140,14 +144,14 @@ The plots will be put into a directory called Plots according to the channel in 
 
 Once the plots has been created you can get the typical systematic errors for the Diff. XSection via:
 
-build/TypicalErrors
+  ./build/TypicalErrors
 
 Please be aware that should be compiled via:
 
-cd build
-cmake ..
-make TypicalErrors
-cd ..
+  cd build
+  cmake ..
+  make TypicalErrors
+  cd ..
 
 This runs TypicalErrors.cc which checks for one specific systematic variation, and one specific
 channel (ee, emu, mumu) in all files 
@@ -161,11 +165,11 @@ Merging all the lots into single PDF file:
 There is an scripts that can be used to plot 6 plots into a single page of a PDF file.
 The plots that will be plotted can be set in 
 
-scripts/mk_booklet.lst
+  ./scripts/mk_booklet.lst
 
 The directory from which the plots will be read can be set in 
 
-scripts/mk_booklet.sh
+  ./scripts/mk_booklet.sh
 
 under the parameters  'PDIR', the default is 'Plots/Nominal/combined' for the control plots of the combined channel
 The output PDF file will be stored in 'Booklets' directory and will include a date tag, and will be named 'booklet-$date.pdf'
