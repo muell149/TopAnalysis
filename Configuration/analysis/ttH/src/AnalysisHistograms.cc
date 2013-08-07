@@ -40,6 +40,11 @@ jetCategories_(jetCategories)
                  <<"No jet categories passed, but request for category-wise selection steps\n...break\n"<<std::endl;
         exit(234);
     }
+    if(jetCategories_ && stepsForCategories_.size()==0){
+        std::cerr<<"ERROR in constructor for AnalysisHistogramsBase! "
+                 <<"Jet categories passed, but no category-wise selection steps defined\n...break\n"<<std::endl;
+        exit(235);
+    }
 }
 
 
@@ -340,9 +345,9 @@ void BasicHistograms::bookHistos(const TString& step)
     name = "jet_btagDiscriminator";
     m_histogram[name] = this->store(new TH1D(prefix+name+step, "b-tag Discriminator d;d;Jets",60,-0.1,1.1));
     name = "jet_chargeGlobalPtWeighted";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "jetChargeGlobalPtWeighted; c_{glob}^{jet};# jets", 110, -1.1, 1.1));
+    m_histogram[name] = this->store(new TH1D(prefix+name+step, "jetChargeGlobalPtWeighted c_{glob}^{jet}; c_{glob}^{jet};# jets", 110, -1.1, 1.1));
     name = "jet_chargeRelativePtWeighted";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "jetChargeRelativePtWeighted; c_{rel}^{jet};# jets", 110, -1.1, 1.1));
+    m_histogram[name] = this->store(new TH1D(prefix+name+step, "jetChargeRelativePtWeighted c_{rel}^{jet}; c_{rel}^{jet};# jets", 110, -1.1, 1.1));
     
     // Bjets
     name = "bjet_multiplicity";
@@ -453,7 +458,9 @@ void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObject
         m_histogram["jet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), weight);
         m_histogram["jet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), weight);
         m_histogram["jet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), weight);
-        m_histogram["jet_btagDiscriminator"]->Fill(recoObjects.jetBTagCSV_->at(index), weight);
+        double btagDiscriminator = recoObjects.jetBTagCSV_->at(index);
+        if(btagDiscriminator < -0.1) btagDiscriminator = -0.05;
+        m_histogram["jet_btagDiscriminator"]->Fill(btagDiscriminator, weight);
         m_histogram["jet_chargeGlobalPtWeighted"]->Fill(recoObjects.jetChargeGlobalPtWeighted_->at(index), weight);
         m_histogram["jet_chargeRelativePtWeighted"]->Fill(recoObjects.jetChargeRelativePtWeighted_->at(index), weight);
     }
