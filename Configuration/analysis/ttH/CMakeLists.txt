@@ -115,7 +115,7 @@ FILE(GLOB scripts RELATIVE  ${PROJECT_SOURCE_DIR}/scripts scripts/*)
 MESSAGE(STATUS "scripts found: ${scripts}")
 FOREACH( script ${scripts})
   MESSAGE(STATUS "configuring ${script} to  ${CMAKE_BINARY_DIR}/scripts")
-  CONFIGURE_FILE( ${PROJECT_SOURCE_DIR}/scripts/${script} ${CMAKE_BINARY_DIR}/scripts @ONLY )
+  CONFIGURE_FILE( ${PROJECT_SOURCE_DIR}/scripts/${script} ${CMAKE_BINARY_DIR}/scripts/${script} @ONLY )
   INSTALL(PROGRAMS  ${CMAKE_BINARY_DIR}/scripts/${script}
     DESTINATION bin )
 ENDFOREACH( script ${scripts} )
