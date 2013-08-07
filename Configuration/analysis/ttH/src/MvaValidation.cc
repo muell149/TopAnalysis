@@ -9,6 +9,7 @@
 
 #include "MvaValidation.h"
 #include "MvaInputVariables.h"
+#include "mvaStructs.h"
 #include "analysisStructs.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 #include "../../diLeptonic/src/analysisUtils.h"
@@ -39,6 +40,9 @@ weightsSwapped_(weightsSwapped)
 
 void MvaValidation::bookHistos(const TString& step)
 {
+    tth::MvaInputVariables mvaInputVariables;
+    tth::MvaInputVariablesPerEvent mvaInputVariablesPerEvent;
+    
     std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
     TString name;
 

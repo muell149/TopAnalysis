@@ -31,6 +31,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   MeanSol
   MvaInputVariables
   MvaValidation
+  mvaStructs
   JetCorrectionUncertainty
   JetCorrectorParameters
   SimpleJetCorrectionUncertainty
