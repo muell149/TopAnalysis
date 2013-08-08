@@ -22,6 +22,7 @@
 #include <TMVA/Reader.h>
 
 #include "MvaInputVariables.h"
+#include "mvaStructs.h"
 #include "analysisStructs.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/classes.h"
