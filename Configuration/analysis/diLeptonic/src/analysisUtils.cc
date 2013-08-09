@@ -109,7 +109,7 @@ void ttbar::selectIndices(std::vector<int>& v_index, const VLV& v_lv, const ttba
 int ttbar::extremumIndex(const VLV& v_lv, const ttbar::LVParameter& parameter, const bool maximumValue)
 {
     const std::vector<double> v_variable = parametersLV(v_lv, parameter);
-    extremumIndex(v_variable, maximumValue);
+    return extremumIndex(v_variable, maximumValue);
 }
 
 
