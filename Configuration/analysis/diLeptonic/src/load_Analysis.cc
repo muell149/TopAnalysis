@@ -119,7 +119,7 @@ void load_Analysis(TString validFilenamePattern,
     // Set up btag efficiency scale factors (do it for all channels)
     BtagScaleFactors btagScaleFactors(BtagEfficiencyInputDIR,
                                       BtagEfficiencyOutputDIR,
-                                      {"ee", "emu", "mumu"},
+                                      channels,
                                       systematic);
     
     // Set up the analysis
