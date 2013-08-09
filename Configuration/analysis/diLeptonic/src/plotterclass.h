@@ -112,7 +112,7 @@ private:
     bool doUnfolding; 
     bool doSystematics;
     bool drawSmoothMadgraph, drawPlotRatio;
-    bool drawNLOCurves, drawMadSpinCorr, drawMCATNLO, drawKidonakis, drawPOWHEG;
+    bool drawNLOCurves, drawMadSpinCorr, drawMCATNLO, drawKidonakis, drawPOWHEG, drawPOWHEGHERWIG;
     TString outpath;
     TString outpathPlots;
     TString outpathResults;

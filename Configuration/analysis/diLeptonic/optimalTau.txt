@@ -1,3 +1,6 @@
+mumu_TtBar_Rapidity_HypTTBarDeltaRapidity                                                           2.67064     4   5   3   8
+emu_TtBar_Rapidity_HypTTBarDeltaRapidity                                                            5.04478     4   5   4   8
+ee_TtBar_Rapidity_HypTTBarDeltaRapidity                                                             2.72261     4   5   4   8
 emu_TopQuarks_Pt_HypToppTTTRestFrame                                                                8.36043     4   5   4   7
 ee_TopQuarks_Pt_HypToppTTTRestFrame                                                                 5.10136     4   5   4   7
 mumu_TopQuarks_Pt_HypToppTTTRestFrame                                                               5.54959     4   5   5   7

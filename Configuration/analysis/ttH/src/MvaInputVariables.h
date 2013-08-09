@@ -155,7 +155,7 @@ public:
     static std::vector<Input> fillInputStructs(const tth::RecoObjectIndices& recoObjectIndices,
                                                const tth::GenObjectIndices& genObjectIndices,
                                                const RecoObjects& recoObjects,
-                                               const double& weight);
+                                               const double& eventWeight);
     
     /// Get the MVA input structs
     std::vector<Input> inputStructs()const;

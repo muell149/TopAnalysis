@@ -329,10 +329,10 @@ void TopAnalysis::SlaveBegin(TTree*)
     h_HypTTBarDeltaPhi = store( new TH1D("HypTTBarDeltaPhi", "#Delta#Phi ofTTBar (HYP)", 200, 0, 3.5));
     h_VisGenTTBarDeltaPhi = store( new TH1D("VisGenTTBarDeltaPhi", "#Delta#Phi ofTTBar (VisGen)", 200, 0, 3.5));
 
-    h_GenRecoTTBarDeltaRapidity = store( new TH2D("GenRecoTTBarDeltaRapidity", "Gen/Reco #Delta y (ttbar)", 200, 0, 6, 200, 0, 6));
-    h_RecoTTBarDeltaRapidity = store( new TH1D("RecoTTBarDeltaRapidity", "#Delta y ofTTBar (RECO)", 200, 0, 6));
-    h_HypTTBarDeltaRapidity = store( new TH1D("HypTTBarDeltaRapidity", "#Delta y ofTTBar (HYP)", 200, 0, 6));
-    h_VisGenTTBarDeltaRapidity = store( new TH1D("VisGenTTBarDeltaRapidity", "#Delta y ofTTBar (VisGen)", 200, 0, 6));
+    h_GenRecoTTBarDeltaRapidity = store( new TH2D("GenRecoTTBarDeltaRapidity", "Gen/Reco |y^{t}| - |y^{#bar{t}}|", 500, -5, 5, 500, -5, 5));
+    h_RecoTTBarDeltaRapidity = store( new TH1D("RecoTTBarDeltaRapidity", "|y^{t}| - |y^{#bar{t}}| (RECO)", 500, -5, 5));
+    h_HypTTBarDeltaRapidity = store( new TH1D("HypTTBarDeltaRapidity", "|y^{t}| - |y^{#bar{t}}| (HYP)", 500, -5, 5));
+    h_VisGenTTBarDeltaRapidity = store( new TH1D("VisGenTTBarDeltaRapidity", "|y^{t}| - |y^{#bar{t}}| (VisGen)", 500, -5, 5));
     
     h_GenRecoBBBarpT = store( new TH2D("GenRecoBBBarpT", "Gen/Reco p_{T} (bbbar)", 400, 0, 800, 400, 0, 800));
     h_RecoBBBarpT = store( new TH1D("RecoBBBarpT", "p_{T} of bbbar (RECO)", 400, 0, 800));
@@ -1284,7 +1284,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     //First fill the reco histograms (which have no scaling factors applied)
     const double recoWeight = trueLevelWeight;
-    h_RecoTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity() - HypAntiTop_->at(solutionIndex).Rapidity()), recoWeight);
+    h_RecoTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity()) - std::abs(HypAntiTop_->at(solutionIndex).Rapidity()), recoWeight);
     h_RecoTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), recoWeight);
     h_RecoTTBarMass->Fill(hypttbar.M(), recoWeight);
     h_RecoTTBarRapidity->Fill(hypttbar.Rapidity(), recoWeight);
@@ -1346,7 +1346,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypTTBarRapidity->Fill(hypttbar.Rapidity(), weight);
     h_HypTTBarpT->Fill(hypttbar.Pt(), weight);
     h_HypTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), weight);
-    h_HypTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity() - HypAntiTop_->at(solutionIndex).Rapidity()), weight);
+    h_HypTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity()) - std::abs(HypAntiTop_->at(solutionIndex).Rapidity()), weight);
 
     h_HypBBBarMass->Fill(hypbbbar.M(), weight);
     h_HypBBBarpT->Fill(hypbbbar.Pt(), weight);
@@ -1699,8 +1699,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_GenRecoTTBarRapidity->Fill(hypttbar.Rapidity(), genttbar.Rapidity(), weight );
     h_GenRecoTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), 
                                  std::abs(DeltaPhi(*GenTop_, *GenAntiTop_)), weight);
-    h_GenRecoTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity() - HypAntiTop_->at(solutionIndex).Rapidity()), 
-                                      std::abs(GenTop_->Rapidity() - GenAntiTop_->Rapidity()), 
+    h_GenRecoTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity()) - std::abs(HypAntiTop_->at(solutionIndex).Rapidity()), 
+                                     std::abs(GenTop_->Rapidity()) - std::abs(GenAntiTop_->Rapidity()), 
                                       weight);
 
     // create top/antitop quark in the ttbar rest frame
@@ -2095,7 +2095,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     h_VisGenTopEta->Fill(GenTop_->Eta(), trueLevelWeight );
     h_VisGenAntiTopEta->Fill(GenAntiTop_->Eta(), trueLevelWeight );
     h_VisGenTTBarDeltaPhi->Fill(std::abs(DeltaPhi(*GenTop_, *GenAntiTop_)), trueLevelWeight);
-    h_VisGenTTBarDeltaRapidity->Fill(std::abs(GenTop_->Rapidity() - GenAntiTop_->Rapidity()), trueLevelWeight);
+    h_VisGenTTBarDeltaRapidity->Fill(std::abs(GenTop_->Rapidity()) - std::abs(GenAntiTop_->Rapidity()), trueLevelWeight);
     
     h_VisGenNeutrinopT->Fill(GenNeutrino_->Pt(), trueLevelWeight);
     h_VisGenAntiNeutrinopT->Fill(GenAntiNeutrino_->Pt(), trueLevelWeight);
