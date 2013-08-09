@@ -37,7 +37,7 @@ const std::vector<const char*> VectorOfValidSystematics
     "BTAG_LJET_PT_UP", "BTAG_LJET_PT_DOWN", "BTAG_LJET_ETA_UP", "BTAG_LJET_ETA_DOWN",
 //     "BTAG_BEFF_UP", "BTAG_BEFF_DOWN", "BTAG_CEFF_UP", "BTAG_CEFF_DOWN", "BTAG_LEFF_UP", "BTAG_LEFF_DOWN",
     "MASS_UP", "MASS_DOWN", "MATCH_UP", "MATCH_DOWN", "SCALE_UP", "SCALE_DOWN", 
-    "POWHEG", "MCATNLO",// "SPINCORR", 
+    "POWHEG", "POWHEGHERWIG", "MCATNLO",// "SPINCORR", 
     "all"};
     
 void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
