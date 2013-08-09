@@ -2090,7 +2090,7 @@ namespace semileptonic {
     // used enumerators: none
       
     // restrict axis
-    if(variable.Contains("topPt"))          his->GetXaxis()->SetRangeUser(0.  , 399. ); 
+    if(variable.Contains("topPt"))          his->GetXaxis()->SetRangeUser(0.  , 499. ); 
     else if(variable.Contains("topY"     )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
     else if(variable.Contains("ttbarY"   )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
     else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(346., 1599.);
