@@ -47,7 +47,7 @@ dijet_mvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
 dijet_bestMvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
 mva_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaBest_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mva_best_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
 
 

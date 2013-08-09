@@ -7,6 +7,7 @@ class TString;
 
 #include "AnalysisHistograms.h"
 
+class JetCategories;
 class RecoObjects;
 class MvaInputTopJetsVariables;
 namespace tth{
@@ -39,7 +40,7 @@ public:
     /// Fill histograms
     void fill(const RecoObjects& recoObjects,
               const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-              const double& weight, const TString& step);
+              const double& weight, const TString& stepShort);
     
     
     

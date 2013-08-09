@@ -57,14 +57,18 @@ void Playground::fill(const RecoObjects& recoObjects, const CommonGenObjects& co
                       const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
                       const double& weight, const TString& stepShort)
 {
+    // Number of selected jets and bjets
+    const int numberOfJets = recoObjectIndices.jetIndices_.size();
+    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
+    
     // Set up step name and check if step exists
     const bool stepInCategory = stepShort.Contains("_cate");
     const TString step = stepInCategory ? stepShort : this->stepName(stepShort);
     const bool stepExists(this->checkExistence(step));
     if(!stepInCategory && jetCategories_){
         // Here check the individual jet categories
-        const int category = jetCategories_->categoryId(recoObjectIndices.jetIndices_.size(), recoObjectIndices.bjetIndices_.size());
-        const TString fullStepName = this->stepName(stepShort, category);
+        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
+        const TString fullStepName = this->stepName(stepShort, categoryId);
         this->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
                    genObjectIndices, recoObjectIndices, genLevelWeights, recoLevelWeights, weight, fullStepName);
     }
