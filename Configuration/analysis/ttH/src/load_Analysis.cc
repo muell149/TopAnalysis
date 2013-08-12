@@ -17,6 +17,9 @@
 #include "HiggsAnalysis.h"
 #include "analysisHelpers.h"
 #include "JetCategories.h"
+#include "MvaTreeHandler.h"
+#include "MvaReader.h"
+
 #include "MvaInputVariables.h"
 #include "MvaValidation.h"
 #include "DijetAnalyzer.h"
@@ -164,20 +167,15 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     }
     
     // Set up production of MVA input tree
-    MvaInputTopJetsVariables* mvaInputTopJetsVariables(0);
+    MvaTreeHandler* mvaTreeHandler(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaInputTopJetsVariables = new MvaInputTopJetsVariables({"8"}, 0, MvaInputDIR);
+        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"8"});
     }
     
     // Set up MVA validation, including reading in MVA weights in case they exist
     MvaValidation* mvaValidation(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
-        // FIXME: Cannot be const due to the internal structure at present
-        MvaInputTopJetsVariables* mvaInputWeightsCorrect(0);
-        MvaInputTopJetsVariables* mvaInputWeightsSwapped(0);
-        mvaInputWeightsCorrect = new MvaInputTopJetsVariables({}, MvaWeightsCorrectFILE);
-        mvaInputWeightsSwapped = new MvaInputTopJetsVariables({}, MvaWeightsSwappedFILE);
-        mvaValidation = new MvaValidation(mvaInputWeightsCorrect, mvaInputWeightsSwapped, {"8"});
+        mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE, {"8"});
     }
     
     // Set up the analysis
@@ -189,7 +187,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetBtagScaleFactors(btagScaleFactors);
     selector->SetUseObjectStructs(true);
     
-    selector->SetMvaInputProduction(mvaInputTopJetsVariables);
+    selector->SetMvaInputProduction(mvaTreeHandler);
     selector->SetMvaValidation(mvaValidation);
     selector->SetEventYieldHistograms(eventYieldHistograms);
     selector->SetDyScalingHistograms(dyScalingHistograms);

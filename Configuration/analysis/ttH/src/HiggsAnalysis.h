@@ -11,7 +11,7 @@ class TString;
 #include "../../diLeptonic/src/AnalysisBase.h"
 #include "../../diLeptonic/src/classesFwd.h"
 
-class MvaInputTopJetsVariables;
+class MvaTreeHandler;
 class MvaValidation;
 class DijetAnalyzer;
 class BasicHistograms;
@@ -61,7 +61,7 @@ public:
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
     
     /// Set up production of MVA input
-    void SetMvaInputProduction(MvaInputTopJetsVariables* mvaInputTopJetsVariables);
+    void SetMvaInputProduction(MvaTreeHandler* mvaTreeHandler);
     
     /// Set up validation of MVA
     void SetMvaValidation(MvaValidation* mvaValidation);
@@ -144,8 +144,10 @@ private:
     
     
     
-    /// Class holding the input variables for MVA, trying to identify the jets coming from (anti)b's from (anti)tops
-    MvaInputTopJetsVariables* mvaInputTopJetsVariables_;
+    /// Class for steering the I/O of MVA input tree, trying to identify the jets coming from (anti)b's from (anti)tops
+    MvaTreeHandler* mvaTreeHandler_;
+    
+    
     
     /// Event yield histograms
     EventYieldHistograms* eventYieldHistograms_;

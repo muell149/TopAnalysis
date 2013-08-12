@@ -29,6 +29,9 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   KinematicReconstruction
   KinematicReconstruction_LSroutines
   MeanSol
+  MvaTreeHandler
+  MvaReader
+  MvaFactory
   MvaInputVariables
   MvaValidation
   mvaStructs
