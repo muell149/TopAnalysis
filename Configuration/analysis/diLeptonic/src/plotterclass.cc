@@ -2559,7 +2559,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         if(binned_theory==false){spincorrhist->Draw("SAME,C");}
         else{spincorrhistBinned->Draw("SAME");}
     }
-    if(drawNLOCurves && drawKidonakis && (name.Contains("TopRapidity") || name.Contains("ToppT")) && !name.Contains("Lead")){
+    if(drawNLOCurves && drawKidonakis && (name.Contains("TopRapidity") || name.Contains("ToppT")) && !name.Contains("Lead") && !name.Contains("RestFrame")){
         Kidoth1_Binned->SetLineWidth(2);
         Kidoth1_Binned->SetLineColor(kOrange+4);
         Kidoth1_Binned->SetLineStyle(2);
@@ -2650,7 +2650,8 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         if (drawPOWHEG && powheghist->GetEntries())                                                     leg2->AddEntry(powheghistBinned, "POWHEG+Pythia",  "l");
         if (drawPOWHEGHERWIG && powhegHerwighist->GetEntries())                                         leg2->AddEntry(powhegHerwighistBinned, "POWHEG+Herwig",  "l");
         if (drawMadSpinCorr && spincorrhist->GetEntries())                                              leg2->AddEntry(spincorrhistBinned, "MadGraph SC",  "l");
-        if (drawKidonakis && !name.Contains("Lead") && (name.Contains("ToppT") || name.Contains("TopRapidity"))) leg2->AddEntry(Kidoth1_Binned, "Approx. NNLO",  "l");
+        if (drawKidonakis && !name.Contains("Lead") && !name.Contains("RestFrame") &&
+            (name.Contains("ToppT") || name.Contains("TopRapidity")))                                   leg2->AddEntry(Kidoth1_Binned, "Approx. NNLO",  "l");
     }
     leg2->SetFillStyle(0);
     leg2->SetBorderSize(0);
@@ -2660,7 +2661,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     leg2->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg2->SetTextSize(0.04);
     leg2->Draw("same");
-    if (drawNLOCurves && drawKidonakis &&  (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
+    if (drawNLOCurves && drawKidonakis &&  (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead") && name.Contains("RestFrame")){
         DrawLabel("(arXiv:1210.7813)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
     }
     h_GenDiffXSec->Draw("SAME");
@@ -2696,7 +2697,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         double chi2McAtNlo = Plotter::GetChi2 (tga_DiffXSecPlotwithSys, mcnlohistBinned);
         std::cout<<"The CHI2/ndof (vs MC@NLO+Herwig) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2McAtNlo<<std::endl;
     }
-    if(drawKidonakis && Kidoth1_Binned && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
+    if(drawKidonakis && Kidoth1_Binned && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead") && !name.Contains("RestFrame")){
         double chi2Kidonakis = Plotter::GetChi2 (tga_DiffXSecPlotwithSys, Kidoth1_Binned);
         std::cout<<"The CHI2/ndof (vs Kidonakis) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2Kidonakis<<std::endl;
     }
@@ -3198,7 +3199,9 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         spincorrhistBinned->Scale(1./spincorrhistBinned->Integral("width"));
     }
 
-    if(drawNLOCurves && drawKidonakis && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
+    if(drawNLOCurves && drawKidonakis &&
+        (name== "HypToppT" || name == "HypTopRapidity") && 
+        !name.Contains("Lead") && !name.Contains("RestFrame")){
         TString kidoFile = ttbar::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
         if(name.Contains("ToppT")){
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topPt");
@@ -3273,7 +3276,9 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         spincorrhistBinned->SetLineStyle(2);
         spincorrhistBinned->Draw("SAME");
     }
-    if(drawNLOCurves && drawKidonakis && (name.Contains("TopRapidity") || name.Contains("ToppT")) && !name.Contains("Lead")){
+    if(drawNLOCurves && drawKidonakis &&
+        (name== "HypToppT" || name == "HypTopRapidity") && 
+        !name.Contains("Lead") && !name.Contains("RestFrame")){
         Kidoth1_Binned->SetLineWidth(2);
         Kidoth1_Binned->SetLineColor(kOrange+4);
         Kidoth1_Binned->SetLineStyle(2);
@@ -3292,7 +3297,8 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         if (drawPOWHEG && powheghist->GetEntries())                                                     leg2->AddEntry(powheghistBinned, "Powheg+Pythia",  "l");
         if (drawPOWHEGHERWIG && powhegHerwighist->GetEntries())                                         leg2->AddEntry(powhegHerwighistBinned, "Powheg+Herwig",  "l");
         if (drawMadSpinCorr && spincorrhist->GetEntries())                                              leg2->AddEntry(spincorrhistBinned, "MadGraph SC",  "l");
-        if (drawKidonakis && !name.Contains("Lead") && (name.Contains("ToppT") || name.Contains("TopRapidity"))) leg2->AddEntry(Kidoth1_Binned, "Approx. NNLO",  "l");
+        if (drawKidonakis && !name.Contains("RestFrame") && !name.Contains("Lead") && 
+            (name.Contains("ToppT") || name.Contains("TopRapidity")))                                   leg2->AddEntry(Kidoth1_Binned, "Approx. NNLO",  "l");
     }
     leg2->SetFillStyle(0);
     leg2->SetBorderSize(0);
@@ -3302,7 +3308,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     leg2->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg2->SetTextSize(0.04);
     leg2->Draw("same");
-    if (drawNLOCurves && drawKidonakis &&  (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
+    if (drawNLOCurves && drawKidonakis &&  (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead") && !name.Contains("RestFrame")){
         DrawLabel("(arXiv:1210.7813)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
     }
     h_GenDiffXSec->Draw("SAME");
@@ -3335,7 +3341,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         double chi2McAtNlo = Plotter::GetChi2 (tga_DiffXSecPlot, mcnlohistBinned);
         std::cout<<"The CHI2/ndof (vs MC@NLO+Herwig) value for '"<<name<<"' in channel '"<<Channel<<"' is "<<chi2McAtNlo<<std::endl;
     }
-    if(drawKidonakis && Kidoth1_Binned && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
+    if(drawKidonakis && Kidoth1_Binned && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead") && !name.Contains("RestFrame")){
         double chi2Kidonakis = Plotter::GetChi2 (tga_DiffXSecPlot, Kidoth1_Binned);
         std::cout<<"The CHI2/ndof (vs Kidonakis) value for '"<<name<<"' in channel '"<<Channel<<"' is "<<chi2Kidonakis<<std::endl;
     }
