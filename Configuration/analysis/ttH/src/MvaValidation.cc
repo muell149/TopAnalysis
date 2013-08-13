@@ -8,7 +8,7 @@
 #include <Math/VectorUtil.h>
 
 #include "MvaValidation.h"
-#include "MvaInputVariables.h"
+#include "MvaReader.h"
 #include "mvaStructs.h"
 #include "analysisStructs.h"
 #include "JetCategories.h"
@@ -25,15 +25,17 @@
 
 
 
-MvaValidation::MvaValidation(MvaInputTopJetsVariables* weightsCorrect, MvaInputTopJetsVariables* weightsSwapped,
+MvaValidation::MvaValidation(const char* weightsCorrectFile, const char* weightsSwappedFile,
                              const std::vector<TString>& selectionStepsNoCategories,
                              const std::vector<TString>& stepsForCategories,
                              const JetCategories* jetCategories):
 AnalysisHistogramsBase(selectionStepsNoCategories, stepsForCategories, jetCategories),
-weightsCorrect_(weightsCorrect),
-weightsSwapped_(weightsSwapped)
+weightsCorrect_(0),
+weightsSwapped_(0)
 {
     std::cout<<"--- Beginning setting up MVA validation\n";
+    weightsCorrect_ = new MvaReader(weightsCorrectFile, selectionStepsNoCategories);
+    weightsSwapped_ = new MvaReader(weightsSwappedFile, selectionStepsNoCategories);
     std::cout<<"=== Finishing setting up MVA validation\n\n";
 }
 
@@ -120,12 +122,12 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
     
     
     // Loop over all jet combinations and get MVA input variables
-    const std::vector<MvaInputTopJetsVariables::Input>& v_mvaInput =
-            MvaInputTopJetsVariables::fillInputStructs(recoObjectIndices, genObjectIndices, recoObjects, weight);
+    const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables = 
+            MvaTopJetsVariables::fillVariables(recoObjectIndices, genObjectIndices, recoObjects, weight);
     
     // Get the MVA weights from weights file as vector, one entry per jet pair
-    const std::vector<float>& mvaWeightsCorrect = weightsCorrect_->mvaWeights(v_mvaInput);
-    const std::vector<float>& mvaWeightsSwapped = weightsSwapped_->mvaWeights(v_mvaInput);
+    const std::vector<float>& mvaWeightsCorrect = weightsCorrect_->mvaWeights(v_mvaTopJetsVariables);
+//    const std::vector<float>& mvaWeightsSwapped = weightsSwapped_->mvaWeights(v_mvaTopJetsVariables);
     
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;

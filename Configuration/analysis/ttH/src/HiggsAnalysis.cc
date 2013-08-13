@@ -18,6 +18,8 @@
 #include "analysisStructs.h"
 #include "AnalysisHistograms.h"
 #include "Playground.h"
+#include "MvaTreeHandler.h"
+
 #include "MvaInputVariables.h"
 #include "MvaValidation.h"
 #include "../../diLeptonic/src/analysisUtils.h"
@@ -63,7 +65,7 @@ HiggsAnalysis::HiggsAnalysis(TTree*):
 isInclusiveHiggs_(false),
 bbbarDecayFromInclusiveHiggs_(false),
 runWithTtbb_(false),
-mvaInputTopJetsVariables_(0),
+mvaTreeHandler_(0),
 eventYieldHistograms_(0),
 dyScalingHistograms_(0),
 basicHistograms_(0),
@@ -98,18 +100,18 @@ void HiggsAnalysis::Terminate()
     if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
     
     // Do everything needed for MVA
-    if(mvaInputTopJetsVariables_){
+    if(mvaTreeHandler_){
         // Produce and write tree
-        mvaInputTopJetsVariables_->produceMvaInputTree(static_cast<std::string>(outputfilename_),
-                                                       Channel::convertChannel(static_cast<std::string>(channel_)),
-                                                       Systematic::convertSystematic(static_cast<std::string>(systematic_)));
-        //mvaInputTopJetsVariables_.produceMvaInputTree(fOutput);
+        mvaTreeHandler_->produceMvaInputTree(static_cast<std::string>(outputfilename_),
+                                             Channel::convertChannel(static_cast<std::string>(channel_)),
+                                             Systematic::convertSystematic(static_cast<std::string>(systematic_)));
+        //mvaTreeHandler_.produceMvaInputTree(fOutput);
 
         // Create and store control plots in fOutput
-        mvaInputTopJetsVariables_->mvaInputVariablesControlPlots(fOutput);
+//        mvaInputTopJetsVariables_->mvaInputVariablesControlPlots(fOutput);
         
         // Cleanup
-        mvaInputTopJetsVariables_->clear();
+        mvaTreeHandler_->clear();
     }
     
     
@@ -231,7 +233,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectIndices(allLeptonIndices, allLeptons, LVeta, -LeptonEtaCUT);
     selectIndices(allLeptonIndices, allLeptons, LVpt, LeptonPtCut);
     orderIndices(allLeptonIndices, allLeptons, LVpt);
-    const int numberOfAllLeptons = allLeptonIndices.size();
+    //const int numberOfAllLeptons = allLeptonIndices.size();
     
     // Get indices of leptons and antiLeptons separated by charge, and get the leading ones if they exist
     const std::vector<int>& lepPdgId = *recoObjects.lepPdgId_;
@@ -721,9 +723,9 @@ void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusi
 
 
 
-void HiggsAnalysis::SetMvaInputProduction(MvaInputTopJetsVariables* mvaInputTopJetsVariables)
+void HiggsAnalysis::SetMvaInputProduction(MvaTreeHandler* mvaTreeHandler)
 {
-    mvaInputTopJetsVariables_ = mvaInputTopJetsVariables;
+    mvaTreeHandler_ = mvaTreeHandler;
 }
 
 
@@ -821,9 +823,9 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
                                       genObjectIndices, recoObjectIndices,
                                       genLevelWeights, recoLevelWeights, defaultWeight,
                                       selectionStep);
-    if(mvaInputTopJetsVariables_) mvaInputTopJetsVariables_->fillForInputProduction(recoObjects,
-                                                                                    genObjectIndices, recoObjectIndices,
-                                                                                    defaultWeight, selectionStep);
+    if(mvaTreeHandler_) mvaTreeHandler_->fillForInputProduction(recoObjects,
+                                                                genObjectIndices, recoObjectIndices,
+                                                                defaultWeight, selectionStep);
     if(mvaValidation_) mvaValidation_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
     if(dijetAnalyzer_) dijetAnalyzer_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
                                             genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
