@@ -1,34 +1,18 @@
 #include <iostream>
-#include <fstream>
-#include <cmath>
-#include <cstdlib>
-#include <algorithm>
 
 #include <TTree.h>
 #include <TSystem.h>
-#include <TH1.h>
-#include <TH1D.h>
-#include <TH2D.h>
 #include <TFile.h>
 #include <TString.h>
-#include <Math/VectorUtil.h>
-#include <TSelectorList.h>
 #include <Rtypes.h>
 #include <TCut.h>
 #include <TMVA/Tools.h>
 #include <TMVA/Config.h>
 #include <TMVA/Factory.h>
 #include <TMVA/Types.h>
-#include <TMVA/Reader.h>
 
 #include "MvaFactory.h"
 #include "mvaStructs.h"
-#include "analysisStructs.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
-#include "../../diLeptonic/src/classes.h"
-#include "../../diLeptonic/src/analysisObjectStructs.h"
-
-
 
 
 

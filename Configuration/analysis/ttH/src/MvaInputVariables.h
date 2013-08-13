@@ -7,31 +7,14 @@
 
 #include <Rtypes.h>
 
-class TTree;
 class TSelectorList;
 class TH1;
 class TH2;
 class TString;
-class TCut;
 
-namespace TMVA{
-    class Reader;
-}
-
-#include "analysisStructsFwd.h"
 #include "mvaStructs.h"
 #include "../../diLeptonic/src/storeTemplate.h"
-#include "../../diLeptonic/src/classesFwd.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
 
-class MvaTopJetsVariables;
-class RecoObjects;
-namespace tth{
-    //class GenLevelWeights;
-    //class RecoLevelWeights;
-    class GenObjectIndices;
-    class RecoObjectIndices;
-}
 
 
 

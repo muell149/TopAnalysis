@@ -3,10 +3,7 @@
 
 #include <vector>
 
-#include <Rtypes.h>
-
 class TString;
-
 namespace TMVA{
     class Reader;
 }

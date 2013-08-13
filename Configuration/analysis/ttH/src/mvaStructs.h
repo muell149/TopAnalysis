@@ -114,34 +114,6 @@ public:
     
     
     
-private:
-    
-    // The names associated to the variables
-    
-    static constexpr const char* name_bQuarkRecoJetMatched_ = "bQuarkRecoJetMatched";
-    static constexpr const char* name_correctCombination_ = "correctCombination";
-    static constexpr const char* name_swappedCombination_ = "swappedCombination";
-    
-    static constexpr const char* name_eventWeight_ = "eventWeight";
-    
-    static constexpr const char* name_jetChargeDiff_ = "jetChargeDiff";
-    static constexpr const char* name_meanDeltaPhi_b_met_ = "meanDeltaPhi_b_met";
-    static constexpr const char* name_massDiff_recoil_bbbar_ = "massDiff_recoil_bbbar";
-    static constexpr const char* name_pt_b_antiLepton_ = "pt_b_antiLepton";
-    static constexpr const char* name_pt_antiB_lepton_ = "pt_antiB_lepton";
-    static constexpr const char* name_deltaR_b_antiLepton_ = "deltaR_b_antiLepton";
-    static constexpr const char* name_deltaR_antiB_lepton_ = "deltaR_antiB_lepton";
-    static constexpr const char* name_btagDiscriminatorSum_ = "btagDiscriminatorSum";
-    static constexpr const char* name_deltaPhi_antiBLepton_bAntiLepton_ = "deltaPhi_antiBLepton_bAntiLepton";
-    static constexpr const char* name_massDiff_fullBLepton_bbbar_ = "massDiff_fullBLepton_bbbar";
-    static constexpr const char* name_meanMt_b_met_ = "meanMt_b_met";
-    static constexpr const char* name_massSum_antiBLepton_bAntiLepton_ = "massSum_antiBLepton_bAntiLepton";
-    static constexpr const char* name_massDiff_antiBLepton_bAntiLepton_ = "massDiff_antiBLepton_bAntiLepton";
-    
-    
-    
-public:
-    
     // The variables needed for MVA
     
     /// Could b quark and anti-b quark be matched to reco jets
@@ -172,8 +144,29 @@ public:
     
     
     
+private:
     
+    // The names associated to the variables
     
+    static constexpr const char* name_bQuarkRecoJetMatched_ = "bQuarkRecoJetMatched";
+    static constexpr const char* name_correctCombination_ = "correctCombination";
+    static constexpr const char* name_swappedCombination_ = "swappedCombination";
+    
+    static constexpr const char* name_eventWeight_ = "eventWeight";
+    
+    static constexpr const char* name_jetChargeDiff_ = "jetChargeDiff";
+    static constexpr const char* name_meanDeltaPhi_b_met_ = "meanDeltaPhi_b_met";
+    static constexpr const char* name_massDiff_recoil_bbbar_ = "massDiff_recoil_bbbar";
+    static constexpr const char* name_pt_b_antiLepton_ = "pt_b_antiLepton";
+    static constexpr const char* name_pt_antiB_lepton_ = "pt_antiB_lepton";
+    static constexpr const char* name_deltaR_b_antiLepton_ = "deltaR_b_antiLepton";
+    static constexpr const char* name_deltaR_antiB_lepton_ = "deltaR_antiB_lepton";
+    static constexpr const char* name_btagDiscriminatorSum_ = "btagDiscriminatorSum";
+    static constexpr const char* name_deltaPhi_antiBLepton_bAntiLepton_ = "deltaPhi_antiBLepton_bAntiLepton";
+    static constexpr const char* name_massDiff_fullBLepton_bbbar_ = "massDiff_fullBLepton_bbbar";
+    static constexpr const char* name_meanMt_b_met_ = "meanMt_b_met";
+    static constexpr const char* name_massSum_antiBLepton_bAntiLepton_ = "massSum_antiBLepton_bAntiLepton";
+    static constexpr const char* name_massDiff_antiBLepton_bAntiLepton_ = "massDiff_antiBLepton_bAntiLepton";
 };
 
 
