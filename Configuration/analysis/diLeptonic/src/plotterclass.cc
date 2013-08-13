@@ -53,7 +53,7 @@ void Plotter::UnfoldingOptions(bool doSVD)
   drawNLOCurves = true; // boolean to draw/not-draw extra theory curves in the Diff.XSection plots
 
   drawPlotRatio    = true;
-  drawSmoothMadgraph = true;
+  drawSmoothMadgraph = false;
   drawMadSpinCorr  = false;
   drawMCATNLO      = true;
   drawKidonakis    = true;
@@ -2143,12 +2143,15 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
 
     //Read absolute systematic uncertainty of each bin from file
     for(int Syst=0; Syst<(int)vec_systematic.size(); Syst++){
+        if(vec_systematic.at(Syst).Contains("HERWIG") || vec_systematic.at(Syst).Contains("MCATNLO")) continue;
+
         TString sysup = vec_systematic.at(Syst)+"UP";
         TString sysdown = vec_systematic.at(Syst)+"DOWN";
-        if(vec_systematic.at(Syst) == "HAD_")
+        if(vec_systematic.at(Syst) == "POWHEG")
         {
             sysup = "POWHEG";
             sysdown = "MCATNLO";
+            vec_systematic.at(Syst) = "HAD_";
         };
         ifstream SysResultsList("UnfoldingResults/"+vec_systematic.at(Syst)+"/"+Channel+"/"+name+"Results.txt");
         if(!SysResultsList.is_open()){
@@ -2157,6 +2160,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
             Plotter::CalcUpDownDifference(Channel, sysup, sysdown, name);
         }
         SysResultsList.close();
+//         if(vec_systematic.at(Syst) == "POWHEG") {vec_systematic.at(Syst) = "HAD_";}
         SysResultsList.open("UnfoldingResults/"+vec_systematic.at(Syst)+"/"+Channel+"/"+name+"Results.txt");
         for (Int_t bin=0; bin<bins; ++bin) {
             TString DUMMY;
@@ -2445,7 +2449,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         powheghistBinned->Scale(1./powheghistBinned->Integral("width"));
     }
     if(drawNLOCurves && drawPOWHEGHERWIG){
-        powhegHerwighist = GetNloCurve(newname, "POWHEG");
+        powhegHerwighist = GetNloCurve(newname, "POWHEGHERWIG");
         double powhegHerwigscale = 1./powhegHerwighist->Integral("width");
         if (binned_theory==false) powhegHerwighist->Rebin(2);powhegHerwighist->Scale(0.5);
         powhegHerwighist->Scale(powhegHerwigscale);
@@ -2469,7 +2473,9 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         spincorrhistBinned->Scale(1./spincorrhistBinned->Integral("width"));
     }
     
-    if(drawNLOCurves && drawKidonakis && (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead")){
+    if(drawNLOCurves && drawKidonakis &&
+        (name== "HypToppT" || name == "HypTopRapidity") && 
+        !name.Contains("Lead") && !name.Contains("RestFrame")){
         TString kidoFile = ttbar::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
         //KidoFile=TFile::Open(ttbar::DATA_PATH() + "dilepton_kidonakisNNLO.root");
         if(name.Contains("ToppT")){
@@ -3300,7 +3306,6 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         DrawLabel("(arXiv:1210.7813)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
     }
     h_GenDiffXSec->Draw("SAME");
-std::cout<<"File: "<<__FILE__<<"   line: "<<__LINE__<<std::endl;
     gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
     gPad->RedrawAxis();
@@ -3885,7 +3890,7 @@ void Plotter::CalcUpDownDifference( TString Channel, TString Syst_Up, TString Sy
     }
     NominalFile.close(); UpFile.close(); DownFile.close();
 
-    if(Syst_Up.Contains("POWHEG") && Syst_Down.Contains("MCATNLO"))
+    if(Syst_Up =="POWHEG" && Syst_Down == "MCATNLO")
     {
         Syst_Up = "HAD_";
     } else {

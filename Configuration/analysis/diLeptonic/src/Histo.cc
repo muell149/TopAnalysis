@@ -128,8 +128,11 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
                 std::vector<TString> valid_sys;
                 for (size_t sys=0; sys<syst.size(); ++sys){
                     ///Ugly method to use the systematic convention used up to now
-                    if(syst.at(sys) == TString("Nominal") || syst.at(sys).Contains("_DOWN")){continue;}
-                    valid_sys.push_back(syst.at(sys).Remove(syst.at(sys).Length()-2, 2));
+                    if(syst.at(sys) == TString("Nominal") || syst.at(sys).Contains("_DOWN") ||
+                      syst.at(sys) == "MCATNLO" || syst.at(sys).Contains("HERWIG") || syst.at(sys).Contains("SPINCORR") ){continue;}
+
+                    if (!syst.at(sys).Contains("POWHEG")) {valid_sys.push_back(syst.at(sys).Remove(syst.at(sys).Length()-2, 2));}
+                    else {valid_sys.push_back(syst.at(sys));};
                 };
                 h_generalPlot.PlotDiffXSec(channel, valid_sys);
             }

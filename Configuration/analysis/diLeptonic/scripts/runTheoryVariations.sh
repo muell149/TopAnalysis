@@ -16,7 +16,7 @@ for chann in ee emu mumu; do
 done
 
 #these have rather low statistics, don't need to split them into ee/emu/mumu
-for Syst in match mass scale powheg mcatnlo; do
+for Syst in match mass scale powheg.root mcatnlo; do
     $LA -f $Syst &
     w
 done
