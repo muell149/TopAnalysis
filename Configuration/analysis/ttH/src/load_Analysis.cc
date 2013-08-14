@@ -20,7 +20,6 @@
 #include "MvaTreeHandler.h"
 #include "MvaReader.h"
 
-#include "MvaInputVariables.h"
 #include "MvaValidation.h"
 #include "DijetAnalyzer.h"
 #include "AnalysisHistograms.h"

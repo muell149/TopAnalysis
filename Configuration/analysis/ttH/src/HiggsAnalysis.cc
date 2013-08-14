@@ -20,7 +20,6 @@
 #include "Playground.h"
 #include "MvaTreeHandler.h"
 
-#include "MvaInputVariables.h"
 #include "MvaValidation.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"

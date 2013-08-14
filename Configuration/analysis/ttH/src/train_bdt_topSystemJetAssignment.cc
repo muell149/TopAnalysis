@@ -14,7 +14,6 @@
 
 #include "MvaFactory.h"
 #include "MvaTreeHandler.h"
-#include "MvaInputVariables.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
 #include "../../diLeptonic/src/utils.h"
