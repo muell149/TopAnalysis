@@ -26,8 +26,7 @@ class MvaInputTopJetsVariables{
 public:
     
     /// Constructor which can optionally set MVA weights and creating TMVA Reader
-    MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps,
-                             const char* mvaWeightsFile =0, const char* mvaInputDir =0);
+    MvaInputTopJetsVariables(const std::vector<TString>& selectionStepsNoCategories);
     
     /// Destructor
     ~MvaInputTopJetsVariables(){};
@@ -110,10 +109,6 @@ private:
     
     /// Selection steps for which to run the MVA tool
     const std::vector<TString> selectionSteps_;
-    
-    
-    /// The folder where to store the input for MVA
-    const char* mvaInputDir_;
 };
 
 

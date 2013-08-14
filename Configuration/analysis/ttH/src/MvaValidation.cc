@@ -3,6 +3,8 @@
 
 #include <TH1.h>
 #include <TH1D.h>
+#include <TH2.h>
+#include <TH2D.h>
 #include <TProfile.h>
 #include <TString.h>
 #include <Math/VectorUtil.h>
@@ -43,7 +45,7 @@ weightsSwapped_(0)
 
 void MvaValidation::bookHistos(const TString& step)
 {
-    constexpr const char* prefix = "mva_";
+    constexpr const char* prefix = "mvaA_";
     std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
     TString name;
 
@@ -91,6 +93,25 @@ void MvaValidation::bookHistos(const TString& step)
     m_histogram[name] = this->store(new TProfile(prefix+name+step, "bestDijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
     name = "best_dijet_massVsMvaWeightDiff";
     m_histogram[name] = this->store(new TProfile(prefix+name+step, "bestDijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
+    
+    
+    name = "mvaWeightCorrect";
+    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA}^{correct};# jet pairs", 80, -1.2, 0.2);
+    
+    name = "best_mvaWeightCorrect";
+    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA,1}^{correct};# events", 80, -1.2, 0.2);
+    
+    name = "mvaWeightSwapped";
+    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA}^{swapped};# jet pairs", 80, -1.2, 0.2);
+    
+    name = "best_mvaWeightSwapped";
+    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA,1}^{swapped};# events", 80, -1.2, 0.2);
+    
+    name = "mvaWeightCorrectVsSwapped";
+    this->bookHistosInclExcl2D(m_histogram, prefix, step, name, name+";w_{MVA}^{correct};w_{MVA}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
+    
+    name = "best_mvaWeightCorrectVsSwapped";
+    this->bookHistosInclExcl2D(m_histogram, prefix, step, name, name+";w_{MVA,1}^{correct};w_{MVA,1}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
 }
 
 
@@ -122,17 +143,20 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
     
     
     // Loop over all jet combinations and get MVA input variables
-    const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables = 
+    const std::vector<MvaTopJetsVariables> v_mvaTopJetsVariables = 
             MvaTopJetsVariables::fillVariables(recoObjectIndices, genObjectIndices, recoObjects, weight);
     
     // Get the MVA weights from weights file as vector, one entry per jet pair
-    const std::vector<float>& mvaWeightsCorrect = weightsCorrect_->mvaWeights(v_mvaTopJetsVariables);
-//    const std::vector<float>& mvaWeightsSwapped = weightsSwapped_->mvaWeights(v_mvaTopJetsVariables);
+    const std::vector<float> v_mvaWeightsCorrect = weightsCorrect_->mvaWeights(v_mvaTopJetsVariables);
+    const std::vector<float> v_mvaWeightsSwapped = weightsSwapped_->mvaWeights(v_mvaTopJetsVariables);
+    
+    // Fill all variables and associated MVA weights per event
+    const MvaTopJetsVariablesPerEvent mvaTopJetsVariablesPerEvent(v_mvaTopJetsVariables, v_mvaWeightsCorrect, v_mvaWeightsSwapped);
     
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;
     std::vector<int> jetIndexPairsIndices = ttbar::initialiseIndices(jetIndexPairs);
-    ttbar::orderIndices(jetIndexPairsIndices, mvaWeightsCorrect);
+    ttbar::orderIndices(jetIndexPairsIndices, v_mvaWeightsCorrect);
     
     // Get jet pair leading in MVA weight, and extract bIndex and antiBIndex
     const std::pair<int, int>& leadingJetIndexPair = jetIndexPairs.at(jetIndexPairsIndices.at(0));
@@ -160,62 +184,175 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
     const bool isPairFromHiggs(genObjectIndices.isPairFromHiggs(jet1FromHiggsIndex, jet2FromHiggsIndex));
     
     
+    // Fill the histograms
+    TString name;
     
-    if(!genObjectIndices.uniqueGenTopMatching()) m_histogram["matchedBjetFromTop"]->Fill(0., weight);
-    else if(!genObjectIndices.uniqueRecoTopMatching()) m_histogram["matchedBjetFromTop"]->Fill(1., weight);
-    else m_histogram["matchedBjetFromTop"]->Fill(2., weight);
+    name = "matchedBjetFromTop";
+    if(!genObjectIndices.uniqueGenTopMatching()) m_histogram[name]->Fill(0., weight);
+    else if(!genObjectIndices.uniqueRecoTopMatching()) m_histogram[name]->Fill(1., weight);
+    else m_histogram[name]->Fill(2., weight);
     
-    if(!genObjectIndices.uniqueGenHiggsMatching()) m_histogram["matchedBjetFromHiggs"]->Fill(0., weight);
-    else if(!genObjectIndices.uniqueRecoHiggsMatching()) m_histogram["matchedBjetFromHiggs"]->Fill(1., weight);
-    else m_histogram["matchedBjetFromHiggs"]->Fill(2., weight);
+    name = "matchedBjetFromHiggs";
+    if(!genObjectIndices.uniqueGenHiggsMatching()) m_histogram[name]->Fill(0., weight);
+    else if(!genObjectIndices.uniqueRecoHiggsMatching()) m_histogram[name]->Fill(1., weight);
+    else m_histogram[name]->Fill(2., weight);
     
     
     
     for(const auto& jetIndexPair : jetIndexPairs){
         const LV dijet = recoObjects.jets_->at(jetIndexPair.first) + recoObjects.jets_->at(jetIndexPair.second);
-        m_histogram["dijet_mass"]->Fill(dijet.M(), weight);
-        ((TProfile*)m_histogram["dijet_massVsMvaWeightHigh"])->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
-        ((TProfile*)m_histogram["dijet_massVsMvaWeightDiff"])->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
+        name = "dijet_mass";
+        m_histogram[name]->Fill(dijet.M(), weight);
+        name = "dijet_massVsMvaWeightHigh";
+        ((TProfile*)m_histogram[name])->Fill(v_mvaWeightsCorrect.at(0), dijet.M(), weight);
+        name = "dijet_massVsMvaWeightDiff";
+        ((TProfile*)m_histogram[name])->Fill(v_mvaWeightsCorrect.at(0)-v_mvaWeightsCorrect.at(1), dijet.M(), weight);
     }
     
     
     const LV dijet = recoObjects.jets_->at(jet1FromHiggsIndex) + recoObjects.jets_->at(jet2FromHiggsIndex);
-    m_histogram["best_dijet_mass"]->Fill(dijet.M(), weight);
-    ((TProfile*)m_histogram["best_dijet_massVsMvaWeightHigh"])->Fill(mvaWeightsCorrect.at(0), dijet.M(), weight);
-    ((TProfile*)m_histogram["best_dijet_massVsMvaWeightDiff"])->Fill(mvaWeightsCorrect.at(0)-mvaWeightsCorrect.at(1), dijet.M(), weight);
+    name = "best_dijet_mass";
+    m_histogram[name]->Fill(dijet.M(), weight);
+    name = "best_dijet_massVsMvaWeightHigh";
+    ((TProfile*)m_histogram[name])->Fill(v_mvaWeightsCorrect.at(0), dijet.M(), weight);
+    name = "best_dijet_massVsMvaWeightDiff";
+    ((TProfile*)m_histogram[name])->Fill(v_mvaWeightsCorrect.at(0)-v_mvaWeightsCorrect.at(1), dijet.M(), weight);
     
     
-    
+    name = "best_jetsFromTop";
     if(genObjectIndices.uniqueRecoTopMatching()){
-        m_histogram["best_jetsFromTop"]->Fill(0., weight);
+        m_histogram[name]->Fill(0., weight);
         if(isCorrectPairFromTop){
-            m_histogram["best_jetsFromTop"]->Fill(1., weight);
-            m_histogram["best_jetsFromTop"]->Fill(2., weight);
+            m_histogram[name]->Fill(1., weight);
+            m_histogram[name]->Fill(2., weight);
         }
         else if(isSwappedPairFromTop){
-            m_histogram["best_jetsFromTop"]->Fill(1., weight);
-            m_histogram["best_jetsFromTop"]->Fill(3., weight);
+            m_histogram[name]->Fill(1., weight);
+            m_histogram[name]->Fill(3., weight);
         }
     }
     else{
-        m_histogram["best_jetsFromTop"]->Fill(-999., weight);
+        m_histogram[name]->Fill(-999., weight);
     }
     
     
+    name = "best_jetsFromHiggs";
     if(genObjectIndices.uniqueRecoHiggsMatching()){
-        m_histogram["best_jetsFromHiggs"]->Fill(0., weight);
+        m_histogram[name]->Fill(0., weight);
         if(isPairFromHiggs){
-            m_histogram["best_jetsFromHiggs"]->Fill(1., weight);
-            if(!genObjectIndices.uniqueRecoMatching()) m_histogram["best_jetsFromHiggs"]->Fill(2., weight);
-            else if(isPairFromTop) m_histogram["best_jetsFromHiggs"]->Fill(3., weight);
+            m_histogram[name]->Fill(1., weight);
+            if(!genObjectIndices.uniqueRecoMatching()) m_histogram[name]->Fill(2., weight);
+            else if(isPairFromTop) m_histogram[name]->Fill(3., weight);
         }
     }
     else{
-        m_histogram["best_jetsFromHiggs"]->Fill(-999., weight);
+        m_histogram[name]->Fill(-999., weight);
     }
     
+    
+    for(size_t index = 0; index<mvaTopJetsVariablesPerEvent.variables().size(); ++index){
+        const MvaTopJetsVariables& mvaTopJetsVariables = mvaTopJetsVariablesPerEvent.variables().at(index);
+        const float& mvaWeightCorrect = mvaTopJetsVariablesPerEvent.mvaWeightsCorrect().at(index);
+        const float& mvaWeightSwapped = mvaTopJetsVariablesPerEvent.mvaWeightsSwapped().at(index);
+        
+        const bool isMaxWeightCorrect = index==mvaTopJetsVariablesPerEvent.maxWeightCorrectIndex();
+        const bool isMaxWeightSwapped = index==mvaTopJetsVariablesPerEvent.maxWeightSwappedIndex();
+        
+        name = "mvaWeightCorrect";
+        this->fillHistosInclExcl(m_histogram, name, mvaWeightCorrect, mvaTopJetsVariables, weight);
+        
+        name = "best_mvaWeightCorrect";
+        if(isMaxWeightCorrect) this->fillHistosInclExcl(m_histogram, name, mvaWeightCorrect, mvaTopJetsVariables, weight);
+        
+        name = "mvaWeightSwapped";
+        this->fillHistosInclExcl(m_histogram, name, mvaWeightSwapped, mvaTopJetsVariables, weight);
+        
+        name = "best_mvaWeightSwapped";
+        if(isMaxWeightSwapped) this->fillHistosInclExcl(m_histogram, name, mvaWeightSwapped, mvaTopJetsVariables, weight);
+        
+        name = "mvaWeightCorrectVsSwapped";
+        this->fillHistosInclExcl2D(m_histogram, name, mvaWeightCorrect, mvaWeightSwapped, mvaTopJetsVariables, weight);
+        
+        name = "best_mvaWeightCorrectVsSwapped";
+        if(index==0){
+            const float& maxWeightCorrect = mvaTopJetsVariablesPerEvent.maxWeightCorrect();
+            const float& maxWeightSwapped = mvaTopJetsVariablesPerEvent.maxWeightSwapped();
+            this->fillHistosInclExcl2D(m_histogram, name, maxWeightCorrect, maxWeightSwapped, mvaTopJetsVariables, weight);
+        }
+    }
     
 }
+
+
+
+void MvaValidation::bookHistosInclExcl(std::map<TString, TH1*>& m_histogram, const TString& prefix, const TString& step,
+                                       const TString& name, const TString& title,
+                                       const int& nBinX, const double& xMin, const double& xMax)
+{
+    const TString correct("correct_");
+    const TString swapped("swapped_");
+    const TString wrong("wrong_");
+    
+    m_histogram[name] = this->store(new TH1D(prefix+name+step, title, nBinX, xMin, xMax));
+    
+    m_histogram[correct+name] = this->store(new TH1D(correct+prefix+name+step, title, nBinX, xMin, xMax));
+    m_histogram[swapped+name] = this->store(new TH1D(swapped+prefix+name+step, title, nBinX, xMin, xMax));
+    m_histogram[wrong+name] = this->store(new TH1D(wrong+prefix+name+step, title, nBinX, xMin, xMax));
+}
+
+
+
+void MvaValidation::bookHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, const TString& prefix, const TString& step,
+                                         const TString& name, const TString& title,
+                                         const int& nBinX, const double& xMin, const double& xMax,
+                                         const int& nBinY, const double& yMin, const double& yMax)
+{
+    const TString correct("correct_");
+    const TString swapped("swapped_");
+    const TString wrong("wrong_");
+    
+    m_histogram[name] = this->store(new TH2D(prefix+name+step, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+    
+    m_histogram[correct+name] = this->store(new TH2D(correct+prefix+name+step, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+    m_histogram[swapped+name] = this->store(new TH2D(swapped+prefix+name+step, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+    m_histogram[wrong+name] = this->store(new TH2D(wrong+prefix+name+step, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+}
+
+
+
+void MvaValidation::fillHistosInclExcl(std::map<TString, TH1*>& m_histogram, const TString& name,
+                                       const double& variable,
+                                       const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight)
+{
+    const TString correct("correct_");
+    const TString swapped("swapped_");
+    const TString wrong("wrong_");
+    
+    m_histogram[name]->Fill(variable, weight);
+    
+    if(mvaTopJetsVariables.correctCombination_.value_) m_histogram[correct+name]->Fill(variable, weight);
+    else if(mvaTopJetsVariables.swappedCombination_.value_) m_histogram[swapped+name]->Fill(variable, weight);
+    else m_histogram[wrong+name]->Fill(variable, weight);
+}
+
+
+
+void MvaValidation::fillHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, const TString& name,
+                                         const double& variable1, const double& variable2,
+                                         const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight)
+{
+    const TString correct("correct_");
+    const TString swapped("swapped_");
+    const TString wrong("wrong_");
+    
+    ((TH2*)m_histogram[name])->Fill(variable1, variable2, weight);
+    
+    if(mvaTopJetsVariables.correctCombination_.value_) ((TH2*)m_histogram[correct+name])->Fill(variable1, variable2, weight);
+    else if(mvaTopJetsVariables.swappedCombination_.value_) ((TH2*)m_histogram[swapped+name])->Fill(variable1, variable2, weight);
+    else ((TH2*)m_histogram[wrong+name])->Fill(variable1, variable2, weight);
+}
+
+
 
 
 

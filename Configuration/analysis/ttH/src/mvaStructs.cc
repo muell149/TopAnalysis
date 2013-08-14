@@ -1,3 +1,6 @@
+#include <iostream>
+#include <cstdlib>
+
 #include <Math/VectorUtil.h>
 
 #include "mvaStructs.h"
@@ -215,18 +218,24 @@ MvaTopJetsVariablesPerEvent::MvaTopJetsVariablesPerEvent(const std::vector<MvaTo
 v_mvaTopJetsVariables_(v_mvaInputVariables),
 v_mvaWeightCorrect_(v_mvaWeightCorrect),
 v_mvaWeightSwapped_(v_mvaWeightSwapped)
-{}
+{
+    if(v_mvaInputVariables.size()!=v_mvaWeightCorrect.size() || v_mvaInputVariables.size()!=v_mvaWeightSwapped.size()){
+        std::cerr<<"ERROR in constructor of MvaTopJetsVariablesPerEvent! Vector sizes do not match (variables, correct weights, swapped weights): "
+                 <<v_mvaInputVariables.size()<<" , "<<v_mvaWeightCorrect.size()<<" , "<<v_mvaWeightSwapped.size()<<"\n...break\n"<<std::endl;
+        exit(47);
+    }
+}
 
 
 
-int MvaTopJetsVariablesPerEvent::maxWeightCorrectIndex()const
+size_t MvaTopJetsVariablesPerEvent::maxWeightCorrectIndex()const
 {
     return ttbar::extremumIndex(v_mvaWeightCorrect_);
 }
 
 
 
-int MvaTopJetsVariablesPerEvent::maxWeightSwappedIndex()const
+size_t MvaTopJetsVariablesPerEvent::maxWeightSwappedIndex()const
 {
     return ttbar::extremumIndex(v_mvaWeightSwapped_);
 }
@@ -257,6 +266,20 @@ bool MvaTopJetsVariablesPerEvent::isSameMaxCombination() const
 std::vector<MvaTopJetsVariables> MvaTopJetsVariablesPerEvent::variables()const
 {
     return v_mvaTopJetsVariables_;
+}
+
+
+
+std::vector<float> MvaTopJetsVariablesPerEvent::mvaWeightsCorrect()const
+{
+    return v_mvaWeightCorrect_;
+}
+
+
+
+std::vector<float> MvaTopJetsVariablesPerEvent::mvaWeightsSwapped()const
+{
+    return v_mvaWeightSwapped_;
 }
 
 

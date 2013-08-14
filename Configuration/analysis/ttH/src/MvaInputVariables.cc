@@ -13,16 +13,15 @@
 
 #include "MvaInputVariables.h"
 #include "mvaStructs.h"
+#include "AnalysisHistograms.h"
 
 
 
 
 
-MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionSteps,
-                                                   const char* mvaWeightsFile, const char* mvaInputDir):
+MvaInputTopJetsVariables::MvaInputTopJetsVariables(const std::vector<TString>& selectionStepsNoCategories):
 selectorList_(0),
-selectionSteps_(selectionSteps),
-mvaInputDir_(mvaInputDir)
+selectionSteps_(selectionStepsNoCategories)
 {
     std::cout<<"--- Beginning control plots for MVA input\n";
     std::cout<<"=== Finishing control plots for MVA input\n\n";
@@ -69,33 +68,27 @@ void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* outp
     // Set pointer to output, so that histograms are owned by it
     selectorList_ = output;
     
+    const TString step("_step8");
+    
     // Book histograms concerning MVA
     TH1* h_trueStatus_step8 = store(new TH1D("trueStatus_step8", "True status of matched jets;Status;# jet pairs",2,0,2));
     h_trueStatus_step8->GetXaxis()->SetBinLabel(1, "swapped");
     h_trueStatus_step8->GetXaxis()->SetBinLabel(2, "correct");
     
-    this->bookHistograms("jetChargeDiff_step8", "jetChargeDiff_step8;#Deltac_{rel}^{jet};# jet pairs",50,0,2);
+    this->bookHistograms("jetChargeDiff"+step, "jetChargeDiff;#Deltac_{rel}^{jet};# jet pairs",50,0,2);
     
-    this->bookHistograms("meanDeltaPhi_b_met_step8", "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2);
-    this->bookHistograms("massDiff_recoil_bbbar_step8", "massDiff_recoil_Bbbar; m_{recoil}^{jets}-m^{b#bar{b}}  [GeV];# jet pairs",16,-600,600);
-    this->bookHistograms("pt_b_antiLepton_step8", "pt_b_antiLepton; p_{T}^{bl^{+}}  [GeV];# jet pairs",20,0,500);
-    this->bookHistograms("pt_antiB_lepton_step8", "pt_antiB_lepton; p_{T}^{#bar{b}l^{-}}  [GeV];# jet pairs",20,0,500);
-    this->bookHistograms("deltaR_b_antiLepton_step8", "deltaR_b_antiLepton; #DeltaR(b,l^{+});# jet pairs",25,0,5);
-    this->bookHistograms("deltaR_antiB_lepton_step8", "deltaR_antiB_lepton; #DeltaR(#bar{b},l^{-});# jet pairs",25,0,5);
-    this->bookHistograms("btagDiscriminatorSum_step8", "btagDiscriminatorSum; d^{b}+d^{#bar{b}};# jet pairs",20,0,2);
-    this->bookHistograms("deltaPhi_antiBLepton_bAntiLepton_step8", "deltaPhi_antiBLepton_bAntiLepton; |#Delta#phi(bl^{+},#bar{b}l^{-})|  [rad];# jet pairs",10,0,3.2);
-    this->bookHistograms("massDiff_fullBLepton_bbbar_step8", "massDiff_fullBLepton_bbbar; m^{b#bar{b}l^{+}l^{-}}-m^{b#bar{b}}  [GeV];# jet pairs",13,0,1050);
-    this->bookHistograms("meanMt_b_met_step8", "meanMt_b_met; 0.5(m_{T}^{b,MET}+m_{T}^{#bar{b},MET)}  [GeV];# jet pairs",21,0,630);
-    this->bookHistograms("massSum_antiBLepton_bAntiLepton_step8", "massSum_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}+m^{bl^{+}}  [GeV];# jet pairs",21,0,840);
-    this->bookHistograms("massDiff_antiBLepton_bAntiLepton_step8", "massDiff_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}-m^{bl^{+}}  [GeV];# jet pairs",41,-400,420);
-    
-    this->bookHistograms("dijet_mvaWeightCorrect_step8", "dijet MVA weight correct;w_{MVA}^{correct};# jet pairs", 80, -1.2, 0.2);
-    this->bookHistograms("dijet_bestMvaWeightCorrect_step8", "dijet best MVA weight correct;w_{MVA,1}^{correct};# events", 80, -1.2, 0.2);
-    this->bookHistograms("dijet_mvaWeightSwapped_step8", "dijet MVA weight swapped;w_{MVA}^{swapped};# jet pairs", 80, -1.2, 0.2);
-    this->bookHistograms("dijet_bestMvaWeightSwapped_step8", "dijet best MVA weight swapped;w_{MVA,1}^{swapped};# events", 80, -1.2, 0.2);
-    
-    this->bookHistograms2D("dijet_mvaWeightCorrectVsSwapped_step8", "dijet MVA weight correct vs. swapped;w_{MVA}^{correct};w_{MVA}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
-    this->bookHistograms2D("dijet_bestMvaWeightCorrectVsSwapped_step8", "dijet best MVA weight correct vs. swapped;w_{MVA,1}^{correct};w_{MVA,1}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
+    this->bookHistograms("meanDeltaPhi_b_met"+step, "meanDeltaPhi_b_met;0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2);
+    this->bookHistograms("massDiff_recoil_bbbar"+step, "massDiff_recoil_Bbbar; m_{recoil}^{jets}-m^{b#bar{b}}  [GeV];# jet pairs",16,-600,600);
+    this->bookHistograms("pt_b_antiLepton"+step, "pt_b_antiLepton; p_{T}^{bl^{+}}  [GeV];# jet pairs",20,0,500);
+    this->bookHistograms("pt_antiB_lepton"+step, "pt_antiB_lepton; p_{T}^{#bar{b}l^{-}}  [GeV];# jet pairs",20,0,500);
+    this->bookHistograms("deltaR_b_antiLepton"+step, "deltaR_b_antiLepton; #DeltaR(b,l^{+});# jet pairs",25,0,5);
+    this->bookHistograms("deltaR_antiB_lepton"+step, "deltaR_antiB_lepton; #DeltaR(#bar{b},l^{-});# jet pairs",25,0,5);
+    this->bookHistograms("btagDiscriminatorSum"+step, "btagDiscriminatorSum; d^{b}+d^{#bar{b}};# jet pairs",20,0,2);
+    this->bookHistograms("deltaPhi_antiBLepton_bAntiLepton"+step, "deltaPhi_antiBLepton_bAntiLepton; |#Delta#phi(bl^{+},#bar{b}l^{-})|  [rad];# jet pairs",10,0,3.2);
+    this->bookHistograms("massDiff_fullBLepton_bbbar"+step, "massDiff_fullBLepton_bbbar; m^{b#bar{b}l^{+}l^{-}}-m^{b#bar{b}}  [GeV];# jet pairs",13,0,1050);
+    this->bookHistograms("meanMt_b_met"+step, "meanMt_b_met; 0.5(m_{T}^{b,MET}+m_{T}^{#bar{b},MET)}  [GeV];# jet pairs",21,0,630);
+    this->bookHistograms("massSum_antiBLepton_bAntiLepton"+step, "massSum_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}+m^{bl^{+}}  [GeV];# jet pairs",21,0,840);
+    this->bookHistograms("massDiff_antiBLepton_bAntiLepton"+step, "massDiff_antiBLepton_bAntiLepton; m^{#bar{b}l^{-}}-m^{bl^{+}}  [GeV];# jet pairs",41,-400,420);
     
     // Fill histograms
     for(const auto& mvaTopJetsVariablesPerEvent : v_mvaTopJetsVariablesPerEvent_){
@@ -109,29 +102,20 @@ void MvaInputTopJetsVariables::mvaInputVariablesControlPlots(TSelectorList* outp
             
             
             // FIXME: replace by variable names
-            this->fillHistograms("jetChargeDiff_step8", mvaTopJetsVariables.jetChargeDiff_.value_, mvaTopJetsVariables);
+            this->fillHistograms("jetChargeDiff"+step, mvaTopJetsVariables.jetChargeDiff_.value_, mvaTopJetsVariables);
             
-            this->fillHistograms("meanDeltaPhi_b_met_step8", mvaTopJetsVariables.meanDeltaPhi_b_met_.value_, mvaTopJetsVariables);
-            this->fillHistograms("massDiff_recoil_bbbar_step8", mvaTopJetsVariables.massDiff_recoil_bbbar_.value_, mvaTopJetsVariables);
-            this->fillHistograms("pt_b_antiLepton_step8", mvaTopJetsVariables.pt_b_antiLepton_.value_, mvaTopJetsVariables);
-            this->fillHistograms("pt_antiB_lepton_step8", mvaTopJetsVariables.pt_antiB_lepton_.value_, mvaTopJetsVariables);
-            this->fillHistograms("deltaR_b_antiLepton_step8", mvaTopJetsVariables.deltaR_b_antiLepton_.value_, mvaTopJetsVariables);
-            this->fillHistograms("deltaR_antiB_lepton_step8", mvaTopJetsVariables.deltaR_antiB_lepton_.value_, mvaTopJetsVariables);
-            this->fillHistograms("btagDiscriminatorSum_step8", mvaTopJetsVariables.btagDiscriminatorSum_.value_, mvaTopJetsVariables);
-            this->fillHistograms("deltaPhi_antiBLepton_bAntiLepton_step8", mvaTopJetsVariables.deltaPhi_antiBLepton_bAntiLepton_.value_, mvaTopJetsVariables);
-            this->fillHistograms("massDiff_fullBLepton_bbbar_step8", mvaTopJetsVariables.massDiff_fullBLepton_bbbar_.value_, mvaTopJetsVariables);
-            this->fillHistograms("meanMt_b_met_step8", mvaTopJetsVariables.meanMt_b_met_.value_, mvaTopJetsVariables);
-            this->fillHistograms("massSum_antiBLepton_bAntiLepton_step8", mvaTopJetsVariables.massSum_antiBLepton_bAntiLepton_.value_, mvaTopJetsVariables);
-            this->fillHistograms("massDiff_antiBLepton_bAntiLepton_step8", mvaTopJetsVariables.massDiff_antiBLepton_bAntiLepton_.value_, mvaTopJetsVariables);
-            
-//             this->fillHistograms("dijet_mvaWeightCorrect_step8", mvaTopJetsVariables.mvaWeightCorrect_, mvaTopJetsVariables);
-//             if(mvaTopJetsVariables.bestMvaWeightCorrect_>-990.) this->fillHistograms("dijet_bestMvaWeightCorrect_step8", mvaTopJetsVariables.bestMvaWeightCorrect_, mvaTopJetsVariables);
-//             this->fillHistograms("dijet_mvaWeightSwapped_step8", mvaTopJetsVariables.mvaWeightSwapped_, mvaTopJetsVariables);
-//             if(mvaTopJetsVariables.bestMvaWeightSwapped_>-990.) this->fillHistograms("dijet_bestMvaWeightSwapped_step8", mvaTopJetsVariables.bestMvaWeightSwapped_, mvaTopJetsVariables);
-//             
-//             this->fillHistograms2D("dijet_mvaWeightCorrectVsSwapped_step8", mvaTopJetsVariables.mvaWeightCorrect_, mvaTopJetsVariables.mvaWeightSwapped_, mvaTopJetsVariables);
-//             if(mvaTopJetsVariables.bestMvaWeightCorrect_>-990. && mvaTopJetsVariables.bestMvaWeightSwapped_>-990.)
-//                 this->fillHistograms2D("dijet_bestMvaWeightCorrectVsSwapped_step8", mvaTopJetsVariables.bestMvaWeightCorrect_, mvaTopJetsVariables.bestMvaWeightSwapped_, mvaTopJetsVariables);
+            this->fillHistograms("meanDeltaPhi_b_met"+step, mvaTopJetsVariables.meanDeltaPhi_b_met_.value_, mvaTopJetsVariables);
+            this->fillHistograms("massDiff_recoil_bbbar"+step, mvaTopJetsVariables.massDiff_recoil_bbbar_.value_, mvaTopJetsVariables);
+            this->fillHistograms("pt_b_antiLepton"+step, mvaTopJetsVariables.pt_b_antiLepton_.value_, mvaTopJetsVariables);
+            this->fillHistograms("pt_antiB_lepton"+step, mvaTopJetsVariables.pt_antiB_lepton_.value_, mvaTopJetsVariables);
+            this->fillHistograms("deltaR_b_antiLepton"+step, mvaTopJetsVariables.deltaR_b_antiLepton_.value_, mvaTopJetsVariables);
+            this->fillHistograms("deltaR_antiB_lepton"+step, mvaTopJetsVariables.deltaR_antiB_lepton_.value_, mvaTopJetsVariables);
+            this->fillHistograms("btagDiscriminatorSum"+step, mvaTopJetsVariables.btagDiscriminatorSum_.value_, mvaTopJetsVariables);
+            this->fillHistograms("deltaPhi_antiBLepton_bAntiLepton"+step, mvaTopJetsVariables.deltaPhi_antiBLepton_bAntiLepton_.value_, mvaTopJetsVariables);
+            this->fillHistograms("massDiff_fullBLepton_bbbar"+step, mvaTopJetsVariables.massDiff_fullBLepton_bbbar_.value_, mvaTopJetsVariables);
+            this->fillHistograms("meanMt_b_met"+step, mvaTopJetsVariables.meanMt_b_met_.value_, mvaTopJetsVariables);
+            this->fillHistograms("massSum_antiBLepton_bAntiLepton"+step, mvaTopJetsVariables.massSum_antiBLepton_bAntiLepton_.value_, mvaTopJetsVariables);
+            this->fillHistograms("massDiff_antiBLepton_bAntiLepton"+step, mvaTopJetsVariables.massDiff_antiBLepton_bAntiLepton_.value_, mvaTopJetsVariables);
         }
     }
     
