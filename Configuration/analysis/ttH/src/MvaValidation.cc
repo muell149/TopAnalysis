@@ -252,8 +252,8 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
     
     for(size_t index = 0; index<mvaTopJetsVariablesPerEvent.variables().size(); ++index){
         const MvaTopJetsVariables& mvaTopJetsVariables = mvaTopJetsVariablesPerEvent.variables().at(index);
-        const float& mvaWeightCorrect = mvaTopJetsVariablesPerEvent.mvaWeightsCorrect().at(index);
-        const float& mvaWeightSwapped = mvaTopJetsVariablesPerEvent.mvaWeightsSwapped().at(index);
+        const float mvaWeightCorrect = mvaTopJetsVariablesPerEvent.mvaWeightsCorrect().at(index);
+        const float mvaWeightSwapped = mvaTopJetsVariablesPerEvent.mvaWeightsSwapped().at(index);
         
         const bool isMaxWeightCorrect = index==mvaTopJetsVariablesPerEvent.maxWeightCorrectIndex();
         const bool isMaxWeightSwapped = index==mvaTopJetsVariablesPerEvent.maxWeightSwappedIndex();
@@ -275,8 +275,8 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
         
         name = "best_mvaWeightCorrectVsSwapped";
         if(index==0){
-            const float& maxWeightCorrect = mvaTopJetsVariablesPerEvent.maxWeightCorrect();
-            const float& maxWeightSwapped = mvaTopJetsVariablesPerEvent.maxWeightSwapped();
+            const float maxWeightCorrect = mvaTopJetsVariablesPerEvent.maxWeightCorrect();
+            const float maxWeightSwapped = mvaTopJetsVariablesPerEvent.maxWeightSwapped();
             this->fillHistosInclExcl2D(m_histogram, name, maxWeightCorrect, maxWeightSwapped, mvaTopJetsVariables, weight);
         }
     }
@@ -321,7 +321,7 @@ void MvaValidation::bookHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, c
 
 
 void MvaValidation::fillHistosInclExcl(std::map<TString, TH1*>& m_histogram, const TString& name,
-                                       const double& variable,
+                                       const float& variable,
                                        const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight)
 {
     const TString correct("correct_");
@@ -338,7 +338,7 @@ void MvaValidation::fillHistosInclExcl(std::map<TString, TH1*>& m_histogram, con
 
 
 void MvaValidation::fillHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, const TString& name,
-                                         const double& variable1, const double& variable2,
+                                         const float& variable1, const float& variable2,
                                          const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight)
 {
     const TString correct("correct_");

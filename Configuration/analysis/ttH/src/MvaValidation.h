@@ -65,12 +65,12 @@ private:
     
     /// Fill 1-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
     void fillHistosInclExcl(std::map<TString, TH1*>& m_histogram, const TString& name,
-                            const double& variable,
+                            const float& variable,
                             const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight =1.);
     
     /// Fill 1-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
     void fillHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, const TString& name,
-                              const double& variable1, const double& variable2,
+                              const float& variable1, const float& variable2,
                               const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight =1.);
     
     /// MVA weights of correct dijet assignment for top system
