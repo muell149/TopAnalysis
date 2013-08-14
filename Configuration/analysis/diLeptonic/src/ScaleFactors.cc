@@ -441,7 +441,7 @@ makeEfficiencies_(false),
 systematic_(nominal)
 {
     std::cout<<"--- Beginning preparation of b-tagging scale factors\n";
-    if (systematic == "") systematic = "Nominal";
+    if (systematic == "" || systematic.Contains("PDF")) systematic = "Nominal";
     // Check if all relevant input files are available
     bool allInputFilesAvailable(true);
     for(const auto& channel : channels){

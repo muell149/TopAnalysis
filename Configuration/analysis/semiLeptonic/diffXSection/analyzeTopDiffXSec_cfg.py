@@ -1407,7 +1407,7 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     genLeptons = cms.InputTag('isolatedGenMuons'),
     bJetCollection = cms.bool(True),
     recoJets= cms.InputTag('tightLeadingPFJets'),
-    useRecBjetsKinematicsBeforeFit= cms.bool(True),
+    useRecBjetsKinematicsBeforeFit= cms.bool(False),
     output = cms.int32(0),
     weight = cms.InputTag(""),
     genPlots = cms.bool(True),
@@ -1463,7 +1463,7 @@ process.analyzeTopRecoKinematicsLepton=process.analyzeSemiLepLepton.clone(
                                      weight = cms.InputTag(""),
                                      genPlots = cms.bool(True), 
                                      recPlots = cms.bool(True),
-                                     useRecLeptonKinematicsBeforeFit= cms.bool(True),
+                                     useRecLeptonKinematicsBeforeFit= cms.bool(False),
                                      useTree = cms.bool(True)
                                      )
 if(decayChannel=="electron"):
@@ -1520,6 +1520,7 @@ if(applyKinFit==True):
                                              process.lightJetSelection                       +
                                              process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
+                                             #process.filterProbKinFit                        + #FIXME MARTIN: prob cut for systematic folder
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -2342,6 +2343,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     process.myAnalyzers=cms.Sequence(process.dummy)
     process.myBanalyzers=cms.Sequence(process.dummy)
     process.myLepanalyzers=cms.Sequence(process.dummy)
+    process.myMixAnalyzers=cms.Sequence(process.dummy)
     systExt=["NoWeight", "OnlyPUWeight", "NoBtagSFWeight",
              "PUup", "PUdown",
              "FlatEffSF", "EffSFNormUpStat", "EffSFNormDownStat", "EffSFShapeUpEta", "EffSFShapeDownEta",
@@ -2377,14 +2379,17 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         # create plots for top/antitop analyzer
         setattr(process,"analyzeTopRecoKinematicsKinFitTopAntitop"+sys, process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=weightTagName))
         getattr(process,"analyzeTopRecoKinematicsKinFitTopAntitop"+sys).analyze.useTree = False
-        # create plots for standard analyzer
+        # create plots for lepton/bjets analyzer
         setattr(process,"analyzeTopRecoKinematicsBjets"+sys, process.analyzeTopRecoKinematicsBjets.clone(weight=weightTagName, useTree = False))
         setattr(process,"analyzeTopRecoKinematicsLepton"+sys, process.analyzeTopRecoKinematicsLepton.clone(weight=weightTagName, useTree = False))
+        # create plots for mixed objects analyzer  
+        setattr(process,"compositedKinematicsKinFit"+sys, process.compositedKinematicsKinFit.clone(weight=weightTagName))        
         # weights to be added to sequence
         if(sys.find("NoWeight") == -1 and sys.find("OnlyPUWeight") == -1 and sys.find("NoBtagSFWeight") == -1):
             process.weights*=getattr(process,"eventWeight"+sys)
         # analyzer to be added to sequence
         process.myAnalyzers*=getattr(process,"analyzeTopRecoKinematicsKinFit"+sys)
+        process.myMixAnalyzers*=getattr(process,"compositedKinematicsKinFit"+sys)
         #analyzer*=getattr(process,"analyzeTopRecoKinematicsKinFitTopAntitop"+sys)
         if(sys.find("NoWeight") == -1 and sys.find("OnlyPUWeight") == -1 and sys.find("NoBtagSFWeight") == -1):
             process.myBanalyzers*=getattr(process,"analyzeTopRecoKinematicsBjets"+sys)
@@ -2394,6 +2399,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     process.myAnalyzers .remove(process.dummy)
     process.myBanalyzers.remove(process.dummy)
     process.myLepanalyzers.remove(process.dummy)
+    process.myMixAnalyzers.remove(process.dummy)
         
     ## add to Sequence
     # a) event weights 
@@ -2467,6 +2473,13 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            ## additional b-hadron jet analyzers
                            process.myLepanalyzers                     
                            )
+
+    process.kinFit.replace(process.compositedKinematicsKinFit,
+                           process.compositedKinematicsKinFit *
+                           ## additional mixed objects analyzers
+                           process.myMixAnalyzers                     
+                           )
+    
 ## SSV event weights
 if(runningOnData=="MC" and BtagReweigthing):
     SSVModules = process.SSVMonitoring.moduleNames()
@@ -3189,7 +3202,7 @@ if(runningOnData=="MC"):
                      process.selectedPatJets * process.scaledJetEnergy)
 
     if(applyKinFit==True):
-    # use status 3 particles (!)
+        # use status 3 particles (!)
         process.decaySubset.fillMode = cms.string("kME")
 
 

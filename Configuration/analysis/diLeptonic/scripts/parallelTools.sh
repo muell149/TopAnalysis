@@ -18,7 +18,7 @@ if [ `hostname | grep "naf.desy.de"` ]; then
     HISTO="qsub -@ $SCRIPTPATH/qsubParams.txt -l h_vmem=6000M $BIN/Histo"
 else
     w() {
-        while [ `ps ax | grep -E 'load_Analysis|Histo' | wc -l` -gt 10 ]; do
+        while [ `ps ax | grep -E 'load_Analysis|Histo' | wc -l` -gt 8 ]; do
             sleep 1;
         done
     }

@@ -124,6 +124,8 @@ void DilepSVDFunctions::SVD_Tex(TString channel, TString particle, TString quant
         particleTex.Append("Jets");
     } else if ( strcmp(particle, "BJets") == 0 ){
         particleTex.Append("BJets");
+    } else if ( strcmp(particle, "BBbar") == 0 ){
+        particleTex.Append("b#bar{b}");
     } else if ( strcmp(particle, "TopQuarks") == 0 ) {
         particleTex.Append("t / #bar{t}");
     } else if ( strcmp(particle, "TtBar") == 0 ) {

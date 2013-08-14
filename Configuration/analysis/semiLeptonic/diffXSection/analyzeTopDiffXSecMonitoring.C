@@ -308,6 +308,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "compositedKinematicsKinFit/MJJ",
     "compositedKinematicsKinFit/mHbb",
     "compositedKinematicsKinFit/mbb",
+    "analyzeTopRecoKinematicsKinFit/lbMass",
     // complementary plots - with or without probability selection to have both versions for sure
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/ttbarAngle",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/topPt",
@@ -622,6 +623,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
     "m^{jj} #left[GeV#right];Events;1;10",
     "m^{bb} (KinFit non t#bar{t} b-jets) #left[GeV#right];4 b-tag events;1;50",
     "m^{bb} #left[GeV#right];permutations;1;10",
+    "m^{lb} #left[GeV#right];events;1;5",
     // complementary plots - with or without probability selection to have both versions for sure
     "#angle(t,#bar{t});Events;0;15",
     "p_{T}^{t} #left[GeV#right];Top quarks;0;20",
@@ -1322,7 +1324,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
       }
     }
   }
-
+  
   // ============================
   // introduce some BG subtracted
   // shape plots

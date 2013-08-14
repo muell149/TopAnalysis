@@ -98,6 +98,21 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_VisGenAntiLeptonpT, *h_VisGenAntiLeptonEta;
     TH1 *h_VisGenLeptonpT, *h_VisGenLeptonEta;
 
+    TH2 *h_GenRecoTTBarDeltaPhi, *h_GenRecoTTBarDeltaRapidity;
+    TH1 *h_RecoTTBarDeltaPhi, *h_RecoTTBarDeltaRapidity;
+    TH1 *h_HypTTBarDeltaPhi, *h_HypTTBarDeltaRapidity;
+    TH1 *h_VisGenTTBarDeltaPhi, *h_VisGenTTBarDeltaRapidity;
+    
+    TH2 *h_GenRecoBBBarpT, *h_GenRecoBBBarMass;
+    TH1 *h_RecoBBBarpT, *h_RecoBBBarMass;
+    TH1 *h_HypBBBarpT, *h_HypBBBarMass;
+    TH1 *h_VisGenBBBarpT, *h_VisGenBBBarMass;
+    
+    TH1 *h_HypToppTTTRestFrame, *h_HypAntiToppTTTRestFrame;
+    TH1 *h_RecoToppTTTRestFrame, *h_RecoAntiToppTTTRestFrame;
+    TH1 *h_VisGenToppTTTRestFrame, *h_VisGenAntiToppTTTRestFrame;
+    TH2 *h_GenRecoToppTTTRestFrame, *h_GenRecoAntiToppTTTRestFrame;
+    
     TH2 *h_GenRecoLLBarDPhi, *h_GenRecoLeptonantiBjetMass, *h_GenRecoAntiLeptonBjetMass, *h_GenRecoJetMult;
     TH1 *h_VisGenLLBarDPhi,  *h_VisGenLeptonantiBjetMass,  *h_VisGenAntiLeptonBjetMass,  *h_VisGenJetMult;
     TH1 *h_HypLLBarDPhi,     *h_HypLeptonantiBjetMass,     *h_HypAntiLeptonBjetMass,     *h_HypJetMult;

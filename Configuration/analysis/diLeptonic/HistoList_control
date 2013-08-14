@@ -1,6 +1,6 @@
 # Name, Extra, axis labels (y,x), rebin, do_dyscale, logx, logy, ymin, ymax, xmin, xmax, nbins, xbins, bcs
 
-HypjetMultiXSec Standard N_{Events} N_{jets} 1 1 0 0 0 0 0 0 0 0
+HypjetMultiXSec Standard N_{Events} N_{jets} 1 1 0 0 0 0 2 9 0 0
 vertMulti Standard Events N_{vtx} 1 0 0 0 0 0 0 0 0 0
 vertMulti_noPU Standard Events N_{vtx} 1 0 0 0 0 0 0 0 0 0
 DIMFull Standard Events m^{ll} 2 0 0 1 10.0 0 0 0 0 0
@@ -38,9 +38,16 @@ HypTTBarRapidity Standard Toppairs y^{t#bar{t}} 2 1 0 0 0 0 -2.5 2.5 0 0
 HypTTBarpT Standard Toppairs p_{T}^{t#bar{t}} 10 1 0 0 0 0 0 295 0 0
 HypBJetpT Standard b-jets p_{T}^{b} 2 0 0 0 0 0 0 0 0 0
 HypBJetEta Standard b-jets #eta^{b} 2 1 0 0 0 0 -2.5 2.5 0 0
-HypLeptonEta Standard Events #eta^{l} 1 1 0 0 0 0 0 0 0 0
-HypLeptonpT Standard Events p_{T}^{l} 1 1 0 0 0 0 0 0 0 0
+HypLeptonEta Standard Events #eta^{l} 5 1 0 0 0 0 0 0 0 0
+HypLeptonpT Standard Events p_{T}^{l} 5 1 0 0 0 0 0 0 0 0
 HypLeptonBjetMass Standard N_{Events} m^{lb} 10 1 0 0 0 0 0 300 0 0
+
+HypBBBarpT Standard N_{Events} p_{T}^{b#bar{b}} 5 1 0 0 0 0 0 350 0 0
+HypBBBarMass Standard N_{Events} m^{b#bar{b}} 10 1 0 0 0 0 0 600 0 0
+HypToppTTTRestFrame Standard N_{Events} p_{T}^{t}(t#bar{t}R.F.) 10 1 0 0 0 0 0 400 0 0
+HypTTBarDeltaPhi Standard N_{Events} #Delta#phi^{t#bar{t}} 5 1 0 0 0 0 0 3.15 0 0
+HypTTBarDeltaRapidity Standard N_{Events} |y^{t}|-|y^{#bar{t}}| 10 1 0 0 0 0 -3 3 0 0
+
 
 TrigSF Standard Events SF_{Trigg.} 1 1 0 0 0 0 0 0 0 0
 LepSF Standard Events SF_{Lept.} 1 1 0 0 0 0 0 0 0 0
@@ -180,8 +187,8 @@ HypTopRapidityLead Standard Topquarks y^{Lead.t} 2 1 0 0 0 0 -2.5 2.5 0 0
 HypTopRapidityNLead Standard Topquarks y^{N.Lead.t} 2 1 0 0 0 0 -2.5 2.5 0 0
 HypToppTLead Standard Topquarks p_{T}^{Lead.t} 10 1 0 0 0 0 0 0 0 0
 HypToppTNLead Standard Topquarks p_{T}^{N.Leadl.t} 10 1 0 0 0 0 0 0 0 0
-HypLLBarpT Standard Events p_{T}^{l^{+}l^{-}} 1 1 0 0 0 0 0 0 0 0
-HypLLBarMass Standard Events p_{T}^{l^{+}l^{-}} 1 1 0 0 0 0 0 0 0 0
+HypLLBarpT Standard Events p_{T}^{l^{+}l^{-}} 4 1 0 0 0 0 0 500 0 0
+HypLLBarMass Standard Events m^{l^{+}l^{-}} 10 1 0 0 0 0 0 0 0 0
 HypMet Standard Events E_{T}^{miss} 1 1 0 0 0 0 0 0 0 0
 
 LeptonpTbkr Standard Leptons p_{T} 4 1 0 0 0 0 20 250 0 0

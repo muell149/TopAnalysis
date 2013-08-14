@@ -7,8 +7,9 @@ class TString;
 
 #include "AnalysisHistograms.h"
 
+class JetCategories;
 class RecoObjects;
-class MvaInputTopJetsVariables;
+class MvaReader;
 namespace tth{
     class RecoObjectIndices;
     class GenObjectIndices;
@@ -28,7 +29,7 @@ class MvaValidation : public AnalysisHistogramsBase{
 public:
     
     /// Constructor
-    MvaValidation(MvaInputTopJetsVariables* weightsCorrect, MvaInputTopJetsVariables* weightsSwapped,
+    MvaValidation(const char* weightsCorrectFile, const char* weightsSwappedFile,
                   const std::vector<TString>& selectionStepsNoCategories,
                   const std::vector<TString>& stepsForCategories =std::vector<TString>(),
                   const JetCategories* jetCategories =0);
@@ -39,7 +40,7 @@ public:
     /// Fill histograms
     void fill(const RecoObjects& recoObjects,
               const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-              const double& weight, const TString& step);
+              const double& weight, const TString& stepShort);
     
     
     
@@ -49,10 +50,10 @@ private:
     virtual void bookHistos(const TString& step);
     
     /// MVA weights of correct dijet assignment for top system
-    MvaInputTopJetsVariables* weightsCorrect_;
+    MvaReader* weightsCorrect_;
     
     /// MVA weights of swapped dijet assignment for top system
-    MvaInputTopJetsVariables* weightsSwapped_;
+    MvaReader* weightsSwapped_;
 };
 
 

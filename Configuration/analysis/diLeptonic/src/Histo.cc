@@ -37,7 +37,7 @@ const std::vector<const char*> VectorOfValidSystematics
     "BTAG_LJET_PT_UP", "BTAG_LJET_PT_DOWN", "BTAG_LJET_ETA_UP", "BTAG_LJET_ETA_DOWN",
 //     "BTAG_BEFF_UP", "BTAG_BEFF_DOWN", "BTAG_CEFF_UP", "BTAG_CEFF_DOWN", "BTAG_LEFF_UP", "BTAG_LEFF_DOWN",
     "MASS_UP", "MASS_DOWN", "MATCH_UP", "MATCH_DOWN", "SCALE_UP", "SCALE_DOWN", 
-    "POWHEG", "MCATNLO",// "SPINCORR", 
+    "POWHEG", "POWHEGHERWIG", "MCATNLO",// "SPINCORR", 
     "all"};
     
 void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
@@ -128,8 +128,11 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
                 std::vector<TString> valid_sys;
                 for (size_t sys=0; sys<syst.size(); ++sys){
                     ///Ugly method to use the systematic convention used up to now
-                    if(syst.at(sys) == TString("Nominal") || syst.at(sys).Contains("_DOWN")){continue;}
-                    valid_sys.push_back(syst.at(sys).Remove(syst.at(sys).Length()-2, 2));
+                    if(syst.at(sys) == TString("Nominal") || syst.at(sys).Contains("_DOWN") ||
+                      syst.at(sys) == "MCATNLO" || syst.at(sys).Contains("HERWIG") || syst.at(sys).Contains("SPINCORR") ){continue;}
+
+                    if (!syst.at(sys).Contains("POWHEG")) {valid_sys.push_back(syst.at(sys).Remove(syst.at(sys).Length()-2, 2));}
+                    else {valid_sys.push_back(syst.at(sys));};
                 };
                 h_generalPlot.PlotDiffXSec(channel, valid_sys);
             }

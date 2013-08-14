@@ -2,7 +2,7 @@
 
 SCRIPT=$(readlink -f $0)
 SCRIPTPATH=$(dirname "$SCRIPT")
-BIN="$CMSSW_BASE/src/TopAnalysis/Configuration/analysis/ttH/build"
+BIN="@CMAKE_INSTALL_PREFIX@/bin"
 
 if [ `hostname | grep "naf.desy.de"` ]; then
     echo "Running on the NAF - so let's submit our jobs, job output will be stored in batch_output/..."
@@ -25,5 +25,5 @@ else
 
     isNAF=0
     LA=$BIN/load_Analysis
-    HISTO=$BIN/Histo 
+    HISTO=$BIN/Histo
 fi
