@@ -32,7 +32,6 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   MvaTreeHandler
   MvaReader
   MvaFactory
-  MvaInputVariables
   MvaValidation
   mvaStructs
   JetCorrectionUncertainty

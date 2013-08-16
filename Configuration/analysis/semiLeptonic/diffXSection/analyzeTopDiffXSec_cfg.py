@@ -154,7 +154,7 @@ if(not globals().has_key('eventFilter')):
 if("BG" in options.sample):
     eventFilter='background only'
     print "ttbar decay subset filter is inverted semileptonic muon decay"
-if(not "ttbar" in options.sample and not "powheg" in options.sample and not "powhegherwig" in options.sample and not "mcatnlo" in options.sample):
+if(not "ttbar" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample and not "mcatnlo" in options.sample):
     removeGenTtbar = True
     eventFilter='all'
 if (cutflowSynch):
@@ -196,7 +196,7 @@ if(not globals().has_key('sysDistort')):
     #sysDistort =  'Up'
     #sysDistort =  'Down'
 # only done for ttbar
-if(not "ttbar" in options.sample and not "mcatnlo" in options.sample and not "powheg" in options.sample and not "powhegherwig" in options.sample ):
+if(not "ttbar" in options.sample and not "mcatnlo" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample ):
     sysDistort=''
 # coupled to PU weight, therefore not applicable without
 if(not PUreweigthing):
@@ -333,6 +333,16 @@ if(not options.sample=="none"):
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
+    elif("perugia" in options.sample):
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff" 
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugia"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugia"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+	    outputFileName+="SysDistort"+sysDistort
     elif("powhegherwig" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TT_CT10_AUET2_8TeV_powheg_herwig_Summer12_DR53X-PU_S10_START53_V19_v1_cff" 
         if(eventFilter=='signal only'):

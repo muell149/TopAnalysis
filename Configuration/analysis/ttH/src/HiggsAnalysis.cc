@@ -20,7 +20,6 @@
 #include "Playground.h"
 #include "MvaTreeHandler.h"
 
-#include "MvaInputVariables.h"
 #include "MvaValidation.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
@@ -108,7 +107,7 @@ void HiggsAnalysis::Terminate()
         //mvaTreeHandler_.produceMvaInputTree(fOutput);
 
         // Create and store control plots in fOutput
-//        mvaInputTopJetsVariables_->mvaInputVariablesControlPlots(fOutput);
+        mvaTreeHandler_->plotVariables(fOutput);
         
         // Cleanup
         mvaTreeHandler_->clear();

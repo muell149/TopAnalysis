@@ -25,29 +25,32 @@
 
 
 ##
-## Control plots for MVA input (perhaps should have an own HistoList_mvaControlPlots)
+## MVA input variable plots (perhaps should have an own HistoList_mvaP)
 ##
-jetChargeDiff_step8 - - - 1 1 0 0 0 0 0 0 0 0
-meanDeltaPhi_b_met_step8 - - - 1 1 0 0 0 0 0 0 0 0
-massDiff_recoil_bbbar_step8 - - - 1 1 0 0 0 0 0 0 0 0
-pt_b_antiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-pt_antiB_lepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-deltaR_b_antiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-deltaR_antiB_lepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-btagDiscriminatorSum_step8 - - - 1 1 0 0 0 0 0 0 0 0
-deltaPhi_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-massDiff_fullBLepton_bbbar_step8 - - - 1 1 0 0 0 0 0 0 0 0
-meanMt_b_met_step8 - - - 1 1 0 0 0 0 0 0 0 0
-massSum_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-massDiff_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_jetChargeDiff_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_meanDeltaPhi_b_met_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massDiff_recoil_bbbar_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_pt_b_antiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_pt_antiB_lepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_deltaR_b_antiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_deltaR_antiB_lepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_btagDiscriminatorSum_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_deltaPhi_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massDiff_fullBLepton_bbbar_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_meanMt_b_met_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massSum_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massDiff_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
-dijet_mvaWeightCorrect_step8 - - - 1 1 0 0 0 0 0 0 0 0
-dijet_bestMvaWeightCorrect_step8 - - - 1 1 0 0 0 0 0 0 0 0
-dijet_mvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
-dijet_bestMvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
+##
+## MVA validation plots (perhaps should have an own HistoList_mvaA)
+##
+mvaA_mvaWeightCorrect_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_best_mvaWeightCorrect_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_mvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_best_mvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
-mva_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mva_best_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_best_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
 
 
@@ -55,7 +58,7 @@ mva_best_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
 ##
 ## Basic control plots
 ##
-basic_lepton_multiplicity_step8 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton_multiplicity_step8 - - - 1 1 0 1 0 0 0 0 0 0
 basic_lepton_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
 basic_lepton_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
 basic_lepton_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
