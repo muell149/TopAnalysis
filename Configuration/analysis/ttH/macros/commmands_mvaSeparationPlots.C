@@ -63,25 +63,44 @@ gROOT->ProcessLine(".L macros/mvaSeparationPlots.C++");
 TString inputFileName("mvaOutput/plots.root");
 
 
+TString step = "8";
+int category = -1;
+
+
+
+//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
+
+
+TString prefix("mvaP_");
+
+
+step.Prepend("_step");
+
+
+if(category>=0){
+    std::ostringstream convert;
+    convert<<category;
+    step.Append("_cate").Append(convert.str());
+}
+std::cout<<"\n\n\tStep: "<<step<<"\n\n\n";
+
+
 
 std::vector<TString> histogramNames;
-histogramNames.push_back("jetChargeDiff_step8");
-histogramNames.push_back("meanDeltaPhi_b_met_step8");
-histogramNames.push_back("massDiff_recoil_bbbar_step8");
-histogramNames.push_back("pt_b_antiLepton_step8");
-histogramNames.push_back("pt_antiB_lepton_step8");
-histogramNames.push_back("deltaR_b_antiLepton_step8");
-histogramNames.push_back("deltaR_antiB_lepton_step8");
-histogramNames.push_back("btagDiscriminatorSum_step8");
-histogramNames.push_back("deltaPhi_antiBLepton_bAntiLepton_step8");
-histogramNames.push_back("massDiff_fullBLepton_bbbar_step8");
-histogramNames.push_back("meanMt_b_met_step8");
-histogramNames.push_back("massSum_antiBLepton_bAntiLepton_step8");
-histogramNames.push_back("massDiff_antiBLepton_bAntiLepton_step8");
-histogramNames.push_back("dijet_mvaWeightCorrect_step8");
-histogramNames.push_back("dijet_bestMvaWeightCorrect_step8");
-histogramNames.push_back("dijet_mvaWeightSwapped_step8");
-histogramNames.push_back("dijet_bestMvaWeightSwapped_step8");
+histogramNames.push_back(prefix+"jetChargeDiff"+step);
+histogramNames.push_back(prefix+"meanDeltaPhi_b_met"+step);
+histogramNames.push_back(prefix+"massDiff_recoil_bbbar"+step);
+histogramNames.push_back(prefix+"pt_b_antiLepton"+step);
+histogramNames.push_back(prefix+"pt_antiB_lepton"+step);
+histogramNames.push_back(prefix+"deltaR_b_antiLepton"+step);
+histogramNames.push_back(prefix+"deltaR_antiB_lepton"+step);
+histogramNames.push_back(prefix+"btagDiscriminatorSum"+step);
+histogramNames.push_back(prefix+"deltaPhi_antiBLepton_bAntiLepton"+step);
+histogramNames.push_back(prefix+"massDiff_fullBLepton_bbbar"+step);
+histogramNames.push_back(prefix+"meanMt_b_met"+step);
+histogramNames.push_back(prefix+"massSum_antiBLepton_bAntiLepton"+step);
+histogramNames.push_back(prefix+"massDiff_antiBLepton_bAntiLepton"+step);
+
 
 
 std::vector<TString> combinations;
@@ -102,6 +121,44 @@ combinations.push_back("correct");
 combinations.push_back("wrong");
 
 mvaSeparationPlots(inputFileName, outputDirectory, histogramNames, combinations);
+
+
+
+
+
+//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
+
+
+
+// FIXME: need first to merge them!!!
+
+
+prefix = "mvaA_";
+
+inputFileName = "selectionRoot/Nominal/emu/emu_ttbarH125tobbbar.root";
+
+outputDirectory = "mvaOutput/ddd/";
+
+std::vector<TString> weightHistoNames;
+weightHistoNames.push_back(prefix+"mvaWeightCorrect"+step);
+weightHistoNames.push_back(prefix+"best_mvaWeightCorrect"+step);
+weightHistoNames.push_back(prefix+"mvaWeightSwapped"+step);
+weightHistoNames.push_back(prefix+"best_mvaWeightSwapped"+step);
+
+mvaSeparationPlots(inputFileName, outputDirectory, weightHistoNames, combinations);
+
+
+
+
+
+outputDirectory = "mvaOutput/eee/";
+
+combinations.clear();
+combinations.push_back("correct");
+combinations.push_back("swapped");
+combinations.push_back("wrong");
+
+mvaSeparationPlots(inputFileName, outputDirectory, weightHistoNames, combinations);
 
 
 
