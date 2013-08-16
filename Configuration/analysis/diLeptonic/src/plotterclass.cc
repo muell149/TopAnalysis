@@ -1191,7 +1191,7 @@ void Plotter::PlotXSec(TString Channel){
     double BR_Error = 0.015;
     double Lumi_Error = 0.044;
 
-    double InclusiveXsectionPlot[4], InclusiveXsectionStatErrorPlot[4], InclusiveXsectionSysErrorPlot[4], InclusiveXsectionTotalErrorPlot[4];
+    double InclusiveXsectionPlot[4] = {0.}, InclusiveXsectionStatErrorPlot[4] = {0.}, InclusiveXsectionSysErrorPlot[4] = {0.}, InclusiveXsectionTotalErrorPlot[4] = {0.};
     for (int j=0; j<(int)vec_channel.size(); j++){
         TString outdir = ttbar::assignFolder(outpathPlots, vec_channel.at(j), TString("FinalResults"));
         ifstream SysResultsList("Plots/Nominal/"+vec_channel.at(j)+"/InclusiveXSec.txt");
@@ -1210,6 +1210,7 @@ void Plotter::PlotXSec(TString Channel){
             if(vec_systematic.at(i) != "HAD_"){
                 SysUP.open("Plots/"+vec_systematic.at(i)+"UP/"+vec_channel.at(j)+"/InclusiveXSec.txt");
                 SysDOWN.open("Plots/"+vec_systematic.at(i)+"DOWN/"+vec_channel.at(j)+"/InclusiveXSec.txt");
+                if(!SysUP.is_open() || !SysDOWN.is_open()) continue;
             } else{
                 SysUP.open("Plots/MCATNLO/"+vec_channel.at(j)+"/InclusiveXSec.txt");
                 SysDOWN.open("Plots/POWHEG/"+vec_channel.at(j)+"/InclusiveXSec.txt");

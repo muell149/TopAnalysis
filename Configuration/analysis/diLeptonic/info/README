@@ -121,6 +121,20 @@ There are 3 more parameters:
 The -p, -c, and -s parameters can also take more than one argument; they can also be
 omitted (-> use default values, i.e. all channels, all plots, Nominal systematic)
 
+The inclusive cross section is extracted from the histogram 'HypjetMultiXSec'. To obtain the result please run:
+
+  for i in ee emu mumu combined; do build/Histo -t cp -s all -p +HypjetMultiXSec -c${i} &; done
+
+and once this is finished:
+
+  for i in ee emu mumu combined; do build/Histo -t cp -s Nominal -p +HypjetMultiXSec -c${i} &; done
+
+The results will be stored in the file 'InclusiveXSecResultLateX.txt' under:
+
+   Plots/FinalResults/channel/InclusiveXSecResultLateX
+
+where channel is each if the channels: ee, emu, mumu, combined.
+
 To unfold all distributions from your HistoList in parallel, use the script:
 
   ./scripts/unfoldAll.sh 
