@@ -1200,7 +1200,7 @@ void Plotter::PlotXSec(TString Channel){
         SysResultsList>>DUMMY>>DUMMY>>DUMMY>>DUMMY>>DUMMY>>InclusiveXsectionPlot[j]>>DUMMY>>InclusiveXsectionStatErrorPlot[j];
         SysResultsList.close();
 
-        ofstream OutputFile(outdir.Copy()+"InclusiveXSecResultLateX.txt");
+        std::ofstream OutputFile(outdir.Copy()+"InclusiveXSecResultLateX.txt", std::ofstream::trunc);
         OutputFile<<"Inclusive XSection Numerical Results for channel "<<vec_channel.at(j)<<std::endl;
 
         double syst_square_for_channel=0.0;
@@ -1240,7 +1240,7 @@ void Plotter::PlotXSec(TString Channel){
 
         OutputFile<<"\n\n*******************************************************************************\n\n";
         OutputFile<<" InclXsec[pb]     Stat.[pb]    Syst.[pb]   Total[pb]"<<std::endl;
-        OutputFile<<setprecision(6)<<InclusiveXsectionPlot[j]<<" +- "<<setprecision(3)<<InclusiveXsectionStatErrorPlot[j]<<" +- "<<setprecision(4)<<InclusiveXsectionSysErrorPlot[j]*InclusiveXsectionPlot[j]<<" +- "<<setprecision(4)<<InclusiveXsectionTotalErrorPlot[j];
+        OutputFile<<setprecision(6)<<InclusiveXsectionPlot[j]<<" +- "<<setprecision(3)<<InclusiveXsectionStatErrorPlot[j]<<" +- "<<setprecision(4)<<InclusiveXsectionSysErrorPlot[j]*InclusiveXsectionPlot[j]<<" +- "<<setprecision(4)<<InclusiveXsectionTotalErrorPlot[j]<<std::endl;
         OutputFile.close();
     }
 

@@ -131,7 +131,7 @@ and once this is finished:
 
 The results will be stored in the file 'InclusiveXSecResultLateX.txt' under:
 
-   Plots/FinalResults/channel/InclusiveXSecResultLateX
+   Plots/FinalResults/channel/InclusiveXSecResultLateX.txt
 
 where channel is each if the channels: ee, emu, mumu, combined.
 
