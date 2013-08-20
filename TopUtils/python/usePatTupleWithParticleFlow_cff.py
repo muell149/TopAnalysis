@@ -841,12 +841,14 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## switchmodules to correct sources
     massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+postfix),'pfNoTau'+postfix,'pfJets'+postfix)
 
-    ## remove soft lepton taggers, which would have needed more RECO collections as input
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonBJetTagsAOD'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByPtBJetTagsAOD'+postfix))
-    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByIP3dBJetTagsAOD'+postfix))
+#    ## remove soft lepton taggers, which would have needed more RECO collections as input
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonBJetTagsAOD'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByPtBJetTagsAOD'+postfix))
+#    getattr(process,'patPF2PATSequence'+postfix).remove(getattr(process,'softMuonByIP3dBJetTagsAOD'+postfix))
 
-    getattr(process,'patJets'+postfix).tagInfoSources = []
+#    getattr(process,'patJets'+postfix).tagInfoSources = []
+    getattr(process,'patJets'+postfix).addTagInfos = True
+    getattr(process,'combinedSecondaryVertexBJetTagsAOD'+postfix).jetTagComputer = cms.string('combinedSecondaryVertex')
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonBJetTagsAOD"+postfix))
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonByPtBJetTagsAOD"+postfix))
     getattr(process,'patJets'+postfix).discriminatorSources.remove(cms.InputTag("softMuonByIP3dBJetTagsAOD"+postfix))
@@ -886,10 +888,15 @@ def prependPF2PATSequence(process, pathnames = [''], options = dict()):
     ## use rho from ALL PFcandidates to be consistent with the JEC
     from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
     process.kt6PFJets = kt4PFJets.clone(src='particleFlow', doAreaFastjet=True, doRhoFastjet=True, rParam=0.6)
+ 
+    ##add calculation of rho in tracker-covered region to be compatible with Hbb-guys
+    setattr(process, 'rho25kt6PFJets'+postfix, kt4PFJets.clone(src='particleFlow', rParam = cms.double(0.6), Rho_EtaMax = cms.double(2.5), doRhoFastjet = cms.bool(True) ))
+
 
     ## add kt6PFJets for rho calculation needed for L1FastJet correction
+    ## also add 'rho25kt6PFJets' for rho25-variable used for b-regression
     getattr(process,'patPF2PATSequence'+postfix).replace( getattr(process,'pfMET'+postfix)
-                                                        , process.kt6PFJets * getattr(process,'pfMET'+postfix)
+                                                          , process.kt6PFJets * getattr(process,'rho25kt6PFJets'+postfix) * getattr(process,'pfMET'+postfix)
                                                         )
 
     ## do gluon tagging for jets 	 

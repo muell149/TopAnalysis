@@ -64,6 +64,16 @@ namespace ttbar{
     
     
     
+    /// Template function returning the index of a vector whose element has the most extreme value (in case of several, will be the first one found)
+    /// Result is (if maximumValue==true): Index of element with maximum value
+    /// Result is (if maximumValue==false): Index of element with minimum value
+    /// If the vector is empty, return -1
+    template <class T> int extremumIndex(const std::vector<T>& v_variable, const bool maximumValue =true);
+    
+    
+    
+    
+    
     /// Possible parameters of a lorentz vector to be used in following tools
     enum LVParameter{LVpt, LVeta};
     
@@ -89,11 +99,25 @@ namespace ttbar{
     
     
     
+    /// Function returning the index of a vector whose parameter of the LVs has the most extreme value (in case of several, will be the first one found)
+    /// Result is (if maximumValue==true): Index of element with maximum value of LV parameter
+    /// Result is (if maximumValue==false): Index of element with minimum value of LV parameter
+    /// If the vector is empty, return -1
+    int extremumIndex(const VLV& v_lv, const LVParameter& parameter, const bool maximumValue =true);
+    
+    
+    
     /// Function to order two Lorentz vectors by comparison operator for the parameter of the LVs
     /// Result is (if absoluteValue==false): lv1.parameter > lv2.parameter
     /// Result is (if absoluteValue==true): |lv1.parameter| > |lv2.parameter|
     void orderLV(LV& lv1, LV& lv2, const LV& inputLv1, const LV& inputLv2, const LVParameter& parameter, const bool absoluteValue =false);
 }
+
+
+
+
+
+
 
 
 
@@ -147,8 +171,6 @@ template<class T> void ttbar::orderIndices(std::vector<int>& v_index, const std:
 
 
 
-
-
 template<class T> void ttbar::selectIndices(std::vector<int>& v_index, const std::vector<T>& v_variable,
                                             const T& cutValue, const bool lowerThreshold)
 {
@@ -169,12 +191,38 @@ template<class T> void ttbar::selectIndices(std::vector<int>& v_index, const std
 
 
 
+template<class T> int ttbar::extremumIndex(const std::vector<T>& v_variable, const bool maximumValue)
+{
+    if(v_variable.size() == 0) return -1;
+    
+    int result(0);
+    T extremum(v_variable.at(0));
+    
+    for(size_t i = 1; i < v_variable.size(); ++i){
+        if(maximumValue){
+            if(extremum < v_variable.at(i)){
+                extremum = v_variable.at(i);
+                result = i;
+            }
+        }
+        else{
+            if(extremum > v_variable.at(i)){
+                extremum = v_variable.at(i);
+                result = i;
+            }
+        }
+    }
+    
+    return result;
+}
 
 
 
 
 
-#endif // ttbar_analysisUtils_h
+
+
+#endif
 
 
 

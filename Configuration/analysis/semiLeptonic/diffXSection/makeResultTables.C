@@ -70,6 +70,7 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
     TH1F* binned = (TH1F*)canvas->GetPrimitive(plotName);
     TH1F* binnedMCatNLO = (TH1F*)canvas->GetPrimitive(plotName+"MC@NLO");
     TH1F* binnedPowheg  = (TH1F*)canvas->GetPrimitive(plotName+"POWHEG");
+    TH1F* binnedPowhegHerwig  = (TH1F*)canvas->GetPrimitive(plotName+"POWHEGHERWIG");
     TH1F* binnedNNLO    = (TH1F*)canvas->GetPrimitive(plotName+"nnlo");
     if(!dataTot){
       std::cout << "ERROR: can not load TGraphAsymmErrors dataTotalError in canvas finalXSec/"+plotName+"Norm" << std::endl;
@@ -110,6 +111,7 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
     double chi2=0;
     double chi2Mc=0;
     double chi2Po=0;
+    double chi2PoHer=0;
     double chi2NN=0;
     //  loop all bins
     for(int bin=1; bin<=binned->GetNbinsX(); ++bin){
@@ -118,6 +120,7 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
       double MCxSec  =binned       ->GetBinContent(bin);
       double MCxSecMc=binnedMCatNLO ? binnedMCatNLO->GetBinContent(bin) : 0;
       double MCxSecPo=binnedPowheg  ? binnedPowheg ->GetBinContent(bin) : 0;
+      double MCxSecPoHer=binnedPowhegHerwig ? binnedPowhegHerwig ->GetBinContent(bin) : 0;
       double MCxSecNN=binnedNNLO    ? binnedNNLO   ->GetBinContent(bin) : 0;
       // FIXME: current topY NNLO prediction is shifted by one! make sure this is still the case if you update the new prediction
       if(plotName.Contains("topY")) MCxSecNN=binnedNNLO ? binnedNNLO->GetBinContent(bin+1) : 0;
@@ -182,6 +185,7 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
 	chi2+=                 ((std::abs(MCxSec  -xSec)/totError)*(std::abs(MCxSec  -xSec)/totError));
 	if(MCxSecMc!=0)chi2Mc+=((std::abs(MCxSecMc-xSec)/totError)*(std::abs(MCxSecMc-xSec)/totError));
 	if(MCxSecPo!=0)chi2Po+=((std::abs(MCxSecPo-xSec)/totError)*(std::abs(MCxSecPo-xSec)/totError));
+	if(MCxSecPoHer!=0)chi2PoHer+=((std::abs(MCxSecPoHer-xSec)/totError)*(std::abs(MCxSecPoHer-xSec)/totError));
 	if(MCxSecNN!=0)chi2NN+=((std::abs(MCxSecNN-xSec)/totError)*(std::abs(MCxSecNN-xSec)/totError));
 	if(verbose>1) std::cout << "-> considered for chi2" << std::endl;
       }
@@ -189,15 +193,19 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
       //std::cout << BCCxValue << " &  " << xValueDn << " to  " << xValueUp << " & " << MCxSec << "  & " << xSec << " &  " << statError/xSec << " &  " << sysError/xSec << " &  " << totError/xSec << " \\\\ " << std::endl;
       if(verbose>1){
 	std::cout << std::setprecision(7) << std::fixed << "data:     " << xSec << "+/-" << statError << "+/-" << sysError << std::endl;
-	std::cout << std::setprecision(7) << std::fixed << "MadGraph: " << MCxSec; 
+	std::cout << std::setprecision(7) << std::fixed << "MadGraph+Pythia: " << MCxSec; 
 	std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSec  -xSec)/totError << " std variations)" << std::endl;
 	if(MCxSecMc!=0){
-	std::cout << std::setprecision(7) << std::fixed << "MC@NLO:   " << MCxSecMc;
+	std::cout << std::setprecision(7) << std::fixed << "MC@NLO+Herwig:   " << MCxSecMc;
 	std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSecMc-xSec)/totError << " std variations)" << std::endl;
 	}
 	if(MCxSecPo!=0){
-	  std::cout << std::setprecision(7) << std::fixed << "Powheg:   " << MCxSecPo;
+	  std::cout << std::setprecision(7) << std::fixed << "Powheg+Pythia:   " << MCxSecPo;
 	  std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSecPo-xSec)/totError << " std variations)" << std::endl;
+	}
+	if(MCxSecPoHer!=0){
+	  std::cout << std::setprecision(7) << std::fixed << "Powheg+Herwig:   " << MCxSecPoHer;
+	  std::cout << std::setprecision(2) << std::fixed << " (" << std::abs(MCxSecPoHer-xSec)/totError << " std variations)" << std::endl;
 	}
 	if(MCxSecNN!=0){
 	   std::cout << std::setprecision(7) << std::fixed << "NNLO:     " << MCxSecNN;
@@ -208,12 +216,14 @@ void makeResultTables(std::string decayChannel = "combined", bool extrapolate=tr
 	chi2  /=ndof;
 	chi2Mc/=ndof;
 	chi2Po/=ndof;
+	chi2PoHer/=ndof;
 	chi2NN/=ndof;
 	if(verbose>0){
 	  if(verbose>1) std::cout << std::endl;
-	  if(chi2  !=0) std::cout << "chi2(MadGraph): " << chi2   << std::endl;
-	  if(chi2Mc!=0) std::cout << "chi2(MC@NLO  ): " << chi2Mc << std::endl;
-	  if(chi2Po!=0) std::cout << "chi2(Powheg  ): " << chi2Po << std::endl;
+	  if(chi2  !=0) std::cout << "chi2(MadGraph+Pythia): " << chi2   << std::endl;
+	  if(chi2Mc!=0) std::cout << "chi2(MC@NLO+Herwig  ): " << chi2Mc << std::endl;
+	  if(chi2Po!=0) std::cout << "chi2(Powheg+Pythia  ): " << chi2Po << std::endl;
+	  if(chi2PoHer!=0) std::cout << "chi2(Powheg+Herwig  ): " << chi2PoHer << std::endl;
 	  if(chi2NN!=0) std::cout << "chi2(NNLO    ): " << chi2NN << std::endl;
 	}
       }

@@ -547,9 +547,9 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   // tt+jet distribution
   ttbarJetMass=ttbarJetMassTrue=-999;
   if(semiLepEvt_h.isValid()){
+    if(debug) std::cout << "hypothesis valid" << std::endl;
     // gen level
     if(semiLepEvt_h->hadronicDecayTop()&&semiLepEvt_h->leptonicDecayTop()){
-      if(debug) std::cout << "hypothesis valid" << std::endl;
       if(addGenJets_h.isValid()&&(addGenJets_h->size()>0)){
 	ttbarJetMassTrue=(semiLepEvt_h->hadronicDecayTop()->p4()+semiLepEvt_h->leptonicDecayTop()->p4()+(addGenJets_h->at(0)).p4()).mass();
 	if(debug) std::cout << "ttbarJetMassTrue=" << ttbarJetMassTrue << std::endl;

@@ -1,8 +1,0 @@
-load_Analysis
-Histo
-mva
-*.o
-dict.*
-
-*.kdev4
-

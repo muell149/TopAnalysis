@@ -154,7 +154,7 @@ if(not globals().has_key('eventFilter')):
 if("BG" in options.sample):
     eventFilter='background only'
     print "ttbar decay subset filter is inverted semileptonic muon decay"
-if(not "ttbar" in options.sample and not "powheg" in options.sample and not "powhegherwig" in options.sample and not "mcatnlo" in options.sample):
+if(not "ttbar" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample and not "mcatnlo" in options.sample):
     removeGenTtbar = True
     eventFilter='all'
 if (cutflowSynch):
@@ -196,7 +196,7 @@ if(not globals().has_key('sysDistort')):
     #sysDistort =  'Up'
     #sysDistort =  'Down'
 # only done for ttbar
-if(not "ttbar" in options.sample and not "mcatnlo" in options.sample and not "powheg" in options.sample and not "powhegherwig" in options.sample ):
+if(not "ttbar" in options.sample and not "mcatnlo" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample ):
     sysDistort=''
 # coupled to PU weight, therefore not applicable without
 if(not PUreweigthing):
@@ -333,6 +333,16 @@ if(not options.sample=="none"):
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
+    elif("perugia" in options.sample):
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff" 
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugia"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugia"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+	    outputFileName+="SysDistort"+sysDistort
     elif("powhegherwig" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TT_CT10_AUET2_8TeV_powheg_herwig_Summer12_DR53X-PU_S10_START53_V19_v1_cff" 
         if(eventFilter=='signal only'):
@@ -1407,7 +1417,7 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     genLeptons = cms.InputTag('isolatedGenMuons'),
     bJetCollection = cms.bool(True),
     recoJets= cms.InputTag('tightLeadingPFJets'),
-    useRecBjetsKinematicsBeforeFit= cms.bool(True),
+    useRecBjetsKinematicsBeforeFit= cms.bool(False),
     output = cms.int32(0),
     weight = cms.InputTag(""),
     genPlots = cms.bool(True),
@@ -1463,7 +1473,7 @@ process.analyzeTopRecoKinematicsLepton=process.analyzeSemiLepLepton.clone(
                                      weight = cms.InputTag(""),
                                      genPlots = cms.bool(True), 
                                      recPlots = cms.bool(True),
-                                     useRecLeptonKinematicsBeforeFit= cms.bool(True),
+                                     useRecLeptonKinematicsBeforeFit= cms.bool(False),
                                      useTree = cms.bool(True)
                                      )
 if(decayChannel=="electron"):
@@ -1520,6 +1530,7 @@ if(applyKinFit==True):
                                              process.lightJetSelection                       +
                                              process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
+                                             #process.filterProbKinFit                        + #FIXME MARTIN: prob cut for systematic folder
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -2342,6 +2353,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     process.myAnalyzers=cms.Sequence(process.dummy)
     process.myBanalyzers=cms.Sequence(process.dummy)
     process.myLepanalyzers=cms.Sequence(process.dummy)
+    process.myMixAnalyzers=cms.Sequence(process.dummy)
     systExt=["NoWeight", "OnlyPUWeight", "NoBtagSFWeight",
              "PUup", "PUdown",
              "FlatEffSF", "EffSFNormUpStat", "EffSFNormDownStat", "EffSFShapeUpEta", "EffSFShapeDownEta",
@@ -2377,14 +2389,17 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
         # create plots for top/antitop analyzer
         setattr(process,"analyzeTopRecoKinematicsKinFitTopAntitop"+sys, process.analyzeTopRecoKinematicsKinFitTopAntitop.clone(weight=weightTagName))
         getattr(process,"analyzeTopRecoKinematicsKinFitTopAntitop"+sys).analyze.useTree = False
-        # create plots for standard analyzer
+        # create plots for lepton/bjets analyzer
         setattr(process,"analyzeTopRecoKinematicsBjets"+sys, process.analyzeTopRecoKinematicsBjets.clone(weight=weightTagName, useTree = False))
         setattr(process,"analyzeTopRecoKinematicsLepton"+sys, process.analyzeTopRecoKinematicsLepton.clone(weight=weightTagName, useTree = False))
+        # create plots for mixed objects analyzer  
+        setattr(process,"compositedKinematicsKinFit"+sys, process.compositedKinematicsKinFit.clone(weight=weightTagName))        
         # weights to be added to sequence
         if(sys.find("NoWeight") == -1 and sys.find("OnlyPUWeight") == -1 and sys.find("NoBtagSFWeight") == -1):
             process.weights*=getattr(process,"eventWeight"+sys)
         # analyzer to be added to sequence
         process.myAnalyzers*=getattr(process,"analyzeTopRecoKinematicsKinFit"+sys)
+        process.myMixAnalyzers*=getattr(process,"compositedKinematicsKinFit"+sys)
         #analyzer*=getattr(process,"analyzeTopRecoKinematicsKinFitTopAntitop"+sys)
         if(sys.find("NoWeight") == -1 and sys.find("OnlyPUWeight") == -1 and sys.find("NoBtagSFWeight") == -1):
             process.myBanalyzers*=getattr(process,"analyzeTopRecoKinematicsBjets"+sys)
@@ -2394,6 +2409,7 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
     process.myAnalyzers .remove(process.dummy)
     process.myBanalyzers.remove(process.dummy)
     process.myLepanalyzers.remove(process.dummy)
+    process.myMixAnalyzers.remove(process.dummy)
         
     ## add to Sequence
     # a) event weights 
@@ -2467,6 +2483,13 @@ if(runningOnData=="MC" and applyKinFit==True and additionalEventWeights):
                            ## additional b-hadron jet analyzers
                            process.myLepanalyzers                     
                            )
+
+    process.kinFit.replace(process.compositedKinematicsKinFit,
+                           process.compositedKinematicsKinFit *
+                           ## additional mixed objects analyzers
+                           process.myMixAnalyzers                     
+                           )
+    
 ## SSV event weights
 if(runningOnData=="MC" and BtagReweigthing):
     SSVModules = process.SSVMonitoring.moduleNames()
@@ -3189,7 +3212,7 @@ if(runningOnData=="MC"):
                      process.selectedPatJets * process.scaledJetEnergy)
 
     if(applyKinFit==True):
-    # use status 3 particles (!)
+        # use status 3 particles (!)
         process.decaySubset.fillMode = cms.string("kME")
 
 

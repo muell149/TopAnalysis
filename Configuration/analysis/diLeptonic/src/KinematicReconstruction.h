@@ -36,8 +36,8 @@ public:
   KinematicReconstruction(const LV& leptonMinus, const LV& leptonPlus, const VLV *jets, const std::vector<double> *btags, const LV* met);
   KinematicReconstruction(const LV& leptonMinus, const LV& leptonPlus, const VLV *jets, const std::vector<double> *btags, const LV* met, bool mass_loop_on);
 
-int GetNSol();
-struct_KinematicReconstruction GetSol();
+int GetNSol()const;
+struct_KinematicReconstruction GetSol()const;
 
 private:
 

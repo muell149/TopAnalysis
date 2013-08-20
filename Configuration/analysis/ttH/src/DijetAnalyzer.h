@@ -11,52 +11,42 @@ class TH1;
 class TString;
 
 #include "JetCategories.h"
-// #include "AnalysisHistograms.h"
+#include "AnalysisHistograms.h"
 #include "../../diLeptonic/src/storeTemplate.h"
 #include "../../diLeptonic/src/classesFwd.h"
+
+class RecoObjects;
+class CommonGenObjects;
+class TopGenObjects;
+class HiggsGenObjects;
+class KinRecoObjects;
+namespace tth{
+    class RecoObjectIndices;
+    class GenObjectIndices;
+}
 
 
 /// Class that analyzes all b-jet pairs from the input jet collection
 /// In addition produces other plots about input jets, their origin, other properties
-class DijetAnalyzer {
+class DijetAnalyzer : public AnalysisHistogramsBase{
 
 public:
 
-    /// Struct holding all input variables used in DiJetAnalyzer
-    struct Input{
-        Input( const VLV& allJets_, const std::vector<int>& jetsId_, const std::vector<int>& bJetsId_,
-               const std::vector<double>& allJetsBtagDiscriminant_, const std::vector<int>& topJetsId_, const VLV& genJets_,
-               const std::vector<int>& bHadJetIndex_, const std::vector<int>& bHadFlavour_,
-               const LV& met_, const LV& lepton_, const LV& antilepton_
-             );
-        ~Input(){}
-
-        #ifndef __CINT__
-        const VLV& allJets;
-        const std::vector<int>& jetsId;
-        const std::vector<int>& bJetsId;
-        const std::vector<double>& allJetsBtagDiscriminant;
-        const std::vector<int>& topJetsId;
-        const VLV& genJets;
-        const std::vector<int>& bHadJetIndex;
-        const std::vector<int>& bHadFlavour;
-        const LV& met;
-        const LV& lepton;
-        const LV& antilepton;
-        #endif
-    };
 
     /// Constructor for given jet categories
-    DijetAnalyzer(const JetCategories& jetCategories);
+    DijetAnalyzer(const std::vector<TString>& selectionStepsNoCategories,
+                  const std::vector<TString>& stepsForCategories =std::vector<TString>(),
+                  const JetCategories* jetCategories =0);
 
     /// Empty destructor
     ~DijetAnalyzer(){};
 
-    /// Setting the output selectorList
-    void setOutputSelectorList(TSelectorList* output);
-
     /// Fill all histograms
-    void fill(const Input& input, const double& weight);
+    void fill(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+              const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+              const KinRecoObjects& kinRecoObjects,
+              const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
+              const double& weight, const TString& stepShort);
 
     /// Find index of genJet corresponding to the specified reco jet. Returns -1 if not found
     int genJetIdOfRecoJet(const LV& recoJet, const VLV& genJets, const float dR_max=0.3);
@@ -77,17 +67,12 @@ public:
     /// Whether index is in the vector of indices
     bool isInVector(const std::vector<int>& idVector, const int id);
 
-    /// Clearing the class instance
-    void clear();
 
 
 private:
 
-    /// Book all histograms for all jet categories categories
-    void bookAllHistos();
-
     /// Book histograms for one categoryId with given id and label
-    virtual void bookHistos(int cat, const TString& label);
+    virtual void bookHistos(const TString& step);
     
     
     
@@ -101,15 +86,6 @@ private:
         /// The map with all the histograms for one jet category
         std::map<TString, TH1*> map_histo;
     };
-
-    /// Store the object in the output list and return it
-    template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
-
-    /// Pointer for bookkeeping of histograms, trees, etc.
-    TSelectorList* selectorList_;
-
-    /// Jet categories for which the plots should be filled
-    const JetCategories& jetCategories_;
 
     /// Histograms for all jet categories
     std::vector<CatHistograms> histograms_;

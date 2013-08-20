@@ -12,7 +12,8 @@
 #include "TSystem.h"
 #include "TList.h"
 
-#include "MvaInputVariables.h"
+#include "MvaFactory.h"
+#include "MvaTreeHandler.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
 #include "../../diLeptonic/src/utils.h"
@@ -77,7 +78,6 @@ void trainBdtTopSystemJetAssignment(const std::vector<std::string>& modes)
     }
     
     // Open the input files and access the MVA input training trees
-    std::vector<TTree*> v_treeTraining;
     TList* listTraining = new TList;
     for(const auto& inputFileName : v_inputFileNameTraining){
         std::cout<<"File for training: "<<inputFileName<<std::endl;
@@ -86,13 +86,11 @@ void trainBdtTopSystemJetAssignment(const std::vector<std::string>& modes)
         TFile* inputFile(0);
         inputFile = TFile::Open(inputFileName);
         TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
-//        v_treeTraining.push_back(inputTree);
         listTraining->Add(inputTree);
     }
     std::cout<<std::endl;
     
     // Open the input files and access the MVA input testing trees
-    std::vector<TTree*> v_treeTesting;
     TList* listTesting = new TList;
     for(const auto& inputFileName : v_inputFileNameTesting){
         std::cout<<"File for testing: "<<inputFileName<<std::endl;
@@ -101,7 +99,6 @@ void trainBdtTopSystemJetAssignment(const std::vector<std::string>& modes)
         TFile* inputFile(0);
         inputFile = TFile::Open(inputFileName);
         TTree* inputTree = (TTree*)inputFile->Get("mvaInputTopJets");
-//        v_treeTesting.push_back(inputTree);
         listTesting->Add(inputTree);
     }
     
@@ -120,41 +117,46 @@ void trainBdtTopSystemJetAssignment(const std::vector<std::string>& modes)
     mergedTrees->Close();
     
     // Print all separation power plots
-    TString outputPlots(MvaOutputDIR);
-    outputPlots.Append("/").Append(PlotOutputFILE);
-    MvaInputTopJetsVariables mvaInputTopJetsVariables({});
-    mvaInputTopJetsVariables.importTree(mergedTreesName.Data(), "mvaInputTopJets_training");
-    if(std::find(modes.begin(), modes.end(), "cp") != modes.end()) mvaInputTopJetsVariables.mvaInputVariablesControlPlots(outputPlots.Data());
+    if(std::find(modes.begin(), modes.end(), "cp") != modes.end()){
+        TString outputPlots(MvaOutputDIR);
+        outputPlots.Append("/").Append(PlotOutputFILE);
+        MvaTreeHandler mvaTreeHandler("", {});
+        mvaTreeHandler.importTree(mergedTreesName.Data(), "mvaInputTopJets_training");
+        mvaTreeHandler.plotVariables(outputPlots.Data(), true);
+    }
     
-    mergedTrees = TFile::Open(mergedTreesName);
-    treeTraining = (TTree*)mergedTrees->Get("mvaInputTopJets_training");
-    treeTesting = (TTree*)mergedTrees->Get("mvaInputTopJets_testing");
+    // Run the MVA training
+    if(std::find(modes.begin(), modes.end(), "mva") != modes.end()){
+        mergedTrees = TFile::Open(mergedTreesName);
+        treeTraining = (TTree*)mergedTrees->Get("mvaInputTopJets_training");
+        treeTesting = (TTree*)mergedTrees->Get("mvaInputTopJets_testing");
+        
+        MvaFactory mvaFactory(0, {});
+        
+        // MVA for correct dijet combinations
+        constexpr const char* mvaOutputFilenameCorrect = "correct.root";
+        constexpr const char* methodNameCorrect = "correct";
+        
+        const TCut cutSignalCorrect = "correctCombination != 0";
+        const TCut cutBackgroundCorrect = "correctCombination == 0 && swappedCombination == 0";
+        
+        mvaFactory.runMva(MvaOutputDIR, MvaWeightFileDIR, mvaOutputFilenameCorrect,
+                          methodNameCorrect, cutSignalCorrect, cutBackgroundCorrect,
+                          treeTraining, treeTesting);
+        
+        
+        // MVA for swapped dijet combinations
+        constexpr const char* mvaOutputFilenameSwapped = "swapped.root";
+        constexpr const char* methodNameSwapped = "swapped";
+        
+        const TCut cutSignalSwapped = "swappedCombination != 0";
+        const TCut cutBackgroundSwapped = "correctCombination == 0 && swappedCombination == 0";
+        
+        mvaFactory.runMva(MvaOutputDIR, MvaWeightFileDIR, mvaOutputFilenameSwapped,
+                          methodNameSwapped, cutSignalSwapped, cutBackgroundSwapped,
+                          treeTraining, treeTesting);
+    }
     
-    
-    
-    constexpr const char* mvaOutputFilenameCorrect = "correct.root";
-    constexpr const char* methodNameCorrect = "correct";
-    
-    const TCut cutSignalCorrect = "correctCombination != 0";
-    const TCut cutBackgroundCorrect = "correctCombination == 0 && swappedCombination == 0";
-    
-    if(std::find(modes.begin(), modes.end(), "mva") != modes.end())
-        mvaInputTopJetsVariables.runMva(MvaOutputDIR, MvaWeightFileDIR, mvaOutputFilenameCorrect,
-                                        methodNameCorrect, cutSignalCorrect, cutBackgroundCorrect,
-                                        treeTraining, treeTesting);
-    
-    
-    
-    constexpr const char* mvaOutputFilenameSwapped = "swapped.root";
-    constexpr const char* methodNameSwapped = "swapped";
-    
-    const TCut cutSignalSwapped = "swappedCombination != 0";
-    const TCut cutBackgroundSwapped = "correctCombination == 0 && swappedCombination == 0";
-    
-    if(std::find(modes.begin(), modes.end(), "mva") != modes.end())
-        mvaInputTopJetsVariables.runMva(MvaOutputDIR, MvaWeightFileDIR, mvaOutputFilenameSwapped,
-                                        methodNameSwapped, cutSignalSwapped, cutBackgroundSwapped,
-                                        treeTraining, treeTesting);
     
     std::cout<<"=== Finishing MVA training\n\n";
 }

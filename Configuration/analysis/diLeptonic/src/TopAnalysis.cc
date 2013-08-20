@@ -33,7 +33,7 @@
 constexpr double TOPXSEC = 234.;
 
 /// Luminosity in 1/fb
-constexpr double LUMI = 19.6248;
+constexpr double LUMI = 19.789;
 
 ///do we want to run the sync excercise?
 constexpr bool RUNSYNC = false;
@@ -50,6 +50,9 @@ constexpr double JetEtaCUT = 2.4;
 /// Cut value for jet pt
 constexpr double JetPtCUT = 30.;
 
+/// Cut value for jet pt
+constexpr double JetPtCUT2 = 50.;
+
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
 
@@ -62,7 +65,7 @@ constexpr bool ReTagJet = true;
 /// Apply Top Pt reweighting from fit calculated by Martin
 constexpr bool ApplyTopPtReweight = false;
 
-
+constexpr double rho0 = 340.0;
 
 
 
@@ -229,6 +232,16 @@ void TopAnalysis::SlaveBegin(TTree*)
     h_AntiLeptonpT_diLep = store(new TH1D ( "AntiLeptonpT_diLep", "Lepton pT (after dilepton cut)", 80, 0, 400 ));
     h_AntiLeptonEta_diLep = store(new TH1D ( "AntiLeptonEta_diLep", "Lepton Eta (after dilepton cut)", 100, -5, 5 ));
 
+    h_RecoToppTTTRestFrame = store(new TH1D ( "RecoToppTTTRestFrame", "Top pT in TTBar Rest Frame", 400, 0, 400 ));
+    h_HypToppTTTRestFrame = store(new TH1D ( "HypToppTTTRestFrame", "Top pT in TTBar Rest Frame (HYP)", 400, 0, 400 ));
+    h_VisGenToppTTTRestFrame = store(new TH1D ( "VisGenToppTTTRestFrame", "Top pT in TTBar Rest Frame (VisGEN)", 400, 0, 400 ));
+    h_GenRecoToppTTTRestFrame = store(new TH2D ( "GenRecoToppTTTRestFrame", "Gen/Reco (Top pT in TTBar Rest Frame)", 400, 0, 400, 400, 0, 400));
+
+    h_RecoAntiToppTTTRestFrame = store(new TH1D ( "RecoAntiToppTTTRestFrame", "AntiTop pT in TTBar Rest Frame", 400, 0, 400 ));
+    h_HypAntiToppTTTRestFrame = store(new TH1D ( "HypAntiToppTTTRestFrame", "AntiTop pT in TTBar Rest Frame (HYP)", 400, 0, 400 ));
+    h_VisGenAntiToppTTTRestFrame = store(new TH1D ( "VisGenAntiToppTTTRestFrame", "AntiTop pT in TTBar Rest Frame (VisGEN)", 400, 0, 400 ));
+    h_GenRecoAntiToppTTTRestFrame = store(new TH2D ( "GenRecoAntiToppTTTRestFrame", "Gen/Reco (AntiTop pT in TTBar Rest Frame)", 400, 0, 400, 400, 0, 400));
+
     h_HypToppT = store(new TH1D ( "HypToppT", "Top pT", 400, 0, 400 ));
     h_HypTopEta = store(new TH1D ( "HypTopEta", "Top #eta", 100, -5, 5 ));
     h_HypTopMass = store(new TH1D ( "HypTopMass", "Top Mass", 80, 0, 400 ));
@@ -310,6 +323,26 @@ void TopAnalysis::SlaveBegin(TTree*)
     h_VisGenAntiNeutrinopT = store(new TH1D("VisGenAntiNeutrinopT", "Nubar pT (VisGEN)", 80, 0, 400));
     h_RecoAntiNeutrinopT = store(new TH1D("RecoAntiNeutrinopT", "reco nubar pT", 80, 0, 400));
     h_HypAntiNeutrinopT = store(new TH1D("HypAntiNeutrinopT", "hyp nubar pT", 80, 0, 400));
+
+    h_GenRecoTTBarDeltaPhi = store( new TH2D("GenRecoTTBarDeltaPhi", "Gen/Reco #Delta#Phi (ttbar)", 200, 0, 3.5, 200, 0, 3.5));
+    h_RecoTTBarDeltaPhi = store( new TH1D("RecoTTBarDeltaPhi", "#Delta#Phi ofTTBar (RECO)", 200, 0, 3.5));
+    h_HypTTBarDeltaPhi = store( new TH1D("HypTTBarDeltaPhi", "#Delta#Phi ofTTBar (HYP)", 200, 0, 3.5));
+    h_VisGenTTBarDeltaPhi = store( new TH1D("VisGenTTBarDeltaPhi", "#Delta#Phi ofTTBar (VisGen)", 200, 0, 3.5));
+
+    h_GenRecoTTBarDeltaRapidity = store( new TH2D("GenRecoTTBarDeltaRapidity", "Gen/Reco |y^{t}| - |y^{#bar{t}}|", 500, -5, 5, 500, -5, 5));
+    h_RecoTTBarDeltaRapidity = store( new TH1D("RecoTTBarDeltaRapidity", "|y^{t}| - |y^{#bar{t}}| (RECO)", 500, -5, 5));
+    h_HypTTBarDeltaRapidity = store( new TH1D("HypTTBarDeltaRapidity", "|y^{t}| - |y^{#bar{t}}| (HYP)", 500, -5, 5));
+    h_VisGenTTBarDeltaRapidity = store( new TH1D("VisGenTTBarDeltaRapidity", "|y^{t}| - |y^{#bar{t}}| (VisGen)", 500, -5, 5));
+    
+    h_GenRecoBBBarpT = store( new TH2D("GenRecoBBBarpT", "Gen/Reco p_{T} (bbbar)", 400, 0, 800, 400, 0, 800));
+    h_RecoBBBarpT = store( new TH1D("RecoBBBarpT", "p_{T} of bbbar (RECO)", 400, 0, 800));
+    h_HypBBBarpT = store( new TH1D("HypBBBarpT", "p_{T} of bbbarpT (HYP)", 400, 0, 800));
+    h_VisGenBBBarpT = store( new TH1D("VisGenBBBarpT", "p_{T} of bbbarpT (VisGen)", 400, 0, 800));
+
+    h_GenRecoBBBarMass = store( new TH2D("GenRecoBBBarMass", "Gen/Reco Mass (bbbar)", 400, 0, 800, 400, 0, 800));
+    h_RecoBBBarMass = store( new TH1D("RecoBBBarMass", "Mass of bbbar (RECO)", 400, 0, 800));
+    h_HypBBBarMass = store( new TH1D("HypBBBarMass", "Mass of bbbarMass (HYP)", 400, 0, 800));
+    h_VisGenBBBarMass = store( new TH1D("VisGenBBBarMass", "Mass of bbbarMass (VisGen)", 400, 0, 800));
 
     h_GenRecoTTBarRapidity = store(new TH2D ( "GenRecoTTBarRapidity", "Rapidity of TTbar System (HYP)", 100, -5, 5, 100, -5, 5 ));
     h_GenRecoTTBarpT = store(new TH2D ( "GenRecoTTBarpT", "pT of TTbar System (HYP)", 500, 0, 500, 500, 0, 500 ));
@@ -470,6 +503,25 @@ void TopAnalysis::SlaveBegin(TTree*)
     h_HypDeltaRExtraJet12 = store(new TH1D("HypDeltaRExtraJet12","Hyp #DeltaR of additional Jets",100,0,10));
     h_VisGenDeltaRExtraJet12 = store(new TH1D("VisGenDeltaRExtraJet12","#Delta R of additional Jets",100,0,10));
 
+    h_RecoDeltaPhiExtraJet12 = store(new TH1D("RecoDeltaPhiExtraJet12","Reco #Delta#Phi of additional Jets",100,-TMath::Pi(), TMath::Pi()));
+    h_HypDeltaPhiExtraJet12 = store(new TH1D("HypDeltaPhiExtraJet12","Hyp #Delta#Phi of additional Jets",100,-TMath::Pi(), TMath::Pi()));
+    h_GenRecoDeltaPhiExtraJet12 = store(new TH2D("GenRecoDeltaPhiExtraJet12","Gen/Reco #Delta #phi of additional Jets",100,-TMath::Pi(), TMath::Pi(),100,0,10));
+    h_VisGenDeltaPhiExtraJet12 = store(new TH1D("VisGenDeltaPhiExtraJet12","#Delta #phi of additional Jets",100,-TMath::Pi(), TMath::Pi()));
+
+    h_RecoPhiExtraJet12 = store(new TH1D("RecoPhiExtraJet12","Reco #sum#Phi of additional Jets",100,-TMath::Pi(), TMath::Pi()));
+    h_HypPhiExtraJet12 = store(new TH1D("HypPhiExtraJet12","Hyp #sum#Phi of additional Jets",100,-TMath::Pi(), TMath::Pi()));
+    h_GenRecoPhiExtraJet12 = store(new TH2D("GenRecoPhiExtraJet12","Gen/Reco #Sum #phi of additional Jets",100,-TMath::Pi(), TMath::Pi(),100,-TMath::Pi(), TMath::Pi()));
+    h_VisGenPhiExtraJet12 = store(new TH1D("VisGenPhiExtraJet12","#Sum #phi of additional Jets",100, -TMath::Pi(), TMath::Pi()));
+
+    h_VisGenTTBar1stJetMass = store(new TH1D("VisGenTTBar1stJetMass","TTBar1stJetMass (VisGEN)",100,0,1));
+    h_GenRecoTTBar1stJetMass = store(new TH2D("GenRecoTTBar1stJetMass","TTBar1stJetMass Gen/Reco",100,0,1,100,0,1));
+    h_RecoTTBar1stJetMass = store(new TH1D("RecoTTBar1stJetMass", "TTBar1stJetMass (Reco)",100,0,1));
+    h_HypTTBar1stJetMass = store(new TH1D("HypTTBar1stJetMass","TTBar1stJetMass (HYP)",100,0,1));
+
+    h_VisGenTTBar0Mass = store(new TH1D("VisGenTTBar0Mass","TTBar0Mass (VisGEN)",200,0,2));
+    h_GenRecoTTBar0Mass = store(new TH2D("GenRecoTTBar0Mass","TTBar0Mass Gen/Reco",200,0,2,200,0,2));
+    h_RecoTTBar0Mass = store(new TH1D("RecoTTBar0Mass", "TTBar0Mass (Reco)",200,0,2));
+    h_HypTTBar0Mass = store(new TH1D("HypTTBar0Mass","TTBar0Mass (HYP)",200,0,2));
 
     double xbin[20]={30.,40.,50.,60.,70.,80.,90.,100.,120.,140.,160.,180.,200.,220.,240.,260.,280.,320.,360.,400.};
 
@@ -1217,13 +1269,23 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     orderLV(LeadHypTop, NLeadHypTop, HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex), LVpt);
     orderLV(LeadHypLepton, NLeadHypLepton, HypLepton_->at(solutionIndex), HypAntiLepton_->at(solutionIndex), LVpt);
     orderLV(LeadHypBJet, NLeadHypBJet, HypBJet_->at(solutionIndex), HypAntiBJet_->at(solutionIndex), LVpt);
-    
-    //create ll and tt system
+
+    //create ll, bb and tt system 
     LV hypllbar(HypLepton_->at(solutionIndex) + HypAntiLepton_->at(solutionIndex));
+    LV hypbbbar(HypBJet_->at(solutionIndex) + HypAntiBJet_->at(solutionIndex));
     LV hypttbar(HypTop_->at(solutionIndex)+HypAntiTop_->at(solutionIndex));
-    
+
+    // create top/antitop quark in the ttbar rest frame
+    ROOT::Math::Boost CoMBoostHypTtbar (hypttbar.BoostToCM());
+    LV top = HypTop_->at(solutionIndex);
+    LV antitop = HypAntiTop_->at(solutionIndex);
+    top = CoMBoostHypTtbar(top);
+    antitop = CoMBoostHypTtbar(antitop);
+
     //First fill the reco histograms (which have no scaling factors applied)
     const double recoWeight = trueLevelWeight;
+    h_RecoTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity()) - std::abs(HypAntiTop_->at(solutionIndex).Rapidity()), recoWeight);
+    h_RecoTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), recoWeight);
     h_RecoTTBarMass->Fill(hypttbar.M(), recoWeight);
     h_RecoTTBarRapidity->Fill(hypttbar.Rapidity(), recoWeight);
     h_RecoTTBarpT->Fill(hypttbar.Pt(), recoWeight);
@@ -1232,6 +1294,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_RecoTopRapidity->Fill(HypTop_->at(solutionIndex).Rapidity(), recoWeight);
     h_RecoAntiTopRapidity->Fill(HypAntiTop_->at(solutionIndex).Rapidity(), recoWeight);
 
+    h_RecoToppTTTRestFrame->Fill(top.Pt(), recoWeight);
+    h_RecoAntiToppTTTRestFrame->Fill(antitop.Pt(), recoWeight);
+    
     h_RecoLLBarMass->Fill(hypllbar.M(), recoWeight);
     h_RecoLLBarpT->Fill(hypllbar.Pt(), recoWeight);
     h_RecoLeptonpT->Fill(HypLepton_->at(solutionIndex).Pt(), recoWeight);
@@ -1244,6 +1309,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     h_RecoNeutrinopT->Fill(HypNeutrino_->at(solutionIndex).Pt(), recoWeight);
     h_RecoAntiNeutrinopT->Fill(HypAntiNeutrino_->at(solutionIndex).Pt(), recoWeight);
+
+    h_RecoBBBarMass->Fill(hypbbbar.M(), recoWeight);
+    h_RecoBBBarpT->Fill(hypbbbar.Pt(), recoWeight);
 
     h_RecoBJetpT->Fill(HypBJet_->at(solutionIndex).Pt(), recoWeight);
     h_RecoAntiBJetpT->Fill(HypAntiBJet_->at(solutionIndex).Pt(), recoWeight);
@@ -1277,10 +1345,18 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypTTBarMass->Fill(hypttbar.M(), weight);
     h_HypTTBarRapidity->Fill(hypttbar.Rapidity(), weight);
     h_HypTTBarpT->Fill(hypttbar.Pt(), weight);
+    h_HypTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), weight);
+    h_HypTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity()) - std::abs(HypAntiTop_->at(solutionIndex).Rapidity()), weight);
+
+    h_HypBBBarMass->Fill(hypbbbar.M(), weight);
+    h_HypBBBarpT->Fill(hypbbbar.Pt(), weight);
 
     h_HypLLBarMass->Fill(hypllbar.M(), weight);
     h_HypLLBarpT->Fill(hypllbar.Pt(), weight);
-    
+
+    h_HypToppTTTRestFrame->Fill(top.Pt(), weight);
+    h_HypAntiToppTTTRestFrame->Fill(antitop.Pt(), weight);
+
     h_HypMet->Fill(met_->Pt(), weight);
     h_HypHT->Fill(jetHT, weight);
 
@@ -1344,7 +1420,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         if(std::fabs(jets_->at(k).Eta()) > 2.4) continue;//carmen eta cuts
         if(jets_->at(k).Pt()< JetPtCUT) {continue;}
     // changed to fill Mult***
-        if (jets_->at(k).Pt()> JetPtCUT)
+        if (jets_->at(k).Pt()> JetPtCUT2)
         {
             RecoJets++;
             if(std::fabs(HypAntiBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1 && std::fabs(HypBJet_->at(solutionIndex).Pt() - jets_->at(k).Pt())>0.1 && jetnumReco<4) {
@@ -1419,6 +1495,12 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         {
             h_RecoDeltaRExtraJet12->Fill(std::fabs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),recoWeight);
             h_HypDeltaRExtraJet12->Fill(std::fabs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),weight);
+         if(jets_->at(extrarecojet[first]).Pt()< 60. && jets_->at(extrarecojet[second]).Pt()< 60. && TMath::Abs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))) > 0.6 && jets_->at(extrarecojet[first]).Eta() >0.0 && jets_->at(extrarecojet[second]).Eta() < 0.0 ) {
+         h_RecoDeltaPhiExtraJet12->Fill(DeltaPhi(jets_->at(extrarecojet[first]),jets_->at(extrarecojet[second])),recoWeight);
+         h_HypDeltaPhiExtraJet12->Fill(DeltaPhi(jets_->at(extrarecojet[first]),jets_->at(extrarecojet[second])),weight);
+         h_RecoPhiExtraJet12->Fill(jets_->at(extrarecojet[second]).phi()+jets_->at(extrarecojet[first]).phi(),recoWeight);
+         h_HypPhiExtraJet12->Fill(jets_->at(extrarecojet[second]).phi()+jets_->at(extrarecojet[first]).phi(),weight);
+         }
         }
     }
     if (jetnumReco > -1)
@@ -1427,6 +1509,12 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_RecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),recoWeight);
         h_HypExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),weight);
         h_HypExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),weight);
+
+        h_RecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(), recoWeight);
+        h_HypTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),weight);
+        h_RecoTTBar0Mass->Fill(rho0/(hypttbar).M(), recoWeight);
+        h_HypTTBar0Mass->Fill(rho0/(hypttbar).M(),weight);
+
     }
     for(int q0 = 0; q0<19;q0++){
         h_RecoJetMultTotal->Fill(cbin[q0],recoWeight);
@@ -1497,12 +1585,18 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_GenRecoLeptonEtaNLead->Fill(NLeadHypLepton.Eta(), NLeadGenLepton.Eta(), weight);
     
     if(BHadronIndex >= 0 && AntiBHadronIndex >= 0){
+        LV genbbbar (allGenJets_->at(BHadronIndex) + allGenJets_->at(AntiBHadronIndex));
+        h_GenRecoBBBarpT->Fill(hypbbbar.Pt(), genbbbar.Pt(), weight);
+        h_GenRecoBBBarMass->Fill(hypbbbar.M(), genbbbar.M(), weight);
+
         h_GenRecoBJetpTLead->Fill(LeadHypBJet.Pt(), LeadGenBJet.Pt(), weight);
         h_GenRecoBJetpTNLead->Fill(NLeadHypBJet.Pt(), NLeadGenBJet.Pt(), weight);
         h_GenRecoBJetEtaLead->Fill(LeadHypBJet.Eta(), LeadGenBJet.Eta(), weight);
         h_GenRecoBJetEtaNLead->Fill(NLeadHypBJet.Eta(), NLeadGenBJet.Eta(), weight);
     }
     else{
+        h_GenRecoBBBarpT->Fill(hypbbbar.Pt(), -1000, weight);
+        h_GenRecoBBBarMass->Fill(hypbbbar.M(), -1000, weight);
         h_GenRecoBJetpTLead->Fill(LeadHypBJet.Pt(), -1000, weight);
         h_GenRecoBJetpTNLead->Fill(NLeadHypBJet.Pt(), -1000, weight);
         h_GenRecoBJetEtaLead->Fill(LeadHypBJet.Eta(), -1000, weight);
@@ -1552,10 +1646,19 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
             h_GenRecoExtraJetpT2->Fill(jets_->at(extrarecojet[second]).Pt(),allGenJets_->at(extragenjet[1]).Pt(),weight);
             h_GenRecoExtraJetEta2->Fill(jets_->at(extrarecojet[second]).Eta(),allGenJets_->at(extragenjet[1]).Eta(),weight);
             h_GenRecoDeltaRExtraJet12->Fill(std::fabs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))),std::fabs(DeltaR(allGenJets_->at(extragenjet[1]),allGenJets_->at(extragenjet[0]))),weight);
+            if(jets_->at(extrarecojet[first]).Pt()< 60. && jets_->at(extrarecojet[second]).Pt()< 60. && TMath::Abs(DeltaR(jets_->at(extrarecojet[second]),jets_->at(extrarecojet[first]))) > 0.6 && jets_->at(extrarecojet[first]).Eta() >0.0 && jets_->at(extrarecojet[second]).Eta() < 0.0 ) {
+            h_GenRecoDeltaPhiExtraJet12->Fill(DeltaPhi(jets_->at(extrarecojet[first]),jets_->at(extrarecojet[second])),DeltaPhi(allGenJets_->at(extragenjet[1]),allGenJets_->at(extragenjet[0])),weight);
+            h_GenRecoPhiExtraJet12->Fill(jets_->at(extrarecojet[first]).Phi()+jets_->at(extrarecojet[second]).Phi(),allGenJets_->at(extragenjet[0]).Phi()+allGenJets_->at(extragenjet[1]).Phi(),weight);
+            }
+
         }
         else if (jetnumReco >-1 ){
             h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),allGenJets_->at(extragenjet[0]).Pt(),weight); 
             h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),allGenJets_->at(extragenjet[0]).Eta(),weight);
+            LV genttbar2(*GenTop_ + *GenAntiTop_);
+            h_GenRecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),rho0/(genttbar2+allGenJets_->at(extragenjet[0])).M(),weight);
+            h_GenRecoTTBar0Mass->Fill(rho0/(hypttbar).M(),rho0/(genttbar2).M(),weight);
+
         }
     } else {
         h_GenRecoJetMult->Fill(numberOfJets, -1000., weight );
@@ -1579,6 +1682,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         else if (jetnumReco >-1 ){
             h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),-1000.,weight);
             h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),-1000.,weight);
+
+            h_GenRecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),-1000.,weight);
+            h_GenRecoTTBar0Mass->Fill(rho0/(hypttbar).M(),-1000.,weight);
         }
 
     }
@@ -1591,7 +1697,22 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_GenRecoTTBarMass->Fill(hypttbar.M(), genttbar.M(), weight );
     h_GenRecoTTBarpT->Fill(hypttbar.Pt(), genttbar.Pt(), weight );
     h_GenRecoTTBarRapidity->Fill(hypttbar.Rapidity(), genttbar.Rapidity(), weight );
+    h_GenRecoTTBarDeltaPhi->Fill(std::abs(DeltaPhi(HypTop_->at(solutionIndex), HypAntiTop_->at(solutionIndex))), 
+                                 std::abs(DeltaPhi(*GenTop_, *GenAntiTop_)), weight);
+    h_GenRecoTTBarDeltaRapidity->Fill(std::abs(HypTop_->at(solutionIndex).Rapidity()) - std::abs(HypAntiTop_->at(solutionIndex).Rapidity()), 
+                                     std::abs(GenTop_->Rapidity()) - std::abs(GenAntiTop_->Rapidity()), 
+                                      weight);
 
+    // create top/antitop quark in the ttbar rest frame
+    ROOT::Math::Boost CoMBoostGenTtbar (genttbar.BoostToCM());
+    LV gentop (*GenTop_);
+    LV genantitop (*GenAntiTop_);
+    gentop = CoMBoostGenTtbar(gentop);
+    genantitop = CoMBoostGenTtbar(genantitop);
+
+    h_GenRecoToppTTTRestFrame->Fill(top.Pt(), gentop.Pt(), weight);
+    h_GenRecoAntiToppTTTRestFrame->Fill(antitop.Pt(), genantitop.Pt(), weight);
+    
     return kTRUE;
 }
 
@@ -1944,6 +2065,9 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                 h_VisGenAntiLeptonBjetMass->Fill(( *GenAntiLepton_ + allGenJets_->at(BHadronIndex) ).M(), trueLevelWeight );
                 h_VisGenJetMult->Fill(allGenJets_->size(), trueLevelWeight );
 
+                h_VisGenBBBarpT->Fill((allGenJets_->at(BHadronIndex) + allGenJets_->at(AntiBHadronIndex)).Pt(), trueLevelWeight );
+                h_VisGenBBBarMass->Fill((allGenJets_->at(BHadronIndex) + allGenJets_->at(AntiBHadronIndex)).M(), trueLevelWeight );
+
                 //Begin: Select & Fill histograms with Leading pT and 2nd Leading pT: Lepton and BJet
                 h_VisGenLeptonpTLead->Fill(LeadGenLepton.Pt(), trueLevelWeight);
                 h_VisGenLeptonpTNLead->Fill(NLeadGenLepton.Pt(), trueLevelWeight);
@@ -1970,6 +2094,8 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     h_VisGenAntiTopRapidity->Fill(GenAntiTop_->Rapidity(), trueLevelWeight );
     h_VisGenTopEta->Fill(GenTop_->Eta(), trueLevelWeight );
     h_VisGenAntiTopEta->Fill(GenAntiTop_->Eta(), trueLevelWeight );
+    h_VisGenTTBarDeltaPhi->Fill(std::abs(DeltaPhi(*GenTop_, *GenAntiTop_)), trueLevelWeight);
+    h_VisGenTTBarDeltaRapidity->Fill(std::abs(GenTop_->Rapidity()) - std::abs(GenAntiTop_->Rapidity()), trueLevelWeight);
     
     h_VisGenNeutrinopT->Fill(GenNeutrino_->Pt(), trueLevelWeight);
     h_VisGenAntiNeutrinopT->Fill(GenAntiNeutrino_->Pt(), trueLevelWeight);
@@ -1983,6 +2109,17 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     h_VisGenTopMassLead->Fill(LeadGenTop.M(), trueLevelWeight);
     h_VisGenTopMassNLead->Fill(NLeadGenTop.M(), trueLevelWeight);
     //End: Fill histograms with Leading pT and 2nd Leading pT: Top
+    
+    // create top/antitop quark in the ttbar rest frame
+    ROOT::Math::Boost CoMBoostGenTtbar (genttbar.BoostToCM());
+    LV gentop (*GenTop_);
+    LV genantitop (*GenAntiTop_);
+    gentop = CoMBoostGenTtbar(gentop);
+    genantitop = CoMBoostGenTtbar(genantitop);
+
+    h_VisGenToppTTTRestFrame->Fill(gentop.Pt(), trueLevelWeight);
+    h_VisGenAntiToppTTTRestFrame->Fill(genantitop.Pt(), trueLevelWeight);
+
 }
 
 void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
@@ -2014,12 +2151,12 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                 //New plots from Carmen: Begin
                 for(int genJet=0; genJet<(int)allGenJets_->size(); genJet++)
                 {
-                    if(std::fabs(allGenJets_->at(genJet).Eta() ) > JetEtaCUT || allGenJets_->at(genJet).Pt() <= JetPtCUT ||
+                    if(std::fabs(allGenJets_->at(genJet).Eta() ) > JetEtaCUT || allGenJets_->at(genJet).Pt() <= JetPtCUT2 ||
                         std::fabs(DeltaR(*GenLepton_, allGenJets_->at(genJet))) < 0.4 || std::fabs(DeltaR(*GenAntiLepton_, allGenJets_->at(genJet))) < 0.4 )
                     {
                         continue;
                     }
-                    if(allGenJets_->at(genJet).Pt()> JetPtCUT && std::fabs(allGenJets_->at(genJet).Eta())<2.4) {//CARMEN ETA CUT
+                    if(allGenJets_->at(genJet).Pt()> JetPtCUT2 && std::fabs(allGenJets_->at(genJet).Eta())<2.4) {//CARMEN ETA CUT
                         GenJets_cut++;
                         if(allGenJets_->at(BHadronIndex) != allGenJets_->at(genJet) && allGenJets_->at(AntiBHadronIndex) != allGenJets_->at(genJet))
                         {
@@ -2050,9 +2187,13 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                     h_VisGenExtraJetpT2->Fill(allGenJets_->at(extragenjet[1]).Pt(),trueLevelWeight);
                     h_VisGenExtraJetEta2->Fill(allGenJets_->at(extragenjet[1]).Eta(),trueLevelWeight);
                     h_VisGenDeltaRExtraJet12->Fill(std::fabs(DeltaR(allGenJets_->at(extragenjet[0]),allGenJets_->at(extragenjet[1]))),trueLevelWeight);
-                } else if(jetnum == 0){
+                } else if(jetnum > -1 ){
                     h_VisGenExtraJetpT->Fill(allGenJets_->at(extragenjet[0]).Pt(),trueLevelWeight);
                     h_VisGenExtraJetEta->Fill(allGenJets_->at(extragenjet[0]).Eta(),trueLevelWeight);
+                    LV genttbar(*GenTop_ + *GenAntiTop_);
+                    h_VisGenTTBar1stJetMass->Fill(rho0/(genttbar+allGenJets_->at(extragenjet[0])).M(),trueLevelWeight);  
+                    h_VisGenTTBar0Mass->Fill(rho0/genttbar.M(),trueLevelWeight);
+
                 }
                 for(int q0 = 0; q0<19; q0++){
                     h_VisGenJetMultTotal->Fill(cbin[q0],trueLevelWeight);

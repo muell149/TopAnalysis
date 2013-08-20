@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <sstream>
+#include <iterator>
 
 #include <TH1.h>
 #include <TH1D.h>
@@ -38,6 +39,11 @@ jetCategories_(jetCategories)
         std::cerr<<"ERROR in constructor for AnalysisHistogramsBase! "
                  <<"No jet categories passed, but request for category-wise selection steps\n...break\n"<<std::endl;
         exit(234);
+    }
+    if(jetCategories_ && stepsForCategories_.size()==0){
+        std::cerr<<"ERROR in constructor for AnalysisHistogramsBase! "
+                 <<"Jet categories passed, but no category-wise selection steps defined\n...break\n"<<std::endl;
+        exit(235);
     }
 }
 
@@ -185,6 +191,7 @@ looseStep_(looseStep)
         std::cerr<<"ERROR in constructor of DyScalingHistograms!"
                  <<"Could not find in selection steps the step specified for loose histogram: "<<looseStep_
                  <<"\n...break\n"<<std::endl;
+        exit(987);
     }
     std::cout<<"=== Finishing setting up Drell-Yan scaling histograms\n\n";
 }
@@ -195,7 +202,8 @@ void DyScalingHistograms::bookHistos(const TString& step)
 {
     std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
     
-    if(step == looseStep_+"zWindow"){
+    const TString looseStep = this->stepName(looseStep_) + "zWindow";
+    if(step == looseStep){
         m_histogram["h_loose"] = this->bookHisto(m_histogram["h_loose"], "Looseh1");
     }
     
@@ -244,7 +252,8 @@ void DyScalingHistograms::fill(const RecoObjects& recoObjects, const tth::RecoOb
     
     
     // Fill histograms
-    if(step == looseStep_+"zWindow") m_stepHistograms_[looseStep_+"zWindow"].m_histogram_["h_loose"]->Fill(dileptonMass, weight);
+    const TString looseStep = this->stepName(looseStep_) + "zWindow";
+    if(step == looseStep) m_stepHistograms_[looseStep].m_histogram_["h_loose"]->Fill(dileptonMass, weight);
     
     if(step.Contains("zWindow")){
         m_histogram["h_zWindow"]->Fill(dileptonMass, weight);
@@ -335,6 +344,10 @@ void BasicHistograms::bookHistos(const TString& step)
     m_histogram[name] = this->store(new TH1D(prefix+name+step, "Jet #phi;#phi^{jet};Jets",50,-3.2,3.2));
     name = "jet_btagDiscriminator";
     m_histogram[name] = this->store(new TH1D(prefix+name+step, "b-tag Discriminator d;d;Jets",60,-0.1,1.1));
+    name = "jet_chargeGlobalPtWeighted";
+    m_histogram[name] = this->store(new TH1D(prefix+name+step, "jetChargeGlobalPtWeighted c_{glob}^{jet}; c_{glob}^{jet};# jets", 110, -1.1, 1.1));
+    name = "jet_chargeRelativePtWeighted";
+    m_histogram[name] = this->store(new TH1D(prefix+name+step, "jetChargeRelativePtWeighted c_{rel}^{jet}; c_{rel}^{jet};# jets", 110, -1.1, 1.1));
     
     // Bjets
     name = "bjet_multiplicity";
@@ -351,6 +364,21 @@ void BasicHistograms::bookHistos(const TString& step)
     m_histogram[name] = this->store(new TH1D(prefix+name+step, "Met E_{t};E_{t}^{met};Events",50,0,300));
     name = "met_phi";
     m_histogram[name] = this->store(new TH1D(prefix+name+step, "Met #phi;#phi^{met};Events",50,-3.2,3.2));
+    
+    // Jet categories
+    const bool stepInCategory = step.Contains("_cate");
+    if(!stepInCategory && jetCategories_){
+        const int numberOfCategories(jetCategories_->numberOfCategories());
+        
+        name = "jetCategories";
+        m_histogram[name] = this->store(new TH1D(prefix+name+step, "Jet categories;# jets/b-jets; # events", numberOfCategories, 0, numberOfCategories));
+        const std::vector<TString> v_binLabel(jetCategories_->binLabels());
+        for(std::vector<TString>::const_iterator i_binLabel = v_binLabel.begin(); i_binLabel != v_binLabel.end(); ++i_binLabel){
+            const TString binLabel(*i_binLabel);
+            int position = std::distance(v_binLabel.begin(), i_binLabel) +1;
+            m_histogram[name]->GetXaxis()->SetBinLabel(position, binLabel);
+        }
+    }
 }
 
 
@@ -358,14 +386,18 @@ void BasicHistograms::bookHistos(const TString& step)
 void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
                            const double& weight, const TString& stepShort)
 {
+    // Number of selected jets and bjets
+    const int numberOfJets = recoObjectIndices.jetIndices_.size();
+    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
+    
     // Set up step name and check if step exists
     const bool stepInCategory = stepShort.Contains("_cate");
     const TString step = stepInCategory ? stepShort : this->stepName(stepShort);
     const bool stepExists(this->checkExistence(step));
     if(!stepInCategory && jetCategories_){
         // Here check the individual jet categories
-        const int category = jetCategories_->categoryId(recoObjectIndices.jetIndices_.size(), recoObjectIndices.bjetIndices_.size());
-        const TString fullStepName = this->stepName(stepShort, category);
+        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
+        const TString fullStepName = this->stepName(stepShort, categoryId);
         this->fill(recoObjects, recoObjectIndices, weight, fullStepName);
     }
     if(!stepExists) return;
@@ -426,7 +458,11 @@ void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObject
         m_histogram["jet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), weight);
         m_histogram["jet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), weight);
         m_histogram["jet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), weight);
-        m_histogram["jet_btagDiscriminator"]->Fill(recoObjects.jetBTagCSV_->at(index), weight);
+        double btagDiscriminator = recoObjects.jetBTagCSV_->at(index);
+        if(btagDiscriminator < -0.1) btagDiscriminator = -0.05;
+        m_histogram["jet_btagDiscriminator"]->Fill(btagDiscriminator, weight);
+        m_histogram["jet_chargeGlobalPtWeighted"]->Fill(recoObjects.jetChargeGlobalPtWeighted_->at(index), weight);
+        m_histogram["jet_chargeRelativePtWeighted"]->Fill(recoObjects.jetChargeRelativePtWeighted_->at(index), weight);
     }
     
     
@@ -442,6 +478,13 @@ void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObject
     // Met
     m_histogram["met_et"]->Fill(recoObjects.met_->E(), weight);
     m_histogram["met_phi"]->Fill(recoObjects.met_->Phi(), weight);
+    
+    
+    // Jet categories
+    if(!stepInCategory && jetCategories_){
+        const int categoryId = jetCategories_->categoryId(numberOfJets,numberOfBjets);
+        m_histogram["jetCategories"]->Fill(categoryId, weight);
+    }
 }
 
 

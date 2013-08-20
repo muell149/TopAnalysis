@@ -138,9 +138,9 @@ if options.globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('START53_V22::All')
+        process.GlobalTag.globaltag = cms.string('START53_V27::All')
     else:
-	process.GlobalTag.globaltag = cms.string('FT_53_V21_AN4::All')
+	process.GlobalTag.globaltag = cms.string('FT_53_V21_AN5::All')
 
 print "Using global tag: ", process.GlobalTag.globaltag
 
@@ -761,7 +761,7 @@ if signal:
 process.scaledJetEnergy.inputElectrons       = "selectedPatElectrons"
 process.scaledJetEnergy.inputJets            = "selectedPatJets"
 process.scaledJetEnergy.inputMETs            = "patMETs"
-process.scaledJetEnergy.JECUncSrcFile        = cms.FileInPath("TopAnalysis/TopUtils/data/Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt")
+process.scaledJetEnergy.JECUncSrcFile        = cms.FileInPath("TopAnalysis/TopUtils/data/Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt")
 process.scaledJetEnergy.scaleType = "abs"   #abs = 1, jes:up, jes:down
 
 if options.runOnMC:

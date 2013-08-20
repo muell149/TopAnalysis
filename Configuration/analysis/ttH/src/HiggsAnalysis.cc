@@ -6,22 +6,20 @@
 #include <utility>
 #include <algorithm>
 
-#include <TH1.h>
 #include <TTree.h>
 #include <TString.h>
 #include <TFile.h>
 #include <TSystem.h>
 #include <Math/VectorUtil.h>
-#include <TProfile.h>
 
 #include "HiggsAnalysis.h"
 #include "higgsUtils.h"
-#include "JetCategories.h"
 #include "DijetAnalyzer.h"
 #include "analysisStructs.h"
 #include "AnalysisHistograms.h"
 #include "Playground.h"
-#include "MvaInputVariables.h"
+#include "MvaTreeHandler.h"
+
 #include "MvaValidation.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
@@ -55,12 +53,6 @@ constexpr double MetCUT = 40.;
 
 
 
-// FIXME: move this also to load_HiggsAnalysis
-/// Folder for storage of MVA input TTree
-constexpr const char* MvaInputDIR = "mvaInput";
-
-
-
 
 
 
@@ -69,8 +61,10 @@ constexpr const char* MvaInputDIR = "mvaInput";
 
 
 HiggsAnalysis::HiggsAnalysis(TTree*):
+isInclusiveHiggs_(false),
+bbbarDecayFromInclusiveHiggs_(false),
 runWithTtbb_(false),
-mvaInputTopJetsVariables_(0),
+mvaTreeHandler_(0),
 eventYieldHistograms_(0),
 dyScalingHistograms_(0),
 basicHistograms_(0),
@@ -105,18 +99,18 @@ void HiggsAnalysis::Terminate()
     if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
     
     // Do everything needed for MVA
-    if(mvaInputTopJetsVariables_){
-        // Create output directory for MVA input tree, and produce and write tree
-        std::string f_savename = ttbar::assignFolder(MvaInputDIR, channel_, systematic_);
-        f_savename.append(outputfilename_);
-        mvaInputTopJetsVariables_->produceMvaInputTree(f_savename);
-        //mvaInputTopJetsVariables_.produceMvaInputTree(fOutput);
+    if(mvaTreeHandler_){
+        // Produce and write tree
+        mvaTreeHandler_->produceMvaInputTree(static_cast<std::string>(outputfilename_),
+                                             Channel::convertChannel(static_cast<std::string>(channel_)),
+                                             Systematic::convertSystematic(static_cast<std::string>(systematic_)));
+        //mvaTreeHandler_.produceMvaInputTree(fOutput);
 
         // Create and store control plots in fOutput
-        mvaInputTopJetsVariables_->mvaInputVariablesControlPlots(fOutput);
+        mvaTreeHandler_->plotVariables(fOutput);
         
         // Cleanup
-        mvaInputTopJetsVariables_->clear();
+        mvaTreeHandler_->clear();
     }
     
     
@@ -131,70 +125,10 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     // Defaults from AnalysisBase
     AnalysisBase::SlaveBegin(0);
 
-
-    // Analysis categories
-    const int numberOfCategories(jetCategories_->numberOfCategories());
-
-    h_jetCategories_step8 = store(new TH1D("jetCategories_step8","Jet categories;# jets/b-jets; # events", numberOfCategories, 0, numberOfCategories));
-
-    const std::vector<TString> v_binLabel(jetCategories_->binLabels());
-    for(std::vector<TString>::const_iterator i_binLabel = v_binLabel.begin(); i_binLabel != v_binLabel.end(); ++i_binLabel){
-        const TString binLabel(*i_binLabel);
-        int position = std::distance(v_binLabel.begin(), i_binLabel) +1;
-        h_jetCategories_step8->GetXaxis()->SetBinLabel(position, binLabel);
-    }
-
-
-    // Overview categories
-    const int numberOfCategories_overview(jetCategories_overview_->numberOfCategories());
-
-    h_jetCategories_overview_step1 = store(new TH1D("jetCategories_overview_step1","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step2 = store(new TH1D("jetCategories_overview_step2","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step3 = store(new TH1D("jetCategories_overview_step3","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step4 = store(new TH1D("jetCategories_overview_step4","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step5 = store(new TH1D("jetCategories_overview_step5","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step6 = store(new TH1D("jetCategories_overview_step6","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step7 = store(new TH1D("jetCategories_overview_step7","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-    h_jetCategories_overview_step8 = store(new TH1D("jetCategories_overview_step8","Jet categories;# jets/b-jets; # events", numberOfCategories_overview, 0, numberOfCategories_overview));
-
-    const std::vector<TString> v_binLabel_overview(jetCategories_overview_->binLabels());
-    for(std::vector<TString>::const_iterator i_binLabel = v_binLabel_overview.begin(); i_binLabel != v_binLabel_overview.end(); ++i_binLabel){
-        const TString binLabel(*i_binLabel);
-        int position = std::distance(v_binLabel_overview.begin(), i_binLabel) +1;
-        h_jetCategories_overview_step1->GetXaxis()->SetBinLabel(position, binLabel);
-        h_jetCategories_overview_step2->GetXaxis()->SetBinLabel(position, binLabel);
-        h_jetCategories_overview_step3->GetXaxis()->SetBinLabel(position, binLabel);
-        h_jetCategories_overview_step4->GetXaxis()->SetBinLabel(position, binLabel);
-        h_jetCategories_overview_step5->GetXaxis()->SetBinLabel(position, binLabel);
-        h_jetCategories_overview_step6->GetXaxis()->SetBinLabel(position, binLabel);
-        h_jetCategories_overview_step7->GetXaxis()->SetBinLabel(position, binLabel);
-        h_jetCategories_overview_step8->GetXaxis()->SetBinLabel(position, binLabel);
-        //std::cout<<"Bin, label: "<<position<<" , "<<binLabel<<"\n";
-    }
-
-/*
-    // Histograms needed for cutflow tables
-    h_events_step8 = store(new TH1D("events_step8","event count at after 1btag;;# events",8,0,8));
-    h_events_step8->Sumw2();
-*/
-    
-    
-    // Control plots
-    h_jetPt_step8 = store(new TH1D("jetPt_step8", "jet pt;p_{t}  [GeV];# jets", 40, 0, 400));
-    h_jetChargeGlobalPtWeighted_step8 = store(new TH1D("jetChargeGlobalPtWeighted_step8", "jetChargeGlobalPtWeighted; c_{jet}^{glob};# jets", 110, -1.1, 1.1));
-    h_jetChargeRelativePtWeighted_step8 = store(new TH1D("jetChargeRelativePtWeighted_step8", "jetChargeRelativePtWeighted; c_{jet}^{rel};# jets", 110, -1.1, 1.1));
-
-
-    // Binned control plots
-//    CreateBinnedControlPlots(h_jetCategories_step8, h_events_step8, false);
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetPt_step8, false);
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeGlobalPtWeighted_step8, false);
-    CreateBinnedControlPlots(h_jetCategories_step8, h_jetChargeRelativePtWeighted_step8, false);
-
     // Histograms for b-tagging efficiencies
     if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
     
-    
+    // Book histograms of all analyzers
     this->bookAll();
 }
 
@@ -213,7 +147,7 @@ void HiggsAnalysis::SlaveTerminate()
 Bool_t HiggsAnalysis::Process(Long64_t entry)
 {
     // Defaults from AnalysisBase
-    if(!AnalysisBase::Process(entry))return kFALSE;
+    if(!AnalysisBase::Process(entry)) return kFALSE;
     
     
     // Use utilities without namespaces
@@ -298,7 +232,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectIndices(allLeptonIndices, allLeptons, LVeta, -LeptonEtaCUT);
     selectIndices(allLeptonIndices, allLeptons, LVpt, LeptonPtCut);
     orderIndices(allLeptonIndices, allLeptons, LVpt);
-    const int numberOfAllLeptons = allLeptonIndices.size();
+    //const int numberOfAllLeptons = allLeptonIndices.size();
     
     // Get indices of leptons and antiLeptons separated by charge, and get the leading ones if they exist
     const std::vector<int>& lepPdgId = *recoObjects.lepPdgId_;
@@ -383,9 +317,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     const tth::GenObjectIndices genObjectIndicesDummy(-1, -1, -1, -1, -1, -1, -1, -1);
     
-    const int jetCategoryId_overview = jetCategories_overview_->categoryId(numberOfJets,numberOfBjets);
-    const int jetCategoryId = jetCategories_->categoryId(numberOfJets,numberOfBjets);
-    
     
     // Determine all reco level weights
     const double weightLeptonSF = this->weightLeptonSF(leadingLeptonIndex, nLeadingLeptonIndex, allLeptons, lepPdgId);
@@ -413,16 +344,14 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                   genLevelWeights, recoLevelWeights,
                   1.);
     
-    h_jetCategories_overview_step1->Fill(jetCategoryId_overview, 1);
-
-
-
+    
+    
     //===CUT===
     selectionStep = "2";
     
     // we need an OS lepton pair matching the trigger selection...
     if (!hasLeptonPair) return kTRUE;
-
+    
     // ++++ Control Plots ++++
     
     this->fillAll(selectionStep,
@@ -433,22 +362,19 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                   genLevelWeights, recoLevelWeights,
                   weight);
     
-    // FIXME: should also here apply weights
-    h_jetCategories_overview_step2->Fill(jetCategoryId_overview, 1);
-
-
-
+    
+    
     //===CUT===
     selectionStep = "3";
     
     // ...with at least 20 GeV invariant mass
-    if (dilepton.M() < 20.) return kTRUE;
+    if(dilepton.M() < 20.) return kTRUE;
     
     const bool isZregion = dilepton.M() > 76 && dilepton.M() < 106;
-    KinRecoObjects* kinRecoObjectsPtr(0);
-    const bool hasSolution = this->calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices,
-                                                    allLeptons, jets, jetBTagCSV, met,
-                                                    kinRecoObjectsPtr);
+    //const KinRecoObjects& kinRecoObjects = this->getKinRecoObjects(entry);
+    const KinRecoObjects& kinRecoObjects = this->getKinRecoObjectsOnTheFly(leptonIndex, antiLeptonIndex, jetIndices,
+                                                                           allLeptons, jets, jetBTagCSV, met);
+    const bool hasSolution = kinRecoObjects.valuesSet_;
     
     
     
@@ -457,12 +383,10 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
-    
-    h_jetCategories_overview_step3->Fill(jetCategoryId_overview, weight);
     
     
     
@@ -475,7 +399,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
         this->fillAll(selectionStep,
                       recoObjects, commonGenObjects,
                       topGenObjectsDummy, higgsGenObjectsDummy,
-                      kinRecoObjectsDummy,
+                      kinRecoObjects,
                       genObjectIndicesDummy, recoObjectIndices,
                       genLevelWeights, recoLevelWeights,
                       weight);
@@ -486,7 +410,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
             this->fillAll(selectionStep,
                           recoObjects, commonGenObjects,
                           topGenObjectsDummy, higgsGenObjectsDummy,
-                          kinRecoObjectsDummy,
+                          kinRecoObjects,
                           genObjectIndicesDummy, recoObjectIndices,
                           genLevelWeights, recoLevelWeights,
                           weight);
@@ -497,7 +421,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                 this->fillAll(selectionStep,
                               recoObjects, commonGenObjects,
                               topGenObjectsDummy, higgsGenObjectsDummy,
-                              kinRecoObjectsDummy,
+                              kinRecoObjects,
                               genObjectIndicesDummy, recoObjectIndices,
                               genLevelWeights, recoLevelWeights,
                               weight);
@@ -512,7 +436,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                     this->fillAll(selectionStep,
                                   recoObjects, commonGenObjects,
                                   topGenObjectsDummy, higgsGenObjectsDummy,
-                                  kinRecoObjectsDummy,
+                                  kinRecoObjects,
                                   genObjectIndicesDummy, recoObjectIndices,
                                   genLevelWeights, recoLevelWeights,
                                   weight);
@@ -526,7 +450,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                         this->fillAll(selectionStep,
                                       recoObjects, commonGenObjects,
                                       topGenObjectsDummy, higgsGenObjectsDummy,
-                                      kinRecoObjectsDummy,
+                                      kinRecoObjects,
                                       genObjectIndicesDummy, recoObjectIndices,
                                       genLevelWeights, recoLevelWeights,
                                       weight);
@@ -543,18 +467,16 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     //Exclude the Z window
     if(channel_!="emu" && isZregion) return kTRUE;
-
+    
     // ++++ Control Plots ++++
     
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
-    
-    h_jetCategories_overview_step4->Fill(jetCategoryId_overview, weight);
     
     
     
@@ -563,39 +485,35 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     //Require at least two jets
     if(!has2Jets) return kTRUE;
-
+    
     // ++++ Control Plots ++++
     
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
     
-    h_jetCategories_overview_step5->Fill(jetCategoryId_overview, weight);
-
-
-
+    
+    
     //=== CUT ===
     selectionStep = "6";
     
     //Require MET > 40 GeV in non-emu channels
     if(!hasMetOrEmu) return kTRUE;
-
+    
     // ++++ Control Plots ++++
     
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
     
-    h_jetCategories_overview_step6->Fill(jetCategoryId_overview, weight);
-
     // Fill the b-tagging efficiency plots
     if(this->makeBtagEfficiencies()){
         btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
@@ -610,24 +528,21 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     //Require at least one b tagged jet
     if(!hasBtag) return kTRUE;
-
+    
     weight *= weightBtagSF;
-
+    
     // ++++ Control Plots ++++
     
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjectsDummy, higgsGenObjectsDummy,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndicesDummy, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
     
-    h_jetCategories_overview_step7->Fill(jetCategoryId_overview, weight);
-
-
-
-
+    
+    
     //=== CUT ===
     selectionStep = "8";
     
@@ -680,7 +595,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                                      &allGenJets.at(genBjetFromHiggsIndex), &allGenJets.at(genAntiBjetFromHiggsIndex));
         }
     }
-
+    
     const tth::GenObjectIndices genObjectIndices(genBjetFromTopIndex, genAntiBjetFromTopIndex,
                                                  matchedBjetFromTopIndex, matchedAntiBjetFromTopIndex,
                                                  genBjetFromHiggsIndex, genAntiBjetFromHiggsIndex,
@@ -693,48 +608,10 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     this->fillAll(selectionStep,
                   recoObjects, commonGenObjects,
                   topGenObjects, higgsGenObjects,
-                  *kinRecoObjectsPtr,
+                  kinRecoObjects,
                   genObjectIndices, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
-    
-//    FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_events_step8, 1, weight);
-
-    h_jetCategories_step8->Fill(jetCategoryId, weight);
-    h_jetCategories_overview_step8->Fill(jetCategoryId_overview, weight);
-
-    // Fill jet quantities
-    for(const auto& index : jetIndices){
-        h_jetPt_step8->Fill(jets.at(index).pt(), weight);
-//        h_jetChargeGlobalPtWeighted_step8->Fill(jetChargeGlobalPtWeighted.at(index), weight);
-        h_jetChargeRelativePtWeighted_step8->Fill(jetChargeRelativePtWeighted.at(index), weight);
-        FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_jetPt_step8, jets.at(index).pt(), weight);
-//        FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_jetChargeGlobalPtWeighted_step8, jetChargeGlobalPtWeighted.at(index), weight);
-        FillBinnedControlPlot(h_jetCategories_step8, jetCategoryId, h_jetChargeRelativePtWeighted_step8, jetChargeRelativePtWeighted.at(index), weight);
-    }
-    
-    
-    // Passing information to DijetAnalyzer
-    if(dijetAnalyzer_) {
-        const VLV& allGenJets = *commonGenObjects.allGenJets_;
-        const std::vector<int>& genBHadJetIndex = *topGenObjects.genBHadJetIndex_;
-        const std::vector<int>& genBHadFlavour = *topGenObjects.genBHadFlavour_;
-        
-        // Push_back indices of top b-jets identified by kinematic reconstruction
-        std::vector<int> topJetIds;
-        if(kinRecoObjectsPtr){
-            topJetIds.push_back(kinRecoObjectsPtr->HypJet0index_->at(0));
-            topJetIds.push_back(kinRecoObjectsPtr->HypJet1index_->at(0));
-        }
-        
-        DijetAnalyzer::Input dijetInput(jets, jetIndices, bjetIndices,
-                                        jetBTagCSV, topJetIds, allGenJets,
-                                        genBHadJetIndex, genBHadFlavour,
-                                        met, allLeptons.at(leptonIndex), allLeptons.at(antiLeptonIndex)
-                                       );
-
-        dijetAnalyzer_->fill(dijetInput, weight);
-    }
     
     
     return kTRUE;
@@ -781,7 +658,7 @@ bool HiggsAnalysis::getGenBjetIndices(int& genBjetIndex, int& genAntiBjetIndex,
     
     for(size_t iBHadron=0; iBHadron<genBHadFlavour.size(); ++iBHadron){
         const int flavour = genBHadFlavour.at(iBHadron);
-        if(abs(flavour) != abs(pdgId)) continue;     // Skipping hadrons with the wrong flavour
+        if(std::abs(flavour) != std::abs(pdgId)) continue;     // Skipping hadrons with the wrong flavour
         // Assigning jet index of corresponding hadron. Set to -2 if >1 hadrons found for the same flavour
         if(flavour>0) genBjetIndex = (genBjetIndex==-1) ? genBHadJetIndex.at(iBHadron) : -2;
         else if(flavour<0) genAntiBjetIndex = (genAntiBjetIndex==-1) ? genBHadJetIndex.at(iBHadron) : -2;
@@ -845,30 +722,9 @@ void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusi
 
 
 
-void HiggsAnalysis::SetAnalysisModes(const std::vector<AnalysisMode::AnalysisMode>& analysisModes)
+void HiggsAnalysis::SetMvaInputProduction(MvaTreeHandler* mvaTreeHandler)
 {
-    analysisModes_ = analysisModes;
-}
-
-
-
-void HiggsAnalysis::SetJetCategoriesOverview(const JetCategories& jetCategories)
-{
-    jetCategories_overview_ = &jetCategories;
-}
-
-
-
-void HiggsAnalysis::SetMvaInputProduction(MvaInputTopJetsVariables* mvaInputTopJetsVariables)
-{
-    mvaInputTopJetsVariables_ = mvaInputTopJetsVariables;
-}
-
-
-
-void HiggsAnalysis::SetJetCategoriesAnalysis(const JetCategories& jetCategories)
-{
-    jetCategories_ = &jetCategories;
+    mvaTreeHandler_ = mvaTreeHandler;
 }
 
 
@@ -966,10 +822,12 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
                                       genObjectIndices, recoObjectIndices,
                                       genLevelWeights, recoLevelWeights, defaultWeight,
                                       selectionStep);
-    if(mvaInputTopJetsVariables_) mvaInputTopJetsVariables_->fillForInputProduction(recoObjects,
-                                                                                    genObjectIndices, recoObjectIndices,
-                                                                                    defaultWeight, selectionStep);
+    if(mvaTreeHandler_) mvaTreeHandler_->fillForInputProduction(recoObjects,
+                                                                genObjectIndices, recoObjectIndices,
+                                                                defaultWeight, selectionStep);
     if(mvaValidation_) mvaValidation_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
+    if(dijetAnalyzer_) dijetAnalyzer_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
+                                            genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
 }
 
 
@@ -981,10 +839,7 @@ void HiggsAnalysis::bookAll()
     if(basicHistograms_) basicHistograms_->book(fOutput);
     if(mvaValidation_) mvaValidation_->book(fOutput);
     if(playground_) playground_->book(fOutput);
-    
-    // Setting the output for DijetAnalyzer
-    // FIXME: where are the steps for dijet analyzer set? not existing ???
-    if(dijetAnalyzer_) dijetAnalyzer_->setOutputSelectorList(fOutput);
+    if(dijetAnalyzer_) dijetAnalyzer_->book(fOutput);
 }
 
 

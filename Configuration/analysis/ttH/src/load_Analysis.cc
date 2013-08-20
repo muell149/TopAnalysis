@@ -17,7 +17,9 @@
 #include "HiggsAnalysis.h"
 #include "analysisHelpers.h"
 #include "JetCategories.h"
-#include "MvaInputVariables.h"
+#include "MvaTreeHandler.h"
+#include "MvaReader.h"
+
 #include "MvaValidation.h"
 #include "DijetAnalyzer.h"
 #include "AnalysisHistograms.h"
@@ -158,26 +160,21 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     
     // Set up DijetAnalyzer
     DijetAnalyzer* dijetAnalyzer(0);
+    const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end()){
-        const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
-        dijetAnalyzer= new DijetAnalyzer(jetCategories_dijetAnalyzer);
+        dijetAnalyzer= new DijetAnalyzer({}, {"8"}, &jetCategories_dijetAnalyzer);
     }
     
     // Set up production of MVA input tree
-    MvaInputTopJetsVariables* mvaInputTopJetsVariables(0);
+    MvaTreeHandler* mvaTreeHandler(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaInputTopJetsVariables = new MvaInputTopJetsVariables({"8"});
+        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"8"});
     }
     
     // Set up MVA validation, including reading in MVA weights in case they exist
     MvaValidation* mvaValidation(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
-        // FIXME: Cannot be const due to the internal structure at present
-        MvaInputTopJetsVariables* mvaInputWeightsCorrect(0);
-        MvaInputTopJetsVariables* mvaInputWeightsSwapped(0);
-        mvaInputWeightsCorrect = new MvaInputTopJetsVariables({}, MvaWeightsCorrectFILE);
-        mvaInputWeightsSwapped = new MvaInputTopJetsVariables({}, MvaWeightsSwappedFILE);
-        mvaValidation = new MvaValidation(mvaInputWeightsCorrect, mvaInputWeightsSwapped, {"8"});
+        mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE, {"8"});
     }
     
     // Set up the analysis
@@ -189,9 +186,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetBtagScaleFactors(btagScaleFactors);
     selector->SetUseObjectStructs(true);
     
-    selector->SetJetCategoriesOverview(jetCategories_overview);
-    selector->SetJetCategoriesAnalysis(jetCategories);
-    selector->SetMvaInputProduction(mvaInputTopJetsVariables);
+    selector->SetMvaInputProduction(mvaTreeHandler);
     selector->SetMvaValidation(mvaValidation);
     selector->SetEventYieldHistograms(eventYieldHistograms);
     selector->SetDyScalingHistograms(dyScalingHistograms);
@@ -312,7 +307,6 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
             selector->SetRunWithTtbb(0);
             selector->SetHiggsInclusiveSample(isHiggsInclusive);
             selector->SetHiggsInclusiveSeparation(false);
-            selector->SetAnalysisModes(v_analysisMode);
             
             // Set up nTuple chain and run selector
             TChain chain("writeNTuple/NTuple");

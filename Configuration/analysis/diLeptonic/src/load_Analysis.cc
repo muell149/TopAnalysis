@@ -27,7 +27,8 @@
 /// Set pileup distribution file corresponding to data sample in use
 /// The file ending is automatically adjusted for different systematics
 //constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
-constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19789pb";
 
 
 
@@ -118,7 +119,7 @@ void load_Analysis(TString validFilenamePattern,
     // Set up btag efficiency scale factors (do it for all channels)
     BtagScaleFactors btagScaleFactors(BtagEfficiencyInputDIR,
                                       BtagEfficiencyOutputDIR,
-                                      {"ee", "emu", "mumu"},
+                                      channels,
                                       systematic);
     
     // Set up the analysis

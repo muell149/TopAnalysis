@@ -441,7 +441,7 @@ makeEfficiencies_(false),
 systematic_(nominal)
 {
     std::cout<<"--- Beginning preparation of b-tagging scale factors\n";
-    if (systematic == "") systematic = "Nominal";
+    if (systematic == "" || systematic.Contains("PDF")) systematic = "Nominal";
     // Check if all relevant input files are available
     bool allInputFilesAvailable(true);
     for(const auto& channel : channels){
@@ -1038,7 +1038,7 @@ double BtagScaleFactors::BJetSF(const double& pt, const double& eta)const
 {
     //CSVL b-jet SF
     //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.tptt (ICHEP 2012 prescription)
-    //From: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_payload_Moriond13.tptt  (Moriond 2013 prescription)
+    //From: https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_NOttbar_payload_EPS13.txt  (EPS 2013 prescription)
     
     if(std::fabs(eta) > 2.4){
         std::cerr<<"Jet Eta="<<eta<<" Out of the selected range (|eta|<2.4). Check it\n";
@@ -1049,7 +1049,8 @@ double BtagScaleFactors::BJetSF(const double& pt, const double& eta)const
     if(jetPt < 20) jetPt = 20;
     if(jetPt > 800) jetPt = 800;
 
-    return 0.981149*((1.+(-0.000713295*jetPt))/(1.+(-0.000703264*jetPt)));
+    return  1.00572*((1.+(0.013676*jetPt))/(1.+(0.0143279*jetPt)));
+    //            0.981149*((1.+(-0.000713295*jetPt))/(1.+(-0.000703264*jetPt))); old
 }
 
 
@@ -1068,8 +1069,8 @@ double BtagScaleFactors::CJetSF(const double& pt, const double& eta)const
 double BtagScaleFactors::LJetSF(const double& pt, const double& eta, const TString& typevar)const
 {
     //CSVL ligth jet mistag SF. Includes also the SF for variations up and down
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C (ICHEP 2012 prescription)
-    //From https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C  (Moriond 2013 prescription)
+    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_EPS2013.C (EPS 2013  prescription)
+    //From https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_EPS2013.C  (EPS 2013 prescription)
 
     const double eta_abs = std::fabs(eta);
     if(eta_abs > 2.4){
@@ -1086,34 +1087,34 @@ double BtagScaleFactors::LJetSF(const double& pt, const double& eta, const TStri
     else if(jetPt>700 && eta_abs>1.5) jetPt = 700;
     
     if(typevar == "central"){
-        if (eta_abs <= 0.5)
-            return ((1.04901+(0.00152181*jetPt))+(-3.43568e-06*(jetPt*jetPt)))+(2.17219e-09*(jetPt*(jetPt*jetPt)));
+      if (eta_abs <= 0.5) 
+	    return ((1.01177+(0.0023066*jetPt))+(-4.56052e-06*(jetPt*jetPt)))+(2.57917e-09*(jetPt*(jetPt*jetPt)));
         else if(eta_abs <= 1.0)
-            return ((0.991915+(0.00172552*jetPt))+(-3.92652e-06*(jetPt*jetPt)))+(2.56816e-09*(jetPt*(jetPt*jetPt)));
+            return ((0.975966+(0.00196354*jetPt))+(-3.83768e-06*(jetPt*jetPt)))+(2.17466e-09*(jetPt*(jetPt*jetPt)));
         else if(eta_abs <= 1.5)
-            return ((0.962127+(0.00192796*jetPt))+(-4.53385e-06*(jetPt*jetPt)))+(3.0605e-09*(jetPt*(jetPt*jetPt)));
+	  return ((0.93821+(0.00180935*jetPt))+(-3.86937e-06*(jetPt*jetPt)))+(2.43222e-09*(jetPt*(jetPt*jetPt)));//((0.962127+(0.00192796*jetPt))+(-4.53385e-06*(jetPt*jetPt)))+(3.0605e-09*(jetPt*(jetPt*jetPt)));
         else
-            return ((1.06121+(0.000332747*jetPt))+(-8.81201e-07*(jetPt*jetPt)))+(7.43896e-10*(jetPt*(jetPt*jetPt)));
+	  return ((1.00022+(0.0010998*jetPt))+(-3.10672e-06*(jetPt*jetPt)))+(2.35006e-09*(jetPt*(jetPt*jetPt)));//((1.06121+(0.000332747*jetPt))+(-8.81201e-07*(jetPt*jetPt)))+(7.43896e-10*(jetPt*(jetPt*jetPt)));
     }
     else if(typevar == "up"){
         if(eta_abs <= 0.5)
-            return ((1.12424+(0.00201136*jetPt))+(-4.64021e-06*(jetPt*jetPt)))+(2.97219e-09*(jetPt*(jetPt*jetPt)));
+	  return ((1.04582+(0.00290226*jetPt))+(-5.89124e-06*(jetPt*jetPt)))+(3.37128e-09*(jetPt*(jetPt*jetPt)));//((1.12424+(0.00201136*jetPt))+(-4.64021e-06*(jetPt*jetPt)))+(2.97219e-09*(jetPt*(jetPt*jetPt)));
         else if(eta_abs <= 1.0)
-            return ((1.06231+(0.00215815*jetPt))+(-4.9844e-06*(jetPt*jetPt)))+(3.27623e-09*(jetPt*(jetPt*jetPt)));
+	  return ((1.00683+(0.00246404*jetPt))+(-4.96729e-06*(jetPt*jetPt)))+(2.85697e-09*(jetPt*(jetPt*jetPt)));//((1.06231+(0.00215815*jetPt))+(-4.9844e-06*(jetPt*jetPt)))+(3.27623e-09*(jetPt*(jetPt*jetPt)));
         else if(eta_abs <= 1.5)
-            return ((1.02883+(0.00231985*jetPt))+(-5.57924e-06*(jetPt*jetPt)))+(3.81235e-09*(jetPt*(jetPt*jetPt)));
+	  return ((0.964787+(0.00219574*jetPt))+(-4.85552e-06*(jetPt*jetPt)))+(3.09457e-09*(jetPt*(jetPt*jetPt)));//((1.02883+(0.00231985*jetPt))+(-5.57924e-06*(jetPt*jetPt)))+(3.81235e-09*(jetPt*(jetPt*jetPt)));
         else
-            return ((1.1388+(0.000468418*jetPt))+(-1.36341e-06*(jetPt*jetPt)))+(1.19256e-09*(jetPt*(jetPt*jetPt)));
+	  return ((1.03039+(0.0013358*jetPt))+(-3.89284e-06*(jetPt*jetPt)))+(3.01155e-09*(jetPt*(jetPt*jetPt)));//((1.1388+(0.000468418*jetPt))+(-1.36341e-06*(jetPt*jetPt)))+(1.19256e-09*(jetPt*(jetPt*jetPt)));
     }
     else if(typevar == "down"){
         if(eta_abs <= 0.5)
-            return ((0.973773+(0.00103049*jetPt))+(-2.2277e-06*(jetPt*jetPt)))+(1.37208e-09*(jetPt*(jetPt*jetPt)));
+	  return ((0.977761+(0.00170704*jetPt))+(-3.2197e-06*(jetPt*jetPt)))+(1.78139e-09*(jetPt*(jetPt*jetPt)));//((0.973773+(0.00103049*jetPt))+(-2.2277e-06*(jetPt*jetPt)))+(1.37208e-09*(jetPt*(jetPt*jetPt)));
         else if(eta_abs <= 1.0)
-            return ((0.921518+(0.00129098*jetPt))+(-2.86488e-06*(jetPt*jetPt)))+(1.86022e-09*(jetPt*(jetPt*jetPt)));
+	  return ((0.945135+(0.00146006*jetPt))+(-2.70048e-06*(jetPt*jetPt)))+(1.4883e-09*(jetPt*(jetPt*jetPt)));//((0.921518+(0.00129098*jetPt))+(-2.86488e-06*(jetPt*jetPt)))+(1.86022e-09*(jetPt*(jetPt*jetPt)));
         else if(eta_abs <= 1.5)
-            return ((0.895419+(0.00153387*jetPt))+(-3.48409e-06*(jetPt*jetPt)))+(2.30899e-09*(jetPt*(jetPt*jetPt)));
+	  return ((0.911657+(0.00142008*jetPt))+(-2.87569e-06*(jetPt*jetPt)))+(1.76619e-09*(jetPt*(jetPt*jetPt)));//((0.895419+(0.00153387*jetPt))+(-3.48409e-06*(jetPt*jetPt)))+(2.30899e-09*(jetPt*(jetPt*jetPt)));
         else
-            return ((0.983607+(0.000196747*jetPt))+(-3.98327e-07*(jetPt*jetPt)))+(2.95764e-10*(jetPt*(jetPt*jetPt)));
+	  return ((0.970045+(0.000862284*jetPt))+(-2.31714e-06*(jetPt*jetPt)))+(1.68866e-09*(jetPt*(jetPt*jetPt)));//((0.983607+(0.000196747*jetPt))+(-3.98327e-07*(jetPt*jetPt)))+(2.95764e-10*(jetPt*(jetPt*jetPt)));
     }
     else{
         std::cerr<<"ERROR in BtagScaleFactors::LJetSF! Type of variation not valid: "<<typevar
@@ -1130,7 +1131,7 @@ double BtagScaleFactors::BJetSFAbsErr(const double& pt)const
     //this pt range MUST match the binning of the error array provided by the BTV in the above link
 
     constexpr double ptarray[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600, 800};
-    constexpr double SFb_error[] = { 0.0484285,  0.0126178,  0.0120027,  0.0141137, 0.0145441, 0.0131145, 0.0168479, 0.0160836, 0.0126209, 0.0136017, 0.019182, 0.0198805, 0.0386531, 0.0392831, 0.0481008, 0.0474291 };
+    constexpr double SFb_error[] = {0.033408,0.015446,0.0146992,0.0183964,0.0185363,0.0145547,0.0176743,0.0203609,0.0143342,0.0148771,0.0157936,0.0176496,0.0209156,0.0278529,0.0346877,0.0350101};
 
     int ptbin = -1;
     int ptarray_Size = sizeof(ptarray) / sizeof(ptarray[0]);

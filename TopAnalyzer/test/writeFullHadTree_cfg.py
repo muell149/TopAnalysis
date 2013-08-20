@@ -130,81 +130,49 @@ process.source = cms.Source("PoolSource",
         '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9A494832-27E2-E111-983A-0030487F1BCF.root',
         '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6DA98EE-80E1-E111-8A16-002481E0D480.root',
         '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FA1056FA-06E2-E111-BE82-0030487EBB25.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B0B4B764-38D6-E111-97B2-0026189438B8.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/C896D297-09D6-E111-9664-002618943981.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/9E1AC7FF-24D7-E111-BEDD-001A9281170C.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/4EF06138-31D6-E111-A977-003048FFCBFC.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6CAF3A97-09D5-E111-B813-002618943960.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/0643C4AE-D1D4-E111-9A8C-002618943845.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/647639EB-E8D4-E111-A994-00248C55CC9D.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/90DD56B4-FFD5-E111-91BB-003048FFD756.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/7CB00378-E0D4-E111-B5D1-00304867902E.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3C8258EC-A3D4-E111-8E96-00261894393C.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6C976CFF-D6D5-E111-8483-00248C55CC3C.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BAA172B7-F8D4-E111-A33C-003048679180.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0002/8CD24D3C-9BD4-E111-9AEF-0026189438E7.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/5E0407D4-FFD4-E111-9C46-003048D15DB6.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/66A12C7E-E0D4-E111-A11C-0018F3D09710.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BA181933-0FD5-E111-A707-003048FFCBFC.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/CCED3020-F1D4-E111-AEEE-00304867C026.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/C226ED78-F8D4-E111-A29E-001A9281170A.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/D009BCB1-30D6-E111-8579-00248C55CC3C.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/48F56E4C-CCD4-E111-B38E-0018F3D0966C.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6A113A81-A2D4-E111-99E7-0030486792B6.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/32FDBDE8-3DD6-E111-A91F-0018F3D09700.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BE40606F-A1D4-E111-8BEB-002618943972.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/D29C800E-C7D4-E111-A428-002618943875.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/469C0A2B-DFD4-E111-9B3C-00261894393D.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BEC944FB-00D6-E111-AFC4-002618943933.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/DA962CCD-18D5-E111-B9B7-00261894395B.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/36477A50-6ED4-E111-9B2D-002618943901.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/842F9897-B9D4-E111-BD7A-001A92971B94.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6E971145-F4D5-E111-87FF-0026189438E8.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/A898D2BD-F8D4-E111-859D-00261894392F.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BE62CE17-2FD7-E111-9D97-002618943939.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/74A83952-F3D5-E111-BC26-00304867916E.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/507B704E-E4D5-E111-8CF8-00248C0BE014.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/125B194A-F4D4-E111-B075-00304866C398.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/58B97953-DCD4-E111-B077-002618943800.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/04892EF6-2FD6-E111-92AD-001A92810A98.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/A2DB1E3F-C6D4-E111-943B-003048678FB2.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/30AEBD9E-42D6-E111-9518-0026189438C9.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/64C5C45E-F8D6-E111-8386-00304867924E.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/7AEA46A5-B5D4-E111-A95E-0026189438FE.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/FA4DB4BA-28D3-E111-B707-00261894393E.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/DABDCB44-0DD5-E111-BED5-001A928116E2.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/F035E4F4-44D3-E111-8BFB-001A928116BC.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/F04DFA64-E1D4-E111-A54A-003048678E52.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/8C293053-96D4-E111-BE5C-002618943857.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/6AA79317-E5D4-E111-B102-0018F3D0969A.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/AE434F20-DBD5-E111-82AB-0026189438EB.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/FEEE7FEB-EED4-E111-96C7-002618943809.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E2F4E9FF-FDD5-E111-8F37-002618943939.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/BE683B39-23D6-E111-B583-0018F3D096CE.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/F6DB0B98-E0D4-E111-8170-003048FF86CA.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/74487D9A-BED4-E111-AD5D-003048678B70.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/EEB32C42-C8D4-E111-82B5-0018F3D096DC.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/2A0D66A7-D5D4-E111-8DAF-0018F3D096DE.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/1A45E231-E8D4-E111-AA64-003048FFCB8C.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3613E522-EBD5-E111-9D53-00304867920C.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/02386C4C-F4D5-E111-B44A-0018F3D09680.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/7800CC07-F0D5-E111-A675-0026189438C1.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/201FF7D7-F6D5-E111-B2E9-0018F3D096A0.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3A520B10-51D3-E111-A54C-003048FFCBA4.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/04A62579-9FD4-E111-8F5F-0018F3D095EE.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/14C7DE62-7BD4-E111-ACFE-002618FDA263.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/961E3F4B-34D6-E111-82B0-003048FFD736.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/429DAFB0-2ED6-E111-85AC-003048678B38.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B2FEC746-F0D5-E111-83CC-002618943836.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E6DF28FD-1BD3-E111-8056-00261894394D.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/3EF758E0-F5D5-E111-8847-00304867BFB2.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/A87FF6AE-93D4-E111-B69B-002618943857.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E87AF240-54D7-E111-A28A-001A92971B90.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/9871741E-C9D4-E111-A764-0026189438D8.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/1856E847-69D3-E111-9178-002618943914.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/64AC3443-9CD4-E111-8158-003048678FFE.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B8137AD1-DAD4-E111-BF6D-00261894398D.root',
-        #'/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/B67A7A58-1FD6-E111-A066-003048FFCB8C.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/001A6A4D-E95B-E211-9C65-002590200B78.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/425D1632-885B-E211-914A-001E67396C9D.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/7E9D8C16-1B5B-E211-AB4C-002590200A1C.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/00CDCBFA-545B-E211-8A2A-001E672CC1E7.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/42A54E74-255B-E211-B67C-001E673975EE.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/803354FE-1A5A-E211-8019-003048673F54.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/023141E4-7B5B-E211-94CE-003048673FEA.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/442C6826-595A-E211-AFDD-001E673969FA.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/8076E800-125C-E211-B770-001E67397D55.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/02A75FFB-255B-E211-BA26-001E67396AC2.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/44B95CED-7D5B-E211-A945-001E67396D51.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/8204B281-9C5B-E211-BDE6-001E6739801B.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/0420CCF5-7F5B-E211-9F50-001E67396A22.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/44EEF52A-3B5B-E211-B538-003048D47A6A.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/8230EB0E-285B-E211-A269-002590200AB8.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/04911EE3-515B-E211-9584-002590200878.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/465ED53D-955B-E211-81FA-003048D460FA.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/82DAA0CE-3F5B-E211-950F-0025B3E05DBE.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/06029B85-235C-E211-BB9A-003048D462D2.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/46A0A04F-165C-E211-B098-002590200850.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/842161B1-855B-E211-A36E-003048D47A6A.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/06532BFD-245C-E211-AAC6-002590200A94.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/481ED799-3E5B-E211-9D98-001E673989DF.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/8454E820-105C-E211-A060-003048D45F5C.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/0815D818-995B-E211-B6BC-001E67396A22.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/48D4F772-1B5B-E211-84B8-003048D45FB8.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/84BAAD77-7A5B-E211-9AAB-0025B3E05CF2.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/086421D1-FC5B-E211-883F-002590200828.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/4A2FB095-1A5B-E211-9DB1-001E67396C9D.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/861550D4-1E5B-E211-BB1C-001E67397094.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/08C77995-0A5B-E211-90C2-0025B3E0661E.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/4A580CD8-335C-E211-A094-001E67397BC5.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/86748E6C-F25B-E211-9A70-002590200AC4.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/0A22AB6F-3D5B-E211-9F69-0025902008B8.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/4A952395-2C5C-E211-AF85-001E67397314.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/868DB624-735A-E211-8947-001E67397D00.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/0AF644BA-265A-E211-8C20-003048D46050.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/4AF904C2-0B5B-E211-81F2-0025902009B4.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/86E7A3E1-405B-E211-98D3-003048D47A14.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/0C5329EB-6F5B-E211-B8E7-001E67396D10.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/4C6C96AD-BE5B-E211-93EA-0030486740BA.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/888DCD34-F35B-E211-9B1D-002590200878.root',
+        #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/0E359FB4-8D5B-E211-93DC-001E6739801B.root',
         ),
                             skipEvents = cms.untracked.uint32(0)
                             )
@@ -254,7 +222,8 @@ if(options.eventFilter=='data'):
         
 else:
     if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_'):
-        #process.GlobalTag.globaltag = cms.string('START53_V15::All')
+        process.GlobalTag.globaltag = cms.string('START53_V15::All')
+    if os.getenv('CMSSW_VERSION').startswith('CMSSW_5_3_11'):
         process.GlobalTag.globaltag = cms.string('START53_V23::All')
     elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_2_'):
         #process.GlobalTag.globaltag = cms.string('START42_V12::All')
@@ -491,14 +460,20 @@ process.load("TopAnalysis.TopAnalyzer.FullHadTreeWriter_cfi")
 ## register TreeRegistryService
 process.load("TopMass.TopEventTree.TreeRegistryService_cfi")
 process.TreeRegistryService.treeName  = "eventTree"
-process.TreeRegistryService.treeTitle = "Tree for UHH top-quark analysis\nParticles are in order {TTBar0, Top1, Top2, W1, W2, B1, LightQ1, LightQBar1, B2, LightQ2, LightQBar2}"
+process.TreeRegistryService.treeTitle = "Tree for UHH top-quark analysis.\n//Particles are in order {TTBar0, Top1, Top2, W1, W2, B1, LightQ1, LightQBar1, B2, LightQ2, LightQBar2}"
 
+## import QuarkGluonTagger
+#from QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff import *
+   
 ## load HypothesisAnalyzer
 from TopMass.TopEventTree.EventHypothesisAnalyzer_cfi import analyzeHypothesis
 process.analyzeKinFit = analyzeHypothesis.clone(hypoClassKey = "ttFullHadHypKinFit:Key", ttEvent = "ttFullHadEvent", ttEventGen2 = "ttFullHadEvent2", jets = "tightLeadingJets", gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'), maxNJets = cms.int32(20))
 from TopMass.TopEventTree.JetEventAnalyzer_cfi import analyzeJets
 process.analyzeJets = analyzeJets.clone(jets = "tightLeadingJets",
+                                        alternativeJets = "selectedPatJetsAK5Calo",
                                         gluonTagSrc = cms.InputTag('QGTagger', 'qgLikelihood'))
+from TopMass.TopEventTree.BRegJetEventAnalyzer_cfi import analyzeBRegJets
+process.analyzeBRegJets = analyzeBRegJets.clone(jets = "tightLeadingJets")
 from TopMass.TopEventTree.WeightEventAnalyzer_cfi import analyzeWeights
 process.analyzeWeights = analyzeWeights.clone(jets = "tightLeadingJets",
                                               mcWeight = options.mcWeight,
@@ -599,9 +574,10 @@ process.p1 = cms.Path(## do the genEvent selection
                       *process.bTagSFEventWeightMisTagSFDown
                       *process.makeTtFullHadEvent
                       ## write the tree
-                      *process.FullHadTreeWriter
+                      #*process.FullHadTreeWriter
                       *process.analyzeKinFit
                       *process.analyzeJets
+                      #*process.analyzeBRegJets
                       *process.analyzeWeights
                       #*process.eventContentAnalyzer
                       )
@@ -781,7 +757,43 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
 
     if not options.useSkimmedEventContent:
         prependPF2PATSequence(process, options = pf2patOptions)
+        
+        ## choose correct set of jec levels for MC and data
+        if options.eventFilter=='data':
+            jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
+            myGenJetCollection = None
+        else:
+            jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+            myGenJetCollection = cms.InputTag("ak5GenJets")
 
+        ## add AK5Calo Jets
+        preSeq = process.patDefaultSequence.copy()
+        from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
+        addJetCollection(process,cms.InputTag('ak5CaloJets'),
+                 'AK5', 'Calo',
+                 doJTA        = False,
+                 doBTagging   = False,
+                 jetCorrLabel = ('AK5Calo', cms.vstring(jecLevels)),
+                 doType1MET   = False,
+                 doL1Cleaning = False,
+                 doL1Counters = False,
+                 genJetCollection=myGenJetCollection,
+                 doJetID      = True,
+                 jetIdLabel   = "ak5",
+                 outputModules = []
+                 )
+        for mod in preSeq.moduleNames() :
+            process.patDefaultSequence.remove(getattr(process,mod))
+        
+        process.patJetsAK5Calo.addResolutions = False
+        process.patJetsAK5Calo.resolutions = cms.PSet()
+        process.patJetsAK5Calo.addTagInfos = False
+        process.patJetsAK5Calo.userData.userFloats.src = cms.VInputTag("")
+        process.patJetsAK5Calo.addDiscriminators = False
+        
+        process.selectedPatJetsAK5Calo.cut = 'pt > 10. & abs(eta) < 2.4'
+        process.p1.replace(process.leadingJetSelection, process.leadingJetSelection*process.patDefaultSequence)
+        
     ## load bugfix for wrongly generated MC files (MadGraph / Powheg + Pythia6)
     process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
     ## test higher threshold to avoid bias
