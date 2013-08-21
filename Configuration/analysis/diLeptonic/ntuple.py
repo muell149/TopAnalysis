@@ -138,9 +138,9 @@ if options.globalTag != '':
 else:
     print "Determine global tag automatically"
     if options.runOnMC:
-        process.GlobalTag.globaltag = cms.string('START53_V27::All')
+        process.GlobalTag.globaltag = cms.string('START53_V26::All')
     else:
-	process.GlobalTag.globaltag = cms.string('FT_53_V21_AN5::All')
+	process.GlobalTag.globaltag = cms.string('FT_53_V21_AN6::All')
 
 print "Using global tag: ", process.GlobalTag.globaltag
 
@@ -765,7 +765,7 @@ process.scaledJetEnergy.JECUncSrcFile        = cms.FileInPath("TopAnalysis/TopUt
 process.scaledJetEnergy.scaleType = "abs"   #abs = 1, jes:up, jes:down
 
 if options.runOnMC:
-    process.scaledJetEnergy.resolutionEtaRanges  = cms.vdouble(0, 0.5, 0.5, 1.1, 1.1, 1.7, 1.7, 2.3, 2.3, -1)
+    process.scaledJetEnergy.resolutionEtaRanges  = cms.vdouble(0, 0.5, 0.5, 1.1, 1.1, 1.7, 1.7, 2.3, 2.3, 5.4)
     process.scaledJetEnergy.resolutionFactors    = cms.vdouble(1.052, 1.057, 1.096, 1.134, 1.288) # JER standard
 
     #please change this on the top where the defaults for the VarParsing are given
