@@ -1,0 +1,41 @@
+import FWCore.ParameterSet.Config as cms
+
+maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+readFiles = cms.untracked.vstring()
+secFiles = cms.untracked.vstring() 
+source = cms.Source ("PoolSource",fileNames = readFiles, secondaryFileNames = secFiles)
+readFiles.extend( [
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/0AA95E63-FDDB-E111-8B2E-0030487D86CB.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/10803976-8DDB-E111-BB1D-0030487F92B3.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/1A55D297-80DB-E111-90D9-0030487E52A3.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/1C93E903-8BDB-E111-B1F1-0030487F1BE5.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/3CBDA44D-7DDB-E111-BF02-0030487D8541.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/3E20EF06-65DB-E111-BF17-0030487F1653.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/3EED6FFA-82DB-E111-9826-0030487D70FF.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/46A43BAB-56DB-E111-ACEA-0030487F92B5.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/4A2FCB8F-7BDB-E111-B385-0030487EAFF9.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/4AC9D7A6-86DB-E111-AF2D-0030487E0A29.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/4ACF4C50-8FDB-E111-83AD-0030487F9367.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/50BA2342-DADB-E111-8FE3-0030487F1665.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/50E2E309-85DB-E111-99FE-003048C693BC.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/52C44151-7EDB-E111-AB84-0030487D5EAF.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/5A68CAD7-81DB-E111-B95C-0030487D5EAD.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/5E517397-77DB-E111-B30A-0030487D5EAD.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/680786D4-6CDB-E111-A1F9-0030487F1653.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/869C6070-70DB-E111-9103-0030487E5399.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/92186BAE-86DB-E111-9A79-0030487FA4CB.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/A04DF588-61DB-E111-B1A0-0030487D811F.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/AC9999C4-7EDB-E111-8022-0030487D5EAF.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/AE26645B-4DDB-E111-B8A5-0030487F1BD7.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/C6FA3615-7ADB-E111-9928-0030487D605B.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/D89E7179-89DB-E111-9762-003048D43734.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/DA4CB25C-83DB-E111-8892-0030487D5EAD.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/E6F4899D-5CDB-E111-9D7C-0030487F164F.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/E83C448A-52DB-E111-958D-003048C693FC.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/F6266A95-88DB-E111-80D0-003048D4DEA6.root',
+       '/store/mc/Summer12_DR53X/ZZZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/FCE177CA-7FDB-E111-B589-0030487D70FF.root' ] );
+
+
+secFiles.extend( [
+               ] )
+
