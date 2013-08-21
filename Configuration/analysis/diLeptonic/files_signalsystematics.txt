@@ -66,3 +66,7 @@
 300  Summer12.TTJets_FullLeptMGDecays_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v2_cff                 ttbarsignalplustau_FullLeptMadgraphWithSpinCorrelation.root  ttbarsignalplustau,systematicsName=SPINCORR
 200  Summer12.TTJets_SemiLeptMGDecays_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                 ttbarbg_SemiLeptMadgraphWithSpinCorrelation.root             ttbarbg,systematicsName=SPINCORR
 200  Summer12.TTJets_HadronicMGDecays_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff                 ttbarbg_HadronicMadgraphWithSpinCorrelation.root             ttbarbg,systematicsName=SPINCORR
+
+
+#   MadGraph+Pythia with Perugia11 Tune
+#60   Summer12.TTJets_FullLeptMGDecays_TuneP11_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff   ttbarsignalplustau_Perugia11.root     ttbarsignalplustau,systematicsName=PERUGIA11

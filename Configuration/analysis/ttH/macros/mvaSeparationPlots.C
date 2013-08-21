@@ -66,7 +66,7 @@ for(std::vector<TString>::const_iterator i_histName = histogramNames.begin(); i_
     if(drawCorrect){
         TH1* hist(0);
         inputFile->GetObject(labelCorrect + "_" + histName + ";1", hist);
-        hist->SetLineColor(2);
+        hist->SetLineColor(4);
         legend->AddEntry(hist, labelCorrect, "l");
         v_hist.push_back(hist);
     }
@@ -80,7 +80,7 @@ for(std::vector<TString>::const_iterator i_histName = histogramNames.begin(); i_
     if(drawWrong){
         TH1* hist(0);
         inputFile->GetObject(labelWrong + "_" + histName + ";1", hist);
-        hist->SetLineColor(4);
+        hist->SetLineColor(2);
         legend->AddEntry(hist, labelWrong, "l");
         v_hist.push_back(hist);
     }

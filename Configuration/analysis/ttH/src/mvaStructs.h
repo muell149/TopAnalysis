@@ -192,10 +192,10 @@ public:
     
     
     /// Index of dijet combination with maximum correct MVA weight
-    int maxWeightCorrectIndex()const;
+    size_t maxWeightCorrectIndex()const;
     
     /// Index of dijet combination with maximum swapped MVA weight
-    int maxWeightSwappedIndex()const;
+    size_t maxWeightSwappedIndex()const;
     
     /// Returns the maximum correct MVA weight per event
     float maxWeightCorrect()const;
@@ -209,6 +209,12 @@ public:
     /// Get the vector of MVA variables
     std::vector<MvaTopJetsVariables> variables()const;
     
+    /// Get the vector of MVA correct weights
+    std::vector<float> mvaWeightsCorrect()const;
+    
+    /// Get the vector of MVA swapped weights
+    std::vector<float> mvaWeightsSwapped()const;
+    
     
     
 private:
@@ -217,10 +223,10 @@ private:
     std::vector<MvaTopJetsVariables> v_mvaTopJetsVariables_;
     
     /// Vector containing correct MVA weights for all dijet pairs per event
-    std::vector<Float_t> v_mvaWeightCorrect_;
+    std::vector<float> v_mvaWeightCorrect_;
     
     /// Vector containing swapped MVA weights for all dijet pairs per event
-    std::vector<Float_t> v_mvaWeightSwapped_;
+    std::vector<float> v_mvaWeightSwapped_;
 };
 
 

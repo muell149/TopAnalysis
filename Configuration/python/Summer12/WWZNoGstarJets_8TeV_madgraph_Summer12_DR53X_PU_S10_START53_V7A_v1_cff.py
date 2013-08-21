@@ -1,0 +1,41 @@
+import FWCore.ParameterSet.Config as cms
+
+maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+readFiles = cms.untracked.vstring()
+secFiles = cms.untracked.vstring() 
+source = cms.Source ("PoolSource",fileNames = readFiles, secondaryFileNames = secFiles)
+readFiles.extend( [
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/260947FC-91E0-E111-AD59-485B39800C16.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/26E1AC72-56E0-E111-A104-00261834B577.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/2A5302E2-98E0-E111-B5EE-E0CB4EA0A8FA.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/367CA10E-75E0-E111-B892-90E6BA19A25D.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/4468DA3D-90E0-E111-9107-20CF305B055B.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/56433E27-B5E0-E111-A880-BCAEC54B304A.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/5EF41F19-97E0-E111-827E-90E6BA442EF4.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/668641D7-B8E0-E111-B624-E0CB4E553682.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/6AB85CAE-95E0-E111-8733-90E6BA442EF8.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/7675B9A6-95E0-E111-81FD-E0CB4E29C4D3.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/7A03C1B2-BDE0-E111-ADC8-20CF305616EA.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/7A310099-8DE0-E111-BDED-485B3989725B.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/7A97648C-9DE0-E111-8628-20CF305616D0.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/80E0B316-BBE0-E111-B9D6-90E6BA0D09AA.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/8225D8C0-96E0-E111-B391-90E6BA19A214.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/847B0C6E-62E0-E111-9024-E0CB4E1A118B.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/88710B25-5DE0-E111-89C8-E0CB4E29C4C6.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/8CCE32CB-92E0-E111-9A36-20CF305B0512.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/9875FC00-C2E0-E111-83C1-20CF300E9EC3.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/9A6C75AB-96E0-E111-B593-20CF3027A5B7.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/9CA7AD51-94E0-E111-AB0D-90E6BA442F2D.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/AE500863-9AE0-E111-BC19-90E6BA19A25D.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/B2A6DA4B-99E0-E111-87EA-20CF3027A614.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/BACD91CF-1FE1-E111-AA7E-20CF3027A62C.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/D637EDAB-FDE0-E111-8FC8-E0CB4E19F9A2.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/F2D889A2-BCE0-E111-8BC5-002590747DEC.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/F86F63ED-BEE0-E111-BDEB-485B39800BBE.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/FE5D4402-94E0-E111-8037-E0CB4E553676.root',
+       '/store/mc/Summer12_DR53X/WWZNoGstarJets_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/FEAF3626-95E0-E111-A289-20CF3027A5FE.root' ] );
+
+
+secFiles.extend( [
+               ] )
+

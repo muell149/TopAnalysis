@@ -59,9 +59,20 @@ gStyle->SetLabelSize(0.05,"XY");
 
 
 
-TString inputFileName("mvaOutput/plots.root");
+//TString inputFileName("mvaOutput/plots.root");
+TString inputFileName("selectionRoot/Nominal/emu/emu_ttbarH125tobbbar.root");
 
 TString outputDirectory = "mvaOutput/ccc/";
+
+
+
+
+TString prefix("mvaA_");
+
+TString step = "8";
+
+step.Prepend("_step");
+
 
 
 
@@ -91,7 +102,34 @@ canvas1 = new TCanvas("canvas1");
 canvas1->cd();
 
 
-histName = "correct_dijet_mvaWeightCorrectVsSwapped_step8";
+histName = "correct_"+prefix+"mvaWeightCorrectVsSwapped"+step;
+file1->GetObject(histName + ";1", hist1);
+
+hist1->Draw("box");
+
+canvas1->Modified();
+canvas1->Update();
+
+TString plotName(outputDirectory + histName);
+
+canvas1->Print(plotName + ".eps");
+canvas1->Print(plotName + ".png");
+
+canvas1->Close();
+
+
+
+
+//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
+
+
+
+
+canvas1 = new TCanvas("canvas1");
+canvas1->cd();
+
+
+histName = "swapped_"+prefix+"mvaWeightCorrectVsSwapped"+step;
 file1->GetObject(histName + ";1", hist1);
 
 hist1->Draw("box");
@@ -117,7 +155,7 @@ canvas1 = new TCanvas("canvas1");
 canvas1->cd();
 
 
-histName = "swapped_dijet_mvaWeightCorrectVsSwapped_step8";
+histName = "wrong_"+prefix+"mvaWeightCorrectVsSwapped"+step;
 file1->GetObject(histName + ";1", hist1);
 
 hist1->Draw("box");
@@ -143,7 +181,60 @@ canvas1 = new TCanvas("canvas1");
 canvas1->cd();
 
 
-histName = "wrong_dijet_mvaWeightCorrectVsSwapped_step8";
+histName = "correct_"+prefix+"best_mvaWeightCorrectVsSwapped"+step;
+file1->GetObject(histName + ";1", hist1);
+
+hist1->Draw("box");
+
+canvas1->Modified();
+canvas1->Update();
+
+TString plotName(outputDirectory + histName);
+
+canvas1->Print(plotName + ".eps");
+canvas1->Print(plotName + ".png");
+
+canvas1->Close();
+
+
+
+
+//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
+
+
+
+
+canvas1 = new TCanvas("canvas1");
+canvas1->cd();
+
+
+histName = "swapped_"+prefix+"best_mvaWeightCorrectVsSwapped"+step;
+file1->GetObject(histName + ";1", hist1);
+
+hist1->Draw("box");
+
+canvas1->Modified();
+canvas1->Update();
+
+TString plotName(outputDirectory + histName);
+
+canvas1->Print(plotName + ".eps");
+canvas1->Print(plotName + ".png");
+
+canvas1->Close();
+
+
+
+
+//++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
+
+
+
+canvas1 = new TCanvas("canvas1");
+canvas1->cd();
+
+
+histName = "wrong_"+prefix+"best_mvaWeightCorrectVsSwapped"+step;
 file1->GetObject(histName + ";1", hist1);
 
 hist1->Draw("box");
