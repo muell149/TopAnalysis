@@ -26,28 +26,29 @@ vector<TString> Variables(){
     
     vector<TString> variables {"ToppTLead", "ToppTNLead", "ToppT",
                                "TopRapidityLead", "TopRapidityNLead", "TopRapidity",
-                               "BJetpTLead", "BJetpTNLead", "BJetpT",
-                               "BJetEtaLead", "BJetEtaNLead", "BJetEta",
+                               "BJetpTLead", "BJetpT",
+                               "BJetEtaLead", "BJetEta",
                                "LeptonpTLead", "LeptonpTNLead", "LeptonpT",
                                "LeptonEtaLead", "LeptonEtaNLead", "LeptonEta",
                                "TTBarpT", "TTBarRapidity", "TTBarMass", 
                                "LLBarpT", "LLBarMass", 
-                               "LeptonBjetMass"
+                               "LeptonBjetMass", 
+                               "BBBarMass", "BBBarpT"
                                };
     return variables;
 }
 
 vector<TString> Systematics (){
 
-    vector<TString> systematics {"BTAG_", "BTAG_LJET_", 
+    vector<TString> systematics {"TRIG_", "LEPT_",
+                                "BG_", "DY_", 
+                                "JES_", "JER_", 
+                                "PU_",
+                                "BTAG_", "BTAG_LJET_", 
                                 "BTAG_PT_", "BTAG_ETA_",
                                 "BTAG_LJET_PT_", "BTAG_LJET_ETA_", 
-                                "MASS_", "SCALE_", "MATCH_", "HAD_",
-                                "KIN_", "LEPT_",
-                                "JES_", "JER_",
-                                "PU_", "TRIG_",
-                                "DY_", "BG_",
-                                "PDF_"
+                                "KIN_",
+                                "HAD_", "MASS_", "SCALE_", "MATCH_"
                                 };
 
 
@@ -64,7 +65,7 @@ vector<TString> Files(TString channel = "", TString variable = ""){
     else{WhichVariable = Variables();}
 
     for (int j=0; j<(int)WhichVariable.size(); j++){
-        FileVector.push_back(TString("Plots/FinalResults").Append(channel).Append("/").Append(WhichVariable.at(j)).Append("SystematicsLaTeX.txt"));
+        FileVector.push_back(TString("Plots/FinalResults/").Append(channel).Append("/").Append(WhichVariable.at(j)).Append("_SystematicsLaTeX.txt"));
     }
 
     return FileVector;
