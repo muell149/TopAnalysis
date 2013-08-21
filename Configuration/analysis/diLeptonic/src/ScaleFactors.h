@@ -69,9 +69,13 @@ public:
     /// Destructor
     ~LeptonScaleFactors(){}
     
-    /// Get lepton per-event scale factor
+    /// Get lepton per-event scale factor for exactly two leptons
     double getLeptonIDSF(const int leadingLeptonIndex, const int nLeadingLeptonIndex,
                          const VLV& leptons, const std::vector<int>& lepPdgIds)const;
+    
+    /// Get lepton per-event scale factor for all leptons in the event
+    double scaleFactorAllLeptons(const std::vector<int>& allLeptonIndices,
+                                 const VLV& leptons, const std::vector<int>& lepPdgIds)const;
     
     
     

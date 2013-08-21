@@ -253,6 +253,32 @@ double LeptonScaleFactors::getLeptonIDSF(const int leadingLeptonIndex, const int
 
 
 
+double LeptonScaleFactors::scaleFactorAllLeptons(const std::vector<int>& allLeptonIndices,
+                                                 const VLV& leptons, const std::vector<int>& lepPdgIds)const
+{
+    if(!h2_ElectronIDSFpteta || !h2_MuonIDSFpteta) return 1.;
+    
+    double result(1.);
+    
+    for(const int index : allLeptonIndices){
+        const int absPdgId(std::abs(lepPdgIds.at(index)));
+        TH2* histo(0);
+        if(absPdgId==11) histo = h2_ElectronIDSFpteta;
+        else if(absPdgId==13) histo = h2_MuonIDSFpteta;
+        else{
+            std::cout<<"WARNING in method scaleFactorAllLeptons! LeptonPdgId is not as expected: "
+                     <<absPdgId<<"\n...will use scale factor = 1.\n";
+             continue;
+        }
+        
+        result *= ScaleFactorHelpers::get2DSF(histo, leptons.at(index).eta(), leptons.at(index).pt());
+    }
+    
+    return result;
+}
+
+
+
 
 
 
