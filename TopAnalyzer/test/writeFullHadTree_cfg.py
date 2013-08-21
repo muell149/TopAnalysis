@@ -193,7 +193,8 @@ process.maxEvents = cms.untracked.PSet(
 
 ## configure process options
 process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(True)
+    wantSummary = cms.untracked.bool(True),
+    #SkipEvent = cms.untracked.vstring('UnimplementedFeature')
 )
 
 ## register TFileService
@@ -312,7 +313,7 @@ elif options.jesType == 'flavor' :
     elif options.jesFactor < 1.0 :
         process.scaledJetEnergy.scaleType = "flavor:down"
 ## set energy scaling factors for a single source
-elif options.jesType == 'CorrelationGroupMPFInSitu' or options.jesType == 'CorrelationGroupFlavor' or options.jesType == 'CorrelationGroupIntercalibration' or options.jesType == 'CorrelationGroupUncorrelated' or options.jesType == 'CorrelationGroupbJES':
+elif options.jesType == 'CorrelationGroupMPFInSitu' or options.jesType == 'CorrelationGroupFlavor' or options.jesType == 'CorrelationGroupIntercalibration' or options.jesType == 'CorrelationGroupUncorrelated' or options.jesType == 'CorrelationGroupbJES' or options.jesType == 'TotalNoFlavor' or options.jesType == 'FlavorPureQuark':
     process.scaledJetEnergy.sourceName = options.jesType
     if options.jesFactor > 1.0 :
         process.scaledJetEnergy.scaleType = "source:up"
@@ -651,6 +652,8 @@ if options.backgroundEstimation != 0:
         PUSource = cms.InputTag("tightLeadingJets", "addPileupInfo")
         process.eventWeightPU.PUSource = PUSource
         process.analyzeWeights.puSrc = PUSource
+        
+        process.analyzeJets.alternativeJets = ""
 
         process.TFileService.fileName = 'QCDEstimation_2_'+options.eventFilter+'.root'
 
@@ -827,7 +830,7 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
             getattr(process, pathname).insert(0,process.totalKinematicsFilter)
 
         ## add filter for hcal laser events
-        if options.eventFilter == 'data' and os.getenv('CMSSW_VERSION').startswith('CMSSW_5_'):
+        if options.eventFilter == 'data' and os.getenv('CMSSW_VERSION').startswith('CMSSW_5_') and not options.useSkimmedEventContent == True:
             process.hcalLaserFilter = hltHighLevel.clone( TriggerResultsTag = cms.InputTag('TriggerResults')
                                                         , HLTPaths = cms.vstring('user_step')
                                                         )
