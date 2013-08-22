@@ -31,4 +31,29 @@
 
 
 
+################################################################
+############# Samples for ttZ(4l) analysis #####################
+################################################################
+
+
+### Dibosons
+
+40 Summer12.ZZJetsTo4L_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 	zzto4l.root        zz
+18 Summer12.WZJetsTo3LNu_TuneZ2_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 		wzto3lnu.root      wz
+17 Summer12.WWJetsTo2L2Nu_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 	wwto2l2nu.root     ww
+
+### Tribosons
+3 Summer12.ZZZNoGstarJets_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 			zzz.root           zzz
+3 Summer12.WWZNoGstarJets_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 			wwz.root           wwz
+3 Summer12.WWWJets_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 				www.root           www
+
+### ttWW
+3 Summer12.TTWWJets_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 				ttww.root          ttww
+
+### tt+gjets
+1 Summer12.TTGJets_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 				ttgjets.root       ttg
+
+### ww+gjets
+2 Summer12.WWGJets_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff 				wwgjets.root       wwg
+
 
