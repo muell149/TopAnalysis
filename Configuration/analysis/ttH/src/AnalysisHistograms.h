@@ -61,6 +61,7 @@ protected:
     /// Book all histograms for given selection step (dummy method, override in inherited AnalysisHistograms)
     virtual void bookHistos(const TString& step);
     
+// FIXME: remove this function after after introduction of generalised virtual book method, and take it from higgsUtils.*
     /// Get the full name of the step
     TString stepName(const TString& step, const int& category =-1);
     

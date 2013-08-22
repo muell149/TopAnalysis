@@ -27,6 +27,19 @@
 
 
 
+// FIXME: remove this function after after introduction of generalised virtual book method, and take it from higgsUtils.*
+TString AnalysisHistogramsBase::stepName(const TString& stepShort, const int& category)
+{
+    std::stringstream result;
+    result<<"_step"<<stepShort;
+    if(category>=0){
+        result<<"_cate"<<category;
+    }
+    return result.str().c_str();
+}
+
+
+
 AnalysisHistogramsBase::AnalysisHistogramsBase(const std::vector<TString>& selectionStepsNoCategories,
                                                const std::vector<TString>& stepsForCategories,
                                                const JetCategories* jetCategories):
@@ -62,18 +75,6 @@ void AnalysisHistogramsBase::book(TSelectorList* output)
             this->addStep(step, output);
         }
     }
-}
-
-
-
-TString AnalysisHistogramsBase::stepName(const TString& stepShort, const int& category)
-{
-    std::stringstream result;
-    result<<"_step"<<stepShort;
-    if(category>=0){
-        result<<"_cate"<<category;
-    }
-    return result.str().c_str();
 }
 
 

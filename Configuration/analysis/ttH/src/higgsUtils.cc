@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
 
 #include <TObjArray.h>
 #include <TString.h>
@@ -8,6 +9,18 @@
 #include "higgsUtils.h"
 
 
+
+
+
+TString tth::stepName(const TString& stepShort, const int& category)
+{
+    std::ostringstream result;
+    result<<"_step"<<stepShort;
+    if(category>=0){
+        result<<"_cate"<<category;
+    }
+    return result.str().c_str();
+}
 
 
 

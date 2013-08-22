@@ -12,6 +12,7 @@ class TString;
 #include "../../diLeptonic/src/storeTemplate.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 
+class JetCategories;
 class RecoObjects;
 namespace tth{
     //class GenLevelWeights;
@@ -43,10 +44,34 @@ public:
     
     
     /// Constructor for selection steps
-    MvaTreeHandler(const char* mvaInputDir, const std::vector<TString>& selectionSteps);
+    MvaTreeHandler(const char* mvaInputDir,
+                   const std::vector<TString>& selectionStepsNoCategories,
+                   const std::vector<TString>& stepsForCategories =std::vector<TString>(),
+                   const JetCategories* jetCategories =0);
     
     /// Destructor
     ~MvaTreeHandler(){}
+    
+    
+    
+    /// Book the vector of MVA variables for each requested selection step
+    void book();
+    
+    /// Fill the vector of MVA variables for given selection step
+    void fill(const RecoObjects& recoObjects,
+              const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
+              const double& weight, const TString& stepShort);
+    
+    /// Write trees with MVA input variables in own file
+    void writeTrees(const std::string& outputFilename,
+                    const Channel::Channel& channel, const Systematic::Systematic& systematic);
+    
+    /// Write trees with MVA input variables owned by a given selectorList
+    void writeTrees(TSelectorList* output);
+    
+    
+    
+    
     
     
     
@@ -61,7 +86,7 @@ public:
     void createMvaInputBranches(TTree* tree);
     
     /// Fill branches of MVA input TTree
-    void fillMvaInputBranches();
+    void fillMvaInputBranches(const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables);
     
     /// Produce MVA input TTree in own file
     void produceMvaInputTree(const std::string& outputFilename,
@@ -79,6 +104,11 @@ public:
     
     /// Clear the class instance
     void clear();
+    
+    
+    
+    
+    
     
     
     
@@ -105,11 +135,19 @@ private:
     
     
     
+    /// Add a new selection step
+    void addStep(const TString& step);
+    
+    /// Check if selection step exists
+    bool checkExistence(const TString& step)const;
+    
     /// Create single branch for TTree based on MvaInputVariables structs of type int
     void createBranch(const MvaVariableInt& variable);
     
     /// Create single branch for TTree based on MvaInputVariables structs of type int
     void createBranch(const MvaVariableFloat& variable);
+    
+    
     
     /// Import all branches from TTree
     void importBranches(TTree* tree);
@@ -136,8 +174,17 @@ private:
     /// Storage of all entries for the MVA
     std::vector<MvaTopJetsVariables> v_mvaTopJetsVariables_;
     
+    /// The map containing all the vectors of MVA variables for all selection steps
+    std::map<TString, std::vector<MvaTopJetsVariables> > m_stepMvaVariables_;
+    
     /// Selection steps for which to run the MVA tool
     const std::vector<TString> selectionSteps_;
+    
+    /// The vector of selection steps where analysis should also be performed in individual jet categories
+    const std::vector<TString> stepsForCategories_;
+    
+    /// The categories in no. of jets and b-jets
+    const JetCategories* jetCategories_;
     
     /// The folder where to store the input for MVA
     const char* mvaInputDir_;

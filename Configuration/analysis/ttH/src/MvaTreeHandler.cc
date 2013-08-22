@@ -11,6 +11,8 @@
 #include "MvaTreeHandler.h"
 #include "mvaStructs.h"
 #include "analysisStructs.h"
+#include "JetCategories.h"
+#include "higgsUtils.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 
@@ -33,16 +35,178 @@
 
 
 
-MvaTreeHandler::MvaTreeHandler(const char* mvaInputDir, const std::vector<TString>& selectionSteps):
+MvaTreeHandler::MvaTreeHandler(const char* mvaInputDir,
+                               const std::vector<TString>& selectionStepsNoCategories,
+                               const std::vector<TString>& stepsForCategories,
+                               const JetCategories* jetCategories):
 selectorList_(0),
 t_mvaInput_(0),
-selectionSteps_(selectionSteps),
+selectionSteps_(selectionStepsNoCategories),
+stepsForCategories_(stepsForCategories),
+jetCategories_(jetCategories),
 mvaInputDir_(mvaInputDir),
 plotExclusively_(false)
 {
     std::cout<<"--- Beginning setting up MVA input tree handler\n";
+    
+    if(!jetCategories_ && stepsForCategories_.size()>0){
+        std::cerr<<"ERROR in constructor for MvaTreeHandler! "
+                 <<"No jet categories passed, but request for category-wise selection steps\n...break\n"<<std::endl;
+        exit(236);
+    }
+    if(jetCategories_ && stepsForCategories_.size()==0){
+        std::cerr<<"ERROR in constructor for MvaTreeHandler! "
+                 <<"Jet categories passed, but no category-wise selection steps defined\n...break\n"<<std::endl;
+        exit(237);
+    }
+    
     std::cout<<"=== Finishing setting up MVA input tree handler\n\n";
 }
+
+
+
+void MvaTreeHandler::book()
+{
+    for(const auto& stepShort : selectionSteps_){
+        const TString step = tth::stepName(stepShort);
+        this->addStep(step);
+    }
+    
+    for(const auto& stepShort : stepsForCategories_){
+        for(int category = 0; category<jetCategories_->numberOfCategories(); ++category){
+            const TString step = tth::stepName(stepShort, category);
+            this->addStep(step);
+        }
+    }
+    
+    std::cout<<"\n\nBooked: ";
+    for(const auto& stepMvaVariables : m_stepMvaVariables_){
+        std::cout<<stepMvaVariables.first<<" , ";
+    }
+    std::cout<<"\n\n\n";
+}
+
+
+
+void MvaTreeHandler::addStep(const TString& step)
+{
+    // Check whether step already exists
+    if(this->checkExistence(step)){
+        std::cout<<"Warning in addStep()! Selection step already contained: "<<step
+                 <<"\n...skip this one\n";
+        return;
+    }
+
+    // Book the step
+    m_stepMvaVariables_[step] = std::vector<MvaTopJetsVariables>();
+}
+
+
+
+bool MvaTreeHandler::checkExistence(const TString& step)const
+{
+    return m_stepMvaVariables_.find(step) != m_stepMvaVariables_.end();
+}
+
+
+
+void MvaTreeHandler::fill(const RecoObjects& recoObjects,
+                          const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
+                          const double& weight, const TString& stepShort)
+{
+    // Number of selected jets and bjets
+    const int numberOfJets = recoObjectIndices.jetIndices_.size();
+    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
+    
+    // Set up step name and check if step exists
+    const bool stepInCategory = stepShort.Contains("_cate");
+    const TString step = stepInCategory ? stepShort : tth::stepName(stepShort);
+    const bool stepExists(this->checkExistence(step));
+    if(!stepInCategory && jetCategories_){
+        // Here check the individual jet categories
+        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
+        const TString fullStepName = tth::stepName(stepShort, categoryId);
+        this->fill(recoObjects, genObjectIndices, recoObjectIndices, weight, fullStepName);
+    }
+    if(!stepExists) return;
+    
+    // Loop over all jet combinations and get MVA input variables
+    const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables = 
+            MvaTopJetsVariables::fillVariables(recoObjectIndices, genObjectIndices, recoObjects, weight);
+    
+    // Fill the MVA variables
+    m_stepMvaVariables_.at(step).insert(m_stepMvaVariables_.at(step).end(), v_mvaTopJetsVariables.begin(), v_mvaTopJetsVariables.end());
+}
+
+
+
+void MvaTreeHandler::writeTrees(const std::string& outputFilename,
+                                const Channel::Channel& channel, const Systematic::Systematic& systematic)
+{
+    std::cout<<"\n\nValues:\n";
+    for(auto vars : m_stepMvaVariables_){
+        std::cout<<"\t"<<vars.first<<" , "<<vars.second.size()<<"\n";
+    }
+    std::cout<<"\n\n\n";
+    
+    
+    // Create output file for MVA tree
+    std::string f_savename = static_cast<std::string>(ttbar::assignFolder(mvaInputDir_, channel, systematic));
+    f_savename.append(outputFilename);
+    TFile outputFile(f_savename.c_str(),"RECREATE");
+    std::cout<<"\nOutput file for MVA input trees: "<<f_savename<<"\n";
+    
+    // Produce MVA input TTree and store it in output
+    TSelectorList* output = new TSelectorList();
+    this->writeTrees(output);
+    
+    // Write file and cleanup
+    TIterator* it = output->MakeIterator();
+    while(TObject* obj = it->Next()){
+        obj->Write();
+    }
+    outputFile.Close();
+    output->SetOwner();
+    output->Clear();
+}
+
+
+
+void MvaTreeHandler::writeTrees(TSelectorList* output)
+{
+    std::cout<<"--- Beginning production of MVA input trees\n";
+    
+    // Set pointer to output, so that TTree is owned by it
+    selectorList_ = output;
+    
+    std::map<TString, TTree*> m_stepTree;
+    for(const auto& stepMvaVariables : m_stepMvaVariables_){
+        const TString& step = stepMvaVariables.first;
+        const std::vector<MvaTopJetsVariables>& v_mvaVariables = stepMvaVariables.second;
+        TTree* tree = m_stepTree[step];
+        tree = this->store(new TTree("mvaInputTopJets"+step, "mvaInputTopJets"));
+        this->createMvaInputBranches(tree);
+        this->fillMvaInputBranches(v_mvaVariables);
+    }
+    
+    std::cout<<"Dijet combinations per step (step, no. of combinations):\n";
+    for(auto vars : m_stepMvaVariables_){
+        std::cout<<"\t"<<vars.first<<" , "<<vars.second.size()<<"\n";
+    }
+    
+    std::cout<<"=== Finishing production of MVA input trees\n\n";
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -120,6 +284,11 @@ void MvaTreeHandler::clear()
     t_mvaInput_ = 0;
     selectorList_ = 0;
     
+    for(auto& stepMvaVariables : m_stepMvaVariables_){
+        stepMvaVariables.second.clear();
+    }
+    m_stepMvaVariables_.clear();
+    
     // For plotting
     for(auto stepHistograms : m_stepHistograms_){
         stepHistograms.second.m_histogram_.clear();
@@ -129,9 +298,9 @@ void MvaTreeHandler::clear()
 
 
 
-void MvaTreeHandler::fillMvaInputBranches()
+void MvaTreeHandler::fillMvaInputBranches(const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables)
 {
-    for(const auto& mvaTopJetsVariables : v_mvaTopJetsVariables_){
+    for(const auto& mvaTopJetsVariables : v_mvaTopJetsVariables){
         mvaTopJetsVariables_ = mvaTopJetsVariables;
         t_mvaInput_->Fill();
     }
@@ -142,6 +311,13 @@ void MvaTreeHandler::fillMvaInputBranches()
 void MvaTreeHandler::produceMvaInputTree(const std::string& outputFilename,
                                          const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
+    std::cout<<"\n\nValues:\n";
+    for(auto vars : m_stepMvaVariables_){
+        std::cout<<"\t"<<vars.first<<" , "<<vars.second.size()<<"\n";
+    }
+    std::cout<<"\n\n\n";
+    
+    
     // Create output file for MVA tree
     std::string f_savename = static_cast<std::string>(ttbar::assignFolder(mvaInputDir_, channel, systematic));
     f_savename.append(outputFilename);
@@ -178,7 +354,7 @@ void MvaTreeHandler::produceMvaInputTree(TSelectorList* output)
     
     // Create branches and fill tree
     this->createMvaInputBranches(tree);
-    this->fillMvaInputBranches();
+    this->fillMvaInputBranches(v_mvaTopJetsVariables_);
     
     std::cout<<"Number of dijet combinations for MVA: "<<v_mvaTopJetsVariables_.size()<<"\n";
     std::cout<<"=== Finishing production of MVA input tree\n\n";

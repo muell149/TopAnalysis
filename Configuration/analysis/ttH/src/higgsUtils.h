@@ -9,6 +9,9 @@ class TString;
 
 namespace tth{
     
+    /// Assign a step name for a given short name of the step, and potentially for specific categories
+    TString stepName(const TString& stepShort, const int& category =-1);
+    
     /// Get from a TString the selection step of pattern "step*"
     TString extractSelectionStep(const TString& name);
     

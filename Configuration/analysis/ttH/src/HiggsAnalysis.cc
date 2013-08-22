@@ -87,6 +87,9 @@ void HiggsAnalysis::Begin(TTree*)
 
     // Prepare things for analysis
     this->prepareJER_JES();
+    
+    // Set up selection steps of MVA tree handler
+    if(mvaTreeHandler_) mvaTreeHandler_->book();
 }
 
 
@@ -101,10 +104,10 @@ void HiggsAnalysis::Terminate()
     // Do everything needed for MVA
     if(mvaTreeHandler_){
         // Produce and write tree
-        mvaTreeHandler_->produceMvaInputTree(static_cast<std::string>(outputfilename_),
-                                             Channel::convertChannel(static_cast<std::string>(channel_)),
-                                             Systematic::convertSystematic(static_cast<std::string>(systematic_)));
-        //mvaTreeHandler_.produceMvaInputTree(fOutput);
+        mvaTreeHandler_->writeTrees(static_cast<std::string>(outputfilename_),
+                                    Channel::convertChannel(static_cast<std::string>(channel_)),
+                                    Systematic::convertSystematic(static_cast<std::string>(systematic_)));
+        //mvaTreeHandler_->writeTrees(fOutput);
 
         // Create and store control plots in fOutput
         mvaTreeHandler_->plotVariables(fOutput);
@@ -825,6 +828,7 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
     if(mvaTreeHandler_) mvaTreeHandler_->fillForInputProduction(recoObjects,
                                                                 genObjectIndices, recoObjectIndices,
                                                                 defaultWeight, selectionStep);
+    if(mvaTreeHandler_) mvaTreeHandler_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
     if(mvaValidation_) mvaValidation_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
     if(dijetAnalyzer_) dijetAnalyzer_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
                                             genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
