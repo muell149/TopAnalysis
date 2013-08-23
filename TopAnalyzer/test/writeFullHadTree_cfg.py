@@ -769,33 +769,34 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
             jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
             myGenJetCollection = cms.InputTag("ak5GenJets")
 
-        ## add AK5Calo Jets
-        preSeq = process.patDefaultSequence.copy()
-        from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
-        addJetCollection(process,cms.InputTag('ak5CaloJets'),
-                 'AK5', 'Calo',
-                 doJTA        = False,
-                 doBTagging   = False,
-                 jetCorrLabel = ('AK5Calo', cms.vstring(jecLevels)),
-                 doType1MET   = False,
-                 doL1Cleaning = False,
-                 doL1Counters = False,
-                 genJetCollection=myGenJetCollection,
-                 doJetID      = True,
-                 jetIdLabel   = "ak5",
-                 outputModules = []
-                 )
-        for mod in preSeq.moduleNames() :
-            process.patDefaultSequence.remove(getattr(process,mod))
-        
-        process.patJetsAK5Calo.addResolutions = False
-        process.patJetsAK5Calo.resolutions = cms.PSet()
-        process.patJetsAK5Calo.addTagInfos = False
-        process.patJetsAK5Calo.userData.userFloats.src = cms.VInputTag("")
-        process.patJetsAK5Calo.addDiscriminators = False
-        
-        process.selectedPatJetsAK5Calo.cut = 'pt > 10. & abs(eta) < 2.4'
-        process.p1.replace(process.leadingJetSelection, process.leadingJetSelection*process.patDefaultSequence)
+        if not options.onlySkimming:
+            ## add AK5Calo Jets
+            preSeq = process.patDefaultSequence.copy()
+            from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
+            addJetCollection(process,cms.InputTag('ak5CaloJets'),
+                     'AK5', 'Calo',
+                     doJTA        = False,
+                     doBTagging   = False,
+                     jetCorrLabel = ('AK5Calo', cms.vstring(jecLevels)),
+                     doType1MET   = False,
+                     doL1Cleaning = False,
+                     doL1Counters = False,
+                     genJetCollection=myGenJetCollection,
+                     doJetID      = True,
+                     jetIdLabel   = "ak5",
+                     outputModules = []
+                     )
+            for mod in preSeq.moduleNames() :
+                process.patDefaultSequence.remove(getattr(process,mod))
+            
+            process.patJetsAK5Calo.addResolutions = False
+            process.patJetsAK5Calo.resolutions = cms.PSet()
+            process.patJetsAK5Calo.addTagInfos = False
+            process.patJetsAK5Calo.userData.userFloats.src = cms.VInputTag("")
+            process.patJetsAK5Calo.addDiscriminators = False
+            
+            process.selectedPatJetsAK5Calo.cut = 'pt > 10. & abs(eta) < 2.4'
+            process.p1.replace(process.leadingJetSelection, process.leadingJetSelection*process.patDefaultSequence)
         
     ## load bugfix for wrongly generated MC files (MadGraph / Powheg + Pythia6)
     process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
@@ -901,6 +902,8 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
                     process.p1.remove(process.eventWeightPUSysUp)
                 if hasattr(process,'eventWeightPUSysDown'):
                     process.p1.remove(process.eventWeightPUSysDown)
+                if hasattr(process,'TFileService'):
+                    delattr(process, 'TFileService')
              ## when bTag efficiency is determined PUweight and bTagEff are needed
             if options.bTagEfficiencyDetermination:
                 process.p1 += process.bTagEff
