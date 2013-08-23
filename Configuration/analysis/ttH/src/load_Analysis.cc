@@ -168,7 +168,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up production of MVA input tree
     MvaTreeHandler* mvaTreeHandler(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"8"});
+        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"7", "8"}, {"8"}, &jetCategories);
     }
     
     // Set up MVA validation, including reading in MVA weights in case they exist
