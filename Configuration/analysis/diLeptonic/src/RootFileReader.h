@@ -33,7 +33,7 @@ public:
     
     // Find in a given file histograms whose names contain the given fragment,
     // either anywhere in the name, or only at the begin of the name
-    std::vector<TString> findHistos(const char* filename, const char* histonameFragment, const bool fragmentAtBegin =true);
+    std::vector<TString> findObjects(const char* filename, const char* objectNameFragment, const bool fragmentAtBegin =true);
     
     //get a histogram from the file
     template <typename T> void Get(const char* filename, const char* histoname, T& result, const bool allowNonexisting =false, const bool verbosity =true);

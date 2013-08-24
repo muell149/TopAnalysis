@@ -66,30 +66,30 @@ TObject *RootFileReader::GetObj(const char* filename, const char* histoname, con
 
 
 
-std::vector<TString> RootFileReader::findHistos(const char* filename, const char* histonameFragment, const bool fragmentAtBegin)
+std::vector<TString> RootFileReader::findObjects(const char* filename, const char* objectNameFragment, const bool fragmentAtBegin)
 {
     
     TFile* file = TFile::Open(filename);
     if (!file) {
         const std::string helpText(fragmentAtBegin ? "beginning with: " : "containing: ");
         std::cerr << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n\n"
-                  << "The file "<<filename<<" does not exist, thus cannot search for histogram "<<helpText<<histonameFragment
+                  << "The file "<<filename<<" does not exist, thus cannot search for object "<<helpText<<objectNameFragment
                   << "\n\n******************* ERROR ******************* ERROR ******************* ERROR *******************\n"
                   << std::endl;
         exit(1);
     }
     std::vector<TString> result;
-    TList* histoList = file->GetListOfKeys();
-    for(int i=0; i<histoList->GetSize(); ++i){
-        TObject* i_histoList = histoList->At(i);
-        TString* histoName(0);
-        histoName = new TString(i_histoList->GetName());
-        //std::cout<<"\n\tName of object: "<<*histoName<<"\n\n";
+    TList* objectList = file->GetListOfKeys();
+    for(int i = 0; i < objectList->GetSize(); ++i){
+        TObject* i_objectList = objectList->At(i);
+        TString* objectName(0);
+        objectName = new TString(i_objectList->GetName());
+        //std::cout<<"\n\tName of object: "<<*objectName<<"\n\n";
         if(fragmentAtBegin){
-            if(histoName->BeginsWith(histonameFragment)) result.push_back(*histoName);
+            if(objectName->BeginsWith(objectNameFragment)) result.push_back(*objectName);
         }
         else{
-            if(histoName->Contains(histonameFragment)) result.push_back(*histoName);
+            if(objectName->Contains(objectNameFragment)) result.push_back(*objectName);
         }
     }
     return result;
