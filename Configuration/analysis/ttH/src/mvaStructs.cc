@@ -18,6 +18,7 @@
 
 
 MvaTopJetsVariables::MvaTopJetsVariables():
+lastInEvent_(MvaVariableInt(name_lastInEvent_)),
 bQuarkRecoJetMatched_(MvaVariableInt(name_bQuarkRecoJetMatched_)),
 correctCombination_(MvaVariableInt(name_correctCombination_)),
 swappedCombination_(MvaVariableInt(name_swappedCombination_)),
@@ -46,7 +47,9 @@ MvaTopJetsVariables::MvaTopJetsVariables(const LV& lepton, const LV& antiLepton,
                                          const LV& jetRecoil, const LV& met,
                                          const bool bQuarkRecoJetMatched,
                                          const bool correctCombination, const bool swappedCombination,
+                                         const bool lastInEvent,
                                          const double& eventWeight):
+lastInEvent_(MvaVariableInt(name_lastInEvent_)),
 bQuarkRecoJetMatched_(MvaVariableInt(name_bQuarkRecoJetMatched_)),
 correctCombination_(MvaVariableInt(name_correctCombination_)),
 swappedCombination_(MvaVariableInt(name_swappedCombination_)),
@@ -74,7 +77,8 @@ massDiff_antiBLepton_bAntiLepton_(MvaVariableFloat(name_massDiff_antiBLepton_bAn
     const LV antiBLeptonSystem = antiBJet + lepton;
     const LV fullBLeptonSystem = bAntiLeptonSystem + antiBLeptonSystem;
     
-    // Booleans needed for MVA
+    // Needed booleans
+    lastInEvent_.value_ = lastInEvent;
     bQuarkRecoJetMatched_.value_ = bQuarkRecoJetMatched;
     correctCombination_.value_ = correctCombination;
     swappedCombination_.value_ = swappedCombination;
@@ -129,7 +133,9 @@ std::vector<MvaTopJetsVariables> MvaTopJetsVariables::fillVariables(const tth::R
     
     // Loop over all jet pairs
     for(size_t iJetIndexPairs = 0; iJetIndexPairs < jetIndexPairs.size(); ++iJetIndexPairs){
-
+        // Is it the last entry of an event
+        const bool lastInEvent = iJetIndexPairs == jetIndexPairs.size()-1;
+        
         // Get the indices of b and anti-b jet defined by jet charge
         const int antiBIndex = jetIndexPairs.at(iJetIndexPairs).first;
         const int bIndex = jetIndexPairs.at(iJetIndexPairs).second;
@@ -160,13 +166,14 @@ std::vector<MvaTopJetsVariables> MvaTopJetsVariables::fillVariables(const tth::R
         const LV& jetRecoil = jetRecoils.at(iJetIndexPairs);
 
         const MvaTopJetsVariables mvaInput(lepton, antiLepton,
-                                         bjet, antiBjet,
-                                         bjetBtagDiscriminator, antiBjetBtagDiscriminator,
-                                         jetChargeDiff,
-                                         jetRecoil, met,
-                                         successfulTopMatching,
-                                         isCorrectPair, isSwappedPair,
-                                         eventWeight);
+                                           bjet, antiBjet,
+                                           bjetBtagDiscriminator, antiBjetBtagDiscriminator,
+                                           jetChargeDiff,
+                                           jetRecoil, met,
+                                           successfulTopMatching,
+                                           isCorrectPair, isSwappedPair,
+                                           lastInEvent,
+                                           eventWeight);
 
         result.push_back(mvaInput);
     }

@@ -1,6 +1,9 @@
 #ifndef tth_utils_h
 #define tth_utils_h
 
+#include <vector>
+#include <utility>
+
 class TString;
 
 
@@ -8,6 +11,13 @@ class TString;
 
 
 namespace tth{
+    
+    /// Get vector of pairs with < stepName, objectName from ROOT-file (e.g. histo or tree) >
+    std::vector<std::pair<TString, TString> > nameStepPairs(const char* filename,
+                                                            const char* objectNameFragment,
+                                                            const std::vector<TString>& selectedSteps =std::vector<TString>());
+    
+    
     
     /// Assign a step name for a given short name of the step, and potentially for specific categories
     TString stepName(const TString& stepShort, const int& category =-1);

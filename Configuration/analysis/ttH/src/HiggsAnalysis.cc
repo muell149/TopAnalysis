@@ -19,7 +19,7 @@
 #include "AnalysisHistograms.h"
 #include "Playground.h"
 #include "MvaTreeHandler.h"
-
+#include "MvaTreeAnalyzer.h"
 #include "MvaValidation.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
@@ -108,9 +108,11 @@ void HiggsAnalysis::Terminate()
                                     Channel::convertChannel(static_cast<std::string>(channel_)),
                                     Systematic::convertSystematic(static_cast<std::string>(systematic_)));
         //mvaTreeHandler_->writeTrees(fOutput);
-
+        
         // Create and store control plots in fOutput
-        mvaTreeHandler_->plotVariables(fOutput);
+        MvaTreeAnalyzer mvaTreeAnalyzer(mvaTreeHandler_->stepMvaVariablesMap());
+        mvaTreeAnalyzer.plotVariables(fOutput);
+        mvaTreeAnalyzer.clear();
         
         // Cleanup
         mvaTreeHandler_->clear();
@@ -825,9 +827,6 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
                                       genObjectIndices, recoObjectIndices,
                                       genLevelWeights, recoLevelWeights, defaultWeight,
                                       selectionStep);
-    if(mvaTreeHandler_) mvaTreeHandler_->fillForInputProduction(recoObjects,
-                                                                genObjectIndices, recoObjectIndices,
-                                                                defaultWeight, selectionStep);
     if(mvaTreeHandler_) mvaTreeHandler_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
     if(mvaValidation_) mvaValidation_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
     if(dijetAnalyzer_) dijetAnalyzer_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,

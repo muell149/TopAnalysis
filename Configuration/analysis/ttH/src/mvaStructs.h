@@ -90,13 +90,14 @@ public:
     
     /// Constructor setting up input variables from physics objects
     MvaTopJetsVariables(const LV& lepton, const LV& antiLepton,
-                      const LV& bJet, const LV& antiBJet,
-                      const double& bJetBtagDiscriminator, const double& antiBJetBtagDiscriminator,
-                      const double& jetChargeDiff,
-                      const LV& jetRecoil, const LV& met,
-                      const bool bQuarkRecoJetMatched,
-                      const bool correctCombination, const bool swappedCombination,
-                      const double& eventWeight =1.);
+                        const LV& bJet, const LV& antiBJet,
+                        const double& bJetBtagDiscriminator, const double& antiBJetBtagDiscriminator,
+                        const double& jetChargeDiff,
+                        const LV& jetRecoil, const LV& met,
+                        const bool bQuarkRecoJetMatched,
+                        const bool correctCombination, const bool swappedCombination,
+                        const bool lastInEvent,
+                        const double& eventWeight);
     
     /// Destructor
     ~MvaTopJetsVariables(){}
@@ -116,6 +117,8 @@ public:
     
     // The variables needed for MVA
     
+    /// Is it the last dijet combination in the event
+    MvaVariableInt lastInEvent_;
     /// Could b quark and anti-b quark be matched to reco jets
     MvaVariableInt bQuarkRecoJetMatched_;
     /// Is it the true correct jet combination
@@ -148,6 +151,7 @@ private:
     
     // The names associated to the variables
     
+    static constexpr const char* name_lastInEvent_ = "lastInEvent";
     static constexpr const char* name_bQuarkRecoJetMatched_ = "bQuarkRecoJetMatched";
     static constexpr const char* name_correctCombination_ = "correctCombination";
     static constexpr const char* name_swappedCombination_ = "swappedCombination";

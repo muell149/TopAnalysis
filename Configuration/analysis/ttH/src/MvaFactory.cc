@@ -18,9 +18,11 @@
 
 
 
-MvaFactory::MvaFactory(const char* mvaOutputDir, const std::vector<TString>& selectionSteps):
+MvaFactory::MvaFactory(const char* mvaOutputDir,  const char* weightFileDir,
+                       const std::vector<TString>& selectionSteps):
 selectionSteps_(selectionSteps),
-mvaOutputDir_(mvaOutputDir)
+mvaOutputDir_(mvaOutputDir),
+weightFileDir_(weightFileDir)
 {
     std::cout<<"--- Beginning setting up MVA training\n";
     std::cout<<"=== Finishing setting up MVA training\n\n";
@@ -31,11 +33,12 @@ mvaOutputDir_(mvaOutputDir)
 void MvaFactory::clear()
 {
     mvaOutputDir_ = 0;
+    weightFileDir_ = 0;
 }
 
 
 
-void MvaFactory::runMva(const char* outputDir, const char* weightFileDir, const char* outputFileName,
+void MvaFactory::runMva(const char* outputFileName,
                         const char* methodName, const TCut& cutSignal, const TCut& cutBackground,
                         TTree* treeTraining, TTree* treeTesting)
 {
@@ -43,15 +46,15 @@ void MvaFactory::runMva(const char* outputDir, const char* weightFileDir, const 
     TMVA::Tools::Instance();
     
     // Create a ROOT output file for TMVA
-    TString mvaOutputFilename(outputDir);
+    TString mvaOutputFilename(mvaOutputDir_);
     mvaOutputFilename.Append("/");
     gSystem->MakeDirectory(mvaOutputFilename);
     mvaOutputFilename.Append(outputFileName);
     TFile* outputFile = TFile::Open(mvaOutputFilename, "RECREATE");
     
     // Set the output directory for the weights (if not specified, default is "weights")
-    TString mvaOutputWeightsFilename(outputDir);
-    mvaOutputWeightsFilename.Append(weightFileDir);
+    TString mvaOutputWeightsFilename(mvaOutputDir_);
+    mvaOutputWeightsFilename.Append(weightFileDir_);
     (TMVA::gConfig().GetIONames()).fWeightFileDir = mvaOutputWeightsFilename;
     
     // Create the factory

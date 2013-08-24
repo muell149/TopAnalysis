@@ -25,7 +25,8 @@ class MvaFactory{
 public:
     
     /// Constructor which can optionally set MVA weights and creating TMVA Reader
-    MvaFactory(const char* mvaOutputDir, const std::vector<TString>& selectionSteps);
+    MvaFactory(const char* mvaOutputDir, const char* weightFileDir,
+               const std::vector<TString>& selectionSteps);
     
     /// Destructor
     ~MvaFactory(){};
@@ -39,7 +40,7 @@ public:
     
     
     /// Run the MVA for given parameters
-    void runMva(const char* outputDir, const char* weightFileDir, const char* outputFileName,
+    void runMva(const char* outputFileName,
                 const char* methodName, const TCut& cutSignal, const TCut& cutBackground,
                 TTree* treeTraining, TTree* treeTesting);
     
@@ -66,6 +67,9 @@ private:
     
     /// The folder where to store the input for MVA
     const char* mvaOutputDir_;
+    
+    /// The sub-folder where to store MVA weights
+    const char* weightFileDir_;
 };
 
 

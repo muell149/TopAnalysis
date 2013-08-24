@@ -1,14 +1,51 @@
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
+#include <vector>
+#include <utility>
+#include <sstream>
+#include <algorithm>
 
 #include <TObjArray.h>
 #include <TString.h>
 #include <Rtypes.h>
 
 #include "higgsUtils.h"
+#include "../../diLeptonic/src/RootFileReader.h"
 
 
+
+
+
+std::vector<std::pair<TString, TString> > tth::nameStepPairs(const char* filename,
+                                                             const char* objectNameFragment,
+                                                             const std::vector<TString>& selectedSteps)
+{
+    std::vector<std::pair<TString, TString> > result;
+    std::stringstream ss_step;
+    std::stringstream ss_unselected;
+    
+    // Search for all steps
+    RootFileReader* fileReader(RootFileReader::getInstance());
+    const std::vector<TString>& v_treeName = fileReader->findObjects(filename, objectNameFragment, false);
+    for(std::vector<TString>::const_iterator i_objectName = v_treeName.begin(); i_objectName != v_treeName.end(); ++i_objectName){
+        const TString& step = tth::extractSelectionStepAndJetCategory(*i_objectName);
+        
+        // Reject steps in case only selected steps should be chosen
+        if(selectedSteps.size() && std::find(selectedSteps.begin(), selectedSteps.end(), step) == selectedSteps.end()){
+            ss_unselected<<step<<", ";
+            continue;
+        }
+        
+        // Add selection steps
+        ss_step<<step<<", ";
+        result.push_back(std::make_pair(*i_objectName, step));
+    }
+    
+    std::cout<<"Found chosen selection steps:\n"<<ss_step.str()<<std::endl;
+    if(selectedSteps.size() && ss_unselected.str()!="") std::cout<<"Found rejected selection steps:\n"<<ss_unselected.str()<<std::endl;
+    return result;
+}
 
 
 

@@ -30,27 +30,20 @@ void DyScaleFactors::produceScaleFactors(const Samples& samples)
 {
     std::cout<<"--- Beginning production of Drell-Yan scale factors\n\n";
     
-    // Get histograms for Drell-Yan scaling from first file in map
-    std::vector<TString> v_eventHistoName;
+    // Extract steps for Drell-Yan scaling from first file in map
     const SystematicChannelSamples& m_systematicChannelSamples = samples.getSystematicChannelSamples();
     const TString& filename = m_systematicChannelSamples.begin()->second.begin()->second.begin()->inputFile();
-    v_eventHistoName = fileReader_->findHistos(filename, "Allh1_step");
-    
-    // Extract selection steps
-    std::vector<TString> v_step;
-    for(std::vector<TString>::const_iterator i_eventHistoName = v_eventHistoName.begin(); i_eventHistoName != v_eventHistoName.end(); ++i_eventHistoName){
-        const TString& step = tth::extractSelectionStep(*i_eventHistoName);
-        v_step.push_back(step);
-    }
+    const std::vector<std::pair<TString, TString> > v_nameStepPair = tth::nameStepPairs(filename, "Allh1_step");
     
     // Loop over selection steps and systematics
-    for(TString step : v_step){
+    for(const auto& nameStepPair : v_nameStepPair){
         for(auto systematicChannelSamples : m_systematicChannelSamples){
             const Systematic::Systematic& systematic(systematicChannelSamples.first);
-            this->produceScaleFactors(step, systematic, systematicChannelSamples.second);
+            this->produceScaleFactors(nameStepPair.second, systematic, systematicChannelSamples.second);
         }
     }
     
+    // Print table
     std::cout<<"Step\t\tSystematic\tScale factors (ee, mumu)\n";
     std::cout<<"--------\t----------\t------------------------\n";
     for(auto dyScaleFactorsPerStep : m_dyScaleFactors_){
