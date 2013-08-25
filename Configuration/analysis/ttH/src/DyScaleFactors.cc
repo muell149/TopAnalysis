@@ -97,9 +97,9 @@ void DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::
             const double allWeights = luminosityWeight; // calculate here all the flat-weights we apply: Lumi*others*...
             
             TH1D* h_loose = fileReader_->GetClone<TH1D>(sample.inputFile(), "Looseh1");
-            TH1D* h_zWindow = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("Zh1_").Append(step).Append("zWindow"));
-            TH1D* h_zVeto = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("TTh1_").Append(step));
-            TH1D* h_all = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("Allh1_").Append(step));
+            TH1D* h_zWindow = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("Zh1").Append(step).Append("zWindow"));
+            TH1D* h_zVeto = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("TTh1").Append(step));
+            TH1D* h_all = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("Allh1").Append(step));
             
             h_loose->Scale(allWeights);
             h_zWindow->Scale(allWeights);

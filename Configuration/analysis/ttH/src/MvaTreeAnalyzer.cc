@@ -80,9 +80,8 @@ void MvaTreeAnalyzer::plotVariables(TSelectorList* output)
 
 
 
-void MvaTreeAnalyzer::plotStep(const TString& stepWoSlash, const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables)
+void MvaTreeAnalyzer::plotStep(const TString& step, const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables)
 {    
-    const TString step("_"+stepWoSlash);
     const MvaTopJetsVariables nameDummy;
     constexpr const char* prefix = "mvaP_";
     std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
