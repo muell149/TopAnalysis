@@ -389,6 +389,83 @@ tth::mvaHelpers::SystematicChannelFileNames tth::mvaHelpers::systematicChannelFi
 
 
 
+tth::mvaHelpers::SystematicChannelFileNames tth::mvaHelpers::mergeTrees(
+                    const char* mvaInputDir,
+                    const tth::mvaHelpers::SystematicChannelFileNames& m_systematicChannelFileNamesTraining,
+                    const tth::mvaHelpers::SystematicChannelFileNames& m_systematicChannelFileNamesTesting,
+                    const std::vector<std::pair<TString, TString> >& v_nameStepPair)
+{
+    SystematicChannelFileNames result;
+    
+    // Loop over all channels and systematics
+    for(const auto& systematicChannelFileNamesTraining : m_systematicChannelFileNamesTraining){
+        const Systematic::Systematic& systematic = systematicChannelFileNamesTraining.first;
+        for(const auto& channelFileNamesTraining : systematicChannelFileNamesTraining.second){
+            const Channel::Channel& channel = channelFileNamesTraining.first;
+            const std::vector<TString>& v_fileNameTraining = channelFileNamesTraining.second;
+            const std::vector<TString>& v_fileNameTesting = m_systematicChannelFileNamesTesting.at(systematic).at(channel);
+            std::cout<<"Processing (Channel, Systematic): "<<Channel::convertChannel(channel)<<" , "<<Systematic::convertSystematic(systematic)<<"\n\n";
+            
+            // Open the input files and access the MVA input training trees
+            std::map<TString, TList*> m_stepListTraining;
+            for(const auto& fileName : v_fileNameTraining){
+                std::cout<<"File for training: "<<fileName<<std::endl;
+                // FIXME: need to check whether input file really exists
+                TFile* inputFile(0);
+                inputFile = TFile::Open(fileName);
+                for(const auto& nameStepPair : v_nameStepPair){
+                    //std::cout<<"Tree and step: "<<nameStepPair.first<<" , "<<nameStepPair.second<<"\n\n";
+                    // FIXME: need to check whether input tree really exists
+                    TTree* inputTree = (TTree*)inputFile->Get(nameStepPair.first);
+                    if(m_stepListTraining.find(nameStepPair.second) == m_stepListTraining.end()){
+                        m_stepListTraining[nameStepPair.second] = new TList;
+                    }
+                    m_stepListTraining.at(nameStepPair.second)->Add(inputTree);
+                }
+            }
+            std::cout<<std::endl;
+            
+            // Open the input files and access the MVA input testing trees
+            std::map<TString, TList*> m_stepListTesting;
+            for(const auto& fileName : v_fileNameTesting){
+                std::cout<<"File for testing: "<<fileName<<std::endl;
+                // FIXME: need to check whether input file really exists
+                TFile* inputFile(0);
+                inputFile = TFile::Open(fileName);
+                for(const auto& nameStepPair : v_nameStepPair){
+                    //std::cout<<"Tree and step: "<<nameStepPair.first<<" , "<<nameStepPair.second<<"\n\n";
+                    // FIXME: need to check whether input tree really exists
+                    TTree* inputTree = (TTree*)inputFile->Get(nameStepPair.first);
+                    if(m_stepListTesting.find(nameStepPair.second) == m_stepListTesting.end()){
+                        m_stepListTesting[nameStepPair.second] = new TList;
+                    }
+                    m_stepListTesting.at(nameStepPair.second)->Add(inputTree);
+                }
+            }
+            std::cout<<std::endl;
+            
+            // Unfortunately this output file is needed to prevent from strange ROOT message
+            TString mergedTreesFileName = ttbar::assignFolder(mvaInputDir, channel, systematic);
+            mergedTreesFileName.Append("/");
+            mergedTreesFileName.Append("mergedTrees.root");
+            TFile* mergedTrees = new TFile(mergedTreesFileName, "RECREATE");
+            for(const auto& nameStepPair : v_nameStepPair){
+                TTree* treeTraining = TTree::MergeTrees(m_stepListTraining.at(nameStepPair.second));
+                treeTraining->SetName("training_"+nameStepPair.first);
+                TTree* treeTesting = TTree::MergeTrees(m_stepListTesting.at(nameStepPair.second));
+                treeTesting->SetName("testing_"+nameStepPair.first);
+                treeTraining->Write();
+                treeTesting->Write();
+            }
+            mergedTrees->Close();
+            result[systematic][channel].push_back(mergedTreesFileName);
+        }
+    }
+    
+    return result;
+}
+
+
 
 
 

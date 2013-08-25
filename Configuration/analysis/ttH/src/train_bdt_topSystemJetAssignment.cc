@@ -16,6 +16,7 @@
 #include "MvaFactory.h"
 #include "MvaTreeHandler.h"
 #include "MvaTreeAnalyzer.h"
+#include "mvaSetup.h"
 #include "higgsUtils.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
@@ -32,8 +33,8 @@ constexpr const char* MvaInputDIR = "mvaInput";
 /// The MVA output base folder
 constexpr const char* MvaOutputDIR = "mvaOutput";
 
-/// The MVA weights output folder
-constexpr const char* MvaWeightFileDIR = "/weights";
+/// The MVA output sub-folder for weights
+constexpr const char* MvaWeightFileDIR = "weights";
 
 
 
@@ -63,7 +64,7 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
     
     // Define steps for indiviual MVA treatment
     // FIXME: make general selections via steps and categories
-    std::vector<TString> v_selectionSteps = {"step8", "step8_cate5"};
+    std::vector<TString> v_selectionSteps = {"_step8", "_step8_cate1", "_step8_cate5"};
     
     // Find all trees of all steps/categories containing MVA input variables from first input file
     const std::vector<std::pair<TString, TString> > v_nameStepPair =
@@ -71,152 +72,42 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
                            "mvaInputTopJets_step",
                            v_selectionSteps);
     
-    // Loop over all channels and systematics
-    for(const auto& systematicChannelFileNamesTraining : m_systematicChannelFileNamesTraining){
-        const Systematic::Systematic& systematic = systematicChannelFileNamesTraining.first;
-        for(const auto& channelFileNamesTraining : systematicChannelFileNamesTraining.second){
-            const Channel::Channel& channel = channelFileNamesTraining.first;
-            const std::vector<TString>& v_fileNameTraining = channelFileNamesTraining.second;
-            const std::vector<TString>& v_fileNameTesting = m_systematicChannelFileNamesTesting.at(systematic).at(channel);
+    // Loop over all channels and systematics and merge trees
+    tth::mvaHelpers::SystematicChannelFileNames m_systematicChannelMergedFiles = 
+        tth::mvaHelpers::mergeTrees(MvaInputDIR,
+                                    m_systematicChannelFileNamesTraining,
+                                    m_systematicChannelFileNamesTesting,
+                                    v_nameStepPair);
+    
+    // Loop over all channels and systematics and run MVA
+    for(const auto& systematicChannelMergedFiles : m_systematicChannelMergedFiles){
+        const Systematic::Systematic& systematic = systematicChannelMergedFiles.first;
+        for(const auto& channelMergedFiles : systematicChannelMergedFiles.second){
+            const Channel::Channel& channel = channelMergedFiles.first;
+            const TString& fileName = channelMergedFiles.second.at(0);
             std::cout<<"Processing (Channel, Systematic): "<<Channel::convertChannel(channel)<<" , "<<Systematic::convertSystematic(systematic)<<"\n\n";
-            
-            // Open the input files and access the MVA input training trees
-            std::map<TString, TList*> m_stepListTraining;
-            for(const auto& fileName : v_fileNameTraining){
-                std::cout<<"File for training: "<<fileName<<std::endl;
-                // FIXME: need to check whether input file really exists
-                TFile* inputFile(0);
-                inputFile = TFile::Open(fileName);
-                for(const auto& nameStepPair : v_nameStepPair){
-                    //std::cout<<"Tree and step: "<<nameStepPair.first<<" , "<<nameStepPair.second<<"\n\n";
-                    // FIXME: need to check whether input tree really exists
-                    TTree* inputTree = (TTree*)inputFile->Get(nameStepPair.first);
-                    if(m_stepListTraining.find(nameStepPair.second) == m_stepListTraining.end()){
-                        m_stepListTraining[nameStepPair.second] = new TList;
-                    }
-                    m_stepListTraining.at(nameStepPair.second)->Add(inputTree);
-                }
-            }
-            std::cout<<std::endl;
-            
-            // Open the input files and access the MVA input testing trees
-            std::map<TString, TList*> m_stepListTesting;
-            for(const auto& fileName : v_fileNameTesting){
-                std::cout<<"File for testing: "<<fileName<<std::endl;
-                // FIXME: need to check whether input file really exists
-                TFile* inputFile(0);
-                inputFile = TFile::Open(fileName);
-                for(const auto& nameStepPair : v_nameStepPair){
-                    //std::cout<<"Tree and step: "<<nameStepPair.first<<" , "<<nameStepPair.second<<"\n\n";
-                    // FIXME: need to check whether input tree really exists
-                    TTree* inputTree = (TTree*)inputFile->Get(nameStepPair.first);
-                    if(m_stepListTesting.find(nameStepPair.second) == m_stepListTesting.end()){
-                        m_stepListTesting[nameStepPair.second] = new TList;
-                    }
-                    m_stepListTesting.at(nameStepPair.second)->Add(inputTree);
-                }
-            }
-            std::cout<<std::endl;
-            
-            // Unfortunately this output file is needed to prevent from strange ROOT message
-            TString mergedTreesFileName = ttbar::assignFolder(MvaInputDIR, channel, systematic);
-            mergedTreesFileName.Append("/");
-            mergedTreesFileName.Append("mergedTrees.root");
-            TFile* mergedTrees = new TFile(mergedTreesFileName, "RECREATE");
-            for(const auto& nameStepPair : v_nameStepPair){
-                TTree* treeTraining = TTree::MergeTrees(m_stepListTraining.at(nameStepPair.second));
-                treeTraining->SetName("training_"+nameStepPair.first);
-                TTree* treeTesting = TTree::MergeTrees(m_stepListTesting.at(nameStepPair.second));
-                treeTesting->SetName("testing_"+nameStepPair.first);
-                treeTraining->Write();
-                treeTesting->Write();
-            }
-            mergedTrees->Close();
             
             // Print all separation power plots
             if(std::find(v_mode.begin(), v_mode.end(), "cp") != v_mode.end()){
                 TString outputPlots = ttbar::assignFolder(MvaOutputDIR, channel, systematic);
                 outputPlots.Append(PlotOutputFILE);
                 MvaTreeHandler mvaTreeHandler("", {});
-                mvaTreeHandler.importTrees(mergedTreesFileName.Data(), "training_");
+                mvaTreeHandler.importTrees(fileName.Data(), "training_");
                 MvaTreeAnalyzer mvaTreeAnalyzer(mvaTreeHandler.stepMvaVariablesMap(), true);
                 mvaTreeAnalyzer.plotVariables(outputPlots.Data());
             }
             
             // Run the MVA training
             if(std::find(v_mode.begin(), v_mode.end(), "mva") != v_mode.end()){
-                mergedTrees = TFile::Open(mergedTreesFileName);
-                std::vector<TString> selectionSteps;
-                for(const auto& nameStepPair : v_nameStepPair){
-                    selectionSteps.push_back(nameStepPair.second);
-                }
-                MvaFactory mvaFactory(ttbar::assignFolder(MvaOutputDIR, channel, systematic), MvaWeightFileDIR, selectionSteps);
-                
-                for(const auto& nameStepPair : v_nameStepPair){
-                    TTree* treeTraining = (TTree*)mergedTrees->Get("training_"+nameStepPair.first);
-                    TTree* treeTesting = (TTree*)mergedTrees->Get("testing_"+nameStepPair.first);
-                    std::cout<<"\n\n\tTrees: "<<treeTraining->GetName()<<" , "<<treeTesting->GetName()<<"\n\n\n";
-                    
-                    // MVA for correct dijet combinations
-                    constexpr const char* mvaOutputFilenameCorrect = "correct.root";
-                    constexpr const char* methodNameCorrect = "correct";
-                    const TCut cutSignalCorrect = "correctCombination != 0";
-                    const TCut cutBackgroundCorrect = "correctCombination == 0 && swappedCombination == 0";
-                    
-                    mvaFactory.runMva(mvaOutputFilenameCorrect,
-                                      methodNameCorrect, cutSignalCorrect, cutBackgroundCorrect,
-                                      treeTraining, treeTesting);
-                    
-                    // MVA for swapped dijet combinations
-                    constexpr const char* mvaOutputFilenameSwapped = "swapped.root";
-                    constexpr const char* methodNameSwapped = "swapped";
-                    const TCut cutSignalSwapped = "swappedCombination != 0";
-                    const TCut cutBackgroundSwapped = "correctCombination == 0 && swappedCombination == 0";
-                    
-                    mvaFactory.runMva(mvaOutputFilenameSwapped,
-                                      methodNameSwapped, cutSignalSwapped, cutBackgroundSwapped,
-                                      treeTraining, treeTesting);
-                }
+                TFile* mergedTrees = TFile::Open(fileName);
+                const TString folder = ttbar::assignFolder(MvaOutputDIR, channel, systematic);
+                MvaFactory mvaFactory(folder, MvaWeightFileDIR,
+                                      v_nameStepPair, mergedTrees);
+                mvaFactory.train(mvaSetups::v_mvaSetCorrect, mvaSetups::v_mvaSetSwapped, channel);
+                mergedTrees->Close();
             }
         }
     }
-    
-    
-    
-    
-/*    
-    // Run the MVA training
-    if(std::find(v_mode.begin(), v_mode.end(), "mva") != v_mode.end()){
-        mergedTrees = TFile::Open(mergedTreesName);
-        treeTraining = (TTree*)mergedTrees->Get("mvaInputTopJets_training");
-        treeTesting = (TTree*)mergedTrees->Get("mvaInputTopJets_testing");
-        
-        MvaFactory mvaFactory(0, {});
-        
-        // MVA for correct dijet combinations
-        constexpr const char* mvaOutputFilenameCorrect = "correct.root";
-        constexpr const char* methodNameCorrect = "correct";
-        
-        const TCut cutSignalCorrect = "correctCombination != 0";
-        const TCut cutBackgroundCorrect = "correctCombination == 0 && swappedCombination == 0";
-        
-        mvaFactory.runMva(MvaOutputDIR, MvaWeightFileDIR, mvaOutputFilenameCorrect,
-                          methodNameCorrect, cutSignalCorrect, cutBackgroundCorrect,
-                          treeTraining, treeTesting);
-        
-        
-        // MVA for swapped dijet combinations
-        constexpr const char* mvaOutputFilenameSwapped = "swapped.root";
-        constexpr const char* methodNameSwapped = "swapped";
-        
-        const TCut cutSignalSwapped = "swappedCombination != 0";
-        const TCut cutBackgroundSwapped = "correctCombination == 0 && swappedCombination == 0";
-        
-        mvaFactory.runMva(MvaOutputDIR, MvaWeightFileDIR, mvaOutputFilenameSwapped,
-                          methodNameSwapped, cutSignalSwapped, cutBackgroundSwapped,
-                          treeTraining, treeTesting);
-    }
-*/    
     
     std::cout<<"=== Finishing MVA training\n\n";
 }

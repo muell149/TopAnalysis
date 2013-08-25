@@ -35,13 +35,9 @@ namespace tth{
     /// Helper functions only needed by functions defined in this file
     namespace helper{
         
-        /// Helper function to get the fragment containing the selection step
-        /// (needs to be separated by given token)
-        TString stepFragmentByToken(const TString& nameFragment, const TString& token);
-        
-        /// Helper function to get the fragment containing the jet category
-        /// (needs to be separated by given token)
-        TString categoryFragmentByToken(const TString& nameFragment, const TString& token);
+        /// Helper function to get the fragment containing a searchPattern,
+        /// fragments are separated by given token
+        TString searchFragmentByToken(const TString& name, const TString& searchPattern, const TString& token);
     }
 }
 

@@ -135,11 +135,16 @@ private:
 namespace tth{
     namespace mvaHelpers{
         typedef std::map<Systematic::Systematic, std::map<Channel::Channel, std::vector<TString> > > SystematicChannelFileNames;
+        
         SystematicChannelFileNames systematicChannelFileNames(const char* fileListBase,
                                                               const std::vector<Channel::Channel>& v_channel,
                                                               const std::vector<Systematic::Systematic>& v_systematic,
                                                               const bool forTraining =true);
         
+        SystematicChannelFileNames mergeTrees(const char* mvaInputDir,
+                                              const SystematicChannelFileNames& m_systematicChannelFileNamesTraining,
+                                              const SystematicChannelFileNames& m_systematicChannelFileNamesTesting,
+                                              const std::vector<std::pair<TString, TString> >& v_nameStepPair);
     }
 }
 
