@@ -37,7 +37,8 @@
 /// Set pileup distribution file corresponding to data sample in use
 /// The file ending is automatically adjusted for different systematics
 //constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
-constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
+constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19789pb";
 
 
 
@@ -70,10 +71,10 @@ constexpr const char* BtagEfficiencyOutputDIR = "selectionRoot/BTagEff";
 constexpr const char* MvaInputDIR = "mvaInput";
 
 /// File containing MVA weights for correct combinations of ttbar jets
-constexpr const char* MvaWeightsCorrectFILE = "mvaOutput/weights/MVA_correct.weights.xml";
+constexpr const char* MvaWeightsCorrectFILE = "mvaOutput/Nominal/combined/weights/correct_step10_c1.weights.xml";
 
 /// File containing MVA weights for correct combinations of ttbar jets
-constexpr const char* MvaWeightsSwappedFILE = "mvaOutput/weights/MVA_swapped.weights.xml";
+constexpr const char* MvaWeightsSwappedFILE = "mvaOutput/Nominal/combined/weights/swapped_step10_c1.weights.xml";
 
 
 
@@ -166,15 +167,16 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     }
     
     // Set up production of MVA input tree
+    const JetCategories jetCategories_mva(4, 4, 1, 3, true, true);
     MvaTreeHandler* mvaTreeHandler(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"7", "8"}, {"8"}, &jetCategories);
+        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"10"}, {"10"}, &jetCategories_mva);
     }
     
     // Set up MVA validation, including reading in MVA weights in case they exist
     MvaValidation* mvaValidation(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
-        mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE, {"8"});
+        mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE, {"10"}, {"10"}, &jetCategories_mva);
     }
     
     // Set up the analysis

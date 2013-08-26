@@ -96,7 +96,7 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
         std::ofstream eventFile;
         TString eventFileString = ttbar::assignFolder(YieldDIR, channel, Systematic::nominal);
         if(useCorrections) eventFileString.Append("corrected_");
-        eventFileString.Append("events_" + i_nameStepPair->second + ".txt");
+        eventFileString.Append("events" + i_nameStepPair->second + ".txt");
         eventFile.open(eventFileString.Data());
         
         // Make output for tables

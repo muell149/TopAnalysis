@@ -49,7 +49,7 @@ public:
         MvaSet(const std::vector<MvaConfig>& v_mvaConfig,
                const std::vector<int>& v_category,
                const std::vector<Channel::Channel>& channel,// ={Channel::combined},
-               const TString& step ="8");
+               const TString& step ="10");
         ~MvaSet(){}
         
         std::vector<TString> stepNames()const;

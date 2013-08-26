@@ -98,8 +98,9 @@ void HiggsAnalysis::Begin(TTree*)
 void HiggsAnalysis::Terminate()
 {
     // Produce b-tag efficiencies
-    // FIXME: shouldn't we also clear b-tagging efficiency histograms if they are produced ?
-    if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
+    // FIXME: runWithTtbb_ is dirty hack, since makeBtagEfficiencies() is in AnalysisBase
+    // FIXME: Shouldn't we also clear b-tagging efficiency histograms if they are produced ?
+    if(!runWithTtbb_ && this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
     
     // Do everything needed for MVA
     if(mvaTreeHandler_){
@@ -131,7 +132,7 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     AnalysisBase::SlaveBegin(0);
 
     // Histograms for b-tagging efficiencies
-    if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
+    if(!runWithTtbb_ && this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
     
     // Book histograms of all analyzers
     this->bookAll();
@@ -520,7 +521,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                   weight);
     
     // Fill the b-tagging efficiency plots
-    if(this->makeBtagEfficiencies()){
+    if(!runWithTtbb_ && this->makeBtagEfficiencies()){
         btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
                                               jets, jetPartonFlavour,
                                               weight, static_cast<std::string>(channel_));
@@ -617,6 +618,45 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                   genObjectIndices, recoObjectIndices,
                   genLevelWeights, recoLevelWeights,
                   weight);
+    
+    
+    
+    // FIXME; following selection steps are only workaround for MVA training in merged category
+    //=== CUT ===
+    selectionStep = "9";
+    
+    // Require at least 3 jets
+    if(numberOfJets<3) return kTRUE;
+    
+    // ++++ Control Plots ++++
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjects, higgsGenObjects,
+                  kinRecoObjects,
+                  genObjectIndices, recoObjectIndices,
+                  genLevelWeights, recoLevelWeights,
+                  weight);
+    
+    
+    
+    
+    //=== CUT ===
+    selectionStep = "10";
+    
+    // Require at least 4 jets
+    if(numberOfJets<4) return kTRUE;
+    
+    // ++++ Control Plots ++++
+    
+    this->fillAll(selectionStep,
+                  recoObjects, commonGenObjects,
+                  topGenObjects, higgsGenObjects,
+                  kinRecoObjects,
+                  genObjectIndices, recoObjectIndices,
+                  genLevelWeights, recoLevelWeights,
+                  weight);
+    
     
     
     return kTRUE;
