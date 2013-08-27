@@ -147,12 +147,12 @@ h2_MuonIDSFpteta(0)
         std::string histogramName;
         if(lepton == electron){
             inputFileName.append(electronSFInputFileName);
-            histogramName = "ElectronSFtop12028";
+            histogramName = "ElectronIdIsoSF";
             h2_ElectronIDSFpteta = this->prepareLeptonIDSF(inputFileName, histogramName, systematic);
         }
         else if(lepton == muon){
             inputFileName.append(muonSFInputFileName);
-            histogramName = "MuonSFtop12028";
+            histogramName = "MuonIdIsoSF";
             h2_MuonIDSFpteta = this->prepareLeptonIDSF(inputFileName, histogramName, systematic);
         }
     }

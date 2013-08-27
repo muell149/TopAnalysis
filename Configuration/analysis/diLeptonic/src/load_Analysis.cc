@@ -34,12 +34,12 @@ constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis
 
 /// Input file for electron ID scale factor
 //constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028.root";
-constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028_19fb.root";
-
+//constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028_19fb.root";
+constexpr const char* ElectronSFInputFILE = "ElectronSF_198fbReReco.root";
 /// Input file for muon ID scale factor
 //constexpr const char* MuonSFInputFILE = "MuonSFtop12028.root";
-constexpr const char* MuonSFInputFILE = "MuonSFtop12028_19fb.root";
-
+//constexpr const char* MuonSFInputFILE = "MuonSFtop12028_19fb.root";
+constexpr const char* MuonSFInputFILE = "MuonSF_198fbReReco.root";
 
 
 /// File ending of dilepton trigger scale factors input file
