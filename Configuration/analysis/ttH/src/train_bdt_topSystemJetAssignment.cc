@@ -54,8 +54,6 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
                                     const std::vector<Systematic::Systematic>& v_systematic,
                                     const std::vector<std::string>& v_mode)
 {
-    std::cout<<"\n--- Beginning MVA training\n";
-    
     // Access all MVA input file names for all systematics and channels
     tth::mvaHelpers::SystematicChannelFileNames m_systematicChannelFileNamesTraining =
         tth::mvaHelpers::systematicChannelFileNames(FileListBASE, v_channel, v_systematic);
@@ -64,7 +62,8 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
     
     // Define steps for indiviual MVA treatment
     // FIXME: make general selections via steps and categories
-    std::vector<TString> v_selectionSteps = {"_step8", "_step8_cate1", "_step8_cate5"};
+    // FIXME: offer merging of steps
+    std::vector<TString> v_selectionSteps = {"_step10", "_step10_cate0", "_step10_cate1", "_step10_cate2"};
     
     // Find all trees of all steps/categories containing MVA input variables from first input file
     const std::vector<std::pair<TString, TString> > v_nameStepPair =
@@ -85,14 +84,13 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
         for(const auto& channelMergedFiles : systematicChannelMergedFiles.second){
             const Channel::Channel& channel = channelMergedFiles.first;
             const TString& fileName = channelMergedFiles.second.at(0);
-            std::cout<<"Processing (Channel, Systematic): "<<Channel::convertChannel(channel)<<" , "<<Systematic::convertSystematic(systematic)<<"\n\n";
             
             // Print all separation power plots
             if(std::find(v_mode.begin(), v_mode.end(), "cp") != v_mode.end()){
                 TString outputPlots = ttbar::assignFolder(MvaOutputDIR, channel, systematic);
                 outputPlots.Append(PlotOutputFILE);
                 MvaTreeHandler mvaTreeHandler("", {});
-                mvaTreeHandler.importTrees(fileName.Data(), "training_");
+                mvaTreeHandler.importTrees(fileName.Data(), "training");
                 MvaTreeAnalyzer mvaTreeAnalyzer(mvaTreeHandler.stepMvaVariablesMap(), true);
                 mvaTreeAnalyzer.plotVariables(outputPlots.Data());
             }
@@ -108,8 +106,7 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
             }
         }
     }
-    
-    std::cout<<"=== Finishing MVA training\n\n";
+    std::cout<<"MVA program successfully finished";
 }
 
 

@@ -122,12 +122,6 @@ void MvaTreeHandler::fill(const RecoObjects& recoObjects,
 void MvaTreeHandler::writeTrees(const std::string& outputFilename,
                                 const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
-    std::cout<<"\n\nValues:\n";
-    for(auto vars : m_stepMvaVariables_){
-        std::cout<<"\t"<<vars.first<<" , "<<vars.second.size()<<"\n";
-    }
-    std::cout<<"\n\n\n";
-    
     // Create output file for MVA tree
     std::string f_savename = static_cast<std::string>(ttbar::assignFolder(mvaInputDir_, channel, systematic));
     f_savename.append(outputFilename);
@@ -278,7 +272,7 @@ void MvaTreeHandler::importTrees(const std::string& f_savename, const std::strin
         this->importBranches(tree, m_stepMvaVariables_[nameStepPair.second]);
         tree = 0;
         
-        std::cout<<"\nStep, Number of entries: "<<nameStepPair.second<<" , "<<m_stepMvaVariables_[nameStepPair.second].size()<<"\n\n";
+        std::cout<<"Step, Number of entries: "<<nameStepPair.second<<" , "<<m_stepMvaVariables_[nameStepPair.second].size()<<"\n";
     }
     inputFile->Close();
     
@@ -404,7 +398,7 @@ tth::mvaHelpers::SystematicChannelFileNames tth::mvaHelpers::mergeTrees(
             const Channel::Channel& channel = channelFileNamesTraining.first;
             const std::vector<TString>& v_fileNameTraining = channelFileNamesTraining.second;
             const std::vector<TString>& v_fileNameTesting = m_systematicChannelFileNamesTesting.at(systematic).at(channel);
-            std::cout<<"Processing (Channel, Systematic): "<<Channel::convertChannel(channel)<<" , "<<Systematic::convertSystematic(systematic)<<"\n\n";
+            std::cout<<"\nProcessing (Channel, Systematic): "<<Channel::convertChannel(channel)<<" , "<<Systematic::convertSystematic(systematic)<<"\n\n";
             
             // Open the input files and access the MVA input training trees
             std::map<TString, TList*> m_stepListTraining;
@@ -451,9 +445,9 @@ tth::mvaHelpers::SystematicChannelFileNames tth::mvaHelpers::mergeTrees(
             TFile* mergedTrees = new TFile(mergedTreesFileName, "RECREATE");
             for(const auto& nameStepPair : v_nameStepPair){
                 TTree* treeTraining = TTree::MergeTrees(m_stepListTraining.at(nameStepPair.second));
-                treeTraining->SetName("training_"+nameStepPair.first);
+                treeTraining->SetName("training"+nameStepPair.first);
                 TTree* treeTesting = TTree::MergeTrees(m_stepListTesting.at(nameStepPair.second));
-                treeTesting->SetName("testing_"+nameStepPair.first);
+                treeTesting->SetName("testing"+nameStepPair.first);
                 treeTraining->Write();
                 treeTesting->Write();
             }

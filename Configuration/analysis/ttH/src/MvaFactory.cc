@@ -76,8 +76,8 @@ void MvaFactory::train(const std::vector<MvaSet>& v_mvaSetCorrect,
             exit(139);
         }
         
-        TTree* treeTraining = (TTree*)mergedTrees_->Get("training_"+nameStepPair.first);
-        TTree* treeTesting = (TTree*)mergedTrees_->Get("testing_"+nameStepPair.first);
+        TTree* treeTraining = (TTree*)mergedTrees_->Get("training"+nameStepPair.first);
+        TTree* treeTesting = (TTree*)mergedTrees_->Get("testing"+nameStepPair.first);
         
         if(v_selectedSetCorrect.size())
             this->runMva(methodPrefixCorrect, cutSignalCorrect, cutBackgroundCorrect, treeTraining, treeTesting, v_selectedSetCorrect, nameStepPair.second);

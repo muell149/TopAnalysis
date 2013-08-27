@@ -27,7 +27,7 @@ namespace mvaSetups{
     
     // Apply set of categories
     const MvaFactory::MvaSet set1 = MvaFactory::MvaSet({config1, config2, config3},
-                                                       {1, 3, 4, 5},
+                                                       {0, 1, 2},
                                                        allChannels);
     
     // Apply no categories
@@ -38,7 +38,7 @@ namespace mvaSetups{
     
     const std::vector<MvaFactory::MvaSet> v_mvaSetCorrect = std::vector<MvaFactory::MvaSet>({set1, set2});
     
-    const std::vector<MvaFactory::MvaSet> v_mvaSetSwapped = std::vector<MvaFactory::MvaSet>({set1});
+    const std::vector<MvaFactory::MvaSet> v_mvaSetSwapped = std::vector<MvaFactory::MvaSet>({set1, set2});
 }
 
 

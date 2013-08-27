@@ -82,7 +82,7 @@ public:
     void SetPlayground(Playground* playground);
     
     /// Bool for separating ttbar+bbar events and ttbar+other events
-    void SetRunWithTtbb(const bool runWithTtbb_);
+    void SetRunWithTtbb(const bool runWithTtbb);
     
     
     
