@@ -157,23 +157,42 @@ namespace ztop{
    * return -1 if no match is found.
    * the input elements are NOT changed but passing by const& leads to errors in some cases
    */
+template <class T, class U>
+  int getClosestInDR(T* element, std::vector<U*>& coll, double & dRmax=999, const double & dptrel=200){
+    double dRmin=9999;
+    if(dRmax)
+      dRmin=dRmax;
+    int idx=-1;
+    for(size_t i=0;i<coll.size();i++){
+      double dr=dR(element, coll.at(i));
+      if(dr<dRmin && dptrel > fabs(element->pt() - coll.at(i)->pt())/element->pt()){
+	dRmin=dr;
+	idx=i;
+      }
+    }
+    if(!dRmax)
+      dRmax=dRmin;
+    return idx;
+  }
+  
   template <class T, class U>
   int getClosestInDR(T& element, std::vector<U>& coll, double & dRmax=999, const double & dptrel=200){
-	  double dRmin=9999;
-	  if(dRmax)
-		  dRmin=dRmax;
-	  int idx=-1;
-	  for(size_t i=0;i<coll.size();i++){
-		  double dr=dR(element, coll.at(i));
-		  if(dr<dRmin && dptrel > fabs(element.pt() - coll.at(i).pt())/element.pt()){
-			  dRmin=dr;
-			  idx=i;
-		  }
-	  }
-	  if(!dRmax)
-		  dRmax=dRmin;
-	  return idx;
+    double dRmin=9999;
+    if(dRmax)
+      dRmin=dRmax;
+    int idx=-1;
+    for(size_t i=0;i<coll.size();i++){
+      double dr=dR(element, coll.at(i));
+      if(dr<dRmin && dptrel > fabs(element.pt() - coll.at(i).pt())/element.pt()){
+	dRmin=dr;
+	idx=i;
+      }
+    }
+    if(!dRmax)
+      dRmax=dRmin;
+    return idx;
   }
+  
 
 }
 
