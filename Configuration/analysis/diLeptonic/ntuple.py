@@ -293,7 +293,8 @@ elif options.samplename == 'ttbarw' or options.samplename == 'ttbarz':
 elif options.samplename in ['data', 'singletop', 'singleantitop','ww',
         'wz','zz','wjets',
         'qcdmu15','qcdem2030','qcdem3080','qcdem80170',
-        'qcdbcem2030','qcdbcem3080','qcdbcem80170']:
+        'qcdbcem2030','qcdbcem3080','qcdbcem80170',
+	'zzz','wwz','www','ttww','ttg','wwg']:
     #no special treatment needed, put here to avoid typos
     pass
 else:
