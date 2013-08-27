@@ -49,7 +49,7 @@ public:
               const double& weight, const TString& stepShort);
 
     /// Find index of genJet corresponding to the specified reco jet. Returns -1 if not found
-    int genJetIdOfRecoJet(const LV& recoJet, const VLV& genJets, const float dR_max=0.3);
+    int genJetIdOfRecoJet(const LV& recoJet, const VLV& genJets, const float dR_max=0.5);
 
     /// Get vector of indices of hadrons that are associted to the given gen jet
     std::vector<int> bHadIdsInGenJet(const int jetId, const std::vector<int>& hadJetIndices);
@@ -73,9 +73,9 @@ private:
 
     /// Book histograms for one categoryId with given id and label
     virtual void bookHistos(const TString& step);
-    
-    
-    
+
+
+
     /// Struct holding the histograms for one jet category
     struct CatHistograms{
         /// Constructor
