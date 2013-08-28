@@ -130,6 +130,7 @@ process.source = cms.Source("PoolSource",
         '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9A494832-27E2-E111-983A-0030487F1BCF.root',
         '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6DA98EE-80E1-E111-8A16-002481E0D480.root',
         '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FA1056FA-06E2-E111-BE82-0030487EBB25.root',
+        #'/store/mc/Summer12_DR53X/TT_8TeV-mcatnlo/AODSIM/PU_S10_START53_V7A-v1/00003/7687BF3C-5E19-E211-B850-003048679180.root'
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/001A6A4D-E95B-E211-9C65-002590200B78.root',
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/425D1632-885B-E211-914A-001E67396C9D.root',
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/7E9D8C16-1B5B-E211-AB4C-002590200A1C.root',
@@ -289,7 +290,7 @@ process.scaledJetEnergy = scaledJetEnergy.clone( inputJets            = "selecte
                                                  jetEMLimitForMET     = 0.9,
                                                  resolutionFactors    = resolutions,
                                                  resolutionEtaRanges  = etaRanges,
-                                                 JECUncSrcFile        = "TopAnalysis/TopUtils/data/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt",
+                                                 JECUncSrcFile        = "TopAnalysis/TopUtils/data/Summer13_V4_DATA_UncertaintySources_AK5PFchs.txt",
                                                  )
 
 ## don't scale MET if skimmed event content is used
