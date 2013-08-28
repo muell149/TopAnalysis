@@ -44,8 +44,8 @@ constexpr const char* MuonSFInputFILE = "MuonSF_198fbReReco.root";
 
 /// File ending of dilepton trigger scale factors input file
 //constexpr const char* TriggerSFInputSUFFIX = ".root";
-constexpr const char* TriggerSFInputSUFFIX = "_19fb.root";
-
+//constexpr const char* TriggerSFInputSUFFIX = "_19fb.root";
+constexpr const char* TriggerSFInputSUFFIX = "_rereco198fb.root";
 
 
 
