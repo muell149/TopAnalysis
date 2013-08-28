@@ -10,7 +10,7 @@
 
 
 ################################################################
-############# Higgs samples ####################################
+############# ttH samples ######################################
 ################################################################
 
 50   Summer12.TTH_HToBB_M_110_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff         ttbarH110tobbbar.root        ttbarhiggstobbbar,systematicsName=mH110
@@ -28,6 +28,15 @@
 50   Summer12.TTH_Inclusive_M_135_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     ttbarH135inclusive.root      ttbarhiggsinclusive,systematicsName=mH135
 50   Summer12.TTH_Inclusive_M_140_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff     ttbarH140inclusive.root      ttbarhiggsinclusive,systematicsName=mH140
 
+
+
+################################################################
+############# H->ZZ samples ####################################
+################################################################
+
+
+50   Summer12.GluGluToHToZZTo4L_M_125_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff	ggH125zz4l.root		gghiggstozzto4l
+5    Summer12.VBF_HToZZTo4L_M_125_8TeV_powheg_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v1_cff		vbfH125zz4l.root	vbfhiggstozzto4l
 
 
 
