@@ -134,7 +134,7 @@ void DijetAnalyzer::fill(const RecoObjects& recoObjects, const CommonGenObjects&
     // Filling the dijet mass of true gen jets from Higgs
     if(trueHiggsGenBJetId >= 0 && trueHiggsGenAntiBJetId >= 0) {
         LV dijet_genH = genJets.at(trueHiggsGenBJetId) + genJets.at(trueHiggsGenAntiBJetId);
-        m_histogram["dijet_mass_trueHiggsJets"]->Fill(dijet_genH.M(), weight);
+        m_histogram["dijet_mass_genHiggsJets"]->Fill(dijet_genH.M(), weight);
     }
 
 
@@ -366,6 +366,236 @@ void DijetAnalyzer::fill(const RecoObjects& recoObjects, const CommonGenObjects&
     ((TH2*)m_histogram["bHadVsBJet_multiplicity"])->Fill(nGenBhads, nBJets, weight);
     ((TH2*)m_histogram["bHadVsBHadNoT_multiplicity"])->Fill(nGenBhads, nGenBhadsNoT, weight);
 
+
+    ///////////////////////////////////////////////////////////////////////// COMPARISON OF GEN MATCHING AND dR MATCHING
+    // Finding the closest b-hadrons to the b-quarks
+    LV* bQt = topGenObjects.GenB_;
+    LV* bQat = topGenObjects.GenAntiB_;
+    LV* bQh = higgsGenObjects.GenBFromH_;
+    LV* bQah = higgsGenObjects.GenAntiBFromH_;
+    int bHt_id=-1;
+    int bHat_id=-1;
+    int bHh_id=-1;
+    int bHah_id=-1;
+    float dRQHt_min = 999.9;
+    float dRQHat_min = 999.9;
+    float dRQHh_min = 999.9;
+    float dRQHah_min = 999.9;
+    int bHt_id_05=-1;
+    int bHat_id_05=-1;
+    int bHh_id_05=-1;
+    int bHah_id_05=-1;
+    float dRQHt_min_05 = 0.5;
+    float dRQHat_min_05 = 0.5;
+    float dRQHh_min_05 = 0.5;
+    float dRQHah_min_05 = 0.5;
+    std::vector<int> bHt_unique_ids_dR(0);
+    std::vector<int> bHh_unique_ids_dR(0);
+    std::vector<int> bHth_unique_ids_dR(0);
+    std::vector<int> bHt_unique_ids_dR_05(0);
+    std::vector<int> bHh_unique_ids_dR_05(0);
+    std::vector<int> bHth_unique_ids_dR_05(0);
+    std::vector<int> bHt_unique_ids_matched(0);
+    std::vector<int> bHh_unique_ids_matched(0);
+    std::vector<int> bHth_unique_ids_matched(0);
+    std::vector<int> bJt_unique_ids_dR(0);
+    std::vector<int> bJh_unique_ids_dR(0);
+    std::vector<int> bJth_unique_ids_dR(0);
+    std::vector<int> bJt_unique_ids_dR_05(0);
+    std::vector<int> bJh_unique_ids_dR_05(0);
+    std::vector<int> bJth_unique_ids_dR_05(0);
+    std::vector<int> bJt_unique_ids_matched(0);
+    std::vector<int> bJh_unique_ids_matched(0);
+    std::vector<int> bJth_unique_ids_matched(0);
+
+    // Looping over all b-hadrons in the event to find closest ones
+    using ROOT::Math::VectorUtil::DeltaR;
+    for(int iHad = 0; iHad < (int)bHadLVs.size(); iHad++ ) {
+        LV bHadLV = bHadLVs.at(iHad);
+        float dRQHt = bQt?DeltaR(*bQt, bHadLV):1000.f;
+        float dRQHat = bQat?DeltaR(*bQat, bHadLV):1000.f;
+        float dRQHh = bQh?DeltaR(*bQh, bHadLV):1000.f;
+        float dRQHah = bQah?DeltaR(*bQah, bHadLV):1000.f;
+        if(dRQHt < dRQHt_min)   {dRQHt_min = dRQHt; bHt_id = iHad;}
+        if(dRQHat < dRQHat_min) {dRQHat_min = dRQHat; bHat_id = iHad;}
+        if(dRQHh < dRQHh_min)   {dRQHh_min = dRQHh; bHh_id = iHad;}
+        if(dRQHah < dRQHah_min) {dRQHah_min = dRQHah; bHah_id = iHad;}
+        if(dRQHt < dRQHt_min_05)   {dRQHt_min_05 = dRQHt; bHt_id_05 = iHad;}
+        if(dRQHat < dRQHat_min_05) {dRQHat_min_05 = dRQHat; bHat_id_05 = iHad;}
+        if(dRQHh < dRQHh_min_05)   {dRQHh_min_05 = dRQHh; bHh_id_05 = iHad;}
+        if(dRQHah < dRQHah_min_05) {dRQHah_min_05 = dRQHah; bHah_id_05 = iHad;}
+
+        // Filling multiplicity of unique hadrons and dR to closest quark
+        switch(bHadFlavour.at(iHad)) {
+            case 6:
+                bHt_unique_ids_matched.push_back(iHad);
+                if(bQt) m_histogram["bQuarkT_bHad_dRmatched"]->Fill(DeltaR(*bQt, bHadLV), weight);
+                if(!isInVector(bHth_unique_ids_matched, iHad)) bHth_unique_ids_matched.push_back(iHad);
+                break;
+            case -6:
+                bHt_unique_ids_matched.push_back(iHad);
+                if(bQat) m_histogram["bQuarkT_bHad_dRmatched"]->Fill(DeltaR(*bQat, bHadLV), weight);
+                if(!isInVector(bHth_unique_ids_matched, iHad)) bHth_unique_ids_matched.push_back(iHad);
+                break;
+            case 25:
+                bHh_unique_ids_matched.push_back(iHad);
+                if(bQh) m_histogram["bQuarkH_bHad_dRmatched"]->Fill(DeltaR(*bQh, bHadLV), weight);
+                if(!isInVector(bHth_unique_ids_matched, iHad)) bHth_unique_ids_matched.push_back(iHad);
+                break;
+            case -25:
+                bHh_unique_ids_matched.push_back(iHad);
+                if(bQah) m_histogram["bQuarkH_bHad_dRmatched"]->Fill(DeltaR(*bQah, bHadLV), weight);
+                if(!isInVector(bHth_unique_ids_matched, iHad)) bHth_unique_ids_matched.push_back(iHad);
+                break;
+            default:
+                break;
+        }
+
+        int flavour = bHadFlavour.at(iHad);
+        int flavourAbs = std::abs(flavour);
+
+        if(flavourAbs!=6 && flavourAbs!=25 && flavourAbs!=21) continue;
+
+        // Finding the closest gen jet
+        int genJetId_matched = bHadJetIndex.at(iHad);
+        float dR_min = 999.9;
+        float dR_min_05 = 0.5;
+        int genJetId_dR = -1;
+        int genJetId_dR_05 = -1;
+        for(int iJet = 0; iJet < (int)genJets.size(); iJet++) {
+            float dR = DeltaR(bHadLV, genJets.at(iJet));
+            if(dR<dR_min) {
+                dR_min = dR;
+                genJetId_dR = iJet;
+            }
+            if(dR<dR_min_05) {
+                dR_min_05 = dR;
+                genJetId_dR_05 = iJet;
+            }
+        }       // End of loop over gen Jets
+
+        // Filling dR to matched and closest jets
+        switch(flavourAbs) {
+            case 6:
+                if(genJetId_dR>=0) {
+                    m_histogram["bHadT_genJet_dRmin"]->Fill(dR_min, weight);
+                    if(!isInVector(bJt_unique_ids_dR, genJetId_dR)) bJt_unique_ids_dR.push_back(genJetId_dR);
+                    if(!isInVector(bJth_unique_ids_dR, genJetId_dR)) bJth_unique_ids_dR.push_back(genJetId_dR);
+                    if(flavour<0 && bQat) m_histogram["bQuarkT_genJet_dRmin"]->Fill(DeltaR(*bQat, genJets.at(genJetId_dR))); else
+                        if(flavour>0 && bQt) m_histogram["bQuarkT_genJet_dRmin"]->Fill(DeltaR(*bQt, genJets.at(genJetId_dR)));
+
+                    if(isInVector(bHt_unique_ids_dR_05, iHad) && genJetId_dR_05>=0) {
+                        if(!isInVector(bJt_unique_ids_dR_05, genJetId_dR_05)) bJt_unique_ids_dR_05.push_back(genJetId_dR_05);
+                        if(!isInVector(bJth_unique_ids_dR_05, genJetId_dR_05)) bJth_unique_ids_dR_05.push_back(genJetId_dR_05);
+                    }
+                }
+                if(genJetId_matched>=0) {
+                    m_histogram["bHadT_genJet_dRmatched"]->Fill(DeltaR(bHadLV, genJets.at(genJetId_matched)), weight);
+                    if(!isInVector(bJt_unique_ids_matched, genJetId_matched)) bJt_unique_ids_matched.push_back(genJetId_matched);
+                    if(!isInVector(bJth_unique_ids_matched, genJetId_matched)) bJth_unique_ids_matched.push_back(genJetId_matched);
+                    if(flavour<0 && bQat) m_histogram["bQuarkT_genJet_dRmatched"]->Fill(DeltaR(*bQat, genJets.at(genJetId_matched))); else
+                        if(flavour>0 && bQt) m_histogram["bQuarkT_genJet_dRmatched"]->Fill(DeltaR(*bQt, genJets.at(genJetId_matched)));
+                }
+                break;
+            case 25:
+                if(genJetId_dR>=0) {
+                    m_histogram["bHadH_genJet_dRmin"]->Fill(dR_min, weight);
+                    if(!isInVector(bJh_unique_ids_dR, genJetId_dR)) bJh_unique_ids_dR.push_back(genJetId_dR);
+                    if(!isInVector(bJth_unique_ids_dR, genJetId_dR)) bJth_unique_ids_dR.push_back(genJetId_dR);
+                    if(flavour<0 && bQah) m_histogram["bQuarkH_genJet_dRmin"]->Fill(DeltaR(*bQah, genJets.at(genJetId_dR))); else
+                        if(flavour>0 && bQh) m_histogram["bQuarkH_genJet_dRmin"]->Fill(DeltaR(*bQh, genJets.at(genJetId_dR)));
+
+                    if(isInVector(bHh_unique_ids_dR_05, iHad) && genJetId_dR_05>=0) {
+                        if(!isInVector(bJh_unique_ids_dR_05, genJetId_dR_05)) bJh_unique_ids_dR_05.push_back(genJetId_dR_05);
+                        if(!isInVector(bJth_unique_ids_dR_05, genJetId_dR_05)) bJth_unique_ids_dR_05.push_back(genJetId_dR_05);
+                    }
+                }
+                if(genJetId_matched>=0) {
+                    m_histogram["bHadH_genJet_dRmatched"]->Fill(DeltaR(bHadLV, genJets.at(genJetId_matched)), weight);
+                    if(!isInVector(bJh_unique_ids_matched, genJetId_dR)) bJh_unique_ids_matched.push_back(genJetId_matched);
+                    if(!isInVector(bJth_unique_ids_matched, genJetId_dR)) bJth_unique_ids_matched.push_back(genJetId_dR);
+                    if(flavour<0 && bQah) m_histogram["bQuarkH_genJet_dRmatched"]->Fill(DeltaR(*bQah, genJets.at(genJetId_matched))); else
+                        if(flavour>0 && bQh) m_histogram["bQuarkH_genJet_dRmatched"]->Fill(DeltaR(*bQh, genJets.at(genJetId_matched)));
+                }
+                break;
+            case 21:
+                if(genJetId_dR>=0) m_histogram["bHadG_genJet_dRmin"]->Fill(dR_min, weight);
+                if(genJetId_matched>=0) m_histogram["bHadG_genJet_dRmatched"]->Fill(DeltaR(bHadLV, genJets.at(genJetId_matched)), weight);
+                break;
+            default:
+                break;
+        }
+
+    }       // End of loop over b-hadrons
+
+
+    if(bHt_id >= 0) {
+        if(bQt) m_histogram["bQuarkT_bHad_dRmin"]->Fill(DeltaR(*bQt, bHadLVs.at(bHt_id)), weight);
+        if(!isInVector(bHt_unique_ids_dR, bHt_id)) bHt_unique_ids_dR.push_back(bHt_id);
+        if(!isInVector(bHth_unique_ids_dR, bHt_id)) bHth_unique_ids_dR.push_back(bHt_id);
+    }
+    if(bHat_id >= 0) {
+        if(bQat) m_histogram["bQuarkT_bHad_dRmin"]->Fill(DeltaR(*bQat, bHadLVs.at(bHat_id)), weight);
+        if(!isInVector(bHt_unique_ids_dR, bHat_id)) bHt_unique_ids_dR.push_back(bHat_id);
+        if(!isInVector(bHth_unique_ids_dR, bHat_id)) bHth_unique_ids_dR.push_back(bHat_id);
+    }
+    if(bHh_id >= 0) {
+        if(bQh) m_histogram["bQuarkH_bHad_dRmin"]->Fill(DeltaR(*bQh, bHadLVs.at(bHh_id)), weight);
+        if(!isInVector(bHh_unique_ids_dR, bHh_id)) bHh_unique_ids_dR.push_back(bHh_id);
+        if(!isInVector(bHth_unique_ids_dR, bHh_id)) bHth_unique_ids_dR.push_back(bHh_id);
+    }
+    if(bHah_id >= 0) {
+        if(bQah) m_histogram["bQuarkH_bHad_dRmin"]->Fill(DeltaR(*bQah, bHadLVs.at(bHah_id)), weight);
+        if(!isInVector(bHh_unique_ids_dR, bHah_id)) bHh_unique_ids_dR.push_back(bHah_id);
+        if(!isInVector(bHth_unique_ids_dR, bHah_id)) bHth_unique_ids_dR.push_back(bHah_id);
+    }
+
+    if(bHt_id_05 >= 0) {
+        if(!isInVector(bHt_unique_ids_dR_05, bHt_id_05)) bHt_unique_ids_dR_05.push_back(bHt_id_05);
+        if(!isInVector(bHth_unique_ids_dR_05, bHt_id_05)) bHth_unique_ids_dR_05.push_back(bHt_id_05);
+    }
+    if(bHat_id_05 >= 0) {
+        if(!isInVector(bHt_unique_ids_dR_05, bHat_id_05)) bHt_unique_ids_dR_05.push_back(bHat_id_05);
+        if(!isInVector(bHth_unique_ids_dR_05, bHat_id_05)) bHth_unique_ids_dR_05.push_back(bHat_id_05);
+    }
+    if(bHh_id_05 >= 0) {
+        if(!isInVector(bHh_unique_ids_dR_05, bHh_id_05)) bHh_unique_ids_dR_05.push_back(bHh_id_05);
+        if(!isInVector(bHth_unique_ids_dR_05, bHh_id_05)) bHth_unique_ids_dR_05.push_back(bHh_id_05);
+    }
+    if(bHah_id_05 >= 0) {
+        if(!isInVector(bHh_unique_ids_dR_05, bHah_id_05)) bHh_unique_ids_dR_05.push_back(bHah_id_05);
+        if(!isInVector(bHth_unique_ids_dR_05, bHah_id_05)) bHth_unique_ids_dR_05.push_back(bHah_id_05);
+    }
+
+    // Unique hadrons
+    m_histogram["bHadT_unique_multiplicity_dR"]->Fill(bHt_unique_ids_dR.size());
+    m_histogram["bHadH_unique_multiplicity_dR"]->Fill(bHh_unique_ids_dR.size());
+    m_histogram["bHadTH_unique_multiplicity_dR"]->Fill(bHth_unique_ids_dR.size());
+
+    m_histogram["bHadT_unique_multiplicity_dR_05"]->Fill(bHt_unique_ids_dR_05.size());
+    m_histogram["bHadH_unique_multiplicity_dR_05"]->Fill(bHh_unique_ids_dR_05.size());
+    m_histogram["bHadTH_unique_multiplicity_dR_05"]->Fill(bHth_unique_ids_dR_05.size());
+
+    m_histogram["bHadT_unique_multiplicity_match"]->Fill(bHt_unique_ids_matched.size());
+    m_histogram["bHadH_unique_multiplicity_match"]->Fill(bHh_unique_ids_matched.size());
+    m_histogram["bHadTH_unique_multiplicity_match"]->Fill(bHth_unique_ids_matched.size());
+
+    // Unique jets
+    m_histogram["genJetT_unique_multiplicity_dR"]->Fill(bJt_unique_ids_dR.size());
+    m_histogram["genJetH_unique_multiplicity_dR"]->Fill(bJh_unique_ids_dR.size());
+    m_histogram["genJetTH_unique_multiplicity_dR"]->Fill(bJth_unique_ids_dR.size());
+
+    m_histogram["genJetT_unique_multiplicity_dR_05"]->Fill(bJt_unique_ids_dR_05.size());
+    m_histogram["genJetH_unique_multiplicity_dR_05"]->Fill(bJh_unique_ids_dR_05.size());
+    m_histogram["genJetTH_unique_multiplicity_dR_05"]->Fill(bJth_unique_ids_dR_05.size());
+
+    m_histogram["genJetT_unique_multiplicity_match"]->Fill(bJt_unique_ids_matched.size());
+    m_histogram["genJetH_unique_multiplicity_match"]->Fill(bJh_unique_ids_matched.size());
+    m_histogram["genJetTH_unique_multiplicity_match"]->Fill(bJth_unique_ids_matched.size());
+
+//     if((int)bHt_unique_ids_dR.size() < 2) printf("nHadrons: %d\tnSelJets: %d\tnColesJets: %d\n", (int)bHt_unique_ids_dR.size(), (int)genJets.size(), (int)bJt_unique_ids_dR.size());
+
+
 }
 
 
@@ -562,6 +792,73 @@ void DijetAnalyzer::bookHistos(const TString& step)
     m_histogram[name] = store(new TH1D(prefix+name+step, "Jet btagDiscriminator d (Pt<30);d_{reco}^{Pt<30}"+label+";Jets",20,0,1));
     name = "bJet_PtLt30_btagDiscriminator";
     m_histogram[name] = store(new TH1D(prefix+name+step, "B-jet btagDiscriminator d (Pt<30);d_{reco}^{Pt<30}"+label+";B-tagged jets",20,0,1));
+
+    name = "bQuarkT_bHad_dRmin";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Min. dR b-quark_{tt} ^ bHadron;dR(bQ,bHad)^{t}_{min}"+label+";b-quarks_{tt}",50,0,3.5));
+    name = "bQuarkH_bHad_dRmin";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Min. dR b-quark_{H} ^ bHadron;dR(bQ,bHad)^{H}_{min}"+label+";b-quarks_{H}",50,0,3.5));
+    name = "bQuarkT_bHad_dRmatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{tt} ^ bHadron_{tt};dR(bQ,bHad)^{t}_{matched}"+label+";b-quarks_{tt}",51,-0.07,3.5));
+    name = "bQuarkH_bHad_dRmatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{H} ^ bHadron_{H};dR(bQ,bHad)^{H}_{matched}"+label+";b-quarks_{H}",51,-0.07,3.5));
+    name = "bHadT_genJet_dRmin";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Min. dR b-hadron_{tt} ^ jet_{gen};dR(bHad,genJet)^{t}_{min}"+label+";b-hadrons_{tt}",50,0,3.5));
+    name = "bHadH_genJet_dRmin";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Min. dR b-hadron_{H} ^ jet_{gen};dR(bHad,genJet)^{H}_{min}"+label+";b-hadrons_{H}",50,0,3.5));
+    name = "bHadG_genJet_dRmin";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-hadron_{gluon} ^ jet_{gen};dR(bHad,genJet)^{g}_{min}"+label+";b-hadrons_{gluon}",50,0,3.5));
+    name = "bHadT_genJet_dRmatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-hadron_{tt} ^ jet_{gen};dR(bHad,genJet)^{t}_{matched}"+label+";b-hadrons_{tt}",51,-0.07,3.5));
+    name = "bHadH_genJet_dRmatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-hadron_{H} ^ jet_{gen};dR(bHad,genJet)^{H}_{matched}"+label+";b-hadrons_{H}",51,-0.07,3.5));
+    name = "bHadG_genJet_dRmatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-hadron_{gluon} ^ jet_{gen};dR(bHad,genJet)^{g}_{matched}"+label+";b-hadrons_{gluon}",51,-0.07,3.5));
+    name = "bQuarkT_genJet_dRmin";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Min. dR b-quark_{tt} ^ jet_{gen};dR(bQ,genJet)^{t}_{min}"+label+";b-quarks_{tt}",50,0,3.5));
+    name = "bQuarkH_genJet_dRmin";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Min. dR b-quark_{H} ^ jet_{gen};dR(bQ,genJet)^{H}_{min}"+label+";b-quarks_{H}",50,0,3.5));
+    name = "bQuarkT_genJet_dRmatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{tt} ^ jet_{gen};dR(bQ,genJet)^{t}_{matched}"+label+";b-quarks_{tt}",51,-0.07,3.5));
+    name = "bQuarkH_genJet_dRmatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{H} ^ jet_{gen};dR(bQ,genJet)^{H}_{matched}"+label+";b-quarks_{H}",51,-0.07,3.5));
+
+    name = "bHadT_unique_multiplicity_dR";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (tt);N hadrons_{unique}^{tt} (dR)"+label+";Events",5,0,5));
+    name = "bHadH_unique_multiplicity_dR";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (H);N hadrons_{unique}^{H} (dR)"+label+";Events",5,0,5));
+    name = "bHadTH_unique_multiplicity_dR";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (ttH);N hadrons_{unique}^{ttH} (dR)"+label+";Events",5,0,5));
+    name = "bHadT_unique_multiplicity_dR_05";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (tt);N hadrons_{unique}^{tt} (dR<0.5)"+label+";Events",5,0,5));
+    name = "bHadH_unique_multiplicity_dR_05";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (H);N hadrons_{unique}^{H} (dR<0.5)"+label+";Events",5,0,5));
+    name = "bHadTH_unique_multiplicity_dR_05";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (ttH);N hadrons_{unique}^{ttH} (dR<0.5)"+label+";Events",5,0,5));
+    name = "bHadT_unique_multiplicity_match";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (tt);N hadrons_{unique}^{tt} (match)"+label+";Events",5,0,5));
+    name = "bHadH_unique_multiplicity_match";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (H);N hadrons_{unique}^{H} (match)"+label+";Events",5,0,5));
+    name = "bHadTH_unique_multiplicity_match";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "B-hadron multiplicity (ttH);N hadrons_{unique}^{ttH} (match)"+label+";Events",5,0,5));
+    name = "genJetT_unique_multiplicity_dR";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (tt);N genJets_{unique}^{tt} (dR)"+label+";Events",5,0,5));
+    name = "genJetH_unique_multiplicity_dR";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (H);N genJets_{unique}^{H} (dR)"+label+";Events",5,0,5));
+    name = "genJetTH_unique_multiplicity_dR";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (ttH);N genJets_{unique}^{ttH} (dR)"+label+";Events",5,0,5));
+    name = "genJetT_unique_multiplicity_dR_05";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (tt);N genJets_{unique}^{tt} (dR<0.5)"+label+";Events",5,0,5));
+    name = "genJetH_unique_multiplicity_dR_05";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (H);N genJets_{unique}^{H} (dR<0.5)"+label+";Events",5,0,5));
+    name = "genJetTH_unique_multiplicity_dR_05";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (ttH);N genJets_{unique}^{ttH} (dR<0.5)"+label+";Events",5,0,5));
+    name = "genJetT_unique_multiplicity_match";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (tt);N genJets_{unique}^{tt} (match)"+label+";Events",5,0,5));
+    name = "genJetH_unique_multiplicity_match";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (H);N genJets_{unique}^{H} (match)"+label+";Events",5,0,5));
+    name = "genJetTH_unique_multiplicity_match";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Jet_{gen} multiplicity (ttH);N genJets_{unique}^{ttH} (match)"+label+";Events",5,0,5));
+
 
     name = "weight";
     m_histogram[name] = store(new TH1D(prefix+name+step, "Weight of the event;weight"+label+";Events",30,0,3));
