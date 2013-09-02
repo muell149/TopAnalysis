@@ -33,7 +33,7 @@
 constexpr double TOPXSEC = 234.;
 
 /// Luminosity in 1/fb
-constexpr double LUMI = 19.789;
+constexpr double LUMI = 19.712;
 
 ///do we want to run the sync excercise?
 constexpr bool RUNSYNC = false;

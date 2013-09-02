@@ -1190,7 +1190,7 @@ void Plotter::PlotXSec(TString Channel){
     std::vector<TString> vec_channel {"ee","mumu","emu","combined"};
 
     double BR_Error = 0.015;
-    double Lumi_Error = 0.044;
+    double Lumi_Error = 0.026;
 
     double InclusiveXsectionPlot[4] = {0.}, InclusiveXsectionStatErrorPlot[4] = {0.}, InclusiveXsectionSysErrorPlot[4] = {0.}, InclusiveXsectionTotalErrorPlot[4] = {0.};
     for (int j=0; j<(int)vec_channel.size(); j++){
