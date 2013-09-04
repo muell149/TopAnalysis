@@ -21,7 +21,9 @@
 
 /// Set data luminosity in pb-1
 //constexpr double Luminosity = 19624.8;
-constexpr double Luminosity = 19789;
+//constexpr double Luminosity = 19789;
+constexpr double Luminosity = 19712;
+
 
 
 
