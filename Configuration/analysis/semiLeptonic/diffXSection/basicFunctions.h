@@ -115,6 +115,7 @@ namespace semileptonic {
   const unsigned int constPowhegColor2  = kGreen+3;
   const unsigned int constNnloColor     = kOrange+4;
   const unsigned int constNnloColor2    = kMagenta+2;
+  const unsigned int constMadgraphPerugiaColor = kRed-7;
 
   // Line style for theory curves
 
@@ -123,6 +124,7 @@ namespace semileptonic {
   const unsigned int constNnloStyle    = 2;
   const unsigned int constMcatnloStyle = 5;
   const unsigned int constNnloStyle2   = 10;
+  const unsigned int constMadgraphPerugiaStyle = 3;
 
   // legend entries for theory curves
   const TString constMadGraphPythiaLabel   = "MadGraph+Pythia";
@@ -132,6 +134,7 @@ namespace semileptonic {
   const TString constNnloLabelKidonakis = "Approx. NNLO";
   const TString constMcatnloHerwigLabel = "MC@NLO+Herwig";
   const TString constNloNNLLLabelAhrens = "NLO+NNLL";
+  const TString constMadGraphPythiaPerugiaLabel = "MadGraph+Pythia (Perugia)";
 
   // Marker style (<=kSAToptW)
 

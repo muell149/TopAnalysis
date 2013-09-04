@@ -2,6 +2,9 @@
 
 void analyzeGenComparison(bool save = true, int verbose=2){
   
+  // run different ttbar MCs or Theory Variations
+  bool theoryVariations=true;
+
   // ============================
   //  Set Root Style
   // ============================
@@ -19,14 +22,23 @@ void analyzeGenComparison(bool save = true, int verbose=2){
   // ============================
   std::vector<TFile* > file_;
   if(verbose>0) std::cout << "opening files" << std::endl;
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigSummer12PF.root"            , "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigPowhegSummer12PF.root"      , "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigPowhegHerwigSummer12PF.root", "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root"     , "Open"));
-
+  if(!theoryVariations){
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigSummer12PF.root"                    , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigPowhegSummer12PF.root"              , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigPowhegHerwigSummer12PF.root"        , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root"             , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugiaSummer12PF.root", "Open"));
+  }
+  else{
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                    , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchUp/combinedDiffXSecSigMatchUpSummer12PF.root"     , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchDown/combinedDiffXSecSigMatchDownSummer12PF.root" , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleUp/combinedDiffXSecSigScaleUpSummer12PF.root"     , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleDown/combinedDiffXSecSigScaleDownSummer12PF.root" , "Open"));
+  }
   // save output path
   TString outpath="diffXSecFromSignal/plots/combined/2012/ttgencomparison/";
-  // ->create it via: mkdir -p diffXSecFromSignal/plots/combined/2012/ttgencomparison
+  // -> create it via: mkdir -p diffXSecFromSignal/plots/combined/2012/ttgencomparison
   
   // list plots of relevance
   if(verbose>0) std::cout << "listing plots" << std::endl;
@@ -139,6 +151,16 @@ void analyzeGenComparison(bool save = true, int verbose=2){
   unsigned int kPowPy=1;
   unsigned int kPowHer=2;
   unsigned int kMcHer=3;
+  unsigned int kMadPer=4;
+
+  unsigned int kMadStd =0;
+  unsigned int kMatchUp=1;
+  unsigned int kMatchDn=2;
+  unsigned int kScaleUp=3;
+  unsigned int kScaleDn=4;
+
+  unsigned int kStart=theoryVariations ? kMadStd : kMadPy;
+  unsigned int kEnd=theoryVariations ? kScaleDn+1 : kMadPer+1;
 
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
   // loop all plots
@@ -147,16 +169,13 @@ void analyzeGenComparison(bool save = true, int verbose=2){
     // name
     TString name=plotList_[plot];
     if(verbose>1) std::cout << "plot: " << name << std::endl;
-    // sample found indicator
-    bool foundMadPy =false;
-    bool foundPowPy =false;
-    bool foundPowHer=false;
-    bool foundMcHer =false;
     // legend
     TLegend* leg= new TLegend(0.6, 0.75, 0.9, 0.88);
     legendStyle(*leg,"");
     // loop samples
-    for( unsigned int sample=kMadPy; sample<=kMcHer; ++sample ){
+    for( unsigned int sample=kStart; sample<kEnd; ++sample ){
+      // sample found indicator
+      bool foundPlot=false;
       if(verbose>1) std::cout << " - sample" << sample << std::endl;
       // load histogram
       TH1* targetPlot;
@@ -174,20 +193,25 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	// normalize to unity
 	histo_[name][sample]->Scale(1./histo_[name][sample]->Integral(0,histo_[name][sample]->GetNbinsX()));
 	// add legend entry
-	if(!foundMadPy &&sample==kMadPy ){ leg->AddEntry(histo_[name][sample], constMadGraphPythiaLabel, "L"); foundMadPy =true; }
-	if(!foundPowPy &&sample==kPowPy ){ leg->AddEntry(histo_[name][sample], constPowhegPythiaLabel  , "L"); foundPowPy =true; }
-	if(!foundPowHer&&sample==kPowHer){ leg->AddEntry(histo_[name][sample], constPowhegHerwigLabel  , "L"); foundPowHer=true; }
-	if(!foundMcHer &&sample==kMcHer ){ leg->AddEntry(histo_[name][sample], constMcatnloHerwigLabel , "L"); foundMcHer =true; }
+	if(!foundPlot){
+	  foundPlot=true;
+	  if(sample==kMadPy ||sample==kMadStd ) leg->AddEntry(histo_[name][sample], constMadGraphPythiaLabel, "L"       );
+	  if(sample==kPowPy ||sample==kMatchUp) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Match up" : constPowhegPythiaLabel         ), "L");
+	  if(sample==kPowHer||sample==kMatchDn) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Match dn" : constPowhegHerwigLabel         ), "L");
+	  if(sample==kMcHer ||sample==kScaleUp) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Scale up" : constMcatnloHerwigLabel        ), "L");
+	  if(sample==kMadPer||sample==kScaleDn) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Scale dn" : constMadGraphPythiaPerugiaLabel), "L");
+	}
 	// histostyle
 	histo_[name][sample]->SetStats(false);
 	histo_[name][sample]->SetLineWidth(3);
-	if(sample==kMadPy ){ histo_[name][sample]->SetLineColor(kBlack)            ; histo_[name][sample]->SetLineStyle(1                ); }
-	if(sample==kPowPy ){ histo_[name][sample]->SetLineColor(constPowhegColor  ); histo_[name][sample]->SetLineStyle(constPowhegStyle ); }
-	if(sample==kPowHer){ histo_[name][sample]->SetLineColor(constMadgraphColor); histo_[name][sample]->SetLineStyle(constPowhegStyle2); }
-	if(sample==kMcHer ){ histo_[name][sample]->SetLineColor(constMcatnloColor ); histo_[name][sample]->SetLineStyle(constMcatnloStyle); }
+	if(sample==kMadPy ||sample==kMadStd ){ histo_[name][sample]->SetLineColor(kBlack)            ; histo_[name][sample]->SetLineStyle(1                ); }
+	if(sample==kPowPy ||sample==kMatchUp){ histo_[name][sample]->SetLineColor(constPowhegColor  ); histo_[name][sample]->SetLineStyle(constPowhegStyle ); }
+	if(sample==kPowHer||sample==kMatchDn){ histo_[name][sample]->SetLineColor(constMadgraphColor); histo_[name][sample]->SetLineStyle(constPowhegStyle2); }
+	if(sample==kMcHer ||sample==kScaleUp){ histo_[name][sample]->SetLineColor(constMcatnloColor ); histo_[name][sample]->SetLineStyle(constMcatnloStyle); }
+	if(sample==kMadPer||sample==kScaleDn){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaColor ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaStyle); }
       }
-      // Drawing etc done for last sample
-      if(sample==kMcHer&&histo_[name].count(kMadPy)>0){
+      // Drawing etc done after progressing last sample
+      if(sample==kEnd-1&&histo_[name].count(kStart)>0){
 	if(verbose>1) std::cout << "drawing" << std::endl;
 	// ============================
 	//  create canvas
@@ -195,10 +219,12 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	char canvname[10];
 	sprintf(canvname,"canv%i",plot);    
 	plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
-	plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(name,2)+getStringEntry(name,1));
+	TString canvTitle=getStringEntry(name,2)+getStringEntry(name,1);
+	if(theoryVariations) canvTitle+="_theoryMods";
+	plotCanvas_[plotCanvas_.size()-1]->SetTitle(canvTitle);
 	// min/max (y-axis)
-	unsigned int sampleMax=kMadPy;
-	for( unsigned int sample2=kMadPy+1; sample2<=kMcHer; ++sample2 ){
+	unsigned int sampleMax=kStart;
+	for( unsigned int sample2=kStart+1; sample2<kEnd; ++sample2 ){
 	  if(histo_[name].count(sample2)>0&&histo_[name][sample2]->GetMaximum()>histo_[name][sampleMax]->GetMaximum()) sampleMax=sample2;
 	}
 	if(verbose>1) std::cout << "use max from sample " << sampleMax << std::endl;
@@ -212,11 +238,11 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	}
 	if(min==0.&&max>0.001) min+=0.001;
 	if(min==1.&&max>1.001) min+=0.001;
-	axesStyle(*histo_[name][kMadPy], getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"), min, max);
-	histo_[plotList_[plot]][kMadPy]->GetXaxis()->SetNoExponent(true);  
+	axesStyle(*histo_[name][kStart], getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"), min, max);
+	histo_[plotList_[plot]][kStart]->GetXaxis()->SetNoExponent(true);  
 	// adjust range (x-axis)
-	double xUp=histo_[name][kMadPy]->GetXaxis()->GetXmax();
-	double xDn=histo_[name][kMadPy]->GetXaxis()->GetXmin();
+	double xUp=histo_[name][kStart]->GetXaxis()->GetXmax();
+	double xDn=histo_[name][kStart]->GetXaxis()->GetXmin();
 	if(name.Contains("topMass")){xDn=165.;xUp=180.;}
 	if(name.Contains("lepPt")){xDn=0.;xUp=500.;}
 	if(name.Contains("bqPt" )){xDn=0.;xUp=500.;}
@@ -224,9 +250,9 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	if(name.Contains("bbbarMass" )){xDn=0.;xUp=1000.;}
 	if(name.Contains("bbbarPt"   )){xDn=0.;xUp=500. ;}
 	if(name.Contains("MET"       )){xDn=0.;xUp=1000.;}
-	if(xUp!=histo_[name][kMadPy]->GetXaxis()->GetXmax()||xDn!=histo_[name][kMadPy]->GetXaxis()->GetXmin()){
+	if(xUp!=histo_[name][kStart]->GetXaxis()->GetXmax()||xDn!=histo_[name][kStart]->GetXaxis()->GetXmin()){
 	  if(verbose>1) std::cout << "resetting x range: " << xDn << ".." << xUp << std::endl;
-	  for( unsigned int sample2=kMadPy; sample2<=kMcHer; ++sample2 ){
+	  for( unsigned int sample2=kStart; sample2<kEnd; ++sample2 ){
 	    if(histo_[name].count(sample2)>0) histo_[name][sample2]->GetXaxis()->SetRangeUser(xDn,xUp-0.000001);
 	  }
 	}
@@ -234,8 +260,8 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	//  plotting
 	// ============================
 	if(verbose>1) std::cout << "draw MadGraph" << std::endl;
-	histo_[name][kMadPy]->Draw("hist");
-	for( unsigned int sample2=kMadPy+1; sample2<=kMcHer; ++sample2 ){
+	histo_[name][kStart]->Draw("hist");
+	for( unsigned int sample2=kStart+1; sample2<kEnd; ++sample2 ){
 	  if(histo_[name].count(sample2)>0){
 	    if(verbose>1) std::cout << "draw sample " << sample2 << "/" << kMcHer << std::endl;
 	    histo_[name][sample2]->Draw("hist same");
@@ -265,12 +291,12 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	if(ratio){
 	  if(verbose>1) std::cout << "draw ratios " << std::endl;
 	  bool one=true;
-	  for( unsigned int sample2=kMadPy+1; sample2<=kMcHer; ++sample2 ){
+	  for( unsigned int sample2=kStart+1; sample2<kEnd; ++sample2 ){
 	    if(histo_[name].count(sample2)>0){
 	      if(verbose>1) std::cout << "  for sample " << sample2 << "/" << kMcHer << std::endl;
 	      std::vector<double> err_=std::vector<double>(0);
-	      //for(int bin=1; bin<=histo_[name][kMadPy]->GetNbinsX(); ++bin){
-	      //  double b =histo_[name][kMadPy]->GetBinContent(bin);
+	      //for(int bin=1; bin<=histo_[name][kStart]->GetNbinsX(); ++bin){
+	      //  double b =histo_[name][kStart]->GetBinContent(bin);
 	      //  double Db=sqrt(b);
 	      //  double a =histo_[name][sample2]->GetBinContent(bin);
 	      //  double Da=sqrt(a);
@@ -280,7 +306,8 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	      TString drawoption=  one ? "hist" : "hist same";
 	      if(verbose>1) std::cout << "  with drawoption: " << drawoption << std::endl;
 	      one=false;
-	      drawRatio(histo_[name][sample2], histo_[name][kMadPy], 0.5, 1.5, myStyle, verbose, err_, "generator", "MadGraph", drawoption, histo_[name][sample2]->GetLineColor(), false, 0.2);
+	      TString denumLabel="MadGraph";
+	      drawRatio(histo_[name][sample2], histo_[name][kStart], 0.5, 1.5, myStyle, verbose, err_, "generator", denumLabel, drawoption, histo_[name][sample2]->GetLineColor(), false, 0.2);
 	    }
 	  }
 	}
@@ -290,6 +317,8 @@ void analyzeGenComparison(bool save = true, int verbose=2){
   }
   if(save){
     if(verbose>1) std::cout << "saving"  << std::endl;
-    saveCanvas(plotCanvas_, outpath, "topComparison", true, true);
+    TString filename="topComparison";
+    if(theoryVariations) filename+="_theoryMods";
+    saveCanvas(plotCanvas_, outpath, filename, true, true);
   }
 }
