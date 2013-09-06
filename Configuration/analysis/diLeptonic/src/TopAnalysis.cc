@@ -56,6 +56,9 @@ constexpr double JetPtCUT2 = 50.;
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
 
+/// Dxy(vertex) cut for electrons
+constexpr double DVertex = 0.04;
+
 
 /// Select the b-tagging method: Apply SF to the histogram or re-tag a jet via a random method
 ///  default method is the re-tagging of the jetBTagCSV_: true
@@ -775,6 +778,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     selectIndices(allLeptonIndices, *leptons_, LVeta, LeptonEtaCUT, false);
     selectIndices(allLeptonIndices, *leptons_, LVeta, -LeptonEtaCUT);
     selectIndices(allLeptonIndices, *leptons_, LVpt, LeptonPtCut);
+    // for electrons apply D0 cut
+    selectIndices(allLeptonIndices, *lepPdgId_, *lepDxyVertex0_, DVertex, false);
+    selectIndices(allLeptonIndices, *lepPdgId_, *lepDxyVertex0_, -DVertex, true);
     orderIndices(allLeptonIndices, *leptons_, LVpt);
     const int numberOfAllLeptons = allLeptonIndices.size();
     
