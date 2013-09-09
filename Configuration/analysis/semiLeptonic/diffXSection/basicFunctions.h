@@ -196,14 +196,14 @@ namespace semileptonic {
 
   const double SF_TopMassDownUncertainty=0.9/3.0; // scale factors for top mass uncertainty
   const double SF_TopMassUpUncertainty  =0.9/3.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
-                                                   // --> systematic samples are varied by +/-3.0 GeV 
-                                                   // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
+                                                  // --> systematic samples are varied by +/-3.0 GeV 
+                                                  // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
-  const double globalLumiUncertainty = 0.044; // relative uncertainty 
+  const double globalLumiUncertainty = 0.026; // relative uncertainty 
 	
-  const double constLumiElec = 19800.0; // luminosity of Jan22ReReco ABCD dataset
-  const double constLumiMuon = 19800.0; // luminosity of Jan22ReReco ABCD dataset
+  const double constLumiElec = 19712.0; // luminosity of Jan22ReReco ABCD dataset, see https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM, LUM-13-001
+  const double constLumiMuon = 19712.0; // see above
   
   const double BRPDG=0.145888;
 
@@ -646,6 +646,7 @@ namespace semileptonic {
     // modified quantities: NONE
     // used functions: NONE
     // used enumerators: NONE
+    if(value==0.) return 0.;
     double modvalue=std::abs(value);
     for(int i=0; i<10; ++i){
       if(modvalue>=1){
@@ -1275,7 +1276,7 @@ namespace semileptonic {
     return fileName;
   }
 
-  void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName, const bool savePdf=true, const bool saveEps=true )
+  void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName, const bool savePdf=true, const bool saveEps=true, const bool savePng=false )
   {
     // introduce function that saves every single canvas in
     // MyCanvas as ./outputFolder/CanvasTitle.eps and in addition
@@ -1296,6 +1297,12 @@ namespace semileptonic {
     if(saveEps){
       for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
 	MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".eps");
+      }
+    }
+    // c) save every plot as png with title as name
+    if(savePng){
+      for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+	MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".png");
       }
     }
   }
