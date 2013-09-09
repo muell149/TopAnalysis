@@ -97,7 +97,10 @@ namespace ttbar{
     void selectIndices(std::vector<int>& v_index, const VLV& v_lv, const LVParameter& parameter,
                                          const double cutValue, const bool lowerThreshold =true);
     
-    
+    /// Function to select from a vector of indices those whose corresponding value of a LV parameter
+    /// in the vector survive the cut REMOVING ELECTRONS WITH D0>0.04
+    void selectIndices(std::vector<int>& v_index, const std::vector<int>& v_variable0, const std::vector<double>& v_variable, 
+                                         const double cutValue, const bool lowerThreshold =true);
     
     /// Function returning the index of a vector whose parameter of the LVs has the most extreme value (in case of several, will be the first one found)
     /// Result is (if maximumValue==true): Index of element with maximum value of LV parameter
