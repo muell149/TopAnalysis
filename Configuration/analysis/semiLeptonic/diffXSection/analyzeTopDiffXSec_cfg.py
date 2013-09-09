@@ -3084,6 +3084,7 @@ process.ecalMomentum.scaleType           = cms.string("abs")
 process.ecalMomentum.resolutionFactors   = cms.vdouble(1.0)
 process.ecalMomentum.resolutionEtaRanges = cms.vdouble(0, -1)
 process.ecalMomentum.inputElectrons      = cms.InputTag("selectedPatElectrons")
+process.ecalMomentum.inputJets           = cms.InputTag("selectedPatJetsAK5PF")
 for path in pathlist:
     path.replace(process.pf2pat,
                  process.pf2pat * process.ecalMomentum)
@@ -3176,7 +3177,8 @@ if(runningOnData=="MC"):
             massSearchReplaceAnyInputTag(path, 'patMETs'        , 'scaledJetEnergy:patMETs'        )
         else:
             print "unknown jetType"
-
+    # keep uncorrected jets to avoid out of range error in this module
+    process.ecalMomentum.inputJets = "selectedPatJets"
     # eta-dependent smearing of the jet energy
     process.scaledJetEnergy.resolutionFactors   = cms.vdouble( 1.052 , 1.057 , 1.096 , 1.134 , 1.288 )
     process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.0,0.5,0.5,1.1,1.1,1.7,1.7,2.3,2.3,-1.)
