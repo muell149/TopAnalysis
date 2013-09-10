@@ -35,14 +35,12 @@
 
 using namespace std;
 
-// const double Plotter::topxsec = 244.849; //again changes with normalization, must be set outside of the class
-//const double Plotter::topxsec = 244.794; //Mitov, arXiv:1303.6254
-const double Plotter::topxsec = 247.205; //Measured XSection after normalization to Mitov
 const bool Plotter::doClosureTest = 0; //Signal is MC - so add BG to it and dont do DY scaling
 
-void Plotter::setLumi(double newLumi)
+void Plotter::setLumi(double newLumi, double xSec)
 {
     this->lumi = newLumi;
+    this->topxsec = xSec;
 }
 
 
@@ -78,7 +76,9 @@ void Plotter::unfolding(TString channel, TString systematic)
     std::cout << "Starting Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "' and Systematic '"<< systematic <<"':" << std::endl;
     std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
 
-    if(channel == "combined")
+    /// This was only necessary for the statistical combination of the results.
+    /// Current method combination in yield level
+    if(kFALSE && channel == "combined")
     {
         ifstream ResultsEE ("UnfoldingResults/"+systematic+"/ee/"+name+"Results.txt");
         ifstream ResultsEMu("UnfoldingResults/"+systematic+"/emu/"+name+"Results.txt");
@@ -1625,6 +1625,12 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     double xsec = ( (numbers[0]-numbers[4]) * (numbers[1]/(numbers[1]+numbers[3])) ) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
     double xsecstaterror = TMath::Sqrt(error_numbers[0]) * (numbers[1]/(numbers[1]+numbers[3])) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
 
+    InclusiveXsectionVec[channelType] = xsec;
+    InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
+
+    /// This was only necessary for the statistical combination of the results.
+    /// Current method combination in yield level
+    /*
     if(channelType!=3){
         InclusiveXsectionVec[channelType] = xsec;
         InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
@@ -1668,6 +1674,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
                                             +(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]))
                                                                     ));
     }
+    */
     EventFile<<"XSection  = "<<InclusiveXsectionVec[channelType]<<std::endl;
     EventFile<<"XSecStaErr= "<<InclusiveXsectionStatErrorVec[channelType]<<std::endl;
     EventFile.close();
@@ -1713,7 +1720,8 @@ int Plotter::CalcDiffXSec(TString Channel, TString Systematic){
     if(Channel=="combined"){channelType=3;}
 
     // DAVID 
-    if ( doUnfolding == true && channelType !=3) {//do the unfolding only in the individual channels: ee, emu, mumu
+//     if ( doUnfolding == true && channelType !=3) {//do the unfolding only in the individual channels: ee, emu, mumu
+    if ( doUnfolding == true) {//do the unfolding only in the individual channels: ee, emu, mumu
 
         // SVD Helper Class
         DilepSVDFunctions mySVDFunctions;
@@ -1806,7 +1814,9 @@ int Plotter::CalcDiffXSec(TString Channel, TString Systematic){
         }
     }
 
-    if (doUnfolding && channelType==3){//for 'combined' channel: do an statistical combination of the the 3 independent channels
+    /// This was only necessary for the statistical combination of the results.
+    /// Current method combination in yield level
+    if (kFALSE && doUnfolding && channelType==3){//for 'combined' channel: do an statistical combination of the the 3 independent channels
 
         TString eefilename="UnfoldingResults/"+Systematic+"/ee/"+name+"Results.txt";
         TString emufilename="UnfoldingResults/"+Systematic+"/emu/"+name+"Results.txt";
@@ -2719,7 +2729,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     }
     TH1D* syshist =0;
     syshist = (TH1D*)stacksum->Clone();
-    double lumierr = 0.045;
+    double lumierr = 0.026;
     //stat uncertainty::make a function 
     for(Int_t i=0; i<=syshist->GetNbinsX(); ++i){
         Double_t binc = 0;
@@ -3043,7 +3053,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     Double_t mexh[XAxisbinCenters.size()];
     for (unsigned int j=0; j<XAxisbinCenters.size();j++){mexl[j]=0;mexh[j]=0;}
     TGraphAsymmErrors *tga_DiffXSecPlot = new TGraphAsymmErrors(bins, binCenters, DiffXSecPlot, mexl, mexh, DiffXSecStatErrorPlot, DiffXSecStatErrorPlot);
-    tga_DiffXSecPlot->SetMarkerStyle(20);
+    tga_DiffXSecPlot->SetMarkerStyle(1);
     tga_DiffXSecPlot->SetMarkerColor(kBlack);
     tga_DiffXSecPlot->SetMarkerSize(1);
     tga_DiffXSecPlot->SetLineColor(kBlack);
@@ -3338,6 +3348,10 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     h_GenDiffXSec->Draw("SAME");
     gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
+    ///Stupid clone to be able to see the stat error bars
+    TGraphAsymmErrors *tga_DiffXSecPlotClone = (TGraphAsymmErrors*) tga_DiffXSecPlot->Clone();
+    tga_DiffXSecPlotClone->SetMarkerStyle(20);
+    tga_DiffXSecPlotClone->Draw("p, SAME");
     gPad->RedrawAxis();
     c->Print(outdir.Copy()+"DiffXS_"+name+".eps");
     TFile out_source(outdir.Copy()+"DiffXS_"+name+"_source.root", "RECREATE");

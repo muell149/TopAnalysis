@@ -33,7 +33,7 @@ public:
     ///add addThis to addToThis (and delete it afterwards) - or assign it it to addToThis if addToThis is nullptr.
     void   addAndDelete_or_Assign(TH1*& addToThis, TH1* addThis);
     void   write(TString, TString);
-    void   setLumi(double);
+    void   setLumi(double, double);
     
     double CalcXSec(std::vector<TString> datasetVec, double InclusiveXsectionVec[4],double InclusiveXsectionStatErrorVec[4], TString Systematic, TString Shift);
     void MakeTable(TString Channel, TString Systematic);
@@ -101,7 +101,7 @@ private:
     std::vector<TH1D> systhistsDown;
 
     bool initialized, logX, logY, doDYScale;
-    double lumi;
+    double lumi, topxsec;
     int signalHist;
 
     std::vector<TString> channelLabel;
@@ -119,7 +119,6 @@ private:
     TString subfolderChannel;
     TString subfolderSpecial;
 
-    static const double topxsec;
     static const bool doClosureTest;
     RootFileReader *fileReader;
     void DrawDecayChLabel(TString decaychannel="", double textSize=0.04);

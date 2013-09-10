@@ -23,6 +23,11 @@
 //constexpr double lumi = 19789;
 constexpr double lumi = 19712;
 
+//constexpr double topxsec = 244.849; //again changes with normalization, must be set outside of the class
+//constexpr double topxsec = 244.794; //Mitov, arXiv:1303.6254
+//constexpr double topxsec = 247.205; //Measured XSection after normalization to Mitov, and statistical combination of channels
+ constexpr double topxsec = 248.207; //Measured XSection after normalization to Mitov, and after combination of channels at yield level
+
 using namespace std;
 
 ///Please put the variation of each systematics one after each other, satarting from the UP variation.
@@ -71,7 +76,7 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
 
         // Create Plotter 
         Plotter h_generalPlot;
-        h_generalPlot.setLumi(lumi);
+        h_generalPlot.setLumi(lumi, topxsec);
         h_generalPlot.ListOfSystematics(SetOfValidSystematics);
         
         /////////////////////////////////////////////////////
@@ -100,7 +105,8 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
                 //unfold all channels except combined in parallel
                 std::vector<std::future<void>> unfoldJobs;
                 for (auto channel:channels) {
-                    if (channel != "combined") {
+/// This part of the code was only necessary for the statistical combination of the 3 channels
+//                     if (channel != "combined") {
                         TString ch(channel.c_str());
                         TString sys(systematic.c_str());
                         unfoldJobs.push_back(std::async(std::launch::async, [ch, sys](Plotter p) -> void { 
@@ -110,16 +116,17 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
                         //it seems unfolding is not thread safe! 
                         //fix that and remove the next line
                         unfoldJobs.at(unfoldJobs.size()-1).wait();
-                    }
+//                     }
                 }
                 //wait for the 3 channels to finish
                 for (auto &i : unfoldJobs) {
                     i.get();
                 }
-                //only now do combined (if requested)
-                for (auto channel:channels) {
-                    if (channel == "combined") h_generalPlot.unfolding(channel,systematic);
-                }
+/// This part of the code was only necessary for the statistical combination of the 3 channels
+//                 //only now do combined (if requested)
+//                 for (auto channel:channels) {
+//                     if (channel == "combined") h_generalPlot.unfolding(channel,systematic);
+//                 }
             }
         std::cout << "Done with the unfolding\n";
         }
