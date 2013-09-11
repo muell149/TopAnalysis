@@ -40,9 +40,10 @@ inputFileName_("")
 
 std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
+    float ttbbScale = 1.f;
     // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
-    Sample ttbarsignalPlusBbbar("t#bar{t}b#bar{b}", kRed+1, 234.0);
+    Sample ttbarsignalPlusBbbar("t#bar{t}b#bar{b}", kRed+1, ttbbScale*234.0);
     Sample ttbarsignalPlusOther("t#bar{t}Other", kOrange+1, 234.0);
     Sample ttbarbkg("t#bar{t} Bkg", kOrange+8, 234);
     Sample singletop("Single Top", kMagenta, 11.1);
@@ -154,8 +155,8 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarZ));
         else if(filename.Contains("ttbarH") && filename.Contains("inclusiveOther"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHinclusiveOther));
-        else if(filename.Contains("ttbarH") && filename.Contains("inclusiveBbbar"))
-            v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHinclusiveBbbar));
+        // else if(filename.Contains("ttbarH") && filename.Contains("inclusiveBbbar"))
+            // v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHinclusiveBbbar));
         else if(filename.Contains("ttbarH") && filename.Contains("tobbbar"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarHtobbbar));
         else{

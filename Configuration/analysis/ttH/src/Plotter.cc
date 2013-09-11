@@ -60,7 +60,7 @@ XAxis_(""),
 logX_(false),
 logY_(false),
 doDYScale_(false),
-scaleMCtoData_(false)
+scaleMCtoData_(true)
 {
     // Suppress default info that canvas is printed
     gErrorIgnoreLevel = 1001;
@@ -89,7 +89,7 @@ void Plotter::setOptions(const TString& name, const TString& specialComment,
     rangemin_ = rangemin; //Min. value in X-axis
     rangemax_ = rangemax; //Max. value in X-axis
     bins_ = bins; //Number of bins to plot
-    XAxisbins_.clear(); 
+    XAxisbins_.clear();
     XAxisbins_ = XAxisbins; // Bins edges=bins+1
     XAxisbinCenters_.clear();
     XAxisbinCenters_ = XAxisbinCenters; //Central point for BinCenterCorrection=bins
@@ -100,7 +100,7 @@ void Plotter::setOptions(const TString& name, const TString& specialComment,
 void Plotter::producePlots()
 {
     //std::cout<<"--- Beginning of plot production\n\n";
-    
+
     const SystematicChannelSamples& m_systematicChannelSample(samples_.getSystematicChannelSamples());
     for(const auto& systematicChannelSamples : m_systematicChannelSample){
         const Systematic::Systematic& systematic(systematicChannelSamples.first);
@@ -116,7 +116,7 @@ void Plotter::producePlots()
             this->write(channel, systematic);
         }
     }
-    
+
     //std::cout<<"\n=== Finishing of plot production\n\n";
 }
 
@@ -125,8 +125,8 @@ void Plotter::producePlots()
 bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systematic::Systematic& systematic)
 {
     bool allHistosAvailable(true);
-    
-    
+
+
     // Associate histogram to dataset if histogram can be found
     v_sampleHistPair_.clear();
     TH1::AddDirectory(kFALSE);
@@ -146,15 +146,15 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
                 const double lumiWeight = Tools::luminosityWeight(sample, luminosity_, fileReader_);
                 hist->Scale(lumiWeight);
             }
-            
+
             // Drell-Yan reweighting
             if(doDYScale_){
                 dyScaleFactors_.applyDyScaleFactor(hist, sample, systematic);
             }
-            
+
             // Set style
             ttbar::setHHStyle(*gStyle);
-            
+
             // Clone histogram directly here
             TH1D* histClone = (TH1D*) hist->Clone();
             p_sampleHist = SampleHistPair(sample, histClone);
@@ -162,8 +162,8 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
         v_sampleHistPair_.push_back(p_sampleHist);
     }
     //std::cout<<"Number of samples used for histogram ("<<name_<<"): "<<v_sampleHistPair_.size()<<"\n";
-    
-    
+
+
     return allHistosAvailable;
 }
 
@@ -186,21 +186,21 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     legend->SetBorderSize(0);
     canvas->SetName("");
     canvas->SetTitle("");
-    
-    
+
+
     // Here fill colors and line width are adjusted, and potentially rebinning applied
     for(auto sampleHistPair : v_sampleHistPair_){
         TH1* tmp_hist = sampleHistPair.second;
         if(rebin_>1) tmp_hist->Rebin(rebin_);
         setStyle(sampleHistPair, true);
     }
-    
+
     // Check whether Higgs sample should be drawn overlaid and/or scaled
     bool drawHiggsOverlaid(false);
     bool drawHiggsScaled(false);
     if(drawMode_ == DrawMode::overlaid){drawHiggsOverlaid = true;}
     else if(drawMode_ == DrawMode::scaledoverlaid){drawHiggsOverlaid = true; drawHiggsScaled = true;}
-    
+
     // Loop over all samples and add those with identical legendEntry
     // And sort them into the categories data, Higgs, other
     LegendHistPair dataHist;
@@ -213,14 +213,14 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
         const Sample::SampleType& sampleType(i_sampleHistPair->first.sampleType());
         const TString& legendEntry(i_sampleHistPair->first.legendEntry());
         const TH1* hist = i_sampleHistPair->second;
-        
+
         std::vector<SampleHistPair>::iterator incrementIterator(i_sampleHistPair);
         ++incrementIterator;
         const bool lastHist(incrementIterator == v_sampleHistPair_.end());
         const bool newHist(!tmpHist);
-        
+
         if(newHist)tmpHist = (TH1D*)hist->Clone();
-        
+
         if(lastHist || (legendEntry!=incrementIterator->first.legendEntry())){
             if(!newHist)tmpHist->Add(hist);
             if(sampleType == Sample::data) dataHist = LegendHistPair(legendEntry, tmpHist);
@@ -232,18 +232,41 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
             if(!newHist)tmpHist->Add(hist);
         }
     }
-    
+
     // Create histogram corresponding to the sum of all stacked histograms
     TH1D* stacksum = (TH1D*) stackHists.at(0).second->Clone();
-    for (unsigned int i = 1; i < stackHists.size(); ++i) { stacksum->Add((TH1D*)stackHists.at(i).second);}
+//     TH1D* stacksumNottbb = (TH1D*) stackHists.at(0).second->Clone();
+    TH1D* ttbbHist(0);
+    for (unsigned int i = 1; i < stackHists.size(); ++i) {
+        stacksum->Add((TH1D*)stackHists.at(i).second);
+        if(stackHists.at(i).first == "t#bar{t}b#bar{b}") ttbbHist = (TH1D*)stackHists.at(i).second;
+//         else stacksumNottbb->Add((TH1D*)stackHists.at(i).second);
+    }
     if(!drawHiggsOverlaid) for(auto higgsHist :higgsHists) { stacksum->Add((TH1D*)higgsHist.second);}
+
+
+    // Scale the summed MC sample to the data
+    if(scaleMCtoData_) {
+        // Estimate the scaling factor for MC histos to have the same integral as Data
+        float MCtoData = (float)dataHist.second->Integral()/(float)stacksum->Integral();
+        // Scaling MC to match data
+        for (const auto& stackHist : stackHists) { stackHist.second->Scale(MCtoData); }
+        for (const auto& higgsHist : higgsHists) { higgsHist.second->Scale(MCtoData); }
+        stacksum->Scale(MCtoData);
+    }
 
 
     // Drawing signal significance for dijet_mass H->bb
     TString histo_name = TString(higgsHists.at(0).second->GetName());
-    TPaveText* sigSignLabel = 0;
-    if(histo_name.Contains("diJetAn_dijet_mass") && higgsHists.size()>0) {
-        sigSignLabel = drawSigSign(higgsHists.at(0).second,stacksum,85,135);
+    TPaveText* sigSignLabelTTH = 0;
+    TPaveText* sigSignLabelTTbb = 0;
+    if(histo_name.Contains("dijet_dijet_mass") && higgsHists.size()>0) {
+        TH1D* stacksum_ttH = (TH1D*)stacksum->Clone();
+        stacksum_ttH->Add((TH1D*)higgsHists.at(0).second);
+        TH1D* ttHbbHist = 0;
+        for (const auto& higgsHist : higgsHists) { if(higgsHist.first == "t#bar{t}H (b#bar{b})") ttHbbHist = (TH1D*)higgsHist.second; }
+        if(ttbbHist) sigSignLabelTTbb = drawSigSign(ttbbHist,stacksum,85,140,0.f,"ttbb");
+        if(ttHbbHist) sigSignLabelTTH = drawSigSign(ttHbbHist,stacksum_ttH,85,140,0.1,"ttH");
     }
 
 
@@ -260,24 +283,13 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
         }
     }
 
-
-    // Scale the summed MC sample to the data
-    if(scaleMCtoData_) {
-        // Estimate the scaling factor for MC histos to have the same integral as Data
-        float MCtoData = (float)dataHist.second->Integral()/(float)stacksum->Integral();
-        // Scaling MC to match data
-        for (unsigned int i = 0, iN = stackHists.size(); i < iN; ++i) { stackHists.at(i).second->Scale(MCtoData);}
-        stacksum->Scale(MCtoData);
-    }
-   
-
     // If Higgs samples should be stacked, add them to stack histograms and clear Higgs vector
     if(!drawHiggsOverlaid){
         stackHists.insert(stackHists.end(), higgsHists.begin(), higgsHists.end());
         higgsHists.clear();
     }
 
-    
+
     // Create the stack and add entries to legend
     THStack* stack = new THStack("def", "def");
     legend->AddEntry(dataHist.second, dataHist.first,"pe");
@@ -291,12 +303,12 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
         higgsHist.second->SetLineWidth(2);
         legend->AddEntry(higgsHist.second, higgsHist.first,"l");
     }
-    
+
     // In fact the legend is filled oppositely than the stack, so this is used for turning the order (but not completely)
 //    legend = ControlLegend(dataHist, stackHists, higgsHists, legend);
-    
-    
-    
+
+
+
     // FIXME: is this histo for error band on stack? but it is commented out ?!
     TH1D* syshist =0;
     syshist = (TH1D*)stacksum->Clone();
@@ -307,10 +319,10 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     }
     syshist->SetFillStyle(3004);
     syshist->SetFillColor(kBlack);
-    
+
     // Set x and y axis
     if(logY_) {
-      // Setting minimum to >0 value 
+      // Setting minimum to >0 value
       // FIXME: Should we automatically calculate minimum value instead of the fixed value?
       dataHist.second->SetMinimum(1e-1);
       if(ymin_>0) dataHist.second->SetMinimum(ymin_);
@@ -340,7 +352,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     if(name_.Contains("Rapidity") || name_.Contains("Eta")){ytitle.Append(" / ").Append(width.str());}
     else if(name_.Contains("pT") || name_.Contains("Mass") || name_.Contains("mass") || name_.Contains("MET") || name_.Contains("HT")){ytitle.Append(" / ").Append(width.str()).Append(" GeV");};
     dataHist.second->GetYaxis()->SetTitle(ytitle);
-    
+
     // Draw data histogram and stack and error bars
     dataHist.second->Draw("e1");
     stack->Draw("same HIST");
@@ -355,20 +367,21 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     for(const auto& higgsHist : higgsHists){
         higgsHist.second->Draw("same");
     }
-    
+
     // Put additional stuff to histogram
     drawCmsLabels(1, 8);
     drawDecayChannelLabel(channel);
-    if(sigSignLabel) sigSignLabel->Draw("same");
+    if(sigSignLabelTTH) sigSignLabelTTH->Draw("same");
+    if(sigSignLabelTTbb) sigSignLabelTTbb->Draw("same");
     legend->Draw("SAME");
     ttbar::drawRatio(dataHist.second, stacksum, 0.5, 1.7);
 
     // Create Directory for Output Plots and write them
     const TString eventFileString = ttbar::assignFolder(ControlPlotDIR, channel, systematic);
     canvas->Print(eventFileString+name_+".eps");
-    
+
     // Prepare additional histograms for root-file
-    TH1 *sumMC = 0; 
+    TH1 *sumMC = 0;
     TH1 *sumSignal = 0;
     for(const auto& sampleHistPair : v_sampleHistPair_){
         if(sampleHistPair.first.sampleType() == Sample::SampleType::higgssignal){
@@ -383,7 +396,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
         }
     }
     sumMC->SetName(name_);
-    
+
     //save Canvas AND sources in a root file
     TFile out_root(eventFileString+name_+"_source.root", "RECREATE");
     dataHist.second->Write(name_+"_data");
@@ -391,7 +404,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     sumMC->Write(name_+"_allmc");
     canvas->Write(name_ + "_canvas");
     out_root.Close();
-    
+
     canvas->Clear();
     legend->Clear();
     delete canvas;
@@ -403,14 +416,14 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
 void Plotter::setStyle(SampleHistPair& sampleHistPair, const bool isControlPlot)
 {
     TH1* hist(sampleHistPair.second);
-    
+
     hist->SetFillColor(sampleHistPair.first.color());
     hist->SetLineColor(sampleHistPair.first.color());
     hist->SetLineWidth(1);
-    
+
     if(XAxis_ == "-")XAxis_ = hist->GetXaxis()->GetTitle();
     if(YAxis_ == "-")YAxis_ = hist->GetYaxis()->GetTitle();
-    
+
     if(sampleHistPair.first.sampleType() == Sample::SampleType::data){
         hist->SetFillColor(0);
         hist->SetMarkerStyle(20);
@@ -424,10 +437,10 @@ void Plotter::setStyle(SampleHistPair& sampleHistPair, const bool isControlPlot)
         hist->GetXaxis()->SetTitleOffset(1.25);
         if ((name_.Contains("pT") || name_.Contains("Mass")) && !name_.Contains("Rapidity")) {
             hist->GetXaxis()->SetTitle(XAxis_+" #left[GeV#right]");
-            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis_+"}"+" #left[GeV^{-1}#right]"); 
+            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis_+"}"+" #left[GeV^{-1}#right]");
         } else {
             hist->GetXaxis()->SetTitle(XAxis_);
-            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis_+"}");     
+            hist->GetYaxis()->SetTitle("#frac{1}{#sigma} #frac{d#sigma}{d"+XAxis_+"}");
         }
         if (isControlPlot) hist->GetYaxis()->SetTitle(YAxis_);
     }
@@ -451,7 +464,7 @@ TLegend* Plotter::controlLegend(const LegendHistPair& dataHist, const std::vecto
     v_orderedLegend.push_back("QCD Multijet");
     v_orderedLegend.push_back("t#bar{t}H (incl.)");
     v_orderedLegend.push_back("t#bar{t}H (b#bar{b})");
-    
+
     leg->Clear();
     leg->SetX1NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.25);
     leg->SetY1NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength()-0.30);
@@ -515,7 +528,7 @@ void Plotter::drawCmsLabels(const int cmsprelim, const double& energy, const dou
     } else {//CMS label
         text = "CMS, %2.1f fb^{-1} at #sqrt{s} = %2.f TeV";
     }
-    
+
     TPaveText *label = new TPaveText();
     label->SetX1NDC(gStyle->GetPadLeftMargin());
     label->SetY1NDC(1.0-gStyle->GetPadTopMargin());
@@ -532,47 +545,37 @@ void Plotter::drawCmsLabels(const int cmsprelim, const double& energy, const dou
 
 
 
-TPaveText* Plotter::drawSigSign(TH1* signal, TH1* bkg, float min, float max)
+TPaveText* Plotter::drawSigSign(TH1* signal, TH1* sigBkg, float min, float max, float yOffset, std::string sLabel)
 {
     if(max<=min) {
         std::cout<<"Wrong range for signal significance in  histogram ("<<name_<<")\n";
         return 0;
     }
 
-
-    // Creating the signal histogram scaled to background
-    float sigToBkg = bkg->Integral()/signal->Integral();
-    TH1* signalScaled = (TH1*)signal->Clone();
-    signalScaled->Scale(sigToBkg);
-
     // Finding the bin range corresponding to [min;max]
-    int bin1 = signal->FindBin(min); 
+    int bin1 = signal->FindBin(min);
     int bin2 = signal->FindBin(max);
 
     // Calculating integral of the signal and background
-    float sigInt = signalScaled->Integral(bin1,bin2);
-    float bkgInt = bkg->Integral(bin1,bin2);
+    float sigInt = signal->Integral(bin1,bin2);
+    float sigBkgInt = sigBkg->Integral(bin1,bin2);
 
-    sigInt-=bkgInt;
-    sigInt/=sigToBkg;       // Scale signal integral back to the original scale
-
-    float sigSign = sigInt/sqrt(sigInt + bkgInt);
+    float sigSign = sigInt/sqrt(sigBkgInt);
 
     char text[40];
-    sprintf(text,"#frac{S}{#sqrt{S+B}} = %.3f",sigSign);
+    sprintf(text,"#frac{S_{%s}}{#sqrt{S_{%s}+B}} = %.2f", sLabel.c_str(), sLabel.c_str(), sigSign);
 
     TPaveText *label = new TPaveText();
     label->SetX1NDC(gStyle->GetPadLeftMargin()+0.4);
     label->SetX2NDC(label->GetX1NDC()+0.1);
-    label->SetY2NDC(1.0-gStyle->GetPadTopMargin()-0.15);
+    label->SetY2NDC(1.0-gStyle->GetPadTopMargin()-0.13 - yOffset);
     label->SetY1NDC(label->GetY2NDC()-0.05);
     label->SetTextFont(42);
     label->AddText(text);
     label->SetFillStyle(0);
     label->SetBorderSize(0);
-    label->SetTextSize(0.035);
+    label->SetTextSize(0.025);
     label->SetTextAlign(32);
-    // label->Draw("same");
 
     return label;
 }
