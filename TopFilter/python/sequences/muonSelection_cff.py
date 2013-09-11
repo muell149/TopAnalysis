@@ -13,7 +13,7 @@ vetoJets = goodJets.clone()
 
 from TopAnalysis.TopFilter.sequences.MuonVertexDistanceSelector_cfi import *
 
-vertexSelectedMuons2012 = vertexSelectedMuons.clone()
+vertexSelectedMuons2012 = vertexSelectedMuons.clone(cutValue = 0.5)
 
 ## create helper collection with jet-distance filter only
 #dRMuons = checkJetOverlapMuons.clone(muons = "vertexSelectedMuons2012",
