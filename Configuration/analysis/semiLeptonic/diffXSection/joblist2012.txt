@@ -90,6 +90,15 @@ nafJobSplitter.pl -q 12 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElM
 # Perugia Tune
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarP11SG -c mctag=Summer12,triggerTag=HLT,sample=perugia,lepton=muon     649 analyzeTopDiffXSec_cfg.py
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarP11SG -c mctag=Summer12,triggerTag=HLT,sample=perugia,lepton=electron 649 analyzeTopDiffXSec_cfg.py
+#no color reconnection
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarP11noCRSG -c mctag=Summer12,triggerTag=HLT,sample=perugianoCR,lepton=muon     693 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarP11noCRSG -c mctag=Summer12,triggerTag=HLT,sample=perugianoCR,lepton=electron 693 analyzeTopDiffXSec_cfg.py
+#multi-parton interaction high
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarP11mpiHiSG -c mctag=Summer12,triggerTag=HLT,sample=perugiampiHi,lepton=muon     835 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarP11mpiHiSG -c mctag=Summer12,triggerTag=HLT,sample=perugiampiHi,lepton=electron 835 analyzeTopDiffXSec_cfg.py
+#tuned to TeVatron data
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarP11TeVSG -c mctag=Summer12,triggerTag=HLT,sample=perugiaTeV,lepton=muon     881 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarP11TeVSG -c mctag=Summer12,triggerTag=HLT,sample=perugiaTeV,lepton=electron 881 analyzeTopDiffXSec_cfg.py
 
 ###############
 # other ttbar #
