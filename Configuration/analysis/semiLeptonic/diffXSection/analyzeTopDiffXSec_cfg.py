@@ -342,7 +342,7 @@ if(not options.sample=="none"):
         if(sysDistort!=""):
             if(sysDistort!="data"):
                 additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
-           outputFileName+="SysDistort"+sysDistort
+            outputFileName+="SysDistort"+sysDistort
     elif("perugiampiHi" in options.sample):       
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11mpiHi_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
         if(eventFilter=='signal only'):
@@ -352,7 +352,7 @@ if(not options.sample=="none"):
         if(sysDistort!=""):
             if(sysDistort!="data"):
                 additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
-           outputFileName+="SysDistort"+sysDistort
+            outputFileName+="SysDistort"+sysDistort
     elif("perugiaTeV" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11TeV_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
         if(eventFilter=='signal only'):
@@ -362,7 +362,7 @@ if(not options.sample=="none"):
         if(sysDistort!=""):
             if(sysDistort!="data"):
                 additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
-           outputFileName+="SysDistort"+sysDistort
+            outputFileName+="SysDistort"+sysDistort
     elif("perugia" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff" 
         if(eventFilter=='signal only'):
@@ -3259,4 +3259,3 @@ for lep in relevantLeptonCollections:
         lep.cut=tmpExp
         if(tmpExp.find("\'")>-1):
             lep.cut=tmpExp.strip("'")
-
