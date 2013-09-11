@@ -409,7 +409,7 @@ void DijetAnalyzer::bookHistos(const TString& step)
     std::stringstream ss_label;
     TString categoryName = tth::extractJetCategory(step);
     if(categoryName != ""){
-        categoryName.ReplaceAll("cate", "");
+        categoryName.ReplaceAll("_cate", "");
         int category = atoi(categoryName);
         ss_label<<" ["<<jetCategories_->binLabels().at(category)<<"]";
     }
@@ -689,19 +689,27 @@ void DijetAnalyzer::bookHistos(const TString& step)
     m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{tt} ^ jet_{gen} (if not as matched);dR(bQ,genJet)^{tt}"+label+";b-quarks_{tt}",50,0,2));
     name = "bQuarkH_genJet_dRmin_05_notAsMatched";
     m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{H} ^ jet_{gen} (if not as matched);dR(bQ,genJet)^{H}"+label+";b-quarks_{H}",50,0,2));
+    name = "bQuarkTH_genJet_dRmin_05_notAsMatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{ttH} ^ jet_{gen} (if not as matched);dR(bQ,genJet)^{ttH}"+label+";b-quarks_{ttH}",50,0,2));
     name = "bQuarkT_genJet_dRmin_05_isAsMatched";
     m_histogram[name] = store(new TH1D(prefix+name+step, "Is b-quark_{tt} - jet_{gen} matched as with QdR;dR(bQ,genJet)^{tt}"+label+";b-quarks_{tt}",3,0,3));
     name = "bQuarkH_genJet_dRmin_05_isAsMatched";
     m_histogram[name] = store(new TH1D(prefix+name+step, "Is b-quark_{H} - jet_{gen} matched as with QdR;dR(bQ,genJet)^{H}"+label+";b-quarks_{H}",3,0,3));
+    name = "bQuarkTH_genJet_dRmin_05_isAsMatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Is b-quark_{ttH} - jet_{gen} matched as with QdR;dR(bQ,genJet)^{ttH}"+label+";b-quarks_{ttH}",3,0,3));
 
     name = "bQuarkT_genJet_directQ_dRmin_05_notAsMatched";
     m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{tt} ^ jet_{gen} (if not as matched);dR(bQ,genJet)^{tt}"+label+";b-quarks_{tt}",50,0,2));
     name = "bQuarkH_genJet_directQ_dRmin_05_notAsMatched";
     m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{H} ^ jet_{gen} (if not as matched);dR(bQ,genJet)^{H}"+label+";b-quarks_{H}",50,0,2));
+    name = "bQuarkTH_genJet_directQ_dRmin_05_notAsMatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "dR b-quark_{ttH} ^ jet_{gen} (if not as matched);dR(bQ,genJet)^{ttH}"+label+";b-quarks_{ttH}",50,0,2));
     name = "bQuarkT_genJet_directQ_dRmin_05_isAsMatched";
     m_histogram[name] = store(new TH1D(prefix+name+step, "Is b-quark_{tt} - jet_{gen} matched as with direct QdR;dR(bQ,genJet)^{tt}"+label+";b-quarks_{tt}",3,0,3));
     name = "bQuarkH_genJet_directQ_dRmin_05_isAsMatched";
     m_histogram[name] = store(new TH1D(prefix+name+step, "Is b-quark_{H} - jet_{gen} matched as with direct QdR;dR(bQ,genJet)^{H}"+label+";b-quarks_{H}",3,0,3));
+    name = "bQuarkTH_genJet_directQ_dRmin_05_isAsMatched";
+    m_histogram[name] = store(new TH1D(prefix+name+step, "Is b-quark_{ttH} - jet_{gen} matched as with direct QdR;dR(bQ,genJet)^{ttH}"+label+";b-quarks_{ttH}",3,0,3));
 
 
     name = "jetBtagDiscriminantVsHadronMultiplicity";
@@ -1014,8 +1022,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             if(bQ) m_histogram["bQuarkT_genJet_dRmin_05"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
             if(genJetId!=bJt_id_matched && bJt_id_matched>=0) {
                 m_histogram["bQuarkT_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
                 m_histogram["bQuarkT_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkT_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkT_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
     if(bHat_id_05 >= 0) {
@@ -1031,8 +1044,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             if(bQ) m_histogram["bQuarkT_genJet_dRmin_05"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
             if(genJetId!=bJat_id_matched && bJat_id_matched>=0) {
                 m_histogram["bQuarkT_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
                 m_histogram["bQuarkT_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkT_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkT_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
     if(bHh_id_05 >= 0) {
@@ -1048,8 +1066,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             if(bQ) m_histogram["bQuarkH_genJet_dRmin_05"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
             if(genJetId!=bJh_id_matched && bJh_id_matched>=0) {
                 m_histogram["bQuarkH_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
                 m_histogram["bQuarkH_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
     if(bHah_id_05 >= 0) {
@@ -1065,8 +1088,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             if(bQ) m_histogram["bQuarkH_genJet_dRmin_05"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
             if(genJetId!=bJah_id_matched && bJah_id_matched>=0) {
                 m_histogram["bQuarkH_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId)), weight);
                 m_histogram["bQuarkH_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
 
@@ -1114,8 +1142,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             putUniquelyInVector(bJth_unique_ids_directQ_dR_05, genJetId_05);
             if(genJetId_05!=bJt_id_matched && bJt_id_matched>=0) {
                 m_histogram["bQuarkT_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
                 m_histogram["bQuarkT_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkT_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkT_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
     if(bQat) {
@@ -1128,8 +1161,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             putUniquelyInVector(bJth_unique_ids_directQ_dR_05, genJetId_05);
             if(genJetId_05!=bJat_id_matched && bJat_id_matched>=0) {
                 m_histogram["bQuarkT_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
                 m_histogram["bQuarkT_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkT_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkT_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
     if(bQh) {
@@ -1142,8 +1180,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             putUniquelyInVector(bJth_unique_ids_directQ_dR_05, genJetId_05);
             if(genJetId_05!=bJh_id_matched && bJh_id_matched >=0) {
                 m_histogram["bQuarkH_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
                 m_histogram["bQuarkH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
     if(bQah) {
@@ -1156,8 +1199,13 @@ void DijetAnalyzer::fillGenRecoMatchingComparisonHistos(const TopGenObjects& top
             putUniquelyInVector(bJth_unique_ids_directQ_dR_05, genJetId_05);
             if(genJetId_05!=bJah_id_matched && bJah_id_matched>=0) {
                 m_histogram["bQuarkH_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_notAsMatched"]->Fill(DeltaR(*bQ, genJets.at(genJetId_05)), weight);
                 m_histogram["bQuarkH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
-            } else m_histogram["bQuarkH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(0.0, weight);
+            } else {
+                m_histogram["bQuarkH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+                m_histogram["bQuarkTH_genJet_directQ_dRmin_05_isAsMatched"]->Fill(1.0, weight);
+            }
         }
     }
 

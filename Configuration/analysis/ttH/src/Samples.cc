@@ -40,11 +40,10 @@ inputFileName_("")
 
 std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
-    float ttbbScale = 1.f;
     // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
-    Sample ttbarsignalPlusBbbar("t#bar{t}b#bar{b}", kRed+1, ttbbScale*234.0);
-    Sample ttbarsignalPlusOther("t#bar{t}Other", kOrange+1, (2.0 - ttbbScale)*234.0);
+    Sample ttbarsignalPlusBbbar("t#bar{t}b#bar{b}", kRed+1, 234.0);
+    Sample ttbarsignalPlusOther("t#bar{t}Other", kOrange+1, 234.0);
     Sample ttbarbkg("t#bar{t} Bkg", kOrange+8, 234);
     Sample singletop("Single Top", kMagenta, 11.1);
     Sample ww("Diboson", 10, 54.838);
@@ -72,7 +71,7 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
     Sample ttbarW("t#bar{t}W", kBlue, 0.232);
     Sample ttbarZ("t#bar{t}Z", kBlue-10, 0.2057);
     Sample ttbarHinclusiveOther("t#bar{t}H Other", kSpring, 0.1302, Sample::higgssignal);
-    Sample ttbarHinclusiveBbbar("t#bar{t}H (b#bar{b} via incl.)", kSpring+9, 0.1302, Sample::higgssignal);
+    // Sample ttbarHinclusiveBbbar("t#bar{t}H (b#bar{b} via incl.)", kSpring+9, 0.1302, Sample::higgssignal);
     Sample ttbarHtobbbar("t#bar{t}H (b#bar{b})", kOrange-7, 0.1302*0.577, Sample::higgssignal);
     
     
