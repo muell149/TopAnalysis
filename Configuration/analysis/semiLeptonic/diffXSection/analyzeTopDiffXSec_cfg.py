@@ -333,6 +333,36 @@ if(not options.sample=="none"):
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
+    elif("perugianoCR" in options.sample):       
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11noCR_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugianoCR"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugianoCR"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+           outputFileName+="SysDistort"+sysDistort
+    elif("perugiampiHi" in options.sample):       
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11mpiHi_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugiampiHi"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugiampiHi"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+           outputFileName+="SysDistort"+sysDistort
+    elif("perugiaTeV" in options.sample):
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11TeV_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugiaTeV"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugiaTeV"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+           outputFileName+="SysDistort"+sysDistort
     elif("perugia" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff" 
         if(eventFilter=='signal only'):
