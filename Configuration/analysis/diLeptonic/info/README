@@ -19,7 +19,7 @@ The file /data/group/top/DiffXS/README contains a description of the NTuples, i.
 what was new, which <date> to use...
 
 The input files need to be listed in selectionList.txt, so do:
-ls -1 --color=no /data/group/top/DiffXS/2013_04_05/*.root > selectionList.txt
+ls -1 --color=no /data/group/top/DiffXS/2013_08_26_Reco22Jan2013/*.root > selectionList.txt
 (the date may differ)
 
 To compile the code:
