@@ -109,6 +109,7 @@ private:
 
     /// Temporary hardcoded options
     bool scaleMCtoData_;
+    double ttbbScale_;
 };
 
 

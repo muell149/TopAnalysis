@@ -40,10 +40,9 @@ inputFileName_("")
 
 std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
-    float ttbbScale = 1.f;
     // Define all samples as differential as they are needed
     Sample data("Data", kBlack, 1., Sample::data);
-    Sample ttbarsignalPlusBbbar("t#bar{t}b#bar{b}", kRed+1, ttbbScale*234.0);
+    Sample ttbarsignalPlusBbbar("t#bar{t}b#bar{b}", kRed+1, 234.0);
     Sample ttbarsignalPlusOther("t#bar{t}Other", kOrange+1, 234.0);
     Sample ttbarbkg("t#bar{t} Bkg", kOrange+8, 234);
     Sample singletop("Single Top", kMagenta, 11.1);
@@ -74,8 +73,8 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
     Sample ttbarHinclusiveOther("t#bar{t}H Other", kSpring, 0.1302, Sample::higgssignal);
     // Sample ttbarHinclusiveBbbar("t#bar{t}H (b#bar{b} via incl.)", kSpring+9, 0.1302, Sample::higgssignal);
     Sample ttbarHtobbbar("t#bar{t}H (b#bar{b})", kOrange-7, 0.1302*0.577, Sample::higgssignal);
-    
-    
+
+
     // Access FileList containing list of input root files
     const TString histoListName(FileListBASE + Systematic::convertSystematic(systematic) + "_" + Channel::convertChannel(channel) + ".txt");
     std::cout << "Reading file: " << histoListName << std::endl;
@@ -84,8 +83,8 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
         std::cerr << "Error reading file: " << histoListName << std::endl;
         exit(1);
     }
-    
-    
+
+
     // Fill vector with samples defined above, based on their filename
     std::vector<std::pair<TString, Sample> > v_filenameSamplePair;
     while(!fileList.eof()){
@@ -123,7 +122,7 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, dytautau50inf));
         else if(filename.Contains("wtolnu"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, wlnu));
-        
+
         else if(filename.Contains("qcdmu15"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, qcdmu15));
         else if(filename.Contains("qcdmu2030"))
@@ -148,7 +147,7 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, qcdbcem3080));
         else if(filename.Contains("qcdbcem80170"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, qcdbcem80170));
-        
+
         else if(filename.Contains("ttbarW"))
             v_filenameSamplePair.push_back(std::pair<TString, Sample>(filename, ttbarW));
         else if(filename.Contains("ttbarZ"))
@@ -164,7 +163,7 @@ std::vector<std::pair<TString, Sample> > Samples::setSamples(const Channel::Chan
             continue;
         }
     }
-    
+
     return v_filenameSamplePair;
 }
 
@@ -245,13 +244,13 @@ Samples::Samples(){}
 Samples::Samples(const std::vector< Channel::Channel >& v_channel, const std::vector< Systematic::Systematic >& v_systematic)
 {
     std::cout<<"--- Beginning to set up the samples\n\n";
-    
+
     for (auto systematic : v_systematic) {
         for (auto channel : v_channel) {
             this->addSamples(channel, systematic);
         }
     }
-    
+
     std::cout<<"\n=== Finishing to set up the samples\n\n";
 }
 
@@ -261,16 +260,16 @@ void Samples::addSamples(const Channel::Channel& channel, const Systematic::Syst
 {
     // Add all samples as they are defined in setSamples()
     std::vector< std::pair< TString, Sample > > v_filenameSamplePair(this->setSamples(channel, systematic));
-    
+
     // Set sample options via filename
     std::vector<Sample> v_sample(this->setSampleOptions(systematic, v_filenameSamplePair));
-    
+
     // Order files by legendEntry
     this->orderByLegend(v_sample);
-    
+
     // Create map of maps, containing Sample per channel per systematic
     m_systematicChannelSample_[systematic][channel] = v_sample;
-    
+
     //for(auto systematicChannelSample : m_systematicChannelSample_){
     //    for(auto channelSample : systematicChannelSample.second){
     //        for(auto sample : channelSample.second){
@@ -288,7 +287,7 @@ void Samples::addSamples(const Channel::Channel& channel, const Systematic::Syst
 std::vector<Sample> Samples::setSampleOptions(const Systematic::Systematic& systematic, const std::vector< std::pair<TString, Sample> >& v_filenameSamplePair)
 {
     std::vector<Sample> v_sample;
-    
+
     for(auto filenameSamplePair : v_filenameSamplePair){
         TString filename(filenameSamplePair.first);
         Sample sample(filenameSamplePair.second);
@@ -300,7 +299,7 @@ std::vector<Sample> Samples::setSampleOptions(const Systematic::Systematic& syst
         sample.setInputFile(filename);
         v_sample.push_back(sample);
     }
-    
+
     return v_sample;
 }
 
@@ -319,17 +318,17 @@ void Samples::orderByLegend(std::vector<Sample>& v_sample)
         if(std::find(v_legendEntry.begin(), v_legendEntry.end(), legendEntry) != v_legendEntry.end())continue;
         else v_legendEntry.push_back(legendEntry);
     }
-    
+
     // Clear vector and fill it again in correct order
     v_sample.clear();
     for(auto legendEntry : v_legendEntry){
-        int testColor(-999); 
+        int testColor(-999);
         for(auto legendSamplePair : v_legendSamplePair){
              if(legendSamplePair.first != legendEntry)continue;
-             
+
              //std::cout<<"Legends after: "<<legendEntry<<std::endl;
              v_sample.push_back(legendSamplePair.second);
-             
+
              // Check if all with same legend do have same colour
              int color = legendSamplePair.second.color();
              if(testColor == -999)testColor = color;
@@ -363,7 +362,7 @@ Channel::Channel Samples::assignFinalState(const TString& filename)
 Systematic::Systematic Samples::assignSystematic(TString& filename, const Systematic::Systematic& systematic)
 {
     // FIXME: adjust filename corresponding to specific systematic
-    
+
     return Systematic::undefined;
 }
 
@@ -418,7 +417,7 @@ double Tools::luminosityWeight(const Sample& sample, const double luminosity, Ro
     //std::cout<<"Input file: "<<inputFile<<std::endl;
     //std::cout<<"Luminosity, Xsection, weighted events, lumi weight: "
     //         <<luminosity<<" , "<<crossSection<<" , "<<weightedEvents<<" , "<<luminosityWeight<<std::endl;
-    
+
     return luminosityWeight;
 }
 
