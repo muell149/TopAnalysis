@@ -355,8 +355,19 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     if(rangemin_!=0 || rangemax_!=0) {dataHist.second->SetAxisRange(rangemin_, rangemax_, "X");}
 
     if(ymax_==0){
-        if(logY_){dataHist.second->SetMaximum(18  * dataHist.second->GetBinContent(dataHist.second->GetMaximumBin()));}
-        else{dataHist.second->SetMaximum(1.5 * dataHist.second->GetBinContent(dataHist.second->GetMaximumBin()));}
+        // Determining the highest Y value that is plotted
+        float ymax_hist = dataHist.second->GetBinContent(dataHist.second->GetMaximumBin());
+        for(const auto& stackHist : stackHists) {
+            float maxY = stackHist.second->GetBinContent(dataHist.second->GetMaximumBin());
+            if(maxY>ymax_hist) ymax_hist = maxY;
+        }
+        for(const auto& stackHist : higgsHists) {
+            float maxY = stackHist.second->GetBinContent(dataHist.second->GetMaximumBin());
+            if(maxY>ymax_hist) ymax_hist = maxY;
+        }
+        // Scaling the Y axis
+        if(logY_){dataHist.second->SetMaximum(18  * ymax_hist);}
+        else{dataHist.second->SetMaximum(1.5 * ymax_hist);}
     }
     else{dataHist.second->SetMaximum(ymax_);}
 
