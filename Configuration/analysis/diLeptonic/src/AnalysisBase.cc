@@ -971,7 +971,7 @@ void AnalysisBase::GetRecoBranchesEntry(const Long64_t& entry)const
     //b_lepPhotonIso->GetEntry(entry);
     //b_lepPuChargedHadronIso->GetEntry(entry);
     //b_lepCombIso->GetEntry(entry);
-    //b_lepDxyVertex0->GetEntry(entry);
+    b_lepDxyVertex0->GetEntry(entry);
     //b_lepTrigger->GetEntry(entry);
     b_jet->GetEntry(entry);
     //b_jetBTagTCHE->GetEntry(entry);

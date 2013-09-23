@@ -60,7 +60,8 @@ XAxis_(""),
 logX_(false),
 logY_(false),
 doDYScale_(false),
-scaleMCtoData_(true)
+scaleMCtoData_(true),
+ttbbScale_(1.0)
 {
     // Suppress default info that canvas is printed
     gErrorIgnoreLevel = 1001;
@@ -233,14 +234,34 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
         }
     }
 
+
+    // Scaling the tt+bb component of the tt+jets sample
+    double ttbbInt = 0.f;
+    double ttOtherInt = 0.f;
+    double ttScale = 1.f;
+
+    TH1D* ttbbHist(0);
+    TH1D* ttOtherHist(0);
+
+    // Getting the ttbb and ttOther histograms
+    for (unsigned int i = 1; i < stackHists.size(); ++i) {
+        if(stackHists.at(i).first == "t#bar{t}b#bar{b}") ttbbHist = (TH1D*)stackHists.at(i).second;
+        if(stackHists.at(i).first == "t#bar{t}Other") ttOtherHist = (TH1D*)stackHists.at(i).second;
+    }
+
+    if(ttbbHist) ttbbInt = ttbbHist->Integral();
+    if(ttOtherHist) ttOtherInt = ttOtherHist->Integral();
+    double ttInt = ttbbInt + ttOtherInt;
+    double ttIntScaled = ttbbInt*ttbbScale_ + ttOtherInt;
+    if(ttInt>0. && ttIntScaled>0.) ttScale = ttInt/ttIntScaled;
+    ttbbHist->Scale(ttbbScale_*ttScale);
+    ttOtherHist->Scale(ttScale);
+
+
     // Create histogram corresponding to the sum of all stacked histograms
     TH1D* stacksum = (TH1D*) stackHists.at(0).second->Clone();
-//     TH1D* stacksumNottbb = (TH1D*) stackHists.at(0).second->Clone();
-    TH1D* ttbbHist(0);
     for (unsigned int i = 1; i < stackHists.size(); ++i) {
         stacksum->Add((TH1D*)stackHists.at(i).second);
-        if(stackHists.at(i).first == "t#bar{t}b#bar{b}") ttbbHist = (TH1D*)stackHists.at(i).second;
-//         else stacksumNottbb->Add((TH1D*)stackHists.at(i).second);
     }
     if(!drawHiggsOverlaid) for(auto higgsHist :higgsHists) { stacksum->Add((TH1D*)higgsHist.second);}
 
@@ -334,8 +355,17 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     if(rangemin_!=0 || rangemax_!=0) {dataHist.second->SetAxisRange(rangemin_, rangemax_, "X");}
 
     if(ymax_==0){
-        if(logY_){dataHist.second->SetMaximum(18  * dataHist.second->GetBinContent(dataHist.second->GetMaximumBin()));}
-        else{dataHist.second->SetMaximum(1.5 * dataHist.second->GetBinContent(dataHist.second->GetMaximumBin()));}
+        // Determining the highest Y value that is plotted
+        float ymax = dataHist.second->GetBinContent(dataHist.second->GetMaximumBin());
+        float ymax_stack = stack->GetMaximum();
+        if(ymax_stack>ymax) ymax = ymax_stack;
+        for(const auto& stackHist : higgsHists) {
+            float maxY = stackHist.second->GetBinContent(stackHist.second->GetMaximumBin());
+            if(maxY>ymax) ymax = maxY;
+        }
+        // Scaling the Y axis
+        if(logY_){dataHist.second->SetMaximum(18  * ymax);}
+        else{dataHist.second->SetMaximum(1.35 * ymax);}
     }
     else{dataHist.second->SetMaximum(ymax_);}
 
