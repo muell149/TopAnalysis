@@ -174,7 +174,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
 {
     // Prepare canvas and legend
     TCanvas* canvas = new TCanvas("","");
-    TLegend* legend = new TLegend(0.70,0.55,0.98,0.85);
+    TLegend* legend = new TLegend(0.70,0.55,0.92,0.85);
     legend->SetFillStyle(0);
     legend->SetBorderSize(0);
     legend->SetX1NDC(1.0 - gStyle->GetPadRightMargin() - gStyle->GetTickLength() - 0.25);
