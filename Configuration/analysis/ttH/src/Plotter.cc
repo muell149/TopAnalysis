@@ -60,7 +60,7 @@ XAxis_(""),
 logX_(false),
 logY_(false),
 doDYScale_(false),
-scaleMCtoData_(true),
+scaleMCtoData_(false),
 ttbbScale_(1.0)
 {
     // Suppress default info that canvas is printed
@@ -286,8 +286,8 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
         stacksum_ttH->Add((TH1D*)higgsHists.at(0).second);
         TH1D* ttHbbHist = 0;
         for (const auto& higgsHist : higgsHists) { if(higgsHist.first == "t#bar{t}H (b#bar{b})") ttHbbHist = (TH1D*)higgsHist.second; }
-        if(ttbbHist) sigSignLabelTTbb = drawSigSign(ttbbHist,stacksum,85,140,0.f,"ttbb");
-        if(ttHbbHist) sigSignLabelTTH = drawSigSign(ttHbbHist,stacksum_ttH,85,140,0.1,"ttH");
+//         if(ttbbHist) sigSignLabelTTbb = drawSigSign(ttbbHist,stacksum,85,140,0.f,"ttbb");
+//         if(ttHbbHist) sigSignLabelTTH = drawSigSign(ttHbbHist,stacksum_ttH,85,140,0.1,"ttH");
     }
 
 
@@ -399,7 +399,7 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     }
 
     // Put additional stuff to histogram
-    drawCmsLabels(1, 8);
+    drawCmsLabels(2, 8);
     drawDecayChannelLabel(channel);
     if(sigSignLabelTTH) sigSignLabelTTH->Draw("same");
     if(sigSignLabelTTbb) sigSignLabelTTbb->Draw("same");
