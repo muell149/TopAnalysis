@@ -63,7 +63,7 @@ void Plotter::UnfoldingOptions(bool doSVD)
 }
 
 
-void Plotter::DoFit(bool doFit)
+void Plotter::DoFitInRatio(bool doFit)
 {
     doFit_ = doFit;
 }
@@ -82,9 +82,7 @@ void Plotter::unfolding(TString channel, TString systematic)
     std::cout << "Starting Calculation of Diff. X Section for '" << name << "' in Channel '" << channel << "' and Systematic '"<< systematic <<"':" << std::endl;
     std::cout << "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << std::endl;
 
-    /// This was only necessary for the statistical combination of the results.
-    /// Current method combination in yield level
-    if(kFALSE && channel == "combined")
+    if(channel == "combined")
     {
         ifstream ResultsEE ("UnfoldingResults/"+systematic+"/ee/"+name+"Results.txt");
         ifstream ResultsEMu("UnfoldingResults/"+systematic+"/emu/"+name+"Results.txt");
@@ -1631,12 +1629,6 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     double xsec = ( (numbers[0]-numbers[4]) * (numbers[1]/(numbers[1]+numbers[3])) ) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
     double xsecstaterror = TMath::Sqrt(error_numbers[0]) * (numbers[1]/(numbers[1]+numbers[3])) / ( (numbers[1]/numbers[2])*BranchingFraction[channelType]*lumi);
 
-    InclusiveXsectionVec[channelType] = xsec;
-    InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
-
-    /// This was only necessary for the statistical combination of the results.
-    /// Current method combination in yield level
-    /*
     if(channelType!=3){
         InclusiveXsectionVec[channelType] = xsec;
         InclusiveXsectionStatErrorVec[channelType] = xsecstaterror;
@@ -1680,7 +1672,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
                                             +(1/(InclusiveXsectionStatErrorVec[2]*InclusiveXsectionStatErrorVec[2]))
                                                                     ));
     }
-    */
+
     EventFile<<"XSection  = "<<InclusiveXsectionVec[channelType]<<std::endl;
     EventFile<<"XSecStaErr= "<<InclusiveXsectionStatErrorVec[channelType]<<std::endl;
     EventFile.close();
@@ -1726,9 +1718,8 @@ int Plotter::CalcDiffXSec(TString Channel, TString Systematic){
     if(Channel=="combined"){channelType=3;}
 
     // DAVID 
-//     if ( doUnfolding == true && channelType !=3) {//do the unfolding only in the individual channels: ee, emu, mumu
-    if ( doUnfolding == true) {//do the unfolding only in the individual channels: ee, emu, mumu
-
+    if ( doUnfolding == true && channelType !=3)//do the unfolding only in the individual channels: ee, emu, mumu
+    {
         // SVD Helper Class
         DilepSVDFunctions mySVDFunctions;
         mySVDFunctions.SetOutputPath(outpath);
@@ -1820,9 +1811,7 @@ int Plotter::CalcDiffXSec(TString Channel, TString Systematic){
         }
     }
 
-    /// This was only necessary for the statistical combination of the results.
-    /// Current method combination in yield level
-    if (kFALSE && doUnfolding && channelType==3){//for 'combined' channel: do an statistical combination of the the 3 independent channels
+    if (doUnfolding && channelType==3){//for 'combined' channel: do an statistical combination of the the 3 independent channels
 
         TString eefilename="UnfoldingResults/"+Systematic+"/ee/"+name+"Results.txt";
         TString emufilename="UnfoldingResults/"+Systematic+"/emu/"+name+"Results.txt";
@@ -3368,6 +3357,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     delete c;
     gStyle->SetEndErrorSize(0);
 
+//     double result_Integral = Plotter::CalculateIntegral(tga_DiffXSecPlot, Xbins);
     std::cout<<"-------------------------------------------------------------------"<<std::endl;
     std::cout<<"Starting the calculation of Chi2/ndof\n"<<std::endl;
     double chi2 = Plotter::GetChi2 (tga_DiffXSecPlot, h_GenDiffXSec);
@@ -3966,4 +3956,17 @@ void Plotter::CalcUpDownDifference( TString Channel, TString Syst_Up, TString Sy
     }
     SystematicRelError.close();
 
+}
+
+
+
+double Plotter::CalculateIntegral(TGraphAsymmErrors *tga_DiffXSecPlot, double Xbins[])
+{
+    double tmp_integral = 0;
+    for (int i =0; i<tga_DiffXSecPlot->GetN(); i++)
+    {
+        tmp_integral += tga_DiffXSecPlot->GetY()[i] * (Xbins[i+1]-Xbins[i]);
+    }
+    std::cout<<"Integral = "<<tmp_integral<<std::endl;
+    return tmp_integral;
 }
