@@ -19,6 +19,7 @@ namespace ttbar{
                    const TH1* histDenominator,
                    const Double_t& ratioMin, 
                    const Double_t& ratioMax, 
+                   const bool addFit = 0,
                    const TStyle& myStyle = *gStyle, 
                    const int verbose=0, 
                    const std::vector<double>& err=std::vector<double>(0));

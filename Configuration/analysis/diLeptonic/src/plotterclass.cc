@@ -37,6 +37,7 @@ using namespace std;
 
 const bool Plotter::doClosureTest = 0; //Signal is MC - so add BG to it and dont do DY scaling
 
+
 void Plotter::setLumi(double newLumi, double xSec)
 {
     this->lumi = newLumi;
@@ -61,6 +62,11 @@ void Plotter::UnfoldingOptions(bool doSVD)
 
 }
 
+
+void Plotter::DoFit(bool doFit)
+{
+    doFit_ = doFit;
+}
 
 // DAVID
 void Plotter::SetOutpath(TString path)
@@ -1119,7 +1125,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     leg->Draw("SAME");
     if(drawPlotRatio){
         TH1* stacksum = ttbar::summedStackHisto(stack.get());
-        ttbar::drawRatio(drawhists[0], stacksum, 0.5, 1.7);
+        ttbar::drawRatio(drawhists[0], stacksum, 0.5, 1.7, doFit_);
     }
 
     // Create Directory for Output Plots 
@@ -3624,7 +3630,8 @@ double Plotter::GetChi2 (TGraphAsymmErrors *data, TH1 *mc){
     for ( int i=0; i<(int)data->GetN(); ++i ) {
         if (data->GetErrorYhigh(i) == 0 || data->GetErrorYlow(i) == 0) {
             std::cout<<"When calculating the Chi2 the DATA TGraph has error 0 in bin "<<i<<std::endl;
-            exit(42);
+            //exit(42);
+            return 0;
         }
         double dataMinusMC = data->GetY()[i]-mc->GetBinContent(mc->FindBin(data->GetX()[i]));
         double dataError   = (data->GetErrorYhigh(i) + data->GetErrorYlow(i))/2;
@@ -3777,7 +3784,6 @@ double Plotter::CalcLumiWeight(const TString& WhichSample){
     if (lumiWeight == 0) {
         std::cout << WhichSample << " has lumi weight 0\n";
     }
-
     return lumiWeight;
 }
 
@@ -3792,6 +3798,8 @@ double Plotter::SampleXSection(const TString& filename){
     else if(filename.Contains("FullLept"))    {return topxsec * 0.1049;}
     else if(filename.Contains("SemiLept"))    {return topxsec * 0.4380;}
     else if(filename.Contains("Hadronic"))    {return topxsec * 0.4570;}
+    else if(filename.Contains("Perugia11") &&
+        filename.Contains("signal"))          {return topxsec * 0.1049;}
     else if(filename.Contains("ttbar"))       {return topxsec;}
     else if(filename.Contains("single"))      {return 11.1;}
     else if(filename.Contains("ww"))          {return 54.838;}

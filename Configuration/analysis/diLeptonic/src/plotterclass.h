@@ -29,6 +29,7 @@ public:
     void   setStyle(TH1*, unsigned int, bool = false);
     void   unfolding(TString channel, TString systematic);
     void   preunfolding(TString Channel="", TString Systematic="");
+    void   DoFit(bool doFit = 0);
     
     ///add addThis to addToThis (and delete it afterwards) - or assign it it to addToThis if addToThis is nullptr.
     void   addAndDelete_or_Assign(TH1*& addToThis, TH1* addThis);
@@ -100,6 +101,7 @@ private:
     std::vector<TH1D> systhistsUp;
     std::vector<TH1D> systhistsDown;
 
+    bool doFit_;
     bool initialized, logX, logY, doDYScale;
     double lumi, topxsec;
     int signalHist;
