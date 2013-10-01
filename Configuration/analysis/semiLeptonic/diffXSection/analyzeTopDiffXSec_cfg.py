@@ -139,7 +139,20 @@ if(not globals().has_key('applyKinFit')):
     applyKinFit = True # False
     if(cutflowSynch):
         applyKinFit = False
+        
+## choose whether you want to use the double KinFit approach
+## fit1: mtop=172.5GeV fix -> jet permutation
+## -> fit2: mtop free, jet permutation from fit1 -> result                
+doubleKinFit = True
+if(applyKinFit==False):
+    doubleKinFit=False
 
+## choose whether you want to do the probability cut
+## already before filling any result plot
+ProbCutByDefault = False
+if(applyKinFit==False):
+    ProbCutByDefault=False
+    
 ## choose whether you want a pat tuple as output
 if(not globals().has_key('writeOutput')): 
     writeOutput  = False # True
@@ -636,6 +649,8 @@ print " Apply Btag reweighting:             ",BtagReweigthing
 print " Apply effSF reweighting:            ",effSFReweigthing
 print " JEC level in jetKinematics:         ",corrLevel
 print " Apply kinematic Fit:                ",applyKinFit," ---- Programme execution slowed down if 'True'"
+print " Use double KinFit approach:         ",doubleKinFit
+print " Prob selection for all result plots: ",ProbCutByDefault
 print " Write PAT tuples:                   ",writeOutput
 print " Analyzed sample:                    ",usedSample+".py"
 print " Output file name:                   ",outputFileName
@@ -1314,21 +1329,22 @@ process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## add a second kinematic fit which calculates the jet permutation as input for the first kin fit
-#cloneTtSemiLepEvent(process)
-#process.kinFitTtSemiLepEventHypothesis2.constraints = [1, 2, 3, 4]
-#process.kinFitTtSemiLepEventHypothesis2.mTop = 172.5
-#process.kinFitTtSemiLepEventHypothesis.match = cms.InputTag("kinFitTtSemiLepEventHypothesis2")
-#process.kinFitTtSemiLepEventHypothesis.useOnlyMatch = cms.bool(True)
-#
-#process.filterRecoKinFit2 = process.ttSemiLepEventFilter.clone( src = cms.InputTag("ttSemiLepEvent2"),
-#                                                                cut = cms.string("isHypoValid('kKinFit')"  ) )
-#
-#process.makeTtSemiLepEvent += process.filterRecoKinFit2
-#
-#process.makeTtSemiLepEvent.replace(process.filterRecoKinFit2,
-#                                   process.filterRecoKinFit2*process.makeTtSemiLepEventBase)
-#
-#process.makeTtSemiLepEvent.remove(process.makeTtSemiLepEventBase)
+if(doubleKinFit==True):
+    cloneTtSemiLepEvent(process)
+    process.kinFitTtSemiLepEventHypothesis2.constraints = [1, 2, 3, 4]
+    process.kinFitTtSemiLepEventHypothesis2.mTop = 172.5
+    process.kinFitTtSemiLepEventHypothesis.match = cms.InputTag("kinFitTtSemiLepEventHypothesis2")
+    process.kinFitTtSemiLepEventHypothesis.useOnlyMatch = cms.bool(True)
+    
+    process.filterRecoKinFit2 = process.ttSemiLepEventFilter.clone( src = cms.InputTag("ttSemiLepEvent2"),
+                                                                    cut = cms.string("isHypoValid('kKinFit')"  ) )
+    
+    process.makeTtSemiLepEvent += process.filterRecoKinFit2
+    
+    process.makeTtSemiLepEvent.replace(process.filterRecoKinFit2,
+                                       process.filterRecoKinFit2*process.makeTtSemiLepEventBase)
+    
+    process.makeTtSemiLepEvent.remove(process.makeTtSemiLepEventBase)
 
 ## configure top reconstruction analyzers & define PSets
 ## A) for top reconstruction analyzer
@@ -1560,7 +1576,6 @@ if(applyKinFit==True):
                                              process.lightJetSelection                       +
                                              process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
-                                             #process.filterProbKinFit                        + #FIXME MARTIN: prob cut for systematic folder
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -1581,6 +1596,10 @@ if(applyKinFit==True):
                                              process.compositedKinematicsProbSel             +
                                              process.filterMatchKinFit
                                              )
+            if(ProbCutByDefault):
+                process.kinFit.replace(process.filterRecoKinFit,
+                                       process.filterRecoKinFit+process.filterProbKinFit)
+                
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics     +
                                                        # add bjet indices
                                                        process.makeGenLevelBJets                   +
@@ -1625,6 +1644,9 @@ if(applyKinFit==True):
                                              process.analyzeTopRecoKinematicsKinFitProbSel   +
                                              process.compositedKinematicsProbSel             
                                              )
+            if(ProbCutByDefault):
+                process.kinFit.replace(process.filterRecoKinFit,
+                                       process.filterRecoKinFit+process.filterProbKinFit)
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
@@ -1641,6 +1663,9 @@ if(applyKinFit==True):
                                          process.analyzeTopRecoKinematicsKinFitProbSel   +
                                          process.compositedKinematicsProbSel             
                                          )
+        if(ProbCutByDefault):
+            process.kinFit.replace(process.filterRecoKinFit,
+                                   process.filterRecoKinFit+process.filterProbKinFit)
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
