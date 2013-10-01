@@ -178,7 +178,7 @@ verbose=0
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=false
+redoControlPlots=true
 
 ## Re-create systematically varied results
 ## redoSystematics = true / false (default: true)
@@ -186,7 +186,7 @@ redoSystematics=true
 
 ## Re-create systematically PDF shifted signal files 
 ## redoPDFReweighting = true / false (default: true)
-redoPDFReweighting=false
+redoPDFReweighting=true
 
 ## Produce final xSec plots, ratios and uncertainties 
 ## produceResults = true / false (default: true)
@@ -228,7 +228,7 @@ redetTau=false
 
 ## Re-create purity/stability/resolution plots
 ## redoPurStab = true / false (default: true)
-redoPurStab=false
+redoPurStab=true
 
 ## Use bin-centre corrections (BCC)
 ## useBCC = true / false (default: false)
