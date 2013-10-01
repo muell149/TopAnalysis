@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=19800., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
+void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=false, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
 
   // ============================
   //  Systematic Variations:
@@ -47,7 +47,8 @@ void combineTopDiffXSecUncertainties(double luminosity=19800., bool save=true, u
   // ============================
   //  Parameter Configuration
   // ============================
-  
+  // name quantity for which you want to see a detailed uncertainty printout
+  TString testVar="";//"topPtNorm";
   // if true: for uncertainties with different versions like eff. SF (norm., eta+pt shape) take only maximum of those
   bool takeMaxOfNormAndShape=true;
 
@@ -352,7 +353,7 @@ void combineTopDiffXSecUncertainties(double luminosity=19800., bool save=true, u
     // loop variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     int verbose2=verbose;
-    if(xSecVariables_[i]=="inclusive") verbose2+=1;
+    if(xSecVariables_[i]=="inclusive"||xSecVariables_[i]==testVar) verbose2+=1;
       if(verbose2>0) std::cout << std::endl << "variable: " << xSecVariables_[i] << std::endl;
       // check if any plot of the chosen variable has been found
       if(calculateError_.count(xSecVariables_[i])>0&&calculateError_[xSecVariables_[i]][sysNo]==true){
