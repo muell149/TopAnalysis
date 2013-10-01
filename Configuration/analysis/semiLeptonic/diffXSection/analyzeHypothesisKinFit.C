@@ -2,14 +2,14 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 19800.,
-			     bool save = true, int systematicVariation=4, unsigned int verbose=0, 
-			     TString inputFolderName="RecentAnalysisRun8TeV",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
+void analyzeHypothesisKinFit(double luminosity = 19712.,
+			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=0,
+			     TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
+			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root",
+			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="")
+			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
   // ============================
   //  Set ROOT Style
@@ -20,8 +20,8 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   TGaxis::SetMaxDigits(2);
   myStyle.cd();
   gROOT->SetStyle("HHStyle");
-  gROOT->ForceStyle();	
-  
+  gROOT->ForceStyle();
+
   // ============================
   //  Name Conventions
   // ============================
@@ -74,6 +74,10 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   //        45: sysGenMCatNLO              46: sysGenPowheg  
   //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
   
+  // systematic variation for which you want to print the
+  // inclusive cross section and the jet permutation overview
+  // testMe=ENDOFSYSENUM means none
+  int testMe=ENDOFSYSENUM;///sysPUUp;
   // errorbands for yield plots
   bool errorbands=false;
   // addSel: xSec from prob selection step
@@ -303,8 +307,9 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 
   // choose correct input folder for mixed object analyzer
   TString recMixpath= "compositedKinematics";
-  //addSel!="" ? recMixpath+=addSel : recMixpath+="KinFit";
-  recMixpath+="KinFit";
+  // FIXME1: no Prob folder existing for mixed object analyzer
+  addSel=="ProbSel"&&!inputFolder.Contains("Prob") ? recMixpath+=addSel : recMixpath+="KinFit";
+  //recMixpath+="KinFit";
   TString genMixpath= "composited"+LV+"Gen"+PS;
 
   //  ---
@@ -1042,7 +1047,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData, false, addSelData);
     getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose-1, "muon"    , &vecRedundantPartOfNameInData, false, addSelData);
   }
-  
+  //exit(0); // debug exit - use with high verbosity to see which plots are loaded
   // ===============================================
   // take care of rec level b quark plots from MC BG
   // ===============================================
@@ -1404,12 +1409,16 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 	newName.ReplaceAll("composited", "analyzeTop");
 	if(sysInputGenFolderExtension!=""&&newName.Contains("Gen"+PS)&&!newName.Contains(sysInputGenFolderExtension)) newName.ReplaceAll("Gen"+PS, "Gen"+PS+sysInputGenFolderExtension);
 	if(plotList_[plot].Contains("Gen")) newName.ReplaceAll("Gen", "LevelKinematics");
-	else newName.ReplaceAll("analyzeTop", "analyzeTopReco");
+	else{
+	  newName.ReplaceAll("analyzeTop", "analyzeTopReco"  );
+	  if(!newName.Contains("KinFit")) newName.ReplaceAll("Kinematics", "KinematicsKinFit");
+	}
 	newName.ReplaceAll("Ngenjets", "Njets");
 	TString syAdd=sysInputFolderExtension;
 	syAdd.ReplaceAll(addSel, "");
 	if(syAdd!=""&&!newName.Contains(syAdd)) newName.ReplaceAll("KinFit","KinFit"+syAdd);
-	if(addSel.Contains("ProbSel")&&!newName.Contains("ProbSel")) newName.ReplaceAll("KinFit", "KinFitProbSel");
+	if(addSel.Contains("ProbSel")&&!newName.Contains("ProbSel")) newName.ReplaceAll("/", "ProbSel/");
+	if(addSel.Contains("ProbSel")&&newName.Contains("ProbSel")&&(newName.Contains("Hadron")||newName.Contains("Parton"))) newName.ReplaceAll("ProbSel", "");
       }
       // for all gen plots
       if(plotList_[plot].Contains(genHadronLeppath)){ 
@@ -1421,7 +1430,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     }
     // check if replacement is necessary
     if(newName!=plotList_[plot]){
-      if(verbose>1) std::cout << plotList_[plot] << " -> " << newName << " for " << std::endl;
+      if(verbose>=1) std::cout << plotList_[plot] << " -> " << newName << " for " << std::endl;
       // loop samples
       for(unsigned int sample=kSig; sample<=kData; ++sample){
 	// check if plot exists 1D
@@ -1602,9 +1611,15 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
     // signal reco plot
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_[varname][kSig]->Clone(variable);
     // signal gen plot
-    histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone(variable);
+    if(!histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]){
+      std::cout << "missing plot: " << "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable << " for ttbar signal" << std::endl;
+    }
+    else histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone(variable);
     // response matrix plot
-    histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_[varname+"_"][kSig]->Clone(variable);
+    if(!histo2_[varname+"_"][kSig]){
+      std::cout << "missing plot: " << varname+"_" << " for ttbar signal" << std::endl;
+    }
+    else histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig]=(TH2F*)histo2_[varname+"_"][kSig]->Clone(variable);
   }
   
   // ============================
@@ -1873,7 +1888,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
   xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity2*BR );
   double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity2*BR );
   // text output
-  if(systematicVariation==sysNo||systematicVariation==sysGenMCatNLO||systematicVariation==sysGenPowheg||systematicVariation==sysGenPowhegHerwig){ 
+  if(systematicVariation==testMe||systematicVariation==sysNo||systematicVariation==sysGenMCatNLO||systematicVariation==sysGenPowheg||systematicVariation==sysGenPowhegHerwig){ 
     std::cout << std::endl;
     std::cout << "systematic variation: " << sysLabel(systematicVariation) << std::endl;
     std::cout << "Phase space: "; 
@@ -2938,7 +2953,7 @@ void analyzeHypothesisKinFit(double luminosity = 19800.,
 	if(plotList_[plot].Contains("qAssignment")){
 	  histogramStyle( *histo_[permutationLabel][kSig], kSig, true);
 	  // print permutations
-	  if(systematicVariation==sysNo){
+	  if(systematicVariation==testMe||systematicVariation==sysNo){
 	    std::cout << std::endl << "permutations wrt jet parton matching: " << std::endl;
 	    std::cout << "-------------------------------------" << std::endl;
 	    std::cout << "ok     : " << histo_[permutationLabel][kSig]->GetBinContent(1) << std::endl;
