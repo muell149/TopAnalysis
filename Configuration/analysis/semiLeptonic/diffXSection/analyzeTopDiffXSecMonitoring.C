@@ -1,13 +1,13 @@
 #include "basicFunctions.h"
 
-void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
+void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 				  bool save = true, int verbose=0,
-				  TString inputFolderName= "RecentAnalysisRun8TeV",
+				  TString inputFolderName= "RecentAnalysisRun8TeV_doubleKinFit",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
-				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
+				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="ProbSel")
 { 
   // ============================
   //  Set Root Style
@@ -152,7 +152,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
   //        45: sysGenMCatNLO              46: sysGenPowheg  
   //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
 
-  int systematicVariation=sysNo; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg: sysGenPowheg/sysTestPowheg, McatNLO: sysGenMCatNLO/sysTestMCatNLO
+  int systematicVariation=sysNo; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg+Pythia: sysGenPowheg/sysTestPowheg, Powheg+Herwig: sysGenPowhegHerwig/sysTestPowhegHerwig, McatNLO: sysGenMCatNLO/sysTestMCatNLO
   // use different ttbar MC ("Madgraph", "Powheg", "PowhegHerwig", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
   if     (systematicVariation==sysGenMCatNLO||systematicVariation==sysTestMCatNLO            ) ttbarMC="Mcatnlo";
@@ -1097,6 +1097,11 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19800,
       std::cout << "hadLV efficiency:    " << std::setprecision(3) << std::fixed << effHad << std::endl;
       std::cout << "hadLV acceptance:    " << std::setprecision(3) << std::fixed << AHad   << std::endl;
       std::cout << "      eff. lumi[pb]: " << std::setprecision(3) << std::fixed << luminosity2 << std::endl;
+      std::cout << "Nrec, sel.:    " << std::setprecision(3) << std::fixed << events_[selection_[step]][kSig] << std::endl;
+      std::cout << "Ngen, all:    " << std::setprecision(3) << std::fixed << NttbarFull << std::endl;
+      std::cout << "Ngen, vis:    " << std::setprecision(3) << std::fixed << NttbarPSHad << std::endl;
+      std::cout << "Nrec/Ngen,vis:    " << std::setprecision(3) << std::fixed << events_[selection_[step]][kSig]/NttbarPSHad << std::endl;
+      std::cout << "Nrec/Ngen,all:    " << std::setprecision(3) << std::fixed << events_[selection_[step]][kSig]/NttbarFull  << std::endl;
     }
   }
   std::cout << std::endl;
