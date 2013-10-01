@@ -15,7 +15,6 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/xSec
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/binning
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/effAndAcc
-## mkdir -p diffXSecFromSignal/plots/combined/2012/effAndAcc/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/shapeReweighting
@@ -46,7 +45,9 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/monitoring/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/xSecRatio
-
+## mkdir -p diffXSecFromSignal/plots/combined/2012/effAndAcc/withoutRatioPlots
+## mkdir -p diffXSecFromSignal/plots/combined/2012/ttgencomparison
+## mkdir -p diffXSecFromSignal/plots/combined/2012/comparisonATLAS
 
 ## b) you don't need to copy root files needed for the Analysis 
 ##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
@@ -86,10 +87,10 @@ closureTestSpecifier=\"\"
 combinedEventYields=false
 
 ## use prob sel analysis
-addSel=\"\"
-chi2Max=99999
-#addSel=\"ProbSel\"
-#chi2Max=7.824
+#addSel=\"\"
+#chi2Max=99999
+addSel=\"ProbSel\"
+chi2Max=7.824
 
 ## take arguments
 clear
@@ -137,23 +138,27 @@ echo
 
 ## folder on /afs/naf.desy.de/group/cms/scratch/tophh where MC and data files are stored
 ## inputFolderName=\"RecentAnalysisRun8TeV\" (default)
-inputFolderName=\"RecentAnalysisRun8TeV\"
+#inputFolderName=\"RecentAnalysisRun8TeV\"
+inputFolderName=\"RecentAnalysisRun8TeV_doubleKinFit\"
 
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
-mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root\"
-eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root\"
+#mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root\"
+#eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root\"
+
+mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root\"
+eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root\"
 
 if [ $decayChannel == \"electron\" ]; then
-    dataLuminosity=19800
+    dataLuminosity=19712
     dataSample=$eldataSample
 else
     if [ $decayChannel == \"muon\" ]; then
-	dataLuminosity=19800
+	dataLuminosity=19712
 	dataSample=$mudataSample
     else
-	dataLuminosity=19800 # mean value
+	dataLuminosity=19712 # mean value
 	dataSample=$eldataSample\":\"$mudataSample
     fi
 fi
@@ -173,7 +178,7 @@ verbose=0
 
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
-redoControlPlots=true
+redoControlPlots=false
 
 ## Re-create systematically varied results
 ## redoSystematics = true / false (default: true)
@@ -181,7 +186,7 @@ redoSystematics=true
 
 ## Re-create systematically PDF shifted signal files 
 ## redoPDFReweighting = true / false (default: true)
-redoPDFReweighting=true
+redoPDFReweighting=false
 
 ## Produce final xSec plots, ratios and uncertainties 
 ## produceResults = true / false (default: true)
@@ -223,7 +228,7 @@ redetTau=false
 
 ## Re-create purity/stability/resolution plots
 ## redoPurStab = true / false (default: true)
-redoPurStab=true
+redoPurStab=false
 
 ## Use bin-centre corrections (BCC)
 ## useBCC = true / false (default: false)
