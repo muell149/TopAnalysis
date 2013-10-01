@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeGenComparison(bool save = true, int verbose=2){
+void analyzeGenComparison(bool save = true, int verbose=0){
   
-  // run different ttbar MCs or Theory Variations
-  bool theoryVariations=true;
+  // !!! run different ttbar MCs OR Theory Variations !!!
+  bool theoryVariations=false;
 
   // ============================
   //  Set Root Style
@@ -28,6 +28,8 @@ void analyzeGenComparison(bool save = true, int verbose=2){
     file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigPowhegHerwigSummer12PF.root"        , "Open"));
     file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root"             , "Open"));
     file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugiaSummer12PF.root", "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugianoCRSummer12PF.root" , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugiampiHiSummer12PF.root", "Open"));
   }
   else{
     file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                    , "Open"));
@@ -108,11 +110,11 @@ void analyzeGenComparison(bool save = true, int verbose=2){
     "charged electromagnetic fraction (jets);rel. #Jets;1;1",
     "N_{charged particles} (jets);rel. #Jets;0;1"           ,
     // generated full PS quantities
-    "parton truth m^{t#bar{t}} #left[GeV#right];rel. #Events;0;10"    ,
+    "parton truth m^{t#bar{t}} #left[GeV#right];rel. #Events;0;25"    ,
     "parton truth p_{T}^{t#bar{t}} #left[GeV#right];rel. #Events;0;1",
     "parton truth y^{t#bar{t}};rel. #Events;0;1"                     ,
     "parton truth m^{t} #left[GeV#right];rel. #Top quarks;0;1"       ,
-    "parton truth p_{T}^{t} #left[GeV#right];rel. #Top quarks;0;5"   ,
+    "parton truth p_{T}^{t} #left[GeV#right];rel. #Top quarks;0;10"  ,
     "parton truth y^{t};rel. #Top quarks;0;1"                        ,
     "parton truth p_{T}^{lepton} #left[GeV#right];rel. #Events;0;5"       ,
     "parton truth #eta^{lepton};rel. #Events;0;1"                         ,
@@ -152,6 +154,8 @@ void analyzeGenComparison(bool save = true, int verbose=2){
   unsigned int kPowHer=2;
   unsigned int kMcHer=3;
   unsigned int kMadPer=4;
+  unsigned int kMadPerNoCR=5;
+  unsigned int kMadPerMpiHi=6;
 
   unsigned int kMadStd =0;
   unsigned int kMatchUp=1;
@@ -160,7 +164,7 @@ void analyzeGenComparison(bool save = true, int verbose=2){
   unsigned int kScaleDn=4;
 
   unsigned int kStart=theoryVariations ? kMadStd : kMadPy;
-  unsigned int kEnd=theoryVariations ? kScaleDn+1 : kMadPer+1;
+  unsigned int kEnd=theoryVariations ? kScaleDn+1 : kMadPerMpiHi+1;
 
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
   // loop all plots
@@ -170,7 +174,7 @@ void analyzeGenComparison(bool save = true, int verbose=2){
     TString name=plotList_[plot];
     if(verbose>1) std::cout << "plot: " << name << std::endl;
     // legend
-    TLegend* leg= new TLegend(0.6, 0.75, 0.9, 0.88);
+    TLegend* leg= new TLegend(0.55, 0.65, 0.85, 0.88);
     legendStyle(*leg,"");
     // loop samples
     for( unsigned int sample=kStart; sample<kEnd; ++sample ){
@@ -200,6 +204,9 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	  if(sample==kPowHer||sample==kMatchDn) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Match dn" : constPowhegHerwigLabel         ), "L");
 	  if(sample==kMcHer ||sample==kScaleUp) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Scale up" : constMcatnloHerwigLabel        ), "L");
 	  if(sample==kMadPer||sample==kScaleDn) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Scale dn" : constMadGraphPythiaPerugiaLabel), "L");
+	  if(sample==kMadPerNoCR ) leg->AddEntry(histo_[name][sample], constMadGraphPythiaPerugiaNoCRLabel, "L");
+	  if(sample==kMadPerMpiHi) leg->AddEntry(histo_[name][sample], constMadGraphPythiaPerugiaMpiHiLabel, "L");
+
 	}
 	// histostyle
 	histo_[name][sample]->SetStats(false);
@@ -209,6 +216,13 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	if(sample==kPowHer||sample==kMatchDn){ histo_[name][sample]->SetLineColor(constMadgraphColor); histo_[name][sample]->SetLineStyle(constPowhegStyle2); }
 	if(sample==kMcHer ||sample==kScaleUp){ histo_[name][sample]->SetLineColor(constMcatnloColor ); histo_[name][sample]->SetLineStyle(constMcatnloStyle); }
 	if(sample==kMadPer||sample==kScaleDn){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaColor ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaStyle); }
+	//if(sample==kMadPy ||sample==kMadStd ){ histo_[name][sample]->SetLineColor(constMadgraphColor); histo_[name][sample]->SetLineStyle(1                ); }
+	//if(sample==kPowPy ||sample==kMatchUp){ histo_[name][sample]->SetLineColor(constPowhegColor  ); histo_[name][sample]->SetLineStyle(constPowhegStyle ); }
+	//if(sample==kPowHer||sample==kMatchDn){ histo_[name][sample]->SetLineColor(constPowhegColor2 ); histo_[name][sample]->SetLineStyle(constPowhegStyle2); }
+	//if(sample==kMcHer ||sample==kScaleUp){ histo_[name][sample]->SetLineColor(constMcatnloColor ); histo_[name][sample]->SetLineStyle(constMcatnloStyle); }
+	//if(sample==kMadPer||sample==kScaleDn){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaColor ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaStyle); }
+	if(sample==kMadPerNoCR ){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaNoCRColor  ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaNoCRStyle ); }
+	if(sample==kMadPerMpiHi){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaMpiHiColor ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaMpiHiStyle); }
       }
       // Drawing etc done after progressing last sample
       if(sample==kEnd-1&&histo_[name].count(kStart)>0){
@@ -307,7 +321,9 @@ void analyzeGenComparison(bool save = true, int verbose=2){
 	      if(verbose>1) std::cout << "  with drawoption: " << drawoption << std::endl;
 	      one=false;
 	      TString denumLabel="MadGraph";
-	      drawRatio(histo_[name][sample2], histo_[name][kStart], 0.5, 1.5, myStyle, verbose, err_, "generator", denumLabel, drawoption, histo_[name][sample2]->GetLineColor(), false, 0.2);
+	      double maxRat=1.5;
+	      if(name.Contains("ttbarMass")) maxRat=2.0;
+	      drawRatio(histo_[name][sample2], histo_[name][kStart], 0.5, maxRat, myStyle, verbose, err_, "generator", denumLabel, drawoption, histo_[name][sample2]->GetLineColor(), false, 0.2);
 	    }
 	  }
 	}
