@@ -36,10 +36,10 @@ HypToppT Standard Topquarks p_{T}^{t} 20 1 0 0 0 0 0 0 0 0
 HypTTBarMass Standard Toppairs m^{t#bar{t}} 40 1 0 0 0 0 0 0 0 0
 HypTTBarRapidity Standard Toppairs y^{t#bar{t}} 2 1 0 0 0 0 -2.5 2.5 0 0
 HypTTBarpT Standard Toppairs p_{T}^{t#bar{t}} 10 1 0 0 0 0 0 295 0 0
-HypBJetpT Standard b-jets p_{T}^{b} 2 0 0 0 0 0 0 0 0 0
+HypBJetpT Standard b-jets p_{T}^{b} 2 0 0 0 0 0 0 400 0 0
 HypBJetEta Standard b-jets #eta^{b} 2 1 0 0 0 0 -2.5 2.5 0 0
-HypLeptonEta Standard Events #eta^{l} 5 1 0 0 0 0 -3 3 0 0
-HypLeptonpT Standard Events p_{T}^{l} 5 1 0 0 0 0 0 0 0 0
+HypLeptonEta Standard Leptons #eta^{l} 5 1 0 0 0 0 -3 3 0 0
+HypLeptonpT Standard Leptons p_{T}^{l} 5 1 0 0 0 0 0 0 0 0
 HypLeptonBjetMass Standard N_{Events} m^{lb} 10 1 0 0 0 0 0 300 0 0
 
 HypBBBarpT Standard N_{Events} p_{T}^{b#bar{b}} 5 1 0 0 0 0 0 350 0 0
