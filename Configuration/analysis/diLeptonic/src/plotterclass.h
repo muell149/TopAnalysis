@@ -29,6 +29,7 @@ public:
     void   setStyle(TH1*, unsigned int, bool = false);
     void   unfolding(TString channel, TString systematic);
     void   preunfolding(TString Channel="", TString Systematic="");
+    void   DoFitInRatio(bool doFit = 0);
     
     ///add addThis to addToThis (and delete it afterwards) - or assign it it to addToThis if addToThis is nullptr.
     void   addAndDelete_or_Assign(TH1*& addToThis, TH1* addThis);
@@ -72,6 +73,8 @@ public:
     void ControlLegend(std::vector<TH1*> drawhists, std::vector<TString> legends, TLegend *leg);
     void DrawLabel(TString text, const double x1, const double y1, const double x2, const double y2, int centering, double textSize);
 
+    double CalculateIntegral(TGraphAsymmErrors *tga_DiffXSecPlot, double Xbins[]);
+
     void ListOfSystematics(std::set<TString>);
     std::set<TString> ListOfSyst;
 
@@ -100,6 +103,7 @@ private:
     std::vector<TH1D> systhistsUp;
     std::vector<TH1D> systhistsDown;
 
+    bool doFit_;
     bool initialized, logX, logY, doDYScale;
     double lumi, topxsec;
     int signalHist;
@@ -112,7 +116,8 @@ private:
     bool doUnfolding; 
     bool doSystematics;
     bool drawSmoothMadgraph, drawPlotRatio;
-    bool drawNLOCurves, drawMadSpinCorr, drawMCATNLO, drawKidonakis, drawPOWHEG, drawPOWHEGHERWIG, drawPERUGIA11;
+    bool drawNLOCurves, drawMadSpinCorr, drawMCATNLO, drawKidonakis, drawAhrens;
+    bool drawPOWHEG, drawPOWHEGHERWIG, drawPERUGIA11;
     TString outpath;
     TString outpathPlots;
     TString outpathResults;

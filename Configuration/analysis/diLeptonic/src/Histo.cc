@@ -24,9 +24,9 @@
 constexpr double lumi = 19712;
 
 //constexpr double topxsec = 244.849; //again changes with normalization, must be set outside of the class
-//constexpr double topxsec = 244.794; //Mitov, arXiv:1303.6254
-//constexpr double topxsec = 247.205; //Measured XSection after normalization to Mitov, and statistical combination of channels
- constexpr double topxsec = 248.207; //Measured XSection after normalization to Mitov, and after combination of channels at yield level
+// constexpr double topxsec = 244.794; //Mitov, arXiv:1303.6254
+constexpr double topxsec = 247.998; //Measured XSection after normalization to Mitov, and statistical combination of channels
+//constexpr double topxsec = 248.207; //Measured XSection after normalization to Mitov, and after combination of channels at yield level
 
 using namespace std;
 
@@ -86,6 +86,9 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
         TString outpath = "";
         h_generalPlot.UnfoldingOptions(doUnfold);
         h_generalPlot.SetOutpath("");
+
+        /// Do fit in the ratio plot, if ratio plot done
+        h_generalPlot.DoFitInRatio(1);
 
         /////////////////////////////////////////////////////
         /////////////////////////////////////////////////////

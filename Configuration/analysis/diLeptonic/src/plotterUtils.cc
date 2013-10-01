@@ -8,6 +8,7 @@
 #include <TPad.h>
 #include <TF1.h>
 #include <TStyle.h>
+#include <TText.h>
 
 #include "plotterUtils.h"
 
@@ -17,6 +18,7 @@
 
 void ttbar::drawRatio(const TH1* histNumerator, const TH1* histDenominator, 
                const Double_t& ratioMin, const Double_t& ratioMax, 
+               bool addFit,
                const TStyle& myStyle, const int verbose, const std::vector<double>& err)
 {
     // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator'
@@ -130,6 +132,27 @@ void ttbar::drawRatio(const TH1* histNumerator, const TH1* histDenominator,
     gPad->RedrawAxis();
     // draw grid
     //rPad->SetGrid(1,1);
+
+    /// make linear fit of the ratio plot
+    TF1 *fit = 0;
+    if (addFit){
+        double ratioxmin = ratio->GetXaxis()->GetXmin();
+        double ratioxmax = ratio->GetXaxis()->GetXmax();
+        fit = new TF1("fit", "[0]+[1]*x", ratioxmin, ratioxmax);
+        fit->SetParName(0, "origin");  fit->SetParameter(0, ratioxmin);
+        fit->SetParName(1, "slope");   fit->SetParameter(1, 0);
+        fit->SetLineColor(kRed);
+        ratio->Fit(fit);
+        fit->SetLineColor(kRed);
+        fit->Draw("L,same");
+        char fitresult[30];
+        sprintf(fitresult, "fit = %2.4f + x * %2.4f", fit->GetParameter("origin"), fit->GetParameter("slope"));
+        TText *st = new TText (rPad->GetLeftMargin()+0.5, rPad->GetBottomMargin()+0.5, fitresult);
+        st->SetTextSize(1.2*st->GetTextSize());
+        st->SetNDC(1);
+        st->SetTextColor(fit->GetLineColor());
+        st->DrawClone();
+    }
 
     // draw a horizontal lines on a given histogram
     // a) at 1
