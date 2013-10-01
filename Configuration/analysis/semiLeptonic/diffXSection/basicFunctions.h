@@ -116,6 +116,8 @@ namespace semileptonic {
   const unsigned int constNnloColor     = kOrange+4;
   const unsigned int constNnloColor2    = kMagenta+2;
   const unsigned int constMadgraphPerugiaColor = kRed-7;
+  const unsigned int constMadgraphPerugiaMpiHiColor = kCyan;
+  const unsigned int constMadgraphPerugiaNoCRColor  = kRed-5;
 
   // Line style for theory curves
 
@@ -125,6 +127,8 @@ namespace semileptonic {
   const unsigned int constMcatnloStyle = 5;
   const unsigned int constNnloStyle2   = 10;
   const unsigned int constMadgraphPerugiaStyle = 3;
+  const unsigned int constMadgraphPerugiaNoCRStyle  = 3;
+  const unsigned int constMadgraphPerugiaMpiHiStyle = 3;
 
   // legend entries for theory curves
   const TString constMadGraphPythiaLabel   = "MadGraph+Pythia";
@@ -134,7 +138,9 @@ namespace semileptonic {
   const TString constNnloLabelKidonakis = "Approx. NNLO";
   const TString constMcatnloHerwigLabel = "MC@NLO+Herwig";
   const TString constNloNNLLLabelAhrens = "NLO+NNLL";
-  const TString constMadGraphPythiaPerugiaLabel = "MadGraph+Pythia (Perugia)";
+  const TString constMadGraphPythiaPerugiaLabel      = "MadGraph+Pythia(P11)";
+  const TString constMadGraphPythiaPerugiaNoCRLabel  = "MadGraph+Pythia(P11,noCR)";
+  const TString constMadGraphPythiaPerugiaMpiHiLabel = "MadGraph+Pythia(P11,MpiHi)";
 
   // Marker style (<=kSAToptW)
 
@@ -200,7 +206,7 @@ namespace semileptonic {
                                                   // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
-  const double globalLumiUncertainty = 0.026; // relative uncertainty 
+  const double globalLumiUncertainty = sqrt(0.025*0.025+0.005*0.005); // relative uncertainty // from CMS-PAS-LUM-13-001
 	
   const double constLumiElec = 19712.0; // luminosity of Jan22ReReco ABCD dataset, see https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM, LUM-13-001
   const double constLumiMuon = 19712.0; // see above
@@ -4148,8 +4154,9 @@ namespace semileptonic {
 	  // optimized parameters for each PS, final state, selection and closure test configuration
 	    if(decayChannel.Contains("muon")){
 	      if(closureTestSpecifier==""){
-		// optimized parameters 
+		// optimized parameters (for mu+jets channel, cross check only) 
 		// top & ttbar:  hadron level not important
+                // FIXME: needs update for doubleKinFit
 		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 4.53         : 6.15        ) : 7.22;
 		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 2.52         : 3.41        ) : 7.22;
 		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 3.15         : 4.27        ) : 7   ;
@@ -4172,8 +4179,9 @@ namespace semileptonic {
 	    }
 	    else if (decayChannel.Contains("electron")){
 	      if(closureTestSpecifier==""){
-		// optimized parameters 
+		// optimized parameters (for e+jets channel, cross check only)
 		// top & ttbar:  hadron level not important
+		// FIXME: needs update for doubleKinFit
 		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 4.82         : 6.30        ) : 7.45;
 		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 2.54         : 3.55        ) : 7.45;
 		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 3.28         : 4.47        ) : 7   ;
@@ -4195,31 +4203,35 @@ namespace semileptonic {
 	      }
 	    }
 	    else if(decayChannel.Contains("combined")){ 
-	      // optimized parameters 
-	      // top & ttbar:  hadron level not important
-	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ?  6.61/*7.28*//*8.64*/ :  8.82/*10.37*/) : 10.36;
-	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ?  3.59/*5.13*//*8.64*/ :  4.92/*10.37*/) : 10.36;
-	      else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ?  4.54                 :  6.19         ) :  7   ;
-	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ?  7.24/*8.83*//*8.64*/ :  9.73/*10.37*/) : 10.36;
-	      else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ?  9.70/*7.77*//*8.0 */ : 12.00/* 9.51*/) :  9.51;
-	      else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ?  5.89/*4.46*//*4.61*/ :  6.92/* 5.49*/) :  5.54;
-	      else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ?  8.06/*6.23*//*6.63*/ : 10.04/* 7.93*/) :  7.93;
-	      else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ?  4.60/*3.00*//*3.61*/ :  5.68/* 4.44*/) :  4.44;
-	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.24                 : 13.58         ) :  7   ;
-	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.20                 : 12.88         ) :  7   ;
-	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  7.24/*4.93*/    : 10.02/* 6.60*/  ) :  7.65);
-	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  2.69/*2.9e-07*/ :  3.75/*7.7e-06*/) :  3.00);
-	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 10.19/*8.56*/    : 16.00/*12.51*/  ) : 10.53);
-	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  8.10/*6.78*/    : 11.47/* 9.19*/  ) : 11.11);
-	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.62/*1.51*/    :  5.23/* 2.57*/  ) :  8   );
-	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  7.68/*8.20*/    :  8.33/*11.14*/  ) :  8   );
-	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  9.03            : 11.58           ) :  4   );
-	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.77/*FIXME*/   :  0.77           ) :  1   );
+	      // optimized parameters, those are the ones used for the main results 
+	      // top & ttbar:  visible PS (hadron+parton level) not relevant
+	      // lepton&b(jet): full PS and parton level PS  not relevant
+	      // probSel values correspond to doubleKinFit+Prob>2%
+	      //                   top/ttbar quantity                   (fullPS    doubleKinFit+Prob               default      )   dummy other PS  
+	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 6.87/*6.61*//*7.28*//*8.64*/ :  8.82/*10.37*/) : 10.36;
+	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 3.84/*3.59*//*5.13*//*8.64*/ :  4.92/*10.37*/) : 10.36;
+	      else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 4.86/*4.54*/                 :  6.19         ) :  7   ;
+	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 7.56/*7.24*//*8.83*//*8.64*/ :  9.73/*10.37*/) : 10.36;
+	      else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ? 9.59/*9.70*//*7.77*//*8.0 */ : 12.00/* 9.51*/) :  9.51;
+	      else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ? 5.85/*5.89*//*4.46*//*4.61*/ :  6.92/* 5.49*/) :  5.54;
+	      else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ? 7.68/*8.06*//*6.23*//*6.63*/ : 10.04/* 7.93*/) :  7.93;
+	      else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ? 4.55/*4.60*//*3.00*//*3.61*/ :  5.68/* 4.44*/) :  4.44;
+	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.54/*10.24*/                 : 13.58         ) :  7   ;
+	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.42/*10.20*/                 : 12.88         ) :  7   ;
+	      //          lepton/(b)jet quantity               dummy full PS    (visible PS:              doubleKinFit+Prob       default           )  dummy parton PS
+	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  6.78/*7.24*//*4.93*/    : 10.02/* 6.60*/  ) :  7.65);
+	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  2.46/*2.69*//*2.9e-07*/ :  3.75/*7.7e-06*/) :  3.00);
+	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ?  9.37/*10.19*//*8.56*/   : 16.00/*12.51*/  ) : 10.53);
+	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  7.61/*8.10*//*6.78*/    : 11.47/* 9.19*/  ) : 11.11);
+	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.32/*4.62*//*1.51*/    :  5.23/* 2.57*/  ) :  8   );
+	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  7.33/*7.68*//*8.20*/    :  8.33/*11.14*/  ) :  8   );
+	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  8.61/*9.03*/            : 11.58           ) :  4   );
+	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.71/*0.77*/            :  0.77           ) :  1   );
 	    }
 	}
 	else{
-	  // Default unfolding with number of bins
-	  // New Binning
+	  // Default unfolding with number of bins (see makeVariableBinning)
+	  // SVD unfolding at the moment NOT USED, values are only placeholders
 	  if     (variable.Contains("topPt")    ) k =  7;
 	  else if(variable.Contains("topY")     ) k = 10;
 	  else if(variable.Contains("ttbarPt")  ) k =  6;
