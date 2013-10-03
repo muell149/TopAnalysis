@@ -5840,7 +5840,7 @@ double TopSVDFunctions::SVD_Unfold(
         
         // Read K Value
         TString theKStr = theLine;
-        theKStr.Remove(127,100000);
+        theKStr.Remove(125,100000);
         theKStr.Remove(0,121);
         int theK = (int) theKStr.Atoi();
             
