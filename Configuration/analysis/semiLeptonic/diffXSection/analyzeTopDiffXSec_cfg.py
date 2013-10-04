@@ -3147,8 +3147,8 @@ for path in pathlist:
 # reduce module content if reduced==True
 if(reduced):
     for path in allpaths:
-        if(hasattr(process,                      'eventWeightNoPUWeight')):
-            getattr(process,path).remove( process.eventWeightNoPUWeight    )
+        #if(hasattr(process,                      'eventWeightNoPUWeight')):  # still needed for PU control distribution analyzer!!!
+        #    getattr(process,path).remove( process.eventWeightNoPUWeight    )
         if(hasattr(process,                      'eventWeightFlatEffSF')):
             getattr(process,path).remove( process.eventWeightFlatEffSF     )
         if(hasattr(process,                      'analyzeTopRecoKinematicsKinFitNoWeight')):
