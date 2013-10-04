@@ -7,7 +7,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="ProbSel")
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
 { 
   // ============================
   //  Set Root Style
@@ -72,7 +72,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   // produce additional control plots for probability selection efficiency
   bool diffProbEff=true;
   if(decayChannel!="combined") effA=false;
-  // activate plots added by hand from tree 
+  // draw MadGraph+Pythia Theory Shape uncertainties
+  bool ttbarTheoryBands=false;
+  if(decayChannel!="combined") ttbarTheoryBands=true;
+  // activate plots added by hand from tree (using e.g.addDistributions.C/addHistograms.C)
   // will not work with raw .root files!
   bool extra=false;
   // get the .root files from the following folder:
@@ -163,6 +166,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     outputFolder+=ttbarMC;
     effA=false;
     compareTTsample=false;
+    ttbarTheoryBands=false;
   }
   
   // ============================
@@ -916,8 +920,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   // =======================================================
   if(decayChannel=="combined"){
     // loop samples
-      for(unsigned int sample=kSig; sample<=kData; ++sample){
-	if(verbose>1) std::cout << sampleLabel(sample, decayChannel) << std::endl;
+    for(unsigned int sample=kSig; sample<=kData; ++sample){
+      if(verbose>1) std::cout << sampleLabel(sample, decayChannel) << std::endl;
       // loop plots
       for(unsigned int plot=0; plot<plotList_.size(); ++plot){
 	//if(sample==kData&&plotList_[plot].Contains("topPt")&&plotList_[plot].Contains("Lead")) verbose=2;
@@ -1126,11 +1130,32 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     }
   }
 
+  // ======================================
+  //  scale ttbar component to measured xSec
+  // ======================================
+  if(scaleToMeasured){
+    if(verbose>2) std::cout << "data/NNLO+NNLL=" << xSec/ttbarCrossSection << std::endl;
+    for(unsigned int sample=kSig; sample<=kBkg; ++sample){
+      for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
+	  //if(plotList_[plot].Contains("PUControlDistributionsAfterBtagging/npvertex_reweighted")) std::cout << sampleLabel(sample, decayChannel) << " before rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //if(plotList_[plot].Contains("tightJetKinematicsTagged/n")) std::cout << sampleLabel(sample, decayChannel) << " njets before rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //std::cout << plotList_[plot] << std::endl;
+	  histo_[plotList_[plot]][sample]->Scale(xSec/ttbarCrossSection);
+	  //if(plotList_[plot].Contains("PUControlDistributionsAfterBtagging/npvertex_reweighted")) std::cout << sampleLabel(sample, decayChannel) << " after rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //if(plotList_[plot].Contains("tightJetKinematicsTagged/n")) std::cout << sampleLabel(sample, decayChannel) << " njets after rescale: "  << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
+	  //std::cout << "ok" << std::endl;
+	}
+      }
+    }
+  }
+
   // ===============================================================
   //  Errors for uncertainty bands from ttbar Xsec and luminosity
   // ===============================================================
   if(verbose>0) std::cout << std::endl << " Start calculating error bands for 1D plots .... ";
   if(!SSV&&!scaleToMeasured) makeUncertaintyBands(histo_, histoErrorBand_, plotList_, N1Dplots);
+  if(ttbarTheoryBands) makeTheoryUncertaintyBands(histo_, histoErrorBand_, plotList_, plotListEl_, plotListMu_, Nplots, N1Dplots, inputFolder, dataFileMu, dataFileEl, vecRedundantPartOfNameInData, luminosityMu, luminosityEl);
   if(verbose>0) std::cout << " .... Finished." << std::endl; 
 
   // ========================================================
@@ -1173,29 +1198,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     }
   }
 
-  // Uncertainty band
+  // Uncertainty band in legend
   if(histoErrorBand_.size() > 0 && plotList_.size() > 0){
-    leg ->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
-    leg0->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
-    leg1->AddEntry(histoErrorBand_[plotList_[0]],"Uncertainty","F");
-  }
-
-  // scale ttbar component to measured xSec	
-  if(scaleToMeasured){
-    if(verbose>2) std::cout << "data/NNLO+NNLL=" << xSec/ttbarCrossSection << std::endl;
-    for(unsigned int sample=kSig; sample<=kBkg; ++sample){
-      for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-	if((histo_.count(plotList_[plot])>0)&&(histo_[plotList_[plot]].count(sample)>0)){
-	  //if(plotList_[plot].Contains("PUControlDistributionsAfterBtagging/npvertex_reweighted")) std::cout << sampleLabel(sample, decayChannel) << " before rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
-	  //if(plotList_[plot].Contains("tightJetKinematicsTagged/n")) std::cout << sampleLabel(sample, decayChannel) << " njets before rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
-	  //std::cout << plotList_[plot] << std::endl;
-	  histo_[plotList_[plot]][sample]->Scale(xSec/ttbarCrossSection);
-	  //if(plotList_[plot].Contains("PUControlDistributionsAfterBtagging/npvertex_reweighted")) std::cout << sampleLabel(sample, decayChannel) << " after rescale: " << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
-	  //if(plotList_[plot].Contains("tightJetKinematicsTagged/n")) std::cout << sampleLabel(sample, decayChannel) << " njets after rescale: "  << histo_[plotList_[plot]][sample]->Integral(0,40) << std::endl;
-	  //std::cout << "ok" << std::endl;
-	}
-      }
-    }
+    TString unclabel = ttbarTheoryBands ? "t#bar{t} model unc." : "Norm. Uncertainty";
+    leg ->AddEntry(histoErrorBand_[plotList_[0]], unclabel, "F");
+    leg0->AddEntry(histoErrorBand_[plotList_[0]], unclabel, "F");
+    leg1->AddEntry(histoErrorBand_[plotList_[0]], unclabel, "F");
   }
 
   // ===================================
@@ -1990,7 +1998,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 	  first=false;
 	  // at the end:
 	  if((sample==kData)&&(histo_.count(plotList_[plot])>0)&&histo_[plotList_[plot]][sample]){
-	    if(!scaleToMeasured&&!SSV&&!plotList_[plot].Contains("BGSubNorm")){
+	    if(histoErrorBand_.count(plotList_[plot])>0){
 	      // configure style of and draw uncertainty bands
 	      histoErrorBand_[plotList_[plot]]->SetMarkerStyle(0);
 	      histoErrorBand_[plotList_[plot]]->SetFillColor(1);
@@ -2034,7 +2042,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 	      else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
 	      else DrawDecayChLabel("e/#mu + Jets Combined");	      
 	      DrawCMSLabels(true,luminosity); 
-	      //draw data/MC ratio
+	      // draw data/MC ratio
 	      if((histo_[plotList_[plot]].count(kSig)>0) && withRatioPlot && !plotList_[plot].Contains("PartonLevel")){
 		if(plotList_[plot].Contains("BGSubNorm")){
 		  std::vector<TH1F*>ratiohists_;
@@ -2066,9 +2074,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 		  TString ratioLabelNominator  ="N_{data}";
 		  TString ratioLabelDenominator="N_{MC}";
 		  std::vector<double> err_=std::vector<double>(0);
+		  std::vector<double> err2_;
 		  if(plotList_[plot].Contains("KinFitEff")||plotList_[plot].Contains("ProbEff")){legProbEff->Draw("same"); ratMin=0.79; ratMax=1.21; ratioLabelNominator  ="eff_{data}"; ratioLabelDenominator="eff_{MC}"; if(errEff_.count(plotList_[plot])>0){err_=errEff_[plotList_[plot]];}}
 		  int rval = drawRatio(histo_[plotList_[plot]][kData], histo_[plotList_[plot]][kSig], ratMin, ratMax, myStyle, verbose, err_, ratioLabelNominator, ratioLabelDenominator, "p e X0", kBlack, true, 0.8, ndivisions);
 		  if (rval!=0) std::cout << " Problem occured when creating ratio plot for " << plotList_[plot] << std::endl;
+		  // MC shape arrorband
+		  if(histoErrorBand_.count(plotList_[plot])>0&&rval==0){
+		    for(int bin=1; bin<=histoErrorBand_[plotList_[plot]]->GetNbinsX(); ++bin){
+		      err2_.push_back(histoErrorBand_[plotList_[plot]]->GetBinError(bin)/histoErrorBand_[plotList_[plot]]->GetBinContent(bin));
+		    }
+		    int rval2 = drawRatio(histoErrorBand_[plotList_[plot]], histoErrorBand_[plotList_[plot]], ratMin, ratMax, myStyle, verbose, err2_, ratioLabelNominator, ratioLabelDenominator, "e2 same", kBlack, true, 0.8, ndivisions);
+		    if (rval2!=0) std::cout << " Problem occured when creating errorband ratio plot for " << plotList_[plot] << std::endl;		    
+		  }
 		}
 	      }
 	    }
@@ -2126,6 +2143,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   // ==============
   //  Saving plots
   // ==============
+  //std::cout << "test0" << std::endl;
   if(save){
     // eps and png
     if(verbose==0) gErrorIgnoreLevel=kWarning;
@@ -2161,6 +2179,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
       saveToRootFile(outputFileName, plotCanvas_[idx], true, verbose, "monitoring");
     }
   }
+  //std::cout << "test" << std::endl;
   // delete pointer
   closeStdTopAnalysisFiles(files_);
+  //std::cout << "test2" << std::endl;
 }
