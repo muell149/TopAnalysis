@@ -14,6 +14,188 @@
 
 
 
+void ttbar::drawRatioXSEC(const TH1* histNumerator, const TH1* histDenominator1, const TH1* histDenominator2, const TH1* histDenominator3, 
+                          const TH1* histDenominator4, const TH1* histDenominator5, const TH1* histDenominator6, const TH1* histDenominator7, 
+                          const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle)
+{
+    // this function draws a pad with the ratio of 'histNumerator' and 'histDenominator_i' (_i = 1-5)
+    // the range of the ratio is 'ratioMin' to 'ratioMax'
+    // per default only the gaussian error of the 'histNumerator' is considered:
+    // (error(bin i) = sqrt(histNumerator->GetBinContent(i))/histDenominator->GetBinContent(i))
+    // the histogram style is transferred from 'histDenominator_i' to the 'ratio_i'
+    // NOTE: x Axis is transferred from histDenominator to the bottom of the canvas
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none
+
+    /// check that histos exist and have the same binning
+    if(histNumerator->GetNbinsX()!=histDenominator1->GetNbinsX()){
+        std::cout << "error when calling drawRatio - histos have different number of bins" << std::endl;
+        return;
+    }
+
+    /// create ratio
+    TH1F *ratio1 = 0, *ratio2 = 0, *ratio3 = 0, *ratio4 = 0, *ratio5 = 0, *ratio6 = 0, *ratio7 = 0; 
+    
+    ratio1 = (TH1F*)histNumerator->Clone();
+    ratio1->SetLineColor(histDenominator1->GetLineColor());
+    ratio1->SetLineStyle(histDenominator1->GetLineStyle());
+    ratio1->SetLineWidth(histDenominator1->GetLineWidth());
+    ratio1->Divide(histDenominator1);
+    
+    if (histDenominator2){
+        ratio2 = (TH1F*)histNumerator->Clone();
+        ratio2->SetLineColor(histDenominator2->GetLineColor());
+        ratio2->SetLineStyle(histDenominator2->GetLineStyle());
+        ratio2->SetLineWidth(histDenominator2->GetLineWidth());
+        if(histNumerator->GetNbinsX()!=histDenominator2->GetNbinsX()){ratio2 = 0;}
+        else {ratio2->Divide(histDenominator2);}
+    };
+    if (histDenominator3){
+        ratio3 = (TH1F*)histNumerator->Clone();
+        ratio3->SetLineColor(histDenominator3->GetLineColor());
+        ratio3->SetLineStyle(histDenominator3->GetLineStyle());
+        ratio3->SetLineWidth(histDenominator3->GetLineWidth());
+        if(histNumerator->GetNbinsX()!=histDenominator3->GetNbinsX()){ratio3 = 0;}
+        else {ratio3->Divide(histDenominator3);}
+    };
+    if (histDenominator4){
+        ratio4 = (TH1F*)histNumerator->Clone();
+        ratio4->SetLineColor(histDenominator4->GetLineColor());
+        ratio4->SetLineStyle(histDenominator4->GetLineStyle());
+        ratio4->SetLineWidth(histDenominator4->GetLineWidth());
+        if(histNumerator->GetNbinsX()!=histDenominator4->GetNbinsX()){ratio4 = 0;}
+        else {ratio4->Divide(histDenominator4);}
+    };
+    if (histDenominator5){
+        ratio5 = (TH1F*)histNumerator->Clone();
+        ratio5->SetLineColor(histDenominator5->GetLineColor());
+        ratio5->SetLineStyle(histDenominator5->GetLineStyle());
+        ratio5->SetLineWidth(histDenominator5->GetLineWidth());
+        if(histNumerator->GetNbinsX()!=histDenominator5->GetNbinsX()){ratio5 = 0;}
+        else {ratio5->Divide(histDenominator5);}
+    };
+    if (histDenominator6){
+        ratio6 = (TH1F*)histNumerator->Clone();
+        ratio6->SetLineColor(histDenominator6->GetLineColor());
+        ratio6->SetLineStyle(histDenominator6->GetLineStyle());
+        ratio6->SetLineWidth(histDenominator6->GetLineWidth());
+        if(histNumerator->GetNbinsX()!=histDenominator6->GetNbinsX()){ratio6 = 0;}
+        else {ratio6->Divide(histDenominator6);}
+    };
+    if (histDenominator7){
+        ratio7 = (TH1F*)histNumerator->Clone();
+        ratio7->SetLineColor(histDenominator7->GetLineColor());
+        ratio7->SetLineStyle(histDenominator7->GetLineStyle());
+        ratio7->SetLineWidth(histDenominator7->GetLineWidth());
+        if(histNumerator->GetNbinsX()!=histDenominator7->GetNbinsX()){ratio7 = 0;}
+        else {ratio7->Divide(histDenominator7);}
+    };
+
+    /// calculate error for ratio only gaussian error of histNumerator
+    for(int bin=1; bin<=histNumerator->GetNbinsX(); bin++){
+        if (ratio1) ratio1->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator1->GetBinContent(bin));
+        if (ratio2) ratio2->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator2->GetBinContent(bin));
+        if (ratio3) ratio3->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator3->GetBinContent(bin));
+        if (ratio4) ratio4->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator4->GetBinContent(bin));
+        if (ratio5) ratio5->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator5->GetBinContent(bin));
+        if (ratio6) ratio6->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator6->GetBinContent(bin));
+        if (ratio7) ratio7->SetBinError(bin, sqrt(histNumerator->GetBinContent(bin))/histDenominator7->GetBinContent(bin));
+    }
+
+    Int_t    logx  = myStyle.GetOptLogx();
+    Double_t left  = myStyle.GetPadLeftMargin();
+    Double_t right = myStyle.GetPadRightMargin();
+
+    // y:x size ratio for canvas
+    double canvAsym = 4./3.;
+    // ratio size of pad with plot and pad with ratio
+    double ratioSize = 0.25;
+    // change old pad
+    gPad->SetBottomMargin(ratioSize);
+    gPad->SetRightMargin(right);
+    gPad->SetLeftMargin(left);
+    gPad->SetBorderMode(0);
+    gPad->SetBorderSize(0);
+    gPad->SetFillColor(10);
+
+    /// create new pad for ratio plot
+    TPad *rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
+    rPad->SetBorderSize(0);
+    rPad->SetBorderMode(0);
+    rPad->Draw();
+    rPad->cd();
+    rPad->SetLogy(0);
+    rPad->SetLogx(logx);
+    rPad->SetTicky(1);
+    
+    /// configure ratio plot
+    double scaleFactor = 1./(canvAsym*ratioSize);
+    ratio1->SetStats(kFALSE);
+    ratio1->SetTitle("");
+    ratio1->SetMaximum(ratioMax);
+    ratio1->SetMinimum(ratioMin);
+    ratio1->SetLineWidth(1);
+    
+    /// configure axis of ratio plot
+    ratio1->GetXaxis()->SetTitleSize(histNumerator->GetXaxis()->GetTitleSize()*scaleFactor*1.3);
+    ratio1->GetXaxis()->SetTitleOffset(histNumerator->GetXaxis()->GetTitleOffset()*0.9);
+    ratio1->GetXaxis()->SetLabelSize(histNumerator->GetXaxis()->GetLabelSize()*scaleFactor*1.4);
+    ratio1->GetXaxis()->SetTitle(histNumerator->GetXaxis()->GetTitle());
+
+
+    ratio1->GetYaxis()->CenterTitle();
+    ratio1->GetYaxis()->SetTitle("Data/Th.");
+    ratio1->GetYaxis()->SetTitleSize(histNumerator->GetYaxis()->GetTitleSize()*scaleFactor);
+    ratio1->GetYaxis()->SetTitleOffset(histNumerator->GetYaxis()->GetTitleOffset()/scaleFactor);
+    ratio1->GetYaxis()->SetLabelSize(histNumerator->GetYaxis()->GetLabelSize()*scaleFactor);
+    ratio1->GetYaxis()->SetLabelOffset(histNumerator->GetYaxis()->GetLabelOffset()*3.3);
+    ratio1->GetYaxis()->SetTickLength(0.03);
+    ratio1->GetYaxis()->SetNdivisions(504);
+    ratio1->GetXaxis()->SetRange(histNumerator->GetXaxis()->GetFirst(), histNumerator->GetXaxis()->GetLast());
+    
+    /// delete axis of initial plot
+    histNumerator->GetXaxis()->SetLabelSize(0);
+    histNumerator->GetXaxis()->SetTitleSize(0);
+    histNumerator->GetXaxis()->SetNoExponent(kFALSE);
+
+    /// draw ratio plot
+    ratio1->DrawClone("Histo");
+    rPad->SetTopMargin(0.0);
+    rPad->SetBottomMargin(0.15*scaleFactor);
+    rPad->SetRightMargin(right);
+    gPad->SetLeftMargin(left);
+    gPad->RedrawAxis();
+    
+    /// draw grid
+    //rPad->SetGrid(1,1);
+
+    // draw a horizontal lines on a given histogram
+    // a) at 1
+    Double_t xmin = ratio1->GetXaxis()->GetXmin();
+    Double_t xmax = ratio1->GetXaxis()->GetXmax();
+    TString height = ""; height += 1;
+    TF1 *f = new TF1("f", height.Data(), xmin, xmax);
+    f->SetLineStyle(1);
+    f->SetLineWidth(1);
+    f->SetLineColor(kBlack);
+    f->Draw("L same");
+    // b) at upper end of ratio pad
+    TString height2 = ""; height2 += ratioMax;
+    TF1 *f2 = new TF1("f2", height2.Data(), xmin, xmax);
+    f2->SetLineStyle(1);
+    f2->SetLineWidth(1);
+    f2->SetLineColor(kBlack);
+    f2->Draw("L same");
+
+    if (ratio2) ratio2->Draw("Histo,same");
+    if (ratio3) ratio3->Draw("Histo,same");
+    if (ratio4) ratio4->Draw("Histo,same");
+    if (ratio5) ratio5->Draw("Histo,same");
+}
+
+
+
 
 
 void ttbar::drawRatio(const TH1* histNumerator, const TH1* histDenominator, 

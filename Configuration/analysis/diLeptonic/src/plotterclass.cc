@@ -58,7 +58,7 @@ void Plotter::UnfoldingOptions(bool doSVD)
   drawKidonakis    = true;
   drawAhrens       = true;
   drawPOWHEG       = true;
-  drawPOWHEGHERWIG = true;
+  drawPOWHEGHERWIG = false;
   drawPERUGIA11 = false;
 
 }
@@ -2723,6 +2723,25 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     tga_DiffXSecPlot->Draw("p, SAME");
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
     gPad->RedrawAxis();
+
+    if(drawPlotRatio) {
+        TH1D* tmpKido =0;
+        if(Kidoth1_Binned){
+            /// Idiot definition of temporary histogram for Kidonakis due to the larger number of bins in raw histogram
+            tmpKido = (TH1D*)h_DiffXSec->Clone();
+            tmpKido->SetLineColor(Kidoth1_Binned->GetLineColor());
+            tmpKido->SetLineStyle(Kidoth1_Binned->GetLineStyle());
+            tmpKido->SetLineWidth(Kidoth1_Binned->GetLineWidth());
+            for (int i=1; i<(int)tmpKido->GetNbinsX()+1; i++){ tmpKido->SetBinContent(i,Kidoth1_Binned->GetBinContent(i));};
+        }
+
+        ttbar::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, 
+                            powheghistBinned, mcnlohistBinned, 
+                            tmpKido, Ahrensth1_Binned,
+                            powhegHerwighistBinned, perugia11histBinned,
+                            0.4, 1.6);
+    };
+
     c->Print(outdir.Copy()+"DiffXS_"+name+".eps");
     TFile out_source(outdir.Copy()+"DiffXS_"+name+"_source.root", "RECREATE");
     c->Write("canvas");
@@ -3417,6 +3436,25 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     tga_DiffXSecPlotClone->SetMarkerStyle(20);
     tga_DiffXSecPlotClone->Draw("p, SAME");
     gPad->RedrawAxis();
+
+    if(drawPlotRatio) {
+        TH1D* tmpKido =0;
+        if(Kidoth1_Binned){
+            /// Idiot definition of temporary histogram for Kidonakis due to the larger number of bins in raw histogram
+            tmpKido = (TH1D*)h_DiffXSec->Clone();
+            tmpKido->SetLineColor(Kidoth1_Binned->GetLineColor());
+            tmpKido->SetLineStyle(Kidoth1_Binned->GetLineStyle());
+            tmpKido->SetLineWidth(Kidoth1_Binned->GetLineWidth());
+            for (int i=1; i<(int)tmpKido->GetNbinsX()+1; i++){ tmpKido->SetBinContent(i,Kidoth1_Binned->GetBinContent(i));};
+        }
+
+        ttbar::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, 
+                            powheghistBinned, mcnlohistBinned, 
+                            tmpKido, Ahrensth1_Binned,
+                            powhegHerwighistBinned, perugia11histBinned,
+                            0.4, 1.6);
+    };
+
     c->Print(outdir.Copy()+"DiffXS_"+name+".eps");
     TFile out_source(outdir.Copy()+"DiffXS_"+name+"_source.root", "RECREATE");
     c->Write("canvas");
