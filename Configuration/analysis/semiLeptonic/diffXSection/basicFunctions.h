@@ -3171,6 +3171,218 @@ namespace semileptonic {
     }
   }
 
+
+  void makeTheoryUncertaintyBands(std::map< TString, std::map <unsigned int, TH1F*> >& histo_,
+				  std::map< TString, TH1F* >& histoErrorBand_,
+				  std::vector<TString>& plotList_, std::vector<TString>& plotListEl_, std::vector<TString>& plotListMu_,
+				  int& Nplots, unsigned int& N1Dplots,
+				  TString& inputFolder, TString& dataFileMu, TString& dataFileEl,
+				  std::vector<TString> vecRedundantPartOfNameInData,
+				  double& luminosityMu, double& luminosityEl
+				  )
+  {
+    // this function generates set of errorbands ("histoErrorBand_") for all samples 
+    // and histogrammes in "histo_", using the "Nplots" plots listed in "plotList_" 
+    // taking into account ttbar modeling uncertainties
+    // 
+    // modified quantities: histoErrorBand_
+    // used functions:      getStdTopAnalysisFiles
+    // used enumerators:    samples, systematicVariation, 
+
+    // internal configurations
+    int verbose=0;  // printout within makeTheoryUncertaintyBands
+    int verbose2=0; // argument passed to called functions
+    unsigned int sysNoBG =42;
+    unsigned int sysNoAll=42*42;
+
+    // debug output
+    if(verbose>0) std::cout << "executing function makeTheoryUncertaintyBands" << std::endl;
+
+    // A collect relevant systematics
+    // WARNING: systematics are expected to be listed as up/down pairs in this order!!!
+    if(verbose>0) std::cout << std::endl << "A collect relevant systematics" << std::endl;
+    std::vector<int> RelevantSys_;
+    int sysList[ ] = { sysTopMatchUp, sysTopMatchDown, sysTopScaleUp, sysTopScaleDown, sysTopMassUp, sysTopMassDown };
+    RelevantSys_.insert(RelevantSys_.begin(), sysList, sysList+ sizeof(sysList)/sizeof(int));
+    if(verbose>1){
+      std::cout << "considered systematics: " << std::endl;
+      for(unsigned int i=0; i<RelevantSys_.size(); ++i){
+	std::cout << sysLabel(RelevantSys_[i]) << std::endl;
+      }
+    }
+    // plot container
+    std::map< TString, std::map <unsigned int, TH1F*> > histoSys_;
+
+    // B Get ttbar sysNo Reference plot
+    if(verbose>0) std::cout << std::endl << "B Get ttbar sysNo Reference plot" << std::endl;
+    // loop plots
+    for(unsigned int plot=0; plot<N1Dplots; plot++){
+      // name of the plot
+      TString plotName = plotList_[plot];  
+      // debug output
+      if(verbose>1) std::cout << "plot #" << plot+1 << "/" << N1Dplots << ": " << plotName;
+      // consider only plots available for SG+BG
+      if(histo_[plotName].count(kSig)>0&&histo_[plotName].count(kBkg)>0&&histo_[plotName].count(kZjets)>0){
+	if(verbose>1)  std::cout << " (ok) ";
+	// get ttbar sysNo
+	histoSys_[plotName][sysNo]    = (TH1F*)histo_[plotName][kSig]->Clone();
+	histoSys_[plotName][sysNo]->Add((TH1F*)histo_[plotName][kBkg]->Clone());
+	// get non-ttbar sysNo
+	histoSys_[plotName][sysNoBG ]=(TH1F*)histoSys_[plotName][sysNo]->Clone();
+	histoSys_[plotName][sysNoBG ]->Reset("ICESM");
+	for(unsigned int sample=kZjets; sample<kData; ++sample){
+	  histoSys_[plotName][sysNoBG ]->Add((TH1F*)histo_[plotName][sample]->Clone());
+	}
+	// get combined sysNo
+	histoSys_[plotName][sysNoAll]=(TH1F*)histoSys_[plotName][sysNo]->Clone();
+	histoSys_[plotName][sysNoAll]->Add((TH1F*)histoSys_[plotName][sysNoBG]->Clone());
+      }
+      else if(verbose>1) std::cout << " (skipped) ";	
+      if(verbose>1) std::cout << std::endl;
+    }
+    
+    // C Get ttbar systematic shifted plots
+    if(verbose>0) std::cout << std::endl << "C Get ttbar systematic shifted plots" << std::endl;
+    // loop systematics
+    for(unsigned int sys=0; sys<RelevantSys_.size(); ++sys){
+      int sysNow=RelevantSys_[sys];
+      if(verbose>1) std::cout << "- " << sysLabel(sysNow) << ":" << std::endl;
+      // c1 get files
+      if(verbose>1) std::cout << "c1 get rootfiles" << std::endl;
+      std::map<unsigned int, TFile*> filesMu_, filesEl_;
+      filesMu_ = getStdTopAnalysisFiles(inputFolder, sysNow, dataFileMu, "muon"    , "Madgraph");
+      filesEl_ = getStdTopAnalysisFiles(inputFolder, sysNow, dataFileEl, "electron", "Madgraph");
+      // c2 get plots 
+      if(verbose>1) std::cout << "c2 get all plots" << std::endl;
+      std::map< TString, std::map <unsigned int, TH1F*> > histoEl_ , histoMu_, histoComb_;
+      std::map< TString, std::map <unsigned int, TH2F*> > histo2El_, histo2Mu_, histo2Comb_;
+      getAllPlots(filesEl_, plotListEl_, histoEl_, histo2El_, N1Dplots, Nplots, verbose2, "electron", &vecRedundantPartOfNameInData, false);
+      getAllPlots(filesMu_, plotListMu_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose2, "muon"    , &vecRedundantPartOfNameInData, false);
+      // c3 lumi scale
+      if(verbose>1) std::cout << "c3 lumiscaling" << std::endl;
+      scaleByLuminosity(plotListMu_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose2, sysNow, "muon"    , "Madgraph");
+      scaleByLuminosity(plotListEl_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose2, sysNow, "electron", "Madgraph");
+      // c4 add channels
+     if(verbose>1) std::cout << "c4 add mu and el channel plots" << std::endl;
+      // loop samples
+      for(unsigned int sample=kSig; sample<kData; ++sample){
+	if(verbose>2) std::cout << sampleLabel(sample, "combined") << std::endl;
+	// loop plots
+	for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+	  if(verbose>2) std::cout << "comb: " << plotList_[plot] << ", mu: " << plotListMu_[plot] << ", el: " << plotListEl_[plot] << std::endl;
+	  // c4.1) 1D, existing in both
+	  if((plot<N1Dplots)&&(histoMu_.count(plotListMu_[plot])>0)&&(histoMu_[plotListMu_[plot]].count(sample)>0)&&(histoEl_.count(plotListEl_[plot])>0)&&(histoEl_[plotListEl_[plot]].count(sample)>0)){ 
+	    if(verbose>2) std::cout << "-> 1D" << std::endl;
+	    // add channels
+	    histoComb_[plotList_[plot]][sample]=     (TH1F*)(histoMu_[plotListMu_[plot]][sample]->Clone());
+	    // take care of lepton pt from different folders
+	    if (plotListMu_[plot]=="tightMuonKinematics/pt"){
+	      histoComb_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_["tightElectronKinematics/et"][sample]->Clone()));
+	    }
+	    else histoComb_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_[plotListEl_[plot]][sample]->Clone()));
+	  }
+	  // c4.2) 2D, existing in both
+	  else if((plot>=N1Dplots)&&(histo2Comb_.count(plotList_[plot])>0)&&(histo2Comb_[plotList_[plot]].count(sample)>0)){
+	    if(verbose>2) std::cout << "-> 2D" << std::endl;
+	    // add them
+	    histo2Comb_[plotList_[plot]][sample]=     (TH2F*)(histo2Mu_[plotListMu_[plot]][sample]->Clone());
+	    histo2Comb_[plotList_[plot]][sample]->Add((TH2F*)(histo2El_[plotListEl_[plot]][sample]->Clone()));
+	  }
+	  else{
+	    if(verbose>2){
+	      std::cout << "WARNING: " << plotList_[plot] << "NOT FOUND" << std::endl;
+	      if(!histoMu_.count(plotListMu_[plot])>0) std::cout << "in histoMu" << std::endl;
+	      if( histoMu_.count(plotListMu_[plot])>0&&!histoMu_[plotListMu_[plot]].count(sample)>0) std::cout << "in mu sample " << sampleLabel(sample, "muon"    ) << std::endl;
+	      if(!histoEl_.count(plotListEl_[plot])>0) std::cout << "in histoEl" << std::endl;
+	      if( histoEl_.count(plotListEl_[plot])>0&&!histoEl_[plotListEl_[plot]].count(sample)>0) std::cout << "in el sample " << sampleLabel(sample, "electron") << std::endl;
+	    } // end if verbose
+	  } // ende else (plot not found)
+	} // end loop plots
+      } // end loop sample
+      // c5 rebinning and storing of systematically shifted plots
+      if(verbose>1) std::cout << "c5 rebinning and storing of systematically shifted plots" << std::endl;
+      // loop plots
+      for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+	// plot name
+	TString plotName = plotList_[plot];
+	// debug output
+	if(verbose>2) std::cout << "- plot #" << plot+1 << "/" << plotList_.size() << ": " << plotName;
+	// existing 1D plots
+	if( histoSys_[plotName].count(kSig)>0 && histo_.count(plotList_[plot])>0 && histoComb_.count(plotList_[plot])>0 && plot<N1Dplots ){
+	  // do rebinning (based on sysNo binning)
+	  int reBinFactor=roundToInt((histoComb_[plotName][kSig]->GetNbinsX())/(histo_[plotName][sysNo]->GetNbinsX()));
+	  if(reBinFactor>1){
+	    equalReBinTH1(reBinFactor, histoComb_, plotName, kSig);
+	    equalReBinTH1(reBinFactor, histoComb_, plotName, kBkg);
+	  }
+	  // store Plot
+	  histoSys_[plotName][sysNow]     =(TH1F*)histoComb_[plotName][kSig]->Clone();
+	  histoSys_[plotName][sysNow]->Add((TH1F*)histoComb_[plotName][kBkg]->Clone());
+	  // ensure same normalization as in sysNo sample
+	  // (N.B.: was scales to inclusive cross section derived from data)	  
+	  histoSys_[plotName][sysNow]->Scale((histoSys_[plotName][sysNo]->Integral(0,histoSys_[plotName][sysNo]->GetNbinsX()+1))/(histoSys_[plotName][sysNow]->Integral(0,histoSys_[plotName][sysNow]->GetNbinsX()+1)));
+	}
+      } // for plots
+    } // end loop systematics
+    
+    // D Symmetrize and Combine Variations, create error band  
+    if(verbose>0) std::cout << std::endl << "D Symmetrize and Combine Variations, create error band" << std::endl;    
+    // loop plots
+    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+      // mane of plot
+      TString plotName = plotList_[plot];
+      // debug output
+      if(verbose>1) std::cout << "- plot #" << plot+1 << "/" << plotList_.size() << ": " << plotName;
+      // process only 1D plots existing for SG & BG and in the loaded files
+      if( histoSys_[plotName].count(kSig)>0 ){
+	// clone sysNo for errorband
+	histoErrorBand_[plotName]=(TH1F*)histoSys_[plotName][sysNoAll]->Clone();
+	// loop bins
+	for (int bin=1; bin<=histoErrorBand_[plotName]->GetNbinsX(); ++bin){
+	  // debug output
+	  if(verbose>2) std::cout << "  - bin #" << bin << "/" << histoErrorBand_[plotName]->GetNbinsX() << std::endl;
+	  double NttbarSysNo=histoSys_[plotName][sysNo  ]->GetBinContent(bin);
+	  double NBGSysNo   =histoSys_[plotName][sysNoBG]->GetBinContent(bin);
+	  double uncUp=0;
+	  double uncDn=0;
+	  // loop systematics
+	  for(unsigned int sys=0; sys<RelevantSys_.size(); ++sys){
+	    int sysNow=RelevantSys_[sys];
+	    // debug output
+	    if(verbose>2) std::cout << "    - " << sysLabel(sysNow);
+	    if(histoSys_[plotName].count(sysNow)>0){
+	      if(verbose>2) std::cout << " (considered)" << std::endl;
+	      // process up and down at the same time (during dn is looped)
+	      if(verbose>2) std::cout << sys+1 << "%2=" << (sys+1)%2 << std::endl;
+	      if(((sys+1)%2)==0){
+		if(verbose>2) std::cout << "down systematics" << std::endl;
+		int sysUp=RelevantSys_[sys-1];
+		int sysDn=RelevantSys_[sys  ];
+		double NttbarSysUp=histoSys_[plotName][sysUp]->GetBinContent(bin);
+		double NttbarSysDn=histoSys_[plotName][sysDn]->GetBinContent(bin);
+		double relDiffUp=std::abs((NttbarSysUp-NttbarSysNo)/(NttbarSysNo+NBGSysNo));
+		double relDiffDn=std::abs((NttbarSysDn-NttbarSysNo)/(NttbarSysNo+NBGSysNo));
+		// apply SF for mass uncertainty
+		if(sysUp==sysTopMassUp&&sysDn==sysTopMassDown){
+		  relDiffDn*=SF_TopMassDownUncertainty;
+		  relDiffUp*=SF_TopMassUpUncertainty;
+		}
+		uncUp+=relDiffUp*relDiffUp;
+		uncDn+=relDiffDn*relDiffDn;
+	      } // end if modulo 2 - processing Dn systematics
+	    } // end if sys is successfully loaded
+	    else if(verbose>2) std::cout << " (skipped)" << std::endl;
+	  } // end loop systematics
+	  double uncSymm=(sqrt(uncUp)+sqrt(uncDn))/2;
+	  // Set uncertainty value for errorband
+	  histoErrorBand_[plotName]->SetBinError(bin, uncSymm*histoErrorBand_[plotName]->GetBinContent(bin));
+	} // end loop bins
+      } // end if plot exists
+      else if(verbose>1) std::cout << " (skipped)" << std::endl;
+    } // end loop plots
+    
+  }
+
   // ===========================================================================================
   // ===========================================================================================
   
