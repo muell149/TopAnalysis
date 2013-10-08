@@ -74,6 +74,7 @@ private:
     bool searchInMothers ( const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::vector<const reco::Candidate*> particleChain, pCRC *bHadron );
     bool putMotherIndex ( std::vector<std::vector<int> > &hadMothersIndices, int partIndex, int mothIndex );
     bool isHadron ( const int flavour, const reco::Candidate* thisParticle );
+    bool isHadronPdgId ( const int flavour, const int pdgId );
     bool hasHadronDaughter ( const int flavour, const reco::Candidate* thisParticle );
     int isInList ( std::vector<const reco::Candidate*> particleList, const reco::Candidate* particle );
     void findInMothers ( int idx, std::vector<int> &mothChains, std::vector<std::vector<int> > &hadMothersIndices, std::vector<reco::GenParticle> &hadMothers, int status, int pdgId, bool pdgAbs, int firstLast, bool verbose );

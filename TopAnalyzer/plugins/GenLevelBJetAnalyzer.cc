@@ -167,6 +167,8 @@ void GenLevelBJetAnalyzer::analyze ( const edm::Event& evt, const edm::EventSetu
 
     using namespace edm;
 
+    // printf("Run: %d\tLumi: %d\tEvent: %d\n",(int)evt.eventAuxiliary().run(), (int)evt.eventAuxiliary().luminosityBlock(), (int)evt.eventAuxiliary().event());
+
     std::auto_ptr<std::vector<int> > bIdx ( new std::vector<int> );
     std::auto_ptr<std::vector<int> > anti_bIdx ( new std::vector<int> );
     std::auto_ptr<std::vector<int> > bHadronVsJet ( new std::vector<int> );
@@ -574,8 +576,33 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
             hadFlav*=-1;    // Inverting flavour of hadron if it is a meson
         }
 
+        // Creating a list of pdgIds of neutral hadrons
+        int bHadNeutralPdg_[] = {511, 513, 515, 531, 533, 535, 551, 553, 555, 5122, 5142, 5212,
+          5214, 5232, 5322, 5324, 5342, 5412, 5414, 5432, 5434, 5522, 5524, 5542, 5544 };
+        std::vector<int> bHadNeutralPdg (bHadNeutralPdg_, bHadNeutralPdg_ + sizeof(bHadNeutralPdg_) / sizeof(int) );
+        bool verbose = false;
+
+        // Checking whether this is a neutral hadron
+        if(std::find(bHadNeutralPdg.begin(), bHadNeutralPdg.end(), std::abs(hadMothers[hadIdx].pdgId()) ) != bHadNeutralPdg.end() ) {
+          verbose = false;
+        }
+
+        //if(verbose) printf("Checking a hadron: %d ##########################################\n", hadMothers[hadIdx].pdgId());
+
 // Searching only first quark in the chain with the same flavour as hadron
-        findInMothers ( hadIdx, FirstQuarkId, hadMothersIndices, hadMothers, 0, hadFlav*flavour_, false, 1, false );
+        findInMothers ( hadIdx, FirstQuarkId, hadMothersIndices, hadMothers, 0, hadFlav*flavour_, false, 1, verbose );
+        if(verbose) {
+          printf("Found %d b quarks Hadron: %d ###########################################\n", (int)FirstQuarkId.size(), hadMothers[hadIdx].pdgId());
+          for(int i=0; i<(int)FirstQuarkId.size(); i++) {
+            printf("   %d. pdgId: %d\tstatus: %d", i, hadMothers[FirstQuarkId[i]].pdgId(), hadMothers[FirstQuarkId[i]].status());
+            if(hadFlav*hadMothers[FirstQuarkId[i]].pdgId() < 0) printf(" WRONG CHARGE");
+            printf("\n");
+          }
+        }
+//      if((int)FirstQuarkId.size()<1) findInMothers ( hadIdx, FirstQuarkId, hadMothersIndices, hadMothers, 0, hadFlav*flavour_, true, 1, true );
+        if((int)FirstQuarkId.size()<1) printf(" NO QUARK FOUND!!!\n");
+        // return result;
+
 
 // Filling histograms for each 1-st quark
         for ( unsigned int qId=0; qId<FirstQuarkId.size(); qId++ ) {
@@ -596,11 +623,11 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
             }		// End of loop over all mothers of the first quark of the hadron
 
 // Finding last quark of the hadron starting from the first quark
-            findInMothers ( FirstQuarkId[qId], LastQuarkId, hadMothersIndices, hadMothers, 0, hadFlav*flavour_, false, 2, false );
+            findInMothers ( FirstQuarkId[qId], LastQuarkId, hadMothersIndices, hadMothers, 0, qFlav*flavour_, false, 2, false );
 
         }		// End of loop over all first quarks of the hadron
 
-// Setting iinitial flavour of the hadron
+// Setting initial flavour of the hadron
         int hadronFlavour = 0;
 
 //  Setting initial values for the quark that is closest to the hadron
@@ -825,6 +852,7 @@ int GenLevelBJetAnalyzer::isInList ( std::vector<const reco::Candidate*> particl
     return -1;
 }
 
+
 /**
 * @brief Check the pdgId of a given particle if it is a hadron
 *
@@ -835,9 +863,25 @@ int GenLevelBJetAnalyzer::isInList ( std::vector<const reco::Candidate*> particl
 */
 bool GenLevelBJetAnalyzer::isHadron ( const int flavour, const reco::Candidate* thisParticle )
 {
-    if ( abs ( thisParticle->pdgId() / 1000 )  == flavour // baryions
-            || ( abs ( thisParticle->pdgId() / 100 % 10 ) == flavour // mesons
-                 && ! ( noBBbarResonances_ && abs ( thisParticle->pdgId() / 10 % 100 ) == 11*flavour ) // but not a resonance
+    return isHadronPdgId(flavour, thisParticle->pdgId());
+}
+
+/**
+* @brief Check the pdgId if it represents a hadron of particular flavour
+*
+* @param[in] flavour - flavour of a hadron that is being searched (5-B, 4-C)
+* @param[in] pdgId - pdgId to be checked
+*
+* @returns if the pdgId represents a hadron of specified flavour
+*/
+bool GenLevelBJetAnalyzer::isHadronPdgId ( const int flavour, const int pdgId )
+{
+    int flavour_abs = std::abs(flavour);
+    int pdgId_abs = std::abs(pdgId);
+
+    if ( pdgId_abs / 1000 == flavour_abs // baryons
+            || ( pdgId_abs / 100 % 10 == flavour_abs // mesons
+                 && ! ( noBBbarResonances_ && pdgId_abs / 10 % 100 == 11*flavour_abs ) // but not a resonance
                )
        ) {
         return true;
@@ -1188,7 +1232,7 @@ int GenLevelBJetAnalyzer::getGenJetNear ( const reco::Candidate* particle, std::
 
 void GenLevelBJetAnalyzer::findInMothers ( int idx, std::vector<int> &mothChains, std::vector<std::vector<int> > &hadMothersIndices, std::vector<reco::GenParticle> &hadMothers, int status, int pdgId, bool pdgAbs=false, int firstLast=0, bool verbose=false	)
 {
-
+    int pdg_1 = hadMothers.at ( idx ).pdgId();
     int partCharge = ( hadMothers.at ( idx ).pdgId() >0 ) ?1:-1;
 // Inverting charge if mother is a b(c) meson
     if ( abs ( hadMothers.at ( idx ).pdgId() ) /1000 < 1 && ( abs ( hadMothers.at ( idx ).pdgId() ) /100%10 == 4 || abs ( hadMothers.at ( idx ).pdgId() ) /100%10 == 5 ) ) {
@@ -1218,10 +1262,11 @@ void GenLevelBJetAnalyzer::findInMothers ( int idx, std::vector<int> &mothChains
         if ( motherId<0 ) {
             continue;
         }
-        if ( !isNeutralPdg ( hadMothers.at ( motherId ).pdgId() ) && hadMothers.at ( motherId ).pdgId() *pdgId<0 && !pdgAbs ) {
+        if ( !isNeutralPdg ( hadMothers.at ( motherId ).pdgId() ) && hadMothers.at ( motherId ).pdgId() *pdgId<0 && !pdgAbs && !isHadronPdgId(pdgId, hadMothers.at( motherId ).pdgId() ) ) {
             continue;    // Skipping if mother of the particle has wrong charge
         }
         hasCorrectMothers=true;
+        break;
     }
 // Checking whether current mother satisfies selection criteria
     if ( ( ( hadMothers.at ( idx ).pdgId() == pdgId && pdgAbs==false )
@@ -1262,6 +1307,10 @@ void GenLevelBJetAnalyzer::findInMothers ( int idx, std::vector<int> &mothChains
         }
         if ( idx2==idx ) {
             continue;    // Skipping if particle is stored as its own mother
+        }
+        int pdg_2 = hadMothers[idx2].pdgId();
+        if ( isHadronPdgId(pdgId, pdg_1) && isHadronPdgId(pdgId, pdg_2) &&  pdg_1*pdg_2 < 0 ) {
+            pdgId*=-1;
         }
         if ( firstLast==2 && isCorrect && (
                     ( abs ( hadMothers[idx2].pdgId() ) != abs ( pdgId ) && pdgAbs==true ) ||
