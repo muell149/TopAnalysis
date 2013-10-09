@@ -48,15 +48,24 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/effAndAcc/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/ttgencomparison
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/comparisonATLAS
-
-## b) you don't need to copy root files needed for the Analysis 
-##    the are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
-## c) when using the shell script for the very first time, do "chmod a+x topDiffXSecAnalysis2012.sh
+## b) root files needed for the Analysis are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
+## c) if not yet done, combine the MC samples for the single channels (like QCD, single top, Diboson) using combineMCsamples.C
+## d) when using the shell script for the very first time, do "chmod a+x topDiffXSecAnalysis2012.sh
 ## find final plots in ./diffXSecFromSignal/plots/ after running the analysis via ./topDiffXSecAnalysis2012.sh
-## d) The decay channel, PS and level can be specified via 3 arguments, e.g.
+## e1) Specify the parameters under 'configure settings' in this shell script
+## e2) The decay channel, PS and level are specified via 3 external arguments, e.g.
 ##    ./topDiffXSecAnalysis2012.sh muon (or electron or combined) extrapolate (or visible) parton (or hadron)
 ##    if 0 arguments are given -> default values as specified below
 ##    if not 0 or 3 arguments -> Abort!!!
+## f) Further plots can be produced using the following macros:
+##    ATLASCMSCOMPARISON.C -> 7TeV comparison plots CMS&ATLAS
+##    btagEfficiencyComparison.C -> some b-tag related simulation comparison plots
+##    getMCcorrectionfactors.C -> produce data/MadGraph scale factors from CMS data results
+##    analyzeFileComparison.C -> compare mass bias from choice of top mass in reconstruction
+##    applyBCCs.C -> produce BCC values and store them in a rootfile to be used in combineTopDiffXSecUncertainties
+##    optimizeProbCut.C -> calculate optimal value for probability selection cut and produce some control ditsributions and numbers
+##    createPseudoData.C -> create pseudo data based on the MC simluation (also mixing in e.g. Z')
+##    addDistributions.C/addHistograms.C -> add additional control plots to the analyses root files
 
 ########################
 ## configure settings ##
@@ -179,6 +188,10 @@ verbose=0
 ## Re-create monitoring plots
 ## redoControlPlots = true / false (default: true)
 redoControlPlots=true
+
+## ttbar generator comparison plots
+## genComparison = true / false (default: true)
+genComparison=true
 
 ## Re-create systematically varied results
 ## redoSystematics = true / false (default: true)
@@ -431,6 +444,13 @@ EOF
 	    echo " Processing .... analyzeTopDiffXSecMonitoring.C++($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, $extrapolate, $hadron)"
 	    root -l -b < commandsMonRun.cint
 	done
+	echo ""
+	echo " Processing .... analyzeGenComparison.C++($save', '$verbose, true/false)"
+        ## gen comparison
+	if [ $genComparison = true ]; then  
+	    root -l -q -b './analyzeGenComparison.C++('$save', '$verbose', true )'
+	    root -l -q -b './analyzeGenComparison.C++('$save', '$verbose', false)'	
+	fi
     fi
 fi
 
@@ -620,36 +640,64 @@ fi
 
 if [ $decayChannel == \"combined\" -a $produceResults = true ]; then
     
-    echo "Cross sections for all systematic variations and decay channels"
+    ## A final uncertainties and result plots
+    echo "Cross sections for all systematic variations and combined decay channels"
     echo
-    
-    ## Compile library
-    
+    ## delete old files    
     if [ -f commandsCombineChannelsPrepare.cint ]; then    
 	rm commandsCombineChannelsPrepare.cint
 	rm bothDecayChannelsCombination_C.so
 	rm bothDecayChannelsCombination_C.d
     fi
-    
+
+    ## Compile library
     cat >> commandsCombineChannelsPrepare.cint << EOF
 .L bothDecayChannelsCombination.C++g
 EOF
-    
     root -l -b < commandsCombineChannelsPrepare.cint
     
-    ## Execute macro
-
+    ## Execute macros
+    
     if [ -f commandsCombineChannelsRun.cint ]; then    
 	rm commandsCombineChannelsRun.cint       
-    fi    
-    
+    fi  
     cat >> commandsCombineChannelsRun.cint << EOF
 .L bothDecayChannelsCombination_C.so
 bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier, $useBCC)
 EOF
+
     echo ""
-    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier, $useBCC)"
+    echo " Processing .... bothDecayChannelsCombination($dataLuminosity, $save, $verbose, $inputFolderName, $makeLogPlots, $extrapolate, $hadron, $inclCCVars, $combinedEventYields, $closureTestSpecifier, $useBCC)"    
     root -l -b < commandsCombineChannelsRun.cint
+
+    ## B covariance matrix
+    echo
+    echo "Covariance Matrix for systematic variations"
+    echo
+    ## delete old files
+    if [ -f commandsCovMatrixPrepare.cint ]; then    
+	rm commandsCovMatrixPrepare.cint
+	rm covarianceOfSystematicUnc_C.d
+	rm covarianceOfSystematicUnc_C.so
+    fi
+    ## Compile library
+    cat >> commandsCovMatrixPrepare.cint << EOF
+.L covarianceOfSystematicUnc.C++g
+EOF
+    root -l -b < commandsCovMatrixPrepare.cint
+
+    ## Execute macros    
+    if [ -f commandsCovMatrixRun.cint ]; then    
+	rm commandsCovMatrixRun.cint       
+    fi    
+    
+    cat >> commandsCovMatrixRun.cint << EOF
+.L  covarianceOfSystematicUnc_C.so
+covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)
+EOF
+    echo ""
+    echo " Processing ....  covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)"
+    root -l -b < commandsCovMatrixRun.cint
 
 else
     echo "will be ignored, only done for decayChannel=combined and if final results are produced (produceResults is set to $produceResults)"
