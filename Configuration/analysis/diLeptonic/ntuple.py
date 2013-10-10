@@ -210,6 +210,8 @@ process.selectedPatElectronsAfterScaling = selectedPatElectrons.clone(
     cut = 'pt > 20 && abs(eta) < 2.5'
 )
 
+process.selectedPatJets.cut = 'abs(eta)<5.4'
+
 process.pfIsolatedMuons.doDeltaBetaCorrection = True
 process.pfIsolatedMuons.isolationCut = 0.15
 process.pfIsolatedMuons.deltaBetaIsolationValueMap = cms.InputTag("muPFIsoValuePU03", "", "")
