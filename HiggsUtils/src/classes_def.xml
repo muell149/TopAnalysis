@@ -16,6 +16,16 @@
   <class name="std::vector<JetProperties>" />
   <class name="edm::Wrapper<std::vector<JetProperties> >" />
   
+  <class name="GenZDecayProperties" ClassVersion="10">
+    <version ClassVersion="10" checksum="2584697250"/>
+  </class>
+  <class name="edm::Wrapper<GenZDecayProperties>" />
+  <class name="edm::RefProd<GenZDecayProperties>" />
+  
+  <class name="std::vector<GenZDecayProperties>" />
+  <class name="edm::Wrapper<std::vector<GenZDecayProperties> >" />
+  
+  
   
 </lcgdict>
 
