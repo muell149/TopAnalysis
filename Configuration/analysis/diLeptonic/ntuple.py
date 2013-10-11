@@ -7,7 +7,7 @@ import os
 ####################################################################
 # global job options
 
-REPORTEVERY = 1000
+REPORTEVERY = 100
 WANTSUMMARY = True
 
 ####################################################################
@@ -256,6 +256,7 @@ process.TFileService = cms.Service("TFileService",
 
 ### OLD ANALYSIS STARTS HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+zGenInfo = False
 zproducer = False
 topfilter = False
 signal = False
@@ -280,11 +281,15 @@ elif options.samplename == 'ttbarbg':
     topfilter = True
 elif options.samplename == 'dy1050' or options.samplename == 'dy50inf':
     zproducer = True
+    zGenInfo = True
 elif options.samplename == 'ttbarhiggstobbbar' or options.samplename == 'ttbarhiggsinclusive':
     topfilter = True
     signal = True
     viaTau = False
     alsoViaTau = True
+    higgsSignal = True
+elif options.samplename == 'gghiggstozzto4l' or options.samplename == 'vbfhiggstozzto4l':
+    zGenInfo = True
     higgsSignal = True
 elif options.samplename == 'ttbarw' or options.samplename == 'ttbarz':
     topfilter = True
@@ -296,7 +301,7 @@ elif options.samplename in ['data', 'singletop', 'singleantitop','ww',
         'wz','zz','wjets',
         'qcdmu15','qcdem2030','qcdem3080','qcdem80170',
         'qcdbcem2030','qcdbcem3080','qcdbcem80170',
-	'zzz','wwz','www','ttww','ttg','wwg']:
+        'zzz','wwz','www','ttww','ttg','wwg']:
     #no special treatment needed, put here to avoid typos
     pass
 else:
@@ -454,6 +459,7 @@ writeNTuple.systematicsName = options.systematicsName
 writeNTuple.isMC = options.runOnMC
 writeNTuple.isTtBarSample = signal
 writeNTuple.isHiggsSample = higgsSignal
+writeNTuple.isZSample = zGenInfo
 writeNTuple.includePDFWeights = options.includePDFWeights
 writeNTuple.pdfWeights = "pdfWeights:cteq66"
 writeNTuple.includeZdecay = zproducer
@@ -574,11 +580,16 @@ process.kinSolutionTtFullLepEventHypothesis.eeChannel = True
 #-------------------------------------------------
 
 if zproducer:
-        process.load("TopAnalysis.TopUtils.ZDecayProducer_cfi")
-        process.zsequence = cms.Sequence(process.ZDecayProducer)
+    process.load("TopAnalysis.TopUtils.ZDecayProducer_cfi")
+    process.zsequence = cms.Sequence(process.ZDecayProducer)
 else:
-        process.zsequence = cms.Sequence()
+    process.zsequence = cms.Sequence()
 
+if zGenInfo:
+    process.load("TopAnalysis.HiggsUtils.producers.GenZDecay_cfi")
+    process.zGenSequence = cms.Sequence(process.genZDecay)
+else:
+    process.zGenSequence = cms.Sequence()
 
 if topfilter:
     process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
@@ -596,7 +607,7 @@ if topfilter:
     if signal:
         process.topsequence = cms.Sequence(
             process.makeGenEvt *
-	    process.improvedJetHadronQuarkMatchingSequence *
+            process.improvedJetHadronQuarkMatchingSequence *
             process.generatorTopFilter *
             process.produceGenLevelBJetsPlusHadron)
     else:
@@ -621,7 +632,7 @@ if higgsSignal:
 else:
     process.higgssequence = cms.Sequence()
 
-if signal or higgsSignal:
+if signal or higgsSignal or zGenInfo:
     process.ntupleInRecoSeq = cms.Sequence()
 else:
     process.ntupleInRecoSeq = cms.Sequence(process.zsequence * process.writeNTuple)
@@ -730,11 +741,12 @@ process.p = cms.Path(
     process.ntupleInRecoSeq
 )
 
-if signal:
+if signal or higgsSignal or zGenInfo:
     process.pNtuple = cms.Path(
         process.goodOfflinePrimaryVertices *
         getattr(process,'patPF2PATSequence'+pfpostfix) *
         process.buildJets *
+        process.zsequence *
         process.writeNTuple
         )
 
@@ -756,9 +768,10 @@ for pathname in pathnames:
         process.EventsBeforeSelection *
         process.topsequence *
         process.higgssequence *
+        process.zGenSequence *
         process.filterTrigger
         ))
-if signal:
+if signal or higgsSignal or zGenInfo:
     process.pNtuple.remove(process.filterTrigger)
 
 process.scaledJetEnergy.inputElectrons       = "selectedPatElectrons"
