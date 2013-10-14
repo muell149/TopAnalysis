@@ -74,12 +74,22 @@ bool tth::GenObjectIndices::uniqueRecoHiggsMatching()const
 
 
 
+bool tth::GenObjectIndices::uniqueGenMatching()const
+{
+    if(!this->uniqueGenTopMatching() || !this->uniqueGenHiggsMatching()) return false;
+    
+    return !(genBjetFromTopIndex_==genBjetFromHiggsIndex_ || genBjetFromTopIndex_==genAntiBjetFromHiggsIndex_ ||
+             genAntiBjetFromTopIndex_==genBjetFromHiggsIndex_ || genAntiBjetFromTopIndex_==genAntiBjetFromHiggsIndex_);
+}
+
+
+
 bool tth::GenObjectIndices::uniqueRecoMatching()const
 {
-    if(!this->uniqueRecoTopMatching() || !this->uniqueRecoHiggsMatching()) return false;
+    if(!this->uniqueRecoTopMatching() || !this->uniqueRecoHiggsMatching() || !this->uniqueGenMatching()) return false;
     
-    return recoBjetFromTopIndex_==recoBjetFromHiggsIndex_ || recoBjetFromTopIndex_==recoAntiBjetFromHiggsIndex_ ||
-           recoAntiBjetFromTopIndex_==recoBjetFromHiggsIndex_ || recoAntiBjetFromTopIndex_==recoAntiBjetFromHiggsIndex_;
+    return !(recoBjetFromTopIndex_==recoBjetFromHiggsIndex_ || recoBjetFromTopIndex_==recoAntiBjetFromHiggsIndex_ ||
+             recoAntiBjetFromTopIndex_==recoBjetFromHiggsIndex_ || recoAntiBjetFromTopIndex_==recoAntiBjetFromHiggsIndex_);
 }
 
 

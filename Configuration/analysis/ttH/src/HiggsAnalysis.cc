@@ -710,7 +710,7 @@ bool HiggsAnalysis::getGenBjetIndices(int& genBjetIndex, int& genAntiBjetIndex,
     }
 
     // If no unique match of jets from (anti)b from (anti)top is found, return false
-    if(genBjetIndex<0 || genAntiBjetIndex<0){
+    if(genBjetIndex<0 || genAntiBjetIndex<0 || genBjetIndex==genAntiBjetIndex){
         return false;
     }
     return true;
@@ -742,8 +742,8 @@ bool HiggsAnalysis::matchRecoToGenJets(int& matchedBjetIndex, int& matchedAntiBj
     }
 
     // Call a jet matched if it is close enough (should this be a configurable parameter?)
-    if(deltaRBjet>0.3) matchedBjetIndex = -1;
-    if(deltaRAntiBjet>0.3) matchedAntiBjetIndex = -1;
+    if(deltaRBjet>0.5) matchedBjetIndex = -1;
+    if(deltaRAntiBjet>0.5) matchedAntiBjetIndex = -1;
 
     // Check if both gen jets are successfully matched to different reco jets
     if(matchedBjetIndex==-1 || matchedAntiBjetIndex==-1 || matchedBjetIndex == matchedAntiBjetIndex) return false;
