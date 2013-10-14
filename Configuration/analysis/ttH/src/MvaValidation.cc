@@ -149,32 +149,14 @@ void MvaValidation::bookHistos(const TString& step)
 
 
 
-void MvaValidation::fill(const RecoObjects& recoObjects,
-                         const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-                         const double& weight, const TString& stepShort)
+void MvaValidation::fillHistos(const RecoObjects& recoObjects, const CommonGenObjects&,
+                               const TopGenObjects&, const HiggsGenObjects&,
+                               const KinRecoObjects&,
+                               const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                               const tth::GenLevelWeights&, const tth::RecoLevelWeights&,
+                               const double& weight, const TString&,
+                               std::map< TString, TH1* >& m_histogram)
 {
-    // Number of selected jets and bjets
-    const int numberOfJets = recoObjectIndices.jetIndices_.size();
-    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
-    
-    // Set up step name and check if step exists
-    const bool stepInCategory = stepShort.Contains("_cate");
-    const TString step = stepInCategory ? stepShort : this->stepName(stepShort);
-    const bool stepExists(this->checkExistence(step));
-    if(!stepInCategory && jetCategories_){
-        // Here check the individual jet categories
-        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
-        const TString fullStepName = this->stepName(stepShort, categoryId);
-        this->fill(recoObjects, genObjectIndices, recoObjectIndices, weight, fullStepName);
-    }
-    if(!stepExists) return;
-    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    
-    
-    // FIXME: which events exactly to fill? For now all with at least 4 jets
-    if(numberOfJets<4) return;
-    
-    
     // Loop over all jet combinations and get MVA input variables
     const std::vector<MvaTopJetsVariables> v_mvaTopJetsVariables = 
             MvaTopJetsVariables::fillVariables(recoObjectIndices, genObjectIndices, recoObjects, weight);
@@ -346,7 +328,6 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
             this->fillHistosInclExcl2D(m_histogram, name, maxWeightCorrect, maxWeightSwapped, mvaTopJetsVariables, weight);
         }
     }
-    
 }
 
 

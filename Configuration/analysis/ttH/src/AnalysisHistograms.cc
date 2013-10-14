@@ -15,6 +15,7 @@
 #include "AnalysisHistograms.h"
 #include "analysisStructs.h"
 #include "JetCategories.h"
+#include "higgsUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/classes.h"
@@ -108,6 +109,67 @@ bool AnalysisHistogramsBase::checkExistence(const TString& step)const
 void AnalysisHistogramsBase::bookHistos(const TString&)
 {
     // WARNING: this is empty template method, overwrite for inherited histogram class
+    
+    std::cerr<<"ERROR! Dummy method bookHistos() in AnalysisHistogramBase is called, but overridden one should be used\n"
+             <<"...break\n"<<std::endl;
+    exit(567);
+}
+
+
+
+void AnalysisHistogramsBase::fill(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                                  const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                                  const KinRecoObjects& kinRecoObjects,
+                                  const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                                  const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                                  const double& weight, const TString& stepShort)
+{
+    // Number of selected jets and bjets
+    const int numberOfJets = recoObjectIndices.jetIndices_.size();
+    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
+    
+    // Set up step name and check if step exists
+    const bool stepInCategory = stepShort.Contains("_cate");
+    const TString step = stepInCategory ? stepShort : tth::stepName(stepShort);
+    const bool stepExists(this->checkExistence(step));
+    if(!stepInCategory && jetCategories_){
+        // Here check the individual jet categories
+        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
+        const TString fullStepName = tth::stepName(stepShort, categoryId);
+        this->fill(recoObjects, commonGenObjects,
+                   topGenObjects, higgsGenObjects,
+                   kinRecoObjects,
+                   recoObjectIndices, genObjectIndices,
+                   genLevelWeights, recoLevelWeights,
+                   weight, fullStepName);
+    }
+    if(!stepExists) return;
+    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
+    
+    this->fillHistos(recoObjects, commonGenObjects,
+                     topGenObjects, higgsGenObjects,
+                     kinRecoObjects,
+                     recoObjectIndices, genObjectIndices,
+                     genLevelWeights, recoLevelWeights,
+                     weight, step,
+                     m_histogram);
+}
+
+
+
+void AnalysisHistogramsBase::fillHistos(const RecoObjects&, const CommonGenObjects&,
+                                        const TopGenObjects&, const HiggsGenObjects&,
+                                        const KinRecoObjects&,
+                                        const tth::RecoObjectIndices&, const tth::GenObjectIndices&,
+                                        const tth::GenLevelWeights&, const tth::RecoLevelWeights&,
+                                        const double&, const TString&,
+                                        std::map<TString, TH1*>&)
+{
+    // WARNING: this is empty template method, overwrite for inherited histogram class
+    
+    std::cerr<<"ERROR! Dummy method fillHistos() in AnalysisHistogramBase is called, but overridden one should be used\n"
+             <<"...break\n"<<std::endl;
+    exit(568);
 }
 
 
@@ -152,22 +214,14 @@ void EventYieldHistograms::bookHistos(const TString& step)
 
 
 
-void EventYieldHistograms::fill(const tth::RecoObjectIndices& recoObjectIndices, const double& weight, const TString& stepShort)
+void EventYieldHistograms::fillHistos(const RecoObjects&, const CommonGenObjects&,
+                                      const TopGenObjects&, const HiggsGenObjects&,
+                                      const KinRecoObjects&,
+                                      const tth::RecoObjectIndices&, const tth::GenObjectIndices&,
+                                      const tth::GenLevelWeights&, const tth::RecoLevelWeights&,
+                                      const double& weight, const TString&,
+                                      std::map<TString, TH1*>& m_histogram)
 {
-    // Set up step name and check if step exists
-    const bool stepInCategory = stepShort.Contains("_cate");
-    const TString step = stepInCategory ? stepShort : this->stepName(stepShort);
-    const bool stepExists(this->checkExistence(step));
-    if(!stepInCategory && jetCategories_){
-        // Here check the individual jet categories
-        const int category = jetCategories_->categoryId(recoObjectIndices.jetIndices_.size(), recoObjectIndices.bjetIndices_.size());
-        const TString fullStepName = this->stepName(stepShort, category);
-        this->fill( recoObjectIndices, weight, fullStepName);
-    }
-    if(!stepExists) return;
-    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    
-    
     m_histogram["events"]->Fill(1., weight);
 }
 
@@ -228,28 +282,27 @@ TH1* DyScalingHistograms::bookHisto(TH1* histo, const TString& name)
 
 
 
-void DyScalingHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
-                               const double& weight, const TString& stepShort)
+void DyScalingHistograms::fillHistos(const RecoObjects& recoObjects, const CommonGenObjects&,
+                                     const TopGenObjects&, const HiggsGenObjects&,
+                                     const KinRecoObjects&,
+                                     const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices&,
+                                     const tth::GenLevelWeights&, const tth::RecoLevelWeights&,
+                                     const double& weight, const TString& step,
+                                     std::map<TString, TH1*>& m_histogram)
 {
-    // Set up step name and check if step exists
-    const TString step = this->stepName(stepShort);
-    const bool stepExists(this->checkExistence(step));
-    if(!stepExists) return;
-    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    
     const int leadingLeptonIndex = recoObjectIndices.leadingLeptonIndex_;
     const int nLeadingLeptonIndex = recoObjectIndices.nLeadingLeptonIndex_;
     
     // FIXME: should use one common function in HiggsAnalysis and here
-    bool hasLeptonPair(false);
+    //bool hasLeptonPair(false);
     if(leadingLeptonIndex!=-1 && nLeadingLeptonIndex!=-1){
-        hasLeptonPair = true;
+        ;//hasLeptonPair = true;
     }
     else return;
     
     const LV dilepton = recoObjects.allLeptons_->at(leadingLeptonIndex) + recoObjects.allLeptons_->at(nLeadingLeptonIndex);
     const double dileptonMass = dilepton.M();
-    const bool isZregion = dileptonMass > 76 && dileptonMass < 106;
+    const bool isZregion = dileptonMass>76. && dileptonMass<106.;
     
     
     // Fill histograms
@@ -366,6 +419,7 @@ void BasicHistograms::bookHistos(const TString& step)
     name = "met_phi";
     m_histogram[name] = this->store(new TH1D(prefix+name+step, "Met #phi;#phi^{met};Events",50,-3.2,3.2));
     
+    // FIXME: make jet categories a plot of each analyzer in AnalysisHistogramBase
     // Jet categories
     const bool stepInCategory = step.Contains("_cate");
     if(!stepInCategory && jetCategories_){
@@ -384,27 +438,14 @@ void BasicHistograms::bookHistos(const TString& step)
 
 
 
-void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObjectIndices& recoObjectIndices,
-                           const double& weight, const TString& stepShort)
+void BasicHistograms::fillHistos(const RecoObjects& recoObjects, const CommonGenObjects&,
+                                 const TopGenObjects&, const HiggsGenObjects&,
+                                 const KinRecoObjects&,
+                                 const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices&,
+                                 const tth::GenLevelWeights&, const tth::RecoLevelWeights&,
+                                 const double& weight, const TString& step,
+                                 std::map< TString, TH1* >& m_histogram)
 {
-    // Number of selected jets and bjets
-    const int numberOfJets = recoObjectIndices.jetIndices_.size();
-    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
-    
-    // Set up step name and check if step exists
-    const bool stepInCategory = stepShort.Contains("_cate");
-    const TString step = stepInCategory ? stepShort : this->stepName(stepShort);
-    const bool stepExists(this->checkExistence(step));
-    if(!stepInCategory && jetCategories_){
-        // Here check the individual jet categories
-        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
-        const TString fullStepName = this->stepName(stepShort, categoryId);
-        this->fill(recoObjects, recoObjectIndices, weight, fullStepName);
-    }
-    if(!stepExists) return;
-    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    
-    
     // Leptons
     m_histogram["lepton_multiplicity"]->Fill(recoObjects.allLeptons_->size(), weight);
     for(const int index : recoObjectIndices.leptonIndices_){
@@ -481,7 +522,11 @@ void BasicHistograms::fill(const RecoObjects& recoObjects, const tth::RecoObject
     m_histogram["met_phi"]->Fill(recoObjects.met_->Phi(), weight);
     
     
+    // FIXME: make jet categories a plot of each analyzer in AnalysisHistogramBase
     // Jet categories
+    const int numberOfJets = recoObjectIndices.jetIndices_.size();
+    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
+    const bool stepInCategory = step.Contains("_cate");
     if(!stepInCategory && jetCategories_){
         const int categoryId = jetCategories_->categoryId(numberOfJets,numberOfBjets);
         m_histogram["jetCategories"]->Fill(categoryId, weight);

@@ -50,36 +50,18 @@ void Playground::bookHistos(const TString& step)
 
 
 
-void Playground::fill(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
-                      const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
-                      const KinRecoObjects& kinRecoObjects,
-                      const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-                      const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
-                      const double& weight, const TString& stepShort)
+void Playground::fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                            const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                            const KinRecoObjects& kinRecoObjects,
+                            const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                            const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                            const double& weight, const TString& step, std::map<TString, TH1*>& m_histogram)
 {
-    // Number of selected jets and bjets
-    const int numberOfJets = recoObjectIndices.jetIndices_.size();
-    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
-    
-    // Set up step name and check if step exists
-    const bool stepInCategory = stepShort.Contains("_cate");
-    const TString step = stepInCategory ? stepShort : this->stepName(stepShort);
-    const bool stepExists(this->checkExistence(step));
-    if(!stepInCategory && jetCategories_){
-        // Here check the individual jet categories
-        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
-        const TString fullStepName = this->stepName(stepShort, categoryId);
-        this->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
-                   genObjectIndices, recoObjectIndices, genLevelWeights, recoLevelWeights, weight, fullStepName);
-    }
-    if(!stepExists) return;
-    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    
-    
-    // Now do calculations and filling of histograms
+    // Do calculations and filling of histograms
     m_histogram["blah1"]->Fill(1., weight);
     m_histogram["blah2_blubb"]->Fill(31., weight);
 }
+
 
 
 

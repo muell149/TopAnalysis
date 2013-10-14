@@ -40,17 +40,21 @@ public:
     /// Destructor
     ~MvaValidation(){}
     
-    /// Fill histograms
-    void fill(const RecoObjects& recoObjects,
-              const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-              const double& weight, const TString& stepShort);
-    
     
     
 private:
     
     /// Book all histograms for given selection step
     virtual void bookHistos(const TString& step);
+    
+    /// Fill all histograms for given selection step
+    virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                            const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                            const KinRecoObjects& kinRecoObjects,
+                            const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                            const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                            const double& weight, const TString& step,
+                            std::map<TString, TH1*>& m_histogram);
     
     /// Book 1-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
     void bookHistosInclExcl(std::map<TString, TH1*>& m_histogram, const TString& prefix, const TString& step,
