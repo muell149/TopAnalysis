@@ -60,14 +60,14 @@ void AnalysisHistogramsBase::book(TSelectorList* output)
     // Book histograms for steps not separated in JetCategories
     for(const auto& stepShort : selectionSteps_){
         const TString step = tth::stepName(stepShort);
-        this->addStep(step, output);
+        this->addStep(step);
     }
     
     // Book histograms for steps exclusive in each JetCategory
     for(const auto& stepShort : stepsForCategories_){
         for(int category = 0; category<jetCategories_->numberOfCategories(); ++category){
             const TString step = tth::stepName(stepShort, category);
-            this->addStep(step, output);
+            this->addStep(step);
         }
     }
     
@@ -92,7 +92,7 @@ void AnalysisHistogramsBase::book(TSelectorList* output)
 
 
 
-void AnalysisHistogramsBase::addStep(const TString& step, TSelectorList* output)
+void AnalysisHistogramsBase::addStep(const TString& step)
 {
     // Check whether step already exists
     if(this->checkExistence(step)){

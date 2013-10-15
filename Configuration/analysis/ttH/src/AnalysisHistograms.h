@@ -70,7 +70,7 @@ protected:
     };
     
     /// Add a new selection step
-    void addStep(const TString& step, TSelectorList* output);
+    void addStep(const TString& step);
     
     /// Book all histograms for given selection step (dummy method, override in inherited AnalysisHistograms)
     virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
