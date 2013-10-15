@@ -32,7 +32,8 @@ class AnalysisHistogramsBase{
 public:
     
     /// Constructor with setting up selection steps
-    AnalysisHistogramsBase(const std::vector<TString>& selectionStepsNoCategories,
+    AnalysisHistogramsBase(const TString& prefix,
+                           const std::vector<TString>& selectionStepsNoCategories,
                            const std::vector<TString>& stepsForCategories =std::vector<TString>(),
                            const JetCategories* jetCategories =0);
     
@@ -72,7 +73,7 @@ protected:
     void addStep(const TString& step, TSelectorList* output);
     
     /// Book all histograms for given selection step (dummy method, override in inherited AnalysisHistograms)
-    virtual void bookHistos(const TString& step);
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
     
     /// Fill all histograms for given selection step (dummy method, override in inherited AnalysisHistograms)
     virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
@@ -83,15 +84,16 @@ protected:
                             const double& weight, const TString& step,
                             std::map<TString, TH1*>& m_histogram);
     
-// FIXME: remove this function after after introduction of generalised virtual book method, and take it from higgsUtils.*
-    /// Get the full name of the step
-    TString stepName(const TString& step, const int& category =-1);
-    
     /// Check whether a given selection step already exists
     bool checkExistence(const TString& step)const;
     
     /// Store the object in the output list and return it
     template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
+    
+    
+    
+    /// The prefix which all histograms of the specific analyzer should have
+    const TString prefix_;
     
     /// Pointer for bookkeeping of histograms
     TSelectorList* selectorList_;
@@ -132,7 +134,7 @@ public:
 private:
     
     /// Book all histograms for given selection step
-    virtual void bookHistos(const TString& step);
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
     
     /// Fill all histograms for given selection step
     virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
@@ -164,7 +166,7 @@ public:
 private:
 
     /// Book all histograms for given selection step
-    virtual void bookHistos(const TString& step);
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
 
     /// Store histogram in output
     TH1* bookHisto(TH1* histo, const TString& name);
@@ -205,7 +207,7 @@ public:
 private:
 
     /// Book all histograms for given selection step
-    virtual void bookHistos(const TString& step);
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
 
     /// Fill all histograms for given selection step
     virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,

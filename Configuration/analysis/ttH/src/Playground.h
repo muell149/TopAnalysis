@@ -45,7 +45,7 @@ public:
 private:
     
     /// Book all histograms for given selection step
-    virtual void bookHistos(const TString& step);
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
     
     /// Fill all histograms for given selection step
     virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,

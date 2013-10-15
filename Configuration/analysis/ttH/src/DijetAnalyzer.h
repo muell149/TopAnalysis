@@ -61,7 +61,7 @@ public:
 private:
 
     /// Book histograms for one categoryId with given id and label
-    virtual void bookHistos(const TString& step);
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
     
     /// Fill all histograms for given selection step
     virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
