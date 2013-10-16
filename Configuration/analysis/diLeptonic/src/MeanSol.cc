@@ -11,6 +11,7 @@ MeanSol::MeanSol(double topm)
 {
     mass_top=topm;
     sum_weight=0;
+    max_sum_weight=0;
 }
 
 MeanSol::~MeanSol()
@@ -25,7 +26,21 @@ void MeanSol::Clear()
     v_nbar.clear();
     v_weight.clear();
     sum_weight=0;
+    max_sum_weight=0;
 }
+
+void MeanSol::Add(TLorentzVector top, TLorentzVector topbar,TLorentzVector n,TLorentzVector nbar,double weight,double mbl_weight)
+{
+    v_top.push_back(top);
+    v_topbar.push_back(topbar);
+    v_n.push_back(n);
+    v_nbar.push_back(nbar);
+
+    v_weight.push_back(weight);    
+    sum_weight = sum_weight + weight;
+    max_sum_weight = max_sum_weight + mbl_weight;
+}
+
 
 void MeanSol::Add(TLorentzVector top, TLorentzVector topbar,TLorentzVector n,TLorentzVector nbar,double weight)
 {
@@ -36,6 +51,7 @@ void MeanSol::Add(TLorentzVector top, TLorentzVector topbar,TLorentzVector n,TLo
 
     v_weight.push_back(weight);    
     sum_weight = sum_weight + weight;
+    max_sum_weight = max_sum_weight +weight;
 }
 
 void MeanSol::GetMeanVect(TLorentzVector& lv,vector<TLorentzVector> vlv,double mass)

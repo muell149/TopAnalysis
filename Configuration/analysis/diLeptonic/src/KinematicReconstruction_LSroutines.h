@@ -7,6 +7,8 @@
 #include <vector>
 #include <TMath.h>
 #include <TF2.h>
+#include <TH1.h>
+#include <TFile.h>
 #include <Rtypes.h>
 #include <iostream>
 #include <stdio.h>
@@ -21,10 +23,17 @@ class KinematicReconstruction_LSroutines {
 public:
   KinematicReconstruction_LSroutines();
   KinematicReconstruction_LSroutines(double mass_l, double mass_al);
+  KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F* hvE[]);
+  KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F hneutrino);
   KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm);
   KinematicReconstruction_LSroutines(double mass_top, double mass_b, double mass_w, double mass_l, double mass_al);
       ~KinematicReconstruction_LSroutines();
   
+  void Delete();    
+      
+      
+  void ini(double mass_l, double mass_al,double mass_Wp, double mass_Wm);
+    
   void SetConstraints(TLorentzVector LV_al, 
                       TLorentzVector LV_l, 
                       TLorentzVector LV_b, 
@@ -43,6 +52,7 @@ public:
   
   int GetNsol();
 
+  void SetWeightOption(int wo);
   
   struct TopSolution {
         double TopPt;
@@ -78,7 +88,7 @@ public:
 void SetTrueInfo(TLorentzVector LV_Top,TLorentzVector LV_AntiTop,TLorentzVector LV_Neutrino, TLorentzVector LV_AntiNeutrino);
 void SortBy(std::string ch);
 void Print();
-
+TF1* GetNeutrinoPxF();
 
 private:
     void FilldTS();
@@ -94,6 +104,7 @@ private:
     void quadratic_equation(double a,double b,double c,std::vector<double> &v);
     void linear_equation(double a,double b,std::vector<double> &v);
     int sign(long double ld);
+    double Landau2D(double x,double y);
     
   
       //Utility Methods
@@ -101,6 +112,7 @@ private:
     void SWAP(double& realone, double& realtwo);
     
 //private:
+    int weight_option;   // weight option
     int nSol;
     double coeffs[5];
     std::vector<double> vect_pxv;
@@ -121,7 +133,12 @@ private:
     TLorentzVector true_topbar;
     TLorentzVector true_neutrino;
     TLorentzVector true_neutrinobar;
+
+    TF1 * pol4_neutrinoPx; //("pol4_neutrinoPx","pol4",-100,100);
     
+    TH1F hnw_cuts;
+    TH1F* hneutrino_E[6];
+
     double px_miss;
     double py_miss;
   
