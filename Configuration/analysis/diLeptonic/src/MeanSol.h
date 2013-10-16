@@ -23,6 +23,7 @@ public:
     
   MeanSol(double topm);
  ~MeanSol();  
+  void Add(TLorentzVector top,TLorentzVector topbar,TLorentzVector n,TLorentzVector nbar, double weight,double mbl_weight);
   void Add(TLorentzVector top,TLorentzVector topbar,TLorentzVector n,TLorentzVector nbar, double weight);
   void GetMeanVect(TLorentzVector& lv,vector<TLorentzVector> vlv,double mass);
   void GetMeanSol(TLorentzVector& top,TLorentzVector& topbar,TLorentzVector& n,TLorentzVector& nbar);
@@ -40,7 +41,8 @@ public:
     
     vector<double> v_weight;
     double sum_weight;  
-    
+    double max_sum_weight;
+
     double mass_top;
     
 };
