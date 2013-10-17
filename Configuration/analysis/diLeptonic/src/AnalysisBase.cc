@@ -54,6 +54,7 @@ trueDYchannelCut_(0),
 checkZDecayMode_(nullptr),
 outputfilename_(""),
 runViaTau_(false),
+kinematicReconstruction_(0),
 puReweighter_(nullptr),
 leptonScaleFactors_(0),
 triggerScaleFactors_(0),
@@ -308,6 +309,13 @@ void AnalysisBase::SetRunViaTau(const bool runViaTau)
 void AnalysisBase::SetAnalysisOutputBase(const char* analysisOutputBase)
 {
     analysisOutputBase_ = analysisOutputBase;
+}
+
+
+
+void AnalysisBase::SetKinematicReconstruction(KinematicReconstruction* kinematicReconstruction)
+{
+    kinematicReconstruction_ = kinematicReconstruction;
 }
 
 
@@ -1314,23 +1322,21 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     
     
     // 2 lines needed for OLD kinReco
-  const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-  const int nSolution = sols.size();
+    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+    const int nSolution = sols.size();
     
-    // 3 lines needed for NEW kinReco
-    //const KinematicReconstruction new_topsol();
-//     KinematicReconstruction new_topsol = KinematicReconstruction();
-//     new_topsol.kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);//Option true - mass_loop ON; Option false - smearing ON; NO boolean option - weighted average
-//     const int nSolution = new_topsol.GetNSol();
+    // 2 lines needed for NEW kinReco
+//    kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+//    const int nSolution = kinematicReconstruction_->GetNSol();
     
     
     if(nSolution == 0) return false;
     
     // 1 line needed for OLD kinReco
-  const auto& sol = sols.at(0);
+    const auto& sol = sols.at(0);
     
     // 1 line needed for NEW kinReco
-//   const auto& sol = new_topsol.GetSol();
+//    const auto& sol = kinematicReconstruction_->GetSol();
   
   
     

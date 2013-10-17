@@ -101,7 +101,9 @@ void angle_rot(double alpha, double e, TLorentzVector jet, TLorentzVector & jet_
 
 KinematicReconstruction::KinematicReconstruction()
 {
-   this->loadData();
+    std::cout<<"--- Beginning preparation of kinematic reconstruction\n";
+    this->loadData();
+    std::cout<<"=== Finishing preparation of kinematic reconstruction\n\n";
 }
 
 

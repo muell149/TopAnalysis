@@ -20,6 +20,7 @@ class TString;
 #include "storeTemplate.h"
 
 class PUReweighter;
+class KinematicReconstruction;
 class JetCorrectionUncertainty;
 class TriggerScaleFactors;
 class LeptonScaleFactors;
@@ -195,6 +196,9 @@ protected:
     TString outputfilename_;
     bool runViaTau_;
     
+    
+    /// Pointer to the kinematic reconstruction instance
+    KinematicReconstruction* kinematicReconstruction_;
     
     /// Pointer to the pileup reweighter instance
     PUReweighter *puReweighter_;
@@ -436,6 +440,8 @@ public:
     /// Set folder for basic analysis output
     void SetAnalysisOutputBase(const char* analysisOutputBase);
     
+    /// Set the kinematic reconstruction
+    void SetKinematicReconstruction(KinematicReconstruction* kinematicReconstruction);
     /// Set the pileup reweighter
     void SetPUReweighter(PUReweighter* puReweighter);
     /// Set the lepton scale factors

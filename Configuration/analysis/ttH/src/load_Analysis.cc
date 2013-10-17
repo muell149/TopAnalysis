@@ -26,10 +26,10 @@
 #include "Playground.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/utils.h"
-#include "../../diLeptonic/src/PUReweighter.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
+#include "../../diLeptonic/src/KinematicReconstruction.h"
+#include "../../diLeptonic/src/PUReweighter.h"
 #include "../../diLeptonic/src/ScaleFactors.h"
-
 
 
 
@@ -98,6 +98,8 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                         const int dy,
                         const std::vector<AnalysisMode::AnalysisMode>& v_analysisMode)
 {   
+    std::cout<<std::endl;
+    
     // Set up the channels to run over
     std::vector<Channel::Channel> channels;
     if(channel != Channel::undefined){
@@ -107,8 +109,11 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
         channels = Channel::realChannels;
     }
     
+    // Set up kinematic reconstruction
+    KinematicReconstruction* kinematicReconstruction(0);
+    //kinematicReconstruction = new KinematicReconstruction();
+    
     // Set up pileup reweighter
-    std::cout<<std::endl;
     std::cout<<"--- Beginning preparation of pileup reweighter\n";
     PUReweighter* puReweighter = new PUReweighter();
     puReweighter->setMCDistrSum12("S10");
@@ -194,6 +199,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up the analysis
     HiggsAnalysis* selector = new HiggsAnalysis();
     selector->SetAnalysisOutputBase(AnalysisOutputDIR);
+    selector->SetKinematicReconstruction(kinematicReconstruction);
     selector->SetPUReweighter(puReweighter);
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);
