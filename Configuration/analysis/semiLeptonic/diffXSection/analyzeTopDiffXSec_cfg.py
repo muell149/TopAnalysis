@@ -139,7 +139,20 @@ if(not globals().has_key('applyKinFit')):
     applyKinFit = True # False
     if(cutflowSynch):
         applyKinFit = False
+        
+## choose whether you want to use the double KinFit approach
+## fit1: mtop=172.5GeV fix -> jet permutation
+## -> fit2: mtop free, jet permutation from fit1 -> result                
+doubleKinFit = True
+if(applyKinFit==False):
+    doubleKinFit=False
 
+## choose whether you want to do the probability cut
+## already before filling any result plot
+ProbCutByDefault = False
+if(applyKinFit==False):
+    ProbCutByDefault=False
+    
 ## choose whether you want a pat tuple as output
 if(not globals().has_key('writeOutput')): 
     writeOutput  = False # True
@@ -189,7 +202,7 @@ else:
 if(not globals().has_key('additionalEventWeights')): 
     additionalEventWeights  = True
 
-## enable/ disable systematic shape distortion event reweighting
+## enable/ disable systematic ttbar shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
     sysDistort =  ''
     #sysDistort =  'data'
@@ -210,7 +223,7 @@ if(not options.MCweighting=='unset'):
 # take care of data
 if (not runningOnData == "MC"):
     MCweighting = False
-        
+
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
 
@@ -333,6 +346,36 @@ if(not options.sample=="none"):
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
+    elif("perugianoCR" in options.sample):       
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11noCR_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugianoCR"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugianoCR"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+            outputFileName+="SysDistort"+sysDistort
+    elif("perugiampiHi" in options.sample):       
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11mpiHi_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugiampiHi"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugiampiHi"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+            outputFileName+="SysDistort"+sysDistort
+    elif("perugiaTeV" in options.sample):
+        usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11TeV_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff"
+        if(eventFilter=='signal only'):
+            outputFileName+="SigPerugiaTeV"
+        elif(eventFilter=='background only'):
+            outputFileName+="BkgPerugiaTeV"
+        if(sysDistort!=""):
+            if(sysDistort!="data"):
+                additionalEventWeights=False # if set to false no variations (SF+-, ...) are done
+            outputFileName+="SysDistort"+sysDistort
     elif("perugia" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_SemiLeptMGDecays_TuneP11_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V19_v1_cff" 
         if(eventFilter=='signal only'):
@@ -598,7 +641,7 @@ print " Label for MC samples:               ",options.mctag
 print " Chosen sample                       ",options.sample
 print " Lepton decay channel:               ",decayChannel
 print " ttbar filter:                       ",eventFilter," ---- Obsolete if RunningOnData != 'MC' "
-print " Include tau->l events               ",tau
+print " Include tau->l events in SG         ",tau
 print " B-tag algo:                         ",bTagAlgo
 print " B-tag discriminator cut value:      ",bTagDiscrCut
 print " Apply PU reweighting:               ",PUreweigthing
@@ -606,6 +649,8 @@ print " Apply Btag reweighting:             ",BtagReweigthing
 print " Apply effSF reweighting:            ",effSFReweigthing
 print " JEC level in jetKinematics:         ",corrLevel
 print " Apply kinematic Fit:                ",applyKinFit," ---- Programme execution slowed down if 'True'"
+print " Use double KinFit approach:         ",doubleKinFit
+print " Prob selection for all result plots: ",ProbCutByDefault
 print " Write PAT tuples:                   ",writeOutput
 print " Analyzed sample:                    ",usedSample+".py"
 print " Output file name:                   ",outputFileName
@@ -1284,21 +1329,22 @@ process.filterProbKinFit  = process.ttSemiLepEventFilter.clone( cut = cms.string
 process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string("isHypoValid('kGenMatch')") )
 
 ## add a second kinematic fit which calculates the jet permutation as input for the first kin fit
-#cloneTtSemiLepEvent(process)
-#process.kinFitTtSemiLepEventHypothesis2.constraints = [1, 2, 3, 4]
-#process.kinFitTtSemiLepEventHypothesis2.mTop = 172.5
-#process.kinFitTtSemiLepEventHypothesis.match = cms.InputTag("kinFitTtSemiLepEventHypothesis2")
-#process.kinFitTtSemiLepEventHypothesis.useOnlyMatch = cms.bool(True)
-#
-#process.filterRecoKinFit2 = process.ttSemiLepEventFilter.clone( src = cms.InputTag("ttSemiLepEvent2"),
-#                                                                cut = cms.string("isHypoValid('kKinFit')"  ) )
-#
-#process.makeTtSemiLepEvent += process.filterRecoKinFit2
-#
-#process.makeTtSemiLepEvent.replace(process.filterRecoKinFit2,
-#                                   process.filterRecoKinFit2*process.makeTtSemiLepEventBase)
-#
-#process.makeTtSemiLepEvent.remove(process.makeTtSemiLepEventBase)
+if(doubleKinFit==True):
+    cloneTtSemiLepEvent(process)
+    process.kinFitTtSemiLepEventHypothesis2.constraints = [1, 2, 3, 4]
+    process.kinFitTtSemiLepEventHypothesis2.mTop = 172.5
+    process.kinFitTtSemiLepEventHypothesis.match = cms.InputTag("kinFitTtSemiLepEventHypothesis2")
+    process.kinFitTtSemiLepEventHypothesis.useOnlyMatch = cms.bool(True)
+    
+    process.filterRecoKinFit2 = process.ttSemiLepEventFilter.clone( src = cms.InputTag("ttSemiLepEvent2"),
+                                                                    cut = cms.string("isHypoValid('kKinFit')"  ) )
+    
+    process.makeTtSemiLepEvent += process.filterRecoKinFit2
+    
+    process.makeTtSemiLepEvent.replace(process.filterRecoKinFit2,
+                                       process.filterRecoKinFit2*process.makeTtSemiLepEventBase)
+    
+    process.makeTtSemiLepEvent.remove(process.makeTtSemiLepEventBase)
 
 ## configure top reconstruction analyzers & define PSets
 ## A) for top reconstruction analyzer
@@ -1530,7 +1576,6 @@ if(applyKinFit==True):
                                              process.lightJetSelection                       +
                                              process.makeTtSemiLepEvent                      +
                                              process.filterRecoKinFit                        +
-                                             #process.filterProbKinFit                        + #FIXME MARTIN: prob cut for systematic folder
                                              process.analyzeTopRecoKinematicsKinFit          +
                                              process.analyzeTopRecoKinematicsKinFitTopAntitop+
                                              process.analyzeTopRecoKinematicsGenMatch        +
@@ -1551,6 +1596,10 @@ if(applyKinFit==True):
                                              process.compositedKinematicsProbSel             +
                                              process.filterMatchKinFit
                                              )
+            if(ProbCutByDefault):
+                process.kinFit.replace(process.filterRecoKinFit,
+                                       process.filterRecoKinFit+process.filterProbKinFit)
+                
             process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics     +
                                                        # add bjet indices
                                                        process.makeGenLevelBJets                   +
@@ -1595,6 +1644,9 @@ if(applyKinFit==True):
                                              process.analyzeTopRecoKinematicsKinFitProbSel   +
                                              process.compositedKinematicsProbSel             
                                              )
+            if(ProbCutByDefault):
+                process.kinFit.replace(process.filterRecoKinFit,
+                                       process.filterRecoKinFit+process.filterProbKinFit)
             process.kinFitGen           = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
             process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
@@ -1611,6 +1663,9 @@ if(applyKinFit==True):
                                          process.analyzeTopRecoKinematicsKinFitProbSel   +
                                          process.compositedKinematicsProbSel             
                                          )
+        if(ProbCutByDefault):
+            process.kinFit.replace(process.filterRecoKinFit,
+                                   process.filterRecoKinFit+process.filterProbKinFit)
         process.kinFitGen           = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpace = cms.Sequence(process.dummy)
         process.kinFitGenPhaseSpaceHad = cms.Sequence(process.dummy)
@@ -1735,7 +1790,7 @@ process.load("TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi")
 #process.eventWeightDileptonModelVariation.variation=cms.string(sysDistort)
 #process.eventWeightDileptonModelVariation.ttGenEvent=cms.InputTag('genEvt')
 process.eventWeightDileptonModelVariation.ttGenEvent = cms.InputTag('genEvt')
-process.eventWeightDileptonModelVariation.weightVariable = cms.string('data') #valid values: toppt, topeta, ttbarmass, data
+process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass') #valid values: toppt, topeta, ttbarmass, data
 process.eventWeightDileptonModelVariation.slope = cms.double(0.00137)
 process.eventWeightDileptonModelVariation.weight1x = cms.double(113.9)  #position where weight is 1
 process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-off, at least 0.1 event weight
@@ -2242,21 +2297,30 @@ if(runningOnData=="MC" and PUreweigthing):
             setattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys, process.analyzeTopPartonLevelKinematicsBjets.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys).useTree = False
             setattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys, process.analyzeTopPartonLevelKinematicsLepton.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys).useTree = False          
+            getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys).useTree = False
+            setattr(process,"compositedPartonGen"+sys, process.compositedPartonGen.clone(weight=weightTagName))
+            #getattr(process,"compositedPartonGen"+sys).useTree = False 
+            
             # create plots for parton level PS
             setattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
             setattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys).useTree = False            
             setattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys).useTree = False           
+            getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys).useTree = False
+            setattr(process,"compositedPartonGenPhaseSpace"+sys, process.compositedPartonGenPhaseSpace.clone(weight=weightTagName))
+            #getattr(process,"compositedPartonGenPhaseSpace"+sys).useTree = False 
+
             # create plots for hadron level PS
             setattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
             setattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys).useTree = False           
             setattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsLeptonPhaseSpace.clone(weight=weightTagName))
-            getattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys).useTree = False           
+            getattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys).useTree = False
+            setattr(process,"compositedHadronGenPhaseSpace"+sys, process.compositedHadronGenPhaseSpace.clone(weight=weightTagName))
+            #getattr(process,"compositedHadronGenPhaseSpace"+sys).useTree = False
+            
             # analyzer to be added to sequence
             process.GENFULLanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematics"+sys)
             process.GENpartonPSanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys)
@@ -2267,6 +2331,10 @@ if(runningOnData=="MC" and PUreweigthing):
             process.GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys)
             process.GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys)
             process.GENhadronPSbanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys)
+            process.GENFULLbanalyzers    *=getattr(process,"compositedPartonGen"+sys)
+            process.GENpartonPSbanalyzers*=getattr(process,"compositedPartonGenPhaseSpace"+sys)
+            process.GENhadronPSbanalyzers*=getattr(process,"compositedHadronGenPhaseSpace"+sys)
+            
 
         process.GENFULLanalyzers.remove(process.dummy)
         process.GENpartonPSanalyzers.remove(process.dummy)
@@ -3084,6 +3152,7 @@ process.ecalMomentum.scaleType           = cms.string("abs")
 process.ecalMomentum.resolutionFactors   = cms.vdouble(1.0)
 process.ecalMomentum.resolutionEtaRanges = cms.vdouble(0, -1)
 process.ecalMomentum.inputElectrons      = cms.InputTag("selectedPatElectrons")
+process.ecalMomentum.inputJets           = cms.InputTag("selectedPatJetsAK5PF")
 for path in pathlist:
     path.replace(process.pf2pat,
                  process.pf2pat * process.ecalMomentum)
@@ -3091,8 +3160,8 @@ for path in pathlist:
 # reduce module content if reduced==True
 if(reduced):
     for path in allpaths:
-        if(hasattr(process,                      'eventWeightNoPUWeight')):
-            getattr(process,path).remove( process.eventWeightNoPUWeight    )
+        #if(hasattr(process,                      'eventWeightNoPUWeight')):  # still needed for PU control distribution analyzer!!!
+        #    getattr(process,path).remove( process.eventWeightNoPUWeight    )
         if(hasattr(process,                      'eventWeightFlatEffSF')):
             getattr(process,path).remove( process.eventWeightFlatEffSF     )
         if(hasattr(process,                      'analyzeTopRecoKinematicsKinFitNoWeight')):
@@ -3176,7 +3245,8 @@ if(runningOnData=="MC"):
             massSearchReplaceAnyInputTag(path, 'patMETs'        , 'scaledJetEnergy:patMETs'        )
         else:
             print "unknown jetType"
-
+    # keep uncorrected jets to avoid out of range error in this module
+    process.ecalMomentum.inputJets = "selectedPatJets"
     # eta-dependent smearing of the jet energy
     process.scaledJetEnergy.resolutionFactors   = cms.vdouble( 1.052 , 1.057 , 1.096 , 1.134 , 1.288 )
     process.scaledJetEnergy.resolutionEtaRanges = cms.vdouble(0.0,0.5,0.5,1.1,1.1,1.7,1.7,2.3,2.3,-1.)
@@ -3227,4 +3297,3 @@ for lep in relevantLeptonCollections:
         lep.cut=tmpExp
         if(tmpExp.find("\'")>-1):
             lep.cut=tmpExp.strip("'")
-

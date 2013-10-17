@@ -971,7 +971,7 @@ void AnalysisBase::GetRecoBranchesEntry(const Long64_t& entry)const
     //b_lepPhotonIso->GetEntry(entry);
     //b_lepPuChargedHadronIso->GetEntry(entry);
     //b_lepCombIso->GetEntry(entry);
-    //b_lepDxyVertex0->GetEntry(entry);
+    b_lepDxyVertex0->GetEntry(entry);
     //b_lepTrigger->GetEntry(entry);
     b_jet->GetEntry(entry);
     //b_jetBTagTCHE->GetEntry(entry);
@@ -1314,21 +1314,25 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     
     
     // 2 lines needed for OLD kinReco
-    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-    const int nSolution = sols.size();
+  const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+  const int nSolution = sols.size();
     
-    // 2 lines needed for NEW kinReco
-//    const KinematicReconstruction new_topsol(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met); //Option true - mass_loop ON; Option false - smearing ON; NO boolean option - weighted average
-//    const int nSolution = new_topsol.GetNSol();
+    // 3 lines needed for NEW kinReco
+    //const KinematicReconstruction new_topsol();
+//     KinematicReconstruction new_topsol = KinematicReconstruction();
+//     new_topsol.kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);//Option true - mass_loop ON; Option false - smearing ON; NO boolean option - weighted average
+//     const int nSolution = new_topsol.GetNSol();
     
     
     if(nSolution == 0) return false;
     
     // 1 line needed for OLD kinReco
-    const auto& sol = sols.at(0);
+  const auto& sol = sols.at(0);
     
     // 1 line needed for NEW kinReco
-//    const auto& sol = new_topsol.GetSol();
+//   const auto& sol = new_topsol.GetSol();
+  
+  
     
     // Fill the results of the on-the-fly kinematic reconstruction
     if(useObjectStructs_){

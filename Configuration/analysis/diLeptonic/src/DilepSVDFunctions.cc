@@ -42,7 +42,7 @@ TString DilepSVDFunctions::SVD_GetSteering(TString channel, TString particle, TS
     int flag_lowersidebin = 3;       // Cut out side bin on rec, not on gen level (3)
     int flag_uppersidebin = 3;       // Cut out side bin on rec, not on gen level (3)
     int flag_matrixorientation = 1;  // Transpose matrix prior to unfolding (1)
-    int flag_norm = 1;               // Extrinsic Normalization (1) 
+    int flag_norm = 2;               // Extrinsic Normalization (1) 
     int flag_closure = 1;            // Turn off closure test (1) 
     int flag_preweighting = 1;       // Reweighting prior to unfolding off (1)
     

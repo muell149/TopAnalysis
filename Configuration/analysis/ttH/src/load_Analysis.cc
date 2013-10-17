@@ -135,6 +135,9 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                                       Channel::convertChannels(Channel::realChannels),
                                       Systematic::convertSystematic(systematic));
     
+    
+    std::vector<AnalysisHistogramsBase*> v_analysisHistograms;
+    
     // Set up jet categories for overview
     const JetCategories jetCategories_overview(2, 5, 0, 5, true, true);
     
@@ -144,15 +147,18 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up event yield histograms
     EventYieldHistograms* eventYieldHistograms(0);
     eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
+    v_analysisHistograms.push_back(eventYieldHistograms);
     
     // Set up Drell-Yan scaling histograms
     DyScalingHistograms* dyScalingHistograms(0);
     dyScalingHistograms = new DyScalingHistograms({"4", "5", "6", "7", "8"}, "5");
+    v_analysisHistograms.push_back(dyScalingHistograms);
     
     // Set up basic histograms
     BasicHistograms* basicHistograms(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::cp) != v_analysisMode.end()){
         basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
+        v_analysisHistograms.push_back(basicHistograms);
     }
     
     // Set up playground
@@ -160,26 +166,29 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::playg) != v_analysisMode.end()){
         //playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"},{"7", "8"}, &jetCategories_overview);
         playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"});
+        v_analysisHistograms.push_back(playground);
     }
     
     // Set up DijetAnalyzer
     DijetAnalyzer* dijetAnalyzer(0);
     const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end()){
-        dijetAnalyzer= new DijetAnalyzer({}, {"8"}, &jetCategories_dijetAnalyzer);
-    }
-    
-    // Set up production of MVA input tree
-    const JetCategories jetCategories_mva(4, 4, 1, 3, true, true);
-    MvaTreeHandler* mvaTreeHandler(0);
-    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"10"}, {"10"}, &jetCategories_mva);
+        dijetAnalyzer = new DijetAnalyzer({}, {"8"}, &jetCategories_dijetAnalyzer);
+        v_analysisHistograms.push_back(dijetAnalyzer);
     }
     
     // Set up MVA validation, including reading in MVA weights in case they exist
     MvaValidation* mvaValidation(0);
+    const JetCategories jetCategories_mva(4, 4, 1, 3, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
         mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE, {"10"}, {"10"}, &jetCategories_mva);
+        v_analysisHistograms.push_back(mvaValidation);
+    }
+    
+    // Set up production of MVA input tree
+    MvaTreeHandler* mvaTreeHandler(0);
+    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
+        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"10"}, {"10"}, &jetCategories_mva);
     }
     
     // Set up the analysis
@@ -192,12 +201,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetUseObjectStructs(true);
     
     selector->SetMvaInputProduction(mvaTreeHandler);
-    selector->SetMvaValidation(mvaValidation);
-    selector->SetEventYieldHistograms(eventYieldHistograms);
-    selector->SetDyScalingHistograms(dyScalingHistograms);
-    selector->SetBasicHistograms(basicHistograms);
-    selector->SetPlayground(playground);
-    selector->SetDijetAnalyzer(dijetAnalyzer);
+    selector->SetAllAnalysisHistograms(v_analysisHistograms);
     
     // Access selectionList containing all input sample nTuples
     ifstream infile("selectionList.txt");

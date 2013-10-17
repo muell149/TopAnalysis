@@ -104,6 +104,27 @@ void ttbar::selectIndices(std::vector<int>& v_index, const VLV& v_lv, const ttba
     selectIndices(v_index, v_variable, cutValue, lowerThreshold);
 }
 
+void ttbar::selectIndices(std::vector<int>& v_index, const std::vector<int>& v_variable0, const std::vector<double>& v_variable,
+                          const double cutValue, const bool lowerThreshold)
+{
+    std::vector<int> result;
+    for(const int index : v_index){
+        const int& variable0(v_variable0.at(index));
+        if(std::abs(variable0)==11) {
+        const double& variable(v_variable.at(index));
+            if(lowerThreshold){
+                if(variable<cutValue) continue;
+            }
+            else{
+                if(variable>cutValue) continue;
+            }
+        }
+        result.push_back(index);
+    }
+    v_index.clear();
+    v_index = result;
+
+}
 
 
 int ttbar::extremumIndex(const VLV& v_lv, const ttbar::LVParameter& parameter, const bool maximumValue)

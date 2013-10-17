@@ -19,10 +19,16 @@ namespace ttbar{
                    const TH1* histDenominator,
                    const Double_t& ratioMin, 
                    const Double_t& ratioMax, 
+                   const bool addFit = 0,
                    const TStyle& myStyle = *gStyle, 
                    const int verbose=0, 
                    const std::vector<double>& err=std::vector<double>(0));
 
+    /// Draw ratio of histograms if not NULL pointers
+    void drawRatioXSEC(const TH1* histNumerator, const TH1* histDenominator1, 
+                       const TH1* histDenominator2 = 0, const TH1* histDenominator3 = 0, const TH1* histDenominator4 = 0, const TH1* histDenominator5 = 0, const TH1* histDenominator6 = 0, const TH1* histDenominator7 = 0,
+                       const Double_t& ratioMin = 0.5, const Double_t& ratioMax = 1.5, 
+                       TStyle myStyle = *gStyle);//, int verbose = , const std::vector<double>& err=std::vector<double>(0));
 
 
     /// Set histogram style to HH definition

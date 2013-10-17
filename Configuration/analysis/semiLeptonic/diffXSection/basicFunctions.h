@@ -116,6 +116,8 @@ namespace semileptonic {
   const unsigned int constNnloColor     = kOrange+4;
   const unsigned int constNnloColor2    = kMagenta+2;
   const unsigned int constMadgraphPerugiaColor = kRed-7;
+  const unsigned int constMadgraphPerugiaMpiHiColor = kCyan;
+  const unsigned int constMadgraphPerugiaNoCRColor  = kRed-5;
 
   // Line style for theory curves
 
@@ -125,6 +127,8 @@ namespace semileptonic {
   const unsigned int constMcatnloStyle = 5;
   const unsigned int constNnloStyle2   = 10;
   const unsigned int constMadgraphPerugiaStyle = 3;
+  const unsigned int constMadgraphPerugiaNoCRStyle  = 3;
+  const unsigned int constMadgraphPerugiaMpiHiStyle = 3;
 
   // legend entries for theory curves
   const TString constMadGraphPythiaLabel   = "MadGraph+Pythia";
@@ -134,7 +138,9 @@ namespace semileptonic {
   const TString constNnloLabelKidonakis = "Approx. NNLO";
   const TString constMcatnloHerwigLabel = "MC@NLO+Herwig";
   const TString constNloNNLLLabelAhrens = "NLO+NNLL";
-  const TString constMadGraphPythiaPerugiaLabel = "MadGraph+Pythia (Perugia)";
+  const TString constMadGraphPythiaPerugiaLabel      = "MadGraph+Pythia(P11)";
+  const TString constMadGraphPythiaPerugiaNoCRLabel  = "MadGraph+Pythia(P11,noCR)";
+  const TString constMadGraphPythiaPerugiaMpiHiLabel = "MadGraph+Pythia(P11,MpiHi)";
 
   // Marker style (<=kSAToptW)
 
@@ -196,14 +202,14 @@ namespace semileptonic {
 
   const double SF_TopMassDownUncertainty=0.9/3.0; // scale factors for top mass uncertainty
   const double SF_TopMassUpUncertainty  =0.9/3.0; // --> world average is presently known at +/-0.9 GeV (arXiv:1107.5255v3 [hep-ex])
-                                                   // --> systematic samples are varied by +/-3.0 GeV 
-                                                   // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
+                                                  // --> systematic samples are varied by +/-3.0 GeV 
+                                                  // --> linearily rescale uncertainty on top mass in combineTopDiffXSecUncertainties.C
 
   const double constHadUncertainty   = 0.050; // relative uncertainty // outdated and only used as placeholder for bquark quantities
-  const double globalLumiUncertainty = 0.044; // relative uncertainty 
+  const double globalLumiUncertainty = sqrt(0.025*0.025+0.005*0.005); // relative uncertainty // from CMS-PAS-LUM-13-001
 	
-  const double constLumiElec = 19800.0; // luminosity of Jan22ReReco ABCD dataset
-  const double constLumiMuon = 19800.0; // luminosity of Jan22ReReco ABCD dataset
+  const double constLumiElec = 19712.0; // luminosity of Jan22ReReco ABCD dataset, see https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM, LUM-13-001
+  const double constLumiMuon = 19712.0; // see above
   
   const double BRPDG=0.145888;
 
@@ -646,6 +652,7 @@ namespace semileptonic {
     // modified quantities: NONE
     // used functions: NONE
     // used enumerators: NONE
+    if(value==0.) return 0.;
     double modvalue=std::abs(value);
     for(int i=0; i<10; ++i){
       if(modvalue>=1){
@@ -1275,7 +1282,7 @@ namespace semileptonic {
     return fileName;
   }
 
-  void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName, const bool savePdf=true, const bool saveEps=true )
+  void saveCanvas(const std::vector<TCanvas*> MyCanvas, const TString outputFolder, const TString pdfName, const bool savePdf=true, const bool saveEps=true, const bool savePng=false )
   {
     // introduce function that saves every single canvas in
     // MyCanvas as ./outputFolder/CanvasTitle.eps and in addition
@@ -1296,6 +1303,12 @@ namespace semileptonic {
     if(saveEps){
       for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
 	MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".eps");
+      }
+    }
+    // c) save every plot as png with title as name
+    if(savePng){
+      for(unsigned int idx=0; idx<MyCanvas.size(); idx++){
+	MyCanvas[idx]->Print(outputFolder+(TString)(MyCanvas[idx]->GetTitle())+".png");
       }
     }
   }
@@ -1346,7 +1359,7 @@ namespace semileptonic {
       return files_;
     }
 
-  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0, bool SSV=false, TString ignorePartNameInMC="")
+  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0, bool SSV=false, TString ignorePartNameInMC="", std::vector<TString> *vecRedundantPartOfNameInNonTTbarSG = 0)
   {
     // this function searches for every plot listed in "plotList_" in all files listed in "files_",
     // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -1361,6 +1374,7 @@ namespace semileptonic {
     //                              (needed to handle systematic variations where foldername in data and MC is different)
     // "SSV": for all btagging plots SSV control plots are used instead of the default (CSV) plots
     // "ignorePartNameInMC": like redundantPartOfNameInData, but for MC instead of data
+    //  "ignorePartNameInNonTTbarSG": like ignorePartNameInMC, but for non ttbar MC only, expects the format plotname/ignoreString
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1399,8 +1413,27 @@ namespace semileptonic {
 		plotname.ReplaceAll((*iter), ""); 
 	      }
 	    }
+	    // by hand fix for probability label in mixed object analyzer data folder
+	    if(ignorePartNameInMC=="ProbSel"&&plotname.Contains("compositedKinematicsKinFit")){
+	      plotname.ReplaceAll("compositedKinematicsKinFit","compositedKinematicsProbSel");
+	    }
 	  }
-	  else plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	  else{
+	    plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	    if(sample!=kSig){
+	      if (vecRedundantPartOfNameInNonTTbarSG != 0 && vecRedundantPartOfNameInNonTTbarSG->size() != 0){
+		std::vector<TString>::iterator iter;
+		for (iter = (vecRedundantPartOfNameInNonTTbarSG->begin()); iter != (vecRedundantPartOfNameInNonTTbarSG->end()); iter++){
+		  TString targetPlotString = getStringEntry((*iter), 1);
+		  TString ignorePartNameInNonttbar= getStringEntry((*iter), 2);
+		  std::cout << ignorePartNameInNonttbar << std::endl;
+		  if(plotname.Contains(targetPlotString)){
+		    plotname.ReplaceAll(ignorePartNameInNonttbar, "");
+		  } // end if plot is target plot
+		} // end loop vecRedundantPartOfNameInNonTTbarSG elements
+	      } // end if vecRedundantPartOfNameInNonTTbarSG non empty
+	    } // end if !SG
+	  } // end else kData
 	  if(hugo) std::cout << "-> searching plot " << plotname << std::endl;
 	  files_[sample]->GetObject(plotname, targetPlot);
 	  // Check existence of plot
@@ -1434,8 +1467,28 @@ namespace semileptonic {
 		if (plotname.Contains((*iter))) plotname.ReplaceAll((*iter), "");
 	      }
 	    }
+	    // by hand fix for probability label in mixed object analyzer data folder
+	    if(ignorePartNameInMC=="ProbSel"&&plotname.Contains("compositedKinematicsKinFit")){
+	      plotname.ReplaceAll("compositedKinematicsKinFit","compositedKinematicsProbSel");
+	    }
 	  }
-	  else plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	  else {
+	    plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	    if(sample!=kSig){
+	      if (vecRedundantPartOfNameInNonTTbarSG != 0 && vecRedundantPartOfNameInNonTTbarSG->size() != 0){
+		std::vector<TString>::iterator iter;
+		for (iter = (vecRedundantPartOfNameInNonTTbarSG->begin()); iter != (vecRedundantPartOfNameInNonTTbarSG->end()); iter++){
+		  TString targetPlotString = getStringEntry((*iter), 1);
+		  TString ignorePartNameInNonttbar= getStringEntry((*iter), 2);
+		  if(plotname.Contains(targetPlotString)){
+		    // debug
+		    if(verbose>1) std::cout << "INFO: plot " << plotname << " in sample " << sampleLabel(sample, decayChannel) << " contains " << targetPlotString << " - will ignore " << ignorePartNameInNonttbar << " in name" << std::endl;
+		    plotname.ReplaceAll(ignorePartNameInNonttbar, "");
+		  } // end if plot is target plot
+		} // end loop vecRedundantPartOfNameInNonTTbarSG elements
+	      } // end if vecRedundantPartOfNameInNonTTbarSG non empty
+	    } // end if !SG
+	  } // end else kData
 	  // check if file exists
 	  // give warning if file does not exist
 	  if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample,decayChannel) << " does not exist- continue and neglect this sample" << std::endl;
@@ -2077,7 +2130,7 @@ namespace semileptonic {
       bins_.clear();
 
       // N(jets)
-      double NjetsBins[]={0.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 14.5};
+      double NjetsBins[]={3.5, 4.5, 5.5, 6.5, 7.5, 9.5};
       bins_.insert( bins_.begin(), NjetsBins, NjetsBins + sizeof(NjetsBins)/sizeof(double) );
       result["Njets"]=bins_;
       bins_.clear();
@@ -3158,6 +3211,218 @@ namespace semileptonic {
     }
   }
 
+
+  void makeTheoryUncertaintyBands(std::map< TString, std::map <unsigned int, TH1F*> >& histo_,
+				  std::map< TString, TH1F* >& histoErrorBand_,
+				  std::vector<TString>& plotList_, std::vector<TString>& plotListEl_, std::vector<TString>& plotListMu_,
+				  int& Nplots, unsigned int& N1Dplots,
+				  TString& inputFolder, TString& dataFileMu, TString& dataFileEl,
+				  std::vector<TString> vecRedundantPartOfNameInData,
+				  double& luminosityMu, double& luminosityEl
+				  )
+  {
+    // this function generates set of errorbands ("histoErrorBand_") for all samples 
+    // and histogrammes in "histo_", using the "Nplots" plots listed in "plotList_" 
+    // taking into account ttbar modeling uncertainties
+    // 
+    // modified quantities: histoErrorBand_
+    // used functions:      getStdTopAnalysisFiles
+    // used enumerators:    samples, systematicVariation, 
+
+    // internal configurations
+    int verbose=0;  // printout within makeTheoryUncertaintyBands
+    int verbose2=0; // argument passed to called functions
+    unsigned int sysNoBG =42;
+    unsigned int sysNoAll=42*42;
+
+    // debug output
+    if(verbose>0) std::cout << "executing function makeTheoryUncertaintyBands" << std::endl;
+
+    // A collect relevant systematics
+    // WARNING: systematics are expected to be listed as up/down pairs in this order!!!
+    if(verbose>0) std::cout << std::endl << "A collect relevant systematics" << std::endl;
+    std::vector<int> RelevantSys_;
+    int sysList[ ] = { sysTopMatchUp, sysTopMatchDown, sysTopScaleUp, sysTopScaleDown, sysTopMassUp, sysTopMassDown };
+    RelevantSys_.insert(RelevantSys_.begin(), sysList, sysList+ sizeof(sysList)/sizeof(int));
+    if(verbose>1){
+      std::cout << "considered systematics: " << std::endl;
+      for(unsigned int i=0; i<RelevantSys_.size(); ++i){
+	std::cout << sysLabel(RelevantSys_[i]) << std::endl;
+      }
+    }
+    // plot container
+    std::map< TString, std::map <unsigned int, TH1F*> > histoSys_;
+
+    // B Get ttbar sysNo Reference plot
+    if(verbose>0) std::cout << std::endl << "B Get ttbar sysNo Reference plot" << std::endl;
+    // loop plots
+    for(unsigned int plot=0; plot<N1Dplots; plot++){
+      // name of the plot
+      TString plotName = plotList_[plot];  
+      // debug output
+      if(verbose>1) std::cout << "plot #" << plot+1 << "/" << N1Dplots << ": " << plotName;
+      // consider only plots available for SG+BG
+      if(histo_[plotName].count(kSig)>0&&histo_[plotName].count(kBkg)>0&&histo_[plotName].count(kZjets)>0){
+	if(verbose>1)  std::cout << " (ok) ";
+	// get ttbar sysNo
+	histoSys_[plotName][sysNo]    = (TH1F*)histo_[plotName][kSig]->Clone();
+	histoSys_[plotName][sysNo]->Add((TH1F*)histo_[plotName][kBkg]->Clone());
+	// get non-ttbar sysNo
+	histoSys_[plotName][sysNoBG ]=(TH1F*)histoSys_[plotName][sysNo]->Clone();
+	histoSys_[plotName][sysNoBG ]->Reset("ICESM");
+	for(unsigned int sample=kZjets; sample<kData; ++sample){
+	  histoSys_[plotName][sysNoBG ]->Add((TH1F*)histo_[plotName][sample]->Clone());
+	}
+	// get combined sysNo
+	histoSys_[plotName][sysNoAll]=(TH1F*)histoSys_[plotName][sysNo]->Clone();
+	histoSys_[plotName][sysNoAll]->Add((TH1F*)histoSys_[plotName][sysNoBG]->Clone());
+      }
+      else if(verbose>1) std::cout << " (skipped) ";	
+      if(verbose>1) std::cout << std::endl;
+    }
+    
+    // C Get ttbar systematic shifted plots
+    if(verbose>0) std::cout << std::endl << "C Get ttbar systematic shifted plots" << std::endl;
+    // loop systematics
+    for(unsigned int sys=0; sys<RelevantSys_.size(); ++sys){
+      int sysNow=RelevantSys_[sys];
+      if(verbose>1) std::cout << "- " << sysLabel(sysNow) << ":" << std::endl;
+      // c1 get files
+      if(verbose>1) std::cout << "c1 get rootfiles" << std::endl;
+      std::map<unsigned int, TFile*> filesMu_, filesEl_;
+      filesMu_ = getStdTopAnalysisFiles(inputFolder, sysNow, dataFileMu, "muon"    , "Madgraph");
+      filesEl_ = getStdTopAnalysisFiles(inputFolder, sysNow, dataFileEl, "electron", "Madgraph");
+      // c2 get plots 
+      if(verbose>1) std::cout << "c2 get all plots" << std::endl;
+      std::map< TString, std::map <unsigned int, TH1F*> > histoEl_ , histoMu_, histoComb_;
+      std::map< TString, std::map <unsigned int, TH2F*> > histo2El_, histo2Mu_, histo2Comb_;
+      getAllPlots(filesEl_, plotListEl_, histoEl_, histo2El_, N1Dplots, Nplots, verbose2, "electron", &vecRedundantPartOfNameInData, false);
+      getAllPlots(filesMu_, plotListMu_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose2, "muon"    , &vecRedundantPartOfNameInData, false);
+      // c3 lumi scale
+      if(verbose>1) std::cout << "c3 lumiscaling" << std::endl;
+      scaleByLuminosity(plotListMu_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose2, sysNow, "muon"    , "Madgraph");
+      scaleByLuminosity(plotListEl_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose2, sysNow, "electron", "Madgraph");
+      // c4 add channels
+     if(verbose>1) std::cout << "c4 add mu and el channel plots" << std::endl;
+      // loop samples
+      for(unsigned int sample=kSig; sample<kData; ++sample){
+	if(verbose>2) std::cout << sampleLabel(sample, "combined") << std::endl;
+	// loop plots
+	for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+	  if(verbose>2) std::cout << "comb: " << plotList_[plot] << ", mu: " << plotListMu_[plot] << ", el: " << plotListEl_[plot] << std::endl;
+	  // c4.1) 1D, existing in both
+	  if((plot<N1Dplots)&&(histoMu_.count(plotListMu_[plot])>0)&&(histoMu_[plotListMu_[plot]].count(sample)>0)&&(histoEl_.count(plotListEl_[plot])>0)&&(histoEl_[plotListEl_[plot]].count(sample)>0)){ 
+	    if(verbose>2) std::cout << "-> 1D" << std::endl;
+	    // add channels
+	    histoComb_[plotList_[plot]][sample]=     (TH1F*)(histoMu_[plotListMu_[plot]][sample]->Clone());
+	    // take care of lepton pt from different folders
+	    if (plotListMu_[plot]=="tightMuonKinematics/pt"){
+	      histoComb_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_["tightElectronKinematics/et"][sample]->Clone()));
+	    }
+	    else histoComb_[plotList_[plot]][sample]->Add((TH1F*)(histoEl_[plotListEl_[plot]][sample]->Clone()));
+	  }
+	  // c4.2) 2D, existing in both
+	  else if((plot>=N1Dplots)&&(histo2Comb_.count(plotList_[plot])>0)&&(histo2Comb_[plotList_[plot]].count(sample)>0)){
+	    if(verbose>2) std::cout << "-> 2D" << std::endl;
+	    // add them
+	    histo2Comb_[plotList_[plot]][sample]=     (TH2F*)(histo2Mu_[plotListMu_[plot]][sample]->Clone());
+	    histo2Comb_[plotList_[plot]][sample]->Add((TH2F*)(histo2El_[plotListEl_[plot]][sample]->Clone()));
+	  }
+	  else{
+	    if(verbose>2){
+	      std::cout << "WARNING: " << plotList_[plot] << "NOT FOUND" << std::endl;
+	      if(!histoMu_.count(plotListMu_[plot])>0) std::cout << "in histoMu" << std::endl;
+	      if( histoMu_.count(plotListMu_[plot])>0&&!histoMu_[plotListMu_[plot]].count(sample)>0) std::cout << "in mu sample " << sampleLabel(sample, "muon"    ) << std::endl;
+	      if(!histoEl_.count(plotListEl_[plot])>0) std::cout << "in histoEl" << std::endl;
+	      if( histoEl_.count(plotListEl_[plot])>0&&!histoEl_[plotListEl_[plot]].count(sample)>0) std::cout << "in el sample " << sampleLabel(sample, "electron") << std::endl;
+	    } // end if verbose
+	  } // ende else (plot not found)
+	} // end loop plots
+      } // end loop sample
+      // c5 rebinning and storing of systematically shifted plots
+      if(verbose>1) std::cout << "c5 rebinning and storing of systematically shifted plots" << std::endl;
+      // loop plots
+      for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+	// plot name
+	TString plotName = plotList_[plot];
+	// debug output
+	if(verbose>2) std::cout << "- plot #" << plot+1 << "/" << plotList_.size() << ": " << plotName;
+	// existing 1D plots
+	if( histoSys_[plotName].count(kSig)>0 && histo_.count(plotList_[plot])>0 && histoComb_.count(plotList_[plot])>0 && plot<N1Dplots ){
+	  // do rebinning (based on sysNo binning)
+	  int reBinFactor=roundToInt((histoComb_[plotName][kSig]->GetNbinsX())/(histo_[plotName][sysNo]->GetNbinsX()));
+	  if(reBinFactor>1){
+	    equalReBinTH1(reBinFactor, histoComb_, plotName, kSig);
+	    equalReBinTH1(reBinFactor, histoComb_, plotName, kBkg);
+	  }
+	  // store Plot
+	  histoSys_[plotName][sysNow]     =(TH1F*)histoComb_[plotName][kSig]->Clone();
+	  histoSys_[plotName][sysNow]->Add((TH1F*)histoComb_[plotName][kBkg]->Clone());
+	  // ensure same normalization as in sysNo sample
+	  // (N.B.: was scales to inclusive cross section derived from data)	  
+	  histoSys_[plotName][sysNow]->Scale((histoSys_[plotName][sysNo]->Integral(0,histoSys_[plotName][sysNo]->GetNbinsX()+1))/(histoSys_[plotName][sysNow]->Integral(0,histoSys_[plotName][sysNow]->GetNbinsX()+1)));
+	}
+      } // for plots
+    } // end loop systematics
+    
+    // D Symmetrize and Combine Variations, create error band  
+    if(verbose>0) std::cout << std::endl << "D Symmetrize and Combine Variations, create error band" << std::endl;    
+    // loop plots
+    for(unsigned int plot=0; plot<plotList_.size(); ++plot){
+      // mane of plot
+      TString plotName = plotList_[plot];
+      // debug output
+      if(verbose>1) std::cout << "- plot #" << plot+1 << "/" << plotList_.size() << ": " << plotName;
+      // process only 1D plots existing for SG & BG and in the loaded files
+      if( histoSys_[plotName].count(kSig)>0 ){
+	// clone sysNo for errorband
+	histoErrorBand_[plotName]=(TH1F*)histoSys_[plotName][sysNoAll]->Clone();
+	// loop bins
+	for (int bin=1; bin<=histoErrorBand_[plotName]->GetNbinsX(); ++bin){
+	  // debug output
+	  if(verbose>2) std::cout << "  - bin #" << bin << "/" << histoErrorBand_[plotName]->GetNbinsX() << std::endl;
+	  double NttbarSysNo=histoSys_[plotName][sysNo  ]->GetBinContent(bin);
+	  double NBGSysNo   =histoSys_[plotName][sysNoBG]->GetBinContent(bin);
+	  double uncUp=0;
+	  double uncDn=0;
+	  // loop systematics
+	  for(unsigned int sys=0; sys<RelevantSys_.size(); ++sys){
+	    int sysNow=RelevantSys_[sys];
+	    // debug output
+	    if(verbose>2) std::cout << "    - " << sysLabel(sysNow);
+	    if(histoSys_[plotName].count(sysNow)>0){
+	      if(verbose>2) std::cout << " (considered)" << std::endl;
+	      // process up and down at the same time (during dn is looped)
+	      if(verbose>2) std::cout << sys+1 << "%2=" << (sys+1)%2 << std::endl;
+	      if(((sys+1)%2)==0){
+		if(verbose>2) std::cout << "down systematics" << std::endl;
+		int sysUp=RelevantSys_[sys-1];
+		int sysDn=RelevantSys_[sys  ];
+		double NttbarSysUp=histoSys_[plotName][sysUp]->GetBinContent(bin);
+		double NttbarSysDn=histoSys_[plotName][sysDn]->GetBinContent(bin);
+		double relDiffUp=std::abs((NttbarSysUp-NttbarSysNo)/(NttbarSysNo+NBGSysNo));
+		double relDiffDn=std::abs((NttbarSysDn-NttbarSysNo)/(NttbarSysNo+NBGSysNo));
+		// apply SF for mass uncertainty
+		if(sysUp==sysTopMassUp&&sysDn==sysTopMassDown){
+		  relDiffDn*=SF_TopMassDownUncertainty;
+		  relDiffUp*=SF_TopMassUpUncertainty;
+		}
+		uncUp+=relDiffUp*relDiffUp;
+		uncDn+=relDiffDn*relDiffDn;
+	      } // end if modulo 2 - processing Dn systematics
+	    } // end if sys is successfully loaded
+	    else if(verbose>2) std::cout << " (skipped)" << std::endl;
+	  } // end loop systematics
+	  double uncSymm=(sqrt(uncUp)+sqrt(uncDn))/2;
+	  // Set uncertainty value for errorband
+	  histoErrorBand_[plotName]->SetBinError(bin, uncSymm*histoErrorBand_[plotName]->GetBinContent(bin));
+	} // end loop bins
+      } // end if plot exists
+      else if(verbose>1) std::cout << " (skipped)" << std::endl;
+    } // end loop plots
+    
+  }
+
   // ===========================================================================================
   // ===========================================================================================
   
@@ -4141,8 +4406,9 @@ namespace semileptonic {
 	  // optimized parameters for each PS, final state, selection and closure test configuration
 	    if(decayChannel.Contains("muon")){
 	      if(closureTestSpecifier==""){
-		// optimized parameters 
+		// optimized parameters (for mu+jets channel, cross check only) 
 		// top & ttbar:  hadron level not important
+                // FIXME: needs update for doubleKinFit
 		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 4.53         : 6.15        ) : 7.22;
 		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 2.52         : 3.41        ) : 7.22;
 		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 3.15         : 4.27        ) : 7   ;
@@ -4165,8 +4431,9 @@ namespace semileptonic {
 	    }
 	    else if (decayChannel.Contains("electron")){
 	      if(closureTestSpecifier==""){
-		// optimized parameters 
+		// optimized parameters (for e+jets channel, cross check only)
 		// top & ttbar:  hadron level not important
+		// FIXME: needs update for doubleKinFit
 		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 4.82         : 6.30        ) : 7.45;
 		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 2.54         : 3.55        ) : 7.45;
 		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 3.28         : 4.47        ) : 7   ;
@@ -4188,31 +4455,35 @@ namespace semileptonic {
 	      }
 	    }
 	    else if(decayChannel.Contains("combined")){ 
-	      // optimized parameters 
-	      // top & ttbar:  hadron level not important
-	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ?  6.61/*7.28*//*8.64*/ :  8.82/*10.37*/) : 10.36;
-	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ?  3.59/*5.13*//*8.64*/ :  4.92/*10.37*/) : 10.36;
-	      else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ?  4.54                 :  6.19         ) :  7   ;
-	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ?  7.24/*8.83*//*8.64*/ :  9.73/*10.37*/) : 10.36;
-	      else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ?  9.70/*7.77*//*8.0 */ : 12.00/* 9.51*/) :  9.51;
-	      else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ?  5.89/*4.46*//*4.61*/ :  6.92/* 5.49*/) :  5.54;
-	      else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ?  8.06/*6.23*//*6.63*/ : 10.04/* 7.93*/) :  7.93;
-	      else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ?  4.60/*3.00*//*3.61*/ :  5.68/* 4.44*/) :  4.44;
-	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.24                 : 13.58         ) :  7   ;
-	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.20                 : 12.88         ) :  7   ;
-	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  7.24/*4.93*/    : 10.02/* 6.60*/  ) :  7.65);
-	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  2.69/*2.9e-07*/ :  3.75/*7.7e-06*/) :  3.00);
-	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ? 10.19/*8.56*/    : 16.00/*12.51*/  ) : 10.53);
-	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  8.10/*6.78*/    : 11.47/* 9.19*/  ) : 11.11);
-	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.62/*1.51*/    :  5.23/* 2.57*/  ) :  8   );
-	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  7.68/*8.20*/    :  8.33/*11.14*/  ) :  8   );
-	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  9.03            : 11.58           ) :  4   );
-	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.77/*FIXME*/   :  0.77           ) :  1   );
+	      // optimized parameters, those are the ones used for the main results 
+	      // top & ttbar:  visible PS (hadron+parton level) not relevant
+	      // lepton&b(jet): full PS and parton level PS  not relevant
+	      // probSel values correspond to doubleKinFit+Prob>2%
+	      //                   top/ttbar quantity                   (fullPS    doubleKinFit+Prob               default      )   dummy other PS  
+	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 6.87/*6.61*//*7.28*//*8.64*/ :  8.82/*10.37*/) : 10.36;
+	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 3.84/*3.59*//*5.13*//*8.64*/ :  4.92/*10.37*/) : 10.36;
+	      else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 4.86/*4.54*/                 :  6.19         ) :  7   ;
+	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 7.56/*7.24*//*8.83*//*8.64*/ :  9.73/*10.37*/) : 10.36;
+	      else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ? 9.59/*9.70*//*7.77*//*8.0 */ : 12.00/* 9.51*/) :  9.51;
+	      else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ? 5.85/*5.89*//*4.46*//*4.61*/ :  6.92/* 5.49*/) :  5.54;
+	      else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ? 7.68/*8.06*//*6.23*//*6.63*/ : 10.04/* 7.93*/) :  7.93;
+	      else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ? 4.55/*4.60*//*3.00*//*3.61*/ :  5.68/* 4.44*/) :  4.44;
+	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.54/*10.24*/                 : 13.58         ) :  7   ;
+	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.42/*10.20*/                 : 12.88         ) :  7   ;
+	      //          lepton/(b)jet quantity               dummy full PS    (visible PS:              doubleKinFit+Prob       default           )  dummy parton PS
+	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  6.78/*7.24*//*4.93*/    : 10.02/* 6.60*/  ) :  7.65);
+	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  2.46/*2.69*//*2.9e-07*/ :  3.75/*7.7e-06*/) :  3.00);
+	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ?  9.37/*10.19*//*8.56*/   : 16.00/*12.51*/  ) : 10.53);
+	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  7.61/*8.10*//*6.78*/    : 11.47/* 9.19*/  ) : 11.11);
+	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.32/*4.62*//*1.51*/    :  5.23/* 2.57*/  ) :  8   );
+	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  7.33/*7.68*//*8.20*/    :  8.33/*11.14*/  ) :  8   );
+	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  8.61/*9.03*/            : 11.58           ) :  4   );
+	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.71/*0.77*/            :  0.77           ) :  1   );
 	    }
 	}
 	else{
-	  // Default unfolding with number of bins
-	  // New Binning
+	  // Default unfolding with number of bins (see makeVariableBinning)
+	  // SVD unfolding at the moment NOT USED, values are only placeholders
 	  if     (variable.Contains("topPt")    ) k =  7;
 	  else if(variable.Contains("topY")     ) k = 10;
 	  else if(variable.Contains("ttbarPt")  ) k =  6;

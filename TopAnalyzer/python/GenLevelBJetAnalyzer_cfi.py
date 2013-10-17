@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-analyzeGenLevelBJetPlusHadron = cms.EDAnalyzer("GenLevelBJetAnalyzer",
+analyzeGenLevelBJets = cms.EDAnalyzer("GenLevelBJetAnalyzer",
     ttGenEvent = cms.InputTag('genEvt'),
     genJets = cms.InputTag('ak5GenJetsPlusHadron','','SIM'),   
     deltaR = cms.double(0.5),
