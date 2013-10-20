@@ -530,13 +530,9 @@ void DijetAnalyzer::bookHistos(const TString& step, std::map<TString, TH1*>& m_h
     name = "dijet_mass_trueTopJets";
     m_histogram[name] = store(new TH1D(prefix_+name+step, "Dijet mass;M(dijet) (trueTopJets)"+label+";Jet pairs",25,0,500));
     name = "dijet_mass_recoTopJets";
-<<<<<<< HEAD
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet) (recoTopJets)"+label+";Jet pairs",25,0,500));
-    name = "dijet_mass_genTopJets";
-    m_histogram[name] = store(new TH1D(prefix+name+step, "Dijet mass;M(dijet) (genTopJets)"+label+";Jet pairs",25,0,500));
-=======
     m_histogram[name] = store(new TH1D(prefix_+name+step, "Dijet mass;M(dijet) (recoTopJets)"+label+";Jet pairs",25,0,500));
->>>>>>> 15f62704cb85caf413f1c829a8e64ba20cbf83cb
+    name = "dijet_mass_genTopJets";
+    m_histogram[name] = store(new TH1D(prefix_+name+step, "Dijet mass;M(dijet) (genTopJets)"+label+";Jet pairs",25,0,500));
 
     name = "dijet_mass_all_jetPtLt30";
     m_histogram[name] = store(new TH1D(prefix_+name+step, "Dijet mass;M(dijet)_{Pt<30} (all)"+label+";Jet pairs",25,0,500));
