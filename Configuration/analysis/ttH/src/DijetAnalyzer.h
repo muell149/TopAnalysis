@@ -74,7 +74,8 @@ private:
     float correctPairFraction(const VLV& allJets, const std::vector<int>& jetsId,
                               const std::vector<int>& bJetsId, const std::vector<double>& jetsBtagDiscriminant,
                               const std::vector<int>& topJetsId, const std::vector<int>& higgsJetsId,
-                              const double weight, TH1* h_dijetMass, TH1* h_correctJetMultiplicity, const bool fillAllCombinations = true);
+                              const double weight, TH1* h_dijetMass, TH1* h_correctJetMultiplicity, const bool fillAllCombinations = true,
+                              const double jetPt_threshold = 0.0, const int lowerHigher = 0 );
 
     /// Fill histograms about Gen/Reco matching: comparison of dR to true matching
     void fillGenRecoMatchingComparisonHistos(const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
