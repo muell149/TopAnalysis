@@ -14,6 +14,7 @@ source $(dirname `readlink -f $0`)/parallelTools.sh
 
 
 for c in ee emu mumu; do
+    w
     $LA -f dy -d 11 -c $c $@ &
     $LA -f dy -d 13 -c $c $@ &
     $LA -f dy -d 15 -c $c $@ &
@@ -22,13 +23,14 @@ for c in ee emu mumu; do
 done
 
 for c in ee emu mumu; do
+    w
     $LA -f ${c}_run2012A -c $c $@ &
     $LA -f ${c}_run2012B -c $c $@ &
     $LA -f ${c}_run2012C -c $c $@ &
     $LA -f ${c}_run2012D -c $c $@ &
 done 
 
-for i in qcd single ttbarbg.root wtol ww wz zz ttbarW ttbarZ; do
+for i in qcd single ttbarbg.root wtol wwtoall wztoall zztoall ttbarW ttbarZ; do
     w
     $LA -f $i -c ee $@ &
     $LA -f $i -c emu $@ &

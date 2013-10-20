@@ -202,7 +202,7 @@ else:
 if(not globals().has_key('additionalEventWeights')): 
     additionalEventWeights  = True
 
-## enable/ disable systematic shape distortion event reweighting
+## enable/ disable systematic ttbar shape distortion event reweighting
 if(not globals().has_key('sysDistort')):
     sysDistort =  ''
     #sysDistort =  'data'
@@ -223,7 +223,7 @@ if(not options.MCweighting=='unset'):
 # take care of data
 if (not runningOnData == "MC"):
     MCweighting = False
-        
+
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
 
@@ -641,7 +641,7 @@ print " Label for MC samples:               ",options.mctag
 print " Chosen sample                       ",options.sample
 print " Lepton decay channel:               ",decayChannel
 print " ttbar filter:                       ",eventFilter," ---- Obsolete if RunningOnData != 'MC' "
-print " Include tau->l events               ",tau
+print " Include tau->l events in SG         ",tau
 print " B-tag algo:                         ",bTagAlgo
 print " B-tag discriminator cut value:      ",bTagDiscrCut
 print " Apply PU reweighting:               ",PUreweigthing
@@ -1790,7 +1790,7 @@ process.load("TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi")
 #process.eventWeightDileptonModelVariation.variation=cms.string(sysDistort)
 #process.eventWeightDileptonModelVariation.ttGenEvent=cms.InputTag('genEvt')
 process.eventWeightDileptonModelVariation.ttGenEvent = cms.InputTag('genEvt')
-process.eventWeightDileptonModelVariation.weightVariable = cms.string('data') #valid values: toppt, topeta, ttbarmass, data
+process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass') #valid values: toppt, topeta, ttbarmass, data
 process.eventWeightDileptonModelVariation.slope = cms.double(0.00137)
 process.eventWeightDileptonModelVariation.weight1x = cms.double(113.9)  #position where weight is 1
 process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-off, at least 0.1 event weight
@@ -2297,21 +2297,30 @@ if(runningOnData=="MC" and PUreweigthing):
             setattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys, process.analyzeTopPartonLevelKinematicsBjets.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys).useTree = False
             setattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys, process.analyzeTopPartonLevelKinematicsLepton.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys).useTree = False          
+            getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys).useTree = False
+            setattr(process,"compositedPartonGen"+sys, process.compositedPartonGen.clone(weight=weightTagName))
+            #getattr(process,"compositedPartonGen"+sys).useTree = False 
+            
             # create plots for parton level PS
             setattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
             setattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys).useTree = False            
             setattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys).useTree = False           
+            getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys).useTree = False
+            setattr(process,"compositedPartonGenPhaseSpace"+sys, process.compositedPartonGenPhaseSpace.clone(weight=weightTagName))
+            #getattr(process,"compositedPartonGenPhaseSpace"+sys).useTree = False 
+
             # create plots for hadron level PS
             setattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
             setattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys).useTree = False           
             setattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsLeptonPhaseSpace.clone(weight=weightTagName))
-            getattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys).useTree = False           
+            getattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys).useTree = False
+            setattr(process,"compositedHadronGenPhaseSpace"+sys, process.compositedHadronGenPhaseSpace.clone(weight=weightTagName))
+            #getattr(process,"compositedHadronGenPhaseSpace"+sys).useTree = False
+            
             # analyzer to be added to sequence
             process.GENFULLanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematics"+sys)
             process.GENpartonPSanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys)
@@ -2322,6 +2331,10 @@ if(runningOnData=="MC" and PUreweigthing):
             process.GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys)
             process.GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys)
             process.GENhadronPSbanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys)
+            process.GENFULLbanalyzers    *=getattr(process,"compositedPartonGen"+sys)
+            process.GENpartonPSbanalyzers*=getattr(process,"compositedPartonGenPhaseSpace"+sys)
+            process.GENhadronPSbanalyzers*=getattr(process,"compositedHadronGenPhaseSpace"+sys)
+            
 
         process.GENFULLanalyzers.remove(process.dummy)
         process.GENpartonPSanalyzers.remove(process.dummy)

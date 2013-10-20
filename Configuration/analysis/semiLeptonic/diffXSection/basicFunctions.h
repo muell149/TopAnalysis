@@ -1359,7 +1359,7 @@ namespace semileptonic {
       return files_;
     }
 
-  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0, bool SSV=false, TString ignorePartNameInMC="")
+  void getAllPlots( std::map<unsigned int, TFile*> files_, const std::vector<TString> plotList_,  std::map< TString, std::map <unsigned int, TH1F*> >& histo_, std::map< TString, std::map <unsigned int, TH2F*> >& histo2_, const unsigned int N1Dplots, int& Nplots, const int verbose=0, const std::string decayChannel = "unset", std::vector<TString> *vecRedundantPartOfNameInData = 0, bool SSV=false, TString ignorePartNameInMC="", std::vector<TString> *vecRedundantPartOfNameInNonTTbarSG = 0)
   {
     // this function searches for every plot listed in "plotList_" in all files listed in "files_",
     // saves all 1D histos into "histo_" and all 2D histos into "histo2_"
@@ -1374,6 +1374,7 @@ namespace semileptonic {
     //                              (needed to handle systematic variations where foldername in data and MC is different)
     // "SSV": for all btagging plots SSV control plots are used instead of the default (CSV) plots
     // "ignorePartNameInMC": like redundantPartOfNameInData, but for MC instead of data
+    //  "ignorePartNameInNonTTbarSG": like ignorePartNameInMC, but for non ttbar MC only, expects the format plotname/ignoreString
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1412,8 +1413,27 @@ namespace semileptonic {
 		plotname.ReplaceAll((*iter), ""); 
 	      }
 	    }
+	    // by hand fix for probability label in mixed object analyzer data folder
+	    if(ignorePartNameInMC=="ProbSel"&&plotname.Contains("compositedKinematicsKinFit")){
+	      plotname.ReplaceAll("compositedKinematicsKinFit","compositedKinematicsProbSel");
+	    }
 	  }
-	  else plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	  else{
+	    plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	    if(sample!=kSig){
+	      if (vecRedundantPartOfNameInNonTTbarSG != 0 && vecRedundantPartOfNameInNonTTbarSG->size() != 0){
+		std::vector<TString>::iterator iter;
+		for (iter = (vecRedundantPartOfNameInNonTTbarSG->begin()); iter != (vecRedundantPartOfNameInNonTTbarSG->end()); iter++){
+		  TString targetPlotString = getStringEntry((*iter), 1);
+		  TString ignorePartNameInNonttbar= getStringEntry((*iter), 2);
+		  std::cout << ignorePartNameInNonttbar << std::endl;
+		  if(plotname.Contains(targetPlotString)){
+		    plotname.ReplaceAll(ignorePartNameInNonttbar, "");
+		  } // end if plot is target plot
+		} // end loop vecRedundantPartOfNameInNonTTbarSG elements
+	      } // end if vecRedundantPartOfNameInNonTTbarSG non empty
+	    } // end if !SG
+	  } // end else kData
 	  if(hugo) std::cout << "-> searching plot " << plotname << std::endl;
 	  files_[sample]->GetObject(plotname, targetPlot);
 	  // Check existence of plot
@@ -1447,8 +1467,28 @@ namespace semileptonic {
 		if (plotname.Contains((*iter))) plotname.ReplaceAll((*iter), "");
 	      }
 	    }
+	    // by hand fix for probability label in mixed object analyzer data folder
+	    if(ignorePartNameInMC=="ProbSel"&&plotname.Contains("compositedKinematicsKinFit")){
+	      plotname.ReplaceAll("compositedKinematicsKinFit","compositedKinematicsProbSel");
+	    }
 	  }
-	  else plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	  else {
+	    plotname.ReplaceAll(ignorePartNameInMC, ""); 
+	    if(sample!=kSig){
+	      if (vecRedundantPartOfNameInNonTTbarSG != 0 && vecRedundantPartOfNameInNonTTbarSG->size() != 0){
+		std::vector<TString>::iterator iter;
+		for (iter = (vecRedundantPartOfNameInNonTTbarSG->begin()); iter != (vecRedundantPartOfNameInNonTTbarSG->end()); iter++){
+		  TString targetPlotString = getStringEntry((*iter), 1);
+		  TString ignorePartNameInNonttbar= getStringEntry((*iter), 2);
+		  if(plotname.Contains(targetPlotString)){
+		    // debug
+		    if(verbose>1) std::cout << "INFO: plot " << plotname << " in sample " << sampleLabel(sample, decayChannel) << " contains " << targetPlotString << " - will ignore " << ignorePartNameInNonttbar << " in name" << std::endl;
+		    plotname.ReplaceAll(ignorePartNameInNonttbar, "");
+		  } // end if plot is target plot
+		} // end loop vecRedundantPartOfNameInNonTTbarSG elements
+	      } // end if vecRedundantPartOfNameInNonTTbarSG non empty
+	    } // end if !SG
+	  } // end else kData
 	  // check if file exists
 	  // give warning if file does not exist
 	  if((files_.count(sample)==0)&&(plot==0)&&(verbose>0)) std::cout << "file for " << sampleLabel(sample,decayChannel) << " does not exist- continue and neglect this sample" << std::endl;
@@ -2090,7 +2130,7 @@ namespace semileptonic {
       bins_.clear();
 
       // N(jets)
-      double NjetsBins[]={0.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 14.5};
+      double NjetsBins[]={3.5, 4.5, 5.5, 6.5, 7.5, 9.5};
       bins_.insert( bins_.begin(), NjetsBins, NjetsBins + sizeof(NjetsBins)/sizeof(double) );
       result["Njets"]=bins_;
       bins_.clear();

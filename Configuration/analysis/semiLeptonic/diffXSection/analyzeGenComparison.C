@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeGenComparison(bool save = true, int verbose=0){
+void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations=false){
   
   // !!! run different ttbar MCs OR Theory Variations !!!
-  bool theoryVariations=false;
+  // theoryVariations=false OR true
 
   // ============================
   //  Set Root Style
@@ -23,20 +23,22 @@ void analyzeGenComparison(bool save = true, int verbose=0){
   std::vector<TFile* > file_;
   if(verbose>0) std::cout << "opening files" << std::endl;
   if(!theoryVariations){
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigSummer12PF.root"                    , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigPowhegSummer12PF.root"              , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigPowhegHerwigSummer12PF.root"        , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/combinedDiffXSecSigMcatnloSummer12PF.root"             , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugiaSummer12PF.root", "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"            , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPowhegSummer12PF.root"      , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPowhegHerwigSummer12PF.root", "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigMcatnloSummer12PF.root"     , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugiaSummer12PF.root"     , "Open"));
     file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugianoCRSummer12PF.root" , "Open"));
     file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigPerugiampiHiSummer12PF.root", "Open"));
   }
   else{
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                    , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchUp/combinedDiffXSecSigMatchUpSummer12PF.root"     , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchDown/combinedDiffXSecSigMatchDownSummer12PF.root" , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleUp/combinedDiffXSecSigScaleUpSummer12PF.root"     , "Open"));
-    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleDown/combinedDiffXSecSigScaleDownSummer12PF.root" , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                       , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchUp/combinedDiffXSecSigMatchUpSummer12PF.root"        , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchDown/combinedDiffXSecSigMatchDownSummer12PF.root"    , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleUp/combinedDiffXSecSigScaleUpSummer12PF.root"        , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleDown/combinedDiffXSecSigScaleDownSummer12PF.root"    , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUpSummer12PF.root"    , "Open"));
+    file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDownSummer12PF.root", "Open"));
   }
   // save output path
   TString outpath="diffXSecFromSignal/plots/combined/2012/ttgencomparison/";
@@ -65,6 +67,9 @@ void analyzeGenComparison(bool save = true, int verbose=0){
     "tightJetQuality/chf"   ,
     "tightJetQuality/cef"   ,
     "tightJetQuality/ncp"   ,
+    // kinFit
+    "compositedKinematicsKinFit/rhos",
+    "compositedKinematicsProbSel/rhos",
     // generated full PS quantities    
     "analyzeTopPartonLevelKinematics/ttbarMass",
     "analyzeTopPartonLevelKinematics/ttbarPt"  ,
@@ -88,6 +93,8 @@ void analyzeGenComparison(bool save = true, int verbose=0){
     "analyzeTopHadronLevelKinematicsBjetsPhaseSpace/lbMassGen"   ,
     "analyzeTopHadronLevelKinematicsBjetsPhaseSpace/bbbarPtGen"  ,
     "analyzeTopHadronLevelKinematicsBjetsPhaseSpace/bbbarMassGen",
+    "compositedHadronGenPhaseSpace/rhosGen",
+    "compositedHadronGenPhaseSpace/Ngenjets",
   };
   TString axisLabel1D[ ] = { 
     // jet kinematics
@@ -109,6 +116,9 @@ void analyzeGenComparison(bool save = true, int verbose=0){
     "charged hadronic fraction (jets);rel. #Jets;0;1"       ,
     "charged electromagnetic fraction (jets);rel. #Jets;1;1",
     "N_{charged particles} (jets);rel. #Jets;0;1"           ,
+    // kinFit
+    "reco level KinFit #rho_{S}=2*172.5GeV/m^{t#bar{t}+1j};rel. #Events;1;10" ,
+    "reco level KinFit+prob #rho_{S}=2*172.5GeV/m^{t#bar{t}+1j};rel. #Events;1;10" ,  
     // generated full PS quantities
     "parton truth m^{t#bar{t}} #left[GeV#right];rel. #Events;0;25"    ,
     "parton truth p_{T}^{t#bar{t}} #left[GeV#right];rel. #Events;0;1",
@@ -116,8 +126,8 @@ void analyzeGenComparison(bool save = true, int verbose=0){
     "parton truth m^{t} #left[GeV#right];rel. #Top quarks;0;1"       ,
     "parton truth p_{T}^{t} #left[GeV#right];rel. #Top quarks;0;10"  ,
     "parton truth y^{t};rel. #Top quarks;0;1"                        ,
-    "parton truth p_{T}^{lepton} #left[GeV#right];rel. #Events;0;5"       ,
-    "parton truth #eta^{lepton};rel. #Events;0;1"                         ,
+    "parton truth p_{T}^{lepton} #left[GeV#right];rel. #Events;0;5"  ,
+    "parton truth #eta^{lepton};rel. #Events;0;1"                    ,
     "parton truth p_{T}^{b} #left[GeV#right];rel. #b-quarks;0;5"     ,
     "parton truth #eta^{b};rel. #b-quarks;0;1"                       ,
     "parton truth m^{b#bar{b}} #left[GeV#right];rel. #Events;0;20"   ,
@@ -132,6 +142,8 @@ void analyzeGenComparison(bool save = true, int verbose=0){
     "visible hadron level truth m^{lb} #left[GeV#right];rel. #Events;1;5"   ,
     "visible hadron level truth m^{bb}(from t#bar{t}) #left[GeV#right];rel. #Events;1;10"          ,
     "visible hadron level truth p_{T}^{b#bar{b}}(from t#bar{t}) #left[GeV#right];rel. #Events;0;10", 
+    "visible hadron level truth #rho_{S}=2*172.5GeV/m^{t#bar{t}+1j};rel. #Events;1;10"          ,
+    "visible hadron level truth N_{gen jets};rel. #Events;0;1", 
   };
   plotList_ .insert(plotList_ .begin(), plots1D    , plots1D    + sizeof(plots1D    )/sizeof(TString));
   axisLabel_.insert(axisLabel_.begin(), axisLabel1D, axisLabel1D+ sizeof(axisLabel1D)/sizeof(TString));
@@ -162,9 +174,11 @@ void analyzeGenComparison(bool save = true, int verbose=0){
   unsigned int kMatchDn=2;
   unsigned int kScaleUp=3;
   unsigned int kScaleDn=4;
+  unsigned int kMassUp =5;
+  unsigned int kMassDn =6;
 
   unsigned int kStart=theoryVariations ? kMadStd : kMadPy;
-  unsigned int kEnd=theoryVariations ? kScaleDn+1 : kMadPerMpiHi+1;
+  unsigned int kEnd=theoryVariations ? kMassDn+1 : kMadPerMpiHi+1;
 
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
   // loop all plots
@@ -204,9 +218,8 @@ void analyzeGenComparison(bool save = true, int verbose=0){
 	  if(sample==kPowHer||sample==kMatchDn) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Match dn" : constPowhegHerwigLabel         ), "L");
 	  if(sample==kMcHer ||sample==kScaleUp) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Scale up" : constMcatnloHerwigLabel        ), "L");
 	  if(sample==kMadPer||sample==kScaleDn) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Scale dn" : constMadGraphPythiaPerugiaLabel), "L");
-	  if(sample==kMadPerNoCR ) leg->AddEntry(histo_[name][sample], constMadGraphPythiaPerugiaNoCRLabel, "L");
-	  if(sample==kMadPerMpiHi) leg->AddEntry(histo_[name][sample], constMadGraphPythiaPerugiaMpiHiLabel, "L");
-
+	  if(sample==kMadPerNoCR ||sample==kMassUp) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Mass up" : constMadGraphPythiaPerugiaNoCRLabel ), "L");
+	  if(sample==kMadPerMpiHi||sample==kMassDn) leg->AddEntry(histo_[name][sample], (theoryVariations ? "Mass dn" : constMadGraphPythiaPerugiaMpiHiLabel), "L");
 	}
 	// histostyle
 	histo_[name][sample]->SetStats(false);
@@ -221,8 +234,8 @@ void analyzeGenComparison(bool save = true, int verbose=0){
 	//if(sample==kPowHer||sample==kMatchDn){ histo_[name][sample]->SetLineColor(constPowhegColor2 ); histo_[name][sample]->SetLineStyle(constPowhegStyle2); }
 	//if(sample==kMcHer ||sample==kScaleUp){ histo_[name][sample]->SetLineColor(constMcatnloColor ); histo_[name][sample]->SetLineStyle(constMcatnloStyle); }
 	//if(sample==kMadPer||sample==kScaleDn){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaColor ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaStyle); }
-	if(sample==kMadPerNoCR ){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaNoCRColor  ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaNoCRStyle ); }
-	if(sample==kMadPerMpiHi){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaMpiHiColor ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaMpiHiStyle); }
+	if(sample==kMadPerNoCR ||sample==kMassUp){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaNoCRColor  ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaNoCRStyle ); }
+	if(sample==kMadPerMpiHi||sample==kMassDn){ histo_[name][sample]->SetLineColor(constMadgraphPerugiaMpiHiColor ); histo_[name][sample]->SetLineStyle(constMadgraphPerugiaMpiHiStyle); }
       }
       // Drawing etc done after progressing last sample
       if(sample==kEnd-1&&histo_[name].count(kStart)>0){
@@ -332,6 +345,7 @@ void analyzeGenComparison(bool save = true, int verbose=0){
     delete leg;
   }
   if(save){
+    if(verbose==0) gErrorIgnoreLevel=kWarning;
     if(verbose>1) std::cout << "saving"  << std::endl;
     TString filename="topComparison";
     if(theoryVariations) filename+="_theoryMods";

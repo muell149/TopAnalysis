@@ -41,13 +41,6 @@ public:
     /// Empty destructor
     ~DijetAnalyzer(){};
 
-    /// Fill all histograms
-    void fill(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
-              const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
-              const KinRecoObjects& kinRecoObjects,
-              const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-              const double& weight, const TString& stepShort);
-
     /// Find index of genJet corresponding to the specified reco jet. Returns -1 if not found
     int genJetIdOfRecoJet(const LV& recoJet, const VLV& genJets, const float dR_max=999.9);
 
@@ -68,8 +61,17 @@ public:
 private:
 
     /// Book histograms for one categoryId with given id and label
-    virtual void bookHistos(const TString& step);
-
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
+    
+    /// Fill all histograms for given selection step
+    virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                            const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                            const KinRecoObjects& kinRecoObjects,
+                            const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                            const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                            const double& weight, const TString& step,
+                            std::map<TString, TH1*>& m_histogram);
+    
     /// Analyze jet pairs of given jets for the given b-jets from top. Returns ration of correct pairs to wrong pairs
     float correctPairFraction(const VLV& allJets, const std::vector<int>& jetsId,
                               const std::vector<int>& bJetsId, const std::vector<double>& jetsBtagDiscriminant,

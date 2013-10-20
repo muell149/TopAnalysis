@@ -1,9 +1,13 @@
 #include "basicFunctions.h"
 
-void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, TString closureTestSpecifier=""){
+void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, TString closureTestSpecifier=""){
   
   // print info if up/down errors are asymmetric or very different in size
   bool check=false;
+  // verbose = 0: no output, 
+  //           1: + print basic options, final covariance matrices, initial and final uncertainties and number of bins with up/down in same direction
+  //           2: + single systematic uncertainties, some save information
+  //           3/4+ debufg and detail output
   // ======================================
   //  Nomenclature- Systematic Variations:
   // ======================================
@@ -150,20 +154,20 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
   //  Open Input File
   // ============================
   TFile* file = TFile::Open(outputFile, "UPDATE");
-  if(verbose>2) std::cout << " Opened file "+outputFile << std::endl;
+  if(verbose>3) std::cout << " Opened file "+outputFile << std::endl;
 
   // Proceed only if file exists and is not broken    
   if(!file || file->IsZombie()){
     std::cout << "ERROR: Target file does not exist or is broken!" << std::endl;
     exit(0);
   }
-  else if(verbose>2) std::cout << " Target file found!" << std::endl;
+  else if(verbose>3) std::cout << " Target file found!" << std::endl;
   
   // ===============================================================
   //  Get all data xSecs for all systematic variations
   // ===============================================================
   // printout
-  if(verbose>0) std::cout << std::endl << "Loading Plots" << std::endl;
+  if(verbose>1) std::cout << std::endl << "Loading Plots" << std::endl;
   // loop all systematic variations
   for(unsigned int sys=sysNo; sys<ENDOFSYSENUM; ++sys){
     TString subfolder=sysLabel(sys);      
@@ -177,7 +181,7 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	plotName.ReplaceAll("Norm","");
 	TH1F* plot= (TH1F*)canvas->GetPrimitive(plotName+"kData");
 	if(plot){ 
-	  if(verbose>1) std::cout << " Plot "+plotName+"kData found in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
+	  if(verbose>2) std::cout << " Plot "+plotName+"kData found in "+xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
 	  // go to root directory, keep plot when closing rootfile
 	  gROOT->cd();	    
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
@@ -191,13 +195,13 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	  // sysHadronizationOld=MC@NLO+HERWIG vs. POWHEG+PYTHIA
 	  if(sys==ENDOFSYSENUM-1){ considerSys_[xSecVariables_[i]][ENDOFSYSENUM]=true; }
 	} // end if(plot)
-	else if(verbose>1) std::cout << "ERROR: Plot " << plotName +"kData not found in "+ xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
+	else if(verbose>2) std::cout << "ERROR: Plot " << plotName +"kData not found in "+ xSecFolder+"/"+subfolder+"/"+xSecVariables_[i] << std::endl;
       } // end if(canvas)
     } // end for xSecVariables_ loop
   } // end for sys loop
 
   // INFO printout
-  if(verbose>1){
+  if(verbose>2){
     std::cout << std::endl << "considered uncertainties: " << std::endl;
     // loop all variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
@@ -222,11 +226,11 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
   // ==================================
   std::vector<TString> symmUncLabel_;
   // printout
-  if(verbose>0) std::cout << std::endl << "Calculate Uncertainty Shift" << std::endl;
+  if(verbose>1) std::cout << std::endl << "Calculate Initial Uncertainty Shift" << std::endl;
   // loop all variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // printout
-    if(verbose>2) std::cout << std::endl << xSecVariables_[i] << std::endl;
+    if(verbose>1) std::cout << std::endl << xSecVariables_[i] << std::endl;
     int numTot=0;
     int numAsymm=0;
     // loop all systematic variations
@@ -249,7 +253,7 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	  else if(sys==ENDOFSYSENUM) systLabel="sysHadronizationOld";
 	  if(i==0) symmUncLabel_.push_back(systLabel);
 	  // printout
-	  if(verbose>2) std::cout << "  - " << systLabel << std::endl;
+	  if(verbose>1) std::cout << "  - " << systLabel << std::endl;
 	  // loop all bins
 	  for(int bin=1; bin<=histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){
 	    double xSecStd    = histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
@@ -260,9 +264,14 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	    if(symm){ 
 	      double xSecUp=histo_[xSecVariables_[i]][sys  ]->GetBinContent(bin);
 	      double xSecDn=histo_[xSecVariables_[i]][sys+1]->GetBinContent(bin);
-	      dBin=0.5*(std::abs(xSecUp-xSecStd)+std::abs(xSecDn-xSecStd));
 	      double dUp=xSecUp-xSecStd;
 	      double dDn=xSecDn-xSecStd;
+	      // linear rescaling of top mass uncertainty
+	      if(sys==sysTopMassUp||sys==sysTopMassDown){
+		dUp*=SF_TopMassUpUncertainty;
+		dDn*=SF_TopMassDownUncertainty;
+	      }
+	      dBin=0.5*(std::abs(dUp)+std::abs(dDn));
 	      bool show=false;
 	      numTot++;
 	      if((dUp/std::abs(dUp))==(dDn/std::abs(dDn))){ numAsymm++; if(check){std::cout << "NOTE: UP/DN IN SAME DIRECTION!"<< std::endl; show=true;} }
@@ -294,12 +303,25 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	    }
 	    // save absolute uncertainties for variable and uncertainty
 	    unc_[xSecVariables_[i]][systLabel].push_back(dBin);
+	    // add unc. for total syst. unc.
+	    double relUncPercBin=100*(dBin/xSecStd);
+	    if(sys==sysNo+1) unc_[xSecVariables_[i]]["all"].push_back(relUncPercBin*relUncPercBin);
+	    else unc_[xSecVariables_[i]]["all"][bin-1]+=relUncPercBin*relUncPercBin;
 	    // printout
-	    if(verbose>2){
+	    if(verbose>1){
 	      std::cout << "    bin #" << bin;
 	      if(systLabel==symmUncLabel_[0]) std::cout << "(" << binEdgeDown << ".." << binEdgeUp << ")";
 	      std::cout << ": " << 100*(dBin/xSecStd) << "%" << std::endl;
-	    }
+	    } // end if verbose
+	    // last bin and systematic: total systematic uncertainty
+	    if(verbose>1&&sys==ENDOFSYSENUM&&bin==histo_[xSecVariables_[i]][sysNo]->GetNbinsX()){
+	      std::cout << "-----------------------------" << std::endl;
+	      std::cout << "total syst. uncertainty " << std::endl;
+	      // loop all bins
+	      for(int bin2=1; bin2<=histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin2){  
+		std::cout << "bin #" << bin2 << ": " << sqrt(unc_[xSecVariables_[i]]["all"][bin2-1]) << "%" << std::endl;
+	      } //end for bin2 loop
+	    } // end if last systematic, bin and if verbose	    
 	  } // end for bin loop
 	} // end if !label
       } // end if consider  
@@ -313,10 +335,13 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
   // ============================================
   // printout
   if(verbose>1) std::cout << std::endl << "Normalize symmetrized up/down cross sections again" << std::endl;
+  double Nconsider=0;
+  double totdev=0;
+  double totdevsign=0;
   // loop all variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // printout
-    if(verbose>0) std::cout << std::endl << xSecVariables_[i] << std::endl;
+    if(verbose>2) std::cout << std::endl << xSecVariables_[i] << std::endl;
     // loop all systematic variations
     for(unsigned int sys=sysNo+1; sys<=ENDOFSYSENUM; ++sys){
       // check if uncertainty that should be considered
@@ -337,27 +362,27 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	uncIter_[xSecVariables_[i]][systStripLabel]=unc_[xSecVariables_[i]][systStripLabel];
 	// reprocess only up/down systematics
 	if(systLabel.Contains("up")||systLabel.Contains("Up")||systLabel.Contains("Down")||systLabel.Contains("down")){
-	  if(verbose>1) std::cout << systLabel << std::endl;
+	  if(verbose>3) std::cout << systLabel << std::endl;
 	  // loop bins
 	  for(unsigned int bin=1; bin<=(unsigned int)histoSysShift_[xSecVariables_[i]][sys]->GetNbinsX(); ++bin){
-	    if(verbose>1) std::cout << "bin" << bin << std::endl;
+	    if(verbose>3) std::cout << "bin" << bin << std::endl;
 	    // get symmetrized uncertainties
 	    double xSecStd     =histo_[xSecVariables_[i]][sysNo         ]->GetBinContent(bin);
 	    double symmSysShift=unc_  [xSecVariables_[i]][systStripLabel].at(bin-1);
 	    // inverse sign for down variation	    
 	    if(systLabel.Contains("down")||systLabel.Contains("Down")) symmSysShift*=-1;
 	    // create symmetrized uncertainty histo
-	    if(verbose>2) std::cout << xSecStd << " + " << symmSysShift << std::endl;
+	    if(verbose>3) std::cout << xSecStd << " + " << symmSysShift << std::endl;
 	    histoSysShift_[xSecVariables_[i]][sys]->SetBinContent(bin, xSecStd+symmSysShift);
 	  } // end for loop bins
 	  // do normalization
-	  double area=getInclusiveXSec(histoSysShift_[xSecVariables_[i]][sys],verbose-1);
-	  if(verbose>2) std::cout << "area is: " << area << std::endl;
+	  double area=getInclusiveXSec(histoSysShift_[xSecVariables_[i]][sys],verbose-2);
+	  if(verbose>3) std::cout << "area is: " << area << std::endl;
 	  histoSysShift_[xSecVariables_[i]][sys]->Scale(1./area);
 	  // for down variations... 
 	  if(systLabel.Contains("Down")||systLabel.Contains("down")){
 	    // ... redetermine uncertainty
-	    if(verbose>1) std::cout << "variation " << systStripLabel << std::endl;
+	    if(verbose>3) std::cout << "variation " << systStripLabel << std::endl;
 	    // loop bins
 	    for(unsigned int bin=1; bin<=(unsigned int)histoSysShift_[xSecVariables_[i]][sys]->GetNbinsX(); ++bin){
 	      double xSecStd=histo_        [xSecVariables_[i]][sysNo]->GetBinContent(bin);
@@ -371,7 +396,7 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	      double xSecOldDn =histo_[xSecVariables_[i]][sys  ]->GetBinContent(bin);
 	      double dOldUp=xSecOldUp-xSecStd;
 	      double dOldDn=xSecOldDn-xSecStd;	   
-	      if(verbose>2){
+	      if(verbose>3){
 		std::cout << "  bin #" << bin << std::endl;
 		std::cout << "  up: " << 100*dOldUp/xSecStd << "% -> " << 100*dUp/xSecStd << "%" << std::endl;
 		std::cout << "  dn: " << 100*dOldDn/xSecStd << "% -> " << 100*dDn/xSecStd << "%" << std::endl;
@@ -381,7 +406,7 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	      // store sign of upwards variation
 	      double sign= ( dUp==0. ? 1. : (dUp/std::abs(dUp)) );
 	      dBin*=sign;
-	      if(verbose>2) std::cout << "  symmetrized: " << 100*unc_  [xSecVariables_[i]][systStripLabel].at(bin-1)/xSecStd << " -> " << 100*dBin/xSecStd << std::endl;
+	      if(verbose>3) std::cout << "  symmetrized: " << 100*unc_  [xSecVariables_[i]][systStripLabel].at(bin-1)/xSecStd << " -> " << 100*dBin/xSecStd << std::endl;
 	      uncIter_  [xSecVariables_[i]][systStripLabel].at(bin-1)=dBin;
 	    } // end for loop bins
 	  } // end if down
@@ -390,12 +415,12 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
     } // end for sys loop
     // printout change in total uncertainty
     if(verbose>0){
-      std::cout << "=> total uncertainty: " << std::endl;
+      std::cout << "=> final total uncertainty (" << xSecVariables_[i] << "): " << std::endl;
       // loop bins
       for(unsigned int bin=1; bin<=(unsigned int)histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){	
 	double binEdgeDown= histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin);
 	double binEdgeUp  = histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin+1);
-	std::cout << "     bin #" << bin << "(" << binEdgeDown << ".." << binEdgeUp << ")" << std::endl;
+	if(verbose>0) std::cout << "     bin #" << bin << "(" << binEdgeDown << ".." << binEdgeUp << ")" << std::endl;
 	double totErr    =0.;
 	double totErrIter=0.;
 	// add all different uncertainties
@@ -406,7 +431,27 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
 	}
 	// printout of relative uncertainty
 	double xSecStd=histo_[xSecVariables_[i]][sysNo]->GetBinContent(bin);
-	std::cout << "      " << 100*sqrt(totErr)/xSecStd << "% -> " << 100*sqrt(totErrIter)/xSecStd << "%" << std::endl;
+	double old   =100*sqrt(totErr)    /xSecStd;
+	double latest=100*sqrt(totErrIter)/xSecStd;
+	double relChange=100*std::abs(old-latest)/old;
+	double changeSign=(latest-old)/std::abs(old-latest);
+	if(relChange<100.&&old<50.){
+	  ++Nconsider;
+	  totdev+=relChange;
+	  totdevsign+=(changeSign*relChange);
+	}
+	if(verbose>0){
+	  std::cout << "      " << old << "% -> " << latest << "% (=";
+	  if     (relChange<=5. ) std::cout << "\033[42m\033[1m";
+	  else if(relChange<=10.) std::cout << "\033[33m\033[43m\033[1m";
+	  else                    std::cout << "\033[33m\033[41m\033[1m";
+	  std::cout << changeSign*relChange << "% \033[0m relative change)";
+	  std::cout << std::endl;
+	  if(bin==(unsigned int)histo_[xSecVariables_[i]][sysNo]->GetNbinsX()&&i==xSecVariables_.size()-1){
+	    std::cout << "average abs change: " << totdev/Nconsider << std::endl;
+	    std::cout << "average change: " << totdevsign/Nconsider << std::endl;
+	  }
+	} // end if verbose
       } // for loop bins
     } // end if verbose
   } // end for xSecVariables_ loop
@@ -538,7 +583,7 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=1, TString d
     // loop all variables
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       // i)  total systematic covariance matrix
-      saveToRootFile(outputFile, sysCov_[xSecVariables_[i]][42], true, verbose, "covMatrixSys/"+xSecVariables_[i]);
+      saveToRootFile(outputFile, sysCov_[xSecVariables_[i]][42], true, verbose-1, "covMatrixSys/"+xSecVariables_[i]);
       // ii) single systematic covariance matrices
       // loop relevant symmetrized systematic variations
       for(unsigned int sys=0; sys<(unsigned int)symmUncLabel_.size(); ++sys){

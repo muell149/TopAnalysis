@@ -12,12 +12,7 @@ class TString;
 #include "../../diLeptonic/src/classesFwd.h"
 
 class MvaTreeHandler;
-class MvaValidation;
-class DijetAnalyzer;
-class BasicHistograms;
-class EventYieldHistograms;
-class DyScalingHistograms;
-class Playground;
+class AnalysisHistogramsBase;
 class RecoObjects;
 class CommonGenObjects;
 class TopGenObjects;
@@ -54,35 +49,24 @@ public:
     /// Class definition
     ClassDef(HiggsAnalysis, 0);
     
+    
+    
     /// Is it a ttH sample inclusive in Higgs decay
     void SetHiggsInclusiveSample(const bool isInclusiveHiggs);
     
     /// Select H->bbbar or H->other decay from ttH sample inclusive in Higgs decay
     void SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusiveHiggs);
     
+    /// Bool for separating ttbar+bbar events and ttbar+other events
+    void SetRunWithTtbb(const bool runWithTtbb);
+    
+    
+    
     /// Set up production of MVA input
     void SetMvaInputProduction(MvaTreeHandler* mvaTreeHandler);
     
-    /// Set up validation of MVA
-    void SetMvaValidation(MvaValidation* mvaValidation);
-    
-    /// Set the pointer to DijetAnalyzer
-    void SetDijetAnalyzer(DijetAnalyzer* analyzer);
-    
-    /// Set event yield histograms
-    void SetEventYieldHistograms(EventYieldHistograms* eventYieldHistograms);
-    
-    /// Set histograms for Drell-Yan scaling
-    void SetDyScalingHistograms(DyScalingHistograms* dyScalingHistograms);
-    
-    /// Set basic histograms
-    void SetBasicHistograms(BasicHistograms* basicHistograms);
-    
-    /// Set playground for histograms
-    void SetPlayground(Playground* playground);
-    
-    /// Bool for separating ttbar+bbar events and ttbar+other events
-    void SetRunWithTtbb(const bool runWithTtbb);
+    /// Set up all analysers of type AnalysisHistogramsBase
+    void SetAllAnalysisHistograms(std::vector<AnalysisHistogramsBase*> v_analysisHistograms);
     
     
     
@@ -147,25 +131,8 @@ private:
     /// Class for steering the I/O of MVA input tree, trying to identify the jets coming from (anti)b's from (anti)tops
     MvaTreeHandler* mvaTreeHandler_;
     
-    
-    
-    /// Event yield histograms
-    EventYieldHistograms* eventYieldHistograms_;
-    
-    /// Histograms for Drell-Yan scaling
-    DyScalingHistograms* dyScalingHistograms_;
-    
-    /// Basic histograms
-    BasicHistograms* basicHistograms_;
-    
-    /// MVA validation histograms
-    MvaValidation* mvaValidation_;
-    
-    /// Playground
-    Playground* playground_;
-    
-    /// Class that analyzes dijet pairs from jets that pass selection cuts
-    DijetAnalyzer* dijetAnalyzer_;
+    /// All analysers of type AnalysisHistogramsBase
+    std::vector<AnalysisHistogramsBase*> v_analysisHistograms_;
 };
 
 

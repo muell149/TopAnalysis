@@ -31,7 +31,7 @@ MvaValidation::MvaValidation(const char* weightsCorrectFile, const char* weights
                              const std::vector<TString>& selectionStepsNoCategories,
                              const std::vector<TString>& stepsForCategories,
                              const JetCategories* jetCategories):
-AnalysisHistogramsBase(selectionStepsNoCategories, stepsForCategories, jetCategories),
+AnalysisHistogramsBase("mvaA_", selectionStepsNoCategories, stepsForCategories, jetCategories),
 weightsCorrect_(0),
 weightsSwapped_(0)
 {
@@ -43,105 +43,118 @@ weightsSwapped_(0)
 
 
 
-void MvaValidation::bookHistos(const TString& step)
+void MvaValidation::bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram)
 {
-    constexpr const char* prefix = "mvaA_";
-    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
     TString name;
 
     name = "matchedBjetFromTop";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "matchedBjetsFromTop;;# events",3,0,3));
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "matchedBjetFromTop;;# events",3,0,3));
     m_histogram[name]->GetXaxis()->SetBinLabel(1, "bQuark-genJet fail");
     m_histogram[name]->GetXaxis()->SetBinLabel(2, "genJet-recoJet fail");
     m_histogram[name]->GetXaxis()->SetBinLabel(3, "Matched");
     
+    name = "unmatchedGenBjetFromTop";
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "unmatchedGenBjetFromTop;;# events",4,0,4));
+    m_histogram[name]->GetXaxis()->SetBinLabel(1, "Top jets overlap");
+    m_histogram[name]->GetXaxis()->SetBinLabel(2, "2 jets not matched");
+    m_histogram[name]->GetXaxis()->SetBinLabel(3, "1 jet not matched");
+    m_histogram[name]->GetXaxis()->SetBinLabel(4, "Several hadrons");
+    
+    name = "unmatchedRecoBjetFromTop";
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "unmatchedRecoBjetFromTop;;# events",3,0,3));
+    m_histogram[name]->GetXaxis()->SetBinLabel(1, "Top jets overlap");
+    m_histogram[name]->GetXaxis()->SetBinLabel(2, "2 jets not matched");
+    m_histogram[name]->GetXaxis()->SetBinLabel(3, "1 jet not matched");
+    
     name = "matchedBjetFromHiggs";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "matchedBjetsFromHiggs;;# events",3,0,3));
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "matchedBjetFromHiggs;;# events",3,0,3));
     m_histogram[name]->GetXaxis()->SetBinLabel(1, "bQuark-genJet fail");
     m_histogram[name]->GetXaxis()->SetBinLabel(2, "genJet-recoJet fail");
     m_histogram[name]->GetXaxis()->SetBinLabel(3, "Matched");
+    
+    name = "unmatchedGenBjetFromHiggs";
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "unmatchedGenBjetFromHiggs;;# events",4,0,4));
+    m_histogram[name]->GetXaxis()->SetBinLabel(1, "Higgs jets overlap");
+    m_histogram[name]->GetXaxis()->SetBinLabel(2, "2 jets not matched");
+    m_histogram[name]->GetXaxis()->SetBinLabel(3, "1 jet not matched");
+    m_histogram[name]->GetXaxis()->SetBinLabel(4, "Several hadrons");
+    
+    name = "unmatchedRecoBjetFromHiggs";
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "unmatchedRecoBjetFromHiggs;;# events",3,0,3));
+    m_histogram[name]->GetXaxis()->SetBinLabel(1, "Higgs jets overlap");
+    m_histogram[name]->GetXaxis()->SetBinLabel(2, "2 jets not matched");
+    m_histogram[name]->GetXaxis()->SetBinLabel(3, "1 jet not matched");
+    
+    name = "matchedBjet";
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "matchedBjet;;# events",4,0,4));
+    m_histogram[name]->GetXaxis()->SetBinLabel(1, "Top-Higgs gen overlap");
+    m_histogram[name]->GetXaxis()->SetBinLabel(2, "Unique gen jets");
+    m_histogram[name]->GetXaxis()->SetBinLabel(3, "Top-Higgs reco overlap");
+    m_histogram[name]->GetXaxis()->SetBinLabel(4, "Unique reco jets");
     
     
     name = "dijet_mass";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "dijetMass;m_{jj} [GeV];# jet pairs", 100, 0, 500));
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "dijetMass;m_{jj} [GeV];# jet pairs", 100, 0, 500));
     
     
     name = "best_dijet_mass";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "bestDijetMass;m_{jj} [GeV];# events", 100, 0, 500));
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "bestDijetMass;m_{jj} [GeV];# events", 100, 0, 500));
     
     
     name = "best_jetsFromTop";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "bestJetsFromTop;;# events",4,0,4));
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "bestJetsFromTop;;# events",4,0,4));
     m_histogram[name]->GetXaxis()->SetBinLabel(1, "matched Top jets");
     m_histogram[name]->GetXaxis()->SetBinLabel(2, "pair from Top");
     m_histogram[name]->GetXaxis()->SetBinLabel(3, "correct pair");
     m_histogram[name]->GetXaxis()->SetBinLabel(4, "swapped pair");
     
     name = "best_jetsFromHiggs";
-    m_histogram[name] = this->store(new TH1D(prefix+name+step, "bestJetsFromHiggs;;# events",4,0,4));
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "bestJetsFromHiggs;;# events",4,0,4));
     m_histogram[name]->GetXaxis()->SetBinLabel(1, "matched Higgs jets");
     m_histogram[name]->GetXaxis()->SetBinLabel(2, "pair from Higgs");
     m_histogram[name]->GetXaxis()->SetBinLabel(3, "overlap with Top");
     m_histogram[name]->GetXaxis()->SetBinLabel(4, "Fully solved");
     
     name = "dijet_massVsMvaWeightHigh";
-    m_histogram[name] = this->store(new TProfile(prefix+name+step, "dijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
+    m_histogram[name] = this->store(new TProfile(prefix_+name+step, "dijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
     name = "dijet_massVsMvaWeightDiff";
-    m_histogram[name] = this->store(new TProfile(prefix+name+step, "dijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
+    m_histogram[name] = this->store(new TProfile(prefix_+name+step, "dijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
     
     name = "best_dijet_massVsMvaWeightHigh";
-    m_histogram[name] = this->store(new TProfile(prefix+name+step, "bestDijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
+    m_histogram[name] = this->store(new TProfile(prefix_+name+step, "bestDijetMassVsMvaWeightHigh;w_{MVA,1};m_{jj} [GeV]",20, -1.2, 0.2, "s"));
     name = "best_dijet_massVsMvaWeightDiff";
-    m_histogram[name] = this->store(new TProfile(prefix+name+step, "bestDijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
+    m_histogram[name] = this->store(new TProfile(prefix_+name+step, "bestDijetMassVsMvaWeightDiff;w_{MVA,1} - w_{MVA,2};m_{jj} [GeV]",20, 0, 3, "s"));
     
     
     name = "mvaWeightCorrect";
-    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA}^{correct};# jet pairs", 80, -1.2, 0.2);
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+";w_{MVA}^{correct};# jet pairs", 80, -1.2, 0.2);
     
     name = "best_mvaWeightCorrect";
-    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA,1}^{correct};# events", 80, -1.2, 0.2);
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+";w_{MVA,1}^{correct};# events", 80, -1.2, 0.2);
     
     name = "mvaWeightSwapped";
-    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA}^{swapped};# jet pairs", 80, -1.2, 0.2);
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+";w_{MVA}^{swapped};# jet pairs", 80, -1.2, 0.2);
     
     name = "best_mvaWeightSwapped";
-    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";w_{MVA,1}^{swapped};# events", 80, -1.2, 0.2);
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+";w_{MVA,1}^{swapped};# events", 80, -1.2, 0.2);
     
     name = "mvaWeightCorrectVsSwapped";
-    this->bookHistosInclExcl2D(m_histogram, prefix, step, name, name+";w_{MVA}^{correct};w_{MVA}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
+    this->bookHistosInclExcl2D(m_histogram, prefix_, step, name, name+";w_{MVA}^{correct};w_{MVA}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
     
     name = "best_mvaWeightCorrectVsSwapped";
-    this->bookHistosInclExcl2D(m_histogram, prefix, step, name, name+";w_{MVA,1}^{correct};w_{MVA,1}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
+    this->bookHistosInclExcl2D(m_histogram, prefix_, step, name, name+";w_{MVA,1}^{correct};w_{MVA,1}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
 }
 
 
 
-void MvaValidation::fill(const RecoObjects& recoObjects,
-                         const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-                         const double& weight, const TString& stepShort)
+void MvaValidation::fillHistos(const RecoObjects& recoObjects, const CommonGenObjects&,
+                               const TopGenObjects&, const HiggsGenObjects&,
+                               const KinRecoObjects&,
+                               const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                               const tth::GenLevelWeights&, const tth::RecoLevelWeights&,
+                               const double& weight, const TString&,
+                               std::map< TString, TH1* >& m_histogram)
 {
-    // Number of selected jets and bjets
-    const int numberOfJets = recoObjectIndices.jetIndices_.size();
-    const int numberOfBjets = recoObjectIndices.bjetIndices_.size();
-    
-    // Set up step name and check if step exists
-    const bool stepInCategory = stepShort.Contains("_cate");
-    const TString step = stepInCategory ? stepShort : this->stepName(stepShort);
-    const bool stepExists(this->checkExistence(step));
-    if(!stepInCategory && jetCategories_){
-        // Here check the individual jet categories
-        const int categoryId = jetCategories_->categoryId(numberOfJets, numberOfBjets);
-        const TString fullStepName = this->stepName(stepShort, categoryId);
-        this->fill(recoObjects, genObjectIndices, recoObjectIndices, weight, fullStepName);
-    }
-    if(!stepExists) return;
-    std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-    
-    
-    // FIXME: which events exactly to fill? For now all with at least 4 jets
-    if(numberOfJets<4) return;
-    
-    
     // Loop over all jet combinations and get MVA input variables
     const std::vector<MvaTopJetsVariables> v_mvaTopJetsVariables = 
             MvaTopJetsVariables::fillVariables(recoObjectIndices, genObjectIndices, recoObjects, weight);
@@ -192,11 +205,44 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
     else if(!genObjectIndices.uniqueRecoTopMatching()) m_histogram[name]->Fill(1., weight);
     else m_histogram[name]->Fill(2., weight);
     
+    name = "unmatchedGenBjetFromTop";
+    if(genObjectIndices.genBjetFromTopIndex_==-2 || genObjectIndices.genAntiBjetFromTopIndex_==-2) m_histogram[name]->Fill(3., weight);
+    else if(genObjectIndices.genBjetFromTopIndex_==-1 && genObjectIndices.genAntiBjetFromTopIndex_==-1) m_histogram[name]->Fill(1., weight);
+    else if(genObjectIndices.genBjetFromTopIndex_==-1 || genObjectIndices.genAntiBjetFromTopIndex_==-1) m_histogram[name]->Fill(2., weight);
+    else if(genObjectIndices.genBjetFromTopIndex_==genObjectIndices.genAntiBjetFromTopIndex_) m_histogram[name]->Fill(0., weight);
+    
+    name = "unmatchedRecoBjetFromTop";
+    if(genObjectIndices.uniqueGenTopMatching()){
+        if(genObjectIndices.recoBjetFromTopIndex_==-1 && genObjectIndices.recoAntiBjetFromTopIndex_==-1) m_histogram[name]->Fill(1., weight);
+        else if(genObjectIndices.recoBjetFromTopIndex_==-1 || genObjectIndices.recoAntiBjetFromTopIndex_==-1) m_histogram[name]->Fill(2., weight);
+        else if(genObjectIndices.recoBjetFromTopIndex_==genObjectIndices.recoAntiBjetFromTopIndex_) m_histogram[name]->Fill(0., weight);
+    }
+    
     name = "matchedBjetFromHiggs";
     if(!genObjectIndices.uniqueGenHiggsMatching()) m_histogram[name]->Fill(0., weight);
     else if(!genObjectIndices.uniqueRecoHiggsMatching()) m_histogram[name]->Fill(1., weight);
     else m_histogram[name]->Fill(2., weight);
     
+    name = "unmatchedGenBjetFromHiggs";
+    if(genObjectIndices.genBjetFromHiggsIndex_==-2 || genObjectIndices.genAntiBjetFromHiggsIndex_==-2) m_histogram[name]->Fill(3., weight);
+    else if(genObjectIndices.genBjetFromHiggsIndex_==-1 && genObjectIndices.genAntiBjetFromHiggsIndex_==-1) m_histogram[name]->Fill(1., weight);
+    else if(genObjectIndices.genBjetFromHiggsIndex_==-1 || genObjectIndices.genAntiBjetFromHiggsIndex_==-1) m_histogram[name]->Fill(2., weight);
+    else if(genObjectIndices.genBjetFromHiggsIndex_==genObjectIndices.genAntiBjetFromHiggsIndex_) m_histogram[name]->Fill(0., weight);
+    
+    name = "unmatchedRecoBjetFromHiggs";
+    if(genObjectIndices.uniqueGenHiggsMatching()){
+        if(genObjectIndices.recoBjetFromHiggsIndex_==-1 && genObjectIndices.recoAntiBjetFromHiggsIndex_==-1) m_histogram[name]->Fill(1., weight);
+        else if(genObjectIndices.recoBjetFromHiggsIndex_==-1 || genObjectIndices.recoAntiBjetFromHiggsIndex_==-1) m_histogram[name]->Fill(2., weight);
+        else if(genObjectIndices.recoBjetFromHiggsIndex_==genObjectIndices.recoAntiBjetFromHiggsIndex_) m_histogram[name]->Fill(0., weight);
+    }
+    
+    name = "matchedBjet";
+    if(genObjectIndices.uniqueGenMatching()){
+        m_histogram[name]->Fill(1., weight);
+        if(genObjectIndices.uniqueRecoMatching()) m_histogram[name]->Fill(3., weight);
+        else if(genObjectIndices.uniqueRecoTopMatching() && genObjectIndices.uniqueRecoHiggsMatching()) m_histogram[name]->Fill(2., weight);
+    }
+    else if(genObjectIndices.uniqueGenTopMatching() && genObjectIndices.uniqueGenHiggsMatching()) m_histogram[name]->Fill(0., weight);
     
     
     for(const auto& jetIndexPair : jetIndexPairs){
@@ -280,7 +326,6 @@ void MvaValidation::fill(const RecoObjects& recoObjects,
             this->fillHistosInclExcl2D(m_histogram, name, maxWeightCorrect, maxWeightSwapped, mvaTopJetsVariables, weight);
         }
     }
-    
 }
 
 

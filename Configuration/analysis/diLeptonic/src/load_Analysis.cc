@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "ScaleFactors.h"
 #include "sampleHelpers.h"
+#include "KinematicReconstruction.h"
 
 
 
@@ -94,8 +95,12 @@ void load_Analysis(TString validFilenamePattern,
         channels = {"ee", "emu", "mumu"};
     }
     
-    // Set up pileup reweighter
+    // Set up kinematic reconstruction
     std::cout<<std::endl;
+    KinematicReconstruction* kinematicReconstruction(0);
+    kinematicReconstruction = new KinematicReconstruction();
+    
+    // Set up pileup reweighter
     std::cout<<"--- Beginning preparation of pileup reweighter\n";
     PUReweighter* puReweighter = new PUReweighter();
     puReweighter->setMCDistrSum12("S10");
@@ -125,6 +130,7 @@ void load_Analysis(TString validFilenamePattern,
     // Set up the analysis
     TopAnalysis *selector = new TopAnalysis();
     selector->SetAnalysisOutputBase(AnalysisOutputDIR);
+    selector->SetKinematicReconstruction(kinematicReconstruction);
     selector->SetPUReweighter(puReweighter);
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);

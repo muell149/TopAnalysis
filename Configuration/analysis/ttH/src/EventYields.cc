@@ -38,7 +38,7 @@ void EventYields::produceYields(const Samples& samples)const
     
     // Find all histograms containing information for cutflow table (in systematic Nominal and channel emu, first histogram)
     const std::vector<std::pair<TString, TString> > v_nameStepPair =
-        tth::nameStepPairs(samples.getSamples(Channel::emu, Systematic::nominal).at(0).inputFile(), "events_step");
+        tth::nameStepPairs(samples.getSamples(Channel::emu, Systematic::nominal).at(0).inputFile(), "events_weighted_step");
     
     // Loop over systematics (exclude all but Nominal - so outer loop could be removed) and channels
     for(auto systematicChannelSamples : samples.getSystematicChannelSamples()){

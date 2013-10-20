@@ -40,20 +40,21 @@ public:
     /// Destructor
     ~Playground(){}
     
-    /// Fill histograms
-    void fill(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
-              const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
-              const KinRecoObjects& kinRecoObjects,
-              const tth::GenObjectIndices& genObjectIndices, const tth::RecoObjectIndices& recoObjectIndices,
-              const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
-              const double& weight, const TString& stepShort);
-    
     
     
 private:
     
     /// Book all histograms for given selection step
-    virtual void bookHistos(const TString& step);
+    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
+    
+    /// Fill all histograms for given selection step
+    virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                            const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                            const KinRecoObjects& kinRecoObjects,
+                            const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                            const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                            const double& weight, const TString& step,
+                            std::map<TString, TH1*>& m_histogram);
 };
 
 
