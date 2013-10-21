@@ -1,9 +1,12 @@
 #include "basicFunctions.h"
 
-void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations=false){
+void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations=true){
   
   // !!! run different ttbar MCs OR Theory Variations !!!
   // theoryVariations=false OR true
+  // use same binning as in analysis?
+  bool analysisBinning=true;
+  TString saveNameExt="";
 
   // ============================
   //  Set Root Style
@@ -156,7 +159,9 @@ void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations
 
   // canvas container
   std::vector<TCanvas*> plotCanvas_;
-  
+  // create variable bin edges
+  std::map<TString, std::vector<double> > binning_ = makeVariableBinning(false);
+
   // ============================
   //  get histos
   // ============================
@@ -207,7 +212,18 @@ void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations
 	histo_[name][sample]=(TH1F*)(targetPlot->Clone());
 	// rebinning
 	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4,";")).c_str());
-	if(reBinFactor>1) equalReBinTH1(reBinFactor, histo_, name, sample);
+	TString xSecName=extractxSecName(name);	
+	if(analysisBinning&&binning_.count(xSecName)>0){ 
+	  // check existence of e.g. binning_["topPt"]
+	  if(binning_.count(xSecName)>0){
+	    reBinTH1F(*histo_[name][sample], binning_[xSecName], verbose-1);
+	    // remove additional bins with 0 width
+	    double *newBinLowEdges = new double[binning_[xSecName].size()];
+	    newBinLowEdges = &binning_[xSecName].front();
+	    histo_[name][sample]= (TH1F*)histo_[name][sample]->Rebin(binning_[xSecName].size()-1, histo_[name][sample]->GetName(), newBinLowEdges); 
+	  }
+	}
+	else if(reBinFactor>1) equalReBinTH1(reBinFactor, histo_, name, sample);
 	// normalize to unity
 	histo_[name][sample]->Scale(1./histo_[name][sample]->Integral(0,histo_[name][sample]->GetNbinsX()));
 	// add legend entry
@@ -248,6 +264,7 @@ void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations
 	plotCanvas_.push_back( new TCanvas( canvname, canvname, 600, 600) );
 	TString canvTitle=getStringEntry(name,2)+getStringEntry(name,1);
 	if(theoryVariations) canvTitle+="_theoryMods";
+	if(analysisBinning) canvTitle+="PAPERBinning";
 	plotCanvas_[plotCanvas_.size()-1]->SetTitle(canvTitle);
 	// min/max (y-axis)
 	unsigned int sampleMax=kStart;
