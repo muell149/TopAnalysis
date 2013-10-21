@@ -66,6 +66,8 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   edm::InputTag weight_;
   // create gen plots?
   bool genPlots_;
+  // within visible cross section range?
+  edm::InputTag ingenPS_;
   // create rec plots?
   bool recPlots_;
   // use b-jet kinematics as before the kinematic fit?
@@ -116,6 +118,7 @@ class SemiLepBjetAnalyzer : public edm::EDAnalyzer {
   //float valuexBLepGen;
   bool bbSwapBetter;
   float valueAssignment;
+  bool inVisPS;
 
   // ---
   //    histos
