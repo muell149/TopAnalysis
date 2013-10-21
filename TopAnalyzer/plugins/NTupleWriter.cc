@@ -53,6 +53,7 @@ Implementation:
 
 #include "TopAnalysis/HiggsUtils/interface/HiggsGenEvent.h"
 #include "TopAnalysis/HiggsUtils/interface/JetProperties.h"
+#include "TopAnalysis/HiggsUtils/interface/GenZDecayProperties.h"
 
 #include <TTree.h>
 #include <TLorentzVector.h>
@@ -102,6 +103,7 @@ private:
     edm::InputTag vertices_, genEvent_ ;
     edm::InputTag FullLepEvt_, hypoKey_;
     edm::InputTag genEventHiggs_;
+    edm::InputTag genZDecay_;
     edm::InputTag genParticles_;
     edm::InputTag genJets_;
     edm::InputTag bIndex_;
@@ -119,7 +121,7 @@ private:
     bool saveHadronMothers;
 
     bool includeTrig_;
-    bool isTtBarSample_, isHiggsSample_;
+    bool isTtBarSample_, isHiggsSample_, isZSample_;
     bool includePDFWeights_;
     bool isMC_;
     std::string sampleName_;
@@ -178,8 +180,15 @@ private:
     std::vector<int>             VgenBHadPlusMothersPdg, VgenBHadPlusMothersStatus;
     std::vector<std::vector<int> >  VgenBHadPlusMothersIndices;
     std::vector<int>             VgenBHadIndex, VgenBHadFlavour, VgenBHadJetIndex;
-
-
+    
+    // True level info from Zs and their decays
+    std::vector<LV> VGenZ;
+    std::vector<LV> VGenZMeDaughterParticle;
+    std::vector<LV> VGenZMeDaughterAntiParticle;
+    std::vector<LV> VGenZStableLepton;
+    std::vector<LV> VGenZStableAntiLepton;
+    std::vector<int> VGenZDecayMode;
+    
     //Complete true level info
     std::vector<LV> GenParticleP4;
     std::vector<int> GenParticlePdgId;
@@ -276,6 +285,7 @@ NTupleWriter::NTupleWriter(const edm::ParameterSet& iConfig):
     FullLepEvt_(iConfig.getParameter<edm::InputTag>("FullLepEvent")),
     hypoKey_(iConfig.getParameter<edm::InputTag>("hypoKey")),
     genEventHiggs_(iConfig.getParameter<edm::InputTag>("genEventHiggs")),
+    genZDecay_(iConfig.getParameter<edm::InputTag>("genZDecay")),
     genParticles_( iConfig.getParameter<edm::InputTag>("genParticles")),
 
     genJets_   (iConfig.getParameter<edm::InputTag>("genJets")),
@@ -306,6 +316,7 @@ NTupleWriter::NTupleWriter(const edm::ParameterSet& iConfig):
     includeTrig_(iConfig.getParameter<bool>("includeTrigger")),
     isTtBarSample_(iConfig.getParameter<bool>("isTtBarSample")),
     isHiggsSample_(iConfig.getParameter<bool>("isHiggsSample")),
+    isZSample_(iConfig.getParameter<bool>("isZSample")),
     includePDFWeights_ (iConfig.getParameter<bool>("includePDFWeights")),
 
     //used for header:
@@ -682,7 +693,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         {
             std::cerr << "Error: no gen event?!\n";
             TopProductionMode = -1;
-	    GenTop = nullP4; GenAntiTop = nullP4;
+            GenTop = nullP4; GenAntiTop = nullP4;
             GenLepton = nullP4; GenAntiLepton = nullP4;
             GenTau = nullP4; GenAntiTau = nullP4;
             GenLeptonPdgId = 0; GenAntiLeptonPdgId = 0;
@@ -722,6 +733,27 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         edm::Handle<int> HiggsDecayModeHandle;
         iEvent.getByLabel(higgsDecayMode_, HiggsDecayModeHandle);
         HiggsDecayMode = HiggsDecayModeHandle.failedToGet() ? 0 : *HiggsDecayModeHandle;
+    }
+    
+    if(isZSample_){
+        //Generator info
+        edm::Handle<std::vector<GenZDecayProperties> > v_genZDecayProperties;
+        iEvent.getByLabel(genZDecay_, v_genZDecayProperties);
+        if(!v_genZDecayProperties.failedToGet()){
+            for(size_t i = 0; i < v_genZDecayProperties->size(); ++i){
+                VGenZ.push_back(v_genZDecayProperties->at(i).z()->polarP4());
+                VGenZMeDaughterParticle.push_back(v_genZDecayProperties->at(i).meDaughterParticle()->polarP4());
+                VGenZMeDaughterAntiParticle.push_back(v_genZDecayProperties->at(i).meDaughterAntiParticle()->polarP4());
+                if(v_genZDecayProperties->at(i).stableLepton()) VGenZStableLepton.push_back(v_genZDecayProperties->at(i).stableLepton()->polarP4());
+                else VGenZStableLepton.push_back(nullP4);
+                if(v_genZDecayProperties->at(i).stableAntiLepton()) VGenZStableAntiLepton.push_back(v_genZDecayProperties->at(i).stableAntiLepton()->polarP4());
+                else VGenZStableAntiLepton.push_back(nullP4);
+                VGenZDecayMode.push_back(v_genZDecayProperties->at(i).decayMode());
+            }
+        }
+        else{
+            std::cerr << "Error: no GenZDecayProperties ?!\n";
+        }
     }
 
 
@@ -1139,7 +1171,7 @@ NTupleWriter::beginJob()
     ////////Gen Info
     if (isTtBarSample_) {
         Ntuple->Branch("TopProductionMode", &TopProductionMode, "TopProductionMode/I");
-	Ntuple->Branch("GenMET", &GenMET);
+        Ntuple->Branch("GenMET", &GenMET);
         Ntuple->Branch("GenTop", &GenTop);
         Ntuple->Branch("GenAntiTop", &GenAntiTop);
         Ntuple->Branch("GenLepton", &GenLepton);
@@ -1181,7 +1213,7 @@ NTupleWriter::beginJob()
 
         Ntuple->Branch("jetAssociatedParton", &VjetAssociatedParton);
     }
-
+    
     //Gen Info for Higgs and b quarks of decay
     if (isHiggsSample_) {
         Ntuple->Branch("GenH", &GenH);
@@ -1189,7 +1221,17 @@ NTupleWriter::beginJob()
         Ntuple->Branch("GenAntiBFromH", &GenAntiBFromH);
         Ntuple->Branch("HiggsDecayMode", &HiggsDecayMode, "HiggsDecayMode/I");
     }
-
+    
+    // Gen Info for Zs and decay products
+    if(isZSample_){
+        Ntuple->Branch("GenZ", &VGenZ);
+        Ntuple->Branch("GenZMeDaughterParticle", &VGenZMeDaughterParticle);
+        Ntuple->Branch("GenZMeDaughterAntiParticle", &VGenZMeDaughterAntiParticle);
+        Ntuple->Branch("GenZStableLepton", &VGenZStableLepton);
+        Ntuple->Branch("GenZStableAntiLepton", &VGenZStableAntiLepton);
+        Ntuple->Branch("GenZDecayMode", &VGenZDecayMode);
+    }
+    
     //Hypothesis Info
     Ntuple->Branch("HypTop", &HypTop);
     Ntuple->Branch("HypAntiTop", &HypAntiTop);
@@ -1296,10 +1338,17 @@ void NTupleWriter::clearVariables()
     HypAntiB.clear();
     HypWPlus.clear();
     HypWMinus.clear();
-
+    
     HypJet0index.clear();
     HypJet1index.clear();
-
+    
+    VGenZ.clear();
+    VGenZMeDaughterParticle.clear();
+    VGenZMeDaughterAntiParticle.clear();
+    VGenZStableLepton.clear();
+    VGenZStableAntiLepton.clear();
+    VGenZDecayMode.clear();
+    
     ZDecayMode.clear();
     TopDecayMode = 0;
     HiggsDecayMode = 0;

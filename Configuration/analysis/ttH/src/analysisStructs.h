@@ -56,6 +56,8 @@ namespace tth{
         bool uniqueGenTopMatching()const;
         bool uniqueRecoTopMatching()const;
         
+        bool uniqueGenMatching()const;
+        
         bool uniqueGenHiggsMatching()const;
         bool uniqueRecoHiggsMatching()const;
         

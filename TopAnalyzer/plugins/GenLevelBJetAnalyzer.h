@@ -66,22 +66,52 @@ private:
     virtual void beginLuminosityBlock ( edm::LuminosityBlock&, edm::EventSetup const& );
     virtual void endLuminosityBlock ( edm::LuminosityBlock&, edm::EventSetup const& );
 
-    std::vector<int> findHadronJets ( const reco::GenJetCollection& genJets,  std::vector<int> &hadIndex, std::vector<reco::GenParticle> &hadMothersGenPart, std::vector<std::vector<int> > &hadMothersIndices, std::vector<int> &hadFlavour );
-    std::vector<int> getGenJetWith ( const reco::Candidate* bQuark, const reco::GenJetCollection& genJets, std::vector<reco::GenParticle> &bHadronObjects, std::vector<bool> &isFromBquark, std::vector<int> &bHadronsInJet );
+    std::vector<int> findHadronJets ( 
+        const reco::GenJetCollection& genJets,  
+        std::vector<int> &hadIndex, 
+        std::vector<reco::GenParticle> &hadMothersGenPart, 
+        std::vector<std::vector<int> > &hadMothersIndices, 
+        std::vector<int> &hadFlavour );
+    std::vector<int> getGenJetWith ( 
+        const reco::Candidate* bQuark, 
+        const reco::GenJetCollection& genJets, 
+        std::vector<reco::GenParticle> &bHadronObjects, 
+        std::vector<bool> &isFromBquark, 
+        std::vector<int> &bHadronsInJet );
     int getGenJetNear ( const reco::Candidate* particle, std::vector<const reco::GenJet*> &genJets );
     typedef const reco::Candidate* pCRC;
-    int analyzeMothers ( const reco::Candidate* thisParticle, pCRC *hadron, std::vector<const reco::Candidate*> &hadMothers, std::vector<std::vector<int> > &hadMothersIndices, std::set<const reco::Candidate*> *analyzedParticles, const int prevPartIndex );
-    bool searchInMothers ( const reco::Candidate* bQuark, const reco::Candidate* thisParticle, std::vector<const reco::Candidate*> particleChain, pCRC *bHadron );
+    int analyzeMothers ( 
+        const reco::Candidate* thisParticle, 
+        pCRC *hadron, 
+        std::vector<const reco::Candidate*> &hadMothers, 
+        std::vector<std::vector<int> > &hadMothersIndices, 
+        std::set<const reco::Candidate*> *analyzedParticles, 
+        const int prevPartIndex );
+    bool searchInMothers ( 
+        const reco::Candidate* bQuark, 
+        const reco::Candidate* thisParticle, 
+        std::vector<const reco::Candidate*> particleChain, 
+        pCRC *bHadron );
     bool putMotherIndex ( std::vector<std::vector<int> > &hadMothersIndices, int partIndex, int mothIndex );
     bool isHadron ( const int flavour, const reco::Candidate* thisParticle );
     bool isHadronPdgId ( const int flavour, const int pdgId );
     bool hasHadronDaughter ( const int flavour, const reco::Candidate* thisParticle );
     int isInList ( std::vector<const reco::Candidate*> particleList, const reco::Candidate* particle );
-    void findInMothers ( int idx, std::vector<int> &mothChains, std::vector<std::vector<int> > &hadMothersIndices, std::vector<reco::GenParticle> &hadMothers, int status, int pdgId, bool pdgAbs, int firstLast, bool verbose );
+    void findInMothers ( 
+        int idx, std::vector<int> &mothChains, 
+        std::vector<std::vector<int> > &hadMothersIndices, 
+        std::vector<reco::GenParticle> &hadMothers, 
+        int status, int pdgId, bool pdgAbs, int firstLast, bool verbose );
     bool isNeutralPdg ( int pdgId );
 
     bool checkForLoop ( std::vector<const reco::Candidate*> &particleChain, const reco::Candidate* particle );
     std::string getParticleName ( int id ) const;
+
+    bool fixExtraSameFlavours(
+        const unsigned int hadId, const std::vector<int> &hadIndices, const std::vector<reco::GenParticle> &hadMothers, 
+        const std::vector<std::vector<int> > &hadMothersIndices, const std::vector<std::vector<int> > &LastQuarkIds, 
+        const std::vector<std::vector<int> > &LastQuarkMotherIds, std::vector<int> &lastQuarkIndices, std::vector<int> &hadronFlavour, 
+        const int lastQuarkIndex);
 
     inline std::string printJetInfo ( const size_t iJet, const reco::GenJet* ) const;
     inline std::string printParticleChain ( const std::vector<const reco::Candidate*> &particleChain, const reco::Candidate *bHadron ) const;
@@ -118,7 +148,7 @@ private:
     TH2D *h2_lastQFlav_HadFlav, *h2_lastQFlav_QMotherFlav, *h2_lastQPdg_QMotherPdg;
     TH1D *h_lastQ_lastQ_dRmin, *h_hadJet_dRmin;
     TH1D *h_dEHadJet_T, *h_dEHadJet_H, *h_dEHadJet_Z, *h_dEHadJet_G, *h_dEHadJet_P, *h_dEHadJet_Q, *h_dEHadJet_Other, *h_dEHadJet[7];
-    TH1I *h_nHadInJet;
+    TH1I *h_nHadInJet, *h_hadFlavour;
 
 
 };

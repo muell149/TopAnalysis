@@ -194,9 +194,9 @@ void TtFullLepKinSolver::NeutrinoRec(const double sol)
 double
 TtFullLepKinSolver::WeightSolfromShape() const
 {
-    return nupars_[0] * TMath::Landau(LV_n.E(), nupars_[1], nupars_[2], 0) 
-                      * TMath::Landau(LV_n_.E(), nupars_[3], nupars_[4], 0);
+    return nupars_[0] * TMath::Landau(LV_n.E(), nupars_[1], nupars_[2], 0) * TMath::Landau(LV_n_.E(), nupars_[3], nupars_[4], 0);
 
+    //return 1;
 }
 
 
@@ -421,7 +421,7 @@ GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus,
             // !!!!!!!!!!!!!!!!!!WARNING!!!!!!!!!!!!!!!!
             
             for(double topMass = 100; topMass < 300.5; topMass += 1) 
-//             for(double topMass = 163; topMass < 183.5; topMass += 1) 
+//             for(double topMass = 172.5; topMass <= 172.5; topMass += 1) 
 //             double topMass = 173;
             {
 //                 std::cout << "input = " << x(leptonPlus_tlv) << x(leptonMinus_tlv) 

@@ -64,13 +64,7 @@ HiggsAnalysis::HiggsAnalysis(TTree*):
 isInclusiveHiggs_(false),
 bbbarDecayFromInclusiveHiggs_(false),
 runWithTtbb_(false),
-mvaTreeHandler_(0),
-eventYieldHistograms_(0),
-dyScalingHistograms_(0),
-basicHistograms_(0),
-mvaValidation_(0),
-playground_(0),
-dijetAnalyzer_(0)
+mvaTreeHandler_(0)
 {}
 
 
@@ -710,7 +704,7 @@ bool HiggsAnalysis::getGenBjetIndices(int& genBjetIndex, int& genAntiBjetIndex,
     }
 
     // If no unique match of jets from (anti)b from (anti)top is found, return false
-    if(genBjetIndex<0 || genAntiBjetIndex<0){
+    if(genBjetIndex<0 || genAntiBjetIndex<0 || genBjetIndex==genAntiBjetIndex){
         return false;
     }
     return true;
@@ -742,8 +736,8 @@ bool HiggsAnalysis::matchRecoToGenJets(int& matchedBjetIndex, int& matchedAntiBj
     }
 
     // Call a jet matched if it is close enough (should this be a configurable parameter?)
-    if(deltaRBjet>0.3) matchedBjetIndex = -1;
-    if(deltaRAntiBjet>0.3) matchedAntiBjetIndex = -1;
+    if(deltaRBjet>0.5) matchedBjetIndex = -1;
+    if(deltaRAntiBjet>0.5) matchedAntiBjetIndex = -1;
 
     // Check if both gen jets are successfully matched to different reco jets
     if(matchedBjetIndex==-1 || matchedAntiBjetIndex==-1 || matchedBjetIndex == matchedAntiBjetIndex) return false;
@@ -767,9 +761,23 @@ void HiggsAnalysis::SetHiggsInclusiveSeparation(const bool bbbarDecayFromInclusi
 
 
 
+void HiggsAnalysis::SetRunWithTtbb(const bool runWithTtbb)
+{
+    runWithTtbb_ = runWithTtbb;
+}
+
+
+
 void HiggsAnalysis::SetMvaInputProduction(MvaTreeHandler* mvaTreeHandler)
 {
     mvaTreeHandler_ = mvaTreeHandler;
+}
+
+
+
+void HiggsAnalysis::SetAllAnalysisHistograms(std::vector<AnalysisHistogramsBase*> v_analysisHistograms)
+{
+    v_analysisHistograms_ = v_analysisHistograms;
 }
 
 
@@ -803,55 +811,6 @@ bool HiggsAnalysis::failsAdditionalJetFlavourSelection(const Long64_t& entry)con
 
 
 
-void HiggsAnalysis::SetEventYieldHistograms(EventYieldHistograms* eventYieldHistograms)
-{
-    eventYieldHistograms_ = eventYieldHistograms;
-}
-
-
-
-void HiggsAnalysis::SetDyScalingHistograms(DyScalingHistograms* dyScalingHistograms)
-{
-    dyScalingHistograms_ = dyScalingHistograms;
-}
-
-
-
-void HiggsAnalysis::SetBasicHistograms(BasicHistograms* basicHistograms)
-{
-    basicHistograms_ = basicHistograms;
-}
-
-
-
-void HiggsAnalysis::SetMvaValidation(MvaValidation* mvaValidation)
-{
-    mvaValidation_ = mvaValidation;
-}
-
-
-
-void HiggsAnalysis::SetPlayground(Playground* playground)
-{
-    playground_ = playground;
-}
-
-
-
-void HiggsAnalysis::SetDijetAnalyzer(DijetAnalyzer* analyzer)
-{
-    dijetAnalyzer_ = analyzer;
-}
-
-
-
-void HiggsAnalysis::SetRunWithTtbb(const bool runWithTtbb)
-{
-    runWithTtbb_ = runWithTtbb;
-}
-
-
-
 void HiggsAnalysis::fillAll(const std::string& selectionStep,
                             const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
                             const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
@@ -860,41 +819,34 @@ void HiggsAnalysis::fillAll(const std::string& selectionStep,
                             const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
                             const double& defaultWeight)const
 {
-    if(eventYieldHistograms_) eventYieldHistograms_->fill(recoObjectIndices, defaultWeight, selectionStep);
-    if(dyScalingHistograms_) dyScalingHistograms_->fill(recoObjects, recoObjectIndices, defaultWeight, selectionStep);
-    if(basicHistograms_) basicHistograms_->fill(recoObjects, recoObjectIndices, defaultWeight, selectionStep);
-    if(playground_) playground_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
-                                      genObjectIndices, recoObjectIndices,
-                                      genLevelWeights, recoLevelWeights, defaultWeight,
-                                      selectionStep);
+    for(AnalysisHistogramsBase* analysisHistograms : v_analysisHistograms_){
+        if(analysisHistograms) analysisHistograms->fill(recoObjects, commonGenObjects,
+                                                   topGenObjects, higgsGenObjects,
+                                                   kinRecoObjects,
+                                                   recoObjectIndices, genObjectIndices,
+                                                   genLevelWeights, recoLevelWeights,
+                                                   defaultWeight, selectionStep);
+    }
+    
     if(mvaTreeHandler_) mvaTreeHandler_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
-    if(mvaValidation_) mvaValidation_->fill(recoObjects, genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
-    if(dijetAnalyzer_) dijetAnalyzer_->fill(recoObjects, commonGenObjects, topGenObjects, higgsGenObjects, kinRecoObjects,
-                                            genObjectIndices, recoObjectIndices, defaultWeight, selectionStep);
 }
 
 
 
 void HiggsAnalysis::bookAll()
 {
-    if(eventYieldHistograms_) eventYieldHistograms_->book(fOutput);
-    if(dyScalingHistograms_) dyScalingHistograms_->book(fOutput);
-    if(basicHistograms_) basicHistograms_->book(fOutput);
-    if(mvaValidation_) mvaValidation_->book(fOutput);
-    if(playground_) playground_->book(fOutput);
-    if(dijetAnalyzer_) dijetAnalyzer_->book(fOutput);
+    for(AnalysisHistogramsBase* analysisHistograms : v_analysisHistograms_){
+        if(analysisHistograms) analysisHistograms->book(fOutput);
+    }
 }
 
 
 
 void HiggsAnalysis::clearAll()
 {
-    if(eventYieldHistograms_) eventYieldHistograms_->clear();
-    if(dyScalingHistograms_) dyScalingHistograms_->clear();
-    if(basicHistograms_) basicHistograms_->clear();
-    if(mvaValidation_) mvaValidation_->clear();
-    if(playground_) playground_->clear();
-    if(dijetAnalyzer_) dijetAnalyzer_->clear();
+    for(AnalysisHistogramsBase* analysisHistograms : v_analysisHistograms_){
+        if(analysisHistograms) analysisHistograms->clear();
+    }
 }
 
 
