@@ -224,6 +224,11 @@ if(not options.MCweighting=='unset'):
 if (not runningOnData == "MC"):
     MCweighting = False
 
+## print gen particle list?
+printGenParticleList=False
+if(not "ttbar" in options.sample):
+    printGenParticleList=False
+
 # differetial xSec Analysis
 process = cms.Process("topDifferentialXSec")
 
@@ -965,7 +970,7 @@ process.noOverlapGenJetCollection=cms.EDFilter("CommonGenJetSelector",
 process.leadingCleanedGenJetSelectionNjets4 = process.leadingGenJetSelection.clone (src = 'noOverlapGenJetCollection', minNumber = 4)
 
 
-process.selectedGenMuonCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
+process.selectedGenMuonCollection.cut    =cms.string('abs(eta) < 2.1 & pt > 30.')
 process.selectedGenElectronCollection.cut=cms.string('abs(eta) < 2.1 & pt > 30.')
 process.genAllMuonKinematics = process.analyzeMuonKinematics.clone    (src = 'isolatedGenMuons')
 process.genAllElectronKinematics = process.analyzeElectronKinematics.clone(src = 'isolatedGenElectrons')
@@ -1036,9 +1041,13 @@ process.tightLead_1_JetKinematicsTagged  = process.tightLead_1_JetKinematics.clo
 process.tightLead_2_JetKinematicsTagged  = process.tightLead_2_JetKinematics.clone()
 process.tightLead_3_JetKinematicsTagged  = process.tightLead_3_JetKinematics.clone()
 process.tightJetKinematicsTagged         = process.tightJetKinematics.clone()
+process.tightJetKinematicsKinFit         = process.tightJetKinematics.clone()
 process.tightJetQualityTagged            = process.tightJetQuality.clone()
+process.tightJetQualityKinFit            = process.tightJetQuality.clone()
 process.bottomJetKinematicsTagged        = process.bottomJetKinematics.clone()
+process.bottomJetKinematicsKinFit        = process.bottomJetKinematics.clone()
 process.bottomJetQualityTagged           = process.bottomJetQuality.clone()
+process.bottomJetQualityKinFit           = process.bottomJetQuality.clone()
 process.bottomLead_0_JetKinematicsTagged = process.analyzeJetKinematics.clone (src = 'tightBottomPFJets', analyze = uds0 )
 process.bottomLead_1_JetKinematicsTagged = process.analyzeJetKinematics.clone (src = 'tightBottomPFJets', analyze = uds1 )
 
@@ -1056,7 +1065,8 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   GenJetSrc = cms.InputTag('ak5GenJets'),
                                   addGenJetSrc = cms.InputTag('additionalGenJet'),
                                   GenMETSrc = 'genMetTrue',
-                                  GenLepSrc = 'isolatedGenMuons',
+                                  GenLepSrc = 'selectedGenMuonCollection',
+                                  ingenPS = cms.InputTag("visibleHadronPS", "inVisiblePS"),
                                   weight = "",
                                   VertexSrc = "goodOfflinePrimaryVertices",
                                   semiLepEvent = cms.InputTag(""),
@@ -1066,14 +1076,14 @@ process.compositedKinematics  = process.analyzeCompositedObjects.clone(
                                   addJetPt=cms.double(50.)
                                   )
 if(decayChannel=='electron'):
-    process.compositedKinematics.GenLepSrc = 'isolatedGenElectrons'
+    process.compositedKinematics.GenLepSrc = 'selectedGenElectronCollection'
 process.compositedKinematicsKinFit = process.compositedKinematics.clone()
 process.compositedKinematicsKinFit.semiLepEvent = cms.InputTag("ttSemiLepEvent")
 process.compositedKinematicsKinFit.GenJetSrc= cms.InputTag('noOverlapGenJetCollection')
 process.compositedKinematicsProbSel=process.compositedKinematicsKinFit.clone()
 process.compositedKinematics.btagDiscr=cms.double(0.244) # loose WP for untagged selection
 # gen
-process.compositedPartonGen=process.compositedKinematicsKinFit.clone()
+process.compositedPartonGen          =process.compositedKinematicsKinFit.clone(addGenJetSrc = cms.InputTag('additionalGenJet'))
 process.compositedPartonGenPhaseSpace=process.compositedPartonGen.clone()
 process.compositedHadronGenPhaseSpace=process.compositedPartonGen.clone()
 
@@ -1205,7 +1215,13 @@ process.monitorKinematicsAfterBtagging = cms.Sequence(process.tightMuonKinematic
                                                       process.bottomLead_0_JetKinematicsTagged   +
                                                       process.bottomLead_1_JetKinematicsTagged
                                                       )
-    
+
+process.monitorJetKinematicsAfterKinFit = cms.Sequence(process.tightJetKinematicsKinFit           +
+                                                       process.tightJetQualityKinFit              +
+                                                       process.bottomJetKinematicsKinFit          +
+                                                       process.bottomJetQualityKinFit             
+                                                       )
+
 process.SSVMonitoring = cms.Sequence(process.tightMuontightJetsKinematicsSSV +
                                      process.tightMuonKinematicsSSV          +
                                      process.tightMuonQualitySSV             +
@@ -1435,14 +1451,6 @@ process.altermakeGenLevelBJets=process.produceGenLevelBJets.clone(
 
 ## tool to select identified bjets from genJet collection
 process.load("TopAnalysis.TopUtils.UhhGenJetSelector_cfi")
-process.bjetGenJetsRaw=process.uhhSelectedGenJets.clone(
-    genJet = cms.InputTag("cleanedGenJetCollection"),
-    #genJet = cms.InputTag("ak5GenJets"),
-    BHadJetIndex     = cms.InputTag("makeGenLevelBJets", "BHadJetIndex"    ),
-    AntiBHadJetIndex = cms.InputTag("makeGenLevelBJets", "AntiBHadJetIndex"),
-    pt =cms.double(10.),
-    eta=cms.double(5.0)                          
-    )
 
 process.bjetGenJets=process.uhhSelectedGenJets.clone(
     genJet = cms.InputTag("noOverlapGenJetCollection"),
@@ -1459,14 +1467,15 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     hypoKey = cms.string("kKinFit"),
     #genJets = cms.InputTag('ak5GenJets','','HLT'),
     #genJets = cms.InputTag("noOverlapGenJetCollection"),
-    genJets = cms.InputTag("bjetGenJetsRaw"),
-    genLeptons = cms.InputTag('isolatedGenMuons'),
+    genJets = cms.InputTag("bjetGenJets"),
+    genLeptons = cms.InputTag('selectedGenMuonCollection'),
     bJetCollection = cms.bool(True),
     recoJets= cms.InputTag('tightLeadingPFJets'),
     useRecBjetsKinematicsBeforeFit= cms.bool(False),
     output = cms.int32(0),
     weight = cms.InputTag(""),
     genPlots = cms.bool(True),
+    ingenPS = cms.InputTag("visibleHadronPS", "inVisiblePS"),
     recPlots = cms.bool(True),
     BHadJetIndex     = cms.InputTag("", ""),
     AntiBHadJetIndex = cms.InputTag("", ""),
@@ -1478,7 +1487,7 @@ process.analyzeTopRecoKinematicsBjets=process.analyzeSemiLepBJets.clone(
     )
 
 if(decayChannel=="electron"):
-    process.analyzeTopRecoKinematicsBjets.genLeptons = cms.InputTag('isolatedGenElectrons')
+    process.analyzeTopRecoKinematicsBjets.genLeptons = cms.InputTag('selectedGenElectronCollection')
 
 process.analyzeTopPartonLevelKinematicsBjets=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False),useRecBjetsKinematicsBeforeFit= cms.bool(False))
 process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace=process.analyzeTopRecoKinematicsBjets.clone(recPlots = cms.bool(False),useRecBjetsKinematicsBeforeFit= cms.bool(False))
@@ -1492,19 +1501,45 @@ process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.genJets = cms.InputTag("b
 
 # b gen jet selection
 process.bGenJetSelection    = process.leadingGenJetSelection.clone (src = 'bjetGenJets'   , minNumber = 2)
-process.bGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = 'bjetGenJetsRaw', minNumber = 2)
 process.lightGenJetSelection = process.leadingGenJetSelection.clone (src = cms.InputTag("bjetGenJets", "lightJetsFromTop")  , minNumber = 2)
-process.lightGenJetSelectionRaw = process.leadingGenJetSelection.clone (src = cms.InputTag("bjetGenJetsRaw", "lightJetsFromTop")  , minNumber = 2)
-
 
 process.additionalGenJet=cms.EDFilter("CommonGenJetSelector",
                                       src = cms.InputTag("bjetGenJets", "lightJetsFromTop"),
                                       cut = cms.string('abs(eta) < 2.4 & pt > 30.')
                                       )
-#cms.InputTag("bjetGenJets", "lightJetsFromTop")
+
+#cms.InputTag(b"jetGenJets", "lightJetsFromTop")
 
 
+## tool to check whether the event is within the visible hadron level generator PS 
+process.load("TopAnalysis.TopUtils.visiblePhaseSpaceFilter_cfi")
 
+process.visibleHadronPS=process.visiblePhaseSpace.clone(
+    ## input gen lepton collection     (should be of type reco::GenParticle)
+    genLeptons   = cms.InputTag("selectedGenMuonCollection"),
+    ## required lepton multiplicity
+    nLeptonsMin   = cms.int32(1),
+    nLeptonsMax   = cms.int32(1),
+    ## input gen jet collection        (should be of type reco::GenJet)
+    genJets      = cms.InputTag("noOverlapGenJetCollection"),  
+    ## required jet multiplicity
+    nJetsMin      = cms.int32(4),
+    nJetsMax      = cms.int32(99999),            
+    ## input gen b jet collection      (should be of type reco::GenJet)
+    genbJets     = cms.InputTag("bjetGenJets"),
+    ## required b jet multiplicity
+    nbJetsMin     = cms.int32(2),
+    nbJetsMax     = cms.int32(2),
+    ## input gen light jet collection  (should be of type reco::GenJet)
+    genlightJets = cms.InputTag("bjetGenJets", "lightJetsFromTop"),
+    ## required light jet multiplicity
+    nlightJetsMin = cms.int32(2),
+    nlightJetsMax = cms.int32(2)
+    )
+
+if(decayChannel=="electron"):
+    process.visibleHadronPS.genLeptons = cms.InputTag('selectedGenElectronCollection')
+    
 
 ## ---
 ##    lepton hadron level distributions
@@ -1514,17 +1549,18 @@ process.analyzeTopRecoKinematicsLepton=process.analyzeSemiLepLepton.clone(
                                      semiLepEvent = cms.InputTag("ttSemiLepEvent"),
                                      hypoKey = cms.string("kKinFit"),
                                      recLeptons = cms.InputTag('tightMuons'),
-                                     genLeptons = cms.InputTag('isolatedGenMuons'),
+                                     genLeptons = cms.InputTag('selectedGenMuonCollection'),
                                      output = cms.int32(0),
                                      weight = cms.InputTag(""),
-                                     genPlots = cms.bool(True), 
+                                     genPlots = cms.bool(True),
+                                     ingenPS = cms.InputTag("visibleHadronPS", "inVisiblePS"),
                                      recPlots = cms.bool(True),
                                      useRecLeptonKinematicsBeforeFit= cms.bool(False),
                                      useTree = cms.bool(True)
                                      )
 if(decayChannel=="electron"):
     process.analyzeTopRecoKinematicsLepton.recLeptons = cms.InputTag('tightElectronsEJ')
-    process.analyzeTopRecoKinematicsLepton.genLeptons = cms.InputTag('isolatedGenElectrons')
+    process.analyzeTopRecoKinematicsLepton.genLeptons = cms.InputTag('selectedGenElectronCollection')
 
 process.analyzeTopPartonLevelKinematicsLepton=process.analyzeTopRecoKinematicsLepton.clone(
     genPlots = cms.bool(True), 
@@ -1550,9 +1586,7 @@ process.genJetCuts = cms.Sequence(process.leadingGenJetSelectionNjets1 +
                                   # add bjet indices
                                   #process.makeGenLevelBJets                         +
                                   # add bjet selection
-                                  process.bGenJetSelectionRaw                       +
                                   process.bGenJetSelection                          +
-                                  process.lightGenJetSelectionRaw                   +
                                   process.lightGenJetSelection
                                   )
 
@@ -1600,29 +1634,29 @@ if(applyKinFit==True):
                 process.kinFit.replace(process.filterRecoKinFit,
                                        process.filterRecoKinFit+process.filterProbKinFit)
                 
-            process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics     +
+            process.kinFitGen           = cms.Sequence(process.analyzeTopPartonLevelKinematics     
                                                        # add bjet indices
-                                                       process.makeGenLevelBJets                   +
+                                                       #process.makeGenLevelBJets                   +
                                                        # add bjet analyzer
-                                                       process.analyzeTopPartonLevelKinematicsBjets +
+                                                       #process.analyzeTopPartonLevelKinematicsBjets +
                                                        # add lepton analyzer
-                                                       process.analyzeTopPartonLevelKinematicsLepton +
+                                                       #process.analyzeTopPartonLevelKinematicsLepton +
                                                        # add mixed object analyzer
-                                                       process.compositedPartonGen
+                                                       #process.compositedPartonGen
                                                        )
-            process.kinFitGenPhaseSpace = cms.Sequence(process.analyzeTopPartonLevelKinematicsPhaseSpace+
+            process.kinFitGenPhaseSpace = cms.Sequence(process.analyzeTopPartonLevelKinematicsPhaseSpace
                                                        # add bjet indices
-                                                       process.makeGenLevelBJets                        +
+                                                       #process.makeGenLevelBJets                        +
                                                        # add bjet analyzer
-                                                       process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace +
+                                                       #process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace +
                                                        # add lepton analyzer
-                                                       process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace +
+                                                       #process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace +
                                                        # add mixed object analyzer
-                                                       process.compositedPartonGenPhaseSpace
+                                                       #process.compositedPartonGenPhaseSpace
                                                        )
             process.kinFitGenPhaseSpaceHad = cms.Sequence(
                                                           # default analyzer module
-                                                          process.analyzeTopHadronLevelKinematicsPhaseSpace +
+                                                          #process.analyzeTopHadronLevelKinematicsPhaseSpace +
                                                           # add bjet analyzer
                                                           process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace +
                                                           # add lepton analyzer
@@ -2294,26 +2328,26 @@ if(runningOnData=="MC" and PUreweigthing):
             # create plots for full PS
             setattr(process,"analyzeTopPartonLevelKinematics"+sys, process.analyzeTopPartonLevelKinematics.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematics"+sys).analyze.useTree = False
-            setattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys, process.analyzeTopPartonLevelKinematicsBjets.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys).useTree = False
-            setattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys, process.analyzeTopPartonLevelKinematicsLepton.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys).useTree = False
-            setattr(process,"compositedPartonGen"+sys, process.compositedPartonGen.clone(weight=weightTagName))
+            #setattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys, process.analyzeTopPartonLevelKinematicsBjets.clone(weight=weightTagName))
+            #getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys).useTree = False
+            #setattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys, process.analyzeTopPartonLevelKinematicsLepton.clone(weight=weightTagName))
+            #getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys).useTree = False
+            #setattr(process,"compositedPartonGen"+sys, process.compositedPartonGen.clone(weight=weightTagName))
             #getattr(process,"compositedPartonGen"+sys).useTree = False 
             
             # create plots for parton level PS
             setattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
-            setattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys).useTree = False            
-            setattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace.clone(weight=weightTagName))
-            getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys).useTree = False
-            setattr(process,"compositedPartonGenPhaseSpace"+sys, process.compositedPartonGenPhaseSpace.clone(weight=weightTagName))
+            #setattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
+            #getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys).useTree = False            
+            #setattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys, process.analyzeTopPartonLevelKinematicsLeptonPhaseSpace.clone(weight=weightTagName))
+            #getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys).useTree = False
+            #setattr(process,"compositedPartonGenPhaseSpace"+sys, process.compositedPartonGenPhaseSpace.clone(weight=weightTagName))
             #getattr(process,"compositedPartonGenPhaseSpace"+sys).useTree = False 
 
             # create plots for hadron level PS
-            setattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=weightTagName))
-            getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
+            #setattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsPhaseSpace.clone(weight=weightTagName))
+            #getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys).analyze.useTree = False
             setattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsBjetsPhaseSpace.clone(weight=weightTagName))
             getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys).useTree = False           
             setattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys, process.analyzeTopHadronLevelKinematicsLeptonPhaseSpace.clone(weight=weightTagName))
@@ -2324,15 +2358,15 @@ if(runningOnData=="MC" and PUreweigthing):
             # analyzer to be added to sequence
             process.GENFULLanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematics"+sys)
             process.GENpartonPSanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsPhaseSpace"+sys)
-            process.GENhadronPSanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys)
-            process.GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys)
-            process.GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys)
+            #process.GENhadronPSanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsPhaseSpace"+sys)
+            #process.GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsBjets"+sys)
+            #process.GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsBjetsPhaseSpace"+sys)
             process.GENhadronPSbanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sys)
-            process.GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys)
-            process.GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys)
+            #process.GENFULLbanalyzers    *=getattr(process,"analyzeTopPartonLevelKinematicsLepton"+sys)
+            #process.GENpartonPSbanalyzers*=getattr(process,"analyzeTopPartonLevelKinematicsLeptonPhaseSpace"+sys)
             process.GENhadronPSbanalyzers*=getattr(process,"analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sys)
-            process.GENFULLbanalyzers    *=getattr(process,"compositedPartonGen"+sys)
-            process.GENpartonPSbanalyzers*=getattr(process,"compositedPartonGenPhaseSpace"+sys)
+            #process.GENFULLbanalyzers    *=getattr(process,"compositedPartonGen"+sys)
+            #process.GENpartonPSbanalyzers*=getattr(process,"compositedPartonGenPhaseSpace"+sys)
             process.GENhadronPSbanalyzers*=getattr(process,"compositedHadronGenPhaseSpace"+sys)
             
 
@@ -2586,6 +2620,16 @@ process.testIsoElectrons=process.tightElectronsEJ.clone(
 process.testIsoElectronSelection= process.convElecRejection.clone (src = 'testIsoElectrons', minNumber = 1, maxNumber = 99999999)
 process.testIsoElectronQuality  = process.tightElectronQualityTagged.clone(src = 'testIsoElectrons')
 
+
+## test event particle listing
+## using ParticleListDrawer from PhysicsTools/HepMCCandAlgos
+#process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.printTree = cms.EDAnalyzer("ParticleListDrawer",
+    src = cms.InputTag("genParticles"),
+    maxEventsToPrint  = cms.untracked.int32(10)
+) 
+
+
 ## ---
 ##    run the final sequences
 ## ---
@@ -2600,10 +2644,10 @@ process.p1 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       process.semiLeptGenCollections                *
                       process.cleanedGenJetCollection               *
                       process.makeGenLevelBJets                     *
-                      process.bjetGenJetsRaw                        *
                       process.noOverlapGenJetCollection             *
                       process.altermakeGenLevelBJets                *
-                      process.bjetGenJets                           * 
+                      process.bjetGenJets                           *
+                      process.visibleHadronPS                       *
                       process.additionalGenJet                      *
                       ## create PU event weights
                       process.makeEventWeightsPU                    *
@@ -2639,7 +2683,9 @@ process.p1 = cms.Path(## gen event selection (decay channel) and the trigger sel
                       process.monitorKinematicsAfterBtagging        *
                       process.PUControlDistributionsAfterBtagging   *
                       ## apply kinematic fit
-                      process.kinFit
+                      process.kinFit                                *
+                      ## monitor after kinematic fit
+                      process.monitorJetKinematicsAfterKinFit
                       )
 
 if(applyKinFit==False or eventFilter!="signal only"):
@@ -2649,7 +2695,7 @@ if(applyKinFit==False or eventFilter!="signal only"):
     process.p1.remove(process.isolatedGenLeptons           )
     process.p1.remove(process.semiLeptGenCollections       )
     process.p1.remove(process.bjetGenJets                  )
-    process.p1.remove(process.bjetGenJetsRaw               )
+    process.p1.remove(process.visibleHadronPS              )
     process.p1.remove(process.cleanedGenJetCollection      )
     process.p1.remove(process.altermakeGenLevelBJets       )
     process.p1.remove(process.additionalGenJet             )
@@ -2705,16 +2751,17 @@ if(runningOnData=="MC" and not cutflowSynch):
     process.p3 = cms.Path(## gen event selection: semileptonic (lepton &
                           ## tau->lepton if tau==True), lepton=muon/electron
                           process.genFilterSequence                     *
+                          process.printTree                             *
                           ## introduce some collections
                           process.isolatedGenLeptons                    *
                           process.semiLeptGenCollections                *
                           process.cleanedGenJetCollection               *
                           process.makeGenLevelBJets                     *
-                          process.bjetGenJetsRaw                        *
                           process.noOverlapGenJetCollection             *
                           process.altermakeGenLevelBJets                *
-                          process.bjetGenJets                           * 
-                          process.additionalGenJet                      *                         
+                          process.bjetGenJets                           *
+                          process.visibleHadronPS                       *
+                          process.additionalGenJet                      *  
                           ## create PU event weights
                           process.makeEventWeightsPU                    *
                           ## create shape distortion event weights
@@ -2745,7 +2792,7 @@ if(runningOnData=="MC" and not cutflowSynch):
         process.p3.remove(process.genJetCuts)
         process.p3.remove(process.noOverlapGenJetCollection)
         process.p3.remove(process.bjetGenJets)
-        process.p3.remove(process.bjetGenJetsRaw)
+        process.p3.remove(process.visibleHadronPS)
         process.p3.remove(process.cleanedGenJetCollection)
         process.p3.remove(process.altermakeGenLevelBJets)
         process.p3.remove(process.makeGenLevelBJets)
@@ -2757,12 +2804,14 @@ if(runningOnData=="MC" and not cutflowSynch):
         process.p3.remove(process.genJetCuts)
         process.p3.remove(process.noOverlapGenJetCollection)
         process.p3.remove(process.bjetGenJets)
-        process.p3.remove(process.bjetGenJetsRaw)
+        process.p3.remove(process.visibleHadronPS)
         process.p3.remove(process.cleanedGenJetCollection)
         process.p3.remove(process.altermakeGenLevelBJets)
         process.p3.remove(process.makeGenLevelBJets)
         process.p3.remove(process.additionalGenJet)
         process.p3.remove(process.dummy)
+    if(not printGenParticleList):
+        process.p3.remove(process.printTree)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
         process.p3.remove(process.dummy)
@@ -2777,7 +2826,8 @@ if(runningOnData=="MC" and not cutflowSynch):
                               process.semiLeptGenCollections                *
                               process.noOverlapGenJetCollection             *
                               process.altermakeGenLevelBJets                *
-                              process.bjetGenJets                           * 
+                              process.bjetGenJets                           *
+                              process.visibleHadronPS                       *
                               process.additionalGenJet                      *
                               ## create PU event weights
                               process.makeEventWeightsPU                    *
@@ -2813,6 +2863,7 @@ if(runningOnData=="MC" and not cutflowSynch):
         process.p4.remove(process.noOverlapGenJetCollection)
         process.p4.remove(process.altermakeGenLevelBJets)
         process.p4.remove(process.bjetGenJets     )
+        process.p4.remove(process.visibleHadronPS)
         process.p4.remove(process.additionalGenJet)
     if(eventFilter=='background only'):
         process.p4.remove(process.filterGenPhaseSpace)
@@ -2822,6 +2873,7 @@ if(runningOnData=="MC" and not cutflowSynch):
         process.p4.remove(process.noOverlapGenJetCollection)
         process.p4.remove(process.altermakeGenLevelBJets)
         process.p4.remove(process.bjetGenJets     )
+        process.p4.remove(process.visibleHadronPS)
         process.p4.remove(process.additionalGenJet)
     ## delete dummy sequence
     if(applyKinFit==False or eventFilter!="signal only"):
@@ -3156,6 +3208,8 @@ process.ecalMomentum.inputJets           = cms.InputTag("selectedPatJetsAK5PF")
 for path in pathlist:
     path.replace(process.pf2pat,
                  process.pf2pat * process.ecalMomentum)
+if(runningOnData=="data"):
+    process.ecalMomentum.inputJets = cms.InputTag("selectedPatJets")
 
 # reduce module content if reduced==True
 if(reduced):
@@ -3297,3 +3351,4 @@ for lep in relevantLeptonCollections:
         lep.cut=tmpExp
         if(tmpExp.find("\'")>-1):
             lep.cut=tmpExp.strip("'")
+
