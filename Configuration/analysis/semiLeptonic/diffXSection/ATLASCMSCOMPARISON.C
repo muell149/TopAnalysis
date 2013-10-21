@@ -380,15 +380,15 @@ void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
       errM_.push_back(0.);
       //errM_.push_back((CMSMadGraph7->GetY()[bin-1]/CMSdata7->GetY()[bin-1])*((CMSMadGraph7->GetErrorYhigh(bin-1)/CMSMadGraph7->GetY()[bin-1])));
     }
-    drawRatio(M, C, 0.5, 1.5,  myStyle, 0, errM_, "ATLAS", "CMS", "hist ", kAzure+6, false, 0.7);
-    drawRatio(C, C, 0.5, 1.5,  myStyle, 0, errC_, "ATLAS", "CMS", "p e2 same"     , kBlue, true, 0.7);
+    drawRatio(M, C, 0.5, 1.5,  myStyle, 0, errM_, "x", "CMS data", "hist ", kAzure+6, false, 0.7);
+    drawRatio(C, C, 0.5, 1.5,  myStyle, 0, errC_, "x", "CMS data", "p e2 same"     , kBlue, true, 0.7);
 
   }
-  else drawRatio(C, C, 0.5, 1.5,  myStyle, 0, errC_, "ATLAS", "CMS", "p e2"     , kBlue, true, 0.7);
-  drawRatio(A, C, 0.5, 1.5,  myStyle, 0, errA_, "ATLAS", "CMS", "p e2 same", kRed , true, 0.7);
+  else drawRatio(C, C, 0.5, 1.5,  myStyle, 0, errC_, "x", "CMS data", "p e2"     , kBlue, true, 0.7);
+  drawRatio(A, C, 0.5, 1.5,  myStyle, 0, errA_, "x", "CMS data", "p e2 same", kRed , true, 0.7);
 
   //saving
-  TString path="./diffXSecFromSignal/plots/combined/2012/comparisonATLAS";
+  TString path="./diffXSecFromSignal/plots/combined/2012/comparisonATLAS/";
   plotCanvas_[0]->Print(path+quantity+"ATLASvsCMS7TeV.eps");
   plotCanvas_[0]->Print(path+quantity+"ATLASvsCMS7TeV.png");
   plotCanvas_[1]->Print(path+quantity+"ATLASvsCMS7TeVLog.eps");
