@@ -1,3 +1,5 @@
+#include <utility>
+#include <algorithm>
 #include "TopAnalysis/TopAnalyzer/plugins/GenLevelBJetAnalyzer.h"
 
 //
@@ -114,6 +116,7 @@ GenLevelBJetAnalyzer::GenLevelBJetAnalyzer ( const edm::ParameterSet& cfg )
     h_nHadNo = fs->make<TH1I> ( "nHadNo", "Nr. of hadrons without flavour;N", 10, 0, 10 );
 
     h_nHadInJet = fs->make<TH1I> ( "nHadInJet", "N hadrons associated to a jet;N hadrons;Jets", 10, 0, 10 );
+    h_hadFlavour = fs->make<TH1I> ( "hadFlavour", "Flavour of the hadron origin;Flavour;Hadron", 60, -30, 30 );
 }
 
 GenLevelBJetAnalyzer::~GenLevelBJetAnalyzer()
@@ -523,7 +526,7 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
     }   // End of loop over jets
 
     for ( int i=0; i< ( int ) hadMothersCand.size(); i++ ) {
-        hadMothers.push_back ( ( *dynamic_cast<const reco::GenParticle*> ( hadMothersCand[i] ) ) );
+        hadMothers.push_back ( ( *dynamic_cast<const reco::GenParticle*> ( hadMothersCand.at(i) ) ) );
     }
 
 // Checking mothers of hadrons in order to assign flags (where the hadron comes from)
@@ -533,20 +536,22 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
     int nFlavHadrons[5] = {0};		// Numbers of hadrons (0-Top, 1-Higgs, 2-Gluon, 3-Z)
 
     std::vector<std::vector<int> > LastQuarkMotherIds;
+    std::vector<std::vector<int> > LastQuarkIds;
+    std::vector<int> lastQuarkIndices(nHad, -1);
 
 // Looping over all hadrons
     for ( unsigned int hadNum=0; hadNum<nHad; hadNum++ ) {
 
-        unsigned int hadIdx = hadIndex[hadNum];   // Index of hadron in the hadMothers
-        const reco::GenParticle* hadron = &hadMothers[hadIdx];
+        unsigned int hadIdx = hadIndex.at(hadNum);   // Index of hadron in the hadMothers
+        const reco::GenParticle* hadron = &hadMothers.at(hadIdx);
         int jetIndex = -1;
 
 // Looping over all jets to match them to current hadron
         for ( unsigned int jetNum = 0; jetNum < nJets; jetNum++ ) {
 // Checking whether jet contains this hadron in it (that was put in jet by clustering algorithm)
-            std::vector<const reco::GenParticle*> particles = genJets[jetNum].getGenConstituents();
+            std::vector<const reco::GenParticle*> particles = genJets.at(jetNum).getGenConstituents();
             for ( unsigned int partNum=0; partNum<particles.size(); partNum++ ) {
-                const reco::GenParticle* particle = particles[partNum];
+                const reco::GenParticle* particle = particles.at(partNum);
                 if ( particle->status() <2 ) {
                     continue;    // Skipping final state particles
                 }
@@ -571,8 +576,8 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
         std::vector <int> LastQuarkId;
         std::vector <int> LastQuarkMotherId;
 
-        int hadFlav = hadMothers[hadIdx].pdgId() <0?-1:1; // Charge of the hadron (-1,1)
-        if ( abs ( hadMothers[hadIdx].pdgId() ) /1000 < 1 ) {
+        int hadFlav = hadMothers.at(hadIdx).pdgId() <0?-1:1; // Charge of the hadron (-1,1)
+        if ( abs ( hadMothers.at(hadIdx).pdgId() ) /1000 < 1 ) {
             hadFlav*=-1;    // Inverting flavour of hadron if it is a meson
         }
 
@@ -583,11 +588,11 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
         bool verbose = false;
 
         // Checking whether this is a neutral hadron
-        if(std::find(bHadNeutralPdg.begin(), bHadNeutralPdg.end(), std::abs(hadMothers[hadIdx].pdgId()) ) != bHadNeutralPdg.end() ) {
-          verbose = false;
-        }
+        // if(std::find(bHadNeutralPdg.begin(), bHadNeutralPdg.end(), std::abs(hadMothers[hadIdx].pdgId()) ) != bHadNeutralPdg.end() ) {
+        //   verbose = false;
+        // }
 
-        //if(verbose) printf("Checking a hadron: %d ##########################################\n", hadMothers[hadIdx].pdgId());
+        if(verbose) printf("\n\n\nChecking a hadron: %d ##########################################\n", hadMothers[hadIdx].pdgId());
 
 // Searching only first quark in the chain with the same flavour as hadron
         findInMothers ( hadIdx, FirstQuarkId, hadMothersIndices, hadMothers, 0, hadFlav*flavour_, false, 1, verbose );
@@ -595,7 +600,7 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
           printf("Found %d b quarks Hadron: %d ###########################################\n", (int)FirstQuarkId.size(), hadMothers[hadIdx].pdgId());
           for(int i=0; i<(int)FirstQuarkId.size(); i++) {
             printf("   %d. pdgId: %d\tstatus: %d", i, hadMothers[FirstQuarkId[i]].pdgId(), hadMothers[FirstQuarkId[i]].status());
-            if(hadFlav*hadMothers[FirstQuarkId[i]].pdgId() < 0) printf(" WRONG CHARGE");
+            // if(hadFlav*hadMothers[FirstQuarkId[i]].pdgId() < 0) printf(" WRONG CHARGE");
             printf("\n");
           }
         }
@@ -604,7 +609,7 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
         // return result;
 
 
-// Filling histograms for each 1-st quark
+        // Filling histograms for each 1-st quark
         for ( unsigned int qId=0; qId<FirstQuarkId.size(); qId++ ) {
             int qFlav = ( hadMothers[FirstQuarkId[qId]].pdgId() <0 ) ?-1:1;
             if ( toPlot ) {
@@ -613,107 +618,128 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
                 h2_firstQFlav_HadFlav->Fill ( hadFlav,qFlav );
             }
 
-// Getting mothers of the first quark
+            // Getting mothers of the first quark
             std::vector<int> FirstQMotherId = hadMothersIndices.at ( FirstQuarkId[qId] );
             for ( unsigned int qmId=0; qmId<FirstQMotherId.size(); qmId++ ) {
-                int qmFlav = ( hadMothers[FirstQMotherId[qmId]].pdgId() <0 ) ?-1:1;
+                int qmFlav = ( hadMothers.at(FirstQMotherId.at(qmId)).pdgId() <0 ) ?-1:1;
                 if ( toPlot ) {
                     h2_firstQFlav_QMotherFlav->Fill ( qFlav,qmFlav );
                 }
             }		// End of loop over all mothers of the first quark of the hadron
 
-// Finding last quark of the hadron starting from the first quark
-            findInMothers ( FirstQuarkId[qId], LastQuarkId, hadMothersIndices, hadMothers, 0, qFlav*flavour_, false, 2, false );
+            // Finding last quark of the hadron starting from the first quark
+            // printf("   Looking for last b quark --------------------------------\n");
+            findInMothers ( FirstQuarkId.at(qId), LastQuarkId, hadMothersIndices, hadMothers, 0, qFlav*flavour_, false, 2, verbose );
 
-        }		// End of loop over all first quarks of the hadron
+        }       // End of loop over all first quarks of the hadron
+        // printf("   Found %d last b quarks +++++++++++++++++++++++++++++++\n", (int)LastQuarkId.size());
+        // for(int i=0; i<(int)LastQuarkId.size(); i++) printf("      %d. qIdx: %d\tpdg: %d\tpt: %.3f\n", i, LastQuarkId.at(i), hadMothers.at(LastQuarkId.at(i)).pdgId(), hadMothers.at(LastQuarkId.at(i)).pt());
 
-// Setting initial flavour of the hadron
+        // Setting initial flavour of the hadron
         int hadronFlavour = 0;
 
-//  Setting initial values for the quark that is closest to the hadron
-        float dRmin = 999.9;
-        int dRminQMId = -1;
+        std::vector<std::pair<double, int> > lastQuark_dR_id_pairs;
 
-// Finding the closest quark in dR
+        // Finding the closest quark in dR
         for ( unsigned int qId=0; qId<LastQuarkId.size(); qId++ ) {
-            int qIdx = LastQuarkId[qId];
+            int qIdx = LastQuarkId.at(qId);
             int qFlav = ( hadMothers.at ( qIdx ).pdgId() <0 ) ?-1:1;
-// Checking the dR between hadron and quark
+
+            // Checking the dR between hadron and quark
             float dR = deltaR ( hadMothers[hadIdx].eta(),hadMothers[hadIdx].phi(),hadMothers[qIdx].eta(),hadMothers[qIdx].phi() );
-            if ( dR>=dRmin ) {
-                continue;
-            }
+            // printf("  qIdx: %d dR: %.3f\n", qIdx, dR);
+            std::pair<double, int> dR_hadId_pair(dR,qIdx);
+            lastQuark_dR_id_pairs.push_back(dR_hadId_pair);
+
             if ( toPlot ) {
                 h_lastQstatus->Fill ( hadMothers.at ( qIdx ).status() );
                 h_lastQPdg->Fill ( hadMothers.at ( qIdx ).pdgId() );
                 h2_lastQFlav_HadFlav->Fill ( hadFlav,qFlav );
             }
-// Getting mothers of the last quark
-            std::vector<int> LastQMotherId = hadMothersIndices.at ( qIdx );
-            int inList = -1;
-            for ( unsigned int i=0; i<LastQuarkMotherId.size(); i++ ) {
-                if ( LastQuarkMotherId.at ( i ) ==LastQMotherId.at ( 0 ) ) {
-                    inList=i;
-                }
-                break;
-            }
-            if ( inList<0 ) {
-                LastQuarkMotherId.push_back ( LastQMotherId.at ( 0 ) );
-                inList = LastQuarkMotherId.size()-1;
-            }
+        }       // End of loop over all last quarks of the hadron
 
-            int qmFlav = ( hadMothers.at ( LastQMotherId.at ( 0 ) ).pdgId() <0 ) ?-1:1;
+        std::sort(lastQuark_dR_id_pairs.begin(), lastQuark_dR_id_pairs.end());
+
+        for(unsigned int qId=0; qId<lastQuark_dR_id_pairs.size(); qId++) {
+            int qIdx = lastQuark_dR_id_pairs.at(qId).second;
+            // Putting id of the last quark to the vector
+            LastQuarkId.at(qId) = qIdx;
+            // Putting id of the mother of the last quark to the vector
+            int qmIdx = hadMothersIndices.at ( qIdx ).at(0);
+            LastQuarkMotherId.push_back( qmIdx );
+            // Filling the plots
+            int qFlav = ( hadMothers.at ( qIdx ).pdgId() <0 ) ?-1:1;
+            int qmFlav = ( hadMothers.at ( LastQuarkMotherId.at ( qId ) ).pdgId() <0 ) ?-1:1;
             if ( toPlot ) {
                 h2_lastQFlav_QMotherFlav->Fill ( qFlav,qmFlav );
-                h2_lastQPdg_QMotherPdg->Fill ( hadMothers.at ( qIdx ).pdgId(),hadMothers.at ( LastQMotherId.at ( 0 ) ).pdgId() );
+                h2_lastQPdg_QMotherPdg->Fill ( hadMothers.at ( qIdx ).pdgId(),hadMothers.at ( LastQuarkMotherId.at ( qId ) ).pdgId() );
             }
-// Updating indices of closest quark mother
-            dRmin=dR;
-            dRminQMId=inList;
-        }		// End of loop over all last quarks of the hadron
+        }
+
+        if((int)LastQuarkId.size()>0) lastQuarkIndices.at(hadNum) = 0;     // Setting the first quark in array as a candidate if it exists
+
+        LastQuarkIds.push_back( LastQuarkId );
 
         LastQuarkMotherIds.push_back ( LastQuarkMotherId );
 
-        if ( toPlot ) {
-            h_lastQ_lastQ_dRmin->Fill ( dRmin );
+        // if ( toPlot ) {
+        //     h_lastQ_lastQ_dRmin->Fill ( dRmin );
+        // }
+
+        // printf("   Ordered last b quarks, hadron: %d +++++++++++++++++++\n", hadNum);
+        // for(int i=0; i<(int)LastQuarkId.size(); i++) printf("      %d. qIdx: %d\tpdg: %d\tpt: %.3f\n", i, LastQuarkId.at(i), hadMothers.at(LastQuarkId.at(i)).pdgId(), hadMothers.at(LastQuarkId.at(i)).pt());
+       
+        if(lastQuarkIndices.at(hadNum)<0) {
+            hadronFlavour = 0;
+        } else {
+            int qIdx = LastQuarkId.at( lastQuarkIndices.at( hadNum ) );
+            int qFlav = ( hadMothers.at(qIdx).pdgId() < 0 ) ? -1 : 1;
+            hadronFlavour = qFlav*std::abs( hadMothers.at( LastQuarkMotherId.at( lastQuarkIndices.at( hadNum ) ) ).pdgId() );
+        }
+        hadFlavour.push_back(hadronFlavour);    // Adding hadron flavour to the list of flavours
+
+        if(lastQuarkIndices.at(hadNum)>=0) {
+            bool noAmbiguity = fixExtraSameFlavours(hadNum, hadIndex, hadMothers, hadMothersIndices, LastQuarkIds, LastQuarkMotherIds, lastQuarkIndices, hadFlavour, 0);
+
+            int qIdx = LastQuarkId.at( lastQuarkIndices.at( hadNum ) );
+            int qFlav = ( hadMothers.at(qIdx).pdgId() < 0 ) ? -1 : 1;
+            hadronFlavour = qFlav*std::abs( hadMothers.at( LastQuarkMotherId.at( lastQuarkIndices.at( hadNum ) ) ).pdgId() );
+            if(!noAmbiguity) hadronFlavour = qFlav*21;      // Assigning the gluon as mother of ambiguous hadron
         }
 
-        if ( dRminQMId>=0 ) {
-            int qmIdx = LastQuarkMotherId.at ( dRminQMId );
-            hadronFlavour = abs ( hadMothers.at ( qmIdx ).pdgId() ) *hadFlav;		// Assigning hadron flavour to the pdg of the closest quark's mother
-        }
 
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Should be in a separate recursive function
 // Comparing the matched quarks to quarks matched to the previous hadrons for selecting the highest Pt hadron
-        if ( LastQuarkMotherId.size() >0 && dRminQMId>=0 ) {
-            int sameQHadId = -1;
-            for ( unsigned int j=0; j<hadNum; j++ ) {
-                if ( hadFlavour.at ( j ) !=hadronFlavour ) {
-                    continue;    // Skipping hadrons that don't have the same flavour
-                }
-                std::vector<int> LastQuarkMotherId_ = LastQuarkMotherIds.at ( j );
-                for ( unsigned int i=0; i<LastQuarkMotherId_.size(); i++ ) {		// Looping over quark mothers of the hadron
-                    if ( LastQuarkMotherId_.at ( i ) !=LastQuarkMotherId.at ( dRminQMId ) ) {
-                        continue;    // Skipping quark mothers that are not identical to the current one
-                    }
-                    sameQHadId = j;		// Assigning id of the hadron that has the same associated quark mother
-                    break;
-                }		// End of loop over quark mothers of previous hadrons
-                if ( sameQHadId>=0 ) {
-                    break;    // Stopping if hadron with the same mother has been found
-                }
-            }		// End of loop over previous hadrons
-// Setting flavour to 0 for the lower Pt hadron that was matched to the same quark
-            if ( sameQHadId>=0 ) {
-                if ( hadMothers.at ( hadIndex.at ( sameQHadId ) ).pt() > hadMothers.at ( hadIdx ).pt() ) {
-                    hadronFlavour=0;
-                } else {
-                    hadFlavour.at ( sameQHadId ) =0;
-                }
-            }
-        }
+//         if ( LastQuarkMotherId.size() >0 && dRminQMId>=0 ) {
+//             int sameQHadId = -1;
+//             for ( unsigned int j=0; j<hadNum; j++ ) {
+//                 if ( hadFlavour.at ( j ) !=hadronFlavour ) {
+//                     continue;    // Skipping hadrons that don't have the same flavour
+//                 }
+//                 std::vector<int> LastQuarkMotherId_ = LastQuarkMotherIds.at ( j );
+//                 for ( unsigned int i=0; i<LastQuarkMotherId_.size(); i++ ) {		// Looping over quark mothers of the hadron
+//                     if ( LastQuarkMotherId_.at ( i ) !=LastQuarkMotherId.at ( dRminQMId ) ) {
+//                         continue;    // Skipping quark mothers that are not identical to the current one
+//                     }
+//                     sameQHadId = j;		// Assigning id of the hadron that has the same associated quark mother
+//                     break;
+//                 }		// End of loop over quark mothers of previous hadrons
+//                 if ( sameQHadId >= 0 ) {
+//                     break;    // Stopping if hadron with the same mother has been found
+//                 }
+//             }		// End of loop over previous hadrons
+// // Setting flavour to 0 for the lower Pt hadron that was matched to the same quark
+//             if ( sameQHadId>=0 ) {
+//                 if ( hadMothers.at ( hadIndex.at ( sameQHadId ) ).pt() > hadMothers.at ( hadIdx ).pt() ) {
+//                     hadronFlavour=0;
+//                 } else {
+//                     hadFlavour.at ( sameQHadId ) =0;
+//                 }
+//             }
+//         }
+        // <<<<<<<<<<<<<<<<<<<<
 
-// 		printf("  hadronFlavour: %d (%d)\n",hadronFlavour,hadFlav);
-        hadFlavour.push_back ( hadronFlavour );
+		// printf("  hadronFlavour: %d (%d)\n",hadronFlavour,hadFlav);
 
         int jetIdx1 = result[hadNum];   // Index of jet from matching by jet clustering algorithm
 
@@ -767,8 +793,11 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
         }
     }		// End of loop over all hadrons
 
+
 // Checking number of different flavours of hadrons in the event
     for ( unsigned int i=0; i<hadFlavour.size(); i++ ) {
+        h_hadFlavour->Fill( hadFlavour.at(i) );
+        // printf("HADRON %d : FLAVOUR %d\n", i, hadFlavour.at(i));
         switch ( abs ( hadFlavour.at ( i ) ) ) {
         case 6:
             nFlavHadrons[0]++;	// Top
@@ -787,6 +816,9 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
             break;
         }
     }
+
+    // if( nFlavHadrons[0] > 3 ) printf("nHadTop > 3\n\n");
+    // if( nFlavHadrons[1] < 2 ) printf("nHadHiggs < 2**********************\n\n");
 
     if ( toPlot ) {
         h_nHad->Fill ( nHad );
@@ -980,13 +1012,14 @@ int GenLevelBJetAnalyzer::analyzeMothers ( const reco::Candidate* thisParticle, 
             continue;		// Skipping the mother that is its own daughter
         }
 
+        int nSameDaugh=0;
+
 // Checking whether this mother has other daughters that have the same pdgId [Only if plotting option is enabled]
         if ( toPlot && abs ( thisParticle->pdgId() ) ==flavour_ && abs ( thisParticle->pdgId() ) == abs ( mother->pdgId() ) ) {
             double highPt = -1.0;
             int highPtId = -1;
 // Loop over daughters of the mother to look how many daughters with the same pdgId it has
             float dR_min=999.9;
-            int nSameDaugh=0;
             for ( unsigned int iDaughter = 0; iDaughter<mother->numberOfDaughters(); iDaughter++ ) {
                 const reco::Candidate* daughter = mother->daughter ( iDaughter );
                 if ( abs ( daughter->pdgId() ) !=abs ( thisParticle->pdgId() ) ) {
@@ -1256,17 +1289,22 @@ void GenLevelBJetAnalyzer::findInMothers ( int idx, std::vector<int> &mothChains
             printf ( " Chk:  %d(%d mothers)\tpdg: %d\tstatus: %d\tPt: %.3f\tEta: %.3f",idx, nMothers, hadMothers.at ( idx ).pdgId(), hadMothers.at ( idx ).status(), hadMothers.at ( idx ).pt(),hadMothers.at ( idx ).eta() );
         }
     }
-    bool hasCorrectMothers = false;
+    bool hasCorrectMothers = true;
+    if(nMothers<1) hasCorrectMothers=false;
     for ( unsigned int i=0; i<nMothers; i++ ) {
         int motherId = mothers.at ( i );
         if ( motherId<0 ) {
             continue;
         }
-        if ( !isNeutralPdg ( hadMothers.at ( motherId ).pdgId() ) && hadMothers.at ( motherId ).pdgId() *pdgId<0 && !pdgAbs && !isHadronPdgId(pdgId, hadMothers.at( motherId ).pdgId() ) ) {
+        if ( !isNeutralPdg ( hadMothers.at ( motherId ).pdgId() ) && hadMothers.at ( motherId ).pdgId() * hadMothers.at ( idx ).pdgId() < 0 && !pdgAbs && !isHadronPdgId(pdgId, hadMothers.at( motherId ).pdgId() ) ) {
             continue;    // Skipping if mother of the particle has wrong charge
         }
         hasCorrectMothers=true;
         break;
+    }
+    if(!hasCorrectMothers) {
+        if(verbose) printf("    NO CORRECT MOTHER\n");
+        return;
     }
 // Checking whether current mother satisfies selection criteria
     if ( ( ( hadMothers.at ( idx ).pdgId() == pdgId && pdgAbs==false )
@@ -1303,14 +1341,16 @@ void GenLevelBJetAnalyzer::findInMothers ( int idx, std::vector<int> &mothChains
     for ( unsigned int i=0; i<nMothers; i++ ) {
         int idx2 = mothers[i];
         if ( idx2<0 ) {
-            continue;    // Skipping if mothers id is -1 (no mother), that means current particle is a proton
+            continue;    // Skipping if mother's id is -1 (no mother), that means current particle is a proton
         }
         if ( idx2==idx ) {
             continue;    // Skipping if particle is stored as its own mother
         }
         int pdg_2 = hadMothers[idx2].pdgId();
+        // Inverting the flavour if bb oscillation identified
         if ( isHadronPdgId(pdgId, pdg_1) && isHadronPdgId(pdgId, pdg_2) &&  pdg_1*pdg_2 < 0 ) {
             pdgId*=-1;
+            if(verbose) printf("######### Inverting flavour of the hadron\n");
         }
         if ( firstLast==2 && isCorrect && (
                     ( abs ( hadMothers[idx2].pdgId() ) != abs ( pdgId ) && pdgAbs==true ) ||
@@ -1323,7 +1363,7 @@ void GenLevelBJetAnalyzer::findInMothers ( int idx, std::vector<int> &mothChains
 
 // Checking next level mother
         if ( verbose ) {
-            printf ( "Checking mother %d out of %d mothers\n",i,nMothers );
+            printf ( "Checking mother %d out of %d mothers with pdgId: %d\n",i,nMothers,pdgId );
         }
         findInMothers ( idx2, mothChains, hadMothersIndices, hadMothers, status, pdgId, pdgAbs, firstLast, verbose );
     }
@@ -1346,6 +1386,94 @@ bool GenLevelBJetAnalyzer::isNeutralPdg ( int pdgId )
             return true;
         }
     return false;
+}
+
+
+/**
+ * Finds hadrons that have the same flavour and origin and resolve this ambiguity
+ * @method fixExtraSameFlavours
+ * @param  hadId                Index of the hadron being checked
+ * @param  hadIndex             Vector of indices of each hadron pointing to the hadMothers
+ * @param  hadMothers           Vector of gen particles (contain hadrons and all its ancestors)
+ * @param  hadMothersIndices    Vector of indices for each particle from hadMothers
+ * @param  LastQuarkIds         Vector of indices of last quarks for each hadron
+ * @param  LastQuarkMotherIds   Vector of indices of mothers for each last quark from LastQuarkIds
+ * @param  lastQuakIndices      Vector of indices pointing to particular index from the LastQuarkIds and LastQuarkMotherIds to be used for each hadron
+ * @param  lastQuarkIndex       Index from the LastQuarkIds and LastQuarkMotherIds for this particular hadron with index hadId
+ * @return Whether other mother with unique association has been found for the hadrons
+ */
+bool GenLevelBJetAnalyzer::fixExtraSameFlavours(
+    const unsigned int hadId, const std::vector<int> &hadIndices, const std::vector<reco::GenParticle> &hadMothers, 
+    const std::vector<std::vector<int> > &hadMothersIndices, const std::vector<std::vector<int> > &LastQuarkIds, 
+    const std::vector<std::vector<int> > &LastQuarkMotherIds, std::vector<int> &lastQuarkIndices, std::vector<int> &hadronFlavour, 
+    const int lastQuarkIndex)
+{
+    if(lastQuarkIndex<0) return false;
+    if((int)LastQuarkIds.at(hadId).size()<lastQuarkIndex+1) return false;
+    int hadIndex = hadIndices.at(hadId);
+    int LastQuarkId = LastQuarkIds.at(hadId).at(lastQuarkIndex);
+    int LastQuarkMotherId = LastQuarkMotherIds.at( hadId ).at( lastQuarkIndex );
+    int qmFlav = hadMothers.at(LastQuarkId).pdgId() < 0 ? -1 : 1;
+    int hadFlavour = qmFlav*std::abs( hadMothers.at( LastQuarkMotherId ).pdgId() );
+    bool ambiguityResolved = true;
+    // If last quark has inconsistent flavour with its mother, setting the hadron flavour to gluon
+    if(hadMothers.at(LastQuarkId).pdgId()*hadMothers.at(LastQuarkMotherId).pdgId() < 0 && !isNeutralPdg(hadMothers.at(LastQuarkMotherId).pdgId())) {
+        hadronFlavour.at(hadId) = qmFlav*21;
+        // printf("Setting flavour of hadron %d to %d (wrong mother flavour)\n", hadId, hadronFlavour.at(hadId));
+        return true;
+    }
+
+    // printf("hadId: %d  LastQuarkId: %d hadFlavour: %d\n", hadId, LastQuarkId, hadFlavour);
+    int nSameFlavourHadrons = 0;
+    // Looping over all previous hadrons
+    for(unsigned int iHad = 0; iHad<hadronFlavour.size(); iHad++) {
+        if(iHad==hadId) continue;
+        int theHadIndex = hadIndices.at(iHad);
+        int theLastQuarkIndex = lastQuarkIndices.at(iHad);
+        if(theLastQuarkIndex<0) continue;
+        int theLastQuarkId = LastQuarkIds.at(iHad).at(theLastQuarkIndex);
+        if((int)LastQuarkMotherIds.at( iHad ).size() <= theLastQuarkIndex) continue;
+        int theLastQuarkMotherId = LastQuarkMotherIds.at( iHad ).at( theLastQuarkIndex );
+        int theHadFlavour = hadronFlavour.at(iHad);
+        // Skipping hadrons with different flavour
+        if(theHadFlavour==0 || theHadFlavour==21) continue;
+        // printf(" hadId: %d flavour: %d|%d motherId: %d(%.3f)|%d(%.3f)\n", iHad, hadFlavour, theHadFlavour, LastQuarkMotherId, hadMothers.at(LastQuarkMotherId).pt(), theLastQuarkMotherId, hadMothers.at(theLastQuarkMotherId).pt());
+        if(theHadFlavour != hadFlavour || theLastQuarkMotherId != LastQuarkMotherId) continue;
+        ambiguityResolved = false;
+        nSameFlavourHadrons++;
+        // printf("   hadId: %d  LastQuarkId: %d hadFlavour: %d\n", iHad, theLastQuarkId, theHadFlavour);
+        // 
+        // Checking other b-quark mother candidates of this hadron
+        if((int)LastQuarkIds.at(hadId).size() > lastQuarkIndex+1) {
+            if(fixExtraSameFlavours(hadId, hadIndices, hadMothers, hadMothersIndices, LastQuarkIds, LastQuarkMotherIds, lastQuarkIndices, hadronFlavour, lastQuarkIndex+1) ) {
+                ambiguityResolved = true;
+                break;
+            }
+        } else
+        // Checking other b-quark mother candidates of the particular previous hadron
+        if((int)LastQuarkIds.at(iHad).size() > theLastQuarkIndex+1) {
+            if(fixExtraSameFlavours(iHad, hadIndices, hadMothers, hadMothersIndices, LastQuarkIds, LastQuarkMotherIds, lastQuarkIndices, hadronFlavour, theLastQuarkIndex+1) ) {
+                ambiguityResolved = true;
+                break;
+            };
+        } 
+        // else {
+        //     // Setting origin flavour of the lower Pt hadron to gluon
+        //     if(hadMothers.at(theHadIndex).pt() > hadMothers.at(hadIndex).pt()) hadronFlavour.at(hadId) = qmFlav*21; else hadronFlavour.at(iHad) = theHadFlavour/std::abs(theHadFlavour)*21;
+        //     ambiguityResolved = true;
+
+        // }
+    }       // End of loop over all previous hadrons
+    if(nSameFlavourHadrons>0 && !ambiguityResolved) {
+        hadronFlavour.at(hadId) = qmFlav*21;
+        // printf("   Setting flavour of hadron %d to %d\n", hadId, hadronFlavour.at(hadId));
+
+        return true;
+    }
+    lastQuarkIndices.at(hadId) = lastQuarkIndex;
+    hadronFlavour.at(hadId) = hadFlavour;
+    // printf("   Setting flavour of hadron %d to %d\n", hadId, hadronFlavour.at(hadId));
+    return true;
 }
 
 
