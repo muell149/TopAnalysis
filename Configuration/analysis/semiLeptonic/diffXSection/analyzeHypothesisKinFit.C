@@ -8,7 +8,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
-			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
+			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=false, bool hadron=true,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
   // ============================
@@ -81,7 +81,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // name of the cross section quantity you want to print
   // detailed information for
   // testQuantity="" means all, testQuantity="NOTEST" means none
-  TString testQuantity="NOTEST"; 
+  TString testQuantity="NOTEST";
   // errorbands for yield plots
   bool errorbands=false;
   // addSel: xSec from prob selection step
@@ -324,6 +324,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   std::vector<TString> vecRedundantPartOfNameInNonTTbarSG_;
   if(sysInputFolderExtensionRaw!=""&&!(addSel=="ProbSel"&&inputFolder.Contains("Prob"))){
     vecRedundantPartOfNameInNonTTbarSG_.push_back("Njets/"+sysInputFolderExtensionRaw);
+    vecRedundantPartOfNameInNonTTbarSG_.push_back("rhos/"+sysInputFolderExtensionRaw);
   }
   // debug
   //std::cout << genMixpath << std::endl;
@@ -412,6 +413,10 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     recMixpath+"/Njets",
     // gen jet multiplicity
     genMixpath+"/Ngenjets",
+    // reco rhos=2*172.5GeV/m(ttbar+1jet)
+    recMixpath+"/rhos",
+    // gen rhos=2*172.5GeV/m(ttbar+1jet)
+    genMixpath+"/rhosGen",
     // ttbar other composition
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/decayChannel"
   }; 
@@ -650,6 +655,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     recBpath+"/bbbarMass_"                                                  ,   
     // g) response matrix jet multiplicity
     recMixpath+"/Njets_"                                                    ,
+    // h) response matrix rhos=2*172.5GeV/m(ttbar+1jet)
+    recMixpath+"/rhos_"                                                     ,
   };
 
   TString plots2D_CCVars[ ] = {
@@ -740,6 +747,10 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     xSecLabelName("Njets"  )+"/events/0/1",
     // gen jet multiplicity
     xSecLabelName("Njets"  )+" parton truth/events/0/1",
+    // reco rhos=2*172.5GeV/m(ttbar+1jet)
+    xSecLabelName("rhos"  )+"/events/0/1",
+    // gen rhos=2*172.5GeV/m(ttbar+1jet)
+    xSecLabelName("rhos"  )+" parton truth/events/0/1",
     // ttbar other composition
     "t#bar{t} other decay channel/events/0/1"
   };
@@ -795,6 +806,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     xSecLabelName("bbbarMass")+" gen/"+xSecLabelName("bbbarMass")+" reco",
     // g) response matrix jet multiplicity
     xSecLabelName("Njets"    )+" gen/"+xSecLabelName("Njets")+" reco",
+    // h) response matrix rhos=2*172.5GeV/m(ttbar+1jet)
+    xSecLabelName("rhos"     )+" gen/"+xSecLabelName("rhos" )+" reco",
   };
 
   TString axisLabel2D_CCVars[ ] = {
@@ -1427,13 +1440,14 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       // for mixed object analyzer
       if(plotList_[plot].Contains("composited")){
 	newName.ReplaceAll("composited", "analyzeTop");
+	newName.ReplaceAll("Ngenjets", "Njets");
+	newName.ReplaceAll("rhosGen" , "rhos" );
 	if(sysInputGenFolderExtension!=""&&newName.Contains("Gen"+PS)&&!newName.Contains(sysInputGenFolderExtension)) newName.ReplaceAll("Gen"+PS, "Gen"+PS+sysInputGenFolderExtension);
 	if(plotList_[plot].Contains("Gen")) newName.ReplaceAll("Gen", "LevelKinematics");
 	else{
 	  newName.ReplaceAll("analyzeTop", "analyzeTopReco"  );
 	  if(!newName.Contains("KinFit")) newName.ReplaceAll("Kinematics", "KinematicsKinFit");
 	}
-	newName.ReplaceAll("Ngenjets", "Njets");
 	TString syAdd=sysInputFolderExtension;
 	syAdd.ReplaceAll(addSel, "");
 	if(syAdd!=""&&!newName.Contains(syAdd)) newName.ReplaceAll("KinFit","KinFit"+syAdd);
@@ -1491,7 +1505,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       plotList_[plot]=newName;
     }
   }
-  
+
   // ==========================================
   //  Lumiweighting for choosen luminosity
   // ==========================================
