@@ -58,7 +58,7 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   bool findAncestor(const reco::Candidate* cand, TString decaychain);
     
   /// src's for the different infos
-  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_,  GenJetSrc_, addGenJetSrc_, GenMETSrc_, GenLepSrc_, weight_, VertexSrc_, semiLepEvt_;
+  edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_,  GenJetSrc_, addGenJetSrc_, GenMETSrc_, GenLepSrc_, ingenPS_, weight_, VertexSrc_, semiLepEvt_;
 
   // class key of kinfit hypothesis
   std::string hypoKey_, btagAlgo_;
@@ -79,13 +79,14 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   double bqhadPtFit, bqhadEtaFit, bqhadPhiFit, bqlepPtFit, bqlepEtaFit, bqlepPhiFit, lqPtFit, lqEtaFit, lqPhiFit, lqbarPtFit, lqbarEtaFit, lqbarPhiFit, nuPtFit, nuEtaFit, nuPhiFit, lepPtFit, lepEtaFit, lepPhiFit;
   double nuPtTrue, nuEtaTrue, nuPhiTrue, lepPtTrue, lepEtaTrue, lepPhiTrue, sumEtPre, sumEtTrue;
   double nPV;
-  double ttbarJetMass, ttbarJetMassTrue;
+  double ttbarJetMass, ttbarJetMassTrue, rhos, rhosTrue;
   double leadNonttjetPtTrue, leadNonttjetYTrue, leadNonttjetEtaTrue;
   double topPtLepFit, topPtHadFit, topYLepFit, topYHadFit, ttbarMassFit, ttbarYFit, ttbarPtFit;
   double topPtLepTrue, topPtHadTrue, topYLepTrue, topYHadTrue, ttbarMassTrue, ttbarYTrue, ttbarPtTrue;
+  bool inVisPS;
 
   /// ints
-  int BindexA, BindexB, BindexC, BindexD, Nbjets, Njets, leadNonttjet;
+  int BindexA, BindexB, BindexC, BindexD, Nbjets, Njets, NjetsTrue, leadNonttjetIX;
 
   /// histo container
   std::map< std::string, TH1F* > hists_;
