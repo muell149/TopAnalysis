@@ -268,13 +268,14 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive("analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName) : (TH1F*)canvasTheo->GetPrimitive("analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName);
 	  if(verbose>0) std::cout << "INFO: can not find " << "analyzeTop"+LV+"LevelKinematics"+PS+"/"+plotName << std::endl;
 	}
-	if(!plotTheo&&plotNameTheo.Contains("Njets")){
+	if(!plotTheo&&(plotNameTheo.Contains("Njets")||plotNameTheo.Contains("rhos"))){
 	  if(verbose>0) std::cout << "INFO: can not find " << plotNameTheo << std::endl;
 	  // take care of differing naming conventions of mixed object analyzer plots
 	  if(hadron){
 	    TString plotNameTheoAlter=plotNameTheo;
-	    plotNameTheoAlter.ReplaceAll("Njets", "Ngenjets"); 	    
-	    plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotNameTheoAlter) : (TH1F*)canvasTheo->GetPrimitive(plotNameTheoAlter); 
+	    if(plotNameTheo.Contains("Njets")) plotNameTheoAlter.ReplaceAll("Njets"  , "Ngenjets"); 	    
+	    if(plotNameTheo.Contains("rhos" )) plotNameTheoAlter.ReplaceAll("rhosGen", "rhos"    );
+	      plotTheo = combinedEventYields ? (TH1F*)canvasTheoComb->GetPrimitive(plotNameTheoAlter) : (TH1F*)canvasTheo->GetPrimitive(plotNameTheoAlter); 
 	  }
 	}
 	if(((plotMu&&plotEl)||plotComb)&&plotTheo){ 
@@ -562,12 +563,13 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	    //  combicanvas->SetLogy(1); 
 	    //}
 	    // adjust max
-	    if(plotName.Contains("lepEta")||plotName=="bqEta"||plotName.Contains("topY")||plotName=="ttbarY") plotTheo->GetYaxis()->SetNoExponent(true);
+	    if(plotName.Contains("lepEta")||plotName=="bqEta"||plotName.Contains("topY")||plotName=="ttbarY"||plotName.Contains("rhos")) plotTheo->GetYaxis()->SetNoExponent(true);
 	    
 	    if      (plotName.Contains("topY")  ) plotTheo->SetMaximum(0.7);
 	    else if (plotName=="ttbarY"         ) plotTheo->SetMaximum(0.8);
 	    else if (plotName.Contains("lepEta")) plotTheo->SetMaximum(0.6);
 	    else if (plotName=="bqEta"          ) plotTheo->SetMaximum(0.6);
+	    else if (plotName.Contains("rhos")  ) plotTheo->SetMaximum(4.0);
 	  }
 	  
 	  // activate canvas
@@ -633,6 +635,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  // load it from combined file
 	  TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
 	  if(xSecVariables_[i].Contains("Njets")) plotNameMadgraph="composited"+LV+"Gen"+PS+"/Ngenjets";
+	  if(xSecVariables_[i].Contains("rhos" )) plotNameMadgraph="composited"+LV+"Gen"+PS+"/rhosGen" ;
 	  plotNameMadgraph.ReplaceAll("Norm","");
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
 	  TString plotNameMadgraph2=plotNameMadgraph;
@@ -765,6 +768,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BottomEta" ;
 }
 	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"Njets" ;}
+	  else if(xSecVariables_[i].Contains("rhos"     )){ smoothFactor = 1; rebinFactor =  1; errorRebinFactor =  1; errorSmoothFactor = 1; plotNameMCAtNLO="h"+PSlabel+"rhos"  ;}
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarPt"  ;}
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"BBbarMass";}
 	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 10; rebinFactor =  2; errorRebinFactor =  5; errorSmoothFactor = 10; plotNameMCAtNLO="h"+PSlabel+"lbMass";}
@@ -783,13 +787,14 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  // plotname for std simulation file = madgraph-plotname from analyzer structure
 	  TString plotNameMCAtNLO2="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
 	  if(xSecVariables_[i].Contains("Njets")) plotNameMCAtNLO2="composited"+LV+"Gen"+PS+"/Ngenjets"; 
+	  if(xSecVariables_[i].Contains("rhos" )) plotNameMCAtNLO2="composited"+LV+"Gen"+PS+"/rhosGen"; 
 	  plotNameMCAtNLO2.ReplaceAll("Norm","");
 	  plotNameMCAtNLO2.ReplaceAll("Minus","");
 	  plotNameMCAtNLO2.ReplaceAll("Plus","");
 	  // for bbbar and lead/sublead quantities
 	  // -> no error bands
 	  bool errorbands=true; 
- 	  if(xSecVariables_[i].Contains("lbMass")||xSecVariables_[i].Contains("bbbar")||xSecVariables_[i].Contains("Lead")||xSecVariables_[i].Contains("PhiStar")||xSecVariables_[i].Contains("DelPhi")||xSecVariables_[i].Contains("topPtTtbarSys")||xSecVariables_[i].Contains("Njets")){
+ 	  if(xSecVariables_[i].Contains("lbMass")||xSecVariables_[i].Contains("bbbar")||xSecVariables_[i].Contains("Lead")||xSecVariables_[i].Contains("PhiStar")||xSecVariables_[i].Contains("DelPhi")||xSecVariables_[i].Contains("topPtTtbarSys")||xSecVariables_[i].Contains("Njets")||xSecVariables_[i].Contains("rhos")){
 	    errorbands=false;
 	    // check if only external file should be used
  	    // -> then: no mcatnlo curve
@@ -831,6 +836,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  rebinFactor=0;
 	  TString plotNamePOWHEG="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+xSecVariables_[i]+hadLevelPlotExtend;
 	  if(xSecVariables_[i].Contains("Njets")) plotNamePOWHEG="composited"+LV+"Gen"+PS+"/Ngenjets";
+	  if(xSecVariables_[i].Contains("rhos" )) plotNamePOWHEG="composited"+LV+"Gen"+PS+"/rhosGen";
 	  plotNamePOWHEG.ReplaceAll("Norm","");
 	  plotNamePOWHEG.ReplaceAll("Minus","");	
 	  plotNamePOWHEG.ReplaceAll("Plus","");
@@ -848,6 +854,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 10; rebinFactor= 2; }
 	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1 ; rebinFactor= 1; }
+	  else if(xSecVariables_[i].Contains("rhos"     )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 1 ; rebinFactor= 1; }
 	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 1 ; rebinFactor= 1; }
@@ -949,6 +956,7 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  else if(xSecVariables_[i].Contains("bqPt"     )){ smoothFactor = 0; rebinFactor =  0; }
 	  else if(xSecVariables_[i].Contains("bqEta"    )){ smoothFactor = 2; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("Njets"    )){ smoothFactor = 1; rebinFactor =  1; }
+	  else if(xSecVariables_[i].Contains("rhos"     )){ smoothFactor = 1; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bbbarPt"  )){ smoothFactor = 1; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("bbbarMass")){ smoothFactor = 1; rebinFactor =  1; }
 	  else if(xSecVariables_[i].Contains("lbMass"   )){ smoothFactor = 1; rebinFactor =  1; }
