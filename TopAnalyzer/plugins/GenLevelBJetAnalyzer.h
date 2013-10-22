@@ -111,7 +111,7 @@ private:
         const unsigned int hadId, const std::vector<int> &hadIndices, const std::vector<reco::GenParticle> &hadMothers, 
         const std::vector<std::vector<int> > &hadMothersIndices, const std::vector<std::vector<int> > &LastQuarkIds, 
         const std::vector<std::vector<int> > &LastQuarkMotherIds, std::vector<int> &lastQuarkIndices, std::vector<int> &hadronFlavour, 
-        const int lastQuarkIndex);
+        std::set<int> &checkedHadronIds, const int lastQuarkIndex);
 
     inline std::string printJetInfo ( const size_t iJet, const reco::GenJet* ) const;
     inline std::string printParticleChain ( const std::vector<const reco::Candidate*> &particleChain, const reco::Candidate *bHadron ) const;
