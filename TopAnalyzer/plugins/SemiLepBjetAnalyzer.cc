@@ -80,8 +80,17 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   // ---
   //     A: configure input
   // ---
-  if(verbose>0) std::cout << "prepare inputs" << std::endl;
-  if(verbose>1) std::cout << "a) event weight" << std::endl;
+
+  if(verbose>0){
+    std::cout << "processing SemiLepBjetAnalyzer" << std::endl;
+    std::cout << "- prepare inputs" << std::endl;
+  }
+  if(verbose>1){
+    std::cout << "  genPlots_: " << genPlots_ << std::endl;
+    std::cout << "  recPlots_: " << recPlots_ << std::endl;
+    std::cout << "  preBjets : " << preBjets  << std::endl;
+  }
+  if(verbose>1) std::cout << "a) event weight: ";
    // a) prepare the event weight
   weight = 1;
   // get weight from the CMSSW event
@@ -93,7 +102,7 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     if(verbose>0) std::cout << "eventWeight not found" << std::endl;
     edm::LogInfo("weightNotFound") << "eventWeight not found";
   }
-  if(verbose>1) std::cout << "weight=" << weight << std::endl;
+  if(verbose>1) std::cout << weight << std::endl;
   // b) get a handle for the TtSemiLepEvent 
   if(verbose>1) std::cout << "b) TtSemiLepEvent" << std::endl;
   edm::Handle<TtSemiLeptonicEvent> semiLepEvt;
@@ -119,8 +128,9 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   // f) visible hadron level gen phase space indicator
   edm::Handle<bool > visPS;
   if(genPlots_) event.getByLabel(ingenPS_, visPS);
-  inVisPS=!genPlots_||!*visPS ? false : true;
-  if(verbose>1) std::cout << "f) visible phase space indicator" << std::endl;
+  inVisPS=false;
+  if(!visPS.failedToGet()&&visPS.isValid()&&*visPS) inVisPS=true;
+  if(verbose>1) std::cout << "f) visible phase space indicator: " << inVisPS << std::endl;
   if(genPlots_){
     // take leading two jets assuming that collection genJets consists of b-jets only in the order 1st entry: b-jet, 2nd entry: anti-bjet
     if(bJetCollection_==true){
@@ -259,27 +269,27 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     genPlots_=false;
   }
   // get generator level b-Jets from gen jet collection using indices from B Hadron identification procedure
-  const reco::GenJet*      genb      = genPlots_ ? getJetFromCollection(*genJets,bIX   ) : 0;
-  const reco::GenJet*      genbbar   = genPlots_ ? getJetFromCollection(*genJets,bbarIX) : 0;
-  const reco::GenParticle* genLepton = genPlots_ ? &genLeptons->at(0) : 0;
+  const reco::GenJet*      genb      = genPlots_&&inVisPS ? getJetFromCollection(*genJets,bIX   ) : 0;
+  const reco::GenJet*      genbbar   = genPlots_&&inVisPS ? getJetFromCollection(*genJets,bbarIX) : 0;
+  const reco::GenParticle* genLepton = genPlots_&&inVisPS ? &genLeptons->at(0) : 0;
 
   //double genxBhad=-1;
   //double genxBlep=-1;
   // fill gen histograms
-  valueBqPtGen       =-1000;
-  valueLeadBqPtGen   =-1000;
-  valueSubLeadBqPtGen=-1000;
-  valueBqEtaGen      =-1000;
-  valueBqYGen        =-1000;
-  valueBbarqPtGen    =-1000;
-  valueBbarqEtaGen   =-1000;
-  valueBbarqYGen     =-1000;
-  valueBbbarPtGen    =-1000;
-  valueBbbarEtaGen   =-1000;
-  valueBbbarYGen     =-1000;
-  valueBbbarMassGen  =-1000;
-  valueLbMassGen     =-1000;
-  if(genb&&genbbar&&inVisPS){
+  valueBqPtGen       =-1000.;
+  valueLeadBqPtGen   =-1000.;
+  valueSubLeadBqPtGen=-1000.;
+  valueBqEtaGen      =-1000.;
+  valueBqYGen        =-1000.;
+  valueBbarqPtGen    =-1000.;
+  valueBbarqEtaGen   =-1000.;
+  valueBbarqYGen     =-1000.;
+  valueBbbarPtGen    =-1000.;
+  valueBbbarEtaGen   =-1000.;
+  valueBbbarYGen     =-1000.;
+  valueBbbarMassGen  =-1000.;
+  valueLbMassGen     =-1000.;
+  if(genb&&genbbar){
     // top and W from parton truth
     
     //reco::Particle::LorentzVector hadWGen=semiLepEvt->hadronicDecayW()->p4();
@@ -359,20 +369,30 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     if(verbose>1) std::cout << "do filling" << std::endl;
     // fill lead b-jet and bbbar correlation histograms 
     // (those have only one entry per event and are independend of the rec-gen b-jet association)
-    bqPtLead_   ->Fill(inVisPS ? valueLeadBqPtGen : -1000, valueLeadBqPtRec   , weight);
-    bqPtSubLead_->Fill(inVisPS ? valueSubLeadBqPtGen : -1000, valueSubLeadBqPtRec, weight);
-    bbbarPt_    ->Fill(inVisPS ? valueBbbarPtGen     : -1000, valueBbbarPtRec    , weight);
-    bbbarEta_   ->Fill(inVisPS ? valueBbarqEtaGen    : -1000, valueBbbarEtaRec   , weight);
-    bbbarY_     ->Fill(inVisPS ? valueBbbarYGen      : -1000, valueBbbarYRec     , weight);
-    bbbarMass_  ->Fill(inVisPS ? valueBbbarMassGen   : -1000, valueBbbarMassRec  , weight);
+    if(verbose>1){
+      std::cout << "valueLeadBqPtGen: " << valueLeadBqPtGen << std::endl; 
+      std::cout << "valueLeadBqPtRec: " << valueLeadBqPtRec << std::endl;
+      std::cout << "valueSubLeadBqPtGen: " << valueSubLeadBqPtGen << std::endl; 
+      std::cout << "valueSubLeadBqPtRec: " << valueSubLeadBqPtRec << std::endl;
+      std::cout << "valueBbbarPtGen: " << valueBbbarPtGen << std::endl; 
+      std::cout << "valueBbarqEtaGen: " << valueBbbarPtRec << std::endl;
+      std::cout << "valueBbarqEtaGen: " << valueBbarqEtaGen << std::endl; 
+      std::cout << "valueBbbarEtaRec: " << valueBbbarEtaRec << std::endl;
+      std::cout << "valueBbbarYGen: " << valueBbbarYGen << std::endl; 
+      std::cout << "valueBbbarYRec: " << valueBbbarYRec << std::endl;
+      std::cout << "valueBbbarMassGen: " << valueBbbarMassGen   << std::endl; 
+      std::cout << "valueBbbarMassRec: " << valueBbbarMassRec   << std::endl;
+    }
+    bqPtLead_   ->Fill(valueLeadBqPtGen   , valueLeadBqPtRec   , weight);
+    bqPtSubLead_->Fill(valueSubLeadBqPtGen, valueSubLeadBqPtRec, weight);
+    bbbarPt_    ->Fill(valueBbbarPtGen    , valueBbbarPtRec    , weight);
+    bbbarEta_   ->Fill(valueBbarqEtaGen   , valueBbbarEtaRec   , weight);
+    bbbarY_     ->Fill(valueBbbarYGen     , valueBbbarYRec     , weight);
+    bbbarMass_  ->Fill(valueBbbarMassGen  , valueBbbarMassRec  , weight);
     if(valueLbMassRec>=0) lbMass_->Fill( valueLbMassGen, valueLbMassRec, weight );
     //if(genxBlep>=0&&recxBlep>=0) xB_->Fill( genxBlep, recxBlep, weight );
     //if(genxBhad>=0&&recxBhad>=0) xB_->Fill( genxBhad, recxBhad, weight );
-    if(verbose>1){
-      std::cout << "---" << std::endl;
-      std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << b->pt()    << "-- eta: genb   = " << genb->eta()    << "; recb   = " << b->eta() << std::endl;
-      std::cout << "pt: genbbar= " << genbbar->pt() << "; recbbar= " << bbar->pt() << "-- eta: genbbar= " << genbbar->eta() << "; recbbar= " << bbar->eta() << std::endl;
-    }
+    
     // for plots with combined b-jet and bbar-jet measurement:
     // take into account that both values end up in the same histogram
     // -> search for best gen-reco association based on minimal dR 
@@ -391,14 +411,15 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
       double valueBbarqPhiRec=bbar->phi();
       double valueBqPhiGen   =genb   ->phi();
       double valueBbarqPhiGen=genbbar->phi();
-      if(deltaR( valueBqEtaRec   , valueBqPhiRec   , valueBqEtaGen   , valueBqPhiGen   )+
-	 deltaR( valueBbarqEtaRec, valueBbarqPhiRec, valueBbarqEtaGen, valueBbarqPhiGen) > 
-	 deltaR( valueBbarqEtaRec, valueBbarqPhiRec, valueBqEtaGen   , valueBqPhiGen   )+ 
-	 deltaR( valueBqEtaRec   , valueBqPhiRec   , valueBbarqEtaGen, valueBbarqPhiGen)){
-	swapped = true;
+      double dROri =deltaR( valueBqEtaRec   , valueBqPhiRec   , valueBqEtaGen   , valueBqPhiGen   )+
+	            deltaR( valueBbarqEtaRec, valueBbarqPhiRec, valueBbarqEtaGen, valueBbarqPhiGen);
+      double dRSwap=deltaR( valueBbarqEtaRec, valueBbarqPhiRec, valueBqEtaGen   , valueBqPhiGen   )+ 
+	deltaR( valueBqEtaRec   , valueBqPhiRec   , valueBbarqEtaGen, valueBbarqPhiGen);
+      if(dROri > dRSwap){
 	bbSwapBetter = true;
 	// use the better dR combination only if parameter useClosestDrBs_ is true
 	if(useClosestDrBs_){
+	  swapped = true;
 	  bY     =valueBbarqYRec; 
 	  bbarY  =valueBqYRec;
 	  bpt    =valueBbarqPtRec; 
@@ -406,7 +427,10 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
 	  beta   =valueBbarqEtaRec; 
 	  bbareta=valueBqEtaRec;
 	}
-	if(verbose>1) std::cout << "dR unswapped = " << deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) << "; dR swapped = " << deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi()) << std::endl;
+	if(verbose>1){
+	  std::cout << "dR unswapped = " << dROri  << std::endl;
+	  std::cout << "dR swapped   = " << dRSwap << std::endl;
+	}
       }
     }
     // fill combined b-jet and bbar-jet correlation histograms 
