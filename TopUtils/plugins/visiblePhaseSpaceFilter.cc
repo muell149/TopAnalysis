@@ -36,7 +36,7 @@ void
 visiblePhaseSpaceFilter::produce(edm::Event& evt, const edm::EventSetup& setup)
 {
   // switch on/off debug output
-  bool debug=true;
+  bool debug=false;
 
   // initialize tree entries
   nLeptons  =-1;
