@@ -51,10 +51,10 @@ class SemiLepLeptonAnalyzer : public edm::EDAnalyzer {
   int verbose;
   // event weight
   edm::InputTag weight_;
-  // within visible cross section range?
-  edm::InputTag ingenPS_;
   // create gen plots?
   bool genPlots_;
+  // within visible cross section range?
+  edm::InputTag ingenPS_;
   // create rec plots?
   bool recPlots_;
   // use lepton kinematics as before the kinematic fit?
