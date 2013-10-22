@@ -156,6 +156,7 @@ TCanvas* getRatio(TString plotName, int verbose, TString outputFile){
   if(plotName.Contains("bbbarMass")){min=0.3;max=1.75;}
   if(plotName.Contains("bbbarPt"  )){min=0.4;max=1.8;}
   if(plotName.Contains("Njets"   )){min=0.15;max=1.85;}
+  if(plotName.Contains("rhos"    )){min=0.1 ;max=2.4;}
   if(plotName.Contains("lbMass")){min=0.55;max=1.35;}
   if(plotName.Contains("topPt")){
        if(plotName.Contains("Sub")){min=0.8;max=1.7;}

@@ -52,17 +52,14 @@ namespace semileptonic {
   // ==========================================
 
   // basic variables
-  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt", "lbMass", "Njets"};
+  TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt", "lbMass", "Njets", "rhos"};
   TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass", "topPtTtbarSys", "ttbarDelPhi", "ttbarPhiStar"};
-  //TString xSecVariablesKinFit[]     = {"topPt"};
-  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm", "lbMassNorm", "NjetsNorm"};
+  TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm", "lbMassNorm", "NjetsNorm", "rhosNorm"};
   TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "topPtTtbarSysNorm", "ttbarDelPhiNorm", "ttbarPhiStarNorm"};
-  //TString xSecVariablesKinFitNorm[]     = {"topPtNorm"};
   TString xSecVariablesIncl[] = {"inclusive"};
 
   TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{t} (t#bar{t} restframe)/[GeV]", "#Delta#phi^{t}/ ", "#Phi^{#lower[-0.9]{* }}(t,#bar{t})/ "};
-  //TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]"};
-  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "m^{b#bar{b}}/[GeV]", "p_{T}^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]", "N_{jets}/ "};
+  TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "m^{b#bar{b}}/[GeV]", "p_{T}^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]", "N_{jets}/ ", "#rho_{S}/ "};
 
   // cross-check variables
  
@@ -344,6 +341,44 @@ namespace semileptonic {
     if(sample==kData   ) return "Data";
     else return "Default "+decayChannel;
   }
+
+  TString extractxSecName(TString in)
+  {
+    // this function returns a TString that corresponds
+    // to the xSec quantity contained in "in", none is 
+    // returned if "in" does not contain any quantities
+    // modified quantities: none
+    // used functions: none
+    // used enumerators: none 
+
+    // define output
+    TString out="none";
+    // parton level full PS quantities
+    if(     in.Contains("topPtSubLead" )) out="topPtSubLead" ;
+    else if(in.Contains("topPtLead"    )) out="topPtLead"    ;
+    else if(in.Contains("topPtTtbarSys")) out="topPtTtbarSys";
+    else if(in.Contains("topPt"        )) out="topPt"        ;
+    else if(in.Contains("topY"         )) out="topY"         ;
+    else if(in.Contains("ttbarPt"      )) out="ttbarPt"      ;
+    else if(in.Contains("ttbarY"       )) out="ttbarY"       ;
+    else if(in.Contains("ttbarMass"    )) out="ttbarMass"    ;
+    else if(in.Contains("ttbarDelPhi"  )) out="ttbarDelPhi"  ;
+    else if(in.Contains("ttbarPhiStar" )) out="ttbarPhiStar" ;
+    // visible hadron/particle level quantities
+    else if(in.Contains("lepPt"    )) out="lepPt";
+    else if(in.Contains("lepEta"   )) out="lepEta";
+    else if(in.Contains("bqPt"     )) out="bqPt";
+    else if(in.Contains("bqEta"    )) out="bqEta";
+    else if(in.Contains("bbbarMass")) out="bbbarMass";
+    else if(in.Contains("bbbarPt"  )) out="bbbarPt";
+    else if(in.Contains("lbMass"   )) out="lbMass";
+    else if(in.Contains("rhos"     )) out="rhos";
+    else if(in.Contains("Njets")||in.Contains("Ngenjets")) out="Njets";
+    // return output
+    return out;
+  }
+
+
 
   double effSFAB(int sys=sysNo, std::string decayChannel="unset")
   {
@@ -2135,6 +2170,14 @@ namespace semileptonic {
       result["Njets"]=bins_;
       bins_.clear();
 
+      // rhos=tt+1jet/172.5GeV
+      //double rhoSBins[]={0., 0.4, 0.60, 1.1}; // purity and stability optimized
+      //double rhoSBins[]={0., 0.35, 0.65, 1.1}; // compomise
+      double rhoSBins[]={0., 0.2, 0.4, 0.7, 1.1};
+      bins_.insert( bins_.begin(), rhoSBins, rhoSBins + sizeof(rhoSBins)/sizeof(double) );
+      result["rhos"]=bins_;
+      bins_.clear();
+
       return result;
     }
 
@@ -2146,19 +2189,20 @@ namespace semileptonic {
     // used enumerators: none
       
     // restrict axis
-    if(variable.Contains("topPt"))          his->GetXaxis()->SetRangeUser(0.  , 499. ); 
-    else if(variable.Contains("topY"     )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
-    else if(variable.Contains("ttbarY"   )) his->GetXaxis()->SetRangeUser(-2.5, 2.49 );
-    else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(346., 1599.);
+    if(     variable.Contains("topPt"    )) his->GetXaxis()->SetRangeUser(0.   , 499. ); 
+    else if(variable.Contains("topY"     )) his->GetXaxis()->SetRangeUser(-2.5 , 2.49 );
+    else if(variable.Contains("ttbarY"   )) his->GetXaxis()->SetRangeUser(-2.5 , 2.49 );
+    else if(variable.Contains("ttbarMass")) his->GetXaxis()->SetRangeUser(346. , 1599.);
     else if(variable.Contains("ttbarDelPhi" )) his->GetXaxis()->SetRangeUser(0., 3.149);
-    else if(variable.Contains("ttbarPhiStar")) his->GetXaxis()->SetRangeUser(0., 1.99);
-    else if(variable.Contains("ttbarPt"  )) his->GetXaxis()->SetRangeUser(0.  , 299. );
-    else if(variable.Contains("lepPt"    )) his->GetXaxis()->SetRangeUser(30  , 199. );
-    else if(variable.Contains("lepEta"   )) his->GetXaxis()->SetRangeUser(-2.1, 2.09 );
-    else if(variable.Contains("bqPt"     )) his->GetXaxis()->SetRangeUser(30. , 399. );
-    else if(variable.Contains("bqEta"    )) his->GetXaxis()->SetRangeUser(-2.4, 2.39 );
-    else if(variable.Contains("lbMass"   )) his->GetXaxis()->SetRangeUser(0., 500);
-    else if(variable.Contains("Njets"    )) his->GetXaxis()->SetRangeUser(3.5, 14.5);
+    else if(variable.Contains("ttbarPhiStar")) his->GetXaxis()->SetRangeUser(0., 1.99 );
+    else if(variable.Contains("ttbarPt"  )) his->GetXaxis()->SetRangeUser(0.   , 299. );
+    else if(variable.Contains("lepPt"    )) his->GetXaxis()->SetRangeUser(30   , 199. );
+    else if(variable.Contains("lepEta"   )) his->GetXaxis()->SetRangeUser(-2.1 , 2.09 );
+    else if(variable.Contains("bqPt"     )) his->GetXaxis()->SetRangeUser(30.  , 399. );
+    else if(variable.Contains("bqEta"    )) his->GetXaxis()->SetRangeUser(-2.4 , 2.39 );
+    else if(variable.Contains("lbMass"   )) his->GetXaxis()->SetRangeUser(0.   , 500  );
+    else if(variable.Contains("Njets"    )) his->GetXaxis()->SetRangeUser(3.5  , 14.5 );
+    else if(variable.Contains("rhos"     )) his->GetXaxis()->SetRangeUser(0.   , 1.1  );
   }
     
   template <class T>
@@ -2652,6 +2696,7 @@ namespace semileptonic {
     else if(variable == "bbbarMass"    ) return "m^{b#bar{b}}"+strUnitGeV;
     else if(variable == "lbMass"       ) return "m^{lb}"+strUnitGeV;
     else if(variable == "Njets"        ) return "N_{jets} (p_{T}>30 GeV, |#eta|<2.4)";
+    else if(variable == "rhos"         ) return "#rho_{S}=2*172.5GeV/m(t#bar{t}+1jet)";
     else return "Default Label for variable "+variable;
   }
 
@@ -4069,6 +4114,7 @@ namespace semileptonic {
     // rename
     TString name=plotname2;
     if(name.Contains("Ngenjets")) name.ReplaceAll("Ngenjets", "Njets");
+    if(name.Contains("rhosGen" )) name.ReplaceAll("rhosGen" , "rhos" );
     if(model=="powheg") name+="POWHEG";
     else if(model=="powhegherwig") name+="POWHEGHERWIG";
     else if(model=="mcatnlo"){
@@ -4427,6 +4473,7 @@ namespace semileptonic {
 		else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 5.43/*5.86*/    :  5.98/*7.94*/   ) : 8   );
 	        else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4    : ((hadronPS) ? (probSel ? 6.43            :  8.27           ) : 4   );
 		else if(variable.Contains("Njets")       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );
+		else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );/*FIXME*/
 	      }
 	    }
 	    else if (decayChannel.Contains("electron")){
@@ -4452,6 +4499,7 @@ namespace semileptonic {
 		else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 5.41/*5.73*/    :  5.83/*7.83*/   ) : 8   );
 	        else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4    : ((hadronPS) ? (probSel ? 6.34            :  8.12           ) : 4   );
 		else if(variable.Contains("Njets")       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.42/*FIXME*/   :  0.42           ) : 1   );
+		else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );/*FIXME*/
 	      }
 	    }
 	    else if(decayChannel.Contains("combined")){ 
@@ -4479,6 +4527,7 @@ namespace semileptonic {
 	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  7.33/*7.68*//*8.20*/    :  8.33/*11.14*/  ) :  8   );
 	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  8.61/*9.03*/            : 11.58           ) :  4   );
 	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.71/*0.77*/            :  0.77           ) :  1   );
+	      else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );/*FIXME*/
 	    }
 	}
 	else{
@@ -4495,6 +4544,8 @@ namespace semileptonic {
 	  else if(variable.Contains("bqEta")    ) k =  8;
 	  else if(variable.Contains("bbbarPt"  )) k =  6;
 	  else if(variable.Contains("bbbarMass")) k =  7;
+	  else if(variable.Contains("Njets"    )) k =  5;
+	  else if(variable.Contains("rhoS"     )) k =  6;
 	}
 	// output
 	if(verbose>1){

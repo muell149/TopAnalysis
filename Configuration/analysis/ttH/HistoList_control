@@ -22,6 +22,9 @@
 #events_step8_cate6 - - - 1 1 0 0 0 0 0 0 0 0
 #events_step8_cate7 - - - 1 1 0 0 0 0 0 0 0 0
 
+##### Error in DY scale factors for step*jetCategories
+events_jetCategories_step8jetCategories - - - 1 0 0 0 0 0 0 0 0 0
+
 
 
 ##
@@ -44,13 +47,15 @@ mvaP_massDiff_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
 ##
 ## MVA validation plots (perhaps should have an own HistoList_mvaA)
 ##
-mvaA_mvaWeightCorrect_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaA_best_mvaWeightCorrect_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaA_mvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaA_best_mvaWeightSwapped_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_jetCategories_step10jetCategories - - - 1 0 0 0 0 0 0 0 0 0
 
-mvaA_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaA_best_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_mvaWeightCorrect_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_best_mvaWeightCorrect_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_mvaWeightSwapped_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_best_mvaWeightSwapped_step10 - - - 1 0 0 0 0 0 0 0 0 0
+
+mvaA_dijet_mass_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_best_dijet_mass_step10 - - - 1 0 0 0 0 0 0 0 0 0
 
 
 
@@ -58,6 +63,8 @@ mvaA_best_dijet_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
 ##
 ## Basic control plots
 ##
+basic_jetCategories_step8jetCategories - - - 1 0 0 0 0 0 0 0 0 0
+
 basic_lepton_multiplicity_step8 - - - 1 1 0 1 0 0 0 0 0 0
 basic_lepton_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
 basic_lepton_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
@@ -87,7 +94,8 @@ basic_bjet_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
 basic_bjet_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
 basic_met_et_step8 - - - 1 1 0 0 0 0 0 0 0 0
 basic_met_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jetCategories_step8 - - - 1 1 0 0 0 0 0 0 0 0
+
+
 
 #basic_lepton_multiplicity_step7 - - - 1 1 0 0 0 0 0 0 0 0
 #basic_lepton_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0

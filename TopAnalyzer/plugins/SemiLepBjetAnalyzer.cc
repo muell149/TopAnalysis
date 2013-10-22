@@ -15,49 +15,51 @@ SemiLepBjetAnalyzer::SemiLepBjetAnalyzer(const edm::ParameterSet& cfg):
   hypoKey_   (cfg.getParameter<std::string>  ("hypoKey"     )),
   genJets_   (cfg.getParameter<edm::InputTag>("genJets"     )),
   genLeptons_(cfg.getParameter<edm::InputTag>("genLeptons"  )),
+
   bJetCollection_(cfg.getParameter<bool>     ("bJetCollection")),
   recoJets_  (cfg.getParameter<edm::InputTag>("recoJets"    )),
   verbose    (cfg.getParameter<int>          ("output"      )),
   weight_    (cfg.getParameter<edm::InputTag>("weight"      )),
   genPlots_  (cfg.getParameter<bool>         ("genPlots"    )),
+  ingenPS_   (cfg.getParameter<edm::InputTag>("ingenPS"     )),
   recPlots_  (cfg.getParameter<bool>         ("recPlots"    )),
   preBjets   (cfg.getParameter<bool>         ("useRecBjetsKinematicsBeforeFit")),
   bHadJetIdx_    (cfg.getParameter<edm::InputTag> ("BHadJetIndex"    )),
   antibHadJetIdx_(cfg.getParameter<edm::InputTag> ("AntiBHadJetIndex")),
   useClosestDrBs_(cfg.getParameter<bool>   ("useClosestDrBs")),
   useTree_   (cfg.getParameter<bool>("useTree")),
-  valueBqPtRec(-999),
-  valueBqPtGen(-999),
-  valueLeadBqPtRec(-999),
-  valueLeadBqPtGen(-999),
-  valueSubLeadBqPtRec(-999),
-  valueSubLeadBqPtGen(-999),
-  valueBqEtaRec(-999),
-  valueBqEtaGen(-999),
-  valueBqYRec(-999),
-  valueBqYGen(-999),
-  valueBbarqPtRec(-999),
-  valueBbarqPtGen(-999),
-  valueBbarqEtaRec(-999),
-  valueBbarqEtaGen(-999),
-  valueBbarqYRec(-999),
-  valueBbarqYGen(-999),
-  valueBbbarPtRec(-999),
-  valueBbbarPtGen(-999),
-  valueBbbarEtaRec(-999),
-  valueBbbarEtaGen(-999),
-  valueBbbarYRec(-999),
-  valueBbbarYGen(-999),
-  valueBbbarMassRec(-999),
-  valueBbbarMassGen(-999),
-  valueLbMassRec(-999),
-  valueLbMassGen(-999),
-  //valuexBHadRec(-999),
-  //valuexBHadGen(-999),
-  //valuexBLepRec(-999),
-  //valuexBLepGen(-999),
+  valueBqPtRec(-1000),
+  valueBqPtGen(-1000),
+  valueLeadBqPtRec(-1000),
+  valueLeadBqPtGen(-1000),
+  valueSubLeadBqPtRec(-1000),
+  valueSubLeadBqPtGen(-1000),
+  valueBqEtaRec(-1000),
+  valueBqEtaGen(-1000),
+  valueBqYRec(-1000),
+  valueBqYGen(-1000),
+  valueBbarqPtRec(-1000),
+  valueBbarqPtGen(-1000),
+  valueBbarqEtaRec(-1000),
+  valueBbarqEtaGen(-1000),
+  valueBbarqYRec(-1000),
+  valueBbarqYGen(-1000),
+  valueBbbarPtRec(-1000),
+  valueBbbarPtGen(-1000),
+  valueBbbarEtaRec(-1000),
+  valueBbbarEtaGen(-1000),
+  valueBbbarYRec(-1000),
+  valueBbbarYGen(-1000),
+  valueBbbarMassRec(-1000),
+  valueBbbarMassGen(-1000),
+  valueLbMassRec(-1000),
+  valueLbMassGen(-1000),
+  //valuexBHadRec(-1000),
+  //valuexBHadGen(-1000),
+  //valuexBLepRec(-1000),
+  //valuexBLepGen(-1000),
   bbSwapBetter(false),
-  valueAssignment(-999)
+  valueAssignment(-1000)
 {
 }
 
@@ -113,7 +115,12 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   // e) get lepton collection
   edm::Handle<std::vector<reco::GenParticle> > genLeptons;
   if(genPlots_) event.getByLabel(genLeptons_, genLeptons);
-
+  if(verbose>1) std::cout << "e) gen lepton collection" << std::endl;
+  // f) visible hadron level gen phase space indicator
+  edm::Handle<bool > visPS;
+  if(genPlots_) event.getByLabel(ingenPS_, visPS);
+  inVisPS=!genPlots_||!*visPS ? false : true;
+  if(verbose>1) std::cout << "f) visible phase space indicator" << std::endl;
   if(genPlots_){
     // take leading two jets assuming that collection genJets consists of b-jets only in the order 1st entry: b-jet, 2nd entry: anti-bjet
     if(bJetCollection_==true){
@@ -164,10 +171,25 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   const reco::Candidate* b   = recBJets.first ;
   const reco::Candidate* bbar= recBJets.second;
 
-  double reclbm=-1;
   //double recxBhad = -1; 
   //double recxBlep = -1;
 
+  valueBqPtRec        =-1000;
+  valueLeadBqPtRec    =-1000;
+  valueSubLeadBqPtRec =-1000;
+  valueBqEtaRec       =-1000;
+  valueBqYRec         =-1000;
+  valueBbarqPtRec     =-1000;
+  valueBbarqEtaRec    =-1000;
+  valueBbarqYRec      =-1000;
+  valueBbbarPtRec     =-1000;
+  valueBbbarEtaRec    =-1000;
+  valueBbbarYRec      =-1000;
+  valueBbbarMassRec   =-1000;
+  valueLbMassRec      =-1000;
+  //valuexBHadRec    =recxBhad;
+  //valuexBLepRec    =recxBlep;
+  
   // fill rec histograms
   if(b&&bbar){
     // reconstructed top and W
@@ -179,49 +201,47 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     
     // pick b(lepton/hadron) wrt lepton charge
     double lepChargeRec= semiLepEvt->singleLepton(hypoKey_)->charge();
-    // q(lep) < 0 -> bjet(leptonic)>0 -> bjet(leptonic)=bbar
+    // q(lep) < 0 -> q(leptonic bjet)>0 -> bjet(leptonic)=bbar
     reco::Particle::LorentzVector lepBRec = lepChargeRec < 0 ? bbar->p4() : b   ->p4();
-    reco::Particle::LorentzVector hadBRec = lepChargeRec < 0 ? b   ->p4() : bbar->p4();
+    //reco::Particle::LorentzVector hadBRec = lepChargeRec < 0 ? b   ->p4() : bbar->p4();
+
+    // fill tree variables   
+    valueBqPtRec        =b->pt();
+    valueLeadBqPtRec    =b->pt()>bbar->pt() ? b->pt() : bbar->pt();
+    valueSubLeadBqPtRec =b->pt()<bbar->pt() ? b->pt() : bbar->pt();
+    valueBqEtaRec       =b->eta();
+    valueBqYRec         =b->rapidity(); 
+    valueBbarqPtRec     =bbar->pt();
+    valueBbarqEtaRec    =bbar->eta();
+    valueBbarqYRec      =bbar->rapidity();
+    valueBbbarPtRec     =(b->p4()+bbar->p4()).pt();
+    valueBbbarEtaRec    =(b->p4()+bbar->p4()).eta();
+    valueBbbarYRec      =(b->p4()+bbar->p4()).Rapidity();
+    valueBbbarMassRec   =(b->p4()+bbar->p4()).mass();
+    //valuexBHadRec    =recxBhad;
+    //valuexBLepRec    =recxBlep;
 
     // calculate more complex variables
-    reclbm=(semiLepEvt->singleLepton(hypoKey_)->p4()+lepBRec).mass();
+    valueLbMassRec=(semiLepEvt->singleLepton(hypoKey_)->p4()+lepBRec).mass();
     //recxBhad=(1/(1-(hadWRec.mass2())/(hadTopRec.mass2()))) * 2*(hadBRec.Dot(hadTopRec)/(hadTopRec.mass2()));
     //recxBlep=(1/(1-(lepWRec.mass2())/(lepTopRec.mass2()))) * 2*(lepBRec.Dot(lepTopRec)/(lepTopRec.mass2()));
 
-    // fill tree variables   
-    if(useTree_){
-      valueBqPtRec =b->pt();
-      valueLeadBqPtRec    = b->pt()>bbar->pt() ? b->pt() : bbar->pt();
-      valueSubLeadBqPtRec = b->pt()<bbar->pt() ? b->pt() : bbar->pt();
-      valueBqEtaRec=b->eta();
-      valueBqYRec  =b->rapidity(); 
-      valueBbarqPtRec =bbar->pt();
-      valueBbarqEtaRec=bbar->eta();
-      valueBbarqYRec  =bbar->rapidity();
-      valueBbbarPtRec  =(b->p4()+bbar->p4()).pt();
-      valueBbbarEtaRec =(b->p4()+bbar->p4()).eta();
-      valueBbbarYRec   =(b->p4()+bbar->p4()).Rapidity();
-      valueBbbarMassRec=(b->p4()+bbar->p4()).mass();
-      valueLbMassRec   =reclbm;
-      //valuexBHadRec    =recxBhad;
-      //valuexBLepRec    =recxBlep;
-    }
     // debug output
     if(verbose>1) std::cout << "do filling" << std::endl;
     // fill plots
-    bqPtRec ->Fill( b->pt()         , weight);
-    bqPtRec ->Fill( bbar->pt()      , weight);
-    bqPtLeadRec    ->Fill( (b->pt()>bbar->pt() ? b->pt() : bbar->pt()), weight);
-    bqPtSubLeadRec ->Fill( (b->pt()<bbar->pt() ? b->pt() : bbar->pt()), weight);
-    bqEtaRec->Fill( b->eta()        , weight);
-    bqEtaRec->Fill( bbar->eta()     , weight);
-    bqYRec  ->Fill( b->rapidity()   , weight);
-    bqYRec  ->Fill( bbar->rapidity(), weight);
-    bbbarPtRec  ->Fill( (b->p4()+bbar->p4()).pt()      , weight);
-    bbbarEtaRec ->Fill( (b->p4()+bbar->p4()).eta()     , weight);
-    bbbarYRec   ->Fill( (b->p4()+bbar->p4()).Rapidity(), weight);
-    bbbarMassRec->Fill( (b->p4()+bbar->p4()).mass()    , weight);
-    lbMassRec->Fill(reclbm, weight);
+    bqPtRec        ->Fill( valueBqPtRec       , weight );
+    bqPtRec        ->Fill( valueBbarqPtRec    , weight );
+    bqPtLeadRec    ->Fill( valueLeadBqPtRec   , weight);
+    bqPtSubLeadRec ->Fill( valueSubLeadBqPtRec, weight);
+    bqEtaRec       ->Fill( valueBqEtaRec      , weight);
+    bqEtaRec       ->Fill( valueBbarqEtaRec   , weight);
+    bqYRec         ->Fill( valueBqYRec        , weight);
+    bqYRec         ->Fill( valueBbarqYRec     , weight);
+    bbbarPtRec     ->Fill( valueBbbarPtRec    , weight);
+    bbbarEtaRec    ->Fill( valueBbbarEtaRec   , weight);
+    bbbarYRec      ->Fill( valueBbbarYRec     , weight);
+    bbbarMassRec   ->Fill( valueBbbarMassRec  , weight);
+    lbMassRec      ->Fill( valueLbMassRec     , weight);
     //xBLepRec->Fill(recxBlep, weight);
     //xBHadRec->Fill(recxBhad, weight);
     //xBRec   ->Fill(recxBlep, weight);
@@ -239,15 +259,27 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     genPlots_=false;
   }
   // get generator level b-Jets from gen jet collection using indices from B Hadron identification procedure
-  const reco::GenJet* genb    = genPlots_ ? getJetFromCollection(*genJets,bIX   ) : 0;
-  const reco::GenJet* genbbar = genPlots_ ? getJetFromCollection(*genJets,bbarIX) : 0;
+  const reco::GenJet*      genb      = genPlots_ ? getJetFromCollection(*genJets,bIX   ) : 0;
+  const reco::GenJet*      genbbar   = genPlots_ ? getJetFromCollection(*genJets,bbarIX) : 0;
   const reco::GenParticle* genLepton = genPlots_ ? &genLeptons->at(0) : 0;
 
-  double genlbm=-1;
   //double genxBhad=-1;
   //double genxBlep=-1;
   // fill gen histograms
-  if(genb&&genbbar){
+  valueBqPtGen       =-1000;
+  valueLeadBqPtGen   =-1000;
+  valueSubLeadBqPtGen=-1000;
+  valueBqEtaGen      =-1000;
+  valueBqYGen        =-1000;
+  valueBbarqPtGen    =-1000;
+  valueBbarqEtaGen   =-1000;
+  valueBbarqYGen     =-1000;
+  valueBbbarPtGen    =-1000;
+  valueBbbarEtaGen   =-1000;
+  valueBbbarYGen     =-1000;
+  valueBbbarMassGen  =-1000;
+  valueLbMassGen     =-1000;
+  if(genb&&genbbar&&inVisPS){
     // top and W from parton truth
     
     //reco::Particle::LorentzVector hadWGen=semiLepEvt->hadronicDecayW()->p4();
@@ -259,52 +291,50 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     double lepChargeGen=genLepton->charge();
     // q(lep) < 0 -> bjet(leptonic)>0 -> bjet(leptonic)=bbar
     reco::Particle::LorentzVector lepBGen = lepChargeGen < 0 ? genbbar->p4() : genb   ->p4();
-    reco::Particle::LorentzVector hadBGen = lepChargeGen < 0 ? genb   ->p4() : genbbar->p4();
+    //reco::Particle::LorentzVector hadBGen = lepChargeGen < 0 ? genb   ->p4() : genbbar->p4();
+
+    // set tree gen variables
+    valueBqPtGen =genb->pt();
+    valueLeadBqPtGen    = genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt();
+    valueSubLeadBqPtGen = genb->pt()<genbbar->pt() ? genb->pt() : genbbar->pt();
+    valueBqEtaGen   =genb->eta();
+    valueBqYGen     =genb->rapidity();
+    valueBbarqPtGen =genbbar->pt();
+    valueBbarqEtaGen=genbbar->eta();
+    valueBbarqYGen  =genbbar->rapidity();
+    valueBbbarPtGen  =(genb->p4()+genbbar->p4()).pt();
+    valueBbbarEtaGen =(genb->p4()+genbbar->p4()).eta();
+    valueBbbarYGen   =(genb->p4()+genbbar->p4()).Rapidity();
+    valueBbbarMassGen=(genb->p4()+genbbar->p4()).mass();
+    //valuexBHadGen=genxBhad;
+    //valuexBLepGen=genxBlep;
 
     // calculate more complex variables
-    genlbm = (genLepton->p4()+lepBGen).mass();
+    valueLbMassGen = (genLepton->p4()+lepBGen).mass();
     //genxBhad=(1/(1-(hadWGen.mass2())/(hadTopGen.mass2()))) * 2*(hadBGen.Dot(hadTopGen)/(hadTopGen.mass2()));
     //genxBlep=(1/(1-(lepWGen.mass2())/(lepTopGen.mass2()))) * 2*(lepBGen.Dot(lepTopGen)/(lepTopGen.mass2()));
 
-    // fill tree variables   
-    if(useTree_){
-      valueBqPtGen =genb->pt();
-      valueLeadBqPtGen    = genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt();
-      valueSubLeadBqPtGen = genb->pt()<genbbar->pt() ? genb->pt() : genbbar->pt();
-      valueBqEtaGen   =genb->eta();
-      valueBqYGen     =genb->rapidity();
-      valueBbarqPtGen =genbbar->pt();
-      valueBbarqEtaGen=genbbar->eta();
-      valueBbarqYGen  =genbbar->rapidity();
-      valueBbbarPtGen  =(genb->p4()+genbbar->p4()).pt();
-      valueBbbarEtaGen =(genb->p4()+genbbar->p4()).eta();
-      valueBbbarYGen   =(genb->p4()+genbbar->p4()).Rapidity();
-      valueBbbarMassGen=(genb->p4()+genbbar->p4()).mass();
-      valueLbMassGen   =genlbm;
-      //valuexBHadGen=genxBhad;
-      //valuexBLepGen=genxBlep;
-    }
     // debug output
     if(!recPlots_&&valueBqPtGen>0&&valueBbarqPtGen>0&&verbose>1){ 
       std::cout << "gen truth filling" << std::endl;
-      std::cout << "b(pt, eta)=(" << valueBqPtGen << "." << valueBqEtaGen << ")" << std::endl;
-      std::cout << "bbar(pt, eta)=(" << valueBbarqPtGen << "." << valueBbarqEtaGen << ")" << std::endl;
+      std::cout << "b(pt, eta)=("    << valueBqPtGen    << ", " << valueBqEtaGen    << ")" << std::endl;
+      std::cout << "bbar(pt, eta)=(" << valueBbarqPtGen << ", " << valueBbarqEtaGen << ")" << std::endl;
     }
     if(verbose>1) std::cout << "do filling" << std::endl;
     // fill plots
-    bqPtGen ->Fill( genb->pt()         , weight);
-    bqPtGen ->Fill( genbbar->pt()      , weight);
-    bqPtLeadGen    ->Fill( (genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt()), weight);
-    bqPtSubLeadGen ->Fill( (genb->pt()<genbbar->pt() ? genb->pt() : genbbar->pt()), weight);
-    bqEtaGen->Fill( genb->eta()        , weight);
-    bqEtaGen->Fill( genbbar->eta()     , weight);
-    bqYGen  ->Fill( genb->rapidity()   , weight);
-    bqYGen  ->Fill( genbbar->rapidity(), weight);
-    bbbarPtGen  ->Fill( (genb->p4()+genbbar->p4()).pt()      , weight);
-    bbbarEtaGen ->Fill( (genb->p4()+genbbar->p4()).eta()     , weight);
-    bbbarYGen   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), weight);
-    bbbarMassGen->Fill( (genb->p4()+genbbar->p4()).mass()    , weight);
-    lbMassGen   ->Fill( genlbm, weight);
+    bqPtGen        ->Fill( valueBqPtGen       , weight );
+    bqPtGen        ->Fill( valueBbarqPtGen    , weight );
+    bqPtLeadGen    ->Fill( valueLeadBqPtGen   , weight );
+    bqPtSubLeadGen ->Fill( valueSubLeadBqPtGen, weight );
+    bqEtaGen       ->Fill( valueBqEtaGen      , weight );
+    bqEtaGen       ->Fill( valueBbarqEtaGen   , weight );
+    bqYGen         ->Fill( valueBqYGen        , weight );
+    bqYGen         ->Fill( valueBbarqYGen     , weight );
+    bbbarPtGen     ->Fill( valueBbbarPtGen    , weight );
+    bbbarEtaGen    ->Fill( valueBbarqEtaGen   , weight );
+    bbbarYGen      ->Fill( valueBbbarYGen     , weight );
+    bbbarMassGen   ->Fill( valueBbbarMassGen  , weight );
+    lbMassGen      ->Fill( valueLbMassGen     , weight );
     //xBLepGen->Fill(genxBlep, weight);
     //xBHadGen->Fill(genxBhad, weight);
     //xBGen   ->Fill(genxBlep, weight);
@@ -316,25 +346,26 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
   //     D: gen rec correlation plots
   // ---  
   if(verbose>0) std::cout << std::endl << "correlation plots" << std::endl;
-  // check if gen and reco b-jets exist in the event
-  if(genb&&genbbar&&b&&bbar){
+  // check ONLY if RECO b-jets exist in the event
+  bbSwapBetter = false;
+  if(b&&bbar){
     // parton level quark vs reco jet assignment
     valueAssignment=checkPartonAssignment(semiLepEvt, 5); // FIXME: N(jets) in KinFit hardcoded for the moment
     if(verbose>1){
-      std::cout << "mlb(gen correct)=" << genlbm  << std::endl;
-      std::cout << "mlb(rec KinFit )=" << reclbm  << std::endl;
+      std::cout << "mlb(gen correct)=" << valueLbMassGen  << std::endl;
+      std::cout << "mlb(rec KinFit )=" << valueLbMassRec  << std::endl;
       std::cout << "reco jet assignment (kinFit) wrt reco jet-quark matching: " << valueAssignment << std::endl;
     }
     if(verbose>1) std::cout << "do filling" << std::endl;
     // fill lead b-jet and bbbar correlation histograms 
     // (those have only one entry per event and are independend of the rec-gen b-jet association)
-    bqPtLead_ ->Fill((genb->pt()>genbbar->pt() ? genb->pt() : genbbar->pt()), (b->pt()>bbar->pt() ? b->pt() : bbar->pt()), weight);
-    bqPtSubLead_ ->Fill((genb->pt()<genbbar->pt() ? genb->pt() : genbbar->pt()), (b->pt()<bbar->pt() ? b->pt() : bbar->pt()), weight);
-    bbbarPt_  ->Fill( (genb->p4()+genbbar->p4()).pt()      , (b->p4()+bbar->p4()).pt()      , weight);
-    bbbarEta_ ->Fill( (genb->p4()+genbbar->p4()).eta()     , (b->p4()+bbar->p4()).eta()     , weight);
-    bbbarY_   ->Fill( (genb->p4()+genbbar->p4()).Rapidity(), (b->p4()+bbar->p4()).Rapidity(), weight);
-    bbbarMass_->Fill( (genb->p4()+genbbar->p4()).mass()    , (b->p4()+bbar->p4()).mass()    , weight);
-    if(reclbm>=0&&genlbm>=0) lbMass_->Fill( genlbm, reclbm, weight );
+    bqPtLead_   ->Fill(inVisPS ? valueLeadBqPtGen : -1000, valueLeadBqPtRec   , weight);
+    bqPtSubLead_->Fill(inVisPS ? valueSubLeadBqPtGen : -1000, valueSubLeadBqPtRec, weight);
+    bbbarPt_    ->Fill(inVisPS ? valueBbbarPtGen     : -1000, valueBbbarPtRec    , weight);
+    bbbarEta_   ->Fill(inVisPS ? valueBbarqEtaGen    : -1000, valueBbbarEtaRec   , weight);
+    bbbarY_     ->Fill(inVisPS ? valueBbbarYGen      : -1000, valueBbbarYRec     , weight);
+    bbbarMass_  ->Fill(inVisPS ? valueBbbarMassGen   : -1000, valueBbbarMassRec  , weight);
+    if(valueLbMassRec>=0) lbMass_->Fill( valueLbMassGen, valueLbMassRec, weight );
     //if(genxBlep>=0&&recxBlep>=0) xB_->Fill( genxBlep, recxBlep, weight );
     //if(genxBhad>=0&&recxBhad>=0) xB_->Fill( genxBhad, recxBhad, weight );
     if(verbose>1){
@@ -347,47 +378,50 @@ SemiLepBjetAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& set
     // -> search for best gen-reco association based on minimal dR 
 
     // start with gen: association from B/AntiB, reco: association from KinFit
-    double bpt    =b->pt();         
-    double bbarpt =bbar->pt(); 
-    double beta   =b->eta();        
-    double bbareta=bbar->eta(); 
-    double bY     =b->rapidity();   
-    double bbarY  =bbar->rapidity();
+    double bpt    =valueBqPtRec;         
+    double bbarpt =valueBbarqPtRec; 
+    double beta   =valueBqEtaRec;        
+    double bbareta=valueBbarqEtaRec; 
+    double bY     =valueBqYRec;   
+    double bbarY  =valueBbarqYRec;
     bool swapped = false;
-    bbSwapBetter = false;
     // check if dR is smaller for swopping gen-rec assignment
-    if(deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) > deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi())){
-      swapped = true;
-      if(useTree_) bbSwapBetter = true;
-      // use the better dR combination only if parameter useClosestDrBs_ is true
-      if(useClosestDrBs_){
-	bY=bbar->rapidity(); 
-	bbarY=b->rapidity();
-	bpt=bbar->pt(); 
-	bbarpt=b->pt();
-	beta=bbar->eta(); 
-	bbareta=b->eta();
+    if(genb&&genbbar){
+      double valueBqPhiRec   =b   ->phi();
+      double valueBbarqPhiRec=bbar->phi();
+      double valueBqPhiGen   =genb   ->phi();
+      double valueBbarqPhiGen=genbbar->phi();
+      if(deltaR( valueBqEtaRec   , valueBqPhiRec   , valueBqEtaGen   , valueBqPhiGen   )+
+	 deltaR( valueBbarqEtaRec, valueBbarqPhiRec, valueBbarqEtaGen, valueBbarqPhiGen) > 
+	 deltaR( valueBbarqEtaRec, valueBbarqPhiRec, valueBqEtaGen   , valueBqPhiGen   )+ 
+	 deltaR( valueBqEtaRec   , valueBqPhiRec   , valueBbarqEtaGen, valueBbarqPhiGen)){
+	swapped = true;
+	bbSwapBetter = true;
+	// use the better dR combination only if parameter useClosestDrBs_ is true
+	if(useClosestDrBs_){
+	  bY     =valueBbarqYRec; 
+	  bbarY  =valueBqYRec;
+	  bpt    =valueBbarqPtRec; 
+	  bbarpt =valueBqPtRec;
+	  beta   =valueBbarqEtaRec; 
+	  bbareta=valueBqEtaRec;
+	}
+	if(verbose>1) std::cout << "dR unswapped = " << deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) << "; dR swapped = " << deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi()) << std::endl;
       }
-      if(verbose>1) std::cout << "dR unswapped = " << deltaR( b->eta(), b->phi(), genb->eta(), genb->phi())+ deltaR( bbar->eta(), bbar->phi(), genbbar->eta(), genbbar->phi()) << "; dR swapped = " << deltaR( bbar->eta(), bbar->phi(), genb->eta(), genb->phi())+ deltaR( b->eta(), b->phi(), genbbar->eta(), genbbar->phi()) << std::endl;
     }
     // fill combined b-jet and bbar-jet correlation histograms 
     // (those have both b-jets as entry per event and depend on rec-gen b-jet association)
-    bqPt_ ->Fill( genb->pt()         , bpt    , weight);
-    bqPt_ ->Fill( genbbar->pt()      , bbarpt , weight);
-    bqEta_->Fill( genb->eta()        , beta   , weight);
-    bqEta_->Fill( genbbar->eta()     , bbareta, weight);
-    bqY_  ->Fill( genb->rapidity()   , bY     , weight);
-    bqY_  ->Fill( genbbar->rapidity(), bbarY  , weight);
+    bqPt_ ->Fill( valueBqPtGen    , bpt    , weight);
+    bqPt_ ->Fill( valueBbarqPtGen , bbarpt , weight);
+    bqEta_->Fill( valueBqEtaGen   , beta   , weight);
+    bqEta_->Fill( valueBbarqEtaGen, bbareta, weight);
+    bqY_  ->Fill( valueBqYGen     , bY     , weight);
+    bqY_  ->Fill( valueBbarqYGen  , bbarY  , weight);
     // output
     if(verbose>1){
       std::cout << "swapped: " << swapped << "; bbSwapBetter: " << bbSwapBetter << std::endl;
-      std::cout << "pt: genb   = " << genb->pt()    << "; recb   = " << bpt << "-- eta: genb   = " << genb->eta()    << "; recb   = " << beta << std::endl;
-      std::cout << "pt: genbbar= " << genbbar->pt() << "; recbbar= " << bbarpt << "-- eta: genbbar= " << genbbar->eta()    << "; recbbar= " << bbareta << std::endl;
-    }
-    if(valueBqPtGen>0&&valueBbarqPtGen>0&&verbose>1){ 
-      std::cout << "XXXXXXXXXXXX correlation filling XXXXXXXXXXXXXXXXX" << std::endl;
-      std::cout << "b(pt, eta)=(" << valueBqPtGen << "." << valueBqEtaGen << ")" << std::endl;
-      std::cout << "bbar(pt, eta)=(" << valueBbarqPtGen << "." << valueBbarqEtaGen << ")" << std::endl;
+      std::cout << "pt: genb   = " << valueBqPtGen    << "; recb   = " << bpt    << "-- eta: genb   = " << valueBqEtaGen    << "; recb   = " << beta << std::endl;
+      std::cout << "pt: genbbar= " << valueBbarqPtGen << "; recbbar= " << bbarpt << "-- eta: genbbar= " << valueBbarqEtaGen << "; recbbar= " << bbareta << std::endl;
     }
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
@@ -512,7 +546,8 @@ SemiLepBjetAnalyzer::beginJob()
     tree->Branch("bqPtSubLeadRec", &valueSubLeadBqPtRec, "bqPtSubLeadRec/F");
     tree->Branch("bqPtSubLeadGen", &valueSubLeadBqPtGen, "bqPtSubLeadGen/F");
     // boolean = true if swapping gives better results
-    tree->Branch("bbSwapBetter"  , &bbSwapBetter  , "bbSwapBetter/O"  );
+    tree->Branch("bbSwapBetter"  , &bbSwapBetter  , "bbSwapBetter/O" );
+    tree->Branch("inVisPS"       , &inVisPS       , "inVisPS/O"      );
     // parton level quark vs reco jet assignment
     if(recPlots_&&genPlots_) tree->Branch("qAssignment" , &valueAssignment , "qAssignment/F" );
   }

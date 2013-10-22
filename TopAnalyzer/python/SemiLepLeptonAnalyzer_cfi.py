@@ -23,7 +23,9 @@ analyzeSemiLepLepton = cms.EDAnalyzer("SemiLepLeptonAnalyzer",
                                       # specify event weight
                                       weight = cms.InputTag(""),
                                       # produce gen level plots?
-                                      genPlots = cms.bool(False), 
+                                      genPlots = cms.bool(False),
+                                      # within visible cross section range?
+                                      ingenPS = cms.InputTag("visiblePhaseSpace", "inVisiblePS"),
                                       # produce rec level plots?
                                       recPlots = cms.bool(True),
                                       # use lepton kinematics as before the kinematic fit?

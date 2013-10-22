@@ -19,15 +19,16 @@ SemiLepLeptonAnalyzer::SemiLepLeptonAnalyzer(const edm::ParameterSet& cfg):
   verbose    (cfg.getParameter<int>          ("output"      )),
   weight_    (cfg.getParameter<edm::InputTag>("weight"      )),
   genPlots_  (cfg.getParameter<bool>         ("genPlots"    )),
+  ingenPS_   (cfg.getParameter<edm::InputTag>("ingenPS"     )),
   recPlots_  (cfg.getParameter<bool>         ("recPlots"    )),
   preLep     (cfg.getParameter<bool>         ("useRecLeptonKinematicsBeforeFit")),
-  useTree_   (cfg.getParameter<bool>("useTree")),
-  valueLepPtRec(0),
-  valueLepPtGen(0),
-  valueLepEtaRec(0),
-  valueLepEtaGen(0),
-  valueLepYRec(0),
-  valueLepYGen(0)
+  useTree_   (cfg.getParameter<bool>         ("useTree"     )),
+  valueLepPtRec (-1000),
+  valueLepPtGen (-1000),
+  valueLepEtaRec(-1000),
+  valueLepEtaGen(-1000),
+  valueLepYRec  (-1000),
+  valueLepYGen  (-1000)
 {
 }
 
@@ -71,6 +72,11 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   // get lepton collection
   edm::Handle<std::vector<reco::GenParticle> > genLeptons;
   if(genPlots_) event.getByLabel(genLeptons_, genLeptons);
+  // d) get visible phase space information
+  edm::Handle<bool > visPS;
+  if(genPlots_) event.getByLabel(ingenPS_, visPS);
+  inVisPS=!genPlots_||!*visPS ? false: true;
+
   // ---
   //     B: rec level plots
   // ---
@@ -82,12 +88,13 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   if(!recPlots_) preLep=false;
   const reco::Candidate* recLepton = !recPlots_ ? zero : (preLep ? &(recLeptons->front()) : getLepton(semiLepEvt, hypoKey_));
   // fill rec histograms
+  valueLepPtRec =-1000;
+  valueLepEtaRec=-1000;
+  valueLepYRec  =-1000; 
   if(recLepton){
-    if(useTree_){
-      valueLepPtRec =recLepton->pt();
-      valueLepEtaRec=recLepton->eta();
-      valueLepYRec  =recLepton->rapidity(); 
-    }
+    valueLepPtRec =recLepton->pt();
+    valueLepEtaRec=recLepton->eta();
+    valueLepYRec  =recLepton->rapidity(); 
     if(verbose>1) std::cout << "do filling" << std::endl;
     lepPtRec ->Fill( recLepton->pt()         , weight);
     lepEtaRec->Fill( recLepton->eta()        , weight);
@@ -107,12 +114,13 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   const reco::GenParticle* genLepton = genPlots_ ? &genLeptons->at(0) : zeroL;
 
   // fill gen histograms
-  if(genLepton){
-    if(useTree_){
-      valueLepPtGen =genLepton->pt();
-      valueLepEtaGen=genLepton->eta();
-      valueLepYGen  =genLepton->rapidity();
-    }
+  valueLepPtGen =-1000;
+  valueLepEtaGen=-1000;
+  valueLepYGen  =-1000;
+  if(genLepton&&inVisPS){
+    valueLepPtGen =genLepton->pt();
+    valueLepEtaGen=genLepton->eta();
+    valueLepYGen  =genLepton->rapidity();
     if(verbose>1) std::cout << "do filling" << std::endl;
     lepPtGen ->Fill( genLepton->pt()         , weight);
     lepEtaGen->Fill( genLepton->eta()        , weight);
@@ -124,12 +132,12 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   //     D: gen rec correlation plots
   // ---  
   if(verbose>0) std::cout << std::endl << "correlation plots" << std::endl;
-  if(genLepton&&recLepton){
+  if(recLepton){
     if(verbose>1) std::cout << "do filling" << std::endl;
     // fill correlation histograms
-    lepPt_ ->Fill( genLepton->pt()         , recLepton->pt()         , weight);
-    lepEta_->Fill( genLepton->eta()        , recLepton->eta()        , weight);
-    lepY_  ->Fill( genLepton->rapidity()   , recLepton->rapidity()   , weight);
+    lepPt_ ->Fill( valueLepPtGen , recLepton->pt()      , weight);
+    lepEta_->Fill( valueLepEtaGen, recLepton->eta()     , weight);
+    lepY_  ->Fill( valueLepYGen  , recLepton->rapidity(), weight);
   }
   else if(verbose>1) std::cout << "no filling done" << std::endl;
  
@@ -191,6 +199,8 @@ SemiLepLeptonAnalyzer::beginJob()
     tree->Branch("lepEtaGen", &valueLepEtaGen, "lepEtaGen/F");
     tree->Branch("lepYRec"  , &valueLepYRec  , "lepYRec/F"  );
     tree->Branch("lepYGen"  , &valueLepYGen  , "lepYGen/F"  );
+    // within visible phase space?
+    tree->Branch("inVisPS"       , &inVisPS       , "inVisPS/O"      );
   }
 }
 

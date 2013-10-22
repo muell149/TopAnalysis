@@ -16,7 +16,9 @@ analyzeCompositedObjects = cms.EDAnalyzer("MixedObjectsAnalyzer",
                                           ## gen MET
                                           GenMETSrc =  cms.InputTag(""),
                                           ## gen lepton
-                                          GenLepSrc =  cms.InputTag(""),
+                                          GenLepSrc =  cms.InputTag(""),                                          
+                                          ## within visible cross section range?
+                                          ingenPS = cms.InputTag("visiblePhaseSpace", "inVisiblePS"),
                                           ## event weight (PU, etc...)
                                           weight = cms.InputTag("eventWeightPU","eventWeightPU"),
                                           ## primary vertex info

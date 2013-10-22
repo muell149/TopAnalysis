@@ -37,7 +37,9 @@ analyzeSemiLepBJets = cms.EDAnalyzer("SemiLepBjetAnalyzer",
                                      # specify event weight
                                      weight = cms.InputTag(""),
                                      # produce gen level plots?
-                                     genPlots = cms.bool(False), 
+                                     genPlots = cms.bool(False),
+                                     # within visible cross section range?
+                                     ingenPS = cms.InputTag("visiblePhaseSpace", "inVisiblePS"),
                                      # produce rec level plots?
                                      recPlots = cms.bool(True),
                                      # input tags to get the (anti)-b-jet indices as created by
