@@ -266,8 +266,10 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
             {
                   if(vX_reco.Pt()>ptBins[i]&&vX_reco.Pt()<=ptBins[i+1])
                   {
-                       fX=h_metPtres[i]->GetRandom();
-                       dAX=h_metAngleRes[i]->GetRandom();
+                       //fX=h_metPtres[i]->GetRandom();
+                       //dAX=h_metAngleRes[i]->GetRandom();
+                       fX=1;
+                       dAX=0;
                   }
             }
             double tempX= vX_reco.Px()*fX;
@@ -278,20 +280,6 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
             TVector3 metV3_sm= -b_sm.Vect()-bbar_sm.Vect()-l_sm.Vect()-al_sm.Vect()-vX_sm.Vect();
             met_sm.SetXYZM(metV3_sm.Px(),metV3_sm.Py(),0,0);
 
-//            double xX=r.Gaus(1, xRMS);
-
-//             met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); // tollko b - jet
-//             met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar) + l_sm.Px()*(1 - xL) + al_sm.Px()*(1 - xaL))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar) + l_sm.Py()*(1 - xL) + al_sm.Py()*(1 - xaL))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); //only b - jet and lep
-
-///Anya
-//            met_sm.SetXYZM(((b_sm.Px()*(1 - xB) + bbar_sm.Px()*(1 - xBbar) + l_sm.Px()*(1 - xL) + al_sm.Px()*(1 - xaL) + vX_reco.Px()*(1 - xX))/(met_sm.Px()) + 1)*met_sm.Px(), ((b_sm.Py()*(1 - xB) + bbar_sm.Py()*(1 - xBbar) + l_sm.Py()*(1 - xL) + al_sm.Py()*(1 - xaL) + vX_reco.Py()*(1 - xX))/(met_sm.Py()) + 1)*met_sm.Py(), 0, 0); //all
-
-//            b_sm.SetXYZT(b_sm.Px()*xB, b_sm.Py()*xB, b_sm.Pz()*xB, b_sm.E()*fB);
-//            bbar_sm.SetXYZT(bbar_sm.Px()*xBbar, bbar_sm.Py()*xBbar, bbar_sm.Pz()*xBbar, bbar_sm.E()*fBbar);
-//
-//            l_sm.SetXYZT(l_sm.Px()*xL, l_sm.Py()*xL, l_sm.Pz()*xL, l_sm.E()*fL);
-//            al_sm.SetXYZT(al_sm.Px()*xaL, al_sm.Py()*xaL, al_sm.Pz()*xaL, al_sm.E()*faL);
-///
 
             ///Anya
 //            KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass->GetRandom(),h_wmass->GetRandom(),(*h_nwcuts));
@@ -303,8 +291,9 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
             for(int i=0; i<tp_sm.GetNsol(); i++) {
 
                    meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,(tp_sm.GetTtSol()->at(i).vw));//*b_w*bbar_w
-                   //double mbl_weight=h_mbl_w->GetBinContent(h_mbl_w->FindBin((al_sm+b_sm).M()))*h_mbl_w->GetBinContent(h_mbl_w->FindBin((l_sm+bbar_sm).M()))/10000000000;
-                   //meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,(tp_sm.GetTtSol()->at(i).vw),mbl_weight);//
+//                    double mbl_weight=h_mbl_w->GetBinContent(h_mbl_w->FindBin((al_sm+b_sm).M()))*h_mbl_w->GetBinContent(h_mbl_w->FindBin((l_sm+bbar_sm).M()))/100000000;
+//                    meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,mbl_weight);//
+//                    meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,(tp_sm.GetTtSol()->at(i).vw),mbl_weight);//
 
             }
             if(tp_sm.GetNsol()>0){isHaveSol=1; nSol++; }
@@ -480,7 +469,8 @@ void KinematicReconstruction::loadData()
     
 ///  E 1d bins
         TString data_path6 = ttbar::DATA_PATH();
-        data_path6.Append("/KinReco_wneutrino_E.root");
+        data_path6.Append("/KinReco_wneutrino_E.root"); // no norm
+//         data_path6.Append("/KinReco_wneutrino_E_normilyze.root"); // norm
         TFile frootNeut(data_path6);
         char hvE_name[20];
         
