@@ -272,7 +272,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   hists_["nPVunweighted"]->Fill(nPV, 1.    );
   
   // collect information from KinFitHypothesis
-  int lepBIndex=-1, hadBIndex=-1, lightQIndex=-1, lightQBarIndex=-1;
+  int lepBIndex=-1000, hadBIndex=-1000, lightQIndex=-1000, lightQBarIndex=-1000;
   bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqlepPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=-1000;
   lepPtFit=lepEtaFit=lepPhiFit=lepPtTrue=lepEtaTrue=lepPhiTrue=nuPtFit=nuEtaFit=nuPhiFit=nuPtTrue=nuEtaTrue=nuPhiTrue=-1000;
   if( semiLepEvt_h.isValid()&&semiLepEvt_h->isHypoValid(hypoKey_) ){
@@ -337,7 +337,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   BindexD=-1000;
   Nbjets=-1000;
   Njets=-1000;
-  leadNonttjetIX=-1;
+  leadNonttjetIX=-1000;
   leadNonttjetPt=leadNonttjetY=leadNonttjetEta=-1000;
   bqhadPtPre=bqhadEtaPre=bqhadPhiPre=bqlepPtPre=bqlepEtaPre=bqlepPhiPre=lqPtPre=lqEtaPre=lqPhiPre=lqbarPtPre=lqbarEtaPre=lqbarPhiPre=-1000;
   // loop jets
@@ -401,8 +401,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
 	  if(jetsA->bDiscriminator(btagAlgo_) >btagDiscr_&&jetsB->bDiscriminator(btagAlgo_) >btagDiscr_){
 	    hists_["mbb"]->Fill((jetsA->p4()+jetsB->p4()).mass(), weight);
 	  }
-	  // d) for all invariant masses
-	  hists_["MJJ"]->Fill(mJJ, weight);
+	  // d) for all invariant masses hists_["MJJ"]->Fill(mJJ, weight);
 	}
       }
     }
@@ -422,18 +421,18 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   }
 
   // fill multiplicity plots
-  if(Nbjets>-1   ) hists_["Nbjets"]->Fill(Nbjets, weight);
+  if(Nbjets!=-1000   ) hists_["Nbjets"]->Fill(Nbjets, weight);
   hists_["Nbjets"]->GetXaxis()->SetTitle("N("+TString(btagAlgo_)+" b-jets)");
-  if(Njets>-1    ) hists_["Njets" ]->Fill(Njets , weight);
+  if(Njets!=-1000    ) hists_["Njets" ]->Fill(Njets , weight);
   if(debug) std::cout << "fill gen jet plot" << std::endl;
-  if(NjetsTrue>-1) hists_["Ngenjets"]->Fill(NjetsTrue, weight); 
+  if(NjetsTrue!=-1000) hists_["Ngenjets"]->Fill(NjetsTrue, weight); 
   if(debug) std::cout << "fill gen-reco jet plot" << std::endl;
-  if(Njets>-1    ) hists2D_["Njets_"]->Fill(NjetsTrue, Njets, weight); 
+  if(Njets!=-1000    ) hists2D_["Njets_"]->Fill(NjetsTrue, Njets, weight); 
   if(debug) std::cout << "done" << std::endl;
 
   // lead non ttbar jet
   if(debug) std::cout << "fill leading non ttbar jet plot" << std::endl;
-  if(leadNonttjetIX>-1){
+  if(leadNonttjetIX!=-1000){
     hists_["leadNonttjetPt" ]->Fill(leadNonttjetPt , weight);
     hists_["leadNonttjetY"  ]->Fill(leadNonttjetY  , weight);
     hists_["leadNonttjetEta"]->Fill(leadNonttjetEta, weight);
@@ -447,15 +446,15 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
 
   // jet-jet invariant mass from jets associated to W decay by kinfit
   if(debug) std::cout << "fill m(WJJ) from fit" << std::endl;
-  if(lightQIndex>-1&&lightQBarIndex>-1) mWFitJJ=(jets_h->at(lightQIndex).p4()+jets_h->at(lightQBarIndex).p4()).mass();
+  if(lightQIndex!=-1000&&lightQBarIndex!=-1000) mWFitJJ=(jets_h->at(lightQIndex).p4()+jets_h->at(lightQBarIndex).p4()).mass();
   if(mWFitJJ>0) hists_["MWFitJJ"]->Fill(mWFitJJ, weight);  
   if(debug) std::cout << "done" << std::endl;
 
   // bjet-bjet invariant mass for bjet pair comming NOT from ttbar decay (using kinfit information) in 4 b events
   if(debug) std::cout << "fill m(bb) not from ttbar" << std::endl;
-  if(Nbjets>=4&&lepBIndex>-1&&hadBIndex>-1){
+  if(Nbjets>=4&&lepBIndex!=-1000&&hadBIndex!=-1000){
     // search non ttbar bjets
-    int HbbindexA=-1, HbbindexB=-1;
+    int HbbindexA=-1000, HbbindexB=-1000;
     if(debug){
       std::cout << "lepBIndex: " << lepBIndex << std::endl;
       std::cout << "hadBIndex: " << hadBIndex << std::endl;
@@ -465,35 +464,35 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       std::cout << "BindexD: " << BindexD << std::endl;
     }
     if(BindexA!=lepBIndex&&BindexA!=hadBIndex){
-      if     (HbbindexA<=-1) HbbindexA=BindexA;
-      else if(HbbindexB<=-1) HbbindexB=BindexA;
+      if     (HbbindexA<=-1000) HbbindexA=BindexA;
+      else if(HbbindexB<=-1000) HbbindexB=BindexA;
     }
     if(BindexB!=lepBIndex&&BindexB!=hadBIndex){
-      if     (HbbindexA<=-1) HbbindexA=BindexB;
-      else if(HbbindexB<=-1) HbbindexB=BindexB;
+      if     (HbbindexA<=-1000) HbbindexA=BindexB;
+      else if(HbbindexB<=-1000) HbbindexB=BindexB;
     }
     if(BindexC!=lepBIndex&&BindexC!=hadBIndex){
-      if     (HbbindexA<=-1) HbbindexA=BindexC;
-      else if(HbbindexB<=-1) HbbindexB=BindexC;
+      if     (HbbindexA<=-1000) HbbindexA=BindexC;
+      else if(HbbindexB<=-1000) HbbindexB=BindexC;
     }
     if(BindexD!=lepBIndex&&BindexD!=hadBIndex){
-      if(     HbbindexA<=-1) HbbindexA=BindexD;
-      else if(HbbindexB<=-1) HbbindexB=BindexD;
+      if(     HbbindexA<=-1000) HbbindexA=BindexD;
+      else if(HbbindexB<=-1000) HbbindexB=BindexD;
     }
     if(debug){
       std::cout << "HbbindexA: " << HbbindexA << std::endl;
       std::cout << "HbbindexB: " << HbbindexB << std::endl;
     }
-    if(HbbindexA>-1&&HbbindexB>-1) mHbb=(jets_h->at(HbbindexA).p4()+jets_h->at(HbbindexB).p4()).mass();
-    if(mHbb>-1) hists_["mHbb"]->Fill(mHbb, weight); 
+    if(HbbindexA!=-1000&&HbbindexB!=-1000) mHbb=(jets_h->at(HbbindexA).p4()+jets_h->at(HbbindexB).p4()).mass();
+    if(mHbb!=-1000) hists_["mHbb"]->Fill(mHbb, weight); 
   }
   if(debug) std::cout << "done" << std::endl;
     
   // fill kinfit shift histos
   if(debug) std::cout << "fill kinfit shift histos" << std::endl;
-  if(bqhadPtFit>-1&&bqhadPtPre>-1) hists_["shiftBqPt" ]->Fill( bqhadPtFit-bqhadPtPre, weight);
-  if(bqlepPtFit>-1&&bqlepPtPre>-1) hists_["shiftBqPt" ]->Fill( bqlepPtFit-bqlepPtPre, weight);
-  if(lqPtFit>-1&&lqPtPre>-1&&lqbarPtFit>-1&&lqbarPtPre>-1){
+  if(bqhadPtFit!=-1000&&bqhadPtPre!=-1000) hists_["shiftBqPt" ]->Fill( bqhadPtFit-bqhadPtPre, weight);
+  if(bqlepPtFit!=-1000&&bqlepPtPre!=-1000) hists_["shiftBqPt" ]->Fill( bqlepPtFit-bqlepPtPre, weight);
+  if(lqPtFit!=-1000&&lqPtPre!=-1000&&lqbarPtFit!=-1000&&lqbarPtPre!=-1000){
     // consider ambiguity for light jets
     if(std::abs(lqPtFit-lqPtPre)+std::abs(lqbarPtFit-lqbarPtPre)<std::abs(lqPtFit-lqbarPtPre)+std::abs(lqbarPtFit-lqPtPre)){
       hists_["shiftLqPt"    ]->Fill( lqPtFit-lqPtPre, weight);
@@ -504,9 +503,9 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       hists_["shiftLqPt"    ]->Fill( lqbarPtFit-lqPtPre, weight);
     }
   }
-  if(bqhadEtaFit>-1&&bqhadEtaPre>-1) hists_["shiftBqEta" ]->Fill( bqhadEtaFit-bqhadEtaPre, weight);
-  if(bqlepEtaFit>-1&&bqlepEtaPre>-1) hists_["shiftBqEta" ]->Fill( bqlepEtaFit-bqlepEtaPre, weight);
-  if(lqEtaFit>-1&&lqEtaPre>-1&&lqbarEtaFit>-1&&lqbarEtaPre>-1){
+  if(bqhadEtaFit!=-1000&&bqhadEtaPre!=-1000) hists_["shiftBqEta" ]->Fill( bqhadEtaFit-bqhadEtaPre, weight);
+  if(bqlepEtaFit!=-1000&&bqlepEtaPre!=-1000) hists_["shiftBqEta" ]->Fill( bqlepEtaFit-bqlepEtaPre, weight);
+  if(lqEtaFit!=-1000&&lqEtaPre!=-1000&&lqbarEtaFit!=-1000&&lqbarEtaPre!=-1000){
     // consider ambiguity for light jets
     if(std::abs(lqEtaFit-lqEtaPre)+std::abs(lqbarEtaFit-lqbarEtaPre)<std::abs(lqEtaFit-lqbarEtaPre)+std::abs(lqbarEtaFit-lqEtaPre)){
       hists_["shiftLqEta"    ]->Fill( lqEtaFit-lqEtaPre, weight);
@@ -517,9 +516,9 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       hists_["shiftLqEta"    ]->Fill( lqbarEtaFit-lqEtaPre, weight);
     }
   }
-  if(bqhadPhiFit>-1&&bqhadPhiPre>-1) hists_["shiftBqPhi" ]->Fill( modTwoPi(bqhadPhiFit-bqhadPhiPre), weight);
-  if(bqlepPhiFit>-1&&bqlepPhiPre>-1) hists_["shiftBqPhi" ]->Fill( modTwoPi(bqlepPhiFit-bqlepPhiPre), weight);
-  if(lqPhiFit>-1&&lqPhiPre>-1&&lqbarPhiFit>-1&&lqbarPhiPre>-1){
+  if(bqhadPhiFit!=-1000&&bqhadPhiPre!=-1000) hists_["shiftBqPhi" ]->Fill( modTwoPi(bqhadPhiFit-bqhadPhiPre), weight);
+  if(bqlepPhiFit!=-1000&&bqlepPhiPre!=-1000) hists_["shiftBqPhi" ]->Fill( modTwoPi(bqlepPhiFit-bqlepPhiPre), weight);
+  if(lqPhiFit!=-1000&&lqPhiPre!=-1000&&lqbarPhiFit!=-1000&&lqbarPhiPre!=-1000){
     // consider ambiguity for light jets
     if(std::abs(modTwoPi(lqPhiFit-lqPhiPre))+std::abs(modTwoPi(lqbarPhiFit-lqbarPhiPre))<std::abs(modTwoPi(lqPhiFit-lqbarPhiPre))+std::abs(modTwoPi(lqbarPhiFit-lqPhiPre))){
       hists_["shiftLqPhi"    ]->Fill( modTwoPi(lqPhiFit-lqPhiPre), weight);
@@ -550,12 +549,12 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
       sumEtTrue=MET_h->begin()->genMET()->sumEt();
     }
   }
-  if(lepPtFit>-1&&lepPtPre>-1  ) hists_["shiftLepPt" ]->Fill( lepPtFit -lepPtPre , weight);  
-  if(nuPtFit>-1 &&nuPtPre>-1   ) hists_["shiftNuPt"  ]->Fill( nuPtFit  -nuPtPre  , weight);
-  if(lepEtaFit>-1&&lepEtaPre>-1) hists_["shiftLepEta"]->Fill( lepEtaFit-lepEtaPre, weight);  
-  if(nuEtaFit>-1 &&nuEtaPre>-1 ) hists_["shiftNuEta" ]->Fill( nuEtaFit -nuEtaPre , weight);
-  if(lepPhiFit>-1&&lepPhiPre>-1) hists_["shiftLepPhi"]->Fill( modTwoPi(lepPhiFit-lepPhiPre), weight);  
-  if(nuPhiFit>-1 &&nuPhiPre>-1 ) hists_["shiftNuPhi" ]->Fill( modTwoPi( nuPhiFit -nuPhiPre), weight);
+  if(lepPtFit !=-1000&&lepPtPre !=-1000) hists_["shiftLepPt" ]->Fill( lepPtFit -lepPtPre , weight);  
+  if(nuPtFit  !=-1000&&nuPtPre  !=-1000) hists_["shiftNuPt"  ]->Fill( nuPtFit  -nuPtPre  , weight);
+  if(lepEtaFit!=-1000&&lepEtaPre!=-1000) hists_["shiftLepEta"]->Fill( lepEtaFit-lepEtaPre, weight);  
+  if(nuEtaFit !=-1000&&nuEtaPre !=-1000) hists_["shiftNuEta" ]->Fill( nuEtaFit -nuEtaPre , weight);
+  if(lepPhiFit!=-1000&&lepPhiPre!=-1000) hists_["shiftLepPhi"]->Fill( modTwoPi(lepPhiFit-lepPhiPre), weight);  
+  if(nuPhiFit !=-1000&&nuPhiPre !=-1000) hists_["shiftNuPhi" ]->Fill( modTwoPi( nuPhiFit -nuPhiPre), weight);
   if(debug) std::cout << "done" << std::endl;
 
   // top and ttbar distributions
@@ -614,7 +613,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     // reco level
     if(debug) std::cout << "b) reco level" << std::endl;
     if(semiLepEvt_h->hadronicDecayTop(hypoKey_)&&semiLepEvt_h->leptonicDecayTop(hypoKey_)){
-      if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjetIX>-1) ){
+      if( (semiLepEvt_h->isHypoValid(hypoKey_))&&(leadNonttjetIX!=-1000) ){
 	ttbarJetMass=(semiLepEvt_h->hadronicDecayTop(hypoKey_)->p4()+semiLepEvt_h->leptonicDecayTop(hypoKey_)->p4()+(jets_h->at(leadNonttjetIX)).p4()).mass();
 	rhos=2*mtop/ttbarJetMass;
 	if(debug) std::cout << "ttbarJetMass=" << ttbarJetMass << std::endl;
@@ -638,9 +637,9 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
 
   // fill rhos plots
   if(debug) std::cout << "fill ttbar+1jet plots" << std::endl;
-  if(rhos    >-1&&leadNonttjetPt    >addJetPt_) hists_  ["rhos"   ]->Fill( rhos    , weight);
-  if(rhosTrue>-1&&leadNonttjetPtTrue>addJetPt_) hists_  ["rhosGen"]->Fill( rhosTrue, weight);
-  if(rhos    >-1&&leadNonttjetPt    >addJetPt_) hists2D_["rhos_"  ]->Fill( rhosTrue, rhos, weight );
+  if(rhos    !=-1000&&leadNonttjetPt    >addJetPt_) hists_  ["rhos"   ]->Fill( rhos    , weight);
+  if(rhosTrue!=-1000&&leadNonttjetPtTrue>addJetPt_) hists_  ["rhosGen"]->Fill( rhosTrue, weight);
+  if(rhos    !=-1000&&leadNonttjetPt    >addJetPt_) hists2D_["rhos_"  ]->Fill( rhosTrue, rhos, weight );
   if(debug) std::cout << "done" << std::endl;
 
   // lead non ttbar jet GEN
