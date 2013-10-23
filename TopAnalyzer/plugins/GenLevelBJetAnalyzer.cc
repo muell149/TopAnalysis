@@ -503,9 +503,24 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
         for ( unsigned int iParticle = 0; iParticle < particles.size(); ++iParticle ) {
             const reco::GenParticle* thisParticle = particles[iParticle];
             const reco::Candidate* hadron = 0;
-            if ( thisParticle->status() >1 ) {
-                continue;    // Excluding non-final state particles (e.g. bHadrons)
+            //############################################################
+            //##################### NEEDED FOR GENERIC HADRON-JET MATCHING
+            //########################### WILL WORK X1000 SLOWER IN SHERPA
+            // if ( thisParticle->status() > 1 ) {
+            //     continue;    // Skipping non-final state particles (e.g. bHadrons)
+            // }
+            //############################################################
+            
+            
+            //############################################################
+            //###### IF HADRON-JET MATCHING BY INJECTING HADRONS INTO JETS
+            //########################### WORKS FASTER AND SAFE FOR SHERPA
+            if ( !isHadronPdgId(flavour_, thisParticle->pdgId()) ) {
+                continue;    // Skipping everything except hadrons
             }
+            //############################################################
+
+            // printf("   particle: %d\tpdgId: %d\n", iParticle, thisParticle->pdgId());
             int hadronIndex = analyzeMothers ( thisParticle, &hadron, hadMothersCand, hadMothersIndices, 0, -1 );
             if ( hadron ) { // Putting hadron index to the list if it is not yet
                 int hadListIndex=-1;
@@ -947,12 +962,14 @@ int GenLevelBJetAnalyzer::analyzeMothers ( const reco::Candidate* thisParticle, 
         }
     }
 
+
     //################################################### FOR SHERPA
     // if(hadronIndex > -1) return hadronIndex;
     //################################################### FOR SHERPA
 
-    int partIndex = -1;	  // Index of particle being checked in the list of mothers
+    int partIndex = -1;   // Index of particle being checked in the list of mothers
     partIndex = isInList ( hadMothers, thisParticle );
+    // printf("      hadronIndex: %d\tpartIndex: %d|%d (%d)\tpdgId: %d\n", hadronIndex, partIndex, prevPartIndex, (int)hadMothers.size(), thisParticle->pdgId());
 
 // Checking whether this particle is already in the chain of analyzed particles in order to identify a loop
     bool isLoop = false;
@@ -1387,7 +1404,6 @@ bool GenLevelBJetAnalyzer::fixExtraSameFlavours(
 
     if(lastQuarkIndex<0) return false;
     if((int)LastQuarkIds.at(hadId).size()<lastQuarkIndex+1) return false;
-    int hadIndex = hadIndices.at(hadId);
     int LastQuarkId = LastQuarkIds.at(hadId).at(lastQuarkIndex);
     int LastQuarkMotherId = LastQuarkMotherIds.at( hadId ).at( lastQuarkIndex );
     int qmFlav = hadMothers.at(LastQuarkId).pdgId() < 0 ? -1 : 1;
@@ -1405,10 +1421,8 @@ bool GenLevelBJetAnalyzer::fixExtraSameFlavours(
     // Looping over all previous hadrons
     for(unsigned int iHad = 0; iHad<hadronFlavour.size(); iHad++) {
         if(iHad==hadId) continue;
-        int theHadIndex = hadIndices.at(iHad);
         int theLastQuarkIndex = lastQuarkIndices.at(iHad);
         if(theLastQuarkIndex<0) continue;
-        int theLastQuarkId = LastQuarkIds.at(iHad).at(theLastQuarkIndex);
         if((int)LastQuarkMotherIds.at( iHad ).size() <= theLastQuarkIndex) continue;
         int theLastQuarkMotherId = LastQuarkMotherIds.at( iHad ).at( theLastQuarkIndex );
         int theHadFlavour = hadronFlavour.at(iHad);
@@ -1418,7 +1432,6 @@ bool GenLevelBJetAnalyzer::fixExtraSameFlavours(
         if(theHadFlavour != hadFlavour || theLastQuarkMotherId != LastQuarkMotherId) continue;
         ambiguityResolved = false;
         nSameFlavourHadrons++;
-        // printf("   hadId: %d  LastQuarkId: %d hadFlavour: %d\n", iHad, theLastQuarkId, theHadFlavour);
         
         // Checking other b-quark mother candidates of this hadron
         if((int)LastQuarkIds.at(hadId).size() > lastQuarkIndex+1) {
