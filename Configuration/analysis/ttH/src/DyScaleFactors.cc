@@ -33,7 +33,7 @@ void DyScaleFactors::produceScaleFactors(const Samples& samples)
     // Extract steps for Drell-Yan scaling from first file in map
     const SystematicChannelSamples& m_systematicChannelSamples = samples.getSystematicChannelSamples();
     const TString& filename = m_systematicChannelSamples.begin()->second.begin()->second.begin()->inputFile();
-    const std::vector<std::pair<TString, TString> > v_nameStepPair = tth::nameStepPairs(filename, "Allh1_step");
+    const std::vector<std::pair<TString, TString> > v_nameStepPair = tth::nameStepPairs(filename, "dyScaling_Allh1_step");
     
     // Loop over selection steps and systematics
     for(const auto& nameStepPair : v_nameStepPair){
@@ -96,10 +96,10 @@ void DyScaleFactors::produceScaleFactors(const TString& step, const Systematic::
             const double luminosityWeight(Tools::luminosityWeight(sample, luminosity_, fileReader_));
             const double allWeights = luminosityWeight; // calculate here all the flat-weights we apply: Lumi*others*...
             
-            TH1D* h_loose = fileReader_->GetClone<TH1D>(sample.inputFile(), "Looseh1");
-            TH1D* h_zWindow = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("Zh1").Append(step).Append("zWindow"));
-            TH1D* h_zVeto = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("TTh1").Append(step));
-            TH1D* h_all = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("Allh1").Append(step));
+            TH1D* h_loose = fileReader_->GetClone<TH1D>(sample.inputFile(), "dyScaling_Looseh1");
+            TH1D* h_zWindow = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("dyScaling_Zh1").Append(step).Append("zWindow"));
+            TH1D* h_zVeto = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("dyScaling_TTh1").Append(step));
+            TH1D* h_all = fileReader_->GetClone<TH1D>(sample.inputFile(), TString("dyScaling_Allh1").Append(step));
             
             h_loose->Scale(allWeights);
             h_zWindow->Scale(allWeights);

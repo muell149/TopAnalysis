@@ -73,8 +73,8 @@ void AnalysisHistogramsBase::book(TSelectorList* output)
     
     // Book overview plot for each step divided in JetCategories
     for(const auto& stepShort : stepsForCategories_){
-        const TString step = tth::stepName(stepShort) + "jetCategories";
-        std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
+        const TString step = tth::stepName(stepShort);
+        std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step+"jetCategories"].m_histogram_;
         const int numberOfCategories(jetCategories_->numberOfCategories());
         TString name = "jetCategories";
         m_histogram[name] = this->store(new TH1D(prefix_+name+step, "Jet categories;# jets/b-jets; # events", numberOfCategories, 0, numberOfCategories));
@@ -261,7 +261,7 @@ void EventYieldHistograms::fillHistos(const RecoObjects&, const CommonGenObjects
 
 
 DyScalingHistograms::DyScalingHistograms(const std::vector<TString>& selectionSteps, const TString& looseStep):
-AnalysisHistogramsBase("", selectionSteps),
+AnalysisHistogramsBase("dyScaling_", selectionSteps),
 looseStep_(looseStep)
 {
     std::cout<<"--- Beginning setting up Drell-Yan scaling histograms\n";
@@ -280,15 +280,15 @@ void DyScalingHistograms::bookHistos(const TString& step, std::map<TString, TH1*
 {
     const TString looseStep = tth::stepName(looseStep_) + "zWindow";
     if(step == looseStep){
-        m_histogram["h_loose"] = this->bookHisto(m_histogram["h_loose"], "Looseh1");
+        m_histogram["h_loose"] = this->bookHisto(m_histogram["h_loose"], prefix_+"Looseh1");
     }
     
     if(step.Contains("zWindow")){
-        m_histogram["h_zWindow"] = this->bookHisto(m_histogram["h_zWindow"], "Zh1"+step);
+        m_histogram["h_zWindow"] = this->bookHisto(m_histogram["h_zWindow"], prefix_+"Zh1"+step);
     }
     else{
-        m_histogram["h_all"] = this->bookHisto(m_histogram["h_all"], "Allh1"+step);
-        m_histogram["h_zVeto"] = this->bookHisto(m_histogram["h_zVeto"], "TTh1"+step);
+        m_histogram["h_all"] = this->bookHisto(m_histogram["h_all"], prefix_+"Allh1"+step);
+        m_histogram["h_zVeto"] = this->bookHisto(m_histogram["h_zVeto"], prefix_+"TTh1"+step);
         this->bookHistos(step + "zWindow", m_stepHistograms_[step + "zWindow"].m_histogram_);
     }
 }
