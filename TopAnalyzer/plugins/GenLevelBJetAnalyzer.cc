@@ -36,6 +36,7 @@ GenLevelBJetAnalyzer::GenLevelBJetAnalyzer ( const edm::ParameterSet& cfg )
     deltaR_            = cfg.getParameter<double> ( "deltaR" );
     flavour_           = cfg.getParameter<int> ( "flavour" );
     noBBbarResonances_ = cfg.getParameter<bool> ( "noBBbarResonances" );
+    onlyJetClusteredHadrons_ = cfg.getParameter<bool> ( "onlyJetClusteredHadrons" );
     requireTopBquark_  = cfg.getParameter<bool> ( "requireTopBquark" );
     resolveName_       = cfg.getParameter<bool> ( "resolveParticleName" );
     doImprovedHadronMatching_ = cfg.getParameter<bool> ( "doImprovedHadronMatching" );
@@ -503,22 +504,27 @@ std::vector<int> GenLevelBJetAnalyzer::findHadronJets ( const reco::GenJetCollec
         for ( unsigned int iParticle = 0; iParticle < particles.size(); ++iParticle ) {
             const reco::GenParticle* thisParticle = particles[iParticle];
             const reco::Candidate* hadron = 0;
-            //############################################################
-            //##################### NEEDED FOR GENERIC HADRON-JET MATCHING
-            //########################### WILL WORK X1000 SLOWER IN SHERPA
-            // if ( thisParticle->status() > 1 ) {
-            //     continue;    // Skipping non-final state particles (e.g. bHadrons)
-            // }
-            //############################################################
-            
-            
-            //############################################################
-            //###### IF HADRON-JET MATCHING BY INJECTING HADRONS INTO JETS
-            //########################### WORKS FASTER AND SAFE FOR SHERPA
-            if ( !isHadronPdgId(flavour_, thisParticle->pdgId()) ) {
-                continue;    // Skipping everything except hadrons
+
+            if(onlyJetClusteredHadrons_) {
+                //############################################################
+                //###### IF HADRON-JET MATCHING BY INJECTING HADRONS INTO JETS
+                //########################### WORKS FASTER AND SAFE FOR SHERPA
+                //########## HADRONS NOT CLUSTERED TO ANY JET ARE LOST (~0.5%)
+                if ( !isHadronPdgId(flavour_, thisParticle->pdgId()) ) {
+                    continue;    // Skipping everything except hadrons
+                }
+                //############################################################
+            } else {
+                //############################################################
+                //##################### NEEDED FOR GENERIC HADRON-JET MATCHING
+                //########################### WILL WORK X1000 SLOWER IN SHERPA
+                //############ STORES ALL HADRONS REGARDLESS OF JET CLUSTERING
+                if ( thisParticle->status() > 1 ) {
+                    continue;    // Skipping non-final state particles (e.g. bHadrons)
+                }
+                //############################################################
             }
-            //############################################################
+            
 
             // printf("   particle: %d\tpdgId: %d\n", iParticle, thisParticle->pdgId());
             int hadronIndex = analyzeMothers ( thisParticle, &hadron, hadMothersCand, hadMothersIndices, 0, -1 );
