@@ -1360,14 +1360,19 @@ namespace semileptonic {
       // used enumerators: samples
       // ttbarMC: use "Madgraph", "Mcatnlo", "Powheg" or "PowhegHerwig" for the respective samples
 
-
+      bool debug=false;
       // open our standard analysis files and save them in a map
       std::map<unsigned int, TFile*> files_;
       // loop samples
       for(int sample = kSig; sample<=kSAToptW; sample++){
 	// there are no QCD subsamples for muon channel
 	if(!(sample>=kQCDEM1&&sample<=kQCDBCE3&&decayChannel.compare("muon")==0)){
-	  TString fileName;
+	  TString fileName =""; 
+	  TString fileName2=""; 
+	  TString fileName3="";
+	  int sampleflag=sample;
+	  int sampleflag2=-1;
+	  int sampleflag3=-1;
 	  if(sample!=kData){
 	    if(((sample==kSig)||(sample==kBkg))&&ttbarMC=="Powheg") {
 	      if(sample==kSig) fileName = inputFolder+"/"+TopFilename(kSigPow, systematicVariation, decayChannel);
@@ -1382,12 +1387,39 @@ namespace semileptonic {
 	      if(sample==kBkg) fileName = inputFolder+"/"+TopFilename(kBkgMca, systematicVariation, decayChannel);
 	    }
 	    else fileName = inputFolder+"/"+TopFilename(sample, systematicVariation, decayChannel);
+	    // take care of splitted single top tW sample for scale systematics
+	    if((systematicVariation==sysSingleTopScaleUp||systematicVariation==sysSingleTopScaleDown)&&(sample==kSToptW||sample==kSAToptW)){
+	      if(sample==kSToptW){
+		sampleflag =kSToptW1;
+		sampleflag2=kSToptW2;
+		sampleflag3=kSToptW3;
+	      }
+	      else if(sample==kSAToptW){
+		sampleflag =kSAToptW1;
+		sampleflag2=kSAToptW2;
+		sampleflag3=kSAToptW3;
+	      }
+	      fileName =inputFolder+"/"+TopFilename(sampleflag , systematicVariation, decayChannel);
+	      fileName2=inputFolder+"/"+TopFilename(sampleflag2, systematicVariation, decayChannel);
+	      fileName3=inputFolder+"/"+TopFilename(sampleflag3, systematicVariation, decayChannel);	      
+	    }
 	  }
-	  if(sample==kData) fileName = dataFile;
+	  else fileName = dataFile;
 	  // if file exists - save in map
 	  if((fileName!="no")&&(fileName!="")){
 	    TFile* file = TFile::Open(fileName);
-	    if(file&&!(file->IsZombie())) files_[sample]= file;
+	    if(file&&!(file->IsZombie())){
+	      files_[sampleflag]= file;
+	      if(debug) std::cout << "found " << fileName << std::endl;
+	    }
+	  }
+	  if(sampleflag2>-1&&(fileName2!="no")&&(fileName2!="")){
+	    TFile* file = TFile::Open(fileName);
+	    if(file&&!(file->IsZombie())) files_[sampleflag2]= file;
+	  }
+	  if(sampleflag3>-1&&(fileName3!="no")&&(fileName3!="")){
+	    TFile* file = TFile::Open(fileName);
+	    if(file&&!(file->IsZombie())) files_[sampleflag3]= file;
 	  }
 	}
       }
