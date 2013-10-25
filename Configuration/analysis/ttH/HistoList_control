@@ -31,19 +31,19 @@ events_jetCategories_step8 - - - 1 1 0 0 0 0 0 0 0 0
 ##
 mvaP_jetCategories_step10 - - - 1 0 0 0 0 0 0 0 0 0
 
-mvaP_jetChargeDiff_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_meanDeltaPhi_b_met_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massDiff_recoil_bbbar_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_pt_b_antiLepton_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_pt_antiB_lepton_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_deltaR_b_antiLepton_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_deltaR_antiB_lepton_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_btagDiscriminatorSum_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_deltaPhi_antiBLepton_bAntiLepton_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massDiff_fullBLepton_bbbar_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_meanMt_b_met_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massSum_antiBLepton_bAntiLepton_step10 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massDiff_antiBLepton_bAntiLepton_step10 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_jetChargeDiff_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_meanDeltaPhi_b_met_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massDiff_recoil_bbbar_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_pt_b_antiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_pt_antiB_lepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_deltaR_b_antiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_deltaR_antiB_lepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_btagDiscriminatorSum_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_deltaPhi_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massDiff_fullBLepton_bbbar_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_meanMt_b_met_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massSum_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massDiff_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
 
 
 
