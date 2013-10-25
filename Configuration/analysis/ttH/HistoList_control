@@ -5,6 +5,8 @@
 ##
 ## Event yields
 ##
+events_jetCategories_step8 - - - 1 1 0 0 0 0 0 0 0 0
+
 #events_step1 - - - 1 0 0 0 0 0 0 0 0 0
 #events_step2 - - - 1 0 0 0 0 0 0 0 0 0
 #events_step3 - - - 1 0 0 0 0 0 0 0 0 0
@@ -22,32 +24,36 @@
 #events_step8_cate6 - - - 1 1 0 0 0 0 0 0 0 0
 #events_step8_cate7 - - - 1 1 0 0 0 0 0 0 0 0
 
-##### Error in DY scale factors for step*jetCategories
-events_jetCategories_step8jetCategories - - - 1 0 0 0 0 0 0 0 0 0
-
 
 
 ##
 ## MVA input variable plots (perhaps should have an own HistoList_mvaP)
 ##
-mvaP_jetChargeDiff_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_meanDeltaPhi_b_met_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massDiff_recoil_bbbar_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_pt_b_antiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_pt_antiB_lepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_deltaR_b_antiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_deltaR_antiB_lepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_btagDiscriminatorSum_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_deltaPhi_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massDiff_fullBLepton_bbbar_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_meanMt_b_met_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massSum_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
-mvaP_massDiff_antiBLepton_bAntiLepton_step8 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_jetCategories_step10 - - - 1 0 0 0 0 0 0 0 0 0
+
+mvaP_jetChargeDiff_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_meanDeltaPhi_b_met_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massDiff_recoil_bbbar_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_pt_b_antiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_pt_antiB_lepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_deltaR_b_antiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_deltaR_antiB_lepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_btagDiscriminatorSum_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_deltaPhi_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massDiff_fullBLepton_bbbar_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_meanMt_b_met_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massSum_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_massDiff_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+
+
+
+
+
 
 ##
 ## MVA validation plots (perhaps should have an own HistoList_mvaA)
 ##
-mvaA_jetCategories_step10jetCategories - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_jetCategories_step10 - - - 1 0 0 0 0 0 0 0 0 0
 
 mvaA_mvaWeightCorrect_step10 - - - 1 0 0 0 0 0 0 0 0 0
 mvaA_best_mvaWeightCorrect_step10 - - - 1 0 0 0 0 0 0 0 0 0
@@ -60,10 +66,11 @@ mvaA_best_dijet_mass_step10 - - - 1 0 0 0 0 0 0 0 0 0
 
 
 
+
 ##
 ## Basic control plots
 ##
-basic_jetCategories_step8jetCategories - - - 1 0 0 0 0 0 0 0 0 0
+basic_jetCategories_step8 - - - 1 1 0 0 0 0 0 0 0 0
 
 basic_lepton_multiplicity_step8 - - - 1 1 0 1 0 0 0 0 0 0
 basic_lepton_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0

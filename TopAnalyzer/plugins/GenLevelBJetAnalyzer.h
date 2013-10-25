@@ -122,6 +122,7 @@ private:
     double deltaR_;
     int flavour_;
     bool noBBbarResonances_;
+    bool onlyJetClusteredHadrons_;
     bool requireTopBquark_;
     bool resolveName_;
     bool doImprovedHadronMatching_;
