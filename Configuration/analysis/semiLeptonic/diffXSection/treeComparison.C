@@ -2,7 +2,7 @@
 
 bool isValidsample(unsigned int sample, unsigned int systematicVariation);
 
-void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, TString inputFolderName= "RecentAnalysisRun8TeV_doubleKinFit", TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root", const std::string decayChannel = "combined", bool withRatioPlot=true)
+void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, TString inputFolderName= "RecentAnalysisRun8TeV_doubleKinFit", TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root", const std::string decayChannel = "combined", bool withRatioPlot=true, TString test="prob")
 {
 
   // ============================
@@ -17,6 +17,32 @@ void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, 
   gROOT->ForceStyle();
   TGaxis::SetMaxDigits(2);
 
+  // user specific configuration
+  TString testQuantity=""; // name of separator in tree
+  TString treePath=""; // path of tree
+  // values for splitting topPt (Val0<=plot1<Val1<=plot2<Val2)
+  std::vector< double > Val_;
+  TString treeExt="";
+  if(test=="PV"){
+    testQuantity="nPV";
+    treePath="compositedKinematicsKinFit/tree";
+    Val_.push_back(0. );
+    Val_.push_back(8. );
+    Val_.push_back(13.);
+    Val_.push_back(17.);
+    Val_.push_back(22.);
+    Val_.push_back(50.);
+    treeExt="Fit";
+  }
+  if(test=="prob"){
+    testQuantity="chi2";
+    treePath="analyzeTopRecoKinematicsKinFit/tree";
+    Val_.push_back(0. );
+    Val_.push_back(3.219);
+    Val_.push_back(7.824);
+    Val_.push_back(99999.);
+    treeExt="";
+  }
   // default configurations
   unsigned int systematicVariation=sysNo;
   TString ttbarMC="Madgraph";
@@ -58,7 +84,7 @@ void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, 
   temp->GetXaxis()->SetTitle("p_{T}^{t} #left[GeV#right]");
   temp->GetYaxis()->SetTitle("Top quarks");
   //axesStyle(*temp, "p_{T}^{t} #left[GeV#right]", "norm. Top quarks", 0., 0.15);
-  temp->GetXaxis()->SetRangeUser(0.,400.);
+  //temp->GetXaxis()->SetRangeUser(0.,400.);
   //temp->GetYaxis()->SetRangeUser(0.,0.2 );
   temp->SetStats(kFALSE);
   temp->SetLineWidth(3);
@@ -90,30 +116,34 @@ void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, 
 	double lumiwgt=lumiweight(sample, lumi, systematicVariation, tempChannel);
 	if(verbose>1) std::cout << "     (lumiweight=" << lumiwgt << ")" << std::endl;
 	// get trees
-	TTree* tree = (TTree*)(tempfiles_[sample]->Get("analyzeTopRecoKinematicsKinFit/tree"));
-	if(!tree) std::cout << "     !WARNING: tree not found, will ignore file and continue!" << std::endl;
+	TTree* tree = (TTree*)(tempfiles_[sample]->Get(treePath));
+	if(!tree){
+	  std::cout << "     !ERROR: tree not found!" << std::endl;
+	  exit(0);
+	}
 	else if(verbose>1)  std::cout << "     (tree found, contains " << tree->GetEntries() << " entries)" << std::endl;
 	// container for values read from tree
 	std::map< TString, float > value_;
 	// initialize map entries with 0 
 	value_["weight"  ]=1;
-	value_["chi2"    ]=0;
+	value_["testQuantity"    ]=0;
 	value_["topPtLep"]=0;
 	value_["topPtHad"]=0;
 	// initialize branches
 	tree->SetBranchStatus ("*", 0);
 	tree->SetBranchStatus ("weight"  , 1);
-	tree->SetBranchStatus ("topPtLep", 1);
-	tree->SetBranchStatus ("topPtHad", 1);
-	tree->SetBranchStatus ("chi2"    , 1);
-	tree->SetBranchAddress("chi2"    ,(&value_["chi2"    ]));
+	tree->SetBranchStatus ("topPtLep"+treeExt, 1);
+	tree->SetBranchStatus ("topPtHad"+treeExt, 1);
+	tree->SetBranchStatus (testQuantity     , 1);
+	tree->SetBranchAddress(testQuantity     ,(&value_["testQuantity"    ]));
 	tree->SetBranchAddress("weight"  ,(&value_["weight"  ]));
-	tree->SetBranchAddress("topPtLep",(&value_["topPtLep"]));
-	tree->SetBranchAddress("topPtHad",(&value_["topPtHad"]));
+	tree->SetBranchAddress("topPtLep"+treeExt,(&value_["topPtLep"]));
+	tree->SetBranchAddress("topPtHad"+treeExt,(&value_["topPtHad"]));
 	// initialize result plots
 	histo_["topPt"+channelExt     ][sample]=(TH1F*)(temp->Clone());
-	histo_["topPtProb1"+channelExt][sample]=(TH1F*)(temp->Clone());
-	histo_["topPtProb2"+channelExt][sample]=(TH1F*)(temp->Clone());
+	for(int plot=1; plot<(int)Val_.size(); ++plot){
+	  histo_["topPtProb"+getTStringFromInt(plot)+channelExt][sample]=(TH1F*)(temp->Clone());
+	}
 	if(verbose>1) std::cout << "     -> looping tree" << std::endl;
 	// loop all events to fill plots
 	for(unsigned int event=0; event<tree->GetEntries(); ++event){
@@ -121,32 +151,28 @@ void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, 
 	  tree->GetEntry(event);
 	  // get relevant quantities
 	  double weight=value_["weight"]*lumiwgt;
-	  double chi2  =value_["chi2"  ];
+	  double filterQuantity  =value_["testQuantity"  ];
 	  double topPtLep=value_["topPtLep"];
 	  double topPtHad=value_["topPtHad"];
 	  if(verbose>2){
 	    std::cout << "      event #" << event+1 << "/" << tree->GetEntries() << ":" << std::endl;
-	    std::cout << "      weight=" << weight << ", chi2=" << chi2 << ", topPtLep=" << topPtLep << ", topPtHad=" << topPtHad << std::endl;
+	    std::cout << "      weight=" << weight << ", " << "testQuantity" << "=" << filterQuantity << ", topPtLep=" << topPtLep << ", topPtHad=" << topPtHad << std::endl;
 	  }
 	  // fill histo for all
 	  histo_["topPt"+channelExt][sample]->Fill(topPtLep, weight);
 	  histo_["topPt"+channelExt][sample]->Fill(topPtHad, weight);
-	  // fill histo for prob>0.02
-	  if(chi2<7.824){
-	    histo_["topPtProb1"+channelExt][sample]->Fill(topPtLep, weight);
-	    histo_["topPtProb1"+channelExt][sample]->Fill(topPtHad, weight);
-	  }
-	  // fill histo for prob>0.20
-	  if(chi2<3.219){
-	    histo_["topPtProb2"+channelExt][sample]->Fill(topPtLep, weight);
-	    histo_["topPtProb2"+channelExt][sample]->Fill(topPtHad, weight);
-	  }
+	  // fill histo for different ranges of the filterQuantity
+	  for(int plot=1; plot<(int)Val_.size(); ++plot){
+	    TString nameNr=getTStringFromInt(plot);
+	    if(filterQuantity>=Val_[plot-1]&&filterQuantity<Val_[plot]){
+	      histo_["topPtProb"+nameNr+channelExt][sample]->Fill(topPtLep, weight);
+	      histo_["topPtProb"+nameNr+channelExt][sample]->Fill(topPtHad, weight);
+	    }
+	  } // end for loop separation values
 	} // end for loop tree events
       } // end if is valid sample
     } // end for loop samples
   } // end for loop decay channels
-
-
 
   // create final plots
   // -> combine decay channels and MC samples
@@ -162,243 +188,288 @@ void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, 
 	if(verbose>1) std::cout << " -> processing " << sampleLabel(sample, tempChannel) << "(" << tempChannel << ")" << std::endl;
 	TString channelExt=getTStringFromInt(channel);
 	// get plots for current channels
-	TH1F* tempHist1=(TH1F*)histo_["topPt"+channelExt     ][sample]->Clone();
-	TH1F* tempHist2=(TH1F*)histo_["topPtProb1"+channelExt][sample]->Clone();
-	TH1F* tempHist3=(TH1F*)histo_["topPtProb2"+channelExt][sample]->Clone();
-	double nevents1=tempHist1->Integral(0,binMax);
-	double nevents2=tempHist2->Integral(0,binMax);
-	double nevents3=tempHist3->Integral(0,binMax);
-
+	std::vector <TH1F*> tempHist_;
+        tempHist_.push_back((TH1F*)histo_["topPt"+channelExt     ][sample]->Clone());
+	for(int plot=1; plot<(int)Val_.size(); ++plot){
+	  TString nameNr=getTStringFromInt(plot);
+	  tempHist_.push_back((TH1F*)histo_["topPtProb"+nameNr+channelExt][sample]->Clone());
+	}
+	std::vector <int> nevents_;
+        for(int plot=0; plot<(int)Val_.size(); ++plot){
+	  nevents_.push_back(tempHist_[plot]->Integral(0,binMax));
+	}
 	// add all channels for final histogram
 	if(channel==0){
-	  histo_["topPt"     ][sample]=(TH1F*)tempHist1->Clone();
-	  histo_["topPtProb1"][sample]=(TH1F*)tempHist2->Clone();
-	  histo_["topPtProb2"][sample]=(TH1F*)tempHist3->Clone();
+	  for(int plot=0; plot<(int)Val_.size(); ++plot){
+	    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	    histo_["topPt"+nameNr][sample]=(TH1F*)tempHist_[plot]->Clone();
+	  }
 	}
 	else{
-	  histo_["topPt"     ][sample]->Add((TH1F*)tempHist1->Clone());
-	  histo_["topPtProb1"][sample]->Add((TH1F*)tempHist2->Clone());
-	  histo_["topPtProb2"][sample]->Add((TH1F*)tempHist3->Clone());
+          for(int plot=0; plot<(int)Val_.size(); ++plot){
+            TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	    histo_["topPt"+nameNr][sample]->Add((TH1F*)tempHist_[plot]->Clone());
+	  }
 	}
-	if(verbose>2) std::cout << "    (#events(" << tempChannel << ")=" <<  nevents1 << " / " << nevents2 << " / " << nevents3 << ")" << std::endl;
-      } // end channel for loop 
-      double neventsComb1=histo_["topPt"     ][sample]->Integral(0,binMax);
-      double neventsComb2=histo_["topPtProb1"][sample]->Integral(0,binMax);
-      double neventsComb3=histo_["topPtProb2"][sample]->Integral(0,binMax);
-      if(verbose>1) std::cout << "    (#events=" <<  neventsComb1 << " / " << neventsComb2 << " / " << neventsComb3 << ")" << std::endl;
+	if(verbose>2){
+	  std::cout << "    (#events(" << tempChannel << ")=";
+	  for(int plot=0; plot<(int)Val_.size(); ++plot){
+	    std::cout <<  nevents_[plot];
+	    if(plot<(int)Val_.size()-1) std::cout << " / ";
+	  }
+	  std::cout << ")" << std::endl;
+	}
+      } // end channel for loop
+      std::vector <double> neventsComb_;
+      for(int plot=0; plot<(int)Val_.size(); ++plot){
+	TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	neventsComb_.push_back(histo_["topPt"+nameNr][sample]->Integral(0,binMax));
+      }
+      if(verbose>1){
+	std::cout << "    (#events=";
+	for(int plot=0; plot<(int)Val_.size(); ++plot){
+	  std::cout <<  neventsComb_[plot];
+	  if(plot<(int)Val_.size()-1) std::cout << " / ";
+	}
+	std::cout << ")" << std::endl;
+      }
       // combine all MC samples
       if(sample!=kData){
 	if(sample==kSig){
-	  histo_["topPt"     ][kAllMC]=(TH1F*)histo_["topPt"     ][sample]->Clone();
-	  histo_["topPtProb1"][kAllMC]=(TH1F*)histo_["topPtProb1"][sample]->Clone();
-	  histo_["topPtProb2"][kAllMC]=(TH1F*)histo_["topPtProb2"][sample]->Clone();
+	  for(int plot=0; plot<(int)Val_.size(); ++plot){
+	    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	    histo_["topPt"+nameNr][kAllMC]=(TH1F*)histo_["topPt"+nameNr][sample]->Clone();
+	  }
 	}
 	else{
-	  histo_["topPt"     ][kAllMC]->Add((TH1F*)histo_["topPt"     ][sample]->Clone());
-	  histo_["topPtProb1"][kAllMC]->Add((TH1F*)histo_["topPtProb1"][sample]->Clone());
-	  histo_["topPtProb2"][kAllMC]->Add((TH1F*)histo_["topPtProb2"][sample]->Clone());
-	  // MC stack creation
+	  for(int plot=0; plot<(int)Val_.size(); ++plot){
+            TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	    histo_["topPt"+nameNr][kAllMC]->Add((TH1F*)histo_["topPt"+nameNr][sample]->Clone());
+	  }
 	}
 	// MC histogram style
-	histogramStyle(*histo_["topPt"     ][sample], sample, true);
-	histogramStyle(*histo_["topPtProb1"][sample], sample, true);
-	histogramStyle(*histo_["topPtProb2"][sample], sample, true);	
+	for(int plot=0; plot<(int)Val_.size(); ++plot){
+	  TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	  histogramStyle(*histo_["topPt"+nameNr][sample], sample, true);
+	  histo_["topPt"+nameNr][sample]->SetLineColor(histo_["topPt"+nameNr][sample]->GetFillColor());
+	  histo_["topPt"+nameNr][sample]->SetLineWidth(1);
+	}
       }
       else{
 	// data histogram style
-	histogramStyle(*histo_["topPt"     ][sample], kData, false);
-	histogramStyle(*histo_["topPtProb1"][sample], kData, false);
-	histogramStyle(*histo_["topPtProb2"][sample], kData, false);
+        for(int plot=0; plot<(int)Val_.size(); ++plot){
+          TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	  histogramStyle(*histo_["topPt"+nameNr][sample], kData, false);
+	}
       }
     } // end if sample is valid
   } // end sample for loop
 
   // print some interesting numbers
-  double neventsMC1=histo_["topPt"     ][kAllMC]->Integral(0,binMax);
-  double neventsMC2=histo_["topPtProb1"][kAllMC]->Integral(0,binMax);
-  double neventsMC3=histo_["topPtProb2"][kAllMC]->Integral(0,binMax);
-  if(verbose>0) std::cout << "#events( MC )=" <<  neventsMC1 << " / " << neventsMC2 << " / " << neventsMC3 << ")" << std::endl;
-  double neventsData1=histo_["topPt"     ][kData]->Integral(0,binMax);
-  double neventsData2=histo_["topPtProb1"][kData]->Integral(0,binMax);
-  double neventsData3=histo_["topPtProb2"][kData]->Integral(0,binMax);
-  if(verbose>0) std::cout << "#events(Data)=" <<  neventsData1 << " / " << neventsData2 << " / " << neventsData3 << ")" << std::endl;
-  if(verbose>0) std::cout << "data/MC ratio=" <<  neventsData1/neventsMC1 << " / " << neventsData2/neventsMC2 << " / " << neventsData3/neventsMC3 << ")" << std::endl;
+  // total number of MC events
+  std::vector< double >neventsMC_;
+  for(int plot=0; plot<(int)Val_.size(); ++plot){
+    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+    neventsMC_.push_back(histo_["topPt"+nameNr][kAllMC]->Integral(0,binMax));
+  }
+  if(verbose>0){
+    std::cout << "#events( MC )=";
+    for(int plot=0; plot<(int)Val_.size(); ++plot){
+      std::cout <<  neventsMC_[plot];
+      if(plot<(int)Val_.size()-1) std::cout << " / ";
+    }
+    std::cout << std::endl;
+  }
+  // total number of data events
+  std::vector< double >neventsData_;
+  for(int plot=0; plot<(int)Val_.size(); ++plot){
+    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+    neventsData_.push_back(histo_["topPt"+nameNr][kData]->Integral(0,binMax));
+  }
+  if(verbose>0){
+    std::cout << "#events(Data)=";
+    for(int plot=0; plot<(int)Val_.size(); ++plot){
+      std::cout <<  neventsData_[plot];
+      if(plot<(int)Val_.size()-1) std::cout << " / ";
+    }
+    std::cout << std::endl;
+  }
+  // data over MC ratio
+  if(verbose>0){
+    std::cout << "(data/MC ratio=";
+    for(int plot=0; plot<(int)Val_.size(); ++plot){
+      std::cout <<  neventsData_[plot]/neventsMC_[plot];
+      if(plot<(int)Val_.size()-1) std::cout << " / ";
+    }
+    std::cout << ")" << std::endl;
+  }
 
-  // sacale ttbar to match total number of events
+  // scale ttbar to match total number of events
   if(scaleTtbarToMeasured){
     if(verbose>0) std::cout << "scale ttbar component to match #data events " << std::endl;
-    double neventsTop1=histo_["topPt"     ][kSig]->Integral(0,binMax)+histo_["topPt"     ][kBkg]->Integral(0,binMax);
-    double neventsTop2=histo_["topPtProb1"][kSig]->Integral(0,binMax)+histo_["topPtProb1"][kBkg]->Integral(0,binMax);
-    double neventsTop3=histo_["topPtProb2"][kSig]->Integral(0,binMax)+histo_["topPtProb2"][kBkg]->Integral(0,binMax);
-    double SFTop1=(neventsTop1+(neventsData1-neventsMC1))/neventsTop1;
-    double SFTop2=(neventsTop2+(neventsData2-neventsMC2))/neventsTop2;
-    double SFTop3=(neventsTop3+(neventsData3-neventsMC3))/neventsTop3;
-    // scale top plots
-    histo_["topPt"     ][kSig]->Scale(SFTop1);
-    histo_["topPtProb1"][kSig]->Scale(SFTop2);
-    histo_["topPtProb2"][kSig]->Scale(SFTop3);
-    histo_["topPt"     ][kBkg]->Scale(SFTop1);
-    histo_["topPtProb1"][kBkg]->Scale(SFTop2);
-    histo_["topPtProb2"][kBkg]->Scale(SFTop3);
-    // scale combined MC plots
-    histo_["topPt"     ][kAllMC]->Add(histo_["topPt"     ][kSig] , SFTop1-1.);
-    histo_["topPtProb1"][kAllMC]->Add(histo_["topPtProb1"][kSig] , SFTop2-1.);
-    histo_["topPtProb2"][kAllMC]->Add(histo_["topPtProb2"][kSig] , SFTop3-1.);
-    histo_["topPt"     ][kAllMC]->Add(histo_["topPt"     ][kBkg] , SFTop1-1.);
-    histo_["topPtProb1"][kAllMC]->Add(histo_["topPtProb1"][kBkg] , SFTop2-1.);
-    histo_["topPtProb2"][kAllMC]->Add(histo_["topPtProb2"][kBkg] , SFTop3-1.);
-    double neventsMCscaled1=histo_["topPt"     ][kAllMC]->Integral(0,binMax);
-    double neventsMCscaled2=histo_["topPtProb1"][kAllMC]->Integral(0,binMax);
-    double neventsMCscaled3=histo_["topPtProb2"][kAllMC]->Integral(0,binMax);
-    if(verbose>1) std::cout << "data/MC ratio=" <<  neventsData1/neventsMCscaled1 << " / " << neventsData2/neventsMCscaled2 << " / " << neventsData3/neventsMCscaled3 << ")" << std::endl;
+    std::vector<double>neventsTop_, SFTop_;
+    for(int plot=0; plot<(int)Val_.size(); ++plot){
+      TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+      neventsTop_.push_back(histo_["topPt"+nameNr][kSig]->Integral(0,binMax)+histo_["topPt"+nameNr][kBkg]->Integral(0,binMax));
+      SFTop_.push_back((neventsTop_[plot]+(neventsData_[plot]-neventsMC_[plot]))/neventsTop_[plot]);
+    }
+    // scale combined and top MC plots
+    for(int plot=0; plot<(int)Val_.size(); ++plot){
+      TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+      histo_["topPt"+nameNr][kAllMC]->Add((TH1F*)(histo_["topPt"+nameNr][kSig]->Clone()) , -1.);
+      histo_["topPt"+nameNr][kAllMC]->Add((TH1F*)(histo_["topPt"+nameNr][kBkg]->Clone()) , -1.);
+      histo_["topPt"+nameNr][kSig]->Scale(SFTop_[plot]);
+      histo_["topPt"+nameNr][kBkg]->Scale(SFTop_[plot]);
+      histo_["topPt"+nameNr][kAllMC]->Add((TH1F*)(histo_["topPt"+nameNr][kSig]->Clone()) );
+      histo_["topPt"+nameNr][kAllMC]->Add((TH1F*)(histo_["topPt"+nameNr][kBkg]->Clone()) );
+    }
+    // printout
+    std::vector<double>neventsMCscaled_;
+    for(int plot=0; plot<(int)Val_.size(); ++plot){
+      TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+      neventsMCscaled_.push_back(histo_["topPt"+nameNr][kAllMC]->Integral(0,binMax));
+    }
+    if(verbose>1){
+      std::cout << "#events(scaledMC)=";
+      for(int plot=0; plot<(int)Val_.size(); ++plot){
+	std::cout << neventsMCscaled_[plot];
+        if(plot<(int)Val_.size()-1) std::cout << " / ";
+      }
+      std::cout << std::endl;
+      std::cout << "(data/scaledMC ratio=";
+      for(int plot=0; plot<(int)Val_.size(); ++plot){
+	std::cout <<  neventsData_[plot]/neventsMCscaled_[plot];
+	if(plot<(int)Val_.size()-1) std::cout << " / ";
+      }
+      std::cout << ")" << std::endl;
+    }
   };
 
+  // create MC histo stack plots
+  // loop samples
+  if(verbose>0) std::cout << "creating MC stack histos" << std::endl;
+  int lastSample=-1;
+  for(int sample=(int)kSAToptW; sample>=(int)kSig; --sample){
+    if(sample!=kData&&isValidsample(sample, systematicVariation)){
+      if(lastSample>(int)kSig){
+	if(verbose>1) std::cout << "adding " << sampleLabel(lastSample, decayChannel) << " to " <<  sampleLabel(sample, decayChannel) << std::endl;
+	for(int plot=0; plot<(int)Val_.size(); ++plot){
+	  TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+	  histo_["topPt"+nameNr][sample]->Add((TH1F*)histo_["topPt"+nameNr][lastSample]->Clone());
+	}
+      }
+      lastSample=sample;
+    }
+  }
+
+  // printout
+  std::vector<double>neventsMCstack_;
+  for(int plot=0; plot<(int)Val_.size(); ++plot){
+    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+    neventsMCstack_.push_back(histo_["topPt"+nameNr][kAllMC]->Integral(0,binMax));
+  }
+  if(verbose>1){
+    std::cout << "#events(stack MC) =";
+    for(int plot=0; plot<(int)Val_.size(); ++plot){
+      std::cout << neventsMCstack_[plot];
+      if(plot<(int)Val_.size()-1) std::cout << " / ";
+    }
+    std::cout << std::endl;
+  }
+
   // all MC histogram style
-  histo_["topPt"     ][kAllMC]->SetLineColor(kBlue);
-  histo_["topPt"     ][kAllMC]->SetMarkerColor(kBlue);
-  histo_["topPt"     ][kAllMC]->SetLineStyle(1);
-  histo_["topPtProb1"][kAllMC]->SetLineColor(kBlue);
-  histo_["topPtProb1"][kAllMC]->SetMarkerColor(kBlue);
-  histo_["topPtProb1"][kAllMC]->SetLineStyle(1);
-  histo_["topPtProb2"][kAllMC]->SetLineColor(kBlue);
-  histo_["topPtProb2"][kAllMC]->SetMarkerColor(kBlue);
-  histo_["topPtProb2"][kAllMC]->SetLineStyle(1);
+  for(int plot=0; plot<(int)Val_.size(); ++plot){
+    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+    histo_["topPt"+nameNr][kAllMC]->SetLineColor(kBlue);
+    histo_["topPt"+nameNr][kAllMC]->SetMarkerColor(kBlue);
+    histo_["topPt"+nameNr][kAllMC]->SetLineStyle(1);
+  }
   
   std::vector<double> zeroerr_;
   for(int bin=0; bin<histo_["topPt"][kAllMC]->GetNbinsX(); ++bin) zeroerr_.push_back(0);
 
   // normalization
-  // -> not done at the moment
+  // -> not done at the moment, scaled wrt Ndata for each plot separately
 
   //  Create canvas
   if(verbose>0)  std::cout << "creating canvas" << std::endl;
   std::vector<TCanvas*> plotCanvas_;
-  for(unsigned int sample=0; sample<3; sample++){
+  for(unsigned int sample=0; sample<Val_.size(); sample++){
     addCanvas(plotCanvas_);
   }
 
-  // create legend
+  // create legends
   if(verbose>0)  std::cout << "creating legend" << std::endl;
-  TLegend *leg= new TLegend(0.73, 0.69, 0.91, 0.88);
+  std::vector< TLegend* > leg_;
+  TLegend *leg= new TLegend(0.73, 0.5, 0.91, 0.88);
   legendStyle(*leg,"");
-  TLegend *leg2=(TLegend*)leg->Clone(); 
-  TLegend *leg3=(TLegend*)leg->Clone(); 
-  leg ->SetHeader("KinFit, all");
-  leg2->SetHeader("prob>0.02");
-  leg3->SetHeader("prob>0.20");
-  leg ->AddEntry(histo_["topPt"     ][kData ], "data"   , "LP");
-  leg ->AddEntry(histo_["topPt"     ][kAllMC], "all MC" , "L");
-  leg2->AddEntry(histo_["topPtProb1"][kData ], "data"   , "LP");
-  leg2->AddEntry(histo_["topPtProb1"][kAllMC], "all MC" , "L");
-  leg3->AddEntry(histo_["topPtProb2"][kData ], "data"   , "LP");
-  leg3->AddEntry(histo_["topPtProb2"][kAllMC], "all MC" , "L");
+  for(int plot=0; plot<(int)Val_.size(); ++plot){
+    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);    
+    TString sVallow = plot==0 ? "" : getTStringFromDouble(Val_[plot-1], getRelevantDigits(Val_[plot-1]));
+    TString sValhigh= plot==0 ? "" : getTStringFromDouble(Val_[plot  ], getRelevantDigits(Val_[plot ]));
+    TString legHeader= plot==0 ? "KinFit, all" : sVallow+"#leq"+testQuantity+"<"+sValhigh;
+    TLegend *templeg=(TLegend*)leg->Clone(); 
+    templeg ->SetHeader(legHeader);
+    templeg ->AddEntry(histo_["topPt"+nameNr][kData ], "data"   , "LP");
+    //templeg ->AddEntry(histo_["topPt"+nameNr][kAllMC], "all MC" , "L" );
+    for(unsigned int sample=kSig; sample<kData; sample++){
+      unsigned int sampleAlt=sample;
+      if(sample==kSTop) sampleAlt=kSTops;
+      if(sample!=kQCD) templeg ->AddEntry(histo_["topPt"+nameNr][sampleAlt], sampleLabel(sample, decayChannel), "F" );
+    }
+    leg_.push_back((TLegend*)(templeg->Clone()));
+  }
 
   int canvasNumber=0;
-  // KinFit
+  // do the plotting 
   if(verbose>0)  std::cout << "plotting " << std::endl;
-  plotCanvas_[canvasNumber]->cd(0);
-  plotCanvas_[canvasNumber]->SetTitle("topPtKinFit");
-  // drawing
-  // axis
-  //temp->Draw("axis");
-  // plots
-  histo_["topPt"][kData ]->SetMaximum(1.2*histo_["topPt"][kData ]->GetMaximum());
-  histo_["topPt"][kData ]->GetXaxis()->SetNoExponent(true);
-  histo_["topPt"][kData ]->GetYaxis()->SetNoExponent(true);
-  histo_["topPt"][kData ]->Draw("axis");
-  histo_["topPt"][kAllMC]->Draw("hist same");
-  histo_["topPt"][kData ]->Draw("ep same");
-  // legend
-  leg->Draw("same");
-  // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
-  if      (decayChannel=="muon"    ) DrawDecayChLabel("#mu + Jets");
-  else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
-  else                               DrawDecayChLabel("e/#mu + Jets Combined");  
-  DrawCMSLabels(true,luminosity);
-  // draw ratio
-  if(withRatioPlot){
-    std::vector<double> err_;
-    for(int bin=1; bin<histo_["topPt"][kAllMC]->GetNbinsX(); ++bin){
-      double val=histo_["topPt"][kData]->GetBinContent(bin)/histo_["topPt"][kAllMC]->GetBinContent(bin)*histo_["topPt"][kData]->GetBinError(bin)/histo_["topPt"][kData]->GetBinContent(bin);    
-      if(val<0||val>histo_["topPt"][kData]->GetBinContent(bin)) val=1.;
-      err_.push_back(val);
+  for(int plot=0; plot<(int)Val_.size(); ++plot){
+    TString nameNr= plot==0 ? "" : "Prob"+getTStringFromInt(plot);
+    TString title = plot==0 ? "topPtKinFit" : "topPt"+testQuantity+getTStringFromInt(plot);
+    plotCanvas_[canvasNumber]->cd(0);
+    plotCanvas_[canvasNumber]->SetTitle(title);
+    // drawing
+    // plots
+    histo_["topPt"+nameNr][kData ]->SetMaximum(1.2*histo_["topPt"+nameNr][kData ]->GetMaximum());
+    histo_["topPt"+nameNr][kData ]->GetXaxis()->SetNoExponent(true);
+    histo_["topPt"+nameNr][kData ]->GetYaxis()->SetNoExponent(true);
+    histo_["topPt"+nameNr][kData ]->Draw("axis");
+    // loop samples
+    for(unsigned int sample=kSig; sample<=kSAToptW; ++sample){
+      // check if sample is relevant
+      if(sample!=kData&&isValidsample(sample, systematicVariation)){
+	histo_["topPt"+nameNr][sample]->Draw("hist same");
+      }
     }
-    int rval1 = drawRatio(histo_["topPt"][kData], histo_["topPt"][kAllMC], 0.7, 1.3, myStyle, verbose, err_, "N(data)", "N(MC)", "p e", kBlack, true, 1.2);
-    if (rval1!=0) std::cout << " Problem occured when creating ratio plot for " << "KinFit" << std::endl;
-  }
-  canvasNumber++;
-
-  // prob>0.02
-  plotCanvas_[canvasNumber]->cd(0);
-  plotCanvas_[canvasNumber]->SetTitle("topPtProb01");
-  // drawing
-  // axis
-  temp->Draw("axis");
-  // plots
-  histo_["topPtProb1"][kData ]->SetMaximum(1.2*histo_["topPtProb1"][kData ]->GetMaximum());
-  histo_["topPtProb1"][kData ]->GetXaxis()->SetNoExponent(true);
-  histo_["topPtProb1"][kData ]->GetYaxis()->SetNoExponent(true);
-  histo_["topPtProb1"][kData ]->Draw("axis");
-  histo_["topPtProb1"][kAllMC]->Draw("hist same");
-  histo_["topPtProb1"][kData ]->Draw("ep same");
-  // legend
-  leg2->Draw("same");
-  // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
-  if      (decayChannel=="muon"    ) DrawDecayChLabel("#mu + Jets");
-  else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
-  else                               DrawDecayChLabel("e/#mu + Jets Combined");  
-  DrawCMSLabels(true,luminosity);
-  // draw ratio
-  if(withRatioPlot){
-    std::vector<double> err_;
-    for(int bin=1; bin<histo_["topPtProb1"][kAllMC]->GetNbinsX(); ++bin){
-      double val=histo_["topPtProb1"][kData]->GetBinContent(bin)/histo_["topPtProb1"][kAllMC]->GetBinContent(bin)*histo_["topPtProb1"][kData]->GetBinError(bin)/histo_["topPtProb1"][kData]->GetBinContent(bin);    
-      if(val<0||val>histo_["topPtProb1"][kData]->GetBinContent(bin)) val=1.;
-      err_.push_back(val);
+    //histo_["topPt"+nameNr][kAllMC]->Draw("hist same");
+    histo_["topPt"+nameNr][kData ]->Draw("ep same");
+    // legend
+    leg_[plot]->Draw("same");
+    // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
+    if      (decayChannel=="muon"    ) DrawDecayChLabel("#mu + Jets");
+    else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
+    else                               DrawDecayChLabel("e/#mu + Jets Combined");  
+    DrawCMSLabels(true,luminosity);
+    // draw ratio
+    if(withRatioPlot){
+      std::vector<double> err_;
+      for(int bin=1; bin<histo_["topPt"+nameNr][kSig]->GetNbinsX(); ++bin){
+	double val=histo_["topPt"+nameNr][kData]->GetBinContent(bin)/histo_["topPt"+nameNr][kSig]->GetBinContent(bin)*histo_["topPt"+nameNr][kData]->GetBinError(bin)/histo_["topPt"+nameNr][kData]->GetBinContent(bin);    
+	if(val<0||val>histo_["topPt"+nameNr][kData]->GetBinContent(bin)) val=1.;
+	err_.push_back(val);
+      }
+      int rval1 = drawRatio(histo_["topPt"+nameNr][kData], histo_["topPt"+nameNr][kSig], 0.7, 1.3, myStyle, verbose, err_, "N(data)", "N(MC)", "p e", kBlack, true, 0.5);
+      if (rval1!=0) std::cout << " Problem occured when creating ratio plot for " << nameNr << std::endl;
     }
-    int rval1 = drawRatio(histo_["topPtProb1"][kData], histo_["topPtProb1"][kAllMC], 0.7, 1.3, myStyle, verbose, err_, "N(data)", "N(MC)", "p e", kBlack, true, 1.2);
-    if (rval1!=0) std::cout << " Problem occured when creating ratio plot for " << "KinFit" << std::endl;
+    canvasNumber++;
   }
-  canvasNumber++;
-
-  // prob>0.20
-  plotCanvas_[canvasNumber]->cd(0);
-  plotCanvas_[canvasNumber]->SetTitle("topPtProb02");
-  // drawing
-  // axis
-  temp->Draw("axis");
-  // plots
-  histo_["topPtProb2"][kData ]->SetMaximum(1.2*histo_["topPtProb2"][kData ]->GetMaximum());
-  histo_["topPtProb2"][kData ]->GetXaxis()->SetNoExponent(true);
-  histo_["topPtProb2"][kData ]->GetYaxis()->SetNoExponent(true);
-  histo_["topPtProb2"][kData ]->Draw("axis");
-  histo_["topPtProb2"][kAllMC]->Draw("hist same");
-  histo_["topPtProb2"][kData ]->Draw("ep same");
-  // legend
-  leg3->Draw("same");
-  // add labels for decay channel, luminosity, energy and CMS preliminary (if applicable)
-  if      (decayChannel=="muon"    ) DrawDecayChLabel("#mu + Jets");
-  else if (decayChannel=="electron") DrawDecayChLabel("e + Jets");
-  else                               DrawDecayChLabel("e/#mu + Jets Combined");  
-  DrawCMSLabels(true,luminosity);
-  // draw ratio
-  if(withRatioPlot){
-    std::vector<double> err_;
-    for(int bin=1; bin<histo_["topPtProb2"][kAllMC]->GetNbinsX(); ++bin){
-      double val=histo_["topPtProb2"][kData]->GetBinContent(bin)/histo_["topPtProb2"][kAllMC]->GetBinContent(bin)*histo_["topPtProb2"][kData]->GetBinError(bin)/histo_["topPtProb2"][kData]->GetBinContent(bin);    
-      if(val<0||val>histo_["topPtProb2"][kData]->GetBinContent(bin)) val=1.;
-      err_.push_back(val);
-    }
-    int rval1 = drawRatio(histo_["topPtProb2"][kData], histo_["topPtProb2"][kAllMC], 0.7, 1.3, myStyle, verbose, err_, "N(data)", "N(MC)", "p e", kBlack, true, 1.2);
-    if (rval1!=0) std::cout << " Problem occured when creating ratio plot for " << "KinFit" << std::endl;
-  }
-  canvasNumber++;
-
+  
+  // saving
   if(verbose>0) std::cout << "do saving" << std::endl;
   if(save){
     // eps and png
     if(verbose==0) gErrorIgnoreLevel=kWarning;
-    saveCanvas(plotCanvas_, "./", "topPtProbabilityTest", true, true, true);
+    saveCanvas(plotCanvas_, "./", "topPtTest"+testQuantity, true, true, true);
   }
 }
 
