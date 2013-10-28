@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 ## ---
-##   use this file to test the GenLevelBJetAnalyzer.cc module
+##   use this file to test the GenHFHadronAnalyzer.cc module
 ## ---
 
 
@@ -11,7 +11,7 @@ process = cms.Process("Analyzer")
 ## configure message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## define input
 process.source = cms.Source("PoolSource",
@@ -37,7 +37,7 @@ process.source = cms.Source("PoolSource",
 
 ## define maximal number of events to loop over
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 ## configure process options
@@ -47,7 +47,7 @@ process.options = cms.untracked.PSet(
 
 ## register TFileService
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('analyzeGenLevelBJetPlusHadronAnalyzer_test.root')
+    fileName = cms.string('analyzeGenHFHadronJetsAnalyzer_test.root')
 )
 
 ## ---
@@ -60,16 +60,14 @@ process.load("TopQuarkAnalysis.TopEventProducers.sequences.ttGenEvent_cff")
 # get genJets with hadrons in it
 process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
 
-# supply PDG ID to real name resolution of MC particles, necessary for GenLevelBJetAnalyzer
+# supply PDG ID to real name resolution of MC particles, necessary for GenHFHadronAnalyzer
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
 ## get particle content of sample with IDs
-process.load("TopAnalysis.TopAnalyzer.GenLevelBJetAnalyzer_cfi")
-process.analyzeGenLevelBJetPlusHadron = process.analyzeGenLevelBJetPlusHadron.clone()
+process.load("TopAnalysis.TopAnalyzer.GenHFHadronAnalyzer_cff")
+process.analyzeGenHFHadronJets = process.analyzeGenHFHadronJets.clone()
 
-process.analyzeGenLevelBJetPlusHadron.deltaR = 5.0
-process.analyzeGenLevelBJetPlusHadron.noBBbarResonances = True
-process.analyzeGenLevelBJetPlusHadron.doImprovedHadronMatching = True
+process.analyzeGenHFHadronJets.noBBbarResonances = True
 
 
 ## ---
@@ -80,5 +78,5 @@ process.p1 = cms.Path(
     ## apply the analyzer
     process.makeGenEvt *
     process.improvedJetHadronQuarkMatchingSequence *
-    process.analyzeGenLevelBJetPlusHadron
+    process.analyzeGenHFHadronJets
     )
