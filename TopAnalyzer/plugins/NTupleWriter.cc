@@ -180,7 +180,7 @@ private:
     std::vector<int>             VgenBHadPlusMothersPdg, VgenBHadPlusMothersStatus;
     std::vector<std::vector<int> >  VgenBHadPlusMothersIndices;
     std::vector<int>             VgenBHadIndex, VgenBHadFlavour, VgenBHadJetIndex;
-    
+
     // True level info from Zs and their decays
     std::vector<LV> VGenZ;
     std::vector<LV> VGenZMeDaughterParticle;
@@ -188,7 +188,7 @@ private:
     std::vector<LV> VGenZStableLepton;
     std::vector<LV> VGenZStableAntiLepton;
     std::vector<int> VGenZDecayMode;
-    
+
     //Complete true level info
     std::vector<LV> GenParticleP4;
     std::vector<int> GenParticlePdgId;
@@ -206,8 +206,8 @@ private:
     std::vector<LV> HypWMinus;
     std::vector<int> HypJet0index;
     std::vector<int> HypJet1index;
-    
-    
+
+
     int TopProductionMode;
     int TopDecayMode;
     int HiggsDecayMode;
@@ -545,7 +545,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
             if (genEvt->fromGluonFusion()) TopProductionMode = 0;
 	    else if (genEvt->fromQuarkAnnihilation()) TopProductionMode = 1;
 	    else TopProductionMode = 2;
-	    
+
             GenTop = genEvt->top()->polarP4();
             GenAntiTop = genEvt->topBar()->polarP4();
             //for Higgs analysis, also non-leptonic modes might be written
@@ -659,8 +659,9 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
                     }       // End of loop over all particles
                 }   else {      // If only hadrons have to be stored
                     for (unsigned int i=0; i<genBHadIndex->size(); ++i) {
-                        VgenBHadPlusMothers.push_back(genBHadPlusMothers->at(VgenBHadIndex[i]).polarP4());
-                        VgenBHadIndex[i]=i;
+                        VgenBHadPlusMothers.push_back(genBHadPlusMothers->at(VgenBHadIndex.at(i)).polarP4());
+                        VgenBHadPlusMothersPdg.push_back(genBHadPlusMothers->at(VgenBHadIndex.at(i)).pdgId());
+                        VgenBHadIndex.at(i)=i;
                     }       // End of loop over hadrons
                 }
             }       // If genBHadPlusMothers is not empty
@@ -734,7 +735,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         iEvent.getByLabel(higgsDecayMode_, HiggsDecayModeHandle);
         HiggsDecayMode = HiggsDecayModeHandle.failedToGet() ? 0 : *HiggsDecayModeHandle;
     }
-    
+
     if(isZSample_){
         //Generator info
         edm::Handle<std::vector<GenZDecayProperties> > v_genZDecayProperties;
@@ -1202,8 +1203,8 @@ NTupleWriter::beginJob()
         Ntuple->Branch("AntiBHadronVsJet", &VAntiBHadVsJet);
 
         Ntuple->Branch("genBHadPlusMothers", &VgenBHadPlusMothers);
+        Ntuple->Branch("genBHadPlusMothersPdgId", &VgenBHadPlusMothersPdg);
         if(saveHadronMothers) {
-            Ntuple->Branch("genBHadPlusMothersPdgId", &VgenBHadPlusMothersPdg);
             Ntuple->Branch("genBHadPlusMothersStatus", &VgenBHadPlusMothersStatus);
             Ntuple->Branch("genBHadPlusMothersIndices", &VgenBHadPlusMothersIndices);
         }
@@ -1213,7 +1214,7 @@ NTupleWriter::beginJob()
 
         Ntuple->Branch("jetAssociatedParton", &VjetAssociatedParton);
     }
-    
+
     //Gen Info for Higgs and b quarks of decay
     if (isHiggsSample_) {
         Ntuple->Branch("GenH", &GenH);
@@ -1221,7 +1222,7 @@ NTupleWriter::beginJob()
         Ntuple->Branch("GenAntiBFromH", &GenAntiBFromH);
         Ntuple->Branch("HiggsDecayMode", &HiggsDecayMode, "HiggsDecayMode/I");
     }
-    
+
     // Gen Info for Zs and decay products
     if(isZSample_){
         Ntuple->Branch("GenZ", &VGenZ);
@@ -1231,7 +1232,7 @@ NTupleWriter::beginJob()
         Ntuple->Branch("GenZStableAntiLepton", &VGenZStableAntiLepton);
         Ntuple->Branch("GenZDecayMode", &VGenZDecayMode);
     }
-    
+
     //Hypothesis Info
     Ntuple->Branch("HypTop", &HypTop);
     Ntuple->Branch("HypAntiTop", &HypAntiTop);
@@ -1338,17 +1339,17 @@ void NTupleWriter::clearVariables()
     HypAntiB.clear();
     HypWPlus.clear();
     HypWMinus.clear();
-    
+
     HypJet0index.clear();
     HypJet1index.clear();
-    
+
     VGenZ.clear();
     VGenZMeDaughterParticle.clear();
     VGenZMeDaughterAntiParticle.clear();
     VGenZStableLepton.clear();
     VGenZStableAntiLepton.clear();
     VGenZDecayMode.clear();
-    
+
     ZDecayMode.clear();
     TopDecayMode = 0;
     HiggsDecayMode = 0;

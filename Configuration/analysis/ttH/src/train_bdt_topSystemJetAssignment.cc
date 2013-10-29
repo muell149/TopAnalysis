@@ -16,6 +16,7 @@
 #include "MvaFactory.h"
 #include "MvaTreeHandler.h"
 #include "MvaTreeAnalyzer.h"
+#include "MvaWeightsAnalyzer.h"
 #include "mvaSetup.h"
 #include "higgsUtils.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
@@ -45,6 +46,8 @@ constexpr const char* FileListBASE = "FileLists_mva/HistoFileList_";
 /// The output file name for the control and separation power plots
 constexpr const char* PlotOutputFILE = "plots.root";
 
+/// The output file name for the MVA weights histograms (1D and 2D)
+constexpr const char* WeightsOutputFILE = "weights.root";
 
 
 
@@ -83,26 +86,48 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
         const Systematic::Systematic& systematic = systematicChannelMergedFiles.first;
         for(const auto& channelMergedFiles : systematicChannelMergedFiles.second){
             const Channel::Channel& channel = channelMergedFiles.first;
+            const TString outputFolder = ttbar::assignFolder(MvaOutputDIR, channel, systematic);
             const TString& fileName = channelMergedFiles.second.at(0);
             
             // Print all separation power plots
             if(std::find(v_mode.begin(), v_mode.end(), "cp") != v_mode.end()){
-                TString outputPlots = ttbar::assignFolder(MvaOutputDIR, channel, systematic);
-                outputPlots.Append(PlotOutputFILE);
+                TString outputFile = outputFolder;
+                outputFile.Append(PlotOutputFILE);
                 MvaTreeHandler mvaTreeHandler("", {});
                 mvaTreeHandler.importTrees(fileName.Data(), "training");
                 MvaTreeAnalyzer mvaTreeAnalyzer(mvaTreeHandler.stepMvaVariablesMap(), true);
-                mvaTreeAnalyzer.plotVariables(outputPlots.Data());
+                mvaTreeAnalyzer.plotVariables(outputFile.Data());
             }
             
             // Run the MVA training
             if(std::find(v_mode.begin(), v_mode.end(), "mva") != v_mode.end()){
-                TFile* mergedTrees = TFile::Open(fileName);
-                const TString folder = ttbar::assignFolder(MvaOutputDIR, channel, systematic);
-                MvaFactory mvaFactory(folder, MvaWeightFileDIR,
-                                      v_nameStepPair, mergedTrees);
-                mvaFactory.train(mvaSetups::v_mvaSetCorrect, mvaSetups::v_mvaSetSwapped, channel);
-                mergedTrees->Close();
+                
+                // Clean the MVA sets in case they are not selected for training
+                const std::vector<MvaFactory::MvaSet> v_cleanSetCorrect =
+                        MvaFactory::cleanSets(mvaSetups::v_mvaSetCorrect, v_nameStepPair, channel);
+                const std::vector<MvaFactory::MvaSet> v_cleanSetSwapped =
+                        MvaFactory::cleanSets(mvaSetups::v_mvaSetSwapped, v_nameStepPair, channel);
+                
+                TFile* mergedTreesFile = TFile::Open(fileName);
+                MvaFactory mvaFactory(outputFolder, MvaWeightFileDIR,
+                                      v_nameStepPair, mergedTreesFile);
+                mvaFactory.train(v_cleanSetCorrect, v_cleanSetSwapped);
+                mergedTreesFile->Close();
+                
+                // Build 2D histograms of MVA weights for correct and swapped combinations
+                TString outputFile = outputFolder;
+                outputFile.Append("weights2d/");
+                gSystem->MakeDirectory(outputFile.Data());
+                outputFile.Append(WeightsOutputFILE);
+                MvaTreeHandler mvaTreeHandler("", {});
+                mvaTreeHandler.importTrees(fileName.Data(), "training");
+                TString weightsFolder(outputFolder);
+                weightsFolder.Append(MvaWeightFileDIR).Append("/");
+                MvaWeightsAnalyzer mvaWeightsAnalyzer(mvaTreeHandler.stepMvaVariablesMap(),
+                                                      weightsFolder.Data(),
+                                                      v_cleanSetCorrect, v_cleanSetSwapped,
+                                                      true);
+                mvaWeightsAnalyzer.plotVariables(outputFile.Data());
             }
         }
     }

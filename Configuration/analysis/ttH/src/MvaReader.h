@@ -4,6 +4,7 @@
 #include <vector>
 
 class TString;
+class TH2;
 namespace TMVA{
     class Reader;
 }
@@ -38,6 +39,13 @@ public:
     
     /// Get the MVA weights for all jet pairs from weights file
     std::vector<float> mvaWeights(const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables);
+    
+    
+    
+    /// Get the combined 1D weight from two MVA weights, and the 2D histogram of these weights from training
+    static std::vector<float> combinedWeight(const TH2* weights2d,
+                                             const std::vector<float>& weightCorrect,
+                                             const std::vector<float>& weightSwapped);
     
     
     

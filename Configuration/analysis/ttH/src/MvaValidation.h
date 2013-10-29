@@ -6,6 +6,7 @@
 
 class TString;
 class TH1;
+class TH2D;
 
 #include "AnalysisHistograms.h"
 
@@ -33,6 +34,7 @@ public:
     
     /// Constructor
     MvaValidation(const char* weightsCorrectFile, const char* weightsSwappedFile,
+                  const char* mva2dWeightsDir, const char* mva2dWeightsHisto,
                   const std::vector<TString>& selectionStepsNoCategories,
                   const std::vector<TString>& stepsForCategories =std::vector<TString>(),
                   const JetCategories* jetCategories =0);
@@ -61,7 +63,7 @@ private:
                             const TString& name, const TString& title,
                             const int& nBinX, const double& xMin, const double& xMax);
     
-    /// Book 1-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
+    /// Book 2-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
     void bookHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, const TString& prefix, const TString& step,
                               const TString& name, const TString& title,
                               const int& nBinX, const double& xMin, const double& xMax,
@@ -72,16 +74,22 @@ private:
                             const float& variable,
                             const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight =1.);
     
-    /// Fill 1-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
+    /// Fill 2-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
     void fillHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, const TString& name,
                               const float& variable1, const float& variable2,
                               const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight =1.);
+    
+    
     
     /// MVA weights of correct dijet assignment for top system
     MvaReader* weightsCorrect_;
     
     /// MVA weights of swapped dijet assignment for top system
     MvaReader* weightsSwapped_;
+    
+    
+    
+    TH2D* weights2d_;
 };
 
 

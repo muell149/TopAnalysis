@@ -31,6 +31,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   MeanSol
   MvaTreeHandler
   MvaTreeAnalyzer
+  MvaWeightsAnalyzer
   MvaReader
   MvaFactory
   MvaValidation

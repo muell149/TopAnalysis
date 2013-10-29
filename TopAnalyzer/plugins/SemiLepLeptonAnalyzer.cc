@@ -111,13 +111,13 @@ SemiLepLeptonAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& s
   //edm::Handle<std::vector<reco::GenParticle> > genLeptons;
   //if(genPlots_) event.getByLabel(genLeptons_, genLeptons);
   const reco::GenParticle* zeroL=0;
-  const reco::GenParticle* genLepton = genPlots_ ? &genLeptons->at(0) : zeroL;
+  const reco::GenParticle* genLepton = genPlots_&&inVisPS ? &genLeptons->at(0) : zeroL;
 
   // fill gen histograms
   valueLepPtGen =-1000;
   valueLepEtaGen=-1000;
   valueLepYGen  =-1000;
-  if(genLepton&&inVisPS){
+  if(genLepton){
     valueLepPtGen =genLepton->pt();
     valueLepEtaGen=genLepton->eta();
     valueLepYGen  =genLepton->rapidity();

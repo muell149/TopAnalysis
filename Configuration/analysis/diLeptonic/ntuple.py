@@ -329,7 +329,8 @@ metCollection = "scaledJetEnergy:patMETs"
 
 genJetCollection = "ak5GenJetsPlusHadron"
 
-genLevelBJetProducerInput = "produceGenLevelBJetsPlusHadron"
+genLevelBJetProducerInput = "produceGenLevelBJets"
+genHFHadronMatcherInput = "matchGenHFHadronJets"
 
 #-------------------------------------------------
 # modules
@@ -481,11 +482,11 @@ process.writeNTuple = writeNTuple.clone(
     AntiBHadronFromTopB = cms.InputTag(genLevelBJetProducerInput, "AntiBHadronFromTopB"),
     BHadronVsJet = cms.InputTag(genLevelBJetProducerInput, "BHadronVsJet"),
     AntiBHadronVsJet = cms.InputTag(genLevelBJetProducerInput, "AntiBHadronVsJet"),
-    genBHadPlusMothers = cms.InputTag(genLevelBJetProducerInput,"genBHadPlusMothers"),
-    genBHadPlusMothersIndices = cms.InputTag(genLevelBJetProducerInput,"genBHadPlusMothersIndices"),
-    genBHadIndex = cms.InputTag(genLevelBJetProducerInput,"genBHadIndex"),
-    genBHadFlavour = cms.InputTag(genLevelBJetProducerInput,"genBHadFlavour"),
-    genBHadJetIndex = cms.InputTag(genLevelBJetProducerInput,"genBHadJetIndex"),
+    genBHadPlusMothers = cms.InputTag(genHFHadronMatcherInput,"genBHadPlusMothers"),
+    genBHadPlusMothersIndices = cms.InputTag(genHFHadronMatcherInput,"genBHadPlusMothersIndices"),
+    genBHadIndex = cms.InputTag(genHFHadronMatcherInput,"genBHadIndex"),
+    genBHadFlavour = cms.InputTag(genHFHadronMatcherInput,"genBHadFlavour"),
+    genBHadJetIndex = cms.InputTag(genHFHadronMatcherInput,"genBHadJetIndex"),
 )
 
 process.writeNTuple.jetsForMET    = cms.InputTag("scaledJetEnergy:selectedPatJets")
@@ -596,10 +597,13 @@ if topfilter:
     #process.load("TopAnalysis.TopUtils.HadronLevelBJetProducer_cfi")
 
     process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi") # supplies PDG ID to real name resolution of MC particles, necessary for GenLevelBJetProducer
-    process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cff")
-    process.produceGenLevelBJetsPlusHadron.deltaR = 5.0
-    process.produceGenLevelBJetsPlusHadron.noBBbarResonances = True
-    process.produceGenLevelBJetsPlusHadron.doImprovedHadronMatching = True
+    process.load("TopAnalysis.TopUtils.GenLevelBJetProducer_cfi")
+    process.produceGenLevelBJets.deltaR = 5.0
+    process.produceGenLevelBJets.noBBbarResonances = True
+
+    process.load("TopAnalysis.TopUtils.GenHFHadronMatcher_cff")
+    process.matchGenHFHadronJets.flavour = 5
+    process.matchGenHFHadronJets.noBBbarResonances = True
 
     process.load("TopAnalysis.TopUtils.sequences.improvedJetHadronQuarkMatching_cff")
 
@@ -609,7 +613,8 @@ if topfilter:
             process.makeGenEvt *
             process.improvedJetHadronQuarkMatchingSequence *
             process.generatorTopFilter *
-            process.produceGenLevelBJetsPlusHadron)
+            process.produceGenLevelBJets *
+            process.matchGenHFHadronJets)
     else:
         process.topsequence = cms.Sequence(
             process.makeGenEvt *
