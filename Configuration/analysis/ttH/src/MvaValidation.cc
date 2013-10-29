@@ -17,7 +17,7 @@
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/classes.h"
-
+#include "../../diLeptonic/src/RootFileReader.h"
 
 
 
@@ -28,16 +28,30 @@
 
 
 MvaValidation::MvaValidation(const char* weightsCorrectFile, const char* weightsSwappedFile,
+                             const char* mva2dWeightsDir, const char* mva2dWeightsHisto,
                              const std::vector<TString>& selectionStepsNoCategories,
                              const std::vector<TString>& stepsForCategories,
                              const JetCategories* jetCategories):
 AnalysisHistogramsBase("mvaA_", selectionStepsNoCategories, stepsForCategories, jetCategories),
 weightsCorrect_(0),
-weightsSwapped_(0)
+weightsSwapped_(0),
+weights2d_(0)
 {
     std::cout<<"--- Beginning setting up MVA validation\n";
+    
     weightsCorrect_ = new MvaReader(weightsCorrectFile, selectionStepsNoCategories);
     weightsSwapped_ = new MvaReader(weightsSwappedFile, selectionStepsNoCategories);
+    
+    TString weights2dFilename(mva2dWeightsDir);
+    weights2dFilename.Append("/weights.root");
+    TString weights2dHistoname("correctAndSwapped_");
+    weights2dHistoname.Append(mva2dWeightsHisto);
+    //std::cout<<"Names: "<<weights2dFilename<<" , "<<weights2dHistoname<<"\n\n\n";
+    RootFileReader* fileReader(RootFileReader::getInstance());
+    weights2d_ = fileReader->GetClone<TH2D>(weights2dFilename, weights2dHistoname);
+    const double integral = weights2d_->Integral(0, weights2d_->GetNbinsX()+1, 0, weights2d_->GetNbinsY()+1);
+    weights2d_->Scale(1./integral);
+    
     std::cout<<"=== Finishing setting up MVA validation\n\n";
 }
 
@@ -143,6 +157,13 @@ void MvaValidation::bookHistos(const TString& step, std::map<TString, TH1*>& m_h
     
     name = "best_mvaWeightCorrectVsSwapped";
     this->bookHistosInclExcl2D(m_histogram, prefix_, step, name, name+";w_{MVA,1}^{correct};w_{MVA,1}^{swapped}", 40, -1.2, 0.2, 40, -1.2, 0.2);
+    
+    
+    name = "mvaWeightCombined";
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+";w_{MVA}^{combined};# jet pairs", 80, 0., 1.);
+    
+    name = "best_mvaWeightCombined";
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+";w_{MVA,1}^{combined};# events", 80, 0., 1.);
 }
 
 
@@ -163,8 +184,16 @@ void MvaValidation::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
     const std::vector<float> v_mvaWeightsCorrect = weightsCorrect_->mvaWeights(v_mvaTopJetsVariables);
     const std::vector<float> v_mvaWeightsSwapped = weightsSwapped_->mvaWeights(v_mvaTopJetsVariables);
     
+    // Get the combined weight from 2D histogram
+    const std::vector<float> v_mvaWeightsCombined = MvaReader::combinedWeight(weights2d_,
+                                                                              v_mvaWeightsCorrect,
+                                                                              v_mvaWeightsSwapped);
+    
     // Fill all variables and associated MVA weights per event
-    const MvaTopJetsVariablesPerEvent mvaTopJetsVariablesPerEvent(v_mvaTopJetsVariables, v_mvaWeightsCorrect, v_mvaWeightsSwapped);
+    const MvaTopJetsVariablesPerEvent mvaTopJetsVariablesPerEvent(v_mvaTopJetsVariables,
+                                                                  v_mvaWeightsCorrect,
+                                                                  v_mvaWeightsSwapped,
+                                                                  v_mvaWeightsCombined);
     
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;
@@ -298,11 +327,14 @@ void MvaValidation::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
     
     for(size_t index = 0; index<mvaTopJetsVariablesPerEvent.variables().size(); ++index){
         const MvaTopJetsVariables& mvaTopJetsVariables = mvaTopJetsVariablesPerEvent.variables().at(index);
+        
         const float mvaWeightCorrect = mvaTopJetsVariablesPerEvent.mvaWeightsCorrect().at(index);
         const float mvaWeightSwapped = mvaTopJetsVariablesPerEvent.mvaWeightsSwapped().at(index);
+        const float mvaWeightCombined = mvaTopJetsVariablesPerEvent.mvaWeightsCombined().at(index);
         
         const bool isMaxWeightCorrect = index==mvaTopJetsVariablesPerEvent.maxWeightCorrectIndex();
         const bool isMaxWeightSwapped = index==mvaTopJetsVariablesPerEvent.maxWeightSwappedIndex();
+        const bool isMaxWeightCombined = index==mvaTopJetsVariablesPerEvent.maxWeightCombinedIndex();
         
         name = "mvaWeightCorrect";
         this->fillHistosInclExcl(m_histogram, name, mvaWeightCorrect, mvaTopJetsVariables, weight);
@@ -325,6 +357,16 @@ void MvaValidation::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
             const float maxWeightSwapped = mvaTopJetsVariablesPerEvent.maxWeightSwapped();
             this->fillHistosInclExcl2D(m_histogram, name, maxWeightCorrect, maxWeightSwapped, mvaTopJetsVariables, weight);
         }
+/*        
+        Int_t binX = weights2d_->GetXaxis()->FindBin(mvaWeightCorrect);
+        Int_t binY = weights2d_->GetYaxis()->FindBin(mvaWeightSwapped);
+        const double integral2d = weights2d_->Integral(0, binX, 0, binY);
+*/        
+        name = "mvaWeightCombined";
+        this->fillHistosInclExcl(m_histogram, name, mvaWeightCombined, mvaTopJetsVariables, weight);
+        
+        name = "best_mvaWeightCombined";
+        if(isMaxWeightCombined) this->fillHistosInclExcl(m_histogram, name, mvaWeightCombined, mvaTopJetsVariables, weight);
     }
 }
 

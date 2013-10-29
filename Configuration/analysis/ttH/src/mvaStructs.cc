@@ -221,14 +221,17 @@ v_mvaTopJetsVariables_(v_mvaInputVariables)
 
 MvaTopJetsVariablesPerEvent::MvaTopJetsVariablesPerEvent(const std::vector<MvaTopJetsVariables>& v_mvaInputVariables,
                                                          const std::vector<float>& v_mvaWeightCorrect,
-                                                         const std::vector<float>& v_mvaWeightSwapped):
+                                                         const std::vector<float>& v_mvaWeightSwapped,
+                                                         const std::vector<float>& v_mvaWeightCombined):
 v_mvaTopJetsVariables_(v_mvaInputVariables),
 v_mvaWeightCorrect_(v_mvaWeightCorrect),
-v_mvaWeightSwapped_(v_mvaWeightSwapped)
+v_mvaWeightSwapped_(v_mvaWeightSwapped),
+v_mvaWeightCombined_(v_mvaWeightCombined)
 {
-    if(v_mvaInputVariables.size()!=v_mvaWeightCorrect.size() || v_mvaInputVariables.size()!=v_mvaWeightSwapped.size()){
-        std::cerr<<"ERROR in constructor of MvaTopJetsVariablesPerEvent! Vector sizes do not match (variables, correct weights, swapped weights): "
-                 <<v_mvaInputVariables.size()<<" , "<<v_mvaWeightCorrect.size()<<" , "<<v_mvaWeightSwapped.size()<<"\n...break\n"<<std::endl;
+    if(v_mvaInputVariables.size()!=v_mvaWeightCorrect.size() || v_mvaInputVariables.size()!=v_mvaWeightSwapped.size() ||
+       v_mvaInputVariables.size()!=v_mvaWeightCombined.size()){
+        std::cerr<<"ERROR in constructor of MvaTopJetsVariablesPerEvent! Vector sizes do not match (variables, correct weights, swapped weights, combined weights): "
+                 <<v_mvaInputVariables.size()<<" , "<<v_mvaWeightCorrect.size()<<" , "<<v_mvaWeightSwapped.size()<<" , "<<v_mvaWeightCombined.size()<<"\n...break\n"<<std::endl;
         exit(47);
     }
 }
@@ -249,6 +252,13 @@ size_t MvaTopJetsVariablesPerEvent::maxWeightSwappedIndex()const
 
 
 
+size_t MvaTopJetsVariablesPerEvent::maxWeightCombinedIndex()const
+{
+    return ttbar::extremumIndex(v_mvaWeightCombined_);
+}
+
+
+
 float MvaTopJetsVariablesPerEvent::maxWeightCorrect()const
 {
     return v_mvaWeightCorrect_.at(this->maxWeightCorrectIndex());
@@ -259,6 +269,13 @@ float MvaTopJetsVariablesPerEvent::maxWeightCorrect()const
 float MvaTopJetsVariablesPerEvent::maxWeightSwapped()const
 {
     return v_mvaWeightSwapped_.at(this->maxWeightSwappedIndex());
+}
+
+
+
+float MvaTopJetsVariablesPerEvent::maxWeightCombined()const
+{
+    return v_mvaWeightCombined_.at(this->maxWeightCombinedIndex());
 }
 
 
@@ -287,6 +304,13 @@ std::vector<float> MvaTopJetsVariablesPerEvent::mvaWeightsCorrect()const
 std::vector<float> MvaTopJetsVariablesPerEvent::mvaWeightsSwapped()const
 {
     return v_mvaWeightSwapped_;
+}
+
+
+
+std::vector<float> MvaTopJetsVariablesPerEvent::mvaWeightsCombined()const
+{
+    return v_mvaWeightCombined_;
 }
 
 

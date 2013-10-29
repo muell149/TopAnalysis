@@ -188,7 +188,8 @@ public:
     /// Constructor setting up mvaInputVariables together with MVA weights for correct and for swapped combinations
     MvaTopJetsVariablesPerEvent(const std::vector<MvaTopJetsVariables>& v_mvaInputVariables,
                                 const std::vector<float>& v_mvaWeightCorrect,
-                                const std::vector<float>& v_mvaWeightSwapped);
+                                const std::vector<float>& v_mvaWeightSwapped,
+                                const std::vector<float>& v_mvaWeightCombined);
     
     /// Destructor
     ~MvaTopJetsVariablesPerEvent(){}
@@ -201,11 +202,17 @@ public:
     /// Index of dijet combination with maximum swapped MVA weight
     size_t maxWeightSwappedIndex()const;
     
+    /// Index of dijet combination with maximum combined MVA weight
+    size_t maxWeightCombinedIndex()const;
+    
     /// Returns the maximum correct MVA weight per event
     float maxWeightCorrect()const;
     
     /// Returns the maximum swapped MVA weight per event
     float maxWeightSwapped()const;
+    
+    /// Returns the maximum combined MVA weight per event
+    float maxWeightCombined()const;
     
     /// Does the same dijet combination have the maximum correct and the maximum swapped weight per event
     bool isSameMaxCombination()const;
@@ -219,6 +226,9 @@ public:
     /// Get the vector of MVA swapped weights
     std::vector<float> mvaWeightsSwapped()const;
     
+    /// Get the vector of MVA combined weights
+    std::vector<float> mvaWeightsCombined()const;
+    
     
     
 private:
@@ -231,6 +241,9 @@ private:
     
     /// Vector containing swapped MVA weights for all dijet pairs per event
     std::vector<float> v_mvaWeightSwapped_;
+    
+    /// Vector containing combined MVA weights for all dijet pairs per event
+    std::vector<float> v_mvaWeightCombined_;
 };
 
 

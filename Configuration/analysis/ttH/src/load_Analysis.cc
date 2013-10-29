@@ -79,6 +79,10 @@ constexpr const char* MvaWeightsCorrectFILE = "mvaOutput/Nominal/combined/weight
 /// File containing MVA weights for correct combinations of ttbar jets
 constexpr const char* MvaWeightsSwappedFILE = "mvaOutput/Nominal/combined/weights/swapped_step10_c1.weights.xml";
 
+/// Histogram containing the 2D distribution of MVA weights (needs to fit with the two weights also specified here)
+constexpr const char* Mva2dWeightsDIR = "mvaOutput/Nominal/combined/weights2d";
+constexpr const char* Mva2dWeightsHISTO = "c1_c1_step10";
+
 
 
 /// Folder for basic analysis output
@@ -186,7 +190,9 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     MvaValidation* mvaValidation(0);
     const JetCategories jetCategories_mva(4, 4, 1, 3, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
-        mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE, {"10"}, {"10"}, &jetCategories_mva);
+        mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE,
+                                          Mva2dWeightsDIR, Mva2dWeightsHISTO,
+                                          {"10"}, {"10"}, &jetCategories_mva);
         v_analysisHistograms.push_back(mvaValidation);
     }
     
