@@ -24,7 +24,7 @@ options = VarParsing.VarParsing ('standard')
 # create object triggerTag with default value HLT of type singleton and string
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
 # create sample label with default value data
-# for Summer11/Fall11 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), zprime_m500gev_w5000mev, zprime_m750gev_w7500mev
+# for Summer12 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), not yet working: zprime_m500gev_w5000mev, zprime_m750gev_w7500mev
 # for systematic samples see list for each MC sample
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
@@ -258,7 +258,10 @@ process.source = cms.Source("PoolSource",
     #'/store/data/Run2011A/ElectronHad/AOD/PromptReco-v4/000/165/093/2C186C6C-C27F-E011-A1C7-001617E30F58.root'
     #'/store/data/Run2011A/MuHad/AOD/PromptReco-v4/000/165/205/0C569F2A-D382-E011-B122-00304879FBB2.root' 
     #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/FEEE3638-F297-E011-AAF8-00304867BEC0.root'
-    #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/1204EE92-F397-E011-99E8-003048679012.root' 
+    #'/store/mc/Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/1204EE92-F397-E011-99E8-003048679012.root'
+    # '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FCB7FB42-ACE1-E111-B8AB-0025901D4936.root'
+    #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/DA4A7A9F-8DE1-E111-82D9-002481E0D480.root'
+    #'/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/FC5CECAE-8B14-E211-8578-0025B3E0652A.root'
     )
 )
 
@@ -619,6 +622,13 @@ if(not options.sample=="none"):
         process.load(usedSample)
     else:
         raise NameError, "The sample '"+options.sample+"' is not known, no poolsource file loaded!"
+
+
+## TEST a specific file, careful- needs to be commented out again afterwards!!!
+#process.source.fileNames = cms.untracked.vstring(    
+#    ## add your test file here
+#    '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/DA4A7A9F-8DE1-E111-82D9-002481E0D480.root'
+#    )
 
 #process.source.eventsToProcess = cms.untracked.VEventRange('1:1258499') 
 outputFileNamePart=outputFileName
@@ -1758,7 +1768,7 @@ process.eventWeightPUsysUp.WeightName          = "eventWeightPUUp"
 if ("11" in options.mctag):
     process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_73564_2012ABCD22JanReReco_190456-208686_8TeV.root"
+    process.eventWeightPUsysUp.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysUp_72870_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysUp.CreateWeight3DHisto = False
@@ -1770,7 +1780,7 @@ process.eventWeightPUsysDown.WeightName          = "eventWeightPUDown"
 if ("11" in options.mctag):
     process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDown_2011Full.root"
 elif ("12" in options.mctag):
-    process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65236_2012ABCD22JanReReco_190456-208686_8TeV.root"
+    process.eventWeightPUsysDown.DataFile        = "TopAnalysis/TopUtils/data/Data_PUDist_sysDn_65930_2012ABCD22JanReReco_190456-208686_8TeV.root"
 else:
     print "only configured for 2011 and 2012 so far!"
 process.eventWeightPUsysDown.CreateWeight3DHisto = False
