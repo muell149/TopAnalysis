@@ -2,7 +2,7 @@
 
 TH1F* convertToHist(TGraphAsymmErrors* in,  TH1F* templatePlot, double NbinsIn);
 
-void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
+void ATLASCMSCOMPARISON(TString quantity="ttbarMass"){
 
   bool cmssim=true;
 
@@ -295,6 +295,22 @@ void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
   leg1->AddEntry( CMSdata7    , "CMS (TOP-11-013 in ATLAS binning)"   , "FP");
   if(cmssim) leg1->AddEntry( CMSMadGraph7, "CMS MadGraph+Pythia(Z2*)", "LP");
 
+
+  // ---
+  //    privatworklabel
+  // ---
+  TPaveText *privatworklabel = new TPaveText();
+  privatworklabel -> SetX1NDC(gStyle->GetPadLeftMargin());
+  privatworklabel -> SetY1NDC(1.0-gStyle->GetPadTopMargin());
+  privatworklabel -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
+  privatworklabel -> SetY2NDC(1.0);
+  privatworklabel -> SetTextFont(42);
+  privatworklabel -> AddText("private work");
+  privatworklabel->SetFillStyle(0);
+  privatworklabel->SetBorderSize(0);
+  privatworklabel->SetTextSize(0.04);
+  privatworklabel->SetTextAlign(32);
+
   // canvas
   std::vector<TCanvas*> plotCanvas_;
   // a) linear
@@ -307,6 +323,7 @@ void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
   ATLASdata7  ->Draw("p e2 same");
   CMSdata7    ->Draw("p e2 same");
   leg0 ->Draw("same");
+  privatworklabel->Draw("same");
   // b) log scale
   TH1F* dummy2=(TH1F*)dummy->Clone();
   dummy2->SetMinimum(0.00001);
@@ -321,6 +338,7 @@ void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
   CMSdata7    ->Draw("p e2 same");
   ATLASdata7  ->Draw("p e2 same");
   leg0 ->Draw("same");
+  privatworklabel->Draw("same");
   // c) both data with bands
   addCanvas(plotCanvas_);
   plotCanvas_[plotCanvas_.size()-1]->cd(0);
@@ -352,6 +370,7 @@ void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
   CMSdata7    ->Draw("p e2 same");
   ATLASdata7  ->Draw("p e2 same");
   leg1->Draw("same");
+  privatworklabel->Draw("same");
   // d) both data with ratio
   addCanvas(plotCanvas_);
   plotCanvas_[plotCanvas_.size()-1]->cd(0);
@@ -366,6 +385,7 @@ void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
   CMSdata7    ->Draw("p e2 same");
   ATLASdata7  ->Draw("p e2 same");
   leg1 ->Draw("same");
+  privatworklabel->Draw("same");
   std::vector<double> errA_;
   for(int bin=1; bin<=Nbins7; ++bin){
     errA_.push_back((ATLASdata7->GetY()[bin-1]/CMSdata7->GetY()[bin-1])*((ATLASdata7->GetErrorYhigh(bin-1)/ATLASdata7->GetY()[bin-1])));
@@ -397,6 +417,8 @@ void ATLASCMSCOMPARISON(TString quantity="ttbarY"){
   plotCanvas_[2]->Print(path+quantity+"ATLASvsCMS7TeVNoratio.png");
   plotCanvas_[plotCanvas_.size()-1]->Print(path+quantity+"ATLASvsCMS7TeVratio.eps");
   plotCanvas_[plotCanvas_.size()-1]->Print(path+quantity+"ATLASvsCMS7TeVratio.png");
+  plotCanvas_[plotCanvas_.size()-1]->SetTitle(quantity);
+  saveToRootFile("ATLASvsCMSDataComparisonPlots.root", plotCanvas_[plotCanvas_.size()-1], true, 0,"");
 }
 
 TH1F* convertToHist(TGraphAsymmErrors* in,  TH1F* templatePlot, double NbinsIn){
