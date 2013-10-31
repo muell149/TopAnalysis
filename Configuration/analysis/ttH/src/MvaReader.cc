@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include <TString.h>
+#include <TH2.h>
 #include <TMVA/Reader.h>
 
 #include "MvaReader.h"
@@ -105,6 +106,36 @@ std::vector<float> MvaReader::mvaWeights(const std::vector<MvaTopJetsVariables>&
         mvaTopJetsVariables_ = mvaTopJetsVariables;
         const float weight = mvaWeightsReader_->EvaluateMVA("BDT method");
         result.push_back(weight);
+    }
+    
+    return result;
+}
+
+
+
+std::vector<float> MvaReader::combinedWeight(const TH2* weights2d,
+                                             const std::vector<float>& weightCorrect,
+                                             const std::vector<float>& weightSwapped)
+{
+    if(weightCorrect.size() != weightSwapped.size()){
+        std::cerr<<"ERROR in combinedWeight()! The two weight vectors are of different size\n...break\n"<<std::endl;
+        exit(873);
+    }
+    if(!weights2d){
+        std::cerr<<"ERROR in combinedWeight()! No valid histogram is passed\n...break\n"<<std::endl;
+        exit(874);
+    }
+    
+    std::vector<float> result;
+    for(size_t iWeight = 0; iWeight < weightCorrect.size(); ++iWeight){
+        const float mvaWeightCorrect = weightCorrect.at(iWeight);
+        const float mvaWeightSwapped = weightSwapped.at(iWeight);
+        
+        Int_t binX = weights2d->GetXaxis()->FindBin(mvaWeightCorrect);
+        Int_t binY = weights2d->GetYaxis()->FindBin(mvaWeightSwapped);
+        const double integral2d = weights2d->Integral(0, binX, 0, binY);
+        
+        result.push_back(static_cast<float>(integral2d));
     }
     
     return result;

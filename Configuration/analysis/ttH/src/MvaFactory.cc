@@ -49,9 +49,7 @@ void MvaFactory::clear()
 
 
 
-void MvaFactory::train(const std::vector<MvaSet>& v_mvaSetCorrect,
-                       const std::vector<MvaSet>& v_mvaSetSwapped,
-                       const Channel::Channel& channel)
+void MvaFactory::train(const std::vector<MvaSet>& v_mvaSetCorrect, const std::vector<MvaSet>& v_mvaSetSwapped)
 {
     // MVA for correct dijet combinations
     constexpr const char* methodPrefixCorrect = "correct";
@@ -63,26 +61,23 @@ void MvaFactory::train(const std::vector<MvaSet>& v_mvaSetCorrect,
     const TCut cutSignalSwapped = "swappedCombination != 0";
     const TCut cutBackgroundSwapped = "correctCombination == 0 && swappedCombination == 0";
     
-    // Clean the MVA sets in case they are not selected for training
-    const std::vector<MvaSet> v_cleanSetCorrect = this->cleanSets(v_mvaSetCorrect, channel);
-    const std::vector<MvaSet> v_cleanSetSwapped = this->cleanSets(v_mvaSetSwapped, channel);
-    
+    // Loop over the steps/categories and and train MVAs
     for(const auto& nameStepPair : v_nameStepPair_){
-        const std::vector<MvaSet> v_selectedSetCorrect = this->selectSets(v_cleanSetCorrect, nameStepPair.second);
-        const std::vector<MvaSet> v_selectedSetSwapped = this->selectSets(v_cleanSetSwapped, nameStepPair.second);
+        const std::vector<MvaSet> v_selectedSetCorrect = this->selectSets(v_mvaSetCorrect, nameStepPair.second);
+        const std::vector<MvaSet> v_selectedSetSwapped = this->selectSets(v_mvaSetSwapped, nameStepPair.second);
         if(!v_selectedSetCorrect.size() && !v_selectedSetSwapped.size()){
             std::cerr<<"ERROR in train()! Defined step/category has no definitions of MVA sets: "<<nameStepPair.second
-                     <<"\n...break\n"<<std::endl;
+            <<"\n...break\n"<<std::endl;
             exit(139);
         }
         
         TTree* treeTraining = (TTree*)mergedTrees_->Get("training"+nameStepPair.first);
         TTree* treeTesting = (TTree*)mergedTrees_->Get("testing"+nameStepPair.first);
         
-        if(v_selectedSetCorrect.size())
-            this->runMva(methodPrefixCorrect, cutSignalCorrect, cutBackgroundCorrect, treeTraining, treeTesting, v_selectedSetCorrect, nameStepPair.second);
-        if(v_selectedSetSwapped.size())
-            this->runMva(methodPrefixSwapped, cutSignalSwapped, cutBackgroundSwapped, treeTraining, treeTesting, v_selectedSetSwapped, nameStepPair.second);
+         if(v_selectedSetCorrect.size())
+             this->runMva(methodPrefixCorrect, cutSignalCorrect, cutBackgroundCorrect, treeTraining, treeTesting, v_selectedSetCorrect, nameStepPair.second);
+         if(v_selectedSetSwapped.size())
+             this->runMva(methodPrefixSwapped, cutSignalSwapped, cutBackgroundSwapped, treeTraining, treeTesting, v_selectedSetSwapped, nameStepPair.second);
     }
 }
 
@@ -209,7 +204,8 @@ void MvaFactory::addSpectator(TMVA::Factory* factory, MvaVariableFloat& variable
 
 
 std::vector<MvaFactory::MvaSet> MvaFactory::cleanSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
-                                                      const Channel::Channel& channel)const
+                                                      const std::vector<std::pair<TString, TString> >& v_nameStepPair,
+                                                      const Channel::Channel& channel)
 {
     std::vector<MvaFactory::MvaSet> result;
     
@@ -220,7 +216,7 @@ std::vector<MvaFactory::MvaSet> MvaFactory::cleanSets(const std::vector<MvaFacto
         // Check if set is valid for any of the chosen selection steps and cateogories
         bool selectedStepCategory(false);
         const std::vector<TString> v_stepName = mvaSet.stepNames();
-        for(const auto& nameStepPair : v_nameStepPair_){
+        for(const auto& nameStepPair : v_nameStepPair){
             if(std::find(v_stepName.begin(), v_stepName.end(), nameStepPair.second) != v_stepName.end()){
                 selectedStepCategory = true;
                 break;
@@ -241,7 +237,7 @@ std::vector<MvaFactory::MvaSet> MvaFactory::cleanSets(const std::vector<MvaFacto
 
 
 std::vector<MvaFactory::MvaSet> MvaFactory::selectSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
-                                                       const TString& step)const
+                                                       const TString& step)
 {
     std::vector<MvaFactory::MvaSet> result;
     

@@ -38,10 +38,23 @@ chmod u+x SCRAM_ARCH
 eval `scramv1 runtime -sh`
 
 
-
 ###### Hamburg TOP package (plus dependencies) #####
 #cvs co -d TopAnalysis UserCode/Bromo/TopAnalysis
-git clone https://git.cern.ch/reps/TopAnalysis
+if [ -z "${TOP_TAG}" ]; then
+    echo "Installing the HEAD version of the TopAnalysis code from GIT."
+    echo "  To use specific tag, 'export TOP_TAG=<TAG_NAME>' before running the install script"
+    echo "  or execute 'git checkout <TAG_NAME>' in the TopAnalysis directory after the script execution."
+    echo "  To see available tags, execute: 'git tag'"
+    git clone https://git.cern.ch/reps/TopAnalysis
+    echo
+else
+    echo "Installing the TopAnalysis code from GIT with tag: ${TOP_TAG}"
+    git clone https://git.cern.ch/reps/TopAnalysis
+    cd ./TopAnalysis
+    git checkout ${TOP_TAG}
+    cd -
+    echo
+fi
 
 
 if [[ "$minimalInstall" == True ]] ; then

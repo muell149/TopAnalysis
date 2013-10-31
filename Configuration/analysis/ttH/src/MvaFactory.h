@@ -62,7 +62,18 @@ public:
     
     
     
-    /// Constructor which can optionally set MVA weights and creating TMVA Reader
+    /// Clean a vector of MVA sets for non-selected ones
+    static std::vector<MvaFactory::MvaSet> cleanSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
+                                                     const std::vector<std::pair<TString, TString> >& v_nameStepPair,
+                                                     const Channel::Channel& channel);
+    
+    /// Select a vector of MVA sets valid for given selection step
+    static std::vector<MvaFactory::MvaSet> selectSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
+                                                      const TString& step);
+    
+    
+    
+    /// Constructor
     MvaFactory(const TString& mvaOutputDir, const char* weightFileDir,
                const std::vector<std::pair<TString, TString> >& v_nameStepPair,
                TFile* mergedTrees);
@@ -73,33 +84,16 @@ public:
     
     
     /// Run the MVA training
-    void train(const std::vector<MvaSet>& v_mvaSetCorrect,
-               const std::vector<MvaSet>& v_mvaSetSwapped,
-               const Channel::Channel& channel);
-    
+    void train(const std::vector<MvaSet>& v_mvaSetCorrect, const std::vector<MvaSet>& v_mvaSetSwapped);
     
     /// Clear the class instance
     void clear();
     
     
     
-    /// Run the MVA for given parameters
-    void runMva(const char* methodPrefix, const TCut& cutSignal, const TCut& cutBackground,
-                TTree* treeTraining, TTree* treeTesting,
-                const std::vector<MvaSet>& v_mvaSet,
-                const TString& stepName);
-    
     
     
 private:
-    
-    /// Clean a vector of MVA sets for non-selected ones
-    std::vector<MvaFactory::MvaSet> cleanSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
-                                              const Channel::Channel& channel)const;
-    
-    /// Select a vector of MVA sets valid for given selection step
-    std::vector<MvaFactory::MvaSet> selectSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
-                                               const TString& step)const;
     
     /// Add a variable to the factory of type Int_t
     void addVariable(TMVA::Factory* factory, MvaVariableInt& variable);
@@ -112,6 +106,12 @@ private:
     
     /// Add a spectator to the factory of type Float_t
     void addSpectator(TMVA::Factory* factory, MvaVariableFloat& variable);
+    
+    /// Run the MVA for given parameters
+    void runMva(const char* methodPrefix, const TCut& cutSignal, const TCut& cutBackground,
+                TTree* treeTraining, TTree* treeTesting,
+                const std::vector<MvaSet>& v_mvaSet,
+                const TString& stepName);
     
     
     
