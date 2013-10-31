@@ -16,8 +16,6 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-#include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
-#include "AnalysisDataFormats/TopObjects/interface/TtSemiLeptonicEvent.h"
 
 /// default constructor
 MixedObjectsAnalyzer::MixedObjectsAnalyzer(const edm::ParameterSet& cfg) :
@@ -65,8 +63,11 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("eventNumber", &eventNumber, "eventNumber/i");
 
   // event weight
-  tree->Branch("weight", &weight, "weight/D");
-  
+  tree->Branch("weight", &weight, "weight/F");
+
+  // parton level quark vs reco jet assignment
+  tree->Branch("qAssignment" , &valueAssignment , "qAssignment/F" );
+
   // different invariant masses
   MuNu4J=-1000;
   ElNu4J=-1000;
@@ -74,97 +75,97 @@ MixedObjectsAnalyzer::beginJob()
   mWJJ=-1000;
   mWFitJJ=-1000;
   mHbb=-1000;         
-  tree->Branch("MWJJ"      , &mWJJ      , "MWJJ/D"      );
-  tree->Branch("MWFitJJ"   , &mWFitJJ   , "MWFitJJ/D"   );
-  tree->Branch("MuNu4J"    , &MuNu4J    , "MuNu4J/D"    );
-  tree->Branch("ElNu4J"    , &ElNu4J    , "MuNu4J/D"    );                
-  tree->Branch("mHbb"      , &mHbb      , "MHbb/D"      ); 
+  tree->Branch("MWJJ"      , &mWJJ      , "MWJJ/F"      );
+  tree->Branch("MWFitJJ"   , &mWFitJJ   , "MWFitJJ/F"   );
+  tree->Branch("MuNu4J"    , &MuNu4J    , "MuNu4J/F"    );
+  tree->Branch("ElNu4J"    , &ElNu4J    , "MuNu4J/F"    );                
+  tree->Branch("mHbb"      , &mHbb      , "MHbb/F"      ); 
 
   // multiplicities
   Nbjets=-1000;
   Njets=-1000;
   NjetsTrue=-1000;
-  tree->Branch("Nbjets"    , &Nbjets    , "Nbjets/I"    );
-  tree->Branch("Njets"     , &Njets     , "Njets/I"     );
-  tree->Branch("NjetsTrue" , &NjetsTrue , "NjetsTrue/I" );
+  tree->Branch("Nbjets"    , &Nbjets    , "Nbjets/F"    );
+  tree->Branch("Njets"     , &Njets     , "Njets/F"     );
+  tree->Branch("NjetsTrue" , &NjetsTrue , "NjetsTrue/F" );
  
   // leading jet which is not associated with the ttbar system
-  tree->Branch("leadNonttjetPt" , &leadNonttjetPt , "leadNonttjetPt/D" );   
-  tree->Branch("leadNonttjetY"  , &leadNonttjetY  , "leadNonttjetY/D"  );   
-  tree->Branch("leadNonttjetEta", &leadNonttjetEta, "leadNonttjetEta/D"); 
-  tree->Branch("leadNonttjetPtTrue" , &leadNonttjetPtTrue , "leadNonttjetPtTrue/D" );   
-  tree->Branch("leadNonttjetYTrue"  , &leadNonttjetYTrue  , "leadNonttjetYTrue/D"  );   
-  tree->Branch("leadNonttjetEtaTrue", &leadNonttjetEtaTrue, "leadNonttjetEtaTrue/D");  
+  tree->Branch("leadNonttjetPt" , &leadNonttjetPt , "leadNonttjetPt/F" );   
+  tree->Branch("leadNonttjetY"  , &leadNonttjetY  , "leadNonttjetY/F"  );   
+  tree->Branch("leadNonttjetEta", &leadNonttjetEta, "leadNonttjetEta/F"); 
+  tree->Branch("leadNonttjetPtTrue" , &leadNonttjetPtTrue , "leadNonttjetPtTrue/F" );   
+  tree->Branch("leadNonttjetYTrue"  , &leadNonttjetYTrue  , "leadNonttjetYTrue/F"  );   
+  tree->Branch("leadNonttjetEtaTrue", &leadNonttjetEtaTrue, "leadNonttjetEtaTrue/F");  
   // m(ttbar+jet)
-  tree->Branch("ttbarJetMass"    , &ttbarJetMass    , "ttbarJetMass/D"    ); 
-  tree->Branch("ttbarJetMassTrue", &ttbarJetMassTrue, "ttbarJetMassTrue/D"); 
-  tree->Branch("rhos"            , &rhos            , "rhos/D"            ); 
-  tree->Branch("rhosTrue"        , &rhosTrue        , "rhosTrue/D"        ); 
+  tree->Branch("ttbarJetMass"    , &ttbarJetMass    , "ttbarJetMass/F"    ); 
+  tree->Branch("ttbarJetMassTrue", &ttbarJetMassTrue, "ttbarJetMassTrue/F"); 
+  tree->Branch("rhos"            , &rhos            , "rhos/F"            ); 
+  tree->Branch("rhosTrue"        , &rhosTrue        , "rhosTrue/F"        ); 
 
   // object kinematics to check kinfit shift
-  tree->Branch("bqhadPtPre"   ,&bqhadPtPre , "bqhadPtPre/D" ); 
-  tree->Branch("bqhadEtaPre"  ,&bqhadEtaPre, "bqhadEtaPre/D"); 
-  tree->Branch("bqhadPhiPre"  ,&bqhadPhiPre, "bqhadEtaPre/D"); 
-  tree->Branch("bqlepPtPre"   ,&bqlepPtPre , "bqlepPtPre/D" ); 
-  tree->Branch("bqlepEtaPre"  ,&bqlepEtaPre, "bqlepEtaPre/D"); 
-  tree->Branch("bqlepPhiPre"  ,&bqlepPhiPre, "bqlepPhiPre/D"); 
-  tree->Branch("lqPtPre"      ,&lqPtPre    , "lqPtPre/D"    ); 
-  tree->Branch("lqEtaPre"     ,&lqEtaPre   , "lqEtaPre/D"   ); 
-  tree->Branch("lqPhiPre"     ,&lqPhiPre   , "lqPhiPre/D"   ); 
-  tree->Branch("lqbarPtPre"   ,&lqbarPtPre , "lqbarPtPre/D" ); 
-  tree->Branch("lqbarEtaPre"  ,&lqbarEtaPre, "lqbarEtaPre/D"); 
-  tree->Branch("lqbarPhiPre"  ,&lqbarPhiPre, "lqbarPhiPre/D"); 
-  tree->Branch("bqhadPtFit"   ,&bqhadPtFit , "bqhadPtFit/D" ); 
-  tree->Branch("bqhadEtaFit"  ,&bqhadEtaFit, "bqhadEtaFit/D"); 
-  tree->Branch("bqhadPhiFit"  ,&bqhadPhiFit, "bqhadPhiFit/D"); 
-  tree->Branch("bqlepPtFit"   ,&bqlepPtFit , "bqlepPtFit/D" ); 
-  tree->Branch("bqlepEtaFit"  ,&bqlepEtaFit, "bqlepEtaFit/D"); 
-  tree->Branch("bqlepPhiFit"  ,&bqlepPhiFit, "bqlepPhiFit/D"); 
-  tree->Branch("lqPtFit"      ,&lqPtFit    , "lqPtFit/D"    ); 
-  tree->Branch("lqEtaFit"     ,&lqEtaFit   , "lqEtaFit/D"   ); 
-  tree->Branch("lqPhiFit"     ,&lqPhiFit   , "lqPhiFit/D"   ); 
-  tree->Branch("lqbarPtFit"   ,&lqbarPtFit , "lqbarPtFit/D" ); 
-  tree->Branch("lqbarEtaFit"  ,&lqbarEtaFit, "lqbarEtaFit/D"); 
-  tree->Branch("lqbarPhiFit"  ,&lqbarPhiFit, "lqbarPhiFit/D"); 
-  tree->Branch("nuPtPre"      ,&nuPtPre    , "nuPtPre/D"    ); 
-  tree->Branch("nuEtaPre"     ,&nuEtaPre   , "nuEtaPre/D"   ); 
-  tree->Branch("nuPhiPre"     ,&nuPhiPre   , "nuEtaPre/D"   ); 
-  tree->Branch("nuPtTrue"     ,&nuPtTrue   , "nuPtTrue/D"   ); 
-  tree->Branch("nuEtaTrue"    ,&nuEtaTrue  , "nuEtaTrue/D"  ); 
-  tree->Branch("nuPhiTrue"    ,&nuPhiTrue  , "nuEtaTrue/D"  ); 
-  tree->Branch("nuPtFit"      ,&nuPtFit    , "nuPtFit/D"    ); 
-  tree->Branch("nuEtaFit"     ,&nuEtaFit   , "nuEtaFit/D"   ); 
-  tree->Branch("nuPhiFit"     ,&nuPhiFit   , "nuEtaFit/D"   ); 
-  tree->Branch("lepPtPre"     ,&lepPtPre   , "lepPtPre/D"   ); 
-  tree->Branch("lepEtaPre"    ,&lepEtaPre  , "lepEtaPre/D"  ); 
-  tree->Branch("lepPhiPre"    ,&lepPhiPre  , "lepEtaPre/D"  );
-  tree->Branch("lepPtTrue"    ,&lepPtTrue  , "lepPtTrue/D"  ); 
-  tree->Branch("lepEtaTrue"   ,&lepEtaTrue , "lepEtaTrue/D" ); 
-  tree->Branch("lepPhiTrue"   ,&lepPhiTrue , "lepEtaTrue/D" );
-  tree->Branch("lepPtFit"     ,&lepPtFit   , "lepPtFit/D"   ); 
-  tree->Branch("lepEtaFit"    ,&lepEtaFit  , "lepEtaFit/D"  ); 
-  tree->Branch("lepPhiFit"    ,&lepPhiFit  , "lepEtaFit/D"  );
-  tree->Branch("sumEtPre"     ,&sumEtPre   , "sumEtPre/D"   ); 
-  tree->Branch("sumEtTrue"    ,&sumEtTrue  , "sumEtTrue/D"  ); 
+  tree->Branch("bqhadPtPre"   ,&bqhadPtPre , "bqhadPtPre/F" ); 
+  tree->Branch("bqhadEtaPre"  ,&bqhadEtaPre, "bqhadEtaPre/F"); 
+  tree->Branch("bqhadPhiPre"  ,&bqhadPhiPre, "bqhadEtaPre/F"); 
+  tree->Branch("bqlepPtPre"   ,&bqlepPtPre , "bqlepPtPre/F" ); 
+  tree->Branch("bqlepEtaPre"  ,&bqlepEtaPre, "bqlepEtaPre/F"); 
+  tree->Branch("bqlepPhiPre"  ,&bqlepPhiPre, "bqlepPhiPre/F"); 
+  tree->Branch("lqPtPre"      ,&lqPtPre    , "lqPtPre/F"    ); 
+  tree->Branch("lqEtaPre"     ,&lqEtaPre   , "lqEtaPre/F"   ); 
+  tree->Branch("lqPhiPre"     ,&lqPhiPre   , "lqPhiPre/F"   ); 
+  tree->Branch("lqbarPtPre"   ,&lqbarPtPre , "lqbarPtPre/F" ); 
+  tree->Branch("lqbarEtaPre"  ,&lqbarEtaPre, "lqbarEtaPre/F"); 
+  tree->Branch("lqbarPhiPre"  ,&lqbarPhiPre, "lqbarPhiPre/F"); 
+  tree->Branch("bqhadPtFit"   ,&bqhadPtFit , "bqhadPtFit/F" ); 
+  tree->Branch("bqhadEtaFit"  ,&bqhadEtaFit, "bqhadEtaFit/F"); 
+  tree->Branch("bqhadPhiFit"  ,&bqhadPhiFit, "bqhadPhiFit/F"); 
+  tree->Branch("bqlepPtFit"   ,&bqlepPtFit , "bqlepPtFit/F" ); 
+  tree->Branch("bqlepEtaFit"  ,&bqlepEtaFit, "bqlepEtaFit/F"); 
+  tree->Branch("bqlepPhiFit"  ,&bqlepPhiFit, "bqlepPhiFit/F"); 
+  tree->Branch("lqPtFit"      ,&lqPtFit    , "lqPtFit/F"    ); 
+  tree->Branch("lqEtaFit"     ,&lqEtaFit   , "lqEtaFit/F"   ); 
+  tree->Branch("lqPhiFit"     ,&lqPhiFit   , "lqPhiFit/F"   ); 
+  tree->Branch("lqbarPtFit"   ,&lqbarPtFit , "lqbarPtFit/F" ); 
+  tree->Branch("lqbarEtaFit"  ,&lqbarEtaFit, "lqbarEtaFit/F"); 
+  tree->Branch("lqbarPhiFit"  ,&lqbarPhiFit, "lqbarPhiFit/F"); 
+  tree->Branch("nuPtPre"      ,&nuPtPre    , "nuPtPre/F"    ); 
+  tree->Branch("nuEtaPre"     ,&nuEtaPre   , "nuEtaPre/F"   ); 
+  tree->Branch("nuPhiPre"     ,&nuPhiPre   , "nuEtaPre/F"   ); 
+  tree->Branch("nuPtTrue"     ,&nuPtTrue   , "nuPtTrue/F"   ); 
+  tree->Branch("nuEtaTrue"    ,&nuEtaTrue  , "nuEtaTrue/F"  ); 
+  tree->Branch("nuPhiTrue"    ,&nuPhiTrue  , "nuEtaTrue/F"  ); 
+  tree->Branch("nuPtFit"      ,&nuPtFit    , "nuPtFit/F"    ); 
+  tree->Branch("nuEtaFit"     ,&nuEtaFit   , "nuEtaFit/F"   ); 
+  tree->Branch("nuPhiFit"     ,&nuPhiFit   , "nuEtaFit/F"   ); 
+  tree->Branch("lepPtPre"     ,&lepPtPre   , "lepPtPre/F"   ); 
+  tree->Branch("lepEtaPre"    ,&lepEtaPre  , "lepEtaPre/F"  ); 
+  tree->Branch("lepPhiPre"    ,&lepPhiPre  , "lepEtaPre/F"  );
+  tree->Branch("lepPtTrue"    ,&lepPtTrue  , "lepPtTrue/F"  ); 
+  tree->Branch("lepEtaTrue"   ,&lepEtaTrue , "lepEtaTrue/F" ); 
+  tree->Branch("lepPhiTrue"   ,&lepPhiTrue , "lepEtaTrue/F" );
+  tree->Branch("lepPtFit"     ,&lepPtFit   , "lepPtFit/F"   ); 
+  tree->Branch("lepEtaFit"    ,&lepEtaFit  , "lepEtaFit/F"  ); 
+  tree->Branch("lepPhiFit"    ,&lepPhiFit  , "lepEtaFit/F"  );
+  tree->Branch("sumEtPre"     ,&sumEtPre   , "sumEtPre/F"   ); 
+  tree->Branch("sumEtTrue"    ,&sumEtTrue  , "sumEtTrue/F"  ); 
   // top and ttbar quantities
-  tree->Branch("topPtLepFit"  ,&topPtLepFit , "topPtLepFit/D" );
-  tree->Branch("topPtHadFit"  ,&topPtHadFit , "topPtHadFit/D" );
-  tree->Branch("topYLepFit"   ,&topYLepFit  , "topYLepFit/D"  );
-  tree->Branch("topYHadFit"   ,&topYHadFit  , "topYHadFit/D"  );
-  tree->Branch("ttbarMassFit" ,&ttbarMassFit, "ttbarMassFit/D");
-  tree->Branch("ttbarYFit"    ,&ttbarYFit   , "ttbarYFit/D"   );
-  tree->Branch("ttbarPtFit"   ,&ttbarPtFit  , "ttbarPtFit/D"  );
-  tree->Branch("topPtLepTrue"  ,&topPtLepTrue , "topPtLepTrue/D" );
-  tree->Branch("topPtHadTrue"  ,&topPtHadTrue , "topPtHadTrue/D" );
-  tree->Branch("topYLepTrue"   ,&topYLepTrue  , "topYLepTrue/D"  );
-  tree->Branch("topYHadTrue"   ,&topYHadTrue  , "topYHadTrue/D"  );
-  tree->Branch("ttbarMassTrue" ,&ttbarMassTrue, "ttbarMassTrue/D");
-  tree->Branch("ttbarYTrue"    ,&ttbarYTrue   , "ttbarYTrue/D"   );
-  tree->Branch("ttbarPtTrue"   ,&ttbarPtTrue  , "ttbarPtTrue/D"  );
+  tree->Branch("topPtLepFit"  ,&topPtLepFit , "topPtLepFit/F" );
+  tree->Branch("topPtHadFit"  ,&topPtHadFit , "topPtHadFit/F" );
+  tree->Branch("topYLepFit"   ,&topYLepFit  , "topYLepFit/F"  );
+  tree->Branch("topYHadFit"   ,&topYHadFit  , "topYHadFit/F"  );
+  tree->Branch("ttbarMassFit" ,&ttbarMassFit, "ttbarMassFit/F");
+  tree->Branch("ttbarYFit"    ,&ttbarYFit   , "ttbarYFit/F"   );
+  tree->Branch("ttbarPtFit"   ,&ttbarPtFit  , "ttbarPtFit/F"  );
+  tree->Branch("topPtLepTrue"  ,&topPtLepTrue , "topPtLepTrue/F" );
+  tree->Branch("topPtHadTrue"  ,&topPtHadTrue , "topPtHadTrue/F" );
+  tree->Branch("topYLepTrue"   ,&topYLepTrue  , "topYLepTrue/F"  );
+  tree->Branch("topYHadTrue"   ,&topYHadTrue  , "topYHadTrue/F"  );
+  tree->Branch("ttbarMassTrue" ,&ttbarMassTrue, "ttbarMassTrue/F");
+  tree->Branch("ttbarYTrue"    ,&ttbarYTrue   , "ttbarYTrue/F"   );
+  tree->Branch("ttbarPtTrue"   ,&ttbarPtTrue  , "ttbarPtTrue/F"  );
 
   // nPV
   nPV=-1000;
-  tree->Branch("nPV",&nPV, "nPV/D");
+  tree->Branch("nPV",&nPV, "nPV/F");
   // within visible phase space?
   tree->Branch("inVisPS"       , &inVisPS       , "inVisPS/O"      );
 
@@ -309,7 +310,10 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     nuEtaTrue =semiLepEvt_h->singleNeutrino()->eta();
     nuPhiTrue =semiLepEvt_h->singleNeutrino()->phi();
   }
-
+  // parton level quark vs reco jet assignment
+  valueAssignment=-1000.;
+  if(genLep_h.isValid()&&!visPS.failedToGet()&&visPS.isValid()&&semiLepEvt_h.isValid()) valueAssignment=checkPartonAssignment(semiLepEvt_h, 5); // FIXME: N(jets) in KinFit hardcoded for the moment
+  if(debug) std::cout << "reco jet assignment (kinFit) wrt reco jet-quark matching: " << valueAssignment << std::endl;
   // invariant masses (measure for mttbar)
   MuNu4J=-1000;
   ElNu4J=-1000;
@@ -588,7 +592,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
 
   // tt+jet distribution
   // scale value chosen
-  double mtop=172.5; //170.
+  double mtop=170.0; //172.5
   // initialize tree entries
   ttbarJetMass=ttbarJetMassTrue=-1000;
   rhos=rhosTrue=-1000;
@@ -774,6 +778,88 @@ MixedObjectsAnalyzer::findAncestor(const reco::Candidate* cand, TString decaycha
   return false;
 }
 
+double  
+MixedObjectsAnalyzer::checkPartonAssignment(const edm::Handle<TtSemiLeptonicEvent> semiLepEvt, int maxNJets){
+  double assignment=-1;
+  // ---
+  //    check quark assignment
+  // ---
+  // no parton jet parton match exists
+  if(semiLepEvt->isHypoValid("kKinFit")&&(!semiLepEvt->isHypoValid("kGenMatch"))){
+    assignment= 9.;
+  }
+  // if jet parton match exists:
+  if(semiLepEvt->isHypoValid("kKinFit")&& semiLepEvt->isHypoValid("kGenMatch")){
+    // indices for all quarks from Kinfit Hypothesis and genmatch
+    int lepBIndex         = semiLepEvt->jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LepB     ];
+    int hadBIndex         = semiLepEvt->jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::HadB     ];
+    int lightQIndex       = semiLepEvt->jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LightQ   ];
+    int lightQBarIndex    = semiLepEvt->jetLeptonCombination("kKinFit"  )[TtSemiLepEvtPartons::LightQBar];
+    int lepBIndexGen      = semiLepEvt->jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LepB     ];
+    int hadBIndexGen      = semiLepEvt->jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::HadB     ];
+    int lightQIndexGen    = semiLepEvt->jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQ   ];
+    int lightQBarIndexGen = semiLepEvt->jetLeptonCombination("kGenMatch")[TtSemiLepEvtPartons::LightQBar];
+    // calculate permutation
+    // 0: nothing wrong
+    if((lepBIndex==lepBIndexGen)&&(hadBIndex==hadBIndexGen)&&
+       (((lightQIndex==lightQIndexGen   )&&(lightQBarIndex==lightQBarIndexGen))||
+	((lightQIndex==lightQBarIndexGen)&&(lightQBarIndex==lightQIndexGen   )))) assignment=0;
+    else{
+      // 1: b quarks switched
+      if((lepBIndex==hadBIndexGen)&&(hadBIndex==lepBIndexGen)) assignment=1;
+      // 2: leptonic b and light quark switched
+      if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&
+	 (((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen)))) assignment=2;
+      // 3: hadronic b and light quark switched/
+      if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&
+	 (((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen)))) assignment=3;
+      // 4: light quark->leptonic b & leptonic b->hadronic b & hadronic b-> light quark
+      if(((lepBIndex==lightQIndexGen)||(lepBIndex==lightQBarIndexGen))&&(hadBIndex==lepBIndexGen)&&
+	 ((lightQIndex==hadBIndexGen)||(lightQBarIndex==hadBIndexGen))) assignment=4;
+      // 5: light quark->hadronic b & hadronic b->leptonic b & leptonic b-> light quark
+      if(((hadBIndex==lightQIndexGen)||(hadBIndex==lightQBarIndexGen))&&(lepBIndex==hadBIndexGen)&&
+	 ((lightQIndex==lepBIndexGen)||(lightQBarIndex==lepBIndexGen))) assignment=5;
+      // 6: hadronic/leptonic b-> light quarks &  light quarks->hadronic/leptonic b
+      if(((hadBIndex     ==lightQIndexGen)||(hadBIndex     ==lightQBarIndexGen))&&
+	 ((lepBIndex     ==lightQIndexGen)||(lepBIndex     ==lightQBarIndexGen))&&
+	 ((lightQIndex   ==lepBIndexGen  )||(lightQIndex   ==hadBIndexGen     ))&&
+	 ((lightQBarIndex==lepBIndexGen  )||(lightQBarIndex==hadBIndexGen     ))) assignment=6;
+      // make sure that no relevant jet is missing
+      std::vector<int> genJets_, recoJets_;
+      // list of genJets
+      genJets_ .push_back(lepBIndexGen     );
+      genJets_ .push_back(hadBIndexGen     );
+      genJets_ .push_back(lightQIndexGen   );
+      genJets_ .push_back(lightQBarIndexGen);
+      std::sort( genJets_.begin(), genJets_.end());
+      // list of recoJets
+      recoJets_.push_back(lepBIndex);
+      recoJets_.push_back(hadBIndex);
+      recoJets_.push_back(lightQIndex);
+      recoJets_.push_back(lightQBarIndex);
+      std::sort( recoJets_.begin(), recoJets_.end());
+      // compare recoJets and genJets
+      for(unsigned int i=0; i<recoJets_.size(); ++i){
+	if( recoJets_[i]!=genJets_[i] ){ 
+	  if(maxNJets<4){
+	    std::cout << "ERROR: number of conidered jets can not be smaller than 4" << std::endl;
+	    exit(1);
+	  }
+
+	  // 7: jet is missing
+	  if( genJets_.back()>maxNJets-1 ) assignment=7;
+	  // 8: wrong jet chosen (only valid if kinFitTtSemiLepEventHypothesis.maxNJets>4)
+	  // e.g. took the wrong 4 out of 5 jets 
+	  else{
+	    if(assignment<0) assignment=8;
+	  }
+	  break;
+	}
+      }
+    }
+  }
+  return assignment;
+}
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE( MixedObjectsAnalyzer );

@@ -27,6 +27,8 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Candidate/interface/CompositePtrCandidate.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtSemiLepEvtPartons.h"
+#include "AnalysisDataFormats/TopObjects/interface/TtSemiLeptonicEvent.h"
 
 /**
    \class   MixedObjectsAnalyzer MixedObjectsAnalyzer.h "TopAnalysis/TopAnalyzer/interface/MixedObjectsAnalyzer.h"
@@ -56,7 +58,9 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   double modTwoPi(double DeltaPhi);
   /// helper function to find to find non-ttbar jets
   bool findAncestor(const reco::Candidate* cand, TString decaychain);
-    
+  // helper function to get the jet-parton matching result for the KinFit reco jet assignment
+  double checkPartonAssignment(const edm::Handle<TtSemiLeptonicEvent> semiLepEvt, int maxNJets);
+
   /// src's for the different infos
   edm::InputTag JetSrc_, METSrc_, MuonSrc_, ElectronSrc_,  GenJetSrc_, addGenJetSrc_, GenMETSrc_, GenLepSrc_, ingenPS_, weight_, VertexSrc_, semiLepEvt_;
 
@@ -72,21 +76,23 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   /// define Tree for event content
   TTree * tree;
 
-  /// doubles
-  double btagDiscr_, MuNu4J, ElNu4J, mJJ, mWJJ, mWFitJJ, mHbb, leadNonttjetPt, leadNonttjetY, leadNonttjetEta;
-  double addJetPt_;
-  double bqhadPtPre, bqhadEtaPre, bqhadPhiPre, bqlepPtPre, bqlepEtaPre, bqlepPhiPre, lqPtPre, lqEtaPre, lqPhiPre, lqbarPtPre, lqbarEtaPre, lqbarPhiPre, nuPtPre, nuEtaPre, nuPhiPre, lepPtPre, lepEtaPre, lepPhiPre;
-  double bqhadPtFit, bqhadEtaFit, bqhadPhiFit, bqlepPtFit, bqlepEtaFit, bqlepPhiFit, lqPtFit, lqEtaFit, lqPhiFit, lqbarPtFit, lqbarEtaFit, lqbarPhiFit, nuPtFit, nuEtaFit, nuPhiFit, lepPtFit, lepEtaFit, lepPhiFit;
-  double nuPtTrue, nuEtaTrue, nuPhiTrue, lepPtTrue, lepEtaTrue, lepPhiTrue, sumEtPre, sumEtTrue;
-  double nPV;
-  double ttbarJetMass, ttbarJetMassTrue, rhos, rhosTrue;
-  double leadNonttjetPtTrue, leadNonttjetYTrue, leadNonttjetEtaTrue;
-  double topPtLepFit, topPtHadFit, topYLepFit, topYHadFit, ttbarMassFit, ttbarYFit, ttbarPtFit;
-  double topPtLepTrue, topPtHadTrue, topYLepTrue, topYHadTrue, ttbarMassTrue, ttbarYTrue, ttbarPtTrue;
+  /// floats
+  float btagDiscr_, MuNu4J, ElNu4J, mJJ, mWJJ, mWFitJJ, mHbb, leadNonttjetPt, leadNonttjetY, leadNonttjetEta;
+  float addJetPt_;
+  float bqhadPtPre, bqhadEtaPre, bqhadPhiPre, bqlepPtPre, bqlepEtaPre, bqlepPhiPre, lqPtPre, lqEtaPre, lqPhiPre, lqbarPtPre, lqbarEtaPre, lqbarPhiPre, nuPtPre, nuEtaPre, nuPhiPre, lepPtPre, lepEtaPre, lepPhiPre;
+  float bqhadPtFit, bqhadEtaFit, bqhadPhiFit, bqlepPtFit, bqlepEtaFit, bqlepPhiFit, lqPtFit, lqEtaFit, lqPhiFit, lqbarPtFit, lqbarEtaFit, lqbarPhiFit, nuPtFit, nuEtaFit, nuPhiFit, lepPtFit, lepEtaFit, lepPhiFit;
+  float nuPtTrue, nuEtaTrue, nuPhiTrue, lepPtTrue, lepEtaTrue, lepPhiTrue, sumEtPre, sumEtTrue;
+  float nPV;
+  float ttbarJetMass, ttbarJetMassTrue, rhos, rhosTrue;
+  float leadNonttjetPtTrue, leadNonttjetYTrue, leadNonttjetEtaTrue;
+  float topPtLepFit, topPtHadFit, topYLepFit, topYHadFit, ttbarMassFit, ttbarYFit, ttbarPtFit;
+  float topPtLepTrue, topPtHadTrue, topYLepTrue, topYHadTrue, ttbarMassTrue, ttbarYTrue, ttbarPtTrue;
+  float Nbjets, Njets, NjetsTrue;
   bool inVisPS;
+  float valueAssignment;
 
   /// ints
-  int BindexA, BindexB, BindexC, BindexD, Nbjets, Njets, NjetsTrue, leadNonttjetIX;
+  int BindexA, BindexB, BindexC, BindexD, leadNonttjetIX;
 
   /// histo container
   std::map< std::string, TH1F* > hists_;
