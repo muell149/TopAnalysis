@@ -1,11 +1,11 @@
 #include "basicFunctions.h"
 
-void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations=true){
+void analyzeGenComparison(bool save = false, int verbose=0, bool theoryVariations=false){
   
   // !!! run different ttbar MCs OR Theory Variations !!!
   // theoryVariations=false OR true
   // use same binning as in analysis?
-  bool analysisBinning=true;
+  bool analysisBinning=false;
   TString saveNameExt="";
 
   // ============================
@@ -357,6 +357,13 @@ void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations
 	    }
 	  }
 	}
+	// save topPt in extra rootfile
+	if(name.Contains("topPt")){
+	  plotCanvas_[plotCanvas_.size()-1]->SetTitle(getStringEntry(name,2));
+	  saveToRootFile("topPt8TeVSimulationComparison.root", plotCanvas_[plotCanvas_.size()-1], true, 0,"");
+	  plotCanvas_[plotCanvas_.size()-1]->SetTitle(canvTitle);
+	}
+
       }
     }
     delete leg;
