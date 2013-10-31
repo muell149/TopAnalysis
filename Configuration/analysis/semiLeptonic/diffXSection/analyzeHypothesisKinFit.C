@@ -103,6 +103,9 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // save: save plots?
   // SVDunfold: use SVD instead of bin to bin unfolding
   // choose phase space
+  // -> process only visible hadron level PS and extrapolated parton level PS 
+  if(!extrapolate) hadron=true;
+  else hadron=false;
   TString PS="";
   // a) for full PS use extrapolate=true;
   if(!extrapolate) PS="PhaseSpace";
@@ -292,23 +295,27 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   TString recPartonBpath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
   //if(addSel!="") recPartonBpath+=addSel;
   TString recHadronBpath= "analyzeTopRecoKinematicsBjets" +sysInputFolderExtension;
-  TString genPartonBpath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
+  TString genPartonBpath= "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension;
   TString genHadronBpath= "analyzeTopHadronLevelKinematicsBjetsPhaseSpace"+sysInputGenFolderExtension;
   TString recBpath = ( (!extrapolate&&hadron) ? recHadronBpath : recPartonBpath );
-  TString genBpath = ( (!extrapolate&&hadron) ? genHadronBpath : genPartonBpath );
+  //TString genBpath = ( (!extrapolate&&hadron) ? genHadronBpath : genPartonBpath );
+  TString genBpath = genHadronBpath;
   TString recBlabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
-  TString genBlabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
+  //TString genBlabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
+  TString genBlabel = "Gen";
 
   // choose correct input folder for status 1 or 3 lepton
   TString recPartonLeppath= "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension;
   //if(addSel!="") recPartonLeppath+=addSel;
   TString recHadronLeppath= "analyzeTopRecoKinematicsLepton" +sysInputFolderExtension;
-  TString genPartonLeppath= "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension;
+  TString genPartonLeppath= "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension;
   TString genHadronLeppath= "analyzeTopHadronLevelKinematicsLeptonPhaseSpace"+sysInputGenFolderExtension;
   TString recLeppath  = ( (!extrapolate&&hadron) ? recHadronLeppath : recPartonLeppath );
-  TString genLeppath  = ( (!extrapolate&&hadron) ? genHadronLeppath : genPartonLeppath );
+  //TString genLeppath  = ( (!extrapolate&&hadron) ? genHadronLeppath : genPartonLeppath );
+  TString genLeppath=genHadronLeppath;
   TString recLeplabel = ( (!extrapolate&&hadron) ? "Rec" : "" );
-  TString genLeplabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
+  //TString genLeplabel = ( (!extrapolate&&hadron) ? "Gen" : "" );
+  TString genLeplabel =  "Gen";
 
   // choose correct input folder for mixed object analyzer
   TString recMixpath= "compositedKinematics";
@@ -317,7 +324,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   if(addSel==""||(addSel=="ProbSel"&&inputFolder.Contains("Prob")))  recMixpath+="KinFit";
   else if(addSel=="ProbSel") recMixpath+=addSel;
   recMixpath+=sysInputFolderExtensionRaw;
-  TString genMixpath= "composited"+LV+"Gen"+PS;
+  TString genMixpath= "compositedHadronGenPhaseSpace";
   // FIXME1: no sys weight gen folder existing for mixed object analyzer
   // genMixpath+=sysInputGenFolderExtension;
   // FIXME2: no sys weight reco folders existing for mixed object analyzer in Non-ttbar SG samples outside the .../Prob/ subfolder
@@ -356,20 +363,19 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiLep"  ,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYLep"    ,  
     // generated top quantities
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topMass"      , 
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topMass"      , 
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"           , // XSec relevant! GEN  
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtTtbarSys"   , // XSec relevant! GEN  
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtLead"       , // XSec relevant! GEN  
     "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtSubLead"    , // XSec relevant! GEN  
-    "analyzeTop"+LV+"LevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt" , 
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhi"       ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topY"         , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtHad"     ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhiHad"    ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYHad"      ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtLep"     ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPhiLep"    ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYLep"      ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhi"       ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topY"         , // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtHad"     ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhiHad"    ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYHad"      ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtLep"     ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhiLep"    ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYLep"      ,
     // reconstructed ttbar quantities
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass"  , // XSec relevant! REC
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt"    , // XSec relevant! REC
@@ -380,14 +386,14 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPhiStar", // XSec relevant! REC
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY"  ,
     // generated ttbar quantities
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarMass", // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarPt"  , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarY"   , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarHT"    ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarSumY"  ,
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarDelPhi",  // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarPhiStar", // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/ttbarDelY"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarMass", // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarPt"  , // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarY"   , // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarHT"    ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarSumY"  ,
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarDelPhi",  // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarPhiStar", // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarDelY"  ,
     // reconstructed lepton quantities
     recLeppath+"/lepPt"+recLeplabel,            // XSec relevant! REC
     recLeppath+"/lepEta"+recLeplabel,           // XSec relevant! REC
@@ -426,10 +432,10 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus"       , // XSec relevant! REC       
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus"         , // XSec relevant! REC       
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus"        , // XSec relevant! REC       
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtPlus" , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topPtMinus", // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYPlus"  , // XSec relevant! GEN
-    "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topYMinus" , // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtPlus" , // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtMinus", // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYPlus"  , // XSec relevant! GEN
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYMinus" , // XSec relevant! GEN
     recLeppath+"/lepEtaPlus"+recLeplabel                                         , // XSec relevant! REC
     recLeppath+"/lepEtaMinus"+recLeplabel                                        , // XSec relevant! REC
     genLeppath+"/lepEtaPlus"+genLeplabel                                         , // XSec relevant! GEN
@@ -438,29 +444,29 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 
  TString plots1Dadd[ ] = {
    // generated angular distributions
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/bbbarAngle"   ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/bbbarAngleTtRF",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/WWAngle"     ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topWAngleLep",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topWAngleHad",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topBAngleLep",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/topBAngleHad",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/bWAngleLep"  ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/bWAngleHad"  ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/qqbarAngle"  ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/qBlepAngle"  ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/qBhadAngle"  ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepBlepAngle",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepBlepAngleTtRF",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepBhadAngle",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepQAngle"   ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/MuonNeutrinoAngle",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepBNeutrinoAngle",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/hadBNeutrinoAngle",
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/qNeutrinoAngle"   ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/lepWDir"     ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/qWDir"       ,
-   "analyzeTop"+LV+"LevelKinematics"+PS+sysInputGenFolderExtension+"/nuWDir"      ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngle"   ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngleTtRF",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/WWAngle"     ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleLep",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleHad",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleLep",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleHad",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleLep"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleHad"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qqbarAngle"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBlepAngle"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBhadAngle"  ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngleTtRF",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBhadAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepQAngle"   ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/MuonNeutrinoAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBNeutrinoAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/hadBNeutrinoAngle",
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qNeutrinoAngle"   ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepWDir"     ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qWDir"       ,
+   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/nuWDir"      ,
    // reconstructed angular distributions
    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle"  ,
    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngleTtRF",
@@ -696,7 +702,6 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     xSecLabelName("topPtTtbarSys")+" parton truth/events/0/1",//20"
     xSecLabelName("topPtLead"   )+" parton truth/events/0/1",
     xSecLabelName("topPtSubLead")+" parton truth/events/0/1",
-    xSecLabelName("topPt")+" parton truth Phase Space/events/0/1",//20"
     "#phi(t) parton truth/events/0/4",
     xSecLabelName("topY")+" parton truth/events/0/1",//5"
     "p_{T}(hadronic t) #left[GeV#right] parton truth/events/0/20",                         
@@ -1407,61 +1412,58 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     // ---
     //    a) for parton level FULL PS configuration
     // ---
-    if(extrapolate==true){
-      // change gen level full PS label to gen level PS label
-      if(plotList_[plot].Contains("analyzePartonLevel")&&!plotList_[plot].Contains("PhaseSpace")){
-	// attention: topPt full PS plots still needed!!!
-	if(!plotList_[plot].Contains("topPt")||plotList_[plot].Contains("topPtLep")||plotList_[plot].Contains("topPtHad")) newName.ReplaceAll("analyzePartonLevelKinematics", "analyzePartonLevelKinematicsPhaseSpace");
-      }
+    // change gen level full PS label to gen level PS label
+    if(plotList_[plot].Contains("analyzePartonLevel")&&!plotList_[plot].Contains("PhaseSpace")){
+      newName.ReplaceAll("analyzePartonLevelKinematics", "analyzePartonLevelKinematicsPhaseSpace");
     }
     // ---
     //    b) for hadron level PS configuration
     // ---
-    else if(LV=="Hadron"){
-      //  b1) change b-jet to b-quark label
-      // for rec plots
-      if(plotList_[plot].Contains(recHadronBpath)){ 
-	newName.ReplaceAll(recHadronBpath, recPartonBpath);
-	newName.ReplaceAll("Rec", "");
-	newName.ReplaceAll("Topo", "TopReco");
-      }
-      // for gen plots
-      if(plotList_[plot].Contains(genHadronBpath)){ 
-	newName.ReplaceAll(genHadronBpath, genPartonBpath);
-	if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
-      }
-      //  b2) change lepton status 1 to lepton status 3 label
-      // for rec plots
-      if(plotList_[plot].Contains(recHadronLeppath)){ 
-	newName.ReplaceAll(recHadronLeppath, recPartonLeppath);
-	newName.ReplaceAll("Rec", "");
-	newName.ReplaceAll("Topo", "TopReco");
-      }
-      // for mixed object analyzer
-      if(plotList_[plot].Contains("composited")){
-	newName.ReplaceAll("composited", "analyzeTop");
-	newName.ReplaceAll("Ngenjets", "Njets");
-	newName.ReplaceAll("rhosGen" , "rhos" );
-	if(sysInputGenFolderExtension!=""&&newName.Contains("Gen"+PS)&&!newName.Contains(sysInputGenFolderExtension)) newName.ReplaceAll("Gen"+PS, "Gen"+PS+sysInputGenFolderExtension);
-	if(plotList_[plot].Contains("Gen")) newName.ReplaceAll("Gen", "LevelKinematics");
-	else{
-	  newName.ReplaceAll("analyzeTop", "analyzeTopReco"  );
-	  if(!newName.Contains("KinFit")) newName.ReplaceAll("Kinematics", "KinematicsKinFit");
-	}
-	TString syAdd=sysInputFolderExtension;
-	syAdd.ReplaceAll(addSel, "");
-	if(syAdd!=""&&!newName.Contains(syAdd)) newName.ReplaceAll("KinFit","KinFit"+syAdd);
-	if(addSel.Contains("ProbSel")&&!newName.Contains("ProbSel")) newName.ReplaceAll("/", "ProbSel/");
-	if(addSel.Contains("ProbSel")&&newName.Contains("ProbSel")&&(newName.Contains("Hadron")||newName.Contains("Parton"))) newName.ReplaceAll("ProbSel", "");
-      }
-      // for all gen plots
-      if(plotList_[plot].Contains(genHadronLeppath)){ 
-	newName.ReplaceAll(genHadronLeppath, genPartonLeppath);
-	if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
-      }
-      // b3) change hadron PS gen level label to parton PS gen level label
-      if(newName.Contains(LV)&&newName.Contains("PhaseSpace")) newName.ReplaceAll(LV, "Parton");
+    //  b1) change b-jet to b-quark label
+    // for rec plots
+    if(plotList_[plot].Contains(recHadronBpath)){ 
+      newName.ReplaceAll(recHadronBpath, recPartonBpath);
+      newName.ReplaceAll("Rec", "");
+      newName.ReplaceAll("Topo", "TopReco");
     }
+    // for gen plots
+    if(plotList_[plot].Contains(genHadronBpath)){ 
+      newName.ReplaceAll(genHadronBpath, genPartonBpath);
+      if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
+    }
+    //  b2) change lepton status 1 to lepton status 3 label
+    // for rec plots
+    if(plotList_[plot].Contains(recHadronLeppath)){ 
+      newName.ReplaceAll(recHadronLeppath, recPartonLeppath);
+      newName.ReplaceAll("Rec", "");
+      newName.ReplaceAll("Topo", "TopReco");
+    }
+    // for mixed object analyzer
+    if(plotList_[plot].Contains("composited")){
+      newName.ReplaceAll("composited", "analyzeTop");
+      newName.ReplaceAll("Ngenjets", "Njets");
+      newName.ReplaceAll("rhosGen" , "rhos" );
+      if(sysInputGenFolderExtension!=""&&newName.Contains("Gen"+PS)&&!newName.Contains(sysInputGenFolderExtension)) newName.ReplaceAll("Gen"+PS, "Gen"+PS+sysInputGenFolderExtension);
+      if(plotList_[plot].Contains("Gen")) newName.ReplaceAll("Gen", "LevelKinematics");
+      else{
+	newName.ReplaceAll("analyzeTop", "analyzeTopReco"  );
+	if(!newName.Contains("KinFit")) newName.ReplaceAll("Kinematics", "KinematicsKinFit");
+      }
+      TString syAdd=sysInputFolderExtension;
+      syAdd.ReplaceAll(addSel, "");
+      if(syAdd!=""&&!newName.Contains(syAdd)) newName.ReplaceAll("KinFit","KinFit"+syAdd);
+      if(addSel.Contains("ProbSel")&&!newName.Contains("ProbSel")) newName.ReplaceAll("/", "ProbSel/");
+	if(addSel.Contains("ProbSel")&&newName.Contains("ProbSel")&&(newName.Contains("Hadron")||newName.Contains("Parton"))) newName.ReplaceAll("ProbSel", "");
+    }
+    // for all gen plots
+    if(plotList_[plot].Contains(genHadronLeppath)){ 
+      newName.ReplaceAll(genHadronLeppath, genPartonLeppath);
+      if(!plotList_[plot].Contains("_")) newName.ReplaceAll("Gen", "");
+    }
+    // b3) change hadron PS gen level label to parton PS gen level label
+    if(newName.Contains(LV)&&newName.Contains("PhaseSpace")) newName.ReplaceAll(LV, "Parton");
+    // b4) remove phase space form name
+    if(newName.Contains("PhaseSpace")) newName.ReplaceAll("PhaseSpace", "");
     // check if replacement is necessary
     if(newName!=plotList_[plot]){
       if(verbose>=1||(plotList_[plot].Contains("composited")&&systematicVariation==testMe)) std::cout << plotList_[plot] << " -> " << newName << " for " << std::endl;
@@ -1573,7 +1575,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   TH1F* DiBosYield=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kDiBos]->Clone());
   TH1F* QCDYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kQCD  ]->Clone());
   TH1F* GenInclusive =(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"          ][kSig]->Clone());
-  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematicsPhaseSpace"+sysInputGenFolderExtension+"/topPt"][kSig]->Clone()); // don't let you confuse from the naming- for hadron=true this is the hadron level plots as "Hadron" level is renamed to "Parton" level in the step before!
+  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepPt"][kSig]->Clone()); // don't let you confuse from the naming- this is the visible hadron level as "Hadron...PhaseSpace" is renamed to "Parton" in the step before!
 
   // ============================
   //  Configure histograms
@@ -1645,10 +1647,10 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     // signal reco plot
     histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_[varname][kSig]->Clone(variable);
     // signal gen plot
-    if(!histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]){
-      std::cout << "missing plot: " << "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable << " for ttbar signal" << std::endl;
+    if(!histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable][kSig]){
+      std::cout << "missing plot: " << "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable << " for ttbar signal" << std::endl;
     }
-    else histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone(variable);
+    else histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig]=(TH1F*)histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable][kSig]->Clone(variable);
     // response matrix plot
     if(!histo2_[varname+"_"][kSig]){
       std::cout << "missing plot: " << varname+"_" << " for ttbar signal" << std::endl;
@@ -1719,12 +1721,12 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     TString variable=xSecVariables_[number];    
     TString efficiency="efficiency/"+variable;
     // check if gen and reco plots are available
-    if(plotExists(histo_, "analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kSig)){
+    if(extrapolate&&plotExists(histo_, "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable, kSig)&&plotExists(histo_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable, kSig)){
       // std::cout << "found gen and reco" << std::endl;
       // get reco plot
       histo_[efficiency][kSig]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kSig]->Clone());
       // divide by gen plot
-      histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone()));
+      histo_[efficiency][kSig]->Divide((TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable][kSig]->Clone()));
       // add plot to list of plots
       plotList_.push_back(efficiency);
       // add axis configuration
@@ -1737,8 +1739,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       if(verbose>1) std::cout << "       eff, events, width, sqrt(eff*(1.-eff)/events" << std::endl;
       for(int bin=1; bin<=histo_[efficiency][kSig]->GetNbinsX(); ++bin){
 	double eff=histo_[efficiency][kSig]->GetBinContent(bin); 
-	double N=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
-	double width=histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinWidth(bin);
+	double N=histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinContent(bin);
+	double width=histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable][kSig]->GetBinWidth(bin);
 	N*=width*effSFAB(systematicVariationMod,decayChannel);
 	if(decayChannel!="combined"){
 	  if(ttbarMC2=="Powheg") N/=(lumiweight(kSigPow, luminosity, systematicVariationMod, decayChannel));
@@ -1893,15 +1895,15 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     std::cout << " (" << NBGVV << ") " << std::endl;
   }
   // set QCD to 0
-  //if(setQCDtoZero){ 
-  //  NBG-=NBGQCD;
-  //  NAllMC-=NBGQCD;
-  //}
+  if(setQCDtoZero){ 
+    NBG-=NBGQCD;
+    NAllMC-=NBGQCD;
+  }
   // efficiency calculation
-  double NGenPhaseSpace=0.5 * GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
+  double NGenPhaseSpace= GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
   double eff=NSig/NGenPhaseSpace;
   // acceptance
-  double NGen          =0.5 * GenInclusive ->Integral(0, GenInclusive ->GetNbinsX()+1);
+  double NGen          =0.5 * GenInclusive ->Integral(0, GenInclusive ->GetNbinsX()+1); // 0.5 because of 2 tops/event
   effA=NSig/NGen;
   double A= effA/eff;
   // branching ratio
@@ -2832,7 +2834,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	//  Calculate differential XSec from Signal(MC prediction)
 	// ========================================================
 	// get PS gen event yield/binwidth plots
-	histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/"+variable][kSig]->Clone());
+	histo_[xSec][kSig]=(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/"+variable][kSig]->Clone());
 	// divide by lumi
 	histo_[xSec][kSig]->Scale(1./luminosity2);
 	// BR correction
@@ -3215,6 +3217,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	      plotCanvas_[plotCanvas_.size()-1]->SetRightMargin(myStyle.GetPadRightMargin());
 	      TString canvname=getStringEntry(plotList_[plot],2)+getStringEntry(plotList_[plot],1)+getTStringFromInt(sample);
 	      canvname.ReplaceAll(addSel,"");
+	      // special naming of hadron level quanatities
+	      if(canvname.Contains("Ngenjets")) canvname.ReplaceAll("Ngenjets","Njets");
 	      plotCanvas_[plotCanvas_.size()-1]->SetTitle(canvname);
 	      if(verbose>1){
 		  std::cout << " Plotting "    << plotList_[plot];
