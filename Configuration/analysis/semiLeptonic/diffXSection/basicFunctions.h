@@ -435,6 +435,10 @@ namespace semileptonic {
     // "filled": 0 - line only
     //           1 - area under plot filled
 
+    // identify subsamples with main sample
+    if(sampleType>=kSTops&&sampleType<=kSAToptW ) sampleType=kSTop;
+    if(sampleType>=kQCDEM1&&sampleType<=kQCDBCE3) sampleType=kQCD;
+
     hist.SetStats(kFALSE);
     if(sampleType==kData || !filled){
       if(!filled)hist.SetLineWidth(2);
@@ -767,7 +771,7 @@ namespace semileptonic {
     decch -> Draw("same");
   }
 
-  void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04, bool cmssimulation=false)
+  void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04, bool cmssimulation=false, bool privateWork=false)
   {
     // Draw official labels (CMS Preliminary/Simulation, luminosity and CM energy) above plot
 
@@ -779,19 +783,22 @@ namespace semileptonic {
     label -> SetY2NDC(1.0);
     label -> SetTextFont(42);
 
-    if (cmssimulation)
+    TString extension="CMS";
+    if (cmssimulation) extension+=" Simulation";
+    else{
+      if(privateWork) extension+=" Private Work";
+      else if(cmsprelim  ) extension+=" Preliminary";
+    }
+    
+    if (cmssimulation||luminosity==0.)
       {
-	label -> AddText("CMS Simulation at #sqrt{s} = 8 TeV");
+	label -> AddText(extension+", #sqrt{s} = 8 TeV");
       }
-    else if (cmsprelim)
+    else 
       {
-	label -> AddText(Form("CMS Preliminary, %2.1f fb^{-1} at #sqrt{s} = 8 TeV",luminosity/1000));
+	label -> AddText(Form(extension+", %2.1f fb^{-1} at #sqrt{s} = 8 TeV",luminosity/1000));
       }
-    else
-      {
-	label -> AddText(Form("CMS, %2.1f fb^{-1} at #sqrt{s} = 8 TeV",luminosity/1000));
-      }
-
+    
     label->SetFillStyle(0);
     label->SetBorderSize(0);
     label->SetTextSize(textSize);
@@ -2130,6 +2137,7 @@ namespace semileptonic {
 
       // m(ttbar)
       double ttbarMassBins[]={345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0};
+      //double ttbarMassBins[]={345.0, 450.0, 550.0, 700.0, 950.0, 2500.0};// ATLAS binning 2500 -> 2700
       // First option: double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0};  
       // Korea:        double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
       // PAS binning:  double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
@@ -3320,6 +3328,7 @@ namespace semileptonic {
     if(verbose>0) std::cout << std::endl << "A collect relevant systematics" << std::endl;
     std::vector<int> RelevantSys_;
     int sysList[ ] = { sysTopMatchUp, sysTopMatchDown, sysTopScaleUp, sysTopScaleDown, sysTopMassUp, sysTopMassDown };
+    //int sysList[ ] = { sysJERUp, sysJERDown };
     RelevantSys_.insert(RelevantSys_.begin(), sysList, sysList+ sizeof(sysList)/sizeof(int));
     if(verbose>1){
       std::cout << "considered systematics: " << std::endl;
@@ -4420,6 +4429,8 @@ namespace semileptonic {
     //draw central value
     // --- 
     if(!drawOnlyErrors){ 
+      result->SetName( TString(result->GetName() ).ReplaceAll("Ngenjets", "Njets"));
+      result->SetTitle(TString(result->GetTitle()).ReplaceAll("Ngenjets", "Njets"));
       if(smoothcurves) result->Draw("hist c same"); 
       else DrawSteps(result, "same");//result->Draw("hist same");
       if(verbose>0) std::cout << "theory curve drawn" << std::endl;
