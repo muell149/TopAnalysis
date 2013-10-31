@@ -7,7 +7,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="")
+				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="ProbSel")
 { 
   // ============================
   //  Set Root Style
@@ -61,8 +61,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   // b) options to be configured only once
   // choose if you want to set QCD artificially to 0 to avoid problems with large SF for single events
   bool setQCDtoZero=true;
-  if(addSel=="ProbSel") setQCDtoZero=false;
-  setQCDtoZero=true;
+  //if(addSel=="ProbSel") setQCDtoZero=false;
   // scale ttbar component to measured inclusive xSec	
   bool scaleToMeasured=true;
   // add some shape plots comparing some different ttbar MC generators
@@ -119,7 +118,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     luminosityEl=constLumiElec;
     luminosityMu=constLumiMuon;
     if(!dataFile.Contains(":")){
-      std::cout << "wrong input filenames, should be dataFileEl:dataFileMu, but is";
+      std::cout << "wrong input filenames, should be dataFileEl:dataFileMu, but is ";
       std::cout << dataFile << std::endl;
       exit(0);
     }
@@ -361,7 +360,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     "analyzeTopRecoKinematicsKinFit"+addSel+"/decayChannel", 
     "analyzeTopPartonLevelKinematics/ttbarMass",
     "analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass",
-    "analyzeTopHadronLevelKinematicsPhaseSpace/ttbarMass",
+    "analyzeTopHadronLevelKinematicsLeptonPhaseSpace/lepPtGen",
     // kinfit object shifts
     "compositedKinematicsKinFit/shiftLqPt",
     "compositedKinematicsKinFit/shiftLqEta",
@@ -676,7 +675,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     "t#bar{t} other decay channel;events;0;1",
     "m^{t#bar{t}} #left[GeV#right] parton all truth;Events;1;1",
     "m^{t#bar{t}} #left[GeV#right] parton lv PS parton truth;Events;1;1",
-    "m^{t#bar{t}} #left[GeV#right] hadron lv PS parton truth;Events;1;1",
+    "p_{T}^{lep} #left[GeV#right] hadron lv PS truth;Events;1;1",
     // kinfit object shifts
     "#Delta p_{T}^{light jets} #left[GeV#right];Events;0;40",
     "#Delta #eta^{light jets};Events;0;1",
@@ -849,7 +848,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 
     for (std::vector<TString>::iterator iter = plotList_.begin(); iter != plotList_.end(); iter++){
       
-      if (iter->Contains("Lepton")){     
+      if (iter->Contains("Lepton")&&!iter->Contains("Hadron")){     
 	if (decayChannel=="electron")  iter->ReplaceAll("Lepton","Electron");
 	else if (decayChannel=="muon") iter->ReplaceAll("Lepton","Muon");    
       }
@@ -860,12 +859,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     plotListMu_ = plotList_;
     
     for (std::vector<TString>::iterator iter = plotListEl_.begin(); iter != plotListEl_.end(); iter++){
-      if (iter->Contains("Lepton")) iter->ReplaceAll("Lepton","Electron");
+      if (iter->Contains("Lepton")&&!iter->Contains("Hadron")) iter->ReplaceAll("Lepton","Electron");
       if (iter->Contains("tightElectronKinematics/pt")) iter->ReplaceAll("tightElectronKinematics/pt","tightElectronKinematics/et");
     }
     
     for (std::vector<TString>::iterator iter = plotListMu_.begin(); iter != plotListMu_.end(); iter++)
-      if (iter->Contains("Lepton")) iter->ReplaceAll("Lepton","Muon");
+      if (iter->Contains("Lepton")&&!iter->Contains("Hadron")) iter->ReplaceAll("Lepton","Muon");
   }
 
   // container for all histos (1D&2D)
@@ -996,7 +995,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 	if(plotList_[plot].Contains("bottomJetKinematics")&&plotList_[plot].Contains("/n")) histo_[plotList_[plot]][sample]->SetNdivisions(010);
 	if(plotList_[plot].Contains("Njets")&&plotList_[plot].Contains("compositedKinematics")) histo_[plotList_[plot]][sample]->SetNdivisions(010);
 	// set QCD to 0
-	if(setQCDtoZero&&sample==kQCD&&(plotList_[plot].Contains("Tagged")||plotList_[plot].Contains("AfterBtagging")||plotList_[plot].Contains("analyzeTopReco"))) histo_[plotList_[plot]][sample]->Scale(0.);
+	if(setQCDtoZero&&sample==kQCD&&(plotList_[plot].Contains("Tagged")||plotList_[plot].Contains("AfterBtagging")||plotList_[plot].Contains("analyzeTopReco")||plotList_[plot].Contains("compositedKinematicsKinFit"))) histo_[plotList_[plot]][sample]->Scale(0.);
       }
       // b) 2D
       if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)){
@@ -1032,7 +1031,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   // b) print composition (only if ratio is also drawn)
   double xSec=0;
   double NttbarFull  = histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->GetNbinsX()+1);
-  double NttbarPSHad = histo_["analyzeTopHadronLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopHadronLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
+  double NttbarPSHad = histo_["analyzeTopHadronLevelKinematicsLeptonPhaseSpace/lepPtGen"][kSig]->Integral(0, histo_["analyzeTopHadronLevelKinematicsLeptonPhaseSpace/lepPtGen"][kSig]->GetNbinsX()+1);
   double NttbarPS    = histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
   double BR=0.145888;
   double A   =NttbarPS   /NttbarFull;
@@ -1056,7 +1055,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     // print yield and composition
     if(verbose>=0&&withRatioPlot){
       std::cout << " Events observed in data: " << NData << std::endl;
-      std::cout << " Events expected from MC: " << NAllMC << std::endl << std::endl;
+      std::cout << " Events expected from MC: " << NAllMC << std::endl;
+      std::cout << " -> data/MC ratio: "           << NData/NAllMC << std::endl << std::endl;
       std::cout << " Expected event composition:"   << std::endl; 
       std::cout << " ttbar SG:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kSig  ] / NAllMC << std::endl;
       std::cout << " ttbar BG:   " << std::setprecision(4) << std::fixed << events_[selection_[step]][kBkg  ] / NAllMC << std::endl;
@@ -1076,7 +1076,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
       double NtWchannel=histo_[selection_[step]][kSToptW ]->Integral(0,histo_[selection_[step]][kSToptW ]->GetNbinsX()+1);
       NtWchannel+=      histo_[selection_[step]][kSAToptW]->Integral(0,histo_[selection_[step]][kSAToptW]->GetNbinsX()+1);
       double NallCh=events_[selection_[step]][kSTop];
-      if(verbose>=0&&withRatioPlot){
+      if(withRatioPlot){
 	std::cout << "             (s: " << std::setprecision(2) << std::fixed << Nschannel/NallCh;
 	std::cout << ", t: "  << std::setprecision(2) << std::fixed << Ntchannel/NallCh;
 	std::cout << ", tW: " << std::setprecision(2) << std::fixed << NtWchannel/NallCh << ")" << std::endl;
@@ -1092,7 +1092,9 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     xSec=(NData-NnonTtbarBG)*ttbarSigFrac/(A*eff*BR*luminosity2);
     if(verbose>=0&&withRatioPlot){
       std::cout << std::endl;
-      std::cout << "    inclusive cross section: " << std::setprecision(2) << std::fixed << xSec << std::endl;
+      std::cout << "    inclusive cross section: " << std::setprecision(2) << std::fixed << xSec;
+      std::cout << " ( +" << std::setprecision(2) << std::fixed << 100*(xSec-ttbarCrossSection)/ttbarCrossSection;
+      std::cout << "% wrt. NNLO+NNLL)" << std::endl;
       std::cout << "      N(nonttBG):    " << std::setprecision(3) << std::fixed << NnonTtbarBG << std::endl;
       std::cout << "      tt SG frac:    " << std::setprecision(3) << std::fixed << ttbarSigFrac << std::endl;
       std::cout << "      BR:            " << std::setprecision(3) << std::fixed << BR  << std::endl;
@@ -1106,6 +1108,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
       std::cout << "Ngen, vis:    " << std::setprecision(3) << std::fixed << NttbarPSHad << std::endl;
       std::cout << "Nrec/Ngen,vis:    " << std::setprecision(3) << std::fixed << events_[selection_[step]][kSig]/NttbarPSHad << std::endl;
       std::cout << "Nrec/Ngen,all:    " << std::setprecision(3) << std::fixed << events_[selection_[step]][kSig]/NttbarFull  << std::endl;
+
+      std::cout << std::endl;
+      if(step==selection_.size()-1&&scaleToMeasured){
+	std::cout << " scaling ttbar MC wrt. sigma(ttbar)=";
+	std::cout << std::setprecision(2) << std::fixed << xSec << " pb" << std::endl;
+	for(unsigned int step2=0; step2<selection_.size(); ++step2){
+	  std::cout << "   - " << selection_[step2] << std::endl;
+	  double NscaledAllMC=events_[selection_[step2]][kSig]+events_[selection_[step2]][MCBG]+(xSec/ttbarCrossSection-1)*(events_[selection_[step2]][kSig]+events_[selection_[step2]][kBkg]);
+	std::cout << "      Events in scaled MC : " << NscaledAllMC << std::endl;
+	std::cout << "      ratio data/scaled MC: " << events_[selection_[step2]][kData]/NscaledAllMC << std::endl << std::endl;
+	}
+      }
     }
   }
   std::cout << std::endl;
