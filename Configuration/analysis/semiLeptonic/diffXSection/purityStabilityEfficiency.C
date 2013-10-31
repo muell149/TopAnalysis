@@ -23,10 +23,10 @@
 #include "basicFunctions.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "bbbarMass", bool save=true, TString lepton="combined", 
-			       TString inputFolderName="RecentAnalysisRun8TeV", bool plotAcceptance = false, 
+void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TString lepton="combined", 
+			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit", bool plotAcceptance = false, 
 			       bool plotEfficiencyPhaseSpace = false, bool plotEfficiency2 = false, double chi2Max=7.824,//9999.,//7.824,
-			       int verbose=1, bool hadron=true, int qAssignment=-1,
+			       int verbose=3, bool hadron=true, int qAssignment=-1,
 			       bool fitGaussRes=false, bool printSeparateRes = false)
 {
   // ARGUMENTS of function:
@@ -145,7 +145,7 @@ void purityStabilityEfficiency(TString variable = "bbbarMass", bool save=true, T
       folderRecoKin          = "compositedKinematicsKinFit";
       folderRecoKinGeneral   = "compositedKinematicsKinFit";
       folderGenKinPhaseSpace = "compositedHadronGenPhaseSpace";
-      folderGenKin           = "compositedPartonGen";
+      folderGenKin           = "compositedHadronGenPhaseSpace";
       genExtTree="True";
     }
     else{
