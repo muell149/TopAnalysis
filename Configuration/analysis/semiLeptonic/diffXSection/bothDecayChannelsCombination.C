@@ -1,10 +1,10 @@
 #include "basicFunctions.h"
 
-void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsigned int verbose=0,
-				  TString inputFolderName="RecentAnalysisRun8TeV",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, 
+void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsigned int verbose=0,
+				  TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
+				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, 
 				  bool combinedEventYields=true, TString closureTestSpecifier="", bool smoothcurves=false){
-
+  
   // run automatically in batch mode
   gROOT->SetBatch();
     
@@ -634,12 +634,15 @@ void bothDecayChannelsCombination(double luminosity=19800, bool save=true, unsig
 	  // b1) create binned MADGRAPH theory curve (std sample w.o. SC)
 	  // load it from combined file
 	  TString plotNameMadgraph="analyzeTop"+LV+"LevelKinematics"+hadLevelExtend+PS+"/"+plotName+hadLevelPlotExtend;
-	  if(xSecVariables_[i].Contains("Njets")) plotNameMadgraph="composited"+LV+"Gen"+PS+"/Ngenjets";
-	  if(xSecVariables_[i].Contains("rhos" )) plotNameMadgraph="composited"+LV+"Gen"+PS+"/rhosGen" ;
+	  if(xSecVariables_[i].Contains("Njets"    )) plotNameMadgraph="composited"+LV+"Gen"+PS+"/Ngenjets";
+	  if(xSecVariables_[i].Contains("rhos"     )) plotNameMadgraph="composited"+LV+"Gen"+PS+"/rhosGen" ;
 	  plotNameMadgraph.ReplaceAll("Norm","");
 	  TString MGcombFile="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/"+TopFilename(kSig, 0, "muon").ReplaceAll("muon", "combined");
 	  TString plotNameMadgraph2=plotNameMadgraph;
-	  plotNameMadgraph2.ReplaceAll("inclusive", "topPt");
+	  if(xSecVariables_[i].Contains("inclusive")){
+	    if(extrapolate) plotNameMadgraph2.ReplaceAll("inclusive", "topPt");
+	    else            plotNameMadgraph2="analyzeTopHadronLevelKinematicsLeptonPhaseSpace/lepEtaGen";
+	  }
 	  TH1F* plotTheo2 = getTheoryPrediction(plotNameMadgraph2, MGcombFile);
 	  // inclusive cross section
 	  if(xSecVariables_[i]=="inclusive"){
