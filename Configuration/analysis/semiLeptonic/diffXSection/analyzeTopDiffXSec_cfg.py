@@ -1441,22 +1441,18 @@ process.makeGenLevelBJets=process.produceGenLevelBJets.clone(
     #genJets = cms.InputTag('ak5GenJets','','HLT'),
     genJets = cms.InputTag("cleanedGenJetCollection"),
     deltaR = cms.double(0.5),
-    flavour = cms.int32(5),
     resolveParticleName = cms.bool(False),
     requireTopBquark = cms.bool(True),
     noBBbarResonances = cms.bool(True),
-    doImprovedHadronMatching = cms.bool(False),
     )
 process.altermakeGenLevelBJets=process.produceGenLevelBJets.clone(
     ttGenEvent = cms.InputTag('genEvt'),
     #genJets = cms.InputTag('ak5GenJets','','HLT'),
     genJets = cms.InputTag("noOverlapGenJetCollection"),
     deltaR = cms.double(5.0),
-    flavour = cms.int32(5),
     resolveParticleName = cms.bool(False),
     requireTopBquark = cms.bool(True),
     noBBbarResonances = cms.bool(True),
-    doImprovedHadronMatching = cms.bool(False),
     )
 
 ## tool to select identified bjets from genJet collection
