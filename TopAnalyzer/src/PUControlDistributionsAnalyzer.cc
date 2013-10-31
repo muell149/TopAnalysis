@@ -87,6 +87,9 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
   if (pPVertex.isValid())
   {
     double weight = (pDefEventWeight.isValid()) ? (*pDefEventWeight) : 1.0;
+    
+    // FIXME DEBUG MARTIN
+    //if(weight==1.0) std::cout << "NONPUweight=1!!!!" << std::endl;
 
     histoNPVertex -> Fill(pPVertex->size(),weight);
 
@@ -105,6 +108,8 @@ void PUControlDistributionsAnalyzer::analyze(const edm::Event& iEvent, const edm
       double PUEventWeightUp      = (pPUEventWeightUp.isValid())      ? (*pPUEventWeightUp)      : 1.0;     
       double PUEventWeightDown    = (pPUEventWeightDown.isValid())    ? (*pPUEventWeightDown)    : 1.0;     
 
+      // FIXME DEBUG MARTIN
+      //if(PUEventWeight==1.0) std::cout << "PUEventWeight=1!!!!" << std::endl;
       edm::View<PileupSummaryInfo>::const_iterator iterPU;
 
       double NPUEvents;
