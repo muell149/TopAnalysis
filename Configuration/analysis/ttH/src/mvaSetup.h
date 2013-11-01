@@ -36,9 +36,14 @@ namespace mvaSetups{
                                                        allChannels);
     
     
-    const std::vector<MvaFactory::MvaSet> v_mvaSetCorrect = std::vector<MvaFactory::MvaSet>({set1, set2});
+    //const std::vector<MvaFactory::MvaSet> v_mvaSetCorrect = std::vector<MvaFactory::MvaSet>({set1, set2});
+    //const std::vector<MvaFactory::MvaSet> v_mvaSetSwapped = std::vector<MvaFactory::MvaSet>({set1, set2});
     
-    const std::vector<MvaFactory::MvaSet> v_mvaSetSwapped = std::vector<MvaFactory::MvaSet>({set1, set2});
+    const std::vector<MvaFactory::MvaSet> v_mvaSetCorrect = std::vector<MvaFactory::MvaSet>({set2});
+    const std::vector<MvaFactory::MvaSet> v_mvaSetSwapped = std::vector<MvaFactory::MvaSet>({set2});
+    
+    
+    
 }
 
 
