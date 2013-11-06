@@ -440,21 +440,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                                   genObjectIndicesDummy, recoObjectIndices,
                                   genLevelWeights, recoLevelWeights,
                                   weight);
-                    
-                    if(hasSolution){
-                        selectionStep = "8zWindow";
-                        
-                        // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
-                        //fullWeights *= weightKinFit;
-                        
-                        this->fillAll(selectionStep,
-                                      recoObjects, commonGenObjects,
-                                      topGenObjectsDummy, higgsGenObjectsDummy,
-                                      kinRecoObjects,
-                                      genObjectIndicesDummy, recoObjectIndices,
-                                      genLevelWeights, recoLevelWeights,
-                                      weight);
-                    }
                 }
             }
         }
@@ -531,26 +516,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     
     weight *= weightBtagSF;
     
-    // ++++ Control Plots ++++
-    
-    this->fillAll(selectionStep,
-                  recoObjects, commonGenObjects,
-                  topGenObjectsDummy, higgsGenObjectsDummy,
-                  kinRecoObjects,
-                  genObjectIndicesDummy, recoObjectIndices,
-                  genLevelWeights, recoLevelWeights,
-                  weight);
-    
-    
-    
-    //=== CUT ===
-    selectionStep = "8";
-    
-    //Require at least one solution for the kinematic event reconstruction
-    if(!hasSolution) return kTRUE;
-    // FIXME: weightKinFit is just a constant, but is it valid for each event selection (jetCategories) and can be used here?
-    //weight *= weightKinFit;
-    
     
     
     // === FULL GEN OBJECT SELECTION ===
@@ -602,44 +567,6 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
                                                  matchedBjetFromHiggsIndex, matchedAntiBjetFromHiggsIndex);
     
     
-    
-    // ++++ Control Plots ++++
-    
-    this->fillAll(selectionStep,
-                  recoObjects, commonGenObjects,
-                  topGenObjects, higgsGenObjects,
-                  kinRecoObjects,
-                  genObjectIndices, recoObjectIndices,
-                  genLevelWeights, recoLevelWeights,
-                  weight);
-    
-    
-    
-    // FIXME; following selection steps are only workaround for MVA training in merged category
-    //=== CUT ===
-    selectionStep = "9";
-    
-    // Require at least 3 jets
-    if(numberOfJets<3) return kTRUE;
-    
-    // ++++ Control Plots ++++
-    
-    this->fillAll(selectionStep,
-                  recoObjects, commonGenObjects,
-                  topGenObjects, higgsGenObjects,
-                  kinRecoObjects,
-                  genObjectIndices, recoObjectIndices,
-                  genLevelWeights, recoLevelWeights,
-                  weight);
-    
-    
-    
-    
-    //=== CUT ===
-    selectionStep = "10";
-    
-    // Require at least 4 jets
-    if(numberOfJets<4) return kTRUE;
     
     // ++++ Control Plots ++++
     

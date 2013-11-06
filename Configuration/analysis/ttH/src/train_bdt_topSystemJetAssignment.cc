@@ -62,22 +62,16 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
     std::vector<mvaSetup::MvaSet> mvaSets;
     mvaSets.push_back(mvaSetup::MvaSet(
         allChannels,
-        "10",
-        {0,1},
+        "7",
+        {5,6,7},
         {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3},
         {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3}));
-    mvaSets.push_back(mvaSetup::MvaSet(
-        allChannels,
-        "10",
-        {2},
-        {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3},
-        {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3}));
-    mvaSets.push_back(mvaSetup::MvaSet(
-        allChannels,
-        "10",
-        {},
-        {mvaSetup::c1},
-        {mvaSetup::c2, mvaSetup::c3}));
+//     mvaSets.push_back(mvaSetup::MvaSet(
+//         allChannels,
+//         "7",
+//         {2,3,4},
+//         {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3},
+//         {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3}));
     
     // Loop over all channels and systematics and merge trees
     mvaSetup::SystematicChannelFileNames m_systematicChannelMergedFiles = 

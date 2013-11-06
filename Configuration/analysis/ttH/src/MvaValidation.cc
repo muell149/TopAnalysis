@@ -43,7 +43,7 @@ weights2d_(0)
     weightsSwapped_ = new MvaReader(weightsSwappedFile, selectionStepsNoCategories);
 
     TString weights2dFilename(mva2dWeightsDir);
-    weights2dFilename.Append("/weights.root");
+    weights2dFilename.Append("/weights2d.root");
     TString weights2dHistoname("correctAndSwapped_");
     weights2dHistoname.Append(mva2dWeightsHisto);
     //std::cout<<"Names: "<<weights2dFilename<<" , "<<weights2dHistoname<<"\n\n\n";
@@ -347,7 +347,10 @@ void MvaValidation::fillMVASpecificHistograms(const std::vector<float>& v_mvaWei
         remainingJetIndices.push_back(index);
     }
     ttbar::orderIndices(remainingJetIndices, *recoObjects.jetBTagCSV_);
-
+    
+    // FIXME: needs to check whether 4 jets are present
+    if(recoObjectIndices.jetIndices_.size()<4) return;
+    
     // Get the two jets assigned to Higgs
     const int jet1FromHiggsIndex = remainingJetIndices.at(0);
     const int jet2FromHiggsIndex = remainingJetIndices.at(1);

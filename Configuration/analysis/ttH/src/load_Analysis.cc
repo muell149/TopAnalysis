@@ -74,14 +74,14 @@ constexpr const char* BtagEfficiencyOutputDIR = "selectionRoot/BTagEff";
 constexpr const char* MvaInputDIR = "mvaInput";
 
 /// File containing MVA weights for correct combinations of ttbar jets
-constexpr const char* MvaWeightsCorrectFILE = "mvaOutput/Nominal/combined/weights/correct_step10_c1.weights.xml";
+constexpr const char* MvaWeightsCorrectFILE = "mvaOutput/Nominal/combined/weights/correct_step7_cate5_cate6_cate7_c1.weights.xml";
 
 /// File containing MVA weights for correct combinations of ttbar jets
-constexpr const char* MvaWeightsSwappedFILE = "mvaOutput/Nominal/combined/weights/swapped_step10_c1.weights.xml";
+constexpr const char* MvaWeightsSwappedFILE = "mvaOutput/Nominal/combined/weights/swapped_step7_cate5_cate6_cate7_c1.weights.xml";
 
 /// Histogram containing the 2D distribution of MVA weights (needs to fit with the two weights also specified here)
-constexpr const char* Mva2dWeightsDIR = "mvaOutput/Nominal/combined/weights2d";
-constexpr const char* Mva2dWeightsHISTO = "c1_c1_step10";
+constexpr const char* Mva2dWeightsDIR = "mvaOutput/Nominal/combined/weights";
+constexpr const char* Mva2dWeightsHISTO = "c1_c1_step7_cate5_cate6_cate7";
 
 
 
@@ -155,26 +155,26 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
 
     // Set up event yield histograms
     EventYieldHistograms* eventYieldHistograms(0);
-    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
+    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7"}, {"7"}, &jetCategories);
     v_analysisHistograms.push_back(eventYieldHistograms);
     
     // Set up Drell-Yan scaling histograms
     DyScalingHistograms* dyScalingHistograms(0);
-    dyScalingHistograms = new DyScalingHistograms({"4", "5", "6", "7", "8"}, "5");
+    dyScalingHistograms = new DyScalingHistograms({"4", "5", "6", "7"}, "5");
     v_analysisHistograms.push_back(dyScalingHistograms);
     
     // Set up basic histograms
     BasicHistograms* basicHistograms(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::cp) != v_analysisMode.end()){
-        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7", "8"}, {"8"}, &jetCategories);
+        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7"}, {"7"}, &jetCategories);
         v_analysisHistograms.push_back(basicHistograms);
     }
     
     // Set up playground
     Playground* playground(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::playg) != v_analysisMode.end()){
-        //playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"},{"7", "8"}, &jetCategories_overview);
-        playground = new Playground({"1", "2", "3", "4", "5", "6", "7", "8"});
+        //playground = new Playground({"1", "2", "3", "4", "5", "6", "7"},{"6", "7"}, &jetCategories_overview);
+        playground = new Playground({"1", "2", "3", "4", "5", "6", "7"});
         v_analysisHistograms.push_back(playground);
     }
     
@@ -182,7 +182,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     DijetAnalyzer* dijetAnalyzer(0);
     const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end()){
-        dijetAnalyzer = new DijetAnalyzer({}, {"8"}, &jetCategories_dijetAnalyzer);
+        dijetAnalyzer = new DijetAnalyzer({}, {"7"}, &jetCategories_dijetAnalyzer);
         v_analysisHistograms.push_back(dijetAnalyzer);
     }
     
@@ -192,14 +192,14 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
         mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE,
                                           Mva2dWeightsDIR, Mva2dWeightsHISTO,
-                                          {"10"}, {"10"}, &jetCategories_mva);
+                                          {"7"}, {"7"}, &jetCategories);
         v_analysisHistograms.push_back(mvaValidation);
     }
     
     // Set up production of MVA input tree
     MvaTreeHandler* mvaTreeHandler(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"10"}, {"10"}, &jetCategories_mva);
+        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"7"}, {"7"}, &jetCategories);
     }
     
     // Set up the analysis

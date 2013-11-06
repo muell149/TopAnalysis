@@ -5,7 +5,7 @@
 ##
 ## Event yields
 ##
-events_jetCategories_step8 - - - 1 1 0 0 0 0 0 0 0 0
+events_jetCategories_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
 #events_step1 - - - 1 0 0 0 0 0 0 0 0 0
 #events_step2 - - - 1 0 0 0 0 0 0 0 0 0
@@ -14,36 +14,35 @@ events_jetCategories_step8 - - - 1 1 0 0 0 0 0 0 0 0
 #events_step5 - - - 1 1 0 0 0 0 0 0 0 0
 #events_step6 - - - 1 1 0 0 0 0 0 0 0 0
 #events_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate0 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate1 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate2 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate3 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate4 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate5 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate6 - - - 1 1 0 0 0 0 0 0 0 0
-#events_step8_cate7 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate0 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate1 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate2 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate3 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate4 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate5 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate6 - - - 1 1 0 0 0 0 0 0 0 0
+#events_step7_cate7 - - - 1 1 0 0 0 0 0 0 0 0
 
 
 
 ##
 ## MVA input variable plots (perhaps should have an own HistoList_mvaP)
 ##
-mvaP_jetCategories_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_jetCategories_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
-mvaP_jetChargeDiff_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_meanDeltaPhi_b_met_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_massDiff_recoil_bbbar_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_pt_b_antiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_pt_antiB_lepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_deltaR_b_antiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_deltaR_antiB_lepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_btagDiscriminatorSum_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_deltaPhi_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_massDiff_fullBLepton_bbbar_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_meanMt_b_met_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_massSum_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaP_massDiff_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaP_jetChargeDiff_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_meanDeltaPhi_b_met_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massDiff_recoil_bbbar_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_pt_b_antiLepton_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_pt_antiB_lepton_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_deltaR_b_antiLepton_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_deltaR_antiB_lepton_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_btagDiscriminatorSum_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_deltaPhi_antiBLepton_bAntiLepton_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massDiff_fullBLepton_bbbar_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_meanMt_b_met_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massSum_antiBLepton_bAntiLepton_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaP_massDiff_antiBLepton_bAntiLepton_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
 
 
@@ -53,18 +52,18 @@ mvaP_massDiff_antiBLepton_bAntiLepton_step10 - - - 1 0 0 0 0 0 0 0 0 0
 ##
 ## MVA validation plots (perhaps should have an own HistoList_mvaA)
 ##
-mvaA_jetCategories_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_jetCategories_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
-mvaA_mvaWeightCorrect_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaA_best_mvaWeightCorrect_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaA_mvaWeightSwapped_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaA_best_mvaWeightSwapped_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_mvaWeightCorrect_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_best_mvaWeightCorrect_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_mvaWeightSwapped_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_best_mvaWeightSwapped_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
-mvaA_dijet_mass_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaA_best_dijet_mass_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_dijet_mass_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_best_dijet_mass_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
-mvaA_mvaWeightCombined_step10 - - - 1 0 0 0 0 0 0 0 0 0
-mvaA_best_mvaWeightCombined_step10 - - - 1 0 0 0 0 0 0 0 0 0
+mvaA_mvaWeightCombined_step7 - - - 1 1 0 0 0 0 0 0 0 0
+mvaA_best_mvaWeightCombined_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
 
 
@@ -72,67 +71,39 @@ mvaA_best_mvaWeightCombined_step10 - - - 1 0 0 0 0 0 0 0 0 0
 ##
 ## Basic control plots
 ##
-basic_jetCategories_step8 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jetCategories_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
-basic_lepton_multiplicity_step8 - - - 1 1 0 1 0 0 0 0 0 0
-basic_lepton_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton1st_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton1st_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton1st_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton2nd_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton2nd_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_lepton2nd_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_dilepton_mass_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_dilepton_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_dilepton_rapidity_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_dilepton_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_dilepton_deltaEta_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_dilepton_deltaPhi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jet_multiplicity_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jet_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jet_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jet_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jet_btagDiscriminator_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jet_chargeGlobalPtWeighted_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_jet_chargeRelativePtWeighted_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_bjet_multiplicity_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_bjet_pt_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_bjet_eta_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_bjet_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_met_et_step8 - - - 1 1 0 0 0 0 0 0 0 0
-basic_met_phi_step8 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton_multiplicity_step7 - - - 1 1 0 1 0 0 0 0 0 0
+basic_lepton_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton1st_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton1st_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton1st_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton2nd_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton2nd_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_lepton2nd_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_dilepton_mass_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_dilepton_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_dilepton_rapidity_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_dilepton_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_dilepton_deltaEta_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_dilepton_deltaPhi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jet_multiplicity_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jet_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jet_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jet_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jet_btagDiscriminator_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jet_chargeGlobalPtWeighted_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_jet_chargeRelativePtWeighted_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_bjet_multiplicity_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_bjet_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_bjet_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_bjet_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_met_et_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_met_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
 
-
-#basic_lepton_multiplicity_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton1st_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton1st_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton1st_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton2nd_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton2nd_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_lepton2nd_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_dilepton_mass_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_dilepton_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_dilepton_rapidity_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_dilepton_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_dilepton_deltaEta_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_dilepton_deltaPhi_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_jet_multiplicity_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_jet_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_jet_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_jet_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_jet_btagDiscriminator_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_bjet_multiplicity_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_bjet_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_bjet_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_bjet_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_met_et_step7 - - - 1 1 0 0 0 0 0 0 0 0
-#basic_met_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
 #basic_lepton_multiplicity_step6 - - - 1 1 0 0 0 0 0 0 0 0
 #basic_lepton_pt_step6 - - - 1 1 0 0 0 0 0 0 0 0
