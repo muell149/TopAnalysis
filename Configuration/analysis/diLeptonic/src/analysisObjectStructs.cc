@@ -38,6 +38,10 @@ void RecoObjects::clear()
     //jetBTagCSVMVA_ = 0;
     jetChargeGlobalPtWeighted_ = 0;
     jetChargeRelativePtWeighted_ = 0;
+    jetChargeRelativePtWeighted_ = 0;
+//     jetTrackIndex_ = 0;
+//     jetTrackCharge_ = 0;
+//     jetTrack_ = 0;
     met_ = 0;
     jetJERSF_ = 0;
     jetsForMET_ = 0;
@@ -111,7 +115,7 @@ void TopGenObjects::clear()
     AntiBHadronFromTopB_ = 0;
     BHadronVsJet_ = 0;
     AntiBHadronVsJet_ = 0;
-    //genBHadPlusMothersPdgId_ = 0;
+    genBHadPlusMothersPdgId_ = 0;
     //genBHadPlusMothersStatus_ = 0;
     //genBHadPlusMothersIndices_ = 0;
     genBHadPlusMothers_ = 0;

@@ -65,6 +65,9 @@ protected:
     //std::vector<double> *jetBTagCSVMVA_;
     std::vector<double> *jetChargeGlobalPtWeighted_;
     std::vector<double> *jetChargeRelativePtWeighted_;
+//     std::vector<int>* jetTrackIndex_;
+//     std::vector<int>* jetTrackCharge_;
+//     std::vector<LV>* jetTrack_;
     LV                  *met_;
     std::vector<double> *jetJERSF_;
     VLV                 *jetsForMET_;
@@ -161,7 +164,7 @@ protected:
     std::vector<bool> *AntiBHadronFromTopB_;
     std::vector<int>  *BHadronVsJet_;
     std::vector<int>  *AntiBHadronVsJet_;
-    //std::vector<int>  *genBHadPlusMothersPdgId_;
+    std::vector<int>  *genBHadPlusMothersPdgId_;
     //std::vector<int>  *genBHadPlusMothersStatus_;
     //std::vector<std::vector<int> > *genBHadPlusMothersIndices_;
     std::vector<LV>   *genBHadPlusMothers_;
@@ -271,6 +274,9 @@ private:
     TBranch *b_jetBTagCSVMVA;
     TBranch *b_jetChargeGlobalPtWeighted;
     TBranch *b_jetChargeRelativePtWeighted;
+//     TBranch *b_jetTrackIndex;
+//     TBranch *b_jetTrackCharge;
+//     TBranch *b_jetTrack;
     TBranch *b_met;
     TBranch *b_jetJERSF;
     TBranch *b_jetForMET;

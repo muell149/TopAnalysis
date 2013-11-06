@@ -22,6 +22,8 @@ Implementation:
 #include <memory>
 #include <string>
 #include <map>
+#include <iostream>
+#include <sstream>
 #include <boost/lexical_cast.hpp>
 
 // user include files
@@ -62,6 +64,7 @@ Implementation:
 // class declaration
 //
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > LV;
+typedef std::vector<LV> VLV;
 
 class NTupleWriter : public edm::EDAnalyzer
 {
@@ -70,6 +73,7 @@ public:
     ~NTupleWriter();
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+    void genJets();
 
 
 private:
@@ -238,6 +242,9 @@ private:
     std::vector<double> VjetChargeRelativePtWeighted;
     std::vector<int> VjetAssociatedPartonPdgId;
     std::vector<LV> VjetAssociatedParton;
+    std::vector<int> VjetTrackIndex;
+    std::vector<int> VjetTrackCharge;
+    std::vector<LV> VjetTrack;
 
     std::vector<double> VPdfWeights;
 
@@ -405,7 +412,7 @@ void
 NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
     clearVariables();
-
+    std::cout<<"================next event================"<<std::endl;
     //##################### MC weights for MCatNLO ###############
     if ( iEvent.isRealData() ) {
         weightGenerator = 1;
@@ -497,7 +504,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
                 if ((jet1tagged || jet2tagged) && best < 0) { best = i; }
             }
 
-            //std::cout << iEvent.eventAuxiliary().id() <<  ": choose combination #" << best << "\n";
+//             std::cout << iEvent.eventAuxiliary().id() <<  ": choose combination #" << best << "\n";
 
             //for ( size_t i=0; i<FullLepEvt->numberOfAvailableHypos (hypoKey); ++i )
             if (best >= 0)
@@ -916,12 +923,30 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetBTagCSV.push_back(ajet->bDiscriminator("combinedSecondaryVertexBJetTags"));
         VjetBTagCSVMVA.push_back(ajet->bDiscriminator("combinedSecondaryVertexMVABJetTags"));
     }
-
+    
+    
+    
     for(std::vector<JetProperties>::const_iterator i_jetProperties = jetPropertiesHandle->begin(); i_jetProperties != jetPropertiesHandle->end(); ++i_jetProperties){
         VjetChargeGlobalPtWeighted.push_back(i_jetProperties->jetChargeGlobalPtWeighted());
         VjetChargeRelativePtWeighted.push_back(i_jetProperties->jetChargeRelativePtWeighted());
         VjetAssociatedPartonPdgId.push_back(i_jetProperties->jetAssociatedPartonPdgId());
         VjetAssociatedParton.push_back(i_jetProperties->jetAssociatedParton());
+	std::cout<<"================next jet================"<<std::endl;
+	std::cout<<"i_jetProperties is = "<<i_jetProperties-jetPropertiesHandle->begin()<<std::endl;
+// 	std::cout<<"jetAssociatedPartonPdgId size is = "<<i_jetProperties->jetAssociatedPartonPdgId.size()<<std::endl;
+// 	std::cout<<"jet handle size = "<<jetHandle.size()<<std::endl;
+// 	for ( edm::View<pat::Jet>::const_iterator ajet  = jets->begin() ; ajet != jets->end(); ++ajet )
+// 	{
+    
+	//Here I create the index list with the track charge and LV
+	if (i_jetProperties->jetTrackCharge().size() != i_jetProperties->jetTrack().size()) std::cout<<"*****************ERROR!! Charge and track size are not the same size!!****************"<<std::endl;
+		for (unsigned int i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++){
+			VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
+			VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());
+			VjetTrack.push_back(i_jetProperties->jetTrack().at(i_charge));
+// 		}
+			
+	}
     }
 
 
@@ -1146,6 +1171,9 @@ NTupleWriter::beginJob()
 
     Ntuple->Branch("jetChargeGlobalPtWeighted", &VjetChargeGlobalPtWeighted);
     Ntuple->Branch("jetChargeRelativePtWeighted", &VjetChargeRelativePtWeighted);
+    Ntuple->Branch("jetTrackIndex", &VjetTrackIndex);
+    Ntuple->Branch("jetTrackCharge", &VjetTrackCharge);
+    Ntuple->Branch("jetTrack", &VjetTrack);
     if (isTtBarSample_) Ntuple->Branch("jetAssociatedPartonPdgId", &VjetAssociatedPartonPdgId);
 
     /////////////met properties///////////
@@ -1304,6 +1332,9 @@ void NTupleWriter::clearVariables()
     VjetChargeRelativePtWeighted.clear();
     VjetAssociatedPartonPdgId.clear();
     VjetAssociatedParton.clear();
+    VjetTrackIndex.clear();
+    VjetTrackCharge.clear();
+    VjetTrack.clear();
 
     VBHadJetIdx.clear();
     VAntiBHadJetIdx.clear();
