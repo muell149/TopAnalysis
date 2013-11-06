@@ -60,10 +60,10 @@ gROOT->ProcessLine(".L macros/mvaSeparationPlots.C++");
 
 
 
-TString inputFileName("mvaOutput/plots.root");
+TString inputFileName("mvaOutput/Nominal/combined/plots.root");
 
 
-TString step = "8";
+TString step = "10";
 int category = -1;
 
 

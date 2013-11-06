@@ -1,5 +1,5 @@
-#ifndef MvaWeightsAnalyzer_h
-#define MvaWeightsAnalyzer_h
+#ifndef MvaWeights2d_h
+#define MvaWeights2d_h
 
 #include <vector>
 #include <string>
@@ -10,28 +10,28 @@ class TString;
 class TH1;
 
 #include "mvaStructs.h"
-#include "MvaFactory.h"
 #include "../../diLeptonic/src/storeTemplate.h"
 
+namespace mvaSetup{
+    class MvaSet;
+}
 
 
 
 
-/// Class for plotting input variables for MVA,
-/// trying to identify the jets coming from (anti)b's from (anti)tops
-class MvaWeightsAnalyzer{
+/// Class for plotting 2D distributions for MVA weights of correct and swapped training
+class MvaWeights2d{
     
 public:
     
     /// Constructor for selection steps
-    MvaWeightsAnalyzer(const std::map<TString, std::vector<MvaTopJetsVariables> >& m_stepMvaVariables,
-                       const char* mvaWeightFileDirectory,
-                       const std::vector<MvaFactory::MvaSet>& v_mvaSetCorrect,
-                       const std::vector<MvaFactory::MvaSet>& v_mvaSetSwapped,
-                       const bool separationPowerPlots =false);
+    MvaWeights2d(const std::map<TString, std::vector<MvaTopJetsVariables> >& m_stepMvaVariables,
+                 const char* mvaWeightFileDirectory,
+                 const std::vector<mvaSetup::MvaSet>& v_mvaSet,
+                 const bool separationPowerPlots =false);
     
     /// Destructor
-    ~MvaWeightsAnalyzer(){}
+    ~MvaWeights2d(){}
     
     
     
@@ -67,8 +67,8 @@ private:
     
     
     
-    /// Book and fill histograms for given selection step
-    void plotStep(const TString& step, const std::vector<MvaTopJetsVariables>& v_mvaTopJetsVariables);
+    /// Book and fill histograms for given MVA set
+    void plotStep(const mvaSetup::MvaSet& mvaSet);
     
     /// Book 1-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
     void bookHistosInclExcl(std::map<TString, TH1*>& m_histogram, const TString& prefix, const TString& step,
@@ -110,11 +110,11 @@ private:
     /// Whether to produce plots inclusively, or exclusively for correct, swapped and wrong combinations
     const bool plotExclusively_;
     
-    
-    
+    /// Where to find the MVA weight files and to store the 2D-weight histograms
     const char* mvaWeightFileDirectory_;
-    const std::vector<MvaFactory::MvaSet>& v_mvaSetCorrect_;
-    const std::vector<MvaFactory::MvaSet>& v_mvaSetSwapped_;
+    
+    /// The MVA sets used to define the MVA trainings
+    const std::vector<mvaSetup::MvaSet>& v_mvaSet_;
 };
 
 

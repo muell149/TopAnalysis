@@ -31,10 +31,11 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   MeanSol
   MvaTreeHandler
   MvaTreeAnalyzer
-  MvaWeightsAnalyzer
+  MvaWeights2d
   MvaReader
   MvaFactory
   MvaValidation
+  mvaSetup
   mvaStructs
   JetCorrectionUncertainty
   JetCorrectorParameters

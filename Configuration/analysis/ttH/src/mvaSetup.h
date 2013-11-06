@@ -3,48 +3,80 @@
 
 #include <vector>
 #include <string>
-#include <utility>
 
 #include <TMVA/Types.h>
 
 #include "../../diLeptonic/src/sampleHelpers.h"
-#include "MvaFactory.h"
 
 
 
 
 
 
-namespace mvaSetups{
-    const std::vector<Channel::Channel> allChannels = {Channel::ee, Channel::emu, Channel::mumu, Channel::combined};
-    
-    const MvaFactory::MvaConfig config1("!H:!V:NTrees=600:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=13:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1",
-                                        "c1");
-    const MvaFactory::MvaConfig config2("!H:!V:NTrees=400:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=13:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1",
-                                        "c2");
-    const MvaFactory::MvaConfig config3("!H:!V:NTrees=200:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=13:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1",
-                                        "c3");
-    
-    // Apply set of categories
-    const MvaFactory::MvaSet set1 = MvaFactory::MvaSet({config1, config2, config3},
-                                                       {0, 1, 2},
-                                                       allChannels);
-    
-    // Apply no categories
-    const MvaFactory::MvaSet set2 = MvaFactory::MvaSet({config1, config2, config3},
-                                                       {},
-                                                       allChannels);
+namespace mvaSetup{
     
     
-    //const std::vector<MvaFactory::MvaSet> v_mvaSetCorrect = std::vector<MvaFactory::MvaSet>({set1, set2});
-    //const std::vector<MvaFactory::MvaSet> v_mvaSetSwapped = std::vector<MvaFactory::MvaSet>({set1, set2});
-    
-    const std::vector<MvaFactory::MvaSet> v_mvaSetCorrect = std::vector<MvaFactory::MvaSet>({set2});
-    const std::vector<MvaFactory::MvaSet> v_mvaSetSwapped = std::vector<MvaFactory::MvaSet>({set2});
+    /// Struct keeping steering parameters for MVA training
+    struct MvaConfig{
+        MvaConfig(const TString& options,
+                  const TString& methodAppendix,
+                  const TMVA::Types::EMVA& mvaType =TMVA::Types::kBDT);
+        ~MvaConfig(){}
+        
+        TMVA::Types::EMVA mvaType_;
+        TString methodAppendix_;
+        TString options_;
+    };
     
     
     
+    /// Struct for setting up same set of MvaConfigs in different event selections
+    struct MvaSet{
+        MvaSet(const std::vector<Channel::Channel>& channel,
+               const TString& step,
+               const std::vector<int>& v_category,
+               const std::vector<MvaConfig>& v_mvaConfigCorrect,
+               const std::vector<MvaConfig>& v_mvaConfigSwapped);
+        ~MvaSet(){}
+        
+        std::vector<Channel::Channel> v_channel_;
+        TString step_;
+        std::vector<int> v_category_;
+        std::vector<MvaConfig> v_mvaConfigCorrect_;
+        std::vector<MvaConfig> v_mvaConfigSwapped_;
+    };
+    
+    
+    /// Vector of file names for MVA, separated by channels and by systematics
+    typedef std::map<Systematic::Systematic, std::map<Channel::Channel, std::vector<TString> > > SystematicChannelFileNames;
+    
+    /// Find all files from file list for MVA, separated by channels and by systematics
+    /// Flag forTraining is used to separate training and testing files
+    SystematicChannelFileNames systematicChannelFileNames(const char* fileListBase,
+                                                          const std::vector<Channel::Channel>& v_channel,
+                                                          const std::vector<Systematic::Systematic>& v_systematic,
+                                                          const bool forTraining =true);
+    
+    /// Merge training and testing trees as they are sprecified in MVA sets (for given steps/categories and channels)
+    SystematicChannelFileNames mergeTrees(const char* mvaInputDir,
+                                          const SystematicChannelFileNames& m_systematicChannelFileNamesTraining,
+                                          const SystematicChannelFileNames& m_systematicChannelFileNamesTesting,
+                                          const std::vector<MvaSet>& v_mvaSet);
+    
+    /// Remove MVA sets which are not valid for given channel
+    std::vector<MvaSet> cleanForChannel(const std::vector<MvaSet>& v_mvaSet, const Channel::Channel& channel);
+    
+    
+    
+    /// MVA training configurations
+    const MvaConfig c1("!H:!V:NTrees=600:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=13:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1",
+                       "c1");
+    const MvaConfig c2("!H:!V:NTrees=400:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=13:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1",
+                       "c2");
+    const MvaConfig c3("!H:!V:NTrees=200:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.45:UseRandomisedTrees=False:UseNVars=13:nCuts=1000:PruneMethod=CostComplexity:PruneStrength=-1",
+                       "c3");
 }
+
 
 
 

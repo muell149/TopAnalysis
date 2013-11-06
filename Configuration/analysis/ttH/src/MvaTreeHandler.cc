@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
-#include <sstream>
 #include <fstream>
 
 #include <TTree.h>
@@ -245,6 +244,7 @@ void MvaTreeHandler::importTrees(const std::string& f_savename, const std::strin
 {
     std::cout<<"--- Beginning import of TTrees with MVA variables\n";
     
+    // Open input file
     TFile* inputFile = TFile::Open(f_savename.c_str());
     if(inputFile->IsZombie()){
         std::cerr<<"ERROR in importTrees()! Cannot open input file to import TTrees, filename is: "
@@ -252,10 +252,8 @@ void MvaTreeHandler::importTrees(const std::string& f_savename, const std::strin
         exit(77);
     }
     
-    TString treeName = prefix;
-    if(prefix != "") treeName.Append("mvaInputTopJets_");
-    
     // Find all trees of all steps/categories containing MVA input variables
+    const TString treeName = prefix;
     const std::vector<std::pair<TString, TString> > v_nameStepPair =
         tth::nameStepPairs(f_savename.c_str(), treeName);
     
@@ -380,6 +378,14 @@ tth::mvaHelpers::SystematicChannelFileNames tth::mvaHelpers::systematicChannelFi
     
     return m_systematicChannelFileNames;
 }
+
+
+
+
+
+
+
+
 
 
 
