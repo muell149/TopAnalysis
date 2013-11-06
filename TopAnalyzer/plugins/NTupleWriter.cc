@@ -22,8 +22,6 @@ Implementation:
 #include <memory>
 #include <string>
 #include <map>
-#include <iostream>
-#include <sstream>
 #include <boost/lexical_cast.hpp>
 
 // user include files
@@ -64,7 +62,6 @@ Implementation:
 // class declaration
 //
 typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > LV;
-typedef std::vector<LV> VLV;
 
 class NTupleWriter : public edm::EDAnalyzer
 {
@@ -412,7 +409,6 @@ void
 NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
     clearVariables();
-    std::cout<<"================next event================"<<std::endl;
     //##################### MC weights for MCatNLO ###############
     if ( iEvent.isRealData() ) {
         weightGenerator = 1;
@@ -931,15 +927,12 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetChargeRelativePtWeighted.push_back(i_jetProperties->jetChargeRelativePtWeighted());
         VjetAssociatedPartonPdgId.push_back(i_jetProperties->jetAssociatedPartonPdgId());
         VjetAssociatedParton.push_back(i_jetProperties->jetAssociatedParton());
-	std::cout<<"================next jet================"<<std::endl;
-	std::cout<<"i_jetProperties is = "<<i_jetProperties-jetPropertiesHandle->begin()<<std::endl;
 // 	std::cout<<"jetAssociatedPartonPdgId size is = "<<i_jetProperties->jetAssociatedPartonPdgId.size()<<std::endl;
 // 	std::cout<<"jet handle size = "<<jetHandle.size()<<std::endl;
 // 	for ( edm::View<pat::Jet>::const_iterator ajet  = jets->begin() ; ajet != jets->end(); ++ajet )
 // 	{
     
 	//Here I create the index list with the track charge and LV
-	if (i_jetProperties->jetTrackCharge().size() != i_jetProperties->jetTrack().size()) std::cout<<"*****************ERROR!! Charge and track size are not the same size!!****************"<<std::endl;
 		for (unsigned int i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++){
 			VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
 			VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());

@@ -5,7 +5,7 @@
 
 JetProperties::JetProperties():
 jetChargeGlobalPtWeighted_(0), jetChargeRelativePtWeighted_(0),
-jetAssociatedPartonPdgId_(0), jetAssociatedParton_(math::PtEtaPhiMLorentzVectorD(0,0,0,0)) //NEED TO DISCOVER HOW TO INITIALISE MY VECTORS HERE!!!!!!!!!
+jetAssociatedPartonPdgId_(0), jetAssociatedParton_(math::PtEtaPhiMLorentzVectorD(0,0,0,0)) 
 {}
     
 JetProperties::JetProperties(const double& jetChargeGlobalPtWeighted, const double& jetChargeRelativePtWeighted,
