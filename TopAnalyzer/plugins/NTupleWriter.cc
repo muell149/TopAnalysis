@@ -70,7 +70,6 @@ public:
     ~NTupleWriter();
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-    void genJets();
 
 
 private:
@@ -500,8 +499,8 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
                 if ((jet1tagged || jet2tagged) && best < 0) { best = i; }
             }
 
-//             std::cout << iEvent.eventAuxiliary().id() <<  ": choose combination #" << best << "\n";
-
+            //std::cout << iEvent.eventAuxiliary().id() <<  ": choose combination #" << best << "\n";
+            
             //for ( size_t i=0; i<FullLepEvt->numberOfAvailableHypos (hypoKey); ++i )
             if (best >= 0)
             {
@@ -927,17 +926,13 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetChargeRelativePtWeighted.push_back(i_jetProperties->jetChargeRelativePtWeighted());
         VjetAssociatedPartonPdgId.push_back(i_jetProperties->jetAssociatedPartonPdgId());
         VjetAssociatedParton.push_back(i_jetProperties->jetAssociatedParton());
-// 	std::cout<<"jetAssociatedPartonPdgId size is = "<<i_jetProperties->jetAssociatedPartonPdgId.size()<<std::endl;
-// 	std::cout<<"jet handle size = "<<jetHandle.size()<<std::endl;
-// 	for ( edm::View<pat::Jet>::const_iterator ajet  = jets->begin() ; ajet != jets->end(); ++ajet )
-// 	{
+
     
-	//Here I create the index list with the track charge and LV
-		for (unsigned int i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++){
+		//Here I create the index list with the track charge and LV
+		for (size_t i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++){
 			VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
 			VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());
 			VjetTrack.push_back(i_jetProperties->jetTrack().at(i_charge));
-// 		}
 			
 	}
     }
