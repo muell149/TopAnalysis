@@ -23,6 +23,9 @@
 #include "MvaValidation.h"
 #include "DijetAnalyzer.h"
 #include "AnalysisHistograms.h"
+#include "BasicAnalyzer.h"
+#include "JetMatchAnalyzer.h"
+#include "JetChargeAnalyzer.h"
 #include "Playground.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/utils.h"
@@ -100,6 +103,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                         const Channel::Channel& channel,
                         const Systematic::Systematic& systematic,
                         const int dy,
+                        const int jetCategoriesId,
                         const std::vector<AnalysisMode::AnalysisMode>& v_analysisMode)
 {   
     std::cout<<std::endl;
@@ -144,18 +148,23 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                                       Channel::convertChannels(Channel::realChannels),
                                       Systematic::convertSystematic(systematic));
     
+    // Set up jet categories
+    JetCategories* jetCategories(0);
+    if(jetCategoriesId == 0) jetCategories = new JetCategories(2, 4, 1, 3, true, true); // Default categories
+    else if(jetCategoriesId == 1) jetCategories = new JetCategories(2, 5, 0, 5, true, true); // Overview categories
+    else if(jetCategoriesId == 2) jetCategories = new JetCategories(4, 4, 1, 3, true, true); // 4-jet categories of default categories
+    else if(jetCategoriesId == 3) jetCategories = new JetCategories(4, 4, 2, 4, true, true); // Nazar's categories
+    if(!jetCategories){
+        std::cerr<<"Error in load_Analysis! No jet categories defined\n...break\n"<<std::endl;
+        exit(832);
+    }
     
+    // Vector for setting up all analysers
     std::vector<AnalysisHistogramsBase*> v_analysisHistograms;
     
-    // Set up jet categories for overview
-    const JetCategories jetCategories_overview(2, 5, 0, 5, true, true);
-    
-    // Set up jet categories for analysis
-    const JetCategories jetCategories(2, 4, 1, 3, true, true);
-
     // Set up event yield histograms
     EventYieldHistograms* eventYieldHistograms(0);
-    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7"}, {"7"}, &jetCategories);
+    eventYieldHistograms = new EventYieldHistograms({"1", "2", "3", "4", "5", "6", "7"}, {"7"}, jetCategories);
     v_analysisHistograms.push_back(eventYieldHistograms);
     
     // Set up Drell-Yan scaling histograms
@@ -166,40 +175,52 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     // Set up basic histograms
     BasicHistograms* basicHistograms(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::cp) != v_analysisMode.end()){
-        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7"}, {"7"}, &jetCategories);
+        basicHistograms = new BasicHistograms({"1", "2", "3", "4", "5", "6", "7"}, {"7"}, jetCategories);
         v_analysisHistograms.push_back(basicHistograms);
+    }
+    
+    // Set up jet charge analyzer
+    JetChargeAnalyzer* jetChargeAnalyzer(0);
+    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::charge) != v_analysisMode.end()){
+        jetChargeAnalyzer = new JetChargeAnalyzer({"7"}, {"7"}, jetCategories);
+        v_analysisHistograms.push_back(jetChargeAnalyzer);
+    }
+    
+    // Set up jet match analyzer
+    JetMatchAnalyzer* jetMatchAnalyzer(0);
+    if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::match) != v_analysisMode.end()){
+        jetMatchAnalyzer = new JetMatchAnalyzer({"7"}, {"7"}, jetCategories);
+        v_analysisHistograms.push_back(jetMatchAnalyzer);
     }
     
     // Set up playground
     Playground* playground(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::playg) != v_analysisMode.end()){
-        //playground = new Playground({"1", "2", "3", "4", "5", "6", "7"},{"6", "7"}, &jetCategories_overview);
+        //playground = new Playground({"1", "2", "3", "4", "5", "6", "7"},{"6", "7"}, jetCategories);
         playground = new Playground({"1", "2", "3", "4", "5", "6", "7"});
         v_analysisHistograms.push_back(playground);
     }
     
     // Set up DijetAnalyzer
     DijetAnalyzer* dijetAnalyzer(0);
-    const JetCategories jetCategories_dijetAnalyzer(4, 4, 2, 4, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::dijet) != v_analysisMode.end()){
-        dijetAnalyzer = new DijetAnalyzer({}, {"7"}, &jetCategories_dijetAnalyzer);
+        dijetAnalyzer = new DijetAnalyzer({}, {"7"}, jetCategories);
         v_analysisHistograms.push_back(dijetAnalyzer);
     }
     
     // Set up MVA validation, including reading in MVA weights in case they exist
     MvaValidation* mvaValidation(0);
-    const JetCategories jetCategories_mva(4, 4, 1, 3, true, true);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaA) != v_analysisMode.end()){
         mvaValidation = new MvaValidation(MvaWeightsCorrectFILE, MvaWeightsSwappedFILE,
                                           Mva2dWeightsDIR, Mva2dWeightsHISTO,
-                                          {"7"}, {"7"}, &jetCategories);
+                                          {"7"}, {"7"}, jetCategories);
         v_analysisHistograms.push_back(mvaValidation);
     }
     
     // Set up production of MVA input tree
     MvaTreeHandler* mvaTreeHandler(0);
     if(std::find(v_analysisMode.begin(), v_analysisMode.end(), AnalysisMode::mvaP) != v_analysisMode.end()){
-        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"7"}, {"7"}, &jetCategories);
+        mvaTreeHandler = new MvaTreeHandler(MvaInputDIR, {"7"}, {"7"}, jetCategories);
     }
     
     // Set up the analysis
@@ -365,6 +386,8 @@ int main(int argc, char** argv) {
             ttbar::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsAnalysis)));
     CLParameter<int> opt_dy("d", "Drell-Yan mode (11 for ee, 13 for mumu, 15 for tautau)", false, 1, 1,
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
+    CLParameter<int> opt_jetCategoriesId("j", "ID for jet categories (# jets, # b-jets). If not specified, use default categories (=0)", false, 1, 1,
+            [](int id){return id>=0 && id<=3;});
     CLParameter<std::string> opt_mode("m", "Mode of analysis: control plots (cp), Produce MVA input (mvaP), Apply MVA weights (mvaA), dijet analyser (dijet), playground (playg). Default is cp", false, 1, 100,
             ttbar::makeStringCheck(AnalysisMode::convertAnalysisModes(AnalysisMode::allowedAnalysisModes)));
     CLAnalyser::interpretGlobal(argc, argv);
@@ -383,6 +406,9 @@ int main(int argc, char** argv) {
     // Set up Drell-Yan mode
     const int dy = opt_dy.isSet() ? opt_dy[0] : 0;
     
+    // Set up jet categories
+    const int jetCategoriesId = opt_jetCategoriesId.isSet() ? opt_jetCategoriesId[0] : 0;
+    
     // Set up analysis mode
     std::vector<AnalysisMode::AnalysisMode> v_analysisMode({AnalysisMode::cp});
     if(opt_mode.isSet()) v_analysisMode = AnalysisMode::convertAnalysisModes(opt_mode.getArguments());
@@ -392,7 +418,7 @@ int main(int argc, char** argv) {
     
     // Start plotting
     //TProof* p = TProof::Open(""); // not before ROOT 5.34
-    load_HiggsAnalysis(validFilenamePattern, channel, systematic, dy, v_analysisMode);
+    load_HiggsAnalysis(validFilenamePattern, channel, systematic, dy, jetCategoriesId, v_analysisMode);
     //delete p;
 }
 

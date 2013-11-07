@@ -11,11 +11,17 @@ class TH2D;
 #include "AnalysisHistograms.h"
 #include "mvaStructs.h"
 
-class MvaTopJetsVariables;
 class JetCategories;
 class RecoObjects;
+class CommonGenObjects;
+class TopGenObjects;
+class HiggsGenObjects;
+class KinRecoObjects;
+class MvaTopJetsVariables;
 class MvaReader;
 namespace tth{
+    class RecoLevelWeights;
+    class GenLevelWeights;
     class RecoObjectIndices;
     class GenObjectIndices;
 }

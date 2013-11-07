@@ -13,7 +13,6 @@
 #include "Playground.h"
 #include "analysisStructs.h"
 #include "JetCategories.h"
-#include "higgsUtils.h"
 #include "../../diLeptonic/src/analysisUtils.h"
 #include "../../diLeptonic/src/analysisObjectStructs.h"
 #include "../../diLeptonic/src/classes.h"
@@ -37,6 +36,7 @@ void Playground::bookHistos(const TString& step, std::map<TString, TH1*>& m_hist
 {
     TString name;
     
+    
     // Book histograms here
     name = "blah1";
     m_histogram[name] = this->store(new TH1D(prefix_+name+step,"histo title;x axis;y axis",10,0,100));
@@ -56,12 +56,25 @@ void Playground::fillHistos(const RecoObjects& recoObjects, const CommonGenObjec
 {
     TString name;
     
+    
     // Do calculations and filling of histograms
+    const bool nonsenseBool = recoObjects.valuesSet_ && commonGenObjects.valuesSet_ && topGenObjects.valuesSet_ &&
+                              higgsGenObjects.valuesSet_ && kinRecoObjects.valuesSet_;
+    
+    const int nonsenseInt = recoObjectIndices.antiLeptonIndex_ + genObjectIndices.genAntiBjetFromHiggsIndex_;
+    
+    const double nonsenseDouble = genLevelWeights.trueLevelWeight_ * recoLevelWeights.weight_ * 10.;
+    
+    
+    
     name = "blah1";
-    m_histogram[name]->Fill(1., weight);
+    if(nonsenseBool) m_histogram[name]->Fill(1., weight);
+    else if(step == "nonsense") m_histogram[name]->Fill(2., weight);
+    else m_histogram[name]->Fill(3., weight);
     
     name = "blah2_blubb";
-    m_histogram[name]->Fill(31., weight);
+    m_histogram[name]->Fill(nonsenseInt, weight);
+    m_histogram[name]->Fill(nonsenseDouble, weight);
 }
 
 

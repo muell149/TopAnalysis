@@ -41,6 +41,9 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   JetCorrectorParameters
   SimpleJetCorrectionUncertainty
   AnalysisHistograms
+  BasicAnalyzer
+  JetChargeAnalyzer
+  JetMatchAnalyzer
   JetCategories
   ScaleFactors
   Playground

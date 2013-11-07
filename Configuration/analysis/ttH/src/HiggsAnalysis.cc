@@ -374,7 +374,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     //const KinRecoObjects& kinRecoObjects = this->getKinRecoObjects(entry);
     const KinRecoObjects& kinRecoObjects = this->getKinRecoObjectsOnTheFly(leptonIndex, antiLeptonIndex, jetIndices,
                                                                            allLeptons, jets, jetBTagCSV, met);
-    const bool hasSolution = kinRecoObjects.valuesSet_;
+    //const bool hasSolution = kinRecoObjects.valuesSet_;
     
     
     

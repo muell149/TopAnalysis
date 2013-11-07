@@ -21,7 +21,7 @@ private:
                     const bool greaterEqualJetNumber =false, const bool greaterEqualBjetNumber =false);
         
         /// Get label in format [>=]numberOfJets, [>=]numberOfBjets
-        TString binLabel(const bool rootLabel=true)const;
+        TString binLabel(const bool rootLabel =true)const;
         
         /// number of jets
         int numberOfJets_;
@@ -68,7 +68,7 @@ public:
     void clear();
     
     /// Get the category labels to assign them to histogram bins
-    std::vector<TString> binLabels()const;
+    std::vector<TString> binLabels(const bool rootLabel =true)const;
     
     
     

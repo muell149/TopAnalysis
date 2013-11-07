@@ -9,7 +9,6 @@ class TH1;
 class TSelectorList;
 
 #include "../../diLeptonic/src/storeTemplate.h"
-#include "../../diLeptonic/src/classesFwd.h"
 
 class JetCategories;
 class RecoObjects;
@@ -185,39 +184,6 @@ private:
 };
 
 
-
-
-
-
-/// Class for basic histograms that are filled simultaneously for any step
-class BasicHistograms : public AnalysisHistogramsBase{
-
-public:
-    
-    /// Constructor
-    BasicHistograms(const std::vector<TString>& selectionStepsNoCategories,
-                    const std::vector<TString>& stepsForCategories =std::vector<TString>(),
-                    const JetCategories* jetCategories =0);
-
-    /// Destructor
-    ~BasicHistograms(){}
-
-
-
-private:
-
-    /// Book all histograms for given selection step
-    virtual void bookHistos(const TString& step, std::map<TString, TH1*>& m_histogram);
-
-    /// Fill all histograms for given selection step
-    virtual void fillHistos(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
-                            const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
-                            const KinRecoObjects& kinRecoObjects,
-                            const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
-                            const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
-                            const double& weight, const TString& step,
-                            std::map<TString, TH1*>& m_histogram);
-};
 
 
 
