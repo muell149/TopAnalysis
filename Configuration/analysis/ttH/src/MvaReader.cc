@@ -12,9 +12,8 @@
 
 
 
-MvaReader::MvaReader(const char* mvaWeightsFile, const std::vector<TString>& selectionSteps):
-mvaWeightsReader_(0),
-selectionSteps_(selectionSteps)
+MvaReader::MvaReader(const char* mvaWeightsFile):
+mvaWeightsReader_(0)
 {
     std::cout<<"--- Beginning setting up MVA weights from file\n";
     

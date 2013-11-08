@@ -66,12 +66,6 @@ private:
                             std::map<TString, TH1*>& m_histogram);
 
 
-    /// Fill all histograms that are specific to a signel MVA training
-    void fillMVASpecificHistograms(const std::vector<float>& v_mvaWeights, const MvaTopJetsVariablesPerEvent& mvaTopJetsVariablesPerEvent,
-                                   std::map< TString, TH1* >& m_histogram, const RecoObjects& recoObjects,
-                                   const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
-                                   std::string mvaName, const double& weight, bool fillGenericHistograms);
-
     /// Book 1-D histograms exclusively for correct, swapped and wrong combinations, and inclusively
     void bookHistosInclExcl(std::map<TString, TH1*>& m_histogram, const TString& prefix, const TString& step,
                             const TString& name, const TString& title,
@@ -95,15 +89,58 @@ private:
 
 
 
-    /// MVA weights of correct dijet assignment for top system
-    MvaReader* weightsCorrect_;
-
-    /// MVA weights of swapped dijet assignment for top system
-    MvaReader* weightsSwapped_;
-
-
-
-    TH2D* weights2d_;
+    struct MvaWeightsStruct{
+    public:
+        
+        MvaWeightsStruct(const std::string& stepName, const std::vector<std::string>& v_nameCorrect, const std::vector<std::string>& v_nameSwapped);
+        ~MvaWeightsStruct(){}
+        
+        std::string stepName()const{return stepName_;}
+        const std::map<std::string, MvaReader*>& correctWeights()const{return m_correct_;}
+        const std::map<std::string, MvaReader*>& swappedWeights()const{return m_swapped_;}
+        const std::map<std::string, std::map<std::string, TH2D*> >& combinedWeights()const{return m_combined_;}
+        
+        
+    private:
+        
+        std::string stepName_;
+        
+        std::map<std::string, MvaReader*> m_correct_;
+        std::map<std::string, MvaReader*> m_swapped_;
+        std::map<std::string, std::map<std::string, TH2D*> > m_combined_;
+    };
+    
+    
+    std::vector<MvaWeightsStruct> v_mvaWeightsStruct_;
+    
+    void bookHistosPerSet(const TString& step, std::map<TString, TH1*>& m_histogram, const MvaWeightsStruct& mvaWeightsStruct);
+    
+    void bookMvaSpecificHistos(const TString& step, std::map<TString, TH1*>& m_histogram,
+                               const TString& mvaConfigName, const TString& mvaType);
+    
+    void fillHistosPerSet(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
+                          const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
+                          const KinRecoObjects& kinRecoObjects,
+                          const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                          const tth::GenLevelWeights& genLevelWeights, const tth::RecoLevelWeights& recoLevelWeights,
+                          const double& weight, const TString& step,
+                          std::map<TString, TH1*>& m_histogram,
+                          const MvaWeightsStruct& mvaWeightsStruct
+                         );
+    
+    void fillWeightHistos(const MvaTopJetsVariablesPerEvent& mvaTopJetsVariablesPerEvent,
+                          const std::vector<float>& v_mvaWeight, const size_t maxWeightIndex,
+                          const double& weight,
+                          std::map<TString, TH1*>& m_histogram,
+                          const TString& mvaType, const std::string& mvaConfigName1, const std::string& mvaConfigName2 ="");
+    
+    void fillBestWeightHistos(const std::vector<float>& v_mvaWeights,
+                              const RecoObjects& recoObjects,
+                              const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
+                              const double& weight, 
+                              std::map<TString, TH1*>& m_histogram,
+                              const std::string& mvaType, const std::string& mvaConfigName);
+    
 };
 
 

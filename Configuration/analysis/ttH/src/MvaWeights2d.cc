@@ -107,7 +107,7 @@ void MvaWeights2d::plotStep(const mvaSetup::MvaSet& mvaSet)
         TString fileNameCorrect(mvaWeightFileDirectory_);
         fileNameCorrect.Append(methodPrefixCorrect);
         fileNameCorrect.Append(step).Append("_").Append(methodTitleCorrect).Append(fileAppendix);
-        MvaReader weightsCorrect(fileNameCorrect, {});
+        MvaReader weightsCorrect(fileNameCorrect);
         const std::vector<float> v_mvaWeightsCorrect = weightsCorrect.mvaWeights(v_mvaTopJetsVariables);
         
         for(const mvaSetup::MvaConfig& mvaConfigSwapped : v_mvaConfigSwapped){
@@ -115,7 +115,7 @@ void MvaWeights2d::plotStep(const mvaSetup::MvaSet& mvaSet)
             TString fileNameSwapped(mvaWeightFileDirectory_);
             fileNameSwapped.Append(methodPrefixSwapped);
             fileNameSwapped.Append(step).Append("_").Append(methodTitleSwapped).Append(fileAppendix);
-            MvaReader weightsSwapped(fileNameSwapped, {});
+            MvaReader weightsSwapped(fileNameSwapped);
             const std::vector<float> v_mvaWeightsSwapped = weightsSwapped.mvaWeights(v_mvaTopJetsVariables);
             
             // Book histograms
