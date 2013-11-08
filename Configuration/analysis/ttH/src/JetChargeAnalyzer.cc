@@ -3,12 +3,15 @@
 #include <cstdlib>
 #include <utility>
 #include <algorithm>
+#include <map>
+#include <vector>
 
 #include <TString.h>
 #include <TH1.h>
 #include<TH1I.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TString.h>
 #include <Math/VectorUtil.h>
 #include <TProfile.h>
 
@@ -28,10 +31,10 @@
 JetChargeAnalyzer::JetChargeAnalyzer(const std::vector<TString>& selectionStepsNoCategories,
                        const std::vector<TString>& stepsForCategories,
                        const JetCategories* jetCategories):
-AnalysisHistogramsBase("test_", selectionStepsNoCategories, stepsForCategories, jetCategories)
+AnalysisHistogramsBase("jetCharge_", selectionStepsNoCategories, stepsForCategories, jetCategories)
 {
-    std::cout<<"--- Beginning setting up playground\n";
-    std::cout<<"=== Finishing setting up playground\n\n";
+    std::cout<<"--- Beginning setting up jetChargeAnalyzer\n";
+    std::cout<<"=== Finishing setting up jetChargeAnalyzer\n\n";
 }
 
 
