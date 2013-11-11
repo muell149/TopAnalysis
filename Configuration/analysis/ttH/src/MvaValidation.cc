@@ -46,7 +46,6 @@ AnalysisHistogramsBase("mvaA_", selectionStepsNoCategories, stepsForCategories, 
     // Adding names of correct trainings
     for ( int trainId=0; trainId<trainingsCorrect->GetEntries(); trainId++ )
     {
-        printf("    Adding correct weight: %s\n", ((TObjString*)trainingsCorrect->At(trainId))->String().Data());
         v_correct.push_back( std::string( ((TObjString*)trainingsCorrect->At(trainId))->String() ) );
     }
 
@@ -54,7 +53,6 @@ AnalysisHistogramsBase("mvaA_", selectionStepsNoCategories, stepsForCategories, 
     // Adding names of swapped trainings
     for ( int trainId=0; trainId<trainingsSwapped->GetEntries(); trainId++ )
     {
-        printf("    Adding swapped weight: %s\n", ((TObjString*)trainingsSwapped->At(trainId))->String().Data());
         v_swapped.push_back( std::string( ((TObjString*)trainingsSwapped->At(trainId))->String() ) );
     }
 

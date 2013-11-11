@@ -78,7 +78,7 @@ constexpr const char* MvaInputDIR = "mvaInput";
 
 
 /// Histogram containing the 2D distribution of MVA weights (needs to fit with the two weights also specified here)
-constexpr const char* Mva2dWeightsFILE = "mvaOutput/Nominal/emu/weights/weights2d.root";
+constexpr const char* Mva2dWeightsFILE = "mvaOutput/Nominal/combined/weights/weights2d.root";
 
 
 /// Folder for basic analysis output
