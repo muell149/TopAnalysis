@@ -40,10 +40,9 @@ class MvaValidation : public AnalysisHistogramsBase{
 public:
 
     /// Constructor
-    MvaValidation(const char* weightsCorrectFile, const char* weightsSwappedFile,
-                  const char* mva2dWeightsDir, const char* mva2dWeightsHisto,
+    MvaValidation(const char* mva2dWeightsFile,
                   const std::vector<TString>& selectionStepsNoCategories,
-                  const std::vector<TString>& stepsForCategories =std::vector<TString>(),
+                  const std::vector<TString>& stepsForCategories = std::vector<TString>(),
                   const JetCategories* jetCategories =0);
 
     /// Destructor
@@ -91,33 +90,34 @@ private:
 
     struct MvaWeightsStruct{
     public:
-        
-        MvaWeightsStruct(const std::string& stepName, const std::vector<std::string>& v_nameCorrect, const std::vector<std::string>& v_nameSwapped);
+
+        MvaWeightsStruct(const std::string& stepName, const std::vector<std::string>& v_nameCorrect,
+                         const std::vector<std::string>& v_nameSwapped, const char* mva2dWeightsFile);
         ~MvaWeightsStruct(){}
-        
+
         std::string stepName()const{return stepName_;}
         const std::map<std::string, MvaReader*>& correctWeights()const{return m_correct_;}
         const std::map<std::string, MvaReader*>& swappedWeights()const{return m_swapped_;}
         const std::map<std::string, std::map<std::string, TH2D*> >& combinedWeights()const{return m_combined_;}
-        
-        
+
+
     private:
-        
+
         std::string stepName_;
-        
+
         std::map<std::string, MvaReader*> m_correct_;
         std::map<std::string, MvaReader*> m_swapped_;
         std::map<std::string, std::map<std::string, TH2D*> > m_combined_;
     };
-    
-    
+
+
     std::vector<MvaWeightsStruct> v_mvaWeightsStruct_;
-    
+
     void bookHistosPerSet(const TString& step, std::map<TString, TH1*>& m_histogram, const MvaWeightsStruct& mvaWeightsStruct);
-    
+
     void bookMvaSpecificHistos(const TString& step, std::map<TString, TH1*>& m_histogram,
                                const TString& mvaConfigName, const TString& mvaType);
-    
+
     void fillHistosPerSet(const RecoObjects& recoObjects, const CommonGenObjects& commonGenObjects,
                           const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
                           const KinRecoObjects& kinRecoObjects,
@@ -127,20 +127,20 @@ private:
                           std::map<TString, TH1*>& m_histogram,
                           const MvaWeightsStruct& mvaWeightsStruct
                          );
-    
+
     void fillWeightHistos(const MvaTopJetsVariablesPerEvent& mvaTopJetsVariablesPerEvent,
                           const std::vector<float>& v_mvaWeight, const size_t maxWeightIndex,
                           const double& weight,
                           std::map<TString, TH1*>& m_histogram,
                           const TString& mvaType, const std::string& mvaConfigName1, const std::string& mvaConfigName2 ="");
-    
+
     void fillBestWeightHistos(const std::vector<float>& v_mvaWeights,
                               const RecoObjects& recoObjects,
                               const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
-                              const double& weight, 
+                              const double& weight,
                               std::map<TString, TH1*>& m_histogram,
                               const std::string& mvaType, const std::string& mvaConfigName);
-    
+
 };
 
 
