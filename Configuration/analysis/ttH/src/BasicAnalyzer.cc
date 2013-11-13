@@ -99,6 +99,8 @@ void BasicHistograms::bookHistos(const TString& step, std::map<TString, TH1*>& m
     m_histogram[name] = this->store(new TH1D(prefix_+name+step, "B-Jet #eta;#eta^{b-jet};B-Jets",50,-2.6,2.6));
     name = "bjet_phi";
     m_histogram[name] = this->store(new TH1D(prefix_+name+step, "B-Jet #phi;#phi^{b-jet};B-Jets",50,-3.2,3.2));
+    name = "bjet_chargeRelativePtWeighted";
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "B-JetChargeRelativePtWeighted c_{rel}^{jet}; c_{rel}^{jet};# B-Jets", 110, -1.1, 1.1));
 
     // Met
     name = "met_et";
@@ -185,6 +187,7 @@ void BasicHistograms::fillHistos(const RecoObjects& recoObjects, const CommonGen
         m_histogram["bjet_pt"]->Fill(recoObjects.jets_->at(index).Pt(), weight);
         m_histogram["bjet_eta"]->Fill(recoObjects.jets_->at(index).Eta(), weight);
         m_histogram["bjet_phi"]->Fill(recoObjects.jets_->at(index).Phi(), weight);
+        m_histogram["bjet_chargeRelativePtWeighted"]->Fill(recoObjects.jetChargeRelativePtWeighted_->at(index), weight);
     }
     
     
