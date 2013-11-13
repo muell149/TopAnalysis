@@ -24,7 +24,7 @@ options = VarParsing.VarParsing ('standard')
 # create object triggerTag with default value HLT of type singleton and string
 options.register('triggerTag', 'HLT',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen trigger tag")
 # create sample label with default value data
-# for Summer12 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel), not yet working: zprime_m500gev_w5000mev, zprime_m750gev_w7500mev
+# for Summer12 MC one can choose: ttbar, wjets, zjets, singleAntiTopS, singleTopT, singleAntiTopT, singleTopTw, singleAntiTopTw, singleTopS WW, WZ, ZZ, zprime_m1000gev_w100gev, qcd (for muon channel); qcdEM1, qcdEM2, qcdEM3, qcdBCE1, qcdBCE2, qcdBCE3 (for electron channel)
 # for systematic samples see list for each MC sample
 options.register('sample', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen sample")
 # create lepton channel label 
@@ -40,6 +40,8 @@ options.register('eventsToProcess', -42,VarParsing.VarParsing.multiplicity.singl
 options.register('MCweighting', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.bool, "processing MC weights?")
 # create tag for jet energy variations (JERUp, JERDown, JESUp, JESDown)
 options.register('JEtag', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen jet energy tag")
+# closure test shape distortions
+options.register('sysDistort', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "ttbar shape distortion")
 
 # define the syntax for parsing
 # you need to enter in the cfg file:
@@ -203,11 +205,15 @@ if(not globals().has_key('additionalEventWeights')):
     additionalEventWeights  = True
 
 ## enable/ disable systematic ttbar shape distortion event reweighting
+if(not options.sysDistort=='unset'):
+    sysDistort=options.sysDistort
 if(not globals().has_key('sysDistort')):
     sysDistort =  ''
-    #sysDistort =  'data'
-    #sysDistort =  'Up'
-    #sysDistort =  'Down'
+    #sysDistort =  'data' // -> topPt wrt measurement
+    #sysDistort =  'ttbarMassUp'   
+    #sysDistort =  'ttbarMassDown'
+    #sysDistort =  'topPtUp'   
+    #sysDistort =  'topPtDown'
 # only done for ttbar
 if(not "ttbar" in options.sample and not "mcatnlo" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample ):
     sysDistort=''
@@ -561,20 +567,12 @@ if(not options.sample=="none"):
     elif(options.sample=="singleAntiTopTwScaleUp3"):        
         usedSample="TopAnalysis/Configuration/Summer12/TBarToTlepWhad_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	additionalEventWeights=False
-	outputFileName+="SingleAntiTopTWScaleUp3"       
-# FIXME: Z prime to be updated for 8 TeV
-##     elif(options.sample=="zprime_m500gev_w5000mev"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/zprime_M500GeV_W5000MeV_Madgraph_Fall11_AOD_cff"
-## 	additionalEventWeights=False
-## 	if(eventFilter=='signal only'):
-## 	    outputFileName+="Sig"
-## 	outputFileName+="Zprime_M500_W5000_"
-##     elif(options.sample=="zprime_m750gev_w7500mev"):        
-##         usedSample="TopAnalysis/Configuration/Fall11/zprime_M750GeV_W7500MeV_Madgraph_Fall11_AOD_cff"
-## 	if(eventFilter=='signal only'):
-## 	    outputFileName+="Sig"
-## 	additionalEventWeights=False
-## 	outputFileName+="Zprime_M750_W7500_"
+	outputFileName+="SingleAntiTopTWScaleUp3"
+    elif(options.sample=="zprime_m1000gev_w100gev"):
+        usedSample="TopAnalysis/Configuration/Summer12/ZPrimeToTTJets_M1000GeV_W100GeV_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff"
+        additionalEventWeights=False
+        if(eventFilter=='signal only'):
+            outputFileName+="Sig"
     elif(options.sample=="qcd" and decayChannel=='muon'):
         usedSample="TopAnalysis/Configuration/Summer12/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v3_cff"
         PythiaSample="True"
@@ -1830,21 +1828,31 @@ process.load("TopAnalysis.TopUtils.EventWeightDileptonModelVariation_cfi")
 #process.eventWeightDileptonModelVariation.variation=cms.string(sysDistort)
 #process.eventWeightDileptonModelVariation.ttGenEvent=cms.InputTag('genEvt')
 process.eventWeightDileptonModelVariation.ttGenEvent = cms.InputTag('genEvt')
-process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass') #valid values: toppt, topeta, ttbarmass, data
-process.eventWeightDileptonModelVariation.slope = cms.double(0.00137)
-process.eventWeightDileptonModelVariation.weight1x = cms.double(113.9)  #position where weight is 1
+process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass') #valid values: toppt, topeta, ttbarmass, ttbarmasslandau, data
 process.eventWeightDileptonModelVariation.minWeight = cms.double(0.1) #low cut-off, at least 0.1 event weight
-process.eventWeightDileptonModelVariation.maxWeight = cms.double(2)  #high cut-off, at most 2 event weight
+process.eventWeightDileptonModelVariation.maxWeight = cms.double(2.)  #high cut-off, at most 2 event weight
 process.eventWeightDileptonModelVariation.landauMPV = cms.double(420)
 process.eventWeightDileptonModelVariation.landauSigma = cms.double(34)
-if(sysDistort=='Up'):
-    process.eventWeightDileptonModelVariation.slope = cms.double(0.03)
-if(sysDistort=='Down'):
-    process.eventWeightDileptonModelVariation.slope = cms.double(-0.03)
-if(sysDistort=='Up0p015'):
-    process.eventWeightDileptonModelVariation.slope = cms.double(0.015)
-if(sysDistort=='Down0p015'):
-    process.eventWeightDileptonModelVariation.slope = cms.double(-0.015)
+
+if(sysDistort=='data'):
+    process.eventWeightDileptonModelVariation.weightVariable = cms.string('data')
+    process.eventWeightDileptonModelVariation.weight1x = cms.double(112.766) 
+    process.eventWeightDileptonModelVariation.slope    = cms.double(0.00141)
+elif( sysDistort.find('ttbarMass')>-1):
+    process.eventWeightDileptonModelVariation.weightVariable = cms.string('ttbarmass')
+    process.eventWeightDileptonModelVariation.weight1x = cms.double(350.) 
+    if( sysDistort.find('Up'  )>-1):
+        process.eventWeightDileptonModelVariation.slope = cms.double( 0.015)
+    elif( sysDistort.find('Down')>-1):
+        process.eventWeightDileptonModelVariation.slope = cms.double(-0.015)
+elif( sysDistort.find('topPt')>-1):
+    process.eventWeightDileptonModelVariation.weight1x = cms.double(0.318)    # equals 2*a from exp(a+bx) fit to 8TeV l+jets 12/fb data/MadGraph+Pythia
+    process.eventWeightDileptonModelVariation.slope = cms.double(-0.00282)    # equals 2*b from exp(a+bx) fit to 8TeV l+jets 12/fb data/MadGraph+Pythia
+    if( sysDistort.find('Up')>-1):
+        process.eventWeightDileptonModelVariation.weightVariable = cms.string('topptHard')
+    elif( sysDistort.find('Down')>-1):
+        process.eventWeightDileptonModelVariation.weightVariable = cms.string('topptSoft')
+        
 # multiply with PU weight
 eventWeightDileptonModelVariation=cms.InputTag("eventWeightDileptonModelVariation")
 weightlistDistortPU=cms.VInputTag()

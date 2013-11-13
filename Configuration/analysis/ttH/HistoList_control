@@ -100,6 +100,7 @@ basic_bjet_multiplicity_step7 - - - 1 1 0 0 0 0 0 0 0 0
 basic_bjet_pt_step7 - - - 1 1 0 0 0 0 0 0 0 0
 basic_bjet_eta_step7 - - - 1 1 0 0 0 0 0 0 0 0
 basic_bjet_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
+basic_bjet_chargeRelativePtWeighted_step7 - - - 1 1 0 0 0 0 0 0 0 0
 basic_met_et_step7 - - - 1 1 0 0 0 0 0 0 0 0
 basic_met_phi_step7 - - - 1 1 0 0 0 0 0 0 0 0
 
