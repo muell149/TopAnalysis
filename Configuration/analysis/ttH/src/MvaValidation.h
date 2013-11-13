@@ -42,7 +42,7 @@ public:
     /// Constructor
     MvaValidation(const char* mva2dWeightsFile,
                   const std::vector<TString>& selectionStepsNoCategories,
-                  const std::vector<TString>& stepsForCategories =std::vector<TString>(),
+                  const std::vector<TString>& stepsForCategories = std::vector<TString>(),
                   const JetCategories* jetCategories =0);
 
     /// Destructor
@@ -91,7 +91,8 @@ private:
     struct MvaWeightsStruct{
     public:
 
-        MvaWeightsStruct(const char* mva2dWeightsFile, const std::vector<std::string>& v_nameCorrect, const std::vector<std::string>& v_nameSwapped);
+        MvaWeightsStruct(const std::string& stepName, const std::vector<std::string>& v_nameCorrect,
+                         const std::vector<std::string>& v_nameSwapped, const char* mva2dWeightsFile);
         ~MvaWeightsStruct(){}
 
         std::string stepName()const{return stepName_;}

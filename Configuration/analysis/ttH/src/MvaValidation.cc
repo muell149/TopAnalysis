@@ -4,11 +4,13 @@
 #include <TH1D.h>
 #include <TH2.h>
 #include <TH2D.h>
-#include <TObjArray.h>
-#include <TObjString.h>
 #include <TProfile.h>
 #include <TString.h>
 #include <TFile.h>
+#include <TList.h>
+#include <TKey.h>
+#include <TObjArray.h>
+#include <TObjString.h>
 
 #include "MvaValidation.h"
 #include "MvaReader.h"
@@ -36,28 +38,45 @@ AnalysisHistogramsBase("mvaA_", selectionStepsNoCategories, stepsForCategories, 
 {
     std::cout<<"--- Beginning setting up MVA validation\n";
 
-    std::vector<std::string> v_correct;
-    std::vector<std::string> v_swapped;
-
     // Opening the root file
     TFile *weightsFile = new TFile(mva2dWeightsFile,"READ");
+    // Generating the list of all objects, stored in the root file to find steps and training names
+    TList *list = weightsFile->GetListOfKeys();
+    for ( int keyNum=0; keyNum<list->GetSize(); keyNum++ ) {
+        TKey* key = ( TKey* ) list->At ( keyNum );
 
-    TObjArray* trainingsCorrect = (TObjArray*)( weightsFile->Get("trainingsCorrect") );
-    // Adding names of correct trainings
-    for ( int trainId=0; trainId<trainingsCorrect->GetEntries(); trainId++ )
-    {
-        v_correct.push_back( std::string( ((TObjString*)trainingsCorrect->At(trainId))->String() ) );
+        TString objType ( key->GetClassName() );
+        if(!objType.EqualTo("TObjArray")) continue;
+
+        TString objName ( key->GetName() );
+        if(!objName.BeginsWith("correct_")) continue;
+
+        // Extracting the name of the step (substring from 8-th character to the end)
+        std::string stepName(objName.Data(), 8, objName.Length());     // Synchronized with the length of "correct_"
+
+        TObjArray* trainingsList;
+        // Extracting names of all correct trainings for the current step
+        std::vector<std::string> v_correct;
+        trainingsList = (TObjArray*)( weightsFile->Get(TString("correct_").Append(stepName))->Clone() );
+        for ( int trainId=0; trainId<trainingsList->GetEntries(); trainId++ )
+        {
+            v_correct.push_back( std::string( ((TObjString*)trainingsList->At(trainId))->String() ) );
+        }
+
+        // Extracting names of all swapped trainings for the current step
+        std::vector<std::string> v_swapped;
+        trainingsList = (TObjArray*)( weightsFile->Get(TString("swapped_").Append(stepName))->Clone() );
+        for ( int trainId=0; trainId<trainingsList->GetEntries(); trainId++ )
+        {
+            v_swapped.push_back( std::string( ((TObjString*)trainingsList->At(trainId))->String() ) );
+        }
+
+        // Creating the struct of correct and swapped weights for the current step
+        MvaWeightsStruct mvaWeightsStruct = MvaWeightsStruct(stepName, v_correct, v_swapped, mva2dWeightsFile);
+        v_mvaWeightsStruct_.push_back(mvaWeightsStruct);
     }
 
-    TObjArray* trainingsSwapped = (TObjArray*)( weightsFile->Get("trainingsSwapped") );
-    // Adding names of swapped trainings
-    for ( int trainId=0; trainId<trainingsSwapped->GetEntries(); trainId++ )
-    {
-        v_swapped.push_back( std::string( ((TObjString*)trainingsSwapped->At(trainId))->String() ) );
-    }
-
-    MvaWeightsStruct mvaWeightsStruct = MvaWeightsStruct(mva2dWeightsFile, v_correct, v_swapped);
-    v_mvaWeightsStruct_.push_back(mvaWeightsStruct);
+    weightsFile->Close();
 
     std::cout<<"=== Finishing setting up MVA validation\n\n";
 }
@@ -491,51 +510,45 @@ void MvaValidation::fillHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, c
 
 
 
-MvaValidation::MvaWeightsStruct::MvaWeightsStruct(const char* weights2dFile,
+MvaValidation::MvaWeightsStruct::MvaWeightsStruct(const std::string& stepName,
                                                   const std::vector<std::string>& v_nameCorrect,
-                                                  const std::vector<std::string>& v_nameSwapped)
+                                                  const std::vector<std::string>& v_nameSwapped,
+                                                  const char* mva2dWeightsFile):
+stepName_(stepName)
 {
-    bool addedSwappedTrainings = false;
-    TString weightFolder(weights2dFile);
-    weightFolder.Remove(weightFolder.Last('/')+1);
+    // Extracting the path to the folder containing the root file and xml files with weights
+    TString mva2dWeightsFolder(mva2dWeightsFile);
+    mva2dWeightsFolder.Remove(mva2dWeightsFolder.Last('/')+1);
+
     // Access correct weights
     for(const auto& nameCorrect : v_nameCorrect){
-        TString trainNameCorrect(nameCorrect);
-        trainNameCorrect.Remove(0, trainNameCorrect.Last('_') + 1);
+        TString weightsCorrectFilename(mva2dWeightsFolder);
+        weightsCorrectFilename.Append("correct_").Append(stepName).Append("_").Append(nameCorrect).Append(".weights.xml");
 
-        TString xmlFileCorrect(weightFolder);
-        xmlFileCorrect.Append(nameCorrect).Append(".weights.xml");
-
-        m_correct_[trainNameCorrect.Data()] = new MvaReader( xmlFileCorrect );
+        m_correct_[nameCorrect] = new MvaReader(weightsCorrectFilename);
 
         // Access combined weights
         for(const auto& nameSwapped : v_nameSwapped){
-            TString trainNameSwapped(nameSwapped);
-            trainNameSwapped.Remove(0, trainNameSwapped.Last('_') + 1);
-
-            TString weights2dHistoname(nameCorrect);
-            weights2dHistoname.Replace(0, weights2dHistoname.First('_'), "combined");
-            weights2dHistoname.Append("_").Append(trainNameSwapped);
+            TString weights2dHistoname("combined_");
+            weights2dHistoname.Append(stepName).Append("_").Append(nameCorrect).Append("_").Append(nameSwapped);
 
             RootFileReader* fileReader(RootFileReader::getInstance());
             // FIXME: do normalisation already during storage
-            TH2D* weightsCombined = fileReader->GetClone<TH2D>(weights2dFile, weights2dHistoname);
+            TH2D* weightsCombined = fileReader->GetClone<TH2D>(mva2dWeightsFile, weights2dHistoname);
             const double integral = weightsCombined->Integral(0, weightsCombined->GetNbinsX()+1, 0, weightsCombined->GetNbinsY()+1);
             weightsCombined->Scale(1./integral);
-            m_combined_[trainNameCorrect.Data()][trainNameSwapped.Data()] = weightsCombined;
+            m_combined_[nameCorrect][nameSwapped] = weightsCombined;
+        }
 
-            // Access swapped weights (only once)
-            if(!addedSwappedTrainings) {
-                TString xmlFileSwapped(weightFolder);
-                xmlFileSwapped.Append(nameSwapped).Append(".weights.xml");
-                m_swapped_[trainNameSwapped.Data()] = new MvaReader( xmlFileSwapped );
-            }
+    }
 
-        }       // End of loop over swapped trainings
-        addedSwappedTrainings = true;
+    // Access swapped weights
+    for(const auto& nameSwapped : v_nameSwapped){
+        TString weightsSwappedFilename(mva2dWeightsFolder);
+        weightsSwappedFilename.Append("swapped_").Append(stepName).Append("_").Append(nameSwapped).Append(".weights.xml");
 
-    }       // End of loop over correct trainings
-
+        m_swapped_[nameSwapped] = new MvaReader(weightsSwappedFilename);
+    }
 }
 
 

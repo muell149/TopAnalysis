@@ -96,11 +96,7 @@ void MvaWeights2d::plotStep(const mvaSetup::MvaSet& mvaSet)
     const std::vector<mvaSetup::MvaConfig>& v_mvaConfigCorrect = mvaSet.v_mvaConfigCorrect_;
     const std::vector<mvaSetup::MvaConfig>& v_mvaConfigSwapped = mvaSet.v_mvaConfigSwapped_;
 
-    TObjArray* trainingsCorrect = new TObjArray();
-    TObjArray* trainingsSwapped = new TObjArray();
-
-
-
+    storeTrainingsForStep(step, v_mvaConfigCorrect, v_mvaConfigSwapped);
 
     constexpr const char* methodPrefixCorrect = "correct";
     constexpr const char* methodPrefixSwapped = "swapped";
@@ -117,11 +113,6 @@ void MvaWeights2d::plotStep(const mvaSetup::MvaSet& mvaSet)
         MvaReader weightsCorrect(fileNameCorrect);
         const std::vector<float> v_mvaWeightsCorrect = weightsCorrect.mvaWeights(v_mvaTopJetsVariables);
 
-        // Creating the name of the correct training
-        TString trainingName(methodPrefixCorrect);
-        trainingName.Append(step).Append("_").Append(methodTitleCorrect);
-        trainingsCorrect->Add(new TObjString(trainingName));
-
         for(const mvaSetup::MvaConfig& mvaConfigSwapped : v_mvaConfigSwapped){
             const TString methodTitleSwapped(mvaConfigSwapped.methodAppendix_);
             TString fileNameSwapped(mvaWeightFileDirectory_);
@@ -130,17 +121,9 @@ void MvaWeights2d::plotStep(const mvaSetup::MvaSet& mvaSet)
             MvaReader weightsSwapped(fileNameSwapped);
             const std::vector<float> v_mvaWeightsSwapped = weightsSwapped.mvaWeights(v_mvaTopJetsVariables);
 
-            // Preventing adding the same swapped training multiple times
-            if((size_t)trainingsCorrect->GetEntries() < 2) {
-                // Creating the name of the swapped training
-                TString trainingName(methodPrefixSwapped);
-                trainingName.Append(step).Append("_").Append(methodTitleSwapped);
-                trainingsSwapped->Add(new TObjString(trainingName));
-            }
-
             // Book histograms
             std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
-            name = "_";
+            name = "";
             name.Append(methodTitleCorrect).Append("_").Append(methodTitleSwapped);
             this->bookHistosInclExcl2D(m_histogram, prefix, step, name, name+";w_{MVA}^{correct};w_{MVA}^{swapped}", 200, -2., 2., 200, -2., 2.);
 
@@ -154,12 +137,6 @@ void MvaWeights2d::plotStep(const mvaSetup::MvaSet& mvaSet)
             }
         }
     }
-
-    trainingsCorrect->Write("trainingsCorrect", TObject::kSingleKey);
-    trainingsSwapped->Write("trainingsSwapped", TObject::kSingleKey);
-    delete trainingsCorrect;
-    delete trainingsSwapped;
-
 }
 
 
@@ -173,12 +150,12 @@ void MvaWeights2d::bookHistosInclExcl(std::map<TString, TH1*>& m_histogram, cons
     const TString wrong("wrong");
 
     if(!plotExclusively_){
-        m_histogram[name] = this->store(new TH1D(prefix+step+name, title, nBinX, xMin, xMax));
+        m_histogram[name] = this->store(new TH1D(prefix+step+"_"+name, title, nBinX, xMin, xMax));
     }
     else{
-        m_histogram[correct+name] = this->store(new TH1D(correct+prefix+step+name, title, nBinX, xMin, xMax));
-        m_histogram[swapped+name] = this->store(new TH1D(swapped+prefix+step+name, title, nBinX, xMin, xMax));
-        m_histogram[wrong+name] = this->store(new TH1D(wrong+prefix+step+name, title, nBinX, xMin, xMax));
+        m_histogram[correct+name] = this->store(new TH1D(correct+prefix+step+"_"+name, title, nBinX, xMin, xMax));
+        m_histogram[swapped+name] = this->store(new TH1D(swapped+prefix+step+"_"+name, title, nBinX, xMin, xMax));
+        m_histogram[wrong+name] = this->store(new TH1D(wrong+prefix+step+"_"+name, title, nBinX, xMin, xMax));
     }
 }
 
@@ -198,10 +175,10 @@ void MvaWeights2d::bookHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, co
         m_histogram[name] = this->store(new TH2D(prefix+step+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
     }
     else{
-        m_histogram[combined+name] = this->store(new TH2D(combined+prefix+step+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
-        m_histogram[correct+name] = this->store(new TH2D(correct+prefix+step+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
-        m_histogram[swapped+name] = this->store(new TH2D(swapped+prefix+step+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
-        m_histogram[wrong+name] = this->store(new TH2D(wrong+prefix+step+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+        m_histogram[combined+name] = this->store(new TH2D(combined+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+        m_histogram[correct+name] = this->store(new TH2D(correct+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+        m_histogram[swapped+name] = this->store(new TH2D(swapped+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+        m_histogram[wrong+name] = this->store(new TH2D(wrong+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
     }
 }
 
@@ -250,6 +227,31 @@ void MvaWeights2d::fillHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, co
         }
         else ((TH2*)m_histogram[wrong+name])->Fill(variable1, variable2, weight);
     }
+}
+
+
+
+void MvaWeights2d::storeTrainingsForStep(const TString& stepName, const std::vector<mvaSetup::MvaConfig>& v_mvaConfigCorrect,
+                                         const std::vector<mvaSetup::MvaConfig>& v_mvaConfigSwapped)
+{
+    TObjArray* trainingsCorrect = new TObjArray();
+    TObjArray* trainingsSwapped = new TObjArray();
+
+    // Adding all correct trainings
+    for(const mvaSetup::MvaConfig& mvaConfig : v_mvaConfigCorrect){
+        trainingsCorrect->Add(new TObjString(mvaConfig.methodAppendix_));
+    }
+
+    // Adding all swapped trainings
+    for(const mvaSetup::MvaConfig& mvaConfig : v_mvaConfigSwapped){
+        trainingsSwapped->Add(new TObjString(mvaConfig.methodAppendix_));
+    }
+
+    trainingsCorrect->Write("correct"+stepName, TObject::kSingleKey);
+    trainingsSwapped->Write("swapped"+stepName, TObject::kSingleKey);
+
+    delete trainingsCorrect;
+    delete trainingsSwapped;
 }
 
 
