@@ -357,21 +357,54 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
             
             if(histNameBase == "mvaA_jetsFromTop"){
                 std::ofstream outfile;
-                const TString fileString = outputFolder + fileShort + "/result_jetsFromTop" + step + ".txt";
+                TString fileString = outputFolder + fileShort + "/result_jetsFromTop";
+                fileString.Append("_correct");
+                fileString.Append(step).Append(".txt");
                 outfile.open(fileString.Data());
                 for(const auto iter : m_correct.at(step)){
                     const TString& configName = iter.first;
                     TH1* hist = iter.second;
-                    const double fraction = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
-                    const double fractionCorrect = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
-                    const double fractionSwapped = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction
-                           <<std::setw(10)<<fractionCorrect<<std::setw(10)<<fractionSwapped<<std::endl;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                 }
                 outfile.close();
             }
             else if(histNameBase == "mvaA_jetsFromHiggs"){
-                
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromHiggs";
+                fileString.Append("_correct");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter : m_correct.at(step)){
+                    const TString& configName = iter.first;
+                    TH1* hist = iter.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                }
+                outfile.close();
+            }
+            else if(histNameBase == "mvaA_jetsFromBoth"){
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromBoth";
+                fileString.Append("_correct");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter : m_correct.at(step)){
+                    const TString& configName = iter.first;
+                    TH1* hist = iter.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                }
+                outfile.close();
             }
             
             // Scale histograms and get minimum and maximum value
@@ -449,6 +482,58 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                 legend->AddEntry(hist, configName, "l");
                 v_hist.push_back(hist);
                 ++counter;
+            }
+            
+            if(histNameBase == "mvaA_jetsFromTop"){
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromTop";
+                fileString.Append("_swapped");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter : m_swapped.at(step)){
+                    const TString& configName = iter.first;
+                    TH1* hist = iter.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                }
+                outfile.close();
+            }
+            else if(histNameBase == "mvaA_jetsFromHiggs"){
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromHiggs";
+                fileString.Append("_swapped");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter : m_swapped.at(step)){
+                    const TString& configName = iter.first;
+                    TH1* hist = iter.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                }
+                outfile.close();
+            }
+            else if(histNameBase == "mvaA_jetsFromBoth"){
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromBoth";
+                fileString.Append("_swapped");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter : m_swapped.at(step)){
+                    const TString& configName = iter.first;
+                    TH1* hist = iter.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                }
+                outfile.close();
             }
             
             // Scale histograms and get minimum and maximum value
@@ -533,6 +618,64 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                     v_hist.push_back(hist);
                     ++counter;
                 }
+            }
+            
+            if(histNameBase == "mvaA_jetsFromTop"){
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromTop";
+                fileString.Append("_combined");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter1 : m_combined.at(step)){
+                    for(const auto iter2 : iter1.second){
+                    const TString configName = iter1.first + iter2.first;
+                    TH1* hist = iter2.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                    }
+                }
+                outfile.close();
+            }
+            else if(histNameBase == "mvaA_jetsFromHiggs"){
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromHiggs";
+                fileString.Append("_combined");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter1 : m_combined.at(step)){
+                    for(const auto iter2 : iter1.second){
+                    const TString configName = iter1.first + iter2.first;
+                    TH1* hist = iter2.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                    }
+                }
+                outfile.close();
+            }
+            else if(histNameBase == "mvaA_jetsFromBoth"){
+                std::ofstream outfile;
+                TString fileString = outputFolder + fileShort + "/result_jetsFromBoth";
+                fileString.Append("_combined");
+                fileString.Append(step).Append(".txt");
+                outfile.open(fileString.Data());
+                for(const auto iter1 : m_combined.at(step)){
+                    for(const auto iter2 : iter1.second){
+                    const TString configName = iter1.first + iter2.first;
+                    TH1* hist = iter2.second;
+                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                    }
+                }
+                outfile.close();
             }
             
             // Scale histograms and get minimum and maximum value
@@ -683,8 +826,8 @@ void histoBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
         {
 //            "ttbarW",
 //            "ttbarZ",
-//            "ttbarH125inclusiveBbbar",
-//            "ttbarH125inclusiveOther",
+            "ttbarH125inclusiveBbbar",
+            "ttbarH125inclusiveOther",
             "ttbarH125tobbbar",
             "ttbarsignalPlusBbbar",
             "ttbarsignalPlusOther"
@@ -793,10 +936,14 @@ void histoBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
             }
             
             
-//            plotWeightHistos(v_nameStepPairCorrect, v_nameStepPairSwapped, v_nameStepPairWrong, v_input, outputFolder);
-            plotBestWeightHistos(m_mvaConfigCorrect, m_mvaConfigSwapped, v_input, outputFolder, "mvaA_dijet_mass");
+            // FIXME: steering option for this type of plot
+            //plotWeightHistos(v_nameStepPairCorrect, v_nameStepPairSwapped, v_nameStepPairWrong, v_input, outputFolder);
+            
+            // FIXME: another steering option for this type of plot
+            //plotBestWeightHistos(m_mvaConfigCorrect, m_mvaConfigSwapped, v_input, outputFolder, "mvaA_dijet_mass");
             plotBestWeightHistos(m_mvaConfigCorrect, m_mvaConfigSwapped, v_input, outputFolder, "mvaA_jetsFromTop");
             plotBestWeightHistos(m_mvaConfigCorrect, m_mvaConfigSwapped, v_input, outputFolder, "mvaA_jetsFromHiggs");
+            plotBestWeightHistos(m_mvaConfigCorrect, m_mvaConfigSwapped, v_input, outputFolder, "mvaA_jetsFromBoth");
         }
     }
     
