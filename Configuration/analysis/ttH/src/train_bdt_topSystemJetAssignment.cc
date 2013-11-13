@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <sstream>
 
 #include "TString.h"
 
@@ -55,6 +56,34 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
         tth::mvaHelpers::systematicChannelFileNames(FileListBASE, v_channel, v_systematic);
     tth::mvaHelpers::SystematicChannelFileNames m_systematicChannelFileNamesTesting =
         tth::mvaHelpers::systematicChannelFileNames(FileListBASE, v_channel, v_systematic, false);
+    
+    // Set up several parameters for automated application of zillions of test trainings
+    std::vector<TString> v_NTrees = {"100", "200", "400", "600", "800", "1000"};
+    std::vector<TString> v_MaxDepth = {"3", "4", "5"};
+    //std::vector<TString> v_BoostType = {"AdaBoost:AdaBoostBeta=0.45", "Grad"};
+    std::vector<TString> v_BoostType = {"AdaBoost:AdaBoostBeta=0.45"};
+    std::vector<TString> v_UseNVars = {"4", "6", "8", "10", "12"};
+    std::vector<TString> v_nCuts = {"100", "1000", "5000"};
+    std::vector<mvaSetup::MvaConfig> v_config;
+    int counter(1);
+    for(const auto& NTrees : v_NTrees){
+        for(const auto& MaxDepth : v_MaxDepth){
+            for(const auto& BoostType : v_BoostType){
+                for(const auto& UseNVars : v_UseNVars){
+                    for(const auto& nCuts : v_nCuts){
+                        std::stringstream ss_counter;
+                        ss_counter<<counter;
+                        const TString commands = "!H:!V:NTrees="+NTrees+":nEventsMin=400:MaxDepth="+MaxDepth+":BoostType="+BoostType+":UseRandomisedTrees=True:UseNVars="+UseNVars+":nCuts="+nCuts+":PruneMethod=CostComplexity:PruneStrength=-1";
+                        TString name = "d";
+                        name.Append(ss_counter.str().c_str());
+                        mvaSetup::MvaConfig config(commands, name);
+                        v_config.push_back(config);
+                        ++counter;
+                    }
+                }
+            }
+        }
+    }
     
     // Define MVA sets, i.e. for which merged categories of which step to apply MVA (also separated by channels)
     // First set is for correct combinations, second for swapped combinations
