@@ -1,11 +1,11 @@
+#include <vector>
+#include <string>
+#include <utility>
 #include <iostream>
 #include <cstdlib>
-#include <algorithm>
 
 #include <TFile.h>
 #include <TTree.h>
-#include <TSystem.h>
-#include <TFile.h>
 #include <TString.h>
 #include <Rtypes.h>
 #include <TCut.h>
@@ -16,27 +16,36 @@
 
 #include "MvaFactory.h"
 #include "mvaStructs.h"
+#include "mvaSetup.h"
 #include "higgsUtils.h"
 
 
 
 
 MvaFactory::MvaFactory(const TString& mvaOutputDir, const char* weightFileDir,
-                       const std::vector<std::pair<TString, TString> >& v_nameStepPair,
-                       TFile* mergedTrees):
-v_nameStepPair_(v_nameStepPair),
+                       const std::vector<mvaSetup::MvaSet>& v_mvaSet,
+                       const TString& mergedTreesFileName):
 mvaOutputDir_(mvaOutputDir),
 weightFileDir_(weightFileDir),
-mergedTrees_(mergedTrees)
+mergedTreesFile_(0)
 {
-    std::cout<<"--- Beginning setting up MVA training\n";
+    std::cout<<"--- Beginning MVA training\n";
     
-    if(!mergedTrees_){
+    // Open input file
+    mergedTreesFile_ = TFile::Open(mergedTreesFileName);
+    if(!mergedTreesFile_){
         std::cerr<<"ERROR in constructor of MvaFactory! File containing the merged trees not found\n...break\n"<<std::endl;
         exit(123);
     }
     
-    std::cout<<"=== Finishing setting up MVA training\n\n";
+    // Run all MVA trainings for all given sets
+    this->train(v_mvaSet);
+    
+    // Cleanup
+    mergedTreesFile_->Close();
+    this->clear();
+    
+    std::cout<<"=== Finishing MVA training\n\n";
 }
 
 
@@ -44,12 +53,12 @@ mergedTrees_(mergedTrees)
 void MvaFactory::clear()
 {
     weightFileDir_ = 0;
-    mergedTrees_ = 0;
+    mergedTreesFile_ = 0;
 }
 
 
 
-void MvaFactory::train(const std::vector<MvaSet>& v_mvaSetCorrect, const std::vector<MvaSet>& v_mvaSetSwapped)
+void MvaFactory::train(const std::vector<mvaSetup::MvaSet>& v_mvaSet)
 {
     // MVA for correct dijet combinations
     constexpr const char* methodPrefixCorrect = "correct";
@@ -61,31 +70,28 @@ void MvaFactory::train(const std::vector<MvaSet>& v_mvaSetCorrect, const std::ve
     const TCut cutSignalSwapped = "swappedCombination != 0";
     const TCut cutBackgroundSwapped = "correctCombination == 0 && swappedCombination == 0";
     
-    // Loop over the steps/categories and and train MVAs
-    for(const auto& nameStepPair : v_nameStepPair_){
-        const std::vector<MvaSet> v_selectedSetCorrect = this->selectSets(v_mvaSetCorrect, nameStepPair.second);
-        const std::vector<MvaSet> v_selectedSetSwapped = this->selectSets(v_mvaSetSwapped, nameStepPair.second);
-        if(!v_selectedSetCorrect.size() && !v_selectedSetSwapped.size()){
-            std::cerr<<"ERROR in train()! Defined step/category has no definitions of MVA sets: "<<nameStepPair.second
-            <<"\n...break\n"<<std::endl;
-            exit(139);
-        }
+    // Loop over the steps/categories and train MVAs
+    for(const auto& mvaSet : v_mvaSet){
+        const TString mergedStepName = tth::stepName(mvaSet.step_, mvaSet.v_category_);
         
-        TTree* treeTraining = (TTree*)mergedTrees_->Get("training"+nameStepPair.first);
-        TTree* treeTesting = (TTree*)mergedTrees_->Get("testing"+nameStepPair.first);
+        TTree* treeTraining = (TTree*)mergedTreesFile_->Get("training"+mergedStepName);
+        TTree* treeTesting = (TTree*)mergedTreesFile_->Get("testing"+mergedStepName);
         
-         if(v_selectedSetCorrect.size())
-             this->runMva(methodPrefixCorrect, cutSignalCorrect, cutBackgroundCorrect, treeTraining, treeTesting, v_selectedSetCorrect, nameStepPair.second);
-         if(v_selectedSetSwapped.size())
-             this->runMva(methodPrefixSwapped, cutSignalSwapped, cutBackgroundSwapped, treeTraining, treeTesting, v_selectedSetSwapped, nameStepPair.second);
+        if(mvaSet.v_mvaConfigCorrect_.size())
+            this->runMva(methodPrefixCorrect, cutSignalCorrect, cutBackgroundCorrect, treeTraining, treeTesting, mvaSet.v_mvaConfigCorrect_, mergedStepName);
+        if(mvaSet.v_mvaConfigSwapped_.size())
+            this->runMva(methodPrefixSwapped, cutSignalSwapped, cutBackgroundSwapped, treeTraining, treeTesting, mvaSet.v_mvaConfigSwapped_, mergedStepName);
+        
+        
     }
+    
 }
 
 
 
 void MvaFactory::runMva(const char* methodPrefix, const TCut& cutSignal, const TCut& cutBackground,
                         TTree* treeTraining, TTree* treeTesting,
-                        const std::vector<MvaSet>& v_mvaSet,
+                        const std::vector<mvaSetup::MvaConfig>& v_mvaConfig,
                         const TString& stepName)
 {
     
@@ -154,13 +160,11 @@ void MvaFactory::runMva(const char* methodPrefix, const TCut& cutSignal, const T
                                         "SplitMode=Block:SplitSeed=0:NormMode=NumEvents:!V" );
     
     // Book the MVA methods (e.g. boosted decision tree with specific setup)
-    for(const auto& mvaSet : v_mvaSet){
-        for(const auto& mvaConfig : mvaSet.v_mvaConfig_){
-            const TString methodTitle(mvaConfig.methodAppendix_);
-            factory->BookMethod(mvaConfig.mvaType_,
-                                methodTitle,
-                                mvaConfig.options_);
-        }
+    for(const auto& mvaConfig : v_mvaConfig){
+        const TString methodTitle(mvaConfig.methodAppendix_);
+        factory->BookMethod(mvaConfig.mvaType_,
+                            methodTitle,
+                            mvaConfig.options_);
     }
     
     // Run factory
@@ -202,108 +206,6 @@ void MvaFactory::addSpectator(TMVA::Factory* factory, MvaVariableFloat& variable
 }
 
 
-
-std::vector<MvaFactory::MvaSet> MvaFactory::cleanSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
-                                                      const std::vector<std::pair<TString, TString> >& v_nameStepPair,
-                                                      const Channel::Channel& channel)
-{
-    std::vector<MvaFactory::MvaSet> result;
-    
-    for(const MvaFactory::MvaSet& mvaSet : v_mvaSet){
-        // Check if set is valid for processed channel
-        if(std::find(mvaSet.v_channel_.begin(), mvaSet.v_channel_.end(), channel) == mvaSet.v_channel_.end()) continue;
-        
-        // Check if set is valid for any of the chosen selection steps and cateogories
-        bool selectedStepCategory(false);
-        const std::vector<TString> v_stepName = mvaSet.stepNames();
-        for(const auto& nameStepPair : v_nameStepPair){
-            if(std::find(v_stepName.begin(), v_stepName.end(), nameStepPair.second) != v_stepName.end()){
-                selectedStepCategory = true;
-                break;
-            }
-        }
-        if(!selectedStepCategory) continue;
-        
-        result.push_back(mvaSet);
-    }
-    if(!result.size()){
-        std::cerr<<"ERROR in cleanSets()! All MVA sets are deselected, no valid configuration found\n...break\n"<<std::endl;
-        exit(137);
-    }
-    
-    return result;
-}
-
-
-
-std::vector<MvaFactory::MvaSet> MvaFactory::selectSets(const std::vector<MvaFactory::MvaSet>& v_mvaSet,
-                                                       const TString& step)
-{
-    std::vector<MvaFactory::MvaSet> result;
-    
-    for(const MvaFactory::MvaSet& mvaSet : v_mvaSet){
-        const std::vector<TString> v_stepName = mvaSet.stepNames();
-        if(std::find(v_stepName.begin(), v_stepName.end(), step) == v_stepName.end()) continue;
-        result.push_back(mvaSet);
-    }
-    
-    return result;
-}
-
-
-
-
-
-
-
-
-MvaFactory::MvaConfig::MvaConfig(const TString& options,
-                                 const TString& methodAppendix,
-                                 const TMVA::Types::EMVA& mvaType):
-mvaType_(mvaType),
-methodAppendix_(methodAppendix),
-options_(options)
-{}
-
-
-
-MvaFactory::MvaSet::MvaSet(const std::vector<MvaConfig>& v_mvaConfig,
-                           const std::vector<int>& v_category,
-                           const std::vector<Channel::Channel>& v_channel,
-                           const TString& step):
-v_channel_(v_channel),
-step_(step),
-v_category_(v_category),
-v_mvaConfig_(v_mvaConfig)
-{
-    for(const int category : v_category_){
-        if(category<0){
-            std::cerr<<"ERROR in constructor of MvaSet! jetCategories contain value <0: "<<category
-                     <<"\n...break\n"<<std::endl;
-            exit(136);
-        }
-    }
-}
-
-
-
-std::vector<TString> MvaFactory::MvaSet::stepNames()const
-{
-    std::vector<TString> v_stepName;
-    
-    if(v_category_.size()){
-        for(const int category : v_category_){
-            TString step = tth::stepName(step_, category);
-            v_stepName.push_back(step);
-        }
-    }
-    else{
-        TString step = tth::stepName(step_);
-        v_stepName.push_back(step);
-    }
-    
-    return v_stepName;
-}
 
 
 

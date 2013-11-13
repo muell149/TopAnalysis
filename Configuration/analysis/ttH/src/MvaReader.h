@@ -22,7 +22,7 @@ class MvaReader{
 public:
     
     /// Constructor which sets MVA weights and creating TMVA Reader
-    MvaReader(const char* mvaWeightsFile, const std::vector<TString>& selectionSteps);
+    MvaReader(const char* mvaWeightsFile);
     
     /// Destructor
     ~MvaReader(){};
@@ -73,10 +73,6 @@ private:
     
     /// Struct for setting addresses of variables for mvaWeightsReader_
     MvaTopJetsVariables mvaTopJetsVariables_;
-    
-    
-    /// Selection steps for which to run the MVA tool
-    const std::vector<TString> selectionSteps_;
 };
 
 

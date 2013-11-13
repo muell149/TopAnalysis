@@ -1,28 +1,20 @@
 #include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <vector>
-#include <map>
 #include <string>
 #include <algorithm>
 
-#include "TCut.h"
-#include "TFile.h"
-#include "TTree.h"
 #include "TString.h"
-#include "TSystem.h"
-#include "TList.h"
 
 #include "MvaFactory.h"
 #include "MvaTreeHandler.h"
 #include "MvaTreeAnalyzer.h"
-#include "MvaWeightsAnalyzer.h"
+#include "MvaWeights2d.h"
 #include "mvaSetup.h"
 #include "higgsUtils.h"
 #include "../../diLeptonic/src/sampleHelpers.h"
 #include "../../diLeptonic/src/CommandLineParameters.h"
 #include "../../diLeptonic/src/utils.h"
-#include "../../diLeptonic/src/RootFileReader.h"
 
 
 
@@ -34,7 +26,7 @@ constexpr const char* MvaInputDIR = "mvaInput";
 /// The MVA output base folder
 constexpr const char* MvaOutputDIR = "mvaOutput";
 
-/// The MVA output sub-folder for weights
+/// The MVA output sub-folder for weights (1D and 2D weights)
 constexpr const char* MvaWeightFileDIR = "weights";
 
 
@@ -43,11 +35,12 @@ constexpr const char* MvaWeightFileDIR = "weights";
 constexpr const char* FileListBASE = "FileLists_mva/HistoFileList_";
 
 
+
 /// The output file name for the control and separation power plots
 constexpr const char* PlotOutputFILE = "plots.root";
 
-/// The output file name for the MVA weights histograms (1D and 2D)
-constexpr const char* WeightsOutputFILE = "weights.root";
+/// The output file name for the MVA weights histograms (2D)
+constexpr const char* WeightsOutputFILE = "weights2d.root";
 
 
 
@@ -63,25 +56,31 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
     tth::mvaHelpers::SystematicChannelFileNames m_systematicChannelFileNamesTesting =
         tth::mvaHelpers::systematicChannelFileNames(FileListBASE, v_channel, v_systematic, false);
     
-    // Define steps for indiviual MVA treatment
-    // FIXME: make general selections via steps and categories
-    // FIXME: offer merging of steps
-    std::vector<TString> v_selectionSteps = {"_step10", "_step10_cate0", "_step10_cate1", "_step10_cate2"};
-    
-    // Find all trees of all steps/categories containing MVA input variables from first input file
-    const std::vector<std::pair<TString, TString> > v_nameStepPair =
-        tth::nameStepPairs(m_systematicChannelFileNamesTraining.at(v_systematic.at(0)).at(v_channel.at(0)).at(0),
-                           "mvaInputTopJets_step",
-                           v_selectionSteps);
+    // Define MVA sets, i.e. for which merged categories of which step to apply MVA (also separated by channels)
+    // First set is for correct combinations, second for swapped combinations
+    const std::vector<Channel::Channel> allChannels = {Channel::ee, Channel::emu, Channel::mumu, Channel::combined};
+    std::vector<mvaSetup::MvaSet> mvaSets;
+    mvaSets.push_back(mvaSetup::MvaSet(
+        allChannels,
+        "7",
+        {5,6,7},
+        {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3},
+        {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3}));
+//     mvaSets.push_back(mvaSetup::MvaSet(
+//         allChannels,
+//         "7",
+//         {2,3,4},
+//         {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3},
+//         {mvaSetup::c1, mvaSetup::c2, mvaSetup::c3}));
     
     // Loop over all channels and systematics and merge trees
-    tth::mvaHelpers::SystematicChannelFileNames m_systematicChannelMergedFiles = 
-        tth::mvaHelpers::mergeTrees(MvaInputDIR,
-                                    m_systematicChannelFileNamesTraining,
-                                    m_systematicChannelFileNamesTesting,
-                                    v_nameStepPair);
+    mvaSetup::SystematicChannelFileNames m_systematicChannelMergedFiles = 
+        mvaSetup::mergeTrees(MvaInputDIR,
+                             m_systematicChannelFileNamesTraining,
+                             m_systematicChannelFileNamesTesting,
+                             mvaSets);
     
-    // Loop over all channels and systematics and run MVA
+    // Loop over all channels and systematics and run tools
     for(const auto& systematicChannelMergedFiles : m_systematicChannelMergedFiles){
         const Systematic::Systematic& systematic = systematicChannelMergedFiles.first;
         for(const auto& channelMergedFiles : systematicChannelMergedFiles.second){
@@ -99,38 +98,30 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
                 mvaTreeAnalyzer.plotVariables(outputFile.Data());
             }
             
-            // Run the MVA training
+            // Produce MVA weights
             if(std::find(v_mode.begin(), v_mode.end(), "mva") != v_mode.end()){
                 
                 // Clean the MVA sets in case they are not selected for training
-                const std::vector<MvaFactory::MvaSet> v_cleanSetCorrect =
-                        MvaFactory::cleanSets(mvaSetups::v_mvaSetCorrect, v_nameStepPair, channel);
-                const std::vector<MvaFactory::MvaSet> v_cleanSetSwapped =
-                        MvaFactory::cleanSets(mvaSetups::v_mvaSetSwapped, v_nameStepPair, channel);
+                std::vector<mvaSetup::MvaSet> cleanSets = mvaSetup::cleanForChannel(mvaSets, channel);
                 
-                TFile* mergedTreesFile = TFile::Open(fileName);
+                // Run the MVA training for correct and swapped combinations
                 MvaFactory mvaFactory(outputFolder, MvaWeightFileDIR,
-                                      v_nameStepPair, mergedTreesFile);
-                mvaFactory.train(v_cleanSetCorrect, v_cleanSetSwapped);
-                mergedTreesFile->Close();
+                                      cleanSets, fileName);
                 
                 // Build 2D histograms of MVA weights for correct and swapped combinations
-                TString outputFile = outputFolder;
-                outputFile.Append("weights2d/");
-                gSystem->MakeDirectory(outputFile.Data());
-                outputFile.Append(WeightsOutputFILE);
                 MvaTreeHandler mvaTreeHandler("", {});
                 mvaTreeHandler.importTrees(fileName.Data(), "training");
                 TString weightsFolder(outputFolder);
                 weightsFolder.Append(MvaWeightFileDIR).Append("/");
-                MvaWeightsAnalyzer mvaWeightsAnalyzer(mvaTreeHandler.stepMvaVariablesMap(),
-                                                      weightsFolder.Data(),
-                                                      v_cleanSetCorrect, v_cleanSetSwapped,
-                                                      true);
-                mvaWeightsAnalyzer.plotVariables(outputFile.Data());
+                TString outputFile = weightsFolder;
+                outputFile.Append(WeightsOutputFILE);
+                MvaWeights2d mvaWeights2d(mvaTreeHandler.stepMvaVariablesMap(),
+                                          weightsFolder.Data(), mvaSets, true);
+                mvaWeights2d.plotVariables(outputFile.Data());
             }
         }
     }
+    
     std::cout<<"MVA program successfully finished";
 }
 

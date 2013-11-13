@@ -1747,7 +1747,7 @@ void TopAnalysis::SetClosureTest(TString closure, double slope)
                 return std::max((1.+(std::fabs(GenTop_->Rapidity())-1.)*slope)
                                *(1.+(std::fabs(GenAntiTop_->Rapidity()-1.))*slope) , 0.1);
             };
-        } if (closure == "nominal") {
+        } else if (closure == "nominal") {
             closureFunction_ = [](){return 1.;};
         } else {
             std::cerr << "invalid closure test function\n";

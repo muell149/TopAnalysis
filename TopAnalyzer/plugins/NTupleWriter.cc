@@ -238,6 +238,9 @@ private:
     std::vector<double> VjetChargeRelativePtWeighted;
     std::vector<int> VjetAssociatedPartonPdgId;
     std::vector<LV> VjetAssociatedParton;
+    std::vector<int> VjetTrackIndex;
+    std::vector<int> VjetTrackCharge;
+    std::vector<LV> VjetTrack;
 
     std::vector<double> VPdfWeights;
 
@@ -405,7 +408,6 @@ void
 NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
 {
     clearVariables();
-
     //##################### MC weights for MCatNLO ###############
     if ( iEvent.isRealData() ) {
         weightGenerator = 1;
@@ -498,7 +500,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
             }
 
             //std::cout << iEvent.eventAuxiliary().id() <<  ": choose combination #" << best << "\n";
-
+            
             //for ( size_t i=0; i<FullLepEvt->numberOfAvailableHypos (hypoKey); ++i )
             if (best >= 0)
             {
@@ -916,12 +918,23 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetBTagCSV.push_back(ajet->bDiscriminator("combinedSecondaryVertexBJetTags"));
         VjetBTagCSVMVA.push_back(ajet->bDiscriminator("combinedSecondaryVertexMVABJetTags"));
     }
-
+    
+    
+    
     for(std::vector<JetProperties>::const_iterator i_jetProperties = jetPropertiesHandle->begin(); i_jetProperties != jetPropertiesHandle->end(); ++i_jetProperties){
         VjetChargeGlobalPtWeighted.push_back(i_jetProperties->jetChargeGlobalPtWeighted());
         VjetChargeRelativePtWeighted.push_back(i_jetProperties->jetChargeRelativePtWeighted());
         VjetAssociatedPartonPdgId.push_back(i_jetProperties->jetAssociatedPartonPdgId());
         VjetAssociatedParton.push_back(i_jetProperties->jetAssociatedParton());
+
+    
+		//Here I create the index list with the track charge and LV
+		for (size_t i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++){
+			VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
+			VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());
+			VjetTrack.push_back(i_jetProperties->jetTrack().at(i_charge));
+			
+	}
     }
 
 
@@ -1146,6 +1159,9 @@ NTupleWriter::beginJob()
 
     Ntuple->Branch("jetChargeGlobalPtWeighted", &VjetChargeGlobalPtWeighted);
     Ntuple->Branch("jetChargeRelativePtWeighted", &VjetChargeRelativePtWeighted);
+    Ntuple->Branch("jetTrackIndex", &VjetTrackIndex);
+    Ntuple->Branch("jetTrackCharge", &VjetTrackCharge);
+    Ntuple->Branch("jetTrack", &VjetTrack);
     if (isTtBarSample_) Ntuple->Branch("jetAssociatedPartonPdgId", &VjetAssociatedPartonPdgId);
 
     /////////////met properties///////////
@@ -1304,6 +1320,9 @@ void NTupleWriter::clearVariables()
     VjetChargeRelativePtWeighted.clear();
     VjetAssociatedPartonPdgId.clear();
     VjetAssociatedParton.clear();
+    VjetTrackIndex.clear();
+    VjetTrackCharge.clear();
+    VjetTrack.clear();
 
     VBHadJetIdx.clear();
     VAntiBHadJetIdx.clear();

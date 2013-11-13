@@ -381,6 +381,9 @@ void AnalysisBase::clearBranches()
     b_jetBTagCSVMVA = 0;
     b_jetChargeGlobalPtWeighted = 0;
     b_jetChargeRelativePtWeighted = 0;
+    //b_jetTrackIndex = 0;
+    //b_jetTrackCharge = 0;
+    //b_jetTrack = 0;
     b_met = 0;
     b_jetJERSF = 0;
     b_jetForMET = 0;
@@ -528,7 +531,10 @@ void AnalysisBase::clearBranchVariables()
         //jetBTagCSVMVA_ = 0;
         jetChargeGlobalPtWeighted_ = 0;
         jetChargeRelativePtWeighted_ = 0;
-        met_ = 0;
+	//jetTrackIndex_ = 0;
+	//jetTrackCharge_ = 0;
+	//jetTrack_ = 0;
+	met_ = 0;
         jetJERSF_ = 0;
         jetsForMET_ = 0;
         jetForMETJERSF_ = 0;
@@ -597,7 +603,7 @@ void AnalysisBase::clearBranchVariables()
         AntiBHadronFromTopB_ = 0;
         BHadronVsJet_ = 0;
         AntiBHadronVsJet_ = 0;
-        //genBHadPlusMothersPdgId_ = 0;
+        genBHadPlusMothersPdgId_ = 0;
         //genBHadPlusMothersStatus_ = 0;
         //genBHadPlusMothersIndices_ = 0;
         genBHadPlusMothers_ = 0;
@@ -671,6 +677,15 @@ void AnalysisBase::SetRecoBranchAddresses()
         if(chain_->GetBranch("jetChargeRelativePtWeighted")) // new variable, keep check a while for compatibility
             chain_->SetBranchAddress("jetChargeRelativePtWeighted", &recoObjects_->jetChargeRelativePtWeighted_, &b_jetChargeRelativePtWeighted);
         else b_jetChargeRelativePtWeighted = 0;
+	//if(chain_->GetBranch("jetTrackIndex")) // new variable, keep check a while for compatibility
+        //   chain_->SetBranchAddress("jetTrackIndex", &recoObjects_->jetTrackIndex_, &b_jetTrackIndex);
+        //else b_jetTrackIndex = 0;
+	//if(chain_->GetBranch("jetTrackCharge")) // new variable, keep check a while for compatibility
+        //   chain_->SetBranchAddress("jetTrackCharge", &recoObjects_->jetTrackCharge_, &b_jetTrackCharge);
+	//else b_jetTrackCharge = 0;
+	//if(chain_->GetBranch("jetTrack")) // new variable, keep check a while for compatibility
+        //   chain_->SetBranchAddress("jetTrack", &recoObjects_->jetTrack_, &b_jetTrack);
+	//else b_jetTrack = 0;
         chain_->SetBranchAddress("met", &recoObjects_->met_, &b_met);
         if(doJesJer_){
             chain_->SetBranchAddress("jetJERSF", &recoObjects_->jetJERSF_, &b_jetJERSF);
@@ -716,6 +731,15 @@ void AnalysisBase::SetRecoBranchAddresses()
     if(chain_->GetBranch("jetChargeRelativePtWeighted")) // new variable, keep check a while for compatibility
         chain_->SetBranchAddress("jetChargeRelativePtWeighted", &jetChargeRelativePtWeighted_, &b_jetChargeRelativePtWeighted);
     else b_jetChargeRelativePtWeighted = 0;
+    //if(chain_->GetBranch("jetTrackIndex")) // new variable, keep check a while for compatibility
+    //        chain_->SetBranchAddress("jetTrackIndex", &recoObjects_->jetTrackIndex_, &b_jetTrackIndex);
+    //else b_jetTrackIndex = 0;
+    //if(chain_->GetBranch("jetTrackCharge")) // new variable, keep check a while for compatibility
+    //        chain_->SetBranchAddress("jetTrackCharge", &recoObjects_->jetTrackCharge_, &b_jetTrackCharge);
+    //else b_jetTrackCharge = 0;
+    //if(chain_->GetBranch("jetTrack")) // new variable, keep check a while for compatibility
+    //        chain_->SetBranchAddress("jetTrack", &recoObjects_->jetTrack_, &b_jetTrack);
+    //else b_jetTrack = 0;
     chain_->SetBranchAddress("met", &met_, &b_met);
     if(doJesJer_){
         chain_->SetBranchAddress("jetJERSF", &jetJERSF_, &b_jetJERSF);
@@ -879,8 +903,8 @@ void AnalysisBase::SetTopSignalBranchAddresses()
         chain_->SetBranchAddress("AntiBHadronFromTopB", &topGenObjects_->AntiBHadronFromTopB_, &b_AntiBHadronFromTopB);
         chain_->SetBranchAddress("BHadronVsJet", &topGenObjects_->BHadronVsJet_, &b_BHadronVsJet);
         chain_->SetBranchAddress("AntiBHadronVsJet", &topGenObjects_->AntiBHadronVsJet_, &b_AntiBHadronVsJet);
-        //if(chain_->GetBranch("genBHadPlusMothersPdgId")) // need to check whether branch exists
-        //    chain_->SetBranchAddress("genBHadPlusMothersPdgId", &topGenObjects_->genBHadPlusMothersPdgId_, &b_genBHadPlusMothersPdgId);
+        if(chain_->GetBranch("genBHadPlusMothersPdgId")) // need to check whether branch exists
+           chain_->SetBranchAddress("genBHadPlusMothersPdgId", &topGenObjects_->genBHadPlusMothersPdgId_, &b_genBHadPlusMothersPdgId);
         //if(chain_->GetBranch("genBHadPlusMothersStatus")) // need to check whether branch exists
         //    chain_->SetBranchAddress("genBHadPlusMothersStatus", &topGenObjects_->genBHadPlusMothersStatus_, &b_genBHadPlusMothersStatus);
         //if(chain_->GetBranch("genBHadPlusMothersIndices")) // need to check whether branch exists
@@ -926,8 +950,8 @@ void AnalysisBase::SetTopSignalBranchAddresses()
     chain_->SetBranchAddress("AntiBHadronFromTopB", &AntiBHadronFromTopB_, &b_AntiBHadronFromTopB);
     chain_->SetBranchAddress("BHadronVsJet", &BHadronVsJet_, &b_BHadronVsJet);
     chain_->SetBranchAddress("AntiBHadronVsJet", &AntiBHadronVsJet_, &b_AntiBHadronVsJet);
-    //if(chain_->GetBranch("genBHadPlusMothersPdgId")) // need to check whether branch exists
-    //    chain_->SetBranchAddress("genBHadPlusMothersPdgId", &genBHadPlusMothersPdgId_, &b_genBHadPlusMothersPdgId);
+    if(chain_->GetBranch("genBHadPlusMothersPdgId")) // need to check whether branch exists
+       chain_->SetBranchAddress("genBHadPlusMothersPdgId", &genBHadPlusMothersPdgId_, &b_genBHadPlusMothersPdgId);
     //if(chain_->GetBranch("genBHadPlusMothersStatus")) // need to check whether branch exists
     //    chain_->SetBranchAddress("genBHadPlusMothersStatus", &genBHadPlusMothersStatus_, &b_genBHadPlusMothersStatus);
     //if(chain_->GetBranch("genBHadPlusMothersIndices")) // need to check whether branch exists
@@ -992,6 +1016,9 @@ void AnalysisBase::GetRecoBranchesEntry(const Long64_t& entry)const
     //b_jetBTagCSVMVA->GetEntry(entry);
     if(b_jetChargeGlobalPtWeighted) b_jetChargeGlobalPtWeighted->GetEntry(entry);
     if(b_jetChargeRelativePtWeighted) b_jetChargeRelativePtWeighted->GetEntry(entry);
+    //if(b_jetTrackIndex) b_jetTrackIndex->GetEntry(entry);
+    //if(b_jetTrackCharge) b_jetTrackCharge->GetEntry(entry);
+    //if(b_jetTrack) b_jetTrack->GetEntry(entry);
     b_met->GetEntry(entry);
     if(doJesJer_){
         b_jetJERSF->GetEntry(entry);

@@ -61,6 +61,20 @@ TString tth::stepName(const TString& stepShort, const int& category)
 
 
 
+TString tth::stepName(const TString& stepShort, const std::vector<int>& v_category)
+{
+    std::ostringstream result;
+    result<<"_step"<<stepShort;
+    std::vector<int> v_clone = v_category;
+    std::sort(v_clone.begin(), v_clone.end());
+    for(const auto& category : v_clone){
+        result<<"_cate"<<category;
+    }
+    return result.str().c_str();
+}
+
+
+
 TString tth::extractSelectionStep(const TString& name)
 {
     TString result(name);
@@ -78,9 +92,9 @@ TString tth::extractJetCategory(const TString& name)
 {
     TString result(name);
     // Remove e.g. things like .root ??
-    result = helper::searchFragmentByToken(result, "cate", ".");
+    result = helper::searchFragmentByToken(result, "cate", ".", true);
     // Further separation by "_" to find string containing step
-    result = helper::searchFragmentByToken(result, "cate", "_");
+    result = helper::searchFragmentByToken(result, "cate", "_", true);
     //std::cout<<"The extracted category bin is (bin/histogram name): "<<result<<" / "<<name<<std::endl;
     return result;
 }
@@ -97,7 +111,7 @@ TString tth::extractSelectionStepAndJetCategory(const TString& name)
 
 
 
-TString tth::helper::searchFragmentByToken(const TString& name, const TString& searchPattern, const TString& token)
+TString tth::helper::searchFragmentByToken(const TString& name, const TString& searchPattern, const TString& token, const bool allowMultiple)
 {
     TString result;
     TObjArray* a_nameFragment = TString(name).Tokenize(token);
@@ -105,14 +119,14 @@ TString tth::helper::searchFragmentByToken(const TString& name, const TString& s
     for(Int_t iFragment= 0; iFragment < a_nameFragment->GetEntriesFast(); ++iFragment){
         const TString& fragment = a_nameFragment->At(iFragment)->GetName();
         if(fragment.Contains(searchPattern)){
-            if(alreadyFound){
+            if(!allowMultiple && alreadyFound){
                 std::cerr<<"ERROR in searchFragmentByToken()! Ambiguous string, name contains search pattern \""<<searchPattern
                          <<"\" in more than one fragment: "<<name
                          <<"\n...cannot extract fragment, so break\n";
                 exit(33);
             }
             alreadyFound = true;
-            result = "_" + fragment;
+            result.Append("_").Append(fragment);
         }
     }
     return result;

@@ -16,6 +16,8 @@ namespace AnalysisMode{
         mvaP,       // Produce MVA input
         mvaA,       // Access MVA output
         dijet,      // Dijet analyser
+        charge,     // Jet charge analyser
+        match,      // Jet matching analyser
         playg,      // Playground
         undefined   // Undefined mode
     };
@@ -24,7 +26,7 @@ namespace AnalysisMode{
     
     /// All analysis modes allowed for analysis
     const std::vector<AnalysisMode> allowedAnalysisModes
-        {cp, mvaP, mvaA, dijet, playg};
+        {cp, mvaP, mvaA, dijet, charge, match, playg};
     
     
     

@@ -117,7 +117,10 @@ JetCategories::JetCategories(const int minNumberOfJets, const int maxNumberOfJet
         }
     }
     std::cout<<"Number of categories: "<<this->numberOfCategories()<<"\n";
-    
+    std::cout<<"Labels:\t";
+    for(const auto label : this->binLabels(false)) std::cout<<label<<"  ;  ";
+    std::cout<<std::endl;
+        
     std::cout<<"=== Finishing setting up jet categories\n\n";
 }
 
@@ -240,11 +243,11 @@ int JetCategories::categoryId(const int numberOfJets, const int numberOfBjets)co
 
 
 
-std::vector<TString> JetCategories::binLabels()const
+std::vector<TString> JetCategories::binLabels(const bool rootLabel)const
 {
     std::vector<TString> v_label;
     for(std::vector<JetCategory>::const_iterator i_jetCategory = v_jetCategory_.begin(); i_jetCategory != v_jetCategory_.end(); ++i_jetCategory){
-        v_label.push_back(i_jetCategory->binLabel());
+        v_label.push_back(i_jetCategory->binLabel(rootLabel));
     }
     return v_label;
 }
