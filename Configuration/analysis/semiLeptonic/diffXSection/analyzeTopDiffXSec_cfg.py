@@ -573,6 +573,7 @@ if(not options.sample=="none"):
         additionalEventWeights=False
         if(eventFilter=='signal only'):
             outputFileName+="Sig"
+        outputFileName+="ZprimeM1000W100"
     elif(options.sample=="qcd" and decayChannel=='muon'):
         usedSample="TopAnalysis/Configuration/Summer12/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v3_cff"
         PythiaSample="True"
