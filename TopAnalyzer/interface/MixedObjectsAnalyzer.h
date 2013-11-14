@@ -68,7 +68,7 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   std::string hypoKey_, btagAlgo_;
 
   /// event weight
-  double weight;
+  float weight;
 
   /// event identifiers
   unsigned int runNumber, luminosityBlockNumber, eventNumber;
