@@ -21,6 +21,9 @@ for systematic in H110 H115 H120 H1225 H1275 H130 H135 H140; do
     w
 done
 
+for c in ee emu mumu; do
+    $LA -f ttbarH125 -c $c $@ &
+done
 
 
 wait

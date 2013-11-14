@@ -161,16 +161,25 @@ void MvaValidation::bookMvaSpecificHistos(const TString& step, std::map<TString,
     m_histogram[name]->GetXaxis()->SetBinLabel(1, "matched Higgs jets");
     m_histogram[name]->GetXaxis()->SetBinLabel(2, "pair from Higgs");
     m_histogram[name]->GetXaxis()->SetBinLabel(3, "overlap with Top");
-    m_histogram[name]->GetXaxis()->SetBinLabel(4, "Fully solved");
+    m_histogram[name]->GetXaxis()->SetBinLabel(4, "fully solved");
+    
+    
+    name = "jetsFromBoth_best"+mvaTypeC+mvaConfigName;
+    m_histogram[name] = this->store(new TH1D(prefix_+name+step, "jetsFromBoth_{"+mvaType+"}^{best};;# events",4,0,4));
+    m_histogram[name]->GetXaxis()->SetBinLabel(1, "matched jets");
+    m_histogram[name]->GetXaxis()->SetBinLabel(2, "pair from top");
+    m_histogram[name]->GetXaxis()->SetBinLabel(3, "pair from higgs");
+    m_histogram[name]->GetXaxis()->SetBinLabel(4, "fully solved");
 
-
-
+    
+    const double mvaWeightLow = mvaType=="combined" ? 0. : -1.2;
+    const double mvaWeightHigh = mvaType=="combined" ? 1. : 0.2;
 
     name = "mvaWeight"+mvaTypeC+mvaConfigName;
-    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+"mvaWeight_{"+mvaType+"};w_{MVA}^{"+mvaType+"};# jet pairs", 80, -1.2, 0.2);
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+"mvaWeight_{"+mvaType+"};w_{MVA}^{"+mvaType+"};# jet pairs", 80, mvaWeightLow, mvaWeightHigh);
 
     name = "mvaWeight"+mvaTypeC+"_best"+mvaTypeC+mvaConfigName;
-    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+"best mvaWeight_{"+mvaType+"};w_{MVA,1}^{"+mvaType+"};# events", 80, -1.2, 0.2);
+    this->bookHistosInclExcl(m_histogram, prefix_, step, name, name+"best mvaWeight_{"+mvaType+"};w_{MVA,1}^{"+mvaType+"};# events", 80, mvaWeightLow, mvaWeightHigh);
 
     if(mvaType == "combined"){
         name = "mvaWeightCorrectVsSwapped"+mvaConfigName;
@@ -428,6 +437,16 @@ void MvaValidation::fillBestWeightHistos(const std::vector<float>& v_mvaWeights,
         }
         else{
             m_histogram[name]->Fill(-999., weight);
+        }
+        
+        name = "jetsFromBoth_best"+mvaType+mvaConfigName;
+        if(genObjectIndices.uniqueRecoMatching()){
+            m_histogram[name]->Fill(0., weight);
+            if(isPairFromTop) m_histogram[name]->Fill(1., weight);
+            if(isPairFromHiggs){
+                m_histogram[name]->Fill(2., weight);
+                if(isPairFromTop) m_histogram[name]->Fill(3., weight);
+            }
         }
     }
 }

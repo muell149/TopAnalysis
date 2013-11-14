@@ -1,10 +1,9 @@
 #!/bin/sh
 
 
-
-if [ $# -ge 1 ] && [[ ! "$1" == "-m" ]] ; then
-    echo "Option is not allowed here: $1"
-    echo "Only '-m OPTION' can be used here with this script"
+if [ $# -ge 1 ] && ( [[ "$@" == *"-c"* ]] || [[ "$@" == *"-s"* ]] || [[ "$@" == *"-f"* ]] ) ; then
+    echo "Options '-s', '-c', '-f' are not allowed."
+    echo "You used options: $@"
     exit 1
 fi
 
@@ -28,7 +27,7 @@ for c in ee emu mumu; do
     $LA -f ${c}_run2012B -c $c $@ &
     $LA -f ${c}_run2012C -c $c $@ &
     $LA -f ${c}_run2012D -c $c $@ &
-done 
+done
 
 for i in qcd single ttbarbg.root wtol wwtoall wztoall zztoall ttbarW ttbarZ; do
     w
