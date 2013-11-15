@@ -90,6 +90,7 @@ class MixedObjectsAnalyzer : public edm::EDAnalyzer {
   float Nbjets, Njets, NjetsTrue;
   bool inVisPS;
   float valueAssignment;
+  float chi2;
 
   /// ints
   int BindexA, BindexB, BindexC, BindexD, leadNonttjetIX;
