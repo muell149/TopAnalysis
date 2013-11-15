@@ -2334,7 +2334,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
 
     bool binned_theory=true; //############
 
-    TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0, *Ahrensth1 = 0;
+    TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0;
     TH1* mcnlohistnorm=0;
     TGraph *mcatnloBand=0;
 
@@ -2442,6 +2442,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
             mcatnloBand->SetLineColor(kBlue);
             mcatnloBand->SetLineWidth(2);
             mcatnloBand->SetLineStyle(5);
+            canDrawMCATNLO = false;
         } else {
             std::cout << "\n*************************\nMC@NLO Curve not available!\n**********************\n";
             canDrawMCATNLO = false;
@@ -2508,16 +2509,12 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         }
     }
 
-    if(drawNLOCurves && drawAhrens && name == "HypTTBarMass"){
-        TString ahrensFile = ttbar::DATA_PATH() + "/mttAhrens_8Tev_1725.root";
-        Ahrensth1 = fileReader->GetClone<TH1>(ahrensFile, "mttbar");
-        Ahrensth1_Binned = Ahrensth1->Rebin(bins, "Ahrensth1_Binned", Xbins);
-        for (Int_t bin=0; bin<bins; bin++){
-            Ahrensth1_Binned->SetBinContent(bin+1,Ahrensth1_Binned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/Ahrensth1->GetBinWidth(1)));
-        }
+    if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT")){
+        TString ahrensFile = ttbar::DATA_PATH() + "/ahrensNNLL_8TeV.root";
+        if(name == "HypTTBarMass") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarM");
+        else if(name == "HypTTBarpT") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarPt");
         Ahrensth1_Binned->Scale(1./Ahrensth1_Binned->Integral("width"));
     } else {drawAhrens = 0;}
-
 
     TCanvas * c = new TCanvas("DiffXS","DiffXS");
     if(logY){
@@ -2603,11 +2600,8 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         Kidoth1_Binned->SetLineStyle(2);
         Kidoth1_Binned->Draw("SAME][");
     }
-    if(drawNLOCurves && drawAhrens && name == "HypTTBarMass")
+    if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT"))
     {
-        Ahrensth1->SetLineWidth(2);
-        Ahrensth1->SetLineColor(kMagenta+2);
-        Ahrensth1->SetLineStyle(10);
         Ahrensth1_Binned->SetLineWidth(2);
         Ahrensth1_Binned->SetLineColor(kMagenta+2);
         Ahrensth1_Binned->SetLineStyle(10);
@@ -2701,7 +2695,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         if (drawPERUGIA11 && perugia11hist->GetEntries())                                               leg2->AddEntry(perugia11histBinned, "MadGraph+Pythia (Perugia11)",  "l");
         if (drawKidonakis && !name.Contains("RestFrame") && !name.Contains("Lead") && 
             (name.Contains("ToppT") || name.Contains("TopRapidity")))                                   leg2->AddEntry(Kidoth1_Binned, "Approx. NNLO",  "l");
-        if (drawAhrens && name == "HypTTBarMass")                                                       leg2->AddEntry(Ahrensth1_Binned, "NLO+NNLL",  "l");
+        if (drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT"))                             leg2->AddEntry(Ahrensth1_Binned, "NLO+NNLL",  "l");
     }
     leg2->SetFillStyle(0);
     leg2->SetBorderSize(0);
@@ -2711,14 +2705,15 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     leg2->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg2->SetTextSize(0.04);
     leg2->Draw("same");
-    if (drawNLOCurves && drawKidonakis &&  (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead") && name.Contains("RestFrame")){
+    if (drawNLOCurves && drawKidonakis &&  (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead") && !name.Contains("RestFrame")){
         DrawLabel("(arXiv:1210.7813)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
     }
-    if (drawNLOCurves && drawAhrens && name == "HypTTBarMass"){
-        DrawLabel("(arXiv:1003.5827)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
+    if (drawNLOCurves && drawAhrens){
+        if(name == "HypTTBarMass") {DrawLabel("(arXiv:1306.1537)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);}
+        else if (name == "HypTTBarpT"){DrawLabel("(arXiv:1307.2464)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);}
     }
-    h_GenDiffXSec->Draw("SAME");
 
+    h_GenDiffXSec->Draw("SAME");
     gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
@@ -3131,7 +3126,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     genscale = 1./ h_GenDiffXSec->Integral("width");
     h_GenDiffXSec->Scale(genscale);
 
-    TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0, *Ahrensth1 = 0;
+    TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0;
     TH1* mcnlohistnorm=0;
     TGraph *mcatnloBand=0;
 
@@ -3234,6 +3229,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
             mcatnloBand->SetLineColor(kBlue);
             mcatnloBand->SetLineWidth(2);
             mcatnloBand->SetLineStyle(5);
+            canDrawMCATNLO = false;
         } else {
             std::cout << "\n*************************\nMC@NLO Curve not available!\n**********************\n";
             canDrawMCATNLO = false;
@@ -3293,13 +3289,10 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topY");
         }
     }
-    if(drawNLOCurves && drawAhrens && name == "HypTTBarMass"){
-        TString ahrensFile = ttbar::DATA_PATH() + "/mttAhrens_8Tev_1725.root";
-        Ahrensth1 = fileReader->GetClone<TH1>(ahrensFile, "mttbar");
-        Ahrensth1_Binned = Ahrensth1->Rebin(bins, "Ahrensth1_Binned", Xbins);
-        for (Int_t bin=0; bin<bins; bin++){
-            Ahrensth1_Binned->SetBinContent(bin+1,Ahrensth1_Binned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/Ahrensth1->GetBinWidth(1)));
-        }
+    if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT")){
+        TString ahrensFile = ttbar::DATA_PATH() + "/ahrensNNLL_8TeV.root";
+        if(name == "HypTTBarMass") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarM");
+        else if(name == "HypTTBarpT") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarPt");
         Ahrensth1_Binned->Scale(1./Ahrensth1_Binned->Integral("width"));
     } else {drawAhrens = 0;}
 
@@ -3384,12 +3377,8 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         Kidoth1_Binned->SetLineStyle(2);
         Kidoth1_Binned->Draw("SAME][");
     }
-    if(drawNLOCurves && drawAhrens && name == "HypTTBarMass")
+    if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT"))
     {
-        Ahrensth1->SetLineWidth(2);
-        Ahrensth1->SetLineColor(kMagenta+2);
-        Ahrensth1->SetLineStyle(10);
-
         Ahrensth1_Binned->SetLineWidth(2);
         Ahrensth1_Binned->SetLineColor(kMagenta+2);
         Ahrensth1_Binned->SetLineStyle(10);
@@ -3411,7 +3400,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         if (drawPERUGIA11 && perugia11hist->GetEntries())                                               leg2->AddEntry(perugia11histBinned, "MadGraph+Pythia (Perugia11)",  "l");
         if (drawKidonakis && !name.Contains("RestFrame") && !name.Contains("Lead") && 
             (name.Contains("ToppT") || name.Contains("TopRapidity")))                                   leg2->AddEntry(Kidoth1_Binned, "Approx. NNLO",  "l");
-        if (drawAhrens && name == "HypTTBarMass")                                                       leg2->AddEntry(Ahrensth1_Binned, "NLO+NNLL",  "l");
+        if (drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT"))                             leg2->AddEntry(Ahrensth1_Binned, "NLO+NNLL",  "l");
     }
     leg2->SetFillStyle(0);
     leg2->SetBorderSize(0);
@@ -3424,8 +3413,9 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     if (drawNLOCurves && drawKidonakis &&  (name.Contains("ToppT") || name.Contains("TopRapidity")) && !name.Contains("Lead") && !name.Contains("RestFrame")){
         DrawLabel("(arXiv:1210.7813)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
     }
-    if (drawNLOCurves && drawAhrens && name == "HypTTBarMass"){
-        DrawLabel("(arXiv:1003.5827)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);
+    if (drawNLOCurves && drawAhrens){
+        if(name == "HypTTBarMass") {DrawLabel("(arXiv:1306.1537)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);}
+        else if (name == "HypTTBarpT"){DrawLabel("(arXiv:1307.2464)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);}
     }
 
     h_GenDiffXSec->Draw("SAME");
