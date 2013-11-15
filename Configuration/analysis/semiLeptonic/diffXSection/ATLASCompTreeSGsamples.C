@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-std::map<TString, std::vector<double> > makeVariableBinningA(bool ATLAS=false);
+std::map<TString, std::vector<double> > makeVariableBinningA(int binning=1);
 bool PythiaSample (unsigned int s);
 
 unsigned int kMad    =0;
@@ -13,7 +13,7 @@ unsigned int kPowHerA=6;
 unsigned int kMcaA   =7;
 
 void ATLASCompTreeSGsamples(bool save = true, int verbose=0){
-  bool ATLASbinning=false;
+  int binning=2; //0:fine binning, 1:ATLAS, 2:CMS
   bool debug  = true ;
   bool debug2 = false;
 
@@ -56,11 +56,11 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=0){
   };
   TString axisLabel1D[ ] = { 
     // KinFit plots before prob cut 
-    "p_{T}^{t} #left[GeV#right];relative #Top quarks;0;20",
-    "y^{t};relative #Top quarks;0;1",
-    "p_{T}^{t#bar{t}} #left[GeV#right];relative #Top-quark pairs;0;20",
-    "y^{t#bar{t}};relative #Top-quark pairs;0;1",
-    "m^{t#bar{t}} #left[GeV#right];relative #Top-quark pairs;0;50",
+    "p_{T}^{t} #left[GeV#right];#Top quarks (norm.);0;20",
+    "y^{t};#Top quarks (norm.);0;1",
+    "p_{T}^{t#bar{t}} #left[GeV#right];t#bar{t} pairs (norm.);0;20",
+    "y^{t#bar{t}};t#bar{t} pairs (norm.);0;1",
+    "m^{t#bar{t}} #left[GeV#right];t#bar{t} pairs (norm.);0;50",
     //"t#bar{t} decay Channel;relative #Top-quark pairs;0;1",
   };
 
@@ -74,33 +74,33 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=0){
   if(plotList_.size()>15) gROOT->SetBatch();
 
   // create canvas container
-  std::vector<TCanvas*> plotCanvas_;
+  std::vector<TCanvas*> plotCanvas_, plotCanvas2_;
   // create legend
   TLegend* leg= new TLegend(0.5, 0.5, 0.85, 0.88);
-  legendStyle(*leg,"t#bar{t} simulation, #srt(s)=7 TeV");
+  legendStyle(*leg ,"#bf{t#bar{t} simulation, #sqrt{s}=7 TeV}"       );
   TLegend* leg2= new TLegend(0.5, 0.5, 0.85, 0.88);
-  legendStyle(*leg2,"t#bar{t} PYTHIA simulation, #srt(s)=7 TeV");
+  legendStyle(*leg2,"#bf{t#bar{t} PYTHIA simulation, #sqrt{s}=7 TeV}");
   TLegend* leg3= new TLegend(0.5, 0.5, 0.85, 0.88);
-  legendStyle(*leg3,"t#bar{t} HERWIG simulation, #srt(s)=7 TeV");
+  legendStyle(*leg3,"#bf{t#bar{t} HERWIG simulation, #sqrt{s}=7 TeV}");
 
   // ============================
   //  get histos from tree
   // ============================
   unsigned int kfirst    =kMad;
   unsigned int klast     =kMcaA;
-  unsigned int krelative1 =kPow;
-  TString krelative1lab="PowPy(CMS)";
-  unsigned int krelative2 =kPowHer;
-  TString krelative2lab="PowPy(CMS)";
+  unsigned int krelative1 =kPow; 
+  TString krelative1lab="#scale[0.65]{CMS Powheg+Pythia}";
+  unsigned int krelative2 =kPow;
+  TString krelative2lab="#scale[0.65]{CMS Powheg+Pythia}";
   unsigned int krelative3 =kPowHer;
-  TString krelative3lab="PowHer(CMS)";  
+  TString krelative3lab="#scale[0.65]{CMS Powheg+Herwig}";  
   TString treePath ="genTree/tree";
   TString treePathA="tree";
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
-  std::map<TString, std::vector<double> > binning_=makeVariableBinningA(ATLASbinning);
+  std::map<TString, std::vector<double> > binning_=makeVariableBinningA(binning);
 
   // get template histos
-  std::vector<TH1F*> template_;
+  std::vector<TH1F*> template_, template2_, template3_;
   if(debug) std::cout << "get template histos" << std::endl; 
   // loop all plots
   for(int plot=0; plot<(int)plotList_.size(); ++plot){
@@ -120,7 +120,9 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=0){
     temp->SetLineWidth(3);
     temp->SetMarkerSize(1.25);
     //int binMax=temp->GetNbinsX()+1;
-    template_.push_back(temp);
+    template_ .push_back(temp);
+    template2_.push_back(temp);
+    template3_.push_back(temp);
   }
   if(debug) std::cout << "process trees" << std::endl; 
   // loop all samples
@@ -202,14 +204,14 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=0){
     if(debug) std::cout << "initialize histos from template" << std::endl; 
     int color =kRed+7; TString sampleName="MadGraph+Pythia old";
     //if(     sample==kMadOld){ color =kRed+7  ; sampleName="MadGraph+Pythia old" ;}
-    if(sample==kMad||sample==kAlp){ color =kRed    ; sampleName="MadGraph+Pythia"     ;}
+    if(sample==kMad||sample==kAlp){ color =kRed    ; sample==kMad ? sampleName="MadGraph+Pythia" : sampleName="Alpgen+Herwig"     ;}
     else if(sample==kPow   ||sample==kPowA   ){ color =kGreen  ; sampleName="Powheg+Pythia"      ;}
-    else if(sample==kPowHer||sample==kPowHerA){ color =kMagenta; sampleName="Powheg+Herwig"       ;} 
-    else if(sample==kMca   ||sample==kMcaA   ){ color =kBlue   ; sampleName="MC@NLO+Herwig"       ;}
+    else if(sample==kPowHer||sample==kPowHerA){ color =kMagenta; sampleName="Powheg+Herwig"      ;} 
+    else if(sample==kMca   ||sample==kMcaA   ){ color =kBlue   ; sampleName="MC@NLO+Herwig"      ;}
     if(CMS) sampleName+="(CMS)"  ;
     else{
       sampleName+="(ATLAS)";
-      color+=3;      
+      color+=1;      
     }
     for(int plot=0; plot<(int)plotList_.size(); ++plot){
       // initialize result plots from template
@@ -276,11 +278,20 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=0){
     // loop plots
     for(int plot=0; plot<(int)plotList_.size(); ++plot){
       TString name=plotList_[plot];
+      TH1F* temptemplate=0;
+      if(set==1) temptemplate=(TH1F*)template_ [plot]->Clone(TString(template_ [plot]->GetName())+"1");
+      if(set==2) temptemplate=(TH1F*)template2_[plot]->Clone(TString(template2_[plot]->GetName())+"2");
+      if(set==3) temptemplate=(TH1F*)template3_[plot]->Clone(TString(template3_[plot]->GetName())+"3");
+      TString nameExt= set==2 ? "PYTHIA" : (set==3 ? "HERWIG" : "");
       if(debug) std::cout << "plot " << name << std::endl; 
       addCanvas(plotCanvas_);
       plotCanvas_[plotCanvas_.size()-1]->cd(0);
-      template_[plot]->SetMaximum(1.5*histo_[name][kPow]->GetMaximum());
-      template_[plot]->Draw("AXIS");
+      plotCanvas_[plotCanvas_.size()-1]->SetName(name+nameExt);
+      plotCanvas_[plotCanvas_.size()-1]->SetTitle(name+nameExt);
+      temptemplate->SetMaximum(1.5*histo_[name][kPow]->GetMaximum());
+      //temptemplate->GetXaxis()->SetLabelSize(0);
+      //temptemplate->GetXaxis()->SetTitleSize(0);
+      temptemplate->Draw("AXIS");
       // draw all samples
       for(unsigned int sample=kfirst; sample<=klast; ++sample){
 	if(histo_[name].count(sample)>0&&(set==1||(set==2&&PythiaSample(sample))||(set==3&&!PythiaSample(sample)))){
@@ -297,31 +308,56 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=0){
       }
       // zero error
       std::vector<double> zeroerr_;
-      for(int bin=0; bin<template_[plot]->GetNbinsX(); ++bin) zeroerr_.push_back(0);
+      for(int bin=0; bin<temptemplate->GetNbinsX(); ++bin) zeroerr_.push_back(0);
       // draw ratios
       if(debug) std::cout << " - draw ratios:" << std::endl; 
-      bool first=true;
+      //bool first=true;
+      unsigned int krelative=krelative1;
+      TString krelativelab=krelative1lab;
+      if(set==2 ){ krelative=krelative2; krelativelab=krelative2lab;}
+      if(set==3 ){ krelative=krelative3; krelativelab=krelative3lab;}
+      drawRatio(temptemplate, temptemplate, 0.3, 1.7, myStyle, verbose, zeroerr_, "simulation", krelativelab, "AXIS", kWhite);
       for(unsigned int sample=kfirst; sample<=klast; ++sample){
-	unsigned int krelative=krelative1;
-	TString krelativelab=krelative1lab;
-	if(set==2 ){ krelative=krelative2; krelativelab=krelative2lab;}
-	if(set==3 ){ krelative=krelative3; krelativelab=krelative3lab;}
 	if((histo_[name].count(sample)>0&&histo_[name].count(krelative)>0)&&((set==1)||(set==2&&PythiaSample(sample))||(set==3&&!PythiaSample(sample)))){
 	  if(debug) std::cout << "   sample " << sample << std::endl; 
-	  TString opt = first ? "hist" : "hist same";
-	  if(first) first=false;
+	  //TString opt = first ? "hist" : "hist same";
+	  TString opt = "hist same";
+	  //if(first) first=false;
 	  drawRatio(histo_[name][sample], histo_[name][krelative], 0.3, 1.7, myStyle, verbose, zeroerr_, "simulation", krelativelab, opt, histo_[name][sample]->GetLineColor());
 	}
       }
-    }
-  }
+      //if(set>1) DrawLabel(TString(template_[plot]->GetXaxis()->GetTitle()), 0.2, 0.07, 0.95, 0.3, 32, 0.15);
+      temptemplate->Draw("AXIS same");
+    } // end for loop plot
+  } // end for loop sep
   if(save){
-    saveCanvas(plotCanvas_, "./treeATLASCMScomparison", "", true, true);
+    TString name="./treeATLASCMScomparison";
+    TString name2=binning==1 ? "ATLASbinning" : (binning==2 ? "CMSbinning" : "FineBinning");
+    if(debug) std::cout << "save plots as pictures" << std::endl;  
+    saveCanvas(plotCanvas_, name+name2, "", true, true);
+    if(debug) std::cout << "save plots in rootfile" << std::endl;
+    for(unsigned int i=0; i<plotCanvas_.size(); ++i){
+      if(debug) {
+	std::cout << i+1 << "/" << plotCanvas_.size();
+	std::cout << ": "<< plotCanvas_[i]->GetTitle();
+	std::cout << "->" << name+".root" << std::endl;
+      }
+      saveToRootFile(name+".root", plotCanvas_[i], true, 0, name2);
+      //TFile* tempf=TFile::Open(name+".root", "READ");
+      //if(!tempf) std::cout << "ERROR: can't open file!" << std::endl;
+      //std::cout << "a" << std::endl;
+      //TCanvas* temp = (TCanvas*)(tempf->Get(name2+"/"+plotCanvas_[i]->GetTitle())->Clone());
+      //std::cout << "b" << std::endl;
+      //plotCanvas2_.push_back(temp);
+      //std::cout << "d" << std::endl;
+      //tempf->Close();
+    }
+    //saveCanvas(plotCanvas2_, name+name2, "", true, true);
   }
 }
 
 
-std::map<TString, std::vector<double> > makeVariableBinningA(bool ATLAS)
+std::map<TString, std::vector<double> > makeVariableBinningA(int binning)
 {
   // this function creates a map with the hard coded
   // bin values for variable binning
@@ -339,38 +375,78 @@ std::map<TString, std::vector<double> > makeVariableBinningA(bool ATLAS)
   // pt(top)
   double topPtBins[]= {0.0, 50.0, 100.0, 150.0, 200.0 , 250.0, 350.0, 800.};
   double topPtBinsA[]= {0.0, 60.0, 100.0, 150.0, 200.0, 260.0, 320.0, 400.0, 500.0};
-  if(!ATLAS) bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
-  else bins_.insert( bins_.begin(), topPtBinsA, topPtBinsA + sizeof(topPtBinsA)/sizeof(double) );
+  if(binning==2) bins_.insert( bins_.begin(), topPtBins, topPtBins + sizeof(topPtBins)/sizeof(double) );
+  else if(binning ==1) bins_.insert( bins_.begin(), topPtBinsA, topPtBinsA + sizeof(topPtBinsA)/sizeof(double) );
+  else{
+    double width=10.;
+    double min=0.;
+    double max=800.;
+    for(double bin=min; bin<=max; bin+=width){
+      bins_.push_back(bin);
+    }
+  }
   result["topPt"        ] = bins_;
   bins_.clear();
 
   // y(top)
   double topYBins[]={-2.5, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.5}; 
-  bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
+  if(binning>0) bins_.insert( bins_.begin(), topYBins, topYBins + sizeof(topYBins)/sizeof(double) );
+  else{
+    double width=0.1;
+    double min=-2.5;
+    double max= 2.5;
+    for(double bin=min; bin<=max; bin+=width){
+      bins_.push_back(bin);
+    }
+  }
   result["topY"   ]   = bins_;
   bins_.clear();
 
   // pt(ttbar)
   double ttbarPtBins[] = {0.0, 40.0, 170.0, 340.0, 1000.0};
   double ttbarPtBinsA[]= {0.0, 20.0, 45.0, 75.0, 120.0, 190.0, 300.0};
-  if(!ATLAS) bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
-  else bins_.insert( bins_.begin(), ttbarPtBinsA, ttbarPtBinsA + sizeof(ttbarPtBinsA)/sizeof(double) );
+  if(binning==2) bins_.insert( bins_.begin(), ttbarPtBins, ttbarPtBins + sizeof(ttbarPtBins)/sizeof(double) );
+  else if(binning ==1) bins_.insert( bins_.begin(), ttbarPtBinsA, ttbarPtBinsA + sizeof(ttbarPtBinsA)/sizeof(double) );
+  else{
+    double width=10.;
+    double min=0.;
+    double max=1000.;
+    for(double bin=min; bin<=max; bin+=width){
+      bins_.push_back(bin);
+    }
+  }
   result["ttbarPt"]=bins_;
   bins_.clear();
 
   // y(ttbar)
   double ttbarYBins[]= {-2.5, -1.0, -0.5, 0.0, 0.5, 1.0, 2.5};
   double ttbarYBinsA[]= {-2.5, -1.3, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.9, 1.3, 2.5};
-  if(!ATLAS) bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
-  else bins_.insert( bins_.begin(), ttbarYBinsA, ttbarYBinsA + sizeof(ttbarYBinsA)/sizeof(double) );
+  if(binning==2) bins_.insert( bins_.begin(), ttbarYBins, ttbarYBins + sizeof(ttbarYBins)/sizeof(double) );
+  else if(binning ==1) bins_.insert( bins_.begin(), ttbarYBinsA, ttbarYBinsA + sizeof(ttbarYBinsA)/sizeof(double) );
+  else{
+    double width=0.1;
+    double min=-2.5;
+    double max= 2.5;
+    for(double bin=min; bin<=max; bin+=width){
+      bins_.push_back(bin);
+    }
+  }
   result["ttbarY"]=bins_;
   bins_.clear();
 
   // m(ttbar)
   double ttbarMassBins[]= {345.0, 450.0, 550.0, 700.0, 950.0, 2700.0};
   double ttbarMassBinsA[]= {345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0};
-  if(!ATLAS) bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
-  else bins_.insert( bins_.begin(), ttbarMassBinsA, ttbarMassBinsA + sizeof(ttbarMassBinsA)/sizeof(double) );
+  if(binning==2) bins_.insert( bins_.begin(), ttbarMassBins, ttbarMassBins + sizeof(ttbarMassBins)/sizeof(double) );
+  else if(binning ==1) bins_.insert( bins_.begin(), ttbarMassBinsA, ttbarMassBinsA + sizeof(ttbarMassBinsA)/sizeof(double) );
+  else{
+    double width=10.;
+    double min=250.;
+    double max=2500.;
+    for(double bin=min; bin<=max; bin+=width){
+      bins_.push_back(bin);
+    }
+  }
   result["ttbarMass"]=bins_;
   bins_.clear();
 
