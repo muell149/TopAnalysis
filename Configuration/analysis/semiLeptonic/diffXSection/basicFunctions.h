@@ -771,7 +771,7 @@ namespace semileptonic {
     decch -> Draw("same");
   }
 
-  void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04, bool cmssimulation=false, bool privateWork=false)
+  void DrawCMSLabels(bool cmsprelim=true, double luminosity=0.0, double textSize=0.04, bool cmssimulation=false, bool privateWork=false, bool sevenTeV=false)
   {
     // Draw official labels (CMS Preliminary/Simulation, luminosity and CM energy) above plot
 
@@ -784,19 +784,20 @@ namespace semileptonic {
     label -> SetTextFont(42);
 
     TString extension="CMS";
-    if (cmssimulation) extension+=" Simulation";
-    else{
-      if(privateWork) extension+=" Private Work";
-      else if(cmsprelim  ) extension+=" Preliminary";
-    }
+    TString comE="8";
+    if(sevenTeV) comE="7";
+
+    if(cmsprelim  ) extension+=" Preliminary";
+    else if(cmssimulation) extension+=" Simulation";
+    if(privateWork) extension+=" (Private Work)";
     
     if (cmssimulation||luminosity==0.)
       {
-	label -> AddText(extension+", #sqrt{s} = 8 TeV");
+	label -> AddText(extension+", #sqrt{s} = "+comE+" TeV");
       }
     else 
       {
-	label -> AddText(Form(extension+", %2.1f fb^{-1} at #sqrt{s} = 8 TeV",luminosity/1000));
+	label -> AddText(Form(extension+", %2.1f fb^{-1} at #sqrt{s} = "+comE+" TeV",luminosity/1000));
       }
     
     label->SetFillStyle(0);
@@ -2137,7 +2138,7 @@ namespace semileptonic {
 
       // m(ttbar)
       double ttbarMassBins[]={345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1100.0, 1600.0};
-      //double ttbarMassBins[]={345.0, 450.0, 550.0, 700.0, 950.0, 2500.0};// ATLAS binning 2500 -> 2700
+      //double ttbarMassBins[]={250.0, 450.0, 550.0, 700.0, 950.0, 2700.0};// ATLAS binning 2500 -> 2700
       // First option: double ttbarMassBins[]={0.0, 345.0, 400.0, 470.0, 550.0, 650.0, 800.0, 1200.0};  
       // Korea:        double ttbarMassBins[]={0.0, 345.0, 400.0, 450.0, 500.0, 550.0, 600.0, 700.0, 800.0, 1200.0}; 
       // PAS binning:  double ttbarMassBins[]={0., 345., 410., 480., 580., 750., 1200.};
@@ -2586,6 +2587,11 @@ namespace semileptonic {
 
     if(ratioDrawOption.Contains("same")&&verbose>1) std::cout << "drawing into same ratio" << std::endl;
     if(!ratioDrawOption.Contains("same")){
+      TPad *whitebox3 = new TPad("whitebox3","",0.2,0.,1.,1.);
+      whitebox3->SetFillColor(10);
+      whitebox3->SetFillStyle(1001);
+      whitebox3->SetBorderSize(0);
+      whitebox3->SetBorderMode(0);
       // create new pad for ratio plot
       TPad *rPad;
       rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
@@ -2600,6 +2606,7 @@ namespace semileptonic {
       rPad->Draw();
       // configure ratio plot
       rPad->cd();
+      //whitebox3->Draw();
       rPad->SetLogy(0);
       rPad->SetLogx(logx);
       rPad->SetTicky(1);
@@ -2632,6 +2639,7 @@ namespace semileptonic {
       // delete axis of initial plot
       histDenominator->GetXaxis()->SetLabelSize(0);
       histDenominator->GetXaxis()->SetTitleSize(0);
+      rPad->RedrawAxis("g");
     }
     // draw ratio plot
     ratio->SetLineWidth(2);
@@ -2641,7 +2649,7 @@ namespace semileptonic {
     //gPad->Update();
     ratio->Draw(ratioDrawOption);
     gPad->SetLeftMargin(left);
-    gPad->RedrawAxis();
+    gPad->RedrawAxis("g");
 
     if(!ratioDrawOption.Contains("same")){
       // draw a horizontal lines on a given histogram
@@ -2661,8 +2669,35 @@ namespace semileptonic {
       f2->SetLineWidth(1);
       f2->SetLineColor(kBlack);
       f2->Draw("L same");
+      // c) at 0.5
+      TString height05 = ""; height05 += 0.5;
+      TF1 *f05 = new TF1("f05", height05, xmin, xmax);
+      f05->SetLineStyle(3);
+      f05->SetLineWidth(1);
+      f05->SetLineColor(kBlack);
+      f05->Draw("L same");
+      // d) at 1.5
+      TString height15 = ""; height15 += 1.5;
+      TF1 *f15 = new TF1("f15", height15, xmin, xmax);
+      f15->SetLineStyle(3);
+      f15->SetLineWidth(1);
+      f15->SetLineColor(kBlack);
+      f15->Draw("L same");
+      // e) at 0.8
+      TString height08 = ""; height08 += 0.8;
+      TF1 *f08 = new TF1("f08", height08, xmin, xmax);
+      f08->SetLineStyle(3);
+      f08->SetLineWidth(1);
+      f08->SetLineColor(kBlack);
+      f08->Draw("L same");
+      // f) at 1.2
+      TString height12 = ""; height12 += 1.2;
+      TF1 *f12 = new TF1("f12", height12, xmin, xmax);
+      f12->SetLineStyle(3);
+      f12->SetLineWidth(1);
+      f12->SetLineColor(kBlack);
+      f12->Draw("L same");
     }
-
     return 0;    
   }
 
@@ -2867,6 +2902,13 @@ namespace semileptonic {
       whitebox2->SetBorderSize(0);
       whitebox2->SetBorderMode(0);
       //if(((TString)histNumeratorData->GetName()).Contains("Y"))	whitebox2->Draw("");
+      // create pad to hide the outer left part of the
+      // rapidity x-axis without masking the 0 of the y-axis
+      TPad *whitebox3 = new TPad("whitebox3","",0.2,0.,1.,1.);
+      whitebox3->SetFillColor(10);
+      whitebox3->SetFillStyle(1001);
+      whitebox3->SetBorderSize(0);
+      whitebox3->SetBorderMode(0);
       // create new pad for ratio plot
       TPad *rPad = new TPad("rPad","",0,0,1,ratioSize+0.001);
 #ifdef DILEPTON_MACRO
@@ -2887,6 +2929,7 @@ namespace semileptonic {
       rPad->SetGrid(0,1);
       rPad->Draw("");
       rPad->cd();
+      //whitebox3->Draw();
       TH1F* one2;
       TGraphAsymmErrors* errorband2=0;
       TGraphAsymmErrors* errorbandStat2=0;
