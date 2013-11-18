@@ -163,9 +163,11 @@ MixedObjectsAnalyzer::beginJob()
   tree->Branch("ttbarYTrue"    ,&ttbarYTrue   , "ttbarYTrue/F"   );
   tree->Branch("ttbarPtTrue"   ,&ttbarPtTrue  , "ttbarPtTrue/F"  );
 
+  // chi2
+  tree->Branch("chi2", &chi2, "chi2/F"  );
   // nPV
   nPV=-1000;
-  tree->Branch("nPV",&nPV, "nPV/F");
+  tree->Branch("nPV", &nPV, "nPV/F");
   // within visible phase space?
   tree->Branch("inVisPS"       , &inVisPS       , "inVisPS/O"      );
 
@@ -274,7 +276,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
   
   // collect information from KinFitHypothesis
   int lepBIndex=-1000, hadBIndex=-1000, lightQIndex=-1000, lightQBarIndex=-1000;
-  bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqlepPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=-1000;
+  bqhadPtFit=bqhadEtaFit=bqhadPhiFit=bqlepPtFit=bqlepEtaFit=bqlepPhiFit=lqPtFit=lqEtaFit=lqPhiFit=lqbarPtFit=lqbarEtaFit=lqbarPhiFit=chi2=-1000;
   lepPtFit=lepEtaFit=lepPhiFit=lepPtTrue=lepEtaTrue=lepPhiTrue=nuPtFit=nuEtaFit=nuPhiFit=nuPtTrue=nuEtaTrue=nuPhiTrue=-1000;
   if( semiLepEvt_h.isValid()&&semiLepEvt_h->isHypoValid(hypoKey_) ){
     // jet indices
@@ -301,6 +303,7 @@ MixedObjectsAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iS
     nuPtFit   =semiLepEvt_h->singleNeutrino(hypoKey_)->pt();
     nuEtaFit  =semiLepEvt_h->singleNeutrino(hypoKey_)->eta();
     nuPhiFit  =semiLepEvt_h->singleNeutrino(hypoKey_)->phi();
+    chi2=semiLepEvt_h->fitChi2();
   }
   if( semiLepEvt_h.isValid()&&semiLepEvt_h->singleLepton()&&semiLepEvt_h->singleNeutrino() ){
     lepPtTrue =semiLepEvt_h->singleLepton()->pt();
