@@ -1453,7 +1453,7 @@ namespace semileptonic {
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-      TString testPlotNameForTrackingDownErrors="notUsedAtTheMoment";
+      TString testPlotNameForTrackingDownErrors="NotUsedAtTheMoment";
       bool hugo=plotList_[plot].Contains(testPlotNameForTrackingDownErrors) ? true : false;
       // check if plot exists in any sample
       bool existsInAnySample=false;
@@ -1481,6 +1481,7 @@ namespace semileptonic {
 	  // delete additional part of MC foldername
 	  // that does not exist in data 
 	  TString plotname=plotList_[plot];	  
+	  if(hugo) std::cout << "plot: " << plotList_[plot] << std::endl;
 	  if(sample==kData){
 	    if (vecRedundantPartOfNameInData != 0 && vecRedundantPartOfNameInData->size() != 0){
 	      std::vector<TString>::iterator iter;
@@ -2211,10 +2212,8 @@ namespace semileptonic {
       result["Njets"]=bins_;
       bins_.clear();
 
-      // rhos=tt+1jet/172.5GeV
-      //double rhoSBins[]={0., 0.4, 0.60, 1.1}; // purity and stability optimized
-      //double rhoSBins[]={0., 0.35, 0.65, 1.1}; // compomise
-      double rhoSBins[]={0., 0.2, 0.4, 0.7, 1.1};
+      // rhos=tt+1jet/170.GeV
+      double rhoSBins[]={0., 0.25, 0.55, 0.7, 1.1};
       bins_.insert( bins_.begin(), rhoSBins, rhoSBins + sizeof(rhoSBins)/sizeof(double) );
       result["rhos"]=bins_;
       bins_.clear();
@@ -2675,28 +2674,28 @@ namespace semileptonic {
       f05->SetLineStyle(3);
       f05->SetLineWidth(1);
       f05->SetLineColor(kBlack);
-      f05->Draw("L same");
+      //f05->Draw("L same");
       // d) at 1.5
       TString height15 = ""; height15 += 1.5;
       TF1 *f15 = new TF1("f15", height15, xmin, xmax);
       f15->SetLineStyle(3);
       f15->SetLineWidth(1);
       f15->SetLineColor(kBlack);
-      f15->Draw("L same");
+      //f15->Draw("L same");
       // e) at 0.8
       TString height08 = ""; height08 += 0.8;
       TF1 *f08 = new TF1("f08", height08, xmin, xmax);
       f08->SetLineStyle(3);
       f08->SetLineWidth(1);
       f08->SetLineColor(kBlack);
-      f08->Draw("L same");
+      //f08->Draw("L same");
       // f) at 1.2
       TString height12 = ""; height12 += 1.2;
       TF1 *f12 = new TF1("f12", height12, xmin, xmax);
       f12->SetLineStyle(3);
       f12->SetLineWidth(1);
       f12->SetLineColor(kBlack);
-      f12->Draw("L same");
+      //f12->Draw("L same");
     }
     return 0;    
   }
@@ -2771,7 +2770,7 @@ namespace semileptonic {
     else if(variable == "bbbarMass"    ) return "m^{b#bar{b}}"+strUnitGeV;
     else if(variable == "lbMass"       ) return "m^{lb}"+strUnitGeV;
     else if(variable == "Njets"        ) return "N_{jets} (p_{T}>30 GeV, |#eta|<2.4)";
-    else if(variable == "rhos"         ) return "#rho_{S}=2*172.5GeV/m(t#bar{t}+1jet)";
+    else if(variable == "rhos"         ) return "#rho_{S}=2*170GeV/m(t#bar{t}+1jet)";
     else return "Default Label for variable "+variable;
   }
 
@@ -4605,15 +4604,15 @@ namespace semileptonic {
 	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.54/*10.24*/                 : 13.58         ) :  7   ;
 	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.42/*10.20*/                 : 12.88         ) :  7   ;
 	      //          lepton/(b)jet quantity               dummy full PS    (visible PS:              doubleKinFit+Prob       default           )  dummy parton PS
-	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  6.78/*7.24*//*4.93*/    : 10.02/* 6.60*/  ) :  7.65);
-	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  2.46/*2.69*//*2.9e-07*/ :  3.75/*7.7e-06*/) :  3.00);
-	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ?  9.37/*10.19*//*8.56*/   : 16.00/*12.51*/  ) : 10.53);
-	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  7.61/*8.10*//*6.78*/    : 11.47/* 9.19*/  ) : 11.11);
-	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.32/*4.62*//*1.51*/    :  5.23/* 2.57*/  ) :  8   );
-	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  7.33/*7.68*//*8.20*/    :  8.33/*11.14*/  ) :  8   );
-	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  8.61/*9.03*/            : 11.58           ) :  4   );
-	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  0.71/*0.77*/            :  0.77           ) :  1   );
-	      else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );/*FIXME*/
+	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  4.945/*7.24*//*4.93*/    : 5.536/* 6.60*/  ) :  7.65);
+	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  3.373/*2.69*//*2.9e-07*/ : 4.217/*7.7e-06*/) :  3.00);
+	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ?  7.045/*10.19*//*8.56*/   : 8.063/*12.51*/  ) : 10.53);
+	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  6.657/*8.10*//*6.78*/    : 8.504/* 9.19*/  ) : 11.11);
+	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.487/*4.62*//*1.51*/    : 4.089/* 2.57*/  ) :  8   );
+	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.857/*7.68*//*8.20*/    : 5.015/*11.14*/  ) :  8   );
+	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  5.119/*9.03*/            : 9.392           ) :  4   );
+	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  2.352/*0.77*/            : 4.890           ) :  1   );
+	      else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  4.668/*FIXME*/           : 5.660           ) : 1   );/*FIXME*/
 	    }
 	}
 	else{
