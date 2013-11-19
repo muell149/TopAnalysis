@@ -26,7 +26,7 @@
 void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TString lepton="combined", 
 			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit", bool plotAcceptance = false, 
 			       bool plotEfficiencyPhaseSpace = false, bool plotEfficiency2 = false, double chi2Max=7.824,//9999.,//7.824,
-			       int verbose=3, bool hadron=true, int qAssignment=-1,
+			       int verbose=1, bool hadron=true, int qAssignment=-1,
 			       bool fitGaussRes=false, bool printSeparateRes = false)
 {
   // ARGUMENTS of function:
@@ -42,13 +42,12 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   // fitGaussRes:    fit a Gauss to the residuum plots to obtain the resolution
   // printSeparateRes save the residuum plots separately
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
-  if(variable.Contains("rhos")||variable.Contains("Njets")) useTree=false; // FIXME: some variables are missing in the tree for the moment...
   TString nameExt="";
   double chi2MaxInit=chi2Max;
   // if chi2 sel is applied-plot pur and stab without chi2 sel in addition?
-  bool plotDefToCompare=true;
+  bool plotDefToCompare=false;
   if(chi2Max>100) plotDefToCompare=false;
-  if(!useTree){
+  if(!useTree){//||variable.Contains("rhos")||variable.Contains("Njets")){
     // use chi2/probability selected events
     if(chi2Max<100) nameExt+="ProbSel";
     chi2Max=99999; // can be done only with tree
@@ -161,8 +160,8 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   if(nameExt!=""){
     folderRecoKin+=nameExt;
     folderRecoKinGeneral+=nameExt;
-    if(folderRecoKin.Contains(       "composited")) folderRecoKin.ReplaceAll(       "KinFitProbSel", "ProbSel");
-    if(folderRecoKinGeneral.Contains("composited")) folderRecoKinGeneral.ReplaceAll("KinFitProbSel", "ProbSel");
+    //if(folderRecoKin.Contains(       "composited")) folderRecoKin.ReplaceAll(       "KinFitProbSel", "ProbSel");
+    //if(folderRecoKinGeneral.Contains("composited")) folderRecoKinGeneral.ReplaceAll("KinFitProbSel", "ProbSel");
   }
 
   
@@ -349,8 +348,8 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
     tree->SetBranchStatus("weight",1);
     tree->SetBranchAddress("weight",(&value_["weight"]));
     treeGeneral->SetBranchStatus("qAssignment",1);
-    treeGeneral->SetBranchStatus("chi2",1);
-    treeGeneral->SetBranchAddress("chi2",(&value_["chi2"]));
+    if(nameExt!="ProbSel") treeGeneral->SetBranchStatus("chi2",1);
+    if(nameExt!="ProbSel") treeGeneral->SetBranchAddress("chi2",(&value_["chi2"]));
     treeGeneral->SetBranchAddress("qAssignment",(&value_["qAssignment"]));
     if(variable.Contains("bq") && swapBb){
       tree->SetBranchStatus("bbSwapBetter",1);
@@ -368,18 +367,20 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
     }
     // loop all events to fill plots
     for(unsigned int event=0; event<tree->GetEntries(); ++event){
+      if(debug) std::cout << "event " << event+1 << "/" << tree->GetEntries() << std::endl;
       tree->GetEntry(event);
       treeGeneral->GetEntry(event);
       double weight=value_["weight"];
-      double chi2=value_["chi2"];
+      double chi2= nameExt=="ProbSel" ? 0. : value_["chi2"];
       for(unsigned int i=0; i<variable_.size(); ++i){
 	double rec =value_[variable_[i]+recExtTree];
 	TString genName=variable_[i]+genExtTree;
-	if(genName.Contains("rhos" )) genName="rhosGen";
+	//if(genName.Contains("rhos" )||genName.Contains("Njets")) weight=1.; // FIXME MARTIN: weight is wrong at the moment for composited... analyzer
+	if(genName.Contains("rhos" )) genName="rhosTrue";
 	if(genName.Contains("Njets")) genName="Ngenjets";	
 	double gen =value_[genName];
-	// swap bb if deltaR better then
-	if(swapBb && bbSwapBetter){
+	// swap b and bbar if deltaR is better
+	if(genName.Contains("bq" )&&swapBb && bbSwapBetter){
 	  gen = (i==0) ? value_[variable_[1]+genExtTree] : value_[variable_[0]+genExtTree];
 	}
 	if(rec==-9999||gen==-9999){ 
@@ -388,25 +389,47 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
 	  std::cout << "gen " <<  genName                 << ": " << gen << std::endl;
 	  exit(0);
 	}
-	// apply chi2 and qAssignment cut
-	if(chi2<chi2Max && (qAssignment==-1 || qAssignment==value_["qAssignment"])){
-	  myHist2d       ->Fill(gen, rec, weight);
-	  responseMatrix ->Fill(gen, rec, weight);
-	  // fill events passing chi2
-	  chi2eff->Fill(rec, weight);
-	  // fill residual histo of the right bin
-	  for(int iBin=0; iBin < NxBins; iBin++){
-	    if(gen>xBins[iBin] && gen< xBins[iBin+1]){
-	      residualHistos_.at(iBin)->Fill(rec-gen, weight);
-	      if(gen!=0) relativeResidualHistos_.at(iBin)->Fill((rec-gen)/gen, weight);
-	      else       relativeResidualHistos_.at(iBin)->Fill(-1);
-	      break;
+	else if(debug){
+	  std::cout << variable << ":" << std::endl;
+	  std::cout << "rec " <<  variable_[i]+recExtTree << ": " << rec << std::endl;
+	  std::cout << "gen " <<  genName                 << ": " << gen << std::endl;
+	  std::cout << "chi2: " <<   chi2 << std::endl;
+	  std::cout << "qAssignment: " << value_["qAssignment"] << std::endl;
+	  std::cout << "weight: " << weight << std::endl;
+	}
+	// check that reco value is valid
+	// (needed as eg not all events in tree have an additional jet and therefore a valid rhos value)
+	if(rec>-1000){
+	  if(debug) std::cout << "filling: ";
+	  // apply chi2 and qAssignment cut
+	  if(chi2<chi2Max && (qAssignment==-1 || qAssignment==value_["qAssignment"])){
+	    if(debug) std::cout << "responseMatrix myHist2d ";
+	    myHist2d       ->Fill(gen, rec, weight);
+	    responseMatrix ->Fill(gen, rec, weight);
+	    // fill events passing chi2
+	    if(nameExt!="ProbSel"){
+	      if(debug) std::cout << "chi2eff ";
+	      chi2eff->Fill(rec, weight);
+	    }
+	    // fill residual histo of the right bin
+	    if(debug) std::cout << "residuals ";
+	    for(int iBin=0; iBin < NxBins; iBin++){
+	      if(gen>xBins[iBin] && gen< xBins[iBin+1]){
+		residualHistos_.at(iBin)->Fill(rec-gen, weight);
+		if(gen!=0) relativeResidualHistos_.at(iBin)->Fill((rec-gen)/gen, weight);
+		else       relativeResidualHistos_.at(iBin)->Fill(-1);
+		break;
+	      }
 	    }
 	  }
+	  if((qAssignment==-1 || qAssignment==value_["qAssignment"])){
+	    myHist2d2->Fill(gen, rec, weight);
+	    if(debug) std::cout << "myHist2d2 ";
+	  }
+	  // fill all events
+	  all->Fill(rec, weight);
+	  if(debug) std::cout << "all " << std::endl;
 	}
-	if((qAssignment==-1 || qAssignment==value_["qAssignment"])) myHist2d2->Fill(gen, rec, weight);
-	// fill all events
-	all->Fill(rec, weight);
       }
     }
   }
@@ -784,7 +807,7 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
     effHistBBB2->Draw("same");
   }
   // chi2 cut efficiency
-  if(useTree && chi2Max<100){    
+  if(nameExt!="ProbSel"&&useTree && chi2Max<100){    
     chi2eff = (TH1F*)chi2eff->Rebin(binvec.size()-1, chi2eff->GetName(), &(binvec.front()));
     all     = (TH1F*)all    ->Rebin(binvec.size()-1, all->GetName()    , &(binvec.front()));
     chi2eff->Divide(all);
