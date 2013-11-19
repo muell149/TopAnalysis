@@ -3,11 +3,11 @@
 void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 				  bool save = true, int verbose=0,
 				  TString inputFolderName= "RecentAnalysisRun8TeV_doubleKinFit",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root",
-				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
+				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root",
 				  TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 				  const std::string decayChannel = "combined", 
-				  bool withRatioPlot = true, bool extrapolate=true, bool hadron=false, TString addSel="ProbSel")
+				  bool withRatioPlot = true, bool extrapolate=false, bool hadron=true, TString addSel="ProbSel")
 { 
   // ============================
   //  Set Root Style
@@ -126,7 +126,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
   // addSel: xSec from prob selection step?
-  if(!extrapolate) addSel="";
+  //if(!extrapolate) addSel="";
   TString probComplement = addSel=="ProbSel" ? "" : "ProbSel";
   //         0: sysNo                                                       
   //         1: sysLumiUp                   2: sysLumiDown                 
@@ -347,12 +347,12 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/bbbarY",
     "analyzeTopRecoKinematicsKinFit"+probComplement+"/bbbarMass",
     // more KinFit plots
-    "compositedKinematicsKinFit/Nbjets",
-    "compositedKinematicsKinFit/Njets",
-    "compositedKinematicsKinFit/rhos",
-    "compositedKinematicsKinFit/leadNonttjetPt",
-    "compositedKinematicsKinFit/leadNonttjetY",
-    "compositedKinematicsKinFit/leadNonttjetEta",
+    "compositedKinematicsKinFit"+addSel+"/Nbjets",
+    "compositedKinematicsKinFit"+addSel+"/Njets",
+    "compositedKinematicsKinFit"+addSel+"/rhos",
+    "compositedKinematicsKinFit"+addSel+"/leadNonttjetPt",
+    "compositedKinematicsKinFit"+addSel+"/leadNonttjetY",
+    "compositedKinematicsKinFit"+addSel+"/leadNonttjetEta",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/prob", 
     "analyzeTopRecoKinematicsKinFit"+addSel+"/chi2",
     "analyzeTopRecoKinematicsKinFit"+addSel+"/ttbarDelPhi",
@@ -677,18 +677,18 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     "m^{t#bar{t}} #left[GeV#right] parton lv PS parton truth;Events;1;1",
     "p_{T}^{lep} #left[GeV#right] hadron lv PS truth;Events;1;1",
     // kinfit object shifts
-    "#Delta p_{T}^{light jets} #left[GeV#right];Events;0;40",
+    "#Delta p_{T}^{light jets} #left[GeV#right];Events;0;1",
     "#Delta #eta^{light jets};Events;0;1",
-    "#Delta #phi^{light jets};Events;0;20",
-    "#Delta p_{T}^{b jets} #left[GeV#right];Events;0;25",
-    "#Delta #eta^{b jets};Events;0;2",
-    "#Delta #phi^{b jets};Events;0;2",
-    "#Delta p_{T}^{lepton} #left[GeV#right];Events;0;2",
+    "#Delta #phi^{light jets};Events;0;1",
+    "#Delta p_{T}^{b jets} #left[GeV#right];Events;0;1",
+    "#Delta #eta^{b jets};Events;0;1",
+    "#Delta #phi^{b jets};Events;0;1",
+    "#Delta p_{T}^{lepton} #left[GeV#right];Events;0;1",
     "#Delta #eta^{lepton};Events;0;1",
     "#Delta #phi^{lepton};Events;0;1",
-    "#Delta p_{T}^{neutrino} #left[GeV#right];Events;0;20",
-    "#Delta #eta^{neutrino};Events;0;20",
-    "#Delta #phi^{neutrino};Events;0;4",
+    "#Delta p_{T}^{neutrino} #left[GeV#right];Events;0;1",
+    "#Delta #eta^{neutrino};Events;0;1",
+    "#Delta #phi^{neutrino};Events;0;1",
     // additional top pt plots with splitted contributions
     "p_{T}^{t+} #left[GeV#right];Events;0;20",
     "p_{T}^{t-} #left[GeV#right];Events;0;20",
@@ -842,29 +842,37 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   if(extra                   ) plotList_.insert(plotList_.end(), plots1Dextra, plots1Dextra + sizeof(plots1Dextra)/sizeof(TString)); 
   plotList_.insert( plotList_.end(), plots2D, plots2D + sizeof(plots2D)/sizeof(TString) );	
 
-  // Rename lepton plots according to chosen decay channel
+  if(decayChannel == "combined"){
+    plotListEl_ = plotList_;
+    plotListMu_ = plotList_;
+  }
 
-  if (decayChannel != "combined"){
-
+  // Renaming: for the naming used to save the plots and later to access them internally
+  if(decayChannel != "combined"){
     for (std::vector<TString>::iterator iter = plotList_.begin(); iter != plotList_.end(); iter++){
-      
+      // Rename lepton plots according to chosen decay channel
       if (iter->Contains("Lepton")&&!iter->Contains("Hadron")){     
 	if (decayChannel=="electron")  iter->ReplaceAll("Lepton","Electron");
 	else if (decayChannel=="muon") iter->ReplaceAll("Lepton","Muon");    
       }
     }
-  }
+  }  
   else{
-    plotListEl_ = plotList_;
-    plotListMu_ = plotList_;
-    
+    // electron plots
     for (std::vector<TString>::iterator iter = plotListEl_.begin(); iter != plotListEl_.end(); iter++){
+      // Rename lepton plots to electron label and change pt to et
       if (iter->Contains("Lepton")&&!iter->Contains("Hadron")) iter->ReplaceAll("Lepton","Electron");
       if (iter->Contains("tightElectronKinematics/pt")) iter->ReplaceAll("tightElectronKinematics/pt","tightElectronKinematics/et");
+      // Rename KinFitProbSel plots
+      if (iter->Contains("KinFitProbSel")&&iter->Contains("composited")) iter->ReplaceAll("KinFitProbSel","ProbSel"); 
     }
-    
-    for (std::vector<TString>::iterator iter = plotListMu_.begin(); iter != plotListMu_.end(); iter++)
+    // muon plots    
+    for (std::vector<TString>::iterator iter = plotListMu_.begin(); iter != plotListMu_.end(); iter++){
+      // Rename lepton plots to muon label
       if (iter->Contains("Lepton")&&!iter->Contains("Hadron")) iter->ReplaceAll("Lepton","Muon");
+      // Rename KinFitProbSel plots
+      if (iter->Contains("KinFitProbSel")&&iter->Contains("composited")) iter->ReplaceAll("KinFitProbSel","ProbSel"); 
+    }
   }
 
   // container for all histos (1D&2D)
