@@ -1,4 +1,3 @@
-
 #!/bin/sh
 
 ## this shell script runs all macro parts of the 2012 differential cross section analysis 
@@ -66,6 +65,11 @@
 ##    optimizeProbCut.C -> calculate optimal value for probability selection cut and produce some control ditsributions and numbers
 ##    createPseudoData.C -> create pseudo data based on the MC simluation (also mixing in e.g. Z')
 ##    addDistributions.C/addHistograms.C -> add additional control plots to the analyses root files
+##    treeComparison.C-> plot topPt in bins of e.g. chi2 and nPV
+##    ATLASCompTreeSGsamples.C-> compare various official ATLAS and CMS samples
+##    analyzeGenComparison7TeV.C -> like analyzeGenComparison.C but for 7TeV samples/analysis
+##    createNNLOplot.C -> create ahrens theory curves
+
 
 ########################
 ## configure settings ##
