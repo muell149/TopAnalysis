@@ -863,14 +863,14 @@ bool Plotter::fillHisto()
         ApplyFlatWeights(hist, LumiWeight);
 
         ttbar::setHHStyle(*gStyle);
-
         hists.push_back(*hist);
         delete hist;
     }
     if (doClosureTest) {
         for (size_t i = 1; i<dataset.size(); ++i) {
-            if (!dataset.at(i).Contains("ttbarsignalplustau"))
+            if (!dataset.at(i).Contains("ttbarsignalplustau")){
                 hists[0].Add(&hists[i]);
+            }
         }
     }
     initialized=true;
@@ -3328,6 +3328,33 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     h_GenDiffXSec->SetLineColor(kRed+1);
     h_GenDiffXSec->SetLineStyle(1);
 
+    TH1* realTruthBinned = nullptr;
+    if(doClosureTest && dataset.at(0).Contains("fakerun") && Channel != "combined")
+    {
+        newname.ReplaceAll("Hyp", "VisGen");
+        newname.Prepend("VisGen");
+        TH1* realTruth = fileReader->GetClone<TH1>(dataset.at(0), newname);
+        if (!newname.Contains("Lead") && (newname.Contains("Lepton") || newname.Contains("Top") || newname.Contains("BJet")))
+        {
+            //loop over anti-particle histograms and add them
+            TString antiName = newname.ReplaceAll("VisGen", "VisGenAnti");
+            realTruth->Add(fileReader->Get<TH1>(dataset.at(0), antiName));
+        }
+        // Rebin histogram to final binning
+        double realTruthScale = 1./realTruth->Integral("width");
+        realTruth->Scale(realTruthScale);
+        realTruthBinned = realTruth->Rebin(bins,"realTruthBinned",Xbins);
+        for (Int_t bin=0; bin<bins; bin++){
+            realTruthBinned->SetBinContent(bin+1,realTruthBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/realTruth->GetBinWidth(1)));
+        }
+        realTruthBinned->Scale(1./realTruthBinned->Integral("width"));
+
+        // Histogram style
+        realTruthBinned->SetLineColor(kRed-7);
+        realTruthBinned->SetLineStyle(2);
+        realTruthBinned->Draw("same");
+    }
+
     if (drawNLOCurves && drawMCATNLO) {
         mcnlohist->SetLineColor(kBlue);
         mcnlohist->SetLineStyle(5);
@@ -3389,9 +3416,11 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     DrawDecayChLabel(channelLabel[channelType]);
     TLegend *leg2 = getNewLegend();
     leg2->SetHeader(Systematic);
-    leg2->AddEntry(h_DiffXSec, "Data", "p");
+    if(doClosureTest){leg2->AddEntry(h_DiffXSec, "Pseudo-Data", "p");}
+    else {leg2->AddEntry(h_DiffXSec, "Data", "p");}
     leg2->AddEntry(GenPlotTheory, "MadGraph+Pythia","l");
     if (drawNLOCurves) {
+        if(doClosureTest && realTruthBinned->GetEntries())                                              leg2->AddEntry(realTruthBinned, "Simu. Reweighted", "l");
         if (drawMCATNLO && canDrawMCATNLO && mcnlohistup->GetEntries() && mcnlohistdown->GetEntries())  leg2->AddEntry(mcatnloBand, "MC@NLO+Herwig",  "fl");
         else if (drawMCATNLO && mcnlohist->GetEntries())                                                leg2->AddEntry(mcnlohist, "MC@NLO+Herwig",  "l");
         if (drawPOWHEG && powheghist->GetEntries())                                                     leg2->AddEntry(powheghistBinned, "Powheg+Pythia",  "l");
@@ -3438,11 +3467,11 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
             for (int i=1; i<(int)tmpKido->GetNbinsX()+1; i++){ tmpKido->SetBinContent(i,Kidoth1_Binned->GetBinContent(i));};
         }
 
-        ttbar::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, 
-                            powheghistBinned, mcnlohistBinned, 
-                            tmpKido, Ahrensth1_Binned,
-                            powhegHerwighistBinned, perugia11histBinned,
-                            0.4, 1.6);
+        if(doClosureTest) { ttbar::drawRatioXSEC(h_DiffXSec, realTruthBinned, h_GenDiffXSec, powheghistBinned,
+                                                 mcnlohistBinned, tmpKido, Ahrensth1_Binned,powhegHerwighistBinned, 0.4, 1.6);
+        } else { ttbar::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, powheghistBinned, mcnlohistBinned, 
+                                  tmpKido, Ahrensth1_Binned, powhegHerwighistBinned, perugia11histBinned,0.4, 1.6);
+        };
     };
 
     c->Print(outdir.Copy()+"DiffXS_"+name+".eps");
