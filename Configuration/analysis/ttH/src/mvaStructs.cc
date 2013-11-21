@@ -77,6 +77,10 @@ massDiff_antiBLepton_bAntiLepton_(MvaVariableFloat(name_massDiff_antiBLepton_bAn
     const LV antiBLeptonSystem = antiBJet + lepton;
     const LV fullBLeptonSystem = bAntiLeptonSystem + antiBLeptonSystem;
     
+    // Set btag discriminator to 0 in case it has value -1
+    const double bJetBtagDiscriminatorPositive = bJetBtagDiscriminator<0. ? 0. : bJetBtagDiscriminator;
+    const double antiBJetBtagDiscriminatorPositive = antiBJetBtagDiscriminator<0. ? 0. : antiBJetBtagDiscriminator;
+    
     // Needed booleans
     lastInEvent_.value_ = lastInEvent;
     bQuarkRecoJetMatched_.value_ = bQuarkRecoJetMatched;
@@ -94,7 +98,7 @@ massDiff_antiBLepton_bAntiLepton_(MvaVariableFloat(name_massDiff_antiBLepton_bAn
     pt_antiB_lepton_.value_ = antiBLeptonSystem.pt();
     deltaR_b_antiLepton_.value_ = DeltaR(bJet, antiLepton);
     deltaR_antiB_lepton_.value_ = DeltaR(antiBJet, lepton);
-    btagDiscriminatorSum_.value_ = bJetBtagDiscriminator + antiBJetBtagDiscriminator;
+    btagDiscriminatorSum_.value_ = bJetBtagDiscriminatorPositive + antiBJetBtagDiscriminatorPositive;
     deltaPhi_antiBLepton_bAntiLepton_.value_ = std::abs(DeltaPhi(antiBLeptonSystem, bAntiLeptonSystem));
     massDiff_fullBLepton_bbbar_.value_ = fullBLeptonSystem.M() - bAntiBSystem.M();
     meanMt_b_met_.value_ = 0.5*((bJet + met).Mt() + (antiBJet + met).Mt());
