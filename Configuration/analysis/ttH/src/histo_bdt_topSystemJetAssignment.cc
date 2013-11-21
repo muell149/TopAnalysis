@@ -15,7 +15,8 @@
 #include "TGaxis.h"
 #include "TStyle.h"
 #include "TROOT.h"
-#include <TSystem.h>
+#include "TSystem.h"
+#include "TError.h"
 
 #include "MvaFactory.h"
 #include "MvaTreeHandler.h"
@@ -51,7 +52,8 @@ void plotWeightHistos(const std::vector<std::pair<TString, TString> >& v_nameSte
     gROOT->SetStyle("Plain");
     gROOT->ForceStyle();
     gStyle->SetOptStat(111110);
-
+    gErrorIgnoreLevel = 1001;
+    
     gStyle->SetPalette(1);      //Spektralpalette, Default: 0 resp. 50
     //gStyle->SetNumberContours(20);  // Default: 20
 
@@ -213,10 +215,11 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
     gROOT->SetStyle("Plain");
     gROOT->ForceStyle();
     gStyle->SetOptStat(0);
-
+    gErrorIgnoreLevel = 1001;
+    
     gStyle->SetPalette(1);      //Spektralpalette, Default: 0 resp. 50
     //gStyle->SetNumberContours(20);  // Default: 20
-
+    
     const double width = 600.;
 
     gStyle->SetCanvasDefW(width);
