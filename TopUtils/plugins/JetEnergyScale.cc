@@ -188,7 +188,7 @@ JetEnergyScale::produce(edm::Event& event, const edm::EventSetup& setup)
     else if(scaleType_.substr(0, scaleType_.find(':'))=="flavor") {
       // get the uncertainty parameters from file, see
       // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECUncertaintySources
-      JetCorrectorParameters* param = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), "Flavor");
+      JetCorrectorParameters* param = new JetCorrectorParameters(JECUncSrcFile_.fullPath(), sourceName_);
       // instantiate the jec uncertainty object
       JetCorrectionUncertainty* deltaJEC = new JetCorrectionUncertainty(*param);
       deltaJEC->setJetEta(jet->eta()); deltaJEC->setJetPt(jet->pt()); 

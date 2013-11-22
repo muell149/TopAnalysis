@@ -97,36 +97,54 @@ void MvaWeights2d::plotStep(const mvaSetup::MvaSet& mvaSet)
     const std::vector<mvaSetup::MvaConfig>& v_mvaConfigSwapped = mvaSet.v_mvaConfigSwapped_;
 
     storeTrainingsForStep(step, v_mvaConfigCorrect, v_mvaConfigSwapped);
-
+    
+    // 2D weights are only possible in case correct and swapped trainings are applied
+    if(!v_mvaConfigCorrect.size() || !v_mvaConfigSwapped.size()) return;
+    
     constexpr const char* methodPrefixCorrect = "correct";
     constexpr const char* methodPrefixSwapped = "swapped";
     constexpr const char* fileAppendix = ".weights.xml";
+    
+    
+    
+    std::vector<std::pair<mvaSetup::MvaConfig, std::vector<float> > > v_mvaConfigWeightsPairCorrect;
+    for(const mvaSetup::MvaConfig& mvaConfig : v_mvaConfigCorrect){
+        const TString& methodTitle(mvaConfig.methodAppendix_);
+        TString fileName(mvaWeightFileDirectory_);
+        fileName.Append(methodPrefixCorrect);
+        fileName.Append(step).Append("_").Append(methodTitle).Append(fileAppendix);
+        MvaReader reader(fileName);
+        v_mvaConfigWeightsPairCorrect.push_back(std::make_pair(mvaConfig, reader.mvaWeights(v_mvaTopJetsVariables)));
+    }
+    
+    std::vector<std::pair<mvaSetup::MvaConfig, std::vector<float> > > v_mvaConfigWeightsPairSwapped;
+    for(const mvaSetup::MvaConfig& mvaConfig : v_mvaConfigSwapped){
+        const TString& methodTitle(mvaConfig.methodAppendix_);
+        TString fileName(mvaWeightFileDirectory_);
+        fileName.Append(methodPrefixSwapped);
+        fileName.Append(step).Append("_").Append(methodTitle).Append(fileAppendix);
+        MvaReader reader(fileName);
+        v_mvaConfigWeightsPairSwapped.push_back(std::make_pair(mvaConfig, reader.mvaWeights(v_mvaTopJetsVariables)));
+    }
+    
+    
     TString name;
     constexpr const char* prefix = "";
-
+    
     // Loop over all trainings for correct and swapped combinations
-    for(const mvaSetup::MvaConfig& mvaConfigCorrect : v_mvaConfigCorrect){
-        const TString methodTitleCorrect(mvaConfigCorrect.methodAppendix_);
-        TString fileNameCorrect(mvaWeightFileDirectory_);
-        fileNameCorrect.Append(methodPrefixCorrect);
-        fileNameCorrect.Append(step).Append("_").Append(methodTitleCorrect).Append(fileAppendix);
-        MvaReader weightsCorrect(fileNameCorrect);
-        const std::vector<float> v_mvaWeightsCorrect = weightsCorrect.mvaWeights(v_mvaTopJetsVariables);
-
-        for(const mvaSetup::MvaConfig& mvaConfigSwapped : v_mvaConfigSwapped){
-            const TString methodTitleSwapped(mvaConfigSwapped.methodAppendix_);
-            TString fileNameSwapped(mvaWeightFileDirectory_);
-            fileNameSwapped.Append(methodPrefixSwapped);
-            fileNameSwapped.Append(step).Append("_").Append(methodTitleSwapped).Append(fileAppendix);
-            MvaReader weightsSwapped(fileNameSwapped);
-            const std::vector<float> v_mvaWeightsSwapped = weightsSwapped.mvaWeights(v_mvaTopJetsVariables);
-
+    for(const auto& mvaConfigWeightsPairCorrect : v_mvaConfigWeightsPairCorrect){
+        const TString& methodTitleCorrect(mvaConfigWeightsPairCorrect.first.methodAppendix_);
+        const std::vector<float>& v_mvaWeightsCorrect(mvaConfigWeightsPairCorrect.second);
+        for(const auto& mvaConfigWeightsPairSwapped : v_mvaConfigWeightsPairSwapped){
+            const TString& methodTitleSwapped(mvaConfigWeightsPairSwapped.first.methodAppendix_);
+            const std::vector<float>& v_mvaWeightsSwapped(mvaConfigWeightsPairSwapped.second);
+            
             // Book histograms
             std::map<TString, TH1*>& m_histogram = m_stepHistograms_[step].m_histogram_;
             name = "";
             name.Append(methodTitleCorrect).Append("_").Append(methodTitleSwapped);
-            this->bookHistosInclExcl2D(m_histogram, prefix, step, name, name+";w_{MVA}^{correct};w_{MVA}^{swapped}", 200, -2., 2., 200, -2., 2.);
-
+            this->bookHistosInclExcl2D(m_histogram, prefix, step, name, name+";w_{MVA}^{correct};w_{MVA}^{swapped}", 200, -1.5, 1., 200, -1.5, 1.);
+            
             // Fill histograms
             for(size_t iWeight = 0; iWeight < v_mvaWeightsCorrect.size(); ++iWeight){
                 const MvaTopJetsVariables& mvaTopJetsVariables = v_mvaTopJetsVariables.at(iWeight);
@@ -166,9 +184,9 @@ void MvaWeights2d::bookHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, co
                                               const int& nBinX, const double& xMin, const double& xMax,
                                               const int& nBinY, const double& yMin, const double& yMax)
 {
-    const TString correct("correct");
-    const TString swapped("swapped");
-    const TString wrong("wrong");
+//    const TString correct("correct");
+//    const TString swapped("swapped");
+//    const TString wrong("wrong");
     const TString combined("combined");
 
     if(!plotExclusively_){
@@ -176,9 +194,9 @@ void MvaWeights2d::bookHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, co
     }
     else{
         m_histogram[combined+name] = this->store(new TH2D(combined+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
-        m_histogram[correct+name] = this->store(new TH2D(correct+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
-        m_histogram[swapped+name] = this->store(new TH2D(swapped+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
-        m_histogram[wrong+name] = this->store(new TH2D(wrong+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+//        m_histogram[correct+name] = this->store(new TH2D(correct+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+//        m_histogram[swapped+name] = this->store(new TH2D(swapped+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
+//        m_histogram[wrong+name] = this->store(new TH2D(wrong+prefix+step+"_"+name, title, nBinX, xMin, xMax, nBinY, yMin, yMax));
     }
 }
 
@@ -208,24 +226,24 @@ void MvaWeights2d::fillHistosInclExcl2D(std::map<TString, TH1*>& m_histogram, co
                                               const float& variable1, const float& variable2,
                                               const MvaTopJetsVariables& mvaTopJetsVariables, const double& weight)
 {
-    const TString correct("correct");
-    const TString swapped("swapped");
-    const TString wrong("wrong");
-    const TString correctAndSwapped("combined");
+//    const TString correct("correct");
+//    const TString swapped("swapped");
+//    const TString wrong("wrong");
+    const TString combined("combined");
 
     if(!plotExclusively_){
         ((TH2*)m_histogram[name])->Fill(variable1, variable2, weight);
     }
     else{
         if(mvaTopJetsVariables.correctCombination_.value_){
-            ((TH2*)m_histogram[correct+name])->Fill(variable1, variable2, weight);
-            ((TH2*)m_histogram[correctAndSwapped+name])->Fill(variable1, variable2, weight);
+//            ((TH2*)m_histogram[correct+name])->Fill(variable1, variable2, weight);
+            ((TH2*)m_histogram[combined+name])->Fill(variable1, variable2, weight);
         }
         else if(mvaTopJetsVariables.swappedCombination_.value_){
-            ((TH2*)m_histogram[swapped+name])->Fill(variable1, variable2, weight);
-            ((TH2*)m_histogram[correctAndSwapped+name])->Fill(variable1, variable2, weight);
+//            ((TH2*)m_histogram[swapped+name])->Fill(variable1, variable2, weight);
+            ((TH2*)m_histogram[combined+name])->Fill(variable1, variable2, weight);
         }
-        else ((TH2*)m_histogram[wrong+name])->Fill(variable1, variable2, weight);
+//        else ((TH2*)m_histogram[wrong+name])->Fill(variable1, variable2, weight);
     }
 }
 

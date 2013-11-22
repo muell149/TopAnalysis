@@ -88,3 +88,35 @@ echo " Now you can run 'root -l -b -q macros/compareClosure.C++' to plot all the
 
 
 
+
+################################################################################################################################
+####
+###
+###        Before running this part of the scripts you have to run:
+###             build/load_Analysis -f tau.root -s closure --closure nominal -c ${ch}
+###           where ch = ee, emu, mumu
+###
+###
+################################################################################################################################
+
+
+# for slope in nominal; do
+# 
+#    for ch in ee emu mumu; do
+#         ls -1 selectionRoot/Nominal/${ch}/*.root | grep -v run2012 > closure_${ch}mc.txt
+#         rm FileLists/HistoFileList_Nominal_${ch}.txt
+#         echo "selectionRoot/closure/$ch/${ch}_ttbarsignalplustau_fakerun_${slope}.root" > FileLists/HistoFileList_Nominal_${ch}.txt
+#         cat closure_${ch}mc.txt >> FileLists/HistoFileList_Nominal_${ch}.txt
+#         rm closure_${ch}mc.txt
+# 
+#         ### Make unfolding
+#         w
+#         $HISTO -t unfold -p +hyptoppt -c ${ch}
+#         grep -v Bin < UnfoldingResults/Nominal/${ch}/HypToppTResults.txt | awk '{print $2"  "$8"  "$10"  "$10}' >> ${basedir}closure_result_${ch}_${slope}.txt
+# 
+#         ### Make control plot
+#         $HISTO -t cp -p +hyptoppt -c ${ch}
+#    done
+# 
+#    mv Plots ${basedir}Plots$slope
+# done
