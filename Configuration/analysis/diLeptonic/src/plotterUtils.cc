@@ -192,6 +192,9 @@ void ttbar::drawRatioXSEC(const TH1* histNumerator, const TH1* histDenominator1,
     if (ratio3) ratio3->Draw("Histo,same");
     if (ratio4) ratio4->Draw("Histo,same");
     if (ratio5) ratio5->Draw("Histo,same");
+    if (ratio6) ratio6->Draw("Histo,same");
+    if (ratio7) ratio7->Draw("Histo,same");
+    
 }
 
 
