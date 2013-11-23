@@ -14,7 +14,8 @@ unsigned int kPowA2  =6;
 unsigned int kPowHerA=7;
 unsigned int kMcaA   =8;
 
-void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TString outputfolder="./diffXSecFromSignal/plots/combined/2012/ttgencomparison/"){
+//void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TString outputfolder="./diffXSecFromSignal/plots/combined/2012/ttgencomparison/"){
+void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TString outputfolder="./ttgencomparison/"){
   // binning= 0:fine binning, 1:ATLAS, 2:CMS
   bool debug  = verbose>0 ? true : false;
   bool debug2 = verbose>1 ? true : false;
@@ -94,15 +95,15 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
   std::vector<TCanvas*> plotCanvas_, plotCanvas2_;
   // create legend
   TLegend* leg = new TLegend(0.4, 0.5, 0.85, 0.88);
-  legendStyle(*leg ,"#bf{t#bar{t} simulation, #sqrt{s}=7 TeV}"       );
+  //legendStyle(*leg ,"#bf{t#bar{t} simulation, #sqrt{s}=7 TeV}"       );
   TLegend* leg2= new TLegend(0.4, 0.6, 0.85, 0.88);
-  legendStyle(*leg2,"#bf{t#bar{t} PYTHIA simulation, #sqrt{s}=7 TeV}");
+  //legendStyle(*leg2,"#bf{t#bar{t} PYTHIA simulation, #sqrt{s}=7 TeV}");
   TLegend* leg3= new TLegend(0.4, 0.6, 0.85, 0.88);
-  legendStyle(*leg3,"#bf{t#bar{t} HERWIG simulation, #sqrt{s}=7 TeV}");
+  //legendStyle(*leg3,"#bf{t#bar{t} HERWIG simulation, #sqrt{s}=7 TeV}");
   TLegend* leg4= new TLegend(0.4, 0.7, 0.85, 0.88);
-  legendStyle(*leg4,"#bf{t#bar{t} default simulation, #sqrt{s}=7 TeV}");
+  //legendStyle(*leg4,"#bf{t#bar{t} default simulation, #sqrt{s}=7 TeV}");
   TLegend* leg5= new TLegend(0.4, 0.7, 0.85, 0.88);
-  legendStyle(*leg5,"#bf{t#bar{t} Powheg simulation, #sqrt{s}=7 TeV}");
+  //legendStyle(*leg5,"#bf{t#bar{t} Powheg simulation, #sqrt{s}=7 TeV}");
 
   // ============================
   //  get histos from tree
@@ -342,6 +343,13 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
       TString nameExt= set==2 ? "PYTHIA" : (set==3 ? "HERWIG" : (set==4 ? "MadgraphAlpgen" : ( set==5 ? "Powheg" : "")));
       if(debug) std::cout << "plot " << name << std::endl; 
       addCanvas(plotCanvas_);
+      //######################################
+      if(plotList_[plot].Contains("topPt")){
+        plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
+        temptemplate->GetYaxis()->SetRangeUser(0.0001, 1000);
+        temptemplate->GetXaxis()->SetRangeUser(0., 500);
+      }
+      //######################################
       plotCanvas_[plotCanvas_.size()-1]->cd(0);
       plotCanvas_[plotCanvas_.size()-1]->SetName(name+nameExt);
       plotCanvas_[plotCanvas_.size()-1]->SetTitle(name+nameExt);
@@ -359,7 +367,7 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
       // legend
       if(plotList_[plot].Contains("topPt")){
 	if     (set==1) leg ->Draw("same");
-	else if(set==2) leg2->Draw("same");
+	if(set==2) leg2->Draw("same");
 	else if(set==3) leg3->Draw("same");
 	else if(set==4) leg4->Draw("same");
 	else if(set==5) leg5->Draw("same");
@@ -385,6 +393,7 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
       double max=1.7;
       if(binning>0){min=0.7 ; max=1.3 ;}
       if(set==4)   {min=0.85; max=1.15;}
+      if(binning==0&&(name.Contains("topPt")||name.Contains("ttbarY")))   {min=0.85; max=1.15;}
       // axis and labels for ratio plot
       drawRatio(temptemplate, temptemplate, min, max, myStyle, verbose, zeroerr_, nominatorLabel, krelativelab, "AXIS", kWhite);
       // draw errorband for relative MC
@@ -478,7 +487,7 @@ std::map<TString, std::vector<double> > makeVariableBinningA(int binning)
   else{
     double width=20.;
     double min=0.;
-    double max=800.;
+    double max=500.;
     for(double bin=min; bin<=max; bin+=width){
       bins_.push_back(bin);
     }
