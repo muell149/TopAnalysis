@@ -63,8 +63,11 @@ gROOT->ProcessLine(".L macros/mvaSeparationPlots.C++");
 TString inputFileName("mvaOutput/Nominal/combined/plots.root");
 
 
-TString step = "10";
-int category = -1;
+TString step = "7"; // which step to plot
+std::vector<int> categories; // which merged categories, need to be in increasing order (empty vector for step without categories)
+categories.push_back(5);
+categories.push_back(6);
+categories.push_back(7);
 
 
 
@@ -77,9 +80,9 @@ TString prefix("mvaP_");
 step.Prepend("_step");
 
 
-if(category>=0){
+for(std::vector<int>::const_iterator i_category = categories.begin(); i_category != categories.end(); ++i_category){
     std::ostringstream convert;
-    convert<<category;
+    convert<<(*i_category);
     step.Append("_cate").Append(convert.str());
 }
 std::cout<<"\n\n\tStep: "<<step<<"\n\n\n";
@@ -127,40 +130,6 @@ mvaSeparationPlots(inputFileName, outputDirectory, histogramNames, combinations)
 
 
 //++++++++++++++++++++++++++++++++++=====================================+++++++++++++++++++++++++++++++
-
-
-
-// FIXME: need first to merge them!!!
-
-
-prefix = "mvaA_";
-
-inputFileName = "selectionRoot/Nominal/emu/emu_ttbarH125tobbbar.root";
-
-outputDirectory = "mvaOutput/ddd/";
-
-std::vector<TString> weightHistoNames;
-weightHistoNames.push_back(prefix+"mvaWeightCorrect"+step);
-weightHistoNames.push_back(prefix+"best_mvaWeightCorrect"+step);
-weightHistoNames.push_back(prefix+"mvaWeightSwapped"+step);
-weightHistoNames.push_back(prefix+"best_mvaWeightSwapped"+step);
-
-mvaSeparationPlots(inputFileName, outputDirectory, weightHistoNames, combinations);
-
-
-
-
-
-outputDirectory = "mvaOutput/eee/";
-
-combinations.clear();
-combinations.push_back("correct");
-combinations.push_back("swapped");
-combinations.push_back("wrong");
-
-mvaSeparationPlots(inputFileName, outputDirectory, weightHistoNames, combinations);
-
-
 
 
 
