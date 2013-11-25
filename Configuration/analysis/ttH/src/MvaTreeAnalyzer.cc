@@ -94,7 +94,7 @@ void MvaTreeAnalyzer::plotStep(const TString& step, const std::vector<MvaTopJets
     m_histogram[name]->GetXaxis()->SetBinLabel(2, "correct");
     
     name = nameDummy.jetChargeDiff_.name();
-    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";#Deltac_{rel}^{jet};# jet pairs",50,0,2);
+    this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";c_{rel}^{#bar{b}}-c_{rel}^{b};# jet pairs",50,0,2);
     
     name = nameDummy.meanDeltaPhi_b_met_.name();
     this->bookHistosInclExcl(m_histogram, prefix, step, name, name+";0.5(|#Delta#phi(b,MET)|+|#Delta#phi(#bar{b},MET)|)  [rad];# jet pairs",20,0,3.2);
