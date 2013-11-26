@@ -8,6 +8,9 @@
 #include <string>
 #include <iostream>
 #include "utils.h"
+#include <cmath>
+#include "RootFileReader.h"
+#include <TStyle.h>
 
 void drawDoubleRatio(const TH1* histNumerator1, const TH1* histDenominator1, 
                const TH1* histNumerator2, const TH1* histDenominator2,
