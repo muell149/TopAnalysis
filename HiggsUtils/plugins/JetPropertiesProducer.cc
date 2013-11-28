@@ -111,7 +111,6 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     //edm::Handle<edm::View< pat::Jet > > jetHandle;
     iEvent.getByLabel(jets, jetHandle);
     
-// 	std::vector<int> jetTrackIndex;
     
 	for(std::vector<pat::Jet>::const_iterator i_jet = jetHandle->begin(); i_jet != jetHandle->end(); ++i_jet){
         
@@ -140,7 +139,6 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 	    
 	    jetTrack.push_back( (*i_candidate)->polarP4());
 	    jetTrackCharge.push_back(charge);
-// 	    jetTrackIndex.push_back(i_jet-jetHandle->begin());
 	    
             const double constituentPx = (*i_candidate)->px();
             const double constituentPy = (*i_candidate)->py();
@@ -151,7 +149,6 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
             sumMomentumQ += static_cast<double>(charge)*product;
         }//end looping over PF candidates
         
-	    std::cout<<"The jet charge size for jet "<<i_jet-jetHandle->begin()<<" is = "<<jetTrackCharge.size()<<std::endl;
         const double jetChargeRelativePtWeighted(sumMomentum>0 ? sumMomentumQ/sumMomentum : 0);
         
         
