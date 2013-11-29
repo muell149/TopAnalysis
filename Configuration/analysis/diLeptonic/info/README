@@ -172,6 +172,24 @@ channel (ee, emu, mumu) in all files
     Plots/FinalResults/channel/*Systematics.txt
 it parses the content and for one specific systematic takes the average ('typical') systematic error.
 
+
+
+Once the plots has been created you can get the typical systematic errors for the Diff. XSection via:
+
+  ./build/createSystCovMatrix
+
+Please be aware that should be compiled via:
+
+  cd build
+  cmake ..
+  make createSystCovMatrix
+  cd ..
+
+This runs createSystCovMatrix.cc which produces the correlation amtrix for between all systematics for a given variable in a given channel
+The description of the method is explained in: https://indico.desy.de/getFile.py/access?contribId=0&resId=0&materialId=slides&confId=8972 
+password: bottom
+
+
 ========
 
 Merging all the lots into single PDF file:
