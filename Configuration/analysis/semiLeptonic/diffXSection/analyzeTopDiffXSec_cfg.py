@@ -42,6 +42,8 @@ options.register('MCweighting', 'unset',VarParsing.VarParsing.multiplicity.singl
 options.register('JEtag', 'none',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "chosen jet energy tag")
 # closure test shape distortions
 options.register('sysDistort', 'unset',VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.string, "ttbar shape distortion")
+# value for top mass constraint in KinFit
+options.register('massfix', 172.5 ,VarParsing.VarParsing.multiplicity.singleton,VarParsing.VarParsing.varType.float, "top mass constraint used in double kinFit approach")
 
 # define the syntax for parsing
 # you need to enter in the cfg file:
@@ -168,7 +170,7 @@ if(not globals().has_key('eventFilter')):
     eventFilter  = 'signal only' # 'background only' # 'all' # 'signal only' # 'semileptonic electron only' # 'dileptonic electron only' # 'dileptonic muon only' # 'fullhadronic' # 'dileptonic muon + electron only' # 'via single tau only' # 'dileptonic via tau only'
 if("BG" in options.sample):
     eventFilter='background only'
-    print "ttbar decay subset filter is inverted semileptonic muon decay"
+    print "ttbar decay subset filter is inverted semileptonic muon or electron decay"
 if(not "ttbar" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample and not "mcatnlo" in options.sample):
     removeGenTtbar = True
     eventFilter='all'
@@ -349,14 +351,42 @@ if(not options.sample=="none"):
             usedSample="TopAnalysis/Configuration/Summer12/TTJets_ScaleUp_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
             additionalEventWeights=False
             outputFileName+="ScaleUp"
+        elif("ttbarMassDown4" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass161_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassDown4"
+        elif("ttbarMassDown3" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass163_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassDown3"
+        elif("ttbarMassDown2" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass166_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassDown2"
         elif("ttbarMassDown" in options.sample):        
             usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass169_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
             additionalEventWeights=False
             outputFileName+="TopMassDown"
+        elif("ttbarMassUp4" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass184_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassUp4"
+        elif("ttbarMassUp3" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass181_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassUp3"
+        elif("ttbarMassUp2" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass178_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="TopMassUp2"
         elif("ttbarMassUp" in options.sample):        
             usedSample="TopAnalysis/Configuration/Summer12/TTJets_mass175_5_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
             additionalEventWeights=False
             outputFileName+="TopMassUp"
+        elif("MadSpin" in options.sample):        
+            usedSample="TopAnalysis/Configuration/Summer12/TTJets_MSDecays_central_TuneZ2star_8TeV_madgraph_tauola__Summer12_DR53X_PU_S10_START53_V19_v1_cff"
+            additionalEventWeights=False
+            outputFileName+="MadSpin"
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
@@ -664,6 +694,7 @@ print " Apply effSF reweighting:            ",effSFReweigthing
 print " JEC level in jetKinematics:         ",corrLevel
 print " Apply kinematic Fit:                ",applyKinFit," ---- Programme execution slowed down if 'True'"
 print " Use double KinFit approach:         ",doubleKinFit
+print " mass constraintin (double) KinFit:  ",options.massfix
 print " Prob selection for all result plots: ",ProbCutByDefault
 print " Write PAT tuples:                   ",writeOutput
 print " Analyzed sample:                    ",usedSample+".py"
@@ -1305,7 +1336,8 @@ process.kinFitTtSemiLepEventHypothesis.constraints = [1, 2, 6]
 # the number of degrees of freedom is the number of constraints reduced by one due to the unmeasured eta of the neutrino
 # the cut on the fit probability is not working properly as the inherent ndof is wrong. Therefore, the cut (fitProb>=0.02) is converted to a cut on chi^2.
 if(process.kinFitTtSemiLepEventHypothesis.constraints == [1, 2, 3, 4]):
-    process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
+    #process.kinFitTtSemiLepEventHypothesis.mTop = 172.5
+    process.kinFitTtSemiLepEventHypothesis.mTop=options.massfix
     degreesOfFreedom = cms.int32(3)
     chi2cut = "fitChi2<=9.8374093111925935418"
     print "ndof set to 3"
@@ -1357,7 +1389,7 @@ process.filterMatchKinFit = process.ttSemiLepEventFilter.clone( cut = cms.string
 if(doubleKinFit==True):
     cloneTtSemiLepEvent(process)
     process.kinFitTtSemiLepEventHypothesis2.constraints = [1, 2, 3, 4]
-    process.kinFitTtSemiLepEventHypothesis2.mTop = 172.5
+    process.kinFitTtSemiLepEventHypothesis2.mTop = options.massfix
     process.kinFitTtSemiLepEventHypothesis.match = cms.InputTag("kinFitTtSemiLepEventHypothesis2")
     process.kinFitTtSemiLepEventHypothesis.useOnlyMatch = cms.bool(True)
     
@@ -1408,7 +1440,6 @@ hypoKinFit = cms.PSet(hypoKey = cms.string("kKinFit"),
                       maxNJets = process.kinFitTtSemiLepEventHypothesis.maxNJets,
                       ndof = degreesOfFreedom)
 process.analyzeHypoKinFit = process.analyzeHypothesisKinFit.clone(analyze=hypoKinFit)
-
 
 ## B object reconstruction quality
 # 1) Psets:
