@@ -42,4 +42,13 @@ add_executable(TypicalErrors
     TypicalErrors
 )
 TARGET_LINK_LIBRARIES(TypicalErrors ${ROOT_LIBRARIES} miscTools) 
-    
+
+add_executable(kinRecoEfficienciesAndSF
+    kinRecoEfficienciesAndSF
+)
+TARGET_LINK_LIBRARIES(kinRecoEfficienciesAndSF ${ROOT_LIBRARIES} miscTools) 
+
+add_executable(createSystCovMatrix
+    createSystCovMatrix
+)
+TARGET_LINK_LIBRARIES(createSystCovMatrix ${ROOT_LIBRARIES})
