@@ -26,7 +26,8 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetCountFilter_cfi import *
 ## ---
 
 ## define tight cuts for jet kinematics
-tight4JetCut  = 'pt > 60. & abs(eta) < 2.4'
+#tight4JetCut  = 'pt > 60. & abs(eta) < 2.4'
+tight4JetCut  = 'pt > 30. & abs(eta) < 2.4'
 tight5JetCut  = 'pt > 30. & abs(eta) < 2.4'
 tight6JetCut  = 'pt > 30. & abs(eta) < 2.4'
 #tight5JetCut  = 'pt > 50. & abs(eta) < 2.4'
