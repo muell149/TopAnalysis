@@ -26,7 +26,7 @@ options.register('pdfUn'   , 1 , VarParsing.VarParsing.multiplicity.singleton, V
 ## choose which background estimate should be done (0: no estimate, 1: b-tag weighting, 2: event mixing)
 options.register('backgroundEstimation', 0 , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, "decide which background estimate should be done")
 ## run directly on AOD, do everything on the fly
-options.register('runOnAOD', False , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "run on AOD, do everything on the fly")
+options.register('runOnAOD', True , VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.bool, "run on AOD, do everything on the fly")
 ## which b-tag algo and WP should be used
 options.register('bTagAlgoWP', 'CSVT', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, "which b-tag algo and WP should be used")
 ## do mva selection instead of old style selection
@@ -87,7 +87,7 @@ else :
 ## configure message logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
 # use only when PATTrigger is needed on data to suppress useless error messages
 #process.MessageLogger.cerr.default.limit = 0
@@ -100,36 +100,36 @@ process.source = cms.Source("PoolSource",
         #'file:patTuple_selected.root',
         #'file:patTuple_selected_large.root',
         #'file:/tmp/eschliec/tmp.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/209D26E9-AEE1-E111-BAA6-0030487D5D8D.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/54145FEE-1AE2-E111-8B8E-003048C69408.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8CA6B320-CFE1-E111-A04C-003048D2BB22.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/B6D6C237-DBE1-E111-B65F-002481E0DC4C.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/E88CC8A4-85E1-E111-9EFF-0030487F1A55.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2289830F-84E1-E111-9B1A-0030487F1717.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/56A8FFAD-29E2-E111-BB50-003048F0E55A.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8EFC5ECD-D3E1-E111-BC9F-0030487F1737.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BA1CA24C-CFE1-E111-8991-003048D436D4.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/EA0F572E-93E1-E111-9521-0025901D4936.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/28609559-8CE1-E111-9836-003048F0E18E.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5898B1DB-6CE1-E111-86F5-00266CFB8D74.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/92900233-DDE1-E111-A7F8-0030487D710F.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BCD8A9A3-EEE1-E111-B148-003048C69402.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/ECCFBCDD-89E1-E111-96C9-0025901D4936.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2ADEA5DB-00E2-E111-AF20-0030487E4EBF.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5CEE2644-2AE2-E111-AAE8-0030487F9151.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9636845B-06E2-E111-8F7B-0030487DA061.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C0E610CD-CEE1-E111-AEF3-00266CF1074C.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F097145C-E7E1-E111-A64E-0030487E0A2D.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2E5C881C-75E1-E111-AC25-0025901D4AF0.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/624FA788-7CE1-E111-B1EC-0030487FA607.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9899EDC7-8FE1-E111-ADBD-0025904B1446.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C4169660-82E1-E111-BFA3-0030487F9297.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F60F0652-C8E1-E111-BE82-002481E94B26.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/324A56C4-94E1-E111-87C2-003048C68A90.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/66279F97-99E1-E111-83BC-003048C68A8A.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9A494832-27E2-E111-983A-0030487F1BCF.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6DA98EE-80E1-E111-8A16-002481E0D480.root',
-        '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FA1056FA-06E2-E111-BE82-0030487EBB25.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/209D26E9-AEE1-E111-BAA6-0030487D5D8D.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/54145FEE-1AE2-E111-8B8E-003048C69408.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8CA6B320-CFE1-E111-A04C-003048D2BB22.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/B6D6C237-DBE1-E111-B65F-002481E0DC4C.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/E88CC8A4-85E1-E111-9EFF-0030487F1A55.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2289830F-84E1-E111-9B1A-0030487F1717.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/56A8FFAD-29E2-E111-BB50-003048F0E55A.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/8EFC5ECD-D3E1-E111-BC9F-0030487F1737.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BA1CA24C-CFE1-E111-8991-003048D436D4.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/EA0F572E-93E1-E111-9521-0025901D4936.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/28609559-8CE1-E111-9836-003048F0E18E.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5898B1DB-6CE1-E111-86F5-00266CFB8D74.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/92900233-DDE1-E111-A7F8-0030487D710F.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/BCD8A9A3-EEE1-E111-B148-003048C69402.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/ECCFBCDD-89E1-E111-96C9-0025901D4936.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2ADEA5DB-00E2-E111-AF20-0030487E4EBF.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/5CEE2644-2AE2-E111-AAE8-0030487F9151.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9636845B-06E2-E111-8F7B-0030487DA061.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C0E610CD-CEE1-E111-AEF3-00266CF1074C.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F097145C-E7E1-E111-A64E-0030487E0A2D.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/2E5C881C-75E1-E111-AC25-0025901D4AF0.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/624FA788-7CE1-E111-B1EC-0030487FA607.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9899EDC7-8FE1-E111-ADBD-0025904B1446.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C4169660-82E1-E111-BFA3-0030487F9297.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/F60F0652-C8E1-E111-BE82-002481E94B26.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/324A56C4-94E1-E111-87C2-003048C68A90.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/66279F97-99E1-E111-83BC-003048C68A8A.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/9A494832-27E2-E111-983A-0030487F1BCF.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6DA98EE-80E1-E111-8A16-002481E0D480.root',
+        #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FA1056FA-06E2-E111-BE82-0030487EBB25.root',
         #'/store/mc/Summer12_DR53X/TT_8TeV-mcatnlo/AODSIM/PU_S10_START53_V7A-v1/00003/7687BF3C-5E19-E211-B850-003048679180.root'
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/001A6A4D-E95B-E211-9C65-002590200B78.root',
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/425D1632-885B-E211-914A-001E67396C9D.root',
@@ -174,7 +174,24 @@ process.source = cms.Source("PoolSource",
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/4C6C96AD-BE5B-E211-93EA-0030486740BA.root',
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/888DCD34-F35B-E211-9B1D-002590200878.root',
         #'/store/data/Run2012C/MultiJet1Parked/AOD/part2_05Nov2012-v2/10001/0E359FB4-8D5B-E211-93DC-001E6739801B.root',
-        ),
+        #"/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/F67C1297-9618-E211-AA98-001EC9D8A8D4.root",
+        #"/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/FA7398AB-A618-E211-A744-90E6BA19A227.root",
+        #"/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/36680301-9D18-E211-BDCA-00259073E496.root",
+        #"/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/6A8BEA61-B218-E211-A181-E0CB4E29C4D9.root",
+        #"/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/665A64E6-E818-E211-B986-E0CB4E19F9BD.root"
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3266.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3259.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3260.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3261.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3262.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3263.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3264.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3265.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3266.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3267.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3268.root",
+        #"/store/user/eschliec/Skim_02_Data01/Skim_MJP12D2_v1_data/patTuple_selected_3269.root",
+),
                             skipEvents = cms.untracked.uint32(0)
                             )
 
@@ -183,6 +200,7 @@ process.source = cms.Source("PoolSource",
 #process.source.eventsToSkip = cms.untracked.VEventRange('1:1-1:6','2:100-3:max')
 #process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('1:1-1:6','2:100-3:max')
 #process.source.lumisToSkip = cms.untracked.VLuminosityBlockRange('1:1-1:6','2:100-3:max')
+#process.source.eventsToProcess = cms.untracked.VEventRange('1:26916229','1:41631988','1:41647546')
 
 ## print memory infos to check for modules with memory leaks
 #process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck", ignoreTotal = cms.untracked.int32(0))
@@ -309,6 +327,7 @@ if options.jesType == 'jes' :
         process.scaledJetEnergy.scaleType = "jes:down"
 ## set set energy scaling factors for flavor ONLY
 elif options.jesType == 'flavor' :
+    process.scaledJetEnergy.sourceName = "FlavorPureBottom"
     if options.jesFactor > 1.0 :
         process.scaledJetEnergy.scaleType = "flavor:up"
     elif options.jesFactor < 1.0 :
@@ -506,8 +525,8 @@ elif os.getenv('CMSSW_VERSION').startswith('CMSSW_4_1_'):
 if options.PUscenario == '2012':
     process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_69400_SysNo.root"
     process.eventWeightPU.DataHistoName = "pileup"
-    process.eventWeightPUSysUp   = process.eventWeightPU.clone(DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_73564_SysUp.root")
-    process.eventWeightPUSysDown = process.eventWeightPU.clone(DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_65236_SysDown.root")
+    process.eventWeightPUSysUp   = process.eventWeightPU.clone(DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_72870_SysUp.root")
+    process.eventWeightPUSysDown = process.eventWeightPU.clone(DataFile = "TopAnalysis/TopUtils/data/MyPileup_HLT_QuadJet50_65930_SysDown.root")
 elif options.PUscenario == '11_178078':
     #process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/MyDataPileupHistogram_precaleWeighted_new.root"
     #process.eventWeightPU.DataFile = "TopAnalysis/TopUtils/data/MyDataPileupHistogram_precaleWeighted_3545fb-1.root"
@@ -643,6 +662,8 @@ if options.backgroundEstimation != 0:
         from TopMass.TopEventTree.JetEventMixer_cfi import mixJets
         process.tightLeadingJets = mixJets.clone()
         process.tightLeadingJets.input.fileNames = process.source.fileNames
+        process.tightLeadingJets.nMix = 8
+        process.tightLeadingJets.speedUp = 1
         #process.tightLeadingJets.input.skipEvents = cms.untracked.uint32(0) ## DOES NOT WORK
         process.source = cms.Source("EmptySource")
         #process.p1.replace(process.leading6JetSelection, process.leading6JetSelection*process.mixJets)
@@ -910,6 +931,9 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
                 process.p1 += process.bTagEff
                 process.TFileService.fileName = 'bTagEff_test.root'
 
+
+#process.kinFitTtFullHadEventHypothesis.constraints = [1,2,3,4]
+#process.kinFitTtFullHadEventHypothesis.mTop = 190
 
 ## Output Module Configuration
 if options.writeOutput:
