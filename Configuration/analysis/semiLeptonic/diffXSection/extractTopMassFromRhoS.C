@@ -1,6 +1,5 @@
 #include "basicFunctions.h"
 
-
 std::pair< double, double > extraction(int verbose=1, double luminosity=19712., bool save=true, double minx=160., double maxx=185., double nbinsx=250, bool dataMassDependence=false, int binOfInterest=1, TString outputFolder="./", TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root");
 
 void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=true){
@@ -16,7 +15,7 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   // where to store the output
   TString outputFolder="./diffXSecFromSignal/plots/combined/2012/rhos/";
   TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root";
-  // comraison mass value
+  // comparison mass value (Tevatron)
   double mass   =173.18;
   double masserr=0.94;
 
@@ -37,17 +36,22 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   TH1F* extractedMass= new TH1F("extractedMass", "extractedMass", Nbins, binning_["rhos"][0], binning_["rhos"][binning_["rhos"].size()-1]);
   reBinTH1F(*extractedMass, binning_["rhos"], 0);
   TH1F* TevatronMass= new TH1F("TevatronMass", "TevatronMass", 1, binning_["rhos"][0], binning_["rhos"][binning_["rhos"].size()-1]);
-  TH1F* TevatronMassUp=(TH1F*)TevatronMass->Clone("TevatronMassUp");
-  TH1F* TevatronMassDn=(TH1F*)TevatronMass->Clone("TevatronMassDn");
   histogramStyle(*TevatronMass, kSig, false, 0.1);
-  histogramStyle(*TevatronMassUp, kBkg, true, 0.1); 
-  TevatronMassUp->SetFillColor(color_[1]);
-  TevatronMassUp->SetFillStyle(1001);
-  TevatronMassUp->SetLineColor(10);
-  histogramStyle(*TevatronMassDn, kBkg, true, 0.1, 10); 
-  TevatronMass  ->SetBinContent(1, mass);
-  TevatronMassUp->SetBinContent(1, mass+masserr);
-  TevatronMassDn->SetBinContent(1, mass-masserr);
+  TevatronMass->SetBinContent(1,mass);
+  TGraphAsymmErrors* TevatronMassErr= new TGraphAsymmErrors(nbinsx);  
+  for(int bin=1; bin<=extractedMass->GetNbinsX(); ++bin){
+    double binWidth             = extractedMass->GetBinWidth(bin);
+    double binCenter            = extractedMass->GetBinCenter(bin);
+    TevatronMassErr->SetPoint     (bin-1, binCenter, mass);
+    TevatronMassErr->SetPointError(bin-1, 0.5*binWidth, 0.5*binWidth, masserr, masserr);
+  }
+  TevatronMassErr->SetLineColor(color_[kSig]);
+  TevatronMassErr->SetMarkerColor(color_[kSig]);
+  TevatronMassErr->SetFillColor(color_[kBkg]);
+  TevatronMassErr->SetFillStyle(1001);
+  TevatronMassErr->SetLineWidth(2);
+  TevatronMassErr->SetLineStyle(1);
+  TevatronMassErr->SetMarkerSize(0.1);
 
   //loop all bins
   for(int bin=1; bin<=4; ++bin){
@@ -59,39 +63,89 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
     extractedMass->SetBinError(bin, std::abs(resultbin.second));
   }
   
-  // create legend
-  TLegend *leg = new TLegend(0.68, 0.74, 0.92, 0.85);
-  legendStyle(*leg,"");
-  TH1F* legtev=(TH1F*)TevatronMass->Clone("legtevatron");
-  legtev->SetFillColor  (TevatronMassUp->GetFillColor());
-  legtev->SetFillStyle  (TevatronMassUp->GetFillStyle());
-  leg->AddEntry(extractedMass, "#splitline{extracted from}{CMS data}", "LP" );
-  leg->AddEntry(legtev       , "Tevatron"               , "FLP");
- 
-  // draw extracted mass for all bins
+  // linear fit to extracted mass values
   std::vector<TCanvas*> plotCanvas_;
   addCanvas(plotCanvas_);
   plotCanvas_[plotCanvas_.size()-1]->cd(0);
+  TF1* combfit=new TF1("combfitdata", "[0]", extractedMass->GetBinLowEdge(1), extractedMass->GetBinLowEdge(extractedMass->GetNbinsX()+1));
+  combfit->SetLineColor(kBlue);
+  combfit->SetLineWidth(3);
+  TString option="Q";
+  if(verbose>0)option="";
+  if(verbose>1)option="V";
+  option+="0";
+  extractedMass->Fit(combfit, option,"",extractedMass->GetBinLowEdge(1), extractedMass->GetBinLowEdge(extractedMass->GetNbinsX()+1));
+  double mcomb=combfit->GetParameter(0);
+  double merr =combfit->GetParError(0);
+  // histogram with fit result
+  TH1F* CombMass= new TH1F("CombMass", "CombMass", 1, binning_["rhos"][0], binning_["rhos"][binning_["rhos"].size()-1]);
+  histogramStyle(*CombMass, kSig, false, 0.1, kBlue);
+  CombMass->SetBinContent(1, mcomb);
+  TGraphAsymmErrors* massfinal= new TGraphAsymmErrors(nbinsx);  
+  for(int bin=1; bin<=extractedMass->GetNbinsX(); ++bin){
+    double binWidth             = extractedMass->GetBinWidth(bin);
+    double binCenter            = extractedMass->GetBinCenter(bin);
+    massfinal->SetPoint     (bin-1, binCenter, mcomb);
+    massfinal->SetPointError(bin-1, 0.5*binWidth, 0.5*binWidth, merr, merr);
+  }
+  massfinal->SetLineColor(kBlue);
+  massfinal->SetMarkerColor(kBlue);
+  massfinal->SetFillColor(kBlue-9);
+  massfinal->SetFillStyle(1001);
+  massfinal->SetLineWidth(2);
+  massfinal->SetLineStyle(1);
+  massfinal->SetMarkerSize(0.1);
+
+  std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV" << std::endl;
+
+  // create legend
+  TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85);
+  legendStyle(*leg,"");
+  TH1F* legtev=(TH1F*)TevatronMass->Clone("legtevatron");
+  legtev->SetFillColor  (TevatronMassErr->GetFillColor());
+  legtev->SetFillStyle  (TevatronMassErr->GetFillStyle());
+  TH1F* legcomb=(TH1F*)TevatronMass->Clone("legcomb");
+  legcomb->SetLineColor(massfinal->GetLineColor());
+  legcomb->SetLineWidth(massfinal->GetLineWidth());
+  legcomb->SetFillColor(massfinal->GetFillColor());
+  legcomb->SetFillStyle(massfinal->GetFillStyle());
+  leg->AddEntry(extractedMass, "#splitline{extracted from}{CMS data}", "LP" );
+  leg->AddEntry(legcomb      , "#splitline{fit to data points:}{"+getTStringFromDouble(mcomb, 1)+"#pm"+getTStringFromDouble(merr, 1)+" GeV}", "FLP");
+  leg->AddEntry(legtev       , "Tevatron"               , "FLP");
+
+  // draw extracted mass for all bins
   TString title="mtopExtractionFromRhosAllBins";
   if(dataMassDependence) title+="DataMassDependence";
   plotCanvas_[plotCanvas_.size()-1]->SetName (title);
   plotCanvas_[plotCanvas_.size()-1]->SetTitle(title);
   if(!dataMassDependence) plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
-  //double min=dataMassDependence ? 120.: 1.;
-  //double max=dataMassDependence ? 230.: 500.;
   axesStyle(*extractedMass, xSecLabelName("rhos"), "m^{top} [GeV]");
   histogramStyle(*extractedMass, kData);
-  //extractedMass->SetMaximum(max);
-  //extractedMass->SetMinimum(min);
   extractedMass->GetYaxis()->SetNoExponent(true);
   extractedMass->Draw("AXIS");
-  TevatronMassUp->Draw("hist same");
-  TevatronMassDn->Draw("hist same");
-  TevatronMass  ->Draw("hist same");
-  extractedMass ->Draw("p e same");
+  massfinal->Draw("e2 same");
+  CombMass->Draw("hist same");
+  TevatronMassErr->Draw("e2 same");
+  TevatronMass->Draw("hist same");
+  extractedMass->Draw("p e same");
   leg->Draw("same");
- extractedMass->Draw("AXIS same");
+  extractedMass->Draw("AXIS same");
   DrawCMSLabels(true, luminosity, 0.04, false, false, false);
+
+  // saving 
+  if(save){
+    if(verbose>0) std::cout << "saving" << std::endl;
+    int initWarningLV=gErrorIgnoreLevel;
+    if(verbose<1) gErrorIgnoreLevel=kWarning;
+    for(unsigned int plot=0; plot<=plotCanvas_.size()-1; ++plot){
+      //if(verbose>1) std::cout << " - for " << outputFolder+plotCanvas_[plot]->GetName() << std::endl;
+      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
+      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
+      saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
+    }
+    gErrorIgnoreLevel=initWarningLV;
+ } 
+
 }
 
 std::pair< double, double > extraction(int verbose, double luminosity, bool save, double minx, double maxx, double nbinsx, bool dataMassDependence, int binOfInterest, TString outputFolder, TString outputFile){
@@ -150,7 +204,7 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     measurement->SetBinContent(measurement->FindBin(MassPointsData_[masspoint]), value   );
     measurement->SetBinError  (measurement->FindBin(MassPointsData_[masspoint]), errorAbs);
   }
-  histogramStyle(*measurement, kData, false, 1.3, color_[0]);
+  histogramStyle(*measurement, kData, false, 1.5, color_[0]);
   measurement->SetMarkerColor(color_[0]);
   measurement->SetMarkerStyle(33);
   // keep modified versions for drawing
@@ -213,7 +267,15 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   mtop_.push_back(172.5);
   mtop_.push_back(175.5);
 
-  // get rhos plots
+  // C) get prediction with theory parameter dependence
+  std::vector<TFile* > fileSys_;
+  //  load rootfiles
+  fileSys_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleUp/combinedDiffXSecSigScaleUpSummer12PF.root"     , "Open"));
+  fileSys_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ScaleDown/combinedDiffXSecSigScaleDownSummer12PF.root" , "Open"));
+  fileSys_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchUp/combinedDiffXSecSigMatchUpSummer12PF.root"     , "Open"));
+  fileSys_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/MatchDown/combinedDiffXSecSigMatchDownSummer12PF.root" , "Open"));
+
+  // get rhos(mtop) plots
   std::vector<TH1F* > rhosMC_;
   // loop samples
   for(int sample=0; sample<(int)file_.size(); ++sample ){
@@ -230,7 +292,25 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     rhosMC_.push_back((TH1F*)temp->Clone(TString("rhosMC")+getTStringFromInt(sample)));  
   }
 
+  // get rhos(parameter) plots
+  std::vector<TH1F* > rhosMCsys_;
+  // loop samples
+  for(int sample=0; sample<(int)fileSys_.size(); ++sample ){
+    // get plot
+    TH1F* temp=(TH1F*)((fileSys_[sample]->Get("compositedHadronGenPhaseSpace/rhosGen"))->Clone("tempSys"));
+    // rebin it
+    reBinTH1F(*temp, binning_["rhos"], 0);
+    // divide by integral and binwidth
+    double N=temp->Integral(1, temp->GetNbinsX());
+    for(int i=1; i<= temp->GetNbinsX(); i++){
+      temp->SetBinContent(i, ( (double)(temp->GetBinContent(i)) / (N*temp->GetBinWidth(i)) ) );
+    }
+    // keep it in vector
+    rhosMCsys_.push_back((TH1F*)temp->Clone(TString("rhosMCsys")+getTStringFromInt(sample)));  
+  }
+
   // collect rhos results from last bin for different masses is separate plot
+  double MCnom=0.;
   TH1F* MC= new TH1F("CMSMC", "CMSMC", nbinsx, minx, maxx);
   //reBinTH1F(*data, mtop_,0);
   // loop samples
@@ -238,8 +318,19 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     double value=rhosMC_[sample]->GetBinContent(binOfInterest);
     if(verbose>0) std::cout << "MC(" << mtop_[sample] << "GeV): " << value << std::endl;
     MC->SetBinContent(MC->FindBin(mtop_[sample]), value);
+    if(MassPointsData_[sample]==172.5) MCnom=value;
   }
-  histogramStyle(*MC, kData, false, 1.2, kGreen);
+  histogramStyle(*MC, kData, false, 1.2, kGreen-2);
+
+  // extract values for parameter dependence
+  double MCnomUnc=0.;
+  for( unsigned int sample=0; sample<fileSys_.size(); sample=sample+2){
+    double valueUp=rhosMCsys_[sample  ]->GetBinContent(binOfInterest);
+    double valueDn=rhosMCsys_[sample+1]->GetBinContent(binOfInterest);
+    double unc=0.5*(std::abs(valueUp-MCnom)+std::abs(valueDn-MCnom));
+    MCnomUnc+=unc;
+  }
+  
   // do a linear fit of the mass dependence
   TF1* lin=new TF1("linFit", "[0]*x+[1]", minx, maxx);
   lin->SetLineColor(MC->GetLineColor());
@@ -251,13 +342,46 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   //double mresult=(central-b)/a;
   double mresultfit=(b-bdata)/(adata-a);
   double centralfit=adata*mresultfit+bdata;
-  double mup=(b-(bdata+errorAbs))/(adata-a);
-  double mdn=(b-(bdata-errorAbs))/(adata-a);
+  double mup=(b-MCnomUnc-(bdata+errorAbs))/(adata-a);
+  double mdn=(b+MCnomUnc-(bdata-errorAbs))/(adata-a);
   double up=adata*mup+(bdata+errorAbs);
   double dn=adata*mdn+(bdata-errorAbs);
   if(verbose>0){
     std::cout << "mtop= (" << mdn << ".." << mresultfit << ".." << mup << ")" << std::endl; 
     if(verbose>0) std::cout << "mtop= " << mresultfit << " +" << mresultfit-mup << " -" << mdn-mresultfit << std::endl; 
+  }
+  TGraphAsymmErrors* MCunc= new TGraphAsymmErrors(nbinsx);  
+  for(int bin=1; bin<=measurementCentral->GetNbinsX(); ++bin){
+    //double binEdgeDown          = measurementCentral->GetBinLowEdge(bin);
+    //double binEdgeUp            = measurementCentral->GetBinLowEdge(bin+1);
+    double binWidth             = measurementCentral->GetBinWidth(bin);
+    double binCenter            = measurementCentral->GetBinCenter(bin);
+    double value=a*binCenter+b;
+    MCunc->SetPoint     (bin-1, binCenter, value);
+    MCunc->SetPointError(bin-1, 0.5*binWidth, 0.5*binWidth, MCnomUnc, MCnomUnc);
+  }
+  MCunc->SetLineColor(kGreen);
+  MCunc->SetMarkerColor(kGreen);
+  MCunc->SetFillColor(kGreen);
+  MCunc->SetFillStyle(3344);
+  MCunc->SetLineWidth(1);
+  MCunc->SetLineStyle(1);
+  MCunc->SetMarkerSize(0.1);
+  
+  // chi2 approach for binOfInterest
+  TH1F* chi2CMS= new TH1F  ("chi2Bin"+getTStringFromInt(binOfInterest), "chi2Bin"+getTStringFromInt(binOfInterest), nbinsx, minx, maxx);
+  histogramStyle(*chi2CMS, kData, false, 1.3);
+  axesStyle(*chi2CMS, "m^{top}", "#chi^{2} ("+getTStringFromDouble(data->GetBinLowEdge(binOfInterest))+" #leq#rho_{S}#leq "+getTStringFromDouble(data->GetBinLowEdge(binOfInterest+1))+")");
+  chi2CMS->GetXaxis()->SetNoExponent(true);
+  // uncertainty MC pred.+ data measurement from central masspoint
+  double totUnc=MCnomUnc*MCnomUnc+errorAbs*errorAbs;
+  // loop all masspoints
+  for( unsigned int masspoint=0; masspoint<data_.size(); ++masspoint ){
+    double valuedata=data_  [masspoint]->GetBinContent(binOfInterest);
+    double valueMC  =rhosMC_[masspoint]->GetBinContent(binOfInterest);
+    double currentmasspoint=mtop_[masspoint];
+    double chi2=std::abs(valuedata-valueMC)*std::abs(valuedata-valueMC)/totUnc;
+    chi2CMS->SetBinContent(chi2CMS->FindBin(currentmasspoint), chi2);
   }
 
   // ---
@@ -270,12 +394,17 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   legmeasurement->SetFillStyle  (measurementUp->GetFillStyle());
   legmeasurement->SetMarkerStyle(measurement->GetMarkerStyle());
   legmeasurement->SetMarkerColor(measurement->GetMarkerColor());
-  leg->AddEntry(legmeasurement, "CMS data"      , "FPL");
-  leg->AddEntry(MC            , "CMS simulation", "P" );
+  legmeasurement->SetMarkerSize (measurement->GetMarkerSize() );
+  TH1F* legMC=(TH1F*)MC->Clone("legMC");
+  legMC->SetFillColor(MCunc->GetFillColor());
+  legMC->SetFillStyle(MCunc->GetFillStyle());
+  leg->AddEntry(legmeasurement, "CMS data"      , "FLP");
+  leg->AddEntry(legMC         , "CMS simulation", "PLF" );
   //leg->AddEntry(lin           , "linear fit"    , "L" );
   
-  // D) create final plot
+  // D) create final plots
   std::vector<TCanvas*> plotCanvas_;
+  // intersection method
   addCanvas(plotCanvas_);
   plotCanvas_[plotCanvas_.size()-1]->cd(0);
   TString title="mtopExtractionFromRhosBin"+getTStringFromInt(binOfInterest);
@@ -308,25 +437,37 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   measurementUp     ->Draw("hist same");
   measurementDn     ->Draw("hist same");
   measurementCentral->Draw("hist same");
-  MC->Draw("p same");
+  MCunc->Draw("p e2 same");
+  MC   ->Draw("p same");
   lin->Draw("same");
-  MC->Draw("AXIS same");
   measNonNomOnly->Draw("p same");
   measNomOnly->Draw("p same");
-  drawLine(mresultfit, min, mresultfit, centralfit, kBlack, 2, 2);
-  drawLine(mup    , min, mup       , up     , kBlack, 1, 2);
-  drawLine(mdn    , min, mdn       , dn     , kBlack, 1, 2);
+  MC->Draw("AXIS same");
+  if(mresultfit<=maxx&&mresultfit>=minx) drawLine(mresultfit, min, mresultfit, centralfit, kBlack, 2, 2);
+  if(mup<=maxx       &&mup>=minx       ) drawLine(mup       , min, mup       , up        , kBlack, 1, 2);
+  if(mdn<=maxx       &&mdn>=minx       ) drawLine(mdn       , min, mdn       , dn        , kBlack, 1, 2);
   leg->Draw("same");
   DrawCMSLabels(true, luminosity, 0.04, false, false, false);
+  // chi2 method
+  addCanvas(plotCanvas_);
+  plotCanvas_[plotCanvas_.size()-1]->cd(0);
+  TString title2="mtopChi2ScanRhosBin"+getTStringFromInt(binOfInterest);
+  if(dataMassDependence) title2+="DataMassDependence";
+  plotCanvas_[plotCanvas_.size()-1]->SetName (title2);
+  plotCanvas_[plotCanvas_.size()-1]->SetTitle(title2);
+  chi2CMS->Draw("p");
+  
   // E) do saving 
   if(save){
     int initWarningLV=gErrorIgnoreLevel;
-    if(verbose<=1) gErrorIgnoreLevel=kWarning;
-    plotCanvas_[0]->Print(outputFolder+plotCanvas_[0]->GetName()+".eps");
-    plotCanvas_[0]->Print(outputFolder+plotCanvas_[0]->GetName()+".png");
-    saveToRootFile(outputFile, plotCanvas_[0], true, verbose-1, "massFromRhos");
+    if(verbose<1) gErrorIgnoreLevel=kWarning;
+    for(unsigned int plot=0; plot<plotCanvas_.size()-1; ++plot){
+      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
+      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
+      saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
+    }
     gErrorIgnoreLevel=initWarningLV;
   }
-  std::cout << mresultfit << "+/-" << std::abs(mresultfit-mup) << std::endl;
+  std::cout << "intersection method: " << mresultfit << "+/-" << std::abs(mresultfit-mup) << std::endl;
   return make_pair(mresultfit, std::abs(mresultfit-mup));
 }
