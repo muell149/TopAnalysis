@@ -929,12 +929,12 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetAssociatedParton.push_back(i_jetProperties->jetAssociatedParton());
 
 		//Here I create the index list with the track charge and LV
-		for (size_t i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++)
-		{
-			VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
-			VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());
-			VjetTrack.push_back(i_jetProperties->jetTrack().at(i_charge));
-		}
+        for (size_t i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++)
+        {
+            VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
+            VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());
+            VjetTrack.push_back(i_jetProperties->jetTrack().at(i_charge));
+        }
     }
 
 
