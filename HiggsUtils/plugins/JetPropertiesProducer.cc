@@ -38,8 +38,6 @@
 
 #include "TopAnalysis/HiggsUtils/interface/JetProperties.h"
 
-#include "../../Configuration/analysis/diLeptonic/src/classes.h"
-
 
 //
 // class declaration
@@ -107,19 +105,19 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     iEvent.getByLabel(jets, jetHandle);
     
     
-	for(std::vector<pat::Jet>::const_iterator i_jet = jetHandle->begin(); i_jet != jetHandle->end(); ++i_jet){
+    for(std::vector<pat::Jet>::const_iterator i_jet = jetHandle->begin(); i_jet != jetHandle->end(); ++i_jet){
         
-	std::vector<LV> jetTrack;
-	std::vector<int> jetTrackCharge;
+        std::vector<math::PtEtaPhiMLorentzVectorD> jetTrack;
+        std::vector<int> jetTrackCharge;
         // Jet charge as given by PAT (weighted by global pt)
         const double jetChargeGlobalPtWeighted(i_jet->jetCharge());
         
         
         // Jet charge as weighted sum
    	    // weight = projection of charged pflow object momentum on jet axis 
-		double jetPx = i_jet->px();
-		double jetPy = i_jet->py();
-		double jetPz = i_jet->pz();
+        double jetPx = i_jet->px();
+        double jetPy = i_jet->py();
+        double jetPz = i_jet->pz();
         
         const std::vector<reco::PFCandidatePtr> pfConstituents = i_jet->getPFConstituents();
         
@@ -127,54 +125,54 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
         double sumMomentumQ = 0; 
 
 	
-		for(std::vector<reco::PFCandidatePtr>::const_iterator i_candidate = pfConstituents.begin(); i_candidate != pfConstituents.end(); ++i_candidate){
-			const int charge = (*i_candidate)->charge();
+        for(std::vector<reco::PFCandidatePtr>::const_iterator i_candidate = pfConstituents.begin(); i_candidate != pfConstituents.end(); ++i_candidate){
+            const int charge = (*i_candidate)->charge();
 	    
-			if(charge == 0) continue;
+            if(charge == 0) continue;
 	    
-			jetTrack.push_back( (*i_candidate)->polarP4());
-			jetTrackCharge.push_back(charge);
+            jetTrack.push_back( (*i_candidate)->polarP4());
+            jetTrackCharge.push_back(charge);
 	    
-			const double constituentPx = (*i_candidate)->px();
-			const double constituentPy = (*i_candidate)->py();
-			const double constituentPz = (*i_candidate)->pz();
-			const double product = constituentPx*jetPx + constituentPy*jetPy + constituentPz*jetPz;
+            const double constituentPx = (*i_candidate)->px();
+            const double constituentPy = (*i_candidate)->py();
+            const double constituentPz = (*i_candidate)->pz();
+            const double product = constituentPx*jetPx + constituentPy*jetPy + constituentPz*jetPz;
             
-			sumMomentum += product;
-			sumMomentumQ += static_cast<double>(charge)*product;
-		}
-        
-		const double jetChargeRelativePtWeighted(sumMomentum>0 ? sumMomentumQ/sumMomentum : 0);
-        
-        
-		// Access Lorentz vector and PDG ID of parton associated to jet by PAT
-        // If it does not exist, this can be identified by PDG ID =0
-		int jetAssociatedPartonPdgId(0);
-		math::PtEtaPhiMLorentzVectorD jetAssociatedParton(0,0,0,0);
-		const reco::GenParticle * genParton = i_jet->genParton();
-		if(genParton){
-			jetAssociatedPartonPdgId = genParton->pdgId();
-			jetAssociatedParton = genParton->polarP4();
+            sumMomentum += product;
+            sumMomentumQ += static_cast<double>(charge)*product;
         }
         
-		JetProperties jetProperties(jetChargeGlobalPtWeighted, jetChargeRelativePtWeighted, jetAssociatedPartonPdgId, jetAssociatedParton, jetTrack, jetTrackCharge);
-		v_jetProperties->push_back(jetProperties);
+        const double jetChargeRelativePtWeighted(sumMomentum>0 ? sumMomentumQ/sumMomentum : 0);
         
-		edm::LogVerbatim log("JetPropertiesProducer");
-		log<<"   ---   Jet Properties   ---   \n";
-		log<<"Jet charge global pt weighted:   "<<jetProperties.jetChargeGlobalPtWeighted()<<"\n";
-		log<<"Jet charge relative pt weighted: "<<jetProperties.jetChargeRelativePtWeighted()<<"\n";
-		log<<"Jet associated parton PDG ID:    "<<jetProperties.jetAssociatedPartonPdgId()<<"\n";
-		log<<"Jet associated parton pt: "<<jetProperties.jetAssociatedParton().pt()<<"\n";
-		log<<"Jet associated parton eta: "<<jetProperties.jetAssociatedParton().eta()<<"\n";
-		log<<"Jet associated parton phi: "<<jetProperties.jetAssociatedParton().phi()<<"\n";
-		log<<"Jet associated parton mass: "<<jetProperties.jetAssociatedParton().M()<<"\n";
-		log<<"   --------------------------   \n\n";
-    
-		jetTrackCharge.clear();
-		jetTrack.clear();
-		
-	}
+        
+        // Access Lorentz vector and PDG ID of parton associated to jet by PAT
+        // If it does not exist, this can be identified by PDG ID =0
+        int jetAssociatedPartonPdgId(0);
+        math::PtEtaPhiMLorentzVectorD jetAssociatedParton(0,0,0,0);
+        const reco::GenParticle * genParton = i_jet->genParton();
+        if(genParton){
+            jetAssociatedPartonPdgId = genParton->pdgId();
+            jetAssociatedParton = genParton->polarP4();
+        }
+        
+        JetProperties jetProperties(jetChargeGlobalPtWeighted, jetChargeRelativePtWeighted, jetAssociatedPartonPdgId, jetAssociatedParton, jetTrack, jetTrackCharge);
+        v_jetProperties->push_back(jetProperties);
+        
+        edm::LogVerbatim log("JetPropertiesProducer");
+        log<<"   ---   Jet Properties   ---   \n";
+        log<<"Jet charge global pt weighted:   "<<jetProperties.jetChargeGlobalPtWeighted()<<"\n";
+        log<<"Jet charge relative pt weighted: "<<jetProperties.jetChargeRelativePtWeighted()<<"\n";
+        log<<"Jet associated parton PDG ID:    "<<jetProperties.jetAssociatedPartonPdgId()<<"\n";
+        log<<"Jet associated parton pt: "<<jetProperties.jetAssociatedParton().pt()<<"\n";
+        log<<"Jet associated parton eta: "<<jetProperties.jetAssociatedParton().eta()<<"\n";
+        log<<"Jet associated parton phi: "<<jetProperties.jetAssociatedParton().phi()<<"\n";
+        log<<"Jet associated parton mass: "<<jetProperties.jetAssociatedParton().M()<<"\n";
+        log<<"   --------------------------   \n\n";    
+        
+        jetTrackCharge.clear();
+        jetTrack.clear();
+        
+    }
     
     iEvent.put(v_jetProperties);
     
