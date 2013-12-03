@@ -895,6 +895,7 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
 
     double jetPTThresholdForMET_ =10.;
     double jetEMLimitForMET_ = 0.9;
+//     bool ptJetTooLow;    
     for ( edm::View<pat::Jet>::const_iterator ajet  = jets->begin() ; ajet != jets->end(); ++ajet )
     {
         Vjet.push_back(ajet->polarP4());
@@ -927,14 +928,13 @@ NTupleWriter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup )
         VjetAssociatedPartonPdgId.push_back(i_jetProperties->jetAssociatedPartonPdgId());
         VjetAssociatedParton.push_back(i_jetProperties->jetAssociatedParton());
 
-    
 		//Here I create the index list with the track charge and LV
-		for (size_t i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++){
-			VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
-			VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());
-			VjetTrack.push_back(i_jetProperties->jetTrack().at(i_charge));
-			
-	}
+        for (size_t i_charge=0;i_charge != i_jetProperties->jetTrackCharge().size();i_charge++)
+        {
+            VjetTrackCharge.push_back(i_jetProperties->jetTrackCharge().at(i_charge));
+            VjetTrackIndex.push_back(i_jetProperties-jetPropertiesHandle->begin());
+            VjetTrack.push_back(i_jetProperties->jetTrack().at(i_charge));
+        }
     }
 
 
