@@ -18,13 +18,13 @@ public:
 	
 	JetProperties(const double& jetChargeGlobalPtWeighted, const double& jetChargeRelativePtWeighted,
 		      const int& jetAssociatedPartonPdgId, const math::PtEtaPhiMLorentzVectorD& jetAssociatedParton,
-	       const std::vector<math::PtEtaPhiMLorentzVectorD>& jetTrack, const std::vector<int>& jetTrackCharge
+			  const std::vector<math::PtEtaPhiMLorentzVectorD>& jetTrack, const std::vector<int>& jetTrackCharge
 	);
 	
 	
 	JetProperties(const JetProperties& jetProperties);
 	
-    double jetChargeGlobalPtWeighted()const;
+	double jetChargeGlobalPtWeighted()const;
 	double jetChargeRelativePtWeighted()const;
 	int jetAssociatedPartonPdgId()const;
 	math::PtEtaPhiMLorentzVectorD jetAssociatedParton()const;
