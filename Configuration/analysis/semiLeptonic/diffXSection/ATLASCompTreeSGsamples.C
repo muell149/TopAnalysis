@@ -97,20 +97,15 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
   // create canvas container
   std::vector<TCanvas*> plotCanvas_, plotCanvas2_;
   // create legend
-  //TLegend* leg = new TLegend(0.4, 0.5, 0.85, 0.88);
-  TLegend* leg = new TLegend(0.22, 0.4, 0.67, 0.66);
+  TLegend* leg = new TLegend(0.4, 0.5, 0.85, 0.88);
   legendStyle(*leg ,"#bf{t#bar{t} simulation, #sqrt{s}=7 TeV}"       );
-  //TLegend* leg2= new TLegend(0.4, 0.6, 0.85, 0.88);
-  TLegend* leg2 = new TLegend(0.22, 0.4, 0.67, 0.66);
+  TLegend* leg2= new TLegend(0.4, 0.6, 0.85, 0.88);
   legendStyle(*leg2,"#bf{t#bar{t} PYTHIA simulation, #sqrt{s}=7 TeV}");
-  //TLegend* leg3= new TLegend(0.4, 0.6, 0.85, 0.88);
-  TLegend* leg3= new TLegend(0.22, 0.4, 0.67, 0.66);
+  TLegend* leg3= new TLegend(0.4, 0.6, 0.85, 0.88);
   legendStyle(*leg3,"#bf{t#bar{t} HERWIG simulation, #sqrt{s}=7 TeV}");
-  //TLegend* leg4= new TLegend(0.4, 0.7, 0.85, 0.88);
-  TLegend* leg4= new TLegend(0.22, 0.4, 0.67, 0.66);
+  TLegend* leg4= new TLegend(0.4, 0.7, 0.85, 0.88);
   legendStyle(*leg4,"#bf{t#bar{t} default simulation, #sqrt{s}=7 TeV}");
-  //TLegend* leg5= new TLegend(0.4, 0.7, 0.85, 0.88);
-  TLegend* leg5= new TLegend(0.22, 0.4, 0.67, 0.66);
+  TLegend* leg5= new TLegend(0.4, 0.7, 0.85, 0.88);
   legendStyle(*leg5,"#bf{t#bar{t} Powheg simulation, #sqrt{s}=7 TeV}");
 
   // ============================
@@ -119,11 +114,11 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
   unsigned int kfirst    =kMad;
   unsigned int klast     =kMcaA;
   unsigned int krelative1 =kPow; 
-  TString krelative1lab="#scale[0.85]{#splitline{Powheg+Pythia}{(CMS)}}";
+  TString krelative1lab=excludeATLAS ? "#scale[0.85]{Powheg+Pythia}" : "#scale[0.85]{#splitline{Powheg+Pythia}{(CMS)}}";
   unsigned int krelative2 =kPow;
   TString krelative2lab=krelative1lab;
   unsigned int krelative3 =kPowHer;
-  TString krelative3lab="#scale[0.85]{#splitline{Powheg+Herwig}{(CMS)}}";  
+  TString krelative3lab=excludeATLAS ? "#scale[0.85]{Powheg+Herwig}" : "#scale[0.85]{#splitline{Powheg+Herwig}{(CMS)}}";  
   unsigned int krelative4 =kMad;
   TString krelative4lab="#scale[0.55]{MadGraph+Pythia (CMS)}";   
   unsigned int krelative5 =kPowHer;
@@ -250,8 +245,8 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
     }
     else if(sample==kPowHer||sample==kPowHerA){ color =kMagenta; sampleName="Powheg+Herwig(AUET2)";} 
     else if(sample==kMca   ||sample==kMcaA   ){ color =kBlue   ; sampleName="MC@NLO+Herwig"; if(sample==kMcaA) sampleName+="(AUET2)";}
-    if(CMS) sampleName+="(CMS)"  ;
-    else{
+    if(CMS&&!excludeATLAS) sampleName+="(CMS)"  ;
+    else if(!CMS){
       sampleName+="(ATLAS)";
       //color+=1;      
     }
@@ -333,7 +328,7 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
   label -> SetX2NDC(1.0-gStyle->GetPadRightMargin());
   label -> SetY2NDC(1.0);
   label -> SetTextFont(42);
-  label -> AddText("TOPLHCWG Preliminary, #sqrt{s} = 7 TeV");
+  label -> AddText(excludeATLAS ? "CMS simulation, #sqrt{s} = 7 TeV" : "TOPLHCWG Preliminary, #sqrt{s} = 7 TeV");
   label -> SetFillStyle(0);
   label -> SetBorderSize(0);
   label -> SetTextSize(0.04);
@@ -357,16 +352,18 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
       if(debug) std::cout << "plot " << name << std::endl; 
       addCanvas(plotCanvas_);
       //######################################
-      if(plotList_[plot].Contains("topPt")){
+      if(plotList_[plot].Contains("topPt")||plotList_[plot].Contains("ttbarPt")){
         plotCanvas_[plotCanvas_.size()-1]->SetLogy(1);
         temptemplate->GetYaxis()->SetRangeUser(0.0001, 1000);
-        temptemplate->GetXaxis()->SetRangeUser(0., 500);
       }
       //######################################
       plotCanvas_[plotCanvas_.size()-1]->cd(0);
       plotCanvas_[plotCanvas_.size()-1]->SetName(name+nameExt);
       plotCanvas_[plotCanvas_.size()-1]->SetTitle(name+nameExt);
       temptemplate->SetMaximum(1.5*histo_[name][kPow]->GetMaximum());
+      if(plotCanvas_[plotCanvas_.size()-1]->GetLogy()) temptemplate->SetMaximum(10*temptemplate->GetMaximum());
+      if(plotList_[plot].Contains("Y")) temptemplate->SetMaximum(1.2*temptemplate->GetMaximum());
+      if(plotList_[plot].Contains("ttbarMass")) temptemplate->SetLabelSize(0.03);
       //temptemplate->GetXaxis()->SetLabelSize(0);
       //temptemplate->GetXaxis()->SetTitleSize(0);
       temptemplate->Draw("AXIS");
@@ -378,14 +375,47 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
 	}
       }
       // legend
+      TLegend* templeg=0;
+      // - clone correct legend
+      if     (set==1) templeg=(TLegend*)(leg ->Clone(TString("templeg")+plotList_[plot]+getTStringFromInt(set)));
+      else if(set==2) templeg=(TLegend*)(leg2->Clone(TString("templeg")+plotList_[plot]+getTStringFromInt(set)));
+      else if(set==3) templeg=(TLegend*)(leg3->Clone(TString("templeg")+plotList_[plot]+getTStringFromInt(set)));
+      else if(set==4) templeg=(TLegend*)(leg4->Clone(TString("templeg")+plotList_[plot]+getTStringFromInt(set)));
+      else if(set==5) templeg=(TLegend*)(leg5->Clone(TString("templeg")+plotList_[plot]+getTStringFromInt(set)));
+      // - adjust legend position for different quantities
       if(plotList_[plot].Contains("topPt")){
-	if     (set==1) leg ->Draw("same");
-	if(set==2) leg2->Draw("same");
-	else if(set==3) leg3->Draw("same");
-	else if(set==4) leg4->Draw("same");
-	else if(set==5) leg5->Draw("same");
-	if(debug) std::cout << " - draw legend" << std::endl; 
+	templeg->SetX1(0.22);
+	templeg->SetY1(0.4);
+	templeg->SetX2(0.67);
+	templeg->SetY2(0.61);
       }
+      else if(plotList_[plot].Contains("topY")){
+	templeg->SetX1(0.4);
+	templeg->SetY1(0.37);
+	templeg->SetX2(0.85);
+	templeg->SetY2(0.55);
+      }
+      else if(plotList_[plot].Contains("ttbarPt")){	
+	templeg->SetX1(0.46);
+	templeg->SetY1(0.63);
+	templeg->SetX2(0.91);
+	templeg->SetY2(0.87);
+      }
+      else if(plotList_[plot].Contains("ttbarY")){	
+	templeg->SetX1(0.45);
+	templeg->SetY1(0.68);
+	templeg->SetX2(0.90);
+	templeg->SetY2(0.88);
+      }
+      else if(plotList_[plot].Contains("ttbarMass")){	
+	templeg->SetX1(0.44);
+	templeg->SetY1(0.60);
+	templeg->SetX2(0.89);
+	templeg->SetY2(0.86);
+      }
+      // - draw it
+      if(debug) std::cout << " - draw legend" << std::endl; 
+      templeg->Draw("same");
       label->Draw("same");
       if(debug) std::cout << " - draw label" << std::endl; 
       // zero error
@@ -469,7 +499,7 @@ void ATLASCompTreeSGsamples(bool save = true, int verbose=1, int binning=0, TStr
     if(excludeATLAS) name+="CMSonly";
     TString name2=binning==1 ? "ATLASbinning" : (binning==2 ? "CMSbinning" : "FineBinning");
     if(debug) std::cout << "save plots as pictures" << std::endl;  
-    saveCanvas(plotCanvas_, name+name2, "", true, true);
+    saveCanvas(plotCanvas_, name+name2, "", true, true, true);
     if(debug) std::cout << "save plots in rootfile" << std::endl;
     for(unsigned int i=0; i<plotCanvas_.size(); ++i){
       if(debug) {
@@ -536,7 +566,7 @@ std::map<TString, std::vector<double> > makeVariableBinningA(int binning)
   else{
     double width=20.;
     double min=0.;
-    double max=1000.;
+    double max=500.;
     for(double bin=min; bin<=max; bin+=width){
       bins_.push_back(bin);
     }

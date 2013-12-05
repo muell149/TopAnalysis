@@ -320,22 +320,22 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // choose correct input folder for mixed object analyzer
   TString recMixpath= "compositedKinematics";
   // warning: naming different than for std analyzer
-  // addSel=="ProbSel"&&!inputFolder.Contains("Prob") ? recMixpath+=sysInputFolderExtensionl : recMixpath+="KinFit"; // outdated: no sysWeights at all
   if(addSel==""||(addSel=="ProbSel"&&inputFolder.Contains("Prob")))  recMixpath+="KinFit";
   else if(addSel=="ProbSel") recMixpath+=addSel;
   recMixpath+=sysInputFolderExtensionRaw;
   TString genMixpath= "compositedHadronGenPhaseSpace";
   // FIXME1: no sys weight gen folder existing for mixed object analyzer
-  // genMixpath+=sysInputGenFolderExtension;
+  genMixpath+=sysInputGenFolderExtension;
   // FIXME2: no sys weight reco folders existing for mixed object analyzer in Non-ttbar SG samples outside the .../Prob/ subfolder
+  
   std::vector<TString> vecRedundantPartOfNameInNonTTbarSG_;
-  if(sysInputFolderExtensionRaw!=""&&!(addSel=="ProbSel"&&inputFolder.Contains("Prob"))){
-    vecRedundantPartOfNameInNonTTbarSG_.push_back("Njets/"+sysInputFolderExtensionRaw);
-    vecRedundantPartOfNameInNonTTbarSG_.push_back("rhos/"+sysInputFolderExtensionRaw);
-  }
+  //if(sysInputFolderExtensionRaw!=""&&!(addSel=="ProbSel"&&inputFolder.Contains("Prob"))){
+  //  vecRedundantPartOfNameInNonTTbarSG_.push_back("Njets/"+sysInputFolderExtensionRaw);
+  //  vecRedundantPartOfNameInNonTTbarSG_.push_back("rhos/"+sysInputFolderExtensionRaw);
+  //}
   // debug
-  //std::cout << genMixpath << std::endl;
-  //std::cout << recMixpath << std::endl;
+  std::cout << genMixpath << std::endl;
+  std::cout << recMixpath << std::endl;
   //for(unsigned int i=0; i<vecRedundantPartOfNameInNonTTbarSG_.size(); ++i){
   //  std::cout << vecRedundantPartOfNameInNonTTbarSG_[i] << std::endl;
   //}
@@ -419,9 +419,9 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     recMixpath+"/Njets",
     // gen jet multiplicity
     genMixpath+"/Ngenjets",
-    // reco rhos=2*172.5GeV/m(ttbar+1jet)
+    // reco rhos=2*170GeV/m(ttbar+1jet)
     recMixpath+"/rhos",
-    // gen rhos=2*172.5GeV/m(ttbar+1jet)
+    // gen rhos=2*170GeV/m(ttbar+1jet)
     genMixpath+"/rhosGen",
     // ttbar other composition
     "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/decayChannel"
@@ -661,7 +661,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     recBpath+"/bbbarMass_"                                                  ,   
     // g) response matrix jet multiplicity
     recMixpath+"/Njets_"                                                    ,
-    // h) response matrix rhos=2*172.5GeV/m(ttbar+1jet)
+    // h) response matrix rhos=2*170GeV/m(ttbar+1jet)
     recMixpath+"/rhos_"                                                     ,
   };
 
@@ -752,9 +752,9 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     xSecLabelName("Njets"  )+"/events/0/1",
     // gen jet multiplicity
     xSecLabelName("Njets"  )+" parton truth/events/0/1",
-    // reco rhos=2*172.5GeV/m(ttbar+1jet)
+    // reco rhos=2*170GeV/m(ttbar+1jet)
     xSecLabelName("rhos"  )+"/events/0/1",
-    // gen rhos=2*172.5GeV/m(ttbar+1jet)
+    // gen rhos=2*170GeV/m(ttbar+1jet)
     xSecLabelName("rhos"  )+" parton truth/events/0/1",
     // ttbar other composition
     "t#bar{t} other decay channel/events/0/1"
@@ -811,7 +811,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     xSecLabelName("bbbarMass")+" gen/"+xSecLabelName("bbbarMass")+" reco",
     // g) response matrix jet multiplicity
     xSecLabelName("Njets"    )+" gen/"+xSecLabelName("Njets")+" reco",
-    // h) response matrix rhos=2*172.5GeV/m(ttbar+1jet)
+    // h) response matrix rhos=2*170GeV/m(ttbar+1jet)
     xSecLabelName("rhos"     )+" gen/"+xSecLabelName("rhos" )+" reco",
   };
 
@@ -1085,7 +1085,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData, false, addSelData, &vecRedundantPartOfNameInNonTTbarSG_);
     getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose-1, "muon"    , &vecRedundantPartOfNameInData, false, addSelData, &vecRedundantPartOfNameInNonTTbarSG_);
   }
-  //exit(0); // debug exit - use with high verbosity to see which plots are loaded
+  exit(0); // debug exit - use with high verbosity to see which plots are loaded
   // ===============================================
   // take care of rec level b quark plots from MC BG
   // ===============================================
@@ -2417,7 +2417,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
       int scanpoints= (scan==2 ? 3 : 0);
-      //scanpoints=1; // FIXME: fast tauscan results
+      scanpoints=1; // FIXME: fast tauscan results
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2

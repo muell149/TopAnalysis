@@ -10,17 +10,17 @@ jetAssociatedPartonPdgId_(0), jetAssociatedParton_(math::PtEtaPhiMLorentzVectorD
     
 JetProperties::JetProperties(const double& jetChargeGlobalPtWeighted, const double& jetChargeRelativePtWeighted,
 			     const int& jetAssociatedPartonPdgId, const math::PtEtaPhiMLorentzVectorD& jetAssociatedParton, 
-			     const std::vector<math::PtEtaPhiMLorentzVectorD>& jetTrack, const std::vector<int>& jetTrackCharge/*,
-			     const std::vector<int>& jetTrackIndex*/):
+			     const std::vector<math::PtEtaPhiMLorentzVectorD>& jetTrack, const std::vector<int>& jetTrackCharge):
+			     
 jetChargeGlobalPtWeighted_(jetChargeGlobalPtWeighted), jetChargeRelativePtWeighted_(jetChargeRelativePtWeighted),
 jetAssociatedPartonPdgId_(jetAssociatedPartonPdgId), jetAssociatedParton_(jetAssociatedParton),
-jetTrack_(jetTrack), jetTrackCharge_(jetTrackCharge)/*,jetTrackIndex_(jetTrackIndex)*/
+jetTrack_(jetTrack), jetTrackCharge_(jetTrackCharge)
 {}
     
 JetProperties::JetProperties(const JetProperties& jetProperties):
 jetChargeGlobalPtWeighted_(jetProperties.jetChargeGlobalPtWeighted_), jetChargeRelativePtWeighted_(jetProperties.jetChargeRelativePtWeighted_),
 jetAssociatedPartonPdgId_(jetProperties.jetAssociatedPartonPdgId_), jetAssociatedParton_(jetProperties.jetAssociatedParton_),jetTrack_(jetProperties.jetTrack_), 
-jetTrackCharge_(jetProperties.jetTrackCharge_)/*,jetTrackIndex_(jetProperties.jetTrackIndex_)*/
+jetTrackCharge_(jetProperties.jetTrackCharge_)
 {}
     
 
@@ -57,10 +57,6 @@ JetProperties::jetTrack()const{return jetTrack_;}
 std::vector<int>
 JetProperties::jetTrackCharge()const{return jetTrackCharge_;}
 
-
-
-// std::vector<int>
-// JetProperties::jetTrackIndex()const{return jetTrackIndex_;}
 
 
 
