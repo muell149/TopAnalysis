@@ -387,6 +387,9 @@ if(not options.sample=="none"):
             usedSample="TopAnalysis/Configuration/Summer12/TTJets_MSDecays_central_TuneZ2star_8TeV_madgraph_tauola__Summer12_DR53X_PU_S10_START53_V19_v1_cff"
             additionalEventWeights=False
             outputFileName+="MadSpin"
+        if(not options.massfix==172.5):        
+            outputFileName+="TopMassConstraint"
+            outputFileName+=((str(options.massfix)).replace(".", "p"))
     elif(options.sample=="synch"):
         usedSample="TopAnalysis/Configuration/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_synch2_cff"
         outputFileName+="Synch"
