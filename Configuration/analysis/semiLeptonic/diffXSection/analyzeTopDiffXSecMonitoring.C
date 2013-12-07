@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
-				  bool save = true, int verbose=0,
+				  bool save = false, int verbose=0,
 				  TString inputFolderName= "RecentAnalysisRun8TeV_doubleKinFit",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root",
@@ -154,7 +154,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   //        45: sysGenMCatNLO              46: sysGenPowheg  
   //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
 
-  int systematicVariation=sysJESDown; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg+Pythia: sysGenPowheg/sysTestPowheg, Powheg+Herwig: sysGenPowhegHerwig/sysTestPowhegHerwig, McatNLO: sysGenMCatNLO/sysTestMCatNLO
+  int systematicVariation=sysNo; // MadGraph: sysNo, topPt-reweigthing: sysTest, Powheg+Pythia: sysGenPowheg/sysTestPowheg, Powheg+Herwig: sysGenPowhegHerwig/sysTestPowhegHerwig, McatNLO: sysGenMCatNLO/sysTestMCatNLO
   // use different ttbar MC ("Madgraph", "Powheg", "PowhegHerwig", "McatNLO"), also used for generator uncertainties
   TString ttbarMC="Madgraph";
   if     (systematicVariation==sysGenMCatNLO||systematicVariation==sysTestMCatNLO            ) ttbarMC="Mcatnlo";
@@ -942,6 +942,10 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
 	if(verbose>1) std::cout << "comb: " << plotList_[plot] << ", mu: " << plotListMu_[plot] << ", el: " << plotListEl_[plot] << std::endl;
 	// a) 1D
 	if((plot<N1Dplots)&&(histoMu_.count(plotListMu_[plot])>0)&&(histoMu_[plotListMu_[plot]].count(sample)>0)&&(histoEl_.count(plotListEl_[plot])>0)&&(histoEl_[plotListEl_[plot]].count(sample)>0)){ 
+	  //if(plotListMu_[plot].Contains("shift")){
+	  //  std::cout << "muon: " << plotListMu_[plot] << ", sample " << sampleLabel(sample, "muon") << " (" << histoMu_[plotListMu_[plot]][sample]->GetNbinsX() << " bins, [" << histoMu_[plotListMu_[plot]][sample]->GetBinLowEdge(1) << ".." << histoMu_[plotListMu_[plot]][sample]->GetBinLowEdge(histoMu_[plotListMu_[plot]][sample]->GetNbinsX()+1) << "]" << std::endl;
+	  //  std::cout << "electron: " << plotListEl_[plot] << ", sample " << sampleLabel(sample, "electron") << " (" << histoEl_[plotListEl_[plot]][sample]->GetNbinsX() << " bins, [" << histoEl_[plotListEl_[plot]][sample]->GetBinLowEdge(1) << ".." << histoEl_[plotListEl_[plot]][sample]->GetBinLowEdge(histoEl_[plotListEl_[plot]][sample]->GetNbinsX()+1) << "]" << std::endl; 
+	  //}
 	  if(verbose>1) std::cout << "-> 1D" << std::endl;
 	  histo_[plotList_[plot]][sample]=     (TH1F*)(histoMu_[plotListMu_[plot]][sample]->Clone());
 	  if (plotListMu_[plot]=="tightMuonKinematics/pt"){
@@ -1051,7 +1055,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
   double NttbarFull  = histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematics/ttbarMass"          ][kSig]->GetNbinsX()+1);
   double NttbarPSHad = histo_["analyzeTopHadronLevelKinematicsLeptonPhaseSpace/lepPtGen"][kSig]->Integral(0, histo_["analyzeTopHadronLevelKinematicsLeptonPhaseSpace/lepPtGen"][kSig]->GetNbinsX()+1);
   double NttbarPS    = histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->Integral(0, histo_["analyzeTopPartonLevelKinematicsPhaseSpace/ttbarMass"][kSig]->GetNbinsX()+1);
-  double BR=0.145888;
+  double BR=BRPDG(systematicVariation);
   double A   =NttbarPS   /NttbarFull;
   double AHad=NttbarPSHad/NttbarFull;
   if(verbose>2) std::cout << "NallttbarGenSG=" << NttbarFull << std::endl;
