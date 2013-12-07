@@ -171,7 +171,7 @@ if(not globals().has_key('eventFilter')):
 if("BG" in options.sample):
     eventFilter='background only'
     print "ttbar decay subset filter is inverted semileptonic muon or electron decay"
-if(not "ttbar" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample and not "mcatnlo" in options.sample):
+if(not "ttbar" in options.sample and not "powheg" in options.sample and not "perugia" in options.sample and not "mcatnlo" in options.sample and not "zprime" in options.sample):
     removeGenTtbar = True
     eventFilter='all'
 if (cutflowSynch):
