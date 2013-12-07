@@ -1,10 +1,9 @@
 #!/bin/sh
 
 
-
-if [ $# -ge 1 ] && [[ ! "$1" == "-m" ]] ; then
-    echo "Option is not allowed here: $1"
-    echo "Only '-m OPTION' can be used here with this script"
+if [ $# -ge 1 ] && ( [[ "$@" == *"-c"* ]] || [[ "$@" == *"-s"* ]] || [[ "$@" == *"-f"* ]] ) ; then
+    echo "Options '-s', '-c', '-f' are not allowed."
+    echo "You used options: $@"
     exit 1
 fi
 
@@ -21,6 +20,7 @@ for systematic in H110 H115 H120 H1225 H1275 H130 H135 H140; do
     w
 done
 
+# Run over sample with Higgs mass 125 GeV
 for c in ee emu mumu; do
     $LA -f ttbarH125 -c $c $@ &
 done
