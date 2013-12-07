@@ -3,16 +3,15 @@
 #include "../../unfolding/TopSVDFunctions.C" 
 
 void analyzeHypothesisKinFit(double luminosity = 19712.,
-			     bool save = false, int systematicVariation=sysNo, unsigned int verbose=0,
+			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0,
 			     TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root",
 			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
-			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=false, bool hadron=true,
+			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
-  // ============================
-  //  Set ROOT Style
+  // ============================  //  Set ROOT Style
   // ============================
  
   TStyle myStyle("HHStyle","HHStyle");
@@ -82,6 +81,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // detailed information for
   // testQuantity="" means all, testQuantity="NOTEST" means none
   TString testQuantity="NOTEST";
+  // closureTestSpecifier = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
   // errorbands for yield plots
   bool errorbands=false;
   // addSel: xSec from prob selection step
@@ -130,17 +130,17 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   TString dataSample="2012";
   // for closure test if desired
   TString closureLabel = "";
-  if (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")){
-    closureLabel = "SysDistort"+closureTestSpecifier;
-    //dataFile = inputFolder+"/Shape"+closureTestSpecifier+"/"+decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"8TeV.root";
-    dataFile=decayChannel+"PseudoData"+lumi+"pbReweightedttbarMass"+closureTestSpecifier+"8TeV.root";
+  if      (closureTestSpecifier.Contains("NoDistort")) closureLabel = "PseudoData"+closureTestSpecifier;
+  else if (closureTestSpecifier.Contains("topPt"   )||
+	   closureTestSpecifier.Contains("ttbarMass")) closureLabel = "PseudoDataReweight"+closureTestSpecifier;
+  else if (closureTestSpecifier.Contains("data"     )) closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;
+  else if (closureTestSpecifier.Contains("1000"     )) closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
+  else{
+    std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
+    exit(0);
   }
-  else if (closureTestSpecifier.Contains("500") || closureTestSpecifier.Contains("750")){
-    closureLabel = "Zprime"+closureTestSpecifier;
-    //dataFile = inputFolder+"/Zprime/"+decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime8TeV.root";
-    dataFile = decayChannel+"PseudoData"+lumi+"pband"+closureTestSpecifier+"GeVZprime8TeV.root";
-  }
-  // save all plots into the following folder
+  if(closureTestSpecifier!=""&&!dataFile.Contains("PseudoData")) dataFile=inputFolder+"/pseudodata/"+pseudoDataFileName(closureTestSpecifier, "electron")+":"+inputFolder+"/pseudodata/"+pseudoDataFileName(closureTestSpecifier, "muon");
+  // save all plots into the following foldre
   TString outputFolder = "./diffXSecFromSignal/plots/"+decayChannel+"/";
   if(dataSample!="") outputFolder+=dataSample+"/";
   // save all plots within a root file named:
@@ -178,7 +178,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
-  if(verbose>1) {
+  if(verbose>1||closureTestSpecifier!="") {
     std::cout << "dataFile " << dataFile << std::endl;
     std::cout << "closureTestSpecifier " << closureTestSpecifier << std::endl;
     std::cout << "outputFileName " << outputFileName << std::endl;
@@ -334,8 +334,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   //  vecRedundantPartOfNameInNonTTbarSG_.push_back("rhos/"+sysInputFolderExtensionRaw);
   //}
   // debug
-  std::cout << genMixpath << std::endl;
-  std::cout << recMixpath << std::endl;
+  //std::cout << genMixpath << std::endl;
+  //std::cout << recMixpath << std::endl;
   //for(unsigned int i=0; i<vecRedundantPartOfNameInNonTTbarSG_.size(); ++i){
   //  std::cout << vecRedundantPartOfNameInNonTTbarSG_[i] << std::endl;
   //}
@@ -1085,7 +1085,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     getAllPlots(filesEl_, plotList_, histoEl_, histo2El_, N1Dplots, Nplots, verbose-1, "electron", &vecRedundantPartOfNameInData, false, addSelData, &vecRedundantPartOfNameInNonTTbarSG_);
     getAllPlots(filesMu_, plotList_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose-1, "muon"    , &vecRedundantPartOfNameInData, false, addSelData, &vecRedundantPartOfNameInNonTTbarSG_);
   }
-  exit(0); // debug exit - use with high verbosity to see which plots are loaded
+  //exit(0); // debug exit - use with high verbosity to see which plots are loaded
   // ===============================================
   // take care of rec level b quark plots from MC BG
   // ===============================================
@@ -1910,7 +1910,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // careful: the xSec here needs to be 
   // consistent with the one in lumiweight()
   //BR=NGen*1.0/(ttbarCrossSection*luminosity);
-  BR=BRPDG;//PDG
+  BR=BRPDG(systematicVariation);//use PDG BR from basic functions
   // for inclusive xSec in chosen PS
   if(!extrapolate){ 
     BR=1.; // kinematic cuts for final state objects are specific for the decay channel (at least l+jets)!
@@ -1965,7 +1965,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   histo_[inclName][kSig]=(TH1F*)histo_[inclName][kData]->Clone("xSec/inclusiveTheory");
   double xSecRef=ttbarCrossSection;
   double xSecErr=ttbarCrossSectionError;
-  if(!extrapolate) xSecRef*=(GenPhaseSpace->Integral(0,GenPhaseSpace->GetNbinsX()+1))/(GenInclusive->Integral(0, GenInclusive->GetNbinsX()+1))*BRPDG; // BR: only l+jets events for l=#mu OR e, A=GenPS/GenInlusive: xSec in chosen kinematic PS
+  if(!extrapolate) xSecRef*=(GenPhaseSpace->Integral(0,GenPhaseSpace->GetNbinsX()+1))/(GenInclusive->Integral(0, GenInclusive->GetNbinsX()+1))*BRPDG(systematicVariation); // BR: only l+jets events for l=#mu OR e, A=GenPS/GenInlusive: xSec in chosen kinematic PS
   histo_[inclName][kSig]->SetBinContent(1, xSecRef);
   histo_[inclName][kSig]->SetBinError  (1, xSecErr);
   histogramStyle(*histo_[inclName][kSig ], kSig , false);
@@ -2768,7 +2768,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	// divide by luminosity 
 	histo_[xSec][kData]->Scale(1./(luminosity2));
 	// BR correction
-	if(extrapolate) histo_[xSec][kData]->Scale(1./BRPDG);
+	if(extrapolate) histo_[xSec][kData]->Scale(1./BRPDG(systematicVariation));
 	// Normalization -> not needed anymore, done in unfolding setup
 	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
 	//histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
@@ -2838,14 +2838,14 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	// divide by lumi
 	histo_[xSec][kSig]->Scale(1./luminosity2);
 	// BR correction
-	if(extrapolate) histo_[xSec][kSig]->Scale(1./BRPDG);
+	if(extrapolate) histo_[xSec][kSig]->Scale(1./BRPDG(systematicVariation));
 	// Normalization
 	histo_[xSecNorm][kSig]=(TH1F*)(histo_[xSec][kSig]->Clone());
-	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
+	// NB: exclude underflow and overflow bins because they are mostly negligible and we want to nornmalise to the visible range
+	histo_[xSecNorm][kSig]->SetBinContent(0                                    , 0.);
+	histo_[xSecNorm][kSig]->SetBinContent(histo_[xSecNorm][kSig]->GetNbinsX()+1, 0.);
 	double XSecInclTheoPS= getInclusiveXSec(histo_[xSec][kSig],verbose-1);
-	//XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(0);
-	//XSecInclTheoPS-=histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1);
-	histo_[xSecNorm][kSig]->Scale(1/(XSecInclTheoPS));
+	histo_[xSecNorm][kSig]->Scale(1./(XSecInclTheoPS));
 	// style
 	histogramStyle(*histo_[xSec    ][kSig ], kSig , false);
 	histogramStyle(*histo_[xSecNorm][kSig ], kSig , false);
@@ -2856,12 +2856,12 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	setXAxisRange(histo_[xSec    ][kSig],variable);
 	setXAxisRange(histo_[xSecNorm][kSig],variable);
 	if(verbose>1){
-	std::cout << std::endl << xSec << std::endl;
-	std::cout << "mc abs for normalization: "   << XSecInclTheoPS << std::endl << std::endl;
-	std::cout << "UF: "   << histo_[xSec][kSig]->GetBinContent(0) << std::endl;
-	std::cout << "OF: "   << histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1) << std::endl;
-	std::cout << "mc abs:"   << getInclusiveXSec(histo_[xSec    ][kSig],2) << std::endl;
-	std::cout << "mc norm: " << getInclusiveXSec(histo_[xSecNorm][kSig],2) << std::endl;
+	  std::cout << std::endl << xSec << std::endl;
+	  std::cout << "mc abs for normalization: "   << XSecInclTheoPS << std::endl << std::endl;
+	  std::cout << "UF: "   << histo_[xSec][kSig]->GetBinContent(0) << std::endl;
+	  std::cout << "OF: "   << histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1) << std::endl;
+	  std::cout << "mc abs:"   << getInclusiveXSec(histo_[xSec    ][kSig],2) << std::endl;
+	  std::cout << "mc norm: " << getInclusiveXSec(histo_[xSecNorm][kSig],2) << std::endl;
 	}
       }
     }
@@ -2892,8 +2892,13 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // fill in contributing sample
   // data is to be first entry
   TString lumilabel = Form("%3.2f fb^{-1}",luminosity/1000);
-  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel),"P");
-  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], sampleLabel(kData,decayChannel)+", "+lumilabel,"P");
+  TString dataLabel=sampleLabel(kData,decayChannel);
+  if(closureTestSpecifier!=""){
+    dataLabel.ReplaceAll("Data", "Pseudo Data");
+    dataLabel.ReplaceAll("data", "pseudo data");
+  }
+  leg ->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], dataLabel,"P");
+  leg0->AddEntry(histo_[plotList_[plotList_.size()-1]][kData], dataLabel+", "+lumilabel,"P");
   // now loop over MC samples
   for(unsigned int sample=kSig; sample<kData; ++sample){
     // check if sampe exists in at least one plot
@@ -3198,7 +3203,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 			if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
 			else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
 			else if(decayChannel=="combined") DrawDecayChLabel("e/#mu + Jets Combined");
-			DrawCMSLabels(true,luminosity);
+			DrawCMSLabels(prelim, luminosity, 0.04, (closureTestSpecifier!="" ? true : false), false, false);
 		      }
 		      // redraw axis
 		      histo_[plotList_[plot]][42]->Draw("axis same");
@@ -3260,13 +3265,16 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       // b) as eps and png
       for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
 	TString saveToFolder=outputFolder;
-	TString title=(plotCanvas_[idx])->GetTitle();
-	if(title.Contains("efficiency"                     )) saveToFolder+="effAndAcc/";
-	if(title.Contains("analyzeTopPartonLevelKinematics")||title.Contains("compositedPartonGen")) saveToFolder+="partonLevel/";
-	if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
-	if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
-       	if(title.Contains("analyzeTopRecoKinematicsKinFit" )||title.Contains("compositedKinematics")) saveToFolder+="recoYield/";
-	if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
+	TString title=(plotCanvas_[idx])->GetTitle();	
+	if(closureTestSpecifier=="" ){
+	  if(title.Contains("efficiency"                     )) saveToFolder+="effAndAcc/";
+	  if(title.Contains("analyzeTopPartonLevelKinematics")||title.Contains("compositedPartonGen")) saveToFolder+="partonLevel/";
+	  if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
+	  if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
+	  if(title.Contains("analyzeTopRecoKinematicsKinFit" )||title.Contains("compositedKinematics")) saveToFolder+="recoYield/";
+	  if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
+	}
+	else saveToFolder+="closureTest/";
 	if(!title.Contains("canv")){
 	  // add additional label that indicates PS for all relevant plots
 	  TString universalplotLabel="";
