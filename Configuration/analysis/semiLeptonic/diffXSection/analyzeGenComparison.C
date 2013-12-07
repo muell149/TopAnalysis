@@ -1,11 +1,10 @@
 #include "basicFunctions.h"
 
-void analyzeGenComparison(bool save = false, int verbose=0, bool theoryVariations=false){
+void analyzeGenComparison(bool save = true, int verbose=0, bool theoryVariations=false, bool analysisBinning=true){
   
   // !!! run different ttbar MCs OR Theory Variations !!!
   // theoryVariations=false OR true
-  // use same binning as in analysis?
-  bool analysisBinning=false;
+  // analysisBinning: use same binning as in analysis?
   TString saveNameExt="";
 
   // ============================
@@ -120,10 +119,10 @@ void analyzeGenComparison(bool save = false, int verbose=0, bool theoryVariation
     "charged electromagnetic fraction (jets);rel. #Jets;1;1",
     "N_{charged particles} (jets);rel. #Jets;0;1"           ,
     // kinFit
-    "reco level KinFit #rho_{S}=2*172.5GeV/m^{t#bar{t}+1j};rel. #Events;1;10" ,
-    "reco level KinFit+prob #rho_{S}=2*172.5GeV/m^{t#bar{t}+1j};rel. #Events;1;10" ,  
+    "reco level KinFit #rho_{S}=2*170GeV/m^{t#bar{t}+1j};rel. #Events;1;10" ,
+    "reco level KinFit+prob #rho_{S}=2*170GeV/m^{t#bar{t}+1j};rel. #Events;1;10" ,  
     // generated full PS quantities
-    "parton truth m^{t#bar{t}} #left[GeV#right];rel. #Events;0;25"    ,
+    "parton truth m^{t#bar{t}} #left[GeV#right];rel. #Events;0;25"   ,
     "parton truth p_{T}^{t#bar{t}} #left[GeV#right];rel. #Events;0;1",
     "parton truth y^{t#bar{t}};rel. #Events;0;1"                     ,
     "parton truth m^{t} #left[GeV#right];rel. #Top quarks;0;1"       ,
@@ -145,7 +144,7 @@ void analyzeGenComparison(bool save = false, int verbose=0, bool theoryVariation
     "visible hadron level truth m^{lb} #left[GeV#right];rel. #Events;1;5"   ,
     "visible hadron level truth m^{bb}(from t#bar{t}) #left[GeV#right];rel. #Events;1;10"          ,
     "visible hadron level truth p_{T}^{b#bar{b}}(from t#bar{t}) #left[GeV#right];rel. #Events;0;10", 
-    "visible hadron level truth #rho_{S}=2*172.5GeV/m^{t#bar{t}+1j};rel. #Events;1;10"          ,
+    "visible hadron level truth #rho_{S}=2*170GeV/m^{t#bar{t}+1j};rel. #Events;1;10"          ,
     "visible hadron level truth N_{gen jets};rel. #Events;0;1", 
   };
   plotList_ .insert(plotList_ .begin(), plots1D    , plots1D    + sizeof(plots1D    )/sizeof(TString));
