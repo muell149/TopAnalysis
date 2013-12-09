@@ -10,7 +10,7 @@ rm -r Plots
 rm -r PlotsPt*
 set -e
 
-for slope in 0.002 0.004 0.006 0.008 -0.002 -0.004 -0.006 -0.008; do
+for slope in 0.000 0.002 0.004 0.006 0.008 -0.002 -0.004 -0.006 -0.008; do
 
    for ch in ee emu mumu; do
         ls -1 selectionRoot/Nominal/${ch}/*.root | grep -v run2012 > closure_${ch}mc.txt
@@ -47,7 +47,7 @@ rm -r Plots
 rm -r PlotsY*
 set -e
 
-for slope in 0.080 0.160 0.240 0.320 -0.080 -0.160 -0.240 -0.320; do
+for slope in 0.000 0.080 0.160 0.240 0.320 -0.080 -0.160 -0.240 -0.320; do
 
     for ch in ee emu mumu; do
         ls -1 selectionRoot/Nominal/${ch}/*.root | grep -v run2012 > closure_${ch}mc.txt
