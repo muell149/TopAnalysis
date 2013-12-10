@@ -338,7 +338,7 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
             double maxFraction2(-999.);
             double minFraction3(999.);
             double maxFraction3(-999.);
-	
+            
             // Set up canvas
             canvas = new TCanvas("canvas1");
             canvas->cd();
@@ -378,12 +378,12 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                     const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
                     const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
                     const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                    if(fraction1 < minFraction1) minFraction1 = fraction1;
+                    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                    if(fraction2 < minFraction2) minFraction2 = fraction2;
+                    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                    if(fraction3 < minFraction3) minFraction3 = fraction3;
+                    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
                     outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
                            <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                 }
@@ -401,12 +401,12 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                     const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
                     const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
                     const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                    if(fraction1 < minFraction1) minFraction1 = fraction1;
+                    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                    if(fraction2 < minFraction2) minFraction2 = fraction2;
+                    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                    if(fraction3 < minFraction3) minFraction3 = fraction3;
+                    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
                     outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
                            <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                 }
@@ -424,23 +424,23 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                     const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
                     const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
                     const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                    if(fraction1 < minFraction1) minFraction1 = fraction1;
+                    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                    if(fraction2 < minFraction2) minFraction2 = fraction2;
+                    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                    if(fraction3 < minFraction3) minFraction3 = fraction3;
+                    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
                     outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
                            <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                 }
                 outfile.close();
             }
             
-	    std::cout<<"\nExtreme results for correct trainings:\n"<<fileShort<<"\n"<<outputFolder<<" , "<<step<<" , "<<histNameBase<<"\n";
-	    std::cout<<"Fraction 1 (min, max): "<<minFraction1<<" , "<<maxFraction1<<"\n";
-	    std::cout<<"Fraction 2 (min, max): "<<minFraction2<<" , "<<maxFraction2<<"\n";
-	    std::cout<<"Fraction 3 (min, max): "<<minFraction3<<" , "<<maxFraction3<<"\n\n";
-	    
+            std::cout<<"\nExtreme results for correct trainings:\n"<<fileShort<<"\n"<<outputFolder<<" , "<<step<<" , "<<histNameBase<<"\n";
+            std::cout<<"Fraction 1 (min, max): "<<minFraction1<<" , "<<maxFraction1<<"\n";
+            std::cout<<"Fraction 2 (min, max): "<<minFraction2<<" , "<<maxFraction2<<"\n";
+            std::cout<<"Fraction 3 (min, max): "<<minFraction3<<" , "<<maxFraction3<<"\n\n";
+            
             // Scale histograms and get minimum and maximum value
             Double_t yMin(99999.);
             Double_t yMax(-99999.);
@@ -498,7 +498,7 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
             double maxFraction2(-999.);
             double minFraction3(999.);
             double maxFraction3(-999.);
-	
+            
             // Set up canvas
             canvas = new TCanvas("canvas1");
             canvas->cd();
@@ -538,12 +538,12 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                     const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
                     const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
                     const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                    if(fraction1 < minFraction1) minFraction1 = fraction1;
+                    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                    if(fraction2 < minFraction2) minFraction2 = fraction2;
+                    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                    if(fraction3 < minFraction3) minFraction3 = fraction3;
+                    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
                     outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
                            <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                 }
@@ -561,12 +561,12 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                     const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
                     const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
                     const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                    if(fraction1 < minFraction1) minFraction1 = fraction1;
+                    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                    if(fraction2 < minFraction2) minFraction2 = fraction2;
+                    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                    if(fraction3 < minFraction3) minFraction3 = fraction3;
+                    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
                     outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
                            <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                 }
@@ -584,23 +584,23 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                     const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
                     const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
                     const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                    if(fraction1 < minFraction1) minFraction1 = fraction1;
+                    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                    if(fraction2 < minFraction2) minFraction2 = fraction2;
+                    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                    if(fraction3 < minFraction3) minFraction3 = fraction3;
+                    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
                     outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
                            <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                 }
                 outfile.close();
             }
             
-	    std::cout<<"\nExtreme results for swapped trainings:\n"<<fileShort<<"\n"<<outputFolder<<" , "<<step<<" , "<<histNameBase<<"\n";
-	    std::cout<<"Fraction 1 (min, max): "<<minFraction1<<" , "<<maxFraction1<<"\n";
-	    std::cout<<"Fraction 2 (min, max): "<<minFraction2<<" , "<<maxFraction2<<"\n";
-	    std::cout<<"Fraction 3 (min, max): "<<minFraction3<<" , "<<maxFraction3<<"\n\n";
-	    
+            std::cout<<"\nExtreme results for swapped trainings:\n"<<fileShort<<"\n"<<outputFolder<<" , "<<step<<" , "<<histNameBase<<"\n";
+            std::cout<<"Fraction 1 (min, max): "<<minFraction1<<" , "<<maxFraction1<<"\n";
+            std::cout<<"Fraction 2 (min, max): "<<minFraction2<<" , "<<maxFraction2<<"\n";
+            std::cout<<"Fraction 3 (min, max): "<<minFraction3<<" , "<<maxFraction3<<"\n\n";
+            
             // Scale histograms and get minimum and maximum value
             Double_t yMin(99999.);
             Double_t yMax(-99999.);
@@ -660,7 +660,7 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
             double maxFraction2(-999.);
             double minFraction3(999.);
             double maxFraction3(-999.);
-	
+            
             const std::vector<TString>& v_configName2 = m_mvaConfigSwapped.at(step);
             
             // Set up canvas
@@ -701,19 +701,19 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                 outfile.open(fileString.Data());
                 for(const auto iter1 : m_combined.at(step)){
                     for(const auto iter2 : iter1.second){
-                    const TString configName = iter1.first + iter2.first;
-                    TH1* hist = iter2.second;
-                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
-                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
-                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
-                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
-                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                        const TString configName = iter1.first + iter2.first;
+                        TH1* hist = iter2.second;
+                        const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                        const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                        const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                        if(fraction1 < minFraction1) minFraction1 = fraction1;
+                        if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                        if(fraction2 < minFraction2) minFraction2 = fraction2;
+                        if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                        if(fraction3 < minFraction3) minFraction3 = fraction3;
+                        if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                        outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                               <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                     }
                 }
                 outfile.close();
@@ -726,19 +726,19 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                 outfile.open(fileString.Data());
                 for(const auto iter1 : m_combined.at(step)){
                     for(const auto iter2 : iter1.second){
-                    const TString configName = iter1.first + iter2.first;
-                    TH1* hist = iter2.second;
-                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
-                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
-                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
-                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
-                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                        const TString configName = iter1.first + iter2.first;
+                        TH1* hist = iter2.second;
+                        const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                        const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                        const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                        if(fraction1 < minFraction1) minFraction1 = fraction1;
+                        if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                        if(fraction2 < minFraction2) minFraction2 = fraction2;
+                        if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                        if(fraction3 < minFraction3) minFraction3 = fraction3;
+                        if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                        outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                               <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                     }
                 }
                 outfile.close();
@@ -751,29 +751,29 @@ void plotBestWeightHistos(std::map<TString, std::vector<TString> >& m_mvaConfigC
                 outfile.open(fileString.Data());
                 for(const auto iter1 : m_combined.at(step)){
                     for(const auto iter2 : iter1.second){
-                    const TString configName = iter1.first + iter2.first;
-                    TH1* hist = iter2.second;
-                    const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
-                    const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
-                    const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
-		    if(fraction1 < minFraction1) minFraction1 = fraction1;
-		    if(fraction1 > maxFraction1) maxFraction1 = fraction1;
-		    if(fraction2 < minFraction2) minFraction2 = fraction2;
-		    if(fraction2 > maxFraction2) maxFraction2 = fraction2;
-		    if(fraction3 < minFraction3) minFraction3 = fraction3;
-		    if(fraction3 > maxFraction3) maxFraction3 = fraction3;
-                    outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
-                           <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
+                        const TString configName = iter1.first + iter2.first;
+                        TH1* hist = iter2.second;
+                        const double fraction1 = hist->GetBinContent(2)/hist->GetBinContent(1)*100.;
+                        const double fraction2 = hist->GetBinContent(3)/hist->GetBinContent(1)*100.;
+                        const double fraction3 = hist->GetBinContent(4)/hist->GetBinContent(1)*100.;
+                        if(fraction1 < minFraction1) minFraction1 = fraction1;
+                        if(fraction1 > maxFraction1) maxFraction1 = fraction1;
+                        if(fraction2 < minFraction2) minFraction2 = fraction2;
+                        if(fraction2 > maxFraction2) maxFraction2 = fraction2;
+                        if(fraction3 < minFraction3) minFraction3 = fraction3;
+                        if(fraction3 > maxFraction3) maxFraction3 = fraction3;
+                        outfile<<std::setw(10)<<configName<<std::setw(10)<<fraction1
+                               <<std::setw(10)<<fraction2<<std::setw(10)<<fraction3<<std::endl;
                     }
                 }
                 outfile.close();
             }
             
-	    std::cout<<"\nExtreme results for combined trainings:\n"<<fileShort<<"\n"<<outputFolder<<" , "<<step<<" , "<<histNameBase<<"\n";
-	    std::cout<<"Fraction 1 (min, max): "<<minFraction1<<" , "<<maxFraction1<<"\n";
-	    std::cout<<"Fraction 2 (min, max): "<<minFraction2<<" , "<<maxFraction2<<"\n";
-	    std::cout<<"Fraction 3 (min, max): "<<minFraction3<<" , "<<maxFraction3<<"\n\n";
-	    
+            std::cout<<"\nExtreme results for combined trainings:\n"<<fileShort<<"\n"<<outputFolder<<" , "<<step<<" , "<<histNameBase<<"\n";
+            std::cout<<"Fraction 1 (min, max): "<<minFraction1<<" , "<<maxFraction1<<"\n";
+            std::cout<<"Fraction 2 (min, max): "<<minFraction2<<" , "<<maxFraction2<<"\n";
+            std::cout<<"Fraction 3 (min, max): "<<minFraction3<<" , "<<maxFraction3<<"\n\n";
+            
             // Scale histograms and get minimum and maximum value
             Double_t yMin(99999.);
             Double_t yMax(-99999.);
