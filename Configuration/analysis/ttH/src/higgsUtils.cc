@@ -22,7 +22,9 @@ std::vector<std::pair<TString, TString> > tth::nameStepPairs(const char* filenam
                                                              const std::vector<TString>& selectedSteps)
 {
     std::vector<std::pair<TString, TString> > result;
+    std::vector<TString> v_step;
     std::stringstream ss_step;
+    std::vector<TString> v_unselectedStep;
     std::stringstream ss_unselected;
     
     // Search for all steps
@@ -33,12 +35,18 @@ std::vector<std::pair<TString, TString> > tth::nameStepPairs(const char* filenam
         
         // Reject steps in case only selected steps should be chosen
         if(selectedSteps.size() && std::find(selectedSteps.begin(), selectedSteps.end(), step) == selectedSteps.end()){
-            ss_unselected<<step<<", ";
+            if(std::find(v_unselectedStep.begin(), v_unselectedStep.end(), step) == v_unselectedStep.end()){
+                ss_unselected<<step<<", ";
+                v_unselectedStep.push_back(step);
+            }
             continue;
         }
         
         // Add selection steps
-        ss_step<<step<<", ";
+        if(std::find(v_step.begin(), v_step.end(), step) == v_step.end()){
+            ss_step<<step<<", ";
+            v_step.push_back(step);
+        }
         result.push_back(std::make_pair(*i_objectName, step));
     }
     
