@@ -1014,8 +1014,8 @@ void histoBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
 //            "ttbarZ",
 //            "ttbarH125inclusiveBbbar",
 //            "ttbarH125inclusiveOther",
-//            "ttbarH125tobbbar",
-//            "ttbarsignalPlusBbbar",
+            "ttbarH125tobbbar",
+            "ttbarsignalPlusBbbar",
             "ttbarsignalPlusOther"
         };
     
