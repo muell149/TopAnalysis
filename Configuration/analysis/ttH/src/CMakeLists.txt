@@ -61,6 +61,7 @@ SET( ${PROJECT_NAME}_EXECUTABLES
   load_Analysis
   train_bdt_topSystemJetAssignment
   histo_bdt_topSystemJetAssignment
+  histo_mvaVariables_topSystemJetAssignment
   Histo
   )
 
