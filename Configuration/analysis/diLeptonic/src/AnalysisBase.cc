@@ -1347,25 +1347,58 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     }
     
     
+//     if(0){//print
+//          printf("****************************************************************************************************************\n");
+//                           printf("Event nr: %d\n",eventNumber_);
+//                           std::cout <<"Jets info:"<< std::endl;
+//                           for(int i=0;i<(int)jetBTagCSV.size();i++)
+//                           {
+//                                 std::cout << "jet " << i <<": ";printf("(Pt,eta,Phi)=(%f %f %f) w=%f \n",(*jets)[i].Pt(),(*jets)[i].Eta(),(*jets)[i].Phi(),jetBTagCSV.at(i));
+//                           }
+//                           
+//                           
+//                           std::cout << std::endl;
+//                           std::cout <<"  True info:"<< std::endl;
+//                           std::cout << "  tt     -> ";printf("(Mtt,Pt,eta,Phi)=(%f %f %f %f)\n",(GenTop_+GenAntiTop_).M(),(GenTop_+GenAntiTop_).Pt(),(GenTop_+GenAntiTop_).Eta(),(GenTop_+GenAntiTop_).Phi());
+//                           std::cout << "    top     -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenTop_.Pt(),GenTop_.Eta(),GenTop_.Phi());
+//                           std::cout << "      B     -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenB_.Pt(),GenB_.Eta(),GenB_.Phi());
+//                           std::cout << "      W+    -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenWPlus_.Pt(),GenWPlus_.Eta(),GenWPlus_.Phi());
+//                           std::cout << "        neutrino    -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenNeutrino_.Pt(),GenNeutrino_.Eta(),GenNeutrino_.Phi());
+//                           std::cout << "        Antilepton  -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenAntiLepton_.Pt(),GenAntiLepton_.Eta(),GenAntiLepton_.Phi());
+//                           std::cout << "    topbar  -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenAntiTop_.Pt(),GenAntiTop_.Eta(),GenAntiTop_.Phi());
+//                           std::cout << "      Bbar  -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenAntiB_.Pt(),GenAntiB_.Eta(),GenAntiB_.Phi());
+//                           std::cout << "      W-    -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenWMinus_.Pt(),GenWMinus_.Eta(),GenWMinus_.Phi());
+//                           std::cout << "        Antineutrino -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenAntiNeutrino_.Pt(),GenAntiNeutrino_.Eta(),GenAntiNeutrino_.Phi());
+//                           std::cout << "        lepton       -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenLepton_.Pt(),GenLepton_.Eta(),GenLepton_.Phi());
+//                           std::cout << std::endl;
+//                           
+//     }
+//     
     
     // 2 lines needed for OLD kinReco
-    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-    const int nSolution = sols.size();
+   const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+   const int nSolution = sols.size();
+    
     
     // 2 lines needed for NEW kinReco
 //    kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
 //    const int nSolution = kinematicReconstruction_->GetNSol();
     
-    
+   //////////kinematicReconstruction_->doJetsMerging(&jets,&jetBTagCSV);
+   
+   
     if(nSolution == 0) return false;
     
     // 1 line needed for OLD kinReco
-    const auto& sol = sols.at(0);
+     const auto& sol = sols.at(0);
     
     // 1 line needed for NEW kinReco
-//    const auto& sol = kinematicReconstruction_->GetSol();
+    // const auto& sol = kinematicReconstruction_->GetSol();
   
   
+   
+   
+   
     
     // Fill the results of the on-the-fly kinematic reconstruction
     if(useObjectStructs_){

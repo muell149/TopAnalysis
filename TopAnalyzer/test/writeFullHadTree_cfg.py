@@ -98,7 +98,6 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
         #'file:patTuple.root',
         #'file:patTuple_selected.root',
-        #'file:patTuple_selected_large.root',
         #'file:/tmp/eschliec/tmp.root',
         #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/209D26E9-AEE1-E111-BAA6-0030487D5D8D.root',
         #'/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/54145FEE-1AE2-E111-8B8E-003048C69408.root',
@@ -259,6 +258,7 @@ else:
 #process.readAK5PF = cms.EDAnalyzer( 'JetCorrectorDBReader'
 #                                    # below is the communication to the database 
 #                                  , payloadName    = cms.untracked.string('AK5PFchs')
+#                                  #, payloadName    = cms.untracked.string('AK5Calo')
 #                                    # this is used ONLY for the name of the printed txt files. You can use any name that you like, 
 #                                    # but it is recommended to use the GT name that you retrieved the files from.
 #                                  , globalTag      = cms.untracked.string('GR_R_42_V23')
@@ -675,7 +675,7 @@ if options.backgroundEstimation != 0:
         process.eventWeightPU.PUSource = PUSource
         process.analyzeWeights.puSrc = PUSource
         
-        process.analyzeJets.alternativeJets = ""
+        process.analyzeJets.alternativeJets = cms.InputTag("tightLeadingJets","calo")
 
         process.TFileService.fileName = 'QCDEstimation_2_'+options.eventFilter+'.root'
 
@@ -791,34 +791,33 @@ if(not options.pdfUn==2 and not options.eventFilter=='toyMC'):
             jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
             myGenJetCollection = cms.InputTag("ak5GenJets")
 
-        if not options.onlySkimming:
-            ## add AK5Calo Jets
-            preSeq = process.patDefaultSequence.copy()
-            from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
-            addJetCollection(process,cms.InputTag('ak5CaloJets'),
-                     'AK5', 'Calo',
-                     doJTA        = False,
-                     doBTagging   = False,
-                     jetCorrLabel = ('AK5Calo', cms.vstring(jecLevels)),
-                     doType1MET   = False,
-                     doL1Cleaning = False,
-                     doL1Counters = False,
-                     genJetCollection=myGenJetCollection,
-                     doJetID      = True,
-                     jetIdLabel   = "ak5",
-                     outputModules = []
-                     )
-            for mod in preSeq.moduleNames() :
-                process.patDefaultSequence.remove(getattr(process,mod))
-            
-            process.patJetsAK5Calo.addResolutions = False
-            process.patJetsAK5Calo.resolutions = cms.PSet()
-            process.patJetsAK5Calo.addTagInfos = False
-            process.patJetsAK5Calo.userData.userFloats.src = cms.VInputTag("")
-            process.patJetsAK5Calo.addDiscriminators = False
-            
-            process.selectedPatJetsAK5Calo.cut = 'pt > 10. & abs(eta) < 2.4'
-            process.p1.replace(process.leadingJetSelection, process.leadingJetSelection*process.patDefaultSequence)
+        ## add AK5Calo Jets
+        preSeq = process.patDefaultSequence.copy()
+        from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
+        addJetCollection(process,cms.InputTag('ak5CaloJets'),
+                 'AK5', 'Calo',
+                 doJTA        = False,
+                 doBTagging   = False,
+                 jetCorrLabel = ('AK5Calo', cms.vstring(jecLevels)),
+                 doType1MET   = False,
+                 doL1Cleaning = False,
+                 doL1Counters = False,
+                 genJetCollection=myGenJetCollection,
+                 doJetID      = True,
+                 jetIdLabel   = "ak5",
+                 outputModules = []
+                 )
+        for mod in preSeq.moduleNames() :
+            process.patDefaultSequence.remove(getattr(process,mod))
+        
+        process.patJetsAK5Calo.addResolutions = False
+        process.patJetsAK5Calo.resolutions = cms.PSet()
+        process.patJetsAK5Calo.addTagInfos = False
+        process.patJetsAK5Calo.userData.userFloats.src = cms.VInputTag("")
+        process.patJetsAK5Calo.addDiscriminators = False
+        
+        process.selectedPatJetsAK5Calo.cut = 'pt > 10. & abs(eta) < 2.4'
+        process.p1.replace(process.leadingJetSelection, process.leadingJetSelection*process.patDefaultSequence)
         
     ## load bugfix for wrongly generated MC files (MadGraph / Powheg + Pythia6)
     process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
@@ -956,6 +955,7 @@ if options.writeOutput:
                                                                                 #'keep *_eventWeightPU_*_*',
                                                                                 #'keep *_selectedPatJets_*_*',
                                                                                 'keep *_tightLeadingJets_*_*',
+                                                                                'keep *_selectedPatJetsAK5Calo__*',
                                                                                 #'keep *_selectedPatElectrons_*_*',
                                                                                 #'keep *_selectedPatMuons_*_*',
                                                                                 #'keep *_patMETs_*_*',

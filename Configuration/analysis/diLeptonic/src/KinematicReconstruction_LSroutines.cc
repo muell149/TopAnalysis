@@ -69,10 +69,29 @@ KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double ma
 
         for(int i=0;i<6;i++)hneutrino_E[i]= hvE[i];
 
-    //pol4_neutrinoPx = new TF1("pol4_neutrinoPx","pol4",-100,100);
-    //((TAttLine*)pol4_neutrinoPx->GetParent())->SetLineWidth(1);
     weight_option=0;
 }
+
+KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al, double mass_Wp, double mass_Wm, TH1F* hvE[], TH1F hneutrino)
+{
+    mt    = 172.5;
+    mtbar = 172.5;
+    mb    = 4.8;
+    mbbar = 4.8;
+    mw    = mass_Wp;
+    mwbar = mass_Wm; 
+    ml    = mass_l;
+    mal    = mass_al;
+    mv=0;
+    mav=0;
+
+        for(int i=0;i<6;i++)hneutrino_E[i]= hvE[i];
+        hnw_cuts= hneutrino;
+        
+    weight_option=0;
+
+}
+
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F hneutrino)
 {
@@ -93,6 +112,29 @@ KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double ma
     //((TAttLine*)pol4_neutrinoPx->GetParent())->SetLineWidth(1);
     weight_option=0;
 }
+
+KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F hcostheta, int index)
+{
+    mt=index;
+    
+    mt    = 172.5;
+    mtbar = 172.5;
+    mb    = 4.8;
+    mbbar = 4.8;
+    mw    = mass_Wp;
+    mwbar = mass_Wm; 
+    ml    = mass_l;
+    mal    = mass_al;
+    mv=0;
+    mav=0;
+    
+    hcosw= hcostheta;
+    
+    //pol4_neutrinoPx = new TF1("pol4_neutrinoPx","pol4",-100,100);
+    //((TAttLine*)pol4_neutrinoPx->GetParent())->SetLineWidth(1);
+    weight_option=0;
+}
+
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_top, double mass_b, double mass_w, double mass_l, double mass_al)
 {
@@ -231,14 +273,14 @@ void KinematicReconstruction_LSroutines::DoAll()
        //data_path_wneutrino_E.Append("/wneutrino_E.root");
        //TFile frootNeut("/data/user/dolinska/CMSSW_5_3_11/src/TopAnalysis/Configuration/analysis/diLeptonic/data/wneutrino_E.root");
        //TFile frootNeut(data_path_wneutrino_E);
-       double pt_bins[6]={0,210,240,330,510,1000};
+       ///double pt_bins[6]={0,210,240,330,510,1000};
         
         
 //         TFile frootNeut("/home/korol/top/weight/wneutrino_pt_eta.root");
 //         double pt_top_bins_2d[3]={0,80,150};
 //         double eta_top_bins_2d[4]={-5,-1,1,5};
 //         
-        TH1F * hvw=0;
+       // TH1F * hvw=0;
     /// ...
     
 
@@ -263,7 +305,7 @@ void KinematicReconstruction_LSroutines::DoAll()
                   
                 //...
                     double vw1=1,vw2=1;
-                    char hvw_name[20];
+                    //char hvw_name[20];
  //pt 1d                   
 //                         for(int i=0;i<5;i++)
 //                         {
@@ -293,61 +335,61 @@ void KinematicReconstruction_LSroutines::DoAll()
 //                         }
 
  //E 1d loaded inside
-/*                        for(int i=0;i<5;i++)
-                        {
-                            sprintf(hvw_name,"Eneu_true%d",i+1);
-                            if(top.E()>pt_bins[i]&&top.E()<=pt_bins[i+1])
-                                {
-                                    hvw = (TH1F*)frootNeut.Get(hvw_name);
-                                    vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
-                            }
-                            else if(top.E()>pt_bins[5])
-                            {
-                                hvw = (TH1F*)frootNeut.Get("Eneu_true6");
-                                vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
-                            }
-                            
-                            
-                            if(topbar.E()>pt_bins[i]&&topbar.E()<=pt_bins[i+1])
-                            {
-                                    hvw = (TH1F*)frootNeut.Get(hvw_name);
-                                    vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
-                            }
-                            else if(topbar.E()>pt_bins[5])
-                            {
-                                hvw = (TH1F*)frootNeut.Get("Eneu_true6");
-                                vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
-                            }
-                        }*/
+//                         for(int i=0;i<5;i++)
+//                         {
+//                             sprintf(hvw_name,"Eneu_true%d",i+1);
+//                             if(top.E()>pt_bins[i]&&top.E()<=pt_bins[i+1])
+//                                 {
+//                                     hvw = (TH1F*)frootNeut.Get(hvw_name);
+//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                             }
+//                             else if(top.E()>pt_bins[5])
+//                             {
+//                                 hvw = (TH1F*)frootNeut.Get("Eneu_true6");
+//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                             }
+//                             
+//                             
+//                             if(topbar.E()>pt_bins[i]&&topbar.E()<=pt_bins[i+1])
+//                             {
+//                                     hvw = (TH1F*)frootNeut.Get(hvw_name);
+//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                             }
+//                             else if(topbar.E()>pt_bins[5])
+//                             {
+//                                 hvw = (TH1F*)frootNeut.Get("Eneu_true6");
+//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                             }
+//                         }
        
 // E 1d loaded outside
        
-                        for(int i=0;i<5;i++)
-                        {
-                            if(top.E()>pt_bins[i]&&top.E()<=pt_bins[i+1])
-                                {
-                                    hvw = hneutrino_E[i];
-                                    vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
-                            }
-                            else if(top.E()>pt_bins[5])
-                            {
-                                hvw = hneutrino_E[5];
-                                vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
-                            }
-                            
-                            
-                            if(topbar.E()>pt_bins[i]&&topbar.E()<=pt_bins[i+1])
-                            {
-                                    hvw = hneutrino_E[i];
-                                    vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
-                            }
-                            else if(topbar.E()>pt_bins[5])
-                            {
-                                hvw = hneutrino_E[5];
-                                vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
-                            }
-                        }
-//        
+//                         for(int i=0;i<5;i++)
+//                         {
+//                             if(top.E()>pt_bins[i]&&top.E()<=pt_bins[i+1])
+//                                 {
+//                                     hvw = hneutrino_E[i];
+//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                             }
+//                             else if(top.E()>pt_bins[5])
+//                             {
+//                                 hvw = hneutrino_E[5];
+//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                             }
+//                             
+//                             
+//                             if(topbar.E()>pt_bins[i]&&topbar.E()<=pt_bins[i+1])
+//                             {
+//                                     hvw = hneutrino_E[i];
+//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                             }
+//                             else if(topbar.E()>pt_bins[5])
+//                             {
+//                                 hvw = hneutrino_E[5];
+//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                             }
+//                         }
+       
        
        
  //pt,eta 2d
@@ -394,8 +436,9 @@ void KinematicReconstruction_LSroutines::DoAll()
 //                             
 //                         }
 //                         
-                       TS_temp.vw=vw1*vw2;
+                    // TS_temp.vw=vw1*vw2;
                   //...
+                       
                        
   //neutrino 1d weight
 //                     double vw1=1,vw2=1;
@@ -403,7 +446,15 @@ void KinematicReconstruction_LSroutines::DoAll()
 //                             vw2=hnw_cuts.GetBinContent(hnw_cuts.FindBin(neutrinobar.E()));
 //                 TS_temp.vw=vw1*vw2;
   // ...                   
-                    
+   
+   
+  //neutrino 1d Eta weight
+//                             vw1=vw1*hnw_cuts.GetBinContent(hnw_cuts.FindBin(neutrino.Eta()));
+//                             vw2=vw2*hnw_cuts.GetBinContent(hnw_cuts.FindBin(neutrinobar.Eta()));
+//                 TS_temp.vw=vw1*vw2;
+  // ...                   
+     
+   
   //mbl 1d weight
 //                     double vw1=1,vw2=1;
 //                             vw1=hnw_cuts.GetBinContent(hnw_cuts.FindBin((b+neutrinobar).M()));
@@ -412,6 +463,8 @@ void KinematicReconstruction_LSroutines::DoAll()
   // ...   
                     
                     
+            
+                       
                 
 //              TS_temp.vw=Landau2D(neutrino.E(),neutrinobar.E());
                 
@@ -442,19 +495,39 @@ void KinematicReconstruction_LSroutines::DoAll()
                 TS_temp.neutrinobar = neutrinobar;
                 
                 TLorentzVector b_boost_top=b,bbar_boost_topbar=bbar;
-                b_boost_top.Boost(-top.BoostVector());
-                bbar_boost_topbar.Boost(-topbar.BoostVector());
+                    b_boost_top.Boost(-top.BoostVector());
+                    bbar_boost_topbar.Boost(-topbar.BoostVector());
+                TLorentzVector topbar_boost_top=topbar,top_boost_topbar=top;
+                    topbar_boost_top.Boost(-top.BoostVector());
+                    top_boost_topbar.Boost(-topbar.BoostVector());
+                
+                TLorentzVector l_boost_topbar=l,al_boost_top=al;
+                    al_boost_top.Boost(-top.BoostVector());
+                    l_boost_topbar.Boost(-topbar.BoostVector());
+                
                 TS_temp.cos_bTR_top = cos(top.Vect().Angle(b_boost_top.Vect()));
                 TS_temp.cos_bbarTR_topbar = cos(topbar.Vect().Angle(bbar_boost_topbar.Vect()));
                 
-                TLorentzVector top_boost=top,topbar_boost=topbar,b_boost=b;
-                top_boost.Boost(-tt.BoostVector());
-                topbar_boost.Boost(-tt.BoostVector());
+                TLorentzVector top_boost=top,topbar_boost=topbar,b_boost=b,bbar_boost=bbar;
+                
                 
                 TS_temp.ttpt_top=top_boost.Pt();
                 TS_temp.ttpt_topbar=topbar_boost.Pt();
                 
                 b_boost.Boost(-tt.BoostVector());
+                bbar_boost.Boost(-tt.BoostVector());
+             
+                TS_temp.costheta=cos(topbar_boost_top.Vect().Angle(b_boost_top.Vect()));
+                TS_temp.costhetabar=cos(top_boost_topbar.Vect().Angle(bbar_boost_topbar.Vect()));
+                
+            //          costheta 1d weight
+//                             vw1=hcosw.GetBinContent(hcosw.FindBin(TS_temp.costheta));
+//                             vw2=hcosw.GetBinContent(hcosw.FindBin(TS_temp.costhetabar));
+//                             TS_temp.vw=vw1*vw2;
+              //          ...                         
+           
+                
+                
                 b_boost.Boost(-top_boost.BoostVector());
                 TS_temp.cos1 = cos(top_boost.Vect().Angle(b_boost.Vect()));
                 
@@ -466,9 +539,23 @@ void KinematicReconstruction_LSroutines::DoAll()
                 TS_temp.cos2 = cos(w_boost.Vect().Angle(al_boost.Vect()));
                 TS_temp.Mtt = tt.M();
                 
+                TS_temp.mttw = 1.0/TS_temp.Mtt;
+                
+                
+                
+                //TS_temp.vw = 1.0/(neutrino.Pt()+neutrinobar.Pt());
+                
+                
+                
+                vw1=4*mt*al_boost_top.E()*(mt*mt-mb*mb-2*mt*al_boost_top.E())/(pow((mt*mt-mb*mb),2)+mw*mw*(mt*mt-mb*mb)-2*pow(mw,4));
+                vw2=4*mt*l_boost_topbar.E()*(mt*mt-mb*mb-2*mt*l_boost_topbar.E())/(pow((mt*mt-mb*mb),2)+mwbar*mwbar*(mt*mt-mb*mb)-2*pow(mwbar,4));
+                
+                TS_temp.lepEw=vw1*vw2;
+                
                 TS_temp.mbl    = (b+al).M();
                 TS_temp.mblbar = (bbar+l).M();
                 
+                TS_temp.vw=TS_temp.mttw;
                 
                 //if((fabs(top.M()-mt)+fabs(topbar.M()-mtbar))<0.01)
                 ttSol.push_back(TS_temp);
