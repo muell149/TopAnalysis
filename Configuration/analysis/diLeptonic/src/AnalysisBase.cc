@@ -1376,13 +1376,13 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //     
     
     // 2 lines needed for OLD kinReco
-//    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-//    const int nSolution = sols.size();
+   const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+   const int nSolution = sols.size();
     
     
     // 2 lines needed for NEW kinReco
-   kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-   const int nSolution = kinematicReconstruction_->GetNSol();
+//    kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+//    const int nSolution = kinematicReconstruction_->GetNSol();
     
    //////////kinematicReconstruction_->doJetsMerging(&jets,&jetBTagCSV);
    
@@ -1390,10 +1390,10 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     if(nSolution == 0) return false;
     
     // 1 line needed for OLD kinReco
-//      const auto& sol = sols.at(0);
+     const auto& sol = sols.at(0);
     
     // 1 line needed for NEW kinReco
-    const auto& sol = kinematicReconstruction_->GetSol();
+    // const auto& sol = kinematicReconstruction_->GetSol();
   
   
    
