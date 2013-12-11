@@ -187,7 +187,7 @@ void createNNLOplot(TString theory="ahrens")
     for(unsigned int i=0; i<recoBins_.size(); ++i){
       i==0 ? std::cout << "(" : std::cout << ", ";
       std::cout << recoBins_[i];
-      if(i==recoBins_.size()-1) std:cout << ")" << std::endl;
+      if(i==recoBins_.size()-1) std::cout << ")" << std::endl;
     }
     // check if you need to divide by binwidth
     if(std::abs(1.-integralRawTheory)<0.03){
@@ -237,16 +237,20 @@ void createNNLOplot(TString theory="ahrens")
     TH1F* binnedPlot=new TH1F(name, name, bins_[variable].size()-1, &bins_[variable][0]);
     for(int bin=1; bin<=hist->GetNbinsX(); ++bin){
       double y=hist->GetBinContent(bin)*hist->GetBinWidth(bin);
-      double xlow=hist->GetBinLowEdge(bin);
+      double xlow =hist->GetBinLowEdge(bin);
       double xhigh=hist->GetBinLowEdge(bin+1);
       // search corresponding bin in rebinned curve
       bool found=false;
-      for(int binRebinned=1; binRebinned<=binnedPlot->GetNbinsX(); ++binRebinned){
+      //std::cout << "xlow: " << xlow << ", xhigh: " << xhigh << std::endl; // FIXME
+      for(int binRebinned=0; binRebinned<=binnedPlot->GetNbinsX()+1; ++binRebinned){
 	if(binnedPlot->GetBinLowEdge(binRebinned)<=xlow&&binnedPlot->GetBinLowEdge(binRebinned+1)>=xhigh){
 	  found=true;
 	  binnedPlot->SetBinContent(binRebinned, binnedPlot->GetBinContent(binRebinned)+y);
 	  break;
 	}
+	//else{
+	//  std::cout << "not in: " << binnedPlot->GetBinLowEdge(binRebinned) << ".." << binnedPlot->GetBinLowEdge(binRebinned+1)<< std::endl;
+	//}
       }
       // --------------------
       // use linear interpolation for edge bins
@@ -315,6 +319,9 @@ void createNNLOplot(TString theory="ahrens")
 	binnedPlot->SetBinContent(binHigh, binnedPlot->GetBinContent(binHigh)+contributionUpperBin);
       }
     }
+    // ensure over/underflow is 0
+    binnedPlot->SetBinContent(0, 0.);
+    binnedPlot->SetBinContent(binnedPlot->GetNbinsX()+1, 0.);
     // ensure normalization
     binnedPlot->Scale(1./(binnedPlot->Integral(0.,binnedPlot->GetNbinsX()+1)));
     // divide by binwidth

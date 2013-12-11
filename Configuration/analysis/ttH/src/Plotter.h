@@ -70,7 +70,7 @@ private:
     void drawCmsLabels(const int cmsprelim=1, const double& energy=8, const double& textSize=0.04);
 
     /// Draw signal significance label over the plot
-    TPaveText* drawSigSign(TH1* signal, TH1* bkg, float Xmin,  float Xmax, float yOffset = 0.f, std::string sLabel = "");
+    TPaveText* drawSignificance(TH1* signal, TH1* bkg, float Xmin,  float Xmax, float yOffset = 0.f, std::string sLabel = "");
 
 
 

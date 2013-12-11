@@ -182,13 +182,17 @@ namespace semileptonic {
 			     /*47:*/ sysGenPowhegHerwig,         /*48:*/ ENDOFSYSENUM, 
 			     /*49:*/ sysTest, 			 /*50:*/ sysTestMCatNLO,             
 			     /*51:*/ sysTestPowheg,     	 /*52:*/ sysTestPowhegHerwig,        
-			     /*53:*/ ENDOFSYSENUM2
+			     /*53:*/ ENDOFSYSENUM2,
+			     sysVjetsUp, sysVjetsDown,
+			     sysBRUp   , sysBRDown
   };
 
   // ============================
   //  Numerical Constants
   // ============================
-
+  // draw preliminary label for all plots?
+  bool prelim=true;
+  
   //const double ttbarCrossSection=234;                      // approx.NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
   //const double ttbarCrossSectionError=sqrt(12.*12.+((10.+7.)/2.)*((10.+7.)/2.)); // Scale and PDF uncertainties on NNLO value
                                                              // --> the scale contributions has been symetrized
@@ -208,11 +212,73 @@ namespace semileptonic {
   const double constLumiElec = 19712.0; // luminosity of Jan22ReReco ABCD dataset, see https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM, LUM-13-001
   const double constLumiMuon = 19712.0; // see above
   
-  const double BRPDG=0.145888;
+  const double BRwlnu   =0.1080;
+  const double BRwlnuUnc=0.0009;
+  const double BRwqq    =0.6760;
+  const double BRwqqUnc =0.0027;
 
   // ============== 
   //  Functions
   // ============== 
+
+  double BRPDG(int sys=sysNo)
+  {
+    // This function returns the PDG BR for ttbar->e/mu+jets=2*[BR(W->lnu)*BR(W->qq)]
+    // modified quantities: none
+    // used quantities: BRwlnu, BRwlnuUnc, BRwqq, BRwqqUnc
+    // used enumerators: systematicVariation
+    double out = 2.;
+    if(     sys==sysBRUp  ) out*=(BRwlnu+BRwlnuUnc);
+    else if(sys==sysBRDown) out*=(BRwlnu-BRwlnuUnc);
+    else out*=BRwlnu;
+    if(     sys==sysBRUp  ) out*=(BRwqq+BRwqqUnc  );
+    else if(sys==sysBRDown) out*=(BRwqq-BRwqqUnc  );
+    else out*=BRwqq;
+    return out;
+  }
+
+  double BRSF(int sys=sysNo, TString finalState="ljets")
+  {
+    // This function returns event SFs to get to the PDG 
+    // BR for ttbar decays [BR(W->lnu)*BR(W->qq)]
+    // modified quantities: none
+    // used quantities: BRwlnu, BRwlnuUnc, BRwqq, BRwqqUnc
+    // used enumerators: systematicVariation
+    // finalState="ljets","alljets","dilepton"
+    double out = 1.; 
+
+    // BR W-> lnu
+    double wlnuSF=3./(1./3.); // 3 leptons / (W->lnu BR used in simulation)
+    if(     sys==sysBRUp  ) wlnuSF*=(BRwlnu+BRwlnuUnc);
+    else if(sys==sysBRDown) wlnuSF*=(BRwlnu-BRwlnuUnc);
+    else wlnuSF*=BRwlnu;
+    // BR W->qq
+    double wqqSF=1./(2./3.); // 1. / (W->all qqbar BR used in simulation)
+    if(     sys==sysBRUp  ) wqqSF*=(BRwqq+BRwqqUnc  );
+    else if(sys==sysBRDown) wqqSF*=(BRwqq-BRwqqUnc  );
+    else wqqSF*=BRwqq;
+    // SF for final state 
+    if(     finalState=="ljets"   ) out*=(wlnuSF*wqqSF );
+    else if(finalState=="alljets" ) out*=(wqqSF *wqqSF );
+    else if(finalState=="dilepton") out*=(wlnuSF*wlnuSF);
+    else{
+      std::cout << "ERROR in BRSF: unknow input finalState=" << finalState << std::endl;
+      exit(0);
+    }
+    return out;
+  }
+
+  double BRSFBG(int sys=sysNo, double fracLjets=0.6, double fracDilep=0.4, double fracAllHad=0.){
+    // This function returns event SFs to get to the PDG 
+    // BR for ttbar a mixed sample of ttbar events specified
+    // via fracLjets, fracDilep & fracAllHad
+    // modified quantities: none
+    // used functions: BRSF
+    // used enumerators: systematicVariation
+    // NOTE: the 60%l+jets and 40%dilepton composition 
+    // corresponds to the 8TeV doubleKinFit+prob analysis
+    return fracLjets*BRSF(sys,"ljets")+fracDilep*BRSF(sys,"dilepton")+fracAllHad*BRSF(sys,"alljets");
+  }
 
   TString sysLabel(unsigned int sys)
   {
@@ -418,10 +484,6 @@ namespace semileptonic {
     //if(sys==sysMuEffSFDown) result-=errorDown;
     return result;
   }
-  
-  // BR correction for ttbar->lnuqq'bb'
-  // used for ttbar SG and BG (which is mainly from tau decays)
-  double BRcorrectionSemileptonic = 0.985608;
   
   void histogramStyle(TH1& hist, int sampleType, bool filled=true, double markersize=1.2, unsigned int color=0)
   {
@@ -787,8 +849,8 @@ namespace semileptonic {
     TString comE="8";
     if(sevenTeV) comE="7";
 
+    if(cmssimulation) extension+=" Simulation";
     if(cmsprelim  ) extension+=" Preliminary";
-    else if(cmssimulation) extension+=" Simulation";
     if(privateWork) extension+=" (Private Work)";
     
     if (cmssimulation||luminosity==0.)
@@ -850,10 +912,10 @@ namespace semileptonic {
     // this function derives the lumiweight for every standard MC
     // sample "sample" based on the theoretical cross section, the
     // number of generated events and the chosen "luminosity"
-    // Furthermore, the BR correction is considered for ttbar signal
+    // Furthermore, the BR correction is considered for ttbarSG/BG
     // NOTE: enter luminosity IN / pb!!!!
     // modified quantities: NONE
-    // used functions: BRcorrectionSemileptonic
+    // used functions: BRSFBG, BRSF
     // used enumerators: samples, systematicVariation
     TString calledfunction="lumiweight(unsigned int sample=";
     calledfunction+=sample;
@@ -1128,8 +1190,9 @@ namespace semileptonic {
       if(sample==kBkg&&decayChannel.compare("muon"    )==0) weight*=1.02521244/1.02378495;//3151.23/3196.51;
     }
     if(verbose>1) std::cout << "weight before scaling: " << weight2 << std::endl;
-    // e1) for ttbar->lnu: BR correction
-    if((sample==kSig)||(sample==kSigPow)||(sample==kSigMca)||(sample==kSigPowHer)) weight *= BRcorrectionSemileptonic;
+    // e1) for ttbar/W BR correction
+    if((sample==kSig)||(sample==kSigPow)||(sample==kSigMca)||(sample==kSigPowHer)) weight *= BRSF  (kSys);
+    if((sample==kBkg)||(sample==kBkgPow)||(sample==kBkgMca)||(sample==kBkgPowHer)) weight *= BRSFBG(kSys);
     // e2) systematic higher/lower BG
     double scale=0;
     // (i) more/less DiBoson
@@ -1150,7 +1213,12 @@ namespace semileptonic {
       if(kSys==sysSTopUp  ) weight*=(1.0+scale);
       if(kSys==sysSTopDown) weight*=(1.0-scale);
     }
-    if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
+    if(sample==kWjets||sample==kZjets){
+      scale=1.0;
+      if(kSys==sysVjetsUp  ) weight*=(1.0+scale);
+      if(kSys==sysVjetsDown) weight*=(1.0-scale);
+      if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
+    }
     // printout for systematic variation
     if(verbose==1){
       std::cout << "weight";
@@ -1162,6 +1230,7 @@ namespace semileptonic {
       if(verbose>1) std::cout << "ratio: " << weight/weight2 << std::endl;
       if(weight!=weight2&&((sample==kSig)||(sample==kSigPow)||(sample==kSigPowHer)||(sample==kSigMca))) std::cout << "(BR correction applied)" << std::endl;
     }
+
     // return result
     if(sample!=kData&&weight==1){
       std::cout << "WARNING: function lumiweight";
@@ -1449,7 +1518,7 @@ namespace semileptonic {
     //                              (needed to handle systematic variations where foldername in data and MC is different)
     // "SSV": for all btagging plots SSV control plots are used instead of the default (CSV) plots
     // "ignorePartNameInMC": like redundantPartOfNameInData, but for MC instead of data
-    //  "ignorePartNameInNonTTbarSG": like ignorePartNameInMC, but for non ttbar MC only, expects the format plotname/ignoreString
+    // "ignorePartNameInNonTTbarSG": like ignorePartNameInMC, but for non ttbar MC only, expects the format plotname/ignoreString
 
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1590,8 +1659,8 @@ namespace semileptonic {
 	      emptyPlot=false;
 	      if(!emptyPlot){
 		// save plot in corresponding map
-		if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotname));
-		if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotname));
+		if(plot<N1Dplots ) histo_ [plotList_[plot]][sample] = (TH1F*)(files_[sample]->Get(plotname)->Clone());
+		if(plot>=N1Dplots) histo2_[plotList_[plot]][sample] = (TH2F*)(files_[sample]->Get(plotname)->Clone());
 		// count every existing 2D plot (every sample is counted separetly as it will be drawn into an own canvas)
 		if(plot>=N1Dplots) Nplots++;
 	      }
@@ -2570,7 +2639,8 @@ namespace semileptonic {
     Int_t    logx  = myStyle.GetOptLogx();
     Double_t left  = myStyle.GetPadLeftMargin();
     Double_t right = myStyle.GetPadRightMargin();
-    
+    if(!histDenominator->GetXaxis()->GetNoExponent()&&TString(histDenominator->GetName()).Contains("shift")&&(TString(histDenominator->GetName()).Contains("Eta")||TString(histDenominator->GetName()).Contains("Phi"))&&!(TString(histDenominator->GetName()).Contains("Nu"))) right=0.11;
+
     // y:x size ratio for canvas
     double canvAsym = 4./3.;
     // ratio size of pad with plot and pad with ratio
@@ -2634,7 +2704,7 @@ namespace semileptonic {
       ratio->GetYaxis()->SetTickLength(0.03);
       ratio->GetYaxis()->SetNdivisions(ndiv);
       ratio->GetXaxis()->SetRange(histDenominator->GetXaxis()->GetFirst(), histDenominator->GetXaxis()->GetLast());
-      ratio->GetXaxis()->SetNoExponent(true);
+      ratio->GetXaxis()->SetNoExponent(histDenominator->GetXaxis()->GetNoExponent());
       // delete axis of initial plot
       histDenominator->GetXaxis()->SetLabelSize(0);
       histDenominator->GetXaxis()->SetTitleSize(0);
@@ -2770,7 +2840,7 @@ namespace semileptonic {
     else if(variable == "bbbarMass"    ) return "m^{b#bar{b}}"+strUnitGeV;
     else if(variable == "lbMass"       ) return "m^{lb}"+strUnitGeV;
     else if(variable == "Njets"        ) return "N_{jets} (p_{T}>30 GeV, |#eta|<2.4)";
-    else if(variable == "rhos"         ) return "#rho_{S}=2*170GeV/m(t#bar{t}+1jet)";
+    else if(variable == "rhos"         ) return "#rho_{S}= #frac{#scale[0.6]{2#upoint170 GeV}}{#scale[0.6]{m(t#bar{t}+1jet)}}";
     else return "Default Label for variable "+variable;
   }
 
@@ -3274,7 +3344,8 @@ namespace semileptonic {
       // close and delete input files
       for(std::map<unsigned int, TFile*>::const_iterator file=files_.begin(); file!=files_.end(); ++file){
 	if(file->second){
-	  file->second->Close();	  delete file->second;
+	  file->second->Close();	  
+	  delete file->second;
 	}
       }
     }
@@ -3357,7 +3428,7 @@ namespace semileptonic {
     // used enumerators:    samples, systematicVariation, 
 
     // internal configurations
-    int verbose=0;  // printout within makeTheoryUncertaintyBands
+    int verbose =1; // printout within makeTheoryUncertaintyBands
     int verbose2=0; // argument passed to called functions
     unsigned int sysNoBG =42;
     unsigned int sysNoAll=42*42;
@@ -3369,8 +3440,9 @@ namespace semileptonic {
     // WARNING: systematics are expected to be listed as up/down pairs in this order!!!
     if(verbose>0) std::cout << std::endl << "A collect relevant systematics" << std::endl;
     std::vector<int> RelevantSys_;
-    int sysList[ ] = { sysTopMatchUp, sysTopMatchDown, sysTopScaleUp, sysTopScaleDown, sysTopMassUp, sysTopMassDown };
-    //int sysList[ ] = { sysJERUp, sysJERDown };
+    //int sysList[ ] = { sysHadUp, sysHadDown};
+    //int sysList[ ] = { sysTopMatchUp, sysTopMatchDown, sysTopScaleUp, sysTopScaleDown, sysTopMassUp, sysTopMassDown};
+    int sysList[ ] = { sysLumiUp, sysLumiDown, sysTopMatchUp, sysTopMatchDown, sysTopScaleUp, sysTopScaleDown, sysTopMassUp, sysTopMassDown, sysJESUp, sysJESDown ,sysJERUp, sysJERDown, sysPUUp, sysPUDown, sysLepEffSFNormUp, sysLepEffSFNormDown, sysLepEffSFShapeUpEta, sysLepEffSFShapeDownEta, sysLepEffSFShapeUpPt, sysLepEffSFShapeDownPt, sysBtagSFUp, sysBtagSFDown, sysBtagSFShapeUpPt65, sysBtagSFShapeDownPt65, sysBtagSFShapeUpEta0p7, sysBtagSFShapeDownEta0p7, sysHadUp, sysHadDown};
     RelevantSys_.insert(RelevantSys_.begin(), sysList, sysList+ sizeof(sysList)/sizeof(int));
     if(verbose>1){
       std::cout << "considered systematics: " << std::endl;
@@ -3410,26 +3482,38 @@ namespace semileptonic {
     }
     
     // C Get ttbar systematic shifted plots
-    if(verbose>0) std::cout << std::endl << "C Get ttbar systematic shifted plots" << std::endl;
+    if(verbose>0) std::cout << std::endl << "C Get ttbar systematic shifted plots (note: takes centuries)" << std::endl;
     // loop systematics
     for(unsigned int sys=0; sys<RelevantSys_.size(); ++sys){
+      if(verbose==1) std::cout << ".";
       int sysNow=RelevantSys_[sys];
-      if(verbose>1) std::cout << "- " << sysLabel(sysNow) << ":" << std::endl;
+      // special treatment for hadronization uncertainty
+      TString ttbarMC="Madgraph";
+      int sysNow2=sysNow;
+      if(     sysNow==sysHadUp  ){ sysNow2=sysNo; ttbarMC="Mcatnlo";}
+      else if(sysNow==sysHadDown){ sysNow2=sysNo; ttbarMC="Powheg" ;}
+      if(verbose>1) std::cout << "- " << sysNow << ":" << std::endl;
       // c1 get files
       if(verbose>1) std::cout << "c1 get rootfiles" << std::endl;
       std::map<unsigned int, TFile*> filesMu_, filesEl_;
-      filesMu_ = getStdTopAnalysisFiles(inputFolder, sysNow, dataFileMu, "muon"    , "Madgraph");
-      filesEl_ = getStdTopAnalysisFiles(inputFolder, sysNow, dataFileEl, "electron", "Madgraph");
+      filesMu_ = getStdTopAnalysisFiles(inputFolder, sysNow2, dataFileMu, "muon"    , "Madgraph");
+      filesEl_ = getStdTopAnalysisFiles(inputFolder, sysNow2, dataFileEl, "electron", "Madgraph");
       // c2 get plots 
       if(verbose>1) std::cout << "c2 get all plots" << std::endl;
       std::map< TString, std::map <unsigned int, TH1F*> > histoEl_ , histoMu_, histoComb_;
       std::map< TString, std::map <unsigned int, TH2F*> > histo2El_, histo2Mu_, histo2Comb_;
+      // store plots NOT into the files
+      gROOT->cd();
+      // get plots
       getAllPlots(filesEl_, plotListEl_, histoEl_, histo2El_, N1Dplots, Nplots, verbose2, "electron", &vecRedundantPartOfNameInData, false);
       getAllPlots(filesMu_, plotListMu_, histoMu_, histo2Mu_, N1Dplots, Nplots, verbose2, "muon"    , &vecRedundantPartOfNameInData, false);
+      // close files
+      closeStdTopAnalysisFiles(filesMu_);
+      closeStdTopAnalysisFiles(filesEl_);
       // c3 lumi scale
       if(verbose>1) std::cout << "c3 lumiscaling" << std::endl;
-      scaleByLuminosity(plotListMu_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose2, sysNow, "muon"    , "Madgraph");
-      scaleByLuminosity(plotListEl_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose2, sysNow, "electron", "Madgraph");
+      scaleByLuminosity(plotListMu_, histoMu_, histo2Mu_, N1Dplots, luminosityMu, verbose2, sysNow2, "muon"    , "Madgraph");
+      scaleByLuminosity(plotListEl_, histoEl_, histo2El_, N1Dplots, luminosityEl, verbose2, sysNow2, "electron", "Madgraph");
       // c4 add channels
      if(verbose>1) std::cout << "c4 add mu and el channel plots" << std::endl;
       // loop samples
@@ -3481,23 +3565,24 @@ namespace semileptonic {
 	  int reBinFactor=roundToInt((histoComb_[plotName][kSig]->GetNbinsX())/(histo_[plotName][sysNo]->GetNbinsX()));
 	  if(reBinFactor>1){
 	    equalReBinTH1(reBinFactor, histoComb_, plotName, kSig);
-	    equalReBinTH1(reBinFactor, histoComb_, plotName, kBkg);
+	    if(histoSys_[plotName].count(kBkg)>0) equalReBinTH1(reBinFactor, histoComb_, plotName, kBkg);
 	  }
 	  // store Plot
 	  histoSys_[plotName][sysNow]     =(TH1F*)histoComb_[plotName][kSig]->Clone();
-	  histoSys_[plotName][sysNow]->Add((TH1F*)histoComb_[plotName][kBkg]->Clone());
+	  if(histoSys_[plotName].count(kBkg)>0) histoSys_[plotName][sysNow]->Add((TH1F*)histoComb_[plotName][kBkg]->Clone());
 	  // ensure same normalization as in sysNo sample
 	  // (N.B.: was scales to inclusive cross section derived from data)	  
 	  histoSys_[plotName][sysNow]->Scale((histoSys_[plotName][sysNo]->Integral(0,histoSys_[plotName][sysNo]->GetNbinsX()+1))/(histoSys_[plotName][sysNow]->Integral(0,histoSys_[plotName][sysNow]->GetNbinsX()+1)));
 	}
       } // for plots
     } // end loop systematics
-    
+    if(verbose==1) std::cout << std::endl;
+
     // D Symmetrize and Combine Variations, create error band  
     if(verbose>0) std::cout << std::endl << "D Symmetrize and Combine Variations, create error band" << std::endl;    
     // loop plots
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
-      // mane of plot
+      // name of plot
       TString plotName = plotList_[plot];
       // debug output
       if(verbose>1) std::cout << "- plot #" << plot+1 << "/" << plotList_.size() << ": " << plotName;
@@ -3535,6 +3620,12 @@ namespace semileptonic {
 		  relDiffDn*=SF_TopMassDownUncertainty;
 		  relDiffUp*=SF_TopMassUpUncertainty;
 		}
+		// special treatment for hadronization uncertainty
+		if(sys==sysHadDown||sys==sysHadUp){
+		  relDiffUp=std::abs((NttbarSysUp-NttbarSysDn)/(NttbarSysNo+NBGSysNo));
+		  relDiffDn=relDiffUp;
+		}
+		// collect all unecrtainties
 		uncUp+=relDiffUp*relDiffUp;
 		uncDn+=relDiffDn*relDiffDn;
 	      } // end if modulo 2 - processing Dn systematics
@@ -3547,8 +3638,7 @@ namespace semileptonic {
 	} // end loop bins
       } // end if plot exists
       else if(verbose>1) std::cout << " (skipped)" << std::endl;
-    } // end loop plots
-    
+    } // end loop plots    
   }
 
   // ===========================================================================================
@@ -4193,6 +4283,9 @@ namespace semileptonic {
 	}
 	result= reBinTH1FIrregularNewBinning(load, binning_[plotname3] , plotname3, false);
       }
+      // force under/ and overflow bins to be empty
+      result->SetBinContent(0, 0.);
+      result->SetBinContent(result->GetNbinsX()+1, 0.);
     }
     // rename
     TString name=plotname2;
@@ -4679,6 +4772,34 @@ namespace semileptonic {
     }
 
 
+    TString pseudoDataFileName(TString closureTestSpecifier, std::string decayChannel = "combined"){
+      // this function returns k/value for SVD 
+      // unfolding for the corresponding variable
+      // modified quantities: NONE
+      // used functions: NONE
+      // used enumerators: NONE
+      // closureTestSpecifier: = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
+
+      TString out="";
+      // decay channel label
+      if(     decayChannel.compare("muon"    )==0) out+="muon"    ;
+      else if(decayChannel.compare("electron")==0) out+="electron";
+      //else if(decayChannel.compare("combined")==0) out+="combined";
+      else{
+	std::cout << "ERROR in pseudoDataFile, unknown input decayChannel=" << decayChannel << std::endl;
+	exit(0);
+      }
+      // closure test label
+      if      (closureTestSpecifier.Contains("NoDistort"    )) out+="PseudoData19712pb8TeV.root";
+      else if (closureTestSpecifier.Contains("topPtUp"      )) out+="PseudoData19712pbReweightedtopPtUp8TeV.root";
+      else if (closureTestSpecifier.Contains("topPtDown"    )) out+="PseudoData19712pbReweightedtopPtDown8TeV.root";
+      else if (closureTestSpecifier.Contains("ttbarMassUp"  )) out+="PseudoData19712pbReweightedttbarMassUp8TeV.root";
+      else if (closureTestSpecifier.Contains("ttbarMassDown")) out+="PseudoData19712pbReweightedttbarMassDown8TeV.root";
+      else if (closureTestSpecifier.Contains("data"         )) out+="PseudoData19712pbReweighteddata8TeV.root";
+      else if (closureTestSpecifier.Contains("1000"         )) out+="PseudoData19712pbandM1000W100Zprime8TeV.root";
+      return out;
+    }
+    
     // ===============================================================
     // ===============================================================
 

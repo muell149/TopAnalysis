@@ -38,17 +38,10 @@
 
 #include "TopAnalysis/HiggsUtils/interface/JetProperties.h"
 
-//my include files....
-#include <iostream>
-#include <sstream>
-
 
 //
 // class declaration
 //
-
-typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > LV;
-typedef std::vector<LV> VLV;
 
 class JetPropertiesProducer : public edm::EDProducer {
    public:
@@ -112,10 +105,10 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     iEvent.getByLabel(jets, jetHandle);
     
     
-	for(std::vector<pat::Jet>::const_iterator i_jet = jetHandle->begin(); i_jet != jetHandle->end(); ++i_jet){
+    for(std::vector<pat::Jet>::const_iterator i_jet = jetHandle->begin(); i_jet != jetHandle->end(); ++i_jet){
         
-	std::vector<LV> jetTrack;
-	std::vector<int> jetTrackCharge;
+        std::vector<math::PtEtaPhiMLorentzVectorD> jetTrack;
+        std::vector<int> jetTrackCharge;
         // Jet charge as given by PAT (weighted by global pt)
         const double jetChargeGlobalPtWeighted(i_jet->jetCharge());
         
@@ -123,8 +116,8 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
         // Jet charge as weighted sum
    	    // weight = projection of charged pflow object momentum on jet axis 
         double jetPx = i_jet->px();
-    	double jetPy = i_jet->py();
-    	double jetPz = i_jet->pz();
+        double jetPy = i_jet->py();
+        double jetPz = i_jet->pz();
         
         const std::vector<reco::PFCandidatePtr> pfConstituents = i_jet->getPFConstituents();
         
@@ -135,10 +128,10 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
         for(std::vector<reco::PFCandidatePtr>::const_iterator i_candidate = pfConstituents.begin(); i_candidate != pfConstituents.end(); ++i_candidate){
             const int charge = (*i_candidate)->charge();
 	    
-	    if(charge == 0) continue;
+            if(charge == 0) continue;
 	    
-	    jetTrack.push_back( (*i_candidate)->polarP4());
-	    jetTrackCharge.push_back(charge);
+            jetTrack.push_back( (*i_candidate)->polarP4());
+            jetTrackCharge.push_back(charge);
 	    
             const double constituentPx = (*i_candidate)->px();
             const double constituentPy = (*i_candidate)->py();
@@ -147,7 +140,7 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
             
             sumMomentum += product;
             sumMomentumQ += static_cast<double>(charge)*product;
-        }//end looping over PF candidates
+        }
         
         const double jetChargeRelativePtWeighted(sumMomentum>0 ? sumMomentumQ/sumMomentum : 0);
         
@@ -162,7 +155,7 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
             jetAssociatedParton = genParton->polarP4();
         }
         
-        JetProperties jetProperties(jetChargeGlobalPtWeighted, jetChargeRelativePtWeighted, jetAssociatedPartonPdgId, jetAssociatedParton, jetTrack, jetTrackCharge/*,jetTrackIndex*/);
+        JetProperties jetProperties(jetChargeGlobalPtWeighted, jetChargeRelativePtWeighted, jetAssociatedPartonPdgId, jetAssociatedParton, jetTrack, jetTrackCharge);
         v_jetProperties->push_back(jetProperties);
         
         edm::LogVerbatim log("JetPropertiesProducer");
@@ -174,12 +167,12 @@ JetPropertiesProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
         log<<"Jet associated parton eta: "<<jetProperties.jetAssociatedParton().eta()<<"\n";
         log<<"Jet associated parton phi: "<<jetProperties.jetAssociatedParton().phi()<<"\n";
         log<<"Jet associated parton mass: "<<jetProperties.jetAssociatedParton().M()<<"\n";
-        log<<"   --------------------------   \n\n";
-    
-       jetTrackCharge.clear();
-       jetTrack.clear();
-		
-	}
+        log<<"   --------------------------   \n\n";    
+        
+        jetTrackCharge.clear();
+        jetTrack.clear();
+        
+    }
     
     iEvent.put(v_jetProperties);
     

@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=false, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
+void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, bool useBCC=false){
 
   // ============================
   //  Systematic Variations:
@@ -74,10 +74,6 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=false, 
   TString universalplotLabel = extrapolate ? "FullPS" : LV+"LvPS";  
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2012";
-  // for closure test if desired
-  TString closureLabel = "";
-  if      (closureTestSpecifier.Contains("Up") || closureTestSpecifier.Contains("Down") || closureTestSpecifier.Contains("NoDistort")) closureLabel = "SysDistort"+closureTestSpecifier;
-  else if (closureTestSpecifier.Contains("500") || closureTestSpecifier.Contains("750")) closureLabel = "Zprime"+closureTestSpecifier;
   // outputFile: target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C

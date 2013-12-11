@@ -46,6 +46,7 @@ struct_KinematicReconstruction GetSol()const;
 void loadData();
 void kinReco(const LV& leptonMinus, const LV& leptonPlus, const VLV *jets, const std::vector<double> *btags, const LV* met);
 void kinReco(const LV& leptonMinus, const LV& leptonPlus, const VLV *jets, const std::vector<double> *btags, const LV* met, bool mass_loop_on);
+void doJetsMerging(const VLV *jets,const std::vector<double> *btags); 
 
 private:
 
@@ -53,6 +54,9 @@ private:
     int nSol;
     struct_KinematicReconstruction sol;
     
+    bool isJetsMerging;
+    std::vector<TLorentzVector> alljets;
+    std::vector<double> allbtags;
 //     // W mass
     TH1F * h_wmass;
 // 
@@ -69,6 +73,10 @@ private:
     std::vector<double> ptBins;
     TH1F * h_metAngleRes[13];
     TH1F * h_metPtres[13];
+    
+    TH1F * h_metPxRes[13];
+    TH1F * h_metPyRes[13];
+    
 // 
     TH1F *h_nwcuts;
 // 
@@ -77,7 +85,13 @@ private:
 // 
 // // mbl
         TH1F *h_mbl_w;
+// // costheta        
+        TH1F *h_costheta_w;
 
+// neuEta 0d weight
+        TH1F *h_neuEta_w;
+//
+        
   };
 
 

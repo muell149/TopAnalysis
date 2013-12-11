@@ -18,6 +18,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/shapeReweighting
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/unfolding
+## mkdir -p diffXSecFromSignal/plots/muon/2012/closureTest
 ## mkdir -p diffXSecFromSignal/plots/electron/2012/monitoring/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/electron/2012/partonLevel
 ## mkdir -p diffXSecFromSignal/plots/electron/2012/recoYield
@@ -31,6 +32,7 @@
 ## mkdir -p diffXSecFromSignal/plots/electron/2012/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/electron/2012/shapeReweighting 
 ## mkdir -p diffXSecFromSignal/plots/electron/2012/unfolding
+## mkdir -p diffXSecFromSignal/plots/electron/2012/closureTest
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/xSec
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/binning
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/partonLevel
@@ -47,6 +49,10 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/effAndAcc/withoutRatioPlots
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/ttgencomparison
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/comparisonATLAS
+## mkdir -p diffXSecFromSignal/plots/combined/2012/unfolding
+## mkdir -p diffXSecFromSignal/plots/combined/2012/closureTest
+## mkdir -p diffXSecFromSignal/plots/combined/2012/massConstraintTest
+
 ## b) root files needed for the Analysis are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
 ## c) if not yet done, combine the MC samples for the single channels (like QCD, single top, Diboson) using combineMCsamples.C
 ## d) when using the shell script for the very first time, do "chmod a+x topDiffXSecAnalysis2012.sh
@@ -90,9 +96,10 @@ extrapolate=true
 hadron=false
 
 ## Unfolding closure test -> use pseudo data
-## closureTestSpecifier = \"500\" or \"750\" for corresponding Zprime pseudo data  (default: \"\")
+## closureTestSpecifier = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
+## for corresponding ttbarReweighting/Zprime pseudo data  (default: \"\")
 closureTestSpecifier=\"\"
-  
+
 ## run combination based on event yield combination instead of 
 ## combinedEventYields = true / false (default: false)
 ## attention: this affects only bothDecayChannelsCombination.C 
@@ -157,11 +164,35 @@ inputFolderName=\"RecentAnalysisRun8TeV_doubleKinFit\"
 ## Dataset and luminosity [/pb]
 ## has to fit to current dataset
 
-#mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/muonDiffXData2012ABCDAll.root\"
-#eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV/elecDiffXData2012ABCDAll.root\"
-
 mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root\"
 eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root\"
+
+# closure tests
+# [ $closureTestSpecifier != \"\" ]; then
+#  if [ $closureTestSpecifierS==\"NoDistort\"]; then
+#	mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/muonPseudoData19712pb8TeV.root\"
+#	eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/electronPseudoData19712pb8TeV.root\"
+#  elif [ $closureTestSpecifierS==\"topPtUp\"]; then
+#	mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/muonPseudoData19712pbReweightedtopPtUp8TeV.root\"
+#	eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/electronPseudoData19712pbReweightedtopPtUp8TeV.root\"
+#  elif [ $closureTestSpecifierS==\"topPtDown\"]; then
+#	mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/muonPseudoData19712pbReweightedtopPtDown8TeV.root\"
+#	eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/electronPseudoData19712pbReweightedtopPtDown8TeV.root\"
+#  elif [ $closureTestSpecifierS==\"ttbarMassUp\"]; then
+#	mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/muonPseudoData19712pbReweightedttbarMassUp8TeV.root\"
+#	eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/electronPseudoData19712pbReweightedttbarMassUp8TeV.root\"
+#  elif [ $closureTestSpecifierS==\"ttbarMassDown\"]; then
+#	mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/muonPseudoData19712pbReweightedttbarMassDown8TeV.root\"
+#	eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/electronPseudoData19712pbReweightedttbarMassDown8TeV.root\"
+#  elif [ $closureTestSpecifierS==\"data\"]; then
+#	mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/muonPseudoData19712pbReweighteddata8TeV.root\"
+#	eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/electronPseudoData19712pbReweighteddata8TeV.root\"
+#  elif [ $closureTestSpecifierS==\"1000\"]; then
+#	mudataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/muonPseudoData19712pbandM1000W100Zprime8TeV.root\"
+#	eldataSample=\"/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/electronPseudoData19712pbandM1000W100Zprime8TeV.root\"
+#  fi
+#
+# -> directly specified within basicFunctions.h
 
 if [ $decayChannel == \"electron\" ]; then
     dataLuminosity=19712
@@ -208,6 +239,10 @@ redoPDFReweighting=true
 ## Produce final xSec plots, ratios and uncertainties 
 ## produceResults = true / false (default: true)
 produceResults=true
+
+## Produce covariance matrices for final result
+## redoCov = true / false (default: true)
+redoCov=true
 
 ## Make pt plots logarithmic
 ## makeLogPlots = true / false (default: false)
@@ -279,11 +314,16 @@ if [ $closureTestSpecifier != \"\" ]
     echo
     echo "CLOSURE TEST FOR UNFOLDING!"
     echo "closure test type: " $closureTestSpecifier
+    redoPDFReweighting=false
     redoControlPlots=false
     redoSystematics=false
     maxSys=0
     redoPurStab=false
+    redetTau=false
+    genComparison=false
     useBCC=false
+    clean=false
+    redoCov=false
 fi
 
 muonFile=./diffXSecTopSemiMu$dataLabel$LV$PS.root
@@ -306,6 +346,7 @@ if [ $decayChannel == \"combined\" ]
 	echo "Re-do control plots:                        $redoControlPlots" 
 	echo "Re-do systematic uncertainties:             $redoSystematics "
 	echo "Number of considered systematics:           $maxSys          "
+	echo "additional selection:                       $addSel (chi2<$chi2Max)"
 	echo "Save plots:                                 $save            " 
 	echo
     elif [  $1 == "combined2" ]; then
@@ -316,11 +357,12 @@ if [ $decayChannel == \"combined\" ]
 	echo "Data Label:                                 $dataLabel       "
 	echo "Used data:                                  $dataSample      "
 	echo "Decay channel:                              $decayChannel    "
-	echo "Luminosity:                                 $dataLuminosity  " 
+	echo "Luminosity:                                 $dataLuminosity  "
 	echo "Re-do control plots:                        $redoControlPlots" 
 	echo "Re-do systematic uncertainties:             $redoSystematics "
 	echo "Number of considered systematics:           $maxSys          "
-	echo "Save plots:                                 $save            " 
+	echo "additional selection:                       $addSel (chi2<$chi2Max)"
+	echo "Save plots:                                 $save            "
 	echo
     else
 	echo
@@ -678,31 +720,34 @@ EOF
     echo
     echo "Covariance Matrix for systematic variations"
     echo
-    ## delete old files
-    if [ -f commandsCovMatrixPrepare.cint ]; then    
+    if [ $redoCov = true ]; then    
+        ## delete old files
+	if [ -f commandsCovMatrixPrepare.cint ]; then    
 	rm commandsCovMatrixPrepare.cint
 	rm covarianceOfSystematicUnc_C.d
 	rm covarianceOfSystematicUnc_C.so
-    fi
-    ## Compile library
-    cat >> commandsCovMatrixPrepare.cint << EOF
+	fi
+        ## Compile library
+	cat >> commandsCovMatrixPrepare.cint << EOF
 .L covarianceOfSystematicUnc.C++g
 EOF
-    root -l -b < commandsCovMatrixPrepare.cint
-
-    ## Execute macros    
-    if [ -f commandsCovMatrixRun.cint ]; then    
-	rm commandsCovMatrixRun.cint       
-    fi    
+	root -l -b < commandsCovMatrixPrepare.cint
+	
+        ## Execute macros    
+	if [ -f commandsCovMatrixRun.cint ]; then    
+	    rm commandsCovMatrixRun.cint       
+	fi    
     
-    cat >> commandsCovMatrixRun.cint << EOF
+	cat >> commandsCovMatrixRun.cint << EOF
 .L  covarianceOfSystematicUnc_C.so
 covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)
 EOF
-    echo ""
-    echo " Processing ....  covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)"
-    root -l -b < commandsCovMatrixRun.cint
-
+	echo ""
+	echo " Processing ....  covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)"
+	root -l -b < commandsCovMatrixRun.cint
+    else
+	echo "... skipped"
+    fi
 else
     echo "will be ignored, only done for decayChannel=combined and if final results are produced (produceResults is set to $produceResults)"
 fi
@@ -722,9 +767,9 @@ if [ $fast = false ]; then
     sleep 3
 fi
 
-if [ $produceResults = true ]; then
+if [ $produceResults = true -a $closureTestSpecifier == \"\" ]; then
     echo ""
-    echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $extrapolate, $hadron, $inclCCVars, $closureTestSpecifier, $useBCC)"
+    echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $extrapolate, $hadron, $inclCCVars, $useBCC)"
     root -l -q -b './combineTopDiffXSecUncertainties.C++('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$extrapolate', '$hadron', '$inclCCVars', '$closureTestSpecifier', '$useBCC')'
 else
     echo "will be ignored, only done if final results are produced (produceResults is set to $produceResults)"

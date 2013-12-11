@@ -24,7 +24,9 @@ public:
   KinematicReconstruction_LSroutines();
   KinematicReconstruction_LSroutines(double mass_l, double mass_al);
   KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F* hvE[]);
+  KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F* hvE[], TH1F hneutrino);
   KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F hneutrino);
+  KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F hcostheta,int weight_index);
   KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm);
   KinematicReconstruction_LSroutines(double mass_top, double mass_b, double mass_w, double mass_l, double mass_al);
       ~KinematicReconstruction_LSroutines();
@@ -63,6 +65,8 @@ public:
         double mTop;
         double mAntiTop;
         double vw;
+        double mttw;
+        double lepEw;
         double dTS;
         double dR;
         double dN;
@@ -81,6 +85,8 @@ public:
         double ttpt_topbar;
         double mbl;
         double mblbar;
+        double costheta;
+        double costhetabar;
         
     };
   std::vector<TopSolution>* GetTtSol();
@@ -137,8 +143,10 @@ private:
     TF1 * pol4_neutrinoPx; //("pol4_neutrinoPx","pol4",-100,100);
     
     TH1F hnw_cuts;
+    
     TH1F* hneutrino_E[6];
-
+    TH1F hcosw;
+    
     double px_miss;
     double py_miss;
   

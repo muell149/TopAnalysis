@@ -36,15 +36,15 @@ void EventYields::produceYields(const Samples& samples)const
 {
     std::cout<<"--- Beginning event yield table processing\n\n";
     
-    // Find all histograms containing information for cutflow table (in systematic Nominal and channel emu, first histogram)
+    // Find all histograms containing information for cutflow table (in systematic Nominal and first channel, first file)
     const std::vector<std::pair<TString, TString> > v_nameStepPair =
-        tth::nameStepPairs(samples.getSamples(Channel::emu, Systematic::nominal).at(0).inputFile(), "events_weighted_step");
+        tth::nameStepPairs(samples.getSamples(samples.getSystematicChannelSamples().at(Systematic::nominal).begin()->first, Systematic::nominal).at(0).inputFile(), "events_weighted_step");
     
     // Loop over systematics (exclude all but Nominal - so outer loop could be removed) and channels
-    for(auto systematicChannelSamples : samples.getSystematicChannelSamples()){
+    for(const auto& systematicChannelSamples : samples.getSystematicChannelSamples()){
         const Systematic::Systematic& systematic(systematicChannelSamples.first);
         if(systematic != Systematic::nominal)continue;
-        for(auto channelSample : systematicChannelSamples.second){
+        for(const auto& channelSample : systematicChannelSamples.second){
             const Channel::Channel& channel(channelSample.first);
             this->writeYields(channel, channelSample.second, v_nameStepPair);
             this->writeYields(channel, channelSample.second, v_nameStepPair, true);

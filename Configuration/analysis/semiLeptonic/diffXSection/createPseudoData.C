@@ -14,21 +14,64 @@
 #include <TDirectory.h>
 
 void poisson(const std::map< TString, std::map <unsigned int, TH1F*> > histo_, const std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, const int luminosity, const unsigned int verbose=0, bool smear=1, bool useReweightedTop=0, double avReweight=1, bool useZprime=0, double zPrimeLumiWeight=1);
+void createPseudoDataFunc(double luminosity=19712., const std::string decayChannel="muon", TString specifier="NoDistort");
 
-void createPseudoData(double luminosity=4955., const std::string decayChannel="muon", bool zprime=true, bool useReweightedTop=false, TString specifier=""){
-  // specifier="Up" or "Down" for shape distortions, "500" or "750" for Zprime
+void createPseudoData(double luminosity=19712.){
+
+  // collect leptons
+  std::vector<std::string> leptons_;
+  leptons_.push_back("muon"    );
+  leptons_.push_back("electron");
+  // collect relevant tests
+  std::vector<TString> tests_;
+  tests_.push_back("NoDistort"    );
+  tests_.push_back("topPtUp"      );
+  tests_.push_back("topPtDown"    );
+  tests_.push_back("ttbarMassUp"  );
+  tests_.push_back("ttbarMassDown");
+  tests_.push_back("data"         );
+  tests_.push_back("1000"         );
+  
+  // create all relevant files
+  for(unsigned int lepton=0; lepton<leptons_.size(); ++lepton){
+    for(unsigned int test=0; test<tests_.size(); ++test){
+      std::cout << "- " << leptons_[lepton] << ", " << tests_[test] << std::endl;
+      createPseudoDataFunc(luminosity, leptons_[lepton], tests_[test]);
+    }
+  }
+
+}
+
+void createPseudoDataFunc(double luminosity, const std::string decayChannel, TString specifier){
+  // specifier="NoDistort" for closure test; "topPtUp", "topPtDown", "ttbarMassUp", "ttbarMassDown" or "data" for shape distortions; "1000" for Zprime
   // "verbose": set detail level of output ( 0: no output, 1: std output 2: output for debugging )
   int verbose=0;
   // "smear": say if you want to do a poisson smearing for each bin or just a combination for the different samples 
   bool smear=false;
   // "dataFile": absolute path of data file, used to define plots of interest
   TString dataFile= "";
-  if(decayChannel.compare("electron")==0) dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedElectron.root";
-  else dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/analyzeDiffXData2011AllCombinedMuon.root";
+  if(decayChannel.compare("electron")==0) dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root";
+  else                                    dataFile="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root";
   // "useReweightedTop": use parton level reweighted ttbar signal file in pseudo data?
+  bool useReweightedTop = (specifier.Contains("NoDistort")||specifier.Contains("1000")) ? false : true;
   // "zprime": include additional Zprime in pseudo data?
-  if(useReweightedTop) zprime=false;
+  bool zprime=specifier.Contains("1000") ? true : false;
+  // naming for outputfile, constructed within macro
   TString outNameExtension="";
+
+  // check input parameter validity
+  // type of closure test
+  if(!(specifier.Contains("NoDistort")||specifier.Contains("1000")||specifier.Contains("data")||specifier.Contains("topPtUp")||specifier.Contains("topPtDown")||specifier.Contains("ttbarMassUp")||specifier.Contains("ttbarMassDown"))){
+    std::cout << "ERROR: invalid input specifier=" << specifier<< std::endl;
+    std::cout << "supported are: specifier=NoDistort,1000,data,topPtUp,topPtDown,ttbarMassUp,ttbarMassDown" << std::endl;
+    exit(0);
+  }
+  // decay channel
+  if(!(decayChannel.compare("electron")==0||decayChannel.compare("muon")==0)){
+    std::cout << "ERROR: invalid input decayChannel=" << decayChannel << std::endl;
+    std::cout << "supported are: decayChannel=muon,electron" << std::endl;
+    exit(0);
+  }
 
   //  ---
   //     create container for histos and files
@@ -41,71 +84,75 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   //     parton level reweighted top distribution
   //  ---
   // a) name and path of rootfile
-  TString variation="";
-  if      (specifier.Contains("Up"  )) variation="Up";
-  else if (specifier.Contains("Down")) variation="Down";  
-  TString nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/Shape"+variation+"/";
+  // path
+  TString nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/ttbarReweight/";
+  // SG reweighting test
   if(decayChannel.compare("electron")==0) nameTtbarReweighted+="elecDiffXSec";
   else                                    nameTtbarReweighted+="muonDiffXSec";
-  nameTtbarReweighted+="SigSysDistort"+specifier+"Fall11PF.root";
-  if(specifier=="NoDistort"&&decayChannel.compare("muon")==0) nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/muonDiffXSecSigFall11PF.root";
-  else if(specifier=="NoDistort"&&decayChannel.compare("electron")==0) nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/elecDiffXSecSigFall11PF.root";
+  nameTtbarReweighted+="SigSysDistort"+specifier+"Summer12PF.root";
+  // SG closure test
+  if     (specifier=="NoDistort"&&decayChannel.compare("muon"    )==0) nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecSigSummer12PF.root";
+  else if(specifier=="NoDistort"&&decayChannel.compare("electron")==0) nameTtbarReweighted="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecSigSummer12PF.root";
+  // BG
   TString nameTtbarBGReweighted=nameTtbarReweighted;
-  nameTtbarBGReweighted.ReplaceAll("Sig","Bkg"); 
-  //nameTtbarBGReweighted.ReplaceAll("/Shape"+variation,""); //  ttbar SG reweighted for the moment
-  //nameTtbarBGReweighted.ReplaceAll("SigSysDistort"+variation,"BkgFall11PF"); 
-  if(useReweightedTop) outNameExtension="ReweightedttbarMass"+specifier;
-  // b) get average weight of reweighting
+  nameTtbarBGReweighted.ReplaceAll("Sig","Bkg");
+  if(useReweightedTop) outNameExtension+="Reweighted"+specifier;
+  // b) get average weight for reweighted samples
   double avWeight=1;
   if(useReweightedTop && specifier!="NoDistort"){
     TFile* ttbarRewfile = new (TFile)(nameTtbarReweighted);
     TString weightPlot="eventWeightDileptonModelVariation/modelWeightSum";
-    weightPlot.ReplaceAll("Up"  ,"");
-    weightPlot.ReplaceAll("Down","");
-    histo_["avWeight"][kSig] = (TH1F*)(ttbarRewfile->Get(weightPlot));
+    histo_["avWeight"][kSig] = (TH1F*)(ttbarRewfile->Get(weightPlot)->Clone());
     avWeight=histo_ ["avWeight"][kSig]->GetBinContent(2)/histo_ ["avWeight"][kSig]->GetBinContent(1);
     histo_["avWeight"].erase(kSig);
-    //std::cout << "histo ratio: " << avWeight << std::endl;
-    TFile* sigfile = new (TFile)("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/"+TopFilename(kSig, sysNo, decayChannel));
+    TFile* sigfile = new (TFile)("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/"+TopFilename(kSig, sysNo, decayChannel));
     TString partonPlot="analyzeTopPartonLevelKinematics/ttbarMass";
-    histo_["parton"   ][kSig] = (TH1F*)(sigfile     ->Get(partonPlot));
-    histo_["partonRew"][kSig] = (TH1F*)(ttbarRewfile->Get(partonPlot));
+    gROOT->cd();
+    histo_["parton"   ][kSig] = (TH1F*)(sigfile     ->Get(partonPlot)->Clone());
+    histo_["partonRew"][kSig] = (TH1F*)(ttbarRewfile->Get(partonPlot)->Clone());
     double avWeight2  = histo_["partonRew"][kSig]->Integral(0, histo_["partonRew"][kSig]->GetNbinsX()+1);
     avWeight2        /= histo_["parton"   ][kSig]->Integral(0, histo_["parton"   ][kSig]->GetNbinsX()+1);
-    //std::cout << "area ratio: "<< avWeight2 << std::endl;
-    delete ttbarRewfile;
-    delete sigfile;
+    if(verbose>1){
+      std::cout << "ratio unweighted/weighted" << std::endl;
+      std::cout << avWeight  << " (from " << weightPlot << ")" << std::endl;
+      std::cout << avWeight2 << TString(" (from entries in ")+partonPlot+" wrt /afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/"+TopFilename(kSig, sysNo, decayChannel)+"): " << std::endl;
+    }
   }
 
   //  ---
   //     Z prime 
   //  ---
-  TString zprimeMass=specifier;
-  TString nameZprime="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun/Zprime/";
+  // xSec scaling (default value chosen for M1000W100: 5pb)
   double xSecSF=1.0;
-  xSecSF=0.03;
+  // path & naming
+  TString zprimeMass =specifier;
+  TString zprimeWidth=specifier;
+  zprimeWidth.ReplaceAll("1000", "100");
+  TString nameZprime="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/zprime/";
   if(decayChannel.compare("electron")==0) nameZprime+="elec";
-  else nameZprime+="muon";
-  nameZprime+="DiffXSecZprime_M"+zprimeMass+"_W"+zprimeMass+"0_Fall11PF.root";
+  else                                    nameZprime+="muon";
+  nameZprime+="DiffXSecZprimeM"+zprimeMass+"W"+zprimeWidth+"Summer12PF.root";
+  // event weight wrt luminosity
   double zPrimeLumiWeight=1.;
-  if     (zprimeMass=="500") zPrimeLumiWeight=(xSecSF*16.2208794979645*luminosity)/232074;
-  else if(zprimeMass=="750") zPrimeLumiWeight=(xSecSF*3.16951400706147*luminosity)/206525;
+  if     (zprimeMass=="1000") zPrimeLumiWeight=(xSecSF*5*luminosity)/104043;
+  // naming of oututfile 
   TString xSecSFstr="";
-  if      (xSecSF==0.5)  xSecSFstr="x0p5";
+  if      (xSecSF==0.5 ) xSecSFstr="x0p5";
   else if (xSecSF==0.25) xSecSFstr="x0p25";
-  else if (xSecSF==0.1) xSecSFstr="x0p1";
+  else if (xSecSF==0.1 ) xSecSFstr="x0p1";
   else if (xSecSF==0.03) xSecSFstr="x0p03";
-  else if (xSecSF>1.)    xSecSFstr="x"+getTStringFromDouble(xSecSF,0);
-  if(zprime) outNameExtension="and"+zprimeMass+xSecSFstr+"GeVZprime";
-  unsigned int kLast=kSAToptW;
-  unsigned int kZprime=kSAToptW+1;
+  else if (xSecSF>1.   ) xSecSFstr="x"+getTStringFromDouble(xSecSF,0);
+  if(zprime) outNameExtension="andM"+zprimeMass+"W"+zprimeWidth+xSecSFstr+"Zprime";
+  // sample iteration limit
+  int kLast  =kSAToptW;
+  int kZprime=kLast+1;
   if(zprime) kLast=kZprime;
 
   if(zprime&&zPrimeLumiWeight==1){
-    exit(0);
     std::cout << "ERROR: chosen zprime weight is exactly 1!" << std::endl;
+    exit(0);
   }
-
+  
   // -------------------------
   // !!! choose luminosity !!!
   // -------------------------
@@ -113,15 +160,14 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   // -----------------------------------------
   // !!! add all contributing samples here !!!
   // -----------------------------------------
-  TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun";
+  TString inputFolder = "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/";
   // save all default top analysis samples in files_
   files_ = getStdTopAnalysisFiles(inputFolder, sysNo, dataFile, decayChannel);
-  // remove single Top (combined), DiBoson (combined) and data
+  // remove combined file dor single Top & DiBoson
   if(files_.count(kSTop )>0)files_.erase(kSTop );
   if(files_.count(kDiBos)>0)files_.erase(kDiBos);
-  //if(files_.count(kData )>0)fiZprime/les_.erase(kData ); // data file needed for list of plots
   // remove combined QCD file for electron channel
-  //if(decayChannel.compare("electron")==0&&files_.count(kQCD)>0) files_.erase(kQCD);
+  if(decayChannel.compare("electron")==0&&files_.count(kQCD)>0) files_.erase(kQCD);
   // remove all QCD files to be consistent with later treatment
   if(files_.count(kQCD)>0) files_.erase(kQCD);
   if(decayChannel.compare("electron")==0){
@@ -131,7 +177,7 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   }
   // add zprime
   if(zprime) files_[kZprime]=new (TFile)(nameZprime);
-  // change ttbar files for reweighted distributions
+  // exchange default ttbar files with the reweighted ones
   if(useReweightedTop){ 
     files_[kSig]=new (TFile)(nameTtbarReweighted  );
     files_[kBkg]=new (TFile)(nameTtbarBGReweighted);
@@ -142,7 +188,7 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   //  -----------------------------------------
   std::vector<TString> plotList_;
   TString currentFolder ="";
-  TString currentPlot = "";
+  TString currentPlot   ="";
   if(verbose>0) std::cout << std::endl << "searching for all plots in file " << files_[kData]->GetName() << std::endl;
   // go to data file for getting plot names
   files_[kData]->cd();
@@ -169,11 +215,8 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
 	std::cout << "looping objects in in ";
 	gDirectory->pwd();
       }
-      // loop objects in directory
-      //TList* folderList = gDirectory->GetListOfKeys();
-      //TIter folderIterator=folderList->MakeIterator();
       TIter folderIterator(gDirectory->GetListOfKeys());
-      TKey *folderKey;// = (TKey*)folderIterator();
+      TKey *folderKey;
       int count2=0;
       while( (folderKey = (TKey*)folderIterator()) ) {
 	++count2;
@@ -184,7 +227,7 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
 	if(folderObject->InheritsFrom("TH1")){
 	  if(verbose>2) std::cout << "inherits from TH1";
 	  // check if TH2 and neglect because a simple 
-	  // resmearing here is not possible
+	  // re-smearing is here not possible
 	  if((folderObject->InheritsFrom("TH2"))&&(verbose>2)) std::cout << " and from TH2" << std::endl;
 	  else{
 	    if(verbose>2) std::cout << " and NOT from TH2" << std::endl;
@@ -196,7 +239,7 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
       }
     }
   }
-  // close data file for getting plot names
+  // close data file after getting plot names
   files_[kData]->Close();
   // remove data file from list of considered files
   if(files_.count(kData )>0)files_.erase(kData );
@@ -225,11 +268,13 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   // ---------------------------------------
   unsigned int N1Dplots=plotList_.size();
   int Nplots=0;
-  std::cout << std::endl << "loading plots: " << std::endl;
-  // a) for std analysis file
+  if(verbose>0) std::cout << std::endl << "loading plots: " << std::endl;
+  // a) for std analysis file (& reweighted ttbar)
   getAllPlots(files_, plotList_, histo_, histo2_, N1Dplots, Nplots, verbose-1);
-  std::cout << Nplots << " plots loaded from " << plotList_.size();
-  std::cout << " requested" << std::endl << "empty plots are not counted" << std::endl;
+  if(verbose>0){
+    std::cout << Nplots << " plots loaded from " << plotList_.size();
+    std::cout << " requested" << std::endl << "empty plots are not counted" << std::endl;
+  }
   // b) for zprime
   if(zprime){ 
     for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -240,11 +285,37 @@ void createPseudoData(double luminosity=4955., const std::string decayChannel="m
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-  TString outputfile="./"+(TString)decayChannel+"PseudoData"+lum+"pb"+outNameExtension+"7TeV.root";
+  //TString outputfile="/afs/naf.desy.de/user/g/goerner/WGspace/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/"+(TString)decayChannel+"PseudoData"+lum+"pb"+outNameExtension+"8TeV.root";
+  TString outputfile="/afs/naf.desy.de/user/g/goerner/WGspace/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/"+pseudoDataFileName(specifier, decayChannel);
   TFile* out = new TFile(outputfile, "recreate");
   if(verbose>0) std::cout << std::endl << "outputfile: " << outputfile << std::endl;
   poisson(histo_, plotList_, decayChannel, *out, luminosity, verbose, smear, useReweightedTop, avWeight, zprime, zPrimeLumiWeight);
+
+  // free memory
+  for(std::map< TString, std::map <unsigned int, TH1F*> >::iterator histo=histo_.begin(); histo!=histo_.end(); ++histo){
+    for(std::map <unsigned int, TH1F*>::iterator histoSub=histo->second.begin(); histoSub!=histo->second.end(); ++histoSub){
+      if(histoSub->second) delete histoSub->second;
+    }
+    histo->second.clear();
+  }
+  histo_ .clear();
+  for(std::map< TString, std::map <unsigned int, TH2F*> >::iterator histo2=histo2_.begin(); histo2!=histo2_.end(); ++histo2){
+    for(std::map <unsigned int, TH2F*>::iterator histo2Sub=histo2->second.begin(); histo2Sub!=histo2->second.end(); ++histo2Sub){
+      if(histo2Sub->second) delete histo2Sub->second;      
+    }
+    histo2->second.clear();
+  }
+  histo2_ .clear();
+  for(std::map<unsigned int, TFile*>::const_iterator file=files_.begin(); file!=files_.end(); ++file){
+    if(file->second){
+      file->second->Close();	  
+      delete file->second;
+    }
+  }
+  files_ .clear();
   out->Close();
+  delete out;
+
 }
 
 void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::vector<TString> plotList_, const std::string decayChannel, TFile& outputfile, int luminosity, const unsigned int verbose, bool smear, bool useReweightedTop, double avReweight, bool useZprime, double zPrimeLumiWeight){
@@ -263,8 +334,8 @@ void poisson(std::map< TString, std::map <unsigned int, TH1F*> > histo_, std::ve
     sleep(5);
   }
   // upper bound for looping events: in/exclude zprime
-  unsigned int kLast=kSAToptW;
-  unsigned int kZprime=kSAToptW+1;
+  int kLast  =kSAToptW;
+  int kZprime=kLast+1;
   if(useZprime) kLast=kZprime;
 
   // go to output file

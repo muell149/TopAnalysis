@@ -24,10 +24,10 @@ if [ -n "$1" ]; then
 	elif [[ "${FOLDER}" == *JESUp* ]]; then
 	    cp -vu ${FOLDER}/????DiffXSec*JESUp*.root	     /afs/naf.desy.de/group/cms/scratch/tophh/$1/JESUp/${merged}
 	    cp -vu ${FOLDER}/????DiffXSec*JESUp*.txt	     /afs/naf.desy.de/group/cms/scratch/tophh/$1/JESUp/TriggerReports/
-	elif [[ "${FOLDER}" == *MassDn* ]]; then
+	elif [[ "${FOLDER}" == *Mass*Dn* ]]; then
 	    cp -vu ${FOLDER}/????DiffXSec*TopMassDown*.root /afs/naf.desy.de/group/cms/scratch/tophh/$1/TopMassDown/${merged}
 	    cp -vu ${FOLDER}/????DiffXSec*TopMassDown*.txt /afs/naf.desy.de/group/cms/scratch/tophh/$1/TopMassDown/TriggerReports/
-	elif [[ "${FOLDER}" == *MassUp* ]]; then
+	elif [[ "${FOLDER}" == *Mass*Up* ]]; then
 	    cp -vu ${FOLDER}/????DiffXSec*TopMassUp*.root   /afs/naf.desy.de/group/cms/scratch/tophh/$1/TopMassUp/${merged}
 	    cp -vu ${FOLDER}/????DiffXSec*TopMassUp*.txt   /afs/naf.desy.de/group/cms/scratch/tophh/$1/TopMassUp/TriggerReports/
 	elif [[ "${FOLDER}" == *MatchDn* ]]; then

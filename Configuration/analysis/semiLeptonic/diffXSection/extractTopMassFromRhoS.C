@@ -258,14 +258,26 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   // B) get prediction with top mass dependence
   //  load rootfiles
   std::vector<TFile* > file_;
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDownSummer12PF.root", "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                       , "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUpSummer12PF.root"    , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDown4Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDown3Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDown2Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDownSummer12PF.root" , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                        , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUpSummer12PF.root"     , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUp2Summer12PF.root"    , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUp3Summer12PF.root"    , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUp4Summer12PF.root"    , "Open"));
   std::vector<double > mtop_;
   // fill mass indication
+  mtop_.push_back(161.5);
+  mtop_.push_back(163.5);
+  mtop_.push_back(166.5);
   mtop_.push_back(169.5);
   mtop_.push_back(172.5);
   mtop_.push_back(175.5);
+  mtop_.push_back(178.5);
+  mtop_.push_back(181.5);
+  mtop_.push_back(184.5);
 
   // C) get prediction with theory parameter dependence
   std::vector<TFile* > fileSys_;
@@ -309,7 +321,7 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     rhosMCsys_.push_back((TH1F*)temp->Clone(TString("rhosMCsys")+getTStringFromInt(sample)));  
   }
 
-  // collect rhos results from last bin for different masses is separate plot
+  // collect rhos results from bin of interest for different masses is separate plot
   double MCnom=0.;
   TH1F* MC= new TH1F("CMSMC", "CMSMC", nbinsx, minx, maxx);
   //reBinTH1F(*data, mtop_,0);
@@ -318,7 +330,7 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     double value=rhosMC_[sample]->GetBinContent(binOfInterest);
     if(verbose>0) std::cout << "MC(" << mtop_[sample] << "GeV): " << value << std::endl;
     MC->SetBinContent(MC->FindBin(mtop_[sample]), value);
-    if(MassPointsData_[sample]==172.5) MCnom=value;
+    if(mtop_[sample]==172.5) MCnom=value;
   }
   histogramStyle(*MC, kData, false, 1.2, kGreen-2);
 
@@ -329,6 +341,9 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     double valueDn=rhosMCsys_[sample+1]->GetBinContent(binOfInterest);
     double unc=0.5*(std::abs(valueUp-MCnom)+std::abs(valueDn-MCnom));
     MCnomUnc+=unc;
+    //std::cout << "c : " << MCnom << std::endl;
+    //std::cout << "up=" << fileSys_[sample  ]->GetName() << ": " << valueUp << std::endl;
+    //std::cout << "dn=" << fileSys_[sample+1]->GetName() << ": " << valueDn << std::endl;
   }
   
   // do a linear fit of the mass dependence
