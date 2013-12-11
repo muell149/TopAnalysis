@@ -51,6 +51,7 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/comparisonATLAS
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/unfolding
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/closureTest
+## mkdir -p diffXSecFromSignal/plots/combined/2012/massConstraintTest
 
 ## b) root files needed for the Analysis are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
 ## c) if not yet done, combine the MC samples for the single channels (like QCD, single top, Diboson) using combineMCsamples.C
