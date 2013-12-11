@@ -90,7 +90,9 @@ void MeanSol::GetMeanSol(TLorentzVector& top, TLorentzVector& topbar, TLorentzVe
 
 double MeanSol::GetSumWeight()
 {
-    return sum_weight;
+    return sum_weight; // for 1 weight
+//     return max_sum_weight; // for 2 weights
+    
 }
 
 int MeanSol::GetNsol()
