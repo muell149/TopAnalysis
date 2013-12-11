@@ -389,11 +389,13 @@ void Plotter::CalcDiffSystematics(TString Channel, TString Systematic, TString S
         if ( name.Contains("TTBar")   ) theParticleName = "TtBar";
         if ( name.Contains("BJet")    ) theParticleName = "BJets";
         if ( name.Contains("BBBar")   ) theParticleName = "BBbar";
+        if ( name.Contains("JetMult") ) theParticleName = "Jets";
         TString theQuantityName = "";
         if ( name.Contains("pT")      ) theQuantityName = "Pt";
         if ( name.Contains("Eta")     ) theQuantityName = "Eta";
         if ( name.Contains("Rapidity")) theQuantityName = "Rapidity";
         if ( name.Contains("Mass")    ) theQuantityName = "Mass";
+        if ( name.Contains("Mult")    ) theQuantityName = "Mult";
         TString theSpecialPostfix = "";
         theSpecialPostfix = name;
         if ( specialComment.CompareTo("Standard") != 0 ) {
@@ -1739,11 +1741,13 @@ int Plotter::CalcDiffXSec(TString Channel, TString Systematic){
         if ( name.Contains("TTBar")   ) theParticleName = "TtBar";
         if ( name.Contains("BBBar")   ) theParticleName = "BBbar";
         if ( name.Contains("BJet")    ) theParticleName = "BJets";
+        if ( name.Contains("JetMult") ) theParticleName = "Jets";
         TString theQuantityName = "";
         if ( name.Contains("pT")      ) theQuantityName = "Pt";
         if ( name.Contains("Eta")     ) theQuantityName = "Eta";
         if ( name.Contains("Rapidity")) theQuantityName = "Rapidity";
         if ( name.Contains("Mass")    ) theQuantityName = "Mass";
+        if ( name.Contains("Mult")    ) theQuantityName = "Mult";
         TString theSpecialPostfix = "";
         //if (name.Contains("Lead")) theSpecialPostfix = name;
         theSpecialPostfix = name;
