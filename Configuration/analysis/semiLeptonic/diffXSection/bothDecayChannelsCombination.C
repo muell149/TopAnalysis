@@ -2,8 +2,8 @@
 
 void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsigned int verbose=0,
 				  TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
-				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, 
-				  bool combinedEventYields=true, TString closureTestSpecifier="NoDistort", bool smoothcurves=false){
+				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, 
+				  bool combinedEventYields=true, TString closureTestSpecifier="topPtUp", bool smoothcurves=false){
 
   // closureTestSpecifier = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
   // run automatically in batch mode
@@ -222,6 +222,7 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
     //if(sys>sysNo) break; // FIXME: shortcut- process only results without systematic variation 
     TString subfolder=sysLabel(sys);
     // loop variables
+    int countNorm=0;
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       // get canvas
       TCanvas* canvasMu   = combinedEventYields ? 0 : (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
@@ -477,8 +478,8 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 	      // name for chosen mass
 	      TString massextension="";
 	      if(zprime=="1000") massextension="ZprimeM1000W100";
-	      muzprime.ReplaceAll("Sig", massextension);
-	      elzprime.ReplaceAll("Sig", massextension);
+	      muzprime.ReplaceAll("Sig", massextension+"Sig");
+	      elzprime.ReplaceAll("Sig", massextension+"Sig");
 	      // get files
 	      TFile* zprimemufile = new (TFile)(muzprime);
 	      TFile* zprimeelfile = new (TFile)(elzprime);
@@ -986,8 +987,8 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 		closureentry="#splitline{Reweighted t#bar{t}}{#scale[0.75]{(MadGraph+Pythia, "+closureTestSpecifier+")}}";   
 		// label cosmetics
 		if(closureTestSpecifier=="data") closureentry.ReplaceAll(closureTestSpecifier, "topPt#rightarrow"+closureTestSpecifier);
-		if(closureentry.Contains("Up"  )){ closureentry.ReplaceAll(closureTestSpecifier, "harder "+closureTestSpecifier); closureentry.ReplaceAll("Up"  , "");}
-		if(closureentry.Contains("Down")){ closureentry.ReplaceAll(closureTestSpecifier, "softer "+closureTestSpecifier); closureentry.ReplaceAll("Down", "");}
+		if(closureentry.Contains("Up"  )){ closureentry.ReplaceAll(closureTestSpecifier, (closureentry.Contains("ttbarMass") ? "harder " : "softer ")+closureTestSpecifier); closureentry.ReplaceAll("Up"  , "");}
+		if(closureentry.Contains("Down")){ closureentry.ReplaceAll(closureTestSpecifier, (closureentry.Contains("ttbarMass") ? "softer " : "harder ")+closureTestSpecifier); closureentry.ReplaceAll("Down", "");}
 		closureentry.ReplaceAll("topPt"    , "p_{T}^{t}"   );
 		closureentry.ReplaceAll("ttbarMass", "m^{t#bar{t}}");
 	      }
@@ -1124,6 +1125,19 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 	    TString outfolder = closureTestSpecifier=="" ? "xSec/" : "closureTest/";
 	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/"+outfolder+"xSec"+closureLabel+xSecVariables_[i]+universalplotLabel+".eps"); 
 	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/"+outfolder+"xSec"+closureLabel+xSecVariables_[i]+universalplotLabel+".png");
+	    // pdf for all relevant closureTest plots
+	    if(closureTestSpecifier!=""){
+	      if(verbose>1) std::cout << "saving for closure test" << std::endl;
+	      TString closureTestPdfName ="./diffXSecFromSignal/plots/combined/2012/closureTest/xSecs"+closureLabel+LV+PS;
+	      int Nnorm=(xSecVariables_.size())/2;
+	      if(xSecVariables_[i].Contains("Norm")&&canvas_.count(xSecVariables_[i])>0&&canvas_[xSecVariables_[i]].count(sysNo)>0&&canvas_[xSecVariables_[i]][sysNo]){
+		++countNorm;
+		if(verbose>1) std::cout << "normalized xSec " << xSecVariables_[i] << ", "<< countNorm << "/" << Nnorm <<  std::endl;	
+		if     (countNorm==1)     combicanvas->Print(closureTestPdfName+".pdf(", "pdf");	
+		else if(countNorm==Nnorm) combicanvas->Print(closureTestPdfName+".pdf)", "pdf");
+		else                      combicanvas->Print(closureTestPdfName+".pdf" , "pdf");
+	      }
+	    }
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
 	  // close Canvas
@@ -1158,6 +1172,7 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
   //  Save combined mu+e plots to ROOT-file
   // =================================================
 
+  // saving in rootfile
   // loop variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // loop systematic variations
