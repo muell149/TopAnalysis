@@ -130,14 +130,16 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   TString dataSample="2012";
   // for closure test if desired
   TString closureLabel = "";
-  if      (closureTestSpecifier.Contains("NoDistort")) closureLabel = "PseudoData"+closureTestSpecifier;
-  else if (closureTestSpecifier.Contains("topPt"   )||
-	   closureTestSpecifier.Contains("ttbarMass")) closureLabel = "PseudoDataReweight"+closureTestSpecifier;
-  else if (closureTestSpecifier.Contains("data"     )) closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;
-  else if (closureTestSpecifier.Contains("1000"     )) closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
-  else{
-    std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
-    exit(0);
+  if(closureTestSpecifier!=""){
+    if      (closureTestSpecifier.Contains("NoDistort")) closureLabel = "PseudoData"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("topPt"   )||
+	     closureTestSpecifier.Contains("ttbarMass")) closureLabel = "PseudoDataReweight"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("data"     )) closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("1000"     )) closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
+    else{
+      std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
+      exit(0);
+    }
   }
   if(closureTestSpecifier!=""&&!dataFile.Contains("PseudoData")) dataFile=inputFolder+"/pseudodata/"+pseudoDataFileName(closureTestSpecifier, "electron")+":"+inputFolder+"/pseudodata/"+pseudoDataFileName(closureTestSpecifier, "muon");
   // save all plots into the following foldre
