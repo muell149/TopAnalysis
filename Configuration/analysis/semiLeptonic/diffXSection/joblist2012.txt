@@ -496,6 +496,15 @@ nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d Mutt
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMassConstraintDn2 -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=electron,massfix=160.0 722 analyzeTopDiffXSec_cfg.py
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMassConstraintDn2 -c mctag=Summer12,triggerTag=HLT,sample=ttbarBG,lepton=muon,massfix=160.0     722 analyzeTopDiffXSec_cfg.py
 nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMassConstraintDn2 -c mctag=Summer12,triggerTag=HLT,sample=ttbarBG,lepton=electron,massfix=160.0 722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMassConstraintUp3 -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=muon,massfix=174.5     722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMassConstraintUp3 -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=electron,massfix=174.5 722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMassConstraintUp3 -c mctag=Summer12,triggerTag=HLT,sample=ttbarBG,lepton=muon,massfix=174.5     722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMassConstraintUp3 -c mctag=Summer12,triggerTag=HLT,sample=ttbarBG,lepton=electron,massfix=174.5 722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMassConstraintDn3 -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=muon,massfix=170.5     722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarSGMassConstraintDn3 -c mctag=Summer12,triggerTag=HLT,sample=ttbar,lepton=electron,massfix=170.5 722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarBGMassConstraintDn3 -c mctag=Summer12,triggerTag=HLT,sample=ttbarBG,lepton=muon,massfix=170.5     722 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMassConstraintDn3 -c mctag=Summer12,triggerTag=HLT,sample=ttbarBG,lepton=electron,massfix=170.5 722 analyzeTopDiffXSec_cfg.py
+
 
 # MadSpin
 nafJobSplitter.pl -j -q 12 -M 4000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuttbarSGMadSpin -c mctag=Summer12,triggerTag=HLT,sample=ttbarMadSpin,lepton=muon     900 analyzeTopDiffXSec_cfg.py
@@ -504,5 +513,8 @@ nafJobSplitter.pl -j -q 12 -M 4000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d 
 nafJobSplitter.pl -j -q 12 -M 4000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElttbarBGMadSpin -c mctag=Summer12,triggerTag=HLT,sample=ttbarMadSpinBG,lepton=electron 900 analyzeTopDiffXSec_cfg.py
 
 # zprime
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElZprimeM1000_w100 -c mctag=Summer12,triggerTag=HLT,sample=zprime_m1000gev_w100gev,lepton=electron 15 analyzeTopDiffXSec_cfg.py
-nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuZprimeM1000_w100 -c mctag=Summer12,triggerTag=HLT,sample=zprime_m1000gev_w100gev,lepton=muon 15 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElZprimeM1000_w100SG -c mctag=Summer12,triggerTag=HLT,sample=zprime_m1000gev_w100gev,lepton=electron 15 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuZprimeM1000_w100SG -c mctag=Summer12,triggerTag=HLT,sample=zprime_m1000gev_w100gev,lepton=muon 15 analyzeTopDiffXSec_cfg.py
+
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d ElZprimeM1000_w100BG -c mctag=Summer12,triggerTag=HLT,sample=zprime_m1000gev_w100gevBG,lepton=electron 15 analyzeTopDiffXSec_cfg.py
+nafJobSplitter.pl -q 1 -M 6000 -o /scratch/hh/dust/naf/cms/user/`whoami` -d MuZprimeM1000_w100BG -c mctag=Summer12,triggerTag=HLT,sample=zprime_m1000gev_w100gevBG,lepton=muon 15 analyzeTopDiffXSec_cfg.py
