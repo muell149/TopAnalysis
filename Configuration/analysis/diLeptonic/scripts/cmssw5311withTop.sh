@@ -56,8 +56,14 @@ else
     echo
 fi
 
-
 if [[ "$minimalInstall" == True ]] ; then
+    echo "Minimum installation needs to compile common tools in TopAnalysis/ZTopUtils with scram"
+    echo "Warning about 'Invalid tool lhapdffull' can be ignored"
+    echo
+    cd $CMSSW_BASE/src/TopAnalysis/ZTopUtils
+    scram b -j 8
+    cd -
+    
     echo
     echo "Minimal installation successfully done"
     exit 0
@@ -75,8 +81,14 @@ addpkg PhysicsTools/PatAlgos
 
 ###### Electron ID #####
 
-#electron mva id stuff (following top reference twiki, and TQAF TWiki page rev.223)
-cvs co -r V00-00-30-01 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+# Electron mva id stuff (following top reference twiki, and TQAF TWiki page rev.223)
+# The following line is not working anymore, since the -d option returns some error, thus use workaround with the 5 lines after
+#cvs co -r V00-00-30-01 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cd $CMSSW_BASE/src
+cvs co -r V00-00-30-01 UserCode/EGamma/EGammaAnalysisTools
+mv UserCode/EGamma EGamma
+rm -rf UserCode
+cd -
 cd $CMSSW_BASE/src/EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 cd -
