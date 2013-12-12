@@ -171,28 +171,29 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
   TString zprime="";
   double  zPrimeLumiWeightIni=1.;
   TString zPrimeLumiWeightStr="";
-  if      (closureTestSpecifier.Contains("NoDistort")) {dataLabel="#splitline{Reco.&Unfolded}{Pseudo Data}"; reweightClosure=true; closureLabel = "PseudoData"+closureTestSpecifier;             } 
-  else if (closureTestSpecifier.Contains("topPt"   )||
-	   closureTestSpecifier.Contains("ttbarMass")) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweight"+closureTestSpecifier;     }
-  else if (closureTestSpecifier.Contains("data"     )) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;}
-  else if (closureTestSpecifier.Contains("1000"     )) {
-    closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV"; 
-    // identify exact closure test
-    zprime="1000";
-    if      (closureTestSpecifier.Contains("x0p03")) {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.03)";}
-    else if (closureTestSpecifier.Contains("x0p1" )) {zPrimeLumiWeightIni=0.1 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.1)" ;}
-    else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.25)";}
-    else if (closureTestSpecifier.Contains("x0p5" )) {zPrimeLumiWeightIni=0.5 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.5)" ;}
-    else if (closureTestSpecifier.Contains("x2"   )) {zPrimeLumiWeightIni=2.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x2)"   ;}
-    else if (closureTestSpecifier.Contains("x4"   )) {zPrimeLumiWeightIni=4.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x4)"   ;}
-    // adjust label in plot: data -> pseudo data
-    dataLabel = "#splitline{Reco. and Unf.}{t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr+"}";
+  if(closureTestSpecifier!=""){
+    if      (closureTestSpecifier.Contains("NoDistort")) {dataLabel="#splitline{Reco.&Unfolded}{Pseudo Data}"; reweightClosure=true; closureLabel = "PseudoData"+closureTestSpecifier;             } 
+    else if (closureTestSpecifier.Contains("topPt"   )||
+	     closureTestSpecifier.Contains("ttbarMass")) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweight"+closureTestSpecifier;     }
+    else if (closureTestSpecifier.Contains("data"     )) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;}
+    else if (closureTestSpecifier.Contains("1000"     )) {
+      closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV"; 
+      // identify exact closure test
+      zprime="1000";
+      if      (closureTestSpecifier.Contains("x0p03")) {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.03)";}
+      else if (closureTestSpecifier.Contains("x0p1" )) {zPrimeLumiWeightIni=0.1 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.1)" ;}
+      else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.25)";}
+      else if (closureTestSpecifier.Contains("x0p5" )) {zPrimeLumiWeightIni=0.5 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.5)" ;}
+      else if (closureTestSpecifier.Contains("x2"   )) {zPrimeLumiWeightIni=2.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x2)"   ;}
+      else if (closureTestSpecifier.Contains("x4"   )) {zPrimeLumiWeightIni=4.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x4)"   ;}
+      // adjust label in plot: data -> pseudo data
+      dataLabel = "#splitline{Reco. and Unf.}{t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr+"}";
+    }
+    else{
+      std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
+      exit(0);
+    }
   }
-  else{
-    std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
-    exit(0);
-  }
-  
   //  Define muon and electron input rootfiles
   std::map<unsigned int, TFile*> files_;
   if(!combinedEventYields){
