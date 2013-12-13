@@ -35,9 +35,11 @@
 ################################################################
 
 # TT
-230  Summer12.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff   ttbarsignalplustau.root      ttbarsignalplustau,includePDFWeights=True
-150  Summer12.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff   ttbarbg.root                 ttbarbg
-
+#230  Summer12.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff   ttbarsignalplustau.root      ttbarsignalplustau,includePDFWeights=True
+#150  Summer12.TTJets_MassiveBinDECAY_TuneZ2star_8TeV_madgraph_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff   ttbarbg.root                 ttbarbg
+# TTMadSpin
+730   Summer12.TTJets_MSDecays_central_TuneZ2star_8TeV_madgraph_tauola__Summer12_DR53X_PU_S10_START53_V19_v1_cff  ttbarsignalplustau.root      ttbarsignalplustau,includePDFWeights=True
+300   Summer12.TTJets_MSDecays_central_TuneZ2star_8TeV_madgraph_tauola__Summer12_DR53X_PU_S10_START53_V19_v1_cff  ttbarbg.root                 ttbarbg
 # Drell Yan
 160    Summer12.DYJetsToLL_M_10To50filter_8TeV_madgraph_Summer12_DR53X_PU_S10_START53_V7A_v1_cff             dy1050.root      dy1050
 180    Summer12.DYJetsToLL_M_50_TuneZ2Star_8TeV_madgraph_tarball_Summer12_DR53X_PU_S10_START53_V7A_v1_cff    dy50inf.root     dy50inf
