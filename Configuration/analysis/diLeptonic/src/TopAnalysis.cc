@@ -51,7 +51,7 @@ constexpr double JetEtaCUT = 2.4;
 constexpr double JetPtCUT = 30.;
 
 /// Cut value for jet pt
-constexpr double JetPtCUT2 = 50.;
+constexpr double JetPtCUT2 = 30.;
 
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
@@ -950,9 +950,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Access kinematic reconstruction info
     this->GetKinRecoBranchesEntry(entry);
     bool hasSolution = HypTop_->size() > 0;
-    if (kinRecoOnTheFly_ || true)
+    if ((kinRecoOnTheFly_ || true) && !this->makeBtagEfficiencies()){
         hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, *leptons_, *jets_, *jetBTagCSV_, met);
-
+    }
+ 
     if ( isZregion ) {
         double fullWeights = weight;
         Zh1_postZcut->Fill(dilepton.M(), fullWeights);
@@ -1163,6 +1164,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
                                               *jets_, *jetPartonFlavour_,
                                               weight, static_cast<std::string>(channel_));
+        return kTRUE;
     }
     
     //=== CUT ===
@@ -1433,6 +1435,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_RecoAntiPartonFraction->Fill(RecoAntipartonMomFraction, recoWeight);
 
     //New plots from Carmen: Begin
+    h_RecoTTBar0Mass->Fill(rho0/(hypttbar).M(), recoWeight);
+    h_HypTTBar0Mass->Fill(rho0/(hypttbar).M(), weight);
+
     int extrarecojet[4] = {0};
     int jetnumReco = -1;
     double jetHTreco = 0;
@@ -1466,6 +1471,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypJetMultpt40->Fill(RecoJets_cut40,weight);
     h_HypJetMultpt60->Fill(RecoJets_cut60,weight);
     h_HypJetMultpt100->Fill(RecoJets_cut100,weight);
+  
     int first= -1, second=-1, third=-1, fourth=-1;
     double ptjet = 0;
     for(int ord = 0; ord <= jetnumReco; ord++)
@@ -1536,8 +1542,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
         h_RecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(), recoWeight);
         h_HypTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),weight);
-        h_RecoTTBar0Mass->Fill(rho0/(hypttbar).M(), recoWeight);
-        h_HypTTBar0Mass->Fill(rho0/(hypttbar).M(),weight);
 
     }
     for(int q0 = 0; q0<19;q0++){
@@ -1667,6 +1671,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
             h_GenRecoBJetEtaLead->Fill(LeadHypBJet.Eta(), LeadGenBJet.Eta(), weight);
             h_GenRecoBJetEtaNLead->Fill(NLeadHypBJet.Eta(), NLeadGenBJet.Eta(), weight);
 
+            //rho/masstt 
+            h_GenRecoTTBar0Mass->Fill(rho0/hypttbar.M(),rho0/genttbar.M(),weight);
             // jet multiplicities
             h_GenRecoJetMult->Fill(numberOfJets, allGenJets_->size(), weight );
             h_GenRecoJetMultpt30->Fill(RecoJets,GenJets_cut,weight);
@@ -1697,7 +1703,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
                 h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),allGenJets_->at(extragenjet[0]).Pt(),weight);
                 h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),allGenJets_->at(extragenjet[0]).Eta(),weight);
                 h_GenRecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),rho0/(genttbar+allGenJets_->at(extragenjet[0])).M(),weight);
-                h_GenRecoTTBar0Mass->Fill(rho0/(hypttbar).M(),rho0/(genttbar).M(),weight);
             }
         }
     }
@@ -1744,6 +1749,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_GenRecoBJetEtaLead->Fill(LeadHypBJet.Eta(), -1000, weight);
         h_GenRecoBJetEtaNLead->Fill(NLeadHypBJet.Eta(), -1000, weight);
 
+        //rho/masstt 
+        h_GenRecoTTBar0Mass->Fill(rho0/hypttbar.M(), -1000, weight);
+
         // jet multiplicities
         h_GenRecoJetMult->Fill(numberOfJets, -1000, weight );
         h_GenRecoJetMultpt30->Fill(RecoJets,-1000,weight);
@@ -1769,7 +1777,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
             h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),-1000.,weight);
             h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),-1000.,weight);
             h_GenRecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),-1000.,weight);
-            h_GenRecoTTBar0Mass->Fill(rho0/(hypttbar).M(),-1000.,weight);
         }
     }
 
@@ -2243,6 +2250,9 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                 h_VisGenJetMultpt60->Fill(GenJets_cut60,trueLevelWeight);
                 h_VisGenJetMultpt100->Fill(GenJets_cut100,trueLevelWeight);
 
+                LV genttbar(*GenTop_ + *GenAntiTop_);
+                h_VisGenTTBar0Mass->Fill(rho0/genttbar.M(),trueLevelWeight);
+
                 if(jetnum>2){
                     h_VisGenExtraJetpT4->Fill(allGenJets_->at(extragenjet[3]).Pt(),trueLevelWeight);
                     h_VisGenExtraJetEta4->Fill(allGenJets_->at(extragenjet[3]).Eta(),trueLevelWeight);
@@ -2258,9 +2268,8 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                     h_VisGenExtraJetEta->Fill(allGenJets_->at(extragenjet[0]).Eta(),trueLevelWeight);
                     LV genttbar(*GenTop_ + *GenAntiTop_);
                     h_VisGenTTBar1stJetMass->Fill(rho0/(genttbar+allGenJets_->at(extragenjet[0])).M(),trueLevelWeight);  
-                    h_VisGenTTBar0Mass->Fill(rho0/genttbar.M(),trueLevelWeight);
-
                 }
+
                 for(int q0 = 0; q0<19; q0++){
                     h_VisGenJetMultTotal->Fill(cbin[q0],trueLevelWeight);
                     if(allGenJets_->at(extragenjet[0]).Pt()<=cbin[q0] || jetnum<0 ) h_VisGenJetMultQ0->Fill(cbin[q0],trueLevelWeight);
