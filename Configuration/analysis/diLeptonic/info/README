@@ -185,9 +185,19 @@ Please be aware that should be compiled via:
   make createSystCovMatrix
   cd ..
 
-This runs createSystCovMatrix.cc which produces the correlation amtrix for between all systematics for a given variable in a given channel
+This runs createSystCovMatrix.cc which produces the correlation matrix for between all systematics for a given variable in a given channel
 The description of the method is explained in: https://indico.desy.de/getFile.py/access?contribId=0&resId=0&materialId=slides&confId=8972 
 password: bottom
+
+
+For the edition of the analysis notes can be usefull also to run the next scripts/macros:
+
+cd Plots/Nominal
+../../scripts/mk_eventcounttable.sh
+cd ../../
+root -l -b -q macros/getBtagEfficiencies.C++
+
+This will generate the table with the event yields at every selection step, and the macro will create the b-taggin efficiency plots and store them in 'bTagEfficiencies' directory
 
 
 ========
