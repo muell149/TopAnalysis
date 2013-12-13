@@ -11,7 +11,7 @@ SET(CMSSW_DIR "$ENV{CMSSW_BASE}")
 ## NEED to find out where the CMSSW local libraries are stored
 ## I didn't figure out a straight forward approach for this,
 ## doing a bit of gymnastics in the hope it will be robust with different versions of CMSSW
-FILE(GLOB_RECURSE localLibraries FOLLOW_SYMLINKS ${CMSSW_DIR}/*.so )
+FILE(GLOB_RECURSE localLibraries FOLLOW_SYMLINKS ${CMSSW_DIR}/.edmplugincache )
 LIST(GET localLibraries 0 anyLibrary )
 GET_FILENAME_COMPONENT(CMSSW_LIBRARIES_PATH ${anyLibrary} PATH)
 
