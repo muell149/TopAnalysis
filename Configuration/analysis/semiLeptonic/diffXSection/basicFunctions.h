@@ -3139,8 +3139,7 @@ namespace semileptonic {
 	for(int bin=2; bin<=histNumeratorData->GetNbinsX(); ++bin){
 	  double xBorder=histNumeratorData->GetBinLowEdge(bin);
 	  drawLine(xBorder, ratioMin, xBorder, ratioMax, kBlack, 1, 3);
-	}
-      }
+	}      }
       rPad->SetTopMargin(0.0);
       rPad->SetBottomMargin(0.15*scaleFactor);
       rPad->SetRightMargin(right);
@@ -4773,8 +4772,8 @@ namespace semileptonic {
 
 
     TString pseudoDataFileName(TString closureTestSpecifier, std::string decayChannel = "combined"){
-      // this function returns k/value for SVD 
-      // unfolding for the corresponding variable
+      // this function returns the name of the pseudo data  
+      // rootfile for the corresponding closureTestSpecifier
       // modified quantities: NONE
       // used functions: NONE
       // used enumerators: NONE
@@ -4799,7 +4798,27 @@ namespace semileptonic {
       else if (closureTestSpecifier.Contains("1000"         )) out+="PseudoData19712pbandM1000W100Zprime8TeV.root";
       return out;
     }
-    
+ 
+    TString pseudoDatalabel(TString closureTestSpecifier){
+      // this function return
+      // unfolding for the corresponding variable
+      // modified quantities: NONE
+      // used functions: NONE
+      // used enumerators: NONE
+      // closureTestSpecifier: = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
+
+      TString out="";
+      // closure test label
+      if      (closureTestSpecifier.Contains("NoDistort"    )) out+="pseudo data=sum of default MC";
+      else if (closureTestSpecifier.Contains("topPtUp"      )) out+="pseudo data=softer p_{T}(top)";
+      else if (closureTestSpecifier.Contains("topPtDown"    )) out+="pseudo data=harder p_{T}(top)";
+      else if (closureTestSpecifier.Contains("ttbarMassUp"  )) out+="pseudo data=harder m(t#bar{t})";
+      else if (closureTestSpecifier.Contains("ttbarMassDown")) out+="pseudo data=softer m(t#bar{t})";
+      else if (closureTestSpecifier.Contains("data"         )) out+="pseudo data=p_{T}(top)#rightarrow data";
+      else if (closureTestSpecifier.Contains("1000"         )) out+="pseudo data=default MC + 1TeV Z'";
+      return out;
+    }
+   
     // ===============================================================
     // ===============================================================
 

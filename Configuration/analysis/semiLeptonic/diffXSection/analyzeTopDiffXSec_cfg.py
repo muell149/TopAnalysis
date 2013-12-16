@@ -601,11 +601,13 @@ if(not options.sample=="none"):
         usedSample="TopAnalysis/Configuration/Summer12/TBarToTlepWhad_tW_channel_DR_scaleup_8TeV_powheg_tauola_Summer12_DR53X_PU_S10_START53_V7A_v1_cff"
 	additionalEventWeights=False
 	outputFileName+="SingleAntiTopTWScaleUp3"
-    elif(options.sample=="zprime_m1000gev_w100gev"):
+    elif("zprime_m1000gev_w100gev" in options.sample):
         usedSample="TopAnalysis/Configuration/Summer12/ZPrimeToTTJets_M1000GeV_W100GeV_TuneZ2star_8TeV-madgraph-tauola_Summer12_DR53X-PU_S10_START53_V7A-v1_cff"
         additionalEventWeights=False
         if(eventFilter=='signal only'):
             outputFileName+="Sig"
+        elif(eventFilter=='background only'):
+            outputFileName+="Bkg"
         outputFileName+="ZprimeM1000W100"
     elif(options.sample=="qcd" and decayChannel=='muon'):
         usedSample="TopAnalysis/Configuration/Summer12/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6_Summer12_DR53X_PU_S10_START53_V7A_v3_cff"

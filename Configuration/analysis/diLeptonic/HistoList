@@ -38,5 +38,9 @@ HypBBBarMass Standard N_{Events} m^{b#bar{b}} 1 1 0 0 0 0 0 600 6 0 60 120 180 2
 HypToppTTTRestFrame Standard N_{Events} p_{T}^{t}(t#bar{t}R.F.) 1 1 0 0 0.00001 0.01 0 0 5 0 80 130 200 300 400 35 105 165 245 350
 HypTTBarDeltaRapidity Standard N_{Events} |y^{t}|-|y^{#bar{t}}| 1 1 0 0 0 0 -2.5 2.5 6 -2.5 -0.9 -0.4 0 0.4 0.9 2.5 -1.65 -0.55 -0.15 0.15 0.55 1.65
 
+HypJetMultpt30 Standard Events Jets 1 1 0 1 0.001 99 0 0 5 1.5 2.5 3.5 4.5 5.5 6.5 2.0 3.0 4.0 5.0 6.0
+HypJetMultpt60 Standard Events Jets 1 1 0 1 0.000001 179 0 0 6 -0.5 0.5 1.5 2.5 3.5 4.5 5.5 0.0 1.0 2.0 3.0 4.0 5.0
+HypJetMultpt100 Standard Events Jets 1 1 0 1 0.00005 99 0 0 5 -0.5 0.5 1.5 2.5 3.5 4.5 0.0 1.0 2.0 3.0 4.0
+
 # just for testing
 #HypNeutrinopT Standard N_{2EntriesPerEvent} p_{T}^{#nu} 1 1 0 0 0.00001 0.015 0 0 7 0 20 40 60 90 120 200 400 15 30 50 75 105 150 250
