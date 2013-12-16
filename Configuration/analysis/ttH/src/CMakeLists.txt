@@ -28,7 +28,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   KinReco
   KinematicReconstruction
   KinematicReconstruction_LSroutines
-  MeanSol
+  KinematicReconstruction_MeanSol
   MvaTreeHandler
   MvaTreeAnalyzer
   MvaWeights2d
