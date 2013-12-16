@@ -1,21 +1,17 @@
 #ifndef KinematicReconstruction_LSroutines_h
 #define KinematicReconstruction_LSroutines_h
 
-#include <TLorentzVector.h>
-#include <Math/LorentzVector.h>
-#include <Math/PtEtaPhiM4D.h>
-#include <vector>
-#include <TMath.h>
-#include <TF2.h>
+
+
 #include <TH1.h>
-#include <TFile.h>
-#include <Rtypes.h>
-#include <iostream>
-#include <stdio.h>
+#include <TLorentzVector.h>
+#include <TMath.h>
+
+#include "Rtypes.h"
+#include "Math/LorentzVector.h"
+#include "Math/PtEtaPhiM4D.h"
 #include "classesFwd.h"
 
-
-//#include "classesFwd.h"
 //typedef ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > LV;
 
 class KinematicReconstruction_LSroutines {
@@ -31,12 +27,12 @@ public:
   KinematicReconstruction_LSroutines(double mass_top, double mass_b, double mass_w, double mass_l, double mass_al);
       ~KinematicReconstruction_LSroutines();
   
-  void Delete();    
+  void fDelete();    
       
       
   void ini(double mass_l, double mass_al,double mass_Wp, double mass_Wm);
     
-  void SetConstraints(TLorentzVector LV_al, 
+  void setConstraints(TLorentzVector LV_al, 
                       TLorentzVector LV_l, 
                       TLorentzVector LV_b, 
                       TLorentzVector LV_bbar,
@@ -44,7 +40,7 @@ public:
                       double missPy
                      );
   
-  void SetConstraints(LV LV_al, 
+  void setConstraints(LV LV_al, 
                       LV LV_l, 
                       LV LV_b, 
                       LV LV_bbar,
@@ -52,9 +48,9 @@ public:
                       double missPy
                      );
   
-  int GetNsol();
+  int getNsol();
 
-  void SetWeightOption(int wo);
+  void setWeightOption(int wo);
   
   struct TopSolution {
         double TopPt;
@@ -89,86 +85,86 @@ public:
         double costhetabar;
         
     };
-  std::vector<TopSolution>* GetTtSol();
+  std::vector<TopSolution>* getTtSol();
     
-void SetTrueInfo(TLorentzVector LV_Top,TLorentzVector LV_AntiTop,TLorentzVector LV_Neutrino, TLorentzVector LV_AntiNeutrino);
-void SortBy(std::string ch);
-void Print();
-TF1* GetNeutrinoPxF();
+void setTrueInfo(TLorentzVector LV_Top,TLorentzVector LV_AntiTop,TLorentzVector LV_Neutrino, TLorentzVector LV_AntiNeutrino);
+void sortBy(std::string ch);
+void print();
+TF1* getNeutrinoPxF();
 
 private:
-    void FilldTS();
-    void FilldR();
-    void FilldN();
-    void SWAPtopSol(TopSolution& sol1, TopSolution& sol2);
-    void SortTopSol(std::vector<TopSolution> &v);
-    void DoAll(); 
-    void TopRec(double sol);
-    void FindCoeff(double* koeficienty);
+    void filldTS();
+    void filldR();
+    void filldN();
+    void swapTopSol(TopSolution& sol1, TopSolution& sol2);
+    void sortTopSol(std::vector<TopSolution> &v);
+    void doAll(); 
+    void topRec(double sol);
+    void findCoeff(double* koeficienty);
     void quartic_equation(double h0,double h1,double h2,double h3,double h4,std::vector<double>& v);
     void cubic_equation(double a,double b,double c,double d,std::vector<double> &v);
     void quadratic_equation(double a,double b,double c,std::vector<double> &v);
     void linear_equation(double a,double b,std::vector<double> &v);
     int sign(long double ld);
-    double Landau2D(double x,double y);
+    double landau2D(double x,double y);
     
   
       //Utility Methods
     double sqr(double x);
-    void SWAP(double& realone, double& realtwo);
+    void swap(double& realone, double& realtwo);
     
 //private:
-    int weight_option;   // weight option
-    int nSol;
-    double coeffs[5];
-    std::vector<double> vect_pxv;
-    std::vector<TopSolution> ttSol;
-    TLorentzVector al;
-    TLorentzVector l;
-    TLorentzVector b;
-    TLorentzVector bbar;
-    TLorentzVector top;
-    TLorentzVector topbar;
-    TLorentzVector neutrino;
-    TLorentzVector neutrinobar;
-    TLorentzVector w;
-    TLorentzVector wbar;
-    TLorentzVector tt;
+    int weight_option_;   // weight option
+    int nSol_;
+    double coeffs_[5];
+    std::vector<double> vect_pxv_;
+    std::vector<TopSolution> ttSol_;
+    TLorentzVector al_;
+    TLorentzVector l_;
+    TLorentzVector b_;
+    TLorentzVector bbar_;
+    TLorentzVector top_;
+    TLorentzVector topbar_;
+    TLorentzVector neutrino_;
+    TLorentzVector neutrinobar_;
+    TLorentzVector w_;
+    TLorentzVector wbar_;
+    TLorentzVector tt_;
     
-    TLorentzVector true_top;
-    TLorentzVector true_topbar;
-    TLorentzVector true_neutrino;
-    TLorentzVector true_neutrinobar;
+    TLorentzVector true_top_;
+    TLorentzVector true_topbar_;
+    TLorentzVector true_neutrino_;
+    TLorentzVector true_neutrinobar_;
 
-    TF1 * pol4_neutrinoPx; //("pol4_neutrinoPx","pol4",-100,100);
+    TF1 * pol4_neutrinoPx_; //("pol4_neutrinoPx","pol4",-100,100);
     
-    TH1F hnw_cuts;
+    TH1F hnw_cuts_;
     
-    TH1F* hneutrino_E[6];
-    TH1F hcosw;
+    TH1F* hneutrino_E_[6];
+    TH1F hcosw_;
     
-    double px_miss;
-    double py_miss;
+    double px_miss_;
+    double py_miss_;
   
-    double mt;
-    double mtbar;
-    double mb;
-    double mbbar;
-    double mw;
-    double mwbar;
-    double ml;
-    double mal;
-    double mv;
-    double mav;
+    double mt_;
+    double mtbar_;
+    double mb_;
+    double mbbar_;
+    double mw_;
+    double mwbar_;
+    double ml_;
+    double mal_;
+    double mv_;
+    double mav_;
   
     //TF2 * NeutrinoEventShape;  // ()  30.641000 57.941000 22.344000 57.533000 22.232000
     
-   double a1,a2,a3,a4;
-   double b1,b2,b3,b4;
-   double c22,c21,c20,c11,c10,c00;
-   double d22,d21,d20,d11,d10,d00;
-   double d0,d1,d2;
-   double c0,c1,c2;
+   double a1_,a2_,a3_,a4_;
+   double b1_,b2_,b3_,b4_;
+   double c22_,c21_,c20_,c11_,c10_,c00_;
+   double d22_,d21_,d20_,d11_,d10_,d00_;
+   double d0_,d1_,d2_;
+   double c0_,c1_,c2_;
     
   };
 

@@ -1341,11 +1341,14 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     const LV& leptonPlus(allLeptons.at(antiLeptonIndex));
     VLV selectedJets;
     std::vector<double> btagValues;
+    std::vector<int> jIndex;
     for(const int index : jetIndices){
+        
         selectedJets.push_back(jets.at(index));
         btagValues.push_back(jetBTagCSV.at(index));
+        jIndex.push_back(index);
     }
-    
+   
     
 //     if(0){//print
 //          printf("****************************************************************************************************************\n");
@@ -1376,29 +1379,29 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //     
     
     // 2 lines needed for OLD kinReco
-   const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-   const int nSolution = sols.size();
-    
-    
-    // 2 lines needed for NEW kinReco
-//    kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-//    const int nSolution = kinematicReconstruction_->GetNSol();
+    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+    const int nSolution = sols.size();
+        
+    // 3 lines needed for NEW kinReco
+//   kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+//    const auto& sols = kinematicReconstruction_->getSols();
+//    const int nSolution = sols.size();
     
    //////////kinematicReconstruction_->doJetsMerging(&jets,&jetBTagCSV);
    
-   
     if(nSolution == 0) return false;
-    
-    // 1 line needed for OLD kinReco
-     const auto& sol = sols.at(0);
-    
-    // 1 line needed for NEW kinReco
-    // const auto& sol = kinematicReconstruction_->GetSol();
-  
-  
-   
-   
-   
+
+        const auto& sol = sols.at(0);
+        
+        
+//    std::cout<< std::endl;
+//    std::cout<<selectedJets.size() << std::endl;
+//    for(int i=0;i<nSolution;i++)
+//     {
+//         std::cout <<i<< "  "<< sols.at(i).ntags <<"  "<< sols.at(i).weight<<" " <<jIndex[sols.at(i).jetB_index]  << " " << jIndex[sols.at(i).jetBbar_index] << std::endl;
+//         
+//     }
+        
     
     // Fill the results of the on-the-fly kinematic reconstruction
     if(useObjectStructs_){
@@ -1410,8 +1413,8 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         kinRecoObjects_->HypAntiBJet_->push_back(ttbar::TLVtoLV(sol.jetBbar));
         kinRecoObjects_->HypNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrino));
         kinRecoObjects_->HypAntiNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrinoBar));
-        kinRecoObjects_->HypJet0index_->push_back(sol.jetB_index);
-        kinRecoObjects_->HypJet1index_->push_back(sol.jetBbar_index);
+        kinRecoObjects_->HypJet0index_->push_back(jIndex[sol.jetB_index]);
+        kinRecoObjects_->HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
         
         kinRecoObjects_->valuesSet_ = true;
     }
@@ -1424,8 +1427,8 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         HypAntiBJet_->push_back(ttbar::TLVtoLV(sol.jetBbar));
         HypNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrino));
         HypAntiNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrinoBar));
-        HypJet0index_->push_back(sol.jetB_index);
-        HypJet1index_->push_back(sol.jetBbar_index);
+        HypJet0index_->push_back(jIndex[sol.jetB_index]);
+        HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
     }
     
     //check for strange events

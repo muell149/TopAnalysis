@@ -1,36 +1,33 @@
-#include "KinematicReconstruction.h"
-#include <TAttLine.h>
-#define printout 0
-#include "KinematicReconstruction_LSroutines.h"
-#include "analysisUtils.h"
-#include <TLorentzVector.h>
-
-
 #include <cmath>
 #include <cassert>
 #include <algorithm>
 #include <utility>
 #include <cmath>
 
-#include <TLorentzVector.h>
-#include <TMath.h>
-
-#include "KinReco.h"
-#include "utils.h"
-#include "analysisUtils.h"
-#include "classes.h"
-// #include "TVector3.h"
-#include <TRandom3.h>
-#include "MeanSol.h"
-#include <TH1.h>
+//#include <TH1.h>
 #include <TFile.h>
 #include <TString.h>
+#include <TLorentzVector.h>
+// #include <TAttLine.h>
+#include <TMath.h>
+#include <TVector3.h>
+#include <TRandom3.h>
 
+#include "classes.h"
+#include "utils.h"
+#include "analysisUtils.h"
+// #include "KinReco.h"
+#include "KinematicReconstruction.h"
+#include "KinematicReconstruction_LSroutines.h"
+#include "KinematicReconstruction_MeanSol.h"
+
+#define printout 0
 
 using namespace std;
 
 void angle_rot(double alpha, double e, TLorentzVector jet, TLorentzVector & jet_sm)
 {
+    /*Ganna Dolinska*/
   double px_1, py_1, pz_1; // sistema koordinat, gde impul's vdol' Oz
   
   /// Transition matrix detector -> syst1 ///
@@ -39,11 +36,9 @@ void angle_rot(double alpha, double e, TLorentzVector jet, TLorentzVector & jet_
   double x3, y3, z3;
   ///
   
-  
   if(fabs(jet.Px())<=e){jet.SetPx(0);}
   if(fabs(jet.Py())<=e){jet.SetPy(0);}
   if(fabs(jet.Pz())<=e){jet.SetPz(0);}
-  
   
   /// Rotation in syst 1 ///
  int seed_random = (int)(( jet.Pt() - (int)(jet.Pt()) )*1000000000);
@@ -59,7 +54,6 @@ void angle_rot(double alpha, double e, TLorentzVector jet, TLorentzVector & jet_
   {
     double d = sqrt(jet.Pz()*jet.Pz() + jet.Py()*jet.Py());
     double p = jet.Vect().Mag();
-
     
     x1 = d/p;
     y1 = 0;
@@ -95,13 +89,27 @@ void angle_rot(double alpha, double e, TLorentzVector jet, TLorentzVector & jet_
     jet_sm.SetE(jet.E());
   }
   ///
-  
 }
 
 
-KinematicReconstruction::KinematicReconstruction()
+KinematicReconstruction::KinematicReconstruction():
+nSol_(0),
+isJetsMerging_(false),
+h_wmass_(0),
+h_jetAngleRes_(0),
+h_jetEres_(0),
+h_lepAngleRes_(0),
+h_lepEres_(0),
+//h_metAngleRes_(0),
+//h_metPtres_(0),
+//h_metPxRes_(0),
+//h_metPyRes_(0),
+h_nwcuts_(0),
+//hvE_(0),
+h_mbl_w_(0),
+h_costheta_w_(0),
+h_neuEta_w_(0)
 {
-    isJetsMerging=false;
     //std::cout<<"--- Beginning preparation of kinematic reconstruction\n";
     this->loadData();
     //std::cout<<"=== Finishing preparation of kinematic reconstruction\n\n";
@@ -109,34 +117,28 @@ KinematicReconstruction::KinematicReconstruction()
 
 void KinematicReconstruction::doJetsMerging(const VLV* jets,const std::vector<double> *btags)
 {
+    isJetsMerging_=true;   
     
-    isJetsMerging=true;
-    
-    
-    alljets.clear();
-    allbtags.clear();
+    alljets_.clear();
+    allbtags_.clear();
         for (const auto& jet : *jets) {
-        alljets.push_back(ttbar::LVtoTLV(jet));
+        alljets_.push_back(ttbar::LVtoTLV(jet));
     }
     for(int i=0; i<(int)btags->size(); i++) {
-        allbtags.push_back(btags->at(i));
+        allbtags_.push_back(btags->at(i));
     }
     
 }
 
 void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlus, const VLV *jets, const std::vector<double> *btags, const LV* met)
 {
-
-    gRandom->SetSeed(0);
-
-    std::vector<struct_KinematicReconstruction> vect_sol;
+    
+    sols_.clear();
 
     TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
     TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
     TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
 
-    
-    
     //jets selection
 
     vector<int> b1_id;
@@ -147,10 +149,9 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
     
     double btag_wp=0.244;
     
-if(!isJetsMerging)
+if(!isJetsMerging_)
 {
-        
-    
+            
     for (const auto& jet : *jets) {
         jets_tlv.push_back(ttbar::LVtoTLV(jet));
     }
@@ -180,23 +181,23 @@ else
 //     std::vector<double> new_btag;
 //     std::vector<int> veto_i;
 //     std::vector<int> veto_j;
-//         for(int i=0; i<(int)alljets.size(); i++)
+//         for(int i=0; i<(int)alljets_.size(); i++)
 //         {
-//             if(allbtags.at(i)<btag_wp)continue;
-//             TLorentzVector ijet=alljets.at(i);
+//             if(allbtags_.at(i)<btag_wp)continue;
+//             TLorentzVector ijet=alljets_.at(i);
 //             
-//             for(int j=0; j<(int)alljets.size(); j++)
+//             for(int j=0; j<(int)alljets_.size(); j++)
 //             {
 //                  if(i==j)continue;
-//                  if(allbtags.at(j)>=btag_wp)continue; 
-//                 TLorentzVector jjet=alljets.at(j);
+//                  if(allbtags_.at(j)>=btag_wp)continue; 
+//                 TLorentzVector jjet=alljets_.at(j);
 //                 double dRij=ijet.DeltaR(jjet);
 //                  if(dRij>1)continue;
 //                 TLorentzVector new_jet=ijet+jjet;
 //                     if(new_jet.Pt()<30)continue;
 //                     if(fabs(new_jet.Eta())>2.4)continue;
 //                 new_jets_tlv.push_back(new_jet);
-//                 new_btag.push_back(allbtags.at(i));
+//                 new_btag.push_back(allbtags_.at(i));
 //                 veto_i.push_back(i);
 //                 veto_j.push_back(j);
 //             }   
@@ -204,12 +205,12 @@ else
 //  
 //      std::vector<int> index_i;
 //      std::vector<int> index_j;
-//      for(int i=0; i<(int)alljets.size(); i++)
+//      for(int i=0; i<(int)alljets_.size(); i++)
 //         {
-//                 if(alljets.at(i).Pt()<30)continue;
-//                 if(fabs(alljets.at(i).Eta())>2.4)continue;
-//                 jets_tlv.push_back(alljets.at(i));
-//                 new_btags.push_back(allbtags.at(i));
+//                 if(alljets_.at(i).Pt()<30)continue;
+//                 if(fabs(alljets_.at(i).Eta())>2.4)continue;
+//                 jets_tlv.push_back(alljets_.at(i));
+//                 new_btags.push_back(allbtags_.at(i));
 //                 index_i.push_back(i);
 //                 index_j.push_back(i);
 //         }
@@ -248,7 +249,7 @@ else
     int index_i;
     int index_j;
     
-    for(int i=0; i<(int)alljets.size(); i++)
+    for(int i=0; i<(int)alljets_.size(); i++)
     {
             index_dR.push_back(-1);
 
@@ -259,18 +260,18 @@ else
        min_dR=1;
        index_i=-1;
        index_j=-1;
-        for(int i=0; i<(int)alljets.size(); i++)
+        for(int i=0; i<(int)alljets_.size(); i++)
         {
-            if(alljets.at(i).Pt()<10)continue;
+            if(alljets_.at(i).Pt()<10)continue;
             if(index_dR[i]>-1)continue;
-            TLorentzVector ijet=alljets.at(i);
+            TLorentzVector ijet=alljets_.at(i);
              
-            for(int j=0; j<(int)alljets.size(); j++)
+            for(int j=0; j<(int)alljets_.size(); j++)
             {
                 if(i==j)continue;
-                if(alljets.at(j).Pt()<10)continue;
+                if(alljets_.at(j).Pt()<10)continue;
                 if(index_dR[j]>-1)continue;
-                TLorentzVector jjet=alljets.at(j);
+                TLorentzVector jjet=alljets_.at(j);
                 
                 double dRij=ijet.DeltaR(jjet);
                 
@@ -299,7 +300,7 @@ else
      
      vector<int> used_index;
      
-     for(int i=0; i<(int)alljets.size(); i++)
+     for(int i=0; i<(int)alljets_.size(); i++)
      {
          bool flag=false;
          for(int k=0; k<(int)used_index.size(); k++)
@@ -310,22 +311,22 @@ else
          
         if(index_dR[i]<0)
         {
-                if(alljets.at(i).Pt()<30)continue;
-                if(fabs(alljets.at(i).Eta())>2.4)continue;
-                jets_tlv.push_back(alljets.at(i));
-                new_btags.push_back(allbtags.at(i));
+                if(alljets_.at(i).Pt()<30)continue;
+                if(fabs(alljets_.at(i).Eta())>2.4)continue;
+                jets_tlv.push_back(alljets_.at(i));
+                new_btags.push_back(allbtags_.at(i));
                 
         }
         else
         {
             if(index_dR[i]>-1)
             {
-                TLorentzVector temp = alljets.at(i) + alljets.at((index_dR[i]));
+                TLorentzVector temp = alljets_.at(i) + alljets_.at((index_dR[i]));
                 used_index.push_back(index_dR[i]);
                 if(temp.Pt()<30)continue;
                 if(fabs(temp.Eta())>2.4)continue;
                 jets_tlv.push_back(temp);
-                new_btags.push_back(allbtags.at(i)*(allbtags.at(i)>allbtags.at(index_dR[i])) + allbtags.at(index_dR[i])*(allbtags.at(index_dR[i])>allbtags.at(i)));
+                new_btags.push_back(allbtags_.at(i)*(allbtags_.at(i)>allbtags_.at(index_dR[i])) + allbtags_.at(index_dR[i])*(allbtags_.at(index_dR[i])>allbtags_.at(i)));
             }
         }
         
@@ -348,26 +349,17 @@ else
         }
      
     
-}    
-    if(b1_id.size()<2){
-        nSol=0;
-        return;
-    }    
-   //... 
-    
-    
-    
+} //else !isJetsMerging_
 
-    ///jets loop
-    /// Anya
-    MeanSol meanSol(172.5);
-    double max_sum_weight=0;
-    int nbtag=0, isHaveSol;
 
-    ///
+if(b1_id.size()<2)return;     
 
-    nSol=0;
+    KinematicReconstruction_MeanSol meanSol(172.5);
+    //double max_sum_weight=0;
+    int /*nbtag=0,*/ isHaveSol=0;
+
     for(int ib=0; ib<(int)b1_id.size(); ib++) {
+        isHaveSol=0;
         int j1=b1_id[ib];
         int j2=b2_id[ib];
 //         if((*jets)[j1].Pt()<30 || (*jets)[j2].Pt()<30)continue;
@@ -391,11 +383,8 @@ else
 
     TRandom3 r((int)(( jets_tlv[0].Pt() - (int)(jets_tlv[0].Pt()) )*1000000000)); ///random seed
     gRandom->SetSeed((int)(( jets_tlv[0].Pt() - (int)(jets_tlv[0].Pt()) )*1000000000));
-
-
           
-        TVector3 vX_reco =  - b_temp.Vect() - bbar_temp.Vect() - l_temp.Vect() - al_temp.Vect() - met_temp.Vect();
-       
+        TVector3 vX_reco =  - b_temp.Vect() - bbar_temp.Vect() - l_temp.Vect() - al_temp.Vect() - met_temp.Vect();       
 
         for(int sm=0; sm<100; sm++) {
             TLorentzVector b_sm=b_temp;
@@ -405,39 +394,37 @@ else
             TLorentzVector al_sm=al_temp;
             TLorentzVector vX_sm;
 
-            
-
-            double fB=h_jetEres->GetRandom();//fB=1;  //sm off
+            double fB=h_jetEres_->GetRandom();//fB=1;  //sm off
             double xB=sqrt((fB*fB*b_sm.E()*b_sm.E()-b_sm.M2())/(b_sm.P()*b_sm.P()));
-            double fBbar=h_jetEres->GetRandom();//fBbar=1; //sm off
+            double fBbar=h_jetEres_->GetRandom();//fBbar=1; //sm off
             double xBbar=sqrt((fBbar*fBbar*bbar_sm.E()*bbar_sm.E()-bbar_sm.M2())/(bbar_sm.P()*bbar_sm.P()));
                            
-            double fL=h_lepEres->GetRandom();//fL=1; //sm off
+            double fL=h_lepEres_->GetRandom();//fL=1; //sm off
             double xL=sqrt((fL*fL*l_sm.E()*l_sm.E()-l_sm.M2())/(l_sm.P()*l_sm.P()));
-            double faL=h_lepEres->GetRandom();//faL=1;  //sm off
+            double faL=h_lepEres_->GetRandom();//faL=1;  //sm off
             double xaL=sqrt((faL*faL*al_sm.E()*al_sm.E()-al_sm.M2())/(al_sm.P()*al_sm.P()));
                            
             b_sm.SetXYZT(b_sm.Px()*xB,b_sm.Py()*xB,b_sm.Pz()*xB,b_sm.E()*fB);
-            angle_rot(h_jetAngleRes->GetRandom(),0.001,b_sm,b_sm);
+            angle_rot(h_jetAngleRes_->GetRandom(),0.001,b_sm,b_sm);
                            
             bbar_sm.SetXYZT(bbar_sm.Px()*xBbar,bbar_sm.Py()*xBbar,bbar_sm.Pz()*xBbar,bbar_sm.E()*fBbar);    
-            angle_rot(h_jetAngleRes->GetRandom(),0.001,bbar_sm,bbar_sm);
+            angle_rot(h_jetAngleRes_->GetRandom(),0.001,bbar_sm,bbar_sm);
                                 
             l_sm.SetXYZT(l_sm.Px()*xL,l_sm.Py()*xL,l_sm.Pz()*xL,l_sm.E()*fL);
-            angle_rot(h_lepAngleRes->GetRandom(),0.001,l_sm,l_sm);
+            angle_rot(h_lepAngleRes_->GetRandom(),0.001,l_sm,l_sm);
                            
             al_sm.SetXYZT(al_sm.Px()*xaL,al_sm.Py()*xaL,al_sm.Pz()*xaL,al_sm.E()*faL);
-            angle_rot(h_lepAngleRes->GetRandom(),0.001,al_sm,al_sm);
+            angle_rot(h_lepAngleRes_->GetRandom(),0.001,al_sm,al_sm);
                            
 // met Pt+angle smearing
 //             double fX=1;
 //             double dAX=0;
-//             for(int i=0;i<((int)(ptBins.size()));i++)
+//             for(int i=0;i<((int)(ptBins_.size()));i++)
 //             {
-//                   if(vX_reco.Pt()>ptBins[i]&&vX_reco.Pt()<=ptBins[i+1])
+//                   if(vX_reco.Pt()>ptBins_[i]&&vX_reco.Pt()<=ptBins_[i+1])
 //                   {
-//                        //fX=h_metPtres[i]->GetRandom();
-//                        //dAX=h_metAngleRes[i]->GetRandom();
+//                        //fX=h_metPtres_[i]->GetRandom();
+//                        //dAX=h_metAngleRes_[i]->GetRandom();
 //                        
 //                        fX=1;
 //                         dAX=0;
@@ -453,12 +440,12 @@ else
 //met Pt+angle smearing
             double fPx=1;
             double fPy=0;
-            for(int i=0;i<((int)(ptBins.size()));i++)
+            for(int i=0;i<((int)(ptBins_.size()));i++)
             {
-                  if(vX_reco.Pt()>ptBins[i]&&vX_reco.Pt()<=ptBins[i+1])
+                  if(vX_reco.Pt()>ptBins_[i]&&vX_reco.Pt()<=ptBins_[i+1])
                   {
-                       //fPx=h_metPxRes[i]->GetRandom();
-                       //fPy=h_metPyRes[i]->GetRandom();
+                       //fPx=h_metPxRes_[i]->GetRandom();
+                       //fPy=h_metPyRes_[i]->GetRandom();
                        fPx=1;
                        fPy=1;
                   }
@@ -466,134 +453,133 @@ else
             double tempX= vX_reco.Px()*fPx;
             double tempY= vX_reco.Py()*fPy;
             vX_sm.SetXYZM(tempX,tempY,0,0);
-                           
        
 //...
             TVector3 metV3_sm= -b_sm.Vect()-bbar_sm.Vect()-l_sm.Vect()-al_sm.Vect()-vX_sm.Vect();
             met_sm.SetXYZM(metV3_sm.Px(),metV3_sm.Py(),0,0);
             
             
+//            KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass_->GetRandom(),h_wmass_->GetRandom(),(*h_nwcuts_));
+            KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass_->GetRandom(),h_wmass_->GetRandom(),(*h_neuEta_w_));
+//              KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass_->GetRandom(),h_wmass_->GetRandom(),hvE_);
+//             KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass_->GetRandom(),h_wmass_->GetRandom(),hvE_,(*h_neuEta_w_));
+//              KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass_->GetRandom(),h_wmass_->GetRandom(),(*h_costheta_w_),1);
             
-            ///Anya
-           
-//            KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass->GetRandom(),h_wmass->GetRandom(),(*h_nwcuts));
-            KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass->GetRandom(),h_wmass->GetRandom(),(*h_neuEta_w));
-//              KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass->GetRandom(),h_wmass->GetRandom(),hvE);
-//             KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass->GetRandom(),h_wmass->GetRandom(),hvE,(*h_neuEta_w));
-//              KinematicReconstruction_LSroutines tp_sm(0.0,0.0,h_wmass->GetRandom(),h_wmass->GetRandom(),(*h_costheta_w),1);
-            ///
-            tp_sm.SetConstraints(al_sm, l_sm, b_sm, bbar_sm, met_sm.Px(), met_sm.Py());
+            tp_sm.setConstraints(al_sm, l_sm, b_sm, bbar_sm, met_sm.Px(), met_sm.Py());
 
-            /// Anya
-            if(tp_sm.GetNsol()>0){
-            for(int i=0; i<=tp_sm.GetNsol()*0; i++) {
-                   // meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,1);
-                  //meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,(tp_sm.GetTtSol()->at(i).lepEw));//*b_w*bbar_w
-                  double mbl_weight=h_mbl_w->GetBinContent(h_mbl_w->FindBin((al_sm+b_sm).M()))*h_mbl_w->GetBinContent(h_mbl_w->FindBin((l_sm+bbar_sm).M()))/100000000;
-                  meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,mbl_weight);//
-                  //meanSol.Add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,(tp_sm.GetTtSol()->at(i).vw));//
+
+            if(tp_sm.getNsol()>0)
+            {
+                isHaveSol=1;
+                for(int i=0; i<=tp_sm.getNsol()*0; i++) 
+                {
+                   // meanSol.add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,1);
+                  //meanSol.add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,(tp_sm.GetTtSol()->at(i).lepEw));//*b_w*bbar_w
+                  double mbl_weight=h_mbl_w_->GetBinContent(h_mbl_w_->FindBin((al_sm+b_sm).M()))*h_mbl_w_->GetBinContent(h_mbl_w_->FindBin((l_sm+bbar_sm).M()))/100000000;
+                  meanSol.add(tp_sm.getTtSol()->at(i).top,tp_sm.getTtSol()->at(i).topbar,tp_sm.getTtSol()->at(i).neutrino,tp_sm.getTtSol()->at(i).neutrinobar,mbl_weight);//
+                  //meanSol.add(tp_sm.GetTtSol()->at(i).top,tp_sm.GetTtSol()->at(i).topbar,tp_sm.GetTtSol()->at(i).neutrino,tp_sm.GetTtSol()->at(i).neutrinobar,(tp_sm.GetTtSol()->at(i).vw));//
 
                    
-             }
-            }
-            
-            if(tp_sm.GetNsol()>0){isHaveSol=1; nSol++; }
-            ///
-///Anya comment
-//             if(!(tp_sm.GetNsol()<1 || tp_sm.GetNsol()==1 || tp_sm.GetNsol()==3)) {
-//                 if(tp_sm.GetTtSol()->at(0).vw>vw_max){
-//                     nSol++;
-//
-//                     vw_max=tp_sm.GetTtSol()->at(0).vw;
-//                     sol.jetB = b_temp;
-//                     sol.jetBbar = bbar_temp;
-//                     sol.lm = leptonMinus_tlv;
-//                     sol.lp = leptonPlus_tlv;
-//                     sol.met = met_temp;
-//                     sol.neutrino = tp_sm.GetTtSol()->at(0).neutrino;
-//                     sol.neutrinoBar = tp_sm.GetTtSol()->at(0).neutrinobar;
-//                     sol.weight = tp_sm.GetTtSol()->at(0).vw;
-//                     sol.Wplus = sol.lp + sol.neutrino;
-//                     sol.Wminus = sol.lm + sol.neutrinoBar;
-//                     sol.top = sol.Wplus + sol.jetB;
-// //                     cout << "vw: " << tp_m.GetTtSol()->at(0).vw << "pt: " << sol.top.Pt() << endl;
-//                     sol.topBar = sol.Wminus + sol.jetBbar;
-//                     sol.ttbar = sol.top + sol.topBar;
-//                     sol.jetB_index = j1;
-//                     sol.jetBbar_index = j2;
-//                     sol.ntags = nb_tag[ib];
-//                 }
-//             }
-///
-			}
-	/*smearing*/
-
-
-        if(isHaveSol) {
-            if(nb_tag[ib]==nbtag) {
-                if(meanSol.GetSumWeight()>max_sum_weight) {
-                    max_sum_weight=meanSol.GetSumWeight();
-                    meanSol.GetMeanSol(sol.top, sol.topBar, sol.neutrino, sol.neutrinoBar);
-                    sol.jetB = b_temp;
-                    sol.jetBbar = bbar_temp;
-                    sol.lm = leptonMinus_tlv;
-                    sol.lp = leptonPlus_tlv;
-                    sol.met = met_temp;
-                    sol.weight = 1;//chto-to chto bollshe nulya
-                    sol.Wplus = sol.lp + sol.neutrino;
-                    sol.Wminus = sol.lm + sol.neutrinoBar;
-                    sol.ttbar = sol.top + sol.topBar;
-                    sol.jetB_index = b1_id[ib];
-                    sol.jetBbar_index = b2_id[ib];
-                    sol.ntags = nb_tag[ib];
                 }
             }
-            else if(nb_tag[ib]>nbtag) {
-                nbtag=nb_tag[ib];
-                max_sum_weight=meanSol.GetSumWeight();
-                meanSol.GetMeanSol(sol.top, sol.topBar, sol.neutrino, sol.neutrinoBar);
-                sol.jetB = b_temp;
-                sol.jetBbar = bbar_temp;
-                sol.lm = leptonMinus_tlv;
-                sol.lp = leptonPlus_tlv;
-                sol.met = met_temp;
-                sol.weight = 1;//chto-to chto bollshe nulya
-                sol.Wplus = sol.lp + sol.neutrino;
-                sol.Wminus = sol.lm + sol.neutrinoBar;
-                sol.ttbar = sol.top + sol.topBar;
-                sol.jetB_index = b1_id[ib];
-                sol.jetBbar_index = b2_id[ib];
-                sol.ntags = nb_tag[ib];
-            }
-        }
+            
+			} // for sm=100 end
 
-        meanSol.Clear();
-///
+
+//         if(isHaveSol) {
+//             
+//                 if(nb_tag[ib]==nbtag){
+//                     if(meanSol.getSumWeight()>max_sum_weight) {
+//                         max_sum_weight=meanSol.getSumWeight();
+//                         meanSol.getMeanSol(sol_.top, sol_.topBar, sol_.neutrino, sol_.neutrinoBar);
+//                         sol_.jetB = b_temp;
+//                         sol_.jetBbar = bbar_temp;
+//                         sol_.lm = leptonMinus_tlv;
+//                         sol_.lp = leptonPlus_tlv;
+//                         sol_.met = met_temp;
+//                         sol_.weight = max_sum_weight;
+//                         sol_.Wplus = sol_.lp + sol_.neutrino;
+//                         sol_.Wminus = sol_.lm + sol_.neutrinoBar;
+//                         sol_.ttbar = sol_.top + sol_.topBar;
+//                         sol_.jetB_index = b1_id[ib];
+//                         sol_.jetBbar_index = b2_id[ib];
+//                         sol_.ntags = nb_tag[ib];
+//                         }
+//                 }
+//             else if(nb_tag[ib]>nbtag) {
+//                 nbtag=nb_tag[ib];
+//                 max_sum_weight=meanSol.getSumWeight();
+//                 meanSol.getMeanSol(sol_.top, sol_.topBar, sol_.neutrino, sol_.neutrinoBar);
+//                 sol_.jetB = b_temp;
+//                 sol_.jetBbar = bbar_temp;
+//                 sol_.lm = leptonMinus_tlv;
+//                 sol_.lp = leptonPlus_tlv;
+//                 sol_.met = met_temp;
+//                 sol_.weight = max_sum_weight;
+//                 sol_.Wplus = sol_.lp + sol_.neutrino;
+//                 sol_.Wminus = sol_.lm + sol_.neutrinoBar;
+//                 sol_.ttbar = sol_.top + sol_.topBar;
+//                 sol_.jetB_index = b1_id[ib];
+//                 sol_.jetBbar_index = b2_id[ib];
+//                 sol_.ntags = nb_tag[ib];
+//             }
+//         }
+
+        if(isHaveSol) 
+            {
+                        meanSol.getMeanSol(sol_.top, sol_.topBar, sol_.neutrino, sol_.neutrinoBar);
+                        sol_.jetB = b_temp;
+                        sol_.jetBbar = bbar_temp;
+                        sol_.lm = leptonMinus_tlv;
+                        sol_.lp = leptonPlus_tlv;
+                        sol_.met = met_temp;
+                        sol_.weight = meanSol.getSumWeight();
+                        sol_.Wplus = sol_.lp + sol_.neutrino;
+                        sol_.Wminus = sol_.lm + sol_.neutrinoBar;
+                        sol_.ttbar = sol_.top + sol_.topBar;
+                        sol_.jetB_index = b1_id[ib];
+                        sol_.jetBbar_index = b2_id[ib];
+                        sol_.ntags = nb_tag[ib];
+                sols_.push_back(sol_);
+            }
+
+
+        meanSol.clear();
 
     } ///end jets loop
 
+    nSol_=(int)(sols_.size());
+    
+     if(nSol_>0){
+        std::nth_element(begin(sols_), begin(sols_), end(sols_),
+                         [](const Struct_KinematicReconstruction& a, const Struct_KinematicReconstruction& b){
+                             return  b.ntags < a.ntags || (b.ntags == a.ntags && b.weight < a.weight);
+                         });
 
+        sol_=sols_[0];
+    }
 
-}       // End of KinematicReconstruction constructor
-
-
-
-
-
-
-
-
-int KinematicReconstruction::GetNSol()const
-{
-    return nSol;
 }
 
 
 
-struct_KinematicReconstruction KinematicReconstruction::GetSol()const
+int KinematicReconstruction::getNSol()const
 {
-    return sol;
+    return nSol_;
 }
+
+
+
+Struct_KinematicReconstruction KinematicReconstruction::getSol()const
+{
+    return sol_;
+}
+
+vector< Struct_KinematicReconstruction > KinematicReconstruction::getSols() const
+{
+    return sols_;
+}
+
 
 void KinematicReconstruction::loadData()
 {
@@ -603,18 +589,18 @@ void KinematicReconstruction::loadData()
     TString data_path = ttbar::DATA_PATH();
     data_path.Append("/KinReco_wmass.root");
     TFile wmassfile(data_path);
-    h_wmass = (TH1F*)wmassfile.Get("W_mass");
-    h_wmass->SetDirectory(0);
+    h_wmass_ = (TH1F*)wmassfile.Get("W_mass");
+    h_wmass_->SetDirectory(0);
     wmassfile.Close();
     
     // jet resolution
     TString data_path1 = ttbar::DATA_PATH();
     data_path1.Append("/KinReco_d_angle_jet.root");
     TFile danglejetfile(data_path1);
-    h_jetAngleRes = (TH1F*)danglejetfile.Get("d_angle_jet");
-    h_jetEres = (TH1F*)danglejetfile.Get("fE");
-    h_jetAngleRes->SetDirectory(0);
-    h_jetEres->SetDirectory(0);
+    h_jetAngleRes_ = (TH1F*)danglejetfile.Get("d_angle_jet");
+    h_jetEres_ = (TH1F*)danglejetfile.Get("fE");
+    h_jetAngleRes_->SetDirectory(0);
+    h_jetEres_->SetDirectory(0);
     danglejetfile.Close();
     //
     
@@ -622,27 +608,27 @@ void KinematicReconstruction::loadData()
     TString data_path2 = ttbar::DATA_PATH();
     data_path2.Append("/KinReco_d_angle_lep.root");
     TFile lepangleresfile(data_path2);
-    h_lepAngleRes = (TH1F*)lepangleresfile.Get("d_angle_jet");
-    h_lepEres = (TH1F*)lepangleresfile.Get("fE");
-    h_lepAngleRes->SetDirectory(0);
-    h_lepEres->SetDirectory(0);
+    h_lepAngleRes_ = (TH1F*)lepangleresfile.Get("d_angle_jet");
+    h_lepEres_ = (TH1F*)lepangleresfile.Get("fE");
+    h_lepAngleRes_->SetDirectory(0);
+    h_lepEres_->SetDirectory(0);
     lepangleresfile.Close();
     //
 // 
 //     //MET resolution
     
-    ptBins =  {0,7,13,18,27,37,48,59,70,100,200,500,1000,1500};
+    ptBins_ =  {0,7,13,18,27,37,48,59,70,100,200,500,1000,1500};
     TString data_path3 = ttbar::DATA_PATH();
     data_path3.Append("/KinReco_rmshistA_dAngle_vs_Pt.root");
     TFile metangleresfile(data_path3);
     for(int i=0;i<13;i++)
     {
         char temp_name[100];
-        sprintf(temp_name,"bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metAngleRes[i]=(TH1F*)metangleresfile.Get(temp_name);
-        sprintf(temp_name,"metAng_bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metAngleRes[i]->SetName(temp_name);
-        h_metAngleRes[i]->SetDirectory(0);
+        sprintf(temp_name,"bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metAngleRes_[i]=(TH1F*)metangleresfile.Get(temp_name);
+        sprintf(temp_name,"metAng_bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metAngleRes_[i]->SetName(temp_name);
+        h_metAngleRes_[i]->SetDirectory(0);
     }
     metangleresfile.Close();
     
@@ -652,11 +638,11 @@ void KinematicReconstruction::loadData()
     for(int i=0;i<13;i++)
     {
         char temp_name[100];
-        sprintf(temp_name,"bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metPtres[i]=(TH1F*)metptresfile.Get(temp_name);
-        sprintf(temp_name,"metPt_bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metPtres[i]->SetName(temp_name);
-        h_metPtres[i]->SetDirectory(0);
+        sprintf(temp_name,"bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metPtres_[i]=(TH1F*)metptresfile.Get(temp_name);
+        sprintf(temp_name,"metPt_bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metPtres_[i]->SetName(temp_name);
+        h_metPtres_[i]->SetDirectory(0);
     }
     metptresfile.Close();
     
@@ -667,11 +653,11 @@ void KinematicReconstruction::loadData()
     for(int i=0;i<13;i++)
     {
         char temp_name[100];
-        sprintf(temp_name,"bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metPxRes[i]=(TH1F*)metpxresfile.Get(temp_name);
-        sprintf(temp_name,"metPx_bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metPxRes[i]->SetName(temp_name);
-        h_metPxRes[i]->SetDirectory(0);
+        sprintf(temp_name,"bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metPxRes_[i]=(TH1F*)metpxresfile.Get(temp_name);
+        sprintf(temp_name,"metPx_bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metPxRes_[i]->SetName(temp_name);
+        h_metPxRes_[i]->SetDirectory(0);
     }
     metpxresfile.Close();
   //...   
@@ -683,11 +669,11 @@ void KinematicReconstruction::loadData()
     for(int i=0;i<13;i++)
     {
         char temp_name[100];
-        sprintf(temp_name,"bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metPyRes[i]=(TH1F*)metpyresfile.Get(temp_name);
-        sprintf(temp_name,"metPy_bin_%.0f_%.0f",ptBins[i],ptBins[i+1]);
-        h_metPyRes[i]->SetName(temp_name);
-        h_metPyRes[i]->SetDirectory(0);
+        sprintf(temp_name,"bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metPyRes_[i]=(TH1F*)metpyresfile.Get(temp_name);
+        sprintf(temp_name,"metPy_bin_%.0f_%.0f",ptBins_[i],ptBins_[i+1]);
+        h_metPyRes_[i]->SetName(temp_name);
+        h_metPyRes_[i]->SetDirectory(0);
     }
     metpyresfile.Close();
   //...   
@@ -696,8 +682,8 @@ void KinematicReconstruction::loadData()
     TString data_path5 = ttbar::DATA_PATH();
     data_path5.Append("/KinReco_wneutrinocuts.root");
     TFile fnw(data_path5);
-    h_nwcuts = (TH1F*)fnw.Get("Eneu_true");
-    h_nwcuts->SetDirectory(0);
+    h_nwcuts_ = (TH1F*)fnw.Get("Eneu_true");
+    h_nwcuts_->SetDirectory(0);
     fnw.Close();
     
 ///  E 1d bins
@@ -710,8 +696,8 @@ void KinematicReconstruction::loadData()
                         for(int i=0;i<6;i++)
                         {
                             sprintf(hvE_name,"Eneu_true%d",i+1);
-                                    hvE[i] = (TH1F*)frootNeut.Get(hvE_name);
-                                    hvE[i]->SetDirectory(0);
+                                    hvE_[i] = (TH1F*)frootNeut.Get(hvE_name);
+                                    hvE_[i]->SetDirectory(0);
                         }
     frootNeut.Close();
 ///...
@@ -721,15 +707,15 @@ void KinematicReconstruction::loadData()
         TString data_path7 = ttbar::DATA_PATH();
         data_path7.Append("/KinReco_mbl.root");
         TFile fmbl(data_path7);
-        h_mbl_w = (TH1F*)fmbl.Get("mbl_true");
-        h_mbl_w->SetDirectory(0);
+        h_mbl_w_ = (TH1F*)fmbl.Get("mbl_true");
+        h_mbl_w_->SetDirectory(0);
         fmbl.Close();
         
         TString data_path71 = ttbar::DATA_PATH();
         data_path71.Append("/KinReco_mbl_wrong.root");
         TFile fmbl_wrong(data_path71);
-//         h_mbl_w = (TH1F*)fmbl_wrong.Get("mbl_true_wrong");
-//         h_mbl_w->SetDirectory(0);
+//         h_mbl_w_ = (TH1F*)fmbl_wrong.Get("mbl_true_wrong");
+//         h_mbl_w_->SetDirectory(0);
         fmbl_wrong.Close();
         
 /// ...        
@@ -739,8 +725,8 @@ void KinematicReconstruction::loadData()
         TString data_path8 = ttbar::DATA_PATH();
         data_path8.Append("/KinReco_costheta_true.root");
         TFile fcostheta(data_path8);
-        h_costheta_w = (TH1F*)fcostheta.Get("cos_theta_true");
-        h_costheta_w->SetDirectory(0);
+        h_costheta_w_ = (TH1F*)fcostheta.Get("cos_theta_true");
+        h_costheta_w_->SetDirectory(0);
         fcostheta.Close();
 /// ...
         
@@ -748,8 +734,8 @@ void KinematicReconstruction::loadData()
         TString data_path9 = ttbar::DATA_PATH();
         data_path9.Append("/KinReco_wneutrinoEta.root");
         TFile fneuEta(data_path9);
-        h_neuEta_w = (TH1F*)fneuEta.Get("Etaneu_true");
-        h_neuEta_w->SetDirectory(0);
+        h_neuEta_w_ = (TH1F*)fneuEta.Get("Etaneu_true");
+        h_neuEta_w_->SetDirectory(0);
         fneuEta.Close();
 /// ...        
         
@@ -759,7 +745,7 @@ void KinematicReconstruction::loadData()
 void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlus, const VLV *jets, const std::vector<double> *btags, const LV* met, bool mass_loop_on)
 {
 
-    std::vector<struct_KinematicReconstruction> vect_sol;
+    std::vector<Struct_KinematicReconstruction> vect_sol;
 
 
     TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
@@ -793,7 +779,7 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
     }
 
     if(b1_id.size()<2) {
-        nSol=0;
+        nSol_=0;
         return;
     }
 
@@ -820,7 +806,7 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
 
     ///jets loop
 
-    nSol=0;
+    nSol_=0;
     for(int ib=0; ib<(int)b1_id.size(); ib++) {
         int j1=b1_id[ib];
         int j2=b2_id[ib];
@@ -891,30 +877,29 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
                 al_sm.SetXYZT(al_sm.Px()*xaL, al_sm.Py()*xaL, al_sm.Pz()*xaL, al_sm.E()*faL);
 
                 KinematicReconstruction_LSroutines tp_sm(172.5, 4.8, 80.4, 0.0, 0.0);
-                tp_sm.SetConstraints(al_sm, l_sm, b_sm, bbar_sm, met_sm.Px(), met_sm.Py());
+                tp_sm.setConstraints(al_sm, l_sm, b_sm, bbar_sm, met_sm.Px(), met_sm.Py());
 
-                if(!(tp_sm.GetNsol()<1 || tp_sm.GetNsol()==1 || tp_sm.GetNsol()==3)) {
-                    if(tp_sm.GetTtSol()->at(0).vw>vw_max) {
-                        nSol++;
+                if(!(tp_sm.getNsol()<1 || tp_sm.getNsol()==1 || tp_sm.getNsol()==3)) {
+                    if(tp_sm.getTtSol()->at(0).vw>vw_max) {
+                        nSol_++;
 
-                        vw_max=tp_sm.GetTtSol()->at(0).vw;
-                        sol.jetB = b_temp;
-                        sol.jetBbar = bbar_temp;
-                        sol.lm = leptonMinus_tlv;
-                        sol.lp = leptonPlus_tlv;
-                        sol.met = met_temp;
-                        sol.neutrino = tp_sm.GetTtSol()->at(0).neutrino;
-                        sol.neutrinoBar = tp_sm.GetTtSol()->at(0).neutrinobar;
-                        sol.weight = tp_sm.GetTtSol()->at(0).vw;
-                        sol.Wplus = sol.lp + sol.neutrino;
-                        sol.Wminus = sol.lm + sol.neutrinoBar;
-                        sol.top = sol.Wplus + sol.jetB;
-//                         cout << "vw: " << tp_m.GetTtSol()->at(0).vw << "pt: " << sol.top.Pt() << endl;
-                        sol.topBar = sol.Wminus + sol.jetBbar;
-                        sol.ttbar = sol.top + sol.topBar;
-                        sol.jetB_index = j1;
-                        sol.jetBbar_index = j2;
-                        sol.ntags = nb_tag[ib];
+                        vw_max=tp_sm.getTtSol()->at(0).vw;
+                        sol_.jetB = b_temp;
+                        sol_.jetBbar = bbar_temp;
+                        sol_.lm = leptonMinus_tlv;
+                        sol_.lp = leptonPlus_tlv;
+                        sol_.met = met_temp;
+                        sol_.neutrino = tp_sm.getTtSol()->at(0).neutrino;
+                        sol_.neutrinoBar = tp_sm.getTtSol()->at(0).neutrinobar;
+                        sol_.weight = tp_sm.getTtSol()->at(0).vw;
+                        sol_.Wplus = sol_.lp + sol_.neutrino;
+                        sol_.Wminus = sol_.lm + sol_.neutrinoBar;
+                        sol_.top = sol_.Wplus + sol_.jetB;
+                        sol_.topBar = sol_.Wminus + sol_.jetBbar;
+                        sol_.ttbar = sol_.top + sol_.topBar;
+                        sol_.jetB_index = j1;
+                        sol_.jetBbar_index = j2;
+                        sol_.ntags = nb_tag[ib];
                     }
 
                 }
@@ -931,53 +916,50 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
 
                 KinematicReconstruction_LSroutines tp_m(im, 4.8, 80.4, 0.0, 0.0);
 
-                tp_m.SetConstraints(al_temp, l_temp, b_temp, bbar_temp, met_temp.Px(), met_temp.Py());
+                tp_m.setConstraints(al_temp, l_temp, b_temp, bbar_temp, met_temp.Px(), met_temp.Py());
 
 //                 if(tp_m.GetNsol()<1 || tp_m.GetNsol()==1 || tp_m.GetNsol()==3) continue;
-                if(tp_m.GetNsol()<1) continue;
+                if(tp_m.getNsol()<1) continue;
                 
-                if(!(tp_m.GetTtSol()->at(0).vw>vw_max)) continue;
+                if(!(tp_m.getTtSol()->at(0).vw>vw_max)) continue;
                 
-                nSol++;
+                nSol_++;
                 
-                vw_max=tp_m.GetTtSol()->at(0).vw;
-                sol.jetB = b_temp;
-                sol.jetBbar = bbar_temp;
-                sol.lm = leptonMinus_tlv;
-                sol.lp = leptonPlus_tlv;
-                sol.met = met_temp;
-                sol.neutrino = tp_m.GetTtSol()->at(0).neutrino;
-                sol.neutrinoBar = tp_m.GetTtSol()->at(0).neutrinobar;
-                sol.weight = tp_m.GetTtSol()->at(0).vw;
-                sol.Wplus = sol.lp + sol.neutrino;
-                sol.Wminus = sol.lm + sol.neutrinoBar;
-                sol.top = sol.Wplus + sol.jetB;
-//                 cout << "vw: " << tp_m.GetTtSol()->at(0).vw << "pt: " << sol.top.Pt() << endl;
-                sol.topBar = sol.Wminus + sol.jetBbar;
-                sol.ttbar = sol.top + sol.topBar;
-                sol.jetB_index = j1;
-                sol.jetBbar_index = j2;
-                sol.ntags = nb_tag[ib];
+                vw_max=tp_m.getTtSol()->at(0).vw;
+                sol_.jetB = b_temp;
+                sol_.jetBbar = bbar_temp;
+                sol_.lm = leptonMinus_tlv;
+                sol_.lp = leptonPlus_tlv;
+                sol_.met = met_temp;
+                sol_.neutrino = tp_m.getTtSol()->at(0).neutrino;
+                sol_.neutrinoBar = tp_m.getTtSol()->at(0).neutrinobar;
+                sol_.weight = tp_m.getTtSol()->at(0).vw;
+                sol_.Wplus = sol_.lp + sol_.neutrino;
+                sol_.Wminus = sol_.lm + sol_.neutrinoBar;
+                sol_.top = sol_.Wplus + sol_.jetB;
+                sol_.topBar = sol_.Wminus + sol_.jetBbar;
+                sol_.ttbar = sol_.top + sol_.topBar;
+                sol_.jetB_index = j1;
+                sol_.jetBbar_index = j2;
+                sol_.ntags = nb_tag[ib];
             }
         }
 
         /*mass scan*/
 
         if(vw_max>0){
-            vect_sol.push_back(sol);
-            //jeka
-            //cout << "N tags:  " << sol.ntags << endl;
+            vect_sol.push_back(sol_);
         }
 
     } ///end jets loop
 
-    if(nSol>0){
+    if(nSol_>0){
         std::nth_element(begin(vect_sol), begin(vect_sol), end(vect_sol),
-                         [](const struct_KinematicReconstruction& a, const struct_KinematicReconstruction& b){
+                         [](const Struct_KinematicReconstruction& a, const Struct_KinematicReconstruction& b){
                              return  b.ntags < a.ntags || (b.ntags == a.ntags && b.weight < a.weight);
                          });
 
-        sol=vect_sol[0];
+        sol_=vect_sol[0];
     }
 
 }       // End of KinematicReconstruction constructor
