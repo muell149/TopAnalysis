@@ -4,6 +4,12 @@ Right now it is under construction.
 
 Guidelines for the tools:
 
+General:
+
+- do not let your code produce compiler warnings!
+- add any new class to src/classes.h and src/classes_def.xml
+  if it is supposed to be used in the framework
+
 These tools SOULD:
 
 - implement functions used for general corrections
@@ -36,7 +42,7 @@ These tools SHOULD NOT:
 
 
 
-Tool desciption:
+Tool description:
 
 bTagBase:
   base class for calculating b-tag weights, retagging jets and
