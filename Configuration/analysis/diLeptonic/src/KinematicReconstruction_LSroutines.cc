@@ -1,156 +1,168 @@
-#include "KinematicReconstruction_LSroutines.h"
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+
 #include <TAttLine.h>
+#include <TLorentzVector.h>
+#include <TF2.h>
+#include <TH1.h>
+#include <TFile.h>
+
+#include "KinematicReconstruction_LSroutines.h"
+#include "classesFwd.h"
+
 #define printout 0
 
 using namespace std;
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines()
 {
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = 80.4;
-    mwbar = 80.4; 
-    ml    = 0.000511;
-    mal    = 0.000511; 
-    mv=0;
-    mav=0;
-    weight_option=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = 80.4;
+    mwbar_ = 80.4; 
+    ml_    = 0.000511;
+    mal_    = 0.000511; 
+    mv_=0;
+    mav_=0;
+    weight_option_=0;
     
 }
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al)
 {
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = 80.4;//mw    = 76.671425; for event  799
-    mwbar = 80.4; //mwbar = 80.177391; for event  799 
-    ml    = mass_l;
-    mal    = mass_al;
-    mv=0;
-    mav=0;
-    weight_option=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = 80.4;//mw_    = 76.671425; for event  799
+    mwbar_ = 80.4; //mwbar_ = 80.177391; for event  799 
+    ml_    = mass_l;
+    mal_    = mass_al;
+    mv_=0;
+    mav_=0;
+    weight_option_=0;
 
 }
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm)
 {
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = mass_Wp;
-    mwbar = mass_Wm; 
-    ml    = mass_l;
-    mal    = mass_al;
-    mv=0;
-    mav=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = mass_Wp;
+    mwbar_ = mass_Wm; 
+    ml_    = mass_l;
+    mal_    = mass_al;
+    mv_=0;
+    mav_=0;
    // NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
    // NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
-   weight_option=0;
+   weight_option_=0;
 
 }
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F* hvE[])
 {
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = mass_Wp;
-    mwbar = mass_Wm; 
-    ml    = mass_l;
-    mal    = mass_al;
-    mv=0;
-    mav=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = mass_Wp;
+    mwbar_ = mass_Wm; 
+    ml_    = mass_l;
+    mal_    = mass_al;
+    mv_=0;
+    mav_=0;
 
-        for(int i=0;i<6;i++)hneutrino_E[i]= hvE[i];
+        for(int i=0;i<6;i++)hneutrino_E_[i]= hvE[i];
 
-    weight_option=0;
+    weight_option_=0;
 }
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al, double mass_Wp, double mass_Wm, TH1F* hvE[], TH1F hneutrino)
 {
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = mass_Wp;
-    mwbar = mass_Wm; 
-    ml    = mass_l;
-    mal    = mass_al;
-    mv=0;
-    mav=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = mass_Wp;
+    mwbar_ = mass_Wm; 
+    ml_    = mass_l;
+    mal_    = mass_al;
+    mv_=0;
+    mav_=0;
 
-        for(int i=0;i<6;i++)hneutrino_E[i]= hvE[i];
-        hnw_cuts= hneutrino;
+        for(int i=0;i<6;i++)hneutrino_E_[i]= hvE[i];
+        hnw_cuts_= hneutrino;
         
-    weight_option=0;
+    weight_option_=0;
 
 }
 
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F hneutrino)
 {
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = mass_Wp;
-    mwbar = mass_Wm; 
-    ml    = mass_l;
-    mal    = mass_al;
-    mv=0;
-    mav=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = mass_Wp;
+    mwbar_ = mass_Wm; 
+    ml_    = mass_l;
+    mal_    = mass_al;
+    mv_=0;
+    mav_=0;
     
-    hnw_cuts= hneutrino;
+    hnw_cuts_= hneutrino;
     
-    //pol4_neutrinoPx = new TF1("pol4_neutrinoPx","pol4",-100,100);
-    //((TAttLine*)pol4_neutrinoPx->GetParent())->SetLineWidth(1);
-    weight_option=0;
+    //pol4_neutrinoPx_ = new TF1("pol4_neutrinoPx","pol4",-100,100);
+    //((TAttLine*)pol4_neutrinoPx_->GetParent())->SetLineWidth(1);
+    weight_option_=0;
 }
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_l, double mass_al,double mass_Wp, double mass_Wm, TH1F hcostheta, int index)
 {
-    mt=index;
+    mt_=index;
     
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = mass_Wp;
-    mwbar = mass_Wm; 
-    ml    = mass_l;
-    mal    = mass_al;
-    mv=0;
-    mav=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = mass_Wp;
+    mwbar_ = mass_Wm; 
+    ml_    = mass_l;
+    mal_    = mass_al;
+    mv_=0;
+    mav_=0;
     
-    hcosw= hcostheta;
+    hcosw_= hcostheta;
     
-    //pol4_neutrinoPx = new TF1("pol4_neutrinoPx","pol4",-100,100);
-    //((TAttLine*)pol4_neutrinoPx->GetParent())->SetLineWidth(1);
-    weight_option=0;
+    //pol4_neutrinoPx_ = new TF1("pol4_neutrinoPx","pol4",-100,100);
+    //((TAttLine*)pol4_neutrinoPx_->GetParent())->SetLineWidth(1);
+    weight_option_=0;
 }
 
 
 KinematicReconstruction_LSroutines::KinematicReconstruction_LSroutines(double mass_top, double mass_b, double mass_w, double mass_l, double mass_al)
 {
-    mt    = mass_top;
-    mtbar = mass_top;
-    mb    = mass_b;
-    mbbar = mass_b;
-    mw    = mass_w;
-    mwbar = mass_w;
-    ml=mass_l;
-    mal=mass_al;
-    mv=0;
-    mav=0;
+    mt_    = mass_top;
+    mtbar_ = mass_top;
+    mb_    = mass_b;
+    mbbar_ = mass_b;
+    mw_    = mass_w;
+    mwbar_ = mass_w;
+    ml_=mass_l;
+    mal_=mass_al;
+    mv_=0;
+    mav_=0;
    // NeutrinoEventShape = new TF2("landau2D","[0]*TMath::Landau(x,[1],[2],0)*TMath::Landau(y,[3],[4],0)",0,500,0,500);
    // NeutrinoEventShape->SetParameters(30.641,57.941,22.344,57.533,22.232);
-    weight_option=0;
+    weight_option_=0;
 }
 
 KinematicReconstruction_LSroutines::~KinematicReconstruction_LSroutines()
@@ -158,109 +170,109 @@ KinematicReconstruction_LSroutines::~KinematicReconstruction_LSroutines()
     //delete NeutrinoEventShape;
 }
 
-void KinematicReconstruction_LSroutines::Delete()
+void KinematicReconstruction_LSroutines::fDelete()
 {
     delete this;
 }
 
 void KinematicReconstruction_LSroutines::ini(double mass_l, double mass_al,double mass_Wp, double mass_Wm)
 {
-    mt    = 172.5;
-    mtbar = 172.5;
-    mb    = 4.8;
-    mbbar = 4.8;
-    mw    = mass_Wp;
-    mwbar = mass_Wm; 
-    ml    = mass_l;
-    mal    = mass_al;
-    mv=0;
-    mav=0;
+    mt_    = 172.5;
+    mtbar_ = 172.5;
+    mb_    = 4.8;
+    mbbar_ = 4.8;
+    mw_    = mass_Wp;
+    mwbar_ = mass_Wm; 
+    ml_    = mass_l;
+    mal_    = mass_al;
+    mv_=0;
+    mav_=0;
     
     
-    //weight_option=0;
+    //weight_option_=0;
 }
 
-void KinematicReconstruction_LSroutines::SetConstraints(TLorentzVector LV_al, TLorentzVector LV_l, TLorentzVector LV_b, TLorentzVector LV_bbar, double missPx, double missPy)
+void KinematicReconstruction_LSroutines::setConstraints(TLorentzVector LV_al, TLorentzVector LV_l, TLorentzVector LV_b, TLorentzVector LV_bbar, double missPx, double missPy)
 {
-    l  = LV_l;
-    al = LV_al;
-    b  = LV_b;
-    bbar = LV_bbar;
-    px_miss = missPx;
-    py_miss = missPy;
-    DoAll();
+    l_  = LV_l;
+    al_ = LV_al;
+    b_  = LV_b;
+    bbar_ = LV_bbar;
+    px_miss_ = missPx;
+    py_miss_ = missPy;
+    doAll();
 }
 
-void KinematicReconstruction_LSroutines::SetConstraints(LV LV_al, LV LV_l, LV LV_b, LV LV_bbar, double missPx, double missPy)
+void KinematicReconstruction_LSroutines::setConstraints(LV LV_al, LV LV_l, LV LV_b, LV LV_bbar, double missPx, double missPy)
 {
     TLorentzVector temp_al(LV_al.Px(),LV_al.Py(),LV_al.Pz(),LV_al.E());
     TLorentzVector temp_l(LV_l.Px(),LV_l.Py(),LV_l.Pz(),LV_l.E());
     TLorentzVector temp_b(LV_b.Px(),LV_b.Py(),LV_b.Pz(),LV_b.E());
     TLorentzVector temp_bbar(LV_bbar.Px(),LV_bbar.Py(),LV_bbar.Pz(),LV_bbar.E());
-        l  = temp_l;
-        al = temp_al;
-        b  = temp_b;
-        bbar = temp_bbar;
-        px_miss = missPx;
-        py_miss = missPy;
-        DoAll();
+        l_  = temp_l;
+        al_ = temp_al;
+        b_  = temp_b;
+        bbar_ = temp_bbar;
+        px_miss_ = missPx;
+        py_miss_ = missPy;
+        doAll();
 }
 
-int KinematicReconstruction_LSroutines::GetNsol()
+int KinematicReconstruction_LSroutines::getNsol()
 {
-  return (int)nSol;
+  return (int)nSol_;
 }
 
-void KinematicReconstruction_LSroutines::SetWeightOption(int wo)
+void KinematicReconstruction_LSroutines::setWeightOption(int wo)
 {
-    weight_option=wo;
-}
-
-
-vector< KinematicReconstruction_LSroutines::TopSolution >* KinematicReconstruction_LSroutines::GetTtSol()
-{
-    return &ttSol;
+    weight_option_=wo;
 }
 
 
-void KinematicReconstruction_LSroutines::SetTrueInfo(TLorentzVector LV_Top, TLorentzVector LV_AntiTop,TLorentzVector LV_Neutrino, TLorentzVector LV_AntiNeutrino)
+vector< KinematicReconstruction_LSroutines::TopSolution >* KinematicReconstruction_LSroutines::getTtSol()
 {
-    true_top         = LV_Top;
-    true_topbar      = LV_AntiTop;
-    true_neutrino    = LV_Neutrino;
-    true_neutrinobar = LV_AntiNeutrino;
-    FilldTS();
-    FilldR();
-    FilldN();
+    return &ttSol_;
 }
 
-void KinematicReconstruction_LSroutines::Print()
+
+void KinematicReconstruction_LSroutines::setTrueInfo(TLorentzVector LV_Top, TLorentzVector LV_AntiTop,TLorentzVector LV_Neutrino, TLorentzVector LV_AntiNeutrino)
 {
-    for(int i=0;i<(int)ttSol.size();i++)
+    true_top_         = LV_Top;
+    true_topbar_      = LV_AntiTop;
+    true_neutrino_    = LV_Neutrino;
+    true_neutrinobar_ = LV_AntiNeutrino;
+    filldTS();
+    filldR();
+    filldN();
+}
+
+void KinematicReconstruction_LSroutines::print()
+{
+    for(int i=0;i<(int)ttSol_.size();i++)
     {
-        printf("\nSol: %d:   vw: %f dTS: %f\n",i+1,ttSol[i].vw,ttSol[i].dTS);
-//         ttSol[i].top.Print();
-//         ttSol[i].topbar.Print();
-           ttSol[i].neutrino.Print();
-           ttSol[i].neutrinobar.Print();
+        printf("\nSol: %d:   vw: %f dTS: %f\n",i+1,ttSol_[i].vw,ttSol_[i].dTS);
+//         ttSol_[i].top.Print();
+//         ttSol_[i].topbar.Print();
+           ttSol_[i].neutrino.Print();
+           ttSol_[i].neutrinobar.Print();
         
         
-        //printf("vw: %f dTS: %f\n",ttSol[i].vw,ttSol[i].dTS);
+        //printf("vw: %f dTS: %f\n",ttSol_[i].vw,ttSol_[i].dTS);
         
     }
 }
 
-TF1* KinematicReconstruction_LSroutines::GetNeutrinoPxF()
+TF1* KinematicReconstruction_LSroutines::getNeutrinoPxF()
 {
-    return pol4_neutrinoPx;
+    return pol4_neutrinoPx_;
 }
 
-double KinematicReconstruction_LSroutines::Landau2D(double xv,double xvbar)
+double KinematicReconstruction_LSroutines::landau2D(double xv,double xvbar)
 {
     return 30.641*TMath::Landau(xv,57.941,22.344,0)*TMath::Landau(xvbar,57.533,22.232,0);   // top_mass = 172.5 GeV  CME = 7 TeV
 }
 
-void KinematicReconstruction_LSroutines::DoAll()
+void KinematicReconstruction_LSroutines::doAll()
 {
     
     
@@ -284,24 +296,24 @@ void KinematicReconstruction_LSroutines::DoAll()
     /// ...
     
 
-        FindCoeff(coeffs);
-        quartic_equation(coeffs[0],coeffs[1],coeffs[2],coeffs[3],coeffs[4],vect_pxv);
-        nSol=vect_pxv[0];
+        findCoeff(coeffs_);
+        quartic_equation(coeffs_[0],coeffs_[1],coeffs_[2],coeffs_[3],coeffs_[4],vect_pxv_);
+        nSol_=vect_pxv_[0];
         
-            for(int i=1;i<=nSol;i++)
+            for(int i=1;i<=nSol_;i++)
             {
-                TopRec(vect_pxv[i]);
+                topRec(vect_pxv_[i]);
                  //printf("Sol: %d: \n",i);
-                 //top.Print();
-                 //topbar.Print();
+                 //top_.Print();
+                 //topbar_.Print();
                 TopSolution TS_temp;
-                TS_temp.ttPt=tt.Pt();
-                TS_temp.TopPt=top.Pt();
-                TS_temp.AntiTopPt=topbar.Pt();
-                TS_temp.NeutrinoPx=neutrino.Px();
-                TS_temp.AntiNeutrinoPx=neutrinobar.Px();
-                TS_temp.mTop=top.M();
-                TS_temp.mAntiTop=topbar.M();
+                TS_temp.ttPt=tt_.Pt();
+                TS_temp.TopPt=top_.Pt();
+                TS_temp.AntiTopPt=topbar_.Pt();
+                TS_temp.NeutrinoPx=neutrino_.Px();
+                TS_temp.AntiNeutrinoPx=neutrinobar_.Px();
+                TS_temp.mTop=top_.M();
+                TS_temp.mAntiTop=topbar_.M();
                   
                 //...
                     double vw1=1,vw2=1;
@@ -310,27 +322,27 @@ void KinematicReconstruction_LSroutines::DoAll()
 //                         for(int i=0;i<5;i++)
 //                         {
 //                             sprintf(hvw_name,"Eneu_true%d",i+1);
-//                             if(top.Pt()>pt_bins[i]&&top.Pt()<=pt_bins[i+1])
+//                             if(top_.Pt()>pt_bins[i]&&top_.Pt()<=pt_bins[i+1])
 //                                 {
 //                                     hvw = (TH1F*)frootNeut.Get(hvw_name);
-//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                             }
-//                             else if(top.Pt()>pt_bins[5])
+//                             else if(top_.Pt()>pt_bins[5])
 //                             {
 //                                 hvw = (TH1F*)frootNeut.Get("Eneu_true6");
-//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                             }
 //                             
 //                             
-//                             if(topbar.Pt()>pt_bins[i]&&topbar.Pt()<=pt_bins[i+1])
+//                             if(topbar_.Pt()>pt_bins[i]&&topbar_.Pt()<=pt_bins[i+1])
 //                             {
 //                                     hvw = (TH1F*)frootNeut.Get(hvw_name);
-//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                             }
-//                             else if(topbar.Pt()>pt_bins[5])
+//                             else if(topbar_.Pt()>pt_bins[5])
 //                             {
 //                                 hvw = (TH1F*)frootNeut.Get("Eneu_true6");
-//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                             }
 //                         }
 
@@ -338,27 +350,27 @@ void KinematicReconstruction_LSroutines::DoAll()
 //                         for(int i=0;i<5;i++)
 //                         {
 //                             sprintf(hvw_name,"Eneu_true%d",i+1);
-//                             if(top.E()>pt_bins[i]&&top.E()<=pt_bins[i+1])
+//                             if(top_.E()>pt_bins[i]&&top_.E()<=pt_bins[i+1])
 //                                 {
 //                                     hvw = (TH1F*)frootNeut.Get(hvw_name);
-//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                             }
-//                             else if(top.E()>pt_bins[5])
+//                             else if(top_.E()>pt_bins[5])
 //                             {
 //                                 hvw = (TH1F*)frootNeut.Get("Eneu_true6");
-//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                             }
 //                             
 //                             
-//                             if(topbar.E()>pt_bins[i]&&topbar.E()<=pt_bins[i+1])
+//                             if(topbar_.E()>pt_bins[i]&&topbar_.E()<=pt_bins[i+1])
 //                             {
 //                                     hvw = (TH1F*)frootNeut.Get(hvw_name);
-//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                             }
-//                             else if(topbar.E()>pt_bins[5])
+//                             else if(topbar_.E()>pt_bins[5])
 //                             {
 //                                 hvw = (TH1F*)frootNeut.Get("Eneu_true6");
-//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                             }
 //                         }
        
@@ -366,27 +378,27 @@ void KinematicReconstruction_LSroutines::DoAll()
        
 //                         for(int i=0;i<5;i++)
 //                         {
-//                             if(top.E()>pt_bins[i]&&top.E()<=pt_bins[i+1])
+//                             if(top_.E()>pt_bins[i]&&top_.E()<=pt_bins[i+1])
 //                                 {
-//                                     hvw = hneutrino_E[i];
-//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                     hvw = hneutrino_E_[i];
+//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                             }
-//                             else if(top.E()>pt_bins[5])
+//                             else if(top_.E()>pt_bins[5])
 //                             {
-//                                 hvw = hneutrino_E[5];
-//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                 hvw = hneutrino_E_[5];
+//                                 vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                             }
 //                             
 //                             
-//                             if(topbar.E()>pt_bins[i]&&topbar.E()<=pt_bins[i+1])
+//                             if(topbar_.E()>pt_bins[i]&&topbar_.E()<=pt_bins[i+1])
 //                             {
-//                                     hvw = hneutrino_E[i];
-//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                     hvw = hneutrino_E_[i];
+//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                             }
-//                             else if(topbar.E()>pt_bins[5])
+//                             else if(topbar_.E()>pt_bins[5])
 //                             {
-//                                 hvw = hneutrino_E[5];
-//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                 hvw = hneutrino_E_[5];
+//                                 vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                             }
 //                         }
        
@@ -404,32 +416,32 @@ void KinematicReconstruction_LSroutines::DoAll()
 //                             int i_pt = i/Netabins;
 //                             int i_eta = i%Netabins;
 // 
-//                             if(top.Eta()>eta_top_bins_2d[i_eta]&&top.Eta()<=eta_top_bins_2d[i_eta+1])
+//                             if(top_.Eta()>eta_top_bins_2d[i_eta]&&top_.Eta()<=eta_top_bins_2d[i_eta+1])
 //                             {  
-//                                 if(i_pt==Nptbins-1&&top.Pt()>pt_top_bins_2d[i_pt])
+//                                 if(i_pt==Nptbins-1&&top_.Pt()>pt_top_bins_2d[i_pt])
 //                                 {
-//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                     vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                                 }
 //                                 else
 //                                 {
-//                                     if(top.Pt()>pt_top_bins_2d[i_pt]&&top.Pt()<=pt_top_bins_2d[i_pt+1])
+//                                     if(top_.Pt()>pt_top_bins_2d[i_pt]&&top_.Pt()<=pt_top_bins_2d[i_pt+1])
 //                                     {
-//                                         vw1=hvw->GetBinContent(hvw->FindBin(neutrino.E()));
+//                                         vw1=hvw->GetBinContent(hvw->FindBin(neutrino_.E()));
 //                                     }
 //                                 }
 //                             }
 //                             
-//                             if(topbar.Eta()>eta_top_bins_2d[i_eta]&&topbar.Eta()<=eta_top_bins_2d[i_eta+1])
+//                             if(topbar_.Eta()>eta_top_bins_2d[i_eta]&&topbar_.Eta()<=eta_top_bins_2d[i_eta+1])
 //                             {  
-//                                 if(i_pt==Nptbins-1&&topbar.Pt()>pt_top_bins_2d[i_pt])
+//                                 if(i_pt==Nptbins-1&&topbar_.Pt()>pt_top_bins_2d[i_pt])
 //                                 {
-//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                     vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                                 }
 //                                 else
 //                                 {
-//                                     if(topbar.Pt()>pt_top_bins_2d[i_pt]&&topbar.Pt()<=pt_top_bins_2d[i_pt+1])
+//                                     if(topbar_.Pt()>pt_top_bins_2d[i_pt]&&topbar_.Pt()<=pt_top_bins_2d[i_pt+1])
 //                                     {
-//                                         vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar.E()));
+//                                         vw2=hvw->GetBinContent(hvw->FindBin(neutrinobar_.E()));
 //                                     }
 //                                 }
 //                             }
@@ -442,23 +454,23 @@ void KinematicReconstruction_LSroutines::DoAll()
                        
   //neutrino 1d weight
 //                     double vw1=1,vw2=1;
-//                             vw1=hnw_cuts.GetBinContent(hnw_cuts.FindBin(neutrino.E()));
-//                             vw2=hnw_cuts.GetBinContent(hnw_cuts.FindBin(neutrinobar.E()));
+//                             vw1=hnw_cuts_.GetBinContent(hnw_cuts_.FindBin(neutrino_.E()));
+//                             vw2=hnw_cuts_.GetBinContent(hnw_cuts_.FindBin(neutrinobar_.E()));
 //                 TS_temp.vw=vw1*vw2;
   // ...                   
    
    
   //neutrino 1d Eta weight
-//                             vw1=vw1*hnw_cuts.GetBinContent(hnw_cuts.FindBin(neutrino.Eta()));
-//                             vw2=vw2*hnw_cuts.GetBinContent(hnw_cuts.FindBin(neutrinobar.Eta()));
+//                             vw1=vw1*hnw_cuts_.GetBinContent(hnw_cuts_.FindBin(neutrino_.Eta()));
+//                             vw2=vw2*hnw_cuts_.GetBinContent(hnw_cuts_.FindBin(neutrinobar_.Eta()));
 //                 TS_temp.vw=vw1*vw2;
   // ...                   
      
    
   //mbl 1d weight
 //                     double vw1=1,vw2=1;
-//                             vw1=hnw_cuts.GetBinContent(hnw_cuts.FindBin((b+neutrinobar).M()));
-//                             vw2=hnw_cuts.GetBinContent(hnw_cuts.FindBin((bbar+neutrino).M()));
+//                             vw1=hnw_cuts_.GetBinContent(hnw_cuts_.FindBin((b_+neutrinobar_).M()));
+//                             vw2=hnw_cuts_.GetBinContent(hnw_cuts_.FindBin((bbar_+neutrino_).M()));
 //                 TS_temp.vw=vw1*vw2;
   // ...   
                     
@@ -466,63 +478,63 @@ void KinematicReconstruction_LSroutines::DoAll()
             
                        
                 
-//              TS_temp.vw=Landau2D(neutrino.E(),neutrinobar.E());
+//              TS_temp.vw=Landau2D(neutrino_.E(),neutrinobar_.E());
                 
-                    if(weight_option==1)
+                    if(weight_option_==1)
                     {
 //                         TF1 f_nm("f_nm","pol2");f_nm.SetParameters(52.8498,-0.010801,0.000480966);
 //                         TF1 f_ns("f_ns","pol2");f_ns.SetParameters(15.8754,0.0274776 ,0.000146676);
-//                         TF1 landau_n_temp("landau_n","[0]*TMath::Landau(x,[1],[2])");landau_n_temp.SetParameters(1.0/f_ns.Eval(top.Pt()),f_nm.Eval(top.Pt()),f_ns.Eval(top.Pt()));
-//                         TF1 landau_an_temp("landau_an","[0]*TMath::Landau(x,[1],[2])");landau_an_temp.SetParameters(1.0/f_ns.Eval(topbar.Pt()),f_nm.Eval(topbar.Pt()),f_ns.Eval(topbar.Pt()));
+//                         TF1 landau_n_temp("landau_n","[0]*TMath::Landau(x,[1],[2])");landau_n_temp.SetParameters(1.0/f_ns.Eval(top_.Pt()),f_nm.Eval(top_.Pt()),f_ns.Eval(top_.Pt()));
+//                         TF1 landau_an_temp("landau_an","[0]*TMath::Landau(x,[1],[2])");landau_an_temp.SetParameters(1.0/f_ns.Eval(topbar_.Pt()),f_nm.Eval(topbar_.Pt()),f_ns.Eval(topbar_.Pt()));
                         TF1 landau_n_temp("landau_n","[0]*TMath::Landau(x,[1],[2])");landau_n_temp.SetParameters(1.0/20.3864,59.91,20.3864);
                         TF1 landau_an_temp("landau_an","[0]*TMath::Landau(x,[1],[2])");landau_an_temp.SetParameters(1.0/20.3864,59.91,20.3864);
                         
                         
-                        TS_temp.vw=landau_n_temp.Eval(neutrino.E())*landau_an_temp.Eval(neutrinobar.E()); 
+                        TS_temp.vw=landau_n_temp.Eval(neutrino_.E())*landau_an_temp.Eval(neutrinobar_.E()); 
                         
                         //TF1 f_mbl("f_mbl","[0]*exp(-(x-[1])*(x-[1])/[2])*([3]+[4]*x)");
                         //f_mbl.SetParameters(-0.000110874,1.90958e+02,7.14791e+03,-9.70099e+02,6.31507e+00);
-                        //TS_temp.vw=10000000*NeutrinoEventShape->Eval(neutrino.E(),neutrinobar.E())*f_mbl.Eval((b+al).M())*f_mbl.Eval((bbar+l).M())*landau_n_temp.Eval(neutrino.E())*landau_an_temp.Eval(neutrinobar.E());
+                        //TS_temp.vw=10000000*NeutrinoEventShape->Eval(neutrino_.E(),neutrinobar_.E())*f_mbl.Eval((b_+al_).M())*f_mbl.Eval((bbar_+l_).M())*landau_n_temp.Eval(neutrino_.E())*landau_an_temp.Eval(neutrinobar_.E());
 
 
                         
                     }
-                TS_temp.top = top;
-                TS_temp.topbar = topbar;
-                TS_temp.wp = w;
-                TS_temp.wm = wbar;
-                TS_temp.neutrino = neutrino;
-                TS_temp.neutrinobar = neutrinobar;
+                TS_temp.top = top_;
+                TS_temp.topbar = topbar_;
+                TS_temp.wp = w_;
+                TS_temp.wm = wbar_;
+                TS_temp.neutrino = neutrino_;
+                TS_temp.neutrinobar = neutrinobar_;
                 
-                TLorentzVector b_boost_top=b,bbar_boost_topbar=bbar;
-                    b_boost_top.Boost(-top.BoostVector());
-                    bbar_boost_topbar.Boost(-topbar.BoostVector());
-                TLorentzVector topbar_boost_top=topbar,top_boost_topbar=top;
-                    topbar_boost_top.Boost(-top.BoostVector());
-                    top_boost_topbar.Boost(-topbar.BoostVector());
+                TLorentzVector b_boost_top=b_,bbar_boost_topbar=bbar_;
+                    b_boost_top.Boost(-top_.BoostVector());
+                    bbar_boost_topbar.Boost(-topbar_.BoostVector());
+                TLorentzVector topbar_boost_top=topbar_,top_boost_topbar=top_;
+                    topbar_boost_top.Boost(-top_.BoostVector());
+                    top_boost_topbar.Boost(-topbar_.BoostVector());
                 
-                TLorentzVector l_boost_topbar=l,al_boost_top=al;
-                    al_boost_top.Boost(-top.BoostVector());
-                    l_boost_topbar.Boost(-topbar.BoostVector());
+                TLorentzVector l_boost_topbar=l_,al_boost_top=al_;
+                    al_boost_top.Boost(-top_.BoostVector());
+                    l_boost_topbar.Boost(-topbar_.BoostVector());
                 
-                TS_temp.cos_bTR_top = cos(top.Vect().Angle(b_boost_top.Vect()));
-                TS_temp.cos_bbarTR_topbar = cos(topbar.Vect().Angle(bbar_boost_topbar.Vect()));
+                TS_temp.cos_bTR_top = cos(top_.Vect().Angle(b_boost_top.Vect()));
+                TS_temp.cos_bbarTR_topbar = cos(topbar_.Vect().Angle(bbar_boost_topbar.Vect()));
                 
-                TLorentzVector top_boost=top,topbar_boost=topbar,b_boost=b,bbar_boost=bbar;
+                TLorentzVector top_boost=top_,topbar_boost=topbar_,b_boost=b_,bbar_boost=bbar_;
                 
                 
                 TS_temp.ttpt_top=top_boost.Pt();
                 TS_temp.ttpt_topbar=topbar_boost.Pt();
                 
-                b_boost.Boost(-tt.BoostVector());
-                bbar_boost.Boost(-tt.BoostVector());
+                b_boost.Boost(-tt_.BoostVector());
+                bbar_boost.Boost(-tt_.BoostVector());
              
                 TS_temp.costheta=cos(topbar_boost_top.Vect().Angle(b_boost_top.Vect()));
                 TS_temp.costhetabar=cos(top_boost_topbar.Vect().Angle(bbar_boost_topbar.Vect()));
                 
             //          costheta 1d weight
-//                             vw1=hcosw.GetBinContent(hcosw.FindBin(TS_temp.costheta));
-//                             vw2=hcosw.GetBinContent(hcosw.FindBin(TS_temp.costhetabar));
+//                             vw1=hcosw_.GetBinContent(hcosw_.FindBin(TS_temp.costheta));
+//                             vw2=hcosw_.GetBinContent(hcosw_.FindBin(TS_temp.costhetabar));
 //                             TS_temp.vw=vw1*vw2;
               //          ...                         
            
@@ -531,120 +543,120 @@ void KinematicReconstruction_LSroutines::DoAll()
                 b_boost.Boost(-top_boost.BoostVector());
                 TS_temp.cos1 = cos(top_boost.Vect().Angle(b_boost.Vect()));
                 
-                TLorentzVector wb = w+b,w_boost=w,al_boost=al;
+                TLorentzVector wb = w_+b_,w_boost=w_,al_boost=al_;
                 //w_boost.Boost(-wb.BoostVector());
-                al_boost.Boost(-w.BoostVector());
+                al_boost.Boost(-w_.BoostVector());
                 //al_boost.Boost(-w_boost.BoostVector());
                 
                 TS_temp.cos2 = cos(w_boost.Vect().Angle(al_boost.Vect()));
-                TS_temp.Mtt = tt.M();
+                TS_temp.Mtt = tt_.M();
                 
                 TS_temp.mttw = 1.0/TS_temp.Mtt;
                 
                 
                 
-                //TS_temp.vw = 1.0/(neutrino.Pt()+neutrinobar.Pt());
+                //TS_temp.vw = 1.0/(neutrino_.Pt()+neutrinobar_.Pt());
                 
                 
                 
-                vw1=4*mt*al_boost_top.E()*(mt*mt-mb*mb-2*mt*al_boost_top.E())/(pow((mt*mt-mb*mb),2)+mw*mw*(mt*mt-mb*mb)-2*pow(mw,4));
-                vw2=4*mt*l_boost_topbar.E()*(mt*mt-mb*mb-2*mt*l_boost_topbar.E())/(pow((mt*mt-mb*mb),2)+mwbar*mwbar*(mt*mt-mb*mb)-2*pow(mwbar,4));
+                vw1=4*mt_*al_boost_top.E()*(mt_*mt_-mb_*mb_-2*mt_*al_boost_top.E())/(pow((mt_*mt_-mb_*mb_),2)+mw_*mw_*(mt_*mt_-mb_*mb_)-2*pow(mw_,4));
+                vw2=4*mt_*l_boost_topbar.E()*(mt_*mt_-mb_*mb_-2*mt_*l_boost_topbar.E())/(pow((mt_*mt_-mb_*mb_),2)+mwbar_*mwbar_*(mt_*mt_-mb_*mb_)-2*pow(mwbar_,4));
                 
                 TS_temp.lepEw=vw1*vw2;
                 
-                TS_temp.mbl    = (b+al).M();
-                TS_temp.mblbar = (bbar+l).M();
+                TS_temp.mbl    = (b_+al_).M();
+                TS_temp.mblbar = (bbar_+l_).M();
                 
                 TS_temp.vw=TS_temp.mttw;
                 
-                //if((fabs(top.M()-mt)+fabs(topbar.M()-mtbar))<0.01)
-                ttSol.push_back(TS_temp);
+                //if((fabs(top_.M()-mt_)+fabs(topbar_.M()-mtbar_))<0.01)
+                ttSol_.push_back(TS_temp);
                   
             }
-        nSol=ttSol.size();
-        if(nSol>0)SortTopSol(ttSol);
+        nSol_=ttSol_.size();
+        if(nSol_>0)sortTopSol(ttSol_);
 
 }
 
-void KinematicReconstruction_LSroutines::FilldTS()
+void KinematicReconstruction_LSroutines::filldTS()
 {
     double dellta_alpha;
     double dellta_E;
-    for(int i=0;i<nSol;i++)
+    for(int i=0;i<nSol_;i++)
             {
-                dellta_alpha = pow(ttSol[i].top.Angle(true_top.Vect())/TMath::Pi(),2) + pow(ttSol[i].topbar.Angle(true_topbar.Vect())/TMath::Pi(),2);
-                dellta_E = pow((ttSol[i].top.E()-true_top.E())/true_top.E(),2) + pow((ttSol[i].topbar.E()-true_topbar.E())/true_topbar.E(),2);
-                //dellta_E = pow((ttSol[i].top.Pt()-true_top.Pt())/true_top.Pt(),2) + pow((ttSol[i].topbar.Pt()-true_topbar.Pt())/true_topbar.Pt(),2);
-                ttSol[i].dTS = sqrt(dellta_alpha+dellta_E);
+                dellta_alpha = pow(ttSol_[i].top.Angle(true_top_.Vect())/TMath::Pi(),2) + pow(ttSol_[i].topbar.Angle(true_topbar_.Vect())/TMath::Pi(),2);
+                dellta_E = pow((ttSol_[i].top.E()-true_top_.E())/true_top_.E(),2) + pow((ttSol_[i].topbar.E()-true_topbar_.E())/true_topbar_.E(),2);
+                //dellta_E = pow((ttSol_[i].top.Pt()-true_top_.Pt())/true_top_.Pt(),2) + pow((ttSol_[i].topbar.Pt()-true_topbar_.Pt())/true_topbar_.Pt(),2);
+                ttSol_[i].dTS = sqrt(dellta_alpha+dellta_E);
                 
                 
                 
             }
 }
-void KinematicReconstruction_LSroutines::FilldR()
+void KinematicReconstruction_LSroutines::filldR()
 {
-    for(int i=0;i<nSol;i++)
+    for(int i=0;i<nSol_;i++)
             {
-                ttSol[i].dR = sqrt(pow(ttSol[i].top.DeltaR(true_top),2)+pow(ttSol[i].topbar.DeltaR(true_topbar),2));   
+                ttSol_[i].dR = sqrt(pow(ttSol_[i].top.DeltaR(true_top_),2)+pow(ttSol_[i].topbar.DeltaR(true_topbar_),2));   
             }
 }
 
-void KinematicReconstruction_LSroutines::FilldN()
+void KinematicReconstruction_LSroutines::filldN()
 {
-    for(int i=0;i<nSol;i++)
+    for(int i=0;i<nSol_;i++)
        {
-           ttSol[i].dN = sqrt(pow((ttSol[i].neutrino.Px()-true_neutrino.Px()),2)+pow((ttSol[i].neutrino.Py()-true_neutrino.Py()),2)+pow((ttSol[i].neutrino.Pz()-true_neutrino.Pz()),2)+pow((ttSol[i].neutrinobar.Px()-true_neutrinobar.Px()),2)+pow((ttSol[i].neutrinobar.Py()-true_neutrinobar.Py()),2)+pow((ttSol[i].neutrinobar.Pz()-true_neutrinobar.Pz()),2));   
-           //ttSol[i].dN = sqrt(pow((ttSol[i].neutrino.Px()-true_neutrino.Px()),2)+pow((ttSol[i].neutrinobar.Px()-true_neutrinobar.Px()),2));   
+           ttSol_[i].dN = sqrt(pow((ttSol_[i].neutrino.Px()-true_neutrino_.Px()),2)+pow((ttSol_[i].neutrino.Py()-true_neutrino_.Py()),2)+pow((ttSol_[i].neutrino.Pz()-true_neutrino_.Pz()),2)+pow((ttSol_[i].neutrinobar.Px()-true_neutrinobar_.Px()),2)+pow((ttSol_[i].neutrinobar.Py()-true_neutrinobar_.Py()),2)+pow((ttSol_[i].neutrinobar.Pz()-true_neutrinobar_.Pz()),2));   
+           //ttSol_[i].dN = sqrt(pow((ttSol_[i].neutrino.Px()-true_neutrino_.Px()),2)+pow((ttSol_[i].neutrinobar.Px()-true_neutrinobar_.Px()),2));   
        }
 }
 
-void KinematicReconstruction_LSroutines::SWAPtopSol(KinematicReconstruction_LSroutines::TopSolution& sol1, KinematicReconstruction_LSroutines::TopSolution& sol2)
+void KinematicReconstruction_LSroutines::swapTopSol(KinematicReconstruction_LSroutines::TopSolution& sol1, KinematicReconstruction_LSroutines::TopSolution& sol2)
 {
     KinematicReconstruction_LSroutines::TopSolution aux = sol1;
     sol1 = sol2;
     sol2 = aux;
 }
 
-void KinematicReconstruction_LSroutines::SortBy(string ch)
+void KinematicReconstruction_LSroutines::sortBy(string ch)
 {
     
-    if(ch=="dTS"&&ttSol.size()>0)
+    if(ch=="dTS"&&ttSol_.size()>0)
     {
-     for(uint i=0;i<ttSol.size()-1;i++)
+     for(uint i=0;i<ttSol_.size()-1;i++)
         {
-            if(ttSol[i].dTS > ttSol[i+1].dTS){ SWAPtopSol(ttSol[i],ttSol[i+1]);i=-1;}
+            if(ttSol_[i].dTS > ttSol_[i+1].dTS){ swapTopSol(ttSol_[i],ttSol_[i+1]);i=-1;}
         }   
     }
-    if(ch=="dR"&&ttSol.size()>0)
+    if(ch=="dR"&&ttSol_.size()>0)
     {
-     for(uint i=0;i<ttSol.size()-1;i++)
+     for(uint i=0;i<ttSol_.size()-1;i++)
         {
-            if(ttSol[i].dR > ttSol[i+1].dR){ SWAPtopSol(ttSol[i],ttSol[i+1]);i=-1;}
+            if(ttSol_[i].dR > ttSol_[i+1].dR){ swapTopSol(ttSol_[i],ttSol_[i+1]);i=-1;}
         }   
     }
-    if(ch=="dN"&&ttSol.size()>0)
+    if(ch=="dN"&&ttSol_.size()>0)
     {
-     for(uint i=0;i<ttSol.size()-1;i++)
+     for(uint i=0;i<ttSol_.size()-1;i++)
         {
-            if(ttSol[i].dN > ttSol[i+1].dN){ SWAPtopSol(ttSol[i],ttSol[i+1]);i=-1; }
+            if(ttSol_[i].dN > ttSol_[i+1].dN){ swapTopSol(ttSol_[i],ttSol_[i+1]);i=-1; }
         }   
     }
-    if(ch=="dRN"&&ttSol.size()>0)
+    if(ch=="dRN"&&ttSol_.size()>0)
     {
-     for(uint i=0;i<ttSol.size()-1;i++)
+     for(uint i=0;i<ttSol_.size()-1;i++)
         {
-            if(ttSol[i].dN*ttSol[i].dR > ttSol[i+1].dN*ttSol[i+1].dR){ SWAPtopSol(ttSol[i],ttSol[i+1]);i=-1; }
+            if(ttSol_[i].dN*ttSol_[i].dR > ttSol_[i+1].dN*ttSol_[i+1].dR){ swapTopSol(ttSol_[i],ttSol_[i+1]);i=-1; }
         }   
     }
     
 }
 
-void KinematicReconstruction_LSroutines::SortTopSol(vector< KinematicReconstruction_LSroutines::TopSolution >& v)
+void KinematicReconstruction_LSroutines::sortTopSol(vector< KinematicReconstruction_LSroutines::TopSolution >& v)
 {
     //std::vector< KinematicReconstruction_LSroutines::TopSolution > result;
     for(uint i=0;i<v.size()-1;i++)
     {
-      if(v[i].vw < v[i+1].vw){ SWAPtopSol(v[i],v[i+1]);i=-1;}
+      if(v[i].vw < v[i+1].vw){ swapTopSol(v[i],v[i+1]);i=-1;}
     }
     
     //v.swap(result);
@@ -653,93 +665,93 @@ void KinematicReconstruction_LSroutines::SortTopSol(vector< KinematicReconstruct
 
 
 
-void KinematicReconstruction_LSroutines::TopRec(double sol)
+void KinematicReconstruction_LSroutines::topRec(double sol)
 {
   double pxp, pyp, pzp, pup, pvp, pwp;
   
-  d0=d00;
-  d1=d11+d10*sol;
-  d2=d22+d21*sol+d20*sol*sol;
+  d0_=d00_;
+  d1_=d11_+d10_*sol;
+  d2_=d22_+d21_*sol+d20_*sol*sol;
   
-  c0=c00;
-  c1=c11+c10*sol;
-  c2=c22+c21*sol+c20*sol*sol;
+  c0_=c00_;
+  c1_=c11_+c10_*sol;
+  c2_=c22_+c21_*sol+c20_*sol*sol;
   
   
   pup = sol;
-  pvp = (c0*d2-c2*d0)/(c1*d0-c0*d1);
-  pwp = (-1)*(a1+a2*pup+a3*pvp)/a4;
+  pvp = (c0_*d2_-c2_*d0_)/(c1_*d0_-c0_*d1_);
+  pwp = (-1)*(a1_+a2_*pup+a3_*pvp)/a4_;
   
-  pxp = px_miss-pup;   
-  pyp = py_miss-pvp;
-  pzp = (-1)*(b1+b2*pxp+b3*pyp)/b4;
+  pxp = px_miss_-pup;   
+  pyp = py_miss_-pvp;
+  pzp = (-1)*(b1_+b2_*pxp+b3_*pyp)/b4_;
   
-  neutrinobar.SetXYZM(pxp, pyp, pzp, mav);
-  neutrino.SetXYZM(pup, pvp, pwp, mv);
+  neutrinobar_.SetXYZM(pxp, pyp, pzp, mav_);
+  neutrino_.SetXYZM(pup, pvp, pwp, mv_);
       
-  top = b + al + neutrino;
-  topbar = bbar + l + neutrinobar; 
-  tt=top+topbar;
-  w = al + neutrino;
-  wbar = l + neutrinobar;
+  top_ = b_ + al_ + neutrino_;
+  topbar_ = bbar_ + l_ + neutrinobar_; 
+  tt_=top_+topbar_;
+  w_ = al_ + neutrino_;
+  wbar_ = l_ + neutrinobar_;
   
 }
 
 
-void KinematicReconstruction_LSroutines::FindCoeff(double* koeficienty)
+void KinematicReconstruction_LSroutines::findCoeff(double* koeficienty)
 {
-    a1 = ((b.E()+al.E())*(mw*mw-mal*mal-mv*mv)-al.E()*(mt*mt-mb*mb-mal*mal-mv*mv)+2*b.E()*al.E()*al.E()-2*al.E()*(al.Vect().Dot(b.Vect())))/(2*al.E()*(b.E()+al.E()));
-    a2 = 2*(b.E()*al.Px()-al.E()*b.Px())/(2*al.E()*(b.E()+al.E()));
-    a3 = 2*(b.E()*al.Py()-al.E()*b.Py())/(2*al.E()*(b.E()+al.E()));
-    a4 = 2*(b.E()*al.Pz()-al.E()*b.Pz())/(2*al.E()*(b.E()+al.E()));
+    a1_ = ((b_.E()+al_.E())*(mw_*mw_-mal_*mal_-mv_*mv_)-al_.E()*(mt_*mt_-mb_*mb_-mal_*mal_-mv_*mv_)+2*b_.E()*al_.E()*al_.E()-2*al_.E()*(al_.Vect().Dot(b_.Vect())))/(2*al_.E()*(b_.E()+al_.E()));
+    a2_ = 2*(b_.E()*al_.Px()-al_.E()*b_.Px())/(2*al_.E()*(b_.E()+al_.E()));
+    a3_ = 2*(b_.E()*al_.Py()-al_.E()*b_.Py())/(2*al_.E()*(b_.E()+al_.E()));
+    a4_ = 2*(b_.E()*al_.Pz()-al_.E()*b_.Pz())/(2*al_.E()*(b_.E()+al_.E()));
         
-    //printf("Koefs ai: %f %f %f %f\n",a1,a2,a3,a4);//printout
+    //printf("Koefs ai: %f %f %f %f\n",a1_,a2_,a3_,a4_);//printout
     
-    b1 = ((bbar.E()+l.E())*(mwbar*mwbar-ml*ml-mav*mav)-l.E()*(mtbar*mtbar-mbbar*mbbar-ml*ml-mav*mav)+2*bbar.E()*l.E()*l.E()-2*l.E()*(l.Vect().Dot(bbar.Vect())))/(2*l.E()*(bbar.E()+l.E()));
-    b2 = 2*(bbar.E()*l.Px()-l.E()*bbar.Px())/(2*l.E()*(bbar.E()+l.E()));
-    b3 = 2*(bbar.E()*l.Py()-l.E()*bbar.Py())/(2*l.E()*(bbar.E()+l.E()));
-    b4 = 2*(bbar.E()*l.Pz()-l.E()*bbar.Pz())/(2*l.E()*(bbar.E()+l.E()));
+    b1_ = ((bbar_.E()+l_.E())*(mwbar_*mwbar_-ml_*ml_-mav_*mav_)-l_.E()*(mtbar_*mtbar_-mbbar_*mbbar_-ml_*ml_-mav_*mav_)+2*bbar_.E()*l_.E()*l_.E()-2*l_.E()*(l_.Vect().Dot(bbar_.Vect())))/(2*l_.E()*(bbar_.E()+l_.E()));
+    b2_ = 2*(bbar_.E()*l_.Px()-l_.E()*bbar_.Px())/(2*l_.E()*(bbar_.E()+l_.E()));
+    b3_ = 2*(bbar_.E()*l_.Py()-l_.E()*bbar_.Py())/(2*l_.E()*(bbar_.E()+l_.E()));
+    b4_ = 2*(bbar_.E()*l_.Pz()-l_.E()*bbar_.Pz())/(2*l_.E()*(bbar_.E()+l_.E()));
     
-     //printf("Koefs bi: %f %f %f %f\n",b1,b2,b3,b4);//printout
+     //printf("Koefs bi: %f %f %f %f\n",b1_,b2_,b3_,b4_);//printout
     
-        c22 = (sqr((mw*mw-mal*mal-mv*mv))-4*(sqr(al.E())-sqr(al.Pz()))*sqr(a1/a4)-4*(mw*mw-mal*mal-mv*mv)*al.Pz()*(a1/a4))/sqr(2*(b.E()+al.E())); 
-        c21 = (4*(mw*mw-mal*mal-mv*mv)*(al.Px()-al.Pz()*(a2/a4))-8*(sqr(al.E())-sqr(al.Pz()))*(a1*a2/sqr(a4))-8*al.Px()*al.Pz()*(a1/a4))/sqr(2*(b.E()+al.E())); 
-        c20 = (-4*(sqr(al.E())-sqr(al.Px()))-4*(sqr(al.E())-sqr(al.Pz()))*sqr(a2/a4)-8*al.Px()*al.Pz()*(a2/a4))/sqr(2*(b.E()+al.E())); 
-        c11 = (4*(mw*mw-mal*mal-mv*mv)*(al.Py()-al.Pz()*(a3/a4))-8*(sqr(al.E())-sqr(al.Pz()))*(a1*a3/sqr(a4))-8*al.Py()*al.Pz()*(a1/a4))/sqr(2*(b.E()+al.E())); 
-        c10 = (-8*(sqr(al.E())-sqr(al.Pz()))*(a2*a3/sqr(a4)) + 8*al.Px()*al.Py() - 8*al.Px()*al.Pz()*(a3/a4) - 8*al.Py()*al.Pz()*(a2/a4))/sqr(2*(b.E()+al.E()));
-        c00 = (-4*(sqr(al.E())-sqr(al.Py())) -4*(sqr(al.E())-sqr(al.Pz()))*sqr(a3/a4)-8*al.Py()*al.Pz()*(a3/a4))/sqr(2*(b.E()+al.E()));
+        c22_ = (sqr((mw_*mw_-mal_*mal_-mv_*mv_))-4*(sqr(al_.E())-sqr(al_.Pz()))*sqr(a1_/a4_)-4*(mw_*mw_-mal_*mal_-mv_*mv_)*al_.Pz()*(a1_/a4_))/sqr(2*(b_.E()+al_.E())); 
+        c21_ = (4*(mw_*mw_-mal_*mal_-mv_*mv_)*(al_.Px()-al_.Pz()*(a2_/a4_))-8*(sqr(al_.E())-sqr(al_.Pz()))*(a1_*a2_/sqr(a4_))-8*al_.Px()*al_.Pz()*(a1_/a4_))/sqr(2*(b_.E()+al_.E())); 
+        c20_ = (-4*(sqr(al_.E())-sqr(al_.Px()))-4*(sqr(al_.E())-sqr(al_.Pz()))*sqr(a2_/a4_)-8*al_.Px()*al_.Pz()*(a2_/a4_))/sqr(2*(b_.E()+al_.E())); 
+        c11_ = (4*(mw_*mw_-mal_*mal_-mv_*mv_)*(al_.Py()-al_.Pz()*(a3_/a4_))-8*(sqr(al_.E())-sqr(al_.Pz()))*(a1_*a3_/sqr(a4_))-8*al_.Py()*al_.Pz()*(a1_/a4_))/sqr(2*(b_.E()+al_.E())); 
+        c10_ = (-8*(sqr(al_.E())-sqr(al_.Pz()))*(a2_*a3_/sqr(a4_)) + 8*al_.Px()*al_.Py() - 8*al_.Px()*al_.Pz()*(a3_/a4_) - 8*al_.Py()*al_.Pz()*(a2_/a4_))/sqr(2*(b_.E()+al_.E()));
+        c00_ = (-4*(sqr(al_.E())-sqr(al_.Py())) -4*(sqr(al_.E())-sqr(al_.Pz()))*sqr(a3_/a4_)-8*al_.Py()*al_.Pz()*(a3_/a4_))/sqr(2*(b_.E()+al_.E()));
       
-       // printf("Koefs ci: %f %f %f %f %f %f\n",c22,c21/c22,c11/c22,c20/c22,c10/c22,c00/c22);//printout
+       // printf("Koefs ci: %f %f %f %f %f %f\n",c22_,c21_/c22_,c11_/c22_,c20_/c22_,c10_/c22_,c00_/c22_);//printout
         
         
 
-        double d22_,d21_,d20_,d11_,d10_,d00_;
-        d22_ = (sqr((mwbar*mwbar-ml*ml-mav*mav))-4*(sqr(l.E())-sqr(l.Pz()))*sqr(b1/b4)-4*(mwbar*mwbar-ml*ml-mav*mav)*l.Pz()*(b1/b4))/sqr(2*(bbar.E()+l.E())); 
-        d21_ = (4*(mwbar*mwbar-ml*ml-mav*mav)*(l.Px()-l.Pz()*(b2/b4))-8*(sqr(l.E())-sqr(l.Pz()))*(b1*b2/sqr(b4))-8*l.Px()*l.Pz()*(b1/b4))/sqr(2*(bbar.E()+l.E())); 
-        d20_ = (-4*(sqr(l.E())-sqr(l.Px()))-4*(sqr(l.E())-sqr(l.Pz()))*sqr(b2/b4)-8*l.Px()*l.Pz()*(b2/b4))/sqr(2*(bbar.E()+l.E())); 
-        d11_ = (4*(mwbar*mwbar-ml*ml-mav*mav)*(l.Py()-l.Pz()*(b3/b4))-8*(sqr(l.E())-sqr(l.Pz()))*(b1*b3/sqr(b4))-8*l.Py()*l.Pz()*(b1/b4))/sqr(2*(bbar.E()+l.E())); 
-        d10_ = (-8*(sqr(l.E())-sqr(l.Pz()))*(b2*b3/sqr(b4)) + 8*l.Px()*l.Py() - 8*l.Px()*l.Pz()*(b3/b4) - 8*l.Py()*l.Pz()*(b2/b4))/sqr(2*(bbar.E()+l.E()));
-        d00_  = (-4*(sqr(l.E())-sqr(l.Py())) -4*(sqr(l.E())-sqr(l.Pz()))*sqr(b3/b4)-8*l.Py()*l.Pz()*(b3/b4))/sqr(2*(bbar.E()+l.E()));
+        double D22,D21,D20,D11,D10,D00;
+        D22 = (sqr((mwbar_*mwbar_-ml_*ml_-mav_*mav_))-4*(sqr(l_.E())-sqr(l_.Pz()))*sqr(b1_/b4_)-4*(mwbar_*mwbar_-ml_*ml_-mav_*mav_)*l_.Pz()*(b1_/b4_))/sqr(2*(bbar_.E()+l_.E())); 
+        D21 = (4*(mwbar_*mwbar_-ml_*ml_-mav_*mav_)*(l_.Px()-l_.Pz()*(b2_/b4_))-8*(sqr(l_.E())-sqr(l_.Pz()))*(b1_*b2_/sqr(b4_))-8*l_.Px()*l_.Pz()*(b1_/b4_))/sqr(2*(bbar_.E()+l_.E())); 
+        D20 = (-4*(sqr(l_.E())-sqr(l_.Px()))-4*(sqr(l_.E())-sqr(l_.Pz()))*sqr(b2_/b4_)-8*l_.Px()*l_.Pz()*(b2_/b4_))/sqr(2*(bbar_.E()+l_.E())); 
+        D11 = (4*(mwbar_*mwbar_-ml_*ml_-mav_*mav_)*(l_.Py()-l_.Pz()*(b3_/b4_))-8*(sqr(l_.E())-sqr(l_.Pz()))*(b1_*b3_/sqr(b4_))-8*l_.Py()*l_.Pz()*(b1_/b4_))/sqr(2*(bbar_.E()+l_.E())); 
+        D10 = (-8*(sqr(l_.E())-sqr(l_.Pz()))*(b2_*b3_/sqr(b4_)) + 8*l_.Px()*l_.Py() - 8*l_.Px()*l_.Pz()*(b3_/b4_) - 8*l_.Py()*l_.Pz()*(b2_/b4_))/sqr(2*(bbar_.E()+l_.E()));
+        D00  = (-4*(sqr(l_.E())-sqr(l_.Py())) -4*(sqr(l_.E())-sqr(l_.Pz()))*sqr(b3_/b4_)-8*l_.Py()*l_.Pz()*(b3_/b4_))/sqr(2*(bbar_.E()+l_.E()));
         
-        //printf("Koefs di_: %f %f %f %f %f %f\n",d22_,d21_/d22_,d11_/d22_,d20_/d22_,d10_/d22_,d00_/d22_);//printout
+        //printf("Koefs di_: %f %f %f %f %f %f\n",D22,D21/D22,D11/D22,D20/D22,D10/D22,D00/D22);//printout
         
         
-        d22 = d22_+sqr(px_miss)*d20_+sqr(py_miss)*d00_+px_miss*py_miss*d10_+px_miss*d21_+py_miss*d11_;
-        d21 = -d21_-2*px_miss*d20_-py_miss*d10_;
-        d20 = d20_;
-        d11 = -d11_-2*py_miss*d00_-px_miss*d10_;
-        d10 = d10_;
-        d00  = d00_;
+        d22_ = D22+sqr(px_miss_)*D20+sqr(py_miss_)*D00+px_miss_*py_miss_*D10+px_miss_*D21+py_miss_*D11;
+        d21_ = -D21-2*px_miss_*D20-py_miss_*D10;
+        d20_ = D20;
+        d11_ = -D11-2*py_miss_*D00-px_miss_*D10;
+        d10_ = D10;
+        d00_  = D00;
         
-        //printf("Koefs di: %f %f %f %f %f %f\n",d22, d21/d22, d11/d22, d20/d22, d10/d22, d00/d22);//printout
+        //printf("Koefs di: %f %f %f %f %f %f\n",d22_, d21_/d22_, d11_/d22_, d20_/d22_, d10_/d22_, d00_/d22_);//printout
                 
 
-        koeficienty[4] = sqr(c00)*sqr(d22)+c11*d22*(c11*d00-c00*d11)+c00*c22*(sqr(d11)-2*d00*d22)+c22*d00*(c22*d00-c11*d11);
-        koeficienty[3] = c00*d21*(2*c00*d22-c11*d11)+c00*d11*(2*c22*d10+c21*d11)+c22*d00*(2*c21*d00-c11*d10)-c00*d22*(c11*d10+c10*d11)-2*c00*d00*(c22*d21+c21*d22)-d00*d11*(c11*c21+c10*c22)+c11*d00*(c11*d21+2*c10*d22);
-        koeficienty[2] = sqr(c00)*(2*d22*d20+sqr(d21))-c00*d21*(c11*d10+c10*d11)+c11*d20*(c11*d00-c00*d11)+c00*d10*(c22*d10-c10*d22)+c00*d11*(2*c21*d10+c20*d11)+(2*c22*c20+sqr(c21))*sqr(d00)-2*c00*d00*(c22*d20+c21*d21+c20*d22)+c10*d00*(2*c11*d21+c10*d22)-d00*d10*(c11*c21+c10*c22)-d00*d11*(c11*c20+c10*c21);
-       // koeficienty[1] = c00*d21*(2*c00*d20-c10*d10)-c00*d20*(c11*d10+c10*d11)+c00*d10*(c21*d10+2*c20*d11)-2*c00*d00*(c21*d20+c20*d21)+c10*d00*(2*c11*d20+c10*d21)-c20*d00*(2*c21*d00-c10*d11)-d00*d10*(c11*c20+c10*c21);
-        koeficienty[1] = c00*d21*(2*c00*d20-c10*d10)-c00*d20*(c11*d10+c10*d11)+c00*d10*(c21*d10+2*c20*d11)-2*c00*d00*(c21*d20+c20*d21)+c10*d00*(2*c11*d20+c10*d21)+c20*d00*(2*c21*d00-c10*d11)-d00*d10*(c11*c20+c10*c21);
-        koeficienty[0] = sqr(c00)*sqr(d20)+c10*d20*(c10*d00-c00*d10)+c20*d10*(c00*d10-c10*d00)+c20*d00*(c20*d00-2*c00*d20);
+        koeficienty[4] = sqr(c00_)*sqr(d22_)+c11_*d22_*(c11_*d00_-c00_*d11_)+c00_*c22_*(sqr(d11_)-2*d00_*d22_)+c22_*d00_*(c22_*d00_-c11_*d11_);
+        koeficienty[3] = c00_*d21_*(2*c00_*d22_-c11_*d11_)+c00_*d11_*(2*c22_*d10_+c21_*d11_)+c22_*d00_*(2*c21_*d00_-c11_*d10_)-c00_*d22_*(c11_*d10_+c10_*d11_)-2*c00_*d00_*(c22_*d21_+c21_*d22_)-d00_*d11_*(c11_*c21_+c10_*c22_)+c11_*d00_*(c11_*d21_+2*c10_*d22_);
+        koeficienty[2] = sqr(c00_)*(2*d22_*d20_+sqr(d21_))-c00_*d21_*(c11_*d10_+c10_*d11_)+c11_*d20_*(c11_*d00_-c00_*d11_)+c00_*d10_*(c22_*d10_-c10_*d22_)+c00_*d11_*(2*c21_*d10_+c20_*d11_)+(2*c22_*c20_+sqr(c21_))*sqr(d00_)-2*c00_*d00_*(c22_*d20_+c21_*d21_+c20_*d22_)+c10_*d00_*(2*c11_*d21_+c10_*d22_)-d00_*d10_*(c11_*c21_+c10_*c22_)-d00_*d11_*(c11_*c20_+c10_*c21_);
+       // koeficienty[1] = c00_*d21_*(2*c00_*d20_-c10_*d10_)-c00_*d20_*(c11_*d10_+c10_*d11_)+c00_*d10_*(c21_*d10_+2*c20_*d11_)-2*c00_*d00_*(c21_*d20_+c20_*d21_)+c10_*d00_*(2*c11_*d20_+c10_*d21_)-c20_*d00_*(2*c21_*d00_-c10_*d11_)-d00_*d10_*(c11_*c20_+c10_*c21_);
+        koeficienty[1] = c00_*d21_*(2*c00_*d20_-c10_*d10_)-c00_*d20_*(c11_*d10_+c10_*d11_)+c00_*d10_*(c21_*d10_+2*c20_*d11_)-2*c00_*d00_*(c21_*d20_+c20_*d21_)+c10_*d00_*(2*c11_*d20_+c10_*d21_)+c20_*d00_*(2*c21_*d00_-c10_*d11_)-d00_*d10_*(c11_*c20_+c10_*c21_);
+        koeficienty[0] = sqr(c00_)*sqr(d20_)+c10_*d20_*(c10_*d00_-c00_*d10_)+c20_*d10_*(c00_*d10_-c10_*d00_)+c20_*d00_*(c20_*d00_-2*c00_*d20_);
         //printf("Koefs_in_f: %15.15f %f %f %f %f\n",koeficienty[0],koeficienty[1],koeficienty[2],koeficienty[3],koeficienty[4]); //printout
 
 }
@@ -751,7 +763,7 @@ double KinematicReconstruction_LSroutines::sqr(double x)
     return (x*x);
 }
 
-void KinematicReconstruction_LSroutines::SWAP(double& realone, double& realtwo)
+void KinematicReconstruction_LSroutines::swap(double& realone, double& realtwo)
 {
       if (realtwo < realone) {
     double aux = realtwo;
@@ -775,7 +787,7 @@ void KinematicReconstruction_LSroutines::quartic_equation(double h0, double h1, 
     //printf("Koefs_norm_in_f: %f %f %f %f %f\n",h0/h0,h1/h0,h2/h0,h3/h0,h4/h0); //printout
 
 
-        if(sign(a4)==0||sign(b4)==0)
+        if(sign(a4_)==0||sign(b4_)==0)
         {
             result.push_back(0);
             v.swap(result);    

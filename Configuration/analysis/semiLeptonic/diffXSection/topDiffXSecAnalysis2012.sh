@@ -52,6 +52,7 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/unfolding
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/closureTest
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/massConstraintTest
+## mkdir -p diffXSecFromSignal/plots/combined/2012/regularizationTest
 
 ## b) root files needed for the Analysis are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
 ## c) if not yet done, combine the MC samples for the single channels (like QCD, single top, Diboson) using combineMCsamples.C
@@ -75,7 +76,7 @@
 ##    ATLASCompTreeSGsamples.C-> compare various official ATLAS and CMS samples
 ##    analyzeGenComparison7TeV.C -> like analyzeGenComparison.C but for 7TeV samples/analysis
 ##    createNNLOplot.C -> create ahrens theory curves
-
+##    analyzeRegularizationTest.C-> test different choices of regularization methods and parameters
 
 ########################
 ## configure settings ##

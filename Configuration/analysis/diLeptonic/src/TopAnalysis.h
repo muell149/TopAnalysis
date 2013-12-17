@@ -1,6 +1,11 @@
 #ifndef TopAnalysis_h
 #define TopAnalysis_h
 
+#include <map>
+
+class TH1;
+class TH2;
+
 #include "AnalysisBase.h"
 #include "classesFwd.h"
 
@@ -232,7 +237,8 @@ public:
         kinRecoOnTheFly_(false),
         doClosureTest_(false),
         pdf_no_(-1),
-        closureFunction_(nullptr)
+        closureFunction_(nullptr),
+        binnedControlPlots_(0)
         {}
     
     /// Inherited from AnalysisBase and overwritten for needs of TopAnalysis
@@ -254,6 +260,22 @@ public:
     
     
 private:
+    
+    /// Create binned control plots
+    // Create Nbins control plots for the differential distribution h_differential
+    // Use h_control for the control plot name and binning
+    void CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList =true);
+    
+    /// Fill binned control plots
+    // h: differential distribution histogram
+    // binvalue: the value of the quantity in the differential distribution histogram
+    // the control plot histogram
+    // the value for the control plot
+    // weight: event weight
+    void FillBinnedControlPlot(TH1* h_differential, double binvalue, 
+                               TH1 *h_control, double value, double weight);
+    
+    
     
     /// Set global normalisation factors
     double overallGlobalNormalisationFactor();
@@ -285,6 +307,15 @@ private:
                                  const double trueLevelWeight,
                                  int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100,
                                  double extragenjet[4]);
+    
+    
+    
+    /// Map holding binned control plots
+    //binnedControlPlots contains:
+    //map of name of differential distribution
+    // -> pair( histogram with the binning of the differential distribution,
+    //          vector(bin) -> map( control plot name -> TH1*))
+    std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >* binnedControlPlots_;
 };
 
 

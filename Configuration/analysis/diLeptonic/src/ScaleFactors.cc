@@ -758,14 +758,14 @@ double BtagScaleFactors::varySF(const double pt, const double abs_eta,
        (this->etaUpSystematic() && abs_eta>etamedian) ||
        (this->etaDownSystematic() && abs_eta<etamedian))
     {
-        return -0.5;
+        return -1.0;
     }
     else if((this->ptUpSystematic() && pt<ptmedian) ||
             (this->ptDownSystematic() && pt>ptmedian) ||
             (this->etaUpSystematic() && abs_eta<etamedian) ||
             (this->etaDownSystematic() && abs_eta>etamedian))
     {
-        return 0.5;
+        return 1.0;
     }
     
     // Absolute scale up or down
@@ -859,20 +859,20 @@ double BtagScaleFactors::calculateBtagSF(const std::vector<int>& jetIndices,
             perEventSFAtLeastOneTag = perJetSF - SF_Error;
         }
         else if(systematic_ == btagPt_up){
-            if(pt>channelStruct.btag_ptmedian_) perEventSFAtLeastOneTag = perJetSF - 0.5*SF_Error;
-            else perEventSFAtLeastOneTag = perJetSF + 0.5*SF_Error;
+            if(pt>channelStruct.btag_ptmedian_) perEventSFAtLeastOneTag = perJetSF - 1.0*SF_Error;
+            else perEventSFAtLeastOneTag = perJetSF + 1.0*SF_Error;
         }
         else if(systematic_ == btagPt_down){
-            if(pt>channelStruct.btag_ptmedian_) perEventSFAtLeastOneTag = perJetSF + 0.5 * SF_Error;
-            else perEventSFAtLeastOneTag = perJetSF - 0.5 * SF_Error;
+            if(pt>channelStruct.btag_ptmedian_) perEventSFAtLeastOneTag = perJetSF + 1.0 * SF_Error;
+            else perEventSFAtLeastOneTag = perJetSF - 1.0 * SF_Error;
         }
         else if(systematic_ == btagEta_up){
-            if(eta>channelStruct.btag_etamedian_) perEventSFAtLeastOneTag = perJetSF - 0.5 * SF_Error;
-            else perEventSFAtLeastOneTag = perJetSF + 0.5 * SF_Error;
+            if(eta>channelStruct.btag_etamedian_) perEventSFAtLeastOneTag = perJetSF - 1.0 * SF_Error;
+            else perEventSFAtLeastOneTag = perJetSF + 1.0 * SF_Error;
         }
         else if(systematic_ == btagEta_down){
-            if(eta>channelStruct.btag_etamedian_) perEventSFAtLeastOneTag = perJetSF + 0.5 * SF_Error;
-            else perEventSFAtLeastOneTag = perJetSF - 0.5 * SF_Error;
+            if(eta>channelStruct.btag_etamedian_) perEventSFAtLeastOneTag = perJetSF + 1.0 * SF_Error;
+            else perEventSFAtLeastOneTag = perJetSF - 1.0 * SF_Error;
         }
         oneMinusSFEfficiency *= 1. - efficiency*perEventSFAtLeastOneTag;
     }

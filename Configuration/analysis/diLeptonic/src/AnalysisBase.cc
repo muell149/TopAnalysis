@@ -23,7 +23,6 @@
 #include <TRandom3.h>
 
 #include "AnalysisBase.h"
-#include "HistoListReader.h"
 #include "utils.h"
 #include "KinReco.h"
 #include "JetCorrectorParameters.h"
@@ -62,7 +61,6 @@ btagScaleFactors_(0),
 doJesJer_(false),
 weightKinFit_(0),
 isTtbarSample_(false),
-binnedControlPlots_(0),
 chain_(0),
 useObjectStructs_(false),
 h_weightedEvents(0),
@@ -105,8 +103,6 @@ void AnalysisBase::SlaveBegin(TTree*)
         higgsGenObjects_ = new HiggsGenObjects();
         kinRecoObjects_ = new KinRecoObjects();
     }
-    
-    binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
 }
 
 
@@ -118,11 +114,6 @@ void AnalysisBase::SlaveTerminate()
     // The SlaveTerminate() function is called after all entries or objects
     // have been processed. When running with PROOF SlaveTerminate() is called
     // on each slave server.
-    
-    for (auto it = binnedControlPlots_->begin(); it != binnedControlPlots_->end(); ++it) {
-        delete (*it).second.first;
-    }
-    delete binnedControlPlots_;
     
     if(recoObjects_) delete recoObjects_;
     if(commonGenObjects_) delete commonGenObjects_;
@@ -1226,62 +1217,6 @@ double AnalysisBase::getJetHT(const std::vector<int>& jetIndices, const VLV& jet
 
 
 
-void AnalysisBase::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList)
-{
-    auto &pair = (*binnedControlPlots_)[h_differential->GetName()];
-    if(fromHistoList){
-        HistoListReader histoList("HistoList");
-        if(histoList.IsZombie()) { std::cout << "Need a HistoList to create binned control plots!\n"; exit(273); }
-        pair.first = histoList.getPlotProperties(h_differential->GetName()).getClonedHistogram();
-    }
-    else{
-        bool old = TH1::AddDirectoryStatus();
-        TH1::AddDirectory(false);
-        TH1* clone = static_cast<TH1*>(h_differential->Clone());
-        TH1::AddDirectory(old);
-        pair.first = clone;
-    }
-    std::string name = "bcp_";
-    name.append(h_differential->GetName()).append("_bin_");
-    //create maps if we are called for the first time with a certain h_differential
-    if (pair.second.size() == 0) {
-        for (int i = 0; i <= pair.first->GetNbinsX() + 1; ++i)
-            pair.second.push_back(std::map<std::string, TH1*>());
-    }
-    //now really create the histograms
-    for (int i = 0; i <= pair.first->GetNbinsX() + 1; ++i) {
-        std::string binning = 
-            i == 0 ? "underflow" :
-            i == pair.first->GetNbinsX() + 1 ? "overflow" :
-            ttbar::d2s(pair.first->GetBinLowEdge(i)) + " to " + ttbar::d2s(pair.first->GetBinLowEdge(i+1));
-        binning = std::string(" (") + h_differential->GetName() + " " + binning + ")";
-        std::string n = name + std::to_string(i) + "_" + h_control->GetName();
-        pair.second[i][h_control->GetName()] = store(
-            new TH1D(n.c_str(), (std::string(h_control->GetName())+binning).c_str(), 
-                     h_control->GetNbinsX(), h_control->GetBinLowEdge(1), 
-                     h_control->GetBinLowEdge(h_control->GetNbinsX()+1)));
-    }
-}
-
-
-
-void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue, 
-                                         TH1* h_control, double value, double weight)
-{
-    auto pair = (*binnedControlPlots_)[h_differential->GetName()];
-    auto bin = pair.first->FindBin(binvalue);
-    auto m = pair.second.at(bin);
-    TH1* h = m[h_control->GetName()];
-    if (!h) { 
-        std::cerr << "Error: please CreateBinnedControlPlots for " << h_differential->GetName() 
-            << " and " << h_control->GetName() << std::endl;
-        exit(911);
-    }
-    h->Fill(value, weight);
-}
-
-
-
 void AnalysisBase::prepareKinRecoSF()
 {
     // --> uncomment the following line to determine the Kin Reco SFs
@@ -1341,11 +1276,14 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     const LV& leptonPlus(allLeptons.at(antiLeptonIndex));
     VLV selectedJets;
     std::vector<double> btagValues;
+    std::vector<int> jIndex;
     for(const int index : jetIndices){
+        
         selectedJets.push_back(jets.at(index));
         btagValues.push_back(jetBTagCSV.at(index));
+        jIndex.push_back(index);
     }
-    
+   
     
 //     if(0){//print
 //          printf("****************************************************************************************************************\n");
@@ -1376,29 +1314,29 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //     
     
     // 2 lines needed for OLD kinReco
-   const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-   const int nSolution = sols.size();
-    
-    
-    // 2 lines needed for NEW kinReco
-//    kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-//    const int nSolution = kinematicReconstruction_->GetNSol();
+    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+    const int nSolution = sols.size();
+        
+    // 3 lines needed for NEW kinReco
+//   kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+//    const auto& sols = kinematicReconstruction_->getSols();
+//    const int nSolution = sols.size();
     
    //////////kinematicReconstruction_->doJetsMerging(&jets,&jetBTagCSV);
    
-   
     if(nSolution == 0) return false;
-    
-    // 1 line needed for OLD kinReco
-     const auto& sol = sols.at(0);
-    
-    // 1 line needed for NEW kinReco
-    // const auto& sol = kinematicReconstruction_->GetSol();
-  
-  
-   
-   
-   
+
+        const auto& sol = sols.at(0);
+        
+        
+//    std::cout<< std::endl;
+//    std::cout<<selectedJets.size() << std::endl;
+//    for(int i=0;i<nSolution;i++)
+//     {
+//         std::cout <<i<< "  "<< sols.at(i).ntags <<"  "<< sols.at(i).weight<<" " <<jIndex[sols.at(i).jetB_index]  << " " << jIndex[sols.at(i).jetBbar_index] << std::endl;
+//         
+//     }
+        
     
     // Fill the results of the on-the-fly kinematic reconstruction
     if(useObjectStructs_){
@@ -1410,8 +1348,8 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         kinRecoObjects_->HypAntiBJet_->push_back(ttbar::TLVtoLV(sol.jetBbar));
         kinRecoObjects_->HypNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrino));
         kinRecoObjects_->HypAntiNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrinoBar));
-        kinRecoObjects_->HypJet0index_->push_back(sol.jetB_index);
-        kinRecoObjects_->HypJet1index_->push_back(sol.jetBbar_index);
+        kinRecoObjects_->HypJet0index_->push_back(jIndex[sol.jetB_index]);
+        kinRecoObjects_->HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
         
         kinRecoObjects_->valuesSet_ = true;
     }
@@ -1424,8 +1362,8 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         HypAntiBJet_->push_back(ttbar::TLVtoLV(sol.jetBbar));
         HypNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrino));
         HypAntiNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrinoBar));
-        HypJet0index_->push_back(sol.jetB_index);
-        HypJet1index_->push_back(sol.jetBbar_index);
+        HypJet0index_->push_back(jIndex[sol.jetB_index]);
+        HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
     }
     
     //check for strange events

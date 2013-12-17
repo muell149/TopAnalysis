@@ -345,7 +345,10 @@ void analyzeFileComparison(bool save = true, int verbose=0){
     TString cutLabel="1 lepton, #geq4 Jets";
     if(name.Contains("Tagged")||plotList_[plot].Contains("AfterBtagging")) cutLabel+=", #geq2 b-tags";
     else if(name.Contains("KinFit")) cutLabel+=", #geq2 b-tags, KinFit";
-    if(plotList_[plot].Contains("ProbSel")) cutLabel.ReplaceAll("KinFit","prob>0.02");
+    if(plotList_[plot].Contains("ProbSel")){
+      if(name.Contains("KinFit")) cutLabel.ReplaceAll("KinFit","prob>0.02");
+      else cutLabel+=", #geq2 b-tags, prob>0.02";
+    }
     double positionX=xUp+0.045*(xUp-xDn)*(gStyle->GetCanvasDefW()/600.);
     double positionY=min;
     //std::cout << plotList_[plot] << ": " << xUp << "+0.03*(" << xUp << "-" << xDn << ")=" << positionX << std::endl;

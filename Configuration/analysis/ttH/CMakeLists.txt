@@ -48,6 +48,9 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 SET( ROOT_EXTRA_LIBS -lGenVector -lTMVA -lHistPainter)
 FIND_PACKAGE( ROOT REQUIRED )
 
+FIND_PACKAGE( ZTopUtils REQUIRED )
+# now you can use ${ZTopUtils_INCLUDE_DIRS} and ${ZTopUtils_LIBRARIES}
+
 #######################
 # installation options
 #######################

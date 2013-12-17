@@ -51,7 +51,7 @@ constexpr double JetEtaCUT = 2.4;
 constexpr double JetPtCUT = 30.;
 
 /// Cut value for jet pt
-constexpr double JetPtCUT2 = 50.;
+constexpr double JetPtCUT2 = 30.;
 
 /// CSV Loose working point
 constexpr double BtagWP = 0.244;
@@ -73,7 +73,7 @@ constexpr double rho0 = 340.0;
 
 
 
-void TopAnalysis::Begin(TTree* )
+void TopAnalysis::Begin(TTree*)
 {
     // Defaults from AnalysisBase
     AnalysisBase::Begin(0);
@@ -679,13 +679,21 @@ void TopAnalysis::SlaveBegin(TTree*)
     h_BTagSF->Sumw2();
     h_KinRecoSF = store(new TH1D("KinRecoSF", "Kinematic Reco. SF per event", 200, 0.5, 1.5));
     h_EventWeight = store(new TH1D("EventWeight", "Event SF", 600, 0, 3));
-
+    
+    
+    // Map for binned control plots
+    binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
 }
 
 
 
 void TopAnalysis::SlaveTerminate()
 {
+    for (auto it = binnedControlPlots_->begin(); it != binnedControlPlots_->end(); ++it) {
+        delete (*it).second.first;
+    }
+    delete binnedControlPlots_;
+    
     AnalysisBase::SlaveTerminate();
 }
 
@@ -950,9 +958,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Access kinematic reconstruction info
     this->GetKinRecoBranchesEntry(entry);
     bool hasSolution = HypTop_->size() > 0;
-    if (kinRecoOnTheFly_ || true)
+    if ((kinRecoOnTheFly_ || true) && !this->makeBtagEfficiencies()){
         hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, *leptons_, *jets_, *jetBTagCSV_, met);
-
+    }
+ 
     if ( isZregion ) {
         double fullWeights = weight;
         Zh1_postZcut->Fill(dilepton.M(), fullWeights);
@@ -1163,6 +1172,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
                                               *jets_, *jetPartonFlavour_,
                                               weight, static_cast<std::string>(channel_));
+        return kTRUE;
     }
     
     //=== CUT ===
@@ -1433,6 +1443,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_RecoAntiPartonFraction->Fill(RecoAntipartonMomFraction, recoWeight);
 
     //New plots from Carmen: Begin
+    h_RecoTTBar0Mass->Fill(rho0/(hypttbar).M(), recoWeight);
+    h_HypTTBar0Mass->Fill(rho0/(hypttbar).M(), weight);
+
     int extrarecojet[4] = {0};
     int jetnumReco = -1;
     double jetHTreco = 0;
@@ -1466,6 +1479,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_HypJetMultpt40->Fill(RecoJets_cut40,weight);
     h_HypJetMultpt60->Fill(RecoJets_cut60,weight);
     h_HypJetMultpt100->Fill(RecoJets_cut100,weight);
+  
     int first= -1, second=-1, third=-1, fourth=-1;
     double ptjet = 0;
     for(int ord = 0; ord <= jetnumReco; ord++)
@@ -1536,8 +1550,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
         h_RecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(), recoWeight);
         h_HypTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),weight);
-        h_RecoTTBar0Mass->Fill(rho0/(hypttbar).M(), recoWeight);
-        h_HypTTBar0Mass->Fill(rho0/(hypttbar).M(),weight);
 
     }
     for(int q0 = 0; q0<19;q0++){
@@ -1667,6 +1679,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
             h_GenRecoBJetEtaLead->Fill(LeadHypBJet.Eta(), LeadGenBJet.Eta(), weight);
             h_GenRecoBJetEtaNLead->Fill(NLeadHypBJet.Eta(), NLeadGenBJet.Eta(), weight);
 
+            //rho/masstt 
+            h_GenRecoTTBar0Mass->Fill(rho0/hypttbar.M(),rho0/genttbar.M(),weight);
             // jet multiplicities
             h_GenRecoJetMult->Fill(numberOfJets, allGenJets_->size(), weight );
             h_GenRecoJetMultpt30->Fill(RecoJets,GenJets_cut,weight);
@@ -1697,7 +1711,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
                 h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),allGenJets_->at(extragenjet[0]).Pt(),weight);
                 h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),allGenJets_->at(extragenjet[0]).Eta(),weight);
                 h_GenRecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),rho0/(genttbar+allGenJets_->at(extragenjet[0])).M(),weight);
-                h_GenRecoTTBar0Mass->Fill(rho0/(hypttbar).M(),rho0/(genttbar).M(),weight);
             }
         }
     }
@@ -1744,6 +1757,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         h_GenRecoBJetEtaLead->Fill(LeadHypBJet.Eta(), -1000, weight);
         h_GenRecoBJetEtaNLead->Fill(NLeadHypBJet.Eta(), -1000, weight);
 
+        //rho/masstt 
+        h_GenRecoTTBar0Mass->Fill(rho0/hypttbar.M(), -1000, weight);
+
         // jet multiplicities
         h_GenRecoJetMult->Fill(numberOfJets, -1000, weight );
         h_GenRecoJetMultpt30->Fill(RecoJets,-1000,weight);
@@ -1769,7 +1785,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
             h_GenRecoExtraJetpT->Fill(jets_->at(extrarecojet[first]).Pt(),-1000.,weight);
             h_GenRecoExtraJetEta->Fill(jets_->at(extrarecojet[first]).Eta(),-1000.,weight);
             h_GenRecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),-1000.,weight);
-            h_GenRecoTTBar0Mass->Fill(rho0/(hypttbar).M(),-1000.,weight);
         }
     }
 
@@ -2243,6 +2258,9 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                 h_VisGenJetMultpt60->Fill(GenJets_cut60,trueLevelWeight);
                 h_VisGenJetMultpt100->Fill(GenJets_cut100,trueLevelWeight);
 
+                LV genttbar(*GenTop_ + *GenAntiTop_);
+                h_VisGenTTBar0Mass->Fill(rho0/genttbar.M(),trueLevelWeight);
+
                 if(jetnum>2){
                     h_VisGenExtraJetpT4->Fill(allGenJets_->at(extragenjet[3]).Pt(),trueLevelWeight);
                     h_VisGenExtraJetEta4->Fill(allGenJets_->at(extragenjet[3]).Eta(),trueLevelWeight);
@@ -2258,9 +2276,8 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                     h_VisGenExtraJetEta->Fill(allGenJets_->at(extragenjet[0]).Eta(),trueLevelWeight);
                     LV genttbar(*GenTop_ + *GenAntiTop_);
                     h_VisGenTTBar1stJetMass->Fill(rho0/(genttbar+allGenJets_->at(extragenjet[0])).M(),trueLevelWeight);  
-                    h_VisGenTTBar0Mass->Fill(rho0/genttbar.M(),trueLevelWeight);
-
                 }
+
                 for(int q0 = 0; q0<19; q0++){
                     h_VisGenJetMultTotal->Fill(cbin[q0],trueLevelWeight);
                     if(allGenJets_->at(extragenjet[0]).Pt()<=cbin[q0] || jetnum<0 ) h_VisGenJetMultQ0->Fill(cbin[q0],trueLevelWeight);
@@ -2271,3 +2288,68 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
         }
     }
 }
+
+
+
+void TopAnalysis::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList)
+{
+    auto &pair = (*binnedControlPlots_)[h_differential->GetName()];
+    if(fromHistoList){
+        HistoListReader histoList("HistoList");
+        if(histoList.IsZombie()) { std::cout << "Need a HistoList to create binned control plots!\n"; exit(273); }
+        pair.first = histoList.getPlotProperties(h_differential->GetName()).getClonedHistogram();
+    }
+    else{
+        bool old = TH1::AddDirectoryStatus();
+        TH1::AddDirectory(false);
+        TH1* clone = static_cast<TH1*>(h_differential->Clone());
+        TH1::AddDirectory(old);
+        pair.first = clone;
+    }
+    std::string name = "bcp_";
+    name.append(h_differential->GetName()).append("_bin_");
+    //create maps if we are called for the first time with a certain h_differential
+    if (pair.second.size() == 0) {
+        for (int i = 0; i <= pair.first->GetNbinsX() + 1; ++i)
+            pair.second.push_back(std::map<std::string, TH1*>());
+    }
+    //now really create the histograms
+    for (int i = 0; i <= pair.first->GetNbinsX() + 1; ++i) {
+        std::string binning = 
+            i == 0 ? "underflow" :
+            i == pair.first->GetNbinsX() + 1 ? "overflow" :
+            ttbar::d2s(pair.first->GetBinLowEdge(i)) + " to " + ttbar::d2s(pair.first->GetBinLowEdge(i+1));
+        binning = std::string(" (") + h_differential->GetName() + " " + binning + ")";
+        std::string n = name + std::to_string(i) + "_" + h_control->GetName();
+        pair.second[i][h_control->GetName()] = store(
+            new TH1D(n.c_str(), (std::string(h_control->GetName())+binning).c_str(), 
+                     h_control->GetNbinsX(), h_control->GetBinLowEdge(1), 
+                     h_control->GetBinLowEdge(h_control->GetNbinsX()+1)));
+    }
+}
+
+
+
+void TopAnalysis::FillBinnedControlPlot(TH1* h_differential, double binvalue, 
+                                        TH1* h_control, double value, double weight)
+{
+    auto pair = (*binnedControlPlots_)[h_differential->GetName()];
+    auto bin = pair.first->FindBin(binvalue);
+    auto m = pair.second.at(bin);
+    TH1* h = m[h_control->GetName()];
+    if (!h) { 
+        std::cerr << "Error: please CreateBinnedControlPlots for " << h_differential->GetName() 
+            << " and " << h_control->GetName() << std::endl;
+        exit(911);
+    }
+    h->Fill(value, weight);
+}
+
+
+
+
+
+
+
+
+
