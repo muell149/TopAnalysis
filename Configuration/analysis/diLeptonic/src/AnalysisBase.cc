@@ -23,7 +23,6 @@
 #include <TRandom3.h>
 
 #include "AnalysisBase.h"
-#include "HistoListReader.h"
 #include "utils.h"
 #include "KinReco.h"
 #include "JetCorrectorParameters.h"
@@ -62,7 +61,6 @@ btagScaleFactors_(0),
 doJesJer_(false),
 weightKinFit_(0),
 isTtbarSample_(false),
-binnedControlPlots_(0),
 chain_(0),
 useObjectStructs_(false),
 h_weightedEvents(0),
@@ -105,8 +103,6 @@ void AnalysisBase::SlaveBegin(TTree*)
         higgsGenObjects_ = new HiggsGenObjects();
         kinRecoObjects_ = new KinRecoObjects();
     }
-    
-    binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
 }
 
 
@@ -118,11 +114,6 @@ void AnalysisBase::SlaveTerminate()
     // The SlaveTerminate() function is called after all entries or objects
     // have been processed. When running with PROOF SlaveTerminate() is called
     // on each slave server.
-    
-    for (auto it = binnedControlPlots_->begin(); it != binnedControlPlots_->end(); ++it) {
-        delete (*it).second.first;
-    }
-    delete binnedControlPlots_;
     
     if(recoObjects_) delete recoObjects_;
     if(commonGenObjects_) delete commonGenObjects_;
@@ -1222,62 +1213,6 @@ double AnalysisBase::getJetHT(const std::vector<int>& jetIndices, const VLV& jet
         result += pt;
     }
     return result;
-}
-
-
-
-void AnalysisBase::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList)
-{
-    auto &pair = (*binnedControlPlots_)[h_differential->GetName()];
-    if(fromHistoList){
-        HistoListReader histoList("HistoList");
-        if(histoList.IsZombie()) { std::cout << "Need a HistoList to create binned control plots!\n"; exit(273); }
-        pair.first = histoList.getPlotProperties(h_differential->GetName()).getClonedHistogram();
-    }
-    else{
-        bool old = TH1::AddDirectoryStatus();
-        TH1::AddDirectory(false);
-        TH1* clone = static_cast<TH1*>(h_differential->Clone());
-        TH1::AddDirectory(old);
-        pair.first = clone;
-    }
-    std::string name = "bcp_";
-    name.append(h_differential->GetName()).append("_bin_");
-    //create maps if we are called for the first time with a certain h_differential
-    if (pair.second.size() == 0) {
-        for (int i = 0; i <= pair.first->GetNbinsX() + 1; ++i)
-            pair.second.push_back(std::map<std::string, TH1*>());
-    }
-    //now really create the histograms
-    for (int i = 0; i <= pair.first->GetNbinsX() + 1; ++i) {
-        std::string binning = 
-            i == 0 ? "underflow" :
-            i == pair.first->GetNbinsX() + 1 ? "overflow" :
-            ttbar::d2s(pair.first->GetBinLowEdge(i)) + " to " + ttbar::d2s(pair.first->GetBinLowEdge(i+1));
-        binning = std::string(" (") + h_differential->GetName() + " " + binning + ")";
-        std::string n = name + std::to_string(i) + "_" + h_control->GetName();
-        pair.second[i][h_control->GetName()] = store(
-            new TH1D(n.c_str(), (std::string(h_control->GetName())+binning).c_str(), 
-                     h_control->GetNbinsX(), h_control->GetBinLowEdge(1), 
-                     h_control->GetBinLowEdge(h_control->GetNbinsX()+1)));
-    }
-}
-
-
-
-void AnalysisBase::FillBinnedControlPlot(TH1* h_differential, double binvalue, 
-                                         TH1* h_control, double value, double weight)
-{
-    auto pair = (*binnedControlPlots_)[h_differential->GetName()];
-    auto bin = pair.first->FindBin(binvalue);
-    auto m = pair.second.at(bin);
-    TH1* h = m[h_control->GetName()];
-    if (!h) { 
-        std::cerr << "Error: please CreateBinnedControlPlots for " << h_differential->GetName() 
-            << " and " << h_control->GetName() << std::endl;
-        exit(911);
-    }
-    h->Fill(value, weight);
 }
 
 
