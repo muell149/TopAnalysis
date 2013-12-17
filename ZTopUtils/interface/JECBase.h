@@ -9,35 +9,52 @@
 #include <string>
 #include "mathdefs.h"
 
+namespace ztop {
 
+/**
+ *
+ *
+ *
+ *
+ *
+ WHATEVER you add as functions, please don't use exit() in case an error occurs.
+ replace it with either:
+ - throw an exception (throw std::logic_error("sometext") or std::runtime_error("");)
+ - return something (-1 or another int for dubugging)
 
-namespace ztop{
- 
+ */
 
+class JECBase {
+public:
 
-  class JECBase{
-  public:
-
-    JECBase(){is2012_=true;totalunc_=0;}
+    JECBase() {
+        is2012_ = true;
+        totalunc_ = 0;
+    }
     JECBase(const ztop::JECBase &);
-    JECBase & operator = (const ztop::JECBase &);
+    JECBase & operator =(const ztop::JECBase &);
     ~JECBase();
 
-    void setFile(std::string pathToFile, bool quiet=false);
+    void setFile(std::string pathToFile, bool quiet = false);
     void setSystematics(std::string); //! up, down, no
-    void setIs2012(bool is){is2012_=is; std::cout << "JEC mode changed; set File again!" << std::endl;}
-
-    std::vector<unsigned int> &  sources(){return sources_;}
-
-    void applyJECUncertainties(ztop::PolarLorentzVector &);
-    void applyJECUncertainties(ztop::LorentzVector & v){
-      ztop::PolarLorentzVector vp;
-      vp=v;
-      applyJECUncertainties(vp);
-      v=vp;
+    void setIs2012(bool is) {
+        is2012_ = is;
+        std::cout << "JEC mode changed; set File again!" << std::endl;
     }
 
-  protected:
+    std::vector<unsigned int> & sources() {
+        return sources_;
+    }
+
+    void applyJECUncertainties(ztop::PolarLorentzVector &);
+    void applyJECUncertainties(ztop::LorentzVector & v) {
+        ztop::PolarLorentzVector vp;
+        vp = v;
+        applyJECUncertainties(vp);
+        v = vp;
+    }
+
+protected:
 
     std::string pathToFile_;
     std::vector<ztop::JetCorrectionUncertainty*> vsrc_;
@@ -47,7 +64,7 @@ namespace ztop{
     bool is2012_;
     void copyFrom(const ztop::JECBase &);
 
-  };
+};
 
 }
 #endif

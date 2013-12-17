@@ -28,7 +28,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   KinReco
   KinematicReconstruction
   KinematicReconstruction_LSroutines
-  MeanSol
+  KinematicReconstruction_MeanSol
   MvaTreeHandler
   MvaTreeAnalyzer
   MvaWeights2d
@@ -74,6 +74,7 @@ ADD_DEFINITIONS(-Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c++0x -DSTANDALONE_
 #####################
 
 INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIR} )
+INCLUDE_DIRECTORIES( ${ZTopUtils_INCLUDE_DIRS} )
 ## TO-DO: use installed header files as soon as available
 INCLUDE_DIRECTORIES( "${${PROJECT_NAME}_SOURCE_DIR}/../diLeptonic/src")
 ## TO-DO: do proper separation in include and src directories
@@ -116,7 +117,7 @@ ENDFOREACH( filename ${${PROJECT_NAME}_LIBSOURCES} )
 
 
 ADD_LIBRARY( ${PROJECT_NAME} SHARED ${${PROJECT_NAME}_LIBSOURCES_full} ${DICT_NAME} )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${ROOT_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${ROOT_LIBRARIES} ${ZTopUtils_LIBRARIES} )
 
 INSTALL(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION lib
@@ -128,7 +129,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
 
 FOREACH( exec ${${PROJECT_NAME}_EXECUTABLES} )
   ADD_EXECUTABLE( ${exec} ${exec} )
-  TARGET_LINK_LIBRARIES( ${exec} ${PROJECT_NAME} ${ROOT_LIBRARIES} )
+  TARGET_LINK_LIBRARIES( ${exec} ${PROJECT_NAME} ${ROOT_LIBRARIES} ${ZTopUtils_LIBRARIES} )
   INSTALL(TARGETS ${exec}
     RUNTIME DESTINATION bin )
 ENDFOREACH( exec ${${PROJECT_NAME}_EXECUTABLES} )
