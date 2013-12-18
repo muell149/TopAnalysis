@@ -27,12 +27,12 @@
 #include "JetMatchAnalyzer.h"
 #include "JetChargeAnalyzer.h"
 #include "Playground.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
-#include "../../diLeptonic/src/utils.h"
-#include "../../diLeptonic/src/CommandLineParameters.h"
-#include "../../diLeptonic/src/KinematicReconstruction.h"
-#include "../../diLeptonic/src/PUReweighter.h"
-#include "../../diLeptonic/src/ScaleFactors.h"
+#include "../../common/include/sampleHelpers.h"
+#include "../../common/include/utils.h"
+#include "../../common/include/CommandLineParameters.h"
+#include "../../common/include/KinematicReconstruction.h"
+#include "../../common/include/PUReweighter.h"
+#include "../../common/include/ScaleFactors.h"
 
 
 

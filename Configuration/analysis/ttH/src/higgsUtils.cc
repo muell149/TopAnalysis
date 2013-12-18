@@ -11,7 +11,7 @@
 #include <Rtypes.h>
 
 #include "higgsUtils.h"
-#include "../../diLeptonic/src/RootFileReader.h"
+#include "../../common/include/RootFileReader.h"
 
 
 

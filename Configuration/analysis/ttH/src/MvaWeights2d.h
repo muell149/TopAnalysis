@@ -10,7 +10,7 @@ class TString;
 class TH1;
 
 #include "mvaStructs.h"
-#include "../../diLeptonic/src/storeTemplate.h"
+#include "../../common/include/storeTemplate.h"
 
 namespace mvaSetup{
     class MvaConfig;

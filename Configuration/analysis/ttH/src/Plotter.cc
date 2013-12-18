@@ -24,9 +24,9 @@
 #include "higgsUtils.h"
 #include "Samples.h"
 #include "DyScaleFactors.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
-#include "../../diLeptonic/src/RootFileReader.h"
-#include "../../diLeptonic/src/plotterUtils.h"
+#include "../../common/include/sampleHelpers.h"
+#include "../../common/include/RootFileReader.h"
+#include "../../common/include/plotterUtils.h"
 
 
 

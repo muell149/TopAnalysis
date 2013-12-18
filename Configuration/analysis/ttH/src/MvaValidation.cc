@@ -17,10 +17,10 @@
 #include "mvaStructs.h"
 #include "analysisStructs.h"
 #include "JetCategories.h"
-#include "../../diLeptonic/src/analysisObjectStructs.h"
-#include "../../diLeptonic/src/analysisUtils.h"
-#include "../../diLeptonic/src/classes.h"
-#include "../../diLeptonic/src/RootFileReader.h"
+#include "../../common/include/analysisObjectStructs.h"
+#include "../../common/include/analysisUtils.h"
+#include "../../common/include/classes.h"
+#include "../../common/include/RootFileReader.h"
 
 
 

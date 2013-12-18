@@ -10,8 +10,8 @@ class TSelectorList;
 class TString;
 
 #include "mvaStructs.h"
-#include "../../diLeptonic/src/storeTemplate.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../common/include/storeTemplate.h"
+#include "../../common/include/sampleHelpers.h"
 
 class JetCategories;
 class RecoObjects;

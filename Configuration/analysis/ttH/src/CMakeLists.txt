@@ -1,4 +1,4 @@
-SET(TopAnalysis_DIR "${${PROJECT_NAME}_SOURCE_DIR}/../diLeptonic")
+SET(CommonAnalysis_DIR "${${PROJECT_NAME}_SOURCE_DIR}/../common")
 SET( ${PROJECT_NAME}_ROOTDICT_DIR ${CMAKE_BINARY_DIR}/ROOTdicts )
 SET( DICT_NAME ${${PROJECT_NAME}_ROOTDICT_DIR}/${PROJECT_NAME}_dict.cc )
 
@@ -76,7 +76,7 @@ ADD_DEFINITIONS(-Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c++0x -DSTANDALONE_
 INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIR} )
 INCLUDE_DIRECTORIES( ${ZTopUtils_INCLUDE_DIRS} )
 ## TO-DO: use installed header files as soon as available
-INCLUDE_DIRECTORIES( "${${PROJECT_NAME}_SOURCE_DIR}/../diLeptonic/src")
+INCLUDE_DIRECTORIES( "${CommonAnalysis_DIR}/include")
 ## TO-DO: do proper separation in include and src directories
 INCLUDE_DIRECTORIES( BEFORE "${${PROJECT_NAME}_SOURCE_DIR}/src" ${${PROJECT_NAME}_ROOTDICT_DIR} )
 
@@ -85,7 +85,7 @@ INCLUDE_DIRECTORIES( BEFORE "${${PROJECT_NAME}_SOURCE_DIR}/src" ${${PROJECT_NAME
 # targets
 ####################
 
-SET(FILE_SEARCH_PATHS "${${PROJECT_NAME}_SOURCE_DIR}/src" "${TopAnalysis_DIR}/src")
+SET(FILE_SEARCH_PATHS "${${PROJECT_NAME}_SOURCE_DIR}/src" "${CommonAnalysis_DIR}/src" "${CommonAnalysis_DIR}/include")
 
 MESSAGE (STATUS "starting ROOT dict header search:")
 FOREACH( filename ${${PROJECT_NAME}_HEADERS_THAT_NEED_ROOTDICT} )

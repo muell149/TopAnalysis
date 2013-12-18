@@ -12,8 +12,8 @@ class TString;
 
 #include "JetCategories.h"
 #include "AnalysisHistograms.h"
-#include "../../diLeptonic/src/storeTemplate.h"
-#include "../../diLeptonic/src/classesFwd.h"
+#include "../../common/include/storeTemplate.h"
+#include "../../common/include/classesFwd.h"
 
 class RecoObjects;
 class CommonGenObjects;

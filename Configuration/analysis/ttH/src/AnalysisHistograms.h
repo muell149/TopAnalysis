@@ -8,7 +8,7 @@ class TString;
 class TH1;
 class TSelectorList;
 
-#include "../../diLeptonic/src/storeTemplate.h"
+#include "../../common/include/storeTemplate.h"
 
 class JetCategories;
 class RecoObjects;

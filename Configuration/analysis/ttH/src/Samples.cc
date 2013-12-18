@@ -8,8 +8,8 @@
 #include <TH1.h>
 
 #include "Samples.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
-#include "../../diLeptonic/src/RootFileReader.h"
+#include "../../common/include/sampleHelpers.h"
+#include "../../common/include/RootFileReader.h"
 
 
 

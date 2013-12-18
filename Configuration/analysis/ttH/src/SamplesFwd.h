@@ -7,7 +7,7 @@
 
 class TH1;
 
-#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../common/include/sampleHelpers.h"
 
 
 

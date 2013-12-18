@@ -15,7 +15,7 @@ namespace TMVA{
     class Factory;
 }
 
-#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../common/include/sampleHelpers.h"
 
 class MvaVariableInt;
 class MvaVariableFloat;

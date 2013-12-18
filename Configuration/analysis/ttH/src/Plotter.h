@@ -12,7 +12,7 @@ class TPaveText;
 
 #include "plotterHelpers.h"
 #include "SamplesFwd.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../common/include/sampleHelpers.h"
 
 class DyScaleFactors;
 

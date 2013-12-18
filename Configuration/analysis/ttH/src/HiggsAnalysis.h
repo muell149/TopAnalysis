@@ -8,8 +8,8 @@ class TString;
 
 #include "analysisHelpers.h"
 #include "analysisStructsFwd.h"
-#include "../../diLeptonic/src/AnalysisBase.h"
-#include "../../diLeptonic/src/classesFwd.h"
+#include "../../common/include/AnalysisBase.h"
+#include "../../common/include/classesFwd.h"
 
 class MvaTreeHandler;
 class AnalysisHistogramsBase;

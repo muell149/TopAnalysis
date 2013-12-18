@@ -10,7 +10,7 @@
 class TBranch;
 
 #include "analysisStructsFwd.h"
-#include "../../diLeptonic/src/classesFwd.h"
+#include "../../common/include/classesFwd.h"
 
 class RecoObjects;
 namespace tth{

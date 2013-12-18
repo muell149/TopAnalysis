@@ -6,7 +6,7 @@
 
 #include <TMVA/Types.h>
 
-#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../common/include/sampleHelpers.h"
 
 
 

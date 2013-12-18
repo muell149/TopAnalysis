@@ -5,7 +5,7 @@
 #include <map>
 
 #include "SamplesFwd.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../common/include/sampleHelpers.h"
 
 class RootFileReader;
 class TString;
