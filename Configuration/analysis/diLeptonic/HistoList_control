@@ -268,3 +268,18 @@ step8 Standard Events - 1 1 0 0 0 0 0 0 0 0
 step9 Standard Events - 1 1 0 0 0 0 0 0 0 0
 
 # Name, Extra, axis labels (y,x), rebin, do_dyscale, logx, logy, ymin, ymax, xmin, xmax, nbins, xbins, bcs
+HypJetMultpt30 Standard Events Jets 1 1 0 1 0.12 30000000 2 10 0 0
+HypJetMultpt60 Standard Events Jets 1 1 0 1 0.02 10000000 0 10 0 0
+HypJetMultpt100 Standard Events Jets 1 1 0 1 0.005 0 0 10 0 0
+HypDeltaPhiExtraJet12 Standard Events #eta 4 1 0 0 0 400 -3.2 3.2 0 0
+HypPhiExtraJet12 Standard Events #eta 4 1 0 0 0 400 -3.2 3.2 0 0
+HypTTBar1stJetMass Standard Events #rho 5 1 0 0 0 0 0 0 0 0
+HypTTBar0Mass Standard Events #rho 5 1 0 0 0 0 0 0 0 0
+HypDeltaRExtraJet12 Standard Events #DeltaR 4 1 0 0 0 40000 0 5 0 0
+HypExtraJetpT Standard 1^{st}-add-jet p_{T} 4 1 0 0 10 7000 30 400 0 0
+HypExtraJetEta Standard 1^{st}-add-jet #eta 4 1 0 0 10 7000 -2.5 2.5 0 0
+HypExtraJetpT2 Standard 2^{nd}-add-jet p_{T} 4 1 0 0 0 3000 30 400 0 0
+HypExtraJetEta2 Standard 2^{nd}-add-jet #eta 4 1 0 0 0 2000 -2.5 2.5 0 0
+HypExtraJetpT3 Standard 3^{th}-add-jet p_{T} 4 1 0 0 0 1000 30 400 0 0
+HypExtraJetEta3 Standard 3^{th}-add-jet #eta 4 1 0 0 0 500 -2.5 2.5 0 0
+

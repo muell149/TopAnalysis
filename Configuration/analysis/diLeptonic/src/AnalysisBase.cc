@@ -1314,19 +1314,18 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //     
     
     // 2 lines needed for OLD kinReco
-    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-    const int nSolution = sols.size();
+//    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+//    const int nSolution = sols.size();
         
     // 3 lines needed for NEW kinReco
-//   kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
-//    const auto& sols = kinematicReconstruction_->getSols();
-//    const int nSolution = sols.size();
+    kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
+    const auto& sols = kinematicReconstruction_->getSols();
+    const int nSolution = sols.size();
     
    //////////kinematicReconstruction_->doJetsMerging(&jets,&jetBTagCSV);
    
     if(nSolution == 0) return false;
-
-        const auto& sol = sols.at(0);
+    const auto& sol = sols.at(0);
         
         
 //    std::cout<< std::endl;
@@ -1337,7 +1336,6 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //         
 //     }
         
-    
     // Fill the results of the on-the-fly kinematic reconstruction
     if(useObjectStructs_){
         kinRecoObjects_->HypTop_->push_back(ttbar::TLVtoLV(sol.top));

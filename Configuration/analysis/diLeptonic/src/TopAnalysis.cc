@@ -561,16 +561,6 @@ void TopAnalysis::SlaveBegin(TTree*)
     
     h_ClosureTotalWeight = store(new TH1D("ClosureTotalWeight", "Total Weights from closure test",1,0,2));
     h_PDFTotalWeight = store(new TH1D("PDFTotalWeight", "PDF Weights",1,0,2));
-
-    CreateBinnedControlPlots(h_HypToppT, h_LeptonpT);
-    CreateBinnedControlPlots(h_HypToppT, h_LeptonEta);
-    CreateBinnedControlPlots(h_HypToppT, h_MET);
-    CreateBinnedControlPlots(h_HypToppT, h_diLepMassFull);
-    
-    CreateBinnedControlPlots(h_HypTopRapidity, h_LeptonpT);
-    CreateBinnedControlPlots(h_HypTopRapidity, h_LeptonEta);
-    CreateBinnedControlPlots(h_HypTopRapidity, h_MET);
-    CreateBinnedControlPlots(h_HypTopRapidity, h_diLepMassFull);
     
     h_AllLeptonpT_step1 = store(new TH1D("AllLeptonpT_step1", "p_{T} of all leptons before 2 lepton", 80, 0, 400));
     h_AllLeptonEta_step1 = store(new TH1D("AllLeptonEta_step1", "#eta of all leptons before 2 lepton", 20, -2.4, 2.4));
@@ -683,6 +673,16 @@ void TopAnalysis::SlaveBegin(TTree*)
     
     // Map for binned control plots
     binnedControlPlots_ = new std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >;
+    
+    CreateBinnedControlPlots(h_HypToppT, h_LeptonpT);
+    CreateBinnedControlPlots(h_HypToppT, h_LeptonEta);
+    CreateBinnedControlPlots(h_HypToppT, h_MET);
+    CreateBinnedControlPlots(h_HypToppT, h_diLepMassFull);
+    
+    CreateBinnedControlPlots(h_HypTopRapidity, h_LeptonpT);
+    CreateBinnedControlPlots(h_HypTopRapidity, h_LeptonEta);
+    CreateBinnedControlPlots(h_HypTopRapidity, h_MET);
+    CreateBinnedControlPlots(h_HypTopRapidity, h_diLepMassFull);
 }
 
 
