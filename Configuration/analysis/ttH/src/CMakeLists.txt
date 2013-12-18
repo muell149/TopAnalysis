@@ -78,14 +78,14 @@ INCLUDE_DIRECTORIES( ${ZTopUtils_INCLUDE_DIRS} )
 ## TO-DO: use installed header files as soon as available
 INCLUDE_DIRECTORIES( "${CommonAnalysis_DIR}/include")
 ## TO-DO: do proper separation in include and src directories
-INCLUDE_DIRECTORIES( BEFORE "${${PROJECT_NAME}_SOURCE_DIR}/src" ${${PROJECT_NAME}_ROOTDICT_DIR} )
+INCLUDE_DIRECTORIES( BEFORE "${${PROJECT_NAME}_SOURCE_DIR}/include" ${${PROJECT_NAME}_ROOTDICT_DIR} )
 
 
 ####################
 # targets
 ####################
 
-SET(FILE_SEARCH_PATHS "${${PROJECT_NAME}_SOURCE_DIR}/src" "${CommonAnalysis_DIR}/src" "${CommonAnalysis_DIR}/include")
+SET(FILE_SEARCH_PATHS "${${PROJECT_NAME}_SOURCE_DIR}/src" "${${PROJECT_NAME}_SOURCE_DIR}/include" "${CommonAnalysis_DIR}/src" "${CommonAnalysis_DIR}/include")
 
 MESSAGE (STATUS "starting ROOT dict header search:")
 FOREACH( filename ${${PROJECT_NAME}_HEADERS_THAT_NEED_ROOTDICT} )
