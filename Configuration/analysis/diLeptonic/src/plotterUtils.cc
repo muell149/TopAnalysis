@@ -152,6 +152,7 @@ void ttbar::drawRatioXSEC(const TH1* histNumerator, const TH1* histDenominator1,
     ratio1->GetYaxis()->SetLabelOffset(histNumerator->GetYaxis()->GetLabelOffset()*3.3);
     ratio1->GetYaxis()->SetTickLength(0.03);
     ratio1->GetYaxis()->SetNdivisions(504);
+    //ratio1->GetXaxis()->SetNdivisions(7);
     ratio1->GetXaxis()->SetRange(histNumerator->GetXaxis()->GetFirst(), histNumerator->GetXaxis()->GetLast());
     
     /// delete axis of initial plot

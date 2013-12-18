@@ -88,7 +88,7 @@ void Histo(bool doControlPlots, bool doUnfold, bool doDiffXSPlotOnly,
         h_generalPlot.SetOutpath("");
 
         /// Do fit in the ratio plot, if ratio plot done
-        h_generalPlot.DoFitInRatio(1);
+        h_generalPlot.DoFitInRatio(0);
 
         /////////////////////////////////////////////////////
         /////////////////////////////////////////////////////
