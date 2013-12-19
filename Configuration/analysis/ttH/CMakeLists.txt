@@ -3,13 +3,14 @@ PROJECT( ttH )
 #################
 # modules/macros
 #################
-SET( CMAKE_MODULE_PATH ${${PROJECT_NAME}_SOURCE_DIR}/cmake ${${PROJECT_NAME}_SOURCE_DIR}/../cmake ${CMAKE_MODULE_PATH} CACHE PATH "Path to CMake's Modules")
+SET( CMAKE_MODULE_PATH ${${PROJECT_NAME}_SOURCE_DIR}/../cmake ${CMAKE_MODULE_PATH} CACHE PATH "Path to CMake's Modules")
 
 
 ################
 # cmake options
 ################
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
+cmake_policy(SET CMP0003 NEW)
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 
 #################
@@ -45,8 +46,10 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # find packages (dependencies)
 ###############################
 
-SET( ROOT_EXTRA_LIBS -lGenVector -lTMVA -lHistPainter)
 FIND_PACKAGE( ROOT REQUIRED )
+# Next line needed to be replaced by the second line, because changed version of FindROOT.cmake does not work with first line
+#SET( ROOT_EXTRA_LIBS -lGenVector -lTMVA -lHistPainter)
+SET( ROOT_LIBRARIES ${ROOT_LIBRARIES} -lGenVector -lHistPainter -lTMVA )
 
 FIND_PACKAGE( ZTopUtils REQUIRED )
 # now you can use ${ZTopUtils_INCLUDE_DIRS} and ${ZTopUtils_LIBRARIES}
