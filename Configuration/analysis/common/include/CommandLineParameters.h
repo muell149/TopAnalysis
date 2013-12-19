@@ -141,6 +141,7 @@ public:
    * @param[in] isRequired if this parameter is mandatory
    * @param[in] minArguments minimum number of required arguments
    * @param[in] maxArguments maximum number of allowed arguments
+   * @param[in] checkFunction function pointer for defining a bool condition, setting allowed values for this identifier
    */
   CLParameter( const std::string &identifier,
 	       const std::string &helpText,

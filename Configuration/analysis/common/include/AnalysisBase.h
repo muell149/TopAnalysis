@@ -513,8 +513,13 @@ protected:
      * reconstruct the top quarks and store the result in the Hyp* member variables,
      * but also in the pointer kinRecoObjects
      * 
-     * @param leptonMinus 4-vector of the l-
-     * @param leptonPlus 4-vector of the l+
+     * @param leptonIndex Index of selected lepton in the vector of allLeptons
+     * @param antiLeptonIndex Index of selected antilepton in the vector of allLeptons
+     * @param jetIndices Indices of selected jets in the vector of jets
+     * @param allLeptons Vector of Lorentz vectors of all leptons from nTuple
+     * @param jets Vector of Lorentz vectors of all jets from nTuple
+     * @param jetBTagCSV B-tag discriminator values of all jets from nTuple
+     * @param met Lorentz vector of MET
      * 
      * @return true if there is at least one solution
      */
