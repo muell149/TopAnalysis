@@ -359,7 +359,8 @@ Channel::Channel Samples::assignFinalState(const TString& filename)
 
 
 
-Systematic::Systematic Samples::assignSystematic(TString& filename, const Systematic::Systematic& systematic)
+Systematic::Systematic Samples::assignSystematic(TString&, const Systematic::Systematic&)
+//Systematic::Systematic Samples::assignSystematic(TString& filename, const Systematic::Systematic& systematic)
 {
     // FIXME: adjust filename corresponding to specific systematic
 
