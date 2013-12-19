@@ -3,13 +3,14 @@ PROJECT( diLeptonic )
 #################
 # modules/macros
 #################
-SET( CMAKE_MODULE_PATH ${${PROJECT_NAME}_SOURCE_DIR}/cmake ${${PROJECT_NAME}_SOURCE_DIR}/../cmake ${CMAKE_MODULE_PATH} CACHE PATH "Path to CMake's Modules")
+SET( CMAKE_MODULE_PATH ${${PROJECT_NAME}_SOURCE_DIR}/../cmake ${CMAKE_MODULE_PATH} CACHE PATH "Path to CMake's Modules")
 
 
 ################
 # cmake options
 ################
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
+cmake_policy(SET CMP0003 NEW)
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 
 #################
@@ -45,8 +46,10 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # find packages (dependencies)
 ###############################
 
-SET( ROOT_EXTRA_LIBS -lGenVector -lTMVA -lHistPainter)
 FIND_PACKAGE( ROOT REQUIRED )
+## The next line gave a strange runtime error due to std::future. So it is replaced by the following one, and changes are made to the FindROOT.cmake
+#SET( ROOT_EXTRA_LIBS -lGenVector -lHistPainter)
+SET( ROOT_LIBRARIES ${ROOT_LIBRARIES} -lGenVector -lHistPainter )
 
 FIND_PACKAGE( ZTopUtils REQUIRED )
 # now you can use ${ZTopUtils_INCLUDE_DIRS} and ${ZTopUtils_LIBRARIES}
