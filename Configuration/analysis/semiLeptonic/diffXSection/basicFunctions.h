@@ -813,6 +813,20 @@ namespace semileptonic {
       return outputHisto;
     }
 
+  int getBigitFromDouble(double d)
+  {
+    // function to determine the number of 
+    // digits from d before the comma
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: NONE
+    
+    int out=1;
+    while(std::abs(d)>=pow(10, out)) out++;
+    return out;
+
+  }
+
   void DrawDecayChLabel(TString decaychannel="", double textSize=0.04)
   {
     // Draw label for Decay Channel in upper left corner of plot
@@ -4710,7 +4724,7 @@ namespace semileptonic {
 	else{
 	  // Default unfolding with number of bins (see makeVariableBinning)
 	  // SVD unfolding at the moment NOT USED, values are only placeholders
-	  if     (variable.Contains("topPt")    ) k =  7;
+	  if     (variable.Contains("topPt")    ) k =  8;
 	  else if(variable.Contains("topY")     ) k = 10;
 	  else if(variable.Contains("ttbarPt")  ) k =  6;
 	  else if(variable.Contains("ttbarY")   ) k = 10;
