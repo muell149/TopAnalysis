@@ -1,6 +1,11 @@
 #ifndef TopAnalysis_h
 #define TopAnalysis_h
 
+#include <map>
+
+class TH1;
+class TH2;
+
 #include "AnalysisBase.h"
 #include "classesFwd.h"
 
@@ -174,7 +179,6 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_PUSF, *h_TrigSF, *h_LepSF, *h_BTagSF, *h_KinRecoSF, *h_EventWeight;
 
     /// Control Plots
-    TH1 *h_AllLeptonEta_step1, *h_AllLeptonpT_step1, *h_AllJetsEta_step1, *h_AllJetspT_step1;
     TH1 *h_AllLeptonEta_step2, *h_AllLeptonpT_step2, *h_AllJetsEta_step2, *h_AllJetspT_step2;
     TH1 *h_AllLeptonEta_step3, *h_AllLeptonpT_step3, *h_AllJetsEta_step3, *h_AllJetspT_step3;
     TH1 *h_AllLeptonEta_step4, *h_AllLeptonpT_step4, *h_AllJetsEta_step4, *h_AllJetspT_step4;
@@ -182,7 +186,7 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_AllLeptonEta_step6, *h_AllLeptonpT_step6, *h_AllJetsEta_step6, *h_AllJetspT_step6;
     TH1 *h_AllLeptonEta_step7, *h_AllLeptonpT_step7, *h_AllJetsEta_step7, *h_AllJetspT_step7;
     TH1 *h_AllLeptonEta_step8, *h_AllLeptonpT_step8, *h_AllJetsEta_step8, *h_AllJetspT_step8;
-    TH1 *h_LeptonEta_step1, *h_LeptonpT_step1, *h_JetsEta_step1, *h_JetspT_step1;
+    TH1 *h_AllLeptonEta_step9, *h_AllLeptonpT_step9, *h_AllJetsEta_step9, *h_AllJetspT_step9;
     TH1 *h_LeptonEta_step2, *h_LeptonpT_step2, *h_JetsEta_step2, *h_JetspT_step2;
     TH1 *h_LeptonEta_step3, *h_LeptonpT_step3, *h_JetsEta_step3, *h_JetspT_step3;
     TH1 *h_LeptonEta_step4, *h_LeptonpT_step4, *h_JetsEta_step4, *h_JetspT_step4;
@@ -190,7 +194,7 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_LeptonEta_step6, *h_LeptonpT_step6, *h_JetsEta_step6, *h_JetspT_step6;
     TH1 *h_LeptonEta_step7, *h_LeptonpT_step7, *h_JetsEta_step7, *h_JetspT_step7;
     TH1 *h_LeptonEta_step8, *h_LeptonpT_step8, *h_JetsEta_step8, *h_JetspT_step8;
-    TH1 *h_LeptonMult_step1, *h_JetsMult_step1, *h_BJetsMult_step1;
+    TH1 *h_LeptonEta_step9, *h_LeptonpT_step9, *h_JetsEta_step9, *h_JetspT_step9;
     TH1 *h_LeptonMult_step2, *h_JetsMult_step2, *h_BJetsMult_step2;
     TH1 *h_LeptonMult_step3, *h_JetsMult_step3, *h_BJetsMult_step3;
     TH1 *h_LeptonMult_step4, *h_JetsMult_step4, *h_BJetsMult_step4;
@@ -198,6 +202,7 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_LeptonMult_step6, *h_JetsMult_step6, *h_BJetsMult_step6;
     TH1 *h_LeptonMult_step7, *h_JetsMult_step7, *h_BJetsMult_step7;
     TH1 *h_LeptonMult_step8, *h_JetsMult_step8, *h_BJetsMult_step8;
+    TH1 *h_LeptonMult_step9, *h_JetsMult_step9, *h_BJetsMult_step9;
     
     
     /// Do kinematic reconstruction on nTuple level
@@ -232,7 +237,8 @@ public:
         kinRecoOnTheFly_(false),
         doClosureTest_(false),
         pdf_no_(-1),
-        closureFunction_(nullptr)
+        closureFunction_(nullptr),
+        binnedControlPlots_(0)
         {}
     
     /// Inherited from AnalysisBase and overwritten for needs of TopAnalysis
@@ -254,6 +260,22 @@ public:
     
     
 private:
+    
+    /// Create binned control plots
+    // Create Nbins control plots for the differential distribution h_differential
+    // Use h_control for the control plot name and binning
+    void CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, const bool fromHistoList =true);
+    
+    /// Fill binned control plots
+    // h: differential distribution histogram
+    // binvalue: the value of the quantity in the differential distribution histogram
+    // the control plot histogram
+    // the value for the control plot
+    // weight: event weight
+    void FillBinnedControlPlot(TH1* h_differential, double binvalue, 
+                               TH1 *h_control, double value, double weight);
+    
+    
     
     /// Set global normalisation factors
     double overallGlobalNormalisationFactor();
@@ -285,6 +307,15 @@ private:
                                  const double trueLevelWeight,
                                  int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100,
                                  double extragenjet[4]);
+    
+    
+    
+    /// Map holding binned control plots
+    //binnedControlPlots contains:
+    //map of name of differential distribution
+    // -> pair( histogram with the binning of the differential distribution,
+    //          vector(bin) -> map( control plot name -> TH1*))
+    std::map<std::string, std::pair<TH1*, std::vector<std::map<std::string, TH1*> > > >* binnedControlPlots_;
 };
 
 

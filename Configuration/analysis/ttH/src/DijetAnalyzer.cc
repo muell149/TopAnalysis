@@ -19,9 +19,9 @@
 #include "higgsUtils.h"
 #include "MvaReader.h"
 #include "mvaStructs.h"
-#include "../../diLeptonic/src/analysisObjectStructs.h"
-#include "../../diLeptonic/src/analysisUtils.h"
-#include "../../diLeptonic/src/classes.h"
+#include "../../common/include/analysisObjectStructs.h"
+#include "../../common/include/analysisUtils.h"
+#include "../../common/include/classes.h"
 
 
 DijetAnalyzer::DijetAnalyzer(const char* mva2dWeightsFile, const std::string& corName, const std::string& swpName,

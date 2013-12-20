@@ -57,6 +57,7 @@ public:
 
     TH1* GetNloCurve(const char *particle, const char *quantity, const char *generator);
     TH1* GetNloCurve(TString NewName, TString Generator);
+    TH1* GetNloCurveMass(TString NewName, TString Generator, TString Mass);
     TH1F* ConvertGraphToHisto(TGraphErrors *pGraph);
     double GetChi2 (TGraphAsymmErrors *data, TH1 *mc);
     TH1F* reBinTH1FIrregularNewBinning(TH1F *histoOldBinning, TString plotname, bool rescale);
@@ -118,6 +119,7 @@ private:
     bool drawSmoothMadgraph, drawPlotRatio;
     bool drawNLOCurves, drawMadSpinCorr, drawMCATNLO, drawKidonakis, drawAhrens;
     bool drawPOWHEG, drawPOWHEGHERWIG, drawPERUGIA11;
+    bool drawMadMass, drawMadScaleMatching;
     TString outpath;
     TString outpathPlots;
     TString outpathResults;

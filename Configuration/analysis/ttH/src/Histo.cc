@@ -10,10 +10,10 @@
 #include "EventYields.h"
 #include "plotterHelpers.h"
 #include "Plotter.h"
-#include "../../diLeptonic/src/utils.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
-#include "../../diLeptonic/src/HistoListReader.h"
-#include "../../diLeptonic/src/CommandLineParameters.h"
+#include "HistoListReader.h"
+#include "../../common/include/utils.h"
+#include "../../common/include/sampleHelpers.h"
+#include "../../common/include/CommandLineParameters.h"
 
 
 

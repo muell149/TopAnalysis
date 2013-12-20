@@ -10,22 +10,19 @@
 //#include "../ext/interface/SimpleJetCorrector.h"
 #include "../ext/interface/JetCorrectorParameters.h"
 
+namespace {
+struct dict {
 
-namespace
-{
-  struct dict {
-    
     std::vector<double> klklkl;
     std::vector<TString> kkj;
-    std::pair<TString,std::vector<double> > jj;
-    std::vector<std::pair<TString,std::vector<double> > > j;
+    std::pair<TString, std::vector<double> > jj;
+    std::vector<std::pair<TString, std::vector<double> > > j;
     std::vector<long int> kl;
 
     std::vector<TH2D> ijij;
-    std::map<TString,std::vector<TH2D> > kokd;
+    std::map<TString, std::vector<TH2D> > kokd;
 
-
-    std::map<std::string, std::vector<TH2D> >  sdfdsf;
+    std::map<std::string, std::vector<TH2D> > sdfdsf;
 
     ztop::bTagBase ked;
     ztop::JECBase kkss;
@@ -34,9 +31,7 @@ namespace
     std::vector<ztop::JECBase> kkssV;
     std::vector<ztop::JERBase> ksdskV;
 
-
     ///external
-
 
     ztop::JetCorrectorParameters corr;
     ztop::JetCorrectorParameters::Definitions def;
@@ -48,6 +43,6 @@ namespace
     ztop::JetCorrectorParametersCollection::collection_type colltype;
     std::vector<ztop::JetCorrectorParametersCollection> collv;
 
-  };
+};
 }
 
