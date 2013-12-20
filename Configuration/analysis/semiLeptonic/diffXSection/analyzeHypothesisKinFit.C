@@ -11,7 +11,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
-  // ============================  //  Set ROOT Style
+  // ============================
+  //  Set ROOT Style
   // ============================
  
   TStyle myStyle("HHStyle","HHStyle");
@@ -2281,6 +2282,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       int numSys=0;
       // Regularization parameter
       double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier, (addSel=="ProbSel" ? true : false) );
+      if(verbose>0) std::cout << variable << ": tau=" << regPar << std::endl;
       // Regularization Modus 
       //         0 means: Default setting. Same as 2
       //         1 means: Bin by Bin Unfolding
@@ -2305,7 +2307,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //         0 means: Default setting, same as 1
       //         1 means: interpret 'regPar' as k value (default)
       //         2 means: interpret 'regPar' as tau value
-      int unfoldWithParameter=2;
+      int unfoldWithParameter=2; 
+      //int unfoldWithParameter=1;
       if(systematicVariation!=sysNo) regMode=3;
       //    PRE-WEIGHTING
       //         0 means: Default value, same as 1
@@ -2360,9 +2363,9 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	else if(decayChannel=="electron") rootFile+="Elec";
 	else if(decayChannel=="combined") rootFile+="Lep";
-	rootFile+=+variable+LV+PS+unfPreWeightingStr+".root";
-	psFile =outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr;
-	epsFile=outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr+".eps";
+	rootFile+=closureLabel+variable+LV+PS+unfPreWeightingStr+".root";
+	psFile =outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr;
+	epsFile=outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
 	//if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
@@ -2419,7 +2422,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
       int scanpoints= (scan==2 ? 3 : 0);
-      scanpoints=1; // FIXME: fast tauscan results
+      //scanpoints=1; // FIXME: fast tauscan results
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
