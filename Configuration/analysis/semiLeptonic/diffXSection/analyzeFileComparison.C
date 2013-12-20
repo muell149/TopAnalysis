@@ -1,7 +1,10 @@
 #include "basicFunctions.h"
 
 void analyzeFileComparison(bool save = true, int verbose=0){
-  
+ 
+  // use paper binning instead of equidistant binning for cross section quantities
+  bool usePAPERbinning=true;
+
   // ============================
   //  Set Root Style
   // ============================
@@ -21,25 +24,36 @@ void analyzeFileComparison(bool save = true, int verbose=0){
   TString targetfolder="/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/";
   file_.push_back(TFile::Open(targetfolder+"elecDiffXSecSigSummer12PF.root"                      , "Open"));
   file_.push_back(TFile::Open(targetfolder+"muonDiffXSecSigSummer12PF.root"                      , "Open"));
-  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint171p5Summer12PF.root", "Open"));
-  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint171p5Summer12PF.root", "Open"));
   file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint173p5Summer12PF.root", "Open"));
   file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint173p5Summer12PF.root", "Open"));
-  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint160p0Summer12PF.root", "Open"));
-  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint160p0Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint171p5Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint171p5Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint174p5Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint174p5Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint170p5Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint170p5Summer12PF.root", "Open"));
   file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint180p0Summer12PF.root", "Open"));
   file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint180p0Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/elecDiffXSecSigTopMassConstraint160p0Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open(targetfolder+"TopMassConstraint/muonDiffXSecSigTopMassConstraint160p0Summer12PF.root", "Open"));
+
+
   std::vector<double > massConstraint_;
   massConstraint_.push_back(172.5);
   massConstraint_.push_back(172.5);
-  massConstraint_.push_back(171.5);
-  massConstraint_.push_back(171.5);
   massConstraint_.push_back(173.5);
   massConstraint_.push_back(173.5);
-  massConstraint_.push_back(160.0);
-  massConstraint_.push_back(160.0);
+  massConstraint_.push_back(171.5);
+  massConstraint_.push_back(171.5);
+  massConstraint_.push_back(174.5);
+  massConstraint_.push_back(174.5);
+  massConstraint_.push_back(170.5);
+  massConstraint_.push_back(170.5);
   massConstraint_.push_back(180.0);
   massConstraint_.push_back(180.0);
+  massConstraint_.push_back(160.0);
+  massConstraint_.push_back(160.0);
+
 
   // list plots of relevance
   std::vector<TString> plotList_, axisLabel_;
@@ -221,14 +235,14 @@ void analyzeFileComparison(bool save = true, int verbose=0){
   // canvas container
   std::vector<TCanvas*> plotCanvas_;
   // legend
-  TLegend* leg= new TLegend(0.6, 0.65, 0.9, 0.88);
-  legendStyle(*leg,"t#bar{t} SG MC (m_{top}^{gen}=172.5 GeV)");
+  TLegend* leg= new TLegend(0.6, 0.55, 0.9, 0.88);
+  legendStyle(*leg,"t#bar{t} SG MC (m_{#lower[-0.3]{top}}^{#lower[-0.8]{gen}}=172.5 GeV)");
   
   // ============================
   //  get histos
   // ============================
   std::map< TString, std::map <unsigned int, TH1F*> > histo_;
-  
+  std::map<TString, std::vector<double> > binning_ = makeVariableBinning(false);
   // loop all plots
   for(int plot=0; plot<(int)plotList_.size(); ++plot){
     TString name=plotList_[plot];
@@ -243,18 +257,33 @@ void analyzeFileComparison(bool save = true, int verbose=0){
       histo_[name][kcon]     =(TH1F*)file_[sample  ]->Get(name);
       histo_[name][kcon]->Add((TH1F*)file_[sample+1]->Get(name));
       // rebinning
-      double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4,";")).c_str());
-      if(reBinFactor>1) equalReBinTH1(reBinFactor, histo_, name, kcon);
+      if(usePAPERbinning&&binning_.count(getStringEntry(name,2,"/"))>0){
+	reBinTH1F(*histo_[name][kcon], binning_[getStringEntry(name, 2, "/")], verbose-1);
+      }
+      else{
+	double reBinFactor = atof(((string)getStringEntry(axisLabel_[plot],4,";")).c_str());
+	if(reBinFactor>1) equalReBinTH1(reBinFactor, histo_, name, kcon);
+      }
       // legend
-      if(plot==0) leg->AddEntry(histo_[name][kcon], Form("m_{top}^{constraint}=%2.1f GeV", mcon), "L");
+      if(plot==0){
+	if(sample==0) leg->AddEntry(histo_[name][kcon], Form("m_{#lower[-0.1]{top}}^{constr.}=%2.1f GeV", mcon), "L");
+	else{
+	  TString legentry="#Delta m_{#lower[-0.1]{top}}^{#lower[-0.7]{constr.}}=#scale[0.5]{ }";
+	  mcon > 172.5 ? legentry+="+" : legentry+="#scale[0.95]{#bf{#font[122]{-}}}";
+	  legentry+= Form("%2.1f GeV", std::abs(mcon-172.5));
+	  leg->AddEntry(histo_[name][kcon], legentry, "L");
+	}
+      }
       // histostyle
       histo_[name][kcon ]->SetStats(false);
       unsigned int color=kBlack;
       if     (mcon==172.5) color=kBlack  ;
-      else if(mcon==171.5) color=kRed    ;
-      else if(mcon==173.5) color=kMagenta;
-      else if(mcon==160.0) color=kBlue   ;
-      else if(mcon==180.0) color=kCyan   ;
+      else if(mcon==170.5) color=kAzure+8;
+      else if(mcon==171.5) color=kMagenta;
+      else if(mcon==173.5) color=kRed;
+      else if(mcon==174.5) color=kBlue;
+      else if(mcon==160.0) color=kOrange+3;
+      else if(mcon==180.0) color=kGreen+3;
       histo_[name][kcon]->SetLineColor(color);
       histo_[name][kcon]->SetLineWidth(2);
       if     (mcon==172.5) histo_[name][kcon]->SetLineStyle(2);
@@ -276,7 +305,7 @@ void analyzeFileComparison(bool save = true, int verbose=0){
       double newmax=histo_[name][kcon]->GetMaximum();
       if(max<newmax) max=newmax;
     }
-    max=1.4*max;
+    max=1.6*max;
     double min = 0.;
     // log plots
     if(getStringEntry(axisLabel_[plot],3,";")=="1"){
@@ -288,6 +317,7 @@ void analyzeFileComparison(bool save = true, int verbose=0){
     if(min==1.&&max>1.001) min+=0.001;
     axesStyle(*histo_[name][1725], getStringEntry(axisLabel_[plot],1,";"), getStringEntry(axisLabel_[plot],2,";"), min, max);	  
     histo_[name][1725]->GetXaxis()->SetNoExponent(true);
+    if(TString(histo_[name][1725]->GetXaxis()->GetTitle()).Contains("#frac")) histo_[name][1725]->GetXaxis()->SetTitleOffset(1.2*histo_[name][1725]->GetXaxis()->GetTitleOffset());
     // adjust range (x-axis)
     double xUp=histo_[name][1725]->GetXaxis()->GetXmax();
     double xDn=histo_[name][1725]->GetXaxis()->GetXmin();
@@ -358,6 +388,7 @@ void analyzeFileComparison(bool save = true, int verbose=0){
     sellabel->SetTextSize(0.04);
     sellabel->Draw("same");
     DrawDecayChLabel("e/#mu + Jets Combined");
+    DrawCMSLabels(prelim, 19714., 0.04, true, false, false);
     // ratio
     std::vector<double> err_;
     for(int bin=1; bin<=histo_[name][1725]->GetNbinsX(); ++bin){
