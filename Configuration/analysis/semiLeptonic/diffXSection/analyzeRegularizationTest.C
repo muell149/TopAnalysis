@@ -7,7 +7,7 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
 			       TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 			       std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, 
-			       bool redetermineopttau =false, TString closureTestSpecifier="ttbarMassUp", TString addSel="ProbSel")
+			       bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
   std::vector <double > tau_;
   std::vector <int >    tauColor_;
@@ -1561,9 +1561,9 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	else if(decayChannel=="electron") rootFile+="Elec";
 	else if(decayChannel=="combined") rootFile+="Lep";
-	rootFile+=+variable+LV+PS+unfPreWeightingStr+".root";
-	psFile =outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr;
-	epsFile=outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr+".eps";
+	rootFile+=closureLabel+variable+LV+PS+unfPreWeightingStr+".root";
+	psFile =outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr;
+	epsFile=outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
 	//if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
@@ -1576,7 +1576,7 @@ void analyzeRegularizationTest(double luminosity = 19712.,
       if(decayChannel=="muon"    ) txtfile+="Mu";
       else if(decayChannel=="electron") txtfile+="Elec";
       else if(decayChannel=="combined") txtfile+="Lep";
-      txtfile+=dataSample+LV+PS+unfPreWeightingStr+".txt";
+      txtfile+=closureLabel+dataSample+LV+PS+unfPreWeightingStr+".txt";
       // save unfolding plots in rootfile?
       //         0 means: Default value, same as 1
       //         1 means: no root file will be written (default)
@@ -1788,13 +1788,18 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	
 	// collect reg Parameters to calculate cross section for
 	double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier, (addSel=="ProbSel" ? true : false) );
-	stdTau_[variable]=regPar;	  
+	stdTau_[variable]=regPar;
+	//tau_.push_back(3.);	
+	//tau_.push_back(5.);
 	tau_.push_back(0.*regPar);	  
-	tau_.push_back(0.2*regPar);
+	tau_.push_back(0.1*regPar);
 	tau_.push_back(regPar);
 	tau_.push_back(5.0*regPar);
-	tau_.push_back(10.0*regPar);
-	tau_.push_back(50*regPar);
+	tau_.push_back(10.*regPar);
+	tau_.push_back(50.*regPar);
+	//tau_.push_back(10.);
+	//tau_.push_back(15.);
+	//tau_.push_back(25.);
 	kindex=(int)tau_.size(); // used as indicator entries >=kindex == k unfolding
 	tau_.push_back(3); // k parameter
 	tau_.push_back(4); // k parameter
@@ -1822,6 +1827,18 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	tauMarker_.push_back(25); // k parameter
 
 	for(int tau=0; tau<(int)tau_.size(); ++tau){
+	  // to avoid overwriting, add the used tau parameter to all output files
+	  TString tauVal= tau<kindex ? "Tau"+getTStringFromDouble(tau_[tau],2) : "K"+getTStringFromDouble(tau_[tau],0);;
+	  tauVal.ReplaceAll(".","p");
+	  TString rootFileMod=rootFile;
+	  rootFileMod.ReplaceAll(".root", tauVal+".root");
+	  TString psFileMod=psFile;
+	  psFileMod.ReplaceAll(".ps", tauVal+".ps");
+	  TString epsFileMod=epsFile;
+	  epsFileMod.ReplaceAll(".eps", tauVal+".eps");
+	  TString txtfileMod=txtfile;
+	  txtfileMod.ReplaceAll(".txt", tauVal+".txt");
+
 	  TH1D* unfoldedData    =new TH1D();
 	  TH1D* unfoldedDataNorm=new TH1D();
 	  TopSVDFunctions::SVD_Unfold(
@@ -1910,18 +1927,18 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	  //  OUTPUT
 	  // ==============  
 	  // If specified, plots will be saved in ROOT File
-	  rootFile,
+	  rootFileMod,
 	  // If specified, plots will be saved in PS File
-	  psFile,
+	  psFileMod,
 	  // If specified, plots will be saved in EPS Files 
-	  epsFile,
+	  epsFileMod,
 	  // The optimal Reg Parameters will be written to this file.
 	  // The file will NOT be overwritten, rather the result will be appended.
 	  // The following data will be saved in this order: 
 	  // (1) the optimal tau, (2) the two nearest k values,
 	  // (3) the k value from the d value method
 	  // (4) the number of bins including side bins
-	  txtfile,
+	  txtfileMod,
 	  // If specified, optimal Reg Parameters will be 
 	  // written to this file. The file will NOT be 
 	  // overwritten, rather the result will be appended
