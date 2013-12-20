@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 #include <numeric>
 
-void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, bool useBCC=false){
+void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, TString closureTestSpecifier="", bool useBCC=false){
 
   // ============================
   //  Systematic Variations:
@@ -74,6 +74,19 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
   TString universalplotLabel = extrapolate ? "FullPS" : LV+"LvPS";  
   // dataSample: see if its "2010" or "2011" data
   TString dataSample="2012";
+  // for closure test if desired
+  TString closureLabel = "";
+  if(closureTestSpecifier!=""){
+    if      (closureTestSpecifier.Contains("NoDistort")) closureLabel = "PseudoData"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("topPt"   )||
+	     closureTestSpecifier.Contains("ttbarMass")) closureLabel = "PseudoDataReweight"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("data"     )) closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("1000"     )) closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
+    else{
+      std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
+      exit(0);
+    }
+  }
   // outputFile: target rootfile
   // NOTE: this must be identical with TString outputFileName 
   // in analyzeHypothesisKinFit.C
