@@ -179,7 +179,6 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_PUSF, *h_TrigSF, *h_LepSF, *h_BTagSF, *h_KinRecoSF, *h_EventWeight;
 
     /// Control Plots
-    TH1 *h_AllLeptonEta_step1, *h_AllLeptonpT_step1, *h_AllJetsEta_step1, *h_AllJetspT_step1;
     TH1 *h_AllLeptonEta_step2, *h_AllLeptonpT_step2, *h_AllJetsEta_step2, *h_AllJetspT_step2;
     TH1 *h_AllLeptonEta_step3, *h_AllLeptonpT_step3, *h_AllJetsEta_step3, *h_AllJetspT_step3;
     TH1 *h_AllLeptonEta_step4, *h_AllLeptonpT_step4, *h_AllJetsEta_step4, *h_AllJetspT_step4;
@@ -187,7 +186,7 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_AllLeptonEta_step6, *h_AllLeptonpT_step6, *h_AllJetsEta_step6, *h_AllJetspT_step6;
     TH1 *h_AllLeptonEta_step7, *h_AllLeptonpT_step7, *h_AllJetsEta_step7, *h_AllJetspT_step7;
     TH1 *h_AllLeptonEta_step8, *h_AllLeptonpT_step8, *h_AllJetsEta_step8, *h_AllJetspT_step8;
-    TH1 *h_LeptonEta_step1, *h_LeptonpT_step1, *h_JetsEta_step1, *h_JetspT_step1;
+    TH1 *h_AllLeptonEta_step9, *h_AllLeptonpT_step9, *h_AllJetsEta_step9, *h_AllJetspT_step9;
     TH1 *h_LeptonEta_step2, *h_LeptonpT_step2, *h_JetsEta_step2, *h_JetspT_step2;
     TH1 *h_LeptonEta_step3, *h_LeptonpT_step3, *h_JetsEta_step3, *h_JetspT_step3;
     TH1 *h_LeptonEta_step4, *h_LeptonpT_step4, *h_JetsEta_step4, *h_JetspT_step4;
@@ -195,7 +194,7 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_LeptonEta_step6, *h_LeptonpT_step6, *h_JetsEta_step6, *h_JetspT_step6;
     TH1 *h_LeptonEta_step7, *h_LeptonpT_step7, *h_JetsEta_step7, *h_JetspT_step7;
     TH1 *h_LeptonEta_step8, *h_LeptonpT_step8, *h_JetsEta_step8, *h_JetspT_step8;
-    TH1 *h_LeptonMult_step1, *h_JetsMult_step1, *h_BJetsMult_step1;
+    TH1 *h_LeptonEta_step9, *h_LeptonpT_step9, *h_JetsEta_step9, *h_JetspT_step9;
     TH1 *h_LeptonMult_step2, *h_JetsMult_step2, *h_BJetsMult_step2;
     TH1 *h_LeptonMult_step3, *h_JetsMult_step3, *h_BJetsMult_step3;
     TH1 *h_LeptonMult_step4, *h_JetsMult_step4, *h_BJetsMult_step4;
@@ -203,6 +202,7 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_LeptonMult_step6, *h_JetsMult_step6, *h_BJetsMult_step6;
     TH1 *h_LeptonMult_step7, *h_JetsMult_step7, *h_BJetsMult_step7;
     TH1 *h_LeptonMult_step8, *h_JetsMult_step8, *h_BJetsMult_step8;
+    TH1 *h_LeptonMult_step9, *h_JetsMult_step9, *h_BJetsMult_step9;
     
     
     /// Do kinematic reconstruction on nTuple level
