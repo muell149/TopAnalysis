@@ -23,11 +23,11 @@
 #include "basicFunctions.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TString lepton="combined", 
+void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TString lepton="combined", 
 			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit", bool plotAcceptance = false, 
 			       bool plotEfficiencyPhaseSpace = false, bool plotEfficiency2 = false, double chi2Max=7.824,//9999.,//7.824,
-			       int verbose=1, bool hadron=true, int qAssignment=-1,
-			       bool fitGaussRes=false, bool printSeparateRes = false)
+			       int verbose=1, bool hadron=false, int qAssignment=-1,
+			       bool fitGaussRes=true, bool printSeparateRes = false)
 {
   // ARGUMENTS of function:
   // variable:       choose variable to plot, e.g.:
@@ -174,7 +174,7 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   double resEdgeR = 1e6;
   double relResEdgeL = -1e6;
   double relResEdgeR = 1e6;
-  if ( variable == "topPt")          { rangeUserLeft = 0         ; rangeUserRight = 400-0.001;  resEdgeL = -400.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
+  if ( variable == "topPt")          { rangeUserLeft = 0         ; rangeUserRight = 500-0.001;  resEdgeL = -500.0;  resEdgeR=400.0;  relResEdgeL = -1.0; relResEdgeR=4.0; }
   else if ( variable == "topY")      { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -3.0;  resEdgeR=  3.0;  relResEdgeL = -1.5; relResEdgeR=1.5; }
   else if ( variable == "ttbarPt")   { rangeUserLeft = 0         ; rangeUserRight = 300-0.001;  resEdgeL = -300.0;  resEdgeR=300.0;  relResEdgeL = -1.0; relResEdgeR=6.0; }
   else if ( variable == "ttbarY")    { rangeUserLeft = -2.5+0.001; rangeUserRight = 2.5-0.001;  resEdgeL =   -2.0;  resEdgeR=  2.0;  relResEdgeL = -2.0; relResEdgeR=2.0; }
@@ -185,8 +185,8 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   else if ( variable == "bqEta")     { rangeUserLeft = -2.4+0.001; rangeUserRight = 2.4-0.001;  resEdgeL =   -0.2;  resEdgeR=  0.2;  relResEdgeL = -1.0; relResEdgeR=1.0; }
   else if ( variable == "bbbarPt")   { rangeUserLeft = 0         ; rangeUserRight =1000-0.001;  resEdgeL = -400.0;  resEdgeR=  400;  relResEdgeL = -1.5; relResEdgeR=4.0; }
   else if ( variable == "bbbarMass") { rangeUserLeft = 0         ; rangeUserRight =1500-0.001;  resEdgeL = -400.0;  resEdgeR=  400;  relResEdgeL = -1.5; relResEdgeR=4.0; }
-  else if ( variable == "Njets"    ) { rangeUserLeft = -0.5      ; rangeUserRight =14.5;        }
-  else if ( variable == "rhos"     ) { rangeUserLeft = 0         ; rangeUserRight =1.1-0.001 ;  }
+  else if ( variable == "Njets"    ) { rangeUserLeft = -0.5      ; rangeUserRight =14.5      ;  resEdgeL =  0.   ;  resEdgeR=  5.0;  relResEdgeL = -0.5; relResEdgeR=0.5; }
+  else if ( variable == "rhos"     ) { rangeUserLeft = 0         ; rangeUserRight =1.1-0.001 ;  resEdgeL = -2.0  ;  resEdgeR=  2.0;  relResEdgeL = -1.5; relResEdgeR=1.5; }
 
 
   //else if ( variable == "lepPt"  && lepton == "muon")    { rangeUserLeft = 20  ; rangeUserRight = 400-0.001; }
@@ -377,7 +377,7 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
 	TString genName=variable_[i]+genExtTree;
 	//if(genName.Contains("rhos" )||genName.Contains("Njets")) weight=1.; // FIXME MARTIN: weight is wrong at the moment for composited... analyzer
 	if(genName.Contains("rhos" )) genName="rhosTrue";
-	if(genName.Contains("Njets")) genName="Ngenjets";	
+	if(genName.Contains("Njets")) genName="NjetsTrue";	
 	double gen =value_[genName];
 	// swap b and bbar if deltaR is better
 	if(genName.Contains("bq" )&&swapBb && bbSwapBetter){
@@ -917,15 +917,16 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   TCanvas* CanvResolution         = new TCanvas("CanvResolution","CanvResolution",600,600);
   TCanvas* CanvRelativeResolution = new TCanvas("CanvRelativeResolution","CanvRelativeResolution",600,600);
   TCanvas* CanvBinwidthOverResol  = new TCanvas("CanvBinwidthOverResol","CanvBinwidthOverResol",600,600);
-  
+  TH1F* hisRelativeResolRMS=0;
+  TH1F* hisRelativeResolFit=0;
   // calculate resolution
   if(createResolutionPlots){
     //----------------------------------------------------
     // draw residuals and calculate resolution
     TH1F* hisResolRMS = new TH1F("hisResolRMS","hisResolRMS", NxBins, &xBins[0]);
     TH1F* hisResolFit = new TH1F("hisResolFit","hisResolFit", NxBins, &xBins[0]);
-    TH1F* hisRelativeResolRMS = new TH1F("hisRelativeResolRMS","hisRelativeResolRMS", NxBins, &xBins[0]);
-    TH1F* hisRelativeResolFit = new TH1F("hisRelativeResolFit","hisRelativeResolFit", NxBins, &xBins[0]);
+    hisRelativeResolRMS = new TH1F("hisRelativeResolRMS","hisRelativeResolRMS", NxBins, &xBins[0]);
+    hisRelativeResolFit = new TH1F("hisRelativeResolFit","hisRelativeResolFit", NxBins, &xBins[0]);
     TH1F* hisBinwidthOverResolRMS = new TH1F("hisBinwidthOverResolRMS","hisBinwidthOverResolRMS", NxBins, &xBins[0]);
     TH1F* hisBinwidthOverResolFit = new TH1F("hisBinwidthOverResolFit","hisBinwidthOverResolFit", NxBins, &xBins[0]);
     for(int iGenBin=0; iGenBin <NxBins; iGenBin++){
@@ -1189,10 +1190,14 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   double maxPur =0.;
   double minStab=1.;
   double minPur =1.;
+  double minRes =1.;
+  double maxRes =0.;
   int purityMinimumBin=0;
   int purityMaximumBin=0;
   int stabilityMinimumBin=0;
   int stabilityMaximumBin=0;
+  int resolutionMinimumBin=0;
+  int resolutionMaximumBin=0;
   int Nbins=0;
   int NPurok=0;
   int NStabok=0;
@@ -1203,6 +1208,7 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
       // migration in this bin
       double TMPStab=stabilityhist->GetBinContent(bin);
       double TMPPur =purityhist   ->GetBinContent(bin);
+      double TMPRes = createResolutionPlots ? hisRelativeResolRMS->GetBinContent(bin) : -1.;
       if(TMPStab<1.&&TMPPur>0.){
 	// count all bins used for measurement
 	++Nbins;
@@ -1211,6 +1217,10 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
 	if(TMPPur<1. &&TMPPur>maxPur  ){ maxPur = TMPPur; purityMaximumBin=bin;    }
 	if(TMPStab>0.&&TMPStab<minStab){ minStab= TMPStab; stabilityMinimumBin=bin;}
 	if(TMPPur>0. &&TMPPur<minPur  ){ minPur = TMPPur; purityMinimumBin=bin;    }
+	if(TMPRes>-1){
+	  if(TMPRes>0.&&TMPRes<minStab){ minRes= TMPRes; resolutionMinimumBin=bin;}
+	  if(TMPRes<1.&&TMPRes>maxRes ){ maxRes= TMPRes; resolutionMaximumBin=bin;}
+	}
 	// check minimal migration condition
 	if(TMPStab>minMigr)NStabok++;
 	if(TMPPur >minMigr)NPurok++;
@@ -1227,13 +1237,17 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   // all bins
   if(verbose>0){
     for(int bin=1; bin<=purityhist->GetNbinsX(); ++bin){
-      std::cout << std::setprecision(2) << std::fixed << "[" << purityhist->GetBinLowEdge(bin) << ".." <<  purityhist->GetBinLowEdge(bin+1) << "]: ";
+      std::cout << std::setprecision(2) << std::fixed << "[" << purityhist->GetBinLowEdge(bin); 
+      for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin))); space>0; space--){ std::cout << " "; }
+      std::cout << ".." <<  purityhist->GetBinLowEdge(bin+1);
+      for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin+1))); space>0; space--){ std::cout << " "; }
+      std::cout << "]: ";
       std::cout << std::setprecision(2) << std::fixed << purityhist->GetBinContent(bin);
       if(plotDefToCompare){
 	std::cout << " (chi2<" << chi2MaxInit << "), no chi2 cut: ";
 	std::cout << std::setprecision(2) << std::fixed << purityhist2->GetBinContent(bin);
       }
-      std::cout << std::endl;
+      std::cout << std::endl;      
     }
   }
   // min/max value
@@ -1251,7 +1265,11 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   // all bins
   if(verbose>0){
     for(int bin=1; bin<=stabilityhist->GetNbinsX(); ++bin){
-      std::cout << "[" << stabilityhist->GetBinLowEdge(bin) << ".." <<  stabilityhist->GetBinLowEdge(bin+1) << "]: ";
+      std::cout << "[" << stabilityhist->GetBinLowEdge(bin);
+      for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin))); space>0; space--){ std::cout << " "; }
+      std::cout << ".." <<  stabilityhist->GetBinLowEdge(bin+1);
+      for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin+1))); space>0; space--){ std::cout << " "; }
+      std::cout << "]: ";
       std::cout << std::setprecision(2) << std::fixed << stabilityhist->GetBinContent(bin);
       if(plotDefToCompare){
 	std::cout << " (chi2<" << chi2MaxInit << "), no chi2 cut: ";
@@ -1269,4 +1287,42 @@ void purityStabilityEfficiency(TString variable = "rhos", bool save=true, TStrin
   std::cout << stabilityhist->GetBinCenter(stabilityMaximumBin) << ")"<< std::endl;
   std::cout << "( stability > " << std::setprecision(2) << std::fixed << minMigr;
   std::cout << " in " << NStabok << "/" << Nbins << " bins)" << std::endl<< std::endl;
+
+  // gen-rec correlation
+  std::cout << "--------------------" << std::endl;
+  std::cout << "c) correlation" << std::endl;
+  std::cout << "corr(evtMatrix) : " << myHist2d2      ->GetCorrelationFactor() << std::endl;
+  std::cout << "corr(respMatrix): " << responseMatrix ->GetCorrelationFactor() << std::endl;
+  std::cout << "corr(migrMatrix): " << migrationMatrix->GetCorrelationFactor() << std::endl;
+  // resolution
+  if(createResolutionPlots){
+  std::cout << "--------------------" << std::endl;
+  std::cout << "d) resolution" << std::endl;
+  // all bins
+  double SumRes   =0.;
+  double SumResFit=0.;
+  if(verbose>0){
+    for(int bin=1; bin<=hisRelativeResolRMS->GetNbinsX(); ++bin){
+      std::cout << "[" << hisRelativeResolRMS->GetBinLowEdge(bin);
+      for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin)))  ; space>0; space--){ std::cout << " "; }
+      std::cout << ".." <<  hisRelativeResolRMS->GetBinLowEdge(bin+1);
+      for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin+1))); space>0; space--){ std::cout << " "; }
+      std::cout << "]: ";
+      SumRes+=hisRelativeResolRMS->GetBinContent(bin);
+      std::cout << std::setprecision(2) << std::fixed << hisRelativeResolRMS->GetBinContent(bin);
+      if(fitGaussRes){ std::cout << " (1#sigma gaussian fit=" << std::setprecision(2) << std::fixed << hisRelativeResolFit->GetBinContent(bin) << ")";SumResFit+= hisRelativeResolFit->GetBinContent(bin);}
+      std::cout << std::endl;
+    }
+  }
+  // average
+  std::cout << "<resolution(histo)>=" << SumRes   /hisRelativeResolRMS->GetNbinsX() << std::endl;
+  std::cout << "<resolution(gauss)>=" << SumResFit/hisRelativeResolFit->GetNbinsX() << std::endl;
+  // min/max value
+  //std::cout << std::setprecision(2) << std::fixed << minRes << " (<" << variable;
+  //std::cout << ">=" << std::setprecision(0) << std::fixed;
+  //std::cout << hisRelativeResolRMS->GetBinCenter(resolutionMinimumBin) << ") < resolution < ";
+  //std::cout << std::setprecision(2) << std::fixed << maxRes << " (<" << variable;
+  //std::cout << ">=" << std::setprecision(0) << std::fixed;
+  //std::cout << hisRelativeResolRMS->GetBinCenter(resolutionMaximumBin) << ")"<< std::endl;
+  }
 }
