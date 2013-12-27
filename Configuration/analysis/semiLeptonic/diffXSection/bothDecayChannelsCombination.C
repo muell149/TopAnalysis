@@ -2,8 +2,8 @@
 
 void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsigned int verbose=0,
 				  TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
-				  bool pTPlotsLog=false, bool extrapolate=false, bool hadron=true, bool addCrossCheckVariables=false, 
-				  bool combinedEventYields=true, TString closureTestSpecifier="topPtUp", bool smoothcurves=false){
+				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, 
+				  bool combinedEventYields=true, TString closureTestSpecifier="" , bool smoothcurves=false){
 
   // closureTestSpecifier = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
   // run automatically in batch mode
@@ -66,15 +66,21 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
   //        25: sysVBosonScaleUp           26: sysVBosonScaleDown          
   //        27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
   //        29: sysTopMatchUp              30: sysTopMatchDown             
-  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown          
-  //        33: sysTopMassUp               34: sysTopMassDown              
-  //        35: sysQCDUp                   36: sysQCDDown                  
-  //        37: sysSTopUp                  38: sysSTopDown                 
-  //        39: sysDiBosUp                 40: sysDiBosDown                
-  //        41: sysPDFUp                   42: sysPDFDown                  
-  //        43: sysHadUp                   44: sysHadDown                  
-  //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: ENDOFSYSENUM
+  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown  
+  //        33: sysTopMassUp               34: sysTopMassDown  
+  //        35: sysTopMassUp2              36: sysTopMassDown2
+  //        37: sysTopMassUp3              38: sysTopMassDown3
+  //        39: sysTopMassUp4              40: sysTopMassDown4
+  //        41: sysQCDUp                   42: sysQCDDown                  
+  //        43: sysSTopUp                  44: sysSTopDown                 
+  //        45: sysDiBosUp                 46: sysDiBosDown 
+  //        47: sysVjetsUp                 48: sysVjetsDown
+  //        49: sysBRUp                    50: sysBRDown              
+  //        51: sysPDFUp                   52: sysPDFDown                  
+  //        53: sysHadUp                   54: sysHadDown                  
+  //        55: sysGenMCatNLO              56: sysGenPowheg  
+  //        57: sysGenPowhegHerwig         58: ENDOFSYSENUM
+
   std::vector<unsigned int> uncorrSys_;
   // trigger 
   //uncorrSys_.push_back(sysTriggerEffSFJetNormUp	);
