@@ -172,19 +172,23 @@ namespace semileptonic {
 			     /*27:*/ sysSingleTopScaleUp,        /*28:*/ sysSingleTopScaleDown,     
 			     /*29:*/ sysTopMatchUp,              /*30:*/ sysTopMatchDown,            
 			     /*31:*/ sysVBosonMatchUp,           /*32:*/ sysVBosonMatchDown,         
-			     /*33:*/ sysTopMassUp,               /*34:*/ sysTopMassDown,            
-			     /*35:*/ sysQCDUp,                   /*36:*/ sysQCDDown,                 
-			     /*37:*/ sysSTopUp,                  /*38:*/ sysSTopDown,               
-			     /*39:*/ sysDiBosUp,                 /*40:*/ sysDiBosDown,              
-			     /*41:*/ sysPDFUp,                   /*42:*/ sysPDFDown,
-			     /*43:*/ sysHadUp,                   /*44:*/ sysHadDown,
-			     /*45:*/ sysGenMCatNLO,              /*46:*/ sysGenPowheg,
-			     /*47:*/ sysGenPowhegHerwig,         /*48:*/ ENDOFSYSENUM, 
-			     /*49:*/ sysTest, 			 /*50:*/ sysTestMCatNLO,             
-			     /*51:*/ sysTestPowheg,     	 /*52:*/ sysTestPowhegHerwig,        
-			     /*53:*/ ENDOFSYSENUM2,
-			     sysVjetsUp, sysVjetsDown,
-			     sysBRUp   , sysBRDown
+			     /*33:*/ sysTopMassUp,               /*34:*/ sysTopMassDown,    
+			     /*35:*/ sysTopMassUp2,              /*36:*/ sysTopMassDown2,
+			     /*37:*/ sysTopMassUp3,              /*38:*/ sysTopMassDown3,
+			     /*39:*/ sysTopMassUp4,              /*40:*/ sysTopMassDown4,
+			     /*41:*/ sysQCDUp,                   /*42:*/ sysQCDDown,                 
+			     /*43:*/ sysSTopUp,                  /*44:*/ sysSTopDown,               
+			     /*45:*/ sysDiBosUp,                 /*46:*/ sysDiBosDown,  
+			     /*47:*/ sysVjetsUp,                 /*48:*/ sysVjetsDown,
+			     /*49:*/ sysBRUp   ,                 /*50:*/ sysBRDown,
+			     /*51:*/ sysPDFUp,                   /*52:*/ sysPDFDown,
+			     /*53:*/ sysHadUp,                   /*54:*/ sysHadDown,
+			     /*55:*/ sysGenMCatNLO,              /*56:*/ sysGenPowheg,
+			     /*57:*/ sysGenPowhegHerwig,         /*58:*/ ENDOFSYSENUM, 
+			     /*59:*/ sysTest, 			 /*60:*/ sysTestMCatNLO,             
+			     /*61:*/ sysTestPowheg,     	 /*62:*/ sysTestPowhegHerwig,        
+			     /*63:*/ ENDOFSYSENUM2,
+
   };
 
   // ============================
@@ -340,13 +344,23 @@ namespace semileptonic {
       case sysVBosonMatchUp            : return "sysVBosonMatchUp";          
       case sysVBosonMatchDown          : return "sysVBosonMatchDown";
       case sysTopMassUp                : return "sysTopMassUp";  
-      case sysTopMassDown              : return "sysTopMassDown";            
+      case sysTopMassDown              : return "sysTopMassDown";   
+      case sysTopMassUp2               : return "sysTopMassUp2";  
+      case sysTopMassDown2             : return "sysTopMassDown2";   
+      case sysTopMassUp3               : return "sysTopMassUp3";  
+      case sysTopMassDown3             : return "sysTopMassDown3";   
+      case sysTopMassUp4               : return "sysTopMassUp4";  
+      case sysTopMassDown4             : return "sysTopMassDown4";   
       case sysQCDUp                    : return "sysQCDUp";           
       case sysQCDDown                  : return "sysQCDDown";
       case sysSTopUp                   : return "sysSTopUp";               
       case sysSTopDown                 : return "sysSTopDown";
       case sysDiBosUp                  : return "sysDiBosUp";              
       case sysDiBosDown                : return "sysDiBosDown";
+      case sysVjetsUp                  : return "sysVjetsUp";      
+      case sysVjetsDown                : return "sysVjetsDown";      
+      case sysBRUp                     : return "sysBRUp";              
+      case sysBRDown                   : return "sysBRDown";    
       case sysPDFUp                    : return "sysPDFUp";              
       case sysPDFDown                  : return "sysPDFDown";
       case sysHadUp                    : return "sysHadronizationUp";
@@ -980,12 +994,20 @@ namespace semileptonic {
       // Summer12
       Nevents = 6923750*0.999881;// 8 TEV PU SF from gen ttbarSG Integral/entries
       // Systematic samples
-      if(kSys==sysTopScaleUp  ) Nevents=5009488;
-      if(kSys==sysTopScaleDown) Nevents=5387181;
-      if(kSys==sysTopMatchUp  ) Nevents=5415010;
-      if(kSys==sysTopMatchDown) Nevents=5476728;
-      if(kSys==sysTopMassUp   ) Nevents=5249525;
-      if(kSys==sysTopMassDown ) Nevents=5369214;
+      if(kSys!=sysNo){
+	if     (kSys==sysTopScaleUp  ) Nevents=5009488;
+	else if(kSys==sysTopScaleDown) Nevents=5387181;
+	else if(kSys==sysTopMatchUp  ) Nevents=5415010;
+	else if(kSys==sysTopMatchDown) Nevents=5476728;
+	else if(kSys==sysTopMassUp   ) Nevents=5249525;
+	else if(kSys==sysTopMassDown ) Nevents=5369214;
+	else if(kSys==sysTopMassUp2  ) Nevents=4733483;
+	else if(kSys==sysTopMassDown2) Nevents=4469095;
+	else if(kSys==sysTopMassUp3  ) Nevents=5145140;
+	else if(kSys==sysTopMassDown3) Nevents=5365348;
+	else if(kSys==sysTopMassUp4  ) Nevents=5249525;
+	else if(kSys==sysTopMassDown4) Nevents=5369214;
+      }
     }
     else if((sample==kSigPow)||(sample==kBkgPow)){
       crossSection=ttbarCrossSection; 
@@ -1224,14 +1246,18 @@ namespace semileptonic {
     // (iii) more/less single top
     if(sample==kSATops||sample==kSATopt||sample==kSAToptW||sample==kSTops||sample==kSTopt||sample==kSToptW||sample==kSTop){
       scale=0.3;
-      if(kSys==sysSTopUp  ) weight*=(1.0+scale);
-      if(kSys==sysSTopDown) weight*=(1.0-scale);
+      if(kSys!=sysNo){
+	if(kSys==sysSTopUp  ) weight*=(1.0+scale);
+	if(kSys==sysSTopDown) weight*=(1.0-scale);
+      }
     }
     if(sample==kWjets||sample==kZjets){
       scale=1.0;
-      if(kSys==sysVjetsUp  ) weight*=(1.0+scale);
-      if(kSys==sysVjetsDown) weight*=(1.0-scale);
-      if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
+      if(kSys!=sysNo){
+	if(kSys==sysVjetsUp  ) weight*=(1.0+scale);
+	if(kSys==sysVjetsDown) weight*=(1.0-scale);
+	if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
+      }
     }
     // printout for systematic variation
     if(verbose==1){
@@ -1248,7 +1274,7 @@ namespace semileptonic {
     // return result
     if(sample!=kData&&weight==1){
       std::cout << "WARNING: function lumiweight";
-      std::cout << " gives result 1 for sample:" << std::endl;
+      std::cout << " gives result 1 for sample: " << std::endl;
       std::cout << sampleLabel(sample,decayChannel) << ", " << decayChannel << " channel" << std::endl;
       std::cout << "used xSec:       " << crossSection << std::endl;
       std::cout << "used Nevents:    " << Nevents      << std::endl;
@@ -1300,7 +1326,7 @@ namespace semileptonic {
     if(entry<=result_.size()) result=result_[entry-1];
     else{
       std::cout << "warning - the requested element (" << entry <<") does not exist" << std::endl;
-      std::cout << "the string "  << inputTString << " with seperator " << seperateBy << " gives only " <<  result_.size() << "elements!" << std::endl;
+      std::cout << "the string "  << inputTString << " with seperator " << seperateBy << " gives only " <<  result_.size() << " elements!" << std::endl;
     }
     if(verbose) std::cout << "will return: " <<  result_[entry-1] << std::endl;
     // return output
@@ -1397,8 +1423,18 @@ namespace semileptonic {
     if((sys==sysVBosonMatchUp  )&&(sample==kZjets)) {fileName = "MatchUp/"+fileName+"MatchUp";     }
     if((sys==sysVBosonMatchDown)&&(sample==kZjets)) {fileName = "MatchDown/"+fileName+"MatchDown"; }
     // Top Mass
-    if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";    
-    if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
+    if((sysLabel(sys).Contains("sysTopMassUp"  ))&&((sample==kSig)||(sample==kBkg))){ 
+      fileName = "TopMassUp/"+fileName+"TopMassUp";   
+      if(     sys==sysTopMassUp2) fileName+="2";
+      else if(sys==sysTopMassUp3) fileName+="3";
+      else if(sys==sysTopMassUp4) fileName+="4"; 
+    }
+    if((sysLabel(sys).Contains("sysTopMassDown"))&&((sample==kSig)||(sample==kBkg))){
+      fileName = "TopMassDown/"+fileName+"TopMassDown";
+      if(     sys==sysTopMassDown2) fileName+="2";
+      else if(sys==sysTopMassDown3) fileName+="3";
+      else if(sys==sysTopMassDown4) fileName+="4";      
+    }
     // label for MC production cycle
     fileName += "Summer12";
     fileName += "PF.root";
@@ -4784,6 +4820,25 @@ namespace semileptonic {
       return plot->GetBinContent(bin);
     }
 
+    bool considerInTotalError(unsigned int kSys=sysNo){
+      // this function returns false for uncertainties which are not 
+      // considered in the total systematic uncertainty and true otherwise
+      // modified quantities: NONE
+      // used functions: NONE
+      // used enumerators: systematicVariation
+
+      bool result=true;
+      if     (kSys==sysVBosonScaleUp||kSys==sysVBosonScaleDown) result=false;          
+      else if(kSys==sysVBosonMatchUp||kSys==sysVBosonMatchDown) result=false;      
+      else if(kSys==sysTopMassUp2   ||kSys==sysTopMassDown2   ) result=false;
+      else if(kSys==sysTopMassUp3   ||kSys==sysTopMassDown3   ) result=false;
+      else if(kSys==sysTopMassUp4   ||kSys==sysTopMassDown4   ) result=false;
+      else if(kSys==sysBRUp         ||kSys==sysBRDown         ) result=false;
+      else if(kSys==sysGenMCatNLO||kSys==sysGenPowheg||kSys==sysGenPowhegHerwig) result=false;         
+      else if(kSys>=ENDOFSYSENUM                              ) result=false;
+      std::cout << sysLabel(kSys) << ": " << result << std::endl; 
+      return result;
+    }
 
     TString pseudoDataFileName(TString closureTestSpecifier, std::string decayChannel = "combined"){
       // this function returns the name of the pseudo data  
