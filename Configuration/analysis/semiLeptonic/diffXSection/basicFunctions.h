@@ -2273,7 +2273,8 @@ namespace semileptonic {
       bins_.clear();
 
       // pt(lepton)
-      double lepPtBins[]={30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200.};
+      // double lepPtBins[]={30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200.};
+      double lepPtBins[]={30., 37., 45., 55., 68., 80., 100., 135., 200.};
       bins_.insert( bins_.begin(), lepPtBins, lepPtBins + sizeof(lepPtBins)/sizeof(double) );
       result["lepPt"]=bins_;
       bins_.clear();
@@ -2288,8 +2289,9 @@ namespace semileptonic {
       }
       bins_.clear();
 
-      // pt(bquark)
-      double bqPtBins[]={30., 60., 95., 140., 200., 400.};
+      // pt(bjet)
+      // double bqPtBins[]={30., 60., 95., 140., 200., 400.};
+      double bqPtBins[]={30., 48., 75., 180., 400.};
       bins_.insert( bins_.begin(), bqPtBins, bqPtBins + sizeof(bqPtBins)/sizeof(double) );
       result["bqPt"]=bins_;
       bins_.clear();
@@ -2302,19 +2304,22 @@ namespace semileptonic {
 
 
       // pt(bbbar)
-      double bbbarPtBins[]={0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 125.0, 160.0, 200.0, 275.0, 500.0};
+      //double bbbarPtBins[]={0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 125.0, 160.0, 200.0, 275.0, 500.0};
+      double bbbarPtBins[]={0.0, 35.0, 75.0, 115.0, 155.0, 280.0, 500.0};
       bins_.insert( bins_.begin(), bbbarPtBins, bbbarPtBins + sizeof(bbbarPtBins)/sizeof(double) );
       result["bbbarPt"]=bins_;
       bins_.clear();
 
       // m(bbbar)
-      double bbbarMassBins[]={0.0, 45.0, 60.0, 80.0, 105.0, 135.0, 165.0, 205.0, 255.0, 315.0, 390.0, 485.0, 620.0, 800.0};
+      //double bbbarMassBins[]={0.0, 45.0, 60.0, 80.0, 105.0, 135.0, 165.0, 205.0, 255.0, 315.0, 390.0, 485.0, 620.0, 800.0};
+      double bbbarMassBins[]={0.0, 85.0, 135.0, 190.0, 255.0, 325.0, 415.0, 505.0, 630.0, 800.0};
       bins_.insert( bins_.begin(), bbbarMassBins, bbbarMassBins + sizeof(bbbarMassBins)/sizeof(double) );
       result["bbbarMass"]=bins_;
       bins_.clear();
 
       // m(lb)
-      double lbMassBins[]={0.0, 70.0, 95.0, 120.0, 140.0, 500.0};
+      // double lbMassBins[]={0.0, 70.0, 95.0, 120.0, 140.0, 500.0};
+      double lbMassBins[]={0.0, 90.0, 122., 500.0};
       bins_.insert( bins_.begin(), lbMassBins, lbMassBins + sizeof(lbMassBins)/sizeof(double) );
       result["lbMass"]=bins_;
       bins_.clear();
@@ -4746,15 +4751,15 @@ namespace semileptonic {
 	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.54/*10.24*/                 : 13.58         ) :  7   ;
 	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.42/*10.20*/                 : 12.88         ) :  7   ;
 	      //          lepton/(b)jet quantity               dummy full PS    (visible PS:              doubleKinFit+Prob       default           )  dummy parton PS
-	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  4.945/*7.24*//*4.93*/    : 5.536/* 6.60*/  ) :  7.65);
-	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  3.373/*2.69*//*2.9e-07*/ : 4.217/*7.7e-06*/) :  3.00);
-	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ?  7.045/*10.19*//*8.56*/   : 8.063/*12.51*/  ) : 10.53);
-	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  6.657/*8.10*//*6.78*/    : 8.504/* 9.19*/  ) : 11.11);
-	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.487/*4.62*//*1.51*/    : 4.089/* 2.57*/  ) :  8   );
-	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.857/*7.68*//*8.20*/    : 5.015/*11.14*/  ) :  8   );
-	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  5.119/*9.03*/            : 9.392           ) :  4   );
+	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  5.65/*7.24*//*4.93*/    : 5.536/* 6.60*/  ) :  7.65);
+	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  3.30/*2.69*//*2.9e-07*/ : 4.217/*7.7e-06*/) :  3.00);
+	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ?  12.96/*10.19*//*8.56*/   : 8.063/*12.51*/  ) : 10.53);
+	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  6.62/*8.10*//*6.78*/    : 8.504/* 9.19*/  ) : 11.11);
+	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  1.49/*4.62*//*1.51*/    : 4.089/* 2.57*/  ) :  8   );
+	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.93/*7.68*//*8.20*/    : 5.015/*11.14*/  ) :  8   );
+	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  11.96/*9.03*/            : 9.392           ) :  4   );
 	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  2.352/*0.77*/            : 4.890           ) :  1   );
-	      else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  4.668/*FIXME*/           : 5.660           ) : 1   );/*FIXME*/
+	      else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  4.65                     : 5.660           ) :  1   );
 	    }
 	}
 	else{
@@ -4836,7 +4841,7 @@ namespace semileptonic {
       else if(kSys==sysBRUp         ||kSys==sysBRDown         ) result=false;
       else if(kSys==sysGenMCatNLO||kSys==sysGenPowheg||kSys==sysGenPowhegHerwig) result=false;         
       else if(kSys>=ENDOFSYSENUM                              ) result=false;
-      std::cout << sysLabel(kSys) << ": " << result << std::endl; 
+      // std::cout << sysLabel(kSys) << ": " << result << std::endl; 
       return result;
     }
 
