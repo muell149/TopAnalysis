@@ -6,8 +6,11 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
 
   // define some parameters
   // range of plot
+  double minx2=130.;
+  double maxx2=250.;
   double minx=160.;
-  double maxx=185.;
+  double maxx=190.;
+
   // fine bins
   double nbinsx=250.;
   // consider mass dependence of measurement
@@ -58,7 +61,7 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
     // !!! define bin of interest !!! 
     int binOfInterest=bin;
     // perform top mass extraction
-    std::pair< double, double >resultbin=extraction(verbose, luminosity, save, minx, maxx, nbinsx, dataMassDependence, binOfInterest, outputFolder, outputFile);
+    std::pair< double, double >resultbin=extraction(verbose, luminosity, save, (binOfInterest==2||binOfInterest==4) ? minx : minx2, (binOfInterest==2||binOfInterest==4) ? maxx : maxx2, nbinsx, dataMassDependence, binOfInterest, outputFolder, outputFile);
     extractedMass->SetBinContent(bin, resultbin.first);
     extractedMass->SetBinError(bin, std::abs(resultbin.second));
   }
@@ -99,7 +102,7 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV" << std::endl;
 
   // create legend
-  TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85);
+  TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85 );
   legendStyle(*leg,"");
   TH1F* legtev=(TH1F*)TevatronMass->Clone("legtevatron");
   legtev->SetFillColor  (TevatronMassErr->GetFillColor());
@@ -177,22 +180,52 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   // get values for different top masses
   std::vector<double > MassPointsData_;
   std::vector<TH1F*  > data_;
-  if(dataMassDependence) MassPointsData_.push_back(169.5);
+  if(dataMassDependence){
+    MassPointsData_.push_back(161.5);
+    MassPointsData_.push_back(163.5);
+    MassPointsData_.push_back(166.5);
+    MassPointsData_.push_back(169.5);
+  }
   MassPointsData_.push_back(172.5);
-  if(dataMassDependence) MassPointsData_.push_back(175.5);
-  TCanvas* canvasUp = (TCanvas*)(datafile->Get("xSec/sysTopMassUp/rhosNorm"  )->Clone("dataCanvUp"));
-  TCanvas* canvasDn = (TCanvas*)(datafile->Get("xSec/sysTopMassDown/rhosNorm")->Clone("dataCanvDn"));
-  TH1F* dataUp= (TH1F*)(canvasUp->GetPrimitive("rhoskData")->Clone("dataUp"));
-  TH1F* dataDn= (TH1F*)(canvasDn->GetPrimitive("rhoskData")->Clone("dataDn"));
-  if(dataMassDependence) data_.push_back((TH1F*)dataDn->Clone("measurementDn"     ));
+  if(dataMassDependence){
+    MassPointsData_.push_back(175.5);
+    MassPointsData_.push_back(178.5);
+    MassPointsData_.push_back(181.5);
+    MassPointsData_.push_back(184.5);
+  }
+  TCanvas* canvasUp  = (TCanvas*)(datafile->Get("xSec/sysTopMassUp/rhosNorm"   )->Clone("dataCanvUp" ));
+  TCanvas* canvasDn  = (TCanvas*)(datafile->Get("xSec/sysTopMassDown/rhosNorm" )->Clone("dataCanvDn" ));
+  TCanvas* canvasUp2 = (TCanvas*)(datafile->Get("xSec/sysTopMassUp2/rhosNorm"  )->Clone("dataCanvUp2"));
+  TCanvas* canvasDn2 = (TCanvas*)(datafile->Get("xSec/sysTopMassDown2/rhosNorm")->Clone("dataCanvDn2"));
+  TCanvas* canvasUp3 = (TCanvas*)(datafile->Get("xSec/sysTopMassUp3/rhosNorm"  )->Clone("dataCanvUp3"));
+  TCanvas* canvasDn3 = (TCanvas*)(datafile->Get("xSec/sysTopMassDown3/rhosNorm")->Clone("dataCanvDn3"));
+  TCanvas* canvasUp4 = (TCanvas*)(datafile->Get("xSec/sysTopMassUp4/rhosNorm"  )->Clone("dataCanvUp4"));
+  TCanvas* canvasDn4 = (TCanvas*)(datafile->Get("xSec/sysTopMassDown4/rhosNorm")->Clone("dataCanvDn4"));
+  TH1F* dataUp = (TH1F*)(canvasUp ->GetPrimitive("rhoskData")->Clone("dataUp" ));
+  TH1F* dataDn = (TH1F*)(canvasDn ->GetPrimitive("rhoskData")->Clone("dataDn" ));
+  TH1F* dataUp2= (TH1F*)(canvasUp2->GetPrimitive("rhoskData")->Clone("dataUp2"));
+  TH1F* dataDn2= (TH1F*)(canvasDn2->GetPrimitive("rhoskData")->Clone("dataDn2"));
+  TH1F* dataUp3= (TH1F*)(canvasUp3->GetPrimitive("rhoskData")->Clone("dataUp3"));
+  TH1F* dataDn3= (TH1F*)(canvasDn3->GetPrimitive("rhoskData")->Clone("dataDn3"));
+  TH1F* dataUp4= (TH1F*)(canvasUp4->GetPrimitive("rhoskData")->Clone("dataUp4"));
+  TH1F* dataDn4= (TH1F*)(canvasDn4->GetPrimitive("rhoskData")->Clone("dataDn4"));
+ if(dataMassDependence){
+    data_.push_back((TH1F*)dataDn4->Clone("measurementDn4"    ));
+    data_.push_back((TH1F*)dataDn3->Clone("measurementDn3"    ));
+    data_.push_back((TH1F*)dataDn2->Clone("measurementDn2"    ));
+    data_.push_back((TH1F*)dataDn ->Clone("measurementDn"     ));
+  }
   data_.push_back((TH1F*)data  ->Clone("measurementCentral"));
-  if(dataMassDependence) data_.push_back((TH1F*)dataUp->Clone("measurementUp"     ));
+  if(dataMassDependence){
+    data_.push_back((TH1F*)dataUp ->Clone("measurementUp"     ));
+    data_.push_back((TH1F*)dataUp2->Clone("measurementUp2"    ));
+    data_.push_back((TH1F*)dataUp3->Clone("measurementUp3"    ));
+    data_.push_back((TH1F*)dataUp4->Clone("measurementUp4"    ));
+  }
   // extract uncertainty for bin of interest from central mass point 
   double central =data->GetBinContent(binOfInterest);
   double errorAbs=data->GetBinError  (binOfInterest);
   double errRel=std::abs(1.-(central+errorAbs)/central);
-  //double up    =central+errorAbs;
-  //double dn    =central-errorAbs;
   if(verbose>0) std::cout << "central data result: " << central << "+/-" << errorAbs << " (=" << errRel*100 << "% unc.)" << std::endl;
 
   // collect rhos data results from bin of interest for different masses in one separate plot
@@ -402,7 +435,7 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   // ---
   //    legend
   // ---
-  TLegend *leg = new TLegend(0.61, 0.7, 0.96, 0.86);
+  TLegend *leg = new TLegend(0.61, (binOfInterest!=3) ? 0.7 : 0.25, 0.96, (binOfInterest!=3) ? 0.86 : 0.41);
   legendStyle(*leg,"");
   TH1F* legmeasurement=(TH1F*)measurementCentral->Clone("legdata");
   legmeasurement->SetFillColor  (measurementUp->GetFillColor());
