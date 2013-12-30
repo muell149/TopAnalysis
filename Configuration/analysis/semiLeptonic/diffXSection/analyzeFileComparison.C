@@ -1,9 +1,9 @@
 #include "basicFunctions.h"
 
-void analyzeFileComparison(bool save = true, int verbose=0){
+void analyzeFileComparison(bool save = true,  bool usePAPERbinning=true, int verbose=0){
  
-  // use paper binning instead of equidistant binning for cross section quantities
-  bool usePAPERbinning=true;
+  // usePAPERbinning: use paper binning instead of equidistant binning for cross section quantities
+  // usePAPERbinning=true / false
 
   // ============================
   //  Set Root Style
