@@ -27,15 +27,20 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString 
   //        25: sysVBosonScaleUp           26: sysVBosonScaleDown          
   //        27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
   //        29: sysTopMatchUp              30: sysTopMatchDown             
-  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown          
-  //        33: sysTopMassUp               34: sysTopMassDown              
-  //        35: sysQCDUp                   36: sysQCDDown                  
-  //        37: sysSTopUp                  38: sysSTopDown                 
-  //        39: sysDiBosUp                 40: sysDiBosDown                
-  //        41: sysPDFUp                   42: sysPDFDown                  
-  //        43: sysHadUp                   44: sysHadDown                  
-  //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        49: ENDOFSYSENUM
+  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown  
+  //        33: sysTopMassUp               34: sysTopMassDown  
+  //        35: sysTopMassUp2              36: sysTopMassDown2
+  //        37: sysTopMassUp3              38: sysTopMassDown3
+  //        39: sysTopMassUp4              40: sysTopMassDown4
+  //        41: sysQCDUp                   42: sysQCDDown                  
+  //        43: sysSTopUp                  44: sysSTopDown                 
+  //        45: sysDiBosUp                 46: sysDiBosDown 
+  //        47: sysVjetsUp                 48: sysVjetsDown
+  //        49: sysBRUp                    50: sysBRDown              
+  //        51: sysPDFUp                   52: sysPDFDown                  
+  //        53: sysHadUp                   54: sysHadDown                  
+  //        55: sysGenMCatNLO              56: sysGenPowheg  
+  //        57: sysGenPowhegHerwig         58: ENDOFSYSENUM
  
   // ============================
   //  Set Root Style
@@ -185,7 +190,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString 
 	  // go to root directory, keep plot when closing rootfile
 	  gROOT->cd();	    
 	  histo_[xSecVariables_[i]][sys]=(TH1F*)(plot->Clone());
-	  considerSys_[xSecVariables_[i]][sys]=true;
+	  considerSys_[xSecVariables_[i]][sys]=considerInTotalError(sys);
 	  // FIXME: no generator uncertainties considered for final errors
 	  if(sys==sysGenPowheg||sys==sysGenPowhegHerwig||sys==sysGenMCatNLO) considerSys_[xSecVariables_[i]][sys]=false;
 	  // sysHadUp   -> Hadronization: POWHEG+PYTHIA cs. POWHEG+HERWIG
