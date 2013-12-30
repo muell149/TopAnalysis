@@ -38,10 +38,10 @@ void treeComparison(double luminosity = 19712, bool save = true, int verbose=2, 
     testQuantity="chi2";
     treePath="analyzeTopRecoKinematicsKinFit/tree";
     Val_.push_back(0. );
-    Val_.push_back(1.386);   // chi2<1.386 ~prob>0.50
-    //Val_.push_back(2.1);   // chi2<2.1 ~prob>0.35
-    //Val_.push_back(3.219); // chi2<3.219 ~prob>0.20
-    //Val_.push_back(7.824); // chi2<7.824 ~prob>0.02
+    Val_.push_back(1.386); // chi2<1.386 ~prob>0.50
+    Val_.push_back(2.1);   // chi2<2.1 ~prob>0.35
+    Val_.push_back(3.219); // chi2<3.219 ~prob>0.20
+    Val_.push_back(7.824); // chi2<7.824 ~prob>0.02
     Val_.push_back(99999.);
     treeExt="";
   }
