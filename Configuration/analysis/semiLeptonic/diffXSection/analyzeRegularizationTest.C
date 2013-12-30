@@ -2,13 +2,15 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeRegularizationTest(double luminosity = 19712.,
+void analyzeRegularizationTest(TString test="k", double luminosity = 19712.,
 			       bool save = true, int systematicVariation=sysNo, unsigned int verbose=0,
 			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
 			       TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 			       std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, 
 			       bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
+  // regularization mode and scanned parameters
+  // test : mix, k, tau
   std::vector <double > tau_;
   std::vector <int >    tauColor_;
   std::vector <int >    tauMarker_;
@@ -1561,9 +1563,9 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	else if(decayChannel=="electron") rootFile+="Elec";
 	else if(decayChannel=="combined") rootFile+="Lep";
-	rootFile+=closureLabel+variable+LV+PS+unfPreWeightingStr+".root";
-	psFile =outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr;
-	epsFile=outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr+".eps";
+	rootFile+=closureLabel+"RegTest"+variable+LV+PS+unfPreWeightingStr+".root";
+	psFile =outputFolder+"unfolding/unfolding"+closureLabel+"RegTest"+variable+LV+PS+unfPreWeightingStr;
+	epsFile=outputFolder+"unfolding/unfolding"+closureLabel+"RegTest"+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
 	//if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
@@ -1576,7 +1578,7 @@ void analyzeRegularizationTest(double luminosity = 19712.,
       if(decayChannel=="muon"    ) txtfile+="Mu";
       else if(decayChannel=="electron") txtfile+="Elec";
       else if(decayChannel=="combined") txtfile+="Lep";
-      txtfile+=closureLabel+dataSample+LV+PS+unfPreWeightingStr+".txt";
+      txtfile+=closureLabel+"RegTest"+dataSample+LV+PS+unfPreWeightingStr+".txt";
       // save unfolding plots in rootfile?
       //         0 means: Default value, same as 1
       //         1 means: no root file will be written (default)
@@ -1789,25 +1791,47 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	// collect reg Parameters to calculate cross section for
 	double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier, (addSel=="ProbSel" ? true : false) );
 	stdTau_[variable]=regPar;
-	//tau_.push_back(3.);	
-	//tau_.push_back(5.);
-	tau_.push_back(0.*regPar);	  
-	tau_.push_back(0.1*regPar);
+	// tau parameters
+	if(test=="tau"){
+	  tau_.push_back(3.);	
+	  tau_.push_back(5.);
+	}
+	else if(test=="mix"){
+	  tau_.push_back(0.*regPar);	  
+	  tau_.push_back(0.1*regPar);
+	}
 	tau_.push_back(regPar);
-	tau_.push_back(5.0*regPar);
-	tau_.push_back(10.*regPar);
-	tau_.push_back(50.*regPar);
-	//tau_.push_back(10.);
-	//tau_.push_back(15.);
-	//tau_.push_back(25.);
+	int stdindex=(int)tau_.size(); // used as indicator entries >=kindex == k unfolding
+	if(test=="tau"){
+	  tau_.push_back(10.);
+	  tau_.push_back(15.);
+	  tau_.push_back(25.);
+	}
+        else if(test=="mix"){
+	  tau_.push_back(5.0*regPar);
+	  tau_.push_back(10.*regPar);
+	  tau_.push_back(50.*regPar);
+	}
 	kindex=(int)tau_.size(); // used as indicator entries >=kindex == k unfolding
-	tau_.push_back(3); // k parameter
-	tau_.push_back(4); // k parameter
-	tau_.push_back(5); // k parameter
-	tau_.push_back(6); // k parameter
+	// k parameters
+	if(test=="k"){
+	  tau_.push_back(1); 
+	  tau_.push_back(2); 
+	}
+	if(test!="tau"){
+	  tau_.push_back(3);
+	  tau_.push_back(4);
+	  tau_.push_back(5);
+	  tau_.push_back(6);
+	}
+        if(test=="k"){
+          tau_.push_back(7);
+          tau_.push_back(8);
+        }
+	// colors
 	tauColor_.push_back(kCyan+1 );
 	tauColor_.push_back(kBlue   );
-	tauColor_.push_back(kBlack  );
+	//tauColor_.push_back(kBlack  );
 	tauColor_.push_back(kGreen+1);
 	tauColor_.push_back(kGreen+3);
 	tauColor_.push_back(kAzure+8);
@@ -1815,9 +1839,10 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	tauColor_.push_back(kRed      ); // k parameter
 	tauColor_.push_back(kMagenta+2); // k parameter
 	tauColor_.push_back(kOrange+8); // k parameter
+	// marker styles
 	tauMarker_.push_back(33);
 	tauMarker_.push_back(22);	
-	tauMarker_.push_back(29);
+	//tauMarker_.push_back(29);
 	tauMarker_.push_back(23);
 	tauMarker_.push_back(34);
 	tauMarker_.push_back(20);
@@ -1825,7 +1850,12 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	tauMarker_.push_back(30); // k parameter
 	tauMarker_.push_back(32); // k parameter
 	tauMarker_.push_back(25); // k parameter
-
+	// default reg parameter: black star
+	int defCol [1] ={kBlack};
+	int defMar [1] ={29};
+	tauColor_ .insert(tauColor_ .begin()+stdindex-1, defCol, defCol+1);
+        tauMarker_.insert(tauMarker_.begin()+stdindex-1, defMar, defMar+1);
+	
 	for(int tau=0; tau<(int)tau_.size(); ++tau){
 	  // to avoid overwriting, add the used tau parameter to all output files
 	  TString tauVal= tau<kindex ? "Tau"+getTStringFromDouble(tau_[tau],2) : "K"+getTStringFromDouble(tau_[tau],0);;
@@ -2343,11 +2373,11 @@ void analyzeRegularizationTest(double luminosity = 19712.,
   legTau->AddEntry(histo_["xSecNorm/topPt"][kSig], "simulation used for unfolding", "L");
   for(int tau=0; tau<(int)tau_.size(); ++tau){
     if(tau<kindex){
-      if(tau!=(int)stdtau) legTau2->AddEntry(tauxSecNorm_[tau], Form("#tau=%2.2f*#tau_{d}", tau_[tau]/tau_[stdtau]), "LP");
-      else legTau2->AddEntry(tauxSecNorm_[stdtau], Form("#tau=%2.1f (#tau_{d}, default)", tau_[stdtau]), "LP");
+      if(tau!=(int)stdtau) legTau2->AddEntry(tauxSecNorm_[tau], TString(Form("#tau=%2.1f",tau_[tau]))+TString(Form("#scale[0.85]{ (=%2.2f*#tau_{d})}", tau_[tau]/tau_[stdtau])), "LP");
+      else legTau2->AddEntry(tauxSecNorm_[stdtau], Form("#tau_{d}=%2.1f (default)", tau_[stdtau]), "LP");
     }
     else{
-      TString hbw= double(tauxSecNorm_[tau]->GetNbinsX())==2*tau_[tau] ? " (0.5*N_{bins})" : "";
+      TString hbw= double(tauxSecNorm_[tau]->GetNbinsX())==2*tau_[tau] ? " (=0.5*N_{bins})" : "";
       legTau2->AddEntry(tauxSecNorm_[tau], TString(Form("k=%2.0f", tau_[tau]))+hbw, "LP");
     }
   }
@@ -2738,8 +2768,8 @@ void analyzeRegularizationTest(double luminosity = 19712.,
 	  // do the saving
 	  TString canvtit=plotCanvas_[idx]->GetTitle();
 	  if(!(canvtit.Contains("legend")||(canvtit.Contains("xSec")&&!canvtit.Contains("Norm")))){
-	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+".eps")); 
-	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+".png"));
+	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+test+".eps")); 
+	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+test+".png"));
 	  }
 	}
       }
