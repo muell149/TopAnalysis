@@ -23,7 +23,7 @@
 #include "basicFunctions.h"
 #include "../../../../TopUtils/interface/extract_sigma.h"
 
-void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TString lepton="combined", 
+void purityStabilityEfficiency(TString variable = "ttbarDelPhi", bool save=true, TString lepton="combined", 
 			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit", bool plotAcceptance = false, 
 			       bool plotEfficiencyPhaseSpace = false, bool plotEfficiency2 = false, double chi2Max=7.824,//9999.,//7.824,
 			       int verbose=1, bool hadron=false, int qAssignment=-1,
@@ -42,6 +42,7 @@ void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TStri
   // fitGaussRes:    fit a Gauss to the residuum plots to obtain the resolution
   // printSeparateRes save the residuum plots separately
   bool useTree=true; // use default 2D histo or create 2D histo from tree, allows chi2 cuts
+  if(variable.Contains("lbMass")) useTree=false; //FIXME
   TString nameExt="";
   double chi2MaxInit=chi2Max;
   // if chi2 sel is applied-plot pur and stab without chi2 sel in addition?
@@ -71,7 +72,7 @@ void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TStri
   if(hadron) swapBb=true;
   
   int initialIgnoreLevel=gErrorIgnoreLevel;
-  if(verbose==0) gErrorIgnoreLevel=kWarning;
+  if(verbose<=1) gErrorIgnoreLevel=kWarning;
   
   if(qAssignment>=0) std::cout << "qAssignment=" << qAssignment << std::endl;
 
@@ -321,6 +322,7 @@ void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TStri
     }
     else variable_.push_back(variable);
     TString genHistoName=variable+genExtHisto;
+    // TString genHistoName2=genHistoName;
     if(genHistoName.Contains("rhos" )) genHistoName="rhosGen";
     if(genHistoName.Contains("Njets")) genHistoName="Ngenjets";
     // container for values read from tree
@@ -1218,8 +1220,8 @@ void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TStri
 	if(TMPStab>0.&&TMPStab<minStab){ minStab= TMPStab; stabilityMinimumBin=bin;}
 	if(TMPPur>0. &&TMPPur<minPur  ){ minPur = TMPPur; purityMinimumBin=bin;    }
 	if(TMPRes>-1){
-	  if(TMPRes>0.&&TMPRes<minStab){ minRes= TMPRes; resolutionMinimumBin=bin;}
-	  if(TMPRes<1.&&TMPRes>maxRes ){ maxRes= TMPRes; resolutionMaximumBin=bin;}
+	  if(TMPRes>0.&&TMPRes<minRes){ minRes= TMPRes; resolutionMinimumBin=bin;}
+	  if(TMPRes<1.&&TMPRes>maxRes){ maxRes= TMPRes; resolutionMaximumBin=bin;}
 	}
 	// check minimal migration condition
 	if(TMPStab>minMigr)NStabok++;
@@ -1301,16 +1303,17 @@ void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TStri
   // all bins
   double SumRes   =0.;
   double SumResFit=0.;
-  if(verbose>0){
-    for(int bin=1; bin<=hisRelativeResolRMS->GetNbinsX(); ++bin){
+  for(int bin=1; bin<=hisRelativeResolRMS->GetNbinsX(); ++bin){
+    SumRes+=hisRelativeResolRMS->GetBinContent(bin);
+    if(fitGaussRes) SumResFit+= hisRelativeResolFit->GetBinContent(bin);
+    if(verbose>0){
       std::cout << "[" << hisRelativeResolRMS->GetBinLowEdge(bin);
       for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin)))  ; space>0; space--){ std::cout << " "; }
       std::cout << ".." <<  hisRelativeResolRMS->GetBinLowEdge(bin+1);
       for(int space=(getBigitFromDouble(purityhist->GetBinLowEdge(purityhist->GetNbinsX()+1))-getBigitFromDouble(purityhist->GetBinLowEdge(bin+1))); space>0; space--){ std::cout << " "; }
       std::cout << "]: ";
-      SumRes+=hisRelativeResolRMS->GetBinContent(bin);
       std::cout << std::setprecision(2) << std::fixed << hisRelativeResolRMS->GetBinContent(bin);
-      if(fitGaussRes){ std::cout << " (1#sigma gaussian fit=" << std::setprecision(2) << std::fixed << hisRelativeResolFit->GetBinContent(bin) << ")";SumResFit+= hisRelativeResolFit->GetBinContent(bin);}
+      if(fitGaussRes) std::cout << " (1#sigma gaussian fit=" << std::setprecision(2) << std::fixed << hisRelativeResolFit->GetBinContent(bin) << ")";
       std::cout << std::endl;
     }
   }
@@ -1318,11 +1321,13 @@ void purityStabilityEfficiency(TString variable = "topPt", bool save=true, TStri
   std::cout << "<resolution(histo)>=" << SumRes   /hisRelativeResolRMS->GetNbinsX() << std::endl;
   std::cout << "<resolution(gauss)>=" << SumResFit/hisRelativeResolFit->GetNbinsX() << std::endl;
   // min/max value
-  //std::cout << std::setprecision(2) << std::fixed << minRes << " (<" << variable;
-  //std::cout << ">=" << std::setprecision(0) << std::fixed;
-  //std::cout << hisRelativeResolRMS->GetBinCenter(resolutionMinimumBin) << ") < resolution < ";
-  //std::cout << std::setprecision(2) << std::fixed << maxRes << " (<" << variable;
-  //std::cout << ">=" << std::setprecision(0) << std::fixed;
-  //std::cout << hisRelativeResolRMS->GetBinCenter(resolutionMaximumBin) << ")"<< std::endl;
+  if(verbose>1){
+    std::cout << std::setprecision(2) << std::fixed << minRes << " (<" << variable;
+    std::cout << ">=" << std::setprecision(0) << std::fixed;
+    std::cout << hisRelativeResolRMS->GetBinCenter(resolutionMinimumBin) << ") < resolution < ";
+    std::cout << std::setprecision(2) << std::fixed << maxRes << " (<" << variable;
+    std::cout << ">=" << std::setprecision(0) << std::fixed;
+    std::cout << hisRelativeResolRMS->GetBinCenter(resolutionMaximumBin) << ")"<< std::endl;
+  }
   }
 }
