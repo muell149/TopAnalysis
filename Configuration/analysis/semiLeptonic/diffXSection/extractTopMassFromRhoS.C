@@ -1,6 +1,6 @@
 #include "basicFunctions.h"
 
-std::pair< double, double > extraction(int verbose=1, double luminosity=19712., bool save=true, double minx=160., double maxx=185., double nbinsx=250, bool dataMassDependence=false, int binOfInterest=1, TString outputFolder="./", TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root");
+std::pair< double, double > extraction(int verbose=0, double luminosity=19712., bool save=true, double minx=160., double maxx=185., double nbinsx=250, bool dataMassDependence=false, int binOfInterest=1, TString outputFolder="./", TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root");
 
 void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=true){
 
@@ -153,6 +153,15 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
 
 std::pair< double, double > extraction(int verbose, double luminosity, bool save, double minx, double maxx, double nbinsx, bool dataMassDependence, int binOfInterest, TString outputFolder, TString outputFile){
 
+  // ============================  
+  //  Set ROOT Style
+  // ============================
+  TStyle myStyle("HHStyle","HHStyle");
+  setHHStyle(myStyle);
+  //TGaxis::SetMaxDigits(2);
+  //myStyle.cd();
+  //gROOT->SetStyle("HHStyle");
+  //gROOT->ForceStyle();
   // A) get measurement from data
   // open data result file
   TFile* datafile = TFile::Open(outputFile, "READ");
@@ -161,8 +170,8 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   // get canvas for norm rhos
   TCanvas* canvasNom = (TCanvas*)(datafile->Get("finalXSec/rhosNorm")->Clone());
   // get data result plot with final errors from canvas
-  TGraphAsymmErrors* dataRaw  = (TGraphAsymmErrors*)canvasNom->GetPrimitive("dataTotalError");
-  //TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)canvas->GetPrimitive("dataStatError");=
+  TGraphAsymmErrors* dataRaw  = (TGraphAsymmErrors*)((canvasNom->GetPrimitive("dataTotalError"))->Clone("dataTot" ));
+  TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)((canvasNom->GetPrimitive("dataStatError" ))->Clone("dataStat"));
   // binning
   std::map< TString, std::vector<double> > binning_ = makeVariableBinning();
   int Nbins = std::abs(binning_["rhos"][binning_["rhos"].size()-1]-binning_["rhos"][0])*100;
@@ -171,11 +180,15 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   reBinTH1F(*data, binning_["rhos"], 0);
   // refill TGraphAsymmErrors to rebinned histo
   for(int bin=1; bin<=data->GetNbinsX(); ++bin){
+    //std::cout << dataRaw ->GetY()[bin] << std::endl;
+    //std::cout << dataStat->GetY()[bin] << std::endl;
     data->SetBinContent(bin, dataRaw->GetY()[bin]);
     double err=dataRaw->GetErrorYhigh(bin);
     if(err<dataRaw->GetErrorYlow(bin)) err=dataRaw->GetErrorYlow(bin);
     data->SetBinError(bin, err);
   }
+  axesStyle(*data, xSecLabelName("rhos"), "#frac{1}{#sigma} #frac{d#sigma}{d#rho_{S}}" , 0., 4.);
+  data->SetTitleOffset(0.8*data->GetTitleOffset("Y"), "Y");
   std::cout << "bin: [" << data->GetBinLowEdge(binOfInterest) << ".." << data->GetBinLowEdge(binOfInterest+1) << "]" <<  std::endl; 
   // get values for different top masses
   std::vector<double > MassPointsData_;
@@ -366,6 +379,7 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     if(mtop_[sample]==172.5) MCnom=value;
   }
   histogramStyle(*MC, kData, false, 1.2, kGreen-2);
+  
 
   // extract values for parameter dependence
   double MCnomUnc=0.;
@@ -505,14 +519,137 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   plotCanvas_[plotCanvas_.size()-1]->SetTitle(title2);
   chi2CMS->Draw("p");
   
-  // E) do saving 
+  // E) Canvas with different mass predictions
+  //    duplicate canvas from nominal data measurement
+  if(binOfInterest==1){
+    gROOT->cd();
+    std::cout << "create cross section for different masses plot" << std::endl;
+    //plotCanvas_.push_back((TCanvas*)(canvasNom->Clone()));
+    addCanvas(plotCanvas_);  
+    plotCanvas_[plotCanvas_.size()-1]->cd(0);
+    plotCanvas_[plotCanvas_.size()-1]->SetName ("finalXSecrhosNormCombinedHadronLvPSMassCurves");
+    plotCanvas_[plotCanvas_.size()-1]->SetTitle("finalXSecrhosNormCombinedHadronLvPSMassCurves");
+    // remove other MC curves
+    data->Draw("AXIS");
+    // style for mass samples
+    std::vector <int > colorMC_;
+    colorMC_.push_back(6         );
+    colorMC_.push_back(kBlue     );
+    colorMC_.push_back(kGreen+1  );
+    colorMC_.push_back(kGreen+3  );
+    colorMC_.push_back(kRed      );
+    colorMC_.push_back(kAzure+8  );
+    colorMC_.push_back(kOrange+3 ); 
+    colorMC_.push_back(kMagenta+2); 
+    colorMC_.push_back(kOrange+8 );
+    std::vector <int > style_;
+    style_.push_back(2);
+    style_.push_back(10);
+    style_.push_back(4);
+    style_.push_back(6);
+    style_.push_back(1);
+    style_.push_back(7);
+    style_.push_back(8);
+    style_.push_back(9);
+    style_.push_back(3);
+    // create legend
+    TLegend *legMasses = new TLegend(0.7, 0.4 , 1.2, 0.8 );
+    TLegend *legDat    = new TLegend(0.7, 0.75, 1.2, 0.95);
+    legDat->AddEntry(data, "Data", "LP");
+    legendStyle(*legMasses,"#splitline{MadGraph+Pythia}{m_{top}[GeV]=}");
+    legendStyle(*legDat   , "");
+    // loop mass points
+    for(int sample=0; sample<(int)file_.size(); ++sample ){
+      // get and draw curves
+      rhosMC_[sample]->SetLineColor(  colorMC_[sample]);
+      rhosMC_[sample]->SetMarkerColor(colorMC_[sample]);
+      rhosMC_[sample]->SetLineWidth(3);
+      rhosMC_[sample]->SetLineStyle(style_[sample]);
+      rhosMC_[sample]->Draw("hist same");
+      // add legend entry
+      double val=mtop_[sample];
+      legMasses->AddEntry(rhosMC_[sample], Form("%2.1f", val), "L" );
+    }
+    // redraw data
+    dataStat->Draw("e p same");
+    data    ->Draw("e p same");
+    // draw legend
+    legMasses->Draw("same");
+    legDat   ->Draw("same");
+    // draw labels
+    DrawDecayChLabel("e/#mu + Jets Combined");
+    DrawCMSLabels(prelim, 0.5*(constLumiMuon+constLumiElec), 0.04, false, false, false);
+    // saving
+    TCanvas* tempCanv=(TCanvas*)(plotCanvas_[plotCanvas_.size()-1]->Clone());
+    int initWarningLV=gErrorIgnoreLevel;
+    if(verbose<1) gErrorIgnoreLevel=kWarning;   tempCanv->Print(outputFolder+tempCanv->GetName()+".eps");
+    tempCanv->Print(outputFolder+tempCanv->GetName()+".png");
+    saveToRootFile(outputFile, tempCanv, true, verbose-1, "massFromRhos");
+    gErrorIgnoreLevel=initWarningLV;
+    // canvas with ratio
+    gROOT->cd();
+    bool drawRat =true;
+    bool drawRat2=false;
+    std::cout << "create ratios for cross section for different masses" << std::endl;
+    if(drawRat){
+      // adapt some stylings
+      legMasses->SetY1(1.12*legMasses->GetY1());
+      data->SetLabelSize(0.);
+      data->SetTitleSize(0.);
+      data->SetMaximum(5.);
+      rhosMC_[0]->SetLabelSize(0.85*rhosMC_[0]->GetLabelSize());
+      rhosMC_[0]->SetTitleSize(1.3*rhosMC_[0]->GetTitleSize());
+      rhosMC_[0]->SetLabelSize(1.3*rhosMC_[0]->GetLabelSize("y"), "Y");
+      rhosMC_[0]->SetTitleSize(1.4*rhosMC_[0]->GetTitleSize("y"), "Y");
+
+      plotCanvas_[plotCanvas_.size()-1]->Update();
+      // ratio function
+      plotCanvas_.push_back(drawFinalResultRatio((TH1F*)data->Clone("dataTotRat"), 0.35, 1.75, myStyle, verbose, rhosMC_, (TCanvas*)(plotCanvas_[plotCanvas_.size()-1]->Clone()), -1., -1., dataStat, true));
+      plotCanvas_[plotCanvas_.size()-1]->cd();
+      plotCanvas_[plotCanvas_.size()-1]->SetName ("ratioFinalXSecrhosNormCombinedHadronPhaseSpaceMassCurves");
+      plotCanvas_[plotCanvas_.size()-1]->SetTitle("ratioFinalXSecrhosNormCombinedHadronPhaseSpaceMassCurves");
+      plotCanvas_[plotCanvas_.size()-1]->Draw();
+      plotCanvas_[plotCanvas_.size()-1]->Update();
+    }
+    if(drawRat2){
+     gPad->cd();
+      //plotCanvas_[plotCanvas_.size()-1]->Draw();
+      //plotCanvas_[plotCanvas_.size()-1]->Update();
+      //data->Draw("hist same");
+      for(int bin=1; bin<=data->GetNbinsX(); ++bin) std::cout << data->GetBinContent(bin) << std::endl;
+      // error vector dummy
+      std::vector<double> zeroerr_;
+      for(int bin=1; bin<=rhosMC_[0]->GetNbinsX(); ++bin) zeroerr_.push_back(0.);
+      std::cout << "- 1" << std::endl;
+      // axis
+      drawRatio(data, data, 0.6, 1.6, myStyle, 0, zeroerr_, "prediction", "data", "axis", kBlack, false);
+      std::cout << "- 2" << std::endl;
+      // MCs
+      for(int sample=0; sample<(int)file_.size(); ++sample ){
+	drawRatio(rhosMC_[sample], data, 0.6, 1.6, myStyle, 0, zeroerr_, "prediction", "data", "hist same", rhosMC_[sample]->GetLineColor(), false);
+      }
+      std::cout << "- 3" << std::endl;
+      // data error vector
+      std::vector<double> err_;
+      for(int bin=1; bin<=data->GetNbinsX(); ++bin) err_.push_back(data->GetBinError(bin)/data->GetBinContent(bin));
+      // axis
+      drawRatio(data, data, 0.6, 1.6, myStyle, 0, err_, "prediction", "data", "e p same", kBlack, false);
+    }
+  }
+
+  // F) do saving 
   if(save){
+    gROOT->cd();
     int initWarningLV=gErrorIgnoreLevel;
     if(verbose<1) gErrorIgnoreLevel=kWarning;
-    for(unsigned int plot=0; plot<plotCanvas_.size()-1; ++plot){
-      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
-      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
-      saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
+    for(unsigned int plot=0; plot<=plotCanvas_.size()-1; ++plot){
+      //std::cout << plotCanvas_[plot]->GetName() << std::endl;
+      if(!TString(plotCanvas_[plot]->GetName()).Contains("final")){
+	plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
+	plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
+	saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
+	gROOT->cd();
+      }
     }
     gErrorIgnoreLevel=initWarningLV;
   }
