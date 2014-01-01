@@ -2858,7 +2858,8 @@ namespace semileptonic {
       return constNnloStyle;
     }
     if(theo.Contains("nnlo"    )||theo.Contains("kidonakis")) return constNnloStyle;
-    return 1; // MadGraph
+    if(theo.Contains("madgraph")||theo.Contains("Madgraph")||theo.Contains("MadGraph")) return 1;
+    return 42; 
   }
   
   TString xSecLabelName(TString variable="", bool noUnit=false){
@@ -2989,6 +2990,7 @@ namespace semileptonic {
 	}
 	ratio_.push_back((TH1F*)tempRatio->Clone());
       }
+      if(verbose>3) std::cout << "debug A" << std::endl;
       // get some values from style
       Int_t    logx  = myStyle.GetOptLogx();
       Double_t left  = myStyle.GetPadLeftMargin();
@@ -2997,6 +2999,7 @@ namespace semileptonic {
       if(rangeMin!=-1.&&rangeMax!=-1.){
 	histNumeratorData->GetXaxis()->SetRange(histNumeratorData->FindBin(rangeMin),histNumeratorData->FindBin(rangeMax));
       }
+      if(verbose>3) std::cout << "debug B" << std::endl;
       //Double_t xmin = histNumeratorData->GetXaxis()->GetXmin();
       //Double_t xmax = histNumeratorData->GetXaxis()->GetXmax();
       // y:x size ratio for canvas
@@ -3011,6 +3014,7 @@ namespace semileptonic {
       gPad->SetBorderMode(0);
       gPad->SetBorderSize(0);
       gPad->SetFillColor(10);
+      if(verbose>3) std::cout << "debug C" << std::endl;
       // create pad to hide old axis
       TPad *whitebox = new TPad("whitebox","",0.97*left,ratioSize-0.2,1,ratioSize+0.001);
       whitebox->SetFillColor(10);
@@ -3046,6 +3050,8 @@ namespace semileptonic {
       rPad->SetLogy(0);
       rPad->SetLogx(logx);
       rPad->SetTicky(1);
+
+      if(verbose>3) std::cout << "debug D" << std::endl;
       // draw grid
       TPad *grid =(TPad*)rPad->Clone("grid");
       grid->SetGrid(0,1);
@@ -3058,7 +3064,9 @@ namespace semileptonic {
       TGraphAsymmErrors* errorband2=0;
       TGraphAsymmErrors* errorbandStat2=0;
       TLegend *leg  = new TLegend(); 
+      if(verbose>3) std::cout << "debug E" << std::endl;
       for(unsigned int nTheory=0; nTheory<ratio_.size(); ++nTheory){
+	if(verbose>3) std::cout << "  -" << nTheory << std::endl;
 	ratio_[nTheory]->SetStats(kFALSE);
 	ratio_[nTheory]->SetTitle("");
 	ratio_[nTheory]->SetMaximum(ratioMax);
@@ -3074,6 +3082,7 @@ namespace semileptonic {
 	ratio_[nTheory]->SetFillStyle(0);
 	ratio_[nTheory]->SetMarkerSize(0.2);
 	unsigned int style =theoryStyle((TString)histDenominatorTheoryOrdered_[nTheory]->GetName());
+	if(style==42) style=histDenominatorTheoryOrdered_[nTheory]->GetLineStyle();
 	//std::cout << histDenominatorTheoryOrdered_[nTheory]->GetName() << ": " << style << std::endl;
 	ratio_[nTheory]->SetLineStyle(style);
 	// configure axis of ratio_[nTheory] plot
@@ -3093,12 +3102,14 @@ namespace semileptonic {
 	ratio_[nTheory]->GetXaxis()->SetRange(histNumeratorData->GetXaxis()->GetFirst(), histNumeratorData->GetXaxis()->GetLast());
 	// first plot
 	if(nTheory==0){
+	  if(verbose>3) std::cout << "debug F" << std::endl;
 	  setXAxisRange(ratio_[nTheory], (TString)ratio_[nTheory]->GetName());
 	  if(rangeMin!=-1.&&rangeMax!=-1.){
 	    if(verbose>0) std::cout << "manual range chosen: " << ratio_[nTheory]->FindBin(rangeMin) << " .. " << ratio_[nTheory]->FindBin(rangeMax) << std::endl;
 	    ratio_[nTheory]->GetXaxis()->SetRange(ratio_[nTheory]->FindBin(rangeMin),ratio_[nTheory]->FindBin(rangeMax));
 	  }
 	}
+	if(verbose>3) std::cout << "debug G" << std::endl;
 	// MC@NLO errorbands
 	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBand")){
 	  int color2=kGray;
@@ -3120,6 +3131,7 @@ namespace semileptonic {
 	histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->SetTitleSize(0);
 	// draw ratio_[nTheory] plot
 	if(nTheory==0){
+          if(verbose>3) std::cout << "debug G2" << std::endl;
 	  // line at 1
 	  TH1F* one=(TH1F*)ratio_[nTheory]->Clone();
 	  one->Divide(one);
@@ -3138,8 +3150,10 @@ namespace semileptonic {
 	  up->Scale(ratioMax);
 	  up->DrawClone("hist same");
 	  // errorband for data total error around 1
+          if(verbose>3) std::cout << "debug G3" << std::endl;
 	  TGraphAsymmErrors* errorband=histStatData ? (TGraphAsymmErrors*)(histStatData->Clone("errorband")) : new TGraphAsymmErrors(one->GetNbinsX()+1);
 	  for(int bin=1; bin<=one->GetNbinsX(); ++bin){
+	    //int bin2=histStatData->GetX()[bin]==0. ? bin : bin-1; 
 	    double totY=histNumeratorData->GetBinContent(bin);
 	    double totX=histStatData ? histStatData->GetX()[bin] : histNumeratorData->GetBinCenter(bin);
 	    double totErrY=histNumeratorData->GetBinError(bin);
@@ -3149,12 +3163,14 @@ namespace semileptonic {
 	    //errorband->SetBinError  (bin, histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin));	  
 	    //std::cout << bin << ": (x,dy/y)=(" << totX << "," << totErrY/totY << "), (x,y)=(" << totX << "," << totY << "+/-" << totErrY << ")" << std::endl;
 	  }
+          if(verbose>3) std::cout << "debug G4" << std::endl;
 	  int errcolor=kBlack;
 	  errorband->SetLineWidth(3.5);
 	  errorband->SetLineColor(errcolor);
 	  errorband2=(TGraphAsymmErrors*)errorband->Clone();
 	  // errorband for data stat error around 1
 	  if(histStatData){
+	    if(verbose>3) std::cout << "debug G5" << std::endl;
 	    TGraphAsymmErrors* errorbandStat=(TGraphAsymmErrors*)(histStatData->Clone("errorbandStat"));
 	    for(int bin=1; bin<=one->GetNbinsX(); ++bin){
 	      double statY=histStatData->GetY()[bin];
@@ -3168,6 +3184,7 @@ namespace semileptonic {
 	    errorbandStat->SetLineColor(errcolor);
 	    errorbandStat2=(TGraphAsymmErrors*)errorbandStat->Clone();
 	  }
+          if(verbose>3) std::cout << "debug G6" << std::endl;
 	  leg->SetX1NDC(0.22);
 	  leg->SetY1NDC(0.99);
 	  leg->SetX2NDC(0.58);
@@ -3179,9 +3196,9 @@ namespace semileptonic {
 	  leg ->SetTextAlign(12);
 	  leg ->AddEntry(errorband, "data stat+sys error", "F");
 	}
+	if(verbose>3) std::cout << "debug G7" << std::endl;
 	ratio_[nTheory]->DrawClone("hist same");
 	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBandDn")) one2->Draw("hist same");
-
 	if(nTheory==ratio_.size()-1){
 	  gPad->RedrawAxis("g");
 	  gPad->RedrawAxis();
@@ -3190,11 +3207,13 @@ namespace semileptonic {
 	  if(errorbandStat2) errorbandStat2->Draw("p e same");
 	}
       }
+      if(verbose>3) std::cout << "debug H" << std::endl;
       if(addXBinGrid){
 	for(int bin=2; bin<=histNumeratorData->GetNbinsX(); ++bin){
 	  double xBorder=histNumeratorData->GetBinLowEdge(bin);
 	  drawLine(xBorder, ratioMin, xBorder, ratioMax, kBlack, 1, 3);
-	}      }
+	} 
+      }
       rPad->SetTopMargin(0.0);
       rPad->SetBottomMargin(0.15*scaleFactor);
       rPad->SetRightMargin(right);
@@ -3203,6 +3222,7 @@ namespace semileptonic {
       //rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
       gPad->cd();
       rPad->Draw();
+      if(verbose>3) std::cout << "debug H" << std::endl;
       return canv;
     }
     else{
