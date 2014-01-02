@@ -12,12 +12,12 @@
 #include <TH1.h>
 
 #include "TopAnalysis.h"
-#include "PUReweighter.h"
-#include "CommandLineParameters.h"
-#include "utils.h"
-#include "ScaleFactors.h"
-#include "sampleHelpers.h"
-#include "KinematicReconstruction.h"
+#include "../../common/include/PUReweighter.h"
+#include "../../common/include/CommandLineParameters.h"
+#include "../../common/include/utils.h"
+#include "../../common/include/ScaleFactors.h"
+#include "../../common/include/sampleHelpers.h"
+#include "../../common/include/KinematicReconstruction.h"
 
 
 

@@ -6,8 +6,8 @@
 class TH1;
 class TH2;
 
-#include "AnalysisBase.h"
-#include "classesFwd.h"
+#include "../../common/include/AnalysisBase.h"
+#include "../../common/include/classesFwd.h"
 
 
 

@@ -17,13 +17,12 @@
 #include <TStyle.h>
 #include <TIterator.h>
 
-#include "utils.h"
-#include "KinReco.h"
 #include "TopAnalysis.h"
 #include "HistoListReader.h"
-#include "analysisUtils.h"
-#include "classes.h"
-#include "ScaleFactors.h"
+#include "../../common/include/utils.h"
+#include "../../common/include/analysisUtils.h"
+#include "../../common/include/classes.h"
+#include "../../common/include/ScaleFactors.h"
 
 
 
