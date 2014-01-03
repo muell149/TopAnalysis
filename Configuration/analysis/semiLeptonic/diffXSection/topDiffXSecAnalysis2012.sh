@@ -13,7 +13,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/xSec
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/binning
-## mkdir -p diffXSecFromSignal/plots/muon/2012/effAndAcc
+## mkdir -p diffXSecFromSignal/plots/muon/2012/effANdacc
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/shapeReweighting
@@ -681,7 +681,7 @@ EOF
     
         ## loop all systematic variations
 	
-	for (( systematicVariation == 1; systematicVariation <= $maxSys;  systematicVariation++ )); do
+	for (( systematicVariation = 1; systematicVariation <= $maxSys;  systematicVariation++ )); do
 
 	    ## run macro for 2012 analysis
 	    
@@ -770,7 +770,7 @@ EOF
 covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)
 EOF
 	echo ""
-	echo " Processing ....  covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)"
+	echo " Processing ....  covarianceOfSystematicUnc($save, $verbose, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)"
 	root -l -b < commandsCovMatrixRun.cint
     else
 	echo "... skipped"
@@ -843,14 +843,14 @@ if [ $closureTestSpecifier == \"\" ];
 fi
 echo ""
 echo " Processing .... analyzeRegularizationTest.C++(i, $dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $redetTau, $closureTestSpecifier, $addSel)"
-if [ $regTest == true ]; then 
+if [ $regTest == true -a $hadron == false -a $extrapolate == true ]; then 
     # loop over all tests
     for (( iTest=0; iTest<${#listRegScan_[@]}; iTest++ )); do
 	echo "  - i=${listRegScan_[$iTest]}"
 	root -l -b -q './analyzeRegularizationTest.C++g('${listRegScan_[$iTest]}','$dataLuminosity', '$save', 0, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD', '$extrapolate', '$hadron', '$redetTau', '$closureTestSpecifier', '$addSel')'
     done
 else
-     echo "will be ignored, only done for real data and regTest=true"
+     echo "will be ignored, only done for extrapolate=true, hadron=false and regTest=true"
 fi
 
 
