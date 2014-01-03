@@ -1,7 +1,9 @@
 #include "basicFunctions.h"
 
-void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, TString closureTestSpecifier=""){
-  
+void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, TString closureTestSpecifier=""){
+
+  // print important info, neglecting verbose
+  bool output=true;
   // print info if up/down errors are asymmetric or very different in size
   bool check=false;
   // verbose = 0: no output, 
@@ -331,7 +333,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString 
 	} // end if !label
       } // end if consider  
     } // end for sys loop
-    if(verbose>0) std::cout << "fraction of bins with up/down in same direction (" << xSecVariables_[i] << "): " << 100*numAsymm/numTot << "%" << std::endl;
+    if(verbose>0||output) std::cout << "fraction of bins with up/down in same direction (" << xSecVariables_[i] << "): " << 100*numAsymm/numTot << "%" << std::endl;
   } // end for xSecVariables_ loop
   
   
@@ -419,13 +421,13 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString 
       } // end if consider  
     } // end for sys loop
     // printout change in total uncertainty
-    if(verbose>0){
+    if(verbose>0||output){
       std::cout << "=> final total uncertainty (" << xSecVariables_[i] << "): " << std::endl;
       // loop bins
       for(unsigned int bin=1; bin<=(unsigned int)histo_[xSecVariables_[i]][sysNo]->GetNbinsX(); ++bin){	
 	double binEdgeDown= histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin);
 	double binEdgeUp  = histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bin+1);
-	if(verbose>0) std::cout << "     bin #" << bin << "(" << binEdgeDown << ".." << binEdgeUp << ")" << std::endl;
+	if(verbose>0||output) std::cout << "     bin #" << bin << "(" << binEdgeDown << ".." << binEdgeUp << ")" << std::endl;
 	double totErr    =0.;
 	double totErrIter=0.;
 	// add all different uncertainties
@@ -445,7 +447,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString 
 	  totdev+=relChange;
 	  totdevsign+=(changeSign*relChange);
 	}
-	if(verbose>0){
+	if(verbose>0||output){
 	  std::cout << "      " << old << "% -> " << latest << "% (=";
 	  if     (relChange<=5. ) std::cout << "\033[42m\033[1m";
 	  else if(relChange<=10.) std::cout << "\033[33m\033[43m\033[1m";
@@ -465,7 +467,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString 
   // Determine covariance Matrix
   // ============================
   // printout
-  if(verbose>0) std::cout << std::endl << "Determine Covariance Matrices" << std::endl;
+  if(verbose>0||output) std::cout << std::endl << "Determine Covariance Matrices" << std::endl;
   // loop all variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // printout
@@ -547,7 +549,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=1, TString 
       delete tempCovSys;
     } // end for loop symmetrized systematic variations
     // printout
-    if(verbose>0){
+    if(verbose>0||output){
       // double bin loop for filling the covariance matrix
       int Nbins=uncIter_[xSecVariables_[i]][symmUncLabel_[0]].size();
       std::cout << "cov(i,j) [" << xSecVariables_[i] << "]=" << std::endl;
