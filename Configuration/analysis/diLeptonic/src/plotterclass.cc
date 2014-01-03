@@ -23,11 +23,11 @@
 #include <TGraphAsymmErrors.h>
 #include <TError.h>
 
-#include "RootFileReader.h"
 #include "plotterclass.h"
-#include "plotterUtils.h"
-#include "utils.h"
-#include "ScaleFactors.h"
+#include "../../common/include/RootFileReader.h"
+#include "../../common/include/plotterUtils.h"
+#include "../../common/include/utils.h"
+#include "../../common/include/ScaleFactors.h"
 
 
 // DAVID

@@ -14,8 +14,8 @@
 
 #include "plotterclass.h"
 #include "HistoListReader.h"
-#include "CommandLineParameters.h"
-#include "sampleHelpers.h"
+#include "../../common/include/CommandLineParameters.h"
+#include "../../common/include/sampleHelpers.h"
 
 
 //constexpr double lumi = 12210;

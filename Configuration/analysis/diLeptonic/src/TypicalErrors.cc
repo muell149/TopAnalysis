@@ -11,7 +11,7 @@
 #include <vector>
 #include <TString.h>
 
-#include "CommandLineParameters.h"
+#include "../../common/include/CommandLineParameters.h"
 
 using namespace std;
 
