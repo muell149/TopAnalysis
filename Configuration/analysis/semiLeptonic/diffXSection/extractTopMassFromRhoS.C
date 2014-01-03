@@ -99,7 +99,7 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   massfinal->SetLineStyle(1);
   massfinal->SetMarkerSize(0.1);
 
-  std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV" << std::endl;
+  std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV (=" << 100*merr/mcomb << "%)" << std::endl;
 
   // create legend
   TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85 );
@@ -152,6 +152,8 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
 }
 
 std::pair< double, double > extraction(int verbose, double luminosity, bool save, double minx, double maxx, double nbinsx, bool dataMassDependence, int binOfInterest, TString outputFolder, TString outputFile){
+  // quadratic fit instead of linear for last bin
+  bool quad = binOfInterest==4 ? true : false;
 
   // ============================  
   //  Set ROOT Style
@@ -261,8 +263,9 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     if(value!=central) measNomOnly->SetBinContent(measNomOnly->FindBin(MassPointsData_[masspoint]), 0.);
     measNonNomOnly->SetBinError(measNonNomOnly->FindBin(MassPointsData_[masspoint]), 0.);
   }
-  // do a linear fit of the mass dependence
-  TF1* lindata=new TF1("linFitdata", "[0]*x+[1]", minx, maxx);
+  // do a linear or quadratic fit of the mass dependence
+  TF1* lindata= quad ? new TF1("quadFitdata", "[2]*x*x+[0]*x+[1]", minx, maxx) : new TF1("linFitdata", "[0]*x+[1]", minx, maxx);
+  
   lindata->SetLineColor(measurement->GetLineColor());
   lindata->SetLineWidth(2);
   TString option="Q";
@@ -273,9 +276,11 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   if(!dataMassDependence){
     lindata->SetParameter(0, 0.     );
     lindata->SetParameter(1, central);
+    if(quad) lindata->SetParameter(2, 0.);
   }
   double adata=lindata->GetParameter(0);
   double bdata=lindata->GetParameter(1);
+  double cdata= quad ? lindata->GetParameter(2) : 0.;
 //   TF1* lindataUp=new TF1("linFitdataUp", "[0]*x+[1]", minx, maxx);
 //   TF1* lindataDn=new TF1("linFitdataDn", "[0]*x+[1]", minx, maxx);
 //   lindataUp->SetParameter(0, adata);
@@ -401,13 +406,58 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   double a=lin->GetParameter(0);
   double b=lin->GetParameter(1);
   // C) calculate intersection
-  //double mresult=(central-b)/a;
+  // c1) linear
   double mresultfit=(b-bdata)/(adata-a);
   double centralfit=adata*mresultfit+bdata;
   double mup=(b-MCnomUnc-(bdata+errorAbs))/(adata-a);
   double mdn=(b+MCnomUnc-(bdata-errorAbs))/(adata-a);
   double up=adata*mup+(bdata+errorAbs);
   double dn=adata*mdn+(bdata-errorAbs);
+  // c2 quadratic
+  if(quad){
+    if(verbose>1){
+      std::cout << "quadratic intersection" << std::endl;
+      std::cout << "a=" << a << std::endl;
+      std::cout << "b=" << b << std::endl;
+      std::cout << "adata=" << adata << std::endl;
+      std::cout << "bdata=" << bdata << std::endl;
+      std::cout << "cdata=" << cdata << std::endl;
+    }
+    // c2.1 central value
+    double p=(a-adata)/(2*cdata); // -p/2 from p-q
+    double q=(bdata-b)/cdata;     // q from p-q
+    if(verbose>1){
+      std::cout << "-p/2=" << p << std::endl;
+      std::cout << "q="    << q << std::endl;
+    }
+    // solutions from p-q
+    double sol1=p+sqrt(p*p-q);
+    double sol2=p-sqrt(p*p-q);
+    if(verbose>1){
+      std::cout << "sol1=" << sol1 << std::endl;
+      std::cout << "sol2=" << sol2 << std::endl;
+    }
+    // take smaller solution for central value
+    mresultfit=sol1;
+    if(sol1<0.||(sol2>=0.&&sol2<sol1)) mresultfit=sol2;
+    if(verbose>1) std::cout << "mresultfit=" << mresultfit << std::endl;
+    centralfit=adata*mresultfit+bdata+cdata*mresultfit*mresultfit;
+    if(verbose>1) std::cout << "centralfit=" << centralfit << std::endl;
+    // c2.2 up (b->b-MCnommUnc, bdata->bdata+errorAbs)
+    double qup=(bdata+errorAbs-(b-MCnomUnc))/cdata; // q from p-q
+    double sol1up=p+sqrt(p*p-qup);
+    double sol2up=p-sqrt(p*p-qup);
+    mup=sol1up;
+    if(sol1up<0.||(sol2up>=0.&&sol2up<sol1up)) mup=sol2up;
+    up=adata*mup+(bdata+errorAbs)+cdata*mup*mup;
+    // c2.3 dn (b->b+MCnommUnc, bdata->bdata-errorAbs)
+    double qdn=(bdata-errorAbs-(b+MCnomUnc))/cdata; // q from p-q
+    double sol1dn=p+sqrt(p*p-qdn);
+    double sol2dn=p-sqrt(p*p-qdn);
+    mdn=sol1dn;
+    if(sol1dn<0.||(sol2dn>=0.&&sol2dn<sol1dn)) mdn=sol2dn;
+    dn=adata*mdn+(bdata-errorAbs)+cdata*mdn*mdn;
+  }
   if(verbose>0){
     std::cout << "mtop= (" << mdn << ".." << mresultfit << ".." << mup << ")" << std::endl; 
     if(verbose>0) std::cout << "mtop= " << mresultfit << " +" << mresultfit-mup << " -" << mdn-mresultfit << std::endl; 
@@ -445,6 +495,15 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     double chi2=std::abs(valuedata-valueMC)*std::abs(valuedata-valueMC)/totUnc;
     chi2CMS->SetBinContent(chi2CMS->FindBin(currentmasspoint), chi2);
   }
+  // quadratic fit
+  TF1* quadchi= new TF1("quadchi", "[2]*x*x+[0]*x+[1]", minx, maxx);
+  quadchi->SetLineColor(kBlack);
+  quadchi->SetLineWidth(2);
+  TString optionchi="Q";
+  if(verbose>0)optionchi="";
+  if(verbose>1)optionchi="V";
+  optionchi+="R";
+  chi2CMS->Fit(quadchi, optionchi,"",MassPointsData_[0]-0.5, MassPointsData_[MassPointsData_.size()-1]+0.5);
 
   // ---
   //    legend
@@ -518,7 +577,8 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   plotCanvas_[plotCanvas_.size()-1]->SetName (title2);
   plotCanvas_[plotCanvas_.size()-1]->SetTitle(title2);
   chi2CMS->Draw("p");
-  
+  if(binOfInterest<=2) quadchi->Draw("hist same");
+
   // E) Canvas with different mass predictions
   //    duplicate canvas from nominal data measurement
   if(binOfInterest==1){
@@ -654,5 +714,5 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     gErrorIgnoreLevel=initWarningLV;
   }
   std::cout << "intersection method: " << mresultfit << "+/-" << std::abs(mresultfit-mup) << std::endl;
-  return make_pair(mresultfit, std::abs(mresultfit-mup));
+  return make_pair(mresultfit, 0.5*(std::abs(mresultfit-mup)+std::abs(mresultfit-mdn)));
 }
