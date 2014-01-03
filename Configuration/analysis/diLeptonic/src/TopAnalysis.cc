@@ -682,6 +682,39 @@ void TopAnalysis::SlaveBegin(TTree*)
     CreateBinnedControlPlots(h_HypTopRapidity, h_LeptonEta);
     CreateBinnedControlPlots(h_HypTopRapidity, h_MET);
     CreateBinnedControlPlots(h_HypTopRapidity, h_diLepMassFull);
+    /// Ievgen-11.11.2013
+    
+        h_true_vE = store(new TH1D ( "true_vE", "True neutrino energy;E(#nu,#bar{#nu}), GeV;N entries", 120, 0, 600 ));
+        h_reco_vE = store(new TH1D ( "reco_vE", "Reco neutrino energy;E(#nu,#bar{#nu}), GeV;N entries", 120, 0, 600 ));
+        
+        h_signalTopEvents_vs_JetMult = store(new TH1D ( "signalTopEvents_vs_JetMult", "N top events vs Jet Multiplicity", 10, -0.5, 9.5 ));
+        h_MatchedJets_vs_JetMult  = store(new TH1D ( "MatchedJets_vs_JetMult", "N events with 2 jets from t#bar{t}", 10, -0.5, 9.5 ));
+        
+        h_nSolTtJets_vs_JetMult = store(new TH1D ( "nSolTtJets_vs_JetMult", "N sol with 2 jets from t#bar{t}", 10, -0.5, 9.5 ));
+        h_nSolCorrSignJets_vs_JetMult = store(new TH1D ( "nSolCorrSignJets_vs_JetMult", "N sol with correct sign jets", 10, -0.5, 9.5 ));
+        
+        h_nRecoEvt_vs_JetMult    = store(new TH1D ( "h_nRecoEvt_vs_JetMult", "N reco events vs Jet Multiplicity", 10, -0.5, 9.5 ));
+        h_nKinRecoSol_vs_JetMult = store(new TH1D ( "h_nKinRecoSol_vs_JetMult", "N events with sol vs Jet Multiplicity", 10, -0.5, 9.5 ));
+        
+        h_nRecoEvt_vs_LepEta     = store(new TH1D ( "h_nRecoEvt_vs_LepEta", "LeptonEta - Kin. Reco. behaviour;#eta;Leptons / 0.5", 10, -2.5, 2.5 ));
+        h_nKinRecoSol_vs_LepEta  = store(new TH1D ( "h_nKinRecoSol_vs_LepEta", "LeptonEta - Kin. Reco. behaviour;#eta;Leptons / 0.5", 10, -2.5, 2.5 ));
+        
+        h_nRecoEvt_vs_JetEta    = store(new TH1D ( "h_nRecoEvt_vs_JetEta", "JetEta - Kin. Reco. behaviour;#eta;jets / 0.5", 10, -2.5, 2.5 ));
+        h_nKinRecoSol_vs_JetEta = store(new TH1D ( "h_nKinRecoSol_vs_JetEta", "JetEta - Kin. Reco. behaviour;#eta;jets / 0.5", 10, -2.5, 2.5 ));
+        
+        h_nRecoEvt_vs_LeppT      = store(new TH1D ( "h_nRecoEvt_vs_LeppT", "LeptonpT - Kin. Reco. behaviour;p_{T}[GeV];Leptons / 20 GeV", 20, 0, 400 ));
+        h_nKinRecoSol_vs_LeppT   = store(new TH1D ( "h_nKinRecoSol_vs_LeppT", "LeptonpT - Kin. Reco. behaviour;p_{T}[GeV];Leptons / 20 GeV", 20, 0, 400 ));
+        
+        h_nRecoEvt_vs_MET        = store(new TH1D ( "h_nRecoEvt_vs_MET", "MET - Kin. Reco. behaviour;MET;Events / 40 GeV", 10, 0, 400 ));
+        h_nKinRecoSol_vs_MET     = store(new TH1D ( "h_nKinRecoSol_vs_MET", "MET - Kin. Reco. behaviour;MET;Events / 40 GeV", 10, 0, 400 ));
+        
+        h_RMSvsGenToppT = store(new TH2D ( "RMSvsGenToppT", "RMS vs Gen", 500, 0, 500, 1000, -500, 500 ));
+        h_RMSvsGenTopRapidity = store(new TH2D ( "RMSvsGenTopRapidity", "RMS vs Gen", 400, -5, 5, 400, -5, 5 ));
+        h_RMSvsGenTTBarMass = store(new TH2D ( "RMSvsGenTTBarMass", "RMS vs Gen", 2000, 0, 2000, 4000, -2000, 2000 ));
+
+        
+    /// ...
+
 }
 
 
@@ -1238,10 +1271,43 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         Allh1_post1btag->Fill(dilepton.M(), weight);  //this is also filled in the Z region in the code above
     }
     
+    
+
+    h_nRecoEvt_vs_JetMult->Fill((int)jetIndices.size(),weight);//Ievgen all reco events    
+    h_nRecoEvt_vs_LepEta->Fill(leptons_->at(leptonIndex).Eta(),weight);
+    h_nRecoEvt_vs_LepEta->Fill(leptons_->at(antiLeptonIndex).Eta(),weight);    
+    h_nRecoEvt_vs_LeppT->Fill(leptons_->at(leptonIndex).Pt(),weight);
+    h_nRecoEvt_vs_LeppT->Fill(leptons_->at(leptonIndex).Pt(),weight);
+    h_nRecoEvt_vs_MET->Fill(met.Pt(),weight);
+    h_nRecoEvt_vs_JetEta->Fill(jets_->at(0).Eta(), weight);
+    h_nRecoEvt_vs_JetEta->Fill(jets_->at(1).Eta(), weight);
+    
+    //...
     //=== CUT ===
     //Require at least one solution for the kinematic event reconstruction
     if (!hasSolution) return kTRUE;
     weight *= weightKinFit_;
+    
+    h_nKinRecoSol_vs_JetMult->Fill((int)jetIndices.size(),weight);//Ievgen reco events with kin sol
+    h_nKinRecoSol_vs_LepEta->Fill(leptons_->at(leptonIndex).Eta(),weight);
+    h_nKinRecoSol_vs_LepEta->Fill(leptons_->at(antiLeptonIndex).Eta(),weight);    
+    h_nKinRecoSol_vs_LeppT->Fill(leptons_->at(leptonIndex).Pt(),weight);
+    h_nKinRecoSol_vs_LeppT->Fill(leptons_->at(leptonIndex).Pt(),weight);
+    h_nKinRecoSol_vs_MET->Fill(met.Pt(),weight);
+    h_nKinRecoSol_vs_JetEta->Fill(jets_->at(0).Eta(), weight);
+    h_nKinRecoSol_vs_JetEta->Fill(jets_->at(1).Eta(), weight);
+    
+    
+    if(isTopSignal_){//Ievgen
+        h_RMSvsGenToppT->Fill(GenTop_->Pt(),GenTop_->Pt()-HypTop_->at(0).Pt());
+        h_RMSvsGenToppT->Fill(GenAntiTop_->Pt(),GenAntiTop_->Pt()-HypAntiTop_->at(0).Pt());
+   
+        h_RMSvsGenTopRapidity->Fill(GenTop_->Rapidity(),GenTop_->Rapidity()-(HypTop_->at(0)).Rapidity());
+        h_RMSvsGenTopRapidity->Fill(GenAntiTop_->Rapidity(),GenAntiTop_->Rapidity()-(HypAntiTop_->at(0)).Rapidity());
+    
+        h_RMSvsGenTTBarMass->Fill((*GenTop_+*GenAntiTop_).M(),(*GenTop_+*GenAntiTop_).M()-(HypTop_->at(0)+HypAntiTop_->at(0)).M());
+    }
+    
     
     h_leptonPtAfterKinReco->Fill(leptons_->at(leptonIndex).Pt(), weight);
     h_leptonPtAfterKinReco->Fill(leptons_->at(antiLeptonIndex).Pt(), weight);
@@ -1786,6 +1852,66 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
             h_GenRecoTTBar1stJetMass->Fill(rho0/(hypttbar+jets_->at(extrarecojet[first])).M(),-1000.,weight);
         }
     }
+    
+    
+        //Ievgen- 11.11.2013
+    
+//     h_true_vE->Fill(GenNeutrino_->E(),trueLevelWeight);
+//     h_true_vE->Fill(GenAntiNeutrino_->E(),trueLevelWeight);
+//     
+//     h_reco_vE->Fill((HypNeutrino_->at(solutionIndex)).E(),weight);
+//     h_reco_vE->Fill((HypAntiNeutrino_->at(solutionIndex)).E(),weight);
+     
+        h_signalTopEvents_vs_JetMult->Fill((int)jetIndices.size(),weight);
+     if(1)
+     {
+        int bjet_index=-1;
+        int bbarjet_index=-1;
+        int b_matched_jetIndex=0,bbar_matched_jetIndex=0;
+        
+            for(int i=0;i<(int)(genBHadFlavour_->size());i++)
+            {
+                if((genBHadFlavour_->at(i))==6)bjet_index =  genBHadJetIndex_->at((genBHadIndex_->at(i)));
+                if((genBHadFlavour_->at(i))==-6)bbarjet_index =  genBHadJetIndex_->at((genBHadIndex_->at(i)));
+            }
+        double dR=100;
+        if(bjet_index>=0&&bbarjet_index>=0&&bjet_index!=bbarjet_index){
+         for(const int index : jetIndices)
+         { 
+            dR=100;
+            TLorentzVector recojet = LVtoTLV(jets_->at(index));
+            TLorentzVector truejetB = LVtoTLV(allGenJets_->at(bjet_index));
+            TLorentzVector truejetBbar = LVtoTLV(allGenJets_->at(bbarjet_index));
+            dR=recojet.DeltaR(truejetB);
+            if(dR<0.25)b_matched_jetIndex=index;
+            dR=recojet.DeltaR(truejetBbar);
+            if(dR<0.25)bbar_matched_jetIndex=index;
+         }
+            if(b_matched_jetIndex>=0 && bbar_matched_jetIndex>=0 && b_matched_jetIndex!=bbar_matched_jetIndex)
+            {
+                h_MatchedJets_vs_JetMult->Fill((int)jetIndices.size(),weight);
+                TLorentzVector bjet=LVtoTLV(jets_->at(b_matched_jetIndex));                
+                TLorentzVector bBarjet=LVtoTLV(jets_->at(bbar_matched_jetIndex));
+                double dR_b_b=bjet.DeltaR(LVtoTLV(HypBJet_->at(solutionIndex)));
+                double dR_bar_bar=bBarjet.DeltaR(LVtoTLV(HypAntiBJet_->at(solutionIndex)));
+                double dR_b_bar=bjet.DeltaR(LVtoTLV(HypAntiBJet_->at(solutionIndex)));
+                double dR_bar_b=bBarjet.DeltaR(LVtoTLV(HypBJet_->at(solutionIndex)));
+                //std::cout << dR_b_b << " " << dR_bar_bar << "|" << dR_b_bar << " " << dR_bar_b << std::endl;
+                if((dR_b_b<0.01&&dR_bar_bar<0.01)||(dR_b_bar<0.01&&dR_bar_b<0.01))
+                {
+                        h_nSolTtJets_vs_JetMult->Fill((int)jetIndices.size(),weight);
+                        if((dR_b_b<0.01&&dR_bar_bar<0.01))
+                        {
+                            h_nSolCorrSignJets_vs_JetMult->Fill((int)jetIndices.size(),weight);
+                        }
+                }
+            }
+        }
+        
+     }     
+    // ...
+
+    
 
     return kTRUE;
 }

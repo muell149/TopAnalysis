@@ -204,6 +204,36 @@ class TopAnalysis : public AnalysisBase
     TH1 *h_LeptonMult_step8, *h_JetsMult_step8, *h_BJetsMult_step8;
     TH1 *h_LeptonMult_step9, *h_JetsMult_step9, *h_BJetsMult_step9;
     
+    /// Plots fot KinReco, Ievgen-11.11.2013
+       TH1 *h_signalTopEvents_vs_JetMult; 
+       TH1 *h_MatchedJets_vs_JetMult; 
+       TH1 *h_nSolTtJets_vs_JetMult;
+       TH1 *h_nSolCorrSignJets_vs_JetMult;
+       
+       TH1 *h_nRecoEvt_vs_JetMult;
+       TH1 *h_nKinRecoSol_vs_JetMult;
+       
+       TH1 *h_nRecoEvt_vs_LepEta;
+       TH1 *h_nKinRecoSol_vs_LepEta;
+
+       TH1 *h_nRecoEvt_vs_JetEta;
+       TH1 *h_nKinRecoSol_vs_JetEta;
+
+       TH1 *h_nRecoEvt_vs_LeppT;  
+       TH1 *h_nKinRecoSol_vs_LeppT;
+
+       TH1 *h_nRecoEvt_vs_MET;    
+       TH1 *h_nKinRecoSol_vs_MET;
+       
+       
+       TH1 *h_RMSvsGenToppT;
+       TH1 *h_RMSvsGenTopRapidity;
+       TH1 *h_RMSvsGenTTBarMass; 
+       
+       TH1 *h_true_vE;
+       TH1 *h_reco_vE;
+    /// ... 
+    
     
     /// Do kinematic reconstruction on nTuple level
     bool kinRecoOnTheFly_;
@@ -255,8 +285,7 @@ public:
     void SetPDF(int pdf_no);
     
     /// Class definition
-    ClassDef(TopAnalysis, 0);
-    
+    ClassDef(TopAnalysis, 0);    
     
     
 private:
