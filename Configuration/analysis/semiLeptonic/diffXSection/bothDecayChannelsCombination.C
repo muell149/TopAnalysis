@@ -702,7 +702,7 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 	  // load it from combined file
 	  TString MGcombFile2="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
 	  if(!largeMGfile) MGcombFile2.ReplaceAll("Large","");
-	  TH1F* plotTheo3 = (xSecVariables_[i]=="inclusive") ? new TH1F( plotTheo->GetName()+"incl", plotTheo->GetTitle()+"incl", 1, 0., 1.0) : getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
+	  TH1F* plotTheo3 = (xSecVariables_[i]=="inclusive") ? new TH1F( TString(plotTheo->GetName())+"incl", TString(plotTheo->GetTitle())+"incl", 1, 0., 1.0) : getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
 	  // inclusive cross section
 	  if(xSecVariables_[i]=="inclusive"){
 	    // get events in PS from top pt
