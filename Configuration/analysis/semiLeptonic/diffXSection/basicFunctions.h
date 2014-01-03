@@ -3060,7 +3060,7 @@ namespace semileptonic {
       rPad->Draw("");
       rPad->cd();
       //whitebox3->Draw();
-      TH1F* one2;
+      TH1F* one2=0;
       TGraphAsymmErrors* errorband2=0;
       TGraphAsymmErrors* errorbandStat2=0;
       TLegend *leg  = new TLegend(); 
