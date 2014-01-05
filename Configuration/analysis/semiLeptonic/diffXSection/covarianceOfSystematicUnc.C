@@ -1,7 +1,10 @@
 #include "basicFunctions.h"
 
-void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, TString closureTestSpecifier=""){
+TString unfShortLabel(TString variable="");
 
+void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=false, bool hadron=true, TString closureTestSpecifier=""){
+  // take sign of the up instead of the down variation
+  bool signdn=false;
   // print important info, neglecting verbose
   bool output=true;
   // print info if up/down errors are asymmetric or very different in size
@@ -56,7 +59,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
   gStyle->SetErrorX(0.5); // needed to keep the functions alive drawn with DrawSteps
   gROOT->SetBatch(); // you dont want to see all canvas
   gStyle->SetPaintTextFormat("1.3e");
-  gStyle->SetOptTitle(1);
+  //gStyle->SetOptTitle(1);
 
   // ============================
   // Input=Output File
@@ -136,6 +139,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
   // for canvas
   std::vector<TCanvas*> plotCanvas_;
   std::vector<TCanvas*> plotCanvasTot_;
+  std::vector<TCanvas*> plotCanvasCorr_;
 
   // ==================
   // Control printout
@@ -291,6 +295,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
 	      }
 	      // store sign of upwards variation
 	      double sign= ( dUp==0. ? 1. : (dUp/std::abs(dUp)) );
+	      if(signdn) sign= ( dDn==0. ? 1. : (dDn/std::abs(dDn)) );
 	      dBin*=sign;
 	      // in case up and down go in the same direction...
 	      if((dUp/std::abs(dUp))==(dDn/std::abs(dDn))){
@@ -351,7 +356,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
     if(verbose>2) std::cout << std::endl << xSecVariables_[i] << std::endl;
     // loop all systematic variations
     for(unsigned int sys=sysNo+1; sys<=ENDOFSYSENUM; ++sys){
-      // check if uncertainty that should be considered
+      // check if uncertainty should be considered
       if(considerSys_[xSecVariables_[i]].count(sys)>0&&considerSys_[xSecVariables_[i]][sys]==true){
 	// clone default plot
 	histoSysShift_[xSecVariables_[i]][sys]=(TH1F*)histo_[xSecVariables_[i]][sysNo]->Clone(TString(histo_[xSecVariables_[i]][sysNo]->GetName())+"iter");
@@ -365,9 +370,9 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
 	systStripLabel.ReplaceAll("Up", "");
 	systStripLabel.ReplaceAll("Down", "");
 	systStripLabel.ReplaceAll("down", "");	
-	// clone uncertainty values values (will be adapted for up/down variation iterions)
+	// clone uncertainty values (will be adapted for up/down variation iterations)
 	uncIter_[xSecVariables_[i]][systStripLabel]=unc_[xSecVariables_[i]][systStripLabel];
-	// reprocess only up/down systematics
+	// re-process only up/down systematics
 	if(systLabel.Contains("up")||systLabel.Contains("Up")||systLabel.Contains("Down")||systLabel.Contains("down")){
 	  if(verbose>3) std::cout << systLabel << std::endl;
 	  // loop bins
@@ -412,6 +417,7 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
 	      double dBin=0.5*(std::abs(xSecUp-xSecStd)+std::abs(xSecDn-xSecStd));
 	      // store sign of upwards variation
 	      double sign= ( dUp==0. ? 1. : (dUp/std::abs(dUp)) );
+	      if(signdn) sign= ( dDn==0. ? 1. : (dDn/std::abs(dDn)) );
 	      dBin*=sign;
 	      if(verbose>3) std::cout << "  symmetrized: " << 100*unc_  [xSecVariables_[i]][systStripLabel].at(bin-1)/xSecStd << " -> " << 100*dBin/xSecStd << std::endl;
 	      uncIter_  [xSecVariables_[i]][systStripLabel].at(bin-1)=dBin;
@@ -449,14 +455,14 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
 	}
 	if(verbose>0||output){
 	  std::cout << "      " << old << "% -> " << latest << "% (=";
-	  if     (relChange<=5. ) std::cout << "\033[42m\033[1m";
-	  else if(relChange<=10.) std::cout << "\033[33m\033[43m\033[1m";
-	  else                    std::cout << "\033[33m\033[41m\033[1m";
-	  std::cout << changeSign*relChange << "% \033[0m relative change)";
+	  if     (relChange<=5. ) std::cout << "\033[42m\033[1m\033[30m ";
+	  else if(relChange<=10.) std::cout << "\033[33m\033[43m\033[1m\033[30m ";
+	  else                    std::cout << "\033[33m\033[41m\033[1m\033[22m ";
+	  std::cout << changeSign*relChange << "% \033[0m\033[0m relative change)";
 	  std::cout << std::endl;
 	  if(bin==(unsigned int)histo_[xSecVariables_[i]][sysNo]->GetNbinsX()&&i==xSecVariables_.size()-1){
-	    std::cout << "average abs change: " << totdev/Nconsider << std::endl;
-	    std::cout << "average change: " << totdevsign/Nconsider << std::endl;
+	    std::cout << "average abs change: " << totdev/Nconsider << "%" << std::endl;
+	    std::cout << "average change: " << totdevsign/Nconsider << "%" << std::endl;
 	  }
 	} // end if verbose
       } // for loop bins
@@ -508,9 +514,10 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
       if(sys==0) sysCov_[xSecVariables_[i]][42]=(TH2F*)tempCovSys->Clone("covSysTot");
       else sysCov_[xSecVariables_[i]][42]->Add((TH2F*)tempCovSys->Clone(symmUncLabel_[sys]));
       // histo style of covariance matrices
+      TString name=xSecVariables_[i];
+      name.ReplaceAll("Norm","");
       TString nameSys=TString("covSys")+xSecVariables_[i]+symmUncLabel_[sys];      
       histStyle2D(*sysCov_[xSecVariables_[i]][sys], nameSys+"plot", "", "");
-      sysCov_[xSecVariables_[i]][sys]->SetTitle("covariance matrix of "+xSecVariables_[i]+"("+symmUncLabel_[sys]+")");
       // save plot for current systematic
       // create new canvas
       addCanvas(plotCanvas_);
@@ -521,17 +528,16 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
       plotCanvas_[plotCanvas_.size()-1]->SetName( nameSys+"canv");
       plotCanvas_[plotCanvas_.size()-1]->SetTitle(nameSys+"canv");
       // print plot 
-      //sysCov_[xSecVariables_[i]][sys]->Draw("colz");
       sysCov_[xSecVariables_[i]][sys]->Draw("text");
+      DrawLabel(TString("covariance matrix of ")+xSecLabelName(name)+"("+symmUncLabel_[sys]+")", gStyle->GetPadLeftMargin(), 1.0-gStyle->GetPadTopMargin(), 1.0-gStyle->GetPadRightMargin(), 1.0);
       // last systematic:
       if(sys==(unsigned int)symmUncLabel_.size()-1){
 	// style of total systematic covariance matrix
 	TString nameTot=TString("SysCovMatrix")+xSecVariables_[i]+"Tot";
 	histStyle2D(*sysCov_[xSecVariables_[i]][42], nameTot+"plot", "", "");
-	TString sysHistLabel="covariance matrix of "+xSecVariables_[i];
-	if(xSecVariables_[i].Contains("Pt")||xSecVariables_[i].Contains("Mass")) sysHistLabel+="[GeV]";
+	TString sysHistLabel=TString("covariance matrix of ")+xSecLabelName(name);
 	sysHistLabel+=" (total systematic)";
-	sysCov_[xSecVariables_[i]][42]->SetTitle(sysHistLabel);
+	//sysCov_[xSecVariables_[i]][42]->SetTitle(sysHistLabel);
 	// print total systematic covariance matrix
 	// create new canvas
 	addCanvas(plotCanvasTot_);
@@ -543,48 +549,91 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
 	plotCanvasTot_[plotCanvasTot_.size()-1]->SetName( nameTot+"canv");
 	plotCanvasTot_[plotCanvasTot_.size()-1]->SetTitle(nameTot+"canv");
 	// print plot 
-	//sysCov_[xSecVariables_[i]][42]->DrawClone("axis");
 	sysCov_[xSecVariables_[i]][42]->Draw("text");
+	DrawLabel(sysHistLabel, gStyle->GetPadLeftMargin(), 1.0-gStyle->GetPadTopMargin(), 1.0-gStyle->GetPadRightMargin(), 1.0);
       }// end if last sys
       delete tempCovSys;
     } // end for loop symmetrized systematic variations
-    // printout
-    if(verbose>0||output){
-      // double bin loop for filling the covariance matrix
-      int Nbins=uncIter_[xSecVariables_[i]][symmUncLabel_[0]].size();
-      std::cout << "cov(i,j) [" << xSecVariables_[i] << "]=" << std::endl;
-      for(unsigned int bini=1; bini<=(unsigned int)Nbins; ++bini){
-	for(unsigned int binj=1; binj<=(unsigned int)Nbins; ++binj){
-	  double value=sysCov_[xSecVariables_[i]][42]->GetBinContent(bini, binj);
-	  if(value>0) std::cout << " ";
-	  std::cout << std::setprecision(3) << std::scientific << sysCov_[xSecVariables_[i]][42]->GetBinContent(bini, binj) << "  ";
-	  if(binj==(unsigned int)Nbins) std::cout << std::endl;
-	} // end for loop binj
-      } // end for loop bini
-      std::cout << "tot. syst. uncertainty[%]: " << std::endl;
-      for(unsigned int bink=1; bink<=(unsigned int)Nbins; ++bink){
-	double value=sqrt(sysCov_[xSecVariables_[i]][42]->GetBinContent(bink, bink))/histo_[xSecVariables_[i]][sysNo]->GetBinContent(bink);
-	std::cout << std::setprecision(2) << std::fixed << 100*value;
-	if(bink<(unsigned int)Nbins) std::cout << ", ";
-	else std::cout << std::endl;
-      } // end for loop bink
-    } // end if verbose 
   } // end for loop xSecVariables
-  
-  // close file
-  file->Close();
 
-  // ==========
-  // Do Saving
-  // ==========
+  // ===================================
+  // add statistical covariance matrix
+  // ===================================
+  // containter
+  std::map< TString, TH2F* > statCov_;
+  std::map< TString, TH2F* > totCov_ ;
+  // printout
+  if(verbose>0||output) std::cout << std::endl << "Load Statistical Covariance Matrices" << std::endl;
+  // loop all variables
+  for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+   TString name=xSecVariables_[i];
+    name.ReplaceAll("Norm", "");
+    // printout
+    if(verbose>1) std::cout << std::endl << "- for " << xSecVariables_[i] << std::endl;
+    // open file 
+    TString tempfilename=TString("./diffXSecFromSignal/plots/combined/2012/unfolding/diffXSecUnfoldTopSemiLep")+name+(extrapolate ? "Parton" : "HadronPhaseSpace")+".root";
+    TFile* filetemp = TFile::Open(tempfilename, "Open");
+    if(verbose>1){
+      if(filetemp) std::cout << "opened file " << tempfilename << std::endl;
+      else   std::cout << "can not open file " << tempfilename << std::endl;
+    }
+    // get plot
+    TH2F* temp=0;
+    TString tempPlotName=TString("SVD_combined_")+unfShortLabel(name)+"_sysNo_STATCOVNORM";
+    if(verbose>1) std::cout << "trying to open " << tempPlotName << std::endl;
+    // STATERR STATCORRORM bin xSecValue
+    if(filetemp) temp=(TH2F*)(filetemp->Get(tempPlotName)->Clone());
+    if(temp){
+      if(verbose>1) std::cout << "found plot " << tempPlotName << std::endl;
+      // initialization stat cov
+      statCov_[xSecVariables_[i]]=(TH2F*)sysCov_[xSecVariables_[i]][42]->Clone("statCovMatrix");
+      // bin by bin filling from loaded histo
+      for(unsigned int bini=1; bini<=(unsigned int)uncIter_[xSecVariables_[i]][symmUncLabel_[0]].size(); ++bini){
+        for(unsigned int binj=1; binj<=(unsigned int)uncIter_[xSecVariables_[i]][symmUncLabel_[0]].size(); ++binj){
+          statCov_[xSecVariables_[i]]->SetBinContent(bini, binj, temp->GetBinContent(bini+1, binj+1)/(histo_[xSecVariables_[i]][sysNo]->GetBinWidth(bini)*histo_[xSecVariables_[i]][sysNo]->GetBinWidth(binj))); // +1 to skip the underflow bin, NOTE: loaded values from unfolding setup not divided by binwidth
+        } // end for loop binj
+      } // end for loop bini
+    } // end if temp
+    else{
+      if(verbose>1) std::cout << "can not find plot " << tempPlotName << std::endl;
+      statCov_[xSecVariables_[i]]=0;
+    }
+    // determine total covariance matrix=stat+sys
+    // initialization tot cov
+    totCov_[xSecVariables_[i]]=(TH2F*)sysCov_[xSecVariables_[i]][42]->Clone("totCovMatrix");
+    if(temp){
+      // add statistical cov to total cov
+      totCov_[xSecVariables_[i]]->Add((TH2F*)statCov_[xSecVariables_[i]]->Clone());
+      // draw statistical covariance matrix in canvases       
+      // style of total systematic covariance matrix
+      TString nameStat=TString("StatCovMatrix")+xSecVariables_[i];
+      histStyle2D(*statCov_[xSecVariables_[i]], nameStat+"plot", "", "");
+      //statCov_[xSecVariables_[i]]->SetTitle("statistical covariance matrix");
+      // create new canvas
+      addCanvas(plotCanvasTot_);
+      // go to canvas
+      plotCanvasTot_[plotCanvasTot_.size()-1]->cd();
+      plotCanvasTot_[plotCanvasTot_.size()-1]->SetGrid(1,1);
+      plotCanvasTot_[plotCanvasTot_.size()-1]->SetName (nameStat+"canv");
+      plotCanvasTot_[plotCanvasTot_.size()-1]->SetTitle(nameStat+"canv");
+      // print plot
+      statCov_[xSecVariables_[i]]->Draw("text");
+      DrawLabel(TString("statistical covariance for ")+xSecLabelName(name), gStyle->GetPadLeftMargin(), 1.0-gStyle->GetPadTopMargin(), 1.0-gStyle->GetPadRightMargin(), 1.0);
+    }
+  } // end for loop variables
+  
+  // =================
+  // Do Saving Part A
+  // =================
   if(save){
     // printout
-    if(verbose>0) std::cout << std::endl << "Do Saving" << std::endl;
+    if(verbose>0) std::cout << std::endl << "Do Saving A" << std::endl;
+    int initIgnore=gErrorIgnoreLevel;
     if(verbose==0) gErrorIgnoreLevel=kWarning;
     // a)  Save as pictures
     if(verbose>0) std::cout << "a) as pictures" << std::endl;
-    saveCanvas(plotCanvasTot_, outputFolder, "covarianceMatricesTot"      , true, true , true );
-    saveCanvas(plotCanvas_   , outputFolder, "covarianceMatricesSingleSys", true, false, false);
+    saveCanvas(plotCanvasTot_ , outputFolder, "covarianceMatricesSysTot"   , true, true , true );
+    saveCanvas(plotCanvas_    , outputFolder, "covarianceMatricesSingleSys", true, false, false);
     // b) Save in rootfile
     if(verbose>0) std::cout << "b) in rootfile" << std::endl;
     // loop all variables
@@ -594,8 +643,161 @@ void covarianceOfSystematicUnc(bool save=false, unsigned int verbose=0, TString 
       // ii) single systematic covariance matrices
       // loop relevant symmetrized systematic variations
       for(unsigned int sys=0; sys<(unsigned int)symmUncLabel_.size(); ++sys){
-	//saveToRootFile(outputFile, sysCov_[xSecVariables_[i]][sys], true, verbose, "covarianceMatrixSys");	
+        //saveToRootFile(outputFile, sysCov_[xSecVariables_[i]][sys], true, verbose, "covarianceMatrixSys");
       } // end for loop relevant symmetrized systematic variations
+      // iii) statistical covariance matrices
+      if(statCov_.count(xSecVariables_[i])>0&&statCov_[xSecVariables_[i]]) saveToRootFile(outputFile, statCov_[xSecVariables_[i]], true, verbose-1, "covMatrixStat/"+xSecVariables_[i]);
+    } // end for loop variables
+    if(verbose==0) gErrorIgnoreLevel=initIgnore; 
+  } // end if save
+
+  // adapt style for correlation plots
+  gStyle->SetPaintTextFormat("1.2f");
+
+  // ======================
+  // determine correlation
+  // ======================
+  // container
+  std::map< TString, TH2F* > totCorr_;
+  // printout
+  if(verbose>0||output) std::cout << std::endl << "Determine Correlation Matrices" << std::endl;
+  // relation: corr(i,j)=cov(i,j)/(sigma(i)*sigma(j))=cov(i,j)/(sqrt(cov(i,i))*sqrt(cov(j,j)))
+  // loop all variables
+  for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+    // printout
+    if(verbose>1) std::cout << std::endl << "- for " << xSecVariables_[i] << std::endl;
+    // initialization
+    totCorr_[xSecVariables_[i]]=(TH2F*)totCov_[xSecVariables_[i]]->Clone("totCorrMatrix");
+    // double bin loop for determination of the correlation matrix
+    for(unsigned int bini=1; bini<=(unsigned int)uncIter_[xSecVariables_[i]][symmUncLabel_[0]].size(); ++bini){
+      for(unsigned int binj=1; binj<=(unsigned int)uncIter_[xSecVariables_[i]][symmUncLabel_[0]].size(); ++binj){
+	totCorr_[xSecVariables_[i]]->SetBinContent(bini, binj, totCov_[xSecVariables_[i]]->GetBinContent(bini, binj)/(sqrt(totCov_[xSecVariables_[i]]->GetBinContent(bini, bini)*totCov_[xSecVariables_[i]]->GetBinContent(binj, binj))));
+      } // end for loop binj
+    } // end for loop bini
+    // draw total correlation matrix in canvas
+    // style of total systematic covariance matrix
+    TString nameTotCorr=TString("TotCorrMatrix")+xSecVariables_[i];
+    histStyle2D(*totCorr_[xSecVariables_[i]], nameTotCorr+"plot", "", "");
+    TString name=xSecVariables_[i];
+    name.ReplaceAll("Norm","");
+    //totCorr_[xSecVariables_[i]]->SetTitle(TString("stat+sys correlation matrix of ")+xSecLabelName(name));
+    // create new canvas
+    addCanvas(plotCanvasCorr_);
+    // go to canvas
+    plotCanvasCorr_[plotCanvasCorr_.size()-1]->cd();
+    plotCanvasCorr_[plotCanvasCorr_.size()-1]->SetGrid(1,1);
+    plotCanvasCorr_[plotCanvasCorr_.size()-1]->SetName (nameTotCorr+"canv");
+    plotCanvasCorr_[plotCanvasCorr_.size()-1]->SetTitle(nameTotCorr+"canv");
+    // print plot
+    totCorr_[xSecVariables_[i]]->Draw("text");
+    DrawLabel(TString("stat+sys correlation matrix of ")+xSecLabelName(name), gStyle->GetPadLeftMargin(), 1.0-gStyle->GetPadTopMargin(), 1.0-gStyle->GetPadRightMargin(), 1.0);
+  } // end for loop variables
+
+  // close file
+  file->Close();
+
+  // =================
+  // Do Saving Part B
+  // =================
+  if(save){
+    // printout
+    if(verbose>0) std::cout << std::endl << "Do Saving B" << std::endl;
+    if(verbose==0) gErrorIgnoreLevel=kWarning;
+    // a)  Save as pictures
+    if(verbose>0) std::cout << "a) as pictures" << std::endl;
+    saveCanvas(plotCanvasCorr_, outputFolder, "correlationMatricesTot"     , true, true , true );
+    // b) Save in rootfile
+    if(verbose>0) std::cout << "b) in rootfile" << std::endl;
+    // loop all variables
+    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+      // iv) total correlation matrices
+      saveToRootFile(outputFile, totCorr_[xSecVariables_[i]], true, verbose-1, "corrMatrixTot/"+xSecVariables_[i]);
     } // end for loop variables   
   } // end if save  
+
+  // =========
+  // printout
+  // =========
+  if(verbose>0||output){
+    // loop all variables
+    for(unsigned int i=0; i<xSecVariables_.size(); ++i){
+      std::cout << std::endl << "......................................." << std::endl;
+      int Nbins=uncIter_[xSecVariables_[i]][symmUncLabel_[0]].size();
+      // a) systematic cov
+      std::cout << "syscov(i,j) [" << xSecVariables_[i] << "]=" << std::endl;
+      // double bin loop
+      for(unsigned int bini=1; bini<=(unsigned int)Nbins; ++bini){
+	// print bin borders
+	if(bini==1){
+	  std::cout << "           ";
+	  for(unsigned int binj=1; binj<=(unsigned int)Nbins; ++binj){
+	    std::cout << std::setprecision(2) << std::fixed << " [" << histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(binj) << ".." << histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(binj+1) << "] " ;
+	    if(binj==(unsigned int)Nbins) std::cout << std::endl;
+	  } // end for loop binj
+	} // end if bini==1
+        for(unsigned int binj=1; binj<=(unsigned int)Nbins; ++binj){
+	  if(binj==1) std::cout << std::setprecision(2) << std::fixed << "[" << histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bini) << ".." << histo_[xSecVariables_[i]][sysNo]->GetBinLowEdge(bini+1) << "] ";
+          double value=sysCov_[xSecVariables_[i]][42]->GetBinContent(bini, binj);
+          if(value>0) std::cout << " ";
+	  std::cout << std::setprecision(3) << std::scientific << sysCov_[xSecVariables_[i]][42]->GetBinContent(bini, binj) << "  ";
+          if(binj==(unsigned int)Nbins) std::cout << std::endl;
+        } // end for loop binj
+      } // end for loop bini
+      // b) statistic cov
+      std::cout << "statcov(i,j) [" << xSecVariables_[i] << "]=" << std::endl;
+      // double bin loop
+      for(unsigned int bini=1; bini<=(unsigned int)Nbins; ++bini){
+        for(unsigned int binj=1; binj<=(unsigned int)Nbins; ++binj){
+          double value=statCov_[xSecVariables_[i]]->GetBinContent(bini, binj);
+          if(value>0) std::cout << " ";
+	  std::cout << std::setprecision(3) << std::scientific << statCov_[xSecVariables_[i]]->GetBinContent(bini, binj) << "  ";
+          if(binj==(unsigned int)Nbins) std::cout << std::endl;
+        } // end for loop binj
+      } // end for loop bini
+      // c) syst. uncertainty
+      std::cout << std::endl << "tot. syst. uncertainty[%]: " << std::endl;
+      for(unsigned int bink=1; bink<=(unsigned int)Nbins; ++bink){
+	double value=sqrt(sysCov_[xSecVariables_[i]][42]->GetBinContent(bink, bink))/histo_[xSecVariables_[i]][sysNo]->GetBinContent(bink);
+	std::cout << std::setprecision(2) << std::fixed << 100*value;
+	if(bink<(unsigned int)Nbins) std::cout << ", ";
+	else std::cout << std::endl << std::endl;
+      } // end for loop bink
+      // d) stat. uncertainty
+      std::cout << "stat. uncertainty[%]: " << std::endl;
+      for(unsigned int bink=1; bink<=(unsigned int)Nbins; ++bink){
+	double value=sqrt(statCov_[xSecVariables_[i]]->GetBinContent(bink, bink))/histo_[xSecVariables_[i]][sysNo]->GetBinContent(bink);
+	std::cout << std::setprecision(2) << std::fixed << 100*value;
+	if(bink<(unsigned int)Nbins) std::cout << ", ";
+	else std::cout << std::endl << std::endl;
+      } // end for loop bink
+      // e) total (stat+sys) correlation
+      std::cout << "totcorr(i,j) [" << xSecVariables_[i] << "]=" << std::endl;
+      // double bin loop
+      for(unsigned int bini=1; bini<=(unsigned int)Nbins; ++bini){
+	for(unsigned int binj=1; binj<=(unsigned int)Nbins; ++binj){
+	  double value=totCorr_[xSecVariables_[i]]->GetBinContent(bini, binj);
+	  if(value>0) std::cout << " ";
+	  std::cout << std::setprecision(2) << std::fixed << totCorr_[xSecVariables_[i]]->GetBinContent(bini, binj) << "  ";
+	  if(binj==(unsigned int)Nbins) std::cout << std::endl;
+	} // end for loop binj
+      } // end for loop bini
+    } // end for loop variables
+  } // end if verbose
+}
+
+TString unfShortLabel(TString variable){
+  // get the label used in the naming convention of the unfolding code
+  // taken from analyzeHypothesisKinFit.C 
+  TString particle="";
+  variable.Contains("ttbar") ? particle="t#bar{t}" : (variable.Contains("lep") ? particle="lepton" : (variable.Contains("top") ? particle="t" : (variable.Contains("bq") ? particle="b" : ( variable.Contains("bbbar") ? particle="b#bar{b}" : particle="unknown") ) ) );
+  particle.ReplaceAll("#","");
+  particle.ReplaceAll("{","");
+  particle.ReplaceAll("}","");
+  // quantity
+  TString quantity="";
+  variable.Contains("Mass") ? quantity="mass" : (variable.Contains("Pt") ? quantity="p_{t}" : (variable.Contains("Eta") ? quantity="#eta" : (variable.Contains("Y") ? quantity="y" : quantity="unknown") ) );
+  quantity.ReplaceAll("#","");
+  quantity.ReplaceAll("{","");
+  quantity.ReplaceAll("}","");
+  return particle+"_"+quantity;
 }
