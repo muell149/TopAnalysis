@@ -339,7 +339,6 @@ if [ $closureTestSpecifier != \"\" ]
     redoCov=false
     topPtTests=false
     constraintTest=false
-    regTest=false
 fi
 
 muonFile=./diffXSecTopSemiMu$dataLabel$LV$PS.root
