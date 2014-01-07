@@ -96,12 +96,6 @@ public:
         is2011_ = is;
     }
 
-    /**
-     * switches on/off if scale factors are flat in eta for b and c jets
-     */
-    void setCBFlatInEta(bool isflat) {
-        cbflatineta_ = isflat;
-    }
 
     void setSystematic(systematics sys) {
         syst_ = sys;
@@ -209,10 +203,7 @@ private:
     float calcHeavySF(float *, float *, const size_t &, const float &,
             const float &, const float &) const;
 
-    bool cbflatineta_;
-    //value used for eta if SF does not depend on eta.
-    //should also be used for filling to increase stat
-    float consteta_;
+
     //SFs btv input
     float BJetSF(const float &pt, const float& abs_eta,
             float multiplier = 1) const;

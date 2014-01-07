@@ -11,9 +11,7 @@ bTagBase::bTagBase() {
     effhistp_ = 0;
     syst_ = nominal;
     is2011_ = false;
-    cbflatineta_ = true;
     TH1::AddDirectory(kFALSE);
-    consteta_ = 1;
     nancount_=0;
 
     wp_ = csvl_wp;
@@ -134,17 +132,12 @@ void bTagBase::fillEff(const float& pt, const float&abs_eta,
         return;
 
     if (fabs(fabs(genPartonFlavour) - 5) < 0.1) { // b jets
-        if (cbflatineta_)
-            histp_->at(0).Fill(pt, consteta_, puweight);
-        else
-            histp_->at(0).Fill(pt, abs_eta, puweight);
+        histp_->at(0).Fill(pt, abs_eta, puweight);
         if (bDiscrVal > wpvals_[wp_])
             histp_->at(1).Fill(pt, abs_eta, puweight);
     } else if (fabs(fabs(genPartonFlavour) - 4) < 0.1) { // c jets
-        if (cbflatineta_)
-            histp_->at(2).Fill(pt, consteta_, puweight);
-        else
-            histp_->at(2).Fill(pt, abs_eta, puweight);
+
+        histp_->at(2).Fill(pt, abs_eta, puweight);
         if (bDiscrVal > wpvals_[wp_])
             histp_->at(3).Fill(pt, abs_eta, puweight);
     } else if (fabs(genPartonFlavour) > 0) { // light jets (including gluon jets)
@@ -174,7 +167,7 @@ void bTagBase::makeEffs() {
                 float err = 0.99; //to avoid zeros!
                 if (histp_->at(2 * i).GetBinContent(binx, biny) > 0) {
                     cont = histp_->at(2 * i + 1).GetBinContent(binx, biny)
-                                            / histp_->at(2 * i).GetBinContent(binx, biny);
+                                                            / histp_->at(2 * i).GetBinContent(binx, biny);
                     if (debug)
                         std::cout << "makeEffs: content: " << cont;
                     err = sqrt(
@@ -213,18 +206,13 @@ void bTagBase::countJet(const float & pt, const float& abs_eta,
     float sf = 1;
     unsigned int effh = 100;
 
+
     if (fabs(fabs(genPartonFlavor) - 5) < 0.1) { // b jets
         effh = 0;
-        if (cbflatineta_)
-            sf = BJetSF(pt, consteta_);
-        else
-            sf = BJetSF(pt, abs_eta);
+        sf = BJetSF(pt, abs_eta);
     } else if (fabs(fabs(genPartonFlavor) - 4) < 0.1) { // c jets
         effh = 1;
-        if (cbflatineta_)
-            sf = CJetSF(pt, consteta_);
-        else
-            sf = CJetSF(pt, abs_eta);
+        sf = CJetSF(pt, abs_eta);
     } else { // (including gluon jets)
         effh = 2;
         sf = LJetSF(pt, abs_eta);
@@ -348,7 +336,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
             static size_t SFb_errorSize = sizeof(SFb_error)
-                                    / sizeof(SFb_error[0]);
+                                                    / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
@@ -453,9 +441,7 @@ float bTagBase::LJetSF(const float& pt, const float& abs_eta,
                             + (2.35006e-09 * (x * (x * x)));
             } else if (syst_ == lightdown) { //don't change
                 if (abs_eta <= 0.5)
-                    return ((0.977761 + (0.00170704 * x))
-                            + (-3.2197e-06 * (x * x)))
-                            + (1.78139e-09 * (x * (x * x)));
+                    return ((0.977761 + (0.00170704 * x))+ (-3.2197e-06 * (x * x)))+ (1.78139e-09 * (x * (x * x)));
                 else if (abs_eta <= 1.0)
                     return ((0.945135 + (0.00146006 * x))
                             + (-2.70048e-06 * (x * x)))
