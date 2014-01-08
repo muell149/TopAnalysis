@@ -46,6 +46,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   JetMatchAnalyzer
   JetCategories
   ScaleFactors
+  BTagUtils
   Playground
   DijetAnalyzer
   plotterHelpers

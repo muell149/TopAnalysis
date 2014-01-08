@@ -33,6 +33,7 @@
 #include "../../common/include/KinematicReconstruction.h"
 #include "../../common/include/PUReweighter.h"
 #include "../../common/include/ScaleFactors.h"
+#include "../../common/include/BTagUtils.h"
 
 
 
@@ -136,11 +137,26 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                                                   Channel::convertChannels(Channel::realChannels),
                                                   triggerSFSystematic);
 
-    // Set up btag efficiency scale factors (do it for all channels)
-    BtagScaleFactors btagScaleFactors(BtagEfficiencyInputDIR,
-                                      BtagEfficiencyOutputDIR,
-                                      Channel::convertChannels(Channel::realChannels),
-                                      Systematic::convertSystematic(systematic));
+    BtagScaleFactors *btagScaleFactors;
+    BTagSFGeneric *bTagSFGeneric;
+
+    // Setting the flag to choose which kind of btag scale factors to use
+    bool useGenericBTagSF = false;
+
+    if(useGenericBTagSF) {
+        // Set up generic btag efficiency scale factors
+        bTagSFGeneric = new BTagSFGeneric(BtagEfficiencyInputDIR,
+                                          BtagEfficiencyOutputDIR,
+                                          Channel::convertChannels(Channel::realChannels),
+                                          Systematic::convertSystematic(systematic));
+    } else {
+        // Set up btag efficiency scale factors (do it for all channels)
+        btagScaleFactors = new BtagScaleFactors(BtagEfficiencyInputDIR,
+                                                BtagEfficiencyOutputDIR,
+                                                Channel::convertChannels(Channel::realChannels),
+                                                Systematic::convertSystematic(systematic));
+
+    }
 
     // Set up jet categories
     JetCategories* jetCategories(0);
@@ -222,7 +238,8 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetPUReweighter(puReweighter);
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);
-    selector->SetBtagScaleFactors(btagScaleFactors);
+    if(btagScaleFactors) selector->SetBtagScaleFactors(*btagScaleFactors);
+    else if(bTagSFGeneric) selector->SetBtagScaleFactors(*bTagSFGeneric);
     selector->SetUseObjectStructs(true);
 
     selector->SetMvaInputProduction(mvaTreeHandler);

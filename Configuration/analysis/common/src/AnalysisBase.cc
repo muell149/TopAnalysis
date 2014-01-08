@@ -31,6 +31,7 @@
 #include "analysisUtils.h"
 #include "classes.h"
 #include "ScaleFactors.h"
+#include "BTagUtils.h"
 #include "KinematicReconstruction.h"
 #include "analysisObjectStructs.h"
 
@@ -58,6 +59,7 @@ puReweighter_(nullptr),
 leptonScaleFactors_(0),
 triggerScaleFactors_(0),
 btagScaleFactors_(0),
+bTagSFGeneric_(0),
 doJesJer_(false),
 weightKinFit_(0),
 isTtbarSample_(false),
@@ -84,7 +86,7 @@ void AnalysisBase::Begin(TTree*)
     // WARNING! In general do not make changes here, but in your analysis' Begin function
 
     TSelector::Begin(0);
-    
+
     eventCounter_ = 0;
 }
 
@@ -95,7 +97,7 @@ void AnalysisBase::SlaveBegin(TTree*)
     // WARNING! In general do not make changes here, but in your analysis' SlaveBegin function
 
     TSelector::SlaveBegin(0);
-    
+
     if(useObjectStructs_){
         recoObjects_ = new RecoObjects();
         commonGenObjects_ = new CommonGenObjects();
@@ -114,7 +116,7 @@ void AnalysisBase::SlaveTerminate()
     // The SlaveTerminate() function is called after all entries or objects
     // have been processed. When running with PROOF SlaveTerminate() is called
     // on each slave server.
-    
+
     if(recoObjects_) delete recoObjects_;
     if(commonGenObjects_) delete commonGenObjects_;
     if(topGenObjects_) delete topGenObjects_;
@@ -127,7 +129,7 @@ void AnalysisBase::SlaveTerminate()
 Bool_t AnalysisBase::Process(Long64_t)
 {
     // WARNING! In general do not make changes here, but in your analysis' Process function
-    
+
     if(++eventCounter_ % 100000 == 0)
         std::cout<<"Event Counter: "<<eventCounter_<<"\t--  Channel, Systematic, Sample:"
                  <<std::setw(5)<<channel_<<" ,"<<std::setw(10)<<systematic_<<" , "<<samplename_<<std::endl;
@@ -139,12 +141,12 @@ Bool_t AnalysisBase::Process(Long64_t)
 void AnalysisBase::Terminate()
 {
     // WARNING! In general do not make changes here, but in your analysis' Terminate function
-    
+
     // The Terminate() function is the last function to be called during
     // a query. It always runs on the client, it can be used to present
     // the results graphically or save the results to file.
-    
-    
+
+
     // Open output file for writing
     if(!analysisOutputBase_){
         std::cerr<<"ERROR! No base directory for analysis output specified\n...break\n"<<std::endl;
@@ -158,15 +160,15 @@ void AnalysisBase::Terminate()
         std::cerr << "Cannot open " << f_savename << " for writing!\n";
         exit(2);
     }
-    
-    
+
+
     // Write everything held by fOutput
     TIterator* iterator = fOutput->MakeIterator();
     while (TObject* obj = iterator->Next()) {
         obj->Write();
     }
-    
-    
+
+
     // Write additional information into file
     h_weightedEvents->Write();
     TObjString(channel_).Write("channelName");
@@ -177,8 +179,8 @@ void AnalysisBase::Terminate()
     TObjString(isMC_ ? "1" : "0").Write("isMC");
     outputFile.Close();
     std::cout<<"Created: \033[1;1m"<<f_savename<<"\033[1;m\n\n";
-    
-    
+
+
     // Cleanup
     fOutput->SetOwner();
     fOutput->Clear();
@@ -191,7 +193,7 @@ void AnalysisBase::Terminate()
 void AnalysisBase::Init(TTree *tree)
 {
     // WARNING! In general do not make changes here, but in your analysis' Init function
-    
+
     // The Init() function is called when the selector needs to initialize
     // a new tree or chain. Typically here the branch addresses and branch
     // pointers of the tree will be set.
@@ -199,11 +201,11 @@ void AnalysisBase::Init(TTree *tree)
     // code, but the routine can be extended by the user if needed.
     // Init() will be called many times when running on PROOF
     // (once per file to be processed).
-    
+
     // Reset all branches and their associated variables
     this->clearBranches();
     this->clearBranchVariables();
-    
+
     // Set branch addresses and branch pointers
     if(!tree) return;
     chain_ = tree;
@@ -227,7 +229,7 @@ void AnalysisBase::Init(TTree *tree)
 void AnalysisBase::SetChannel(const TString& channel)
 {
     channel_ = channel;
-    channelPdgIdProduct_ = 
+    channelPdgIdProduct_ =
         channel == "ee" ? -11*11
         : channel == "emu" ? -11*13
         : -13*13;
@@ -259,7 +261,7 @@ void AnalysisBase::SetSystematic(const TString& systematic)
 void AnalysisBase::SetSamplename(const TString& samplename, const TString& systematic_from_file)
 {
     samplename_ = samplename;
-    isTtbarSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") && 
+    isTtbarSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") &&
                      !(samplename=="ttbarw") && !(samplename=="ttbarz");
     isTtbarPlusTauSample_ = isTtbarSample_ && !samplename.BeginsWith("ttbarbg");
     correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !systematic_from_file.Contains("SPIN") &&
@@ -339,6 +341,13 @@ void AnalysisBase::SetBtagScaleFactors(BtagScaleFactors& scaleFactors)
 
 
 
+void AnalysisBase::SetBtagScaleFactors(BTagSFGeneric& scaleFactors)
+{
+    bTagSFGeneric_ = &scaleFactors;
+}
+
+
+
 void AnalysisBase::SetUseObjectStructs(const bool useObjectStructs)
 {
     useObjectStructs_ = useObjectStructs;
@@ -379,7 +388,7 @@ void AnalysisBase::clearBranches()
     b_jetJERSF = 0;
     b_jetForMET = 0;
     b_jetForMETJERSF = 0;
-    
+
     // nTuple branches relevant for reconstruction level
     // Concerning event
     b_runNumber = 0;
@@ -387,14 +396,14 @@ void AnalysisBase::clearBranches()
     b_eventNumber = 0;
     b_recoInChannel = 0;
     b_vertMulti = 0;
-    
-    
+
+
     // nTuple branches holding trigger bits
     b_triggerBits = 0;
     b_triggerBitsTau = 0;
     b_firedTriggers = 0;
-    
-    
+
+
     // nTuple branches holding generator information for all MC samples
     // Concerning physics objects
     b_allGenJets = 0;
@@ -403,8 +412,8 @@ void AnalysisBase::clearBranches()
     b_associatedGenJetForMET = 0;
     b_jetAssociatedPartonPdgId = 0;
     b_jetAssociatedParton = 0;
-    
-    
+
+
     // nTuple branches of kinematic reconstruction
     b_HypTop = 0;
     b_HypAntiTop = 0;
@@ -418,32 +427,32 @@ void AnalysisBase::clearBranches()
     b_HypWMinus = 0;
     b_HypJet0index = 0;
     b_HypJet1index = 0;
-    
-    
+
+
     // nTuple branch for true vertex multiplicity
     b_vertMultiTrue = 0;
-    
-    
+
+
     // nTuple branch for generator event weight
     b_weightGenerator = 0;
-    
-    
+
+
     // nTuple branch for PDF weights
     b_weightPDF = 0;
-    
-    
+
+
     // nTuple branch for Drell-Yan decay mode
     b_ZDecayMode = 0;
-    
-    
+
+
     // nTuple branch for Top decay mode
     b_TopDecayMode = 0;
-    
-    
+
+
     // nTuple branch for Higgs decay mode
     b_HiggsDecayMode = 0;
-    
-    
+
+
     // nTuple branches for Top signal samples on generator level
     b_GenMet = 0;
     b_GenTop = 0;
@@ -478,8 +487,8 @@ void AnalysisBase::clearBranches()
     b_genBHadIndex = 0;
     b_genBHadFlavour = 0;
     b_genBHadJetIndex = 0;
-    
-    
+
+
     // nTuple branches for Higgs signal samples on generator level
     b_GenH = 0;
     b_GenBFromH = 0;
@@ -529,7 +538,7 @@ void AnalysisBase::clearBranchVariables()
         jetJERSF_ = 0;
         jetsForMET_ = 0;
         jetForMETJERSF_ = 0;
-        
+
         // Set values to null for branches relevant for reconstruction level
         // Concerning event
         runNumber_ = 0;
@@ -540,8 +549,8 @@ void AnalysisBase::clearBranchVariables()
         //triggerBitsTau_ = 0;
         //firedTriggers_ = 0;
         vertMulti_ = 0;
-        
-        
+
+
         // Set values to null for branches holding generator information for all MC samples
         // Concerning physics objects
         allGenJets_ = 0;
@@ -550,8 +559,8 @@ void AnalysisBase::clearBranchVariables()
         associatedGenJetForMET_ = 0;
         //jetAssociatedPartonPdgId_ = 0;
         //jetAssociatedParton_ = 0;
-        
-        
+
+
         // Set values to null for branches of kinematic reconstruction
         HypTop_ = 0;
         HypAntiTop_ = 0;
@@ -565,8 +574,8 @@ void AnalysisBase::clearBranchVariables()
         //HypWMinus_ = 0;
         HypJet0index_ = 0;
         HypJet1index_ = 0;
-        
-        
+
+
         // Set values to null for Top signal sample branches
         GenMet_ = 0;
         GenTop_ = 0;
@@ -601,39 +610,39 @@ void AnalysisBase::clearBranchVariables()
         genBHadIndex_ = 0;
         genBHadFlavour_ = 0;
         genBHadJetIndex_ = 0;
-        
-        
+
+
         // Set values to null for Higgs signal sample branches
         GenH_ = 0;
         GenBFromH_ = 0;
         GenAntiBFromH_ = 0;
     }
-    
-    
+
+
     // Set values to null for true vertex multiplicity
     vertMultiTrue_ = 0;
-    
-    
+
+
     // Set values to null for generator event weight
     weightGenerator_ = 0;
-    
-    
+
+
     // Set values to null for PDF weight
     weightPDF_ = 0;
-    
-    
+
+
     // Set values to null for Drell-Yan decay branch
     ZDecayMode_ = 0;
-    
-    
+
+
     // Set values to null for Top decay branch
     topDecayMode_ = 0;
-    
-    
+
+
     // Set values to null for Higgs decay branch
     higgsDecayMode_ = 0;
-    
-    
+
+
 }
 
 
@@ -683,18 +692,18 @@ void AnalysisBase::SetRecoBranchAddresses()
             chain_->SetBranchAddress("jetsForMET", &recoObjects_->jetsForMET_, &b_jetForMET);
             chain_->SetBranchAddress("jetForMETJERSF", &recoObjects_->jetForMETJERSF_, &b_jetForMETJERSF);
         }
-        
+
         // Concerning event
         chain_->SetBranchAddress("runNumber", &recoObjects_->runNumber_, &b_runNumber);
         chain_->SetBranchAddress("lumiBlock", &recoObjects_->lumiBlock_, &b_lumiBlock);
         chain_->SetBranchAddress("eventNumber", &recoObjects_->eventNumber_, &b_eventNumber);
         //chain_->SetBranchAddress("recoInChannel", &recoObjects_->recoInChannel_, &b_recoInChannel);
         chain_->SetBranchAddress("vertMulti", &recoObjects_->vertMulti_, &b_vertMulti);
-        
+
         return;
     }
-    
-    
+
+
     // Concerning physics objects
     chain_->SetBranchAddress("leptons", &leptons_, &b_lepton);
     chain_->SetBranchAddress("lepPdgId", &lepPdgId_, &b_lepPdgId);
@@ -737,7 +746,7 @@ void AnalysisBase::SetRecoBranchAddresses()
         chain_->SetBranchAddress("jetsForMET", &jetsForMET_, &b_jetForMET);
         chain_->SetBranchAddress("jetForMETJERSF", &jetForMETJERSF_, &b_jetForMETJERSF);
     }
-    
+
     // Concerning event
     chain_->SetBranchAddress("runNumber", &runNumber_, &b_runNumber);
     chain_->SetBranchAddress("lumiBlock", &lumiBlock_, &b_lumiBlock);
@@ -769,10 +778,10 @@ void AnalysisBase::SetCommonGenBranchAddresses()
         }
         //chain_->SetBranchAddress("jetAssociatedPartonPdgId", &commonGenObjects_->jetAssociatedPartonPdgId_, &b_jetAssociatedPartonPdgId);
         //chain_->SetBranchAddress("jetAssociatedParton", &commonGenObjects_->jetAssociatedParton_, &b_jetAssociatedParton);
-        
+
         return;
     }
-    
+
     // Concerning physics objects
     chain_->SetBranchAddress("allGenJets", &allGenJets_, &b_allGenJets);
     chain_->SetBranchAddress("jetPartonFlavour", &jetPartonFlavour_, &b_jetPartonFlavour);
@@ -801,10 +810,10 @@ void AnalysisBase::SetKinRecoBranchAddresses()
         //chain_->SetBranchAddress("HypWMinus", &kinRecoObjects_->HypWMinus_, &b_HypWMinus_);
         chain_->SetBranchAddress("HypJet0index", &kinRecoObjects_->HypJet0index_, &b_HypJet0index);
         chain_->SetBranchAddress("HypJet1index", &kinRecoObjects_->HypJet1index_, &b_HypJet1index);
-        
+
         return;
     }
-    
+
     chain_->SetBranchAddress("HypTop", &HypTop_, &b_HypTop);
     chain_->SetBranchAddress("HypAntiTop", &HypAntiTop_, &b_HypAntiTop);
     chain_->SetBranchAddress("HypLepton", &HypLepton_, &b_HypLepton);
@@ -908,11 +917,11 @@ void AnalysisBase::SetTopSignalBranchAddresses()
             chain_->SetBranchAddress("genBHadFlavour", &topGenObjects_->genBHadFlavour_, &b_genBHadFlavour);
         if(chain_->GetBranch("genBHadJetIndex")) // need to check whether branch exists
             chain_->SetBranchAddress("genBHadJetIndex", &topGenObjects_->genBHadJetIndex_, &b_genBHadJetIndex);
-        
+
         return;
     }
-    
-    
+
+
     chain_->SetBranchAddress("GenMET", &GenMet_, &b_GenMet);
     chain_->SetBranchAddress("GenTop", &GenTop_, &b_GenTop);
     chain_->SetBranchAddress("GenAntiTop", &GenAntiTop_, &b_GenAntiTop);
@@ -965,10 +974,10 @@ void AnalysisBase::SetHiggsSignalBranchAddresses()
         chain_->SetBranchAddress("GenH", &higgsGenObjects_->GenH_, &b_GenH);
         chain_->SetBranchAddress("GenBFromH", &higgsGenObjects_->GenBFromH_, &b_GenBFromH);
         chain_->SetBranchAddress("GenAntiBFromH", &higgsGenObjects_->GenAntiBFromH_, &b_GenAntiBFromH);
-        
+
         return;
     }
-    
+
     chain_->SetBranchAddress("GenH", &GenH_, &b_GenH);
     chain_->SetBranchAddress("GenBFromH", &GenBFromH_, &b_GenBFromH);
     chain_->SetBranchAddress("GenAntiBFromH", &GenAntiBFromH_, &b_GenAntiBFromH);
@@ -977,13 +986,13 @@ void AnalysisBase::SetHiggsSignalBranchAddresses()
 
 
 void AnalysisBase::GetRecoBranchesEntry(const Long64_t& entry)const
-{    
+{
     // Check if branches' entry is already read
     if(recoObjects_){
         if(recoObjects_->valuesSet_) return;
         recoObjects_->valuesSet_ = true;
     }
-    
+
     // Concerning physics objects
     b_lepton->GetEntry(entry);
     b_lepPdgId->GetEntry(entry);
@@ -1016,7 +1025,7 @@ void AnalysisBase::GetRecoBranchesEntry(const Long64_t& entry)const
         b_jetForMET->GetEntry(entry);
         b_jetForMETJERSF->GetEntry(entry);
     }
-    
+
     // Concerning event
     b_runNumber->GetEntry(entry);
     b_lumiBlock->GetEntry(entry);
@@ -1031,7 +1040,7 @@ void AnalysisBase::GetTriggerBranchesEntry(const Long64_t& entry)const
 {
     b_triggerBits->GetEntry(entry);
     //b_triggerBitsTau->GetEntry(entry);
-    //b_firedTriggers->GetEntry(entry); 
+    //b_firedTriggers->GetEntry(entry);
 }
 
 
@@ -1043,7 +1052,7 @@ void AnalysisBase::GetCommonGenBranchesEntry(const Long64_t& entry)const
         if(commonGenObjects_->valuesSet_) return;
         commonGenObjects_->valuesSet_ = true;
     }
-    
+
     // Concerning physics objects
     b_allGenJets->GetEntry(entry);
     b_jetPartonFlavour->GetEntry(entry);
@@ -1064,7 +1073,7 @@ void AnalysisBase::GetKinRecoBranchesEntry(const Long64_t& entry)const
         if(kinRecoObjects_->valuesSet_) return;
         kinRecoObjects_->valuesSet_ = true;
     }
-    
+
     b_HypTop->GetEntry(entry);
     b_HypAntiTop->GetEntry(entry);
     b_HypLepton->GetEntry(entry);
@@ -1107,7 +1116,7 @@ void AnalysisBase::SetTrueLevelDYChannel(const int dy)
     trueDYchannelCut_ = dy;
     if (dy) {
         std::cout << "Include true-level filter for Z decay to pdgid " << dy << "\n";
-        
+
         //create function to check the DY decay channel
         checkZDecayMode_ = [&, dy](Long64_t entry) -> bool {
             b_ZDecayMode->GetEntry(entry);
@@ -1123,7 +1132,7 @@ void AnalysisBase::SetTrueLevelDYChannel(const int dy)
             }
             return pass;
         };
-        
+
     } else {
         checkZDecayMode_ = nullptr;
     }
@@ -1152,7 +1161,7 @@ void AnalysisBase::GetTopSignalBranchesEntry(const Long64_t& entry)const
         if(topGenObjects_->valuesSet_) return;
         topGenObjects_->valuesSet_ = true;
     }
-    
+
     b_GenMet->GetEntry(entry);
     b_GenTop->GetEntry(entry);
     b_GenAntiTop->GetEntry(entry);
@@ -1197,7 +1206,7 @@ void AnalysisBase::GetHiggsSignalBranchesEntry(const Long64_t& entry)const
         if(higgsGenObjects_->valuesSet_) return;
         higgsGenObjects_->valuesSet_ = true;
     }
-    
+
     b_GenH->GetEntry(entry);
     b_GenBFromH->GetEntry(entry);
     b_GenAntiBFromH->GetEntry(entry);
@@ -1222,16 +1231,16 @@ void AnalysisBase::prepareKinRecoSF()
     // --> uncomment the following line to determine the Kin Reco SFs
     // --> then make && ./runNominalParallel.sh && ./Histo -t cp -p akr bkr step && ./kinRecoEfficienciesAndSF
 //     weightKinFit=1; return;
-    
+
     if (!isMC_) { weightKinFit_ = 1; return; }
     //SF for mass(top) = 100..300 GeV
     const static std::map<TString, double> sfNominal { {"ee", 0.9779}, {"emu", 0.9871}, {"mumu", 0.9879} };
     const static std::map<TString, double> sfUnc { {"ee", 0.0066}, {"emu", 0.0032}, {"mumu", 0.0056} };
-    
+
     //SF for mass(top) = 173 GeV
 //     const static std::map<TString, double> sfNominal { {"ee", 0.9696}, {"emu", 0.9732}, {"mumu", 0.9930} };
 //     const static std::map<TString, double> sfUnc { {"ee", 0.0123}, {"emu", 0.0060}, {"mumu", 0.0105} };
-    
+
     weightKinFit_ = sfNominal.at(channel_);
     if (systematic_ == "KIN_UP") weightKinFit_ += sfUnc.at(channel_);
     else if (systematic_ == "KIN_DOWN") weightKinFit_ -= sfUnc.at(channel_);
@@ -1255,7 +1264,7 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         kinRecoObjects_->HypAntiNeutrino_->clear();
         kinRecoObjects_->HypJet0index_->clear();
         kinRecoObjects_->HypJet1index_->clear();
-        
+
         kinRecoObjects_->valuesSet_ = false;
     }
     else{
@@ -1270,7 +1279,7 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         HypJet0index_->clear();
         HypJet1index_->clear();
     }
-    
+
     // The physics objects needed as input
     const LV& leptonMinus(allLeptons.at(leptonIndex));
     const LV& leptonPlus(allLeptons.at(antiLeptonIndex));
@@ -1278,13 +1287,13 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
     std::vector<double> btagValues;
     std::vector<int> jIndex;
     for(const int index : jetIndices){
-        
+
         selectedJets.push_back(jets.at(index));
         btagValues.push_back(jetBTagCSV.at(index));
         jIndex.push_back(index);
     }
-   
-    
+
+
 //     if(0){//print
 //          printf("****************************************************************************************************************\n");
 //                           printf("Event nr: %d\n",eventNumber_);
@@ -1293,8 +1302,8 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //                           {
 //                                 std::cout << "jet " << i <<": ";printf("(Pt,eta,Phi)=(%f %f %f) w=%f \n",(*jets)[i].Pt(),(*jets)[i].Eta(),(*jets)[i].Phi(),jetBTagCSV.at(i));
 //                           }
-//                           
-//                           
+//
+//
 //                           std::cout << std::endl;
 //                           std::cout <<"  True info:"<< std::endl;
 //                           std::cout << "  tt     -> ";printf("(Mtt,Pt,eta,Phi)=(%f %f %f %f)\n",(GenTop_+GenAntiTop_).M(),(GenTop_+GenAntiTop_).Pt(),(GenTop_+GenAntiTop_).Eta(),(GenTop_+GenAntiTop_).Phi());
@@ -1309,33 +1318,33 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //                           std::cout << "        Antineutrino -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenAntiNeutrino_.Pt(),GenAntiNeutrino_.Eta(),GenAntiNeutrino_.Phi());
 //                           std::cout << "        lepton       -> ";printf("(Pt,eta,Phi)=(%f %f %f)\n",GenLepton_.Pt(),GenLepton_.Eta(),GenLepton_.Phi());
 //                           std::cout << std::endl;
-//                           
+//
 //     }
-//     
-    
+//
+
     // 2 lines needed for OLD kinReco
 //    const auto& sols = GetKinSolutions(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
 //    const int nSolution = sols.size();
-        
+
     // 3 lines needed for NEW kinReco
     kinematicReconstruction_->kinReco(leptonMinus, leptonPlus, &selectedJets, &btagValues, &met);
     const auto& sols = kinematicReconstruction_->getSols();
     const int nSolution = sols.size();
-    
+
    //////////kinematicReconstruction_->doJetsMerging(&jets,&jetBTagCSV);
-   
+
     if(nSolution == 0) return false;
     const auto& sol = sols.at(0);
-        
-        
+
+
 //    std::cout<< std::endl;
 //    std::cout<<selectedJets.size() << std::endl;
 //    for(int i=0;i<nSolution;i++)
 //     {
 //         std::cout <<i<< "  "<< sols.at(i).ntags <<"  "<< sols.at(i).weight<<" " <<jIndex[sols.at(i).jetB_index]  << " " << jIndex[sols.at(i).jetBbar_index] << std::endl;
-//         
+//
 //     }
-        
+
     // Fill the results of the on-the-fly kinematic reconstruction
     if(useObjectStructs_){
         kinRecoObjects_->HypTop_->push_back(ttbar::TLVtoLV(sol.top));
@@ -1348,7 +1357,7 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         kinRecoObjects_->HypAntiNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrinoBar));
         kinRecoObjects_->HypJet0index_->push_back(jIndex[sol.jetB_index]);
         kinRecoObjects_->HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
-        
+
         kinRecoObjects_->valuesSet_ = true;
     }
     else{
@@ -1363,10 +1372,10 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
         HypJet0index_->push_back(jIndex[sol.jetB_index]);
         HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
     }
-    
+
     //check for strange events
     if (false && HypTop_->size()) {
-        double Ecm = (HypTop_->at(0) + HypAntiTop_->at(0) 
+        double Ecm = (HypTop_->at(0) + HypAntiTop_->at(0)
                         + HypLepton_->at(0) + HypAntiLepton_->at(0)
                         + HypNeutrino_->at(0) + HypAntiNeutrino_->at(0)).E();
         //does event's CM energy exceed LHC's energy?
@@ -1378,7 +1387,7 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
             <<"\n";
         }
     }
-    
+
     return true;
 }
 
@@ -1390,13 +1399,13 @@ const std::string AnalysisBase::topDecayModeString()const
     int top = topDecayMode_ / 10;
     int antitop = topDecayMode_ % 10;
     std::string result = WMode[top] + "/" + WMode[antitop];
-    return result;    
+    return result;
 }
 
 
 
 void AnalysisBase::prepareJER_JES()
-{    
+{
 //     const TString pathToFile(ttbar::DATA_PATH() + "/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt");
     const TString pathToFile(ttbar::DATA_PATH() + "/Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt");
     doJesJer_ = false;
@@ -1467,7 +1476,7 @@ void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
 
         if(jetJERSF->at(i) != 0.){
             jets->at(i) *= 1./jetJERSF->at(i);
-            
+
             // FIXME: should this factor really be =0. in case no associatedGenJet is found ?
             double factor = 0.;
 
@@ -1494,12 +1503,12 @@ void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
             const double dpX = jetsForMET->at(i).px();
             const double dpY = jetsForMET->at(i).py();
             jetsForMET->at(i) *= 1./jetForMETJERSF->at(i);
-            
+
             // FIXME: should this factor really be =0. in case no associatedGenJet is found ?
             double factor = 0.;
             if(associatedGenJetForMET->at(i).pt() != 0.) factor = 1. + (ResolutionEtaScaleFactor[jetEtaBin] - 1.)*(1. - (associatedGenJetForMET->at(i).pt()/jetsForMET->at(i).pt()));
             if(jetForMETJERSF->at(i) == 1.) factor = 1.;
-            
+
             jetsForMET->at(i) *= factor;
             JEC_dpX += jetsForMET->at(i).px() - dpX;
             JEC_dpY += jetsForMET->at(i).py() - dpY;
@@ -1523,13 +1532,13 @@ void AnalysisBase::applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const
                  <<"\n...break\n"<<std::endl;
         exit(82);
     }
-    
+
     // This first loop will correct the jet collection that is used for jet selections
     for(size_t i = 0; i < jets->size(); ++i){
-        jetCorrectionUncertainty_->setJetPt(jets->at(i).pt()); 
+        jetCorrectionUncertainty_->setJetPt(jets->at(i).pt());
         jetCorrectionUncertainty_->setJetEta(jets->at(i).eta());
         const double dunc = jetCorrectionUncertainty_->getUncertainty(true);
-        
+
         if(varyUp) jets->at(i) *= 1. + dunc;
         else jets->at(i) *= 1. - dunc;
     }
@@ -1542,7 +1551,7 @@ void AnalysisBase::applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const
         const double dpX = jetsForMET->at(i).px();
         const double dpY = jetsForMET->at(i).py();
 
-        jetCorrectionUncertainty_->setJetPt(jetsForMET->at(i).pt()); 
+        jetCorrectionUncertainty_->setJetPt(jetsForMET->at(i).pt());
         jetCorrectionUncertainty_->setJetEta(jetsForMET->at(i).eta());
         const double dunc = jetCorrectionUncertainty_->getUncertainty(true);
 
@@ -1573,7 +1582,7 @@ bool AnalysisBase::failsTopGeneratorSelection(const Long64_t& entry)const
 {
     if(!isTtbarPlusTauSample_) return false;
     GetTopDecayModeEntry(entry);
-    
+
     //decayMode contains the decay of the top (*10) + the decay of the antitop
     //1=hadron, 2=e, 3=mu, 4=tau->hadron, 5=tau->e, 6=tau->mu
     //i.e. 23 == top decays to e, tbar decays to mu
@@ -1604,7 +1613,7 @@ double AnalysisBase::madgraphWDecayCorrection(const Long64_t& entry)const
 {
     if(!correctMadgraphBR_) return 1.;
     GetTopDecayModeEntry(entry);
-    
+
     // We must correct for the madGraph branching fraction being 1/9 for dileptons (PDG average is .108)
     if(topDecayMode_ == 11){ //all hadronic decay
         return (0.676*1.5) * (0.676*1.5);
@@ -1693,7 +1702,7 @@ bool AnalysisBase::hasLeptonPair(const int leadingLeptonIndex, const int nLeadin
 bool AnalysisBase::failsDileptonTrigger(const Long64_t& entry)const
 {
     this->GetTriggerBranchesEntry(entry);
-    
+
     //our triggers (bits: see the ntuplewriter!)
     constexpr int mumuTriggers = 0x8 + 0x20; //17/8 + 17Tr8
     constexpr int emuTriggers = 0x2000 + 0x4000;
@@ -1712,7 +1721,9 @@ bool AnalysisBase::failsDileptonTrigger(const Long64_t& entry)const
 
 bool AnalysisBase::makeBtagEfficiencies()const
 {
-    return btagScaleFactors_->makeEfficiencies() && isTtbarSample_ && isTopSignal_;
+    if(btagScaleFactors_) return btagScaleFactors_->makeEfficiencies() && isTtbarSample_ && isTopSignal_;
+    if(bTagSFGeneric_) return bTagSFGeneric_->makeEfficiencies() && isTtbarSample_ && isTopSignal_;
+    return false;
 }
 
 
@@ -1736,7 +1747,7 @@ const RecoObjects& AnalysisBase::getRecoObjects(const Long64_t& entry)const
     if(recoObjects_->valuesSet_) return *recoObjects_;
 
     this->GetRecoBranchesEntry(entry);
-    
+
     if(isMC_ && doJesJer_){
 
         // Get references for all relevant reco objects which are modified by JER/JES systematics
@@ -1759,7 +1770,7 @@ const RecoObjects& AnalysisBase::getRecoObjects(const Long64_t& entry)const
                                       associatedGenJet, associatedGenJetForMet);
 
         }
-        
+
         if(systematic_=="JES_UP" || systematic_=="JES_DOWN"){
             this->applyJesSystematics(jets, jetsForMET, met);
         }
@@ -1776,7 +1787,7 @@ const CommonGenObjects& AnalysisBase::getCommonGenObjects(const Long64_t& entry)
 {
     if(!isMC_) return *commonGenObjects_;
     if(commonGenObjects_->valuesSet_) return *commonGenObjects_;
-    
+
     this->GetCommonGenBranchesEntry(entry);
     return *commonGenObjects_;
 }
@@ -1787,7 +1798,7 @@ const TopGenObjects& AnalysisBase::getTopGenObjects(const Long64_t& entry)const
 {
     if(!isTopSignal_) return *topGenObjects_;
     if(topGenObjects_->valuesSet_) return *topGenObjects_;
-    
+
     this->GetTopSignalBranchesEntry(entry);
     return *topGenObjects_;
 }
@@ -1798,7 +1809,7 @@ const HiggsGenObjects& AnalysisBase::getHiggsGenObjects(const Long64_t& entry)co
 {
     if(!isHiggsSignal_) return *higgsGenObjects_;
     if(higgsGenObjects_->valuesSet_) return *higgsGenObjects_;
-    
+
     this->GetHiggsSignalBranchesEntry(entry);
     return *higgsGenObjects_;
 }
@@ -1809,7 +1820,7 @@ const KinRecoObjects& AnalysisBase::getKinRecoObjects(const Long64_t& entry)cons
 {
     if(kinRecoObjects_->valuesSet_) return *kinRecoObjects_;
     if(kinRecoObjects_->HypTop_->size() > 0) this->GetKinRecoBranchesEntry(entry);
-    
+
     return *kinRecoObjects_;
 }
 
@@ -1820,7 +1831,7 @@ const KinRecoObjects& AnalysisBase::getKinRecoObjectsOnTheFly(const int leptonIn
                                                               const LV& met)
 {
     this->calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, allLeptons, jets, jetBTagCSV, met);
-    
+
     return *kinRecoObjects_;
 }
 
