@@ -14,8 +14,8 @@
 #include "analysisStructs.h"
 #include "JetCategories.h"
 #include "higgsUtils.h"
-#include "../../diLeptonic/src/sampleHelpers.h"
-#include "../../diLeptonic/src/analysisObjectStructs.h"
+#include "../../common/include/sampleHelpers.h"
+#include "../../common/include/analysisObjectStructs.h"
 
 
 

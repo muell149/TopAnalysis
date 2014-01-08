@@ -11,7 +11,7 @@
 #include <TFile.h>
 #include <TTree.h>
 
-#include "../../diLeptonic/src/sampleHelpers.h"
+#include "../../common/include/sampleHelpers.h"
 #include "mvaSetup.h"
 #include "higgsUtils.h"
 

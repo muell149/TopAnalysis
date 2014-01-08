@@ -19,18 +19,23 @@ The file /data/group/top/DiffXS/README contains a description of the NTuples, i.
 what was new, which <date> to use...
 
 The input files need to be listed in selectionList.txt, so do:
-ls -1 --color=no /data/group/top/DiffXS/2013_08_26_Reco22Jan2013/*.root > selectionList.txt
+ls -1 --color=no /data/group/top/DiffXS/2013_11_04_TAG_N002/*.root | grep -v tau.root | grep -v bg.root | grep -v ttbarH | grep -v ttbarW | grep -v ttbarZ > selectionList.txt
+ls -1 --color=no /data/group/top/DiffXS/2013_11_04_TAG_N002_MadSpin_FullStats62M/*.root >> selectionList.txt
 (the date may differ)
+(for the time being there are two steps because 2 different ttbar samples were created at the same time: Madgraph 7M and MadSpin 62M. This will change with future ntuple productions)
 
-To compile the code:
+To compile the code execute:
 
-cd build
-cmake ..
-make -j8
+        mkdir build
+        cd build
+        cmake ..
+        make -j8
+        make install
 
 To run the analysis, go to the directory containing the selectionList.txt:
-cd ..
-build/load_Analysis
+
+        cd ..
+        ./install/bin/load_Analysis
 
 **** WARNING ****
 It is assumed that your current working directory is always the diLeptonic directory.
@@ -39,11 +44,14 @@ with build/load_Analysis and build/Histo
 *****************
 
 See
-build/loadAnalysis --help
+        ./install/bin/load_Analysis --help
+
 for a list of command line options.
 
 To run only over a specific dataset, you can do
-build/loadAnalysis -f PATTERN
+
+        ./install/bin/load_Analysis -f PATTERN
+
 where PATTERN is in the file name.
 
 The output produced is in selectionRoot, the files should be fully compatible with
@@ -52,29 +60,33 @@ the old plotterclass.h
 Now, you need to calculate btag efficiencies. This works by running the ttbar sample for each systematic variation.
 This is automatically done by running:
 
-  ./scripts/mk_BTagEffs.sh
+        ./install/bin/mk_BTagEffs.sh
 
 Then copy the created btag files:
-  
-  cp -r selectionRoot/BTagEff .
+
+        cp -r selectionRoot/BTagEff .
 
 Now you are ready to flood the workgroup server or the NAF with a lot of jobs. In case
 you are running on the NAF, the NTuples should be stored on the Sonas file system, i.e.
 under /scratch/hh/dust/naf/cms/... - and parallel access is amazingly fast. 
 
-To run the selection on the Nominal sample, just do: 
-  ./scripts/runNominalParallel.sh
+To run the selection on the Nominal sample, just do:
 
-You also need to generate the signal variations with: 
+        ./install/bin/runNominalParallel.sh
+
+You also need to generate the signal variations with:
   ./scripts/runNominalVariations.sh
+
+or
+    ./install/bin/runNominalVariations.sh
 
 In addition you can also run the theory variations (mass, match, scale) and other 
 generators (powheg, mcatnlo and madgraph with spin correlations): 
 
-  ./scripts/runTheoryVariations.sh
+        ./install/bin/runTheoryVariations.sh
 
-This runs Analysis.C on each event in the root tuple for each sample. All analysis cuts are
-made in Analysis.C and the output are a bunch of user specified histograms. Except for adding 
+This runs TopAnalysis.cc on each event in the root tuple for each sample. All analysis cuts are
+made in TopAnalysis.cc and the output are a bunch of user specified histograms. Except for adding 
 histograms or changing analysis cuts, additions to this file should be made as separate 
 functions in the Analysis class.
 
@@ -95,8 +107,8 @@ NAF:
 Once the selection step is done, we need to setup our data such that the histogram
 tools know where to find which files. You need to run:
 
-  ./scripts/lnData.sh
-  ./scripts/mk_HistoFileList.sh
+        ./install/bin/lnData.sh
+        ./install/bin/mk_HistoFileList.sh
 
 Here, lnData.sh will create symlinks to the Nominal folder for all files which have
 not been varied in the systematics.
@@ -104,18 +116,17 @@ After that, mk_HistoFileList.sh will create the directory FileLists/ and create
 input file lists per channel and systematic.
 
 ===== Histograms!
-
-build/Histo (run build/Histo --help for options to create some of the plots, with or without unfolding etc.)
+        ./install/bin/Histo (run build/Histo --help for options to create some of the plots, with or without unfolding etc.)
 
 You can run Histo with 3 different "types":
-build/Histo -t cp          produces control plots
-build/Histo -t unfold      unfolds and produces the diff. xsec
-build/Histo -t plot        just plot the diff. xsec, use values from previous unfolding
+
+        ./install/bin/Histo -t cp  ##produces control plots
+        ./install/bin/Histo -t unfold  ##unfolds and produces the diff. xsec
+        ./install/bin/Histo -t plot  ##just plot the diff. xsec, use values from previous unfolding
 
 There are 3 more parameters:
- -p Name   just produce the plot/xsection containing "Name" (use +Name for an exact match)
- -c ee/emu/mumu/combined    
-           only one channel
+ -p Name                        just produce the plot/xsection containing "Name" (use +Name for an exact match)
+ -c ee/emu/mumu/combined        only one channel
  -s systematic
 
 The -p, -c, and -s parameters can also take more than one argument; they can also be
@@ -123,26 +134,26 @@ omitted (-> use default values, i.e. all channels, all plots, Nominal systematic
 
 The inclusive cross section is extracted from the histogram 'HypjetMultiXSec'. To obtain the result please run:
 
-  for i in ee emu mumu combined; do build/Histo -t cp -s all -p +HypjetMultiXSec -c${i} &; done
+        for i in ee emu mumu; do ./install/bin/Histo -t cp -s all -p +HypjetMultiXSec -c ${i} &; done
 
 and once this is finished:
 
-  for i in ee emu mumu combined; do build/Histo -t cp -s Nominal -p +HypjetMultiXSec -c${i} &; done
+        ./install/bin/Histo -t cp -s Nominal -p +HypjetMultiXSec -c combined
 
 The results will be stored in the file 'InclusiveXSecResultLateX.txt' under:
 
-   Plots/FinalResults/channel/InclusiveXSecResultLateX.txt
+        Plots/FinalResults/channel/InclusiveXSecResultLateX.txt
 
 where channel is each if the channels: ee, emu, mumu, combined.
 
 To unfold all distributions from your HistoList in parallel, use the script:
 
-  ./scripts/unfoldAll.sh 
+        ./install/bin/unfoldAll.sh
 
 Again, on the workgroup server, it will run up to 10 jobs in parallel,
 while it will submit one job per distribution to the batch system if run on the NAF.
 
-This runs Histo.C which essentially calls function from plotterclass.cc.
+This runs Histo.cc which essentially calls function from plotterclass.cc.
 
 For each histogram you want
 
@@ -158,36 +169,49 @@ The plots will be put into a directory called Plots according to the channel in 
 
 Once the plots has been created you can get the typical systematic errors for the Diff. XSection via:
 
-  ./build/TypicalErrors
+    ./install/bin/TypicalErrors
 
 Please be aware that should be compiled via:
 
-  cd build
-  cmake ..
-  make TypicalErrors
-  cd ..
+    cd build
+    cmake ..
+    make TypicalErrors
+    make install
+    cd ..
 
 This runs TypicalErrors.cc which checks for one specific systematic variation, and one specific
 channel (ee, emu, mumu) in all files 
-    Plots/FinalResults/channel/*Systematics.txt
-it parses the content and for one specific systematic takes the average ('typical') systematic error.
 
+        Plots/FinalResults/channel/*Systematics.txt
+
+it parses the content and for one specific systematic takes the average ('typical') systematic error.
 
 
 Once the plots has been created you can get the typical systematic errors for the Diff. XSection via:
 
-  ./build/createSystCovMatrix
+        ./install/bin/createSystCovMatrix
 
 Please be aware that should be compiled via:
 
-  cd build
-  cmake ..
-  make createSystCovMatrix
-  cd ..
+        cd build
+        cmake ..
+        make createSystCovMatrix
+        make install
+        cd ..
 
-This runs createSystCovMatrix.cc which produces the correlation amtrix for between all systematics for a given variable in a given channel
+This runs createSystCovMatrix.cc which produces the correlation matrix for between all systematics for a given variable in a given channel
 The description of the method is explained in: https://indico.desy.de/getFile.py/access?contribId=0&resId=0&materialId=slides&confId=8972 
 password: bottom
+
+
+For the edition of the analysis notes can be usefull also to run the next scripts/macros:
+
+        cd Plots/Nominal
+        ../../install/bin/mk_eventcounttable.sh
+        cd ../../
+        root -l -b -q macros/getBtagEfficiencies.C++
+
+This will generate the table with the event yields at every selection step, and the macro will create the b-taggin efficiency plots and store them in 'bTagEfficiencies' directory
 
 
 ========
@@ -197,11 +221,11 @@ Merging all the lots into single PDF file:
 There is an scripts that can be used to plot 6 plots into a single page of a PDF file.
 The plots that will be plotted can be set in 
 
-  ./scripts/mk_booklet.lst
+        ./install/bin/mk_booklet.lst
 
 The directory from which the plots will be read can be set in 
 
-  ./scripts/mk_booklet.sh
+        ./install/bin/mk_booklet.sh
 
 under the parameters  'PDIR', the default is 'Plots/Nominal/combined' for the control plots of the combined channel
 The output PDF file will be stored in 'Booklets' directory and will include a date tag, and will be named 'booklet-$date.pdf'
@@ -211,17 +235,26 @@ PDF:
 
 Requirement: you have already run the Nominal (i.e. ./runNominalParallel.sh)
 
-If you also need PDF variations, run ./runPDFVariations.sh - it will run load_Analysis
-over the ttbar signal sample for each PDF variation (currently 1 + 44 times). The PDF_CENTRAL
-should be exactly equal to the Nominal, it is used as cross check.
+If you also need PDF variations, run 
 
-To unfold with the specific PDF variations, run ./unfoldPDF.sh --- this will unfold all 
-differential quantities in parallel - and this will be done 1+44 times. While this script is running,
-please do not touch your Plots/ directory and don't do anything to Plots_temp.
+        ./install/binrunPDFVariations.sh 
 
-After running the script, run ./calcPDFMasterFormula.pl to join the 44 different PDF systematics
-into one, calculated using the "master formula" as explained in AN2009-048. Files with the combined
-PDF uncertainty are written out to UnfoldingResults/PDF_/channel/ and can then be used in the 
+it will run 'src/load_Analysis.cc' over the ttbar signal sample for each PDF variation (currently 1 + 44 times).
+The PDF_CENTRAL should be exactly equal to the Nominal, it is used as cross check.
+
+To unfold with the specific PDF variations, run 
+
+        ./install/bin/unfoldPDF.sh
+
+this will unfold all differential quantities in parallel - and this will be done 1+44 times.
+While this script is running, please do not touch your Plots/ directory and don't do anything to Plots_temp.
+
+After running the script, run
+
+        ./install/bin/calcPDFMasterFormula.pl
+
+to join the 44 different PDF systematics into one, calculated using the "master formula" as explained in AN2009-048.
+Files with the combined PDF uncertainty are written out to UnfoldingResults/PDF_/channel/ and can then be used in the 
 plotterclass.
 
 ========================
@@ -266,13 +299,13 @@ Hover your mouse over a variable to inspect its value.
 Extended description (if you have mounted the work area via sshfs):
   on the workgroup server (replace 12877 with any unique number > 1024 and <= 65535):
   a) create a file called gdbinit_loadAnalysis with the following content:
-        target extended-remote desy-cms012.desy.de:12877
-        file load_Analysis
+target extended-remote desy-cms012.desy.de:12877
+file load_Analysis
   b) run
-        gdbserver :12877 load_Analysis
+gdbserver :12877 load_Analysis
   c) in KDevelop, Run, Configure Launches
-      on the left click on "Debugging", then on the right you should have
-      a field "gdb configuration file": select the gdbinit file here.
+  on the left click on "Debugging", then on the right you should have
+  a field "gdb configuration file": select the gdbinit file here.
 
 As poor man's solution (which will also work on the workgroup server), you can also use 
 the ddd (data display debugger) program to debug. Just run 

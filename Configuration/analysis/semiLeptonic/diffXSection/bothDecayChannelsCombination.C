@@ -3,7 +3,7 @@
 void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsigned int verbose=0,
 				  TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
 				  bool pTPlotsLog=false, bool extrapolate=true, bool hadron=false, bool addCrossCheckVariables=false, 
-				  bool combinedEventYields=true, TString closureTestSpecifier="NoDistort", bool smoothcurves=false){
+				  bool combinedEventYields=true, TString closureTestSpecifier="" , bool smoothcurves=false){
 
   // closureTestSpecifier = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
   // run automatically in batch mode
@@ -66,15 +66,21 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
   //        25: sysVBosonScaleUp           26: sysVBosonScaleDown          
   //        27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
   //        29: sysTopMatchUp              30: sysTopMatchDown             
-  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown          
-  //        33: sysTopMassUp               34: sysTopMassDown              
-  //        35: sysQCDUp                   36: sysQCDDown                  
-  //        37: sysSTopUp                  38: sysSTopDown                 
-  //        39: sysDiBosUp                 40: sysDiBosDown                
-  //        41: sysPDFUp                   42: sysPDFDown                  
-  //        43: sysHadUp                   44: sysHadDown                  
-  //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: ENDOFSYSENUM
+  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown  
+  //        33: sysTopMassUp               34: sysTopMassDown  
+  //        35: sysTopMassUp2              36: sysTopMassDown2
+  //        37: sysTopMassUp3              38: sysTopMassDown3
+  //        39: sysTopMassUp4              40: sysTopMassDown4
+  //        41: sysQCDUp                   42: sysQCDDown                  
+  //        43: sysSTopUp                  44: sysSTopDown                 
+  //        45: sysDiBosUp                 46: sysDiBosDown 
+  //        47: sysVjetsUp                 48: sysVjetsDown
+  //        49: sysBRUp                    50: sysBRDown              
+  //        51: sysPDFUp                   52: sysPDFDown                  
+  //        53: sysHadUp                   54: sysHadDown                  
+  //        55: sysGenMCatNLO              56: sysGenPowheg  
+  //        57: sysGenPowhegHerwig         58: ENDOFSYSENUM
+
   std::vector<unsigned int> uncorrSys_;
   // trigger 
   //uncorrSys_.push_back(sysTriggerEffSFJetNormUp	);
@@ -171,28 +177,29 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
   TString zprime="";
   double  zPrimeLumiWeightIni=1.;
   TString zPrimeLumiWeightStr="";
-  if      (closureTestSpecifier.Contains("NoDistort")) {dataLabel="#splitline{Reco.&Unfolded}{Pseudo Data}"; reweightClosure=true; closureLabel = "PseudoData"+closureTestSpecifier;             } 
-  else if (closureTestSpecifier.Contains("topPt"   )||
-	   closureTestSpecifier.Contains("ttbarMass")) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweight"+closureTestSpecifier;     }
-  else if (closureTestSpecifier.Contains("data"     )) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;}
-  else if (closureTestSpecifier.Contains("1000"     )) {
-    closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV"; 
-    // identify exact closure test
-    zprime="1000";
-    if      (closureTestSpecifier.Contains("x0p03")) {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.03)";}
-    else if (closureTestSpecifier.Contains("x0p1" )) {zPrimeLumiWeightIni=0.1 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.1)" ;}
-    else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.25)";}
-    else if (closureTestSpecifier.Contains("x0p5" )) {zPrimeLumiWeightIni=0.5 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.5)" ;}
-    else if (closureTestSpecifier.Contains("x2"   )) {zPrimeLumiWeightIni=2.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x2)"   ;}
-    else if (closureTestSpecifier.Contains("x4"   )) {zPrimeLumiWeightIni=4.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x4)"   ;}
-    // adjust label in plot: data -> pseudo data
-    dataLabel = "#splitline{Reco. and Unf.}{t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr+"}";
+  if(closureTestSpecifier!=""){
+    if      (closureTestSpecifier.Contains("NoDistort")) {dataLabel="#splitline{Reco.&Unfolded}{Pseudo Data}"; reweightClosure=true; closureLabel = "PseudoData"+closureTestSpecifier;             } 
+    else if (closureTestSpecifier.Contains("topPt"   )||
+	     closureTestSpecifier.Contains("ttbarMass")) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweight"+closureTestSpecifier;     }
+    else if (closureTestSpecifier.Contains("data"     )) {dataLabel=dataLabelrew; reweightClosure=true; closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;}
+    else if (closureTestSpecifier.Contains("1000"     )) {
+      closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV"; 
+      // identify exact closure test
+      zprime="1000";
+      if      (closureTestSpecifier.Contains("x0p03")) {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.03)";}
+      else if (closureTestSpecifier.Contains("x0p1" )) {zPrimeLumiWeightIni=0.1 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.1)" ;}
+      else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.25)";}
+      else if (closureTestSpecifier.Contains("x0p5" )) {zPrimeLumiWeightIni=0.5 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.5)" ;}
+      else if (closureTestSpecifier.Contains("x2"   )) {zPrimeLumiWeightIni=2.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x2)"   ;}
+      else if (closureTestSpecifier.Contains("x4"   )) {zPrimeLumiWeightIni=4.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x4)"   ;}
+      // adjust label in plot: data -> pseudo data
+      dataLabel = "#splitline{Reco. and Unf.}{t#bar{t} + "+zprime+" GeV Z'"+zPrimeLumiWeightStr+"}";
+    }
+    else{
+      std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
+      exit(0);
+    }
   }
-  else{
-    std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
-    exit(0);
-  }
-  
   //  Define muon and electron input rootfiles
   std::map<unsigned int, TFile*> files_;
   if(!combinedEventYields){
@@ -222,6 +229,7 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
     //if(sys>sysNo) break; // FIXME: shortcut- process only results without systematic variation 
     TString subfolder=sysLabel(sys);
     // loop variables
+    int countNorm=0;
     for(unsigned int i=0; i<xSecVariables_.size(); ++i){
       // get canvas
       TCanvas* canvasMu   = combinedEventYields ? 0 : (TCanvas*)(files_[kMuon    ]->Get(xSecFolder+"/"+subfolder+"/"+xSecVariables_[i]));
@@ -477,8 +485,8 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 	      // name for chosen mass
 	      TString massextension="";
 	      if(zprime=="1000") massextension="ZprimeM1000W100";
-	      muzprime.ReplaceAll("Sig", massextension);
-	      elzprime.ReplaceAll("Sig", massextension);
+	      muzprime.ReplaceAll("Sig", massextension+"Sig");
+	      elzprime.ReplaceAll("Sig", massextension+"Sig");
 	      // get files
 	      TFile* zprimemufile = new (TFile)(muzprime);
 	      TFile* zprimeelfile = new (TFile)(elzprime);
@@ -694,7 +702,7 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 	  // load it from combined file
 	  TString MGcombFile2="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/combinedDiffXSecSigSummer12PFLarge.root";
 	  if(!largeMGfile) MGcombFile2.ReplaceAll("Large","");
-	  TH1F* plotTheo3 = (xSecVariables_[i]=="inclusive") ? new TH1F( plotTheo->GetName(), plotTheo->GetTitle(), 1, 0., 1.0) : getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
+	  TH1F* plotTheo3 = (xSecVariables_[i]=="inclusive") ? new TH1F( TString(plotTheo->GetName())+"incl", TString(plotTheo->GetTitle())+"incl", 1, 0., 1.0) : getTheoryPrediction(plotNameMadgraph2, MGcombFile2);
 	  // inclusive cross section
 	  if(xSecVariables_[i]=="inclusive"){
 	    // get events in PS from top pt
@@ -986,8 +994,8 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 		closureentry="#splitline{Reweighted t#bar{t}}{#scale[0.75]{(MadGraph+Pythia, "+closureTestSpecifier+")}}";   
 		// label cosmetics
 		if(closureTestSpecifier=="data") closureentry.ReplaceAll(closureTestSpecifier, "topPt#rightarrow"+closureTestSpecifier);
-		if(closureentry.Contains("Up"  )){ closureentry.ReplaceAll(closureTestSpecifier, "harder "+closureTestSpecifier); closureentry.ReplaceAll("Up"  , "");}
-		if(closureentry.Contains("Down")){ closureentry.ReplaceAll(closureTestSpecifier, "softer "+closureTestSpecifier); closureentry.ReplaceAll("Down", "");}
+		if(closureentry.Contains("Up"  )){ closureentry.ReplaceAll(closureTestSpecifier, (closureentry.Contains("ttbarMass") ? "harder " : "softer ")+closureTestSpecifier); closureentry.ReplaceAll("Up"  , "");}
+		if(closureentry.Contains("Down")){ closureentry.ReplaceAll(closureTestSpecifier, (closureentry.Contains("ttbarMass") ? "softer " : "harder ")+closureTestSpecifier); closureentry.ReplaceAll("Down", "");}
 		closureentry.ReplaceAll("topPt"    , "p_{T}^{t}"   );
 		closureentry.ReplaceAll("ttbarMass", "m^{t#bar{t}}");
 	      }
@@ -998,7 +1006,12 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 	    leg->SetX2NDC(0.820);
 	    leg->SetY2NDC(0.867);
 	  }
-
+	  else {
+            leg->SetX1NDC(0.587);
+            leg->SetY1NDC(0.6  );
+            leg->SetX2NDC(0.820);
+            leg->SetY2NDC(0.867);
+	  }
 	  // b) Legend - Data label
 	  leg->AddEntry(plotCombination, dataLabel, "LP");
 	  
@@ -1124,6 +1137,19 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
 	    TString outfolder = closureTestSpecifier=="" ? "xSec/" : "closureTest/";
 	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/"+outfolder+"xSec"+closureLabel+xSecVariables_[i]+universalplotLabel+".eps"); 
 	    combicanvas->Print("./diffXSecFromSignal/plots/combined/"+dataSample+"/"+outfolder+"xSec"+closureLabel+xSecVariables_[i]+universalplotLabel+".png");
+	    // pdf for all relevant closureTest plots
+	    if(closureTestSpecifier!=""){
+	      if(verbose>1) std::cout << "saving for closure test" << std::endl;
+	      TString closureTestPdfName ="./diffXSecFromSignal/plots/combined/2012/closureTest/xSecs"+closureLabel+LV+PS;
+	      int Nnorm=(xSecVariables_.size())/2;
+	      if(xSecVariables_[i].Contains("Norm")&&canvas_.count(xSecVariables_[i])>0&&canvas_[xSecVariables_[i]].count(sysNo)>0&&canvas_[xSecVariables_[i]][sysNo]){
+		++countNorm;
+		if(verbose>1) std::cout << "normalized xSec " << xSecVariables_[i] << ", "<< countNorm << "/" << Nnorm <<  std::endl;	
+		if     (countNorm==1)     combicanvas->Print(closureTestPdfName+".pdf(", "pdf");	
+		else if(countNorm==Nnorm) combicanvas->Print(closureTestPdfName+".pdf)", "pdf");
+		else                      combicanvas->Print(closureTestPdfName+".pdf" , "pdf");
+	      }
+	    }
 	    gErrorIgnoreLevel=initialIgnoreLevel;
 	  }
 	  // close Canvas
@@ -1158,6 +1184,7 @@ void bothDecayChannelsCombination(double luminosity=19712, bool save=true, unsig
   //  Save combined mu+e plots to ROOT-file
   // =================================================
 
+  // saving in rootfile
   // loop variables
   for(unsigned int i=0; i<xSecVariables_.size(); ++i){
     // loop systematic variations

@@ -12,12 +12,12 @@
 #include <TH1.h>
 
 #include "TopAnalysis.h"
-#include "PUReweighter.h"
-#include "CommandLineParameters.h"
-#include "utils.h"
-#include "ScaleFactors.h"
-#include "sampleHelpers.h"
-#include "KinematicReconstruction.h"
+#include "../../common/include/PUReweighter.h"
+#include "../../common/include/CommandLineParameters.h"
+#include "../../common/include/utils.h"
+#include "../../common/include/ScaleFactors.h"
+#include "../../common/include/sampleHelpers.h"
+#include "../../common/include/KinematicReconstruction.h"
 
 
 
@@ -135,6 +135,7 @@ void load_Analysis(TString validFilenamePattern,
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);
     selector->SetBtagScaleFactors(btagScaleFactors);
+    selector->SetUseObjectStructs(true);
     
     // Access selectionList containing all input sample nTuples
     ifstream infile("selectionList.txt");

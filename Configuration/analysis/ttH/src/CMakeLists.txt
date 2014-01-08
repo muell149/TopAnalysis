@@ -1,4 +1,4 @@
-SET(TopAnalysis_DIR "${${PROJECT_NAME}_SOURCE_DIR}/../diLeptonic")
+SET(CommonAnalysis_DIR "${${PROJECT_NAME}_SOURCE_DIR}/../common")
 SET( ${PROJECT_NAME}_ROOTDICT_DIR ${CMAKE_BINARY_DIR}/ROOTdicts )
 SET( DICT_NAME ${${PROJECT_NAME}_ROOTDICT_DIR}/${PROJECT_NAME}_dict.cc )
 
@@ -28,7 +28,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   KinReco
   KinematicReconstruction
   KinematicReconstruction_LSroutines
-  MeanSol
+  KinematicReconstruction_MeanSol
   MvaTreeHandler
   MvaTreeAnalyzer
   MvaWeights2d
@@ -46,6 +46,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   JetMatchAnalyzer
   JetCategories
   ScaleFactors
+  BTagUtils
   Playground
   DijetAnalyzer
   plotterHelpers
@@ -61,6 +62,7 @@ SET( ${PROJECT_NAME}_EXECUTABLES
   load_Analysis
   train_bdt_topSystemJetAssignment
   histo_bdt_topSystemJetAssignment
+  histo_mvaVariables_topSystemJetAssignment
   Histo
   )
 
@@ -73,17 +75,18 @@ ADD_DEFINITIONS(-Wall -Wextra -pedantic -Wno-vla -O2 -g -std=c++0x -DSTANDALONE_
 #####################
 
 INCLUDE_DIRECTORIES( ${ROOT_INCLUDE_DIR} )
+INCLUDE_DIRECTORIES( ${ZTopUtils_INCLUDE_DIRS} )
 ## TO-DO: use installed header files as soon as available
-INCLUDE_DIRECTORIES( "${${PROJECT_NAME}_SOURCE_DIR}/../diLeptonic/src")
+INCLUDE_DIRECTORIES( "${CommonAnalysis_DIR}/include")
 ## TO-DO: do proper separation in include and src directories
-INCLUDE_DIRECTORIES( BEFORE "${${PROJECT_NAME}_SOURCE_DIR}/src" ${${PROJECT_NAME}_ROOTDICT_DIR} )
+INCLUDE_DIRECTORIES( BEFORE "${${PROJECT_NAME}_SOURCE_DIR}/include" ${${PROJECT_NAME}_ROOTDICT_DIR} )
 
 
 ####################
 # targets
 ####################
 
-SET(FILE_SEARCH_PATHS "${${PROJECT_NAME}_SOURCE_DIR}/src" "${TopAnalysis_DIR}/src")
+SET(FILE_SEARCH_PATHS "${${PROJECT_NAME}_SOURCE_DIR}/src" "${${PROJECT_NAME}_SOURCE_DIR}/include" "${CommonAnalysis_DIR}/src" "${CommonAnalysis_DIR}/include")
 
 MESSAGE (STATUS "starting ROOT dict header search:")
 FOREACH( filename ${${PROJECT_NAME}_HEADERS_THAT_NEED_ROOTDICT} )
@@ -115,7 +118,7 @@ ENDFOREACH( filename ${${PROJECT_NAME}_LIBSOURCES} )
 
 
 ADD_LIBRARY( ${PROJECT_NAME} SHARED ${${PROJECT_NAME}_LIBSOURCES_full} ${DICT_NAME} )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${ROOT_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${ROOT_LIBRARIES} ${ZTopUtils_LIBRARIES} )
 
 INSTALL(TARGETS ${PROJECT_NAME}
 	LIBRARY DESTINATION lib
@@ -127,7 +130,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
 
 FOREACH( exec ${${PROJECT_NAME}_EXECUTABLES} )
   ADD_EXECUTABLE( ${exec} ${exec} )
-  TARGET_LINK_LIBRARIES( ${exec} ${PROJECT_NAME} ${ROOT_LIBRARIES} )
+  TARGET_LINK_LIBRARIES( ${exec} ${PROJECT_NAME} ${ROOT_LIBRARIES} ${ZTopUtils_LIBRARIES} )
   INSTALL(TARGETS ${exec}
     RUNTIME DESTINATION bin )
 ENDFOREACH( exec ${${PROJECT_NAME}_EXECUTABLES} )

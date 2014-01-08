@@ -53,12 +53,12 @@ namespace semileptonic {
 
   // basic variables
   TString xSecVariablesFinalState[] = {"lepPt" , "lepEta", "bqPt"   , "bqEta" , "bbbarMass", "bbbarPt", "lbMass", "Njets", "rhos"};
-  TString xSecVariablesKinFit[]     = {"topPt" , "topPtLead", "topPtSubLead", "topY"  , "ttbarPt", "ttbarY", "ttbarMass", "topPtTtbarSys", "ttbarDelPhi", "ttbarPhiStar"};
+  TString xSecVariablesKinFit[]     = {"topPtLead", "topPtSubLead", "topPtTtbarSys", "topPt", "topY", "ttbarPt", "ttbarY", "ttbarMass", "ttbarDelPhi", "ttbarPhiStar"};
   TString xSecVariablesFinalStateNorm[] = {"lepPtNorm", "lepEtaNorm", "bqPtNorm"   , "bqEtaNorm" , "bbbarMassNorm", "bbbarPtNorm", "lbMassNorm", "NjetsNorm", "rhosNorm"};
   TString xSecVariablesKinFitNorm[]     = {"topPtNorm", "topPtLeadNorm", "topPtSubLeadNorm", "topYNorm"  , "ttbarPtNorm", "ttbarYNorm", "ttbarMassNorm", "topPtTtbarSysNorm", "ttbarDelPhiNorm", "ttbarPhiStarNorm"};
   TString xSecVariablesIncl[] = {"inclusive"};
 
-  TString xSecLabelKinFit[]     = {"p_{T}^{t}/[GeV]", "p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "y^{t}/ ", "p_{T}^{t#bar{t}}/[GeV]", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{t} (t#bar{t} restframe)/[GeV]", "#Delta#phi^{t}/ ", "#Phi^{#lower[-0.9]{* }}(t,#bar{t})/ "};
+  TString xSecLabelKinFit[]     = {"p_{T}^{lead t}/[GeV]", "p_{T}^{sublead t}/[GeV]", "p_{T}^{t#bar{t}}/[GeV]", "p_{T}^{t}/[GeV]", "y^{t}/ ", "y^{t#bar{t}}/ ", "m^{t#bar{t}}/[GeV]", "p_{T}^{t} (t#bar{t} restframe)/[GeV]", "#Delta#phi^{t}/ ", "#Phi^{#lower[-0.9]{* }}(t,#bar{t})/ "};
   TString xSecLabelFinalState[] = {"p_{T}^{l}/[GeV]", "#eta^{l}/ ", "p_{T}^{b}/[GeV]", "#eta^{b}/ ", "m^{b#bar{b}}/[GeV]", "p_{T}^{b#bar{b}}/[GeV]", "m^{lb}/[GeV]", "N_{jets}/ ", "#rho_{S}/ "};
 
   // cross-check variables
@@ -172,19 +172,23 @@ namespace semileptonic {
 			     /*27:*/ sysSingleTopScaleUp,        /*28:*/ sysSingleTopScaleDown,     
 			     /*29:*/ sysTopMatchUp,              /*30:*/ sysTopMatchDown,            
 			     /*31:*/ sysVBosonMatchUp,           /*32:*/ sysVBosonMatchDown,         
-			     /*33:*/ sysTopMassUp,               /*34:*/ sysTopMassDown,            
-			     /*35:*/ sysQCDUp,                   /*36:*/ sysQCDDown,                 
-			     /*37:*/ sysSTopUp,                  /*38:*/ sysSTopDown,               
-			     /*39:*/ sysDiBosUp,                 /*40:*/ sysDiBosDown,              
-			     /*41:*/ sysPDFUp,                   /*42:*/ sysPDFDown,
-			     /*43:*/ sysHadUp,                   /*44:*/ sysHadDown,
-			     /*45:*/ sysGenMCatNLO,              /*46:*/ sysGenPowheg,
-			     /*47:*/ sysGenPowhegHerwig,         /*48:*/ ENDOFSYSENUM, 
-			     /*49:*/ sysTest, 			 /*50:*/ sysTestMCatNLO,             
-			     /*51:*/ sysTestPowheg,     	 /*52:*/ sysTestPowhegHerwig,        
-			     /*53:*/ ENDOFSYSENUM2,
-			     sysVjetsUp, sysVjetsDown,
-			     sysBRUp   , sysBRDown
+			     /*33:*/ sysTopMassUp,               /*34:*/ sysTopMassDown,    
+			     /*35:*/ sysTopMassUp2,              /*36:*/ sysTopMassDown2,
+			     /*37:*/ sysTopMassUp3,              /*38:*/ sysTopMassDown3,
+			     /*39:*/ sysTopMassUp4,              /*40:*/ sysTopMassDown4,
+			     /*41:*/ sysQCDUp,                   /*42:*/ sysQCDDown,                 
+			     /*43:*/ sysSTopUp,                  /*44:*/ sysSTopDown,               
+			     /*45:*/ sysDiBosUp,                 /*46:*/ sysDiBosDown,  
+			     /*47:*/ sysVjetsUp,                 /*48:*/ sysVjetsDown,
+			     /*49:*/ sysBRUp   ,                 /*50:*/ sysBRDown,
+			     /*51:*/ sysPDFUp,                   /*52:*/ sysPDFDown,
+			     /*53:*/ sysHadUp,                   /*54:*/ sysHadDown,
+			     /*55:*/ sysGenMCatNLO,              /*56:*/ sysGenPowheg,
+			     /*57:*/ sysGenPowhegHerwig,         /*58:*/ ENDOFSYSENUM, 
+			     /*59:*/ sysTest, 			 /*60:*/ sysTestMCatNLO,             
+			     /*61:*/ sysTestPowheg,     	 /*62:*/ sysTestPowhegHerwig,        
+			     /*63:*/ ENDOFSYSENUM2,
+
   };
 
   // ============================
@@ -340,13 +344,23 @@ namespace semileptonic {
       case sysVBosonMatchUp            : return "sysVBosonMatchUp";          
       case sysVBosonMatchDown          : return "sysVBosonMatchDown";
       case sysTopMassUp                : return "sysTopMassUp";  
-      case sysTopMassDown              : return "sysTopMassDown";            
+      case sysTopMassDown              : return "sysTopMassDown";   
+      case sysTopMassUp2               : return "sysTopMassUp2";  
+      case sysTopMassDown2             : return "sysTopMassDown2";   
+      case sysTopMassUp3               : return "sysTopMassUp3";  
+      case sysTopMassDown3             : return "sysTopMassDown3";   
+      case sysTopMassUp4               : return "sysTopMassUp4";  
+      case sysTopMassDown4             : return "sysTopMassDown4";   
       case sysQCDUp                    : return "sysQCDUp";           
       case sysQCDDown                  : return "sysQCDDown";
       case sysSTopUp                   : return "sysSTopUp";               
       case sysSTopDown                 : return "sysSTopDown";
       case sysDiBosUp                  : return "sysDiBosUp";              
       case sysDiBosDown                : return "sysDiBosDown";
+      case sysVjetsUp                  : return "sysVjetsUp";      
+      case sysVjetsDown                : return "sysVjetsDown";      
+      case sysBRUp                     : return "sysBRUp";              
+      case sysBRDown                   : return "sysBRDown";    
       case sysPDFUp                    : return "sysPDFUp";              
       case sysPDFDown                  : return "sysPDFDown";
       case sysHadUp                    : return "sysHadronizationUp";
@@ -813,6 +827,20 @@ namespace semileptonic {
       return outputHisto;
     }
 
+  int getBigitFromDouble(double d)
+  {
+    // function to determine the number of 
+    // digits from d before the comma
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: NONE
+    
+    int out=1;
+    while(std::abs(d)>=pow(10, out)) out++;
+    return out;
+
+  }
+
   void DrawDecayChLabel(TString decaychannel="", double textSize=0.04)
   {
     // Draw label for Decay Channel in upper left corner of plot
@@ -966,12 +994,20 @@ namespace semileptonic {
       // Summer12
       Nevents = 6923750*0.999881;// 8 TEV PU SF from gen ttbarSG Integral/entries
       // Systematic samples
-      if(kSys==sysTopScaleUp  ) Nevents=5009488;
-      if(kSys==sysTopScaleDown) Nevents=5387181;
-      if(kSys==sysTopMatchUp  ) Nevents=5415010;
-      if(kSys==sysTopMatchDown) Nevents=5476728;
-      if(kSys==sysTopMassUp   ) Nevents=5249525;
-      if(kSys==sysTopMassDown ) Nevents=5369214;
+      if(kSys!=sysNo){
+	if     (kSys==sysTopScaleUp  ) Nevents=5009488;
+	else if(kSys==sysTopScaleDown) Nevents=5387181;
+	else if(kSys==sysTopMatchUp  ) Nevents=5415010;
+	else if(kSys==sysTopMatchDown) Nevents=5476728;
+	else if(kSys==sysTopMassUp   ) Nevents=5249525;
+	else if(kSys==sysTopMassDown ) Nevents=5369214;
+	else if(kSys==sysTopMassUp2  ) Nevents=4733483;
+	else if(kSys==sysTopMassDown2) Nevents=4469095;
+	else if(kSys==sysTopMassUp3  ) Nevents=5145140;
+	else if(kSys==sysTopMassDown3) Nevents=5365348;
+	else if(kSys==sysTopMassUp4  ) Nevents=5249525;
+	else if(kSys==sysTopMassDown4) Nevents=5369214;
+      }
     }
     else if((sample==kSigPow)||(sample==kBkgPow)){
       crossSection=ttbarCrossSection; 
@@ -1210,14 +1246,18 @@ namespace semileptonic {
     // (iii) more/less single top
     if(sample==kSATops||sample==kSATopt||sample==kSAToptW||sample==kSTops||sample==kSTopt||sample==kSToptW||sample==kSTop){
       scale=0.3;
-      if(kSys==sysSTopUp  ) weight*=(1.0+scale);
-      if(kSys==sysSTopDown) weight*=(1.0-scale);
+      if(kSys!=sysNo){
+	if(kSys==sysSTopUp  ) weight*=(1.0+scale);
+	if(kSys==sysSTopDown) weight*=(1.0-scale);
+      }
     }
     if(sample==kWjets||sample==kZjets){
       scale=1.0;
-      if(kSys==sysVjetsUp  ) weight*=(1.0+scale);
-      if(kSys==sysVjetsDown) weight*=(1.0-scale);
-      if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
+      if(kSys!=sysNo){
+	if(kSys==sysVjetsUp  ) weight*=(1.0+scale);
+	if(kSys==sysVjetsDown) weight*=(1.0-scale);
+	if(scale!=0&&verbose>0) std::cout << "possible scale factor: " << scale << std::endl;
+      }
     }
     // printout for systematic variation
     if(verbose==1){
@@ -1234,7 +1274,7 @@ namespace semileptonic {
     // return result
     if(sample!=kData&&weight==1){
       std::cout << "WARNING: function lumiweight";
-      std::cout << " gives result 1 for sample:" << std::endl;
+      std::cout << " gives result 1 for sample: " << std::endl;
       std::cout << sampleLabel(sample,decayChannel) << ", " << decayChannel << " channel" << std::endl;
       std::cout << "used xSec:       " << crossSection << std::endl;
       std::cout << "used Nevents:    " << Nevents      << std::endl;
@@ -1286,7 +1326,7 @@ namespace semileptonic {
     if(entry<=result_.size()) result=result_[entry-1];
     else{
       std::cout << "warning - the requested element (" << entry <<") does not exist" << std::endl;
-      std::cout << "the string "  << inputTString << " with seperator " << seperateBy << " gives only " <<  result_.size() << "elements!" << std::endl;
+      std::cout << "the string "  << inputTString << " with seperator " << seperateBy << " gives only " <<  result_.size() << " elements!" << std::endl;
     }
     if(verbose) std::cout << "will return: " <<  result_[entry-1] << std::endl;
     // return output
@@ -1383,8 +1423,18 @@ namespace semileptonic {
     if((sys==sysVBosonMatchUp  )&&(sample==kZjets)) {fileName = "MatchUp/"+fileName+"MatchUp";     }
     if((sys==sysVBosonMatchDown)&&(sample==kZjets)) {fileName = "MatchDown/"+fileName+"MatchDown"; }
     // Top Mass
-    if((sys==sysTopMassUp  )&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassUp/"+fileName+"TopMassUp";    
-    if((sys==sysTopMassDown)&&((sample==kSig)||(sample==kBkg))) fileName = "TopMassDown/"+fileName+"TopMassDown";
+    if((sysLabel(sys).Contains("sysTopMassUp"  ))&&((sample==kSig)||(sample==kBkg))){ 
+      fileName = "TopMassUp/"+fileName+"TopMassUp";   
+      if(     sys==sysTopMassUp2) fileName+="2";
+      else if(sys==sysTopMassUp3) fileName+="3";
+      else if(sys==sysTopMassUp4) fileName+="4"; 
+    }
+    if((sysLabel(sys).Contains("sysTopMassDown"))&&((sample==kSig)||(sample==kBkg))){
+      fileName = "TopMassDown/"+fileName+"TopMassDown";
+      if(     sys==sysTopMassDown2) fileName+="2";
+      else if(sys==sysTopMassDown3) fileName+="3";
+      else if(sys==sysTopMassDown4) fileName+="4";      
+    }
     // label for MC production cycle
     fileName += "Summer12";
     fileName += "PF.root";
@@ -2223,7 +2273,8 @@ namespace semileptonic {
       bins_.clear();
 
       // pt(lepton)
-      double lepPtBins[]={30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200.};
+      // double lepPtBins[]={30., 35., 40., 45., 50., 60., 70., 80., 100., 120., 150., 200.};
+      double lepPtBins[]={30., 37., 45., 55., 68., 80., 100., 135., 200.};
       bins_.insert( bins_.begin(), lepPtBins, lepPtBins + sizeof(lepPtBins)/sizeof(double) );
       result["lepPt"]=bins_;
       bins_.clear();
@@ -2238,8 +2289,9 @@ namespace semileptonic {
       }
       bins_.clear();
 
-      // pt(bquark)
-      double bqPtBins[]={30., 60., 95., 140., 200., 400.};
+      // pt(bjet)
+      // double bqPtBins[]={30., 60., 95., 140., 200., 400.};
+      double bqPtBins[]={30., 48., 75., 180., 400.};
       bins_.insert( bins_.begin(), bqPtBins, bqPtBins + sizeof(bqPtBins)/sizeof(double) );
       result["bqPt"]=bins_;
       bins_.clear();
@@ -2252,19 +2304,22 @@ namespace semileptonic {
 
 
       // pt(bbbar)
-      double bbbarPtBins[]={0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 125.0, 160.0, 200.0, 275.0, 500.0};
+      //double bbbarPtBins[]={0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 125.0, 160.0, 200.0, 275.0, 500.0};
+      double bbbarPtBins[]={0.0, 35.0, 75.0, 115.0, 155.0, 280.0, 500.0};
       bins_.insert( bins_.begin(), bbbarPtBins, bbbarPtBins + sizeof(bbbarPtBins)/sizeof(double) );
       result["bbbarPt"]=bins_;
       bins_.clear();
 
       // m(bbbar)
-      double bbbarMassBins[]={0.0, 45.0, 60.0, 80.0, 105.0, 135.0, 165.0, 205.0, 255.0, 315.0, 390.0, 485.0, 620.0, 800.0};
+      //double bbbarMassBins[]={0.0, 45.0, 60.0, 80.0, 105.0, 135.0, 165.0, 205.0, 255.0, 315.0, 390.0, 485.0, 620.0, 800.0};
+      double bbbarMassBins[]={0.0, 85.0, 135.0, 190.0, 255.0, 325.0, 415.0, 505.0, 630.0, 800.0};
       bins_.insert( bins_.begin(), bbbarMassBins, bbbarMassBins + sizeof(bbbarMassBins)/sizeof(double) );
       result["bbbarMass"]=bins_;
       bins_.clear();
 
       // m(lb)
-      double lbMassBins[]={0.0, 70.0, 95.0, 120.0, 140.0, 500.0};
+      // double lbMassBins[]={0.0, 70.0, 95.0, 120.0, 140.0, 500.0};
+      double lbMassBins[]={0.0, 90.0, 122., 500.0};
       bins_.insert( bins_.begin(), lbMassBins, lbMassBins + sizeof(lbMassBins)/sizeof(double) );
       result["lbMass"]=bins_;
       bins_.clear();
@@ -2803,7 +2858,8 @@ namespace semileptonic {
       return constNnloStyle;
     }
     if(theo.Contains("nnlo"    )||theo.Contains("kidonakis")) return constNnloStyle;
-    return 1; // MadGraph
+    if(theo.Contains("madgraph")||theo.Contains("Madgraph")||theo.Contains("MadGraph")) return 1;
+    return 42; 
   }
   
   TString xSecLabelName(TString variable="", bool noUnit=false){
@@ -2934,6 +2990,7 @@ namespace semileptonic {
 	}
 	ratio_.push_back((TH1F*)tempRatio->Clone());
       }
+      if(verbose>3) std::cout << "debug A" << std::endl;
       // get some values from style
       Int_t    logx  = myStyle.GetOptLogx();
       Double_t left  = myStyle.GetPadLeftMargin();
@@ -2942,6 +2999,7 @@ namespace semileptonic {
       if(rangeMin!=-1.&&rangeMax!=-1.){
 	histNumeratorData->GetXaxis()->SetRange(histNumeratorData->FindBin(rangeMin),histNumeratorData->FindBin(rangeMax));
       }
+      if(verbose>3) std::cout << "debug B" << std::endl;
       //Double_t xmin = histNumeratorData->GetXaxis()->GetXmin();
       //Double_t xmax = histNumeratorData->GetXaxis()->GetXmax();
       // y:x size ratio for canvas
@@ -2956,6 +3014,7 @@ namespace semileptonic {
       gPad->SetBorderMode(0);
       gPad->SetBorderSize(0);
       gPad->SetFillColor(10);
+      if(verbose>3) std::cout << "debug C" << std::endl;
       // create pad to hide old axis
       TPad *whitebox = new TPad("whitebox","",0.97*left,ratioSize-0.2,1,ratioSize+0.001);
       whitebox->SetFillColor(10);
@@ -2991,6 +3050,8 @@ namespace semileptonic {
       rPad->SetLogy(0);
       rPad->SetLogx(logx);
       rPad->SetTicky(1);
+
+      if(verbose>3) std::cout << "debug D" << std::endl;
       // draw grid
       TPad *grid =(TPad*)rPad->Clone("grid");
       grid->SetGrid(0,1);
@@ -2999,11 +3060,13 @@ namespace semileptonic {
       rPad->Draw("");
       rPad->cd();
       //whitebox3->Draw();
-      TH1F* one2;
+      TH1F* one2=0;
       TGraphAsymmErrors* errorband2=0;
       TGraphAsymmErrors* errorbandStat2=0;
       TLegend *leg  = new TLegend(); 
+      if(verbose>3) std::cout << "debug E" << std::endl;
       for(unsigned int nTheory=0; nTheory<ratio_.size(); ++nTheory){
+	if(verbose>3) std::cout << "  -" << nTheory << std::endl;
 	ratio_[nTheory]->SetStats(kFALSE);
 	ratio_[nTheory]->SetTitle("");
 	ratio_[nTheory]->SetMaximum(ratioMax);
@@ -3019,6 +3082,7 @@ namespace semileptonic {
 	ratio_[nTheory]->SetFillStyle(0);
 	ratio_[nTheory]->SetMarkerSize(0.2);
 	unsigned int style =theoryStyle((TString)histDenominatorTheoryOrdered_[nTheory]->GetName());
+	if(style==42) style=histDenominatorTheoryOrdered_[nTheory]->GetLineStyle();
 	//std::cout << histDenominatorTheoryOrdered_[nTheory]->GetName() << ": " << style << std::endl;
 	ratio_[nTheory]->SetLineStyle(style);
 	// configure axis of ratio_[nTheory] plot
@@ -3038,12 +3102,14 @@ namespace semileptonic {
 	ratio_[nTheory]->GetXaxis()->SetRange(histNumeratorData->GetXaxis()->GetFirst(), histNumeratorData->GetXaxis()->GetLast());
 	// first plot
 	if(nTheory==0){
+	  if(verbose>3) std::cout << "debug F" << std::endl;
 	  setXAxisRange(ratio_[nTheory], (TString)ratio_[nTheory]->GetName());
 	  if(rangeMin!=-1.&&rangeMax!=-1.){
 	    if(verbose>0) std::cout << "manual range chosen: " << ratio_[nTheory]->FindBin(rangeMin) << " .. " << ratio_[nTheory]->FindBin(rangeMax) << std::endl;
 	    ratio_[nTheory]->GetXaxis()->SetRange(ratio_[nTheory]->FindBin(rangeMin),ratio_[nTheory]->FindBin(rangeMax));
 	  }
 	}
+	if(verbose>3) std::cout << "debug G" << std::endl;
 	// MC@NLO errorbands
 	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBand")){
 	  int color2=kGray;
@@ -3065,6 +3131,7 @@ namespace semileptonic {
 	histDenominatorTheoryOrdered_[nTheory]->GetXaxis()->SetTitleSize(0);
 	// draw ratio_[nTheory] plot
 	if(nTheory==0){
+          if(verbose>3) std::cout << "debug G2" << std::endl;
 	  // line at 1
 	  TH1F* one=(TH1F*)ratio_[nTheory]->Clone();
 	  one->Divide(one);
@@ -3083,8 +3150,10 @@ namespace semileptonic {
 	  up->Scale(ratioMax);
 	  up->DrawClone("hist same");
 	  // errorband for data total error around 1
+          if(verbose>3) std::cout << "debug G3" << std::endl;
 	  TGraphAsymmErrors* errorband=histStatData ? (TGraphAsymmErrors*)(histStatData->Clone("errorband")) : new TGraphAsymmErrors(one->GetNbinsX()+1);
 	  for(int bin=1; bin<=one->GetNbinsX(); ++bin){
+	    //int bin2=histStatData->GetX()[bin]==0. ? bin : bin-1; 
 	    double totY=histNumeratorData->GetBinContent(bin);
 	    double totX=histStatData ? histStatData->GetX()[bin] : histNumeratorData->GetBinCenter(bin);
 	    double totErrY=histNumeratorData->GetBinError(bin);
@@ -3094,12 +3163,14 @@ namespace semileptonic {
 	    //errorband->SetBinError  (bin, histNumeratorData->GetBinError(bin)/histNumeratorData->GetBinContent(bin));	  
 	    //std::cout << bin << ": (x,dy/y)=(" << totX << "," << totErrY/totY << "), (x,y)=(" << totX << "," << totY << "+/-" << totErrY << ")" << std::endl;
 	  }
+          if(verbose>3) std::cout << "debug G4" << std::endl;
 	  int errcolor=kBlack;
 	  errorband->SetLineWidth(3.5);
 	  errorband->SetLineColor(errcolor);
 	  errorband2=(TGraphAsymmErrors*)errorband->Clone();
 	  // errorband for data stat error around 1
 	  if(histStatData){
+	    if(verbose>3) std::cout << "debug G5" << std::endl;
 	    TGraphAsymmErrors* errorbandStat=(TGraphAsymmErrors*)(histStatData->Clone("errorbandStat"));
 	    for(int bin=1; bin<=one->GetNbinsX(); ++bin){
 	      double statY=histStatData->GetY()[bin];
@@ -3113,6 +3184,7 @@ namespace semileptonic {
 	    errorbandStat->SetLineColor(errcolor);
 	    errorbandStat2=(TGraphAsymmErrors*)errorbandStat->Clone();
 	  }
+          if(verbose>3) std::cout << "debug G6" << std::endl;
 	  leg->SetX1NDC(0.22);
 	  leg->SetY1NDC(0.99);
 	  leg->SetX2NDC(0.58);
@@ -3124,9 +3196,9 @@ namespace semileptonic {
 	  leg ->SetTextAlign(12);
 	  leg ->AddEntry(errorband, "data stat+sys error", "F");
 	}
+	if(verbose>3) std::cout << "debug G7" << std::endl;
 	ratio_[nTheory]->DrawClone("hist same");
 	if(((TString)ratio_[nTheory]->GetName()).Contains("errorBandDn")) one2->Draw("hist same");
-
 	if(nTheory==ratio_.size()-1){
 	  gPad->RedrawAxis("g");
 	  gPad->RedrawAxis();
@@ -3135,11 +3207,12 @@ namespace semileptonic {
 	  if(errorbandStat2) errorbandStat2->Draw("p e same");
 	}
       }
+      if(verbose>3) std::cout << "debug H" << std::endl;
       if(addXBinGrid){
 	for(int bin=2; bin<=histNumeratorData->GetNbinsX(); ++bin){
 	  double xBorder=histNumeratorData->GetBinLowEdge(bin);
 	  drawLine(xBorder, ratioMin, xBorder, ratioMax, kBlack, 1, 3);
-	}
+	} 
       }
       rPad->SetTopMargin(0.0);
       rPad->SetBottomMargin(0.15*scaleFactor);
@@ -3149,6 +3222,7 @@ namespace semileptonic {
       //rPad->Print("./"+(TString)(histNumeratorData->GetName())+".png");
       gPad->cd();
       rPad->Draw();
+      if(verbose>3) std::cout << "debug H" << std::endl;
       return canv;
     }
     else{
@@ -4610,170 +4684,340 @@ namespace semileptonic {
     // ===============================================================
     // ===============================================================
     
+
   double regParameter(TString variable, TString decayChannel, int verbose=0, bool fullPS=false, bool tau=false, bool hadronPS=false, TString closureTestSpecifier="", bool probSel=false)
-    {
-	// this function returns k/value for SVD 
-	// unfolding for the corresponding variable
-	// modified quantities: NONE
-	// used functions: NONE
-	// used enumerators: NONE
-	// variable: name of variable
-	// verbose: level of output
-	
-	// NB: k-value should be independent from decay channel
-	// NB: at the moment k=N(bins) is used!
-
-	double k=-1.0;
-
-	// Unfolding with optimal tau
-	if(tau){
-	  // optimized parameters for each PS, final state, selection and closure test configuration
-	    if(decayChannel.Contains("muon")){
-	      if(closureTestSpecifier==""){
-		// optimized parameters (for mu+jets channel, cross check only) 
-		// top & ttbar:  hadron level not important
-                // FIXME: needs update for doubleKinFit
-		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 4.53         : 6.15        ) : 7.22;
-		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 2.52         : 3.41        ) : 7.22;
-		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 3.15         : 4.27        ) : 7   ;
-		else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 4.98/*5.94*/ : 6.66/*7.18*/) : 7.22;
-		else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ? 6.93/*5.90*/ : 8.71/*6.93*/) : 6.92;
-		else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ? 4.19/*3.34*/ : 4.91/*3.94*/) : 3.94;
-		else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ? 5.75/*4.77*/ : 7.24/*5.74*/) : 5.73;
-		else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ? 3.26/*2.42*/ : 3.72/*2.88*/) : 2.94;
-	        else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 7.41         : 9.76        ) : 7   ;
-	        else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 7.24         : 9.19        ) : 7   ;
-		else if(variable.Contains("lepPt")       ) k = (fullPS) ? 5.37 : ((hadronPS) ? (probSel ? 5.03/*5.63*/    :  7.03/*4.38*/   ) : 5.37);
-		else if(variable.Contains("lepEta")      ) k = (fullPS) ? 2.36 : ((hadronPS) ? (probSel ? 2.07/*3.5e-05*/ :  2.91/*1.8e-04*/) : 2.36);
-		else if(variable.Contains("bqPt")        ) k = (fullPS) ? 7.30 : ((hadronPS) ? (probSel ? 7.11/*11.46*/   : 11.24/*8.81*/   ) : 7.33);
-		else if(variable.Contains("bqEta")       ) k = (fullPS) ? 7.93 : ((hadronPS) ? (probSel ? 5.69/*8.06*/    :  8.15/*6.52*/   ) : 7.93);
-		else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 3.39/*1.07*/    :  3.87/*1.70*/   ) : 8   );
-		else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 5.43/*5.86*/    :  5.98/*7.94*/   ) : 8   );
-	        else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4    : ((hadronPS) ? (probSel ? 6.43            :  8.27           ) : 4   );
-		else if(variable.Contains("Njets")       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );
-		else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );/*FIXME*/
-	      }
-	    }
-	    else if (decayChannel.Contains("electron")){
-	      if(closureTestSpecifier==""){
-		// optimized parameters (for e+jets channel, cross check only)
-		// top & ttbar:  hadron level not important
-		// FIXME: needs update for doubleKinFit
-		if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 4.82         : 6.30        ) : 7.45;
-		else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 2.54         : 3.55        ) : 7.45;
-		else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 3.28         : 4.47        ) : 7   ;
-		else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 5.24/*6.26*/ : 7.05/*7.43*/) : 7.45;
-		else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ? 6.79/*5.52*/ : 8.30/*6.51*/) : 6.53;
-		else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ? 4.14/*3.18*/ : 4.91/*3.84*/) : 3.91;
-		else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ? 5.67/*4.58*/ : 6.94/*5.46*/) : 5.47;
-		else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ? 3.26/*2.73*/ : 4.30/*3.36*/) : 3.31;
-	        else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 7.08         : 9.46        ) : 7   ;
-	        else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 7.17         : 9.04        ) : 7   ;
-		else if(variable.Contains("lepPt")       ) k = (fullPS) ? 5.45 : ((hadronPS) ? (probSel ? 5.22/*6.28*/    :  7.15/*4.89*/   ) : 5.45);
-		else if(variable.Contains("lepEta")      ) k = (fullPS) ? 1.86 : ((hadronPS) ? (probSel ? 1.69/*7.6e-06*/ :  2.32/*3.9e-05*/) : 1.86);
-		else if(variable.Contains("bqPt")        ) k = (fullPS) ? 7.54 : ((hadronPS) ? (probSel ? 7.31/*11.75*/   : 11.37/*8.87*/   ) : 7.54);
-		else if(variable.Contains("bqEta")       ) k = (fullPS) ? 7.80 : ((hadronPS) ? (probSel ? 5.76/*8.05*/    :  8.12/*6.45*/   ) : 7.80);
-		else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 3.16/*1.08*/    :  3.54/*1.95*/   ) : 8   );
-		else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8    : ((hadronPS) ? (probSel ? 5.41/*5.73*/    :  5.83/*7.83*/   ) : 8   );
-	        else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4    : ((hadronPS) ? (probSel ? 6.34            :  8.12           ) : 4   );
-		else if(variable.Contains("Njets")       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.42/*FIXME*/   :  0.42           ) : 1   );
-		else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1    : ((hadronPS) ? (probSel ? 0.58/*FIXME*/   :  0.58           ) : 1   );/*FIXME*/
-	      }
-	    }
-	    else if(decayChannel.Contains("combined")){ 
-	      // optimized parameters, those are the ones used for the main results 
-	      // top & ttbar:  visible PS (hadron+parton level) not relevant
-	      // lepton&b(jet): full PS and parton level PS  not relevant
-	      // probSel values correspond to doubleKinFit+Prob>2%
-	      //                   top/ttbar quantity                   (fullPS    doubleKinFit+Prob               default      )   dummy other PS  
-	      if     (variable.Contains("topPtLead")   ) k = (fullPS) ? (probSel ? 6.87/*6.61*//*7.28*//*8.64*/ :  8.82/*10.37*/) : 10.36;
-	      else if(variable.Contains("topPtSubLead")) k = (fullPS) ? (probSel ? 3.84/*3.59*//*5.13*//*8.64*/ :  4.92/*10.37*/) : 10.36;
-	      else if(variable.Contains("topPtTtbarSys"))k = (fullPS) ? (probSel ? 4.86/*4.54*/                 :  6.19         ) :  7   ;
-	      else if(variable.Contains("topPt")       ) k = (fullPS) ? (probSel ? 7.56/*7.24*//*8.83*//*8.64*/ :  9.73/*10.37*/) : 10.36;
-	      else if(variable.Contains("topY" )       ) k = (fullPS) ? (probSel ? 9.59/*9.70*//*7.77*//*8.0 */ : 12.00/* 9.51*/) :  9.51;
-	      else if(variable.Contains("ttbarPt")     ) k = (fullPS) ? (probSel ? 5.85/*5.89*//*4.46*//*4.61*/ :  6.92/* 5.49*/) :  5.54;
-	      else if(variable.Contains("ttbarY")      ) k = (fullPS) ? (probSel ? 7.68/*8.06*//*6.23*//*6.63*/ : 10.04/* 7.93*/) :  7.93;
-	      else if(variable.Contains("ttbarMass")   ) k = (fullPS) ? (probSel ? 4.55/*4.60*//*3.00*//*3.61*/ :  5.68/* 4.44*/) :  4.44;
-	      else if(variable.Contains("ttbarDelPhi" )) k = (fullPS) ? (probSel ? 10.54/*10.24*/                 : 13.58         ) :  7   ;
-	      else if(variable.Contains("ttbarPhiStar")) k = (fullPS) ? (probSel ? 10.42/*10.20*/                 : 12.88         ) :  7   ;
-	      //          lepton/(b)jet quantity               dummy full PS    (visible PS:              doubleKinFit+Prob       default           )  dummy parton PS
-	      else if(variable.Contains("lepPt")       ) k = (fullPS) ? 7.65  : ((hadronPS) ? (probSel ?  4.945/*7.24*//*4.93*/    : 5.536/* 6.60*/  ) :  7.65);
-	      else if(variable.Contains("lepEta")      ) k = (fullPS) ? 3.02  : ((hadronPS) ? (probSel ?  3.373/*2.69*//*2.9e-07*/ : 4.217/*7.7e-06*/) :  3.00);
-	      else if(variable.Contains("bqPt")        ) k = (fullPS) ? 10.53 : ((hadronPS) ? (probSel ?  7.045/*10.19*//*8.56*/   : 8.063/*12.51*/  ) : 10.53);
-	      else if(variable.Contains("bqEta")       ) k = (fullPS) ? 11.12 : ((hadronPS) ? (probSel ?  6.657/*8.10*//*6.78*/    : 8.504/* 9.19*/  ) : 11.11);
-	      else if(variable.Contains("bbbarMass")   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.487/*4.62*//*1.51*/    : 4.089/* 2.57*/  ) :  8   );
-	      else if(variable.Contains("bbbarPt"  )   ) k = (fullPS) ? 8     : ((hadronPS) ? (probSel ?  4.857/*7.68*//*8.20*/    : 5.015/*11.14*/  ) :  8   );
-	      else if(variable.Contains("lbMass")      ) k = (fullPS) ? 4     : ((hadronPS) ? (probSel ?  5.119/*9.03*/            : 9.392           ) :  4   );
-	      else if(variable.Contains("Njets")       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  2.352/*0.77*/            : 4.890           ) :  1   );
-	      else if(variable.Contains("rhos" )       ) k = (fullPS) ? 1     : ((hadronPS) ? (probSel ?  4.668/*FIXME*/           : 5.660           ) : 1   );/*FIXME*/
-	    }
-	}
-	else{
-	  // Default unfolding with number of bins (see makeVariableBinning)
-	  // SVD unfolding at the moment NOT USED, values are only placeholders
-	  if     (variable.Contains("topPt")    ) k =  7;
-	  else if(variable.Contains("topY")     ) k = 10;
-	  else if(variable.Contains("ttbarPt")  ) k =  6;
-	  else if(variable.Contains("ttbarY")   ) k = 10;
-	  else if(variable.Contains("ttbarMass")) k =  7;
-	  else if(variable.Contains("lepPt")    ) k = 11;
-	  else if(variable.Contains("lepEta")   ) k = 14;
-	  else if(variable.Contains("bqPt")     ) k =  5;
-	  else if(variable.Contains("bqEta")    ) k =  8;
-	  else if(variable.Contains("bbbarPt"  )) k =  6;
-	  else if(variable.Contains("bbbarMass")) k =  7;
-	  else if(variable.Contains("Njets"    )) k =  5;
-	  else if(variable.Contains("rhoS"     )) k =  6;
-	}
-	// output
-	if(verbose>1){
-	    if(tau) std::cout << "tau";
-	    else std::cout << "k";
-	    std::cout << "(" << variable << ") = " << k << std::endl;
-	}
-	// check result
-	if(k<0){
-	    std::cout << "ERROR in regParameter:" << std::endl; 
-	    std::cout << "invalid k=" << k << " for variable " << variable << std::endl;
-	    std::cout << "unknown variable " << variable << " or decayChannel " << decayChannel << std::endl;
-	}
-	return k;
-    }
+  {
+    // this function returns k/value for SVD 
+    // unfolding for the corresponding variable
+    // modified quantities: NONE
+    // used functions: makeVariableBinning
+    // used enumerators: NONE
+    // variable: name of variable
+    // verbose: level of output
     
-    double getValue(TString fileName, TString canvName, TString plotName, int bin){
-      // get file
-      TFile* file = TFile::Open(fileName);
-      if(!file||(file->IsZombie())){ 
-	std::cout << "WARNING in getValue: file " << fileName << " not found" << std::endl;
-	return 0.;
+    // NB: only combined channel is supported
+    // NB: only fullPS is supported for top based quantities
+    // NB: only visiblePS is supported for b-jet/lepton based quantities
+    // NB: all parameters have been derived for the doubleKinFit+prob>0.02 setup
+    // NB: for all not supported cases k=Nbins is used!
+
+    double k=-1.0;
+    // Default unfolding with number of bins (see makeVariableBinning)
+    // SVD unfolding at the moment NOT USED, values are only placeholders
+    std::map<TString, std::vector<double> > binning_ = makeVariableBinning();
+    if(binning_.count(variable)>0) k = binning_[variable].size()-1;
+    
+    // Unfolding with optimal tau
+    if(tau&&probSel){
+      // optimized parameters for each PS, final state, selection and closure test configuration
+      if(decayChannel.Contains("combined")){ 
+	// top & ttbar:  visible PS (hadron+parton level) not relevant
+	if(fullPS){
+	  if(closureTestSpecifier==""){
+	    if     (variable.Contains("topPtLead")   ) k = 6.87;
+	    else if(variable.Contains("topPtSubLead")) k = 3.84;
+	    else if(variable.Contains("topPtTtbarSys"))k = 4.86;
+	    else if(variable.Contains("topPt")       ) k = 7.56;
+	    else if(variable.Contains("topY" )       ) k = 9.59;
+	    else if(variable.Contains("ttbarPt")     ) k = 5.85;
+	    else if(variable.Contains("ttbarY")      ) k = 7.68;
+	    else if(variable.Contains("ttbarMass")   ) k = 4.55;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.54;
+	    else if(variable.Contains("ttbarPhiStar")) k = 10.42;
+	  }
+	  else if(closureTestSpecifier=="NoDistort"){
+	    if     (variable.Contains("topPtLead")   ) k = 6.15;
+	    else if(variable.Contains("topPtSubLead")) k = 3.35;
+	    else if(variable.Contains("topPtTtbarSys"))k = 4.15;
+	    else if(variable.Contains("topPt")       ) k = 6.68;
+	    else if(variable.Contains("topY" )       ) k = 10.05;
+	    else if(variable.Contains("ttbarPt")     ) k = 5.98;
+	    else if(variable.Contains("ttbarY")      ) k = 7.80;
+	    else if(variable.Contains("ttbarMass")   ) k = 4.80;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.88;
+	    else if(variable.Contains("ttbarPhiStar")) k = 10.67;
+	  }
+	  else if(closureTestSpecifier=="topPtUp"){
+	    if     (variable.Contains("topPtLead")   ) k = 8.13;
+	    else if(variable.Contains("topPtSubLead")) k = 5.09;
+	    else if(variable.Contains("topPtTtbarSys"))k = 6.23;
+	    else if(variable.Contains("topPt")       ) k = 9.42;
+	    else if(variable.Contains("topY" )       ) k = 10.20;
+	    else if(variable.Contains("ttbarPt")     ) k = 6.19;
+	    else if(variable.Contains("ttbarY")      ) k = 7.95;
+	    else if(variable.Contains("ttbarMass")   ) k = 6.44;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.92;
+	    else if(variable.Contains("ttbarPhiStar")) k = 10.80;
+	  }
+	  else if(closureTestSpecifier=="topPtDown"){
+	    if     (variable.Contains("topPtLead")   ) k = 4.90;
+	    else if(variable.Contains("topPtSubLead")) k = 2.65;
+	    else if(variable.Contains("topPtTtbarSys"))k = 3.28;
+	    else if(variable.Contains("topPt")       ) k = 5.39;
+	    else if(variable.Contains("topY" )       ) k = 9.88;
+	    else if(variable.Contains("ttbarPt")     ) k = 5.78;
+	    else if(variable.Contains("ttbarY")      ) k = 7.66;
+	    else if(variable.Contains("ttbarMass")   ) k = 3.81;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.88;
+	    else if(variable.Contains("ttbarPhiStar")) k = 10.47;
+	  }
+	  else if(closureTestSpecifier=="data"){
+	    if     (variable.Contains("topPtLead")   ) k = 7.18;
+	    else if(variable.Contains("topPtSubLead")) k = 4.13;
+	    else if(variable.Contains("topPtTtbarSys"))k = 5.08;
+	    else if(variable.Contains("topPt")       ) k = 7.98;
+	    else if(variable.Contains("topY" )       ) k = 10.12;
+	    else if(variable.Contains("ttbarPt")     ) k = 6.08;
+	    else if(variable.Contains("ttbarY")      ) k = 7.88;
+	    else if(variable.Contains("ttbarMass")   ) k = 5.69;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.77;
+	    else if(variable.Contains("ttbarPhiStar")) k = 10.75;
+	  }
+	  else if(closureTestSpecifier=="ttbarMassUp"){
+	    if     (variable.Contains("topPtLead")   ) k = 5.78;
+	    else if(variable.Contains("topPtSubLead")) k = 3.21;
+	    else if(variable.Contains("topPtTtbarSys"))k = 3.94;
+	    else if(variable.Contains("topPt")       ) k = 6.36;
+	    else if(variable.Contains("topY" )       ) k = 9.91;
+	    else if(variable.Contains("ttbarPt")     ) k = 5.88;
+	    else if(variable.Contains("ttbarY")      ) k = 7.77;
+	    else if(variable.Contains("ttbarMass")   ) k = 4.54;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.92;
+	    else if(variable.Contains("ttbarPhiStar")) k = 10.62;
+	  }
+	  else if(closureTestSpecifier=="ttbarMassDown"){
+	    if     (variable.Contains("topPtLead")   ) k = 9.15;
+	    else if(variable.Contains("topPtSubLead")) k = 5.37;
+	    else if(variable.Contains("topPtTtbarSys"))k = 6.97;
+	    else if(variable.Contains("topPt")       ) k = 11.18;
+	    else if(variable.Contains("topY" )       ) k = 11.12;
+	    else if(variable.Contains("ttbarPt")     ) k = 6.56;
+	    else if(variable.Contains("ttbarY")      ) k = 8.01;
+	    else if(variable.Contains("ttbarMass")   ) k = 8.35;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.92;
+	    else if(variable.Contains("ttbarPhiStar")) k = 11.07;
+	  }
+	  else if(closureTestSpecifier=="1000"){
+	    if     (variable.Contains("topPtLead")   ) k = 5.32;
+	    else if(variable.Contains("topPtSubLead")) k = 2.42;
+	    else if(variable.Contains("topPtTtbarSys"))k = 3.17;
+	    else if(variable.Contains("topPt")       ) k = 5.48;
+	    else if(variable.Contains("topY" )       ) k = 9.91;
+	    else if(variable.Contains("ttbarPt")     ) k = 5.90;
+	    else if(variable.Contains("ttbarY")      ) k = 7.73;
+	    else if(variable.Contains("ttbarMass")   ) k = 3.84;
+	    else if(variable.Contains("ttbarDelPhi" )) k = 10.85;
+	    else if(variable.Contains("ttbarPhiStar")) k = 10.60;
+	  }
+	}
+	// lepton&b(jet): full PS and parton level PS  not relevant
+	else if(hadronPS){
+	  if(closureTestSpecifier==""){
+	    if(     variable.Contains("lepPt")       ) k = 5.65 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.30 ;
+	    else if(variable.Contains("bqPt")        ) k = 12.96;
+	    else if(variable.Contains("bqEta")       ) k = 6.62 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.49 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 4.93 ;
+	    else if(variable.Contains("lbMass")      ) k = 11.96;
+	    else if(variable.Contains("Njets")       ) k = 2.352;
+	    else if(variable.Contains("rhos" )       ) k = 4.65 ; 
+	  }
+	  else if(closureTestSpecifier=="NoDistort"){
+	    if(     variable.Contains("lepPt")       ) k = 5.62 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.34 ;
+	    else if(variable.Contains("bqPt")        ) k = 12.35;
+	    else if(variable.Contains("bqEta")       ) k = 6.48 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.50 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 5.08 ;
+	    else if(variable.Contains("lbMass")      ) k = 12.30;
+	    else if(variable.Contains("Njets")       ) k = 2.22 ;
+	    else if(variable.Contains("rhos" )       ) k = 4.80 ; 
+	  }
+	  else if(closureTestSpecifier=="topPtDown"){
+	    if(     variable.Contains("lepPt")       ) k = 5.24 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.20 ;
+	    else if(variable.Contains("bqPt")        ) k = 10.64;
+	    else if(variable.Contains("bqEta")       ) k = 6.31 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.35 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 4.81 ;
+	    else if(variable.Contains("lbMass")      ) k = 12.14;
+	    else if(variable.Contains("Njets")       ) k = 2.11 ;
+	    else if(variable.Contains("rhos" )       ) k = 4.44 ; 
+	  }
+	  else if(closureTestSpecifier=="topPtUp"){
+	    if(     variable.Contains("lepPt")       ) k = 6.09 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.46 ;
+	    else if(variable.Contains("bqPt")        ) k = 14.82;
+	    else if(variable.Contains("bqEta")       ) k = 6.76 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.78 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 5.49 ;
+	    else if(variable.Contains("lbMass")      ) k = 12.47;
+	    else if(variable.Contains("Njets")       ) k = 2.355;
+	    else if(variable.Contains("rhos" )       ) k = 5.30 ; 
+	  }
+	  else if(closureTestSpecifier=="data"){
+	    if(     variable.Contains("lepPt")       ) k = 5.83 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.41 ;
+	    else if(variable.Contains("bqPt")        ) k = 13.51;
+	    else if(variable.Contains("bqEta")       ) k = 6.65 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.63 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 5.31 ;
+	    else if(variable.Contains("lbMass")      ) k = 12.42;
+	    else if(variable.Contains("Njets")       ) k = 2.29 ;
+	    else if(variable.Contains("rhos" )       ) k = 5.06 ; 
+	  }
+	  else if(closureTestSpecifier=="ttbarMassUp"){
+	    if(     variable.Contains("lepPt")       ) k = 5.44 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.32 ;
+	    else if(variable.Contains("bqPt")        ) k = 11.71;
+	    else if(variable.Contains("bqEta")       ) k = 6.48 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.46 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 5.02 ;
+	    else if(variable.Contains("lbMass")      ) k = 12.22;
+	    else if(variable.Contains("Njets")       ) k = 2.18 ;
+	    else if(variable.Contains("rhos" )       ) k = 4.68 ; 
+	  }
+	  else if(closureTestSpecifier=="ttbarMassDown"){
+	    if(     variable.Contains("lepPt")       ) k = 7.15 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.50 ;
+	    else if(variable.Contains("bqPt")        ) k = 17.62;
+	    else if(variable.Contains("bqEta")       ) k = 6.65 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.95 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 5.60 ;
+	    else if(variable.Contains("lbMass")      ) k = 12.92;
+	    else if(variable.Contains("Njets")       ) k = 2.52 ;
+	    else if(variable.Contains("rhos" )       ) k = 5.76 ; 
+	  }
+	  else if(closureTestSpecifier=="1000"){
+	    if(     variable.Contains("lepPt")       ) k = 5.47 ;
+	    else if(variable.Contains("lepEta")      ) k = 3.32 ;
+	    else if(variable.Contains("bqPt")        ) k = 11.22;
+	    else if(variable.Contains("bqEta")       ) k = 6.41 ;
+	    else if(variable.Contains("bbbarMass")   ) k = 1.29 ;
+	    else if(variable.Contains("bbbarPt"  )   ) k = 4.83 ;
+	    else if(variable.Contains("lbMass")      ) k = 12.17;
+	    else if(variable.Contains("Njets")       ) k = 2.20 ;
+	    else if(variable.Contains("rhos" )       ) k = 4.66 ; 
+	  }
+	}
       }
-      // get canvas
-      TCanvas* canv=(TCanvas*)file->Get(canvName);
-      if(!canv){ 
-	std::cout << "WARNING in getValue: canvas " << canvName << " in file " << fileName << " not found" << std::endl;
-	return 0.;
-      }
-      // get plot
-      TH1F* plot  = (TH1F*)canv->GetPrimitive(plotName);
-      if(!plot){ 
-	std::cout << "WARNING in getValue: plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found" << std::endl;
-	return 0.;
-      }
-      // get uncertainty value
-      if(plot->GetNbinsX()+1<bin||bin<0){
-	std::cout << "WARNING in getValue: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found (" << plot->GetNbinsX() << " bins)" << std::endl;
-	return 0.;
-      }
-      if(plot->GetBinContent(bin)<0){
-	std::cout << "WARNING in getValue: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " has a negative value" << std::endl;
-      }
-      std::cout << plot->GetBinContent(bin) << std::endl;
-      return plot->GetBinContent(bin);
     }
+    else{
+      // SVD integer unfolding parameters
+      // (NOT USED at the moment, values are only placeholders)
+      if     (variable.Contains("topPt")    ) k =  8;
+      else if(variable.Contains("topY")     ) k = 10;
+      else if(variable.Contains("ttbarPt")  ) k =  6;
+      else if(variable.Contains("ttbarY")   ) k = 10;
+      else if(variable.Contains("ttbarMass")) k =  7;
+      else if(variable.Contains("ttbarPhiStar")) k = 8;
+      else if(variable.Contains("ttbarDelPhi" )) k = 4;
+      else if(variable.Contains("lepPt")    ) k =  6;
+      else if(variable.Contains("lepEta")   ) k = 12;
+      else if(variable.Contains("bqPt")     ) k =  4;
+      else if(variable.Contains("bqEta")    ) k =  8;
+      else if(variable.Contains("bbbarPt"  )) k =  6;
+      else if(variable.Contains("bbbarMass")) k =  9;
+      else if(variable.Contains("lbMass"   )) k =  3;
+      else if(variable.Contains("Njets"    )) k =  5;
+      else if(variable.Contains("rhoS"     )) k =  4;
+    }
+    // output
+    if(verbose>1){
+      if(tau) std::cout << "tau";
+      else std::cout << "k";
+      std::cout << "(" << variable << ") = " << k << std::endl;
+    }
+    // check result
+    if(k<0){
+      std::cout << "ERROR in regParameter:" << std::endl; 
+      std::cout << "invalid k=" << k << " for variable " << variable << std::endl;
+      std::cout << "unknown variable " << variable << " or decayChannel " << decayChannel << std::endl;
+    }
+    return k;
+  }
+ 
+  double getValue(TString fileName, TString canvName, TString plotName, int bin){
+    // get file
+    TFile* file = TFile::Open(fileName);
+    if(!file||(file->IsZombie())){ 
+      std::cout << "WARNING in getValue: file " << fileName << " not found" << std::endl;
+      return 0.;
+    }
+    // get canvas
+    TCanvas* canv=(TCanvas*)file->Get(canvName);
+    if(!canv){ 
+      std::cout << "WARNING in getValue: canvas " << canvName << " in file " << fileName << " not found" << std::endl;
+      return 0.;
+    }
+    // get plot
+    TH1F* plot  = (TH1F*)canv->GetPrimitive(plotName);
+    if(!plot){ 
+      std::cout << "WARNING in getValue: plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found" << std::endl;
+      return 0.;
+    }
+    // get uncertainty value
+    if(plot->GetNbinsX()+1<bin||bin<0){
+      std::cout << "WARNING in getValue: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " not found (" << plot->GetNbinsX() << " bins)" << std::endl;
+      return 0.;
+    }
+    if(plot->GetBinContent(bin)<0){
+      std::cout << "WARNING in getValue: bin " << bin << " in plot " << plotName << " within canvas " << canvName << " in file " << fileName << " has a negative value" << std::endl;
+    }
+    std::cout << plot->GetBinContent(bin) << std::endl;
+    return plot->GetBinContent(bin);
+  }
 
+  bool considerInTotalError(unsigned int kSys=sysNo){
+    // this function returns false for uncertainties which are not 
+    // considered in the total systematic uncertainty and true otherwise
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: systematicVariation
 
-    TString pseudoDataFileName(TString closureTestSpecifier, std::string decayChannel = "combined"){
-      // this function returns k/value for SVD 
+    bool result=true;
+    if     (kSys==sysVBosonScaleUp||kSys==sysVBosonScaleDown) result=false;          
+    else if(kSys==sysVBosonMatchUp||kSys==sysVBosonMatchDown) result=false;      
+    else if(kSys==sysTopMassUp2   ||kSys==sysTopMassDown2   ) result=false;
+    else if(kSys==sysTopMassUp3   ||kSys==sysTopMassDown3   ) result=false;
+    else if(kSys==sysTopMassUp4   ||kSys==sysTopMassDown4   ) result=false;
+    else if(kSys==sysBRUp         ||kSys==sysBRDown         ) result=false;
+    else if(kSys==sysGenMCatNLO||kSys==sysGenPowheg||kSys==sysGenPowhegHerwig) result=false;         
+    else if(kSys>=ENDOFSYSENUM                              ) result=false;
+    // std::cout << sysLabel(kSys) << ": " << result << std::endl; 
+    return result;
+  }
+
+  TString pseudoDataFileName(TString closureTestSpecifier, std::string decayChannel = "combined"){
+    // this function returns the name of the pseudo data  
+    // rootfile for the corresponding closureTestSpecifier
+    // modified quantities: NONE
+    // used functions: NONE
+    // used enumerators: NONE
+    // closureTestSpecifier: = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
+
+    TString out="";
+    // decay channel label
+    if(     decayChannel.compare("muon"    )==0) out+="muon"    ;
+    else if(decayChannel.compare("electron")==0) out+="electron";
+    //else if(decayChannel.compare("combined")==0) out+="combined";
+    else{
+      std::cout << "ERROR in pseudoDataFile, unknown input decayChannel=" << decayChannel << std::endl;
+      exit(0);
+    }
+    // closure test label
+    if      (closureTestSpecifier.Contains("NoDistort"    )) out+="PseudoData19712pb8TeV.root";
+    else if (closureTestSpecifier.Contains("topPtUp"      )) out+="PseudoData19712pbReweightedtopPtUp8TeV.root";
+    else if (closureTestSpecifier.Contains("topPtDown"    )) out+="PseudoData19712pbReweightedtopPtDown8TeV.root";
+    else if (closureTestSpecifier.Contains("ttbarMassUp"  )) out+="PseudoData19712pbReweightedttbarMassUp8TeV.root";
+    else if (closureTestSpecifier.Contains("ttbarMassDown")) out+="PseudoData19712pbReweightedttbarMassDown8TeV.root";
+    else if (closureTestSpecifier.Contains("data"         )) out+="PseudoData19712pbReweighteddata8TeV.root";
+    else if (closureTestSpecifier.Contains("1000"         )) out+="PseudoData19712pbandM1000W100Zprime8TeV.root";
+    return out;
+  }
+    TString pseudoDatalabel(TString closureTestSpecifier){
+      // this function return
       // unfolding for the corresponding variable
       // modified quantities: NONE
       // used functions: NONE
@@ -4781,25 +5025,17 @@ namespace semileptonic {
       // closureTestSpecifier: = \"NoDistort\", \"topPtUp\", \"topPtDown\", \"ttbarMassUp\", \"ttbarMassDown\", \"data\" or \"1000\"
 
       TString out="";
-      // decay channel label
-      if(     decayChannel.compare("muon"    )==0) out+="muon"    ;
-      else if(decayChannel.compare("electron")==0) out+="electron";
-      //else if(decayChannel.compare("combined")==0) out+="combined";
-      else{
-	std::cout << "ERROR in pseudoDataFile, unknown input decayChannel=" << decayChannel << std::endl;
-	exit(0);
-      }
       // closure test label
-      if      (closureTestSpecifier.Contains("NoDistort"    )) out+="PseudoData19712pb8TeV.root";
-      else if (closureTestSpecifier.Contains("topPtUp"      )) out+="PseudoData19712pbReweightedtopPtUp8TeV.root";
-      else if (closureTestSpecifier.Contains("topPtDown"    )) out+="PseudoData19712pbReweightedtopPtDown8TeV.root";
-      else if (closureTestSpecifier.Contains("ttbarMassUp"  )) out+="PseudoData19712pbReweightedttbarMassUp8TeV.root";
-      else if (closureTestSpecifier.Contains("ttbarMassDown")) out+="PseudoData19712pbReweightedttbarMassDown8TeV.root";
-      else if (closureTestSpecifier.Contains("data"         )) out+="PseudoData19712pbReweighteddata8TeV.root";
-      else if (closureTestSpecifier.Contains("1000"         )) out+="PseudoData19712pbandM1000W100Zprime8TeV.root";
+      if      (closureTestSpecifier.Contains("NoDistort"    )) out+="pseudo data=sum of default MC";
+      else if (closureTestSpecifier.Contains("topPtUp"      )) out+="pseudo data=softer p_{T}(top)";
+      else if (closureTestSpecifier.Contains("topPtDown"    )) out+="pseudo data=harder p_{T}(top)";
+      else if (closureTestSpecifier.Contains("ttbarMassUp"  )) out+="pseudo data=harder m(t#bar{t})";
+      else if (closureTestSpecifier.Contains("ttbarMassDown")) out+="pseudo data=softer m(t#bar{t})";
+      else if (closureTestSpecifier.Contains("data"         )) out+="pseudo data=p_{T}(top)#rightarrow data";
+      else if (closureTestSpecifier.Contains("1000"         )) out+="pseudo data=default MC + 1TeV Z'";
       return out;
     }
-    
+   
     // ===============================================================
     // ===============================================================
 

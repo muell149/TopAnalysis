@@ -11,7 +11,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
 			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
-  // ============================  //  Set ROOT Style
+  // ============================
+  //  Set ROOT Style
   // ============================
  
   TStyle myStyle("HHStyle","HHStyle");
@@ -63,15 +64,20 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   //        25: sysVBosonScaleUp           26: sysVBosonScaleDown          
   //        27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
   //        29: sysTopMatchUp              30: sysTopMatchDown             
-  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown          
-  //        33: sysTopMassUp               34: sysTopMassDown              
-  //        35: sysQCDUp                   36: sysQCDDown                  
-  //        37: sysSTopUp                  38: sysSTopDown                 
-  //        39: sysDiBosUp                 40: sysDiBosDown                
-  //        41: sysPDFUp                   42: sysPDFDown                  
-  //        43: sysHadUp                   44: sysHadDown                  
-  //        45: sysGenMCatNLO              46: sysGenPowheg  
-  //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
+  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown  
+  //        33: sysTopMassUp               34: sysTopMassDown  
+  //        35: sysTopMassUp2              36: sysTopMassDown2
+  //        37: sysTopMassUp3              38: sysTopMassDown3
+  //        39: sysTopMassUp4              40: sysTopMassDown4
+  //        41: sysQCDUp                   42: sysQCDDown                  
+  //        43: sysSTopUp                  44: sysSTopDown                 
+  //        45: sysDiBosUp                 46: sysDiBosDown 
+  //        47: sysVjetsUp                 48: sysVjetsDown
+  //        49: sysBRUp                    50: sysBRDown              
+  //        51: sysPDFUp                   52: sysPDFDown                  
+  //        53: sysHadUp                   54: sysHadDown                  
+  //        55: sysGenMCatNLO              56: sysGenPowheg  
+  //        57: sysGenPowhegHerwig         58: ENDOFSYSENUM
   
   // systematic variation for which you want to print the
   // inclusive cross section and the jet permutation overview
@@ -130,14 +136,16 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   TString dataSample="2012";
   // for closure test if desired
   TString closureLabel = "";
-  if      (closureTestSpecifier.Contains("NoDistort")) closureLabel = "PseudoData"+closureTestSpecifier;
-  else if (closureTestSpecifier.Contains("topPt"   )||
-	   closureTestSpecifier.Contains("ttbarMass")) closureLabel = "PseudoDataReweight"+closureTestSpecifier;
-  else if (closureTestSpecifier.Contains("data"     )) closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;
-  else if (closureTestSpecifier.Contains("1000"     )) closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
-  else{
-    std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
-    exit(0);
+  if(closureTestSpecifier!=""){
+    if      (closureTestSpecifier.Contains("NoDistort")) closureLabel = "PseudoData"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("topPt"   )||
+	     closureTestSpecifier.Contains("ttbarMass")) closureLabel = "PseudoDataReweight"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("data"     )) closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;
+    else if (closureTestSpecifier.Contains("1000"     )) closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
+    else{
+      std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
+      exit(0);
+    }
   }
   if(closureTestSpecifier!=""&&!dataFile.Contains("PseudoData")) dataFile=inputFolder+"/pseudodata/"+pseudoDataFileName(closureTestSpecifier, "electron")+":"+inputFolder+"/pseudodata/"+pseudoDataFileName(closureTestSpecifier, "muon");
   // save all plots into the following foldre
@@ -2279,6 +2287,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       int numSys=0;
       // Regularization parameter
       double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier, (addSel=="ProbSel" ? true : false) );
+      if(verbose>0) std::cout << variable << ": tau=" << regPar << std::endl;
       // Regularization Modus 
       //         0 means: Default setting. Same as 2
       //         1 means: Bin by Bin Unfolding
@@ -2303,7 +2312,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //         0 means: Default setting, same as 1
       //         1 means: interpret 'regPar' as k value (default)
       //         2 means: interpret 'regPar' as tau value
-      int unfoldWithParameter=2;
+      int unfoldWithParameter=2; 
+      //int unfoldWithParameter=1;
       if(systematicVariation!=sysNo) regMode=3;
       //    PRE-WEIGHTING
       //         0 means: Default value, same as 1
@@ -2358,9 +2368,9 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	else if(decayChannel=="electron") rootFile+="Elec";
 	else if(decayChannel=="combined") rootFile+="Lep";
-	rootFile+=+variable+LV+PS+unfPreWeightingStr+".root";
-	psFile =outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr;
-	epsFile=outputFolder+"unfolding/unfolding"+variable+LV+PS+unfPreWeightingStr+".eps";
+	rootFile+=closureLabel+variable+LV+PS+unfPreWeightingStr+".root";
+	psFile =outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr;
+	epsFile=outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
 	//if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
@@ -2417,7 +2427,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
       int scanpoints= (scan==2 ? 3 : 0);
-      scanpoints=1; // FIXME: fast tauscan results
+      //scanpoints=1; // FIXME: fast tauscan results
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
@@ -3302,7 +3312,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       TString outputfolder="";
       TString possibleFolderNames[5]={"efficiency", "analyzeTopRecoKinematicsKinFit", "xSec", "analyzeTopPartonLevelKinematics", "analyzeHypoKinFit"};
       for(unsigned int name=0; name<sizeof(possibleFolderNames)/sizeof(TString); ++name){
-	// add another subfoder indicating the systematic variation
+	// add another subfolder indicating the systematic variation
 	if(title.Contains(possibleFolderNames[name])){ 
 	  outputfolder=possibleFolderNames[name]+"/"+sysLabel(systematicVariation);
 	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name],""));

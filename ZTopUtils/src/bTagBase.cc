@@ -1,494 +1,544 @@
 #include "../interface/bTagBase.h"
-#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
- 
-namespace ztop{
+#include <stdexcept>
+#include "TRandom3.h"
 
-  bTagBase::bTagBase(){
-    wp_=0.244;
-    makeeffs_=true;
-    histp_=0;
-    effhistp_=0;
-    syst_=0;
-    is2011_=false;
-    cbflatineta_=true;
-    TH1::AddDirectory(kFALSE); 
-  }
-  int bTagBase::setSampleName(const std::string & samplename){
+namespace ztop {
+/**
+ * constructor does nothing in particular
+ */
+bTagBase::bTagBase() {
+
+    init_ = false;
+    makeeffs_ = true;
+    histp_ = 0;
+    effhistp_ = 0;
+    syst_ = nominal;
+    is2011_ = false;
+    TH1::AddDirectory(kFALSE);
+    nancount_=0;
+
+    wp_ = csvl_wp;
+    showWarnings = true;
+    debug = false;
+
+    sumStuffEff_ = 0.9999999;
+    sumStuffSfEff_ = 0.9999999;
+    wpvals_.resize(workingPoints::length_wp, 0);
+    minpt_.resize(workingPoints::length_wp, 0);
+    maxpt_.resize(workingPoints::length_wp, 0);
+
+}
+/**
+ * sets the sample name. It can be used as a unique identifier when
+ * reading or writing the histograms/data
+ * If input is read, the name is used to identify the right set of
+ * histograms (e.g. different for each sample but in the same bTagBase
+ * object)
+ */
+int bTagBase::setSampleName(const std::string & samplename) {
     //set pointers
-    std::map<std::string,std::vector<TH2D> >::iterator sampleit=histos_.find(samplename);
-    if(sampleit!=histos_.end())
-      histp_ = & (sampleit->second);
-    else
-      histp_ = 0;
-    std::map<std::string,std::vector<TH2D> >::iterator effit=effhistos_.find(samplename);
-    if(effit!=effhistos_.end())
-      effhistp_ = & (effit->second);
-    else
-      effhistp_ = 0;
+    initWorkingpoints();
 
-    if(!makeeffs_ && effhistp_ && histp_){
-      std::cout << "loaded b-tag efficiency histos for " << samplename << std::endl;
-      return 1;
-    }
-    else if(!makeeffs_ &&!effhistp_){
-      std::cout << " bTagBase::setSampleName: efficiency for " << samplename << " not derived, yet! exit." << std::endl;
-      return -1;
+    std::map<std::string, std::vector<TH2D> >::iterator sampleit = histos_.find(
+            samplename);
+    if (sampleit != histos_.end())
+        histp_ = &(sampleit->second);
+    else
+        histp_ = 0;
+    std::map<std::string, std::vector<TH2D> >::iterator effit = effhistos_.find(
+            samplename);
+    if (effit != effhistos_.end())
+        effhistp_ = &(effit->second);
+    else
+        effhistp_ = 0;
+
+    if (!makeeffs_ && effhistp_ && histp_) {
+        std::cout << "loaded b-tag efficiency histos for " << samplename
+                << std::endl;
+        return 1;
+    } else if (!makeeffs_ && !effhistp_) {
+        std::cout << " bTagBase::setSampleName: efficiency for " << samplename
+                << " not derived, yet! exit." << std::endl;
+        return -1;
     }
 
     // efficiencies not determined yet -> prepare efficiency histos
     // bool adddirtemp=TH1::AddDirectory;
     TH1::AddDirectory(kFALSE); //prevent some weird root behaviour
-    std::cout << "preparing b-tag efficiency histos for " << samplename << std::endl;
+    std::cout << "preparing b-tag efficiency histos for " << samplename
+            << std::endl;
 
     //////// put in algorithm to automatically rebin in case of low statistics !! then use a fine (equals btv binning) binning
 
-    double effptbins[] = {30.,50.,70.,100.,160.,210.,670.};
-    unsigned int npt=7;
-    double effetabins[] ={0.0,0.5,1.0,2.5};
-    unsigned int neta=4;
+    float effptbins[] = { 20., 50., 70., 100., 160., 210., 800. };
+    unsigned int npt = 7;
+    float effetabins[] = { 0.0, 0.5, 1.0, 2.5 };
+    unsigned int neta = 4;
 
     //probably there will be less statistics for the light jets, so histos might need a coarser binning
 
-    double l_effptbins[] = {30.,70.,120.,670.};
-    unsigned int l_npt=4;
-    double l_effetabins[] ={0.0,1.5,3.0};
-    unsigned int l_neta=3;
+    float l_effptbins[] = { 20., 70., 120., 800. };
+    unsigned int l_npt = 4;
+    float l_effetabins[] = { 0.0, 1.5, 3.0 };
+    unsigned int l_neta = 3;
 
-    TH2D bjets          = TH2D((TString)("bjets2D_"      +samplename) , "unTagged Bjets", npt-1, effptbins, neta-1, effetabins);    bjets.Sumw2();
-    TH2D bjetstagged    = TH2D((TString)("bjetsTagged2D_"+samplename) , "Tagged Bjets",   npt-1, effptbins, neta-1, effetabins);    bjetstagged.Sumw2(); 
-    TH2D cjets          = TH2D((TString)("cjets2D_"      +samplename) , "unTagged Cjets", npt-1, effptbins, neta-1, effetabins);    cjets.Sumw2();
-    TH2D cjetstagged    = TH2D((TString)("cjetsTagged2D_"+samplename) , "Tagged Cjets",   npt-1, effptbins, neta-1, effetabins);    cjetstagged.Sumw2(); 
-    TH2D ljets          = TH2D((TString)("ljets2D_"      +samplename) , "unTagged Ljets", l_npt-1, l_effptbins, l_neta-1, l_effetabins);    ljets.Sumw2();
-    TH2D ljetstagged    = TH2D((TString)("ljetsTagged2D_"+samplename) , "Tagged Ljets",   l_npt-1, l_effptbins, l_neta-1, l_effetabins);    ljetstagged.Sumw2();
-      
+    TH2D bjets = TH2D((TString) ("bjets2D_"), "unTagged Bjets", npt - 1,
+            effptbins, neta - 1, effetabins);
+    bjets.Sumw2();
+    TH2D bjetstagged = TH2D((TString) ("bjetsTagged2D_"), "Tagged Bjets",
+            npt - 1, effptbins, neta - 1, effetabins);
+    bjetstagged.Sumw2();
+    TH2D cjets = TH2D((TString) ("cjets2D_"), "unTagged Cjets", npt - 1,
+            effptbins, neta - 1, effetabins);
+    cjets.Sumw2();
+    TH2D cjetstagged = TH2D((TString) ("cjetsTagged2D_"), "Tagged Cjets",
+            npt - 1, effptbins, neta - 1, effetabins);
+    cjetstagged.Sumw2();
+    TH2D ljets = TH2D((TString) ("ljets2D_"), "unTagged Ljets", l_npt - 1,
+            l_effptbins, l_neta - 1, l_effetabins);
+    ljets.Sumw2();
+    TH2D ljetstagged = TH2D((TString) ("ljetsTagged2D_"), "Tagged Ljets",
+            l_npt - 1, l_effptbins, l_neta - 1, l_effetabins);
+    ljetstagged.Sumw2();
+
     std::vector<TH2D> temp;
-    temp << bjets << bjetstagged << cjets << cjetstagged << ljets << ljetstagged;
-    histos_[samplename]=temp;
+    temp << bjets << bjetstagged << cjets << cjetstagged << ljets
+            << ljetstagged;
+    histos_[samplename] = temp;
     histp_ = &(histos_.find(samplename)->second);
-    
-    TH2D beff          = TH2D((TString)("beff2D_"+samplename) ,     "Bjets eff", npt-1, effptbins, neta-1, effetabins);    beff.Sumw2();
-    TH2D ceff          = TH2D((TString)("ceff2D_"+samplename) ,     "Cjets eff", npt-1, effptbins, neta-1, effetabins);    ceff.Sumw2();
-    TH2D leff          = TH2D((TString)("leff2D_"+samplename) ,     "Ljets eff", l_npt-1, l_effptbins, l_neta-1, l_effetabins);    leff.Sumw2();
-   
+
+    TH2D beff = TH2D((TString) ("beff2D_"), "Bjets eff", npt - 1, effptbins,
+            neta - 1, effetabins);
+    beff.Sumw2();
+    TH2D ceff = TH2D((TString) ("ceff2D_"), "Cjets eff", npt - 1, effptbins,
+            neta - 1, effetabins);
+    ceff.Sumw2();
+    TH2D leff = TH2D((TString) ("leff2D_"), "Ljets eff", l_npt - 1, l_effptbins,
+            l_neta - 1, l_effetabins);
+    leff.Sumw2();
+
     temp.clear();
     temp << beff << ceff << leff;
-    effhistos_[samplename]=temp;
-    effhistp_=&(effhistos_.find(samplename)->second);
+    effhistos_[samplename] = temp;
+    effhistp_ = &(effhistos_.find(samplename)->second);
 
     return 0;
-    
-  }
 
- 
-  void bTagBase::fillEff(const ztop::PolarLorentzVector & p4, int genPartonFlavour, double bDiscrVal, double puweight){
-    if(!makeeffs_)
-      return;
-    if(!histp_){ //protection
-      std::cout << "bTagBase::fillEff: you have to set a samplename before filling efficiency histograms!" <<std::endl;
-      std::exit(EXIT_FAILURE);
+}
+/**
+ * adds an entry for a jet with p4, genpartonFlavour, bDiscrValue  and PUweight
+ * to the efficiency histograms
+ */
+void bTagBase::fillEff(const float& pt, const float&abs_eta,
+        const int &genPartonFlavour, const float &bDiscrVal,
+        const float &puweight) {
+    if (!makeeffs_)
+        return;
+    if (!histp_) { //protection
+        std::cout
+        << "bTagBase::fillEff: you have to set a samplename before filling efficiency histograms!"
+        << std::endl;
+        throw std::runtime_error(
+                "bTagBase::fillEff: you have to set a samplename before filling efficiency histograms!");
     }
-    if(genPartonFlavour ==0)
-      return;
+    if (genPartonFlavour == 0)
+        return;
 
-    double abs_eta= fabs(p4.Eta());
-    double pt=p4.Pt();
-    if(pt>670) pt=669;
+    jetTypes jettype=jetType(genPartonFlavour);
 
+    if (jettype == bjet) { // b jets
+        histp_->at(0).Fill(pt, abs_eta, puweight);
+        if (bDiscrVal > wpvals_[wp_])
+            histp_->at(1).Fill(pt, abs_eta, puweight);
+    } else if (jettype == cjet) { // c jets
 
-    if(fabs(fabs(genPartonFlavour) - 5) < 0.1 ){ // b jets
-      if(cbflatineta_) abs_eta=1;
-      histp_->at(0).Fill(pt,abs_eta,puweight);
-      if(bDiscrVal > wp_) 
-	histp_->at(1).Fill(pt,abs_eta,puweight);
+        histp_->at(2).Fill(pt, abs_eta, puweight);
+        if (bDiscrVal > wpvals_[wp_])
+            histp_->at(3).Fill(pt, abs_eta, puweight);
+    } else if (jettype == lightjet) { // light jets (including gluon jets)
+        histp_->at(4).Fill(pt, abs_eta, puweight);
+        if (bDiscrVal > wpvals_[wp_])
+            histp_->at(5).Fill(pt, abs_eta, puweight);
     }
-    else if(fabs(fabs(genPartonFlavour) - 4) < 0.1 ){ // c jets
-      if(cbflatineta_) abs_eta=1;
-      histp_->at(2).Fill(pt,abs_eta,puweight);
-      if(bDiscrVal > wp_) 
-	histp_->at(3).Fill(pt,abs_eta,puweight);
-    }  
-    else if(fabs(genPartonFlavour) > 0){ // light jets (including gluon jets)
-      histp_->at(4).Fill(pt,abs_eta,puweight);
-      if(bDiscrVal > wp_) 
-	histp_->at(5).Fill(pt,abs_eta,puweight);
-    }
-    else{
-
-    }
-  }
-
-
-  void bTagBase::makeEffs(){
-    if(!makeeffs_)
-      return;
-    if(!histp_ || !effhistp_){
-      std::cout << "bTagBase::makeEffs: you have to set a samplename!" <<std::endl;
-      std::exit(EXIT_FAILURE);
+}
+/**
+ * creates efficiency histograms, to be run after all are filled
+ */
+void bTagBase::makeEffs() {
+    if (!makeeffs_)
+        return;
+    if (!histp_ || !effhistp_) {
+        std::cout << "bTagBase::makeEffs: you have to set a samplename!"
+                << std::endl;
+        throw std::runtime_error(
+                "bTagBase::makeEffs: you have to set a samplename!");
     }
 
-    for(unsigned int i=0;i<effhistp_->size();i++){
-      for(int binx=1;binx<=effhistp_->at(i).GetNbinsX()+1;binx++){
-	for(int biny=1;biny<=effhistp_->at(i).GetNbinsY()+1;biny++){
-	  //
-	  //uses histos at 2i and 2i+1
-	  double cont=0;
-	  double err=1;
-	  if(histp_->at(2*i).GetBinContent(binx,biny) >0){
-	    cont=histp_->at(2*i+1).GetBinContent(binx,biny) / histp_->at(2*i).GetBinContent(binx,biny);
-	    std::cout << "makeEffs: content: " << cont;
-	    err=sqrt(cont*(1-cont)/ histp_->at(2*i).GetBinContent(binx,biny));
-	    std::cout << " error: " << err << "  " << binx << " " << biny << std::endl;
-	  }
-	  if(err > 0.015 && err!=1 && cont!=0){
-	    std::cout << "bTagBase::makeEffs: warning. error in bin (" << binx << ", " << biny << ") for histogram " << effhistp_->at(i).GetName() << " is larger than 0.015" << std::endl;
+    for (unsigned int i = 0; i < effhistp_->size(); i++) {
+        for (int binx = 1; binx <= effhistp_->at(i).GetNbinsX() + 1; binx++) {
+            for (int biny = 1; biny <= effhistp_->at(i).GetNbinsY() + 1;
+                    biny++) {
+                //
+                //uses histos at 2i and 2i+1
+                float cont = 1;
+                float err = 0.99; //to avoid zeros!
+                if (histp_->at(2 * i).GetBinContent(binx, biny) > 0) {
+                    cont = histp_->at(2 * i + 1).GetBinContent(binx, biny)
+                                                                                                                            / histp_->at(2 * i).GetBinContent(binx, biny);
+                    if (debug)
+                        std::cout << "makeEffs: content: " << cont;
+                    err = sqrt(
+                            cont * (1 - cont)
+                            / histp_->at(2 * i).GetBinContent(binx,
+                                    biny));
+                    if (debug)
+                        std::cout << " error: " << err << "  " << binx << " "
+                        << biny << std::endl;
+                }
+                if (err > 0.02 && err != 0.99) {
+                    if (showWarnings)
+                        std::cout
+                        << "bTagBase::makeEffs: warning. error in bin ("
+                        << binx << ", " << biny << ") for histogram "
+                        << effhistp_->at(i).GetName()
+                        << " is larger than 0.02" << std::endl;
 
-	    //here there is space for automatic rebinning!! just bool binok, if not merge 2 bins - maybe in second step, here performance is not crucial
+                    //here there is space for automatic rebinning!! just bool binok, if not merge 2 bins - maybe in second step, here performance is not crucial
 
-	  }
-	  effhistp_->at(i).SetBinContent(binx,biny,cont);
-	  effhistp_->at(i).SetBinError(binx,biny,err);
-	}
-      }
+                }
+                effhistp_->at(i).SetBinContent(binx, biny, cont);
+                effhistp_->at(i).SetBinError(binx, biny, err);
+            }
+        }
     }
-  }
+}
+
+void bTagBase::countJet(const float & pt, const float& abs_eta,
+        const int & genPartonFlavor) { //pt and eta not const & for a purpose
+
+    if(makeeffs_) return;
+    if (genPartonFlavor == 0)
+        return;
+
+    jetTypes jettype=jetType(genPartonFlavor);
+    float sf = 1;
+    float eff = 0;
+    sf=jetSF(pt, abs_eta,jettype);
+    eff=jetEff(pt, abs_eta,jettype);
+    /*
+    unsigned int effh = 100;
 
 
-  double bTagBase::getEventWeight(const std::vector<ztop::PolarLorentzVector > &p4s , std::vector<int> genPartonFlavours){
-    //skip protection for performance purposes?
+    if (jettype == bjet) { // b jets
+        effh = 0;
+        sf = BJetSF(pt, abs_eta);
+    } else if (jettype == cjet) { // c jets
+        effh = 1;
+        sf = CJetSF(pt, abs_eta);
+    } else { // (including gluon jets)
+        effh = 2;
+        sf = LJetSF(pt, abs_eta);
+    }
+
+    int ptbin = 0;
+    int etabin = 0;
+    int bla = 0;
+
+    effhistp_->at(effh).GetBinXYZ(effhistp_->at(effh).FindBin(pt, abs_eta),
+            ptbin, etabin, bla);
+    eff = effhistp_->at(effh).GetBinContent(ptbin, etabin);
+
+    if (!(0 <= eff && eff <= 1 && sf >= 0 && sf <= 100))
+        std::cout << "warning SF: " << sf << "   eff(" << pt << " GeV, "
+        << abs_eta << "): " << eff << "\t genflav: " << genPartonFlavor
+        << "\teffh " << effh << std::endl;
+     */
+    sumStuffEff_ = sumStuffEff_ * (1 - eff);
+    sumStuffSfEff_ = sumStuffSfEff_ * (1 - sf * eff);
+
+}
+bool bTagBase::jetIsTagged(const float & pt, const float& abs_eta,
+        const int & genPartonFlavor, const float & tagValue, const unsigned int & seed) const {
+
+    jetTypes jettype=jetType(genPartonFlavor);
+    const bool isBTagged = tagValue > wpvals_[wp_];
+    const double Btag_eff = jetEff(pt, abs_eta, jettype);
+    const double Btag_SF = jetSF(pt, abs_eta, jettype);
+    const float coin = TRandom3(seed).Uniform(1.0);
+
+    if ( Btag_SF > 1. ) {  // use this if SF>1
+        if ( !isBTagged ) {
+            // fraction of jets that need to be upgraded
+            const float mistagPercent = (1.0 - Btag_SF) / (1.0 - (1.0/Btag_eff) );
+
+            //upgrade to tagged
+            if( coin < mistagPercent ) return true;
+        }
+    }
+    else if ( Btag_SF < 1. ) {  // use this if SF<1
+        // downgrade tagged to untagged
+        if ( isBTagged && coin > Btag_SF ) return false;
+    }
+    else {  // no change if exactly SF==1
+        return isBTagged;
+    }
+    return isBTagged;
+
+}
+float bTagBase::getEventSF() {
     if(makeeffs_) return 1.;
-
-    if(! effhistp_){
-      std::cout << "bTagBase::getEventWeight: no sample set! EXIT!" <<std::endl;
-      std::exit (EXIT_FAILURE);
+    float sf = (1 - sumStuffSfEff_) / (1 - sumStuffEff_);
+    if(sf!=sf){
+        sf=1;
+        ++nancount_;
     }
-    if(p4s.size() != genPartonFlavours.size()){
-      std::cout << "bTagBase::getEventWeight: vector<lorentzvector> and vector<genPartonFlavour> must be of same size! EXIT!" <<std::endl;
-      std::exit (EXIT_FAILURE);
-    }
-
-    double sumStuffEff =0.9999999999;
-    double sumStuffSfEff =0.9999999999;
-    
-    for(unsigned int i=0;i<p4s.size();i++){
-
-      if(genPartonFlavours.at(i) == 0)
-	continue;
-
-      double pt=p4s.at(i).Pt();
-      double abs_eta=fabs(p4s.at(i).Eta());
-
-      double sf=1;
-      double multi=1; //was needed for ICHEP prescription. Now obsolete
-      unsigned int effh=100;
-      
-    
-      if(fabs(fabs(genPartonFlavours.at(i)) - 5) < 0.1 ){ // b jets
-	effh=0;
-
-	if(cbflatineta_) abs_eta=1;
-    
-	if(abs(syst_)>1 || syst_==0)  //default
-	  sf=BJetSF(pt,abs_eta);
-	else if(fabs(syst_+1) < 0.01)            //bjets down
-	  sf=BJetSF(pt,abs_eta,-1,multi);
-	else if(fabs(syst_-1) < -0.01)             //bjets up
-	  sf=BJetSF(pt,abs_eta,1,multi);
-      }
-      else if(fabs(fabs(genPartonFlavours.at(i)) - 4) < 0.1 ){ // c jets
-
-	if(cbflatineta_) abs_eta=1;
-    
-	effh=1;
-	if(abs(syst_>1) || syst_==0)  //default
-	  sf=CJetSF(pt,abs_eta);
-	else if(fabs(syst_+1) < 0.01)               //cjets down
-	  sf=CJetSF(pt,abs_eta,-1,multi);
-	else if(fabs(syst_-1) < -0.01)          //cjets up
-	  sf=CJetSF(pt,abs_eta,1,multi);
-      }
-      else{ // (including gluon jets)
-	effh=2;
-	if(fabs(syst_) < 1.1) // default
-	  sf=LJetSF(pt,abs_eta);
-	else if(fabs(syst_+2)<0.01)            // ljets down
-	  sf=LJetSF(pt,abs_eta,-1,multi);
-	else if(fabs(syst_-2)<0.01)             // ljets up
-	  sf=LJetSF(pt,abs_eta,1,multi);
-      }
-    
-      //  if(effh>30) continue; //no defined jet
-    
-
-      int ptbin=0;
-      int etabin=0; 
-      int bla=0;
-      double eff=0;
-      effhistp_->at(effh).GetBinXYZ(effhistp_->at(effh).FindBin(pt, abs_eta), ptbin, etabin, bla);
-      eff=effhistp_->at(effh).GetBinContent ( ptbin, etabin );
-      
-      if(!(0<=eff && eff<=1 && sf>=0 && sf <=100))
-	std::cout << "warning SF: " << sf << "   eff(" << pt << " GeV, " << abs_eta <<"): " <<eff<< "\t genflav: " << genPartonFlavours.at(i) << "\teffh " << effh << std::endl;
-      
-      sumStuffEff = sumStuffEff* ( 1-eff );
-      sumStuffSfEff= sumStuffSfEff* ( 1-sf*eff );
-    }
-    
-    if(!(( 1 -sumStuffSfEff ) / ( 1 -sumStuffEff ) > 0.3 || ( 1 -sumStuffSfEff ) / ( 1 -sumStuffEff ) < 1.5));
-      //  std::cout << "unusual weight: " << ( 1 -sumStuffSfEff ) / ( 1 -sumStuffEff ) << std::endl;
-
-
-    return ( 1 -sumStuffSfEff ) / ( 1 -sumStuffEff );
-  }
-
-
-  void bTagBase::setSystematic(const std::string & set){ 
-
-    if(set.find("heavy")!=std::string::npos && set.find("up")!=std::string::npos){
-      syst_=1;}
-    else if(set.find("heavy")!=std::string::npos && set.find("down")!=std::string::npos){
-      syst_=-1;}
-    else if(set.find("light")!=std::string::npos && set.find("up")!=std::string::npos){
-      syst_=2;}
-    else if(set.find("light")!=std::string::npos && set.find("down")!=std::string::npos){
-      syst_=-2;}
-    else if(set.find("def")!=std::string::npos){
-      syst_=0;}
-    else{
-      std::cout << "bTagBase::setSystematic: option " << set << " not available. Possible options: heavy up, heavy down, light up, light down, def";
-      exit(EXIT_FAILURE);}
-  }
-
-
-  void bTagBase::writeToTFile(TString filename, std::string treename){
-    AutoLibraryLoader::enable();
-    TFile * f = new TFile(filename,"RECREATE");
-    bool madenew=false;
-    TTree * t=0;
-    if(f->Get((treename).data())){
-      t = (TTree*) f->Get(treename.data());
-    }
-    else{
-      madenew=true;
-      t = new TTree(treename.data(),treename.data());
-    }
-    if(t->GetBranch("allbTagBase")){ //branch does  exist
-      
-      bTagBase * bt=this;
-      t->SetBranchAddress("allbTagBase", &bt);
-
-    }
-    else{
-      t->Branch("allbTagBase",this);
-      std::cout << "bTagBase::writeToTFile: added branch" << std::endl;
-    }
-    setMakeEff(false);
-    cleanptr();
-    t->Fill();
-    t->Write("",TObject::kOverwrite);
-    if(madenew)
-       delete t;
-    f->Close();
-    delete f;
-  }
-
-
-
-
-  void bTagBase::readFromTFile(TString filename, std::string treename){
-    AutoLibraryLoader::enable();
-    TFile * f = new TFile(filename);
-    TTree * t = (TTree*) f->Get(treename.data());
-    bTagBase * bt=0;
-    t->SetBranchAddress("allbTagBase", &bt); 
-    int entries=t->GetEntries();
-    if(entries>1)
-      std::cout << "bTagBase::readFromTFile: warning more than one bTagBase Class found. chose first entry" << std::endl;
-    for(float n=0;n<t->GetEntries();n++){
-      t->GetEntry(n);
-      if(bt){
-	*this=*bt;
-	setMakeEff(false);
-	return;
-      }
-    }
-    f->Close();
-    delete f;
-  }
-
- 
-
-  bTagBase bTagBase::operator + (bTagBase second){
-   
-    //loop through entries and check wether they can be found in second. If so, fail (future: merge nicely)
-    std::map<std::string,std::vector<TH2D> >::iterator sampleit,sampleit2;//=histos_.find(samplename);
-
-    for(sampleit=histos_.begin();sampleit!=histos_.end();++sampleit){
-      std::string samplename1=sampleit->first;
-      for(sampleit2=second.histos_.begin();sampleit2!=second.histos_.end();++sampleit2){
-	std::string samplename2=sampleit2->first;
-	if(samplename1 == samplename2){
-	  std::cout << "bTagBase: operator +: adding efficiencies with same samplename not supported (yet)!" << std::endl;
-	  return second;
-	}
-      }
-    }
-    //none of the samples are the same
-    second.histos_.insert(histos_.begin(),histos_.end()); // samplename vec<hist>
-    second.effhistos_.insert(effhistos_.begin(),effhistos_.end()); // samplename vec<hist>
-    return second;
-  }
-  //////////////////////////////////////////// BTV INPUT ///////////////////////////////////////
-
-  double bTagBase::BJetSF( double pt, double eta , int sys, double multiplier){
-    //CSVL b-jet SF
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-mujet_payload.txt
-
-    double abs_eta=fabs(eta);
-    abs_eta++; // not used right now; #TRAP#
-
-    if ( pt < 30 ) pt = 30;
-    if ( pt > 670 ) pt = 669;
-
-    double  ptbins[]  = {30.,40.,50.,60.,70.,80.,100.,120.,160.,210.,260.,320.,400.,500.,670.}; 
-    const unsigned int npt=15;
-    //   double  etabins[] = {0.0,0.5,1.0,1.5,2.0,2.4,3.0};
-    //   const unsigned int neta=7;
-
-  
-    double sf11= 1.02658*((1.+(0.0195388*pt))/(1.+(0.0209145*pt)));
-    if(sys==0 && is2011_)
-      return sf11;    
-
-    double sf12 = 0.981149*((1. -0.000713295*pt)/(1. -0.000703264*pt));
-    if(sys==0)
-      return sf12;
-   
-    double sf=sf12;
-    if(is2011_)
-      sf=sf11;
-
-    double SFb_error11[] = { 0.0188743, 0.0161816, 0.0139824, 0.0152644, 0.0161226, 0.0157396, 0.0161619, 0.0168747, 0.0257175, 0.026424, 0.0264928, 0.0315127, 0.030734, 0.0438259 };
-    double SFb_error12[] = {0.0484285, 0.0126178, 0.0120027, 0.0141137, 0.0145441, 0.0131145, 0.0168479, 0.0160836, 0.0126209, 0.0136017, 0.019182, 0.0198805, 0.0386531, 0.0392831, 0.0481008, 0.0474291 }; //moriond13 values tt and mu+jets
-
-    double abserr=0;
-    if(is2011_){
-      for(unsigned int i=1;i<npt;i++){
-	if(ptbins[i] > pt){
-	  abserr=SFb_error11[i-1];
-	}
-      }
-    }
-    else{
-      for(unsigned int i=1;i<npt;i++){
-	if(ptbins[i] > pt){
-	  abserr=SFb_error12[i-1];
-	}
-      }
-    }
-    if(sys<0)
-      return sf-(abserr*multiplier);
-    if(sys>0)
-      return sf+(abserr*multiplier);
-    else 
-      return sf;
-  }
-
-
-
-  double bTagBase::CJetSF ( double pt, double eta, int sys, double multiplier){
-    return BJetSF(pt, eta,sys ,multiplier*2);
-  }
-
-
-  double bTagBase::LJetSF ( double pt, double eta, int sys, double multiplier){    
-    //CSVL ligth jet mistag SF.
-    //From BTV-11-004 and https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs.C
-
-    double eta_abs = fabs(eta);
-    double x =pt; //for easier copy paste
-    if(x>=670) x=669; //approx but should be ok for ttbar/Z etc
-    //for eta > 2.4, the value for 2.4 is taken (should also be ok)
-
-    multiplier++; // to avoid warnings
-
-    double sf=1;
-
-    if(is2011_){
-      if(sys==0){
-	if ( eta_abs <= 0.5 ) {
-	  sf = ((1.07536+(0.000175506*x))+(-8.63317e-07*(x*x)))+(3.27516e-10*(x*(x*x)));
-	} else if ( eta_abs <= 1.0 ) {
-	  sf = ((1.07846+(0.00032458*x))+(-1.30258e-06*(x*x)))+(8.50608e-10*(x*(x*x)));
-	} else if ( eta_abs <= 1.5 ) {
-	  sf = ((1.08294+(0.000474818*x))+(-1.43857e-06*(x*x)))+(1.13308e-09*(x*(x*x)));
-	} else {
-	  sf = ((1.0617+(0.000173654*x))+(-5.29009e-07*(x*x)))+(5.55931e-10*(x*(x*x)));
-	}
-      }
-      else if(sys<0){
-	if ( eta_abs <= 0.5 ) {
-	  sf = ((0.994425+(-8.66392e-05*x))+(-3.03813e-08*(x*x)))+(-3.52151e-10*(x*(x*x)));
-	} else if ( eta_abs <= 1.0 ) {
-	  sf = ((0.998088+(6.94916e-05*x))+(-4.82731e-07*(x*x)))+(1.63506e-10*(x*(x*x)));
-	} else if ( eta_abs <= 1.5 ) {
-	  sf = ((1.00294+(0.000289844*x))+(-7.9845e-07*(x*x)))+(5.38525e-10*(x*(x*x)));
-	} else {
-	  sf = ((0.979816+(0.000138797*x))+(-3.14503e-07*(x*x)))+(2.38124e-10*(x*(x*x)));
-	}
-      }
-      else if(sys>0){
-	if ( eta_abs <= 0.5 ) {
-	  sf = ((1.15628+(0.000437668*x))+(-1.69625e-06*(x*x)))+(1.00718e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.0 ) {
-	  sf = ((1.15882+(0.000579711*x))+(-2.12243e-06*(x*x)))+(1.53771e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.5 ) {
-	  sf = ((1.16292+(0.000659848*x))+(-2.07868e-06*(x*x)))+(1.72763e-09*(x*(x*x)));
-	} else {
-	  sf = ((1.14357+(0.00020854*x))+(-7.43519e-07*(x*x)))+(8.73742e-10*(x*(x*x)));
-	}
-      }
-    }    
-
-    else{ //2012 perscr https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_Moriond2013.C  // Begin of definition of functions from SF_12ABCD ---------------
-      if(sys==0){
-	if ( eta_abs <= 0.5 ) {
-	  sf =((1.04901+(0.00152181*x))+(-3.43568e-06*(x*x)))+(2.17219e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.0 ) {
-	  sf =((0.991915+(0.00172552*x))+(-3.92652e-06*(x*x)))+(2.56816e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.5 ) {
-	  sf =((0.962127+(0.00192796*x))+(-4.53385e-06*(x*x)))+(3.0605e-09*(x*(x*x)));
-	} else {
-	  sf =((1.06121+(0.000332747*x))+(-8.81201e-07*(x*x)))+(7.43896e-10*(x*(x*x)));
-	}  
-      }
-      else if(sys<0){
-	if ( eta_abs <= 0.5 ) {
-	  sf =((0.973773+(0.00103049*x))+(-2.2277e-06*(x*x)))+(1.37208e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.0 ) {
-	  sf =((0.921518+(0.00129098*x))+(-2.86488e-06*(x*x)))+(1.86022e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.5 ) {
-	  sf =((0.895419+(0.00153387*x))+(-3.48409e-06*(x*x)))+(2.30899e-09*(x*(x*x)));
-	} else {
-	  sf =((0.983607+(0.000196747*x))+(-3.98327e-07*(x*x)))+(2.95764e-10*(x*(x*x)));
-	}  
-      }
-      else if(sys>0){
-	if ( eta_abs <= 0.5 ) {
-	  sf =((1.12424+(0.00201136*x))+(-4.64021e-06*(x*x)))+(2.97219e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.0 ) {
-	  sf =((1.06231+(0.00215815*x))+(-4.9844e-06*(x*x)))+(3.27623e-09*(x*(x*x)));
-	} else if ( eta_abs <= 1.5 ) {
-	  sf =((1.02883+(0.00231985*x))+(-5.57924e-06*(x*x)))+(3.81235e-09*(x*(x*x)));
-	} else {
-	  sf =((1.1388+(0.000468418*x))+(-1.36341e-06*(x*x)))+(1.19256e-09*(x*(x*x)));
-	}  
-      }
-    }
+    resetCounter();
     return sf;
-  }
+}
 
+float bTagBase::jetSF(const float &pt, const float& abs_eta,const jetTypes & jettype) const{
+    if(jettype==bjet) return BJetSF(pt, abs_eta);
+    if(jettype==cjet) return CJetSF(pt, abs_eta);
+    if(jettype==lightjet) return LJetSF(pt, abs_eta);
+    else return 1.;
+}
 
+float bTagBase::jetEff(const float &pt, const float& abs_eta,const jetTypes & jettype) const{
+    if(jettype == undefined)
+        return 1;
+    unsigned int effh = 100;
+    if(jettype==bjet)  effh = 0;
+    else if(jettype==cjet)  effh = 1;
+    else if(jettype==lightjet)  effh = 2;
 
+    int ptbin = 0;
+    int etabin = 0;
+    int bla = 0;
 
+    effhistp_->at(effh).GetBinXYZ(effhistp_->at(effh).FindBin(pt, abs_eta),
+            ptbin, etabin, bla);
+    return effhistp_->at(effh).GetBinContent(ptbin, etabin);
+}
+// ///////////////////////////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////// BTagPOG INPUT //////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * For each tagger or working point, the input from the BTag POG needs to be implemented
+ * as follows:
+ *
+ * Add the tagger name including the working point to the enum workingPoints in bTagBase.h
+ * You can find the definition right on top of the class declaration. Do not touch the last entry.
+ *
+ * 1. Add the working point discriminator value to the function initWorkingpoints()
+ *    as wpvals_.at(<your_new_enum)= discriminatorvalue;
+ *    and the pt range the SF are defined in
+ *    minpt_.at(<your_new_enum)=?;
+ *    maxpt_.at(<your_new_enum)=?;
+ *
+ *
+ * 2. Add the corresponding scale factors for B jets to the function BJetSF
+ *    - copy the full entry starting with "if(wp_== csvl_wp){"
+ *    - paste it right before the marker --END OF WORKING POINTS---
+ *    - edit the comments where the SF come from, give a link etc
+ *    - adapt numbers and WP definition, change "if" to "else if"
+ *    - don't change the parts marked as "don't change"
+ *      (--->   <region> <---- indicates a region not to be changed)
+ * 3. Add the scale factors to the function CJetSF/LJetSF
+ *    - similar to BJetSF
+ *
+ */
+
+void bTagBase::initWorkingpoints() {
+    // Please give some information about the SF here. E.g
+    // -------
+    // SF from:
+    // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_NOttbar_payload_EPS13.txt  (EPS 2013 prescription)
+    //  CSVL
+    // -------
+    wpvals_.at(csvl_wp) = 0.244;
+    minpt_.at(csvl_wp) = 20;
+    maxpt_.at(csvl_wp) = 800;
+
+}
+
+float bTagBase::BJetSF(const float & pt, const float& abs_eta,
+        float multiplier) const { //multiplier not const for a reason!
+
+    float x = pt;
+
+    if (is2011_) { //for 7 TeV !!!!
+
+    } else { //this is for 8 TeV!!!
+        if (wp_ == csvl_wp) {
+
+            // Please give some information about the SF here. E.g
+            // -------
+            // SF from:
+            // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_NOttbar_payload_EPS13.txt  (EPS 2013 prescription)
+            // -------
+
+            // please use the UPPER bin boundaries array given in the BTagPOG payload and then
+            // add the lowest bin (e.g. 20) at front
+            // make sure to use "static"
+
+            static float ptbins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 120, 160,
+                    210, 260, 320, 400, 500, 600, 800 };
+
+            //pu the errors to the corresponding SF here (copy/paste from BTagPOG payload)
+            //make sure to use static and that it has the same size as ptbins!!!
+            static float SFb_error[] = { 0.033408, 0.015446, 0.0146992,
+                    0.0183964, 0.0185363, 0.0145547, 0.0176743, 0.0203609,
+                    0.0143342, 0.0148771, 0.0157936, 0.0176496, 0.0209156,
+                    0.0278529, 0.0346877, 0.0350101 };
+
+            //don't change ---------------------------->
+            static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
+            static size_t SFb_errorSize = sizeof(SFb_error)
+                                                                                                                    / sizeof(SFb_error[0]);
+            if (SFb_errorSize != ptbinsSize - 1) {
+                std::cout
+                << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
+                << std::endl;
+                throw std::logic_error(
+                        "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins.");
+            }
+            //force range according to BTagPOG input (dont change)
+            if (x < ptbins[0]) {
+                x = ptbins[0];
+                multiplier *= 2;
+            } else if (x >= ptbins[ptbinsSize - 1]) {
+                x = ptbins[ptbinsSize - 1] - 0.0001;
+                multiplier *= 2;
+            }
+            // <---------------------------- don't change
+
+            //put the parametrization of the scale factor here (copy/paste from BTagPOG payload)
+            //do NOT use static (should not compile anyway)
+            float SF = 1.00572
+                    * ((1. + (0.013676 * x)) / (1. + (0.0143279 * x)));
+
+            //don't change:
+            //takes care of systematic variations (if any)
+            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, SF, multiplier);
+        }
+
+        //----------------END OF WORKING POINTS-----------------//
+        else { //never reached
+            throw std::logic_error(
+                    "bTagBase: no working point set (this should never happen so someone has screwed up the code)");
+        }
+
+    }
+    return 0; //never reached
+}
+
+float bTagBase::CJetSF(const float &pt, const float &abs_eta,
+        float multiplier) const {
+    if (wp_ == csvl_wp) {
+        // Please give some information about the SF here. E.g
+        // -------
+        // SF from:
+        // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG (EPS 2013 prescription)
+        // -------
+        //
+        // the same scale factor is supposed to be used with twice the uncertainty (multiplier*=2)
+        return BJetSF(pt, abs_eta, multiplier * 2.);
+    }
+
+    //----------------END OF WORKING POINTS-----------------//
+    return 0;
+}
+
+float bTagBase::LJetSF(const float& pt, const float& abs_eta,
+        float multiplier) const {
+
+    float x = pt;
+
+    if (is2011_) {
+        if (x >= 670)
+            x = 669; //approx but should be ok for ttbar/Z etc
+        //for eta > 2.4, the value for 2.4 is taken (should also be ok)
+        return 1;
+    }
+
+    else {
+        if (wp_ == csvl_wp) {
+            // Please give some information about the SF here. E.g
+            // -------
+            // SF from:
+            // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG (EPS 2013 prescription)
+            // From https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFlightFuncs_EPS2013.C  (EPS 2013 prescription)
+            // -------
+            //
+            // make sure, the range is appropriate (check the prescription)
+
+            if (x > 800 && abs_eta <= 1.5)
+                x = 800;
+            else if (x > 700 && abs_eta > 1.5)
+                x = 700;
+
+            // Please copy-paste the formulas here. Check the correct eta range
+            // systematics are handled directly here. use "else if" where applicable
+
+            if (syst_ != lightdown && syst_ != lightup) { //don't change
+                if (abs_eta <= 0.5)
+                    return ((1.01177 + (0.0023066 * x))
+                            + (-4.56052e-06 * (x * x)))
+                            + (2.57917e-09 * (x * (x * x)));
+                else if (abs_eta <= 1.0)
+                    return ((0.975966 + (0.00196354 * x))
+                            + (-3.83768e-06 * (x * x)))
+                            + (2.17466e-09 * (x * (x * x)));
+                else if (abs_eta <= 1.5)
+                    return ((0.93821 + (0.00180935 * x))
+                            + (-3.86937e-06 * (x * x)))
+                            + (2.43222e-09 * (x * (x * x)));
+                else
+                    return ((1.00022 + (0.0010998 * x))
+                            + (-3.10672e-06 * (x * x)))
+                            + (2.35006e-09 * (x * (x * x)));
+            } else if (syst_ == lightdown) { //don't change
+                if (abs_eta <= 0.5)
+                    return ((0.977761 + (0.00170704 * x))+ (-3.2197e-06 * (x * x)))+ (1.78139e-09 * (x * (x * x)));
+                else if (abs_eta <= 1.0)
+                    return ((0.945135 + (0.00146006 * x))
+                            + (-2.70048e-06 * (x * x)))
+                            + (1.4883e-09 * (x * (x * x)));
+                else if (abs_eta <= 1.5)
+                    return ((0.911657 + (0.00142008 * x))
+                            + (-2.87569e-06 * (x * x)))
+                            + (1.76619e-09 * (x * (x * x)));
+                else
+                    return ((1.03039 + (0.0013358 * x))
+                            + (-3.89284e-06 * (x * x)))
+                            + (3.01155e-09 * (x * (x * x)));
+            } else if (syst_ == lightup) { //don't change
+                if (abs_eta <= 0.5)
+                    return ((1.04582 + (0.00290226 * x))
+                            + (-5.89124e-06 * (x * x)))
+                            + (3.37128e-09 * (x * (x * x)));
+                else if (abs_eta <= 1.0)
+                    return ((1.00683 + (0.00246404 * x))
+                            + (-4.96729e-06 * (x * x)))
+                            + (2.85697e-09 * (x * (x * x)));
+                else if (abs_eta <= 1.5)
+                    return ((0.964787 + (0.00219574 * x))
+                            + (-4.85552e-06 * (x * x)))
+                            + (3.09457e-09 * (x * (x * x)));
+                else
+                    return ((1.1388 + (0.000468418 * x))
+                            + (-1.36341e-06 * (x * x)))
+                            + (1.19256e-09 * (x * (x * x)));
+            }
+        }
+
+        //----------------END OF WORKING POINTS-----------------//
+
+    }
+    return 0; //never reached
+}
 
 }

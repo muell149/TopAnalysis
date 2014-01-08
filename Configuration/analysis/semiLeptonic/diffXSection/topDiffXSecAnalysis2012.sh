@@ -13,7 +13,7 @@
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/uncertaintyDistributionsOverview
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/xSec
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/binning
-## mkdir -p diffXSecFromSignal/plots/muon/2012/effAndAcc
+## mkdir -p diffXSecFromSignal/plots/muon/2012/effANdacc
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/genRecoCorrPlots
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/kinFitPerformance
 ## mkdir -p diffXSecFromSignal/plots/muon/2012/shapeReweighting
@@ -51,6 +51,8 @@
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/comparisonATLAS
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/unfolding
 ## mkdir -p diffXSecFromSignal/plots/combined/2012/closureTest
+## mkdir -p diffXSecFromSignal/plots/combined/2012/massConstraintTest
+## mkdir -p diffXSecFromSignal/plots/combined/2012/regularizationTest
 
 ## b) root files needed for the Analysis are loaded automatically from /afs/naf.desy.de/group/cms/scratch/tophh/
 ## c) if not yet done, combine the MC samples for the single channels (like QCD, single top, Diboson) using combineMCsamples.C
@@ -74,7 +76,7 @@
 ##    ATLASCompTreeSGsamples.C-> compare various official ATLAS and CMS samples
 ##    analyzeGenComparison7TeV.C -> like analyzeGenComparison.C but for 7TeV samples/analysis
 ##    createNNLOplot.C -> create ahrens theory curves
-
+##    analyzeRegularizationTest.C-> test different choices of regularization methods and parameters
 
 ########################
 ## configure settings ##
@@ -243,14 +245,26 @@ produceResults=true
 ## redoCov = true / false (default: true)
 redoCov=true
 
+## scan different regularization parameter
+## regTest = true / false (default: true)
+regTest=true
+
+## scan different mass constraints
+## constraintTest = true / false (default: true)
+constraintTest=true
+
+## check topPt in different slices
+## topPtTests = true / false (default: true)
+topPtTests=true
+
 ## Make pt plots logarithmic
 ## makeLogPlots = true / false (default: false)
 makeLogPlots=false
 
 ## last systematic to proceed (0: only std analysis without variation)
 ## has to be consistent with the enumerator "systematicVariation" in "basicFunctions.h"
-## maxSys>0 needs a lot of time (must be <= 47 (default), see list of systematics below)
-maxSys=47
+## maxSys>0 needs a lot of time (must be <= 57 (default), see list of systematics below)
+maxSys=57
 
 ## Include cross-check variables to get additional differential cross-sections for
 ## a) pT(top) and pT(antitop)
@@ -323,6 +337,8 @@ if [ $closureTestSpecifier != \"\" ]
     useBCC=false
     clean=false
     redoCov=false
+    topPtTests=false
+    constraintTest=false
 fi
 
 muonFile=./diffXSecTopSemiMu$dataLabel$LV$PS.root
@@ -359,6 +375,12 @@ if [ $decayChannel == \"combined\" ]
 	echo "Luminosity:                                 $dataLuminosity  "
 	echo "Re-do control plots:                        $redoControlPlots" 
 	echo "Re-do systematic uncertainties:             $redoSystematics "
+	echo "Re-do covariance matrix::                   $redoCov         "
+	echo "Perform regularization parameter scan test: $regTest         "
+        echo "Perform top mass constraint bias test:      $constraintTest  "
+        echo "Perform generator comparison test:          $genComparison   "
+        echo "Perform topPt in different slices test:     $topPtTests      "
+	echo "Produce final results:                      $produceResults  "
 	echo "Number of considered systematics:           $maxSys          "
 	echo "additional selection:                       $addSel (chi2<$chi2Max)"
 	echo "Save plots:                                 $save            "
@@ -375,7 +397,7 @@ if [ $decayChannel == \"combined\" ]
     fi
 fi
 
-if [ $fast = false ]
+if [ $fast == false ]
     then
     sleep 5
 fi
@@ -385,13 +407,13 @@ fi
 #### ===================================
 echo
 echo "part A: Delete existing files and plots (if applicable)"
-if [ $fast = false ]; then
+if [ $fast == false ]; then
     sleep 3
 fi
 
-if [ $clean = true ]; then
+if [ $clean == true ]; then
 
-    if [ $redoSystematics = false ]; then
+    if [ $redoSystematics == false ]; then
 	echo
 	echo "Flag 'redoSystematics' is set to $redoSystematics "
 	echo "Flag 'clean' set to 'false' to avoid deleting files/plots which are not recreated "
@@ -447,12 +469,12 @@ fi
 BEFOREB=$(date +%s)
 echo
 echo "Part B: process cut monitoring macro"
-if [ $fast = false ]
+if [ $fast == false ]
     then
     sleep 3
 fi
 
-if [ $redoControlPlots = true ]; then
+if [ $redoControlPlots == true ]; then
     
     ## Compile library
     
@@ -470,7 +492,7 @@ EOF
     
     ## Execute macro
 
-    if [ $redoControlPlots = true ]; then
+    if [ $redoControlPlots == true ]; then
 	
 	for label in "${BoolArray[@]}"; do
 	    
@@ -492,7 +514,7 @@ EOF
 	echo ""
 	echo " Processing .... analyzeGenComparison.C++($save', '$verbose, true/false)"
         ## gen comparison
-	if [ $genComparison = true ]; then  
+	if [ $genComparison == true ]; then  
 	    root -l -q -b './analyzeGenComparison.C++('$save', '$verbose', true )'
 	    root -l -q -b './analyzeGenComparison.C++('$save', '$verbose', false)'	
 	fi
@@ -506,20 +528,20 @@ fi
 BEFOREC=$(date +%s)
 echo
 echo "Part C: process migration macro to validate binning"
-if [ $fast = false ]
+if [ $fast == false ]
     then
     sleep 3
 fi
 
-if [ $redoPurStab = true ]
+if [ $redoPurStab == true ]
     then
     # Array of differential variables
-    listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"topPtTtbarSys\" \"ttbarDelPhi\" \"ttbarPhiStar\" \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\" \"lbMass\" )
+    listVar_=( \"topPt\" \"topY\" \"ttbarPt\" \"ttbarY\" \"ttbarMass\" \"topPtTtbarSys\" \"ttbarDelPhi\" \"ttbarPhiStar\" )
     plotAcceptance=true
-    if [ $hadron = true ]; 
+    if [ $hadron == true ]; 
 	then 
-	listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\" \"bbbarPt\" \"bbbarMass\" \"lbMass\")
-	plotAcceptance=false
+	listVar_=( \"lepPt\" \"lepEta\" \"bqPt\" \"bqEta\" \"bbbarPt\" \"bbbarMass\" \"lbMass\" \"rhos\" \"Njets\" )
+	Plotacceptance=false
     fi
     	
     echo "purity and stability will be calculated for the following variables: "
@@ -528,7 +550,7 @@ if [ $redoPurStab = true ]
   
     # loop over all systematic variations
     for (( iVar=0; iVar<${#listVar_[@]}; iVar++ )); do
-	root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, '$chi2Max', 0, '$hadron')'
+	root -l -q -b './purityStabilityEfficiency.C++('${listVar_[$iVar]}','$save', '$decayChannel', '$inputFolderName', '$plotAcceptance', true, false, '$chi2Max', 1, '$hadron')'
     done
 fi
 
@@ -541,10 +563,10 @@ BEFORED=$(date +%s)
 echo
 echo "Part D: Prepare files for pdf uncertainties"
 
-if [ $decayChannel != \"combined\" -a $redoSystematics = true -a $redoPDFReweighting = true ]; then
+if [ $decayChannel != \"combined\" -a $redoSystematics == true -a $redoPDFReweighting == true ]; then
     echo
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity','$decayChannel', '$save', '$verbose', '$inputFolderName', '$dataSample', 'true', '$inclCCVars')' 
-elif [ $1 == "combined2" -a $redoSystematics = true -a $redoPDFReweighting = true ]; then
+elif [ $1 == "combined2" -a $redoSystematics == true -a $redoPDFReweighting == true ]; then
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"muon\"',     '$save', '$verbose', '$inputFolderName', '$mudataSample', 'true', '$inclCCVars')' 
     root -l -q -b './analyzeTopDiffXSecMCdependency.C++('$dataLuminosity', '\"electron\"', '$save', '$verbose', '$inputFolderName', '$eldataSample', 'true', '$inclCCVars')' 
 else
@@ -561,7 +583,7 @@ echo "INFO: missing files must not be problematic"
 echo "      either all WZ, WW and ZZ or the combined VV sample are necessary"
 echo "      same is true for the single top samples (s, t, tW)"
 echo
-if [ $fast = false ]
+if [ $fast == false ]
     then
     sleep 5
 fi
@@ -571,35 +593,40 @@ fi
 
 echo
 
-echo "  0: sysNo                                                      "
-echo "  1: sysLumiUp                   2: sysLumiDown                 "
-echo "  3: sysPUUp                     4: sysPUDown                   "
-echo "  5: sysJESUp                    6: sysJESDown                  "
-echo "  7: sysJERUp                    8: sysJERDown                  "
-echo "  9: sysLepEffSFNormUp          10: sysLepEffSFNormDown         "
-echo " 11: sysLepEffSFShapeEtaUp      12: sysLepEffSFShapeEtaDown     "
-echo " 13: sysLepEffSFShapePtUp       14: sysLepEffSFShapePtDown      "
-echo " 15: sysBtagSFUp                16: sysBtagSFDown               "
-echo " 17: sysBtagSFShapePt65Up       18: sysBtagSFShapePt65Down      "
-echo " 19: sysBtagSFShapeEta0p7Up     20: sysBtagSFShapeEta0p7Down    "
-echo " 21: sysMisTagSFUp              22: sysMisTagSFDown             "
-echo " 23: sysTopScaleUp              24: sysTopScaleDown             "
-echo " 25: sysVBosonScaleUp           26: sysVBosonScaleDown          "
-echo " 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       "
-echo " 29: sysTopMatchUp              30: sysTopMatchDown             "
-echo " 31: sysVBosonMatchUp           32: sysVBosonMatchDown          "
-echo " 33: sysTopMassUp               34: sysTopMassDown              "
-echo " 35: sysQCDUp                   36: sysQCDDown                  "
-echo " 37: sysSTopUp                  38: sysSTopDown                 "
-echo " 39: sysDiBosUp                 40: sysDiBosDown                "
-echo " 41: sysPDFUp                   42: sysPDFDown                  "
-echo " 43: sysHadUp                   44: sysHadDown                  "
-echo " 45: sysGenMCatNLO              46: sysGenPowheg                "
-echo " 47: sysGenPowhegHerwig         48: ENDOFSYSENUM                "
+echo "  0: sysNo                                                   "                                                    
+echo "  1: sysLumiUp                   2: sysLumiDown              "  
+echo "  3: sysPUUp                     4: sysPUDown                "  
+echo "  5: sysJESUp                    6: sysJESDown               "  
+echo "  7: sysJERUp                    8: sysJERDown               "  
+echo "  9: sysLepEffSFNormUp          10: sysLepEffSFNormDown      "  
+echo " 11: sysLepEffSFShapeUpEta      12: sysLepEffSFShapeDownEta  "  
+echo " 13: sysLepEffSFShapeUpPt       14: sysLepEffSFShapeDownPt   "  
+echo " 15: sysBtagSFUp                16: sysBtagSFDown            "  
+echo " 17: sysBtagSFShapeUpPt65       18: sysBtagSFShapeDownPt65   "  
+echo " 19: sysBtagSFShapeUpEta0p7     20: sysBtagSFShapeDownEta0p7 "  
+echo " 21: sysMisTagSFUp              22: sysMisTagSFDown          "  
+echo " 23: sysTopScaleUp              24: sysTopScaleDown          "  
+echo " 25: sysVBosonScaleUp           26: sysVBosonScaleDown       "  
+echo " 27: sysSingleTopScaleUp        28: sysSingleTopScaleDown    "  
+echo " 29: sysTopMatchUp              30: sysTopMatchDown          "  
+echo " 31: sysVBosonMatchUp           32: sysVBosonMatchDown  	   "
+echo " 33: sysTopMassUp               34: sysTopMassDown  	   "
+echo " 35: sysTopMassUp2              36: sysTopMassDown2	   "
+echo " 37: sysTopMassUp3              38: sysTopMassDown3	   "
+echo " 39: sysTopMassUp4              40: sysTopMassDown4	   "
+echo " 41: sysQCDUp                   42: sysQCDDown               "  
+echo " 43: sysSTopUp                  44: sysSTopDown              "  
+echo " 45: sysDiBosUp                 46: sysDiBosDown 		   "
+echo " 47: sysVjetsUp                 48: sysVjetsDown		   "
+echo " 49: sysBRUp                    50: sysBRDown                "
+echo " 51: sysPDFUp                   52: sysPDFDown               "  
+echo " 53: sysHadUp                   54: sysHadDown               "  
+echo " 55: sysGenMCatNLO              56: sysGenPowheg  	   "
+echo " 57: sysGenPowhegHerwig         58: ENDOFSYSENUM             "
 
 echo
 
-if [ $fast = false ]; then
+if [ $fast == false ]; then
     sleep 5
 fi
 
@@ -649,7 +676,7 @@ EOF
     ##  Processing systematic uncertainties 
     ## ==========================================
 
-    if [ $redoSystematics = true ]; then
+    if [ $redoSystematics == true ]; then
     
         ## loop all systematic variations
 	
@@ -679,11 +706,11 @@ fi
 #### ===================================
 echo
 echo "Part E2: Combine electron and muon channel"
-if [ $fast = false ]; then
+if [ $fast == false ]; then
     sleep 2
 fi
 
-if [ $decayChannel == \"combined\" -a $produceResults = true ]; then
+if [ $decayChannel == \"combined\" -a $produceResults == true ]; then
     
     ## A final uncertainties and result plots
     echo "Cross sections for all systematic variations and combined decay channels"
@@ -719,7 +746,7 @@ EOF
     echo
     echo "Covariance Matrix for systematic variations"
     echo
-    if [ $redoCov = true ]; then    
+    if [ $redoCov == true ]; then    
         ## delete old files
 	if [ -f commandsCovMatrixPrepare.cint ]; then    
 	rm commandsCovMatrixPrepare.cint
@@ -742,7 +769,7 @@ EOF
 covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)
 EOF
 	echo ""
-	echo " Processing ....  covarianceOfSystematicUnc($save, $verbose+1, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)"
+	echo " Processing ....  covarianceOfSystematicUnc($save, $verbose, $decayChannel, $extrapolate, $hadron, $closureTestSpecifier)"
 	root -l -b < commandsCovMatrixRun.cint
     else
 	echo "... skipped"
@@ -762,11 +789,11 @@ BEFOREF=$(date +%s)
 
 echo
 echo "Part F: Calculate systematic errors and draw final cross section"
-if [ $fast = false ]; then
+if [ $fast == false ]; then
     sleep 3
 fi
 
-if [ $produceResults = true -a $closureTestSpecifier == \"\" ]; then
+if [ $produceResults == true -a $closureTestSpecifier == \"\" ]; then
     echo ""
     echo " Processing .... combineTopDiffXSecUncertainties($dataLuminosity, $save, $verbose, $decayChannel, $extrapolate, $hadron, $inclCCVars, $useBCC)"
     root -l -q -b './combineTopDiffXSecUncertainties.C++('$dataLuminosity', '$save', '$verbose', '$decayChannel', '$extrapolate', '$hadron', '$inclCCVars', '$closureTestSpecifier', '$useBCC')'
@@ -778,7 +805,7 @@ fi
 ####  Create ratio plots for final xSecs 
 #### ==========================================
 
-if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" -a $produceResults = true ]; then
+if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" -a $produceResults == true ]; then
     echo ""
     echo " Processing .... createTheoryDataRatios($extrapolate, $hadron, $verbose)"
     root -l -q -b './createTheoryDataRatios.C++('$extrapolate', '$hadron', '$verbose')'
@@ -790,12 +817,70 @@ fi
 #### ===================================================
 ####  Create latex code result tables for final xSecs 
 #### ===================================================
-if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" -a $produceResults = true ]; then
+if [ $decayChannel == \"combined\" -a $closureTestSpecifier == \"\" -a $produceResults == true ]; then
     echo ""
     echo " Processing .... makeResultTables($decayChannel, $extrapolate, $hadron, $inclCCVars)"
     root -l -q -b './makeResultTables.C++('$decayChannel', '$extrapolate', '$hadron', '$inclCCVars')'
 else
     echo "will be ignored, only done if final results are produced (produceResults is set to $produceResults)"
+fi
+
+
+#### ===================================================
+####  Perform regularization parameter scan
+#### ===================================================
+BEFOREG=$(date +%s)
+
+echo
+echo "Part G: Perform different studies and tests"
+
+## collect tests to be performed 
+listRegScan_=( \"mix\" )
+if [ $closureTestSpecifier == \"\" ];
+    then
+    listRegScan_=( \"mix\" \"tau\" \"k\" )
+fi
+echo ""
+echo " Processing .... analyzeRegularizationTest.C++(i, $dataLuminosity, $save, 0, $verbose, $inputFolderName, $dataSample, $decayChannel, $SVD, $extrapolate, $hadron, $redetTau, $closureTestSpecifier, $addSel)"
+if [ $regTest == true -a $hadron == false -a $extrapolate == true ]; then 
+    # loop over all tests
+    for (( iTest=0; iTest<${#listRegScan_[@]}; iTest++ )); do
+	echo "  - i=${listRegScan_[$iTest]}"
+	root -l -b -q './analyzeRegularizationTest.C++g('${listRegScan_[$iTest]}','$dataLuminosity', '$save', 0, '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', '$SVD', '$extrapolate', '$hadron', '$redetTau', '$closureTestSpecifier', '$addSel')'
+    done
+else
+     echo "will be ignored, only done for extrapolate=true, hadron=false and regTest=true"
+fi
+
+
+#### ===================================================
+####  Perform mass parameter bias test
+#### ===================================================
+echo ""
+echo " Processing .... analyzeFileComparison($save, true/false , $verbose)"
+
+if [ $constraintTest == true -a $closureTestSpecifier == \"\" ]; then
+    root -l -b -q './analyzeFileComparison.C++g('$save', true , '$verbose')'
+    root -l -b -q './analyzeFileComparison.C++g('$save', false, '$verbose')'
+else
+    echo "will be ignored (only done for real data and constraintTest=true)"
+fi
+
+#### ===================================================
+####  Perform topPt in slices test
+#### ===================================================
+echo ""
+echo " Processing .... treeComparison($dataLuminosity, $save, $verbose, $inputFolderName, $dataSample, $decayChannel, true, prob/PV)"
+
+ listChecks_=( \"prob\" \"PV\" )
+if [ $topPtTests == true -a $closureTestSpecifier == \"\" ]; then
+    # loop over all tests
+    for (( iCheck=0; iCheck<${#listChecks_[@]}; iCheck++ )); do
+	echo "  - i=${listChecks_[$iCheck]}"
+	root -l -b -q './treeComparison.C++g('$dataLuminosity', '$save', '$verbose', '$inputFolderName', '$dataSample', '$decayChannel', true, '${listChecks_[$iCheck]}')'
+    done
+else
+    echo "will be ignored, only done for real data and topPtTests=true"
 fi
 
 #### ==========================================
@@ -822,5 +907,6 @@ echo "part A: $(( $BEFOREB   - $START    )) seconds (clean up  )"
 echo "part B: $(( $BEFOREC   - $BEFOREB  )) seconds (monitoring)"
 echo "part C: $(( $BEFORED   - $BEFOREC  )) seconds (migration)"
 echo "part D: $(( $BEFOREE   - $BEFORED  )) seconds (prepare PDF uncertainty run)"
-echo "part F: $(( $BEFOREF   - $BEFOREE  )) seconds (xSec, $maxSys systematic variations considered)"
-echo "part G: $(( $END       - $BEFOREF  )) seconds (errors and final xSec)"
+echo "part F: $(( $BEFOREF   - $BEFOREE  )) seconds (xSecs- $maxSys systematic variations considered, cov matrix)"
+echo "part G: $(( $BEFOREG   - $BEFOREF  )) seconds (errors and final xSec)"
+echo "part H: $(( $END       - $BEFOREG  )) seconds (regularization parameter scan, mass constraint test"

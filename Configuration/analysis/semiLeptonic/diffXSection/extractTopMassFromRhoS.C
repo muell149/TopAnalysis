@@ -1,13 +1,16 @@
 #include "basicFunctions.h"
 
-std::pair< double, double > extraction(int verbose=1, double luminosity=19712., bool save=true, double minx=160., double maxx=185., double nbinsx=250, bool dataMassDependence=false, int binOfInterest=1, TString outputFolder="./", TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root");
+std::pair< double, double > extraction(int verbose=0, double luminosity=19712., bool save=true, double minx=160., double maxx=185., double nbinsx=250, bool dataMassDependence=false, int binOfInterest=1, TString outputFolder="./", TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root");
 
 void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=true){
 
   // define some parameters
   // range of plot
+  double minx2=130.;
+  double maxx2=250.;
   double minx=160.;
-  double maxx=185.;
+  double maxx=190.;
+
   // fine bins
   double nbinsx=250.;
   // consider mass dependence of measurement
@@ -58,7 +61,7 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
     // !!! define bin of interest !!! 
     int binOfInterest=bin;
     // perform top mass extraction
-    std::pair< double, double >resultbin=extraction(verbose, luminosity, save, minx, maxx, nbinsx, dataMassDependence, binOfInterest, outputFolder, outputFile);
+    std::pair< double, double >resultbin=extraction(verbose, luminosity, save, (binOfInterest==2||binOfInterest==4) ? minx : minx2, (binOfInterest==2||binOfInterest==4) ? maxx : maxx2, nbinsx, dataMassDependence, binOfInterest, outputFolder, outputFile);
     extractedMass->SetBinContent(bin, resultbin.first);
     extractedMass->SetBinError(bin, std::abs(resultbin.second));
   }
@@ -96,10 +99,10 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   massfinal->SetLineStyle(1);
   massfinal->SetMarkerSize(0.1);
 
-  std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV" << std::endl;
+  std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV (=" << 100*merr/mcomb << "%)" << std::endl;
 
   // create legend
-  TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85);
+  TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85 );
   legendStyle(*leg,"");
   TH1F* legtev=(TH1F*)TevatronMass->Clone("legtevatron");
   legtev->SetFillColor  (TevatronMassErr->GetFillColor());
@@ -149,7 +152,18 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
 }
 
 std::pair< double, double > extraction(int verbose, double luminosity, bool save, double minx, double maxx, double nbinsx, bool dataMassDependence, int binOfInterest, TString outputFolder, TString outputFile){
+  // quadratic fit instead of linear for last bin
+  bool quad = binOfInterest==4 ? true : false;
 
+  // ============================  
+  //  Set ROOT Style
+  // ============================
+  TStyle myStyle("HHStyle","HHStyle");
+  setHHStyle(myStyle);
+  //TGaxis::SetMaxDigits(2);
+  //myStyle.cd();
+  //gROOT->SetStyle("HHStyle");
+  //gROOT->ForceStyle();
   // A) get measurement from data
   // open data result file
   TFile* datafile = TFile::Open(outputFile, "READ");
@@ -158,8 +172,8 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   // get canvas for norm rhos
   TCanvas* canvasNom = (TCanvas*)(datafile->Get("finalXSec/rhosNorm")->Clone());
   // get data result plot with final errors from canvas
-  TGraphAsymmErrors* dataRaw  = (TGraphAsymmErrors*)canvasNom->GetPrimitive("dataTotalError");
-  //TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)canvas->GetPrimitive("dataStatError");=
+  TGraphAsymmErrors* dataRaw  = (TGraphAsymmErrors*)((canvasNom->GetPrimitive("dataTotalError"))->Clone("dataTot" ));
+  TGraphAsymmErrors* dataStat = (TGraphAsymmErrors*)((canvasNom->GetPrimitive("dataStatError" ))->Clone("dataStat"));
   // binning
   std::map< TString, std::vector<double> > binning_ = makeVariableBinning();
   int Nbins = std::abs(binning_["rhos"][binning_["rhos"].size()-1]-binning_["rhos"][0])*100;
@@ -168,31 +182,65 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   reBinTH1F(*data, binning_["rhos"], 0);
   // refill TGraphAsymmErrors to rebinned histo
   for(int bin=1; bin<=data->GetNbinsX(); ++bin){
+    //std::cout << dataRaw ->GetY()[bin] << std::endl;
+    //std::cout << dataStat->GetY()[bin] << std::endl;
     data->SetBinContent(bin, dataRaw->GetY()[bin]);
     double err=dataRaw->GetErrorYhigh(bin);
     if(err<dataRaw->GetErrorYlow(bin)) err=dataRaw->GetErrorYlow(bin);
     data->SetBinError(bin, err);
   }
+  axesStyle(*data, xSecLabelName("rhos"), "#frac{1}{#sigma} #frac{d#sigma}{d#rho_{S}}" , 0., 4.);
+  data->SetTitleOffset(0.8*data->GetTitleOffset("Y"), "Y");
   std::cout << "bin: [" << data->GetBinLowEdge(binOfInterest) << ".." << data->GetBinLowEdge(binOfInterest+1) << "]" <<  std::endl; 
   // get values for different top masses
   std::vector<double > MassPointsData_;
   std::vector<TH1F*  > data_;
-  if(dataMassDependence) MassPointsData_.push_back(169.5);
+  if(dataMassDependence){
+    MassPointsData_.push_back(161.5);
+    MassPointsData_.push_back(163.5);
+    MassPointsData_.push_back(166.5);
+    MassPointsData_.push_back(169.5);
+  }
   MassPointsData_.push_back(172.5);
-  if(dataMassDependence) MassPointsData_.push_back(175.5);
-  TCanvas* canvasUp = (TCanvas*)(datafile->Get("xSec/sysTopMassUp/rhosNorm"  )->Clone("dataCanvUp"));
-  TCanvas* canvasDn = (TCanvas*)(datafile->Get("xSec/sysTopMassDown/rhosNorm")->Clone("dataCanvDn"));
-  TH1F* dataUp= (TH1F*)(canvasUp->GetPrimitive("rhoskData")->Clone("dataUp"));
-  TH1F* dataDn= (TH1F*)(canvasDn->GetPrimitive("rhoskData")->Clone("dataDn"));
-  if(dataMassDependence) data_.push_back((TH1F*)dataDn->Clone("measurementDn"     ));
+  if(dataMassDependence){
+    MassPointsData_.push_back(175.5);
+    MassPointsData_.push_back(178.5);
+    MassPointsData_.push_back(181.5);
+    MassPointsData_.push_back(184.5);
+  }
+  TCanvas* canvasUp  = (TCanvas*)(datafile->Get("xSec/sysTopMassUp/rhosNorm"   )->Clone("dataCanvUp" ));
+  TCanvas* canvasDn  = (TCanvas*)(datafile->Get("xSec/sysTopMassDown/rhosNorm" )->Clone("dataCanvDn" ));
+  TCanvas* canvasUp2 = (TCanvas*)(datafile->Get("xSec/sysTopMassUp2/rhosNorm"  )->Clone("dataCanvUp2"));
+  TCanvas* canvasDn2 = (TCanvas*)(datafile->Get("xSec/sysTopMassDown2/rhosNorm")->Clone("dataCanvDn2"));
+  TCanvas* canvasUp3 = (TCanvas*)(datafile->Get("xSec/sysTopMassUp3/rhosNorm"  )->Clone("dataCanvUp3"));
+  TCanvas* canvasDn3 = (TCanvas*)(datafile->Get("xSec/sysTopMassDown3/rhosNorm")->Clone("dataCanvDn3"));
+  TCanvas* canvasUp4 = (TCanvas*)(datafile->Get("xSec/sysTopMassUp4/rhosNorm"  )->Clone("dataCanvUp4"));
+  TCanvas* canvasDn4 = (TCanvas*)(datafile->Get("xSec/sysTopMassDown4/rhosNorm")->Clone("dataCanvDn4"));
+  TH1F* dataUp = (TH1F*)(canvasUp ->GetPrimitive("rhoskData")->Clone("dataUp" ));
+  TH1F* dataDn = (TH1F*)(canvasDn ->GetPrimitive("rhoskData")->Clone("dataDn" ));
+  TH1F* dataUp2= (TH1F*)(canvasUp2->GetPrimitive("rhoskData")->Clone("dataUp2"));
+  TH1F* dataDn2= (TH1F*)(canvasDn2->GetPrimitive("rhoskData")->Clone("dataDn2"));
+  TH1F* dataUp3= (TH1F*)(canvasUp3->GetPrimitive("rhoskData")->Clone("dataUp3"));
+  TH1F* dataDn3= (TH1F*)(canvasDn3->GetPrimitive("rhoskData")->Clone("dataDn3"));
+  TH1F* dataUp4= (TH1F*)(canvasUp4->GetPrimitive("rhoskData")->Clone("dataUp4"));
+  TH1F* dataDn4= (TH1F*)(canvasDn4->GetPrimitive("rhoskData")->Clone("dataDn4"));
+ if(dataMassDependence){
+    data_.push_back((TH1F*)dataDn4->Clone("measurementDn4"    ));
+    data_.push_back((TH1F*)dataDn3->Clone("measurementDn3"    ));
+    data_.push_back((TH1F*)dataDn2->Clone("measurementDn2"    ));
+    data_.push_back((TH1F*)dataDn ->Clone("measurementDn"     ));
+  }
   data_.push_back((TH1F*)data  ->Clone("measurementCentral"));
-  if(dataMassDependence) data_.push_back((TH1F*)dataUp->Clone("measurementUp"     ));
+  if(dataMassDependence){
+    data_.push_back((TH1F*)dataUp ->Clone("measurementUp"     ));
+    data_.push_back((TH1F*)dataUp2->Clone("measurementUp2"    ));
+    data_.push_back((TH1F*)dataUp3->Clone("measurementUp3"    ));
+    data_.push_back((TH1F*)dataUp4->Clone("measurementUp4"    ));
+  }
   // extract uncertainty for bin of interest from central mass point 
   double central =data->GetBinContent(binOfInterest);
   double errorAbs=data->GetBinError  (binOfInterest);
   double errRel=std::abs(1.-(central+errorAbs)/central);
-  //double up    =central+errorAbs;
-  //double dn    =central-errorAbs;
   if(verbose>0) std::cout << "central data result: " << central << "+/-" << errorAbs << " (=" << errRel*100 << "% unc.)" << std::endl;
 
   // collect rhos data results from bin of interest for different masses in one separate plot
@@ -215,8 +263,9 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     if(value!=central) measNomOnly->SetBinContent(measNomOnly->FindBin(MassPointsData_[masspoint]), 0.);
     measNonNomOnly->SetBinError(measNonNomOnly->FindBin(MassPointsData_[masspoint]), 0.);
   }
-  // do a linear fit of the mass dependence
-  TF1* lindata=new TF1("linFitdata", "[0]*x+[1]", minx, maxx);
+  // do a linear or quadratic fit of the mass dependence
+  TF1* lindata= quad ? new TF1("quadFitdata", "[2]*x*x+[0]*x+[1]", minx, maxx) : new TF1("linFitdata", "[0]*x+[1]", minx, maxx);
+  
   lindata->SetLineColor(measurement->GetLineColor());
   lindata->SetLineWidth(2);
   TString option="Q";
@@ -227,9 +276,11 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   if(!dataMassDependence){
     lindata->SetParameter(0, 0.     );
     lindata->SetParameter(1, central);
+    if(quad) lindata->SetParameter(2, 0.);
   }
   double adata=lindata->GetParameter(0);
   double bdata=lindata->GetParameter(1);
+  double cdata= quad ? lindata->GetParameter(2) : 0.;
 //   TF1* lindataUp=new TF1("linFitdataUp", "[0]*x+[1]", minx, maxx);
 //   TF1* lindataDn=new TF1("linFitdataDn", "[0]*x+[1]", minx, maxx);
 //   lindataUp->SetParameter(0, adata);
@@ -258,14 +309,26 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   // B) get prediction with top mass dependence
   //  load rootfiles
   std::vector<TFile* > file_;
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDownSummer12PF.root", "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                       , "Open"));
-  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUpSummer12PF.root"    , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDown4Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDown3Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDown2Summer12PF.root", "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassDown/combinedDiffXSecSigTopMassDownSummer12PF.root" , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/combinedDiffXSecSigSummer12PF.root"                        , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUpSummer12PF.root"     , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUp2Summer12PF.root"    , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUp3Summer12PF.root"    , "Open"));
+  file_.push_back(TFile::Open("/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/TopMassUp/combinedDiffXSecSigTopMassUp4Summer12PF.root"    , "Open"));
   std::vector<double > mtop_;
   // fill mass indication
+  mtop_.push_back(161.5);
+  mtop_.push_back(163.5);
+  mtop_.push_back(166.5);
   mtop_.push_back(169.5);
   mtop_.push_back(172.5);
   mtop_.push_back(175.5);
+  mtop_.push_back(178.5);
+  mtop_.push_back(181.5);
+  mtop_.push_back(184.5);
 
   // C) get prediction with theory parameter dependence
   std::vector<TFile* > fileSys_;
@@ -309,7 +372,7 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     rhosMCsys_.push_back((TH1F*)temp->Clone(TString("rhosMCsys")+getTStringFromInt(sample)));  
   }
 
-  // collect rhos results from last bin for different masses is separate plot
+  // collect rhos results from bin of interest for different masses is separate plot
   double MCnom=0.;
   TH1F* MC= new TH1F("CMSMC", "CMSMC", nbinsx, minx, maxx);
   //reBinTH1F(*data, mtop_,0);
@@ -318,9 +381,10 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     double value=rhosMC_[sample]->GetBinContent(binOfInterest);
     if(verbose>0) std::cout << "MC(" << mtop_[sample] << "GeV): " << value << std::endl;
     MC->SetBinContent(MC->FindBin(mtop_[sample]), value);
-    if(MassPointsData_[sample]==172.5) MCnom=value;
+    if(mtop_[sample]==172.5) MCnom=value;
   }
   histogramStyle(*MC, kData, false, 1.2, kGreen-2);
+  
 
   // extract values for parameter dependence
   double MCnomUnc=0.;
@@ -329,6 +393,9 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     double valueDn=rhosMCsys_[sample+1]->GetBinContent(binOfInterest);
     double unc=0.5*(std::abs(valueUp-MCnom)+std::abs(valueDn-MCnom));
     MCnomUnc+=unc;
+    //std::cout << "c : " << MCnom << std::endl;
+    //std::cout << "up=" << fileSys_[sample  ]->GetName() << ": " << valueUp << std::endl;
+    //std::cout << "dn=" << fileSys_[sample+1]->GetName() << ": " << valueDn << std::endl;
   }
   
   // do a linear fit of the mass dependence
@@ -339,13 +406,58 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   double a=lin->GetParameter(0);
   double b=lin->GetParameter(1);
   // C) calculate intersection
-  //double mresult=(central-b)/a;
+  // c1) linear
   double mresultfit=(b-bdata)/(adata-a);
   double centralfit=adata*mresultfit+bdata;
   double mup=(b-MCnomUnc-(bdata+errorAbs))/(adata-a);
   double mdn=(b+MCnomUnc-(bdata-errorAbs))/(adata-a);
   double up=adata*mup+(bdata+errorAbs);
   double dn=adata*mdn+(bdata-errorAbs);
+  // c2 quadratic
+  if(quad){
+    if(verbose>1){
+      std::cout << "quadratic intersection" << std::endl;
+      std::cout << "a=" << a << std::endl;
+      std::cout << "b=" << b << std::endl;
+      std::cout << "adata=" << adata << std::endl;
+      std::cout << "bdata=" << bdata << std::endl;
+      std::cout << "cdata=" << cdata << std::endl;
+    }
+    // c2.1 central value
+    double p=(a-adata)/(2*cdata); // -p/2 from p-q
+    double q=(bdata-b)/cdata;     // q from p-q
+    if(verbose>1){
+      std::cout << "-p/2=" << p << std::endl;
+      std::cout << "q="    << q << std::endl;
+    }
+    // solutions from p-q
+    double sol1=p+sqrt(p*p-q);
+    double sol2=p-sqrt(p*p-q);
+    if(verbose>1){
+      std::cout << "sol1=" << sol1 << std::endl;
+      std::cout << "sol2=" << sol2 << std::endl;
+    }
+    // take smaller solution for central value
+    mresultfit=sol1;
+    if(sol1<0.||(sol2>=0.&&sol2<sol1)) mresultfit=sol2;
+    if(verbose>1) std::cout << "mresultfit=" << mresultfit << std::endl;
+    centralfit=adata*mresultfit+bdata+cdata*mresultfit*mresultfit;
+    if(verbose>1) std::cout << "centralfit=" << centralfit << std::endl;
+    // c2.2 up (b->b-MCnommUnc, bdata->bdata+errorAbs)
+    double qup=(bdata+errorAbs-(b-MCnomUnc))/cdata; // q from p-q
+    double sol1up=p+sqrt(p*p-qup);
+    double sol2up=p-sqrt(p*p-qup);
+    mup=sol1up;
+    if(sol1up<0.||(sol2up>=0.&&sol2up<sol1up)) mup=sol2up;
+    up=adata*mup+(bdata+errorAbs)+cdata*mup*mup;
+    // c2.3 dn (b->b+MCnommUnc, bdata->bdata-errorAbs)
+    double qdn=(bdata-errorAbs-(b+MCnomUnc))/cdata; // q from p-q
+    double sol1dn=p+sqrt(p*p-qdn);
+    double sol2dn=p-sqrt(p*p-qdn);
+    mdn=sol1dn;
+    if(sol1dn<0.||(sol2dn>=0.&&sol2dn<sol1dn)) mdn=sol2dn;
+    dn=adata*mdn+(bdata-errorAbs)+cdata*mdn*mdn;
+  }
   if(verbose>0){
     std::cout << "mtop= (" << mdn << ".." << mresultfit << ".." << mup << ")" << std::endl; 
     if(verbose>0) std::cout << "mtop= " << mresultfit << " +" << mresultfit-mup << " -" << mdn-mresultfit << std::endl; 
@@ -383,11 +495,20 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     double chi2=std::abs(valuedata-valueMC)*std::abs(valuedata-valueMC)/totUnc;
     chi2CMS->SetBinContent(chi2CMS->FindBin(currentmasspoint), chi2);
   }
+  // quadratic fit
+  TF1* quadchi= new TF1("quadchi", "[2]*x*x+[0]*x+[1]", minx, maxx);
+  quadchi->SetLineColor(kBlack);
+  quadchi->SetLineWidth(2);
+  TString optionchi="Q";
+  if(verbose>0)optionchi="";
+  if(verbose>1)optionchi="V";
+  optionchi+="R";
+  chi2CMS->Fit(quadchi, optionchi,"",MassPointsData_[0]-0.5, MassPointsData_[MassPointsData_.size()-1]+0.5);
 
   // ---
   //    legend
   // ---
-  TLegend *leg = new TLegend(0.61, 0.7, 0.96, 0.86);
+  TLegend *leg = new TLegend(0.61, (binOfInterest!=3) ? 0.7 : 0.25, 0.96, (binOfInterest!=3) ? 0.86 : 0.41);
   legendStyle(*leg,"");
   TH1F* legmeasurement=(TH1F*)measurementCentral->Clone("legdata");
   legmeasurement->SetFillColor  (measurementUp->GetFillColor());
@@ -456,18 +577,142 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   plotCanvas_[plotCanvas_.size()-1]->SetName (title2);
   plotCanvas_[plotCanvas_.size()-1]->SetTitle(title2);
   chi2CMS->Draw("p");
-  
-  // E) do saving 
+  if(binOfInterest<=2) quadchi->Draw("hist same");
+
+  // E) Canvas with different mass predictions
+  //    duplicate canvas from nominal data measurement
+  if(binOfInterest==1){
+    gROOT->cd();
+    std::cout << "create cross section for different masses plot" << std::endl;
+    //plotCanvas_.push_back((TCanvas*)(canvasNom->Clone()));
+    addCanvas(plotCanvas_);  
+    plotCanvas_[plotCanvas_.size()-1]->cd(0);
+    plotCanvas_[plotCanvas_.size()-1]->SetName ("finalXSecrhosNormCombinedHadronLvPSMassCurves");
+    plotCanvas_[plotCanvas_.size()-1]->SetTitle("finalXSecrhosNormCombinedHadronLvPSMassCurves");
+    // remove other MC curves
+    data->Draw("AXIS");
+    // style for mass samples
+    std::vector <int > colorMC_;
+    colorMC_.push_back(6         );
+    colorMC_.push_back(kBlue     );
+    colorMC_.push_back(kGreen+1  );
+    colorMC_.push_back(kGreen+3  );
+    colorMC_.push_back(kRed      );
+    colorMC_.push_back(kAzure+8  );
+    colorMC_.push_back(kOrange+3 ); 
+    colorMC_.push_back(kMagenta+2); 
+    colorMC_.push_back(kOrange+8 );
+    std::vector <int > style_;
+    style_.push_back(2);
+    style_.push_back(10);
+    style_.push_back(4);
+    style_.push_back(6);
+    style_.push_back(1);
+    style_.push_back(7);
+    style_.push_back(8);
+    style_.push_back(9);
+    style_.push_back(3);
+    // create legend
+    TLegend *legMasses = new TLegend(0.7, 0.4 , 1.2, 0.8 );
+    TLegend *legDat    = new TLegend(0.7, 0.75, 1.2, 0.95);
+    legDat->AddEntry(data, "Data", "LP");
+    legendStyle(*legMasses,"#splitline{MadGraph+Pythia}{m_{top}[GeV]=}");
+    legendStyle(*legDat   , "");
+    // loop mass points
+    for(int sample=0; sample<(int)file_.size(); ++sample ){
+      // get and draw curves
+      rhosMC_[sample]->SetLineColor(  colorMC_[sample]);
+      rhosMC_[sample]->SetMarkerColor(colorMC_[sample]);
+      rhosMC_[sample]->SetLineWidth(3);
+      rhosMC_[sample]->SetLineStyle(style_[sample]);
+      rhosMC_[sample]->Draw("hist same");
+      // add legend entry
+      double val=mtop_[sample];
+      legMasses->AddEntry(rhosMC_[sample], Form("%2.1f", val), "L" );
+    }
+    // redraw data
+    dataStat->Draw("e p same");
+    data    ->Draw("e p same");
+    // draw legend
+    legMasses->Draw("same");
+    legDat   ->Draw("same");
+    // draw labels
+    DrawDecayChLabel("e/#mu + Jets Combined");
+    DrawCMSLabels(prelim, 0.5*(constLumiMuon+constLumiElec), 0.04, false, false, false);
+    // saving
+    TCanvas* tempCanv=(TCanvas*)(plotCanvas_[plotCanvas_.size()-1]->Clone());
+    int initWarningLV=gErrorIgnoreLevel;
+    if(verbose<1) gErrorIgnoreLevel=kWarning;   tempCanv->Print(outputFolder+tempCanv->GetName()+".eps");
+    tempCanv->Print(outputFolder+tempCanv->GetName()+".png");
+    saveToRootFile(outputFile, tempCanv, true, verbose-1, "massFromRhos");
+    gErrorIgnoreLevel=initWarningLV;
+    // canvas with ratio
+    gROOT->cd();
+    bool drawRat =true;
+    bool drawRat2=false;
+    std::cout << "create ratios for cross section for different masses" << std::endl;
+    if(drawRat){
+      // adapt some stylings
+      legMasses->SetY1(1.12*legMasses->GetY1());
+      data->SetLabelSize(0.);
+      data->SetTitleSize(0.);
+      data->SetMaximum(5.);
+      rhosMC_[0]->SetLabelSize(0.85*rhosMC_[0]->GetLabelSize());
+      rhosMC_[0]->SetTitleSize(1.3*rhosMC_[0]->GetTitleSize());
+      rhosMC_[0]->SetLabelSize(1.3*rhosMC_[0]->GetLabelSize("y"), "Y");
+      rhosMC_[0]->SetTitleSize(1.4*rhosMC_[0]->GetTitleSize("y"), "Y");
+
+      plotCanvas_[plotCanvas_.size()-1]->Update();
+      // ratio function
+      plotCanvas_.push_back(drawFinalResultRatio((TH1F*)data->Clone("dataTotRat"), 0.35, 1.75, myStyle, verbose, rhosMC_, (TCanvas*)(plotCanvas_[plotCanvas_.size()-1]->Clone()), -1., -1., dataStat, true));
+      plotCanvas_[plotCanvas_.size()-1]->cd();
+      plotCanvas_[plotCanvas_.size()-1]->SetName ("ratioFinalXSecrhosNormCombinedHadronPhaseSpaceMassCurves");
+      plotCanvas_[plotCanvas_.size()-1]->SetTitle("ratioFinalXSecrhosNormCombinedHadronPhaseSpaceMassCurves");
+      plotCanvas_[plotCanvas_.size()-1]->Draw();
+      plotCanvas_[plotCanvas_.size()-1]->Update();
+    }
+    if(drawRat2){
+     gPad->cd();
+      //plotCanvas_[plotCanvas_.size()-1]->Draw();
+      //plotCanvas_[plotCanvas_.size()-1]->Update();
+      //data->Draw("hist same");
+      for(int bin=1; bin<=data->GetNbinsX(); ++bin) std::cout << data->GetBinContent(bin) << std::endl;
+      // error vector dummy
+      std::vector<double> zeroerr_;
+      for(int bin=1; bin<=rhosMC_[0]->GetNbinsX(); ++bin) zeroerr_.push_back(0.);
+      std::cout << "- 1" << std::endl;
+      // axis
+      drawRatio(data, data, 0.6, 1.6, myStyle, 0, zeroerr_, "prediction", "data", "axis", kBlack, false);
+      std::cout << "- 2" << std::endl;
+      // MCs
+      for(int sample=0; sample<(int)file_.size(); ++sample ){
+	drawRatio(rhosMC_[sample], data, 0.6, 1.6, myStyle, 0, zeroerr_, "prediction", "data", "hist same", rhosMC_[sample]->GetLineColor(), false);
+      }
+      std::cout << "- 3" << std::endl;
+      // data error vector
+      std::vector<double> err_;
+      for(int bin=1; bin<=data->GetNbinsX(); ++bin) err_.push_back(data->GetBinError(bin)/data->GetBinContent(bin));
+      // axis
+      drawRatio(data, data, 0.6, 1.6, myStyle, 0, err_, "prediction", "data", "e p same", kBlack, false);
+    }
+  }
+
+  // F) do saving 
   if(save){
+    gROOT->cd();
     int initWarningLV=gErrorIgnoreLevel;
     if(verbose<1) gErrorIgnoreLevel=kWarning;
-    for(unsigned int plot=0; plot<plotCanvas_.size()-1; ++plot){
-      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
-      plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
-      saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
+    for(unsigned int plot=0; plot<=plotCanvas_.size()-1; ++plot){
+      //std::cout << plotCanvas_[plot]->GetName() << std::endl;
+      if(!TString(plotCanvas_[plot]->GetName()).Contains("final")){
+	plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
+	plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
+	saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
+	gROOT->cd();
+      }
     }
     gErrorIgnoreLevel=initWarningLV;
   }
   std::cout << "intersection method: " << mresultfit << "+/-" << std::abs(mresultfit-mup) << std::endl;
-  return make_pair(mresultfit, std::abs(mresultfit-mup));
+  return make_pair(mresultfit, 0.5*(std::abs(mresultfit-mup)+std::abs(mresultfit-mdn)));
 }

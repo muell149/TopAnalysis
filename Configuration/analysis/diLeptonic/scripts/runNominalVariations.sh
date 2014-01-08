@@ -14,10 +14,10 @@ for sys in JES_UP JES_DOWN JER_UP JER_DOWN \
 
     for c in ee emu mumu; do
         w
+        $LA -f ttbarsignalplustau.root -c $c -s $sys&
         $LA -f dy -d 11 -c $c -s $sys&
         $LA -f dy -d 13 -c $c -s $sys&
         $LA -f dy -d 15 -c $c -s $sys&
-        $LA -f ttbarsignalplustau.root -c $c -s $sys&
     done
 
     for i in qcd single ttbarbg.root wtol ww wz zz; do

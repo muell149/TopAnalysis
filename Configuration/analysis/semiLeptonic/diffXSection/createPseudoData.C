@@ -152,7 +152,7 @@ void createPseudoDataFunc(double luminosity, const std::string decayChannel, TSt
     std::cout << "ERROR: chosen zprime weight is exactly 1!" << std::endl;
     exit(0);
   }
-
+  
   // -------------------------
   // !!! choose luminosity !!!
   // -------------------------
@@ -285,7 +285,8 @@ void createPseudoDataFunc(double luminosity, const std::string decayChannel, TSt
   // ---------------------------------------
   // !!! definition of output file(name) !!!
   // ---------------------------------------
-  TString outputfile="/afs/naf.desy.de/user/g/goerner/WGspace/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/"+(TString)decayChannel+"PseudoData"+lum+"pb"+outNameExtension+"8TeV.root";
+  //TString outputfile="/afs/naf.desy.de/user/g/goerner/WGspace/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/"+(TString)decayChannel+"PseudoData"+lum+"pb"+outNameExtension+"8TeV.root";
+  TString outputfile="/afs/naf.desy.de/user/g/goerner/WGspace/RecentAnalysisRun8TeV_doubleKinFit/pseudodata/"+pseudoDataFileName(specifier, decayChannel);
   TFile* out = new TFile(outputfile, "recreate");
   if(verbose>0) std::cout << std::endl << "outputfile: " << outputfile << std::endl;
   poisson(histo_, plotList_, decayChannel, *out, luminosity, verbose, smear, useReweightedTop, avWeight, zprime, zPrimeLumiWeight);
