@@ -257,8 +257,8 @@ void bTagBase::countJet(const float & pt, const float& abs_eta,
     sumStuffSfEff_ = sumStuffSfEff_ * (1 - sf * eff);
 
 }
-bool bTagBase::changeJetTag(const float & pt, const float& abs_eta,
-        const int & genPartonFlavor, const float & tagValue, const float & seed) const {
+bool bTagBase::jetIsTagged(const float & pt, const float& abs_eta,
+        const int & genPartonFlavor, const float & tagValue, const unsigned int & seed) const {
 
     jetTypes jettype=jetType(genPartonFlavor);
     const bool isBTagged = tagValue > wpvals_[wp_];

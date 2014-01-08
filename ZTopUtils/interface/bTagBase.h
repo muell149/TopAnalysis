@@ -127,8 +127,8 @@ protected:
     void countJet(const float&, const float&, const int & genPartonFlavor);
     float getEventSF();
 
-    bool changeJetTag(const float&, const float&, const int & genPartonFlavor,
-            const float & tagValue, const float & seed) const; // to be implmented
+    bool jetIsTagged(const float&, const float&, const int & genPartonFlavor,
+            const float & tagValue, const unsigned int & seed) const; // to be implmented
 
     void cleanptr() {
         histp_ = 0;
