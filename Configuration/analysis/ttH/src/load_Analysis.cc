@@ -238,8 +238,8 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetPUReweighter(puReweighter);
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);
-    if(btagScaleFactors) selector->SetBtagScaleFactors(btagScaleFactors);
-    else if(bTagSFGeneric) selector->SetBtagScaleFactors(bTagSFGeneric);
+    if(btagScaleFactors) selector->SetBtagScaleFactors(*btagScaleFactors);
+    else if(bTagSFGeneric) selector->SetBtagScaleFactors(*bTagSFGeneric);
     selector->SetUseObjectStructs(true);
 
     selector->SetMvaInputProduction(mvaTreeHandler);
