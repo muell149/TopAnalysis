@@ -322,20 +322,24 @@ private:
     double weightPdf(Long64_t entry);
     
     /// Get indices of B hadron and anti-B hadron
-    void bHadronIndices(int& bHadronIndex, int& antiBHadronIndex);
+    void bHadronIndices(int& bHadronIndex, int& antiBHadronIndex,const CommonGenObjects& commonGenObjects,const TopGenObjects& topGenObjects);
     
     void generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                            LV& leadGenLepton, LV& nLeadGenLepton,
                            LV& leadGenBJet, LV& nLeadGenBJet,
                            double& genHT,
                            const int bHadronIndex, const int antiBHadronIndex,
-                           const double trueLevelWeightNoPileup, const double trueLevelWeight);
+                           const double trueLevelWeightNoPileup, const double trueLevelWeight,
+                           const CommonGenObjects& commonGenObjects,
+                           const TopGenObjects& topGenObjects);
 
     void generatorTTbarjetsEvent(double& jetHTGen,
                                  const int bHadronIndex, const int antiBHadronIndex,
                                  const double trueLevelWeight,
                                  int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100,
-                                 double extragenjet[4]);
+                                 double extragenjet[4],
+                                 const CommonGenObjects& commonGenObjects,
+                                 const TopGenObjects& topGenObjects);
     
     
     

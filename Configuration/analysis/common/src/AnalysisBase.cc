@@ -1413,13 +1413,15 @@ void AnalysisBase::prepareJER_JES()
 
 void AnalysisBase::applyJER_JES()const
 {
+
     if(systematic_=="JER_UP" || systematic_=="JER_DOWN")
         this->applyJerSystematics(jets_, jetsForMET_, met_,
                                   jetJERSF_, jetForMETJERSF_,
                                   associatedGenJet_, associatedGenJetForMET_);
-    
+
     if (systematic_ == "JES_UP" || systematic_ == "JES_DOWN")
         this->applyJesSystematics(jets_, jetsForMET_, met_);
+
 }
 
 
@@ -1428,6 +1430,7 @@ void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
                                        const std::vector<double>* jetJERSF, const std::vector<double>* jetForMETJERSF,
                                        const VLV* associatedGenJet, const VLV* associatedGenJetForMET)const
 {
+
     // Set the eta ranges and the corresponding scale factors for Jet Energy Resolution
     constexpr double ResolutionEtaRange[5] = {0.5, 1.1, 1.7, 2.3, 10};
     double ResolutionEtaScaleFactor[5];//nom = {1.052, 1.057, 1.096, 1.134, 1.288};
@@ -1450,10 +1453,11 @@ void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
                  <<"\n...break\n"<<std::endl;
         exit(81);
     }
-    
+
     // This first loop will correct the jet collection that is used for jet selections
     for(size_t i = 0; i < jets->size(); ++i){
         size_t jetEtaBin = 0;
+
         for(size_t j = 0; j < 5; ++j){
             if(std::fabs(jets->at(i).eta()) < ResolutionEtaRange[j]){
                 jetEtaBin = j;
@@ -1461,14 +1465,15 @@ void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
             }
         }
 
-        if(jetJERSF_->at(i) != 0.){
+        if(jetJERSF->at(i) != 0.){
             jets->at(i) *= 1./jetJERSF->at(i);
             
             // FIXME: should this factor really be =0. in case no associatedGenJet is found ?
             double factor = 0.;
+
             if(associatedGenJet->at(i).pt() != 0.) factor = 1. + (ResolutionEtaScaleFactor[jetEtaBin] - 1.)*(1. - (associatedGenJet->at(i).pt()/jets->at(i).pt()));
             if(jetJERSF->at(i) == 1.) factor = 1.;
-            
+
             jets->at(i) *= factor;
         }
     }
@@ -1484,7 +1489,7 @@ void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
                 break;
             }
         }
-        
+
         if(jetForMETJERSF->at(i) != 0.){
             const double dpX = jetsForMET->at(i).px();
             const double dpY = jetsForMET->at(i).py();
@@ -1500,11 +1505,12 @@ void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
             JEC_dpY += jetsForMET->at(i).py() - dpY;
         }
     }
-    
+
     // Adjust the MET
     const double scaledMETPx = met->px() - JEC_dpX;
     const double scaledMETPy = met->py() - JEC_dpY;
     met->SetPt(std::sqrt(scaledMETPx*scaledMETPx + scaledMETPy*scaledMETPy));
+
 }
 
 
@@ -1728,36 +1734,37 @@ double AnalysisBase::topPtReweightValue(const double& pt)const
 const RecoObjects& AnalysisBase::getRecoObjects(const Long64_t& entry)const
 {
     if(recoObjects_->valuesSet_) return *recoObjects_;
-    
+
     this->GetRecoBranchesEntry(entry);
     
     if(isMC_ && doJesJer_){
-        
+
         // Get references for all relevant reco objects which are modified by JER/JES systematics
         VLV* jets = recoObjects_->jets_;
         VLV* jetsForMET = recoObjects_->jetsForMET_;
         LV* met = recoObjects_->met_;
-        
+
         if(systematic_=="JER_UP" || systematic_=="JER_DOWN"){
             // Get references for all relevant reco objects which are NOT modified
             const std::vector<double>* jetJERSF = recoObjects_->jetJERSF_;
             const std::vector<double>* jetForMETJERSF = recoObjects_->jetForMETJERSF_;
-            
+
             // Get references for all relevant gen objects which are NOT modified
             if(!commonGenObjects_->valuesSet_) this->GetCommonGenBranchesEntry(entry);
             const VLV* associatedGenJet = commonGenObjects_->associatedGenJet_;
             const VLV* associatedGenJetForMet = commonGenObjects_->associatedGenJetForMET_;
-            
+
             this->applyJerSystematics(jets, jetsForMET, met,
                                       jetJERSF, jetForMETJERSF,
                                       associatedGenJet, associatedGenJetForMet);
+
         }
         
         if(systematic_=="JES_UP" || systematic_=="JES_DOWN"){
             this->applyJesSystematics(jets, jetsForMET, met);
         }
     }
-    
+
     return *recoObjects_;
 }
 
