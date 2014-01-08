@@ -1,8 +1,11 @@
 #include "../interface/bTagBase.h"
 #include <stdexcept>
+#include "TRandom3.h"
 
 namespace ztop {
-
+/**
+ * constructor does nothing in particular
+ */
 bTagBase::bTagBase() {
 
     init_ = false;
@@ -25,6 +28,13 @@ bTagBase::bTagBase() {
     maxpt_.resize(workingPoints::length_wp, 0);
 
 }
+/**
+ * sets the sample name. It can be used as a unique identifier when
+ * reading or writing the histograms/data
+ * If input is read, the name is used to identify the right set of
+ * histograms (e.g. different for each sample but in the same bTagBase
+ * object)
+ */
 int bTagBase::setSampleName(const std::string & samplename) {
     //set pointers
     initWorkingpoints();
@@ -115,7 +125,10 @@ int bTagBase::setSampleName(const std::string & samplename) {
     return 0;
 
 }
-
+/**
+ * adds an entry for a jet with p4, genpartonFlavour, bDiscrValue  and PUweight
+ * to the efficiency histograms
+ */
 void bTagBase::fillEff(const float& pt, const float&abs_eta,
         const int &genPartonFlavour, const float &bDiscrVal,
         const float &puweight) {
@@ -131,22 +144,26 @@ void bTagBase::fillEff(const float& pt, const float&abs_eta,
     if (genPartonFlavour == 0)
         return;
 
-    if (fabs(fabs(genPartonFlavour) - 5) < 0.1) { // b jets
+    jetTypes jettype=jetType(genPartonFlavour);
+
+    if (jettype == bjet) { // b jets
         histp_->at(0).Fill(pt, abs_eta, puweight);
         if (bDiscrVal > wpvals_[wp_])
             histp_->at(1).Fill(pt, abs_eta, puweight);
-    } else if (fabs(fabs(genPartonFlavour) - 4) < 0.1) { // c jets
+    } else if (jettype == cjet) { // c jets
 
         histp_->at(2).Fill(pt, abs_eta, puweight);
         if (bDiscrVal > wpvals_[wp_])
             histp_->at(3).Fill(pt, abs_eta, puweight);
-    } else if (fabs(genPartonFlavour) > 0) { // light jets (including gluon jets)
+    } else if (jettype == lightjet) { // light jets (including gluon jets)
         histp_->at(4).Fill(pt, abs_eta, puweight);
         if (bDiscrVal > wpvals_[wp_])
             histp_->at(5).Fill(pt, abs_eta, puweight);
     }
 }
-
+/**
+ * creates efficiency histograms, to be run after all are filled
+ */
 void bTagBase::makeEffs() {
     if (!makeeffs_)
         return;
@@ -167,7 +184,7 @@ void bTagBase::makeEffs() {
                 float err = 0.99; //to avoid zeros!
                 if (histp_->at(2 * i).GetBinContent(binx, biny) > 0) {
                     cont = histp_->at(2 * i + 1).GetBinContent(binx, biny)
-                                                            / histp_->at(2 * i).GetBinContent(binx, biny);
+                                                                                                                            / histp_->at(2 * i).GetBinContent(binx, biny);
                     if (debug)
                         std::cout << "makeEffs: content: " << cont;
                     err = sqrt(
@@ -203,14 +220,19 @@ void bTagBase::countJet(const float & pt, const float& abs_eta,
     if (genPartonFlavor == 0)
         return;
 
+    jetTypes jettype=jetType(genPartonFlavor);
     float sf = 1;
+    float eff = 0;
+    sf=jetSF(pt, abs_eta,jettype);
+    eff=jetEff(pt, abs_eta,jettype);
+    /*
     unsigned int effh = 100;
 
 
-    if (fabs(fabs(genPartonFlavor) - 5) < 0.1) { // b jets
+    if (jettype == bjet) { // b jets
         effh = 0;
         sf = BJetSF(pt, abs_eta);
-    } else if (fabs(fabs(genPartonFlavor) - 4) < 0.1) { // c jets
+    } else if (jettype == cjet) { // c jets
         effh = 1;
         sf = CJetSF(pt, abs_eta);
     } else { // (including gluon jets)
@@ -221,7 +243,7 @@ void bTagBase::countJet(const float & pt, const float& abs_eta,
     int ptbin = 0;
     int etabin = 0;
     int bla = 0;
-    float eff = 0;
+
     effhistp_->at(effh).GetBinXYZ(effhistp_->at(effh).FindBin(pt, abs_eta),
             ptbin, etabin, bla);
     eff = effhistp_->at(effh).GetBinContent(ptbin, etabin);
@@ -230,23 +252,39 @@ void bTagBase::countJet(const float & pt, const float& abs_eta,
         std::cout << "warning SF: " << sf << "   eff(" << pt << " GeV, "
         << abs_eta << "): " << eff << "\t genflav: " << genPartonFlavor
         << "\teffh " << effh << std::endl;
-
+     */
     sumStuffEff_ = sumStuffEff_ * (1 - eff);
     sumStuffSfEff_ = sumStuffSfEff_ * (1 - sf * eff);
 
 }
-bool bTagBase::changeJetTag(const float & pt, const float& eta,
-        const int & genPartonFlavor, const float & tagValue) const {
-    double ignorewarns = pt;
-    ignorewarns = eta;
-    ignorewarns = genPartonFlavor;
-    ignorewarns = tagValue;
-    ignorewarns++;
-    std::cout << "bTagBase::changeJetTag: not implemented yet" << std::endl;
-    throw std::logic_error("bTagBase::changeJetTag: not implemented yet");
+bool bTagBase::changeJetTag(const float & pt, const float& abs_eta,
+        const int & genPartonFlavor, const float & tagValue, const float & seed) const {
 
-    return true;
-} // to be implmented
+    jetTypes jettype=jetType(genPartonFlavor);
+    const bool isBTagged = tagValue > wpvals_[wp_];
+    const double Btag_eff = jetEff(pt, abs_eta, jettype);
+    const double Btag_SF = jetSF(pt, abs_eta, jettype);
+    const float coin = TRandom3(seed).Uniform(1.0);
+
+    if ( Btag_SF > 1. ) {  // use this if SF>1
+        if ( !isBTagged ) {
+            // fraction of jets that need to be upgraded
+            const float mistagPercent = (1.0 - Btag_SF) / (1.0 - (1.0/Btag_eff) );
+
+            //upgrade to tagged
+            if( coin < mistagPercent ) return true;
+        }
+    }
+    else if ( Btag_SF < 1. ) {  // use this if SF<1
+        // downgrade tagged to untagged
+        if ( isBTagged && coin > Btag_SF ) return false;
+    }
+    else {  // no change if exactly SF==1
+        return isBTagged;
+    }
+    return isBTagged;
+
+}
 float bTagBase::getEventSF() {
     if(makeeffs_) return 1.;
     float sf = (1 - sumStuffSfEff_) / (1 - sumStuffEff_);
@@ -258,6 +296,29 @@ float bTagBase::getEventSF() {
     return sf;
 }
 
+float bTagBase::jetSF(const float &pt, const float& abs_eta,const jetTypes & jettype) const{
+    if(jettype==bjet) return BJetSF(pt, abs_eta);
+    if(jettype==cjet) return CJetSF(pt, abs_eta);
+    if(jettype==lightjet) return LJetSF(pt, abs_eta);
+    else return 1.;
+}
+
+float bTagBase::jetEff(const float &pt, const float& abs_eta,const jetTypes & jettype) const{
+    if(jettype == undefined)
+        return 1;
+    unsigned int effh = 100;
+    if(jettype==bjet)  effh = 0;
+    else if(jettype==cjet)  effh = 1;
+    else if(jettype==lightjet)  effh = 2;
+
+    int ptbin = 0;
+    int etabin = 0;
+    int bla = 0;
+
+    effhistp_->at(effh).GetBinXYZ(effhistp_->at(effh).FindBin(pt, abs_eta),
+            ptbin, etabin, bla);
+    return effhistp_->at(effh).GetBinContent(ptbin, etabin);
+}
 // ///////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////// BTagPOG INPUT //////////////////////////////////
@@ -336,7 +397,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
             static size_t SFb_errorSize = sizeof(SFb_error)
-                                                    / sizeof(SFb_error[0]);
+                                                                                                                    / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
