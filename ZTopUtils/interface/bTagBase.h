@@ -61,7 +61,7 @@ public:
         csvm_wp, csvl_wp,
         /* some other WP/taggers ..*/
         //
-        /*don't touch this: */
+        /*don't touch this: needs to be last entry*/
         length_wp
     };
 
@@ -73,6 +73,7 @@ public:
     };
 
     void setWorkingpoint(workingPoints wp) { wp_ = wp; }
+    const float& getWPDiscrValue()const{return wpvals_[wp_];}
 
     workingPoints getWorkingpoint() const { return wp_;}
     /**
