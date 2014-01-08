@@ -212,9 +212,7 @@ void BTagSFGeneric::indexOfBtags(std::vector<int>& bjetIndices,
                                  const std::vector<int>& jetIndices,
                                  const VLV& jets,
                                  const std::vector<int>& jetPartonFlavours,
-                                 const std::vector<double>& btagDiscriminants,
-                                 const double tagCut,
-                                 const std::string& channel)const
+                                 const std::vector<double>& btagDiscriminants)const
 {
     bjetIndices.clear();
 
@@ -222,25 +220,14 @@ void BTagSFGeneric::indexOfBtags(std::vector<int>& bjetIndices,
     for(const int index : jetIndices){
         //Skip jets where there is no partonFlavour
         if(jetPartonFlavours.at(index) == 0) continue;
+        LV jet = jets.at(index);
 
-        if(isTagged(jets.at(index), btagDiscriminants.at(index), jetPartonFlavours.at(index), tagCut, channel))
-            tagged_indices.push_back(index);
+        // Preparing a seed for the random jet retagging
+        const unsigned int seed = std::abs( static_cast<int>( 1.e6*sin( 1.e6*jet.Phi() ) ) );
+        bool isTagged = jetIsTagged( jet.pt(), std::fabs(jet.eta()), jetPartonFlavours.at(index), btagDiscriminants.at(index), seed );
+        if(isTagged) tagged_indices.push_back(index);
     }
     bjetIndices = tagged_indices;
-}
-
-
-
-bool BTagSFGeneric::isTagged(const LV& jet, const double tagValue, const int flavour,
-                             const double tagCut, const std::string& channel)const
-{
-    const bool isBTagged = tagValue > tagCut;
-
-    // FIXME: Implement the proper random tagging from the bTagBase class
-
-
-    // If nothing is changed, return the original value
-    return isBTagged;
 }
 
 

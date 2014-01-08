@@ -81,13 +81,13 @@ public:
 
   /// Method takes the indices of b-tagged jets,
   /// and overwrites them with the b-tagged jets after randomised tag flipping
+  /// Method explained in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFUtil
+  /// and in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#2a_Jet_by_jet_updating_of_the_b
   void indexOfBtags(std::vector<int>& bjetIndices,
                     const std::vector<int>& jetIndices,
                     const VLV& jets,
                     const std::vector<int>& jetPartonFlavours,
-                    const std::vector<double>& btagDiscriminants,
-                    const double TagCut,
-                    const std::string& channel)const;
+                    const std::vector<double>& btagDiscriminants)const;
 
   /// Prepare b-tagging scale factors (efficiency histograms)
   void prepareBTags(TSelectorList* output, const std::string& channel);
@@ -104,12 +104,6 @@ private:
 
   /// Name of the file with btag histograms
   std::string fileName_;
-
-  /// 'Random' decision to tag or not tag a jet.
-  /// Method explained in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFUtil
-  /// and in: https://twiki.cern.ch/twiki/bin/view/CMS/BTagSFMethods#2a_Jet_by_jet_updating_of_the_b
-  bool isTagged(const LV& jet, const double tagValue, const int flavour,
-                const double tagCut, const std::string& channel)const;
 
 
   /// Check if systematic belongs to a specific category
