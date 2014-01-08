@@ -30,6 +30,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   JetCorrectorParameters
   SimpleJetCorrectionUncertainty
   ScaleFactors
+  BTagUtils
   plotterUtils
   RootFileReader
   plotterclass
