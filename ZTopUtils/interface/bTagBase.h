@@ -10,50 +10,46 @@
 
 #include "mathdefs.h"
 
-/*
- workflow:
- -create object
- -set sample name              setSampleName(name)
- -fill efficiencies with jets  fillEff(p4,genPartonFlavour,PUweight)
- ---- get your event weight with your wrapper class!! ----
- ---functions to do that:
- - resetCounter()
- - countJet() (in jet loop)
- - getEventSF() (after jet loop - also resets the counter) returns 1 here
 
-
- -after event loop run makeEffs() once to create histograms
- - input / output should be organized by your wrapper class!
-
- -load from file or use already filled object (implement in your wrapper!)
- -setMakeEff(false)
- -(fillEff,makeEffs etc can remain in the loop/at the end of the loop, does nothing now)
- ---- get your event weight with your wrapper class!! ----
- ---functions to do that:
- - resetCounter()
- - countJet() (in jet loop)
- - getEventSF() (after jet loop - also resets the counter) now returns the proper SF!
-
-
-
-
- WHATEVER you add as functions, please don't use exit() in case an error occurs.
- replace it with either:
- - throw an exception (throw std::logic_error("sometext") or std::runtime_error("");)
- - return something (-1 or another int for dubugging)
-
- */
 namespace ztop {
-
+/**
+ * workflow:
+ *  -create object
+ *  -set sample name              setSampleName(name)
+ *  -fill efficiencies with jets  fillEff(p4,genPartonFlavour,PUweight)
+ *  ---- get your event weight with your wrapper class!! ----
+ *  ---functions to do that:
+ *  - resetCounter()
+ *  - countJet() (in jet loop)
+ *  - getEventSF() (after jet loop - also resets the counter) returns 1 here
+ *
+ *
+ *  -after event loop run makeEffs() once to create histograms
+ *  - input / output should be organized by your wrapper class!
+ *
+ *  -load from file or use already filled object (implement in your wrapper!)
+ *  -setMakeEff(false)
+ * -(fillEff,makeEffs etc can remain in the loop/at the end of the loop, does nothing now)
+ *  ---- get your event weight with your wrapper class!! ----
+ *  ---functions to do that:
+ *  - resetCounter()
+ *  - countJet() (in jet loop)
+ *  - getEventSF() (after jet loop - also resets the counter) now returns the proper SF!
+ *
+ *
+ *
+ *
+ *  WHATEVER you add as functions, please don't use exit() in case an error occurs.
+ *  replace it with either:
+ *  - throw an exception (throw std::logic_error("sometext") or std::runtime_error("");)
+ *  - return something (-1 or another int for dubugging)
+ *
+ */
 class bTagBase {
 public:
-    /**
-     * constructor does nothing in particular
-     */
+
     bTagBase();
-    /**
-     * destructor, does nothing special but setting pointer to 0
-     */
+
     ~bTagBase() {
         cleanptr();
     }
@@ -78,62 +74,28 @@ public:
         nominal, heavyup, heavydown, lightup, lightdown
     };
 
-    /**
-     *
-     */
-    void setWorkingpoint(workingPoints wp) {
-        wp_ = wp;
-    }
-    ;
-    workingPoints getWorkingpoint() const {
-        return wp_;
-    }
-    ;
+    void setWorkingpoint(workingPoints wp) { wp_ = wp; }
+
+    workingPoints getWorkingpoint() const { return wp_;}
     /**
      * switches on SF for 7 TeV data
      */
-    void setIs2011(bool is) {
-        is2011_ = is;
-    }
+    void setIs2011(bool is) {is2011_ = is;}
+
+    void setSystematic(systematics sys) { syst_ = sys;}
+    systematics getSystematic() { return syst_;}
 
 
-    void setSystematic(systematics sys) {
-        syst_ = sys;
-    }
-    systematics getSystematic() {
-        return syst_;
-    }
-
-    /**
-     * sets the sample name. It can be used as a unique identifier when
-     * reading or writing the histograms/data
-     * If input is read, the name is used to identify the right set of
-     * histograms (e.g. different for each sample but in the same bTagBase
-     * object)
-     */
     int setSampleName(const std::string &); //checks if effs should be made, if sample exists,..
 
     /**
      * enables the filling of histograms for efficiencies and disables
      * scale factor output
      */
-    void setMakeEff(bool makee) {
-        makeeffs_ = makee;
-    }
-    bool getMakeEff() {
-        return makeeffs_;
-    }
+    void setMakeEff(bool makee) {makeeffs_ = makee; }
+    bool getMakeEff() { return makeeffs_;}
 
-    /**
-     * adds an entry for a jet with p4, genpartonFlavour, bDiscrValue  and PUweight
-     * to the efficiency histograms
-     */
-    void fillEff(const float &, const float&, const int &, const float &,
-            const float&);
-
-    /**
-     * creates efficiency histograms, to be run after all are filled
-     */
+    void fillEff(const float &, const float&, const int &, const float &,const float&);
     void makeEffs();
 
     /**
@@ -165,20 +127,21 @@ protected:
         sumStuffSfEff_ = 0.99999999;
     }
     void countJet(const float&, const float&, const int & genPartonFlavor);
-    /**
-     *
-     */
     float getEventSF();
 
     bool changeJetTag(const float&, const float&, const int & genPartonFlavor,
-            const float & tagValue) const; // to be implmented
+            const float & tagValue, const float & seed) const; // to be implmented
 
     void cleanptr() {
         histp_ = 0;
         effhistp_ = 0;
     }
 
+
+
+
 private:
+    enum jetTypes{bjet,cjet,lightjet,undefined};
 
     bool init_;
 
@@ -200,9 +163,13 @@ private:
     //counts the fraction of nans
     size_t nancount_;
 
+    jetTypes jetType(const int & )const;
+
     float calcHeavySF(float *, float *, const size_t &, const float &,
             const float &, const float &) const;
 
+    float jetSF(const float &pt, const float& abs_eta,const jetTypes & jettype) const;
+    float jetEff(const float &pt, const float& abs_eta,const jetTypes & jettype) const;
 
     //SFs btv input
     float BJetSF(const float &pt, const float& abs_eta,
@@ -217,6 +184,12 @@ private:
 };
 
 ///inlined functions for performance reasons:
+inline bTagBase::jetTypes bTagBase::jetType(const int & partonflavor)const{
+    if(fabs(fabs(partonflavor) - 5) < 0.1) return bjet;
+    else if (fabs(fabs(partonflavor) - 4) < 0.1) return cjet;
+    else if(fabs(partonflavor)>0) return lightjet;
+    else return undefined;
+}
 
 inline float bTagBase::calcHeavySF(float* ptbins, float * SFb_error,
         const size_t & ptbinsSize, const float & pt, const float & SF,
@@ -227,7 +200,7 @@ inline float bTagBase::calcHeavySF(float* ptbins, float * SFb_error,
 
     //this uses the standard histogram bin range definition from root
     size_t ptbin = std::lower_bound(ptbins, ptbins + ptbinsSize, pt)
-            - &ptbins[0];
+    - &ptbins[0];
     if (ptbins[ptbin] == pt)
         --ptbin;
 
