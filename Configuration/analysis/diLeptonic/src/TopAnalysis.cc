@@ -706,6 +706,9 @@ void TopAnalysis::SlaveBegin(TTree*)
         h_nRecoEvt_vs_MET        = store(new TH1D ( "h_nRecoEvt_vs_MET", "MET - Kin. Reco. behaviour;MET;Events / 40 GeV", 10, 0, 400 ));
         h_nKinRecoSol_vs_MET     = store(new TH1D ( "h_nKinRecoSol_vs_MET", "MET - Kin. Reco. behaviour;MET;Events / 40 GeV", 10, 0, 400 ));
         
+        h_nRecoEvt_Eff = store(new TH1D ( "h_nRecoEvt_Eff", "", 1, 0, 2 ));
+        h_nKinRecoSol_Eff = store(new TH1D ( "h_nKinRecoSol_Eff", "", 1, 0, 2 ));
+        
         h_RMSvsGenToppT = store(new TH2D ( "RMSvsGenToppT", "RMS vs Gen", 500, 0, 500, 1000, -500, 500 ));
         h_RMSvsGenTopRapidity = store(new TH2D ( "RMSvsGenTopRapidity", "RMS vs Gen", 400, -5, 5, 400, -5, 5 ));
         h_RMSvsGenTTBarMass = store(new TH2D ( "RMSvsGenTTBarMass", "RMS vs Gen", 2000, 0, 2000, 4000, -2000, 2000 ));
@@ -773,8 +776,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     const TopGenObjects topGenObjectsDummy;
     // Access Top signal generator info
-    //if(isTopSignal_)this->GetTopSignalBranchesEntry(entry);
-    const TopGenObjects& topGenObjects = isTopSignal_ ? this->getTopGenObjects(entry) : topGenObjectsDummy;
+    const TopGenObjects& topGenObjects = this->getTopGenObjects(entry);
 
     // Apply the top-quark pT reweighting if the bool 'ApplyTopReweight' says so ;)
     const double weightTopPtReweighting = (ApplyTopPtReweight && isTopSignal_) ? this->weightTopPtReweighting( (*topGenObjects.GenTop_).Pt(), (*topGenObjects.GenAntiTop_).Pt() ) : 1.;
@@ -786,8 +788,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     const CommonGenObjects commonGenObjectsDummy;
     // Access MC general generator info
-    //if(isMC_) this->GetCommonGenBranchesEntry(entry);
-    const CommonGenObjects& commonGenObjects = isMC_ ? this->getCommonGenObjects(entry) : commonGenObjectsDummy; 
+    const CommonGenObjects& commonGenObjects = this->getCommonGenObjects(entry); 
 
     // Access objects info
     //this->GetRecoBranchesEntry(entry);
@@ -991,14 +992,10 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Access kinematic reconstruction info
     const KinRecoObjects kinRecoObjectsDummy;
     
-    bool hasSolution = (*kinRecoObjectsDummy.HypTop_).size() > 0;
-//     if (!this->makeBtagEfficiencies()){
-//         hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, (*recoObjects.allLeptons_), (*recoObjects.jets_), (*recoObjects.jetBTagCSV_), met);
-//     }
-
+    //const KinRecoObjects& kinRecoObjects = this->getKinRecoObjects(entry);
     const KinRecoObjects& kinRecoObjects = (!this->makeBtagEfficiencies() ? this->getKinRecoObjectsOnTheFly(leptonIndex, antiLeptonIndex, jetIndices,(*recoObjects.allLeptons_), (*recoObjects.jets_), (*recoObjects.jetBTagCSV_), met) : kinRecoObjectsDummy );
-    hasSolution=kinRecoObjects.valuesSet_;
-
+    bool hasSolution=kinRecoObjects.valuesSet_;
+    
     if ( isZregion ) {
         double fullWeights = weight;
         Zh1_postZcut->Fill(dilepton.M(), fullWeights);
@@ -1284,6 +1281,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_nRecoEvt_vs_MET->Fill(met.Pt(),weight);
     h_nRecoEvt_vs_JetEta->Fill((*recoObjects.jets_).at(0).Eta(), weight);
     h_nRecoEvt_vs_JetEta->Fill((*recoObjects.jets_).at(1).Eta(), weight);
+    h_nRecoEvt_Eff->Fill(1,weight);
     
     //...
     //=== CUT ===
@@ -1299,7 +1297,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_nKinRecoSol_vs_MET->Fill(met.Pt(),weight);
     h_nKinRecoSol_vs_JetEta->Fill((*recoObjects.jets_).at(0).Eta(), weight);
     h_nKinRecoSol_vs_JetEta->Fill((*recoObjects.jets_).at(1).Eta(), weight);
-    
+    h_nKinRecoSol_Eff->Fill(1, weight);
  
     if(isTopSignal_){//Ievgen
         h_RMSvsGenToppT->Fill((*topGenObjects.GenTop_).Pt(),(*topGenObjects.GenTop_).Pt()-(*kinRecoObjects.HypTop_).at(0).Pt());

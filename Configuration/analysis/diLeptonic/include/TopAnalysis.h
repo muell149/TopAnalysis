@@ -222,8 +222,11 @@ class TopAnalysis : public AnalysisBase
        TH1 *h_nRecoEvt_vs_LeppT;  
        TH1 *h_nKinRecoSol_vs_LeppT;
 
-       TH1 *h_nRecoEvt_vs_MET;    
+       TH1 *h_nRecoEvt_vs_MET;
        TH1 *h_nKinRecoSol_vs_MET;
+       
+       TH1 *h_nRecoEvt_Eff;
+       TH1 *h_nKinRecoSol_Eff;
        
        
        TH1 *h_RMSvsGenToppT;
