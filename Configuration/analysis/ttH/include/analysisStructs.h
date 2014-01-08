@@ -114,10 +114,6 @@ namespace tth{
         
         const std::vector<int>& bjetIndices_;
         
-        //const std::vector<int>& _;
-        //const std::vector<int>& _;
-        //const std::vector<int>& _;
-        //const std::vector<int>& _;
         #endif
     };
     

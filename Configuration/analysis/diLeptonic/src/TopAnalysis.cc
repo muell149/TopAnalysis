@@ -781,7 +781,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     // Get true level weights
     const double trueLevelWeightNoPileupNoClosure = weightGenerator*weightMadgraphCorrection*pdfWeight*weightTopPtReweighting;
-    const double trueLevelWeightNoPileup = doClosureTest_ ? calculateClosureTestWeight() : trueLevelWeightNoPileupNoClosure;
+    const double trueLevelWeightNoPileup = doClosureTest_ ? calculateClosureTestWeight(entry) : trueLevelWeightNoPileupNoClosure;
     const double trueLevelWeight = trueLevelWeightNoPileup*weightPU;
 
     const CommonGenObjects commonGenObjectsDummy;
@@ -904,6 +904,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     const double weightTriggerSF = this->weightTriggerSF(leptonXIndex, leptonYIndex, (*recoObjects.allLeptons_));
     const double weightNoPileup = trueLevelWeightNoPileup*weightTriggerSF*weightLeptonSF;
     const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices, (*recoObjects.jets_), (*commonGenObjects.jetPartonFlavour_));
+    const double weightKinReco = this->weightKinReco();
     
     // The weight to be used for filling the histograms
     double weight = weightNoPileup*weightPU;
@@ -966,9 +967,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (dilepton.M() < 20) return kTRUE;
     
     // weight even without PU reweighting
-    h_vertMulti_noPU->Fill(vertMulti_, weightNoPileup);
+    h_vertMulti_noPU->Fill(*recoObjects.vertMulti_, weightNoPileup);
     
-    h_vertMulti->Fill(vertMulti_, weight);
+    h_vertMulti->Fill(*recoObjects.vertMulti_, weight);
     
     h_step4->Fill(1, weight);
     h_TrigSF->Fill(weightTriggerSF, 1.);
@@ -990,7 +991,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Access kinematic reconstruction info
     const KinRecoObjects kinRecoObjectsDummy;
     
-    this->GetKinRecoBranchesEntry(entry);
     bool hasSolution = (*kinRecoObjectsDummy.HypTop_).size() > 0;
 //     if (!this->makeBtagEfficiencies()){
 //         hasSolution = calculateKinReco(leptonIndex, antiLeptonIndex, jetIndices, (*recoObjects.allLeptons_), (*recoObjects.jets_), (*recoObjects.jetBTagCSV_), met);
@@ -1020,7 +1020,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
                     Allh1_post1btag->Fill(dilepton.M(), fullWeights);
 
                     if ( hasSolution ) {
-                        fullWeights *= weightKinFit_;
+                        fullWeights *= weightKinReco;
                         Zh1_postKinReco->Fill(dilepton.M(), fullWeights);
                         Allh1_postKinReco->Fill(dilepton.M(), fullWeights);
                     }
@@ -1224,7 +1224,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         if (fullSelectionCounter == 0)
             std::cout << "Selected#\tRun\tEvent\tlep+\tlep-\tMll\tNJets\tjet0\tjet1\tNTags\tGenJet1\tGenJet2\tMet\tGenMet\tt/tbar_decay\n"
             << std::setprecision(2) << std::fixed;
-            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << runNumber_ << "\t" << eventNumber_ << "\t" << (*recoObjects.allLeptons_).at(antiLeptonIndex) << "\t" << (*recoObjects.allLeptons_).at(leptonIndex) << "\t"
+            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << *recoObjects.runNumber_ << "\t" << *recoObjects.eventNumber_ << "\t" << (*recoObjects.allLeptons_).at(antiLeptonIndex) << "\t" << (*recoObjects.allLeptons_).at(leptonIndex) << "\t"
             << dilepton.M() << "\t" << numberOfJets << "\t"
             << (*recoObjects.jets_).at(jetIndices.at(0)) << "\t" << (*recoObjects.jets_).at(jetIndices.at(1)) << "\t" << numberOfBjets << "\t"
             << (*commonGenObjects.associatedGenJet_).at(jetIndices.at(0)) << "\t" << (*commonGenObjects.associatedGenJet_).at(jetIndices.at(1)) << "\t"
@@ -1289,7 +1289,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     //=== CUT ===
     //Require at least one solution for the kinematic event reconstruction
     if (!hasSolution) return kTRUE;
-    weight *= weightKinFit_;
+    weight *= weightKinReco;
     
     h_nKinRecoSol_vs_JetMult->Fill((int)jetIndices.size(),weight);//Ievgen reco events with kin sol
     h_nKinRecoSol_vs_LepEta->Fill((*recoObjects.allLeptons_).at(leptonIndex).Eta(),weight);
@@ -1320,7 +1320,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     for (const int index : bjetIndices)
         h_bjetetaAfterKinReco->Fill((*recoObjects.jets_).at(index).Eta(), weight);
     
-    h_KinRecoSF->Fill(weightKinFit_, 1);
+    h_KinRecoSF->Fill(weightKinReco, 1);
     h_EventWeight->Fill(weight, 1);
     
      // ++++ Control Plots ++++
@@ -1935,17 +1935,19 @@ void TopAnalysis::SetClosureTest(TString closure, double slope)
     } else {
         doClosureTest_ = true;
         if (closure == "pttop") {
-            closureFunction_ = [&,slope](){
-                return std::max((1.+(GenTop_->Pt()-100.)*slope)
-                               *(1.+(GenAntiTop_->Pt()-100.)*slope) , 0.1);
+            closureFunction_ = [&,slope](Long64_t entry) -> double {
+                const TopGenObjects& topGenObjects = this->getTopGenObjects(entry);
+                return std::max((1.+(topGenObjects.GenTop_->Pt()-100.)*slope)
+                               *(1.+(topGenObjects.GenAntiTop_->Pt()-100.)*slope) , 0.1);
             };
         } else if (closure == "ytop") {
-            closureFunction_ = [&,slope](){
-                return std::max((1.+(std::fabs(GenTop_->Rapidity())-1.)*slope)
-                               *(1.+(std::fabs(GenAntiTop_->Rapidity()-1.))*slope) , 0.1);
+            closureFunction_ = [&,slope](Long64_t entry) -> double {
+                const TopGenObjects& topGenObjects = this->getTopGenObjects(entry);
+                return std::max((1.+(std::fabs(topGenObjects.GenTop_->Rapidity())-1.)*slope)
+                               *(1.+(std::fabs(topGenObjects.GenAntiTop_->Rapidity()-1.))*slope) , 0.1);
             };
         } else if (closure == "nominal") {
-            closureFunction_ = [](){return 1.;};
+            closureFunction_ = [](Long64_t) -> double {return 1.;};
         } else {
             std::cerr << "invalid closure test function\n";
             exit(1);
@@ -1970,10 +1972,10 @@ void TopAnalysis::SetClosureTest(TString closure, double slope)
 
 
 
-double TopAnalysis::calculateClosureTestWeight()
+double TopAnalysis::calculateClosureTestWeight(const Long64_t& entry)
 {
     if(!doClosureTest_ || !isTopSignal_) return 1.;
-    double weight = closureFunction_();
+    double weight = closureFunction_(entry);
     h_ClosureTotalWeight->Fill(1, weight);
     return weight;
 }

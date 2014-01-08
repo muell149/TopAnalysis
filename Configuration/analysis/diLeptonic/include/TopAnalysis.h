@@ -254,7 +254,7 @@ class TopAnalysis : public AnalysisBase
     
     /// Data for closure test
 #ifndef __CINT__
-    std::function<double()> closureFunction_;
+    std::function<double(Long64_t)> closureFunction_;
 #endif
     int closureMaxEvents_;
     
@@ -316,7 +316,7 @@ private:
     double globalNormalisationFactorPDF();
 
     /// Get weight of closure test
-    double calculateClosureTestWeight();
+    double calculateClosureTestWeight(const Long64_t& entry);
     
     /// Get weight of PDF variation
     double weightPdf(Long64_t entry);
@@ -340,7 +340,6 @@ private:
                                  double extragenjet[4],
                                  const CommonGenObjects& commonGenObjects,
                                  const TopGenObjects& topGenObjects);
-    
     
     
     /// Map holding binned control plots
