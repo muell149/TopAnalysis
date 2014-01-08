@@ -19,11 +19,11 @@
 
 #include "TopAnalysis.h"
 #include "HistoListReader.h"
-#include "../../common/utils.h"
-#include "../../common/analysisUtils.h"
-#include "../../common/classes.h"
-#include "../../common/ScaleFactors.h"
-#include "../../common/analysisObjectStructs.h"
+#include "utils.h"
+#include "analysisUtils.h"
+#include "classes.h"
+#include "ScaleFactors.h"
+#include "analysisObjectStructs.h"
 
 
 ///top production xsec in pb
