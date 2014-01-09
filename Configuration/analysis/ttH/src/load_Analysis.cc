@@ -145,7 +145,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     BTagSFGeneric *bTagSFGeneric = 0;
 
     // Setting the flag to choose which kind of btag scale factors to use
-    bool useGenericBTagSF = true;
+    bool useGenericBTagSF = false;
 
     if(useGenericBTagSF) {
         // Set up generic btag efficiency scale factors
