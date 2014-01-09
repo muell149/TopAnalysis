@@ -372,7 +372,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
     if (is2011_) { //for 7 TeV !!!!
 
     } else { //this is for 8 TeV!!!
-        if (wp_ == csvl_wp) {
+        if (wp_ == csvl_wp) { // ############### CSV Loose ################
 
             // Please give some information about the SF here. E.g
             // -------
@@ -385,14 +385,14 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
             // make sure to use "static"
 
             static float ptbins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 120, 160,
-                    210, 260, 320, 400, 500, 600, 800 };
+                                    210, 260, 320, 400, 500, 600, 800 };
 
-            //pu the errors to the corresponding SF here (copy/paste from BTagPOG payload)
+            //put the errors to the corresponding SF here (copy/paste from BTagPOG payload)
             //make sure to use static and that it has the same size as ptbins!!!
-            static float SFb_error[] = { 0.033408, 0.015446, 0.0146992,
-                    0.0183964, 0.0185363, 0.0145547, 0.0176743, 0.0203609,
-                    0.0143342, 0.0148771, 0.0157936, 0.0176496, 0.0209156,
-                    0.0278529, 0.0346877, 0.0350101 };
+            static float SFb_error[] = { 0.033408, 0.015446, 0.0146992, 0.0183964,
+                                        0.0185363, 0.0145547, 0.0176743, 0.0203609,
+                                        0.0143342, 0.0148771, 0.0157936, 0.0176496,
+                                        0.0209156, 0.0278529, 0.0346877, 0.0350101 };
 
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
@@ -419,6 +419,96 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
             //do NOT use static (should not compile anyway)
             float SF = 1.00572
                     * ((1. + (0.013676 * x)) / (1. + (0.0143279 * x)));
+
+            //don't change:
+            //takes care of systematic variations (if any)
+            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, SF, multiplier);
+        } else if (wp_ == csvm_wp) {  // ############### CSV Medium ################
+
+            // -------
+            // SF from:
+            // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_NOttbar_payload_EPS13.txt  (EPS 2013 prescription)
+            // -------
+
+            static float ptbins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 120, 160,
+                                    210, 260, 320, 400, 500, 600, 800 };
+
+            //put the errors to the corresponding SF here (copy/paste from BTagPOG payload)
+            //make sure to use static and that it has the same size as ptbins!!!
+            static float SFb_error[] = { 0.0415694, 0.023429,0.0261074, 0.0239251,
+                                        0.0232416, 0.0197251, 0.0217319, 0.0198108,
+                                        0.0193, 0.0276144, 0.0205839, 0.026915,
+                                        0.0312739, 0.0415054, 0.0740561, 0.0598311};
+
+            //don't change ---------------------------->
+            static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
+            static size_t SFb_errorSize = sizeof(SFb_error)
+                                                                                                                    / sizeof(SFb_error[0]);
+            if (SFb_errorSize != ptbinsSize - 1) {
+                std::cout
+                << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
+                << std::endl;
+                throw std::logic_error(
+                        "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins.");
+            }
+            //force range according to BTagPOG input (dont change)
+            if (x < ptbins[0]) {
+                x = ptbins[0];
+                multiplier *= 2;
+            } else if (x >= ptbins[ptbinsSize - 1]) {
+                x = ptbins[ptbinsSize - 1] - 0.0001;
+                multiplier *= 2;
+            }
+            // <---------------------------- don't change
+
+            //put the parametrization of the scale factor here (copy/paste from BTagPOG payload)
+            //do NOT use static (should not compile anyway)
+            float SF = (0.939158 + (0.000158694 * x))+( -2.53962e-07 * (x * x));
+
+            //don't change:
+            //takes care of systematic variations (if any)
+            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, SF, multiplier);
+        } else if (wp_ == csvt_wp) { // ############### CSV Tight ################
+
+            // -------
+            // SF from:
+            // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG/SFb-pt_NOttbar_payload_EPS13.txt  (EPS 2013 prescription)
+            // -------
+
+            static float ptbins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 120, 160,
+                                    210, 260, 320, 400, 500, 600, 800 };
+
+            //put the errors to the corresponding SF here (copy/paste from BTagPOG payload)
+            //make sure to use static and that it has the same size as ptbins!!!
+            static float SFb_error[] = { 0.0511028, 0.0306671, 0.0317498, 0.032779,
+                                        0.0291528, 0.0249308, 0.0301118, 0.032047,
+                                        0.0348072, 0.0357745, 0.0378756, 0.0412608,
+                                        0.0777516, 0.0860741, 0.0942209, 0.104106};
+
+            //don't change ---------------------------->
+            static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
+            static size_t SFb_errorSize = sizeof(SFb_error)
+                                                                                                                    / sizeof(SFb_error[0]);
+            if (SFb_errorSize != ptbinsSize - 1) {
+                std::cout
+                << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
+                << std::endl;
+                throw std::logic_error(
+                        "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins.");
+            }
+            //force range according to BTagPOG input (dont change)
+            if (x < ptbins[0]) {
+                x = ptbins[0];
+                multiplier *= 2;
+            } else if (x >= ptbins[ptbinsSize - 1]) {
+                x = ptbins[ptbinsSize - 1] - 0.0001;
+                multiplier *= 2;
+            }
+            // <---------------------------- don't change
+
+            //put the parametrization of the scale factor here (copy/paste from BTagPOG payload)
+            //do NOT use static (should not compile anyway)
+            float SF = (0.939158 + (0.000158694 * x))+( -2.53962e-07 * (x * x));
 
             //don't change:
             //takes care of systematic variations (if any)

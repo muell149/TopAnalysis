@@ -58,7 +58,7 @@ public:
      *
      */
     enum workingPoints {
-        csvm_wp, csvl_wp,
+        csvt_wp, csvm_wp, csvl_wp,
         /* some other WP/taggers ..*/
         //
         /*don't touch this: needs to be last entry*/
@@ -72,10 +72,10 @@ public:
         nominal, heavyup, heavydown, lightup, lightdown
     };
 
-    void setWorkingpoint(workingPoints wp) { wp_ = wp; }
+    void setWorkingPoint(workingPoints wp) { wp_ = wp; }
     const float& getWPDiscrValue()const{return wpvals_[wp_];}
 
-    workingPoints getWorkingpoint() const { return wp_;}
+    workingPoints getWorkingPoint() const { return wp_;}
     /**
      * switches on SF for 7 TeV data
      */

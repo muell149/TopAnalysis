@@ -86,6 +86,10 @@ constexpr const char* Mva2dWeightsFILE = "mvaOutput/Nominal/combined/weights/wei
 /// Folder for basic analysis output
 constexpr const char* AnalysisOutputDIR = "selectionRoot";
 
+/// Setting the btag working point
+/// Available options: csvl_wp (0.244), csvm_wp (0.679), csvt_wp (0.898)
+constexpr BTagSFGeneric::workingPoints BtagWP = BTagSFGeneric::csvl_wp;
+
 
 
 
@@ -149,6 +153,7 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                                           BtagEfficiencyOutputDIR,
                                           Channel::convertChannels(Channel::realChannels),
                                           Systematic::convertSystematic(systematic));
+        bTagSFGeneric->setWorkingPoint(BtagWP);
     } else {
         // Set up btag efficiency scale factors (do it for all channels)
         btagScaleFactors = new BtagScaleFactors(BtagEfficiencyInputDIR,

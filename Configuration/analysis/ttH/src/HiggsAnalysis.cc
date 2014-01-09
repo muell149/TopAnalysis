@@ -43,6 +43,8 @@ constexpr double JetEtaCUT = 2.4;
 /// Jet pt selection in GeV
 constexpr double JetPtCUT = 30.;
 
+/// !!! Used only if the default old btag scaling is used ("useGenericBTagSF = false;" in load_Analysis.cc)
+/// Otherwise should be configured via "BtagWP = BTagSFGeneric::csvl_wp;" in load_Analysis.cc
 /// b-tag working point
 /// CSV Loose: 0.244
 /// CSV Medium: 0.679
@@ -296,7 +298,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     const std::vector<double>& jetBTagCSV = *recoObjects.jetBTagCSV_;
     const std::vector<int>& jetPartonFlavour = *commonGenObjects.jetPartonFlavour_;
     std::vector<int> bjetIndices = jetIndices;
-    selectIndices(bjetIndices, jetBTagCSV, BtagWP);
+    if(bTagSFGeneric_) selectIndices(bjetIndices, jetBTagCSV, (double)bTagSFGeneric_->getWPDiscrValue());
+    else selectIndices(bjetIndices, jetBTagCSV, BtagWP);
     if(retagBJets_) {
         if (isMC_ && btagScaleFactors_ && !(btagScaleFactors_->makeEfficiencies())){
             // Apply b-tag efficiency MC correction using random number based tag flipping
