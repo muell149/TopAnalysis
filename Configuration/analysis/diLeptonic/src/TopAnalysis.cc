@@ -741,7 +741,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Use utilities without namespaces
     using ROOT::Math::VectorUtil::DeltaPhi;
     using ROOT::Math::VectorUtil::DeltaR;
-    using namespace ttbar;
+    using namespace common;
     
     
     // Entry for object structs are not yet read, so reset
@@ -2203,7 +2203,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                                     const double trueLevelWeightNoPileup, const double trueLevelWeight,const CommonGenObjects& commonGenObjects,const TopGenObjects& topGenObjects)
 {
     // Use utilities without namespaces
-    using namespace ttbar;
+    using namespace common;
     using ROOT::Math::VectorUtil::DeltaPhi;
     
     LV& LeadGenTop(leadGenTop);
@@ -2340,7 +2340,7 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                                           const TopGenObjects& topGenObjects)
 {
     // Use utilities without namespaces
-    using namespace ttbar;
+    using namespace common;
     using ROOT::Math::VectorUtil::DeltaPhi;
     using ROOT::Math::VectorUtil::DeltaR;
 
@@ -2448,7 +2448,7 @@ void TopAnalysis::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, 
         std::string binning = 
             i == 0 ? "underflow" :
             i == pair.first->GetNbinsX() + 1 ? "overflow" :
-            ttbar::d2s(pair.first->GetBinLowEdge(i)) + " to " + ttbar::d2s(pair.first->GetBinLowEdge(i+1));
+            common::d2s(pair.first->GetBinLowEdge(i)) + " to " + common::d2s(pair.first->GetBinLowEdge(i+1));
         binning = std::string(" (") + h_differential->GetName() + " " + binning + ")";
         std::string n = name + std::to_string(i) + "_" + h_control->GetName();
         pair.second[i][h_control->GetName()] = store(

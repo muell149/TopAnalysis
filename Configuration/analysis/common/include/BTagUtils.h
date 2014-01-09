@@ -15,7 +15,7 @@ class TSelectorList;
 
 
 // FIXME: replace these functions with enum type ones
-namespace ttbar{
+namespace common{
 
     /// Access an already existing input folder
     std::string fullFilePath(const std::string& baseDir, const std::string& fileName,

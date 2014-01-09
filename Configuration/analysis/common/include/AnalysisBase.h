@@ -440,7 +440,7 @@ protected:
     double weightKinReco()const;
     
     /// Store the object in the output list and return it
-    template<class T> T* store(T* obj){return ttbar::store(obj, fOutput);}
+    template<class T> T* store(T* obj){return common::store(obj, fOutput);}
 
     /// Whether to or not to produce b-tag efficiencies for the analysed sample
     bool makeBtagEfficiencies()const;

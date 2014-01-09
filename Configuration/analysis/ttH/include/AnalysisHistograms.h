@@ -87,7 +87,7 @@ protected:
     bool checkExistence(const TString& step)const;
     
     /// Store the object in the output list and return it
-    template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
+    template<class T> T* store(T* obj){return common::store(obj, selectorList_);}
     
     
     

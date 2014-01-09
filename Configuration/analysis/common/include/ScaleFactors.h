@@ -17,7 +17,7 @@ class TSelectorList;
 
 
 // FIXME: replace these functions with enum type ones
-namespace ttbar{
+namespace common{
 
     /// Assign a folder depending on channel and systematic
     std::string assignFolder(const char* baseDir, const TString& channel, const TString& systematic);
@@ -225,7 +225,7 @@ private:
         ~ChannelStruct(){}
         
         /// Store the object in the output list and return it
-        template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
+        template<class T> T* store(T* obj){return common::store(obj, selectorList_);}
         
         /// Input file name for files holding histograms of b-tagging efficiencies
         std::string inputFileName_;

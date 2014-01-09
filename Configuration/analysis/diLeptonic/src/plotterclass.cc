@@ -874,7 +874,7 @@ bool Plotter::fillHisto()
 
         ApplyFlatWeights(hist, LumiWeight);
 
-        ttbar::setHHStyle(*gStyle);
+        common::setHHStyle(*gStyle);
         hists.push_back(*hist);
         delete hist;
     }
@@ -1059,7 +1059,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
     if(XAxisbins.size()>1){//only distributions we want to unfold will have a binning vector
         aDataHist = drawhists[0]->Rebin(bins,"aDataHist",Xbins);
 
-        TString outdir = ttbar::assignFolder("preunfolded", Channel, Systematic);
+        TString outdir = common::assignFolder("preunfolded", Channel, Systematic);
         TFile *f15 = new TFile(outdir.Copy()+name+"_UnfoldingHistos.root","RECREATE");
         aDataHist->Write("aDataHist"); delete aDataHist;
         aTtBgrHist->Write("aTtBgrHist"); delete aTtBgrHist;
@@ -1083,7 +1083,7 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
         if(channelType==3) Plotter::PlotXSec(Channel);
     }
 
-    std::unique_ptr<TH1D> syshist { (TH1D*) ttbar::summedStackHisto(stack.get()) };
+    std::unique_ptr<TH1D> syshist { (TH1D*) common::summedStackHisto(stack.get()) };
 
     if(logY)c->SetLogy();
     syshist->SetFillStyle(3004);
@@ -1153,12 +1153,12 @@ void Plotter::write(TString Channel, TString Systematic) // do scaling, stacking
 
     leg->Draw("SAME");
     if(drawPlotRatio){
-        TH1* stacksum = ttbar::summedStackHisto(stack.get());
-        ttbar::drawRatio(drawhists[0], stacksum, 0.5, 1.7, doFit_);
+        TH1* stacksum = common::summedStackHisto(stack.get());
+        common::drawRatio(drawhists[0], stacksum, 0.5, 1.7, doFit_);
     }
 
     // Create Directory for Output Plots 
-    TString outdir = ttbar::assignFolder(outpathPlots, Channel, Systematic);
+    TString outdir = common::assignFolder(outpathPlots, Channel, Systematic);
     c->Print(outdir.Copy()+name+".eps");
 
     std::unique_ptr<TH1> sumMC;
@@ -1229,7 +1229,7 @@ void Plotter::PlotXSec(TString Channel){
 
     double InclusiveXsectionPlot[4] = {0.}, InclusiveXsectionStatErrorPlot[4] = {0.}, InclusiveXsectionSysErrorPlot[4] = {0.}, InclusiveXsectionTotalErrorPlot[4] = {0.};
     for (int j=0; j<(int)vec_channel.size(); j++){
-        TString outdir = ttbar::assignFolder(outpathPlots, vec_channel.at(j), TString("FinalResults"));
+        TString outdir = common::assignFolder(outpathPlots, vec_channel.at(j), TString("FinalResults"));
         ifstream SysResultsList("Plots/Nominal/"+vec_channel.at(j)+"/InclusiveXSec.txt");
         TString DUMMY;
         SysResultsList>>DUMMY>>DUMMY>>DUMMY>>DUMMY>>DUMMY>>InclusiveXsectionPlot[j]>>DUMMY>>InclusiveXsectionStatErrorPlot[j];
@@ -1381,7 +1381,7 @@ void Plotter::PlotXSec(TString Channel){
     box3->Draw("SAME");
     box4->Draw("SAME");
 
-    TString outdir = ttbar::assignFolder(outpathPlots, Channel, TString("FinalResults"));
+    TString outdir = common::assignFolder(outpathPlots, Channel, TString("FinalResults"));
     c->Print(outdir.Copy()+"InclusiveXSec.eps");
     c->Print(outdir.Copy()+"InclusiveXSec.C");
     c->Clear();
@@ -1438,7 +1438,7 @@ void Plotter::MakeTable(TString Channel, TString Systematic){
     double tmp_num8 = 0;
     double tmp_num9 = 0;
 
-    TString outdir = ttbar::assignFolder(outpathPlots, Channel, Systematic);
+    TString outdir = common::assignFolder(outpathPlots, Channel, Systematic);
     ofstream EventFile5; EventFile5.open(outdir.Copy()+"Events5.txt");
     ofstream EventFile6; EventFile6.open(outdir.Copy()+"Events6.txt");
     ofstream EventFile7; EventFile7.open(outdir.Copy()+"Events7.txt");
@@ -1607,7 +1607,7 @@ double Plotter::CalcXSec(std::vector<TString> datasetVec, double InclusiveXsecti
     double tmp_num = 0;
 
     ofstream EventFile, XSecFile;
-    TString outdir = ttbar::assignFolder(outpathPlots, subfolderChannel.Copy().Remove(0,1), Systematic);
+    TString outdir = common::assignFolder(outpathPlots, subfolderChannel.Copy().Remove(0,1), Systematic);
     EventFile.open(outdir.Copy()+"Events.txt");
     XSecFile.open(outdir.Copy()+"InclusiveXSec.txt");
 
@@ -2145,7 +2145,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     leg3->AddEntry(grP, "Purity",    "p" );
     leg3->AddEntry(grS, "Stability", "p" );
     leg3->Draw("SAME");
-    TString outdir = ttbar::assignFolder(outpathPlots, Channel, TString("FinalResults"));
+    TString outdir = common::assignFolder(outpathPlots, Channel, TString("FinalResults"));
     cESP->Print(outdir.Copy()+"ESP_"+name+".eps");
     cESP->Clear();
     delete cESP;
@@ -2538,8 +2538,8 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     if(drawNLOCurves && drawKidonakis &&
         (name== "HypToppT" || name == "HypTopRapidity") && 
         !name.Contains("Lead") && !name.Contains("RestFrame")){
-        TString kidoFile = ttbar::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
-        //KidoFile=TFile::Open(ttbar::DATA_PATH() + "dilepton_kidonakisNNLO.root");
+        TString kidoFile = common::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
+        //KidoFile=TFile::Open(common::DATA_PATH() + "dilepton_kidonakisNNLO.root");
         if(name.Contains("ToppT")){
             //Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topPt");
@@ -2551,7 +2551,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     }
 
     if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT")){
-        TString ahrensFile = ttbar::DATA_PATH() + "/ahrensNNLL_8TeV.root";
+        TString ahrensFile = common::DATA_PATH() + "/ahrensNNLL_8TeV.root";
         if(name == "HypTTBarMass") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarM");
         else if(name == "HypTTBarpT") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarPt");
         Ahrensth1_Binned->Scale(1./Ahrensth1_Binned->Integral("width"));
@@ -2924,16 +2924,16 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
             for (int i=1; i<(int)tmpKido->GetNbinsX()+1; i++){ tmpKido->SetBinContent(i,Kidoth1_Binned->GetBinContent(i));};
         }
 
-        ttbar::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, 
+        common::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, 
                             powheghistBinned, mcnlohistBinned, 
                             tmpKido, Ahrensth1_Binned,
                             powhegHerwighistBinned, perugia11histBinned,
                             0.4, 1.6);
     };
 
-//    if(drawMadScaleMatching) {powheghist = nullptr; mcnlohist = nullptr; ttbar::drawRatioXSEC(h_DiffXSec,h_GenDiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6); }
-    if(drawNLOCurves && drawMadScaleMatching) ttbar::drawRatioXSEC(h_DiffXSec,h_GenDiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
-    if(drawNLOCurves && drawMadMass) ttbar::drawRatioXSEC(h_GenDiffXSec,h_DiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
+//    if(drawMadScaleMatching) {powheghist = nullptr; mcnlohist = nullptr; common::drawRatioXSEC(h_DiffXSec,h_GenDiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6); }
+    if(drawNLOCurves && drawMadScaleMatching) common::drawRatioXSEC(h_DiffXSec,h_GenDiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
+    if(drawNLOCurves && drawMadMass) common::drawRatioXSEC(h_GenDiffXSec,h_DiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
 
     c->Print(outdir.Copy()+"DiffXS_"+name+".eps");
     //c->Print(outdir.Copy()+"DiffXS_"+name+".C");
@@ -2982,7 +2982,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     PrintResultTotxtFile(Channel, binCenters, tga_DiffXSecPlot, tga_DiffXSecPlotwithSys);
 
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
-    TH1* stacksum = ttbar::summedStackHisto(stack);
+    TH1* stacksum = common::summedStackHisto(stack);
 
     for(unsigned int i=1; i<hists.size() ; i++){ // sum all data plots to first histogram
         if(legends.at(i) == legends.at(0)){
@@ -3255,7 +3255,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     leg3->AddEntry(grS, "Stability", "p" );
     leg3->Draw("SAME");
 
-    TString outdir = ttbar::assignFolder(outpathPlots, Channel, Systematic);
+    TString outdir = common::assignFolder(outpathPlots, Channel, Systematic);
     cESP->Print(outdir.Copy()+"ESP_"+name+".eps");
     cESP->Clear();
     delete cESP;
@@ -3491,7 +3491,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     if(drawNLOCurves && drawKidonakis &&
         (name== "HypToppT" || name == "HypTopRapidity") && 
         !name.Contains("Lead") && !name.Contains("RestFrame")){
-        TString kidoFile = ttbar::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
+        TString kidoFile = common::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
         if(name.Contains("ToppT")){
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topPt");
         }
@@ -3500,7 +3500,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         }
     }
     if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT")){
-        TString ahrensFile = ttbar::DATA_PATH() + "/ahrensNNLL_8TeV.root";
+        TString ahrensFile = common::DATA_PATH() + "/ahrensNNLL_8TeV.root";
         if(name == "HypTTBarMass") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarM");
         else if(name == "HypTTBarpT") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarPt");
         Ahrensth1_Binned->Scale(1./Ahrensth1_Binned->Integral("width"));
@@ -3680,9 +3680,9 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
             for (int i=1; i<(int)tmpKido->GetNbinsX()+1; i++){ tmpKido->SetBinContent(i,Kidoth1_Binned->GetBinContent(i));};
         }
 
-        if(doClosureTest) { ttbar::drawRatioXSEC(h_DiffXSec, realTruthBinned, h_GenDiffXSec, powheghistBinned,
+        if(doClosureTest) { common::drawRatioXSEC(h_DiffXSec, realTruthBinned, h_GenDiffXSec, powheghistBinned,
                                                  mcnlohistBinned, tmpKido, Ahrensth1_Binned,powhegHerwighistBinned, 0.4, 1.6);
-        } else { ttbar::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, powheghistBinned, mcnlohistBinned, 
+        } else { common::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, powheghistBinned, mcnlohistBinned, 
                                   tmpKido, Ahrensth1_Binned, powhegHerwighistBinned, perugia11histBinned,0.4, 1.6);
         };
     };
@@ -3725,7 +3725,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     std::cout<<"-------------------------------------------------------------------"<<std::endl;
 
     TCanvas * c1 = new TCanvas("DiffXS","DiffXS");
-    TH1* stacksum = ttbar::summedStackHisto(stack);
+    TH1* stacksum = common::summedStackHisto(stack);
 
     for(unsigned int i=1; i<hists.size() ; i++){ // sum all data plots to first histogram
         if(legends.at(i) == legends.at(0)){
@@ -3821,9 +3821,9 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
     
     TString filename;
     if(strcmp(generator, "Powheg")==0){filename = "selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root";}
-    else if(strcmp(generator, "MCatNLO")==0){filename = ttbar::DATA_PATH() + "/MCatNLO_status3_v20120729.root";}
-    else if(strcmp(generator, "MCNLOup")==0){filename = ttbar::DATA_PATH() + "/MCatNLO_Uncert_Up_status3_v20120729.root";}
-    else if(strcmp(generator, "MCNLOdown")==0){filename = ttbar::DATA_PATH() + "/MCatNLO_Uncert_Down_status3_v20120729.root";}
+    else if(strcmp(generator, "MCatNLO")==0){filename = common::DATA_PATH() + "/MCatNLO_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOup")==0){filename = common::DATA_PATH() + "/MCatNLO_Uncert_Up_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOdown")==0){filename = common::DATA_PATH() + "/MCatNLO_Uncert_Down_status3_v20120729.root";}
     
     TH1 *hist = fileReader->GetClone<TH1>(filename, histname, true);
     if (hist) {
@@ -4338,7 +4338,7 @@ void Plotter::CalcUpDownDifference( TString Channel, TString Syst_Up, TString Sy
         Syst_Up.Remove(Syst_Up.Length()-2,2);
     }
 
-    ofstream SystematicRelError (ttbar::assignFolder("UnfoldingResults", Channel, Syst_Up)+Variable+"Results.txt");
+    ofstream SystematicRelError (common::assignFolder("UnfoldingResults", Channel, Syst_Up)+Variable+"Results.txt");
     if(!SystematicRelError.is_open()){
         std::cout<<"The output file cannot be opened. Exiting!!"<<std::endl;
         exit(434);

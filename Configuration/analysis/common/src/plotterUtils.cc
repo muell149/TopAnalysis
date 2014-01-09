@@ -14,7 +14,7 @@
 
 
 
-void ttbar::drawRatioXSEC(const TH1* histNumerator, const TH1* histDenominator1, const TH1* histDenominator2, const TH1* histDenominator3, 
+void common::drawRatioXSEC(const TH1* histNumerator, const TH1* histDenominator1, const TH1* histDenominator2, const TH1* histDenominator3, 
                           const TH1* histDenominator4, const TH1* histDenominator5, const TH1* histDenominator6, const TH1* histDenominator7, 
                           const Double_t& ratioMin, const Double_t& ratioMax, TStyle myStyle)
 {
@@ -201,7 +201,7 @@ void ttbar::drawRatioXSEC(const TH1* histNumerator, const TH1* histDenominator1,
 
 
 
-void ttbar::drawRatio(const TH1* histNumerator, const TH1* histDenominator, 
+void common::drawRatio(const TH1* histNumerator, const TH1* histDenominator, 
                const Double_t& ratioMin, const Double_t& ratioMax, 
                bool addFit,
                const TStyle& myStyle, const int verbose, const std::vector<double>& err)
@@ -360,7 +360,7 @@ void ttbar::drawRatio(const TH1* histNumerator, const TH1* histDenominator,
 
 
 
-void ttbar::setHHStyle(TStyle& HHStyle)
+void common::setHHStyle(TStyle& HHStyle)
 {
     const int fontstyle=42;
     HHStyle.SetPalette(1);
@@ -550,7 +550,7 @@ void ttbar::setHHStyle(TStyle& HHStyle)
 
 
 
-TH1* ttbar::summedStackHisto(const THStack *stack)
+TH1* common::summedStackHisto(const THStack *stack)
 {
     TList* list = stack->GetHists(); //the TList is owned by the stack
     if (list->GetEntries() == 0) return 0;

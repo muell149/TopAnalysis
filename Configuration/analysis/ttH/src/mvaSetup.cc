@@ -201,7 +201,7 @@ mvaSetup::SystematicChannelFileNames mvaSetup::mergeTrees(const char* mvaInputDi
             
             
             // Write merged trees to file for given channel and systematic
-            TString mergedTreesFileName = ttbar::assignFolder(mvaInputDir, channel, systematic);
+            TString mergedTreesFileName = common::assignFolder(mvaInputDir, channel, systematic);
             mergedTreesFileName.Append("/");
             mergedTreesFileName.Append("mergedTrees.root");
             TFile* mergedTreesFile = new TFile(mergedTreesFileName, "RECREATE");

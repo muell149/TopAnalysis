@@ -94,7 +94,7 @@ void EventYields::writeYields(const Channel::Channel& channel, const std::vector
         // Prepare output folder and text file
         // At present, event yields are only possible for nominal systematic
         std::ofstream eventFile;
-        TString eventFileString = ttbar::assignFolder(YieldDIR, channel, Systematic::nominal);
+        TString eventFileString = common::assignFolder(YieldDIR, channel, Systematic::nominal);
         if(useCorrections) eventFileString.Append("corrected_");
         eventFileString.Append("events" + i_nameStepPair->second + ".txt");
         eventFile.open(eventFileString.Data());

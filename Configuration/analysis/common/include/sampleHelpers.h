@@ -163,7 +163,7 @@ namespace Channel{
 
 
 
-namespace ttbar{
+namespace common{
     
     /// Create and assign an output folder depending on the channel and systematic
     TString assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic);

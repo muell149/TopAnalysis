@@ -31,7 +31,7 @@
 
 
 
-std::string ttbar::assignFolder(const char* baseDir, const TString& channel, const TString& systematic)
+std::string common::assignFolder(const char* baseDir, const TString& channel, const TString& systematic)
 {
     std::string path("");
     
@@ -57,7 +57,7 @@ std::string ttbar::assignFolder(const char* baseDir, const TString& channel, con
 
 
 
-std::string ttbar::accessFolder(const char* baseDir, const TString& channel,
+std::string common::accessFolder(const char* baseDir, const TString& channel,
                          const TString& systematic, const bool allowNonexisting)
 {
     // Build directory path
@@ -142,7 +142,7 @@ h2_MuonIDSFpteta(0)
     std::cout<<"--- Beginning preparation of lepton scale factors\n";
     
     for(const auto& lepton : {electron, muon}){
-        std::string inputFileName(ttbar::DATA_PATH());
+        std::string inputFileName(common::DATA_PATH());
         inputFileName.append("/");
         std::string histogramName;
         if(lepton == electron){
@@ -309,7 +309,7 @@ h2_mumuTrigSFeta(0)
     
     std::vector<TString> triggerInputFileNames;
     for(const auto& channel : channels){
-        TString fullName(ttbar::DATA_PATH());
+        TString fullName(common::DATA_PATH());
         fullName.Append("/triggerSummary_");
         fullName.Append(channel);
         fullName.Append(inputFileSuffix);
@@ -471,7 +471,7 @@ systematic_(nominal)
     // Check if all relevant input files are available
     bool allInputFilesAvailable(true);
     for(const auto& channel : channels){
-        std::string btagInputFile = ttbar::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
+        std::string btagInputFile = common::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
         if(btagInputFile == "") allInputFilesAvailable = false;
         btagInputFile.append(channel + "_ttbarsignalplustau.root");
         
@@ -505,11 +505,11 @@ systematic_(nominal)
         std::string btagOutputFile("");
         
         if(!makeEfficiencies_){
-            btagInputFile = ttbar::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
+            btagInputFile = common::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
             if(btagInputFile != "") btagInputFile.append(channel + "_ttbarsignalplustau.root");
         }
         else{
-            btagOutputFile = ttbar::assignFolder(btagEfficiencyOutputDir, channel, systematic);
+            btagOutputFile = common::assignFolder(btagEfficiencyOutputDir, channel, systematic);
             if(btagOutputFile != "") btagOutputFile.append(channel + "_ttbarsignalplustau.root");
         }
         

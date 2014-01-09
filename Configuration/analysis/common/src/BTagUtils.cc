@@ -26,14 +26,14 @@
 
 
 
-std::string ttbar::fullFilePath(const std::string& baseDir, const std::string& fileName,
+std::string common::fullFilePath(const std::string& baseDir, const std::string& fileName,
                                 const std::string& channel, const TString& systematic,
                                 const bool createNonExisting, const bool allowNonExisting)
 {
     // Creating full path
     std::string path(baseDir);
     path.append("/");
-    path.append(ttbar::partialFilePath(fileName, channel, systematic));
+    path.append(common::partialFilePath(fileName, channel, systematic));
 
     TString pathStr(path);
 
@@ -69,7 +69,7 @@ std::string ttbar::fullFilePath(const std::string& baseDir, const std::string& f
     return path;
 }
 
-std::string ttbar::partialFilePath(const std::string& fileName, const std::string& channel, const TString& systematic)
+std::string common::partialFilePath(const std::string& fileName, const std::string& channel, const TString& systematic)
 {
     std::string path(systematic);
     path.append("/");
@@ -101,7 +101,7 @@ systematic_(nominal)
     // Check if all relevant input files are available
     bool allInputFilesAvailable(true);
     for(const auto& channel : channels){
-        std::string btagInputFile = ttbar::fullFilePath(inputDirName_, fileName_, channel, systematic);
+        std::string btagInputFile = common::fullFilePath(inputDirName_, fileName_, channel, systematic);
         if(btagInputFile == "") allInputFilesAvailable = false;
 
         ifstream inputFileStream;
@@ -162,8 +162,8 @@ bool BTagSFGeneric::makeEfficiencies()
 
 void BTagSFGeneric::prepareBTags(TSelectorList* output, const std::string& channel)
 {
-    std::string sampleName = ttbar::partialFilePath(fileName_, channel, "Nominal");
-    std::string inputFileName = ttbar::fullFilePath(inputDirName_,fileName_, channel, "Nominal");
+    std::string sampleName = common::partialFilePath(fileName_, channel, "Nominal");
+    std::string inputFileName = common::fullFilePath(inputDirName_,fileName_, channel, "Nominal");
 
     // Set pointer to output, so that histograms are owned by it
     selectorList_ = output;
@@ -269,8 +269,8 @@ void BTagSFGeneric::fillBtagHistograms(const std::vector<int>& jetIndices,
 void BTagSFGeneric::produceBtagEfficiencies(const std::string& channel)
 {
     //FIXME: Change "Nominal" to real systematic name specified in the initializer
-    std::string outputFileName = ttbar::fullFilePath(outputDirName_,fileName_, channel, "Nominal", true);
-    std::string sampleName = ttbar::partialFilePath(fileName_, channel, "Nominal");
+    std::string outputFileName = common::fullFilePath(outputDirName_,fileName_, channel, "Nominal", true);
+    std::string sampleName = common::partialFilePath(fileName_, channel, "Nominal");
 
     TFile file(outputFileName.c_str(),"RECREATE");
 

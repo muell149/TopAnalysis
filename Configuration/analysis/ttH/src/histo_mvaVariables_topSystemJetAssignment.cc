@@ -237,11 +237,11 @@ void histoMvaVariablesTopSystemJetAssignment(const std::vector<Channel::Channel>
         for(const auto& channel : v_channel){
             
             // Compose input filename
-            const TString inputFolder = ttbar::accessFolder(InputBaseDIR, channel, systematic);
+            const TString inputFolder = common::accessFolder(InputBaseDIR, channel, systematic);
             const TString inputFile = inputFolder + "plots.root";
             
             // Compose output folder
-            const TString outputFolder = ttbar::assignFolder(OutputBaseDIR, channel, systematic);
+            const TString outputFolder = common::assignFolder(OutputBaseDIR, channel, systematic);
             
             // Loop over all histogams
             for(const TString& histonameBase : v_histonameBase){
@@ -271,11 +271,11 @@ void histoMvaVariablesTopSystemJetAssignment(const std::vector<Channel::Channel>
 int main(int argc, char** argv)
 {
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: combined", false, 1, 4,
-        ttbar::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsPlotting)));
+        common::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsPlotting)));
     CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal", false, 1, 100,
-        ttbar::makeStringCheck({"Nominal", ""}));
+        common::makeStringCheck({"Nominal", ""}));
     CLParameter<std::string> opt_drawMode("d", "Draw modes - whether to draw curve for swapped combinations (swap)", false, 1, 1,
-        ttbar::makeStringCheck({"swap", ""}));
+        common::makeStringCheck({"swap", ""}));
     CLAnalyser::interpretGlobal(argc, argv);
     
     // Set up channels

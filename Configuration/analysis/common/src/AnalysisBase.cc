@@ -150,7 +150,7 @@ void AnalysisBase::Terminate()
         std::cerr<<"ERROR! No base directory for analysis output specified\n...break\n"<<std::endl;
         exit(3);
     }
-    std::string f_savename = ttbar::assignFolder(analysisOutputBase_, channel_, systematic_);
+    std::string f_savename = common::assignFolder(analysisOutputBase_, channel_, systematic_);
     f_savename.append(outputfilename_);
     std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<samplename_<<"!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     TFile outputFile(f_savename.c_str(), "RECREATE");
@@ -1060,14 +1060,14 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //     }
 
     // Fill the results of the on-the-fly kinematic reconstruction
-    kinRecoObjects_->HypTop_->push_back(ttbar::TLVtoLV(sol.top));
-    kinRecoObjects_->HypAntiTop_->push_back(ttbar::TLVtoLV(sol.topBar));
-    kinRecoObjects_->HypLepton_->push_back(ttbar::TLVtoLV(sol.lm));
-    kinRecoObjects_->HypAntiLepton_->push_back(ttbar::TLVtoLV(sol.lp));
-    kinRecoObjects_->HypBJet_->push_back(ttbar::TLVtoLV(sol.jetB));
-    kinRecoObjects_->HypAntiBJet_->push_back(ttbar::TLVtoLV(sol.jetBbar));
-    kinRecoObjects_->HypNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrino));
-    kinRecoObjects_->HypAntiNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrinoBar));
+    kinRecoObjects_->HypTop_->push_back(common::TLVtoLV(sol.top));
+    kinRecoObjects_->HypAntiTop_->push_back(common::TLVtoLV(sol.topBar));
+    kinRecoObjects_->HypLepton_->push_back(common::TLVtoLV(sol.lm));
+    kinRecoObjects_->HypAntiLepton_->push_back(common::TLVtoLV(sol.lp));
+    kinRecoObjects_->HypBJet_->push_back(common::TLVtoLV(sol.jetB));
+    kinRecoObjects_->HypAntiBJet_->push_back(common::TLVtoLV(sol.jetBbar));
+    kinRecoObjects_->HypNeutrino_->push_back(common::TLVtoLV(sol.neutrino));
+    kinRecoObjects_->HypAntiNeutrino_->push_back(common::TLVtoLV(sol.neutrinoBar));
     kinRecoObjects_->HypJet0index_->push_back(jIndex[sol.jetB_index]);
     kinRecoObjects_->HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
 
@@ -1107,8 +1107,8 @@ const std::string AnalysisBase::topDecayModeString()const
 void AnalysisBase::prepareJER_JES()
 {
     // FIXME: make this string steerable
-    //     const TString pathToFile(ttbar::DATA_PATH() + "/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt");
-    const TString pathToFile(ttbar::DATA_PATH() + "/Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt");
+    //     const TString pathToFile(common::DATA_PATH() + "/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt");
+    const TString pathToFile(common::DATA_PATH() + "/Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt");
     doJesJer_ = false;
     if (systematic_ == "JES_UP" || systematic_ == "JES_DOWN") {
         jetCorrectionUncertainty_ = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.Data(), "Total"));

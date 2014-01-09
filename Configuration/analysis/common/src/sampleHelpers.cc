@@ -224,11 +224,11 @@ std::vector<std::string> Channel::convertChannels(const std::vector<Channel>& ch
 
 
 
-// --------------------- Functions defined in namespace ttbar -------------------------
+// --------------------- Functions defined in namespace common -------------------------
 
 
 
-TString ttbar::assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
+TString common::assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
     std::string path("");
     
@@ -257,7 +257,7 @@ TString ttbar::assignFolder(const char* baseDir, const Channel::Channel& channel
 
 
 
-TString ttbar::accessFolder(const char* baseDir, const Channel::Channel& channel,
+TString common::accessFolder(const char* baseDir, const Channel::Channel& channel,
                             const Systematic::Systematic& systematic, const bool allowNonexisting)
 {
     // Build directory path

@@ -166,7 +166,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
 
     // Use utilities without namespaces
-    using namespace ttbar;
+    using namespace common;
 
 
     // Entry for object structs are not yet read, so reset
@@ -633,7 +633,7 @@ tth::IndexPairs HiggsAnalysis::chargeOrderedJetPairIndices(const std::vector<int
             // Get the indices of b and anti-b jet defined by jet charge
             int bIndex = *i_jetIndex;
             int antiBIndex = *j_jetIndex;
-            ttbar::orderIndices(antiBIndex, bIndex, jetCharges);
+            common::orderIndices(antiBIndex, bIndex, jetCharges);
 
             result.push_back(std::make_pair(antiBIndex, bIndex));
         }

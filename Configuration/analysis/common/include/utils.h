@@ -1,5 +1,5 @@
-#ifndef ttbar_utils_h
-#define ttbar_utils_h
+#ifndef common_utils_h
+#define common_utils_h
 
 #include <string>
 #include <functional>
@@ -9,7 +9,7 @@
 
 
 
-namespace ttbar{
+namespace common{
 
     /// return CMSSW_BASE environment variable as string, with error checking
     const std::string CMSSW_BASE();
