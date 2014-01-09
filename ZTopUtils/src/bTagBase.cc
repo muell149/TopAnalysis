@@ -6,26 +6,12 @@ namespace ztop {
 /**
  * constructor does nothing in particular
  */
-bTagBase::bTagBase() {
-
-    init_ = false;
-    makeeffs_ = true;
-    histp_ = 0;
-    effhistp_ = 0;
-    syst_ = nominal;
-    is2011_ = false;
-    TH1::AddDirectory(kFALSE);
-    nancount_=0;
-
-    wp_ = csvl_wp;
-    showWarnings = true;
-    debug = false;
-
-    sumStuffEff_ = 0.9999999;
-    sumStuffSfEff_ = 0.9999999;
+bTagBase::bTagBase():showWarnings(false),debug(false),init_(false),wp_(csvl_wp),is2011_(false),
+        syst_(nominal),makeeffs_(true),tempsamplename_(""),histp_(0),effhistp_(0),sumStuffEff_(0.9999999),sumStuffSfEff_(0.9999999),
+        nancount_(0){
     wpvals_.resize(workingPoints::length_wp, 0);
-    minpt_.resize(workingPoints::length_wp, 0);
-    maxpt_.resize(workingPoints::length_wp, 0);
+    minpt_.resize (workingPoints::length_wp, 0);
+    maxpt_.resize (workingPoints::length_wp, 0);
 
 }
 /**
@@ -38,6 +24,9 @@ bTagBase::bTagBase() {
 int bTagBase::setSampleName(const std::string & samplename) {
     //set pointers
     initWorkingpoints();
+    if(debug)
+            std::cout << "bTagBase::setSampleName" <<  samplename<< std::endl;
+
 
     std::map<std::string, std::vector<TH2D> >::iterator sampleit = histos_.find(
             samplename);
@@ -184,7 +173,7 @@ void bTagBase::makeEffs() {
                 float err = 0.99; //to avoid zeros!
                 if (histp_->at(2 * i).GetBinContent(binx, biny) > 0) {
                     cont = histp_->at(2 * i + 1).GetBinContent(binx, biny)
-                                                                                                                            / histp_->at(2 * i).GetBinContent(binx, biny);
+                                                                                                                                    / histp_->at(2 * i).GetBinContent(binx, biny);
                     if (debug)
                         std::cout << "makeEffs: content: " << cont;
                     err = sqrt(
@@ -225,34 +214,8 @@ void bTagBase::countJet(const float & pt, const float& abs_eta,
     float eff = 0;
     sf=jetSF(pt, abs_eta,jettype);
     eff=jetEff(pt, abs_eta,jettype);
-    /*
-    unsigned int effh = 100;
 
 
-    if (jettype == bjet) { // b jets
-        effh = 0;
-        sf = BJetSF(pt, abs_eta);
-    } else if (jettype == cjet) { // c jets
-        effh = 1;
-        sf = CJetSF(pt, abs_eta);
-    } else { // (including gluon jets)
-        effh = 2;
-        sf = LJetSF(pt, abs_eta);
-    }
-
-    int ptbin = 0;
-    int etabin = 0;
-    int bla = 0;
-
-    effhistp_->at(effh).GetBinXYZ(effhistp_->at(effh).FindBin(pt, abs_eta),
-            ptbin, etabin, bla);
-    eff = effhistp_->at(effh).GetBinContent(ptbin, etabin);
-
-    if (!(0 <= eff && eff <= 1 && sf >= 0 && sf <= 100))
-        std::cout << "warning SF: " << sf << "   eff(" << pt << " GeV, "
-        << abs_eta << "): " << eff << "\t genflav: " << genPartonFlavor
-        << "\teffh " << effh << std::endl;
-     */
     sumStuffEff_ = sumStuffEff_ * (1 - eff);
     sumStuffSfEff_ = sumStuffSfEff_ * (1 - sf * eff);
 
@@ -337,6 +300,7 @@ float bTagBase::jetEff(const float &pt, const float& abs_eta,const jetTypes & je
  *    and the pt range the SF are defined in
  *    minpt_.at(<your_new_enum)=?;
  *    maxpt_.at(<your_new_enum)=?;
+ * 1a add the name of the working point as a strin to getWorkingPointString()
  *
  *
  * 2. Add the corresponding scale factors for B jets to the function BJetSF
@@ -352,6 +316,9 @@ float bTagBase::jetEff(const float &pt, const float& abs_eta,const jetTypes & je
  */
 
 void bTagBase::initWorkingpoints() {
+    if(debug)
+        std::cout << "bTagBase::initWorkingpoints: "<< wpvals_.size() << std::endl;
+
     // Please give some information about the SF here. E.g
     // -------
     // SF from:
@@ -361,15 +328,23 @@ void bTagBase::initWorkingpoints() {
     wpvals_.at(csvl_wp) = 0.244;
     minpt_.at(csvl_wp) = 20;
     maxpt_.at(csvl_wp) = 800;
-    
+
     wpvals_.at(csvm_wp) = 0.679;
     minpt_.at(csvm_wp) = 20;
     maxpt_.at(csvm_wp) = 800;
-    
+
     wpvals_.at(csvt_wp) = 0.898;
     minpt_.at(csvt_wp) = 20;
     maxpt_.at(csvt_wp) = 800;
 
+
+}
+
+std::string bTagBase::getWorkingPointString()const{
+    if     (wp_ == csvl_wp) return "csvl";
+    else if (wp_ == csvm_wp) return "csvm";
+    else if (wp_ == csvt_wp) return "csvt";
+    else return "notDef";
 }
 
 float bTagBase::BJetSF(const float & pt, const float& abs_eta,
@@ -393,19 +368,19 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
             // make sure to use "static"
 
             static float ptbins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 120, 160,
-                                    210, 260, 320, 400, 500, 600, 800 };
+                    210, 260, 320, 400, 500, 600, 800 };
 
             //put the errors to the corresponding SF here (copy/paste from BTagPOG payload)
             //make sure to use static and that it has the same size as ptbins!!!
             static float SFb_error[] = { 0.033408, 0.015446, 0.0146992, 0.0183964,
-                                        0.0185363, 0.0145547, 0.0176743, 0.0203609,
-                                        0.0143342, 0.0148771, 0.0157936, 0.0176496,
-                                        0.0209156, 0.0278529, 0.0346877, 0.0350101 };
+                    0.0185363, 0.0145547, 0.0176743, 0.0203609,
+                    0.0143342, 0.0148771, 0.0157936, 0.0176496,
+                    0.0209156, 0.0278529, 0.0346877, 0.0350101 };
 
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
             static size_t SFb_errorSize = sizeof(SFb_error)
-                                                                                                                    / sizeof(SFb_error[0]);
+                                                                                                                            / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
@@ -439,19 +414,19 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
             // -------
 
             static float ptbins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 120, 160,
-                                    210, 260, 320, 400, 500, 600, 800 };
+                    210, 260, 320, 400, 500, 600, 800 };
 
             //put the errors to the corresponding SF here (copy/paste from BTagPOG payload)
             //make sure to use static and that it has the same size as ptbins!!!
             static float SFb_error[] = { 0.0415694, 0.023429,0.0261074, 0.0239251,
-                                        0.0232416, 0.0197251, 0.0217319, 0.0198108,
-                                        0.0193, 0.0276144, 0.0205839, 0.026915,
-                                        0.0312739, 0.0415054, 0.0740561, 0.0598311};
+                    0.0232416, 0.0197251, 0.0217319, 0.0198108,
+                    0.0193, 0.0276144, 0.0205839, 0.026915,
+                    0.0312739, 0.0415054, 0.0740561, 0.0598311};
 
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
             static size_t SFb_errorSize = sizeof(SFb_error)
-                                                                                                                    / sizeof(SFb_error[0]);
+                                                                                                                            / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
@@ -484,19 +459,19 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
             // -------
 
             static float ptbins[] = { 20, 30, 40, 50, 60, 70, 80, 100, 120, 160,
-                                    210, 260, 320, 400, 500, 600, 800 };
+                    210, 260, 320, 400, 500, 600, 800 };
 
             //put the errors to the corresponding SF here (copy/paste from BTagPOG payload)
             //make sure to use static and that it has the same size as ptbins!!!
             static float SFb_error[] = { 0.0511028, 0.0306671, 0.0317498, 0.032779,
-                                        0.0291528, 0.0249308, 0.0301118, 0.032047,
-                                        0.0348072, 0.0357745, 0.0378756, 0.0412608,
-                                        0.0777516, 0.0860741, 0.0942209, 0.104106};
+                    0.0291528, 0.0249308, 0.0301118, 0.032047,
+                    0.0348072, 0.0357745, 0.0378756, 0.0412608,
+                    0.0777516, 0.0860741, 0.0942209, 0.104106};
 
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
             static size_t SFb_errorSize = sizeof(SFb_error)
-                                                                                                                    / sizeof(SFb_error[0]);
+                                                                                                                            / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
@@ -536,6 +511,26 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
 float bTagBase::CJetSF(const float &pt, const float &abs_eta,
         float multiplier) const {
     if (wp_ == csvl_wp) {
+        // Please give some information about the SF here. E.g
+        // -------
+        // SF from:
+        // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG (EPS 2013 prescription)
+        // -------
+        //
+        // the same scale factor is supposed to be used with twice the uncertainty (multiplier*=2)
+        return BJetSF(pt, abs_eta, multiplier * 2.);
+    }
+    else if (wp_ == csvm_wp) {
+        // Please give some information about the SF here. E.g
+        // -------
+        // SF from:
+        // https://twiki.cern.ch/twiki/pub/CMS/BtagPOG (EPS 2013 prescription)
+        // -------
+        //
+        // the same scale factor is supposed to be used with twice the uncertainty (multiplier*=2)
+        return BJetSF(pt, abs_eta, multiplier * 2.);
+    }
+    else if (wp_ == csvt_wp) {
         // Please give some information about the SF here. E.g
         // -------
         // SF from:

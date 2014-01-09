@@ -58,7 +58,9 @@ public:
      *
      */
     enum workingPoints {
-        csvt_wp, csvm_wp, csvl_wp,
+        csvt_wp,
+        csvm_wp,
+        csvl_wp,
         /* some other WP/taggers ..*/
         //
         /*don't touch this: needs to be last entry*/
@@ -69,11 +71,14 @@ public:
      * enum for systematic variations
      */
     enum systematics {
-        nominal, heavyup, heavydown, lightup, lightdown
+        nominal,
+        heavyup, heavydown,
+        lightup, lightdown
     };
 
     void setWorkingPoint(workingPoints wp) { wp_ = wp; }
     const float& getWPDiscrValue()const{return wpvals_[wp_];}
+    std::string getWorkingPointString()const;
 
     workingPoints getWorkingPoint() const { return wp_;}
     /**
@@ -92,7 +97,7 @@ public:
      * scale factor output
      */
     void setMakeEff(bool makee) {makeeffs_ = makee; }
-    bool getMakeEff() { return makeeffs_;}
+    bool getMakeEff()const { return makeeffs_;}
 
     void fillEff(const float &, const float&, const int &, const float &,const float&);
     void makeEffs();
@@ -100,7 +105,7 @@ public:
     /**
      * returns the number of nan sf
      */
-    size_t getNanCount(){return nancount_;}
+    size_t getNanCount()const{return nancount_;}
 
     bool showWarnings;
     bool debug;
