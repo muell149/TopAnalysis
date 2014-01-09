@@ -36,147 +36,21 @@ class KinRecoObjects;
 
 class AnalysisBase : public TSelector
 {
-
-// Protected member data
+    
+    
+    
 protected:
 
-    /// Variables associated to nTuple branches relevant for reconstruction level
-    // Concerning physics objects
-    VLV                 *leptons_;
-    std::vector<int>    *lepPdgId_;
-    //std::vector<double> *lepID_;
-    std::vector<double> *lepPfIso_;
-    //std::vector<double> *lepChargedHadronIso_;
-    //std::vector<double> *lepNeutralHadronIso_;
-    //std::vector<double> *lepPhotonIso_;
-    //std::vector<double> *lepPuChargedHadronIso_;
-    std::vector<double> *lepCombIso_;
-    std::vector<double> *lepDxyVertex0_;
-    //std::vector<int>    *lepTrigger_;
-    VLV                 *jets_;
-    std::vector<double> *jetBTagTCHE_;
-    //std::vector<double> *jetBTagTCHP_;
-    std::vector<double> *jetBTagSSVHE_;
-    //std::vector<double> *jetBTagSSVHP_;
-    //std::vector<double> *jetBTagJetProbability_;
-    //std::vector<double> *jetBTagJetBProbability_;
-    std::vector<double> *jetBTagCSV_;
-    //std::vector<double> *jetBTagCSVMVA_;
-    std::vector<double> *jetChargeGlobalPtWeighted_;
-    std::vector<double> *jetChargeRelativePtWeighted_;
-    //std::vector<int>* jetTrackIndex_;
-    //std::vector<int>* jetTrackCharge_;
-    //std::vector<LV>* jetTrack_;
-    LV                  *met_;
-    std::vector<double> *jetJERSF_;
-    VLV                 *jetsForMET_;
-    std::vector<double> *jetForMETJERSF_;
-
-    // Concerning event
-    UInt_t runNumber_;
-    UInt_t lumiBlock_;
-    UInt_t eventNumber_;
-    //int    recoInChannel_;
-    Int_t  vertMulti_;
-
-
-    /// Variables associated to nTuple branches holding trigger bits
-    UInt_t triggerBits_;
-    //UInt_t triggerBitsTau_;
-    //std::vector<std::string> *firedTriggers_;
-
-
-    /// Variables associated to nTuple branches holding generator information for all MC samples
-    // Concerning physics objects
-    VLV                *allGenJets_;
-    std::vector<int>   *jetPartonFlavour_;
-    VLV                *associatedGenJet_;
-    VLV                *associatedGenJetForMET_;
-    //std::vector<int>   *jetAssociatedPartonPdgId_;
-    //std::vector<LV>    *jetAssociatedParton_;
-
-
-    /// Variables associated to nTuple branches of kinematic reconstruction
-    VLV              *HypTop_;
-    VLV              *HypAntiTop_;
-    VLV              *HypLepton_;
-    VLV              *HypAntiLepton_;
-    VLV              *HypNeutrino_;
-    VLV              *HypAntiNeutrino_;
-    VLV              *HypBJet_;
-    VLV              *HypAntiBJet_;
-    //VLV              *HypWPlus_;
-    //VLV              *HypWMinus_;
-    std::vector<int> *HypJet0index_;
-    std::vector<int> *HypJet1index_;
-
-
-    /// Variables associated to nTuple branch of true vertex multiplicity
-    Int_t vertMultiTrue_;
-
-
-    /// Variables associated to nTuple branch for generator event weight
-    Double_t weightGenerator_;
-
-
-    /// Variables associated to nTuple branch for PDF weights
-    std::vector<double> *weightPDF_;
-
-
-    /// Variables associated to nTuple branch for Drell-Yan decay mode
-    std::vector<int> *ZDecayMode_;
-
-
-    /// Variables associated to nTuple branch for Top decay mode
-    Int_t topDecayMode_;
-
-
-    /// Variables associated to nTuple branch for Higgs decay mode
-    Int_t higgsDecayMode_;
-
-
-
-    /// Variables associated to nTuple branches for Top signal samples on generator level
-    LV                *GenMet_;
-    LV                *GenTop_;
-    LV                *GenAntiTop_;
-    LV                *GenLepton_;
-    LV                *GenAntiLepton_;
-    //int               GenLeptonPdgId_;
-    //int               GenAntiLeptonPdgId_;
-    //LV                *GenTau_;
-    //LV                *GenAntiTau_;
-    LV                *GenNeutrino_;
-    LV                *GenAntiNeutrino_;
-    LV                *GenB_;
-    LV                *GenAntiB_;
-    LV                *GenWPlus_;
-    LV                *GenWMinus_;
-    //std::vector<LV>   *GenParticleP4_;
-    //std::vector<int>  *GenParticlePdgId_;
-    //std::vector<int>  *GenParticleStatus_;
-    std::vector<int>  *BHadJetIndex_;
-    std::vector<int>  *AntiBHadJetIndex_;
-    VLV               *BHadrons_;
-    VLV               *AntiBHadrons_;
-    std::vector<bool> *BHadronFromTopB_;
-    std::vector<bool> *AntiBHadronFromTopB_;
-    std::vector<int>  *BHadronVsJet_;
-    std::vector<int>  *AntiBHadronVsJet_;
-    std::vector<int>  *genBHadPlusMothersPdgId_;
-    //std::vector<int>  *genBHadPlusMothersStatus_;
-    //std::vector<std::vector<int> > *genBHadPlusMothersIndices_;
-    std::vector<LV>   *genBHadPlusMothers_;
-    std::vector<int>  *genBHadIndex_;
-    std::vector<int>  *genBHadFlavour_;
-    std::vector<int>  *genBHadJetIndex_;
-
-
-    /// Variables associated to nTuple branches for Higgs signal samples on generator level
-    LV *GenH_;
-    LV *GenBFromH_;
-    LV *GenAntiBFromH_;
-
+    
+    // FIXME: make them also private, access via function
+    /// Pointer to btag scale factors instance
+    BtagScaleFactors* btagScaleFactors_;
+    BTagSFGeneric* bTagSFGeneric_;
+    
+    
+    
+    
+protected:
 
     /// Information in nTuple stored in TObjString once per file, but added from outside and potentially configured
     TString samplename_;
@@ -191,13 +65,13 @@ protected:
     bool isTtbarPlusTauSample_;
     bool correctMadgraphBR_;
     int channelPdgIdProduct_;
-    int trueDYchannelCut_;   // is this variable used at all?
     #ifndef __CINT__
     std::function<bool(Long64_t)> checkZDecayMode_;
     #endif
     TString outputfilename_;
     bool runViaTau_;
-
+    
+private:
 
     /// Pointer to the kinematic reconstruction instance
     KinematicReconstruction* kinematicReconstruction_;
@@ -210,10 +84,6 @@ protected:
 
     /// Pointer to trigger scale factors instance
     const TriggerScaleFactors* triggerScaleFactors_;
-
-    /// Pointer to btag scale factors instance
-    BtagScaleFactors* btagScaleFactors_;
-    BTagSFGeneric* bTagSFGeneric_;
 
 
     /// Apply JER/JES systematics
@@ -236,10 +106,6 @@ private:
 
     /// Pointer to the analyzed TTree or TChain
     TTree *chain_;
-
-
-    /// Whether to use object structs for nTuple access, or all branches individually
-    bool useObjectStructs_;
 
 
     /// nTuple branches relevant for reconstruction level
@@ -266,9 +132,9 @@ private:
     TBranch *b_jetBTagCSVMVA;
     TBranch *b_jetChargeGlobalPtWeighted;
     TBranch *b_jetChargeRelativePtWeighted;
-    //TBranch *b_jetTrackIndex;
-    //TBranch *b_jetTrackCharge;
-    //TBranch *b_jetTrack;
+    TBranch *b_jetTrackIndex;
+    TBranch *b_jetTrackCharge;
+    TBranch *b_jetTrack;
     TBranch *b_met;
     TBranch *b_jetJERSF;
     TBranch *b_jetForMET;
@@ -453,9 +319,6 @@ public:
     /// Set histogram containing the number of weighted events in full sample
     void SetWeightedEvents(TH1* weightedEvents);
 
-    /// Set whether to use object structs for nTuple branch access, or individual variables
-    void SetUseObjectStructs(const bool useObjectStructs);
-
     /// Get version
     //no idea why this is needed! But Process() isn't called otherwise! Argh!
     virtual int Version() const { return 3; }
@@ -467,30 +330,23 @@ public:
 
 // Protected methods
 protected:
-
-    /// Access event entry for nTuple branches relevant for reconstruction level
-    void GetRecoBranchesEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branches for trigger bits
-    void GetTriggerBranchesEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branches holding generator information for all MC samples
-    void GetCommonGenBranchesEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branches of kinematic reconstruction
-    void GetKinRecoBranchesEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branch of true vertex multiplicity
-    void GetVertMultiTrueEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branch for generator event weight
-    void GetWeightGeneratorEntry(const Long64_t&)const;
+    
+    // FIXME: Access also these entries via a function, so that they can be private, as the others are
+    
     /// Access event entry for nTuple branch for PDF weights
     void GetPDFEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branch for Top decay mode
-    void GetTopDecayModeEntry(const Long64_t&)const;
     /// Access event entry for nTuple branch for Higgs decay mode
     void GetHiggsDecayModeEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branches for Top signal samples on generator level
-    void GetTopSignalBranchesEntry(const Long64_t&)const;
-    /// Access event entry for nTuple branches for Higgs signal samples on generator level
-    void GetHiggsSignalBranchesEntry(const Long64_t&)const;
+    
+    
+    /// Variables associated to nTuple branch for Higgs decay mode
+    Int_t higgsDecayMode_;
 
+    /// Variables associated to nTuple branch for PDF weights
+    std::vector<double>* weightPDF_;
+
+protected:
+    
     /** Return a string describing the true level W+/W- decays from the ttbar system
      *
      * @return a string like e/tau->mu describing the decay to the W+/W- from the top/tbar decay
@@ -536,10 +392,6 @@ protected:
      * needs to be read.
      */
     void prepareJER_JES();
-    /// Apply the JER or JES systematic
-    /// This function modifies the jets collection and also scales the MET.
-    /// It uses the collections stored just for the jet scaling
-    void applyJER_JES()const;
 
     /// Check if opposite-charge dilepton combination exists,
     /// and check if lepton pair is correct flavour combination for the specified analysis channel (ee, emu, mumu)
@@ -583,9 +435,10 @@ protected:
     /// Get weight due to b-tagging efficiency MC-to-data scale factors
     double weightBtagSF(const std::vector<int>& jetIndices,
                         const VLV& jets, const std::vector<int>& jetPartonFlavour)const;
-
-
-
+    
+    /// Get weight due to efficiency of kinematic reconstruction
+    double weightKinReco()const;
+    
     /// Store the object in the output list and return it
     template<class T> T* store(T* obj){return ttbar::store(obj, fOutput);}
 
@@ -596,7 +449,27 @@ protected:
 
 // Private methods
 private:
-
+    
+    
+    /// Access event entry for nTuple branches relevant for reconstruction level
+    void GetRecoBranchesEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branches holding generator information for all MC samples
+    void GetCommonGenBranchesEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branches of kinematic reconstruction
+    void GetKinRecoBranchesEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branches for Top signal samples on generator level
+    void GetTopSignalBranchesEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branches for Higgs signal samples on generator level
+    void GetHiggsSignalBranchesEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branches for trigger bits
+    void GetTriggerBranchesEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branch of true vertex multiplicity
+    void GetVertMultiTrueEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branch for generator event weight
+    void GetWeightGeneratorEntry(const Long64_t&)const;
+    /// Access event entry for nTuple branch for Top decay mode
+    void GetTopDecayModeEntry(const Long64_t&)const;
+    
     /// Clear all branches
     void clearBranches();
     /// Clear all variables assigned to branches
@@ -653,16 +526,19 @@ protected:
     const KinRecoObjects& getKinRecoObjectsOnTheFly(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices,
                                                     const VLV& allLeptons, const VLV& jets, const std::vector<double>& jetBTagCSV,
                                                     const LV& met);
-
-
+    
+    
     /// Set for all object structs, that the specific nTuple entry is not read
     void resetObjectStructEntry()const;
 
-
+    /// Apply the JER systematic
+    /// This function modifies the jets collection and also scales the MET
     void applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
                              const std::vector<double>* jetJerSf, const std::vector<double>* jetForMetJerSf,
                              const VLV* associatedGenJet, const VLV* associatedGenJetForMet)const;
-
+    
+    /// Apply the JER or JES systematic
+    /// This function modifies the jets collection and also scales the MET
     void applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const;
 
 
@@ -683,7 +559,26 @@ private:
 
     /// Struct for holding variables associated to nTuple branches of kinematic reconstruction
     KinRecoObjects* kinRecoObjects_;
+    
 
+    /// Variables associated to nTuple branches holding trigger bits
+    UInt_t triggerBits_;
+    //UInt_t triggerBitsTau_;
+    //std::vector<std::string> *firedTriggers_;
+
+    /// Variables associated to nTuple branch of true vertex multiplicity
+    Int_t vertMultiTrue_;
+
+    /// Variables associated to nTuple branch for generator event weight
+    Double_t weightGenerator_;
+
+    /// Variables associated to nTuple branch for Drell-Yan decay mode
+    std::vector<int>* ZDecayMode_;
+
+    /// Variables associated to nTuple branch for Top decay mode
+    Int_t topDecayMode_;
+
+    
 };
 
 

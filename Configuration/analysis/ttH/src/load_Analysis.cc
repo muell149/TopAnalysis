@@ -137,11 +137,11 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
                                                   Channel::convertChannels(Channel::realChannels),
                                                   triggerSFSystematic);
 
-    BtagScaleFactors *btagScaleFactors;
-    BTagSFGeneric *bTagSFGeneric;
+    BtagScaleFactors *btagScaleFactors = 0;
+    BTagSFGeneric *bTagSFGeneric = 0;
 
     // Setting the flag to choose which kind of btag scale factors to use
-    bool useGenericBTagSF = false;
+    bool useGenericBTagSF = true;
 
     if(useGenericBTagSF) {
         // Set up generic btag efficiency scale factors
@@ -240,7 +240,6 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetTriggerScaleFactors(triggerScaleFactors);
     if(btagScaleFactors) selector->SetBtagScaleFactors(*btagScaleFactors);
     else if(bTagSFGeneric) selector->SetBtagScaleFactors(*bTagSFGeneric);
-    selector->SetUseObjectStructs(true);
 
     selector->SetMvaInputProduction(mvaTreeHandler);
     selector->SetAllAnalysisHistograms(v_analysisHistograms);

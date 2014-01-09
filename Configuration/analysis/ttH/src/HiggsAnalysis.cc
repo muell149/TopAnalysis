@@ -65,6 +65,7 @@ HiggsAnalysis::HiggsAnalysis(TTree*):
 isInclusiveHiggs_(false),
 bbbarDecayFromInclusiveHiggs_(false),
 runWithTtbb_(false),
+retagBJets_(true),
 mvaTreeHandler_(0)
 {}
 
@@ -128,7 +129,7 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     AnalysisBase::SlaveBegin(0);
 
     // Histograms for b-tagging efficiencies
-    if(!runWithTtbb_ && this->makeBtagEfficiencies() && btagScaleFactors_) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
+    if(!runWithTtbb_ && btagScaleFactors_ && this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
     else if(!runWithTtbb_ && bTagSFGeneric_) bTagSFGeneric_->prepareBTags(fOutput, static_cast<std::string>(channel_));
 
     // Book histograms of all analyzers
@@ -296,12 +297,19 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     const std::vector<int>& jetPartonFlavour = *commonGenObjects.jetPartonFlavour_;
     std::vector<int> bjetIndices = jetIndices;
     selectIndices(bjetIndices, jetBTagCSV, BtagWP);
-//     if (isMC_ && !(btagScaleFactors_->makeEfficiencies())){
-//         // Apply b-tag efficiency MC correction using random number based tag flipping
-//         btagScaleFactors_->indexOfBtags(bjetIndices, jetIndices,
-//                                         jets, jetPartonFlavour, jetBTagCSV,
-//                                         BtagWP, static_cast<std::string>(channel_));
-//     }
+    if(retagBJets_) {
+        if (isMC_ && btagScaleFactors_ && !(btagScaleFactors_->makeEfficiencies())){
+            // Apply b-tag efficiency MC correction using random number based tag flipping
+            btagScaleFactors_->indexOfBtags(bjetIndices, jetIndices,
+                                            jets, jetPartonFlavour, jetBTagCSV,
+                                            BtagWP, static_cast<std::string>(channel_));
+        }
+        else if (isMC_ && bTagSFGeneric_ && !(bTagSFGeneric_->makeEfficiencies())){
+            // Apply b-tag efficiency MC correction using random number based tag flipping
+            bTagSFGeneric_->indexOfBtags(bjetIndices, jetIndices,
+                                         jets, jetPartonFlavour, jetBTagCSV);
+        }
+    }
     orderIndices(bjetIndices, jetBTagCSV);
     const int numberOfBjets = bjetIndices.size();
     const bool hasBtag = numberOfBjets > 0;
@@ -328,8 +336,10 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     // We do not apply a b-tag scale factor
     //const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices, jets, jetPartonFlavour);
     double weightBtagSF = 1.0;
-    if(btagScaleFactors_) weightBtagSF = this->weightBtagSF(jetIndices, jets, jetPartonFlavour);
-    else if(bTagSFGeneric_ && isMC_) weightBtagSF = bTagSFGeneric_->calculateBtagSF(jetIndices, jets, jetPartonFlavour);
+    if(!retagBJets_) {
+        if(btagScaleFactors_) weightBtagSF = this->weightBtagSF(jetIndices, jets, jetPartonFlavour);
+        else if(bTagSFGeneric_ && isMC_) weightBtagSF = bTagSFGeneric_->calculateBtagSF(jetIndices, jets, jetPartonFlavour);
+    }
 
     // The weight to be used for filling the histograms
     double weight = weightNoPileup*weightPU;
