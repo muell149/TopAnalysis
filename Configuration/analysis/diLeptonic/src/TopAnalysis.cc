@@ -968,9 +968,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (dilepton.M() < 20) return kTRUE;
     
     // weight even without PU reweighting
-    h_vertMulti_noPU->Fill(*recoObjects.vertMulti_, weightNoPileup);
+    h_vertMulti_noPU->Fill(recoObjects.vertMulti_, weightNoPileup);
     
-    h_vertMulti->Fill(*recoObjects.vertMulti_, weight);
+    h_vertMulti->Fill(recoObjects.vertMulti_, weight);
     
     h_step4->Fill(1, weight);
     h_TrigSF->Fill(weightTriggerSF, 1.);
@@ -1221,7 +1221,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         if (fullSelectionCounter == 0)
             std::cout << "Selected#\tRun\tEvent\tlep+\tlep-\tMll\tNJets\tjet0\tjet1\tNTags\tGenJet1\tGenJet2\tMet\tGenMet\tt/tbar_decay\n"
             << std::setprecision(2) << std::fixed;
-            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << *recoObjects.runNumber_ << "\t" << *recoObjects.eventNumber_ << "\t" << (*recoObjects.allLeptons_).at(antiLeptonIndex) << "\t" << (*recoObjects.allLeptons_).at(leptonIndex) << "\t"
+            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << recoObjects.runNumber_ << "\t" << recoObjects.eventNumber_ << "\t" << (*recoObjects.allLeptons_).at(antiLeptonIndex) << "\t" << (*recoObjects.allLeptons_).at(leptonIndex) << "\t"
             << dilepton.M() << "\t" << numberOfJets << "\t"
             << (*recoObjects.jets_).at(jetIndices.at(0)) << "\t" << (*recoObjects.jets_).at(jetIndices.at(1)) << "\t" << numberOfBjets << "\t"
             << (*commonGenObjects.associatedGenJet_).at(jetIndices.at(0)) << "\t" << (*commonGenObjects.associatedGenJet_).at(jetIndices.at(1)) << "\t"
