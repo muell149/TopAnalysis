@@ -361,6 +361,14 @@ void bTagBase::initWorkingpoints() {
     wpvals_.at(csvl_wp) = 0.244;
     minpt_.at(csvl_wp) = 20;
     maxpt_.at(csvl_wp) = 800;
+    
+    wpvals_.at(csvm_wp) = 0.679;
+    minpt_.at(csvm_wp) = 20;
+    maxpt_.at(csvm_wp) = 800;
+    
+    wpvals_.at(csvt_wp) = 0.898;
+    minpt_.at(csvt_wp) = 20;
+    maxpt_.at(csvt_wp) = 800;
 
 }
 

@@ -43,13 +43,19 @@ constexpr double JetEtaCUT = 2.4;
 /// Jet pt selection in GeV
 constexpr double JetPtCUT = 30.;
 
-/// !!! Used only if the default old btag scaling is used ("useGenericBTagSF = false;" in load_Analysis.cc)
-/// Otherwise should be configured via "BtagWP = BTagSFGeneric::csvl_wp;" in load_Analysis.cc
-/// b-tag working point
-/// CSV Loose: 0.244
-/// CSV Medium: 0.679
-/// CSV Tight: 0.898
-constexpr double BtagWP = 0.244;
+
+/// B-tag working point
+/// Available options: 
+///  csvl_wp (0.244) 
+///  csvm_wp (0.679)
+///  csvt_wp (0.898)
+/// Used only if new btag scaling is used (useGenericBTagSF = true; in load_Analysis.cc)
+constexpr BTagSFGeneric::workingPoints BtagWP = BTagSFGeneric::csvl_wp;
+
+/// Used only if default old btag scaling is used (useGenericBTagSF = false; in load_Analysis.cc)
+/// FIXME Should be removed when the old method is deprecated
+constexpr double BtagWP_val = 0.244;
+
 
 /// MET selection for same-flavour channels (ee, mumu)
 constexpr double MetCUT = 40.;
@@ -132,7 +138,10 @@ void HiggsAnalysis::SlaveBegin(TTree *)
 
     // Histograms for b-tagging efficiencies
     if(!runWithTtbb_ && btagScaleFactors_ && this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
-    else if(!runWithTtbb_ && bTagSFGeneric_) bTagSFGeneric_->prepareBTags(fOutput, static_cast<std::string>(channel_));
+    else if(!runWithTtbb_ && bTagSFGeneric_) {
+        bTagSFGeneric_->setWorkingPoint(BtagWP);
+        bTagSFGeneric_->prepareBTags(fOutput, static_cast<std::string>(channel_));
+    }
 
     // Book histograms of all analyzers
     this->bookAll();
@@ -299,13 +308,14 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     const std::vector<int>& jetPartonFlavour = *commonGenObjects.jetPartonFlavour_;
     std::vector<int> bjetIndices = jetIndices;
     if(bTagSFGeneric_) selectIndices(bjetIndices, jetBTagCSV, (double)bTagSFGeneric_->getWPDiscrValue());
-    else selectIndices(bjetIndices, jetBTagCSV, BtagWP);
+    else selectIndices(bjetIndices, jetBTagCSV, BtagWP_val);
     if(retagBJets_) {
+        // FIXME Should be removed when the old method is deprecated
         if (isMC_ && btagScaleFactors_ && !(btagScaleFactors_->makeEfficiencies())){
             // Apply b-tag efficiency MC correction using random number based tag flipping
             btagScaleFactors_->indexOfBtags(bjetIndices, jetIndices,
                                             jets, jetPartonFlavour, jetBTagCSV,
-                                            BtagWP, static_cast<std::string>(channel_));
+                                            BtagWP_val, static_cast<std::string>(channel_));
         }
         else if (isMC_ && bTagSFGeneric_ && !(bTagSFGeneric_->makeEfficiencies())){
             // Apply b-tag efficiency MC correction using random number based tag flipping
@@ -340,6 +350,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     //const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices, jets, jetPartonFlavour);
     double weightBtagSF = 1.0;
     if(!retagBJets_) {
+        // FIXME Should be removed when the old method is deprecated
         if(btagScaleFactors_) weightBtagSF = this->weightBtagSF(jetIndices, jets, jetPartonFlavour);
         else if(bTagSFGeneric_ && isMC_) weightBtagSF = bTagSFGeneric_->calculateBtagSF(jetIndices, jets, jetPartonFlavour);
     }
