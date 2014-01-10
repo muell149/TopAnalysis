@@ -3,6 +3,7 @@
 
 #include <map>
 #include "TH2D.h"
+#include "TH1.h"
 //#include "TString.h"
 #include "../interface/miscUtils.h"
 #include <iostream>
@@ -73,8 +74,15 @@ public:
     enum systematics {
         nominal,
         heavyup, heavydown,
-        lightup, lightdown
+        lightup, lightdown,
+        heavyuppt, heavydownpt,
+        heavyupeta, heavydowneta,
+        lightuppt, lightdownpt,
+        lightupeta, lightdowneta,
+        length_syst
     };
+
+    enum medians {bpt, beta, cpt, ceta, lpt, leta, length_median};
 
     void setWorkingPoint(workingPoints wp) { wp_ = wp; }
     const float& getWPDiscrValue()const{return wpvals_[wp_];}
@@ -141,6 +149,9 @@ protected:
         effhistp_ = 0;
     }
 
+    const float median(TH1 *)const ;
+    std::map<std::string, std::vector<float> > medianMap_;
+
 
 
 
@@ -160,6 +171,7 @@ private:
     std::string tempsamplename_;
     std::vector<TH2D> * histp_;
     std::vector<TH2D> * effhistp_;
+    std::vector<float> * medianvecp_;
 
     float sumStuffEff_;
     float sumStuffSfEff_;
@@ -170,7 +182,7 @@ private:
     jetTypes jetType(const int & )const;
 
     float calcHeavySF(float *, float *, const size_t &, const float &,
-            const float &, const float &) const;
+            const float &, const float &, const float &) const;
 
     float jetSF(const float &pt, const float& abs_eta,const jetTypes & jettype) const;
     float jetEff(const float &pt, const float& abs_eta,const jetTypes & jettype) const;
@@ -196,10 +208,10 @@ inline bTagBase::jetTypes bTagBase::jetType(const int & partonflavor)const{
 }
 
 inline float bTagBase::calcHeavySF(float* ptbins, float * SFb_error,
-        const size_t & ptbinsSize, const float & pt, const float & SF,
+        const size_t & ptbinsSize, const float & pt, const float & abseta, const float & SF,
         const float & multiplier) const {
 
-    if (syst_ != heavyup && syst_ != heavydown)
+    if (syst_ != heavyup && syst_ != heavydown && syst_ != heavyuppt && syst_ != heavydownpt && syst_ != heavyupeta && syst_ != heavydowneta)
         return SF;
 
     //this uses the standard histogram bin range definition from root
@@ -208,9 +220,13 @@ inline float bTagBase::calcHeavySF(float* ptbins, float * SFb_error,
     if (ptbins[ptbin] == pt)
         --ptbin;
 
-    if (syst_ == heavyup)
+    if (syst_ == heavyup ||
+       (syst_ == heavyuppt && pt < medianvecp_->at(bpt)) || (syst_ == heavydownpt && pt > medianvecp_->at(bpt)) ||
+       (syst_ == heavyupeta &&  abseta < medianvecp_->at(beta)) || (syst_ == heavydowneta && abseta > medianvecp_->at(beta)) )
         return SF + (multiplier * SFb_error[ptbin]);
-    if (syst_ == heavydown)
+    if (syst_ == heavydown ||
+       (syst_ == heavyuppt && pt > medianvecp_->at(bpt)) || (syst_ == heavydownpt && pt < medianvecp_->at(bpt)) ||
+       (syst_ == heavyupeta &&  abseta > medianvecp_->at(beta)) || (syst_ == heavydowneta && abseta < medianvecp_->at(beta)) )
         return SF - (multiplier * SFb_error[ptbin]);
 
     return 0;    //never reaches

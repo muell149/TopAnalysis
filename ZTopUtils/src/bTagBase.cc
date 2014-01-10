@@ -1,13 +1,14 @@
 #include "../interface/bTagBase.h"
 #include <stdexcept>
 #include "TRandom3.h"
+#include "TMath.h"
 
 namespace ztop {
 /**
  * constructor does nothing in particular
  */
 bTagBase::bTagBase():showWarnings(false),debug(false),init_(false),wp_(csvl_wp),is2011_(false),
-        syst_(nominal),makeeffs_(true),tempsamplename_(""),histp_(0),effhistp_(0),sumStuffEff_(0.9999999),sumStuffSfEff_(0.9999999),
+        syst_(nominal),makeeffs_(true),tempsamplename_(""),histp_(0),effhistp_(0),medianvecp_(0),sumStuffEff_(0.9999999),sumStuffSfEff_(0.9999999),
         nancount_(0){
     wpvals_.resize(workingPoints::length_wp, 0);
     minpt_.resize (workingPoints::length_wp, 0);
@@ -23,30 +24,39 @@ bTagBase::bTagBase():showWarnings(false),debug(false),init_(false),wp_(csvl_wp),
  */
 int bTagBase::setSampleName(const std::string & samplename) {
     //set pointers
+    tempsamplename_=samplename;
     initWorkingpoints();
     if(debug)
-            std::cout << "bTagBase::setSampleName" <<  samplename<< std::endl;
+            std::cout << "bTagBase::setSampleName" <<  tempsamplename_<< std::endl;
 
 
     std::map<std::string, std::vector<TH2D> >::iterator sampleit = histos_.find(
-            samplename);
+            tempsamplename_);
     if (sampleit != histos_.end())
         histp_ = &(sampleit->second);
     else
         histp_ = 0;
     std::map<std::string, std::vector<TH2D> >::iterator effit = effhistos_.find(
-            samplename);
+            tempsamplename_);
     if (effit != effhistos_.end())
         effhistp_ = &(effit->second);
     else
         effhistp_ = 0;
 
     if (!makeeffs_ && effhistp_ && histp_) {
-        std::cout << "loaded b-tag efficiency histos for " << samplename
+        std::cout << "loaded b-tag efficiency histos for " << tempsamplename_
                 << std::endl;
+        std::map<std::string, std::vector<float> >::iterator medianit = medianMap_.find(
+            tempsamplename_);
+        if ( medianit == medianMap_.end() ) {
+            std::cout<<" bTagBase::setSampleName: Median map doesn't exist for "<<tempsamplename_
+                     <<". exit!"<<std::endl;
+            return -3;
+        }
+        medianvecp_ = &(medianit->second);
         return 1;
     } else if (!makeeffs_ && !effhistp_) {
-        std::cout << " bTagBase::setSampleName: efficiency for " << samplename
+        std::cout << " bTagBase::setSampleName: efficiency for " << tempsamplename_
                 << " not derived, yet! exit." << std::endl;
         return -1;
     }
@@ -54,7 +64,7 @@ int bTagBase::setSampleName(const std::string & samplename) {
     // efficiencies not determined yet -> prepare efficiency histos
     // bool adddirtemp=TH1::AddDirectory;
     TH1::AddDirectory(kFALSE); //prevent some weird root behaviour
-    std::cout << "preparing b-tag efficiency histos for " << samplename
+    std::cout << "preparing b-tag efficiency histos for " << tempsamplename_
             << std::endl;
 
     //////// put in algorithm to automatically rebin in case of low statistics !! then use a fine (equals btv binning) binning
@@ -93,8 +103,8 @@ int bTagBase::setSampleName(const std::string & samplename) {
     std::vector<TH2D> temp;
     temp << bjets << bjetstagged << cjets << cjetstagged << ljets
             << ljetstagged;
-    histos_[samplename] = temp;
-    histp_ = &(histos_.find(samplename)->second);
+    histos_[tempsamplename_] = temp;
+    histp_ = &(histos_.find(tempsamplename_)->second);
 
     TH2D beff = TH2D((TString) ("beff2D_"), "Bjets eff", npt - 1, effptbins,
             neta - 1, effetabins);
@@ -108,8 +118,8 @@ int bTagBase::setSampleName(const std::string & samplename) {
 
     temp.clear();
     temp << beff << ceff << leff;
-    effhistos_[samplename] = temp;
-    effhistp_ = &(effhistos_.find(samplename)->second);
+    effhistos_[tempsamplename_] = temp;
+    effhistp_ = &(effhistos_.find(tempsamplename_)->second);
 
     return 0;
 
@@ -173,13 +183,12 @@ void bTagBase::makeEffs() {
                 float err = 0.99; //to avoid zeros!
                 if (histp_->at(2 * i).GetBinContent(binx, biny) > 0) {
                     cont = histp_->at(2 * i + 1).GetBinContent(binx, biny)
-                                                                                                                                    / histp_->at(2 * i).GetBinContent(binx, biny);
+                         / histp_->at(2 * i).GetBinContent(binx, biny);
                     if (debug)
                         std::cout << "makeEffs: content: " << cont;
                     err = sqrt(
                             cont * (1 - cont)
-                            / histp_->at(2 * i).GetBinContent(binx,
-                                    biny));
+                            / histp_->at(2 * i).GetBinContent(binx, biny));
                     if (debug)
                         std::cout << " error: " << err << "  " << binx << " "
                         << biny << std::endl;
@@ -200,6 +209,14 @@ void bTagBase::makeEffs() {
             }
         }
     }
+    std::vector<float> medianVec(length_median, 0);
+    medianVec.at(bpt) = ztop::bTagBase::median(histp_->at(1).ProjectionX());
+    medianVec.at(beta) = ztop::bTagBase::median(histp_->at(1).ProjectionY());
+    medianVec.at(cpt) = ztop::bTagBase::median(histp_->at(3).ProjectionX());
+    medianVec.at(ceta) = ztop::bTagBase::median(histp_->at(3).ProjectionY());
+    medianVec.at(lpt) = ztop::bTagBase::median(histp_->at(5).ProjectionX());
+    medianVec.at(leta) = ztop::bTagBase::median(histp_->at(5).ProjectionY());
+    medianMap_[tempsamplename_] = medianVec;
 }
 
 void bTagBase::countJet(const float & pt, const float& abs_eta,
@@ -282,6 +299,24 @@ float bTagBase::jetEff(const float &pt, const float& abs_eta,const jetTypes & je
             ptbin, etabin, bla);
     return effhistp_->at(effh).GetBinContent(ptbin, etabin);
 }
+
+const float bTagBase::median(TH1* h1) const{
+    int nBin = h1->GetXaxis()->GetNbins();
+    std::vector<double> x(nBin);
+    h1->GetXaxis()->GetCenter(&x[0]);
+    TH1D* h1D = dynamic_cast<TH1D*>(h1);
+    if(!h1D){
+        std::cerr << "Median needs a TH1D!\n";
+        exit(7);
+    }
+    const double* y = h1D->GetArray();
+    // exclude underflow/overflows from bin content array y
+    return TMath::Median(nBin, &x[0], &y[1]);
+}
+
+
+
+
 // ///////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////// BTagPOG INPUT //////////////////////////////////
@@ -379,8 +414,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
 
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
-            static size_t SFb_errorSize = sizeof(SFb_error)
-                                                                                                                            / sizeof(SFb_error[0]);
+            static size_t SFb_errorSize = sizeof(SFb_error) / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
@@ -405,7 +439,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
 
             //don't change:
             //takes care of systematic variations (if any)
-            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, SF, multiplier);
+            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, abs_eta,  SF, multiplier);
         } else if (wp_ == csvm_wp) {  // ############### CSV Medium ################
 
             // -------
@@ -425,8 +459,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
 
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
-            static size_t SFb_errorSize = sizeof(SFb_error)
-                                                                                                                            / sizeof(SFb_error[0]);
+            static size_t SFb_errorSize = sizeof(SFb_error) / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
@@ -450,7 +483,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
 
             //don't change:
             //takes care of systematic variations (if any)
-            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, SF, multiplier);
+            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, abs_eta,  SF, multiplier);
         } else if (wp_ == csvt_wp) { // ############### CSV Tight ################
 
             // -------
@@ -470,8 +503,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
 
             //don't change ---------------------------->
             static size_t ptbinsSize = sizeof(ptbins) / sizeof(ptbins[0]);
-            static size_t SFb_errorSize = sizeof(SFb_error)
-                                                                                                                            / sizeof(SFb_error[0]);
+            static size_t SFb_errorSize = sizeof(SFb_error) / sizeof(SFb_error[0]);
             if (SFb_errorSize != ptbinsSize - 1) {
                 std::cout
                 << "bTagBase::BJetSF: Size of SFb_error should be one less than of ptbins. throwing exception!"
@@ -495,7 +527,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
 
             //don't change:
             //takes care of systematic variations (if any)
-            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, SF, multiplier);
+            return calcHeavySF(ptbins, SFb_error, ptbinsSize, x, abs_eta,  SF, multiplier);
         }
 
         //----------------END OF WORKING POINTS-----------------//
@@ -508,8 +540,7 @@ float bTagBase::BJetSF(const float & pt, const float& abs_eta,
     return 0; //never reached
 }
 
-float bTagBase::CJetSF(const float &pt, const float &abs_eta,
-        float multiplier) const {
+float bTagBase::CJetSF(const float &pt, const float &abs_eta, float multiplier) const {
     if (wp_ == csvl_wp) {
         // Please give some information about the SF here. E.g
         // -------
@@ -545,11 +576,26 @@ float bTagBase::CJetSF(const float &pt, const float &abs_eta,
     return 0;
 }
 
-float bTagBase::LJetSF(const float& pt, const float& abs_eta,
-        float multiplier) const {
+float bTagBase::LJetSF(const float& pt, const float& abs_eta, float multiplier) const {
 
+    //don't change ---------------------------->
     float x = pt;
 
+    systematics tempsyst = syst_;
+
+    // For the time being use the median points of b-falvour jets!!!
+    if((tempsyst == lightuppt && pt > medianvecp_->at(bpt)) ||
+       (tempsyst == lightdownpt && pt < medianvecp_->at(bpt)) ||
+       (tempsyst == lightupeta && abs_eta > medianvecp_->at(beta)) ||
+       (tempsyst == lightdowneta && abs_eta < medianvecp_->at(beta))){
+        tempsyst = lightup;
+    } else if((tempsyst == lightuppt && pt < medianvecp_->at(bpt)) ||
+              (tempsyst == lightdownpt && pt > medianvecp_->at(bpt)) ||
+              (tempsyst == lightupeta && abs_eta < medianvecp_->at(beta)) ||
+              (tempsyst == lightdowneta && abs_eta > medianvecp_->at(beta))) {
+                tempsyst = lightdown;
+    }
+    //<---------------------------- don't change 
     if (is2011_) {
         if (x >= 670)
             x = 669; //approx but should be ok for ttbar/Z etc
@@ -576,7 +622,7 @@ float bTagBase::LJetSF(const float& pt, const float& abs_eta,
             // Please copy-paste the formulas here. Check the correct eta range
             // systematics are handled directly here. use "else if" where applicable
 
-            if (syst_ != lightdown && syst_ != lightup) { //don't change
+            if (tempsyst != lightdown && tempsyst != lightup) { //don't change
                 if (abs_eta <= 0.5)
                     return ((1.01177 + (0.0023066 * x)) + (-4.56052e-06 * (x * x))) + (2.57917e-09 * (x * (x * x)));
                 else if (abs_eta <= 1.0)
@@ -585,7 +631,7 @@ float bTagBase::LJetSF(const float& pt, const float& abs_eta,
                     return ((0.93821 + (0.00180935 * x)) + (-3.86937e-06 * (x * x))) + (2.43222e-09 * (x * (x * x)));
                 else
                     return ((1.00022 + (0.0010998 * x)) + (-3.10672e-06 * (x * x))) + (2.35006e-09 * (x * (x * x)));
-            } else if (syst_ == lightdown) { //don't change
+            } else if (tempsyst == lightdown) { //don't change
                 if (abs_eta <= 0.5)
                     return ((0.977761 + (0.00170704 * x)) + (-3.2197e-06 * (x * x))) + (1.78139e-09 * (x * (x * x)));
                 else if (abs_eta <= 1.0)
@@ -594,7 +640,7 @@ float bTagBase::LJetSF(const float& pt, const float& abs_eta,
                     return ((0.911657 + (0.00142008 * x)) + (-2.87569e-06 * (x * x))) + (1.76619e-09 * (x * (x * x)));
                 else
                     return ((1.03039 + (0.0013358 * x)) + (-3.89284e-06 * (x * x))) + (3.01155e-09 * (x * (x * x)));
-            } else if (syst_ == lightup) { //don't change
+            } else if (tempsyst == lightup) { //don't change
                 if (abs_eta <= 0.5)
                     return ((1.04582 + (0.00290226 * x)) + (-5.89124e-06 * (x * x))) + (3.37128e-09 * (x * (x * x)));
                 else if (abs_eta <= 1.0)
@@ -622,21 +668,21 @@ float bTagBase::LJetSF(const float& pt, const float& abs_eta,
             // Please copy-paste the formulas here. Check the correct eta range
             // systematics are handled directly here. use "else if" where applicable
 
-            if (syst_ != lightdown && syst_ != lightup) { //don't change
+            if (tempsyst != lightdown && tempsyst != lightup) { //don't change
                 if (abs_eta <= 0.8)
                     return ((1.07541+(0.00231827*x))+(-4.74249e-06*(x*x)))+(2.70862e-09*(x*(x*x)));
                 else if (abs_eta <= 1.6)
                     return ((1.05613+(0.00114031*x))+(-2.56066e-06*(x*x)))+(1.67792e-09*(x*(x*x)));
                 else 
                     return ((1.05625+(0.000487231*x))+(-2.22792e-06*(x*x)))+(1.70262e-09*(x*(x*x)));
-            } else if (syst_ == lightdown) { //don't change
+            } else if (tempsyst == lightdown) { //don't change
                 if (abs_eta <= 0.8)
                     return ((0.964527+(0.00149055*x))+(-2.78338e-06*(x*x)))+(1.51771e-09*(x*(x*x)));
                 else if (abs_eta <= 1.6)
                     return ((0.946051+(0.000759584*x))+(-1.52491e-06*(x*x)))+(9.65822e-10*(x*(x*x)));
                 else
                     return ((0.956736+(0.000280197*x))+(-1.42739e-06*(x*x)))+(1.0085e-09*(x*(x*x)));
-            } else if (syst_ == lightup) { //don't change
+            } else if (tempsyst == lightup) { //don't change
                 if (abs_eta <= 0.8)
                     return ((1.18638+(0.00314148*x))+(-6.68993e-06*(x*x)))+(3.89288e-09*(x*(x*x)));
                 else if (abs_eta <= 1.6)
@@ -662,11 +708,11 @@ float bTagBase::LJetSF(const float& pt, const float& abs_eta,
             // Please copy-paste the formulas here. Check the correct eta range
             // systematics are handled directly here. use "else if" where applicable
 
-            if (syst_ != lightdown && syst_ != lightup) { //don't change
+            if (tempsyst != lightdown && tempsyst != lightup) { //don't change
                 return ((1.00462+(0.00325971*x))+(-7.79184e-06*(x*x)))+(5.22506e-09*(x*(x*x)));
-            } else if (syst_ == lightdown) { //don't change
+            } else if (tempsyst == lightdown) { //don't change
                 return ((0.845757+(0.00186422*x))+(-4.6133e-06*(x*x)))+(3.21723e-09*(x*(x*x)));
-            } else if (syst_ == lightup) { //don't change
+            } else if (tempsyst == lightup) { //don't change
                 return ((1.16361+(0.00464695*x))+(-1.09467e-05*(x*x)))+(7.21896e-09*(x*(x*x)));
             }
         }
