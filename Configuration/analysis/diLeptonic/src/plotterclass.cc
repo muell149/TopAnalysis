@@ -2364,27 +2364,32 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
       GenPlotTheory->Scale(1./2.);
     }
 //     GenPlotTheory->Rebin(2);
-    double genscale = 1./GenPlotTheory->Integral("width");
-    GenPlotTheory->Scale(genscale);
-
-    genscale = 1./ h_GenDiffXSec->Integral("width");
-    h_GenDiffXSec->Scale(genscale);
+    GenPlotTheory->Scale(GenPlotTheory->Integral("width"));
+    h_GenDiffXSec->Scale(h_GenDiffXSec->Integral("width"));
 
     bool binned_theory=true; //############
 
-    TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0;
+    TH1* madgraphhist = 0, *mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0;
     TH1* mcnlohistnorm=0;
     TGraph *mcatnloBand=0;
 
     TH1* mcnlohistnormBinned = 0, *mcnlohistupBinned = 0;
-    TH1 *mcnlohistdownBinned = 0, *mcnlohistBinned = 0;
-    TH1* powheghistBinned = 0, *powhegHerwighistBinned = 0;
+    TH1* mcnlohistdownBinned = 0, *mcnlohistBinned = 0;
+    TH1* madgraphhistBinned = 0, *powheghistBinned = 0, *powhegHerwighistBinned = 0;
     TH1* spincorrhistBinned = 0, *perugia11histBinned = 0;
 
     TH1 *Kidoth1_Binned = 0, *Ahrensth1_Binned = 0;
 
     TH1* madup=0, *maddown=0, *matchup=0, *matchdown=0;
     TH1* madupBinned = 0, *maddownBinned = 0, *matchupBinned = 0, *matchdownBinned = 0;
+
+    madgraphhist = GetNloCurve(newname, "Nominal");
+    madgraphhist->Scale(1./madgraphhist->Integral("width"));
+    madgraphhistBinned = madgraphhist->Rebin(bins,"madgraphplot",Xbins);
+    for (Int_t bin=0; bin<bins; bin++){
+        madgraphhistBinned->SetBinContent(bin+1,madgraphhistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/madgraphhist->GetBinWidth(1)));
+    }
+    madgraphhistBinned->Scale(1./madgraphhistBinned->Integral("width"));
 
     bool canDrawMCATNLO = true;
     if (drawNLOCurves && drawMCATNLO) {
@@ -2517,7 +2522,6 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         double spincorrhistscale = 1./spincorrhist->Integral("width");
         if (binned_theory==false) spincorrhist->Rebin(2);spincorrhist->Scale(0.5);
         spincorrhist->Scale(spincorrhistscale);
-            
         spincorrhistBinned = spincorrhist->Rebin(bins,"spincorrplot",Xbins);
         for (Int_t bin=0; bin<bins; bin++){
             spincorrhistBinned->SetBinContent(bin+1,spincorrhistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/spincorrhist->GetBinWidth(1)));
@@ -2652,26 +2656,26 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     //MCFMHist->SetMarkerStyle(2);
     if(ymax!=0){
         if(logY){
-            h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
+            madgraphhistBinned->SetMaximum(18*madgraphhistBinned->GetBinContent(madgraphhistBinned->GetMaximumBin()));
         }
-        else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
+        else{ madgraphhistBinned->SetMaximum(1.5*madgraphhistBinned->GetBinContent(madgraphhistBinned->GetMaximumBin()));}
     }
-    h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
-    if (name.Contains("Rapidity") || name.Contains("Eta")){h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);}
+    madgraphhistBinned->GetXaxis()->SetNoExponent(kTRUE);
+    if (name.Contains("Rapidity") || name.Contains("Eta")){madgraphhistBinned->GetYaxis()->SetNoExponent(kTRUE);}
     if (name.Contains("JetMult")) {
-        //h_GenDiffXSec->GetXaxis()->SetNdivisions(h_GenDiffXSec->GetNbinsX(),0,0, 1);
+        //madgraphhistBinned->GetXaxis()->SetNdivisions(madgraphhistBinned->GetNbinsX(),0,0, 1);
         TString TitBin = "";
-        for(int bin = 1; bin <= h_GenDiffXSec->GetNbinsX(); bin++) {
-            if( bin == h_GenDiffXSec->GetNbinsX()) {TitBin += "#geq"; TitBin += h_GenDiffXSec->GetBinCenter(bin); h_GenDiffXSec->GetXaxis()->SetBinLabel(bin,TitBin);}
-            else{TitBin += h_GenDiffXSec->GetBinCenter(bin);
-            h_GenDiffXSec->GetXaxis()->SetBinLabel(bin,TitBin);
+        for(int bin = 1; bin <= madgraphhistBinned->GetNbinsX(); bin++) {
+            if( bin == madgraphhistBinned->GetNbinsX()) {TitBin += "#geq"; TitBin += madgraphhistBinned->GetBinCenter(bin); madgraphhistBinned->GetXaxis()->SetBinLabel(bin,TitBin);}
+            else{TitBin += madgraphhistBinned->GetBinCenter(bin);
+            madgraphhistBinned->GetXaxis()->SetBinLabel(bin,TitBin);
             }
             TitBin  = "";
        }
     }
 
-    h_GenDiffXSec->Draw();
-    if (ymax!=0) h_GenDiffXSec->SetMaximum(ymax);
+    madgraphhistBinned->Draw();
+    if (ymax!=0) madgraphhistBinned->SetMaximum(ymax);
     gStyle->SetEndErrorSize(8);
     if (drawNLOCurves && drawMCATNLO && canDrawMCATNLO) {
     //    mcatnloBand->Draw("same, F");
@@ -2685,52 +2689,57 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     GenPlotTheory->SetLineColor(kRed+1);
     GenPlotTheory->SetLineWidth(2);
     GenPlotTheory->SetLineStyle(1);
+    h_GenDiffXSec->SetLineColor(GenPlotTheory->GetLineColor());
+    h_GenDiffXSec->SetLineStyle(GenPlotTheory->GetLineStyle());
 
-    h_GenDiffXSec->SetLineColor(kRed+1);
-    h_GenDiffXSec->SetLineStyle(1);
-    
+    madgraphhist->SetLineColor(kRed+1);
+    madgraphhist->SetLineStyle(1);
+    madgraphhistBinned->SetLineColor(madgraphhist->GetLineColor());
+    madgraphhistBinned->SetLineStyle(madgraphhist->GetLineStyle());
+    madgraphhistBinned->SetLineWidth(2);
+
     if(drawNLOCurves && drawMCATNLO){
         mcnlohist->SetLineColor(kBlue); //#####################
         mcnlohist->SetLineStyle(5);
-        mcnlohistBinned->SetLineColor(kBlue); //#####################
+        mcnlohistBinned->SetLineColor(mcnlohist->GetLineColor());
+        mcnlohistBinned->SetLineStyle(mcnlohist->GetLineStyle());
         mcnlohistBinned->SetLineWidth(2);
-        mcnlohistBinned->SetLineStyle(5);
         if(binned_theory==false){mcnlohist->Draw("SAME");}
         else{mcnlohistBinned->Draw("SAME");}
     }
     if(drawNLOCurves && drawPOWHEG){
         powheghist->SetLineColor(kGreen+1); //#####################
         powheghist->SetLineStyle(7);
-        powheghistBinned->SetLineColor(kGreen+1); //#####################
+        powheghistBinned->SetLineColor(powheghist->GetLineColor());
+        powheghistBinned->SetLineStyle(powheghist->GetLineStyle());
         powheghistBinned->SetLineWidth(2);
-        powheghistBinned->SetLineStyle(7);
         if(binned_theory==false){powheghist->Draw("SAME");}
         else{powheghistBinned->Draw("SAME");}
     }
     if(drawNLOCurves && drawPOWHEGHERWIG){
         powhegHerwighist->SetLineColor(kMagenta); //#####################
         powhegHerwighist->SetLineStyle(7);
-        powhegHerwighistBinned->SetLineColor(kMagenta); //#####################
+        powhegHerwighistBinned->SetLineColor(powhegHerwighist->GetLineColor());
+        powhegHerwighistBinned->SetLineStyle(powhegHerwighist->GetLineStyle());
         powhegHerwighistBinned->SetLineWidth(2);
-        powhegHerwighistBinned->SetLineStyle(7);
         if(binned_theory==false){powhegHerwighist->Draw("SAME");}
         else{powhegHerwighistBinned->Draw("SAME");}
     }
     if(drawNLOCurves && drawMadSpinCorr){
         spincorrhist->SetLineColor(kOrange+3); //#####################
         spincorrhist->SetLineStyle(2);
-        spincorrhistBinned->SetLineColor(kOrange+3); //#####################
+        spincorrhistBinned->SetLineColor(spincorrhist->GetLineColor());
+        spincorrhistBinned->SetLineStyle(spincorrhist->GetLineStyle());
         spincorrhistBinned->SetLineWidth(2);
-        spincorrhistBinned->SetLineStyle(2);
         if(binned_theory==false){spincorrhist->Draw("SAME");}
         else{spincorrhistBinned->Draw("SAME");}
     }
     if(drawNLOCurves && drawPERUGIA11){
         perugia11hist->SetLineColor(kYellow);
         perugia11hist->SetLineStyle(2);
-        perugia11histBinned->SetLineColor(kYellow);
+        perugia11histBinned->SetLineColor(perugia11hist->GetLineColor());
+        perugia11histBinned->SetLineStyle(perugia11hist->GetLineStyle());
         perugia11histBinned->SetLineWidth(3);
-//         perugia11histBinned->SetLineStyle(2);
         perugia11histBinned->Draw("SAME");
     }
     if(drawNLOCurves && drawKidonakis && (name.Contains("TopRapidity") || name.Contains("ToppT")) && !name.Contains("Lead") && !name.Contains("RestFrame")){
@@ -2750,37 +2759,37 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
           madupBinned->SetLineWidth(2);
           maddownBinned->SetLineWidth(2);
           madupBinned->SetLineStyle(2);
-          maddownBinned->SetLineStyle(2);     
+          maddownBinned->SetLineStyle(2);
           madupBinned->SetLineColor(kAzure+2);
-          maddownBinned->SetLineColor(8);     
-          matchupBinned->SetLineWidth(2);     
-          matchdownBinned->SetLineWidth(2);   
-          matchupBinned->SetLineStyle(7);     
-          matchdownBinned->SetLineStyle(7);   
+          maddownBinned->SetLineColor(8);
+          matchupBinned->SetLineWidth(2);
+          matchdownBinned->SetLineWidth(2);
+          matchupBinned->SetLineStyle(7);
+          matchdownBinned->SetLineStyle(7);
           matchupBinned->SetLineColor(kPink-7);
           matchdownBinned->SetLineColor(kRed-7);
-  /*                                            
-          maddownBinned->Scale(1./maddownBinned->Integral());    
-          madupBinned->Scale(1./madupBinned->Integral());        
+  /*
+          maddownBinned->Scale(1./maddownBinned->Integral());
+          madupBinned->Scale(1./madupBinned->Integral());
           matchdownBinned->Scale(1./matchdownBinned->Integral());
-          matchupBinned->Scale(1./matchupBinned->Integral());    
+          matchupBinned->Scale(1./matchupBinned->Integral());
   */
           if(binned_theory==false){
           maddown->Draw("SAME"); 
           matchup->Draw("SAME"); 
           matchdown->Draw("SAME");
-          }else{                    
+          }else{
           madupBinned->Draw("SAME");
           maddownBinned->Draw("SAME");
           matchupBinned->Draw("SAME");
           matchdownBinned->Draw("SAME");
-          }                                
+          }
           ofstream OutputFileXSec(string("Plots/"+Channel+"/"+name+"DiffXsecMass.txt"));       
               for(int i = 1; i < madupBinned->GetNbinsX(); i++){                               
               //OutputFileXSec<<"Nominal "<<"Mass 181 GeV" << " Mass 175 GeV"<< "Mass 169 GeV" << "Mass 163 GeV"<<endl;                             OutputFileXSec<<h_DiffXSec->GetBinContent(i)<< " "<<tga_DiffXSecPlot->GetErrorY(i-1)<<" "<<tga_DiffXSecPlotwithSys->GetErrorY(i-1)<< " "<<h|
-              }                                                                                                                                    
-          OutputFileXSec.close();                                                                                                                 
-      }                                                                                                                                            
+              }
+          OutputFileXSec.close();
+      }
 
     if (drawSmoothMadgraph){
         if( name.Contains("HypTTBarMass")){
@@ -2854,12 +2863,12 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         else {GenPlotTheory->Draw("SAME,C");} //### 150512 ### 
     }
 
-    h_GenDiffXSec->Draw("SAME"); //### 150512 ###
+    madgraphhistBinned->Draw("SAME"); //### 150512 ###
     DrawCMSLabels(1, 8);
     DrawDecayChLabel(channelLabel[channelType]);
     TLegend *leg2 = getNewLegend();
     leg2->AddEntry(h_DiffXSec, "Data", "p");
-    leg2->AddEntry(GenPlotTheory, "MadGraph+Pythia","l");
+    leg2->AddEntry(madgraphhistBinned, "MadGraph+Pythia","l");
     if (drawNLOCurves) {
         if (drawMCATNLO && canDrawMCATNLO && mcnlohistup->GetEntries() && mcnlohistdown->GetEntries())  leg2->AddEntry(mcatnloBand, "MC@NLO+Herwig",  "fl");
         else if (drawMCATNLO && mcnlohist->GetEntries())                                                leg2->AddEntry(mcnlohist, "MC@NLO+Herwig",  "l");
@@ -2890,7 +2899,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     leg2->SetX2NDC(1.0-gStyle->GetPadRightMargin()-gStyle->GetTickLength()-0.1);
     leg2->SetY2NDC(1.0-gStyle->GetPadTopMargin()-gStyle->GetTickLength());
     leg2->SetTextSize(0.04);
-    TString legtit = "";                                        
+    TString legtit = "";
     if(name.Contains("JetMult")) {
         if(name.Contains("pt60")) legtit += "p_{T}^{jet}> 60 GeV";
         else if(name.Contains("pt100")) legtit += "p_{T}^{jet}> 100 GeV";
@@ -2907,7 +2916,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
         else if (name == "HypTTBarpT"){DrawLabel("(arXiv:1307.2464)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);}
     }
 
-    h_GenDiffXSec->Draw("SAME");
+    madgraphhistBinned->Draw("SAME");
     gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
     tga_DiffXSecPlotwithSys->Draw("p, SAME, Z");
@@ -2924,16 +2933,12 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
             for (int i=1; i<(int)tmpKido->GetNbinsX()+1; i++){ tmpKido->SetBinContent(i,Kidoth1_Binned->GetBinContent(i));};
         }
 
-        common::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, 
-                            powheghistBinned, mcnlohistBinned, 
-                            tmpKido, Ahrensth1_Binned,
-                            powhegHerwighistBinned, perugia11histBinned,
-                            0.4, 1.6);
+        common::drawRatioXSEC(h_DiffXSec, madgraphhistBinned, powheghistBinned, mcnlohistBinned, tmpKido, Ahrensth1_Binned,powhegHerwighistBinned, perugia11histBinned, 0.4, 1.6);
     };
 
 //    if(drawMadScaleMatching) {powheghist = nullptr; mcnlohist = nullptr; common::drawRatioXSEC(h_DiffXSec,h_GenDiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6); }
-    if(drawNLOCurves && drawMadScaleMatching) common::drawRatioXSEC(h_DiffXSec,h_GenDiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
-    if(drawNLOCurves && drawMadMass) common::drawRatioXSEC(h_GenDiffXSec,h_DiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
+    if(drawNLOCurves && drawMadScaleMatching) common::drawRatioXSEC(h_DiffXSec,madgraphhistBinned,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
+    if(drawNLOCurves && drawMadMass) common::drawRatioXSEC(madgraphhistBinned,h_DiffXSec,madupBinned,maddownBinned,matchupBinned,matchdownBinned,0,0,0.4, 1.6);
 
     c->Print(outdir.Copy()+"DiffXS_"+name+".eps");
     //c->Print(outdir.Copy()+"DiffXS_"+name+".C");
@@ -2948,7 +2953,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
 
     std::cout<<"-------------------------------------------------------------------"<<std::endl;
     std::cout<<"Starting the calculation of Chi2/ndof\n"<<std::endl;
-    double chi2 = Plotter::GetChi2 (tga_DiffXSecPlotwithSys, h_GenDiffXSec);
+    double chi2 = Plotter::GetChi2 (tga_DiffXSecPlotwithSys, madgraphhistBinned);
     std::cout<<"The CHI2/ndof (vs Madgraph) value for '"<<name<<"' in channel '"<<subfolderChannel.Copy().Remove(0, 1)<<"' is "<<chi2<<std::endl;
 
     if(drawNLOCurves && drawPOWHEG && powheghistBinned && powheghistBinned->GetEntries()){
@@ -3322,26 +3327,20 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     tga_DiffXSecPlot->SetLineColor(kBlack);
 
     GenPlot->Scale(topxsec/(SignalEventswithWeight*GenPlot->GetBinWidth(1)));
-    if( (name.Contains("Lepton")||
-        name.Contains("Top")||
-        name.Contains("BJet"))
-        && !name.Contains("Lead"))
-    {
-        GenPlotTheory->Scale(1./2.);
+    if( (name.Contains("Lepton") || name.Contains("Top") || name.Contains("BJet")) &&
+        !name.Contains("Lead")) {
+            GenPlotTheory->Scale(1./2.);
     }
 
-    double genscale = 1./GenPlotTheory->Integral("width");
-    GenPlotTheory->Scale(genscale);
+    GenPlotTheory->Scale(1./GenPlotTheory->Integral("width"));
+    h_GenDiffXSec->Scale(1./h_GenDiffXSec->Integral("width"));
 
-    genscale = 1./ h_GenDiffXSec->Integral("width");
-    h_GenDiffXSec->Scale(genscale);
-
-    TH1* mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0;
+    TH1* madgraphhist = 0, *mcnlohist=0, *mcnlohistup=0, *mcnlohistdown=0, *powheghist=0, *powhegHerwighist=0, *spincorrhist=0, *perugia11hist = 0;
     TH1* mcnlohistnorm=0;
     TGraph *mcatnloBand=0;
 
-    TH1* mcnlohistnormBinned = 0, *mcnlohistupBinned = 0;
-    TH1 *mcnlohistdownBinned = 0, *mcnlohistBinned = 0;
+    TH1* madgraphhistBinned = 0, *mcnlohistnormBinned = 0, *mcnlohistupBinned = 0;
+    TH1* mcnlohistdownBinned = 0, *mcnlohistBinned = 0;
     TH1* powheghistBinned = 0, *powhegHerwighistBinned = 0;
     TH1* spincorrhistBinned = 0, *perugia11histBinned = 0;
 
@@ -3446,6 +3445,15 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         }
     }
 
+    madgraphhist = GetNloCurve(newname, "Nominal");
+    double madgraphscale = 1./madgraphhist->Integral("width");
+    madgraphhist->Scale(madgraphscale);
+    madgraphhistBinned = madgraphhist->Rebin(bins,"madgraphplot",Xbins);
+    for (Int_t bin=0; bin<bins; bin++){
+        madgraphhistBinned->SetBinContent(bin+1,madgraphhistBinned->GetBinContent(bin+1)/((Xbins[bin+1]-Xbins[bin])/madgraphhist->GetBinWidth(1)));
+    }
+    madgraphhistBinned->Scale(1./madgraphhistBinned->Integral("width"));
+
     if(drawNLOCurves && drawPOWHEG){
         powheghist = GetNloCurve(newname, "POWHEG");
         double powhegscale = 1./powheghist->Integral("width");
@@ -3513,14 +3521,15 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     h_DiffXSec->SetMarkerStyle(20);
     if(ymax!=0){
         if(logY){
-            h_GenDiffXSec->SetMaximum(18*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));
+            madgraphhistBinned->SetMaximum(18*madgraphhistBinned->GetBinContent(madgraphhistBinned->GetMaximumBin()));
+        } else{
+            madgraphhistBinned->SetMaximum(1.5*madgraphhistBinned->GetBinContent(madgraphhistBinned->GetMaximumBin()));
         }
-        else{ h_GenDiffXSec->SetMaximum(1.5*h_GenDiffXSec->GetBinContent(h_GenDiffXSec->GetMaximumBin()));}
     }
-    h_GenDiffXSec->GetXaxis()->SetNoExponent(kTRUE);
-    if (name.Contains("Rapidity") || name.Contains("Eta")){h_GenDiffXSec->GetYaxis()->SetNoExponent(kTRUE);}
-    h_GenDiffXSec->Draw();
-    if (ymax!=0) h_GenDiffXSec->SetMaximum(ymax);
+    madgraphhistBinned->GetXaxis()->SetNoExponent(kTRUE);
+    if (name.Contains("Rapidity") || name.Contains("Eta")){madgraphhistBinned->GetYaxis()->SetNoExponent(kTRUE);}
+    madgraphhistBinned->Draw();
+    if (ymax!=0) madgraphhistBinned->SetMaximum(ymax);
 
     gStyle->SetEndErrorSize(8);
     if (drawNLOCurves && drawMCATNLO && canDrawMCATNLO) {
@@ -3534,9 +3543,15 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     GenPlotTheory->SetLineColor(kRed+1);
     GenPlotTheory->SetLineWidth(2);
     GenPlotTheory->SetLineStyle(1);
+    h_GenDiffXSec->SetLineColor(GenPlotTheory->GetLineColor());
+    h_GenDiffXSec->SetLineStyle(GenPlotTheory->GetLineStyle());
 
-    h_GenDiffXSec->SetLineColor(kRed+1);
-    h_GenDiffXSec->SetLineStyle(1);
+    madgraphhist->SetLineColor(kRed+1);
+    madgraphhist->SetLineStyle(1);
+    madgraphhistBinned->SetLineColor(madgraphhist->GetLineColor());
+    madgraphhistBinned->SetLineStyle(madgraphhist->GetLineStyle());
+    madgraphhistBinned->SetLineWidth(2);
+    madgraphhistBinned->Draw();
 
     TH1* realTruthBinned = nullptr;
     if(doClosureTest && dataset.at(0).Contains("fakerun") && Channel != "combined")
@@ -3622,14 +3637,14 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         Ahrensth1_Binned->SetLineStyle(10);
         Ahrensth1_Binned->Draw("SAME][");
     }
-    h_GenDiffXSec->Draw("SAME");
+    madgraphhistBinned->Draw("SAME");
     DrawCMSLabels(1, 8);
     DrawDecayChLabel(channelLabel[channelType]);
     TLegend *leg2 = getNewLegend();
     leg2->SetHeader(Systematic);
     if(doClosureTest){leg2->AddEntry(h_DiffXSec, "Pseudo-Data", "p");}
     else {leg2->AddEntry(h_DiffXSec, "Data", "p");}
-    leg2->AddEntry(GenPlotTheory, "MadGraph+Pythia","l");
+    leg2->AddEntry(madgraphhistBinned, "MadGraph+Pythia", "l");
     if (drawNLOCurves) {
         if(doClosureTest && realTruthBinned->GetEntries())                                              leg2->AddEntry(realTruthBinned, "Simu. Reweighted", "l");
         if (drawMCATNLO && canDrawMCATNLO && mcnlohistup->GetEntries() && mcnlohistdown->GetEntries())  leg2->AddEntry(mcatnloBand, "MC@NLO+Herwig",  "fl");
@@ -3660,7 +3675,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         else if (name == "HypTTBarpT"){DrawLabel("(arXiv:1307.2464)", leg2->GetX1NDC()+0.06, leg2->GetY1NDC()-0.025, leg2->GetX2NDC(), leg2->GetY1NDC(), 12, 0.025);}
     }
 
-    h_GenDiffXSec->Draw("SAME");
+    madgraphhistBinned->Draw("same");
     gStyle->SetEndErrorSize(10);
     tga_DiffXSecPlot->Draw("p, SAME");
     ///Stupid clone to be able to see the stat error bars
@@ -3680,9 +3695,9 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
             for (int i=1; i<(int)tmpKido->GetNbinsX()+1; i++){ tmpKido->SetBinContent(i,Kidoth1_Binned->GetBinContent(i));};
         }
 
-        if(doClosureTest) { common::drawRatioXSEC(h_DiffXSec, realTruthBinned, h_GenDiffXSec, powheghistBinned,
+        if(doClosureTest) { common::drawRatioXSEC(h_DiffXSec, realTruthBinned, madgraphhistBinned, powheghistBinned,
                                                  mcnlohistBinned, tmpKido, Ahrensth1_Binned,powhegHerwighistBinned, 0.4, 1.6);
-        } else { common::drawRatioXSEC(h_DiffXSec, h_GenDiffXSec, powheghistBinned, mcnlohistBinned, 
+        } else { common::drawRatioXSEC(h_DiffXSec, madgraphhistBinned, powheghistBinned, mcnlohistBinned, 
                                   tmpKido, Ahrensth1_Binned, powhegHerwighistBinned, perugia11histBinned,0.4, 1.6);
         };
     };
@@ -3699,7 +3714,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
 //    double result_Integral = Plotter::CalculateIntegral(tga_DiffXSecPlot, Xbins);
     std::cout<<"-------------------------------------------------------------------"<<std::endl;
     std::cout<<"Starting the calculation of Chi2/ndof\n"<<std::endl;
-    double chi2 = Plotter::GetChi2 (tga_DiffXSecPlot, h_GenDiffXSec);
+    double chi2 = Plotter::GetChi2 (tga_DiffXSecPlot, madgraphhistBinned);
     std::cout<<"The CHI2/ndof (vs Madgraph) value for '"<<name<<"' in channel '"<<Channel<<"' is "<<chi2<<std::endl;
 
     if(drawPOWHEG && powheghistBinned && powheghistBinned->GetEntries()){
@@ -3841,7 +3856,9 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
 TH1* Plotter::GetNloCurve(TString NewName, TString Generator){
 
     TString filename;
-    if (Generator == "MCATNLO") {
+    if (Generator == "Nominal"){
+        filename = "_ttbarsignalplustau.root";
+    } else if (Generator == "MCATNLO") {
         filename = "_ttbarsignalplustau_mcatnlo.root";
     } else if (Generator == "POWHEG") {
         filename = "_ttbarsignalplustau_powheg.root";
