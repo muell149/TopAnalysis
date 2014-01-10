@@ -24,9 +24,9 @@
 #include <TError.h>
 
 #include "plotterclass.h"
+#include "ttbarUtils.h"
 #include "../../common/include/RootFileReader.h"
 #include "../../common/include/plotterUtils.h"
-#include "../../common/include/utils.h"
 #include "../../common/include/ScaleFactors.h"
 
 
@@ -2538,8 +2538,8 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     if(drawNLOCurves && drawKidonakis &&
         (name== "HypToppT" || name == "HypTopRapidity") && 
         !name.Contains("Lead") && !name.Contains("RestFrame")){
-        TString kidoFile = common::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
-        //KidoFile=TFile::Open(common::DATA_PATH() + "dilepton_kidonakisNNLO.root");
+        TString kidoFile = ttbar::DATA_PATH_DILEPTONIC() + "/dilepton_kidonakisNNLO.root";
+        //KidoFile=TFile::Open(ttbar::DATA_PATH_DILEPTONIC() + "dilepton_kidonakisNNLO.root");
         if(name.Contains("ToppT")){
             //Kidoth1_Binned = (TH1F*)KidoFile->Get("topPt");
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topPt");
@@ -2551,7 +2551,7 @@ void Plotter::PlotDiffXSec(TString Channel, std::vector<TString>vec_systematic){
     }
 
     if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT")){
-        TString ahrensFile = common::DATA_PATH() + "/ahrensNNLL_8TeV.root";
+        TString ahrensFile = ttbar::DATA_PATH_DILEPTONIC() + "/ahrensNNLL_8TeV.root";
         if(name == "HypTTBarMass") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarM");
         else if(name == "HypTTBarpT") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarPt");
         Ahrensth1_Binned->Scale(1./Ahrensth1_Binned->Integral("width"));
@@ -3491,7 +3491,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
     if(drawNLOCurves && drawKidonakis &&
         (name== "HypToppT" || name == "HypTopRapidity") && 
         !name.Contains("Lead") && !name.Contains("RestFrame")){
-        TString kidoFile = common::DATA_PATH() + "/dilepton_kidonakisNNLO.root";
+        TString kidoFile = ttbar::DATA_PATH_DILEPTONIC() + "/dilepton_kidonakisNNLO.root";
         if(name.Contains("ToppT")){
             Kidoth1_Binned = fileReader->GetClone<TH1>(kidoFile, "topPt");
         }
@@ -3500,7 +3500,7 @@ void Plotter::PlotSingleDiffXSec(TString Channel, TString Systematic){
         }
     }
     if(drawNLOCurves && drawAhrens && (name == "HypTTBarMass" || name == "HypTTBarpT")){
-        TString ahrensFile = common::DATA_PATH() + "/ahrensNNLL_8TeV.root";
+        TString ahrensFile = ttbar::DATA_PATH_DILEPTONIC() + "/ahrensNNLL_8TeV.root";
         if(name == "HypTTBarMass") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarM");
         else if(name == "HypTTBarpT") Ahrensth1_Binned = fileReader->GetClone<TH1>(ahrensFile, "ttbarPt");
         Ahrensth1_Binned->Scale(1./Ahrensth1_Binned->Integral("width"));
@@ -3821,9 +3821,9 @@ TH1* Plotter::GetNloCurve(const char *particle, const char *quantity, const char
     
     TString filename;
     if(strcmp(generator, "Powheg")==0){filename = "selectionRoot/Nominal/emu/ttbarsignalplustau_powheg.root";}
-    else if(strcmp(generator, "MCatNLO")==0){filename = common::DATA_PATH() + "/MCatNLO_status3_v20120729.root";}
-    else if(strcmp(generator, "MCNLOup")==0){filename = common::DATA_PATH() + "/MCatNLO_Uncert_Up_status3_v20120729.root";}
-    else if(strcmp(generator, "MCNLOdown")==0){filename = common::DATA_PATH() + "/MCatNLO_Uncert_Down_status3_v20120729.root";}
+    else if(strcmp(generator, "MCatNLO")==0){filename = ttbar::DATA_PATH_DILEPTONIC() + "/MCatNLO_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOup")==0){filename = ttbar::DATA_PATH_DILEPTONIC() + "/MCatNLO_Uncert_Up_status3_v20120729.root";}
+    else if(strcmp(generator, "MCNLOdown")==0){filename = ttbar::DATA_PATH_DILEPTONIC() + "/MCatNLO_Uncert_Down_status3_v20120729.root";}
     
     TH1 *hist = fileReader->GetClone<TH1>(filename, histname, true);
     if (hist) {

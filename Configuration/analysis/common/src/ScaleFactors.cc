@@ -142,7 +142,7 @@ h2_MuonIDSFpteta(0)
     std::cout<<"--- Beginning preparation of lepton scale factors\n";
     
     for(const auto& lepton : {electron, muon}){
-        std::string inputFileName(common::DATA_PATH());
+        std::string inputFileName(common::DATA_PATH_COMMON());
         inputFileName.append("/");
         std::string histogramName;
         if(lepton == electron){
@@ -309,7 +309,7 @@ h2_mumuTrigSFeta(0)
     
     std::vector<TString> triggerInputFileNames;
     for(const auto& channel : channels){
-        TString fullName(common::DATA_PATH());
+        TString fullName(common::DATA_PATH_COMMON());
         fullName.Append("/triggerSummary_");
         fullName.Append(channel);
         fullName.Append(inputFileSuffix);

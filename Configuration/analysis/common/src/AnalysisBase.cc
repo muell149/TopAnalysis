@@ -1108,7 +1108,7 @@ void AnalysisBase::prepareJER_JES()
 {
     // FIXME: make this string steerable
     //     const TString pathToFile(common::DATA_PATH() + "/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt");
-    const TString pathToFile(common::DATA_PATH() + "/Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt");
+    const TString pathToFile(common::DATA_PATH_COMMON() + "/Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt");
     doJesJer_ = false;
     if (systematic_ == "JES_UP" || systematic_ == "JES_DOWN") {
         jetCorrectionUncertainty_ = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.Data(), "Total"));

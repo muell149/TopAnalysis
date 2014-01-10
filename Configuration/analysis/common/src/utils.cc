@@ -24,7 +24,7 @@ const std::string common::CMSSW_BASE()
 
 
 
-const std::string common::DATA_PATH()
+const std::string common::DATA_PATH_COMMON()
 {
     std::string result(CMSSW_BASE());
     result.append("/src/TopAnalysis/Configuration/analysis/diLeptonic/data");
