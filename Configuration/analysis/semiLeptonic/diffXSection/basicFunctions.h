@@ -182,12 +182,13 @@ namespace semileptonic {
 			     /*47:*/ sysVjetsUp,                 /*48:*/ sysVjetsDown,
 			     /*49:*/ sysBRUp   ,                 /*50:*/ sysBRDown,
 			     /*51:*/ sysPDFUp,                   /*52:*/ sysPDFDown,
-			     /*53:*/ sysHadUp,                   /*54:*/ sysHadDown,
-			     /*55:*/ sysGenMCatNLO,              /*56:*/ sysGenPowheg,
-			     /*57:*/ sysGenPowhegHerwig,         /*58:*/ ENDOFSYSENUM, 
-			     /*59:*/ sysTest, 			 /*60:*/ sysTestMCatNLO,             
-			     /*61:*/ sysTestPowheg,     	 /*62:*/ sysTestPowhegHerwig,        
-			     /*63:*/ ENDOFSYSENUM2,
+			     /*53:*/ sysUnf,
+			     /*54:*/ sysHadUp,                   /*55:*/ sysHadDown,			     
+			     /*56:*/ sysGenMCatNLO,              /*57:*/ sysGenPowheg,
+			     /*58:*/ sysGenPowhegHerwig,         /*59:*/ ENDOFSYSENUM, 
+			     /*60:*/ sysTest, 			 /*61:*/ sysTestMCatNLO,             
+			     /*62:*/ sysTestPowheg,     	 /*63:*/ sysTestPowhegHerwig,        
+			     /*64:*/ ENDOFSYSENUM2,
 
   };
 
@@ -362,7 +363,8 @@ namespace semileptonic {
       case sysBRUp                     : return "sysBRUp";              
       case sysBRDown                   : return "sysBRDown";    
       case sysPDFUp                    : return "sysPDFUp";              
-      case sysPDFDown                  : return "sysPDFDown";
+      case sysPDFDown                  : return "sysPDFDown"; 
+      case sysUnf                      : return "sysUnf";    
       case sysHadUp                    : return "sysHadronizationUp";
       case sysHadDown                  : return "sysHadronizationDown";
       case sysGenMCatNLO               : return "sysGenMCatNLO";
@@ -729,7 +731,7 @@ namespace semileptonic {
   Double_t round(Double_t value, Int_t k)
   {
     // function to round a double "value"
-    // to a double with "k" digits
+    // to a double with "k" digits, k>0
 
     // no need for rounding if the value is 0
     if(value==0.)return value;
@@ -830,13 +832,16 @@ namespace semileptonic {
   int getBigitFromDouble(double d)
   {
     // function to determine the number of 
-    // digits from d before the comma
+    // digits from d before the comma, 
+    // for negative numbers the minus sign 
+    // is counted too
     // modified quantities: NONE
     // used functions: NONE
     // used enumerators: NONE
     
     int out=1;
     while(std::abs(d)>=pow(10, out)) out++;
+    if(d<0.) out++;
     return out;
 
   }
