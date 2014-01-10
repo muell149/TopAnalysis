@@ -1,6 +1,7 @@
 #include "basicFunctions.h"
 
-std::pair< double, double > extraction(int verbose=0, double luminosity=19712., bool save=true, double minx=160., double maxx=185., double nbinsx=250, bool dataMassDependence=false, int binOfInterest=1, TString outputFolder="./", TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root");
+std::map <TString, TH1F*> extraction(int verbose=0, double luminosity=19712., bool save=true, double minx=160., double maxx=185., double nbinsx=250, bool dataMassDependence=false, int binOfInterest=1, TString outputFolder="./", TString outputFile="diffXSecTopSemiLepHadronPhaseSpace.root");
+std::map<TString, double> GetChi2Info(TH1F* chi2, bool draw=false, int verbose=0, double xmin=-1., double xmax=-1.);
 
 void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=true){
 
@@ -57,13 +58,19 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   TevatronMassErr->SetMarkerSize(0.1);
 
   //loop all bins
+  TH1F* globalchi2=0;
+  std::map <TString, TH1F*> resultbin;
   for(int bin=1; bin<=4; ++bin){
     // !!! define bin of interest !!! 
     int binOfInterest=bin;
     // perform top mass extraction
-    std::pair< double, double >resultbin=extraction(verbose, luminosity, save, (binOfInterest==2||binOfInterest==4) ? minx : minx2, (binOfInterest==2||binOfInterest==4) ? maxx : maxx2, nbinsx, dataMassDependence, binOfInterest, outputFolder, outputFile);
-    extractedMass->SetBinContent(bin, resultbin.first);
-    extractedMass->SetBinError(bin, std::abs(resultbin.second));
+    resultbin=extraction(verbose, luminosity, save, (binOfInterest==2||binOfInterest==4) ? minx : minx2, (binOfInterest==2||binOfInterest==4) ? maxx : maxx2, nbinsx, dataMassDependence, binOfInterest, outputFolder, outputFile);
+    extractedMass->SetBinContent(bin, resultbin["massval"]->GetBinContent(1));
+    extractedMass->SetBinError  (bin, std::abs(resultbin["massunc"]->GetBinContent(1)));
+    if(resultbin["chi2"]){
+      if(globalchi2) globalchi2->Add((TH1F*)resultbin["chi2"]->Clone("globalChi2Bin"+getTStringFromInt(bin)));
+      else globalchi2=(TH1F*)resultbin["chi2"]->Clone("globalChi2");
+    }
   }
   
   // linear fit to extracted mass values
@@ -100,7 +107,6 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   massfinal->SetMarkerSize(0.1);
 
   std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV (=" << 100*merr/mcomb << "%)" << std::endl;
-
   // create legend
   TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85 );
   legendStyle(*leg,"");
@@ -135,6 +141,17 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   extractedMass->Draw("AXIS same");
   DrawCMSLabels(true, luminosity, 0.04, false, false, false);
 
+  // draw global chi2
+  addCanvas(plotCanvas_);
+  plotCanvas_[plotCanvas_.size()-1]->cd(0);
+  TString titlechi2="globalChi2RhosAllBins";
+  plotCanvas_[plotCanvas_.size()-1]->SetName (titlechi2);
+  plotCanvas_[plotCanvas_.size()-1]->SetTitle(titlechi2);
+  globalchi2->GetYaxis()->SetTitle("global  #chi^{2} = #Sigma_{#splitline{ all}{bins}} #chi^{2}(bin)");
+  globalchi2->GetXaxis()->SetRangeUser(minx, maxx);
+  globalchi2->Draw("p");
+  std::map<TString, double> chi2Result=GetChi2Info(globalchi2, true, verbose, minx, maxx);  
+  std::cout << "mtop(global chi2)= " << chi2Result["min"] << "+" << chi2Result["up"] << "-" << chi2Result["dn"] << std::endl;
   // saving 
   if(save){
     if(verbose>0) std::cout << "saving" << std::endl;
@@ -151,10 +168,15 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
 
 }
 
-std::pair< double, double > extraction(int verbose, double luminosity, bool save, double minx, double maxx, double nbinsx, bool dataMassDependence, int binOfInterest, TString outputFolder, TString outputFile){
+std::map <TString, TH1F*> extraction(int verbose, double luminosity, bool save, double minx, double maxx, double nbinsx, bool dataMassDependence, int binOfInterest, TString outputFolder, TString outputFile){
+
+  // returned result
+  std::map<TString, TH1F*> out_;
   // quadratic fit instead of linear for last bin
   bool quad = binOfInterest==4 ? true : false;
-
+  // Draw lines for all intersection points
+  bool DrawIntersection=false;
+  
   // ============================  
   //  Set ROOT Style
   // ============================
@@ -481,29 +503,36 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   MCunc->SetMarkerSize(0.1);
   
   // chi2 approach for binOfInterest
-  TH1F* chi2CMS= new TH1F  ("chi2Bin"+getTStringFromInt(binOfInterest), "chi2Bin"+getTStringFromInt(binOfInterest), nbinsx, minx, maxx);
+  double minxchi2=120;
+  double maxxchi2=250;
+  TH1F* chi2CMS= new TH1F  ("chi2Bin"+getTStringFromInt(binOfInterest), "chi2Bin"+getTStringFromInt(binOfInterest), 1300*(maxxchi2-minxchi2), minxchi2, maxxchi2);
   histogramStyle(*chi2CMS, kData, false, 1.3);
   axesStyle(*chi2CMS, "m^{top}", "#chi^{2} ("+getTStringFromDouble(data->GetBinLowEdge(binOfInterest))+" #leq#rho_{S}#leq "+getTStringFromDouble(data->GetBinLowEdge(binOfInterest+1))+")");
   chi2CMS->GetXaxis()->SetNoExponent(true);
-  // uncertainty MC pred.+ data measurement from central masspoint
-  double totUnc=MCnomUnc*MCnomUnc+errorAbs*errorAbs;
-  // loop all masspoints
-  for( unsigned int masspoint=0; masspoint<data_.size(); ++masspoint ){
-    double valuedata=data_  [masspoint]->GetBinContent(binOfInterest);
-    double valueMC  =rhosMC_[masspoint]->GetBinContent(binOfInterest);
-    double currentmasspoint=mtop_[masspoint];
-    double chi2=std::abs(valuedata-valueMC)*std::abs(valuedata-valueMC)/totUnc;
-    chi2CMS->SetBinContent(chi2CMS->FindBin(currentmasspoint), chi2);
+  // quadratic combination of uncertainty of MC pred.+ data measurement from central masspoint
+  double totUnc=sqrt(MCnomUnc*MCnomUnc+errorAbs*errorAbs);
+  // loop all chi2 bins
+  for(int masspoint=1; masspoint<chi2CMS->GetNbinsX(); ++masspoint ){
+    // mass value
+    double m=chi2CMS->GetBinCenter(masspoint);
+    // data and prediction from 
+    double valuedata=adata*m+bdata+m*m*cdata;
+    double valueMC  =a*m+b;
+    // chi2
+    double chi2=(std::abs(valuedata-valueMC)*std::abs(valuedata-valueMC))/(totUnc*totUnc);
+    chi2CMS->SetBinContent(masspoint, chi2);
   }
+  out_["chi2"   ]=(TH1F*)chi2CMS->Clone(TString("chi2Bin")+getTStringFromInt(binOfInterest));
+  chi2CMS->GetXaxis()->SetRangeUser(minx, maxx);
   // quadratic fit
-  TF1* quadchi= new TF1("quadchi", "[2]*x*x+[0]*x+[1]", minx, maxx);
-  quadchi->SetLineColor(kBlack);
-  quadchi->SetLineWidth(2);
-  TString optionchi="Q";
-  if(verbose>0)optionchi="";
-  if(verbose>1)optionchi="V";
-  optionchi+="R";
-  chi2CMS->Fit(quadchi, optionchi,"",MassPointsData_[0]-0.5, MassPointsData_[MassPointsData_.size()-1]+0.5);
+  //TF1* quadchi= new TF1("quadchi", "[2]*x*x+[0]*x+[1]", minx, maxx);
+  //quadchi->SetLineColor(kBlack);
+  //quadchi->SetLineWidth(2);
+  //TString optionchi="Q";
+  //if(verbose>0)optionchi="";
+  //if(verbose>1)optionchi="V";
+  //optionchi+="R";
+  //chi2CMS->Fit(quadchi, optionchi,"",MassPointsData_[0]-0.5, MassPointsData_[MassPointsData_.size()-1]+0.5);
 
   // ---
   //    legend
@@ -564,9 +593,11 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   measNonNomOnly->Draw("p same");
   measNomOnly->Draw("p same");
   MC->Draw("AXIS same");
-  if(mresultfit<=maxx&&mresultfit>=minx) drawLine(mresultfit, min, mresultfit, centralfit, kBlack, 2, 2);
-  if(mup<=maxx       &&mup>=minx       ) drawLine(mup       , min, mup       , up        , kBlack, 1, 2);
-  if(mdn<=maxx       &&mdn>=minx       ) drawLine(mdn       , min, mdn       , dn        , kBlack, 1, 2);
+  if(DrawIntersection){
+    if(mresultfit<=maxx&&mresultfit>=minx) drawLine(mresultfit, min, mresultfit, centralfit, kBlack, 2, 2);
+    if(mup<=maxx       &&mup>=minx       ) drawLine(mup       , min, mup       , up        , kBlack, 1, 2);
+    if(mdn<=maxx       &&mdn>=minx       ) drawLine(mdn       , min, mdn       , dn        , kBlack, 1, 2);
+  }
   leg->Draw("same");
   DrawCMSLabels(true, luminosity, 0.04, false, false, false);
   // chi2 method
@@ -577,7 +608,8 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
   plotCanvas_[plotCanvas_.size()-1]->SetName (title2);
   plotCanvas_[plotCanvas_.size()-1]->SetTitle(title2);
   chi2CMS->Draw("p");
-  if(binOfInterest<=2) quadchi->Draw("hist same");
+  std::map<TString, double> chi2Result=GetChi2Info(chi2CMS, true, verbose, minx, maxx);  
+  //if(binOfInterest<=2) quadchi->Draw("hist same");
 
   // E) Canvas with different mass predictions
   //    duplicate canvas from nominal data measurement
@@ -614,9 +646,9 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     style_.push_back(3);
     // create legend
     TLegend *legMasses = new TLegend(0.7, 0.4 , 1.2, 0.8 );
-    TLegend *legDat    = new TLegend(0.7, 0.75, 1.2, 0.95);
-    legDat->AddEntry(data, "Data", "LP");
-    legendStyle(*legMasses,"#splitline{MadGraph+Pythia}{m_{top}[GeV]=}");
+    TLegend *legDat    = new TLegend(0.6, 0.75, 1.2, 0.95);
+    legDat->AddEntry(data, "#splitline{Data#scale[0.8]{, unfolded}}{#scale[0.8]{with m_{top}=172.5GeV}}", "LP");
+    legendStyle(*legMasses,"#scale[0.9]{#splitline{MadGraph+Pythia}{with m_{top}[GeV]=}}");
     legendStyle(*legDat   , "");
     // loop mass points
     for(int sample=0; sample<(int)file_.size(); ++sample ){
@@ -640,12 +672,15 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     DrawDecayChLabel("e/#mu + Jets Combined");
     DrawCMSLabels(prelim, 0.5*(constLumiMuon+constLumiElec), 0.04, false, false, false);
     // saving
-    TCanvas* tempCanv=(TCanvas*)(plotCanvas_[plotCanvas_.size()-1]->Clone());
-    int initWarningLV=gErrorIgnoreLevel;
-    if(verbose<1) gErrorIgnoreLevel=kWarning;   tempCanv->Print(outputFolder+tempCanv->GetName()+".eps");
-    tempCanv->Print(outputFolder+tempCanv->GetName()+".png");
-    saveToRootFile(outputFile, tempCanv, true, verbose-1, "massFromRhos");
-    gErrorIgnoreLevel=initWarningLV;
+    if(save){
+      TCanvas* tempCanv=(TCanvas*)(plotCanvas_[plotCanvas_.size()-1]->Clone());
+      int initWarningLV=gErrorIgnoreLevel;
+      if(verbose<1) gErrorIgnoreLevel=kWarning;   
+      tempCanv->Print(outputFolder+tempCanv->GetName()+".eps");
+      tempCanv->Print(outputFolder+tempCanv->GetName()+".png");
+      saveToRootFile(outputFile, tempCanv, true, verbose-1, "massFromRhos");
+      gErrorIgnoreLevel=initWarningLV;
+    }
     // canvas with ratio
     gROOT->cd();
     bool drawRat =true;
@@ -670,6 +705,15 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
       plotCanvas_[plotCanvas_.size()-1]->SetTitle("ratioFinalXSecrhosNormCombinedHadronPhaseSpaceMassCurves");
       plotCanvas_[plotCanvas_.size()-1]->Draw();
       plotCanvas_[plotCanvas_.size()-1]->Update();
+      if(save){    
+	TCanvas* tempCanv=(TCanvas*)(plotCanvas_[plotCanvas_.size()-1]->Clone());
+	int initWarningLV=gErrorIgnoreLevel;
+	if(verbose<1) gErrorIgnoreLevel=kWarning;   
+	tempCanv->Print(outputFolder+tempCanv->GetName()+".eps");
+	tempCanv->Print(outputFolder+tempCanv->GetName()+".png");
+	saveToRootFile(outputFile, tempCanv, true, verbose-1, "massFromRhos");
+	gErrorIgnoreLevel=initWarningLV;
+      }
     }
     if(drawRat2){
      gPad->cd();
@@ -702,17 +746,129 @@ std::pair< double, double > extraction(int verbose, double luminosity, bool save
     gROOT->cd();
     int initWarningLV=gErrorIgnoreLevel;
     if(verbose<1) gErrorIgnoreLevel=kWarning;
-    for(unsigned int plot=0; plot<=plotCanvas_.size()-1; ++plot){
-      //std::cout << plotCanvas_[plot]->GetName() << std::endl;
-      if(!TString(plotCanvas_[plot]->GetName()).Contains("final")){
-	plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
-	plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
-	saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
-	gROOT->cd();
+    // loop canvases
+    for(unsigned int plot=0; plot<plotCanvas_.size(); ++plot){
+      // skip last two canvas for the first bin as different mass predictions have been already saved
+      if(binOfInterest!=1||(binOfInterest==1&&plot<plotCanvas_.size()-2)){
+	if(verbose>1) std::cout << plot+1 << "/" << plotCanvas_.size()-1 << std::endl;
+	if(!plotCanvas_[plot]) std::cout << "ERROR: canvas #" << plot << " not found" << std::endl; 
+	else if(verbose>1) std::cout << plotCanvas_[plot]->GetName() << std::endl;
+	if(!((TString(plotCanvas_[plot]->GetName())).Contains("final"))){
+	  plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
+	  plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
+	  saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
+	  gROOT->cd();
+	}
       }
     }
     gErrorIgnoreLevel=initWarningLV;
   }
-  std::cout << "intersection method: " << mresultfit << "+/-" << std::abs(mresultfit-mup) << std::endl;
-  return make_pair(mresultfit, 0.5*(std::abs(mresultfit-mup)+std::abs(mresultfit-mdn)));
+  double errIup=std::abs(mresultfit-mup);
+  double errIdn=std::abs(mresultfit-mdn);
+  double largerUnc= errIup>errIdn ? errIup : errIdn;
+  std::cout << "intersection method: " << mresultfit << "+" << errIup<< "-" << errIdn << std::endl;
+  std::cout << "chi2 method:         " << chi2Result["min"] << "+" << chi2Result["up"] << "-" << chi2Result["dn"] << std::endl;
+  
+  // collect output
+  TString binext=TString("Bin")+getTStringFromInt(binOfInterest);
+  TH1F* massvaltemp=new TH1F("massvaltemp"+binext, "massvaltemp"+binext, 1, 0., 1.);
+  massvaltemp->SetBinContent(1, mresultfit);
+  TH1F* massunctemp=new TH1F("massunctemp"+binext, "massunctemp"+binext, 1, 0., 1.);
+  massunctemp->SetBinContent(1, largerUnc);
+  out_["massval"]=massvaltemp;
+  out_["massunc"]=massunctemp;
+  return out_;
+}
+
+std::map<TString, double> GetChi2Info(TH1F* chi2, bool draw, int verbose, double xmin, double xmax){
+  // this function scans the provided "chi2", searching for the minimum and also for the uncertainties, coming from Dchi2=1
+  // output: the returned map contains 3 entries: "min", "up", "dn" for the minumum, and the deltaChi2+/-1 values
+  // draw: do you want to draw lines, indicating the minimum and the values for dChi2=1?
+  // verbose: detail of output, 0=no,1=info,2+=degbugging in certain steps
+  // xmin/xmax: plotted range of the chi2 function, only needed for draw==true, -1 means first to last bin
+ 
+  // loop bins to find the minimum
+  double minval =-1.;
+  double minchi2=10000.;
+  for(int bin=1; bin<chi2->GetNbinsX(); ++bin){
+    double binval =chi2->GetBinCenter(bin);
+    double chi2val=chi2->GetBinContent(bin);
+    if(verbose>2) std::cout << "chi2(" << binval << ")=" << chi2val << std::endl;
+    // check also that minimum is invisible range to avoid second minima somewhere
+    if(chi2val<minchi2&&(xmax==-1.||binval<=xmax)&&(xmin==-1||binval>=xmin)){
+      if(verbose>2) std::cout << "-> new Minimum!" << std::endl;
+      minchi2=chi2val;
+      minval=binval;
+    }
+    // stop at the first minimum
+    //else break;
+  }
+  // check if valid point is found
+  if(minval==-1.){
+    std::cout << "ERROR: no minimum can be found in GetChi2Info for plot " << chi2->GetTitle() << std::endl;
+    exit(0);
+  }
+  else if(verbose>0) std::cout << "minimum in chi2 found for plot " << chi2->GetTitle() << ": chi2(" << minval << ")=" <<   minchi2 << std::endl;
+  // search for deltaChi2=1 bins
+  double delChval=minchi2+1.0;
+  double upval   =-1.;
+  double downval =-1.;
+  for(int bin=1; bin<chi2->GetNbinsX()-1; ++bin){
+    double chi2val  =chi2->GetBinContent(bin  );
+    double chi2valup=chi2->GetBinContent(bin+1);
+    // skip bin if the last one was the one for DelChi2=1
+    if(downval==-1||(upval==-1.&&bin-1!=chi2->FindBin(downval))||(upval!=-1.&&bin-1!=chi2->FindBin(upval))){
+      double tempval=-1.;
+      // check if this bin has exactly the searched chi2 value
+      if(delChval==chi2val) tempval=chi2->GetBinCenter(bin);
+      // check if DelChi2=1 is between this and the next bin
+      else if((chi2val<chi2valup&&delChval>chi2val&&delChval<chi2valup)||(chi2valup<chi2val&&delChval<chi2val&&delChval>chi2valup)){
+	// take average of those bins, weighted with the difference between their chi2 and the one searched
+	tempval= (chi2->GetBinCenter(bin)*std::abs(chi2val-delChval)+chi2->GetBinCenter(bin+1)*std::abs(chi2valup-delChval))/(std::abs(chi2val-delChval)+std::abs(chi2valup-delChval));
+      }
+      // assign value as down or up
+      if(tempval!=-1.){
+	if(verbose>1) std::cout << "delchi2=1 for chi2(" << chi2->GetBinCenter(bin) << ")=" << chi2val << ", mtop=" << tempval << std::endl;
+      
+	if(     downval ==-1.) downval=tempval;
+	else if(upval   ==-1.) upval  =tempval;
+	else{
+	  std::cout << "WARNING: more than 2 values are found for deltaChi2=1 in GetChi2Info for plot " << chi2->GetTitle() << ": " << downval << ", "  << upval << ", " << tempval << " (will keep the first two)" << std::endl;
+	}
+      }
+    }
+  }
+  // check if two valid points have been found
+  if(upval==-1.){
+    std::cout << "ERROR: no values for deltaChi2=1 wrt. the minimum can be found in GetChi2Info for plot " << chi2->GetTitle() << std::endl;
+    exit(0);
+  }
+  else if(verbose>0) std::cout << "delchi2=1 found for " << downval << " & " << upval << std::endl;
+  // do the drawing if wanted
+  // expecting a open canvas, where chi2 is drawn already
+  if(draw){
+    // line at minimum 
+    double binF=xmin==-1 ? chi2->GetBinContent(1) : chi2->GetBinContent(chi2->FindBin(xmin));
+    double binL=xmax==-1 ? chi2->GetBinContent(chi2->GetNbinsX()-1) : chi2->GetBinContent(chi2->FindBin(xmax));
+    double height=binF>binL ? binF : binL;
+    drawLine(minval , 0., minval ,  0.25*height                               , kBlack, 2, 2);
+    // line at deltaChi2=-1
+    drawLine(downval, 0., downval, chi2->GetBinContent(chi2->FindBin(downval)), kBlack, 2, 2);
+    // line at deltaChi2=+1
+    drawLine(upval  , 0., upval  , chi2->GetBinContent(chi2->FindBin(upval  )), kBlack, 2, 2);
+    // line at 1 from left  to deltaChi2=-1  
+    if(xmin==-1.) xmin=chi2->GetBinLowEdge(1);
+    drawLine(xmin , delChval, downval, delChval, kBlack, 2, 2);
+    // line at 1 from right to deltaChi2=+1
+    if(xmax==-1.) xmax=chi2->GetBinLowEdge(chi2->GetNbinsX()+1);
+    drawLine(upval, delChval, xmax   , delChval, kBlack, 2, 2);
+    // draw values as label
+    DrawLabel(TString("#splitline{minimum [GeV]: }{#splitline{")+getTStringFromDouble(minval)+"}{#splitline{  +"+getTStringFromDouble(upval -minval)+"}{  - "+getTStringFromDouble(minval-downval)+"}}}", 0.5, 0.4, 0.75, 0.6, 12, 0.03);
+  }
+  // prepare output 
+  std::map <TString, double> out_;
+  out_["min"]=minval;
+  out_["up" ]=(upval -minval );
+  out_["dn" ]=(minval-downval);
+  return out_;
 }
