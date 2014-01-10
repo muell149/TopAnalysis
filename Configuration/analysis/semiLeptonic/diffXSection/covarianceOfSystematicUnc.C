@@ -3,8 +3,8 @@
 TString unfShortLabel(TString variable="");
 TString space(int val, int ref);
 
-void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=false, bool hadron=true, TString closureTestSpecifier=""){
-  // take sign of the up instead of the down variation
+void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=0, TString decayChannel="combined", bool extrapolate=true, bool hadron=false, TString closureTestSpecifier=""){
+  // take sign of the down instead of the up variation
   bool signdn=false;
   // print important info, neglecting verbose
   bool output=true;
@@ -656,9 +656,10 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=0, TString d
     int initIgnore=gErrorIgnoreLevel;
     if(verbose==0) gErrorIgnoreLevel=kWarning;
     // a)  Save as pictures
+    TString ext= extrapolate&&!hadron ? "Extrapolated" : "VisiblePS";
     if(verbose>0) std::cout << "a) as pictures" << std::endl;
-    saveCanvas(plotCanvasTot_ , outputFolder, "covarianceMatricesSysTot"   , true, true , true );
-    saveCanvas(plotCanvas_    , outputFolder, "covarianceMatricesSingleSys", true, false, false);
+    saveCanvas(plotCanvasTot_ , outputFolder, "covarianceMatricesTot"   +ext, true, true , true );
+    saveCanvas(plotCanvas_    , outputFolder, "covarianceMatricesSingleSys"+ext, true, false, false);
     // b) Save in rootfile
     if(verbose>0) std::cout << "b) in rootfile" << std::endl;
     // loop all canvases
@@ -738,7 +739,8 @@ void covarianceOfSystematicUnc(bool save=true, unsigned int verbose=0, TString d
     if(verbose==0) gErrorIgnoreLevel=kWarning;
     // a)  Save as pictures
     if(verbose>0) std::cout << "a) as pictures" << std::endl;
-    saveCanvas(plotCanvasCorr_, outputFolder, "correlationMatricesTot"     , true, true , true );
+    TString ext= extrapolate&&!hadron ? "Extrapolated" : "VisiblePS";
+    saveCanvas(plotCanvasCorr_, outputFolder, "correlationMatricesTot"+ext, true, true , true );
     // b) Save in rootfile
     if(verbose>0) std::cout << "b) in rootfile" << std::endl;
     // loop all canvases
