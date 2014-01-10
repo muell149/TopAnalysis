@@ -2321,6 +2321,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //         2 means: MC is reweighted to unfolded data (1 iteration)
       //         i means: MC is reweighted to unfolded data ((i-1) iteration), i<=9 (up to 8 iterations)
       int unfPreWeighting=0;
+      if(systematicVariation==sysUnf) unfPreWeighting=6;
       TString unfPreWeightingStr = "";
       if(unfPreWeighting>1) unfPreWeightingStr+="PreWeight"+getTStringFromInt(unfPreWeighting-1)+"Iter";
       // produce scan plots? 
@@ -2780,7 +2781,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	// BR correction
 	if(extrapolate) histo_[xSec][kData]->Scale(1./BRPDG(systematicVariation));
 	// Normalization -> not needed anymore, done in unfolding setup
-	// NB: exclude underflow and overflow bins because they are negligible and treated wrong
+	// NB: exclude underflow and overflow bins because we normalize wrt the measured range
 	//histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
 	//double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
 	//inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
