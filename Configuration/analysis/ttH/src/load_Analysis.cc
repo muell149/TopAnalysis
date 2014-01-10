@@ -40,10 +40,9 @@
 
 /// Set pileup distribution file corresponding to data sample in use
 /// The file ending is automatically adjusted for different systematics
-//constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
-//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
-//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19789pb";
-constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/common/data/Data_PUDist_Full2012ReReco_FinalRecommendation";
+//constexpr const char* PileupInputFILE = "Data_PUDist_19624pb.root";
+//constexpr const char* PileupInputFILE = "Data_PUDist_19789pb.root";
+constexpr const char* PileupInputFILE = "Data_PUDist_Full2012ReReco_FinalRecommendation.root";
 
 
 
@@ -126,7 +125,12 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     std::cout<<"--- Beginning preparation of pileup reweighter\n";
     PUReweighter* puReweighter = new PUReweighter();
     puReweighter->setMCDistrSum12("S10");
-    puReweighter->setDataTruePUInput(puReweighter->getPUPath(Systematic::convertSystematic(systematic), PileupInputFILE).c_str());
+    TString pileupInput(common::DATA_PATH_COMMON());
+    pileupInput.Append("/").Append(PileupInputFILE);
+    if(systematic == Systematic::pu_up) pileupInput.ReplaceAll(".root", "_sysUp.root");
+    else if(systematic == Systematic::pu_down) pileupInput.ReplaceAll(".root", "_sysDown.root");
+    std::cout<<"Using PU input file:\n"<<pileupInput<<std::endl;
+    puReweighter->setDataTruePUInput(pileupInput.Data());
     std::cout<<"=== Finishing preparation of pileup reweighter\n\n";
 
     // Set up lepton efficiency scale factors
