@@ -16,6 +16,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TIterator.h>
+#include <TObject.h>
 
 #include "TopAnalysis.h"
 #include "HistoListReader.h"
@@ -74,8 +75,6 @@ void TopAnalysis::Begin(TTree*)
 {
     // Defaults from AnalysisBase
     AnalysisBase::Begin(0);
-    
-    prepareJER_JES();
     
     // FIXME: move this also in ScaleFactors.h ?
     prepareKinRecoSF();

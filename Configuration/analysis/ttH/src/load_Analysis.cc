@@ -43,7 +43,7 @@
 //constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
 //constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
 //constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19789pb";
-constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_Full2012ReReco_FinalRecommendation";
+constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/common/data/Data_PUDist_Full2012ReReco_FinalRecommendation";
 
 
 
@@ -63,6 +63,12 @@ constexpr const char* MuonSFInputFILE = "MuonSF_198fbReReco.root";
 //constexpr const char* TriggerSFInputSUFFIX = ".root";
 //constexpr const char* TriggerSFInputSUFFIX = "_19fb.root";
 constexpr const char* TriggerSFInputSUFFIX = "_rereco198fb.root";
+
+
+
+/// File containing the uncertainties associated to JES
+//constexpr const char* JesUncertaintySourceFILE = "Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt";
+constexpr const char* JesUncertaintySourceFILE = "Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt";
 
 
 
@@ -136,27 +142,44 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     const TriggerScaleFactors triggerScaleFactors(TriggerSFInputSUFFIX,
                                                   Channel::convertChannels(Channel::realChannels),
                                                   triggerSFSystematic);
-
+    
     BtagScaleFactors *btagScaleFactors = 0;
     BTagSFGeneric *bTagSFGeneric = 0;
 
     // Setting the flag to choose which kind of btag scale factors to use
     bool useGenericBTagSF = false;
 
-    if(useGenericBTagSF) {
+    if(useGenericBTagSF){
         // Set up generic btag efficiency scale factors
         bTagSFGeneric = new BTagSFGeneric(BtagEfficiencyInputDIR,
                                           BtagEfficiencyOutputDIR,
                                           Channel::convertChannels(Channel::realChannels),
                                           Systematic::convertSystematic(systematic));
-    } else {
+    }
+    else{
         // Set up btag efficiency scale factors (do it for all channels)
         btagScaleFactors = new BtagScaleFactors(BtagEfficiencyInputDIR,
                                                 BtagEfficiencyOutputDIR,
                                                 Channel::convertChannels(Channel::realChannels),
                                                 Systematic::convertSystematic(systematic));
-
     }
+    
+    // Set up JER systematic scale factors
+    JetEnergyResolutionScaleFactors* jetEnergyResolutionScaleFactors(0);
+    if(systematic==Systematic::jer_up || systematic==Systematic::jer_down){
+        JetEnergyResolutionScaleFactors::Systematic jerSystematic(JetEnergyResolutionScaleFactors::vary_up);
+        if(systematic == Systematic::jer_down) jerSystematic = JetEnergyResolutionScaleFactors::vary_down;
+        jetEnergyResolutionScaleFactors = new JetEnergyResolutionScaleFactors(jerSystematic);
+    }
+    
+    // Set up JES systematic scale factors
+    JetEnergyScaleScaleFactors* jetEnergyScaleScaleFactors(0);
+    if(systematic==Systematic::jes_up || systematic==Systematic::jes_down){
+        JetEnergyScaleScaleFactors::Systematic jesSystematic(JetEnergyScaleScaleFactors::vary_up);
+        if(systematic == Systematic::jes_down) jesSystematic = JetEnergyScaleScaleFactors::vary_down;
+        jetEnergyScaleScaleFactors = new JetEnergyScaleScaleFactors(JesUncertaintySourceFILE, jesSystematic);
+    }
+    
 
     // Set up jet categories
     JetCategories* jetCategories(0);
@@ -240,7 +263,9 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetTriggerScaleFactors(triggerScaleFactors);
     if(btagScaleFactors) selector->SetBtagScaleFactors(*btagScaleFactors);
     else if(bTagSFGeneric) selector->SetBtagScaleFactors(*bTagSFGeneric);
-
+    selector->SetJetEnergyResolutionScaleFactors(jetEnergyResolutionScaleFactors);
+    selector->SetJetEnergyScaleScaleFactors(jetEnergyScaleScaleFactors);
+    
     selector->SetMvaInputProduction(mvaTreeHandler);
     selector->SetAllAnalysisHistograms(v_analysisHistograms);
 

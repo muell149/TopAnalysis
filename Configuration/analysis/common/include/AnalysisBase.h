@@ -19,11 +19,12 @@ class TString;
 
 class PUReweighter;
 class KinematicReconstruction;
-class JetCorrectionUncertainty;
 class TriggerScaleFactors;
 class LeptonScaleFactors;
 class BtagScaleFactors;
 class BTagSFGeneric;
+class JetEnergyResolutionScaleFactors;
+class JetEnergyScaleScaleFactors;
 class RecoObjects;
 class CommonGenObjects;
 class TopGenObjects;
@@ -84,11 +85,14 @@ private:
 
     /// Pointer to trigger scale factors instance
     const TriggerScaleFactors* triggerScaleFactors_;
-
-
-    /// Apply JER/JES systematics
-    bool doJesJer_;
-
+    
+    /// Pointer to jet energy resolution scale factors
+    const JetEnergyResolutionScaleFactors* jetEnergyResolutionScaleFactors_;
+    
+    /// Pointer to jet energy resolution scale factors
+    const JetEnergyScaleScaleFactors* jetEnergyScaleScaleFactors_;
+    
+    
 
     /// Scale factor due to kinematic reconstruction
     double weightKinFit_; //this is per channel and does not need to be calculated inside the event loop
@@ -136,8 +140,8 @@ private:
     TBranch *b_jetTrackCharge;
     TBranch *b_jetTrack;
     TBranch *b_met;
-    TBranch *b_jetJERSF;
     TBranch *b_jetForMET;
+    TBranch *b_jetJERSF;
     TBranch *b_jetForMETJERSF;
 
     // Concerning event
@@ -249,10 +253,6 @@ private:
     TH1* h_weightedEvents;
 
 
-    /// Uncertainty for JES systematics
-    JetCorrectionUncertainty* jetCorrectionUncertainty_;
-
-
     /// Event counter
     Int_t eventCounter_;
 
@@ -315,7 +315,11 @@ public:
     /// Set the btag scale factors
     void SetBtagScaleFactors(BtagScaleFactors& scaleFactors);
     void SetBtagScaleFactors(BTagSFGeneric& scaleFactors);
-
+    /// Set jet energy resolution scale factors
+    void SetJetEnergyResolutionScaleFactors(const JetEnergyResolutionScaleFactors* jetEnergyResolutionScaleFactors);
+    /// Set jet energy scale scale factors
+    void SetJetEnergyScaleScaleFactors(const JetEnergyScaleScaleFactors* jetEnergyScaleScaleFactors);
+    
     /// Set histogram containing the number of weighted events in full sample
     void SetWeightedEvents(TH1* weightedEvents);
 
@@ -384,14 +388,6 @@ protected:
      */
     bool calculateKinReco(const int leptonIndex, const int antiLeptonIndex, const std::vector<int>& jetIndices,
                           const VLV& allLeptons, const VLV& jets, const std::vector<double>& jetBTagCSV, const LV& met);
-
-    /** prepare JER/JES systematics
-     *
-     * This function checks if we are asked to run JER or JES. If so,
-     * additional branches need to be enabled and a JES uncertainty file
-     * needs to be read.
-     */
-    void prepareJER_JES();
 
     /// Check if opposite-charge dilepton combination exists,
     /// and check if lepton pair is correct flavour combination for the specified analysis channel (ee, emu, mumu)
@@ -530,16 +526,6 @@ protected:
     
     /// Set for all object structs, that the specific nTuple entry is not read
     void resetObjectStructEntry()const;
-
-    /// Apply the JER systematic
-    /// This function modifies the jets collection and also scales the MET
-    void applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
-                             const std::vector<double>* jetJerSf, const std::vector<double>* jetForMetJerSf,
-                             const VLV* associatedGenJet, const VLV* associatedGenJetForMet)const;
-    
-    /// Apply the JER or JES systematic
-    /// This function modifies the jets collection and also scales the MET
-    void applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const;
 
 
 

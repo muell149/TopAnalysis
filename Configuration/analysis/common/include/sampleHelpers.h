@@ -56,6 +56,10 @@ namespace Systematic{
         btagCeff_down,
         btagLeff_up,
         btagLeff_down,
+        jer_up,     // scale up jet energy resolution scale factors
+        jer_down,   // scale down jet energy resolution scale factors
+        jes_up,     // scale up jet energy scale scale factors
+        jes_down,   // scale down jet energy scale scale factors
         mass_up,
         mass_down,
         match_up,

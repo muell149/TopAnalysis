@@ -37,6 +37,7 @@ constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis
 //constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028.root";
 //constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028_19fb.root";
 constexpr const char* ElectronSFInputFILE = "ElectronSF_198fbReReco.root";
+
 /// Input file for muon ID scale factor
 //constexpr const char* MuonSFInputFILE = "MuonSFtop12028.root";
 //constexpr const char* MuonSFInputFILE = "MuonSFtop12028_19fb.root";
@@ -47,6 +48,11 @@ constexpr const char* MuonSFInputFILE = "MuonSF_198fbReReco.root";
 //constexpr const char* TriggerSFInputSUFFIX = ".root";
 //constexpr const char* TriggerSFInputSUFFIX = "_19fb.root";
 constexpr const char* TriggerSFInputSUFFIX = "_rereco198fb.root";
+
+
+/// File containing the uncertainties associated to JES
+//constexpr const char* JesUncertaintySourceFILE = "Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt";
+constexpr const char* JesUncertaintySourceFILE = "Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt";
 
 
 
@@ -127,6 +133,23 @@ void load_Analysis(TString validFilenamePattern,
                                       channels,
                                       systematic);
     
+    // Set up JER systematic scale factors
+    JetEnergyResolutionScaleFactors* jetEnergyResolutionScaleFactors(0);
+    if(systematic=="JER_UP" || systematic=="JER_DOWN"){
+        JetEnergyResolutionScaleFactors::Systematic jerSystematic(JetEnergyResolutionScaleFactors::vary_up);
+        if(systematic == "JER_DOWN") jerSystematic = JetEnergyResolutionScaleFactors::vary_down;
+        jetEnergyResolutionScaleFactors = new JetEnergyResolutionScaleFactors(jerSystematic);
+    }
+    
+    // Set up JES systematic scale factors
+    JetEnergyScaleScaleFactors* jetEnergyScaleScaleFactors(0);
+    if(systematic=="JES_UP" || systematic=="JES_DOWN"){
+        JetEnergyScaleScaleFactors::Systematic jesSystematic(JetEnergyScaleScaleFactors::vary_up);
+        if(systematic == "JES_DOWN") jesSystematic = JetEnergyScaleScaleFactors::vary_down;
+        jetEnergyScaleScaleFactors = new JetEnergyScaleScaleFactors(JesUncertaintySourceFILE, jesSystematic);
+    }
+    
+    
     // Set up the analysis
     TopAnalysis *selector = new TopAnalysis();
     selector->SetAnalysisOutputBase(AnalysisOutputDIR);
@@ -135,6 +158,8 @@ void load_Analysis(TString validFilenamePattern,
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);
     selector->SetBtagScaleFactors(btagScaleFactors);
+    selector->SetJetEnergyResolutionScaleFactors(jetEnergyResolutionScaleFactors);
+    selector->SetJetEnergyScaleScaleFactors(jetEnergyScaleScaleFactors);
     
     // Access selectionList containing all input sample nTuples
     ifstream infile("selectionList.txt");

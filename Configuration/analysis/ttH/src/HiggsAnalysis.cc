@@ -89,9 +89,6 @@ void HiggsAnalysis::Begin(TTree*)
     // Defaults from AnalysisBase
     AnalysisBase::Begin(0);
 
-    // Prepare things for analysis
-    this->prepareJER_JES();
-
     // Set up selection steps of MVA tree handler
     if(mvaTreeHandler_) mvaTreeHandler_->book();
 }
