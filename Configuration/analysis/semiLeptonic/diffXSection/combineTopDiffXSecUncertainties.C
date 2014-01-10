@@ -53,7 +53,7 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
   //  Parameter Configuration
   // ============================
   // name quantity for which you want to see a detailed uncertainty printout
-  TString testVar="";//"topPtNorm";
+  TString testVar="topPtNorm";//"topPtNorm";
   // if true: for uncertainties with different versions like eff. SF (norm., eta+pt shape) take only maximum of those
   bool takeMaxOfNormAndShape=true;
 
@@ -522,9 +522,9 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
 		}
 
 		// save relative systematic uncertainties for bin & variable
-		// a) MC generator based uncertainties
-		if (sys==sysGenPowheg || sys==sysGenPowhegHerwig || sys == sysGenMCatNLO || sys==sysHadUp || sys==sysHadDown || sys==ENDOFSYSENUM) relSysPlot->Fill(nSysCnt, 100.0*sysDiff/stdBinXSecValue); 
-		// b) weight 0.5 due to error symmetrization, not applied for
+		// a) non- symmetrized errors (for MC generator based uncertainties and unfolding)
+		if (sys==sysGenPowheg || sys==sysGenPowhegHerwig || sys == sysGenMCatNLO || sys==sysUnf || sys==sysHadUp || sys==sysHadDown || sys==ENDOFSYSENUM) relSysPlot->Fill(nSysCnt, 100.0*sysDiff/stdBinXSecValue); 
+		// b) weight 0.5 due to error symmetrization
 		else relSysPlot->Fill(nSysCnt, 100.0*0.5*sysDiff/stdBinXSecValue);
 		// print single systematic uncertainty absolut and relative for bin & variable
 		if(verbose2>0) {
@@ -639,13 +639,10 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
 		// define style for relative error plots, uncertainties are only plotted positively after implementing the symmetrization
 		histogramStyle(*relativeUncertainties_[xSecVariables_[i]][bin], kSig, true, 2.0, kBlack); 
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->LabelsOption("v");
-		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetLabelSize(0.05);
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(errMax);
-		relativeUncertainties_[xSecVariables_[i]][bin]->SetMinimum(errMin);
-		double histMax = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
-		if (histMax>errMax){
-		  relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(((int(histMax)-int(histMax)%5)/5+1)*5); // maximum in 5er steps
-		}
+		relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetLabelSize(0.04);
+		double histMax = double(roundToInt(1.1*relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximum()));
+		relativeUncertainties_[xSecVariables_[i]][bin]->SetMaximum(histMax);
+		relativeUncertainties_[xSecVariables_[i]][bin]->SetMinimum(errMin );
 		relativeUncertainties_[xSecVariables_[i]][bin]->SetStats(kFALSE);
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitle("Relative Uncertainty (symmetrized) [%]");
 		relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->SetTitleOffset(1.2);
@@ -723,9 +720,7 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
 
 	totalUncertaintyDistributions_[xSecVariables_[i]]->SetLineColor(38);
 	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMinimum(errMin);
-	double histMax=totalUncertaintyDistributions_[xSecVariables_[i]]->GetBinContent(totalUncertaintyDistributions_[xSecVariables_[i]]->GetMaximumBin());
-	double max = (errMax>histMax ? errMax : ((int(histMax)-int(histMax)%5)/5+2)*5); 
-	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMaximum(max);
+	totalUncertaintyDistributions_[xSecVariables_[i]]->SetMaximum(errMax);
 	totalUncertaintyDistributions_[xSecVariables_[i]]->GetYaxis()->SetTitle("Relative Uncertainty [%]");
 	
 	statUncertaintyDistributions_[xSecVariables_[i]] ->SetLineColor(2);
@@ -965,14 +960,16 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
 	      relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->SetTickLength(0.0);
 	      // draw axis also on the right side of canvas, uncertainties are only plotted positively after implementing the symmetrization
 	      double xPosition = relativeUncertainties_[xSecVariables_[i]][bin]->GetXaxis()->GetXmax();
-	      double histMax   = relativeUncertainties_[xSecVariables_[i]][bin]->GetBinContent(relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximumBin());
-	      double max       = ( errMax>histMax ) ? errMax : ((int(histMax)-int(histMax)%5)/5+1)*5;
+	      double max   = relativeUncertainties_[xSecVariables_[i]][bin]->GetMaximum();
 	      double min       = errMin;
 	      TGaxis *axis = new TGaxis(xPosition,min,xPosition,max,min,max,relativeUncertainties_[xSecVariables_[i]][bin]->GetYaxis()->GetNdivisions(),"+L");
 	      axis->SetLabelSize(myStyle.GetLabelSize());
 	      axis->SetLabelFont(myStyle.GetLabelFont());
 	      axis->SetLabelOffset(myStyle.GetLabelOffset());
 	      axis->Draw("same");
+	      // redraw legend with not considered systematics in grey
+	      TH1F* relUnCAxisCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
+	      relUnCAxisCopy->GetXaxis()->SetLabelColor(kRed);// FIXME
 	      // draw every systematic variation with different color
 	      TH1F* relUnCertaintyCopy = (TH1F*)relativeUncertainties_[xSecVariables_[i]][bin]->Clone();
 	      int colourCounter =    1;
@@ -991,6 +988,11 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
 		if(sys<=relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX()-3){
 		  relUnCertaintyCopy->SetFillColor(colour);
 		  relUnCertaintyCopy->DrawCopy("hist same");
+		  // delete label entry for considered uncertainties in axis clone
+		  if(!(TString(relUnCAxisCopy->GetXaxis()->GetBinLabel(sys)).Contains("("))){
+		    std::cout<< "delete label " << relUnCAxisCopy->GetXaxis()->GetBinLabel(sys) << std::endl;
+		    //relUnCAxisCopy->GetXaxis()->SetBinLabel(sys, "");
+		  }
 		}
 		// statistical uncertainty
 		else if(sys==relativeUncertainties_[xSecVariables_[i]][bin]->GetNbinsX()-2){
@@ -1007,6 +1009,7 @@ void combineTopDiffXSecUncertainties(double luminosity=19712., bool save=true, u
 		  relUnCertaintyCopy->SetFillColor(38);
 		  relUnCertaintyCopy->DrawCopy("hist same");
 		  gPad->RedrawAxis("g");
+		  relUnCAxisCopy->Draw("AXIS same");
 		}
 	      }
 	      DrawLabel(xSecVariables_[i]+"Bin"+getTStringFromInt(bin), 0.07, 0.90, 0.4, 1.02);
