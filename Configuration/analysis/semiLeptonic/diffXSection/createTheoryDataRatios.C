@@ -224,7 +224,6 @@ void createTheoryDataRatios(bool extrapolate=true, bool hadron=false, int verbos
     TString variable=xSecVariables_[i];
     // create ratio canvas
     int verbose2=verbose;
-    //if(variable.Contains("topY")) verbose2+=2;
     TCanvas*canv=getRatio(variable, verbose2, outputFile);
     // save ratio plots
     if(canv){
