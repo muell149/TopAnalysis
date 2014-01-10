@@ -12,6 +12,7 @@
 source $(dirname `readlink -f $0`)/parallelTools.sh
 
 for c in ee emu mumu; do
+    w
     $LA -f ttbarsignalplustau.root -c $c &
     $LA -f dy -d 11 -c $c &
     $LA -f dy -d 13 -c $c &

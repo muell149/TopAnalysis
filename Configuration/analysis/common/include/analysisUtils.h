@@ -1,5 +1,5 @@
-#ifndef ttbar_analysisUtils_h
-#define ttbar_analysisUtils_h
+#ifndef common_analysisUtils_h
+#define common_analysisUtils_h
 
 #include <vector>
 #include <cmath>
@@ -15,7 +15,7 @@ class TLorentzVector;
 
 // --- Several conversion functions -------------------------------------------------------------------------------------
 
-namespace ttbar{
+namespace common{
     /// Convert LorentzVector to an array[E, px, py, pz]
     void LVtod4(const LV& lv, double* d);
     
@@ -37,7 +37,7 @@ namespace ttbar{
 
 // --- Functions concerning the treatment of indices of vectors (for working with data stored in nTuple branches) -------------
 
-namespace ttbar{
+namespace common{
     
     /// Setting up a vector with all indices corresonding to its size N {0, 1, 2, ..., N-1}
     template<class T> std::vector<int> initialiseIndices(const std::vector<T>& v_variable);
@@ -125,7 +125,7 @@ namespace ttbar{
 
 
 
-template<class T> std::vector<int> ttbar::initialiseIndices(const std::vector<T>& v_variable)
+template<class T> std::vector<int> common::initialiseIndices(const std::vector<T>& v_variable)
 {
     std::vector<int> result;
     for(size_t i=0; i<v_variable.size(); ++i) result.push_back(i);
@@ -134,7 +134,7 @@ template<class T> std::vector<int> ttbar::initialiseIndices(const std::vector<T>
 
 
 
-template<class T> void ttbar::orderIndices(int& index1, int& index2, const std::vector<T>& v_variable, const bool absoluteValue)
+template<class T> void common::orderIndices(int& index1, int& index2, const std::vector<T>& v_variable, const bool absoluteValue)
 {
     const T& variable1 = absoluteValue ? std::abs(v_variable.at(index1)) : v_variable.at(index1);
     const T& variable2 = absoluteValue ? std::abs(v_variable.at(index2)) : v_variable.at(index2);
@@ -147,7 +147,7 @@ template<class T> void ttbar::orderIndices(int& index1, int& index2, const std::
 
 
 
-template<class T> void ttbar::orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable, const bool absoluteValue)
+template<class T> void common::orderIndices(std::vector<int>& v_index, const std::vector<T>& v_variable, const bool absoluteValue)
 {
     std::vector<int> v_indexResult;
     for(std::vector<int>::const_iterator i_index2 = v_index.begin(); i_index2 != v_index.end(); ++i_index2){
@@ -174,7 +174,7 @@ template<class T> void ttbar::orderIndices(std::vector<int>& v_index, const std:
 
 
 
-template<class T> void ttbar::selectIndices(std::vector<int>& v_index, const std::vector<T>& v_variable,
+template<class T> void common::selectIndices(std::vector<int>& v_index, const std::vector<T>& v_variable,
                                             const T& cutValue, const bool lowerThreshold)
 {
     std::vector<int> result;
@@ -194,7 +194,7 @@ template<class T> void ttbar::selectIndices(std::vector<int>& v_index, const std
 
 
 
-template<class T> int ttbar::extremumIndex(const std::vector<T>& v_variable, const bool maximumValue)
+template<class T> int common::extremumIndex(const std::vector<T>& v_variable, const bool maximumValue)
 {
     if(v_variable.size() == 0) return -1;
     

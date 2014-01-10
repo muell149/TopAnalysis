@@ -27,16 +27,16 @@
 
 /// Set pileup distribution file corresponding to data sample in use
 /// The file ending is automatically adjusted for different systematics
-//constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
-//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
-//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19789pb";
-constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_Full2012ReReco_FinalRecommendation";
+//constexpr const char* PileupInputFILE = "Data_PUDist_19624pb.root";
+//constexpr const char* PileupInputFILE = "Data_PUDist_19789pb.root";
+constexpr const char* PileupInputFILE = "Data_PUDist_Full2012ReReco_FinalRecommendation.root";
 
 
 /// Input file for electron ID scale factor
 //constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028.root";
 //constexpr const char* ElectronSFInputFILE = "ElectronSFtop12028_19fb.root";
 constexpr const char* ElectronSFInputFILE = "ElectronSF_198fbReReco.root";
+
 /// Input file for muon ID scale factor
 //constexpr const char* MuonSFInputFILE = "MuonSFtop12028.root";
 //constexpr const char* MuonSFInputFILE = "MuonSFtop12028_19fb.root";
@@ -47,6 +47,11 @@ constexpr const char* MuonSFInputFILE = "MuonSF_198fbReReco.root";
 //constexpr const char* TriggerSFInputSUFFIX = ".root";
 //constexpr const char* TriggerSFInputSUFFIX = "_19fb.root";
 constexpr const char* TriggerSFInputSUFFIX = "_rereco198fb.root";
+
+
+/// File containing the uncertainties associated to JES
+//constexpr const char* JesUncertaintySourceFILE = "Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt";
+constexpr const char* JesUncertaintySourceFILE = "Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt";
 
 
 
@@ -104,7 +109,12 @@ void load_Analysis(TString validFilenamePattern,
     std::cout<<"--- Beginning preparation of pileup reweighter\n";
     PUReweighter* puReweighter = new PUReweighter();
     puReweighter->setMCDistrSum12("S10");
-    puReweighter->setDataTruePUInput(puReweighter->getPUPath(systematic, PileupInputFILE).c_str());
+    TString pileupInput(common::DATA_PATH_COMMON());
+    pileupInput.Append("/").Append(PileupInputFILE);
+    if(systematic == "PU_UP") pileupInput.ReplaceAll(".root", "_sysUp.root");
+    else if(systematic == "PU_DOWN") pileupInput.ReplaceAll(".root", "_sysDown.root");
+    std::cout<<"Using PU input file:\n"<<pileupInput<<std::endl;
+    puReweighter->setDataTruePUInput(pileupInput.Data());
     std::cout<<"=== Finishing preparation of pileup reweighter\n\n";
     
     // Set up lepton efficiency scale factors
@@ -127,6 +137,23 @@ void load_Analysis(TString validFilenamePattern,
                                       channels,
                                       systematic);
     
+    // Set up JER systematic scale factors
+    JetEnergyResolutionScaleFactors* jetEnergyResolutionScaleFactors(0);
+    if(systematic=="JER_UP" || systematic=="JER_DOWN"){
+        JetEnergyResolutionScaleFactors::Systematic jerSystematic(JetEnergyResolutionScaleFactors::vary_up);
+        if(systematic == "JER_DOWN") jerSystematic = JetEnergyResolutionScaleFactors::vary_down;
+        jetEnergyResolutionScaleFactors = new JetEnergyResolutionScaleFactors(jerSystematic);
+    }
+    
+    // Set up JES systematic scale factors
+    JetEnergyScaleScaleFactors* jetEnergyScaleScaleFactors(0);
+    if(systematic=="JES_UP" || systematic=="JES_DOWN"){
+        JetEnergyScaleScaleFactors::Systematic jesSystematic(JetEnergyScaleScaleFactors::vary_up);
+        if(systematic == "JES_DOWN") jesSystematic = JetEnergyScaleScaleFactors::vary_down;
+        jetEnergyScaleScaleFactors = new JetEnergyScaleScaleFactors(JesUncertaintySourceFILE, jesSystematic);
+    }
+    
+    
     // Set up the analysis
     TopAnalysis *selector = new TopAnalysis();
     selector->SetAnalysisOutputBase(AnalysisOutputDIR);
@@ -135,6 +162,8 @@ void load_Analysis(TString validFilenamePattern,
     selector->SetLeptonScaleFactors(leptonScaleFactors);
     selector->SetTriggerScaleFactors(triggerScaleFactors);
     selector->SetBtagScaleFactors(btagScaleFactors);
+    selector->SetJetEnergyResolutionScaleFactors(jetEnergyResolutionScaleFactors);
+    selector->SetJetEnergyScaleScaleFactors(jetEnergyScaleScaleFactors);
     
     // Access selectionList containing all input sample nTuples
     ifstream infile("selectionList.txt");

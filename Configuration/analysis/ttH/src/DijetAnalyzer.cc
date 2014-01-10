@@ -31,7 +31,7 @@ DijetAnalyzer::DijetAnalyzer(const char* mva2dWeightsFile, const std::string& co
 AnalysisHistogramsBase("dijet_", selectionStepsNoCategories, stepsForCategories, jetCategories),
 weightsCorrect_(0),
 weightsSwapped_(0),
-doHadronMatchingComparison_(false)
+doHadronMatchingComparison_(doHadronMatchingComparison)
 {
     std::cout<<"--- Beginning setting up dijet analyzer\n";
 
@@ -41,35 +41,41 @@ doHadronMatchingComparison_(false)
         TString weightFolder(mva2dWeightsFile);
         weightFolder.Remove(weightFolder.Last('/')+1);
 
-        TObjArray* trainingsCorrect = (TObjArray*)( weightsFile->Get("trainingsCorrect") );
-        // Finding the proper correct training
-        for ( int trainId=0; trainId<trainingsCorrect->GetEntries(); trainId++ )
-        {
-            TString weightName = ((TObjString*)trainingsCorrect->At(trainId))->String();
-            TString trainingName(weightName);
-            trainingName.Remove(0, trainingName.Last('_')+1);
-            if(!trainingName.EqualTo(corName)) continue;
-            TString xmlFileName(weightFolder);
-            xmlFileName.Append(weightName).Append(".weights.xml");
-            weightsCorrect_ = new MvaReader(xmlFileName);
-            break;
-        }
+        TObjArray* trainingsCorrect(0);
+        weightsFile->GetObject("trainingsCorrect", trainingsCorrect);
+        if(trainingsCorrect) {
+            // Finding the proper correct training
+            for ( int trainId=0; trainId<trainingsCorrect->GetEntries(); trainId++ )
+            {
+                TString weightName = ((TObjString*)trainingsCorrect->At(trainId))->String();
+                TString trainingName(weightName);
+                trainingName.Remove(0, trainingName.Last('_')+1);
+                if(!trainingName.EqualTo(corName)) continue;
+                TString xmlFileName(weightFolder);
+                xmlFileName.Append(weightName).Append(".weights.xml");
+                weightsCorrect_ = new MvaReader(xmlFileName);
+                break;
+            }
+        } else printf("      WARNING: No 'trainingsCorrect' object found in %s\n", mva2dWeightsFile);
 
 
-        TObjArray* trainingsSwapped = (TObjArray*)( weightsFile->Get("trainingsSwapped") );
-        // Finding the proper swapped training
-        for ( int trainId=0; trainId<trainingsCorrect->GetEntries(); trainId++ )
-        {
-            TString weightName = ((TObjString*)trainingsCorrect->At(trainId))->String();
-            TString trainingName(weightName);
-            trainingName.Remove(0, trainingName.Last('_')+1);
-            if(!trainingName.EqualTo(swpName)) continue;
-            TString xmlFileName(weightFolder);
-            xmlFileName.Append(weightName).Append(".weights.xml");
-            weightsSwapped_ = new MvaReader(xmlFileName);
-            break;
-        }
-    }
+        TObjArray* trainingsSwapped(0);
+        weightsFile->GetObject("trainingsSwapped", trainingsSwapped);
+        if(trainingsSwapped) {
+            // Finding the proper swapped training
+            for ( int trainId=0; trainId<trainingsSwapped->GetEntries(); trainId++ )
+            {
+                TString weightName = ((TObjString*)trainingsSwapped->At(trainId))->String();
+                TString trainingName(weightName);
+                trainingName.Remove(0, trainingName.Last('_')+1);
+                if(!trainingName.EqualTo(swpName)) continue;
+                TString xmlFileName(weightFolder);
+                xmlFileName.Append(weightName).Append(".weights.xml");
+                weightsSwapped_ = new MvaReader(xmlFileName);
+                break;
+            }
+        } else printf("      WARNING: No 'trainingsSwapped' object found in %s\n", mva2dWeightsFile);
+    } else printf("      WARNING: No MVA weights file found at %s\n", mva2dWeightsFile);
 
     std::cout<<"=== Finishing setting up dijet analyzer\n\n";
 }
@@ -80,7 +86,7 @@ void DijetAnalyzer::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
                                const TopGenObjects& topGenObjects, const HiggsGenObjects& higgsGenObjects,
                                const KinRecoObjects& kinRecoObjects,
                                const tth::RecoObjectIndices& recoObjectIndices, const tth::GenObjectIndices& genObjectIndices,
-                               const tth::GenLevelWeights&, const tth::RecoLevelWeights&,
+                               const tth::GenLevelWeights&, const tth::RecoLevelWeights& recoLevelWeights,
                                const double& weight, const TString&,
                                std::map<TString, TH1*>& m_histogram)
 {
@@ -253,6 +259,7 @@ void DijetAnalyzer::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
     m_histogram["jet_PtLt30_multiplicity"]->Fill(nJetsPtLt30, weight);
     m_histogram["bJet_PtLt30_multiplicity"]->Fill(nBJetsPtLt30, weight);
     m_histogram["weight"]->Fill(weight, weight);
+    m_histogram["weightBTagSF"]->Fill(recoLevelWeights.weightBtagSF_, weight);
 
     // DeltaR between leptons, Met
     m_histogram["topLeptonAntilepton_dR"]->Fill(ROOT::Math::VectorUtil::DeltaR(lepton, antilepton));
@@ -436,10 +443,10 @@ void DijetAnalyzer::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
 
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;
-    std::vector<int> jetIndexPairsIndicesCor = ttbar::initialiseIndices(jetIndexPairs);
-    std::vector<int> jetIndexPairsIndicesSwp = ttbar::initialiseIndices(jetIndexPairs);
-    ttbar::orderIndices(jetIndexPairsIndicesCor, v_mvaWeightsCorrect);
-    ttbar::orderIndices(jetIndexPairsIndicesSwp, v_mvaWeightsSwapped);
+    std::vector<int> jetIndexPairsIndicesCor = common::initialiseIndices(jetIndexPairs);
+    std::vector<int> jetIndexPairsIndicesSwp = common::initialiseIndices(jetIndexPairs);
+    common::orderIndices(jetIndexPairsIndicesCor, v_mvaWeightsCorrect);
+    common::orderIndices(jetIndexPairsIndicesSwp, v_mvaWeightsSwapped);
 
     // Plotting the highest MVA weight from correct training for correct/wrong combinations
     bool foundCorrect = false;
@@ -481,15 +488,12 @@ void DijetAnalyzer::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
         int jet1Id = thePair.first;
         int jet2Id = thePair.second;
 
-        int allJet1Id = jetsId.at(jet1Id);
-        int allJet2Id = jetsId.at(jet2Id);
-
         int jet1IdH = -1;
         int jet2IdH = -1;
 
         for(size_t iJet = 0; iJet<jetsId.size(); iJet++) {
-            if(iJet == jet1Id) continue;
-            if(iJet == jet2Id) continue;
+            if((int)iJet == jet1Id) continue;
+            if((int)iJet == jet2Id) continue;
             if(jet1IdH < 0) jet1IdH = iJet;
             if(jet1IdH >= 0 && jet2IdH < 0) jet2IdH = iJet;
             if(jet1IdH >= 0 && jet2IdH >= 0) break;
@@ -802,6 +806,8 @@ void DijetAnalyzer::bookHistos(const TString& step, std::map<TString, TH1*>& m_h
 
     name = "weight";
     m_histogram[name] = store(new TH1D(prefix_+name+step, "Weight of the event;weight"+label+";Events",30,0,3));
+    name = "weightBTagSF";
+    m_histogram[name] = store(new TH1D(prefix_+name+step, "B-tag weight of the event;weight"+label+";Events",60,0.8,1.1));
 
 
     if(doHadronMatchingComparison_) {
@@ -1004,7 +1010,7 @@ float DijetAnalyzer::correctPairFraction(const VLV& allJets, const std::vector<i
 
     // Finding the two jets that are assumed to come from the Higgs
     // Ordering jets by b-tagging discriminant if there are more than 2 of them
-    if(higgsJetCandidatesId.size()>2) ttbar::orderIndices(higgsJetCandidatesId, jetsBtagDiscriminant);
+    if(higgsJetCandidatesId.size()>2) common::orderIndices(higgsJetCandidatesId, jetsBtagDiscriminant);
     LV dijet = allJets.at(higgsJetCandidatesId.at(0)) + allJets.at(higgsJetCandidatesId.at(1));
     h_dijetMass->Fill(dijet.M(), weight);
 

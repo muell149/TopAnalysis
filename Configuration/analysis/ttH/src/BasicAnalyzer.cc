@@ -140,7 +140,7 @@ void BasicHistograms::fillHistos(const RecoObjects& recoObjects, const CommonGen
     int leadingLeptonIndex(leptonIndex);
     int nLeadingLeptonIndex(antiLeptonIndex);
     if(hasLeptonPair){
-        ttbar::orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *recoObjects.allLeptons_, ttbar::LVpt);
+        common::orderIndices(leadingLeptonIndex, nLeadingLeptonIndex, *recoObjects.allLeptons_, common::LVpt);
         
         m_histogram["lepton1st_pt"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Pt(), weight);
         m_histogram["lepton1st_eta"]->Fill(recoObjects.allLeptons_->at(leadingLeptonIndex).Eta(), weight);

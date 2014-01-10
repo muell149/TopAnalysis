@@ -7,6 +7,8 @@
 #include <TFile.h>
 #include <TString.h>
 #include <TSelectorList.h>
+#include <TIterator.h>
+#include <TObject.h>
 #include <Rtypes.h>
 
 #include "MvaTreeHandler.h"
@@ -122,7 +124,7 @@ void MvaTreeHandler::writeTrees(const std::string& outputFilename,
                                 const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
     // Create output file for MVA tree
-    std::string f_savename = static_cast<std::string>(ttbar::assignFolder(mvaInputDir_, channel, systematic));
+    std::string f_savename = static_cast<std::string>(common::assignFolder(mvaInputDir_, channel, systematic));
     f_savename.append(outputFilename);
     TFile outputFile(f_savename.c_str(),"RECREATE");
     std::cout<<"\nOutput file for MVA input trees: "<<f_savename<<"\n";
@@ -445,7 +447,7 @@ tth::mvaHelpers::SystematicChannelFileNames tth::mvaHelpers::mergeTrees(
             std::cout<<std::endl;
             
             // Unfortunately this output file is needed to prevent from strange ROOT message
-            TString mergedTreesFileName = ttbar::assignFolder(mvaInputDir, channel, systematic);
+            TString mergedTreesFileName = common::assignFolder(mvaInputDir, channel, systematic);
             mergedTreesFileName.Append("/");
             mergedTreesFileName.Append("mergedTrees.root");
             TFile* mergedTrees = new TFile(mergedTreesFileName, "RECREATE");

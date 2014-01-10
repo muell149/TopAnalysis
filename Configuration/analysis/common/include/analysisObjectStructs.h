@@ -51,11 +51,11 @@ struct RecoObjects{
     std::vector<double>* jetForMETJERSF_;
     
     // Concerning event
-    UInt_t* runNumber_;
-    UInt_t* lumiBlock_;
-    UInt_t* eventNumber_;
-    //int* recoInChannel_;
-    Int_t* vertMulti_;
+    UInt_t runNumber_;
+    UInt_t lumiBlock_;
+    UInt_t eventNumber_;
+    //int recoInChannel_;
+    Int_t vertMulti_;
 };
 
 
@@ -92,8 +92,8 @@ struct TopGenObjects{
     LV* GenAntiTop_;
     LV* GenLepton_;
     LV* GenAntiLepton_;
-    //int* GenLeptonPdgId_;
-    //int* GenAntiLeptonPdgId_;
+    //int GenLeptonPdgId_;
+    //int GenAntiLeptonPdgId_;
     //LV* GenTau_;
     //LV* GenAntiTau_;
     LV* GenNeutrino_;

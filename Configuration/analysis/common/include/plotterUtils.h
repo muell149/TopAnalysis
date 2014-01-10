@@ -1,5 +1,5 @@
-#ifndef ttbar_histoUtils_h
-#define ttbar_histoUtils_h
+#ifndef common_histoUtils_h
+#define common_histoUtils_h
 
 #include <vector>
 
@@ -12,7 +12,7 @@ class TStyle;
 
 
 
-namespace ttbar{
+namespace common{
     
     /// Draw ratio of two histograms
     void drawRatio(const TH1* histNumerator, 

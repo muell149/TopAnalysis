@@ -126,6 +126,9 @@ private:
     /// Select tt+bb or tt+other events
     bool runWithTtbb_;
     
+    /// Whether randomly tag b jets or apply an event btag weight
+    bool retagBJets_;
+    
     
     
     /// Class for steering the I/O of MVA input tree, trying to identify the jets coming from (anti)b's from (anti)tops

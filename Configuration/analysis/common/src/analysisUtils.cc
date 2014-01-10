@@ -15,7 +15,7 @@
 
 // --- Several conversion functions -------------------------------------------------------------------------------------
 
-void ttbar::LVtod4(const LV& lv, double* d)
+void common::LVtod4(const LV& lv, double* d)
 {
     d[0] = lv.E();
     d[1] = lv.Px();
@@ -25,7 +25,7 @@ void ttbar::LVtod4(const LV& lv, double* d)
 
 
 
-std::string ttbar::d2s(const double& d)
+std::string common::d2s(const double& d)
 {
     char result[100];
     if(std::abs(d) < 5) {
@@ -43,14 +43,14 @@ std::string ttbar::d2s(const double& d)
 
 
 
-const TLorentzVector ttbar::LVtoTLV(const LV& lv)
+const TLorentzVector common::LVtoTLV(const LV& lv)
 {
     return TLorentzVector(lv.X(), lv.Y(), lv.Z(), lv.T());
 }
 
 
 
-const LV ttbar::TLVtoLV(const TLorentzVector& lv)
+const LV common::TLVtoLV(const TLorentzVector& lv)
 {
     LV result; 
     result.SetXYZT(lv.X(), lv.Y(), lv.Z(), lv.T());
@@ -65,7 +65,7 @@ const LV ttbar::TLVtoLV(const TLorentzVector& lv)
 
 // --- Functions concerning the treatment of indices of vectors (for working with data stored in nTuple branches) -------------
 
-std::vector<double> ttbar::parametersLV(const VLV& v_lv, const ttbar::LVParameter& parameter)
+std::vector<double> common::parametersLV(const VLV& v_lv, const common::LVParameter& parameter)
 {
     std::vector<double> v_variable;
     for(const LV& lv : v_lv){
@@ -81,7 +81,7 @@ std::vector<double> ttbar::parametersLV(const VLV& v_lv, const ttbar::LVParamete
 
 
 
-void ttbar::orderIndices(int& index1, int& index2, const VLV& v_lv, const ttbar::LVParameter& parameter, const bool absoluteValue)
+void common::orderIndices(int& index1, int& index2, const VLV& v_lv, const common::LVParameter& parameter, const bool absoluteValue)
 {
     const std::vector<double> v_variable = parametersLV(v_lv, parameter);
     orderIndices(index1, index2, v_variable, absoluteValue);
@@ -89,7 +89,7 @@ void ttbar::orderIndices(int& index1, int& index2, const VLV& v_lv, const ttbar:
 
 
 
-void ttbar::orderIndices(std::vector<int>& v_index, const VLV& v_lv, const ttbar::LVParameter& parameter, const bool absoluteValue)
+void common::orderIndices(std::vector<int>& v_index, const VLV& v_lv, const common::LVParameter& parameter, const bool absoluteValue)
 {
     const std::vector<double> v_variable = parametersLV(v_lv, parameter);
     orderIndices(v_index, v_variable, absoluteValue);
@@ -97,14 +97,14 @@ void ttbar::orderIndices(std::vector<int>& v_index, const VLV& v_lv, const ttbar
 
 
 
-void ttbar::selectIndices(std::vector<int>& v_index, const VLV& v_lv, const ttbar::LVParameter& parameter,
+void common::selectIndices(std::vector<int>& v_index, const VLV& v_lv, const common::LVParameter& parameter,
                           const double cutValue, const bool lowerThreshold)
 {
     const std::vector<double> v_variable = parametersLV(v_lv, parameter);
     selectIndices(v_index, v_variable, cutValue, lowerThreshold);
 }
 
-void ttbar::selectIndices(std::vector<int>& v_index, const std::vector<int>& v_variable0, const std::vector<double>& v_variable,
+void common::selectIndices(std::vector<int>& v_index, const std::vector<int>& v_variable0, const std::vector<double>& v_variable,
                           const double cutValue, const bool lowerThreshold)
 {
     std::vector<int> result;
@@ -127,7 +127,7 @@ void ttbar::selectIndices(std::vector<int>& v_index, const std::vector<int>& v_v
 }
 
 
-int ttbar::extremumIndex(const VLV& v_lv, const ttbar::LVParameter& parameter, const bool maximumValue)
+int common::extremumIndex(const VLV& v_lv, const common::LVParameter& parameter, const bool maximumValue)
 {
     const std::vector<double> v_variable = parametersLV(v_lv, parameter);
     return extremumIndex(v_variable, maximumValue);
@@ -135,7 +135,7 @@ int ttbar::extremumIndex(const VLV& v_lv, const ttbar::LVParameter& parameter, c
 
 
 
-void ttbar::orderLV(LV& lv1, LV& lv2, const LV& inputLv1, const LV& inputLv2, const ttbar::LVParameter& parameter, const bool absoluteValue)
+void common::orderLV(LV& lv1, LV& lv2, const LV& inputLv1, const LV& inputLv2, const common::LVParameter& parameter, const bool absoluteValue)
 {
     double variable1;
     double variable2;

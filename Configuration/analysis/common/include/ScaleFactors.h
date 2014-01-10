@@ -10,6 +10,8 @@ class TH2;
 class TString;
 class TSelectorList;
 
+class JetCorrectionUncertainty;
+
 #include "classesFwd.h"
 #include "storeTemplate.h"
 
@@ -17,7 +19,7 @@ class TSelectorList;
 
 
 // FIXME: replace these functions with enum type ones
-namespace ttbar{
+namespace common{
 
     /// Assign a folder depending on channel and systematic
     std::string assignFolder(const char* baseDir, const TString& channel, const TString& systematic);
@@ -225,7 +227,7 @@ private:
         ~ChannelStruct(){}
         
         /// Store the object in the output list and return it
-        template<class T> T* store(T* obj){return ttbar::store(obj, selectorList_);}
+        template<class T> T* store(T* obj){return common::store(obj, selectorList_);}
         
         /// Input file name for files holding histograms of b-tagging efficiencies
         std::string inputFileName_;
@@ -309,6 +311,71 @@ private:
     std::map<std::string, ChannelStruct> m_channelChannelStruct_;
 };
 
+
+
+
+
+class JetEnergyResolutionScaleFactors{
+    
+public:
+    
+    /// Enumeration for possible systematics
+    enum Systematic{vary_up, vary_down};
+    
+    /// Constructor
+    JetEnergyResolutionScaleFactors(const Systematic& systematic);
+    
+    /// Destructor
+    ~JetEnergyResolutionScaleFactors(){}
+    
+    /// Scale the jet and MET collections
+    void applySystematic(VLV* jets, VLV* jetsForMET, LV* met,
+                         const std::vector<double>* jetJERSF, const std::vector<double>* jetForMETJERSF,
+                         const VLV* associatedGenJet, const VLV* associatedGenJetForMET)const;
+    
+    
+    
+private:
+    
+    /// The intervals in eta for granularity of scale factor
+    std::vector<double> v_etaRange_;
+    
+    /// The scale factors corresponding to the eta ranges defined in v_etaRange_
+    std::vector<double> v_etaScaleFactor_;
+};
+
+
+
+
+
+
+class JetEnergyScaleScaleFactors{
+    
+public:
+    
+    /// Enumeration for possible systematics
+    enum Systematic{vary_up, vary_down};
+    
+    /// Constructor
+    JetEnergyScaleScaleFactors(const char* jesUncertaintySourceFile,
+                               const Systematic& systematic);
+    
+    /// Destructor
+    ~JetEnergyScaleScaleFactors();
+    
+    /// Scale the jet and MET collections
+    void applySystematic(VLV* jets, VLV* jetsForMET, LV* met)const;
+    
+    
+    
+private:
+    
+    /// Object for retrieving uncertainty values
+    JetCorrectionUncertainty* jetCorrectionUncertainty_;
+    
+    /// Variation upwards?
+    bool varyUp_;
+};
 
 
 

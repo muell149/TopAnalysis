@@ -222,8 +222,11 @@ class TopAnalysis : public AnalysisBase
        TH1 *h_nRecoEvt_vs_LeppT;  
        TH1 *h_nKinRecoSol_vs_LeppT;
 
-       TH1 *h_nRecoEvt_vs_MET;    
+       TH1 *h_nRecoEvt_vs_MET;
        TH1 *h_nKinRecoSol_vs_MET;
+       
+       TH1 *h_nRecoEvt_Eff;
+       TH1 *h_nKinRecoSol_Eff;
        
        
        TH1 *h_RMSvsGenToppT;
@@ -254,7 +257,7 @@ class TopAnalysis : public AnalysisBase
     
     /// Data for closure test
 #ifndef __CINT__
-    std::function<double()> closureFunction_;
+    std::function<double(Long64_t)> closureFunction_;
 #endif
     int closureMaxEvents_;
     
@@ -316,27 +319,30 @@ private:
     double globalNormalisationFactorPDF();
 
     /// Get weight of closure test
-    double calculateClosureTestWeight();
+    double calculateClosureTestWeight(const Long64_t& entry);
     
     /// Get weight of PDF variation
     double weightPdf(Long64_t entry);
     
     /// Get indices of B hadron and anti-B hadron
-    void bHadronIndices(int& bHadronIndex, int& antiBHadronIndex);
+    void bHadronIndices(int& bHadronIndex, int& antiBHadronIndex,const CommonGenObjects& commonGenObjects,const TopGenObjects& topGenObjects);
     
     void generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                            LV& leadGenLepton, LV& nLeadGenLepton,
                            LV& leadGenBJet, LV& nLeadGenBJet,
                            double& genHT,
                            const int bHadronIndex, const int antiBHadronIndex,
-                           const double trueLevelWeightNoPileup, const double trueLevelWeight);
+                           const double trueLevelWeightNoPileup, const double trueLevelWeight,
+                           const CommonGenObjects& commonGenObjects,
+                           const TopGenObjects& topGenObjects);
 
     void generatorTTbarjetsEvent(double& jetHTGen,
                                  const int bHadronIndex, const int antiBHadronIndex,
                                  const double trueLevelWeight,
                                  int& GenJets_cut, int& GenJets_cut40, int& GenJets_cut60, int& GenJets_cut100,
-                                 double extragenjet[4]);
-    
+                                 double extragenjet[4],
+                                 const CommonGenObjects& commonGenObjects,
+                                 const TopGenObjects& topGenObjects);
     
     
     /// Map holding binned control plots
