@@ -30,7 +30,7 @@
 //constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
 //constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
 //constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19789pb";
-constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_Full2012ReReco_FinalRecommendation";
+constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/common/data/Data_PUDist_Full2012ReReco_FinalRecommendation";
 
 
 /// Input file for electron ID scale factor
