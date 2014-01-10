@@ -27,8 +27,6 @@
 #include "AnalysisBase.h"
 #include "utils.h"
 #include "KinReco.h"
-#include "JetCorrectorParameters.h"
-#include "JetCorrectionUncertainty.h"
 #include "PUReweighter.h"
 #include "analysisUtils.h"
 #include "classes.h"
