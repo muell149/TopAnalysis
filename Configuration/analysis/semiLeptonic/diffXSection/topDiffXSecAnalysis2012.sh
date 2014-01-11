@@ -110,8 +110,11 @@ combinedEventYields=false
 ## use prob sel analysis
 #addSel=\"\"
 #chi2Max=99999
+#probMin=-1
 addSel=\"ProbSel\"
-chi2Max=7.824
+chi2Max=7.824 # corresponds to probMin
+probMin=0.02  # corresponds to chi2Max
+ndof=2 #corresponds to prob cut on second KinFit with equal mass constraint
 
 ## take arguments
 clear
@@ -229,6 +232,10 @@ redoControlPlots=true
 ## genComparison = true / false (default: true)
 genComparison=true
 
+## Re-do study for optimal value of the probability cut
+## redoProb = true / false (default: true)
+redoProb=true
+
 ## Re-create systematically varied results
 ## redoSystematics = true / false (default: true)
 redoSystematics=true
@@ -328,6 +335,7 @@ if [ $closureTestSpecifier != \"\" ]
     echo "CLOSURE TEST FOR UNFOLDING!"
     echo "closure test type: " $closureTestSpecifier
     redoPDFReweighting=false
+    redoProb=false
     redoControlPlots=false
     redoSystematics=false
     maxSys=0
@@ -374,6 +382,7 @@ if [ $decayChannel == \"combined\" ]
 	echo "Decay channel:                              $decayChannel    "
 	echo "Luminosity:                                 $dataLuminosity  "
 	echo "Re-do control plots:                        $redoControlPlots" 
+	echo "Re-do probability study:                    $redoProb        "
 	echo "Re-do systematic uncertainties:             $redoSystematics "
 	echo "Re-do covariance matrix::                   $redoCov         "
 	echo "Perform regularization parameter scan test: $regTest         "
@@ -468,10 +477,15 @@ fi
 
 BEFOREB=$(date +%s)
 echo
-echo "Part B: process cut monitoring macro"
+echo "Part B: process cut monitoring macros"
 if [ $fast == false ]
     then
     sleep 3
+fi
+
+## prob cut
+if [ $redoProb = true -a $redoControlPlots = true ]; then
+    root -l -q -b './optimizeProbCut.C++g('$probMin', '$ndof', '$verbose', '$decayChannel', '$inputFolderName', '$save')'
 fi
 
 if [ $redoControlPlots == true ]; then
