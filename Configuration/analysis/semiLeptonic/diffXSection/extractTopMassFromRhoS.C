@@ -39,6 +39,7 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   // get histogram in correct binning
   TH1F* extractedMass= new TH1F("extractedMass", "extractedMass", Nbins, binning_["rhos"][0], binning_["rhos"][binning_["rhos"].size()-1]);
   reBinTH1F(*extractedMass, binning_["rhos"], 0);
+  TGraphAsymmErrors* extractedChi2Mass= new TGraphAsymmErrors(nbinsx);
   TH1F* TevatronMass= new TH1F("TevatronMass", "TevatronMass", 1, binning_["rhos"][0], binning_["rhos"][binning_["rhos"].size()-1]);
   histogramStyle(*TevatronMass, kSig, false, 0.1);
   TevatronMass->SetBinContent(1,mass);
@@ -65,16 +66,40 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
     int binOfInterest=bin;
     // perform top mass extraction
     resultbin=extraction(verbose, luminosity, save, (binOfInterest==2||binOfInterest==4) ? minx : minx2, (binOfInterest==2||binOfInterest==4) ? maxx : maxx2, nbinsx, dataMassDependence, binOfInterest, outputFolder, outputFile);
+    // fill plot for intersection method
     extractedMass->SetBinContent(bin, resultbin["massval"]->GetBinContent(1));
     extractedMass->SetBinError  (bin, std::abs(resultbin["massunc"]->GetBinContent(1)));
     if(resultbin["chi2"]){
+      // collect all chi2 in global chi2
       if(globalchi2) globalchi2->Add((TH1F*)resultbin["chi2"]->Clone("globalChi2Bin"+getTStringFromInt(bin)));
       else globalchi2=(TH1F*)resultbin["chi2"]->Clone("globalChi2");
+      // fill plot for chi2 method
+      double binWidth             = extractedMass->GetBinWidth(bin);
+      double binCenter            = extractedMass->GetBinCenter(bin);
+      std::map<TString, double> chi2mass=GetChi2Info(resultbin["chi2"], false, verbose, (binOfInterest==2||binOfInterest==4) ? minx : minx2, (binOfInterest==2||binOfInterest==4) ? maxx : maxx2);
+      extractedChi2Mass->SetPoint     (bin-1, binCenter, chi2mass["min"]);
+      extractedChi2Mass->SetPointError(bin-1, 0.5*binWidth, 0.5*binWidth, chi2mass["dn"],  chi2mass["up"]);
     }
   }
+
+  std::cout << "combined result:" << std::endl;
+  // draw global chi2
+  std::vector<TCanvas*> plotCanvas_;
+  addCanvas(plotCanvas_);
+  plotCanvas_[plotCanvas_.size()-1]->cd(0);
+  TString titlechi2="globalChi2RhosAllBins";
+  plotCanvas_[plotCanvas_.size()-1]->SetName (titlechi2);
+  plotCanvas_[plotCanvas_.size()-1]->SetTitle(titlechi2);
+  globalchi2->GetYaxis()->SetTitle("global  #chi^{2} = #Sigma_{#splitline{ all}{bins}} #chi^{2}(bin)");
+  globalchi2->GetXaxis()->SetRangeUser(minx, maxx);
+  globalchi2->Draw("p");
+  std::map<TString, double> chi2Result=GetChi2Info(globalchi2, true, verbose, minx, maxx);
+  DrawDecayChLabel("e/#mu + Jets Combined");
+  DrawCMSLabels(prelim, 0.5*(constLumiMuon+constLumiElec), 0.04, false, false, false);
+
+  std::cout << "mtop(global chi2)= " << chi2Result["min"] << "+" << chi2Result["up"] << "-" << chi2Result["dn"] << std::endl;
   
   // linear fit to extracted mass values
-  std::vector<TCanvas*> plotCanvas_;
   addCanvas(plotCanvas_);
   plotCanvas_[plotCanvas_.size()-1]->cd(0);
   TF1* combfit=new TF1("combfitdata", "[0]", extractedMass->GetBinLowEdge(1), extractedMass->GetBinLowEdge(extractedMass->GetNbinsX()+1));
@@ -87,16 +112,16 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   extractedMass->Fit(combfit, option,"",extractedMass->GetBinLowEdge(1), extractedMass->GetBinLowEdge(extractedMass->GetNbinsX()+1));
   double mcomb=combfit->GetParameter(0);
   double merr =combfit->GetParError(0);
-  // histogram with fit result
+  // histogram with global chi2 result
   TH1F* CombMass= new TH1F("CombMass", "CombMass", 1, binning_["rhos"][0], binning_["rhos"][binning_["rhos"].size()-1]);
   histogramStyle(*CombMass, kSig, false, 0.1, kBlue);
-  CombMass->SetBinContent(1, mcomb);
+  CombMass->SetBinContent(1, chi2Result["min"]);
   TGraphAsymmErrors* massfinal= new TGraphAsymmErrors(nbinsx);  
   for(int bin=1; bin<=extractedMass->GetNbinsX(); ++bin){
     double binWidth             = extractedMass->GetBinWidth(bin);
     double binCenter            = extractedMass->GetBinCenter(bin);
-    massfinal->SetPoint     (bin-1, binCenter, mcomb);
-    massfinal->SetPointError(bin-1, 0.5*binWidth, 0.5*binWidth, merr, merr);
+    massfinal->SetPoint     (bin-1, binCenter, chi2Result["min"]);
+    massfinal->SetPointError(bin-1, 0.5*binWidth, 0.5*binWidth, chi2Result["dn"], chi2Result["up"]);
   }
   massfinal->SetLineColor(kBlue);
   massfinal->SetMarkerColor(kBlue);
@@ -105,10 +130,9 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   massfinal->SetLineWidth(2);
   massfinal->SetLineStyle(1);
   massfinal->SetMarkerSize(0.1);
-
-  std::cout << "mtop(combined)=" << mcomb << "+/-" << merr << "GeV (=" << 100*merr/mcomb << "%)" << std::endl;
+  std::cout << "mtop(intersection)=" << mcomb << "+/-" << merr << "GeV (=" << 100*merr/mcomb << "%)" << std::endl;
   // create legend
-  TLegend *leg = new TLegend(0.68, 0.64, 0.92, 0.85 );
+  TLegend *leg = new TLegend(0.67, 0.55, 0.92, 0.88 );
   legendStyle(*leg,"");
   TH1F* legtev=(TH1F*)TevatronMass->Clone("legtevatron");
   legtev->SetFillColor  (TevatronMassErr->GetFillColor());
@@ -118,9 +142,14 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   legcomb->SetLineWidth(massfinal->GetLineWidth());
   legcomb->SetFillColor(massfinal->GetFillColor());
   legcomb->SetFillStyle(massfinal->GetFillStyle());
-  leg->AddEntry(extractedMass, "#splitline{extracted from}{CMS data}", "LP" );
-  leg->AddEntry(legcomb      , "#splitline{fit to data points:}{"+getTStringFromDouble(mcomb, 1)+"#pm"+getTStringFromDouble(merr, 1)+" GeV}", "FLP");
   leg->AddEntry(legtev       , "Tevatron"               , "FLP");
+  TH1F* legEmpty=(TH1F*)TevatronMass->Clone("legEmpty");
+  legEmpty->SetMarkerColor(kWhite);
+  legEmpty->SetMarkerSize(0.000001);
+  leg->AddEntry(legEmpty, "#splitline{extracted from}{#rho_{S}} in CMS data:}", "P"  );
+  leg->AddEntry(extractedMass, "#splitline{#chi^{2} result of}{separate bins}", "LP" );
+  //leg->AddEntry(legEmpty, " ", "P" );
+  leg->AddEntry(legcomb      , "#splitline{global #chi^{2} result:}{"+getTStringFromDouble(chi2Result["min"], 1)+"^{+"+getTStringFromDouble(chi2Result["up"], 1)+"}_{- "+getTStringFromDouble(chi2Result["dn"], 1)+"} GeV}", "FLP");
 
   // draw extracted mass for all bins
   TString title="mtopExtractionFromRhosAllBins";
@@ -131,27 +160,18 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   axesStyle(*extractedMass, xSecLabelName("rhos"), "m^{top} [GeV]");
   histogramStyle(*extractedMass, kData);
   extractedMass->GetYaxis()->SetNoExponent(true);
+  extractedMass->GetXaxis()->SetTitleOffset(1.1*extractedMass->GetXaxis()->GetTitleOffset());
   extractedMass->Draw("AXIS");
   massfinal->Draw("e2 same");
   CombMass->Draw("hist same");
   TevatronMassErr->Draw("e2 same");
   TevatronMass->Draw("hist same");
-  extractedMass->Draw("p e same");
+  //extractedMass->Draw("p e same");
+  extractedChi2Mass->Draw("p e same");  
   leg->Draw("same");
   extractedMass->Draw("AXIS same");
   DrawCMSLabels(true, luminosity, 0.04, false, false, false);
 
-  // draw global chi2
-  addCanvas(plotCanvas_);
-  plotCanvas_[plotCanvas_.size()-1]->cd(0);
-  TString titlechi2="globalChi2RhosAllBins";
-  plotCanvas_[plotCanvas_.size()-1]->SetName (titlechi2);
-  plotCanvas_[plotCanvas_.size()-1]->SetTitle(titlechi2);
-  globalchi2->GetYaxis()->SetTitle("global  #chi^{2} = #Sigma_{#splitline{ all}{bins}} #chi^{2}(bin)");
-  globalchi2->GetXaxis()->SetRangeUser(minx, maxx);
-  globalchi2->Draw("p");
-  std::map<TString, double> chi2Result=GetChi2Info(globalchi2, true, verbose, minx, maxx);  
-  std::cout << "mtop(global chi2)= " << chi2Result["min"] << "+" << chi2Result["up"] << "-" << chi2Result["dn"] << std::endl;
   // saving 
   if(save){
     if(verbose>0) std::cout << "saving" << std::endl;
@@ -610,6 +630,8 @@ std::map <TString, TH1F*> extraction(int verbose, double luminosity, bool save, 
   chi2CMS->Draw("p");
   std::map<TString, double> chi2Result=GetChi2Info(chi2CMS, true, verbose, minx, maxx);  
   //if(binOfInterest<=2) quadchi->Draw("hist same");
+  DrawDecayChLabel("e/#mu + Jets Combined");
+  DrawCMSLabels(prelim, 0.5*(constLumiMuon+constLumiElec), 0.04, false, false, false);
 
   // E) Canvas with different mass predictions
   //    duplicate canvas from nominal data measurement
@@ -833,7 +855,7 @@ std::map<TString, double> GetChi2Info(TH1F* chi2, bool draw, int verbose, double
 	if(     downval ==-1.) downval=tempval;
 	else if(upval   ==-1.) upval  =tempval;
 	else{
-	  std::cout << "WARNING: more than 2 values are found for deltaChi2=1 in GetChi2Info for plot " << chi2->GetTitle() << ": " << downval << ", "  << upval << ", " << tempval << " (will keep the first two)" << std::endl;
+	  if(verbose>0) std::cout << "WARNING: more than 2 values are found for deltaChi2=1 in GetChi2Info for plot " << chi2->GetTitle() << ": " << downval << ", "  << upval << ", " << tempval << " (will keep the first two)" << std::endl;
 	}
       }
     }
@@ -863,7 +885,7 @@ std::map<TString, double> GetChi2Info(TH1F* chi2, bool draw, int verbose, double
     if(xmax==-1.) xmax=chi2->GetBinLowEdge(chi2->GetNbinsX()+1);
     drawLine(upval, delChval, xmax   , delChval, kBlack, 2, 2);
     // draw values as label
-    DrawLabel(TString("#splitline{minimum [GeV]: }{#splitline{")+getTStringFromDouble(minval)+"}{#splitline{  +"+getTStringFromDouble(upval -minval)+"}{  - "+getTStringFromDouble(minval-downval)+"}}}", 0.5, 0.4, 0.75, 0.6, 12, 0.03);
+    DrawLabel(TString("#splitline{minimum: }{")+getTStringFromDouble(minval)+"^{ + "+getTStringFromDouble(upval -minval)+"}_{  - "+getTStringFromDouble(minval-downval)+"} GeV}", 0.5, 0.4, 0.75, 0.6, 12, 0.03);
   }
   // prepare output 
   std::map <TString, double> out_;
