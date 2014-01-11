@@ -195,7 +195,9 @@ namespace semileptonic {
   // ============================
   //  Numerical Constants
   // ============================
-  // draw preliminary label for all plots?
+  // remove official CMS in labels (needed for thesis)
+  bool rmOff=false;
+  // draw preliminary in labels for all plots?
   bool prelim=true;
   
   //const double ttbarCrossSection=234;                      // approx.NNNLO Kidonakis, recalculated for mtop=172.5 GeV (cf. TOP-11-008)
@@ -886,15 +888,18 @@ namespace semileptonic {
     if(cmsprelim  ) extension+=" Preliminary";
     if(privateWork) extension+=" (Private Work)";
     
-    if (cmssimulation||luminosity==0.)
-      {
-	label -> AddText(extension+", #sqrt{s} = "+comE+" TeV");
-      }
-    else 
-      {
-	label -> AddText(Form(extension+", %2.1f fb^{-1} at #sqrt{s} = "+comE+" TeV",luminosity/1000));
-      }
+    TString finalLabel="";
+    if (cmssimulation||luminosity==0.){
+      if(!rmOff) finalLabel=extension+", #sqrt{s} = "+comE+" TeV";
+      else  finalLabel="Simulation at  #sqrt{s} = "+comE+" TeV";
+    }
+    else{
+      if(!rmOff) finalLabel=TString(Form(extension+", %2.1f fb^{-1} at #sqrt{s} = "+comE+" TeV",luminosity/1000));
+      else finalLabel=TString(Form("%2.1f fb^{-1} at #sqrt{s} = "+comE+" TeV",luminosity/1000));
+    }
+
     
+    label-> AddText(finalLabel);
     label->SetFillStyle(0);
     label->SetBorderSize(0);
     label->SetTextSize(textSize);
