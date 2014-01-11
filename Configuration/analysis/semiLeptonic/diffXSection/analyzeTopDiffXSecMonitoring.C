@@ -1,7 +1,7 @@
 #include "basicFunctions.h"
 
 void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
-				  bool save = false, int verbose=0,
+				  bool save = true, int verbose=0,
 				  TString inputFolderName= "RecentAnalysisRun8TeV_doubleKinFit",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 				  //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root",
@@ -2191,6 +2191,7 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
     // eps and png
     if(verbose==0) gErrorIgnoreLevel=kWarning;
     saveCanvas(plotCanvas_, outputFolder, pdfName, true, false);
+    unsigned int idxstop=plotCanvas_.size();
     for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
       TString title=(TString)(plotCanvas_[idx])->GetTitle();
       if(!title.Contains("canv")){
@@ -2212,8 +2213,8 @@ void analyzeTopDiffXSecMonitoring(double luminosity = 19712,
       if(title.Contains("ProbEff")){
 	TString pdfname=outputFolder+"ProbEff.pdf";
 	if(title.Contains("ttbarAngle")) pdfname+="(";
-	if(title.Contains("bbbarMass" )) pdfname+=")";
-	plotCanvas_[idx]->Print(pdfname); 
+	if(title.Contains("bbbarMass" )){ pdfname+=")"; idxstop=idx; }
+	if(idx<=idxstop) plotCanvas_[idx]->Print(pdfname); 
       }
     }
     // root file
