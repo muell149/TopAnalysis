@@ -18,7 +18,7 @@ TString getTStringFromInt(int i);
 TString getTStringFromDouble(double d, int precision, bool output);
 void drawArrow(const double xmin, const double y, const double xmax, const unsigned int color, const double lineWidth, const unsigned int lineStyle, double stretchFactor);
 
-void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString optimize = "#frac{sig}{#sqrt{sig+bkg}}", TString lep = "combined", bool save=true)
+void optimizeProbCut(double forceProb = 0.02, unsigned int ndof = 2, int verbose=1, TString LepDecayChannel = "combined", TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit", bool save=true)
 {
   // configure style
   gROOT->SetStyle("Plain");
@@ -27,19 +27,19 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
 
   // set optimization parameter
   // optimize the product signal efficiency times signal purity:
-  // TString optimize = "#frac{sig}{#sqrt{sig+bkg}}";
+  TString optimize = "#frac{sig}{#sqrt{sig+bkg}}";
   // optimize the product signal efficiency times signal to background ratio:
   // TString optimize = "#frac{sig}{#sqrt{bkg}}"; 
   // optimize signal purity (don't use this one!):
   // TString optimize = "#frac{sig}{sig+bkg}";
 
   // read files
-  TString path = "/afs/naf.desy.de/group/cms/scratch/tophh/newRecentAnalysisRun8TeV/";
+  TString path = TString("/afs/naf.desy.de/group/cms/scratch/tophh/")+inputFolderName+"/";
   std::vector<TFile*> files_;
-  if(lep=="combined" || lep=="muon"    )  files_.push_back(new TFile(path+"muonDiffXSecSigSummer12PF.root"));
-  if(lep=="combined" || lep=="muon"    )  files_.push_back(new TFile(path+"muonDiffXSecBkgSummer12PF.root"));
-  if(lep=="combined" || lep=="electron")  files_.push_back(new TFile(path+"elecDiffXSecSigSummer12PF.root"));
-  if(lep=="combined" || lep=="electron")  files_.push_back(new TFile(path+"elecDiffXSecBkgSummer12PF.root"));
+  if(LepDecayChannel=="combined" || LepDecayChannel=="muon"    )  files_.push_back(new TFile(path+"muonDiffXSecSigSummer12PF.root"));
+  if(LepDecayChannel=="combined" || LepDecayChannel=="muon"    )  files_.push_back(new TFile(path+"muonDiffXSecBkgSummer12PF.root"));
+  if(LepDecayChannel=="combined" || LepDecayChannel=="electron")  files_.push_back(new TFile(path+"elecDiffXSecSigSummer12PF.root"));
+  if(LepDecayChannel=="combined" || LepDecayChannel=="electron")  files_.push_back(new TFile(path+"elecDiffXSecBkgSummer12PF.root"));
 
   // get trees
   vector<TTree*> trees_;
@@ -112,8 +112,8 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
 	double prob = TMath::Prob(chi2,ndof);
 	// ttbar SG
 	//TString fileName=files_[i]->GetName();
-	//if( (fileName.Contains("muon")&&fileName.Contains("Sig")&&(lep=="muon"||lep=="combined")) || (fileName.Contains("elec")&&fileName.Contains("Sig")&&(lep=="electron"||lep=="combined")) ){
-	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2 && !(lep=="electron")) || (lep=="electron" && decayChannel==1)){
+	//if( (fileName.Contains("muon")&&fileName.Contains("Sig")&&(LepDecayChannel=="muon"||LepDecayChannel=="combined")) || (fileName.Contains("elec")&&fileName.Contains("Sig")&&(LepDecayChannel=="electron"||LepDecayChannel=="combined")) ){
+	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2 && !(LepDecayChannel=="electron")) || (LepDecayChannel=="electron" && decayChannel==1)){
 	  // ttbar SG all permutations
 	  ttSigHisto->Fill(prob,weight);
 	  // ttbar SG correct permutation
@@ -132,12 +132,12 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
 	  // ttbar BG + ttbar SG wrong permutations
 	  bkgHisto->Fill(prob,weight);
 	}
-	//std::cout << files_[i]->GetName() << std::endl;
-	//std::cout << "lepton: " << lep << std::endl;
-	//std::cout << "decayChannel: " << decayChannel << std::endl;
-	//std::cout << "qAssignment: "  << qAssignment  << std::endl;
-	//std::cout << "holger: " << holgerSG << std::endl;
-	//std::cout << "martin: " << martinSG << std::endl;	  
+	if(verbose>1){
+	  std::cout << files_[i]->GetName() << std::endl;
+	  std::cout << "lepton: " << LepDecayChannel << std::endl;
+	  std::cout << "decayChannel: " << decayChannel << std::endl;
+	  std::cout << "qAssignment: "  << qAssignment  << std::endl;
+	}	  
       }
     }
 
@@ -161,10 +161,11 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
   vector<double> BGeffVec;
   vector<double> SGeffVec;
 
-  std::cout << std::endl << "optimizing prob cut for " << optimize << std::endl;  
-  std::cout << " (sig=ttbar SG correct permutations)" << std::endl;  
-  std::cout << " (bkg=ttbar BG + ttbar SG wrong permutations" << std::endl << std::endl;
-
+  if(verbose>1){
+    std::cout << std::endl << "optimizing prob cut for " << optimize << std::endl;  
+    std::cout << " (sig=ttbar SG correct permutations)" << std::endl;  
+    std::cout << " (bkg=ttbar BG + ttbar SG wrong permutations" << std::endl << std::endl;
+  }
 
   // calculate some points for the plots
   for ( int i = 0 ; i < 100 ; i++ ) {
@@ -236,21 +237,21 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
   double ttBkgEff = ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1)/ttBkgEvents;
   double ttEff    = (ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)+ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1))/(ttSigEvents+ttBkgEvents);
   double wrongEff=bkgPermuHisto->Integral(bkgPermuHisto->FindBin(optimalProb),bkgPermuHisto->GetNbinsX()+1)/bkgPermuHisto->Integral(0,bkgPermuHisto->GetNbinsX()+1);
-
-  cout << endl << "Optimal probability cut: prob > " << optimalProb << endl;
-  cout << " -> "<< endl;
-  cout << " eff(all ttbar          ): " << ttEff << endl;
-  cout << " eff(correct permutation): " << optimalEff << endl;
-  cout << " eff(wrong   permutation): " << wrongEff << endl;
-  cout << " eff(ttbar-signal       ): " << ttSigEff << endl;
-  cout << " eff(ttbar-bkg          ): " << ttBkgEff << endl;
-  cout << " "<< optimize << "        : " << getSoB(sigHisto,bkgHisto,-1,optimize);
-  cout << "  (" << getSoB(sigHisto,bkgHisto,optimalProb,optimize) << "   for prob>" << optimalProb << ")" << endl;
-  cout << " ttbar SG / ttbar BG               : " <<  ttSigEvents/ttBkgEvents;
-  cout << "  (" <<  ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)/ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1)  << "  for prob>" << optimalProb << ")" << endl;
-  cout << " correct permutation / all ttbar SG: " <<  sigHisto->Integral(0,sigHisto->GetNbinsX()+1)/ttSigEvents;
-  cout << " (" <<  sigHisto->Integral(sigHisto->FindBin(optimalProb),sigHisto->GetNbinsX()+1)/ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1) << " for prob>" << optimalProb << ")" << endl;
-
+  if(verbose>0){
+    cout << endl << "Optimal probability cut: prob > " << optimalProb << endl;
+    cout << " -> "<< endl;
+    cout << " eff(all ttbar          ): " << ttEff << endl;
+    cout << " eff(correct permutation): " << optimalEff << endl;
+    cout << " eff(wrong   permutation): " << wrongEff << endl;
+    cout << " eff(ttbar-signal       ): " << ttSigEff << endl;
+    cout << " eff(ttbar-bkg          ): " << ttBkgEff << endl;
+    cout << " "<< optimize << "        : " << getSoB(sigHisto,bkgHisto,-1,optimize);
+    cout << "  (" << getSoB(sigHisto,bkgHisto,optimalProb,optimize) << "   for prob>" << optimalProb << ")" << endl;
+    cout << " ttbar SG / ttbar BG               : " <<  ttSigEvents/ttBkgEvents;
+    cout << "  (" <<  ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1)/ttBkgHisto->Integral(ttBkgHisto->FindBin(optimalProb),ttBkgHisto->GetNbinsX()+1)  << "  for prob>" << optimalProb << ")" << endl;
+    cout << " correct permutation / all ttbar SG: " <<  sigHisto->Integral(0,sigHisto->GetNbinsX()+1)/ttSigEvents;
+    cout << " (" <<  sigHisto->Integral(sigHisto->FindBin(optimalProb),sigHisto->GetNbinsX()+1)/ttSigHisto->Integral(ttSigHisto->FindBin(optimalProb),ttSigHisto->GetNbinsX()+1) << " for prob>" << optimalProb << ")" << endl;
+  }
 
   // fill permutation histos
   for(UInt_t i = 0; i < files_.size(); i++)
@@ -259,7 +260,7 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
       for(Long64_t ientry = 0; ientry < nevent; ++ientry){
 	trees_[i]->GetEntry(ientry);
 	double prob = TMath::Prob(chi2,ndof);
-	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2 && !(lep=="electron")) || (lep=="electron" && decayChannel==1)){
+	if((i>1 && decayChannel==1) || (i<=1 && decayChannel==2 && !(LepDecayChannel=="electron")) || (LepDecayChannel=="electron" && decayChannel==1)){
 	  permutation->Fill(qAssignment,weight);
 	  if(prob>optimalProb) permutationProb->Fill(qAssignment,weight);
 	}
@@ -284,7 +285,7 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
   decaychannelProb->Scale(1./decaychannelProb->Integral(0,decaychannelProb->GetNbinsX()+1));
 
   // set up canvas
-  TCanvas *canv = new TCanvas("canv","probability cut optimisation",10,10,1200,600);
+  TCanvas *canv = new TCanvas("canv","probabilityCutOptimisation",10,10,1200,600);
   canv->Divide(2,1);
   canv->cd(1)->SetLeftMargin  (0.15);
   canv->cd(1)->SetRightMargin (0.03);
@@ -443,11 +444,11 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
   leg ->AddEntry(sigHisto, "SG correct permutation"  , "F");
   leg ->AddEntry(bkgHisto, "SG other permutation"    , "F");
   leg ->AddEntry(ttBkgHisto, "BG (non prompt l+jets signal)", "F");
-  leg ->AddEntry(effPermu, "optimal cut: prob>"+getTStringFromDouble(optimalProb, 4, false), "L");
+  leg ->AddEntry(effPermu, "optimal cut: prob>"+getTStringFromDouble(optimalProb, 2, false), "L");
   leg2 ->AddEntry(sigFracHisto, "SG correct permutation"  , "L");
   leg2 ->AddEntry(bkgFracHisto, "SG other permutation"    , "L");
   leg2 ->AddEntry(ttBkgFracHisto, "BG (non prompt l+jets signal)", "L");
-  leg2 ->AddEntry(effPermu, "optimal cut: prob>"+getTStringFromDouble(optimalProb, 4, false), "L");
+  leg2 ->AddEntry(effPermu, "optimal cut: prob>"+getTStringFromDouble(optimalProb, 2, false), "L");
   leg ->Draw("same");
   drawLine(optimalProb, sigHisto->GetMinimum(), optimalProb, 0.6*sigHisto->GetMaximum(), kBlack, 2, 1);
   drawArrow(optimalProb, sigHisto->GetMaximum()/10, optimalProb+0.05, kBlack, 2, 1, 1.2);
@@ -500,14 +501,14 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
   leg3 ->SetBorderSize(0);
   leg3 ->SetTextAlign(12);
   leg3->AddEntry(permutation, "t#bar{t}#rightarrowl+jets prompt", "F");
-  leg3->AddEntry(permutationProb, "  + prob>"+getTStringFromDouble(optimalProb, 4, false), "F");
+  leg3->AddEntry(permutationProb, "  + prob>"+getTStringFromDouble(optimalProb, 2, false), "F");
   canv4->SetGrid(1,1);
   leg3->Draw("same");
   // draw efficiency per permutation
   canv5->cd();
   effPermu->SetTitle("");
   effPermu->GetXaxis()->SetTitle("jet permutation wrt. machted parton truth");
-  effPermu->GetYaxis()->SetTitle("eff(prob>"+getTStringFromDouble(optimalProb, 4, false)+")");
+  effPermu->GetYaxis()->SetTitle("eff(prob>"+getTStringFromDouble(optimalProb, 2, false)+")");
   effPermu->GetXaxis()->SetTitleOffset(2.5);
   effPermu->GetXaxis()->SetLabelOffset(0.008);
   effPermu->SetBarWidth(0.5);
@@ -544,14 +545,14 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
   leg4 ->SetBorderSize(0);
   leg4 ->SetTextAlign(12);
   leg4->AddEntry(decaychannel, "t#bar{t} BG (non prompt l+jets signal)", "L");
-  leg4->AddEntry(decaychannelProb, "  + prob>"+getTStringFromDouble(optimalProb, 4, false), "L");
+  leg4->AddEntry(decaychannelProb, "  + prob>"+getTStringFromDouble(optimalProb, 2, false), "L");
   canv6->SetGrid(1,1);
   leg4->Draw("same");
   // draw efficiency per ttbarBG composition
   canv7->cd();
   effDecay->SetTitle("");
   effDecay->GetXaxis()->SetTitle("t#bar{t} BG decay channel");
-  effDecay->GetYaxis()->SetTitle("eff(prob>"+getTStringFromDouble(optimalProb, 4, false)+")");
+  effDecay->GetYaxis()->SetTitle("eff(prob>"+getTStringFromDouble(optimalProb, 2, false)+")");
   effDecay->GetXaxis()->SetRange(5,25);
   effDecay    ->SetLineWidth(3);
   effDecay    ->SetLineColor(kBlack);
@@ -560,7 +561,10 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
   canv7->SetGrid(1,1);
 
   if(save){
-    TString outputFolder="diffXSecFromSignal/plots/"+lep+"/2012/kinFitPerformance/";
+    if(verbose>0) std::cout << "will save all plots as png/eps/pdf" << std::endl;
+    if(verbose<=1) gErrorIgnoreLevel=kWarning;
+    TString outputFolder=TString("./diffXSecFromSignal/plots/")+LepDecayChannel+"/2012/kinFitPerformance/";
+    // as eps
     canv ->Print(outputFolder+(TString)(canv->GetTitle())+".eps");
     canv2->Print(outputFolder+(TString)(canv2->GetTitle())+".eps");
     canv3->Print(outputFolder+(TString)(canv3->GetTitle())+".eps");
@@ -568,6 +572,22 @@ void optimizeProbCut(double forceProb = -1., unsigned int ndof = 2, TString opti
     canv5->Print(outputFolder+(TString)(canv5->GetTitle())+".eps");
     canv6->Print(outputFolder+(TString)(canv6->GetTitle())+".eps");
     canv7->Print(outputFolder+(TString)(canv7->GetTitle())+".eps");
+    // as png
+    canv ->Print(outputFolder+(TString)(canv->GetTitle())+".png");
+    canv2->Print(outputFolder+(TString)(canv2->GetTitle())+".png");
+    canv3->Print(outputFolder+(TString)(canv3->GetTitle())+".png");
+    canv4->Print(outputFolder+(TString)(canv4->GetTitle())+".png");
+    canv5->Print(outputFolder+(TString)(canv5->GetTitle())+".png");
+    canv6->Print(outputFolder+(TString)(canv6->GetTitle())+".png");
+    canv7->Print(outputFolder+(TString)(canv7->GetTitle())+".png");
+    // as pdf
+    canv ->Print(outputFolder+"optimalProbCut.pdf(");
+    canv2->Print(outputFolder+"optimalProbCut.pdf" );
+    canv3->Print(outputFolder+"optimalProbCut.pdf" );
+    canv4->Print(outputFolder+"optimalProbCut.pdf" );
+    canv5->Print(outputFolder+"optimalProbCut.pdf" );
+    canv6->Print(outputFolder+"optimalProbCut.pdf" );
+    canv7->Print(outputFolder+"optimalProbCut.pdf)");
   }
 }
 
