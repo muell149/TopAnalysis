@@ -147,7 +147,7 @@ systematic_(nominal)
     else if(systematic == "BTAG_LEFF_UP") systematic_ = BTagSFGeneric::btagLeff_up;
     else if(systematic == "BTAG_LEFF_DOWN") systematic_ = BTagSFGeneric::btagLeff_down;
     else systematic_= BTagSFGeneric::nominal;
-
+    
     std::cout<<"=== Finishing preparation of b-tagging scale factors\n\n";
 }
 
@@ -177,31 +177,48 @@ void BTagSFGeneric::prepareBTags(TSelectorList* output, const std::string& chann
 
     std::vector<TH2D> histos;
     std::vector<TH2D> effhistos;
+    std::vector<float> medians;
 
     // Load per-jet efficiencies file
     TFile file(inputFileName.c_str(),"READ");
 
-    // Generating the list of all objects, stored in the root file to find the efficiency histograms
-    TList *list = file.GetListOfKeys();
-    for ( int keyNum=0; keyNum<list->GetSize(); keyNum++ ) {
-        TKey* key = ( TKey* ) list->At ( keyNum );
-
-        TString objType ( key->GetClassName() );
-        TString objName ( key->GetName() );
-        if(!objType.EqualTo("TH2D")) continue;
-
-        if(objName.Contains("eff")) {
-            effhistos.push_back(*(TH2D*)(file.Get(objName)) );
-        } else histos.push_back(*(TH2D*)(file.Get(objName)) );
-
+    // Disabling referencing histograms to gDirectory to prevent crashing when closing the root file
+    TH1::AddDirectory(false);
+    TH2D* tempHisto;
+    // Reading the tag and efficiency histograms from the file and adding them to the maps in proper order
+    for(int id = 0; ; ++id) {
+        std::string histoName = histoNameAtId(id, histoTypes::tag);
+        if(histoName != "") {
+            file.GetObject(histoName.c_str(), tempHisto);
+            if(!tempHisto) 
+                throw std::runtime_error("BTagSFGeneric::prepareBTags Couldn't find all [tag] histograms in the input root file");
+            histos.push_back(*tempHisto);
+            tempHisto = 0;
+        }
+        
+        std::string effHistoName = histoNameAtId(id, histoTypes::eff);
+        if(effHistoName != "") {
+            file.GetObject(effHistoName.c_str(), tempHisto);
+            if(!tempHisto) 
+                throw std::runtime_error("BTagSFGeneric::prepareBTags Couldn't find all [eff] histograms in the input root file");
+            effhistos.push_back(*tempHisto);
+        }
+        
+        if(histoName == "" && effHistoName == "") break;
     }
+    // Reading and extracting madian values from the histogram
+    TH1* medianHisto;
+    file.GetObject("medians", medianHisto);
+    if(!medianHisto) throw std::runtime_error("BTagSFGeneric::prepareBTags Couldn't find [medians] histogram in the input root file");
+    for(int i = 0; i<medianHisto->GetNbinsX(); ++i) medians.push_back((float)medianHisto->GetBinContent(i+1));
 
     histos_[sampleName] = histos;
     effhistos_[sampleName] = effhistos;
+    medianMap_[sampleName] = medians;
 
     file.Close();
 
-    setSampleName(sampleName);
+    if(setSampleName(sampleName) < 0) throw std::runtime_error("BTagSFGeneric::prepareBTags Tried to set a non-existing sampleName");
 
 }
 
@@ -279,7 +296,7 @@ void BTagSFGeneric::produceBtagEfficiencies(const std::string& channel)
 
     // Writing each histogram to file
     std::vector<TH2D> histos = histos_.at(sampleName);
-    for(TH2D histo : histos){
+    for(TH2D histo : histos) {
         histo.Write();
     }
 
@@ -288,7 +305,21 @@ void BTagSFGeneric::produceBtagEfficiencies(const std::string& channel)
     for(TH2D histo : effhistos) {
         histo.Write();
     }
+    
+    // Writing medians to the histogram and then to the file
+    size_t nMedians = (size_t)medians::length_median;
+    TH1D histo("medians","Medians;Property id;Median value",nMedians, 0, nMedians);
+    
+    if(nMedians != medianMap_.at(sampleName).size()) {
+        throw std::range_error("BTagSFGeneric::produceBtagEfficiencies Numbers of stored and designed median values differ");
+    }
+    
+    for(size_t i = 0; i<nMedians; ++i) {
+        histo.SetBinContent(i+1, medianMap_.at(sampleName).at(i));
+    }
+    histo.Write();
 
+    
     file.Close();
 
 
