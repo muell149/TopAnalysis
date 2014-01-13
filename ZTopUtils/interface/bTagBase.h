@@ -83,6 +83,8 @@ public:
     };
 
     enum medians {bpt, beta, cpt, ceta, lpt, leta, length_median};
+    
+    enum histoTypes {tag, eff};
 
     void setWorkingPoint(workingPoints wp) { wp_ = wp; }
     const float& getWPDiscrValue()const{return wpvals_[wp_];}
@@ -120,8 +122,9 @@ public:
 
 protected:
 
-    std::map<std::string, std::vector<TH2D> > histos_; //! bjets, btagged, cjets, ctagged, ljets, ltagged
+    std::map<std::string, std::vector<TH2D> > histos_;      //! bjets, btagged, cjets, ctagged, ljets, ltagged
     std::map<std::string, std::vector<TH2D> > effhistos_;   //! beff, ceff, leff
+    std::map<std::string, std::vector<float> > medianMap_;
 
     // functions to be used in the wrapper classes inheriting from this class
     // example implementation:
@@ -149,8 +152,13 @@ protected:
         effhistp_ = 0;
     }
 
-    const float median(TH1 *)const ;
-    std::map<std::string, std::vector<float> > medianMap_;
+    float median(TH1 *)const ;
+    
+    std::string histoNameAtId(const int id, const histoTypes type)const {
+        if(type == tag) return (int)histoNames_.size()>id ? histoNames_.at(id) : std::string("");
+        if(type == eff) return (int)effHistoNames_.size()>id ? effHistoNames_.at(id) : std::string("");
+        else return std::string("");
+    }
 
 
 
@@ -165,6 +173,8 @@ private:
     systematics syst_;
 
     std::vector<float> wpvals_, minpt_, maxpt_;
+    std::vector<std::string> histoNames_;
+    std::vector<std::string> effHistoNames_;
 
     bool makeeffs_;
 
@@ -196,6 +206,8 @@ private:
             float multiplier = 1) const;
 
     void initWorkingpoints();
+    
+    std::vector<TH2D> reorderedHistograms(const std::vector<TH2D>& unorderedHistos, const histoTypes type);
 
 };
 

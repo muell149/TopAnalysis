@@ -13,6 +13,18 @@ bTagBase::bTagBase():showWarnings(false),debug(false),init_(false),wp_(csvl_wp),
     wpvals_.resize(workingPoints::length_wp, 0);
     minpt_.resize (workingPoints::length_wp, 0);
     maxpt_.resize (workingPoints::length_wp, 0);
+    
+    // Adding histogram names
+    histoNames_.push_back("bjets2D");
+    histoNames_.push_back("bjetsTagged2D");
+    histoNames_.push_back("cjets2D");
+    histoNames_.push_back("cjetsTagged2D");
+    histoNames_.push_back("ljets2D");
+    histoNames_.push_back("ljetsTagged2D");
+    // Adding efficiency histogram names
+    effHistoNames_.push_back("beff2D");
+    effHistoNames_.push_back("ceff2D");
+    effHistoNames_.push_back("leff2D");
 
 }
 /**
@@ -27,7 +39,7 @@ int bTagBase::setSampleName(const std::string & samplename) {
     tempsamplename_=samplename;
     initWorkingpoints();
     if(debug)
-            std::cout << "bTagBase::setSampleName" <<  tempsamplename_<< std::endl;
+            std::cout << "bTagBase::setSampleName " <<  tempsamplename_<< std::endl;
 
 
     std::map<std::string, std::vector<TH2D> >::iterator sampleit = histos_.find(
@@ -81,49 +93,77 @@ int bTagBase::setSampleName(const std::string & samplename) {
     float l_effetabins[] = { 0.0, 1.5, 3.0 };
     unsigned int l_neta = 3;
 
-    TH2D bjets = TH2D((TString) ("bjets2D_"), "unTagged Bjets", npt - 1,
+    std::vector<TH2D> temp;
+    
+    TH2D bjets = TH2D("bjets2D", "unTagged Bjets", npt - 1,
             effptbins, neta - 1, effetabins);
     bjets.Sumw2();
-    TH2D bjetstagged = TH2D((TString) ("bjetsTagged2D_"), "Tagged Bjets",
+    
+    TH2D bjetstagged = TH2D("bjetsTagged2D", "Tagged Bjets",
             npt - 1, effptbins, neta - 1, effetabins);
     bjetstagged.Sumw2();
-    TH2D cjets = TH2D((TString) ("cjets2D_"), "unTagged Cjets", npt - 1,
+    
+    TH2D cjets = TH2D("cjets2D", "unTagged Cjets", npt - 1,
             effptbins, neta - 1, effetabins);
     cjets.Sumw2();
-    TH2D cjetstagged = TH2D((TString) ("cjetsTagged2D_"), "Tagged Cjets",
+    
+    TH2D cjetstagged = TH2D("cjetsTagged2D", "Tagged Cjets",
             npt - 1, effptbins, neta - 1, effetabins);
     cjetstagged.Sumw2();
-    TH2D ljets = TH2D((TString) ("ljets2D_"), "unTagged Ljets", l_npt - 1,
+    
+    TH2D ljets = TH2D("ljets2D", "unTagged Ljets", l_npt - 1,
             l_effptbins, l_neta - 1, l_effetabins);
     ljets.Sumw2();
-    TH2D ljetstagged = TH2D((TString) ("ljetsTagged2D_"), "Tagged Ljets",
+    
+    TH2D ljetstagged = TH2D("ljetsTagged2D", "Tagged Ljets",
             l_npt - 1, l_effptbins, l_neta - 1, l_effetabins);
     ljetstagged.Sumw2();
 
-    std::vector<TH2D> temp;
     temp << bjets << bjetstagged << cjets << cjetstagged << ljets
             << ljetstagged;
-    histos_[tempsamplename_] = temp;
+    histos_[tempsamplename_] = reorderedHistograms(temp, tag);
     histp_ = &(histos_.find(tempsamplename_)->second);
 
-    TH2D beff = TH2D((TString) ("beff2D_"), "Bjets eff", npt - 1, effptbins,
+    TH2D beff = TH2D("beff2D", "Bjets eff", npt - 1, effptbins,
             neta - 1, effetabins);
     beff.Sumw2();
-    TH2D ceff = TH2D((TString) ("ceff2D_"), "Cjets eff", npt - 1, effptbins,
+    TH2D ceff = TH2D("ceff2D", "Cjets eff", npt - 1, effptbins,
             neta - 1, effetabins);
     ceff.Sumw2();
-    TH2D leff = TH2D((TString) ("leff2D_"), "Ljets eff", l_npt - 1, l_effptbins,
+    TH2D leff = TH2D("leff2D", "Ljets eff", l_npt - 1, l_effptbins,
             l_neta - 1, l_effetabins);
     leff.Sumw2();
 
     temp.clear();
     temp << beff << ceff << leff;
-    effhistos_[tempsamplename_] = temp;
+    effhistos_[tempsamplename_] = reorderedHistograms(temp, eff);
     effhistp_ = &(effhistos_.find(tempsamplename_)->second);
 
     return 0;
 
 }
+/**
+ * reorders the histograms to be in the same order as in histoNames_ and effHistoNames_
+ */
+std::vector<TH2D> bTagBase::reorderedHistograms(const std::vector<TH2D>& unorderedHistos, const histoTypes type) {
+    std::vector<std::string>& names = type == tag ? histoNames_ : effHistoNames_;
+    std::vector<TH2D> orderedHistos;
+    for(std::string histoName : names) {
+        bool foundHisto = false;
+        if(debug) std::cout << "bTagBase::reorderedHistograms Looking for histogram: " << histoName << " of type " << type << std::endl;
+        for(TH2D unorderedHisto : unorderedHistos) {
+            if(unorderedHisto.GetName() == histoName) {
+                foundHisto = true;
+                orderedHistos.push_back(unorderedHisto);
+                break;
+            }
+        }
+        if(!foundHisto) throw std::logic_error("bTagBase::reorderedHistograms Some required histogram from histoNames_ has not been created.");
+    }
+    
+    return orderedHistos;
+}
+
 /**
  * adds an entry for a jet with p4, genpartonFlavour, bDiscrValue  and PUweight
  * to the efficiency histograms
@@ -300,7 +340,7 @@ float bTagBase::jetEff(const float &pt, const float& abs_eta,const jetTypes & je
     return effhistp_->at(effh).GetBinContent(ptbin, etabin);
 }
 
-const float bTagBase::median(TH1* h1) const{
+float bTagBase::median(TH1* h1) const{
     int nBin = h1->GetXaxis()->GetNbins();
     std::vector<double> x(nBin);
     h1->GetXaxis()->GetCenter(&x[0]);
