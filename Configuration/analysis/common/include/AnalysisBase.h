@@ -247,20 +247,28 @@ protected:
     /// Whether to or not to produce b-tag efficiencies for the analysed sample
     bool makeBtagEfficiencies()const;
     
+    /// Returns the samplename which is written as metadata in ingoing and outgoing root-file
     const TString& samplename()const{return samplename_;}
     
+    /// Returns the output filename
     const TString& outputFilename()const{return outputfilename_;}
     
+    /// Returns the product of the PDG IDs of the two leptons forming the dilepton system
     const int& channelPdgIdProduct()const{return channelPdgIdProduct_;}
     
+    /// Returns the decay channel
     const TString& channel()const{return channel_;}
     
+    /// Returns the analysed systematic
     const TString& systematic()const{return systematic_;}
     
+    /// Whether it is a MC sample
     const bool& isMC()const{return isMC_;}
     
+    /// Whether generator information about a ttbar system is stored (and whether it should be used for analysis)
     const bool& isTopSignal()const{return isTopSignal_;}
     
+    /// Whether generator information about a Higgs system is stored (and whether it should be used for analysis)
     const bool& isHiggsSignal()const{return isHiggsSignal_;}
     
     
