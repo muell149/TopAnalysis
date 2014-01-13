@@ -37,9 +37,6 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   MvaValidation
   mvaSetup
   mvaStructs
-  JetCorrectionUncertainty
-  JetCorrectorParameters
-  SimpleJetCorrectionUncertainty
   AnalysisHistograms
   BasicAnalyzer
   JetChargeAnalyzer
