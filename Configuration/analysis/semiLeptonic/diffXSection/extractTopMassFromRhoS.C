@@ -146,7 +146,7 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
   TH1F* legEmpty=(TH1F*)TevatronMass->Clone("legEmpty");
   legEmpty->SetMarkerColor(kWhite);
   legEmpty->SetMarkerSize(0.000001);
-  leg->AddEntry(legEmpty, "#splitline{extracted from}{#rho_{S}} in CMS data:}", "P"  );
+  leg->AddEntry(legEmpty, "#splitline{extracted from}{#rho_{S} in CMS data:}", "P"  );
   leg->AddEntry(extractedMass, "#splitline{#chi^{2} result of}{separate bins}", "LP" );
   //leg->AddEntry(legEmpty, " ", "P" );
   leg->AddEntry(legcomb      , "#splitline{global #chi^{2} result:}{"+getTStringFromDouble(chi2Result["min"], 1)+"^{+"+getTStringFromDouble(chi2Result["up"], 1)+"}_{- "+getTStringFromDouble(chi2Result["dn"], 1)+"} GeV}", "FLP");
@@ -181,6 +181,8 @@ void extractTopMassFromRhoS(int verbose=0, double luminosity=19712., bool save=t
       //if(verbose>1) std::cout << " - for " << outputFolder+plotCanvas_[plot]->GetName() << std::endl;
       plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
       plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
+      if(plot<plotCanvas_.size()-1) plotCanvas_[plot]->Print(outputFolder+"massFromRhoS.pdf");
+      else plotCanvas_[plot]->Print(outputFolder+"massFromRhoS.pdf)");
       saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
     }
     gErrorIgnoreLevel=initWarningLV;
@@ -700,6 +702,7 @@ std::map <TString, TH1F*> extraction(int verbose, double luminosity, bool save, 
       if(verbose<1) gErrorIgnoreLevel=kWarning;   
       tempCanv->Print(outputFolder+tempCanv->GetName()+".eps");
       tempCanv->Print(outputFolder+tempCanv->GetName()+".png");
+      tempCanv->Print(outputFolder+"massFromRhoS.pdf(");
       saveToRootFile(outputFile, tempCanv, true, verbose-1, "massFromRhos");
       gErrorIgnoreLevel=initWarningLV;
     }
@@ -733,6 +736,7 @@ std::map <TString, TH1F*> extraction(int verbose, double luminosity, bool save, 
 	if(verbose<1) gErrorIgnoreLevel=kWarning;   
 	tempCanv->Print(outputFolder+tempCanv->GetName()+".eps");
 	tempCanv->Print(outputFolder+tempCanv->GetName()+".png");
+	tempCanv->Print(outputFolder+"massFromRhoS.pdf");
 	saveToRootFile(outputFile, tempCanv, true, verbose-1, "massFromRhos");
 	gErrorIgnoreLevel=initWarningLV;
       }
@@ -778,6 +782,7 @@ std::map <TString, TH1F*> extraction(int verbose, double luminosity, bool save, 
 	if(!((TString(plotCanvas_[plot]->GetName())).Contains("final"))){
 	  plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".eps");
 	  plotCanvas_[plot]->Print(outputFolder+plotCanvas_[plot]->GetName()+".png");
+	  plotCanvas_[plot]->Print(outputFolder+"massFromRhoS.pdf");
 	  saveToRootFile(outputFile, plotCanvas_[plot], true, verbose-1, "massFromRhos");
 	  gROOT->cd();
 	}
