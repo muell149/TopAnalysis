@@ -43,6 +43,9 @@ constexpr double JetEtaCUT = 2.4;
 /// Jet pt selection in GeV
 constexpr double JetPtCUT = 30.;
 
+/// Leading 2 jet pt selection in GeV (For cut based approach)
+constexpr double Lead2JetPtCUT = JetPtCUT;
+
 
 /// B-tag working point
 /// Available options: 
@@ -292,7 +295,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectIndices(jetIndices, jets, LVpt, JetPtCUT);
     orderIndices(jetIndices, jets, LVpt);
     const int numberOfJets = jetIndices.size();
-    const bool has2Jets = numberOfJets > 1;
+    const bool has2Jets = numberOfJets > 1 && jets.at(jetIndices.at(0)).pt() >= Lead2JetPtCUT && jets.at(jetIndices.at(1)).pt() >= Lead2JetPtCUT;
 
     // Fill a vector with all jet pair indices, while sorting each pair by the jet charge:
     // first entry is antiBIndex i.e. with higher jet charge, second entry is bIndex
