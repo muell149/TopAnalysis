@@ -17,7 +17,6 @@
 #pragma link C++ class HistoListReader+;
 #pragma link C++ class std::map<std::string, PlotProperties>+;
 #pragma link C++ class std::vector<std::vector<int> >+;
-#pragma link C++ class PUReweighter+;
 
 
 

@@ -9,7 +9,6 @@ SET( ${PROJECT_NAME}_HEADERS_THAT_NEED_ROOTDICT
   classes
   classesFwd
   HistoListReader
-  PUReweighter
   LinkDef )
 
 SET( ${PROJECT_NAME}_LIBSOURCES
@@ -24,7 +23,6 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   HiggsAnalysis
   analysisUtils
   analysisObjectStructs
-  PUReweighter
   KinReco
   KinematicReconstruction
   KinematicReconstruction_LSroutines

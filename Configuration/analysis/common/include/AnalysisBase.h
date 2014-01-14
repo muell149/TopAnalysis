@@ -17,7 +17,6 @@ class TString;
 #include "classesFwd.h"
 #include "storeTemplate.h"
 
-class PUReweighter;
 class KinematicReconstruction;
 class TriggerScaleFactors;
 class LeptonScaleFactors;
@@ -30,6 +29,9 @@ class CommonGenObjects;
 class TopGenObjects;
 class HiggsGenObjects;
 class KinRecoObjects;
+namespace ztop{
+    class PUReweighter;
+}
 
 
 
@@ -88,7 +90,7 @@ public:
     void SetKinematicReconstruction(KinematicReconstruction* kinematicReconstruction);
     
     /// Set the pileup reweighter
-    void SetPUReweighter(PUReweighter* puReweighter);
+    void SetPUReweighter(ztop::PUReweighter* puReweighter);
     
     /// Set the lepton scale factors
     void SetLeptonScaleFactors(const LeptonScaleFactors& scaleFactors);
@@ -603,7 +605,7 @@ private:
     KinematicReconstruction* kinematicReconstruction_;
     
     /// Pointer to the pileup reweighter instance
-    PUReweighter* puReweighter_;
+    ztop::PUReweighter* puReweighter_;
     
     /// Pointer to lepton scale factors instance
     const LeptonScaleFactors* leptonScaleFactors_;

@@ -26,13 +26,13 @@
 
 #include "AnalysisBase.h"
 #include "KinReco.h"
-#include "PUReweighter.h"
 #include "analysisUtils.h"
 #include "classes.h"
 #include "ScaleFactors.h"
 #include "BTagUtils.h"
 #include "KinematicReconstruction.h"
 #include "analysisObjectStructs.h"
+#include "TopAnalysis/ZTopUtils/interface/PUReweighter.h"
 
 
 
@@ -313,7 +313,7 @@ void AnalysisBase::SetKinematicReconstruction(KinematicReconstruction* kinematic
 
 
 
-void AnalysisBase::SetPUReweighter(PUReweighter* puReweighter)
+void AnalysisBase::SetPUReweighter(ztop::PUReweighter* puReweighter)
 {
     puReweighter_ = puReweighter;
 }
