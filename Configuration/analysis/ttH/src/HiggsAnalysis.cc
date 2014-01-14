@@ -43,11 +43,22 @@ constexpr double JetEtaCUT = 2.4;
 /// Jet pt selection in GeV
 constexpr double JetPtCUT = 30.;
 
-/// b-tag working point
-/// CSV Loose: 0.244
-/// CSV Medium: 0.679
-/// CSV Tight: 0.898
-constexpr double BtagWP = 0.244;
+/// Leading 2 jet pt selection in GeV (For cut based approach)
+constexpr double Lead2JetPtCUT = JetPtCUT;
+
+
+/// B-tag working point
+/// Available options: 
+///  csvl_wp (0.244) 
+///  csvm_wp (0.679)
+///  csvt_wp (0.898)
+/// Used only if new btag scaling is used (useGenericBTagSF = true; in load_Analysis.cc)
+constexpr BTagSFGeneric::workingPoints BtagWP = BTagSFGeneric::csvl_wp;
+
+/// Used only if default old btag scaling is used (useGenericBTagSF = false; in load_Analysis.cc)
+/// FIXME Should be removed when the old method is deprecated
+constexpr double BtagWP_val = 0.244;
+
 
 /// MET selection for same-flavour channels (ee, mumu)
 constexpr double MetCUT = 40.;
@@ -81,9 +92,6 @@ void HiggsAnalysis::Begin(TTree*)
     // Defaults from AnalysisBase
     AnalysisBase::Begin(0);
 
-    // Prepare things for analysis
-    this->prepareJER_JES();
-
     // Set up selection steps of MVA tree handler
     if(mvaTreeHandler_) mvaTreeHandler_->book();
 }
@@ -96,15 +104,15 @@ void HiggsAnalysis::Terminate()
     // Produce b-tag efficiencies
     // FIXME: runWithTtbb_ is dirty hack, since makeBtagEfficiencies() is in AnalysisBase
     // FIXME: Shouldn't we also clear b-tagging efficiency histograms if they are produced ?
-    if(!runWithTtbb_ && this->makeBtagEfficiencies() && btagScaleFactors_) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
-    else if(!runWithTtbb_ && this->makeBtagEfficiencies() && bTagSFGeneric_) bTagSFGeneric_->produceBtagEfficiencies(static_cast<std::string>(channel_));
+    if(!runWithTtbb_ && this->makeBtagEfficiencies() && btagScaleFactors_) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(this->channel()));
+    else if(!runWithTtbb_ && this->makeBtagEfficiencies() && bTagSFGeneric_) bTagSFGeneric_->produceBtagEfficiencies(static_cast<std::string>(this->channel()));
 
     // Do everything needed for MVA
     if(mvaTreeHandler_){
         // Produce and write tree
-        mvaTreeHandler_->writeTrees(static_cast<std::string>(outputfilename_),
-                                    Channel::convertChannel(static_cast<std::string>(channel_)),
-                                    Systematic::convertSystematic(static_cast<std::string>(systematic_)));
+        mvaTreeHandler_->writeTrees(static_cast<std::string>(this->outputFilename()),
+                                    Channel::convertChannel(static_cast<std::string>(this->channel())),
+                                    Systematic::convertSystematic(static_cast<std::string>(this->systematic())));
         //mvaTreeHandler_->writeTrees(fOutput);
 
         // Create and store control plots in fOutput
@@ -129,8 +137,11 @@ void HiggsAnalysis::SlaveBegin(TTree *)
     AnalysisBase::SlaveBegin(0);
 
     // Histograms for b-tagging efficiencies
-    if(!runWithTtbb_ && btagScaleFactors_ && this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
-    else if(!runWithTtbb_ && bTagSFGeneric_) bTagSFGeneric_->prepareBTags(fOutput, static_cast<std::string>(channel_));
+    if(!runWithTtbb_ && btagScaleFactors_ && this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(this->channel()));
+    else if(!runWithTtbb_ && bTagSFGeneric_) {
+        bTagSFGeneric_->setWorkingPoint(BtagWP);
+        bTagSFGeneric_->prepareBTags(fOutput, static_cast<std::string>(this->channel()));
+    }
 
     // Book histograms of all analyzers
     this->bookAll();
@@ -155,7 +166,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
 
     // Use utilities without namespaces
-    using namespace ttbar;
+    using namespace common;
 
 
     // Entry for object structs are not yet read, so reset
@@ -185,7 +196,8 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     //if(this->failsTopGeneratorSelection(entry)) return kTRUE;
 
     // Separate inclusive ttH sample in decays H->bbbar and others
-    if(this->failsHiggsGeneratorSelection(entry)) return kTRUE;
+    const int higgsDecayMode = this->higgsDecayMode(entry);
+    if(this->failsHiggsGeneratorSelection(higgsDecayMode)) return kTRUE;
 
     // Separate tt+bb from tt+other
     if(this->failsAdditionalJetFlavourSelection(entry)) return kTRUE;
@@ -283,7 +295,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectIndices(jetIndices, jets, LVpt, JetPtCUT);
     orderIndices(jetIndices, jets, LVpt);
     const int numberOfJets = jetIndices.size();
-    const bool has2Jets = numberOfJets > 1;
+    const bool has2Jets = numberOfJets > 1 && jets.at(jetIndices.at(0)).pt() >= Lead2JetPtCUT && jets.at(jetIndices.at(1)).pt() >= Lead2JetPtCUT;
 
     // Fill a vector with all jet pair indices, while sorting each pair by the jet charge:
     // first entry is antiBIndex i.e. with higher jet charge, second entry is bIndex
@@ -296,15 +308,17 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     const std::vector<double>& jetBTagCSV = *recoObjects.jetBTagCSV_;
     const std::vector<int>& jetPartonFlavour = *commonGenObjects.jetPartonFlavour_;
     std::vector<int> bjetIndices = jetIndices;
-    selectIndices(bjetIndices, jetBTagCSV, BtagWP);
+    if(bTagSFGeneric_) selectIndices(bjetIndices, jetBTagCSV, (double)bTagSFGeneric_->getWPDiscrValue());
+    else selectIndices(bjetIndices, jetBTagCSV, BtagWP_val);
     if(retagBJets_) {
-        if (isMC_ && btagScaleFactors_ && !(btagScaleFactors_->makeEfficiencies())){
+        // FIXME Should be removed when the old method is deprecated
+        if (this->isMC() && btagScaleFactors_ && !(btagScaleFactors_->makeEfficiencies())){
             // Apply b-tag efficiency MC correction using random number based tag flipping
             btagScaleFactors_->indexOfBtags(bjetIndices, jetIndices,
                                             jets, jetPartonFlavour, jetBTagCSV,
-                                            BtagWP, static_cast<std::string>(channel_));
+                                            BtagWP_val, static_cast<std::string>(this->channel()));
         }
-        else if (isMC_ && bTagSFGeneric_ && !(bTagSFGeneric_->makeEfficiencies())){
+        else if (this->isMC() && bTagSFGeneric_ && !(bTagSFGeneric_->makeEfficiencies())){
             // Apply b-tag efficiency MC correction using random number based tag flipping
             bTagSFGeneric_->indexOfBtags(bjetIndices, jetIndices,
                                          jets, jetPartonFlavour, jetBTagCSV);
@@ -316,7 +330,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
 
     // Get MET
     const LV& met = *recoObjects.met_;
-    const bool hasMetOrEmu = channel_=="emu" || met.pt()>MetCUT;
+    const bool hasMetOrEmu = this->channel()=="emu" || met.pt()>MetCUT;
 
     const tth::RecoObjectIndices recoObjectIndices(allLeptonIndices,
                                                    leptonIndices, antiLeptonIndices,
@@ -337,8 +351,9 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     //const double weightBtagSF = ReTagJet ? 1. : this->weightBtagSF(jetIndices, jets, jetPartonFlavour);
     double weightBtagSF = 1.0;
     if(!retagBJets_) {
+        // FIXME Should be removed when the old method is deprecated
         if(btagScaleFactors_) weightBtagSF = this->weightBtagSF(jetIndices, jets, jetPartonFlavour);
-        else if(bTagSFGeneric_ && isMC_) weightBtagSF = bTagSFGeneric_->calculateBtagSF(jetIndices, jets, jetPartonFlavour);
+        else if(bTagSFGeneric_ && this->isMC()) weightBtagSF = bTagSFGeneric_->calculateBtagSF(jetIndices, jets, jetPartonFlavour);
     }
 
     // The weight to be used for filling the histograms
@@ -466,7 +481,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     selectionStep = "4";
 
     //Exclude the Z window
-    if(channel_!="emu" && isZregion) return kTRUE;
+    if(this->channel()!="emu" && isZregion) return kTRUE;
 
     // ++++ Control Plots ++++
 
@@ -518,7 +533,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     if(!runWithTtbb_ && this->makeBtagEfficiencies() && btagScaleFactors_){
         btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
                                               jets, jetPartonFlavour,
-                                              weight, static_cast<std::string>(channel_));
+                                              weight, static_cast<std::string>(this->channel()));
     }
     else if(!runWithTtbb_ && this->makeBtagEfficiencies() && bTagSFGeneric_){
         bTagSFGeneric_->fillBtagHistograms(jetIndices, jetBTagCSV,
@@ -549,7 +564,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     int genAntiBjetFromTopIndex(-1);
     int matchedBjetFromTopIndex(-1);
     int matchedAntiBjetFromTopIndex(-1);
-    if(isTopSignal_){
+    if(topGenObjects.valuesSet_){
         const VLV& allGenJets = *commonGenObjects.allGenJets_;
         // Find gen-level b jet and anti-b jet corresponding to (anti)b from (anti)top
         // FIXME: should one clean the genJetCollection to remove low-pt (or high-eta) jets?
@@ -567,8 +582,7 @@ Bool_t HiggsAnalysis::Process(Long64_t entry)
     int genAntiBjetFromHiggsIndex(-1);
     int matchedBjetFromHiggsIndex(-1);
     int matchedAntiBjetFromHiggsIndex(-1);
-    // FIXME: should not use higgsDecayMode_, but specific method
-    if(isHiggsSignal_ && higgsDecayMode_==5){
+    if(higgsDecayMode == 5){
         const VLV& allGenJets = *commonGenObjects.allGenJets_;
         // Find gen-level b jet and anti-b jet corresponding to (anti)b from Higgs
         // FIXME: should one clean the genJetCollection to remove low-pt (or high-eta) jets?
@@ -619,7 +633,7 @@ tth::IndexPairs HiggsAnalysis::chargeOrderedJetPairIndices(const std::vector<int
             // Get the indices of b and anti-b jet defined by jet charge
             int bIndex = *i_jetIndex;
             int antiBIndex = *j_jetIndex;
-            ttbar::orderIndices(antiBIndex, bIndex, jetCharges);
+            common::orderIndices(antiBIndex, bIndex, jetCharges);
 
             result.push_back(std::make_pair(antiBIndex, bIndex));
         }
@@ -729,14 +743,14 @@ void HiggsAnalysis::SetAllAnalysisHistograms(std::vector<AnalysisHistogramsBase*
 
 
 
-bool HiggsAnalysis::failsHiggsGeneratorSelection(const Long64_t& entry)const
+bool HiggsAnalysis::failsHiggsGeneratorSelection(const int higgsDecayMode)const
 {
-    if(!isHiggsSignal_) return false;
-    GetHiggsDecayModeEntry(entry);
+    // Check whether it is a Higgs sample
+    if(higgsDecayMode < 0) return false;
+    
     // Separate ttH events from inclusve decay into H->bbbar and other decays
-    // FIXME: do not use directly higgsDecayMode_, but a function
-    if(isInclusiveHiggs_ && !bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_==5) return true;
-    if(isInclusiveHiggs_ && bbbarDecayFromInclusiveHiggs_ && higgsDecayMode_!=5) return true;
+    if(isInclusiveHiggs_ && !bbbarDecayFromInclusiveHiggs_ && higgsDecayMode==5) return true;
+    if(isInclusiveHiggs_ && bbbarDecayFromInclusiveHiggs_ && higgsDecayMode!=5) return true;
     return false;
 }
 
@@ -744,14 +758,14 @@ bool HiggsAnalysis::failsHiggsGeneratorSelection(const Long64_t& entry)const
 
 bool HiggsAnalysis::failsAdditionalJetFlavourSelection(const Long64_t& entry)const
 {
-    if(!isTopSignal_) return false;
-    if(isHiggsSignal_) return false;
+    if(!this->isTopSignal()) return false;
+    if(this->isHiggsSignal()) return false;
 
     // FIXME: this is a workaround as long as there is no specific additional jet flavour info written to nTuple
     const TopGenObjects& topGenObjects = this->getTopGenObjects(entry);
-    const int nGenBJets = topGenObjects.genBHadIndex_->size();
-    if(runWithTtbb_ && nGenBJets<=2) return true;
-    if(!runWithTtbb_ && nGenBJets>2) return true;
+    const int nGenBjets = topGenObjects.genBHadIndex_->size();
+    if(runWithTtbb_ && nGenBjets<=2) return true;
+    if(!runWithTtbb_ && nGenBjets>2) return true;
 
     return false;
 }

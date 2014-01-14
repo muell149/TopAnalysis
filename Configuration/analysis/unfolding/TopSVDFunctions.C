@@ -7601,7 +7601,7 @@ double TopSVDFunctions::SVD_Unfold(
         
         // Setup Style
         #ifdef STANDALONE_COMPILE // needed for setHHStyle in dilepton analysis, where it is in a namespace
-        ttbar::setHHStyle(*gStyle);
+        common::setHHStyle(*gStyle);
         #else
         setHHStyle(*gStyle);
         #endif
@@ -8194,7 +8194,7 @@ double TopSVDFunctions::SVD_Unfold(
     
         // Reset Style
         #ifdef STANDALONE_COMPILE // needed for setHHStyle in dilepton analysis, where it is in a namespace
-        ttbar::setHHStyle(*gStyle);
+        common::setHHStyle(*gStyle);
         #else
         setHHStyle(*gStyle);
         #endif

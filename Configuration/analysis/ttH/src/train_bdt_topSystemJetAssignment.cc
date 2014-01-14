@@ -114,7 +114,7 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
         const Systematic::Systematic& systematic = systematicChannelMergedFiles.first;
         for(const auto& channelMergedFiles : systematicChannelMergedFiles.second){
             const Channel::Channel& channel = channelMergedFiles.first;
-            const TString outputFolder = ttbar::assignFolder(MvaOutputDIR, channel, systematic);
+            const TString outputFolder = common::assignFolder(MvaOutputDIR, channel, systematic);
             const TString& fileName = channelMergedFiles.second.at(0);
             
             // Print all separation power plots
@@ -159,12 +159,12 @@ void trainBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
 int main(int argc, char** argv)
 {
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: combined", false, 1, 4,
-        ttbar::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsPlotting)));
+        common::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsPlotting)));
     CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal", false, 1, 100,
-        ttbar::makeStringCheck({"Nominal", ""}));
+        common::makeStringCheck({"Nominal", ""}));
     CLParameter<std::string> opt_mode("m", "Mode: separation plots (cp), run MVA (mva). Default is cp", false, 1, 2,
         //[](const std::string& m){return m=="" || m=="cp" || m=="mva";});
-        ttbar::makeStringCheck({"", "cp", "mva"}));
+        common::makeStringCheck({"", "cp", "mva"}));
     CLAnalyser::interpretGlobal(argc, argv);
     
     // Set up channels

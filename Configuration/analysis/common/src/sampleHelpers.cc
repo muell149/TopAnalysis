@@ -58,6 +58,10 @@ Systematic::Systematic Systematic::convertSystematic(const std::string& systemat
     if(systematic == "BTAG_CEFF_DOWN") return btagCeff_down;
     if(systematic == "BTAG_LEFF_UP") return btagLeff_up;
     if(systematic == "BTAG_LEFF_DOWN") return btagLeff_down;
+    if(systematic == "JER_UP") return jer_up;
+    if(systematic == "JER_DOWN") return jer_down;
+    if(systematic == "JES_UP") return jes_up;
+    if(systematic == "JES_DOWN") return jes_down;
     if(systematic == "MASS_UP") return mass_up;
     if(systematic == "MASS_DOWN") return mass_down;
     if(systematic == "MATCH_UP") return match_up;
@@ -115,6 +119,10 @@ std::string Systematic::convertSystematic(const Systematic& systematic)
     if(systematic == btagCeff_down) return "BTAG_CEFF_DOWN";
     if(systematic == btagLeff_up) return "BTAG_LEFF_UP";
     if(systematic == btagLeff_down) return "BTAG_LEFF_DOWN";
+    if(systematic == jer_up) return "JER_UP";
+    if(systematic == jer_down) return "JER_DOWN";
+    if(systematic == jes_up) return "JES_UP";
+    if(systematic == jes_down) return "JES_DOWN";
     if(systematic == mass_up) return "MASS_UP";
     if(systematic == mass_down) return "MASS_DOWN";
     if(systematic == match_up) return "MATCH_UP";
@@ -224,11 +232,11 @@ std::vector<std::string> Channel::convertChannels(const std::vector<Channel>& ch
 
 
 
-// --------------------- Functions defined in namespace ttbar -------------------------
+// --------------------- Functions defined in namespace common -------------------------
 
 
 
-TString ttbar::assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
+TString common::assignFolder(const char* baseDir, const Channel::Channel& channel, const Systematic::Systematic& systematic)
 {
     std::string path("");
     
@@ -257,7 +265,7 @@ TString ttbar::assignFolder(const char* baseDir, const Channel::Channel& channel
 
 
 
-TString ttbar::accessFolder(const char* baseDir, const Channel::Channel& channel,
+TString common::accessFolder(const char* baseDir, const Channel::Channel& channel,
                             const Systematic::Systematic& systematic, const bool allowNonexisting)
 {
     // Build directory path

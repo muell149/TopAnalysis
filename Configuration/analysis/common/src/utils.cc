@@ -8,7 +8,7 @@
 
 
 
-const std::string ttbar::CMSSW_BASE()
+const std::string common::CMSSW_BASE()
 {
     const char* cmssw_base = std::getenv("CMSSW_BASE");
     if (!cmssw_base) {
@@ -24,16 +24,16 @@ const std::string ttbar::CMSSW_BASE()
 
 
 
-const std::string ttbar::DATA_PATH()
+const std::string common::DATA_PATH_COMMON()
 {
     std::string result(CMSSW_BASE());
-    result.append("/src/TopAnalysis/Configuration/analysis/diLeptonic/data");
+    result.append("/src/TopAnalysis/Configuration/analysis/common/data");
     return result;
 }
 
 
 
-std::function<bool(const std::string& s)> ttbar::makeStringCheck(const std::vector<std::string> v_string)
+std::function<bool(const std::string& s)> common::makeStringCheck(const std::vector<std::string> v_string)
 {
     return [v_string](const std::string& test){
         return std::find(begin(v_string), end(v_string), test) != end(v_string);

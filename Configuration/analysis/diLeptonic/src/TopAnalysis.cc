@@ -16,6 +16,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TIterator.h>
+#include <TObject.h>
 
 #include "TopAnalysis.h"
 #include "HistoListReader.h"
@@ -75,8 +76,6 @@ void TopAnalysis::Begin(TTree*)
     // Defaults from AnalysisBase
     AnalysisBase::Begin(0);
     
-    prepareJER_JES();
-    
     // FIXME: move this also in ScaleFactors.h ?
     prepareKinRecoSF();
     
@@ -87,7 +86,7 @@ void TopAnalysis::Begin(TTree*)
 void TopAnalysis::Terminate()
 {
     // Produce b-tag efficiencies
-    if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(channel_));
+    if(this->makeBtagEfficiencies()) btagScaleFactors_->produceBtagEfficiencies(static_cast<std::string>(this->channel()));
     
     // Calculate an overall weight due to the shape reweighting, and apply it
     const double globalNormalisationFactor = overallGlobalNormalisationFactor();
@@ -657,7 +656,7 @@ void TopAnalysis::SlaveBegin(TTree*)
 
 
     // Histograms for b-tagging efficiencies
-    if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(channel_));
+    if(this->makeBtagEfficiencies()) btagScaleFactors_->bookBtagHistograms(fOutput, static_cast<std::string>(this->channel()));
     
     h_PUSF = store(new TH1D("PUSF", "PU SF per event", 200, 0.5, 1.5));
     h_TrigSF = store(new TH1D("TrigSF", "Trigger SF per event", 200, 0.5, 1.5));
@@ -741,7 +740,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // Use utilities without namespaces
     using ROOT::Math::VectorUtil::DeltaPhi;
     using ROOT::Math::VectorUtil::DeltaR;
-    using namespace ttbar;
+    using namespace common;
     
     
     // Entry for object structs are not yet read, so reset
@@ -766,7 +765,8 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     const double weightMadgraphCorrection = this->madgraphWDecayCorrection(entry);
 
     // Weight due to PDF variation systematics
-    const double pdfWeight = this->weightPdf(entry);
+    const double pdfWeight = this->weightPdf(entry, pdf_no_);
+    h_PDFTotalWeight->Fill(1, pdfWeight);
     
     // Get weight due to pileup reweighting
     const double weightPU = this->weightPileup(entry);
@@ -779,7 +779,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     const TopGenObjects& topGenObjects = this->getTopGenObjects(entry);
 
     // Apply the top-quark pT reweighting if the bool 'ApplyTopReweight' says so ;)
-    const double weightTopPtReweighting = (ApplyTopPtReweight && isTopSignal_) ? this->weightTopPtReweighting( (*topGenObjects.GenTop_).Pt(), (*topGenObjects.GenAntiTop_).Pt() ) : 1.;
+    const double weightTopPtReweighting = ApplyTopPtReweight ? this->weightTopPtReweighting((*topGenObjects.GenTop_).Pt(), (*topGenObjects.GenAntiTop_).Pt()) : 1.;
 
     // Get true level weights
     const double trueLevelWeightNoPileupNoClosure = weightGenerator*weightMadgraphCorrection*pdfWeight*weightTopPtReweighting;
@@ -791,7 +791,6 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     const CommonGenObjects& commonGenObjects = this->getCommonGenObjects(entry); 
 
     // Access objects info
-    //this->GetRecoBranchesEntry(entry);
     const RecoObjects& recoObjects = this->getRecoObjects(entry);
 
     // Get indices of B and anti-B hadrons steming from ttbar system
@@ -886,11 +885,11 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     // and order b-jets by btag discriminator (beginning with the highest value)
     std::vector<int> bjetIndices = jetIndices;
     selectIndices(bjetIndices, (*recoObjects.jetBTagCSV_), BtagWP);
-    if(isMC_ && !(btagScaleFactors_->makeEfficiencies()) && ReTagJet){
+    if(this->isMC() && !(btagScaleFactors_->makeEfficiencies()) && ReTagJet){
         // Apply b-tag efficiency MC correction using random number based tag flipping
         btagScaleFactors_->indexOfBtags(bjetIndices, jetIndices,
                                         (*recoObjects.jets_), (*commonGenObjects.jetPartonFlavour_), (*recoObjects.jetBTagCSV_),
-                                        BtagWP, static_cast<std::string>(channel_));
+                                        BtagWP, static_cast<std::string>(this->channel()));
     }
     orderIndices(bjetIndices, (*recoObjects.jetBTagCSV_));
     const int numberOfBjets = bjetIndices.size();
@@ -898,7 +897,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     
     // Get MET
     const LV& met((*recoObjects.met_));
-    const bool hasMetOrEmu = channel_=="emu" || met.Pt()>40;
+    const bool hasMetOrEmu = this->channel()=="emu" || met.Pt()>40;
     
     // Determine all reco level weights
     const double weightLeptonSF = this->weightLeptonSF(leadingLeptonIndex, nLeadingLeptonIndex, (*recoObjects.allLeptons_), (*recoObjects.lepPdgId_));
@@ -968,9 +967,9 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if (dilepton.M() < 20) return kTRUE;
     
     // weight even without PU reweighting
-    h_vertMulti_noPU->Fill(*recoObjects.vertMulti_, weightNoPileup);
+    h_vertMulti_noPU->Fill(recoObjects.vertMulti_, weightNoPileup);
     
-    h_vertMulti->Fill(*recoObjects.vertMulti_, weight);
+    h_vertMulti->Fill(recoObjects.vertMulti_, weight);
     
     h_step4->Fill(1, weight);
     h_TrigSF->Fill(weightTriggerSF, 1.);
@@ -979,7 +978,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_jetMulti_diLep->Fill(numberOfJets, weight);
     h_diLepMassFull->Fill(dilepton.M(), weight);
     
-    if(isTopSignal_ && hasLeptonPair && has2Jets)
+    if(topGenObjects.valuesSet_ && hasLeptonPair && has2Jets)
     {// Set of histograms needed to estimate the efficiency and acceptance requested by the TopXSection conveners
         h_GenAll_RecoCuts_noweight->Fill((*topGenObjects.GenTop_).M(), trueLevelWeightNoPileup);
         h_GenAll_RecoCuts->Fill((*topGenObjects.GenTop_).M(), weight);
@@ -1052,7 +1051,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     //=== CUT ===
     //Exclude the Z window
-    if (channel_ != "emu" && isZregion) return kTRUE;
+    if (this->channel() != "emu" && isZregion) return kTRUE;
     
     h_step5->Fill(1, weight);
     h_LeptonpT_diLep->Fill((*recoObjects.allLeptons_).at(leptonIndex).Pt(), weight);
@@ -1203,7 +1202,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     if(this->makeBtagEfficiencies()){
         btagScaleFactors_->fillBtagHistograms(jetIndices, bjetIndices,
                                               (*recoObjects.jets_), (*commonGenObjects.jetPartonFlavour_),
-                                              weight, static_cast<std::string>(channel_));
+                                              weight, static_cast<std::string>(this->channel()));
         return kTRUE;
     }
     
@@ -1221,7 +1220,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
         if (fullSelectionCounter == 0)
             std::cout << "Selected#\tRun\tEvent\tlep+\tlep-\tMll\tNJets\tjet0\tjet1\tNTags\tGenJet1\tGenJet2\tMet\tGenMet\tt/tbar_decay\n"
             << std::setprecision(2) << std::fixed;
-            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << *recoObjects.runNumber_ << "\t" << *recoObjects.eventNumber_ << "\t" << (*recoObjects.allLeptons_).at(antiLeptonIndex) << "\t" << (*recoObjects.allLeptons_).at(leptonIndex) << "\t"
+            std::cout << "Event#" << ++fullSelectionCounter << ":\t" << recoObjects.runNumber_ << "\t" << recoObjects.eventNumber_ << "\t" << (*recoObjects.allLeptons_).at(antiLeptonIndex) << "\t" << (*recoObjects.allLeptons_).at(leptonIndex) << "\t"
             << dilepton.M() << "\t" << numberOfJets << "\t"
             << (*recoObjects.jets_).at(jetIndices.at(0)) << "\t" << (*recoObjects.jets_).at(jetIndices.at(1)) << "\t" << numberOfBjets << "\t"
             << (*commonGenObjects.associatedGenJet_).at(jetIndices.at(0)) << "\t" << (*commonGenObjects.associatedGenJet_).at(jetIndices.at(1)) << "\t"
@@ -1299,7 +1298,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
     h_nKinRecoSol_vs_JetEta->Fill((*recoObjects.jets_).at(1).Eta(), weight);
     h_nKinRecoSol_Eff->Fill(1, weight);
  
-    if(isTopSignal_){//Ievgen
+    if(topGenObjects.valuesSet_){//Ievgen
         h_RMSvsGenToppT->Fill((*topGenObjects.GenTop_).Pt(),(*topGenObjects.GenTop_).Pt()-(*kinRecoObjects.HypTop_).at(0).Pt());
         h_RMSvsGenToppT->Fill((*topGenObjects.GenAntiTop_).Pt(),(*topGenObjects.GenAntiTop_).Pt()-(*kinRecoObjects.HypAntiTop_).at(0).Pt());
    
@@ -1651,7 +1650,7 @@ Bool_t TopAnalysis::Process ( Long64_t entry )
 
     //=== CUT ===
     //Following histograms only filled for the signal sample
-    if (! isTopSignal_) return kTRUE;
+    if (!topGenObjects.valuesSet_) return kTRUE;
 
     // top quark properties
     h_GenRecoToppT->Fill((*kinRecoObjects.HypTop_).at(solutionIndex).Pt(), (*topGenObjects.GenTop_).Pt(), weight );
@@ -1949,22 +1948,29 @@ void TopAnalysis::SetClosureTest(TString closure, double slope)
         } else {
             std::cerr << "invalid closure test function\n";
             exit(1);
-        }            
-        if (closure != "nominal") {
-            outputfilename_.ReplaceAll(".root", TString::Format("_fakerun_%s%.3f.root", closure.Data(), slope));
-        } else {
-            outputfilename_.ReplaceAll(".root", TString::Format("_fakerun_%s.root", closure.Data()));
         }
-        std::cout << "<<< Closure test. Writing to: " << outputfilename_ << "\n";
+        
+        TString outputFilename = this->outputFilename();
+        if (closure != "nominal") {
+            outputFilename.ReplaceAll(".root", TString::Format("_fakerun_%s%.3f.root", closure.Data(), slope));
+        } else {
+            outputFilename.ReplaceAll(".root", TString::Format("_fakerun_%s.root", closure.Data()));
+        }
+        this->SetOutputfilename(outputFilename);
+        std::cout << "<<< Closure test. Writing to: " << outputFilename << "\n";
+        
         //BRANCHING FRACTION
         double br = 0.;
-        if (channelPdgIdProduct_ == -11*11 || channelPdgIdProduct_ == -13*13) br = 0.01166;
-        else if (channelPdgIdProduct_ == -11*13) br = 0.02332;
+        const int channelPdgIdProduct = this->channelPdgIdProduct();
+        if (channelPdgIdProduct == -11*11 || channelPdgIdProduct == -13*13) br = 0.01166;
+        else if (channelPdgIdProduct == -11*13) br = 0.02332;
         else {
             std::cerr << "closure test channel invalid\n"; exit(1);
         }
         closureMaxEvents_ = TOPXSEC * 1000 * LUMI * br;
-        samplename_.Append("_fakedata");
+        TString samplename = this->samplename();
+        samplename.Append("_fakedata");
+        this->SetSamplename(samplename, "");
     }
 }
 
@@ -1972,8 +1978,8 @@ void TopAnalysis::SetClosureTest(TString closure, double slope)
 
 double TopAnalysis::calculateClosureTestWeight(const Long64_t& entry)
 {
-    if(!doClosureTest_ || !isTopSignal_) return 1.;
-    double weight = closureFunction_(entry);
+    if(!doClosureTest_ || !this->isTopSignal()) return 1.;
+    const double weight = closureFunction_(entry);
     h_ClosureTotalWeight->Fill(1, weight);
     return weight;
 }
@@ -2022,17 +2028,6 @@ double TopAnalysis::overallGlobalNormalisationFactor()
 
 
 
-double TopAnalysis::weightPdf(Long64_t entry)
-{
-    if(pdf_no_ < 0) return 1.;
-    GetPDFEntry(entry);
-    double pdfWeight = weightPDF_->at(pdf_no_); //vector is 0 based
-    h_PDFTotalWeight->Fill(1, pdfWeight);
-    return pdfWeight;
-}
-
-
-
 void TopAnalysis::bHadronIndices(int& bHadronIndex, int& antiBHadronIndex,const CommonGenObjects& commonGenObjects,const TopGenObjects& topGenObjects)
 {
     int& BHadronIndex(bHadronIndex);
@@ -2040,7 +2035,7 @@ void TopAnalysis::bHadronIndices(int& bHadronIndex, int& antiBHadronIndex,const 
     BHadronIndex = -1;
     AntiBHadronIndex = -1;
     
-    if(!isTopSignal_) return;
+    if(!topGenObjects.valuesSet_) return;
     
     
     std::vector<size_t> idx_leadbHadJet;
@@ -2203,7 +2198,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
                                     const double trueLevelWeightNoPileup, const double trueLevelWeight,const CommonGenObjects& commonGenObjects,const TopGenObjects& topGenObjects)
 {
     // Use utilities without namespaces
-    using namespace ttbar;
+    using namespace common;
     using ROOT::Math::VectorUtil::DeltaPhi;
     
     LV& LeadGenTop(leadGenTop);
@@ -2215,7 +2210,7 @@ void TopAnalysis::generatorTopEvent(LV& leadGenTop, LV& nLeadGenTop,
     
     genHT = -1.;
     
-    if(!isTopSignal_) return;
+    if(!topGenObjects.valuesSet_) return;
     
     const int BHadronIndex(bHadronIndex);
     const int AntiBHadronIndex(antiBHadronIndex);
@@ -2340,7 +2335,7 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
                                           const TopGenObjects& topGenObjects)
 {
     // Use utilities without namespaces
-    using namespace ttbar;
+    using namespace common;
     using ROOT::Math::VectorUtil::DeltaPhi;
     using ROOT::Math::VectorUtil::DeltaR;
 
@@ -2348,7 +2343,7 @@ void TopAnalysis::generatorTTbarjetsEvent(double& jetHTGen,
     int jetnum = -1;
     jetHTGen = 0.;
     
-    if(!isTopSignal_) return;
+    if(!topGenObjects.valuesSet_) return;
     
     const int BHadronIndex(bHadronIndex);
     const int AntiBHadronIndex(antiBHadronIndex);
@@ -2448,7 +2443,7 @@ void TopAnalysis::CreateBinnedControlPlots(TH1* h_differential, TH1* h_control, 
         std::string binning = 
             i == 0 ? "underflow" :
             i == pair.first->GetNbinsX() + 1 ? "overflow" :
-            ttbar::d2s(pair.first->GetBinLowEdge(i)) + " to " + ttbar::d2s(pair.first->GetBinLowEdge(i+1));
+            common::d2s(pair.first->GetBinLowEdge(i)) + " to " + common::d2s(pair.first->GetBinLowEdge(i+1));
         binning = std::string(" (") + h_differential->GetName() + " " + binning + ")";
         std::string n = name + std::to_string(i) + "_" + h_control->GetName();
         pair.second[i][h_control->GetName()] = store(

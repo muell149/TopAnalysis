@@ -14,18 +14,6 @@ class TSelectorList;
 
 
 
-// FIXME: replace these functions with enum type ones
-namespace ttbar{
-
-    /// Access an already existing input folder
-    std::string fullFilePath(const std::string& baseDir, const std::string& fileName,
-                             const std::string& channel, const TString& systematic,
-                             const bool createNonExisting = false, const bool allowNonExisting = true);
-
-    /// Builds the path of the file for a given channel and systematic
-    std::string partialFilePath(const std::string& fileName, const std::string& channel, const TString& systematic);
-}
-
 
 class BTagSFGeneric : public ztop::bTagBase{
 

@@ -443,10 +443,10 @@ void DijetAnalyzer::fillHistos(const RecoObjects& recoObjects, const CommonGenOb
 
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;
-    std::vector<int> jetIndexPairsIndicesCor = ttbar::initialiseIndices(jetIndexPairs);
-    std::vector<int> jetIndexPairsIndicesSwp = ttbar::initialiseIndices(jetIndexPairs);
-    ttbar::orderIndices(jetIndexPairsIndicesCor, v_mvaWeightsCorrect);
-    ttbar::orderIndices(jetIndexPairsIndicesSwp, v_mvaWeightsSwapped);
+    std::vector<int> jetIndexPairsIndicesCor = common::initialiseIndices(jetIndexPairs);
+    std::vector<int> jetIndexPairsIndicesSwp = common::initialiseIndices(jetIndexPairs);
+    common::orderIndices(jetIndexPairsIndicesCor, v_mvaWeightsCorrect);
+    common::orderIndices(jetIndexPairsIndicesSwp, v_mvaWeightsSwapped);
 
     // Plotting the highest MVA weight from correct training for correct/wrong combinations
     bool foundCorrect = false;
@@ -1010,7 +1010,7 @@ float DijetAnalyzer::correctPairFraction(const VLV& allJets, const std::vector<i
 
     // Finding the two jets that are assumed to come from the Higgs
     // Ordering jets by b-tagging discriminant if there are more than 2 of them
-    if(higgsJetCandidatesId.size()>2) ttbar::orderIndices(higgsJetCandidatesId, jetsBtagDiscriminant);
+    if(higgsJetCandidatesId.size()>2) common::orderIndices(higgsJetCandidatesId, jetsBtagDiscriminant);
     LV dijet = allJets.at(higgsJetCandidatesId.at(0)) + allJets.at(higgsJetCandidatesId.at(1));
     h_dijetMass->Fill(dijet.M(), weight);
 

@@ -2,16 +2,20 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeHypothesisKinFit(double luminosity = 19712.,
-			     bool save = true, int systematicVariation=sysNo, unsigned int verbose=0,
-			     TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
-			     //TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root",
-			     TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
-			     std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false,
-			     bool addCrossCheckVariables=false, bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
+void analyzeIterationTest(     double luminosity = 19712.,
+			       bool save = true, int systematicVariation=sysNo, unsigned int verbose=0,
+			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
+			       TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
+			       std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, 
+			       bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
 {
-  // ============================
+  // regularization mode and scanned parameters
+  std::vector <double > iter_;
+  std::vector <int >    iterColor_;
+  std::vector <int >    iterMarker_;
+  std::vector <TH1F*>   iterxSecNorm_;
+  std::vector <TGraphAsymmErrors*> iterxSecNormM_;
+  // ============================  
   //  Set ROOT Style
   // ============================
  
@@ -64,20 +68,15 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   //        25: sysVBosonScaleUp           26: sysVBosonScaleDown          
   //        27: sysSingleTopScaleUp        28: sysSingleTopScaleDown       
   //        29: sysTopMatchUp              30: sysTopMatchDown             
-  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown  
-  //        33: sysTopMassUp               34: sysTopMassDown  
-  //        35: sysTopMassUp2              36: sysTopMassDown2
-  //        37: sysTopMassUp3              38: sysTopMassDown3
-  //        39: sysTopMassUp4              40: sysTopMassDown4
-  //        41: sysQCDUp                   42: sysQCDDown                  
-  //        43: sysSTopUp                  44: sysSTopDown                 
-  //        45: sysDiBosUp                 46: sysDiBosDown 
-  //        47: sysVjetsUp                 48: sysVjetsDown
-  //        49: sysBRUp                    50: sysBRDown              
-  //        51: sysPDFUp                   52: sysPDFDown                  
-  //        53: sysHadUp                   54: sysHadDown                  
-  //        55: sysGenMCatNLO              56: sysGenPowheg  
-  //        57: sysGenPowhegHerwig         58: ENDOFSYSENUM
+  //        31: sysVBosonMatchUp           32: sysVBosonMatchDown          
+  //        33: sysTopMassUp               34: sysTopMassDown              
+  //        35: sysQCDUp                   36: sysQCDDown                  
+  //        37: sysSTopUp                  38: sysSTopDown                 
+  //        39: sysDiBosUp                 40: sysDiBosDown                
+  //        41: sysPDFUp                   42: sysPDFDown                  
+  //        43: sysHadUp                   44: sysHadDown                  
+  //        45: sysGenMCatNLO              46: sysGenPowheg  
+  //        47: sysGenPowhegHerwig         48: ENDOFSYSENUM
   
   // systematic variation for which you want to print the
   // inclusive cross section and the jet permutation overview
@@ -136,12 +135,25 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   TString dataSample="2012";
   // for closure test if desired
   TString closureLabel = "";
+  TString zprime="";
+  double  zPrimeLumiWeightIni=1.;
+  TString zPrimeLumiWeightStr="";
   if(closureTestSpecifier!=""){
     if      (closureTestSpecifier.Contains("NoDistort")) closureLabel = "PseudoData"+closureTestSpecifier;
     else if (closureTestSpecifier.Contains("topPt"   )||
 	     closureTestSpecifier.Contains("ttbarMass")) closureLabel = "PseudoDataReweight"+closureTestSpecifier;
     else if (closureTestSpecifier.Contains("data"     )) closureLabel = "PseudoDataReweighttopPt"+closureTestSpecifier;
-    else if (closureTestSpecifier.Contains("1000"     )) closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
+    else if (closureTestSpecifier.Contains("1000"     )){
+      // identify exact closure test
+      zprime="1000";
+      if      (closureTestSpecifier.Contains("x0p03")) {zPrimeLumiWeightIni=0.03; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.03)";}
+      else if (closureTestSpecifier.Contains("x0p1" )) {zPrimeLumiWeightIni=0.1 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.1)" ;}
+      else if (closureTestSpecifier.Contains("x0p25")) {zPrimeLumiWeightIni=0.25; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.25)";}
+      else if (closureTestSpecifier.Contains("x0p5" )) {zPrimeLumiWeightIni=0.5 ; zPrimeLumiWeightStr=" (#sigma_{Z'}x0.5)" ;}
+      else if (closureTestSpecifier.Contains("x2"   )) {zPrimeLumiWeightIni=2.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x2)"   ;}
+      else if (closureTestSpecifier.Contains("x4"   )) {zPrimeLumiWeightIni=4.  ; zPrimeLumiWeightStr=" (#sigma_{Z'}x4)"   ;}
+      closureLabel = "PseudoDataZprime"+closureTestSpecifier+"GeV";
+    }
     else{
       std::cout << "ERROR: unknown closureTestSpecifier=" << closureTestSpecifier << std::endl;
       exit(0);
@@ -156,6 +168,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   if(decayChannel=="muon"    ) outputFileName+="Mu";
   if(decayChannel=="electron") outputFileName+="Elec";
   if(decayChannel=="combined") outputFileName+="Lep";
+  outputFileName+="IterationTest";
   outputFileName+=closureLabel+LV+PS+".root";
   // choose name of the output .pdf file
   TString pdfName="kinFitHypothesis"+lumi+"pb";
@@ -186,6 +199,11 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     dataFileEl=getStringEntry(dataFile,1 , ":");
     dataFileMu=getStringEntry(dataFile,42, ":");
   }
+  double luminosity2=luminosity;
+  if(decayChannel=="combined") luminosity2= ( constLumiElec + constLumiMuon );
+  if(systematicVariation==sysLumiUp  )      luminosity2*=(1.0+globalLumiUncertainty);
+  else if(systematicVariation==sysLumiDown) luminosity2*=(1.0-globalLumiUncertainty);
+  // output
   if(verbose>1||closureTestSpecifier!="") {
     std::cout << "dataFile " << dataFile << std::endl;
     std::cout << "closureTestSpecifier " << closureTestSpecifier << std::endl;
@@ -231,19 +249,16 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // create list of variables you would like to create the efficiency / cross section for (centrally defined in basicFunctions.h)
   std::vector<TString> xSecVariables_, xSecLabel_; 
   // a) top and ttbar quantities
+  TString xSecVariablesKinFit2[] = {"topPt"};
+  TString xSecLabelKinFit2[]     = {"p_{T}^{t}/[GeV]"};
   if(!hadron){
-    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit, xSecVariablesKinFit + sizeof(xSecVariablesKinFit)/sizeof(TString));
-    xSecLabel_    .insert(xSecLabel_.end(),     xSecLabelKinFit,     xSecLabelKinFit     + sizeof(xSecLabelKinFit    )/sizeof(TString));
+    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesKinFit2, xSecVariablesKinFit2 + sizeof(xSecVariablesKinFit2)/sizeof(TString));
+    xSecLabel_    .insert(xSecLabel_.end(),     xSecLabelKinFit2,     xSecLabelKinFit2     + sizeof(xSecLabelKinFit2    )/sizeof(TString));
   }
   // b) lepton and b-jet quantities
   if(hadron||!extrapolate){
     xSecVariables_.insert(xSecVariables_.end(), xSecVariablesFinalState, xSecVariablesFinalState + sizeof(xSecVariablesFinalState)/sizeof(TString));
     xSecLabel_    .insert(xSecLabel_.end()    , xSecLabelFinalState    , xSecLabelFinalState     + sizeof(xSecLabelFinalState    )/sizeof(TString));
-  }
-  // c) cross check variables (only available for parton level cross-sections)
-  if (addCrossCheckVariables && !hadron){
-    xSecVariables_.insert(xSecVariables_.end(), xSecVariablesCCVar, xSecVariablesCCVar + sizeof(xSecVariablesCCVar)/sizeof(TString));
-    xSecLabel_    .insert(xSecLabel_.end()    , xSecLabelCCVar    , xSecLabelCCVar     + sizeof(xSecLabelCCVar    )/sizeof(TString));
   }
   // check
   if(xSecVariables_.size()!=xSecLabel_.size()){
@@ -348,704 +363,45 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   //  std::cout << vecRedundantPartOfNameInNonTTbarSG_[i] << std::endl;
   //}
 
-  //  ---
+  // ====================
   //     choose plots
-  //  ---
+  // ====================
   // a) list plots you would like to see ("folder/plotName") - same as in .root files (for 1D and 2D)
-  TString plots1D[ ] = { // general fit performance
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/prob"       , 
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/chi2"       , 
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/delChi2"    ,
-    // reconstructed top quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topMass"    ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"      , // XSec relevant! REC 
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtTtbarSys", // XSec relevant! REC  
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLead"  , // XSec relevant! REC   
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtSubLead",// XSec relevant! REC   
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi"     ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY"       , // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtHad"   ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiHad"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYHad"    ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLep"   ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhiLep"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYLep"    ,  
-    // generated top quantities
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topMass"      , 
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"           , // XSec relevant! GEN  
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtTtbarSys"   , // XSec relevant! GEN  
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtLead"       , // XSec relevant! GEN  
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtSubLead"    , // XSec relevant! GEN  
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhi"       ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topY"         , // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtHad"     ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhiHad"    ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYHad"      ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtLep"     ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPhiLep"    ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYLep"      ,
-    // reconstructed ttbar quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass"  , // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt"    , // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarY"     , // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT"    ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi" , // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPhiStar", // XSec relevant! REC
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY"  ,
-    // generated ttbar quantities
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarMass", // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarPt"  , // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarY"   , // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarHT"    ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarSumY"  ,
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarDelPhi",  // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarPhiStar", // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/ttbarDelY"  ,
-    // reconstructed lepton quantities
-    recLeppath+"/lepPt"+recLeplabel,            // XSec relevant! REC
-    recLeppath+"/lepEta"+recLeplabel,           // XSec relevant! REC
-    // generated lepton quantities		
-    genLeppath+"/lepPt"+genLeplabel,            // XSec relevant! GEN
-    genLeppath+"/lepEta"+genLeplabel,           // XSec relevant! GEN
-    // reconstructed b-quark/b-jet quantities	
-    recBpath+"/bqPt"+recBlabel,                 // XSec relevant! REC
-    recBpath+"/bqEta"+recBlabel,                // XSec relevant! REC
-    recBpath+"/lbMass"+recBlabel,               // XSec relevant! REC
-    // generated b-quark/b-jet quantities	
-    genBpath+"/bqPt"+genBlabel,                 // XSec relevant! GEN
-    genBpath+"/bqEta"+genBlabel,                // XSec relevant! GEN
-    genBpath+"/lbMass"+genBlabel,               // XSec relevant! GEN
-
-    // reconstructed b-quark/b-jet quantities	
-    recBpath+"/bbbarPt"+recBlabel,              // XSec relevant! REC
-    recBpath+"/bbbarMass"+recBlabel,            // XSec relevant! REC
-    // generated bbbar quantities	
-    genBpath+"/bbbarPt"+genBlabel,              // XSec relevant! GEN
-    genBpath+"/bbbarMass"+genBlabel,            // XSec relevant! GEN
-    // reco jet multiplicity
-    recMixpath+"/Njets",
-    // gen jet multiplicity
-    genMixpath+"/Ngenjets",
-    // reco rhos=2*170GeV/m(ttbar+1jet)
-    recMixpath+"/rhos",
-    // gen rhos=2*170GeV/m(ttbar+1jet)
-    genMixpath+"/rhosGen",
-    // ttbar other composition
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/decayChannel"
-  }; 
-
-  TString plots1D_CCVars[ ] = {
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus"        , // XSec relevant! REC       
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus"       , // XSec relevant! REC       
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus"         , // XSec relevant! REC       
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus"        , // XSec relevant! REC       
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtPlus" , // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPtMinus", // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYPlus"  , // XSec relevant! GEN
-    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topYMinus" , // XSec relevant! GEN
-    recLeppath+"/lepEtaPlus"+recLeplabel                                         , // XSec relevant! REC
-    recLeppath+"/lepEtaMinus"+recLeplabel                                        , // XSec relevant! REC
-    genLeppath+"/lepEtaPlus"+genLeplabel                                         , // XSec relevant! GEN
-    genLeppath+"/lepEtaMinus"+genLeplabel                                          // XSec relevant! GEN
+  TString plots1D[ ] = { 
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"    , // REC
+    "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt", // GEN
   };
-
- TString plots1Dadd[ ] = {
-   // generated angular distributions
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngle"   ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bbbarAngleTtRF",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/WWAngle"     ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleLep",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topWAngleHad",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleLep",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topBAngleHad",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleLep"  ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/bWAngleHad"  ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qqbarAngle"  ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBlepAngle"  ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qBhadAngle"  ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngle",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBlepAngleTtRF",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBhadAngle",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepQAngle"   ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/MuonNeutrinoAngle",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepBNeutrinoAngle",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/hadBNeutrinoAngle",
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qNeutrinoAngle"   ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepWDir"     ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/qWDir"       ,
-   "analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/nuWDir"      ,
-   // reconstructed angular distributions
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle"  ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngleTtRF",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/WWAngle"     ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleLep",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topWAngleHad",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleLep",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topBAngleHad",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleLep"  ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bWAngleHad"  ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qqbarAngle"  ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBlepAngle"  ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qBhadAngle"  ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngle",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBlepAngleTtRF",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBhadAngle",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepQAngle"   ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/MuonNeutrinoAngle",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepBNeutrinoAngle",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/hadBNeutrinoAngle",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qNeutrinoAngle"   ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/lepWDir"     ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/nuWDir"      ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qWDir"       ,
-   // reconstructed event shape variables
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/aplanarity" ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/sphericity" ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/C"          ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/D"          ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/circularity",
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/isotropy"   ,
-   // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-   "analyzeHypoKinFit/hadBQuark"               , 
-   "analyzeHypoKinFit/lepBQuark"               , 
-   "analyzeHypoKinFit/lightQuark"              , 
-   "analyzeHypoKinFit/wrongAssign"             ,
-   "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/qAssignment",
-   "analyzeHypoKinFit/PartonJetDRall"          ,
-   // pull distributions top quantities
-   "analyzeHypoKinFit/hadBQuarkPt"             ,
-   "analyzeHypoKinFit/hadBQuarkEta"            ,
-   "analyzeHypoKinFit/hadBQuarkPhi"            ,
-   "analyzeHypoKinFit/lepBQuarkPt"             ,
-   "analyzeHypoKinFit/lepBQuarkEta"            ,
-   "analyzeHypoKinFit/lepBQuarkPhi"            ,
-   "analyzeHypoKinFit/lightQuarkPt"            ,
-   "analyzeHypoKinFit/lightQuarkEta"           ,
-   "analyzeHypoKinFit/lightQuarkPhi"           ,
-   "analyzeHypoKinFit/leptonPt"                ,
-   "analyzeHypoKinFit/leptonEta"               ,
-   "analyzeHypoKinFit/leptonPhi"               ,
-   "analyzeHypoKinFit/neutrinoPt"              ,
-   "analyzeHypoKinFit/neutrinoEta"             ,
-   "analyzeHypoKinFit/neutrinoPhi"             ,
-   "analyzeHypoKinFit/lepWPt"                  ,
-   "analyzeHypoKinFit/lepWEta"                 ,
-   "analyzeHypoKinFit/lepWPhi"                 ,
-   "analyzeHypoKinFit/hadWPt"                  ,
-   "analyzeHypoKinFit/hadWEta"                 ,
-   "analyzeHypoKinFit/hadWPhi"                 ,
-   // pull distributions input objects before/after kinematic fit
-   // (i) lepton
-   "analyzeHypoKinFitLepton/leptonPullPtKinFitRec",
-   "analyzeHypoKinFitLepton/leptonPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitLepton/leptonPullPtRecPartonTruth",
-   "analyzeHypoKinFitLepton/leptonPullEtaKinFitRec",
-   "analyzeHypoKinFitLepton/leptonPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitLepton/leptonPullEtaRecPartonTruth",
-   "analyzeHypoKinFitLepton/leptonPullPhiKinFitRec",
-   "analyzeHypoKinFitLepton/leptonPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitLepton/leptonPullPhiRecPartonTruth",
-   "analyzeHypoKinFitLeptonCorr/leptonPullPtKinFitRec",
-   "analyzeHypoKinFitLeptonCorr/leptonPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonCorr/leptonPullPtRecPartonTruth",
-   "analyzeHypoKinFitLeptonCorr/leptonPullEtaKinFitRec",
-   "analyzeHypoKinFitLeptonCorr/leptonPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonCorr/leptonPullEtaRecPartonTruth",
-   "analyzeHypoKinFitLeptonCorr/leptonPullPhiKinFitRec",
-   "analyzeHypoKinFitLeptonCorr/leptonPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitLeptonCorr/leptonPullPhiRecPartonTruth",
-   // (ii) neutrino
-   "analyzeHypoKinFitMET/neutrinoPullPtKinFitRec",
-   "analyzeHypoKinFitMET/neutrinoPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitMET/neutrinoPullPtRecPartonTruth",
-   "analyzeHypoKinFitMET/neutrinoPullEtaKinFitRec",
-   "analyzeHypoKinFitMET/neutrinoPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitMET/neutrinoPullEtaRecPartonTruth",
-   "analyzeHypoKinFitMET/neutrinoPullPhiKinFitRec",
-   "analyzeHypoKinFitMET/neutrinoPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitMET/neutrinoPullPhiRecPartonTruth",
-   "analyzeHypoKinFitMETCorr/neutrinoPullPtKinFitRec",
-   "analyzeHypoKinFitMETCorr/neutrinoPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitMETCorr/neutrinoPullPtRecPartonTruth",
-   "analyzeHypoKinFitMETCorr/neutrinoPullEtaKinFitRec",
-   "analyzeHypoKinFitMETCorr/neutrinoPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitMETCorr/neutrinoPullEtaRecPartonTruth",
-   "analyzeHypoKinFitMETCorr/neutrinoPullPhiKinFitRec",
-   "analyzeHypoKinFitMETCorr/neutrinoPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitMETCorr/neutrinoPullPhiRecPartonTruth",
-   // (iii) hadronic b jet
-   "analyzeHypoKinFitJets/hadBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJets/hadBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJets/hadBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJets/hadBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJets/hadBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJets/hadBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJets/hadBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJets/hadBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJets/hadBQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/hadBQuarkPullPhiRecPartonTruth",
-   // (iv) leptonic b jet
-   "analyzeHypoKinFitJets/lepBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJets/lepBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJets/lepBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJets/lepBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJets/lepBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJets/lepBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJets/lepBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJets/lepBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJets/lepBQuarkPullPhiRecPartonTruth",  
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lepBQuarkPullPhiRecPartonTruth",
-   // (v) light jets
-   "analyzeHypoKinFitJets/lightQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJets/lightQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJets/lightQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJets/lightQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJets/lightQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJets/lightQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJets/lightQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJets/lightQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJets/lightQuarkPullPhiRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullPtKinFitRec",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullPtKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullPtRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullEtaKinFitRec",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullEtaKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullEtaRecPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullPhiKinFitRec",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullPhiKinFitPartonTruth",
-   "analyzeHypoKinFitJetsCorr/lightQuarkPullPhiRecPartonTruth",
- };
-
 
   TString plots2D[ ] = { // reco - gen Match correlation plots (ttbar signal only)
-    // a) combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-    "analyzeHypoKinFit/mapKinFit_"                                          ,
     // b) response matrix top quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_"      ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtTtbarSys_"  , 
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtLead_"      ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtSubLead_"   ,
-    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPhi_",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topY_"     ,
-    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/bbbarAngle_" ,
-    // c) response matrix ttbar quantities
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarMass_"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPt_"    ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarY_"     ,
-    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarHT_"    ,
-    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarSumY_"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelPhi_",
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarPhiStar_",
-    //    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/ttbarDelY_"  , 
-  };
-
-  TString plots2D_LepBjet[ ] = {
-    // d) response matrix lepton quantities
-    recLeppath+"/lepPt_"                                                    ,
-    recLeppath+"/lepEta_"                                                   ,
-    // e) response matrix b-quark/b-jet quantities
-    recBpath+"/bqPt_"                                                       ,
-    recBpath+"/bqEta_"                                                      ,      
-    recBpath+"/lbMass_"                                                     ,
-    // f) response matrix bbbar quantities
-    recBpath+"/bbbarPt_"                                                    ,
-    recBpath+"/bbbarMass_"                                                  ,   
-    // g) response matrix jet multiplicity
-    recMixpath+"/Njets_"                                                    ,
-    // h) response matrix rhos=2*170GeV/m(ttbar+1jet)
-    recMixpath+"/rhos_"                                                     ,
-  };
-
-  TString plots2D_CCVars[ ] = {
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtPlus_" ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPtMinus_", 
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYPlus_"  ,
-    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topYMinus_" ,
-    recLeppath+"/lepEtaPlus_"                                              ,
-    recLeppath+"/lepEtaMinus_"                                             
+    "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt_", // Response Matrix
   };
 
   // b) list plot axes style
   // 1D: "x-axis title"/"y-axis title"/log/rebin-factor
   // log = 0 or 1 for linear or logarithmic axis 
 
-  TString axisLabel1D[ ] = { // general fit performance
-    "probability (best fit hypothesis)/events/1/25"                   , 
-    "#chi^{2} (best fit hypothesis)/events/0/10"                      ,
-    "#Delta#chi^{2} (1^{st} - 2^{nd} best fit hypothesis)/events/0/10",
-    // reconstructed top quantities
-    "m^{t} #left[GeV#right]/#frac{dN}{dm^{t}} #left[GeV^{-1}#right]/0/10",
+  TString axisLabel1D[ ] = { 
     xSecLabelName("topPt")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1",
-    xSecLabelName("topPtTtbarSys")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1",
-    xSecLabelName("topPtLead")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1",
-    xSecLabelName("topPtSubLead")+"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1",
-    "#phi^{t}/#frac{dN}{d#phi^{t}}/0/4",
-    xSecLabelName("topY")+"/#frac{dN}{dy^{t}}/0/1",//5"
-    "p_{T}(hadronic t) #left[GeV#right]/#frac{dN}{dp_{T}^{had. t}} #left[GeV^{-1}#right]/0/20",                         
-    "#phi(hadronic t)/#frac{dN}{d#phi^{had. t}}/0/4",
-    "y(hadronic t)/#frac{dN}{dy^{had. t}}/0/5"    ,
-    "p_{T}(leptonic t) #left[GeV#right]/#frac{dN}{dp_{T}^{lep. t}} #left[GeV^{-1}#right]/0/20",                         
-    "#phi(leptonic t)/#frac{dN}{d#phi^{lep. t}}/0/4",
-    "y(leptonic t)/#frac{dN}{dy^{lep. t}}/0/5"   ,    
-    // generated top quantities
-    "m^{t} parton truth #left[GeV#right]/events/0/10",
-    xSecLabelName("topPt"       )+" parton truth/events/0/1",//20"
-    xSecLabelName("topPtTtbarSys")+" parton truth/events/0/1",//20"
-    xSecLabelName("topPtLead"   )+" parton truth/events/0/1",
-    xSecLabelName("topPtSubLead")+" parton truth/events/0/1",
-    "#phi(t) parton truth/events/0/4",
-    xSecLabelName("topY")+" parton truth/events/0/1",//5"
-    "p_{T}(hadronic t) #left[GeV#right] parton truth/events/0/20",                         
-    "#phi(hadronic t) parton truth/events/0/4",
-    "y(hadronic t) parton truth/events/0/5",
-    "p_{T}(leptonic t) #left[GeV#right] parton truth/events/0/20",                         
-    "#phi(leptonic t) parton truth/events/0/4",
-    "y(leptonic t) parton truth/events/0/5",
-    // reconstructed ttbar quantities	                            
-    xSecLabelName("ttbarMass")+"/#frac{dN}{dm^{t#bar{t}}} #left[GeV^{-1}#right]/1/1",//60"
-    xSecLabelName("ttbarPt")+"/#frac{dN}{dp_{T}^{t#bar{t}}} #left[GeV^{-1}#right]/0/1",//10"
-    xSecLabelName("ttbarY")+"/#frac{dN}{dy^{t#bar{t}}}/0/1",//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right]/#frac{dN}{dH_{T}^{t#bar{t}}}/0/20",
-    "y^{t}+y^{#bar{t}}/#frac{dN}{d(y^{t}+y^{#bar{t}})}/0/10",
-    xSecLabelName("ttbarDelPhi")+"/#frac{dN}{d("+xSecLabelName("ttbarDelPhi")+")}/0/1",   
-    xSecLabelName("ttbarPhiStar")+"/#frac{dN}{d("+xSecLabelName("ttbarPhiStar")+")}/0/1",                
-    "y^{lep. t}-y^{had. t}/#frac{dN}{d(y^(lep. t)-y^{had. t})}/0/4",  
-    // generated ttbar quantities	                            
-    xSecLabelName("ttbarMass")+" parton truth/events/1/1",//60"
-    xSecLabelName("ttbarPt")+" #left[GeV#right] parton truth/events/0/1",//10"
-    xSecLabelName("ttbarY")+" parton truth/events/0/1",//2
-    "H_{T}^{t#bar{t}}=#Sigma(E_{T}(jets)) #left[GeV#right] parton truth/events/0/20",
-    xSecLabelName("ttbarY")+" parton truth/events/0/10",
-    xSecLabelName("ttbarDelPhi")+" parton truth/events/0/1", 
-    xSecLabelName("ttbarPhiStar")+" parton truth/events/0/1",               
-    "y(leptonic t)-y(hadronic t) parton truth/events/0/4",
-    // reconstructed lepton quantities
-    xSecLabelName("lepPt" )     +"/events #left[GeV^{-1}#right]/0/1",
-    xSecLabelName("lepEta")     +"/events/0/1" ,
-    // generated lepton quantities
-    xSecLabelName("lepPt" )     +" parton truth/events/0/1",
-    xSecLabelName("lepEta")     +" parton truth/events/0/1",
-    // reconstructed b-quark/b-jet quantities
-    xSecLabelName("bqPt"  )+"/events #left[GeV^{-1}#right]/0/1",
-    xSecLabelName("bqEta" )+"/events/0/1" ,
-    xSecLabelName("lbMass")+"/events #left[GeV^{-1}#right]/0/1",
-    // generated b-quark/b-jet quantities
-    xSecLabelName("bqPt"  )+" parton truth/events/0/1",
-    xSecLabelName("bqEta" )+" parton truth/events/0/1",
-    xSecLabelName("lbMass")+" parton truth/events/0/1",
-    // reconstructed bbar quantities
-    xSecLabelName("bbbarPt"  )+"/events #left[GeV^{-1}#right]/0/1",
-    xSecLabelName("bbbarMass")+"/events #left[GeV^{-1}#right]/0/1" ,
-    // generated bbbar quantities
-    xSecLabelName("bbbarPt"  )+" parton truth/events/0/1",
-    xSecLabelName("bbbarMass")+" parton truth/events/0/1",
-    // reco jet multiplicity
-    xSecLabelName("Njets"  )+"/events/0/1",
-    // gen jet multiplicity
-    xSecLabelName("Njets"  )+" parton truth/events/0/1",
-    // reco rhos=2*170GeV/m(ttbar+1jet)
-    xSecLabelName("rhos"  )+"/events/0/1",
-    // gen rhos=2*170GeV/m(ttbar+1jet)
-    xSecLabelName("rhos"  )+" parton truth/events/0/1",
-    // ttbar other composition
-    "t#bar{t} other decay channel/events/0/1"
+    xSecLabelName("topPt")+" parton truth/events/0/1",
   };
   
-  TString axisLabel1D_CCVars[ ] = {
-    xSecLabelName("topPtPlus") +"/#frac{dN}{dp_{T}^{t}} #left[GeV^{-1}#right]/0/1", //20"
-    xSecLabelName("topPtMinus")+"/#frac{dN}{dp_{T}^{#bar{t}}} #left[GeV^{-1}#right]/0/1", //20"
-    xSecLabelName("topYPlus")  +"/#frac{dN}{dy^{t}}/0/1",//5"
-    xSecLabelName("topYMinus") +"/#frac{dN}{dy^{#bar{t}}}/0/1",//5" 
-    xSecLabelName("topPtPlus") +" parton truth/events/0/1",//20"
-    xSecLabelName("topPtMinus")+" parton truth/events/0/1",//20"
-    xSecLabelName("topYPlus")  +" parton truth/events/0/1",//5"
-    xSecLabelName("topYMinus") +" parton truth/events/0/1",//5" 
-    xSecLabelName("lepEtaPlus") +"/events/0/1" ,
-    xSecLabelName("lepEtaMinus")+"/events/0/1" , 
-    xSecLabelName("lepEtaPlus") +" parton truth/events/0/1",
-    xSecLabelName("lepEtaMinus")+" parton truth/events/0/1"
-  };
   
   // 2D: "x-axis title"/"y-axis title"
   TString axisLabel2D[ ] = {// reco - gen Match correlation plots (ttbar signal only)
-    // a) combinatorics and KinFit Hypothesis Quality(ttbar signal only)
-    "i_{lead jet} parton truth/i_{lead jet} hypothesis fit",
     // b) response matrix Top quantities
-    xSecLabelName("topPt"        )+" gen/"+xSecLabelName("topPt"        )+" reco",
-    xSecLabelName("topPtTtbarSys")+" gen/"+xSecLabelName("topPtTtbarSys")+" reco",
-    xSecLabelName("topPtLead")+" gen/"+xSecLabelName("topPtLead" )+" reco",
-    xSecLabelName("topPtSubLead")+" gen/"+xSecLabelName("topPtSubLead")+" reco",
-    // "#phi^{t and #bar{t}} gen/#phi^{t and #bar{t}} reco",
-    xSecLabelName("topY"     )+" gen/"+xSecLabelName("topY"     )+" reco",
-    // "angle(b,#bar{b}) gen (t#bar{t} rest frame)/angle(b,#bar{b}) reco (t#bar{t} rest frame)",
-    // c) response matrix ttbar quantities
-    xSecLabelName("ttbarMass")+" gen/"+xSecLabelName("ttbarMass")+" reco",
-    xSecLabelName("ttbarPt")+" gen/"+xSecLabelName("ttbarPt")+" reco",
-    xSecLabelName("ttbarY")+" gen/"+xSecLabelName("ttbarY")+" reco"              ,
-    //    "H_{T}(t#bar{t}) #left[GeV#right] gen/H_{T}(t#bar{t}) #left[GeV#right] reco",
-    //    "#Sigmay(t#bar{t}) gen/#Sigmay(t#bar{t}) reco"  ,
-    xSecLabelName("ttbarDelPhi")+" gen/"+xSecLabelName("ttbarDelPhi")+" Kinfit",
-    xSecLabelName("ttbarPhiStar")+" gen/"+xSecLabelName("ttbarPhiStar")+" Kinfit",
-    //    "y(leptonic t)-y(hadronic t) gen/y(leptonic t)-y(hadronic t) Kinfit" ,
-  };
-
-  TString axisLabel2D_LepBjet[ ] = {
-    // d) response matrix lepton quantities
-    xSecLabelName("lepPt"      )+" gen/"+xSecLabelName("lepPt"      )+" reco",
-    xSecLabelName("lepEta"     )+" gen/"+xSecLabelName("lepEta"     )+" reco", 
-    // e) response matrix b-quark/b-jet quantities
-    xSecLabelName("bqPt" )+" gen/"+xSecLabelName("bqPt" )+" reco",
-    xSecLabelName("bqEta")+" gen/"+xSecLabelName("bqEta")+" reco",
-    xSecLabelName("lbMass")+" gen/"+xSecLabelName("lbMass")+" reco",
-    // f) response matrix bbbar quantities
-    xSecLabelName("bbbarPt"  )+" gen/"+xSecLabelName("bbbarPt"  )+" reco",
-    xSecLabelName("bbbarMass")+" gen/"+xSecLabelName("bbbarMass")+" reco",
-    // g) response matrix jet multiplicity
-    xSecLabelName("Njets"    )+" gen/"+xSecLabelName("Njets")+" reco",
-    // h) response matrix rhos=2*170GeV/m(ttbar+1jet)
-    xSecLabelName("rhos"     )+" gen/"+xSecLabelName("rhos" )+" reco",
-  };
-
-  TString axisLabel2D_CCVars[ ] = {
-    xSecLabelName("topPtPlus") +" gen/"+xSecLabelName("topPtPlus" )  +" reco",
-    xSecLabelName("topPtMinus")+" gen/"+xSecLabelName("topPtMinus")  +" reco",
-    xSecLabelName("topYPlus" ) +" gen/"+xSecLabelName("topYPlus" )   +" reco",
-    xSecLabelName("topYMinus") +" gen/"+xSecLabelName("topYMinus")   +" reco",
-    xSecLabelName("lepEtaPlus" )+" gen/"+xSecLabelName("lepEtaPlus" )+" reco",
-    xSecLabelName("lepEtaMinus")+" gen/"+xSecLabelName("lepEtaMinus")+" reco"         
-  };
-
-  TString axisLabel1Dadd[ ] = {
-    // generated angular distributions
-    "#angle(b,#bar{b}) parton truth (detector rest frame)/events/0/21",
-    "#angle(b,#bar{b}) parton truth (t#bar{t} rest frame)/events/0/21",
-    "#angle(W,W) parton truth (t#bar{t} RF)/events/0/21"              ,
-    "#angle(lep.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(had.t,W) parton truth (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(lep.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.t,b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(lep.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.b,W) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,#bar{q}) parton truth (top rest frame)/events/0/21"     ,
-    "#angle(q,lep.b) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,had.b) parton truth (top rest frame)/events/0/21"       ,
-    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     , 
-    "#angle(#mu,lep.b) parton truth (t#bar{t} rest frame)/events/0/21",
-    "#angle(#mu,lep.b) parton truth (top rest frame)/events/0/21"     ,
-    "#angle(#mu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,#nu) parton truth (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(#nu,lep.b) parton truth (top rest frame)/events/0/21"     ,
-    "#angle(#nu,had.b) parton truth (t#bar{t} rest frame)/events/0/21",
-    "#angle(#nu,q) parton truth (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,W) parton truth (#mu:W RF, W:Det RF)/events/0/21"     ,
-    "#angle(q,W) parton truth (q:W RF, W:Det RF)/events/0/21"         ,
-    "#angle(#nu,W) parton truth (#nu:W RF, W:Det RF)/events/0/21"     ,
-    //  reconstructed angular distributions
-    "#angle(b,#bar{b}) (detector rest frame)/events/0/21",
-    "#angle(b,#bar{b}) (t#bar{t} rest frame)/events/0/21",
-    "#angle(W,W) (t#bar{t} RF)/events/0/21"              ,
-    "#angle(lep.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(had.t,W) (t:t#bar{t} RF, W:t RF)/events/0/21",
-    "#angle(lep.t,b) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.t,b) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(lep.b,W) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(had.b,W) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,#bar{q}) (top rest frame)/events/0/21"     ,
-    "#angle(q,lep.b) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(q,had.b) (top rest frame)/events/0/21"       ,
-    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     , 
-    "#angle(#mu,lep.b) (t#bar{t} rest frame)/events/0/21",
-    "#angle(#mu,lep.b) (top rest frame)/events/0/21"     ,
-    "#angle(#mu,q) (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,#nu) (t#bar{t} rest frame)/events/0/21"  ,
-    "#angle(#nu,lep.b) (top rest frame)/events/0/21"     ,
-    "#angle(#nu,had.b) (t#bar{t} rest frame)/events/0/21",
-    "#angle(#nu,q) (t#bar{t} rest frame)/events/0/21"    ,
-    "#angle(#mu,lep.W) (#mu:W RF, W:Det RF)/events/0/21" ,
-    "#angle(#nu,lep.W) (#nu:W RF, W:Det RF)/events/0/21" ,
-    "#angle(q,had.W) (q:W RF, W:Det RF)/events/0/21"     ,
-    // reconstructed event shape variables
-    "aplanarity/events/0/2"  ,
-    "sphericity/events/0/10" ,
-    "C/events/0/10"          ,
-    "D/events/0/4"           ,
-    "circularity/events/0/10",
-    "isotropy/events/0/10"   ,
-    // combinatorics and Kinfit Hypothesis Quality(ttbar signal only)
-    "#Deltai_{lead jet}(genMatch - kinFit), hadronic b-quark/events/0/1", 
-    "#Deltai_{lead jet}(genMatch - kinFit), leptonic b-quark/events/0/1", 
-    "#Deltai_{lead jet}(genMatch - kinFit), light quarks/events/0/1"    ,
-    "N(wrong assigned jets)/events/0/1"                                 , 
-    "permutation/events/0/1"                                            ,
-    "#DeltaR(parton, reco jet assigned from Kinfit)/partons/1/10"       ,
-    // pull distributions
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (hadronic b-quark)/events/0/1"  ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (hadronic b-quark)/events/0/1" ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (hadronic b-quark)/events/0/1" ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (leptonic b-quark)/events/0/1"  ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (leptonic b-quark)/events/0/1" ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (leptonic b-quark)/events/0/1" ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (light quark)/events/0/1"       ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (light quark)/events/0/1"      ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (light quark)/events/0/1"      ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (lepton)/events/0/1"            ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (lepton)/events/0/1"           ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (lepton)/events/0/1"           ,
-    "(p_{t gen}-p_{t fit}) (#sigmap_{t})^{-1} (neutrino)/events/0/1"          ,
-    "(#eta_{gen}-#eta_{fit}) (#sigma#eta)^{-1} (neutrino)/events/0/1"         ,
-    "(#phi_{gen}-#phi_{fit}) (#sigma#phi)^{-1} (neutrino)/events/0/1"         ,
-    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (leptonic W)/events/0/1"            ,
-    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (leptonic W)/events/0/1"         ,
-    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (leptonic W)/events/0/1"         ,
-    "(p_{t fit}-p_{t gen}) p_{t gen}^{-1} (hadronic W)/events/0/1"            ,
-    "(#eta_{fit}-#eta_{gen}) #eta_{gen}^{-1} (hadronic W)/events/0/1"         ,
-    "(#phi_{fit}-#phi_{gen}) #phi_{gen}^{-1} (hadronic W)/events/0/1"         ,
-    // (IV) residuals for input objects before/after kinematic fit
-    // (i) lepton
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency/0/10",
-    "#eta^{lep kinFit}-#eta^{lep rec}/Frequency/0/10",
-    "#eta^{lep kinFit}-#eta^{lep parton}/Frequency/0/10",
-    "#eta^{lep Rec}-#eta^{lep parton}/Frequency/0/10",
-    "#phi^{lep kinFit}-#phi^{lep rec}/Frequency/0/10",
-    "#phi^{lep kinFit}-#phi^{lep parton}/Frequency/0/10",
-    "#phi^{lep Rec}-#phi^{lep parton}/Frequency/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep rec}) : p_{t}^{lep rec}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{lep kinFit}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{lep Rec}-p_{t}^{lep parton}) : p_{t}^{lep parton}/Frequency (correct permutation)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep rec}/Frequency (correct permutation)/0/10",
-    "#eta^{lep kinFit}-#eta^{lep parton}/Frequency (correct permutation)/0/10",
-    "#eta^{lep Rec}-#eta^{lep parton}/Frequency (correct permutation)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep rec}/Frequency (correct permutation)/0/10",
-    "#phi^{lep kinFit}-#phi^{lep parton}/Frequency (correct permutation)/0/10",
-    "#phi^{lep Rec}-#phi^{lep parton}/Frequency (correct permutation)/0/10",
-    // (ii) neutrino
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu rec}/Frequency/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu parton}/Frequency/0/10",
-    "#eta^{#nu Rec}-#eta^{#nu parton}/Frequency/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency/0/10",
-    "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu rec}) : p_{t}^{#nu rec}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{#nu kinFit}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{#nu Rec}-p_{t}^{#nu parton}) : p_{t}^{#nu parton}/Frequency (correct permutation)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu rec}/Frequency (correct permutation)/0/10",
-    "#eta^{#nu kinFit}-#eta^{#nu parton}/Frequency (correct permutation)/0/10",
-    "#eta^{#nu Rec}-#eta^{#nu parton}/Frequency (correct permutation)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu rec}/Frequency (correct permutation)/0/10",
-    "#phi^{#nu kinFit}-#phi^{#nu parton}/Frequency (correct permutation)/0/10",
-    "#phi^{#nu Rec}-#phi^{#nu parton}/Frequency (correct permutation)/0/10",
-    // (iii) hadronic b jet
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet rec}/Frequency/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet parton}/Frequency/0/10",
-    "#eta^{had b-jet Rec}-#eta^{had b-jet parton}/Frequency/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency/0/10",
-    "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet rec}) : p_{t}^{had b-jet rec}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{had b-jet kinFit}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{had b-jet Rec}-p_{t}^{had b-jet parton}) : p_{t}^{had b-jet parton}/Frequency (correct permutation)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet rec}/Frequency (correct permutation)/0/10",
-    "#eta^{had b-jet kinFit}-#eta^{had b-jet parton}/Frequency (correct permutation)/0/10",
-    "#eta^{had b-jet Rec}-#eta^{had b-jet parton}/Frequency (correct permutation)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet rec}/Frequency (correct permutation)/0/10",
-    "#phi^{had b-jet kinFit}-#phi^{had b-jet parton}/Frequency (correct permutation)/0/10",
-    "#phi^{had b-jet Rec}-#phi^{had b-jet parton}/Frequency (correct permutation)/0/10",
-    // (iv) leptonic b jet
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}/Frequency/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}/Frequency/0/10",
-    "#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}/Frequency/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency/0/10",
-    "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet rec}) : p_{t}^{lep b-jet rec}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{lep b-jet kinFit}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{lep b-jet Rec}-p_{t}^{lep b-jet parton}) : p_{t}^{lep b-jet parton}/Frequency (correct permutation)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet rec}/Frequency (correct permutation)/0/10",
-    "#eta^{lep b-jet kinFit}-#eta^{lep b-jet parton}/Frequency (correct permutation)/0/10",
-    "#eta^{lep b-jet Rec}-#eta^{lep b-jet parton}/Frequency (correct permutation)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet rec}/Frequency (correct permutation)/0/10",
-    "#phi^{lep b-jet kinFit}-#phi^{lep b-jet parton}/Frequency (correct permutation)/0/10",
-    "#phi^{lep b-jet Rec}-#phi^{lep b-jet parton}/Frequency (correct permutation)/0/10",
-    // (v) light jets
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet rec}/Frequency/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet parton}/Frequency/0/10",
-    "#eta^{light jet Rec}-#eta^{light jet parton}/Frequency/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency/0/10",
-    "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet rec}) : p_{t}^{light jet rec}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{light jet kinFit}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (correct permutation)/0/10",
-    "(p_{t}^{light jet Rec}-p_{t}^{light jet parton}) : p_{t}^{light jet parton}/Frequency (correct permutation)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet rec}/Frequency (correct permutation)/0/10",
-    "#eta^{light jet kinFit}-#eta^{light jet parton}/Frequency (correct permutation)/0/10",
-    "#eta^{light jet Rec}-#eta^{light jet parton}/Frequency (correct permutation)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet rec}/Frequency (correct permutation)/0/10",
-    "#phi^{light jet kinFit}-#phi^{light jet parton}/Frequency (correct permutation)/0/10",
-    "#phi^{light jet Rec}-#phi^{light jet parton}/Frequency (correct permutation)/0/10",
+    xSecLabelName("topPt")+" gen/"+xSecLabelName("topPt")+" reco",
   };
 
   // count # plots
   unsigned int N1Dplots        = sizeof(plots1D)/sizeof(TString);
-  unsigned int N1Dplots_CCVars = sizeof(plots1D_CCVars)/sizeof(TString);
-  unsigned int N1Dplotsadd     = sizeof(plots1Dadd)/sizeof(TString);
   unsigned int N2Dplots        = sizeof(plots2D)/sizeof(TString);
-  unsigned int N2Dplots_CCVars = sizeof(plots2D_CCVars)/sizeof(TString);
-  unsigned int N2Dplots_LepBjet= sizeof(plots2D_LepBjet)/sizeof(TString);
 
   // check if all axis labels exist
   if(N1Dplots        != sizeof(axisLabel1D)/sizeof(TString))       { std::cout << "ERROR: some 1D plots or axis label are missing"          << std::endl; exit(1); }
-  if(N1Dplots_CCVars != sizeof(axisLabel1D_CCVars)/sizeof(TString)){ std::cout << "ERROR: some 1D plots (CCVars) or axis label are missing" << std::endl; exit(1); }
-
-  if(systematicVariation==sysNo){
-    if(N1Dplotsadd != sizeof(axisLabel1Dadd)/sizeof(TString)){
-      std::cout << "ERROR: some additional 1D plots or axis label are missing" << std::endl;
-      exit(1);
-    }
-    N1Dplots+=N1Dplotsadd;
-  }
 
   if(N2Dplots        != sizeof(axisLabel2D)/sizeof(TString))       { std::cout << "ERROR: some 2D plots or axis label are missing"          << std::endl; exit(1); }
-  if(N2Dplots_CCVars != sizeof(axisLabel2D_CCVars)/sizeof(TString)){ std::cout << "ERROR: some 2D plots (CCVars) or axis label are missing" << std::endl; exit(1); }
-  if(N2Dplots_LepBjet != sizeof(axisLabel2D_LepBjet)/sizeof(TString)){ std::cout << "ERROR: some 2D plots (lepton, bjet) or axis label are missing" << std::endl; exit(1); }
-
-  if (addCrossCheckVariables&&!hadron){
-    N1Dplots += N1Dplots_CCVars;
-    N2Dplots += N2Dplots_CCVars;
-  }
-  if(!extrapolate&&hadron){
-    N2Dplots += N2Dplots_LepBjet;
-  }
+  
   // run automatically in batch mode if there are many canvas
   if((N1Dplots+N2Dplots)>15) gROOT->SetBatch();
 
@@ -1067,12 +423,8 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   // collect all plot names in vector (first 1D, then 2D)
   std::vector<TString> plotList_;
   plotList_.insert(plotList_.begin(), plots1D, plots1D + sizeof(plots1D)/sizeof(TString));
-  if(addCrossCheckVariables&&!hadron) plotList_.insert(plotList_.end(), plots1D_CCVars, plots1D_CCVars + sizeof(plots1D_CCVars)/sizeof(TString));
-  if(systematicVariation==sysNo)      plotList_.insert(plotList_.end(), plots1Dadd,     plots1Dadd     + sizeof(plots1Dadd)/sizeof(TString)    );
   plotList_.insert(plotList_.end(),   plots2D, plots2D + sizeof(plots2D)/sizeof(TString));
-  if(addCrossCheckVariables&&!hadron) plotList_.insert(plotList_.end(), plots2D_CCVars, plots2D_CCVars + sizeof(plots2D_CCVars)/sizeof(TString));
-  if(!extrapolate&&hadron) plotList_.insert(plotList_.end(), plots2D_LepBjet, plots2D_LepBjet + sizeof(plots2D_LepBjet)/sizeof(TString));
-
+  
   // remove irrelevant plots for systemtic variation to speed up
 
   // container for all histos (1D&2D)
@@ -1571,20 +923,6 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     }
   }
 
-  // =================================================
-  //  Copy event yields for total xSec calculation
-  // =================================================
-  TH1F* dataYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kData ]->Clone());
-  TH1F* SigYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kSig  ]->Clone());
-  TH1F* BkgYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kBkg  ]->Clone());
-  TH1F* STopYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kSTop ]->Clone());
-  TH1F* WjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kWjets]->Clone());
-  TH1F* ZjetYield =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kZjets]->Clone());
-  TH1F* DiBosYield=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kDiBos]->Clone());
-  TH1F* QCDYield  =(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/topPt"][kQCD  ]->Clone());
-  TH1F* GenInclusive =(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/topPt"          ][kSig]->Clone());
-  TH1F* GenPhaseSpace=(TH1F*)(histo_["analyzeTopPartonLevelKinematics"+sysInputGenFolderExtension+"/lepPt"][kSig]->Clone()); // don't let you confuse from the naming- this is the visible hadron level as "Hadron...PhaseSpace" is renamed to "Parton" in the step before!
-
   // ============================
   //  Configure histograms
   // ============================
@@ -1592,11 +930,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   std::vector<TString> axisLabel_;
 
   axisLabel_.insert(axisLabel_.begin(), axisLabel1D, axisLabel1D + sizeof(axisLabel1D)/sizeof(TString));
-  if(addCrossCheckVariables&&!hadron)   axisLabel_.insert(axisLabel_.end(), axisLabel1D_CCVars, axisLabel1D_CCVars + sizeof(axisLabel1D_CCVars)/sizeof(TString));
-  if(systematicVariation==sysNo)        axisLabel_.insert(axisLabel_.end(), axisLabel1Dadd,     axisLabel1Dadd     + sizeof(axisLabel1Dadd)/sizeof(TString)    );
   axisLabel_.insert(axisLabel_.end(),   axisLabel2D, axisLabel2D + sizeof(axisLabel2D)/sizeof(TString));
-  if(addCrossCheckVariables&&!hadron)   axisLabel_.insert(axisLabel_.end(), axisLabel2D_CCVars, axisLabel2D_CCVars + sizeof(axisLabel2D_CCVars)/sizeof(TString));
-  if(!extrapolate&&hadron)   axisLabel_.insert(axisLabel_.end(), axisLabel2D_LepBjet, axisLabel2D_LepBjet + sizeof(axisLabel2D_LepBjet)/sizeof(TString));
 
   // loop plots
   for(unsigned int plot=0; plot<plotList_.size(); ++plot){
@@ -1670,7 +1004,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   //  Rebinning 1D histogramme
   // ============================
   // create variable bin edges
-  std::map<TString, std::vector<double> > binning_ = makeVariableBinning(addCrossCheckVariables);
+  std::map<TString, std::vector<double> > binning_ = makeVariableBinning(false);
   // loop samples
   for(unsigned int sample=kSig; sample<=kData; ++sample){
     // loop plots
@@ -1844,139 +1178,6 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       if(!compare)++NXSec;
     }
   }
-
-  // ===============================================================
-  //  Total inclusive cross section (ttbar->X) determination
-  // ===============================================================
-  double xSecResult=0;
-  double effA=0;
-  double BR=0;
-  ++NXSec;
-  // get event yields
-  // careful: plot contains leptonic and hadronic top -> *0.5
-  double Ndata  = 0.5 * dataYield ->Integral(0, dataYield ->GetNbinsX()+1);
-  double NSig   = 0.5 * SigYield  ->Integral(0, SigYield  ->GetNbinsX()+1);
-  double NBGtop = 0.5 * BkgYield  ->Integral(0, BkgYield  ->GetNbinsX()+1); 
-  double NBGZ   = 0.5 * ZjetYield ->Integral(0, ZjetYield ->GetNbinsX()+1);
-  double NBGW   = 0.5 * WjetYield ->Integral(0, WjetYield ->GetNbinsX()+1);
-  double NBGsTop= 0.5 * STopYield ->Integral(0, STopYield ->GetNbinsX()+1);
-  double NBGVV  = 0.5 * DiBosYield->Integral(0, DiBosYield->GetNbinsX()+1);
-  double NBGQCD = 0.5 * QCDYield  ->Integral(0, QCDYield  ->GetNbinsX()+1);
-  double NBG= NBGZ+NBGW+NBGsTop+NBGVV+NBGQCD; //other ttbar BG is handled by a signal fraction (see below sigFrac)
-  double NAllMC=NSig+NBGtop+NBG;
-  double sigFrac=NSig/(NSig+NBGtop);
-  // print event composition
-  if(verbose>0&&systematicVariation==sysNo){ 
-    unsigned int enumSG=kSig;
-    unsigned int enumBG=kBkg;
-    if(ttbarMC2=="Powheg"){
-      enumSG=kSigPow;
-      enumBG=kBkgPow;
-    }
-    if(ttbarMC2=="PowhegHerwig"){
-      enumSG=kSigPowHer;
-      enumBG=kBkgPowHer;
-    }
-    std::cout << std::endl;
-    std::cout << "events expected from MC: " << NAllMC << std::endl;
-    std::cout << "expected event composition:"   << std::endl;
-    std::cout << "ttbar SG:  " << std::setprecision(4) << std::fixed << NSig   / NAllMC;
-    std::cout << " (" << lumiweight(enumSG, luminosity, systematicVariation, decayChannel) << "*";
-    std::cout << NSig/lumiweight(enumSG, luminosity, systematicVariation, decayChannel) << "=" << NSig    << ") " << std::endl;
-    std::cout << " (" << "mean event SF: " << NSig/(lumiweight(enumSG, luminosity, systematicVariation, decayChannel)*(0.5*SigYield->GetEntries())) << ")" << std::endl;
-    std::cout << "ttbar BG:  " << std::setprecision(4) << std::fixed << NBGtop / NAllMC; 
-    std::cout << " (" << lumiweight(enumBG, luminosity, systematicVariation, decayChannel) << "*";
-    std::cout << NBGtop/lumiweight(enumBG, luminosity, systematicVariation, decayChannel) << "=" << NBGtop << ") " << std::endl;
-    std::cout << "single top:" << std::setprecision(4) << std::fixed << NBGsTop/ NAllMC; 
-    std::cout << " (" << NBGsTop << ") " << std::endl;
-    std::cout << "W+jets    :" << std::setprecision(4) << std::fixed << NBGW   / NAllMC; 
-    std::cout << " (" << lumiweight(kWjets, luminosity, systematicVariation, decayChannel) << "*";
-    std::cout << NBGW/lumiweight(kWjets, luminosity, systematicVariation, decayChannel) << "=" << NBGW << ") " << std::endl;
-    std::cout << "QCD       :" << std::setprecision(4) << std::fixed << NBGQCD / NAllMC; 
-    std::cout << " (" << lumiweight(kQCD, luminosity, systematicVariation, decayChannel) << "*";
-    std::cout << NBGQCD/lumiweight(kQCD, luminosity, systematicVariation, decayChannel) << "=" << NBGQCD << ") " << std::endl;
-    if(setQCDtoZero) std::cout << " will be ignored for all calculations" << std::endl;
-    std::cout << "Z+jets    :" << std::setprecision(4) << std::fixed << NBGZ   / NAllMC;
-    std::cout << " (" << lumiweight(kZjets, luminosity, systematicVariation, decayChannel) << "*";
-    std::cout << NBGZ/lumiweight(kZjets, luminosity, systematicVariation, decayChannel) << "=" << NBGZ << ") " << std::endl;
-    std::cout << "Diboson   :" << std::setprecision(4) << std::fixed << NBGVV  / NAllMC; 
-    std::cout << " (" << NBGVV << ") " << std::endl;
-  }
-  // set QCD to 0
-  if(setQCDtoZero){ 
-    NBG-=NBGQCD;
-    NAllMC-=NBGQCD;
-  }
-  // efficiency calculation
-  double NGenPhaseSpace= GenPhaseSpace->Integral(0, GenPhaseSpace->GetNbinsX()+1);
-  double eff=NSig/NGenPhaseSpace;
-  // acceptance
-  double NGen          =0.5 * GenInclusive ->Integral(0, GenInclusive ->GetNbinsX()+1); // 0.5 because of 2 tops/event
-  effA=NSig/NGen;
-  double A= effA/eff;
-  // branching ratio
-  // careful: the xSec here needs to be 
-  // consistent with the one in lumiweight()
-  //BR=NGen*1.0/(ttbarCrossSection*luminosity);
-  BR=BRPDG(systematicVariation);//use PDG BR from basic functions
-  // for inclusive xSec in chosen PS
-  if(!extrapolate){ 
-    BR=1.; // kinematic cuts for final state objects are specific for the decay channel (at least l+jets)!
-    A=1.;
-  }
-  // calculate xSec
-  double luminosity2=luminosity;
-  if(decayChannel=="combined") luminosity2= ( constLumiElec + constLumiMuon );
-  if(systematicVariation==sysLumiUp  )      luminosity2*=(1.0+globalLumiUncertainty);
-  else if(systematicVariation==sysLumiDown) luminosity2*=(1.0-globalLumiUncertainty);
-  xSecResult= ( Ndata-NBG ) * sigFrac / ( eff*A*luminosity2*BR );
-  double sigmaxSec = sqrt( Ndata ) * sigFrac / ( eff*A*luminosity2*BR );
-  // text output
-  if(systematicVariation==testMe||systematicVariation==sysNo||systematicVariation==sysGenMCatNLO||systematicVariation==sysGenPowheg||systematicVariation==sysGenPowhegHerwig){ 
-    std::cout << std::endl;
-    std::cout << "systematic variation: " << sysLabel(systematicVariation) << std::endl;
-    std::cout << "Phase space: "; 
-    if(extrapolate) std::cout << "full extrapolation" << std::endl; 
-    else{
-      if(hadron) std::cout << "hadron level PS";
-      else std::cout << "parton level PS";
-      std::cout << " (will use A=1&BR=1)" << std::endl; 
-    }
-    std::cout << "lumi[pb]:             " << luminosity << std::endl;
-    std::cout << "N(Data):              " << Ndata << std::endl;
-    std::cout << "N(BG):                " << NBG   << std::endl;
-    std::cout << "eff:                  " << eff   << std::endl;
-    std::cout << "A:                    " << A     << std::endl;
-    std::cout << "BR->l (PDG):          " << BR    << std::endl;
-    std::cout << "effective lumi[pb]:   " << luminosity2 << std::endl;
-    std::cout << "ttbar sigfrac:        " << sigFrac << std::endl;
-    std::cout << "inclusive cross section";
-    std::cout << " [pb]: ";
-    std::cout << xSecResult << " +/- " << sigmaxSec << "(stat.)" << std::endl;
-    std::cout << std::endl;
-    //exit(0); // comment in if you just want to see the xSec
-  }
-  // create histo
-  TString inclName = "xSec/inclusive";
-  histo_[inclName][kData] = new TH1F( "inclusivekData", "inclusivekData", 1, 0., 1.0);
-  histo_[inclName][kData]->SetBinContent(1, xSecResult);
-  histo_[inclName][kData]->SetBinError  (1, sigmaxSec );
-  // add plot to list of all plots
-  plotList_.push_back(inclName);
-  // configure xSec plot histo style
-  histogramStyle(*histo_[inclName][kData], kData, false);
-  TString inclXSeclabel=" #sigma(t#bar{t}#rightarrowX)";
-  if(!extrapolate) inclXSeclabel+="*BR(#mu or e)*A ";
-  inclXSeclabel+="[pb]/ /0/1";
-  axisLabel_.push_back(inclXSeclabel);
-  // theory xSec
-  histo_[inclName][kSig]=(TH1F*)histo_[inclName][kData]->Clone("xSec/inclusiveTheory");
-  double xSecRef=ttbarCrossSection;
-  double xSecErr=ttbarCrossSectionError;
-  if(!extrapolate) xSecRef*=(GenPhaseSpace->Integral(0,GenPhaseSpace->GetNbinsX()+1))/(GenInclusive->Integral(0, GenInclusive->GetNbinsX()+1))*BRPDG(systematicVariation); // BR: only l+jets events for l=#mu OR e, A=GenPS/GenInlusive: xSec in chosen kinematic PS
-  histo_[inclName][kSig]->SetBinContent(1, xSecRef);
-  histo_[inclName][kSig]->SetBinError  (1, xSecErr);
-  histogramStyle(*histo_[inclName][kSig ], kSig , false);
   
   // ---
   //    differential normalized cross section (phase space) determination
@@ -2113,12 +1314,6 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	    std::cout << "eff*A(incl):          " << std::setprecision(3) << std::fixed << effIncl << std::endl;
 	    std::cout << "ttbar sig frac(incl): " << std::setprecision(3) << std::fixed << sigFracVariable << std::endl;
 	    std::cout << "result:               " << std::setprecision(3) << std::fixed << xSecBin << std::endl;
-	    if(extrapolate){
-	      double xSecBinFromDiffAndIncl= histo_["xSec/"+variable][kData]->GetBinContent(bin)/(xSecResult*BR);
-	      std::cout << "from diff and incl. xSec: ";
-	      std::cout << std::setprecision(3) << std::fixed << xSecBinFromDiffAndIncl << std::endl;
-	      std::cout << "ratio: " << xSecBin/xSecBinFromDiffAndIncl << std::endl;
-	    }
 	  }
 	  // apply cross section and error to plot
 	  histo_[xSec][kData]->SetBinContent(bin, xSecBin     );
@@ -2286,8 +1481,6 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       // number of systematic samples to unfold 
       int numSys=0;
       // Regularization parameter
-      double regPar=regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier, (addSel=="ProbSel" ? true : false) );
-      if(verbose>0) std::cout << variable << ": tau=" << regPar << std::endl;
       // Regularization Modus 
       //         0 means: Default setting. Same as 2
       //         1 means: Bin by Bin Unfolding
@@ -2312,16 +1505,14 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //         0 means: Default setting, same as 1
       //         1 means: interpret 'regPar' as k value (default)
       //         2 means: interpret 'regPar' as tau value
-      int unfoldWithParameter=2; 
-      //int unfoldWithParameter=1;
+      int unfoldWithParameter=2;
       if(systematicVariation!=sysNo) regMode=3;
       //    PRE-WEIGHTING
       //         0 means: Default value, same as 1
       //         1 means: No preweighting of MC is performed (default)
       //         2 means: MC is reweighted to unfolded data (1 iteration)
       //         i means: MC is reweighted to unfolded data ((i-1) iteration), i<=9 (up to 8 iterations)
-      int unfPreWeighting=0;
-      if(systematicVariation==sysUnf) unfPreWeighting=6;
+      int unfPreWeighting= 1;     
       TString unfPreWeightingStr = "";
       if(unfPreWeighting>1) unfPreWeightingStr+="PreWeight"+getTStringFromInt(unfPreWeighting-1)+"Iter";
       // produce scan plots? 
@@ -2369,9 +1560,9 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	if(decayChannel=="muon"    ) rootFile+="Mu";
 	else if(decayChannel=="electron") rootFile+="Elec";
 	else if(decayChannel=="combined") rootFile+="Lep";
-	rootFile+=closureLabel+variable+LV+PS+unfPreWeightingStr+".root";
-	psFile =outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr;
-	epsFile=outputFolder+"unfolding/unfolding"+closureLabel+variable+LV+PS+unfPreWeightingStr+".eps";
+	rootFile+=closureLabel+"IterTest"+variable+LV+PS+unfPreWeightingStr+".root";
+	psFile =outputFolder+"unfolding/unfolding"+closureLabel+"IterTest"+variable+LV+PS+unfPreWeightingStr;
+	epsFile=outputFolder+"unfolding/unfolding"+closureLabel+"IterTest"+variable+LV+PS+unfPreWeightingStr+".eps";
 	if(scan==2) psFile+="Scan";
 	psFile+=".ps";
 	//if(regMode>2) regFile=outputFolder+"unfolding/optimalSVDRegularization.txt";
@@ -2384,19 +1575,30 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       if(decayChannel=="muon"    ) txtfile+="Mu";
       else if(decayChannel=="electron") txtfile+="Elec";
       else if(decayChannel=="combined") txtfile+="Lep";
-      txtfile+=dataSample+LV+PS+unfPreWeightingStr+".txt";
+      txtfile+=closureLabel+"IterTest"+dataSample+LV+PS+unfPreWeightingStr+".txt";
       // save unfolding plots in rootfile?
       //         0 means: Default value, same as 1
       //         1 means: no root file will be written (default)
       //         2 means: standard plots to root file  
       int doRootFile=(rootFile=="" ? 1 : 2);
       // Combine all options in one Steering Parameter
-      TString steering="";
+      TString steering =""; // part of steering parameter after  #iterations  
+      TString steering2=""; // part of steering parameter before #iterations
       // Steering options in parameter 'steering' 
       //     (1) REGMODE, see above
+      //         2 means: SVD Unfolding, minimal regularization.
+      //              Regularization will be done with a k value
+      //              and the k value will be set to the number of
+      //              bins (not counting OF). Parameter 'regPar'
+      //              is ignored.
+      //         3 means: SVD unfolding, regularization according
+      //              to the parameter 'regPar'. Whether this one
+      //              is taken as k value or tau value, can be 
+      //              specified with the second digit of this
+      //              parameter. (default)
       steering=getTStringFromInt(regMode)+steering;
       //     (2) REGULARIZATION PARAMETER, see above
-      steering=getTStringFromInt(unfoldWithParameter)+steering;
+      steering=getTStringFromInt(unfoldWithParameter)+steering; //2 means: interpret 'regPar' as tau value
       //     (3) SCAN 
       steering=getTStringFromInt(scan)+steering;
       //     (4) OUTPUT PS CONTENT, see above
@@ -2428,7 +1630,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //          3 means: 125 scan points (default)
       //          4 means: 625 scan points
       int scanpoints= (scan==2 ? 3 : 0);
-      //scanpoints=1; // FIXME: fast tauscan results
+      scanpoints=1; // FIXME: fast tauscan results
       steering=getTStringFromInt(scanpoints)+steering;
       //     (9)  SCANRANGE
       //          0 means: Default value, same as 2
@@ -2488,19 +1690,19 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       //         1 means: No preweighting of MC is performed (default)
       //         2 means: MC is reweighted to unfolded data (1 iteration)
       //         i means: MC is reweighted to unfolded data ((i-1) iteration), i<=9 (up to 8 iterations)
-      steering=getTStringFromInt(unfPreWeighting)+steering;
+      //-> !!! chosen within for loop later !!!
       //    (16) BACKGROUND REDUCTION (16. digit from right)
       //         0 means: Default value, same as 1
       //         1 means: Be non-forgiving
       //         2 means: If Background>Data, set Data to zero.
       int unfBkgReduction=0;
-      steering=getTStringFromInt(unfBkgReduction)+steering;
+      steering2=getTStringFromInt(unfBkgReduction)+steering2;
       //    (17) CONTROL PLOT STYLE (17. digit from right)
       //         0 means: Default value, same as 1
       //         1 means: default style (e.g. show all bins incl. UF/OF, show vertical lines for tau scan etc.)
       //         2 means: Uni HH style (e.g. show only bins of measurement, no vertical lines etc.)
       int unfPlotStyle=2;
-      steering=getTStringFromInt(unfPlotStyle)+steering;
+      steering2=getTStringFromInt(unfPlotStyle)+steering2;
 
       // ==============
       //  Get binning
@@ -2565,282 +1767,336 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	    std::cout << "     N(QCD): "    << NumQCD  << std::endl;
  	  }
 	}
-	TH1D* unfoldedData    =new TH1D();
-	TH1D* unfoldedDataNorm=new TH1D();
-	TopSVDFunctions::SVD_Unfold(
-	// ==============
-	//  HISTOS
-	// ==============				    
-	// Data Input (RAW Data including the background)
-	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
-	// Background (will be substracted from data)
-	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC],
-	// ttbar background only (used to calculate a ttbar signal 
-	// fraction instead of subtracting the yield which depends 
-	// on the inclusive ttbar cross section.) 
-	// Note: if 0 pointer is handed over 
-	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg],
-	// Generated ttbar SG MC
-	(TH1D*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig],
-	// Reconstructed ttbar SG MC
-	(TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig],
-	// Response Matrix 
-	(TH2D*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig],
-	// Returned: Unfolded Distribution              
-	unfoldedData,
-	// Returned: Normalized Unfolded Distribution              
-	unfoldedDataNorm,
-	// ==============
-	//  NUMBERS
-	// ==============	
-        // For Normalization: Total Data Events
-        // If set to zero, will be taken from the integral of dataInputHist
-	NdataTot,
-        // For Normalization: Total Reconstructed all BG MC Events
-        // If set to NULL, will be taken from the integral of bgrInputHist
-	NBGTot,
-        // For Normalization: Total Reconstructed ttbar BG MC Events
-        // If set to NULL, will be taken from the integral of ttbgrInputHist
-	NttBG,
-	// For Normalization: Total Reconstructed ttbar SG MC Events
-        // If set to NULL, will be taken from the integral of recInputHist
-	NttSG,
-	// For Normalization: Total Generated ttbar SG MC Events
-        // If set to NULL, will be taken from the integral of genInputHist
-	NttSGgen,
-	// ==============
-	//  BINS
-	// ==============	
-	// Binning for the unfolding
-	bins, 
-	// Number of bins for unfolding (not counting OF bins !!!)
-	unfoldbins, 
-	// ==============
-	//  OPTIONS
-	// ==============
-	// Regularization parameter
-	regPar,
-	// steering parameter (as defined above)
-	steering,
-	// Specify the number of systematic samples to unfold 
-        numSys,
-	// =====================
-	//  TEX(T) AND LABELS
-	// =====================                         
-	// Specify Name for the Channel ("mumu", "emu", "ee" ...)
-	(TString)decayChannel,  
-	// Specify Name for the Physics Object ("Top", "Jets", "Leptons")      
-	particle,
-	// Specify Name for the Quantity ("Eta", "Pt", or "Mass");      
-	quantity,
-	// Specify Name for special run of unfolding
-	special, 
-        // Array of Names for the different systematics
-        // if you run only over the nominal sample, provide NULL
-        sysList,
-	// Nicely formatted name for the channel
-	channelTex,
-	// Nicely formatted name for the physics object 
-	particleTex,
-	// Nicely formatted name for ithe quantity
-	quantityTex,
-	// Nicely formatted name indicating some special condition 
-	special,
-	// Array of Names for the different systematics
-        // if you run only over the nominal sample, provide NULL
-        sysList,
-	// ==============
-	//  OUTPUT
-	// ==============  
-	// If specified, plots will be saved in ROOT File
-	rootFile,
-	// If specified, plots will be saved in PS File
-	psFile,
-	// If specified, plots will be saved in EPS Files 
-	epsFile,
-        // The optimal Reg Parameters will be written to this file.
-        // The file will NOT be overwritten, rather the result will be appended.
-        // The following data will be saved in this order: 
-        // (1) the optimal tau, (2) the two nearest k values,
-        // (3) the k value from the d value method
-        // (4) the number of bins including side bins
-        txtfile,
-        // If specified, optimal Reg Parameters will be 
-	// written to this file. The file will NOT be 
-	// overwritten, rather the result will be appended
-        // The following data will be saved in this order: 
-        // (1) the optimal tau, (2) the two nearest k values,
-        // (3) the k value from the d value method
-        // (4) the number of bins including side bins
-        regFile
-	);
-	// ========================================================
-	//  Remaining steps for cross section calculation
-	// ========================================================
-	// use unfolded event yield as input
-	histo_[xSec][kData+42   ]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
-	histo_[xSec][kData+42+42]=(TH1F*)(unfoldedDataNorm->Clone(variable+"kData"));
-	// use reco yield plot clone to get correct and complete binning 
-	histo_[xSec    ][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
-	histo_[xSec    ][kData]->Reset("icesm");
-	histo_[xSecNorm][kData]=(TH1F*)(histo_[xSec][kData]->Clone());
-	// remove additional bins with 0 width
-	double *newBinLowEdges = new double[binning_[variable].size()];
-	newBinLowEdges = &binning_[variable].front();
-	histo_[xSec    ][kData] = (TH1F*) histo_[xSec    ][kData]->Rebin(binning_[variable].size()-1, histo_[xSec    ][kData]->GetName(), newBinLowEdges); 
-	histo_[xSecNorm][kData] = (TH1F*) histo_[xSecNorm][kData]->Rebin(binning_[variable].size()-1, histo_[xSecNorm][kData]->GetName(), newBinLowEdges); 
-	// remove additional OF/UF bins from SVD unfolded plots
-	if(verbose>1){ 
-	  std::cout << std::endl << variable << ":" << std::endl;
-	  for(int bin=0; bin<=histo_[xSec][kData+42]->GetNbinsX()+1; ++bin){
-	    std::cout << "bin " << bin;
-	    std::cout << " (" << histo_[xSec][kData+42]->GetBinLowEdge(bin) << " .. ";
-	    //std::cout << (bin==histo_[xSec][kData+42]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData+42]->GetBinLowEdge(bin+1));
-	    std::cout << histo_[xSec][kData+42]->GetBinLowEdge(bin+1);
-	    std::cout << "): " << histo_[xSec][kData+42]->GetBinContent(bin) << ", Norm: " << histo_[xSec][kData+42+42]->GetBinContent(bin) << std::endl;
+	
+	// colors
+	iterColor_.push_back(kCyan+1 );
+	iterColor_.push_back(kBlue   );
+	iterColor_.push_back(kBlack  );
+	iterColor_.push_back(kGreen+1);
+	iterColor_.push_back(kGreen+3);
+	iterColor_.push_back(kAzure+8);
+	iterColor_.push_back(kOrange+3 ); 
+	iterColor_.push_back(kRed      ); 
+	iterColor_.push_back(kMagenta+2); 
+	iterColor_.push_back(kOrange+8); 
+	// marker styles
+	iterMarker_.push_back(33);
+	iterMarker_.push_back(22);	
+	iterMarker_.push_back(29);
+	iterMarker_.push_back(23);
+	iterMarker_.push_back(34);
+	iterMarker_.push_back(20);
+	iterMarker_.push_back(24); 
+	iterMarker_.push_back(30); 
+	iterMarker_.push_back(32); 
+	iterMarker_.push_back(25); 
+	
+	// extract result for different number of iterations
+	for(int iter=1; iter<=9; ++iter){
+	  // to avoid overwriting, add the used #iterations as nametag to all output files
+	  TString iterVal= "Iter"+getTStringFromInt(iter-1);
+	  TString rootFileMod=rootFile;
+	  rootFileMod.ReplaceAll(".root", iterVal+".root");
+	  TString psFileMod=psFile;
+	  psFileMod.ReplaceAll(".ps", iterVal+".ps");
+	  TString epsFileMod=epsFile;
+	  epsFileMod.ReplaceAll(".eps", iterVal+".eps");
+	  TString txtfileMod=txtfile;
+	  txtfileMod.ReplaceAll(".txt", iterVal+".txt");
+
+	  TH1D* unfoldedData    =new TH1D();
+	  TH1D* unfoldedDataNorm=new TH1D();
+	  TopSVDFunctions::SVD_Unfold(
+	  // ==============
+	  //  HISTOS
+	  // ==============				    
+	  // Data Input (RAW Data including the background)
+	  (TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kData],                  
+	  // Background (will be substracted from data)
+	  (TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kAllMC],
+	  // ttbar background only (used to calculate a ttbar signal 
+	  // fraction instead of subtracting the yield which depends 
+	  // on the inclusive ttbar cross section.) 
+	  // Note: if 0 pointer is handed over 
+	  (TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kBkg],
+	  // Generated ttbar SG MC
+	  (TH1D*)histo_["analyzeTopPartonLevelKinematics"+PS+sysInputGenFolderExtension+"/raw"+variable][kSig],
+	  // Reconstructed ttbar SG MC
+	  (TH1D*)histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable][kSig],
+	  // Response Matrix 
+	  (TH2D*)histo2_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/raw"+variable+"_"][kSig],
+	  // Returned: Unfolded Distribution              
+	  unfoldedData,
+	  // Returned: Normalized Unfolded Distribution              
+	  unfoldedDataNorm,
+	  // ==============
+	  //  NUMBERS
+	  // ==============	
+	  // For Normalization: Total Data Events
+	  // If set to zero, will be taken from the integral of dataInputHist
+	  NdataTot,
+	  // For Normalization: Total Reconstructed all BG MC Events
+	  // If set to NULL, will be taken from the integral of bgrInputHist
+	  NBGTot,
+	  // For Normalization: Total Reconstructed ttbar BG MC Events
+	  // If set to NULL, will be taken from the integral of ttbgrInputHist
+	  NttBG,
+	  // For Normalization: Total Reconstructed ttbar SG MC Events
+	  // If set to NULL, will be taken from the integral of recInputHist
+	  NttSG,
+	  // For Normalization: Total Generated ttbar SG MC Events
+	  // If set to NULL, will be taken from the integral of genInputHist
+	  NttSGgen,
+	  // ==============
+	  //  BINS
+	  // ==============	
+	  // Binning for the unfolding
+	  bins, 
+	  // Number of bins for unfolding (not counting OF bins !!!)
+	  unfoldbins, 
+	  // ==============
+	  //  OPTIONS
+	  // ==============
+	  // Regularization parameter
+	  regParameter(variable, decayChannel, verbose, extrapolate, true, hadron, closureTestSpecifier, (addSel=="ProbSel" ? true : false) ),
+	  // steering parameter (as defined above)
+	  steering2+getTStringFromInt(iter)+steering,
+	  // Specify the number of systematic samples to unfold 
+	  numSys,
+	  // =====================
+	  //  TEX(T) AND LABELS
+	  // =====================                         
+	  // Specify Name for the Channel ("mumu", "emu", "ee" ...)
+	  (TString)decayChannel,  
+	  // Specify Name for the Physics Object ("Top", "Jets", "Leptons")      
+	  particle,
+	  // Specify Name for the Quantity ("Eta", "Pt", or "Mass");      
+	  quantity,
+	  // Specify Name for special run of unfolding
+	  special, 
+	  // Array of Names for the different systematics
+	  // if you run only over the nominal sample, provide NULL
+	  sysList,
+	  // Nicely formatted name for the channel
+	  channelTex,
+	  // Nicely formatted name for the physics object 
+	  particleTex,
+	  // Nicely formatted name for ithe quantity
+	  quantityTex,
+	  // Nicely formatted name indicating some special condition 
+	  special,
+	  // Array of Names for the different systematics
+	  // if you run only over the nominal sample, provide NULL
+	  sysList,
+	  // ==============
+	  //  OUTPUT
+	  // ==============  
+	  // If specified, plots will be saved in ROOT File
+	  rootFileMod,
+	  // If specified, plots will be saved in PS File
+	  psFileMod,
+	  // If specified, plots will be saved in EPS Files 
+	  epsFileMod,
+	  // The optimal Reg Parameters will be written to this file.
+	  // The file will NOT be overwritten, rather the result will be appended.
+	  // The following data will be saved in this order: 
+	  // (1) the optimal tau, (2) the two nearest k values,
+	  // (3) the k value from the d value method
+	  // (4) the number of bins including side bins
+	  txtfileMod,
+	  // If specified, optimal Reg Parameters will be 
+	  // written to this file. The file will NOT be 
+	  // overwritten, rather the result will be appended
+	  // The following data will be saved in this order: 
+	  // (1) the optimal tau, (2) the two nearest k values,
+	  // (3) the k value from the d value method
+	  // (4) the number of bins including side bins
+	  regFile
+	  );
+	  // ========================================================
+	  //  Remaining steps for cross section calculation
+	  // ========================================================
+	  // use unfolded event yield as input
+	  histo_[xSec][kData+42   ]=(TH1F*)(unfoldedData->Clone(variable+"kData"));
+	  histo_[xSec][kData+42+42]=(TH1F*)(unfoldedDataNorm->Clone(variable+"kData"));
+	  // use reco yield plot clone to get correct and complete binning 
+	  histo_[xSec    ][kData]=(TH1F*)(histo_["analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable][kData]->Clone(variable+"kData"));
+	  histo_[xSec    ][kData]->Reset("icesm");
+	  histo_[xSecNorm][kData]=(TH1F*)(histo_[xSec][kData]->Clone());
+	  // remove additional bins with 0 width
+	  double *newBinLowEdges = new double[binning_[variable].size()];
+	  newBinLowEdges = &binning_[variable].front();
+	  histo_[xSec    ][kData] = (TH1F*) histo_[xSec    ][kData]->Rebin(binning_[variable].size()-1, histo_[xSec    ][kData]->GetName(), newBinLowEdges); 
+	  histo_[xSecNorm][kData] = (TH1F*) histo_[xSecNorm][kData]->Rebin(binning_[variable].size()-1, histo_[xSecNorm][kData]->GetName(), newBinLowEdges); 
+	  // remove additional OF/UF bins from SVD unfolded plots
+	  if(verbose>1){ 
+	    std::cout << std::endl << variable << ":" << std::endl;
+	    for(int bin=0; bin<=histo_[xSec][kData+42]->GetNbinsX()+1; ++bin){
+	      std::cout << "bin " << bin;
+	      std::cout << " (" << histo_[xSec][kData+42]->GetBinLowEdge(bin) << " .. ";
+	      //std::cout << (bin==histo_[xSec][kData+42]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData+42]->GetBinLowEdge(bin+1));
+	      std::cout << histo_[xSec][kData+42]->GetBinLowEdge(bin+1);
+	      std::cout << "): " << histo_[xSec][kData+42]->GetBinContent(bin) << ", Norm: " << histo_[xSec][kData+42+42]->GetBinContent(bin) << std::endl;
+	    }
 	  }
-	}
-	//std::cout << std::endl << variable << ":" << std::endl;
-	//for(int bin=0; bin<=unfoldedDataNorm->GetNbinsX()+1; ++bin){
-	//  std::cout << "bin " << bin;
-	//  std::cout << " (" << unfoldedDataNorm->GetBinLowEdge(bin) << " .. ";
-	//  std::cout << unfoldedDataNorm->GetBinLowEdge(bin+1);
-	//  std::cout << "): " << unfoldedDataNorm->GetBinContent(bin)/(unfoldedDataNorm->GetBinWidth(bin))  << std::endl;
-	//}
-	for(int binSVD=0; binSVD<=histo_[xSec][kData+42]->GetNbinsX()+1; ++binSVD){
-	  if(verbose>1) std::cout << "bin " << binSVD;
-	  double value=histo_[xSec][kData+42]->GetBinContent(binSVD);
-	  double error=histo_[xSec][kData+42]->GetBinError(binSVD);
-	  double valueNorm=histo_[xSec][kData+42+42]->GetBinContent(binSVD);
-	  double errorNorm=histo_[xSec][kData+42+42]->GetBinError(binSVD);
-	  double loweredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD);
-	  double higheredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD+1);
-	  // search corresponding final bin
-	  bool found=false;
-	  for(int bin=1; bin<=histo_[xSec][kData]->GetNbinsX(); ++bin){
-	    double loweredge=histo_[xSec][kData]->GetBinLowEdge(bin);
-	    double higheredge=histo_[xSec][kData]->GetBinLowEdge(bin+1);
-	    if(!found){
-	      // normal bins
-	      if(loweredgeSVD>=loweredge&&higheredgeSVD<=higheredge){
-		found=true; 
-		if(verbose>1) std::cout << "-> bin " << bin << std::endl;
-		histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
-		histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
-		histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
-		histo_[xSecNorm][kData]->SetBinError(bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
+	  for(int binSVD=0; binSVD<=histo_[xSec][kData+42]->GetNbinsX()+1; ++binSVD){
+	    if(verbose>1) std::cout << "bin " << binSVD;
+	    double value=histo_[xSec][kData+42]->GetBinContent(binSVD);
+	    double error=histo_[xSec][kData+42]->GetBinError(binSVD);
+	    double valueNorm=histo_[xSec][kData+42+42]->GetBinContent(binSVD);
+	    double errorNorm=histo_[xSec][kData+42+42]->GetBinError(binSVD);
+	    double loweredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD);
+	    double higheredgeSVD=histo_[xSec][kData+42]->GetBinLowEdge(binSVD+1);
+	    // search corresponding final bin
+	    bool found=false;
+	    for(int bin=1; bin<=histo_[xSec][kData]->GetNbinsX(); ++bin){
+	      double loweredge=histo_[xSec][kData]->GetBinLowEdge(bin);
+	      double higheredge=histo_[xSec][kData]->GetBinLowEdge(bin+1);
+	      if(!found){
+		// normal bins
+		if(loweredgeSVD>=loweredge&&higheredgeSVD<=higheredge){
+		  found=true; 
+		  if(verbose>1) std::cout << "-> bin " << bin << std::endl;
+		  histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
+		  histo_[xSec][kData]->SetBinError(bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+		  histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
+		  histo_[xSecNorm][kData]->SetBinError(bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
+		}
 	      }
 	    }
-	  }
-	  // SVD bins outside plot range -> OF/UF
-	  if(!found){
-	    if(binSVD==0||(loweredgeSVD<=histo_[xSec][kData]->GetBinLowEdge(1)&&higheredgeSVD<=histo_[xSec][kData]->GetBinLowEdge(1))){
-	      found=true; 
-	      int bin=0;
-	      if(verbose>1) std::cout << "-> bin " << bin << std::endl;
-	      histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
-	      histo_[xSec][kData]->SetBinError(  bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
-	      histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
-	      histo_[xSecNorm][kData]->SetBinError(  bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
+	    // SVD bins outside plot range -> OF/UF
+	    if(!found){
+	      if(binSVD==0||(loweredgeSVD<=histo_[xSec][kData]->GetBinLowEdge(1)&&higheredgeSVD<=histo_[xSec][kData]->GetBinLowEdge(1))){
+		found=true; 
+		int bin=0;
+		if(verbose>1) std::cout << "-> bin " << bin << std::endl;
+		histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
+		histo_[xSec][kData]->SetBinError(  bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+		histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
+		histo_[xSecNorm][kData]->SetBinError(  bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
+	      }
+	      else if(binSVD==histo_[xSec][kData+42]->GetNbinsX()+1||(loweredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1)&&higheredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1))){
+		found=true; 
+		int bin=histo_[xSec][kData]->GetNbinsX()+1;
+		if(verbose>1) std::cout << "-> bin " << bin << std::endl;
+		histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
+		histo_[xSec][kData]->SetBinError(  bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
+		histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
+		histo_[xSecNorm][kData]->SetBinError(  bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
+	      }
 	    }
-	    else if(binSVD==histo_[xSec][kData+42]->GetNbinsX()+1||(loweredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1)&&higheredgeSVD>=histo_[xSec][kData]->GetBinLowEdge(histo_[xSec][kData]->GetNbinsX()+1))){
-	      found=true; 
-	      int bin=histo_[xSec][kData]->GetNbinsX()+1;
-	      if(verbose>1) std::cout << "-> bin " << bin << std::endl;
-	      histo_[xSec][kData]->SetBinContent(bin, histo_[xSec][kData]->GetBinContent(bin)+value);
-	      histo_[xSec][kData]->SetBinError(  bin, sqrt(histo_[xSec][kData]->GetBinError(bin)*histo_[xSec][kData]->GetBinError(bin)+error*error));
-	      histo_[xSecNorm][kData]->SetBinContent(bin, histo_[xSecNorm][kData]->GetBinContent(bin)+valueNorm);
-	      histo_[xSecNorm][kData]->SetBinError(  bin, sqrt(histo_[xSecNorm][kData]->GetBinError(bin)*histo_[xSecNorm][kData]->GetBinError(bin)+errorNorm*errorNorm));
+	    // make sure there is always a corresponding bin found!
+	    if(!found){ 
+	      std::cout << std::endl << "ERROR: bin " << binSVD << " (" << loweredgeSVD << " .. " << higheredgeSVD << ") from SVD plot does not match any of the final bins:" << std::endl;
+	      for(int i=0; i<(int)binning_[variable].size(); ++i){
+		std::cout << binning_[variable][i] << " ";
+	      }
+	      std::cout << std::endl;
+	      exit(0);
 	    }
 	  }
-	  // make sure there is always a corresponding bin found!
-	  if(!found){ 
-	    std::cout << std::endl << "ERROR: bin " << binSVD << " (" << loweredgeSVD << " .. " << higheredgeSVD << ") from SVD plot does not match any of the final bins:" << std::endl;
-	    for(int i=0; i<(int)binning_[variable].size(); ++i){
-	      std::cout << binning_[variable][i] << " ";
+	  if(verbose>1){
+	    // std::cout << std::endl << "->" << std::endl;
+	    for(int bin=0; bin<=histo_[xSec][kData]->GetNbinsX()+1; ++bin){
+	      std::cout << "bin " << bin;
+	      std::cout << " (" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
+	      //std::cout << (bin==histo_[xSec][kData]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData]->GetBinLowEdge(bin+1));
+	      std::cout << histo_[xSec][kData]->GetBinLowEdge(bin+1);
+	      std::cout << "): " << histo_[xSec][kData]->GetBinContent(bin) << std::endl;
 	    }
-	    std::cout << std::endl;
-	    exit(0);
 	  }
-	}
-	if(verbose>1){
-	  // std::cout << std::endl << "->" << std::endl;
-	  for(int bin=0; bin<=histo_[xSec][kData]->GetNbinsX()+1; ++bin){
-	    std::cout << "bin " << bin;
-	    std::cout << " (" << histo_[xSec][kData]->GetBinLowEdge(bin) << " .. ";
-	    //std::cout << (bin==histo_[xSec][kData]->GetNbinsX()+1 ? 999999 : histo_[xSec][kData]->GetBinLowEdge(bin+1));
-	    std::cout << histo_[xSec][kData]->GetBinLowEdge(bin+1);
-	    std::cout << "): " << histo_[xSec][kData]->GetBinContent(bin) << std::endl;
+	  histo_[xSec][kData]->SetTitle(variable);
+	  // divide by binwidth
+	  histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
+	  // divide by luminosity 
+	  histo_[xSec][kData]->Scale(1./(luminosity2));
+	  // BR correction
+	  if(extrapolate) histo_[xSec][kData]->Scale(1./BRPDG(systematicVariation));
+	  // Normalization -> not needed anymore, done in unfolding setup
+	  // NB: exclude underflow and overflow bins because they are negligible and treated wrong
+	  //histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
+	  //double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
+	  //inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
+	  //inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
+	  //if(normToIntegral==true){
+	  //  histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
+	  //  if(verbose>1) std::cout << "normalizing to integral" << std::endl;
+	  //}
+	  //else{
+	  //  histo_[xSecNorm][kData]->Scale(1./xSecPSforNorm);
+	  //  if(verbose>1){
+	  //    std::cout << "normalizing to calculated incl. xSec:" << std::endl;
+	  //    std::cout << xSecPSforNorm << std::endl;
+	  //  }
+	  //}
+	  // divide Normalized plot by binwidth and set title
+	  histo_[xSecNorm][kData]->SetTitle(variable);
+	  histo_[xSecNorm][kData] = divideByBinwidth(histo_[xSecNorm][kData], verbose-1);
+	  if(verboseTest||verbose>1){ 
+	    std::cout << std::endl << variable << ":" << std::endl;
+	    for(int bin=0; bin<=histo_[xSecNorm][kData]->GetNbinsX()+1; ++bin){
+	      std::cout << "bin " << bin;
+	      std::cout << " (" << histo_[xSecNorm][kData]->GetBinLowEdge(bin) << " .. ";
+	      std::cout << (bin==histo_[xSecNorm][kData]->GetNbinsX()+1 ? 999999 : histo_[xSecNorm][kData]->GetBinLowEdge(bin+1));
+	      std::cout << "): " << histo_[xSecNorm][kData]->GetBinContent(bin) << std::endl;
+	    }
 	  }
-	}
-	histo_[xSec][kData]->SetTitle(variable);
-	// divide by binwidth
-	histo_[xSec][kData] = divideByBinwidth(histo_[xSec][kData], verbose-1);
-	// divide by luminosity 
-	histo_[xSec][kData]->Scale(1./(luminosity2));
-	// BR correction
-	if(extrapolate) histo_[xSec][kData]->Scale(1./BRPDG(systematicVariation));
-	// Normalization -> not needed anymore, done in unfolding setup
-	// NB: exclude underflow and overflow bins because we normalize wrt the measured range
-	//histo_[xSecNorm][kData]=(TH1F*)histo_[xSec][kData]->Clone();
-	//double inclXSecPS =getInclusiveXSec(histo_[xSec][kData],verbose-1);
-	//inclXSecPS-=histo_[xSec][kData]->GetBinContent(0);
-	//inclXSecPS-=histo_[xSec][kData]->GetBinContent(histo_[xSec][kData]->GetNbinsX()+1);
-	//if(normToIntegral==true){
-	//  histo_[xSecNorm][kData]->Scale(1./inclXSecPS);
-	//  if(verbose>1) std::cout << "normalizing to integral" << std::endl;
-	//}
-	//else{
-	//  histo_[xSecNorm][kData]->Scale(1./xSecPSforNorm);
-	//  if(verbose>1){
-	//    std::cout << "normalizing to calculated incl. xSec:" << std::endl;
-	//    std::cout << xSecPSforNorm << std::endl;
-	//  }
-	//}
-	// divide Normalized plot by binwidth and set title
-	histo_[xSecNorm][kData]->SetTitle(variable);
-	histo_[xSecNorm][kData] = divideByBinwidth(histo_[xSecNorm][kData], verbose-1);
-	if(verboseTest||verbose>1){ 
-	  std::cout << std::endl << variable << ":" << std::endl;
-	  for(int bin=0; bin<=histo_[xSecNorm][kData]->GetNbinsX()+1; ++bin){
-	    std::cout << "bin " << bin;
-	    std::cout << " (" << histo_[xSecNorm][kData]->GetBinLowEdge(bin) << " .. ";
-	    std::cout << (bin==histo_[xSecNorm][kData]->GetNbinsX()+1 ? 999999 : histo_[xSecNorm][kData]->GetBinLowEdge(bin+1));
-	    std::cout << "): " << histo_[xSecNorm][kData]->GetBinContent(bin) << std::endl;
+	  if(verboseTest||verbose>0){
+	    std::cout << std::endl << variable << std::endl;
+	    std::cout << "data preunfolded inclusive abs: " << xSecPSforNorm << std::endl;
+	    std::cout << "data unfolded sum abs: "  << getInclusiveXSec(histo_[xSec    ][kData],0) << std::endl;
+	    std::cout << "data norm sum: " << getInclusiveXSec(histo_[xSecNorm][kData],0) << std::endl;
 	  }
+	  // =====================
+	  //  Styling issues
+	  // =====================
+	  // add plot to list of plots - only done once
+	  if(iter==1){
+	    plotList_.push_back(xSec);
+	    plotList_.push_back(xSecNorm);
+	    // add axis configuration
+	    unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
+	    TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
+	    recoAxisLabel.ReplaceAll("KinFit ","");
+	    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+	    if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
+	    if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
+	    axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+labelNorm+"} "+label2Norm+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
+	    if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
+	    if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
+	    NXSec=NXSec+2;
+	  }
+	  // configure xSec plot histo style
+	  histogramStyle(*histo_[xSecNorm][kData], kData, false);
+	  // thicker error bars for comparison
+	  if(compare){
+	    histo_[xSecNorm][kData]->SetLineWidth(5);
+	    histo_[xSec    ][kData]->SetLineWidth(3);
+	  }
+	  histo_[xSecNorm][kData]->SetMarkerSize (0.1);	  
+	  TString iterName=(xSecNorm+"Iteration"+getTStringFromInt(iter-1));
+	  iterxSecNorm_.push_back((TH1F*)histo_[xSecNorm][kData]->Clone(iterName));
+	  iterxSecNorm_[iter-1]->SetLineStyle  (1);
+	  iterxSecNorm_[iter-1]->SetLineWidth  (1);
+	  iterxSecNorm_[iter-1]->SetLineColor  (iterColor_ [iter-1]);
+	  iterxSecNorm_[iter-1]->SetMarkerColor(iterColor_ [iter-1]);
+	  iterxSecNorm_[iter-1]->SetMarkerStyle(iterMarker_[iter-1]);
+	  iterxSecNorm_[iter-1]->SetMarkerSize (1.0);
+	  TGraphAsymmErrors* tempxSec=new TGraphAsymmErrors(iterxSecNorm_[iter-1]->GetNbinsX());
+	  double binfac=double(iter)/double(10);
+	  for(int bin=0; bin<iterxSecNorm_[iter-1]->GetNbinsX(); ++bin){
+	    double pointXValue=iterxSecNorm_[iter-1]->GetBinLowEdge(bin+1)+binfac*iterxSecNorm_[iter-1]->GetBinWidth(bin+1);
+	    tempxSec->SetPoint(bin, pointXValue, iterxSecNorm_[iter-1]->GetBinContent(bin+1));
+	  }
+	  tempxSec->SetLineStyle  (1);
+	  tempxSec->SetLineWidth  (1);
+	  tempxSec->SetLineColor  (iterColor_[iter-1]);
+	  tempxSec->SetMarkerColor(iterColor_[iter-1]);
+	  tempxSec->SetMarkerStyle(iterMarker_[iter-1]);
+	  tempxSec->SetMarkerSize (0.8);
+	  iterxSecNormM_.push_back((TGraphAsymmErrors*)tempxSec->Clone(iterName+"asym"));
 	}
-	if(verboseTest||verbose>0){
-	  std::cout << std::endl << variable << std::endl;
-	  std::cout << "data preunfolded inclusive abs: " << xSecPSforNorm << std::endl;
-	  std::cout << "data unfolded sum abs: "  << getInclusiveXSec(histo_[xSec    ][kData],0) << std::endl;
-	  std::cout << "data norm sum: " << getInclusiveXSec(histo_[xSecNorm][kData],0) << std::endl;
-	}
-	// =====================
-	//  Styling issues
-	// =====================
-	// add plot to list of plots
-	plotList_.push_back(xSec);
-	plotList_.push_back(xSecNorm);
-	// add axis configuration
-	unsigned int positionOfRecoAxisLabel = positionInVector(plotList_, "analyzeTopRecoKinematicsKinFit"+sysInputFolderExtension+"/"+variable);
-	TString recoAxisLabel =axisLabel_[positionOfRecoAxisLabel];
-	recoAxisLabel.ReplaceAll("KinFit ","");
-	axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{d#sigma}{d"+label+"} "+label2+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
-	if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
-	axisLabel_.push_back(""+getStringEntry(recoAxisLabel,1)+"/"+"#frac{1}{#sigma}"+" #frac{d#sigma}{d"+labelNorm+"} "+label2Norm+"/"+getStringEntry(recoAxisLabel,3)+"/"+getStringEntry(recoAxisLabel,4));
-	if(decayChannel=="electron") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "e"  );
-	if(decayChannel=="combined") axisLabel_[axisLabel_.size()-1].ReplaceAll("#mu", "lep");
-	// configure xSec plot histo style
-	histogramStyle(*histo_[xSecNorm][kData], kData, false);
-	// restrict axis
-	//setXAxisRange(histo_[xSecNorm][kData], variable);
-	NXSec=NXSec+2;
-	// thicker error bars for comparison
-	if(compare){
-	  histo_[xSecNorm][kData]->SetLineWidth(4);
-	  histo_[xSec    ][kData]->SetLineWidth(4);
-	}
+
 	// ========================================================
 	//  Calculate differential XSec from Signal(MC prediction)
 	// ========================================================
@@ -2862,7 +2118,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	histogramStyle(*histo_[xSecNorm][kSig ], kSig , false);
 	if(compare){
 	  histo_[xSec    ][kSig]->SetLineWidth(3);
-	  histo_[xSecNorm][kSig]->SetLineWidth(3);
+	  histo_[xSecNorm][kSig]->SetLineWidth(4);
 	}
 	setXAxisRange(histo_[xSec    ][kSig],variable);
 	setXAxisRange(histo_[xSecNorm][kSig],variable);
@@ -2873,6 +2129,89 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	  std::cout << "OF: "   << histo_[xSec][kSig]->GetBinContent(histo_[xSec][kSig]->GetNbinsX()+1) << std::endl;
 	  std::cout << "mc abs:"   << getInclusiveXSec(histo_[xSec    ][kSig],2) << std::endl;
 	  std::cout << "mc norm: " << getInclusiveXSec(histo_[xSecNorm][kSig],2) << std::endl;
+	}
+	// =================================================
+	//  Additional histos for closure tests
+	// =================================================
+	if(systematicVariation==sysNo&&variable!="inclusive"&&closureTestSpecifier!=""&&!closureTestSpecifier.Contains("NoDistort")){
+	  // get ttbar signal files (with reweighting applied or without for zprime)
+	  TString rewfold="/afs/naf.desy.de/group/cms/scratch/tophh/"+inputFolderName+"/";
+	  if(zprime=="") rewfold+="ttbarReweight/";
+	  TString muReweighted=rewfold+TopFilename(kSig, sysNo, "muon"    );
+	  TString elReweighted=rewfold+TopFilename(kSig, sysNo, "electron");
+	  // name extension for reweighted files
+	  if(zprime==""){
+	    muReweighted.ReplaceAll("Summer", "SysDistort"+closureTestSpecifier+"Summer");
+	    elReweighted.ReplaceAll("Summer", "SysDistort"+closureTestSpecifier+"Summer");
+	  }
+	  TFile* mufile = new (TFile)(muReweighted);
+	  TFile* elfile = new (TFile)(elReweighted);
+	  // get plot
+	  TString partonPlot="analyzeTop"+LV+"LevelKinematics"+PS+"/"+variable;
+	  if(hadron){
+	    // composited objects analyzer
+	    if(variable.Contains("rhos")||variable.Contains("Njets")){
+	      partonPlot.ReplaceAll("analyzeTop"     , "composited");
+	      partonPlot.ReplaceAll("Njets"          , "Ngenjets"  );
+	      partonPlot.ReplaceAll("rhos"           , "rhosGen"   );
+	      partonPlot.ReplaceAll("LevelKinematics", "Gen"       );
+	    }
+	    // bjets analyzer
+	    else if(variable.Contains("bq")||variable.Contains("lb")||variable.Contains("bbbar")){
+	      partonPlot.ReplaceAll("PhaseSpace", "BjetsPhaseSpace");
+	      partonPlot+="Gen";
+	    }
+	    // lepton analyzer
+	    else if(variable.Contains("lep")){
+	      partonPlot.ReplaceAll("PhaseSpace", "LeptonPhaseSpace");
+	      partonPlot+="Gen";
+	    }
+	  }
+	  histo_["reweighted"+variable+"Mu"][kSig]=(TH1F*)(mufile->Get(partonPlot)->Clone("rewmu"+variable));
+	  histo_["reweighted"+variable+"El"][kSig]=(TH1F*)(elfile->Get(partonPlot)->Clone("rewel"+variable));
+	  // add zprime for zprime closure test
+	  if(zprime!=""){
+	    // zprime files
+	    TString muzprime=rewfold+"zprime/"+TopFilename(kSig, sysNo, "muon"    );
+	    TString elzprime=rewfold+"zprime/"+TopFilename(kSig, sysNo, "electron");
+	    // name for chosen mass
+	    TString massextension="";
+	    if(zprime=="1000") massextension="ZprimeM1000W100";
+	    muzprime.ReplaceAll("Sig", massextension+"Sig");
+	    elzprime.ReplaceAll("Sig", massextension+"Sig");
+	    // get files
+	    TFile* zprimemufile = new (TFile)(muzprime);
+	    TFile* zprimeelfile = new (TFile)(elzprime);
+	    // get plots
+	    if(zprimemufile) histo_["zprime"+variable+"Mu"][kSig]=(TH1F*)(zprimemufile->Get(partonPlot)->Clone("zpmu"+variable));
+	    if(zprimeelfile) histo_["zprime"+variable+"El"][kSig]=(TH1F*)(zprimeelfile->Get(partonPlot)->Clone("zpel"+variable));
+	    // apply lumiweights
+	    double zPrimeLumiWeight=zPrimeLumiWeightIni;
+	    if     (zprime=="1000") zPrimeLumiWeight=(zPrimeLumiWeight*5*luminosity)/104043;
+	    if(histo_["zprime"+variable+"Mu"].count(kSig)>0) histo_["zprime"+variable+"Mu"][kSig]->Scale(zPrimeLumiWeight);
+	    if(histo_["zprime"+variable+"El"].count(kSig)>0) histo_["zprime"+variable+"El"][kSig]->Scale(zPrimeLumiWeight);
+	    histo_["reweighted"+variable+"Mu"][kSig]->Scale(lumiweight(kSig, constLumiMuon, 0, "muon"    ));
+	    histo_["reweighted"+variable+"El"][kSig]->Scale(lumiweight(kSig, constLumiElec, 0, "electron"));
+	    // add zprime to signal
+	    if(histo_["zprime"+variable+"Mu"].count(kSig)>0) histo_["reweighted"+variable+"Mu"][kSig]->Add((TH1F*)histo_["zprime"+variable+"Mu"][kSig]->Clone());
+	    if(histo_["zprime"+variable+"El"].count(kSig)>0) histo_["reweighted"+variable+"El"][kSig]->Add((TH1F*)histo_["zprime"+variable+"El"][kSig]->Clone());
+	  }
+	  // add channels
+	  histo_[xSecNorm+"closure"][kSig]=(TH1F*)(histo_["reweighted"+variable+"Mu"][kSig]->Clone(xSecNorm+"closure"));
+	  histo_[xSecNorm+"closure"][kSig]->Add(   histo_["reweighted"+variable+"El"][kSig]);
+	  // apply standard rebinning
+	  reBinTH1F(*histo_[xSecNorm+"closure"][kSig], binning_[variable], verbose-1);
+	  // ensure that under- and overflow bins are empty
+	  histo_[xSecNorm+"closure"][kSig]->SetBinContent(0                                              , 0.);
+	  histo_[xSecNorm+"closure"][kSig]->SetBinContent(histo_[xSecNorm+"closure"][kSig]->GetNbinsX()+1, 0.);
+	  // normalization to unit area
+	  histo_[xSecNorm+"closure"][kSig]->Scale(1./(histo_[xSecNorm+"closure"][kSig]->Integral(0, histo_[xSecNorm+"closure"][kSig]->GetNbinsX()+1)));
+	  // divide by binwidth
+	  histo_[xSecNorm+"closure"][kSig] = divideByBinwidth(histo_[xSecNorm+"closure"][kSig], verbose-1);
+	  // set style
+	  histogramStyle(*histo_[xSecNorm+"closure"][kSig], kSig, false, 1.2, kMagenta);
+	  histo_[xSecNorm+"closure"][kSig]->SetLineWidth(4);
+	  histo_[xSecNorm+"closure"][kSig]->SetLineStyle(2);
 	}
       }
     }
@@ -2958,6 +2297,18 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
     legPull->AddEntry(histo_["analyzeHypoKinFitLepton/leptonPullPtKinFitPartonTruth"][kSig], "#splitline{after KinFit}{fitted wrt. parton}"       , "L");
   }
 
+  // create a legend for iter closure tests
+  TLegend *legIter = new TLegend(0.47, 0.81, 0.94, 0.87);
+  legendStyle(*legIter, "", 0.03, 12);
+  TLegend *legIter2 = new TLegend( 0.65, 0.41, 0.93, 0.81);
+  TString dataLabel2= (closureTestSpecifier=="" ? "data" : "pseudo data");
+  legendStyle(*legIter2, "#font[22]{unfolded "+dataLabel2+"}", 0.03, 12);
+  if(closureTestSpecifier!="") legIter->AddEntry(histo_["xSecNorm/topPtclosure"][kSig], "gen truth of pseudo data", "L");
+  legIter->AddEntry(histo_["xSecNorm/topPt"][kSig], "simulation used for unfolding", "L");
+  for(int iter=1; iter<=9; ++iter){
+    legIter2->AddEntry(iterxSecNorm_[iter-1], TString("iteration ")+getTStringFromInt(iter-1), "LP");
+  }
+
   // ---
   //     print information about plots, canvas and legends
   // ---
@@ -2996,7 +2347,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	    histo_[permutationLabel].erase(sample);
 	    if(verbose>2) std::cout << "erase plot for sample " << sampleLabel(sample, decayChannel) << std::endl;
 	  }
-	}
+}      
       }
       if((histo_[permutationLabel].count(kSig)>0&&plotList_[plot].Contains("qAssignment"))||(histo_[permutationLabel].count(kBkg)>0&&plotList_[plot].Contains("decayChannel"))){ 
 	if(verbose>2) std::cout << "scale to area" << std::endl;
@@ -3142,10 +2493,10 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 			  // draw efficiency plots as line
 			  if(getStringEntry(plotList_[plot], 1)=="efficiency") histo_[plotList_[plot]][sample]->Draw("p e");
 			  // draw pull plots as line into same canvas with extra legend
-			  if(plotList_[plot].Contains("RecPartonTruth")){
+			  else if(plotList_[plot].Contains("RecPartonTruth")){
 			      histo_[plotList_[plot]][sample]->GetXaxis()->SetRangeUser(-1.5,1.5);
 			      histo_[plotList_[plot]][sample]->GetXaxis()->SetTitle(((TString)(histo_[plotList_[plot]][sample]->GetXaxis()->GetTitle())).ReplaceAll(":","/"));
-			      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);
+			      histo_[plotList_[plot]][sample]->GetYaxis()->SetNoExponent(true);	
 			      histo_[plotList_[plot]][sample]->Draw("hist");
 			      TString afterKinFit=plotList_[plot];
 			      afterKinFit.ReplaceAll("RecPartonTruth","KinFitPartonTruth");
@@ -3157,6 +2508,13 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 			      }
 			      if(histo_.count(kinFitShift)>0) histo_[kinFitShift][sample]->Draw("hist same");
 			      legPull->Draw("same");
+			  }
+			  else if(plotList_[plot].Contains("xSecNorm")){
+			    TH1F* tempAxis=(TH1F*)histo_[plotList_[plot]][sample]->Clone();
+			    tempAxis->GetXaxis()->SetLabelSize(0);
+			    tempAxis->GetXaxis()->SetTitle("");	
+			    tempAxis->Draw("AXIS");
+			    histo_[plotList_[plot]][sample]->Draw("hist same");
 			  }
 			  // others as histo (stack)
 			  else histo_[plotList_[plot]][sample]->Draw("hist");
@@ -3173,13 +2531,25 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 		      else{ 
 			  // draw data as points
 			  if(sample==kData){ 
-			      histo_[plotList_[plot]][sample]->Draw("p e X0 same");
+			    if(!plotList_[plot].Contains("xSecNorm")) histo_[plotList_[plot]][sample]->Draw("p e X0 same");
 			      // draw BBB comparison results in same canvas
 			      if(compare&&plotList_[plot].Contains("xSec")){
 				  TString BBBlabel=plotList_[plot];
 				  BBBlabel.ReplaceAll("xSec/","xSec/BBB");
 				  BBBlabel.ReplaceAll("xSecNorm/","xSecNorm/BBB");
 				  if(plotExists(histo_, BBBlabel, sample)) histo_[BBBlabel][sample]->Draw("p e X0 same");
+			      }
+			      if(plotList_[plot].Contains("xSecNorm")){
+				// draw theory truth curve
+				if(closureTestSpecifier!="") histo_["xSecNorm/topPtclosure"][kSig]->Draw("hist same");
+				// draw all iter parameter results into the same plot
+				for(int xSecnum=0; xSecnum<(int)iterxSecNorm_.size(); ++xSecnum){
+				  //iterxSecNorm_[xSecnum]->Draw("hist same");
+				  iterxSecNormM_[xSecnum]->Draw("p same");
+				}
+				// draw corresponding legend
+				legIter ->Draw("same");
+				legIter2->Draw("same");
 			      }
 			  }
 			  else{
@@ -3202,27 +2572,60 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 			histoErrorBand_[plotList_[plot]]->SetFillStyle(3004);
 			gStyle->SetErrorX(0.5);  
 			histoErrorBand_[plotList_[plot]]->Draw("E2 SAME");
-		      } 	     
-		      // draw legend for recoYield plots
-		      TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
-		      if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
-			if(!plotList_[plot].Contains("qAssignment")&&!plotList_[plot].Contains("decayChannel")) leg->Draw("SAME");
-		      }	 
-		      // labels
-		      TString plotType=getStringEntry(plotList_[plot], 1);
-		      if(plotType.Contains("xSec")||plotType.Contains("Reco")){
-			if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
-			else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
-			else if(decayChannel=="combined") DrawDecayChLabel("e/#mu + Jets Combined");
-			DrawCMSLabels(prelim, luminosity, 0.04, (closureTestSpecifier!="" ? true : false), false, false);
 		      }
+		    }
+		    // draw legend for recoYield plots
+		    TString tempTitle = plotCanvas_[plotCanvas_.size()-1]->GetTitle();
+		    if(tempTitle.Contains("analyzeTopRecoKinematicsKinFit")){
+		      if(!plotList_[plot].Contains("qAssignment")&&!plotList_[plot].Contains("decayChannel")) leg->Draw("SAME");
+		    }	 
+		    // labels
+		    TString plotType=getStringEntry(plotList_[plot], 1);
+		    if(plotType.Contains("xSec")||plotType.Contains("Reco")){
+		      if (decayChannel=="muon")         DrawDecayChLabel("#mu + Jets");
+		      else if(decayChannel=="electron") DrawDecayChLabel("e + Jets");
+		      else if(decayChannel=="combined") DrawDecayChLabel("e/#mu + Jets");
+		      DrawCMSLabels(prelim, luminosity, 0.04, (closureTestSpecifier!="" ? true : false), false, false);
+		    }
+		    if (!plotList_[plot].Contains("xSec")){
 		      // redraw axis
 		      histo_[plotList_[plot]][42]->Draw("axis same");
 		    }
+		    else{
+		      // label indicating the type of closure test performed
+		      if(closureTestSpecifier!=""){
+			double positionX=525;
+			double positionY=0.;
+			TLatex *closurelabel = new TLatex(positionX,positionY,pseudoDatalabel(closureTestSpecifier));
+			closurelabel->SetTextAlign(11);
+			closurelabel->SetTextAngle(90);
+			closurelabel->SetTextSize(0.04);
+			closurelabel->Draw("same");
+		      }
+		      // ratio for different iters
+		      std::vector<double> zeroerr_;
+		      for(int bin=1; bin<=iterxSecNorm_[0]->GetNbinsX(); ++bin) zeroerr_.push_back(0);
+		      if(closureTestSpecifier=="") histo_["xSecNorm/topPtclosure"][kSig]=histo_[plotList_[plot]][42];
+		      double ratioMin=closureTestSpecifier=="" ? 0.75 : 0.95;
+		      double ratioMax=closureTestSpecifier=="" ? 1.15 : 1.05;
+		      drawRatio(histo_[plotList_[plot]][42], histo_[plotList_[plot]][42], ratioMin, ratioMax, myStyle, verbose, zeroerr_, "unfolded", (closureTestSpecifier=="" ? "prediction" : "gen truth"), "AXIS", histo_["xSecNorm/topPtclosure"][kSig]->GetLineColor() , false, 0.1);
+		      drawRatio(histo_["xSecNorm/topPtclosure"][kSig], histo_["xSecNorm/topPtclosure"][kSig], 0.8, 1.35, myStyle, verbose, zeroerr_, "unfolded", "gen truth", "hist same", histo_["xSecNorm/topPtclosure"][kSig]->GetLineColor() , false, 0.1);
+		      for(int xSecnum=0; xSecnum<(int)iterxSecNorm_.size(); ++xSecnum){
+			TGraphAsymmErrors* tempRatio=(TGraphAsymmErrors*)iterxSecNormM_[xSecnum]->Clone();
+			for(int bin=1; bin<=iterxSecNorm_[xSecnum]->GetNbinsX(); ++bin){
+			  tempRatio->SetPoint(bin-1, tempRatio->GetX()[bin-1], ((tempRatio->GetY()[bin-1])/(histo_["xSecNorm/topPtclosure"][kSig]->GetBinContent(bin))));
+			}			
+			tempRatio->Draw("p same");
+			//drawRatio(iterxSecNorm_[xSecnum], histo_["xSecNorm/topPtclosure"][kSig], 0.8, 1.2, myStyle, verbose, zeroerr_, "unfolded", "gen truth", "hist same", iterxSecNorm_[xSecnum]->GetLineColor() , false, 0.1);
+		      }
+		      for(int bin=2; bin<=iterxSecNorm_[0]->GetNbinsX(); ++bin){
+			double xBorder=iterxSecNorm_[0]->GetBinLowEdge(bin);
+			drawLine(xBorder, ratioMin, xBorder, ratioMax, kBlack, 1, 3);
+		      }
+		    }
 		  }
-	      }
+	      } 
 	  }
-	  
 	  // a3) for 2D plots
 	  if((plot>=N1Dplots)&&(histo2_.count(plotList_[plot])>0)&&(histo2_[plotList_[plot]].count(sample)>0)&&	  
 	     // draw gen-reco correlation only for signal 
@@ -3267,6 +2670,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
   //  Saving
   // ==============
   if(save){
+    TString iterext="IterationTest";
     // pdf and eps only for standard analysis without variation
     if(systematicVariation==sysNo){
       if(verbose>0) std::cout << "will save all plots as png/eps/pdf" << std::endl;
@@ -3277,15 +2681,7 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       for(unsigned int idx=0; idx<plotCanvas_.size(); idx++){
 	TString saveToFolder=outputFolder;
 	TString title=(plotCanvas_[idx])->GetTitle();	
-	if(closureTestSpecifier=="" ){
-	  if(title.Contains("efficiency"                     )) saveToFolder+="effAndAcc/";
-	  if(title.Contains("analyzeTopPartonLevelKinematics")||title.Contains("compositedPartonGen")) saveToFolder+="partonLevel/";
-	  if(title.Contains("analyzeHypoKinFit"              )) saveToFolder+="kinFitPerformance/";
-	  if(title.Contains("xSec"                           )) saveToFolder+="xSec/";
-	  if(title.Contains("analyzeTopRecoKinematicsKinFit" )||title.Contains("compositedKinematics")) saveToFolder+="recoYield/";
-	  if(title.Contains("0")                              ) saveToFolder=outputFolder+"genRecoCorrPlots/";
-	}
-	else saveToFolder+="closureTest/";
+	saveToFolder+="iterationTest/";
 	if(!title.Contains("canv")){
 	  // add additional label that indicates PS for all relevant plots
 	  TString universalplotLabel="";
@@ -3298,8 +2694,11 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
 	    if(compare   ) universalplotLabel+="BBBcomparison";
 	  }
 	  // do the saving
-	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+closureLabel+".eps"); 
-	  plotCanvas_[idx]->Print(saveToFolder+(TString)(plotCanvas_[idx]->GetTitle())+universalplotLabel+closureLabel+".png");
+	  TString canvtit=plotCanvas_[idx]->GetTitle();
+	  if(!(canvtit.Contains("legend")||(canvtit.Contains("xSec")&&!canvtit.Contains("Norm")))){
+	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+iterext+".eps")); 
+	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+iterext+".png"));
+	  }
 	}
       }
       if(verbose>0) std::cout << "done" << std::endl;
@@ -3313,10 +2712,10 @@ void analyzeHypothesisKinFit(double luminosity = 19712.,
       TString outputfolder="";
       TString possibleFolderNames[5]={"efficiency", "analyzeTopRecoKinematicsKinFit", "xSec", "analyzeTopPartonLevelKinematics", "analyzeHypoKinFit"};
       for(unsigned int name=0; name<sizeof(possibleFolderNames)/sizeof(TString); ++name){
-	// add another subfolder indicating the systematic variation
+	// add another subfoder indicating the systematic variation
 	if(title.Contains(possibleFolderNames[name])){ 
 	  outputfolder=possibleFolderNames[name]+"/"+sysLabel(systematicVariation);
-	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name],""));
+	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name]+iterext,""));
 	}
       }
       // save only canvas from selected subfolders or legends

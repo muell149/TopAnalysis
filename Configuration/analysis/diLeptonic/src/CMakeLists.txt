@@ -19,6 +19,7 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   sampleHelpers
   AnalysisBase
   TopAnalysis
+  ttbarUtils
   analysisUtils
   analysisObjectStructs
   PUReweighter
@@ -26,9 +27,6 @@ SET( ${PROJECT_NAME}_LIBSOURCES
   KinematicReconstruction
   KinematicReconstruction_LSroutines
   KinematicReconstruction_MeanSol
-  JetCorrectionUncertainty
-  JetCorrectorParameters
-  SimpleJetCorrectionUncertainty
   ScaleFactors
   BTagUtils
   plotterUtils

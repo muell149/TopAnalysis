@@ -387,13 +387,13 @@ GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus,
     static TtFullLepKinSolver solver(nu, 80.4, 4.8);
     
     
-    TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
-    TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
-    TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
+    TLorentzVector leptonPlus_tlv = common::LVtoTLV(leptonPlus);
+    TLorentzVector leptonMinus_tlv = common::LVtoTLV(leptonMinus);
+    TLorentzVector met_tlv = common::LVtoTLV(*met);
     
     std::vector<TLorentzVector> jets_tlv;
     for (const auto& jet : *jets) {
-        jets_tlv.push_back(ttbar::LVtoTLV(jet));
+        jets_tlv.push_back(common::LVtoTLV(jet));
     }
     
     size_t max_jets = jets_tlv.size(); //run over all 'googd' jets
@@ -479,10 +479,10 @@ GetKinSolutions(const LV& leptonMinus, const LV& leptonPlus,
     std::vector<double> pnuychi2, pnunubzchi2, pnuyzchi2, cd_diff;
     int cubic_single_root_cmplx;
     
-    ttbar::LVtod4(leptonPlus, lp);
-    ttbar::LVtod4(leptonMinus, lm);
-    ttbar::LVtod4(HypBJet->at(solutionIndex), b);
-    ttbar::LVtod4(HypAntiBJet->at(solutionIndex), bb);
+    common::LVtod4(leptonPlus, lp);
+    common::LVtod4(leptonMinus, lm);
+    common::LVtod4(HypBJet->at(solutionIndex), b);
+    common::LVtod4(HypAntiBJet->at(solutionIndex), bb);
 
     ETmiss[0] = met->Px();
     ETmiss[1] = met->Py();

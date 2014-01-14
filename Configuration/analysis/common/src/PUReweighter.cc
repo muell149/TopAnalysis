@@ -106,7 +106,7 @@ void PUReweighter::clear()
 
 ///determine the path to the PU distribution files, depending on systematic
 const std::string PUReweighter::getPUPath(TString systematic, const char* filePU) {
-    std::string pu_path(ttbar::CMSSW_BASE());
+    std::string pu_path(common::CMSSW_BASE());
     pu_path.append(filePU);
     if (systematic == "PU_UP") {
         pu_path.append("_sysUp.root");

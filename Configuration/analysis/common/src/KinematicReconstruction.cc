@@ -122,7 +122,7 @@ void KinematicReconstruction::doJetsMerging(const VLV* jets,const std::vector<do
     alljets_.clear();
     allbtags_.clear();
         for (const auto& jet : *jets) {
-        alljets_.push_back(ttbar::LVtoTLV(jet));
+        alljets_.push_back(common::LVtoTLV(jet));
     }
     for(int i=0; i<(int)btags->size(); i++) {
         allbtags_.push_back(btags->at(i));
@@ -135,9 +135,9 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
     
     sols_.clear();
 
-    TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
-    TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
-    TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
+    TLorentzVector leptonPlus_tlv = common::LVtoTLV(leptonPlus);
+    TLorentzVector leptonMinus_tlv = common::LVtoTLV(leptonMinus);
+    TLorentzVector met_tlv = common::LVtoTLV(*met);
 
     //jets selection
 
@@ -153,7 +153,7 @@ if(!isJetsMerging_)
 {
             
     for (const auto& jet : *jets) {
-        jets_tlv.push_back(ttbar::LVtoTLV(jet));
+        jets_tlv.push_back(common::LVtoTLV(jet));
     }
     
     for(int i=0; i<(int)btags->size(); i++) {
@@ -586,7 +586,7 @@ void KinematicReconstruction::loadData()
     
 //     // W mass
 
-    TString data_path = ttbar::DATA_PATH();
+    TString data_path = common::DATA_PATH_COMMON();
     data_path.Append("/KinReco_wmass.root");
     TFile wmassfile(data_path);
     h_wmass_ = (TH1F*)wmassfile.Get("W_mass");
@@ -594,7 +594,7 @@ void KinematicReconstruction::loadData()
     wmassfile.Close();
     
     // jet resolution
-    TString data_path1 = ttbar::DATA_PATH();
+    TString data_path1 = common::DATA_PATH_COMMON();
     data_path1.Append("/KinReco_d_angle_jet.root");
     TFile danglejetfile(data_path1);
     h_jetAngleRes_ = (TH1F*)danglejetfile.Get("d_angle_jet");
@@ -605,7 +605,7 @@ void KinematicReconstruction::loadData()
     //
     
     //lepton resolution
-    TString data_path2 = ttbar::DATA_PATH();
+    TString data_path2 = common::DATA_PATH_COMMON();
     data_path2.Append("/KinReco_d_angle_lep.root");
     TFile lepangleresfile(data_path2);
     h_lepAngleRes_ = (TH1F*)lepangleresfile.Get("d_angle_jet");
@@ -618,7 +618,7 @@ void KinematicReconstruction::loadData()
 //     //MET resolution
     
     ptBins_ =  {0,7,13,18,27,37,48,59,70,100,200,500,1000,1500};
-    TString data_path3 = ttbar::DATA_PATH();
+    TString data_path3 = common::DATA_PATH_COMMON();
     data_path3.Append("/KinReco_rmshistA_dAngle_vs_Pt.root");
     TFile metangleresfile(data_path3);
     for(int i=0;i<13;i++)
@@ -632,7 +632,7 @@ void KinematicReconstruction::loadData()
     }
     metangleresfile.Close();
     
-    TString data_path4 = ttbar::DATA_PATH();
+    TString data_path4 = common::DATA_PATH_COMMON();
     data_path4.Append("/KinReco_rmshistA_fPt_vs_Pt.root");
     TFile metptresfile(data_path4);
     for(int i=0;i<13;i++)
@@ -647,7 +647,7 @@ void KinematicReconstruction::loadData()
     metptresfile.Close();
     
    //met px res
-    TString data_path41 = ttbar::DATA_PATH(); 
+    TString data_path41 = common::DATA_PATH_COMMON(); 
     data_path41.Append("/KinReco_rmshist_fPx_vs_Pt.root");
     TFile metpxresfile(data_path41);
     for(int i=0;i<13;i++)
@@ -663,7 +663,7 @@ void KinematicReconstruction::loadData()
   //...   
     
   //met py res
-    TString data_path42 = ttbar::DATA_PATH(); 
+    TString data_path42 = common::DATA_PATH_COMMON(); 
     data_path42.Append("/KinReco_rmshist_fPy_vs_Pt.root");
     TFile metpyresfile(data_path42);
     for(int i=0;i<13;i++)
@@ -679,7 +679,7 @@ void KinematicReconstruction::loadData()
   //...   
 
 
-    TString data_path5 = ttbar::DATA_PATH();
+    TString data_path5 = common::DATA_PATH_COMMON();
     data_path5.Append("/KinReco_wneutrinocuts.root");
     TFile fnw(data_path5);
     h_nwcuts_ = (TH1F*)fnw.Get("Eneu_true");
@@ -687,7 +687,7 @@ void KinematicReconstruction::loadData()
     fnw.Close();
     
 ///  E 1d bins
-        TString data_path6 = ttbar::DATA_PATH();
+        TString data_path6 = common::DATA_PATH_COMMON();
         data_path6.Append("/KinReco_wneutrino_E.root"); // no norm
 //         data_path6.Append("/KinReco_wneutrino_E_normilyze.root"); // norm
         TFile frootNeut(data_path6);
@@ -704,14 +704,14 @@ void KinematicReconstruction::loadData()
 
 /// mbl
 
-        TString data_path7 = ttbar::DATA_PATH();
+        TString data_path7 = common::DATA_PATH_COMMON();
         data_path7.Append("/KinReco_mbl.root");
         TFile fmbl(data_path7);
         h_mbl_w_ = (TH1F*)fmbl.Get("mbl_true");
         h_mbl_w_->SetDirectory(0);
         fmbl.Close();
         
-        TString data_path71 = ttbar::DATA_PATH();
+        TString data_path71 = common::DATA_PATH_COMMON();
         data_path71.Append("/KinReco_mbl_wrong.root");
         TFile fmbl_wrong(data_path71);
 //         h_mbl_w_ = (TH1F*)fmbl_wrong.Get("mbl_true_wrong");
@@ -722,7 +722,7 @@ void KinematicReconstruction::loadData()
         
 /// cos_theta*
 
-        TString data_path8 = ttbar::DATA_PATH();
+        TString data_path8 = common::DATA_PATH_COMMON();
         data_path8.Append("/KinReco_costheta_true.root");
         TFile fcostheta(data_path8);
         h_costheta_w_ = (TH1F*)fcostheta.Get("cos_theta_true");
@@ -731,7 +731,7 @@ void KinematicReconstruction::loadData()
 /// ...
         
 /// neuEta
-        TString data_path9 = ttbar::DATA_PATH();
+        TString data_path9 = common::DATA_PATH_COMMON();
         data_path9.Append("/KinReco_wneutrinoEta.root");
         TFile fneuEta(data_path9);
         h_neuEta_w_ = (TH1F*)fneuEta.Get("Etaneu_true");
@@ -748,13 +748,13 @@ void KinematicReconstruction::kinReco(const LV& leptonMinus, const LV& leptonPlu
     std::vector<Struct_KinematicReconstruction> vect_sol;
 
 
-    TLorentzVector leptonPlus_tlv = ttbar::LVtoTLV(leptonPlus);
-    TLorentzVector leptonMinus_tlv = ttbar::LVtoTLV(leptonMinus);
-    TLorentzVector met_tlv = ttbar::LVtoTLV(*met);
+    TLorentzVector leptonPlus_tlv = common::LVtoTLV(leptonPlus);
+    TLorentzVector leptonMinus_tlv = common::LVtoTLV(leptonMinus);
+    TLorentzVector met_tlv = common::LVtoTLV(*met);
 
     std::vector<TLorentzVector> jets_tlv;
     for (const auto& jet : *jets) {
-        jets_tlv.push_back(ttbar::LVtoTLV(jet));
+        jets_tlv.push_back(common::LVtoTLV(jet));
     }
 
     vector<int> b1_id;

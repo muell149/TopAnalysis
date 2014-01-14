@@ -2,13 +2,15 @@
 #include "../../unfolding/TopSVDFunctions.h" 
 #include "../../unfolding/TopSVDFunctions.C" 
 
-void analyzeRegularizationTest(TString test="k", double luminosity = 19712.,
+void analyzeRegularizationTest(TString test="tau", double luminosity = 19712.,
 			       bool save = true, int systematicVariation=sysNo, unsigned int verbose=0,
 			       TString inputFolderName="RecentAnalysisRun8TeV_doubleKinFit",
 			       TString dataFile= "/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/elecDiffXSecData2012ABCDAll.root:/afs/naf.desy.de/group/cms/scratch/tophh/RecentAnalysisRun8TeV_doubleKinFit/muonDiffXSecData2012ABCDAll.root",
 			       std::string decayChannel = "combined", bool SVDunfold=true, bool extrapolate=true, bool hadron=false, 
-			       bool redetermineopttau =false, TString closureTestSpecifier="", TString addSel="ProbSel")
+			       bool redetermineopttau =false, TString closureTestSpecifier="data", TString addSel="ProbSel")
 {
+  // iterative unfolding?
+  bool iterative=false;
   // regularization mode and scanned parameters
   // test : mix, k, tau
   std::vector <double > tau_;
@@ -1515,7 +1517,7 @@ void analyzeRegularizationTest(TString test="k", double luminosity = 19712.,
       //         1 means: No preweighting of MC is performed (default)
       //         2 means: MC is reweighted to unfolded data (1 iteration)
       //         i means: MC is reweighted to unfolded data ((i-1) iteration), i<=9 (up to 8 iterations)
-      int unfPreWeighting=0;
+      int unfPreWeighting=iterative ? 6 : 0;      
       TString unfPreWeightingStr = "";
       if(unfPreWeighting>1) unfPreWeightingStr+="PreWeight"+getTStringFromInt(unfPreWeighting-1)+"Iter";
       // produce scan plots? 
@@ -2743,6 +2745,7 @@ void analyzeRegularizationTest(TString test="k", double luminosity = 19712.,
   //  Saving
   // ==============
   if(save){
+    TString iterext=iterative ? "Iter" : "";
     // pdf and eps only for standard analysis without variation
     if(systematicVariation==sysNo){
       if(verbose>0) std::cout << "will save all plots as png/eps/pdf" << std::endl;
@@ -2768,8 +2771,8 @@ void analyzeRegularizationTest(TString test="k", double luminosity = 19712.,
 	  // do the saving
 	  TString canvtit=plotCanvas_[idx]->GetTitle();
 	  if(!(canvtit.Contains("legend")||(canvtit.Contains("xSec")&&!canvtit.Contains("Norm")))){
-	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+test+".eps")); 
-	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+test+".png"));
+	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+test+iterext+".eps")); 
+	    plotCanvas_[idx]->Print(saveToFolder+canvtit+(TString)(universalplotLabel+closureLabel+test+iterext+".png"));
 	  }
 	}
       }
@@ -2787,7 +2790,7 @@ void analyzeRegularizationTest(TString test="k", double luminosity = 19712.,
 	// add another subfoder indicating the systematic variation
 	if(title.Contains(possibleFolderNames[name])){ 
 	  outputfolder=possibleFolderNames[name]+"/"+sysLabel(systematicVariation);
-	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name],""));
+	  plotCanvas_[idx]->SetTitle(title.ReplaceAll(possibleFolderNames[name]+iterext,""));
 	}
       }
       // save only canvas from selected subfolders or legends

@@ -10,7 +10,7 @@
 
 
 
-namespace ttbar{
+namespace common{
     
     /** Store a TObject in a given TSelectorList and return it
      * 
@@ -28,7 +28,7 @@ namespace ttbar{
 
 
 
-template<class T> T* ttbar::store(T* obj, TSelectorList* selectorList)
+template<class T> T* common::store(T* obj, TSelectorList* selectorList)
 {
     if(!obj){
         std::cerr<<"ERROR in function store()!\n"

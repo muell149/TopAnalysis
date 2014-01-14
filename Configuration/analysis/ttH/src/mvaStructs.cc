@@ -262,7 +262,7 @@ m_weightCombined_(m_mvaWeightCombined)
 size_t MvaTopJetsVariablesPerEvent::maxWeightCorrectIndex(const std::string& mvaConfigName)const
 {
     const std::vector<float>& v_weight = this->mvaWeightsCorrect(mvaConfigName);
-    return ttbar::extremumIndex(v_weight);
+    return common::extremumIndex(v_weight);
 }
 
 
@@ -270,7 +270,7 @@ size_t MvaTopJetsVariablesPerEvent::maxWeightCorrectIndex(const std::string& mva
 size_t MvaTopJetsVariablesPerEvent::maxWeightSwappedIndex(const std::string& mvaConfigName)const
 {
     const std::vector<float>& v_weight = this->mvaWeightsSwapped(mvaConfigName);
-    return ttbar::extremumIndex(v_weight);
+    return common::extremumIndex(v_weight);
 }
 
 
@@ -279,7 +279,7 @@ size_t MvaTopJetsVariablesPerEvent::maxWeightCombinedIndex(const std::string& mv
                                                            const std::string& mvaConfigNameSwapped)const
 {
     const std::vector<float>& v_weight = this->mvaWeightsCombined(mvaConfigNameCorrect, mvaConfigNameSwapped);
-    return ttbar::extremumIndex(v_weight);
+    return common::extremumIndex(v_weight);
 }
 
 

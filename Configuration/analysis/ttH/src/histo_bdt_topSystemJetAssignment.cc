@@ -1026,20 +1026,20 @@ void histoBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
             // Access input folders
             std::vector<TString> v_inputFolder;
             if(channel != Channel::combined){
-                TString inputFolder = ttbar::accessFolder(InputBaseDIR, channel, systematic);
+                TString inputFolder = common::accessFolder(InputBaseDIR, channel, systematic);
                 inputFolder.Append(Channel::convertChannel(channel)).Append("_");
                 v_inputFolder.push_back(inputFolder);
             }
             else{
                 for(const auto& realChannel : {Channel::ee, Channel::emu, Channel::mumu}){
-                    TString inputFolder = ttbar::accessFolder(InputBaseDIR, realChannel, systematic);
+                    TString inputFolder = common::accessFolder(InputBaseDIR, realChannel, systematic);
                     inputFolder.Append(Channel::convertChannel(realChannel)).Append("_");
                     v_inputFolder.push_back(inputFolder);
                 }
             }
             
             // Access all filenames, and create output directories
-            const TString outputFolder = ttbar::assignFolder(OutputBaseDIR, channel, systematic);
+            const TString outputFolder = common::assignFolder(OutputBaseDIR, channel, systematic);
             std::vector<std::pair<TString, std::vector<TString> > > v_input;
             for(const auto& inputFileTtbar : v_inputFileTtbar){
                 TString path = outputFolder;
@@ -1144,11 +1144,11 @@ void histoBdtTopSystemJetAssignment(const std::vector<Channel::Channel>& v_chann
 int main(int argc, char** argv)
 {
     CLParameter<std::string> opt_channel("c", "Specify channel(s), valid: emu, ee, mumu, combined. Default: combined", false, 1, 4,
-        ttbar::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsPlotting)));
+        common::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsPlotting)));
     CLParameter<std::string> opt_systematic("s", "Systematic variation - default is Nominal", false, 1, 100,
-        ttbar::makeStringCheck({"Nominal", ""}));
+        common::makeStringCheck({"Nominal", ""}));
     CLParameter<std::string> opt_mode("m", "Which modes to run. 1D weight histos (weight), 2D weight histos(weight2d), best weight validation [default] (best)", false, 1, 3,
-        ttbar::makeStringCheck({"weight", "weight2d", "best", ""}));
+        common::makeStringCheck({"weight", "weight2d", "best", ""}));
     CLAnalyser::interpretGlobal(argc, argv);
     
     // Set up channels

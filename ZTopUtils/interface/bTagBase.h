@@ -3,6 +3,7 @@
 
 #include <map>
 #include "TH2D.h"
+#include "TH1.h"
 //#include "TString.h"
 #include "../interface/miscUtils.h"
 #include <iostream>
@@ -58,7 +59,9 @@ public:
      *
      */
     enum workingPoints {
-        csvm_wp, csvl_wp,
+        csvt_wp,
+        csvm_wp,
+        csvl_wp,
         /* some other WP/taggers ..*/
         //
         /*don't touch this: needs to be last entry*/
@@ -69,13 +72,25 @@ public:
      * enum for systematic variations
      */
     enum systematics {
-        nominal, heavyup, heavydown, lightup, lightdown
+        nominal,
+        heavyup, heavydown,
+        lightup, lightdown,
+        heavyuppt, heavydownpt,
+        heavyupeta, heavydowneta,
+        lightuppt, lightdownpt,
+        lightupeta, lightdowneta,
+        length_syst
     };
 
-    void setWorkingpoint(workingPoints wp) { wp_ = wp; }
-    const float& getWPDiscrValue()const{return wpvals_[wp_];}
+    enum medians {bpt, beta, cpt, ceta, lpt, leta, length_median};
+    
+    enum histoTypes {tag, eff};
 
-    workingPoints getWorkingpoint() const { return wp_;}
+    void setWorkingPoint(workingPoints wp) { wp_ = wp; }
+    const float& getWPDiscrValue()const{return wpvals_[wp_];}
+    std::string getWorkingPointString()const;
+
+    workingPoints getWorkingPoint() const { return wp_;}
     /**
      * switches on SF for 7 TeV data
      */
@@ -92,7 +107,7 @@ public:
      * scale factor output
      */
     void setMakeEff(bool makee) {makeeffs_ = makee; }
-    bool getMakeEff() { return makeeffs_;}
+    bool getMakeEff()const { return makeeffs_;}
 
     void fillEff(const float &, const float&, const int &, const float &,const float&);
     void makeEffs();
@@ -100,15 +115,16 @@ public:
     /**
      * returns the number of nan sf
      */
-    size_t getNanCount(){return nancount_;}
+    size_t getNanCount()const{return nancount_;}
 
     bool showWarnings;
     bool debug;
 
 protected:
 
-    std::map<std::string, std::vector<TH2D> > histos_; //! bjets, btagged, cjets, ctagged, ljets, ltagged
+    std::map<std::string, std::vector<TH2D> > histos_;      //! bjets, btagged, cjets, ctagged, ljets, ltagged
     std::map<std::string, std::vector<TH2D> > effhistos_;   //! beff, ceff, leff
+    std::map<std::string, std::vector<float> > medianMap_;
 
     // functions to be used in the wrapper classes inheriting from this class
     // example implementation:
@@ -136,6 +152,14 @@ protected:
         effhistp_ = 0;
     }
 
+    float median(TH1 *)const ;
+    
+    std::string histoNameAtId(const int id, const histoTypes type)const {
+        if(type == tag) return (int)histoNames_.size()>id ? histoNames_.at(id) : std::string("");
+        if(type == eff) return (int)effHistoNames_.size()>id ? effHistoNames_.at(id) : std::string("");
+        else return std::string("");
+    }
+
 
 
 
@@ -149,12 +173,15 @@ private:
     systematics syst_;
 
     std::vector<float> wpvals_, minpt_, maxpt_;
+    std::vector<std::string> histoNames_;
+    std::vector<std::string> effHistoNames_;
 
     bool makeeffs_;
 
     std::string tempsamplename_;
     std::vector<TH2D> * histp_;
     std::vector<TH2D> * effhistp_;
+    std::vector<float> * medianvecp_;
 
     float sumStuffEff_;
     float sumStuffSfEff_;
@@ -165,7 +192,7 @@ private:
     jetTypes jetType(const int & )const;
 
     float calcHeavySF(float *, float *, const size_t &, const float &,
-            const float &, const float &) const;
+            const float &, const float &, const float &) const;
 
     float jetSF(const float &pt, const float& abs_eta,const jetTypes & jettype) const;
     float jetEff(const float &pt, const float& abs_eta,const jetTypes & jettype) const;
@@ -179,6 +206,8 @@ private:
             float multiplier = 1) const;
 
     void initWorkingpoints();
+    
+    std::vector<TH2D> reorderedHistograms(const std::vector<TH2D>& unorderedHistos, const histoTypes type);
 
 };
 
@@ -191,10 +220,10 @@ inline bTagBase::jetTypes bTagBase::jetType(const int & partonflavor)const{
 }
 
 inline float bTagBase::calcHeavySF(float* ptbins, float * SFb_error,
-        const size_t & ptbinsSize, const float & pt, const float & SF,
+        const size_t & ptbinsSize, const float & pt, const float & abseta, const float & SF,
         const float & multiplier) const {
 
-    if (syst_ != heavyup && syst_ != heavydown)
+    if (syst_ != heavyup && syst_ != heavydown && syst_ != heavyuppt && syst_ != heavydownpt && syst_ != heavyupeta && syst_ != heavydowneta)
         return SF;
 
     //this uses the standard histogram bin range definition from root
@@ -203,9 +232,13 @@ inline float bTagBase::calcHeavySF(float* ptbins, float * SFb_error,
     if (ptbins[ptbin] == pt)
         --ptbin;
 
-    if (syst_ == heavyup)
+    if (syst_ == heavyup ||
+       (syst_ == heavyuppt && pt < medianvecp_->at(bpt)) || (syst_ == heavydownpt && pt > medianvecp_->at(bpt)) ||
+       (syst_ == heavyupeta &&  abseta < medianvecp_->at(beta)) || (syst_ == heavydowneta && abseta > medianvecp_->at(beta)) )
         return SF + (multiplier * SFb_error[ptbin]);
-    if (syst_ == heavydown)
+    if (syst_ == heavydown ||
+       (syst_ == heavyuppt && pt > medianvecp_->at(bpt)) || (syst_ == heavydownpt && pt < medianvecp_->at(bpt)) ||
+       (syst_ == heavyupeta &&  abseta > medianvecp_->at(beta)) || (syst_ == heavydowneta && abseta < medianvecp_->at(beta)) )
         return SF - (multiplier * SFb_error[ptbin]);
 
     return 0;    //never reaches

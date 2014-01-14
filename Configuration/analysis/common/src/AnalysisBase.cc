@@ -25,10 +25,7 @@
 #include <TObject.h>
 
 #include "AnalysisBase.h"
-#include "utils.h"
 #include "KinReco.h"
-#include "JetCorrectorParameters.h"
-#include "JetCorrectionUncertainty.h"
 #include "PUReweighter.h"
 #include "analysisUtils.h"
 #include "classes.h"
@@ -43,8 +40,13 @@
 
 
 AnalysisBase::AnalysisBase(TTree*):
-btagScaleFactors_(0),
-bTagSFGeneric_(0),
+chain_(0),
+recoObjects_(0),
+commonGenObjects_(0),
+topGenObjects_(0),
+higgsGenObjects_(0),
+kinRecoObjects_(0),
+h_weightedEvents(0),
 samplename_(""),
 channel_(""),
 systematic_(""),
@@ -54,26 +56,21 @@ isHiggsSignal_(false),
 isTtbarPlusTauSample_(false),
 correctMadgraphBR_(false),
 channelPdgIdProduct_(0),
-checkZDecayMode_(nullptr),
+checkZDecayMode_(0),
 outputfilename_(""),
 runViaTau_(false),
-kinematicReconstruction_(0),
-puReweighter_(nullptr),
-leptonScaleFactors_(0),
-triggerScaleFactors_(0),
-doJesJer_(false),
-weightKinFit_(0),
 isTtbarSample_(false),
-chain_(0),
-h_weightedEvents(0),
-jetCorrectionUncertainty_(nullptr),
+weightKinFit_(0),
 eventCounter_(0),
 analysisOutputBase_(0),
-recoObjects_(0),
-commonGenObjects_(0),
-topGenObjects_(0),
-higgsGenObjects_(0),
-kinRecoObjects_(0)
+kinematicReconstruction_(0),
+puReweighter_(0),
+leptonScaleFactors_(0),
+triggerScaleFactors_(0),
+jetEnergyResolutionScaleFactors_(0),
+jetEnergyScaleScaleFactors_(0),
+btagScaleFactors_(0),
+bTagSFGeneric_(0)
 {
     this->clearBranches();
     this->clearBranchVariables();
@@ -150,7 +147,7 @@ void AnalysisBase::Terminate()
         std::cerr<<"ERROR! No base directory for analysis output specified\n...break\n"<<std::endl;
         exit(3);
     }
-    std::string f_savename = ttbar::assignFolder(analysisOutputBase_, channel_, systematic_);
+    std::string f_savename = common::assignFolder(analysisOutputBase_, channel_, systematic_);
     f_savename.append(outputfilename_);
     std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!Finishing: "<<samplename_<<"!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     TFile outputFile(f_savename.c_str(), "RECREATE");
@@ -182,8 +179,6 @@ void AnalysisBase::Terminate()
     // Cleanup
     fOutput->SetOwner();
     fOutput->Clear();
-    delete jetCorrectionUncertainty_;
-    jetCorrectionUncertainty_ = nullptr;
 }
 
 
@@ -258,12 +253,19 @@ void AnalysisBase::SetSystematic(const TString& systematic)
 
 void AnalysisBase::SetSamplename(const TString& samplename, const TString& systematic_from_file)
 {
-    samplename_ = samplename;
-    isTtbarSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") &&
-                     !(samplename=="ttbarw") && !(samplename=="ttbarz");
-    isTtbarPlusTauSample_ = isTtbarSample_ && !samplename.BeginsWith("ttbarbg");
-    correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !systematic_from_file.Contains("SPIN") &&
-                         !systematic_from_file.Contains("POWHEG") && !systematic_from_file.Contains("MCATNLO");
+    if(samplename_ == ""){
+        // Samplename was not set so far, so initialize everything based on it
+        samplename_ = samplename;
+        isTtbarSample_ = samplename.BeginsWith("ttbar") && !samplename.BeginsWith("ttbarhiggs") &&
+                         !(samplename=="ttbarw") && !(samplename=="ttbarz");
+        isTtbarPlusTauSample_ = isTtbarSample_ && !samplename.BeginsWith("ttbarbg");
+        correctMadgraphBR_ = samplename.BeginsWith("ttbar") && !systematic_from_file.Contains("SPIN") &&
+                             !systematic_from_file.Contains("POWHEG") && !systematic_from_file.Contains("MCATNLO");
+    }
+    else{
+        // Samplename was already set and everything associated was initialized, so adjust only the name
+        samplename_ = samplename;
+    }
 }
 
 
@@ -292,7 +294,7 @@ void AnalysisBase::SetWeightedEvents(TH1* weightedEvents)
 void AnalysisBase::SetRunViaTau(const bool runViaTau)
 {
     runViaTau_ = runViaTau;
-    if (runViaTau) isTopSignal_ = 0;
+    if (runViaTau) isTopSignal_ = false;
 }
 
 
@@ -342,6 +344,20 @@ void AnalysisBase::SetBtagScaleFactors(BtagScaleFactors& scaleFactors)
 void AnalysisBase::SetBtagScaleFactors(BTagSFGeneric& scaleFactors)
 {
     bTagSFGeneric_ = &scaleFactors;
+}
+
+
+
+void AnalysisBase::SetJetEnergyResolutionScaleFactors(const JetEnergyResolutionScaleFactors* jetEnergyResolutionScaleFactors)
+{
+    jetEnergyResolutionScaleFactors_ = jetEnergyResolutionScaleFactors;
+}
+
+
+
+void AnalysisBase::SetJetEnergyScaleScaleFactors(const JetEnergyScaleScaleFactors* jetEnergyScaleScaleFactors)
+{
+    jetEnergyScaleScaleFactors_ = jetEnergyScaleScaleFactors;
 }
 
 
@@ -497,6 +513,11 @@ void AnalysisBase::clearBranchVariables()
     if(higgsGenObjects_) higgsGenObjects_->clear();
     if(kinRecoObjects_) kinRecoObjects_->clear();
     
+    // Set values to null for trigger bits
+    triggerBits_ = 0;
+    //triggerBitsTau_ = 0;
+    //firedTriggers_ = 0;
+    
     // Set values to null for true vertex multiplicity
     vertMultiTrue_ = 0;
     
@@ -557,9 +578,11 @@ void AnalysisBase::SetRecoBranchAddresses()
     //   chain_->SetBranchAddress("jetTrack", &recoObjects_->jetTrack_, &b_jetTrack);
     //else b_jetTrack = 0;
     chain_->SetBranchAddress("met", &recoObjects_->met_, &b_met);
-    if(doJesJer_){
-        chain_->SetBranchAddress("jetJERSF", &recoObjects_->jetJERSF_, &b_jetJERSF);
+    if(jetEnergyResolutionScaleFactors_ || jetEnergyScaleScaleFactors_){
         chain_->SetBranchAddress("jetsForMET", &recoObjects_->jetsForMET_, &b_jetForMET);
+    }
+    if(jetEnergyResolutionScaleFactors_){
+        chain_->SetBranchAddress("jetJERSF", &recoObjects_->jetJERSF_, &b_jetJERSF);
         chain_->SetBranchAddress("jetForMETJERSF", &recoObjects_->jetForMETJERSF_, &b_jetForMETJERSF);
     }
     
@@ -588,7 +611,7 @@ void AnalysisBase::SetCommonGenBranchAddresses()
     chain_->SetBranchAddress("allGenJets", &commonGenObjects_->allGenJets_, &b_allGenJets);
     chain_->SetBranchAddress("jetPartonFlavour", &commonGenObjects_->jetPartonFlavour_, &b_jetPartonFlavour);
     chain_->SetBranchAddress("associatedGenJet", &commonGenObjects_->associatedGenJet_, &b_associatedGenJet);
-    if(doJesJer_){
+    if(jetEnergyResolutionScaleFactors_){
         chain_->SetBranchAddress("associatedGenJetForMET", &commonGenObjects_->associatedGenJetForMET_, &b_associatedGenJetForMET);
     }
     //chain_->SetBranchAddress("jetAssociatedPartonPdgId", &commonGenObjects_->jetAssociatedPartonPdgId_, &b_jetAssociatedPartonPdgId);
@@ -717,10 +740,8 @@ void AnalysisBase::SetHiggsSignalBranchAddresses()
 void AnalysisBase::GetRecoBranchesEntry(const Long64_t& entry)const
 {
     // Check if branches' entry is already read
-    if(recoObjects_){
-        if(recoObjects_->valuesSet_) return;
-        recoObjects_->valuesSet_ = true;
-    }
+    if(recoObjects_->valuesSet_) return;
+    recoObjects_->valuesSet_ = true;
 
     // Concerning physics objects
     b_lepton->GetEntry(entry);
@@ -749,11 +770,9 @@ void AnalysisBase::GetRecoBranchesEntry(const Long64_t& entry)const
     //if(b_jetTrackCharge) b_jetTrackCharge->GetEntry(entry);
     //if(b_jetTrack) b_jetTrack->GetEntry(entry);
     b_met->GetEntry(entry);
-    if(doJesJer_){
-        b_jetJERSF->GetEntry(entry);
-        b_jetForMET->GetEntry(entry);
-        b_jetForMETJERSF->GetEntry(entry);
-    }
+    if(b_jetForMET) b_jetForMET->GetEntry(entry);
+    if(b_jetJERSF) b_jetJERSF->GetEntry(entry);
+    if(b_jetForMETJERSF) b_jetForMETJERSF->GetEntry(entry);
 
     // Concerning event
     b_runNumber->GetEntry(entry);
@@ -777,20 +796,16 @@ void AnalysisBase::GetTriggerBranchesEntry(const Long64_t& entry)const
 void AnalysisBase::GetCommonGenBranchesEntry(const Long64_t& entry)const
 {
     // Check if branches' entry is already read
-    if(commonGenObjects_){
-        if(commonGenObjects_->valuesSet_) return;
-        commonGenObjects_->valuesSet_ = true;
-    }
+    if(commonGenObjects_->valuesSet_) return;
+    commonGenObjects_->valuesSet_ = true;
 
     // Concerning physics objects
     b_allGenJets->GetEntry(entry);
     b_jetPartonFlavour->GetEntry(entry);
     b_associatedGenJet->GetEntry(entry);
-    if(doJesJer_){
-        b_associatedGenJetForMET->GetEntry(entry);
-    }
-    //if(b_jetAssociatedPartonPdgId)b_jetAssociatedPartonPdgId->GetEntry(entry);
-    //if(b_jetAssociatedParton)b_jetAssociatedParton->GetEntry(entry);
+    if(b_associatedGenJetForMET) b_associatedGenJetForMET->GetEntry(entry);
+    //if(b_jetAssociatedPartonPdgId) b_jetAssociatedPartonPdgId->GetEntry(entry);
+    //if(b_jetAssociatedParton) b_jetAssociatedParton->GetEntry(entry);
 }
 
 
@@ -798,10 +813,8 @@ void AnalysisBase::GetCommonGenBranchesEntry(const Long64_t& entry)const
 void AnalysisBase::GetKinRecoBranchesEntry(const Long64_t& entry)const
 {
     // Check if branches' entry is already read
-    if(kinRecoObjects_){
-        if(kinRecoObjects_->valuesSet_) return;
-        kinRecoObjects_->valuesSet_ = true;
-    }
+    if(kinRecoObjects_->valuesSet_) return;
+    kinRecoObjects_->valuesSet_ = true;
 
     b_HypTop->GetEntry(entry);
     b_HypAntiTop->GetEntry(entry);
@@ -886,10 +899,8 @@ void AnalysisBase::GetHiggsDecayModeEntry(const Long64_t& entry)const
 void AnalysisBase::GetTopSignalBranchesEntry(const Long64_t& entry)const
 {
     // Check if branches' entry is already read
-    if(topGenObjects_){
-        if(topGenObjects_->valuesSet_) return;
-        topGenObjects_->valuesSet_ = true;
-    }
+    if(topGenObjects_->valuesSet_) return;
+    topGenObjects_->valuesSet_ = true;
 
     b_GenMet->GetEntry(entry);
     b_GenTop->GetEntry(entry);
@@ -931,10 +942,8 @@ void AnalysisBase::GetTopSignalBranchesEntry(const Long64_t& entry)const
 void AnalysisBase::GetHiggsSignalBranchesEntry(const Long64_t& entry)const
 {
     // Check if branches' entry is already read
-    if(higgsGenObjects_){
-        if(higgsGenObjects_->valuesSet_) return;
-        higgsGenObjects_->valuesSet_ = true;
-    }
+    if(higgsGenObjects_->valuesSet_) return;
+    higgsGenObjects_->valuesSet_ = true;
 
     b_GenH->GetEntry(entry);
     b_GenBFromH->GetEntry(entry);
@@ -1060,14 +1069,14 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 //     }
 
     // Fill the results of the on-the-fly kinematic reconstruction
-    kinRecoObjects_->HypTop_->push_back(ttbar::TLVtoLV(sol.top));
-    kinRecoObjects_->HypAntiTop_->push_back(ttbar::TLVtoLV(sol.topBar));
-    kinRecoObjects_->HypLepton_->push_back(ttbar::TLVtoLV(sol.lm));
-    kinRecoObjects_->HypAntiLepton_->push_back(ttbar::TLVtoLV(sol.lp));
-    kinRecoObjects_->HypBJet_->push_back(ttbar::TLVtoLV(sol.jetB));
-    kinRecoObjects_->HypAntiBJet_->push_back(ttbar::TLVtoLV(sol.jetBbar));
-    kinRecoObjects_->HypNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrino));
-    kinRecoObjects_->HypAntiNeutrino_->push_back(ttbar::TLVtoLV(sol.neutrinoBar));
+    kinRecoObjects_->HypTop_->push_back(common::TLVtoLV(sol.top));
+    kinRecoObjects_->HypAntiTop_->push_back(common::TLVtoLV(sol.topBar));
+    kinRecoObjects_->HypLepton_->push_back(common::TLVtoLV(sol.lm));
+    kinRecoObjects_->HypAntiLepton_->push_back(common::TLVtoLV(sol.lp));
+    kinRecoObjects_->HypBJet_->push_back(common::TLVtoLV(sol.jetB));
+    kinRecoObjects_->HypAntiBJet_->push_back(common::TLVtoLV(sol.jetBbar));
+    kinRecoObjects_->HypNeutrino_->push_back(common::TLVtoLV(sol.neutrino));
+    kinRecoObjects_->HypAntiNeutrino_->push_back(common::TLVtoLV(sol.neutrinoBar));
     kinRecoObjects_->HypJet0index_->push_back(jIndex[sol.jetB_index]);
     kinRecoObjects_->HypJet1index_->push_back(jIndex[sol.jetBbar_index]);
 
@@ -1096,160 +1105,20 @@ bool AnalysisBase::calculateKinReco(const int leptonIndex, const int antiLeptonI
 const std::string AnalysisBase::topDecayModeString()const
 {
     const std::vector<std::string> WMode {"unknown", "hadronic", "e", "mu", "tau->hadron", "tau->e", "tau->mu"};
-    int top = topDecayMode_ / 10;
-    int antitop = topDecayMode_ % 10;
-    std::string result = WMode[top] + "/" + WMode[antitop];
+    const int top = topDecayMode_ / 10;
+    const int antitop = topDecayMode_ % 10;
+    const std::string result = WMode[top] + "/" + WMode[antitop];
     return result;
 }
 
 
 
-void AnalysisBase::prepareJER_JES()
+int AnalysisBase::higgsDecayMode(const Long64_t& entry)const
 {
-    // FIXME: make this string steerable
-    //     const TString pathToFile(ttbar::DATA_PATH() + "/Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt");
-    const TString pathToFile(ttbar::DATA_PATH() + "/Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt");
-    doJesJer_ = false;
-    if (systematic_ == "JES_UP" || systematic_ == "JES_DOWN") {
-        jetCorrectionUncertainty_ = new JetCorrectionUncertainty(JetCorrectorParameters(pathToFile.Data(), "Total"));
-        doJesJer_ = true;
-    }
-    if (systematic_ == "JER_UP" || systematic_ == "JER_DOWN") {
-        doJesJer_ = true;
-    }
-}
-
-
-
-void AnalysisBase::applyJerSystematics(VLV* jets, VLV* jetsForMET, LV* met,
-                                       const std::vector<double>* jetJERSF, const std::vector<double>* jetForMETJERSF,
-                                       const VLV* associatedGenJet, const VLV* associatedGenJetForMET)const
-{
-    // Set the eta ranges and the corresponding scale factors for Jet Energy Resolution
-    constexpr double ResolutionEtaRange[5] = {0.5, 1.1, 1.7, 2.3, 10};
-    double ResolutionEtaScaleFactor[5];//nom = {1.052, 1.057, 1.096, 1.134, 1.288};
-    if(systematic_ == "JER_UP"){
-        ResolutionEtaScaleFactor[0] = 1.115;
-        ResolutionEtaScaleFactor[1] = 1.114;
-        ResolutionEtaScaleFactor[2] = 1.161;
-        ResolutionEtaScaleFactor[3] = 1.228;
-        ResolutionEtaScaleFactor[4] = 1.488;
-    }
-    else if(systematic_ == "JER_DOWN"){
-        ResolutionEtaScaleFactor[0] = 0.990;
-        ResolutionEtaScaleFactor[1] = 1.001;
-        ResolutionEtaScaleFactor[2] = 1.032;
-        ResolutionEtaScaleFactor[3] = 1.042;
-        ResolutionEtaScaleFactor[4] = 1.089;
-    }
-    else{
-        std::cerr<<"ERROR in applyJerSystematics()! Requested systematic not allowed: "<<systematic_
-                 <<"\n...break\n"<<std::endl;
-        exit(81);
-    }
-
-    // This first loop will correct the jet collection that is used for jet selections
-    for(size_t i = 0; i < jets->size(); ++i){
-        size_t jetEtaBin = 0;
-
-        for(size_t j = 0; j < 5; ++j){
-            if(std::fabs(jets->at(i).eta()) < ResolutionEtaRange[j]){
-                jetEtaBin = j;
-                break;
-            }
-        }
-
-        if(jetJERSF->at(i) != 0.){
-            jets->at(i) *= 1./jetJERSF->at(i);
-
-            // FIXME: should this factor really be =0. in case no associatedGenJet is found ?
-            double factor = 0.;
-
-            if(associatedGenJet->at(i).pt() != 0.) factor = 1. + (ResolutionEtaScaleFactor[jetEtaBin] - 1.)*(1. - (associatedGenJet->at(i).pt()/jets->at(i).pt()));
-            if(jetJERSF->at(i) == 1.) factor = 1.;
-
-            jets->at(i) *= factor;
-        }
-    }
-
-    // This second loop will correct the jet collection that is used to modify the MET
-    double JEC_dpX =0.;
-    double JEC_dpY =0.;
-    for(size_t i = 0; i < jetsForMET->size(); ++i){
-        size_t jetEtaBin = 0;
-        for(size_t j = 0; j < 5; ++j){
-            if(std::fabs(jetsForMET->at(i).eta()) < ResolutionEtaRange[j]){
-                jetEtaBin = j;
-                break;
-            }
-        }
-
-        if(jetForMETJERSF->at(i) != 0.){
-            const double dpX = jetsForMET->at(i).px();
-            const double dpY = jetsForMET->at(i).py();
-            jetsForMET->at(i) *= 1./jetForMETJERSF->at(i);
-
-            // FIXME: should this factor really be =0. in case no associatedGenJet is found ?
-            double factor = 0.;
-            if(associatedGenJetForMET->at(i).pt() != 0.) factor = 1. + (ResolutionEtaScaleFactor[jetEtaBin] - 1.)*(1. - (associatedGenJetForMET->at(i).pt()/jetsForMET->at(i).pt()));
-            if(jetForMETJERSF->at(i) == 1.) factor = 1.;
-
-            jetsForMET->at(i) *= factor;
-            JEC_dpX += jetsForMET->at(i).px() - dpX;
-            JEC_dpY += jetsForMET->at(i).py() - dpY;
-        }
-    }
-
-    // Adjust the MET
-    const double scaledMETPx = met->px() - JEC_dpX;
-    const double scaledMETPy = met->py() - JEC_dpY;
-    met->SetPt(std::sqrt(scaledMETPx*scaledMETPx + scaledMETPy*scaledMETPy));
-}
-
-
-
-void AnalysisBase::applyJesSystematics(VLV* jets, VLV* jetsForMET, LV* met)const
-{
-    const bool varyUp = systematic_=="JES_UP" ? true : false;
-    if(!varyUp && systematic_!="JES_DOWN"){
-        std::cerr<<"ERROR in applyJesSystematics()! Requested systematic not allowed: "<<systematic_
-                 <<"\n...break\n"<<std::endl;
-        exit(82);
-    }
-
-    // This first loop will correct the jet collection that is used for jet selections
-    for(size_t i = 0; i < jets->size(); ++i){
-        jetCorrectionUncertainty_->setJetPt(jets->at(i).pt());
-        jetCorrectionUncertainty_->setJetEta(jets->at(i).eta());
-        const double dunc = jetCorrectionUncertainty_->getUncertainty(true);
-
-        if(varyUp) jets->at(i) *= 1. + dunc;
-        else jets->at(i) *= 1. - dunc;
-    }
-
-    // This second loop will correct the jet collection that is used for modifying MET
-    double JEC_dpX =0.;
-    double JEC_dpY =0.;
-    for(size_t i = 0; i < jetsForMET->size(); ++i){
-
-        const double dpX = jetsForMET->at(i).px();
-        const double dpY = jetsForMET->at(i).py();
-
-        jetCorrectionUncertainty_->setJetPt(jetsForMET->at(i).pt());
-        jetCorrectionUncertainty_->setJetEta(jetsForMET->at(i).eta());
-        const double dunc = jetCorrectionUncertainty_->getUncertainty(true);
-
-        if(varyUp) jetsForMET->at(i) *= 1. + dunc;
-        else jetsForMET->at(i) *= 1. - dunc;
-
-        JEC_dpX += jetsForMET->at(i).px() - dpX;
-        JEC_dpY += jetsForMET->at(i).py() - dpY;
-    }
-
-    // Adjust the MET
-    const double scaledMETPx = met->px() - JEC_dpX;
-    const double scaledMETPy = met->py() - JEC_dpY;
-    met->SetPt(std::sqrt(scaledMETPx*scaledMETPx + scaledMETPy*scaledMETPy));
+    if(!isHiggsSignal_) return -1;
+    this->GetHiggsDecayModeEntry(entry);
+    
+    return higgsDecayMode_;
 }
 
 
@@ -1326,6 +1195,16 @@ double AnalysisBase::weightGenerator(const Long64_t& entry)const
     if(!isMC_) return 1.;
     GetWeightGeneratorEntry(entry);
     return weightGenerator_;
+}
+
+
+
+double AnalysisBase::weightPdf(const Long64_t& entry, const int pdfNo)const
+{
+    if(pdfNo < 0) return 1.;
+    this->GetPDFEntry(entry);
+    const double pdfWeight = weightPDF_->at(pdfNo);
+    return pdfWeight;
 }
 
 
@@ -1435,37 +1314,45 @@ double AnalysisBase::topPtReweightValue(const double& pt)const
 const RecoObjects& AnalysisBase::getRecoObjects(const Long64_t& entry)const
 {
     if(recoObjects_->valuesSet_) return *recoObjects_;
-
+    
     this->GetRecoBranchesEntry(entry);
-
-    if(isMC_ && doJesJer_){
-
-        // Get references for all relevant reco objects which are modified by JER/JES systematics
+    
+    // Apply systematic variations in the following, of course only in MC
+    if(!isMC_) return *recoObjects_;
+    
+    if(jetEnergyResolutionScaleFactors_){
+        
+        // Get references for all relevant reco objects which are modified by JER systematics
         VLV* jets = recoObjects_->jets_;
         VLV* jetsForMET = recoObjects_->jetsForMET_;
         LV* met = recoObjects_->met_;
-
-        if(systematic_=="JER_UP" || systematic_=="JER_DOWN"){
-            // Get references for all relevant reco objects which are NOT modified
-            const std::vector<double>* jetJERSF = recoObjects_->jetJERSF_;
-            const std::vector<double>* jetForMETJERSF = recoObjects_->jetForMETJERSF_;
-
-            // Get references for all relevant gen objects which are NOT modified
-            if(!commonGenObjects_->valuesSet_) this->GetCommonGenBranchesEntry(entry);
-            const VLV* associatedGenJet = commonGenObjects_->associatedGenJet_;
-            const VLV* associatedGenJetForMet = commonGenObjects_->associatedGenJetForMET_;
-
-            this->applyJerSystematics(jets, jetsForMET, met,
-                                      jetJERSF, jetForMETJERSF,
-                                      associatedGenJet, associatedGenJetForMet);
-
-        }
-
-        if(systematic_=="JES_UP" || systematic_=="JES_DOWN"){
-            this->applyJesSystematics(jets, jetsForMET, met);
-        }
+        
+        // Get references for all relevant reco objects which are NOT modified
+        const std::vector<double>* jetJERSF = recoObjects_->jetJERSF_;
+        const std::vector<double>* jetForMETJERSF = recoObjects_->jetForMETJERSF_;
+        
+        // Get references for all relevant gen objects which are NOT modified
+        if(!commonGenObjects_->valuesSet_) this->GetCommonGenBranchesEntry(entry);
+        const VLV* associatedGenJet = commonGenObjects_->associatedGenJet_;
+        const VLV* associatedGenJetForMet = commonGenObjects_->associatedGenJetForMET_;
+        
+        // Apply systematic variation
+        jetEnergyResolutionScaleFactors_->applySystematic(jets, jetsForMET, met,
+                                                          jetJERSF, jetForMETJERSF,
+                                                          associatedGenJet, associatedGenJetForMet);
     }
-
+    
+    if(jetEnergyScaleScaleFactors_){
+        
+        // Get references for all relevant reco objects which are modified by JES systematics
+        VLV* jets = recoObjects_->jets_;
+        VLV* jetsForMET = recoObjects_->jetsForMET_;
+        LV* met = recoObjects_->met_;
+        
+        // Apply systematic variation
+        jetEnergyScaleScaleFactors_->applySystematic(jets, jetsForMET, met);
+    }
+    
     return *recoObjects_;
 }
 

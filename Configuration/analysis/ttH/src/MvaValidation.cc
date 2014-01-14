@@ -371,8 +371,8 @@ void MvaValidation::fillBestWeightHistos(const std::vector<float>& v_mvaWeights,
 
     // Get the indices of the jet pairs and order them by MVA weights, biggest value first
     const tth::IndexPairs& jetIndexPairs = recoObjectIndices.jetIndexPairs_;
-    std::vector<int> jetIndexPairsIndices = ttbar::initialiseIndices(jetIndexPairs);
-    ttbar::orderIndices(jetIndexPairsIndices, v_mvaWeights);
+    std::vector<int> jetIndexPairsIndices = common::initialiseIndices(jetIndexPairs);
+    common::orderIndices(jetIndexPairsIndices, v_mvaWeights);
 
     // Get jet pair leading in MVA weight, and extract bIndex and antiBIndex
     const std::pair<int, int>& leadingJetIndexPair = jetIndexPairs.at(jetIndexPairsIndices.at(0));
@@ -409,7 +409,7 @@ void MvaValidation::fillBestWeightHistos(const std::vector<float>& v_mvaWeights,
         if(index==antiBFromTopIndex || index==bFromTopIndex) continue;
         remainingJetIndices.push_back(index);
     }
-    ttbar::orderIndices(remainingJetIndices, *recoObjects.jetBTagCSV_);
+    common::orderIndices(remainingJetIndices, *recoObjects.jetBTagCSV_);
 
 
     // Calculations requiring the presence of at least 4 jets

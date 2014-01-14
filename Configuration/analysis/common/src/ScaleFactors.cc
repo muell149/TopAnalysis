@@ -21,6 +21,8 @@
 #include "ScaleFactors.h"
 #include "classes.h"
 #include "utils.h"
+#include "TopAnalysis/ZTopUtils/ext/interface/JetCorrectorParameters.h"
+#include "TopAnalysis/ZTopUtils/ext/interface/JetCorrectionUncertainty.h"
 
 
 
@@ -30,8 +32,7 @@
 
 
 
-
-std::string ttbar::assignFolder(const char* baseDir, const TString& channel, const TString& systematic)
+std::string common::assignFolder(const char* baseDir, const TString& channel, const TString& systematic)
 {
     std::string path("");
     
@@ -57,7 +58,7 @@ std::string ttbar::assignFolder(const char* baseDir, const TString& channel, con
 
 
 
-std::string ttbar::accessFolder(const char* baseDir, const TString& channel,
+std::string common::accessFolder(const char* baseDir, const TString& channel,
                          const TString& systematic, const bool allowNonexisting)
 {
     // Build directory path
@@ -142,7 +143,7 @@ h2_MuonIDSFpteta(0)
     std::cout<<"--- Beginning preparation of lepton scale factors\n";
     
     for(const auto& lepton : {electron, muon}){
-        std::string inputFileName(ttbar::DATA_PATH());
+        std::string inputFileName(common::DATA_PATH_COMMON());
         inputFileName.append("/");
         std::string histogramName;
         if(lepton == electron){
@@ -309,7 +310,7 @@ h2_mumuTrigSFeta(0)
     
     std::vector<TString> triggerInputFileNames;
     for(const auto& channel : channels){
-        TString fullName(ttbar::DATA_PATH());
+        TString fullName(common::DATA_PATH_COMMON());
         fullName.Append("/triggerSummary_");
         fullName.Append(channel);
         fullName.Append(inputFileSuffix);
@@ -471,7 +472,7 @@ systematic_(nominal)
     // Check if all relevant input files are available
     bool allInputFilesAvailable(true);
     for(const auto& channel : channels){
-        std::string btagInputFile = ttbar::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
+        std::string btagInputFile = common::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
         if(btagInputFile == "") allInputFilesAvailable = false;
         btagInputFile.append(channel + "_ttbarsignalplustau.root");
         
@@ -505,11 +506,11 @@ systematic_(nominal)
         std::string btagOutputFile("");
         
         if(!makeEfficiencies_){
-            btagInputFile = ttbar::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
+            btagInputFile = common::accessFolder(btagEfficiencyInputDir, channel, systematic, true);
             if(btagInputFile != "") btagInputFile.append(channel + "_ttbarsignalplustau.root");
         }
         else{
-            btagOutputFile = ttbar::assignFolder(btagEfficiencyOutputDir, channel, systematic);
+            btagOutputFile = common::assignFolder(btagEfficiencyOutputDir, channel, systematic);
             if(btagOutputFile != "") btagOutputFile.append(channel + "_ttbarsignalplustau.root");
         }
         
@@ -1245,6 +1246,196 @@ bool BtagScaleFactors::absoluteDownSystematic()const
 
 
 
+
+
+
+
+// --------------------------- Methods for JetEnergyResolutionScaleFactors ---------------------------------------------
+
+
+
+
+JetEnergyResolutionScaleFactors::JetEnergyResolutionScaleFactors(const JetEnergyResolutionScaleFactors::Systematic& systematic)
+{
+    std::cout<<"--- Beginning preparation of JER scale factors\n";
+    
+    // Hardcoded eta ranges
+    v_etaRange_ = {0.5, 1.1, 1.7, 2.3, 10};
+    
+    // Hardcoded scale factors for eta ranges, nominal is = {1.052, 1.057, 1.096, 1.134, 1.288};
+    if(systematic == vary_up){
+        v_etaScaleFactor_ = {1.115, 1.114, 1.161, 1.228, 1.488};
+        std::cout<<"Apply systematic variation: up\n";
+    }
+    else if(systematic == vary_down){
+        v_etaScaleFactor_ = {0.990, 1.001, 1.032, 1.042, 1.089};
+        std::cout<<"Apply systematic variation: down\n";
+    }
+    else{
+        std::cerr<<"Error in constructor of JetEnergyResolutionScaleFactors! Systematic variation not allowed\n...break\n"<<std::endl;
+        exit(621);
+    }
+    
+    // Check correct size
+    if(v_etaRange_.size() != v_etaScaleFactor_.size()){
+        std::cerr<<"Error in constructor of JetEnergyResolutionScaleFactors! "
+                 <<"Different number of intervals in eta and corresponding scale factors (intervals, scale factors): "
+                 <<v_etaRange_.size()<<" , "<<v_etaScaleFactor_.size()<<"\n...break\n"<<std::endl;
+        exit(622);
+    }
+    
+    std::cout<<"=== Finishing preparation of JER scale factors\n\n";
+}
+
+
+
+void JetEnergyResolutionScaleFactors::applySystematic(VLV* jets, VLV* jetsForMET, LV* met,
+                                                      const std::vector<double>* jetJERSF, const std::vector<double>* jetForMETJERSF,
+                                                      const VLV* associatedGenJet, const VLV* associatedGenJetForMET)const
+{
+    // This first loop will correct the jet collection that is used for jet selections
+    for(size_t iJet = 0; iJet < jets->size(); ++iJet){
+        size_t jetEtaBin = 0;
+
+        for(size_t iBin = 0; iBin < v_etaRange_.size(); ++iBin){
+            if(std::fabs(jets->at(iJet).eta()) < v_etaRange_.at(iBin)){
+                jetEtaBin = iBin;
+                break;
+            }
+        }
+
+        if(jetJERSF->at(iJet) != 0.){
+            jets->at(iJet) *= 1./jetJERSF->at(iJet);
+
+            // FIXME: should this factor really be =0. in case no associatedGenJet is found ?
+            double factor = 0.;
+
+            if(associatedGenJet->at(iJet).pt() != 0.) factor = 1. + (v_etaScaleFactor_.at(jetEtaBin) - 1.)*(1. - (associatedGenJet->at(iJet).pt()/jets->at(iJet).pt()));
+            if(jetJERSF->at(iJet) == 1.) factor = 1.;
+
+            jets->at(iJet) *= factor;
+        }
+    }
+
+    // This second loop will correct the jet collection that is used to modify the MET
+    double JEC_dpX =0.;
+    double JEC_dpY =0.;
+    for(size_t iJet = 0; iJet < jetsForMET->size(); ++iJet){
+        size_t jetEtaBin = 0;
+        for(size_t iBin = 0; iBin < v_etaRange_.size(); ++iBin){
+            if(std::fabs(jetsForMET->at(iJet).eta()) < v_etaRange_.at(iBin)){
+                jetEtaBin = iBin;
+                break;
+            }
+        }
+
+        if(jetForMETJERSF->at(iJet) != 0.){
+            const double dpX = jetsForMET->at(iJet).px();
+            const double dpY = jetsForMET->at(iJet).py();
+            jetsForMET->at(iJet) *= 1./jetForMETJERSF->at(iJet);
+
+            // FIXME: should this factor really be =0. in case no associatedGenJet is found ?
+            double factor = 0.;
+            if(associatedGenJetForMET->at(iJet).pt() != 0.) factor = 1. + (v_etaScaleFactor_.at(jetEtaBin) - 1.)*(1. - (associatedGenJetForMET->at(iJet).pt()/jetsForMET->at(iJet).pt()));
+            if(jetForMETJERSF->at(iJet) == 1.) factor = 1.;
+
+            jetsForMET->at(iJet) *= factor;
+            JEC_dpX += jetsForMET->at(iJet).px() - dpX;
+            JEC_dpY += jetsForMET->at(iJet).py() - dpY;
+        }
+    }
+
+    // Adjust the MET
+    const double scaledMETPx = met->px() - JEC_dpX;
+    const double scaledMETPy = met->py() - JEC_dpY;
+    met->SetPt(std::sqrt(scaledMETPx*scaledMETPx + scaledMETPy*scaledMETPy));
+}
+
+
+
+
+
+
+
+
+// --------------------------- Methods for JetEnergyScaleScaleFactors ---------------------------------------------
+
+
+
+
+JetEnergyScaleScaleFactors::JetEnergyScaleScaleFactors(const char* jesUncertaintySourceFile,
+                                                       const JetEnergyScaleScaleFactors::Systematic& systematic):
+jetCorrectionUncertainty_(0),
+varyUp_(false)
+{
+    std::cout<<"--- Beginning preparation of JES scale factors\n";
+    
+    std::string inputFileName(common::DATA_PATH_COMMON());
+    inputFileName.append("/");
+    inputFileName.append(jesUncertaintySourceFile);
+    jetCorrectionUncertainty_ = new ztop::JetCorrectionUncertainty(ztop::JetCorrectorParameters(inputFileName.data(), "Total"));
+    
+    if(systematic == vary_up){
+        varyUp_ = true;
+        std::cout<<"Apply systematic variation: up\n";
+    }
+    else if(systematic == vary_down){
+        varyUp_ = false;
+        std::cout<<"Apply systematic variation: down\n";
+    }
+    else{
+        std::cerr<<"Error in constructor of JetEnergyScaleScaleFactors! Systematic variation not allowed\n...break\n"<<std::endl;
+        exit(624);
+    }
+    
+    std::cout<<"=== Finishing preparation of JES scale factors\n\n";
+}
+
+
+
+JetEnergyScaleScaleFactors::~JetEnergyScaleScaleFactors()
+{
+    delete jetCorrectionUncertainty_;
+}
+
+
+
+void JetEnergyScaleScaleFactors::applySystematic(VLV* jets, VLV* jetsForMET, LV* met)const
+{
+    // This first loop will correct the jet collection that is used for jet selections
+    for(size_t iJet = 0; iJet < jets->size(); ++iJet){
+        jetCorrectionUncertainty_->setJetPt(jets->at(iJet).pt());
+        jetCorrectionUncertainty_->setJetEta(jets->at(iJet).eta());
+        const double dunc = jetCorrectionUncertainty_->getUncertainty(true);
+
+        if(varyUp_) jets->at(iJet) *= 1. + dunc;
+        else jets->at(iJet) *= 1. - dunc;
+    }
+    
+    // This second loop will correct the jet collection that is used for modifying MET
+    double JEC_dpX =0.;
+    double JEC_dpY =0.;
+    for(size_t iJet = 0; iJet < jetsForMET->size(); ++iJet){
+        
+        const double dpX = jetsForMET->at(iJet).px();
+        const double dpY = jetsForMET->at(iJet).py();
+
+        jetCorrectionUncertainty_->setJetPt(jetsForMET->at(iJet).pt());
+        jetCorrectionUncertainty_->setJetEta(jetsForMET->at(iJet).eta());
+        const double dunc = jetCorrectionUncertainty_->getUncertainty(true);
+
+        if(varyUp_) jetsForMET->at(iJet) *= 1. + dunc;
+        else jetsForMET->at(iJet) *= 1. - dunc;
+
+        JEC_dpX += jetsForMET->at(iJet).px() - dpX;
+        JEC_dpY += jetsForMET->at(iJet).py() - dpY;
+    }
+
+    // Adjust the MET
+    const double scaledMETPx = met->px() - JEC_dpX;
+    const double scaledMETPy = met->py() - JEC_dpY;
+    met->SetPt(std::sqrt(scaledMETPx*scaledMETPx + scaledMETPy*scaledMETPy));
+}
 
 
 

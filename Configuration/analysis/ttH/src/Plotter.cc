@@ -154,7 +154,7 @@ bool Plotter::prepareDataset(const std::vector<Sample>& v_sample, const Systemat
             }
 
             // Set style
-            ttbar::setHHStyle(*gStyle);
+            common::setHHStyle(*gStyle);
 
             // Clone histogram directly here
             TH1D* histClone = (TH1D*) hist->Clone();
@@ -438,13 +438,13 @@ void Plotter::write(const Channel::Channel& channel, const Systematic::Systemati
     if(significanceLabelTTbb) significanceLabelTTbb->Draw("same");
     legend->Draw("SAME");
     if(dataHist.second && stacksum){
-        ttbar::drawRatio(dataHist.second, stacksum, 0.5, 1.7);
+        common::drawRatio(dataHist.second, stacksum, 0.5, 1.7);
         firstHistToDraw->GetXaxis()->SetLabelSize(0);
         firstHistToDraw->GetXaxis()->SetTitleSize(0);
     }
 
     // Create Directory for Output Plots and write them
-    const TString eventFileString = ttbar::assignFolder(ControlPlotDIR, channel, systematic);
+    const TString eventFileString = common::assignFolder(ControlPlotDIR, channel, systematic);
     canvas->Print(eventFileString+name_+".eps");
     
     

@@ -40,10 +40,9 @@
 
 /// Set pileup distribution file corresponding to data sample in use
 /// The file ending is automatically adjusted for different systematics
-//constexpr const char* FilePU = "/src/TopAnalysis/TopUtils/data/Data_PUDist_12fb";
-//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19624pb";
-//constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_19789pb";
-constexpr const char* PileupInputFILE = "/src/TopAnalysis/Configuration/analysis/diLeptonic/data/Data_PUDist_Full2012ReReco_FinalRecommendation";
+//constexpr const char* PileupInputFILE = "Data_PUDist_19624pb.root";
+//constexpr const char* PileupInputFILE = "Data_PUDist_19789pb.root";
+constexpr const char* PileupInputFILE = "Data_PUDist_Full2012ReReco_FinalRecommendation.root";
 
 
 
@@ -63,6 +62,12 @@ constexpr const char* MuonSFInputFILE = "MuonSF_198fbReReco.root";
 //constexpr const char* TriggerSFInputSUFFIX = ".root";
 //constexpr const char* TriggerSFInputSUFFIX = "_19fb.root";
 constexpr const char* TriggerSFInputSUFFIX = "_rereco198fb.root";
+
+
+
+/// File containing the uncertainties associated to JES
+//constexpr const char* JesUncertaintySourceFILE = "Fall12_V7_DATA_UncertaintySources_AK5PFchs.txt";
+constexpr const char* JesUncertaintySourceFILE = "Summer13_V1_DATA_UncertaintySources_AK5PFchs.txt";
 
 
 
@@ -120,7 +125,12 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     std::cout<<"--- Beginning preparation of pileup reweighter\n";
     PUReweighter* puReweighter = new PUReweighter();
     puReweighter->setMCDistrSum12("S10");
-    puReweighter->setDataTruePUInput(puReweighter->getPUPath(Systematic::convertSystematic(systematic), PileupInputFILE).c_str());
+    TString pileupInput(common::DATA_PATH_COMMON());
+    pileupInput.Append("/").Append(PileupInputFILE);
+    if(systematic == Systematic::pu_up) pileupInput.ReplaceAll(".root", "_sysUp.root");
+    else if(systematic == Systematic::pu_down) pileupInput.ReplaceAll(".root", "_sysDown.root");
+    std::cout<<"Using PU input file:\n"<<pileupInput<<std::endl;
+    puReweighter->setDataTruePUInput(pileupInput.Data());
     std::cout<<"=== Finishing preparation of pileup reweighter\n\n";
 
     // Set up lepton efficiency scale factors
@@ -136,27 +146,44 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     const TriggerScaleFactors triggerScaleFactors(TriggerSFInputSUFFIX,
                                                   Channel::convertChannels(Channel::realChannels),
                                                   triggerSFSystematic);
-
+    
     BtagScaleFactors *btagScaleFactors = 0;
     BTagSFGeneric *bTagSFGeneric = 0;
 
     // Setting the flag to choose which kind of btag scale factors to use
-    bool useGenericBTagSF = true;
+    bool useGenericBTagSF = false;
 
-    if(useGenericBTagSF) {
+    if(useGenericBTagSF){
         // Set up generic btag efficiency scale factors
         bTagSFGeneric = new BTagSFGeneric(BtagEfficiencyInputDIR,
                                           BtagEfficiencyOutputDIR,
                                           Channel::convertChannels(Channel::realChannels),
                                           Systematic::convertSystematic(systematic));
-    } else {
+    }
+    else{
         // Set up btag efficiency scale factors (do it for all channels)
         btagScaleFactors = new BtagScaleFactors(BtagEfficiencyInputDIR,
                                                 BtagEfficiencyOutputDIR,
                                                 Channel::convertChannels(Channel::realChannels),
                                                 Systematic::convertSystematic(systematic));
-
     }
+    
+    // Set up JER systematic scale factors
+    JetEnergyResolutionScaleFactors* jetEnergyResolutionScaleFactors(0);
+    if(systematic==Systematic::jer_up || systematic==Systematic::jer_down){
+        JetEnergyResolutionScaleFactors::Systematic jerSystematic(JetEnergyResolutionScaleFactors::vary_up);
+        if(systematic == Systematic::jer_down) jerSystematic = JetEnergyResolutionScaleFactors::vary_down;
+        jetEnergyResolutionScaleFactors = new JetEnergyResolutionScaleFactors(jerSystematic);
+    }
+    
+    // Set up JES systematic scale factors
+    JetEnergyScaleScaleFactors* jetEnergyScaleScaleFactors(0);
+    if(systematic==Systematic::jes_up || systematic==Systematic::jes_down){
+        JetEnergyScaleScaleFactors::Systematic jesSystematic(JetEnergyScaleScaleFactors::vary_up);
+        if(systematic == Systematic::jes_down) jesSystematic = JetEnergyScaleScaleFactors::vary_down;
+        jetEnergyScaleScaleFactors = new JetEnergyScaleScaleFactors(JesUncertaintySourceFILE, jesSystematic);
+    }
+    
 
     // Set up jet categories
     JetCategories* jetCategories(0);
@@ -240,7 +267,9 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
     selector->SetTriggerScaleFactors(triggerScaleFactors);
     if(btagScaleFactors) selector->SetBtagScaleFactors(*btagScaleFactors);
     else if(bTagSFGeneric) selector->SetBtagScaleFactors(*bTagSFGeneric);
-
+    selector->SetJetEnergyResolutionScaleFactors(jetEnergyResolutionScaleFactors);
+    selector->SetJetEnergyScaleScaleFactors(jetEnergyScaleScaleFactors);
+    
     selector->SetMvaInputProduction(mvaTreeHandler);
     selector->SetAllAnalysisHistograms(v_analysisHistograms);
 
@@ -389,15 +418,15 @@ void load_HiggsAnalysis(const TString& validFilenamePattern,
 int main(int argc, char** argv) {
     CLParameter<std::string> opt_filenamePattern("f", "Restrict to filename pattern, e.g. ttbar", false, 1, 1);
     CLParameter<std::string> opt_channel("c", "Specify a certain channel (ee, emu, mumu). No channel specified = run on all channels", false, 1, 1,
-            ttbar::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
+            common::makeStringCheck(Channel::convertChannels(Channel::allowedChannelsAnalysis)));
     CLParameter<std::string> opt_systematic("s", "Run with a systematic that runs on the nominal ntuples, e.g. 'PU_UP'", false, 1, 1,
-            ttbar::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsAnalysis)));
+            common::makeStringCheck(Systematic::convertSystematics(Systematic::allowedSystematicsHiggsAnalysis)));
     CLParameter<int> opt_dy("d", "Drell-Yan mode (11 for ee, 13 for mumu, 15 for tautau)", false, 1, 1,
             [](int dy){return dy == 11 || dy == 13 || dy == 15;});
     CLParameter<int> opt_jetCategoriesId("j", "ID for jet categories (# jets, # b-jets). If not specified, use default categories (=0)", false, 1, 1,
             [](int id){return id>=0 && id<=3;});
     CLParameter<std::string> opt_mode("m", "Mode of analysis: control plots (cp), Produce MVA input (mvaP), Apply MVA weights (mvaA), dijet analyser (dijet), playground (playg), charge analyser (charge), jet match analyser (match). Default is cp", false, 1, 100,
-            ttbar::makeStringCheck(AnalysisMode::convertAnalysisModes(AnalysisMode::allowedAnalysisModes)));
+            common::makeStringCheck(AnalysisMode::convertAnalysisModes(AnalysisMode::allowedAnalysisModes)));
     CLAnalyser::interpretGlobal(argc, argv);
 
     // Set up a pattern for selecting only files from selectionList containing that pattern in filename
