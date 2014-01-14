@@ -42,8 +42,8 @@ fileName_("ttbarsignalplustau.root")
     for(const auto& channel : channels){
         std::string bTagInputFile = common::accessFolder(inputDirName_.c_str(),channel, systematic, true).append(channel).append("_").append(fileName_);
         ifstream inputFileStream(bTagInputFile);
-        // Setting the file and sample name for each channel in the map
-        if(inputFileStream.is_open()) {
+        // Setting the file and sample name for each channel in the map if the file exists
+        if(inputFileStream.is_open() && bTagInputFile.length() > fileName_.length() + channel.length() + 1) {
             channelFileNames_[channel] = bTagInputFile;
             
             std::string sampleName(bTagInputFile);
