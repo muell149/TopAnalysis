@@ -33,23 +33,27 @@ BTagSFGeneric::BTagSFGeneric(const char* btagEfficiencyInputDir,
                              TString systematic):
 inputDirName_(btagEfficiencyInputDir),
 outputDirName_(btagEfficiencyOutputDir),
-fileName_("ttbarsignalplustau.root"),
-systematic_(nominal)
+fileName_("ttbarsignalplustau.root")
 {
     std::cout<<"--- Beginning preparation of b-tagging scale factors\n";
     if (systematic == "" || systematic.Contains("PDF") || systematic.Contains("closure")) systematic = "Nominal";
     // Check if all relevant input files are available
     bool allInputFilesAvailable(true);
     for(const auto& channel : channels){
-        //FIXME: Change "Nominal" to the enum value when it is implemented
-        std::string btagInputFile = common::accessFolder(inputDirName_.c_str(),channel, "Nominal", true).append(channel).append("_").append(fileName_);
-        if(btagInputFile.length() < fileName_.length()+channel.length()+2) allInputFilesAvailable = false;
-
-        ifstream inputFileStream;
-        if(allInputFilesAvailable) inputFileStream.open(btagInputFile);
-        if(!inputFileStream.is_open()){
+        std::string bTagInputFile = common::accessFolder(inputDirName_.c_str(),channel, systematic, true).append(channel).append("_").append(fileName_);
+        ifstream inputFileStream(bTagInputFile);
+        // Setting the file and sample name for each channel in the map
+        if(inputFileStream.is_open()) {
+            channelFileNames_[channel] = bTagInputFile;
+            
+            std::string sampleName(bTagInputFile);
+            sampleName.erase(0,inputDirName_.length());
+            while(sampleName.at(0) == '/') sampleName.erase(0,1);
+            channelSampleNames_[channel] = sampleName;
+        } else {
             std::cout<< "******************************************************\n"
-                     << "Required bTag efficiency files don't exist. Running without btagsf!!!\n"
+                     << "Btag efficiency file [" << bTagInputFile << "] doesn't exist.\n"
+                     << "RUNNING WITHOUT BTAGSF!!!\n"
                      << "To create the file, run (for each systematic 'SYST'):\n"
                      << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c emu -s SYST\n"
                      << "\t> ./build/load_Analysis -f ttbarsignalplustau.root -c ee -s SYST\n"
@@ -60,34 +64,39 @@ systematic_(nominal)
                      << "*******************************************************\n";
             allInputFilesAvailable = false;
             break;
-        }
-    }
+        }   // If file couldn't be opened for reading
+    }   // End of loop over channels
+    
     if(!allInputFilesAvailable){
         std::cout<<"Not all input files for b-tagging efficiencies available\n"
                  <<"\t-->  Efficiencies will not be used, but produced in Analysis\n";
         setMakeEff(true);
+        // Resetting the root file names for storing btagging efficiencies for each channel in the map
+        for(const auto& channel : channels){
+            std::string bTagOutputFile = common::assignFolder(outputDirName_.c_str(), channel, systematic).append(channel).append("_").append(fileName_);
+            channelFileNames_[channel] = bTagOutputFile;
+            
+            std::string sampleName(bTagOutputFile);
+            sampleName.erase(0,outputDirName_.length());
+            while(sampleName.at(0) == '/') sampleName.erase(0,1);
+            channelSampleNames_[channel] = sampleName;
+        }
     } else setMakeEff(false);
 
     // Set systematic if it is an allowed one for btag efficiencies, else set to nominal
-    if(systematic == "BTAG_UP") systematic_ = BTagSFGeneric::btag_up;
-    else if(systematic == "BTAG_DOWN") systematic_ = BTagSFGeneric::btag_down;
-    else if(systematic == "BTAG_PT_UP") systematic_ = BTagSFGeneric::btagPt_up;
-    else if(systematic == "BTAG_PT_DOWN") systematic_ = BTagSFGeneric::btagPt_down;
-    else if(systematic == "BTAG_ETA_UP") systematic_ = BTagSFGeneric::btagEta_up;
-    else if(systematic == "BTAG_ETA_DOWN") systematic_ = BTagSFGeneric::btagEta_down;
-    else if(systematic == "BTAG_LJET_UP") systematic_ = BTagSFGeneric::btagLjet_up;
-    else if(systematic == "BTAG_LJET_DOWN") systematic_ = BTagSFGeneric::btagLjet_down;
-    else if(systematic == "BTAG_LJET_PT_UP") systematic_ = BTagSFGeneric::btagLjetPt_up;
-    else if(systematic == "BTAG_LJET_PT_DOWN") systematic_ = BTagSFGeneric::btagLjetPt_down;
-    else if(systematic == "BTAG_LJET_ETA_UP") systematic_ = BTagSFGeneric::btagLjetEta_up;
-    else if(systematic == "BTAG_LJET_ETA_DOWN") systematic_ = BTagSFGeneric::btagLjetEta_down;
-    else if(systematic == "BTAG_BEFF_UP") systematic_ = BTagSFGeneric::btagBeff_up;
-    else if(systematic == "BTAG_BEFF_DOWN") systematic_ = BTagSFGeneric::btagBeff_down;
-    else if(systematic == "BTAG_CEFF_UP") systematic_ = BTagSFGeneric::btagCeff_up;
-    else if(systematic == "BTAG_CEFF_DOWN") systematic_ = BTagSFGeneric::btagCeff_down;
-    else if(systematic == "BTAG_LEFF_UP") systematic_ = BTagSFGeneric::btagLeff_up;
-    else if(systematic == "BTAG_LEFF_DOWN") systematic_ = BTagSFGeneric::btagLeff_down;
-    else systematic_= BTagSFGeneric::nominal;
+    if(systematic == "BTAG_UP") setSystematic(systematics::heavyup);
+    else if(systematic == "BTAG_DOWN") setSystematic(systematics::heavydown);
+    else if(systematic == "BTAG_PT_UP") setSystematic(systematics::heavyuppt);
+    else if(systematic == "BTAG_PT_DOWN") setSystematic(systematics::heavydownpt);
+    else if(systematic == "BTAG_ETA_UP") setSystematic(systematics::heavyupeta);
+    else if(systematic == "BTAG_ETA_DOWN") setSystematic(systematics::heavydowneta);
+    else if(systematic == "BTAG_LJET_UP") setSystematic(systematics::lightup);
+    else if(systematic == "BTAG_LJET_DOWN") setSystematic(systematics::lightdown);
+    else if(systematic == "BTAG_LJET_PT_UP") setSystematic(systematics::lightuppt);
+    else if(systematic == "BTAG_LJET_PT_DOWN") setSystematic(systematics::lightdownpt);
+    else if(systematic == "BTAG_LJET_ETA_UP") setSystematic(systematics::lightupeta);
+    else if(systematic == "BTAG_LJET_ETA_DOWN") setSystematic(systematics::lightdowneta);
+    else setSystematic(systematics::nominal);
     
     std::cout<<"=== Finishing preparation of b-tagging scale factors\n\n";
 }
@@ -103,13 +112,8 @@ bool BTagSFGeneric::makeEfficiencies()
 
 void BTagSFGeneric::prepareBTags(TSelectorList* output, const std::string& channel)
 {
-    //FIXME: Change "Nominal" to the enum value when it is implemented
-    std::string inputFileName;
-    if(!getMakeEff()) inputFileName = common::accessFolder(inputDirName_.c_str(), channel, "Nominal", true).append(channel).append("_").append(fileName_);
-    else inputFileName = common::assignFolder(outputDirName_.c_str(), channel, "Nominal").append(channel).append("_").append(fileName_);
-    std::string sampleName(inputFileName);
-    sampleName.erase(0,inputDirName_.length());
-    while(sampleName.at(0) == '/') sampleName.erase(0,1);
+    std::string inputFileName = channelFileNames_.at(channel);
+    std::string sampleName = channelSampleNames_.at(channel);
 
     // Set pointer to output, so that histograms are owned by it
     selectorList_ = output;
@@ -231,11 +235,8 @@ void BTagSFGeneric::fillBtagHistograms(const std::vector<int>& jetIndices,
 
 void BTagSFGeneric::produceBtagEfficiencies(const std::string& channel)
 {
-    //FIXME: Change "Nominal" to the enum value when it is implemented
-    std::string outputFileName = common::assignFolder(outputDirName_.c_str(), channel, "Nominal").append(channel).append("_").append(fileName_);
-    std::string sampleName(outputFileName);
-    sampleName.erase(0, outputDirName_.length());
-    while(sampleName.at(0) == '/') sampleName.erase(0, 1);
+    std::string outputFileName = channelFileNames_.at(channel);
+    std::string sampleName = channelSampleNames_.at(channel);
 
     TFile file(outputFileName.c_str(),"RECREATE");
 
