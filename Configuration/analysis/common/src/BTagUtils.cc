@@ -106,7 +106,7 @@ void BTagSFGeneric::prepareBTags(TSelectorList* output, const std::string& chann
     //FIXME: Change "Nominal" to the enum value when it is implemented
     std::string inputFileName;
     if(!getMakeEff()) inputFileName = common::accessFolder(inputDirName_.c_str(), channel, "Nominal", true).append(channel).append("_").append(fileName_);
-    else inputFileName = common::assignFolder(ouputDirName_.c_str(), channel, "Nominal").append(channel).append("_").append(fileName_);
+    else inputFileName = common::assignFolder(outputDirName_.c_str(), channel, "Nominal").append(channel).append("_").append(fileName_);
     std::string sampleName(inputFileName);
     sampleName.erase(0,inputDirName_.length());
     while(sampleName.at(0) == '/') sampleName.erase(0,1);
