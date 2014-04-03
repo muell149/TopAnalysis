@@ -56,7 +56,7 @@ op_systematicsName = 'Nominal'#
 op_json = ''#
 op_skipEvents = 0#
 op_includePDFWeights = False#
-op_maxEvents = 30#
+op_maxEvents = 3#
 ####################################################################
 ## Set up samplename
 
@@ -230,7 +230,7 @@ else:
 # )
 
 process.load( "TopQuarkAnalysis.Configuration.patRefSel_outputModule_cff" )
-process.out.fileName = cms.untracked.string("DESY_bean.root")
+process.out.fileName = cms.untracked.string("merged_bean.root")
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out.outputCommands +=patEventContent
 process.out.SelectEvents.SelectEvents = []
@@ -253,13 +253,13 @@ from PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi import *
 # Produce pat trigger content
 process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
 
+#turn off PF2PAT Top Projection....Charlie Projection!
 
 applyPostfix( process, 'pfNoPileUp'  , pfpostfix ).enable = True
 applyPostfix( process, 'pfNoMuon'    , pfpostfix ).enable = False
 applyPostfix( process, 'pfNoElectron', pfpostfix ).enable = False
 applyPostfix( process, 'pfNoJet'     , pfpostfix ).enable = False
 applyPostfix( process, 'pfNoTau'     , pfpostfix ).enable = False
-
 
 ####################################################################
 ## Set up selections for PF2PAT & PAT objects: Electrons
@@ -314,9 +314,7 @@ process.selectedPatElectronsAfterScaling = selectedPatElectrons.clone(
 ####################################################################
 ## Set up selections for PF2PAT & PAT objects: Muons
 
-process.pfSelectedMuons.cut = 'pt > 5.' \
-                              '&& muonRef.isNonnull()' \
-                              '&& (muonRef.isGlobalMuon() || muonRef.isTrackerMuon())'
+process.pfSelectedMuons.cut = 'pt > 5.'
 
 
 # Switch isolation cone to 0.3 and set cut to 0.15
@@ -328,11 +326,11 @@ process.pfIsolatedMuons.isolationCut = 0.2
 
 
 process.patMuons.isolationValues = cms.PSet(
-        pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral04"),
-        pfChargedAll = cms.InputTag("muPFIsoValueChargedAll04"),
-        pfPUChargedHadrons = cms.InputTag("muPFIsoValuePU04"),
-        pfPhotons = cms.InputTag("muPFIsoValueGamma04"),
-        pfChargedHadrons = cms.InputTag("muPFIsoValueCharged04")
+        pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral03"),
+        pfChargedAll = cms.InputTag("muPFIsoValueChargedAll03"),
+        pfPUChargedHadrons = cms.InputTag("muPFIsoValuePU03"),
+        pfPhotons = cms.InputTag("muPFIsoValueGamma03"),
+        pfChargedHadrons = cms.InputTag("muPFIsoValueCharged03")
         )
 
 
@@ -818,11 +816,6 @@ getattr(process,'patPF2PATSequence'+pfpostfix).remove(getattr(process,'countPatP
 getattr(process,'patPF2PATSequence'+pfpostfix).remove(getattr(process,'pfPhotonSequence'+pfpostfix))
 
 massSearchReplaceAnyInputTag(getattr(process,'patPF2PATSequence'+pfpostfix),'pfNoTau'+pfpostfix,'pfJets'+pfpostfix)
-
-
-
-
-
 ##############LETS MAKE SOME BEEEEAAAANNNSSSSSS#####################
 
 process.load("CMGTools.External.pujetidsequence_cff")
@@ -1026,5 +1019,5 @@ else:
 process.load("TopAnalysis.TopUtils.SignalCatcher_cfi")
 
 #Dump python config if wished
-outfile = open('dumpedConfig_charlieProjection.py','w'); print >> outfile,process.dumpPython(); outfile.close()
+outfile = open('dumped_merged_Config_charlieProj.py','w'); print >> outfile,process.dumpPython(); outfile.close()
 
