@@ -909,7 +909,8 @@ if signal or higgsSignal or zGenInfo:
 
 #process.out.outputCommands = ['drop *']
 process.out.outputCommands.extend( [
-    'keep *_BNproducer_*_*',
+    'drop *',
+    'keep *_BNproducer_*_*'
     ])
 
 
