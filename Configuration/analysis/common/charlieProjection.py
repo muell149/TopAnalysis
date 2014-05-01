@@ -249,14 +249,9 @@ getattr(process, 'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElec
                                                 getattr(process,'patElectrons'+pfpostfix)
                                                 )
 
-
 process.pfPileUp.checkClosestZVertex = cms.bool(False)
 
-#default is:
-#process.pfSelectedElectrons.cut = 'pt > 5 && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits<2'
-#here a low pt cut needs to be used!
 process.pfSelectedElectrons.cut = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
-
 
 # Switch isolation cone to 0.3 and set cut to 0.15
 process.pfIsolatedElectrons.doDeltaBetaCorrection = True   # not really a 'deltaBeta' correction, but it serves
