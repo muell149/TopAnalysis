@@ -330,7 +330,7 @@ tauCut                 = 'pt > 5. && abs(eta) < 2.5 && tauID("decayModeFinding")
 process.selectedPatTaus.cut = tauCut
 
 
-
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
 
 
 ####################################################################
@@ -891,6 +891,7 @@ if signal or higgsSignal or zGenInfo:
         process.q2weights *
         getattr(process,'patPF2PATSequence'+pfpostfix) *
         process.metseq *
+        process.recoTauClassicHPSSequence *
         process.BNproducer
         )
 
