@@ -49,7 +49,9 @@ if op_samplename == 'data':
 ## Define input
 
 if op_inputScript != '':
-    process.load(op_inputScript)
+    #process.load(op_inputScript)
+    inputFiles = cms.untracked.vstring('file:ttH_MC.root')
+    process.source = cms.Source("PoolSource", fileNames = inputFiles, secondaryFileNames = cms.untracked.vstring())
 else:
     print 'need an input script'
     exit(8889)
@@ -79,7 +81,6 @@ if op_outputFile == '':
     fn = op_mode + '_test.root'
 else:
     fn = op_outputFile
-print 'Using output file ' + fn
 
 #process.TFileService = cms.Service("TFileService",
 ##    fileName = cms.string(fn)
@@ -215,6 +216,10 @@ process.out.SelectEvents.SelectEvents = []
 
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
+
+
+
+
 #pfpostfix = "PFlow"
 pfpostfix = ""
 
@@ -251,15 +256,17 @@ getattr(process, 'patPF2PATSequence'+pfpostfix).replace(getattr(process,'patElec
 
 process.pfPileUp.checkClosestZVertex = cms.bool(False)
 
-process.pfSelectedElectrons.cut = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
+process.pfSelectedElectrons.cut = 'pt > 5.'# && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
 
 # Switch isolation cone to 0.3 and set cut to 0.15
 process.pfIsolatedElectrons.doDeltaBetaCorrection = True   # not really a 'deltaBeta' correction, but it serves
 process.pfIsolatedElectrons.deltaBetaIsolationValueMap = cms.InputTag("elPFIsoValuePU03PFId")
 process.pfIsolatedElectrons.isolationValueMapsCharged = cms.VInputTag(cms.InputTag("elPFIsoValueCharged03PFId"))
 process.pfIsolatedElectrons.isolationValueMapsNeutral = cms.VInputTag(cms.InputTag("elPFIsoValueNeutral03PFId"), cms.InputTag("elPFIsoValueGamma03PFId"))
-process.pfIsolatedElectrons.isolationCut = 0.2
+process.pfIsolatedElectrons.isolationCut = 99.0#0.2
 
+process.pfElectronsFromVertex.d0Cut = 99.0
+process.pfElectronsFromVertex.dzCut = 99.0
 
 process.patElectrons.isolationValues = cms.PSet(
     pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFId"),
@@ -269,16 +276,15 @@ process.patElectrons.isolationValues = cms.PSet(
     pfPhotons = cms.InputTag("elPFIsoValueGamma03PFId") )
 
 
-process.selectedPatElectrons.cut = 'electronID("mvaTrigV0") > 0.5' \
-            ' && passConversionVeto'
+process.selectedPatElectrons.cut = ''#'electronID("mvaTrigV0") > 0.5 && passConversionVeto'
             #cant do this on python level :-(
             #' && abs(gsfTrack().dxy(vertex_.position())) < 0.04'
 
 
-process.selectedPatElectronsAfterScaling = selectedPatElectrons.clone(
-    src = 'scaledJetEnergy:selectedPatElectrons',
-    cut = 'pt > 20 && abs(eta) < 2.5'
-)
+#process.selectedPatElectronsAfterScaling = selectedPatElectrons.clone(
+#    src = 'scaledJetEnergy:selectedPatElectrons',
+#    cut = 'pt > 20 && abs(eta) < 2.5'
+#)
 
 
 
@@ -293,8 +299,10 @@ process.pfIsolatedMuons.doDeltaBetaCorrection = True
 process.pfIsolatedMuons.deltaBetaIsolationValueMap = cms.InputTag("muPFIsoValuePU03", "", "")
 process.pfIsolatedMuons.isolationValueMapsCharged = [cms.InputTag("muPFIsoValueCharged03")]
 process.pfIsolatedMuons.isolationValueMapsNeutral = [cms.InputTag("muPFIsoValueNeutral03"), cms.InputTag("muPFIsoValueGamma03")]
-process.pfIsolatedMuons.isolationCut = 0.2
+process.pfIsolatedMuons.isolationCut = 99.0#0.2
 
+process.pfMuonsFromVertex.d0Cut = 99.0
+process.pfMuonsFromVertex.dzCut = 99.0
 
 process.patMuons.isolationValues = cms.PSet(
         pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral03"),
@@ -305,7 +313,7 @@ process.patMuons.isolationValues = cms.PSet(
         )
 
 
-process.selectedPatMuons.cut = 'isGlobalMuon && pt > 20 && abs(eta) < 2.5'
+process.selectedPatMuons.cut = ''#'isGlobalMuon && pt > 20 && abs(eta) < 2.5'
 
 
 
@@ -396,8 +404,8 @@ else:
 
 isolatedMuonCollection = "selectedPatMuons"
 
-#isolatedElecCollection = "selectedPatElectrons"
-isolatedElecCollection = "selectedPatElectronsAfterScaling"
+isolatedElecCollection = "selectedPatElectrons"
+#isolatedElecCollection = "selectedPatElectronsAfterScaling"
 
 jetCollection = "hardJets"
 
@@ -462,7 +470,7 @@ process.jetProperties.src = jetCollection
 
 process.buildJets = cms.Sequence(
             process.scaledJetEnergy *
-	    process.selectedPatElectronsAfterScaling *
+	    #process.selectedPatElectronsAfterScaling *
             process.goodIdJets * 
             process.hardJets *
             process.jetProperties
@@ -812,29 +820,17 @@ process.load("CMGTools.External.pujetidsequence_cff")
 from RecoMuon.MuonIsolationProducers.caloExtractorByAssociatorBlocks_cff import *
 from RecoMuon.MuonIsolationProducers.trackExtractorBlocks_cff import *
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-#process.load('Configuration.StandardSequences.Reconstruction_cff')
-
-
 
 process.BNproducer = cms.EDProducer('BEANmaker',
-                                    #calometTag = cms.InputTag("none"),
                                     pfmetTag = cms.InputTag("patMETs"),
-                                    #pfmetTag_type1correctedRECO = cms.InputTag("pfType1CorrectedMet"),
-                                    #pfmetTag_uncorrectedPF2PAT  = cms.InputTag("patPFMetPFlow"),
-                                    #pfmetTag_uncorrectedRECO    = cms.InputTag("pfMETPFlow"),
-                                    #tcmetTag = cms.InputTag("none"),
+                                    pfmetTag_type1correctedRECO = cms.InputTag("pfType1CorrectedMet"),
+                                    pfmetTag_uncorrectedPF2PAT  = cms.InputTag("patPFMet"),
+                                    pfmetTag_uncorrectedRECO    = cms.InputTag("pfMET"),
                                     eleTag = cms.InputTag("selectedPatElectrons"),
-                                    #pfeleTag = cms.InputTag("selectedPatElectronsPFlow"),
-                                    #pfeleLooseTag = cms.InputTag("selectedPatElectronsLoosePFlow"),
                                     genParticleTag = cms.InputTag("genParticles"),
-                                    #calojetTag = cms.InputTag("none"),
                                     pfjetTag = cms.InputTag("selectedPatJets"),
                                     genjetTag = cms.InputTag("ak5GenJets"),
                                     muonTag = cms.InputTag("selectedPatMuons"),
-                                    #muonLooseTag = cms.InputTag("selectedPatMuonsLoose"),
-                                    #pfmuonTag = cms.InputTag("selectedPatMuonsPFlow"),
-                                    #pfmuonLooseTag = cms.InputTag("selectedPatMuonsLoosePFlow"),
-                                    #cocktailmuonTag = cms.InputTag("none"),
                                     photonTag = cms.InputTag("none"),
                                     EBsuperclusterTag = cms.InputTag("correctedHybridSuperClusters"),
                                     EEsuperclusterTag = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower"),
@@ -864,9 +860,7 @@ process.BNproducer = cms.EDProducer('BEANmaker',
 
 
 
-#process.BNanalyzer = cms.EDAnalyzer("BeanAnalyzer",
- #                                   beans = cms.InputTag("BNproducer")
- #                                   )
+
 process.q2weights = cms.EDProducer('Q2Weights')
 
 
@@ -874,16 +868,20 @@ process.q2weights = cms.EDProducer('Q2Weights')
 ####################################################################
 ## Paths, one with preselection, one without for signal samples
 
+process.metseq = cms.Sequence(
+    process.pfJetMETcorr *
+    process.pfType1CorrectedMet
+    )
 
 process.p = cms.Path(
-     process.goodOfflinePrimaryVertices *
-     getattr(process,'patPF2PATSequence'+pfpostfix) *
-     process.buildJets                     *
-     process.filterOppositeCharge          *
-     process.filterChannel                 *
-#     process.filterDiLeptonMassQCDveto     *
-#     process.makeTtFullLepEvent            *
-     process.ntupleInRecoSeq               
+    process.goodOfflinePrimaryVertices *
+    getattr(process,'patPF2PATSequence'+pfpostfix) *
+    process.buildJets                     *
+    process.filterOppositeCharge          *
+    process.filterChannel                 *
+    #     process.filterDiLeptonMassQCDveto     *
+    #     process.makeTtFullLepEvent            *
+    process.ntupleInRecoSeq               
 
  )
 
@@ -892,14 +890,8 @@ if signal or higgsSignal or zGenInfo:
         process.goodOfflinePrimaryVertices *
         process.q2weights *
         getattr(process,'patPF2PATSequence'+pfpostfix) *
+        process.metseq *
         process.BNproducer
-        
-        #process.buildJets 
-        #process.zsequence *
-        #process.puJetIdSqeuenceChs *
-        #process.q2weights *
-        #process.BNproducer   
-        #process.writeNTuple 
         )
 
 #process.out.outputCommands = ['drop *']
