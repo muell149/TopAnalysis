@@ -49,9 +49,9 @@ if op_samplename == 'data':
 ## Define input
 
 if op_inputScript != '':
-    #process.load(op_inputScript)
-    inputFiles = cms.untracked.vstring('file:ttH_MC.root')
-    process.source = cms.Source("PoolSource", fileNames = inputFiles, secondaryFileNames = cms.untracked.vstring())
+    process.load(op_inputScript)
+    #inputFiles = cms.untracked.vstring('file:ttH_MC.root')
+    #process.source = cms.Source("PoolSource", fileNames = inputFiles, secondaryFileNames = cms.untracked.vstring())
 else:
     print 'need an input script'
     exit(8889)
@@ -874,14 +874,14 @@ process.metseq = cms.Sequence(
     )
 
 process.p = cms.Path(
-    process.goodOfflinePrimaryVertices *
-    getattr(process,'patPF2PATSequence'+pfpostfix) *
-    process.buildJets                     *
-    process.filterOppositeCharge          *
-    process.filterChannel                 *
+    #process.goodOfflinePrimaryVertices *
+    #getattr(process,'patPF2PATSequence'+pfpostfix) *
+    #process.buildJets                     *
+    #process.filterOppositeCharge          *
+    #process.filterChannel                 *
     #     process.filterDiLeptonMassQCDveto     *
     #     process.makeTtFullLepEvent            *
-    process.ntupleInRecoSeq               
+    #process.ntupleInRecoSeq               
 
  )
 
